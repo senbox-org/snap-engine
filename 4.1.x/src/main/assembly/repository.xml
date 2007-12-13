@@ -1,0 +1,33 @@
+<assembly>
+    <id>repository</id>
+
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <baseDirectory>beam-4.1.x-m2</baseDirectory>
+    <formats>
+        <format>zip</format>
+    </formats>
+
+    <repositories>
+        <repository>
+            <includeMetadata>true</includeMetadata>
+            <outputDirectory>maven2</outputDirectory>
+            <!--<includeMetadata>true</includeMetadata>-->
+            <!--<groupVersionAlignments>-->
+            <!--<groupVersionAlignment>-->
+            <!--<id/>-->
+            <!--<version/>-->
+            <!--<excludes/>-->
+            <!--</groupVersionAlignment>-->
+            <!--</groupVersionAlignments>-->
+            <!--<scope/>-->
+            <!--<useStrictFiltering/>-->
+            <!--<useDefaultExcludes/>-->
+            <!--<outputDirectory/>-->
+            <!--<includes/>-->
+            <!--<excludes/>-->
+            <!--<fileMode/>-->
+            <!--<directoryMode/>-->
+        </repository>
+    </repositories>
+
+</assembly>
