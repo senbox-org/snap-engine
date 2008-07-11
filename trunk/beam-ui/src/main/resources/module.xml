@@ -1,0 +1,111 @@
+<module>
+    <manifestVersion>1.0.0</manifestVersion>
+    <symbolicName>beam-ui</symbolicName>
+    <version>4.2</version>
+    <name>BEAM User Interface Library</name>
+    <activator>org.esa.beam.BeamUiActivator</activator>
+
+
+    <description>This module provides user interface components used e.g. by VISAT.</description>
+    <changelog>
+        <![CDATA[
+        Changes in 4.2<br>
+        [BEAM-820] Deactivate auto docking of tool views by default<br/>
+        [BEAM-819] Newly opened products should not be expanded<br/>
+        [BEAM-726] Memory not fully released after closing a product<br>
+        [BEAM-712] Processors produce visat.exe zombies<br>
+        [BEAM-694] Bandarithmetic gives acces to latitude and longitude using the provided geocoding<br>
+        <br>Changes in 4.0.1<br>
+        [BEAM-622] Use mouse wheel for zooming<br>
+        [BEAM-614] Not possible to re-select item in Arithmetic Expression Editor<br>
+        ]]>
+    </changelog>
+
+    <vendor>Brockmann Consult GmbH</vendor>
+    <contactAddress>Max Planck Str.2, 21502 Geesthacht (Germany)</contactAddress>
+    <copyright>(C) 2007 by Brockmann Consult GmbH</copyright>
+    <url>http://envisat.esa.int/beam</url>
+    <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
+
+
+    <dependency>
+        <module>beam-core</module>
+    </dependency>
+    <dependency>
+        <module>ceres-ui</module>
+    </dependency>
+    <dependency>
+        <module>ceres-binding</module>
+    </dependency>
+
+    <categories>System,Library</categories>
+
+    <extensionPoint id="helpSets"/>
+
+    <!--
+       todo - Describe configuration elements
+    -->
+    <extensionPoint id="applicationDescriptors">
+        <applicationDescriptor type="org.esa.beam.framework.ui.application.ApplicationDescriptor"
+                               class="@descriptorClass"
+                               autoConfig="true">
+            <descriptorClass type="java.lang.Class">
+                org.esa.beam.framework.ui.application.support.DefaultApplicationDescriptor
+            </descriptorClass>
+            <applicationId type="java.lang.String"/>   <!-- ID of the ceres application -->
+            <displayName type="java.lang.String"/>
+            <frameIcon field="iconPath" type="java.lang.String"/>
+            <resourceBundle type="java.lang.String"/>
+            <excludedActions type="java.lang.String[]"/>
+            <excludedToolViews type="java.lang.String[]"/>
+        </applicationDescriptor>
+    </extensionPoint>
+
+    <!--
+       todo - Describe configuration elements
+    -->
+    <extensionPoint id="toolViews">
+        <toolView type="org.esa.beam.framework.ui.application.ToolViewDescriptor"
+                  class="@descriptorClass"
+                  autoConfig="true">
+            <descriptorClass type="java.lang.Class">
+                org.esa.beam.framework.ui.application.support.DefaultToolViewDescriptor
+            </descriptorClass>
+            <class field="toolViewClass" type="java.lang.Class"/>
+            <title type="java.lang.String"/>
+            <description type="java.lang.String"/>
+            <accelerator type="javax.swing.KeyStroke"/>
+            <icon field="iconPath" type="java.lang.String"/>
+            <mnemonic type="char"/>
+        </toolView>
+    </extensionPoint>
+
+    <!--
+       todo - Describe configuration elements
+    -->
+    <extensionPoint id="actions">
+        <action type="org.esa.beam.framework.ui.command.Command"
+                class="@class"
+                autoConfig="false">
+            <id type="java.lang.String"/>
+            <class type="java.lang.Class"/>
+            <parent type="java.lang.String"/>
+            <text type="java.lang.String"/>
+            <context type="java.lang.String"/>
+            <mnemonic type="char"/>
+            <accelerator type="javax.swing.KeyStroke"/>
+            <placeAtContextTop type="boolean"/>
+            <placeBefore type="java.lang.String"/>
+            <placeAfter type="java.lang.String"/>
+            <separatorBefore type="boolean"/>
+            <separatorAfter type="boolean"/>
+            <shortDescr type="java.lang.String"/>
+            <description type="java.lang.String"/>
+            <smallIcon type="java.lang.String"/>
+            <largeIcon type="java.lang.String"/>
+            <helpId type="java.lang.String"/>
+        </action>
+
+    </extensionPoint>
+
+</module>

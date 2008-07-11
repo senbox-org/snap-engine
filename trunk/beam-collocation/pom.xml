@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                      http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <artifactId>beam</artifactId>
+        <groupId>org.esa.beam</groupId>
+        <version>4.2</version>
+    </parent>
+
+    <artifactId>beam-collocation</artifactId>
+    <name>BEAM Geographic Collocation Tool</name>
+    <groupId>org.esa.beam</groupId>
+    <version>1.0.100</version>
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>Jama</groupId>
+            <artifactId>Jama</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.bc.ceres</groupId>
+            <artifactId>ceres-binding</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.beam</groupId>
+            <artifactId>beam-envisat-reader</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.beam</groupId>
+            <artifactId>beam-visat</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.beam</groupId>
+            <artifactId>beam-gpf</artifactId>
+        </dependency>
+    </dependencies>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <configuration>
+                            <tasks>
+                                <property file="../build.properties"/>
+                                <property name="helpdir" value="${project.build.outputDirectory}/doc/help"/>
+                                <ant antfile="../build.xml" target="create-jh-search-db"/>
+                            </tasks>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

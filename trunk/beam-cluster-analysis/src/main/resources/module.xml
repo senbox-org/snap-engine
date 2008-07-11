@@ -1,0 +1,66 @@
+<module>
+    <manifestVersion>1.0.0</manifestVersion>
+
+    <symbolicName>beam-cluster-analysis</symbolicName>
+    <version>1.0</version>
+    <name>BEAM Cluster Analysis</name>
+
+    <description>
+        Cluster analysis.
+    </description>
+
+    <changelog>
+        <![CDATA[ ]]>
+    </changelog>
+
+    <vendor>Brockmann Consult GmbH</vendor>
+    <contactAddress>Max Planck Str.2, 21502 Geesthacht (Germany)</contactAddress>
+    <copyright>(C) 2007 by Brockmann Consult GmbH</copyright>
+    <url>http://envisat.esa.int/beam</url>
+    <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
+
+    <dependency>
+        <module>beam-visat</module>
+        <optional>true</optional>
+    </dependency>
+    <dependency>
+        <module>beam-gpf</module>
+    </dependency>
+
+    <categories>VISAT,Processing,Image Analysis</categories>
+
+    <extension point="beam-ui:actions">
+        <action>
+            <id>imageAnalysis</id>
+            <class>org.esa.beam.visat.actions.ActionGroup</class>
+            <parent>tools</parent>
+            <text>Image Analysis</text>
+            <mnemonic>A</mnemonic>
+            <shortDescr>Image analysis tools.</shortDescr>
+        </action>
+        <action>
+            <id>emClusterAnalysis</id>
+            <helpID>emClusterAnalysis</helpID>
+            <class>org.esa.beam.cluster.visat.EMClusterAnalysisAction</class>
+            <parent>imageAnalysis</parent>
+            <text>EM Cluster Analysis...</text>
+            <mnemonic>C</mnemonic>
+        </action>
+        <action>
+            <id>kmeansClusterAnalysis</id>
+            <helpID>kmeansClusterAnalysis</helpID>
+            <class>org.esa.beam.cluster.visat.KMeansClusterAnalysisAction</class>
+            <parent>imageAnalysis</parent>
+            <text>K-Means Cluster Analysis...</text>
+            <mnemonic>C</mnemonic>
+        </action>
+    </extension>
+
+    <extension point="beam-ui:helpSets">
+        <helpSet>
+            <parent>beam-help</parent>
+            <path>doc/help/clusteranalysis.hs</path>
+        </helpSet>
+    </extension>
+
+</module>

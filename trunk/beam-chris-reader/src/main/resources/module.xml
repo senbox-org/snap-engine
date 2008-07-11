@@ -1,0 +1,120 @@
+<module>
+    <manifestVersion>1.0.0</manifestVersion>
+    <symbolicName>beam-chris-reader</symbolicName>
+    <version>1.4</version>
+    <name>CHRIS/PROBA Product Reader</name>
+
+    <description>Enables BEAM to read CHRIS/PROBA HDF4 data products.</description>
+
+    <vendor>Brockmann Consult GmbH</vendor>
+    <contactAddress>Max Planck Str.2, 21502 Geesthacht (Germany)</contactAddress>
+    <copyright>(C) 2007 by Brockmann Consult GmbH</copyright>
+    <url>http://envisat.esa.int/beam</url>
+    <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
+
+    <changelog>
+        <![CDATA[
+        <p>Changes in Version 1.4
+        <ul>
+        <li>[CBOX-44] RGB profile for Mode 0</li>
+        <li>[CBOX-43] Support of Modes 20 and 30</li>
+        <li>[CBOX-42] New mask values should leave large gap</li>
+        <li>[CBOX-41] IOException thrown for PR format</li>
+        <li>[CBOX-40] Wrong import of cut-off wavelength</li>
+        </ul>
+        <p>Changes in Version 1.3
+        <ul>
+        <li>[CBOX-32] Dropout correction should be cosmetic only</li>
+        <li>[CBOX-31] Optimize raster data input in order to require less memory</li>
+        <li>[CBOX-30] Make pins available for CHRIS data products</li>
+        <li>[CBOX-29] Predefined bit mask for indicating spectrum quality</li>
+        <li>[CBOX-28] Predefined RGB profiles for all CHRIS modes</li>
+        <li>[CBOX-27] Computation of solar azimuth angle</li>
+        <li>[CBOX-26] Gains and coefficients are not included in metadata</li>
+        </ul>
+        </p>
+        <p>Changes in Version 1.2
+        <ul>
+        <li>[CBOX-25] Dropout and saturated flags are reversed</li>
+        <li>[CBOX-24] Calibration coefficients are applied twice</li>
+        <li>[CBOX-23] Imported subsets are scrambled</li>
+        <li>[CBOX-22] No thumbnail image in subset dialog</li>
+        </ul>
+        </p>
+        ]]>
+    </changelog>
+
+    <dependency>
+        <module>beam-core</module>
+    </dependency>
+    <dependency>
+        <module>lib-hdf</module>
+    </dependency>
+    <dependency>
+        <module>beam-visat</module>
+        <optional>true</optional>
+    </dependency>
+
+
+    <categories>Reader,CHRIS</categories>
+
+    <extension point="beam-ui:actions">
+        <action>
+            <class>org.esa.beam.visat.actions.ProductImportAction</class>
+            <id>importChrisProduct</id>
+            <helpId>importChrisProduct</helpId>
+            <formatName>CHRIS/PROBA</formatName>
+            <useAllFileFilter>true</useAllFileFilter>
+            <text>Import CHRIS/Proba Product...</text>
+            <mnemonic>M</mnemonic>
+            <shortDescr>Import a CHRIS/Proba data product or product subset.</shortDescr>
+            <description>Import a CHRIS/Proba data product or product subset.</description>
+        </action>
+    </extension>
+
+    <extension point="beam-core:rgbProfiles">
+        <rgbProfile>
+            <name>CHRIS/PROBA - Mode 0</name>
+            <red>radiance_3</red>
+            <green>radiance_2</green>
+            <blue>radiance_1</blue>
+        </rgbProfile>
+        <rgbProfile>
+            <name>CHRIS/PROBA - Mode 1</name>
+            <red>radiance_29</red>
+            <green>radiance_12</green>
+            <blue>radiance_2</blue>
+        </rgbProfile>
+        <rgbProfile>
+            <name>CHRIS/PROBA - Mode 2</name>
+            <red>radiance_11</red>
+            <green>radiance_5</green>
+            <blue>radiance_3</blue>
+        </rgbProfile>
+        <rgbProfile>
+            <name>CHRIS/PROBA - Mode 3</name>
+            <red>radiance_8</red>
+            <green>radiance_4</green>
+            <blue>radiance_2</blue>
+        </rgbProfile>
+        <rgbProfile>
+            <name>CHRIS/PROBA - Mode 3A</name>
+            <red>radiance_9</red>
+            <green>radiance_5</green>
+            <blue>radiance_3</blue>
+        </rgbProfile>
+        <rgbProfile>
+            <name>CHRIS/PROBA - Mode 4</name>
+            <red>radiance_4</red>
+            <green>radiance_2</green>
+            <blue>radiance_1</blue>
+        </rgbProfile>
+        <rgbProfile>
+            <name>CHRIS/PROBA - Mode 5</name>
+            <red>radiance_8</red>
+            <green>radiance_4</green>
+            <blue>radiance_2</blue>
+        </rgbProfile>
+    </extension>
+
+</module>
