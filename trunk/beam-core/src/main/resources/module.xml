@@ -1,0 +1,80 @@
+<module>
+    <manifestVersion>1.0.0</manifestVersion>
+    <symbolicName>beam-core</symbolicName>
+    <version>4.2</version>
+    <name>BEAM Core Library</name>
+
+
+    <description>This is the base module of BEAM containing its core functionalities.</description>
+
+    <vendor>Brockmann Consult GmbH</vendor>
+    <contactAddress>Max Planck Str.2, 21502 Geesthacht (Germany)</contactAddress>
+    <copyright>(C) 2007 by Brockmann Consult GmbH</copyright>
+    <url>http://envisat.esa.int/beam</url>
+    <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
+
+    <dependency>
+        <module>ceres-core</module>
+    </dependency>
+
+    <changelog>
+        <![CDATA[<p>Changes in 4.2:<br/>
+        [BEAM-801] TiePointGeoCoding should consider non-linear distribution of longitude values across-track<br/>
+        [BEAM-796] Index coding for classification bands<br/>
+        [BEAM-775] "Write" operator not invoked if last node in graph<br/>
+        [BEAM-767] Band arithmetic shall handle String types<br/>
+        [BEAM-733] Albers Equal Area Conic map projection missing<br/>
+        [BEAM-732] Pixel position is not recalculated for GCPs imported from a placemark file<br/>
+        [BEAM-710] Not able to copy a product using new product dialog<br/>
+        [BEAM-522] Map-projection and orthorectification should also transform tie-point grids<br/>
+        [BEAM-420] "Matrix is singular" error while computing geo-coding.<br/>
+        </p>
+
+        <p>Changes in 4.1:<br/>
+        [BEAM-607] Make "canDecodeInput" return more information<br/>
+        [BEAM-615] Remove JAMA source code from BEAM<br/>
+        [BEAM-617] Add linear, spectral unmixing math API<br/>
+        [BEAM-628] Generic reading of geophysical raster data<br/>
+        [BEAM-630] Remove deprecated bitmask package and references<br/>
+        [BEAM-631] Revise product pin management API<br/>
+        [BEAM-639] Extend ProductData class with a Boolean data type<br/>
+        [BEAM-660] Speedup image creation process<br/>
+        [BEAM-676] New geo-coding based on GCPs<br/>
+        [BEAM-689] GCPs supported by DIMAP<br/>
+        [BEAM-690] Group top level tags in DIMAP<br/>
+        [BEAM-694] Bandarithmetic gives acces to to latitude and longitude using the geocoding<br/>
+        </p>]]>
+    </changelog>
+
+
+    <activator>org.esa.beam.BeamCoreActivator</activator>
+
+    <categories>System,Library</categories>
+
+    <!--
+       todo - Describe configuration elements
+    -->
+    <extensionPoint id="parameterEditors"/>
+
+    <extensionPoint id="rgbProfiles">
+        <rgbProfile>
+            <name type="java.lang.String"/>
+            <red type="java.lang.String"/>
+            <green type="java.lang.String"/>
+            <blue type="java.lang.String"/>
+            <alpha type="java.lang.String"/>
+            <!-- optional -->
+        </rgbProfile>
+    </extensionPoint>
+
+
+    <extension point="ceres-core:serviceProviders">
+        <serviceProvider>org.esa.beam.dataio.dimap.spi.DimapPersistableSpi</serviceProvider>
+        <serviceProvider>org.esa.beam.framework.dataio.ProductReaderPlugIn</serviceProvider>
+        <serviceProvider>org.esa.beam.framework.dataio.ProductWriterPlugIn</serviceProvider>
+        <serviceProvider>org.esa.beam.framework.dataop.maptransf.MapTransformDescriptor</serviceProvider>
+        <serviceProvider>org.esa.beam.framework.dataop.dem.ElevationModelDescriptor</serviceProvider>
+        <serviceProvider>org.esa.beam.framework.datamodel.PointingFactory</serviceProvider>
+    </extension>
+
+</module>

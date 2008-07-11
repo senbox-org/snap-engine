@@ -1,0 +1,43 @@
+<module>
+    <manifestVersion>1.0.0</manifestVersion>
+
+    <symbolicName>beam-help</symbolicName>
+    <name>BEAM Help</name>
+    <version>4.2</version>
+    <packaging>dir</packaging>
+
+
+    <description>Provides the software user manual.</description>
+
+    <vendor>Brockmann Consult GmbH</vendor>
+    <contactAddress>Max Planck Str.2, 21502 Geesthacht (Germany)</contactAddress>
+    <copyright>(C) 2007 by Brockmann Consult GmbH</copyright>
+    <url>http://envisat.esa.int/beam/</url>
+    <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
+
+    <changelog>
+        <![CDATA[
+        Changes in 4.2:<br>
+        [BEAM-758] Provide BEAM help on website<br>
+        <br>Changes in 4.1:<br>
+        Provide compatibility with BEAM 4.1 API.<br>
+        <br>Changes in 4.0.1:<br>
+        List of data sources updated.<br>
+        Some minor correction to other pages.<br>
+        ]]>
+    </changelog>
+
+    <categories>System,Help</categories>
+
+    <dependency>
+        <module>beam-ui</module>
+    </dependency>
+
+    <extension point="beam-ui:helpSets">
+        <helpSet>
+            <id>beam-help</id>
+            <path>doc/help/beam.hs</path>
+        </helpSet>
+    </extension>
+
+</module>

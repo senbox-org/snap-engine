@@ -1,0 +1,166 @@
+<!-- BEAM binary distribution -->
+
+<assembly>
+    <id>bin</id>
+
+    <includeBaseDirectory>false</includeBaseDirectory>
+
+    <formats>
+        <format>zip</format>
+        <format>dir</format>
+        <!-- used by installer-files.xml -->
+    </formats>
+
+    <files>
+        <file>
+            <source>readme.html</source>
+            <lineEnding>unix</lineEnding>
+            <filtered>true</filtered>
+        </file>
+        <file>
+            <source>VERSION.txt</source>
+            <filtered>true</filtered>
+        </file>
+        <file>
+            <source>LICENSE.txt</source>
+        </file>
+        <file>
+            <source>CHANGELOG.txt</source>
+        </file>
+    </files>
+
+    <fileSets>
+
+        <fileSet>
+            <directory>src/main/config</directory>
+            <outputDirectory>config</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>src/main/licenses</directory>
+            <outputDirectory>licenses</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>src/main/bin/common</directory>
+            <outputDirectory>bin</outputDirectory>
+            <includes>
+                <include>splash.png</include>
+            </includes>
+        </fileSet>
+
+        <fileSet>
+            <directory>src/main/bin/win</directory>
+            <outputDirectory>bin</outputDirectory>
+            <lineEnding>dos</lineEnding>
+            <includes>
+                <include>*.bat</include>
+            </includes>
+            <excludes>
+                <exclude>beam-cli-template.*</exclude>
+            </excludes>
+        </fileSet>
+
+        <fileSet>
+            <directory>src/main/bin/linux</directory>
+            <outputDirectory>bin</outputDirectory>
+            <lineEnding>unix</lineEnding>
+            <fileMode>0755</fileMode>
+            <directoryMode>0755</directoryMode>
+            <includes>
+                <include>*.sh</include>
+            </includes>
+            <excludes>
+                <exclude>beam-cli-template.*</exclude>
+            </excludes>
+        </fileSet>
+
+        <fileSet>
+            <directory>src/main/bin/macosx</directory>
+            <outputDirectory>bin</outputDirectory>
+            <lineEnding>unix</lineEnding>
+            <fileMode>0755</fileMode>
+            <directoryMode>0755</directoryMode>
+            <includes>
+                <include>*.command</include>
+            </includes>
+            <excludes>
+                <exclude>beam-cli-template.*</exclude>
+            </excludes>
+        </fileSet>
+
+    </fileSets>
+
+    <moduleSets>
+
+        <!-- (1) Artifacts that go into 'bin', 'lib' or 'modules' -->
+        <moduleSet>
+            <excludes>
+                <exclude>org.esa.beam:beam-bootstrap</exclude>
+                <exclude>org.esa.beam:beam-installer</exclude>
+                <exclude>org.esa.beam:beam-gpf-docgen</exclude>
+            </excludes>
+
+            <binaries>
+                <includeDependencies>false</includeDependencies>
+                <unpack>false</unpack>
+
+                <outputDirectory>modules</outputDirectory>
+                <outputFileNameMapping>${artifactId}-${version}.${extension}</outputFileNameMapping>
+
+                <dependencySets>
+
+                    <!-- (1) Put packed launcher into 'bin' -->
+                    <dependencySet>
+                        <outputDirectory>bin</outputDirectory>
+                        <outputFileNameMapping>${artifactId}.${extension}</outputFileNameMapping>
+                        <includes>
+                            <include>com.bc.ceres:ceres-launcher</include>
+                        </includes>
+                    </dependencySet>
+
+                    <!-- (2) Put packed dependencies into 'lib' -->
+                    <dependencySet>
+                        <outputDirectory>lib</outputDirectory>
+                        <includes>
+                            <include>com.bc:bc-jnn</include>
+                            <include>com.sun.media:clibwrapper-jiio</include>
+                            <include>javax.media.jai:jai-codec</include>
+                            <include>javax.media.jai:jai-core</include>
+                            <include>com.sun.media:jai-imageio</include>
+                            <include>Jama:Jama</include>
+                            <include>jdom:jdom</include>
+                            <include>javax.help:javahelp</include>
+                            <include>com.jidesoft:jide-action</include>
+                            <include>com.jidesoft:jide-common</include>
+                            <include>com.jidesoft:jide-components</include>
+                            <include>com.jidesoft:jide-dock</include>
+                            <include>com.jidesoft:jide-grids</include>
+                            <include>junit:junit</include>
+                            <include>javax.media.jai:mlibwrapper-jai</include>
+                            <include>com.thoughtworks.xstream:xstream</include>
+                            <include>xpp3:xpp3</include>
+							<include>jfree:jfreechart</include>
+							<include>jfree:jcommon</include>
+							<include>com.lowagie:itext</include>
+                        </includes>
+                    </dependencySet>
+
+                    <!-- (3) Put packed Ceres and BEAM artifacts into 'modules' -->
+                    <dependencySet>
+                        <outputDirectory>modules</outputDirectory>
+                        <includes>
+                            <include>com.bc.ceres:ceres-core</include>
+                            <include>com.bc.ceres:ceres-binding</include>
+                            <include>com.bc.ceres:ceres-ui</include>
+                        </includes>
+                    </dependencySet>
+
+                </dependencySets>
+            </binaries>
+
+        </moduleSet>
+
+    </moduleSets>
+
+</assembly>
