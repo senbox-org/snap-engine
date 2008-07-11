@@ -121,14 +121,6 @@
         <module>lib-netcdf</module>
 
         <!--<module>nest-dat</module>-->
-        <module>../ceres-0.x</module>
-        <module>../iavisa-1.x</module>
-        <module>../beam-4.x-contrib</module>
-        <module>../chris-box</module>        
-        <module>../jai-sandbox</module>
-        <module>../binio</module>
-        <module>../binio-hdf-reader</module>
-        <module>../nest-sandbox</module>
 
     </modules>
 
