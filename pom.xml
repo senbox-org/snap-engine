@@ -37,6 +37,14 @@
         <url>https://www.brockmann-consult.de/svn/os/beam-4.x/trunc</url>
     </scm>
 
+    <distributionManagement>
+        <repository>
+            <id>bc-public</id>
+            <name>Public Maven Repository at Brockmann-Consult</name>
+            <url></url>
+        </repository>
+    </distributionManagement>
+
     <repositories>
         <repository>
             <id>bc-public</id>
