@@ -19,6 +19,14 @@
             <url>http://www.brockmann-consult.de/mvn/os</url>
         </repository>
     </repositories>
+    
+    <distributionManagement>
+        <repository>
+            <id>bc-public</id>
+            <name>Public Maven Repository at Brockmann-Consult</name>
+            <url></url>
+        </repository>
+    </distributionManagement>
 
     <dependencies>
         <dependency>
@@ -45,6 +53,12 @@
                     <fork>false</fork>
                     <encoding>ISO-8859-1</encoding>
                 </configuration>
+            </plugin>
+            <plugin>
+            	<artifactId>maven-deploy-plugin</artifactId>
+            	<configuration>
+            		<skip>true</skip>
+            	</configuration>
             </plugin>
         </plugins>
     </build>
