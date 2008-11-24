@@ -16,6 +16,9 @@
  */
 package org.esa.beam.dataio.geotiff.internal;
 
+import org.esa.beam.util.geotiff.GeoTIFFCodes;
+import org.esa.beam.util.geotiff.GeoTIFFCodes;
+
 public class GeoKeyEntry {
 
     private final int keyId;
@@ -46,6 +49,14 @@ public class GeoKeyEntry {
         }
     }
 
+    public int getKeyId(){
+         return keyId;
+    }
+
+    public String getName() {
+        return GeoTIFFCodes.getInstance().getName(getKeyId());
+    }
+
     boolean hasIntValue() {
         return intValue != null;
     }
@@ -58,7 +69,7 @@ public class GeoKeyEntry {
         return dblValue != null;
     }
 
-    public int getIntValue() {
+    public Integer getIntValue() {
         return intValue;
     }
 

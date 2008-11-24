@@ -13,6 +13,7 @@
     <changelog>
         <![CDATA[
         <p>From 1.0 to 1.0.1:<br/>
+            [BEAM-898] Display TIFF and GeoTIFF tags in metadata<br/>
             [BEAM-891] Model transformation is not applied if GeoTiff is projected<br/>
             [BEAM-889] Virtual bands are added as empty images to GeoTIFF files<br/>
         </p>
@@ -21,6 +22,7 @@
 
     <dependency>
         <module>beam-core</module>
+        <version>4.5.1-SNAPSHOT</version>
     </dependency>
     <dependency>
         <module>beam-visat</module>
