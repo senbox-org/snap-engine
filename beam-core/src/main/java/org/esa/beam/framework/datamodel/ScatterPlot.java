@@ -151,8 +151,12 @@ public class ScatterPlot {
                 if (maskImage2 != null) {
                     maskImage = maskImage2;
                 }
-                if (maskImage != null && roiImage != null) {
-                    maskImage = MinDescriptor.create(maskImage, roiImage, null);
+                if (maskImage != null) {
+                    if (roiImage != null) {
+                        maskImage = MinDescriptor.create(maskImage, roiImage, null);
+                    }
+                } else if (roiImage != null){
+                    maskImage = roiImage;
                 }
             }
             
