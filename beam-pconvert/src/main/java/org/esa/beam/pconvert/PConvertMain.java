@@ -67,7 +67,7 @@ import java.util.List;
 public class PConvertMain {
 
     private static final String EXE_NAME = "pconvert";
-    private static final String EXE_VERSION = "1.2";
+    private static final String EXE_VERSION = "1.2.102";
     private static final int[] DEFAULT_RGB_BAND_INDICES = new int[]{8, 5, 2};
     private static final double[] DEFAULT_HISTO_SKIP_PERCENTAGE = new double[]{1, 4};
     private static final String DEFAULT_FORMAT_EXT = "dim";
@@ -481,7 +481,7 @@ public class PConvertMain {
                 log("reading file " + inputFile.getPath());
                 product = ProductIO.readProduct(inputFile, null);
             } catch (IOException e) {
-                warn("I/O error while reading input product: " + e.getMessage());
+                error("I/O error while reading input product: " + e.getMessage());
                 Debug.trace(e);
             }
 
@@ -492,6 +492,9 @@ public class PConvertMain {
                     } else {
                         product = convertToProduct(product, outputFile);
                     }
+                } catch (IOException e) {
+                    error("I/O error while writing output file: " + e.getMessage());
+                    Debug.trace(e);
                 } finally {
                     product.dispose();
                 }
