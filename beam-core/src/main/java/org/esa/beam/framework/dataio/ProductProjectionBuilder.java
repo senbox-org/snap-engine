@@ -457,7 +457,6 @@ public class ProductProjectionBuilder extends AbstractProductBuilder {
     private void addBandsToProduct(Product targetProduct) {
         ProductUtils.copyBandsForGeomTransform(getSourceProduct(), targetProduct, includeTiePointGrids, mapInfo.getNoDataValue(),
                                                bandMap);
-        ProductUtils.copyBitmaskDefsAndOverlays(getSourceProduct(), targetProduct);
     }
 
     private static void addGeoCodingToProduct(final MapGeoCoding targetGC, Product product) {
