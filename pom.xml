@@ -202,12 +202,12 @@
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-visat-rcp</artifactId>
-                <version>4.5</version>
+                <version>4.5.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-visat</artifactId>
-                <version>4.5</version>
+                <version>4.5.1-SNAPSHOT</version>
             </dependency>
 
             <!-- BEAM Modules ############################################# -->
