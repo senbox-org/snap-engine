@@ -825,10 +825,6 @@ class ImageInfoEditor extends JPanel {
             public void propertyChange(PropertyChangeEvent pce) {
                 hidePopup();
                 setSliderSample(sliderIndex, (Double) ctx.getBinding("sample").getPropertyValue());
-//                if (sliderIndex == 0 || sliderIndex == getSliderCount()-1) {
-//                    computeFactors();
-//                    partitionSliders(true);
-//                }
                 computeZoomInToSliderLimits();
             }
         });
