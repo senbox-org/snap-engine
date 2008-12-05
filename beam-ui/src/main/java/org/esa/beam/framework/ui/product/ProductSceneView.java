@@ -1030,7 +1030,7 @@ public class ProductSceneView extends BasicView implements ProductNodeView, Draw
     }
 
     private void setPixelPos(MouseEvent e, boolean showBorder) {
-        Point p = e.getPoint();
+        Point2D p = new Point2D.Double(e.getX() + 0.5, e.getY() + 0.5);
 
         Viewport viewport = getLayerCanvas().getViewport();
         int currentLevel = baseImageLayer.getLevel(viewport);
