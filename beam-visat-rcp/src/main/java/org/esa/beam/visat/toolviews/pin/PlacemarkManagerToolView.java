@@ -529,10 +529,9 @@ class PlacemarkManagerToolView extends AbstractToolView {
         Guardian.assertNotNull("activePin", activePin);
         final ProductSceneView view = getSceneView();
         if (view != null) {
-            final PixelPos imagePos = activePin.getPixelPos();  // in image coordinates
+            final PixelPos imagePos = activePin.getPixelPos();  // in image coordinates on Level 0
             final ImageLayer layer = view.getBaseImageLayer();
-            final int currentLevel = layer.getLevel(view.getLayerCanvas().getViewport());
-            final AffineTransform imageToModelTransform = layer.getImageToModelTransform(currentLevel);
+            final AffineTransform imageToModelTransform = layer.getImageToModelTransform(0);
             final Point2D modelPos = imageToModelTransform.transform(imagePos, null);
             view.zoom(modelPos.getX(), modelPos.getY(), view.getZoomFactor());
             updateUIState();
