@@ -1,17 +1,10 @@
 package org.esa.beam.visat.toolviews.stat;
 
-import com.bc.ceres.glayer.Layer;
-import com.bc.ceres.glayer.support.AbstractLayerListener;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.help.HelpSys;
 import org.esa.beam.framework.ui.TableLayout;
 import org.esa.beam.framework.ui.UIUtils;
-import org.esa.beam.framework.ui.application.PageComponent;
 import org.esa.beam.framework.ui.application.ToolView;
-import org.esa.beam.framework.ui.application.support.PageComponentListenerAdapter;
-import org.esa.beam.framework.ui.product.ProductSceneView;
-import org.esa.beam.framework.ui.product.ProductTree;
-import org.esa.beam.framework.ui.product.ProductTreeListener;
 import org.esa.beam.framework.ui.tool.ToolButtonFactory;
 import org.esa.beam.jai.ImageManager;
 import org.esa.beam.util.SystemUtils;
@@ -21,15 +14,12 @@ import org.jfree.chart.axis.ValueAxis;
 import org.jfree.data.Range;
 
 import javax.swing.*;
-import javax.swing.event.InternalFrameAdapter;
-import javax.swing.event.InternalFrameEvent;
 import java.awt.*;
-import java.awt.image.RenderedImage;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.Rectangle2D;
+import java.awt.image.RenderedImage;
 import java.io.IOException;
 
 /**
