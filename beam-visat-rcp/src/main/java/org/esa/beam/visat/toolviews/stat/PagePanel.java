@@ -20,7 +20,6 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.data.Range;
 
-import javax.media.jai.PlanarImage;
 import javax.swing.*;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
@@ -47,40 +46,13 @@ abstract class PagePanel extends JPanel implements ProductNodeListener {
 
     private final ToolView parentDialog;
     private final String helpId;
-    private final PagePanelPTL pagePanelPTL;
-    private final PagePanelIFL pagePanelIFL;
-    private final PagePanelLL pagePanelLL;
 
     PagePanel(ToolView parentDialog, String helpId) {
         super(new BorderLayout(4, 4));
         this.parentDialog = parentDialog;
-        pagePanelPTL = new PagePanelPTL();
-        pagePanelIFL = new PagePanelIFL();
-        pagePanelLL = new PagePanelLL();
         this.helpId = helpId;
         setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
         setPreferredSize(new Dimension(600, 320));
-        final ProductTree productTree = VisatApp.getApp().getProductTree();
-        this.parentDialog.getContext().getPage().addPageComponentListener(new PageComponentListenerAdapter() {
-            @Override
-            public void componentOpened(PageComponent component) {
-                productTree.addProductTreeListener(pagePanelPTL);
-                transferProductNodeListener(getProduct(), null);
-                VisatApp.getApp().addInternalFrameListener(pagePanelIFL);
-                updateCurrentSelection();
-                transferProductNodeListener(null, product);
-                updateUI();
-            }
-
-            @Override
-            public void componentClosed(PageComponent component) {
-                productTree.removeProductTreeListener(pagePanelPTL);
-                transferProductNodeListener(getProduct(), null);
-                VisatApp.getApp().removeInternalFrameListener(pagePanelIFL);
-            }
-
-        });
-
         updateCurrentSelection();
         initContent();
         transferProductNodeListener(null, product);
@@ -94,7 +66,7 @@ abstract class PagePanel extends JPanel implements ProductNodeListener {
         return helpId;
     }
 
-    private void updateCurrentSelection() {
+    void updateCurrentSelection() {
         final ProductNode selectedNode = VisatApp.getApp().getSelectedProductNode();
         if (selectedNode instanceof Product) {
             setProduct((Product) selectedNode);
@@ -171,9 +143,7 @@ abstract class PagePanel extends JPanel implements ProductNodeListener {
         super.updateUI();
         if (mustUpdateContent()) {
             updateContent();
-            if (this.isShowing()) {
-                parentDialog.getDescriptor().setTitle(getTitle());
-            }
+            parentDialog.getDescriptor().setTitle(getTitle());
             rasterChanged = false;
             productChanged = false;
         }
@@ -347,7 +317,7 @@ abstract class PagePanel extends JPanel implements ProductNodeListener {
         }
     }
 
-    private void selectionChanged(Product product, RasterDataNode raster) {
+    void selectionChanged(Product product, RasterDataNode raster) {
         if (raster != getRaster() || product != getProduct()) {
             setRaster(raster);
             setProduct(product);
@@ -359,7 +329,7 @@ abstract class PagePanel extends JPanel implements ProductNodeListener {
         }
     }
 
-    protected void handleLayerContentChanged() {
+    void handleLayerContentChanged() {
     }
 
     /**
@@ -394,66 +364,5 @@ abstract class PagePanel extends JPanel implements ProductNodeListener {
     public void nodeRemoved(ProductNodeEvent event) {
     }
 
-
-    private class PagePanelPTL implements ProductTreeListener {
-
-        public void tiePointGridSelected(TiePointGrid tiePointGrid, int clickCount) {
-            selectionChanged(tiePointGrid.getProduct(), tiePointGrid);
-        }
-
-        public void bandSelected(Band band, int clickCount) {
-            selectionChanged(band.getProduct(), band);
-        }
-
-        public void productSelected(Product product, int clickCount) {
-            selectionChanged(product, null);
-        }
-
-        public void metadataElementSelected(MetadataElement group, int clickCount) {
-            selectionChanged(group.getProduct(), null);
-        }
-
-        public void productAdded(Product product) {
-        }
-
-        public void productRemoved(Product product) {
-            selectionChanged(null, null);
-        }
-
-    }
-
-    private class PagePanelIFL extends InternalFrameAdapter {
-
-        public PagePanelIFL() {
-        }
-
-        @Override
-        public void internalFrameActivated(InternalFrameEvent e) {
-            final Container contentPane = e.getInternalFrame().getContentPane();
-            if (contentPane instanceof ProductSceneView) {
-                final ProductSceneView view = (ProductSceneView) contentPane;
-                view.getRootLayer().addListener(pagePanelLL);
-                selectionChanged(view.getRaster().getProduct(), view.getRaster());
-            }
-        }
-
-        @Override
-        public void internalFrameDeactivated(InternalFrameEvent e) {
-            final Container contentPane = e.getInternalFrame().getContentPane();
-            if (contentPane instanceof ProductSceneView) {
-                final ProductSceneView view = (ProductSceneView) contentPane;
-                view.getRootLayer().removeListener(pagePanelLL);
-                selectionChanged(view.getRaster().getProduct(), null);
-            }
-        }
-
-    }
-
-    private class PagePanelLL extends AbstractLayerListener {
-        @Override
-        public void handleLayerDataChanged(Layer layer, Rectangle2D modelRegion) {
-            handleLayerContentChanged();
-        }
-    }
 }
 
