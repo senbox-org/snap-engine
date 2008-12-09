@@ -284,7 +284,9 @@ public class SpectrumToolView extends AbstractToolView {
         showGridButton = ToolButtonFactory.createButton(UIUtils.loadImageIcon("icons/SpectrumGrid24.gif"), true);
         showGridButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                if (diagramCanvas.getDiagram() != null) {
                 diagramCanvas.getDiagram().setDrawGrid(showGridButton.isSelected());
+            }
             }
         });
         showGridButton.setName("showGridButton");
@@ -396,7 +398,7 @@ public class SpectrumToolView extends AbstractToolView {
         } else {
             setCurrentView(view);
         }
-
+        updateUIState();
         return mainPane;
     }
 
