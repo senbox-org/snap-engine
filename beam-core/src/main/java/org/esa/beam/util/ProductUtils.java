@@ -1368,7 +1368,7 @@ public class ProductUtils {
     }
 
     /**
-     * @deprecated in 4.0, use {@link #createScatterPlotImage(RasterDataNode,float,float,RasterDataNode,float,float,ROI,int,int,Color,BufferedImage,ProgressMonitor)} instead
+     * @deprecated in 4.0, use {@link #createScatterPlotImage(org.esa.beam.framework.datamodel.RasterDataNode, float, float, org.esa.beam.framework.datamodel.RasterDataNode, float, float, java.awt.image.RenderedImage, int, int, java.awt.Color, java.awt.image.BufferedImage, com.bc.ceres.core.ProgressMonitor)} instead
      */
     public static BufferedImage createScatterPlotImage(final RasterDataNode raster1,
                                                        final float sampleMin1,
