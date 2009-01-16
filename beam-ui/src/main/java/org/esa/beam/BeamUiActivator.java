@@ -137,6 +137,7 @@ public class BeamUiActivator implements Activator, ToolViewDescriptorRegistry {
         actionRegistry.remove(actionId);
     }
 
+
     private void registerToolViews(ModuleContext moduleContext) {
         List<ToolViewDescriptor> toolViewDescriptorList = BeamCoreActivator.loadExecutableExtensions(moduleContext,
                                                                                                      "toolViews",
@@ -272,12 +273,12 @@ public class BeamUiActivator implements Activator, ToolViewDescriptorRegistry {
             moduleContext.getLogger().severe(message);
         }
     }
-    
+
     private static class VerifyingHelpSetFactory extends DefaultHelpSetFactory {
         private final String helpSetPath;
         private final String moduleName;
         private final Logger logger;
-        
+
         public VerifyingHelpSetFactory(String helpSetPath, String moduleName, Logger logger) {
             super();
             this.helpSetPath = helpSetPath;
@@ -287,22 +288,20 @@ public class BeamUiActivator implements Activator, ToolViewDescriptorRegistry {
 
         @Override
         public void processView(HelpSet hs,
-                String name,
-                String label,
-                String type,
-                Hashtable viewAttributes,
-                String data,
-                Hashtable dataAttributes,
-                Locale locale) {
+                                String name,
+                                String label,
+                                String type,
+                                Hashtable viewAttributes,
+                                String data,
+                                Hashtable dataAttributes,
+                                Locale locale) {
             if (name.equals("Search")) {
                 // check if a search engine can be created, this means the search index is available
-                try
-                {
+                try {
                     // just for checking if it can be created
                     QueryEngine qe = new QueryEngine(data, hs.getHelpSetURL());
                 }
-                catch(Exception exception)
-                {
+                catch (Exception exception) {
                     String message = String.format("Help set [%s] of module [%s] has no or bad search index. Search view removed.",
                                                    helpSetPath, moduleName);
                     logger.log(Level.SEVERE, message, "");
