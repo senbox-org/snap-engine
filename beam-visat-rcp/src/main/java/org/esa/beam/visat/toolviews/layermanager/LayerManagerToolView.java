@@ -34,10 +34,6 @@ import com.bc.ceres.glayer.Layer;
 
 /**
  * Layer manager tool view.
- *
- * @author Ralf Quast
- * @version $Revision$ $Date$
- * @since BEAM 4.2
  */
 public class LayerManagerToolView extends AbstractToolView {
 

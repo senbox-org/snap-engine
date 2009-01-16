@@ -25,7 +25,7 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
 import java.awt.BorderLayout;
 import java.beans.PropertyChangeEvent;
-import java.util.ArrayList;
+import java.util.WeakHashMap;
 
 class LayerManagerForm {
 
@@ -33,7 +33,7 @@ class LayerManagerForm {
     private final CheckBoxTree layerTree;
     private final JSlider transparencySlider;
     private final JPanel control;
-    private final ArrayList<LayerSelectionListener> layerSelectionListenerList;
+    private final WeakHashMap<LayerSelectionListener, Object> layerSelectionListenerMap;
 
     private boolean adjusting;
 
@@ -42,7 +42,7 @@ class LayerManagerForm {
         layerTree = createCheckBoxTree(rootLayer);
         initVisibilitySelection(rootLayer);
 
-        layerSelectionListenerList = new ArrayList<LayerSelectionListener>(3);
+        layerSelectionListenerMap = new WeakHashMap<LayerSelectionListener, Object>(3);
 
         transparencySlider = new JSlider(0, 100, 0);
 
@@ -137,11 +137,11 @@ class LayerManagerForm {
     }
 
     void addLayerSelectionListener(LayerSelectionListener listener) {
-        layerSelectionListenerList.add(listener);
+        layerSelectionListenerMap.put(listener, "<null>");
     }
 
     void removeLayerSelectionListener(LayerSelectionListener listener) {
-        layerSelectionListenerList.remove(listener);
+        layerSelectionListenerMap.remove(listener);
     }
 
     private Layer getLayer(TreePath path) {
@@ -153,7 +153,7 @@ class LayerManagerForm {
     }
 
     private void fireLayerSelectionChanged(Layer selectedLayer) {
-        for (LayerSelectionListener layerSelectionListener : layerSelectionListenerList) {
+        for (LayerSelectionListener layerSelectionListener : layerSelectionListenerMap.keySet()) {
             layerSelectionListener.layerSelectionChanged(selectedLayer);
         }
     }
