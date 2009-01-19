@@ -941,6 +941,7 @@ public class VisatApp extends BasicApp {
 
     /**
      * Closes all (internal) frames associated with the given product.
+     * @param product The product to close the internal frames for.
      */
     public synchronized void closeAllAssociatedFrames(final Product product) {
 
@@ -1966,11 +1967,12 @@ public class VisatApp extends BasicApp {
         for (String toolBarId : toolBar2commandIds.keySet()) {
             CommandBar toolBar = getToolBar(toolBarId);
             if (toolBar == null) {
+                // todo - use ToolBarDescriptor to define tool bar properties, e.g. title, dockSite, ...  (nf - 20090119)
                 toolBar = createToolBar(toolBarId, toolBarId.replace('.', ' ').replace('_', ' '));
                 viewToolBars.add(toolBar);
 
-                // 	Retrospectively add "tool bar toggle" menu item
-                ShowToolBarAction action = new ShowToolBarAction(toolBarId + ".showToolBar");
+                // Retrospectively add "tool bar toggle" menu item
+                ShowToolBarAction action = new ShowToolBarAction(toolBarId + ".showToolBarCmd");
                 action.setContexts(new String[] {toolBarId});
                 getCommandManager().addCommand(action);
                 JMenu toolBarsMenu = findMenu("toolBars");
