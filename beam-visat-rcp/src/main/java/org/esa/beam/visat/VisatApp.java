@@ -1973,7 +1973,9 @@ public class VisatApp extends BasicApp {
 
                 // Retrospectively add "tool bar toggle" menu item
                 ShowToolBarAction action = new ShowToolBarAction(toolBarId + ".showToolBarCmd");
+                action.setText(toolBarId);
                 action.setContexts(new String[] {toolBarId});
+                action.setToggle(true);
                 action.setSelected(true);
                 getCommandManager().addCommand(action);
                 JMenu toolBarsMenu = findMenu("toolBars");
