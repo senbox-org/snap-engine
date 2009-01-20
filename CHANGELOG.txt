@@ -6,6 +6,7 @@
 
 This file contains all significant changes for each BEAM release.
 
+    o 31.10.2008: Version 4.5.1
     o 31.10.2008: Version 4.5
     o 11.07.2008: Version 4.2
     o 31.10.2007: Version 4.1
@@ -25,6 +26,12 @@ This file contains all significant changes for each BEAM release.
     o 07.03.2003: Version 1.1
     o 06.12.2002: Version 1.0
 
+_____________________________________________________________________________
+
+
+_____________________________________________________________________________
+
+ Changes from 4.5 to 4.5.1
 _____________________________________________________________________________
 
 
