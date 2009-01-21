@@ -17,9 +17,11 @@
 package org.esa.beam.visat.toolviews.imageinfo;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.SubProgressMonitor;
 import com.bc.ceres.swing.ActionLabel;
 import com.bc.ceres.swing.progress.ProgressMonitorSwingWorker;
 import org.esa.beam.framework.datamodel.Stx;
+import org.esa.beam.framework.datamodel.RasterDataNode;
 import org.esa.beam.framework.ui.ImageInfoEditor;
 import org.esa.beam.framework.ui.ImageInfoEditorModel;
 import org.esa.beam.framework.ui.UIUtils;
@@ -168,7 +170,15 @@ class ImageInfoEditor2 extends ImageInfoEditor {
             UIUtils.setRootFrameWaitCursor(ImageInfoEditor2.this);
             final ProductSceneView view = parentForm.getProductSceneView();
             if (view != null) {
-                view.getRaster().getStx(true, pm);
+                final RasterDataNode[] rasters = view.getRasters();
+                try {
+                    pm.beginTask("Computing statistics", rasters.length);
+                    for (RasterDataNode raster : rasters) {
+                        raster.getStx(true, SubProgressMonitor.create(pm, 1));
+                    }
+                } finally {
+                    pm.done();
+                }
             }
             return null;
         }
