@@ -412,6 +412,13 @@ public class RadToReflProcessor extends Processor {
                 inputBand.readPixels(0, y, rasterWidth, 1, rad, SubProgressMonitor.create(pm, 1));
                 sunZenithBand.readPixels(0, y, rasterWidth, 1, sza, SubProgressMonitor.create(pm, 1));
 
+                // todo -- (rq-20090122)
+                // use F_s^b * F_0^{b,d} / F_0^b to calculate solar flux, where
+                //
+                // F_0^b     = nominal solar flux per band, from auxiliary data
+                // F_0^{b,d} = day-corrected solar flux per band, i.e. band.getSolarFlux
+                // F_s^b     = nominal smile-corrected solar flux per band, from auxiliary data
+                //
                 RsMathUtils.radianceToReflectance(rad, sza, inputBand.getSolarFlux(), rad);
                 reflectanceBand.writePixels(0, y, rasterWidth, 1, rad, ProgressMonitor.NULL);
 
