@@ -35,6 +35,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.*;
 
+import com.bc.ceres.swing.TreeCellExtender;
+
 /**
  * A tree-view component for multiple <code>Product</code>s. Clients can register one or more
  * <code>ProductTreeListener</code>s on this component.
@@ -95,6 +97,8 @@ public class ProductTree extends JTree implements PopupMenuFactory {
         addMouseListener(popupMenuHandler);
         addKeyListener(popupMenuHandler);
         openedRasterMap = new HashMap<RasterDataNode, Integer>();
+
+        TreeCellExtender.equip(this);
     }
 
     public JPopupMenu createPopupMenu(final Component component) {
