@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>beam-geotiff</symbolicName>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
     <name>GeoTIFF Product Module</name>
     <description>A module for reading and writing GeoTIFF Data Products</description>
 
@@ -22,7 +22,7 @@
 
     <dependency>
         <module>beam-core</module>
-        <version>4.5.1-SNAPSHOT</version>
+        <version>4.5.1</version>
     </dependency>
     <dependency>
         <module>beam-visat</module>
