@@ -45,16 +45,15 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
+import java.util.Iterator;
 
-// todo - api doc!
 /**
  * Provides band arithmetic utility methods.
  */
 public class BandArithmetic {
 
-    // todo - api doc!
     public static final String PIXEL_X_NAME = "X";
-    // todo - api doc!
     public static final String PIXEL_Y_NAME = "Y";
 
     private static final Symbol PIXEL_X_SYMBOL = new AbstractSymbol.I(PIXEL_X_NAME) {
@@ -73,7 +72,7 @@ public class BandArithmetic {
 
     private static final List<NamespaceExtender> _namespaceExtenderList = new ArrayList<NamespaceExtender>();
 
-    static{
+    static {
         MoreFuncs.registerExtraFunctions();
         MoreFuncs.registerExtraSymbols();
     }
@@ -81,14 +80,12 @@ public class BandArithmetic {
     private BandArithmetic() {
     }
 
-    // todo - api doc!
     public static void addNamespaceExtender(NamespaceExtender ne) {
         if (ne != null && !_namespaceExtenderList.contains(ne)) {
             _namespaceExtenderList.add(ne);
         }
     }
 
-    // todo - api doc!
     public static void removeNamespaceExtender(NamespaceExtender ne) {
         _namespaceExtenderList.remove(ne);
     }
@@ -129,7 +126,6 @@ public class BandArithmetic {
         DEFAULT_NAMESPACE.deregisterFunction(f);
     }
 
-    // todo - api doc!
     public static int computeBand(final Product[] sourceProducts,
                                   final String expression,
                                   final boolean checkInvalids,
@@ -142,18 +138,18 @@ public class BandArithmetic {
                                   final ProductData targetRasterData,
                                   final Scaling scaling,
                                   ProgressMonitor pm) throws ParseException,
-                                                             IOException {
-
-        final Namespace namespace = createDefaultNamespace(sourceProducts);
-        final Parser parser = new ParserImpl(namespace, false);
-        final Term term = parser.parse(expression);
-
+            IOException {
+        final Term term = parseExpression(sourceProducts, expression);
         return computeBand(term, offsetX, offsetY, width, height, checkInvalids, noDataValueUsed, noDataValue,
                            targetRasterData, scaling, pm);
     }
 
+    public static Term parseExpression(Product[] sourceProducts, String expression) throws ParseException {
+        final Namespace namespace = createDefaultNamespace(sourceProducts);
+        final Parser parser = new ParserImpl(namespace, false);
+        return parser.parse(expression);
+    }
 
-    // todo - api doc!
     public static int computeBand(final Term term,
                                   final int offsetX,
                                   final int offsetY,
@@ -196,7 +192,6 @@ public class BandArithmetic {
      * will have a prefix according to each product's reference number.
      *
      * @param products the array of input products
-     *
      * @return a default namespace, never <code>null</code>
      */
     public static WritableNamespace createDefaultNamespace(Product[] products) {
@@ -211,16 +206,16 @@ public class BandArithmetic {
      * @param products            the array of input products
      * @param defaultProductIndex the index of the product for which also symbols without the
      *                            product prefix <code>$<i>ref-no</i></code> are registered in the namespace
-     *
      * @return a default namespace, never <code>null</code>
      */
     public static WritableNamespace createDefaultNamespace(Product[] products, int defaultProductIndex) {
         return createDefaultNamespace(products, defaultProductIndex,
-        		new ProductPrefixProvider() {
-					public String getPrefix(Product product) {
-						return getProductNodeNamePrefix(product);
-					}});
-    }    
+                                      new ProductPrefixProvider() {
+                                          public String getPrefix(Product product) {
+                                              return getProductNodeNamePrefix(product);
+                                          }
+                                      });
+    }
 
     public static WritableNamespace createDefaultNamespace(Product[] products, int defaultProductIndex, ProductPrefixProvider p) {
         Guardian.assertNotNullOrEmpty("products", products);
@@ -244,11 +239,39 @@ public class BandArithmetic {
         return namespace;
     }
 
+    public static String getValidMaskExpression(String expression, Product[] products, String validMaskExpression) throws ParseException {
+        TreeSet<String> vmeSet = new TreeSet<String>();
+        RasterDataNode[] rasters = getRefRasters(expression, products);
+        for (RasterDataNode raster : rasters) {
+            final String vme = raster.getValidMaskExpression();
+            if (vme != null) {
+                vmeSet.add(vme);
+            }
+        }
+        for (String vme : vmeSet) {
+            if (validMaskExpression == null) {
+                validMaskExpression = vme;
+            } else {
+                validMaskExpression = "(" + validMaskExpression + ") && (" + vme + ")";
+            }
+        }
+        return validMaskExpression;
+    }
+
+    public static RasterDataNode[] getRefRasters(String expression, Product[] products) throws ParseException {
+        RasterDataSymbol[] symbols = getRefRasterDataSymbols(new Term[]{parseExpression(products, expression)});
+        RasterDataNode[] rasters = new RasterDataNode[symbols.length];
+        for (int i = 0; i < symbols.length; i++) {
+            RasterDataSymbol symbol = symbols[i];
+            rasters[i] = symbol.getRaster();
+        }
+        return rasters;
+    }
+
     /**
      * Utility method which returns all raster data symbols references in a given term.
      *
      * @param term the term to be analysed
-     *
      * @return the array of raster data symbols, never <code>null</code> but may be empty
      */
     public static RasterDataSymbol[] getRefRasterDataSymbols(Term term) {
@@ -259,7 +282,6 @@ public class BandArithmetic {
      * Utility method which returns all raster data symbols references in a given term array.
      *
      * @param terms the term array to be analysed
-     *
      * @return the array of raster data symbols, never <code>null</code> but may be empty
      */
     public static RasterDataSymbol[] getRefRasterDataSymbols(Term[] terms) {
@@ -278,7 +300,6 @@ public class BandArithmetic {
      * e.g. if multilple {@link SingleFlagSymbol}s refer to the same raster.
      *
      * @param rasterDataSymbols the array to be analysed
-     *
      * @return the array of raster data nodes, never <code>null</code> but may be empty
      */
     public static RasterDataNode[] getRefRasters(RasterDataSymbol[] rasterDataSymbols) {
@@ -296,7 +317,6 @@ public class BandArithmetic {
      * <p>The method simply delgates to {@link Tokenizer#createExternalName(String)}.
      *
      * @param name the name
-     *
      * @return a valid external name
      */
     public static String createExternalName(final String name) {
@@ -309,7 +329,6 @@ public class BandArithmetic {
      * number returned by {@link org.esa.beam.framework.datamodel.Product#getRefNo()}.
      *
      * @param product the product, must not be <code>null</code>
-     *
      * @return a node name prefix, never null.
      */
     public static String getProductNodeNamePrefix(Product product) {
@@ -399,15 +418,14 @@ public class BandArithmetic {
         return Double.isNaN(pixelValue) || Double.isInfinite(pixelValue);
     }
 
-    // todo - api doc!
     public static interface NamespaceExtender {
 
         void extendNamespace(WritableNamespace namespace,
                              Product product,
                              String namePrefix);
     }
-    
+
     public static interface ProductPrefixProvider {
-    	String getPrefix(Product product);
+        String getPrefix(Product product);
     }
 }
