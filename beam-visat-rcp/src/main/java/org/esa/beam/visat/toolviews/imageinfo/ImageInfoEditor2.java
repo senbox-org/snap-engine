@@ -20,14 +20,15 @@ import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
 import com.bc.ceres.swing.ActionLabel;
 import com.bc.ceres.swing.progress.ProgressMonitorSwingWorker;
-import org.esa.beam.framework.datamodel.Stx;
 import org.esa.beam.framework.datamodel.RasterDataNode;
+import org.esa.beam.framework.datamodel.Stx;
 import org.esa.beam.framework.ui.ImageInfoEditor;
 import org.esa.beam.framework.ui.ImageInfoEditorModel;
 import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.framework.ui.product.ProductSceneView;
 import org.esa.beam.util.math.MathUtils;
 
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -38,8 +39,10 @@ import javax.swing.event.ChangeListener;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -86,9 +89,16 @@ class ImageInfoEditor2 extends ImageInfoEditor {
             return stxOverlayComponent;
         }
 
-        JPanel labels = new JPanel(new GridBagLayout());
+        JComponent labels = new JComponent() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                g.setColor(getBackground());
+                final Rectangle bounds = getBounds();
+                g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
+            }
+        };
+        labels.setLayout(new GridBagLayout());
         labels.setBackground(new Color(255, 255, 255, 140));
-
         stxOverlayComponent.add(labels);
 
         final GridBagConstraints gbc = new GridBagConstraints();
