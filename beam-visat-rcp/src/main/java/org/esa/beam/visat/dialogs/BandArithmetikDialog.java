@@ -166,7 +166,7 @@ public class BandArithmetikDialog extends ModalDialog {
         if (getCreateVirtualBand()) {
             final String validMaskExpression;
             try {
-                validMaskExpression = BandArithmetic.getValidMaskExpression(expression, new Product[]{targetProduct}, null);
+                validMaskExpression = BandArithmetic.getValidMaskExpression(expression, new Product[]{targetProduct}, 0, null);
             } catch (ParseException e) {
                 String errorMessage = "The band could not be created.\nAn expression parse error occurred:\n" + e.getMessage(); /*I18N*/
                 visatApp.showErrorDialog(errorMessage);
@@ -230,7 +230,7 @@ public class BandArithmetikDialog extends ModalDialog {
                 try {
                     if (!getCreateVirtualBand()) {
                         final Product[] products = getCompatibleProducts();
-                        targetBand.setValidPixelExpression(BandArithmetic.getValidMaskExpression(expression, products, null));
+                        targetBand.setValidPixelExpression(BandArithmetic.getValidMaskExpression(expression, products, 0, null));
                         numInvalids = targetBand.computeBand(expression,
                                                              products,
                                                              checkInvalids,
