@@ -27,6 +27,8 @@ import org.jdom.Element;
 
 import java.awt.Color;
 import java.awt.Shape;
+import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
 
 /**
  * This class represents a pin.
@@ -195,9 +197,15 @@ public class Pin extends ProductNode {
         if (pixelPos == null && canComputePixelPos()) {
             pixelPos = getProduct().getGeoCoding().getPixelPos(geoPos, null);
         }
-        if (pixelPos == null) {
+        final Rectangle productRect = new Rectangle(0, 0,
+                                                    getProduct().getSceneRasterWidth(),
+                                                    getProduct().getSceneRasterHeight());
+        
+        if (pixelPos == null || !productRect.contains(pixelPos)) {
             return null;
         }
+
+
         return new PixelPos(pixelPos.x, pixelPos.y);
     }
 
