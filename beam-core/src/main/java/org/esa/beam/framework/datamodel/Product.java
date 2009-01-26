@@ -1699,6 +1699,7 @@ public class Product extends ProductNode {
         return parser.parse(expression);
     }
 
+    @Deprecated
     public Term createTerm(final String expression, RasterDataNode... extraRasters) throws ParseException {
 
         final Product thisProduct = getProductSafe();

@@ -390,7 +390,7 @@
                       </void>
                       <void property="windowsIconFile">
                         <object class="com.install4j.api.beans.ExternalFile">
-                          <string>./src/main/resources/images/visat-icon.ico</string>
+                          <string>./src/main/resources/images/beam-icon.ico</string>
                         </object>
                       </void>
                     </object>
@@ -413,7 +413,7 @@
                       </void>
                       <void property="windowsIconFile">
                         <object class="com.install4j.api.beans.ExternalFile">
-                          <string>./src/main/resources/images/visat-icon.ico</string>
+                          <string>./src/main/resources/images/beam-icon.ico</string>
                         </object>
                       </void>
                     </object>
@@ -439,7 +439,7 @@
                       </void>
                       <void property="windowsIconFile">
                         <object class="com.install4j.api.beans.ExternalFile">
-                          <string>./src/main/resources/images/visat-icon.ico</string>
+                          <string>./src/main/resources/images/beam-icon.ico</string>
                         </object>
                       </void>
                     </object>
@@ -465,7 +465,7 @@
                       </void>
                       <void property="windowsIconFile">
                         <object class="com.install4j.api.beans.ExternalFile">
-                          <string>./src/main/resources/images/visat-icon.ico</string>
+                          <string>./src/main/resources/images/beam-icon.ico</string>
                         </object>
                       </void>
                     </object>
