@@ -32,7 +32,6 @@ public abstract class AbstractImageInfoEditorModel implements ImageInfoEditorMod
     protected AbstractImageInfoEditorModel(ImageInfo imageInfo) {
         this.imageInfo = imageInfo;
         this.listenerList = new EventListenerList();
-        scaling = Scaling.IDENTITY;
     }
 
     public ImageInfo getImageInfo() {
