@@ -317,13 +317,15 @@ public class BandArithmetic {
         RasterDataNode[] rasters = getRefRasters(vme, products, productIndex);
         for (RasterDataNode raster : rasters) {
             String name = raster.getName();
+            int namePos = 0;
             boolean changed;
             do {  // } while (changed)
                 changed = false;
-                int namePos = vme.indexOf(name);
+                namePos = vme.indexOf(name, namePos);
                 if (namePos == 0) {
                     String prefix = getProductNodeNamePrefix(raster.getProduct());
                     vme = prefix + vme;
+                    namePos += name.length() + prefix.length();
                     changed = true;
                 } else if (namePos > 0) {
                     int i1 = namePos - 1;
@@ -333,6 +335,7 @@ public class BandArithmetic {
                     if (c1 != '.' && !isNameChar(c1) && !isNameChar(c2)) {
                         String prefix = getProductNodeNamePrefix(raster.getProduct());
                         vme = vme.substring(0, namePos) + prefix + vme.substring(namePos);
+                        namePos += name.length() + prefix.length();
                         changed = true;
                     }
                 }
