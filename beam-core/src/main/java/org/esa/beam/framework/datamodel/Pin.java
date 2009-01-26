@@ -28,7 +28,6 @@ import org.jdom.Element;
 import java.awt.Color;
 import java.awt.Shape;
 import java.awt.Rectangle;
-import java.awt.geom.Rectangle2D;
 
 /**
  * This class represents a pin.
