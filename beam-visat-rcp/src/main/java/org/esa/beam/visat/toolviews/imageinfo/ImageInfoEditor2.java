@@ -98,7 +98,7 @@ class ImageInfoEditor2 extends ImageInfoEditor {
         };
         labels.setBorder(new EmptyBorder(0, 2, 0, 2));
         labels.setLayout(new GridLayout(-1, 1));
-        labels.setBackground(new Color(255, 255, 255, 127));
+        labels.setBackground(new Color(255, 255, 255, 95));
         stxOverlayComponent.add(labels);
 
         labels.add(new JLabel("Name: " + model.getParameterName()));
