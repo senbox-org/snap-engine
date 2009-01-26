@@ -40,8 +40,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -82,42 +81,36 @@ class ImageInfoEditor2 extends ImageInfoEditor {
     private JPanel createStxOverlayComponent() {
         JPanel stxOverlayComponent = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         stxOverlayComponent.setOpaque(false);
-        stxOverlayComponent.setBorder(new EmptyBorder(4, 0, 0, 8));
 
         final ImageInfoEditorModel model = getModel();
         if (!showExtraInfo || model == null) {
             return stxOverlayComponent;
         }
 
+        stxOverlayComponent.setBorder(new EmptyBorder(4, 0, 0, 8));
+
         JComponent labels = new JComponent() {
             @Override
             protected void paintComponent(Graphics g) {
                 g.setColor(getBackground());
-                final Rectangle bounds = getBounds();
-                g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
+                g.fillRect(0, 0, getWidth(), getHeight());
             }
         };
-        labels.setLayout(new GridBagLayout());
-        labels.setBackground(new Color(255, 255, 255, 140));
+        labels.setBorder(new EmptyBorder(0, 2, 0, 2));
+        labels.setLayout(new GridLayout(-1, 1));
+        labels.setBackground(new Color(255, 255, 255, 127));
         stxOverlayComponent.add(labels);
 
-        final GridBagConstraints gbc = new GridBagConstraints();
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        labels.add(new JLabel("Name: " + model.getParameterName()), gbc);
-        gbc.gridy++;
-        labels.add(new JLabel("Unit: " + model.getParameterUnit()), gbc);
+        labels.add(new JLabel("Name: " + model.getParameterName()));
+        labels.add(new JLabel("Unit: " + model.getParameterUnit()));
 
         final Stx stx = model.getSampleStx();
         if (stx == null) {
             return stxOverlayComponent;
         }
 
-        gbc.gridy++;
-        labels.add(new JLabel("Min: " + MathUtils.round(model.getMinSample(), 1000.0)), gbc);
-        gbc.gridy++;
-        labels.add(new JLabel("Max: " + MathUtils.round(model.getMaxSample(), 1000.0)), gbc);
+        labels.add(new JLabel("Min: " + MathUtils.round(model.getMinSample(), 1000.0)));
+        labels.add(new JLabel("Max: " + MathUtils.round(model.getMaxSample(), 1000.0)));
         if (stx.getResolutionLevel() > 0) {
             final ActionLabel label = new ActionLabel("Rough statistics!");
             label.setToolTipText("Click to compute accurate statistics.");
@@ -126,8 +119,7 @@ class ImageInfoEditor2 extends ImageInfoEditor {
                     askUser();
                 }
             });
-            gbc.gridy++;
-            labels.add(label, gbc);
+            labels.add(label);
         }
 
         return stxOverlayComponent;
