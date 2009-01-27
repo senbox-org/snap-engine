@@ -40,7 +40,7 @@ o Colour manipulation window now indicates rough statistics generated from a
   low-res version of the displayed image. Users can now compute accurate
   statistics on demand.
   Colour palette import will now either
-  - try to keep colours assigned to sample values original sample values or
+  - try to keep colours assigned to sample values or
   - distribute evenely between sample min/max range.
 
 o Band arithmetic now takes into account no-data values from all bands and
