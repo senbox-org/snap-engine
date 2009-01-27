@@ -1,0 +1,33 @@
+<module>
+    <manifestVersion>1.0.0</manifestVersion>
+    <symbolicName>beam-pconvert</symbolicName>
+    <version>1.2.102</version>
+    <name>Product Conversion Tool</name>
+
+
+    <description>A tool for converting data products from one to an other format.</description>
+
+    <vendor>Brockmann Consult GmbH</vendor>
+    <contactAddress>Max Planck Str.2, 21502 Geesthacht (Germany)</contactAddress>
+    <copyright>(C) 2007 by Brockmann Consult GmbH</copyright>
+    <url>http://envisat.esa.int/beam</url>
+    <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
+
+    <changelog>
+        <![CDATA[
+        <p>Changes in 1.2.102:<br/>
+          [BEAM-907] PConvert fails with an IOException<br/>
+         </p>
+         <p>Changes in 1.2.101:<br/>
+          [BEAM-845] Created JPEG Images have false colours<br/>
+         </p>
+         ]]>
+    </changelog>
+
+    <dependency>
+        <module>beam-core</module>
+    </dependency>
+
+    <categories>Application</categories>
+
+</module>
