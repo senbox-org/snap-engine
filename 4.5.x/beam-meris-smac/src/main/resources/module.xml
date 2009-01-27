@@ -1,0 +1,65 @@
+<module>
+    <manifestVersion>1.0.0</manifestVersion>
+    <symbolicName>beam-meris-smac</symbolicName>
+    <version>1.5.101</version>
+    <name>MERIS SMAC Atmospheric Correction</name>
+
+    <description>
+        The MERIS SMAC Processor performs the Simplified Method for Atmospheric Correction.
+    </description>
+    <changelog>
+        <![CDATA[
+        Changes in 1.5.101<br>
+        [BEAM-757] Layout of help pages is not uniform<br>
+        [BEAM-724] Progress is not reported correctly<br>
+        Changes in 1.5.1<br>
+        This version needs the latest beam-envisat-reader module (Version 1.1-20070904)<br>
+        [BEAM-682] The SMAC Processor cannot cope with 'MER_FRS_1P' files<br>
+        Changes in 1.5
+        [BEAM-593] Auxdata path is not updated<br>
+        ]]>
+    </changelog>
+
+    <vendor>Brockmann Consult GmbH</vendor>
+    <contactAddress>Max Planck Str.2, 21502 Geesthacht (Germany)</contactAddress>
+    <copyright>(C) 2007 by Brockmann Consult GmbH</copyright>
+    <url>http://envisat.esa.int/beam</url>
+    <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
+
+
+    <dependency>
+        <module>beam-processing</module>
+    </dependency>
+    <dependency>
+        <module>beam-envisat-reader</module>
+    </dependency>
+    <dependency>
+        <module>beam-visat</module>
+        <optional>true</optional>
+    </dependency>
+
+    <categories>Application,Processor,MERIS,AATSR,Atmosphere</categories>
+
+    <extension point="beam-ui:actions">
+        <action>
+            <id>smacScientificTool</id>
+            <class>org.esa.beam.visat.actions.ProcessorAction</class>
+            <processor>org.esa.beam.processor.smac.SmacProcessor</processor>
+            <text>SMAC Processor (MERIS/(A)ATSR)...</text>
+            <shortDescr>Invoke the MERIS/(A)ATSR SMAC Processor.</shortDescr>
+            <mnemonic>M</mnemonic>
+            <parent>tools</parent>
+            <helpID>smacScientificTool</helpID>
+            <placeAfter>smileScientificToolPlugIn</placeAfter>
+        </action>
+    </extension>
+
+
+    <extension point="beam-ui:helpSets">
+        <helpSet>
+            <parent>beam-help</parent>
+            <path>doc/help/smac.hs</path>
+        </helpSet>
+    </extension>
+
+</module>
