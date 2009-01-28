@@ -26,7 +26,6 @@ public class TiledFileOpImage extends SourcelessOpImage {
 
     public static TiledFileOpImage create(File imageDir, Properties defaultImageProperties) throws IOException {
         final ImageHeader imageHeader = ImageHeader.load(imageDir, defaultImageProperties);
-
         return new TiledFileOpImage(imageHeader, null, imageDir);
     }
 
@@ -78,7 +77,6 @@ public class TiledFileOpImage extends SourcelessOpImage {
 
     private Raster readImageTile(int tileX, int tileY, Point location) {
         File imageFile = new File(imageDir, getTileFilename(tileX, tileY));
-        System.out.println("TiledFileOpImage: Loading '" + imageFile + "'...");
         final RenderedOp renderedOp = FileLoadDescriptor.create(imageFile.getPath(), null, true, null);
         final Raster data = renderedOp.getData();
         return WritableRaster.createRaster(data.getSampleModel(), data.getDataBuffer(), location);
