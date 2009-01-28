@@ -166,12 +166,12 @@ class GeoCodingPanel extends TextPagePanel {
         sb.append("\n");
 
         sb.append("Table of used GCPs:\n");
-        Pin[] pins = gcpGroup.toArray(new Pin[0]);
+        Pin[] gcps = gcpGroup.toArray(new Pin[0]);
         formatString = "%1$-10s \t%2$-15s \t%3$-10s \t%4$-10s \t%5$-18s \t%6$-18s\n";
         sb.append(String.format(formatString,
                                 "Number", "Label", "X", "Y", "Latitude", "Longitude"));
-        for (int i = 0; i < pins.length; i++) {
-            Pin gcp = pins[i];
+        for (int i = 0; i < gcps.length; i++) {
+            Pin gcp = gcps[i];
             PixelPos pixelPos = gcp.getPixelPos();
             GeoPos geoPos = gcp.getGeoPos();
             sb.append(String.format(formatString,
