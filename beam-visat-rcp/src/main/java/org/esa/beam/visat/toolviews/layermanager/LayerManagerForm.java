@@ -3,7 +3,6 @@ package org.esa.beam.visat.toolviews.layermanager;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.support.AbstractLayerListener;
 import com.bc.ceres.glayer.support.LayerStyleListener;
-import com.bc.ceres.swing.TreeCellExtender;
 import com.jidesoft.swing.CheckBoxTree;
 import com.jidesoft.swing.CheckBoxTreeSelectionModel;
 import com.jidesoft.tree.TreeUtils;
@@ -41,11 +40,9 @@ class LayerManagerForm {
     public LayerManagerForm(final Layer rootLayer) {
         this.rootLayer = rootLayer;
         layerTree = createCheckBoxTree(rootLayer);
-        initVisibilitySelection(rootLayer);
-
         // todo - doesn't work properly. Check why (nf - 20090122)
         //TreeCellExtender.equip(layerTree);
-
+        initVisibilitySelection(rootLayer);
 
         layerSelectionListenerMap = new WeakHashMap<LayerSelectionListener, Object>(3);
 
