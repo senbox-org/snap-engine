@@ -156,10 +156,10 @@ public class NavigationCanvas extends JPanel {
 
     private class ObservedViewportHandler implements ViewportListener {
 
-        public void handleViewportChanged(Viewport viewport, boolean orientationChanged) {
+        public void handleViewportChanged(Viewport observedViewport, boolean orientationChanged) {
             if (!adjustingObservedViewport) {
                 if (orientationChanged) {
-                    thumbnailCanvas.getViewport().setOrientation(viewport.getOrientation());
+                    thumbnailCanvas.getViewport().setOrientation(observedViewport.getOrientation());
                     thumbnailCanvas.zoomAll();
                 }
                 updateMoveSliderRect();

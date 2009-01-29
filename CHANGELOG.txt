@@ -6,7 +6,7 @@
 
 This file contains all significant changes for each BEAM release.
 
-    o 27.01.2009: Version 4.5.1
+    o 29.01.2009: Version 4.5.1
     o 31.10.2008: Version 4.5
     o 11.07.2008: Version 4.2
     o 31.10.2007: Version 4.1
@@ -49,6 +49,8 @@ o Band arithmetic now takes into account no-data values from all bands and
 
 2) Complete list of bug fixes and improvements
 
+BEAM-942    VISAT sometimes hangs on startup
+BEAM-937    Colour palette sometimes incorrectly imported
 BEAM-936 	Layer visibility is not synchronised with tool bar buttons
 BEAM-932 	Inconsistent handling of adding and copying bitmasks
 BEAM-931 	Shapes are not displayed while drawing
