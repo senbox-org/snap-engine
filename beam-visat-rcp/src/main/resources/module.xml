@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>beam-visat-rcp</symbolicName>
-    <version>4.6</version>
+    <version>4.6.1-SNAPSHOT</version>
     <name>VISAT Rich Client Platform</name>
 
     <description>
@@ -11,6 +11,9 @@
 
     <changelog>
         <![CDATA[
+        <p>Changes in 4.6.1:<br/>
+          [BEAM-1002] Editing bitmask overlays is not possible using the nimbus or gtk look & feel<br/>
+        </p>
         <p>Changes in 4.6:<br/>
           [BEAM-998] VISAT fails to import shapes from ESRI shapefiles<br/>
           [BEAM-997] VISAT should display a band's coordinate system<br/>
