@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>beam-core</symbolicName>
-    <version>4.6</version>
+    <version>4.6.1</version>
     <name>BEAM Core Library</name>
 
 
@@ -22,6 +22,9 @@
 
     <changelog>
         <![CDATA[
+        <p>Changes in 4.6.1:<br/>
+        [BEAM-1004] X and Y variables always zero in band arithmetic<br/>
+        </p>
         <p>Changes in 4.6:<br/>
         [BEAM-993] Filter band not correct if band is UINT type and does not have scaling<br/>
         [BEAM-978] Data Flip shifts product geo-location<br/>
