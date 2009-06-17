@@ -1763,8 +1763,8 @@ if (wizardContext != null) {
       </installerScript>
     </unixInstaller>
   </mediaSets>
-  <buildIds buildAll="true">
-    <mediaSet refId="20" />
+  <buildIds buildAll="false">
+    <mediaSet refId="126" />
   </buildIds>
 </install4j>
 
