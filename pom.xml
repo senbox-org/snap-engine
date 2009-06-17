@@ -86,7 +86,7 @@
     </pluginRepositories>
 
     <modules>
-        <module>../ceres-0.9</module>
+        <module>../ceres-0.9.x</module>
 
         <!-- the bootstrap module has no sources,
              its only purpose is to construct a class path for VISAT
@@ -183,12 +183,12 @@
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-core</artifactId>
-                <version>4.6.1-SNAPSHOT</version>
+                <version>4.6.1</version>
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-gpf</artifactId>
-                <version>4.6.1-SNAPSHOT</version>
+                <version>4.6.1</version>
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>
@@ -203,7 +203,7 @@
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-visat-rcp</artifactId>
-                <version>4.6.1-SNAPSHOT</version>
+                <version>4.6.1</version>
             </dependency>
             <dependency>
                 <groupId>org.esa.beam</groupId>
