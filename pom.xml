@@ -86,7 +86,7 @@
     </pluginRepositories>
 
     <modules>
-        <module>../ceres-0.x</module>
+        <module>../ceres-0.9</module>
 
         <!-- the bootstrap module has no sources,
              its only purpose is to construct a class path for VISAT
@@ -326,27 +326,27 @@
             <dependency>
                 <groupId>com.jidesoft</groupId>
                 <artifactId>jide-dock</artifactId>
-                <version>2.2.7</version>
+                <version>2.6.6</version>
             </dependency>
             <dependency>
                 <groupId>com.jidesoft</groupId>
                 <artifactId>jide-action</artifactId>
-                <version>2.2.7</version>
+                <version>2.6.6</version>
             </dependency>
             <dependency>
                 <groupId>com.jidesoft</groupId>
                 <artifactId>jide-grids</artifactId>
-                <version>2.2.7</version>
+                <version>2.6.6</version>
             </dependency>
             <dependency>
                 <groupId>com.jidesoft</groupId>
                 <artifactId>jide-components</artifactId>
-                <version>2.2.7</version>
+                <version>2.6.6</version>
             </dependency>
             <dependency>
                 <groupId>com.jidesoft</groupId>
                 <artifactId>jide-common</artifactId>
-                <version>2.2.7</version>
+                <version>2.6.6</version>
             </dependency>
 
             <!-- XStream Libraries ############################################# -->
@@ -421,14 +421,10 @@
                 </plugin>
 
                 <plugin>
-                    <artifactId>maven-javadoc-plugin</artifactId>
-                </plugin>
-
-                <plugin>
                     <artifactId>maven-source-plugin</artifactId>
                     <executions>
                         <execution>
-                            <phase>package</phase>
+                            <phase>verify</phase>
                             <goals>
                                 <goal>jar</goal>
                             </goals>
@@ -456,7 +452,6 @@
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <configuration>
-                        <!--<skip>true</skip>-->
                         <printSummary>true</printSummary>
                         <useFile>false</useFile>
                         <includes>
@@ -473,6 +468,7 @@
                 </plugin>
 
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <configuration>
                         <links>
@@ -514,6 +510,10 @@
         </pluginManagement>
 
         <plugins>
+            <plugin>
+                <artifactId>maven-source-plugin</artifactId>
+            </plugin>
+
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
