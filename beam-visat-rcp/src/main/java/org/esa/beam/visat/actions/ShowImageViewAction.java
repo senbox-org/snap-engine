@@ -160,29 +160,6 @@ public class ShowImageViewAction extends ExecCommand {
             }
         });
 
-
-        // todo - uncomment in order to implement synchronised cursor positions (nf 20090512)
-        /*
-        view.getLayerCanvas().addMouseMotionListener(new MouseMotionAdapter() {
-            @Override
-            public void mouseMoved(MouseEvent e) {
-                LayerCanvas layerCanvas = (LayerCanvas) e.getSource();
-                Point2D mp = layerCanvas.getViewport().getViewToModelTransform().transform(e.getPoint(), null);
-
-                for (JInternalFrame frame : visatApp.getAllInternalFrames()) {
-                    Container contentPane = frame.getContentPane();
-                    if (contentPane instanceof ProductSceneView) {
-                        ProductSceneView otherView = (ProductSceneView) contentPane;
-                        if (otherView != view) {
-
-                            //  layerCanvas.getViewport()
-                        }
-                    }
-                }
-            }
-        });
-        */
-
         visatApp.updateState();
 
         return internalFrame;
