@@ -13,6 +13,7 @@
         <![CDATA[
         <p>Changes in 4.6.1:<br/>
           [BEAM-1014] ROI not considered when using value range<br/>
+          [BEAM-1007] Geo-location / Tie Point Grid consistency<br/>
         </p>     
         <p>Changes in 4.6:<br/>
           [BEAM-998] VISAT fails to import shapes from ESRI shapefiles<br/>
