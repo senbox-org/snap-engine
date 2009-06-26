@@ -221,7 +221,7 @@
             <dependency>
                 <groupId>org.esa.beam</groupId>
                 <artifactId>beam-visat</artifactId>
-                <version>4.6</version>
+                <version>4.6.1-SNAPSHOT</version>
             </dependency>
 
             <!-- BEAM Modules ############################################# -->
