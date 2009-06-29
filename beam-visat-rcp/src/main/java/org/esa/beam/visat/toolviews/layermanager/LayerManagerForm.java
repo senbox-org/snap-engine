@@ -5,12 +5,12 @@ import com.bc.ceres.glayer.support.LayerStyleListener;
 import com.bc.ceres.glayer.support.LayerUtils;
 import com.jidesoft.swing.CheckBoxTree;
 import com.jidesoft.swing.CheckBoxTreeSelectionModel;
+import org.esa.beam.framework.help.HelpSys;
 import org.esa.beam.framework.ui.AppContext;
-import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.framework.ui.GridBagUtils;
+import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.framework.ui.product.ProductSceneView;
 import org.esa.beam.framework.ui.tool.ToolButtonFactory;
-import org.esa.beam.framework.help.HelpSys;
 import org.esa.beam.visat.VisatActivator;
 import org.esa.beam.visat.toolviews.layermanager.layersrc.LayerSourceAssistantPane;
 import org.esa.beam.visat.toolviews.layermanager.layersrc.SelectLayerSourceAssistantPage;
@@ -33,15 +33,14 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.GridLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
-import java.util.List;
 import java.util.Hashtable;
+import java.util.List;
 
 class LayerManagerForm extends AbstractLayerForm {
 
@@ -58,6 +57,7 @@ class LayerManagerForm extends AbstractLayerForm {
     private MoveLayerLeftAction moveLayerLeftAction;
     private MoveLayerRightAction moveLayerRightAction;
     private OpenLayerEditorAction openLayerEditorAction;
+    private ZoomToLayerAction zoomToLayerAction;
 
     LayerManagerForm(AppContext appContext, String helpId) {
         super(appContext);
@@ -96,6 +96,9 @@ class LayerManagerForm extends AbstractLayerForm {
         openLayerEditorAction = new OpenLayerEditorAction();
         AbstractButton openButton = ToolButtonFactory.createButton(openLayerEditorAction, false);
 
+        zoomToLayerAction = new ZoomToLayerAction(getAppContext());
+        AbstractButton zoomButton = ToolButtonFactory.createButton(zoomToLayerAction, false);
+
         moveLayerUpAction = new MoveLayerUpAction(getAppContext());
         AbstractButton upButton = ToolButtonFactory.createButton(moveLayerUpAction, false);
 
@@ -123,6 +126,8 @@ class LayerManagerForm extends AbstractLayerForm {
         actionBar.add(removeButton, gbc);
         gbc.gridy++;
         actionBar.add(openButton, gbc);
+        gbc.gridy++;
+        actionBar.add(zoomButton, gbc);
         gbc.gridy++;
         actionBar.add(upButton, gbc);
         gbc.gridy++;
@@ -190,6 +195,7 @@ class LayerManagerForm extends AbstractLayerForm {
         moveLayerDownAction.setEnabled(isLayerSelected && moveLayerDownAction.canMove(selectedLayer));
         moveLayerLeftAction.setEnabled(isLayerSelected && moveLayerLeftAction.canMove(selectedLayer));
         moveLayerRightAction.setEnabled(isLayerSelected && moveLayerRightAction.canMove(selectedLayer));
+        zoomToLayerAction.setEnabled(isLayerSelected);
     }
 
     public boolean isLayerProtected(Layer layer) {
@@ -319,7 +325,6 @@ class LayerManagerForm extends AbstractLayerForm {
     }
 
 
-
     private class RootLayerListener extends LayerStyleListener {
 
         @Override
@@ -362,7 +367,9 @@ class LayerManagerForm extends AbstractLayerForm {
     }
 
     private class AddLayerActionListener implements ActionListener {
-        Rectangle screenBounds;
+
+        private Rectangle screenBounds;
+
         @Override
         public void actionPerformed(ActionEvent e) {
             LayerSourceAssistantPane pane = new LayerSourceAssistantPane(SwingUtilities.getWindowAncestor(control),
