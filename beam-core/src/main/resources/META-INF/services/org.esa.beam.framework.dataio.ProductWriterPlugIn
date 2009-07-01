@@ -1,1 +1,2 @@
 org.esa.beam.dataio.dimap.DimapProductWriterPlugIn
+org.esa.beam.dataio.rtp.RawTiledPyramidsProductCodecSpi

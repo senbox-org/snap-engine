@@ -12,6 +12,7 @@
     <changelog>
         <![CDATA[
         <p>Changes in 4.6.1:<br/>
+          [BEAM-1021] File chooser boxes shall support "component documents"<br/>
           [BEAM-1019] Blue Marble Layer can not be restored from saved session<br/>
           [BEAM-1018] Value range of ROI does not consider no-data value<br/>
           [BEAM-1016] Add "Zoom to Layer"-Button to Layer Manager<br/>
