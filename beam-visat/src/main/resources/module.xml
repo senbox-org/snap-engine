@@ -12,6 +12,7 @@
     <changelog>
         <![CDATA[
         <p>Changes in 4.6.1:<br/>
+          [BEAM-1018] Value range of ROI does not consider no-data value<br/>
           [BEAM-1016] Add "Zoom to Layer"-Button to Layer Manager<br/>
           [BEAM-1014] ROI not considered when using value range<br/>
           [BEAM-1007] Geo-location / Tie Point Grid consistency<br/>
