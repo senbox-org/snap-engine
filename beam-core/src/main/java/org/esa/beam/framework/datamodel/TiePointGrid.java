@@ -22,7 +22,6 @@ import com.bc.ceres.glevel.MultiLevelImage;
 import com.bc.ceres.glevel.MultiLevelModel;
 import com.bc.ceres.glevel.support.AbstractMultiLevelSource;
 import com.bc.ceres.glevel.support.DefaultMultiLevelImage;
-
 import org.esa.beam.jai.ImageManager;
 import org.esa.beam.jai.ResolutionLevel;
 import org.esa.beam.jai.TiePointGridOpImage;
@@ -618,7 +617,7 @@ public class TiePointGrid extends RasterDataNode {
     public double[] readPixels(int x, int y, int w, int h, double[] pixels, ProgressMonitor pm) throws IOException {
         return getPixels(x, y, w, h, pixels, pm);
     }
-    
+
     /**
      * Reads raster values from this dataset into the user-supplied data buffer.
      * Raster coordinates refer to the product's scene raster.
@@ -627,6 +626,7 @@ public class TiePointGrid extends RasterDataNode {
      * @param rectangle  the rectangle in scene raster co-ordinates of the data buffer
      * @param rasterData a raster data buffer receiving the pixels to be read
      * @param pm         a monitor to inform the user about progress
+     *
      * @throws java.io.IOException      if an I/O error occurs
      * @throws IllegalArgumentException if the raster is null
      * @throws IllegalStateException    if this product raster was not added to a product so far, or if the product to
@@ -635,15 +635,17 @@ public class TiePointGrid extends RasterDataNode {
      */
     @Override
     @Deprecated
-	public void readRaster(Rectangle rectangle, ProductData rasterData, ProgressMonitor pm) throws IOException {
-    	if (rasterData.getType() == ProductData.TYPE_FLOAT32) {
-    		readPixels(rectangle.x, rectangle.y, rectangle.width, rectangle.height, (float[])rasterData.getElems(), pm);
-    	} else {
-    		float[] pixels = readPixels(rectangle.x, rectangle.y, rectangle.width, rectangle.height, (float[])null, pm);
-    		for (int i = 0; i < pixels.length; i++) {
-				rasterData.setElemFloatAt(i, pixels[i]);
-			}
-    	}
+    public void readRaster(Rectangle rectangle, ProductData rasterData, ProgressMonitor pm) throws IOException {
+        if (rasterData.getType() == ProductData.TYPE_FLOAT32) {
+            readPixels(rectangle.x, rectangle.y, rectangle.width, rectangle.height, (float[]) rasterData.getElems(),
+                       pm);
+        } else {
+            float[] pixels = readPixels(rectangle.x, rectangle.y, rectangle.width, rectangle.height, (float[]) null,
+                                        pm);
+            for (int i = 0; i < pixels.length; i++) {
+                rasterData.setElemFloatAt(i, pixels[i]);
+            }
+        }
     }
 
     /**
@@ -661,7 +663,6 @@ public class TiePointGrid extends RasterDataNode {
     public void writePixels(int x, int y, int w, int h, float[] pixels, ProgressMonitor pm) throws IOException {
         raisePixelsAreReadOnlyError();
     }
-
 
 
     /**
@@ -690,7 +691,7 @@ public class TiePointGrid extends RasterDataNode {
      * @throws IllegalArgumentException if the raster is null
      * @throws IllegalStateException    if this product raster was not added to a product so far, or if the product to
      *                                  which this product raster belongs to, has no associated product reader
-     * @see org.esa.beam.framework.dataio.ProductReader#readBandRasterData(Band, int, int, int, int, ProductData, com.bc.ceres.core.ProgressMonitor) 
+     * @see org.esa.beam.framework.dataio.ProductReader#readBandRasterData(Band, int, int, int, int, ProductData, com.bc.ceres.core.ProgressMonitor)
      */
     @Override
     public void readRasterData(int offsetX, int offsetY, int width, int height, ProductData rasterData,
@@ -738,19 +739,19 @@ public class TiePointGrid extends RasterDataNode {
     public void writeRasterDataFully(ProgressMonitor pm) throws IOException {
         raisePixelsAreReadOnlyError();
     }
-    
+
     @Override
     protected RenderedImage createSourceImage() {
-        final MultiLevelModel model = ImageManager.getInstance().getMultiLevelModel(this); 
-        MultiLevelImage multiLevelImage = 
-            new DefaultMultiLevelImage(new AbstractMultiLevelSource(model) {
+        final MultiLevelModel model = ImageManager.getInstance().getMultiLevelModel(this);
+        MultiLevelImage multiLevelImage =
+                new DefaultMultiLevelImage(new AbstractMultiLevelSource(model) {
 
-            @Override
-            public RenderedImage createImage(int level) {
-                return new TiePointGridOpImage(TiePointGrid.this, 
-                                               ResolutionLevel.create(getModel(), level));
-            }
-        });
+                    @Override
+                    public RenderedImage createImage(int level) {
+                        return new TiePointGridOpImage(TiePointGrid.this,
+                                                       ResolutionLevel.create(getModel(), level));
+                    }
+                });
         return multiLevelImage;
     }
 
@@ -776,15 +777,17 @@ public class TiePointGrid extends RasterDataNode {
         final float[] srcTiePoints = this.getTiePoints();
         final float[] destTiePoints = new float[srcTiePoints.length];
         System.arraycopy(srcTiePoints, 0, destTiePoints, 0, srcTiePoints.length);
-        return new TiePointGrid(this.getName(),
-                                this.getRasterWidth(),
-                                this.getRasterHeight(),
-                                this.getOffsetX(),
-                                this.getOffsetY(),
-                                this.getSubSamplingX(),
-                                this.getSubSamplingY(),
-                                destTiePoints,
-                                this.getDiscontinuity());
+        final TiePointGrid grid = new TiePointGrid(this.getName(),
+                                                   this.getRasterWidth(),
+                                                   this.getRasterHeight(),
+                                                   this.getOffsetX(),
+                                                   this.getOffsetY(),
+                                                   this.getSubSamplingX(),
+                                                   this.getSubSamplingY(),
+                                                   destTiePoints,
+                                                   this.getDiscontinuity());
+        grid.setDescription(this.getDescription());
+        return grid;
 
     }
 
