@@ -16,22 +16,14 @@
  */
 package org.esa.beam.framework.ui;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Frame;
-import java.awt.Point;
-import java.awt.Toolkit;
-import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.MouseEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.net.URL;
-import java.text.DecimalFormat;
+import org.esa.beam.framework.param.ParamChangeEvent;
+import org.esa.beam.framework.param.ParamChangeListener;
+import org.esa.beam.framework.param.ParamProperties;
+import org.esa.beam.framework.param.Parameter;
+import org.esa.beam.util.ArrayUtils;
+import org.esa.beam.util.Debug;
+import org.esa.beam.util.Guardian;
+import org.esa.beam.util.StringUtils;
 
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
@@ -53,15 +45,22 @@ import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-
-import org.esa.beam.framework.param.ParamChangeEvent;
-import org.esa.beam.framework.param.ParamChangeListener;
-import org.esa.beam.framework.param.ParamProperties;
-import org.esa.beam.framework.param.Parameter;
-import org.esa.beam.util.ArrayUtils;
-import org.esa.beam.util.Debug;
-import org.esa.beam.util.Guardian;
-import org.esa.beam.util.StringUtils;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Frame;
+import java.awt.Point;
+import java.awt.Toolkit;
+import java.awt.Window;
+import java.awt.event.ActionEvent;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.net.URL;
+import java.text.DecimalFormat;
 
 /**
  * The <code>UIUtils</code> class provides methods frequently used in connection with graphical user interfaces.
@@ -86,16 +85,17 @@ public class UIUtils {
      * @return an image icon loaded from the given resource path or <code>null</code> if it could not be found
      */
     public static ImageIcon loadImageIcon(String resourcePath) {
-       return loadImageIcon(resourcePath, UIUtils.class);
+        return loadImageIcon(resourcePath, UIUtils.class);
     }
 
     /**
      * Gets the image icon loaded from the given resource path.
      *
      * @param resourcePath the resource path
-     * @param callerClass the class which calls this method and therefore provides the class loader for the requested resource
+     * @param callerClass  the class which calls this method and therefore provides the class loader for the requested resource
      *
      * @return an image icon loaded from the given resource path or <code>null</code> if it could not be found
+     *
      * @since 4.0
      */
     public static ImageIcon loadImageIcon(String resourcePath, Class callerClass) {
@@ -123,9 +123,10 @@ public class UIUtils {
      * Gets the location of the given image resource path as an URL.
      *
      * @param resourcePath the resource path
-     * @param callerClass the class which calls this method and therefore provides the class loader for the requested resource
+     * @param callerClass  the class which calls this method and therefore provides the class loader for the requested resource
      *
      * @return an URL representing the given resource path or <code>null</code> if it could not be found
+     *
      * @since 4.0
      */
     public static URL getImageURL(String resourcePath, Class callerClass) {
@@ -256,7 +257,7 @@ public class UIUtils {
 
     public static Border createGroupBorder(String title) {
         return BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
-                title);
+                                                title);
     }
 
     public static Frame getRootFrame(Component component) {
@@ -466,7 +467,8 @@ public class UIUtils {
         return spinner;
     }
 
-    public static JSpinner createSpinner(final Number value, final Comparable rangeMinimum, final Comparable rangeMaximum,
+    public static JSpinner createSpinner(final Number value, final Comparable rangeMinimum,
+                                         final Comparable rangeMaximum,
                                          final Number stepSize, final Number bigStepSize, final String formatPattern) {
 
         final SpinnerNumberModel numberModel = new SpinnerNumberModel(value, rangeMinimum, rangeMaximum, stepSize);
@@ -478,7 +480,7 @@ public class UIUtils {
             format.applyPattern(formatPattern);
             numberEditor.getTextField().setColumns(8);
         }
-        spinner.setValue(0);
+        spinner.setValue(0.0f); // todo - Why is this done? (mp - 2009/07/02)
         spinner.setValue(value);
 
         final String bigDec = "dec++";
