@@ -123,7 +123,7 @@ public class MosaicUi extends AbstractProcessorUI {
     public static final int STANDARD_INSETS_TOP = 3;
     public static final int LARGE_INSETS_TOP = STANDARD_INSETS_TOP + 15;
     private static final String _defaultNumberText = "####";
-    private static final String _defaultLatLonText = "##�";
+    private static final String _defaultLatLonText = "##°";
     private static final int _PREFERRED_TABLE_WIDTH = 500;
 
     private MosaicRequestElementFactory _reqElemFac;
