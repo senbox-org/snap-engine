@@ -709,14 +709,6 @@
             <placeAfter>importShape</placeAfter>
         </action>
 
-        <action>
-            <parent>import</parent>
-            <id>importNonameProduct</id>
-            <class>org.esa.beam.visat.actions.ProductImportAction</class>
-            <formatName>RAW-TILED-PYRAMIDS</formatName>
-        </action>
-
-
         <!--####################-->
         <!-- Export Menu Group  -->
         <!--####################-->
@@ -730,13 +722,6 @@
             <shortDescr>Export product to BEAM-DIMAP format.</shortDescr>
             <description>Export the selected product to BEAM-DIMAP format.</description>
             <helpId>exportDimapProduct</helpId>
-        </action>
-
-        <action>
-            <parent>export</parent>
-            <id>exportNonameProduct</id>
-            <class>org.esa.beam.visat.actions.ProductExportAction</class>
-            <formatName>RAW-TILED-PYRAMIDS</formatName>
         </action>
 
         <action>
