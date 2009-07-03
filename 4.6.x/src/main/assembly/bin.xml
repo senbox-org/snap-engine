@@ -1,0 +1,130 @@
+<!-- BEAM binary distribution -->
+
+<assembly>
+    <id>bin</id>
+
+    <includeBaseDirectory>false</includeBaseDirectory>
+
+    <formats>
+        <format>dir</format>
+    </formats>
+
+    <files>
+        <file>
+            <source>readme.html</source>
+            <lineEnding>unix</lineEnding>
+            <filtered>true</filtered>
+        </file>
+        <file>
+            <source>VERSION.txt</source>
+            <filtered>true</filtered>
+        </file>
+        <file>
+            <source>LICENSE.txt</source>
+        </file>
+        <file>
+            <source>CHANGELOG.txt</source>
+        </file>
+    </files>
+
+    <fileSets>
+
+        <fileSet>
+            <directory>src/main/config</directory>
+            <outputDirectory>config</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>src/main/licenses</directory>
+            <outputDirectory>licenses</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>src/main/bin/common</directory>
+            <outputDirectory>bin</outputDirectory>
+            <includes>
+                <include>splash.png</include>
+            </includes>
+        </fileSet>
+
+        <fileSet>
+            <directory>src/main/bin/win</directory>
+            <outputDirectory>bin</outputDirectory>
+            <lineEnding>dos</lineEnding>
+            <includes>
+                <include>*.bat</include>
+            </includes>
+            <excludes>
+                <exclude>beam-cli-template.*</exclude>
+            </excludes>
+        </fileSet>
+
+        <fileSet>
+            <directory>src/main/bin/linux</directory>
+            <outputDirectory>bin</outputDirectory>
+            <lineEnding>unix</lineEnding>
+            <fileMode>0755</fileMode>
+            <directoryMode>0755</directoryMode>
+            <includes>
+                <include>*.sh</include>
+            </includes>
+            <excludes>
+                <exclude>beam-cli-template.*</exclude>
+            </excludes>
+        </fileSet>
+
+        <fileSet>
+            <directory>src/main/bin/macosx</directory>
+            <outputDirectory>bin</outputDirectory>
+            <lineEnding>unix</lineEnding>
+            <fileMode>0755</fileMode>
+            <directoryMode>0755</directoryMode>
+            <includes>
+                <include>*.command</include>
+            </includes>
+            <excludes>
+                <exclude>beam-cli-template.*</exclude>
+            </excludes>
+        </fileSet>
+
+    </fileSets>
+
+    <moduleSets>
+		<moduleSet>
+            <excludes>
+                <exclude>org.esa.beam:beam-bootstrap</exclude>
+                <exclude>org.esa.beam:beam-installer</exclude>
+                <exclude>com.bc.ceres:ceres-launcher</exclude>
+                <exclude>com.bc.ceres:ceres-deploy</exclude>
+                <exclude>com.bc.ceres:ceres-fs</exclude>
+                <exclude>com.bc.ceres:ceres-site</exclude>
+            </excludes>
+            <binaries>
+                <outputDirectory>modules</outputDirectory>
+				<unpack>false</unpack>
+                <outputFileNameMapping>${module.artifactId}-${module.version}.${module.extension}</outputFileNameMapping>
+                <includeDependencies>false</includeDependencies>
+                <dependencySets>
+                    <dependencySet>
+                        <outputDirectory>bin</outputDirectory>
+                        <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+                        <includes>
+                            <include>com.bc.ceres:ceres-launcher</include>
+                        </includes>
+                    </dependencySet>
+                    <dependencySet>
+                        <outputDirectory>lib</outputDirectory>
+						<outputFileNameMapping>${artifact.artifactId}-${artifact.version}.${artifact.extension}</outputFileNameMapping>
+                        <excludes>
+                            <exclude>com.bc.ceres:ceres-*</exclude>
+                            <exclude>org.esa.beam:beam-*</exclude>
+                            <exclude>ncsa.hdf:*</exclude>
+                            <exclude>ucar.netcdf:*</exclude>
+                        </excludes>
+                    </dependencySet>
+                </dependencySets>
+		    </binaries>
+		</moduleSet>
+    </moduleSets>
+	
+</assembly>
