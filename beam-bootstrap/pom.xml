@@ -7,7 +7,7 @@
     <parent>
         <artifactId>beam</artifactId>
         <groupId>org.esa.beam</groupId>
-        <version>4.6.1-SNAPSHOT</version>
+        <version>4.6.1</version>
     </parent>
 
     <packaging>jar</packaging>
@@ -16,7 +16,7 @@
     <artifactId>beam-bootstrap</artifactId>
     <name>BEAM Bootstrap Classpath</name>
     <description>Provides the bootstrap classpath to launch VISAT from your favourite IDE.</description>
-    <version>4.6.1-SNAPSHOT</version>
+    <version>4.6.1</version>
 
     <dependencies>
         <dependency>
@@ -141,13 +141,13 @@
             <artifactId>junit</artifactId>
             <scope>compile</scope>
         </dependency>
-<!--
-        <dependency>
-            <groupId>ncsa.hdf</groupId>
-            <artifactId>lib-hdf</artifactId>
-            <scope>compile</scope>
-        </dependency>
--->
+        <!--
+                <dependency>
+                    <groupId>ncsa.hdf</groupId>
+                    <artifactId>lib-hdf</artifactId>
+                    <scope>compile</scope>
+                </dependency>
+        -->
     </dependencies>
 
 </project>
