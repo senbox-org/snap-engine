@@ -31,6 +31,8 @@ _____________________________________________________________________________
  Changes from 4.6 to 4.6.1
 _____________________________________________________________________________
 
+BEAM-1029 Make 'Nimbus' default look&feel on Unix
+BEAM-1028 Navigation window not fully functional on Unix/GTK+
 BEAM-1026 Mac/*nix commands/scripts fail because wrong line format (LR+CR)
 BEAM-1025 Installer does not run after Java update on Mac Os X
 BEAM-1024 VISAT does not launch after Java update on Mac Os X
