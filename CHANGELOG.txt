@@ -31,6 +31,7 @@ _____________________________________________________________________________
  Changes from 4.6 to 4.6.1
 _____________________________________________________________________________
 
+BEAM-1026 Mac/*nix commands/scripts fail because wrong line format (LR+CR)
 BEAM-1025 Installer does not run after Java update on Mac Os X
 BEAM-1024 VISAT does not launch after Java update on Mac Os X
 BEAM-1023 Can not overlay compatible products
