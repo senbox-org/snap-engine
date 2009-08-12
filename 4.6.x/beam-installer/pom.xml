@@ -1,0 +1,93 @@
+<project
+        xmlns="http://maven.apache.org/POM/4.0.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <artifactId>beam</artifactId>
+        <groupId>org.esa.beam</groupId>
+        <version>4.6.2</version>
+    </parent>
+
+    <name>BEAM Installer Project</name>
+    <groupId>org.esa.beam</groupId>
+    <artifactId>beam-installer</artifactId>
+    <version>4.6</version>
+
+    <packaging>jar</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.install4j</groupId>
+            <artifactId>i4jruntime</artifactId>
+            <version>4.2.3</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <directory>target</directory>
+        <outputDirectory>target/classes</outputDirectory>
+        <finalName>${project.artifactId}</finalName>
+
+        <plugins>
+            <plugin>
+                <groupId>com.bc.maven.plugins</groupId>
+                <artifactId>maven-template-plugin</artifactId>
+                <version>1.2-SNAPSHOT</version>
+                <executions>
+                    <execution>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>template</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <templates>
+                        <template>
+                            <source>${basedir}/../src/main/bin/win/beam-cli-template.bat</source>
+                            <lineEnding>dos</lineEnding>
+                            <outputDirectory>${basedir}/../target/beam-bin.dir/bin</outputDirectory>
+                            <outputFileNamePattern>@{filterBaseName}.@{sourceExtension}</outputFileNamePattern>
+                            <filterSet>
+                                <directory>${basedir}/../src/main/filters</directory>
+                                <includes>
+                                    <include>*.properties</include>
+                                </includes>
+                            </filterSet>
+                        </template>
+                        <template>
+                            <source>${basedir}/../src/main/bin/linux/beam-cli-template.sh</source>
+                            <lineEnding>unix</lineEnding>
+                            <outputDirectory>${basedir}/../target/beam-bin.dir/bin</outputDirectory>
+                            <outputFileNamePattern>@{filterBaseName}.@{sourceExtension}</outputFileNamePattern>
+                            <filterSet>
+                                <directory>${basedir}/../src/main/filters</directory>
+                                <includes>
+                                    <include>*.properties</include>
+                                </includes>
+                            </filterSet>
+                        </template>
+                        <template>
+                            <source>${basedir}/../src/main/bin/macosx/beam-cli-template.command</source>
+                            <lineEnding>unix</lineEnding>
+                            <outputDirectory>${basedir}/../target/beam-bin.dir/bin</outputDirectory>
+                            <outputFileNamePattern>@{filterBaseName}.@{sourceExtension}</outputFileNamePattern>
+                            <filterSet>
+                                <directory>${basedir}/../src/main/filters</directory>
+                                <includes>
+                                    <include>*.properties</include>
+                                </includes>
+                            </filterSet>
+                        </template>
+                    </templates>
+                </configuration>
+            </plugin>
+
+        </plugins>
+    </build>
+
+
+</project>
