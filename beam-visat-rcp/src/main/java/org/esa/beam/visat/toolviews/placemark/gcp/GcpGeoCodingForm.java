@@ -326,14 +326,8 @@ class GcpGeoCodingForm extends JPanel {
                     detachGeoCoding(currentProduct);
                 }else {
                     Placemark[] gcps = currentProduct.getGcpGroup().toArray(new Placemark[0]);
-//                    GcpGeoCoding newGcpGeoCoding = new GcpGeoCoding(gcpGeoCoding.getMethod(), gcps,
-//                                                                    currentProduct.getSceneRasterWidth(),
-//                                                                    currentProduct.getSceneRasterHeight(),
-//                                                                    gcpGeoCoding.getDatum());
-//                    newGcpGeoCoding.setOriginalGeoCoding(gcpGeoCoding.getOriginalGeoCoding());
                     gcpGeoCoding.setGcps(gcps);
                     currentProduct.fireProductNodeChanged(Product.PROPERTY_NAME_GEOCODING);
-//                    currentProduct.setGeoCoding(newGcpGeoCoding);
                     updateUIState();
                 }
             }
