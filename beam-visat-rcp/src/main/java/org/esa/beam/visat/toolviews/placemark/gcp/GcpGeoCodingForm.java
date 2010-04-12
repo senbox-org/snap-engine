@@ -4,6 +4,7 @@ import com.bc.ceres.swing.TableLayout;
 
 import org.esa.beam.framework.datamodel.GcpGeoCoding;
 import org.esa.beam.framework.datamodel.GeoCoding;
+import org.esa.beam.framework.datamodel.PinDescriptor;
 import org.esa.beam.framework.datamodel.Placemark;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductNode;
@@ -110,6 +111,7 @@ class GcpGeoCodingForm extends JPanel {
         methodComboBox = new JComboBox(GcpGeoCoding.Method.values());
         setComponentName(methodComboBox, "methodComboBox");
         methodComboBox.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 updateUIState();
             }
@@ -119,6 +121,7 @@ class GcpGeoCodingForm extends JPanel {
         attachButton.setName("attachButton");
 
         AbstractAction attachDetachAction = new AbstractAction() {
+            @Override
             public void actionPerformed(ActionEvent e) {
 
                 if (!(currentProduct.getGeoCoding() instanceof GcpGeoCoding)) {
@@ -286,21 +289,31 @@ class GcpGeoCodingForm extends JPanel {
 
     private class GcpGroupListener implements ProductNodeListener {
 
+        @Override
         public void nodeChanged(ProductNodeEvent event) {
             // exclude geo-coding changes to prevent recursion
-            if (!Product.PROPERTY_NAME_GEOCODING.equals(event.getPropertyName())) {
-                updateGcpGeoCoding();
+            boolean isPinEvent = false;
+            if (event.getSourceNode() instanceof Placemark) {
+                Placemark placemark = (Placemark) event.getSourceNode();
+                isPinEvent = placemark.getPlacemarkDescriptor() instanceof PinDescriptor;
             }
+            if (Product.PROPERTY_NAME_GEOCODING.equals(event.getPropertyName()) || isPinEvent) {
+                return;
+            }
+            updateGcpGeoCoding();
         }
 
+        @Override
         public void nodeDataChanged(ProductNodeEvent event) {
             updateGcpGeoCoding();
         }
 
+        @Override
         public void nodeAdded(ProductNodeEvent event) {
             updateGcpGeoCoding();
         }
 
+        @Override
         public void nodeRemoved(ProductNodeEvent event) {
             updateGcpGeoCoding();
         }
@@ -313,13 +326,14 @@ class GcpGeoCodingForm extends JPanel {
                     detachGeoCoding(currentProduct);
                 }else {
                     Placemark[] gcps = currentProduct.getGcpGroup().toArray(new Placemark[0]);
-                    GcpGeoCoding newGcpGeoCoding = new GcpGeoCoding(gcpGeoCoding.getMethod(), gcps,
-                                                                    currentProduct.getSceneRasterWidth(),
-                                                                    currentProduct.getSceneRasterHeight(),
-                                                                    gcpGeoCoding.getDatum());
-                    newGcpGeoCoding.setOriginalGeoCoding(gcpGeoCoding.getOriginalGeoCoding());
+//                    GcpGeoCoding newGcpGeoCoding = new GcpGeoCoding(gcpGeoCoding.getMethod(), gcps,
+//                                                                    currentProduct.getSceneRasterWidth(),
+//                                                                    currentProduct.getSceneRasterHeight(),
+//                                                                    gcpGeoCoding.getDatum());
+//                    newGcpGeoCoding.setOriginalGeoCoding(gcpGeoCoding.getOriginalGeoCoding());
                     gcpGeoCoding.setGcps(gcps);
-                    currentProduct.setGeoCoding(newGcpGeoCoding);
+                    currentProduct.fireProductNodeChanged(Product.PROPERTY_NAME_GEOCODING);
+//                    currentProduct.setGeoCoding(newGcpGeoCoding);
                     updateUIState();
                 }
             }
