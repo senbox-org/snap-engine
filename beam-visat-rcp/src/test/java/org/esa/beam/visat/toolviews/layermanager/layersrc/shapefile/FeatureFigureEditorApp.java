@@ -57,9 +57,9 @@ public class FeatureFigureEditorApp extends FigureEditorApp {
         DefaultGeographicCRS crs = DefaultGeographicCRS.WGS84;
         sftb.setCRS(crs);
         sftb.setName(typeName);
-        sftb.add("geom", geometryType);
-        sftb.add("style", String.class);
-        sftb.setDefaultGeometry("geom");
+        sftb.add("geometry", geometryType);
+        sftb.add("style_css", String.class);
+        sftb.setDefaultGeometry("geometry");
         return sftb.buildFeatureType();
     }
 
