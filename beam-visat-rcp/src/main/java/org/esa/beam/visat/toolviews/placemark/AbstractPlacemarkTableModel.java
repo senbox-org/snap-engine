@@ -3,8 +3,8 @@ package org.esa.beam.visat.toolviews.placemark;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.GeoPos;
-import org.esa.beam.framework.datamodel.Placemark;
 import org.esa.beam.framework.datamodel.PixelPos;
+import org.esa.beam.framework.datamodel.Placemark;
 import org.esa.beam.framework.datamodel.PlacemarkDescriptor;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductNodeEvent;
@@ -311,7 +311,7 @@ public abstract class AbstractPlacemarkTableModel extends DefaultTableModel {
         public void nodeChanged(ProductNodeEvent event) {
             fireTableDataChanged(event);
         }
-        
+
         @Override
         public void nodeDataChanged(ProductNodeEvent event) {
             if (event.getSourceNode() instanceof Band) {
@@ -337,8 +337,9 @@ public abstract class AbstractPlacemarkTableModel extends DefaultTableModel {
         private void fireTableDataChanged(ProductNodeEvent event) {
             if (event.getSourceNode() instanceof Placemark) {
                 Placemark placemark = (Placemark) event.getSourceNode();
-                if (placemarkList.contains(placemark)) {
-                    AbstractPlacemarkTableModel.this.fireTableDataChanged();
+                final int index = placemarkList.indexOf(placemark);
+                if (index != -1) {
+                    AbstractPlacemarkTableModel.this.fireTableRowsUpdated(index, index);
                 }
             }
         }
