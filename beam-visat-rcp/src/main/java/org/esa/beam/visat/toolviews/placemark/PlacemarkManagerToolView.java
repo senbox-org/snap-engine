@@ -7,7 +7,6 @@ import com.bc.ceres.swing.selection.SelectionChangeListener;
 import com.jidesoft.grid.SortableTable;
 import org.esa.beam.dataio.dimap.DimapProductConstants;
 import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.GcpDescriptor;
 import org.esa.beam.framework.datamodel.GeoCoding;
 import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.framework.datamodel.PinDescriptor;
@@ -588,34 +587,37 @@ public class PlacemarkManagerToolView extends AbstractToolView {
         int numPinsRenamed = 0;
         int numInvalids = 0;
         final GeoCoding geoCoding = product.getGeoCoding();
-        if (geoCoding != null && geoCoding.canGetPixelPos()) {
-            for (Placemark placemark : placemarks) {
-                if (makePlacemarkNameUnique0(placemark)) {
-                    numPinsRenamed++;
-                }
+        for (Placemark placemark : placemarks) {
+            if (makePlacemarkNameUnique0(placemark)) {
+                numPinsRenamed++;
+            }
 
-                final PixelPos pixelPos = placemark.getPixelPos();
-                if (!pixelPos.isValid()) {
-                    numInvalids++;
-                    continue;
-                }
-                final GeoPos geoPos = placemark.getGeoPos();
+            final PixelPos pixelPos = placemark.getPixelPos();
+            if ((!pixelPos.isValid() || geoCoding == null || !geoCoding.canGetPixelPos()) && placemarkDescriptor instanceof PinDescriptor) {
+                numInvalids++;
+                continue;
+            }
+            final GeoPos geoPos = placemark.getGeoPos();
+            if (geoCoding != null && geoCoding.canGetGeoPos()) {
                 geoCoding.getPixelPos(geoPos, pixelPos);
+            }
 
-                if (product.containsPixel(pixelPos) || placemarkDescriptor instanceof GcpDescriptor) {
+            if (product.containsPixel(pixelPos)) {
+                getPlacemarkGroup().add(placemark);
+                placemark.setPixelPos(pixelPos);
+            } else {
+                if (placemarkDescriptor instanceof PinDescriptor) {
+                    numPinsOutOfBounds++;
+                } else {
+                    pixelPos.x = -1.0f;
+                    pixelPos.y = -1.0f;
                     getPlacemarkGroup().add(placemark);
                     placemark.setPixelPos(pixelPos);
-                } else {
-                    if (placemarkDescriptor instanceof PinDescriptor) {
-                        numPinsOutOfBounds++;
-                    }
-                }
-                if (!allPlacemarks) {
-                    break; // import only the first one
                 }
             }
-        } else {
-            numInvalids = placemarks.length;
+            if (!allPlacemarks) {
+                break; // import only the first one
+            }
         }
         if (numInvalids > 0) {
             showWarningDialog(MessageFormat.format(
@@ -1096,12 +1098,12 @@ public class PlacemarkManagerToolView extends AbstractToolView {
             int minWidth;
             final int index = e.getToIndex();
             switch (index) {
-            case 0:
-            case 1:
-                minWidth = 60;
-                break;
-            default:
-                minWidth = 80;
+                case 0:
+                case 1:
+                    minWidth = 60;
+                    break;
+                default:
+                    minWidth = 80;
             }
             TableColumnModel columnModel = (TableColumnModel) e.getSource();
             columnModel.getColumn(index).setPreferredWidth(minWidth);
