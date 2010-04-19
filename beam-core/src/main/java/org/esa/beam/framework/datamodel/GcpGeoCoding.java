@@ -110,15 +110,6 @@ public class GcpGeoCoding extends AbstractGeoCoding {
         return true;
     }
 
-    @Override
-    public MathTransform getImageToMapTransform() {
-        if (originalGeoCoding != null) {
-            return originalGeoCoding.getImageToMapTransform();
-        } else {
-            return super.getImageToMapTransform();
-        }
-    }
-
     /**
      * {@inheritDoc}
      */
