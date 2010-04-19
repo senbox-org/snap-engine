@@ -7,11 +7,9 @@ import com.bc.ceres.swing.selection.SelectionChangeListener;
 import com.jidesoft.grid.SortableTable;
 import org.esa.beam.dataio.dimap.DimapProductConstants;
 import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.CrsGeoCoding;
 import org.esa.beam.framework.datamodel.GcpDescriptor;
 import org.esa.beam.framework.datamodel.GeoCoding;
 import org.esa.beam.framework.datamodel.GeoPos;
-import org.esa.beam.framework.datamodel.MapGeoCoding;
 import org.esa.beam.framework.datamodel.PinDescriptor;
 import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.framework.datamodel.Placemark;
@@ -117,8 +115,6 @@ public class PlacemarkManagerToolView extends AbstractToolView {
     public static final String NAME_COL_NAME = "Name";
     public static final String LABEL_COL_NAME = "Label";
     public static final String DESC_COL_NAME = "Desc";
-    public static final String X_COL_NAME = "X";
-    public static final String Y_COL_NAME = "Y";
     public static final String LON_COL_NAME = "Lon";
     public static final String LAT_COL_NAME = "Lat";
 
@@ -839,11 +835,10 @@ public class PlacemarkManagerToolView extends AbstractToolView {
     }
 
     private Placemark[] readPlacemarksFromFile(File inputFile) throws IOException {
-        assert inputFile != null;
         final DataInputStream dataInputStream = new DataInputStream(new FileInputStream(inputFile));
-        byte[] magicBytes;
+        final byte[] magicBytes = new byte[5];
         try {
-            magicBytes = new byte[5];
+            //noinspection ResultOfMethodCallIgnored
             dataInputStream.read(magicBytes);  // todo - BAD PRACTICE HERE!!!
         } finally {
             dataInputStream.close();
@@ -1172,28 +1167,6 @@ public class PlacemarkManagerToolView extends AbstractToolView {
                 }
             }
         }
-    }
-
-
-    /**
-     * Returns the geographical position which is equivalent to the given pixel position. Returns <code>null</code> if
-     * the given pixel position is outside of the given product or the geocoding cannot get geographical positions.
-     *
-     * @param product  must be given and must contain a geocoding.
-     * @param pixelPos must be given.
-     *
-     * @return the geographical position which is equivalent to the given pixel position or <code>null</code> if the
-     *         given pixel position is outside of the given product or the geocoding cannot get geographical positions.
-     */
-    static GeoPos getGeoPos(Product product, PixelPos pixelPos) {
-        Guardian.assertNotNull("product", product);
-        Guardian.assertNotNull("pixelPos", pixelPos);
-        final GeoCoding geoCoding = product.getGeoCoding();
-        Guardian.assertNotNull("geoCoding", geoCoding);
-        if (product.containsPixel(pixelPos)) {
-            return geoCoding.getGeoPos(pixelPos, null);
-        }
-        return null;
     }
 
     private class PlacemarkManagerIFL extends InternalFrameAdapter {
