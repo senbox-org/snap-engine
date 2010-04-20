@@ -593,28 +593,26 @@ public class PlacemarkManagerToolView extends AbstractToolView {
             }
 
             final PixelPos pixelPos = placemark.getPixelPos();
-            if ((!pixelPos.isValid() || geoCoding == null || !geoCoding.canGetPixelPos()) && placemarkDescriptor instanceof PinDescriptor) {
+            if ((!product.containsPixel(pixelPos) && (geoCoding == null || !geoCoding.canGetPixelPos()))
+                && placemarkDescriptor instanceof PinDescriptor) {
                 numInvalids++;
                 continue;
             }
+
+            // from here on we only handle GCPs and valid Pins
+
             final GeoPos geoPos = placemark.getGeoPos();
-            if (geoCoding != null && geoCoding.canGetGeoPos()) {
-                geoCoding.getPixelPos(geoPos, pixelPos);
+            if (geoCoding != null && geoCoding.canGetPixelPos()) {
+                placemarkDescriptor.updatePixelPos(geoCoding, geoPos, pixelPos);
             }
 
-            if (product.containsPixel(pixelPos)) {
+            if (!product.containsPixel(pixelPos) && placemarkDescriptor instanceof PinDescriptor) {
+                numPinsOutOfBounds++;
+            } else {
                 getPlacemarkGroup().add(placemark);
                 placemark.setPixelPos(pixelPos);
-            } else {
-                if (placemarkDescriptor instanceof PinDescriptor) {
-                    numPinsOutOfBounds++;
-                } else {
-                    pixelPos.x = -1.0f;
-                    pixelPos.y = -1.0f;
-                    getPlacemarkGroup().add(placemark);
-                    placemark.setPixelPos(pixelPos);
-                }
             }
+
             if (!allPlacemarks) {
                 break; // import only the first one
             }
