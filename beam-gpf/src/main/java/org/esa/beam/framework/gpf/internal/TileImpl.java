@@ -249,8 +249,8 @@ public class TileImpl implements Tile {
         if (raw) {
             final int size = data.getNumElems();
             float[] samples = new float[size];
-            for (int i = 0; i < samples.length; i++) {
-                samples[i] = toGeoPhysical(data.getElemFloat());
+            for (int i = 0; i < size; i++) {
+                samples[i] = toGeoPhysical(data.getElemFloatAt(i));
             }
             return samples;
         } else {
@@ -259,8 +259,8 @@ public class TileImpl implements Tile {
             } else {
                 final int size = data.getNumElems();
                 float[] samples = new float[size];
-                for (int i = 0; i < samples.length; i++) {
-                    samples[i] = data.getElemFloat();
+                for (int i = 0; i < size; i++) {
+                    samples[i] = data.getElemFloatAt(i);
                 }
                 return samples;
             }
@@ -273,8 +273,8 @@ public class TileImpl implements Tile {
         if (raw) {
             final int size = data.getNumElems();
             double[] samples = new double[size];
-            for (int i = 0; i < samples.length; i++) {
-                samples[i] = toGeoPhysical(data.getElemDouble());
+            for (int i = 0; i < size; i++) {
+                samples[i] = toGeoPhysical(data.getElemDoubleAt(i));
             }
             return samples;
         } else {
@@ -283,8 +283,8 @@ public class TileImpl implements Tile {
             } else {
                 final int size = data.getNumElems();
                 double[] samples = new double[size];
-                for (int i = 0; i < samples.length; i++) {
-                    samples[i] = data.getElemDouble();
+                for (int i = 0; i < size; i++) {
+                    samples[i] = data.getElemDoubleAt(i);
                 }
                 return samples;
             }

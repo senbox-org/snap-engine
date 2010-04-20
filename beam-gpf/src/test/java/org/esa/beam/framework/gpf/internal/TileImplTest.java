@@ -21,7 +21,8 @@ public class TileImplTest extends TestCase {
         assertNotNull(samples);
         assertEquals(32 * 16, samples.length);
         assertEquals(2.5F, samples[0], 1e-10F);
-        assertEquals(2.5F, samples[32 * 16 - 1], 1e-10F);
+        assertEquals(5.0F, samples[1], 1e-10F);
+        assertEquals(1280.0F, samples[32 * 16 - 1], 1e-10F);
     }
 
     public void testGetSamplesDouble() {
@@ -32,7 +33,8 @@ public class TileImplTest extends TestCase {
         assertNotNull(samples);
         assertEquals(32 * 16, samples.length);
         assertEquals(2.5, samples[0], 1e-10);
-        assertEquals(2.5, samples[32 * 16 - 1], 1e-10);
+        assertEquals(5.0, samples[1], 1e-10);
+        assertEquals(1280.0, samples[32 * 16 - 1], 1e-10);
     }
 
     public void testSetSamples() {
@@ -63,9 +65,13 @@ public class TileImplTest extends TestCase {
     static Tile createTile(int x0, int y0, int w, int h) {
         Band band = new Band("x", ProductData.TYPE_UINT16, w, h);
         band.setScalingFactor(2.5);
-        WritableRaster raster = WritableRaster.createBandedRaster(DataBuffer.TYPE_USHORT,
-                                                                  w, h, 1, new Point(x0, y0));
-        Arrays.fill(((DataBufferUShort) raster.getDataBuffer()).getData(), (short) 1);
+        WritableRaster raster =
+                WritableRaster.createBandedRaster(DataBuffer.TYPE_USHORT, w, h, 1, new Point(x0, y0));
+        final short[] data = ((DataBufferUShort) raster.getDataBuffer()).getData();
+        for (int i = 0; i < data.length; i++) {
+            data[i] = (short) (i + 1);
+        }
+
         return new TileImpl(band, raster);
     }
 
