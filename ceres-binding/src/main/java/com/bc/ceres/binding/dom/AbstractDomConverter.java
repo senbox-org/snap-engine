@@ -117,6 +117,8 @@ public abstract class AbstractDomConverter implements DomConverter {
     @Override
     public Object convertDomToValue(DomElement parentElement, Object value) throws ConversionException,
             ValidationException {
+
+        final PropertySet propertySet;
         if (value == null) {
             Class<?> itemType = getValueType();
             final String itemClassName = parentElement.getAttribute("class");
@@ -128,9 +130,12 @@ public abstract class AbstractDomConverter implements DomConverter {
                 }
             }
             value = createValueInstance(itemType);
+            propertySet = getPropertySet(value);
+            propertySet.setDefaultValues();
+        }else {
+            propertySet = getPropertySet(value);
         }
 
-        final PropertySet propertySet = getPropertySet(value);
         final Map<String, List<Object>> inlinedArrays = new HashMap<String, List<Object>>();
 
         for (final DomElement child : parentElement.getChildren()) {
