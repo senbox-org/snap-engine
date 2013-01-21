@@ -124,39 +124,25 @@ public class MetadataEngineMainTest {
                                    "    <2643>$hell.map.get(\"2643\")</2643>\n" +
                                    "</metadata>";
 
-//        fileSystem.setReader("/my/metadata.properties", new StringReader("my.key=my value"));
         Mockito.when(fileSystem.createReader("/my/metadata.properties")).thenReturn(
                 new StringReader("my.key=my value"));
-//        fileSystem.setReader("/my/lut.properties", new StringReader("2643=WGS 84 / UTM"));
         Mockito.when(fileSystem.createReader("/my/lut.properties")).thenReturn(new StringReader("2643=WGS 84 / UTM"));
-//        fileSystem.setReader("/my-template.xml.vm", new StringReader(velocityTemplate));
         Mockito.when(fileSystem.createReader("/my-template.xml.vm")).thenReturn(new StringReader(velocityTemplate));
-//        fileSystem.setReader("/yours.txt.vm", new StringReader(velocityTemplate2));
         Mockito.when(fileSystem.createReader("/yours.txt.vm")).thenReturn(new StringReader(velocityTemplate2));
-//        fileSystem.setDirectoryList("source/path",
-//                                    "tsm-1.dim", "tsm-1.data", "tsm-1-metadata.txt",
-//                                    "tsm-2.N1", "tsm-2-blubber.xm",
-//                                    "tsm-3.hdf", "tsm-3-report.txt", "tsm-3-report.xml");
         Mockito.when(fileSystem.list("source/path")).thenReturn(new String[]{
                 "tsm-1.dim", "tsm-1.data", "tsm-1-metadata.txt",
                 "tsm-2.N1", "tsm-2-blubber.xm",
                 "tsm-3.hdf", "tsm-3-report.txt", "tsm-3-report.xml"
         });
 
-//        fileSystem.setReader("source/path/tsm-1-metadata.txt", new StringReader("source 1 text"));
         Mockito.when(fileSystem.createReader("source/path/tsm-1-metadata.txt")).thenReturn(new StringReader("source 1 text"));
-//        fileSystem.setReader("source/path/tsm-2-blubber.xm", new StringReader("source 2 text"));
         Mockito.when(fileSystem.createReader("source/path/tsm-2-blubber.xm")).thenReturn(new StringReader("source 2 text"));
-//        fileSystem.setReader("source/path/tsm-3-report.txt", new StringReader("source 3-txt text"));
         Mockito.when(fileSystem.createReader("source/path/tsm-3-report.txt")).thenReturn(new StringReader("source 3-txt text"));
-//        fileSystem.setReader("source/path/tsm-3-report.xml", new StringReader("source 3-xml text"));
         Mockito.when(fileSystem.createReader("source/path/tsm-3-report.xml")).thenReturn(
                 new StringReader("source 3-xml text"));
         StringWriter metadataResult = new StringWriter();
         StringWriter metadataResultXml = new StringWriter();
-//        fileSystem.setWriter("/my/chl-a-my-template.xml", metadataResult);
         Mockito.when(fileSystem.createWriter("/my/chl-a-my-template.xml")).thenReturn(metadataResult);
-//        fileSystem.setWriter("/my/chl-a-yours.txt", metadataResultXml);
         Mockito.when(fileSystem.createWriter("/my/chl-a-yours.txt")).thenReturn(metadataResultXml);
 
         Mockito.when(fileSystem.isFile(Matchers.anyString())).thenReturn(true);
