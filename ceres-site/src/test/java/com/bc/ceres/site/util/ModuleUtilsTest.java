@@ -21,12 +21,12 @@ import com.bc.ceres.core.runtime.internal.ModuleImpl;
 import com.bc.ceres.core.runtime.internal.ModuleManifestParser;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.StringReader;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
@@ -60,8 +60,7 @@ public class ModuleUtilsTest {
         }
     }
 
-    // TODO - Enable this test again. It works with IDEA but fails with maven.
-    @Ignore
+    @Test
     public void testFileBasedPomParsing() throws Exception {
         final List<URL> poms = new ArrayList<URL>();
         poms.add(getClass().getResource("test_pom.xml"));
@@ -69,24 +68,32 @@ public class ModuleUtilsTest {
         ExclusionListBuilder.generateExclusionList(exclusionList, poms);
 
         CsvReader csvReader = new CsvReader(new FileReader(exclusionList), new char[]{','});
-        final String[] firstChunkOfModules = csvReader.readRecord();
+        try {
+            final String[] firstChunkOfModules = csvReader.readRecord();
 
-        assertEquals(true, Arrays.asList(firstChunkOfModules).contains("ceres-launcher"));
-        assertEquals(false, Arrays.asList(firstChunkOfModules).contains("beam-download-portlet"));
+            assertEquals(true, Arrays.asList(firstChunkOfModules).contains("ceres-launcher"));
+            assertEquals(false, Arrays.asList(firstChunkOfModules).contains("beam-download-portlet"));
 
-        int numberOfModules = firstChunkOfModules.length;
-        assertEquals(9, numberOfModules);
+            int numberOfModules = firstChunkOfModules.length;
+            assertEquals(9, numberOfModules);
 
-        final URL pom2 = getClass().getResource("test_pom2.xml");
-        ExclusionListBuilder.addPomToExclusionList(exclusionList, pom2);
+            final URL pom2 = getClass().getResource("test_pom2.xml");
+            ExclusionListBuilder.addPomToExclusionList(exclusionList, pom2);
+        } finally {
+            csvReader.close();
+        }
 
         csvReader = new CsvReader(new FileReader(exclusionList), new char[]{ExclusionListBuilder.CSV_SEPARATOR});
-        final String[] secondChunkOfModules = csvReader.readRecord();
-        int newNumberOfModules = secondChunkOfModules.length;
+        try {
+            final String[] secondChunkOfModules = csvReader.readRecord();
+            int newNumberOfModules = secondChunkOfModules.length;
 
-        assertEquals(true, Arrays.asList(secondChunkOfModules).contains("ceres-launcher"));
-        assertEquals(true, Arrays.asList(secondChunkOfModules).contains("beam-download-portlet"));
-        assertEquals(12, newNumberOfModules);
+            assertEquals(true, Arrays.asList(secondChunkOfModules).contains("ceres-launcher"));
+            assertEquals(true, Arrays.asList(secondChunkOfModules).contains("beam-download-portlet"));
+            assertEquals(12, newNumberOfModules);
+        } finally {
+            csvReader.close();
+        }
     }
 
     @Test
@@ -96,25 +103,31 @@ public class ModuleUtilsTest {
         ExclusionListBuilder.generateExclusionList(exclusionList, pomList);
 
         final CsvReader csvReader = new CsvReader(new FileReader(exclusionList), CSV_SEPARATOR_ARRAY);
-        final String[] excludedModules = csvReader.readRecord();
+        try {
+            final String[] excludedModules = csvReader.readRecord();
 
-        assertEquals(false, ModuleUtils.isExcluded(modules.get(0), excludedModules));
-        assertEquals(true, ModuleUtils.isExcluded(modules.get(1), excludedModules));
-        assertEquals(true, ModuleUtils.isExcluded(modules.get(2), excludedModules));
+            assertEquals(false, ModuleUtils.isExcluded(modules.get(0), excludedModules));
+            assertEquals(true, ModuleUtils.isExcluded(modules.get(1), excludedModules));
+            assertEquals(true, ModuleUtils.isExcluded(modules.get(2), excludedModules));
+        } finally {
+            csvReader.close();
+        }
     }
 
-    // TODO - Enable this test again. It works with IDEA but fails with maven.
-    @Ignore
+    @Test
     public void testFileBasedIsIncluded() throws Exception {
 
-        final File inclusionList = new File(getClass().getResource(PLUGINS_LIST_CSV).toURI().getPath());
+        String moduleString = "some-beam-module,ceres-glayer, ceres-jai,ceres-main-module";
+        final CsvReader csvReader = new CsvReader(new StringReader(moduleString), CSV_SEPARATOR_ARRAY);
+        try {
+            final String[] excludedModules = csvReader.readRecord();
 
-        final CsvReader csvReader = new CsvReader(new FileReader(inclusionList), CSV_SEPARATOR_ARRAY);
-        final String[] includedModules = csvReader.readRecord();
-
-        assertEquals(false, ModuleUtils.isExcluded(modules.get(0), includedModules));
-        assertEquals(true, ModuleUtils.isExcluded(modules.get(1), includedModules));
-        assertEquals(true, ModuleUtils.isExcluded(modules.get(2), includedModules));
+            assertEquals(false, ModuleUtils.isExcluded(modules.get(0), excludedModules));
+            assertEquals(true, ModuleUtils.isExcluded(modules.get(1), excludedModules));
+            assertEquals(true, ModuleUtils.isExcluded(modules.get(2), excludedModules));
+        } finally {
+            csvReader.close();
+        }
     }
 
     @Test
@@ -142,8 +155,13 @@ public class ModuleUtilsTest {
     private ModuleImpl generateModule(String resource) throws Exception {
         final URI uri = getClass().getResource(resource).toURI();
         String xml = uri.getPath();
+        ModuleImpl module;
         FileReader fileReader = new FileReader(xml);
-        ModuleImpl module = new ModuleManifestParser().parse(fileReader);
+        try {
+            module = new ModuleManifestParser().parse(fileReader);
+        } finally {
+            fileReader.close();
+        }
         module.setLocation(uri.toURL());
         return module;
     }
