@@ -78,12 +78,11 @@ public class VirtualDirTest extends TestCase {
         final File tempDir = virtualDir.getTempDir();
         assertNotNull(tempDir);
 
-        final File createdDir = new File(tempDir, "VirtualDirTest");
-        assertTrue(createdDir.isDirectory());
+        assertTrue(tempDir.isDirectory());
 
         virtualDir.finalize();
 
-        assertFalse(createdDir.isDirectory());
+        assertFalse(tempDir.isDirectory());
     }
 
     private static File getTestDataDir() {

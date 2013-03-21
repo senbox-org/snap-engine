@@ -16,6 +16,10 @@
 
 package com.bc.ceres.core;
 
+import com.bc.ceres.core.runtime.RuntimeConfig;
+import com.bc.ceres.core.runtime.RuntimeContext;
+import com.bc.ceres.core.runtime.internal.DefaultRuntimeConfig;
+
 import java.io.*;
 import java.util.Enumeration;
 import java.util.TreeSet;
@@ -200,7 +204,7 @@ public abstract class VirtualDir {
             ZipEntry zipEntry = getEntry(path);
 
             if (tempZipFileDir == null) {
-                tempZipFileDir = new File(getTempDir(), getFilenameWithoutExtensionFromPath(getBasePath()));
+                tempZipFileDir = VirtualDir.createUniqueTempDir();
             }
 
             File tempFile = new File(tempZipFileDir, zipEntry.getName());
@@ -273,6 +277,11 @@ public abstract class VirtualDir {
             return true;
         }
 
+        @Override
+        public File getTempDir() throws IOException {
+            return tempZipFileDir;
+        }
+
         private void cleanup() {
             try {
                 zipFile.close();
@@ -299,23 +308,6 @@ public abstract class VirtualDir {
                 throw new FileNotFoundException(zipFile.getName() + "!" + path);
             }
             return zipEntry;
-        }
-
-        // package local to be usable in test tb 2012-02-17
-        public File getTempDir() throws IOException {
-            File tempDir = null;
-            String tempDirName = System.getProperty("java.io.tmpdir");
-            if (tempDirName != null) {
-                tempDir = new File(tempDirName);
-            }
-            if (tempDir == null || !tempDir.exists()) {
-                tempDir = new File(new File(System.getProperty("user.home", ".")), ".beam/temp");
-                tempDir.mkdirs();
-            }
-            if (!tempDir.exists()) {
-                throw new IOException("Temporary directory not available: " + tempDir);
-            }
-            return tempDir;
         }
 
         private void unzip(ZipEntry zipEntry, File tempFile) throws IOException {
@@ -387,4 +379,51 @@ public abstract class VirtualDir {
         }
         treeRoot.delete();
     }
+
+    private static final int TEMP_DIR_ATTEMPTS = 10000;
+
+    public static File createUniqueTempDir() throws IOException {
+        File baseDir = getBaseTempDir();
+        String baseName = System.currentTimeMillis() + "-";
+
+        for (int counter = 0; counter < TEMP_DIR_ATTEMPTS; counter++) {
+            File tempDir = new File(baseDir, baseName + counter);
+            if (tempDir.mkdir()) {
+                return tempDir;
+            }
+        }
+        throw new IllegalStateException("Failed to create directory within "
+                                                + TEMP_DIR_ATTEMPTS + " attempts (tried "
+                                                + baseName + "0 to " + baseName + (TEMP_DIR_ATTEMPTS - 1) + ')');
+    }
+
+    private static File getBaseTempDir() throws IOException {
+        String contextId = getContextId();
+        File tempDir;
+        String tempDirName = System.getProperty("java.io.tmpdir");
+        if (tempDirName != null) {
+            tempDir = new File(tempDirName);
+            if (tempDir.exists()) {
+                tempDir = new File(tempDir, contextId);
+                tempDir.mkdir();
+            }
+        } else {
+            tempDir = new File(System.getProperty("user.home", "."), "." + contextId + "/temp");
+            tempDir.mkdirs();
+        }
+        if (!tempDir.exists()) {
+            throw new IOException("Temporary directory not available: " + tempDir);
+        }
+        return tempDir;
+    }
+
+    private static String getContextId() {
+        String contextId = DefaultRuntimeConfig.DEFAULT_CERES_CONTEXT;
+        RuntimeConfig runtimeConfig = RuntimeContext.getConfig();
+        if (runtimeConfig != null) {
+            contextId = runtimeConfig.getContextId();
+        }
+        return contextId;
+    }
+
 }
