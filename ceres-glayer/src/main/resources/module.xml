@@ -18,6 +18,12 @@
 
     <changelog>
         <![CDATA[
+         changes in 0.13.2<br/>
+         - method added to AbstractMultiLevelSource to compute scaled image rectangles
+         - system properties added to customise rendering performance
+             ceres.renderer.cache.capacity
+             ceres.renderer.cache.retentionPeriod
+         - WakefulComponent can now be set disabled
                 ]]>
     </changelog>
 

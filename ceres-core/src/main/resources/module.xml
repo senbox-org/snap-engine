@@ -8,6 +8,9 @@
 
     <changelog>
         <![CDATA[
+        Changes in 0.13.2<br/>
+          class ProcessObserver added.
+          abstract class ProgressBarProgressMonitor added.
         Changes in 0.13.1<br/>
         [CERES-057] Version text in splash screen shall be configurable<br/>
         Changes in 0.13<br/>
