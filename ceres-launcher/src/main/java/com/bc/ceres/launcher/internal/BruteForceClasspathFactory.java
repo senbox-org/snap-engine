@@ -43,8 +43,11 @@ public class BruteForceClasspathFactory extends AbstractClasspathFactory {
             } else if (LibType.MODULE.equals(libType)) {
                 if (level == 0) {
                     classpath.add(file);
-                } else if (level == 2 && "lib".equalsIgnoreCase(file.getParentFile().getName())) {
-                    classpath.add(file);
+                } else {
+                    File parentFile = file.getParentFile();
+                    if (level == 2 && parentFile != null && "lib".equalsIgnoreCase(parentFile.getName())) {
+                        classpath.add(file);
+                    }
                 }
             }
         }

@@ -17,7 +17,6 @@
 package com.bc.ceres.deploy;
 
 import com.bc.ceres.core.CoreException;
-import static com.bc.ceres.core.runtime.Constants.MODULE_MANIFEST_NAME;
 import com.bc.ceres.core.runtime.Module;
 import com.bc.ceres.core.runtime.internal.JarFilenameFilter;
 import com.bc.ceres.core.runtime.internal.ModuleReader;
@@ -34,6 +33,8 @@ import java.util.jar.JarOutputStream;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+
+import static com.bc.ceres.core.runtime.Constants.*;
 
 /**
  * Converts all module files (ZIPs and JARs) found in a given modules source directory to deployable
@@ -217,7 +218,11 @@ public class DeployMain {
 
     private void extractToDir(ZipFile zip, String entryName, boolean mustExists, File targetDir) throws IOException {
         File targetFile = new File(targetDir, entryName);
-        targetFile.getParentFile().mkdirs();
+        File parentFile = targetFile.getParentFile();
+        if (parentFile == null) {
+            throw new IOException("Could not retrieve the parent directory of '" + targetFile.getAbsolutePath() + "'.");
+        }
+        parentFile.mkdirs();
         ZipEntry entry = zip.getEntry(entryName);
         if (entry == null) {
             String message = "ZIP entry not found: " + entryName;
