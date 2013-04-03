@@ -49,6 +49,7 @@ import java.util.Arrays;
 public class AggregatorPercentile extends AbstractAggregator {
     private final int varIndex;
     private final int percentage;
+    private final String mlName;
 
     public AggregatorPercentile(VariableContext varCtx, String varName, Integer percentage, Number fillValue) {
         this(varCtx, varName, percentage != null ? percentage : 90, fillValue);
@@ -72,6 +73,7 @@ public class AggregatorPercentile extends AbstractAggregator {
         }
         this.varIndex = varCtx.getVariableIndex(varName);
         this.percentage = percentage;
+        this.mlName = "ml." + varName;
     }
 
     @Override
@@ -93,18 +95,18 @@ public class AggregatorPercentile extends AbstractAggregator {
     @Override
     public void initTemporal(BinContext ctx, WritableVector vector) {
         vector.set(0, 0.0f);
-        ctx.put("ml", new GrowableVector(256));
+        ctx.put(mlName, new GrowableVector(256));
     }
 
     @Override
     public void aggregateTemporal(BinContext ctx, Vector spatialVector, int numSpatialObs, WritableVector temporalVector) {
-        GrowableVector measurementsVec = ctx.get("ml");
+        GrowableVector measurementsVec = ctx.get(mlName);
         measurementsVec.add(spatialVector.get(0));
     }
 
     @Override
     public void completeTemporal(BinContext ctx, int numTemporalObs, WritableVector temporalVector) {
-        GrowableVector measurementsVec = ctx.get("ml");
+        GrowableVector measurementsVec = ctx.get(mlName);
         float[] measurements = measurementsVec.getElements();
         Arrays.sort(measurements);
         temporalVector.set(0, computePercentile(percentage, measurements));
