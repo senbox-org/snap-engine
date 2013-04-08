@@ -111,7 +111,7 @@ todo - address the following BinningOp requirements (nf, 2012-03-09)
  */
 @SuppressWarnings("UnusedDeclaration")
 @OperatorMetadata(alias = "Binning",
-                  version = "0.8.1",
+                  version = "0.8.2",
                   authors = "Norman Fomferra, Marco Zühlke, Thomas Storm",
                   copyright = "(c) 2012 by Brockmann Consult GmbH",
                   description = "Performs spatial and temporal aggregation of pixel values into 'bin' cells")
@@ -508,7 +508,7 @@ public class BinningOp extends Operator implements Output {
     }
 
     private SpatialBinCollection doSpatialBinning() throws IOException {
-        SpatialBinCollector spatialBinCollector =  new GeneralSpatialBinCollector(binningContext.getPlanetaryGrid().getNumBins());
+        SpatialBinCollector spatialBinCollector = new GeneralSpatialBinCollector(binningContext.getPlanetaryGrid().getNumBins());
         final SpatialBinner spatialBinner = new SpatialBinner(binningContext, spatialBinCollector);
         if (sourceProducts != null) {
             for (Product sourceProduct : sourceProducts) {
