@@ -1,7 +1,6 @@
 package org.esa.beam.binning.support;
 
 import org.esa.beam.binning.PlanetaryGrid;
-import org.esa.beam.util.math.MathUtils;
 
 import java.io.IOException;
 
