@@ -33,7 +33,15 @@
 package org.esa.beam.binning.aggregators;
 
 import com.bc.ceres.binding.PropertySet;
-import org.esa.beam.binning.*;
+import org.esa.beam.binning.AbstractAggregator;
+import org.esa.beam.binning.Aggregator;
+import org.esa.beam.binning.AggregatorConfig;
+import org.esa.beam.binning.AggregatorDescriptor;
+import org.esa.beam.binning.BinContext;
+import org.esa.beam.binning.Observation;
+import org.esa.beam.binning.VariableContext;
+import org.esa.beam.binning.Vector;
+import org.esa.beam.binning.WritableVector;
 import org.esa.beam.binning.support.GrowableVector;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 
@@ -165,6 +173,14 @@ public class AggregatorPercentile extends AbstractAggregator {
 
         public Config() {
             super(Descriptor.NAME);
+        }
+
+        public void setVarName(String varName) {
+            this.varName = varName;
+        }
+
+        public void setPercentage(Integer percentage) {
+            this.percentage = percentage;
         }
 
         @Override
