@@ -1,6 +1,7 @@
 package org.esa.beam.binning.support;
 
 import org.esa.beam.binning.PlanetaryGrid;
+import org.esa.beam.util.math.MathUtils;
 
 import java.io.IOException;
 
@@ -21,6 +22,9 @@ public class ReducedGaussianGrid implements PlanetaryGrid {
 
     private final GaussianGridConfig config;
     private final int numRows;
+    private long numBins;
+    private long lastBinIndex;
+    private int lastRow;
 
     /**
      * Creates a new reduced gaussian grid.
@@ -34,6 +38,9 @@ public class ReducedGaussianGrid implements PlanetaryGrid {
         } catch (IOException e) {
             throw new IllegalStateException("Could not create gaussian grid: " + e.getMessage(), e);
         }
+        int lastRowIndex = getNumRows() - 1;
+        int lastRowStartIndex = config.getReducedFirstBinIndex(lastRowIndex);
+        numBins = lastRowStartIndex + config.getReducedColumnCount(lastRowIndex);
     }
 
     @Override
@@ -45,6 +52,10 @@ public class ReducedGaussianGrid implements PlanetaryGrid {
 
     @Override
     public int getRowIndex(long binIndex) {
+        if(binIndex == lastBinIndex) {
+            return lastRow;
+        }
+
         int minRow = 0;
         int maxRow = getNumRows() - 1;
         while (true) {
@@ -54,6 +65,8 @@ public class ReducedGaussianGrid implements PlanetaryGrid {
             if (binIndex < lowBinIndex) {
                 maxRow = midRow - 1;
             } else if (binIndex >= lowBinIndex && binIndex <= highBinIndex) {
+                lastBinIndex = binIndex;
+                lastRow = midRow;
                 return midRow;
             } else if (binIndex > highBinIndex) {
                 minRow = midRow + 1;
@@ -63,9 +76,7 @@ public class ReducedGaussianGrid implements PlanetaryGrid {
 
     @Override
     public long getNumBins() {
-        int lastRowIndex = getNumRows() - 1;
-        int lastRowStartIndex = config.getReducedFirstBinIndex(lastRowIndex);
-        return lastRowStartIndex + config.getReducedColumnCount(lastRowIndex);
+        return numBins;
     }
 
     @Override
