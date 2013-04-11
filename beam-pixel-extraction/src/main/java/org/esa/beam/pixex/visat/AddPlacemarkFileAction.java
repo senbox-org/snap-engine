@@ -67,7 +67,8 @@ class AddPlacemarkFileAction extends AbstractAction {
                     tableModel.addPlacemark(placemark);
                 }
             } catch (IOException ioe) {
-                appContext.handleError(String.format("Error occurred while reading file: %s", selectedFile), ioe);
+                final String message = String.format("Error occurred while reading file: %s\n%s", selectedFile,ioe.getMessage());
+                appContext.handleError(message, ioe);
             } finally {
                 if (reader != null) {
                     try {
