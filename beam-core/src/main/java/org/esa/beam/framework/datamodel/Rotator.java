@@ -18,12 +18,7 @@ package org.esa.beam.framework.datamodel;
 
 import java.awt.geom.Point2D;
 
-import static java.lang.Math.asin;
-import static java.lang.Math.atan2;
-import static java.lang.Math.cos;
-import static java.lang.Math.sin;
-import static java.lang.Math.toDegrees;
-import static java.lang.Math.toRadians;
+import static java.lang.Math.*;
 
 /**
  * Class for rotating geographical positions.
@@ -45,7 +40,7 @@ class Rotator {
 
     /**
      * Constructs a new rotation. In the rotated system, the point defined
-     * by the (lat, lon) parameters is located at the origin, i.e. has the
+     * by the (lon, lat) parameters is located at the origin, i.e. has the
      * geographical coordinates (0, 0).
      * <p/>
      * The new rotation is composed of a clockwise rotation about the z-axis
@@ -63,7 +58,7 @@ class Rotator {
 
     /**
      * Constructs a new rotation. In the rotated system, the point defined
-     * by the (lat, lon) parameters is located at the origin, i.e. has the
+     * by the (lon, lat) parameters is located at the origin, i.e. has the
      * geographical coordinates (0, 0).
      * <p/>
      * The new rotation is composed of a clockwise rotation about the z-axis
@@ -104,7 +99,7 @@ class Rotator {
 
     /**
      * Constructs a new rotation. In the rotated system, the point defined
-     * by the (lat, lon) parameters is located at the origin, i.e. has the
+     * by the (lon, lat) parameters is located at the origin, i.e. has the
      * geographical coordinates (0, 0).
      * <p/>
      * The new rotation is composed of a clockwise rotation about the z-axis
@@ -121,7 +116,7 @@ class Rotator {
 
     /**
      * Constructs a new rotation. In the rotated system, the point defined
-     * by the (lat, lon) parameters is located at the origin, i.e. has the
+     * by the (lon, lat) parameters is located at the origin, i.e. has the
      * geographical coordinates (0, 0).
      * <p/>
      * The new rotation is composed of a clockwise rotation about the z-axis
