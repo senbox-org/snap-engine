@@ -26,8 +26,6 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 
-import java.awt.geom.AffineTransform;
-
 /**
  * <code>AbstractGeoCoding</code> is the base class of all geo-coding implementation.
  * <p/>
@@ -101,7 +99,7 @@ public abstract class AbstractGeoCoding implements GeoCoding {
                         image2Map = CRS.findMathTransform(imageCRS, mapCRS);
                     } catch (FactoryException e) {
                         throw new IllegalArgumentException(
-                                "Not able to find a math transformation from image to map CRS.", e);
+                                    "Not able to find a math transformation from image to map CRS.", e);
                     }
                 }
             }
@@ -109,7 +107,7 @@ public abstract class AbstractGeoCoding implements GeoCoding {
         return image2Map;
     }
 
-     protected static DefaultDerivedCRS createImageCRS(CoordinateReferenceSystem baseCRS,
+    protected static DefaultDerivedCRS createImageCRS(CoordinateReferenceSystem baseCRS,
                                                       MathTransform baseToDerivedTransform) {
         return new DefaultDerivedCRS("Image CS based on " + baseCRS.getName(),
                                      baseCRS,
