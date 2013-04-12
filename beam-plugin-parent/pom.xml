@@ -2,12 +2,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <artifactId>beam-parent</artifactId>
         <groupId>org.esa.beam</groupId>
         <version>1</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
 
     <artifactId>beam-plugin-parent</artifactId>
     <version>1.0</version>
@@ -17,8 +18,8 @@
     <description>This POM serves as parent for all internal plugin modules, providing their dependency management.</description>
 
     <properties>
-        <beam.version>[4.10,5-SNAPSHOT)</beam.version>
-        <ceres.version>[0.13,0.14-SNAPSHOT)</ceres.version>
+        <beam.version>[4.11,5-SNAPSHOT)</beam.version>
+        <ceres.version>[0.13.2,0.14-SNAPSHOT)</ceres.version>
         <geotools.version>2.7.4</geotools.version>
         <jide.version>3.3.7</jide.version>
         <!-- This property is set in beam-parent. Reason? See there!-->

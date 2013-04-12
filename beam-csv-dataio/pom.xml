@@ -5,13 +5,12 @@
     <parent>
         <artifactId>beam-system</artifactId>
         <groupId>org.esa.beam</groupId>
-        <version>4.11</version>
+        <version>4.11.1-SNAPSHOT</version>
         <relativePath>../beam-system/pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <name>BEAM CSV Product IO</name>
-    <groupId>org.esa.beam</groupId>
     <artifactId>beam-csv-dataio</artifactId>
 
     <packaging>jar</packaging>

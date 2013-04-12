@@ -24,12 +24,11 @@
     <parent>
         <artifactId>beam-system</artifactId>
         <groupId>org.esa.beam</groupId>
-        <version>4.11</version>
+        <version>4.11.1-SNAPSHOT</version>
         <relativePath>../beam-system/pom.xml</relativePath>
     </parent>
 
     <name>BEAM Graph Processing Framework (GPF)</name>
-    <groupId>org.esa.beam</groupId>
     <artifactId>beam-gpf</artifactId>
     <packaging>jar</packaging>
 

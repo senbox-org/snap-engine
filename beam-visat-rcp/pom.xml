@@ -21,11 +21,10 @@
     <parent>
         <groupId>org.esa.beam</groupId>
         <artifactId>beam-system</artifactId>
-        <version>4.11</version>
+        <version>4.11.1-SNAPSHOT</version>
         <relativePath>../beam-system/pom.xml</relativePath>
     </parent>
 
-    <groupId>org.esa.beam</groupId>
     <artifactId>beam-visat-rcp</artifactId>
     <packaging>jar</packaging>
     <name>BEAM VISAT Rich Client Platform</name>
