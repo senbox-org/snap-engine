@@ -89,8 +89,6 @@ abstract class ObservationIterator implements Iterator<Observation> {
 
     protected abstract Observation getNextObservation();
 
-    protected abstract boolean isSampleValid(int x, int y);
-
     protected Observation createObservation(int x, int y) {
         SamplePointer pointer = getPointer();
         final float[] samples = pointer.createSamples();
@@ -137,8 +135,7 @@ abstract class ObservationIterator implements Iterator<Observation> {
             return null;
         }
 
-        @Override
-        protected boolean isSampleValid(int x, int y) {
+        private boolean isSampleValid(int x, int y) {
             return maskTile.getSample(x, y, 0) != 0;
         }
 
@@ -159,11 +156,6 @@ abstract class ObservationIterator implements Iterator<Observation> {
                 return createObservation(pointer.getX(), pointer.getY());
             }
             return null;
-        }
-
-        @Override
-        protected boolean isSampleValid(int x, int y) {
-            return true;
         }
 
     }
