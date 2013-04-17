@@ -19,7 +19,11 @@ import ucar.nc2.Variable;
 import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -124,7 +128,7 @@ public class BinWriter {
             final String[] featureNames = aggregator.getTemporalFeatureNames();
             for (String featureName : featureNames) {
                 final Variable featureVar = netcdfFile.addVariable("bl_" + featureName, DataType.FLOAT, new Dimension[]{binListDim});
-                featureVar.addAttribute(new Attribute("_FillValue", aggregator.getOutputFillValue()));
+                featureVar.addAttribute(new Attribute("_FillValue", Float.NaN));
                 featureVars.add(featureVar);
             }
         }

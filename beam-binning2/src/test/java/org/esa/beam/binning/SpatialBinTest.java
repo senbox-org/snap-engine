@@ -6,10 +6,14 @@ import org.esa.beam.binning.aggregators.AggregatorMinMax;
 import org.esa.beam.binning.support.ObservationImpl;
 import org.junit.Test;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class SpatialBinTest {
     @Test
@@ -34,9 +38,9 @@ public class SpatialBinTest {
     public void testBinAggregationAndIO() throws IOException {
         MyVariableContext variableContext = new MyVariableContext("A", "B", "C");
         BinManager bman = new BinManager(variableContext,
-                                         new AggregatorMinMax(variableContext, "A", null),
-                                         new AggregatorAverage(variableContext, "B", null, null),
-                                         new AggregatorAverageML(variableContext, "C", null, null));
+                                         new AggregatorMinMax(variableContext, "A"),
+                                         new AggregatorAverage(variableContext, "B", null),
+                                         new AggregatorAverageML(variableContext, "C", null));
 
         SpatialBin bin = bman.createSpatialBin(0);
 

@@ -17,7 +17,16 @@
 package org.esa.beam.binning.aggregators;
 
 import com.bc.ceres.binding.PropertySet;
-import org.esa.beam.binning.*;
+import org.esa.beam.binning.AbstractAggregator;
+import org.esa.beam.binning.Aggregator;
+import org.esa.beam.binning.AggregatorConfig;
+import org.esa.beam.binning.AggregatorDescriptor;
+import org.esa.beam.binning.BinContext;
+import org.esa.beam.binning.Observation;
+import org.esa.beam.binning.VariableContext;
+import org.esa.beam.binning.Vector;
+import org.esa.beam.binning.WeightFn;
+import org.esa.beam.binning.WritableVector;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 
 import java.util.Arrays;
@@ -34,12 +43,11 @@ public class AggregatorAverageML extends AbstractAggregator {
     private final int varIndex;
     private final WeightFn weightFn;
 
-    public AggregatorAverageML(VariableContext ctx, String varName, Double weightCoeff, Number fillValue) {
+    public AggregatorAverageML(VariableContext ctx, String varName, Double weightCoeff) {
         super(Descriptor.NAME,
               createFeatureNames(varName, "sum", "sum_sq"),
               createFeatureNames(varName, "sum", "sum_sq", "weights"),
-              createFeatureNames(varName, "mean", "sigma", "median", "mode"),
-              fillValue);
+              createFeatureNames(varName, "mean", "sigma", "median", "mode"));
         this.varIndex = ctx.getVariableIndex(varName);
         this.weightFn = WeightFn.createPow(weightCoeff != null ? weightCoeff : 0.5);
     }
@@ -149,8 +157,7 @@ public class AggregatorAverageML extends AbstractAggregator {
             PropertySet propertySet = aggregatorConfig.asPropertySet();
             return new AggregatorAverageML(varCtx,
                                            (String) propertySet.getValue("varName"),
-                                           (Double) propertySet.getValue("weightCoeff"),
-                                           (Float) propertySet.getValue("fillValue"));
+                                           (Double) propertySet.getValue("weightCoeff"));
         }
     }
 }

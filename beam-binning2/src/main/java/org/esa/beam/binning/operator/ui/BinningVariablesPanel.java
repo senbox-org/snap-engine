@@ -82,7 +82,7 @@ class BinningVariablesPanel extends JPanel {
                 final String name;
                 final int expressionCount = bandsTable.getExpressionCount();
                 name = "<expression_" + expressionCount + ">";
-                bandsTable.addRow(name, null, AggregatorAverage.Descriptor.NAME, 1.0, Float.NaN, 0);
+                bandsTable.addRow(name, null, AggregatorAverage.Descriptor.NAME, 1.0, 0);
             }
         });
         removeButton.addActionListener(new ActionListener() {

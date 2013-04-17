@@ -40,7 +40,7 @@ public final class AggregatorOnMaxSetWithMask extends AbstractAggregator {
     private int numFeatures;
 
     public AggregatorOnMaxSetWithMask(VariableContext varCtx, String onMaxName, String maskName, String... setNames) {
-        super(Descriptor.NAME, createFeatures(onMaxName, setNames), null);
+        super(Descriptor.NAME, createFeatures(onMaxName, setNames));
         if (varCtx == null) {
             throw new NullPointerException("varCtx");
         }
@@ -128,7 +128,7 @@ public final class AggregatorOnMaxSetWithMask extends AbstractAggregator {
             }
         } else {
             for (int i = 0; i < numFeatures; i++) {
-                outputVector.set(i, getOutputFillValue());
+                outputVector.set(i, Float.NaN);
             }
         }
     }

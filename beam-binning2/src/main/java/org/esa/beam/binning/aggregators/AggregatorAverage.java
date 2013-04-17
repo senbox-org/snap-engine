@@ -17,7 +17,16 @@
 package org.esa.beam.binning.aggregators;
 
 import com.bc.ceres.binding.PropertySet;
-import org.esa.beam.binning.*;
+import org.esa.beam.binning.AbstractAggregator;
+import org.esa.beam.binning.Aggregator;
+import org.esa.beam.binning.AggregatorConfig;
+import org.esa.beam.binning.AggregatorDescriptor;
+import org.esa.beam.binning.BinContext;
+import org.esa.beam.binning.Observation;
+import org.esa.beam.binning.VariableContext;
+import org.esa.beam.binning.Vector;
+import org.esa.beam.binning.WeightFn;
+import org.esa.beam.binning.WritableVector;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 
 import java.util.Arrays;
@@ -29,12 +38,11 @@ public final class AggregatorAverage extends AbstractAggregator {
     private final int varIndex;
     private final WeightFn weightFn;
 
-    public AggregatorAverage(VariableContext varCtx, String varName, Double weightCoeff, Number fillValue) {
+    public AggregatorAverage(VariableContext varCtx, String varName, Double weightCoeff) {
         super(Descriptor.NAME,
               createFeatureNames(varName, "sum", "sum_sq"),
               createFeatureNames(varName, "sum", "sum_sq", "weights"),
-              createFeatureNames(varName, "mean", "sigma"),
-              fillValue);
+              createFeatureNames(varName, "mean", "sigma"));
         if (varCtx == null) {
             throw new NullPointerException("varCtx");
         }
@@ -153,8 +161,7 @@ public final class AggregatorAverage extends AbstractAggregator {
             PropertySet propertySet = aggregatorConfig.asPropertySet();
             return new AggregatorAverage(varCtx,
                                          (String) propertySet.getValue("varName"),
-                                         (Double) propertySet.getValue("weightCoeff"),
-                                         (Float) propertySet.getValue("fillValue"));
+                                         (Double) propertySet.getValue("weightCoeff"));
         }
 
         @Override
