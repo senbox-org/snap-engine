@@ -75,7 +75,7 @@ public final class ImageTemporalBinRenderer implements TemporalBinRenderer {
             Arrays.fill(bandData[i], Float.NaN);
         }
 
-        String[] outputFeatureNames = binningContext.getBinManager().getOutputFeatureNames();
+        String[] outputFeatureNames = binningContext.getBinManager().getResultFeatureNames();
         bandIndices = new int[bandCount];
         bandNames = new String[bandCount];
         bandMinValues = new float[bandCount];

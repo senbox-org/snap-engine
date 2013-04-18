@@ -93,7 +93,7 @@ public final class ProductTemporalBinRenderer implements TemporalBinRenderer {
         numPassesBand.setNoDataValueUsed(true);
         numPassesLine = numPassesBand.createCompatibleRasterData(outputRegion.width, 1);
 
-        String[] outputFeatureNames = binningContext.getBinManager().getOutputFeatureNames();
+        String[] outputFeatureNames = binningContext.getBinManager().getResultFeatureNames();
         outputBands = new Band[outputFeatureNames.length];
         outputLines = new ProductData[outputFeatureNames.length];
         for (int i = 0; i < outputFeatureNames.length; i++) {

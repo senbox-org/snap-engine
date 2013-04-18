@@ -34,15 +34,7 @@ package org.esa.beam.binning.operator;
 
 
 import com.bc.ceres.binding.BindingException;
-import org.esa.beam.binning.Aggregator;
-import org.esa.beam.binning.AggregatorConfig;
-import org.esa.beam.binning.AggregatorDescriptor;
-import org.esa.beam.binning.AggregatorDescriptorRegistry;
-import org.esa.beam.binning.BinManager;
-import org.esa.beam.binning.BinningContext;
-import org.esa.beam.binning.CompositingType;
-import org.esa.beam.binning.PlanetaryGrid;
-import org.esa.beam.binning.VariableContext;
+import org.esa.beam.binning.*;
 import org.esa.beam.binning.support.BinningContextImpl;
 import org.esa.beam.binning.support.SEAGrid;
 import org.esa.beam.binning.support.VariableContextImpl;
@@ -111,6 +103,9 @@ public class BinningConfig {
     @Parameter(alias = "aggregators", domConverter = AggregatorConfigDomConverter.class)
     private AggregatorConfig[] aggregatorConfigs;
 
+    @Parameter(alias = "postProcessor", domConverter = PostProcessorConfigDomConverter.class)
+    private PostProcessorConfig postProcessorConfig;
+
     public String getPlanetaryGrid() {
         return planetaryGrid;
     }
@@ -165,6 +160,14 @@ public class BinningConfig {
 
     public void setAggregatorConfigs(AggregatorConfig... aggregatorConfigs) {
         this.aggregatorConfigs = aggregatorConfigs;
+    }
+
+    public PostProcessorConfig getPostProcessorConfig() {
+        return postProcessorConfig;
+    }
+
+    public void setPostProcessorConfig(PostProcessorConfig postProcessorConfig) {
+        this.postProcessorConfig = postProcessorConfig;
     }
 
     public static BinningConfig fromXml(String xml) throws BindingException {
@@ -236,7 +239,7 @@ public class BinningConfig {
     }
 
     protected BinManager createBinManager(VariableContext variableContext, Aggregator[] aggregators) {
-        return new BinManager(variableContext, aggregators);
+        return new BinManager(variableContext, postProcessorConfig, aggregators);
     }
 
     public VariableContext createVariableContext() {
