@@ -8,15 +8,14 @@
     <parent>
         <groupId>org.esa.beam</groupId>
         <artifactId>beam-plugin-parent</artifactId>
-        <version>1.0</version>
+        <version>1.0.1</version>
         <relativePath>../beam-plugin-parent/pom.xml</relativePath>
     </parent>
 
     <name>BEAM OPeNDAP client</name>
     <description>An OPeNDAP client extension for BEAM</description>
-    <groupId>org.esa.beam</groupId>
     <artifactId>beam-opendap</artifactId>
-    <version>1.0</version>
+    <version>1.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <organization>
