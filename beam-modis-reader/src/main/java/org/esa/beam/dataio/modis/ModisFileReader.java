@@ -104,7 +104,7 @@ class ModisFileReader {
     private static int[] getNamedIntAttribute(Variable variable, String name) {
         final List<Attribute> attributes = variable.getAttributes();
         for (final Attribute attribute : attributes) {
-            if (attribute.getName().equals(name)) {
+            if (attribute.getShortName().equals(name)) {
                 final Array values = attribute.getValues();
                 final long size = values.getSize();
                 final int[] result = new int[(int) size];
@@ -244,7 +244,7 @@ class ModisFileReader {
         final String descriptionAttribName = bandDesc.getDescriptionAttribName();
         final List<Attribute> attributes = variable.getAttributes();
         for (final Attribute attribute : attributes) {
-            if (attribute.getName().equalsIgnoreCase(descriptionAttribName)) {
+            if (attribute.getShortName().equalsIgnoreCase(descriptionAttribName)) {
                 final String description = attribute.getStringValue();
                 band.setDescription(description);
                 return;
@@ -256,7 +256,7 @@ class ModisFileReader {
         final String unitAttribName = bandDesc.getUnitAttribName();
         final List<Attribute> attributes = variable.getAttributes();
         for (final Attribute attribute : attributes) {
-            if (attribute.getName().equalsIgnoreCase(unitAttribName)) {
+            if (attribute.getShortName().equalsIgnoreCase(unitAttribName)) {
                 final String unit = attribute.getStringValue();
                 band.setUnit(unit);
                 return;
@@ -321,15 +321,15 @@ class ModisFileReader {
         TiePointGrid grid;
         String[] tiePointGridNames = prodDb.getTiePointNames(productType);
 
-        for (int n = 0; n < tiePointGridNames.length; n++) {
-            final Variable variable = netCDFVariables.get(tiePointGridNames[n]);
+        for (String tiePointGridName : tiePointGridNames) {
+            final Variable variable = netCDFVariables.get(tiePointGridName);
             if (variable == null) {
-                logger.warning("Unable to access tie point grid: '" + tiePointGridNames[n] + '\'');
+                logger.warning("Unable to access tie point grid: '" + tiePointGridName + '\'');
                 continue;
             }
             final NetCDFAttributes attributes = new NetCDFAttributes();
             attributes.add(variable.getAttributes());
-            grid = readNamedTiePointGrid(variable, attributes, productType, tiePointGridNames[n], globalAttribs);
+            grid = readNamedTiePointGrid(variable, attributes, productType, tiePointGridName, globalAttribs);
             if (grid != null) {
                 prod.addTiePointGrid(grid);
             }
@@ -346,7 +346,6 @@ class ModisFileReader {
      */
     private TiePointGrid readNamedTiePointGrid(Variable variable, NetCDFAttributes netCDFAttributes, String prodType, String name,
                                                ModisGlobalAttributes globalAttribs) throws IOException {
-        Object buffer;
         TiePointGrid gridRet = null;
         final ModisTiePointDescription desc = prodDb.getTiePointDescription(prodType, name);
         final DataType ncDataType = variable.getDataType();
@@ -473,10 +472,10 @@ class ModisFileReader {
         }
 
         final String[] tiePointGridNames = prodDb.getTiePointNames(qcFileContainer.getType());
-        for (int n = 0; n < tiePointGridNames.length; n++) {
-            final Variable variable = netCDFQCVariables.get(tiePointGridNames[n]);
+        for (String tiePointGridName : tiePointGridNames) {
+            final Variable variable = netCDFQCVariables.get(tiePointGridName);
             if (variable != null) {
-                final TiePointGrid grid = readNamedTiePointGrid(variable, netCDFQCAttributes, qcFileContainer.getType(), tiePointGridNames[n], globalAttributes);
+                final TiePointGrid grid = readNamedTiePointGrid(variable, netCDFQCAttributes, qcFileContainer.getType(), tiePointGridName, globalAttributes);
                 if (grid != null) {
                     product.addTiePointGrid(grid);
                 }
@@ -620,7 +619,7 @@ class ModisFileReader {
          *         otherwise.
          */
         public boolean accept(File dir, String name) {
-            return name.indexOf(_fileNamePart) >= 0;
+            return name.contains(_fileNamePart);
         }
     }
 
