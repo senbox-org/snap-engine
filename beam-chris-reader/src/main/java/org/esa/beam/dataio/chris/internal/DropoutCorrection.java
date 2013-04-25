@@ -17,7 +17,6 @@
 package org.esa.beam.dataio.chris.internal;
 
 import com.bc.ceres.core.Assert;
-import org.esa.beam.dataio.chris.Flags;
 
 import java.awt.*;
 import static java.lang.Math.sqrt;
