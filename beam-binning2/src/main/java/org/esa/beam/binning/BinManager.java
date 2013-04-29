@@ -82,8 +82,8 @@ public class BinManager {
         }
         if (postProcessorConfig != null) {
             this.postProcessor = createPostProcessor(postProcessorConfig, outputFeatureNames);
-            this.postFeatureCount = outputFeatureCount;
             this.postFeatureNames = postProcessor.getOutputFeatureNames();
+            this.postFeatureCount = this.postFeatureNames.length;
         } else {
             this.postProcessor = null;
             this.postFeatureCount = 0;

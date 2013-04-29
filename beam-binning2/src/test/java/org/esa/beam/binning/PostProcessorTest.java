@@ -57,9 +57,9 @@ public class PostProcessorTest {
         TemporalBin tbin = doBinning(bman);
         assertEquals(2, tbin.getFeatureValues().length);
         WritableVector resultVector = bman.createResultVector();
-        assertEquals(2, resultVector.size());
+        assertEquals(1, resultVector.size());
         bman.computeResult(tbin, resultVector);
-        assertEquals(2, resultVector.size());
+        assertEquals(1, resultVector.size());
         assertEquals(0.6f, resultVector.get(0), 1e-4);
 
         assertArrayEquals(new String[]{"A_max"}, bman.getResultFeatureNames());
