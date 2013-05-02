@@ -151,7 +151,7 @@ public final class AggregatorOnMaxSet extends AbstractAggregator {
             return NAME;
         }
         @Override
-        public AggregatorConfig createAggregatorConfig() {
+        public AggregatorConfig createConfig() {
             return new Config();
         }
 

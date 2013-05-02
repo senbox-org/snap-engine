@@ -2,15 +2,10 @@ package org.esa.beam.binning.postprocessor;
 
 import com.bc.ceres.binding.PropertySet;
 import org.esa.beam.binning.*;
-import org.esa.beam.binning.aggregators.AggregatorAverage;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 
 /**
- * Created with IntelliJ IDEA.
- * User: marco
- * Date: 17.04.13
- * Time: 23:46
- * To change this template use File | Settings | File Templates.
+ * A cell processor that select a number of features from the available ones.
  */
 public class PPSelection extends PostProcessor{
 
@@ -63,7 +58,7 @@ public class PPSelection extends PostProcessor{
         }
 
         @Override
-        public PostProcessorConfig createPostProcessorConfig() {
+        public PostProcessorConfig createConfig() {
             return new Config();
         }
     }

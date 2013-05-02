@@ -148,7 +148,7 @@ public class AggregatorAverageML extends AbstractAggregator {
         }
 
         @Override
-        public AggregatorConfig createAggregatorConfig() {
+        public AggregatorConfig createConfig() {
             return new Config();
         }
 
