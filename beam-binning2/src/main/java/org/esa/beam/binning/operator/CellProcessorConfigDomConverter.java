@@ -22,7 +22,7 @@ import org.esa.beam.binning.CellProcessorDescriptor;
 /**
  * @author Norman Fomferra
  */
-public class CellProcessorConfigDomConverter extends TypedConfigDomConverter {
+public class CellProcessorConfigDomConverter extends TypedConfigDomConverter<CellProcessorDescriptor, CellProcessorConfig> {
 
     public CellProcessorConfigDomConverter() {
         super(CellProcessorDescriptor.class, CellProcessorConfig.class);
