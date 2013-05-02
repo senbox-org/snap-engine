@@ -14,15 +14,18 @@
  * with this program; if not, see http://www.gnu.org/licenses/
  */
 
-package org.esa.beam.binning;
+package org.esa.beam.binning.operator;
+
+import org.esa.beam.binning.CellProcessorConfig;
+import org.esa.beam.binning.CellProcessorDescriptor;
 
 /**
- * A descriptor for  binning post processor.
- *
- * @author MarcoZ
- * @author Norman
+ * @author Norman Fomferra
  */
-public interface PostProcessorDescriptor extends TypedDescriptor<PostProcessorConfig> {
+public class CellProcessorConfigDomConverter extends TypedConfigDomConverter {
 
-    PostProcessor createPostProcessor(VariableContext varCtx, PostProcessorConfig postProcessorConfig);
+    public CellProcessorConfigDomConverter() {
+        super(CellProcessorDescriptor.class, CellProcessorConfig.class);
+    }
+
 }
