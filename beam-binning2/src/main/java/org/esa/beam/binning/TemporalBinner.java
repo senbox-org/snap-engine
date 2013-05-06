@@ -16,8 +16,6 @@
 
 package org.esa.beam.binning;
 
-import org.esa.beam.binning.support.VectorImpl;
-
 import java.io.IOException;
 
 /**
