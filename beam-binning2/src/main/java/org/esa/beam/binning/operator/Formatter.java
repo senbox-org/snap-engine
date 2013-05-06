@@ -51,6 +51,8 @@ public class Formatter {
         final PlanetaryGrid planetaryGrid = binningContext.getPlanetaryGrid();
         final Rectangle outputRegion = Reprojector.computeRasterSubRegion(planetaryGrid, roiGeometry);
 
+        ProductCustomizer productCustomizer = formatterConfig.getProductCustomizer();
+
         final TemporalBinRenderer temporalBinRenderer;
         if (outputType.equalsIgnoreCase("Product")) {
             temporalBinRenderer = new ProductTemporalBinRenderer(binningContext,
@@ -60,6 +62,7 @@ public class Formatter {
                                                                  Reprojector.getRasterPixelSize(planetaryGrid),
                                                                  startTime,
                                                                  stopTime,
+                                                                 productCustomizer,
                                                                  metadataElements);
         } else {
             temporalBinRenderer = new ImageTemporalBinRenderer(binningContext,
