@@ -159,8 +159,9 @@ class SeaDASLevel3BinWriter implements BinWriter {
             writeBinListVariables(netcdfFile, binNumVar, numObsVar, numScenesVar, featureVars, beginOffsetVar, beginVar, extendVar, temporalBins);
         } catch (InvalidRangeException e) {
             throw new IOException(e);
+        } finally {
+            netcdfFile.close();
         }
-        netcdfFile.close();
     }
 
     // package access for testing only tb 2013-05-06
