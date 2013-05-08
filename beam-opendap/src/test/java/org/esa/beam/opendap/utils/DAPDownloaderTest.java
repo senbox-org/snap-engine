@@ -1,6 +1,6 @@
 package org.esa.beam.opendap.utils;
 
-import org.esa.beam.opendap.ui.OpendapAccessPanel;
+import org.esa.beam.opendap.ui.DownloadProgressBarPM;
 import org.esa.beam.util.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -196,7 +196,7 @@ public class DAPDownloaderTest {
 
     @Test
     public void testGetDownloadSpeed() {
-        assertEquals(1024.0/60.0, DAPDownloader.getDownloadSpeed(60 * 1000, 1024), 1E-4);
+        assertEquals(1024.0 / 60.0, DAPDownloader.getDownloadSpeed(60 * 1000, 1024), 1E-4);
     }
 
     @Ignore
@@ -234,7 +234,7 @@ public class DAPDownloaderTest {
         return new File(TESTDATA_DIR, fileName);
     }
 
-    private static class NullLabelledProgressBarPM extends OpendapAccessPanel.DownloadProgressBarProgressMonitor {
+    private static class NullLabelledProgressBarPM extends DownloadProgressBarPM {
 
         public NullLabelledProgressBarPM() {
             super(null, null, null, null);

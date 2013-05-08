@@ -16,12 +16,16 @@
 
 package org.esa.beam.opendap.ui;
 
-import org.esa.beam.opendap.utils.*;
+import org.esa.beam.opendap.utils.DAPDownloader;
 
-import javax.swing.*;
-import java.awt.event.*;
-import java.io.*;
-import java.util.*;
+import javax.swing.SwingWorker;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Tonio Fincke
@@ -31,14 +35,14 @@ class DownloadAction implements ActionListener, DAPDownloader.FileCountProvider 
 
     private final Set<DownloadWorker> activeDownloaders = new HashSet<DownloadWorker>();
 
-    private final OpendapAccessPanel.DownloadProgressBarProgressMonitor pm;
+    private final DownloadProgressBarPM pm;
     private final ParameterProvider parameterProvider;
     private final DownloadHandler downloadHandler;
 
     private int downloadedFilesCount;
     private int filesToDownloadCount;
 
-    public DownloadAction(OpendapAccessPanel.DownloadProgressBarProgressMonitor pm, ParameterProvider parameterProvider,
+    public DownloadAction(DownloadProgressBarPM pm, ParameterProvider parameterProvider,
                           DownloadHandler downloadHandler) {
         this.pm = pm;
         this.parameterProvider = parameterProvider;
