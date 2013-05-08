@@ -2,7 +2,7 @@ package org.esa.beam.opendap.ui;
 
 import org.esa.beam.opendap.datamodel.CatalogNode;
 import org.esa.beam.opendap.datamodel.OpendapLeaf;
-import org.junit.*;
+import org.junit.Test;
 import thredds.catalog.InvDataset;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -14,28 +14,28 @@ public class CatalogTree_isCatalogReferenceNodeTest {
     @Test
     public void testThatNullIsResolvedToFalse() {
         final Object notADapNode = null;
-        assertEquals(false, CatalogTree.isCatalogReferenceNode(notADapNode));
+        assertEquals(false, CatalogTreeUtils.isCatalogReferenceNode(notADapNode));
     }
 
     @Test
     public void testThatUserObjectWhichIsNoStringIsResolvedToFalse() {
         final Integer userObject = 4;
         final DefaultMutableTreeNode notADapNode = new DefaultMutableTreeNode(userObject);
-        assertEquals(false, CatalogTree.isCatalogReferenceNode(notADapNode));
+        assertEquals(false, CatalogTreeUtils.isCatalogReferenceNode(notADapNode));
     }
 
     @Test
     public void testThatOpendapLeafWhichIsNoCatalogRefIsResolvedToFalse() {
         final Object userObject = new OpendapLeaf("any", new InvDataset(null, "") {
-                });
+        });
         final DefaultMutableTreeNode noDapNode = new DefaultMutableTreeNode(userObject);
-        assertEquals(false, CatalogTree.isCatalogReferenceNode(noDapNode));
+        assertEquals(false, CatalogTreeUtils.isCatalogReferenceNode(noDapNode));
     }
 
     @Test
     public void testThatOpendapLeafWhichIsCatalogRefIsResolvedToTrue() {
         final CatalogNode opendapLeaf = new CatalogNode("any", null);
         final DefaultMutableTreeNode notDapNode = new DefaultMutableTreeNode(opendapLeaf);
-        assertEquals(true, CatalogTree.isCatalogReferenceNode(notDapNode));
+        assertEquals(true, CatalogTreeUtils.isCatalogReferenceNode(notDapNode));
     }
 }

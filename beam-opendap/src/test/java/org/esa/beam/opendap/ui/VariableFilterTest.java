@@ -45,10 +45,10 @@ public class VariableFilterTest {
     @Before
     public void setUp() {
         Lm.verifyLicense("Brockmann Consult", "BEAM", "lCzfhklpZ9ryjomwWxfdupxIcuIoCxg2");
-        variableFilter = new VariableFilter(new JCheckBox(), new CatalogTree(null, new DefaultAppContext("")));
+        variableFilter = new VariableFilter(new JCheckBox(), new CatalogTree(null, new DefaultAppContext(""), null));
         variableFilter.getUI();
         leaf = new OpendapLeaf("leafName", new InvDataset(null, "") {
-                });
+        });
         DArrayDimension[] dArrayDimensions = {new DArrayDimension(10, "dimName")};
         dapVariable = new DAPVariable("vName", "vType", "vDataType", dArrayDimensions);
         leaf.addDAPVariable(dapVariable);
@@ -64,7 +64,7 @@ public class VariableFilterTest {
     @Test
     public void testAccept_AcceptIfFilterSet() throws Exception {
         OpendapLeaf leaf2 = new OpendapLeaf("leafName2", new InvDataset(null, "") {
-                });
+        });
         DAPVariable dapVariable2 = createDAPVariable("vName2");
         leaf2.addDAPVariable(dapVariable2);
 
@@ -80,7 +80,7 @@ public class VariableFilterTest {
     @Test
     public void testAccept_AcceptAllIfNoVariableIsSelected() throws Exception {
         OpendapLeaf leaf2 = new OpendapLeaf("leafName2", new InvDataset(null, "") {
-                });
+        });
         DAPVariable dapVariable2 = createDAPVariable("vName2");
         leaf2.addDAPVariable(dapVariable2);
 
@@ -96,7 +96,7 @@ public class VariableFilterTest {
     @Test
     public void testAccept_AcceptNothingIfNoMatchingVariableIsSelected() throws Exception {
         OpendapLeaf leaf2 = new OpendapLeaf("leafName2", new InvDataset(null, "") {
-                });
+        });
         DAPVariable dapVariable2 = createDAPVariable("vName2");
         leaf2.addDAPVariable(dapVariable2);
 

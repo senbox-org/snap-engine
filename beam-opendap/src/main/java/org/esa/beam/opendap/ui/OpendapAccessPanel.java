@@ -63,7 +63,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class OpendapAccessPanel extends JPanel {
+public class OpendapAccessPanel extends JPanel implements CatalogTree.UIContext {
 
     private static final String PROPERTY_KEY_SERVER_URLS = "opendap.server.urls";
     private final static int DDS_AREA_INDEX = 0;
@@ -187,10 +187,11 @@ public class OpendapAccessPanel extends JPanel {
                 } else {
                     downloadButton.setEnabled(true);
                     double dataSizeInMB = currentDataSize / 1024.0;
-                    updateStatusBar("Total size of currently selected files: " + OpendapUtils.format(dataSizeInMB) + " MB");
+                    updateStatusBar(
+                            "Total size of currently selected files: " + OpendapUtils.format(dataSizeInMB) + " MB");
                 }
             }
-        }, appContext);
+        }, appContext, this);
         useDatasetNameFilter = new JCheckBox("Use dataset name filter");
         useTimeRangeFilter = new JCheckBox("Use time range filter");
         useRegionFilter = new JCheckBox("Use region filter");
@@ -276,7 +277,8 @@ public class OpendapAccessPanel extends JPanel {
                 }
             }
         } catch (IOException e) {
-            BeamLogManager.getSystemLogger().warning("Unable to retrieve meta information for file '" + leaf.getName() + "'.");
+            BeamLogManager.getSystemLogger().warning(
+                    "Unable to retrieve meta information for file '" + leaf.getName() + "'.");
         }
 
         setResponseText(componentIndex, text);
@@ -301,9 +303,9 @@ public class OpendapAccessPanel extends JPanel {
     private void filterLeaf(OpendapLeaf leaf) {
         if (
                 (!useDatasetNameFilter.isSelected() || datasetNameFilter.accept(leaf)) &&
-                        (!useTimeRangeFilter.isSelected() || timeRangeFilter.accept(leaf)) &&
-                        (!useRegionFilter.isSelected() || regionFilter.accept(leaf)) &&
-                        (!useVariableFilter.isSelected() || variableFilter.accept(leaf))) {
+                (!useTimeRangeFilter.isSelected() || timeRangeFilter.accept(leaf)) &&
+                (!useRegionFilter.isSelected() || regionFilter.accept(leaf)) &&
+                (!useVariableFilter.isSelected() || variableFilter.accept(leaf))) {
             catalogTree.setLeafVisible(leaf, true);
         } else {
             catalogTree.setLeafVisible(leaf, false);
@@ -421,7 +423,7 @@ public class OpendapAccessPanel extends JPanel {
 
         JPanel centerRightPane = new JPanel(new BorderLayout());
         final SimpleScrollPane simpleScrollPane = new SimpleScrollPane(filterPanel, JideScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                                                           JideScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+                                                                       JideScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         simpleScrollPane.setBorder(BorderFactory.createEmptyBorder());
         centerRightPane.add(simpleScrollPane, BorderLayout.CENTER);
         centerRightPane.add(downloadButtonPanel, BorderLayout.SOUTH);
@@ -512,7 +514,7 @@ public class OpendapAccessPanel extends JPanel {
     }
 
     public static class DownloadProgressBarProgressMonitor extends ProgressBarProgressMonitor implements
-            LabelledProgressBarPM {
+                                                                                              LabelledProgressBarPM {
 
         private final JProgressBar progressBar;
         private final JLabel preMessageLabel;
@@ -635,7 +637,7 @@ public class OpendapAccessPanel extends JPanel {
 
             for (TreePath selectionPath : selectionPaths) {
                 final DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) selectionPath.getLastPathComponent();
-                if (CatalogTree.isDapNode(treeNode) || CatalogTree.isFileNode(treeNode)) {
+                if (CatalogTreeUtils.isDapNode(treeNode) || CatalogTreeUtils.isFileNode(treeNode)) {
                     final OpendapLeaf leaf = (OpendapLeaf) treeNode.getUserObject();
                     if (leaf.isDapAccess()) {
                         dapURIs.put(leaf.getDapUri(), leaf.getFileSize() >= 2 * 1024 * 1024);
