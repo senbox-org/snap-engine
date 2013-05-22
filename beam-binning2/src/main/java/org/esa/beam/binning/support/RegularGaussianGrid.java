@@ -38,8 +38,8 @@ public class RegularGaussianGrid implements PlanetaryGrid {
 
     @Override
     public long getBinIndex(double lat, double lon) {
-        int rowIndex = findClosestInArray(config.getLatitudePoints(), lat);
-        int colIndex = findClosestInArray(config.getRegularLongitudePoints(), lon);
+        int rowIndex = findClosestLat(config.getLatitudePoints(), lat);
+        int colIndex = findClosestLon(config.getRegularLongitudePoints(), lon);
         return getFirstBinIndex(rowIndex) + colIndex;
     }
 
@@ -94,18 +94,46 @@ public class RegularGaussianGrid implements PlanetaryGrid {
         }
     }
 
-    static int findClosestInArray(double[] array, double value) {
-        double dist = Double.NaN;
-        for (int i = 0; i < array.length; i++) {
-            double arrayValue = array[i];
-            double currentDist = Math.abs(arrayValue - value);
-            if (currentDist > dist) {
-                return i - 1; // previous in array
-            }
-            dist = currentDist;
+    static int findClosestLat(double[] lats, double lat) {
+        int index = lats.length-1 - (int) ((lat + 90) / (180.0 / lats.length));
+        index -= 1;
+        if (index < 0) {
+            index = 0;
         }
-        // if not yet found it is the last one
-        return array.length - 1;
+        if (index > lats.length - 3) {
+            index = lats.length - 3;
+        }
+        final double dist1 = Math.abs(lats[index + 0] - lat);
+        final double dist2 = Math.abs(lats[index + 1] - lat);
+        final double dist3 = Math.abs(lats[index + 2] - lat);
+        if (dist1 < dist2) {
+            return index;
+        }
+        if (dist2 < dist3) {
+            return index + 1;
+        }
+        return index + 2;
+    }
+
+    static int findClosestLon(double[] lons, double lon) {
+        int index = (int) ((lon + 180) / (360.0 / lons.length));
+        index -= 1;
+        if (index < 0) {
+            index = 0;
+        }
+        if (index > lons.length - 3) {
+            index = lons.length - 3;
+        }
+        final double dist1 = Math.abs(lons[index + 0] - lon);
+        final double dist2 = Math.abs(lons[index + 1] - lon);
+        final double dist3 = Math.abs(lons[index + 2] - lon);
+        if (dist1 < dist2) {
+            return index;
+        }
+        if (dist2 < dist3) {
+            return index + 1;
+        }
+        return index + 2;
     }
 
     private int getColumnIndex(long bin) {
@@ -114,4 +142,25 @@ public class RegularGaussianGrid implements PlanetaryGrid {
         return (int) (bin - firstBinIndex);
     }
 
+//    public static class Descriptor implements PlanetaryGridDescriptor {
+//
+//        @Parameter(label = "Number of Grid Rows", defaultValue = 1024 + "",
+//                   description = "Number of rows of the global grid.")
+//        private int numRows;
+//
+//        @Override
+//        public String getName() {
+//            return "Regular Gaussian Grid";
+//        }
+//
+//        @Override
+//        public PropertySet createGridConfig() {
+//            return PropertyContainer.createValueBacked(this.getClass(), new ParameterDescriptorFactory());
+//        }
+//
+//        @Override
+//        public PlanetaryGrid createGrid(PropertySet config) {
+//            return new ReducedGaussianGrid((Integer) config.getProperty("numRows").getValue());
+//        }
+//    }
 }

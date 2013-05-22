@@ -1,8 +1,11 @@
 package org.esa.beam.binning.support;
 
-import org.junit.Test;
-
 import static org.junit.Assert.*;
+
+import org.junit.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Marco Peters
@@ -34,12 +37,69 @@ public class RegularGaussianGridTest {
     }
 
     @Test
-    public void testFindClosestInArray() throws Exception {
-        double[] values = {-175, -50, 50, 175};
-        assertEquals(0, RegularGaussianGrid.findClosestInArray(values, -178));
-        assertEquals(1, RegularGaussianGrid.findClosestInArray(values, -60));
-        assertEquals(2, RegularGaussianGrid.findClosestInArray(values, 30));
-        assertEquals(3, RegularGaussianGrid.findClosestInArray(values, 160));
-        assertEquals(3, RegularGaussianGrid.findClosestInArray(values, 179));
+    public void testFindClosestLat() throws Exception {
+        double[] values = createValues(89.5, -89.5, -1);
+        assertEquals(0, RegularGaussianGrid.findClosestLat(values, 89.5));
+        assertEquals(179, RegularGaussianGrid.findClosestLat(values, -89.5));
+        assertEquals(90, RegularGaussianGrid.findClosestLat(values, 0.0));
+        assertEquals(90, RegularGaussianGrid.findClosestLat(values, -0.0));
+        assertEquals(89, RegularGaussianGrid.findClosestLat(values, 0.0000000000001));
+
+        assertEquals(0, RegularGaussianGrid.findClosestLat(values, 89.0000000000001));
+        assertEquals(1, RegularGaussianGrid.findClosestLat(values, 89.0));
+        assertEquals(178, RegularGaussianGrid.findClosestLat(values, -88.9999999999999));
+        assertEquals(179, RegularGaussianGrid.findClosestLat(values, -89.0));
+
+        assertEquals(44, RegularGaussianGrid.findClosestLat(values, 45.00000000001));
+        assertEquals(45, RegularGaussianGrid.findClosestLat(values, 45.0));
+        assertEquals(134, RegularGaussianGrid.findClosestLat(values, -44.9999999999999));
+        assertEquals(135, RegularGaussianGrid.findClosestLat(values, -45.0));
+
+        assertEquals(0, RegularGaussianGrid.findClosestLat(values, 90.0));
+        assertEquals(179, RegularGaussianGrid.findClosestLat(values, -90.0));
+    }
+
+    @Test
+    public void testFindClosestLon() throws Exception {
+        double[] values = createValues(-179.5, 179.5, 1);
+        assertEquals(0, RegularGaussianGrid.findClosestLon(values, -179.5));
+        assertEquals(359, RegularGaussianGrid.findClosestLon(values, 179.5));
+        assertEquals(180, RegularGaussianGrid.findClosestLon(values, 0.0));
+        assertEquals(180, RegularGaussianGrid.findClosestLon(values, -0.0));
+        assertEquals(179, RegularGaussianGrid.findClosestLon(values, -0.0000000000001));
+
+        assertEquals(0, RegularGaussianGrid.findClosestLon(values, -179.0000000000001));
+        assertEquals(1, RegularGaussianGrid.findClosestLon(values, -179.0));
+        assertEquals(358, RegularGaussianGrid.findClosestLon(values, 178.9999999999999));
+        assertEquals(359, RegularGaussianGrid.findClosestLon(values, 179.0));
+
+        assertEquals(89, RegularGaussianGrid.findClosestLon(values, -90.00000000001));
+        assertEquals(90, RegularGaussianGrid.findClosestLon(values, -90.0));
+        assertEquals(269, RegularGaussianGrid.findClosestLon(values, 89.9999999999999));
+        assertEquals(270, RegularGaussianGrid.findClosestLon(values, 90.0));
+
+        assertEquals(0, RegularGaussianGrid.findClosestLon(values, -180.0));
+        assertEquals(359, RegularGaussianGrid.findClosestLon(values, 180.0));
+    }
+
+    private double[] createValues(double min, double max, double step) {
+        final List<Double> values = new ArrayList<Double>();
+        double value = min;
+        if (min<max) {
+            while (value <= max) {
+                values.add(value);
+                value += step;
+            }
+        } else {
+            while (value >= max) {
+                values.add(value);
+                value += step;
+            }
+        }
+        final double[] doubles = new double[values.size()];
+        for (int i = 0; i < doubles.length; i++) {
+            doubles[i] = values.get(i);
+        }
+        return doubles;
     }
 }
