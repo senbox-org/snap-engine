@@ -33,6 +33,7 @@ import org.esa.beam.framework.datamodel.VirtualBand;
 import org.esa.beam.jai.ImageManager;
 import org.esa.beam.util.StopWatch;
 import org.esa.beam.util.StringUtils;
+import org.esa.beam.util.logging.BeamLogManager;
 import org.esa.beam.util.math.MathUtils;
 
 import java.awt.Dimension;
@@ -43,6 +44,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Utility class which performs a spatial binning of single input products.
@@ -104,12 +106,15 @@ public class SpatialProductBinner {
         final float[] superSamplingSteps = getSuperSamplingSteps(superSampling);
         long numObsTotal = 0;
         progressMonitor.beginTask("Spatially binning of " + product.getName(), sliceRectangles.length);
+        final Logger logger = BeamLogManager.getSystemLogger();
         for (int idx = 0; idx < sliceRectangles.length; idx++) {
             StopWatch stopWatch = new StopWatch();
             stopWatch.start();
             numObsTotal += processSlice(spatialBinner, progressMonitor, superSamplingSteps, maskImage, varImages,
                                         product, sliceRectangles[idx]);
-            stopWatch.stopAndTrace(String.format("Processed slice %d of %d", idx + 1, sliceRectangles.length));
+            final String label = String.format("Processed slice %d of %d : ", idx + 1, sliceRectangles.length);
+            stopWatch.stop();
+            logger.info(label + stopWatch.getTimeDiffString());
         }
         spatialBinner.complete();
         return numObsTotal;
