@@ -1,0 +1,48 @@
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.1"
+        >
+    <id>bin</id>
+
+    <includeBaseDirectory>false</includeBaseDirectory>
+
+    <formats>
+        <format>dir</format>
+    </formats>
+
+    <files>
+        <file>
+            <source>README.md</source>
+            <lineEnding>unix</lineEnding>
+            <fileMode>0444</fileMode>
+            <filtered>true</filtered>
+        </file>
+        <file>
+            <source>LICENSE.txt</source>
+            <lineEnding>unix</lineEnding>
+            <fileMode>0444</fileMode>
+        </file>
+        <file>
+            <source>CHANGELOG.md</source>
+            <lineEnding>unix</lineEnding>
+            <fileMode>0444</fileMode>
+        </file>
+    </files>
+
+    <moduleSets>
+        <moduleSet>
+            <excludes>
+                <exclude>org.esa.s3tbx:s3tbx-bootstrap</exclude>
+                <exclude>org.esa.s3tbx:s3tbx-reader</exclude>
+            </excludes>
+
+            <binaries>
+                <includeDependencies>false</includeDependencies>
+                <fileMode>0444</fileMode>
+                <unpack>false</unpack>
+                <outputDirectory>modules</outputDirectory>
+                <outputFileNameMapping>
+                    ${artifact.artifactId}.<!-- ${artifact.version} -->${artifact.extension}
+                </outputFileNameMapping>
+            </binaries>
+        </moduleSet>
+    </moduleSets>
+</assembly>

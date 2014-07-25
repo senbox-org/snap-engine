@@ -1,0 +1,392 @@
+<?xml version="1.0"?>
+<Earth_Explorer_Header>
+  <Fixed_Header>
+    <File_Name>S3_OL_1_ERR_20130621T100921_20130621T101413_00291_000001_001_EST_TEST_00</File_Name>
+    <File_Description>Sentinel 3 Level 1B Product</File_Description>
+    <Notes>L1B Fixed Header</Notes>
+    <Mission>Sentinel 3</Mission>
+    <File_Class>TEST</File_Class>
+    <File_Type>  OL_1_ERR</File_Type>
+    <Validity_Period>
+      <Validity_Start>UTC=0000-00-00T00:00:00</Validity_Start>
+      <Validity_Stop>UTC=9999-99-99T99:99:99</Validity_Stop>
+    </Validity_Period>
+    <File_Version>0000</File_Version>
+    <Source>
+      <System>Level 1 Optical Ground Prototype Processor</System>
+      <Creator>OLC_L1B</Creator>
+      <Creator_Version>0001</Creator_Version>
+      <Creation_Date>UTC=2011-04-11T05:28:46</Creation_Date>
+    </Source>
+  </Fixed_Header>
+  <Variable_Header>
+    <Main_Product_Header>
+      <Product_Name>OL_1_ERR</Product_Name>
+      <Sensor_Name>OLCI</Sensor_Name>
+      <Platform>S3A</Platform>
+      <Processing_Stage>Level 1</Processing_Stage>
+      <References>
+        <Prod_Def_Ref>S3-RS-ACR-SY-00004</Prod_Def_Ref>
+        <ATBD_Ref>S3-ACR-TN-007</ATBD_Ref>
+      </References>
+      <Processing_Centre>ESTEC</Processing_Centre>
+      <Processing_Time>UTC=2011-04-11T05:28:46</Processing_Time>
+      <Start_Time>UTC=2013-06-21T10:09:20.659100</Start_Time>
+      <Stop_Time>UTC=2013-06-21T10:14:12.597100</Stop_Time>
+      <Orbit_Description>
+        <Phase>1</Phase>
+        <Cycle>1</Cycle>
+        <Relative_Orbit>1</Relative_Orbit>
+        <Absolute_Orbit>1</Absolute_Orbit>
+        <Vector_Source>NAVATT</Vector_Source>
+        <State_Vector_Time>UTC=2013-06-21T10:36:41</State_Vector_Time>
+        <Position_X>-4656216.482220</Position_X>
+        <Position_Y>-90913.379418</Position_Y>
+        <Position_Z>-5475657.988525</Position_Z>
+        <Velocity_X>-5551.273421</Velocity_X>
+        <Velocity_Y>1954.502550</Velocity_Y>
+        <Velocity_Z>4691.200957</Velocity_Z>
+        <Leap_Second>
+          <Leap_Occurrence>UTC=2000-01-01T00:00:00</Leap_Occurrence>
+          <Leap_Sign>0</Leap_Sign>
+          <Leap_Error>TBD</Leap_Error>
+        </Leap_Second>
+      </Orbit_Description>
+      <Data_Error_Flag>TBD</Data_Error_Flag>
+      <History>TBD</History>
+      <Processor_Version_ID>1.0</Processor_Version_ID>
+      <Format_Version_ID>1.0</Format_Version_ID>
+    </Main_Product_Header>
+    <Specific_Product_Header>
+      <SPH_Descriptor>OL_1_ERR Specific Header</SPH_Descriptor>
+      <Product_Title>Reduced Resolution</Product_Title>
+      <Product_Time_Frame>Single Orbit</Product_Time_Frame>
+      <Product_Spatial_Resolution>REDUCED_RESOLUTION</Product_Spatial_Resolution>
+      <Positioning_Information>
+        <First_First_Pixel>
+          <First_First_Lat>61.800691</First_First_Lat>
+          <First_First_Lon>-4.845124</First_First_Lon>
+        </First_First_Pixel>
+        <Med_First_Pixel>
+          <Med_First_Lat>60.860015</Med_First_Lat>
+          <Med_First_Lon>7.279949</Med_First_Lon>
+        </Med_First_Pixel>
+        <Last_First_Pixel>
+          <Last_First_Lat>58.907146</Last_First_Lat>
+          <Last_First_Lon>18.362368</Last_First_Lon>
+        </Last_First_Pixel>
+        <First_Last_Pixel>
+          <First_Last_Lat>44.775034</First_Last_Lat>
+          <First_Last_Lon>-7.385336</First_Last_Lon>
+        </First_Last_Pixel>
+        <Med_Last_Pixel>
+          <Med_Last_Lat>43.829368</Med_Last_Lat>
+          <Med_Last_Lon>0.741085</Med_Last_Lon>
+        </Med_Last_Pixel>
+        <Last_Last_Pixel>
+          <Last_Last_Lat>42.326587</Last_Last_Lat>
+          <Last_Last_Lon>8.542841</Last_Last_Lon>
+        </Last_Last_Pixel>
+      </Positioning_Information>
+      <List_of_Data_Objects>
+        <Data_Object_Descriptor>
+          <Content>Time Stamps file</Content>
+          <Filename>timeCoordinates.nc</Filename>
+          <File_Format>netCDF4</File_Format>
+          <Type>A</Type>
+        </Data_Object_Descriptor>
+        <Data_Object_Descriptor>
+          <Content>Geolocation file</Content>
+          <Filename>geoCoordinates.nc</Filename>
+          <File_Format>netCDF4</File_Format>
+          <Type>A</Type>
+        </Data_Object_Descriptor>
+        <Data_Object_Descriptor>
+          <Content>Quality Flags file</Content>
+          <Filename>qualityFlags.nc</Filename>
+          <File_Format>netCDF4</File_Format>
+          <Type>A</Type>
+        </Data_Object_Descriptor>
+        <Data_Object_Descriptor>
+          <Content>Tie Points Annotation file</Content>
+          <Filename>TiePoints.nc</Filename>
+          <File_Format>netCDF4</File_Format>
+          <Type>A</Type>
+        </Data_Object_Descriptor>
+        <Data_Object_Descriptor>
+          <Content>General Information Data file</Content>
+          <Filename>generalInfo.nc</Filename>
+          <File_Format>netCDF4</File_Format>
+          <Type>A</Type>
+        </Data_Object_Descriptor>
+        <Data_Object_Descriptor>
+          <Content>ith Radiance file</Content>
+          <Filename>radianceOa1.nc</Filename>
+          <File_Format>netCDF4</File_Format>
+          <Type>M</Type>
+        </Data_Object_Descriptor>
+        <Data_Object_Descriptor>
+          <Content>ith Radiance file</Content>
+          <Filename>radianceOa2.nc</Filename>
+          <File_Format>netCDF4</File_Format>
+          <Type>M</Type>
+        </Data_Object_Descriptor>
+        <Data_Object_Descriptor>
+          <Content>ith Radiance file</Content>
+          <Filename>radianceOa3.nc</Filename>
+          <File_Format>netCDF4</File_Format>
+          <Type>M</Type>
+        </Data_Object_Descriptor>
+        <Data_Object_Descriptor>
+          <Content>ith Radiance file</Content>
+          <Filename>radianceOa4.nc</Filename>
+          <File_Format>netCDF4</File_Format>
+          <Type>M</Type>
+        </Data_Object_Descriptor>
+        <Data_Object_Descriptor>
+          <Content>ith Radiance file</Content>
+          <Filename>radianceOa5.nc</Filename>
+          <File_Format>netCDF4</File_Format>
+          <Type>M</Type>
+        </Data_Object_Descriptor>
+        <Data_Object_Descriptor>
+          <Content>ith Radiance file</Content>
+          <Filename>radianceOa6.nc</Filename>
+          <File_Format>netCDF4</File_Format>
+          <Type>M</Type>
+        </Data_Object_Descriptor>
+        <Data_Object_Descriptor>
+          <Content>ith Radiance file</Content>
+          <Filename>radianceOa7.nc</Filename>
+          <File_Format>netCDF4</File_Format>
+          <Type>M</Type>
+        </Data_Object_Descriptor>
+        <Data_Object_Descriptor>
+          <Content>ith Radiance file</Content>
+          <Filename>radianceOa8.nc</Filename>
+          <File_Format>netCDF4</File_Format>
+          <Type>M</Type>
+        </Data_Object_Descriptor>
+        <Data_Object_Descriptor>
+          <Content>ith Radiance file</Content>
+          <Filename>radianceOa9.nc</Filename>
+          <File_Format>netCDF4</File_Format>
+          <Type>M</Type>
+        </Data_Object_Descriptor>
+        <Data_Object_Descriptor>
+          <Content>ith Radiance file</Content>
+          <Filename>radianceOa10.nc</Filename>
+          <File_Format>netCDF4</File_Format>
+          <Type>M</Type>
+        </Data_Object_Descriptor>
+        <Data_Object_Descriptor>
+          <Content>ith Radiance file</Content>
+          <Filename>radianceOa11.nc</Filename>
+          <File_Format>netCDF4</File_Format>
+          <Type>M</Type>
+        </Data_Object_Descriptor>
+        <Data_Object_Descriptor>
+          <Content>ith Radiance file</Content>
+          <Filename>radianceOa12.nc</Filename>
+          <File_Format>netCDF4</File_Format>
+          <Type>M</Type>
+        </Data_Object_Descriptor>
+        <Data_Object_Descriptor>
+          <Content>ith Radiance file</Content>
+          <Filename>radianceOa13.nc</Filename>
+          <File_Format>netCDF4</File_Format>
+          <Type>M</Type>
+        </Data_Object_Descriptor>
+        <Data_Object_Descriptor>
+          <Content>ith Radiance file</Content>
+          <Filename>radianceOa14.nc</Filename>
+          <File_Format>netCDF4</File_Format>
+          <Type>M</Type>
+        </Data_Object_Descriptor>
+        <Data_Object_Descriptor>
+          <Content>ith Radiance file</Content>
+          <Filename>radianceOa15.nc</Filename>
+          <File_Format>netCDF4</File_Format>
+          <Type>M</Type>
+        </Data_Object_Descriptor>
+        <Data_Object_Descriptor>
+          <Content>ith Radiance file</Content>
+          <Filename>radianceOa16.nc</Filename>
+          <File_Format>netCDF4</File_Format>
+          <Type>M</Type>
+        </Data_Object_Descriptor>
+        <Data_Object_Descriptor>
+          <Content>ith Radiance file</Content>
+          <Filename>radianceOa17.nc</Filename>
+          <File_Format>netCDF4</File_Format>
+          <Type>M</Type>
+        </Data_Object_Descriptor>
+        <Data_Object_Descriptor>
+          <Content>ith Radiance file</Content>
+          <Filename>radianceOa18.nc</Filename>
+          <File_Format>netCDF4</File_Format>
+          <Type>M</Type>
+        </Data_Object_Descriptor>
+        <Data_Object_Descriptor>
+          <Content>ith Radiance file</Content>
+          <Filename>radianceOa19.nc</Filename>
+          <File_Format>netCDF4</File_Format>
+          <Type>M</Type>
+        </Data_Object_Descriptor>
+        <Data_Object_Descriptor>
+          <Content>ith Radiance file</Content>
+          <Filename>radianceOa20.nc</Filename>
+          <File_Format>netCDF4</File_Format>
+          <Type>M</Type>
+        </Data_Object_Descriptor>
+        <Data_Object_Descriptor>
+          <Content>ith Radiance file</Content>
+          <Filename>radianceOa21.nc</Filename>
+          <File_Format>netCDF4</File_Format>
+          <Type>M</Type>
+        </Data_Object_Descriptor>
+        <Data_Object_Descriptor>
+          <Content>Removed Pixels file</Content>
+          <Filename>removedPixels.nc</Filename>
+          <File_Format>netCDF4</File_Format>
+          <Type>M</Type>
+        </Data_Object_Descriptor>
+      </List_of_Data_Objects>
+      <List_of_Input_Files>
+        <Input_File>
+          <Input_File_Name></Input_File_Name>
+          <File_Link>output/S3A_OL_0_EFR/</File_Link>
+        </Input_File>
+        <Input_File>
+          <Input_File_Name>OLC_L1b_EO_config.xml</Input_File_Name>
+          <File_Link>input/OLC_L1b_EO_config.xml</File_Link>
+        </Input_File>
+        <Input_File>
+          <Input_File_Name>OLCI_brightpixel_lut.nc</Input_File_Name>
+          <File_Link>/home/febg/ADFs/OLCI_brightpixel_lut.nc</File_Link>
+        </Input_File>
+        <Input_File>
+          <Input_File_Name>S3A_OL_CCDB_CHAR_AllFiles.20110117085249_1.nc4</Input_File_Name>
+          <File_Link>/home/febg/SCCDB/current/S3A_OL_CCDB_CHAR_AllFiles.20110117085249_1.nc4</File_Link>
+        </Input_File>
+        <Input_File>
+          <Input_File_Name>S3A_OL_CCDB_CALI_AllFiles.20110117100745_1.nc4</Input_File_Name>
+          <File_Link>/usr/local/s3_osps/SCCDB/current/S3A_OL_CCDB_CALI_AllFiles.20110117100745_1.nc4</File_Link>
+        </Input_File>
+        <Input_File>
+          <Input_File_Name>S3A_OL_CCDB_PROG_programmable.20110117100951_1.nc4</Input_File_Name>
+          <File_Link>/usr/local/s3_osps/SCCDB/current/S3A_OL_CCDB_PROG_programmable.20110117100951_1.nc4</File_Link>
+        </Input_File>
+        <Input_File>
+          <Input_File_Name>IGEO_ORBPARAM__.xml</Input_File_Name>
+          <File_Link>input/IGEO_ORBPARAM__.xml</File_Link>
+        </Input_File>
+        <Input_File>
+          <Input_File_Name>CS_TEST_INT_DEMCFG_00000000T000000_99999999T999999_0002.EEF</Input_File_Name>
+          <File_Link>/usr/local/s3_osps/dem/current/CS_TEST_INT_DEMCFG_00000000T000000_99999999T999999_0002.EEF</File_Link>
+        </Input_File>
+        <Input_File>
+          <Input_File_Name>coastline_global1pa.tif</Input_File_Name>
+          <File_Link>/usr/local/s3_osps/ADFs/coastline_global1pa.tif</File_Link>
+        </Input_File>
+        <Input_File>
+          <Input_File_Name>land_water_global1pa.tif</Input_File_Name>
+          <File_Link>/usr/local/s3_osps/ADFs/land_water_global1pa.tif</File_Link>
+        </Input_File>
+        <Input_File>
+          <Input_File_Name>open_ocean_global1pa.tif</Input_File_Name>
+          <File_Link>/usr/local/s3_osps/ADFs/open_ocean_global1pa.tif</File_Link>
+        </Input_File>
+        <Input_File>
+          <Input_File_Name>tidal_global1pa.tif</Input_File_Name>
+          <File_Link>/usr/local/s3_osps/ADFs/tidal_global1pa.tif</File_Link>
+        </Input_File>
+        <Input_File>
+          <Input_File_Name>201306210000.grb</Input_File_Name>
+          <File_Link>input/201306210000.grb</File_Link>
+        </Input_File>
+        <Input_File>
+          <Input_File_Name>201306211200.grb</Input_File_Name>
+          <File_Link>input/201306211200.grb</File_Link>
+        </Input_File>
+      </List_of_Input_Files>
+      <Image_Size>
+        <Lines_Number>1664</Lines_Number>
+      </Image_Size>
+      <Columns_Number>1217</Columns_Number>
+      <Summary_Quality_Annotation>
+        <Meas_Accuracy>0</Meas_Accuracy>
+        <Ref_Accuracy>0</Ref_Accuracy>
+        <Quality_Flags>
+          <Transmission_Error_Flag>39</Transmission_Error_Flag>
+          <Format_Error_Flag>0</Format_Error_Flag>
+          <Manoeuvre_Flag>0</Manoeuvre_Flag>
+          <ECMWF_Type>0</ECMWF_Type>
+          <ECMWF_Time_Relevance>0</ECMWF_Time_Relevance>
+        </Quality_Flags>
+        <Quality_Thres>
+          <Transmission_Error_Thres>42</Transmission_Error_Thres>
+          <Format_Error_Thres>0</Format_Error_Thres>
+        </Quality_Thres>
+        <Quality_Stat>
+          <Missing_Packet_Stat>
+            <Missing_Packet_Num>0</Missing_Packet_Num>
+            <Missing_Packet_Perc>-1073772688</Missing_Packet_Perc>
+          </Missing_Packet_Stat>
+          <Duplicated_Packet_Stat>
+            <Duplicated_Packet_Num>127</Duplicated_Packet_Num>
+            <Duplicated_Packet_Perc>-1783452392</Duplicated_Packet_Perc>
+          </Duplicated_Packet_Stat>
+          <Format_Error_Stat>
+            <Format_Error_Num>42</Format_Error_Num>
+            <Format_Error_Perc>58045523</Format_Error_Perc>
+          </Format_Error_Stat>
+          <Manoeuvre_Info>
+            <Manoeuvre_Start_Time>UTC=2000-01-01T00:00:00</Manoeuvre_Start_Time>
+            <Manoeuvre_Stop_Time>UTC=2000-01-01T00:00:00</Manoeuvre_Stop_Time>
+          </Manoeuvre_Info>
+          <Invalid_Pixel_Stat>
+            <Invalid_Pixel_Num>0</Invalid_Pixel_Num>
+            <Invalid_Pixel_Perc>58045523</Invalid_Pixel_Perc>
+          </Invalid_Pixel_Stat>
+          <Cosmetic_Pixel_Stat>
+            <Cosmetic_Pixel_Num>0</Cosmetic_Pixel_Num>
+            <Cosmetic_Pixel_Perc>-1783435394</Cosmetic_Pixel_Perc>
+          </Cosmetic_Pixel_Stat>
+          <Duplicated_Pixel_Stat>
+            <Duplicated_Pixel_Num>42</Duplicated_Pixel_Num>
+            <Duplicated_Pixel_Perc>578845022</Duplicated_Pixel_Perc>
+          </Duplicated_Pixel_Stat>
+          <Saturated_Samples_Stat>
+            <Saturated_Samples_Num>58</Saturated_Samples_Num>
+            <Saturated_Samples_Perc>0</Saturated_Samples_Perc>
+          </Saturated_Samples_Stat>
+          <Dubious_Samples_Stat>
+            <Dubious_Samples_Num>0</Dubious_Samples_Num>
+            <Dubious_Samples_Perc>1</Dubious_Samples_Perc>
+          </Dubious_Samples_Stat>
+          <Classification_Stat>
+            <Bright_Pixels_Perc>0</Bright_Pixels_Perc>
+            <Land_Pixels_Perc>0</Land_Pixels_Perc>
+            <Saline_Water_Pixels_Perc>0</Saline_Water_Pixels_Perc>
+            <Coastal_Pixels_Perc>1</Coastal_Pixels_Perc>
+            <Fresh_Inland_Water_Pixels_Perc>0</Fresh_Inland_Water_Pixels_Perc>
+            <Tidal_Regions_Pixels_Perc>0</Tidal_Regions_Pixels_Perc>
+          </Classification_Stat>
+        </Quality_Stat>
+      </Summary_Quality_Annotation>
+      <Spectral_Bands_Prog>
+        <Band_Config>
+          <Central_Wavelength>0</Central_Wavelength>
+          <Bandwith>0</Bandwith>
+        </Band_Config>
+      </Spectral_Bands_Prog>
+      <OCL_Status>0</OCL_Status>
+      <AL_Time_Sampling>0</AL_Time_Sampling>
+      <AL_Spatial_Sampling>0</AL_Spatial_Sampling>
+      <AC_Spatial_Sampling>0</AC_Spatial_Sampling>
+      <Lines_Per_Tie_Point>1</Lines_Per_Tie_Point>
+      <Columns_Per_Tie_Point>0</Columns_Per_Tie_Point>
+    </Specific_Product_Header>
+  </Variable_Header>
+</Earth_Explorer_Header>

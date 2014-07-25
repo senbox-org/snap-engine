@@ -1,0 +1,59 @@
+<module>
+    <manifestVersion>1.0.0</manifestVersion>
+    <symbolicName>s3tbx-reader</symbolicName>
+    <version>0.6.0</version>
+    <name>Sentinel-3 Products Reader</name>
+
+    <description>
+        This module enables the Sentinel Toolbox to read the following Sentinel-3 data products: OLCI L1b and L2, SLSTR L1b and L2, Synergy L2 and VGT.
+    </description>
+
+    <vendor>Brockmann Consult GmbH and Array Inc</vendor>
+    <contactAddress>Max Planck Str.2, 21502 Geesthacht (Germany)</contactAddress>
+    <copyright>(C) 2012 by Brockmann Consult GmbH and Array Inc</copyright>
+    <url>https://github.com/bcdev/s3tbx</url>
+    <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
+
+    <changelog>
+        <![CDATA[
+                ]]>
+    </changelog>
+
+    <dependency>
+        <module>beam-core</module>
+    </dependency>
+    <dependency>
+        <module>beam-netcdf</module>
+    </dependency>
+    <dependency>
+        <module>beam-visat-rcp</module>
+        <optional>true</optional>
+    </dependency>
+
+    <categories>Reader,Sentinel</categories>
+
+    <extension point="beam-ui:actions">
+        <action>
+            <id>importSentinel3Product</id>
+            <helpId>importSentinel3Product</helpId>
+            <class>org.esa.beam.visat.actions.ProductImportAction</class>
+            <formatName>SENTINEL-3</formatName>
+            <useAllFileFilter>true</useAllFileFilter>
+            <parent>importMultispectral</parent>
+        </action>
+        <!-- Mock-up reader
+                <action>
+                    <id>importSentinel3Product</id>
+                    <helpId>importSentinel3Product</helpId>
+                    <class>org.esa.beam.visat.actions.ProductImportAction</class>
+                    <formatName>SENTINEL-3-SLSTR</formatName>
+                    <useAllFileFilter>true</useAllFileFilter>
+                </action>
+        -->
+    </extension>
+
+    <extension point="beam-core:rgbProfiles">
+        <!-- todo -->
+    </extension>
+
+</module>

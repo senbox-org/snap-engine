@@ -1,0 +1,516 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- SENTINEL 3 SYN VGT P Level 2 archive
+This document is a manifest file of a SAFE archive. -->
+
+<xfdu:XFDU xmlns:xfdu='urn:ccsds:schema:xfdu:1'
+           xmlns:safe='http://www.esa.int/safe/1.2'
+
+           version='esa/safe/1.2/sentinel-3/vgt-p/level2'>
+
+    <!-- ============================================
+            INFORMATION PACKAGE MAP SECTION
+         ============================================ -->
+    <informationPackageMap>
+        <xfdu:contentUnit
+            unitType='Sentinel 3 Information Package'
+            textInfo='Sentinel 3 SYN Level 2 VGT P'
+            pdiID='processing'
+            dmdID='acquisitionPeriod platform'>
+
+    <!-- Measurement Data Sets -->
+            <xfdu:contentUnit
+                unitType='Measurement Data Unit'
+                textInfo='TOA Reflectance 430-470nm (Band B0)'
+                dmdID='viewAzimuthAngle viewZenithAngle solarAzimuthAngle solarZenithAngle waterVapourColumn ozoneColumn aerosolOpticalDepth'
+                repID='measurementDataSchema'>
+                <dataObjectPointer
+                    dataObjectID='toaReflectanceB0' />
+            </xfdu:contentUnit>
+
+            <xfdu:contentUnit
+                unitType='Measurement Data Unit'
+                textInfo='TOA Reflectance 610-680nm (Band B2)'
+                dmdID='viewAzimuthAngle viewZenithAngle solarAzimuthAngle solarZenithAngle waterVapourColumn ozoneColumn aerosolOpticalDepth'
+                repID='measurementDataSchema'>
+                <dataObjectPointer
+                    dataObjectID='toaReflectanceB1' />
+            </xfdu:contentUnit>
+
+            <xfdu:contentUnit
+                unitType='Measurement Data Unit'
+                textInfo='TOA Reflectance 780-890nm (Band B3)'
+                dmdID='viewAzimuthAngle viewZenithAngle solarAzimuthAngle solarZenithAngle waterVapourColumn ozoneColumn aerosolOpticalDepth'
+                repID='measurementDataSchema'>
+                <dataObjectPointer
+                    dataObjectID='toaReflectanceB2' />
+            </xfdu:contentUnit>
+
+            <xfdu:contentUnit
+                unitType='Measurement Data Unit'
+                textInfo='TOA Reflectance 1580-1750nm (Band MIR)'
+                dmdID='viewAzimuthAngle viewZenithAngle solarAzimuthAngle solarZenithAngle waterVapourColumn ozoneColumn aerosolOpticalDepth'
+                repID='measurementDataSchema'>
+                <dataObjectPointer
+                    dataObjectID='toaReflectanceMIR' />
+            </xfdu:contentUnit>
+
+            <xfdu:contentUnit
+                unitType='Measurement Data Unit'
+                textInfo='Pixel Status Flags'
+                repID='statusFlagsSchema'>
+                <dataObjectPointer
+                    dataObjectID='pixelStatusFlags' />
+            </xfdu:contentUnit>
+
+            <!-- Metadata Sets -->
+
+            <xfdu:contentUnit
+                unitType='Metadata Unit'
+                textInfo='Ozone Grid (OG)'
+                repID='tiepointsSchema'>
+                <dataObjectPointer
+                    dataObjectID='ozoneColumn' />
+            </xfdu:contentUnit>
+
+            <xfdu:contentUnit
+                unitType='Metadata Unit'
+                textInfo='Water Vapour Grid (WVG)'
+                repID='tiepointsSchema'>
+                <dataObjectPointer
+                    dataObjectID='waterVapourColumn' />
+            </xfdu:contentUnit>
+
+            <xfdu:contentUnit
+                unitType='Metadata Unit'
+                textInfo='Aerosol Optical Depth Grid (AG)'
+                repID='tiepointsSchema'>
+                <dataObjectPointer
+                    dataObjectID='aerosolOpticalDepth' />
+            </xfdu:contentUnit>
+
+            <xfdu:contentUnit
+                unitType='Metadata Unit'
+                textInfo='View Azimuth Angle (VZA)'
+                repID='geometryDataSchema'>
+                <dataObjectPointer
+                    dataObjectID='viewAzimuthAngle' />
+            </xfdu:contentUnit>
+
+            <xfdu:contentUnit
+                unitType='Metadata Unit'
+                textInfo='View Zenith Angle (VZA)'
+                repID='geometryDataSchema'>
+                <dataObjectPointer
+                    dataObjectID='viewZenithAngle' />
+            </xfdu:contentUnit>
+
+            <xfdu:contentUnit
+                unitType='Metadata Unit'
+                textInfo='Solar Azimuth Angle (SAA)'
+                repID='geometryDataSchema'>
+                <dataObjectPointer
+                    dataObjectID='solarAzimuthAngle' />
+            </xfdu:contentUnit>
+
+            <xfdu:contentUnit
+                unitType='Metadata Unit'
+                textInfo='Solar Zenith Angle (SZA)'
+                repID='geometryDataSchema'>
+                <dataObjectPointer
+                    dataObjectID='solarZenithAngle' />
+            </xfdu:contentUnit>
+
+       </xfdu:contentUnit>
+
+    </informationPackageMap>
+
+
+    <!-- ========================================
+         METADATA OBJECT SECTION
+         ======================================== -->
+    <metadataSection>
+
+        <!-- PRODUCT GENERAL METADATA =========== -->
+        <!-- Platform Description -->
+        <metadataObject
+            ID='platform'
+            classification='DESCRIPTION'
+            category='DMD'>
+            <metadataWrap
+                textinfo='Platform Description'
+                vocabularyName='SAFE'
+                mimeType='text/xml'>
+                <xmlData>
+                    <safe:platform>
+                        <!-- Platform Identification -->
+                        <safe:nssdcIdentifier>YYYY-XXXX</safe:nssdcIdentifier>
+                        <safe:familyName>SENTINEL</safe:familyName>
+                        <safe:Number>3A</safe:Number>
+                        <!-- Instrument Identification -->
+                        <safe:instrument>
+                            <safe:familyName abbreviation='SYN'>
+                                OCLI and SLSTR synergy
+                            </safe:familyName>
+                        </safe:instrument>
+                    </safe:platform>
+                </xmlData>
+            </metadataWrap>
+        </metadataObject>
+
+        <!-- Processing -->
+        <metadataObject
+            ID='processing'
+            classification='PROVENANCE'
+            category='PDI'>
+            <metadataWrap
+                textinfo='Processing Information'
+                vocabularyName='SAFE'
+                mimeType='text/xml'>
+                <xmlData>
+                    <safe:processing
+                        name='L2 Processing'
+                        start='${processing-start-time}'>
+                        <safe:facility
+                            country='TBD'
+                            name='TBD'
+                            organisation='TBD'
+                            site='TBD'>
+                            <safe:software
+                                name='TBD'
+                                version='TBD' />
+                        </safe:facility>
+                        <safe:resource
+                            name='TBD'
+                            role='Applicable Document'>
+                        </safe:resource>
+                        <safe:resource
+                            name='TBD'
+                            role='Input Data'>
+                            <safe:processing
+                                name='L1B Processing'
+                                start='TBD'>
+                                <safe:facility
+                                    country='TBD'
+                                    name='TBD'
+                                    organisation='TBD'
+                                    site='TBD'>
+                                    <safe:software
+                                        name='TBD'
+                                        version='TBD' />
+                                </safe:facility>
+                            </safe:processing>
+                        </safe:resource>
+                        <safe:resource
+                            name='S3__SY_2_VPCPAX.nc'
+                            role='Auxiliary Data' />
+                        <safe:resource
+                            name='S3__SY_2_VPRTAX.nc'
+                            role='Auxiliary Data' />
+                        <safe:resource
+                            name='S3__SY_2_VPSRAX.nc'
+                            role='Auxiliary Data' />
+                        <safe:resource
+                            name='S3__SY_2_VSCPAX.nc'
+                            role='Auxiliary Data' />
+                        <safe:resource
+                            name='S3__SY_2_VSRTAX.nc'
+                            role='Auxiliary Data' />
+                    </safe:processing>
+                </xmlData>
+            </metadataWrap>
+        </metadataObject>
+
+        <!-- Acquisition Period -->
+        <metadataObject
+            ID='acquisitionPeriod'
+            classification='DESCRIPTION'
+            category='DMD'>
+            <metadataWrap
+                textInfo='Acquisition Period'
+                vocabularyName='SAFE'
+                mimeType='text/xml'>
+                <xmlData>
+                    <safe:acquisitionPeriod>
+                        <safe:startTime>2013-06-21T10:09:20</safe:startTime>
+                        <safe:stopTime>2013-06-21T10:14:13</safe:stopTime>
+                    </safe:acquisitionPeriod>
+                </xmlData>
+            </metadataWrap>
+        </metadataObject>
+
+
+        <!-- MEASUREMENT METADATA =============== -->
+
+            <!-- None Defined for SYN in IODD Part 0 -->
+
+        <!-- ANNOTATION METADATA COMPONENTS ===== -->
+
+
+        <metadataObject
+            ID='viewAzimuthAngle'
+            repID='geometryDataSchema'>
+            <byteStream mimeType='application/octetstream'>
+                <fileLocation
+                    locatorType='URL'
+                    href='vaa.nc' />
+                <checksum checksumName='MD5'>
+                    ${checksum-vaa.nc}
+                </checksum>
+            </byteStream>
+        </metadataObject>
+
+        <metadataObject
+            ID='viewZenithAngle'
+            repID='geometryDataSchema'>
+            <byteStream mimeType='application/octetstream'>
+                <fileLocation
+                    locatorType='URL'
+                    href='vza.nc' />
+                <checksum checksumName='MD5'>
+                    ${checksum-vza.nc}
+                </checksum>
+            </byteStream>
+        </metadataObject>
+
+        <metadataObject
+            ID='solarAzimuthAngle'
+            repID='geometryDataSchema'>
+            <byteStream mimeType='application/octetstream'>
+                <fileLocation
+                    locatorType='URL'
+                    href='saa.nc' />
+                <checksum checksumName='MD5'>
+                    ${checksum-saa.nc}
+                </checksum>
+            </byteStream>
+        </metadataObject>
+
+        <metadataObject
+            ID='solarZenithAngle'
+            repID='geometryDataSchema'>
+            <byteStream mimeType='application/octetstream'>
+                <fileLocation
+                    locatorType='URL'
+                    href='sza.nc' />
+                <checksum checksumName='MD5'>
+                    ${checksum-sza.nc}
+                </checksum>
+            </byteStream>
+        </metadataObject>
+
+        <!-- XML SCHEMA FOR DATA COMPONENTS ===== -->
+
+        <metadataObject
+            ID='measurementDataSchema'
+            classification='SYNTAX'
+            category='REP'>
+            <metadataReference
+                locatorType='URL'
+                href='schema/measurementDataSchema.xsd'
+                vocabularyName='SDF'
+                mimeType='text/xml' />
+        </metadataObject>
+
+        <metadataObject
+            ID='geometryDataSchema'
+            classification='SYNTAX'
+            category='REP'>
+            <metadataReference
+                locatorType='URL'
+                href='schema/geometryDataSchema.xsd'
+                vocabularyName='SDF'
+                mimeType='text/xml' />
+        </metadataObject>
+
+        <metadataObject
+            ID='tiepointsSchema'
+            classification='SYNTAX'
+            category='REP'>
+            <metadataReference
+                locatorType='URL'
+                href='schema/tiepointsSchema.xsd'
+                vocabularyName='SDF'
+                mimeType='text/xml' />
+        </metadataObject>
+
+        <metadataObject
+            ID='statusFlagsSchema'
+            classification='SYNTAX'
+            category='REP'>
+            <metadataReference
+                locatorType='URL'
+                href='schema/statusFlagsSchema.xsd'
+                vocabularyName='SDF'
+                mimeType='text/xml' />
+        </metadataObject>
+
+    </metadataSection>
+
+    <!-- ========================================
+         DATA OBJECT SECTION
+         ======================================== -->
+    <dataObjectSection>
+
+        <!-- DATA COMPONENTS ==================== -->
+        <dataObject
+            ID='toaReflectanceB0'
+            repID='measurementDataSchema'>
+            <byteStream mimeType='application/octetstream'>
+                <fileLocation
+                    locatorType='URL'
+                    href='b0.nc' />
+                <checksum checksumName='MD5'>
+                    ${checksum-b0.nc}
+                </checksum>
+            </byteStream>
+        </dataObject>
+
+        <dataObject
+            ID='toaReflectanceB2'
+            repID='measurementDataSchema'>
+            <byteStream mimeType='application/octetstream'>
+                <fileLocation
+                    locatorType='URL'
+                    href='b2.nc' />
+                <checksum checksumName='MD5'>
+                    ${checksum-b2.nc}
+                </checksum>
+            </byteStream>
+        </dataObject>
+
+        <dataObject
+            ID='toaReflectanceB3'
+            repID='measurementDataSchema'>
+            <byteStream mimeType='application/octetstream'>
+                <fileLocation
+                    locatorType='URL'
+                    href='b3.nc' />
+                <checksum checksumName='MD5'>
+                    ${checksum-b3.nc}
+                </checksum>
+            </byteStream>
+        </dataObject>
+
+        <dataObject
+            ID='toaReflectanceMIR'
+            repID='measurementDataSchema'>
+            <byteStream mimeType='application/octetstream'>
+                <fileLocation
+                    locatorType='URL'
+                    href='mir.nc' />
+                <checksum checksumName='MD5'>
+                    ${checksum-mir.nc}
+                </checksum>
+            </byteStream>
+        </dataObject>
+
+        <!--  ANNOTATION COMPONENTS ============= -->
+
+        <dataObject
+            ID='ozoneColumn'
+            repID='tiepointsSchema'>
+            <byteStream mimeType='application/octetstream'>
+                <fileLocation
+                    locatorType='URL'
+                    href='og.nc' />
+                <checksum checksumName='MD5'>
+                    ${checksum-og.nc}
+                </checksum>
+            </byteStream>
+        </dataObject>
+
+        <dataObject
+            ID='waterVapourColumn'
+            repID='tiepointsSchema'>
+            <byteStream mimeType='application/octetstream'>
+                <fileLocation
+                    locatorType='URL'
+                    href='wvg.nc' />
+                <checksum checksumName='MD5'>
+                    ${checksum-wvg.nc}
+                </checksum>
+            </byteStream>
+        </dataObject>
+
+        <dataObject
+            ID='aerosolOpticalDepth'
+            repID='tiepointsSchema'>
+            <byteStream mimeType='application/octetstream'>
+                <fileLocation
+                    locatorType='URL'
+                    href='ag.nc' />
+                <checksum checksumName='MD5'>
+                    ${checksum-ag.nc}
+                </checksum>
+            </byteStream>
+        </dataObject>
+
+        <dataObject
+            ID='pixelStatusFlags'
+            repID='statusFlagsSchema'>
+            <byteStream mimeType='application/octetstream'>
+                <fileLocation
+                    locatorType='URL'
+                    href='sm.nc' />
+                <checksum checksumName='MD5'>
+                    ${checksum-sm.nc}
+                </checksum>
+            </byteStream>
+        </dataObject>
+
+        <dataObject
+            ID='viewAzimuthAngle'
+            repID='geometryDataSchema'>
+            <byteStream mimeType='application/octetstream'>
+                <fileLocation
+                    locatorType='URL'
+                    href='vaa.nc' />
+                <checksum checksumName='MD5'>
+                    ${checksum-vaa.nc}
+                </checksum>
+            </byteStream>
+        </dataObject>
+
+        <dataObject
+            ID='viewZenithAngle'
+            repID='geometryDataSchema'>
+            <byteStream mimeType='application/octetstream'>
+                <fileLocation
+                    locatorType='URL'
+                    href='vza.nc' />
+                <checksum checksumName='MD5'>
+                    ${checksum-vza.nc}
+                </checksum>
+            </byteStream>
+        </dataObject>
+
+        <dataObject
+            ID='solarAzimuthAngle'
+            repID='geometryDataSchema'>
+            <byteStream mimeType='application/octetstream'>
+                <fileLocation
+                    locatorType='URL'
+                    href='saa.nc' />
+                <checksum checksumName='MD5'>
+                    ${checksum-saa.nc}
+                </checksum>
+            </byteStream>
+        </dataObject>
+
+        <dataObject
+            ID='solarZenithAngle'
+            repID='geometryDataSchema'>
+            <byteStream mimeType='application/octetstream'>
+                <fileLocation
+                    locatorType='URL'
+                    href='sza.nc' />
+                <checksum checksumName='MD5'>
+                    ${checksum-sza.nc}
+                </checksum>
+            </byteStream>
+        </dataObject>
+
+    </dataObjectSection>
+
+</xfdu:XFDU>

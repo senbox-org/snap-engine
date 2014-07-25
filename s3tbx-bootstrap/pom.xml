@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.esa.s3tbx</groupId>
+        <artifactId>s3tbx</artifactId>
+        <version>0.6.0</version>
+    </parent>
+
+    <packaging>jar</packaging>
+
+    <artifactId>s3tbx-bootstrap</artifactId>
+    <name>Sentinel-3 Toolbox Bootstrap</name>
+    <description>Provides the bootstrap classpath for all Sentinel-3 Toolbox modules</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.esa.s3tbx</groupId>
+            <artifactId>s3tbx-reader</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
+</project>

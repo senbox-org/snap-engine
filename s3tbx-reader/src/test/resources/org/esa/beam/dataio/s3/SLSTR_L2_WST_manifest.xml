@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- manually written, for unit testing only! no manifest files were included in current WCT/WST test packages! -->
+
+<!-- SENTINEL 3 SLSTR WST Level 2 archive
+This document is a sample manifest file of a SAFE archive. -->
+
+<xfdu:XFDU xmlns:xfdu='urn:ccsds:schema:xfdu:1'
+           xmlns:safe='http://www.esa.int/safe/1.2'
+
+           version='esa/safe/1.2/sentinel-3/slstr/wct/level-2'>
+
+    <!-- ============================================ 
+      INFORMATION PACKAGE MAP SECTION
+   ============================================ -->
+    <informationPackageMap>
+        <xfdu:contentUnit
+                unitType='Sentinel 3 Information Package'
+                textInfo='Sentinel 3 SLST Level 2 WST'
+                pdiID='processing'
+                dmdID='acquisitionPeriod platform'>
+
+            <!-- Measurement Data Sets -->
+            <xfdu:contentUnit
+                    unitType='Measurement Data Unit'
+                    textInfo='L2P SST'
+                    dmdID=''
+                    repID='L2Pschema'>
+                <dataObjectPointer
+                        dataObjectID='L2Pdata'/>
+            </xfdu:contentUnit>
+
+            <!-- Annotation Data Set -->
+            <!-- none -->
+
+        </xfdu:contentUnit>
+
+    </informationPackageMap>
+
+
+    <!-- ========================================
+   METADATA OBJECT SECTION
+   ======================================== -->
+    <metadataSection>
+
+        <!-- PRODUCT GENERAL METADATA =========== -->
+        <!-- Platform Description -->
+        <metadataObject
+                ID='platform'
+                classification='DESCRIPTION'
+                category='DMD'>
+            <metadataWrap
+                    textinfo='Platform Description'
+                    vocabularyName='SAFE'
+                    mimeType='text/xml'>
+                <xmlData>
+                    <safe:platform>
+                        <!-- Platform Identification -->
+                        <safe:nssdcIdentifier>YYYY-XXXX</safe:nssdcIdentifier>
+                        <safe:familyName>SENTINEL</safe:familyName>
+                        <safe:Number>3A</safe:Number>
+                        <!-- Instrument Identification -->
+                        <safe:instrument>
+                            <safe:familyName abbreviation='SLSTR'>
+                                Sea Land Surface Temperature Radiometer
+                            </safe:familyName>
+                        </safe:instrument>
+                    </safe:platform>
+                </xmlData>
+            </metadataWrap>
+        </metadataObject>
+
+        <!-- Processing -->
+        <metadataObject
+                ID='processing'
+                classification='PROVENANCE'
+                category='PDI'>
+            <metadataWrap
+                    textinfo='Processing Information'
+                    vocabularyName='SAFE'
+                    mimeType='text/xml'>
+                <xmlData>
+                    <safe:processing
+                            name='L2 Processing'
+                            start='2011-10-25T16:30:20Z'>
+                        <safe:facility
+                                country='UK'
+                                name='ARGANS'
+                                organisation='ARGANS'
+                                site='Plymouth'>
+                            <safe:software
+                                    name='slstr'
+                                    version='v0.1'/>
+                        </safe:facility>
+                        <safe:resource
+                                name='S3-L2-SD-07-T-RAL-DPM_DetailedProcessingModel_v2.4-110527'
+                                role='Applicable Document'>
+                        </safe:resource>
+                        <safe:resource
+                                name='Test Data Set'
+                                role='Input Data'>
+                            <safe:processing
+                                    name='L1B Processing'
+                                    start='2011-10-25T10:01:11Z'>
+                                <safe:facility
+                                        country='UK'
+                                        name='RAL'
+                                        organisation='RAL'>
+                                    <safe:software
+                                            name=''
+                                            version=''/>
+                                </safe:facility>
+                            </safe:processing>
+                        </safe:resource>
+                        <safe:resource
+                                name='BP-L2_com_6_12-1_att.xml'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='BP-L2_l2p_5_5-1_att.xml'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='BP-L2_sst_6_2-1_att.xml'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='D2_coeff_aux.cdl'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='D2_coeff_aux.nc'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='D2_SST_att.xml'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='D3_coeff_aux.cdl'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='D3_coeff_aux.nc'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='D3_SST_att.xml'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='L2P_SDI2_aux.cdl'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='L2P_SDI2_aux.nc'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='L2P_SDI3_aux.cdl'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='L2P_SDI3_aux.nc'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='L2P_SSES_aux.cdl'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='L2P_SSES_aux.nc'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='L2P_SST_att.xml'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='L2P_SST_aux.cdl'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='L2P_SST_aux.nc'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='L4_SST_aux.cdl'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='L4_SST_aux.nc'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='leap_seconds_aux.cdl'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='leap_seconds_aux.nc'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='N2_coeff_aux.cdl'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='N2_coeff_aux.nc'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='N2_SST_att.xml'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='N3_coeff_aux.cdl'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='N3_coeff_aux.nc'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='N3_SST_att.xml'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='N3R_coeff_aux.cdl'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='N3R_coeff_aux.nc'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='N3R_SST_att.xml'
+                                role='Auxiliary Data'/>
+                    </safe:processing>
+                </xmlData>
+            </metadataWrap>
+        </metadataObject>
+
+        <!-- Acquisition Period -->
+        <metadataObject
+                ID='acquisitionPeriod'
+                classification='DESCRIPTION'
+                category='DMD'>
+            <metadataWrap
+                    textInfo='Acquisition Period'
+                    vocabularyName='SAFE'
+                    mimeType='text/xml'>
+                <xmlData>
+                    <safe:acquisitionPeriod>
+                        <safe:startTime>2007-09-10T09:51:30.389847Z</safe:startTime>
+                        <safe:stopTime>2007-09-10T09:54:41.864790Z</safe:stopTime>
+                    </safe:acquisitionPeriod>
+                </xmlData>
+            </metadataWrap>
+        </metadataObject>
+
+
+        <!-- MEASUREMENT METADATA =============== -->
+
+        <!-- None Defined for SLSTR in IODD Part 0 -->
+
+        <!-- ANNOTATION METADATA COMPONENTS ===== -->
+        <metadataObject
+                ID='obliqueFlags'
+                classification='DESCRIPTION'
+                category='DMD'>
+            <dataObjectPointer
+                    dataObjectID='obliqueFlagsAnnotation'/>
+        </metadataObject>
+
+        <metadataObject
+                ID='obliqueSolarViewGeometry'
+                classification='DESCRIPTION'
+                category='DMD'>
+            <dataObjectPointer
+                    dataObjectID='obliqueSolarViewGeometryAnnotation'/>
+        </metadataObject>
+
+        <metadataObject
+                ID='nadirSolarViewGeometry'
+                classification='DESCRIPTION'
+                category='DMD'>
+            <dataObjectPointer
+                    dataObjectID='nadirSolarViewGeometryAnnotation'/>
+        </metadataObject>
+
+        <metadataObject
+                ID='geodeticTiepointCoordinates'
+                classification='DESCRIPTION'
+                category='DMD'>
+            <dataObjectPointer
+                    dataObjectID='geodeticTiepointCoordinatesAnnotation'/>
+        </metadataObject>
+
+        <!-- XML SCHEMA FOR DATA COMPONENTS ===== -->
+
+        <metadataObject
+                ID='L2Pschema'
+                classification='SYNTAX'
+                category='REP'>
+            <metadataReference
+                    locatorType='URL'
+                    href='schema/L2P.xsd'
+                    vocabularyName='SDF'
+                    mimeType='text/xml'/>
+        </metadataObject>
+
+    </metadataSection>
+
+
+    <!-- ========================================
+   DATA OBJECT SECTION
+   ======================================== -->
+    <dataObjectSection>
+
+        <!-- DATA COMPONENTS ==================== -->
+        <dataObject
+                ID='L2Pdata'
+                repID='L2Pschema'>
+            <byteStream mimeType='application/octetstream'>
+                <fileLocation
+                        locatorType='URL'
+                        href='L2P_SST_in.nc'/>
+                <checksum checksumName='MD5'>
+                    24396a21013dc67ccfcf6fa564f19313
+                </checksum>
+            </byteStream>
+        </dataObject>
+
+        <!-- VIRTUAL DATA COMPONENTS ============ -->
+        <!--none-->
+
+
+        <!--  ANNOTATION COMPONENTS ============= -->
+        <!--none-->
+
+    </dataObjectSection>
+
+</xfdu:XFDU>
+    
