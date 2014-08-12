@@ -26,6 +26,7 @@ import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.ColorPaletteDef;
 import org.esa.beam.framework.datamodel.ImageInfo;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.util.logging.BeamLogManager;
 import ucar.ma2.Array;
 import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
@@ -45,9 +46,12 @@ public class BeamImageInfoPart extends ProfilePartIO {
     public void decode(ProfileReadContext ctx, Product p) throws IOException {
         NetcdfFile netcdfFile = ctx.getNetcdfFile();
         for (Band band : p.getBands()) {
-            String variableName = ReaderUtils.getVariableName(band);
-            Variable variable = netcdfFile.getRootGroup().findVariable(variableName);
-            readImageInfo(variable, band);
+            Variable variable = ReaderUtils.getVariable(netcdfFile, band);
+            if (variable != null) {
+                readImageInfo(variable, band);
+            } else {
+                BeamLogManager.getSystemLogger().warning("Variable for band '" + band.getName() + "' could not be found unexpectedly.");
+            }
         }
     }
 

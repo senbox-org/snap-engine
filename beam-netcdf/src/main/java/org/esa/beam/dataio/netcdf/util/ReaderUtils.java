@@ -16,10 +16,12 @@
 
 package org.esa.beam.dataio.netcdf.util;
 
+import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.datamodel.RasterDataNode;
 import ucar.ma2.Array;
 import ucar.nc2.Attribute;
+import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 import ucar.nc2.iosp.netcdf3.N3iosp;
 
@@ -91,5 +93,18 @@ public class ReaderUtils {
         return name;
     }
 
+    public static Variable getVariable(NetcdfFile netcdfFile, Band band) {
+        String variableName = getVariableName(band);
+        Variable variable = netcdfFile.getRootGroup().findVariable(variableName);
+        if (variable == null) {
+            for (Variable var : netcdfFile.getRootGroup().getVariables()) {
+                Attribute originalName = var.findAttribute(Constants.ORIG_NAME_ATT_NAME);
+                if (originalName != null) {
+                    variable = netcdfFile.getRootGroup().findVariable(originalName.getStringValue());
+                }
+            }
+        }
+        return variable;
+    }
 }
 
