@@ -181,10 +181,10 @@ public abstract class SlstrProductFactory extends AbstractProductFactory {
         TiePointGrid latGrid = null;
         TiePointGrid lonGrid = null;
         for (final TiePointGrid grid : targetProduct.getTiePointGrids()) {
-            if (latGrid == null && grid.getName().endsWith("latitude")) {
+            if (latGrid == null && grid.getName().endsWith("latitude_tx")) {
                 latGrid = grid;
             }
-            if (lonGrid == null && grid.getName().endsWith("longitude")) {
+            if (lonGrid == null && grid.getName().endsWith("longitude_tx")) {
                 lonGrid = grid;
             }
         }
