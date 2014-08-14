@@ -16,7 +16,6 @@ package org.esa.beam.dataio.s3;/*
 
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.dataio.ProductReader;
-import org.esa.beam.framework.dataio.ProductSubsetDef;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.CrsGeoCoding;
 import org.esa.beam.framework.datamodel.Mask;
@@ -132,7 +131,7 @@ public abstract class AbstractProductFactory implements ProductFactory {
         addSpecialVariables(masterProduct, targetProduct);
         setMasks(targetProduct);
         setTimes(targetProduct);
-        if (targetProduct.getGeoCoding() == null) {
+        if (targetProduct.getSceneGeoCoding() == null) {
             setGeoCoding(targetProduct);
         }
         final Product[] sourceProducts = openProductList.toArray(new Product[openProductList.size()]);
@@ -239,8 +238,13 @@ public abstract class AbstractProductFactory implements ProductFactory {
             final Map<String, String> mapping = new HashMap<String, String>();
             for (final Band sourceBand : sourceProduct.getBands()) {
                 final RasterDataNode targetNode;
-                if (sourceBand.getSceneRasterWidth() == w && sourceBand.getSceneRasterHeight() == h) {
-                    targetNode = addBand(sourceBand, targetProduct);
+                if (sourceBand.getRasterWidth() == w && sourceBand.getRasterHeight() == h) {
+                    String sourceBandName = sourceBand.getName();
+                    Band targetBand = new Band(sourceBandName, sourceBand.getDataType(), w, h);
+                    ProductUtils.copyRasterDataNodeProperties(sourceBand, targetBand);
+                    targetBand.setSourceImage(sourceBand.getSourceImage());
+                    targetProduct.addBand(targetBand);
+                    targetNode = targetBand;
                 } else {
                     targetNode = addSpecialNode(masterProduct, sourceBand, targetProduct);
                 }

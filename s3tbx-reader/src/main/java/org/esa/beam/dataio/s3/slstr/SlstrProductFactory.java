@@ -20,12 +20,16 @@ import org.esa.beam.dataio.s3.Sentinel3ProductReader;
 import org.esa.beam.dataio.s3.SourceImageScaler;
 import org.esa.beam.dataio.s3.util.S3NetcdfReader;
 import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.MetadataElement;
+import org.esa.beam.framework.datamodel.GeoCoding;
+import org.esa.beam.framework.datamodel.ImageGeometry;
+import org.esa.beam.framework.datamodel.ImageGeometryTransform;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.RasterDataNode;
 import org.esa.beam.framework.datamodel.TiePointGeoCoding;
 import org.esa.beam.framework.datamodel.TiePointGrid;
 import org.esa.beam.jai.ImageManager;
+import org.esa.beam.util.Guardian;
+import org.esa.beam.util.ProductUtils;
 
 import javax.media.jai.BorderExtender;
 import javax.media.jai.ImageLayout;
@@ -47,7 +51,7 @@ public abstract class SlstrProductFactory extends AbstractProductFactory {
     }
 
     @Override
-    protected RasterDataNode addSpecialNode(Product masterProduct, Band sourceBand, Product targetProduct) {
+    protected RasterDataNode addSpecialNode(final Product masterProduct, final Band sourceBand, Product targetProduct) {
         final String sourceBandName = sourceBand.getName();
         final int sourceBandNameLength = sourceBandName.length();
         String gridIndex = sourceBandName;
@@ -61,15 +65,25 @@ public abstract class SlstrProductFactory extends AbstractProductFactory {
             if (gridIndex.startsWith("t")) {
                 return copyTiePointGrid(sourceBand, targetProduct, sourceStartOffset, sourceTrackOffset, sourceResolutions);
             } else {
-                final Band targetBand = copyBand(sourceBand, targetProduct, false);
-                final float[] offsets = getOffsets(sourceStartOffset, sourceTrackOffset, sourceResolutions);
-                final RenderedImage sourceImage = createSourceImage(masterProduct, sourceBand, offsets, targetBand,
-                                                                    sourceResolutions);
-                targetBand.setSourceImage(sourceImage);
+                final Band targetBand = addBand(sourceBand, targetProduct);
+                targetBand.setImageGeometryTransform(new ImageGeometryTransform() {
+                    @Override
+                    public RenderedImage transform(RenderedImage source, GeoCoding sourceGeoCoding, ImageGeometry targetGeometry) {
+                        final float[] offsets = getOffsets(sourceStartOffset, sourceTrackOffset, sourceResolutions);
+                        return createSourceImage(masterProduct, sourceBand, offsets, targetBand, sourceResolutions);
+                    }
+                });
                 return targetBand;
             }
         }
         return sourceBand;
+    }
+
+    private Band addBand(Band sourceBand, Product targetProduct) {
+        final Band band = new Band(sourceBand.getName(), sourceBand.getDataType(), sourceBand.getRasterWidth(), sourceBand.getRasterHeight());
+        targetProduct.addBand(band);
+        ProductUtils.copyRasterDataNodeProperties(sourceBand, band);
+        return band;
     }
 
     protected abstract Integer getStartOffset(String gridIndex);
