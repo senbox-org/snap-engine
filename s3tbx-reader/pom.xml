@@ -27,6 +27,7 @@
 
     <packaging>jar</packaging>
     <artifactId>s3tbx-reader</artifactId>
+    <name>Sentinel-3 Reader</name>
     <description>
         This module enables the Sentinel Toolbox to read the following Sentinel-3 data products: OLCI L1b and L2, SLSTR L1b and L2, Synergy L2 and VGT.
     </description>

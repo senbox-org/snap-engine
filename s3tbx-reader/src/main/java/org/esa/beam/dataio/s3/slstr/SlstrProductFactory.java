@@ -18,6 +18,7 @@ import com.bc.ceres.glevel.MultiLevelImage;
 import org.esa.beam.dataio.s3.AbstractProductFactory;
 import org.esa.beam.dataio.s3.Sentinel3ProductReader;
 import org.esa.beam.dataio.s3.SourceImageScaler;
+import org.esa.beam.dataio.s3.util.S3NetcdfReader;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
@@ -32,6 +33,7 @@ import javax.media.jai.Interpolation;
 import javax.media.jai.JAI;
 import java.awt.RenderingHints;
 import java.awt.image.RenderedImage;
+import java.io.File;
 import java.io.IOException;
 
 public abstract class SlstrProductFactory extends AbstractProductFactory {
@@ -220,4 +222,10 @@ public abstract class SlstrProductFactory extends AbstractProductFactory {
         return patternBuilder.toString();
     }
 
+    @Override
+    protected Product readProduct(String fileName) throws IOException {
+        final File file = new File(getInputFileParentDirectory(), fileName);
+        final S3NetcdfReader slstrNetcdfReader = SlstrNetcdfReaderFactory.createSlstrNetcdfReader(file);
+        return slstrNetcdfReader.readProduct();
+    }
 }

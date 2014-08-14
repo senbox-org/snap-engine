@@ -61,4 +61,8 @@ public class SlstrWstProductFactory extends SlstrSstProductFactory {
     @Override
     protected void configureTargetNode(Band sourceBand, RasterDataNode targetNode) {}
 
+    @Override
+    protected void setAutoGrouping(Product[] sourceProducts, Product targetProduct) {
+        targetProduct.setAutoGrouping("brightness_temperature:nedt");
+    }
 }

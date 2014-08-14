@@ -286,11 +286,11 @@ public abstract class AbstractProductFactory implements ProductFactory {
 
     private void readProducts(List<String> fileNames) throws IOException {
         for (final String fileName : fileNames) {
-            readProduct(fileName);
+            openProductList.add(readProduct(fileName));
         }
     }
 
-    private Product readProduct(String fileName) throws IOException {
+    protected Product readProduct(String fileName) throws IOException {
         final File file = new File(getInputFileParentDirectory(), fileName);
         final ProductReader reader = ProductIO.getProductReaderForInput(file);
         if (reader == null) {
@@ -309,7 +309,6 @@ public abstract class AbstractProductFactory implements ProductFactory {
         if (product.getNumBands() > 0) {
             product.setNumResolutionsMax(product.getBandAt(0).getSourceImage().getModel().getLevelCount());
         }
-        openProductList.add(product);
         return product;
     }
 
