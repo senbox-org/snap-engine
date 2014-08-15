@@ -45,7 +45,7 @@ public class BeamImageInfoPart extends ProfilePartIO {
     public void decode(ProfileReadContext ctx, Product p) throws IOException {
         NetcdfFile netcdfFile = ctx.getNetcdfFile();
         for (Band band : p.getBands()) {
-            String variableName = ReaderUtils.getVariableName(band);
+            String variableName = ReaderUtils.getVariableName(netcdfFile, band);
             Variable variable = netcdfFile.getRootGroup().findVariable(variableName);
             readImageInfo(variable, band);
         }

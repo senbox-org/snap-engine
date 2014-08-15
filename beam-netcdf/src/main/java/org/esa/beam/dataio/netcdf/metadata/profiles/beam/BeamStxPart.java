@@ -27,6 +27,7 @@ import org.esa.beam.framework.datamodel.Stx;
 import org.esa.beam.framework.datamodel.StxFactory;
 import ucar.ma2.Array;
 import ucar.nc2.Attribute;
+import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
 import java.io.IOException;
@@ -42,9 +43,10 @@ public class BeamStxPart extends ProfilePartIO {
 
     @Override
     public void decode(ProfileReadContext ctx, Product p) throws IOException {
+        NetcdfFile netcdfFile = ctx.getNetcdfFile();
         for (Band band : p.getBands()) {
-            String variableName = ReaderUtils.getVariableName(band);
-            final Variable variable = ctx.getNetcdfFile().getRootGroup().findVariable(variableName);
+            String variableName = ReaderUtils.getVariableName(netcdfFile, band);
+            final Variable variable = netcdfFile.getRootGroup().findVariable(variableName);
 
             final Attribute statistics = variable.findAttributeIgnoreCase(STATISTICS);
             final Attribute sampleFrequencies = variable.findAttributeIgnoreCase(SAMPLE_FREQUENCIES);

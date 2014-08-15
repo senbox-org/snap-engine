@@ -28,6 +28,7 @@ import org.esa.beam.framework.datamodel.IndexCoding;
 import org.esa.beam.framework.datamodel.MetadataAttribute;
 import org.esa.beam.framework.datamodel.Product;
 import ucar.nc2.Attribute;
+import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
 import java.io.IOException;
@@ -42,8 +43,9 @@ public class BeamIndexCodingPart extends ProfilePartIO {
     public void decode(ProfileReadContext ctx, Product p) throws IOException {
         final Band[] bands = p.getBands();
         for (Band band : bands) {
-            String variableName = ReaderUtils.getVariableName(band);
-            final Variable variable = ctx.getNetcdfFile().getRootGroup().findVariable(variableName);
+            NetcdfFile netcdfFile = ctx.getNetcdfFile();
+            String variableName = ReaderUtils.getVariableName(netcdfFile, band);
+            final Variable variable = netcdfFile.getRootGroup().findVariable(variableName);
             final IndexCoding indexCoding = readIndexCoding(variable, band.getName() + "_index_coding");
             if (indexCoding != null) {
                 p.getIndexCodingGroup().add(indexCoding);
