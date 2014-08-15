@@ -35,15 +35,15 @@ class OlciTieMeteoReader extends S3NetcdfReader {
                 if (variable.findDimensionIndex("wind_vectors") != -1) {
                     final Dimension Dimension = variable.getDimension(variable.findDimensionIndex("wind_vectors"));
                     for (int i = 0; i < Dimension.getLength(); i++) {
-                        createBand(product, variable, variableName + "_vector" + (i + 1));
+                        addVariableAsBand(product, variable, variableName + "_vector" + (i + 1));
                     }
                 } else if (variable.findDimensionIndex("tie_pressure_levels") != -1) {
                     final Dimension Dimension = variable.getDimension(variable.findDimensionIndex("tie_pressure_levels"));
                     for (int i = 0; i < Dimension.getLength(); i++) {
-                        createBand(product, variable, variableName + "_pressure_level" + i);
+                        addVariableAsBand(product, variable, variableName + "_pressure_level" + i);
                     }
                 } else {
-                    createBand(product, variable, variableName);
+                    addVariableAsBand(product, variable, variableName);
                 }
             }
             addVariableMetadata(variable, product);

@@ -112,17 +112,17 @@ public class S3NetcdfReader {
                 if(variable.findDimensionIndex("channel") != - 1) {
                     final Dimension channelDimension = variable.getDimension(variable.findDimensionIndex("channel"));
                     for(int i = 0; i < channelDimension.getLength(); i++) {
-                        createBand(product, variable, variableName + "_channel" + (i + 1));
+                        addVariableAsBand(product, variable, variableName + "_channel" + (i + 1));
                     }
                 } else {
-                    createBand(product, variable, variableName);
+                    addVariableAsBand(product, variable, variableName);
                 }
             }
             addVariableMetadata(variable, product);
         }
     }
 
-    protected void createBand(Product product, Variable variable, String variableName) {
+    protected void addVariableAsBand(Product product, Variable variable, String variableName) {
         int type = DataTypeUtils.getEquivalentProductDataType(variable.getDataType(), false, false);
         final Band band = product.addBand(variableName, type);
         band.setDescription(variable.getDescription());
