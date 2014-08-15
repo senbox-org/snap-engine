@@ -1,9 +1,12 @@
 package org.esa.beam.dataio.s3.util;
 
+import org.esa.beam.dataio.netcdf.util.Constants;
 import org.esa.beam.jai.ResolutionLevel;
 import ucar.ma2.Array;
 import ucar.ma2.InvalidRangeException;
 import ucar.ma2.Section;
+import ucar.nc2.Attribute;
+import ucar.nc2.Variable;
 import ucar.nc2.VariableIF;
 
 import javax.media.jai.PlanarImage;
@@ -17,14 +20,14 @@ import java.io.IOException;
  */
 public class S3ReferencingVariableOpImage extends S3VariableOpImage {
 
-    private final VariableIF referencedIndexVariable;
+    private final Variable referencedIndexVariable;
     private final VariableIF variable;
     private float[] dimensionValues;
 
     //todo use this to display fires in SLSTR L2 LST products when data is available
     public S3ReferencingVariableOpImage(VariableIF variable, int dataBufferType, int sourceWidth, int sourceHeight,
                                         Dimension tileSize, ResolutionLevel level, int dimensionIndex,
-                                        VariableIF referencedIndexVariable, String nameOfReferencingDimension,
+                                        Variable referencedIndexVariable, String nameOfReferencingDimension,
                                         String nameOfDisplayedDimension) {
         super(variable, dataBufferType, sourceWidth, sourceHeight, tileSize, level, "", dimensionIndex);
         this.variable = variable;
@@ -76,13 +79,13 @@ public class S3ReferencingVariableOpImage extends S3VariableOpImage {
             try {
                 final Section section = new Section(origin, shape, stride);
                 referencedValues = referencedIndexVariable.read(section);
-
+                final float noDataValue = getNoDataValue(referencedIndexVariable).floatValue();
                 for(int i = 0; i < referencedValues.getSize(); i++) {
                     final int detectorIndex = referencedValues.getInt(i);
                     if(detectorIndex > - 1) {
                         variableValues.setFloat(i, dimensionValues[detectorIndex]);
                     } else {
-                        variableValues.setFloat(i, 0);
+                        variableValues.setFloat(i, noDataValue);
                     }
                 }
             } catch (Exception e) {
@@ -90,6 +93,32 @@ public class S3ReferencingVariableOpImage extends S3VariableOpImage {
             }
         }
         tile.setDataElements(rectangle.x, rectangle.y, rectangle.width, rectangle.height, transformStorage(variableValues));
+    }
+
+    //copied from CfBandPart
+    private static Number getNoDataValue(Variable variable) {
+        Attribute attribute = variable.findAttribute(Constants.FILL_VALUE_ATT_NAME);
+        if (attribute == null) {
+            attribute = variable.findAttribute(Constants.MISSING_VALUE_ATT_NAME);
+        }
+        if (attribute != null) {
+            return getAttributeValue(attribute);
+        }
+        return null;
+    }
+
+    //copied from CfBandPart
+    private static Number getAttributeValue(Attribute attribute) {
+        if (attribute.isString()) {
+            String stringValue = attribute.getStringValue();
+            if (stringValue.endsWith("b")) {
+                return Byte.parseByte(stringValue.substring(0, stringValue.length() - 1));
+            } else {
+                return Double.parseDouble(stringValue);
+            }
+        } else {
+            return attribute.getNumericValue();
+        }
     }
 
 }
