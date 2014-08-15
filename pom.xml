@@ -34,7 +34,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <beamVersion>[5.0,5.1-SNAPSHOT)</beamVersion>
+        <beamVersion>[0.5-SNAPSHOT,1.0-SNAPSHOT)</beamVersion>
         <outputdir>../../output</outputdir>
     </properties>
 
