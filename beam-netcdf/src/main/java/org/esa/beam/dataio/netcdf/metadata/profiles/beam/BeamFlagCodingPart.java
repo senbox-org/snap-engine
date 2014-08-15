@@ -40,7 +40,7 @@ public class BeamFlagCodingPart extends ProfilePartIO {
     public void decode(ProfileReadContext ctx, Product p) throws IOException {
         final Band[] bands = p.getBands();
         for (Band band : bands) {
-            String variableName = ReaderUtils.getVariableName(band);
+            String variableName = ReaderUtils.getVariableName(ctx.getNetcdfFile(), band);
             final FlagCoding flagCoding = readFlagCoding(ctx, variableName);
             if (flagCoding != null) {
                 p.getFlagCodingGroup().add(flagCoding);

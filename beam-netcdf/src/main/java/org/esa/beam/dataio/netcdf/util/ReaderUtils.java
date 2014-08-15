@@ -16,7 +16,6 @@
 
 package org.esa.beam.dataio.netcdf.util;
 
-import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.datamodel.RasterDataNode;
 import ucar.ma2.Array;
@@ -93,18 +92,20 @@ public class ReaderUtils {
         return name;
     }
 
-    public static Variable getVariable(NetcdfFile netcdfFile, Band band) {
-        String variableName = getVariableName(band);
+    public static String getVariableName(NetcdfFile netcdfFile, RasterDataNode rasterDataNode) {
+        String variableName = getVariableName(rasterDataNode);
         Variable variable = netcdfFile.getRootGroup().findVariable(variableName);
-        if (variable == null) {
+        if (variable != null) {
+            return variable.getFullName();
+        } else {
             for (Variable var : netcdfFile.getRootGroup().getVariables()) {
                 Attribute originalName = var.findAttribute(Constants.ORIG_NAME_ATT_NAME);
-                if (originalName != null) {
-                    variable = netcdfFile.getRootGroup().findVariable(originalName.getStringValue());
+                if (originalName != null && originalName.getStringValue().equals(variableName)) {
+                    return var.getFullName();
                 }
             }
         }
-        return variable;
+        throw new IllegalStateException("NetCDF file '" + netcdfFile.getLocation() + "' contains no variable that can be mapped to raster '" + rasterDataNode.getName() + "'.");
     }
 }
 

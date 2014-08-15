@@ -121,7 +121,7 @@ public class BeamMaskPart extends ProfilePartIO {
     private static void readMaskOverlays(ProfileReadContext ctx, Product p) {
         NetcdfFile netcdfFile = ctx.getNetcdfFile();
         for (Band band : p.getBands()) {
-            String variableName = ReaderUtils.getVariableName(band);
+            String variableName = ReaderUtils.getVariableName(netcdfFile, band);
             final Variable variable = netcdfFile.getRootGroup().findVariable(variableName);
             final Attribute attribute = variable.findAttribute(MASK_OVERLAYS);
             if (attribute != null) {
