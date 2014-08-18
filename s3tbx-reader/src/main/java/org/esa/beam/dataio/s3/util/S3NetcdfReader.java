@@ -10,6 +10,7 @@ import org.esa.beam.framework.datamodel.MetadataAttribute;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.datamodel.RasterDataNode;
 import org.esa.beam.framework.datamodel.SampleCoding;
 import org.esa.beam.framework.datamodel.VirtualBand;
 import org.esa.beam.jai.ImageManager;

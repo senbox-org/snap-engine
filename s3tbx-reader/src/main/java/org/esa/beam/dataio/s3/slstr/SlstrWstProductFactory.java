@@ -65,4 +65,23 @@ public class SlstrWstProductFactory extends SlstrSstProductFactory {
     protected void setAutoGrouping(Product[] sourceProducts, Product targetProduct) {
         targetProduct.setAutoGrouping("brightness_temperature:nedt");
     }
+
+    @Override
+    protected void setUncertaintyBands(Product product) {
+        super.setUncertaintyBands(product);
+        String[] bandNames = new String[]{"sses_bias", "sst_dtime", "sses_standard_deviation", "dt_analysis",
+            "quality_level", "sst_theoretical_error"};
+        String[] roles = new String[]{"bias", "time deviation from reference time", "standard deviation",
+                "deviation from analysis field", "uncertainty"};
+        if(product.containsBand("sea_surface_temperature")) {
+            final Band seaSurfaceTemperatureBand = product.getBand("sea_surface_temperature");
+            for (int i = 0; i < bandNames.length; i++) {
+                String bandName = bandNames[i];
+                if(product.containsBand(bandName)) {
+                    seaSurfaceTemperatureBand.setAncillaryBand(roles[i], product.getBand(bandName));
+                }
+            }
+        }
+    }
+
 }
