@@ -268,16 +268,6 @@ public class S3NetcdfReader {
         return productData;
     }
 
-//    private double[] attributeValuesToDoubleArray(Array attributeValues) {
-//        final Object[] array = (Object[]) attributeValues.copyTo1DJavaArray();
-//        final int length = array.length;
-//        double[] res = new double[length];
-//        for (int i = 0; i < length; i++) {
-//            res[i] = (Double) array[i];
-//        }
-//        return res;
-//    }
-
     protected int getWidth() {
         final Dimension widthDimension = netcdfFile.findDimension("columns");
         if (widthDimension != null) {

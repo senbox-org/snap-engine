@@ -7,11 +7,16 @@ import org.esa.beam.dataio.s3.util.S3VariableOpImage;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.FlagCoding;
 import org.esa.beam.framework.datamodel.IndexCoding;
+import org.esa.beam.framework.datamodel.MetadataAttribute;
+import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.datamodel.VirtualBand;
 import org.esa.beam.jai.ImageManager;
 import org.esa.beam.jai.ResolutionLevel;
+import ucar.ma2.Array;
 import ucar.nc2.Attribute;
+import ucar.nc2.Dimension;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
@@ -76,6 +81,30 @@ public class OlciInstrumentDataReader extends S3NetcdfReader {
         return new S3ReferencingVariableOpImage(variable, bufferType, sourceWidth, sourceHeight, tileSize,
                                      ResolutionLevel.MAXRES, dimensionIndex, detectorIndexVariable, "detectors",
                                      dimensionName);
+    }
+
+    @Override
+    protected void addVariableMetadata(Variable variable, Product product) {
+        super.addVariableMetadata(variable, product);
+        if(variable.getRank() == 2 && variable.getDimension(0).getFullName().equals("bands") &&
+                variable.getDimension(1).getFullName().equals("bands")) {
+            try {
+                final MetadataElement variableElement =
+                        product.getMetadataRoot().getElement("Variable_Attributes").getElement(variable.getFullName());
+                final float[][] covarianceMatrix = (float[][]) variable.read().copyToNDJavaArray();
+                final int length = covarianceMatrix.length;
+                for(int i = 0; i < length; i++) {
+                    final MetadataElement xElement = new MetadataElement("Covariances for band " + (i + 1));
+                    final ProductData covariances = ProductData.createInstance(covarianceMatrix[i]);
+                    final MetadataAttribute covarianceAttribute = new MetadataAttribute("Covariance",
+                                                                                        covariances, true);
+                    xElement.addAttribute(covarianceAttribute);
+                    variableElement.addElement(xElement);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 }
