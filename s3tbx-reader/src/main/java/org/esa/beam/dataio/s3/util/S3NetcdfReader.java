@@ -32,7 +32,6 @@ import java.util.List;
  */
 public class S3NetcdfReader {
 
-    //todo make specific solution for dimension "channel" more generic?
     //todo work better with "channel" metadata - after it is no longer experimental
 
     private static final String product_type = "product_type";
@@ -67,6 +66,22 @@ public class S3NetcdfReader {
         return product;
     }
 
+    protected String[] getSeparatingThirdDimensions() {
+        return new String[0];
+    }
+
+    protected String[] getSuffixesForSeparatingThirdDimensions() {
+        return new String[0];
+    }
+
+    protected String getNameOfRowDimension() {
+        return "rows";
+    }
+
+    protected String getNameOfColumnDimension() {
+        return "columns";
+    }
+
     protected RenderedImage createSourceImage(Band band) {
         final int bufferType = ImageManager.getDataBufferType(band.getDataType());
         final int sourceWidth = band.getSceneRasterWidth();
@@ -74,19 +89,31 @@ public class S3NetcdfReader {
         final java.awt.Dimension tileSize = band.getProduct().getPreferredTileSize();
         final String bandName = band.getName();
         String variableName = bandName;
-        Variable variable;
+        Variable variable = null;
         int dimensionIndex = -1;
         String dimensionName = "";
-        if(bandName.contains("_channel")) {
-            variableName = bandName.substring(0, variableName.indexOf("_channel"));
-            variable = netcdfFile.findVariable(variableName);
-            dimensionName = "channel";
-            dimensionIndex = Integer.parseInt(bandName.substring(bandName.length() - 1)) - 1;
-        } else {
+        final String[] separatingDimensions = getSeparatingThirdDimensions();
+        final String[] suffixesForSeparatingThirdDimensions = getSuffixesForSeparatingThirdDimensions();
+        for(int i = 0; i < separatingDimensions.length; i++) {
+            final String dimension = separatingDimensions[i];
+            final String suffix = suffixesForSeparatingThirdDimensions[i];
+            if(bandName.contains(suffix)) {
+                variableName = bandName.substring(0, variableName.indexOf(suffix) - 1);
+                variable = netcdfFile.findVariable(variableName);
+                dimensionName = dimension;
+                dimensionIndex = Integer.parseInt(bandName.substring(bandName.lastIndexOf("_") + 1)) - 1;
+            }
+        }
+        if(variable == null) {
             variable = netcdfFile.findVariable(variableName);
         }
+        return createImage(variable, bufferType, sourceWidth, sourceHeight, tileSize, dimensionName, dimensionIndex);
+    }
+
+    protected RenderedImage createImage(Variable variable, int bufferType, int sourceWidth, int sourceHeight,
+                                        java.awt.Dimension tileSize, String dimensionName, int dimensionIndex) {
         return new S3VariableOpImage(variable, bufferType, sourceWidth, sourceHeight, tileSize,
-                                        ResolutionLevel.MAXRES, dimensionName, dimensionIndex);
+                                     ResolutionLevel.MAXRES, dimensionName, dimensionIndex);
     }
 
     private void addGlobalMetadata(Product product) {
@@ -107,14 +134,25 @@ public class S3NetcdfReader {
     protected void addBands(Product product) {
         final List<Variable> variables = netcdfFile.getVariables();
         for (final Variable variable : variables) {
-            if (variable.findDimensionIndex("rows") != -1 && variable.findDimensionIndex("columns") != -1) {
+            if (variable.findDimensionIndex(getNameOfRowDimension()) != -1 &&
+                    variable.findDimensionIndex(getNameOfColumnDimension()) != -1) {
                 final String variableName = variable.getFullName();
-                if(variable.findDimensionIndex("channel") != - 1) {
-                    final Dimension channelDimension = variable.getDimension(variable.findDimensionIndex("channel"));
-                    for(int i = 0; i < channelDimension.getLength(); i++) {
-                        addVariableAsBand(product, variable, variableName + "_channel" + (i + 1));
+                final String[] dimensions = getSeparatingThirdDimensions();
+                final String[] suffixes = getSuffixesForSeparatingThirdDimensions();
+                boolean variableHasBeenAdded = false;
+                for (int i = 0; i < dimensions.length; i++) {
+                    String dimensionName = dimensions[i];
+                    if (variable.findDimensionIndex(dimensionName) != -1) {
+                        final Dimension dimension =
+                                variable.getDimension(variable.findDimensionIndex(dimensionName));
+                        for (int j = 0; j < dimension.getLength(); j++) {
+                            addVariableAsBand(product, variable, variableName + "_" + suffixes[i] + "_" +(j + 1));
+                        }
+                        variableHasBeenAdded = true;
+                        break;
                     }
-                } else {
+                }
+                if(!variableHasBeenAdded) {
                     addVariableAsBand(product, variable, variableName);
                 }
             }
@@ -268,16 +306,16 @@ public class S3NetcdfReader {
         return productData;
     }
 
-    protected int getWidth() {
-        final Dimension widthDimension = netcdfFile.findDimension("columns");
+    int getWidth() {
+        final Dimension widthDimension = netcdfFile.findDimension(getNameOfColumnDimension());
         if (widthDimension != null) {
             return widthDimension.getLength();
         }
         return 0;
     }
 
-    protected int getHeight() {
-        final Dimension heightDimension = netcdfFile.findDimension("rows");
+    int getHeight() {
+        final Dimension heightDimension = netcdfFile.findDimension(getNameOfRowDimension());
         if (heightDimension != null) {
             return heightDimension.getLength();
         }

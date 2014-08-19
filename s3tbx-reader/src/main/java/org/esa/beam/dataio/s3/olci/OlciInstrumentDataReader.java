@@ -79,8 +79,8 @@ public class OlciInstrumentDataReader extends S3NetcdfReader {
             variable = getNetcdfFile().findVariable(variableName);
         }
         return new S3ReferencingVariableOpImage(variable, bufferType, sourceWidth, sourceHeight, tileSize,
-                                     ResolutionLevel.MAXRES, dimensionIndex, detectorIndexVariable, "detectors",
-                                     dimensionName);
+                                                ResolutionLevel.MAXRES, dimensionIndex, detectorIndexVariable,
+                                                "detectors", dimensionName);
     }
 
     @Override

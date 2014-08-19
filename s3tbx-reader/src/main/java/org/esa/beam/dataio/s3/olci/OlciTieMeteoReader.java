@@ -1,6 +1,7 @@
 package org.esa.beam.dataio.s3.olci;
 
 import org.esa.beam.dataio.s3.util.S3NetcdfReader;
+import org.esa.beam.dataio.s3.util.S3VariableOpImage;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.MetadataAttribute;
 import org.esa.beam.framework.datamodel.MetadataElement;
@@ -26,56 +27,30 @@ class OlciTieMeteoReader extends S3NetcdfReader {
     }
 
     @Override
-    protected void addBands(Product product) {
-        final NetcdfFile netcdfFile = getNetcdfFile();
-        final List<Variable> variables = netcdfFile.getVariables();
-        for (final Variable variable : variables) {
-            final String variableName = variable.getFullName();
-            if (variable.findDimensionIndex("tie_rows") != -1 && variable.findDimensionIndex("tie_columns") != -1) {
-                if (variable.findDimensionIndex("wind_vectors") != -1) {
-                    final Dimension Dimension = variable.getDimension(variable.findDimensionIndex("wind_vectors"));
-                    for (int i = 0; i < Dimension.getLength(); i++) {
-                        addVariableAsBand(product, variable, variableName + "_vector" + (i + 1));
-                    }
-                } else if (variable.findDimensionIndex("tie_pressure_levels") != -1) {
-                    final Dimension Dimension = variable.getDimension(variable.findDimensionIndex("tie_pressure_levels"));
-                    for (int i = 0; i < Dimension.getLength(); i++) {
-                        addVariableAsBand(product, variable, variableName + "_pressure_level" + i);
-                    }
-                } else {
-                    addVariableAsBand(product, variable, variableName);
-                }
-            }
-            addVariableMetadata(variable, product);
-        }
-
+    protected String[] getSeparatingThirdDimensions() {
+        return new String[]{"wind_vectors", "tie_pressure_levels"};
     }
 
-    protected RenderedImage createSourceImage(Band band) {
-        final int bufferType = ImageManager.getDataBufferType(band.getDataType());
-        final int sourceWidth = band.getSceneRasterWidth();
-        final int sourceHeight = band.getSceneRasterHeight();
-        final java.awt.Dimension tileSize = band.getProduct().getPreferredTileSize();
-        final String bandName = band.getName();
-        String variableName = bandName;
-        Variable variable;
-        int dimensionIndex = -1;
-        String dimensionName = "";
-        if (bandName.contains("_vector")) {
-            variableName = bandName.substring(0, variableName.indexOf("_vector"));
-            variable = getNetcdfFile().findVariable(variableName);
-            dimensionName = "wind_vectors";
-            dimensionIndex = Integer.parseInt(bandName.substring(bandName.length() - 1)) - 1;
-        } else if (bandName.contains("_pressure_level")) {
-            variableName = bandName.substring(0, variableName.indexOf("_pressure_level"));
-            variable = getNetcdfFile().findVariable(variableName);
-            dimensionName = "tie_pressure_levels";
-            dimensionIndex = Integer.parseInt(bandName.substring(bandName.length() - 1)) - 1;
-        } else {
-            variable = getNetcdfFile().findVariable(variableName);
-        }
+    @Override
+    protected String[] getSuffixesForSeparatingThirdDimensions() {
+        return new String[]{"vector", "pressure_level"};
+    }
+
+    @Override
+    protected String getNameOfRowDimension() {
+        return "tie_rows";
+    }
+
+    @Override
+    protected String getNameOfColumnDimension() {
+        return "tie_columns";
+    }
+
+    @Override
+    protected RenderedImage createImage(Variable variable, int bufferType, int sourceWidth, int sourceHeight,
+                                        java.awt.Dimension tileSize, String dimensionName, int dimensionIndex) {
         return new OlciVariableOpImage(variable, bufferType, sourceWidth, sourceHeight, tileSize,
-                                       ResolutionLevel.MAXRES, dimensionName, dimensionIndex);
+                                     ResolutionLevel.MAXRES, dimensionName, dimensionIndex);
     }
 
     @Override
@@ -98,24 +73,6 @@ class OlciTieMeteoReader extends S3NetcdfReader {
                 e.printStackTrace();
             }
         }
-    }
-
-    @Override
-    protected int getWidth() {
-        final Dimension widthDimension = getNetcdfFile().findDimension("tie_columns");
-        if (widthDimension != null) {
-            return widthDimension.getLength();
-        }
-        return 0;
-    }
-
-    @Override
-    protected int getHeight() {
-        final Dimension heightDimension = getNetcdfFile().findDimension("tie_rows");
-        if (heightDimension != null) {
-            return heightDimension.getLength();
-        }
-        return 0;
     }
 
 }
