@@ -1,18 +1,13 @@
 package org.esa.beam.dataio.s3.util;
 
 import org.esa.beam.dataio.netcdf.util.AbstractNetcdfMultiLevelImage;
-import org.esa.beam.dataio.netcdf.util.NetcdfOpImage;
-import org.esa.beam.dataio.s3.olci.OlciInstrumentDataReader;
 import org.esa.beam.framework.datamodel.RasterDataNode;
 import org.esa.beam.jai.ImageManager;
 import org.esa.beam.jai.ResolutionLevel;
-import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
 import java.awt.Dimension;
 import java.awt.image.RenderedImage;
-import java.io.File;
-import java.io.IOException;
 
 /**
  * @author Tonio Fincke

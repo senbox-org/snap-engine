@@ -341,10 +341,7 @@ public abstract class AbstractProductFactory implements ProductFactory {
 
         try {
             return DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(inputStream);
-        } catch (SAXException e) {
-            getLogger().log(Level.SEVERE, msg, e);
-            throw new IOException(msg, e);
-        } catch (ParserConfigurationException e) {
+        } catch (SAXException | ParserConfigurationException e) {
             getLogger().log(Level.SEVERE, msg, e);
             throw new IOException(msg, e);
         }
