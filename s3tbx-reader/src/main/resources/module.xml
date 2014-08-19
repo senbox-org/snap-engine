@@ -32,7 +32,7 @@
 
     <categories>Reader,Sentinel</categories>
 
-    <extension point="beam-ui:actions">
+    <extension point="snap-ui:actions">
         <action>
             <id>importSentinel3Product</id>
             <helpId>importSentinel3Product</helpId>
@@ -51,7 +51,7 @@
         -->
     </extension>
 
-    <extension point="beam-core:rgbProfiles">
+    <extension point="snap-core:rgbProfiles">
         <!-- todo -->
     </extension>
 
