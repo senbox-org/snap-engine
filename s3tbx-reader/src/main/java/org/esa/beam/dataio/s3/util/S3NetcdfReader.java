@@ -164,6 +164,7 @@ public class S3NetcdfReader {
         int type = DataTypeUtils.getEquivalentProductDataType(variable.getDataType(), false, false);
         final Band band = product.addBand(variableName, type);
         band.setDescription(variable.getDescription());
+        band.setUnit(variable.getUnitsString());
         final Attribute fillValueAttribute = variable.findAttribute(fillValue);
         if (fillValueAttribute != null) {
             band.setNoDataValue(fillValueAttribute.getNumericValue().doubleValue());
