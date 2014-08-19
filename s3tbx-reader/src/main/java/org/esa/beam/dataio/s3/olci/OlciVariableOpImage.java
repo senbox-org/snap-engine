@@ -14,7 +14,7 @@ public class OlciVariableOpImage extends S3VariableOpImage {
     //todo remove this when data delivers rows and columns at other positions
 
     public OlciVariableOpImage(VariableIF variable, int dataBufferType, int sourceWidth, int sourceHeight, Dimension tileSize, ResolutionLevel level, String dimensionName, int dimensionIndex) {
-        super(variable, dataBufferType, sourceWidth, sourceHeight, tileSize, level, dimensionName, dimensionIndex);
+        super(variable, dataBufferType, sourceWidth, sourceHeight, tileSize, level, dimensionName, dimensionIndex, true);
     }
 
     @Override

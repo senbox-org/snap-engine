@@ -57,6 +57,7 @@ public class S3NetcdfReader {
         product.setFileLocation(file);
         addGlobalMetadata(product);
         addBands(product);
+        addGeoCoding(product);
         for (final Band band : product.getBands()) {
             if (band instanceof VirtualBand) {
                 continue;
@@ -64,6 +65,10 @@ public class S3NetcdfReader {
             band.setSourceImage(createSourceImage(band));
         }
         return product;
+    }
+
+    protected void addGeoCoding(Product product) {
+
     }
 
     protected String[] getSeparatingThirdDimensions() {
@@ -83,10 +88,6 @@ public class S3NetcdfReader {
     }
 
     protected RenderedImage createSourceImage(Band band) {
-        final int bufferType = ImageManager.getDataBufferType(band.getDataType());
-        final int sourceWidth = band.getSceneRasterWidth();
-        final int sourceHeight = band.getSceneRasterHeight();
-        final java.awt.Dimension tileSize = band.getProduct().getPreferredTileSize();
         final String bandName = band.getName();
         String variableName = bandName;
         Variable variable = null;
@@ -107,14 +108,14 @@ public class S3NetcdfReader {
         if(variable == null) {
             variable = netcdfFile.findVariable(variableName);
         }
-        return createImage(variable, bufferType, sourceWidth, sourceHeight, tileSize, dimensionName, dimensionIndex);
+        return createImage(band, variable, dimensionName, dimensionIndex);
     }
 
-    protected RenderedImage createImage(Variable variable, int bufferType, int sourceWidth, int sourceHeight,
-                                        java.awt.Dimension tileSize, String dimensionName, int dimensionIndex) {
-        return new S3VariableOpImage(variable, bufferType, sourceWidth, sourceHeight, tileSize,
-                                     ResolutionLevel.MAXRES, dimensionName, dimensionIndex);
+    protected RenderedImage createImage(Band band, Variable variable, String dimensionName, int dimensionIndex) {
+        return new S3MultiLevelOpImage(band, variable, dimensionName, dimensionIndex, false);
     }
+
+
 
     private void addGlobalMetadata(Product product) {
         final MetadataElement globalAttributesElement = new MetadataElement("Global_Attributes");

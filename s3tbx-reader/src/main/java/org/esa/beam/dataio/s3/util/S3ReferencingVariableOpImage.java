@@ -29,7 +29,7 @@ public class S3ReferencingVariableOpImage extends S3VariableOpImage {
                                         Dimension tileSize, ResolutionLevel level, int dimensionIndex,
                                         Variable referencedIndexVariable, String nameOfReferencingDimension,
                                         String nameOfDisplayedDimension) {
-        super(variable, dataBufferType, sourceWidth, sourceHeight, tileSize, level, "", dimensionIndex);
+        super(variable, dataBufferType, sourceWidth, sourceHeight, tileSize, level, "", dimensionIndex, false);
         this.variable = variable;
         int displayedDimensionIndex = variable.findDimensionIndex(nameOfDisplayedDimension);
         int referencingDimensionIndex = variable.findDimensionIndex(nameOfReferencingDimension);
