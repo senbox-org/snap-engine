@@ -19,13 +19,16 @@ public class S3VariableOpImage extends SingleBandedOpImage {
     private final VariableIF variable;
     private final int dimensionIndex;
     private final String dimensionName;
+    private boolean dimensionsSequenceIsWrong;
 
     public S3VariableOpImage(VariableIF variable, int dataBufferType, int sourceWidth, int sourceHeight,
-                         Dimension tileSize, ResolutionLevel level, String dimensionName, int dimensionIndex) {
+                         Dimension tileSize, ResolutionLevel level, String dimensionName, int dimensionIndex,
+                         boolean dimensionsSequenceIsWrong) {
         super(dataBufferType, sourceWidth, sourceHeight, tileSize, null, level);
         this.variable = variable;
         this.dimensionName = dimensionName;
         this.dimensionIndex = dimensionIndex;
+        this.dimensionsSequenceIsWrong = dimensionsSequenceIsWrong;
     }
 
     @Override
@@ -111,10 +114,16 @@ public class S3VariableOpImage extends SingleBandedOpImage {
     }
 
     protected int getIndexX(int rank) {
+        if (dimensionsSequenceIsWrong) {
+            return 1;
+        }
         return rank - 1;
     }
 
     protected int getIndexY(int rank) {
+        if(dimensionsSequenceIsWrong) {
+            return 0;
+        }
         return rank - 2;
     }
 

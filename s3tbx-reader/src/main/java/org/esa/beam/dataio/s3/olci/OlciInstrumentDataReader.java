@@ -1,6 +1,7 @@
 package org.esa.beam.dataio.s3.olci;
 
 import org.esa.beam.dataio.netcdf.util.DataTypeUtils;
+import org.esa.beam.dataio.s3.util.S3MultiLevelOpImage;
 import org.esa.beam.dataio.s3.util.S3NetcdfReader;
 import org.esa.beam.dataio.s3.util.S3ReferencingVariableOpImage;
 import org.esa.beam.dataio.s3.util.S3VariableOpImage;
@@ -60,10 +61,6 @@ public class OlciInstrumentDataReader extends S3NetcdfReader {
         if(band.getName().equals(detector_index_name)) {
             return super.createSourceImage(band);
         }
-        final int bufferType = ImageManager.getDataBufferType(band.getDataType());
-        final int sourceWidth = detectorIndexVariable.getDimension(detectorIndexVariable.findDimensionIndex("columns")).getLength();
-        final int sourceHeight = detectorIndexVariable.getDimension(detectorIndexVariable.findDimensionIndex("rows")).getLength();
-        final java.awt.Dimension tileSize = band.getProduct().getPreferredTileSize();
         final String bandName = band.getName();
         String variableName = bandName;
         Variable variable;
@@ -78,9 +75,8 @@ public class OlciInstrumentDataReader extends S3NetcdfReader {
         } else {
             variable = getNetcdfFile().findVariable(variableName);
         }
-        return new S3ReferencingVariableOpImage(variable, bufferType, sourceWidth, sourceHeight, tileSize,
-                                                ResolutionLevel.MAXRES, dimensionIndex, detectorIndexVariable,
-                                                "detectors", dimensionName);
+        return new S3MultiLevelOpImage(band, variable, dimensionName, dimensionIndex,
+                                                    detectorIndexVariable, "detectors", dimensionName);
     }
 
     @Override

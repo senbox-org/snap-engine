@@ -1,5 +1,6 @@
 package org.esa.beam.dataio.s3.olci;
 
+import org.esa.beam.dataio.s3.util.S3MultiLevelOpImage;
 import org.esa.beam.dataio.s3.util.S3NetcdfReader;
 import org.esa.beam.dataio.s3.util.S3VariableOpImage;
 import org.esa.beam.framework.datamodel.Band;
@@ -7,6 +8,7 @@ import org.esa.beam.framework.datamodel.MetadataAttribute;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.datamodel.RasterDataNode;
 import org.esa.beam.jai.ImageManager;
 import org.esa.beam.jai.ResolutionLevel;
 import ucar.nc2.Dimension;
@@ -47,10 +49,8 @@ class OlciTieMeteoReader extends S3NetcdfReader {
     }
 
     @Override
-    protected RenderedImage createImage(Variable variable, int bufferType, int sourceWidth, int sourceHeight,
-                                        java.awt.Dimension tileSize, String dimensionName, int dimensionIndex) {
-        return new OlciVariableOpImage(variable, bufferType, sourceWidth, sourceHeight, tileSize,
-                                     ResolutionLevel.MAXRES, dimensionName, dimensionIndex);
+    protected RenderedImage createImage(Band band, Variable variable, String dimensionName, int dimensionIndex) {
+        return new S3MultiLevelOpImage(band, variable, dimensionName, dimensionIndex, true);
     }
 
     @Override
