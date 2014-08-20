@@ -12,8 +12,6 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.datamodel.SampleCoding;
 import org.esa.beam.framework.datamodel.VirtualBand;
-import org.esa.beam.jai.ImageManager;
-import org.esa.beam.jai.ResolutionLevel;
 import org.esa.beam.util.io.FileUtils;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
@@ -95,17 +93,17 @@ public class S3NetcdfReader {
         String dimensionName = "";
         final String[] separatingDimensions = getSeparatingThirdDimensions();
         final String[] suffixesForSeparatingThirdDimensions = getSuffixesForSeparatingThirdDimensions();
-        for(int i = 0; i < separatingDimensions.length; i++) {
+        for (int i = 0; i < separatingDimensions.length; i++) {
             final String dimension = separatingDimensions[i];
             final String suffix = suffixesForSeparatingThirdDimensions[i];
-            if(bandName.contains(suffix)) {
+            if (bandName.contains(suffix)) {
                 variableName = bandName.substring(0, variableName.indexOf(suffix) - 1);
                 variable = netcdfFile.findVariable(variableName);
                 dimensionName = dimension;
                 dimensionIndex = Integer.parseInt(bandName.substring(bandName.lastIndexOf("_") + 1)) - 1;
             }
         }
-        if(variable == null) {
+        if (variable == null) {
             variable = netcdfFile.findVariable(variableName);
         }
         return createImage(band, variable, dimensionName, dimensionIndex);
@@ -114,8 +112,6 @@ public class S3NetcdfReader {
     protected RenderedImage createImage(Band band, Variable variable, String dimensionName, int dimensionIndex) {
         return new S3MultiLevelOpImage(band, variable, dimensionName, dimensionIndex, false);
     }
-
-
 
     private void addGlobalMetadata(Product product) {
         final MetadataElement globalAttributesElement = new MetadataElement("Global_Attributes");
@@ -147,13 +143,13 @@ public class S3NetcdfReader {
                         final Dimension dimension =
                                 variable.getDimension(variable.findDimensionIndex(dimensionName));
                         for (int j = 0; j < dimension.getLength(); j++) {
-                            addVariableAsBand(product, variable, variableName + "_" + suffixes[i] + "_" +(j + 1));
+                            addVariableAsBand(product, variable, variableName + "_" + suffixes[i] + "_" + (j + 1));
                         }
                         variableHasBeenAdded = true;
                         break;
                     }
                 }
-                if(!variableHasBeenAdded) {
+                if (!variableHasBeenAdded) {
                     addVariableAsBand(product, variable, variableName);
                 }
             }
@@ -264,11 +260,23 @@ public class S3NetcdfReader {
         final MetadataElement variableElement = new MetadataElement(variable.getFullName());
         final List<Attribute> attributes = variable.getAttributes();
         for (Attribute attribute : attributes) {
-            int type = DataTypeUtils.getEquivalentProductDataType(attribute.getDataType(), false, false);
-            final ProductData attributeData = getAttributeData(attribute, type);
-            final MetadataAttribute metadataAttribute =
-                    new MetadataAttribute(attribute.getFullName(), attributeData, true);
-            variableElement.addAttribute(metadataAttribute);
+
+            if(attribute.getFullName().equals("flag_meanings")) {
+                final String[] flagMeanings = attribute.getStringValue().split(" ");
+                for (int i = 0; i < flagMeanings.length; i++) {
+                    String flagMeaning = flagMeanings[i];
+                    final ProductData attributeData = ProductData.createInstance(flagMeaning);
+                    final MetadataAttribute metadataAttribute =
+                            new MetadataAttribute(attribute.getFullName() + "." + i, attributeData, true);
+                    variableElement.addAttribute(metadataAttribute);
+                }
+            } else {
+                int type = DataTypeUtils.getEquivalentProductDataType(attribute.getDataType(), false, false);
+                final ProductData attributeData = getAttributeData(attribute, type);
+                final MetadataAttribute metadataAttribute =
+                        new MetadataAttribute(attribute.getFullName(), attributeData, true);
+                variableElement.addAttribute(metadataAttribute);
+            }
         }
         product.getMetadataRoot().getElement("Variable_Attributes").addElement(variableElement);
     }
