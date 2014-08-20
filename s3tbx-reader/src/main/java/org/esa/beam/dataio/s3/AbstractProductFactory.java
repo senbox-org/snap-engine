@@ -16,7 +16,6 @@ package org.esa.beam.dataio.s3;/*
 
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.dataio.ProductReader;
-import org.esa.beam.framework.dataio.ProductSubsetDef;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.CrsGeoCoding;
 import org.esa.beam.framework.datamodel.Mask;
@@ -148,9 +147,9 @@ public abstract class AbstractProductFactory implements ProductFactory {
             final String bandName = band.getName();
             final String errorBandName = bandName + "_err";
             final String uncertaintyBandName = bandName + "_uncertainty";
-            if(product.containsBand(errorBandName)) {
+            if (product.containsBand(errorBandName)) {
                 band.setAncillaryBand("error", product.getBand(errorBandName));
-            } else if(product.containsBand(uncertaintyBandName)) {
+            } else if (product.containsBand(uncertaintyBandName)) {
                 band.setAncillaryBand("uncertainty", product.getBand(uncertaintyBandName));
             }
         }
