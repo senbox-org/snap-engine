@@ -104,9 +104,11 @@ public class SynLevel2ProductFactory extends AbstractProductFactory {
         try {
             final List<Variable> variables = ncFile.getVariables(".*");
             for (final Variable variable : variables) {
-                final String targetBandName = variable.getName();
+                final String targetBandName = variable.getFullName();
                 final Band targetBand = targetProduct.addBand(targetBandName, ProductData.TYPE_FLOAT32);
-                final double[] tpVar = ncFile.read(variable.getName());
+                targetBand.setDescription(variable.getDescription());
+                targetBand.setUnit(variable.getUnitsString());
+                final double[] tpVar = ncFile.read(variable.getFullName());
                 final MultiLevelImage targetImage = createTiePointImage(lonBand.getGeophysicalImage(),
                                                                         latBand.getGeophysicalImage(),
                                                                         tpLon,
