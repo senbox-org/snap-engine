@@ -12,7 +12,10 @@ import org.jpy.PyLib;
 import org.jpy.PyModule;
 import org.jpy.PyObject;
 
-import java.awt.Rectangle;
+import java.awt.*;
+import java.io.File;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Map;
 
 /**
@@ -23,7 +26,7 @@ import java.util.Map;
  */
 @OperatorMetadata(alias = "PyOp",
                   description = "Uses Python code to process data products",
-                  version = "0.5.1",
+                  version = "0.8",
                   authors = "N. Fomferra",
                   internal = true)
 public class PyOperator extends Operator {
@@ -40,6 +43,7 @@ public class PyOperator extends Operator {
     @Parameter(description = "Name of the Python class which implements the operator. Please refer to the BEAM help for details.")
     private String pythonClassName;
 
+    private static boolean globalPythonInit;
     private transient PyModule pyModule;
     private transient PythonProcessor pythonProcessor;
 
@@ -68,6 +72,24 @@ public class PyOperator extends Operator {
         this.pythonClassName = pythonClassName;
     }
 
+    private File getResourceFile(String resourcePath) {
+        URL resourceUrl = getClass().getResource(resourcePath);
+        System.out.println("resourceUrl = " + resourceUrl);
+        if (resourceUrl != null) {
+            try {
+                File resourceFile = new File(resourceUrl.toURI());
+                System.out.println("resourceFile = " + resourceFile);
+                if (resourceFile.exists()) {
+                    return resourceFile;
+                }
+            } catch (URISyntaxException e) {
+                // mmmmh
+            }
+        }
+        return null;
+    }
+
+
     @Override
     public void initialize() throws OperatorException {
         if (pythonModuleName == null || pythonModuleName.isEmpty()) {
@@ -77,23 +99,53 @@ public class PyOperator extends Operator {
             throw new OperatorException("Missing value for parameter 'pythonClassName'");
         }
 
-        synchronized (PyLib.class) {
-            //PyLib.Diag.setFlags(PyLib.Diag.F_JVM);
+        String[] pythonPaths;
+        File beampyDir = getResourceFile("/beampy");
+        if (beampyDir != null && beampyDir.isDirectory()) {
+            pythonPaths = new String[] {beampyDir.getPath()};
+        } else {
+            pythonPaths = new String[0];
+        }
 
-            PyLib.startPython();
+        if (!globalPythonInit) {
 
-            if (pythonModulePath != null && !pythonModulePath.isEmpty()) {
-                PyModule pySysModule = PyModule.importModule("sys");
-                PyObject pyPathList = pySysModule.getAttribute("path");
-                pyPathList.callMethod("append", pythonModulePath);
+            File resourceFile = getResourceFile("/beampy/jpyconfig.properties");
+            if (resourceFile != null && resourceFile.isFile()) {
+                System.setProperty("jpy.config", resourceFile.getPath());
             }
 
-            PyLib.execScript(String.format("if '%s' in globals(): del %s", pythonModuleName, pythonModuleName));
+            synchronized (PyLib.class) {
+                PyLib.Diag.setFlags(PyLib.Diag.F_ALL);
 
-            pyModule = PyModule.importModule(pythonModuleName);
-            PyObject pythonProcessorImpl = pyModule.call(pythonClassName);
-            pythonProcessor = pythonProcessorImpl.createProxy(PythonProcessor.class);
-            pythonProcessor.initialize(this);
+                String pythonVersion = PyLib.getPythonVersion();
+                System.out.println("Running Python " + pythonVersion);
+
+                PyLib.startPython(pythonPaths);
+                if (!PyLib.isPythonRunning()) {
+                    throw new OperatorException("Failed to initialize Python (version " + pythonVersion + ")");
+                }
+
+                globalPythonInit = true;
+            }
+
+            synchronized (PyLib.class) {
+                if (pythonModulePath != null && !pythonModulePath.isEmpty()) {
+                    String code = String.format("" +
+                                                        "import sys;\n" +
+                                                        "p = '%s';\n" +
+                                                        "if not p in sys.path: sys.path.append(p)",
+                                                pythonModulePath.replace("\\", "\\\\"));
+                    PyLib.execScript(code);
+                }
+
+                String code = String.format("if '%s' in globals(): del %s", pythonModuleName, pythonModuleName);
+                PyLib.execScript(code);
+
+                pyModule = PyModule.importModule(pythonModuleName);
+                PyObject pythonProcessorImpl = pyModule.call(pythonClassName);
+                pythonProcessor = pythonProcessorImpl.createProxy(PythonProcessor.class);
+                pythonProcessor.initialize(this);
+            }
         }
     }
 
