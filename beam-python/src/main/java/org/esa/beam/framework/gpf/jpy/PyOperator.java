@@ -99,53 +99,58 @@ public class PyOperator extends Operator {
             throw new OperatorException("Missing value for parameter 'pythonClassName'");
         }
 
-        String[] pythonPaths;
-        File beampyDir = getResourceFile("/beampy");
-        if (beampyDir != null && beampyDir.isDirectory()) {
-            pythonPaths = new String[] {beampyDir.getPath()};
-        } else {
-            pythonPaths = new String[0];
-        }
-
         if (!globalPythonInit) {
 
-            File resourceFile = getResourceFile("/beampy/jpyconfig.properties");
-            if (resourceFile != null && resourceFile.isFile()) {
-                System.setProperty("jpy.config", resourceFile.getPath());
+            File systemModuleDir = getResourceFile("/beampy");
+            File systemConfigFile = getResourceFile("/beampy/jpyconfig.properties");
+            if (systemConfigFile != null && systemConfigFile.isFile()) {
+                System.setProperty("jpy.config", systemConfigFile.getPath());
             }
 
             synchronized (PyLib.class) {
-                PyLib.Diag.setFlags(PyLib.Diag.F_ALL);
+                if (!globalPythonInit) {
 
-                String pythonVersion = PyLib.getPythonVersion();
-                System.out.println("Running Python " + pythonVersion);
+                    //PyLib.Diag.setFlags(PyLib.Diag.F_ALL);
 
-                PyLib.startPython(pythonPaths);
-                if (!PyLib.isPythonRunning()) {
-                    throw new OperatorException("Failed to initialize Python (version " + pythonVersion + ")");
+                    String pythonVersion = PyLib.getPythonVersion();
+                    System.out.println("Running Python " + pythonVersion);
+
+                    PyLib.startPython();
+
+                    if (systemModuleDir != null && systemModuleDir.isDirectory()) {
+                        String dllFilePath = PyLib.getDllFilePath();
+                        File dllFileDir = new File(dllFilePath).getParentFile();
+                        System.out.println("dllFileDir: " + dllFileDir);
+                        System.out.println("pythonBaseModuleDir: " + systemModuleDir);
+                        extendSysPath(systemModuleDir.getPath());
+                    }
+
+                    globalPythonInit = true;
                 }
-
-                globalPythonInit = true;
             }
+        }
 
-            synchronized (PyLib.class) {
-                if (pythonModulePath != null && !pythonModulePath.isEmpty()) {
-                    String code = String.format("" +
-                                                        "import sys;\n" +
-                                                        "p = '%s';\n" +
-                                                        "if not p in sys.path: sys.path.append(p)",
-                                                pythonModulePath.replace("\\", "\\\\"));
-                    PyLib.execScript(code);
-                }
+        synchronized (PyLib.class) {
+            extendSysPath(pythonModulePath);
 
-                String code = String.format("if '%s' in globals(): del %s", pythonModuleName, pythonModuleName);
-                PyLib.execScript(code);
+            String code = String.format("if '%s' in globals(): del %s", pythonModuleName, pythonModuleName);
+            PyLib.execScript(code);
 
-                pyModule = PyModule.importModule(pythonModuleName);
-                PyObject pythonProcessorImpl = pyModule.call(pythonClassName);
-                pythonProcessor = pythonProcessorImpl.createProxy(PythonProcessor.class);
-                pythonProcessor.initialize(this);
-            }
+            pyModule = PyModule.importModule(pythonModuleName);
+            PyObject pythonProcessorImpl = pyModule.call(pythonClassName);
+            pythonProcessor = pythonProcessorImpl.createProxy(PythonProcessor.class);
+            pythonProcessor.initialize(this);
+        }
+    }
+
+    private void extendSysPath(String path) {
+        if (path != null) {
+            String code = String.format("" +
+                            "import sys;\n" +
+                            "p = '%s';\n" +
+                            "if not p in sys.path: sys.path.append(p)",
+                    path.replace("\\", "\\\\"));
+            PyLib.execScript(code);
         }
     }
 
