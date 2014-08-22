@@ -15,7 +15,6 @@
 
 package org.esa.beam.dataio.s3;
 
-import org.esa.beam.dataio.s3.EarthExplorerManifest;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.junit.Before;
