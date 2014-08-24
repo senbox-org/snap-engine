@@ -10,19 +10,31 @@ It is worth mentioning that the `beam-python` module works with the standard *CP
 Python extension modules such as `numpy` and `scipy` can be used. Before you read further you may have a look at the
 example code in
 
-1. `beampy-examples` for using the BEAM Java API from Python, and
-2. `beampy-operator-example` for extending BEAM by an operator plugin.
+1. `beampy-examples/*.py` for using the BEAM Java API from Python, and
+2. `beampy-examples/beampy-ndvi-operator` for extending BEAM by an (NDVI) operator plugin.
 
 The link from Python to the BEAM Java API is established via a Python module named *beampy*. The beampy module
 depends on a *bi-directional* Java-Python bridge *jpy* that enables calls from Python into a Java virtual machine
 and, at the same time, the other way round. This bridge is implemented by the [jpy Project](https://github.com/bcdev/jpy)
 and is independent from the beampy module.
 
-beampy has been tested with Python 2.7 and 3.3 with a Java 7 JDK. It will presumably also work with Python 2.6 or 3.2 
-and a Java 6 JDK.
+beampy has been tested with Python 2.7, 3.3 and 3.4 with Java 7 and 8 JDKs. 
 
-Before you can start using the BEAM API or developing BEAM operator plugins with Python you need
-to install the `jpy` and `beampy` Python modules. Unfortunately this has to be done manually, so be 
+Since `beam-python` version 5.0.5, BEAM configures itself for a given Python executable. If not already done
+by the installer, set the configuration property `beam.pythonExecutable` in file `${beam-home}/config/beam.config`
+to your desired Python executable.
+
+
+////////////////////////////// To following text is outdated - MUST UPDATE SOON ////////////////////////////// 
+
+
+Before you can start using the BEAM API or developing BEAM operator plugins with Python you need configure 
+BEAM for the desired Python version. 
+
+If there is no matching binary distribution, you will have to build `jpy` on your own and then copy your binary 
+distribution to the `${beam-home}/modules/${beam-python}/lib` directory.
+
+Unfortunately this has to be done manually, so be 
 prepared to invest at least half an hour for setting up things correctly.
 
 Installation

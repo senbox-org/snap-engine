@@ -14,6 +14,7 @@ import org.jpy.PyObject;
 
 import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Map;
@@ -46,6 +47,7 @@ public class PyOperator extends Operator {
     private static boolean globalPythonInit;
     private transient PyModule pyModule;
     private transient PythonProcessor pythonProcessor;
+    private static File beampyDir;
 
 
     public String getPythonModulePath() {
@@ -100,34 +102,7 @@ public class PyOperator extends Operator {
         }
 
         if (!globalPythonInit) {
-
-            File systemModuleDir = getResourceFile("/beampy");
-            File systemConfigFile = getResourceFile("/beampy/jpyconfig.properties");
-            if (systemConfigFile != null && systemConfigFile.isFile()) {
-                System.setProperty("jpy.config", systemConfigFile.getPath());
-            }
-
-            synchronized (PyLib.class) {
-                if (!globalPythonInit) {
-
-                    //PyLib.Diag.setFlags(PyLib.Diag.F_ALL);
-
-                    String pythonVersion = PyLib.getPythonVersion();
-                    System.out.println("Running Python " + pythonVersion);
-
-                    PyLib.startPython();
-
-                    if (systemModuleDir != null && systemModuleDir.isDirectory()) {
-                        String dllFilePath = PyLib.getDllFilePath();
-                        File dllFileDir = new File(dllFilePath).getParentFile();
-                        System.out.println("dllFileDir: " + dllFileDir);
-                        System.out.println("pythonBaseModuleDir: " + systemModuleDir);
-                        extendSysPath(systemModuleDir.getPath());
-                    }
-
-                    globalPythonInit = true;
-                }
-            }
+            initPython();
         }
 
         synchronized (PyLib.class) {
@@ -143,13 +118,60 @@ public class PyOperator extends Operator {
         }
     }
 
+    private void initPython() {
+        beampyDir = getResourceFile("/beampy");
+        if (beampyDir == null) {
+            throw new OperatorException("Python can only be run from unpacked modules");
+        }
+        System.out.println("beampyDir: " + beampyDir);
+
+        File jpyConfigFile = new File(beampyDir, "jpyconfig.properties");
+        if (!jpyConfigFile.exists()) {
+            String python = System.getProperty("beam.pythonExecutable", "python");
+            String script = "configtool.py";
+            String architecture = System.getProperty("os.arch");
+            System.out.printf("Executing: \"%s\" %s %s\n", python, script, architecture);
+            try {
+                Process process = new ProcessBuilder()
+                        .command(python, script, architecture)
+                        .directory(beampyDir).start();
+                int exitCode = process.waitFor();
+                if (exitCode != 0) {
+                    throw new OperatorException("Python configuration failed with executable '" + python + "'");
+                }
+            } catch (IOException | InterruptedException e) {
+                throw new OperatorException("Python configuration failed with executable " + python + "'", e);
+            }
+        }
+
+        if (jpyConfigFile.exists()) {
+            System.setProperty("jpy.config", jpyConfigFile.getPath());
+        } else {
+            throw new OperatorException("Python configuration incomplete.\nMissing " + jpyConfigFile);
+        }
+
+        synchronized (PyLib.class) {
+            if (!globalPythonInit) {
+                //PyLib.Diag.setFlags(PyLib.Diag.F_ALL);
+                String pythonVersion = PyLib.getPythonVersion();
+                System.out.println("Running Python " + pythonVersion);
+                if (!PyLib.isPythonRunning()) {
+                    PyLib.startPython(beampyDir.getPath());
+                } else {
+                    extendSysPath(beampyDir.getPath());
+                }
+                globalPythonInit = true;
+            }
+        }
+    }
+
     private void extendSysPath(String path) {
         if (path != null) {
             String code = String.format("" +
-                            "import sys;\n" +
-                            "p = '%s';\n" +
-                            "if not p in sys.path: sys.path.append(p)",
-                    path.replace("\\", "\\\\"));
+                                                "import sys;\n" +
+                                                "p = '%s';\n" +
+                                                "if not p in sys.path: sys.path.append(p)",
+                                        path.replace("\\", "\\\\"));
             PyLib.execScript(code);
         }
     }
