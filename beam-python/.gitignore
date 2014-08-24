@@ -2,13 +2,12 @@ target
 build
 local.txt
 beampy.ini
-jpy.jar
 .idea
 *.iml
-*.class
 *.war
 *.ear
 *.dim
 *.data
 __pycache__/
+jpy.jar
 
