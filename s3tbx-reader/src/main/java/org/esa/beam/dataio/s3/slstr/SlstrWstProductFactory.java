@@ -70,7 +70,7 @@ public class SlstrWstProductFactory extends SlstrSstProductFactory {
     protected void setUncertaintyBands(Product product) {
         super.setUncertaintyBands(product);
         String[] bandNames = new String[]{"sses_bias", "sst_dtime", "sses_standard_deviation", "dt_analysis",
-            "quality_level", "sst_theoretical_error"};
+            "sst_theoretical_error"};
         String[] roles = new String[]{"bias", "time deviation from reference time", "standard deviation",
                 "deviation from analysis field", "uncertainty"};
         if(product.containsBand("sea_surface_temperature")) {
