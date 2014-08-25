@@ -31,8 +31,6 @@ import java.util.List;
  */
 public class S3NetcdfReader {
 
-    //todo work better with "channel" metadata - after it is no longer experimental
-
     private static final String product_type = "product_type";
     private static final String flag_values = "flag_values";
     private static final String flag_masks = "flag_masks";
