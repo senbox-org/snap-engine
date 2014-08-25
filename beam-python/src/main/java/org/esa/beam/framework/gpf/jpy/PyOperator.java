@@ -12,12 +12,16 @@ import org.jpy.PyLib;
 import org.jpy.PyModule;
 import org.jpy.PyObject;
 
-import java.awt.*;
+import java.awt.Rectangle;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * An operator which uses Python code to process data products.
@@ -126,27 +130,42 @@ public class PyOperator extends Operator {
         System.out.println("beampyDir: " + beampyDir);
 
         File jpyConfigFile = new File(beampyDir, "jpyconfig.properties");
+
+
+        String pythonExecutable = System.getProperty("beam.pythonExecutable");
+
+        boolean mustConfigure = false;
+
         if (!jpyConfigFile.exists()) {
-            String python = System.getProperty("beam.pythonExecutable", "python");
-            String script = "configtool.py";
-            String architecture = System.getProperty("os.arch");
-            System.out.printf("Executing: \"%s\" %s %s\n", python, script, architecture);
-            try {
-                Process process = new ProcessBuilder()
-                        .command(python, script, architecture)
-                        .directory(beampyDir).start();
-                int exitCode = process.waitFor();
-                if (exitCode != 0) {
-                    throw new OperatorException("Python configuration failed with executable '" + python + "'");
+            mustConfigure = true;
+        } else {
+            if (pythonExecutable != null) {
+                Properties properties = new Properties();
+                try {
+                    try (FileReader reader = new FileReader(jpyConfigFile)) {
+                        properties.load(reader);
+                        String jpyPythonExecutable = properties.getProperty("jpy.pythonExecutable");
+                        if (jpyPythonExecutable != null && !jpyPythonExecutable.equals(pythonExecutable)) {
+                            mustConfigure = true;
+                        }
+                    }
+                } catch (IOException e) {
+                    // mmmh...
                 }
-            } catch (IOException | InterruptedException e) {
-                throw new OperatorException("Python configuration failed with executable " + python + "'", e);
             }
+        }
+
+        if (mustConfigure) {
+            if (pythonExecutable == null) {
+                pythonExecutable = "python";
+            }
+            configurePythonBridge(pythonExecutable);
         }
 
         if (jpyConfigFile.exists()) {
             System.setProperty("jpy.config", jpyConfigFile.getPath());
         } else {
+            // todo - read "configtool.log" and display errors
             throw new OperatorException("Python configuration incomplete.\nMissing " + jpyConfigFile);
         }
 
@@ -165,12 +184,54 @@ public class PyOperator extends Operator {
         }
     }
 
+    private void configurePythonBridge(String pythonExecutable) {
+        // "java.home" is always present
+        List<String> command = new ArrayList<>();
+        command.add(pythonExecutable);
+        command.add("configtool.py");
+        command.add("--force");
+        String javaHome = System.getProperty("java.home");
+        if (javaHome != null) {
+            command.add( "--java_home");
+            command.add(javaHome);
+        }
+        String osArch = System.getProperty("os.arch");  // "os.arch" is always present
+        if (osArch != null) {
+            command.add("--arch");
+            command.add(osArch);
+        }
+        String commandLine = toCommandLine(command);
+        System.out.printf("Executing command: [%s]\n", commandLine);
+        try {
+            Process process = new ProcessBuilder()
+                    .command(command)
+                    .directory(beampyDir).start();
+            int exitCode = process.waitFor();
+            if (exitCode != 0) {
+                throw new OperatorException(String.format("Python configuration failed.\nCommand [%s]\nfailed with return code %s.", commandLine, exitCode));
+            }
+        } catch (IOException | InterruptedException e) {
+            throw new OperatorException(String.format("Python configuration failed.\nCommand [%s]\nfailed with exception %s.", commandLine, e.getMessage()), e);
+        }
+    }
+
+    private static String toCommandLine(List<String> command) {
+        StringBuilder sb = new StringBuilder();
+        for (String arg : command) {
+            if (sb.length() > 0) {
+                sb.append(" ");
+            }
+            sb.append(arg.contains(" ") ? String.format("\"%s\"", arg) : arg);
+        }
+        return sb.toString();
+    }
+
     private void extendSysPath(String path) {
         if (path != null) {
             String code = String.format("" +
-                                                "import sys;\n" +
-                                                "p = '%s';\n" +
-                                                "if not p in sys.path: sys.path.append(p)",
+                                        "import sys;\n" +
+                                        "p = '%s';\n" +
+                                        "if not p in sys.path: sys.path.append(p)",
                                         path.replace("\\", "\\\\"));
             PyLib.execScript(code);
         }
