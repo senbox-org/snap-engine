@@ -18,8 +18,8 @@ def _configure_beampy(java_home=None, req_arch=None, force=False):
         if req_arch != act_arch:
             warnings.append("architecture requirement not met: Python is " + act_arch + " but JVM requires " + req_arch)
         is64 = sys.maxsize > 2 ** 31 - 1
-        if is64 and not req_arch in ('amd64', 'ia64', 'x64'):
-            warnings.append("architecture requirement not met: Python is 64-bit but JVM requires " + req_arch)
+        if is64 and not req_arch in ('amd64', 'ia64', 'x64', 'x86_64'):
+            warnings.append("architecture requirement not met: Python is 64 bit but JVM requires " + req_arch)
 
     beampy_dir = os.path.dirname(os.path.abspath(__file__))
 
