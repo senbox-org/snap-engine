@@ -36,10 +36,7 @@ public class Sentinel3ProductReaderPlugIn implements ProductReaderPlugIn {
     private final String[] formatNames;
 
     public Sentinel3ProductReaderPlugIn() {
-//        this(FORMAT_NAME, "Sentinel-3 products", "S3.?_(OL_1_E[FR]R|OL_2_(L[FR]R|W[FR]R)|SL_1_SLT|SL_2_(LST|WCT|WST)|SY_2_(VGP|SYN)|SY_[23]_VGS)_.*(.SAFE)?", "manifest", ".safe", ".xml");
         this(FORMAT_NAME, "Sentinel-3 products", "S3.?_(OL_1_E[FR]R|OL_2_(L[FR]R|W[FR]R)|SL_1_RBT|SL_2_(LST|WCT|WST)|SY_2_(VGP|SYN)|SY_[23]_VG1)_.*(.SEN3)?", "xfdumanifest", ".xml");
-        // special version for ACRI - rq-20140214
-        // this(FORMAT_NAME, "Sentinel-3 products", "S3.?_(OL_1_E[FR]R|OL_2_(L[FR]R|W[FR]R))_.*(.SAFE)?", "manifest", ".safe", ".xml");
     }
 
     private Sentinel3ProductReaderPlugIn(String formatName,
@@ -107,8 +104,9 @@ public class Sentinel3ProductReaderPlugIn implements ProductReaderPlugIn {
     private boolean isInputValid(Object input) {
         final File inputFile = new File(input.toString());
         final File parentFile = inputFile.getParentFile();
-        return parentFile != null && isValidInputFileName(inputFile.getName()) && isValidDirectoryName(
-                parentFile.getName());
+        return parentFile != null && (isValidInputFileName(inputFile.getName()) && isValidDirectoryName(
+                parentFile.getName()) ||
+                (isValidDirectoryName(inputFile.getName())) && new File(inputFile, "xfdumanifest.xml").exists());
     }
 
     private boolean isValidDirectoryName(String name) {
