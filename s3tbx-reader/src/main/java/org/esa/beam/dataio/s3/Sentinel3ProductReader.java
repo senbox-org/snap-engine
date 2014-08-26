@@ -71,6 +71,14 @@ public class Sentinel3ProductReader extends AbstractProductReader {
         return factory.createProduct();
     }
 
+    protected void setInput(Object input) {
+        if(input instanceof File && ((File)input).isDirectory()) {
+            super.setInput(new File(((File)input), "xfdumanifest.xml"));
+        } else {
+            super.setInput(input);
+        }
+    }
+
     @Override
     protected final void readBandRasterDataImpl(int sourceOffsetX, int sourceOffsetY, int sourceWidth, int sourceHeight,
                                                 int sourceStepX, int sourceStepY, Band destBand, int destOffsetX,
