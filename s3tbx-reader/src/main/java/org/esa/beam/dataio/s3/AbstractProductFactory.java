@@ -14,6 +14,7 @@ package org.esa.beam.dataio.s3;/*
  * with this program; if not, see http://www.gnu.org/licenses/
  */
 
+import org.esa.beam.dataio.s3.util.ColorProvider;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Band;
@@ -175,6 +176,7 @@ public abstract class AbstractProductFactory implements ProductFactory {
 
     protected void setMasks(Product targetProduct) {
         final Band[] bands = targetProduct.getBands();
+        final ColorProvider colorProvider = new ColorProvider();
         for (Band band : bands) {
             final SampleCoding sampleCoding = band.getSampleCoding();
             if (sampleCoding != null) {
@@ -191,7 +193,8 @@ public abstract class AbstractProductFactory implements ProductFactory {
                             expression = bandName + " == " + sampleValue;
                         }
                         final String maskName = bandName + "_" + sampleName;
-                        targetProduct.addMask(maskName, expression, expression, Color.RED, 0.5);
+                        final Color maskColor = colorProvider.getMaskColor(sampleName);
+                        targetProduct.addMask(maskName, expression, expression, maskColor, 0.5);
                     }
                 }
             }

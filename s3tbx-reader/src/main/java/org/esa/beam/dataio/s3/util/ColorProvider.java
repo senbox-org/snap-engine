@@ -23,7 +23,7 @@ public class ColorProvider {
         thirdPowerOfCurrentDivisions = (int) Math.pow(numberOfTotalSamplePoints, 3);
     }
 
-    public Color getMaskForColor(String maskName) {
+    public Color getMaskColor(String maskName) {
         if (maskName.contains("coastline") || maskName.contains("COASTLINE")) {
             return new Color(0, 255, 0);
         } else if (maskName.contains("land") || maskName.contains("LAND")) {
