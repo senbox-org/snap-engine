@@ -7,7 +7,9 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.util.StopWatch;
 import org.esa.beam.util.io.FileUtils;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 
 /**
@@ -16,6 +18,7 @@ import java.io.IOException;
 public class SpeedTester_2 {
 
     private static String directory = "C:\\Users\\tonio\\Desktop\\Produkte\\Sentinel-3-updated";
+    private static int number_of_iterations = 15;
 
     public static void main(String[] args) throws IOException {
         String[] productDirNames = new String[] {
@@ -31,25 +34,67 @@ public class SpeedTester_2 {
                 "S3A_SY_2_SYN____20130621T100932_20130621T101146_20140604T091546_0134_001_002______LN1_D_NC____.SEN3",
                 "S3A_SY_2_VG1____20130621T100922_20130621T104922_20140527T011902_GLOBAL____________LN2_D_NR____.SEN3",
                 "S3A_SY_2_VGP____20130621T100932_20130621T101146_20140604T091546_0134_001_002______LN1_D_NC____.SEN3"};
+        final File performancesFile = new File("performances.csv");
+        final BufferedWriter writer = new BufferedWriter(new FileWriter(performancesFile));
         for (String productDirName : productDirNames) {
-            printTimeRequiredForReadingProduct(productDirName);
+            printTimesRequiredForReadingProduct(productDirName, writer);
         }
+//        for (String productDirName : productDirNames) {
+//            printTimesRequiredForWritingProduct(productDirName, writer);
+//        }
+        writer.close();
         FileUtils.deleteTree(new File(directory + File.separator + "test"));
     }
 
-    private static void printTimeRequiredForReadingProduct(String productDirName) throws IOException {
+    private static void printTimesRequiredForReadingProduct(String productDirName, BufferedWriter writer) throws IOException {
+        writer.write("Reading " + productDirName + "\n");
+        writer.write("Run;Required time in s;Pixels per s\n");
+        final StopWatch stopWatch = new StopWatch();
+        double totalTime = 0;
+        double size = 0;
+        for(int i = 0; i < number_of_iterations; i++) {
+            final File file = new File(directory + File.separator + productDirName + File.separator + "xfdumanifest.xml");
+            final ProductReader productReader = new Sentinel3ProductReaderPlugIn().createReaderInstance();
+            stopWatch.start();
+            final Product product = productReader.readProductNodes(file, null);
+            stopWatch.stop();
+            double time = ((double)stopWatch.getTimeDiff()) / 1000;
+            totalTime += time;
+            size = product.getSceneRasterWidth() * product.getSceneRasterHeight();
+            product.dispose();
+            writer.write((i + 1) + ";" + time + ";" + (size / time) + "\n");
+        }
+        totalTime /= number_of_iterations;
+        writer.write("Averaged;" + totalTime + ";" + (size / totalTime) + "\n");
+        System.out.println("Average time required for reading of " + productDirName + " = " + totalTime + " s");
+        System.out.println("Average time required for reading one pixel of " + productDirName + " = " +
+                                   (size / totalTime) + " s");
+    }
+
+    private static void printTimesRequiredForWritingProduct(String productDirName, BufferedWriter writer) throws IOException {
+        writer.write("Writing " + productDirName + "\n");
+        writer.write("Run;Required time in s;Pixels per s\n");
         final File file = new File(directory + File.separator + productDirName + File.separator + "xfdumanifest.xml");
         final ProductReader productReader = new Sentinel3ProductReaderPlugIn().createReaderInstance();
-        final StopWatch stopWatch = new StopWatch();
-        stopWatch.start();
         final Product product = productReader.readProductNodes(file, null);
-        stopWatch.stop();
-        System.out.println("Time required for reading of " + productDirName + " = " + stopWatch.getTimeDiffString());
+        final StopWatch stopWatch = new StopWatch();
         final File outputFile = new File(directory + File.separator + "test" + File.separator + productDirName);
-        stopWatch.start();
-        ProductIO.writeProduct(product, outputFile, "BEAM-DIMAP", false);
-        stopWatch.stop();
-        System.out.println("Time required for writing of " + productDirName + " = " + stopWatch.getTimeDiffString());
+        double size = product.getSceneRasterWidth() * product.getSceneRasterHeight();
+        double totalTime = 0;
+        for(int i = 0; i < number_of_iterations; i++) {
+            stopWatch.start();
+            ProductIO.writeProduct(product, outputFile, "BEAM-DIMAP", false);
+            stopWatch.stop();
+            outputFile.delete();
+            double time = ((double)stopWatch.getTimeDiff())  / 1000;
+            writer.write((i + 1) + ";" + time + ";" + (size / time) + "\n");
+            totalTime += time;
+        }
+        totalTime /= number_of_iterations;
+        writer.write("Averaged;" + totalTime + ";" + (size / totalTime) + "\n");
+        System.out.println("Average time required for writing of " + productDirName + " = " + totalTime + " s");
+        System.out.println("Average time required for writing one pixel of " + productDirName + " = " +
+                                   (size / totalTime) + " s");
         product.dispose();
     }
 
