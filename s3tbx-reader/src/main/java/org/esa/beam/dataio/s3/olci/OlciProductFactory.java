@@ -3,6 +3,7 @@ package org.esa.beam.dataio.s3.olci;
 import org.esa.beam.dataio.s3.AbstractProductFactory;
 import org.esa.beam.dataio.s3.Manifest;
 import org.esa.beam.dataio.s3.Sentinel3ProductReader;
+import org.esa.beam.dataio.s3.util.S3NetcdfReader;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.GeoCodingFactory;
 import org.esa.beam.framework.datamodel.MetadataElement;
@@ -10,6 +11,7 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.RasterDataNode;
 import org.esa.beam.framework.datamodel.TiePointGeoCoding;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -88,7 +90,6 @@ abstract class OlciProductFactory extends AbstractProductFactory {
         final Band latBand = targetProduct.getBand("latitude");
         final Band lonBand = targetProduct.getBand("longitude");
         if (latBand != null && lonBand != null) {
-
             targetProduct.setGeoCoding(
                     GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, getValidExpression(), 5));
         }
@@ -116,5 +117,12 @@ abstract class OlciProductFactory extends AbstractProductFactory {
     }
 
     protected abstract String getValidExpression();
+
+    @Override
+    protected Product readProduct(String fileName) throws IOException {
+        final File file = new File(getInputFileParentDirectory(), fileName);
+        final S3NetcdfReader reader = OlciLNetcdfReaderFactory.createOlciNetcdfReader(file);
+        return reader.readProduct();
+    }
 
 }

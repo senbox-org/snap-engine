@@ -28,11 +28,4 @@ public class OlciLevel2LProductFactory extends OlciProductFactory {
                                               "lambda0:FWHM:solar_flux");
     }
 
-    @Override
-    protected Product readProduct(String fileName) throws IOException {
-        final File file = new File(getInputFileParentDirectory(), fileName);
-        final S3NetcdfReader reader = OlciLNetcdfReaderFactory.createOlciNetcdfReader(file);
-        return reader.readProduct();
-    }
-
 }

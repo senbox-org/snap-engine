@@ -21,10 +21,12 @@ public class S3MultiLevelOpImage extends AbstractNetcdfMultiLevelImage {
     private String nameOfReferencingIndexDimension;
     private String nameOfDisplayedDimension;
     private boolean dimensionsTurned;
+    private RasterDataNode rasterDataNode;
 
     public S3MultiLevelOpImage(RasterDataNode rasterDataNode, Variable variable, String dimensionName,
                                int dimensionIndex, boolean dimensionsTurned) {
         super(rasterDataNode);
+        this.rasterDataNode = rasterDataNode;
         this.variable = variable;
         this.dimensionName = dimensionName;
         this.dimensionIndex = dimensionIndex;
@@ -56,6 +58,15 @@ public class S3MultiLevelOpImage extends AbstractNetcdfMultiLevelImage {
                                                     imageTileSize, resolutionLevel, dimensionIndex,
                                                     referencedIndexVariable, nameOfReferencingIndexDimension,
                                                     nameOfDisplayedDimension);
+        }
+        if(rasterDataNode.getName().endsWith("_msb")) {
+            return S3VariableOpImage.createS3VariableOpImage(variable, dataBufferType, sceneRasterWidth,
+                                                             sceneRasterHeight, imageTileSize, resolutionLevel,
+                                                             dimensionName, dimensionIndex, dimensionsTurned, true);
+        } else if(rasterDataNode.getName().endsWith("_lsb")) {
+            return S3VariableOpImage.createS3VariableOpImage(variable, dataBufferType, sceneRasterWidth,
+                                                             sceneRasterHeight, imageTileSize, resolutionLevel,
+                                                             dimensionName, dimensionIndex, dimensionsTurned, false);
         }
         return new S3VariableOpImage(variable, dataBufferType, sceneRasterWidth, sceneRasterHeight, imageTileSize,
                               resolutionLevel, dimensionName, dimensionIndex, dimensionsTurned);

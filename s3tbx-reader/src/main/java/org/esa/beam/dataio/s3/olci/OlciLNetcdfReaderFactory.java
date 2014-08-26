@@ -12,7 +12,7 @@ public class OlciLNetcdfReaderFactory {
 
     static S3NetcdfReader createOlciNetcdfReader(File file) throws IOException {
         final String fileName = file.getName();
-        if(fileName.startsWith("tie_") && fileName.endsWith(".nc")) {
+        if(fileName.equals("tie_meteo.nc")) {
             return new OlciTieMeteoReader(file.getAbsolutePath());
         } else if (fileName.equals("instrument_data.nc")) {
             return new OlciInstrumentDataReader(file.getAbsolutePath());
