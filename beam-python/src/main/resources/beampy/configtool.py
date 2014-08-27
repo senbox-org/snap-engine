@@ -36,11 +36,12 @@ def _configure_beampy(java_home=None,
         beampy_lib_dir = os.path.normpath(os.path.join(beampy_dir, '..', 'lib'))
         archive_path = os.path.join(beampy_lib_dir, jpy_distr_name + '.zip')
         if not os.path.exists(archive_path):
-            logging.error("Can't find the required binary distribution '" + archive_path + "' of\n"
-                          "Python module 'jpy' for this system. You can try to generate one yourself.\n"
-                          "Please go to https://github.com/bcdev/jpy and follow the build instructions\n"
-                          "given there.")
-            raise IOError("can't find required binary distribution '" + archive_path + "'")
+            logging.error("Can't find binary distribution '" + archive_path + "'")
+            logging.error("... of Python module 'jpy' for this system. You can try to generate one yourself.")
+            logging.error("... Please go to https://github.com/bcdev/jpy and follow the build instructions")
+            logging.error("... given there.")
+            return 10
+
         #print('Found binary distribution ' + archive_path)
         #os.mkdir(os.path.join(basename)
         logging.info("unzipping '" + archive_path + "'")
@@ -50,8 +51,8 @@ def _configure_beampy(java_home=None,
 
     #
     # Execute jpyutil.py to write runtime configuration:
-    # jpyconfig.properties - Configuration for Java about Python (jpy extension module)
-    #   jpyconfig.py - Configuration for Python about Java (JVM)
+    # - jpyconfig.properties - Configuration for Java about Python (jpy extension module)
+    # - jpyconfig.py - Configuration for Python about Java (JVM)
     #
 
     retcode = 0
@@ -80,7 +81,9 @@ def _configure_beampy(java_home=None,
                                                  req_java_api_conf=req_java,
                                                  req_py_api_conf=req_py)
         else:
-            raise RuntimeError("Can't find ")
+            logging.error("Missing Python module '" + jpyutil_file + "' required to complete the configuration.")
+            logging.error("This file should have been part of binary distribution '" + archive_path + "'.")
+            retcode = 20
 
     return retcode
 
@@ -119,9 +122,12 @@ if __name__ == '__main__':
                                     req_java=args.req_java,
                                     req_py=args.req_py,
                                     force=args.force)
-    except Exception:
-        logging.exception("Configuration failed")
-        retcode = 10
+    except:
+        logging.exception("Configuration of 'beampy' failed")
+        retcode = 100
+
+    if retcode == 0:
+        logging.info("Configuration of 'beampy' completed")
 
     exit(retcode)
 
