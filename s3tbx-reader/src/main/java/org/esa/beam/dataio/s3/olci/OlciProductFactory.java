@@ -5,11 +5,11 @@ import org.esa.beam.dataio.s3.Manifest;
 import org.esa.beam.dataio.s3.Sentinel3ProductReader;
 import org.esa.beam.dataio.s3.util.S3NetcdfReader;
 import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.GeoCodingFactory;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.RasterDataNode;
 import org.esa.beam.framework.datamodel.TiePointGeoCoding;
+import org.esa.beam.framework.datamodel.TiePointGrid;
 
 import java.io.File;
 import java.io.IOException;
@@ -82,22 +82,37 @@ abstract class OlciProductFactory extends AbstractProductFactory {
         if (targetProduct.containsBand(sourceBandName)) {
             sourceBand.setName("TP_" + sourceBandName);
         }
-        return copyBandAsTiePointGrid(sourceBand, targetProduct, subSamplingX, subSamplingY, 0.0f, 0.0f);
+        final long copyingBandAsTiePointGridStartTime = System.nanoTime();
+        final TiePointGrid tiePointGrid = copyBandAsTiePointGrid(sourceBand, targetProduct, subSamplingX, subSamplingY, 0.0f, 0.0f);
+        final long copyingBandAsTiePointGridEndTime = System.nanoTime();
+        System.out.println("Time required for copying " + sourceBandName + " as tie point grid: " +
+                                   (((double)copyingBandAsTiePointGridEndTime - copyingBandAsTiePointGridStartTime)
+                                           / 1000000000));
+        return tiePointGrid;
     }
 
     @Override
     protected void setGeoCoding(Product targetProduct) throws IOException {
-        final Band latBand = targetProduct.getBand("latitude");
-        final Band lonBand = targetProduct.getBand("longitude");
-        if (latBand != null && lonBand != null) {
-            targetProduct.setGeoCoding(
-                    GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, getValidExpression(), 5));
+        //pixel geocoding slows down reading of products drastically
+
+//        final Band latBand = targetProduct.getBand("latitude");
+//        final Band lonBand = targetProduct.getBand("longitude");
+//        if (latBand != null && lonBand != null) {
+//            targetProduct.setGeoCoding(
+//                    GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, getValidExpression(), 5));
+//        }
+//        if (targetProduct.getGeoCoding() == null) {
+        if (targetProduct.getTiePointGrid("latitude") != null && targetProduct.getTiePointGrid(
+                "longitude") != null) {
+            targetProduct.setGeoCoding(new TiePointGeoCoding(targetProduct.getTiePointGrid("latitude"),
+                                                             targetProduct.getTiePointGrid("longitude")));
         }
+//        }
         if (targetProduct.getGeoCoding() == null) {
-            if (targetProduct.getTiePointGrid("latitude") != null && targetProduct.getTiePointGrid(
-                    "longitude") != null) {
-                targetProduct.setGeoCoding(new TiePointGeoCoding(targetProduct.getTiePointGrid("latitude"),
-                                                                 targetProduct.getTiePointGrid("longitude")));
+            if (targetProduct.getTiePointGrid("TP_latitude") != null && targetProduct.getTiePointGrid(
+                    "TP_longitude") != null) {
+                targetProduct.setGeoCoding(new TiePointGeoCoding(targetProduct.getTiePointGrid("TP_latitude"),
+                                                                 targetProduct.getTiePointGrid("TP_longitude")));
             }
         }
     }

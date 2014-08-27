@@ -1,25 +1,16 @@
 package org.esa.beam.dataio.s3.synergy;
 
-import org.esa.beam.dataio.netcdf.ProfileReadContext;
-import org.esa.beam.dataio.netcdf.util.Constants;
 import org.esa.beam.dataio.s3.util.S3NetcdfReader;
 import org.esa.beam.framework.datamodel.CrsGeoCoding;
-import org.esa.beam.framework.datamodel.GeoCoding;
 import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.jai.ResolutionLevel;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 import ucar.ma2.Array;
 import ucar.ma2.Index;
-import ucar.nc2.Attribute;
 import ucar.nc2.Variable;
 
-import java.awt.Dimension;
-import java.awt.image.RenderedImage;
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * @author Tonio Fincke
@@ -30,12 +21,8 @@ public class VgtReader extends S3NetcdfReader {
         super(pathToFile);
     }
 
-    protected String getNameOfRowDimension() {
-        return "latitude";
-    }
-
-    protected String getNameOfColumnDimension() {
-        return "longitude";
+    protected String[][] getRowColumnNamePairs() {
+        return new String[][]{{"latitude", "longitude"}};
     }
 
     @Override
@@ -68,8 +55,8 @@ public class VgtReader extends S3NetcdfReader {
             pixelX = 0.5f;
             pixelY = 0.5f;
 
-                pixelSizeY = -pixelSizeY;
-                northing = latData.getDouble(latData.getIndex().set(0));
+            pixelSizeY = -pixelSizeY;
+            northing = latData.getDouble(latData.getIndex().set(0));
 
             if (pixelSizeX <= 0 || pixelSizeY <= 0) {
                 return;
