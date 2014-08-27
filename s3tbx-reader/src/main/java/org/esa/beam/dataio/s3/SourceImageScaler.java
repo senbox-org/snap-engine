@@ -88,6 +88,7 @@ public class SourceImageScaler {
             RenderedImage renderedImage = image;
             final float xScale = scalings[0] * scaleRatio;
             final float yScale = scalings[1] * scaleRatio;
+            // todo - clarify whether this should actually be || instead of &&
             if (xScale != 1.0f && yScale != 1.0f) {
                 renderedImage = ScaleDescriptor.create(image, xScale, yScale, scaleTranslations[0], scaleTranslations[1],
                                                        interpolation, renderingHints);
