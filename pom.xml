@@ -34,7 +34,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <beamVersion>[0.5-SNAPSHOT,1.0-SNAPSHOT)</beamVersion>
+        <snap.version>0.5.0-SNAPSHOT</snap.version>
         <outputdir>../../output</outputdir>
     </properties>
 
@@ -91,31 +91,31 @@
             <dependency>
                 <groupId>org.esa.snap</groupId>
                 <artifactId>snap-core</artifactId>
-                <version>${beamVersion}</version>
+                <version>${snap.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.esa.snap</groupId>
                 <artifactId>snap-ui</artifactId>
-                <version>${beamVersion}</version>
+                <version>${snap.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.esa.snap</groupId>
                 <artifactId>snap-gpf</artifactId>
-                <version>${beamVersion}</version>
+                <version>${snap.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.esa.snap</groupId>
                 <artifactId>snap-visat-rcp</artifactId>
-                <version>${beamVersion}</version>
+                <version>${snap.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.esa.snap</groupId>
                 <artifactId>snap-netcdf</artifactId>
-                <version>${beamVersion}</version>
+                <version>${snap.version}</version>
             </dependency>
 
             <dependency>
@@ -136,7 +136,7 @@
     </dependencies>
 
     <build>
-        <outputDirectory>${outputdir}/modules/${project.artifactId}-${project.version}</outputDirectory>
+        <outputDirectory>${outputdir}/modules/${project.artifactId}-${snap.version}</outputDirectory>
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
