@@ -188,8 +188,10 @@ public class PyOperator extends Operator {
         // "java.home" is always present
         List<String> command = new ArrayList<>();
         command.add(pythonExecutable);
-        command.add("configtool.py");
+        command.add("beampyutil.py");
         command.add("--force");
+        command.add("--log_file");
+        command.add("beampyutil.log");
         String javaHome = System.getProperty("java.home");
         if (javaHome != null) {
             command.add( "--java_home");
@@ -197,7 +199,7 @@ public class PyOperator extends Operator {
         }
         String osArch = System.getProperty("os.arch");  // "os.arch" is always present
         if (osArch != null) {
-            command.add("--arch");
+            command.add("--req_arch");
             command.add(osArch);
         }
         String commandLine = toCommandLine(command);
