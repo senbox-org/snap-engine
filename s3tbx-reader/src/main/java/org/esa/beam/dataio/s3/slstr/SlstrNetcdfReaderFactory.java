@@ -14,6 +14,8 @@ public class SlstrNetcdfReaderFactory {
         final String fileName = file.getName();
         if(fileName.equals("FRP_in.nc")) {
             return new SlstrFRPReader(file.getAbsolutePath());
+        } else if(fileName.equals("L2P.nc")) {
+            return new SlstrL2WSTL2PReader(file.getAbsolutePath());
         } else if(fileName.equals("LST_ancillary_ds.nc")) {
             return new SlstrLSTAncillaryDsReader(file.getAbsolutePath());
         } else {

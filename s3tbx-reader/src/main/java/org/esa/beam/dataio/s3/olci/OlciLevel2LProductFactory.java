@@ -24,14 +24,8 @@ public class OlciLevel2LProductFactory extends OlciProductFactory {
 
     @Override
     protected void setAutoGrouping(Product[] sourceProducts, Product targetProduct) {
-        targetProduct.setAutoGrouping("IWV:OGVI:OTCI:RC681:RC865:atmospheric_temperature_profile");
-    }
-
-    @Override
-    protected Product readProduct(String fileName) throws IOException {
-        final File file = new File(getInputFileParentDirectory(), fileName);
-        final S3NetcdfReader reader = OlciLNetcdfReaderFactory.createOlciNetcdfReader(file);
-        return reader.readProduct();
+        targetProduct.setAutoGrouping("IWV:OGVI:OTCI:RC681:RC865:atmospheric_temperature_profile:" +
+                                              "lambda0:FWHM:solar_flux");
     }
 
 }

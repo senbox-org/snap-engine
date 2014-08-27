@@ -21,7 +21,7 @@
 
     <groupId>org.esa.s3tbx</groupId>
     <artifactId>s3tbx</artifactId>
-    <version>0.6.0</version>
+    <version>0.5.0-SNAPSHOT</version>
     <name>Sentinel-3 Toolbox</name>
     <description>Tools for the Sentinel-3 Satellite</description>
     <url>https://github.com/bcdev/s3tbx</url>
@@ -34,15 +34,15 @@
     <packaging>pom</packaging>
 
     <properties>
-        <beamVersion>[5.0,5.1-SNAPSHOT)</beamVersion>
+        <snap.version>0.5.0-SNAPSHOT</snap.version>
         <outputdir>../../output</outputdir>
     </properties>
 
     <repositories>
         <repository>
-            <id>bc-mvn-repo-public</id>
-            <name>Public Maven Repository at Brockmann-Consult</name>
-            <url>http://www.brockmann-consult.de/mvn/os</url>
+            <id>snap-repo-public</id>
+            <name>Public Maven Repository for SNAP</name>
+            <url>http://nexus.senbox.net/nexus/content/repositories/public/</url>
             <releases>
                 <enabled>true</enabled>
                 <checksumPolicy>warn</checksumPolicy>
@@ -56,9 +56,9 @@
 
     <pluginRepositories>
         <pluginRepository>
-            <id>bc-mvn-repo-public</id>
-            <name>Public Maven Repository at Brockmann-Consult</name>
-            <url>http://www.brockmann-consult.de/mvn/os</url>
+            <id>snap-repo-public</id>
+            <name>Public Maven Repository for SNAP</name>
+            <url>http://nexus.senbox.net/nexus/content/repositories/public/</url>
             <releases>
                 <enabled>true</enabled>
                 <checksumPolicy>warn</checksumPolicy>
@@ -66,32 +66,21 @@
             <snapshots>
                 <enabled>true</enabled>
                 <checksumPolicy>warn</checksumPolicy>
-            </snapshots>
-        </pluginRepository>
-        <pluginRepository>
-            <id>apache.org</id>
-            <name>Maven Plugin Snapshots</name>
-            <url>http://people.apache.org/repo/m2-snapshot-repository</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
             </snapshots>
         </pluginRepository>
     </pluginRepositories>
 
     <distributionManagement>
         <repository>
-            <id>bc-mvn-repo-public</id>
-            <name>Public Maven Repository at Brockmann Consult</name>
-            <url>scp://www.brockmann-consult.de/var/www/www.brockmann-consult.de/mvn/os</url>
+            <id>snap-repo-public</id>
+            <name>Public Maven Repository for SNAP</name>
+            <url>http://nexus.senbox.net/nexus/content/repositories/releases/</url>
             <uniqueVersion>false</uniqueVersion>
         </repository>
         <snapshotRepository>
-            <id>bc-mvn-repo-public</id>
-            <name>Public Maven Snapshot Repository at Brockmann Consult</name>
-            <url>scp://www.brockmann-consult.de/var/www/www.brockmann-consult.de/mvn/os</url>
+            <id>snap-repo-public</id>
+            <name>Public Maven Snapshot Repository for SNAP</name>
+            <url>http://nexus.senbox.net/nexus/content/repositories/snapshots/</url>
             <uniqueVersion>false</uniqueVersion>
         </snapshotRepository>
     </distributionManagement>
@@ -100,33 +89,33 @@
         <dependencies>
 
             <dependency>
-                <groupId>org.esa.beam</groupId>
-                <artifactId>beam-core</artifactId>
-                <version>${beamVersion}</version>
+                <groupId>org.esa.snap</groupId>
+                <artifactId>snap-core</artifactId>
+                <version>${snap.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.esa.beam</groupId>
-                <artifactId>beam-ui</artifactId>
-                <version>${beamVersion}</version>
+                <groupId>org.esa.snap</groupId>
+                <artifactId>snap-ui</artifactId>
+                <version>${snap.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.esa.beam</groupId>
-                <artifactId>beam-gpf</artifactId>
-                <version>${beamVersion}</version>
+                <groupId>org.esa.snap</groupId>
+                <artifactId>snap-gpf</artifactId>
+                <version>${snap.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.esa.beam</groupId>
-                <artifactId>beam-visat-rcp</artifactId>
-                <version>${beamVersion}</version>
+                <groupId>org.esa.snap</groupId>
+                <artifactId>snap-visat-rcp</artifactId>
+                <version>${snap.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.esa.beam</groupId>
-                <artifactId>beam-netcdf</artifactId>
-                <version>${beamVersion}</version>
+                <groupId>org.esa.snap</groupId>
+                <artifactId>snap-netcdf</artifactId>
+                <version>${snap.version}</version>
             </dependency>
 
             <dependency>
@@ -147,7 +136,7 @@
     </dependencies>
 
     <build>
-        <outputDirectory>${outputdir}/modules/${project.artifactId}-${project.version}</outputDirectory>
+        <outputDirectory>${outputdir}/modules/${project.artifactId}-${snap.version}</outputDirectory>
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -189,7 +178,7 @@
         <developer>
             <id>olaf</id>
             <name>Olaf Danne</name>
-            <email>olaf.dannet@brockmann-consult.de</email>
+            <email>olaf.danne@brockmann-consult.de</email>
             <organization>Brockmann Consult</organization>
             <roles>
                 <role>Java Developer</role>

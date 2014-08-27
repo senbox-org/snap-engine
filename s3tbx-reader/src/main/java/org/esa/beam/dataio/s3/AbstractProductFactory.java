@@ -14,6 +14,7 @@ package org.esa.beam.dataio.s3;/*
  * with this program; if not, see http://www.gnu.org/licenses/
  */
 
+import org.esa.beam.dataio.s3.util.ColorProvider;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Band;
@@ -131,6 +132,7 @@ public abstract class AbstractProductFactory implements ProductFactory {
         addSpecialVariables(masterProduct, targetProduct);
         setMasks(targetProduct);
         setTimes(targetProduct);
+        setUncertaintyBands(targetProduct);
         if (targetProduct.getSceneGeoCoding() == null) {
             setGeoCoding(targetProduct);
         }
@@ -138,6 +140,20 @@ public abstract class AbstractProductFactory implements ProductFactory {
         setAutoGrouping(sourceProducts, targetProduct);
 
         return targetProduct;
+    }
+
+    protected void setUncertaintyBands(Product product) {
+        final Band[] bands = product.getBands();
+        for (Band band : bands) {
+            final String bandName = band.getName();
+            final String errorBandName = bandName + "_err";
+            final String uncertaintyBandName = bandName + "_uncertainty";
+            if (product.containsBand(errorBandName)) {
+                band.setAncillaryBand("error", product.getBand(errorBandName));
+            } else if (product.containsBand(uncertaintyBandName)) {
+                band.setAncillaryBand("uncertainty", product.getBand(uncertaintyBandName));
+            }
+        }
     }
 
     protected void processProductSpecificMetadata(MetadataElement metadataElement) {
@@ -160,6 +176,7 @@ public abstract class AbstractProductFactory implements ProductFactory {
 
     protected void setMasks(Product targetProduct) {
         final Band[] bands = targetProduct.getBands();
+        final ColorProvider colorProvider = new ColorProvider();
         for (Band band : bands) {
             final SampleCoding sampleCoding = band.getSampleCoding();
             if (sampleCoding != null) {
@@ -176,7 +193,8 @@ public abstract class AbstractProductFactory implements ProductFactory {
                             expression = bandName + " == " + sampleValue;
                         }
                         final String maskName = bandName + "_" + sampleName;
-                        targetProduct.addMask(maskName, expression, expression, Color.RED, 0.5);
+                        final Color maskColor = colorProvider.getMaskColor(sampleName);
+                        targetProduct.addMask(maskName, expression, expression, maskColor, 0.5);
                     }
                 }
             }
@@ -345,10 +363,7 @@ public abstract class AbstractProductFactory implements ProductFactory {
 
         try {
             return DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(inputStream);
-        } catch (SAXException e) {
-            getLogger().log(Level.SEVERE, msg, e);
-            throw new IOException(msg, e);
-        } catch (ParserConfigurationException e) {
+        } catch (SAXException | ParserConfigurationException e) {
             getLogger().log(Level.SEVERE, msg, e);
             throw new IOException(msg, e);
         }

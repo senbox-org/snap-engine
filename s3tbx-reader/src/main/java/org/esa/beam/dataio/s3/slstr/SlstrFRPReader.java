@@ -26,7 +26,7 @@ class SlstrFRPReader extends S3NetcdfReader {
 //        final List<Variable> variables = netcdfFile.getVariables();
 //        for (final Variable variable : variables) {
 //            if (variable.findDimensionIndex("rows") != -1 && variable.findDimensionIndex("columns") != -1) {
-//                createBand(product, variable, variable.getFullName());
+//                addVariableAsBand(product, variable, variable.getFullName());
 //            }
 //            addVariableMetadata(variable, product);
 //        }

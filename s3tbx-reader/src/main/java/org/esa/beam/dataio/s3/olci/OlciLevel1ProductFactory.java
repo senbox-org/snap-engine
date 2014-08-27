@@ -40,7 +40,8 @@ public class OlciLevel1ProductFactory extends OlciProductFactory {
 
     @Override
     protected void setAutoGrouping(Product[] sourceProducts, Product targetProduct) {
-        targetProduct.setAutoGrouping("Oa*_radiance:Oa*_radiance_err");
+        targetProduct.setAutoGrouping("Oa*_radiance:Oa*_radiance_err:atmospheric_temperature_profile:" +
+                                              "lambda0:FWHM:solar_flux");
     }
 
     @Override

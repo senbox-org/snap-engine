@@ -19,6 +19,8 @@ import org.esa.beam.dataio.s3.AbstractProductFactory;
 import org.esa.beam.dataio.s3.Manifest;
 import org.esa.beam.dataio.s3.Sentinel3ProductReader;
 import org.esa.beam.dataio.s3.SourceImageScaler;
+import org.esa.beam.dataio.s3.slstr.SlstrNetcdfReaderFactory;
+import org.esa.beam.dataio.s3.util.S3NetcdfReader;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Mask;
 import org.esa.beam.framework.datamodel.MetadataAttribute;
@@ -31,6 +33,8 @@ import javax.media.jai.BorderExtender;
 import javax.media.jai.Interpolation;
 import javax.media.jai.JAI;
 import java.awt.RenderingHints;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -89,14 +93,10 @@ public class VgtProductFactory extends AbstractProductFactory {
     }
 
     @Override
-    protected void setMasks(Product targetProduct) {
-        final ProductNodeGroup<Mask> maskGroup = targetProduct.getMaskGroup();
-        for (int i = 0; i < maskGroup.getNodeCount(); i++) {
-            final Mask mask = maskGroup.get(i);
-            if (mask.getImageType() == Mask.BandMathsType.INSTANCE) {
-                final String expression = "SM != 0 && " + Mask.BandMathsType.getExpression(mask);
-                Mask.BandMathsType.setExpression(mask, expression);
-            }
-        }
+    protected Product readProduct(String fileName) throws IOException {
+        final File file = new File(getInputFileParentDirectory(), fileName);
+        final VgtReader reader = new VgtReader(file.getAbsolutePath());
+        return reader.readProduct();
     }
+
 }

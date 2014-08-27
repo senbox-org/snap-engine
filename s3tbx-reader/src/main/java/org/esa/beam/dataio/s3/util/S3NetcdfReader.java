@@ -12,8 +12,6 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.datamodel.SampleCoding;
 import org.esa.beam.framework.datamodel.VirtualBand;
-import org.esa.beam.jai.ImageManager;
-import org.esa.beam.jai.ResolutionLevel;
 import org.esa.beam.util.io.FileUtils;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
@@ -31,9 +29,6 @@ import java.util.List;
  * @author Tonio Fincke
  */
 public class S3NetcdfReader {
-
-    //todo make specific solution for dimension "channel" more generic?
-    //todo work better with "channel" metadata - after it is no longer experimental
 
     private static final String product_type = "product_type";
     private static final String flag_values = "flag_values";
@@ -58,6 +53,7 @@ public class S3NetcdfReader {
         product.setFileLocation(file);
         addGlobalMetadata(product);
         addBands(product);
+        addGeoCoding(product);
         for (final Band band : product.getBands()) {
             if (band instanceof VirtualBand) {
                 continue;
@@ -67,26 +63,57 @@ public class S3NetcdfReader {
         return product;
     }
 
+    protected void addGeoCoding(Product product) {
+
+    }
+
+    protected String[] getSeparatingThirdDimensions() {
+        return new String[0];
+    }
+
+    protected String[] getSuffixesForSeparatingThirdDimensions() {
+        return new String[0];
+    }
+
+    protected String getNameOfRowDimension() {
+        return "rows";
+    }
+
+    protected String getNameOfColumnDimension() {
+        return "columns";
+    }
+
     protected RenderedImage createSourceImage(Band band) {
-        final int bufferType = ImageManager.getDataBufferType(band.getDataType());
-        final int sourceWidth = band.getSceneRasterWidth();
-        final int sourceHeight = band.getSceneRasterHeight();
-        final java.awt.Dimension tileSize = band.getProduct().getPreferredTileSize();
         final String bandName = band.getName();
         String variableName = bandName;
-        Variable variable;
+        if(variableName.endsWith("_lsb")) {
+            variableName = variableName.substring(0, variableName.indexOf("_lsb"));
+        } else if(variableName.endsWith("_msb")) {
+            variableName = variableName.substring(0, variableName.indexOf("_msb"));
+        }
+        Variable variable = null;
         int dimensionIndex = -1;
         String dimensionName = "";
-        if(bandName.contains("_channel")) {
-            variableName = bandName.substring(0, variableName.indexOf("_channel"));
-            variable = netcdfFile.findVariable(variableName);
-            dimensionName = "channel";
-            dimensionIndex = Integer.parseInt(bandName.substring(bandName.length() - 1)) - 1;
-        } else {
+        final String[] separatingDimensions = getSeparatingThirdDimensions();
+        final String[] suffixesForSeparatingThirdDimensions = getSuffixesForSeparatingThirdDimensions();
+        for (int i = 0; i < separatingDimensions.length; i++) {
+            final String dimension = separatingDimensions[i];
+            final String suffix = suffixesForSeparatingThirdDimensions[i];
+            if (bandName.contains(suffix)) {
+                variableName = bandName.substring(0, variableName.indexOf(suffix) - 1);
+                variable = netcdfFile.findVariable(variableName);
+                dimensionName = dimension;
+                dimensionIndex = Integer.parseInt(bandName.substring(bandName.lastIndexOf("_") + 1)) - 1;
+            }
+        }
+        if (variable == null) {
             variable = netcdfFile.findVariable(variableName);
         }
-        return new S3VariableOpImage(variable, bufferType, sourceWidth, sourceHeight, tileSize,
-                                        ResolutionLevel.MAXRES, dimensionName, dimensionIndex);
+        return createImage(band, variable, dimensionName, dimensionIndex);
+    }
+
+    protected RenderedImage createImage(Band band, Variable variable, String dimensionName, int dimensionIndex) {
+        return new S3MultiLevelOpImage(band, variable, dimensionName, dimensionIndex, false);
     }
 
     private void addGlobalMetadata(Product product) {
@@ -107,77 +134,122 @@ public class S3NetcdfReader {
     protected void addBands(Product product) {
         final List<Variable> variables = netcdfFile.getVariables();
         for (final Variable variable : variables) {
-            if (variable.findDimensionIndex("rows") != -1 && variable.findDimensionIndex("columns") != -1) {
+            if (variable.findDimensionIndex(getNameOfRowDimension()) != -1 &&
+                    variable.findDimensionIndex(getNameOfColumnDimension()) != -1) {
                 final String variableName = variable.getFullName();
-                if(variable.findDimensionIndex("channel") != - 1) {
-                    final Dimension channelDimension = variable.getDimension(variable.findDimensionIndex("channel"));
-                    for(int i = 0; i < channelDimension.getLength(); i++) {
-                        createBand(product, variable, variableName + "_channel" + (i + 1));
+                final String[] dimensions = getSeparatingThirdDimensions();
+                final String[] suffixes = getSuffixesForSeparatingThirdDimensions();
+                boolean variableHasBeenAdded = false;
+                for (int i = 0; i < dimensions.length; i++) {
+                    String dimensionName = dimensions[i];
+                    if (variable.findDimensionIndex(dimensionName) != -1) {
+                        final Dimension dimension =
+                                variable.getDimension(variable.findDimensionIndex(dimensionName));
+                        for (int j = 0; j < dimension.getLength(); j++) {
+                            addVariableAsBand(product, variable, variableName + "_" + suffixes[i] + "_" + (j + 1));
+                        }
+                        variableHasBeenAdded = true;
+                        break;
                     }
-                } else {
-                    createBand(product, variable, variableName);
+                }
+                if (!variableHasBeenAdded) {
+                    addVariableAsBand(product, variable, variableName);
                 }
             }
             addVariableMetadata(variable, product);
         }
     }
 
-    protected void createBand(Product product, Variable variable, String variableName) {
-        int type = DataTypeUtils.getEquivalentProductDataType(variable.getDataType(), false, false);
-        final Band band = product.addBand(variableName, type);
-        band.setDescription(variable.getDescription());
+    private static int getRasterDataType(Variable variable) {
+        int rasterDataType = DataTypeUtils.getRasterDataType(variable);
+        if (rasterDataType == -1 && variable.getDataType() == DataType.LONG) {
+            rasterDataType = variable.isUnsigned() ? ProductData.TYPE_UINT32 : ProductData.TYPE_INT32;
+        }
+        return rasterDataType;
+    }
+
+    protected void addVariableAsBand(Product product, Variable variable, String variableName) {
+        int type = getRasterDataType(variable);
+        if (variable.getDataType() == DataType.LONG) {
+            final Band lowerBand = product.addBand(variableName + "_lsb", type);
+            lowerBand.setDescription(variable.getDescription() + "(least significant bytes)");
+            lowerBand.setUnit(variable.getUnitsString());
+            addFillValue(lowerBand, variable);
+            addSampleCodings(product, lowerBand, variable, false);
+            final Band upperBand = product.addBand(variableName + "_msb", type);
+            upperBand.setDescription(variable.getDescription() + "(most significant bytes)");
+            upperBand.setUnit(variable.getUnitsString());
+            addFillValue(upperBand, variable);
+            addSampleCodings(product, upperBand, variable, true);
+        } else {
+            final Band band = product.addBand(variableName, type);
+            band.setDescription(variable.getDescription());
+            band.setUnit(variable.getUnitsString());
+            addFillValue(band, variable);
+            addSampleCodings(product, band, variable, false);
+        }
+    }
+
+    private void addFillValue(Band band, Variable variable) {
         final Attribute fillValueAttribute = variable.findAttribute(fillValue);
         if (fillValueAttribute != null) {
+            //todo double is not always correct
             band.setNoDataValue(fillValueAttribute.getNumericValue().doubleValue());
             band.setNoDataValueUsed(true);
         }
+    }
+
+    private void addSampleCodings(Product product, Band band, Variable variable, boolean msb) {
         final Attribute flagValuesAttribute = variable.findAttribute(flag_values);
         final Attribute flagMasksAttribute = variable.findAttribute(flag_masks);
         final Attribute flagMeaningsAttribute = variable.findAttribute(flag_meanings);
         if (flagValuesAttribute != null && flagMasksAttribute != null) {
-            final FlagCoding flagCoding = getFlagCoding(product, variableName, flagMeaningsAttribute, flagMasksAttribute);
+            final FlagCoding flagCoding =
+                    getFlagCoding(product, band.getName(), flagMeaningsAttribute, flagMasksAttribute, msb);
             band.setSampleCoding(flagCoding);
-            final String indexCodingName = variableName + "_index";
+            final String indexCodingName = band.getName() + "_index";
             final IndexCoding indexCoding = getIndexCoding(product, indexCodingName,
-                                                           flagMeaningsAttribute, flagValuesAttribute);
+                                                           flagMeaningsAttribute, flagValuesAttribute, msb);
             final VirtualBand virtualBand = new VirtualBand(indexCodingName, band.getDataType(),
                                                             band.getSceneRasterWidth(), band.getSceneRasterHeight(),
                                                             band.getName());
             virtualBand.setSampleCoding(indexCoding);
             product.addBand(virtualBand);
         } else if (flagValuesAttribute != null) {
-            final IndexCoding indexCoding = getIndexCoding(product, variableName, flagMeaningsAttribute, flagValuesAttribute);
+            final IndexCoding indexCoding =
+                    getIndexCoding(product, band.getName(), flagMeaningsAttribute, flagValuesAttribute, msb);
             band.setSampleCoding(indexCoding);
         } else if (flagMasksAttribute != null) {
-            final FlagCoding flagCoding = getFlagCoding(product, variableName, flagMeaningsAttribute, flagMasksAttribute);
+            final FlagCoding flagCoding =
+                    getFlagCoding(product, band.getName(), flagMeaningsAttribute, flagMasksAttribute, msb);
             band.setSampleCoding(flagCoding);
         }
     }
 
-    private IndexCoding getIndexCoding(Product product, String variableName, Attribute flagMeaningsAttribute,
-                                       Attribute flagValuesAttribute) {
-        final IndexCoding indexCoding = new IndexCoding(variableName);
-        addSamples(indexCoding, flagMeaningsAttribute, flagValuesAttribute);
-        if (!product.getIndexCodingGroup().contains(variableName)) {
+    private IndexCoding getIndexCoding(Product product, String indexCodingName, Attribute flagMeaningsAttribute,
+                                       Attribute flagValuesAttribute, boolean msb) {
+        final IndexCoding indexCoding = new IndexCoding(indexCodingName);
+        addSamples(indexCoding, flagMeaningsAttribute, flagValuesAttribute, msb);
+        if (!product.getIndexCodingGroup().contains(indexCodingName)) {
             product.getIndexCodingGroup().add(indexCoding);
         }
         return indexCoding;
     }
 
-    private FlagCoding getFlagCoding(Product product, String variableName, Attribute flagMeaningsAttribute,
-                                     Attribute flagMasksAttribute) {
-        final FlagCoding flagCoding = new FlagCoding(variableName);
-        addSamples(flagCoding, flagMeaningsAttribute, flagMasksAttribute);
-        if (!product.getFlagCodingGroup().contains(variableName)) {
+    private FlagCoding getFlagCoding(Product product, String flagCodingName, Attribute flagMeaningsAttribute,
+                                     Attribute flagMasksAttribute, boolean msb) {
+        final FlagCoding flagCoding = new FlagCoding(flagCodingName);
+        addSamples(flagCoding, flagMeaningsAttribute, flagMasksAttribute, msb);
+        if (!product.getFlagCodingGroup().contains(flagCodingName)) {
             product.getFlagCodingGroup().add(flagCoding);
         }
         return flagCoding;
     }
 
-    private static void addSamples(SampleCoding sampleCoding, Attribute sampleMeanings, Attribute sampleValues) {
+    private static void addSamples(SampleCoding sampleCoding, Attribute sampleMeanings, Attribute sampleValues,
+                                   boolean msb) {
         final String[] meanings = getSampleMeanings(sampleMeanings);
         final int sampleCount = Math.min(meanings.length, sampleValues.getLength());
-
         for (int i = 0; i < sampleCount; i++) {
             final String sampleName = replaceNonWordCharacters(meanings[i]);
             switch (sampleValues.getDataType()) {
@@ -195,6 +267,20 @@ public class S3NetcdfReader {
                     break;
                 case INT:
                     sampleCoding.addSample(sampleName, sampleValues.getNumericValue(i).intValue(), null);
+                    break;
+                case LONG:
+                    final long sampleValue = sampleValues.getNumericValue(i).longValue();
+                    if (msb) {
+                        final long sampleValueMsb = sampleValue >>> 32;
+                        if (sampleValueMsb > 0) {
+                            sampleCoding.addSample(sampleName, (int) sampleValueMsb, null);
+                        }
+                    } else {
+                        final long sampleValueLsb = sampleValue & 0x00000000FFFFFFFFL;
+                        if (sampleValueLsb > 0 || sampleValue == 0L) {
+                            sampleCoding.addSample(sampleName, (int) sampleValueLsb, null);
+                        }
+                    }
                     break;
             }
         }
@@ -224,11 +310,25 @@ public class S3NetcdfReader {
         final MetadataElement variableElement = new MetadataElement(variable.getFullName());
         final List<Attribute> attributes = variable.getAttributes();
         for (Attribute attribute : attributes) {
-            int type = DataTypeUtils.getEquivalentProductDataType(attribute.getDataType(), false, false);
-            final ProductData attributeData = getAttributeData(attribute, type);
-            final MetadataAttribute metadataAttribute =
-                    new MetadataAttribute(attribute.getFullName(), attributeData, true);
-            variableElement.addAttribute(metadataAttribute);
+            if (attribute.getFullName().equals("flag_meanings")) {
+                final String[] flagMeanings = attribute.getStringValue().split(" ");
+                for (int i = 0; i < flagMeanings.length; i++) {
+                    String flagMeaning = flagMeanings[i];
+                    final ProductData attributeData = ProductData.createInstance(flagMeaning);
+                    final MetadataAttribute metadataAttribute =
+                            new MetadataAttribute(attribute.getFullName() + "." + i, attributeData, true);
+                    variableElement.addAttribute(metadataAttribute);
+                }
+            } else {
+                int type = DataTypeUtils.getEquivalentProductDataType(attribute.getDataType(), false, false);
+                if (type == -1 && attribute.getDataType() == DataType.LONG) {
+                    type = variable.isUnsigned() ? ProductData.TYPE_UINT32 : ProductData.TYPE_INT32;
+                }
+                final ProductData attributeData = getAttributeData(attribute, type);
+                final MetadataAttribute metadataAttribute =
+                        new MetadataAttribute(attribute.getFullName(), attributeData, true);
+                variableElement.addAttribute(metadataAttribute);
+            }
         }
         product.getMetadataRoot().getElement("Variable_Attributes").addElement(variableElement);
     }
@@ -250,7 +350,29 @@ public class S3NetcdfReader {
                 break;
             }
             case ProductData.TYPE_INT32: {
-                productData = ProductData.createInstance((int[]) attributeValues.copyTo1DJavaArray());
+                Object array = attributeValues.copyTo1DJavaArray();
+                if (array instanceof long[]) {
+                    long[] longArray = (long[]) array;
+                    int[] newArray = new int[longArray.length];
+                    for (int i = 0; i < longArray.length; i++) {
+                        newArray[i] = (int) longArray[i];
+                    }
+                    array = newArray;
+                }
+                productData = ProductData.createInstance((int[]) array);
+                break;
+            }
+            case ProductData.TYPE_UINT32: {
+                Object array = attributeValues.copyTo1DJavaArray();
+                if (array instanceof long[]) {
+                    long[] longArray = (long[]) array;
+                    int[] newArray = new int[longArray.length];
+                    for (int i = 0; i < longArray.length; i++) {
+                        newArray[i] = (int) longArray[i];
+                    }
+                    array = newArray;
+                }
+                productData = ProductData.createInstance((int[]) array);
                 break;
             }
             case ProductData.TYPE_FLOAT32: {
@@ -268,26 +390,16 @@ public class S3NetcdfReader {
         return productData;
     }
 
-//    private double[] attributeValuesToDoubleArray(Array attributeValues) {
-//        final Object[] array = (Object[]) attributeValues.copyTo1DJavaArray();
-//        final int length = array.length;
-//        double[] res = new double[length];
-//        for (int i = 0; i < length; i++) {
-//            res[i] = (Double) array[i];
-//        }
-//        return res;
-//    }
-
-    protected int getWidth() {
-        final Dimension widthDimension = netcdfFile.findDimension("columns");
+    int getWidth() {
+        final Dimension widthDimension = netcdfFile.findDimension(getNameOfColumnDimension());
         if (widthDimension != null) {
             return widthDimension.getLength();
         }
         return 0;
     }
 
-    protected int getHeight() {
-        final Dimension heightDimension = netcdfFile.findDimension("rows");
+    int getHeight() {
+        final Dimension heightDimension = netcdfFile.findDimension(getNameOfRowDimension());
         if (heightDimension != null) {
             return heightDimension.getLength();
         }

@@ -20,19 +20,19 @@
     </changelog>
 
     <dependency>
-        <module>beam-core</module>
+        <module>snap-core</module>
     </dependency>
     <dependency>
-        <module>beam-netcdf</module>
+        <module>snap-netcdf</module>
     </dependency>
     <dependency>
-        <module>beam-visat-rcp</module>
+        <module>snap-visat-rcp</module>
         <optional>true</optional>
     </dependency>
 
     <categories>Reader,Sentinel</categories>
 
-    <extension point="beam-ui:actions">
+    <extension point="snap-ui:actions">
         <action>
             <id>importSentinel3Product</id>
             <helpId>importSentinel3Product</helpId>
@@ -51,7 +51,7 @@
         -->
     </extension>
 
-    <extension point="beam-core:rgbProfiles">
+    <extension point="snap-core:rgbProfiles">
         <!-- todo -->
     </extension>
 
