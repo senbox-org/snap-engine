@@ -9,5 +9,5 @@ beampy.ini
 *.dim
 *.data
 __pycache__/
-jpy.jar
+
 
