@@ -34,6 +34,7 @@
             <outputDirectory>config</outputDirectory>
             <includes>
                 <include>s3tbx.config</include>
+                <include>productDB.properties</include>
             </includes>
         </fileSet>
 
