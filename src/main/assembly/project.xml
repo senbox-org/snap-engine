@@ -11,11 +11,15 @@
             <useDefaultExcludes>true</useDefaultExcludes>
             <excludes>
                 <exclude>**/.DS_Store</exclude>
-                <exclude>**/.git</exclude>
-                <exclude>**/.idea</exclude>
-                <exclude>**/*.iml</exclude>
+                <exclude>**/.gitignore</exclude>
+                <exclude>**/*.idea</exclude>
                 <exclude>**/*.ipr</exclude>
+                <exclude>**/*.iml</exclude>
                 <exclude>**/*.iws</exclude>
+                <exclude>**/.project</exclude>
+                <exclude>**/.classpath</exclude>
+                <exclude>**/.settings</exclude>
+                <exclude>**/.git</exclude>
                 <exclude>${project.build.directory}/**</exclude>
                 <exclude>**/target/**</exclude>
             </excludes>

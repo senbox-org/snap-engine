@@ -75,20 +75,16 @@ public class S3NetcdfReader {
         return new String[0];
     }
 
-    protected String getNameOfRowDimension() {
-        return "rows";
-    }
-
-    protected String getNameOfColumnDimension() {
-        return "columns";
+    protected String[][] getRowColumnNamePairs() {
+        return new String[][]{{"rows", "columns"}, {"tie_rows", "tie_columns"}};
     }
 
     protected RenderedImage createSourceImage(Band band) {
         final String bandName = band.getName();
         String variableName = bandName;
-        if(variableName.endsWith("_lsb")) {
+        if (variableName.endsWith("_lsb")) {
             variableName = variableName.substring(0, variableName.indexOf("_lsb"));
-        } else if(variableName.endsWith("_msb")) {
+        } else if (variableName.endsWith("_msb")) {
             variableName = variableName.substring(0, variableName.indexOf("_msb"));
         }
         Variable variable = null;
@@ -134,26 +130,29 @@ public class S3NetcdfReader {
     protected void addBands(Product product) {
         final List<Variable> variables = netcdfFile.getVariables();
         for (final Variable variable : variables) {
-            if (variable.findDimensionIndex(getNameOfRowDimension()) != -1 &&
-                    variable.findDimensionIndex(getNameOfColumnDimension()) != -1) {
-                final String variableName = variable.getFullName();
-                final String[] dimensions = getSeparatingThirdDimensions();
-                final String[] suffixes = getSuffixesForSeparatingThirdDimensions();
-                boolean variableHasBeenAdded = false;
-                for (int i = 0; i < dimensions.length; i++) {
-                    String dimensionName = dimensions[i];
-                    if (variable.findDimensionIndex(dimensionName) != -1) {
-                        final Dimension dimension =
-                                variable.getDimension(variable.findDimensionIndex(dimensionName));
-                        for (int j = 0; j < dimension.getLength(); j++) {
-                            addVariableAsBand(product, variable, variableName + "_" + suffixes[i] + "_" + (j + 1));
+            final String[][] rowColumnNamePairs = getRowColumnNamePairs();
+            for (String[] rowColumnNamePair : rowColumnNamePairs) {
+                if (variable.findDimensionIndex(rowColumnNamePair[0]) != -1 &&
+                        variable.findDimensionIndex(rowColumnNamePair[1]) != -1) {
+                    final String variableName = variable.getFullName();
+                    final String[] dimensions = getSeparatingThirdDimensions();
+                    final String[] suffixes = getSuffixesForSeparatingThirdDimensions();
+                    boolean variableHasBeenAdded = false;
+                    for (int i = 0; i < dimensions.length; i++) {
+                        String dimensionName = dimensions[i];
+                        if (variable.findDimensionIndex(dimensionName) != -1) {
+                            final Dimension dimension =
+                                    variable.getDimension(variable.findDimensionIndex(dimensionName));
+                            for (int j = 0; j < dimension.getLength(); j++) {
+                                addVariableAsBand(product, variable, variableName + "_" + suffixes[i] + "_" + (j + 1), false);
+                            }
+                            variableHasBeenAdded = true;
+                            break;
                         }
-                        variableHasBeenAdded = true;
-                        break;
                     }
-                }
-                if (!variableHasBeenAdded) {
-                    addVariableAsBand(product, variable, variableName);
+                    if (!variableHasBeenAdded) {
+                        addVariableAsBand(product, variable, variableName, false);
+                    }
                 }
             }
             addVariableMetadata(variable, product);
@@ -168,23 +167,32 @@ public class S3NetcdfReader {
         return rasterDataType;
     }
 
-    protected void addVariableAsBand(Product product, Variable variable, String variableName) {
+    protected void addVariableAsBand(Product product, Variable variable, String variableName, boolean synthetic) {
         int type = getRasterDataType(variable);
         if (variable.getDataType() == DataType.LONG) {
             final Band lowerBand = product.addBand(variableName + "_lsb", type);
             lowerBand.setDescription(variable.getDescription() + "(least significant bytes)");
             lowerBand.setUnit(variable.getUnitsString());
+            lowerBand.setScalingFactor(getScalingFactor(variable));
+            lowerBand.setScalingOffset(getAddOffset(variable));
+            lowerBand.setSynthetic(synthetic);
             addFillValue(lowerBand, variable);
             addSampleCodings(product, lowerBand, variable, false);
             final Band upperBand = product.addBand(variableName + "_msb", type);
             upperBand.setDescription(variable.getDescription() + "(most significant bytes)");
             upperBand.setUnit(variable.getUnitsString());
+            upperBand.setScalingFactor(getScalingFactor(variable));
+            upperBand.setScalingOffset(getAddOffset(variable));
+            upperBand.setSynthetic(synthetic);
             addFillValue(upperBand, variable);
             addSampleCodings(product, upperBand, variable, true);
         } else {
             final Band band = product.addBand(variableName, type);
             band.setDescription(variable.getDescription());
             band.setUnit(variable.getUnitsString());
+            band.setScalingFactor(getScalingFactor(variable));
+            band.setScalingOffset(getAddOffset(variable));
+            band.setSynthetic(synthetic);
             addFillValue(band, variable);
             addSampleCodings(product, band, variable, false);
         }
@@ -306,6 +314,45 @@ public class S3NetcdfReader {
         return flagName.replaceAll("\\W+", "_");
     }
 
+    private static double getScalingFactor(Variable variable) {
+        Attribute attribute = variable.findAttribute(Constants.SCALE_FACTOR_ATT_NAME);
+        if (attribute == null) {
+            attribute = variable.findAttribute(Constants.SLOPE_ATT_NAME);
+        }
+        if (attribute == null) {
+            attribute = variable.findAttribute("scaling_factor");
+        }
+        if (attribute != null) {
+            return getAttributeValue(attribute).doubleValue();
+        }
+        return 1.0;
+    }
+
+    private static double getAddOffset(Variable variable) {
+        Attribute attribute = variable.findAttribute(Constants.ADD_OFFSET_ATT_NAME);
+        if (attribute == null) {
+            attribute = variable.findAttribute(Constants.INTERCEPT_ATT_NAME);
+        }
+        if (attribute != null) {
+            return getAttributeValue(attribute).doubleValue();
+        }
+        return 0.0;
+    }
+
+    private static Number getAttributeValue(Attribute attribute) {
+        if (attribute.isString()) {
+            String stringValue = attribute.getStringValue();
+            if (stringValue.endsWith("b")) {
+                // Special management for bytes; Can occur in e.g. ASCAT files from EUMETSAT
+                return Byte.parseByte(stringValue.substring(0, stringValue.length() - 1));
+            } else {
+                return Double.parseDouble(stringValue);
+            }
+        } else {
+            return attribute.getNumericValue();
+        }
+    }
+
     protected void addVariableMetadata(Variable variable, Product product) {
         final MetadataElement variableElement = new MetadataElement(variable.getFullName());
         final List<Attribute> attributes = variable.getAttributes();
@@ -391,17 +438,23 @@ public class S3NetcdfReader {
     }
 
     int getWidth() {
-        final Dimension widthDimension = netcdfFile.findDimension(getNameOfColumnDimension());
-        if (widthDimension != null) {
-            return widthDimension.getLength();
+        final String[][] rowColumnNamePairs = getRowColumnNamePairs();
+        for (String[] rowColumnNamePair : rowColumnNamePairs) {
+            final Dimension widthDimension = netcdfFile.findDimension(rowColumnNamePair[1]);
+            if (widthDimension != null) {
+                return widthDimension.getLength();
+            }
         }
         return 0;
     }
 
     int getHeight() {
-        final Dimension heightDimension = netcdfFile.findDimension(getNameOfRowDimension());
-        if (heightDimension != null) {
-            return heightDimension.getLength();
+        final String[][] rowColumnNamePairs = getRowColumnNamePairs();
+        for (String[] rowColumnNamePair : rowColumnNamePairs) {
+            final Dimension heightDimension = netcdfFile.findDimension(rowColumnNamePair[0]);
+            if (heightDimension != null) {
+                return heightDimension.getLength();
+            }
         }
         return 0;
     }

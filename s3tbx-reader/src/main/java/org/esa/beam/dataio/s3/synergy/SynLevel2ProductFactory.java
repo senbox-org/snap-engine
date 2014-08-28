@@ -21,25 +21,20 @@ import org.esa.beam.dataio.s3.LonLatFunction;
 import org.esa.beam.dataio.s3.LonLatMultiLevelSource;
 import org.esa.beam.dataio.s3.Manifest;
 import org.esa.beam.dataio.s3.Sentinel3ProductReader;
+import org.esa.beam.dataio.s3.util.S3NetcdfReader;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.GeoCodingFactory;
-import org.esa.beam.framework.datamodel.IndexCoding;
 import org.esa.beam.framework.datamodel.MetadataAttribute;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.datamodel.RasterDataNode;
-import org.esa.beam.framework.datamodel.VirtualBand;
-import org.esa.beam.util.ProductUtils;
 import ucar.nc2.Variable;
 
 import java.awt.image.DataBuffer;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class SynLevel2ProductFactory extends AbstractProductFactory {
 
@@ -168,12 +163,19 @@ public class SynLevel2ProductFactory extends AbstractProductFactory {
         final Band latBand = targetProduct.getBand(latBandName);
         final Band lonBand = targetProduct.getBand(lonBandName);
 
-        targetProduct.setGeoCoding(GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, null, 5));
+        targetProduct.setGeoCoding(GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, latBand.getValidMaskExpression(), 5));
     }
 
     @Override
     protected void setAutoGrouping(Product[] sourceProducts, Product targetProduct) {
         targetProduct.setAutoGrouping("SDR:SDR*err:OLC:SLN:SLO");
+    }
+
+    @Override
+    protected Product readProduct(String fileName) throws IOException {
+        final File file = new File(getInputFileParentDirectory(), fileName);
+        final S3NetcdfReader reader = new S3NetcdfReader(file.getAbsolutePath());
+        return reader.readProduct();
     }
 
 }

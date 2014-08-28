@@ -39,16 +39,6 @@ class OlciTieMeteoReader extends S3NetcdfReader {
     }
 
     @Override
-    protected String getNameOfRowDimension() {
-        return "tie_rows";
-    }
-
-    @Override
-    protected String getNameOfColumnDimension() {
-        return "tie_columns";
-    }
-
-    @Override
     protected RenderedImage createImage(Band band, Variable variable, String dimensionName, int dimensionIndex) {
         return new S3MultiLevelOpImage(band, variable, dimensionName, dimensionIndex, true);
     }
