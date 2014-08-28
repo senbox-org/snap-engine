@@ -155,9 +155,7 @@
                 <configuration>
                     <descriptors>
                         <descriptor>src/main/assembly/bin.xml</descriptor>
-                        <!--
                         <descriptor>src/main/assembly/project.xml</descriptor>
-                        -->
                     </descriptors>
                     <finalName>s3tbx</finalName>
                 </configuration>
