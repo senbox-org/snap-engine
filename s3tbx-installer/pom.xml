@@ -363,6 +363,12 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.esa.snap</groupId>
+                                    <artifactId>snap-unmix</artifactId>
+                                    <version>${snap.version}</version>
+                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.esa.snap</groupId>
                                     <artifactId>blue-marble-worldmap</artifactId>
                                     <version>${snap.version}</version>
                                     <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
