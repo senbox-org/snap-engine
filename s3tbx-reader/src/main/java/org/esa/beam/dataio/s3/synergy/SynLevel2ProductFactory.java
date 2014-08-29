@@ -158,12 +158,12 @@ public class SynLevel2ProductFactory extends AbstractProductFactory {
 
     @Override
     protected void setGeoCoding(Product targetProduct) throws IOException {
-        final String latBandName = "lat";
-        final String lonBandName = "lon";
-        final Band latBand = targetProduct.getBand(latBandName);
-        final Band lonBand = targetProduct.getBand(lonBandName);
-
-        targetProduct.setGeoCoding(GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, latBand.getValidMaskExpression(), 5));
+        //todo use this later - currently it slows the reader down during product opening
+//        final String latBandName = "lat";
+//        final String lonBandName = "lon";
+//        final Band latBand = targetProduct.getBand(latBandName);
+//        final Band lonBand = targetProduct.getBand(lonBandName);
+//        targetProduct.setGeoCoding(GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, latBand.getValidMaskExpression(), 5));
     }
 
     @Override
