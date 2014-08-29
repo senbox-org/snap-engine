@@ -81,7 +81,7 @@ public abstract class SlstrProductFactory extends AbstractProductFactory {
         if (gridIndex.startsWith("i")) {
             resolutions = new short[]{1000, 1000};
         } else if (gridIndex.startsWith("t")) {
-            resolutions = new short[]{16000, 16000};
+            resolutions = new short[]{16000, 1000};
         } else {
             resolutions = new short[]{500, 500};
         }
