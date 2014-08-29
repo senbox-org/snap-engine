@@ -82,18 +82,12 @@ abstract class OlciProductFactory extends AbstractProductFactory {
         if (targetProduct.containsBand(sourceBandName)) {
             sourceBand.setName("TP_" + sourceBandName);
         }
-        final long copyingBandAsTiePointGridStartTime = System.nanoTime();
-        final TiePointGrid tiePointGrid = copyBandAsTiePointGrid(sourceBand, targetProduct, subSamplingX, subSamplingY, 0.0f, 0.0f);
-        final long copyingBandAsTiePointGridEndTime = System.nanoTime();
-        System.out.println("Time required for copying " + sourceBandName + " as tie point grid: " +
-                                   (((double)copyingBandAsTiePointGridEndTime - copyingBandAsTiePointGridStartTime)
-                                           / 1000000000));
-        return tiePointGrid;
+        return copyBandAsTiePointGrid(sourceBand, targetProduct, subSamplingX, subSamplingY, 0.0f, 0.0f);
     }
 
     @Override
     protected void setGeoCoding(Product targetProduct) throws IOException {
-        //pixel geocoding slows down reading of products drastically
+        //todo use this later - currently it slows the reader down during product opening
 
 //        final Band latBand = targetProduct.getBand("latitude");
 //        final Band lonBand = targetProduct.getBand("longitude");
