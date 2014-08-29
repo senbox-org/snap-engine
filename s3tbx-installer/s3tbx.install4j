@@ -1793,11 +1793,10 @@ if (wizardContext != null) {
       <excludedBeans />
       <overriddenPrincipalLanguage id="en" customLocalizationFile="" />
       <exclude>
-        <entry location="bin/beam-cli.sh" fileType="regular" />
-        <entry location="bin/gpt.sh" fileType="regular" />
-        <entry location="bin/pconvert.sh" fileType="regular" />
-        <entry location="bin/visat-d.sh" fileType="regular" />
         <entry location="bin/detect_java.sh" fileType="regular" />
+        <entry location="bin/gpt.sh" fileType="regular" />
+        <entry location="bin/snap-cli.sh" fileType="regular" />
+        <entry location="bin/snap-d.sh" fileType="regular" />
       </exclude>
       <variables />
       <autoUpdate useMinUpdatableVersion="false" minUpdatableVersion="" useMaxUpdatableVersion="false" maxUpdatableVersion="">
@@ -1812,11 +1811,10 @@ if (wizardContext != null) {
       <excludedBeans />
       <overriddenPrincipalLanguage id="en" customLocalizationFile="" />
       <exclude>
-        <entry location="bin/beam-cli.sh" fileType="regular" />
-        <entry location="bin/gpt.sh" fileType="regular" />
-        <entry location="bin/pconvert.sh" fileType="regular" />
-        <entry location="bin/visat-d.sh" fileType="regular" />
         <entry location="bin/detect_java.sh" fileType="regular" />
+        <entry location="bin/gpt.sh" fileType="regular" />
+        <entry location="bin/snap-cli.sh" fileType="regular" />
+        <entry location="bin/snap-d.sh" fileType="regular" />
       </exclude>
       <variables />
       <autoUpdate useMinUpdatableVersion="false" minUpdatableVersion="" useMaxUpdatableVersion="false" maxUpdatableVersion="">
@@ -1831,11 +1829,9 @@ if (wizardContext != null) {
       <excludedBeans />
       <overriddenPrincipalLanguage id="en" customLocalizationFile="" />
       <exclude>
-        <entry location="beam-website.url" fileType="regular" />
-        <entry location="bin/beam-cli.bat" fileType="regular" />
         <entry location="bin/gpt.bat" fileType="regular" />
-        <entry location="bin/pconvert.bat" fileType="regular" />
-        <entry location="bin/visat-d.bat" fileType="regular" />
+        <entry location="bin/snap-cli.bat" fileType="regular" />
+        <entry location="bin/snap-d.bat" fileType="regular" />
       </exclude>
       <variables />
       <autoUpdate useMinUpdatableVersion="false" minUpdatableVersion="" useMaxUpdatableVersion="false" maxUpdatableVersion="">
@@ -1852,11 +1848,9 @@ if (wizardContext != null) {
       <excludedBeans />
       <overriddenPrincipalLanguage id="en" customLocalizationFile="" />
       <exclude>
-        <entry location="beam-website.url" fileType="regular" />
-        <entry location="bin/beam-cli.bat" fileType="regular" />
         <entry location="bin/gpt.bat" fileType="regular" />
-        <entry location="bin/pconvert.bat" fileType="regular" />
-        <entry location="bin/visat-d.bat" fileType="regular" />
+        <entry location="bin/snap-cli.bat" fileType="regular" />
+        <entry location="bin/snap-d.bat" fileType="regular" />
       </exclude>
       <variables />
       <autoUpdate useMinUpdatableVersion="false" minUpdatableVersion="" useMaxUpdatableVersion="false" maxUpdatableVersion="">
