@@ -114,7 +114,7 @@ public abstract class SlstrProductFactory extends AbstractProductFactory {
                 ((float) sourceResolutions[1]) / referenceResolutions[1]
         };
         final MultiLevelImage masterImage = masterProduct.getBandAt(0).getSourceImage();
-        return SourceImageScaler.scaleMultiLevelImage(masterImage, sourceImage, scalings, null, offsets, renderingHints,
+        return SourceImageScaler.scaleMultiLevelImage(masterImage, sourceImage, scalings, offsets, renderingHints,
                                                       targetBand.getNoDataValue(),
                                                       Interpolation.getInstance(Interpolation.INTERP_NEAREST));
     }

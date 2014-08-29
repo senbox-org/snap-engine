@@ -79,12 +79,8 @@ public class VgtProductFactory extends AbstractProductFactory {
         final MultiLevelImage sourceImage = sourceBand.getSourceImage();
         float[] scalings = new float[]{((float) targetBand.getRasterWidth()) / sourceBand.getRasterWidth(),
                 ((float) targetBand.getRasterHeight()) / sourceBand.getRasterHeight()};
-        final float transX = (targetBand.getRasterWidth() - sourceImage.getWidth() * scalings[0]) / 2.0f;
-        final float transY = (targetBand.getRasterHeight() - sourceImage.getHeight() * scalings[1]) / 2.0f;
-        float[] scaleTranslations = new float[]{transX, transY};
         final MultiLevelImage scaledImage = SourceImageScaler.scaleMultiLevelImage(targetBand.getSourceImage(),
-                                                                                 sourceImage, scalings,
-                                                                                 scaleTranslations, null,
+                                                                                 sourceImage, scalings, null,
                                                                                  renderingHints, Double.NaN,
                                                                                  Interpolation.getInstance(
                                                                                          Interpolation.INTERP_BILINEAR));
