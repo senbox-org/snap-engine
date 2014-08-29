@@ -38,7 +38,13 @@
         </dependency>
 
         <dependency>
-            <!--used to get transitive dependencies -->
+            <groupId>org.esa.s3tbx</groupId>
+            <artifactId>s3tbx-reader</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+
+        <dependency>
+            <!--used to get other dependencies -->
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-beam-bootstrap</artifactId>
             <version>${snap.version}</version>
@@ -345,36 +351,36 @@
                 <configuration>
                     <templates>
                         <template>
-                            <source>${basedir}/../src/main/bin/win/snap-cli-template.bat</source>
+                            <source>${basedir}/src/main/bin/win/snap-cli-template.bat</source>
                             <lineEnding>dos</lineEnding>
-                            <outputDirectory>${basedir}/../target/s3tbx-bin/bin</outputDirectory>
+                            <outputDirectory>${basedir}/target/s3tbx-bin/bin</outputDirectory>
                             <outputFileNamePattern>@{filterBaseName}.@{sourceExtension}</outputFileNamePattern>
                             <filterSet>
-                                <directory>${basedir}/../src/main/filters</directory>
+                                <directory>${basedir}/src/main/filters</directory>
                                 <includes>
                                     <include>*.properties</include>
                                 </includes>
                             </filterSet>
                         </template>
                         <template>
-                            <source>${basedir}/../src/main/bin/linux/snap-cli-template.sh</source>
+                            <source>${basedir}/src/main/bin/linux/snap-cli-template.sh</source>
                             <lineEnding>unix</lineEnding>
-                            <outputDirectory>${basedir}/../target/s3tbx-bin/bin</outputDirectory>
+                            <outputDirectory>${basedir}/target/s3tbx-bin/bin</outputDirectory>
                             <outputFileNamePattern>@{filterBaseName}.@{sourceExtension}</outputFileNamePattern>
                             <filterSet>
-                                <directory>${basedir}/../src/main/filters</directory>
+                                <directory>${basedir}/src/main/filters</directory>
                                 <includes>
                                     <include>*.properties</include>
                                 </includes>
                             </filterSet>
                         </template>
                         <template>
-                            <source>${basedir}/../src/main/bin/macosx/snap-cli-template.sh</source>
+                            <source>${basedir}/src/main/bin/macosx/snap-cli-template.sh</source>
                             <lineEnding>unix</lineEnding>
-                            <outputDirectory>${basedir}/../target/s3tbx-bin/bin</outputDirectory>
+                            <outputDirectory>${basedir}/target/s3tbx-bin/bin</outputDirectory>
                             <outputFileNamePattern>@{filterBaseName}.@{sourceExtension}</outputFileNamePattern>
                             <filterSet>
-                                <directory>${basedir}/../src/main/filters</directory>
+                                <directory>${basedir}/src/main/filters</directory>
                                 <includes>
                                     <include>*.properties</include>
                                 </includes>

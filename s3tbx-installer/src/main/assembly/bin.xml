@@ -96,22 +96,6 @@
 
     </fileSets>
 
-    <moduleSets>
-        <moduleSet>
-            <useAllReactorProjects>true</useAllReactorProjects>
-            <binaries>
-                <outputDirectory>modules</outputDirectory>
-                <includeDependencies>true</includeDependencies>
-                <includes>
-                    <include>org.esa.s3tbx:s3tbx-reader</include>
-                </includes>
-                <fileMode>0444</fileMode>
-                <unpack>false</unpack>
-                <outputFileNameMapping>${artifact.artifactId}-${artifact.version}.${artifact.extension}</outputFileNameMapping>
-            </binaries>
-        </moduleSet>
-    </moduleSets>
-
     <dependencySets>
         <dependencySet>
             <outputDirectory>bin</outputDirectory>
