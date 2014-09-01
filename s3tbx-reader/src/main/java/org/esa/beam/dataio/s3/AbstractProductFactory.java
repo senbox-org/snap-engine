@@ -19,6 +19,8 @@ import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.CrsGeoCoding;
+import org.esa.beam.framework.datamodel.FlagCoding;
+import org.esa.beam.framework.datamodel.IndexCoding;
 import org.esa.beam.framework.datamodel.Mask;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
@@ -181,20 +183,41 @@ public abstract class AbstractProductFactory implements ProductFactory {
             final SampleCoding sampleCoding = band.getSampleCoding();
             if (sampleCoding != null) {
                 final String bandName = band.getName();
-                final boolean flagBand = band.isFlagBand();
-                for (int i = 0; i < sampleCoding.getNumAttributes(); i++) {
-                    final String sampleName = sampleCoding.getSampleName(i);
-                    final int sampleValue = sampleCoding.getSampleValue(i);
-                    if (!"spare".equals(sampleName)) {
-                        final String expression;
-                        if (flagBand) {
-                            expression = bandName + " & " + sampleValue + " == " + sampleValue;
-                        } else {
-                            expression = bandName + " == " + sampleValue;
+                if(bandName.endsWith("_index")) {
+                    continue;
+                }
+                final boolean isFlagBand = band.isFlagBand();
+                if(isFlagBand && targetProduct.containsBand(bandName + "_index")) {
+                    final Band correspondingIndexCodingBand = targetProduct.getBand(bandName + "_index");
+                    final FlagCoding flagCoding = (FlagCoding) sampleCoding;
+                    final IndexCoding indexCoding = correspondingIndexCodingBand.getIndexCoding();
+                    for (int i = 0; i < flagCoding.getNumAttributes(); i++) {
+                        final String sampleName = flagCoding.getSampleName(i);
+                        if (!"spare".equals(sampleName)) {
+                            final int flagValue = flagCoding.getSampleValue(i);
+                            final int indexValue = indexCoding.getSampleValue(i);
+                            final String expression = bandName + " & " + flagValue + " == " + indexValue;
+                            final String maskName = bandName + "_" + sampleName;
+                            final Color maskColor = colorProvider.getMaskColor(sampleName);
+                            targetProduct.addMask(maskName, expression, expression, maskColor, 0.5);
                         }
-                        final String maskName = bandName + "_" + sampleName;
-                        final Color maskColor = colorProvider.getMaskColor(sampleName);
-                        targetProduct.addMask(maskName, expression, expression, maskColor, 0.5);
+
+                    }
+                } else {
+                    for (int i = 0; i < sampleCoding.getNumAttributes(); i++) {
+                        final String sampleName = sampleCoding.getSampleName(i);
+                        final int sampleValue = sampleCoding.getSampleValue(i);
+                        if (!"spare".equals(sampleName)) {
+                            final String expression;
+                            if (isFlagBand) {
+                                expression = bandName + " & " + sampleValue + " == " + sampleValue;
+                            } else {
+                                expression = bandName + " == " + sampleValue;
+                            }
+                            final String maskName = bandName + "_" + sampleName;
+                            final Color maskColor = colorProvider.getMaskColor(sampleName);
+                            targetProduct.addMask(maskName, expression, expression, maskColor, 0.5);
+                        }
                     }
                 }
             }
