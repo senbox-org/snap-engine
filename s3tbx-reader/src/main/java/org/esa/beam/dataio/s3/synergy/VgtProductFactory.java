@@ -19,14 +19,10 @@ import org.esa.beam.dataio.s3.AbstractProductFactory;
 import org.esa.beam.dataio.s3.Manifest;
 import org.esa.beam.dataio.s3.Sentinel3ProductReader;
 import org.esa.beam.dataio.s3.SourceImageScaler;
-import org.esa.beam.dataio.s3.slstr.SlstrNetcdfReaderFactory;
-import org.esa.beam.dataio.s3.util.S3NetcdfReader;
 import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.Mask;
 import org.esa.beam.framework.datamodel.MetadataAttribute;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductNodeGroup;
 import org.esa.beam.framework.datamodel.RasterDataNode;
 
 import javax.media.jai.BorderExtender;
@@ -35,7 +31,6 @@ import javax.media.jai.JAI;
 import java.awt.RenderingHints;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class VgtProductFactory extends AbstractProductFactory {
@@ -75,15 +70,17 @@ public class VgtProductFactory extends AbstractProductFactory {
         final Band targetBand = copyBand(sourceBand, targetProduct, false);
         final RenderingHints renderingHints = new RenderingHints(JAI.KEY_BORDER_EXTENDER,
                                                                  BorderExtender.createInstance(
-                                                                         BorderExtender.BORDER_COPY));
+                                                                         BorderExtender.BORDER_COPY)
+        );
         final MultiLevelImage sourceImage = sourceBand.getSourceImage();
         float[] scalings = new float[]{((float) targetBand.getRasterWidth()) / sourceBand.getRasterWidth(),
                 ((float) targetBand.getRasterHeight()) / sourceBand.getRasterHeight()};
         final MultiLevelImage scaledImage = SourceImageScaler.scaleMultiLevelImage(targetBand.getSourceImage(),
-                                                                                 sourceImage, scalings, null,
-                                                                                 renderingHints, Double.NaN,
-                                                                                 Interpolation.getInstance(
-                                                                                         Interpolation.INTERP_BILINEAR));
+                                                                                   sourceImage, scalings, null,
+                                                                                   renderingHints, sourceBand.getNoDataValue(),
+                                                                                   Interpolation.getInstance(
+                                                                                           Interpolation.INTERP_NEAREST)
+        );
         targetBand.setSourceImage(scaledImage);
         return targetBand;
     }
