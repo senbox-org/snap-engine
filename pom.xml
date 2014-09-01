@@ -30,6 +30,7 @@
         <module>s3tbx-bootstrap</module>
         <module>s3tbx-reader</module>
         <module>s3tbx-installer</module>
+        <module>s3tbx-app</module>
     </modules>
 
     <packaging>pom</packaging>
