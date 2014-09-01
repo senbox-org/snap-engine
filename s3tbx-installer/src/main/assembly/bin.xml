@@ -94,6 +94,14 @@
             <filtered>true</filtered>
         </fileSet>
 
+        <fileSet>
+            <directory>src/main/doc</directory>
+            <outputDirectory>doc</outputDirectory>
+            <includes>
+                <include>SMOS-BOX-FormatConversionUserGuide-1.0-forAcceptance.pdf</include>
+            </includes>
+        </fileSet>
+
     </fileSets>
 
     <dependencySets>
