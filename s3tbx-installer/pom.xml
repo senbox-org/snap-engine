@@ -335,6 +335,7 @@
                         <descriptors>
                             <descriptor>src/main/assembly/bin.xml</descriptor>
                             <!--<descriptor>src/main/assembly/project.xml</descriptor>-->
+                            <!--<descriptor>src/main/assembly/web-help.xml</descriptor>-->
                         </descriptors>
                         <finalName>s3tbx</finalName>
                         <encoding>UTF-8</encoding>
