@@ -1,6 +1,9 @@
 package org.esa.beam.dataio.s3.util;
 
 import java.awt.Color;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Tonio Fincke
@@ -11,26 +14,43 @@ public class ColorProvider {
     private int numberOfIntermediateSamplePoints;
     private int thirdPowerOfCurrentDivisions;
     private int numberOfTotalSamplePoints;
+    private Map<String, Color> predefinedColors;
 
     public ColorProvider() {
         colourCounter = 0;
         numberOfIntermediateSamplePoints = 0;
         numberOfTotalSamplePoints = 2;
         evaluateMaxNumberOfSamplePointsForDivision();
+        setupReservedColors();
+    }
+
+    private void setupReservedColors() {
+        predefinedColors = new HashMap<>();
+        predefinedColors.put("coastline", new Color(255, 0, 0));
+        predefinedColors.put("land", new Color(0, 127, 63));
+        predefinedColors.put("water", new Color(0, 63, 255));
+        predefinedColors.put("lake", new Color(0, 127, 255));
+        predefinedColors.put("ocean", new Color(0, 0, 191));
     }
 
     private void evaluateMaxNumberOfSamplePointsForDivision() {
         thirdPowerOfCurrentDivisions = (int) Math.pow(numberOfTotalSamplePoints, 3);
     }
 
+    private Color getPredefinedColor(String maskName) {
+        final String maskNameToLowerCase = maskName.toLowerCase();
+        final Set<Map.Entry<String, Color>> entries = predefinedColors.entrySet();
+        for (Map.Entry<String, Color> entry : entries) {
+            if (maskNameToLowerCase.contains(entry.getKey())) {
+                return entry.getValue();
+            }
+        }
+        return null;
+    }
+
     public Color getMaskColor(String maskName) {
-        if (maskName.contains("coastline") || maskName.contains("COASTLINE")) {
-            return new Color(0, 255, 0);
-        } else if (maskName.contains("land") || maskName.contains("LAND")) {
-            return new Color(51, 153, 0);
-        } else if (maskName.contains("water") || maskName.contains("WATER")) {
-            return new Color(153, 153, 255);
-        } else {
+        Color color = getPredefinedColor(maskName);
+        while (color == null) {
             int redStep = 0;
             int greenStep = 0;
             int blueStep = 0;
@@ -44,12 +64,26 @@ public class ColorProvider {
                 blueStep = colourCounter % numberOfTotalSamplePoints;
                 colourCounter++;
             }
-            return new Color((int)(redStep * stepSize), (int)(greenStep * stepSize), (int)(blueStep * stepSize));
+            final Color candidateColor =
+                    new Color((int) (redStep * stepSize), (int) (greenStep * stepSize), (int) (blueStep * stepSize));
+            if (!isPredefinedColor(candidateColor)) {
+                color = candidateColor;
+            }
         }
+        return color;
+    }
+
+    private boolean isPredefinedColor(Color color) {
+        for (Color predefinedColor : predefinedColors.values()) {
+            if (predefinedColor.equals(color)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void updateDivision() {
-        if(colourCounter > thirdPowerOfCurrentDivisions) {
+        if (colourCounter > thirdPowerOfCurrentDivisions) {
             numberOfIntermediateSamplePoints = (numberOfIntermediateSamplePoints * 2) + 1;
             numberOfTotalSamplePoints = numberOfIntermediateSamplePoints + 2;
             evaluateMaxNumberOfSamplePointsForDivision();
