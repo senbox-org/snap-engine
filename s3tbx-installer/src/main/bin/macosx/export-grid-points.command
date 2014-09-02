@@ -23,6 +23,6 @@ ${S3TBX_HOME}/.install4j/jre.bundle/Contents/Home/jre/bin/java \
     -Dceres.context=s3tbx \
     "-Ds3tbx.mainClass=org.esa.beam.smos.visat.export.GridPointExporter" \
     "-Ds3tbx.home=${S3TBX_HOME}" \
-    -jar "${S3TBX_HOME}/bin/ceres-launcher.jar" "$@"
+    -jar "${S3TBX_HOME}/bin/snap-launcher.jar" "$@"
 
 exit 0
