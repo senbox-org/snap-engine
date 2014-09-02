@@ -158,7 +158,6 @@
                 <include>jfree:*</include>
                 <include>joda-time:joda-time</include>
                 <include>ncsa.hdf:*</include>
-                <include>net.java.dev.jna:jna</include>
                 <include>net.java.dev.jsr-275:jsr-275</include>
                 <include>net.jcip:jcip-annotations</include>
                 <include>net.sf.ehcache:*</include>
@@ -176,7 +175,6 @@
                 <include>org.quartz-scheduler:quartz</include>
                 <include>org.slf4j:*</include>
                 <include>org.tukaani:*</include>
-                <include>org.xerial:sqlite-jdbc</include>
                 <include>org.xeustechnologies:*</include>
             </includes>
         </dependencySet>

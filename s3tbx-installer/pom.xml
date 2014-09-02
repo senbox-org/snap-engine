@@ -20,8 +20,8 @@
         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
+
     <properties>
-        <s2tbx.version>${snap.version}</s2tbx.version>
         <s2tbx.version>0.6.0</s2tbx.version>
     </properties>
 
@@ -295,30 +295,6 @@
             <groupId>gov.nasa.gsfc.seadas</groupId>
             <artifactId>seadas-reader</artifactId>
             <version>1.5.6</version>
-        </dependency>
-
-
-        <!-- S2TBX dependencies -->
-
-        <dependency>
-            <groupId>org.esa.s2tbx</groupId>
-            <artifactId>s2tbx-commons</artifactId>
-            <version>${s2tbx.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s2tbx</groupId>
-            <artifactId>s2tbx-rapideye-reader</artifactId>
-            <version>${s2tbx.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s2tbx</groupId>
-            <artifactId>s2tbx-reader</artifactId>
-            <version>${s2tbx.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s2tbx</groupId>
-            <artifactId>s2tbx-spot-reader</artifactId>
-            <version>${s2tbx.version}</version>
         </dependency>
 
 
