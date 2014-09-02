@@ -302,7 +302,7 @@ if (isS3tbxInstallation &amp;&amp; !context.getBooleanVariable("sys.confirmedUpd
                             <string>-Ds3tbx.home=${installer:sys.installationDir}</string>
                           </void>
                           <void index="2">
-                            <string>-Ds3tbx.splash.image=${installer:sys.installationDir}/bin/splash-snap.png</string>
+                            <string>-Ds3tbx.splash.image=${installer:sys.installationDir}/bin/s3tbx-splash.png</string>
                           </void>
                           <void index="3">
                             <string>-Ds3tbx.build.date=${compiler:sys.date}</string>
