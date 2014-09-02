@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <install4j version="5.1.12" transformSequenceNumber="4">
-  <directoryPresets config="../../../../Desktop" />
+  <directoryPresets config="./src/main/resources/images" />
   <application name="S-3 Toolbox" distributionSourceDir="" applicationId="5268-5499-6432-3602" mediaDir="../target/installers" mediaFilePattern="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}" compression="6" lzmaCompression="false" pack200Compression="false" excludeSignedFromPacking="true" commonExternalFiles="false" createMd5Sums="true" shrinkRuntime="true" shortName="s3tbx" publisher="Brockmann Consult GmbH" publisherWeb="http://www.brockmann-consult.de" version="0.5.0-${compiler:sys.date}${compiler:sys.time}" allPathsRelative="true" backupOnSave="true" autoSave="true" convertDotsToUnderscores="false" macSignature="????" installerName="" javaMinVersion="1.8" javaMaxVersion="" allowBetaVM="true" jdkMode="runtimeJre" jdkName="">
     <languages skipLanguageSelection="false" languageSelectionInPrincipalLanguage="false">
       <principalLanguage id="en" customLocalizationFile="" />
@@ -34,11 +34,11 @@
     <components />
   </files>
   <launchers>
-    <launcher name="s3tbx" id="19" customizedId="" external="false" excludeFromMenu="false" unixMode="755" menuName="S3 Toolbox" icnsFile="./src/main/resources/images/visat-icon.icns" customMacBundleIdentifier="false" macBundleIdentifier="" swtApp="false" fileset="" macBundleBinary="JavaApplicationStub" addMacEntitlements="false" macEntitlementsFile="">
+    <launcher name="s3tbx" id="19" customizedId="" external="false" excludeFromMenu="false" unixMode="755" menuName="S3 Toolbox" icnsFile="" customMacBundleIdentifier="false" macBundleIdentifier="" swtApp="false" fileset="" macBundleBinary="JavaApplicationStub" addMacEntitlements="false" macEntitlementsFile="">
       <executable name="s3tbx" type="1" iconSet="true" iconFile="" executableDir="bin" redirectStderr="true" stderrFile="error.log" stderrMode="overwrite" redirectStdout="false" stdoutFile="output.log" stdoutMode="overwrite" failOnStderrOutput="true" executableMode="1" changeWorkingDirectory="true" workingDirectory=".." singleInstance="false" serviceStartType="2" serviceDependencies="" serviceDescription="" jreLocation="" executionLevel="asInvoker" checkConsoleParameter="false" globalSingleInstance="false">
         <versionInfo include="false" fileVersion="" fileDescription="" legalCopyright="" internalName="" productName="" />
       </executable>
-      <splashScreen show="false" autoOff="true" alwaysOnTop="true" width="653" height="195" bitmapFile="../target/beam-installer-files/bin/splash.png" java6SplashScreen="false">
+      <splashScreen show="false" autoOff="true" alwaysOnTop="true" width="653" height="195" bitmapFile="" java6SplashScreen="false">
         <text>
           <statusLine x="20" y="20" text="" font="Arial" fontSize="8" fontColor="0,0,0" fontWeight="500" />
           <versionLine x="20" y="40" text="version ${compiler:sys.version}" font="Arial" fontSize="8" fontColor="0,0,0" fontWeight="500" />
@@ -62,8 +62,9 @@
         <content />
       </infoPlist>
       <iconImageFiles>
-        <file path="./src/main/resources/images/visat-icon-16.png" />
-        <file path="./src/main/resources/images/visat-icon-32.png" />
+        <file path="./src/main/resources/images/s3tbx-icon-16.png" />
+        <file path="./src/main/resources/images/s3tbx-icon-32.png" />
+        <file path="./src/main/resources/images/s3tbx-icon-48.png" />
       </iconImageFiles>
     </launcher>
   </launchers>
@@ -82,14 +83,34 @@
             <object class="com.install4j.runtime.beans.applications.InstallerApplication">
               <void property="customHeaderImage">
                 <object class="com.install4j.api.beans.ExternalFile">
-                  <string>./src/main/resources/images/beam-installer.png</string>
+                  <string>./src/main/resources/images/s3tbx-icon-64.png</string>
                 </object>
+              </void>
+              <void property="customIconImageFiles">
+                <void method="add">
+                  <object class="com.install4j.api.beans.ExternalFile">
+                    <string>./src/main/resources/images/s3tbx-icon-16.png</string>
+                  </object>
+                </void>
+                <void method="add">
+                  <object class="com.install4j.api.beans.ExternalFile">
+                    <string>./src/main/resources/images/s3tbx-icon-32.png</string>
+                  </object>
+                </void>
+                <void method="add">
+                  <object class="com.install4j.api.beans.ExternalFile">
+                    <string>./src/main/resources/images/s3tbx-icon-48.png</string>
+                  </object>
+                </void>
               </void>
               <void property="customWatermarkText">
                 <string>ESA S3TBX</string>
               </void>
               <void property="frameSizeClientArea">
                 <boolean>false</boolean>
+              </void>
+              <void property="useCustomIcon">
+                <boolean>true</boolean>
               </void>
             </object>
           </java>
@@ -622,7 +643,7 @@ return files;
                       </void>
                       <void property="windowsIconFile">
                         <object class="com.install4j.api.beans.ExternalFile">
-                          <string>./src/main/resources/images/beam-icon.ico</string>
+                          <string>./src/main/resources/images/s3tbx.ico</string>
                         </object>
                       </void>
                     </object>
@@ -645,7 +666,7 @@ return files;
                       </void>
                       <void property="windowsIconFile">
                         <object class="com.install4j.api.beans.ExternalFile">
-                          <string>./src/main/resources/images/beam-icon.ico</string>
+                          <string>./src/main/resources/images/s3tbx.ico</string>
                         </object>
                       </void>
                     </object>
@@ -668,7 +689,7 @@ return files;
                       </void>
                       <void property="windowsIconFile">
                         <object class="com.install4j.api.beans.ExternalFile">
-                          <string>./src/main/resources/images/beam-icon.ico</string>
+                          <string>./src/main/resources/images/s3tbx.ico</string>
                         </object>
                       </void>
                     </object>
@@ -694,7 +715,7 @@ return files;
                       </void>
                       <void property="windowsIconFile">
                         <object class="com.install4j.api.beans.ExternalFile">
-                          <string>./src/main/resources/images/beam-icon.ico</string>
+                          <string>./src/main/resources/images/s3tbx.ico</string>
                         </object>
                       </void>
                     </object>
@@ -720,7 +741,7 @@ return files;
                       </void>
                       <void property="windowsIconFile">
                         <object class="com.install4j.api.beans.ExternalFile">
-                          <string>./src/main/resources/images/beam-icon.ico</string>
+                          <string>./src/main/resources/images/s3tbx.ico</string>
                         </object>
                       </void>
                     </object>
@@ -802,7 +823,7 @@ return files;
             <object class="com.install4j.runtime.beans.applications.UninstallerApplication">
               <void property="customHeaderImage">
                 <object class="com.install4j.api.beans.ExternalFile">
-                  <string>./src/main/resources/images/beam-installer.png</string>
+                  <string>./src/main/resources/images/s3tbx-icon-64.png</string>
                 </object>
               </void>
               <void property="executableDirectory">
@@ -932,7 +953,7 @@ return files;
                         <array class="java.io.File" length="1">
                           <void index="0">
                             <object class="java.io.File">
-                              <string>${installer:sys.userHome}/.beam</string>
+                              <string>${installer:sys.userHome}/.s3tbx</string>
                             </object>
                           </void>
                         </array>
