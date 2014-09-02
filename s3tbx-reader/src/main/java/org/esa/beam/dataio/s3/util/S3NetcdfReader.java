@@ -213,16 +213,9 @@ public class S3NetcdfReader {
         final Attribute flagMeaningsAttribute = variable.findAttribute(flag_meanings);
         if (flagValuesAttribute != null && flagMasksAttribute != null) {
             final FlagCoding flagCoding =
-                    getFlagCoding(product, band.getName(), flagMeaningsAttribute, flagMasksAttribute, msb);
+                    getFlagCoding(product, band.getName(), flagMeaningsAttribute, flagValuesAttribute,
+                                  flagMasksAttribute, msb);
             band.setSampleCoding(flagCoding);
-            final String indexCodingName = band.getName() + "_index";
-            final IndexCoding indexCoding = getIndexCoding(product, indexCodingName,
-                                                           flagMeaningsAttribute, flagValuesAttribute, msb);
-            final VirtualBand virtualBand = new VirtualBand(indexCodingName, band.getDataType(),
-                                                            band.getSceneRasterWidth(), band.getSceneRasterHeight(),
-                                                            band.getName());
-            virtualBand.setSampleCoding(indexCoding);
-            product.addBand(virtualBand);
         } else if (flagValuesAttribute != null) {
             final IndexCoding indexCoding =
                     getIndexCoding(product, band.getName(), flagMeaningsAttribute, flagValuesAttribute, msb);
@@ -237,7 +230,7 @@ public class S3NetcdfReader {
     private IndexCoding getIndexCoding(Product product, String indexCodingName, Attribute flagMeaningsAttribute,
                                        Attribute flagValuesAttribute, boolean msb) {
         final IndexCoding indexCoding = new IndexCoding(indexCodingName);
-        addSamples(indexCoding, flagMeaningsAttribute, flagValuesAttribute, msb);
+        addSamples(indexCoding, flagMeaningsAttribute, flagValuesAttribute, flagValuesAttribute, msb);
         if (!product.getIndexCodingGroup().contains(indexCodingName)) {
             product.getIndexCodingGroup().add(indexCoding);
         }
@@ -247,7 +240,17 @@ public class S3NetcdfReader {
     private FlagCoding getFlagCoding(Product product, String flagCodingName, Attribute flagMeaningsAttribute,
                                      Attribute flagMasksAttribute, boolean msb) {
         final FlagCoding flagCoding = new FlagCoding(flagCodingName);
-        addSamples(flagCoding, flagMeaningsAttribute, flagMasksAttribute, msb);
+        addSamples(flagCoding, flagMeaningsAttribute, flagMasksAttribute, flagMasksAttribute, msb);
+        if (!product.getFlagCodingGroup().contains(flagCodingName)) {
+            product.getFlagCodingGroup().add(flagCoding);
+        }
+        return flagCoding;
+    }
+
+    private FlagCoding getFlagCoding(Product product, String flagCodingName, Attribute flagMeaningsAttribute,
+                                     Attribute flagValuesAttribute, Attribute flagMasksAttribute, boolean msb) {
+        final FlagCoding flagCoding = new FlagCoding(flagCodingName);
+        addSamples(flagCoding, flagMeaningsAttribute, flagValuesAttribute, flagMasksAttribute, msb);
         if (!product.getFlagCodingGroup().contains(flagCodingName)) {
             product.getFlagCodingGroup().add(flagCoding);
         }
@@ -255,38 +258,41 @@ public class S3NetcdfReader {
     }
 
     private static void addSamples(SampleCoding sampleCoding, Attribute sampleMeanings, Attribute sampleValues,
-                                   boolean msb) {
+                                   Attribute sampleMasks, boolean msb) {
         final String[] meanings = getSampleMeanings(sampleMeanings);
-        final int sampleCount = Math.min(meanings.length, sampleValues.getLength());
+        final int sampleCount = Math.min(meanings.length, sampleMasks.getLength());
         for (int i = 0; i < sampleCount; i++) {
             final String sampleName = replaceNonWordCharacters(meanings[i]);
-            switch (sampleValues.getDataType()) {
+            switch (sampleMasks.getDataType()) {
                 case BYTE:
-                    sampleCoding.addSample(sampleName,
-                                           DataType.unsignedByteToShort(
-                                                   sampleValues.getNumericValue(i).byteValue()), null
-                    );
+                    int[] byteValues = {DataType.unsignedByteToShort(sampleMasks.getNumericValue(i).byteValue()),
+                            DataType.unsignedByteToShort(sampleValues.getNumericValue(i).byteValue())};
+                    sampleCoding.addSamples(sampleName, byteValues, null);
                     break;
                 case SHORT:
-                    sampleCoding.addSample(sampleName,
-                                           DataType.unsignedShortToInt(
-                                                   sampleValues.getNumericValue(i).shortValue()), null
-                    );
+                    int[] shortValues = {DataType.unsignedShortToInt(sampleMasks.getNumericValue(i).shortValue()),
+                            DataType.unsignedShortToInt(sampleValues.getNumericValue(i).shortValue())};
+                    sampleCoding.addSamples(sampleName, shortValues, null);
                     break;
                 case INT:
-                    sampleCoding.addSample(sampleName, sampleValues.getNumericValue(i).intValue(), null);
+                    int[] intValues = {sampleMasks.getNumericValue(i).intValue(),
+                            sampleValues.getNumericValue(i).intValue()};
+                    sampleCoding.addSamples(sampleName, intValues, null);
                     break;
                 case LONG:
-                    final long sampleValue = sampleValues.getNumericValue(i).longValue();
+                    long[] longValues = {sampleMasks.getNumericValue(i).longValue(),
+                            sampleValues.getNumericValue(i).longValue()};
                     if (msb) {
-                        final long sampleValueMsb = sampleValue >>> 32;
-                        if (sampleValueMsb > 0) {
-                            sampleCoding.addSample(sampleName, (int) sampleValueMsb, null);
+                        int[] intLongValues =
+                                {(int)(longValues[0] >>> 32), (int)(longValues[1] >>> 32)};
+                        if (longValues[0] > 0) {
+                            sampleCoding.addSamples(sampleName, intLongValues, null);
                         }
                     } else {
-                        final long sampleValueLsb = sampleValue & 0x00000000FFFFFFFFL;
-                        if (sampleValueLsb > 0 || sampleValue == 0L) {
-                            sampleCoding.addSample(sampleName, (int) sampleValueLsb, null);
+                        int[] intLongValues =
+                                {(int)(longValues[0] & 0x00000000FFFFFFFFL), (int)(longValues[1] & 0x00000000FFFFFFFFL)};
+                        if (intLongValues[0] > 0 || longValues[0] == 0L) {
+                            sampleCoding.addSamples(sampleName, intLongValues, null);
                         }
                     }
                     break;
