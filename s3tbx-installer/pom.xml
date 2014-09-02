@@ -300,6 +300,37 @@
         </dependency>
 
         <!-- SMOS dependencies -->
+
+        <dependency>
+            <groupId>org.esa.smostbx</groupId>
+            <artifactId>smostbx-dgg</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.smostbx</groupId>
+            <artifactId>smostbx-ee2netcdf</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.smostbx</groupId>
+            <artifactId>smostbx-gui</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.smostbx</groupId>
+            <artifactId>smostbx-lsmask</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.smostbx</groupId>
+            <artifactId>smostbx-tools</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.smostbx</groupId>
+            <artifactId>smostbx-visat</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
         <dependency>
             <groupId>edu.ucar</groupId>
             <artifactId>bufr</artifactId>
