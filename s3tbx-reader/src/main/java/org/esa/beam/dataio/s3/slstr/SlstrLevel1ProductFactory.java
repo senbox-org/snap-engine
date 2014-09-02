@@ -85,15 +85,11 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
                     final String firstLetter =
                             gridTypeToGridIndex.get(slstrElement.getAttribute("grid").getData().getElemString());
                     String index;
-//                if (firstLetter.equals("t")) {
-//                    index = "tx";
-//                } else {
                     if (slstrElementName.equals("nadirImageSize")) {
                         index = firstLetter + "n";
                     } else {
                         index = firstLetter + "o";
                     }
-//                }
                     final int startOffset =
                             Integer.parseInt(slstrElement.getAttribute("startOffset").getData().getElemString());
                     final int trackOffset =
@@ -109,11 +105,8 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
                     final int numberOfColumns =
                             Integer.parseInt(slstrElement.getAttribute("columns").getData().getElemString());
                     if (numberOfColumns == numberOfMasterColumns && numberOfRows == numberOfMasterRows) {
-//                        referenceStartOffset = startOffset;
                         setReferenceStartOffset(startOffset);
-//                        referenceTrackOffset = trackOffset;
                         setReferenceTrackOffset(trackOffset);
-//                        referenceResolutions = getResolutions(index);
                         setReferenceResolutions(getResolutions(index));
                     }
                 }
@@ -137,13 +130,6 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
     @Override
     protected void configureTargetNode(Band sourceBand, RasterDataNode targetNode) {
         super.configureTargetNode(sourceBand, targetNode);
-//        final String sourceBandName = sourceBand.getName();
-//        final String sourceProductName = sourceBand.getProduct().getName();
-//        if (sourceProductName.contains(sourceBandName)) {
-//            targetNode.setName(sourceProductName);
-//        } else {
-//            targetNode.setName(sourceProductName + "_" + sourceBandName);
-//        }
         final String sourceBandName = sourceBand.getName();
         final String sourceBandNameStart = sourceBandName.substring(0, 2);
         if (nameToWavelengthMap.containsKey(sourceBandNameStart)) {
@@ -198,12 +184,10 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
                 bandGrouping = bandGrouping.replace(":" + unwantedGroup, "");
             }
         }
-        StringBuilder patternGrouping = new StringBuilder("F*BT_in*:F*BT_io*:radiance_an:" +
-                                                                  "radiance_ao:radiance_bn:" +
-                                                                  "radiance_bo:radiance_cn:" +
-                                                                  "radiance_co:S*BT_in*:" +
-                                                                  "S*BT_io*:");
-        patternGrouping.append(bandGrouping);
-        targetProduct.setAutoGrouping(patternGrouping.toString());
+        targetProduct.setAutoGrouping("F*BT_in*:F*BT_io*:radiance_an:" +
+                                              "radiance_ao:radiance_bn:" +
+                                              "radiance_bo:radiance_cn:" +
+                                              "radiance_co:S*BT_in*:" +
+                                              "S*BT_io*:" + bandGrouping);
     }
 }

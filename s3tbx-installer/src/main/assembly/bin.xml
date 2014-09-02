@@ -1,0 +1,182 @@
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
+    <id>bin</id>
+
+    <includeBaseDirectory>false</includeBaseDirectory>
+
+    <formats>
+        <format>dir</format>
+    </formats>
+
+    <files>
+        <file>
+            <source>../README.md</source>
+            <lineEnding>unix</lineEnding>
+            <fileMode>0444</fileMode>
+            <filtered>true</filtered>
+        </file>
+        <file>
+            <source>../LICENSE.txt</source>
+            <lineEnding>unix</lineEnding>
+            <fileMode>0444</fileMode>
+        </file>
+        <file>
+            <source>../CHANGELOG.md</source>
+            <lineEnding>unix</lineEnding>
+            <fileMode>0444</fileMode>
+        </file>
+    </files>
+
+    <fileSets>
+
+        <fileSet>
+            <directory>src/main/config</directory>
+            <outputDirectory>config</outputDirectory>
+            <includes>
+                <include>s3tbx.config</include>
+                <include>productDB.properties</include>
+            </includes>
+        </fileSet>
+
+        <fileSet>
+            <directory>src/main/licenses</directory>
+            <outputDirectory>licenses</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>src/main/bin/common</directory>
+            <outputDirectory>bin</outputDirectory>
+            <includes>
+                <include>splash-snap.png</include>
+            </includes>
+        </fileSet>
+
+        <fileSet>
+            <directory>src/main/bin/win</directory>
+            <outputDirectory>bin</outputDirectory>
+            <lineEnding>dos</lineEnding>
+            <includes>
+                <include>*.bat</include>
+            </includes>
+            <excludes>
+                <exclude>snap-cli-template.*</exclude>
+            </excludes>
+            <filtered>true</filtered>
+        </fileSet>
+
+        <fileSet>
+            <directory>src/main/bin/linux</directory>
+            <outputDirectory>bin</outputDirectory>
+            <lineEnding>unix</lineEnding>
+            <fileMode>0755</fileMode>
+            <directoryMode>0755</directoryMode>
+            <includes>
+                <include>*.sh</include>
+            </includes>
+            <excludes>
+                <exclude>snap-cli-template.*</exclude>
+            </excludes>
+            <filtered>true</filtered>
+        </fileSet>
+
+        <fileSet>
+            <directory>src/main/bin/macosx</directory>
+            <outputDirectory>bin</outputDirectory>
+            <lineEnding>unix</lineEnding>
+            <fileMode>0755</fileMode>
+            <directoryMode>0755</directoryMode>
+            <includes>
+                <include>*.sh</include>
+            </includes>
+            <excludes>
+                <exclude>snap-cli-template.*</exclude>
+            </excludes>
+            <filtered>true</filtered>
+        </fileSet>
+
+        <fileSet>
+            <directory>src/main/doc</directory>
+            <outputDirectory>doc</outputDirectory>
+            <includes>
+                <include>SMOS-BOX-FormatConversionUserGuide-1.0-forAcceptance.pdf</include>
+            </includes>
+        </fileSet>
+
+    </fileSets>
+
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory>bin</outputDirectory>
+            <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+            <includes>
+                <include>org.esa.snap:snap-launcher</include>
+            </includes>
+        </dependencySet>
+
+        <dependencySet>
+            <outputDirectory>modules</outputDirectory>
+            <useTransitiveDependencies>false</useTransitiveDependencies>
+            <includes>
+                <include>org.esa.snap:*</include>
+                <include>org.esa.s3tbx:*</include>
+                <include>ncsa.hdf:lib-hdf</include>
+                <include>gov.nasa.gsfc.seadas:seadas-reader</include>
+            </includes>
+            <excludes>
+                <exclude>org.esa.snap:snap-beam-bootstrap</exclude>
+                <exclude>org.esa.s3tbx:s3tbx-installer</exclude>
+            </excludes>
+        </dependencySet>
+
+        <dependencySet>
+            <outputDirectory>lib</outputDirectory>
+            <useTransitiveDependencies>true</useTransitiveDependencies>
+            <useTransitiveFiltering>true</useTransitiveFiltering>
+            <includes>
+                <include>c3p0:c3p0</include>
+                <include>com.bc.jnn:jnn</include>
+                <include>com.fasterxml.jackson.core:*</include>
+                <include>com.google.protobuf:protobuf-java</include>
+                <include>com.googlecode.efficient-java-matrix-library:ejml</include>
+                <include>com.jidesoft:*</include>
+                <include>com.sleepycat:je</include>
+                <include>com.sun.jna:jna</include>
+                <include>com.sun.media:*</include>
+                <include>com.thoughtworks.xstream:xstream</include>
+                <include>com.vividsolutions:jts</include>
+                <include>commons-*:*</include>
+                <include>edu.ucar:*</include>
+                <include>hsqldb:hsqldb</include>
+                <include>it.geosolutions.imageio-ext:*</include>
+                <include>Jama:Jama</include>
+                <include>java3d:vecmath</include>
+                <include>javax.help:javahelp</include>
+                <include>javax.media.jai:*</include>
+                <include>jdom:jdom</include>
+                <include>jfree:*</include>
+                <include>joda-time:joda-time</include>
+                <include>ncsa.hdf:*</include>
+                <include>net.java.dev.jna:jna</include>
+                <include>net.java.dev.jsr-275:jsr-275</include>
+                <include>net.jcip:jcip-annotations</include>
+                <include>net.sf.ehcache:*</include>
+                <include>net.sf.sevenzipjbinding:*</include>
+                <include>net.sf.squirrel-sql.thirdparty-non-maven:napkinlaf</include>
+                <include>net.sourceforge.jexcelapi:jxl</include>
+                <include>org.apache.commons:*</include>
+                <include>org.apache.derby:derby</include>
+                <include>org.apache.velocity:*</include>
+                <include>org.geotools:*</include>
+                <include>org.htmlparser:*</include>
+                <include>org.jdom:*</include>
+                <include>org.jdom:*</include>
+                <include>org.jython:*</include>
+                <include>org.quartz-scheduler:quartz</include>
+                <include>org.slf4j:*</include>
+                <include>org.tukaani:*</include>
+                <include>org.xerial:sqlite-jdbc</include>
+                <include>org.xeustechnologies:*</include>
+            </includes>
+        </dependencySet>
+    </dependencySets>
+</assembly>

@@ -61,6 +61,7 @@ public class SpeedTester_2 {
             double time = ((double)stopWatch.getTimeDiff()) / 1000;
             totalTime += time;
             size = product.getSceneRasterWidth() * product.getSceneRasterHeight();
+            productReader.close();
             product.dispose();
             writer.write((i + 1) + ";" + time + ";" + (size / time) + "\n");
         }

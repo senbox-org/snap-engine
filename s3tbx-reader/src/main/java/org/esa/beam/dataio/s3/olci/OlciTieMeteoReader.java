@@ -30,12 +30,16 @@ class OlciTieMeteoReader extends S3NetcdfReader {
 
     @Override
     protected String[] getSeparatingThirdDimensions() {
-        return new String[]{"wind_vectors", "tie_pressure_levels"};
+        return new String[]{"wind_vectors"};
+        //todo use this later - currently it slows the reader down during product opening
+//        return new String[]{"wind_vectors", "tie_pressure_levels"};
     }
 
     @Override
     protected String[] getSuffixesForSeparatingThirdDimensions() {
-        return new String[]{"vector", "pressure_level"};
+        return new String[]{"vector"};
+        //todo use this later - currently it slows the reader down during product opening
+        //        return new String[]{"vector", "pressure_level"};
     }
 
     @Override

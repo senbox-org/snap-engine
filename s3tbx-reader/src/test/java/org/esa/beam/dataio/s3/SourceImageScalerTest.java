@@ -24,7 +24,6 @@ public class SourceImageScalerTest {
 
     private static final int MAX_USHORT = (2 << 15) - 1;
     private Band targetBand;
-    private float[] translationsBeforeScaling;
     private RenderingHints renderingHints;
     private float[] scalings;
     private int levelCount;
@@ -32,7 +31,6 @@ public class SourceImageScalerTest {
     @Before
     public void setup() {
         targetBand = new Band("targetBand", ProductData.TYPE_INT32, 200, 200);
-        translationsBeforeScaling = new float[]{0f, 0f};
         renderingHints = new RenderingHints(JAI.KEY_BORDER_EXTENDER, BorderExtender.createInstance(
                                                                          BorderExtender.BORDER_COPY));
         scalings = new float[]{2f, 2f};
@@ -44,7 +42,6 @@ public class SourceImageScalerTest {
         MultiLevelImage sourceImage = createSourceImage(levelCount, 100, 100);
         MultiLevelImage scaledImage = SourceImageScaler.scaleMultiLevelImage(targetBand.getSourceImage(),
                                                                              sourceImage, scalings,
-                                                                             translationsBeforeScaling,
                                                                              new float[]{0f,0f}, renderingHints,
                                                                              Double.NaN, Interpolation.getInstance(Interpolation.INTERP_NEAREST));
         final Rectangle targetBounds = targetBand.getSourceImage().getBounds();
@@ -65,7 +62,6 @@ public class SourceImageScalerTest {
         int sourceLevelCount = 3;
         MultiLevelImage sourceImage = createSourceImage(sourceLevelCount, 100, 100);
         MultiLevelImage scaledImage = SourceImageScaler.scaleMultiLevelImage(masterImage, sourceImage, scalings,
-                                                                             translationsBeforeScaling,
                                                                              new float[]{0f, 0f}, renderingHints,
                                                                              Double.NaN, Interpolation.getInstance(Interpolation.INTERP_NEAREST));
         final Rectangle targetBounds = targetBand.getSourceImage().getBounds();
@@ -91,7 +87,6 @@ public class SourceImageScalerTest {
         float[] offsets = new float[]{50f, 50f};
         MultiLevelImage scaledImage = SourceImageScaler.scaleMultiLevelImage(targetBand.getSourceImage(),
                                                                              sourceImage, scalings,
-                                                                             translationsBeforeScaling,
                                                                              offsets, renderingHints,
                                                                              Double.NaN, Interpolation.getInstance(Interpolation.INTERP_NEAREST));
         final Rectangle targetBounds = targetBand.getSourceImage().getBounds();
@@ -111,7 +106,6 @@ public class SourceImageScalerTest {
         float[] offsets = new float[]{-50f, -50f};
         MultiLevelImage scaledImage = SourceImageScaler.scaleMultiLevelImage(targetBand.getSourceImage(),
                                                                              sourceImage, scalings,
-                                                                             translationsBeforeScaling,
                                                                              offsets, renderingHints,
                                                                              Double.NaN, Interpolation.getInstance(Interpolation.INTERP_NEAREST));
 
@@ -130,7 +124,6 @@ public class SourceImageScalerTest {
         float[] offsets = new float[]{-50.5f, -50.5f};
         MultiLevelImage scaledImage = SourceImageScaler.scaleMultiLevelImage(targetBand.getSourceImage(),
                                                                              sourceImage, scalings,
-                                                                             translationsBeforeScaling,
                                                                              offsets, renderingHints,
                                                                              Double.NaN, Interpolation.getInstance(Interpolation.INTERP_NEAREST));
 

@@ -30,6 +30,7 @@
         <module>s3tbx-bootstrap</module>
         <module>s3tbx-reader</module>
         <module>s3tbx-installer</module>
+        <module>s3tbx-app</module>
     </modules>
 
     <packaging>pom</packaging>
@@ -147,17 +148,6 @@
                     <target>1.8</target>
                     <debug>true</debug>
                     <encoding>UTF-8</encoding>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.4</version>
-                <configuration>
-                    <descriptors>
-                        <descriptor>src/main/assembly/bin.xml</descriptor>
-                        <descriptor>src/main/assembly/project.xml</descriptor>
-                    </descriptors>
-                    <finalName>s3tbx</finalName>
                 </configuration>
             </plugin>
         </plugins>

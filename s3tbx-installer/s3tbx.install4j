@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<install4j version="5.1.12" transformSequenceNumber="4">
+<install4j version="5.1.8" transformSequenceNumber="4">
   <directoryPresets config="../../../../Desktop" />
-  <application name="Sentinel-3 Toolbox" distributionSourceDir="" applicationId="5268-5499-6432-3602" mediaDir="../target/installers" mediaFilePattern="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}" compression="6" lzmaCompression="false" pack200Compression="false" excludeSignedFromPacking="true" commonExternalFiles="false" createMd5Sums="true" shrinkRuntime="true" shortName="s3tbx" publisher="Brockmann Consult GmbH" publisherWeb="http://www.brockmann-consult.de" version="0.5-SNAPSHOT" allPathsRelative="true" backupOnSave="true" autoSave="true" convertDotsToUnderscores="false" macSignature="????" installerName="" javaMinVersion="1.8" javaMaxVersion="" allowBetaVM="true" jdkMode="runtimeJre" jdkName="">
+  <application name="S-3 Toolbox" distributionSourceDir="" applicationId="5268-5499-6432-3602" mediaDir="../target/installers" mediaFilePattern="${compiler:sys.shortName}_${compiler:sys.platform}_${compiler:sys.version}" compression="6" lzmaCompression="false" pack200Compression="false" excludeSignedFromPacking="true" commonExternalFiles="false" createMd5Sums="true" shrinkRuntime="true" shortName="s3tbx" publisher="Brockmann Consult GmbH" publisherWeb="http://www.brockmann-consult.de" version="0.5.0-${compiler:sys.date}${compiler:sys.time}" allPathsRelative="true" backupOnSave="true" autoSave="true" convertDotsToUnderscores="false" macSignature="????" installerName="" javaMinVersion="1.8" javaMaxVersion="" allowBetaVM="true" jdkMode="runtimeJre" jdkName="">
     <languages skipLanguageSelection="false" languageSelectionInPrincipalLanguage="false">
       <principalLanguage id="en" customLocalizationFile="" />
       <additionalLanguages />
@@ -22,7 +22,7 @@
       <mountPoint id="17" root="" location="" mode="755" />
     </mountPoints>
     <entries>
-      <dirEntry mountPoint="17" file="../target/s3tbx-bin" overwriteMode="4" shared="false" fileMode="644" uninstallMode="0" overrideFileMode="true" overrideOverwriteMode="true" overrideUninstallMode="true" entryMode="direct" subDirectory="" excludeSuffixes="" dirMode="755" overrideDirMode="true">
+      <dirEntry mountPoint="17" file="./target/s3tbx-bin" overwriteMode="4" shared="false" fileMode="644" uninstallMode="0" overrideFileMode="true" overrideOverwriteMode="true" overrideUninstallMode="true" entryMode="direct" subDirectory="" excludeSuffixes="" dirMode="755" overrideDirMode="true">
         <exclude />
       </dirEntry>
       <dirEntry mountPoint="17" file="./src/main/resources" overwriteMode="4" shared="false" fileMode="644" uninstallMode="2" overrideFileMode="true" overrideOverwriteMode="true" overrideUninstallMode="true" entryMode="direct" subDirectory="" excludeSuffixes="" dirMode="755" overrideDirMode="true">
@@ -192,7 +192,7 @@
               <java class="java.beans.XMLDecoder">
                 <object class="com.install4j.runtime.beans.screens.StandardProgramGroupScreen">
                   <void property="programGroupName">
-                    <string>S3TBX ${compiler:sys.version}</string>
+                    <string>S-3 Toolbox ${compiler:sys.version}</string>
                   </void>
                   <void property="showWarningIfExists">
                     <boolean>true</boolean>
@@ -1793,11 +1793,10 @@ if (wizardContext != null) {
       <excludedBeans />
       <overriddenPrincipalLanguage id="en" customLocalizationFile="" />
       <exclude>
-        <entry location="bin/beam-cli.sh" fileType="regular" />
-        <entry location="bin/gpt.sh" fileType="regular" />
-        <entry location="bin/pconvert.sh" fileType="regular" />
-        <entry location="bin/visat-d.sh" fileType="regular" />
         <entry location="bin/detect_java.sh" fileType="regular" />
+        <entry location="bin/gpt.sh" fileType="regular" />
+        <entry location="bin/snap-cli.sh" fileType="regular" />
+        <entry location="bin/snap-d.sh" fileType="regular" />
       </exclude>
       <variables />
       <autoUpdate useMinUpdatableVersion="false" minUpdatableVersion="" useMaxUpdatableVersion="false" maxUpdatableVersion="">
@@ -1812,11 +1811,10 @@ if (wizardContext != null) {
       <excludedBeans />
       <overriddenPrincipalLanguage id="en" customLocalizationFile="" />
       <exclude>
-        <entry location="bin/beam-cli.sh" fileType="regular" />
-        <entry location="bin/gpt.sh" fileType="regular" />
-        <entry location="bin/pconvert.sh" fileType="regular" />
-        <entry location="bin/visat-d.sh" fileType="regular" />
         <entry location="bin/detect_java.sh" fileType="regular" />
+        <entry location="bin/gpt.sh" fileType="regular" />
+        <entry location="bin/snap-cli.sh" fileType="regular" />
+        <entry location="bin/snap-d.sh" fileType="regular" />
       </exclude>
       <variables />
       <autoUpdate useMinUpdatableVersion="false" minUpdatableVersion="" useMaxUpdatableVersion="false" maxUpdatableVersion="">
@@ -1831,11 +1829,9 @@ if (wizardContext != null) {
       <excludedBeans />
       <overriddenPrincipalLanguage id="en" customLocalizationFile="" />
       <exclude>
-        <entry location="beam-website.url" fileType="regular" />
-        <entry location="bin/beam-cli.bat" fileType="regular" />
         <entry location="bin/gpt.bat" fileType="regular" />
-        <entry location="bin/pconvert.bat" fileType="regular" />
-        <entry location="bin/visat-d.bat" fileType="regular" />
+        <entry location="bin/snap-cli.bat" fileType="regular" />
+        <entry location="bin/snap-d.bat" fileType="regular" />
       </exclude>
       <variables />
       <autoUpdate useMinUpdatableVersion="false" minUpdatableVersion="" useMaxUpdatableVersion="false" maxUpdatableVersion="">
@@ -1852,11 +1848,9 @@ if (wizardContext != null) {
       <excludedBeans />
       <overriddenPrincipalLanguage id="en" customLocalizationFile="" />
       <exclude>
-        <entry location="beam-website.url" fileType="regular" />
-        <entry location="bin/beam-cli.bat" fileType="regular" />
         <entry location="bin/gpt.bat" fileType="regular" />
-        <entry location="bin/pconvert.bat" fileType="regular" />
-        <entry location="bin/visat-d.bat" fileType="regular" />
+        <entry location="bin/snap-cli.bat" fileType="regular" />
+        <entry location="bin/snap-d.bat" fileType="regular" />
       </exclude>
       <variables />
       <autoUpdate useMinUpdatableVersion="false" minUpdatableVersion="" useMaxUpdatableVersion="false" maxUpdatableVersion="">

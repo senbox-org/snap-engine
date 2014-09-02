@@ -34,13 +34,12 @@ import java.awt.image.RenderedImage;
 public class SourceImageScaler {
 
     public static MultiLevelImage scaleMultiLevelImage(MultiLevelImage masterImage, MultiLevelImage sourceImage,
-                                                       float[] scalings, float[] scaleTranslations, float[] offsets,
+                                                       float[] scalings, float[] offsets,
                                                        RenderingHints renderingHints, double noDataValue,
                                                        Interpolation interpolation) {
 
         final ScaledMultiLevelSource multiLevelSource = new ScaledMultiLevelSource(masterImage, sourceImage,
-                                                                                   scalings, scaleTranslations,
-                                                                                   offsets, renderingHints,
+                                                                                   scalings, offsets, renderingHints,
                                                                                    noDataValue,
                                                                                    interpolation);
         return new DefaultMultiLevelImage(multiLevelSource);
@@ -50,7 +49,6 @@ public class SourceImageScaler {
 
         private final MultiLevelImage sourceImage;
         private final float[] scalings;
-        private float[] scaleTranslations;
         private final RenderingHints renderingHints;
         private final double noDataValue;
         private final float[] offsets;
@@ -58,13 +56,12 @@ public class SourceImageScaler {
         private Interpolation interpolation;
 
         private ScaledMultiLevelSource(MultiLevelImage masterImage, MultiLevelImage sourceImage, float[] scalings,
-                                       float[] scaleTranslations, float[] offsets, RenderingHints renderingHints,
-                                       double noDataValue, Interpolation interpolation) {
+                                       float[] offsets, RenderingHints renderingHints, double noDataValue,
+                                       Interpolation interpolation) {
             super(masterImage.getModel());
             this.masterImage = masterImage;
             this.sourceImage = sourceImage;
             this.scalings = scalings;
-            this.scaleTranslations = scaleTranslations;
             this.renderingHints = renderingHints;
             this.noDataValue = noDataValue;
             this.offsets = offsets;
@@ -82,16 +79,11 @@ public class SourceImageScaler {
             final double sourceScale = sourceModel.getScale(sourceLevel);
             final RenderedImage image = sourceImage.getImage(sourceLevel);
             final float scaleRatio = (float) (sourceScale / targetScale);
-            if (scaleTranslations == null) {
-                scaleTranslations = new float[]{0f, 0f};
-            }
             RenderedImage renderedImage = image;
             final float xScale = scalings[0] * scaleRatio;
             final float yScale = scalings[1] * scaleRatio;
-            // todo - clarify whether this should actually be || instead of &&
-            if (xScale != 1.0f && yScale != 1.0f) {
-                renderedImage = ScaleDescriptor.create(image, xScale, yScale, scaleTranslations[0], scaleTranslations[1],
-                                                       interpolation, renderingHints);
+            if (xScale != 1.0f || yScale != 1.0f) {
+                renderedImage = ScaleDescriptor.create(image, xScale, yScale, 0f, 0f, interpolation, renderingHints);
             }
             final float scaledXOffset = (offsets != null) ? (float) (offsets[0] / targetScale) : 0f;
             final float scaledYOffset = (offsets != null) ? (float) (offsets[1] / targetScale) : 0f;

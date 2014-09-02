@@ -20,6 +20,10 @@
         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
+    <properties>
+        <s2tbx.version>${snap.version}</s2tbx.version>
+        <s2tbx.version>0.6.0</s2tbx.version>
+    </properties>
 
     <parent>
         <artifactId>s3tbx</artifactId>
@@ -27,7 +31,7 @@
         <version>0.5.0-SNAPSHOT</version>
     </parent>
 
-    <name>S3TBX Installer Resources</name>
+    <name>Sentinel-3 Installer Resources</name>
     <artifactId>s3tbx-installer</artifactId>
 
     <dependencies>
@@ -36,16 +40,306 @@
             <artifactId>i4jruntime</artifactId>
             <version>5.1.12</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.esa.s3tbx</groupId>
+            <artifactId>s3tbx-reader</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+
+        <dependency>
+            <!--used to get other dependencies -->
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-beam-bootstrap</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-binio</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-core</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-gpf</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-ui</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-visat-rcp</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-aatsr-sst</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-arcbingrid-reader</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-beam-help</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-binning</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-cluster-analysis</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-collocation</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-csv-dataio</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-envi-reader</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-envisat-reader</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-engine-utilities</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-flhmci</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-geotiff</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-getasse30-reader</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-graph-builder</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-hdf5-writer</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-modis-reader</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-ndvi</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-netcdf</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-opendap</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-pconvert</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-pgx-reader</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-pixel-extraction</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-python</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-scripting</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-statistics-op</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-temporal-percentile-op</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-time-series-tool</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-unmix</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>blue-marble-worldmap</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>globcover-worldmap</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.esa.s3tbx</groupId>
+            <artifactId>s3tbx-alos-reader</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.s3tbx</groupId>
+            <artifactId>s3tbx-atsr-reader</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.s3tbx</groupId>
+            <artifactId>s3tbx-avhrr-reader</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.s3tbx</groupId>
+            <artifactId>s3tbx-chris-reader</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.s3tbx</groupId>
+            <artifactId>s3tbx-landsat-reader</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.s3tbx</groupId>
+            <artifactId>s3tbx-meris-cloud</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.s3tbx</groupId>
+            <artifactId>s3tbx-merisl3-reader</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.s3tbx</groupId>
+            <artifactId>s3tbx-meris-radiometry</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.s3tbx</groupId>
+            <artifactId>s3tbx-meris-smac</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.s3tbx</groupId>
+            <artifactId>s3tbx-spot-vgt-reader</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>ncsa.hdf</groupId>
+            <artifactId>lib-hdf</artifactId>
+            <version>2.7</version>
+        </dependency>
+        <dependency>
+            <groupId>gov.nasa.gsfc.seadas</groupId>
+            <artifactId>seadas-reader</artifactId>
+            <version>1.5.6</version>
+        </dependency>
+
+
+        <!-- S2TBX dependencies -->
+
+        <dependency>
+            <groupId>org.esa.s2tbx</groupId>
+            <artifactId>s2tbx-commons</artifactId>
+            <version>${s2tbx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.s2tbx</groupId>
+            <artifactId>s2tbx-rapideye-reader</artifactId>
+            <version>${s2tbx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.s2tbx</groupId>
+            <artifactId>s2tbx-reader</artifactId>
+            <version>${s2tbx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.s2tbx</groupId>
+            <artifactId>s2tbx-spot-reader</artifactId>
+            <version>${s2tbx.version}</version>
+        </dependency>
+
+
     </dependencies>
 
     <build>
         <directory>target</directory>
         <outputDirectory>target/classes</outputDirectory>
         <finalName>${project.artifactId}</finalName>
-
         <plugins>
+                <plugin>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>2.4</version>
+                    <configuration>
+                        <descriptors>
+                            <descriptor>src/main/assembly/bin.xml</descriptor>
+                            <!--<descriptor>src/main/assembly/project.xml</descriptor>-->
+                            <!--<descriptor>src/main/assembly/web-help.xml</descriptor>-->
+                        </descriptors>
+                        <finalName>s3tbx</finalName>
+                        <encoding>UTF-8</encoding>
+                    </configuration>
+                </plugin>
+
             <plugin>
                 <artifactId>maven-deploy-plugin</artifactId>
+                <version>2.8.1</version>
                 <configuration>
                     <skip>true</skip>
                 </configuration>
@@ -82,36 +376,36 @@
                 <configuration>
                     <templates>
                         <template>
-                            <source>${basedir}/../src/main/bin/win/snap-cli-template.bat</source>
+                            <source>${basedir}/src/main/bin/win/snap-cli-template.bat</source>
                             <lineEnding>dos</lineEnding>
-                            <outputDirectory>${basedir}/../target/s3tbx-bin/bin</outputDirectory>
+                            <outputDirectory>${basedir}/target/s3tbx-bin/bin</outputDirectory>
                             <outputFileNamePattern>@{filterBaseName}.@{sourceExtension}</outputFileNamePattern>
                             <filterSet>
-                                <directory>${basedir}/../src/main/filters</directory>
+                                <directory>${basedir}/src/main/filters</directory>
                                 <includes>
                                     <include>*.properties</include>
                                 </includes>
                             </filterSet>
                         </template>
                         <template>
-                            <source>${basedir}/../src/main/bin/linux/snap-cli-template.sh</source>
+                            <source>${basedir}/src/main/bin/linux/snap-cli-template.sh</source>
                             <lineEnding>unix</lineEnding>
-                            <outputDirectory>${basedir}/../target/s3tbx-bin/bin</outputDirectory>
+                            <outputDirectory>${basedir}/target/s3tbx-bin/bin</outputDirectory>
                             <outputFileNamePattern>@{filterBaseName}.@{sourceExtension}</outputFileNamePattern>
                             <filterSet>
-                                <directory>${basedir}/../src/main/filters</directory>
+                                <directory>${basedir}/src/main/filters</directory>
                                 <includes>
                                     <include>*.properties</include>
                                 </includes>
                             </filterSet>
                         </template>
                         <template>
-                            <source>${basedir}/../src/main/bin/macosx/snap-cli-template.sh</source>
+                            <source>${basedir}/src/main/bin/macosx/snap-cli-template.sh</source>
                             <lineEnding>unix</lineEnding>
-                            <outputDirectory>${basedir}/../target/s3tbx-bin/bin</outputDirectory>
+                            <outputDirectory>${basedir}/target/s3tbx-bin/bin</outputDirectory>
                             <outputFileNamePattern>@{filterBaseName}.@{sourceExtension}</outputFileNamePattern>
                             <filterSet>
-                                <directory>${basedir}/../src/main/filters</directory>
+                                <directory>${basedir}/src/main/filters</directory>
                                 <includes>
                                     <include>*.properties</include>
                                 </includes>
@@ -120,17 +414,17 @@
                     </templates>
                 </configuration>
             </plugin>
-            <plugin>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy-case2-modules</id>
-                        <phase>process-sources</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
+            <!--<plugin>-->
+                <!--<artifactId>maven-dependency-plugin</artifactId>-->
+                <!--<executions>-->
+                    <!--<execution>-->
+                        <!--<id>copy-case2-modules</id>-->
+                        <!--<phase>process-sources</phase>-->
+                        <!--<goals>-->
+                            <!--<goal>copy</goal>-->
+                        <!--</goals>-->
+                        <!--<configuration>-->
+                            <!--<artifactItems>-->
                                 <!--<artifactItem>-->
                                     <!--<groupId>org.esa.beam</groupId>-->
                                     <!--<artifactId>beam-meris-case2-regional</artifactId>-->
@@ -161,305 +455,11 @@
                                     <!--<version>1.2.3</version>-->
                                     <!--<outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>-->
                                 <!--</artifactItem>-->
-
-
-                                <artifactItem>
-                                    <groupId>org.esa.snap</groupId>
-                                    <artifactId>snap-binio</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.snap</groupId>
-                                    <artifactId>snap-core</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.snap</groupId>
-                                    <artifactId>snap-gpf</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.snap</groupId>
-                                    <artifactId>snap-ui</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.snap</groupId>
-                                    <artifactId>snap-visat-rcp</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.snap</groupId>
-                                    <artifactId>snap-visat</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.snap</groupId>
-                                    <artifactId>snap-aatsr-sst</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.snap</groupId>
-                                    <artifactId>snap-arcbingrid-reader</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.snap</groupId>
-                                    <artifactId>snap-beam-help</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.snap</groupId>
-                                    <artifactId>snap-binning</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.snap</groupId>
-                                    <artifactId>snap-cluster-analysis</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.snap</groupId>
-                                    <artifactId>snap-collocation</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.snap</groupId>
-                                    <artifactId>snap-csv-dataio</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                 <artifactItem>
-                                    <groupId>org.esa.snap</groupId>
-                                    <artifactId>snap-envi-reader</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                 <artifactItem>
-                                    <groupId>org.esa.snap</groupId>
-                                    <artifactId>snap-envisat-reader</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.snap</groupId>
-                                    <artifactId>snap-engine-utilities</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.snap</groupId>
-                                    <artifactId>snap-flhmci</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.snap</groupId>
-                                    <artifactId>snap-geotiff</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.snap</groupId>
-                                    <artifactId>snap-getasse30-reader</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.snap</groupId>
-                                    <artifactId>snap-graph-builder</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.snap</groupId>
-                                    <artifactId>snap-hdf5-writer</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.snap</groupId>
-                                    <artifactId>snap-modis-reader</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.snap</groupId>
-                                    <artifactId>snap-ndvi</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.snap</groupId>
-                                    <artifactId>snap-netcdf</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.snap</groupId>
-                                    <artifactId>snap-opendap</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.snap</groupId>
-                                    <artifactId>snap-pconvert</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.snap</groupId>
-                                    <artifactId>snap-pgx-reader</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.snap</groupId>
-                                    <artifactId>snap-pixel-extraction</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.snap</groupId>
-                                    <artifactId>snap-python</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.snap</groupId>
-                                    <artifactId>snap-scripting</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.snap</groupId>
-                                    <artifactId>snap-statistics-op</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.snap</groupId>
-                                    <artifactId>snap-temporal-percentile-op</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.snap</groupId>
-                                    <artifactId>snap-time-series-tool</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.snap</groupId>
-                                    <artifactId>snap-unmix</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.snap</groupId>
-                                    <artifactId>blue-marble-worldmap</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.snap</groupId>
-                                    <artifactId>globcover-worldmap</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-
-                                <artifactItem>
-                                    <groupId>org.esa.s3tbx</groupId>
-                                    <artifactId>s3tbx-alos-reader</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.s3tbx</groupId>
-                                    <artifactId>s3tbx-atsr-reader</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.s3tbx</groupId>
-                                    <artifactId>s3tbx-avhrr-reader</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.s3tbx</groupId>
-                                    <artifactId>s3tbx-chris-reader</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.s3tbx</groupId>
-                                    <artifactId>s3tbx-landsat-reader</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.s3tbx</groupId>
-                                    <artifactId>s3tbx-meris-cloud</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.s3tbx</groupId>
-                                    <artifactId>s3tbx-merisl3-reader</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.s3tbx</groupId>
-                                    <artifactId>s3tbx-meris-radiometry</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.s3tbx</groupId>
-                                    <artifactId>s3tbx-meris-smac</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.esa.s3tbx</groupId>
-                                    <artifactId>s3tbx-spot-vgt-reader</artifactId>
-                                    <version>${snap.version}</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-
-                                <artifactItem>
-                                    <groupId>ncsa.hdf</groupId>
-                                    <artifactId>lib-hdf</artifactId>
-                                    <version>2.7</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>gov.nasa.gsfc.seadas</groupId>
-                                    <artifactId>seadas-reader</artifactId>
-                                    <version>1.5.6</version>
-                                    <outputDirectory>${basedir}/../target/s3tbx-bin/modules</outputDirectory>
-                                </artifactItem>
-
-
-                            </artifactItems>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+                            <!--</artifactItems>-->
+                        <!--</configuration>-->
+                    <!--</execution>-->
+                <!--</executions>-->
+            <!--</plugin>-->
         </plugins>
     </build>
 

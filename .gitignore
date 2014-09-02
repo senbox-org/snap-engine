@@ -2,7 +2,7 @@
 modules
 /config/
 target
-config
+/config/
 *.iml
 *.ipr
 *.iws
