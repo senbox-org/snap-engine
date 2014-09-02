@@ -34,6 +34,8 @@
     <name>Sentinel-3 Installer Resources</name>
     <artifactId>s3tbx-installer</artifactId>
 
+    <packaging>pom</packaging>
+
     <dependencies>
         <dependency>
             <groupId>com.install4j</groupId>
