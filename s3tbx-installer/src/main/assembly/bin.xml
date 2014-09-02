@@ -87,6 +87,7 @@
             <directoryMode>0755</directoryMode>
             <includes>
                 <include>*.sh</include>
+                <include>*.command</include>
             </includes>
             <excludes>
                 <exclude>snap-cli-template.*</exclude>
