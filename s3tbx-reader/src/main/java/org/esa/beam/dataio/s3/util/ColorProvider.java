@@ -27,10 +27,13 @@ public class ColorProvider {
     private void setupReservedColors() {
         predefinedColors = new HashMap<>();
         predefinedColors.put("coastline", new Color(255, 0, 0));
-        predefinedColors.put("land", new Color(0, 127, 63));
         predefinedColors.put("water", new Color(0, 63, 255));
+        predefinedColors.put("land", new Color(0, 127, 63));
         predefinedColors.put("lake", new Color(0, 127, 255));
         predefinedColors.put("ocean", new Color(0, 0, 191));
+        predefinedColors.put("snow", new Color(255, 255, 255));
+        predefinedColors.put("ice", new Color(191, 255, 255));
+        predefinedColors.put("cloud", new Color(191, 191, 191));
     }
 
     private void evaluateMaxNumberOfSamplePointsForDivision() {
