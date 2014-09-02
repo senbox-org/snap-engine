@@ -299,6 +299,13 @@
             <version>1.5.6</version>
         </dependency>
 
+        <!-- SMOS dependencies -->
+        <dependency>
+            <groupId>edu.ucar</groupId>
+            <artifactId>bufr</artifactId>
+            <version>4.3.21</version>
+        </dependency>
+
         <!-- S2 dependencies -->
         <dependency>
             <groupId>net.java.dev.jna</groupId>
