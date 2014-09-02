@@ -366,7 +366,7 @@ if (isS3tbxInstallation &amp;&amp; !context.getBooleanVariable("sys.confirmedUpd
                   <java class="java.beans.XMLDecoder">
                     <object class="com.install4j.runtime.beans.actions.desktop.CreateStartMenuEntryAction">
                       <void property="arguments">
-                        <string>/K "${installer:sys.installationDir}\bin\snap-cli.bat"</string>
+                        <string>/K "${installer:sys.installationDir}\bin\s3tbx-cli.bat"</string>
                       </void>
                       <void property="entryName">
                         <string>${installer:sys.programGroupDir}\S3TBX Command Line</string>
