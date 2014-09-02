@@ -48,6 +48,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.esa.s3tbx</groupId>
+            <artifactId>s3tbx-app</artifactId>
+            <version>${snap.version}</version>
+        </dependency>
+
+        <dependency>
             <!--used to get other dependencies -->
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-beam-bootstrap</artifactId>
