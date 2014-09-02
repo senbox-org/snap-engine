@@ -175,6 +175,9 @@
                 <include>org.xerial:sqlite-jdbc</include>
                 <include>org.xeustechnologies:*</include>
             </includes>
+            <excludes>
+                <exclude>ncsa.hdf:lib-hdf</exclude>
+            </excludes>
         </dependencySet>
     </dependencySets>
 </assembly>
