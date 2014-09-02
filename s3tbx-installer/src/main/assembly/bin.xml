@@ -140,6 +140,7 @@
                 <include>com.sleepycat:je</include>
                 <include>com.sun.jna:jna</include>
                 <include>com.sun.media:*</include>
+                <include>com.sun.xsom:xsom</include>
                 <include>com.thoughtworks.xstream:xstream</include>
                 <include>com.vividsolutions:jts</include>
                 <include>commons-*:*</include>
@@ -150,6 +151,7 @@
                 <include>java3d:vecmath</include>
                 <include>javax.help:javahelp</include>
                 <include>javax.media.jai:*</include>
+                <include>javax.xml.parsers:jaxp-api</include>
                 <include>jdom:jdom</include>
                 <include>jfree:*</include>
                 <include>joda-time:joda-time</include>
@@ -174,6 +176,7 @@
                 <include>org.tukaani:*</include>
                 <include>org.xerial:sqlite-jdbc</include>
                 <include>org.xeustechnologies:*</include>
+                <include>relaxngDatatype:relaxngDatatype</include>
             </includes>
             <excludes>
                 <exclude>ncsa.hdf:lib-hdf</exclude>

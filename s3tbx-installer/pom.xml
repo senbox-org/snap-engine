@@ -348,6 +348,21 @@
             <artifactId>sqlite-jdbc</artifactId>
             <version>3.7.2</version>
         </dependency>
+        <dependency>
+            <groupId>com.sun.xsom</groupId>
+            <artifactId>xsom</artifactId>
+            <version>20110809</version>
+        </dependency>
+        <dependency>
+            <groupId>relaxngDatatype</groupId>
+            <artifactId>relaxngDatatype</artifactId>
+            <version>20020414</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.xml.parsers</groupId>
+            <artifactId>jaxp-api</artifactId>
+            <version>1.4.5</version>
+        </dependency>
 
 
     </dependencies>
