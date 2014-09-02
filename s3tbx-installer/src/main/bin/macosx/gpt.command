@@ -11,7 +11,7 @@ if [ -z "$SNAP_HOME" ]; then
     exit 2
 fi
 
-java \
+${S3TBX_HOME}/.install4j/jre.bundle/Contents/Home/jre/bin/java \
     -Xmx${installer:maxHeapSize} \
     -Dceres.context=s3tbx \
     "-Ds3tbx.mainClass=org.esa.beam.framework.gpf.main.GPT" \
