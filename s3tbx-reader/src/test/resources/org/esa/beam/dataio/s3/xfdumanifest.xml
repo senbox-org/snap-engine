@@ -780,8 +780,8 @@ This document is a manifest file of a SAFE archive. -->
                     mimeType='text/xml'>
                 <xmlData>
                     <safe:acquisitionPeriod>
-                        <safe:startTime>2013-06-21T10:09:20</safe:startTime>
-                        <safe:stopTime>2013-06-21T10:14:13</safe:stopTime>
+                        <safe:startTime>2013-06-21T10:09:20.646463Z</safe:startTime>
+                        <safe:stopTime>2013-06-21T10:14:13.646463Z</safe:stopTime>
                     </safe:acquisitionPeriod>
                 </xmlData>
             </metadataWrap>
