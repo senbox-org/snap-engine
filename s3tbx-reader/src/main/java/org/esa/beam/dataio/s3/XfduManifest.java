@@ -176,12 +176,12 @@ public class XfduManifest implements Manifest {
 
     private ProductData.UTC getTime(final String name) {
         final Node period = xPathHelper.getNode("/XFDU/metadataSection/metadataObject[@ID='acquisitionPeriod']", doc);
-        final String time = xPathHelper.getString("//metadataWrap/xmlData/acquisitionPeriod/" + name, period);
+        String time = xPathHelper.getString("//metadataWrap/xmlData/acquisitionPeriod/" + name, period);
         try {
-            if (Character.isDigit(time.charAt(time.length() - 1))) {
-                return ProductData.UTC.parse(time, "yyyy-MM-dd'T'HH:mm:ss");
+            if (!Character.isDigit(time.charAt(time.length() - 1))) {
+                time = time.substring(0, time.length() - 1);
             }
-            return ProductData.UTC.parse(time, "yyyy-MM-dd'T'HH:mm:ss'Z'");
+            return ProductData.UTC.parse(time, "yyyy-MM-dd'T'HH:mm:ss");
         } catch (ParseException ignored) {
             return null;
         }
