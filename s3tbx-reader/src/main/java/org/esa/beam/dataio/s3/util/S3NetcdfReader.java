@@ -230,7 +230,7 @@ public class S3NetcdfReader {
     private IndexCoding getIndexCoding(Product product, String indexCodingName, Attribute flagMeaningsAttribute,
                                        Attribute flagValuesAttribute, boolean msb) {
         final IndexCoding indexCoding = new IndexCoding(indexCodingName);
-        addSamples(indexCoding, flagMeaningsAttribute, flagValuesAttribute, flagValuesAttribute, msb);
+        addSamples(indexCoding, flagMeaningsAttribute, flagValuesAttribute, msb);
         if (!product.getIndexCodingGroup().contains(indexCodingName)) {
             product.getIndexCodingGroup().add(indexCoding);
         }
@@ -240,7 +240,7 @@ public class S3NetcdfReader {
     private FlagCoding getFlagCoding(Product product, String flagCodingName, Attribute flagMeaningsAttribute,
                                      Attribute flagMasksAttribute, boolean msb) {
         final FlagCoding flagCoding = new FlagCoding(flagCodingName);
-        addSamples(flagCoding, flagMeaningsAttribute, flagMasksAttribute, flagMasksAttribute, msb);
+        addSamples(flagCoding, flagMeaningsAttribute, flagMasksAttribute, msb);
         if (!product.getFlagCodingGroup().contains(flagCodingName)) {
             product.getFlagCodingGroup().add(flagCoding);
         }
@@ -258,6 +258,43 @@ public class S3NetcdfReader {
     }
 
     private static void addSamples(SampleCoding sampleCoding, Attribute sampleMeanings, Attribute sampleValues,
+                                   boolean msb) {
+        final String[] meanings = getSampleMeanings(sampleMeanings);
+        final int sampleCount = Math.min(meanings.length, sampleValues.getLength());
+        for (int i = 0; i < sampleCount; i++) {
+            final String sampleName = replaceNonWordCharacters(meanings[i]);
+            switch (sampleValues.getDataType()) {
+                case BYTE:
+                    sampleCoding.addSample(sampleName,
+                                            DataType.unsignedByteToShort(sampleValues.getNumericValue(i).byteValue()),
+                                            null);
+                    break;
+                case SHORT:
+                    sampleCoding.addSample(sampleName,
+                                           DataType.unsignedShortToInt(sampleValues.getNumericValue(i).shortValue()), null);
+                    break;
+                case INT:
+                    sampleCoding.addSample(sampleName, sampleValues.getNumericValue(i).intValue(), null);
+                    break;
+                case LONG:
+                    final long longValue = sampleValues.getNumericValue(i).longValue();
+                    if (msb) {
+                        long shiftedValue = longValue >>> 32;
+                        if (shiftedValue > 0) {
+                            sampleCoding.addSample(sampleName, (int) shiftedValue, null);
+                        }
+                    } else {
+                        long shiftedValue = longValue & 0x00000000FFFFFFFFL;
+                        if (shiftedValue > 0 || longValue == 0L) {
+                            sampleCoding.addSample(sampleName, (int) shiftedValue, null);
+                        }
+                    }
+                    break;
+            }
+        }
+    }
+
+    private static void addSamples(SampleCoding sampleCoding, Attribute sampleMeanings, Attribute sampleValues,
                                    Attribute sampleMasks, boolean msb) {
         final String[] meanings = getSampleMeanings(sampleMeanings);
         final int sampleCount = Math.min(meanings.length, sampleMasks.getLength());
@@ -267,16 +304,29 @@ public class S3NetcdfReader {
                 case BYTE:
                     int[] byteValues = {DataType.unsignedByteToShort(sampleMasks.getNumericValue(i).byteValue()),
                             DataType.unsignedByteToShort(sampleValues.getNumericValue(i).byteValue())};
-                    sampleCoding.addSamples(sampleName, byteValues, null);
+                    if(byteValues[0] == byteValues[1]) {
+                        sampleCoding.addSample(sampleName, byteValues[0], null);
+                    } else {
+                        sampleCoding.addSamples(sampleName, byteValues, null);
+                    }
                     break;
                 case SHORT:
                     int[] shortValues = {DataType.unsignedShortToInt(sampleMasks.getNumericValue(i).shortValue()),
                             DataType.unsignedShortToInt(sampleValues.getNumericValue(i).shortValue())};
-                    sampleCoding.addSamples(sampleName, shortValues, null);
+                    if(shortValues[0] == shortValues[1]) {
+                        sampleCoding.addSample(sampleName, shortValues[0], null);
+                    } else {
+                        sampleCoding.addSamples(sampleName, shortValues, null);
+                    }
                     break;
                 case INT:
                     int[] intValues = {sampleMasks.getNumericValue(i).intValue(),
                             sampleValues.getNumericValue(i).intValue()};
+                    if(intValues[0] == intValues[1]) {
+                        sampleCoding.addSample(sampleName, intValues[0], null);
+                    } else {
+                        sampleCoding.addSamples(sampleName, intValues, null);
+                    }
                     sampleCoding.addSamples(sampleName, intValues, null);
                     break;
                 case LONG:
@@ -286,13 +336,21 @@ public class S3NetcdfReader {
                         int[] intLongValues =
                                 {(int)(longValues[0] >>> 32), (int)(longValues[1] >>> 32)};
                         if (longValues[0] > 0) {
-                            sampleCoding.addSamples(sampleName, intLongValues, null);
+                            if(intLongValues[0] == intLongValues[1]) {
+                                sampleCoding.addSample(sampleName, intLongValues[0], null);
+                            } else {
+                                sampleCoding.addSamples(sampleName, intLongValues, null);
+                            }
                         }
                     } else {
                         int[] intLongValues =
                                 {(int)(longValues[0] & 0x00000000FFFFFFFFL), (int)(longValues[1] & 0x00000000FFFFFFFFL)};
                         if (intLongValues[0] > 0 || longValues[0] == 0L) {
-                            sampleCoding.addSamples(sampleName, intLongValues, null);
+                            if(intLongValues[0] == intLongValues[1]) {
+                                sampleCoding.addSample(sampleName, intLongValues[0], null);
+                            } else {
+                                sampleCoding.addSamples(sampleName, intLongValues, null);
+                            }
                         }
                     }
                     break;
