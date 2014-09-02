@@ -1813,16 +1813,16 @@ if (wizardContext != null) {
       <overriddenPrincipalLanguage id="en" customLocalizationFile="" />
       <exclude>
         <entry location="bin/detect_java.sh" fileType="regular" />
-        <entry location="bin/export-grid-points.command" fileType="regular" />
-        <entry location="bin/export-grid-points.sh" fileType="regular" />
         <entry location="bin/gpt.command" fileType="regular" />
         <entry location="bin/gpt.sh" fileType="regular" />
-        <entry location="bin/smosGPToNetCDF.command" fileType="regular" />
-        <entry location="bin/smosGPToNetCDF.sh" fileType="regular" />
-        <entry location="bin/snap-cli.command" fileType="regular" />
-        <entry location="bin/snap-cli.sh" fileType="regular" />
-        <entry location="bin/snap-d.command" fileType="regular" />
-        <entry location="bin/snap-d.sh" fileType="regular" />
+        <entry location="bin/s3tbx-cli.command" fileType="regular" />
+        <entry location="bin/s3tbx-cli.sh" fileType="regular" />
+        <entry location="bin/s3tbx-d.command" fileType="regular" />
+        <entry location="bin/s3tbx-d.sh" fileType="regular" />
+        <entry location="bin/smos-gp-export.command" fileType="regular" />
+        <entry location="bin/smos-gp-export.sh" fileType="regular" />
+        <entry location="bin/smos-gp-to-nc.command" fileType="regular" />
+        <entry location="bin/smos-gp-to-nc.sh" fileType="regular" />
       </exclude>
       <variables />
       <autoUpdate useMinUpdatableVersion="false" minUpdatableVersion="" useMaxUpdatableVersion="false" maxUpdatableVersion="">
@@ -1838,16 +1838,16 @@ if (wizardContext != null) {
       <overriddenPrincipalLanguage id="en" customLocalizationFile="" />
       <exclude>
         <entry location="bin/detect_java.sh" fileType="regular" />
-        <entry location="bin/export-grid-points.command" fileType="regular" />
-        <entry location="bin/export-grid-points.sh" fileType="regular" />
         <entry location="bin/gpt.command" fileType="regular" />
         <entry location="bin/gpt.sh" fileType="regular" />
-        <entry location="bin/smosGPToNetCDF.command" fileType="regular" />
-        <entry location="bin/smosGPToNetCDF.sh" fileType="regular" />
-        <entry location="bin/snap-cli.command" fileType="regular" />
-        <entry location="bin/snap-cli.sh" fileType="regular" />
-        <entry location="bin/snap-d.command" fileType="regular" />
-        <entry location="bin/snap-d.sh" fileType="regular" />
+        <entry location="bin/s3tbx-cli.command" fileType="regular" />
+        <entry location="bin/s3tbx-cli.sh" fileType="regular" />
+        <entry location="bin/s3tbx-d.command" fileType="regular" />
+        <entry location="bin/s3tbx-d.sh" fileType="regular" />
+        <entry location="bin/smos-gp-export.command" fileType="regular" />
+        <entry location="bin/smos-gp-export.sh" fileType="regular" />
+        <entry location="bin/smos-gp-to-nc.command" fileType="regular" />
+        <entry location="bin/smos-gp-to-nc.sh" fileType="regular" />
       </exclude>
       <variables />
       <autoUpdate useMinUpdatableVersion="false" minUpdatableVersion="" useMaxUpdatableVersion="false" maxUpdatableVersion="">
@@ -1863,16 +1863,16 @@ if (wizardContext != null) {
       <overriddenPrincipalLanguage id="en" customLocalizationFile="" />
       <exclude>
         <entry location="bin/detect_java.sh" fileType="regular" />
-        <entry location="bin/export-grid-points.bat" fileType="regular" />
-        <entry location="bin/export-grid-points.sh" fileType="regular" />
         <entry location="bin/gpt.bat" fileType="regular" />
         <entry location="bin/gpt.sh" fileType="regular" />
-        <entry location="bin/smosGPToNetCDF.bat" fileType="regular" />
-        <entry location="bin/smosGPToNetCDF.sh" fileType="regular" />
-        <entry location="bin/snap-cli.bat" fileType="regular" />
-        <entry location="bin/snap-cli.sh" fileType="regular" />
-        <entry location="bin/snap-d.bat" fileType="regular" />
-        <entry location="bin/snap-d.sh" fileType="regular" />
+        <entry location="bin/s3tbx-cli.bat" fileType="regular" />
+        <entry location="bin/s3tbx-cli.sh" fileType="regular" />
+        <entry location="bin/s3tbx-d.bat" fileType="regular" />
+        <entry location="bin/s3tbx-d.sh" fileType="regular" />
+        <entry location="bin/smos-gp-export.bat" fileType="regular" />
+        <entry location="bin/smos-gp-export.sh" fileType="regular" />
+        <entry location="bin/smos-gp-to-nc.bat" fileType="regular" />
+        <entry location="bin/smos-gp-to-nc.sh" fileType="regular" />
       </exclude>
       <variables />
       <autoUpdate useMinUpdatableVersion="false" minUpdatableVersion="" useMaxUpdatableVersion="false" maxUpdatableVersion="">
@@ -1887,16 +1887,16 @@ if (wizardContext != null) {
       <excludedBeans />
       <overriddenPrincipalLanguage id="en" customLocalizationFile="" />
       <exclude>
-        <entry location="bin/export-grid-points.bat" fileType="regular" />
-        <entry location="bin/export-grid-points.command" fileType="regular" />
         <entry location="bin/gpt.bat" fileType="regular" />
         <entry location="bin/gpt.command" fileType="regular" />
-        <entry location="bin/smosGPToNetCDF.bat" fileType="regular" />
-        <entry location="bin/smosGPToNetCDF.command" fileType="regular" />
-        <entry location="bin/snap-cli.bat" fileType="regular" />
-        <entry location="bin/snap-cli.command" fileType="regular" />
-        <entry location="bin/snap-d.bat" fileType="regular" />
-        <entry location="bin/snap-d.command" fileType="regular" />
+        <entry location="bin/s3tbx-cli.bat" fileType="regular" />
+        <entry location="bin/s3tbx-cli.command" fileType="regular" />
+        <entry location="bin/s3tbx-d.bat" fileType="regular" />
+        <entry location="bin/s3tbx-d.command" fileType="regular" />
+        <entry location="bin/smos-gp-export.bat" fileType="regular" />
+        <entry location="bin/smos-gp-export.command" fileType="regular" />
+        <entry location="bin/smos-gp-to-nc.bat" fileType="regular" />
+        <entry location="bin/smos-gp-to-nc.command" fileType="regular" />
       </exclude>
       <variables />
       <autoUpdate useMinUpdatableVersion="false" minUpdatableVersion="" useMaxUpdatableVersion="false" maxUpdatableVersion="">
