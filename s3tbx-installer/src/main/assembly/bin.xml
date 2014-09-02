@@ -125,6 +125,7 @@
             </includes>
             <excludes>
                 <exclude>org.esa.snap:snap-beam-bootstrap</exclude>
+                <exclude>org.esa.snap:snap-launcher</exclude>
                 <exclude>org.esa.s3tbx:s3tbx-installer</exclude>
             </excludes>
         </dependencySet>
