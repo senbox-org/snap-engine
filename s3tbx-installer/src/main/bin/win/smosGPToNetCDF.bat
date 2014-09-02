@@ -12,7 +12,7 @@ SET EE_TO_NETCDF_DIR=%cd%
 ::    '-Xms64M' sets the minimum heap space to 64 megabytes
 ::    '-Xmx512M' sets the maximum heap space to 512 megabytes
 ::------------------------------------------------------------------
-SET JAVA_OPTS=-Xms64M -Xmx${installer:maxHeapSize}
+SET JAVA_OPTS=-Xms64M -Xmx1300M
 
 
 :: -======================-
@@ -22,10 +22,12 @@ SET JAVA_OPTS=-Xms64M -Xmx${installer:maxHeapSize}
 IF "%JAVA_HOME%" == "" goto error
 
 SET JAVAEXE=%JAVA_HOME%\bin\java.exe
-SET LIBDIR=%EE_TO_NETCDF_DIR%\lib
+SET MODULESDIR=%EE_TO_NETCDF_DIR%\..\modules
+SET LIBDIR=%EE_TO_NETCDF_DIR%\..\lib
+SET LAUNCHER_JAR=%EE_TO_NETCDF_DIR%\snap-launcher.jar
 SET OLD_CLASSPATH=%CLASSPATH%
 
-SET CLASSPATH=%LIBDIR%\*;%LIBDIR%
+SET CLASSPATH=%LAUNCHER_JAR%;%LIBDIR%\*;%LIBDIR%;%MODULESDIR%\*;%MODULESDIR%
 
 ::------------------------------------------------------------------
 :: You can adjust the Java minimum and maximum heap space here.

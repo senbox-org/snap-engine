@@ -22,9 +22,11 @@ export JAVA_OPTS="-Xmx${installer:maxHeapSize}"
 # -======================-
 
 export JAVAEXE="$JAVA_HOME"/bin/java
-export LIBDIR="$EE_TO_NETCDF_DIR"/lib
+export LIBDIR="$EE_TO_NETCDF_DIR"/../lib
+export MODULESDIR="$EE_TO_NETCDF_DIR"/../modules
+export LAUNCHER_JAR="$EE_TO_NETCDF_DIR"/snap-launcher.jar
 export OLD_CLASSPATH="$CLASSPATH"
-CLASSPATH="$LIBDIR/*:$LIBDIR"
+CLASSPATH="$LAUNCHER_JAR:$MODULESDIR/*:$MODULESDIR:$LIBDIR/*:$LIBDIR"
 
 "$JAVAEXE" "$JAVA_OPTS" -classpath "$CLASSPATH" org.esa.beam.smos.ee2netcdf.GPToNetCDFExporterTool "$@"
 
