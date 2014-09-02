@@ -47,7 +47,7 @@
             <directory>src/main/bin/common</directory>
             <outputDirectory>bin</outputDirectory>
             <includes>
-                <include>splash-snap.png</include>
+                <include>s3tbx-splash.png</include>
             </includes>
         </fileSet>
 
