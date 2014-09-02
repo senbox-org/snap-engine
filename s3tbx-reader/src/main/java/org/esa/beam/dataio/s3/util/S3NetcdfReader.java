@@ -30,6 +30,7 @@ import java.util.List;
  */
 public class S3NetcdfReader {
 
+    //todo check whether this class is still necessary as most of its functionality is also provided by the default netcdf reader
     private static final String product_type = "product_type";
     private static final String flag_values = "flag_values";
     private static final String flag_masks = "flag_masks";
