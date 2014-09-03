@@ -19,7 +19,7 @@ public class OlciLevel2LProductFactory extends OlciProductFactory {
 
     @Override
     protected String getValidExpression() {
-        return "!LQSF_INVALID";
+        return "!LQSF.INVALID";
     }
 
     @Override

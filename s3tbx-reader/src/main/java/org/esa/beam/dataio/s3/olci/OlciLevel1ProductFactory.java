@@ -32,7 +32,7 @@ import java.util.List;
 
 public class OlciLevel1ProductFactory extends OlciProductFactory {
 
-    private final static String validExpression = "!quality_flags_invalid";
+    private final static String validExpression = "!quality_flags.invalid";
 
     public OlciLevel1ProductFactory(Sentinel3ProductReader productReader) {
         super(productReader);
