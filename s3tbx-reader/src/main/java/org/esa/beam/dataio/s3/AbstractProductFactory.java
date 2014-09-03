@@ -18,7 +18,9 @@ import org.esa.beam.dataio.s3.util.ColorProvider;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.ColorPaletteDef;
 import org.esa.beam.framework.datamodel.CrsGeoCoding;
+import org.esa.beam.framework.datamodel.ImageInfo;
 import org.esa.beam.framework.datamodel.Mask;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
@@ -53,6 +55,14 @@ public abstract class AbstractProductFactory implements ProductFactory {
     private final List<Product> openProductList = new ArrayList<Product>();
     private final Sentinel3ProductReader productReader;
     private final Logger logger;
+    private final static Color[] uncertainty_colors = new Color[]{
+            new Color(127, 0, 255),
+            new Color(0, 0, 255),
+            new Color(0, 255, 0),
+            new Color(255, 255, 0),
+            new Color(255, 127, 0),
+            new Color(255, 0, 0)
+    };
 
     private volatile Manifest manifest;
 
@@ -149,11 +159,26 @@ public abstract class AbstractProductFactory implements ProductFactory {
             final String errorBandName = bandName + "_err";
             final String uncertaintyBandName = bandName + "_uncertainty";
             if (product.containsBand(errorBandName)) {
-                band.setAncillaryBand("error", product.getBand(errorBandName));
+                final Band errorBand = product.getBand(errorBandName);
+                band.setAncillaryBand("error", errorBand);
+                addUncertaintyImageInfo(errorBand);
             } else if (product.containsBand(uncertaintyBandName)) {
-                band.setAncillaryBand("uncertainty", product.getBand(uncertaintyBandName));
+                final Band uncertaintyBand = product.getBand(uncertaintyBandName);
+                band.setAncillaryBand("uncertainty", uncertaintyBand);
+                addUncertaintyImageInfo(uncertaintyBand);
             }
         }
+    }
+
+    protected void addUncertaintyImageInfo(Band band) {
+        final double minValue = band.getStx().getMinimum();
+        final double maxValue = band.getStx().getMaximum();
+        double colorDist = (maxValue - minValue) / (uncertainty_colors.length - 1);
+        final ColorPaletteDef.Point[] points = new ColorPaletteDef.Point[uncertainty_colors.length];
+        for(int i = 0; i < points.length; i++) {
+            points[i] = new ColorPaletteDef.Point(minValue + (i * colorDist), uncertainty_colors[i]);
+        }
+        band.setImageInfo(new ImageInfo(new ColorPaletteDef(points)));
     }
 
     protected void processProductSpecificMetadata(MetadataElement metadataElement) {
