@@ -65,6 +65,7 @@
         <file path="./src/main/resources/images/s3tbx-icon-16.png" />
         <file path="./src/main/resources/images/s3tbx-icon-32.png" />
         <file path="./src/main/resources/images/s3tbx-icon-48.png" />
+        <file path="./src/main/resources/images/s3tbx-icon-64.png" />
       </iconImageFiles>
     </launcher>
   </launchers>
@@ -1857,23 +1858,11 @@ if (wizardContext != null) {
       <excludedComponents />
       <includedDownloadableComponents />
     </windows>
-    <macosFolder name="Mac OS X Folder JRE" id="5009" customizedId="" mediaFileName="${compiler:sys.shortName}_${compiler:sys.version}_mac_installer" installDir="${compiler:sys.shortName}-${compiler:sys.version}" overridePrincipalLanguage="false" jreBitType="all" runPostProcessor="false" postProcessor="" failOnPostProcessorError="false" useLegacyMediaFileIds="false" legacyMediaFileIds="" includedJRE="macosx-amd64-1.8.0_05" manualJREEntry="false" bundleType="1" jreURL="" jreShared="false" directDownload="false" installOnlyIfNecessary="false" appleJre="false" requiredVmIdPrefix="" customInstallBaseDir="" contentFilesType="1" downloadURL="" signLaunchers="false">
+    <macosFolder name="Mac OS X Folder" id="5009" customizedId="" mediaFileName="${compiler:sys.shortName}_${compiler:sys.version}_mac_installer" installDir="${compiler:sys.shortName}-${compiler:sys.version}" overridePrincipalLanguage="false" jreBitType="all" runPostProcessor="false" postProcessor="" failOnPostProcessorError="false" useLegacyMediaFileIds="false" legacyMediaFileIds="" includedJRE="" manualJREEntry="false" bundleType="1" jreURL="" jreShared="false" directDownload="false" installOnlyIfNecessary="false" appleJre="false" requiredVmIdPrefix="" customInstallBaseDir="" contentFilesType="1" downloadURL="" signLaunchers="false">
       <excludedLaunchers />
       <excludedBeans />
       <overriddenPrincipalLanguage id="en" customLocalizationFile="" />
-      <exclude>
-        <entry location="bin/detect_java.sh" fileType="regular" />
-        <entry location="bin/gpt.bat" fileType="regular" />
-        <entry location="bin/gpt.sh" fileType="regular" />
-        <entry location="bin/s3tbx-cli.bat" fileType="regular" />
-        <entry location="bin/s3tbx-cli.sh" fileType="regular" />
-        <entry location="bin/s3tbx-d.bat" fileType="regular" />
-        <entry location="bin/s3tbx-d.sh" fileType="regular" />
-        <entry location="bin/smos-gp-export.bat" fileType="regular" />
-        <entry location="bin/smos-gp-export.sh" fileType="regular" />
-        <entry location="bin/smos-gp-to-nc.bat" fileType="regular" />
-        <entry location="bin/smos-gp-to-nc.sh" fileType="regular" />
-      </exclude>
+      <exclude />
       <variables />
       <autoUpdate useMinUpdatableVersion="false" minUpdatableVersion="" useMaxUpdatableVersion="false" maxUpdatableVersion="">
         <commentFiles />
@@ -1909,6 +1898,18 @@ if (wizardContext != null) {
         <content />
       </installerScript>
     </unixInstaller>
+    <macos name="Mac OS X Single Bundle" id="5017" customizedId="" mediaFileName="${compiler:sys.shortName}-${compiler:sys.version}_mac_sb" installDir="${compiler:sys.shortName}-${compiler:sys.version}" overridePrincipalLanguage="false" jreBitType="all" runPostProcessor="false" postProcessor="" failOnPostProcessorError="false" useLegacyMediaFileIds="false" legacyMediaFileIds="" includedJRE="" manualJREEntry="false" bundleType="1" jreURL="" jreShared="false" directDownload="false" installOnlyIfNecessary="false" appleJre="true" requiredVmIdPrefix="" customInstallBaseDir="" contentFilesType="1" downloadURL="" signLaunchers="false" launcherId="19">
+      <excludedBeans />
+      <overriddenPrincipalLanguage id="en" customLocalizationFile="" />
+      <exclude />
+      <variables />
+      <autoUpdate useMinUpdatableVersion="false" minUpdatableVersion="" useMaxUpdatableVersion="false" maxUpdatableVersion="">
+        <commentFiles />
+        <customAttributes />
+      </autoUpdate>
+      <excludedComponents />
+      <includedDownloadableComponents />
+    </macos>
   </mediaSets>
   <buildIds buildAll="true">
     <mediaSet refId="4707" />
