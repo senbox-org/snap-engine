@@ -211,7 +211,7 @@
               <java class="java.beans.XMLDecoder">
                 <object class="com.install4j.runtime.beans.screens.StandardProgramGroupScreen">
                   <void property="programGroupName">
-                    <string>ESA SNAP</string>
+                    <string>ESA S-3 Toolbox</string>
                   </void>
                   <void property="showWarningIfExists">
                     <boolean>true</boolean>
