@@ -34,8 +34,8 @@
     <components />
   </files>
   <launchers>
-    <launcher name="s3tbx" id="19" customizedId="" external="false" excludeFromMenu="false" unixMode="755" menuName="S-3 Toolbox" icnsFile="" customMacBundleIdentifier="false" macBundleIdentifier="" swtApp="false" fileset="" macBundleBinary="JavaApplicationStub" addMacEntitlements="false" macEntitlementsFile="">
-      <executable name="s3tbx" type="1" iconSet="true" iconFile="" executableDir="bin" redirectStderr="true" stderrFile="error.log" stderrMode="overwrite" redirectStdout="false" stdoutFile="output.log" stdoutMode="overwrite" failOnStderrOutput="true" executableMode="1" changeWorkingDirectory="true" workingDirectory=".." singleInstance="false" serviceStartType="2" serviceDependencies="" serviceDescription="" jreLocation="" executionLevel="asInvoker" checkConsoleParameter="false" globalSingleInstance="false">
+    <launcher name="s3tbx" id="19" customizedId="" external="false" excludeFromMenu="false" unixMode="755" menuName="S-3 Toolbox" icnsFile="./src/main/resources/images/s3tbx-icon.icns" customMacBundleIdentifier="false" macBundleIdentifier="" swtApp="false" fileset="" macBundleBinary="JavaApplicationStub" addMacEntitlements="false" macEntitlementsFile="">
+      <executable name="s3tbx" type="1" iconSet="true" iconFile="./src/main/resources/images/s3tbx-icon.ico" executableDir="bin" redirectStderr="true" stderrFile="error.log" stderrMode="overwrite" redirectStdout="false" stdoutFile="output.log" stdoutMode="overwrite" failOnStderrOutput="true" executableMode="1" changeWorkingDirectory="true" workingDirectory=".." singleInstance="false" serviceStartType="2" serviceDependencies="" serviceDescription="" jreLocation="" executionLevel="asInvoker" checkConsoleParameter="false" globalSingleInstance="false">
         <versionInfo include="false" fileVersion="" fileDescription="" legalCopyright="" internalName="" productName="" />
       </executable>
       <splashScreen show="false" autoOff="true" alwaysOnTop="true" width="653" height="195" bitmapFile="" java6SplashScreen="false">
@@ -644,7 +644,7 @@ return files;
                       </void>
                       <void property="windowsIconFile">
                         <object class="com.install4j.api.beans.ExternalFile">
-                          <string>./src/main/resources/images/s3tbx.ico</string>
+                          <string>./src/main/resources/images/s3tbx-icon.ico</string>
                         </object>
                       </void>
                     </object>
@@ -667,7 +667,7 @@ return files;
                       </void>
                       <void property="windowsIconFile">
                         <object class="com.install4j.api.beans.ExternalFile">
-                          <string>./src/main/resources/images/s3tbx.ico</string>
+                          <string>./src/main/resources/images/s3tbx-icon.ico</string>
                         </object>
                       </void>
                     </object>
@@ -690,7 +690,7 @@ return files;
                       </void>
                       <void property="windowsIconFile">
                         <object class="com.install4j.api.beans.ExternalFile">
-                          <string>./src/main/resources/images/s3tbx.ico</string>
+                          <string>./src/main/resources/images/s3tbx-icon.ico</string>
                         </object>
                       </void>
                     </object>
@@ -716,7 +716,7 @@ return files;
                       </void>
                       <void property="windowsIconFile">
                         <object class="com.install4j.api.beans.ExternalFile">
-                          <string>./src/main/resources/images/s3tbx.ico</string>
+                          <string>./src/main/resources/images/s3tbx-icon.ico</string>
                         </object>
                       </void>
                     </object>
@@ -742,7 +742,7 @@ return files;
                       </void>
                       <void property="windowsIconFile">
                         <object class="com.install4j.api.beans.ExternalFile">
-                          <string>./src/main/resources/images/s3tbx.ico</string>
+                          <string>./src/main/resources/images/s3tbx-icon.ico</string>
                         </object>
                       </void>
                     </object>
@@ -1862,7 +1862,19 @@ if (wizardContext != null) {
       <excludedLaunchers />
       <excludedBeans />
       <overriddenPrincipalLanguage id="en" customLocalizationFile="" />
-      <exclude />
+      <exclude>
+        <entry location="bin/detect_java.sh" fileType="regular" />
+        <entry location="bin/gpt.bat" fileType="regular" />
+        <entry location="bin/gpt.sh" fileType="regular" />
+        <entry location="bin/s3tbx-cli.bat" fileType="regular" />
+        <entry location="bin/s3tbx-cli.sh" fileType="regular" />
+        <entry location="bin/s3tbx-d.bat" fileType="regular" />
+        <entry location="bin/s3tbx-d.sh" fileType="regular" />
+        <entry location="bin/smos-gp-export.bat" fileType="regular" />
+        <entry location="bin/smos-gp-export.sh" fileType="regular" />
+        <entry location="bin/smos-gp-to-nc.bat" fileType="regular" />
+        <entry location="bin/smos-gp-to-nc.sh" fileType="regular" />
+      </exclude>
       <variables />
       <autoUpdate useMinUpdatableVersion="false" minUpdatableVersion="" useMaxUpdatableVersion="false" maxUpdatableVersion="">
         <commentFiles />
