@@ -46,8 +46,8 @@ abstract class OlciProductFactory extends AbstractProductFactory {
     protected void processProductSpecificMetadata(MetadataElement metadataElement) {
         final MetadataElement olciInformationElement = metadataElement.getElement("olciProductInformation");
         final MetadataElement samplingParametersElement = olciInformationElement.getElement("samplingParameters");
-        subSamplingX = samplingParametersElement.getAttribute("rowsPerTiePoint").getData().getElemInt();
-        subSamplingY = samplingParametersElement.getAttribute("columnsPerTiePoint").getData().getElemInt();
+        subSamplingY = Integer.parseInt(samplingParametersElement.getAttribute("rowsPerTiePoint").getData().toString());
+        subSamplingX = Integer.parseInt(samplingParametersElement.getAttribute("columnsPerTiePoint").getData().toString());
         final MetadataElement bandDescriptionsElement = olciInformationElement.getElement("bandDescriptions");
         if (bandDescriptionsElement != null) {
             for (int i = 0; i < bandDescriptionsElement.getNumElements(); i++) {
