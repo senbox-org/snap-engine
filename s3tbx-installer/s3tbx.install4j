@@ -104,7 +104,7 @@
                 </void>
               </void>
               <void property="customWatermarkText">
-                <string>ESA S3TBX</string>
+                <string>S-3 Toolbox</string>
               </void>
               <void property="frameSizeClientArea">
                 <boolean>false</boolean>
@@ -229,7 +229,7 @@ isS3tbxInstallation &amp;= new File(installationDir, "readme.html").exists();
 isS3tbxInstallation &amp;= new File(installationDir, "modules").exists();
 
 if (isS3tbxInstallation &amp;&amp; !context.getBooleanVariable("sys.confirmedUpdateInstallation")) {
-    int selectedOption = Util.showOptionDialog("There already is a S3TBX installation in " + installationDir.toString() + ".",
+    int selectedOption = Util.showOptionDialog("There already is an S-3 Toolbox installation in " + installationDir.toString() + ".",
                                                new String[]{"Overwrite", "Don't overwrite"},
                                                JOptionPane.WARNING_MESSAGE | JOptionPane.YES_OPTION);
     if (selectedOption == 1) {
@@ -369,7 +369,7 @@ if (isS3tbxInstallation &amp;&amp; !context.getBooleanVariable("sys.confirmedUpd
                         <string>/K "${installer:sys.installationDir}\bin\s3tbx-cli.bat"</string>
                       </void>
                       <void property="entryName">
-                        <string>${installer:sys.programGroupDir}\S3TBX Command Line</string>
+                        <string>${installer:sys.programGroupDir}\S-3 Toolbox Command Line</string>
                       </void>
                       <void property="file">
                         <object class="java.io.File">
@@ -633,7 +633,7 @@ return files;
                   <java class="java.beans.XMLDecoder">
                     <object class="com.install4j.runtime.beans.actions.desktop.CreateFileAssociationAction">
                       <void property="description">
-                        <string>S3 Toolbox session file, used to restore a session</string>
+                        <string>S-3 Toolbox session file, used to restore a session</string>
                       </void>
                       <void property="extension">
                         <string>s3tbx</string>
@@ -783,7 +783,7 @@ return files;
                   <java class="java.beans.XMLDecoder">
                     <object class="com.install4j.runtime.beans.formcomponents.CheckboxComponent">
                       <void property="checkboxText">
-                        <string>Run S3TBX</string>
+                        <string>Run S-3 Toolbox</string>
                       </void>
                       <void property="initiallySelected">
                         <boolean>true</boolean>
@@ -802,7 +802,7 @@ return files;
                   <java class="java.beans.XMLDecoder">
                     <object class="com.install4j.runtime.beans.formcomponents.HyperlinkLabelComponent">
                       <void property="hyperlinkText">
-                        <string>Visit the S3TBX project website!</string>
+                        <string>Visit the S-3 Toolbox project website!</string>
                       </void>
                       <void property="url">
                         <string>http://sentinel.esa.int</string>
@@ -973,7 +973,7 @@ return files;
                   <java class="java.beans.XMLDecoder">
                     <object class="com.install4j.runtime.beans.formcomponents.CheckboxComponent">
                       <void property="checkboxText">
-                        <string>Remove S3TBX application data</string>
+                        <string>Remove S-3 Toolbox application data</string>
                       </void>
                       <void property="initiallySelected">
                         <boolean>true</boolean>
@@ -992,7 +992,7 @@ return files;
                   <java class="java.beans.XMLDecoder">
                     <object class="com.install4j.runtime.beans.formcomponents.MultilineLabelComponent">
                       <void property="labelText">
-                        <string>S3TBX application data such as user preferences and caches are stored in
+                        <string>S-3 Toolbox application data such as user preferences and caches are stored in
 the directory '${installer:sys.userHome}/.s3tbx'. 
 This directory will be entirely removed if you select this option.</string>
                       </void>
