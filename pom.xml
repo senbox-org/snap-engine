@@ -127,6 +127,13 @@
                 <scope>test</scope>
             </dependency>
 
+            <!-- FORWARD declared for SMOS-Box @TODO tb/** make version number consistent with other NetCDF dependencies-->
+            <dependency>
+                <groupId>edu.ucar</groupId>
+                <artifactId>bufr</artifactId>
+                <version>4.3.22</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -134,6 +141,10 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>edu.ucar</groupId>
+            <artifactId>bufr</artifactId>
         </dependency>
     </dependencies>
 
