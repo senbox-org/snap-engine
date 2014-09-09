@@ -13,15 +13,7 @@ import org.jpy.PyModule;
 import org.jpy.PyObject;
 
 import java.awt.Rectangle;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * An operator which uses Python code to process data products.
@@ -48,10 +40,8 @@ public class PyOperator extends Operator {
     @Parameter(description = "Name of the Python class which implements the operator. Please refer to the BEAM help for details.")
     private String pythonClassName;
 
-    private static boolean globalPythonInit;
     private transient PyModule pyModule;
     private transient PythonProcessor pythonProcessor;
-    private static File beampyDir;
 
 
     public String getPythonModulePath() {
@@ -78,23 +68,6 @@ public class PyOperator extends Operator {
         this.pythonClassName = pythonClassName;
     }
 
-    private File getResourceFile(String resourcePath) {
-        URL resourceUrl = getClass().getResource(resourcePath);
-        System.out.println("resourceUrl = " + resourceUrl);
-        if (resourceUrl != null) {
-            try {
-                File resourceFile = new File(resourceUrl.toURI());
-                System.out.println("resourceFile = " + resourceFile);
-                if (resourceFile.exists()) {
-                    return resourceFile;
-                }
-            } catch (URISyntaxException e) {
-                // mmmmh
-            }
-        }
-        return null;
-    }
-
 
     @Override
     public void initialize() throws OperatorException {
@@ -105,12 +78,10 @@ public class PyOperator extends Operator {
             throw new OperatorException("Missing value for parameter 'pythonClassName'");
         }
 
-        if (!globalPythonInit) {
-            initPython();
-        }
+        PyBridge.establish();
 
         synchronized (PyLib.class) {
-            extendSysPath(pythonModulePath);
+            PyBridge.extendSysPath(pythonModulePath);
 
             String code = String.format("if '%s' in globals(): del %s", pythonModuleName, pythonModuleName);
             PyLib.execScript(code);
@@ -119,123 +90,6 @@ public class PyOperator extends Operator {
             PyObject pythonProcessorImpl = pyModule.call(pythonClassName);
             pythonProcessor = pythonProcessorImpl.createProxy(PythonProcessor.class);
             pythonProcessor.initialize(this);
-        }
-    }
-
-    private void initPython() {
-        beampyDir = getResourceFile("/beampy");
-        if (beampyDir == null) {
-            throw new OperatorException("Python can only be run from unpacked modules");
-        }
-        System.out.println("beampyDir: " + beampyDir);
-
-        File jpyConfigFile = new File(beampyDir, "jpyconfig.properties");
-
-
-        String pythonExecutable = System.getProperty("beam.pythonExecutable");
-
-        boolean mustConfigure = false;
-
-        if (!jpyConfigFile.exists()) {
-            mustConfigure = true;
-        } else {
-            if (pythonExecutable != null) {
-                Properties properties = new Properties();
-                try {
-                    try (FileReader reader = new FileReader(jpyConfigFile)) {
-                        properties.load(reader);
-                        String jpyPythonExecutable = properties.getProperty("jpy.pythonExecutable");
-                        if (jpyPythonExecutable != null && !jpyPythonExecutable.equals(pythonExecutable)) {
-                            mustConfigure = true;
-                        }
-                    }
-                } catch (IOException e) {
-                    // mmmh...
-                }
-            }
-        }
-
-        if (mustConfigure) {
-            if (pythonExecutable == null) {
-                pythonExecutable = "python";
-            }
-            configurePythonBridge(pythonExecutable);
-        }
-
-        if (jpyConfigFile.exists()) {
-            System.setProperty("jpy.config", jpyConfigFile.getPath());
-        } else {
-            // todo - read "configtool.log" and display errors
-            throw new OperatorException("Python configuration incomplete.\nMissing " + jpyConfigFile);
-        }
-
-        synchronized (PyLib.class) {
-            if (!globalPythonInit) {
-                //PyLib.Diag.setFlags(PyLib.Diag.F_ALL);
-                String pythonVersion = PyLib.getPythonVersion();
-                System.out.println("Running Python " + pythonVersion);
-                if (!PyLib.isPythonRunning()) {
-                    PyLib.startPython(beampyDir.getPath());
-                } else {
-                    extendSysPath(beampyDir.getPath());
-                }
-                globalPythonInit = true;
-            }
-        }
-    }
-
-    private void configurePythonBridge(String pythonExecutable) {
-        // "java.home" is always present
-        List<String> command = new ArrayList<>();
-        command.add(pythonExecutable);
-        command.add("beampyutil.py");
-        command.add("--force");
-        command.add("--log_file");
-        command.add("beampyutil.log");
-        String javaHome = System.getProperty("java.home");
-        if (javaHome != null) {
-            command.add( "--java_home");
-            command.add(javaHome);
-        }
-        String osArch = System.getProperty("os.arch");  // "os.arch" is always present
-        if (osArch != null) {
-            command.add("--req_arch");
-            command.add(osArch);
-        }
-        String commandLine = toCommandLine(command);
-        System.out.printf("Executing command: [%s]\n", commandLine);
-        try {
-            Process process = new ProcessBuilder()
-                    .command(command)
-                    .directory(beampyDir).start();
-            int exitCode = process.waitFor();
-            if (exitCode != 0) {
-                throw new OperatorException(String.format("Python configuration failed.\nCommand [%s]\nfailed with return code %s.", commandLine, exitCode));
-            }
-        } catch (IOException | InterruptedException e) {
-            throw new OperatorException(String.format("Python configuration failed.\nCommand [%s]\nfailed with exception %s.", commandLine, e.getMessage()), e);
-        }
-    }
-
-    private static String toCommandLine(List<String> command) {
-        StringBuilder sb = new StringBuilder();
-        for (String arg : command) {
-            if (sb.length() > 0) {
-                sb.append(" ");
-            }
-            sb.append(arg.contains(" ") ? String.format("\"%s\"", arg) : arg);
-        }
-        return sb.toString();
-    }
-
-    private void extendSysPath(String path) {
-        if (path != null) {
-            String code = String.format("" +
-                                        "import sys;\n" +
-                                        "p = '%s';\n" +
-                                        "if not p in sys.path: sys.path.append(p)",
-                                        path.replace("\\", "\\\\"));
-            PyLib.execScript(code);
         }
     }
 
