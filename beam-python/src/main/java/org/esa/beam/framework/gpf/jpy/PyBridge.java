@@ -53,21 +53,18 @@ public class PyBridge {
             return;
         }
 
-        String pythonExecutable = System.getProperty("beam.pythonExecutable", "python");
-        boolean forcePythonConfig = System.getProperty("beam.forcePythonConfig", "true").equalsIgnoreCase("true");
-
         beampyDir = getResourceFile("/beampy");
         if (beampyDir == null) {
             throw new OperatorException("Can't find BEAM-Python module directory.\n" +
                                         "(Make sure the BEAM-Python module is unpacked.)");
         }
 
-        BeamLogManager.getSystemLogger().info("BEAM-Python executable: " + pythonExecutable);
         BeamLogManager.getSystemLogger().info("BEAM-Python module directory: " + beampyDir);
 
+        boolean forcePythonConfig = System.getProperty("beam.forcePythonConfig", "true").equalsIgnoreCase("true");
         File jpyConfigFile = new File(beampyDir, JPY_JAVA_API_CONFIG_FILENAME);
-        if (!forcePythonConfig && !jpyConfigFile.exists()) {
-            configureJpy(pythonExecutable);
+        if (forcePythonConfig || !jpyConfigFile.exists()) {
+            configureJpy();
         }
         if (!jpyConfigFile.exists()) {
             throw new OperatorException(String.format("Python configuration incomplete.\n" +
@@ -112,7 +109,11 @@ public class PyBridge {
         }
     }
 
-    private static void configureJpy(String pythonExecutable) {
+    private static void configureJpy() {
+        BeamLogManager.getSystemLogger().info("Configuring BEAM-Python bridge...");
+
+        String pythonExecutable = System.getProperty("beam.pythonExecutable", "python");
+
         // "java.home" is always present
         List<String> command = new ArrayList<>();
         command.add(pythonExecutable);
