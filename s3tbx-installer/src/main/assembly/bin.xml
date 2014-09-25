@@ -132,6 +132,7 @@
             <useStrictFiltering>true</useStrictFiltering>
             <includes>
                 <include>c3p0:c3p0</include>
+                <include>com.alee:weblaf</include>
                 <include>com.bc.jnn:jnn</include>
                 <include>com.fasterxml.jackson.core:*</include>
                 <include>com.google.protobuf:protobuf-java</include>
