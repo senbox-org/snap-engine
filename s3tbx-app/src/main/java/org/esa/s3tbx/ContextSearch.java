@@ -33,6 +33,7 @@ public class ContextSearch {
 
     private static final String DEFAULT_KEY = "control F1";
     private static final String DEFAULT_SEARCH = "http://www.google.com/search?q=";
+    private static final String DEFAULT_QUERY = "Sentinel Toolbox";
     private static final String CONFIG_FILENAME = "context-search.properties";
 
     private final Properties config;
@@ -82,7 +83,7 @@ public class ContextSearch {
         KeyboardFocusManager kfm = KeyboardFocusManager.getCurrentKeyboardFocusManager();
         kfm.addKeyEventDispatcher(e -> {
             if (keyStroke.getModifiers() == e.getModifiers() || (keyStroke.getModifiers() & e.getModifiers()) != 0
-                    && keyStroke.getKeyCode() == e.getKeyCode()) {
+                                                                && keyStroke.getKeyCode() == e.getKeyCode()) {
                 ProductNode productNode = visatApp.getSelectedProductNode();
                 if (productNode != null) {
                     searchForNode(productNode);
@@ -102,7 +103,7 @@ public class ContextSearch {
     }
 
     private String getQuery() {
-        return config.getProperty("query", "");
+        return config.getProperty("query", DEFAULT_QUERY);
     }
 
     private String getQuery(String productType, String def) {
@@ -122,11 +123,19 @@ public class ContextSearch {
 
         String nodeName = node.getName();
         String[] nodeNameSplits = nodeName.split("[\\.\\_\\ \\-]");
-        String nodeNameTerms = nodeNameSplits[0];
 
-        return nodeNameTerms + " " + contextTerms;
+        StringBuilder nodeNameTerms = new StringBuilder();
+        for (String nodeNameSplit : nodeNameSplits) {
+            if (!nodeNameSplit.isEmpty() && Character.isAlphabetic(nodeNameSplit.charAt(0))) {
+                if (nodeNameTerms.length() > 0) {
+                    nodeNameTerms.append(" OR ");
+                }
+                nodeNameTerms.append(nodeNameSplit);
+            }
+        }
+
+        return contextTerms + " " + nodeNameTerms;
     }
-
 
     private void loadConfig() throws IOException {
         Path file = getConfigPath();
