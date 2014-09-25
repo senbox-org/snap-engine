@@ -73,7 +73,16 @@
 
     <extension point="snap-ui:actions">
 
-
+        <action>
+            <parent>help</parent>
+            <placeBefore>showDataSources</placeBefore>
+            <id>org.esa.s3tbx.ContextSearchAction</id>
+            <class>org.esa.s3tbx.ContextSearchAction</class>
+            <text>Web Search...</text>
+            <shortDescr>Perform a contextual web search on the selected node.</shortDescr>
+            <context>product,metadataNode,tiePointGrid,virtualBand,band</context>
+            <helpId>contextSearch</helpId>
+        </action>
 
     </extension>
 

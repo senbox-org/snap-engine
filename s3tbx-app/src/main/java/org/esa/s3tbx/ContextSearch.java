@@ -1,5 +1,6 @@
 package org.esa.s3tbx;
 
+import com.bc.ceres.core.Assert;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductNode;
 import org.esa.beam.util.SystemUtils;
@@ -9,7 +10,6 @@ import org.esa.beam.visat.VisatApp;
 import javax.swing.KeyStroke;
 import java.awt.Desktop;
 import java.awt.KeyboardFocusManager;
-import java.awt.event.KeyEvent;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,52 +31,19 @@ import java.util.logging.Level;
  */
 public class ContextSearch {
 
+    private static final String DEFAULT_KEY = "control F1";
+    private static final String DEFAULT_SEARCH = "http://www.google.com/search?q=";
     private static final String CONFIG_FILENAME = "context-search.properties";
-    private static final String DEFAULT_KEY_STROKE = "control F1";
 
-    private final VisatApp visatApp;
-    private final KeyStroke keyStroke;
     private final Properties config;
 
     public static void install(VisatApp visatApp) {
         new ContextSearch(visatApp);
     }
 
-    private ContextSearch(VisatApp visatApp) {
-        this.visatApp = visatApp;
-        this.config = new Properties();
+    public void searchForNode(ProductNode node) {
 
-        try {
-            loadConfig();
-        } catch (IOException e) {
-            BeamLogManager.getSystemLogger().log(Level.SEVERE, "Failed to load context search configuration", e);
-        }
-
-        KeyStroke keyStroke = KeyStroke.getKeyStroke(config.getProperty("key", DEFAULT_KEY_STROKE));
-        if (keyStroke != null) {
-            this.keyStroke = keyStroke;
-        } else {
-            this.keyStroke = KeyStroke.getKeyStroke(DEFAULT_KEY_STROKE);
-        }
-
-        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(this::processKeyEvent);
-    }
-
-    private boolean processKeyEvent(KeyEvent e) {
-        int modifiers = keyStroke.getModifiers();
-        int keyCode = keyStroke.getKeyCode();
-        boolean activated = (modifiers == e.getModifiers() || (modifiers & e.getModifiers()) != 0)
-                            && e.getKeyCode() == keyCode;
-        if (activated) {
-            ProductNode node = visatApp.getSelectedProductNode();
-            return node != null && searchFor(node);
-        }
-        return false;
-    }
-
-    private boolean searchFor(ProductNode node) {
-
-        String searchString = config.getProperty("search", "http://www.google.com/search?q=");
+        String searchString = getSearch();
         String queryString = getQueryString(node);
 
         try {
@@ -86,27 +53,80 @@ public class ContextSearch {
         } catch (IOException e) {
             BeamLogManager.getSystemLogger().log(Level.WARNING, "Failed to perform context search");
         }
+    }
 
-        return true;
+    private ContextSearch(final VisatApp visatApp) {
+        Assert.notNull(visatApp, "visatApp");
+
+        this.config = new Properties();
+
+        try {
+            loadConfig();
+        } catch (IOException e) {
+            BeamLogManager.getSystemLogger().log(Level.SEVERE, "Failed to load context search configuration", e);
+        }
+
+        final KeyStroke keyStroke;
+        KeyStroke ks = KeyStroke.getKeyStroke(getKey());
+        if (ks == null) {
+            keyStroke = KeyStroke.getKeyStroke(DEFAULT_KEY);
+        } else {
+            keyStroke = ks;
+        }
+        Assert.notNull(keyStroke, "keyStroke");
+
+        ContextSearchAction command = (ContextSearchAction) visatApp.getCommandManager().getCommand(ContextSearchAction.ID);
+        command.setContextSearch(this);
+        command.setAccelerator(keyStroke);
+
+        KeyboardFocusManager kfm = KeyboardFocusManager.getCurrentKeyboardFocusManager();
+        kfm.addKeyEventDispatcher(e -> {
+            if (keyStroke.getModifiers() == e.getModifiers() || (keyStroke.getModifiers() & e.getModifiers()) != 0
+                    && keyStroke.getKeyCode() == e.getKeyCode()) {
+                ProductNode productNode = visatApp.getSelectedProductNode();
+                if (productNode != null) {
+                    searchForNode(productNode);
+                    return true;
+                }
+            }
+            return false;
+        });
+    }
+
+    private String getKey() {
+        return config.getProperty("key", DEFAULT_KEY);
+    }
+
+    private String getSearch() {
+        return config.getProperty("search", DEFAULT_SEARCH);
+    }
+
+    private String getQuery() {
+        return config.getProperty("query", "");
+    }
+
+    private String getQuery(String productType, String def) {
+        return config.getProperty(String.format("products.%s.query", productType.replace(" ", "_")), def);
     }
 
     private String getQueryString(ProductNode node) {
-        String contextTerms = config.getProperty("query", "");
+        String contextTerms = getQuery();
 
         Product product = node.getProduct();
         if (product != null) {
             String productType = product.getProductType();
             if (productType != null) {
-                String productTypeId = productType.replace(" ", "_");
-                contextTerms = config.getProperty(String.format("productTypes.%s.query", productTypeId), contextTerms);
+                contextTerms = getQuery(productType, contextTerms);
             }
         }
 
         String nodeName = node.getName();
-        String nodeNameTerms = nodeName.replace(".", " OR ").replace("_", " OR ").replace("-", " OR ");
+        String[] nodeNameSplits = nodeName.split("[\\.\\_\\ \\-]");
+        String nodeNameTerms = nodeNameSplits[0];
 
         return nodeNameTerms + " " + contextTerms;
     }
+
 
     private void loadConfig() throws IOException {
         Path file = getConfigPath();
