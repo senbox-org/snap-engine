@@ -15,6 +15,7 @@
  */
 package org.esa.s3tbx;
 
+import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.beam.framework.ui.application.ApplicationDescriptor;
 import org.esa.beam.visat.VisatAboutBox;
@@ -24,6 +25,12 @@ public final class S3tbxApp extends VisatApp {
 
     public S3tbxApp(ApplicationDescriptor applicationDescriptor) {
         super(applicationDescriptor);
+    }
+
+    @Override
+    protected void initClient(ProgressMonitor pm) {
+        super.initClient(pm);
+        ContextSearch.install(this);
     }
 
     @Override
