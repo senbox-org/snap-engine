@@ -90,7 +90,7 @@
             <directory>src/main/doc</directory>
             <outputDirectory>doc</outputDirectory>
             <includes>
-                <include>SMOS-BOX-FormatConversionUserGuide-1.0-forAcceptance.pdf</include>
+                <include>SMOS-BOX-FormatConversionUserGuide-*-forAcceptance.pdf</include>
             </includes>
         </fileSet>
 
