@@ -23,6 +23,7 @@
 
     <properties>
         <s2tbx.version>0.6.0</s2tbx.version>
+        <smos.version>4.0-SNAPSHOT</smos.version>
     </properties>
 
     <parent>
@@ -303,33 +304,33 @@
 
         <dependency>
             <groupId>org.esa.smostbx</groupId>
-            <artifactId>smostbx-dgg</artifactId>
-            <version>${snap.version}</version>
+            <artifactId>smos-dgg</artifactId>
+            <version>${smos.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.smostbx</groupId>
-            <artifactId>smostbx-ee2netcdf</artifactId>
-            <version>${snap.version}</version>
+            <artifactId>smos-ee2netcdf</artifactId>
+            <version>${smos.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.smostbx</groupId>
-            <artifactId>smostbx-gui</artifactId>
-            <version>${snap.version}</version>
+            <artifactId>smos-gui</artifactId>
+            <version>${smos.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.smostbx</groupId>
-            <artifactId>smostbx-lsmask</artifactId>
-            <version>${snap.version}</version>
+            <artifactId>smos-lsmask</artifactId>
+            <version>${smos.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.smostbx</groupId>
-            <artifactId>smostbx-tools</artifactId>
-            <version>${snap.version}</version>
+            <artifactId>smos-tools</artifactId>
+            <version>${smos.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.smostbx</groupId>
-            <artifactId>smostbx-visat</artifactId>
-            <version>${snap.version}</version>
+            <artifactId>smos-visat</artifactId>
+            <version>${smos.version}</version>
         </dependency>
         <dependency>
             <groupId>edu.ucar</groupId>
