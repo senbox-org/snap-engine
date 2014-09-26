@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>s3tbx-app</symbolicName>
-    <version>0.5</version>
+    <version>1.0.0</version>
     <name>S-3 Toolbox Application</name>
 
     <vendor>Brockmann Consult GmbH</vendor>
