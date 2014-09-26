@@ -1,33 +1,30 @@
-#!/bin/bash
+#! /bin/sh
 
-# -======================-
-# User configurable values
-# -======================-
+export S3TBX_HOME=${installer:sys.installationDir}
 
-export EE_TO_NETCDF_DIR="`pwd`"
+if [ ! -d "${S3TBX_HOME}" ]
+then
+    PRGDIR=`dirname $0`
+    export S3TBX_HOME=`cd "${PRGDIR}/.." ; pwd`
+fi
 
-#------------------------------------------------------------------
-# You can adjust the Java minimum and maximum heap space here.
-# Just change the Xms and Xmx options. Space is given in megabyte.
-#    '-Xms64M' sets the minimum heap space to 64 megabytes
-#    '-Xmx512M' sets the maximum heap space to 512 megabytes
-#------------------------------------------------------------------
-export JAVA_OPTS="-Xmx${installer:maxHeapSize}"
+if [ -z "${S3TBX_HOME}" ]; then
+    echo
+    echo Error:
+    echo S3TBX_HOME does not exists in your environment. Please
+    echo set the S3TBX_HOME variable in your environment to the
+    echo location of your SNAP installation.
+    echo
+    exit 2
+fi
 
+. "${S3TBX_HOME}/bin/detect_java.sh"
 
+"${app_java_home}/bin/java" \
+    -Xmx1024M \
+    -Dceres.context=s3tbx \
+    "-Ds3tbx.mainClass=org.esa.beam.smos.ee2netcdf.GPToNetCDFExporterTool" \
+    "-Ds3tbx.home=${S3TBX_HOME}" \
+    -jar "${S3TBX_HOME}/bin/snap-launcher.jar" "$@"
 
-
-# -======================-
-# Other values
-# -======================-
-
-export JAVAEXE="$JAVA_HOME"/bin/java
-export LIBDIR="$EE_TO_NETCDF_DIR"/../lib
-export MODULESDIR="$EE_TO_NETCDF_DIR"/../modules
-export LAUNCHER_JAR="$EE_TO_NETCDF_DIR"/snap-launcher.jar
-export OLD_CLASSPATH="$CLASSPATH"
-CLASSPATH="$LAUNCHER_JAR:$MODULESDIR/*:$MODULESDIR:$LIBDIR/*:$LIBDIR"
-
-"$JAVAEXE" "$JAVA_OPTS" -classpath "$CLASSPATH" org.esa.beam.smos.ee2netcdf.GPToNetCDFExporterTool "$@"
-
-export CLASSPATH="$OLD_CLASSPATH"
+exit 0

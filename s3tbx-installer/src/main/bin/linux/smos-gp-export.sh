@@ -18,7 +18,7 @@ if [ -z "${S3TBX_HOME}" ]; then
     exit 2
 fi
 
-. "S3TBX_HOME/bin/detect_java.sh"
+. "${S3TBX_HOME}/bin/detect_java.sh"
 
 "${app_java_home}/bin/java" \
     -Xmx1024M \
