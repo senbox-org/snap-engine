@@ -116,6 +116,7 @@
                 <include>gov.nasa.gsfc.seadas:seadas-reader</include>
             </includes>
             <excludes>
+                <exclude>org.esa.snap:snap-python:*</exclude>
                 <exclude>org.esa.snap:snap-reader-tests:*</exclude>
                 <exclude>org.esa.snap:*:test-jar:*</exclude>
                 <exclude>org.esa.s3tbx:*:test-jar:*</exclude>
