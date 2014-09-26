@@ -37,6 +37,7 @@
 
             <frameIcons>
                 /org/esa/s3tbx/images/s3tbx-icon-16.png,
+                /org/esa/s3tbx/images/s3tbx-icon-24.png,
                 /org/esa/s3tbx/images/s3tbx-icon-32.png,
                 /org/esa/s3tbx/images/s3tbx-icon-48.png,
                 /org/esa/s3tbx/images/s3tbx-icon-64.png,
