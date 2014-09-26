@@ -115,10 +115,17 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
                 for (int j = 0; j < slstrElement.getNumElements(); j++) {
                     final MetadataElement bandElement = slstrElement.getElementAt(j);
                     final String bandName = bandElement.getAttribute("name").getData().getElemString();
-                    final float wavelength =
+                    float wavelength =
                             Float.parseFloat(bandElement.getAttribute("centralWavelength").getData().getElemString());
-                    final float bandWidth =
+                    //consider case that wavelength is given in micro meters
+                    if(wavelength < 100) {
+                        wavelength *= 1000;
+                    }
+                    float bandWidth =
                             Float.parseFloat(bandElement.getAttribute("bandWidth").getData().getElemString());
+                    if(bandWidth <= 1.0) {
+                        bandWidth *= 1000;
+                    }
                     nameToWavelengthMap.put(bandName, wavelength);
                     nameToBandwidthMap.put(bandName, bandWidth);
                     nameToIndexMap.put(bandName, j);
