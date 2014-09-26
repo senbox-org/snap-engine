@@ -16,6 +16,12 @@
             <filtered>true</filtered>
         </file>
         <file>
+            <source>../VERSION.txt</source>
+            <lineEnding>unix</lineEnding>
+            <fileMode>0444</fileMode>
+            <filtered>true</filtered>
+        </file>
+        <file>
             <source>../LICENSE.txt</source>
             <lineEnding>unix</lineEnding>
             <fileMode>0444</fileMode>
