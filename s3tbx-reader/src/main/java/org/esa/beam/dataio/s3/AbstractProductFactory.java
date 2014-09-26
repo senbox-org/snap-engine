@@ -283,15 +283,17 @@ public abstract class AbstractProductFactory implements ProductFactory {
         for (final Product sourceProduct : openProductList) {
             final Map<String, String> mapping = new HashMap<String, String>();
             for (final Band sourceBand : sourceProduct.getBands()) {
-                final RasterDataNode targetNode;
-                if (sourceBand.getSceneRasterWidth() == w && sourceBand.getSceneRasterHeight() == h) {
-                    targetNode = addBand(sourceBand, targetProduct);
-                } else {
-                    targetNode = addSpecialNode(masterProduct, sourceBand, targetProduct);
-                }
-                if (targetNode != null) {
-                    configureTargetNode(sourceBand, targetNode);
-                    mapping.put(sourceBand.getName(), targetNode.getName());
+                if(!sourceBand.getName().contains("orphan")) {
+                    final RasterDataNode targetNode;
+                    if (sourceBand.getSceneRasterWidth() == w && sourceBand.getSceneRasterHeight() == h) {
+                        targetNode = addBand(sourceBand, targetProduct);
+                    } else {
+                        targetNode = addSpecialNode(masterProduct, sourceBand, targetProduct);
+                    }
+                    if (targetNode != null) {
+                        configureTargetNode(sourceBand, targetNode);
+                        mapping.put(sourceBand.getName(), targetNode.getName());
+                    }
                 }
             }
             copyMasks(sourceProduct, targetProduct, mapping);
