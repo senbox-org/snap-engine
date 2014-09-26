@@ -16,6 +16,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author Tonio Fincke
@@ -120,6 +123,31 @@ abstract class OlciProductFactory extends AbstractProductFactory {
                 targetBand.setSpectralBandIndex(getBandindex(cutName));
                 targetBand.setSpectralWavelength(getWavelength(cutName));
                 targetBand.setSpectralBandwidth(getBandwidth(cutName));
+            }
+        }
+        // convert log10 scaled variables int concentrations and also their error bands
+        // the unit string follows the CF conventions.
+        // See: http://www.unidata.ucar.edu/software/udunits/udunits-2.0.4/udunits2lib.html#Syntax
+        if (targetNode.getName().startsWith("ADG443_NN") ||
+            targetNode.getName().startsWith("CHL_NN") ||
+            targetNode.getName().startsWith("CHL_OC4ME") ||
+            targetNode.getName().startsWith("KD490_M07")  ||
+            targetNode.getName().startsWith("TSM_NN")) {
+            if (targetNode instanceof Band) {
+                final Band targetBand = (Band) targetNode;
+                String unit = targetBand.getUnit();
+                Pattern pattern = Pattern.compile("lg\\s*\\(\\s*re:?\\s*(.*)\\)");
+                final Matcher m = pattern.matcher(unit);
+                if (m.matches()) {
+                    targetBand.setLog10Scaled(true);
+                    targetBand.setUnit(m.group(1));
+                    String description = targetBand.getDescription();
+                    description = description.replace("log10 scaled ", "");
+                    targetBand.setDescription(description);
+                } else {
+                    getLogger().log(Level.WARNING, "Unit extraction not working for band " + targetNode.getName());
+                }
+
             }
         }
         targetNode.setValidPixelExpression(getValidExpression());
