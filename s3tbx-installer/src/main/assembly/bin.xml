@@ -16,6 +16,12 @@
             <filtered>true</filtered>
         </file>
         <file>
+            <source>../VERSION.txt</source>
+            <lineEnding>unix</lineEnding>
+            <fileMode>0444</fileMode>
+            <filtered>true</filtered>
+        </file>
+        <file>
             <source>../LICENSE.txt</source>
             <lineEnding>unix</lineEnding>
             <fileMode>0444</fileMode>
@@ -116,6 +122,7 @@
                 <include>gov.nasa.gsfc.seadas:seadas-reader</include>
             </includes>
             <excludes>
+                <exclude>org.esa.snap:snap-python:*</exclude>
                 <exclude>org.esa.snap:snap-reader-tests:*</exclude>
                 <exclude>org.esa.snap:*:test-jar:*</exclude>
                 <exclude>org.esa.s3tbx:*:test-jar:*</exclude>
@@ -132,7 +139,6 @@
             <useStrictFiltering>true</useStrictFiltering>
             <includes>
                 <include>c3p0:c3p0</include>
-                <include>com.alee:weblaf</include>
                 <include>com.bc.jnn:jnn</include>
                 <include>com.fasterxml.jackson.core:*</include>
                 <include>com.google.protobuf:protobuf-java</include>
