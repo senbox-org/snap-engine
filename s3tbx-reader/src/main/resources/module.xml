@@ -53,7 +53,19 @@
     </extension>
 
     <extension point="snap-core:rgbProfiles">
-        <!-- todo -->
+        <rgbProfile>
+            <name>SLSTR L1B False Colours an</name>
+            <red>S5_radiance_an</red>
+            <green>S3_radiance_an</green>
+            <blue>0.5 * S1_radiance_an + 0.5 * S2_radiance_an</blue>
+        </rgbProfile>
+        <rgbProfile>
+            <name>SLSTR L1B False Colours ao</name>
+            <red>S5_radiance_ao</red>
+            <green>S3_radiance_ao</green>
+            <blue>0.5 * S1_radiance_ao + 0.5 * S2_radiance_ao</blue>
+        </rgbProfile>
     </extension>
+
 
 </module>
