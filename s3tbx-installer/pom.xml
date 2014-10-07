@@ -22,8 +22,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <properties>
-        <s2tbx.version>0.6.0</s2tbx.version>
-        <smos.version>4.0</smos.version>
+        <smos.version>[4.0.1-SNAPSHOT,4.1-SNAPSHOT)</smos.version>
     </properties>
 
     <parent>
