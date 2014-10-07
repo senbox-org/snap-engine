@@ -8,7 +8,7 @@
     <parent>
         <groupId>org.esa.s3tbx</groupId>
         <artifactId>s3tbx</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.1-SNAPSHOT</version>
     </parent>
 
     <name>Sentinel-3 Toolbox Application</name>
