@@ -16,7 +16,9 @@
 
 package org.esa.beam.binning.operator;
 
+import com.bc.ceres.binding.ConversionException;
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import org.esa.beam.binning.AggregatorConfig;
 import org.esa.beam.binning.DataPeriod;
@@ -110,7 +112,7 @@ public class BinningOpTest {
             SortedMap<String, String> metadataProperties = binningOp.getMetadataProperties();
             assertNotNull(metadataProperties);
 
-            assertEquals(7, metadataProperties.size());
+            assertEquals(8, metadataProperties.size());
             Set<String> strings = metadataProperties.keySet();
             String[] names = strings.toArray(new String[strings.size()]);
             String[] expectedNames = {
@@ -118,9 +120,11 @@ public class BinningOpTest {
                     "aggregation_period_start",
                     "processing_time",
                     "product_name",
+                    "region",
                     "software_name",
                     "software_qualified_name",
-                    "software_version"
+                    "software_version",
+
             };
             assertArrayEquals(expectedNames, names);
 
@@ -130,6 +134,7 @@ public class BinningOpTest {
             assertEquals("org.esa.beam.binning.operator.BinningOp", metadataProperties.get("software_qualified_name"));
             assertEquals("1.0", metadataProperties.get("software_version"));
             assertEquals("2002-01-01", metadataProperties.get("aggregation_period_start"));
+            assertEquals("LINEARRING (0 0, 0 1, 1 1, 1 0, 0 0)", metadataProperties.get("region"));
 
             final MetadataElement metadataRoot = targetProduct.getMetadataRoot();
             final MetadataElement globalAttributes = metadataRoot.getElement("Global_Attributes");

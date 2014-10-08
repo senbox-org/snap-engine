@@ -143,7 +143,7 @@ public class BinningOp extends Operator {
 
     @Parameter(interval = "[0,24]",
             description = "A sensor-dependent constant given in hours of a day (0 to 24) at which a sensor has a minimum number of " +
-                    "observations at the date line (the 180 degree meridian). Only used if parameter 'dataDayMode' is set to 'SPATIOTEMPORAL_DATADAY'.")
+                    "observations at the date line (the 180 degree meridian). Only used if parameter 'timeFilterMethod' is set to 'SPATIOTEMPORAL_DATADAY'.")
     private Double minDataHour;
 
     @Parameter(description = "Number of rows in the (global) planetary grid. Must be even.", defaultValue = "2160")
@@ -341,6 +341,10 @@ public class BinningOp extends Operator {
         this.metadataAggregatorName = metadataAggregatorName;
     }
 
+    public String getOutputFile() {
+        return outputFile;
+    }
+
     /**
      * Processes all source products and writes the output file.
      * The target product represents the written output file
@@ -505,14 +509,7 @@ public class BinningOp extends Operator {
     }
 
     private void initMetadataProperties() {
-        final GlobalMetaParameter parameter = new GlobalMetaParameter();
-
-        parameter.setDescriptor(getSpi().getOperatorDescriptor());
-        parameter.setOutputFile(new File(outputFile));
-        parameter.setStartDateTime(startDateTime);
-        parameter.setPeriodDuration(periodDuration);
-
-        globalMetadata = GlobalMetadata.create(parameter);
+        globalMetadata = GlobalMetadata.create(this);
         globalMetadata.load(metadataPropertiesFile, getLogger());
     }
 

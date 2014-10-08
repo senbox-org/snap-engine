@@ -1,5 +1,6 @@
 package org.esa.beam.binning.operator.metadata;
 
+import com.vividsolutions.jts.geom.Geometry;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
@@ -24,8 +25,8 @@ public class GlobalMetadata {
 
     private final SortedMap<String, String> metaProperties;
 
-    public static GlobalMetadata create(GlobalMetaParameter parameter) {
-        return new GlobalMetadata(parameter);
+    public static GlobalMetadata create(BinningOp operator) {
+        return new GlobalMetadata(operator);
     }
 
     public void processMetadataTemplates(File metadataTemplateDir, BinningOp operator, Product targetProduct, Logger logger) {
@@ -115,15 +116,16 @@ public class GlobalMetadata {
         }
     }
 
-    private GlobalMetadata(GlobalMetaParameter parameter) {
+    private GlobalMetadata(BinningOp operator) {
         this();
 
-        final File outputFile = parameter.getOutputFile();
-        if (outputFile != null) {
-            metaProperties.put("product_name", FileUtils.getFilenameWithoutExtension(outputFile));
+        final String outputPath = operator.getOutputFile();
+        if (StringUtils.isNotNullAndNotEmpty(outputPath)) {
+            final File outputFile = new File(outputPath);
+            metaProperties.put("product_name", FileUtils.getFilenameWithoutExtension(outputFile.getName()));
         }
 
-        final OperatorDescriptor descriptor = parameter.getDescriptor();
+        final OperatorDescriptor descriptor = operator.getSpi().getOperatorDescriptor();
         if (descriptor != null) {
             metaProperties.put("software_qualified_name", descriptor.getName());
             metaProperties.put("software_name", descriptor.getAlias());
@@ -133,14 +135,31 @@ public class GlobalMetadata {
         final SimpleDateFormat dateFormat = new SimpleDateFormat(DATETIME_OUTPUT_PATTERN, Locale.ENGLISH);
         metaProperties.put("processing_time", dateFormat.format(new Date()));
 
-        final String startDateTime = parameter.getStartDateTime();
+        final String startDateTime = operator.getStartDateTime();
         if (StringUtils.isNotNullAndNotEmpty(startDateTime)) {
             metaProperties.put("aggregation_period_start", startDateTime);
         }
 
-        final Double periodDuration = parameter.getPeriodDuration();
+        final Double periodDuration = operator.getPeriodDuration();
         if (periodDuration != null) {
             metaProperties.put("aggregation_period_duration", Double.toString(periodDuration) + " day(s)");
+        }
+
+        // @todo 2 tb/tb write test 2014-10-08
+        final Geometry region = operator.getRegion();
+        if (region != null) {
+            metaProperties.put("region", region.toString());
+        }
+
+        final BinningOp.TimeFilterMethod timeFilterMethod = operator.getTimeFilterMethod();
+        if (timeFilterMethod != BinningOp.TimeFilterMethod.NONE) {
+            metaProperties.put("time_filter_method", timeFilterMethod.toString());
+            if (timeFilterMethod == BinningOp.TimeFilterMethod.SPATIOTEMPORAL_DATA_DAY) {
+                final Double minDataHour = operator.getMinDataHour();
+                if (minDataHour != null) {
+                    metaProperties.put("min_data_hour", Double.toString(minDataHour));
+                }
+            }
         }
     }
 
