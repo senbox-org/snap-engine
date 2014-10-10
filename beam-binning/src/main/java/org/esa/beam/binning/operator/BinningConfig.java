@@ -108,6 +108,13 @@ public class BinningConfig {
             "observations at the date line (the 180 degree meridian). Only used if parameter 'startDate' is set.")
     private Double minDataHour;
 
+    @Parameter(description = "The type of metadata aggregation to be used. Possible values are:\n" +
+            "'NAME': aggregate the name of each input product\n" +
+            "'FIRST_HISTORY': aggregates all input product names and the processing history of the first product\n" +
+            "'ALL_HISTORIES': aggregates all input product names and processing histories",
+            defaultValue = "NAME")
+    private String metadataAggregatorName;
+
 
     public String getPlanetaryGrid() {
         return planetaryGrid;
@@ -180,6 +187,14 @@ public class BinningConfig {
 
     public void setPostProcessorConfig(CellProcessorConfig cellProcessorConfig) {
         this.postProcessorConfig = cellProcessorConfig;
+    }
+
+    public String getMetadataAggregatorName() {
+        return metadataAggregatorName;
+    }
+
+    public void setMetadataAggregatorName(String metadataAggregatorName) {
+        this.metadataAggregatorName = metadataAggregatorName;
     }
 
     public static BinningConfig fromXml(String xml) throws BindingException {

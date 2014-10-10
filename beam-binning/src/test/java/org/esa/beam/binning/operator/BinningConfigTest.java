@@ -34,9 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 
 public class BinningConfigTest {
 
@@ -103,7 +101,7 @@ public class BinningConfigTest {
 
         assertEquals(AggregatorOnMaxSet.class, binManager.getAggregator(1).getClass());
         assertArrayEquals(new String[]{"ndvi_max", "ndvi_mjd", "reflec_3", "reflec_7", "reflec_8"},
-                          binManager.getAggregator(1).getOutputFeatureNames());
+                binManager.getAggregator(1).getOutputFeatureNames());
 
         assertEquals(AggregatorMinMax.class, binManager.getAggregator(2).getClass());
         assertArrayEquals(new String[]{"chl_min", "chl_max"}, binManager.getAggregator(2).getOutputFeatureNames());
@@ -130,8 +128,21 @@ public class BinningConfigTest {
     }
 
     @Test
-    public void testNumRows() {
+    public void testGetNumNumRows_defaultValue() {
         assertEquals(4320, config.getNumRows());
+    }
+
+    @Test
+    public void testSetGetMetadataAggregatorName() {
+         final String aggregatorName = "Willi";
+
+        config.setMetadataAggregatorName(aggregatorName);
+        assertEquals(aggregatorName, config.getMetadataAggregatorName());
+    }
+
+    @Test
+    public void tstGetMetadataAggregatorName_defaultValue() {
+         assertEquals("NAME", config.getMetadataAggregatorName());
     }
 
     static BinningConfig loadConfig(InputStream is) throws IOException, BindingException {
