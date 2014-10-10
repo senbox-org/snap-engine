@@ -36,7 +36,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <snap.version>1.0.0</snap.version>
+        <snap.version>2.0.0-SNAPSHOT</snap.version>
         <outputdir>../../output</outputdir>
     </properties>
 
