@@ -9,6 +9,7 @@ import org.esa.beam.framework.datamodel.MetadataAttribute;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.descriptor.OperatorDescriptor;
 import org.esa.beam.util.StringUtils;
 import org.esa.beam.util.io.FileUtils;
@@ -22,11 +23,21 @@ import java.util.logging.Logger;
 public class GlobalMetadata {
 
     private static final String DATETIME_OUTPUT_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS";
+    private static final double RE = 6378.145;
 
     private final SortedMap<String, String> metaProperties;
 
     public static GlobalMetadata create(BinningOp operator) {
-        return new GlobalMetadata(operator);
+        final GlobalMetadata globalMetadata = new GlobalMetadata();
+
+        final OperatorSpi spi = operator.getSpi();
+        if (spi != null) {
+            globalMetadata.extractSpiMetadata(spi);
+        }
+
+        globalMetadata.extractOperatorMetadata(operator);
+
+        return globalMetadata;
     }
 
     public void processMetadataTemplates(File metadataTemplateDir, BinningOp operator, Product targetProduct, Logger logger) {
@@ -116,21 +127,13 @@ public class GlobalMetadata {
         }
     }
 
-    private GlobalMetadata(BinningOp operator) {
-        this();
-
+    private void extractOperatorMetadata(BinningOp operator) {
         final String outputPath = operator.getOutputFile();
         if (StringUtils.isNotNullAndNotEmpty(outputPath)) {
             final File outputFile = new File(outputPath);
             metaProperties.put("product_name", FileUtils.getFilenameWithoutExtension(outputFile.getName()));
         }
 
-        final OperatorDescriptor descriptor = operator.getSpi().getOperatorDescriptor();
-        if (descriptor != null) {
-            metaProperties.put("software_qualified_name", descriptor.getName());
-            metaProperties.put("software_name", descriptor.getAlias());
-            metaProperties.put("software_version", descriptor.getVersion());
-        }
 
         final SimpleDateFormat dateFormat = new SimpleDateFormat(DATETIME_OUTPUT_PATTERN, Locale.ENGLISH);
         metaProperties.put("processing_time", dateFormat.format(new Date()));
@@ -145,14 +148,13 @@ public class GlobalMetadata {
             metaProperties.put("aggregation_period_duration", Double.toString(periodDuration) + " day(s)");
         }
 
-        // @todo 2 tb/tb write test 2014-10-08
         final Geometry region = operator.getRegion();
         if (region != null) {
             metaProperties.put("region", region.toString());
         }
 
         final BinningOp.TimeFilterMethod timeFilterMethod = operator.getTimeFilterMethod();
-        if (timeFilterMethod != BinningOp.TimeFilterMethod.NONE) {
+        if (isTimeFilterMetadataRequired(timeFilterMethod)) {
             metaProperties.put("time_filter_method", timeFilterMethod.toString());
             if (timeFilterMethod == BinningOp.TimeFilterMethod.SPATIOTEMPORAL_DATA_DAY) {
                 final Double minDataHour = operator.getMinDataHour();
@@ -160,6 +162,41 @@ public class GlobalMetadata {
                     metaProperties.put("min_data_hour", Double.toString(minDataHour));
                 }
             }
+        }
+
+        final int numRows = operator.getNumRows();
+        if (numRows > 0) {
+            metaProperties.put("num_rows", Integer.toString(numRows));
+            metaProperties.put("pixel_size_in_km", toPixelSizeString(numRows));
+        }
+
+        final Integer superSampling = operator.getSuperSampling();
+        if (superSampling != null) {
+            metaProperties.put("super_sampling", Integer.toString(superSampling));
+        }
+
+        final String maskExpr = operator.getMaskExpr();
+        if (StringUtils.isNullOrEmpty(maskExpr)) {
+            metaProperties.put("mask_expression", "");
+        } else {
+            metaProperties.put("mask_expression", maskExpr);
+        }
+    }
+
+    static boolean isTimeFilterMetadataRequired(BinningOp.TimeFilterMethod timeFilterMethod) {
+        return timeFilterMethod != null && timeFilterMethod != BinningOp.TimeFilterMethod.NONE;
+    }
+
+    static String toPixelSizeString(int numRows) {
+        return Double.toString((RE * Math.PI) / (numRows - 1));
+    }
+
+    private void extractSpiMetadata(OperatorSpi spi) {
+        final OperatorDescriptor descriptor = spi.getOperatorDescriptor();
+        if (descriptor != null) {
+            metaProperties.put("software_qualified_name", descriptor.getName());
+            metaProperties.put("software_name", descriptor.getAlias());
+            metaProperties.put("software_version", descriptor.getVersion());
         }
     }
 
