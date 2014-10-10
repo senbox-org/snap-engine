@@ -112,19 +112,22 @@ public class BinningOpTest {
             SortedMap<String, String> metadataProperties = binningOp.getMetadataProperties();
             assertNotNull(metadataProperties);
 
-            assertEquals(8, metadataProperties.size());
+            assertEquals(12, metadataProperties.size());
             Set<String> strings = metadataProperties.keySet();
             String[] names = strings.toArray(new String[strings.size()]);
             String[] expectedNames = {
                     "aggregation_period_duration",
                     "aggregation_period_start",
+                    "mask_expression",
+                    "num_rows",
+                    "pixel_size_in_km",
                     "processing_time",
                     "product_name",
                     "region",
                     "software_name",
                     "software_qualified_name",
                     "software_version",
-
+                    "super_sampling"
             };
             assertArrayEquals(expectedNames, names);
 
@@ -135,6 +138,7 @@ public class BinningOpTest {
             assertEquals("1.0", metadataProperties.get("software_version"));
             assertEquals("2002-01-01", metadataProperties.get("aggregation_period_start"));
             assertEquals("LINEARRING (0 0, 0 1, 1 1, 1 0, 0 0)", metadataProperties.get("region"));
+            // @todo 2 tb/tb add checks for other properties 2014-10-10
 
             final MetadataElement metadataRoot = targetProduct.getMetadataRoot();
             final MetadataElement globalAttributes = metadataRoot.getElement("Global_Attributes");
