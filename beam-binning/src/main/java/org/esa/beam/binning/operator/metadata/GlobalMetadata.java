@@ -1,10 +1,14 @@
 package org.esa.beam.binning.operator.metadata;
 
+import com.bc.ceres.binding.Property;
+import com.bc.ceres.binding.PropertySet;
 import com.vividsolutions.jts.geom.Geometry;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
+import org.esa.beam.binning.AggregatorConfig;
 import org.esa.beam.binning.operator.BinningOp;
+import org.esa.beam.binning.operator.VariableConfig;
 import org.esa.beam.framework.datamodel.MetadataAttribute;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
@@ -180,6 +184,29 @@ public class GlobalMetadata {
             metaProperties.put("mask_expression", "");
         } else {
             metaProperties.put("mask_expression", maskExpr);
+        }
+
+        final VariableConfig[] variableConfigs = operator.getVariableConfigs();
+        if (variableConfigs != null) {
+            int index = 0;
+            for (final VariableConfig config : variableConfigs) {
+                metaProperties.put("variable_config." + Integer.toString(index) + ":name", config.getName());
+                metaProperties.put("variable_config." + Integer.toString(index) + ":expr", config.getExpr());
+                ++index;
+            }
+        }
+
+        final AggregatorConfig[] aggregatorConfigs = operator.getAggregatorConfigs();
+        if (aggregatorConfigs != null) {
+            int index = 0;
+            for (final AggregatorConfig config : aggregatorConfigs) {
+                final PropertySet propertySet = config.asPropertySet();
+                final Property[] properties = propertySet.getProperties();
+                for (final Property property : properties) {
+                    metaProperties.put("aggregator_config." + Integer.toString(index) + ":" + property.getName(), property.getValueAsText());
+                }
+                ++index;
+            }
         }
     }
 

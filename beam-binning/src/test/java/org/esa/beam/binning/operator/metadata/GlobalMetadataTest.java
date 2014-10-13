@@ -2,11 +2,16 @@ package org.esa.beam.binning.operator.metadata;
 
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
+import org.esa.beam.binning.AggregatorConfig;
+import org.esa.beam.binning.aggregators.AggregatorAverage;
+import org.esa.beam.binning.aggregators.AggregatorOnMaxSet;
 import org.esa.beam.binning.operator.BinningOp;
+import org.esa.beam.binning.operator.VariableConfig;
 import org.esa.beam.framework.datamodel.MetadataAttribute;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.util.io.FileUtils;
 import org.junit.Test;
+import ucar.nc2.Variable;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -15,6 +20,7 @@ import java.util.SortedMap;
 import java.util.logging.Logger;
 
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
 public class GlobalMetadataTest {
@@ -86,7 +92,7 @@ public class GlobalMetadataTest {
     }
 
     @Test
-    public void testCreate_timeFilerMethod_spatioTemporalDay() throws ParseException {
+    public void testCreate_timeFilterMethod_spatioTemporalDay() throws ParseException {
         final BinningOp binningOp = new BinningOp();
         binningOp.setTimeFilterMethod(BinningOp.TimeFilterMethod.SPATIOTEMPORAL_DATA_DAY);
         binningOp.setMinDataHour(0.8876);
@@ -99,6 +105,55 @@ public class GlobalMetadataTest {
 
         assertEquals("SPATIOTEMPORAL_DATA_DAY", metaProperties.get("time_filter_method"));
         assertEquals("0.8876", metaProperties.get("min_data_hour"));
+    }
+
+    @Test
+    public void testCreate_variableConfigs() {
+        final VariableConfig[] variableConfigs = new VariableConfig[2];
+        variableConfigs[0] = new VariableConfig("first", "one and one");
+        variableConfigs[1] = new VariableConfig("second", "is two");
+
+        final BinningOp binningOp = new BinningOp();
+        binningOp.setVariableConfigs(variableConfigs);
+
+        final GlobalMetadata metadata = GlobalMetadata.create(binningOp);
+        assertNotNull(metadata);
+
+        final SortedMap<String, String> metaProperties = metadata.asSortedMap();
+        assertNotNull(metaProperties);
+
+        assertEquals("first", metaProperties.get("variable_config.0:name"));
+        assertEquals("one and one", metaProperties.get("variable_config.0:expr"));
+        assertEquals("second", metaProperties.get("variable_config.1:name"));
+        assertEquals("is two", metaProperties.get("variable_config.1:expr"));
+    }
+
+    @Test
+    public void testCreate_aggregatorConfigs() {
+        final AggregatorConfig[] aggregatorConfigs = new AggregatorConfig[2];
+        aggregatorConfigs[0] = new AggregatorAverage.Config("variable_1", "the target", 1.087, true, false);
+        aggregatorConfigs[1] = new AggregatorOnMaxSet.Config("variable_2", "another one", "set_1", "set_2");
+
+        final BinningOp binningOp = new BinningOp();
+        binningOp.setAggregatorConfigs(aggregatorConfigs);
+
+        final GlobalMetadata metadata = GlobalMetadata.create(binningOp);
+        assertNotNull(metadata);
+
+        final SortedMap<String, String> metaProperties = metadata.asSortedMap();
+        assertNotNull(metaProperties);
+
+        assertEquals("AVG", metaProperties.get("aggregator_config.0:type"));
+        assertEquals("true", metaProperties.get("aggregator_config.0:outputCounts"));
+        assertEquals("false", metaProperties.get("aggregator_config.0:outputSums"));
+        assertEquals("the target", metaProperties.get("aggregator_config.0:targetName"));
+        assertEquals("variable_1", metaProperties.get("aggregator_config.0:varName"));
+        assertEquals("1.087", metaProperties.get("aggregator_config.0:weightCoeff"));
+
+        assertEquals("ON_MAX_SET", metaProperties.get("aggregator_config.1:type"));
+        assertEquals("another one", metaProperties.get("aggregator_config.1:onMaxVarName"));
+        assertEquals("set_1,set_2", metaProperties.get("aggregator_config.1:setVarNames"));
+        assertEquals("variable_2", metaProperties.get("aggregator_config.1:targetName"));
     }
 
     @Test

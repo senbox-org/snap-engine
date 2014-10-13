@@ -16,9 +16,7 @@
 
 package org.esa.beam.binning.operator;
 
-import com.bc.ceres.binding.ConversionException;
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import org.esa.beam.binning.AggregatorConfig;
 import org.esa.beam.binning.DataPeriod;
@@ -112,12 +110,22 @@ public class BinningOpTest {
             SortedMap<String, String> metadataProperties = binningOp.getMetadataProperties();
             assertNotNull(metadataProperties);
 
-            assertEquals(12, metadataProperties.size());
+            assertEquals(22, metadataProperties.size());
             Set<String> strings = metadataProperties.keySet();
             String[] names = strings.toArray(new String[strings.size()]);
             String[] expectedNames = {
                     "aggregation_period_duration",
                     "aggregation_period_start",
+                    "aggregator_config.0:outputCounts",
+                    "aggregator_config.0:outputSums",
+                    "aggregator_config.0:targetName",
+                    "aggregator_config.0:type",
+                    "aggregator_config.0:varName",
+                    "aggregator_config.0:weightCoeff",
+                    "aggregator_config.1:percentage",
+                    "aggregator_config.1:targetName",
+                    "aggregator_config.1:type",
+                    "aggregator_config.1:varName",
                     "mask_expression",
                     "num_rows",
                     "pixel_size_in_km",

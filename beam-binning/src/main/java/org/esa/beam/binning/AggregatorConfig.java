@@ -30,5 +30,4 @@ public abstract class AggregatorConfig extends TypedConfig {
     public AggregatorConfig(String aggregatorName) {
         super(aggregatorName);
     }
-
 }
