@@ -21,7 +21,6 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import org.esa.beam.binning.*;
 import org.esa.beam.binning.cellprocessor.CellProcessorChain;
-import org.esa.beam.binning.operator.metadata.GlobalMetaParameter;
 import org.esa.beam.binning.operator.metadata.GlobalMetadata;
 import org.esa.beam.binning.operator.metadata.MetadataAggregator;
 import org.esa.beam.binning.operator.metadata.MetadataAggregatorFactory;
