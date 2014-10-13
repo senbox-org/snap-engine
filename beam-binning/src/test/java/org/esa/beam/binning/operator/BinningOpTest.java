@@ -150,7 +150,7 @@ public class BinningOpTest {
 
             final MetadataElement metadataRoot = targetProduct.getMetadataRoot();
             final MetadataElement globalAttributes = metadataRoot.getElement("Global_Attributes");
-            final MetadataElement sourceProductsElement = globalAttributes.getElement("source_products");
+            final MetadataElement sourceProductsElement = globalAttributes.getElement("inputs");
             assertNotNull(sourceProductsElement);
             assertEquals(3, sourceProductsElement.getNumElements());
         } finally {

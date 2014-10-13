@@ -8,9 +8,9 @@ import org.esa.beam.framework.datamodel.ProductData;
 
 class Utilities {
 
-    static MetadataElement createProductMetaElement(Product product, int index) {
-        final MetadataElement productElement = new MetadataElement("source_product." + Integer.toString(index));
-        final MetadataAttribute nameAttribute = new MetadataAttribute("name", new ProductData.ASCII(product.getName()), true);
+    static MetadataElement createInputMetaElement(String productName, int index) {
+        final MetadataElement productElement = new MetadataElement("input." + Integer.toString(index));
+        final MetadataAttribute nameAttribute = new MetadataAttribute("name", new ProductData.ASCII(productName), true);
         productElement.addAttribute(nameAttribute);
         return productElement;
     }

@@ -9,6 +9,6 @@ abstract class AbstractMetadataAggregator implements MetadataAggregator {
 
     AbstractMetadataAggregator() {
         aggregatedCount = 0;
-        source_products = new MetadataElement("source_products");
+        source_products = new MetadataElement("inputs");
     }
 }

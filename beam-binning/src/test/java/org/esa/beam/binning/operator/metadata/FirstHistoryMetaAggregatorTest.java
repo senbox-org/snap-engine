@@ -41,7 +41,7 @@ public class FirstHistoryMetaAggregatorTest {
         TestHelper.assertCorrectNameAndNoAttributes(metadataElement);
 
         assertEquals(1, metadataElement.getNumElements());
-        TestHelper.assertProductElementAt(0, metadataElement);
+        TestHelper.assertInputElementAt(0, metadataElement);
     }
 
     @Test
@@ -54,7 +54,7 @@ public class FirstHistoryMetaAggregatorTest {
         TestHelper.assertCorrectNameAndNoAttributes(metadataElement);
 
         assertEquals(1, metadataElement.getNumElements());
-        TestHelper.assertProductElementWithGraphtAt(0, metadataElement);
+        TestHelper.assertProductElementWithGraphAt(0, metadataElement);
     }
 
     @Test
@@ -72,7 +72,7 @@ public class FirstHistoryMetaAggregatorTest {
         TestHelper.assertCorrectNameAndNoAttributes(metadataElement);
 
         assertEquals(3, metadataElement.getNumElements());
-        TestHelper.assertProductElementWithGraphtAt(0, metadataElement);
+        TestHelper.assertProductElementWithGraphAt(0, metadataElement);
         TestHelper.assertProductElementWithoutGraphtAt(1, metadataElement);
         TestHelper.assertProductElementWithoutGraphtAt(2, metadataElement);
     }
