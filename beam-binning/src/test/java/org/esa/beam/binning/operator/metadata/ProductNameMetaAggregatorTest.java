@@ -93,6 +93,6 @@ public class ProductNameMetaAggregatorTest {
         TestHelper.assertCorrectNameAndNoAttributes(metadataElement);
 
         assertEquals(1, metadataElement.getNumElements());
-        TestHelper.assertInputElementAt(0, "unknown", metadataElement);
+        TestHelper.assertInputElementAt(0, "product_1", metadataElement);
     }
 }

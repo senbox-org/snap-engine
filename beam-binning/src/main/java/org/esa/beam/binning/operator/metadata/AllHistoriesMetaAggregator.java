@@ -7,7 +7,8 @@ class AllHistoriesMetaAggregator extends AbstractMetadataAggregator {
 
     @Override
     public void aggregateMetadata(Product product) {
-        final MetadataElement productElement = Utilities.createInputMetaElement(product.getName(), aggregatedCount);
+        final String productName = Utilities.extractProductName(product);
+        final MetadataElement productElement = Utilities.createInputMetaElement(productName, aggregatedCount);
 
         final MetadataElement processingGraphElement = Utilities.getProcessingGraphElement(product);
         if (processingGraphElement != null) {

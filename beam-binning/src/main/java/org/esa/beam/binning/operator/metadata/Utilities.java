@@ -23,10 +23,8 @@ class Utilities {
     static String extractProductName(Product product) {
         final MetadataElement processingGraphElement = getProcessingGraphElement(product);
 
-        String productName = "unknown";
-        if (processingGraphElement == null) {
-            productName = product.getName();
-        } else {
+        String productName = product.getName();
+        if (processingGraphElement != null) {
             final MetadataElement nodeElement = processingGraphElement.getElement("node.0");
             if (nodeElement != null) {
                 final MetadataElement sourcesElement = nodeElement.getElement("sources");
