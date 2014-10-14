@@ -63,8 +63,20 @@ class TestHelper {
         assertNotNull(getProcessingGraphElement(index, metadataElement));
     }
 
+    static void assertProductElementWithGraphAt(int index, String inputName, MetadataElement metadataElement) {
+        assertInputElementAt(index, inputName, metadataElement);
+
+        assertNotNull(getProcessingGraphElement(index, metadataElement));
+    }
+
     static void assertProductElementWithoutGraphtAt(int index, MetadataElement metadataElement) {
         assertInputElementAt(index, metadataElement);
+
+        assertNull(getProcessingGraphElement(index, metadataElement));
+    }
+
+    static void assertProductElementWithoutGraphtAt(int index, String inputName, MetadataElement metadataElement) {
+        assertInputElementAt(index, inputName, metadataElement);
 
         assertNull(getProcessingGraphElement(index, metadataElement));
     }

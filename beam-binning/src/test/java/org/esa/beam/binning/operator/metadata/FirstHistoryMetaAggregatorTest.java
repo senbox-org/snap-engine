@@ -46,7 +46,7 @@ public class FirstHistoryMetaAggregatorTest {
 
     @Test
     public void testAggregateOneProductWithProcessingInfo() {
-        final Product product = TestHelper.createProductWithProcessingGraph(1);
+        final Product product = TestHelper.createProductWithProcessingGraph(1, "a-test_1", "a_test_2");
 
         aggregator.aggregateMetadata(product);
 
@@ -54,26 +54,26 @@ public class FirstHistoryMetaAggregatorTest {
         TestHelper.assertCorrectNameAndNoAttributes(metadataElement);
 
         assertEquals(1, metadataElement.getNumElements());
-        TestHelper.assertProductElementWithGraphAt(0, metadataElement);
+        TestHelper.assertProductElementWithGraphAt(0, "a-test_1", metadataElement);
     }
 
     @Test
     public void testAggregateThreeProductWithProcessingInfo() {
-        Product product = TestHelper.createProductWithProcessingGraph(1);
+        Product product = TestHelper.createProductWithProcessingGraph(1, "first input");
         aggregator.aggregateMetadata(product);
 
-        product = TestHelper.createProductWithProcessingGraph(2);
+        product = TestHelper.createProductWithProcessingGraph(2, "second input");
         aggregator.aggregateMetadata(product);
 
-        product = TestHelper.createProductWithProcessingGraph(3);
+        product = TestHelper.createProductWithProcessingGraph(3, "third input");
         aggregator.aggregateMetadata(product);
 
         final MetadataElement metadataElement = aggregator.getMetadata();
         TestHelper.assertCorrectNameAndNoAttributes(metadataElement);
 
         assertEquals(3, metadataElement.getNumElements());
-        TestHelper.assertProductElementWithGraphAt(0, metadataElement);
-        TestHelper.assertProductElementWithoutGraphtAt(1, metadataElement);
-        TestHelper.assertProductElementWithoutGraphtAt(2, metadataElement);
+        TestHelper.assertProductElementWithGraphAt(0, "first input", metadataElement);
+        TestHelper.assertProductElementWithoutGraphtAt(1, "second input", metadataElement);
+        TestHelper.assertProductElementWithoutGraphtAt(2, "third input", metadataElement);
     }
 }
