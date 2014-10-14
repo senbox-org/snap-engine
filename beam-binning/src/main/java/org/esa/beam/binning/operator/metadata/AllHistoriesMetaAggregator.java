@@ -13,12 +13,12 @@ class AllHistoriesMetaAggregator extends AbstractMetadataAggregator {
         if (processingGraphElement != null) {
             productElement.addElement(processingGraphElement.createDeepClone());
         }
-        source_products.addElementAt(productElement, aggregatedCount);
+        inputsMetaElement.addElementAt(productElement, aggregatedCount);
         ++aggregatedCount;
     }
 
     @Override
     public MetadataElement getMetadata() {
-        return source_products;
+        return inputsMetaElement;
     }
 }

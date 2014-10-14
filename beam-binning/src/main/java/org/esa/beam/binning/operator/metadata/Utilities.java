@@ -19,4 +19,25 @@ class Utilities {
         final MetadataElement metadataRoot = product.getMetadataRoot();
         return metadataRoot.getElement("Processing_Graph");
     }
+
+    static String extractProductName(Product product) {
+        final MetadataElement processingGraphElement = getProcessingGraphElement(product);
+
+        String productName = "unknown";
+        if (processingGraphElement == null) {
+            productName = product.getName();
+        } else {
+            final MetadataElement nodeElement = processingGraphElement.getElement("node.0");
+            if (nodeElement != null) {
+                final MetadataElement sourcesElement = nodeElement.getElement("sources");
+                if (sourcesElement != null) {
+                    final MetadataAttribute sourceProductAttribute = sourcesElement.getAttribute("sourceProduct");
+                    if (sourceProductAttribute != null) {
+                        productName = sourceProductAttribute.getData().getElemString();
+                    }
+                }
+            }
+        }
+        return productName;
+    }
 }
