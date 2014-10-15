@@ -76,4 +76,6 @@ public class FirstHistoryMetaAggregatorTest {
         TestHelper.assertProductElementWithoutGraphtAt(1, "second input", metadataElement);
         TestHelper.assertProductElementWithoutGraphtAt(2, "third input", metadataElement);
     }
+
+    // @todo 3 tb/tb add tests for aggregation on metadataElement 2014-10-15
 }

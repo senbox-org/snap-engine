@@ -5,6 +5,7 @@ import org.esa.beam.framework.datamodel.MetadataAttribute;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.util.StringUtils;
 
 class Utilities {
 
@@ -21,9 +22,18 @@ class Utilities {
     }
 
     static String extractProductName(Product product) {
-        final MetadataElement processingGraphElement = getProcessingGraphElement(product);
+        String productName;
 
-        String productName = product.getName();
+        final MetadataElement processingGraphElement = getProcessingGraphElement(product);
+        productName = extractProductName(processingGraphElement);
+        if (StringUtils.isNullOrEmpty(productName)) {
+            productName = product.getName();
+        }
+
+        return productName;
+    }
+
+    static String extractProductName(MetadataElement processingGraphElement) {
         if (processingGraphElement != null) {
             final MetadataElement nodeElement = processingGraphElement.getElement("node.0");
             if (nodeElement != null) {
@@ -31,11 +41,11 @@ class Utilities {
                 if (sourcesElement != null) {
                     final MetadataAttribute sourceProductAttribute = sourcesElement.getAttribute("sourceProduct");
                     if (sourceProductAttribute != null) {
-                        productName = sourceProductAttribute.getData().getElemString();
+                         return sourceProductAttribute.getData().getElemString();
                     }
                 }
             }
         }
-        return productName;
+        return null;
     }
 }

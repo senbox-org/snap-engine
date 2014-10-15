@@ -95,4 +95,6 @@ public class ProductNameMetaAggregatorTest {
         assertEquals(1, metadataElement.getNumElements());
         TestHelper.assertInputElementAt(0, "product_1", metadataElement);
     }
+
+    // @todo 3 tb/tb add tests for aggregation on metadataElement 2014-10-15
 }

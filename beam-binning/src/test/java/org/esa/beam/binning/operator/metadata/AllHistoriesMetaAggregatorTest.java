@@ -76,4 +76,6 @@ public class AllHistoriesMetaAggregatorTest {
         TestHelper.assertProductElementWithoutGraphtAt(1, "product_2",  metadataElement);
         TestHelper.assertProductElementWithGraphAt(2, "three", metadataElement);
     }
+
+    // @todo 3 tb/tb add tests for aggregation on metadataElement 2014-10-15
 }
