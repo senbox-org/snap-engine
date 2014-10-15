@@ -20,10 +20,6 @@ class TestHelper {
         return new Product("product_" + Integer.toString(number), "test_type", 2, 2);
     }
 
-    static Product createProductWithProcessingGraph(int number) {
-        return createProductWithProcessingGraph(number, (String[]) null);
-    }
-
     static Product createProductWithProcessingGraph(int number, String... inputNames) {
         final Product product = createProduct(number);
         final MetadataElement metadataRoot = product.getMetadataRoot();
@@ -57,22 +53,10 @@ class TestHelper {
         assertEquals(inputName, nameAttribute.getData().getElemString());
     }
 
-    static void assertProductElementWithGraphAt(int index, MetadataElement metadataElement) {
-        assertInputElementAt(index, metadataElement);
-
-        assertNotNull(getProcessingGraphElement(index, metadataElement));
-    }
-
     static void assertProductElementWithGraphAt(int index, String inputName, MetadataElement metadataElement) {
         assertInputElementAt(index, inputName, metadataElement);
 
         assertNotNull(getProcessingGraphElement(index, metadataElement));
-    }
-
-    static void assertProductElementWithoutGraphtAt(int index, MetadataElement metadataElement) {
-        assertInputElementAt(index, metadataElement);
-
-        assertNull(getProcessingGraphElement(index, metadataElement));
     }
 
     static void assertProductElementWithoutGraphtAt(int index, String inputName, MetadataElement metadataElement) {
