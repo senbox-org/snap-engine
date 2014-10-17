@@ -5,13 +5,13 @@ import com.vividsolutions.jts.io.WKTReader;
 import org.esa.beam.binning.AggregatorConfig;
 import org.esa.beam.binning.aggregators.AggregatorAverage;
 import org.esa.beam.binning.aggregators.AggregatorOnMaxSet;
+import org.esa.beam.binning.operator.BinningConfig;
 import org.esa.beam.binning.operator.BinningOp;
 import org.esa.beam.binning.operator.VariableConfig;
 import org.esa.beam.framework.datamodel.MetadataAttribute;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.util.io.FileUtils;
 import org.junit.Test;
-import ucar.nc2.Variable;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -20,18 +20,17 @@ import java.util.SortedMap;
 import java.util.logging.Logger;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
 public class GlobalMetadataTest {
 
-    public static final String TEST_DIR = "test_dir";
+    private static final String TEST_DIR = "test_dir";
     private static final String TEST_PROPERTIES = "param_a = aaaaa\n" +
             "param_b = bbbb\n" +
             "param_c = CCCC";
 
     @Test
-    public void testCreate() throws ParseException {
+    public void testCreate_fromBinningOp() throws ParseException {
         final BinningOp binningOp = createBinningOp();
         final GlobalMetadata metadata = GlobalMetadata.create(binningOp);
         assertNotNull(metadata);
@@ -54,16 +53,52 @@ public class GlobalMetadataTest {
     }
 
     @Test
-    public void testCreate_noParametersSet() throws ParseException {
-        final BinningOp binningOp = new BinningOp();
-        final GlobalMetadata metadata = GlobalMetadata.create(binningOp);
+    public void testCreate_fromConfig() {
+        final BinningConfig config = new BinningConfig();
+        config.setNumRows(12);
+        config.setSuperSampling(13);
+        config.setMaskExpr("14");
+        config.setVariableConfigs(new VariableConfig("var_name", "var_expr"));
+        config.setAggregatorConfigs(new AggregatorAverage.Config("variable", "target", 2.076, false, true));
+        // @todo 3 tb/** add check for PostProcessorConfig 2014-10-17
+        config.setMinDataHour(15.0);
+        config.setTimeFilterMethod(BinningOp.TimeFilterMethod.SPATIOTEMPORAL_DATA_DAY);
+        config.setMetadataAggregatorName("NAME");
+        config.setStartDateTime("here_we_go");
+        config.setPeriodDuration(15.88);
+
+        final GlobalMetadata metadata = GlobalMetadata.create(config);
         assertNotNull(metadata);
 
         final SortedMap<String, String> metaProperties = metadata.asSortedMap();
         assertNotNull(metaProperties);
-        assertEquals("org.esa.beam.binning.operator.BinningOp", metaProperties.get("software_qualified_name"));
-        assertEquals("Binning", metaProperties.get("software_name"));
-        assertEquals("1.0", metaProperties.get("software_version"));
+
+        assertEquals("12", metaProperties.get("num_rows"));
+        assertEquals("13", metaProperties.get("super_sampling"));
+        assertEquals("14", metaProperties.get("mask_expression"));
+        assertEquals("var_name", metaProperties.get("variable_config.0:name"));
+        assertEquals("var_expr", metaProperties.get("variable_config.0:expr"));
+        assertEquals("AVG", metaProperties.get("aggregator_config.0:type"));
+        assertEquals("false", metaProperties.get("aggregator_config.0:outputCounts"));
+        assertEquals("true", metaProperties.get("aggregator_config.0:outputSums"));
+        assertEquals("target", metaProperties.get("aggregator_config.0:targetName"));
+        assertEquals("variable", metaProperties.get("aggregator_config.0:varName"));
+        assertEquals("2.076", metaProperties.get("aggregator_config.0:weightCoeff"));
+        assertEquals("15.0", metaProperties.get("min_data_hour"));
+        assertEquals("SPATIOTEMPORAL_DATA_DAY", metaProperties.get("time_filter_method"));
+        assertEquals("NAME", metaProperties.get("metadata_aggregator_name"));
+        assertEquals("here_we_go", metaProperties.get("aggregation_period_start"));
+        assertEquals("15.88 day(s)", metaProperties.get("aggregation_period_duration"));
+    }
+
+    @Test
+    public void testCreateFromConfig_noParametersSet() throws ParseException {
+        final BinningConfig binningConfig = new BinningConfig();
+        final GlobalMetadata metadata = GlobalMetadata.create(binningConfig);
+        assertNotNull(metadata);
+
+        final SortedMap<String, String> metaProperties = metadata.asSortedMap();
+        assertNotNull(metaProperties);
 
         assertNull(metaProperties.get("product_name"));
         assertNotNull(metaProperties.get("processing_time"));
@@ -74,14 +109,15 @@ public class GlobalMetadataTest {
         assertNull(metaProperties.get("pixel_size_in_km"));
         assertNull(metaProperties.get("super_sampling"));
         assertEquals("", metaProperties.get("mask_expression"));
+        assertNull(metaProperties.get("variable_config.0:name"));
     }
 
     @Test
     public void testCreate_timeFilerMethod_timeRange() throws ParseException {
-        final BinningOp binningOp = new BinningOp();
-        binningOp.setTimeFilterMethod(BinningOp.TimeFilterMethod.TIME_RANGE);
+        final BinningConfig binningConfig = new BinningConfig();
+        binningConfig.setTimeFilterMethod(BinningOp.TimeFilterMethod.TIME_RANGE);
 
-        final GlobalMetadata metadata = GlobalMetadata.create(binningOp);
+        final GlobalMetadata metadata = GlobalMetadata.create(binningConfig);
         assertNotNull(metadata);
 
         final SortedMap<String, String> metaProperties = metadata.asSortedMap();
@@ -93,11 +129,11 @@ public class GlobalMetadataTest {
 
     @Test
     public void testCreate_timeFilterMethod_spatioTemporalDay() throws ParseException {
-        final BinningOp binningOp = new BinningOp();
-        binningOp.setTimeFilterMethod(BinningOp.TimeFilterMethod.SPATIOTEMPORAL_DATA_DAY);
-        binningOp.setMinDataHour(0.8876);
+        final BinningConfig binningConfig = new BinningConfig();
+        binningConfig.setTimeFilterMethod(BinningOp.TimeFilterMethod.SPATIOTEMPORAL_DATA_DAY);
+        binningConfig.setMinDataHour(0.8876);
 
-        final GlobalMetadata metadata = GlobalMetadata.create(binningOp);
+        final GlobalMetadata metadata = GlobalMetadata.create(binningConfig);
         assertNotNull(metadata);
 
         final SortedMap<String, String> metaProperties = metadata.asSortedMap();
@@ -244,8 +280,8 @@ public class GlobalMetadataTest {
 
     @Test
     public void testToPixelSizeString() {
-         assertEquals("1821.593952320952", GlobalMetadata.toPixelSizeString(12));
-         assertEquals("2.446286592055973", GlobalMetadata.toPixelSizeString(8192));
+        assertEquals("1821.593952320952", GlobalMetadata.toPixelSizeString(12));
+        assertEquals("2.446286592055973", GlobalMetadata.toPixelSizeString(8192));
     }
 
     private void deletePropertiesFile() {
@@ -280,6 +316,7 @@ public class GlobalMetadataTest {
         binningOp.setOutputFile("output.file");
         binningOp.setStartDateTime("2013-05-01");
         binningOp.setPeriodDuration(15.56);
+
         final WKTReader wktReader = new WKTReader();
         binningOp.setRegion(wktReader.read("POLYGON((10 10, 15 10, 15 12, 10 12, 10 10))"));
         binningOp.setTimeFilterMethod(BinningOp.TimeFilterMethod.NONE);

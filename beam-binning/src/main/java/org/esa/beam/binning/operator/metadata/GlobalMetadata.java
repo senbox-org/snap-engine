@@ -7,6 +7,7 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.esa.beam.binning.AggregatorConfig;
+import org.esa.beam.binning.operator.BinningConfig;
 import org.esa.beam.binning.operator.BinningOp;
 import org.esa.beam.binning.operator.VariableConfig;
 import org.esa.beam.framework.datamodel.MetadataAttribute;
@@ -38,8 +39,16 @@ public class GlobalMetadata {
         if (spi != null) {
             globalMetadata.extractSpiMetadata(spi);
         }
+        final BinningConfig config = operator.createConfig();
+        globalMetadata.extractConfigMetadata(config);
 
-        globalMetadata.extractOperatorMetadata(operator);
+        return globalMetadata;
+    }
+
+    public static GlobalMetadata create(BinningConfig config) {
+        final GlobalMetadata globalMetadata = new GlobalMetadata();
+
+        globalMetadata.extractConfigMetadata(config);
 
         return globalMetadata;
     }
@@ -131,8 +140,8 @@ public class GlobalMetadata {
         }
     }
 
-    private void extractOperatorMetadata(BinningOp operator) {
-        final String outputPath = operator.getOutputFile();
+    private void extractConfigMetadata(BinningConfig config) {
+        final String outputPath = config.getOutputFile();
         if (StringUtils.isNotNullAndNotEmpty(outputPath)) {
             final File outputFile = new File(outputPath);
             metaProperties.put("product_name", FileUtils.getFilenameWithoutExtension(outputFile.getName()));
@@ -142,71 +151,76 @@ public class GlobalMetadata {
         final SimpleDateFormat dateFormat = new SimpleDateFormat(DATETIME_OUTPUT_PATTERN, Locale.ENGLISH);
         metaProperties.put("processing_time", dateFormat.format(new Date()));
 
-        final String startDateTime = operator.getStartDateTime();
+        final String startDateTime = config.getStartDateTime();
         if (StringUtils.isNotNullAndNotEmpty(startDateTime)) {
             metaProperties.put("aggregation_period_start", startDateTime);
         }
 
-        final Double periodDuration = operator.getPeriodDuration();
+        final Double periodDuration = config.getPeriodDuration();
         if (periodDuration != null) {
             metaProperties.put("aggregation_period_duration", Double.toString(periodDuration) + " day(s)");
         }
 
-        final Geometry region = operator.getRegion();
+        final Geometry region = config.getRegion();
         if (region != null) {
             metaProperties.put("region", region.toString());
         }
 
-        final BinningOp.TimeFilterMethod timeFilterMethod = operator.getTimeFilterMethod();
+        final BinningOp.TimeFilterMethod timeFilterMethod = config.getTimeFilterMethod();
         if (isTimeFilterMetadataRequired(timeFilterMethod)) {
             metaProperties.put("time_filter_method", timeFilterMethod.toString());
             if (timeFilterMethod == BinningOp.TimeFilterMethod.SPATIOTEMPORAL_DATA_DAY) {
-                final Double minDataHour = operator.getMinDataHour();
+                final Double minDataHour = config.getMinDataHour();
                 if (minDataHour != null) {
                     metaProperties.put("min_data_hour", Double.toString(minDataHour));
                 }
             }
         }
 
-        final int numRows = operator.getNumRows();
+        final int numRows = config.getNumRows();
         if (numRows > 0) {
             metaProperties.put("num_rows", Integer.toString(numRows));
             metaProperties.put("pixel_size_in_km", toPixelSizeString(numRows));
         }
 
-        final Integer superSampling = operator.getSuperSampling();
+        final Integer superSampling = config.getSuperSampling();
         if (superSampling != null) {
             metaProperties.put("super_sampling", Integer.toString(superSampling));
         }
 
-        final String maskExpr = operator.getMaskExpr();
+        final String maskExpr = config.getMaskExpr();
         if (StringUtils.isNullOrEmpty(maskExpr)) {
             metaProperties.put("mask_expression", "");
         } else {
             metaProperties.put("mask_expression", maskExpr);
         }
 
-        final VariableConfig[] variableConfigs = operator.getVariableConfigs();
+        final VariableConfig[] variableConfigs = config.getVariableConfigs();
         if (variableConfigs != null) {
             int index = 0;
-            for (final VariableConfig config : variableConfigs) {
-                metaProperties.put("variable_config." + Integer.toString(index) + ":name", config.getName());
-                metaProperties.put("variable_config." + Integer.toString(index) + ":expr", config.getExpr());
+            for (final VariableConfig variableConfig : variableConfigs) {
+                metaProperties.put("variable_config." + Integer.toString(index) + ":name", variableConfig.getName());
+                metaProperties.put("variable_config." + Integer.toString(index) + ":expr", variableConfig.getExpr());
                 ++index;
             }
         }
 
-        final AggregatorConfig[] aggregatorConfigs = operator.getAggregatorConfigs();
+        final AggregatorConfig[] aggregatorConfigs = config.getAggregatorConfigs();
         if (aggregatorConfigs != null) {
             int index = 0;
-            for (final AggregatorConfig config : aggregatorConfigs) {
-                final PropertySet propertySet = config.asPropertySet();
+            for (final AggregatorConfig aggregatorConfig : aggregatorConfigs) {
+                final PropertySet propertySet = aggregatorConfig.asPropertySet();
                 final Property[] properties = propertySet.getProperties();
                 for (final Property property : properties) {
                     metaProperties.put("aggregator_config." + Integer.toString(index) + ":" + property.getName(), property.getValueAsText());
                 }
                 ++index;
             }
+        }
+
+        final String aggregatorName = config.getMetadataAggregatorName();
+        if (StringUtils.isNotNullAndNotEmpty(aggregatorName)) {
+            metaProperties.put("metadata_aggregator_name", aggregatorName);
         }
     }
 

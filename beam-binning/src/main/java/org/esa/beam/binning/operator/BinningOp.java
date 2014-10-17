@@ -435,8 +435,7 @@ public class BinningOp extends Operator {
         super.dispose();
     }
 
-    // package access for testing only tb 2014-10-17
-    BinningConfig createConfig() {
+    public BinningConfig createConfig() {
         final BinningConfig config = new BinningConfig();
         config.setNumRows(numRows);
         config.setSuperSampling(superSampling);
@@ -449,6 +448,8 @@ public class BinningOp extends Operator {
         config.setStartDateTime(startDateTime);
         config.setPeriodDuration(periodDuration);
         config.setTimeFilterMethod(timeFilterMethod);
+        config.setOutputFile(outputFile);
+        config.setRegion(region);
         return config;
     }
 

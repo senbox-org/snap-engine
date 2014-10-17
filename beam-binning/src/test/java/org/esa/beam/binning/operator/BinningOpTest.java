@@ -18,6 +18,8 @@ package org.esa.beam.binning.operator;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.io.ParseException;
+import com.vividsolutions.jts.io.WKTReader;
 import org.esa.beam.binning.AggregatorConfig;
 import org.esa.beam.binning.CellProcessorConfig;
 import org.esa.beam.binning.DataPeriod;
@@ -112,7 +114,7 @@ public class BinningOpTest {
             SortedMap<String, String> metadataProperties = binningOp.getMetadataProperties();
             assertNotNull(metadataProperties);
 
-            assertEquals(22, metadataProperties.size());
+            assertEquals(23, metadataProperties.size());
             Set<String> strings = metadataProperties.keySet();
             String[] names = strings.toArray(new String[strings.size()]);
             String[] expectedNames = {
@@ -129,6 +131,7 @@ public class BinningOpTest {
                     "aggregator_config.1:type",
                     "aggregator_config.1:varName",
                     "mask_expression",
+                    "metadata_aggregator_name",
                     "num_rows",
                     "pixel_size_in_km",
                     "processing_time",
@@ -687,7 +690,7 @@ public class BinningOpTest {
     }
 
     @Test
-    public void testCreateConfig() {
+    public void testCreateConfig() throws ParseException {
         final BinningOp binningOp = createBinningOp();
         binningOp.setNumRows(19);
         binningOp.setSuperSampling(20);
@@ -700,6 +703,9 @@ public class BinningOpTest {
         binningOp.setStartDateTime("start-me-up");
         binningOp.setPeriodDuration(26.0);
         binningOp.setTimeFilterMethod(BinningOp.TimeFilterMethod.TIME_RANGE);
+        binningOp.setOutputFile("a_file");
+        final WKTReader wktReader = new WKTReader();
+        binningOp.setRegion(wktReader.read("POLYGON((10 10, 15 10, 15 12, 10 12, 10 10))"));
 
         final BinningConfig config = binningOp.createConfig();
         assertNotNull(config);
@@ -721,6 +727,8 @@ public class BinningOpTest {
         assertEquals("start-me-up", config.getStartDateTime());
         assertEquals(26.0, config.getPeriodDuration(), 1e-8);
         assertEquals(BinningOp.TimeFilterMethod.TIME_RANGE, config.getTimeFilterMethod());
+        assertEquals("a_file", config.getOutputFile());
+        assertEquals("POLYGON ((10 10, 15 10, 15 12, 10 12, 10 10))", config.getRegion().toString());
     }
 
     private BinningOp createBinningOp() {

@@ -26,6 +26,7 @@ import org.esa.beam.binning.support.VariableContextImpl;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.ParameterBlockConverter;
+import org.esa.beam.util.converters.JtsGeometryConverter;
 
 import java.lang.reflect.Constructor;
 
@@ -124,6 +125,15 @@ public class BinningConfig {
             "Requires the parameter 'minDataHour'.",
             defaultValue = "NONE")
     private BinningOp.TimeFilterMethod timeFilterMethod;
+
+    @Parameter
+    private String outputFile;
+
+    @Parameter(converter = JtsGeometryConverter.class,
+            description = "The considered geographical region as a geometry in well-known text format (WKT).\n" +
+                    "If not given, the geographical region will be computed according to the extents of the " +
+                    "input products.")
+    Geometry region;
 
     public String getPlanetaryGrid() {
         return planetaryGrid;
@@ -227,6 +237,22 @@ public class BinningConfig {
 
     public void setTimeFilterMethod(BinningOp.TimeFilterMethod timeFilterMethod) {
         this.timeFilterMethod = timeFilterMethod;
+    }
+
+    public String getOutputFile() {
+        return outputFile;
+    }
+
+    public void setOutputFile(String outputFile) {
+        this.outputFile = outputFile;
+    }
+
+    public Geometry getRegion() {
+        return region;
+    }
+
+    public void setRegion(Geometry region) {
+        this.region = region;
     }
 
     public static BinningConfig fromXml(String xml) throws BindingException {
