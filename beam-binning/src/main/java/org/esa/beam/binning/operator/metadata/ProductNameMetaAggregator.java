@@ -27,7 +27,7 @@ class ProductNameMetaAggregator extends AbstractMetadataAggregator {
     }
 
     private void aggregate(String productName) {
-        final MetadataElement productElement = Utilities.createInputMetaElement(productName, aggregatedCount);
+        final MetadataElement productElement = Utilities.createSourceMetaElement(productName, aggregatedCount);
 
         inputsMetaElement.addElementAt(productElement, aggregatedCount);
         ++aggregatedCount;

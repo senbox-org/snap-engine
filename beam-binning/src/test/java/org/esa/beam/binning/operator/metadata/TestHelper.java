@@ -12,7 +12,7 @@ class TestHelper {
 
     static void assertCorrectNameAndNoAttributes(MetadataElement metadataElement) {
         assertNotNull(metadataElement);
-        assertEquals("inputs", metadataElement.getName());
+        assertEquals("sources", metadataElement.getName());
         assertEquals(0, metadataElement.getNumAttributes());
     }
 
@@ -46,7 +46,7 @@ class TestHelper {
 
     static void assertInputElementAt(int index, String inputName, MetadataElement metadataElement) {
         final MetadataElement productElement = metadataElement.getElementAt(index);
-        assertEquals("input." + Integer.toString(index), productElement.getName());
+        assertEquals("source." + Integer.toString(index), productElement.getName());
 
         final MetadataAttribute nameAttribute = productElement.getAttribute("name");
         assertNotNull(nameAttribute);

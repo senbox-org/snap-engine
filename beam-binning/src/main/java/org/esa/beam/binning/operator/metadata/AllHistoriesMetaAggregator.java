@@ -30,7 +30,7 @@ class AllHistoriesMetaAggregator extends AbstractMetadataAggregator {
     }
 
     private void aggregate(String productName, MetadataElement processingGraphElement) {
-        final MetadataElement productElement = Utilities.createInputMetaElement(productName, aggregatedCount);
+        final MetadataElement productElement = Utilities.createSourceMetaElement(productName, aggregatedCount);
         if (processingGraphElement != null) {
             productElement.addElement(processingGraphElement.createDeepClone());
         }

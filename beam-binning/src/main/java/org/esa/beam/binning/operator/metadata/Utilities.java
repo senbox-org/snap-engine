@@ -9,8 +9,8 @@ import org.esa.beam.util.StringUtils;
 
 class Utilities {
 
-    static MetadataElement createInputMetaElement(String productName, int index) {
-        final MetadataElement productElement = new MetadataElement("input." + Integer.toString(index));
+    static MetadataElement createSourceMetaElement(String productName, int index) {
+        final MetadataElement productElement = new MetadataElement("source." + Integer.toString(index));
         final MetadataAttribute nameAttribute = new MetadataAttribute("name", new ProductData.ASCII(productName), true);
         productElement.addAttribute(nameAttribute);
         return productElement;
