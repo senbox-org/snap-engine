@@ -151,11 +151,6 @@ public class BinningConfigTest {
     }
 
     @Test
-    public void testDefaultNumRows() {
-        assertEquals(4320, config.getNumRows());
-    }
-
-    @Test
     public void testL3configForCellProcressing() throws Exception {
         BinningConfig binningConfig = loadConfig("l3-cellProcessing.xml");
         assertNotNull(binningConfig);
@@ -171,6 +166,11 @@ public class BinningConfigTest {
         String[] expected = {"tsm_mean", " tsm_sigma", " chl_min", "cmax = chl_max"};
         String[] actual = propertySet.getProperty("varNames").getValue();
         assertArrayEquals(expected, actual);
+    }
+
+    @Test
+    public void testTimeFilterMethod_defaultValue() {
+         assertEquals(BinningOp.TimeFilterMethod.NONE, config.getTimeFilterMethod());
     }
 
     static BinningConfig loadConfig(String configPath) throws Exception {

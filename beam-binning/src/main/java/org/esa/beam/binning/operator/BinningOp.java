@@ -86,6 +86,7 @@ todo - address the following BinningOp requirements (nf, 2012-03-09)
         autoWriteDisabled = true)
 public class BinningOp extends Operator {
 
+
     public static enum TimeFilterMethod {
         NONE,
         TIME_RANGE,
@@ -378,15 +379,7 @@ public class BinningOp extends Operator {
             regionArea = new Area();
         }
 
-        BinningConfig binningConfig = new BinningConfig();
-        binningConfig.setNumRows(numRows);
-        binningConfig.setSuperSampling(superSampling);
-        binningConfig.setMaskExpr(maskExpr);
-        binningConfig.setVariableConfigs(variableConfigs);
-        binningConfig.setAggregatorConfigs(aggregatorConfigs);
-        binningConfig.setPostProcessorConfig(postProcessorConfig);
-        binningConfig.setMinDataHour(minDataHour);
-
+        final BinningConfig binningConfig = createConfig();
         binningContext = binningConfig.createBinningContext(region, startDateUtc, periodDuration);
 
         BinningProductFilter productFilter = createSourceProductFilter(binningContext.getDataPeriod(),
@@ -440,6 +433,23 @@ public class BinningOp extends Operator {
             writtenProduct.dispose();
         }
         super.dispose();
+    }
+
+    // package access for testing only tb 2014-10-17
+    BinningConfig createConfig() {
+        final BinningConfig config = new BinningConfig();
+        config.setNumRows(numRows);
+        config.setSuperSampling(superSampling);
+        config.setMaskExpr(maskExpr);
+        config.setVariableConfigs(variableConfigs);
+        config.setAggregatorConfigs(aggregatorConfigs);
+        config.setPostProcessorConfig(postProcessorConfig);
+        config.setMinDataHour(minDataHour);
+        config.setMetadataAggregatorName(metadataAggregatorName);
+        config.setStartDateTime(startDateTime);
+        config.setPeriodDuration(periodDuration);
+        config.setTimeFilterMethod(timeFilterMethod);
+        return config;
     }
 
     private void validateInput() {

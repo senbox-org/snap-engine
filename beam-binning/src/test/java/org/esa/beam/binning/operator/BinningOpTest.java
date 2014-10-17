@@ -19,8 +19,10 @@ package org.esa.beam.binning.operator;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import org.esa.beam.binning.AggregatorConfig;
+import org.esa.beam.binning.CellProcessorConfig;
 import org.esa.beam.binning.DataPeriod;
 import org.esa.beam.binning.aggregators.AggregatorAverage;
+import org.esa.beam.binning.aggregators.AggregatorMinMax;
 import org.esa.beam.binning.aggregators.AggregatorPercentile;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.*;
@@ -684,6 +686,43 @@ public class BinningOpTest {
         targetProduct.dispose();
     }
 
+    @Test
+    public void testCreateConfig() {
+        final BinningOp binningOp = createBinningOp();
+        binningOp.setNumRows(19);
+        binningOp.setSuperSampling(20);
+        binningOp.setMaskExpr("twenty-one");
+        binningOp.setVariableConfigs(new VariableConfig("yeah", "wow"));
+        binningOp.setAggregatorConfigs(new AggregatorMinMax.Config());
+        binningOp.setPostProcessorConfig(new TestCellProcessorConfig());
+        binningOp.setMinDataHour(25.0);
+        binningOp.setMetadataAggregatorName("clump");
+        binningOp.setStartDateTime("start-me-up");
+        binningOp.setPeriodDuration(26.0);
+        binningOp.setTimeFilterMethod(BinningOp.TimeFilterMethod.TIME_RANGE);
+
+        final BinningConfig config = binningOp.createConfig();
+        assertNotNull(config);
+        assertEquals(19, config.getNumRows());
+        assertEquals(20, config.getSuperSampling().intValue());
+        assertEquals("twenty-one", config.getMaskExpr());
+
+        final VariableConfig[] variableConfigs = config.getVariableConfigs();
+        assertEquals(1, variableConfigs.length);
+        assertEquals("wow", variableConfigs[0].getExpr());
+
+        final AggregatorConfig[] aggregatorConfigs = config.getAggregatorConfigs();
+        assertEquals(1, aggregatorConfigs.length);
+        assertEquals("MIN_MAX", aggregatorConfigs[0].getName());
+
+        assertNotNull(config.getPostProcessorConfig());
+        assertEquals(25.0, config.getMinDataHour(), 1e-8);
+        assertEquals("clump", config.getMetadataAggregatorName());
+        assertEquals("start-me-up", config.getStartDateTime());
+        assertEquals(26.0, config.getPeriodDuration(), 1e-8);
+        assertEquals(BinningOp.TimeFilterMethod.TIME_RANGE, config.getTimeFilterMethod());
+    }
+
     private BinningOp createBinningOp() {
         BinningOp binningOp = new BinningOp();
         binningOp.setParameterDefaultValues();
@@ -824,4 +863,7 @@ public class BinningOpTest {
         return new File(TESTDATA_DIR, fileName);
     }
 
+    private static class TestCellProcessorConfig extends CellProcessorConfig {
+
+    }
 }
