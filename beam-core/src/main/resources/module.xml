@@ -29,6 +29,14 @@
     <url>http://envisat.esa.int/beam</url>
     <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
 
+
+    <changelog>
+        <![CDATA[
+        <b>Changes in 1.0.1</b><br/>
+            [SNAP-5] Some uncertainty visualisation modes hide no-data pixels
+        ]]>
+    </changelog>
+
     <dependency>
         <module>snap-ceres-core</module>
     </dependency>
