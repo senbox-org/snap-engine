@@ -19,7 +19,16 @@ package org.esa.beam.binning.operator;
 import com.bc.ceres.core.ProgressMonitor;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import org.esa.beam.binning.*;
+import org.esa.beam.binning.AggregatorConfig;
+import org.esa.beam.binning.BinningContext;
+import org.esa.beam.binning.CellProcessorConfig;
+import org.esa.beam.binning.DataPeriod;
+import org.esa.beam.binning.ProductCustomizerConfig;
+import org.esa.beam.binning.SpatialBin;
+import org.esa.beam.binning.SpatialBinner;
+import org.esa.beam.binning.TemporalBin;
+import org.esa.beam.binning.TemporalBinSource;
+import org.esa.beam.binning.TemporalBinner;
 import org.esa.beam.binning.cellprocessor.CellProcessorChain;
 import org.esa.beam.binning.operator.metadata.GlobalMetadata;
 import org.esa.beam.binning.operator.metadata.MetadataAggregator;
@@ -49,7 +58,13 @@ import java.awt.geom.GeneralPath;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.logging.Level;
 
 /*
@@ -214,6 +229,7 @@ public class BinningOp extends Operator {
     private transient BinWriter binWriter;
     private transient Area regionArea;
     private transient MetadataAggregator metadataAggregator;
+    private transient String planetaryGridClass;
 
     private final Map<Product, List<Band>> addedVariableBands;
     private Product writtenProduct;
@@ -345,6 +361,10 @@ public class BinningOp extends Operator {
         return outputFile;
     }
 
+    public void setPlanetaryGridClass(String planetaryGridClass) {
+        this.planetaryGridClass = planetaryGridClass;
+    }
+
     /**
      * Processes all source products and writes the output file.
      * The target product represents the written output file
@@ -450,6 +470,9 @@ public class BinningOp extends Operator {
         config.setTimeFilterMethod(timeFilterMethod);
         config.setOutputFile(outputFile);
         config.setRegion(region);
+        if (planetaryGridClass != null) {
+            config.setPlanetaryGrid(planetaryGridClass);
+        }
         return config;
     }
 
