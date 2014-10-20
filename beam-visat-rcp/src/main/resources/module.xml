@@ -17,7 +17,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>beam-visat-rcp</symbolicName>
-    <version>5.0.3</version>
+    <version>5.0.4</version>
     <name>VISAT Rich Client Platform</name>
 
     <description>
@@ -27,6 +27,8 @@
 
     <changelog>
         <![CDATA[
+         <b>Changes in 5.0.4</b><br/>
+          [BEAM-1726] Saving a product takes too long<br/>
           <b>Changes in 5.0.3</b><br/>
           [BEAM-1714] Computation of frequencies for index coded bands fails<br/>
           <b>Changes in 5.0.2</b><br/>
