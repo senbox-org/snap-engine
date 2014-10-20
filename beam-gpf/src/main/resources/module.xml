@@ -17,7 +17,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>beam-gpf</symbolicName>
-    <version>5.0.1</version>
+    <version>5.0.2</version>
     <name>BEAM Graph Processing Framework (GPF)</name>
 
     <description>The basic framework for processing using Operators and the GPT.</description>
@@ -30,6 +30,8 @@
 
     <changelog>
         <![CDATA[
+         <b>Changes in 5.0.2</b><br/>
+            [BEAM-1724] BandMathsOp shall consider scaling factor and scaling offset<br/>
          <b>Changes in 5.0.1</b><br/>
             Only compute virtual band by the WriteOp if shouldWrite property is set<br/>
             Harmonisation with NEST: Operator registry now checks for conflicting operator aliases<br/>
