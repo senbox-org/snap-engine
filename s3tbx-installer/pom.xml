@@ -334,7 +334,7 @@
         <dependency>
             <groupId>edu.ucar</groupId>
             <artifactId>bufr</artifactId>
-            <version>4.3.21</version>
+            <version>4.3.22</version>
         </dependency>
 
         <!-- S2 dependencies -->
