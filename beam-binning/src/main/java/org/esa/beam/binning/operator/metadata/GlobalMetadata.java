@@ -80,12 +80,16 @@ public class GlobalMetadata {
     }
 
     public MetadataElement asMetadataElement() {
-        final MetadataElement globalAttributes = new MetadataElement("Global_Attributes");
+        final MetadataElement processingGraph = new MetadataElement("Processing_Graph");
+        final MetadataElement node_0 = new MetadataElement("node.0");
+        final MetadataElement parameters = new MetadataElement("parameters");
         for (final String name : metaProperties.keySet()) {
             final String value = metaProperties.get(name);
-            globalAttributes.addAttribute(new MetadataAttribute(name, ProductData.createInstance(value), true));
+            parameters.addAttribute(new MetadataAttribute(name, ProductData.createInstance(value), true));
         }
-        return globalAttributes;
+        node_0.addElement(parameters);
+        processingGraph.addElement(node_0);
+        return processingGraph;
     }
 
     public void load(File propertiesFile, Logger logger) {

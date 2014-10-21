@@ -707,8 +707,7 @@ public class BinningOp extends Operator {
 
         if (outputTargetProduct) {
             getLogger().info(String.format("Writing mapped product '%s'...", formatterConfig.getOutputFile()));
-            final MetadataElement globalAttributes = globalMetadata.asMetadataElement();
-            globalAttributes.addElement(metadataAggregator.getMetadata());
+            final MetadataElement processingGraphMetadata = getProcessingGraphMetadata();
             Formatter.format(binningContext.getPlanetaryGrid(),
                     getTemporalBinSource(temporalBins),
                     binningContext.getBinManager().getResultFeatureNames(),
@@ -716,7 +715,7 @@ public class BinningOp extends Operator {
                     region,
                     startTime,
                     stopTime,
-                    globalAttributes);
+                    processingGraphMetadata);
             stopWatch.stop();
 
             String msgPattern = "Writing mapped product '%s' done, took %s";
@@ -733,6 +732,14 @@ public class BinningOp extends Operator {
         } else {
             this.targetProduct = new Product("Dummy", "t", 10, 10);
         }
+    }
+
+    private MetadataElement getProcessingGraphMetadata() {
+        final MetadataElement processingGraphMetadata = globalMetadata.asMetadataElement();
+
+        final MetadataElement node_0 = processingGraphMetadata.getElement("node.0");
+        node_0.addElement(metadataAggregator.getMetadata());
+        return processingGraphMetadata;
     }
 
     private TemporalBinSource getTemporalBinSource(List<TemporalBin> temporalBins) throws IOException {
