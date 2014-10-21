@@ -30,8 +30,9 @@
 
     <changelog>
         <![CDATA[
-         <b>Changes in 5.0.2</b><br/>
+         <b>Changes in 5.0.4</b><br/>
             [BEAM-1726] Saving a product takes too long<br/>
+         <b>Changes in 5.0.2</b><br/>
             [BEAM-1724] BandMathsOp shall consider scaling factor and scaling offset<br/>
          <b>Changes in 5.0.1</b><br/>
             Only compute virtual band by the WriteOp if shouldWrite property is set<br/>
