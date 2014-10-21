@@ -248,13 +248,18 @@ public class GlobalMetadataTest {
 
         final GlobalMetadata globalMetadata = GlobalMetadata.create(binningOp);
 
-        final MetadataElement metadataElement = globalMetadata.asMetadataElement();
-        assertNotNull(metadataElement);
-        assertEquals("Global_Attributes", metadataElement.getName());
-        assertEquals(12, metadataElement.getNumAttributes());
+        final MetadataElement processingGraphElement = globalMetadata.asMetadataElement();
+        assertNotNull(processingGraphElement);
+        assertEquals("Processing_Graph", processingGraphElement.getName());
+
+        final MetadataElement node_0_Element = processingGraphElement.getElement("node.0");
+        assertNotNull(node_0_Element);
+
+        final MetadataElement parameterElement = node_0_Element.getElement("parameters");
+        assertEquals(12, parameterElement.getNumAttributes());
 
         // @todo 2 tb/tb check for other meta elements 2014-10-10
-        final MetadataAttribute software_qualified_name = metadataElement.getAttribute("software_qualified_name");
+        final MetadataAttribute software_qualified_name = parameterElement.getAttribute("software_qualified_name");
         assertNotNull(software_qualified_name);
         assertEquals("org.esa.beam.binning.operator.BinningOp", software_qualified_name.getData().getElemString());
     }
@@ -265,7 +270,7 @@ public class GlobalMetadataTest {
 
         final MetadataElement metadataElement = globalMetadata.asMetadataElement();
         assertNotNull(metadataElement);
-        assertEquals("Global_Attributes", metadataElement.getName());
+        assertEquals("Processing_Graph", metadataElement.getName());
         assertEquals(0, metadataElement.getNumAttributes());
     }
 

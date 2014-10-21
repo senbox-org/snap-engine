@@ -154,10 +154,11 @@ public class BinningOpTest {
             // @todo 2 tb/tb add checks for other properties 2014-10-10
 
             final MetadataElement metadataRoot = targetProduct.getMetadataRoot();
-            final MetadataElement globalAttributes = metadataRoot.getElement("Global_Attributes");
-            final MetadataElement sourceProductsElement = globalAttributes.getElement("sources");
-            assertNotNull(sourceProductsElement);
-            assertEquals(3, sourceProductsElement.getNumElements());
+            final MetadataElement processingGraph = metadataRoot.getElement("Processing_Graph");
+            final MetadataElement node_0 = processingGraph.getElement("node.0");
+            final MetadataElement sourcesElement = node_0.getElement("sources");
+            assertNotNull(sourcesElement);
+            assertEquals(3, sourcesElement.getNumElements());
         } finally {
             targetProduct.dispose();
         }
