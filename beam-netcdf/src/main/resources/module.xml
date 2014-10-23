@@ -31,6 +31,8 @@
 
     <changelog>
         <![CDATA[
+        <b>Changes in 5.0.3</b><br/>
+        [BEAM-1723] In certain cases NetCDF tiles get shuffled
         <b>Changes in 5.0.2</b><br/>
         [BEAM-1713] Variables are not written to NetCDF4 if they contain illegal character<br/>
         [BEAM-1700] NetCDF reader cannot read AMSR2 L1R<br/>
