@@ -45,6 +45,14 @@ class TiffValueRangeChecker {
     }
 
     private static void checkValue(final long value, final String name, final long min, final long max) {
+        if(value > max)
+        {
+            StringBuffer sb = new StringBuffer(32).append("File size too big [");
+            sb.append(value);
+            sb.append("] bytes : TIFF file size is limited to [4294967296] bytes !");
+            throw new IllegalArgumentException(sb.toString());
+        }
+
         Guardian.assertWithinRange(name, value, min, max);
     }
 }
