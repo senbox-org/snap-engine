@@ -114,7 +114,7 @@ public class BinningOpTest {
             SortedMap<String, String> metadataProperties = binningOp.getMetadataProperties();
             assertNotNull(metadataProperties);
 
-            assertEquals(18, metadataProperties.size());
+            assertEquals(17, metadataProperties.size());
             Set<String> strings = metadataProperties.keySet();
             String[] names = strings.toArray(new String[strings.size()]);
             String[] expectedNames = {
@@ -134,7 +134,7 @@ public class BinningOpTest {
                     "metadata_aggregator_name",
                     "num_rows",
                     "pixel_size_in_km",
-                    "processing_time",
+                    //"processing_time",
                     "product_name",
                     "region",
                     "software_name",
@@ -144,7 +144,7 @@ public class BinningOpTest {
             };
             assertArrayEquals(expectedNames, names);
 
-            assertTrue("processing_time", metadataProperties.get("processing_time").startsWith("201"));
+            //assertTrue("processing_time", metadataProperties.get("processing_time").startsWith("201"));
             assertEquals("target-1", metadataProperties.get("product_name"));
             assertEquals("Binning", metadataProperties.get("software_name"));
             assertEquals("org.esa.beam.binning.operator.BinningOp", metadataProperties.get("software_qualified_name"));
