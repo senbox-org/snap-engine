@@ -38,6 +38,7 @@ import org.esa.beam.framework.gpf.internal.OperatorConfiguration.Reference;
 import org.esa.beam.framework.gpf.monitor.TileComputationEvent;
 import org.esa.beam.framework.gpf.monitor.TileComputationObserver;
 import org.esa.beam.gpf.operators.standard.WriteOp;
+import org.esa.beam.util.DateTimeUtils;
 import org.esa.beam.util.jai.JAIUtils;
 import org.esa.beam.util.logging.BeamLogManager;
 
@@ -49,6 +50,7 @@ import java.awt.image.WritableRaster;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 import java.util.Map.Entry;
@@ -64,6 +66,12 @@ import java.util.regex.Pattern;
 public class OperatorContext {
 
     static final String PROCESSING_GRAPH_ELEMENT_NAME = "Processing_Graph";
+
+    private static final String DATETIME_OUTPUT_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+    private static final SimpleDateFormat DATETIME_OUTPUT_FORMAT = new SimpleDateFormat(DATETIME_OUTPUT_PATTERN);
+    static {
+        DATETIME_OUTPUT_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
 
     private static TileCache tileCache;
     private static TileComputationObserver tileComputationObserver;
@@ -560,7 +568,8 @@ public class OperatorContext {
                 targetNodeME.addAttribute(new MetadataAttribute("copyright", copyrightValue, false));
             }
         }
-
+        ProductData processingTime = ProductData.createInstance(DATETIME_OUTPUT_FORMAT.format(new Date()));
+        targetNodeME.addAttribute(new MetadataAttribute("processingTime", processingTime, false));
 
         List<MetadataAttribute> sourceAttributeList = new ArrayList<>(context.sourceProductList.size() * 2);
         for (Product sourceProduct : context.sourceProductList) {

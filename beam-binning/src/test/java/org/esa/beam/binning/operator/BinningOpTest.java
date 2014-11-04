@@ -114,20 +114,20 @@ public class BinningOpTest {
             SortedMap<String, String> metadataProperties = binningOp.getMetadataProperties();
             assertNotNull(metadataProperties);
 
-            assertEquals(23, metadataProperties.size());
+            assertEquals(18, metadataProperties.size());
             Set<String> strings = metadataProperties.keySet();
             String[] names = strings.toArray(new String[strings.size()]);
             String[] expectedNames = {
                     "aggregation_period_duration",
                     "aggregation_period_start",
-                    "aggregator_config.0:outputCounts",
-                    "aggregator_config.0:outputSums",
-                    "aggregator_config.0:targetName",
+                    //"aggregator_config.0:outputCounts",
+                    //"aggregator_config.0:outputSums",
+                    //"aggregator_config.0:targetName",
                     "aggregator_config.0:type",
                     "aggregator_config.0:varName",
-                    "aggregator_config.0:weightCoeff",
+                    //"aggregator_config.0:weightCoeff",
                     "aggregator_config.1:percentage",
-                    "aggregator_config.1:targetName",
+                    //"aggregator_config.1:targetName",
                     "aggregator_config.1:type",
                     "aggregator_config.1:varName",
                     "mask_expression",

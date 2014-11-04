@@ -147,7 +147,7 @@ public class BinningConfigTest {
 
     @Test
     public void testGetMetadataAggregatorName_defaultValue() {
-        assertEquals("NAME", config.getMetadataAggregatorName());
+        assertEquals("FIRST_HISTORY", config.getMetadataAggregatorName());
     }
 
     @Test

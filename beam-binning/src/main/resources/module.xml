@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>beam-binning</symbolicName>
-    <version>5.0.2</version>
+    <version>5.0.3-SNAPSHOT</version>
     <name>Level-3 Binning Processor (GPF)</name>
 
     <description>
@@ -29,6 +29,13 @@
 
     <changelog>
         <![CDATA[
+        <b>Changes in 5.0.3</b><br/>
+        Default metadata aggregator in BinningContext changed from NAME to FIRST_HISTORY.<br/>
+        ProcessingTime added to OperatorContext to add it to each metadata node.<br/>
+        ProcessingTime also added in GlobalMetadata for binning, removed from binning parameters.<br/>
+        Metadata attributes with empty value suppressed.<br/>
+        <b>Changes in 5.0.2</b><br/>
+        ...
         <b>Changes in 5.0.1</b><br/>
         Fixed typo in error message<br/>
         <b>Changes in 5.0</b><br/>

@@ -27,7 +27,12 @@ import java.util.logging.Logger;
 
 public class GlobalMetadata {
 
-    private static final String DATETIME_OUTPUT_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS";
+    private static final String DATETIME_OUTPUT_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+    private static final SimpleDateFormat DATETIME_OUTPUT_FORMAT = new SimpleDateFormat(DATETIME_OUTPUT_PATTERN);
+    static {
+        DATETIME_OUTPUT_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
+
     private static final double RE = 6378.145;
 
     private final SortedMap<String, String> metaProperties;
@@ -87,6 +92,8 @@ public class GlobalMetadata {
             final String value = metaProperties.get(name);
             parameters.addAttribute(new MetadataAttribute(name, ProductData.createInstance(value), true));
         }
+        ProductData processingTime = ProductData.createInstance(DATETIME_OUTPUT_FORMAT.format(new Date()));
+        node_0.addAttribute(new MetadataAttribute("processingTime", processingTime, false));
         node_0.addElement(parameters);
         processingGraph.addElement(node_0);
         return processingGraph;
@@ -151,9 +158,9 @@ public class GlobalMetadata {
             metaProperties.put("product_name", FileUtils.getFilenameWithoutExtension(outputFile.getName()));
         }
 
-
-        final SimpleDateFormat dateFormat = new SimpleDateFormat(DATETIME_OUTPUT_PATTERN, Locale.ENGLISH);
-        metaProperties.put("processing_time", dateFormat.format(new Date()));
+        // provisionally moved to node attributes as it is not a binning parameter, boe, 2014-11-04
+        //final SimpleDateFormat dateFormat = new SimpleDateFormat(DATETIME_OUTPUT_PATTERN, Locale.ENGLISH);
+        //metaProperties.put("processing_time", dateFormat.format(new Date()));
 
         final String startDateTime = config.getStartDateTime();
         if (StringUtils.isNotNullAndNotEmpty(startDateTime)) {
@@ -216,7 +223,10 @@ public class GlobalMetadata {
                 final PropertySet propertySet = aggregatorConfig.asPropertySet();
                 final Property[] properties = propertySet.getProperties();
                 for (final Property property : properties) {
-                    metaProperties.put("aggregator_config." + Integer.toString(index) + ":" + property.getName(), property.getValueAsText());
+                    String value = property.getValueAsText();
+                    if (StringUtils.isNotNullAndNotEmpty(value)) {
+                        metaProperties.put("aggregator_config." + Integer.toString(index) + ":" + property.getName(), value);
+                    }
                 }
                 ++index;
             }

@@ -105,7 +105,8 @@ public class BinningConfig {
             "'NAME': aggregate the name of each input product\n" +
             "'FIRST_HISTORY': aggregates all input product names and the processing history of the first product\n" +
             "'ALL_HISTORIES': aggregates all input product names and processing histories",
-            defaultValue = "NAME")
+            valueSet = {"NAME", "FIRST_HISTORY", "ALL_HISTORIES"},
+            defaultValue = "FIRST_HISTORY")
     private String metadataAggregatorName;
 
     @Parameter(pattern = "\\d{4}-\\d{2}-\\d{2}(\\s\\d{2}:\\d{2}:\\d{2})?",
