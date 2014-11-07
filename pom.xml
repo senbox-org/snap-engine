@@ -137,17 +137,6 @@
         </dependencies>
     </dependencyManagement>
 
-    <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>edu.ucar</groupId>
-            <artifactId>bufr</artifactId>
-        </dependency>
-    </dependencies>
-
     <build>
         <outputDirectory>${outputdir}/modules/${project.artifactId}-${snap.version}</outputDirectory>
         <plugins>
