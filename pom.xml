@@ -30,6 +30,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <snap.version>1.0.1</snap.version>
+        <smos.version>4.1.0</smos.version>
 
         <hdf.version>2.7</hdf.version>
         <netcdf.version>4.3.22</netcdf.version>

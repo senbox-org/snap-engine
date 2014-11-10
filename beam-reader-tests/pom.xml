@@ -202,6 +202,17 @@
             <version>${snap.version}</version>
             <type>test-jar</type>
         </dependency>
+        <dependency>
+            <groupId>org.esa.smostbx</groupId>
+            <artifactId>smos-reader</artifactId>
+            <version>${smos.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.smostbx</groupId>
+            <artifactId>smos-reader</artifactId>
+            <version>${smos.version}</version>
+            <type>test-jar</type>
+        </dependency>
     </dependencies>
 
 </project>
