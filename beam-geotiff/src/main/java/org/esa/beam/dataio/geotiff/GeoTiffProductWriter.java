@@ -18,12 +18,14 @@ package org.esa.beam.dataio.geotiff;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.dataio.geotiff.internal.TiffHeader;
 import org.esa.beam.framework.dataio.AbstractProductWriter;
+import org.esa.beam.framework.dataio.ProductSubsetDef;
 import org.esa.beam.framework.dataio.ProductWriterPlugIn;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.datamodel.ProductNode;
 import org.esa.beam.util.io.FileUtils;
+import org.esa.beam.visat.ErrorMessageMarker;
 
 import javax.imageio.stream.FileImageOutputStream;
 import javax.imageio.stream.ImageOutputStream;
@@ -43,6 +45,9 @@ public class GeoTiffProductWriter extends AbstractProductWriter {
     private File outputFile;
     private ImageOutputStream outputStream;
     private GeoTiffBandWriter bandWriter;
+
+    private static final long UNSIGNED_INT_MAX = 0xffffffffL;
+    private static final int UNSIGNED_SHORT_MAX = 0xffff;
 
     /**
      * Construct a new instance of a product writer for the given GeoTIFF product writer plug-in.
@@ -78,7 +83,50 @@ public class GeoTiffProductWriter extends AbstractProductWriter {
 
         ensureNamingConvention();
 
-        writeGeoTIFFProduct(new FileImageOutputStream(outputFile), getSourceProduct());
+        // checks if estimated file size is lower than 4Gb, if not it throws an exception
+        ensureFileSizeLimits();
+
+        try
+        {
+            writeGeoTIFFProduct(new FileImageOutputStream(outputFile), getSourceProduct());
+        }
+        catch (IllegalArgumentException iex)
+        {
+            // if possible, we intercept well-known errors here and provide a user-friendly message
+            StackTraceElement[] elements = iex.getStackTrace();
+            for(StackTraceElement element : elements)
+            {
+                if(element.getMethodName().contains("calculateStripOffset"))
+                {
+                    throw new TiffUserException("StripOffset Error: the size of the resulting product would be greater than 4Gb, and TIFF files are limited to 4Gb !", iex);
+                }
+            }
+
+            // if is an unknown error we rethrow the original exception
+            throw iex;
+        }
+    }
+
+    private void ensureFileSizeLimits()
+    {
+        Band[] theBands = getSourceProduct().getBands();
+
+        ProductSubsetDef psd = new ProductSubsetDef();
+
+        for(Band aBand : theBands)
+        {
+            psd.addNodeName(aBand.getName());
+        }
+
+        long fileSize = getSourceProduct().getRawStorageSize(psd);
+
+        if(fileSize > UNSIGNED_INT_MAX)
+        {
+            StringBuffer sb = new StringBuffer(32).append("File size too big [");
+            sb.append(fileSize);
+            sb.append("] bytes : TIFF file size is limited to [4294967296] bytes !");
+            throw new TiffUserException(sb.toString());
+        }
     }
 
     private void ensureNamingConvention() {
@@ -154,5 +202,38 @@ public class GeoTiffProductWriter extends AbstractProductWriter {
             outputStream.close();
             outputStream = null;
         }
+    }
+}
+
+class TiffUserException extends IllegalArgumentException implements ErrorMessageMarker
+{
+    /**
+     * Constructs an <code>IllegalArgumentException</code> with the
+     * specified detail message.
+     *
+     * @param s the detail message.
+     */
+    public TiffUserException(String s) {
+        super(s);
+    }
+
+    /**
+     * Constructs a new exception with the specified detail message and
+     * cause.
+     * <p/>
+     * <p>Note that the detail message associated with <code>cause</code> is
+     * <i>not</i> automatically incorporated in this exception's detail
+     * message.
+     *
+     * @param message the detail message (which is saved for later retrieval
+     *                by the {@link Throwable#getMessage()} method).
+     * @param cause   the cause (which is saved for later retrieval by the
+     *                {@link Throwable#getCause()} method).  (A <tt>null</tt> value
+     *                is permitted, and indicates that the cause is nonexistent or
+     *                unknown.)
+     * @since 1.5
+     */
+    TiffUserException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

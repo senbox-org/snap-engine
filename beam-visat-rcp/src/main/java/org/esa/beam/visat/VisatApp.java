@@ -1653,8 +1653,16 @@ public class VisatApp extends BasicApp implements AppContext {
             }
             updateState();
             status = !pm.isCanceled();
-        } catch (Exception e) {
-            handleUnknownException(e);
+        } catch (Exception e)
+        {
+            if(e instanceof ErrorMessageMarker)
+            {
+                handleUserException(e);
+            }
+            else
+            {
+                handleUnknownException(e);
+            }
         } finally {
             UIUtils.setRootFrameDefaultCursor(getMainFrame());
             clearStatusBarMessage();

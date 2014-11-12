@@ -1507,6 +1507,42 @@ public class BasicApp {
         clearStatusBarMessage();
     }
 
+    /////////////////////////////////////////////////////////////////////////
+    // User error handling
+
+    public final void handleUserException(Throwable e) {
+        Debug.trace(e);
+
+        String message;
+        String userMessage;
+
+        if (e == null) {
+            message = "An unknown error occurred."; /*I18N*/
+            userMessage = message;
+        } else if (e.getMessage() == null) {
+            message = "An exception occurred:\n"
+                    + "   Type: " + e.getClass().getName() + "\n"
+                    + "   No message text available."; /*I18N*/
+
+            userMessage = "An exception occurred:\n"
+                    + "   No message text available."; /*I18N*/
+
+        } else {
+            message = "An exception occurred:\n"
+                    + "   Type: " + e.getClass().getName() + "\n"
+                    + "   Message: " + e.getMessage(); /*I18N*/
+
+            userMessage = "An exception occurred:\n"
+                    + "   Message: " + e.getMessage(); /*I18N*/
+        }
+
+        getMainFrame().setCursor(Cursor.getDefaultCursor());
+        setStatusBarMessage("Error.");
+        logger.log(Level.SEVERE, message, e);
+        showErrorDialog("Error", userMessage);
+        clearStatusBarMessage();
+    }
+
 /////////////////////////////////////////////////////////////////////////
 // Message Dialog Support
 
