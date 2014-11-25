@@ -28,7 +28,7 @@ public final class PodAvhrrReaderPlugIn implements ProductReaderPlugIn {
     @Override
     public DecodeQualification getDecodeQualification(Object input) {
         final File file = getInputFile(input);
-        if (PodAvhrrFile.canDecode(file)) {
+        if (file != null && PodAvhrrFile.canDecode(file)) {
             return DecodeQualification.INTENDED;
         }
         return DecodeQualification.UNABLE;

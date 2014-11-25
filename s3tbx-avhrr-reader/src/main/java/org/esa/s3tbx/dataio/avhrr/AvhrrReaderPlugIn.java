@@ -49,7 +49,7 @@ public class AvhrrReaderPlugIn implements ProductReaderPlugIn {
     @Override
     public DecodeQualification getDecodeQualification(Object input) {
         final File file = getInputFile(input);
-        if (KlmAvhrrFile.canDecode(file)) {
+        if (file != null && KlmAvhrrFile.canDecode(file)) {
             return DecodeQualification.INTENDED;
         }
         return DecodeQualification.UNABLE;
