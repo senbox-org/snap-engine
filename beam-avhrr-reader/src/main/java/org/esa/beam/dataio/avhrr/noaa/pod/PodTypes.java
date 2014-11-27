@@ -139,7 +139,7 @@ final class PodTypes {
                      MEMBER("QUALITY_INDICATORS", UINT),
                      MEMBER("CALIBRATION_COEFFICIENTS", SEQUENCE(CALIBRATION_COEFFICIENTS_TYPE, 5)),
                      MEMBER("NUMBER_OF_MEANINGFUL_ZENITH_ANGLES_AND_EARTH_LOCATION_POINTS", UBYTE),
-                     META_MEMBER("SOLAR_ZENITH_ANGLES", SEQUENCE(BYTE, 51),
+                     META_MEMBER("SOLAR_ZENITH_ANGLES", SEQUENCE(UBYTE, 51),
                                  META().setScalingFactor(0.5).setUnits("degree")),
                      MEMBER("EARTH_LOCATION", SEQUENCE(EARTH_LOCATION_TYPE, 51)),
                      MEMBER("TELEMETRY", SEQUENCE(UBYTE, 140)),
