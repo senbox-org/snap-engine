@@ -30,6 +30,7 @@
     <changelog>
         <![CDATA[
         <b>Changes in 5.0.3</b><br/>
+        [BEAM-1734] Spatial data day filter relies on left corners of product<br/>
         Default metadata aggregator in BinningContext changed from NAME to FIRST_HISTORY.<br/>
         ProcessingTime added to OperatorContext to add it to each metadata node.<br/>
         ProcessingTime also added in GlobalMetadata for binning, removed from binning parameters.<br/>
