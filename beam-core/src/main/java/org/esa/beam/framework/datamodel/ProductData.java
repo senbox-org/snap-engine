@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (C) 2014 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -2613,7 +2613,7 @@ public abstract class ProductData implements Cloneable {
             super(3);
 
             final double microSeconds = (mjd * SECONDS_PER_DAY * MICROS_PER_SECOND) % MICROS_PER_SECOND;
-            final double seconds = (mjd * SECONDS_PER_DAY - microSeconds * MICROS_TO_SECONDS) % SECONDS_PER_DAY;
+            final double seconds = (mjd * SECONDS_PER_DAY) % SECONDS_PER_DAY;
             final double days = (int) mjd;
 
             setElemIntAt(0, (int) days);
