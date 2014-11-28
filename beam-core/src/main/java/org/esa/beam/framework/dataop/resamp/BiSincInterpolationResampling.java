@@ -50,6 +50,23 @@ class BiSincInterpolationResampling implements Resampling {
         final int i0 = (int) Math.floor(x);
         final int j0 = (int) Math.floor(y);
 
+        
+        final int iMax = width - 1;
+        final int jMax = height - 1;
+
+        index.i0 = i0;
+        index.j0 = j0;
+
+        for (int i = 0; i < kernelSize; i++) {
+            index.i[i] = Math.min(Math.max(i0 - halfKernelSize + i, 0), iMax);
+        }
+        index.ki[0] = x - i0;
+        for (int j = 0; j < kernelSize; j++) {
+            index.j[j] = Math.min(Math.max(j0 - halfKernelSize + j, 0), jMax);
+        }
+        index.kj[0] = y - j0;
+
+        /*
         final double di = x - (i0 + 0.5);
         final double dj = y - (j0 + 0.5);
 
@@ -81,7 +98,7 @@ class BiSincInterpolationResampling implements Resampling {
                 index.j[j] = Math.min(Math.max(j0 - halfKernelSize - 1 + j, 0), jMax);
             }
             index.kj[0] = dj + 1;
-        }
+        }*/
     }
 
     public final double resample(final Raster raster,
