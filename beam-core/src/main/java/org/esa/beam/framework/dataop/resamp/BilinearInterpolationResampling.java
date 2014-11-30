@@ -39,6 +39,17 @@ public final class BilinearInterpolationResampling implements Resampling {
         final int i0 = (int) Math.floor(x);
         final int j0 = (int) Math.floor(y);
 
+
+        index.i0 = i0;
+        index.j0 = j0;
+        index.i[0] = i0;
+        index.i[1] = i0 + 1;
+        index.ki[0] = x - i0;
+        index.j[0] = j0;
+        index.j[1] = j0 + 1;
+        index.kj[0] = y - j0;
+
+        /*
         final double di = x - (i0 + 0.5);
         final double dj = y - (j0 + 0.5);
 
@@ -69,7 +80,7 @@ public final class BilinearInterpolationResampling implements Resampling {
             index.j[0] = (j1 < 0) ? 0 : (j1 > jMax) ? jMax : j1;
             index.j[1] = (j0 < 0) ? 0 : (j0 > jMax) ? jMax : j0;
             index.kj[0] = dj + 1;
-        }
+        }*/
     }
 
     public final double resample(final Raster raster, final Index index) throws Exception {
