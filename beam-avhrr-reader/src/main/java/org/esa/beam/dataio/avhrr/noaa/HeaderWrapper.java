@@ -73,9 +73,11 @@ public class HeaderWrapper {
                 metadataElement.addAttribute(attribute);
             } else if (member.getType().isSequenceType()) {
                 SequenceData sequence = compoundData.getSequence(i);
-                for (int j = 0; j < sequence.getType().getElementCount(); j++) {
-                    CompoundData compound = sequence.getCompound(j);
-                    metadataElement.addElement(getAsMetadataElement(compound));
+                if (sequence.getType().getElementType().isCompoundType()) {
+                    for (int j = 0; j < sequence.getType().getElementCount(); j++) {
+                        CompoundData compound = sequence.getCompound(j);
+                        metadataElement.addElement(getAsMetadataElement(compound));
+                    }
                 }
             } else if (member.getType().isCompoundType()) {
                 metadataElement.addElement(getAsMetadataElement(compoundData.getCompound(i)));
