@@ -41,15 +41,21 @@ import com.bc.ceres.swing.undo.UndoContext;
 import com.bc.ceres.swing.undo.support.DefaultUndoContext;
 
 import javax.swing.JComponent;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 
+/**
+ * A default implementation of a figure editor.
+ *
+ * @author Norman Fomferra
+ * @since Ceres 0.10
+ */
 public class DefaultFigureEditor extends ExtensibleObject implements FigureEditor {
 
     private final UndoContext undoContext;
@@ -107,23 +113,28 @@ public class DefaultFigureEditor extends ExtensibleObject implements FigureEdito
     }
 
     @Override
+    public UndoContext getUndoContext() {
+        return undoContext;
+    }
+
+    @Override
     public JComponent getEditorComponent() {
         return editorComponent;
     }
 
     @Override
     public void insertFigures(boolean performInsert, Figure... figures) {
-        undoContext.postEdit(new FigureInsertEdit(this, performInsert, figures));
+        getUndoContext().postEdit(new FigureInsertEdit(this, performInsert, figures));
     }
 
     @Override
     public void deleteFigures(boolean performDelete, Figure... figures) {
-        undoContext.postEdit(new FigureDeleteEdit(this, performDelete, figures));
+        getUndoContext().postEdit(new FigureDeleteEdit(this, performDelete, figures));
     }
 
     @Override
     public void changeFigure(Figure figure, Object figureMemento, String presentationName) {
-        undoContext.postEdit(new RestorableEdit(figure, figureMemento, presentationName));
+        getUndoContext().postEdit(new RestorableEdit(figure, figureMemento, presentationName));
     }
 
     @Override
@@ -147,7 +158,7 @@ public class DefaultFigureEditor extends ExtensibleObject implements FigureEdito
             selectionRectangle = newRect;
             repaintRect = newRect;
         } else if (newRect == null) {
-            selectionRectangle = newRect;
+            selectionRectangle = null;
             getEditorComponent().repaint(oldRect);
             repaintRect = oldRect;
         } else if (!oldRect.equals(newRect)) {
@@ -197,7 +208,18 @@ public class DefaultFigureEditor extends ExtensibleObject implements FigureEdito
 
     @Override
     public void setSelection(Selection selection) {
-        // todo - implement (select all figures that are equal to the ones in selection)
+        Object[] selectedValues = selection.getSelectedValues();
+        ArrayList<Figure> selectedFigures = new ArrayList<>();
+        for (Object selectedValue : selectedValues) {
+            if (selectedValue instanceof Figure) {
+                Figure selectedFigure = (Figure) selectedValue;
+                if (figureCollection.contains(selectedFigure)) {
+                    selectedFigures.add(selectedFigure);
+                }
+            }
+        }
+        figureSelection.removeAllFigures();
+        figureSelection.addFigures(selectedFigures.toArray(new Figure[selectedFigures.size()]));
     }
 
     @Override
@@ -267,8 +289,10 @@ public class DefaultFigureEditor extends ExtensibleObject implements FigureEdito
             this.interactor = interactor;
             if (this.interactor != null) {
                 this.interactor.activate();
+                getEditorComponent().setCursor(interactor.getCursor());
+            } else {
+                getEditorComponent().setCursor(Cursor.getDefaultCursor());
             }
-            getEditorComponent().setCursor(interactor.getCursor());
         }
     }
 
