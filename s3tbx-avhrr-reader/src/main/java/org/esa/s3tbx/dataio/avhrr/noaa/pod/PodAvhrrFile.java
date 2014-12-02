@@ -23,7 +23,9 @@ import com.bc.ceres.binio.SequenceData;
 import org.esa.s3tbx.dataio.avhrr.AvhrrConstants;
 import org.esa.s3tbx.dataio.avhrr.BandReader;
 import org.esa.s3tbx.dataio.avhrr.HeaderUtil;
+import org.esa.s3tbx.dataio.avhrr.noaa.HeaderWrapper;
 import org.esa.snap.framework.datamodel.Band;
+import org.esa.snap.framework.datamodel.MetadataElement;
 import org.esa.snap.framework.datamodel.Product;
 import org.esa.snap.framework.datamodel.ProductData;
 import org.esa.snap.framework.datamodel.TiePointGrid;
@@ -56,6 +58,8 @@ final class PodAvhrrFile implements VideoDataProvider, CalibrationCoefficientsPr
     private final File file;
     private final DataContext context;
     private final CompoundData data;
+    private final int tbmHeaderRecordIndex;
+    private final int datasetHeaderRecordIndex;
     private final int dataRecordsIndex;
     private final int videoDataIndex;
     private final int qualityDataIndex;
@@ -72,6 +76,8 @@ final class PodAvhrrFile implements VideoDataProvider, CalibrationCoefficientsPr
         final DataFormat dataFormat = new DataFormat(PodTypes.HRPT_TYPE, ByteOrder.BIG_ENDIAN);
         context = dataFormat.createContext(file, "r");
         data = context.getData();
+        tbmHeaderRecordIndex = PodTypes.HRPT_TYPE.getMemberIndex("TBM_HEADER_RECORD");
+        datasetHeaderRecordIndex = PodTypes.HRPT_TYPE.getMemberIndex("DATASET_HEADER_RECORD");
         dataRecordsIndex = PodTypes.HRPT_TYPE.getMemberIndex("DATA_RECORDS");
         videoDataIndex = PodTypes.DATA_RECORD_TYPE.getMemberIndex("VIDEO_DATA");
         qualityDataIndex = PodTypes.DATA_RECORD_TYPE.getMemberIndex("QUALITY_INDICATORS");
@@ -141,7 +147,18 @@ final class PodAvhrrFile implements VideoDataProvider, CalibrationCoefficientsPr
         final ProductData.UTC endTime = toUTC(endTimeCode);
         product.setEndTime(endTime);
 
+        addMetadata(product);
+
         return product;
+    }
+
+    private void addMetadata(Product product) throws IOException {
+        final MetadataElement tbmHeaderElement = HeaderWrapper.getAsMetadataElement(
+                data.getCompound(tbmHeaderRecordIndex));
+        product.getMetadataRoot().addElement(tbmHeaderElement);
+        final MetadataElement datasetHeaderElement = HeaderWrapper.getAsMetadataElement(
+                data.getCompound(datasetHeaderRecordIndex));
+        product.getMetadataRoot().addElement(datasetHeaderElement);
     }
 
     // package public for testing only
@@ -240,4 +257,5 @@ final class PodAvhrrFile implements VideoDataProvider, CalibrationCoefficientsPr
     private CompoundData getDataRecord(int i) throws IOException {
         return data.getSequence(dataRecordsIndex).getCompound(i);
     }
+
 }

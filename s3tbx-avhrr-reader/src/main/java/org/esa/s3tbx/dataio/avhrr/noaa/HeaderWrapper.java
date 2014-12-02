@@ -31,7 +31,7 @@ import java.util.Map;
 /**
  * A wrapper for a header of the NOAA AVHRR file base on a binio compound.
  */
-class HeaderWrapper {
+public class HeaderWrapper {
 
     private final CompoundData compoundData;
 
@@ -43,7 +43,7 @@ class HeaderWrapper {
         return getAsMetadataElement(compoundData);
     }
 
-    public MetadataElement getAsMetadataElement(CompoundData compoundData) throws IOException {
+    public static MetadataElement getAsMetadataElement(CompoundData compoundData) throws IOException {
         CompoundType type = compoundData.getType();
         final int memberCount = type.getMemberCount();
         MetadataElement metadataElement = new MetadataElement(type.getName());
@@ -91,7 +91,7 @@ class HeaderWrapper {
                     if (scalingFactor == 1.0) {
                         data = ProductData.createInstance(new int[]{intValue});
                     } else {
-                        data = ProductData.createInstance(new double[]{intValue*scalingFactor});
+                        data = ProductData.createInstance(new double[]{intValue * scalingFactor});
                     }
                 }
                 MetadataAttribute attribute = new MetadataAttribute(typeName, data, true);
@@ -126,7 +126,7 @@ class HeaderWrapper {
         int memberIndex = type.getMemberIndex(name);
         double v = compoundData.getDouble(memberIndex);
         double scalingFactor = getScalingFactor(type.getMember(memberIndex));
-        return  v * scalingFactor;
+        return v * scalingFactor;
     }
 
     private static double getScalingFactor(CompoundMember member) {
