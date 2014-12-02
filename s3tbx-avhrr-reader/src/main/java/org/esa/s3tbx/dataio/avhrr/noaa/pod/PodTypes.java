@@ -173,30 +173,6 @@ final class PodTypes {
         return (FormatMetadata) CALIBRATION_COEFFICIENTS_TYPE.getMember(0).getMetadata();
     }
 
-    static FormatMetadata getCartesianInertialElementXMetadata() {
-        return (FormatMetadata) CARTESIAN_INERTIAL_ELEMENTS_TYPE.getMember(0).getMetadata();
-    }
-
-    static FormatMetadata getCartesianInertialElementYMetadata() {
-        return (FormatMetadata) CARTESIAN_INERTIAL_ELEMENTS_TYPE.getMember(1).getMetadata();
-    }
-
-    static FormatMetadata getCartesianInertialElementZMetadata() {
-        return (FormatMetadata) CARTESIAN_INERTIAL_ELEMENTS_TYPE.getMember(2).getMetadata();
-    }
-
-    static FormatMetadata getCartesianInertialElementUMetadata() {
-        return (FormatMetadata) CARTESIAN_INERTIAL_ELEMENTS_TYPE.getMember(3).getMetadata();
-    }
-
-    static FormatMetadata getCartesianInertialElementVMetadata() {
-        return (FormatMetadata) CARTESIAN_INERTIAL_ELEMENTS_TYPE.getMember(4).getMetadata();
-    }
-
-    static FormatMetadata getCartesianInertialElementWMetadata() {
-        return (FormatMetadata) CARTESIAN_INERTIAL_ELEMENTS_TYPE.getMember(5).getMetadata();
-    }
-
     static FormatMetadata getInterceptMetadata() {
         return (FormatMetadata) CALIBRATION_COEFFICIENTS_TYPE.getMember(1).getMetadata();
     }
