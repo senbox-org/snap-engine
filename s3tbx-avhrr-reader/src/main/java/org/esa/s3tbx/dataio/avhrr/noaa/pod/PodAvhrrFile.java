@@ -230,23 +230,26 @@ final class PodAvhrrFile implements VideoDataProvider, CalibrationCoefficientsPr
         }
 
         addTiePointGrid(product, AvhrrConstants.SZA_DS_NAME, PodTypes.getSolarZenithAnglesMetadata().getUnits(),
-                        tiePointGridHeight, gridData[0]);
+                        tiePointGridHeight, gridData[0], TiePointGrid.DISCONT_AT_180);
         final TiePointGrid latGrid = addTiePointGrid(product, AvhrrConstants.LAT_DS_NAME,
                                                      PodTypes.getLatMetadata().getUnits(),
-                                                     tiePointGridHeight, gridData[1]);
+                                                     tiePointGridHeight, gridData[1], TiePointGrid.DISCONT_NONE);
         final TiePointGrid lonGrid = addTiePointGrid(product, AvhrrConstants.LON_DS_NAME,
                                                      PodTypes.getLonMetadata().getUnits(),
-                                                     tiePointGridHeight, gridData[2]);
+                                                     tiePointGridHeight, gridData[2], TiePointGrid.DISCONT_AT_180);
 
         product.setGeoCoding(new PodGeoCoding(latGrid, lonGrid));
     }
 
-    private TiePointGrid addTiePointGrid(Product product, String name, String units, int height, float[] data) {
+
+
+    private TiePointGrid addTiePointGrid(Product product, String name, String units, int height, float[] data,
+                                         int discontinuity) {
         final TiePointGrid grid = new TiePointGrid(name,
                                                    TIE_POINT_GRID_WIDTH, height,
                                                    TIE_POINT_OFFSET_X + 0.5f, 0.5f,
                                                    TIE_POINT_SAMPLING_X, 1,
-                                                   data);
+                                                   data, discontinuity);
         grid.setUnit(units);
         product.addTiePointGrid(grid);
         return grid;
