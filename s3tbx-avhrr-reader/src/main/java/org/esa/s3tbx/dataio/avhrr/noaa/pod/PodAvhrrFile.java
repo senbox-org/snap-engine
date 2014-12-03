@@ -213,8 +213,9 @@ final class PodAvhrrFile implements VideoDataProvider, CalibrationCoefficientsPr
             }
             final SequenceData earthLocationSequence = dataRecord.getSequence("EARTH_LOCATION");
             for (int i = 0; i < TIE_POINT_GRID_WIDTH; i++) {
-                rawLat[i] = earthLocationSequence.getCompound(i).getInt(0);
-                rawLon[i] = earthLocationSequence.getCompound(i).getInt(1);
+                CompoundData earthLocationSequenceCompound = earthLocationSequence.getCompound(i);
+                rawLat[i] = earthLocationSequenceCompound.getInt(0);
+                rawLon[i] = earthLocationSequenceCompound.getInt(1);
             }
             final double solarZenithAnglesScaleFactor = PodTypes.getSolarZenithAnglesMetadata().getScalingFactor();
             final double latScaleFactor = PodTypes.getLatMetadata().getScalingFactor();
