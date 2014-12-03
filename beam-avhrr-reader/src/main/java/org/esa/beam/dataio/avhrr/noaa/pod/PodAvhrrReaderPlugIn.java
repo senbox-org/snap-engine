@@ -42,7 +42,9 @@ public final class PodAvhrrReaderPlugIn implements ProductReaderPlugIn {
     private static final String[] FILE_EXTENSIONS = new String[]{".l1b"};
     private static final String FORMAT_NAME = "NOAA_POD_AVHRR_HRPT";
     private static final String[] FORMAT_NAMES = new String[]{FORMAT_NAME};
-    private static final Class[] INPUT_TYPES = new Class[]{ImageInputStream.class, String.class, File.class};
+    private static final Class[] INPUT_TYPES = new Class[]{
+            //ImageInputStream.class,
+            String.class, File.class};
 
     public PodAvhrrReaderPlugIn() {
     }
@@ -60,13 +62,13 @@ public final class PodAvhrrReaderPlugIn implements ProductReaderPlugIn {
                 return DecodeQualification.UNABLE;
             }
         }
-        if (input instanceof ImageInputStream) {
-            ImageInputStream iis = (ImageInputStream) input;
-            IOHandler ioHandler = new ImageIOHandler(iis);
-            if (PodAvhrrFile.canDecode(ioHandler)) {
-                return DecodeQualification.INTENDED;
-            }
-        }
+//        if (input instanceof ImageInputStream) {
+//            ImageInputStream iis = (ImageInputStream) input;
+//            IOHandler ioHandler = new ImageIOHandler(iis);
+//            if (PodAvhrrFile.canDecode(ioHandler)) {
+//                return DecodeQualification.INTENDED;
+//            }
+//        }
         return DecodeQualification.UNABLE;
     }
 

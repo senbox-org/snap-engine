@@ -56,9 +56,9 @@ final class PodAvhrrReader extends AbstractProductReader {
             productName = file.getName();
             raf = new RandomAccessFile(file, "r");
             ioHandler = new RandomAccessFileIOHandler(raf);
-        } else if (input instanceof ImageInputStream) {
-            ImageInputStream iis = (ImageInputStream) input;
-            ioHandler = new ImageIOHandler(iis);
+//        } else if (input instanceof ImageInputStream) {
+//            ImageInputStream iis = (ImageInputStream) input;
+//            ioHandler = new ImageIOHandler(iis);
         }
         if (ioHandler == null) {
             throw new IllegalArgumentException();
