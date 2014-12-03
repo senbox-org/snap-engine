@@ -1,14 +1,28 @@
+/*
+ * Copyright (C) 2014 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ */
+
 package org.esa.beam.dataio.avhrr.noaa.pod;
 
 import com.bc.ceres.binio.CompoundData;
 import com.bc.ceres.binio.DataContext;
 import com.bc.ceres.binio.DataFormat;
+import com.bc.ceres.binio.IOHandler;
 import com.bc.ceres.binio.SequenceData;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.nio.ByteOrder;
 
 /**
@@ -18,30 +32,16 @@ import java.nio.ByteOrder;
  */
 class PodFormatDetector {
 
-    public boolean canDecode(File file) {
-        RandomAccessFile raf = null;
+    public boolean canDecode(IOHandler ioHandler) {
+        final DataFormat dataFormat = new DataFormat(PodTypes.TBM_HEADER_RECORD_TYPE, ByteOrder.BIG_ENDIAN);
+        final DataContext context = dataFormat.createContext(ioHandler);
         try {
-            raf = new RandomAccessFile(file, "r");
-            final DataFormat dataFormat = new DataFormat(PodTypes.TBM_HEADER_RECORD_TYPE, ByteOrder.BIG_ENDIAN);
-            final DataContext context = dataFormat.createContext(raf);
-            try {
-                return isTbmHeaderRecord(context.getData());
-            } catch (IOException e) {
-                return false;
-            } finally {
-                context.dispose();
-            }
-        } catch (FileNotFoundException e) {
+            return isTbmHeaderRecord(context.getData());
+        } catch (IOException e) {
             return false;
         } finally {
-            if (raf != null) {
-                try {
-                    raf.close();
-                } catch (IOException ignored) {
-                }
-            }
+            context.dispose();
         }
-
     }
 
     // package public for testing only
