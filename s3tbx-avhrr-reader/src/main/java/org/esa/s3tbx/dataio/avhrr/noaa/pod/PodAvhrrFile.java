@@ -19,6 +19,7 @@ package org.esa.s3tbx.dataio.avhrr.noaa.pod;
 import com.bc.ceres.binio.CompoundData;
 import com.bc.ceres.binio.DataContext;
 import com.bc.ceres.binio.DataFormat;
+import com.bc.ceres.binio.IOHandler;
 import com.bc.ceres.binio.SequenceData;
 import org.esa.s3tbx.dataio.avhrr.AvhrrConstants;
 import org.esa.s3tbx.dataio.avhrr.BandReader;
@@ -30,9 +31,7 @@ import org.esa.snap.framework.datamodel.Product;
 import org.esa.snap.framework.datamodel.ProductData;
 import org.esa.snap.framework.datamodel.TiePointGrid;
 
-import java.awt.Dimension;
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.awt.*;
 import java.io.IOException;
 import java.nio.ByteOrder;
 import java.util.HashMap;
@@ -55,7 +54,6 @@ final class PodAvhrrFile implements VideoDataProvider, CalibrationCoefficientsPr
     private static final double SLOPE_SCALE_FACTOR = PodTypes.getSlopeMetadata().getScalingFactor();
     private static final double INTERCEPT_SCALE_FACTOR = PodTypes.getInterceptMetadata().getScalingFactor();
 
-    private final File file;
     private final DataContext context;
     private final CompoundData data;
     private final int tbmHeaderRecordIndex;
@@ -65,16 +63,16 @@ final class PodAvhrrFile implements VideoDataProvider, CalibrationCoefficientsPr
     private final int qualityDataIndex;
     private final int calibrationCofficientsIndex;
     private final Map<Band, BandReader> bandReaderMap;
+    private final String productName;
 
-    static boolean canDecode(File file) {
-        return new PodFormatDetector().canDecode(file);
+    static boolean canDecode(IOHandler ioHandler) {
+        return new PodFormatDetector().canDecode(ioHandler);
     }
 
-    PodAvhrrFile(File file) throws FileNotFoundException {
-        this.file = file;
-
+    PodAvhrrFile(IOHandler ioHandler, String productName) {
+        this.productName = productName;
         final DataFormat dataFormat = new DataFormat(PodTypes.HRPT_TYPE, ByteOrder.BIG_ENDIAN);
-        context = dataFormat.createContext(file, "r");
+        context = dataFormat.createContext(ioHandler);
         data = context.getData();
         tbmHeaderRecordIndex = PodTypes.HRPT_TYPE.getMemberIndex("TBM_HEADER_RECORD");
         datasetHeaderRecordIndex = PodTypes.HRPT_TYPE.getMemberIndex("DATASET_HEADER_RECORD");
@@ -119,7 +117,6 @@ final class PodAvhrrFile implements VideoDataProvider, CalibrationCoefficientsPr
     }
 
     Product createProduct() throws IOException {
-        final String productName = file.getName();
         final String productType = "NOAA_POD_AVHRR_HRPT";
         final int dataRecordCount = data.getUShort("NUMBER_OF_SCANS");
         final Product product = new Product(productName, productType, PRODUCT_WIDTH, dataRecordCount);
