@@ -17,7 +17,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>snap-core</symbolicName>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <name>SNAP Core Library</name>
 
 
@@ -28,6 +28,14 @@
     <copyright>(C) 2014 by Brockmann Consult GmbH</copyright>
     <url>http://envisat.esa.int/beam</url>
     <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
+
+
+    <changelog>
+        <![CDATA[
+        <b>Changes in 1.0.1</b><br/>
+            [SNAP-5] Some uncertainty visualisation modes hide no-data pixels
+        ]]>
+    </changelog>
 
     <dependency>
         <module>snap-ceres-core</module>

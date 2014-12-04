@@ -17,7 +17,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>snap-visat-rcp</symbolicName>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <name>VISAT Rich Client Platform</name>
 
     <description>
@@ -30,6 +30,13 @@
     <copyright>(C) 2014 by Brockmann Consult GmbH</copyright>
     <url>http://envisat.esa.int/beam</url>
     <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
+
+    <changelog>
+        <![CDATA[
+         <b>Changes in 1.0.1</b><br/>
+            [SNAP-17] Saving a product takes too long<br/>
+        ]]>
+    </changelog>
 
     <activator>org.esa.beam.visat.VisatActivator</activator>
 

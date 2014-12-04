@@ -17,7 +17,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>snap-gpf</symbolicName>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <name>SNAP Graph Processing Framework (GPF)</name>
 
     <description>The basic framework for processing using Operators and the GPT.</description>
@@ -56,11 +56,11 @@
         <serviceProvider>org.esa.beam.framework.gpf.OperatorSpi</serviceProvider>
     </extension>
 
-    <!--extension point="snap-ui:helpSets">
+    <extension point="snap-ui:helpSets">
         <helpSet>
             <parent>snap-beam-help</parent>
             <path>doc/help/gpf.hs</path>
         </helpSet>
-    </extension-->
+    </extension>
 
 </module>
