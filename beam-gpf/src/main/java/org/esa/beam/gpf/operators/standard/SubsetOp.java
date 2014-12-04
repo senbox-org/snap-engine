@@ -342,7 +342,7 @@ public class SubsetOp extends Operator {
         }
     }
 
-    public static class PixelRegionFinder implements CoordinateFilter {
+    private static class PixelRegionFinder implements CoordinateFilter {
 
         private final GeoCoding geoCoding;
         private int x1;
@@ -350,7 +350,7 @@ public class SubsetOp extends Operator {
         private int x2;
         private int y2;
 
-        public PixelRegionFinder(GeoCoding geoCoding) {
+        private PixelRegionFinder(GeoCoding geoCoding) {
             this.geoCoding = geoCoding;
             x1 = Integer.MAX_VALUE;
             x2 = Integer.MIN_VALUE;
