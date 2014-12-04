@@ -40,9 +40,6 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.logging.Logger;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
 /**
  * Utilities for Operator unit tests
  * In order to test the datasets at Array, set the following to true in the nest.config
@@ -346,13 +343,17 @@ public class TestUtils {
     public static void comparePixels(final Product targetProduct, final String bandName,
                                      final int x, final int y, final float[] expected) throws IOException {
         final Band band = targetProduct.getBand(bandName);
-        assertNotNull(band);
+        if(band == null) {
+            throw new IOException(bandName+" not found");
+        }
 
         final float[] floatValues = new float[expected.length];
         band.readPixels(x, y, expected.length, 1, floatValues, ProgressMonitor.NULL);
 
         for (int i = 0; i < expected.length; ++i) {
-            assertEquals(expected[i], floatValues[i], 0.0001);
+            if((Math.abs(expected[i] - floatValues[i]) > 0.0001)) {
+                throw new IOException("Mismatch "+floatValues[i] +" is not "+ expected[i]);
+            }
         }
     }
 
