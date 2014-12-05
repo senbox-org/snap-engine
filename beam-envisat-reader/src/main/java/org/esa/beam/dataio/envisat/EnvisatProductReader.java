@@ -620,7 +620,7 @@ private TiePointGrid createTiePointGrid(final BandLineReader bandLineReader,
         int tiePointIndex = 0;
         final float scalingOffset = bandInfo.getScalingOffset();
         final float scalingFactor = bandInfo.getScalingFactor();
-        final float[] tiePoints = new float[gridWidth * gridHeight];
+        final double[] tiePoints = new double[gridWidth * gridHeight];
         final boolean storesPixelsInChronologicalOrder = getProductFile().storesPixelsInChronologicalOrder();
 
         final float offsetX = getProductFile().getTiePointGridOffsetX(gridWidth);
@@ -878,7 +878,7 @@ private TiePointGrid createTiePointGrid(final BandLineReader bandLineReader,
     }
 
     /**
-     * Used by the {@link #createTiePointGrid(String, int, int, float, float, float, float, float[]) createTiePointGrid} method in order to determine
+     * Used by the {@link #createTiePointGrid(String, int, int, double, double, double, double, double[]) createTiePointGrid} method in order to determine
      * the discontinuity mode for angle tie-point grids.
      * <p>The default implementation returns {@link org.esa.beam.framework.datamodel.TiePointGrid#DISCONT_AT_180} for
      * the names "lon", "long" or "longitude" ignoring letter case,
