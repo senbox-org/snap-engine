@@ -29,29 +29,12 @@
         <dependency>
             <groupId>com.jidesoft</groupId>
             <artifactId>jide-common</artifactId>
-            <version>3.6.1</version>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>nbm-maven-plugin</artifactId>
-                <configuration>
-                    <publicPackages>
-                        <publicPackage>com.bc.ceres.swing</publicPackage>
-                        <publicPackage>com.bc.ceres.swing.actions</publicPackage>
-                        <publicPackage>com.bc.ceres.swing.binding</publicPackage>
-                        <publicPackage>com.bc.ceres.swing.debug</publicPackage>
-                        <publicPackage>com.bc.ceres.swing.figure</publicPackage>
-                        <publicPackage>com.bc.ceres.swing.progress</publicPackage>
-                        <publicPackage>com.bc.ceres.swing.selection</publicPackage>
-                        <publicPackage>com.bc.ceres.swing.undo</publicPackage>
-                        <publicPackage>com.bc.ceres.swing.update</publicPackage>
-                    </publicPackages>
-                </configuration>
-            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>

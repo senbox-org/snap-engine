@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~ Copyright (C) 2011 Brockmann Consult GmbH (info@brockmann-consult.de)
   ~
@@ -14,36 +14,44 @@
   ~ You should have received a copy of the GNU General Public License along
   ~ with this program; if not, see http://www.gnu.org/licenses/
   -->
-
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <parent>
-        <artifactId>snap-engine</artifactId>
         <groupId>org.esa.snap</groupId>
+        <artifactId>snap-engine</artifactId>
         <version>1.0.1</version>
     </parent>
 
-    <name>HDF Library</name>
     <groupId>ncsa.hdf</groupId>
     <artifactId>lib-hdf</artifactId>
     <version>2.7</version>
+    <packaging>jar</packaging>
+
+    <name>HDF Library</name>
+    <description>A wrapper module for the native libraries used to read data products in HDF format.</description>
+    <url>http://www.hdfgroup.org/</url>
+    <licenses>
+        <license>
+            <name>Hierarchical Data Format (HDF) Software Library and Utilities</name>
+            <url>http://www.hdfgroup.org/ftp/HDF/HDF_Current/src/unpacked/COPYING</url>
+        </license>
+        <license>
+            <name>HDF5 (Hierarchical Data Format 5) Software Library and Utilities</name>
+            <url>http://www.hdfgroup.org/ftp/HDF5/current/src/unpacked/COPYING</url>
+        </license>
+    </licenses>
 
     <dependencies>
-
         <dependency>
             <groupId>ncsa.hdf</groupId>
             <artifactId>jhdf</artifactId>
             <version>${hdf.version}</version>
         </dependency>
-
         <dependency>
             <groupId>ncsa.hdf</groupId>
             <artifactId>jhdf5</artifactId>
             <version>${hdf.version}</version>
         </dependency>
-
     </dependencies>
 
     <build>
@@ -60,21 +68,18 @@
                         <configuration>
                             <stripVersion>true</stripVersion>
                             <artifactItems>
-
                                 <artifactItem>
                                     <groupId>ncsa.hdf</groupId>
                                     <artifactId>jhdf</artifactId>
                                     <version>${hdf.version}</version>
                                     <outputDirectory>src/main/resources/lib</outputDirectory>
                                 </artifactItem>
-
                                 <artifactItem>
                                     <groupId>ncsa.hdf</groupId>
                                     <artifactId>jhdf5</artifactId>
                                     <version>${hdf.version}</version>
                                     <outputDirectory>src/main/resources/lib</outputDirectory>
                                 </artifactItem>
-
                             </artifactItems>
                         </configuration>
                     </execution>
@@ -102,3 +107,4 @@
     </build>
 
 </project>
+

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~ Copyright (C) 2011 Brockmann Consult GmbH (info@brockmann-consult.de)
   ~
@@ -13,21 +14,30 @@
   ~ You should have received a copy of the GNU General Public License along
   ~ with this program; if not, see http://www.gnu.org/licenses/
   -->
-
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <parent>
-        <artifactId>snap-engine</artifactId>
         <groupId>org.esa.snap</groupId>
+        <artifactId>snap-engine</artifactId>
         <version>1.0.1</version>
     </parent>
 
     <artifactId>snap-geotiff</artifactId>
-    <name>SNAP GeoTIFF Product Reader/Writer</name>
+    <packaging>jar</packaging>
+
+    <name>GeoTIFF Product Module</name>
+    <description>A module for reading and writing GeoTIFF Data Products</description>
 
     <dependencies>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-ceres-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-jai</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-core</artifactId>
@@ -37,25 +47,24 @@
             <artifactId>snap-visat-rcp</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.media.jai</groupId>
-            <artifactId>jai-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.media.jai</groupId>
-            <artifactId>jai-codec</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.media</groupId>
-            <artifactId>jai-imageio</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.geotools</groupId>
-            <artifactId>gt-geotiff</artifactId>
-        </dependency>
-        <dependency>
             <groupId>it.geosolutions.imageio-ext</groupId>
             <artifactId>imageio-ext-tiff</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.media</groupId>
+                    <artifactId>jai_core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax.media</groupId>
+                    <artifactId>jai_codec</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax.media</groupId>
+                    <artifactId>jai_imageio</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 
 </project>
+

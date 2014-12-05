@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~ Copyright (C) 2011 Brockmann Consult GmbH (info@brockmann-consult.de)
   ~
@@ -13,24 +14,19 @@
   ~ You should have received a copy of the GNU General Public License along
   ~ with this program; if not, see http://www.gnu.org/licenses/
   -->
-
-<project
-        xmlns="http://maven.apache.org/POM/4.0.0"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <parent>
         <groupId>org.esa.snap</groupId>
         <artifactId>snap-engine</artifactId>
         <version>1.0.1</version>
     </parent>
 
-    <name>SNAP Core API</name>
     <artifactId>snap-core</artifactId>
-
     <packaging>jar</packaging>
+
+    <name>SNAP Core Library</name>
+    <description>This is the base module of SNAP containing its core functionality.</description>
 
     <dependencies>
         <dependency>
@@ -39,8 +35,11 @@
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
+            <artifactId>snap-binding</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
             <artifactId>snap-binio</artifactId>
-            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
@@ -51,32 +50,8 @@
             <artifactId>snap-jai</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.media.jai</groupId>
-            <artifactId>jai-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.media.jai</groupId>
-            <artifactId>jai-codec</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.media.jai</groupId>
-            <artifactId>mlibwrapper-jai</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.media</groupId>
-            <artifactId>jai-imageio</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.media</groupId>
-            <artifactId>clibwrapper-jiio</artifactId>
-        </dependency>
-        <dependency>
             <groupId>jdom</groupId>
             <artifactId>jdom</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jdom</groupId>
-            <artifactId>jdom2</artifactId>
         </dependency>
         <dependency>
             <groupId>com.bc.jnn</groupId>
@@ -85,10 +60,6 @@
         <dependency>
             <groupId>Jama</groupId>
             <artifactId>Jama</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-math3</artifactId>
         </dependency>
         <dependency>
             <groupId>org.geotools</groupId>
@@ -119,6 +90,15 @@
             <artifactId>gt-cql</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-wms</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-render</artifactId>
+        </dependency>
+        <!-- JUnit dependency is needed because it is used in production code -->
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>
@@ -126,15 +106,12 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
         </dependency>
-		<dependency>
-			<groupId>com.vividsolutions</groupId>
-            <artifactId>jts</artifactId>
-			 <version>1.13</version>
-		</dependency>
         <dependency>
-            <groupId>com.jidesoft</groupId>
-            <artifactId>jide-common</artifactId>
+            <groupId>com.vividsolutions</groupId>
+            <artifactId>jts</artifactId>
+            <version>1.13</version>
         </dependency>
     </dependencies>
 
 </project>
+

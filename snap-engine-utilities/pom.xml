@@ -1,19 +1,17 @@
-<project
-        xmlns="http://maven.apache.org/POM/4.0.0"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <parent>
         <artifactId>snap-engine</artifactId>
         <groupId>org.esa.snap</groupId>
         <version>1.0.1</version>
     </parent>
 
-    <name>SNAP Engine Utilities</name>
     <artifactId>snap-engine-utilities</artifactId>
-
     <packaging>jar</packaging>
+
+    <name>SNAP Engine Utilities</name>
+    <description>SNAP Engine Utilities</description>
 
     <dependencies>
         <dependency>
@@ -22,7 +20,19 @@
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
+            <artifactId>snap-jai</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-ceres-ui</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
             <artifactId>snap-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-ui</artifactId>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
@@ -57,6 +67,12 @@
             <groupId>net.sf.sevenzipjbinding</groupId>
             <artifactId>native-libs</artifactId>
             <version>4.65-1.04</version>
+        </dependency>
+        <!-- JUnit dependency is needed because it is used in production code -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.11</version>
         </dependency>
     </dependencies>
 
