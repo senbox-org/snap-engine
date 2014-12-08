@@ -347,12 +347,22 @@ public class TestUtils {
             throw new IOException(bandName+" not found");
         }
 
-        final float[] floatValues = new float[expected.length];
-        band.readPixels(x, y, expected.length, 1, floatValues, ProgressMonitor.NULL);
+        final float[] actual = new float[expected.length];
+        band.readPixels(x, y, expected.length, 1, actual, ProgressMonitor.NULL);
 
         for (int i = 0; i < expected.length; ++i) {
-            if((Math.abs(expected[i] - floatValues[i]) > 0.0001)) {
-                throw new IOException("Mismatch "+floatValues[i] +" is not "+ expected[i]);
+            if((Math.abs(expected[i] - actual[i]) > 0.0001)) {
+                String msg = "actual:";
+                for (float anActual : actual) {
+                    msg += anActual + ", ";
+                }
+                TestUtils.log.info(msg);
+                msg = "expected:";
+                for (float anExpected : expected) {
+                    msg += anExpected + ", ";
+                }
+                TestUtils.log.info(msg);
+                throw new IOException("Mismatch ["+i+"] "+actual[i] +" is not "+ expected[i]);
             }
         }
     }
