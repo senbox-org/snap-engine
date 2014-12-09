@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2014 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ */
+
 package gov.nasa.gsfc.seadas.dataio;
 
 import com.bc.ceres.core.ProgressMonitor;
@@ -8,6 +24,7 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
+import ucar.nc2.Dimension;
 import ucar.nc2.Variable;
 
 import java.io.IOException;
@@ -30,9 +47,27 @@ public class BrowseProductReader extends SeadasFileReader {
     @Override
     public Product createProduct() throws ProductIOException {
 
-        int sceneWidth = getIntAttribute("Pixels_per_Scan_Line");
-        int sceneHeight = getIntAttribute("Number_of_Scan_Lines");
+        int sceneHeight = 0;
+        int sceneWidth = 0;
 
+        List<Dimension> dims = ncFile.getDimensions();
+        for (Dimension d: dims){
+            if ((d.getShortName().equalsIgnoreCase("number_of_lines"))
+                    ||(d.getShortName().equalsIgnoreCase("Number_of_Scan_Lines")))
+            {
+                sceneHeight = d.getLength();
+            }
+            if ((d.getShortName().equalsIgnoreCase("pixels_per_line"))
+                    || (d.getShortName().equalsIgnoreCase("Pixels_per_Scan_Line"))){
+                sceneWidth = d.getLength();
+            }
+        }
+        if (sceneWidth == 0){
+            sceneWidth = getIntAttribute("Pixels_per_Scan_Line");
+        }
+        if (sceneHeight == 0){
+            sceneHeight = getIntAttribute("Number_of_Scan_Lines");
+        }
         String productName = getStringAttribute("Product_Name");
 
         mustFlipX = mustFlipY = getDefaultFlip();

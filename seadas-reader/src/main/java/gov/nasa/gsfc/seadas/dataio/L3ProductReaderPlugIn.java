@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (C) 2014 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -105,10 +105,6 @@ public class L3ProductReaderPlugIn implements ProductReaderPlugIn {
             if (ncfile != null) {
                 Attribute titleAttribute = ncfile.findGlobalAttributeIgnoreCase("Title");
 
-                if (ncfile.findGroup("Level-3_Binned_Data") == null) {
-                    return DecodeQualification.UNABLE;
-                }
-
                 List<Variable> seadasMappedVariables = ncfile.getVariables();
                 Boolean isSeadasMapped = false;
                 try {
@@ -118,6 +114,9 @@ public class L3ProductReaderPlugIn implements ProductReaderPlugIn {
 
                 if (titleAttribute != null ) {
                         final String title = titleAttribute.getStringValue();
+                        if (!title.contains("Mapped") && ncfile.findGroup("Level-3_Binned_Data") == null) {
+                            return DecodeQualification.UNABLE;
+                        }
                         if (title != null) {
                             if (supportedProductTypeSet.contains(title.trim())) {
                                 if (DEBUG) {
