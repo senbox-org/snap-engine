@@ -158,7 +158,7 @@ public final class AsarAbstractMetadata {
             addAbstractedAttribute("mds4_tx_rx_polar", "", absRoot, "Polarization");
         }
 
-        addAbstractedAttribute("polsar_data", "0", absRoot, "Polarimetric Matrix");
+        addAbstractedAttribute("polsar_data", 0, "flag", absRoot, "Polarimetric Matrix");
         addAbstractedAttribute("algorithm", sph.getAttributeString("ALGORITHM", ""), absRoot, "Processing algorithm");
         addAbstractedAttribute("azimuth_looks", sph.getAttributeDouble("azimuth_looks", 0), "", absRoot, "");
         addAbstractedAttribute("range_looks", sph.getAttributeDouble("range_looks", 0), "", absRoot, "");
