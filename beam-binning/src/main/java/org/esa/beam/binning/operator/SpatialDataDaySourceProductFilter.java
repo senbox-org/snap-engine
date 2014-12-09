@@ -42,13 +42,18 @@ class SpatialDataDaySourceProductFilter extends BinningProductFilter {
     protected boolean acceptForBinning(Product product) {
         GeoCoding geoCoding = product.getGeoCoding();
         ProductData.UTC firstScanLineTime = ProductUtils.getScanLineTime(product, 0);
+        ProductData.UTC lastScanLineTime = ProductUtils.getScanLineTime(product, product.getSceneRasterHeight() - 1);
+        if (firstScanLineTime == null || lastScanLineTime == null) {
+            String message = String.format("not accepting product '%s': missing time coding", product.getName());
+            setReason(message);
+            return false;
+        }
         float firstLon = geoCoding.getGeoPos(new PixelPos(0, 0), null).lon;
         DataPeriod.Membership topLeft = dataPeriod.getObservationMembership(firstLon, firstScanLineTime.getMJD());
         float lastLon = geoCoding.getGeoPos(new PixelPos(product.getSceneRasterWidth() - 1, 0), null).lon;
         DataPeriod.Membership topRight = dataPeriod.getObservationMembership(lastLon, firstScanLineTime.getMJD());
 
 
-        ProductData.UTC lastScanLineTime = ProductUtils.getScanLineTime(product, product.getSceneRasterHeight() - 1);
         firstLon = geoCoding.getGeoPos(new PixelPos(0, product.getSceneRasterHeight() - 1), null).lon;
         DataPeriod.Membership bottomLeft = dataPeriod.getObservationMembership(firstLon, lastScanLineTime.getMJD());
         lastLon = geoCoding.getGeoPos(new PixelPos(product.getSceneRasterWidth() - 1, product.getSceneRasterHeight() - 1), null).lon;
