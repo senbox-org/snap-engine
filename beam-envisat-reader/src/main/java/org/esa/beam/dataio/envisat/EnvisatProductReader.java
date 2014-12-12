@@ -618,8 +618,8 @@ private TiePointGrid createTiePointGrid(final BandLineReader bandLineReader,
         final int gridHeight = bandLineReader.getRasterHeight();
         final int pixelDataType = bandLineReader.getPixelDataField().getDataType();
         int tiePointIndex = 0;
-        final float scalingOffset = bandInfo.getScalingOffset();
-        final float scalingFactor = bandInfo.getScalingFactor();
+        final float scalingOffset = (float)bandInfo.getScalingOffset();
+        final float scalingFactor = (float)bandInfo.getScalingFactor();
         final double[] tiePoints = new double[gridWidth * gridHeight];
         final boolean storesPixelsInChronologicalOrder = getProductFile().storesPixelsInChronologicalOrder();
 
@@ -752,7 +752,7 @@ private TiePointGrid createTiePointGrid(final BandLineReader bandLineReader,
 
                 for (int x = 0; x < gridWidth; x++) {
                     final float p = x*subSamplingX;
-                    tiePoints[tiePointIndex] = interpolateIfNeeded(p, pixelDataFloat, sampleData, x, gridWidth);
+                    tiePoints[tiePointIndex] = interpolateIfNeeded(p, pixelData, sampleData, x, gridWidth);
                     tiePointIndex++;
                 }
 

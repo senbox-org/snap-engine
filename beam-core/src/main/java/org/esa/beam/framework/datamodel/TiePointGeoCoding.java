@@ -211,11 +211,10 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
                     if (approximation != null) {
                         squareDistance = approximation.getSquareDistance(lat, lon);
                     } else {
-                        squareDistance = Float.MAX_VALUE;
+                        squareDistance = Double.MAX_VALUE;
                     }
                     double tempLon = lon + 360;
-                    final Approximation renormalizedApproximation = findRenormalizedApproximation(lat, tempLon,
-                                                                                                  squareDistance);
+                    final Approximation renormalizedApproximation = findRenormalizedApproximation(lat, tempLon, squareDistance);
                     if (renormalizedApproximation != null) {
                         approximation = renormalizedApproximation;
                         lon = tempLon;
@@ -242,11 +241,11 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
 
     /**
      * Gets the normalized latitude value.
-     * The method returns <code>Float.NaN</code> if the given latitude value is out of bounds.
+     * The method returns <code>Double.NaN</code> if the given latitude value is out of bounds.
      *
      * @param lat the raw latitude value in the range -90 to +90 degrees
      *
-     * @return the normalized latitude value, <code>Float.NaN</code> else
+     * @return the normalized latitude value, <code>Double.NaN</code> else
      */
     public static double normalizeLat(double lat) {
         if (lat < -90 || lat > 90) {
@@ -257,12 +256,12 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
 
     /**
      * Gets the normalized longitude value.
-     * The method returns <code>Float.NaN</code> if the given longitude value is out of bounds
+     * The method returns <code>Double.NaN</code> if the given longitude value is out of bounds
      * or if it's normalized value is not in the value range of this geo-coding's normalized longitude grid..
      *
      * @param lon the raw longitude value in the range -180 to +180 degrees
      *
-     * @return the normalized longitude value, <code>Float.NaN</code> else
+     * @return the normalized longitude value, <code>Double.NaN</code> else
      */
     public final double normalizeLon(double lon) {
         if (lon < -180 || lon > 180) {
@@ -341,12 +340,12 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
                 p2 = normalizedLongitudes[index]; // the current, un-normalised point
                 lonDelta = p2 - p1;  // difference = current point minus base point
 
-                if (lonDelta > 180.0f) {
-                    p2 -= 360.0f;  // place new point in the west (with a lon. < -180)
+                if (lonDelta > 180.0) {
+                    p2 -= 360.0;  // place new point in the west (with a lon. < -180)
                     westNormalized = true; // mark what we've done
                     normalizedLongitudes[index] = p2;
-                } else if (lonDelta < -180.0f) {
-                    p2 += 360.0f;  // place new point in the east (with a lon. > +180)
+                } else if (lonDelta < -180.0) {
+                    p2 += 360.0;  // place new point in the east (with a lon. > +180)
                     eastNormalized = true;  // mark what we've done
                     normalizedLongitudes[index] = p2;
                 } else {
@@ -433,7 +432,7 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
             final double lonSpan = normalizedLonMax - normalizedLonMin;
             final double latSpan = latMax - latMin;
             final double angleSpan = Math.max(lonSpan, latSpan);
-            numTiles = (int)Math.round(angleSpan / 10.0f);
+            numTiles = (int)Math.round(angleSpan / 10.0);
             if (numTiles < 1) {
                 numTiles = 1;
             }
@@ -588,8 +587,8 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
                 if (i > i2) {
                     i = i2;
                 }
-                lat = latGrid.getRasterData().getElemFloatAt(j * w + i);
-                lon = lonGrid.getRasterData().getElemFloatAt(j * w + i);
+                lat = latGrid.getRasterData().getElemDoubleAt(j * w + i);
+                lon = lonGrid.getRasterData().getElemDoubleAt(j * w + i);
                 x = latGrid.getOffsetX() + i * latGrid.getSubSamplingX();
                 y = latGrid.getOffsetY() + j * latGrid.getSubSamplingY();
                 data[k][0] = lat;
@@ -610,8 +609,8 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
     private Approximation createApproximation(TiePointGrid normalizedLonGrid, Rectangle subsetRect) {
         final double[][] data = createWarpPoints(normalizedLonGrid, subsetRect);
 
-        double sumLat = 0.0f;
-        double sumLon = 0.0f;
+        double sumLat = 0.0;
+        double sumLon = 0.0;
         for (final double[] point : data) {
             sumLat += point[0];
             sumLon += point[1];
@@ -649,14 +648,14 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
         Debug.trace(
                 "TiePointGeoCoding: Max.error Y = " + maxErrorY + ", " + (maxErrorY < ABS_ERROR_LIMIT ? "OK" : "too large"));
 
-        return new Approximation(fX, fY, centerLat, centerLon, maxSquareDistance * 1.1f);
+        return new Approximation(fX, fY, centerLat, centerLon, maxSquareDistance * 1.1);
     }
 
     private static double getMaxSquareDistance(final double[][] data, double centerLat, double centerLon) {
-        double maxSquareDistance = 0.0f;
+        double maxSquareDistance = 0.0;
         for (final double[] point : data) {
-            final double dLat = (float) point[0] - centerLat;
-            final double dLon = (float) point[1] - centerLon;
+            final double dLat = point[0] - centerLat;
+            final double dLon = point[1] - centerLon;
             final double squareDistance = dLat * dLat + dLon * dLon;
             if (squareDistance > maxSquareDistance) {
                 maxSquareDistance = squareDistance;
