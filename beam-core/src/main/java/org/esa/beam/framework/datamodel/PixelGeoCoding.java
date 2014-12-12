@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (C) 2014 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -696,7 +696,14 @@ public class PixelGeoCoding extends AbstractGeoCoding implements BasicPixelGeoCo
         final float d01 = raster.getSampleFloat(x0, y1, band);
         final float d11 = raster.getSampleFloat(x1, y1, band);
 
-        return MathUtils.interpolate2D(wx, wy, d00, d10, d01, d11);
+        if (band == 0) {
+            // lat
+            return MathUtils.interpolate2D(wx, wy, d00, d10, d01, d11);
+        } else {
+            // lon
+            return GeoCodingFactory.interpolateLon(wx, wy, d00, d10, d01, d11);
+        }
+
     }
 
     @Override
