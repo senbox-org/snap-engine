@@ -246,7 +246,7 @@ public class ProductIO {
             return ProductIO.readProduct(file, "BEAM-DIMAP");
         } else if(filename.endsWith("n1") || filename.endsWith("e1") || filename.endsWith("e2")) {
             return ProductIO.readProduct(file, "ENVISAT");
-        } else if((filename.startsWith("TSX") || filename.startsWith("TDX")) && filename.endsWith("xml")) {
+        } else if((filename.startsWith("tsx") || filename.startsWith("tdx")) && filename.endsWith("xml")) {
             return ProductIO.readProduct(file, "TerraSarX");
         } else if(filename.equals("product.xml")) {
             return ProductIO.readProduct(file, "RADARSAT-2");
@@ -254,6 +254,14 @@ public class ProductIO {
             return ProductIO.readProduct(file, "GeoTIFF");
         } else if(filename.endsWith("dbl")) {
             return ProductIO.readProduct(file, "SMOS-DBL");
+        } else if(filename.endsWith("zip")) {
+            if(filename.startsWith("asa")) {
+                return ProductIO.readProduct(file, "ENVISAT");
+            } else if(filename.startsWith("s1a")) {
+                return ProductIO.readProduct(file, "SENTINEL-1");
+            } else if(filename.startsWith("rs2")) {
+                return ProductIO.readProduct(file, "RADARSAT-2");
+            }
         }
         return null;
     }
