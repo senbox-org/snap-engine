@@ -94,13 +94,13 @@ public class ProductFunctions {
         }
 
         public boolean accept(final File file) {
-            if (file.isDirectory()) return includeFolders;
+            if (includeFolders && file.isDirectory())
+                return true;
+
             final String name = file.getName().toLowerCase();
             for (String ext : validExtensions) {
                 if (name.endsWith(ext)) {
-                    if (name.startsWith("asa_wss"))
-                        return false;
-                    return true;
+                    return !name.startsWith("asa_wss");
                 }
             }
             for (String pre : nonValidprefixes) {
