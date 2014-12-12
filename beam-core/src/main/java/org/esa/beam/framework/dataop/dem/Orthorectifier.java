@@ -334,15 +334,15 @@ public class Orthorectifier implements GeoCoding {
     }
 
     protected final double getElevation(GeoPos geoPos, PixelPos pixelPos) {
-        double h = 0.0f;
+        double h = 0.0;
         if (elevationModel != null) {
             try {
-                h = (float)elevationModel.getElevation(geoPos);
+                h = elevationModel.getElevation(geoPos);
             } catch (Exception ignored) {
                 // ignored
             }
             if (h == elevationModel.getDescriptor().getNoDataValue()) {
-                h = 0.0f;
+                h = 0.0;
             }
         } else if (pointing.canGetElevation()) {
             if (pixelPos == null) {
