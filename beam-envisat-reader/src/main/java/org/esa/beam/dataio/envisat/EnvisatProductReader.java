@@ -752,7 +752,7 @@ private TiePointGrid createTiePointGrid(final BandLineReader bandLineReader,
 
                 for (int x = 0; x < gridWidth; x++) {
                     final float p = x*subSamplingX;
-                    tiePoints[tiePointIndex] = interpolateIfNeeded(p, pixelData, sampleData, x, gridWidth);
+                    tiePoints[tiePointIndex] = interpolateIfNeeded(p, pixelDataFloat, sampleData, x, gridWidth);
                     tiePointIndex++;
                 }
 
