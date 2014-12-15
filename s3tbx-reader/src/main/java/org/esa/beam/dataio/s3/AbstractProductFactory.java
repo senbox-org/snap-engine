@@ -85,7 +85,7 @@ public abstract class AbstractProductFactory implements ProductFactory {
         final RenderedImage sourceImage = sourceBand.getGeophysicalImage();
         final int w = sourceImage.getWidth();
         final int h = sourceImage.getHeight();
-        final double[] tiePoints = sourceImage.getData().getSamples(0, 0, w, h, 0, new double[w * h]);
+        final float[] tiePoints = sourceImage.getData().getSamples(0, 0, w, h, 0, new float[w * h]);
 
         final String unit = sourceBand.getUnit();
         final TiePointGrid tiePointGrid = new TiePointGrid(sourceBand.getName(), w, h,
