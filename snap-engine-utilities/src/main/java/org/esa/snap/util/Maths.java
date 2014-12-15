@@ -322,7 +322,7 @@ public final class Maths {
         final double[][] array = new double[n][warpPolynomialOrder + 1];
         for (int i = 0; i < n; i++) {
             for (int j = 0; j <= warpPolynomialOrder; j++) {
-                array[i][j] = Math.pow(d[i], (double) j);
+                array[i][j] = FastMath.pow(d[i], (double) j);
             }
         }
         return new Matrix(array);

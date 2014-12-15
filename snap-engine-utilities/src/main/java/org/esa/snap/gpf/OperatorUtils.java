@@ -15,6 +15,7 @@
  */
 package org.esa.snap.gpf;
 
+import org.apache.commons.math3.util.FastMath;
 import org.esa.beam.dataio.dimap.DimapProductConstants;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.Datum;
@@ -504,12 +505,12 @@ public final class OperatorUtils {
     public static void getSceneDimensions(final double minSpacing, final SceneProperties scnProp) {
         double minAbsLat;
         if (scnProp.latMin * scnProp.latMax > 0) {
-            minAbsLat = Math.min(Math.abs(scnProp.latMin), Math.abs(scnProp.latMax)) * org.esa.beam.util.math.MathUtils.DTOR;
+            minAbsLat = Math.min(Math.abs(scnProp.latMin), Math.abs(scnProp.latMax)) * Constants.DTOR;
         } else {
             minAbsLat = 0.0;
         }
-        double delLat = minSpacing / Constants.MeanEarthRadius * org.esa.beam.util.math.MathUtils.RTOD;
-        double delLon = minSpacing / (Constants.MeanEarthRadius * Math.cos(minAbsLat)) * org.esa.beam.util.math.MathUtils.RTOD;
+        double delLat = minSpacing / Constants.MeanEarthRadius * Constants.RTOD;
+        double delLon = minSpacing / (Constants.MeanEarthRadius * FastMath.cos(minAbsLat)) * Constants.RTOD;
         delLat = Math.min(delLat, delLon);
         delLon = delLat;
 

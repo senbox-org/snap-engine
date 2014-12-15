@@ -21,6 +21,7 @@ import com.bc.ceres.glayer.swing.LayerCanvas;
 import com.bc.ceres.glayer.swing.WakefulComponent;
 import com.bc.ceres.grender.Rendering;
 import com.bc.ceres.grender.Viewport;
+import org.apache.commons.math3.util.FastMath;
 import org.esa.beam.framework.datamodel.GeoCoding;
 import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.framework.datamodel.PixelPos;
@@ -329,7 +330,7 @@ public class NestWorldMapPane extends JPanel {
         @Override
         public void mouseWheelMoved(MouseWheelEvent e) {
             final int wheelRotation = e.getWheelRotation();
-            final double newZoomFactor = layerCanvas.getViewport().getZoomFactor() * Math.pow(1.1, wheelRotation);
+            final double newZoomFactor = layerCanvas.getViewport().getZoomFactor() * FastMath.pow(1.1, wheelRotation);
             layerCanvas.getViewport().setZoomFactor(newZoomFactor);
         }
     }
