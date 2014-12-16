@@ -206,85 +206,19 @@ public class ProductIO {
     }
 
     private static Product readProductImpl(File file, ProductSubsetDef subsetDef) throws IOException {
-        return readandCacheProduct(file, subsetDef);
-    }
-    
-	private synchronized static Product readandCacheProduct(final File file, final ProductSubsetDef subsetDef) throws IOException {
-
-        final Product cachedProduct = ProductCache.instance().getProduct(file);
-        if(cachedProduct != null) {
-            ProductCache.instance().addProduct(file, cachedProduct);
-            return cachedProduct;
-        }
         Guardian.assertNotNull("file", file);
         if (!file.exists()) {
             throw new FileNotFoundException("File not found: " + file.getPath());
         }
         //System.out.println("Reading "+file.getName());
-        Product product = readCommonProductReader(file);
+        Product product = CommonReaders.readCommonProductReader(file);
         if (product == null) {
             final ProductReader productReader = getProductReaderForInput(file);
             if (productReader != null) {
                 product = productReader.readProductNodes(file, subsetDef);
             }
         }
-        if (product != null) {
-            ProductCache.instance().addProduct(file, product);
-        }
         return product;
-    }
-
-    /**
-     * Quickly return the product read by the right reader without testing many readers
-     * @param file input file
-     * @return the product
-     * @throws IOException if can't be read
-     */
-    public static Product readCommonProductReader(final File file) throws IOException {
-        final String filename = file.getName().toLowerCase();
-        if(filename.endsWith("dim")) {
-            return ProductIO.readProduct(file, "BEAM-DIMAP");
-        } else if(filename.endsWith("n1") || filename.endsWith("e1") || filename.endsWith("e2")) {
-            return ProductIO.readProduct(file, "ENVISAT");
-        } else if((filename.startsWith("tsx") || filename.startsWith("tdx")) && filename.endsWith("xml")) {
-            return ProductIO.readProduct(file, "TerraSarX");
-        } else if(filename.equals("product.xml")) {
-            return ProductIO.readProduct(file, "RADARSAT-2");
-        } else if(filename.endsWith("tif")) {
-            return ProductIO.readProduct(file, "GeoTIFF");
-        } else if(filename.endsWith("dbl")) {
-            return ProductIO.readProduct(file, "SMOS-DBL");
-        } else if(filename.endsWith("zip")) {
-            if(filename.startsWith("asa")) {
-                return ProductIO.readProduct(file, "ENVISAT");
-            } else if(filename.startsWith("s1a")) {
-                return ProductIO.readProduct(file, "SENTINEL-1");
-            } else if(filename.startsWith("rs2")) {
-                return ProductIO.readProduct(file, "RADARSAT-2");
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Quickly return the product reader without testing many readers
-     * @param file input file
-     * @return the product reader or null
-     */
-    public static ProductReader findCommonProductReader(final File file) {
-        final String filename = file.getName().toLowerCase();
-        if(filename.endsWith("n1") || filename.endsWith("e1") || filename.endsWith("e2")) {
-            return ProductIO.getProductReader("ENVISAT");
-        } else if(filename.endsWith("dim")) {
-            return ProductIO.getProductReader("BEAM-DIMAP");
-        } else if((filename.startsWith("TSX") || filename.startsWith("TDX")) && filename.endsWith("xml")) {
-            return ProductIO.getProductReader("TerraSarX");
-        } else if(filename.endsWith("tif")) {
-            return ProductIO.getProductReader("GeoTIFF");
-        } else if(filename.endsWith("dbl")) {
-            return ProductIO.getProductReader("SMOS-DBL");
-        }
-        return null;
     }
 
     /**
@@ -320,8 +254,8 @@ public class ProductIO {
     public static ProductReader getProductReaderForInput(Object input) {
         Logger logger = BeamLogManager.getSystemLogger();
         logger.fine("Searching reader plugin for '" + input + "'");
-        if(input instanceof File) {        //NESTMOD
-            final ProductReader reader = findCommonProductReader((File)input);
+        if(input instanceof File) {
+            final ProductReader reader = CommonReaders.findCommonProductReader((File) input);
             if(reader != null)
                 return reader;
         }
