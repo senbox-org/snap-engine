@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (C) 2014 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -38,7 +38,6 @@ import org.esa.beam.framework.gpf.internal.OperatorConfiguration.Reference;
 import org.esa.beam.framework.gpf.monitor.TileComputationEvent;
 import org.esa.beam.framework.gpf.monitor.TileComputationObserver;
 import org.esa.beam.gpf.operators.standard.WriteOp;
-import org.esa.beam.util.DateTimeUtils;
 import org.esa.beam.util.jai.JAIUtils;
 import org.esa.beam.util.logging.BeamLogManager;
 
@@ -366,6 +365,7 @@ public class OperatorContext {
     }
 
     public Tile getSourceTile(RasterDataNode rasterDataNode, Rectangle region, BorderExtender borderExtender) {
+        suspendWatch();
         MultiLevelImage image = rasterDataNode.getSourceImage();
         /////////////////////////////////////////////////////////////////////
         //
@@ -379,6 +379,7 @@ public class OperatorContext {
         }
         //
         /////////////////////////////////////////////////////////////////////
+        resumeWatch();
         return new TileImpl(rasterDataNode, awtRaster);
     }
 
@@ -1135,11 +1136,47 @@ public class OperatorContext {
             long endNanos = System.nanoTime();
             int tileX = operatorImage.XToTileX(destRect.x);
             int tileY = operatorImage.YToTileY(destRect.y);
+            long nettoNanos = getNettoTime();
             tileComputationObserver.tileComputed(
-                    new TileComputationEvent(operatorImage, tileX, tileY, startNanos, endNanos));
+                    new TileComputationEvent(operatorImage, tileX, tileY, startNanos, endNanos, nettoNanos));
+        }
+    }
+    /////////////////////////////////////////////////////////////////////////////////////
+    private final ThreadLocal<SuspendableStopWatch> nettoWatch = new ThreadLocal<SuspendableStopWatch>() {
+        @Override
+        protected SuspendableStopWatch initialValue() {
+            return new SuspendableStopWatch();
+        }
+    };
+
+    public void startWatch() {
+        if (tileComputationObserver != null) {
+            nettoWatch.get().start();
         }
     }
 
+    public void stopWatch() {
+        if (tileComputationObserver != null) {
+
+        }nettoWatch.get().stop();
+    }
+
+    public void suspendWatch() {
+        if (tileComputationObserver != null) {
+            nettoWatch.get().suspend();
+        }
+    }
+
+    public void resumeWatch() {
+        if (tileComputationObserver != null) {
+            nettoWatch.get().resume();
+        }
+    }
+
+    public long getNettoTime() {
+        return nettoWatch.get().getTime();
+    }
+    /////////////////////////////////////////////////////////////////////////////////////
     boolean isComputingImageOf(Band band) {
         if (band.isSourceImageSet()) {
             RenderedImage sourceImage = band.getSourceImage().getImage(0);
@@ -1159,4 +1196,30 @@ public class OperatorContext {
         this.requiresAllBands = requiresAllBands;
     }
 
+    private static final class SuspendableStopWatch {
+        private long startTime = -1;
+        private long stopTime = -1;
+
+        public void start() {
+            this.stopTime = -1;
+            this.startTime = System.nanoTime();
+        }
+
+        public void stop() {
+            this.stopTime = System.nanoTime();
+        }
+
+        public void suspend() {
+            this.stopTime = System.nanoTime();
+        }
+
+        public void resume() {
+            this.startTime += (System.nanoTime() - this.stopTime);
+            this.stopTime = -1;
+        }
+
+        public long getTime() {
+            return this.stopTime - this.startTime;
+        }
+    }
 }

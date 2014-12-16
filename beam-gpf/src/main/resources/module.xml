@@ -31,6 +31,7 @@
     <changelog>
         <![CDATA[
          <b>Changes in 5.0.5</b><br/>
+            [BEAM-1738] Provide time usage per operator in GPT<br/>
             [BEAM-1736] GPT should allow setting system properties<br/>
          <b>Changes in 5.0.4</b><br/>
             [BEAM-1726] Saving a product takes too long<br/>

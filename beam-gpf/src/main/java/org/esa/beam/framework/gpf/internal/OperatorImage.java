@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (C) 2014 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -18,7 +18,6 @@ package org.esa.beam.framework.gpf.internal;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.framework.gpf.descriptor.OperatorDescriptor;
 import org.esa.beam.jai.ImageManager;
@@ -65,19 +64,22 @@ public class OperatorImage extends SourcelessOpImage {
         long startNanos = System.nanoTime();
 
         Tile targetTile;
-        if (getOperatorContext().isComputingImageOf(getTargetBand())) {
+        if (operatorContext.isComputingImageOf(getTargetBand())) {
             targetTile = createTargetTile(getTargetBand(), tile, destRect);
         } else if (requiresAllBands()) {
-            targetTile = getOperatorContext().getSourceTile(getTargetBand(), destRect);
+            targetTile = operatorContext.getSourceTile(getTargetBand(), destRect);
         } else {
             targetTile = null;
         }
+        operatorContext.startWatch();
         // computeTile() may have been deactivated
-        if (targetTile != null && getOperatorContext().isComputeTileMethodUsable()) {
-            getOperatorContext().getOperator().computeTile(getTargetBand(), targetTile, ProgressMonitor.NULL);
+        if (targetTile != null && operatorContext.isComputeTileMethodUsable()) {
+            operatorContext.getOperator().computeTile(getTargetBand(), targetTile, ProgressMonitor.NULL);
         }
+        operatorContext.stopWatch();
+//        long nettoNanos = operatorContext.getNettoTime();
 
-        getOperatorContext().fireTileComputed(this, destRect, startNanos);
+        operatorContext.fireTileComputed(this, destRect, startNanos);
     }
 
     protected boolean requiresAllBands() {
