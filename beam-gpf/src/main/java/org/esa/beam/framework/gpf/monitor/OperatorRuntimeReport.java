@@ -118,23 +118,23 @@ public class OperatorRuntimeReport extends TileComputationObserver {
             }
         }
         int sum = 5 * 3 + 1 + 10;
-        for (int i = 0; i < colWidth.length; i++) {
+        for (int i = 0; i < colWidth.length - 1; i++) {
             sum += colWidth[i];
         }
         String headerFormat= "%-" + colWidth[0] + "s | %-" + colWidth[1] + "s | %-" + colWidth[2] + "s | %-" + colWidth[3] + "s | %-" + colWidth[4] + "s | %-" + colWidth[5] + "s  | %-" + colWidth[6] + "s\n";
         String rowFormat= "%-" + colWidth[0] + "s | %-" + colWidth[1] + "s | %-" + colWidth[2] + "s | %" + colWidth[3] + "s | %" + colWidth[4] + "s | %" + colWidth[5] + "s%% | %-" + colWidth[6] + "s\n";
 
+        System.out.println();
+        System.out.format(headerFormat, "op Alias", "op Class", "", "brutto", "netto", "", "bands");
         for (int i = 0; i < sum; i++) {
             System.out.print("=");
         }
-        System.out.println();
-        System.out.format(headerFormat, "op Alias", "op Class", "", "brutto", "netto", "", "bands");
         System.out.println();
         for (StatValue stat : values) {
             System.out.format(rowFormat, stat.toStringArray(totalNettoTime));
         }
         System.out.println();
-        System.out.println("total Time: " + asMillis(endNanosMax - startNanosMin));
+        System.out.println("wall clock time: " + asMillis(endNanosMax - startNanosMin));
     }
 
     private static String getOpAlias(OperatorContext operatorContext) {
