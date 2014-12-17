@@ -612,7 +612,6 @@ public class Product extends ProductNode {
             // ignore
         }
 
-        ProductCache.instance().removeProduct(getFileLocation());
         reader = null;
         writer = null;
 
