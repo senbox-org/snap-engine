@@ -399,6 +399,30 @@ public class TestUtils {
         compareMetadata(targetProduct, expectedProduct, exemptionList);
     }
 
+    public static void compareArrays(final float[] actual, final float[] expected, final float threshold)
+            throws IOException {
+
+        if (actual.length != expected.length) {
+            throw new IOException("The actual array and expected array have different lengths");
+        }
+
+        for (int i = 0; i < actual.length; ++i) {
+            if((Math.abs(expected[i] - actual[i]) > threshold)) {
+                String msg = "actual:";
+                for (float anActual : actual) {
+                    msg += anActual + ", ";
+                }
+                TestUtils.log.info(msg);
+                msg = "expected:";
+                for (float anExpected : expected) {
+                    msg += anExpected + ", ";
+                }
+                TestUtils.log.info(msg);
+                throw new IOException("Mismatch [" + i + "] " + actual[i] + " is not " + expected[i]);
+            }
+        }
+    }
+
     public static void executeOperator(final Operator op) throws Exception {
         // get targetProduct: execute initialize()
         final Product targetProduct = op.getTargetProduct();
