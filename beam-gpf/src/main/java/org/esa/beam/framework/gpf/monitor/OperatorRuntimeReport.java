@@ -52,6 +52,9 @@ public class OperatorRuntimeReport extends TileComputationObserver {
 
     @Override
     public void stop() {
+        if (recordedEventList.size() == 0) {
+            return;
+        }
         long totalNettoTime = 0L;
         long startNanosMin = Long.MAX_VALUE;
         long endNanosMax = Long.MIN_VALUE;
