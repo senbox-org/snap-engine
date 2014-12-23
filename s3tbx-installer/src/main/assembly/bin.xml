@@ -119,14 +119,14 @@
                 <include>org.esa.s3tbx:*</include>
                 <include>org.esa.smostbx:*</include>
                 <include>ncsa.hdf:lib-hdf</include>
-                <include>gov.nasa.gsfc.seadas:seadas-reader</include>
+                <include>org.esa.snap.seadas:seadas-reader</include>
             </includes>
             <excludes>
                 <exclude>org.esa.snap:snap-python:*</exclude>
                 <exclude>org.esa.snap:snap-reader-tests:*</exclude>
                 <exclude>org.esa.snap:*:test-jar:*</exclude>
                 <exclude>org.esa.s3tbx:*:test-jar:*</exclude>
-                <exclude>gov.nasa.gsfc.seadas:seadas-reader:test-jar:*</exclude>
+                <exclude>org.esa.snap.seadas:seadas-reader:test-jar:*</exclude>
                 <exclude>org.esa.snap:snap-beam-bootstrap</exclude>
                 <exclude>org.esa.snap:snap-launcher</exclude>
             </excludes>
