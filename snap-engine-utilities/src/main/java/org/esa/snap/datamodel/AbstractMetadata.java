@@ -564,8 +564,8 @@ public final class AbstractMetadata {
                 return ProductData.UTC.parse(newTimeStr, format);
             }
             return ProductData.UTC.parse(timeStr, format);
-        } catch (ParseException e) {
-            System.out.println("UTC parse error:" + e.toString());
+        } catch (Throwable e) {
+            System.out.println("UTC parse error:"+ timeStr +":"+ e.toString());
             return NO_METADATA_UTC;
         }
     }
