@@ -44,8 +44,8 @@ import java.util.List;
  */
 public class ProductExpressionPane extends ExpressionPane {
 
-    private Product[] products;
-    private Product currentProduct;
+    protected Product[] products;
+    protected Product currentProduct;
     private Product targetProduct;
     private JComboBox productBox;
     private JList nodeList;
@@ -84,11 +84,15 @@ public class ProductExpressionPane extends ExpressionPane {
         return currentProduct;
     }
 
+    protected Namespace createNamespace() {
+        final int defaultIndex = Arrays.asList(products).indexOf(currentProduct);
+        return BandArithmetic.createDefaultNamespace(products,
+                defaultIndex == -1 ? 0 : defaultIndex);
+    }
+
     protected void init() {
 
-        final int defaultIndex = Arrays.asList(products).indexOf(currentProduct);
-        Namespace namespace = BandArithmetic.createDefaultNamespace(products,
-                                                                    defaultIndex == -1 ? 0 : defaultIndex);
+        final Namespace namespace = createNamespace();
         // todo - make type checking an option (checkbox) in UI
         setParser(new ParserImpl(namespace, false));
 
@@ -245,9 +249,9 @@ public class ProductExpressionPane extends ExpressionPane {
         }
     }
 
-    private String getNodeNamePrefix() {
+    protected String getNodeNamePrefix() {
         final String namePrefix;
-        if (products.length > 1 || currentProduct != targetProduct) {
+        if (currentProduct != targetProduct) {
             namePrefix = BandArithmetic.getProductNodeNamePrefix(currentProduct);
         } else {
             namePrefix = "";
