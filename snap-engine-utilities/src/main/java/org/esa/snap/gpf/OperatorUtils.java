@@ -375,10 +375,17 @@ public final class OperatorUtils {
         if (opName.contains("$"))
             opName = opName.substring(0, opName.indexOf('$'));
         String message = opName + ": ";
-        if (e.getMessage() != null)
+        if (e.getMessage() != null) {
             message += e.getMessage();
-        else
+        }
+        if (e.getCause()!= null && e.getCause().getMessage() != null) {
+            message += " due to "+ e.getCause().getMessage();
+        } else {
             message += e.toString();
+            if (e.getCause()!= null) {
+                message += " due to " + e.getCause().toString();
+            }
+        }
 
         if (Boolean.getBoolean("sendErrorOnException")) {
             ExceptionLog.log(message);
