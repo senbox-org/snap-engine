@@ -138,11 +138,11 @@ public class TestUtils {
         if (!inputFile.exists()) {
             throw new IOException(inputFile.getAbsolutePath() + " not found");
         }
-
-        final ProductReader reader = ProductIO.getProductReaderForInput(inputFile);
-        if (reader == null)
-            throw new IOException("No reader found for " + inputFile);
-        return reader.readProductNodes(inputFile, null);
+        final Product product = ProductIO.readProduct(inputFile);
+        if(product == null) {
+            throw new IOException("Unable to read "+inputFile.toString());
+        }
+        return product;
     }
 
     public static Product createProduct(final String type, final int w, final int h) {
@@ -554,7 +554,9 @@ public class TestUtils {
                         continue;
                     }
                 } else {
-                    reader = ProductIO.getProductReaderForInput(file);
+                    reader = CommonReaders.findCommonProductReader(file);
+                    if(reader == null)
+                        reader = ProductIO.getProductReaderForInput(file);
                 }
                 if (reader != null) {
                     final Product sourceProduct = reader.readProductNodes(file, null);
@@ -581,7 +583,7 @@ public class TestUtils {
                 boolean ok = false;
                 if (exceptionExemptions != null) {
                     for (String exemption : exceptionExemptions) {
-                        if (e.getMessage().contains(exemption)) {
+                        if (e.getMessage() != null && e.getMessage().contains(exemption)) {
                             ok = true;
                             TestUtils.log.info("Exemption for " + e.getMessage());
                             break;
