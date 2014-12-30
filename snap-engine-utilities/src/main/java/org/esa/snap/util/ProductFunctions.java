@@ -94,8 +94,8 @@ public class ProductFunctions {
         }
 
         public boolean accept(final File file) {
-            if (includeFolders && file.isDirectory())
-                return true;
+            if (file.isDirectory())
+                return includeFolders;
 
             final String name = file.getName().toLowerCase();
             for (String ext : validExtensions) {
