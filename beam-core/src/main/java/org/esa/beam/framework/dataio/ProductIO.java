@@ -182,7 +182,12 @@ public class ProductIO {
      * @see #readProduct(File)
      */
     public static Product readProduct(String filePath) throws IOException {
-        return readProductImpl(new File(filePath), null);
+        final File file = new File(filePath);
+        final Product product = CommonReaders.readCommonProductReader(file);
+        if (product != null) {
+            return product;
+        }
+        return readProductImpl(file, null);
     }
 
     /**
@@ -202,6 +207,10 @@ public class ProductIO {
      * @see #readProduct(String)
      */
     public static Product readProduct(File file) throws IOException {
+        final Product product = CommonReaders.readCommonProductReader(file);
+        if (product != null) {
+            return product;
+        }
         return readProductImpl(file, null);
     }
 
@@ -210,15 +219,11 @@ public class ProductIO {
         if (!file.exists()) {
             throw new FileNotFoundException("File not found: " + file.getPath());
         }
-        //System.out.println("Reading "+file.getName());
-        Product product = CommonReaders.readCommonProductReader(file);
-        if (product == null) {
-            final ProductReader productReader = getProductReaderForInput(file);
-            if (productReader != null) {
-                product = productReader.readProductNodes(file, subsetDef);
-            }
+        final ProductReader productReader = getProductReaderForInput(file);
+        if (productReader != null) {
+            return productReader.readProductNodes(file, subsetDef);
         }
-        return product;
+        return null;
     }
 
     /**
@@ -254,11 +259,7 @@ public class ProductIO {
     public static ProductReader getProductReaderForInput(Object input) {
         Logger logger = BeamLogManager.getSystemLogger();
         logger.fine("Searching reader plugin for '" + input + "'");
-        if(input instanceof File) {
-            final ProductReader reader = CommonReaders.findCommonProductReader((File) input);
-            if(reader != null)
-                return reader;
-        }
+
         ProductIOPlugInManager registry = ProductIOPlugInManager.getInstance();
         Iterator<ProductReaderPlugIn> it = registry.getAllReaderPlugIns();
         ProductReaderPlugIn selectedPlugIn = null;
