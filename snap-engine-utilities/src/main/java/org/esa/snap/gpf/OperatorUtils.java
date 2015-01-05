@@ -378,11 +378,11 @@ public final class OperatorUtils {
         if (e.getMessage() != null) {
             message += e.getMessage();
         }
-        if (e.getCause()!= null && e.getCause().getMessage() != null) {
-            message += " due to "+ e.getCause().getMessage();
-        } else {
+        if (e.getCause() != null && e.getCause().getMessage() != null) {
+            message += " due to " + e.getCause().getMessage();
+        } else if (e.getMessage() == null || e.getMessage().isEmpty()) {
             message += e.toString();
-            if (e.getCause()!= null) {
+            if (e.getCause() != null) {
                 message += " due to " + e.getCause().toString();
             }
         }
