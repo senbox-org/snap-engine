@@ -97,6 +97,7 @@
         <module>blue-marble-worldmap</module>
         <module>globcover-worldmap</module>
         <module>lib-hdf</module>
+        <module>beam-bigtiff</module>
     </modules>
 
     <organization>
@@ -433,7 +434,17 @@
                         <groupId>javax.media</groupId>
                         <artifactId>jai_imageio</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>it.geosolutions.imageio-ext</groupId>
+                        <artifactId>imageio-ext-tiff</artifactId>
+                    </exclusion>
                 </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>it.geosolutions.imageio-ext</groupId>
+                <artifactId>imageio-ext-tiff</artifactId>
+                <version>1.1.9</version>
             </dependency>
 
             <!-- JAI Libraries ############################################# -->
