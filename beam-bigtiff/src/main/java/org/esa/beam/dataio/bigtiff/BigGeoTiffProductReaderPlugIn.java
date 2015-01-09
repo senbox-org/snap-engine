@@ -31,11 +31,8 @@ public class BigGeoTiffProductReaderPlugIn implements ProductReaderPlugIn {
                 return DecodeQualification.UNABLE;
             }
 
-            final ImageInputStream stream = ImageIO.createImageInputStream(imageIOInput);
-            try {
+            try (ImageInputStream stream = ImageIO.createImageInputStream(imageIOInput)) {
                 return getDecodeQualificationImpl(stream);
-            } finally {
-                stream.close();
             }
         } catch (Exception ignore) {
             // nothing to do, return value is already UNABLE
@@ -76,15 +73,7 @@ public class BigGeoTiffProductReaderPlugIn implements ProductReaderPlugIn {
     // @todo 3 tb/tb write test following the original GeoTiff pattern 2015-01-08
     static DecodeQualification getDecodeQualificationImpl(ImageInputStream stream) {
         try {
-            Iterator<ImageReader> imageReaders = ImageIO.getImageReaders(stream);
-            TIFFImageReader imageReader = null;
-            while (imageReaders.hasNext()) {
-                final ImageReader reader = imageReaders.next();
-                if (reader instanceof TIFFImageReader) {
-                    imageReader = (TIFFImageReader) reader;
-                    break;
-                }
-            }
+            TIFFImageReader imageReader = getTiffImageReader(stream);
             if (imageReader == null) {
                 return DecodeQualification.UNABLE;
             }
@@ -92,5 +81,20 @@ public class BigGeoTiffProductReaderPlugIn implements ProductReaderPlugIn {
             return DecodeQualification.UNABLE;
         }
         return DecodeQualification.SUITABLE;
+    }
+
+    static TIFFImageReader getTiffImageReader(ImageInputStream stream) {
+        final Iterator<ImageReader> imageReaders = ImageIO.getImageReaders(stream);
+        TIFFImageReader imageReader = null;
+
+        while (imageReaders.hasNext()) {
+            final ImageReader reader = imageReaders.next();
+            if (reader instanceof TIFFImageReader) {
+                imageReader = (TIFFImageReader) reader;
+                break;
+            }
+        }
+
+        return imageReader;
     }
 }
