@@ -45,7 +45,7 @@
         <action>
             <id>importBigGeoTIFFProduct</id>
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
-            <formatName>BigGeoTIFF</formatName>
+            <formatName>BigGeoTiff</formatName>
             <useAllFileFilter>true</useAllFileFilter>
             <mnemonic>O</mnemonic>
             <shortDescr>Import a GeoTIFF/BigGeoTIFF data product or product subset.</shortDescr>
