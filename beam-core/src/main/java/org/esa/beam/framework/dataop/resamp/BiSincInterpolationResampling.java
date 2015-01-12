@@ -27,7 +27,7 @@ class BiSincInterpolationResampling implements Resampling {
 
     public BiSincInterpolationResampling(final int kernelSize) {
         this.kernelSize = kernelSize;
-        this.kernelSize1 = kernelSize + 1;
+        this.kernelSize1 = kernelSize - 1;
         this.halfKernelSize = kernelSize/2;
     }
 
@@ -147,8 +147,7 @@ class BiSincInterpolationResampling implements Resampling {
 
     private double sincHanning(final double x) {
         return x >= -halfKernelSize && x <= halfKernelSize ?
-                x == 0 ? 0.5 * (1.0 + FastMath.cos(DoublePI * x / kernelSize1)) :
-                FastMath.sin(x * Math.PI) / (x * Math.PI) * (0.5 * (1.0 + FastMath.cos(DoublePI * x / kernelSize1))) : 0.0;
+                x == 0 ? 1.0 : FastMath.sin(x * Math.PI) / (x * Math.PI) * (0.5 * (1.0 + FastMath.cos(DoublePI * x / kernelSize1))) : 0.0;
         //return Double.compare(x, 0.0) == 0 ? 1.0 : FastMath.sin(x * Math.PI) / (x * Math.PI);
     }
 
