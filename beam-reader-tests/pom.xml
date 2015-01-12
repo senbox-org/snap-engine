@@ -203,6 +203,17 @@
             <version>${beam.versionRange}</version>
             <type>test-jar</type>
         </dependency>
+        <dependency>
+            <groupId>org.esa.beam</groupId>
+            <artifactId>beam-bigtiff</artifactId>
+            <version>${beam.versionRange}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.beam</groupId>
+            <artifactId>beam-bigtiff</artifactId>
+            <version>${beam.versionRange}</version>
+            <type>test-jar</type>
+        </dependency>
     </dependencies>
 
 </project>

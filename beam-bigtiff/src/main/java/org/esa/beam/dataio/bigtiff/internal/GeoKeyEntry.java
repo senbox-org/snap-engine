@@ -24,6 +24,7 @@ public class GeoKeyEntry {
     private final int count;
     private final Integer intValue;
     private final String strValue;
+    private final double[] dblValue;
 
     public GeoKeyEntry(int keyId, int tiffTagLocation, int count, Object value) {
         this.keyId = keyId;
@@ -32,9 +33,15 @@ public class GeoKeyEntry {
         if (value instanceof Integer) {
             intValue = (Integer) value;
             strValue = null;
+            dblValue = null;
         } else if (value instanceof String) {
             intValue = null;
             strValue = (String) value;
+            dblValue = null;
+        } else if (value instanceof double[]) {
+            intValue = null;
+            strValue = null;
+            dblValue = (double[]) value;
         } else {
             throw new IllegalArgumentException(value.getClass() + "not supported");
         }
@@ -54,6 +61,14 @@ public class GeoKeyEntry {
 
     public Integer getIntValue() {
         return intValue;
+    }
+
+    public String getStrValue() {
+        return strValue;
+    }
+
+    public double[] getDblValue() {
+        return dblValue;
     }
 
     @Override

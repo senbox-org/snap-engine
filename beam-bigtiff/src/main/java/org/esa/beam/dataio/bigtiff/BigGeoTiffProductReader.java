@@ -220,6 +220,8 @@ public class BigGeoTiffProductReader extends AbstractProductReader {
             applyGeoCoding(tiffFileInfo, imageMetadata, product);
         }
 
+        TiffToProductMetadataConverter.addTiffTagsToMetadata(imageMetadata, tiffFileInfo, product.getMetadataRoot());
+
         setPreferredTiling(product);
 
         return product;
