@@ -275,7 +275,7 @@ public class BinningConfig {
         VariableContext variableContext = createVariableContext();
         Aggregator[] aggregators = createAggregators(variableContext);
         BinManager binManager = createBinManager(variableContext, aggregators);
-        binManager.setBinTracer(BinTracer.create(binManager, planetaryGridInst));
+        binManager.setBinTracer(BinTracer.create(binManager, planetaryGridInst, outputFile));
         DataPeriod dataPeriod = createDataPeriod(startDate, periodDuration, minDataHour);
         return new BinningContextImpl(planetaryGridInst,
                                       binManager,

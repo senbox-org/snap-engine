@@ -43,6 +43,7 @@ public class BinTracer {
     private final String[] temporalFeatureNames;
     private final String[] outputFeatureNames;
     private final String[] postFeatureNames;
+    private final String outputFile;
     private String productName;
     private boolean spatialHeaderWritten;
     private boolean temporalHeaderWritten;
@@ -56,7 +57,7 @@ public class BinTracer {
         return System.getProperty(SYSPROP_TRACE_LAT_LON) != null;
     }
 
-    public static BinTracer create(BinManager binManager, PlanetaryGrid planetaryGridInst) {
+    public static BinTracer create(BinManager binManager, PlanetaryGrid planetaryGridInst, String productOutputFile) {
         long binIndex = getBinIndexToTrace(planetaryGridInst);
         if (binIndex == -1) {
             return null;
@@ -66,12 +67,18 @@ public class BinTracer {
         for (int i = 0; i < obsNames.length; i++) {
             obsNames[i] = variableContext.getVariableName(i);
         }
+        String filename = "";
+        if (productOutputFile != null) {
+            filename = productOutputFile.substring(0, productOutputFile.lastIndexOf(".")) + "_";
+        }
+        filename = filename + "bintrace_" + binIndex + ".csv";
         return new BinTracer(binIndex,
                              obsNames,
                              binManager.getSpatialFeatureNames(),
                              binManager.getTemporalFeatureNames(),
                              binManager.getOutputFeatureNames(),
-                             binManager.getPostProcessFeatureNames());
+                             binManager.getPostProcessFeatureNames(),
+                             filename);
     }
 
     private static long getBinIndexToTrace(PlanetaryGrid planetaryGrid) {
@@ -90,23 +97,29 @@ public class BinTracer {
         return -1;
     }
 
-    private BinTracer(long binIndex, String[] obsNames, String[] spatialFeatureNames, String[] temporalFeatureNames, String[] outputFeatureNames, String[] postFeatureNames) {
+    private BinTracer(long binIndex, String[] obsNames, String[] spatialFeatureNames, String[] temporalFeatureNames, String[] outputFeatureNames, String[] postFeatureNames, String outputFile) {
         this.binIndex = binIndex;
         this.obsNames = obsNames;
         this.spatialFeatureNames = spatialFeatureNames;
         this.temporalFeatureNames = temporalFeatureNames;
         this.outputFeatureNames = outputFeatureNames;
         this.postFeatureNames = postFeatureNames;
-        try {
-            out = new PrintStream(new FileOutputStream("bin_trace_" + binIndex + ".csv"), true);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            out = System.out;
-        }
+        this.outputFile = outputFile;
     }
 
     public void setProductName(String productName) {
         this.productName = productName;
+    }
+
+    private void ensureOutputOpen() {
+        if (out == null) {
+            try {
+                out = new PrintStream(new FileOutputStream(outputFile), true);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                out = System.out;
+            }
+        }
     }
 
     private void printHeaderSpatial() {
@@ -142,6 +155,7 @@ public class BinTracer {
 
 
     public void traceSpatial(String action, Observation observation, SpatialBin spatialBin) {
+        ensureOutputOpen();
         if (!spatialHeaderWritten) {
             printHeaderSpatial();
             spatialHeaderWritten = true;
@@ -157,6 +171,7 @@ public class BinTracer {
     }
 
     public void traceTemporal(String action, SpatialBin spatialBin, TemporalBin temporalBin) {
+        ensureOutputOpen();
         if (!temporalHeaderWritten) {
             printHeaderTemporal();
             temporalHeaderWritten = true;
@@ -168,6 +183,7 @@ public class BinTracer {
     }
 
     public void traceOutput(TemporalBin temporalBin, Vector outputVector) {
+        ensureOutputOpen();
         out.println();
         out.println("output computation");
         out.println();
@@ -186,6 +202,7 @@ public class BinTracer {
     }
 
     public void tracePost(TemporalBin temporalBin, TemporalBin processBin) {
+        ensureOutputOpen();
         out.println();
         out.println("post processing");
         out.println();
