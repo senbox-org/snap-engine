@@ -17,8 +17,6 @@ import java.util.Locale;
 
 public class BigGeoTiffProductReaderPlugIn implements ProductReaderPlugIn {
 
-    private static final String[] FORMAT_NAMES = new String[]{"BigGeoTiff"};
-
     @Override
     public DecodeQualification getDecodeQualification(Object input) {
         try {
@@ -52,22 +50,22 @@ public class BigGeoTiffProductReaderPlugIn implements ProductReaderPlugIn {
 
     @Override
     public String[] getFormatNames() {
-        return FORMAT_NAMES;
+        return Constants.FORMAT_NAMES;
     }
 
     @Override
     public String[] getDefaultFileExtensions() {
-        return new String[]{".tif", ".tiff"};
+        return Constants.FILE_EXTENSIONS;
     }
 
     @Override
     public String getDescription(Locale locale) {
-        return "BigGeoTiff/GeoTiff data product.";
+        return Constants.DESCRIPTION;
     }
 
     @Override
     public BeamFileFilter getProductFileFilter() {
-        return new BeamFileFilter(FORMAT_NAMES[0], getDefaultFileExtensions(), getDescription(null));
+        return new BeamFileFilter(Constants.FORMAT_NAMES[0], getDefaultFileExtensions(), getDescription(null));
     }
 
     // @todo 3 tb/tb write test following the original GeoTiff pattern 2015-01-08
