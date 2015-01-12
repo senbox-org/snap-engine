@@ -98,10 +98,10 @@ class TiffToProductMetadataConverter {
 
     private static ProductData getGeoKeyValue(GeoKeyEntry geoKeyEntry) {
         ProductData value;
-        if (geoKeyEntry.getDblValue() != null) {
-            value = ProductData.createInstance(geoKeyEntry.getDblValue());
-        } else if (geoKeyEntry.getStrValue() != null) {
-            value = ProductData.createInstance(geoKeyEntry.getStrValue());
+        if (geoKeyEntry.hasDoubleValues()) {
+            value = ProductData.createInstance(geoKeyEntry.getDoubleValues());
+        } else if (geoKeyEntry.hasStringValue()) {
+            value = ProductData.createInstance(geoKeyEntry.getStringValue());
         } else {
             if (geoKeyEntry.getKeyId() == GeoTIFFCodes.GTModelTypeGeoKey) {
                 value = getModelTypeValueName(geoKeyEntry.getIntValue());
@@ -125,11 +125,12 @@ class TiffToProductMetadataConverter {
         return value;
     }
 
-    private static ProductData getRasterTypeValueName(Integer intValue) {
+    // package access for testing only tb 2015-01-12
+    static ProductData getRasterTypeValueName(int rasterTypeIndex) {
         ProductData value;
-        if (intValue == GeoTIFFCodes.RasterPixelIsArea) {
+        if (rasterTypeIndex == GeoTIFFCodes.RasterPixelIsArea) {
             value = ProductData.createInstance("RasterPixelIsArea");
-        } else if (intValue == GeoTIFFCodes.RasterPixelIsPoint) {
+        } else if (rasterTypeIndex == GeoTIFFCodes.RasterPixelIsPoint) {
             value = ProductData.createInstance("RasterPixelIsPoint");
         } else {
             value = ProductData.createInstance("unknown");
@@ -137,13 +138,14 @@ class TiffToProductMetadataConverter {
         return value;
     }
 
-    private static ProductData getModelTypeValueName(Integer intValue) {
+    // package access for testing only tb 2015-01-12
+    static ProductData getModelTypeValueName(int modelTypeIndex) {
         ProductData value;
-        if (intValue == GeoTIFFCodes.ModelTypeProjected) {
+        if (modelTypeIndex == GeoTIFFCodes.ModelTypeProjected) {
             value = ProductData.createInstance("ModelTypeProjected");
-        } else if (intValue == GeoTIFFCodes.ModelTypeGeographic) {
+        } else if (modelTypeIndex == GeoTIFFCodes.ModelTypeGeographic) {
             value = ProductData.createInstance("ModelTypeGeographic");
-        } else if (intValue == GeoTIFFCodes.ModelTypeGeocentric) {
+        } else if (modelTypeIndex == GeoTIFFCodes.ModelTypeGeocentric) {
             value = ProductData.createInstance("ModelTypeGeocentric");
         } else {
             value = ProductData.createInstance("unknown");

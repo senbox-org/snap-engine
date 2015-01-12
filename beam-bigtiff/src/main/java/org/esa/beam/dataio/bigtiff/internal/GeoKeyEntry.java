@@ -23,8 +23,8 @@ public class GeoKeyEntry {
     private final int tiffTagLocation;
     private final int count;
     private final Integer intValue;
-    private final String strValue;
-    private final double[] dblValue;
+    private final String stringValue;
+    private final double[] doubleValues;
 
     public GeoKeyEntry(int keyId, int tiffTagLocation, int count, Object value) {
         this.keyId = keyId;
@@ -32,16 +32,16 @@ public class GeoKeyEntry {
         this.count = count;
         if (value instanceof Integer) {
             intValue = (Integer) value;
-            strValue = null;
-            dblValue = null;
+            stringValue = null;
+            doubleValues = null;
         } else if (value instanceof String) {
             intValue = null;
-            strValue = (String) value;
-            dblValue = null;
+            stringValue = (String) value;
+            doubleValues = null;
         } else if (value instanceof double[]) {
             intValue = null;
-            strValue = null;
-            dblValue = (double[]) value;
+            stringValue = null;
+            doubleValues = (double[]) value;
         } else {
             throw new IllegalArgumentException(value.getClass() + "not supported");
         }
@@ -63,12 +63,20 @@ public class GeoKeyEntry {
         return intValue;
     }
 
-    public String getStrValue() {
-        return strValue;
+    public boolean hasStringValue() {
+        return stringValue != null;
     }
 
-    public double[] getDblValue() {
-        return dblValue;
+    public String getStringValue() {
+        return stringValue;
+    }
+
+    public boolean hasDoubleValues() {
+        return doubleValues != null;
+    }
+
+    public double[] getDoubleValues() {
+        return doubleValues;
     }
 
     @Override
@@ -80,8 +88,18 @@ public class GeoKeyEntry {
         final String s2;
         if (hasIntValue()) {
             s2 = String.valueOf(intValue);
-        } else {
-            s2 = strValue;
+        } else if (hasDoubleValues()) {
+            final StringBuilder sb = new StringBuilder();
+            sb.append("[");
+            for (double v : doubleValues) {
+                sb.append(v);
+                sb.append(", ");
+            }
+            sb.setLength(sb.length() - 2);
+            sb.append("]");
+            s2 = sb.toString();
+        }else {
+            s2 = stringValue;
         }
         return s1 + s2;
     }
