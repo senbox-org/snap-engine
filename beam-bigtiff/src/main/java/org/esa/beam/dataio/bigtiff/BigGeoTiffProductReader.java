@@ -20,6 +20,7 @@ import org.esa.beam.jai.ImageManager;
 import org.esa.beam.util.geotiff.EPSGCodes;
 import org.esa.beam.util.geotiff.GeoTIFFCodes;
 import org.esa.beam.util.io.FileUtils;
+import org.esa.beam.util.jai.JAIUtils;
 import org.esa.beam.util.logging.BeamLogManager;
 import org.geotools.coverage.grid.io.imageio.geotiff.*;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
@@ -218,6 +219,8 @@ public class BigGeoTiffProductReader extends AbstractProductReader {
         if (tiffFileInfo.isGeotiff()) {
             applyGeoCoding(tiffFileInfo, imageMetadata, product);
         }
+
+        setPreferredTiling(product);
 
         return product;
     }
@@ -677,5 +680,29 @@ public class BigGeoTiffProductReader extends AbstractProductReader {
             index++;
         }
         return new String[]{latName + index, lonName + index};
+    }
+
+    private void setPreferredTiling(Product product) throws IOException {
+        final Dimension dimension;
+        if (isBadTiling(imageReader)) {
+            dimension = JAIUtils.computePreferredTileSize(imageReader.getWidth(FIRST_IMAGE),
+                    imageReader.getHeight(FIRST_IMAGE), 1);
+        } else {
+            dimension = new Dimension(imageReader.getTileWidth(FIRST_IMAGE), imageReader.getTileHeight(FIRST_IMAGE));
+        }
+
+        if (isGlobalShifted180) {
+            product.setPreferredTileSize(new Dimension(imageReader.getWidth(FIRST_IMAGE), imageReader.getHeight(FIRST_IMAGE)));
+        } else {
+            product.setPreferredTileSize(dimension);
+        }
+    }
+
+    static boolean isBadTiling(TIFFImageReader imageReader) throws IOException {
+        final int imageHeight = imageReader.getHeight(FIRST_IMAGE);
+        final int tileHeight = imageReader.getTileHeight(FIRST_IMAGE);
+        final int imageWidth = imageReader.getWidth(FIRST_IMAGE);
+        final int tileWidth = imageReader.getTileWidth(FIRST_IMAGE);
+        return tileWidth <= 1 || tileHeight <= 1 || imageWidth <= tileWidth || imageHeight <= tileHeight;
     }
 }
