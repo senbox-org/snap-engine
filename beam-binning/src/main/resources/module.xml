@@ -30,6 +30,7 @@
     <changelog>
         <![CDATA[
         <b>Changes in 5.0.4</b><br/>
+        [BEAM-1743] - Complex geometry WKTs can slow down binner<br/>
         [BEAM-1742] Add tracing to L3 binner<br/>
         <b>Changes in 5.0.3</b><br/>
         [BEAM-1737] Product with pole wrapping boundaries should not crash the binner<br/>
