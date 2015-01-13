@@ -692,12 +692,7 @@ public class BigGeoTiffProductReader extends AbstractProductReader {
         } else {
             dimension = new Dimension(imageReader.getTileWidth(FIRST_IMAGE), imageReader.getTileHeight(FIRST_IMAGE));
         }
-
-        if (isGlobalShifted180) {
-            product.setPreferredTileSize(new Dimension(imageReader.getWidth(FIRST_IMAGE), imageReader.getHeight(FIRST_IMAGE)));
-        } else {
-            product.setPreferredTileSize(dimension);
-        }
+        product.setPreferredTileSize(dimension);
     }
 
     static boolean isBadTiling(TIFFImageReader imageReader) throws IOException {
@@ -705,6 +700,7 @@ public class BigGeoTiffProductReader extends AbstractProductReader {
         final int tileHeight = imageReader.getTileHeight(FIRST_IMAGE);
         final int imageWidth = imageReader.getWidth(FIRST_IMAGE);
         final int tileWidth = imageReader.getTileWidth(FIRST_IMAGE);
+        // @todo 2 tb/tb check if that is a good decision
         return tileWidth <= 1 || tileHeight <= 1 || imageWidth <= tileWidth || imageHeight <= tileHeight;
     }
 }
