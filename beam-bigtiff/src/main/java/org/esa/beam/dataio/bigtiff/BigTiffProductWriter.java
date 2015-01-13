@@ -39,10 +39,10 @@ public class BigTiffProductWriter extends AbstractProductWriter {
         updateProductName();
 
         outputStream = new FileImageOutputStream(outputFile);
-        writeGeoTIFFProduct(getSourceProduct());
+        writeGeoTIFFProduct(outputStream, getSourceProduct());
     }
 
-    private void writeGeoTIFFProduct(Product sourceProduct) throws IOException {
+    void writeGeoTIFFProduct(ImageOutputStream outputStream, Product sourceProduct) throws IOException {
         final TiffHeader tiffHeader = new TiffHeader(new Product[]{sourceProduct});
         tiffHeader.write(outputStream);
         bandWriter = new BigGeoTiffBandWriter(tiffHeader.getIfdAt(0), outputStream, sourceProduct);
@@ -95,14 +95,5 @@ public class BigTiffProductWriter extends AbstractProductWriter {
         if (outputFile != null) {
             getSourceProduct().setName(FileUtils.getFilenameWithoutExtension(outputFile));
         }
-    }
-
-    static boolean shouldWriteNode(ProductNode node) {
-        if (node instanceof VirtualBand) {
-            return false;
-        } else if (node instanceof FilterBand) {
-            return false;
-        }
-        return true;
     }
 }

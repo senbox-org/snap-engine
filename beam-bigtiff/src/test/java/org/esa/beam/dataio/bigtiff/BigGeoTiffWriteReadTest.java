@@ -14,7 +14,7 @@
  * with this program; if not, see http://www.gnu.org/licenses/
  */
 
-package org.esa.beam.dataio.geotiff;
+package org.esa.beam.dataio.bigtiff;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.sun.media.imageioimpl.plugins.tiff.TIFFImageReader;
@@ -29,6 +29,7 @@ import org.geotools.referencing.crs.DefaultProjectedCRS;
 import org.geotools.referencing.cs.DefaultCartesianCS;
 import org.geotools.referencing.datum.DefaultGeodeticDatum;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opengis.parameter.ParameterValueGroup;
 import org.opengis.referencing.FactoryException;
@@ -56,8 +57,9 @@ import java.util.Locale;
 
 import static org.junit.Assert.*;
 
+@Ignore
 @SuppressWarnings({"InstanceVariableMayNotBeInitialized"})
-public class GeoTiffWriteReadTest {
+public class BigGeoTiffWriteReadTest {
     private static final String WGS_84 = "EPSG:4326";
     private static final String WGS_72 = "EPSG:4322";
     private static final String WGS_84_UTM_ZONE_28S = "EPSG:32728";
@@ -68,12 +70,12 @@ public class GeoTiffWriteReadTest {
 
     private Product outProduct;
     private ByteArrayOutputStream outputStream;
-    private GeoTiffProductReader reader;
+    private BigGeoTiffProductReader reader;
     private File location;
 
     @Before
     public void setup() {
-        reader = (GeoTiffProductReader) new GeoTiffProductReaderPlugIn().createReaderInstance();
+        reader = (BigGeoTiffProductReader) new BigGeoTiffProductReaderPlugIn().createReaderInstance();
         outputStream = new ByteArrayOutputStream();
         location = new File("memory.tif");
         final int width = 14;
@@ -83,7 +85,13 @@ public class GeoTiffWriteReadTest {
         bandInt16.setDataElems(createShortData(getProductSize(), 23));
         ImageManager.getInstance().getSourceImage(bandInt16, 0);
 
-
+        ImageIO.scanForPlugins();
+        final IIORegistry registry = IIORegistry.getDefaultInstance();
+        final Iterator<ImageReaderSpi> serviceProviders = registry.getServiceProviders(ImageReaderSpi.class, true);
+        while (serviceProviders.hasNext()) {
+            final ImageReaderSpi spi = serviceProviders.next();
+            System.out.println("" + spi.getDescription(Locale.ENGLISH));
+        }
     }
 
     @Test
@@ -118,8 +126,8 @@ public class GeoTiffWriteReadTest {
     @Test
     public void testWriteReadVirtualBandIsNotExcludedInProduct() throws IOException {
         final VirtualBand virtualBand = new VirtualBand("VB", ProductData.TYPE_FLOAT32,
-                outProduct.getSceneRasterWidth(),
-                outProduct.getSceneRasterHeight(), "X * Y");
+                                                        outProduct.getSceneRasterWidth(),
+                                                        outProduct.getSceneRasterHeight(), "X * Y");
         outProduct.addBand(virtualBand);
         final Product inProduct = writeReadProduct();
 
@@ -130,10 +138,10 @@ public class GeoTiffWriteReadTest {
     @Test
     public void testWriteReadVirtualBandIsExcludedInImageFile() throws IOException {
         final VirtualBand virtualBand = new VirtualBand("VB", ProductData.TYPE_FLOAT32,
-                outProduct.getSceneRasterWidth(),
-                outProduct.getSceneRasterHeight(), "X * Y");
+                                                        outProduct.getSceneRasterWidth(),
+                                                        outProduct.getSceneRasterHeight(), "X * Y");
         outProduct.addBand(virtualBand);
-        final GeoTiffProductWriter writer = (GeoTiffProductWriter) new GeoTiffProductWriterPlugIn().createWriterInstance();
+        final BigTiffProductWriter writer = (BigTiffProductWriter) new BigTiffProductWriterPlugin().createWriterInstance();
         outProduct.setProductWriter(writer);
         writer.writeGeoTIFFProduct(new MemoryCacheImageOutputStream(outputStream), outProduct);
         final Band[] bands = outProduct.getBands();
@@ -141,9 +149,9 @@ public class GeoTiffWriteReadTest {
             if (writer.shouldWrite(band)) {
                 band.readRasterDataFully(ProgressMonitor.NULL);
                 writer.writeBandRasterData(band,
-                        0, 0,
-                        band.getSceneRasterWidth(), band.getSceneRasterHeight(),
-                        band.getData(), ProgressMonitor.NULL);
+                                           0, 0,
+                                           band.getSceneRasterWidth(), band.getSceneRasterHeight(),
+                                           band.getData(), ProgressMonitor.NULL);
             }
         }
         writer.flush();
@@ -151,7 +159,7 @@ public class GeoTiffWriteReadTest {
         final MemoryCacheImageInputStream imageStream = new MemoryCacheImageInputStream(inputStream);
         Iterator<ImageReader> imageReaders = ImageIO.getImageReaders(imageStream);
         TIFFImageReader imageReader = null;
-        while (imageReaders.hasNext()) {
+        while(imageReaders.hasNext()) {
             final ImageReader nextReader = imageReaders.next();
             if (nextReader instanceof TIFFImageReader) {
                 imageReader = (TIFFImageReader) nextReader;
@@ -408,7 +416,7 @@ public class GeoTiffWriteReadTest {
 
     private static void setLambertConformalConicGeoCoding_MapGeoCoding(final Product product) {
         final MapTransformDescriptor descriptor = MapProjectionRegistry.getDescriptor(
-                LambertConformalConicDescriptor.TYPE_ID);
+                    LambertConformalConicDescriptor.TYPE_ID);
         final double[] values = descriptor.getParameterDefaultValues();
         for (int i = 0; i < values.length; i++) {
             values[i] = values[i] - 0.001;
@@ -422,7 +430,7 @@ public class GeoTiffWriteReadTest {
     }
 
     private static void setLambertConformalConicGeoCoding(final Product product) throws FactoryException,
-            TransformException {
+                                                                                        TransformException {
         final MathTransformFactory transformFactory = ReferencingFactoryFinder.getMathTransformFactory(null);
         final ParameterValueGroup parameters = transformFactory.getDefaultParameters(LAMBERT_CONIC_CONFORMAL_1SP);
         final Ellipsoid ellipsoid = DefaultGeodeticDatum.WGS84.getEllipsoid();
@@ -434,9 +442,9 @@ public class GeoTiffWriteReadTest {
 
         final MathTransform transform1 = transformFactory.createParameterizedTransform(parameters);
         final DefaultProjectedCRS crs = new DefaultProjectedCRS(parameters.getDescriptor().getName().getCode(),
-                (GeographicCRS) CRS.decode(WGS_72, true),
-                transform1,
-                DefaultCartesianCS.PROJECTED);
+                                                                (GeographicCRS) CRS.decode(WGS_72, true),
+                                                                transform1,
+                                                                DefaultCartesianCS.PROJECTED);
         final AffineTransform imageToMap = new AffineTransform();
         imageToMap.translate(0.7, 0.8);
         imageToMap.scale(0.9, -0.8);
@@ -448,7 +456,7 @@ public class GeoTiffWriteReadTest {
     private static void setAlbersEqualAreaGeoCoding(final Product product) throws FactoryException, TransformException {
         final MathTransformFactory transformFactory = ReferencingFactoryFinder.getMathTransformFactory(null);
         final ParameterValueGroup parameters = transformFactory.getDefaultParameters(ALBERS_CONIC_EQUAL_AREA);
-        final org.opengis.referencing.datum.Ellipsoid ellipsoid = DefaultGeodeticDatum.WGS84.getEllipsoid();
+        final Ellipsoid ellipsoid = DefaultGeodeticDatum.WGS84.getEllipsoid();
         parameters.parameter("semi_major").setValue(ellipsoid.getSemiMajorAxis());
         parameters.parameter("semi_minor").setValue(ellipsoid.getSemiMinorAxis());
         parameters.parameter("latitude_of_origin").setValue(50.0);
@@ -459,9 +467,9 @@ public class GeoTiffWriteReadTest {
 
         final MathTransform transform1 = transformFactory.createParameterizedTransform(parameters);
         final DefaultProjectedCRS crs = new DefaultProjectedCRS(parameters.getDescriptor().getName().getCode(),
-                (GeographicCRS) CRS.decode(WGS_72, true),
-                transform1,
-                DefaultCartesianCS.PROJECTED);
+                                                                (GeographicCRS) CRS.decode(WGS_72, true),
+                                                                transform1,
+                                                                DefaultCartesianCS.PROJECTED);
         final AffineTransform imageToMap = new AffineTransform();
         imageToMap.translate(0.7, 0.8);
         imageToMap.scale(0.9, -0.8);
@@ -473,22 +481,22 @@ public class GeoTiffWriteReadTest {
 
     private static void setTiePointGeoCoding(final Product product) {
         final TiePointGrid latGrid = new TiePointGrid("lat", 3, 3, 0.5f, 0.5f, 5, 5, new float[]{
-                85, 84, 83,
-                75, 74, 73,
-                65, 64, 63
+                    85, 84, 83,
+                    75, 74, 73,
+                    65, 64, 63
         });
         final TiePointGrid lonGrid = new TiePointGrid("lon", 3, 3, 0.5f, 0.5f, 5, 5, new float[]{
-                -15, -5, 5,
-                -16, -6, 4,
-                -17, -7, 3
+                    -15, -5, 5,
+                    -16, -6, 4,
+                    -17, -7, 3
         });
         product.addTiePointGrid(latGrid);
         product.addTiePointGrid(lonGrid);
-        product.setGeoCoding(new TiePointGeoCoding(latGrid, lonGrid, org.esa.beam.framework.dataop.maptransf.Datum.WGS_84));
+        product.setGeoCoding(new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84));
     }
 
     private Product writeReadProduct() throws IOException {
-        final GeoTiffProductWriter writer = (GeoTiffProductWriter) new GeoTiffProductWriterPlugIn().createWriterInstance();
+        final BigTiffProductWriter writer = (BigTiffProductWriter) new BigTiffProductWriterPlugin().createWriterInstance();
         outProduct.setProductWriter(writer);
         writer.writeGeoTIFFProduct(new MemoryCacheImageOutputStream(outputStream), outProduct);
         final Band[] bands = outProduct.getBands();
@@ -496,9 +504,9 @@ public class GeoTiffWriteReadTest {
             if (writer.shouldWrite(band)) {
                 band.readRasterDataFully(ProgressMonitor.NULL);
                 writer.writeBandRasterData(band,
-                        0, 0,
-                        band.getSceneRasterWidth(), band.getSceneRasterHeight(),
-                        band.getData(), ProgressMonitor.NULL);
+                                           0, 0,
+                                           band.getSceneRasterWidth(), band.getSceneRasterHeight(),
+                                           band.getData(), ProgressMonitor.NULL);
             }
         }
         writer.flush();

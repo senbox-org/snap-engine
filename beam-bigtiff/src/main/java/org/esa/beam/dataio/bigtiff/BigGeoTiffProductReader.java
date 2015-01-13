@@ -194,7 +194,7 @@ public class BigGeoTiffProductReader extends AbstractProductReader {
         inputStream.close();
     }
 
-    private Product readGeoTIFFProduct(final ImageInputStream stream, final File inputFile) throws IOException {
+    Product readGeoTIFFProduct(final ImageInputStream stream, final File inputFile) throws IOException {
         imageReader = BigGeoTiffProductReaderPlugIn.getTiffImageReader(stream);
         if (imageReader == null) {
             throw new IOException("GeoTiff imageReader not found");
