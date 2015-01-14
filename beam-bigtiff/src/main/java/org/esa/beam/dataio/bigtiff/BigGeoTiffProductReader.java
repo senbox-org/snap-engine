@@ -216,6 +216,8 @@ public class BigGeoTiffProductReader extends AbstractProductReader {
             product = createProduct(inputFile, tiffFileInfo);
         }
 
+        product.setFileLocation(inputFile);
+
         if (tiffFileInfo.isGeotiff()) {
             applyGeoCoding(tiffFileInfo, imageMetadata, product);
         }

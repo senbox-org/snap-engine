@@ -38,11 +38,11 @@ public class BigTiffProductWriter extends AbstractProductWriter {
         deleteOutput();
         updateProductName();
 
-        outputStream = new FileImageOutputStream(outputFile);
-        writeGeoTIFFProduct(outputStream, getSourceProduct());
+        writeGeoTIFFProduct(new FileImageOutputStream(outputFile), getSourceProduct());
     }
 
     void writeGeoTIFFProduct(ImageOutputStream outputStream, Product sourceProduct) throws IOException {
+        this.outputStream = outputStream;
         final TiffHeader tiffHeader = new TiffHeader(new Product[]{sourceProduct});
         tiffHeader.write(outputStream);
         bandWriter = new BigGeoTiffBandWriter(tiffHeader.getIfdAt(0), outputStream, sourceProduct);
