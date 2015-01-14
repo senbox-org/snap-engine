@@ -51,18 +51,19 @@
             <shortDescr>Import a GeoTIFF/BigGeoTIFF data product or product subset.</shortDescr>
             <!--<helpId>importBigGeoTIFFProduct</helpId>-->
         </action>
-        <!--<action>-->
-            <!--<id>exportGeoTIFFProduct</id>-->
-            <!--<class>org.esa.beam.dataio.geotiff.GeoTiffExportAction</class>-->
-            <!--<formatName>GeoTIFF</formatName>-->
-            <!--<useAllFileFilter>true</useAllFileFilter>-->
-            <!--<mnemonic>O</mnemonic>-->
-            <!--<text>GeoTIFF</text>-->
-            <!--<shortDescr>Export a GeoTIFF data product or product subset.</shortDescr>-->
-            <!--<helpId>exportGeoTIFFProduct</helpId>-->
-        <!--</action>-->
+        <action>
+            <id>exportBigGeoTIFFProduct</id>
+            <class>org.esa.beam.dataio.bigtiff.BigGeoTiffExportAction</class>
+            <formatName>BigGeoTIFF</formatName>
+            <useAllFileFilter>true</useAllFileFilter>
+            <mnemonic>O</mnemonic>
+            <text>BigGeoTIFF</text>
+            <shortDescr>Export a BigGeoTiff/GeoTIFF data product or product subset.</shortDescr>
+            <!--<helpId>exportBigGeoTIFFProduct</helpId>-->
+        </action>
     </extension>
 
+    <!-- @todo 2 tb/tb implement help stuff 2015-01-14 -->
     <!--<extension point="beam-ui:helpSets">-->
         <!--<helpSet>-->
             <!--<parent>beam-help</parent>-->
