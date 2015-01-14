@@ -10,13 +10,13 @@ import java.util.Locale;
 
 import static org.junit.Assert.*;
 
-public class BigTiffProductWriterPluginTest {
+public class BigGeoTiffProductWriterPlugInTest {
 
-    private BigTiffProductWriterPlugin plugIn;
+    private BigGeoTiffProductWriterPlugIn plugIn;
 
     @Before
     public void setUp() {
-        plugIn = new BigTiffProductWriterPlugin();
+        plugIn = new BigGeoTiffProductWriterPlugIn();
     }
 
     @Test
@@ -57,6 +57,6 @@ public class BigTiffProductWriterPluginTest {
         final ProductWriter writer = plugIn.createWriterInstance();
 
         assertNotNull(writer);
-        assertTrue(writer instanceof BigTiffProductWriter);
+        assertTrue(writer instanceof BigGeoTiffProductWriter);
     }
 }

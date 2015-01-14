@@ -136,7 +136,7 @@ public class BigGeoTiffWriteReadTest {
                 outProduct.getSceneRasterWidth(),
                 outProduct.getSceneRasterHeight(), "X * Y");
         outProduct.addBand(virtualBand);
-        final BigTiffProductWriter writer = (BigTiffProductWriter) new BigTiffProductWriterPlugin().createWriterInstance();
+        final BigGeoTiffProductWriter writer = (BigGeoTiffProductWriter) new BigGeoTiffProductWriterPlugIn().createWriterInstance();
         outProduct.setProductWriter(writer);
         writer.writeGeoTIFFProduct(new MemoryCacheImageOutputStream(outputStream), outProduct);
         final Band[] bands = outProduct.getBands();
@@ -491,7 +491,7 @@ public class BigGeoTiffWriteReadTest {
     }
 
     private Product writeReadProduct() throws IOException {
-        final BigTiffProductWriter writer = (BigTiffProductWriter) new BigTiffProductWriterPlugin().createWriterInstance();
+        final BigGeoTiffProductWriter writer = (BigGeoTiffProductWriter) new BigGeoTiffProductWriterPlugIn().createWriterInstance();
         outProduct.setProductWriter(writer);
         writer.writeGeoTIFFProduct(new MemoryCacheImageOutputStream(outputStream), outProduct);
         final Band[] bands = outProduct.getBands();

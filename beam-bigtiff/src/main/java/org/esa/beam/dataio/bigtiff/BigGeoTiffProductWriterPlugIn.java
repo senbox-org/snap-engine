@@ -7,7 +7,7 @@ import org.esa.beam.util.io.BeamFileFilter;
 import java.io.File;
 import java.util.Locale;
 
-public class BigTiffProductWriterPlugin implements ProductWriterPlugIn {
+public class BigGeoTiffProductWriterPlugIn implements ProductWriterPlugIn {
 
     private static final Class[] OUTPUT_TYPES = new Class[]{String.class, File.class,};
 
@@ -18,7 +18,7 @@ public class BigTiffProductWriterPlugin implements ProductWriterPlugIn {
 
     @Override
     public ProductWriter createWriterInstance() {
-        return new BigTiffProductWriter(this);
+        return new BigGeoTiffProductWriter(this);
     }
 
     @Override

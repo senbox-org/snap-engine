@@ -12,13 +12,13 @@ import javax.imageio.stream.ImageOutputStream;
 import java.io.File;
 import java.io.IOException;
 
-public class BigTiffProductWriter extends AbstractProductWriter {
+public class BigGeoTiffProductWriter extends AbstractProductWriter {
 
     private File outputFile;
     private ImageOutputStream outputStream;
     private BigGeoTiffBandWriter bandWriter;
 
-    public BigTiffProductWriter(ProductWriterPlugIn writerPlugIn) {
+    public BigGeoTiffProductWriter(ProductWriterPlugIn writerPlugIn) {
         super(writerPlugIn);
     }
 
