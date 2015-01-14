@@ -78,7 +78,7 @@ public final class AsarAbstractMetadata {
         addAbstractedAttribute("PRODUCT", mph.getAttributeString("PRODUCT", ""), absRoot, "Product name");
         addAbstractedAttribute("PRODUCT_TYPE", _productType, absRoot, "Product type");
         addAbstractedAttribute("SPH_DESCRIPTOR", sph.getAttributeString("SPH_DESCRIPTOR", ""), absRoot, "Description");
-        addAbstractedAttribute("MISSION", getMission(_productType, _file), absRoot, "Satellite mission");
+        addAbstractedAttribute("MISSION", getMission(_productType, mph.getAttributeString("PRODUCT", "")), absRoot, "Satellite mission");
 
         String mode = "Stripmap";
         if (productType.startsWith("ASA_WS"))
@@ -315,9 +315,9 @@ public final class AsarAbstractMetadata {
         addAbstractedAttribute("abstracted_metadata_version", METADATA_VERSION, absRoot, "AbsMetadata version");
     }
 
-    public static String getMission(final String productType, final File file) {
+    public static String getMission(final String productType, final String productName) {
         if (productType.startsWith("SAR")) {
-            if (file.toString().endsWith("E2"))
+            if (productName.endsWith("E2"))
                 return "ERS2";
             else
                 return "ERS1";
