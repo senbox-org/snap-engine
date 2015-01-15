@@ -614,7 +614,7 @@ public class BigGeoTiffProductReader extends AbstractProductReader {
             final Band band = product.addBand(bandName, productDataType);
 //band.setSourceImage(getBandSourceImage(bandIndex));
             band.setSourceImage(getMultiLevelImageSourceImage(band, bandIndex));
-            System.out.println("################### dataType = " + band.getDataType());
+//            System.out.println("################### dataType = " + band.getDataType());
             if (tiffFileInfo.containsField(
                     BaselineTIFFTagSet.TAG_COLOR_MAP) && rawImageType.getColorModel() instanceof IndexColorModel) {
                 IndexColorModel colorModel = (IndexColorModel) rawImageType.getColorModel();

@@ -1,22 +1,34 @@
 package org.esa.beam.dataio.bigtiff;
 
 import com.bc.ceres.core.ProgressMonitor;
+import it.geosolutions.imageio.plugins.tiff.BaselineTIFFTagSet;
+import it.geosolutions.imageio.plugins.tiff.TIFFImageWriteParam;
+import it.geosolutions.imageioimpl.plugins.tiff.TIFFImageWriter;
+import it.geosolutions.imageioimpl.plugins.tiff.TIFFLZWCompressor;
 import org.esa.beam.dataio.bigtiff.internal.TiffHeader;
 import org.esa.beam.framework.dataio.AbstractProductWriter;
 import org.esa.beam.framework.dataio.ProductWriterPlugIn;
-import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.datamodel.ProductNode;
 import org.esa.beam.util.io.FileUtils;
 
+import javax.imageio.ImageIO;
+import javax.imageio.ImageWriter;
 import javax.imageio.stream.FileImageOutputStream;
 import javax.imageio.stream.ImageOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.Locale;
 
 public class BigGeoTiffProductWriter extends AbstractProductWriter {
 
     private File outputFile;
     private ImageOutputStream outputStream;
     private BigGeoTiffBandWriter bandWriter;
+    private TIFFImageWriter imageWriter;
 
     public BigGeoTiffProductWriter(ProductWriterPlugIn writerPlugIn) {
         super(writerPlugIn);
@@ -38,7 +50,32 @@ public class BigGeoTiffProductWriter extends AbstractProductWriter {
         deleteOutput();
         updateProductName();
 
+        final TIFFImageWriteParam writeParam = new TIFFImageWriteParam(Locale.ENGLISH);
+        writeParam.setCompressionMode(TIFFImageWriteParam.MODE_EXPLICIT);                               // @todo 2 tb/tb parse
+        final TIFFLZWCompressor compressor = new TIFFLZWCompressor(BaselineTIFFTagSet.PREDICTOR_NONE);  // @todo 2 tb/tb parse
+        writeParam.setTIFFCompressor(compressor);
+        writeParam.setCompressionType(compressor.getCompressionType());
+        writeParam.setCompressionQuality(0.75f);                                                        // @todo 2 tb/tb parse
+        writeParam.setTilingMode(TIFFImageWriteParam.MODE_EXPLICIT);
+        writeParam.setTiling(360, 360, 0, 0);                                                           // @todo 2 tb/tb parse
+        writeParam.setForceToBigTIFF(true);                                                             // @todo 2 tb/tb parse
+
+        // @todo 1 tb/tb continue here 2015-01-14
+//        imageWriter = getTiffImageWriter();
+//        final File parallelOut = new File(outputFile.getParent(), "test_imageiio_ext.tif");
+//        imageWriter.setOutput(new FileImageOutputStream(parallelOut));
         writeGeoTIFFProduct(new FileImageOutputStream(outputFile), getSourceProduct());
+    }
+
+    private TIFFImageWriter getTiffImageWriter() {
+        final Iterator<ImageWriter> writerIterator = ImageIO.getImageWritersByFormatName("TIFF");
+        while (writerIterator.hasNext()) {
+            final ImageWriter writer = writerIterator.next();
+            if (writer instanceof TIFFImageWriter) {
+                return (TIFFImageWriter) writer;
+            }
+        }
+        throw new IllegalStateException("No appropriate image writer for format BigGeoTiff found.");
     }
 
     void writeGeoTIFFProduct(ImageOutputStream outputStream, Product sourceProduct) throws IOException {
@@ -74,6 +111,10 @@ public class BigGeoTiffProductWriter extends AbstractProductWriter {
             outputStream.flush();
             outputStream.close();
             outputStream = null;
+        }
+        if (imageWriter != null) {
+            imageWriter.dispose();
+            imageWriter = null;
         }
     }
 
