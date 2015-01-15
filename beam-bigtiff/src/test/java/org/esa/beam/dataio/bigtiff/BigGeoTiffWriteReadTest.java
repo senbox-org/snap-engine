@@ -79,14 +79,6 @@ public class BigGeoTiffWriteReadTest {
         final Band bandInt16 = outProduct.addBand("int16", ProductData.TYPE_INT16);
         bandInt16.setDataElems(createShortData(getProductSize(), 23));
         ImageManager.getInstance().getSourceImage(bandInt16, 0);
-//
-//        ImageIO.scanForPlugins();
-//        final IIORegistry registry = IIORegistry.getDefaultInstance();
-//        final Iterator<ImageReaderSpi> serviceProviders = registry.getServiceProviders(ImageReaderSpi.class, true);
-//        while (serviceProviders.hasNext()) {
-//            final ImageReaderSpi spi = serviceProviders.next();
-//            System.out.println("" + spi.getDescription(Locale.ENGLISH));
-//        }
     }
 
     @Test

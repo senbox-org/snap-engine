@@ -42,8 +42,6 @@ import org.opengis.referencing.operation.TransformException;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
-import javax.imageio.spi.IIORegistry;
-import javax.imageio.spi.ImageReaderSpi;
 import javax.imageio.stream.MemoryCacheImageInputStream;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 import java.awt.*;
@@ -52,7 +50,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.Locale;
 
 import static org.junit.Assert.*;
 
