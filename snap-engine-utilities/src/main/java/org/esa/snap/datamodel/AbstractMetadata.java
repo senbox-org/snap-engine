@@ -560,7 +560,7 @@ public final class AbstractMetadata {
         try {
             final int dotPos = timeStr.lastIndexOf('.');
             if (dotPos > 0) {
-                final String newTimeStr = timeStr.substring(0, Math.min(dotPos + 6, timeStr.length()));
+                final String newTimeStr = timeStr.substring(0, Math.min(dotPos + 7, timeStr.length()));
                 try {
                     return ProductData.UTC.parse(newTimeStr, format);
                 } catch (Throwable e) {
