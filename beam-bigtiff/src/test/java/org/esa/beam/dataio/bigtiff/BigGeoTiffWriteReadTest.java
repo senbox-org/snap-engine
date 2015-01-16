@@ -334,9 +334,13 @@ public class BigGeoTiffWriteReadTest {
         band2.readRasterDataFully(ProgressMonitor.NULL);
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
+                // @todo 1 tb/tb enable assertion again 2015-01-16
+                //System.out.println("orig: " + band1.getPixelDouble(i, j) + " tested: " + band2.getPixelDouble(i, j));
                 assertEquals(band1.getPixelDouble(i, j), band2.getPixelDouble(i, j), 1.0e-13);
             }
         }
+
+        //System.out.println("###########################");
     }
 
     private void assertEquality(final GeoCoding gc1, final GeoCoding gc2, float accuracy) {

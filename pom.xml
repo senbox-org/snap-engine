@@ -444,7 +444,7 @@
             <dependency>
                 <groupId>it.geosolutions.imageio-ext</groupId>
                 <artifactId>imageio-ext-tiff</artifactId>
-                <version>1.1.9</version>
+                <version>1.2-SNAPSHOT</version>
             </dependency>
 
             <!-- JAI Libraries ############################################# -->

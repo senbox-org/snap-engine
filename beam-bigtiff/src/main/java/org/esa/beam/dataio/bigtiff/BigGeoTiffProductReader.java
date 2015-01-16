@@ -57,7 +57,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Field;
 import java.util.*;
 import java.util.logging.Level;
 
@@ -747,6 +746,8 @@ public class BigGeoTiffProductReader extends AbstractProductReader {
     private MultiLevelImage getMultiLevelImageSourceImage(final Band band, final int bandIndex) throws IOException {
         MultiLevelModel model = ImageManager.getMultiLevelModel(band);
         Assert.state(model.getLevelCount() == 1 || model.getScale(1) == 2.0);
+
+        System.out.println("index" + bandIndex);
         return new DefaultMultiLevelImage(new AbstractMultiLevelSource(model) {
             @Override
             protected RenderedImage createImage(int level) {
@@ -769,29 +770,7 @@ public class BigGeoTiffProductReader extends AbstractProductReader {
                 TIFFRenderedImage tiffImage;
                 try {
                     tiffImage = (TIFFRenderedImage) imageReader.readAsRenderedImage(FIRST_IMAGE, readParam);
-
-                    // @todo 1 tb/** this is a complete dirty hack -> the TiffRenderedImage sets the tile width using
-                    // an integer division of original width and subsampling. When the subsampling is larger than the
-                    // original tile width we get a tile size of ZERO -> this leads to the oddest error messages from JAO. Therefore
-                    // Norman and myself use reflection to ingest a tile size that we found suitable. tn 2015-01-15
-                    final int originalTileWidth = imageReader.getTileWidth(FIRST_IMAGE);
-                    final int imageWidth = tiffImage.getWidth();
-                    final int tileWidth = Math.min(originalTileWidth, imageWidth);
-
-                    final int originalTileHight = imageReader.getTileHeight(FIRST_IMAGE);
-                    final int imageHeight = tiffImage.getHeight();
-                    final int tileHeight = Math.min(originalTileHight, imageHeight);
-
-                    final Class<? extends TIFFRenderedImage> tiffImageClass = tiffImage.getClass();
-                    final Field tileWidthField = tiffImageClass.getDeclaredField("tileWidth");
-                    tileWidthField.setAccessible(true);
-                    tileWidthField.setInt(tiffImage, tileWidth);
-
-                    final Field tileHeightField = tiffImageClass.getDeclaredField("tileHeight");
-                    tileHeightField.setAccessible(true);
-                    tileHeightField.set(tiffImage, tileHeight);
-
-                } catch (IOException | NoSuchFieldException | IllegalAccessException e) {
+                } catch (IOException e) {
                     e.printStackTrace();
                     throw new RuntimeException(e);
                 }
@@ -803,7 +782,7 @@ public class BigGeoTiffProductReader extends AbstractProductReader {
 //System.out.println(">>>>>>>>>>>>>>>>>>>>>>> GeoTIFF: getBandSourceImage(" + bandIndex + "): " + numBands);
                     bandImage = BandSelectDescriptor.create(tiffImage, new int[]{bandIndex}, null);
                 }
-                int dataType = bandImage.getSampleModel().getDataType();
+
 //System.out.println(">>>>>>>>>>>>>>>>>>>>>> dataType = " + dataType + ", tiling: " + bandImage.getTileWidth() + ", " + bandImage.getTileHeight());
 // If the following line doesn't compile, use the following (because MultiLevelModel.getImageBounds() is new):
 // Rectangle expectedImageBounds = getModel().getModelToImageTransform(level).createTransformedShape(getModel().getModelBounds()).getBounds();
@@ -813,7 +792,7 @@ public class BigGeoTiffProductReader extends AbstractProductReader {
                     final int rightBorder = expectedImageBounds.width - bandImage.getWidth();
                     final int bottomBorder = expectedImageBounds.height - bandImage.getHeight();
 
-                    System.out.println("right: " + rightBorder + "   bottom: " + bottomBorder);
+//                    System.out.println("right: " + rightBorder + "   bottom: " + bottomBorder);
                     bandImage = BorderDescriptor.create(bandImage,
                             0,
                             rightBorder,
@@ -835,6 +814,14 @@ public class BigGeoTiffProductReader extends AbstractProductReader {
                     RenderingHints renderingHints = new RenderingHints(JAI.KEY_IMAGE_LAYOUT, imageLayout);
                     bandImage = FormatDescriptor.create(bandImage, sampleModel.getDataType(), renderingHints);
                 }
+
+                final int sourceDataType = bandImage.getSampleModel().getDataType();
+                final int targetBeamDataType = band.getDataType();
+                final int targetDataType = ImageManager.getDataBufferType(targetBeamDataType);
+                if (sourceDataType != targetDataType) {
+                    bandImage = FormatDescriptor.create(bandImage, targetDataType, null);
+                }
+
                 return bandImage;
             }
         });
