@@ -655,20 +655,20 @@ public class ProductSubsetDialog extends ModalDialog {
                     "insets.left=3,anchor=WEST,fill=HORIZONTAL, weightx=1.0");
             GridBagUtils.setAttributes(gbc, "insets.top=4");
             GridBagUtils.addToPanel(geoCoordinatesPane, new JLabel("North latitude bound:"), gbc, "gridx=0,gridy=0");
-            GridBagUtils.addToPanel(geoCoordinatesPane, UIUtils.createSpinner(paramNorthLat1, (double) 1, "#0.00#"),
+            GridBagUtils.addToPanel(geoCoordinatesPane, UIUtils.createSpinner(paramNorthLat1, (float) 1, "#0.00#"),
                                     gbc, "gridx=1,gridy=0");
             GridBagUtils.setAttributes(gbc, "insets.top=1");
             GridBagUtils.addToPanel(geoCoordinatesPane, new JLabel("West longitude bound:"), gbc, "gridx=0,gridy=1");
-            GridBagUtils.addToPanel(geoCoordinatesPane, UIUtils.createSpinner(paramWestLon1, (double) 1, "#0.00#"),
+            GridBagUtils.addToPanel(geoCoordinatesPane, UIUtils.createSpinner(paramWestLon1, (float) 1, "#0.00#"),
                                     gbc, "gridx=1,gridy=1");
 
             GridBagUtils.setAttributes(gbc, "insets.top=4");
             GridBagUtils.addToPanel(geoCoordinatesPane, new JLabel("South latitude bound:"), gbc, "gridx=0,gridy=2");
-            GridBagUtils.addToPanel(geoCoordinatesPane, UIUtils.createSpinner(paramSouthLat2, (double) 1, "#0.00#"),
+            GridBagUtils.addToPanel(geoCoordinatesPane, UIUtils.createSpinner(paramSouthLat2, (float) 1, "#0.00#"),
                                     gbc, "gridx=1,gridy=2");
             GridBagUtils.setAttributes(gbc, "insets.top=1");
             GridBagUtils.addToPanel(geoCoordinatesPane, new JLabel("East longitude bound:"), gbc, "gridx=0,gridy=3");
-            GridBagUtils.addToPanel(geoCoordinatesPane, UIUtils.createSpinner(paramEastLon2, (double) 1, "#0.00#"),
+            GridBagUtils.addToPanel(geoCoordinatesPane, UIUtils.createSpinner(paramEastLon2, (float) 1, "#0.00#"),
                                     gbc, "gridx=1,gridy=3");
             return geoCoordinatesPane;
         }
@@ -960,10 +960,10 @@ public class ProductSubsetDialog extends ModalDialog {
             final GeoCoding geoCoding = product.getGeoCoding();
             final GeoPos geoPos1 = geoCoding.getGeoPos(pixelPos1, null);
             final GeoPos geoPos2 = geoCoding.getGeoPos(pixelPos2, null);
-            paramNorthLat1.setValue(geoPos1.getLat(), null);
-            paramWestLon1.setValue(geoPos1.getLon(), null);
-            paramSouthLat2.setValue(geoPos2.getLat(), null);
-            paramEastLon2.setValue(geoPos2.getLon(), null);
+            paramNorthLat1.setValue((float)geoPos1.getLat(), null);
+            paramWestLon1.setValue((float)geoPos1.getLon(), null);
+            paramSouthLat2.setValue((float)geoPos2.getLat(), null);
+            paramEastLon2.setValue((float)geoPos2.getLon(), null);
         }
 
         private void updateXYParams(GeoPos geoPos1, GeoPos geoPos2) {
