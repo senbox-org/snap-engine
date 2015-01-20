@@ -15,10 +15,15 @@ import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.datamodel.ProductNode;
 import org.esa.beam.util.io.FileUtils;
 
+import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.FileImageOutputStream;
 import javax.imageio.stream.ImageOutputStream;
+import javax.media.jai.JAI;
+import javax.media.jai.PlanarImage;
+import java.awt.image.ColorModel;
+import java.awt.image.renderable.ParameterBlock;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
@@ -30,7 +35,9 @@ public class BigGeoTiffProductWriter extends AbstractProductWriter {
     private ImageOutputStream outputStream;
     private BigGeoTiffBandWriter bandWriter;
     private TIFFImageWriter imageWriter;
-    private NewBandWriter newBandWriter;
+    private boolean isWritten;
+    private FileImageOutputStream newOutputStream;
+    private TIFFImageWriteParam writeParam;
 
     public BigGeoTiffProductWriter(ProductWriterPlugIn writerPlugIn) {
         super(writerPlugIn);
@@ -57,7 +64,7 @@ public class BigGeoTiffProductWriter extends AbstractProductWriter {
         final int tileWidth = firstSourceImage.getTileWidth();
         final int tileHeight = firstSourceImage.getTileHeight();
 
-        final TIFFImageWriteParam writeParam = new TIFFImageWriteParam(Locale.ENGLISH);
+        writeParam = new TIFFImageWriteParam(Locale.ENGLISH);
         writeParam.setCompressionMode(TIFFImageWriteParam.MODE_EXPLICIT);                               // @todo 2 tb/tb parse
         final TIFFLZWCompressor compressor = new TIFFLZWCompressor(BaselineTIFFTagSet.PREDICTOR_NONE);  // @todo 2 tb/tb parse
         writeParam.setTIFFCompressor(compressor);
@@ -65,20 +72,20 @@ public class BigGeoTiffProductWriter extends AbstractProductWriter {
         writeParam.setCompressionQuality(0.75f);                                                        // @todo 2 tb/tb parse
         writeParam.setTilingMode(TIFFImageWriteParam.MODE_EXPLICIT);
         writeParam.setTiling(tileWidth, tileHeight, 0, 0);                                                           // @todo 2 tb/tb parse
+
 //        writeParam.setForceToBigTIFF(true);                                                             // @todo 2 tb/tb parse
 
         // @todo 1 tb/tb continue here 2015-01-14
-//        writeGeoTiffNewIplementation(writeParam);
+        imageWriter = getTiffImageWriter();
+        final File parallelOut = new File(outputFile.getParent(), "test_imageiio_ext.tif");
+        if (parallelOut.isFile()) {
+            parallelOut.delete();
+        }
+        newOutputStream = new FileImageOutputStream(parallelOut);
+        imageWriter.setOutput(newOutputStream);
 
         writeGeoTIFFProduct(new FileImageOutputStream(outputFile), sourceProduct);
     }
-
-//    private void writeGeoTiffNewIplementation(TIFFImageWriteParam writeParam) throws IOException {
-//        imageWriter = getTiffImageWriter();
-//        final File parallelOut = new File(outputFile.getParent(), "test_imageiio_ext.tif");
-//        imageWriter.setOutput(new FileImageOutputStream(parallelOut));
-//        newBandWriter = new NewBandWriter(imageWriter, writeParam);
-//    }
 
     private TIFFImageWriter getTiffImageWriter() {
         final Iterator<ImageWriter> writerIterator = ImageIO.getImageWritersByFormatName("TIFF");
@@ -105,7 +112,31 @@ public class BigGeoTiffProductWriter extends AbstractProductWriter {
                 sourceWidth, sourceHeight,
                 sourceBuffer, pm);
 
-        //newBandWriter.writeBandRasterData(sourceBand, sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, sourceBuffer, pm);
+        if (isWritten) {
+            return;
+        }
+
+        final ParameterBlock parameterBlock = new ParameterBlock();
+        final Product sourceProduct = sourceBand.getProduct();
+        final MultiLevelImage sourceImage = sourceBand.getSourceImage();
+        final ColorModel colorModel = sourceImage.getColorModel();
+        parameterBlock.add(colorModel);
+
+        final int nodeCount = sourceProduct.getNumBands();
+        IIOImage iioImage;
+        if (nodeCount > 1) {
+            for (int i = 0; i < nodeCount; i++) {
+                parameterBlock.setSource(sourceProduct.getBandAt(i).getSourceImage(), i);
+            }
+
+            final PlanarImage accumulatedImage = JAI.create("bandmerge", parameterBlock, null);
+            iioImage = new IIOImage(accumulatedImage, null, null);
+        } else {
+            iioImage = new IIOImage(sourceImage, null, null);
+        }
+        imageWriter.write(null, iioImage, writeParam);
+
+        isWritten = true;
     }
 
     @Override
@@ -122,9 +153,10 @@ public class BigGeoTiffProductWriter extends AbstractProductWriter {
             bandWriter = null;
         }
 
-        if (newBandWriter != null) {
-            newBandWriter.dispose();
-            newBandWriter = null;
+        if (newOutputStream != null) {
+            newOutputStream.flush();
+            newOutputStream.close();
+            newOutputStream = null;
         }
 
         if (outputStream != null) {

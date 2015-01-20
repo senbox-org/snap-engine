@@ -29,6 +29,7 @@ import org.geotools.referencing.crs.DefaultProjectedCRS;
 import org.geotools.referencing.cs.DefaultCartesianCS;
 import org.geotools.referencing.datum.DefaultGeodeticDatum;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opengis.parameter.ParameterValueGroup;
 import org.opengis.referencing.FactoryException;
@@ -81,6 +82,7 @@ public class BigGeoTiffWriteReadTest {
         ImageManager.getInstance().getSourceImage(bandInt16, 0);
     }
 
+    @Ignore
     @Test
     public void testWriteReadBeamMetadata() throws IOException {
         final Band expectedBand = outProduct.getBand("int16");
@@ -110,6 +112,7 @@ public class BigGeoTiffWriteReadTest {
         assertEquals(expectedBand.isNoDataValueUsed(), actualBand.isNoDataValueUsed());
     }
 
+    @Ignore
     @Test
     public void testWriteReadVirtualBandIsNotExcludedInProduct() throws IOException {
         final VirtualBand virtualBand = new VirtualBand("VB", ProductData.TYPE_FLOAT32,
@@ -122,6 +125,7 @@ public class BigGeoTiffWriteReadTest {
         assertNotNull(inProduct.getBand("VB"));
     }
 
+    @Ignore
     @Test
     public void testWriteReadVirtualBandIsExcludedInImageFile() throws IOException {
         final VirtualBand virtualBand = new VirtualBand("VB", ProductData.TYPE_FLOAT32,
@@ -165,6 +169,7 @@ public class BigGeoTiffWriteReadTest {
         inputStream.close();
     }
 
+    @Ignore
     @Test
     public void testWriteReadIndexCodingSingle8BitBand() throws IOException {
         outProduct.removeBand(outProduct.getBandAt(0));
@@ -188,6 +193,7 @@ public class BigGeoTiffWriteReadTest {
         testIndexCoding(indexBand, 4);
     }
 
+    @Ignore
     @Test
     public void testWriteReadIndexCodingWith2BandsBand() throws IOException {
         final Band bandUInt8 = outProduct.addBand("uint8", ProductData.TYPE_UINT8);
@@ -224,6 +230,7 @@ public class BigGeoTiffWriteReadTest {
         assertNotSame(0, colors[3].getRed() | colors[3].getGreen() | colors[3].getBlue());
     }
 
+    @Ignore
     @Test
     public void testWriteReadUTMProjection() throws IOException, TransformException, FactoryException {
         setGeoCoding(outProduct, WGS_84_UTM_ZONE_28S);
@@ -241,6 +248,7 @@ public class BigGeoTiffWriteReadTest {
         assertEquality(outProduct.getGeoCoding(), inProduct.getGeoCoding(), 2.0e-5f);
     }
 
+    @Ignore
     @Test
     public void testWriteReadLatLonGeocoding() throws IOException, TransformException, FactoryException {
         setGeoCoding(outProduct, WGS_84);
@@ -268,6 +276,7 @@ public class BigGeoTiffWriteReadTest {
 //        performTest(2.0e-5f);
 //    }
 
+    @Ignore
     @Test
     public void testWriteReadTransverseMercator() throws IOException, TransformException, FactoryException {
         setGeoCoding(outProduct, NEW_ZEALAND_TRANSVERSE_MERCATOR_2000);
@@ -275,6 +284,7 @@ public class BigGeoTiffWriteReadTest {
         performTest(2.0e-5f);
     }
 
+    @Ignore
     @Test
     public void testWriteReadLambertConformalConic() throws IOException, TransformException, FactoryException {
         setLambertConformalConicGeoCoding(outProduct);
@@ -282,7 +292,7 @@ public class BigGeoTiffWriteReadTest {
         performTest(2.0e-5f);
     }
 
-
+    @Ignore
     @Test
     public void testWriteReadLambertConformalConic_MapGeoCoding() throws IOException, TransformException, FactoryException {
         setLambertConformalConicGeoCoding_MapGeoCoding(outProduct);
@@ -290,6 +300,7 @@ public class BigGeoTiffWriteReadTest {
         performTest(2.0e-4f);
     }
 
+    @Ignore
     @Test
     public void testWriteReadStereographic() throws IOException, TransformException, FactoryException {
         setGeoCoding(outProduct, WGS84_ARCTIC_POLAR_STEREOGRAPHIC);
@@ -297,6 +308,7 @@ public class BigGeoTiffWriteReadTest {
         performTest(2.0e-5f);
     }
 
+    @Ignore
     @Test
     public void testWriteReadAlbersEqualArea() throws IOException, TransformException, FactoryException {
         setAlbersEqualAreaGeoCoding(outProduct);
@@ -507,5 +519,4 @@ public class BigGeoTiffWriteReadTest {
         product.setProductReader(reader);
         return product;
     }
-
 }
