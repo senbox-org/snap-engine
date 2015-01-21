@@ -183,10 +183,6 @@ public class ProductIO {
      */
     public static Product readProduct(String filePath) throws IOException {
         final File file = new File(filePath);
-        final Product product = CommonReaders.readCommonProductReader(file);
-        if (product != null) {
-            return product;
-        }
         return readProductImpl(file, null);
     }
 
@@ -207,10 +203,6 @@ public class ProductIO {
      * @see #readProduct(String)
      */
     public static Product readProduct(File file) throws IOException {
-        final Product product = CommonReaders.readCommonProductReader(file);
-        if (product != null) {
-            return product;
-        }
         return readProductImpl(file, null);
     }
 

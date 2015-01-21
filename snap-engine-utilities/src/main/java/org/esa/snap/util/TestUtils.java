@@ -30,6 +30,7 @@ import org.esa.beam.util.SystemUtils;
 import org.esa.beam.util.logging.BeamLogManager;
 import org.esa.snap.datamodel.AbstractMetadata;
 import org.esa.snap.datamodel.Unit;
+import org.esa.snap.db.CommonReaders;
 
 import javax.media.jai.JAI;
 import java.io.File;
