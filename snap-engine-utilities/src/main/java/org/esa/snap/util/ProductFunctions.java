@@ -27,14 +27,17 @@ import java.util.ArrayList;
  */
 public class ProductFunctions {
 
-    private final static String[] validExtensions = {".dim", ".n1", ".e1", ".e2", ".h5"};
+    private final static String[] validExtensions = {".dim", ".n1", ".e1", ".e2", ".h5", ".zip"};
     private final static String[] xmlPrefix = {"product", "tsx1_sar", "tsx2_sar", "tdx1_sar", "tdx2_sar"};
 
-    private static final String[] nonValidExtensions = {"xsd", "xsl", "xls", "pdf", "txt", "doc", "ps", "db", "ief", "ord",
-            "tfw", "gif", "jpg", "jgw", "hdr", "self", "report", "raw", "tgz",
-            "log", "html", "htm", "png", "bmp", "ps", "aux", "ovr", "brs", "kml", "kmz",
+    // valid but not products
+    private static final String[] excludedExtensions = { "pix", "tif" };
+
+    private static final String[] nonValidExtensions = {"xsd", "xsl", "xls", "pdf", "doc", "ps", "db", "ief", "ord",
+            "tfw", "gif", "jpg", "jgw", "hdr", "self", "report", "raw", "tgz", "pox",
+            "log", "html", "htm", "png", "bmp", "aux", "ovr", "brs", "kml", "kmz",
             "sav", "7z", "rrd", "lbl", "z", "gz", "exe", "so", "dll", "bat", "sh", "rtf",
-            "prj", "dbf", "shx", "shp", "ace", "ace2", "tar", "tooldes", "metadata.xml"};
+            "prj", "dbf", "shx", "shp", "ace", "ace2", "tar", "tooldes"};
     private static final String[] nonValidprefixes = {"led", "trl", "tra_", "nul", "lea", "dat", "img", "imop", "sarl", "sart", "par_",
             "dfas", "dfdn", "lut",
             "readme", "l1b_iif", "dor_vor", "imagery_", "browse"};
@@ -100,11 +103,15 @@ public class ProductFunctions {
             final String name = file.getName().toLowerCase();
             for (String ext : validExtensions) {
                 if (name.endsWith(ext)) {
-                    return !name.startsWith("asa_wss");
+                    return !name.startsWith("asa_wss");     // exclude wss products
                 }
             }
             for (String pre : nonValidprefixes) {
                 if (name.startsWith(pre))
+                    return false;
+            }
+            for (String ext : excludedExtensions) {
+                if (name.endsWith(ext))
                     return false;
             }
             for (String ext : nonValidExtensions) {
