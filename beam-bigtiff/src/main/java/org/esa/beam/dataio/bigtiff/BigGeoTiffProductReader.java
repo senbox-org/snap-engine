@@ -747,7 +747,6 @@ public class BigGeoTiffProductReader extends AbstractProductReader {
         MultiLevelModel model = ImageManager.getMultiLevelModel(band);
         Assert.state(model.getLevelCount() == 1 || model.getScale(1) == 2.0);
 
-        System.out.println("index" + bandIndex);
         return new DefaultMultiLevelImage(new AbstractMultiLevelSource(model) {
             @Override
             protected RenderedImage createImage(int level) {

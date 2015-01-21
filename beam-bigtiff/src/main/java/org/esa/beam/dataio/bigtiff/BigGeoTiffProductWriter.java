@@ -6,7 +6,6 @@ import it.geosolutions.imageio.plugins.tiff.BaselineTIFFTagSet;
 import it.geosolutions.imageio.plugins.tiff.TIFFImageWriteParam;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFImageWriter;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFLZWCompressor;
-import org.esa.beam.dataio.bigtiff.internal.TiffHeader;
 import org.esa.beam.framework.dataio.AbstractProductWriter;
 import org.esa.beam.framework.dataio.ProductWriterPlugIn;
 import org.esa.beam.framework.datamodel.Band;
@@ -17,12 +16,12 @@ import org.esa.beam.util.io.FileUtils;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageTypeSpecifier;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.FileImageOutputStream;
-import javax.imageio.stream.ImageOutputStream;
 import javax.media.jai.JAI;
-import javax.media.jai.PlanarImage;
-import java.awt.image.ColorModel;
+import java.awt.color.ColorSpace;
+import java.awt.image.*;
 import java.awt.image.renderable.ParameterBlock;
 import java.io.File;
 import java.io.IOException;
@@ -32,11 +31,9 @@ import java.util.Locale;
 public class BigGeoTiffProductWriter extends AbstractProductWriter {
 
     private File outputFile;
-    private ImageOutputStream outputStream;
-    private BigGeoTiffBandWriter bandWriter;
     private TIFFImageWriter imageWriter;
     private boolean isWritten;
-    private FileImageOutputStream newOutputStream;
+    private FileImageOutputStream outputStream;
     private TIFFImageWriteParam writeParam;
 
     public BigGeoTiffProductWriter(ProductWriterPlugIn writerPlugIn) {
@@ -70,21 +67,18 @@ public class BigGeoTiffProductWriter extends AbstractProductWriter {
         writeParam.setTIFFCompressor(compressor);
         writeParam.setCompressionType(compressor.getCompressionType());
         writeParam.setCompressionQuality(0.75f);                                                        // @todo 2 tb/tb parse
+
         writeParam.setTilingMode(TIFFImageWriteParam.MODE_EXPLICIT);
         writeParam.setTiling(tileWidth, tileHeight, 0, 0);                                                           // @todo 2 tb/tb parse
 
+//        writeParam.unsetColorConverter();
+
 //        writeParam.setForceToBigTIFF(true);                                                             // @todo 2 tb/tb parse
 
-        // @todo 1 tb/tb continue here 2015-01-14
         imageWriter = getTiffImageWriter();
-        final File parallelOut = new File(outputFile.getParent(), "test_imageiio_ext.tif");
-        if (parallelOut.isFile()) {
-            parallelOut.delete();
-        }
-        newOutputStream = new FileImageOutputStream(parallelOut);
-        imageWriter.setOutput(newOutputStream);
 
-        writeGeoTIFFProduct(new FileImageOutputStream(outputFile), sourceProduct);
+        outputStream = new FileImageOutputStream(outputFile);
+        imageWriter.setOutput(outputStream);
     }
 
     private TIFFImageWriter getTiffImageWriter() {
@@ -98,42 +92,31 @@ public class BigGeoTiffProductWriter extends AbstractProductWriter {
         throw new IllegalStateException("No appropriate image writer for format BigGeoTiff found.");
     }
 
-    void writeGeoTIFFProduct(ImageOutputStream outputStream, Product sourceProduct) throws IOException {
-        this.outputStream = outputStream;
-        final TiffHeader tiffHeader = new TiffHeader(new Product[]{sourceProduct});
-        tiffHeader.write(outputStream);
-        bandWriter = new BigGeoTiffBandWriter(tiffHeader.getIfdAt(0), outputStream, sourceProduct);
-    }
-
     @Override
     public void writeBandRasterData(Band sourceBand, int sourceOffsetX, int sourceOffsetY, int sourceWidth, int sourceHeight, ProductData sourceBuffer, ProgressMonitor pm) throws IOException {
-        bandWriter.writeBandRasterData(sourceBand,
-                sourceOffsetX, sourceOffsetY,
-                sourceWidth, sourceHeight,
-                sourceBuffer, pm);
-
         if (isWritten) {
             return;
         }
 
         final ParameterBlock parameterBlock = new ParameterBlock();
         final Product sourceProduct = sourceBand.getProduct();
-        final MultiLevelImage sourceImage = sourceBand.getSourceImage();
-        final ColorModel colorModel = sourceImage.getColorModel();
-        parameterBlock.add(colorModel);
+
+        RenderedImage writeImage;
 
         final int nodeCount = sourceProduct.getNumBands();
-        IIOImage iioImage;
         if (nodeCount > 1) {
             for (int i = 0; i < nodeCount; i++) {
                 parameterBlock.setSource(sourceProduct.getBandAt(i).getSourceImage(), i);
             }
-
-            final PlanarImage accumulatedImage = JAI.create("bandmerge", parameterBlock, null);
-            iioImage = new IIOImage(accumulatedImage, null, null);
+            writeImage = JAI.create("bandmerge", parameterBlock, null);
         } else {
-            iioImage = new IIOImage(sourceImage, null, null);
+            writeImage = sourceBand.getSourceImage();
         }
+
+        final SampleModel sampleModel = writeImage.getSampleModel();
+        writeParam.setDestinationType(new ImageTypeSpecifier(new BogusAndCheatingColorModel(sampleModel), sampleModel));
+
+        final IIOImage iioImage = new IIOImage(writeImage, null, null);
         imageWriter.write(null, iioImage, writeParam);
 
         isWritten = true;
@@ -148,22 +131,13 @@ public class BigGeoTiffProductWriter extends AbstractProductWriter {
 
     @Override
     public void close() throws IOException {
-        if (bandWriter != null) {
-            bandWriter.dispose();
-            bandWriter = null;
-        }
-
-        if (newOutputStream != null) {
-            newOutputStream.flush();
-            newOutputStream.close();
-            newOutputStream = null;
-        }
 
         if (outputStream != null) {
             outputStream.flush();
             outputStream.close();
             outputStream = null;
         }
+
         if (imageWriter != null) {
             imageWriter.dispose();
             imageWriter = null;
@@ -187,6 +161,50 @@ public class BigGeoTiffProductWriter extends AbstractProductWriter {
     private void updateProductName() {
         if (outputFile != null) {
             getSourceProduct().setName(FileUtils.getFilenameWithoutExtension(outputFile));
+        }
+    }
+
+    private static class BogusAndCheatingColorModel extends ColorModel {
+        private SampleModel sampleModel;
+
+        public BogusAndCheatingColorModel(SampleModel sampleModel) {
+            super(8, new int[]{8}, ColorSpace.getInstance(ColorSpace.CS_GRAY), false, false, OPAQUE, DataBuffer.TYPE_BYTE);
+            this.sampleModel = sampleModel;
+        }
+
+        @Override
+        public boolean isCompatibleRaster(Raster raster) {
+            return isCompatibleSampleModel(raster.getSampleModel());
+        }
+
+        @Override
+        public boolean isCompatibleSampleModel(SampleModel sm) {
+            return sampleModel.getNumBands() == sm.getNumBands() && sampleModel.getDataType() == sm.getDataType();
+        }
+
+        @Override
+        public int getNumComponents() {
+            return sampleModel.getNumBands();
+        }
+
+        @Override
+        public int getRed(int pixel) {
+            return 0;
+        }
+
+        @Override
+        public int getGreen(int pixel) {
+            return 0;
+        }
+
+        @Override
+        public int getBlue(int pixel) {
+            return 0;
+        }
+
+        @Override
+        public int getAlpha(int pixel) {
+            return 0;
         }
     }
 }

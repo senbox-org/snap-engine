@@ -15,12 +15,15 @@
  */
 package org.esa.beam.framework.dataio;
 
+import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.SubProgressMonitor;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductNode;
 import org.esa.beam.util.Guardian;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * The <code>AbstractProductWriter</code> class can be used as a base class for new product writer implementations.
@@ -119,6 +122,40 @@ public abstract class AbstractProductWriter implements ProductWriter {
      * @throws IOException              if an I/O error occurs
      */
     protected abstract void writeProductNodesImpl() throws IOException;
+
+    /*
+ * This implementation helper methods writes all bands of the given product using the specified product writer. If a
+ * band is entirely loaded its data is written out immediately, if not, a band's data raster is written out
+ * line-by-line without producing any memory overhead.
+ */
+    protected void writeAllBands(ProgressMonitor pm) throws IOException {
+        Product product = _sourceProduct;
+        ProductWriter productWriter = this;
+
+        // for correct progress indication we need to collect
+        // all bands which shall be written to the output
+        ArrayList<Band> bandsToWrite = new ArrayList<Band>();
+        for (int i = 0; i < product.getNumBands(); i++) {
+            Band band = product.getBandAt(i);
+            if (productWriter.shouldWrite(band)) {
+                bandsToWrite.add(band);
+            }
+        }
+
+        if (!bandsToWrite.isEmpty()) {
+            pm.beginTask("Writing bands of product '" + product.getName() + "'...", bandsToWrite.size());
+            try {
+                for (Band band : bandsToWrite) {
+                    if (pm.isCanceled()) {
+                        break;
+                    }
+                    band.writeRasterDataFully(SubProgressMonitor.create(pm, 1));
+                }
+            } finally {
+                pm.done();
+            }
+        }
+    }
 
     /**
      * Utility method which ensures that an output is assigned to this writer.

@@ -20,14 +20,17 @@ import com.bc.ceres.core.ProgressMonitor;
 import com.sun.media.imageioimpl.plugins.tiff.TIFFImageReader;
 import com.sun.media.imageioimpl.plugins.tiff.TIFFRenderedImage;
 import com.sun.media.jai.codec.ByteArraySeekableStream;
+import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.*;
 import org.esa.beam.jai.ImageManager;
+import org.esa.beam.util.io.FileUtils;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.ReferencingFactoryFinder;
 import org.geotools.referencing.crs.DefaultProjectedCRS;
 import org.geotools.referencing.cs.DefaultCartesianCS;
 import org.geotools.referencing.datum.DefaultGeodeticDatum;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -44,7 +47,6 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.MemoryCacheImageInputStream;
-import javax.imageio.stream.MemoryCacheImageOutputStream;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.io.ByteArrayOutputStream;
@@ -56,6 +58,7 @@ import static org.junit.Assert.*;
 
 @SuppressWarnings({"InstanceVariableMayNotBeInitialized"})
 public class BigGeoTiffWriteReadTest {
+
     private static final String WGS_84 = "EPSG:4326";
     private static final String WGS_72 = "EPSG:4322";
     private static final String WGS_84_UTM_ZONE_28S = "EPSG:32728";
@@ -64,6 +67,8 @@ public class BigGeoTiffWriteReadTest {
     private static final String LAMBERT_CONIC_CONFORMAL_1SP = "EPSG:9801";
     private static final String ALBERS_CONIC_EQUAL_AREA = "Albers_Conic_Equal_Area";
 
+    private final static File TEST_DIR = new File("test_data");
+
     private Product outProduct;
     private ByteArrayOutputStream outputStream;
     private BigGeoTiffProductReader reader;
@@ -71,6 +76,9 @@ public class BigGeoTiffWriteReadTest {
 
     @Before
     public void setup() {
+        if (!TEST_DIR.mkdirs()) {
+            fail("unable to create test directory");
+        }
         reader = (BigGeoTiffProductReader) new BigGeoTiffProductReaderPlugIn().createReaderInstance();
         outputStream = new ByteArrayOutputStream();
         location = new File("memory.tif");
@@ -80,6 +88,13 @@ public class BigGeoTiffWriteReadTest {
         final Band bandInt16 = outProduct.addBand("int16", ProductData.TYPE_INT16);
         bandInt16.setDataElems(createShortData(getProductSize(), 23));
         ImageManager.getInstance().getSourceImage(bandInt16, 0);
+    }
+
+    @After
+    public void tearDown() {
+        if (!FileUtils.deleteTree(TEST_DIR)) {
+            fail("unable to delete test directory");
+        }
     }
 
     @Ignore
@@ -134,7 +149,8 @@ public class BigGeoTiffWriteReadTest {
         outProduct.addBand(virtualBand);
         final BigGeoTiffProductWriter writer = (BigGeoTiffProductWriter) new BigGeoTiffProductWriterPlugIn().createWriterInstance();
         outProduct.setProductWriter(writer);
-        writer.writeGeoTIFFProduct(new MemoryCacheImageOutputStream(outputStream), outProduct);
+        // @todo 1 tb/tb refactor and make run again 2015-01-21
+        //writer.writeGeoTIFFProduct(new MemoryCacheImageOutputStream(outputStream), outProduct);
         final Band[] bands = outProduct.getBands();
         for (Band band : bands) {
             if (writer.shouldWrite(band)) {
@@ -500,23 +516,11 @@ public class BigGeoTiffWriteReadTest {
     }
 
     private Product writeReadProduct() throws IOException {
-        final BigGeoTiffProductWriter writer = (BigGeoTiffProductWriter) new BigGeoTiffProductWriterPlugIn().createWriterInstance();
-        outProduct.setProductWriter(writer);
-        writer.writeGeoTIFFProduct(new MemoryCacheImageOutputStream(outputStream), outProduct);
-        final Band[] bands = outProduct.getBands();
-        for (Band band : bands) {
-            if (writer.shouldWrite(band)) {
-                band.readRasterDataFully(ProgressMonitor.NULL);
-                writer.writeBandRasterData(band,
-                        0, 0,
-                        band.getSceneRasterWidth(), band.getSceneRasterHeight(),
-                        band.getData(), ProgressMonitor.NULL);
-            }
-        }
-        writer.flush();
-        ByteArraySeekableStream inputStream = new ByteArraySeekableStream(outputStream.toByteArray());
-        final Product product = reader.readGeoTIFFProduct(new MemoryCacheImageInputStream(inputStream), location);
-        product.setProductReader(reader);
-        return product;
+        final File productFile = new File(TEST_DIR, "test_product.tif");
+
+        final String bigGeoTiffFormatName = "BigGeoTiff";
+        ProductIO.writeProduct(outProduct, productFile.getAbsolutePath(), bigGeoTiffFormatName);
+
+        return ProductIO.readProduct(productFile, bigGeoTiffFormatName);
     }
 }
