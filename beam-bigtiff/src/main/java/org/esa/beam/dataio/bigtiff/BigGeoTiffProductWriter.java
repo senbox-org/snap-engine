@@ -12,6 +12,7 @@ import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.datamodel.ProductNode;
+import org.esa.beam.util.StringUtils;
 import org.esa.beam.util.io.FileUtils;
 
 import javax.imageio.IIOImage;
@@ -30,6 +31,16 @@ import java.util.Locale;
 
 public class BigGeoTiffProductWriter extends AbstractProductWriter {
 
+    private static String PARAM_COMPRESSION_TYPE = "org.esa.beam.dataio.bigtiff.compression.type";   // value must be "LZW"
+
+    private static String PARAM_COMPRESSION_QUALITY = "org.esa.beam.dataio.bigtiff.compression.quality";   // value float 0 ... 1, default 0.75
+    private static String PARAM_COMPRESSION_QUALITY_DEFAULT = "0.75";
+
+    private static String PARAM_TILING_WIDTH = "org.esa.beam.dataio.bigtiff.tiling.width";   // integer value
+    private static String PARAM_TILING_HEIGHT = "org.esa.beam.dataio.bigtiff.tiling.height";   // integer value
+
+    private static String PARAM_FORCE_BIGTIFF = "org.esa.beam.dataio.bigtiff.force.bigtiff";   // boolean
+
     private File outputFile;
     private TIFFImageWriter imageWriter;
     private boolean isWritten;
@@ -38,6 +49,45 @@ public class BigGeoTiffProductWriter extends AbstractProductWriter {
 
     public BigGeoTiffProductWriter(ProductWriterPlugIn writerPlugIn) {
         super(writerPlugIn);
+
+        createWriterParams();
+    }
+
+    private void createWriterParams() {
+        writeParam = new TIFFImageWriteParam(Locale.ENGLISH);
+
+        final String compressionType = System.getProperty(PARAM_COMPRESSION_TYPE);
+        if (StringUtils.isNotNullAndNotEmpty(compressionType)) {
+            if (compressionType.equals("LZW")) {
+                writeParam.setCompressionMode(TIFFImageWriteParam.MODE_EXPLICIT);
+
+                final TIFFLZWCompressor compressor = new TIFFLZWCompressor(BaselineTIFFTagSet.PREDICTOR_NONE);
+                writeParam.setTIFFCompressor(compressor);
+                writeParam.setCompressionType(compressor.getCompressionType());
+
+                final String compressionQualityProperty = System.getProperty(PARAM_COMPRESSION_QUALITY, PARAM_COMPRESSION_QUALITY_DEFAULT);
+                final float compressionQuality = Float.parseFloat(compressionQualityProperty);
+                writeParam.setCompressionQuality(compressionQuality);
+            } else {
+                throw new IllegalArgumentException("Compression type '" + compressionType + "' is not supported");
+            }
+        }
+
+        final String tilingWidthProperty = System.getProperty(PARAM_TILING_WIDTH);
+        final String tilingHeightProperty = System.getProperty(PARAM_TILING_HEIGHT);
+        if (StringUtils.isNotNullAndNotEmpty(tilingWidthProperty) && StringUtils.isNotNullAndNotEmpty(tilingHeightProperty)) {
+            final int tileWidth = Integer.parseInt(tilingWidthProperty);
+            final int tileHeight = Integer.parseInt(tilingHeightProperty);
+
+            writeParam.setTilingMode(TIFFImageWriteParam.MODE_EXPLICIT);
+            writeParam.setTiling(tileWidth, tileHeight, 0, 0);
+        }
+
+        final String bigTiffProperty = System.getProperty(PARAM_FORCE_BIGTIFF);
+        if (StringUtils.isNotNullAndNotEmpty(bigTiffProperty)) {
+            final boolean forceBigTiff = Boolean.parseBoolean(bigTiffProperty);
+            writeParam.setForceToBigTIFF(forceBigTiff);
+        }
     }
 
     @Override
@@ -55,30 +105,24 @@ public class BigGeoTiffProductWriter extends AbstractProductWriter {
 
         deleteOutput();
         updateProductName();
-
-        final Product sourceProduct = getSourceProduct();
-        final MultiLevelImage firstSourceImage = sourceProduct.getBandAt(0).getSourceImage();
-        final int tileWidth = firstSourceImage.getTileWidth();
-        final int tileHeight = firstSourceImage.getTileHeight();
-
-        writeParam = new TIFFImageWriteParam(Locale.ENGLISH);
-        writeParam.setCompressionMode(TIFFImageWriteParam.MODE_EXPLICIT);                               // @todo 2 tb/tb parse
-        final TIFFLZWCompressor compressor = new TIFFLZWCompressor(BaselineTIFFTagSet.PREDICTOR_NONE);  // @todo 2 tb/tb parse
-        writeParam.setTIFFCompressor(compressor);
-        writeParam.setCompressionType(compressor.getCompressionType());
-        writeParam.setCompressionQuality(0.75f);                                                        // @todo 2 tb/tb parse
-
-        writeParam.setTilingMode(TIFFImageWriteParam.MODE_EXPLICIT);
-        writeParam.setTiling(tileWidth, tileHeight, 0, 0);                                                           // @todo 2 tb/tb parse
-
-//        writeParam.unsetColorConverter();
-
-//        writeParam.setForceToBigTIFF(true);                                                             // @todo 2 tb/tb parse
+        updateTilingParameter();
 
         imageWriter = getTiffImageWriter();
 
         outputStream = new FileImageOutputStream(outputFile);
         imageWriter.setOutput(outputStream);
+    }
+
+    private void updateTilingParameter() {
+        if (writeParam.getTilingMode() != TIFFImageWriteParam.MODE_EXPLICIT) {
+            final Product sourceProduct = getSourceProduct();
+            final MultiLevelImage firstSourceImage = sourceProduct.getBandAt(0).getSourceImage();
+            final int tileWidth = firstSourceImage.getTileWidth();
+            final int tileHeight = firstSourceImage.getTileHeight();
+
+            writeParam.setTilingMode(TIFFImageWriteParam.MODE_EXPLICIT);
+            writeParam.setTiling(tileWidth, tileHeight, 0, 0);
+        }
     }
 
     private TIFFImageWriter getTiffImageWriter() {
