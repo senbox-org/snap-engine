@@ -81,6 +81,16 @@ public class InputProductValidator {
         } else if (!shouldbe && isMultiSwath) {
             throw new OperatorException("Source product should first be deburst");
         }
+        if(!shouldbe) {
+            for (Band band : product.getBands()) {
+                final String name = band.getName();
+                if (name.startsWith("i_IW1") || name.startsWith("i_EW1") ||
+                        name.startsWith("i_IW2") || name.startsWith("i_EW2") ||
+                        name.startsWith("i_IW3") || name.startsWith("i_EW3")) {
+                    throw new OperatorException("Source product should first be deburst");
+                }
+            }
+        }
     }
 
     private static boolean contains(final String[] list, final String tag) {
