@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (C) 2014 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -182,8 +182,7 @@ public class ProductIO {
      * @see #readProduct(File)
      */
     public static Product readProduct(String filePath) throws IOException {
-        final File file = new File(filePath);
-        return readProductImpl(file, null);
+        return readProductImpl(new File(filePath), null);
     }
 
     /**
@@ -249,9 +248,9 @@ public class ProductIO {
      * @see ProductReader#readProductNodes(Object, ProductSubsetDef)
      */
     public static ProductReader getProductReaderForInput(Object input) {
+        final long startTimeTotal = System.currentTimeMillis();
         Logger logger = BeamLogManager.getSystemLogger();
         logger.fine("Searching reader plugin for '" + input + "'");
-
         ProductIOPlugInManager registry = ProductIOPlugInManager.getInstance();
         Iterator<ProductReaderPlugIn> it = registry.getAllReaderPlugIns();
         ProductReaderPlugIn selectedPlugIn = null;
@@ -269,6 +268,8 @@ public class ProductIO {
                 selectedPlugIn = plugIn;
             }
         }
+        final long endTimeTotal = System.currentTimeMillis();
+        logger.fine(String.format("Searching reader plugin took %d ms", (endTimeTotal - startTimeTotal)));
         if (selectedPlugIn != null) {
             logger.fine("Selected " + selectedPlugIn.getClass().getName());
             return selectedPlugIn.createReaderInstance();
