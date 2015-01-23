@@ -15,19 +15,8 @@
  */
 package org.esa.beam.util.geotiff;
 
-import java.awt.image.RenderedImage;
-import java.io.File;
-import java.io.IOException;
-
-import javax.imageio.IIOException;
-import javax.imageio.IIOImage;
-import javax.imageio.ImageIO;
-import javax.imageio.ImageTypeSpecifier;
-import javax.imageio.ImageWriter;
-import javax.imageio.metadata.IIOInvalidTreeException;
-import javax.imageio.metadata.IIOMetadata;
-import javax.imageio.stream.ImageOutputStream;
-
+import com.sun.media.imageio.plugins.tiff.BaselineTIFFTagSet;
+import com.sun.media.imageio.plugins.tiff.GeoTIFFTagSet;
 import org.esa.beam.util.Debug;
 import org.jdom.Document;
 import org.jdom.Element;
@@ -38,6 +27,14 @@ import org.jdom.output.DOMOutputter;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 
+import javax.imageio.*;
+import javax.imageio.metadata.IIOInvalidTreeException;
+import javax.imageio.metadata.IIOMetadata;
+import javax.imageio.stream.ImageOutputStream;
+import java.awt.image.RenderedImage;
+import java.io.File;
+import java.io.IOException;
+
 public class GeoTIFF {
 
     /**
@@ -47,9 +44,7 @@ public class GeoTIFF {
      * @param image           a <code>RenderedImage</code> to be written. name of the format.
      * @param outputFile      a <code>File</code> to be written to.
      * @param geoTIFFMetadata the GeoTIFF specific metadata
-     *
      * @return <code>false</code> if no appropriate image I/O writer was found.
-     *
      * @throws IllegalArgumentException if any parameter is <code>null</code>.
      * @throws java.io.IOException      if an error occurs during writing.
      */
@@ -90,9 +85,7 @@ public class GeoTIFF {
      * @param image           a <code>RenderedImage</code> to be written.
      * @param outputStream    an <code>ImageOutputStream</code> to be written to.
      * @param geoTIFFMetadata the GeoTIFF specific metadata
-     *
      * @return <code>false</code> if no appropriate writer is found.
-     *
      * @throws IllegalArgumentException if any parameter is <code>null</code>.
      * @throws java.io.IOException      if an error occurs during writing.
      */
@@ -124,7 +117,6 @@ public class GeoTIFF {
      * Gets an image writer suitable to be used for GeoTIFF.
      *
      * @param image the image to be written later
-     *
      * @return a suitable image writer, or <code>null</code> if no writer is found
      */
     public static ImageWriter getImageWriter(RenderedImage image) {
@@ -135,7 +127,6 @@ public class GeoTIFF {
      * Gets an image writer suitable to be used for GeoTIFF.
      *
      * @param imageType the type of the image to be written later
-     *
      * @return a suitable image writer, or <code>null</code> if no writer is found
      */
     public static ImageWriter getImageWriter(ImageTypeSpecifier imageType) {
@@ -150,9 +141,7 @@ public class GeoTIFF {
      * @param writer          the image writer, must not be null
      * @param im              the image, must not be null
      * @param geoTIFFMetadata the GeoTIFF metadata, must not be null
-     *
      * @return the IIO image, never null
-     *
      * @throws IIOException if the metadata cannot be created
      */
     public static IIOImage createIIOImage(ImageWriter writer, RenderedImage im, GeoTIFFMetadata geoTIFFMetadata) throws IIOException {
@@ -167,23 +156,37 @@ public class GeoTIFF {
      * @param writer          the image writer, must not be null
      * @param type            the image type, must not be null
      * @param geoTIFFMetadata the GeoTIFF metadata, must not be null
-     *
      * @return the image metadata, never null
-     *
      * @throws IIOException if the metadata cannot be created
      */
     public static IIOMetadata createIIOMetadata(ImageWriter writer, ImageTypeSpecifier type,
                                                 GeoTIFFMetadata geoTIFFMetadata) throws IIOException {
+        final String classnameList = BaselineTIFFTagSet.class.getName() + "," + GeoTIFFTagSet.class.getName();
+        return createIIOMetadata(writer, type, geoTIFFMetadata, GeoTIFFMetadata.IIO_METADATA_FORMAT_NAME, classnameList);
+    }
+
+    /**
+     * Creates image metadata which complies to the GeoTIFF specification for the given image writer, image type and
+     * GeoTIFF metadata.
+     *
+     * @param writer             the image writer, must not be null
+     * @param type               the image type, must not be null
+     * @param geoTIFFMetadata    the GeoTIFF metadata, must not be null
+     * @param metadataFormatName the name of the Metadata Format specification
+     * @return the image metadata, never null
+     * @throws IIOException if the metadata cannot be created
+     */
+    public static IIOMetadata createIIOMetadata(ImageWriter writer, ImageTypeSpecifier type,
+                                                GeoTIFFMetadata geoTIFFMetadata, String metadataFormatName, String classNameList) throws IIOException {
         final IIOMetadata imageMetadata = writer.getDefaultImageMetadata(type, null);
-        org.w3c.dom.Element w3cElement = (org.w3c.dom.Element) imageMetadata.getAsTree(
-                GeoTIFFMetadata.IIO_METADATA_FORMAT_NAME);
+        org.w3c.dom.Element w3cElement = (org.w3c.dom.Element) imageMetadata.getAsTree(metadataFormatName);
         final Element element = new DOMBuilder().build(w3cElement);
 
         if (Debug.isEnabled()) {
             Debug.trace("Dumping original TIFF metadata tree:\n" + toXMLString(element));
         }
 
-        geoTIFFMetadata.assignTo(element);
+        geoTIFFMetadata.assignTo(element, metadataFormatName, classNameList);
 
         if (Debug.isEnabled()) {
             Debug.trace("Dumping modified GeoTIFF metadata tree:\n" + toXMLString(element));
@@ -194,7 +197,7 @@ public class GeoTIFF {
         final Document document = new Document(element);
         try {
             final org.w3c.dom.Document w3cDoc = new DOMOutputter().output(document);
-            imageMetadata.setFromTree(GeoTIFFMetadata.IIO_METADATA_FORMAT_NAME, w3cDoc.getDocumentElement());
+            imageMetadata.setFromTree(metadataFormatName, w3cDoc.getDocumentElement());
         } catch (JDOMException e) {
             throw new IIOException("Failed to set GeoTIFF specific tags.", e);
         } catch (IIOInvalidTreeException e) {

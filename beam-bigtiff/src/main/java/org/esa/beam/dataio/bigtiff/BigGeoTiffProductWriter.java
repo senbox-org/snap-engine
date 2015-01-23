@@ -4,6 +4,7 @@ import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.glevel.MultiLevelImage;
 import it.geosolutions.imageio.plugins.tiff.BaselineTIFFTagSet;
 import it.geosolutions.imageio.plugins.tiff.TIFFImageWriteParam;
+import it.geosolutions.imageioimpl.plugins.tiff.TIFFImageMetadata;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFImageWriter;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFLZWCompressor;
 import org.esa.beam.framework.dataio.AbstractProductWriter;
@@ -12,7 +13,10 @@ import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.datamodel.ProductNode;
+import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.StringUtils;
+import org.esa.beam.util.geotiff.GeoTIFF;
+import org.esa.beam.util.geotiff.GeoTIFFMetadata;
 import org.esa.beam.util.io.FileUtils;
 
 import javax.imageio.IIOImage;
@@ -157,10 +161,27 @@ public class BigGeoTiffProductWriter extends AbstractProductWriter {
             writeImage = sourceBand.getSourceImage();
         }
 
+        GeoTIFFMetadata geoTIFFMetadata = ProductUtils.createGeoTIFFMetadata(sourceProduct);
+        if (geoTIFFMetadata == null) {
+            geoTIFFMetadata = new GeoTIFFMetadata();
+        }
+        final ImageTypeSpecifier imageTypeSpecifier = ImageTypeSpecifier.createFromRenderedImage(writeImage);
+        final TIFFImageMetadata iioMetadata = (TIFFImageMetadata) GeoTIFF.createIIOMetadata(imageWriter, imageTypeSpecifier, geoTIFFMetadata,
+                "it_geosolutions_imageioimpl_plugins_tiff_image_1.0",
+                "it.geosolutions.imageio.plugins.tiff.BaselineTIFFTagSet,it.geosolutions.imageio.plugins.tiff.BaselineTIFFTagSet");
+
+//        final TiffIFD tiffIFD = new TiffIFD(sourceProduct);
+//        final TIFFField tiffField = iioMetadata.getTIFFField(256);
+//        tiffField.getAsString(0);
+//
+//        final TIFFIFD rootIFD = iioMetadata.getRootIFD();
+//        rootIFD.addTagSet();
+
+
         final SampleModel sampleModel = writeImage.getSampleModel();
         writeParam.setDestinationType(new ImageTypeSpecifier(new BogusAndCheatingColorModel(sampleModel), sampleModel));
 
-        final IIOImage iioImage = new IIOImage(writeImage, null, null);
+        final IIOImage iioImage = new IIOImage(writeImage, null, iioMetadata);
         imageWriter.write(null, iioImage, writeParam);
 
         isWritten = true;
