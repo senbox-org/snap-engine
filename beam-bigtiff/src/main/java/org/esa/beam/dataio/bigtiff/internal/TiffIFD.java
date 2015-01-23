@@ -187,7 +187,7 @@ public class TiffIFD {
 
     private static int getNumBands(Product product) {
         final Band[] bands = product.getBands();
-        final List<Band> bandList = new ArrayList<Band>(bands.length);
+        final List<Band> bandList = new ArrayList<>(bands.length);
         for (Band band : bands) {
             if (shouldWriteNode(band)) {
                 bandList.add(band);
@@ -247,8 +247,8 @@ public class TiffIFD {
 
         final int numEntries = geoTIFFMetadata.getNumGeoKeyEntries();
         final TiffShort[] directoryTagValues = new TiffShort[numEntries * 4];
-        final ArrayList<TiffDouble> doubleValues = new ArrayList<TiffDouble>();
-        final ArrayList<String> asciiValues = new ArrayList<String>();
+        final ArrayList<TiffDouble> doubleValues = new ArrayList<>();
+        final ArrayList<String> asciiValues = new ArrayList<>();
         for (int i = 0; i < numEntries; i++) {
             final GeoTIFFMetadata.KeyEntry entry = geoTIFFMetadata.getGeoKeyEntryAt(i);
             final int[] data = entry.getData();
@@ -339,7 +339,11 @@ public class TiffIFD {
         }
 
         if (maxFloatType != -1) {
-            return ProductData.TYPE_FLOAT32;
+            if (maxUnsignedIntType == ProductData.TYPE_UINT32 || maxSignedIntType == ProductData.TYPE_INT32) {
+                return ProductData.TYPE_FLOAT64;
+            } else {
+                return maxFloatType;
+            }
         }
 
         if (maxUnsignedIntType != -1) {
@@ -349,7 +353,7 @@ public class TiffIFD {
             if (ProductData.getElemSize(maxUnsignedIntType) >= ProductData.getElemSize(maxSignedIntType)) {
                 int returnType = maxUnsignedIntType - 10 + 1;
                 if (returnType > 12) {
-                    return ProductData.TYPE_FLOAT32;
+                    return ProductData.TYPE_FLOAT64;
                 } else {
                     return returnType;
                 }

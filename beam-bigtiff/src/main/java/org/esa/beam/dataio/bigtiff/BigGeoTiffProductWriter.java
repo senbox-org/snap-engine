@@ -7,6 +7,7 @@ import it.geosolutions.imageio.plugins.tiff.TIFFImageWriteParam;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFImageMetadata;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFImageWriter;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFLZWCompressor;
+import org.esa.beam.dataio.bigtiff.internal.TiffIFD;
 import org.esa.beam.framework.dataio.AbstractProductWriter;
 import org.esa.beam.framework.dataio.ProductWriterPlugIn;
 import org.esa.beam.framework.datamodel.Band;
@@ -149,6 +150,9 @@ public class BigGeoTiffProductWriter extends AbstractProductWriter {
         final ParameterBlock parameterBlock = new ParameterBlock();
         final Product sourceProduct = sourceBand.getProduct();
 
+        final TiffIFD tiffIFD = new TiffIFD(sourceProduct);
+        final int bandDataType = tiffIFD.getBandDataType();
+
         RenderedImage writeImage;
 
         final int nodeCount = sourceProduct.getNumBands();
@@ -170,7 +174,7 @@ public class BigGeoTiffProductWriter extends AbstractProductWriter {
                 "it_geosolutions_imageioimpl_plugins_tiff_image_1.0",
                 "it.geosolutions.imageio.plugins.tiff.BaselineTIFFTagSet,it.geosolutions.imageio.plugins.tiff.BaselineTIFFTagSet");
 
-//        final TiffIFD tiffIFD = new TiffIFD(sourceProduct);
+
 //        final TIFFField tiffField = iioMetadata.getTIFFField(256);
 //        tiffField.getAsString(0);
 //
