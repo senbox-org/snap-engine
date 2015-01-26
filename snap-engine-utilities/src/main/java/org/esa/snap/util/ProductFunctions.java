@@ -78,6 +78,11 @@ public class ProductFunctions {
         final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
         if(absRoot != null) {
             final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
+            if(mission.equals("ENVISAT")) {
+                if(product.getProductType().startsWith("ASA")) {
+                    return true;
+                }
+            }
             for(String sar : SARMISSIONS) {
                 if (mission.startsWith(sar)) {
                     return true;
