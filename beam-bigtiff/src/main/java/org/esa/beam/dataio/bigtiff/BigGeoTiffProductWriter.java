@@ -14,10 +14,7 @@ import org.esa.beam.dataio.bigtiff.internal.TiffIFD;
 import org.esa.beam.dataio.dimap.DimapHeaderWriter;
 import org.esa.beam.framework.dataio.AbstractProductWriter;
 import org.esa.beam.framework.dataio.ProductWriterPlugIn;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.framework.datamodel.ProductNode;
+import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.jai.ImageManager;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.StringUtils;
@@ -155,33 +152,22 @@ public class BigGeoTiffProductWriter extends AbstractProductWriter {
             return;
         }
 
-        final ParameterBlock parameterBlock = new ParameterBlock();
         final Product sourceProduct = sourceBand.getProduct();
 
-        final TiffIFD tiffIFD = new TiffIFD(sourceProduct);
-        final int maxSourceDataType = tiffIFD.getBandDataType();
-        final int targetDataType = ImageManager.getDataBufferType(maxSourceDataType);
+        final int targetDataType = getTargetDataType(sourceProduct);
+        final ArrayList<Band> bandsToExport = getBandsToExport(sourceProduct);
 
         RenderedImage writeImage;
-
-        final int nodeCount = sourceProduct.getNumBands();
-        final ArrayList<Band> bandsToWrite = new ArrayList<>();
-        for (int i = 0; i < nodeCount; i++){
-            final Band band = sourceProduct.getBandAt(i);
-            if (BigGeoTiffBandWriter.shouldWriteNode(band)) {
-                bandsToWrite.add(band);
-            }
-        }
-
-        if (bandsToWrite.size() > 1) {
-            for (int i = 0; i < bandsToWrite.size(); i++) {
-                final Band subsetBand = bandsToWrite.get(i);
+        if (bandsToExport.size() > 1) {
+            final ParameterBlock parameterBlock = new ParameterBlock();
+            for (int i = 0; i < bandsToExport.size(); i++) {
+                final Band subsetBand = bandsToExport.get(i);
                 final RenderedImage sourceImage = getImageWithTargetDataType(targetDataType, subsetBand);
                 parameterBlock.setSource(sourceImage, i);
             }
             writeImage = JAI.create("bandmerge", parameterBlock, null);
         } else {
-            writeImage = getImageWithTargetDataType(targetDataType, bandsToWrite.get(0));
+            writeImage = getImageWithTargetDataType(targetDataType, bandsToExport.get(0));
         }
 
         GeoTIFFMetadata geoTIFFMetadata = ProductUtils.createGeoTIFFMetadata(sourceProduct);
@@ -196,7 +182,6 @@ public class BigGeoTiffProductWriter extends AbstractProductWriter {
 
         addDimapMetaField(sourceProduct, iioMetadata);
 
-
         final SampleModel sampleModel = writeImage.getSampleModel();
         writeParam.setDestinationType(new ImageTypeSpecifier(new BogusAndCheatingColorModel(sampleModel), sampleModel));
 
@@ -206,12 +191,30 @@ public class BigGeoTiffProductWriter extends AbstractProductWriter {
         isWritten = true;
     }
 
+    private ArrayList<Band> getBandsToExport(Product sourceProduct) {
+        final int nodeCount = sourceProduct.getNumBands();
+        final ArrayList<Band> bandsToWrite = new ArrayList<>();
+        for (int i = 0; i < nodeCount; i++) {
+            final Band band = sourceProduct.getBandAt(i);
+            if (shouldWrite(band)) {
+                bandsToWrite.add(band);
+            }
+        }
+        return bandsToWrite;
+    }
+
+    private int getTargetDataType(Product sourceProduct) {
+        final TiffIFD tiffIFD = new TiffIFD(sourceProduct);
+        final int maxSourceDataType = tiffIFD.getBandDataType();
+        return ImageManager.getDataBufferType(maxSourceDataType);
+    }
+
     private void addDimapMetaField(Product sourceProduct, TIFFImageMetadata iioMetadata) {
         final TIFFTag beamMetaTag = new TIFFTag("BEAM_METADATA", Constants.PRIVATE_BEAM_TIFF_TAG_NUMBER, TIFFTag.TIFF_ASCII);
         final String beamMetadata = getBeamMetadata(sourceProduct);
 
         final TIFFIFD rootIFD = iioMetadata.getRootIFD();
-        final TIFFField beamMetaDataTiffField = new TIFFField(beamMetaTag, TIFFTag.TIFF_ASCII, 1, new String[] {beamMetadata});
+        final TIFFField beamMetaDataTiffField = new TIFFField(beamMetaTag, TIFFTag.TIFF_ASCII, 1, new String[]{beamMetadata});
         rootIFD.addTIFFField(beamMetaDataTiffField);
     }
 
@@ -256,7 +259,12 @@ public class BigGeoTiffProductWriter extends AbstractProductWriter {
 
     @Override
     public boolean shouldWrite(ProductNode node) {
-        return BigGeoTiffBandWriter.shouldWriteNode(node);
+        if (node instanceof VirtualBand) {
+            return false;
+        } else if (node instanceof FilterBand) {
+            return false;
+        }
+        return true;
     }
 
     @Override
