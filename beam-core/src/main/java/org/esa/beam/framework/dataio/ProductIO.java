@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (C) 2014 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -182,12 +182,7 @@ public class ProductIO {
      * @see #readProduct(File)
      */
     public static Product readProduct(String filePath) throws IOException {
-        final File file = new File(filePath);
-        final Product product = CommonReaders.readCommonProductReader(file);
-        if (product != null) {
-            return product;
-        }
-        return readProductImpl(file, null);
+        return readProductImpl(new File(filePath), null);
     }
 
     /**
@@ -207,10 +202,6 @@ public class ProductIO {
      * @see #readProduct(String)
      */
     public static Product readProduct(File file) throws IOException {
-        final Product product = CommonReaders.readCommonProductReader(file);
-        if (product != null) {
-            return product;
-        }
         return readProductImpl(file, null);
     }
 
@@ -257,9 +248,9 @@ public class ProductIO {
      * @see ProductReader#readProductNodes(Object, ProductSubsetDef)
      */
     public static ProductReader getProductReaderForInput(Object input) {
+        final long startTimeTotal = System.currentTimeMillis();
         Logger logger = BeamLogManager.getSystemLogger();
         logger.fine("Searching reader plugin for '" + input + "'");
-
         ProductIOPlugInManager registry = ProductIOPlugInManager.getInstance();
         Iterator<ProductReaderPlugIn> it = registry.getAllReaderPlugIns();
         ProductReaderPlugIn selectedPlugIn = null;
@@ -277,6 +268,8 @@ public class ProductIO {
                 selectedPlugIn = plugIn;
             }
         }
+        final long endTimeTotal = System.currentTimeMillis();
+        logger.fine(String.format("Searching reader plugin took %d ms", (endTimeTotal - startTimeTotal)));
         if (selectedPlugIn != null) {
             logger.fine("Selected " + selectedPlugIn.getClass().getName());
             return selectedPlugIn.createReaderInstance();
@@ -437,6 +430,7 @@ public class ProductIO {
                     if (pm.isCanceled()) {
                         break;
                     }
+                    pm.setSubTaskName("Writing band '" + band.getName() + "'");
                     band.writeRasterDataFully(SubProgressMonitor.create(pm, 1));
                 }
             } finally {

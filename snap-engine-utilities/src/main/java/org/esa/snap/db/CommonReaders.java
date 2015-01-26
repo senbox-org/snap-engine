@@ -1,5 +1,7 @@
-package org.esa.beam.framework.dataio;
+package org.esa.snap.db;
 
+import org.esa.beam.framework.dataio.ProductIO;
+import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Product;
 
 import java.io.File;
@@ -9,6 +11,14 @@ import java.io.IOException;
  * Optimize getting readers for common data products
  */
 public class CommonReaders {
+
+    public static Product readProduct(final File file) throws IOException {
+        Product product = CommonReaders.readCommonProductReader(file);
+        if(product == null) {
+            product = ProductIO.readProduct(file);
+        }
+        return product;
+    }
 
     /**
      * Quickly return the product read by the right reader without testing many readers

@@ -194,7 +194,7 @@ public final class AbstractMetadata {
      * @param root the product metadata root
      * @return abstracted metadata root
      */
-    public static MetadataElement addAbstractedMetadataHeader(MetadataElement root) {
+    public static MetadataElement addAbstractedMetadataHeader(final MetadataElement root) {
         MetadataElement absRoot;
         if (root == null) {
             absRoot = new MetadataElement(ABSTRACT_METADATA_ROOT);
@@ -629,12 +629,27 @@ public final class AbstractMetadata {
             abstractedMetadata = root.getElement("Abstracted Metadata"); // legacy
             if (abstractedMetadata == null) {
                 abstractedMetadata = addAbstractedMetadataHeader(root);
+                defaultToProduct(abstractedMetadata, sourceProduct);
             }
         }
         migrateToCurrentVersion(abstractedMetadata);
         patchMissingMetadata(abstractedMetadata);
 
         return abstractedMetadata;
+    }
+
+    private static void defaultToProduct(final MetadataElement abstractedMetadata, final Product product) {
+        setAttribute(abstractedMetadata, PRODUCT, product.getName());
+        setAttribute(abstractedMetadata, PRODUCT_TYPE, product.getProductType());
+        setAttribute(abstractedMetadata, SPH_DESCRIPTOR, product.getDescription());
+
+        setAttribute(abstractedMetadata, num_output_lines, product.getSceneRasterHeight());
+        setAttribute(abstractedMetadata, num_samples_per_line, product.getSceneRasterWidth());
+
+        setAttribute(abstractedMetadata, first_line_time, product.getStartTime());
+        setAttribute(abstractedMetadata, last_line_time, product.getEndTime());
+
+        setAttribute(abstractedMetadata, MISSION, product.getProductReader().getReaderPlugIn().getFormatNames()[0]);
     }
 
     private static void migrateToCurrentVersion(final MetadataElement abstractedMetadata) {

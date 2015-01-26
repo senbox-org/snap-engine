@@ -132,10 +132,6 @@ public class ProductSceneView extends BasicView
      */
     public static final String PROPERTY_KEY_PIXEL_BORDER_SHOWN = "pixel.border.shown";
     /**
-     * Property name for antialiased graphics drawing
-     */
-    public static final String PROPERTY_KEY_GRAPHICS_ANTIALIASING = "graphics.antialiasing";
-    /**
      * Name of property which switches display of af a navigataion control in the image view.
      */
     public static final String PROPERTY_KEY_IMAGE_NAV_CONTROL_SHOWN = "image.navControlShown";
@@ -238,8 +234,7 @@ public class ProductSceneView extends BasicView
         final boolean navControlShown = sceneImage.getConfiguration().getPropertyBool(
                 PROPERTY_KEY_IMAGE_NAV_CONTROL_SHOWN, true);
         this.layerCanvas.setNavControlShown(navControlShown);
-        this.layerCanvas.setAntialiasing(
-                sceneImage.getConfiguration().getPropertyBool(PROPERTY_KEY_GRAPHICS_ANTIALIASING, true));
+        this.layerCanvas.setAntialiasing(true);
         this.layerCanvas.setPreferredSize(new Dimension(400, 400));
         this.layerCanvas.addOverlay((canvas, rendering) -> {
             figureEditor.drawFigureSelection(rendering);
@@ -681,7 +676,7 @@ public class ProductSceneView extends BasicView
      */
     public void setLayerProperties(PropertyMap configuration) {
         setScrollBarsShown(configuration.getPropertyBool(PROPERTY_KEY_IMAGE_SCROLL_BARS_SHOWN, false));
-        layerCanvas.setAntialiasing(configuration.getPropertyBool(PROPERTY_KEY_GRAPHICS_ANTIALIASING, true));
+        layerCanvas.setAntialiasing(true);
         layerCanvas.setNavControlShown(configuration.getPropertyBool(PROPERTY_KEY_IMAGE_NAV_CONTROL_SHOWN, true));
         layerCanvas.setBackground(
                 configuration.getPropertyColor("image.background.color", DEFAULT_IMAGE_BACKGROUND_COLOR));
@@ -856,8 +851,8 @@ public class ProductSceneView extends BasicView
         ArrayList<SimpleFeatureFigure> selectedFigures = new ArrayList<>();
         collectFeatureFigures(figureEditor.getFigureSelection(), selectedFigures);
         if (selectedFigures.isEmpty()
-            && !selectedOnly
-            && getSelectedLayer() instanceof VectorDataLayer) {
+                && !selectedOnly
+                && getSelectedLayer() instanceof VectorDataLayer) {
             VectorDataLayer vectorDataLayer = (VectorDataLayer) getSelectedLayer();
             collectFeatureFigures(vectorDataLayer.getFigureCollection(), selectedFigures);
         }
@@ -1203,7 +1198,7 @@ public class ProductSceneView extends BasicView
     private boolean isPixelPosValid(int currentPixelX, int currentPixelY, int currentLevel) {
         return currentPixelX >= 0 && currentPixelX < baseImageLayer.getImage(
                 currentLevel).getWidth() && currentPixelY >= 0
-               && currentPixelY < baseImageLayer.getImage(currentLevel).getHeight();
+                && currentPixelY < baseImageLayer.getImage(currentLevel).getHeight();
     }
 
     private void firePixelPosChanged(MouseEvent e, int currentPixelX, int currentPixelY, int currentLevel) {
@@ -1254,7 +1249,7 @@ public class ProductSceneView extends BasicView
 
     private boolean isPixelBorderDisplayEnabled() {
         return pixelBorderShown &&
-               getLayerCanvas().getViewport().getZoomFactor() >= pixelBorderViewScale;
+                getLayerCanvas().getViewport().getZoomFactor() >= pixelBorderViewScale;
     }
 
     private void drawPixelBorder(int currentPixelX, int currentPixelY, int currentLevel, boolean showBorder) {

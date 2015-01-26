@@ -1,11 +1,14 @@
 package org.esa.beam.opendap;
 
+import org.esa.beam.framework.gpf.ui.DefaultAppContext;
 import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.opendap.ui.OpendapAccessPanel;
 import org.esa.beam.visat.actions.AbstractVisatAction;
 
+import javax.swing.Action;
 import javax.swing.JDialog;
 import java.awt.Dimension;
+import java.util.Map;
 
 public class ShowOpendapClientAction extends AbstractVisatAction {
 

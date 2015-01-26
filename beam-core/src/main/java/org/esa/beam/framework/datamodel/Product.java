@@ -434,7 +434,11 @@ public class Product extends ProductNode {
      * @param fileLocation the file location, may be <code>null</code>
      */
     public void setFileLocation(final File fileLocation) {
-        this.fileLocation = fileLocation;
+        if (!ObjectUtils.equalObjects(this.fileLocation, fileLocation)) {
+            File oldValue = this.fileLocation;
+            this.fileLocation = fileLocation;
+            fireNodeChanged(this, "fileLocation", oldValue, fileLocation);
+        }
     }
 
 
@@ -1365,6 +1369,28 @@ public class Product extends ProductNode {
         final Parser parser = createBandArithmeticParser();
         return parser.parse(expression);
     }
+
+    /**
+     * Gets all raster data nodes referenced by the given band maths expression.
+     *
+     * @param expression The expression.
+     * @return all raster data nodes referenced by the given band maths expression.
+     * @throws ParseException If the expression contains errors.
+     * @since SNAP 2
+     */
+    public RasterDataNode[] getRefRasterDataNodes(String expression) throws ParseException {
+        RasterDataNode[] nodes;
+        final ProductManager productManager = getProductManager();
+        if (productManager != null) {
+            nodes = BandArithmetic.getRefRasters(expression,
+                                                 productManager.getProducts(),
+                                                 productManager.getProductIndex(this));
+        } else {
+            nodes = BandArithmetic.getRefRasters(expression, this);
+        }
+        return nodes;
+    }
+
 
     //////////////////////////////////////////////////////////////////////////
     // Visitor-Pattern support
