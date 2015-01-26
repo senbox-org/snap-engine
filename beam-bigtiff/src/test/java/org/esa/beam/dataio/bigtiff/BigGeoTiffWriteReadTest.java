@@ -248,12 +248,32 @@ public class BigGeoTiffWriteReadTest {
         assertEquality(outProduct.getGeoCoding(), inProduct.getGeoCoding(), 2.0e-5f);
     }
 
-    // @todo 1 tb/tb enable when issue with this test is resolved 2015-01-14
     @Test
     public void testWriteReadTiePointGeoCoding() throws IOException {
         setTiePointGeoCoding(outProduct);
         final Band bandFloat32 = outProduct.addBand("float32", ProductData.TYPE_FLOAT32);
         bandFloat32.setDataElems(createFloats(getProductSize(), 2.343f));
+
+        performTest(2.0e-5f);
+    }
+
+    @Test
+    public void testWriteReadTiePointGeoCoding_withMultipleMixedBands() throws IOException {
+        setTiePointGeoCoding(outProduct);
+        Band bandFloat32 = outProduct.addBand("float32_1", ProductData.TYPE_FLOAT32);
+        bandFloat32.setDataElems(createFloats(getProductSize(), 2.343f));
+
+        bandFloat32 = outProduct.addBand("float32_2", ProductData.TYPE_FLOAT32);
+        bandFloat32.setDataElems(createFloats(getProductSize(), 3.19f));
+
+        bandFloat32 = outProduct.addBand("float32_3", ProductData.TYPE_FLOAT32);
+        bandFloat32.setDataElems(createFloats(getProductSize(), 2.66f));
+
+        bandFloat32 = outProduct.addBand("float32_4", ProductData.TYPE_FLOAT32);
+        bandFloat32.setDataElems(createFloats(getProductSize(), 0.619f));
+
+        bandFloat32 = outProduct.addBand("float32_5", ProductData.TYPE_FLOAT32);
+        bandFloat32.setDataElems(createFloats(getProductSize(), 11.8f));
 
         performTest(2.0e-5f);
     }
@@ -323,13 +343,9 @@ public class BigGeoTiffWriteReadTest {
         band2.readRasterDataFully(ProgressMonitor.NULL);
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
-                // @todo 1 tb/tb enable assertion again 2015-01-16
-                //System.out.println("orig: " + band1.getPixelDouble(i, j) + " tested: " + band2.getPixelDouble(i, j));
                 assertEquals(band1.getPixelDouble(i, j), band2.getPixelDouble(i, j), 1.0e-13);
             }
         }
-
-        //System.out.println("###########################");
     }
 
     private void assertEquality(final GeoCoding gc1, final GeoCoding gc2, float accuracy) {

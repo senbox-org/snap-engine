@@ -589,54 +589,21 @@ public class BigGeoTiffProductReader extends AbstractProductReader {
     }
 
     private void addBandsToProduct(TiffFileInfo tiffFileInfo, Product product) throws IOException {
-//        final ImageReadParam readParam = imageReader.getDefaultReadParam();
-//        final TIFFRenderedImage baseImage = (TIFFRenderedImage) imageReader.readAsRenderedImage(FIRST_IMAGE, readParam);
-//        final SampleModel sampleModel = baseImage.getSampleModel();
-//        final int numBands = sampleModel.getNumBands();
-//        final int productDataType = ImageManager.getProductDataType(sampleModel.getDataType());
-//
-//        bandMap = new HashMap<>(numBands);
-//        for (int i = 0; i < numBands; i++) {
-//            final String bandName = String.format("band_%d", i + 1);
-//            final Band band = product.addBand(bandName, productDataType);
-//            if (tiffFileInfo.containsField(BaselineTIFFTagSet.TAG_COLOR_MAP) && baseImage.getColorModel() instanceof IndexColorModel) {
-//                band.setImageInfo(createIndexedImageInfo(product, baseImage, band));
-//            }
-//            bandMap.put(band, i);
-//        }
-        ImageTypeSpecifier rawImageType = imageReader.getRawImageType(0);
+        final ImageTypeSpecifier rawImageType = imageReader.getRawImageType(0);
         final int numBands = rawImageType.getNumBands();
         final int productDataType = ImageManager.getProductDataType(rawImageType.getSampleModel().getDataType());
         bandMap = new HashMap<>(numBands);
         for (int bandIndex = 0; bandIndex < numBands; bandIndex++) {
             final String bandName = String.format("band_%d", bandIndex + 1);
             final Band band = product.addBand(bandName, productDataType);
-//band.setSourceImage(getBandSourceImage(bandIndex));
             band.setSourceImage(getMultiLevelImageSourceImage(band, bandIndex));
-//            System.out.println("################### dataType = " + band.getDataType());
-            if (tiffFileInfo.containsField(
-                    BaselineTIFFTagSet.TAG_COLOR_MAP) && rawImageType.getColorModel() instanceof IndexColorModel) {
-                IndexColorModel colorModel = (IndexColorModel) rawImageType.getColorModel();
+            if (tiffFileInfo.containsField(BaselineTIFFTagSet.TAG_COLOR_MAP) &&
+                    rawImageType.getColorModel() instanceof IndexColorModel) {
+                final IndexColorModel colorModel = (IndexColorModel) rawImageType.getColorModel();
                 band.setImageInfo(createIndexedImageInfo(product, band, colorModel));
             }
             bandMap.put(band, bandIndex);
         }
-    }
-
-    private ImageInfo createIndexedImageInfo(Product product, TIFFRenderedImage baseImage, Band band) {
-        final IndexColorModel colorModel = (IndexColorModel) baseImage.getColorModel();
-        final IndexCoding indexCoding = new IndexCoding("color_map");
-        final int colorCount = colorModel.getMapSize();
-        final ColorPaletteDef.Point[] points = new ColorPaletteDef.Point[colorCount];
-        for (int j = 0; j < colorCount; j++) {
-            final String name = String.format("I%3d", j);
-            indexCoding.addIndex(name, j, "");
-            points[j] = new ColorPaletteDef.Point(j, new Color(colorModel.getRGB(j)), name);
-        }
-        product.getIndexCodingGroup().add(indexCoding);
-        band.setSampleCoding(indexCoding);
-
-        return new ImageInfo(new ColorPaletteDef(points, points.length));
     }
 
     private static ImageInfo createIndexedImageInfo(Product product, Band band, IndexColorModel colorModel) {
