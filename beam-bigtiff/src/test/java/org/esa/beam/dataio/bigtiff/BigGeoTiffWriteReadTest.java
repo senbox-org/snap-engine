@@ -17,9 +17,8 @@
 package org.esa.beam.dataio.bigtiff;
 
 import com.bc.ceres.core.ProgressMonitor;
-import com.sun.media.imageioimpl.plugins.tiff.TIFFImageReader;
-import com.sun.media.imageioimpl.plugins.tiff.TIFFRenderedImage;
-import com.sun.media.jai.codec.ByteArraySeekableStream;
+import it.geosolutions.imageioimpl.plugins.tiff.TIFFImageReader;
+import it.geosolutions.imageioimpl.plugins.tiff.TIFFRenderedImage;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.dataop.maptransf.*;
@@ -32,7 +31,6 @@ import org.geotools.referencing.cs.DefaultCartesianCS;
 import org.geotools.referencing.datum.DefaultGeodeticDatum;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.opengis.parameter.ParameterValueGroup;
 import org.opengis.referencing.FactoryException;
@@ -45,14 +43,12 @@ import org.opengis.referencing.operation.TransformException;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
-import javax.imageio.ImageReader;
-import javax.imageio.stream.MemoryCacheImageInputStream;
+import javax.imageio.stream.ImageInputStream;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
 
 import static org.junit.Assert.*;
 
@@ -79,7 +75,6 @@ public class BigGeoTiffWriteReadTest {
             fail("unable to create test directory");
         }
         outputStream = new ByteArrayOutputStream();
-        location = new File("memory.tif");
         final int width = 14;
         final int height = 14;
         outProduct = new Product("P", "T", width, height);
@@ -109,24 +104,21 @@ public class BigGeoTiffWriteReadTest {
         final Product inProduct = writeReadProduct();
 
         assertEquals(outProduct.getName(), inProduct.getName());
-        // todo 1 tb/tb enable again 2015-01-23
-        //assertEquals(outProduct.getProductType(), inProduct.getProductType());
+        assertEquals(outProduct.getProductType(), inProduct.getProductType());
         assertEquals(outProduct.getNumBands(), inProduct.getNumBands());
 
-        // todo 1 tb/tb enable again 2015-01-23
-//        final Band actualBand = inProduct.getBandAt(0);
-//        assertEquals(expectedBand.getName(), actualBand.getName());
-//        assertEquals(expectedBand.getDescription(), actualBand.getDescription());
-//        assertEquals(expectedBand.getUnit(), actualBand.getUnit());
-//        assertEquals(expectedBand.getDataType(), actualBand.getDataType());
-//        assertEquals(expectedBand.getScalingFactor(), actualBand.getScalingFactor(), 1.0e-6);
-//        assertEquals(expectedBand.getScalingOffset(), actualBand.getScalingOffset(), 1.0e-6);
-//        assertEquals(expectedBand.isLog10Scaled(), actualBand.isLog10Scaled());
-//        assertEquals(expectedBand.getNoDataValue(), actualBand.getNoDataValue(), 1.0e-6);
-//        assertEquals(expectedBand.isNoDataValueUsed(), actualBand.isNoDataValueUsed());
+        final Band actualBand = inProduct.getBandAt(0);
+        assertEquals(expectedBand.getName(), actualBand.getName());
+        assertEquals(expectedBand.getDescription(), actualBand.getDescription());
+        assertEquals(expectedBand.getUnit(), actualBand.getUnit());
+        assertEquals(expectedBand.getDataType(), actualBand.getDataType());
+        assertEquals(expectedBand.getScalingFactor(), actualBand.getScalingFactor(), 1.0e-6);
+        assertEquals(expectedBand.getScalingOffset(), actualBand.getScalingOffset(), 1.0e-6);
+        assertEquals(expectedBand.isLog10Scaled(), actualBand.isLog10Scaled());
+        assertEquals(expectedBand.getNoDataValue(), actualBand.getNoDataValue(), 1.0e-6);
+        assertEquals(expectedBand.isNoDataValueUsed(), actualBand.isNoDataValueUsed());
     }
 
-    @Ignore
     @Test
     public void testWriteReadVirtualBandIsNotExcludedInProduct() throws IOException {
         final VirtualBand virtualBand = new VirtualBand("VB", ProductData.TYPE_FLOAT32,
@@ -139,52 +131,30 @@ public class BigGeoTiffWriteReadTest {
         assertNotNull(inProduct.getBand("VB"));
     }
 
-    @Ignore
     @Test
     public void testWriteReadVirtualBandIsExcludedInImageFile() throws IOException {
         final VirtualBand virtualBand = new VirtualBand("VB", ProductData.TYPE_FLOAT32,
                 outProduct.getSceneRasterWidth(),
                 outProduct.getSceneRasterHeight(), "X * Y");
         outProduct.addBand(virtualBand);
-        final BigGeoTiffProductWriter writer = (BigGeoTiffProductWriter) new BigGeoTiffProductWriterPlugIn().createWriterInstance();
-        outProduct.setProductWriter(writer);
-        // @todo 1 tb/tb refactor and make run again 2015-01-21
-        //writer.writeGeoTIFFProduct(new MemoryCacheImageOutputStream(outputStream), outProduct);
-        final Band[] bands = outProduct.getBands();
-        for (Band band : bands) {
-            if (writer.shouldWrite(band)) {
-                band.readRasterDataFully(ProgressMonitor.NULL);
-                writer.writeBandRasterData(band,
-                        0, 0,
-                        band.getSceneRasterWidth(), band.getSceneRasterHeight(),
-                        band.getData(), ProgressMonitor.NULL);
-            }
-        }
-        writer.flush();
-        ByteArraySeekableStream inputStream = new ByteArraySeekableStream(outputStream.toByteArray());
-        final MemoryCacheImageInputStream imageStream = new MemoryCacheImageInputStream(inputStream);
-        Iterator<ImageReader> imageReaders = ImageIO.getImageReaders(imageStream);
-        TIFFImageReader imageReader = null;
-        while (imageReaders.hasNext()) {
-            final ImageReader nextReader = imageReaders.next();
-            if (nextReader instanceof TIFFImageReader) {
-                imageReader = (TIFFImageReader) nextReader;
-            }
-        }
-        if (imageReader == null) {
-            throw new IllegalStateException("No TIFFImageReader found");
-        }
 
-        imageReader.setInput(imageStream);
-        assertEquals(1, imageReader.getNumImages(true));
+        final Product inProduct = writeReadProduct();
+        assertEquals(2, inProduct.getNumBands());
 
-        final ImageReadParam readParam = imageReader.getDefaultReadParam();
-        TIFFRenderedImage image = (TIFFRenderedImage) imageReader.readAsRenderedImage(0, readParam);
-        assertEquals(1, image.getSampleModel().getNumBands());
-        inputStream.close();
+        try (ImageInputStream imageInputStream = ImageIO.createImageInputStream(location)) {
+            final TIFFImageReader imageReader = BigGeoTiffProductReaderPlugIn.getTiffImageReader(imageInputStream);
+            if (imageReader == null) {
+                throw new IOException("GeoTiff imageReader not found");
+            }
+            imageReader.setInput(imageInputStream);
+            assertEquals(1, imageReader.getNumImages(true));
+
+            final ImageReadParam readParam = imageReader.getDefaultReadParam();
+            TIFFRenderedImage image = (TIFFRenderedImage) imageReader.readAsRenderedImage(0, readParam);
+            assertEquals(1, image.getSampleModel().getNumBands());
+        }
     }
 
-    @Ignore
     @Test
     public void testWriteReadIndexCodingSingle8BitBand() throws IOException {
         outProduct.removeBand(outProduct.getBandAt(0));
@@ -208,7 +178,6 @@ public class BigGeoTiffWriteReadTest {
         testIndexCoding(indexBand, 4);
     }
 
-    @Ignore
     @Test
     public void testWriteReadIndexCodingWith2BandsBand() throws IOException {
         final Band bandUInt8 = outProduct.addBand("uint8", ProductData.TYPE_UINT8);
@@ -245,7 +214,6 @@ public class BigGeoTiffWriteReadTest {
         assertNotSame(0, colors[3].getRed() | colors[3].getGreen() | colors[3].getBlue());
     }
 
-    @Ignore
     @Test
     public void testWriteReadUTMProjection() throws IOException, TransformException, FactoryException {
         setGeoCoding(outProduct, WGS_84_UTM_ZONE_28S);
@@ -263,7 +231,6 @@ public class BigGeoTiffWriteReadTest {
         assertEquality(outProduct.getGeoCoding(), inProduct.getGeoCoding(), 2.0e-5f);
     }
 
-    @Ignore
     @Test
     public void testWriteReadLatLonGeocoding() throws IOException, TransformException, FactoryException {
         setGeoCoding(outProduct, WGS_84);
@@ -282,16 +249,15 @@ public class BigGeoTiffWriteReadTest {
     }
 
     // @todo 1 tb/tb enable when issue with this test is resolved 2015-01-14
-//    @Test
-//    public void testWriteReadTiePointGeoCoding() throws IOException {
-//        setTiePointGeoCoding(outProduct);
-//        final Band bandFloat32 = outProduct.addBand("float32", ProductData.TYPE_FLOAT32);
-//        bandFloat32.setDataElems(createFloats(getProductSize(), 2.343f));
-//
-//        performTest(2.0e-5f);
-//    }
+    @Test
+    public void testWriteReadTiePointGeoCoding() throws IOException {
+        setTiePointGeoCoding(outProduct);
+        final Band bandFloat32 = outProduct.addBand("float32", ProductData.TYPE_FLOAT32);
+        bandFloat32.setDataElems(createFloats(getProductSize(), 2.343f));
 
-    @Ignore
+        performTest(2.0e-5f);
+    }
+
     @Test
     public void testWriteReadTransverseMercator() throws IOException, TransformException, FactoryException {
         setGeoCoding(outProduct, NEW_ZEALAND_TRANSVERSE_MERCATOR_2000);
@@ -299,7 +265,6 @@ public class BigGeoTiffWriteReadTest {
         performTest(2.0e-5f);
     }
 
-    @Ignore
     @Test
     public void testWriteReadLambertConformalConic() throws IOException, TransformException, FactoryException {
         setLambertConformalConicGeoCoding(outProduct);
@@ -307,7 +272,6 @@ public class BigGeoTiffWriteReadTest {
         performTest(2.0e-5f);
     }
 
-    @Ignore
     @Test
     public void testWriteReadLambertConformalConic_MapGeoCoding() throws IOException, TransformException, FactoryException {
         setLambertConformalConicGeoCoding_MapGeoCoding(outProduct);
@@ -315,7 +279,6 @@ public class BigGeoTiffWriteReadTest {
         performTest(2.0e-4f);
     }
 
-    @Ignore
     @Test
     public void testWriteReadStereographic() throws IOException, TransformException, FactoryException {
         setGeoCoding(outProduct, WGS84_ARCTIC_POLAR_STEREOGRAPHIC);
@@ -323,7 +286,6 @@ public class BigGeoTiffWriteReadTest {
         performTest(2.0e-5f);
     }
 
-    @Ignore
     @Test
     public void testWriteReadAlbersEqualArea() throws IOException, TransformException, FactoryException {
         setAlbersEqualAreaGeoCoding(outProduct);
@@ -515,11 +477,11 @@ public class BigGeoTiffWriteReadTest {
     }
 
     private Product writeReadProduct() throws IOException {
-        final File productFile = new File(TEST_DIR, "test_product.tif");
+        location = new File(TEST_DIR, "test_product.tif");
 
         final String bigGeoTiffFormatName = "BigGeoTiff";
-        ProductIO.writeProduct(outProduct, productFile.getAbsolutePath(), bigGeoTiffFormatName);
+        ProductIO.writeProduct(outProduct, location.getAbsolutePath(), bigGeoTiffFormatName);
 
-        return ProductIO.readProduct(productFile, bigGeoTiffFormatName);
+        return ProductIO.readProduct(location, bigGeoTiffFormatName);
     }
 }

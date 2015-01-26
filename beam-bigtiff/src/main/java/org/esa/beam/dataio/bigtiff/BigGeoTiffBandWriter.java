@@ -119,7 +119,6 @@ class BigGeoTiffBandWriter {
 
     private int getStripIndex(Band sourceBand) {
         return bandsList.indexOf(sourceBand);
-//        return tempProduct.getBandIndex(sourceBand.getName());
     }
 
     static boolean shouldWriteNode(ProductNode node) {

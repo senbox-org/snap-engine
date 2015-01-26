@@ -3,11 +3,15 @@ package org.esa.beam.dataio.bigtiff;
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.glevel.MultiLevelImage;
 import it.geosolutions.imageio.plugins.tiff.BaselineTIFFTagSet;
+import it.geosolutions.imageio.plugins.tiff.TIFFField;
 import it.geosolutions.imageio.plugins.tiff.TIFFImageWriteParam;
+import it.geosolutions.imageio.plugins.tiff.TIFFTag;
+import it.geosolutions.imageioimpl.plugins.tiff.TIFFIFD;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFImageMetadata;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFImageWriter;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFLZWCompressor;
 import org.esa.beam.dataio.bigtiff.internal.TiffIFD;
+import org.esa.beam.dataio.dimap.DimapHeaderWriter;
 import org.esa.beam.framework.dataio.AbstractProductWriter;
 import org.esa.beam.framework.dataio.ProductWriterPlugIn;
 import org.esa.beam.framework.datamodel.Band;
@@ -33,6 +37,8 @@ import java.awt.image.*;
 import java.awt.image.renderable.ParameterBlock;
 import java.io.File;
 import java.io.IOException;
+import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Locale;
 
@@ -159,15 +165,23 @@ public class BigGeoTiffProductWriter extends AbstractProductWriter {
         RenderedImage writeImage;
 
         final int nodeCount = sourceProduct.getNumBands();
-        if (nodeCount > 1) {
-            for (int i = 0; i < nodeCount; i++) {
-                final Band subsetBand = sourceProduct.getBandAt(i);
+        final ArrayList<Band> bandsToWrite = new ArrayList<>();
+        for (int i = 0; i < nodeCount; i++){
+            final Band band = sourceProduct.getBandAt(i);
+            if (BigGeoTiffBandWriter.shouldWriteNode(band)) {
+                bandsToWrite.add(band);
+            }
+        }
+
+        if (bandsToWrite.size() > 1) {
+            for (int i = 0; i < bandsToWrite.size(); i++) {
+                final Band subsetBand = bandsToWrite.get(i);
                 final RenderedImage sourceImage = getImageWithTargetDataType(targetDataType, subsetBand);
                 parameterBlock.setSource(sourceImage, i);
             }
             writeImage = JAI.create("bandmerge", parameterBlock, null);
         } else {
-            writeImage = getImageWithTargetDataType(targetDataType, sourceBand);
+            writeImage = getImageWithTargetDataType(targetDataType, bandsToWrite.get(0));
         }
 
         GeoTIFFMetadata geoTIFFMetadata = ProductUtils.createGeoTIFFMetadata(sourceProduct);
@@ -180,11 +194,7 @@ public class BigGeoTiffProductWriter extends AbstractProductWriter {
                 "it.geosolutions.imageio.plugins.tiff.BaselineTIFFTagSet,it.geosolutions.imageio.plugins.tiff.BaselineTIFFTagSet");
 
 
-//        final TIFFField tiffField = iioMetadata.getTIFFField(256);
-//        tiffField.getAsString(0);
-//
-//        final TIFFIFD rootIFD = iioMetadata.getRootIFD();
-//        rootIFD.addTagSet();
+        addDimapMetaField(sourceProduct, iioMetadata);
 
 
         final SampleModel sampleModel = writeImage.getSampleModel();
@@ -194,6 +204,23 @@ public class BigGeoTiffProductWriter extends AbstractProductWriter {
         imageWriter.write(null, iioImage, writeParam);
 
         isWritten = true;
+    }
+
+    private void addDimapMetaField(Product sourceProduct, TIFFImageMetadata iioMetadata) {
+        final TIFFTag beamMetaTag = new TIFFTag("BEAM_METADATA", Constants.PRIVATE_BEAM_TIFF_TAG_NUMBER, TIFFTag.TIFF_ASCII);
+        final String beamMetadata = getBeamMetadata(sourceProduct);
+
+        final TIFFIFD rootIFD = iioMetadata.getRootIFD();
+        final TIFFField beamMetaDataTiffField = new TIFFField(beamMetaTag, TIFFTag.TIFF_ASCII, 1, new String[] {beamMetadata});
+        rootIFD.addTIFFField(beamMetaDataTiffField);
+    }
+
+    private String getBeamMetadata(final Product product) {
+        final StringWriter stringWriter = new StringWriter();
+        final DimapHeaderWriter writer = new DimapHeaderWriter(product, stringWriter, "");
+        writer.writeHeader();
+        writer.close();
+        return stringWriter.getBuffer().toString();
     }
 
     private RenderedImage getImageWithTargetDataType(int targetDataType, Band subsetBand) {
