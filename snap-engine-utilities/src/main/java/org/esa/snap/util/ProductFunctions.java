@@ -72,7 +72,7 @@ public class ProductFunctions {
     }
 
     // common SAR missions -- non exhaustive
-    private static String[] SARMISSIONS = {"SENTINEL1", "ERS", "CSK", "RS2", "ALOS", "TSX"};
+    private static String[] SARMISSIONS = {"SENTINEL1", "ERS", "CSK", "RS", "ALOS", "TSX", "JERS", "UAVSAR"};
 
     public static boolean isSARProduct(final Product product) {
         final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
