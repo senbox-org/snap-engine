@@ -83,6 +83,20 @@ public class InputProductValidator {
         }
     }
 
+    public boolean isTOPSARBurstProduct() throws OperatorException {
+        final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
+        if (!mission.startsWith("SENTINEL-1")) {
+            return false;
+        }
+
+        final boolean isMultiSwath = isMultiSwath();
+        if (!isMultiSwath) {
+            return false;
+        }
+
+        return true;
+    }
+
     private static boolean contains(final String[] list, final String tag) {
         for (String s : list) {
             if (s.contains(tag))
