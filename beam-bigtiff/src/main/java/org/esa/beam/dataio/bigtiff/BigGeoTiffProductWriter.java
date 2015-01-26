@@ -14,6 +14,7 @@ import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.datamodel.ProductNode;
+import org.esa.beam.jai.ImageManager;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.StringUtils;
 import org.esa.beam.util.geotiff.GeoTIFF;
@@ -26,6 +27,7 @@ import javax.imageio.ImageTypeSpecifier;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.FileImageOutputStream;
 import javax.media.jai.JAI;
+import javax.media.jai.operator.FormatDescriptor;
 import java.awt.color.ColorSpace;
 import java.awt.image.*;
 import java.awt.image.renderable.ParameterBlock;
@@ -151,18 +153,21 @@ public class BigGeoTiffProductWriter extends AbstractProductWriter {
         final Product sourceProduct = sourceBand.getProduct();
 
         final TiffIFD tiffIFD = new TiffIFD(sourceProduct);
-        final int bandDataType = tiffIFD.getBandDataType();
+        final int maxSourceDataType = tiffIFD.getBandDataType();
+        final int targetDataType = ImageManager.getDataBufferType(maxSourceDataType);
 
         RenderedImage writeImage;
 
         final int nodeCount = sourceProduct.getNumBands();
         if (nodeCount > 1) {
             for (int i = 0; i < nodeCount; i++) {
-                parameterBlock.setSource(sourceProduct.getBandAt(i).getSourceImage(), i);
+                final Band subsetBand = sourceProduct.getBandAt(i);
+                final RenderedImage sourceImage = getImageWithTargetDataType(targetDataType, subsetBand);
+                parameterBlock.setSource(sourceImage, i);
             }
             writeImage = JAI.create("bandmerge", parameterBlock, null);
         } else {
-            writeImage = sourceBand.getSourceImage();
+            writeImage = getImageWithTargetDataType(targetDataType, sourceBand);
         }
 
         GeoTIFFMetadata geoTIFFMetadata = ProductUtils.createGeoTIFFMetadata(sourceProduct);
@@ -189,6 +194,15 @@ public class BigGeoTiffProductWriter extends AbstractProductWriter {
         imageWriter.write(null, iioImage, writeParam);
 
         isWritten = true;
+    }
+
+    private RenderedImage getImageWithTargetDataType(int targetDataType, Band subsetBand) {
+        RenderedImage sourceImage = subsetBand.getSourceImage();
+        final int actualTargetBandDataType = sourceImage.getSampleModel().getDataType();
+        if (actualTargetBandDataType != targetDataType) {
+            sourceImage = FormatDescriptor.create(sourceImage, targetDataType, null);
+        }
+        return sourceImage;
     }
 
     @Override
