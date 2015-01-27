@@ -720,6 +720,7 @@ public class BigGeoTiffProductReader extends AbstractProductReader {
                 final ImageReadParam readParam = new ImageReadParam(); //imageReader.getDefaultReadParam();
                 readParam.setSourceBands(new int[]{bandIndex});
                 readParam.setDestinationBands(new int[]{bandIndex});
+                System.out.println("bandIndex = " + bandIndex);
 //double scale = this.getModel().getScale(level);
 //System.out.println("level = " + level + ", scale = " + scale);
                 if (level > 0) {

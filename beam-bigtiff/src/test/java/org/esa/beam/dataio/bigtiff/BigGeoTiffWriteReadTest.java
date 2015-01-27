@@ -304,6 +304,49 @@ public class BigGeoTiffWriteReadTest {
     }
 
     @Test
+    public void testWriteReadTiePointGeoCoding_forceBigTiff() throws IOException {
+        setTiePointGeoCoding(outProduct);
+        final Band bandFloat32 = outProduct.addBand("float32", ProductData.TYPE_FLOAT32);
+        bandFloat32.setDataElems(createFloats(getProductSize(), 2.343f));
+
+        try {
+            System.setProperty("org.esa.beam.dataio.bigtiff.force.bigtiff", "true");
+            performTest(2.0e-5f);
+        } finally {
+            System.clearProperty("org.esa.beam.dataio.bigtiff.force.bigtiff");
+        }
+    }
+
+    @Test
+    public void testWriteReadTiePointGeoCoding_compressed() throws IOException {
+        setTiePointGeoCoding(outProduct);
+        Band bandFloat32 = outProduct.addBand("float32_1", ProductData.TYPE_FLOAT32);
+        bandFloat32.setDataElems(createFloats(getProductSize(), 2.343f));
+
+        bandFloat32 = outProduct.addBand("float32_2", ProductData.TYPE_FLOAT32);
+        bandFloat32.setDataElems(createFloats(getProductSize(), 5.66f));
+
+        bandFloat32 = outProduct.addBand("float32_3", ProductData.TYPE_FLOAT32);
+        bandFloat32.setDataElems(createFloats(getProductSize(), 11.8f));
+
+        bandFloat32 = outProduct.addBand("float32_4", ProductData.TYPE_FLOAT32);
+        bandFloat32.setDataElems(createFloats(getProductSize(), 19.2f));
+
+        bandFloat32 = outProduct.addBand("float32_5", ProductData.TYPE_FLOAT32);
+        bandFloat32.setDataElems(createFloats(getProductSize(), 108.65f));
+
+        try {
+            System.setProperty("org.esa.beam.dataio.bigtiff.compression.type", "LZW");
+            System.setProperty("org.esa.beam.dataio.bigtiff.compression.quality", "0.8");
+
+            performTest(2.0e-5f);
+        } finally {
+            System.clearProperty("org.esa.beam.dataio.bigtiff.compression.type");
+            System.clearProperty("org.esa.beam.dataio.bigtiff.compression.quality");
+        }
+    }
+
+    @Test
     public void testWriteReadTransverseMercator() throws IOException, TransformException, FactoryException {
         setGeoCoding(outProduct, NEW_ZEALAND_TRANSVERSE_MERCATOR_2000);
 
