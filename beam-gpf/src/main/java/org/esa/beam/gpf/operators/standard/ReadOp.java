@@ -69,7 +69,11 @@ public class ReadOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
         try {
-            targetProduct = ProductIO.readProduct(file);
+            targetProduct = ProductCache.instance().getProduct(file);
+            if(targetProduct == null) {
+                targetProduct = ProductIO.readProduct(file);
+                ProductCache.instance().addProduct(file, targetProduct);
+            }
             this.productReader = targetProduct.getProductReader();
             targetProduct.setFileLocation(file);
 
