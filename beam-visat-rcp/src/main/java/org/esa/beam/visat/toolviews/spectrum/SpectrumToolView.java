@@ -973,7 +973,7 @@ public class SpectrumToolView extends AbstractToolView {
         }
 
         private void fillDatasetWithCursorSeries(List<DisplayableSpectrum> spectra, XYSeriesCollection dataset, JFreeChart chart) {
-            if (isShowingCursorSpectrum() && getCurrentView().isCurrentPixelPosValid()) {
+            if (isShowingCursorSpectrum() && getCurrentView() != null && getCurrentView().isCurrentPixelPosValid()) {
                 for (DisplayableSpectrum spectrum : spectra) {
                     XYSeries series = new XYSeries(spectrum.getName());
                     final Band[] spectralBands = spectrum.getSelectedBands();
