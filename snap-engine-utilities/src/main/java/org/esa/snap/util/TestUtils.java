@@ -139,7 +139,7 @@ public class TestUtils {
         if (!inputFile.exists()) {
             throw new IOException(inputFile.getAbsolutePath() + " not found");
         }
-        final Product product = ProductIO.readProduct(inputFile);
+        final Product product = CommonReaders.readProduct(inputFile);
         if(product == null) {
             throw new IOException("Unable to read "+inputFile.toString());
         }
