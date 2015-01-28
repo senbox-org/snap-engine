@@ -315,8 +315,8 @@ public class SMIFileReader extends SeadasFileReader {
             String south = "Southernmost_Latitude";
             Attribute latmax = ncFile.findGlobalAttributeIgnoreCase("geospatial_lat_max");
             if (latmax != null) {
-                east = "geospatial_lon_min";
-                west = "geospatial_lon_max";
+                east = "geospatial_lon_max";
+                west = "geospatial_lon_min";
                 north = "geospatial_lat_max";
                 south = "geospatial_lat_min";
             } else {
