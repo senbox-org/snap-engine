@@ -15,6 +15,8 @@
     <changelog>
         <![CDATA[
         Changes in 1.5.6:</br>
+        Fixed a swapped geospatial_lon_min/max issue</br>
+        Fixed VIIRS Aggrigation zone geolocation problem. Can now tolerate missing geolocation scans in the middle of a file.</br>
         [BEAM-1740] -Seadas MODIS reader gives wrong geo-positions at dateline</br>
         (based on Seadas V7.1, seadas-reader v1.5.3)</br>
         Modified VIIRS reader to support CLASS aggregate files</br>
