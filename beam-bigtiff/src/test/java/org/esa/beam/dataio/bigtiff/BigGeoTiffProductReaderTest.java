@@ -103,6 +103,35 @@ public class BigGeoTiffProductReaderTest {
         assertTrue(BigGeoTiffProductReader.isBadTiling(reader));
     }
 
+    @Test
+    public void testIsPixelScaleValid() {
+        assertFalse(BigGeoTiffProductReader.isPixelScaleValid(null));
+
+        final double[] scales = new double[2];
+        scales[0] = Double.NaN;
+        scales[1] = 9.1;
+        assertFalse(BigGeoTiffProductReader.isPixelScaleValid(scales));
+
+        scales[0] = 9.2;
+        scales[1] = Double.NaN;
+        assertFalse(BigGeoTiffProductReader.isPixelScaleValid(scales));
+
+        scales[0] = Double.NEGATIVE_INFINITY;
+        scales[1] = 9.3;
+        assertFalse(BigGeoTiffProductReader.isPixelScaleValid(scales));
+
+        scales[0] = 9.4;
+        scales[1] = Double.POSITIVE_INFINITY;
+        assertFalse(BigGeoTiffProductReader.isPixelScaleValid(scales));
+
+        scales[0] = 9.5;
+        scales[1] = 9.6;
+        assertTrue(BigGeoTiffProductReader.isPixelScaleValid(scales));
+
+        scales[0] = -9.7;
+        scales[1] = 0.0;
+        assertTrue(BigGeoTiffProductReader.isPixelScaleValid(scales));
+    }
 
     private TIFFField getTiffField(int type, Object data) {
         final TIFFTag tag = new TIFFTag("test", 1, type);

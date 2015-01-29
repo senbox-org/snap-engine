@@ -60,7 +60,7 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.logging.Level;
 
-public class BigGeoTiffProductReader extends AbstractProductReader {
+class BigGeoTiffProductReader extends AbstractProductReader {
 
     private static final int FIRST_IMAGE = 0;
 
@@ -545,8 +545,8 @@ public class BigGeoTiffProductReader extends AbstractProductReader {
         return isGlobal;
     }
 
-    // @todo 2 tb/tb write test 20015-01-09
-    private boolean isPixelScaleValid(double[] pixelScales) {
+    // package access for testing only tb 2015-01-29
+    static boolean isPixelScaleValid(double[] pixelScales) {
         return pixelScales != null &&
                 !Double.isNaN(pixelScales[0]) && !Double.isInfinite(pixelScales[0]) &&
                 !Double.isNaN(pixelScales[1]) && !Double.isInfinite(pixelScales[1]);

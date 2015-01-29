@@ -8,7 +8,7 @@ import org.esa.beam.dataio.bigtiff.internal.GeoKeyEntry;
 
 import java.util.*;
 
-class TiffFileInfo {
+public class TiffFileInfo {
 
     private static final int TAG_GEO_KEY_DIRECTORY___SPOT = 34735;
     private static final int TAG_GEO_DOUBLE_PARAMS___SPOT = 34736;

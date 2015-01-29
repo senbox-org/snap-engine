@@ -39,7 +39,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Locale;
 
-public class BigGeoTiffProductWriter extends AbstractProductWriter {
+class BigGeoTiffProductWriter extends AbstractProductWriter {
 
     private static String PARAM_COMPRESSION_TYPE = "org.esa.beam.dataio.bigtiff.compression.type";   // value must be "LZW"
 
