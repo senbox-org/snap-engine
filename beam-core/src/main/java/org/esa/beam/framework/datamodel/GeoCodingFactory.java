@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (C) 2015 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -167,7 +167,7 @@ public class GeoCodingFactory {
         return subSamplingX != 1 || subSamplingY != 1;
     }
 
-    static float interpolateLon(float wx, float wy, float d00, float d10, float d01, float d11) {
+    public static float interpolateLon(float wx, float wy, float d00, float d10, float d01, float d11) {
         float range = GeoCodingFactory.computeRange(d00, d01, d10, d11);
         if (range > 180f) {
             return GeoCodingFactory.interpolateSperical(wx, wy, d00, d10, d01, d11);
