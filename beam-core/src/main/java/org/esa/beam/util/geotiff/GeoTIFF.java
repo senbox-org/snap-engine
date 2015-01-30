@@ -173,6 +173,7 @@ public class GeoTIFF {
      * @param type               the image type, must not be null
      * @param geoTIFFMetadata    the GeoTIFF metadata, must not be null
      * @param metadataFormatName the name of the Metadata Format specification
+     * @param classNameList      comma separated list of Metadata classes
      * @return the image metadata, never null
      * @throws IIOException if the metadata cannot be created
      */
