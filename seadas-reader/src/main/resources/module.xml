@@ -28,6 +28,7 @@
 
     <dependency>
         <module>beam-core</module>
+        <version>5.0.4</version>
     </dependency>
     <dependency>
         <module>beam-merisl3-reader</module>
