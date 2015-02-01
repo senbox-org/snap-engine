@@ -18,6 +18,7 @@ package org.esa.snap.util;
 import org.esa.beam.dataio.dimap.DimapProductConstants;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.dataio.ProductReader;
+import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.snap.datamodel.AbstractMetadata;
@@ -170,5 +171,18 @@ public class ProductFunctions {
             }
             return true;
         }
+    }
+
+    /**
+     * Gets a quicker estimate than product.getRawStorageSize, raw storage size in bytes of this product node.
+     *
+     * @return the size in bytes.
+     */
+    public static long getRawStorageSize(final Product product) {
+        long size = 0;
+        for (Band band : product.getBands()) {
+            size += band.getRawStorageSize(null);
+        }
+        return size;
     }
 }
