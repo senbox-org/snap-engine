@@ -77,6 +77,7 @@
         <module>beam-arcbingrid-reader</module>
         <module>beam-atsr-reader</module>
         <module>beam-avhrr-reader</module>
+        <!--module>beam-bigtiff</module-->
         <module>beam-binning</module>
         <module>beam-chris-reader</module>
         <module>beam-cluster-analysis</module>
@@ -95,7 +96,7 @@
         <module>beam-merisl3-reader</module>
         <module>beam-modis-reader</module>
         <module>beam-netcdf</module>
-        <module>seadas-reader</module>
+        <!--module>seadas-reader</module-->
         <module>beam-opendap</module>
         <module>beam-pconvert</module>
         <module>beam-pixel-extraction</module>
@@ -314,6 +315,24 @@
                 <groupId>it.geosolutions.imageio-ext</groupId>
                 <artifactId>imageio-ext-tiff</artifactId>
                 <version>1.1.9</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_core</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_codec</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>javax.media</groupId>
+                        <artifactId>jai_imageio</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>xerces</groupId>
+                        <artifactId>xercesImpl</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <!-- GeoTools Libraries ############################################# -->
@@ -554,7 +573,8 @@
             <dependency>
                 <groupId>javax.help</groupId>
                 <artifactId>javahelp</artifactId>
-                <version>2.0.02</version>
+                <version>2.0.05</version>
+                <!--scope>provided</scope-->
             </dependency>
 
             <!-- BC Neural Network Library ############################################# -->
@@ -850,6 +870,13 @@
                     <artifactId>nbm-maven-plugin</artifactId>
                     <version>3.14</version>
                     <extensions>true</extensions>
+                    <dependencies>
+                        <dependency>
+                            <groupId>javax.help</groupId>
+                            <artifactId>javahelp</artifactId>
+                            <version>2.0.05</version>
+                        </dependency>
+                    </dependencies>
                     <configuration>
                         <moduleType>normal</moduleType>
                         <licenseName>GPL 3</licenseName>
