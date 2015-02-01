@@ -29,6 +29,8 @@
 
     <changelog>
         <![CDATA[
+        <b>Changes in 5.0.5</b><br/>
+        Support output format BigGeoTiff.
         <b>Changes in 5.0.4</b><br/>
         [BEAM-1746] Writing binning result SeaDAS-style failes with exception<br/>
         [BEAM-1743] Complex geometry WKTs can slow down binner<br/>
