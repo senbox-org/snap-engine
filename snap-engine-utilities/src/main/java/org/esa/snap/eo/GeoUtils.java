@@ -257,7 +257,7 @@ public final class GeoUtils {
      * @param xyz  The xyz coordinate for the target.
      * @param time The slant range time in seconds.
      */
-    public static void computeAccurateXYZ(final Orbits.OrbitData data, final double[] xyz, final double time) {
+    public static void computeAccurateXYZ(final Orbits.OrbitVector data, final double[] xyz, final double time) {
 
         final double a = Constants.semiMajorAxis;
         final double b = Constants.semiMinorAxis;
