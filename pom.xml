@@ -32,6 +32,7 @@
         <module>s3tbx-app</module>
         <module>s3tbx-sentinel3-reader</module>
         <module>s3tbx-alos-reader</module>
+        <module>s3tbx-atsr-reader</module>
     </modules>
 
     <packaging>pom</packaging>
