@@ -28,9 +28,10 @@
 
     <modules>
         <module>s3tbx-bootstrap</module>
-        <module>s3tbx-reader</module>
         <module>s3tbx-installer</module>
         <module>s3tbx-app</module>
+        <module>s3tbx-sentinel3-reader</module>
+        <module>s3tbx-alos-reader</module>
     </modules>
 
     <packaging>pom</packaging>
@@ -89,6 +90,24 @@
 
     <dependencyManagement>
         <dependencies>
+
+            <dependency>
+                <groupId>org.esa.snap</groupId>
+                <artifactId>snap-ceres-core</artifactId>
+                <version>${snap.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.esa.snap</groupId>
+                <artifactId>snap-jai</artifactId>
+                <version>${snap.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.esa.snap</groupId>
+                <artifactId>snap-glayer</artifactId>
+                <version>${snap.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.esa.snap</groupId>
