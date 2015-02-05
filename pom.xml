@@ -191,8 +191,15 @@
                     <artifactId>nbm-maven-plugin</artifactId>
                     <version>3.14</version>
                     <extensions>true</extensions>
+
                     <configuration>
+                        <moduleType>normal</moduleType>
+                        <licenseName>GPL 3</licenseName>
+                        <licenseFile>../LICENSE.html</licenseFile>
+                        <cluster>s3tbx</cluster>
+                        <defaultCluster>s3tbx</defaultCluster>
                         <useOSGiDependencies>false</useOSGiDependencies>
+                        <requiresRestart>false</requiresRestart>
                         <keystore>..\snap-desktop\snap-gui\src\main\resources\keystore\snap.ks</keystore>
                         <keystorealias>snap</keystorealias>
                         <keystorepassword>snap-123</keystorepassword>
