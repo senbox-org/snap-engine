@@ -386,12 +386,12 @@ public class TiffIFD {
         return tiffValues;
     }
 
-    private TiffUInt[] calculateStripByteCounts() {
+    private TiffLong[] calculateStripByteCounts() {
         TiffValue[] bitsPerSample = getBitsPerSampleValues();
-        final TiffUInt[] tiffValues = new TiffUInt[bitsPerSample.length];
+        final TiffLong[] tiffValues = new TiffLong[bitsPerSample.length];
         for (int i = 0; i < tiffValues.length; i++) {
             long byteCount = getByteCount(bitsPerSample, i);
-            tiffValues[i] = new TiffUInt(byteCount);
+            tiffValues[i] = new TiffLong(byteCount);
         }
         return tiffValues;
     }
