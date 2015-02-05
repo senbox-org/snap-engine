@@ -138,8 +138,8 @@ class TiffType {
             ensureElementsEqualValueType(values, TiffShort.class);
             return SHORT;
         }
-        if (value instanceof TiffLong) {
-            ensureElementsEqualValueType(values, TiffLong.class);
+        if (value instanceof TiffUInt) {
+            ensureElementsEqualValueType(values, TiffUInt.class);
             return LONG;
         }
         if (value instanceof TiffRational) {

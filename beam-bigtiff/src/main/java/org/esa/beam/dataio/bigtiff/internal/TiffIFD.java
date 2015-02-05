@@ -72,7 +72,7 @@ public class TiffIFD {
     private void writeNextIfdOffset(final ImageOutputStream ios, final long ifdOffset, final long nextIfdOffset) throws
             IOException {
         ios.seek(getPosForNextIfdOffset(ifdOffset));
-        new TiffLong(nextIfdOffset).write(ios);
+        new TiffUInt(nextIfdOffset).write(ios);
     }
 
     private long getPosForNextIfdOffset(final long ifdOffset) {
@@ -100,9 +100,9 @@ public class TiffIFD {
     }
 
     public long getRequiredSizeForStrips() {
-        final TiffLong[] counts = (TiffLong[]) getEntry(TiffTag.STRIP_BYTE_COUNTS).getValues();
+        final TiffUInt[] counts = (TiffUInt[]) getEntry(TiffTag.STRIP_BYTE_COUNTS).getValues();
         long size = 0;
-        for (TiffLong count : counts) {
+        for (TiffUInt count : counts) {
             size += count.getValue();
         }
         return size;
@@ -125,11 +125,11 @@ public class TiffIFD {
     }
 
     private void moveStripsTo(final long stripsStart) {
-        final TiffLong[] values = (TiffLong[]) getEntry(TiffTag.STRIP_OFFSETS).getValues();
+        final TiffUInt[] values = (TiffUInt[]) getEntry(TiffTag.STRIP_OFFSETS).getValues();
         for (int i = 0; i < values.length; i++) {
             final long oldValue = values[i].getValue();
             final long newValue = oldValue + stripsStart;
-            values[i] = new TiffLong(newValue);
+            values[i] = new TiffUInt(newValue);
         }
     }
 
@@ -152,15 +152,15 @@ public class TiffIFD {
         final int width = product.getSceneRasterWidth();
         final int height = product.getSceneRasterHeight();
 
-        setEntry(new TiffDirectoryEntry(TiffTag.IMAGE_WIDTH, new TiffLong(width)));
-        setEntry(new TiffDirectoryEntry(TiffTag.IMAGE_LENGTH, new TiffLong(height)));
+        setEntry(new TiffDirectoryEntry(TiffTag.IMAGE_WIDTH, new TiffUInt(width)));
+        setEntry(new TiffDirectoryEntry(TiffTag.IMAGE_LENGTH, new TiffUInt(height)));
         setEntry(new TiffDirectoryEntry(TiffTag.BITS_PER_SAMPLE, calculateBitsPerSample(product)));
         setEntry(new TiffDirectoryEntry(TiffTag.COMPRESSION, new TiffShort(1)));
         setEntry(new TiffDirectoryEntry(TiffTag.IMAGE_DESCRIPTION, new TiffAscii(product.getName())));
         setEntry(new TiffDirectoryEntry(TiffTag.SAMPLES_PER_PIXEL, new TiffShort(getNumBands(product))));
 
         setEntry(new TiffDirectoryEntry(TiffTag.STRIP_OFFSETS, calculateStripOffsets()));
-        setEntry(new TiffDirectoryEntry(TiffTag.ROWS_PER_STRIP, new TiffLong(height)));
+        setEntry(new TiffDirectoryEntry(TiffTag.ROWS_PER_STRIP, new TiffUInt(height)));
         setEntry(new TiffDirectoryEntry(TiffTag.STRIP_BYTE_COUNTS, calculateStripByteCounts()));
 
         setEntry(new TiffDirectoryEntry(TiffTag.X_RESOLUTION, new TiffRational(1, 1)));
@@ -386,22 +386,22 @@ public class TiffIFD {
         return tiffValues;
     }
 
-    private TiffLong[] calculateStripByteCounts() {
+    private TiffUInt[] calculateStripByteCounts() {
         TiffValue[] bitsPerSample = getBitsPerSampleValues();
-        final TiffLong[] tiffValues = new TiffLong[bitsPerSample.length];
+        final TiffUInt[] tiffValues = new TiffUInt[bitsPerSample.length];
         for (int i = 0; i < tiffValues.length; i++) {
             long byteCount = getByteCount(bitsPerSample, i);
-            tiffValues[i] = new TiffLong(byteCount);
+            tiffValues[i] = new TiffUInt(byteCount);
         }
         return tiffValues;
     }
 
-    private TiffLong[] calculateStripOffsets() {
+    private TiffUInt[] calculateStripOffsets() {
         TiffValue[] bitsPerSample = getBitsPerSampleValues();
-        final TiffLong[] tiffValues = new TiffLong[bitsPerSample.length];
+        final TiffUInt[] tiffValues = new TiffUInt[bitsPerSample.length];
         long offset = 0;
         for (int i = 0; i < tiffValues.length; i++) {
-            tiffValues[i] = new TiffLong(offset);
+            tiffValues[i] = new TiffUInt(offset);
             long byteCount = getByteCount(bitsPerSample, i);
             offset += byteCount;
         }
@@ -428,11 +428,11 @@ public class TiffIFD {
     }
 
     private long getHeight() {
-        return ((TiffLong) getEntry(TiffTag.IMAGE_LENGTH).getValues()[0]).getValue();
+        return ((TiffUInt) getEntry(TiffTag.IMAGE_LENGTH).getValues()[0]).getValue();
     }
 
     private long getWidth() {
-        return ((TiffLong) getEntry(TiffTag.IMAGE_WIDTH).getValues()[0]).getValue();
+        return ((TiffUInt) getEntry(TiffTag.IMAGE_WIDTH).getValues()[0]).getValue();
     }
 
     // @todo 1 tb/tb copied from utils class ...
