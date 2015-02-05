@@ -45,6 +45,7 @@
         <snap.version>2.0.0-SNAPSHOT</snap.version>
         <netbeans.version>RELEASE802</netbeans.version>
         <outputdir>../../output</outputdir>
+        <brandingToken>s3tbx</brandingToken>
     </properties>
 
     <repositories>
@@ -196,8 +197,8 @@
                         <moduleType>normal</moduleType>
                         <licenseName>GPL 3</licenseName>
                         <licenseFile>../LICENSE.html</licenseFile>
-                        <cluster>s3tbx</cluster>
-                        <defaultCluster>s3tbx</defaultCluster>
+                        <cluster>${brandingToken}</cluster>
+                        <brandingToken>${brandingToken}</brandingToken>
                         <useOSGiDependencies>false</useOSGiDependencies>
                         <requiresRestart>false</requiresRestart>
                         <keystore>..\snap-desktop\snap-gui\src\main\resources\keystore\snap.ks</keystore>

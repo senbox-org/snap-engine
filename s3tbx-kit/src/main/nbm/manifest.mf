@@ -1,4 +1,4 @@
 Manifest-Version: 1.0
-OpenIDE-Module-Display-Category: SNAP Engine
+OpenIDE-Module-Display-Category: Sentinel-3 Toolbox
 AutoUpdate-Show-In-Client: true
 AutoUpdate-Essential-Module: true

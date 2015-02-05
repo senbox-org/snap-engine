@@ -34,12 +34,7 @@
 
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-aatsr-sst</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-aatsr-sst-ui</artifactId>
+            <artifactId>s3tbx-sentinel3-reader</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -54,7 +49,12 @@
         </dependency>
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-sentinel3-reader</artifactId>
+            <artifactId>s3tbx-aatsr-sst</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.s3tbx</groupId>
+            <artifactId>s3tbx-aatsr-sst-ui</artifactId>
             <version>${project.version}</version>
         </dependency>
 
