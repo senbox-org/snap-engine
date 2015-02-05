@@ -29,16 +29,21 @@
     <modules>
         <module>s3tbx-bootstrap</module>
         <module>s3tbx-installer</module>
+        <module>s3tbx-kit</module>
         <module>s3tbx-app</module>
         <module>s3tbx-sentinel3-reader</module>
         <module>s3tbx-alos-reader</module>
         <module>s3tbx-atsr-reader</module>
+
+        <module>s3tbx-aatsr-sst</module>
+        <module>s3tbx-aatsr-sst-ui</module>
     </modules>
 
     <packaging>pom</packaging>
 
     <properties>
         <snap.version>2.0.0-SNAPSHOT</snap.version>
+        <netbeans.version>RELEASE802</netbeans.version>
         <outputdir>../../output</outputdir>
     </properties>
 
