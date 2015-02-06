@@ -198,6 +198,7 @@
                         <licenseName>GPL 3</licenseName>
                         <licenseFile>../LICENSE.html</licenseFile>
                         <cluster>${brandingToken}</cluster>
+                        <nbmBuildDir>../target/nbmCluster/</nbmBuildDir>
                         <brandingToken>${brandingToken}</brandingToken>
                         <useOSGiDependencies>false</useOSGiDependencies>
                         <requiresRestart>false</requiresRestart>
