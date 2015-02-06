@@ -11,8 +11,10 @@
     <artifactId>s3tbx-kit</artifactId>
     <packaging>nbm</packaging>
 
-    <name>S3TBX Kit Module</name>
-    <description>The SNAP Engine provides sensor-independent core functionality for remote sensing applications.
+    <name>Sentinel-3 Toolbox Kit Module</name>
+    <description>
+        The Sentinel-3 Toolbox is a SNAP extension dedicated to the exploitation of Sentinel-3 OLCI/SLSTR data and
+        data of other optical, medium resolution sensors.
     </description>
 
     <build>
