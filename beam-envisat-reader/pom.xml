@@ -27,7 +27,7 @@
 
     <artifactId>beam-envisat-reader</artifactId>
     <name>BEAM Envisat Product Reader</name>
-    <version>5.0</version>
+    <version>5.0.1-SNAPSHOT</version>
 
     <dependencies>
         <dependency>
