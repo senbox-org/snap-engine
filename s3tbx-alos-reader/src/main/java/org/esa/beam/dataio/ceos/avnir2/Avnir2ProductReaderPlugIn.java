@@ -20,6 +20,8 @@ import org.esa.beam.dataio.ceos.CeosHelper;
 import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
+import org.esa.beam.framework.datamodel.RGBImageProfile;
+import org.esa.beam.framework.datamodel.RGBImageProfileManager;
 import org.esa.beam.util.io.BeamFileFilter;
 import org.esa.beam.util.io.FileUtils;
 
@@ -34,15 +36,24 @@ import java.util.Locale;
  */
 public class Avnir2ProductReaderPlugIn implements ProductReaderPlugIn {
 
-    private final static String _AVNIR2_INDICATION_KEY = "ALAV2";
-    private final static int _MINIMUM_FILES = 7;    // 4 image files + leader file + volume file + trailer file
+    private final static String AVNIR2_INDICATION_KEY = "ALAV2";
+    private final static int MINIMUM_FILES = 7;    // 4 image files + leader file + volume file + trailer file
+
+    public Avnir2ProductReaderPlugIn() {
+        RGBImageProfile profile = new RGBImageProfile("AVNIR-2 - 3,2,1", // display name
+                                                      new String[]{
+                                                              "radiance_3",  // red channel band-maths expression
+                                                              "radiance_2",  // green channel band-maths expression
+                                                              "radiance_1"   // blue channel band-maths expression
+                                                      });
+        RGBImageProfileManager.getInstance().addProfile(profile);
+    }
 
     /**
      * Checks whether the given object is an acceptable input for this product reader and if so, the method checks if it
      * is capable of decoding the input's content.
      *
      * @param input any input object
-     *
      * @return true if this product reader can decode the given input, otherwise false.
      */
     public DecodeQualification getDecodeQualification(final Object input) {
@@ -59,11 +70,11 @@ public class Avnir2ProductReaderPlugIn implements ProductReaderPlugIn {
         if (file.isFile() && parentDir != null && parentDir.isDirectory()) {
             final FilenameFilter filter = new FilenameFilter() {
                 public boolean accept(final File dir, final String name) {
-                    return name.contains(_AVNIR2_INDICATION_KEY);
+                    return name.contains(AVNIR2_INDICATION_KEY);
                 }
             };
             final File[] files = parentDir.listFiles(filter);
-            if (files != null && files.length >= _MINIMUM_FILES) {
+            if (files != null && files.length >= MINIMUM_FILES) {
                 return DecodeQualification.INTENDED;
             }
         }
@@ -72,7 +83,7 @@ public class Avnir2ProductReaderPlugIn implements ProductReaderPlugIn {
 
     /**
      * Returns an array containing the classes that represent valid input types for this reader.
-     * <p/>
+     * <p>
      * <p> Intances of the classes returned in this array are valid objects for the <code>setInput</code> method of the
      * <code>ProductReader</code> interface (the method will not throw an <code>InvalidArgumentException</code> in this
      * case).
@@ -120,11 +131,10 @@ public class Avnir2ProductReaderPlugIn implements ProductReaderPlugIn {
     /**
      * Gets a short description of this plug-in. If the given locale is set to <code>null</code> the default locale is
      * used.
-     * <p/>
+     * <p>
      * <p> In a GUI, the description returned could be used as tool-tip text.
      *
      * @param locale the local for the given decription string, if <code>null</code> the default locale is used
-     *
      * @return a textual description of this product reader/writer
      */
     public String getDescription(final Locale locale) {
@@ -145,7 +155,6 @@ public class Avnir2ProductReaderPlugIn implements ProductReaderPlugIn {
          * if no extension are defined, the method always returns <code>true</code>
          *
          * @param file the file to be or not be accepted.
-         *
          * @return <code>true</code> if given file is accepted by this filter
          */
         @Override
