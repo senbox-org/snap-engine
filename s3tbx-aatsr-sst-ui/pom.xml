@@ -75,8 +75,8 @@
             <version>${snap.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.esa.snap</groupId>
-            <artifactId>snap-aatsr-sst</artifactId>
+            <groupId>org.esa.s3tbx</groupId>
+            <artifactId>s3tbx-aatsr-sst</artifactId>
             <version>${snap.version}</version>
         </dependency>
 
