@@ -35,6 +35,7 @@
         <module>s3tbx-avhrr-reader</module>
         <module>s3tbx-aatsr-sst</module>
         <module>s3tbx-aatsr-sst-ui</module>
+        <module>s3tbx-meris-radiometry</module>
     </modules>
 
     <packaging>pom</packaging>
@@ -42,6 +43,7 @@
     <properties>
         <snap.version>2.0.0-SNAPSHOT</snap.version>
         <netbeans.version>RELEASE802</netbeans.version>
+        <javahelp.version>2.0.05</javahelp.version>
         <outputdir>../../output</outputdir>
         <brandingToken>s3tbx</brandingToken>
     </properties>
