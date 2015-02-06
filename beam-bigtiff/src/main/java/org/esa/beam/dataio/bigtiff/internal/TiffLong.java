@@ -17,7 +17,7 @@ public class TiffLong extends TiffValue {
 
     @Override
     public int getSizeInBytes() {
-        return Long.BYTES;
+        return 8;
     }
 
     @Override
