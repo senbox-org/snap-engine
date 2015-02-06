@@ -54,4 +54,13 @@
         </folder>
     </folder>
 
+    <folder name="RgbProfiles">
+        <file name="AVNIR">
+            <attr name="name" stringvalue="AVNIR-2 - 3,2,1"/>
+            <attr name="red" stringvalue="radiance_3"/>
+            <attr name="green" stringvalue="radiance_2"/>
+            <attr name="blue" stringvalue="radiance_1"/>
+        </file>
+    </folder>
+
 </filesystem>

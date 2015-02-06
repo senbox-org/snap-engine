@@ -32,6 +32,7 @@
         <module>s3tbx-sentinel3-reader</module>
         <module>s3tbx-alos-reader</module>
         <module>s3tbx-atsr-reader</module>
+        <module>s3tbx-avhrr-reader</module>
         <module>s3tbx-aatsr-sst</module>
         <module>s3tbx-aatsr-sst-ui</module>
     </modules>
@@ -98,6 +99,12 @@
             <dependency>
                 <groupId>org.esa.snap</groupId>
                 <artifactId>snap-ceres-core</artifactId>
+                <version>${snap.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.esa.snap</groupId>
+                <artifactId>snap-binio</artifactId>
                 <version>${snap.version}</version>
             </dependency>
 
