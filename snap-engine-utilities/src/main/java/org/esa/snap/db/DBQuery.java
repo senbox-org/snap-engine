@@ -417,6 +417,11 @@ public class DBQuery {
 
         final boolean singlePointSelection = selectionRectangle.getWidth() == 0 && selectionRectangle.getHeight() == 0;
 
+        //debug
+        final boolean belowMaxLat = false;
+        final float maxLat = -60;
+        //debug end
+
         final Polygon p = new Polygon();
         for (final ProductEntry entry : resultsList) {
             p.reset();
@@ -425,7 +430,18 @@ public class DBQuery {
                 p.addPoint((int) (geo.getLat() * mult), (int) (geo.getLon() * mult));
             }
             p.addPoint((int) (geoBox[0].getLat() * mult), (int) (geoBox[0].getLon() * mult));
-            if (singlePointSelection) {
+
+            if(belowMaxLat) {
+                boolean allPoints = true;
+                for (GeoPos geo : geoBox) {
+                    if ((maxLat > 0 && geo.getLat() < maxLat) || (maxLat < 0 && geo.getLat() > maxLat)) {
+                        allPoints = false;
+                        break;
+                    }
+                }
+                if (allPoints)
+                    intersectList.add(entry);
+            } else if (singlePointSelection) {
                 if (p.contains(selRect.x, selRect.y)) {
                     intersectList.add(entry);
                 }
@@ -447,6 +463,7 @@ public class DBQuery {
             }
         }
 
+        // if nothing selected then return all
         if (singlePointSelection && returnAllIfNoIntersection && intersectList.isEmpty())
             return resultsList;
 
