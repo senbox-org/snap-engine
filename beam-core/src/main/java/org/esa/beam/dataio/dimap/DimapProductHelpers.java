@@ -1605,8 +1605,7 @@ public class DimapProductHelpers {
                 return null;
             }
             if (isVirtualBand(element)) {
-                final VirtualBand virtualBand = new VirtualBand(bandName, type, rasterWidth, rasterHeight, getExpression(element));
-                product.addBand(virtualBand);
+                final VirtualBand virtualBand = new VirtualBand(bandName, type, rasterWidth, rasterHeight, getExpression(element));                product.addBand(virtualBand);
                 virtualBand.setNoDataValue(getInvalidValue(element));
                 virtualBand.setNoDataValueUsed(getUseInvalidValue(element));
                 band = virtualBand;
