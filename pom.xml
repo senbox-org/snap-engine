@@ -60,7 +60,7 @@
         <module>beam-csv-dataio</module>
         <!--module>beam-examples</module-->
         <module>beam-gpf</module>
-        <!--module>beam-help</module-->
+        <!--module>snap-help</module-->
         <module>beam-scripting</module>
         <module>beam-ui</module>
         <module>beam-visat-rcp</module>
@@ -86,8 +86,7 @@
         <module>beam-hdf5-writer</module>
         <module>beam-landsat-reader</module>
         <module>beam-meris-cloud</module>
-        <module>beam-ndvi</module>
-        <module>beam-meris-radiometry</module>
+        <module>snap-ndvi</module>
         <module>beam-meris-smac</module>
         <module>beam-merisl3-reader</module>
         <module>beam-modis-reader</module>
