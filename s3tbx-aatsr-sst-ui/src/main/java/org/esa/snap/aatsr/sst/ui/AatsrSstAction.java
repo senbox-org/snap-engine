@@ -14,7 +14,7 @@
  * with this program; if not, see http://www.gnu.org/licenses/
  */
 
-package org.esa.snap.aatsr.sst.visat;
+package org.esa.snap.aatsr.sst.ui;
 
 import com.bc.ceres.swing.binding.BindingContext;
 import org.esa.beam.framework.gpf.ui.DefaultSingleTargetProductDialog;
@@ -28,7 +28,7 @@ import org.openide.util.NbBundle;
 import java.awt.event.ActionEvent;
 
 @ActionID(
-        category = "Processors",
+        category = "Processing",
         id = "org.esa.snap.aatsr.sst.visat.AatsrSstAction"
 )
 @ActionRegistration(displayName = "#CTL_AatsrSstActionText")
