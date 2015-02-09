@@ -37,6 +37,7 @@
         <module>s3tbx-aatsr-sst</module>
         <module>s3tbx-aatsr-sst-ui</module>
         <module>s3tbx-meris-radiometry</module>
+        <module>s3tbx-meris-radiometry-ui</module>
     </modules>
 
     <packaging>pom</packaging>
@@ -107,6 +108,12 @@
 
             <dependency>
                 <groupId>org.esa.snap</groupId>
+                <artifactId>snap-ceres-ui</artifactId>
+                <version>${snap.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.esa.snap</groupId>
                 <artifactId>snap-binio</artifactId>
                 <version>${snap.version}</version>
             </dependency>
@@ -120,6 +127,12 @@
             <dependency>
                 <groupId>org.esa.snap</groupId>
                 <artifactId>snap-glayer</artifactId>
+                <version>${snap.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.esa.snap</groupId>
+                <artifactId>snap-binding</artifactId>
                 <version>${snap.version}</version>
             </dependency>
 
@@ -149,6 +162,12 @@
 
             <dependency>
                 <groupId>org.esa.snap</groupId>
+                <artifactId>snap-gui</artifactId>
+                <version>${snap.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.esa.snap</groupId>
                 <artifactId>snap-netcdf</artifactId>
                 <version>${snap.version}</version>
             </dependency>
@@ -160,12 +179,29 @@
                 <scope>test</scope>
             </dependency>
 
-            <!-- FORWARD declared for SMOS-Box @TODO tb/** make version number consistent with other NetCDF dependencies-->
+            <!-- NetBeans Modules -->
+
             <dependency>
-                <groupId>edu.ucar</groupId>
-                <artifactId>bufr</artifactId>
-                <version>4.3.22</version>
+                <groupId>org.netbeans.api</groupId>
+                <artifactId>org-openide-awt</artifactId>
+                <version>${netbeans.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.netbeans.api</groupId>
+                <artifactId>org-openide-util</artifactId>
+                <version>${netbeans.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.netbeans.api</groupId>
+                <artifactId>org-netbeans-api-annotations-common</artifactId>
+                <version>${netbeans.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.netbeans.api</groupId>
+                <artifactId>org-netbeans-modules-javahelp</artifactId>
+                <version>${netbeans.version}</version>
+            </dependency>
+
 
         </dependencies>
     </dependencyManagement>
