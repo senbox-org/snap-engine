@@ -22,7 +22,6 @@ import com.bc.ceres.swing.progress.ProgressMonitorSwingWorker;
 import com.bc.ceres.swing.selection.AbstractSelectionChangeListener;
 import com.bc.ceres.swing.selection.Selection;
 import com.bc.ceres.swing.selection.SelectionChangeEvent;
-import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductNodeEvent;
 import org.esa.beam.framework.datamodel.ProductNodeListener;
@@ -46,7 +45,7 @@ import org.esa.snap.db.CommonReaders;
 import org.esa.snap.gpf.ProgressMonitorList;
 import org.esa.snap.gpf.ui.OperatorUI;
 import org.esa.snap.gpf.ui.UIValidation;
-import org.esa.snap.util.ResourceUtils;
+import org.esa.snap.util.ImageUtils;
 
 import javax.media.jai.JAI;
 import javax.swing.*;
@@ -118,7 +117,7 @@ public class SingleOperatorDialog extends SingleTargetProductDialog {
         addParameters();
 
         getJDialog().setMinimumSize(new Dimension(450, 450));
-        getJDialog().setIconImage(ResourceUtils.esaPlanetIcon.getImage());
+        getJDialog().setIconImage(ImageUtils.esaPlanetIcon.getImage());
 
         statusLabel = new JLabel("");
         statusLabel.setForeground(new Color(255, 0, 0));

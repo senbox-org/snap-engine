@@ -69,6 +69,7 @@
 
         <module>snap-engine-utilities</module>
         <module>snap-graph-builder</module>
+        <module>snap-gui-utilities</module>
 
         <!-- BEAM Plugin Modules -->
 
