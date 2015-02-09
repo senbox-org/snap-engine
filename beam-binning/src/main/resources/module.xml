@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>beam-binning</symbolicName>
-    <version>5.0.4</version>
+    <version>5.0.5</version>
     <name>Level-3 Binning Processor (GPF)</name>
 
     <description>
@@ -30,6 +30,7 @@
     <changelog>
         <![CDATA[
         <b>Changes in 5.0.5</b><br/>
+        [BEAM-1748] - Binned product reader should handle time dimension<br/>
         Support output format BigGeoTiff.
         <b>Changes in 5.0.4</b><br/>
         [BEAM-1746] Writing binning result SeaDAS-style failes with exception<br/>
