@@ -29,7 +29,7 @@ import java.awt.event.ActionEvent;
 
 @ActionID(
         category = "Processing",
-        id = "org.esa.snap.aatsr.sst.visat.AatsrSstAction"
+        id = "org.esa.snap.aatsr.sst.ui.AatsrSstAction"
 )
 @ActionRegistration(displayName = "#CTL_AatsrSstActionText")
 @ActionReference(
