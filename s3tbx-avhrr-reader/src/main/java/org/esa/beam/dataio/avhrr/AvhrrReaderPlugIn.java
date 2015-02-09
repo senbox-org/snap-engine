@@ -42,38 +42,8 @@ public class AvhrrReaderPlugIn implements ProductReaderPlugIn {
             File.class,
     };
 
-    public AvhrrReaderPlugIn() {
-        RGBImageProfileManager profileManager = RGBImageProfileManager.getInstance();
-        RGBImageProfile profile = new RGBImageProfile("AVHRR/3 L1b - 3a,2,1, Day", // display name
-                                                      new String[]{
-                                                              "radiance_3a",
-                                                              "radiance_2",
-                                                              "radiance_1"
-                                                      });
-        profileManager.addProfile(new RGBImageProfile("AVHRR/3 L1b - 3a,2,1, Day", // display name
-                                                      new String[]{
-                                                              "radiance_3a",
-                                                              "radiance_2",
-                                                              "radiance_1"
-                                                      }));
-        profileManager.addProfile(new RGBImageProfile("AVHRR/3 L1b - 5,4,3b, Night", // display name
-                                                      new String[]{
-                                                              "temp_5",
-                                                              "temp_4",
-                                                              "temp_3b"
-                                                      }));
-        profileManager.addProfile(new RGBImageProfile("AVHRR/3 L1b - 5,4,3b, Night, Inverse", // display name
-                                                      new String[]{
-                                                              "-temp_5",
-                                                              "-temp_4",
-                                                              "-temp_3b"
-                                                      }));
-        profileManager.addProfile(new RGBImageProfile("AVHRR/3 L1b - Ionian, Day", // display name
-                                                      new String[]{
-                                                              "radiance_1",
-                                                              "radiance_2",
-                                                              "-radiance_4"
-                                                      }));
+    static {
+        registerRGBProfiles();
     }
 
     @Override
@@ -126,4 +96,33 @@ public class AvhrrReaderPlugIn implements ProductReaderPlugIn {
     public String getDescription(Locale locale) {
         return DESCRIPTION;
     }
+
+    private static void registerRGBProfiles() {
+        RGBImageProfileManager profileManager = RGBImageProfileManager.getInstance();
+        profileManager.addProfile(new RGBImageProfile("AVHRR/3 L1b - 3a,2,1, Day", // display name
+                                                      new String[]{
+                                                              "radiance_3a",
+                                                              "radiance_2",
+                                                              "radiance_1"
+                                                      }));
+        profileManager.addProfile(new RGBImageProfile("AVHRR/3 L1b - 5,4,3b, Night", // display name
+                                                      new String[]{
+                                                              "temp_5",
+                                                              "temp_4",
+                                                              "temp_3b"
+                                                      }));
+        profileManager.addProfile(new RGBImageProfile("AVHRR/3 L1b - 5,4,3b, Night, Inverse", // display name
+                                                      new String[]{
+                                                              "-temp_5",
+                                                              "-temp_4",
+                                                              "-temp_3b"
+                                                      }));
+        profileManager.addProfile(new RGBImageProfile("AVHRR/3 L1b - Ionian, Day", // display name
+                                                      new String[]{
+                                                              "radiance_1",
+                                                              "radiance_2",
+                                                              "-radiance_4"
+                                                      }));
+    }
+
 }

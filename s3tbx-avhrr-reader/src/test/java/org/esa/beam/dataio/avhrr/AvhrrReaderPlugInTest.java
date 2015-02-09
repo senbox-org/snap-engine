@@ -12,6 +12,7 @@ public class AvhrrReaderPlugInTest {
 
         int profileCount1 = RGBImageProfileManager.getInstance().getProfileCount();
 
+        // just touching the class to trigger the RGB profile registration
         new AvhrrReaderPlugIn();
 
         int profileCount2 = RGBImageProfileManager.getInstance().getProfileCount();
