@@ -187,6 +187,9 @@ public class ProductDB extends DAO {
         final ProductEntry[] list = queryProduct(queryStr);
         pm.beginTask("Removing products...", list.length);
         for (ProductEntry entry : list) {
+            if(pm.isCanceled())
+                break;
+
             deleteProductEntry(entry);
             pm.worked(1);
         }
@@ -198,6 +201,9 @@ public class ProductDB extends DAO {
         final ProductEntry[] list = queryProduct(queryStr);
         pm.beginTask("Removing products...", list.length);
         for (ProductEntry entry : list) {
+            if(pm.isCanceled())
+                break;
+
             deleteProductEntry(entry);
             pm.worked(1);
         }
