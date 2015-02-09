@@ -76,7 +76,7 @@
         <module>beam-arcbingrid-reader</module>
         <!--module>beam-bigtiff</module-->
         <module>snap-binning</module>
-        <module>beam-cluster-analysis</module>
+        <module>snap-cluster-analysis</module>
         <module>beam-collocation</module>
         <module>beam-envi-reader</module>
         <module>beam-envisat-reader</module>
