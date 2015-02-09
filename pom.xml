@@ -73,11 +73,11 @@
 
         <!-- BEAM Plugin Modules -->
 
-        <module>beam-arcbingrid-reader</module>
+        <module>snap-arcbingrid-reader</module>
         <!--module>beam-bigtiff</module-->
         <module>snap-binning</module>
         <module>snap-cluster-analysis</module>
-        <module>beam-collocation</module>
+        <module>snap-collocation</module>
         <module>beam-envi-reader</module>
         <module>beam-envisat-reader</module>
         <module>beam-flhmci</module>
