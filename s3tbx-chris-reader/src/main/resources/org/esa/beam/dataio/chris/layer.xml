@@ -1,0 +1,36 @@
+<filesystem>
+    <folder name="Actions">
+        <folder name="Readers">
+            <file name="org-esa-s3tbx-dataio-chris-ImportChrisProduct.instance">
+                <attr name="instanceCreate"
+                      methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
+                <attr name="delegate"
+                      methodvalue="org.esa.snap.gui.actions.file.ImportProductAction.create"/>
+                <attr name="displayName"
+                      stringvalue="CHRIS/Proba"/>
+                <attr name="formatName"
+                      stringvalue="CHRIS/Proba"/>
+                <attr name="useAllFileFilter"
+                      boolvalue="true"/>
+                <attr name="helpId"
+                      stringvalue="importChrisProduct"/>
+                <attr name="ShortDescription"
+                      stringvalue="Import a CHRIS/Proba data product."/>
+            </file>
+        </folder>
+    </folder>
+
+    <folder name="Menu">
+        <folder name="File">
+            <folder name="Import">
+                <folder name="Optical Sensors">
+                    <file name="org-esa-s3tbx-dataio-chris-ImportChrisProduct.shadow">
+                        <attr name="originalFile"
+                              stringvalue="Actions/Readers/org-esa-s3tbx-dataio-chris-ImportChrisProduct.instance"/>
+                    </file>
+                </folder>
+            </folder>
+        </folder>
+    </folder>
+
+</filesystem>
