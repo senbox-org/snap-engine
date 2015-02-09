@@ -419,7 +419,8 @@ public class DBQuery {
 
         //debug
         final boolean belowMaxLat = false;
-        final float maxLat = -60;
+        //final float maxLat = -50;
+        final float maxLat = 70;
         //debug end
 
         final Polygon p = new Polygon();
