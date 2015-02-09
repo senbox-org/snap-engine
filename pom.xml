@@ -56,7 +56,7 @@
 
         <!-- BEAM System Modules -->
 
-        <module>beam-core</module>
+        <module>snap-core</module>
         <module>beam-csv-dataio</module>
         <!--module>beam-examples</module-->
         <module>beam-gpf</module>
@@ -75,8 +75,7 @@
 
         <module>beam-arcbingrid-reader</module>
         <!--module>beam-bigtiff</module-->
-        <module>beam-binning</module>
-        <module>beam-chris-reader</module>
+        <module>snap-binning</module>
         <module>beam-cluster-analysis</module>
         <module>beam-collocation</module>
         <module>beam-envi-reader</module>
