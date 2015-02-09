@@ -23,7 +23,6 @@
     <folder name="Menu">
         <folder name="File">
             <folder name="Import">
-                <attr name="position" intvalue="300"/>
                 <folder name="Optical Sensors">
                     <file name="org-esa-s3tbx-dataio-avhrr-ImportAvhrrProduct.shadow">
                         <attr name="originalFile"
