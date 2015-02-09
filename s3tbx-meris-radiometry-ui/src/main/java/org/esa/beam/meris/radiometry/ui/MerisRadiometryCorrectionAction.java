@@ -14,23 +14,44 @@
  * with this program; if not, see http://www.gnu.org/licenses/
  */
 
-package org.esa.beam.meris.radiometry.visat;
+package org.esa.beam.meris.radiometry.ui;
 
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
-import org.esa.beam.framework.ui.command.CommandEvent;
 import org.esa.beam.meris.radiometry.MerisRadiometryCorrectionOp;
-import org.esa.beam.visat.actions.AbstractVisatAction;
+import org.esa.snap.gui.actions.AbstractSnapAction;
+import org.openide.awt.ActionID;
+import org.openide.awt.ActionReference;
+import org.openide.awt.ActionRegistration;
+import org.openide.util.NbBundle;
 
-public class MerisRadiometryCorrectionAction extends AbstractVisatAction {
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+
+
+@ActionID(
+        category = "Processing",
+        id = "org.esa.beam.meris.radiometry.ui.MerisRadiometryCorrectionAction"
+)
+@ActionRegistration(displayName = "#CTL_MerisRadiometryCorrectionAction_Text")
+@ActionReference(
+        path = "Menu/Processing/Preprocessing",
+        position = 100
+)
+@NbBundle.Messages({"CTL_MerisRadiometryCorrectionAction_Text=MERIS Radiometric Correction"})
+public class MerisRadiometryCorrectionAction extends AbstractSnapAction {
+
+    public MerisRadiometryCorrectionAction() {
+        setHelpId("merisRadiometryCorrection");
+        putValue(Action.SHORT_DESCRIPTION, "Performs radiometric corrections on a MERIS L1b data product.");
+    }
 
     @Override
-    public void actionPerformed(CommandEvent event) {
+    public void actionPerformed(ActionEvent e) {
         final OperatorMetadata opMetadata = MerisRadiometryCorrectionOp.class.getAnnotation(OperatorMetadata.class);
         final RadiometryDialog operatorDialog = new RadiometryDialog(opMetadata.alias(), getAppContext(),
                                                                      "MERIS L1b Radiometric Correction",
-                                                                     event.getCommand().getHelpId());
+                                                                     getHelpId());
         operatorDialog.getJDialog().pack();
         operatorDialog.show();
     }
-
 }
