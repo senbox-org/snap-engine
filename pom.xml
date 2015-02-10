@@ -33,7 +33,6 @@
         <module>s3tbx-atsr-reader</module>
         <module>s3tbx-avhrr-reader</module>
         <module>s3tbx-chris-reader</module>
-        <module>s3tbx-installer</module>
         <module>s3tbx-kit</module>
         <module>s3tbx-landsat-reader</module>
         <module>s3tbx-meris-radiometry</module>
