@@ -23,7 +23,11 @@ import com.bc.jexp.Parser;
 import com.bc.jexp.Term;
 import com.bc.jexp.WritableNamespace;
 import com.bc.jexp.impl.ParserImpl;
-import org.esa.beam.framework.dataio.*;
+import org.esa.beam.framework.dataio.ProductFlipper;
+import org.esa.beam.framework.dataio.ProductReader;
+import org.esa.beam.framework.dataio.ProductSubsetBuilder;
+import org.esa.beam.framework.dataio.ProductSubsetDef;
+import org.esa.beam.framework.dataio.ProductWriter;
 import org.esa.beam.framework.dataop.barithm.BandArithmetic;
 import org.esa.beam.framework.dataop.barithm.RasterDataEvalEnv;
 import org.esa.beam.framework.dataop.barithm.RasterDataLoop;
@@ -124,14 +128,15 @@ public class Product extends ProductNode {
     private String productType;
 
     /**
-     * The scene width of the product
+     * The product's scene raster size in pixels.
      */
-    private final int sceneRasterWidth;
+    private Dimension sceneRasterSize;
 
     /**
-     * The scene height of the product
+     * Has the product's scene raster geometry been invalidated?
+     * Used to determine whether the geometry must be recomputed.
      */
-    private final int sceneRasterHeight;
+    private boolean sceneRasterGeometryInvalidated;
 
     /**
      * The start time of the first raster line.
@@ -173,7 +178,9 @@ public class Product extends ProductNode {
     private final PlacemarkGroup pinGroup;
     private final PlacemarkGroup gcpGroup;
 
-     /**
+    /**
+     * The group which contains all other product node groups.
+     *
      * @since BEAM 5.0
      */
     private final ProductNodeGroup<ProductNodeGroup> groups;
@@ -194,7 +201,7 @@ public class Product extends ProductNode {
      * @param sceneRasterWidth  the scene width in pixels for this data product
      * @param sceneRasterHeight the scene height in pixels for this data product
      */
-    public Product(final String name, final String type, final int sceneRasterWidth, final int sceneRasterHeight) {
+    public Product(String name, String type, int sceneRasterWidth, int sceneRasterHeight) {
         this(name, type, sceneRasterWidth, sceneRasterHeight, null);
     }
 
@@ -208,28 +215,44 @@ public class Product extends ProductNode {
      * @param reader            the reader used to create this product and read data from it.
      * @see ProductReader
      */
-    public Product(final String name, final String type, final int sceneRasterWidth, final int sceneRasterHeight,
-                   final ProductReader reader) {
-        this(null, name, type, sceneRasterWidth, sceneRasterHeight, reader);
+    public Product(String name, String type, int sceneRasterWidth, int sceneRasterHeight, ProductReader reader) {
+        this(name, type, new Dimension(sceneRasterWidth, sceneRasterHeight), reader);
+    }
+
+    /**
+     * Constructs a new product with the given name and type.
+     *
+     * @param name the product identifier
+     * @param type the product type
+     */
+    public Product(String name, String type) {
+        this(name, type, null);
+    }
+
+    /**
+     * Constructs a new product with the given name, type and the reader.
+     *
+     * @param name   the product identifier
+     * @param type   the product type
+     * @param reader the reader used to create this product and read data from it.
+     * @see ProductReader
+     */
+    public Product(String name, String type, ProductReader reader) {
+        this(name, type, null, reader);
     }
 
     /*
      * Internally used constructor. Is kept private to keep product name and file location consistent.
      */
-
-    private Product(final File fileLocation,
-                    final String name,
-                    final String type,
-                    final int sceneRasterWidth,
-                    final int sceneRasterHeight,
-                    final ProductReader reader) {
+    private Product(String name,
+                    String type,
+                    Dimension sceneRasterSize,
+                    ProductReader reader) {
         super(name);
         Guardian.assertNotNullOrEmpty("type", type);
-        this.fileLocation = fileLocation;
         this.productType = type;
         this.reader = reader;
-        this.sceneRasterWidth = sceneRasterWidth;
-        this.sceneRasterHeight = sceneRasterHeight;
+        this.sceneRasterSize = sceneRasterSize;
         this.metadataRoot = new MetadataElement(METADATA_ROOT_NAME);
         this.metadataRoot.setOwner(this);
 
@@ -259,6 +282,9 @@ public class Product extends ProductNode {
         addProductNodeListener(new ProductNodeListenerAdapter() {
             @Override
             public void nodeAdded(ProductNodeEvent event) {
+                if(event.getSourceNode() instanceof RasterDataNode) {
+                    maybeInvalidateSceneRasterGeometry((RasterDataNode) event.getSourceNode());
+                }
                 if (event.getGroup() == vectorDataGroup) {
                     handleVectorDataNodeAdded(event);
                 } else if (event.getGroup() == maskGroup) {
@@ -289,8 +315,8 @@ public class Product extends ProductNode {
     }
 
     private void handleMaskAdded(ProductNodeEvent event) {
-        // TODO - move code to where masks are created
         final Mask mask = (Mask) event.getSourceNode();
+        // TODO - move code to where masks are created
         if (StringUtils.isNullOrEmpty(mask.getDescription()) && mask.getImageType() == Mask.BandMathsType.INSTANCE) {
             String expression = Mask.BandMathsType.getExpression(mask);
             mask.setDescription(getSuitableBitmaskDefDescription(expression));
@@ -744,22 +770,42 @@ public class Product extends ProductNode {
         return destScene != null && srcScene.transferGeoCodingTo(destScene, subsetDef);
     }
 
+    public Dimension getSceneRasterSize() {
+        if (sceneRasterGeometryInvalidated) {
+            recomputeSceneRasterGeometry();
+        }
+        return sceneRasterSize != null ? (Dimension) sceneRasterSize.clone() : null;
+    }
+
+    // todo - [multisize_products] do we want this method at all? Maybe useful to init size after no-size constructor before bands are added
+//    public void setSceneRasterSize(Dimension sceneRasterSize) {
+//        Assert.state(!sceneRasterGeometryInvalidated && this.sceneRasterSize == null);
+//        if (!ObjectUtils.equalObjects(this.sceneRasterSize, sceneRasterSize)) {
+//            Dimension oldSceneRasterSize = this.sceneRasterSize;
+//            this.sceneRasterSize = sceneRasterSize != null ? (Dimension) sceneRasterSize.clone() : null;
+//            sceneRasterGeometryInvalidated = false;
+//            fireNodeChanged(this, "sceneRasterSize", oldSceneRasterSize, sceneRasterSize);
+//        }
+//    }
+
     /**
-     * Returns the scene width in pixels for this data product.
-     *
-     * @return the scene width in pixels for this data product.
+     * @return The scene raster width in pixels, or 0 if the scene raster geometry is not (yet) determined.
      */
     public int getSceneRasterWidth() {
-        return sceneRasterWidth;
+        if (sceneRasterGeometryInvalidated) {
+            recomputeSceneRasterGeometry();
+        }
+        return sceneRasterSize != null ? sceneRasterSize.width : 0;
     }
 
     /**
-     * Returns the scene height in pixels for this data product.
-     *
-     * @return the scene height in pixels for this data product.
+     * @return The scene raster height in pixels, or 0 if the scene raster geometry is not (yet) determined.
      */
     public int getSceneRasterHeight() {
-        return sceneRasterHeight;
+        if (sceneRasterGeometryInvalidated) {
+            recomputeSceneRasterGeometry();
+        }
+        return sceneRasterSize != null ? sceneRasterSize.height : 0;
     }
 
     /**
@@ -882,6 +928,7 @@ public class Product extends ProductNode {
                                                        "a tie-point grid with the name '" + tiePointGrid.getName() + "'.");
         }
         tiePointGridGroup.add(tiePointGrid);
+//        maybeInvalidateSceneRasterGeometry(tiePointGrid);
     }
 
     /**
@@ -982,11 +1029,7 @@ public class Product extends ProductNode {
      * @param band the band to added, must not be <code>null</code>
      */
     public void addBand(final Band band) {
-        Guardian.assertNotNull("band", band);
-        //if (band.getSceneRasterWidth() != getSceneRasterWidth()
-        //    || band.getSceneRasterHeight() != getSceneRasterHeight()) {
-           //NESTMOD throw new IllegalArgumentException("illegal raster dimensions");
-        //}
+        Assert.notNull(band, "band");
         if (containsRasterDataNode(band.getName())) {
             String name = band.getName();
             int i = name.lastIndexOf("__");
@@ -1004,7 +1047,11 @@ public class Product extends ProductNode {
             //throw new IllegalArgumentException("The Product '" + getName() + "' already contains " +
             //                                           "a band with the name '" + band.getName() + "'.");
         }
+        //Assert.argument(!containsRasterDataNode(band.getName()),
+        //                "The Product '" + getName() + "' already contains " +
+        //                "a band with the name '" + band.getName() + "'.");
         bandGroup.add(band);
+//        maybeInvalidateSceneRasterGeometry(band);
     }
 
     /**
@@ -1301,12 +1348,12 @@ public class Product extends ProductNode {
         if (this == product) {
             return true;
         }
-   /*     if (getSceneRasterWidth() != product.getSceneRasterWidth()) {
+        if (getSceneRasterWidth() != product.getSceneRasterWidth()) {
             return false;
         }
         if (getSceneRasterHeight() != product.getSceneRasterHeight()) {
             return false;
-        }     */
+        }
         if (getGeoCoding() == null && product.getGeoCoding() != null) {
             return false;
         }
@@ -2147,8 +2194,8 @@ public class Product extends ProductNode {
      * @since BEAM 4.10
      */
     public Mask addMask(String maskName, Mask.ImageType imageType) {
-        final Mask mask = new Mask(maskName, sceneRasterWidth, sceneRasterHeight, imageType);
-        getMaskGroup().add(mask);
+        final Mask mask = new Mask(maskName, getSceneRasterWidth(), getSceneRasterHeight(), imageType);
+        addMask(mask);
         return mask;
     }
 
@@ -2166,9 +2213,9 @@ public class Product extends ProductNode {
      */
     public Mask addMask(String maskName, String expression, String description, Color color, double transparency) {
         final Mask mask = Mask.BandMathsType.create(maskName, description,
-                                                    sceneRasterWidth, sceneRasterHeight,
+                                                    getSceneRasterWidth(), getSceneRasterHeight(),
                                                     expression, color, transparency);
-        getMaskGroup().add(mask);
+        addMask(mask);
         return mask;
     }
 
@@ -2194,8 +2241,48 @@ public class Product extends ProductNode {
         mask.setDescription(description);
         mask.setImageColor(color);
         mask.setImageTransparency(transparency);
-        getMaskGroup().add(mask);
+        addMask(mask);
         return mask;
+    }
+
+    /**
+     * Adds the given mask to this product.
+     *
+     * @param mask the mask to be added, must not be <code>null</code>
+     */
+    public void addMask(Mask mask) {
+        getMaskGroup().add(mask);
+    }
+
+    private void maybeInvalidateSceneRasterGeometry(RasterDataNode rasterDataNode) {
+        if (sceneRasterGeometryInvalidated || !rasterDataNode.getRasterSize().equals(sceneRasterSize)) {
+            sceneRasterGeometryInvalidated = true;
+        }
+    }
+
+    private void recomputeSceneRasterGeometry() {
+        // todo - [multisize_products] replace this numb algorithm by something reasonable that takes the bands' geographical coverage into account (nf)
+        RasterDataNode[] bands = getBands();
+        RasterDataNode[] grids = getTiePointGrids();
+        RasterDataNode[] masks = getMaskGroup().toArray(new Mask[0]);
+        List<RasterDataNode> rasters = new ArrayList<>();
+        rasters.addAll(Arrays.asList(bands));
+        rasters.addAll(Arrays.asList(grids));
+        rasters.addAll(Arrays.asList(masks));
+        Object oldSceneRasterSize = sceneRasterSize != null ? sceneRasterSize.clone() : null;
+        Dimension dimension = sceneRasterSize;
+        for (RasterDataNode band : rasters) {
+            if (dimension == null) {
+                dimension = new Dimension();
+            }
+            dimension.width = Math.max(dimension.width, band.getRasterWidth());
+            dimension.height = Math.max(dimension.height, band.getRasterHeight());
+        }
+        sceneRasterSize = dimension;
+        sceneRasterGeometryInvalidated = false;
+        if (sceneRasterSize != null && !sceneRasterSize.equals(oldSceneRasterSize)) {
+            fireNodeChanged(this, "sceneRasterSize", oldSceneRasterSize, sceneRasterSize);
+        }
     }
 
     /**
@@ -2449,7 +2536,7 @@ public class Product extends ProductNode {
             bitmaskDef.setDescription(defaultDescription);
         }
         bitmaskDefGroup.add(bitmaskDef);
-        maskGroup.add(bitmaskDef.createMask(sceneRasterWidth, sceneRasterHeight));
+        maskGroup.add(bitmaskDef.createMask(getSceneRasterWidth(), getSceneRasterHeight()));
     }
 
     /**

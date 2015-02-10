@@ -57,7 +57,7 @@
         <!-- BEAM System Modules -->
 
         <module>snap-core</module>
-        <module>beam-csv-dataio</module>
+        <module>snap-csv-dataio</module>
         <!--module>beam-examples</module-->
         <module>beam-gpf</module>
         <!--module>snap-help</module-->
@@ -79,16 +79,13 @@
         <module>snap-cluster-analysis</module>
         <module>snap-collocation</module>
         <module>beam-envi-reader</module>
-        <module>beam-envisat-reader</module>
+        <module>snap-envisat-reader</module>
         <module>beam-flhmci</module>
         <module>beam-geotiff</module>
         <!--module>beam-getasse30-reader</module-->
         <module>beam-hdf5-writer</module>
-        <module>beam-landsat-reader</module>
         <module>beam-meris-cloud</module>
         <module>snap-ndvi</module>
-        <module>beam-meris-smac</module>
-        <module>beam-merisl3-reader</module>
         <module>beam-modis-reader</module>
         <module>beam-netcdf</module>
         <!--module>seadas-reader</module-->
