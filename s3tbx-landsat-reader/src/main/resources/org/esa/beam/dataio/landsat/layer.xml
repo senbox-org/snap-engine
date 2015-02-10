@@ -1,0 +1,57 @@
+<filesystem>
+
+    <folder name="Actions">
+        <folder name="Readers">
+            <file name="org-esa-s3tbx-dataio-landsat-ImportLandsatFASTProduct.instance">
+                <attr name="instanceCreate"
+                      methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
+                <attr name="delegate"
+                      methodvalue="org.esa.snap.gui.actions.file.ImportProductAction.create"/>
+                <attr name="displayName"
+                      stringvalue="Landsat 5 TM (FAST)"/>
+                <attr name="formatName"
+                      stringvalue="FAST L5"/>
+                <attr name="useAllFileFilter"
+                      boolvalue="true"/>
+                <attr name="helpId"
+                      stringvalue="importLandsatProduct"/>
+                <attr name="ShortDescription"
+                      stringvalue="Import a Landsat 5 TM (in FAST format) data product."/>
+            </file>
+            <file name="org-esa-s3tbx-dataio-landsat-ImportLandsatGeoTIFFProduct.instance">
+                <attr name="instanceCreate"
+                      methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
+                <attr name="delegate"
+                      methodvalue="org.esa.snap.gui.actions.file.ImportProductAction.create"/>
+                <attr name="displayName"
+                      stringvalue="Landsat (GeoTIFF)"/>
+                <attr name="formatName"
+                      stringvalue="LandsatGeoTIFF"/>
+                <attr name="useAllFileFilter"
+                      boolvalue="true"/>
+                <attr name="helpId"
+                      stringvalue="importLandsatProduct"/>
+                <attr name="ShortDescription"
+                      stringvalue="Import a Landsat (in GeoTIFF format) data product."/>
+            </file>
+        </folder>
+    </folder>
+
+    <folder name="Menu">
+        <folder name="File">
+            <folder name="Import">
+                <folder name="Optical Sensors">
+                    <file name="org-esa-s3tbx-dataio-landsat-ImportLandsatFASTProduct.shadow">
+                        <attr name="originalFile"
+                              stringvalue="Actions/Readers/org-esa-s3tbx-dataio-landsat-ImportLandsatFASTProduct.instance"/>
+                    </file>
+                    <file name="org-esa-s3tbx-dataio-landsat-ImportLandsatGeoTIFFProduct.shadow">
+                        <attr name="originalFile"
+                              stringvalue="Actions/Readers/org-esa-s3tbx-dataio-landsat-ImportLandsatGeoTIFFProduct.instance"/>
+                    </file>
+                </folder>
+            </folder>
+        </folder>
+    </folder>
+
+</filesystem>

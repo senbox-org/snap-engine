@@ -27,17 +27,20 @@
     <url>https://github.com/bcdev/s3tbx</url>
 
     <modules>
-        <module>s3tbx-installer</module>
-        <module>s3tbx-kit</module>
-        <module>s3tbx-sentinel3-reader</module>
+        <module>s3tbx-aatsr-sst</module>
+        <module>s3tbx-aatsr-sst-ui</module>
         <module>s3tbx-alos-reader</module>
         <module>s3tbx-atsr-reader</module>
         <module>s3tbx-avhrr-reader</module>
         <module>s3tbx-chris-reader</module>
-        <module>s3tbx-aatsr-sst</module>
-        <module>s3tbx-aatsr-sst-ui</module>
+        <module>s3tbx-installer</module>
+        <module>s3tbx-kit</module>
+        <module>s3tbx-landsat-reader</module>
         <module>s3tbx-meris-radiometry</module>
         <module>s3tbx-meris-radiometry-ui</module>
+        <module>s3tbx-meris-smac</module>
+        <module>s3tbx-merisl3-reader</module>
+        <module>s3tbx-sentinel3-reader</module>
     </modules>
 
     <packaging>pom</packaging>
@@ -202,6 +205,13 @@
                 <version>${netbeans.version}</version>
             </dependency>
 
+            <!-- TAR archive support  -->
+
+            <dependency>
+                <groupId>org.xeustechnologies</groupId>
+                <artifactId>jtar</artifactId>
+                <version>1.0.4</version>
+            </dependency>
 
         </dependencies>
     </dependencyManagement>

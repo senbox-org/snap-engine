@@ -1,0 +1,45 @@
+<filesystem>
+
+    <folder name="Actions">
+        <folder name="Operators">
+            <file name="org-esa-beam-smac-MerisSmacOpAction.instance">
+                <attr name="instanceCreate"
+                      methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
+                <attr name="delegate"
+                      methodvalue="org.esa.snap.gui.actions.DefaultOperatorAction.create"/>
+                <attr name="displayName"
+                      stringvalue="MERIS/(A)ATSR SMAC Atmospheric Correction"/>
+                <attr name="operatorName"
+                      stringvalue="SmacOp"/>
+                <attr name="dialogTitle"
+                      stringvalue="MERIS/(A)ATSR SMAC Atmospheric Correction"/>
+                <attr name="targetProductNameSuffix"
+                      stringvalue="_smac"/>
+                <attr name="helpId"
+                      stringvalue="smacScientificTool"/>
+                <attr name="ShortDescription"
+                      stringvalue="Perform the Simplified Method for Atmospheric Correction on MERIS and (A)ATSR L1b products."/>
+            </file>
+        </folder>
+    </folder>
+
+    <folder name="Menu">
+        <folder name="Processing">
+            <folder name="Thematic Land Processing">
+                <file name="org-esa-beam-smac-MerisSmacOpAction.shadow">
+                    <attr name="originalFile"
+                          stringvalue="Actions/Operators/org-esa-beam-smac-MerisSmacOpAction.instance"/>
+                </file>
+            </folder>
+        </folder>
+    </folder>
+
+    <folder name="Services">
+        <folder name="JavaHelp">
+            <file name="helpset.xml" url="helpset.xml">
+                <attr name="position" intvalue="4500"/>
+            </file>
+        </folder>
+    </folder>
+
+</filesystem>

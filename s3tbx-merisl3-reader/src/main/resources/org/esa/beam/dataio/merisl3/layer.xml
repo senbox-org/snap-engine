@@ -1,0 +1,37 @@
+<filesystem>
+
+    <folder name="Actions">
+        <folder name="Readers">
+            <file name="org-esa-s3tbx-dataio-merisl3-ImportMerisBinnedL3Product.instance">
+                <attr name="instanceCreate"
+                      methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
+                <attr name="delegate"
+                      methodvalue="org.esa.snap.gui.actions.file.ImportProductAction.create"/>
+                <attr name="displayName"
+                      stringvalue="MERIS Binned Level-3"/>
+                <attr name="formatName"
+                      stringvalue="L3_ENV_MER"/>
+                <attr name="useAllFileFilter"
+                      boolvalue="true"/>
+                <attr name="helpId"
+                      stringvalue="importMerisBinnedL3Product"/>
+                <attr name="ShortDescription"
+                      stringvalue="Import a MERIS Binned Level-3 (NetCDF) data product."/>
+            </file>
+        </folder>
+    </folder>
+
+    <folder name="Menu">
+        <folder name="File">
+            <folder name="Import">
+                <folder name="Optical Sensors">
+                    <file name="org-esa-s3tbx-dataio-merisl3-ImportMerisBinnedL3Product.shadow">
+                        <attr name="originalFile"
+                              stringvalue="Actions/Readers/org-esa-s3tbx-dataio-merisl3-ImportMerisBinnedL3Product.instance"/>
+                    </file>
+                </folder>
+            </folder>
+        </folder>
+    </folder>
+
+</filesystem>
