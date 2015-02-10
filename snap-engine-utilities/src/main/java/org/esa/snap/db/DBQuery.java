@@ -418,8 +418,9 @@ public class DBQuery {
         final boolean singlePointSelection = selectionRectangle.getWidth() == 0 && selectionRectangle.getHeight() == 0;
 
         //debug
-        final boolean belowMaxLat = false;
-        //final float maxLat = -50;
+        final boolean anyBelowMaxLat = false;
+        final boolean allBelowMaxLat = false;
+        //final float maxLat = -54;
         final float maxLat = 70;
         //debug end
 
@@ -432,7 +433,17 @@ public class DBQuery {
             }
             p.addPoint((int) (geoBox[0].getLat() * mult), (int) (geoBox[0].getLon() * mult));
 
-            if(belowMaxLat) {
+            if(anyBelowMaxLat) {
+                boolean anyPoint = false;
+                for (GeoPos geo : geoBox) {
+                    if ((maxLat > 0 && geo.getLat() > maxLat) || (maxLat < 0 && geo.getLat() < maxLat)) {
+                        anyPoint = true;
+                        break;
+                    }
+                }
+                if (anyPoint)
+                    intersectList.add(entry);
+            } else if(allBelowMaxLat) {
                 boolean allPoints = true;
                 for (GeoPos geo : geoBox) {
                     if ((maxLat > 0 && geo.getLat() < maxLat) || (maxLat < 0 && geo.getLat() > maxLat)) {

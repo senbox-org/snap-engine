@@ -162,14 +162,17 @@ public class ProductDB extends DAO {
         }
     }
 
-    public void cleanUpRemovedProducts() throws SQLException {
+    public void cleanUpRemovedProducts(final ProgressMonitor pm) throws SQLException {
         final DBQuery dbQuery = new DBQuery();
         final ProductEntry[] entries = dbQuery.queryDatabase(this);
+        pm.beginTask("Cleaning up database...", entries.length);
         for (ProductEntry entry : entries) {
             if (!entry.getFile().exists()) {
                 deleteProductEntry(entry);
             }
+            pm.worked(1);
         }
+        pm.done();
     }
 
     public void deleteProductEntry(final ProductEntry entry) throws SQLException {
