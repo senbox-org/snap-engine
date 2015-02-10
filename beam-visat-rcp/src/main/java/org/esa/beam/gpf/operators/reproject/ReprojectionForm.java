@@ -538,6 +538,11 @@ class ReprojectionForm extends JTabbedPane {
             public void selectionChanged(SelectionChangeEvent event) {
                 final Product sourceProduct = getSourceProduct();
                 updateTargetProductName(sourceProduct);
+
+                if(reprojectionModel.noDataValue == Double.NaN) {
+                    reprojectionModel.noDataValue = sourceProduct.getBandAt(0).getNoDataValue();
+                }
+
                 GeoPos centerGeoPos = null;
                 if (sourceProduct != null) {
                     centerGeoPos = ProductUtils.getCenterGeoPos(sourceProduct);
