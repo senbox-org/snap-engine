@@ -18,7 +18,7 @@ package org.esa.snap.aatsr.sst.ui;
 
 import com.bc.ceres.swing.binding.BindingContext;
 import org.esa.beam.framework.gpf.ui.DefaultSingleTargetProductDialog;
-import org.esa.snap.gui.actions.AbstractSnapAction;
+import org.esa.snap.rcp.actions.AbstractSnapAction;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.awt.ActionRegistration;

@@ -18,7 +18,7 @@ package org.esa.beam.meris.radiometry.ui;
 
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.meris.radiometry.MerisRadiometryCorrectionOp;
-import org.esa.snap.gui.actions.AbstractSnapAction;
+import org.esa.snap.rcp.actions.AbstractSnapAction;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.awt.ActionRegistration;

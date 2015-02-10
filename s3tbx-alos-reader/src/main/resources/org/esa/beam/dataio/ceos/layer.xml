@@ -5,7 +5,7 @@
                 <attr name="instanceCreate"
                       methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
                 <attr name="delegate"
-                      methodvalue="org.esa.snap.gui.actions.file.ImportProductAction.create"/>
+                      methodvalue="org.esa.snap.rcp.actions.file.ImportProductAction.create"/>
                 <attr name="displayName"
                       stringvalue="ALOS/AVNIR-2 Product"/>
                 <attr name="formatName"
@@ -23,7 +23,7 @@
                 <attr name="displayName"
                       stringvalue="ALOS/PRISM Product"/>
                 <attr name="delegate"
-                      methodvalue="org.esa.snap.gui.actions.file.ImportProductAction.create"/>
+                      methodvalue="org.esa.snap.rcp.actions.file.ImportProductAction.create"/>
                 <attr name="formatName"
                       stringvalue="PRISM"/>
                 <attr name="useAllFileFilter"

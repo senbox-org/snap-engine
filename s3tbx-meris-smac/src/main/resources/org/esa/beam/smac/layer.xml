@@ -6,7 +6,7 @@
                 <attr name="instanceCreate"
                       methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
                 <attr name="delegate"
-                      methodvalue="org.esa.snap.gui.actions.DefaultOperatorAction.create"/>
+                      methodvalue="org.esa.snap.rcp.actions.DefaultOperatorAction.create"/>
                 <attr name="displayName"
                       stringvalue="MERIS/(A)ATSR SMAC Atmospheric Correction"/>
                 <attr name="operatorName"
