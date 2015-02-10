@@ -334,7 +334,7 @@ public class Orthorectifier implements GeoCoding {
     }
 
     protected final double getElevation(GeoPos geoPos, PixelPos pixelPos) {
-        double h = 0.0;
+        double h = 0.0f;
         if (elevationModel != null) {
             try {
                 h = elevationModel.getElevation(geoPos);
@@ -342,7 +342,7 @@ public class Orthorectifier implements GeoCoding {
                 // ignored
             }
             if (h == elevationModel.getDescriptor().getNoDataValue()) {
-                h = 0.0;
+                h = 0.0f;
             }
         } else if (pointing.canGetElevation()) {
             if (pixelPos == null) {
