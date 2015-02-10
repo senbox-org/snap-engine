@@ -18,7 +18,7 @@
                 <attr name="helpId"
                       stringvalue="smacScientificTool"/>
                 <attr name="ShortDescription"
-                      stringvalue="Perform the Simplified Method for Atmospheric Correction on MERIS and (A)ATSR L1b products."/>
+                      stringvalue="Perform the Simplified Method for Atmospheric Correction (SMAC) on MERIS and (A)ATSR L1b products."/>
             </file>
         </folder>
     </folder>
@@ -29,6 +29,8 @@
                 <file name="org-esa-beam-smac-MerisSmacOpAction.shadow">
                     <attr name="originalFile"
                           stringvalue="Actions/Operators/org-esa-beam-smac-MerisSmacOpAction.instance"/>
+                    <attr name="position"
+                          intvalue="1000"/>
                 </file>
             </folder>
         </folder>
