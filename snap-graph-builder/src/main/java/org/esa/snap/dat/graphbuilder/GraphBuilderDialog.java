@@ -16,7 +16,6 @@
 package org.esa.snap.dat.graphbuilder;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.graph.GraphException;
 import org.esa.beam.framework.help.HelpSys;
@@ -32,6 +31,7 @@ import org.esa.snap.gpf.ProductSetReaderOpUI;
 import org.esa.snap.gpf.ui.SourceUI;
 import org.esa.snap.gpf.ui.UIValidation;
 import org.esa.snap.util.DialogUtils;
+import org.esa.snap.util.ImageUtils;
 import org.esa.snap.util.MemUtils;
 import org.esa.snap.util.ResourceUtils;
 
@@ -52,12 +52,12 @@ import java.util.List;
  */
 public class GraphBuilderDialog extends ModelessDialog implements Observer {
 
-    private static final ImageIcon processIcon = ResourceUtils.LoadIcon("org/esa/snap/icons/cog.png");
-    private static final ImageIcon saveIcon = ResourceUtils.LoadIcon("org/esa/snap/icons/save.png");
-    private static final ImageIcon loadIcon = ResourceUtils.LoadIcon("org/esa/snap/icons/open.png");
-    private static final ImageIcon clearIcon = ResourceUtils.LoadIcon("org/esa/snap/icons/edit-clear.png");
-    private static final ImageIcon helpIcon = ResourceUtils.LoadIcon("org/esa/snap/icons/help-browser.png");
-    private static final ImageIcon infoIcon = ResourceUtils.LoadIcon("org/esa/snap/icons/info22.png");
+    private static final ImageIcon processIcon = ImageUtils.LoadIcon("org/esa/snap/icons/cog.png");
+    private static final ImageIcon saveIcon = ImageUtils.LoadIcon("org/esa/snap/icons/save.png");
+    private static final ImageIcon loadIcon = ImageUtils.LoadIcon("org/esa/snap/icons/open.png");
+    private static final ImageIcon clearIcon = ImageUtils.LoadIcon("org/esa/snap/icons/edit-clear.png");
+    private static final ImageIcon helpIcon = ImageUtils.LoadIcon("org/esa/snap/icons/help-browser.png");
+    private static final ImageIcon infoIcon = ImageUtils.LoadIcon("org/esa/snap/icons/info22.png");
 
     private final AppContext appContext;
     private GraphPanel graphPanel = null;
@@ -110,7 +110,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
         } else {
             super.getJDialog().setMinimumSize(new Dimension(600, 500));
         }
-        super.getJDialog().setIconImage(ResourceUtils.esaPlanetIcon.getImage());
+        super.getJDialog().setIconImage(ImageUtils.esaPlanetIcon.getImage());
 
         final JPanel mainPanel = new JPanel(new BorderLayout(4, 4));
 

@@ -56,11 +56,11 @@
 
         <!-- BEAM System Modules -->
 
-        <module>beam-core</module>
-        <module>beam-csv-dataio</module>
+        <module>snap-core</module>
+        <module>snap-csv-dataio</module>
         <!--module>beam-examples</module-->
         <module>beam-gpf</module>
-        <!--module>beam-help</module-->
+        <!--module>snap-help</module-->
         <module>beam-scripting</module>
         <module>beam-ui</module>
         <module>beam-visat-rcp</module>
@@ -69,31 +69,23 @@
 
         <module>snap-engine-utilities</module>
         <module>snap-graph-builder</module>
+        <module>snap-gui-utilities</module>
 
         <!-- BEAM Plugin Modules -->
 
-        <module>beam-aatsr-sst</module>
-        <module>beam-alos-reader</module>
-        <module>beam-arcbingrid-reader</module>
-        <module>beam-atsr-reader</module>
-        <module>beam-avhrr-reader</module>
+        <module>snap-arcbingrid-reader</module>
         <!--module>beam-bigtiff</module-->
-        <module>beam-binning</module>
-        <module>beam-chris-reader</module>
-        <module>beam-cluster-analysis</module>
-        <module>beam-collocation</module>
+        <module>snap-binning</module>
+        <module>snap-cluster-analysis</module>
+        <module>snap-collocation</module>
         <module>beam-envi-reader</module>
-        <module>beam-envisat-reader</module>
+        <module>snap-envisat-reader</module>
         <module>beam-flhmci</module>
         <module>beam-geotiff</module>
         <!--module>beam-getasse30-reader</module-->
         <module>beam-hdf5-writer</module>
-        <module>beam-landsat-reader</module>
         <module>beam-meris-cloud</module>
-        <module>beam-ndvi</module>
-        <module>beam-meris-radiometry</module>
-        <module>beam-meris-smac</module>
-        <module>beam-merisl3-reader</module>
+        <module>snap-ndvi</module>
         <module>beam-modis-reader</module>
         <module>beam-netcdf</module>
         <!--module>seadas-reader</module-->

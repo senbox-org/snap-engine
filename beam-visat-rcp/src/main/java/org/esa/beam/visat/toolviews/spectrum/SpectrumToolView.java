@@ -242,7 +242,7 @@ public class SpectrumToolView extends AbstractToolView {
     }
 
     void updateChart() {
-        maybeShowTip();
+        //maybeShowTip();
         chartHandler.updateChart();
         chartPanel.repaint();
     }
