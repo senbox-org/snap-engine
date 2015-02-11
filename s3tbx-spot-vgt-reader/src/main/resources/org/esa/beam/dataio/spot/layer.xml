@@ -1,0 +1,29 @@
+<filesystem>
+
+    <folder name="Actions">
+        <folder name="Readers">
+            <file name="org-esa-s3tbx-dataio-spot-ImportSpotVgtProduct.instance">
+                <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
+                <attr name="delegate" methodvalue="org.esa.snap.rcp.actions.file.ImportProductAction.create"/>
+                <attr name="displayName" stringvalue="SPOT VGT"/>
+                <attr name="formatName" stringvalue="SPOT-VGT"/>
+                <attr name="useAllFileFilter" boolvalue="true"/>
+                <attr name="helpId" stringvalue="importSpotVgtProduct"/>
+            </file>
+        </folder>
+    </folder>
+
+    <folder name="Menu">
+        <folder name="File">
+            <folder name="Import">
+                <folder name="Optical Sensors">
+                    <file name="org-esa-s3tbx-dataio-spot-ImportSpotVgtProduct.shadow">
+                        <attr name="originalFile"
+                              stringvalue="Actions/Readers/org-esa-s3tbx-dataio-spot-ImportSpotVgtProduct.instance"/>
+                    </file>
+                </folder>
+            </folder>
+        </folder>
+    </folder>
+
+</filesystem>
