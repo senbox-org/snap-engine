@@ -93,6 +93,22 @@ public class InputProductValidator {
         }
     }
 
+    public void checkIfSentinel1DeburstProduct() throws OperatorException {
+
+        // First off, it must be SLC
+        checkIfSLC();
+
+        // Then...
+        // If it is not Sentinel1, we don't have to check.
+        // If it is single-path (i.e., not multi-path), we don't have to check.
+        // If it is multi-path, then it needs to be deburst.
+        // Now isMultiPath() returns true if it is multi-path AND not deburst
+        // So we want to throw if isMultiPath() returns true in isTOPSARBurstProduct()
+        if (isTOPSARBurstProduct()) {
+            throw new OperatorException("Source product should first be deburst");
+        }
+    }
+
     public boolean isTOPSARBurstProduct() throws OperatorException {
         final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
         if (!mission.startsWith("SENTINEL-1")) {
