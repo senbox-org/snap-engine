@@ -51,7 +51,6 @@
         <snap.version>2.0.0-SNAPSHOT</snap.version>
         <netbeans.version>RELEASE802</netbeans.version>
         <javahelp.version>2.0.05</javahelp.version>
-        <outputdir>../../output</outputdir>
         <brandingToken>s3tbx</brandingToken>
     </properties>
 
@@ -219,7 +218,6 @@
     </dependencyManagement>
 
     <build>
-        <outputDirectory>${outputdir}/modules/${project.artifactId}-${snap.version}</outputDirectory>
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
