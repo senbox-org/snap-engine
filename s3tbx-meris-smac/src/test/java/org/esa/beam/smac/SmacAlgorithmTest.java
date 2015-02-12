@@ -16,14 +16,13 @@
 
 package org.esa.beam.smac;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.Test;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
-public class SmacAlgorithmTest extends TestCase {
+import static org.junit.Assert.*;
+
+public class SmacAlgorithmTest {
 
     /*
     These are the reference results calculated with the original c-sources from
@@ -182,14 +181,7 @@ public class SmacAlgorithmTest extends TestCase {
     static float _defPressure = 900.0f;
     static float _defToa = 0.4f;
 
-    public SmacAlgorithmTest(String testName) {
-        super(testName);
-    }
-
-    public static Test suite() {
-        return new TestSuite(SmacAlgorithmTest.class);
-    }
-
+    @Test
     public void testRun() {
         int n;
         SmacAlgorithm smac = new SmacAlgorithm();
@@ -224,7 +216,7 @@ public class SmacAlgorithmTest extends TestCase {
 
         try {
             SensorCoefficientFile file = new SensorCoefficientFile();
-            String filePath = new String("../../src/org/esa/beam/toolviews/smac/coefficients/");
+            String filePath = "../../src/org/esa/beam/toolviews/smac/coefficients/";
 
             // loop over all sensor coefficient files and perform smac
             for (n = 0; n < _referenceCoeffs.length; n++) {
@@ -246,8 +238,7 @@ public class SmacAlgorithmTest extends TestCase {
             smac.setSensorCoefficients(file);
             t_surf = smac.run(sza, saa, vza, vaa, taup550, uh2o, uo3, pressure, process, invalid, toa, t_surf);
             assertEquals(invalid, t_surf[0], 1e-7f);
-        } catch (FileNotFoundException e) {
-        } catch (IOException e) {
+        } catch (IOException ignored) {
         }
     }
 

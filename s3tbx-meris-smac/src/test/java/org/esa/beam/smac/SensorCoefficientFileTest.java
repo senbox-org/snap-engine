@@ -16,41 +16,44 @@
 
 package org.esa.beam.smac;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-import org.esa.beam.GlobalTestConfig;
+import org.esa.beam.util.io.FileUtils;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
-public class SensorCoefficientFileTest extends TestCase {
+import static org.junit.Assert.*;
+
+public class SensorCoefficientFileTest {
 
     private File smacAuxDir;
     private String oldAuxdataPath;
+    private Path testAuxdataPath;
 
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         oldAuxdataPath = System.getProperty(SmacOperator.SMAC_AUXDATA_DIR_PROPERTY, "");
-        String path = new File(GlobalTestConfig.getBeamTestDataOutputDirectory(), "auxdata/smac").getPath();
-        System.setProperty(SmacOperator.SMAC_AUXDATA_DIR_PROPERTY, path);
+        testAuxdataPath = Files.createTempDirectory(SensorCoefficientFileTest.class.getName());
+        System.setProperty(SmacOperator.SMAC_AUXDATA_DIR_PROPERTY, testAuxdataPath.toString());
         SmacOperator op = new SmacOperator();
         op.installAuxdata(); // just to extract auxdata
         smacAuxDir = op.getAuxdataInstallDir();
-        assertEquals(path, smacAuxDir.getPath());
+        assertEquals(testAuxdataPath.toString(), smacAuxDir.getPath());
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         System.setProperty(SmacOperator.SMAC_AUXDATA_DIR_PROPERTY, oldAuxdataPath);
+        FileUtils.deleteTree(testAuxdataPath.toFile());
     }
 
-    public static Test suite() {
-        return new TestSuite(SensorCoefficientFileTest.class);
-    }
-
+    @Test
     public void testReadFile() {
         SensorCoefficientFile file = new SensorCoefficientFile();
 
@@ -58,13 +61,13 @@ public class SensorCoefficientFileTest extends TestCase {
         try {
             file.readFile(null);
             fail("illegal null argument shall not be accepted");
-        } catch (IllegalArgumentException | IOException e) {
+        } catch (IllegalArgumentException | IOException ignored) {
         }
         // class shall throw exception when file does not exist
         try {
             file.readFile("gbrmtzewz");
             fail("exception must be thrown when non existent file is passed in");
-        } catch (IOException e) {
+        } catch (IOException ignored) {
         }
 
         // now read an existing file
@@ -74,7 +77,7 @@ public class SensorCoefficientFileTest extends TestCase {
             file.readFile(toRead.toString());
         } catch (FileNotFoundException e) {
             fail("must be able to read this file");
-        } catch (IOException e) {
+        } catch (IOException ignored) {
         }
 
         assertEquals(-0.002718, file.getAh2o(), 1e-12);

@@ -15,29 +15,23 @@
  */
 package org.esa.beam.smac;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 import org.esa.beam.dataio.envisat.EnvisatConstants;
+import org.junit.Test;
 
-public class SmacUtilsTest extends TestCase {
+import static org.junit.Assert.*;
 
-    public SmacUtilsTest(String testName) {
-        super(testName);
-    }
+public class SmacUtilsTest {
 
-    public static Test suite() {
-        return new TestSuite(SmacUtilsTest.class);
-    }
-
+    @Test
     public void testGetSensorTypeDoesNotAcceptNullParameter() {
         try {
             SmacUtils.getSensorType(null);
             fail("IllegalArgumentException expected");
-        } catch (IllegalArgumentException expected) {
+        } catch (IllegalArgumentException ignored) {
         }
     }
 
+    @Test
     public void testGetSensorTypeReturnsCorrectType() {
         String type;
 
@@ -51,17 +45,19 @@ public class SmacUtilsTest extends TestCase {
         assertEquals(SensorCoefficientManager.MERIS_NAME, type);
     }
 
+    @Test
     public void testGetSensorTypeIsNullOnIllegalTypes() {
         assertNull(SmacUtils.getSensorType("Nasenann"));
         assertNull(SmacUtils.getSensorType("strange"));
         assertNull(SmacUtils.getSensorType(""));
     }
 
+    @Test
     public void testIsSupportedFileType() {
         try {
             SmacUtils.isSupportedProductType(null);
             fail("IllegalArgumentException expected");
-        } catch (IllegalArgumentException expected) {
+        } catch (IllegalArgumentException ignored) {
         }
 
         assertTrue(SmacUtils.isSupportedProductType(EnvisatConstants.AATSR_L1B_TOA_PRODUCT_TYPE_NAME));
