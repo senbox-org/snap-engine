@@ -31,6 +31,10 @@ public class FlhMciAction extends AbstractSnapAction {
     private static final String OPERATOR_ALIAS = "FlhMci";
     private static final String HELP_ID = "flhMciScientificTool";
 
+    public FlhMciAction() {
+        putValue(SHORT_DESCRIPTION, "Generates florescence line height (FLH) / maximum chlorophyll index (MCI) from spectral bands.");
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
         final AppContext appContext = getAppContext();
