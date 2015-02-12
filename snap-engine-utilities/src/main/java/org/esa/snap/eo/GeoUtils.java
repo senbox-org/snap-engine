@@ -351,7 +351,7 @@ public final class GeoUtils {
         final double R = 1.0 - F;
         double TU = R * FastMath.tan(lat1);
         final double SF = FastMath.sin(FAZ);
-        final double CF = Math.cos(FAZ);
+        final double CF = FastMath.cos(FAZ);
         double BAZ = 0.0;
         if (CF != 0.0)
             BAZ = Math.atan2(TU, CF) * 2.0;
