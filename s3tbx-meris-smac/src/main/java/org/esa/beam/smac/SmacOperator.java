@@ -30,12 +30,12 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.beam.framework.ui.BooleanExpressionConverter;
 import org.esa.beam.util.ObjectUtils;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.ResourceInstaller;
 import org.esa.beam.util.StringUtils;
 import org.esa.beam.util.SystemUtils;
+import org.esa.beam.util.converters.BooleanExpressionConverter;
 import org.esa.beam.util.math.RsMathUtils;
 
 import java.awt.*;
@@ -674,10 +674,7 @@ public class SmacOperator extends Operator {
                 coefficients.put(bandName, coeff);
                 success = true;
             }
-        } catch (IOException e) {
-            handleError = true;
-            logger.severe(e.getMessage());
-        } catch (URISyntaxException e) {
+        } catch (IOException | URISyntaxException e) {
             handleError = true;
             logger.severe(e.getMessage());
         }
