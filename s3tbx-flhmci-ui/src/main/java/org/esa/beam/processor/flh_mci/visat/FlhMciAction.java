@@ -38,10 +38,10 @@ public class FlhMciAction extends AbstractSnapAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         final AppContext appContext = getAppContext();
-        final String title = "FLH/MCI Processor";
 
         final DefaultSingleTargetProductDialog dialog = new DefaultSingleTargetProductDialog(OPERATOR_ALIAS, appContext,
-                                                                                             title, HELP_ID);
+                                                                                             Bundle.CTL_FlhMciAction_Text(),
+                                                                                             HELP_ID);
         final BindingContext bindingContext = dialog.getBindingContext();
         final PropertySet propertySet = bindingContext.getPropertySet();
         configurePropertySet(propertySet);
