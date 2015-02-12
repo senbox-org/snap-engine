@@ -110,17 +110,22 @@ public class InputProductValidator {
     }
 
     public boolean isTOPSARBurstProduct() throws OperatorException {
+
         final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
         if (!mission.startsWith("SENTINEL-1")) {
             return false;
         }
 
-        final boolean isMultiSwath = isMultiSwath();
-        if (!isMultiSwath) {
-            return false;
+        final String[] bandNames = product.getBandNames();
+        for (String bandName : bandNames) {
+            if (bandName.contains("IW1") || bandName.contains("IW2") || bandName.contains("IW3") ||
+                bandName.contains("EW1") || bandName.contains("EW2") || bandName.contains("EW3") ||
+                bandName.contains("EW4") || bandName.contains("EW5")) {
+                return true;
+            }
         }
 
-        return true;
+        return false;
     }
 
     private static boolean contains(final String[] list, final String tag) {
