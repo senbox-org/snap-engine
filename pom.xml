@@ -35,6 +35,8 @@
         <module>s3tbx-chris-reader</module>
         <module>s3tbx-kit</module>
         <module>s3tbx-landsat-reader</module>
+        <module>s3tbx-flhmci</module>
+        <module>s3tbx-flhmci-ui</module>
         <module>s3tbx-meris-radiometry</module>
         <module>s3tbx-meris-radiometry-ui</module>
         <module>s3tbx-meris-smac</module>
