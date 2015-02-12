@@ -80,7 +80,6 @@
         <module>snap-collocation</module>
         <module>snap-envi-reader</module>
         <module>snap-envisat-reader</module>
-        <module>beam-flhmci</module>
         <module>snap-geotiff</module>
         <!--module>beam-getasse30-reader</module-->
         <module>beam-hdf5-writer</module>
@@ -89,13 +88,12 @@
         <module>beam-modis-reader</module>
         <module>beam-netcdf</module>
         <!--module>seadas-reader</module-->
-        <module>beam-opendap</module>
         <module>beam-pconvert</module>
-        <module>beam-pixel-extraction</module>
+        <module>snap-pixel-extraction</module>
         <!--module>snap-rtp-codec</module-->
         <module>snap-pgx-reader</module>
         <module>beam-statistics-op</module>
-        <module>snap-temporal-percentile-op</module>
+        <module>snap-temporal-percentile</module>
         <module>beam-time-series-tool</module>
         <module>snap-unmix</module>
         <module>blue-marble-worldmap</module>
