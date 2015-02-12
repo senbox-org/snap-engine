@@ -93,7 +93,7 @@
         <!--module>snap-rtp-codec</module-->
         <module>snap-pgx-reader</module>
         <module>beam-statistics-op</module>
-        <module>snap-temporal-percentile-op</module>
+        <module>snap-temporal-percentile</module>
         <module>beam-time-series-tool</module>
         <module>snap-unmix</module>
         <module>blue-marble-worldmap</module>
