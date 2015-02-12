@@ -59,7 +59,7 @@
         <module>snap-core</module>
         <module>snap-csv-dataio</module>
         <!--module>beam-examples</module-->
-        <module>beam-gpf</module>
+        <module>snap-gpf</module>
         <!--module>snap-help</module-->
         <module>beam-scripting</module>
         <module>beam-ui</module>
@@ -87,7 +87,6 @@
         <module>snap-ndvi</module>
         <module>beam-modis-reader</module>
         <module>beam-netcdf</module>
-        <!--module>seadas-reader</module-->
         <module>beam-pconvert</module>
         <module>snap-pixel-extraction</module>
         <!--module>snap-rtp-codec</module-->
