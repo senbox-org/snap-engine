@@ -61,7 +61,6 @@
         <!--module>beam-examples</module-->
         <module>snap-gpf</module>
         <!--module>snap-help</module-->
-        <module>beam-scripting</module>
         <module>beam-ui</module>
         <module>beam-visat-rcp</module>
         <!--module>beam-reader-tests</module-->
@@ -82,11 +81,9 @@
         <module>snap-envisat-reader</module>
         <module>snap-geotiff</module>
         <!--module>beam-getasse30-reader</module-->
-        <module>beam-hdf5-writer</module>
-        <!--module>beam-meris-cloud</module-->
+        <module>snap-hdf5-writer</module>
         <!--module>snap-ndvi</module-->
-        <module>beam-modis-reader</module>
-        <module>beam-netcdf</module>
+        <module>snap-netcdf</module>
         <!--module>beam-pconvert</module-->
         <module>snap-pixel-extraction</module>
         <!--module>snap-rtp-codec</module-->
