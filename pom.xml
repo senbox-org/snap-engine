@@ -75,19 +75,19 @@
 
         <module>snap-arcbingrid-reader</module>
         <!--module>snap-bigtiff</module-->
-        <module>snap-binning</module>
+        <!--module>snap-binning</module-->
         <module>snap-cluster-analysis</module>
-        <module>snap-collocation</module>
+        <!--module>snap-collocation</module-->
         <module>snap-envi-reader</module>
         <module>snap-envisat-reader</module>
         <module>snap-geotiff</module>
         <!--module>beam-getasse30-reader</module-->
         <module>beam-hdf5-writer</module>
-        <module>beam-meris-cloud</module>
-        <module>snap-ndvi</module>
+        <!--module>beam-meris-cloud</module-->
+        <!--module>snap-ndvi</module-->
         <module>beam-modis-reader</module>
         <module>beam-netcdf</module>
-        <module>beam-pconvert</module>
+        <!--module>beam-pconvert</module-->
         <module>snap-pixel-extraction</module>
         <!--module>snap-rtp-codec</module-->
         <module>snap-pgx-reader</module>
