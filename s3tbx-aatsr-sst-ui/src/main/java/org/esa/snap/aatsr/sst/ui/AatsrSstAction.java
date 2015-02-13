@@ -36,7 +36,7 @@ import java.awt.event.ActionEvent;
         path = "Menu/Processing/Thematic Water Processing",
         position = 100
 )
-@NbBundle.Messages({"CTL_AatsrSstActionText=(A)ATSR SST Processor..."})
+@NbBundle.Messages({"CTL_AatsrSstActionText=(A)ATSR SST Processor"})
 public class AatsrSstAction extends AbstractSnapAction {
 
     public static final String HELP_ID = "sstScientificTool";
