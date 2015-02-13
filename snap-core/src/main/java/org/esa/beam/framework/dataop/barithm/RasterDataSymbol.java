@@ -125,25 +125,21 @@ public class RasterDataSymbol implements Symbol {
 
     @Override
     public boolean evalB(final EvalEnv env) throws EvalException {
-        final int elemIndex = ((RasterDataEvalEnv) env).getElemIndex();
-        return Term.toB(data.getElemDoubleAt(elemIndex));
+        return Term.toB(data.getElemDoubleAt(((RasterDataEvalEnv) env).getElemIndex()));
     }
 
     @Override
     public int evalI(final EvalEnv env) throws EvalException {
-        final int elemIndex = ((RasterDataEvalEnv) env).getElemIndex();
-        return data.getElemIntAt(elemIndex);
+        return data.getElemIntAt(((RasterDataEvalEnv) env).getElemIndex());
     }
 
     @Override
     public double evalD(final EvalEnv env) throws EvalException {
-        final int elemIndex = ((RasterDataEvalEnv) env).getElemIndex();
-        return data.getElemDoubleAt(elemIndex);
+        return data.getElemDoubleAt(((RasterDataEvalEnv) env).getElemIndex());
     }
 
     @Override
     public String evalS(EvalEnv env) throws EvalException {
-        final double value = evalD(env);
-        return Double.toString(value);
+        return Double.toString(evalD(env));
     }
 }
