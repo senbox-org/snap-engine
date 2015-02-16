@@ -39,14 +39,8 @@ public class Avnir2ProductReaderPlugIn implements ProductReaderPlugIn {
     private final static String AVNIR2_INDICATION_KEY = "ALAV2";
     private final static int MINIMUM_FILES = 7;    // 4 image files + leader file + volume file + trailer file
 
-    public Avnir2ProductReaderPlugIn() {
-        RGBImageProfile profile = new RGBImageProfile("AVNIR-2 - 3,2,1", // display name
-                                                      new String[]{
-                                                              "radiance_3",  // red channel band-maths expression
-                                                              "radiance_2",  // green channel band-maths expression
-                                                              "radiance_1"   // blue channel band-maths expression
-                                                      });
-        RGBImageProfileManager.getInstance().addProfile(profile);
+    static {
+        registerRGBProfile();
     }
 
     /**
@@ -68,11 +62,7 @@ public class Avnir2ProductReaderPlugIn implements ProductReaderPlugIn {
 
         final File parentDir = file.getParentFile();
         if (file.isFile() && parentDir != null && parentDir.isDirectory()) {
-            final FilenameFilter filter = new FilenameFilter() {
-                public boolean accept(final File dir, final String name) {
-                    return name.contains(AVNIR2_INDICATION_KEY);
-                }
-            };
+            final FilenameFilter filter = (dir, name) -> name.contains(AVNIR2_INDICATION_KEY);
             final File[] files = parentDir.listFiles(filter);
             if (files != null && files.length >= MINIMUM_FILES) {
                 return DecodeQualification.INTENDED;
@@ -168,4 +158,15 @@ public class Avnir2ProductReaderPlugIn implements ProductReaderPlugIn {
         }
 
     }
+
+    private static void registerRGBProfile() {
+        RGBImageProfile profile = new RGBImageProfile("AVNIR-2 - 3,2,1", // display name
+                                                      new String[]{
+                                                              "radiance_3",  // red channel band-maths expression
+                                                              "radiance_2",  // green channel band-maths expression
+                                                              "radiance_1"   // blue channel band-maths expression
+                                                      });
+        RGBImageProfileManager.getInstance().addProfile(profile);
+    }
+
 }
