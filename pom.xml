@@ -88,7 +88,7 @@
         <module>snap-pixel-extraction</module>
         <!--module>snap-rtp-codec</module-->
         <module>snap-pgx-reader</module>
-        <module>beam-statistics-op</module>
+        <module>snap-statistics</module>
         <module>snap-temporal-percentile</module>
         <module>beam-time-series-tool</module>
         <module>snap-unmix</module>
