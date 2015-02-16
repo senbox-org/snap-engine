@@ -26,7 +26,7 @@
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
-            <artifactId>snap-binding</artifactId>
+            <artifactId>ceres-binding</artifactId>
             <version>${snap.version}</version>
         </dependency>
         <dependency>
