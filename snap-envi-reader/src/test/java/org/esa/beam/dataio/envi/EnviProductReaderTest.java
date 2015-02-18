@@ -19,7 +19,10 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.text.ParseException;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class EnviProductReaderTest {
 

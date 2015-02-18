@@ -10,7 +10,10 @@ import java.io.InputStreamReader;
 import java.nio.ByteOrder;
 import java.util.Locale;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 
 public class HeaderTest {
 
