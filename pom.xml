@@ -45,12 +45,10 @@
         <module>ceres-core</module>
         <module>ceres-binding</module>
         <module>ceres-ui</module>
-        <module>ceres-deploy</module>
         <module>ceres-glayer</module>
         <module>ceres-jai</module>
         <module>ceres-binio</module>
         <module>ceres-metadata</module>
-        <module>ceres-site</module>
         <!-- the bootstrap module has no sources, its only purpose is to construct a class path for VISAT -->
         <module>beam-bootstrap</module>
 
@@ -58,13 +56,11 @@
 
         <module>snap-core</module>
         <module>snap-csv-dataio</module>
-        <!--module>beam-examples</module-->
+        <!--module>snap-engine-examples</module-->
         <module>snap-gpf</module>
-        <!--module>snap-help</module-->
         <module>beam-ui</module>
         <module>beam-visat-rcp</module>
-        <!--module>beam-reader-tests</module-->
-        <module>beam-python</module>
+        <module>snap-python</module>
 
         <module>snap-engine-utilities</module>
         <module>snap-graph-builder</module>
