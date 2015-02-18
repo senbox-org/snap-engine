@@ -17,7 +17,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>snap-gpf</symbolicName>
-    <version>1.0.1</version>
+    <version>1.1.0</version>
     <name>SNAP Graph Processing Framework (GPF)</name>
 
     <description>The basic framework for processing using Operators and the GPT.</description>
@@ -37,10 +37,10 @@
     </changelog>
 
     <dependency>
-        <module>snap-binding</module>
+        <module>ceres-binding</module>
     </dependency>
     <dependency>
-        <module>snap-metadata</module>
+        <module>ceres-metadata</module>
     </dependency>
     <dependency>
         <module>snap-core</module>
@@ -52,7 +52,7 @@
 
     <categories>System,Application,Processing</categories>
 
-    <extension point="snap-ceres-core:serviceProviders">
+    <extension point="ceres-core:serviceProviders">
         <serviceProvider>org.esa.beam.framework.gpf.OperatorSpi</serviceProvider>
     </extension>
 

@@ -1,8 +1,8 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
 
-    <symbolicName>snap-jai</symbolicName>
-    <version>1.0.1</version>
+    <symbolicName>ceres-jai</symbolicName>
+    <version>1.1.0</version>
     <name>Ceres JAI Library</name>
 
     <categories>System,Library</categories>
@@ -24,7 +24,7 @@
     <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
 
     <dependency>
-        <module>snap-ceres-core</module>
+        <module>ceres-core</module>
     </dependency>
 
     <activator>com.bc.ceres.jai.ModuleActivator</activator>

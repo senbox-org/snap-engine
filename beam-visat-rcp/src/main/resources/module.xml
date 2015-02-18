@@ -17,7 +17,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>snap-visat-rcp</symbolicName>
-    <version>1.0.1</version>
+    <version>1.1.0</version>
     <name>VISAT Rich Client Platform</name>
 
     <description>
@@ -50,10 +50,10 @@
         <module>snap-gpf</module>
     </dependency>
     <dependency>
-        <module>snap-binding</module>
+        <module>ceres-binding</module>
     </dependency>
     <dependency>
-        <module>snap-ceres-ui</module>
+        <module>ceres-ui</module>
     </dependency>
     <!-- TODO: replace this dependency! -->
     <dependency>
@@ -131,7 +131,7 @@
     <!--
        todo - The VisatPlugIn interface should be deprecated, use an ApplicationLifecycleListener instead
     -->
-    <extension point="snap-ceres-core:serviceProviders">
+    <extension point="ceres-core:serviceProviders">
         <serviceProvider>org.esa.beam.visat.VisatPlugIn</serviceProvider>
         <serviceProvider>com.bc.ceres.glayer.LayerType</serviceProvider>
     </extension>

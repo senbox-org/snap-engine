@@ -22,7 +22,7 @@
 
     <groupId>org.esa.snap</groupId>
     <artifactId>snap-engine</artifactId>
-    <version>1.0.1</version>
+    <version>1.1.0</version>
     <packaging>pom</packaging>
 
     <name>SNAP Engine Project</name>
@@ -30,7 +30,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <snap.version>1.0.1</snap.version>
+        <snap.version>1.1.0</snap.version>
 
         <hdf.version>2.7</hdf.version>
         <netcdf.version>4.3.22</netcdf.version>
@@ -126,43 +126,43 @@
 
             <dependency>
                 <groupId>org.esa.snap</groupId>
-                <artifactId>snap-ceres-core</artifactId>
+                <artifactId>ceres-core</artifactId>
                 <version>${snap.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.esa.snap</groupId>
-                <artifactId>snap-binding</artifactId>
+                <artifactId>ceres-binding</artifactId>
                 <version>${snap.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.esa.snap</groupId>
-                <artifactId>snap-ceres-ui</artifactId>
+                <artifactId>ceres-ui</artifactId>
                 <version>${snap.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.esa.snap</groupId>
-                <artifactId>snap-binio</artifactId>
+                <artifactId>ceres-binio</artifactId>
                 <version>${snap.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.esa.snap</groupId>
-                <artifactId>snap-glayer</artifactId>
+                <artifactId>ceres-glayer</artifactId>
                 <version>${snap.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.esa.snap</groupId>
-                <artifactId>snap-jai</artifactId>
+                <artifactId>ceres-jai</artifactId>
                 <version>${snap.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.esa.snap</groupId>
-                <artifactId>snap-metadata</artifactId>
+                <artifactId>ceres-metadata</artifactId>
                 <version>${snap.version}</version>
             </dependency>
 

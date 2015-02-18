@@ -89,7 +89,7 @@ public abstract class AbstractRuntimeTest extends TestCase {
         mkdir(dirPath + "/lib/lib-jide-1.9");
 
         mkdir(dirPath + "/modules");
-        touch(dirPath + "/modules/snap-ceres-core-0.5.jar");
+        touch(dirPath + "/modules/ceres-core-0.5.jar");
         touch(dirPath + "/modules/snap-ceres-ui-0.5.jar");
         touch(dirPath + "/modules/beam-core-4.0.jar");
         touch(dirPath + "/modules/beam-ui-4.0.jar");

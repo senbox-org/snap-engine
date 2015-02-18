@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>snap-arcbingrid-reader</symbolicName>
-    <version>1.0.1</version>
+    <version>1.1.0</version>
     <name>Arc/Info Binary Grid Reader</name>
 
     <description>
@@ -25,7 +25,7 @@
     </changelog>
 
     <dependency>
-        <module>snap-binio</module>
+        <module>ceres-binio</module>
     </dependency>
     <dependency>
         <module>snap-core</module>

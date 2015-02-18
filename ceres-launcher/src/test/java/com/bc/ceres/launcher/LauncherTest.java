@@ -66,7 +66,7 @@ public class LauncherTest extends AbstractRuntimeTest {
         testInDefaultClasspath(YES, cp2, "x-app/lib/jdom-1.0.jar");
         testInDefaultClasspath(YES, cp2, "x-app/lib/lib-jide-1.9");
         testInDefaultClasspath(NO_, cp2, "x-app/modules");
-        testInDefaultClasspath(YES, cp2, "x-app/modules/snap-ceres-core-0.5.jar");
+        testInDefaultClasspath(YES, cp2, "x-app/modules/ceres-core-0.5.jar");
         testInDefaultClasspath(NO_, cp2, "x-app/modules/snap-ceres-ui-0.5.jar");
         testInDefaultClasspath(NO_, cp2, "x-app/modules/beam-core-4.0.jar");
         testInDefaultClasspath(NO_, cp2, "x-app/modules/beam-ui-4.0.jar");
@@ -111,7 +111,7 @@ public class LauncherTest extends AbstractRuntimeTest {
         testInDefaultClasspath(YES, cp2, "x-app/lib/jdom-1.0.jar");
         testInDefaultClasspath(YES, cp2, "x-app/lib/lib-jide-1.9");
         testInDefaultClasspath(NO_, cp2, "x-app/modules");
-        testInDefaultClasspath(YES, cp2, "x-app/modules/snap-ceres-core-0.5.jar");
+        testInDefaultClasspath(YES, cp2, "x-app/modules/ceres-core-0.5.jar");
         testInDefaultClasspath(YES, cp2, "x-app/modules/snap-ceres-ui-0.5.jar");
         testInDefaultClasspath(YES, cp2, "x-app/modules/beam-core-4.0.jar");
         testInDefaultClasspath(YES, cp2, "x-app/modules/beam-ui-4.0.jar");

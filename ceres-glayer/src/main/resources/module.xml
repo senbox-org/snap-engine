@@ -1,8 +1,8 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
 
-    <symbolicName>snap-glayer</symbolicName>
-    <version>1.0.1</version>
+    <symbolicName>ceres-glayer</symbolicName>
+    <version>1.1.0</version>
     <name>Ceres GLayer Library</name>
 
     <categories>System,Library</categories>
@@ -13,7 +13,7 @@
     </description>
 
     <dependency>
-        <module>snap-binding</module>
+        <module>ceres-binding</module>
     </dependency>
 
     <changelog>
@@ -27,7 +27,7 @@
     <url>http://www.brockmann-consult.de/</url>
     <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
 
-    <extension point="snap-ceres-core:serviceProviders">
+    <extension point="ceres-core:serviceProviders">
         <serviceProvider>com.bc.ceres.glayer.LayerType</serviceProvider>
     </extension>
 

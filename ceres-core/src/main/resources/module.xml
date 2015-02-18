@@ -1,8 +1,8 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
 
-    <symbolicName>snap-ceres-core</symbolicName>
-    <version>1.0.1</version>
+    <symbolicName>ceres-core</symbolicName>
+    <version>1.1.0</version>
     <name>Ceres Runtime Library</name>
     <activator>com.bc.ceres.core.runtime.internal.RuntimeActivator</activator>
 
@@ -36,7 +36,7 @@
             The application id is given by the 'id' attribute,
             the application class by the 'class' attribute, e.g.
 
-            <extension point="snap-ceres-core:applications">
+            <extension point="ceres-core:applications">
                 <application id="MyApp" class="com.acme.MyApp" />
             </extension>
 

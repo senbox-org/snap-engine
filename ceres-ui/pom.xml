@@ -4,10 +4,10 @@
     <parent>
         <groupId>org.esa.snap</groupId>
         <artifactId>snap-engine</artifactId>
-        <version>1.0.1</version>
+        <version>1.1.0</version>
     </parent>
 
-    <artifactId>snap-ceres-ui</artifactId>
+    <artifactId>ceres-ui</artifactId>
     <packaging>jar</packaging>
 
     <name>Ceres User Interface Library</name>
@@ -16,15 +16,15 @@
     <dependencies>
         <dependency>
             <groupId>org.esa.snap</groupId>
-            <artifactId>snap-ceres-core</artifactId>
+            <artifactId>ceres-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
-            <artifactId>snap-binding</artifactId>
+            <artifactId>ceres-binding</artifactId>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
-            <artifactId>snap-glayer</artifactId>
+            <artifactId>ceres-glayer</artifactId>
         </dependency>
         <dependency>
             <groupId>com.jidesoft</groupId>

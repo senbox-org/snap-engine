@@ -2,7 +2,7 @@
     <manifestVersion>1.0.0</manifestVersion>
 
     <symbolicName>time-series-tool</symbolicName>
-    <version>1.0.1</version>
+    <version>1.1.0</version>
     <name>Time Series Tool</name>
     <funding>ESA, EU</funding>
 
@@ -24,6 +24,15 @@
 
     <categories>ui</categories>
 
+	<dependency>
+        <module>snap-core</module>
+    </dependency>
+	<dependency>
+        <module>snap-ui</module>
+    </dependency>
+	<dependency>
+        <module>snap-gpf</module>
+    </dependency>
     <dependency>
         <module>snap-visat-rcp</module>
     </dependency>

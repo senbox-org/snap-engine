@@ -17,7 +17,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>snap-core</symbolicName>
-    <version>1.0.1</version>
+    <version>1.1.0</version>
     <name>SNAP Core Library</name>
 
 
@@ -38,13 +38,19 @@
     </changelog>
 
     <dependency>
-        <module>snap-ceres-core</module>
+        <module>ceres-core</module>
+    </dependency>
+	<dependency>
+        <module>ceres-binding</module>
+    </dependency>
+	<dependency>
+        <module>ceres-binio</module>
     </dependency>
     <dependency>
-        <module>snap-glayer</module>
+        <module>ceres-glayer</module>
     </dependency>
     <dependency>
-        <module>snap-jai</module>
+        <module>ceres-jai</module>
     </dependency>
 
 
@@ -69,7 +75,7 @@
     </extensionPoint>
 
 
-    <extension point="snap-ceres-core:serviceProviders">
+    <extension point="ceres-core:serviceProviders">
         <serviceProvider>org.esa.beam.dataio.dimap.spi.DimapPersistableSpi</serviceProvider>
         <serviceProvider>org.esa.beam.framework.dataio.ProductReaderPlugIn</serviceProvider>
         <serviceProvider>org.esa.beam.framework.dataio.ProductWriterPlugIn</serviceProvider>

@@ -34,37 +34,37 @@
         <!-- Engine Core Modules -->
         <dependency>
             <groupId>org.esa.snap</groupId>
-            <artifactId>snap-binding</artifactId>
+            <artifactId>ceres-binding</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
-            <artifactId>snap-binio</artifactId>
+            <artifactId>ceres-binio</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
-            <artifactId>snap-ceres-core</artifactId>
+            <artifactId>ceres-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
-            <artifactId>snap-glayer</artifactId>
+            <artifactId>ceres-glayer</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
-            <artifactId>snap-jai</artifactId>
+            <artifactId>ceres-jai</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
-            <artifactId>snap-metadata</artifactId>
+            <artifactId>ceres-metadata</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
-            <artifactId>snap-ceres-ui</artifactId>
+            <artifactId>ceres-ui</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

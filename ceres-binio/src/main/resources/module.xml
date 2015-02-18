@@ -1,8 +1,8 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
 
-    <symbolicName>snap-binio</symbolicName>
-    <version>1.0.1</version>
+    <symbolicName>ceres-binio</symbolicName>
+    <version>1.1.0</version>
     <name>Ceres Binary I/O Library</name>
 
     <categories>System,Library</categories>

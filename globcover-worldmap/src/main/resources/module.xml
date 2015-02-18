@@ -3,7 +3,7 @@
 
     <symbolicName>globcover-worldmap</symbolicName>
     <name>ESA GlobCover Worldmap</name>
-    <version>1.0.1</version>
+    <version>1.1.0</version>
     <description>
         This module provides the ESA GlobCover world map layer in WGS84.
     </description>
@@ -23,7 +23,7 @@
     <categories>System,World-Map</categories>
 
     <dependency>
-        <module>snap-glayer</module>
+        <module>ceres-glayer</module>
     </dependency>
     <dependency>
         <module>snap-core</module>
