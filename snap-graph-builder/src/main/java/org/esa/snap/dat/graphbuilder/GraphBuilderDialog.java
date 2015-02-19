@@ -30,10 +30,7 @@ import org.esa.snap.gpf.ProductSetReaderOp;
 import org.esa.snap.gpf.ProductSetReaderOpUI;
 import org.esa.snap.gpf.ui.SourceUI;
 import org.esa.snap.gpf.ui.UIValidation;
-import org.esa.snap.util.DialogUtils;
-import org.esa.snap.util.ImageUtils;
-import org.esa.snap.util.MemUtils;
-import org.esa.snap.util.ResourceUtils;
+import org.esa.snap.util.*;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -602,37 +599,43 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
         public void done() {
             if (!errorOccured) {
                 final Date now = Calendar.getInstance().getTime();
-                final long diff = (now.getTime() - executeStartTime.getTime()) / 1000;
-                if (diff > 120) {
-                    final float minutes = diff / 60f;
-                    statusLabel.setText("Processing completed in " + minutes + " minutes");
-                } else {
-                    statusLabel.setText("Processing completed in " + diff + " seconds");
-                }
+                final long totalSeconds = (now.getTime() - executeStartTime.getTime()) / 1000;
+
+                statusLabel.setText(ProductFunctions.getProcessingStatistics(totalSeconds));
+
                 final List<File> fileList = graphEx.getProductsToOpenInDAT();
                 final File[] files = fileList.toArray(new File[fileList.size()]);
                 notifyMSG(ProcessingListener.MSG.DONE, files);
 
-                openTargetProducts(files);
+                ProcessingStats stats = openTargetProducts(files);
+                statusLabel.setText(ProductFunctions.getProcessingStatistics(totalSeconds, stats.totalBytes, stats.totalPixels));
             }
         }
-
     }
 
-    private void openTargetProducts(final File[] fileList) {
+    private ProcessingStats openTargetProducts(final File[] fileList) {
+        ProcessingStats stats = new ProcessingStats();
         if (fileList.length != 0) {
             for (File file : fileList) {
                 try {
-
                     final Product product = CommonReaders.readProduct(file);
                     if (product != null) {
                         appContext.getProductManager().addProduct(product);
+
+                        stats.totalBytes += ProductFunctions.getRawStorageSize(product);
+                        stats.totalPixels = ProductFunctions.getTotalPixels(product);
                     }
                 } catch (IOException e) {
                     showErrorDialog(e.getMessage());
                 }
             }
         }
+        return stats;
+    }
+
+    private static class ProcessingStats {
+        long totalBytes = 0;
+        long totalPixels = 0;
     }
 
     public static File getInternalGraphFolder() {

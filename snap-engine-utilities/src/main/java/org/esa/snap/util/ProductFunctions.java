@@ -21,7 +21,9 @@ import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.VirtualBand;
 import org.esa.snap.datamodel.AbstractMetadata;
+import org.esa.snap.eo.Constants;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -184,5 +186,60 @@ public class ProductFunctions {
             size += band.getRawStorageSize(null);
         }
         return size;
+    }
+
+    public static long getTotalPixels(final Product product) {
+        long size = 0;
+        for (Band band : product.getBands()) {
+            if(!(band instanceof VirtualBand)) {
+                size += band.getRasterWidth()*band.getRasterHeight();
+            }
+        }
+        return size;
+    }
+
+    public static String getProcessingStatistics(final Long totalSeconds) {
+        return getProcessingStatistics(totalSeconds, null, null);
+    }
+
+    public static String getProcessingStatistics(final Long totalSeconds, final Long totalBytes, final Long totalPixels) {
+
+        String durationStr;
+        if (totalSeconds > 120) {
+            final float minutes = totalSeconds / 60f;
+            durationStr = minutes + " minutes";
+        } else {
+            durationStr = totalSeconds + " seconds";
+        }
+
+        String throughPutStr = "";
+        if(totalBytes != null && totalBytes > 0) {
+            final long BperSec = totalBytes / totalSeconds;
+            if(BperSec > Constants.oneBillion) {
+                final long GiBperSec = Math.round(totalBytes / (1024.0 * 1024.0 * 1024.0)) / totalSeconds;
+                throughPutStr = " (" + GiBperSec + " GB/s)";
+            } else if(BperSec > Constants.oneMillion) {
+                final long MiBperSec = Math.round(totalBytes / (1024.0 * 1024.0)) / totalSeconds;
+                throughPutStr = " (" + MiBperSec + " MB/s";
+            } else {
+                throughPutStr = " (" + BperSec + " B/s";
+            }
+        }
+
+        String pixelsRateStr = "";
+        if(totalPixels != null && totalPixels > 0) {
+            final long PperSec = totalPixels / totalSeconds;
+            if(PperSec > Constants.oneBillion) {
+                final long GiBperSec = Math.round(totalPixels / (1000 * 1000 * 1000)) / totalSeconds;
+                pixelsRateStr = " (" + GiBperSec + " GPixel/s)";
+            } else if(PperSec > Constants.oneMillion) {
+                final long MiBperSec = Math.round(totalPixels / (1000 * 1000)) / totalSeconds;
+                pixelsRateStr = " " + MiBperSec + " MPixel/s)";
+            } else {
+                pixelsRateStr = " " + PperSec + " Pixels/s)";
+            }
+        }
+
+        return "Processing completed in " + durationStr + throughPutStr + pixelsRateStr;
     }
 }
