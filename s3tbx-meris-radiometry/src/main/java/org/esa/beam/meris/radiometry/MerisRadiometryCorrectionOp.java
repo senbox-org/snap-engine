@@ -24,7 +24,11 @@ import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
-import org.esa.beam.framework.gpf.pointop.*;
+import org.esa.beam.framework.gpf.pointop.ProductConfigurer;
+import org.esa.beam.framework.gpf.pointop.Sample;
+import org.esa.beam.framework.gpf.pointop.SampleConfigurer;
+import org.esa.beam.framework.gpf.pointop.SampleOperator;
+import org.esa.beam.framework.gpf.pointop.WritableSample;
 import org.esa.beam.meris.radiometry.calibration.CalibrationAlgorithm;
 import org.esa.beam.meris.radiometry.calibration.Resolution;
 import org.esa.beam.meris.radiometry.equalization.EqualizationAlgorithm;
@@ -34,7 +38,11 @@ import org.esa.beam.meris.radiometry.smilecorr.SmileCorrectionAuxdata;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.math.RsMathUtils;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -62,11 +70,10 @@ import static org.esa.beam.dataio.envisat.EnvisatConstants.*;
  * @since BEAM 4.9
  */
 @OperatorMetadata(alias = "Meris.CorrectRadiometry",
-                  category = "Optical Processing/Pre-Processing",
-                  description = "Performs radiometric corrections on MERIS L1b data products.",
-                  authors = "Marc Bouvet (ESTEC); Marco Peters, Ralf Quast, Thomas Storm, Marco Zuehlke (Brockmann Consult)",
-                  copyright = "(c) 2014 by Brockmann Consult",
-                  version = "1.1.3")
+        description = "Performs radiometric corrections on MERIS L1b data products.",
+        authors = "Marc Bouvet (ESTEC); Marco Peters, Ralf Quast, Thomas Storm, Marco Zuehlke (Brockmann Consult)",
+        copyright = "(c) 2015 by Brockmann Consult",
+        version = "1.2")
 public class MerisRadiometryCorrectionOp extends SampleOperator {
 
     private static final String UNIT_DL = "dl";
@@ -77,61 +84,61 @@ public class MerisRadiometryCorrectionOp extends SampleOperator {
     private static final int LAND_BIT_INDEX = 4;
 
     @Parameter(defaultValue = "true",
-               label = "Perform calibration",
-               description = "Whether to perform the calibration.")
+            label = "Perform calibration",
+            description = "Whether to perform the calibration.")
     private boolean doCalibration;
 
     @Parameter(label = "Source radiometric correction file (optional)",
-               description = "The radiometric correction auxiliary file for the source product. " +
-                             "The default '" + DEFAULT_SOURCE_RAC_RESOURCE + "'")
+            description = "The radiometric correction auxiliary file for the source product. " +
+                          "The default '" + DEFAULT_SOURCE_RAC_RESOURCE + "'")
     private File sourceRacFile;
 
     @Parameter(label = "Target radiometric correction file (optional)",
-               description = "The radiometric correction auxiliary file for the target product. " +
-                             "The default '" + DEFAULT_TARGET_RAC_RESOURCE + "'")
+            description = "The radiometric correction auxiliary file for the target product. " +
+                          "The default '" + DEFAULT_TARGET_RAC_RESOURCE + "'")
     private File targetRacFile;
 
     @Parameter(defaultValue = "true",
-               label = "Perform Smile-effect correction",
-               description = "Whether to perform Smile-effect correction.")
+            label = "Perform Smile-effect correction",
+            description = "Whether to perform Smile-effect correction.")
     private boolean doSmile;
 
     @Parameter(defaultValue = "true",
-               label = "Perform equalisation",
-               description = "Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products.")
+            label = "Perform equalisation",
+            description = "Perform removal of detector-to-detector systematic radiometric differences in MERIS L1b data products.")
     private boolean doEqualization;
 
     @Parameter(label = "Reprocessing version", valueSet = {"AUTO_DETECT", "REPROCESSING_2", "REPROCESSING_3"},
-               defaultValue = "AUTO_DETECT",
-               description = "The version of the reprocessing the product comes from. Is only used if " +
-                             "equalisation is enabled.")
+            defaultValue = "AUTO_DETECT",
+            description = "The version of the reprocessing the product comes from. Is only used if " +
+                          "equalisation is enabled.")
     private ReprocessingVersion reproVersion;
 
     @Parameter(defaultValue = "false",
-               label = "Perform radiance-to-reflectance conversion",
-               description = "Whether to perform radiance-to-reflectance conversion. " +
-                             "When selecting ENVISAT as target format, the radiance to reflectance conversion can not be performed.")
+            label = "Perform radiance-to-reflectance conversion",
+            description = "Whether to perform radiance-to-reflectance conversion. " +
+                          "When selecting ENVISAT as target format, the radiance to reflectance conversion can not be performed.")
     private boolean doRadToRefl;
 
     @SourceProduct(alias = "source", label = "Name", description = "The source product.",
-                   bands = {
-                           MERIS_L1B_FLAGS_DS_NAME, MERIS_DETECTOR_INDEX_DS_NAME,
-                           MERIS_L1B_RADIANCE_1_BAND_NAME,
-                           MERIS_L1B_RADIANCE_2_BAND_NAME,
-                           MERIS_L1B_RADIANCE_3_BAND_NAME,
-                           MERIS_L1B_RADIANCE_4_BAND_NAME,
-                           MERIS_L1B_RADIANCE_5_BAND_NAME,
-                           MERIS_L1B_RADIANCE_6_BAND_NAME,
-                           MERIS_L1B_RADIANCE_7_BAND_NAME,
-                           MERIS_L1B_RADIANCE_8_BAND_NAME,
-                           MERIS_L1B_RADIANCE_9_BAND_NAME,
-                           MERIS_L1B_RADIANCE_10_BAND_NAME,
-                           MERIS_L1B_RADIANCE_11_BAND_NAME,
-                           MERIS_L1B_RADIANCE_12_BAND_NAME,
-                           MERIS_L1B_RADIANCE_13_BAND_NAME,
-                           MERIS_L1B_RADIANCE_14_BAND_NAME,
-                           MERIS_L1B_RADIANCE_15_BAND_NAME
-                   })
+            bands = {
+                    MERIS_L1B_FLAGS_DS_NAME, MERIS_DETECTOR_INDEX_DS_NAME,
+                    MERIS_L1B_RADIANCE_1_BAND_NAME,
+                    MERIS_L1B_RADIANCE_2_BAND_NAME,
+                    MERIS_L1B_RADIANCE_3_BAND_NAME,
+                    MERIS_L1B_RADIANCE_4_BAND_NAME,
+                    MERIS_L1B_RADIANCE_5_BAND_NAME,
+                    MERIS_L1B_RADIANCE_6_BAND_NAME,
+                    MERIS_L1B_RADIANCE_7_BAND_NAME,
+                    MERIS_L1B_RADIANCE_8_BAND_NAME,
+                    MERIS_L1B_RADIANCE_9_BAND_NAME,
+                    MERIS_L1B_RADIANCE_10_BAND_NAME,
+                    MERIS_L1B_RADIANCE_11_BAND_NAME,
+                    MERIS_L1B_RADIANCE_12_BAND_NAME,
+                    MERIS_L1B_RADIANCE_13_BAND_NAME,
+                    MERIS_L1B_RADIANCE_14_BAND_NAME,
+                    MERIS_L1B_RADIANCE_15_BAND_NAME
+            })
     private Product sourceProduct;
 
     private transient CalibrationAlgorithm calibrationAlgorithm;
@@ -155,7 +162,7 @@ public class MerisRadiometryCorrectionOp extends SampleOperator {
     protected void configureSourceSamples(SampleConfigurer sampleConfigurer) {
         int i = -1;
         // define samples corresponding to spectral bands, using the spectral band index as sample index
-        for (final Band band : sourceProduct.getBands()) {
+        for (final Band band : getSourceProduct().getBands()) {
             final int spectralBandIndex = band.getSpectralBandIndex();
             if (spectralBandIndex != -1) {
                 sampleConfigurer.defineSample(spectralBandIndex, band.getName());
@@ -195,20 +202,20 @@ public class MerisRadiometryCorrectionOp extends SampleOperator {
         productConfigurer.copyTimeCoding();
 
         Product targetProduct = productConfigurer.getTargetProduct();
-        targetProduct.setName(sourceProduct.getName());
+        targetProduct.setName(getSourceProduct().getName());
         if (doRadToRefl) {
-            targetProduct.setProductType(String.format("%s_REFL", sourceProduct.getProductType()));
+            targetProduct.setProductType(String.format("%s_REFL", getSourceProduct().getProductType()));
             targetProduct.setAutoGrouping("reflec");
         } else {
-            targetProduct.setProductType(sourceProduct.getProductType());
+            targetProduct.setProductType(getSourceProduct().getProductType());
             targetProduct.setAutoGrouping("radiance");
         }
         targetProduct.setDescription("MERIS L1b Radiometric Correction");
 
         bandIndexToMaxValueMap = new TreeMap<>();
-        Band[] bands = sourceProduct.getBands();
-        for (int i = 0; i < bands.length; i++) {
-            Band sourceBand = bands[i];
+        Band[] bands = getSourceProduct().getBands();
+        int bandIndex = 0;
+        for (Band sourceBand : bands) {
             if (sourceBand.getSpectralBandIndex() != -1) {
                 final String targetBandName;
                 final String targetBandDescription;
@@ -234,7 +241,7 @@ public class MerisRadiometryCorrectionOp extends SampleOperator {
                 final Band targetBand = targetProduct.addBand(targetBandName, dataType);
                 targetBand.setScalingFactor(scalingFactor);
                 targetBand.setScalingOffset(scalingOffset);
-                bandIndexToMaxValueMap.put(i, targetBand.scale(0xFFFF));
+                bandIndexToMaxValueMap.put(bandIndex++, targetBand.scale(0xFFFF));
                 targetBand.setDescription(targetBandDescription);
                 targetBand.setUnit(unit);
                 targetBand.setValidPixelExpression(sourceBand.getValidPixelExpression());
@@ -246,7 +253,7 @@ public class MerisRadiometryCorrectionOp extends SampleOperator {
         productConfigurer.copyGeoCoding();
 
         // copy all source bands yet ignored
-        for (final Band sourceBand : sourceProduct.getBands()) {
+        for (final Band sourceBand : getSourceProduct().getBands()) {
             if (sourceBand.getSpectralBandIndex() == -1 && !targetProduct.containsBand(sourceBand.getName())) {
                 productConfigurer.copyBands(sourceBand.getName());
             }
@@ -296,14 +303,14 @@ public class MerisRadiometryCorrectionOp extends SampleOperator {
     }
 
     private void initAlgorithms() {
-        final String productType = sourceProduct.getProductType();
+        final String productType = getSourceProduct().getProductType();
         if (doCalibration) {
             InputStream sourceRacStream = null;
             InputStream targetRacStream = null;
             try {
                 sourceRacStream = openStream(sourceRacFile, DEFAULT_SOURCE_RAC_RESOURCE);
                 targetRacStream = openStream(targetRacFile, DEFAULT_TARGET_RAC_RESOURCE);
-                final double cntJD = 0.5 * (sourceProduct.getStartTime().getMJD() + sourceProduct.getEndTime().getMJD());
+                final double cntJD = 0.5 * (getSourceProduct().getStartTime().getMJD() + getSourceProduct().getEndTime().getMJD());
                 final Resolution resolution = productType.contains("RR") ? Resolution.RR : Resolution.FR;
                 calibrationAlgorithm = new CalibrationAlgorithm(resolution, cntJD, sourceRacStream, targetRacStream);
             } catch (IOException e) {
@@ -331,7 +338,7 @@ public class MerisRadiometryCorrectionOp extends SampleOperator {
         }
         if (doEqualization) {
             try {
-                equalizationAlgorithm = new EqualizationAlgorithm(sourceProduct, reproVersion);
+                equalizationAlgorithm = new EqualizationAlgorithm(getSourceProduct(), reproVersion);
             } catch (Exception e) {
                 throw new OperatorException(e);
             }
@@ -347,48 +354,48 @@ public class MerisRadiometryCorrectionOp extends SampleOperator {
     }
 
     private void validateSourceProduct() throws OperatorException {
-        if (!MERIS_L1_TYPE_PATTERN.matcher(sourceProduct.getProductType()).matches()) {
+        if (!MERIS_L1_TYPE_PATTERN.matcher(getSourceProduct().getProductType()).matches()) {
             String msg = String.format("Source product must be of type MERIS Level 1b. Product type is: '%s'",
-                                       sourceProduct.getProductType());
+                                       getSourceProduct().getProductType());
             getLogger().warning(msg);
         }
         boolean isReprocessing2 = reproVersion == ReprocessingVersion.REPROCESSING_2 ||
-                                  ReprocessingVersion.autoDetect(sourceProduct) == ReprocessingVersion.REPROCESSING_2;
+                                  ReprocessingVersion.autoDetect(getSourceProduct()) == ReprocessingVersion.REPROCESSING_2;
         if (!isReprocessing2 && doCalibration) {
             getLogger().warning("Skipping calibration. Source product is already of 3rd reprocessing.");
             doCalibration = false;
         }
         if (doCalibration || doEqualization) {
-            if (sourceProduct.getStartTime() == null) {
+            if (getSourceProduct().getStartTime() == null) {
                 throw new OperatorException("Source product must have a start time");
             }
         }
         if (doCalibration) {
-            if (sourceProduct.getEndTime() == null) {
+            if (getSourceProduct().getEndTime() == null) {
                 throw new OperatorException("Source product must have an end time");
             }
         }
 
         final String msgPatternMissingBand = "Source product must contain '%s'.";
         if (doSmile) {
-            if (!sourceProduct.containsBand(MERIS_DETECTOR_INDEX_DS_NAME)) {
+            if (!getSourceProduct().containsBand(MERIS_DETECTOR_INDEX_DS_NAME)) {
                 throw new OperatorException(String.format(msgPatternMissingBand, MERIS_DETECTOR_INDEX_DS_NAME));
             }
-            if (!sourceProduct.containsBand(MERIS_L1B_FLAGS_DS_NAME)) {
+            if (!getSourceProduct().containsBand(MERIS_L1B_FLAGS_DS_NAME)) {
                 throw new OperatorException(String.format(msgPatternMissingBand, MERIS_L1B_FLAGS_DS_NAME));
             }
-            if (!sourceProduct.getBand(MERIS_L1B_FLAGS_DS_NAME).isFlagBand()) {
+            if (!getSourceProduct().getBand(MERIS_L1B_FLAGS_DS_NAME).isFlagBand()) {
                 throw new OperatorException(
                         String.format("Flag-coding is missing for band '%s' ", MERIS_L1B_FLAGS_DS_NAME));
             }
         }
         if (doEqualization) {
-            if (!sourceProduct.containsBand(MERIS_DETECTOR_INDEX_DS_NAME)) {
+            if (!getSourceProduct().containsBand(MERIS_DETECTOR_INDEX_DS_NAME)) {
                 throw new OperatorException(String.format(msgPatternMissingBand, MERIS_DETECTOR_INDEX_DS_NAME));
             }
         }
         if (doRadToRefl) {
-            if (!sourceProduct.containsRasterDataNode(MERIS_SUN_ZENITH_DS_NAME)) {
+            if (!getSourceProduct().containsRasterDataNode(MERIS_SUN_ZENITH_DS_NAME)) {
                 throw new OperatorException(String.format(msgPatternMissingBand, MERIS_SUN_ZENITH_DS_NAME));
             }
         }
