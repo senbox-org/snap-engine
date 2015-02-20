@@ -37,8 +37,8 @@ import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.datamodel.TiePointGrid;
 import org.esa.beam.util.Debug;
 import org.esa.beam.util.StringUtils;
+import org.esa.beam.util.SystemUtils;
 import org.esa.beam.util.io.FileUtils;
-import org.esa.beam.util.logging.BeamLogManager;
 import org.esa.beam.util.math.Range;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
@@ -66,7 +66,7 @@ class ModisFileReader {
      */
     public ModisFileReader() {
         prodDb = ModisProductDb.getInstance();
-        logger = BeamLogManager.getSystemLogger();
+        logger = SystemUtils.LOG;
         bandReaderMap = new HashMap<Band, ModisBandReader>();
     }
 

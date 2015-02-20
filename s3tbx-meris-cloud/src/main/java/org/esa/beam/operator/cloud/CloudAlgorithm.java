@@ -18,7 +18,7 @@ package org.esa.beam.operator.cloud;
 import com.bc.jnn.Jnn;
 import com.bc.jnn.JnnException;
 import com.bc.jnn.JnnNet;
-import org.esa.beam.util.logging.BeamLogManager;
+import org.esa.beam.util.SystemUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -68,7 +68,7 @@ class CloudAlgorithm {
         Jnn.setOptimizing(true);
         neuralNet = Jnn.readNna(neuralNetFile);
 
-        final Logger logger = BeamLogManager.getSystemLogger();
+        final Logger logger = SystemUtils.LOG;
         logger.info("Using JNN Neural Net Library, version " + Jnn.VERSION_STRING);
         logger.info(neuralNetFile + " loaded");
     }

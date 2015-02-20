@@ -28,10 +28,10 @@ import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.datamodel.RasterDataNode;
 import org.esa.beam.framework.datamodel.TiePointGrid;
 import org.esa.beam.operator.cloud.internal.ProcessingNode;
-import org.esa.beam.util.logging.BeamLogManager;
+import org.esa.beam.util.SystemUtils;
 import org.esa.beam.util.math.MathUtils;
 
-import java.awt.Color;
+import java.awt.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -100,7 +100,7 @@ class CloudPN extends ProcessingNode {
     public CloudPN(String auxdataDir) {
         super();
         this.auxdataDir = auxdataDir;
-        logger = BeamLogManager.getSystemLogger();
+        logger = SystemUtils.LOG;
     }
 
     @Override

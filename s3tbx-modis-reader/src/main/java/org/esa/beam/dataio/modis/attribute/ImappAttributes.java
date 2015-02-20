@@ -11,12 +11,12 @@ import org.esa.beam.dataio.modis.netcdf.NetCDFVariables;
 import org.esa.beam.framework.dataio.ProductIOException;
 import org.esa.beam.framework.datamodel.GeoCoding;
 import org.esa.beam.util.StringUtils;
+import org.esa.beam.util.SystemUtils;
 import org.esa.beam.util.io.FileUtils;
-import org.esa.beam.util.logging.BeamLogManager;
 import ucar.nc2.Attribute;
 import ucar.nc2.Variable;
 
-import java.awt.Dimension;
+import java.awt.*;
 import java.io.File;
 import java.text.ParseException;
 import java.util.Date;
@@ -39,7 +39,7 @@ public class ImappAttributes implements ModisGlobalAttributes {
         this.netCDFVariables = netCDFVariables;
         this.netCDFAttributes = netCDFAttributes;
 
-        logger = BeamLogManager.getSystemLogger();
+        logger = SystemUtils.LOG;
     }
 
     @Override

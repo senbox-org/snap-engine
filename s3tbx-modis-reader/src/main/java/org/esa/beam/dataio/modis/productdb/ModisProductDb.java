@@ -19,8 +19,8 @@ import org.esa.beam.dataio.modis.ModisConstants;
 import org.esa.beam.framework.dataio.ProductIOException;
 import org.esa.beam.util.Debug;
 import org.esa.beam.util.Guardian;
+import org.esa.beam.util.SystemUtils;
 import org.esa.beam.util.io.CsvReader;
-import org.esa.beam.util.logging.BeamLogManager;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -205,7 +205,7 @@ public class ModisProductDb {
      */
     private ModisProductDb() {
         _productDescriptions = new HashMap();
-        logger = BeamLogManager.getSystemLogger();
+        logger = SystemUtils.LOG;
     }
 
     /**
