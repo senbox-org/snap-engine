@@ -17,7 +17,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>beam-meris-radiometry</symbolicName>
-    <version>5.0.2</version>
+    <version>5.0.3</version>
     <name>MERIS L1b Radiometric Correction</name>
 
     <description>
@@ -26,6 +26,8 @@
 
     <changelog>
         <![CDATA[
+        <b>Changes in 5.0.3</b><br/>
+        [BEAM-1749] Radiometric correction operator fails if bands are not in expected order<br/>
         <b>Changes in 5.0.2</b><br/>
         [BEAM-1708] Fixed saturation issue in MERIS Radiometric Correction Operator<br/>
         <b>Changes in 5.0.1</b><br/>
@@ -40,7 +42,7 @@
 
     <vendor>Brockmann Consult GmbH</vendor>
     <contactAddress>Max-Planck-Str. 2, 21502 Geesthacht (Germany)</contactAddress>
-    <copyright>(C) 2014 by Brockmann Consult GmbH</copyright>
+    <copyright>(C) 2015 by Brockmann Consult GmbH</copyright>
     <url>http://envisat.esa.int/beam</url>
     <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
 
