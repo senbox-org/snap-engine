@@ -323,16 +323,17 @@ public final class OperatorUtils {
      *
      * @param sourceProduct   the input product
      * @param sourceBandNames the select band names
+     * @param includeVirtualBands include virtual bands by default
      * @return band list
      * @throws OperatorException if source band not found
      */
-    public static Band[] getSourceBands(final Product sourceProduct, String[] sourceBandNames) throws OperatorException {
+    public static Band[] getSourceBands(final Product sourceProduct, String[] sourceBandNames, final boolean includeVirtualBands) throws OperatorException {
 
         if (sourceBandNames == null || sourceBandNames.length == 0) {
             final Band[] bands = sourceProduct.getBands();
             final List<String> bandNameList = new ArrayList<>(sourceProduct.getNumBands());
             for (Band band : bands) {
-                if (!(band instanceof VirtualBand))
+                if (!(band instanceof VirtualBand) || includeVirtualBands)
                     bandNameList.add(band.getName());
             }
             sourceBandNames = bandNameList.toArray(new String[bandNameList.size()]);
@@ -586,7 +587,7 @@ public final class OperatorUtils {
                                         final Map<String, String[]> targetBandNameToSourceBandName,
                                         final boolean outputIntensity, final boolean outputFloat) throws OperatorException {
 
-        final Band[] sourceBands = getSourceBands(sourceProduct, sourceBandNames);
+        final Band[] sourceBands = getSourceBands(sourceProduct, sourceBandNames, false);
 
         final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(sourceProduct);
         final boolean isPolsar = absRoot.getAttributeInt(AbstractMetadata.polsarData, 0) == 1;
