@@ -32,19 +32,6 @@ public final class OperatorUIUtils {
 
     public final static String SOURCE_BAND_NAMES = "sourceBandNames";
 
-    public static void initParamList(final JList paramList, final String[] availNames, final Object[] paramDefaults) {
-        if (paramDefaults != null) {
-            final String[] srcBandNames = new String[paramDefaults.length];
-            final int[] indixes = new int[paramDefaults.length];
-            for (int i = 0; i < srcBandNames.length; ++i) {
-                srcBandNames[i] = (String) paramDefaults[i];
-                indixes[i] = i;
-            }
-            paramList.setListData(srcBandNames);
-            paramList.setSelectedIndices(indixes);
-        }
-        initParamList(paramList, availNames);
-    }
 
     public static void initParamList(final JList paramList, final String[] availNames) {
         initParamList(paramList, availNames, null);
