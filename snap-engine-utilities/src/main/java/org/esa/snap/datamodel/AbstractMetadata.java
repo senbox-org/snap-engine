@@ -649,7 +649,9 @@ public final class AbstractMetadata {
         setAttribute(abstractedMetadata, first_line_time, product.getStartTime());
         setAttribute(abstractedMetadata, last_line_time, product.getEndTime());
 
-        setAttribute(abstractedMetadata, MISSION, product.getProductReader().getReaderPlugIn().getFormatNames()[0]);
+        if(product.getProductReader() != null) {
+            setAttribute(abstractedMetadata, MISSION, product.getProductReader().getReaderPlugIn().getFormatNames()[0]);
+        }
     }
 
     private static void migrateToCurrentVersion(final MetadataElement abstractedMetadata) {
