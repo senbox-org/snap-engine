@@ -88,6 +88,9 @@ public final class OperatorUIUtils {
         for (Object selectedValue : selectedValues) {
             names[i++] = (String) selectedValue;
         }
+        if(names.length == 0 && paramMap.get(paramName) != null)    // don't overwrite with empty value
+            return;
+
         paramMap.put(paramName, names);
     }
 
