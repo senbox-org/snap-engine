@@ -242,11 +242,6 @@ public class WriteOp extends Operator {
         productWriter.setIncrementalMode(incremental);
         productWriter.setFormatName(formatName);
         targetProduct.setProductWriter(productWriter);
-        try {
-            productWriter.writeProductNodes(targetProduct, file);
-        } catch (IOException e) {
-            throw new OperatorException("Not able to write product file: '" + file.getAbsolutePath() + "'", e);
-        }
 
         tileSize = ImageManager.getPreferredTileSize(targetProduct);
         targetProduct.setPreferredTileSize(tileSize);
@@ -265,6 +260,12 @@ public class WriteOp extends Operator {
     private synchronized void writeProductNodes() {
         if(productNodesWritten)
             return;
+
+        try {
+            productWriter.writeProductNodes(targetProduct, file);
+        } catch (IOException e) {
+            throw new OperatorException("Not able to write product file: '" + file.getAbsolutePath() + "'", e);
+        }
     }
 
     @Override
