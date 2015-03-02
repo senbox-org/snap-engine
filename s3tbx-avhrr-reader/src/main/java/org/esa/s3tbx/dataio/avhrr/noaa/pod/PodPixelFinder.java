@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2015 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ */
+
 package org.esa.s3tbx.dataio.avhrr.noaa.pod;
 
 import org.esa.snap.framework.datamodel.GeoPos;
@@ -114,7 +130,7 @@ class PodPixelFinder {
                 result.invoke(innerMaxX, innerMinY);
             }
         }
-        if (result.isFound()) {
+        if (result.getX() > 0 && result.getX() < imageW - 1 && result.getY()  > 0 && result.getY() < imageH -1 ) {
             pixelPos.setLocation(result.getX() + 0.5f, result.getY() + 0.5f);
         } else {
             pixelPos.setInvalid();
@@ -167,7 +183,7 @@ class PodPixelFinder {
                     x = otherX;
                     y = otherY;
                     distance = d;
-                    found = found || d < tolerance;
+                    //found = found || d < tolerance;
                 }
             }
             return this;

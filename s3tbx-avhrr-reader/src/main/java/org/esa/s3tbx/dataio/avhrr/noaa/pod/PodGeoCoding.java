@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2015 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ */
+
 package org.esa.s3tbx.dataio.avhrr.noaa.pod;
 
 import org.esa.snap.framework.dataio.ProductSubsetDef;
@@ -5,6 +21,7 @@ import org.esa.snap.framework.datamodel.GeoApproximation;
 import org.esa.snap.framework.datamodel.GeoPos;
 import org.esa.snap.framework.datamodel.PixelPos;
 import org.esa.snap.framework.datamodel.PixelPosEstimator;
+import org.esa.snap.framework.datamodel.Product;
 import org.esa.snap.framework.datamodel.Scene;
 import org.esa.snap.framework.datamodel.TiePointGeoCoding;
 import org.esa.snap.framework.datamodel.TiePointGrid;
@@ -25,14 +42,19 @@ final class PodGeoCoding extends TiePointGeoCoding {
 
     private transient PixelPosEstimator pixelPosEstimator;
     private transient PodPixelFinder pixelFinder;
+    private transient GeoApproximation[] approximations;
 
     PodGeoCoding(TiePointGrid latGrid, TiePointGrid lonGrid) {
+        this(latGrid, lonGrid, createApproximations(lonGrid.getGeophysicalImage(), latGrid.getGeophysicalImage()));
+    }
+
+    private PodGeoCoding(TiePointGrid latGrid, TiePointGrid lonGrid, GeoApproximation[] approximations) {
         super(latGrid, lonGrid);
+        this.approximations = approximations;
 
         final PlanarImage lonImage = lonGrid.getGeophysicalImage();
         final PlanarImage latImage = latGrid.getGeophysicalImage();
 
-        final GeoApproximation[] approximations = createApproximations(lonImage, latImage);
         final Rectangle bounds = new Rectangle(0, 0, lonGrid.getSceneRasterWidth(), lonGrid.getSceneRasterHeight());
         pixelPosEstimator = new PixelPosEstimator(approximations, bounds);
         pixelFinder = new PodPixelFinder(lonImage, latImage, null, 0.01);
@@ -64,8 +86,31 @@ final class PodGeoCoding extends TiePointGeoCoding {
     }
 
     @Override
-    public boolean transferGeoCoding(Scene sourceScene, Scene targetScene, ProductSubsetDef subsetDef) {
-        return false;
+    public boolean transferGeoCoding(Scene srcScene, Scene destScene, ProductSubsetDef subsetDef) {
+        final String latGridName = getLatGrid().getName();
+        final String lonGridName = getLonGrid().getName();
+        final Product destProduct = destScene.getProduct();
+        TiePointGrid latGrid = destProduct.getTiePointGrid(latGridName);
+        if (latGrid == null) {
+            latGrid = TiePointGrid.createSubset(getLatGrid(), subsetDef);
+            destProduct.addTiePointGrid(latGrid);
+        }
+        TiePointGrid lonGrid = destProduct.getTiePointGrid(lonGridName);
+        if (lonGrid == null) {
+            lonGrid = TiePointGrid.createSubset(getLonGrid(), subsetDef);
+            destProduct.addTiePointGrid(lonGrid);
+        }
+        if (latGrid != null && lonGrid != null) {
+            if (subsetDef.getRegion() != null) {
+                destScene.setGeoCoding(new PodGeoCoding(latGrid, lonGrid));
+            } else {
+                // re-use approximations
+                destScene.setGeoCoding(new PodGeoCoding(latGrid, lonGrid, approximations));
+            }
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override
@@ -74,5 +119,6 @@ final class PodGeoCoding extends TiePointGeoCoding {
 
         pixelFinder = null;
         pixelPosEstimator = null;
+        approximations = null;
     }
 }
