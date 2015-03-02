@@ -213,7 +213,7 @@ public class ProductFunctions {
         }
 
         String throughPutStr = "";
-        if(totalBytes != null && totalBytes > 0) {
+        if(totalBytes != null && totalBytes > 0 && totalSeconds > 0) {
             final long BperSec = totalBytes / totalSeconds;
             if(BperSec > Constants.oneBillion) {
                 final long GiBperSec = Math.round(totalBytes / (1024.0 * 1024.0 * 1024.0)) / totalSeconds;
@@ -227,7 +227,7 @@ public class ProductFunctions {
         }
 
         String pixelsRateStr = "";
-        if(totalPixels != null && totalPixels > 0) {
+        if(totalPixels != null && totalPixels > 0 && totalSeconds > 0) {
             final long PperSec = totalPixels / totalSeconds;
             if(PperSec > Constants.oneBillion) {
                 final long GiBperSec = Math.round(totalPixels / (1000 * 1000 * 1000)) / totalSeconds;
