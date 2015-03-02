@@ -263,6 +263,8 @@ public class WriteOp extends Operator {
 
         try {
             productWriter.writeProductNodes(targetProduct, file);
+
+            productNodesWritten = true;
         } catch (IOException e) {
             throw new OperatorException("Not able to write product file: '" + file.getAbsolutePath() + "'", e);
         }
