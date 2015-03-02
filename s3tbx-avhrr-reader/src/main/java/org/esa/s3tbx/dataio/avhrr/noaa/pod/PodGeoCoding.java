@@ -101,11 +101,11 @@ final class PodGeoCoding extends TiePointGeoCoding {
             destProduct.addTiePointGrid(lonGrid);
         }
         if (latGrid != null && lonGrid != null) {
-            if (subsetDef.getRegion() != null) {
-                destScene.setGeoCoding(new PodGeoCoding(latGrid, lonGrid));
-            } else {
+            if (subsetDef == null || subsetDef.getRegion() == null) {
                 // re-use approximations
                 destScene.setGeoCoding(new PodGeoCoding(latGrid, lonGrid, approximations));
+            } else {
+                destScene.setGeoCoding(new PodGeoCoding(latGrid, lonGrid));
             }
             return true;
         } else {
