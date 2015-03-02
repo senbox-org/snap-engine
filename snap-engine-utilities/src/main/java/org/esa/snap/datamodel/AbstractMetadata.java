@@ -350,6 +350,8 @@ public final class AbstractMetadata {
 
     public static void addBandToBandMap(final MetadataElement bandAbsRoot, final String name) {
         String bandNames = bandAbsRoot.getAttributeString(band_names);
+        if(bandNames.equals(NO_METADATA_STRING))
+            bandNames = "";
         if (!bandNames.isEmpty())
             bandNames += ' ';
         bandNames += name;
