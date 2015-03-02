@@ -17,7 +17,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>beam-core</symbolicName>
-    <version>5.0.4</version>
+    <version>5.0.5</version>
     <name>BEAM Core Library</name>
 
 
@@ -41,6 +41,8 @@
 
     <changelog>
         <![CDATA[
+        <b>Changes in 5.0.5</b><br/>
+        [BEAM-1751] Write/Read GeoCodings using DimapPersitables<br/>
         <b>Changes in 5.0.4</b><br/>
         [BEAM-1735] Pixel Geo Coding with fractional accuracy is wrong at the dateline<br/>
         [BEAM-1733] ProductData.UTC from MJD conversion is wrong<br/>
