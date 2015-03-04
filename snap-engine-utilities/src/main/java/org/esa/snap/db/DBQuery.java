@@ -17,7 +17,7 @@ package org.esa.snap.db;
 
 import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.util.StringUtils;
-import org.esa.beam.util.logging.BeamLogManager;
+import org.esa.beam.util.SystemUtils;
 import org.esa.snap.datamodel.AbstractMetadata;
 import org.esa.snap.util.XMLSupport;
 import org.jdom2.Attribute;
@@ -310,7 +310,7 @@ public class DBQuery {
         }
 
         if (queryStr.length() > 0) {
-            BeamLogManager.getSystemLogger().info("Query=" + queryStr);
+            SystemUtils.LOG.info("Query=" + queryStr);
             return intersectMapSelection(db.queryProduct(queryStr.toString()), returnAllIfNoIntersection);
         } else {
             return intersectMapSelection(db.getProductEntryList(false), returnAllIfNoIntersection);

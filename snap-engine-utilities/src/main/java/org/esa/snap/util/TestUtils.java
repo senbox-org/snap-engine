@@ -27,7 +27,6 @@ import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.gpf.operators.standard.WriteOp;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.SystemUtils;
-import org.esa.beam.util.logging.BeamLogManager;
 import org.esa.snap.datamodel.AbstractMetadata;
 import org.esa.snap.datamodel.Unit;
 import org.esa.snap.db.CommonReaders;
@@ -54,7 +53,7 @@ public class TestUtils {
     private static boolean testEnvironmentInitialized = false;
     public static final String SKIPTEST = "skipTest";
 
-    public static final Logger log = BeamLogManager.getSystemLogger();
+    public static final Logger log = SystemUtils.LOG;
     private final static String contextID = SystemUtils.getApplicationContextId();
     private static final PropertiesMap testPreferences = Config.getAutomatedTestConfigPropertyMap(contextID + ".tests");
 

@@ -28,7 +28,7 @@ import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.beam.framework.ui.GeneralExpressionConverter;
+import org.esa.beam.util.converters.GeneralExpressionConverter;
 
 import javax.swing.UIManager;
 
