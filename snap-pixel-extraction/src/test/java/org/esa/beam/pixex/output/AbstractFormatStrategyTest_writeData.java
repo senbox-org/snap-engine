@@ -10,7 +10,7 @@ import java.awt.Rectangle;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 
 public class AbstractFormatStrategyTest_writeData {

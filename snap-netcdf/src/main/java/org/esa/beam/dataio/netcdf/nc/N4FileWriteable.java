@@ -16,11 +16,15 @@
 
 package org.esa.beam.dataio.netcdf.nc;
 
-import edu.ucar.ral.nujan.netcdf.*;
+import edu.ucar.ral.nujan.netcdf.NhDimension;
+import edu.ucar.ral.nujan.netcdf.NhException;
+import edu.ucar.ral.nujan.netcdf.NhFileWriter;
+import edu.ucar.ral.nujan.netcdf.NhGroup;
+import edu.ucar.ral.nujan.netcdf.NhVariable;
 import org.esa.beam.dataio.netcdf.util.VariableNameHelper;
 import ucar.ma2.DataType;
 
-import java.awt.*;
+import java.awt.Dimension;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;

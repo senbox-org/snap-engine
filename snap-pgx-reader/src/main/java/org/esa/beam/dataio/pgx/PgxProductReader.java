@@ -24,7 +24,7 @@ import org.esa.beam.util.io.FileUtils;
 
 import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
-import java.awt.Dimension;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteOrder;

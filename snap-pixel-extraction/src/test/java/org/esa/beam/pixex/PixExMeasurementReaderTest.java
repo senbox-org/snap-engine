@@ -36,8 +36,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.fail;
+import static junit.framework.Assert.*;
 
 public class PixExMeasurementReaderTest {
 

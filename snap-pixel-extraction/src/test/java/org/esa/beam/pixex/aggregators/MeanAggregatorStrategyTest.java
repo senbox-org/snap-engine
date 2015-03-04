@@ -3,7 +3,7 @@ package org.esa.beam.pixex.aggregators;
 import org.esa.beam.pixex.calvalus.ma.DefaultRecord;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class MeanAggregatorStrategyTest {
 

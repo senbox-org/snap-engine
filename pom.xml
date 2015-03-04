@@ -86,7 +86,6 @@
         <module>snap-pgx-reader</module>
         <module>snap-statistics</module>
         <module>snap-temporal-percentile</module>
-        <module>beam-time-series-tool</module>
         <module>snap-unmix</module>
         <module>blue-marble-worldmap</module>
         <module>globcover-worldmap</module>
