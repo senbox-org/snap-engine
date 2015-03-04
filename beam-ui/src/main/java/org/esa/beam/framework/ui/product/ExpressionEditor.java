@@ -23,9 +23,9 @@ import com.bc.ceres.swing.binding.ComponentAdapter;
 import com.bc.ceres.swing.binding.PropertyEditor;
 import com.bc.ceres.swing.binding.internal.TextComponentAdapter;
 import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.util.converters.BooleanExpressionConverter;
 import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.beam.framework.ui.UIUtils;
+import org.esa.beam.util.converters.BooleanExpressionConverter;
 import org.esa.beam.util.converters.GeneralExpressionConverter;
 
 import javax.swing.*;
