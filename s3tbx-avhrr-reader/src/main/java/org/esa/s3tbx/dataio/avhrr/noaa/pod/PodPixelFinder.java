@@ -130,7 +130,7 @@ class PodPixelFinder {
                 result.invoke(innerMaxX, innerMinY);
             }
         }
-        if (result.getX() > 0 && result.getX() < imageW - 1 && result.getY()  > 0 && result.getY() < imageH -1 ) {
+        if (result.isFound()) {
             pixelPos.setLocation(result.getX() + 0.5f, result.getY() + 0.5f);
         } else {
             pixelPos.setInvalid();
@@ -183,7 +183,7 @@ class PodPixelFinder {
                     x = otherX;
                     y = otherY;
                     distance = d;
-                    //found = found || d < tolerance;
+                    found = found || d < tolerance;
                 }
             }
             return this;
