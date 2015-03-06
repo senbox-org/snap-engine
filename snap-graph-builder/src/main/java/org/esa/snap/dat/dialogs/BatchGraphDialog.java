@@ -17,7 +17,6 @@ package org.esa.snap.dat.dialogs;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
-import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.graph.GraphException;
 import org.esa.beam.framework.ui.AppContext;
@@ -73,7 +72,7 @@ public class BatchGraphDialog extends ModelessDialog {
 
     private boolean isProcessing = false;
     protected File graphFile;
-    protected boolean openProcessedProducts = false;
+    protected boolean openProcessedProducts = true;
 
     public BatchGraphDialog(final AppContext theAppContext, final String title, final String helpID,
                             final boolean closeOnDone) {
@@ -332,7 +331,7 @@ public class BatchGraphDialog extends ModelessDialog {
             assignParameters();
 
             // first graph must pass
-            result = true;//graphExecutorList.get(0).InitGraph();
+            result = graphExecutorList.get(0).InitGraph();
 
         } catch (Exception e) {
             statusLabel.setText(e.getMessage());
@@ -505,8 +504,8 @@ public class BatchGraphDialog extends ModelessDialog {
             final List<GraphNode> cloneGraphNodes = cloneGraphEx.GetGraphNodes();
             for (GraphNode cloneNode : cloneGraphNodes) {
                 final GraphNode node = graphEx.getGraphNodeList().findGraphNode(cloneNode.getID());
-                //               if (node != null)
-                //                   cloneNode.setOperatorUI(node.GetOperatorUI());
+                if (node != null)
+                     cloneNode.setOperatorUI(node.GetOperatorUI());
             }
         }
     }

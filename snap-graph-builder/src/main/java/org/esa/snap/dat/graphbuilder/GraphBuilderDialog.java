@@ -433,7 +433,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
     }
 
     /**
-     * Call decription dialog
+     * Call description dialog
      */
     private void OnInfo() {
         final PromptDialog dlg = new PromptDialog("Graph Description", "Description", graphEx.getGraphDescription(), true);
