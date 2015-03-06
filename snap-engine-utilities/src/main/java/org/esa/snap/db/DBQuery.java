@@ -19,7 +19,6 @@ import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.util.StringUtils;
 import org.esa.beam.util.SystemUtils;
 import org.esa.snap.datamodel.AbstractMetadata;
-import org.esa.snap.util.XMLSupport;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
 
@@ -60,6 +59,7 @@ public class DBQuery {
     private String selectedProductTypes[] = {};
     private String selectedAcquisitionMode = "";
     private String selectedPass = "";
+    private String selectedName = "";
     private String selectedTrack = "";
     private String selectedSampleType = "";
     private String selectedPolarization = ANY;
@@ -112,6 +112,11 @@ public class DBQuery {
 
     public String getSelectedPass() {
         return selectedPass;
+    }
+
+    public void setSelectedName(final String name) {
+        if (name != null)
+            selectedName = name;
     }
 
     public void setSelectedTrack(final String track) {
@@ -232,6 +237,10 @@ public class DBQuery {
         if (!selectedPass.isEmpty() && !selectedPass.equals(ALL_PASSES)) {
             SQLUtils.addAND(queryStr);
             queryStr.append(ProductTable.TABLE + '.' + AbstractMetadata.PASS + "='" + selectedPass + '\'');
+        }
+        if (!selectedName.isEmpty()) {
+            SQLUtils.addAND(queryStr);
+            queryStr.append("( " + MetadataTable.TABLE + '.' + AbstractMetadata.PRODUCT + " LIKE '%" + selectedName + "%' )");
         }
         if (!selectedTrack.isEmpty()) {
             SQLUtils.addAND(queryStr);
