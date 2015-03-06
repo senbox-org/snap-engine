@@ -18,10 +18,12 @@ package org.esa.beam.dataio.landsat.geotiff;
 
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.util.logging.BeamLogManager;
 
 import java.awt.Dimension;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 /**
@@ -119,12 +121,22 @@ class Landsat8Metadata extends AbstractLandsatMetadata {
 
     @Override
     public double getScalingFactor(String bandId) {
-        return getScalingFactor(bandId, "MIN_MAX_RADIANCE", "RADIANCE_MINIMUM_BAND_", "RADIANCE_MAXIMUM_BAND_", "MIN_MAX_PIXEL_VALUE", "QUANTIZE_CAL_MIN_BAND_", "QUANTIZE_CAL_MAX_BAND_");
+        final String spectralInput = getSpectralInputString();
+        return getScalingFactor(bandId,
+                                "MIN_MAX_" + spectralInput,
+                                spectralInput + "_MINIMUM_BAND_",
+                                spectralInput + "_MAXIMUM_BAND_",
+                                "MIN_MAX_PIXEL_VALUE", "QUANTIZE_CAL_MIN_BAND_", "QUANTIZE_CAL_MAX_BAND_");
     }
 
     @Override
     public double getScalingOffset(String bandId) {
-        return getScalingOffset(bandId, "MIN_MAX_RADIANCE", "RADIANCE_MINIMUM_BAND_", "RADIANCE_MAXIMUM_BAND_", "MIN_MAX_PIXEL_VALUE", "QUANTIZE_CAL_MIN_BAND_", "QUANTIZE_CAL_MAX_BAND_");
+        final String spectralInput = getSpectralInputString();
+        return getScalingOffset(bandId,
+                                "MIN_MAX_" + spectralInput,
+                                spectralInput + "_MINIMUM_BAND_",
+                                spectralInput + "_MAXIMUM_BAND_",
+                                "MIN_MAX_PIXEL_VALUE", "QUANTIZE_CAL_MIN_BAND_", "QUANTIZE_CAL_MAX_BAND_");
     }
 
     @Override
@@ -168,5 +180,22 @@ class Landsat8Metadata extends AbstractLandsatMetadata {
 
     private static int getIndex(String bandIndexNumber) {
         return Integer.parseInt(bandIndexNumber) - 1;
+    }
+
+    static String getSpectralInputString() {
+        String spectralInput = "RADIANCE";
+        final String readAs = System.getProperty(LandsatGeotiffReader.SYSPROP_READ_AS);
+        if (readAs != null) {
+            switch (readAs) {
+                case "reflectance":
+                    spectralInput = "REFLECTANCE";
+                default:
+                    Logger systemLogger = BeamLogManager.getSystemLogger();
+                    systemLogger.warning(String.format("Property '%s' has unsupported value '%s'",
+                                                       LandsatGeotiffReader.SYSPROP_READ_AS, readAs));
+            }
+        }
+
+        return spectralInput;
     }
 }

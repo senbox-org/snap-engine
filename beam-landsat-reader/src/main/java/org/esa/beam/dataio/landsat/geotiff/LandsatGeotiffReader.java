@@ -31,6 +31,7 @@ import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.jai.ImageManager;
+import org.esa.beam.util.logging.BeamLogManager;
 
 import javax.media.jai.ImageLayout;
 import javax.media.jai.Interpolation;
@@ -48,6 +49,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -57,8 +59,11 @@ import java.util.regex.Pattern;
  */
 public class LandsatGeotiffReader extends AbstractProductReader {
 
+    static final String SYSPROP_READ_AS = "landsat.reader.readAs";
+
     private static final String SYSPROP_READER_DO_NOT_SCALE_TO_PAN_RESOLUTION = "landsat.reader.donotscaletopanresolution";
-    private static final String UNITS = "W/(m^2*sr*µm)";
+    private static final String RADIANCE_UNITS = "W/(m^2*sr*µm)";
+    private static final String REFLECTANCE_UNITS = "dl";
 
     private LandsatMetadata landsatMetadata;
     private List<Product> bandProducts;
@@ -157,7 +162,19 @@ public class LandsatGeotiffReader extends AbstractProductReader {
                     band.setSpectralBandwidth(landsatMetadata.getBandwidth(bandNumber));
 
                     band.setDescription(landsatMetadata.getBandDescription(bandNumber));
-                    band.setUnit(UNITS);
+                    band.setUnit(RADIANCE_UNITS);
+                    final String readAs = System.getProperty(LandsatGeotiffReader.SYSPROP_READ_AS);
+                    if (readAs != null) {
+                        switch (readAs) {
+                            case "reflectance":
+                                band.setDescription(landsatMetadata.getBandDescription(bandNumber) + " , as TOA Reflectance");
+                                band.setUnit(REFLECTANCE_UNITS);
+                            default:
+                                Logger systemLogger = BeamLogManager.getSystemLogger();
+                                systemLogger.warning(String.format("Property '%s' has unsupported value '%s'",
+                                                                   LandsatGeotiffReader.SYSPROP_READ_AS, readAs));
+                        }
+                    }
                 }
             } else if (attributeName.equals(landsatMetadata.getQualityBandNameKey())) {
                 String fileName = metadataAttribute.getData().getElemString();
