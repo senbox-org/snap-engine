@@ -89,6 +89,8 @@ public class ConvertComputedBandIntoBandAction extends ExecCommand {
         }
 
         Product product = computedBand.getProduct();
+        realBand.setOwner(product);
+
         final JInternalFrame[] internalFrames = visatApp.findInternalFrames(computedBand);
         boolean productSceneViewOpen = false;
         for (final JInternalFrame internalFrame : internalFrames) {

@@ -310,6 +310,7 @@ public class EnvisatProductReader extends AbstractProductReader {
                     band.setValidPixelExpression(expression.trim());
                 }
                 bandlineReaderMap.put(band, bandLineReader);
+                band.setOwner(product);
                 product.addBand(band);
             }
 

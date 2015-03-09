@@ -189,6 +189,7 @@ public final class OperatorUtils {
         virtBand.setDescription(srcBand.getDescription());
         virtBand.setNoDataValue(srcBand.getNoDataValue());
         virtBand.setNoDataValueUsed(srcBand.isNoDataValueUsed());
+        virtBand.setOwner(product);
         product.addBand(virtBand);
     }
 
