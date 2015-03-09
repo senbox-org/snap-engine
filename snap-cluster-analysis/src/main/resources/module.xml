@@ -54,7 +54,7 @@
             <targetProductNameSuffix>_kmeans</targetProductNameSuffix>
             <helpId>clusterAnalysisKMeans</helpId>
         </action>
-        <action>
+        <!--action>
             <parent>processing.imageAnalysis</parent>
             <id>principleComponentAnalysis</id>
             <text>Principle Component Analysis...</text>
@@ -63,7 +63,7 @@
             <dialogTitle>Principle Component Analysis</dialogTitle>
             <targetProductNameSuffix>_pca</targetProductNameSuffix>
             <helpId>principleComponentAnalysis</helpId>
-        </action>
+        </action-->
     </extension>
 
     <extension point="snap-ui:helpSets">
