@@ -32,8 +32,16 @@
     <categories>VISAT,Processing,Image Analysis</categories>
 
     <extension point="snap-ui:actions">
+
         <action>
+            <id>ClusteringGroup</id>
+            <class>org.esa.beam.visat.actions.ActionGroup</class>
+            <text>Clustering</text>
             <parent>processing.imageAnalysis</parent>
+        </action>
+
+        <action>
+            <parent>ClusteringGroup</parent>
             <id>emClusterAnalysis</id>
             <text>EM Cluster Analysis...</text>
             <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
@@ -44,7 +52,7 @@
             <helpId>clusterAnalysisEM</helpId>
         </action>
         <action>
-            <parent>processing.imageAnalysis</parent>
+            <parent>ClusteringGroup</parent>
             <id>kmeansClusterAnalysis</id>
             <text>K-Means Cluster Analysis...</text>
             <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
@@ -55,7 +63,7 @@
             <helpId>clusterAnalysisKMeans</helpId>
         </action>
         <!--action>
-            <parent>processing.imageAnalysis</parent>
+            <parent>ClusteringGroup</parent>
             <id>principleComponentAnalysis</id>
             <text>Principle Component Analysis...</text>
             <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
