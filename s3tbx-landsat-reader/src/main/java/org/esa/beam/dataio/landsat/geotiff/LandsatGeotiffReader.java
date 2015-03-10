@@ -39,13 +39,16 @@ import javax.media.jai.PlanarImage;
 import javax.media.jai.RenderedOp;
 import javax.media.jai.operator.CropDescriptor;
 import javax.media.jai.operator.ScaleDescriptor;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.RenderingHints;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -55,8 +58,12 @@ import java.util.regex.Pattern;
  */
 public class LandsatGeotiffReader extends AbstractProductReader {
 
+    private static final Logger LOG = Logger.getLogger(LandsatGeotiffReader.class.getName());
+
+    static final String SYSPROP_READ_AS = "s3tbx.landsat.readAs";
     private static final String SYSPROP_DO_NOT_SCALE_TO_PAN_RESOLUTION = "s3tbx.landsat.doNotScaleToPanResolution";
-    private static final String UNITS = "W/(m^2*sr*µm)";
+    private static final String RADIANCE_UNITS = "W/(m^2*sr*µm)";
+    private static final String REFLECTANCE_UNITS = "dl";
 
     private LandsatMetadata landsatMetadata;
     private List<Product> bandProducts;
@@ -155,7 +162,19 @@ public class LandsatGeotiffReader extends AbstractProductReader {
                     band.setSpectralBandwidth(landsatMetadata.getBandwidth(bandNumber));
 
                     band.setDescription(landsatMetadata.getBandDescription(bandNumber));
-                    band.setUnit(UNITS);
+                    band.setUnit(RADIANCE_UNITS);
+                    final String readAs = System.getProperty(LandsatGeotiffReader.SYSPROP_READ_AS);
+                    if (readAs != null) {
+                        switch (readAs.toLowerCase()) {
+                            case "reflectance":
+                                band.setDescription(landsatMetadata.getBandDescription(bandNumber) + " , as TOA Reflectance");
+                                band.setUnit(REFLECTANCE_UNITS);
+                                break;
+                            default:
+                                LOG.warning(String.format("Property '%s' has unsupported value '%s'",
+                                                          LandsatGeotiffReader.SYSPROP_READ_AS, readAs));
+                        }
+                    }
                 }
             } else if (attributeName.equals(landsatMetadata.getQualityBandNameKey())) {
                 String fileName = metadataAttribute.getData().getElemString();
@@ -187,8 +206,8 @@ public class LandsatGeotiffReader extends AbstractProductReader {
         ImageLayout imageLayout = new ImageLayout();
         for (Product bandProduct : bandProducts) {
             if (product.getGeoCoding() == null &&
-                    product.getSceneRasterWidth() == bandProduct.getSceneRasterWidth() &&
-                    product.getSceneRasterHeight() == bandProduct.getSceneRasterHeight()) {
+                product.getSceneRasterWidth() == bandProduct.getSceneRasterWidth() &&
+                product.getSceneRasterHeight() == bandProduct.getSceneRasterHeight()) {
                 product.setGeoCoding(bandProduct.getGeoCoding());
                 Dimension tileSize = bandProduct.getPreferredTileSize();
                 if (tileSize != null) {
@@ -207,7 +226,7 @@ public class LandsatGeotiffReader extends AbstractProductReader {
             Band band = product.getBandAt(i);
             final MultiLevelImage sourceImage = bandProduct.getBandAt(0).getSourceImage();
             if (product.getSceneRasterWidth() == bandProduct.getSceneRasterWidth() &&
-                    product.getSceneRasterHeight() == bandProduct.getSceneRasterHeight()) {
+                product.getSceneRasterHeight() == bandProduct.getSceneRasterHeight()) {
                 band.setSourceImage(sourceImage);
             } else {
                 final RenderingHints renderingHints = new RenderingHints(JAI.KEY_IMAGE_LAYOUT, imageLayout);

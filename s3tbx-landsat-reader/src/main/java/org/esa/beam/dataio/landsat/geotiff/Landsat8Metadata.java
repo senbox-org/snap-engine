@@ -19,15 +19,17 @@ package org.esa.beam.dataio.landsat.geotiff;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.ProductData;
 
-import java.awt.*;
+import java.awt.Dimension;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 /**
  * @author Thomas Storm
  */
 class Landsat8Metadata extends AbstractLandsatMetadata {
+    private static final Logger LOG = Logger.getLogger(Landsat8Metadata.class.getName());
 
     private static final String[] BAND_DESCRIPTIONS = {
             "Coastal Aerosol (Operational Land Imager (OLI))",
@@ -119,12 +121,22 @@ class Landsat8Metadata extends AbstractLandsatMetadata {
 
     @Override
     public double getScalingFactor(String bandId) {
-        return getScalingFactor(bandId, "MIN_MAX_RADIANCE", "RADIANCE_MINIMUM_BAND_", "RADIANCE_MAXIMUM_BAND_", "MIN_MAX_PIXEL_VALUE", "QUANTIZE_CAL_MIN_BAND_", "QUANTIZE_CAL_MAX_BAND_");
+        final String spectralInput = getSpectralInputString();
+        return getScalingFactor(bandId,
+                                "MIN_MAX_" + spectralInput,
+                                spectralInput + "_MINIMUM_BAND_",
+                                spectralInput + "_MAXIMUM_BAND_",
+                                "MIN_MAX_PIXEL_VALUE", "QUANTIZE_CAL_MIN_BAND_", "QUANTIZE_CAL_MAX_BAND_");
     }
 
     @Override
     public double getScalingOffset(String bandId) {
-        return getScalingOffset(bandId, "MIN_MAX_RADIANCE", "RADIANCE_MINIMUM_BAND_", "RADIANCE_MAXIMUM_BAND_", "MIN_MAX_PIXEL_VALUE", "QUANTIZE_CAL_MIN_BAND_", "QUANTIZE_CAL_MAX_BAND_");
+        final String spectralInput = getSpectralInputString();
+        return getScalingOffset(bandId,
+                                "MIN_MAX_" + spectralInput,
+                                spectralInput + "_MINIMUM_BAND_",
+                                spectralInput + "_MAXIMUM_BAND_",
+                                "MIN_MAX_PIXEL_VALUE", "QUANTIZE_CAL_MIN_BAND_", "QUANTIZE_CAL_MAX_BAND_");
     }
 
     @Override
@@ -168,5 +180,29 @@ class Landsat8Metadata extends AbstractLandsatMetadata {
 
     private static int getIndex(String bandIndexNumber) {
         return Integer.parseInt(bandIndexNumber) - 1;
+    }
+
+    static String getSpectralInputString() {
+        final String readAs = System.getProperty(LandsatGeotiffReader.SYSPROP_READ_AS);
+        String spectralInput;
+        if (readAs != null) {
+            switch (readAs.toLowerCase()) {
+                case "reflectance":
+                    spectralInput = "REFLECTANCE";
+                    break;
+                case "radiance":
+                    spectralInput = "RADIANCE";
+                    break;
+                default:
+                    spectralInput = "RADIANCE";
+                    LOG.warning(String.format("Property '%s' has unsupported value '%s'.%n" +
+                                              "Interpreting values as radiance.",
+                                              LandsatGeotiffReader.SYSPROP_READ_AS, readAs));
+
+            }
+        }else {
+            spectralInput = "RADIANCE";
+        }
+        return spectralInput;
     }
 }
