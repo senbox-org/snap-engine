@@ -551,7 +551,7 @@
         <action>
             <parent>file</parent>
             <id>close</id>
-            <placeAfter>productGrabber</placeAfter>
+            <placeAfter>Session</placeAfter>
             <separatorBefore>true</separatorBefore>
             <class>org.esa.beam.visat.actions.CloseAction</class>
             <text>Close Product</text>
