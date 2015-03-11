@@ -1,0 +1,45 @@
+<module>
+    <manifestVersion>1.0.0</manifestVersion>
+    <symbolicName>beam-proba-v-reader</symbolicName>
+    <version>5.0</version>
+    <name>Proba V Product Reader</name>
+    <funding>ESA</funding>
+
+    <description>
+        Enables BEAM to read Proba V data products.
+    </description>
+
+    <vendor>Brockmann Consult GmbH</vendor>
+    <contactAddress>Max-Planck-Str. 2, 21502 Geesthacht (Germany)</contactAddress>
+    <copyright>(C) 2014 by Brockmann Consult GmbH</copyright>
+    <url>http://www.brockmann-consult.de/</url>
+    <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
+
+    <changelog>
+        <![CDATA[
+          <b>Changes in 5.0</b><br/>
+          Initial release <br/>
+        ]]>
+    </changelog>
+
+    <dependency>
+        <module>beam-core</module>
+    </dependency>
+    <dependency>
+        <module>beam-visat</module>
+        <optional>true</optional>
+    </dependency>
+
+    <categories>Reader</categories>
+
+    <extension point="beam-ui:actions">
+        <action>
+            <id>importProbaVProduct</id>
+            <class>org.esa.beam.visat.actions.ProductImportAction</class>
+            <formatName>PROBAV</formatName>
+            <useAllFileFilter>false</useAllFileFilter>
+            <shortDescr>Import a Proba V data product.</shortDescr>
+        </action>
+    </extension>
+
+</module>

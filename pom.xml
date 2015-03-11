@@ -87,6 +87,7 @@
         <module>beam-opendap</module>
         <module>beam-pconvert</module>
         <module>beam-pixel-extraction</module>
+        <module>beam-proba-v-reader</module>
         <module>beam-rtp-codec</module>
         <module>beam-pgx-reader</module>
         <module>beam-spot-vgt-reader</module>
