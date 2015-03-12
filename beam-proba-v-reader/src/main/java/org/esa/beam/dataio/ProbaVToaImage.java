@@ -1,11 +1,16 @@
 package org.esa.beam.dataio;
 
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.jai.RasterDataNodeOpImage;
 import org.esa.beam.jai.ResolutionLevel;
 import org.esa.beam.jai.SingleBandedOpImage;
 
 import javax.media.jai.PlanarImage;
 import java.awt.*;
+import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -16,38 +21,30 @@ import java.util.Map;
  *
  * @author olafd
  */
-public class ProbaVToaImage extends SingleBandedOpImage {
+public class ProbaVToaImage extends RasterDataNodeOpImage {
 
-    // todo: implement
-    // (see e.g. ScapeMGapFilledImage in beam-scape-m processor)
+    // todo: maybe rename 'ToaImage' to sth. more general
 
-    private final int tileHeight;
-    private final int tileWidth;
-    private final short[][] rasterValues;
+    private final short[] dataValues;           // todo: check for the data type!
+    private final float scaleFactor;
 
-
-    protected ProbaVToaImage(int dataBufferType, int sourceWidth, int sourceHeight,
-                             Dimension tileSize, Map configuration, ResolutionLevel level,
-                             short[][] rasterValues) {
-        super(dataBufferType, sourceWidth, sourceHeight, tileSize, configuration, level);
-        tileHeight = tileSize.height;
-        tileWidth = tileSize.width;
-        this.rasterValues = rasterValues;
+    protected ProbaVToaImage(Band band, short[] dataValues, float scaleFactor) {
+        super(band, ResolutionLevel.MAXRES);
+        height = band.getSceneRasterHeight();
+        width = band.getSceneRasterWidth();
+        this.dataValues = dataValues;
+        this.scaleFactor = scaleFactor;
     }
 
     @Override
-    protected void computeRect(PlanarImage[] sources, WritableRaster dest, Rectangle destRect) {
-        float[] elems = new float[destRect.width * destRect.height];
-        int index = 0;
-        for (int y = destRect.y; y < destRect.height + destRect.y; y++) {
-            int yCellIndex = y / tileHeight;
-            for (int x = destRect.x; x < destRect.width + destRect.x; x++) {
-                int xCellIndex = x / tileWidth;
-                short value = rasterValues[xCellIndex][yCellIndex];
-                elems[index++] = value;
+    protected void computeProductData(ProductData outputData, Rectangle region) throws IOException {
+        System.out.println("region = " + region);
+        for (int y = 0; y < region.height; y++) {
+            for (int x = 0; x < region.width; x++) {
+                int k = y * region.width + x;
+                int kk = (region.y + y)*width + (region.x + x);
+                outputData.setElemFloatAt(k, dataValues[kk]/scaleFactor);
             }
         }
-        dest.setDataElements(destRect.x, destRect.y, destRect.width, destRect.height, elems);
-
     }
 }

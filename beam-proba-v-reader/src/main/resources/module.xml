@@ -3,6 +3,7 @@
     <symbolicName>beam-proba-v-reader</symbolicName>
     <version>5.0</version>
     <name>Proba V Product Reader</name>
+    <packaging>dir</packaging>
     <funding>ESA</funding>
 
     <description>
@@ -26,7 +27,21 @@
         <module>beam-core</module>
     </dependency>
     <dependency>
-        <module>beam-visat</module>
+        <module>lib-hdf</module>
+    </dependency>
+
+    <dependency>
+        <lib>lib/jhdfobj-2.7.jar</lib>
+    </dependency>
+    <dependency>
+        <lib>lib/jhdf4obj-2.7.jar</lib>
+    </dependency>
+    <dependency>
+        <lib>lib/jhdf5obj-2.7.jar</lib>
+    </dependency>
+
+    <dependency>
+        <module>beam-visat-rcp</module>
         <optional>true</optional>
     </dependency>
 

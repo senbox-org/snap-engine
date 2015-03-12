@@ -36,7 +36,7 @@ import java.util.List;
 public class ProbaVProductReaderTest {
 
     @Test
-//    @Ignore
+    @Ignore
     public void testReadH5() throws ProductIOException {
         ProbaVProductReaderPlugIn.loadHdf5Lib(ProbaVProductReaderPlugIn.class);
         try {
@@ -56,8 +56,9 @@ public class ProbaVProductReaderTest {
     }
 
     @Test
+    @Ignore
     public void testReadH5_2() throws Exception {
-        ProbaVProductReaderPlugIn.loadHdf5Lib(ProbaVProductReaderPlugIn.class);
+        final Class<?> aClass = ProbaVProductReaderPlugIn.loadHdf5Lib(ProbaVProductReaderPlugIn.class);
         String path = "C:\\Users\\olafd\\proba_v_reader\\PROBAV_L1C_20131025_115650_2_V003.HDF5";
 //        String path = "C:\\Users\\olafd\\proba_v_reader\\HDF5_LSASAF_MSG_ALBEDO_Euro_200601020000";
         FileFormat h5FileFormat = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5);
@@ -79,40 +80,12 @@ public class ProbaVProductReaderTest {
             final List<Attribute> metadata = scalarDS.getMetadata();
             for (Attribute attribute : metadata) {
                 System.out.println("attribute name = " + attribute.getName());
-                System.out.println("attribute value = " + getAttributeValue(attribute));
+                System.out.println("attribute value = " + ProbaVUtils.getAttributeValue(attribute));
             }
 
         }
 
         h5File.close();
-    }
-
-    private String getAttributeValue(Attribute attribute) {
-        String result = "";
-        switch (attribute.getType().getDatatypeClass()) {
-            case Datatype.CLASS_INTEGER:
-                int[] ivals = (int[]) attribute.getValue();
-                for (int ival : ivals) {
-                    result = result.concat(Integer.toString(ival) + "  ");
-                }
-                break;
-            case Datatype.CLASS_FLOAT:
-                float[] fvals = (float[]) attribute.getValue();
-                for (float fval : fvals) {
-                    result = result.concat(Float.toString(fval) + "  ");
-                }
-                break;
-            case Datatype.CLASS_STRING:
-                String[] svals = (String[]) attribute.getValue();
-                for (String sval : svals) {
-                    result = result.concat(sval + "  ");
-                }
-                break;
-            default:
-                break;
-        }
-
-        return result;
     }
 
     // print out the data object recusively

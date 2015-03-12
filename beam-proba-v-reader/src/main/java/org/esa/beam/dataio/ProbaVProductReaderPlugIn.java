@@ -42,7 +42,6 @@ public class ProbaVProductReaderPlugIn implements ProductReaderPlugIn {
         hdf5LibAvailable = loadHdf5Lib(ProbaVProductReaderPlugIn.class) != null;
     }
 
-
     @Override
     public DecodeQualification getDecodeQualification(Object input) {
         if (isInputValid(input)) {
@@ -50,6 +49,22 @@ public class ProbaVProductReaderPlugIn implements ProductReaderPlugIn {
         } else {
             return DecodeQualification.UNABLE;
         }
+    }
+
+    static File getFileInput(Object input) {
+        if (input instanceof String) {
+            return new File((String) input);
+        } else if (input instanceof File) {
+            return (File) input;
+        }
+        return null;
+    }
+
+    /**
+     * Returns whether or not the HDF5 library is available.
+     */
+    static boolean isHdf5LibAvailable() {
+        return hdf5LibAvailable;
     }
 
     @Override
@@ -88,11 +103,31 @@ public class ProbaVProductReaderPlugIn implements ProductReaderPlugIn {
     }
 
     private boolean isInputProbaVFileNameValid(String fileName) {
-        return fileName.matches(ProbaVProductReader.PROBAV_L1C_FILENAME_REGEXP) ||
-                fileName.matches(ProbaVProductReader.PROBAV_S1_TOA_FILENAME_REGEXP) ||
-                fileName.matches(ProbaVProductReader.PROBAV_S1_TOC_FILENAME_REGEXP) ||
-                fileName.matches(ProbaVProductReader.PROBAV_S10_TOC_FILENAME_REGEXP) ||
-                fileName.matches(ProbaVProductReader.PROBAV_S10_TOC_NDVI_FILENAME_REGEXP);
+        return isProbaL1CProduct(fileName) ||
+                isProbaS1ToaProduct(fileName) ||
+                isProbaS1TocProduct(fileName) ||
+                isProbaS10TocProduct(fileName) ||
+                isProbaS10TocNdviProduct(fileName);
+    }
+
+    static boolean isProbaS10TocNdviProduct(String fileName) {
+        return fileName.matches(ProbaVProductReader.PROBAV_S10_TOC_NDVI_FILENAME_REGEXP);
+    }
+
+    static boolean isProbaS10TocProduct(String fileName) {
+        return fileName.matches(ProbaVProductReader.PROBAV_S10_TOC_FILENAME_REGEXP);
+    }
+
+    static boolean isProbaS1TocProduct(String fileName) {
+        return fileName.matches(ProbaVProductReader.PROBAV_S1_TOC_FILENAME_REGEXP);
+    }
+
+    static boolean isProbaS1ToaProduct(String fileName) {
+        return fileName.matches(ProbaVProductReader.PROBAV_S1_TOA_FILENAME_REGEXP);
+    }
+
+    static boolean isProbaL1CProduct(String fileName) {
+        return fileName.matches(ProbaVProductReader.PROBAV_L1C_FILENAME_REGEXP);
     }
 
 
