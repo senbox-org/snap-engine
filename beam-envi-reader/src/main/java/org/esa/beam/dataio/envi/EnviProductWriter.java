@@ -104,7 +104,7 @@ public class EnviProductWriter extends AbstractProductWriter {
         checkSourceRegionInsideBandRegion(sourceWidth, sourceBandWidth, sourceHeight, sourceBandHeight, sourceOffsetX,
                                           sourceOffsetY);
         final ImageOutputStream outputStream = getOrCreateImageOutputStream(sourceBand);
-        long outputPos = sourceOffsetY * sourceBandWidth + sourceOffsetX;
+        long outputPos = (long) sourceOffsetY * (long) sourceBandWidth + sourceOffsetX;
         pm.beginTask("Writing band '" + sourceBand.getName() + "'...", 1);//sourceHeight);
         try {
             final long max = sourceHeight * sourceWidth;
@@ -139,8 +139,8 @@ public class EnviProductWriter extends AbstractProductWriter {
     }
 
     private static void checkBufferSize(int sourceWidth, int sourceHeight, ProductData sourceBuffer) {
-        final int expectedBufferSize = sourceWidth * sourceHeight;
-        final int actualBufferSize = sourceBuffer.getNumElems();
+        final long expectedBufferSize = (long) sourceWidth * (long) sourceHeight;
+        final long actualBufferSize = sourceBuffer.getNumElems();
         Guardian.assertEquals("sourceWidth * sourceHeight", actualBufferSize, expectedBufferSize);  /*I18N*/
     }
 
