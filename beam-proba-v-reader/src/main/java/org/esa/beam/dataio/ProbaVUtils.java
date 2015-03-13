@@ -6,7 +6,6 @@ import org.esa.beam.util.logging.BeamLogManager;
 
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * todo: add comment
@@ -46,13 +45,13 @@ public class ProbaVUtils {
         return result;
     }
 
-    public static short[][] convert1Dto2DShort( final short[] array1D, final int rows, final int cols ) {
-        if (array1D.length != (rows*cols))
+    public static short[][] convert1Dto2DShort(final short[] array1D, final int rows, final int cols) {
+        if (array1D.length != (rows * cols))
             throw new IllegalArgumentException("Invalid array1D length");
 
         short[][] array2D = new short[rows][cols];
-        for ( int i = 0; i < rows; i++ )
-            System.arraycopy(array1D, (i*cols), array2D[i], 0, cols);
+        for (int i = 0; i < rows; i++)
+            System.arraycopy(array1D, (i * cols), array2D[i], 0, cols);
 
         return array2D;
     }
@@ -68,6 +67,51 @@ public class ProbaVUtils {
                 }
             }
         }
-        return scaleFactor;
+        return 1.0f/scaleFactor;
     }
+
+    public static float getScaleOffset(List<Attribute> metadata) {
+        float scaleOffset = 0.0f;
+        for (Attribute attribute : metadata) {
+            if (attribute.getName().equals("OFFSET")) {
+                try {
+                    scaleOffset = Float.parseFloat(getAttributeValue(attribute));
+                } catch (NumberFormatException e) {
+                    BeamLogManager.getSystemLogger().log(Level.WARNING, "Cannot parse scale offset: " + e.getMessage());
+                }
+            }
+        }
+        return scaleOffset;
+    }
+
+
+    public static int getSynthesisProductRasterDimension(String productName) {
+        // we have the products:
+        // PROBAV_S1_TOA_X07Y04_20131025_1KM_V003
+        // PROBAV_S1_TOA_X00Y01_20131025_333M_V003
+        // PROBAV_S1_TOC_X07Y04_20131025_1KM_V003
+        // PROBAV_S1_TOC_X00Y01_20131025_333M_V003
+        // PROBAV_S10_TOC_X07Y04_20131025_1KM_V003
+        // PROBAV_S10_TOC_X00Y01_20131025_333M_V003
+        //
+        return (isSynthesis1kmProduct(productName) ? ProbaVConstants.SYNTHESIS_PRODUCT_DIMENSION_1km :
+                ProbaVConstants.SYNTHESIS_PRODUCT_DIMENSION_333m);
+    }
+
+    public static boolean isSynthesis1kmProduct(String productName) {
+        return productName.toUpperCase().contains("_1KM_");
+    }
+
+    public static boolean isSynthesis333mProduct(String productName) {
+        return productName.toUpperCase().contains("_333M_");
+    }
+
+    public static boolean isSynthesis1dayProduct(String productName) {
+        return productName.toUpperCase().startsWith("PROBAV_S1_");
+    }
+
+    public static boolean isSynthesis10dayProduct(String productName) {
+        return productName.toUpperCase().startsWith("PROBAV_S10_");
+    }
+
 }

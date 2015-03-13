@@ -36,6 +36,17 @@ public class ProbaVProductReaderPlugIn implements ProductReaderPlugIn {
     private static final String[] DEFAULT_FILE_EXTENSIONS = new String[]{FILE_EXTENSION};
     private static final String[] FORMAT_NAMES = new String[]{FORMAT_NAME_PROBA_V};
 
+    private static final String PROBAV_L1C_FILENAME_REGEXP =
+            "PROBAV_L1C_[0-9]{8}_[0-9]{6}_[0-2]{1}_V003.(?i)(hdf5)";
+    private static final String PROBAV_S1_TOA_FILENAME_REGEXP =
+            "PROBAV_S1_TOA_X[0-9]{2}Y[0-9]{2}_[0-9]{8}_333M_V[0-9]{3}.(?i)(hdf5)";
+    private static final String PROBAV_S1_TOC_FILENAME_REGEXP =
+            "PROBAV_S1_TOC_X[0-9]{2}Y[0-9]{2}_[0-9]{8}_333M_V[0-9]{3}.(?i)(hdf5)";
+    private static final String PROBAV_S10_TOC_FILENAME_REGEXP =
+            "PROBAV_S10_TOC_X[0-9]{2}Y[0-9]{2}_[0-9]{8}_333M_V[0-9]{3}.(?i)(hdf5)";
+    private static final String PROBAV_S10_TOC_NDVI_FILENAME_REGEXP =
+            "PROBAV_S1_TOA_X[0-9]{2}Y[0-9]{2}_[0-9]{8}_333M_NDVI_V[0-9]{3}.(?i)(hdf5)";   // todo: shall this be supported?
+
     private static boolean hdf5LibAvailable = false;
 
     static {
@@ -111,23 +122,23 @@ public class ProbaVProductReaderPlugIn implements ProductReaderPlugIn {
     }
 
     static boolean isProbaS10TocNdviProduct(String fileName) {
-        return fileName.matches(ProbaVProductReader.PROBAV_S10_TOC_NDVI_FILENAME_REGEXP);
+        return fileName.matches(PROBAV_S10_TOC_NDVI_FILENAME_REGEXP);
     }
 
     static boolean isProbaS10TocProduct(String fileName) {
-        return fileName.matches(ProbaVProductReader.PROBAV_S10_TOC_FILENAME_REGEXP);
+        return fileName.matches(PROBAV_S10_TOC_FILENAME_REGEXP);
     }
 
     static boolean isProbaS1TocProduct(String fileName) {
-        return fileName.matches(ProbaVProductReader.PROBAV_S1_TOC_FILENAME_REGEXP);
+        return fileName.matches(PROBAV_S1_TOC_FILENAME_REGEXP);
     }
 
     static boolean isProbaS1ToaProduct(String fileName) {
-        return fileName.matches(ProbaVProductReader.PROBAV_S1_TOA_FILENAME_REGEXP);
+        return fileName.matches(PROBAV_S1_TOA_FILENAME_REGEXP);
     }
 
     static boolean isProbaL1CProduct(String fileName) {
-        return fileName.matches(ProbaVProductReader.PROBAV_L1C_FILENAME_REGEXP);
+        return fileName.matches(PROBAV_L1C_FILENAME_REGEXP);
     }
 
 
