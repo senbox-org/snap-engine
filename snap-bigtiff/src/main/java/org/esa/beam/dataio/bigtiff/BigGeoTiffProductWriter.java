@@ -14,7 +14,12 @@ import org.esa.beam.dataio.bigtiff.internal.TiffIFD;
 import org.esa.beam.dataio.dimap.DimapHeaderWriter;
 import org.esa.beam.framework.dataio.AbstractProductWriter;
 import org.esa.beam.framework.dataio.ProductWriterPlugIn;
-import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.FilterBand;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.datamodel.ProductNode;
+import org.esa.beam.framework.datamodel.VirtualBand;
 import org.esa.beam.jai.ImageManager;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.StringUtils;
@@ -30,7 +35,11 @@ import javax.imageio.stream.FileImageOutputStream;
 import javax.media.jai.JAI;
 import javax.media.jai.operator.FormatDescriptor;
 import java.awt.color.ColorSpace;
-import java.awt.image.*;
+import java.awt.image.ColorModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.Raster;
+import java.awt.image.RenderedImage;
+import java.awt.image.SampleModel;
 import java.awt.image.renderable.ParameterBlock;
 import java.io.File;
 import java.io.IOException;
@@ -143,7 +152,7 @@ class BigGeoTiffProductWriter extends AbstractProductWriter {
                 return (TIFFImageWriter) writer;
             }
         }
-        throw new IllegalStateException("No appropriate image writer for format BigGeoTiff found.");
+        throw new IllegalStateException("No appropriate image writer for format BigTIFF found.");
     }
 
     @Override

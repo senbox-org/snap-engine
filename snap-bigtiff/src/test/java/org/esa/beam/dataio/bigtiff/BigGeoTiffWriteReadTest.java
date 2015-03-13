@@ -20,8 +20,26 @@ import com.bc.ceres.core.ProgressMonitor;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFImageReader;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFRenderedImage;
 import org.esa.beam.framework.dataio.ProductIO;
-import org.esa.beam.framework.datamodel.*;
-import org.esa.beam.framework.dataop.maptransf.*;
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.ColorPaletteDef;
+import org.esa.beam.framework.datamodel.CrsGeoCoding;
+import org.esa.beam.framework.datamodel.GeoCoding;
+import org.esa.beam.framework.datamodel.GeoPos;
+import org.esa.beam.framework.datamodel.IndexCoding;
+import org.esa.beam.framework.datamodel.MapGeoCoding;
+import org.esa.beam.framework.datamodel.PixelPos;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.datamodel.TiePointGeoCoding;
+import org.esa.beam.framework.datamodel.TiePointGrid;
+import org.esa.beam.framework.datamodel.VirtualBand;
+import org.esa.beam.framework.dataop.maptransf.Datum;
+import org.esa.beam.framework.dataop.maptransf.LambertConformalConicDescriptor;
+import org.esa.beam.framework.dataop.maptransf.MapInfo;
+import org.esa.beam.framework.dataop.maptransf.MapProjection;
+import org.esa.beam.framework.dataop.maptransf.MapProjectionRegistry;
+import org.esa.beam.framework.dataop.maptransf.MapTransform;
+import org.esa.beam.framework.dataop.maptransf.MapTransformDescriptor;
 import org.esa.beam.jai.ImageManager;
 import org.esa.beam.util.io.FileUtils;
 import org.geotools.referencing.CRS;
@@ -49,7 +67,11 @@ import java.awt.geom.AffineTransform;
 import java.io.File;
 import java.io.IOException;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 @SuppressWarnings({"InstanceVariableMayNotBeInitialized"})
 public class BigGeoTiffWriteReadTest {
@@ -567,7 +589,7 @@ public class BigGeoTiffWriteReadTest {
     private Product writeReadProduct() throws IOException {
         location = new File(TEST_DIR, "test_product.tif");
 
-        final String bigGeoTiffFormatName = "BigGeoTiff";
+        final String bigGeoTiffFormatName = BigGeoTiffProductReaderPlugIn.FORMAT_NAME;
         ProductIO.writeProduct(outProduct, location.getAbsolutePath(), bigGeoTiffFormatName);
 
         return ProductIO.readProduct(location, bigGeoTiffFormatName);

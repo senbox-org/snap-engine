@@ -28,7 +28,7 @@ public class BigGeoTiffProductWriterPlugInTest {
     @Test
     public void testGetFormatNames() {
         final String[] formatNames = plugIn.getFormatNames();
-        assertArrayEquals(new String[]{"BigGeoTiff"}, formatNames);
+        assertArrayEquals(new String[]{BigGeoTiffProductWriterPlugIn.FORMAT_NAME}, formatNames);
     }
 
     @Test
@@ -45,7 +45,7 @@ public class BigGeoTiffProductWriterPlugInTest {
 
     @Test
     public void testGetDescription() {
-        assertEquals("BigGeoTiff/GeoTiff data product.", plugIn.getDescription(null));
+        assertNotNull(plugIn.getDescription(null));
     }
 
     @Test

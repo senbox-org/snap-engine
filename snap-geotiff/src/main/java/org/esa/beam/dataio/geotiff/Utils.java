@@ -15,8 +15,8 @@
  */
 package org.esa.beam.dataio.geotiff;
 
-import it.geosolutions.imageio.plugins.tiff.GeoTIFFTagSet;
 import com.sun.media.jai.codec.TIFFField;
+import it.geosolutions.imageio.plugins.tiff.GeoTIFFTagSet;
 import org.esa.beam.framework.datamodel.FilterBand;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductNode;

@@ -6,7 +6,12 @@ import it.geosolutions.imageio.plugins.tiff.TIFFField;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFIFD;
 import org.esa.beam.dataio.bigtiff.internal.GeoKeyEntry;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 public class TiffFileInfo {
 

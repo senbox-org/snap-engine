@@ -18,7 +18,14 @@ package org.esa.beam.dataio.bigtiff.internal;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.dataio.dimap.DimapHeaderWriter;
-import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.ColorPaletteDef;
+import org.esa.beam.framework.datamodel.FilterBand;
+import org.esa.beam.framework.datamodel.ImageInfo;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.datamodel.ProductNode;
+import org.esa.beam.framework.datamodel.VirtualBand;
 import org.esa.beam.util.Guardian;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.geotiff.GeoTIFFMetadata;

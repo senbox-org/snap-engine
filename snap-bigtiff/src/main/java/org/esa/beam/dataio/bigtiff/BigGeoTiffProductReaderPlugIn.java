@@ -17,6 +17,8 @@ import java.util.Locale;
 
 public class BigGeoTiffProductReaderPlugIn implements ProductReaderPlugIn {
 
+    public static final String FORMAT_NAME = "GeoTIFF-BigTIFF";
+
     @Override
     public DecodeQualification getDecodeQualification(Object input) {
         try {

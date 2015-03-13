@@ -25,7 +25,7 @@ import org.esa.beam.util.jai.JAIUtils;
 import org.junit.Assert;
 
 import javax.imageio.stream.MemoryCacheImageOutputStream;
-import java.awt.Dimension;
+import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Method;

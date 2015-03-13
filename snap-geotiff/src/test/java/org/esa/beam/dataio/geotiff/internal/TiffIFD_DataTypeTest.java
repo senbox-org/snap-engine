@@ -18,9 +18,10 @@ package org.esa.beam.dataio.geotiff.internal;
 
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.ProductData;
-import static org.junit.Assert.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class TiffIFD_DataTypeTest {
 

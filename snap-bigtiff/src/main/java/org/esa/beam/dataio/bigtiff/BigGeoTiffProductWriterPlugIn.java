@@ -14,6 +14,8 @@ import java.util.Locale;
 
 public class BigGeoTiffProductWriterPlugIn implements ProductWriterPlugIn {
 
+    public static final String FORMAT_NAME = BigGeoTiffProductReaderPlugIn.FORMAT_NAME;
+
     private static final Class[] OUTPUT_TYPES = new Class[]{String.class, File.class,};
 
     @Override
@@ -42,7 +44,7 @@ public class BigGeoTiffProductWriterPlugIn implements ProductWriterPlugIn {
 
     @Override
     public String[] getFormatNames() {
-        return Constants.FORMAT_NAMES;
+        return new String[]{FORMAT_NAME};
     }
 
     @Override

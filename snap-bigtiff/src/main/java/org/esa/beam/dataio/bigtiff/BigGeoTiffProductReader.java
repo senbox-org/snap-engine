@@ -19,15 +19,36 @@ import org.esa.beam.dataio.bigtiff.internal.GeoKeyEntry;
 import org.esa.beam.dataio.dimap.DimapProductHelpers;
 import org.esa.beam.framework.dataio.AbstractProductReader;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
-import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.ColorPaletteDef;
+import org.esa.beam.framework.datamodel.CrsGeoCoding;
+import org.esa.beam.framework.datamodel.FilterBand;
+import org.esa.beam.framework.datamodel.GcpDescriptor;
+import org.esa.beam.framework.datamodel.GcpGeoCoding;
+import org.esa.beam.framework.datamodel.GeoPos;
+import org.esa.beam.framework.datamodel.ImageInfo;
+import org.esa.beam.framework.datamodel.IndexCoding;
+import org.esa.beam.framework.datamodel.PixelPos;
+import org.esa.beam.framework.datamodel.Placemark;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.datamodel.ProductNodeGroup;
+import org.esa.beam.framework.datamodel.TiePointGeoCoding;
+import org.esa.beam.framework.datamodel.TiePointGrid;
+import org.esa.beam.framework.datamodel.VirtualBand;
 import org.esa.beam.framework.dataop.maptransf.Datum;
 import org.esa.beam.jai.ImageManager;
+import org.esa.beam.util.SystemUtils;
 import org.esa.beam.util.geotiff.EPSGCodes;
 import org.esa.beam.util.geotiff.GeoTIFFCodes;
 import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.util.jai.JAIUtils;
-import org.esa.beam.util.logging.BeamLogManager;
-import org.geotools.coverage.grid.io.imageio.geotiff.*;
+import org.geotools.coverage.grid.io.imageio.geotiff.GeoTiffConstants;
+import org.geotools.coverage.grid.io.imageio.geotiff.GeoTiffException;
+import org.geotools.coverage.grid.io.imageio.geotiff.GeoTiffIIOMetadataDecoder;
+import org.geotools.coverage.grid.io.imageio.geotiff.GeoTiffMetadata2CRSAdapter;
+import org.geotools.coverage.grid.io.imageio.geotiff.PixelScale;
+import org.geotools.coverage.grid.io.imageio.geotiff.TiePoint;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.referencing.operation.matrix.GeneralMatrix;
 import org.geotools.referencing.operation.transform.ProjectiveTransform;
@@ -52,12 +73,20 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.awt.image.*;
+import java.awt.image.DataBuffer;
+import java.awt.image.IndexColorModel;
+import java.awt.image.Raster;
+import java.awt.image.RenderedImage;
+import java.awt.image.SampleModel;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.logging.Level;
 
 class BigGeoTiffProductReader extends AbstractProductReader {
@@ -379,7 +408,7 @@ class BigGeoTiffProductReader extends AbstractProductReader {
         try {
             return Integer.parseInt(metadata.getGeoKey(key));
         } catch (NumberFormatException ne) {
-            BeamLogManager.getSystemLogger().log(Level.FINE, ne.getMessage(), ne);
+            SystemUtils.LOG.log(Level.FINE, ne.getMessage(), ne);
             return GeoTiffConstants.UNDEFINED;
         }
     }

@@ -29,7 +29,7 @@ import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.geotiff.GeoTIFFMetadata;
 
 import javax.imageio.stream.ImageOutputStream;
-import java.awt.Color;
+import java.awt.*;
 import java.awt.image.DataBuffer;
 import java.io.IOException;
 import java.io.StringWriter;

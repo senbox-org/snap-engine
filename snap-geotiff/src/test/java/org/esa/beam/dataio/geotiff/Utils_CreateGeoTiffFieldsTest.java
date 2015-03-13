@@ -16,15 +16,18 @@
 
 package org.esa.beam.dataio.geotiff;
 
-import it.geosolutions.imageio.plugins.tiff.GeoTIFFTagSet;
 import com.sun.media.jai.codec.TIFFField;
+import it.geosolutions.imageio.plugins.tiff.GeoTIFFTagSet;
 import org.esa.beam.util.geotiff.GeoTIFFMetadata;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class Utils_CreateGeoTiffFieldsTest {
 

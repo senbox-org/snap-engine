@@ -28,7 +28,7 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 
 import javax.imageio.stream.MemoryCacheImageOutputStream;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
