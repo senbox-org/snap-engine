@@ -81,11 +81,21 @@ public class ProbaVRasterImage extends RasterDataNodeOpImage {
                 break;
 
             case ProductData.TYPE_INT16:
+            for (int y = 0; y < region.height; y++) {
+                for (int x = 0; x < region.width; x++) {
+                    final int indexInTile = y * region.width + x;
+                    final int indexInImage = (region.y + y) * width + (region.x + x);
+                    outputData.setElemIntAt(indexInTile, shortDataValues[indexInImage]);
+                }
+            }
+            break;
+
+            case ProductData.TYPE_UINT16:
                 for (int y = 0; y < region.height; y++) {
                     for (int x = 0; x < region.width; x++) {
                         final int indexInTile = y * region.width + x;
                         final int indexInImage = (region.y + y) * width + (region.x + x);
-                        outputData.setElemIntAt(indexInTile, shortDataValues[indexInImage]);
+                        outputData.setElemUIntAt(indexInTile, shortDataValues[indexInImage]);
                     }
                 }
                 break;

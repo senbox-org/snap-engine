@@ -2,8 +2,11 @@ package org.esa.beam.dataio;
 
 import ncsa.hdf.object.Attribute;
 import ncsa.hdf.object.Datatype;
+import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.util.BitSetter;
 import org.esa.beam.util.logging.BeamLogManager;
 
+import java.awt.*;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -67,7 +70,7 @@ public class ProbaVUtils {
                 }
             }
         }
-        return 1.0f/scaleFactor;
+        return 1.0f / scaleFactor;
     }
 
     public static float getScaleOffset(List<Attribute> metadata) {
@@ -84,6 +87,35 @@ public class ProbaVUtils {
         return scaleOffset;
     }
 
+    public static double getGeometryCoordinateValue(List<Attribute> metadata, String coordinateName) {
+        double coordValue = Double.NaN;
+        for (Attribute attribute : metadata) {
+            if (attribute.getName().equals(coordinateName)) {
+                try {
+                    coordValue = Float.parseFloat(getAttributeValue(attribute));
+                } catch (NumberFormatException e) {
+                    BeamLogManager.getSystemLogger().log(Level.WARNING, "Cannot parse geometry coordinate: " +
+                            e.getMessage());
+                }
+            }
+        }
+        return coordValue;
+    }
+
+    public static String getGeometryCrsString(List<Attribute> metadata) {
+        String crsString = null;
+        for (Attribute attribute : metadata) {
+            if (attribute.getName().equals("MAP_PROJECTION_WKT")) {
+                try {
+                    crsString = getAttributeValue(attribute);
+                } catch (NumberFormatException e) {
+                    BeamLogManager.getSystemLogger().log(Level.WARNING, "Cannot parse CRS WKT string: " +
+                            e.getMessage());
+                }
+            }
+        }
+        return crsString;
+    }
 
     public static int getSynthesisProductRasterDimension(String productName) {
         // we have the products:
@@ -113,5 +145,75 @@ public class ProbaVUtils {
     public static boolean isSynthesis10dayProduct(String productName) {
         return productName.toUpperCase().startsWith("PROBAV_S10_");
     }
+
+    public static void addSmMasks(Product probavProduct) {
+        ProductNodeGroup<Mask> maskGroup = probavProduct.getMaskGroup();
+        addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.CLEAR_FLAG_NAME,
+                ProbaVConstants.CLEAR_FLAG_DESCR, ProbaVConstants.SM_COLORS[0], 0.5f);
+        addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.UNDEFINED_FLAG_NAME,
+                ProbaVConstants.UNDEFINED_FLAG_DESCR, ProbaVConstants.SM_COLORS[1], 0.5f);
+        addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.CLOUD_FLAG_NAME,
+                ProbaVConstants.CLOUD_FLAG_DESCR, ProbaVConstants.SM_COLORS[2], 0.5f);
+        addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.SNOWICE_FLAG_NAME,
+                ProbaVConstants.SNOWICE_FLAG_DESCR, ProbaVConstants.SM_COLORS[3], 0.5f);
+        addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.CLOUD_SHADOW_FLAG_NAME,
+                ProbaVConstants.CLOUD_SHADOW_FLAG_DESCR, ProbaVConstants.SM_COLORS[4], 0.5f);
+        addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.LAND_FLAG_NAME,
+                ProbaVConstants.LAND_FLAG_DESCR, ProbaVConstants.SM_COLORS[5], 0.5f);
+        addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.GOOD_SWIR_FLAG_NAME,
+                ProbaVConstants.GOOD_SWIR_FLAG_DESCR, ProbaVConstants.SM_COLORS[6], 0.5f);
+        addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.GOOD_NIR_FLAG_NAME,
+                ProbaVConstants.GOOD_NIR_FLAG_DESCR, ProbaVConstants.SM_COLORS[7], 0.5f);
+        addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.GOOD_RED_FLAG_NAME,
+                ProbaVConstants.GOOD_RED_FLAG_DESCR, ProbaVConstants.SM_COLORS[8], 0.5f);
+        addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.GOOD_BLUE_FLAG_NAME,
+                ProbaVConstants.GOOD_BLUE_FLAG_DESCR, ProbaVConstants.SM_COLORS[9], 0.5f);
+    }
+
+    public static void addSmFlags(FlagCoding probavSmFlagCoding) {
+        probavSmFlagCoding.addFlag(ProbaVConstants.CLEAR_FLAG_NAME,
+                BitSetter.setFlag(0, ProbaVConstants.CLEAR_BIT_INDEX),
+                ProbaVConstants.CLEAR_FLAG_DESCR);
+        probavSmFlagCoding.addFlag(ProbaVConstants.UNDEFINED_FLAG_NAME,
+                BitSetter.setFlag(0, ProbaVConstants.UNDEFINED_BIT_INDEX),
+                ProbaVConstants.UNDEFINED_FLAG_DESCR);
+        probavSmFlagCoding.addFlag(ProbaVConstants.CLOUD_FLAG_NAME,
+                BitSetter.setFlag(0, ProbaVConstants.CLOUD_BIT_INDEX),
+                ProbaVConstants.CLOUD_FLAG_DESCR);
+        probavSmFlagCoding.addFlag(ProbaVConstants.SNOWICE_FLAG_NAME,
+                BitSetter.setFlag(0, ProbaVConstants.SNOWICE_INDEX),
+                ProbaVConstants.SNOWICE_FLAG_DESCR);
+        probavSmFlagCoding.addFlag(ProbaVConstants.CLOUD_SHADOW_FLAG_NAME,
+                BitSetter.setFlag(0, ProbaVConstants.CLOUD_SHADOW_BIT_INDEX),
+                ProbaVConstants.CLOUD_SHADOW_FLAG_DESCR);
+        probavSmFlagCoding.addFlag(ProbaVConstants.LAND_FLAG_NAME,
+                BitSetter.setFlag(0, ProbaVConstants.LAND_BIT_INDEX),
+                ProbaVConstants.LAND_FLAG_DESCR);
+        probavSmFlagCoding.addFlag(ProbaVConstants.GOOD_SWIR_FLAG_NAME,
+                BitSetter.setFlag(0, ProbaVConstants.GOOD_SWIR_INDEX),
+                ProbaVConstants.GOOD_SWIR_FLAG_DESCR);
+        probavSmFlagCoding.addFlag(ProbaVConstants.GOOD_NIR_FLAG_NAME,
+                BitSetter.setFlag(0, ProbaVConstants.GOOD_NIR_BIT_INDEX),
+                ProbaVConstants.GOOD_NIR_FLAG_DESCR);
+        probavSmFlagCoding.addFlag(ProbaVConstants.GOOD_RED_FLAG_NAME,
+                BitSetter.setFlag(0, ProbaVConstants.GOOD_RED_BIT_INDEX),
+                ProbaVConstants.GOOD_RED_FLAG_DESCR);
+        probavSmFlagCoding.addFlag(ProbaVConstants.GOOD_BLUE_FLAG_NAME,
+                BitSetter.setFlag(0, ProbaVConstants.GOOD_BLUE_BIT_INDEX),
+                ProbaVConstants.GOOD_BLUE_FLAG_DESCR);
+    }
+
+    private static void addMask(Product mod35Product, ProductNodeGroup<Mask> maskGroup,
+                                String bandName, String flagName, String description, Color color, float transparency) {
+        int width = mod35Product.getSceneRasterWidth();
+        int height = mod35Product.getSceneRasterHeight();
+        String maskPrefix = "";
+        Mask mask = Mask.BandMathsType.create(maskPrefix + flagName,
+                description, width, height,
+                bandName + "." + flagName,
+                color, transparency);
+        maskGroup.add(mask);
+    }
+
 
 }
