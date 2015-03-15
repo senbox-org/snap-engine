@@ -8,11 +8,11 @@
     </parent>
 
     <artifactId>snap-gui-utilities</artifactId>
-    <packaging>jar</packaging>
-
     <name>SNAP GUI Utilities</name>
     <description>SNAP GUI Utilities</description>
 
+    <packaging>jar</packaging>
+    
     <dependencies>
         <dependency>
             <groupId>org.esa.snap</groupId>
@@ -29,4 +29,19 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>           
+            <!--plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>nbm-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <useDefaultManifestFile>true</useDefaultManifestFile>
+                </configuration>
+            </plugin-->
+        </plugins>
+    </build>
 </project>

@@ -8,11 +8,11 @@
     </parent>
 
     <artifactId>snap-graph-builder</artifactId>
-    <packaging>jar</packaging>
-
     <name>SNAP Graph Builder</name>
     <description>SNAP Graph Builder</description>
 
+    <packaging>jar</packaging>
+    
     <dependencies>
         <dependency>
             <groupId>org.esa.snap</groupId>
@@ -64,10 +64,17 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>com.bc.maven.plugins</groupId>
-                <artifactId>maven-javahelp-plugin</artifactId>
+            <!--plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>nbm-maven-plugin</artifactId>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <useDefaultManifestFile>true</useDefaultManifestFile>
+                </configuration>
+            </plugin-->
         </plugins>
     </build>
 </project>
