@@ -56,11 +56,11 @@ public class ProbaVProductReaderTest {
     }
 
     @Test
-//    @Ignore
+    @Ignore
     public void testReadH5_2() throws Exception {
         final Class<?> aClass = ProbaVProductReaderPlugIn.loadHdf5Lib(ProbaVProductReaderPlugIn.class);
-        String path = "C:\\Users\\olafd\\bc\\proba-v-reader\\PROBAV_L1C_20131025_115650_2_V003.HDF5";
-//        String path = "C:\\Users\\olafd\\proba_v_reader\\HDF5_LSASAF_MSG_ALBEDO_Euro_200601020000";
+//        String path = "C:\\Users\\olafd\\bc\\proba-v-reader\\PROBAV_L1C_20131025_115650_2_V003.HDF5";
+        String path = "C:\\Users\\olafd\\proba_v_reader\\HDF5_LSASAF_MSG_ALBEDO_Euro_200601020000";
         FileFormat h5FileFormat = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5);
         FileFormat h5File = h5FileFormat.createInstance(path, FileFormat.READ);
 
