@@ -38,12 +38,18 @@ public class ProbaVProductReaderPlugIn implements ProductReaderPlugIn {
 
     private static final String PROBAV_L1C_FILENAME_REGEXP =
             "PROBAV_L1C_[0-9]{8}_[0-9]{6}_[0-2]{1}_V003.(?i)(hdf5)";
-    private static final String PROBAV_S1_TOA_FILENAME_REGEXP =
+    private static final String PROBAV_S1_TOA_333M_FILENAME_REGEXP =
             "PROBAV_S1_TOA_X[0-9]{2}Y[0-9]{2}_[0-9]{8}_333M_V[0-9]{3}.(?i)(hdf5)";
-    private static final String PROBAV_S1_TOC_FILENAME_REGEXP =
+    private static final String PROBAV_S1_TOA_1KM_FILENAME_REGEXP =
+            "PROBAV_S1_TOA_X[0-9]{2}Y[0-9]{2}_[0-9]{8}_1KM_V[0-9]{3}.(?i)(hdf5)";
+    private static final String PROBAV_S1_TOC_333M_FILENAME_REGEXP =
             "PROBAV_S1_TOC_X[0-9]{2}Y[0-9]{2}_[0-9]{8}_333M_V[0-9]{3}.(?i)(hdf5)";
-    private static final String PROBAV_S10_TOC_FILENAME_REGEXP =
+    private static final String PROBAV_S1_TOC_1KM_FILENAME_REGEXP =
+            "PROBAV_S1_TOC_X[0-9]{2}Y[0-9]{2}_[0-9]{8}_1KM_V[0-9]{3}.(?i)(hdf5)";
+    private static final String PROBAV_S10_TOC_333M_FILENAME_REGEXP =
             "PROBAV_S10_TOC_X[0-9]{2}Y[0-9]{2}_[0-9]{8}_333M_V[0-9]{3}.(?i)(hdf5)";
+    private static final String PROBAV_S10_TOC_1KM_FILENAME_REGEXP =
+            "PROBAV_S10_TOC_X[0-9]{2}Y[0-9]{2}_[0-9]{8}_1KM_V[0-9]{3}.(?i)(hdf5)";
     private static final String PROBAV_S10_TOC_NDVI_FILENAME_REGEXP =
             "PROBAV_S1_TOA_X[0-9]{2}Y[0-9]{2}_[0-9]{8}_333M_NDVI_V[0-9]{3}.(?i)(hdf5)";   // todo: shall this be supported?
 
@@ -121,24 +127,24 @@ public class ProbaVProductReaderPlugIn implements ProductReaderPlugIn {
                 isProbaS10TocNdviProduct(fileName);
     }
 
-    static boolean isProbaS10TocNdviProduct(String fileName) {
-        return fileName.matches(PROBAV_S10_TOC_NDVI_FILENAME_REGEXP);
-    }
-
     static boolean isProbaS10TocProduct(String fileName) {
-        return fileName.matches(PROBAV_S10_TOC_FILENAME_REGEXP);
+        return fileName.matches(PROBAV_S10_TOC_333M_FILENAME_REGEXP) || fileName.matches(PROBAV_S10_TOC_1KM_FILENAME_REGEXP);
     }
 
     static boolean isProbaS1TocProduct(String fileName) {
-        return fileName.matches(PROBAV_S1_TOC_FILENAME_REGEXP);
+        return fileName.matches(PROBAV_S1_TOC_333M_FILENAME_REGEXP) || fileName.matches(PROBAV_S1_TOC_1KM_FILENAME_REGEXP);
     }
 
     static boolean isProbaS1ToaProduct(String fileName) {
-        return fileName.matches(PROBAV_S1_TOA_FILENAME_REGEXP);
+        return fileName.matches(PROBAV_S1_TOA_333M_FILENAME_REGEXP) || fileName.matches(PROBAV_S1_TOA_1KM_FILENAME_REGEXP);
     }
 
     static boolean isProbaL1CProduct(String fileName) {
         return fileName.matches(PROBAV_L1C_FILENAME_REGEXP);
+    }
+
+    static boolean isProbaS10TocNdviProduct(String fileName) {
+        return fileName.matches(PROBAV_S10_TOC_NDVI_FILENAME_REGEXP);
     }
 
 

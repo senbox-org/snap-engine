@@ -121,6 +121,9 @@ public class ProbaVProductReader extends AbstractProductReader {
             // - extract constants
             // - no data values
 
+            // - !! TOC product can't be read
+            // - !! 1km products can't be read
+
 
             final TreeNode level3Node = inputFileRootNode.getChildAt(0);        // 'LEVEL3'
             for (int i = 0; i < level3Node.getChildCount(); i++) {
