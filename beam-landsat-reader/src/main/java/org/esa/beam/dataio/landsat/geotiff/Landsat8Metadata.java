@@ -85,6 +85,8 @@ class Landsat8Metadata extends AbstractLandsatMetadata {
                     590,
                     1010
             };
+    private static final double DEFAULT_SCALE_FACTOR = 1.0;
+    private static final double DEFAULT_OFFSET = 0.0;
 
     public Landsat8Metadata(Reader fileReader) throws IOException {
         super(fileReader);
@@ -122,15 +124,23 @@ class Landsat8Metadata extends AbstractLandsatMetadata {
     @Override
     public double getScalingFactor(String bandId) {
         final String spectralInput = getSpectralInputString();
-        MetadataElement radiometricRescalingElement = getMetaDataElementRoot().getElement("RADIOMETRIC_RESCALING");
         String attributeKey = String.format("%s_MULT_BAND_%s", spectralInput, bandId);
+        MetadataElement radiometricRescalingElement = getMetaDataElementRoot().getElement("RADIOMETRIC_RESCALING");
+        if (radiometricRescalingElement.getAttribute(attributeKey) == null) {
+            return DEFAULT_SCALE_FACTOR;
+        }
         return radiometricRescalingElement.getAttributeDouble(attributeKey);
     }
 
     @Override
     public double getScalingOffset(String bandId) {
         final String spectralInput = getSpectralInputString();
-        return getMetaDataElementRoot().getElement("RADIOMETRIC_RESCALING").getAttributeDouble(String.format("%s_ADD_BAND_%s", spectralInput, bandId));
+        String attributeKey = String.format("%s_ADD_BAND_%s", spectralInput, bandId);
+        MetadataElement radiometricRescalingElement = getMetaDataElementRoot().getElement("RADIOMETRIC_RESCALING");
+        if (radiometricRescalingElement.getAttribute(attributeKey) == null) {
+            return DEFAULT_OFFSET;
+        }
+        return radiometricRescalingElement.getAttributeDouble(attributeKey);
     }
 
     @Override
