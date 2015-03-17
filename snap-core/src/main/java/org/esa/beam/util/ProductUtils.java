@@ -1239,7 +1239,7 @@ public class ProductUtils {
         if (sourceBand == null) {
             return null;
         }
-        final Band targetBand = new Band(targetBandName, sourceBand.getDataType(), sourceBand.getSceneRasterWidth(), sourceBand.getSceneRasterHeight());
+        final Band targetBand = new Band(targetBandName, sourceBand.getDataType(), sourceBand.getRasterWidth(), sourceBand.getRasterHeight());
         targetProduct.addBand(targetBand);
         copyRasterDataNodeProperties(sourceBand, targetBand);
         if (copySourceImage) {
