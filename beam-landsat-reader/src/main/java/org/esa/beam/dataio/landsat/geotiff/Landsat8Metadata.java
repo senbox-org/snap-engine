@@ -19,6 +19,7 @@ package org.esa.beam.dataio.landsat.geotiff;
 import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.util.logging.BeamLogManager;
+import org.esa.beam.util.math.MathUtils;
 
 import java.awt.Dimension;
 import java.io.IOException;
@@ -129,7 +130,11 @@ class Landsat8Metadata extends AbstractLandsatMetadata {
         if (radiometricRescalingElement.getAttribute(attributeKey) == null) {
             return DEFAULT_SCALE_FACTOR;
         }
-        return radiometricRescalingElement.getAttributeDouble(attributeKey);
+
+        final double scalingFactor = radiometricRescalingElement.getAttributeDouble(attributeKey);
+        final double sunAngleCorrectionFactor = getSunAngleCorrectionFactor(spectralInput);
+
+        return scalingFactor / sunAngleCorrectionFactor;
     }
 
     @Override
@@ -140,7 +145,11 @@ class Landsat8Metadata extends AbstractLandsatMetadata {
         if (radiometricRescalingElement.getAttribute(attributeKey) == null) {
             return DEFAULT_OFFSET;
         }
-        return radiometricRescalingElement.getAttributeDouble(attributeKey);
+
+        final double scalingOffset = radiometricRescalingElement.getAttributeDouble(attributeKey);
+        final double sunAngleCorrectionFactor = getSunAngleCorrectionFactor(spectralInput);
+
+        return scalingOffset / sunAngleCorrectionFactor;
     }
 
     @Override
@@ -190,17 +199,32 @@ class Landsat8Metadata extends AbstractLandsatMetadata {
         String spectralInput = "RADIANCE";
         final String readAs = System.getProperty(LandsatGeotiffReader.SYSPROP_READ_AS);
         if (readAs != null) {
-            switch (readAs) {
-                case "reflectance":
-                    spectralInput = "REFLECTANCE";
-                    break;
-                default:
-                    Logger systemLogger = BeamLogManager.getSystemLogger();
-                    systemLogger.warning(String.format("Property '%s' has unsupported value '%s'",
-                                                       LandsatGeotiffReader.SYSPROP_READ_AS, readAs));
+            if (readAs.trim().equals("reflectance")) {
+                spectralInput = "REFLECTANCE";
+            }  else {
+                Logger systemLogger = BeamLogManager.getSystemLogger();
+                systemLogger.warning(String.format("Property '%s' has unsupported value '%s'",
+                                                   LandsatGeotiffReader.SYSPROP_READ_AS, readAs));
             }
         }
 
         return spectralInput;
+    }
+
+    private double getSunAngleCorrectionFactor(String spectralInput) {
+        // this follows:
+        // http://landsat.usgs.gov/Landsat8_Using_Product.php, section 'Conversion to TOA Reflectance'
+        double sunAngleCorrectionFactor = 1.0;
+        if (spectralInput.equals("REFLECTANCE")) {
+            MetadataElement imageAttributesElement = getMetaDataElementRoot().getElement("IMAGE_ATTRIBUTES");
+            if (imageAttributesElement != null) {
+                final String sunElevationAttributeKey = "SUN_ELEVATION";
+                if (imageAttributesElement.getAttribute(sunElevationAttributeKey) != null) {
+                    final double sunElevationAngle = imageAttributesElement.getAttributeDouble(sunElevationAttributeKey);
+                    sunAngleCorrectionFactor = Math.sin(sunElevationAngle* MathUtils.DTOR);
+                }
+            }
+        }
+        return sunAngleCorrectionFactor;
     }
 }

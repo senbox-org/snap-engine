@@ -165,14 +165,13 @@ public class LandsatGeotiffReader extends AbstractProductReader {
                     band.setUnit(RADIANCE_UNITS);
                     final String readAs = System.getProperty(LandsatGeotiffReader.SYSPROP_READ_AS);
                     if (readAs != null) {
-                        switch (readAs) {
-                            case "reflectance":
-                                band.setDescription(landsatMetadata.getBandDescription(bandNumber) + " , as TOA Reflectance");
-                                band.setUnit(REFLECTANCE_UNITS);
-                            default:
-                                Logger systemLogger = BeamLogManager.getSystemLogger();
-                                systemLogger.warning(String.format("Property '%s' has unsupported value '%s'",
-                                                                   LandsatGeotiffReader.SYSPROP_READ_AS, readAs));
+                        if (readAs.trim().equals("reflectance")) {
+                            band.setDescription(landsatMetadata.getBandDescription(bandNumber) + " , as TOA Reflectance");
+                            band.setUnit(REFLECTANCE_UNITS);
+                        }  else {
+                            Logger systemLogger = BeamLogManager.getSystemLogger();
+                            systemLogger.warning(String.format("Property '%s' has unsupported value '%s'",
+                                                               LandsatGeotiffReader.SYSPROP_READ_AS, readAs));
                         }
                     }
                 }
