@@ -380,7 +380,7 @@ public final class OperatorUtils {
         if (e.getMessage() != null) {
             message += e.getMessage();
         }
-        if (e.getCause() != null && e.getCause().getMessage() != null) {
+        if (e.getCause() != null && e.getCause().getMessage() != null && !e.getCause().getMessage().equals(e.getMessage())) {
             message += " due to " + e.getCause().getMessage();
         } else if (e.getMessage() == null || e.getMessage().isEmpty()) {
             message += e.toString();
