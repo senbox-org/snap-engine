@@ -125,18 +125,12 @@ class Landsat8Metadata extends AbstractLandsatMetadata {
         MetadataElement radiometricRescalingElement = getMetaDataElementRoot().getElement("RADIOMETRIC_RESCALING");
         String attributeKey = String.format("%s_MULT_BAND_%s", spectralInput, bandId);
         return radiometricRescalingElement.getAttributeDouble(attributeKey);
-//        return getScalingFactor(bandId,
-//                                "MIN_MAX_" + spectralInput,
-//                                spectralInput + "_MINIMUM_BAND_",
-//                                spectralInput + "_MAXIMUM_BAND_",
-//                                "MIN_MAX_PIXEL_VALUE", "QUANTIZE_CAL_MIN_BAND_", "QUANTIZE_CAL_MAX_BAND_");
     }
 
     @Override
     public double getScalingOffset(String bandId) {
         final String spectralInput = getSpectralInputString();
         return getMetaDataElementRoot().getElement("RADIOMETRIC_RESCALING").getAttributeDouble(String.format("%s_ADD_BAND_%s", spectralInput, bandId));
-//        return getScalingOffset(bandId, "MIN_MAX_RADIANCE", "RADIANCE_MINIMUM_BAND_", "RADIANCE_MAXIMUM_BAND_", "MIN_MAX_PIXEL_VALUE", "QUANTIZE_CAL_MIN_BAND_", "QUANTIZE_CAL_MAX_BAND_");
     }
 
     @Override
