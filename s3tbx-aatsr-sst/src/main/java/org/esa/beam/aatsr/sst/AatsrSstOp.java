@@ -40,6 +40,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Path;
 
 /**
  * An operator for computing sea surface temperature from (A)ATSR products.
@@ -446,8 +447,8 @@ public class AatsrSstOp extends PixelOperator {
         final String targetPath = System.getProperty(SST_AUXDATA_DIR_PROPERTY, defaultTargetDir.getAbsolutePath());
         final File targetDir = new File(targetPath);
 
-        final URL url = ResourceInstaller.getSourceUrl(getClass());
-        final ResourceInstaller installer = new ResourceInstaller(url, "auxdata/aatsr/sst", targetDir);
+        final Path path = ResourceInstaller.findModuleCodeBasePath(getClass());
+        final ResourceInstaller installer = new ResourceInstaller(path, "auxdata/aatsr/sst", targetDir.toPath());
         try {
             installer.install(".*", ProgressMonitor.NULL);
         } catch (IOException e) {

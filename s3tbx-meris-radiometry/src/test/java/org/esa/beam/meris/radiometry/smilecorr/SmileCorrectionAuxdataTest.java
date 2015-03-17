@@ -20,23 +20,23 @@ package org.esa.beam.meris.radiometry.smilecorr;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 
 import static org.junit.Assert.*;
 
 public class SmileCorrectionAuxdataTest {
 
-    private static SmileCorrectionAuxdata _rrData;
-    private static SmileCorrectionAuxdata _frData;
-    private static File auxdataDir;
+    private static SmileCorrectionAuxdata rrData;
+    private static SmileCorrectionAuxdata frData;
+    private static Path auxdataDir;
 
 
     @BeforeClass
     public static void beforeClass() throws Exception {
         auxdataDir = SmileCorrectionAuxdata.installAuxdata();
-        _rrData = SmileCorrectionAuxdata.loadRRAuxdata(auxdataDir);
-        _frData = SmileCorrectionAuxdata.loadFRAuxdata(auxdataDir);
+        rrData = SmileCorrectionAuxdata.loadRRAuxdata(auxdataDir);
+        frData = SmileCorrectionAuxdata.loadFRAuxdata(auxdataDir);
     }
 
     @Test
@@ -47,49 +47,49 @@ public class SmileCorrectionAuxdataTest {
         } catch (IOException e) {
             fail("IOException not expected: " + e.getMessage());
         }
-        assertNotSame(rrData.getRadCorrFlagsLand(), _rrData.getRadCorrFlagsLand());
-        assertNotSame(rrData.getRadCorrFlagsWater(), _rrData.getRadCorrFlagsWater());
-        assertNotSame(rrData.getLowerBandIndexesLand(), _rrData.getLowerBandIndexesLand());
-        assertNotSame(rrData.getLowerBandIndexesWater(), _rrData.getLowerBandIndexesWater());
-        assertNotSame(rrData.getUpperBandIndexesLand(), _rrData.getUpperBandIndexesLand());
-        assertNotSame(rrData.getUpperBandIndexesWater(), _rrData.getUpperBandIndexesWater());
-        assertNotSame(rrData.getTheoreticalWavelengths(), _rrData.getTheoreticalWavelengths());
-        assertNotSame(rrData.getTheoreticalSunSpectralFluxes(), _rrData.getTheoreticalSunSpectralFluxes());
-        assertNotSame(rrData.getDetectorWavelengths(), _rrData.getDetectorWavelengths());
-        assertNotSame(rrData.getDetectorSunSpectralFluxes(), _rrData.getDetectorSunSpectralFluxes());
+        assertNotSame(rrData.getRadCorrFlagsLand(), SmileCorrectionAuxdataTest.rrData.getRadCorrFlagsLand());
+        assertNotSame(rrData.getRadCorrFlagsWater(), SmileCorrectionAuxdataTest.rrData.getRadCorrFlagsWater());
+        assertNotSame(rrData.getLowerBandIndexesLand(), SmileCorrectionAuxdataTest.rrData.getLowerBandIndexesLand());
+        assertNotSame(rrData.getLowerBandIndexesWater(), SmileCorrectionAuxdataTest.rrData.getLowerBandIndexesWater());
+        assertNotSame(rrData.getUpperBandIndexesLand(), SmileCorrectionAuxdataTest.rrData.getUpperBandIndexesLand());
+        assertNotSame(rrData.getUpperBandIndexesWater(), SmileCorrectionAuxdataTest.rrData.getUpperBandIndexesWater());
+        assertNotSame(rrData.getTheoreticalWavelengths(), SmileCorrectionAuxdataTest.rrData.getTheoreticalWavelengths());
+        assertNotSame(rrData.getTheoreticalSunSpectralFluxes(), SmileCorrectionAuxdataTest.rrData.getTheoreticalSunSpectralFluxes());
+        assertNotSame(rrData.getDetectorWavelengths(), SmileCorrectionAuxdataTest.rrData.getDetectorWavelengths());
+        assertNotSame(rrData.getDetectorSunSpectralFluxes(), SmileCorrectionAuxdataTest.rrData.getDetectorSunSpectralFluxes());
     }
 
     @Test
     public void testCurrentRrData() {
         //       	band    switch_land	lower_land	upper_land	switch_water	lower_water	upper_water	lam_theo	E0_theo
         //         	13	1	13	14	1	13	14	865	958.763
-        assertEquals(true, _rrData.getRadCorrFlagsLand()[12]);
-        assertEquals(13 - 1, _rrData.getLowerBandIndexesLand()[12]);
-        assertEquals(14 - 1, _rrData.getUpperBandIndexesLand()[12]);
-        assertEquals(true, _rrData.getRadCorrFlagsWater()[12]);
-        assertEquals(13 - 1, _rrData.getLowerBandIndexesWater()[12]);
-        assertEquals(14 - 1, _rrData.getUpperBandIndexesWater()[12]);
-        assertEquals(865, _rrData.getTheoreticalWavelengths()[12], 1.0e-6);
-        assertEquals(958.763, _rrData.getTheoreticalSunSpectralFluxes()[12], 1.0e-6);
+        assertEquals(true, rrData.getRadCorrFlagsLand()[12]);
+        assertEquals(13 - 1, rrData.getLowerBandIndexesLand()[12]);
+        assertEquals(14 - 1, rrData.getUpperBandIndexesLand()[12]);
+        assertEquals(true, rrData.getRadCorrFlagsWater()[12]);
+        assertEquals(13 - 1, rrData.getLowerBandIndexesWater()[12]);
+        assertEquals(14 - 1, rrData.getUpperBandIndexesWater()[12]);
+        assertEquals(865, rrData.getTheoreticalWavelengths()[12], 1.0e-6);
+        assertEquals(958.763, rrData.getTheoreticalSunSpectralFluxes()[12], 1.0e-6);
 
-        assertEquals(490.0209579, _rrData.getDetectorWavelengths()[20][2], 1.0e-6);
-        assertEquals(1929.29938966317, _rrData.getDetectorSunSpectralFluxes()[20][2], 1.0e-10);
+        assertEquals(490.0209579, rrData.getDetectorWavelengths()[20][2], 1.0e-6);
+        assertEquals(1929.29938966317, rrData.getDetectorSunSpectralFluxes()[20][2], 1.0e-10);
     }
 
     @Test
     public void testCurrentFrData() {
         //        band	switch_land	lower_land	upper_land	switch_water	lower_water	upper_water	lam_theo	E0_theo
         //          3	1	2	4	1	2	4	490	1929.26
-        assertEquals(true, _frData.getRadCorrFlagsLand()[2]);
-        assertEquals(2 - 1, _frData.getLowerBandIndexesLand()[2]);
-        assertEquals(4 - 1, _frData.getUpperBandIndexesLand()[2]);
-        assertEquals(true, _frData.getRadCorrFlagsWater()[2]);
-        assertEquals(2 - 1, _frData.getLowerBandIndexesWater()[2]);
-        assertEquals(4 - 1, _frData.getUpperBandIndexesWater()[2]);
-        assertEquals(490.0, _frData.getTheoreticalWavelengths()[2], 1.0e-6);
-        assertEquals(1929.26, _frData.getTheoreticalSunSpectralFluxes()[2], 1.0e-6);
+        assertEquals(true, frData.getRadCorrFlagsLand()[2]);
+        assertEquals(2 - 1, frData.getLowerBandIndexesLand()[2]);
+        assertEquals(4 - 1, frData.getUpperBandIndexesLand()[2]);
+        assertEquals(true, frData.getRadCorrFlagsWater()[2]);
+        assertEquals(2 - 1, frData.getLowerBandIndexesWater()[2]);
+        assertEquals(4 - 1, frData.getUpperBandIndexesWater()[2]);
+        assertEquals(490.0, frData.getTheoreticalWavelengths()[2], 1.0e-6);
+        assertEquals(1929.26, frData.getTheoreticalSunSpectralFluxes()[2], 1.0e-6);
 
-        assertEquals(490.1104498, _frData.getDetectorWavelengths()[20][2], 1.0e-6);
-        assertEquals(1930.1682671039, _frData.getDetectorSunSpectralFluxes()[20][2], 1.0e-10);
+        assertEquals(490.1104498, frData.getDetectorWavelengths()[20][2], 1.0e-6);
+        assertEquals(1930.1682671039, frData.getDetectorSunSpectralFluxes()[20][2], 1.0e-10);
     }
 }

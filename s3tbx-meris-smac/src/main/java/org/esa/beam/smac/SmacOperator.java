@@ -38,11 +38,13 @@ import org.esa.beam.util.SystemUtils;
 import org.esa.beam.util.converters.BooleanExpressionConverter;
 import org.esa.beam.util.math.RsMathUtils;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Rectangle;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -237,7 +239,7 @@ public class SmacOperator extends Operator {
     void installAuxdata() {
         setAuxdataInstallDir(SMAC_AUXDATA_DIR_PROPERTY, getDefaultAuxdataInstallDir());
         try {
-            installAuxdata(ResourceInstaller.getSourceUrl(getClass()), "auxdata/", auxdataInstallDir);
+            installAuxdata(ResourceInstaller.findModuleCodeBasePath(getClass()), "auxdata/", auxdataInstallDir.toPath());
         } catch (IOException e) {
             throw new OperatorException("Failed to install auxdata into " + auxdataInstallDir, e);
         }
@@ -473,9 +475,8 @@ public class SmacOperator extends Operator {
         return new File(SystemUtils.getApplicationDataDir(), PROCESSOR_SYMBOLIC_NAME + "/auxdata");
     }
 
-    private void installAuxdata(URL sourceLocation, String sourceRelPath, File auxdataInstallDir) throws IOException {
-        new ResourceInstaller(sourceLocation, sourceRelPath, auxdataInstallDir)
-                .install(".*", ProgressMonitor.NULL);
+    private void installAuxdata(Path sourceLocation, String sourceRelPath, Path targetDirPath) throws IOException {
+        new ResourceInstaller(sourceLocation, sourceRelPath, targetDirPath).install(".*", ProgressMonitor.NULL);
     }
 
     private void createOutputProduct() throws IOException {

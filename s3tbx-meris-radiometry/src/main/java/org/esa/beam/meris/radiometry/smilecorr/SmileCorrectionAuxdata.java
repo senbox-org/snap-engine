@@ -22,9 +22,10 @@ import org.esa.beam.util.SystemUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.StringTokenizer;
 
 /**
@@ -59,9 +60,9 @@ public class SmileCorrectionAuxdata {
     private double[/*15*/] _theoreticalSunSpectralFluxes;
     private double[][/*15*/] _detectorWavelengths;
     private double[][/*15*/] _detectorSunSpectralFluxes;
-    private final File auxdataDir;
+    private final Path auxdataDir;
 
-    private SmileCorrectionAuxdata(File auxdataDir,
+    private SmileCorrectionAuxdata(Path auxdataDir,
                                    final String detectorWavelengthsFilename,
                                    final String detectorSunSpectralFluxesFilename,
                                    final int numRows,
@@ -72,7 +73,7 @@ public class SmileCorrectionAuxdata {
     }
 
     public static SmileCorrectionAuxdata loadAuxdata(String productType) throws IOException {
-        final File auxdataDir = installAuxdata();
+        final Path auxdataDir = installAuxdata();
 
         if (productType.startsWith("MER_F")) {
             return loadFRAuxdata(auxdataDir);
@@ -123,7 +124,7 @@ public class SmileCorrectionAuxdata {
         return _detectorSunSpectralFluxes;
     }
 
-    public static SmileCorrectionAuxdata loadRRAuxdata(File auxdataDir) throws IOException {
+    public static SmileCorrectionAuxdata loadRRAuxdata(Path auxdataDir) throws IOException {
         return new SmileCorrectionAuxdata(auxdataDir,
                                           _CENTRAL_WAVELEN_RR_FILENAME,
                                           _SUN_SPECTRAL_FLUX_RR_FILENAME,
@@ -131,7 +132,7 @@ public class SmileCorrectionAuxdata {
                                           EnvisatConstants.MERIS_L1B_NUM_SPECTRAL_BANDS);
     }
 
-    public static SmileCorrectionAuxdata loadFRAuxdata(File auxdataDir) throws IOException {
+    public static SmileCorrectionAuxdata loadFRAuxdata(Path auxdataDir) throws IOException {
         return new SmileCorrectionAuxdata(auxdataDir,
                                           _CENTRAL_WAVELEN_FR_FILENAME,
                                           _SUN_SPECTRAL_FLUX_FR_FILENAME,
@@ -173,15 +174,12 @@ public class SmileCorrectionAuxdata {
 
     private double[][] loadFlatAuxDataFile(final String auxFileName, final int numRows, final int numCols) throws
                                                                                                            IOException {
-        BufferedReader reader = openFlatAuxDataFile(auxFileName);
         double[][] tableData = new double[numRows][numCols];
         IOException ioError = null;
-        try {
+        try (BufferedReader reader = openFlatAuxDataFile(auxFileName)) {
             readFlatAuxDataFile(tableData, reader);
         } catch (IOException e) {
             ioError = e;
-        } finally {
-            reader.close();
         }
         if (ioError != null) {
             throw ioError;
@@ -192,7 +190,7 @@ public class SmileCorrectionAuxdata {
     private BufferedReader openFlatAuxDataFile(String fileName) throws IOException {
         assert fileName != null;
         assert fileName.length() > 0;
-        return new BufferedReader(new FileReader(new File(auxdataDir, fileName)));
+        return Files.newBufferedReader(auxdataDir.resolve(fileName));
     }
 
     private static void readFlatAuxDataFile(double[][] xrWLs, BufferedReader reader) throws IOException {
@@ -220,14 +218,14 @@ public class SmileCorrectionAuxdata {
         }
     }
 
-    static File installAuxdata() throws IOException {
+    static Path installAuxdata() throws IOException {
         File defaultAuxdataInstallDir = new File(SystemUtils.getApplicationDataDir(),
                                                  "beam-meris-radiometry/smile-correction/auxdata");
         String auxdataDirPath = System.getProperty(AUXDATA_DIR_PROPERTY,
                                                    defaultAuxdataInstallDir.getAbsolutePath());
-        File auxdataDirectory = new File(auxdataDirPath);
+        Path auxdataDirectory = Paths.get(auxdataDirPath);
 
-        URL sourceUrl = ResourceInstaller.getSourceUrl(SmileCorrectionAuxdata.class);
+        Path sourceUrl = ResourceInstaller.findModuleCodeBasePath(SmileCorrectionAuxdata.class);
         final ResourceInstaller resourceInstaller = new ResourceInstaller(sourceUrl, "auxdata/smile", auxdataDirectory);
         resourceInstaller.install(".*", ProgressMonitor.NULL);
         return auxdataDirectory;

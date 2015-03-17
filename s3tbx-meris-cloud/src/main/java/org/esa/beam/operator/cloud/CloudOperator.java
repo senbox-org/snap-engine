@@ -33,9 +33,9 @@ import org.esa.beam.util.ResourceInstaller;
 import org.esa.beam.util.SystemUtils;
 
 import java.awt.Rectangle;
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -110,18 +110,18 @@ public class CloudOperator extends Operator {
     // package local for testing purposes
     void installAuxdata() throws IOException {
         String auxdataDirPath = getAuxdataInstallationPath();
-        installAuxdata(ResourceInstaller.getSourceUrl(getClass()), "auxdata/", new File(auxdataDirPath));
+        final Path targetDir = Paths.get(auxdataDirPath);
+        installAuxdata(ResourceInstaller.findModuleCodeBasePath(getClass()), "auxdata/", targetDir);
     }
 
     // package local for testing purposes
     String getAuxdataInstallationPath() {
-        File defaultAuxdataDir = new File(SystemUtils.getApplicationDataDir(), AUXDATA_DIR);
-        return System.getProperty(CloudPN.CLOUD_AUXDATA_DIR_PROPERTY, defaultAuxdataDir.getAbsolutePath());
+        Path defaultAuxdataDir = Paths.get(SystemUtils.getApplicationDataDir().getAbsolutePath(), AUXDATA_DIR);
+        return System.getProperty(CloudPN.CLOUD_AUXDATA_DIR_PROPERTY, defaultAuxdataDir.toString());
     }
 
-    private void installAuxdata(URL sourceLocation, String sourceRelPath, File auxdataInstallDir) throws IOException {
-        new ResourceInstaller(sourceLocation, sourceRelPath, auxdataInstallDir)
-                .install(".*", ProgressMonitor.NULL);
+    private void installAuxdata(Path sourceLocation, String sourceRelPath, Path targetDirPath) throws IOException {
+        new ResourceInstaller(sourceLocation, sourceRelPath, targetDirPath).install(".*", ProgressMonitor.NULL);
     }
 
     /**
