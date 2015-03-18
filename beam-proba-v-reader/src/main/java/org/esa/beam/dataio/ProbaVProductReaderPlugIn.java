@@ -139,6 +139,10 @@ public class ProbaVProductReaderPlugIn implements ProductReaderPlugIn {
         return fileName.matches(PROBAV_S1_TOA_333M_FILENAME_REGEXP) || fileName.matches(PROBAV_S1_TOA_1KM_FILENAME_REGEXP);
     }
 
+    static boolean isProbaSynthesisProduct(String fileName) {
+        return isProbaS1ToaProduct(fileName) || isProbaS1TocProduct(fileName) || isProbaS10TocProduct(fileName);
+    }
+
     static boolean isProbaL1CProduct(String fileName) {
         return fileName.matches(PROBAV_L1C_FILENAME_REGEXP);
     }

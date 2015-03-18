@@ -11,9 +11,10 @@ public class PyOperatorTest {
         GPT.main("PyOp",
                  "-q", "4",
                  "-e",
-                 "-PpythonModulePath=C:\\Users\\Norman\\JavaProjects\\beam\\beam\\beam-python\\src\\main\\resources\\examples",
+//                 "-PpythonModulePath=C:\\Users\\Norman\\JavaProjects\\beam\\beam\\beam-python\\src\\main\\resources\\examples",
+                 "-PpythonModulePath=C:\\Users\\olafd\\workspaces\\git\\beam\\beam-python\\src\\main\\resources\\beam-operator-example",
                  "-PpythonModuleName=ndvi_op",
                  "-PpythonClassName=MerisNdviTileComputer",
-                 "C:\\Users\\Norman\\JavaProjects\\jpy\\beampy\\MER_RR__1P.N1");
+                 "C:\\Users\\olafd\\wadamo\\MER_RR_SUBSET.dim");
     }
 }

@@ -30,7 +30,8 @@ import java.util.logging.Level;
  */
 public class ProbaVProductReader extends AbstractProductReader {
 
-    private int rasterDim;
+    private int productWidth;
+    private int productHeight;
 
     /**
      * Constructs a new abstract product reader.
@@ -63,12 +64,8 @@ public class ProbaVProductReader extends AbstractProductReader {
                 // check of which of the supported product types the input is:
                 if (ProbaVProductReaderPlugIn.isProbaL1CProduct(fileName)) {
                     targetProduct = createTargetProductFromL1C(inputFile, rootNode);
-                } else if (ProbaVProductReaderPlugIn.isProbaS1ToaProduct(fileName)) {
-                    targetProduct = createTargetProductFromS1Toa(inputFile, rootNode);
-                } else if (ProbaVProductReaderPlugIn.isProbaS1TocProduct(fileName)) {
-                    targetProduct = createTargetProductFromS1Toc(inputFile, rootNode);
-                } else if (ProbaVProductReaderPlugIn.isProbaS10TocProduct(fileName)) {
-                    targetProduct = createTargetProductFromS10Toc(inputFile, rootNode);
+                } else if (ProbaVProductReaderPlugIn.isProbaSynthesisProduct(fileName)) {
+                    targetProduct = createTargetProductFromSynthesis(inputFile, rootNode);
                 } else if (ProbaVProductReaderPlugIn.isProbaS10TocNdviProduct(fileName)) {
                     targetProduct = createTargetProductFromS10TocNdvi(inputFile, rootNode);
                 }
@@ -92,27 +89,13 @@ public class ProbaVProductReader extends AbstractProductReader {
         return null;
     }
 
-    private Product createTargetProductFromS10Toc(File inputFile, TreeNode rootNode) {
-        // todo
-        return null;
-    }
-
-    private Product createTargetProductFromS1Toc(File inputFile, TreeNode rootNode) {
-        // todo
-        return null;
-    }
-
-    private Product createTargetProductFromS1Toa(File inputFile, TreeNode inputFileRootNode) throws Exception {
+    private Product createTargetProductFromSynthesis(File inputFile, TreeNode inputFileRootNode) throws Exception {
         Product product = null;
 
         if (inputFileRootNode != null) {
-            rasterDim = ProbaVUtils.getSynthesisProductRasterDimension(inputFile.getName());
-            product = new Product(inputFile.getName(), "PROBA-V", rasterDim, rasterDim);
 
-            product.setAutoGrouping("TOA_REFL:VAA:VZA");
 
             // todo (see e.g. Chris-Proba reader):
-            // - SM as flag band  (see description attribute in SM variable, do bit 0-2 as in Mod35BitMaskOp (GA))
             // - start/stop times
             // - product metadata
             // - band properties and metadata
@@ -121,11 +104,13 @@ public class ProbaVProductReader extends AbstractProductReader {
             // - extract constants
             // - no data values
 
-            // - !! TOC product can't be read
-            // - !! 1km products can't be read
-
 
             final TreeNode level3Node = inputFileRootNode.getChildAt(0);        // 'LEVEL3'
+            productWidth = (int) getH5ScalarDS(level3Node.getChildAt(0).getChildAt(0)).getDims()[0];
+            productHeight = (int) getH5ScalarDS(level3Node.getChildAt(0).getChildAt(0)).getDims()[1];
+            product = new Product(inputFile.getName(), "PROBA-V SYNTHESIS", productWidth, productHeight);
+            product.setAutoGrouping("TOA_REFL:TOC_REFL:VAA:VZA");
+
             for (int i = 0; i < level3Node.getChildCount(); i++) {
                 // we have: 'GEOMETRY', 'NDVI', 'QUALITY', 'RADIOMETRY', 'TIME'
                 final TreeNode level3ChildNode = level3Node.getChildAt(i);
@@ -133,29 +118,29 @@ public class ProbaVProductReader extends AbstractProductReader {
 
                 switch (level3ChildNodeName) {
                     case "GEOMETRY":
-                        setGeoCoding(product, inputFileRootNode, level3ChildNode);
+                        setSynthesisGeoCoding(product, inputFileRootNode, level3ChildNode);
                         // 8-bit unsigned character
                         for (int j = 0; j < level3ChildNode.getChildCount(); j++) {
                             final TreeNode level3GeometryChildNode = level3ChildNode.getChildAt(j);
                             final String level3GeometryChildNodeName = level3GeometryChildNode.toString();
                             System.out.println("level3GeometryChildNode = " + level3GeometryChildNodeName);
-                            if (isSunAngleDataNode(level3GeometryChildNodeName)) {
+                            if (isSynthesisSunAngleDataNode(level3GeometryChildNodeName)) {
                                 final H5ScalarDS sunAngleDS = getH5ScalarDS(level3GeometryChildNode);
                                 final Band sunAngleBand = createTargetBand(product, sunAngleDS, level3GeometryChildNodeName,
-                                        ProductData.TYPE_UINT8);
+                                                                           ProductData.TYPE_UINT8);
                                 final byte[] sunAngleData = (byte[]) sunAngleDS.getData();
                                 final ProbaVRasterImage ndviImage = new ProbaVRasterImage(sunAngleBand, sunAngleData);
                                 sunAngleBand.setSourceImage(ndviImage);
-                            } else if (isViewAngleGroupNode(level3GeometryChildNodeName)) {
+                            } else if (isSynthesisViewAngleGroupNode(level3GeometryChildNodeName)) {
                                 for (int k = 0; k < level3GeometryChildNode.getChildCount(); k++) {
                                     final TreeNode level3GeometryViewAngleChildNode = level3GeometryChildNode.getChildAt(k);
                                     final H5ScalarDS geometryViewAngleDS = getH5ScalarDS(level3GeometryViewAngleChildNode);
                                     final String level3GeometryViewAngleChildNodeName =
                                             level3GeometryViewAngleChildNode.toString();
                                     final Band geometryViewAngleBand = createTargetBand(product,
-                                            geometryViewAngleDS,
-                                            level3GeometryViewAngleChildNodeName + "_" + level3GeometryChildNodeName,
-                                            ProductData.TYPE_UINT8);
+                                                                                        geometryViewAngleDS,
+                                                                                        level3GeometryViewAngleChildNodeName + "_" + level3GeometryChildNodeName,
+                                                                                        ProductData.TYPE_UINT8);
                                     final byte[] geometryViewAngleData = (byte[]) geometryViewAngleDS.getData();
                                     final ProbaVRasterImage geometryViewAngleImage =
                                             new ProbaVRasterImage(geometryViewAngleBand, geometryViewAngleData);
@@ -172,7 +157,7 @@ public class ProbaVProductReader extends AbstractProductReader {
                         final byte[] ndviData = (byte[]) ndviDS.getData();
                         // todo: the scaling with the original data looks weird, check why!
                         // for the moment use workaround: convert to scaled floats manually
-                        final float[] ndviFloatData = getNdviAsFloat(ndviBand, ndviData);
+                        final float[] ndviFloatData = ProbaVUtils.getNdviAsFloat(ndviBand, ndviData);
 //                        final ProbaVRasterImage ndviImage = new ProbaVRasterImage(ndviBand, ndviData);
                         final ProbaVRasterImage ndviImage = new ProbaVRasterImage(ndviBand, ndviFloatData);
                         ndviBand.setSourceImage(ndviImage);
@@ -185,7 +170,7 @@ public class ProbaVProductReader extends AbstractProductReader {
                         final byte[] qualityData = (byte[]) qualityDS.getData();
                         final ProbaVRasterImage image = new ProbaVRasterImage(smBand, qualityData);
                         smBand.setSourceImage(image);
-                        attachSynthesisSmFlagBand(product);
+                        attachSynthesisQualityFlagBand(product);
                         break;
                     case "RADIOMETRY":
                         // 16-bit integer
@@ -194,10 +179,13 @@ public class ProbaVProductReader extends AbstractProductReader {
                             final TreeNode level3RadiometryChildNode = level3ChildNode.getChildAt(j);
                             final H5ScalarDS radiometryDS = getH5ScalarDS(level3RadiometryChildNode.getChildAt(0));
                             final String level3RadiometryChildNodeName = level3RadiometryChildNode.toString();
+                            final String radiometryBandPrefix =
+                                    (ProbaVProductReaderPlugIn.isProbaS1ToaProduct(inputFile.getName())) ?
+                                            "TOA_REFL_" : "TOC_REFL_";
                             final Band radiometryBand = createTargetBand(product,
-                                    radiometryDS,
-                                    "TOA_REFL_" + level3RadiometryChildNodeName,
-                                    ProductData.TYPE_INT16);
+                                                                         radiometryDS,
+                                                                         radiometryBandPrefix + level3RadiometryChildNodeName,
+                                                                         ProductData.TYPE_INT16);
                             final short[] radiometryData = (short[]) radiometryDS.getData();
                             final ProbaVRasterImage radiometryImage = new ProbaVRasterImage(radiometryBand, radiometryData);
                             radiometryBand.setSourceImage(radiometryImage);
@@ -220,39 +208,107 @@ public class ProbaVProductReader extends AbstractProductReader {
         return product;
     }
 
-    private void setGeoCoding(Product product, TreeNode inputFileRootNode, TreeNode level3ChildNode)
+    private Product createTargetProductFromL1C(File inputFile, TreeNode inputFileRootNode) throws Exception {
+        Product product = null;
+
+        if (inputFileRootNode != null) {
+            final TreeNode level1aNode = inputFileRootNode.getChildAt(0);               // 'LEVEL1A'
+            // todo: do we need any metadata from this group?
+
+            final TreeNode level1bNode = inputFileRootNode.getChildAt(2);               // 'LEVEL1B'
+            // todo: do we need any metadata from this group?
+            // todo: extract lat/lon info from LN1/LT1 and set up tie point geocoding
+            // careful: we have different lat/lon tie point grids again for blue/nir/red vs. SWIR
+            // also, downscaling factor with regard to the L1C raster data is not integer!
+
+            final TreeNode level1cNode = inputFileRootNode.getChildAt(2);               // 'LEVEL1C'
+
+            final int width = (int) getH5ScalarDS(level1cNode.getChildAt(0).getChildAt(0)).getDims()[0];
+            final int height = (int) getH5ScalarDS(level1cNode.getChildAt(0).getChildAt(0)).getDims()[1];
+            product = new Product(inputFile.getName(), "PROBA-V L1C", width, height);
+            product.setAutoGrouping("TOA_REFL:BLUE:NIR:RED:SWIR1:SWIR2:SWIR3");
+
+            for (int i = 0; i < level1cNode.getChildCount(); i++) {
+                final TreeNode level1cChildNode = level1cNode.getChildAt(i);
+                final String level1cChildNodeName = level1cChildNode.toString();
+                if (level1cChildNodeName.startsWith("SWIR")) {
+                    // on the smaller grid, we have: 'BLUE', 'NIR', 'RED'
+                    for (int j = 0; j < level1cChildNode.getChildCount(); j++) {
+                        // we have 'Q' and 'TOA'
+                        final TreeNode level1cRadiometryChildNode = level1cChildNode.getChildAt(j);
+                        final String level1cRadiometryChildNodeName = level1cRadiometryChildNode.toString();
+                        System.out.println("level1cRadiometryChildNode = " + level1cRadiometryChildNodeName);
+                        final H5ScalarDS radiometryDS = getH5ScalarDS(level1cRadiometryChildNode);
+                        final String radiometryBandName = level1cChildNodeName + "_" + level1cRadiometryChildNodeName;
+                        if (level1cRadiometryChildNodeName.equals("Q")) {
+                            // 8-bit unsigned character
+                            final Band qBand =
+                                    createTargetBand(product, radiometryDS, radiometryBandName, ProductData.TYPE_UINT8);
+                            final byte[] qualityData = (byte[]) radiometryDS.getData();
+                            final ProbaVRasterImage image = new ProbaVRasterImage(qBand, qualityData);
+                            qBand.setSourceImage(image);
+                            attachL1cQualityFlagBand(product);
+                        } else if (level1cRadiometryChildNodeName.equals("TOA")) {
+                            // 16-bit integer
+                            final Band radiometryBand = createTargetBand(product,
+                                                                         radiometryDS,
+                                                                         radiometryBandName + "_REFL",
+                                                                         ProductData.TYPE_INT16);
+                            final short[] radiometryData = (short[]) radiometryDS.getData();
+                            final ProbaVRasterImage radiometryImage = new ProbaVRasterImage(radiometryBand, radiometryData);
+                            radiometryBand.setSourceImage(radiometryImage);
+                        }
+                    }
+                } else {
+                    // todo: in L1C product we have two different sizes:
+                    // blue, nir, red: e.g. 18984 x 5200 (y=5200 is fix)
+                    // swir 1-3:   9492*1024 (y=1024 is fix)
+                    // --> BEAM: downscale the blue, nir, red bands, as e.g. in Modis35ProductReader (GA)
+                    // --> SNAP: use new functionality for different raster sizes
+                }
+            }
+        }
+
+        return product;
+    }
+
+
+    private void setSynthesisGeoCoding(Product product, TreeNode inputFileRootNode, TreeNode level3ChildNode)
             throws HDF5Exception {
 
         final H5Group h5GeometryGroup = (H5Group) ((DefaultMutableTreeNode) level3ChildNode).getUserObject();
         final List geometryMetadata = h5GeometryGroup.getMetadata();
         final double easting = ProbaVUtils.getGeometryCoordinateValue(geometryMetadata, "TOP_LEFT_LONGITUDE");
         final double northing = ProbaVUtils.getGeometryCoordinateValue(geometryMetadata, "TOP_LEFT_LATITUDE");
-        final int imageWidth = rasterDim;
-        final int imageHeight = rasterDim;
         // pixel size: 10deg/rasterDim, it is also in the 6th and 7th value of MAPPING attribute in the raster nodes
         final double topLeftLon = easting;
         final double topRightLon = ProbaVUtils.getGeometryCoordinateValue(geometryMetadata, "TOP_RIGHT_LONGITUDE");
-        final double pixelSizeX = Math.abs(topRightLon - topLeftLon) / rasterDim;
+        final double pixelSizeX = Math.abs(topRightLon - topLeftLon) / productWidth;
         final double topLeftLat = northing;
         final double bottomLeftLat = ProbaVUtils.getGeometryCoordinateValue(geometryMetadata, "BOTTOM_LEFT_LATITUDE");
-        final double pixelSizeY = (topLeftLat - bottomLeftLat) / rasterDim;
+        final double pixelSizeY = (topLeftLat - bottomLeftLat) / productHeight;
 
         final H5Group h5RootGroup = (H5Group) ((DefaultMutableTreeNode) inputFileRootNode).getUserObject();
         final List rootMetadata = h5RootGroup.getMetadata();
         final String crsString = ProbaVUtils.getGeometryCrsString(rootMetadata);
         try {
             final CoordinateReferenceSystem crs = CRS.parseWKT(crsString);
-            final CrsGeoCoding geoCoding = new CrsGeoCoding(crs, imageWidth, imageHeight, easting, northing, pixelSizeX, pixelSizeY);
+            final CrsGeoCoding geoCoding = new CrsGeoCoding(crs, productWidth, productHeight, easting, northing, pixelSizeX, pixelSizeY);
             product.setGeoCoding(geoCoding);
         } catch (Exception e) {
             BeamLogManager.getSystemLogger().log(Level.WARNING, "Cannot attach geocoding: " + e.getMessage());
         }
     }
 
-    private static void attachSynthesisSmFlagBand(Product probavProduct) {
+    private void setL1cGeoCoding(Product product, TreeNode inputFileRootNode,
+                                 TreeNode level2ChildNode, TreeNode level3ChildNode) throws HDF5Exception {
+        // todo
+    }
+
+    private static void attachSynthesisQualityFlagBand(Product probavProduct) {
         FlagCoding probavSmFlagCoding = new FlagCoding(ProbaVConstants.SM_FLAG_BAND_NAME);
-        ProbaVUtils.addSmFlags(probavSmFlagCoding);
-        ProbaVUtils.addSmMasks(probavProduct);
+        ProbaVUtils.addSynthesisQualityFlags(probavSmFlagCoding);
+        ProbaVUtils.addSynthesisQualityMasks(probavProduct);
         probavProduct.getFlagCodingGroup().add(probavSmFlagCoding);
         final Band smFlagBand =
                 probavProduct.addBand(ProbaVConstants.SM_FLAG_BAND_NAME, ProductData.TYPE_INT16);
@@ -266,25 +322,28 @@ public class ProbaVProductReader extends AbstractProductReader {
         smFlagBand.setSourceImage(bitMaskProduct.getBand(ProbaVConstants.SM_FLAG_BAND_NAME).getSourceImage());
     }
 
+    private static void attachL1cQualityFlagBand(Product probavProduct) {
+        FlagCoding probavL1cQualityFlagCoding = new FlagCoding(ProbaVConstants.Q_FLAG_BAND_NAME);
+        ProbaVUtils.addL1cQualityFlags(probavL1cQualityFlagCoding);
+        ProbaVUtils.addL1cQualityMasks(probavProduct);
+        probavProduct.getFlagCodingGroup().add(probavL1cQualityFlagCoding);
+        final Band l1cQualityFlagBand = probavProduct.addBand(ProbaVConstants.Q_FLAG_BAND_NAME, ProductData.TYPE_INT16);
+        l1cQualityFlagBand.setDescription("PROBA-V L1C Quality Flags");
+        l1cQualityFlagBand.setSampleCoding(probavL1cQualityFlagCoding);
 
-    private boolean isViewAngleGroupNode(String level3GeometryChildNodeName) {
+        ProbaVL1cBitMaskOp bitMaskOp = new ProbaVL1cBitMaskOp();
+        bitMaskOp.setParameterDefaultValues();
+        bitMaskOp.setSourceProduct("sourceProduct", probavProduct);
+        Product bitMaskProduct = bitMaskOp.getTargetProduct();
+        l1cQualityFlagBand.setSourceImage(bitMaskProduct.getBand(ProbaVConstants.Q_FLAG_BAND_NAME).getSourceImage());
+    }
+
+    private boolean isSynthesisViewAngleGroupNode(String level3GeometryChildNodeName) {
         return level3GeometryChildNodeName.equals("SWIR") || level3GeometryChildNodeName.equals("VNIR");
     }
 
-    private boolean isSunAngleDataNode(String level3GeometryChildNodeName) {
+    private boolean isSynthesisSunAngleDataNode(String level3GeometryChildNodeName) {
         return level3GeometryChildNodeName.equals("SAA") || level3GeometryChildNodeName.equals("SZA");
-    }
-
-    private float[] getNdviAsFloat(Band ndviBand, byte[] ndviData) {
-        float[] ndviFloatData = new float[ndviData.length];
-
-        for (int i = 0; i < ndviFloatData.length; i++) {
-            ndviFloatData[i] = (float) ((ndviData[i] - ndviBand.getScalingOffset()) * ndviBand.getScalingFactor());
-        }
-        ndviBand.setScalingFactor(1.0);
-        ndviBand.setScalingOffset(0.0);
-
-        return ndviFloatData;
     }
 
     private Band createTargetBand(Product product, H5ScalarDS scalarDS, String bandName, int dataType) throws Exception {
@@ -305,52 +364,9 @@ public class ProbaVProductReader extends AbstractProductReader {
         return scalarDS;
     }
 
-
-    private Product createTargetProductFromL1C(File inputFile, TreeNode rootNode) throws Exception {
-        Product product = null;
-
-        if (rootNode != null) {
-            final TreeNode level1cChildNode = rootNode.getChildAt(2);               // 'LEVEL1C'
-            for (int i = 0; i < level1cChildNode.getChildCount(); i++) {
-                final TreeNode level1cBandsChildNode = level1cChildNode.getChildAt(i);
-                final String reflectanceBandName = level1cBandsChildNode.toString();
-                if (reflectanceBandName.startsWith("SWIR")) {
-                    // todo: in L1C product we have two different sizes:
-                    // blue, nir, red: 18984 x 5200
-                    // swir 1-3:   9492*1024
-                } else {
-                    //  blue, nir, red:
-                    final TreeNode l1cQualityChild = level1cBandsChildNode.getChildAt(0);   // todo
-                    final TreeNode l1cToaChild = level1cBandsChildNode.getChildAt(1);
-                    System.out.println("Child: " + l1cToaChild.toString());
-                    final H5ScalarDS scalarDS = (H5ScalarDS) ((DefaultMutableTreeNode) l1cToaChild).getUserObject();
-                    scalarDS.open();
-                    scalarDS.read();
-                    final int yDim = (int) scalarDS.getDims()[0];
-                    final int xDim = (int) scalarDS.getDims()[1];
-                    final short[] data = (short[]) scalarDS.getData();
-                    final List<Attribute> metadata = scalarDS.getMetadata();
-                    final float scaleFactor = ProbaVUtils.getScaleFactor(metadata);
-                    final float scaleOffset = ProbaVUtils.getScaleOffset(metadata);
-                    if (product == null) {
-                        product = new Product(inputFile.getName(), "PROBA-V", xDim, yDim);
-                    }
-//                    final Band toaBand = product.addBand(reflectanceBandName + "_TOA", ProductData.TYPE_FLOAT32);
-                    final Band toaBand = product.addBand(reflectanceBandName + "_TOA", ProductData.TYPE_INT16);
-                    toaBand.setScalingFactor(scaleFactor);
-                    toaBand.setScalingOffset(scaleOffset);
-                    final ProbaVRasterImage image = new ProbaVRasterImage(toaBand, data);
-                    toaBand.setSourceImage(image);
-                }
-            }
-        }
-
-        return product;
-    }
-
     @Override
     protected void readBandRasterDataImpl(int sourceOffsetX, int sourceOffsetY, int sourceWidth, int sourceHeight, int sourceStepX, int sourceStepY, Band destBand, int destOffsetX, int destOffsetY, int destWidth, int destHeight, ProductData destBuffer, ProgressMonitor pm) throws IOException {
-
+        throw new IllegalStateException(String.format("No source to read for band '%s'.", destBand.getName()));
     }
 
 }
