@@ -29,6 +29,9 @@ import java.util.regex.Pattern;
  * @author Thomas Storm
  */
 class Landsat8Metadata extends AbstractLandsatMetadata {
+    private static final double DEFAULT_SCALE_FACTOR = 1.0;
+    private static final double DEFAULT_OFFSET = 0.0;
+
     private static final Logger LOG = Logger.getLogger(Landsat8Metadata.class.getName());
 
     private static final String[] BAND_DESCRIPTIONS = {
@@ -122,21 +125,31 @@ class Landsat8Metadata extends AbstractLandsatMetadata {
     @Override
     public double getScalingFactor(String bandId) {
         final String spectralInput = getSpectralInputString();
-        return getScalingFactor(bandId,
-                                "MIN_MAX_" + spectralInput,
-                                spectralInput + "_MINIMUM_BAND_",
-                                spectralInput + "_MAXIMUM_BAND_",
-                                "MIN_MAX_PIXEL_VALUE", "QUANTIZE_CAL_MIN_BAND_", "QUANTIZE_CAL_MAX_BAND_");
+        String attributeKey = String.format("%s_MULT_BAND_%s", spectralInput, bandId);
+        MetadataElement radiometricRescalingElement = getMetaDataElementRoot().getElement("RADIOMETRIC_RESCALING");
+        if (radiometricRescalingElement.getAttribute(attributeKey) == null) {
+            return DEFAULT_SCALE_FACTOR;
+        }
+
+        final double scalingFactor = radiometricRescalingElement.getAttributeDouble(attributeKey);
+        final double sunAngleCorrectionFactor = getSunAngleCorrectionFactor(spectralInput);
+
+        return scalingFactor / sunAngleCorrectionFactor;
     }
 
     @Override
     public double getScalingOffset(String bandId) {
         final String spectralInput = getSpectralInputString();
-        return getScalingOffset(bandId,
-                                "MIN_MAX_" + spectralInput,
-                                spectralInput + "_MINIMUM_BAND_",
-                                spectralInput + "_MAXIMUM_BAND_",
-                                "MIN_MAX_PIXEL_VALUE", "QUANTIZE_CAL_MIN_BAND_", "QUANTIZE_CAL_MAX_BAND_");
+        String attributeKey = String.format("%s_ADD_BAND_%s", spectralInput, bandId);
+        MetadataElement radiometricRescalingElement = getMetaDataElementRoot().getElement("RADIOMETRIC_RESCALING");
+        if (radiometricRescalingElement.getAttribute(attributeKey) == null) {
+            return DEFAULT_OFFSET;
+        }
+
+        final double scalingOffset = radiometricRescalingElement.getAttributeDouble(attributeKey);
+        final double sunAngleCorrectionFactor = getSunAngleCorrectionFactor(spectralInput);
+
+        return scalingOffset / sunAngleCorrectionFactor;
     }
 
     @Override
@@ -204,5 +217,22 @@ class Landsat8Metadata extends AbstractLandsatMetadata {
             spectralInput = "RADIANCE";
         }
         return spectralInput;
+    }
+
+    private double getSunAngleCorrectionFactor(String spectralInput) {
+        // this follows:
+        // http://landsat.usgs.gov/Landsat8_Using_Product.php, section 'Conversion to TOA Reflectance'
+        double sunAngleCorrectionFactor = 1.0;
+        if (spectralInput.equals("REFLECTANCE")) {
+            MetadataElement imageAttributesElement = getMetaDataElementRoot().getElement("IMAGE_ATTRIBUTES");
+            if (imageAttributesElement != null) {
+                final String sunElevationAttributeKey = "SUN_ELEVATION";
+                if (imageAttributesElement.getAttribute(sunElevationAttributeKey) != null) {
+                    final double sunElevationAngle = imageAttributesElement.getAttributeDouble(sunElevationAttributeKey);
+                    sunAngleCorrectionFactor = Math.sin(Math.toRadians(sunElevationAngle));
+                }
+            }
+        }
+        return sunAngleCorrectionFactor;
     }
 }
