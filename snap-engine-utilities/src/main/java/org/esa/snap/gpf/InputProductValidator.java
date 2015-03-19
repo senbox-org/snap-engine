@@ -49,9 +49,13 @@ public class InputProductValidator {
                 (contains(bandNames, "EW1") && contains(bandNames, "EW2"));
     }
 
-    public void checkIfSentinel1Product() throws OperatorException {
+    public boolean isSentinel1Product() throws OperatorException {
         final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
-        if (!mission.startsWith("SENTINEL-1")) {
+        return mission.startsWith("SENTINEL-1");
+    }
+
+    public void checkIfSentinel1Product() throws OperatorException {
+        if (!isSentinel1Product()) {
             throw new OperatorException("Input should be a Sentinel-1 product.");
         }
     }
@@ -103,12 +107,14 @@ public class InputProductValidator {
     }
 
     public boolean isDebursted() {
+        if(!isSentinel1Product())
+            return true;
 
         boolean isDebursted = true;
         final MetadataElement origProdRoot = AbstractMetadata.getOriginalProductMetadata(product);
         MetadataElement annotation = origProdRoot.getElement("annotation");
         if (annotation == null) {
-            throw new OperatorException("Annotation Metadata not found");
+            return true;
         }
 
         final MetadataElement[] elems = annotation.getElements();
