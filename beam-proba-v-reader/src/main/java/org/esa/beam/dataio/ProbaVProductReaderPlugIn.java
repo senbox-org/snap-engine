@@ -37,7 +37,7 @@ public class ProbaVProductReaderPlugIn implements ProductReaderPlugIn {
     private static final String[] FORMAT_NAMES = new String[]{FORMAT_NAME_PROBA_V};
 
     private static final String PROBAV_L1C_FILENAME_REGEXP =
-            "PROBAV_L1C_[0-9]{8}_[0-9]{6}_[0-2]{1}_V003.(?i)(hdf5)";
+            "PROBAV_L1C_[0-9]{8}_[0-9]{6}_[0-2]{1}_V[0-9]{3}.(?i)(hdf5)";
     private static final String PROBAV_S1_TOA_333M_FILENAME_REGEXP =
             "PROBAV_S1_TOA_X[0-9]{2}Y[0-9]{2}_[0-9]{8}_333M_V[0-9]{3}.(?i)(hdf5)";
     private static final String PROBAV_S1_TOA_1KM_FILENAME_REGEXP =

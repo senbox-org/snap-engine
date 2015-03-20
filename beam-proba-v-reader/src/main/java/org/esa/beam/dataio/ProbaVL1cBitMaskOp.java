@@ -5,6 +5,7 @@ import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
+import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.pointop.*;
 
@@ -27,7 +28,11 @@ public class ProbaVL1cBitMaskOp extends PixelOperator {
     @SourceProduct
     private Product sourceProduct;
 
-    private static final String TARGET_FLAG_BAND_NAME = ProbaVConstants.Q_FLAG_BAND_NAME;
+    @Parameter(description = "Source product Quality band name")
+    private String sourceQualityBandName;
+
+    @Parameter(description = "Target product Quality flag band name")
+    private String targetQualityFlagBandName;
 
 
     @Override
@@ -35,17 +40,17 @@ public class ProbaVL1cBitMaskOp extends PixelOperator {
         super.configureTargetProduct(productConfigurer);
 
         final Product targetProduct = productConfigurer.getTargetProduct();
-        targetProduct.addBand(TARGET_FLAG_BAND_NAME, ProductData.TYPE_INT16);
+        targetProduct.addBand(targetQualityFlagBandName, ProductData.TYPE_INT8);
     }
 
     @Override
     protected void configureSourceSamples(SampleConfigurer sampleConfigurer) throws OperatorException {
-        sampleConfigurer.defineSample(SRC_FLAG, ProbaVConstants.Q_BAND_NAME);
+        sampleConfigurer.defineSample(SRC_FLAG, sourceQualityBandName);
     }
 
     @Override
     protected void configureTargetSamples(SampleConfigurer sampleConfigurer) throws OperatorException {
-        sampleConfigurer.defineSample(TRG_FLAG, TARGET_FLAG_BAND_NAME);
+        sampleConfigurer.defineSample(TRG_FLAG, targetQualityFlagBandName);
     }
 
     @Override

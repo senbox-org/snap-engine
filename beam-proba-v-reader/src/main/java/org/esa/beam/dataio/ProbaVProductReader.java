@@ -165,12 +165,13 @@ public class ProbaVProductReader extends AbstractProductReader {
                     case "QUALITY":
                         // 8-bit unsigned character
                         final H5ScalarDS qualityDS = getH5ScalarDS(level3ChildNode.getChildAt(0));
+                        Product flagProduct = new Product("QUALITY", "flags", productWidth, productHeight);
                         final Band smBand =
-                                createTargetBand(product, qualityDS, ProbaVConstants.SM_BAND_NAME, ProductData.TYPE_UINT8);
+                                createTargetBand(flagProduct, qualityDS, ProbaVConstants.SM_BAND_NAME, ProductData.TYPE_UINT8);
                         final byte[] qualityData = (byte[]) qualityDS.getData();
                         final ProbaVRasterImage image = new ProbaVRasterImage(smBand, qualityData);
                         smBand.setSourceImage(image);
-                        attachSynthesisQualityFlagBand(product);
+                        attachSynthesisQualityFlagBand(product, flagProduct);
                         break;
                     case "RADIOMETRY":
                         // 16-bit integer
@@ -215,7 +216,7 @@ public class ProbaVProductReader extends AbstractProductReader {
             final TreeNode level1aNode = inputFileRootNode.getChildAt(0);               // 'LEVEL1A'
             // todo: do we need any metadata from this group?
 
-            final TreeNode level1bNode = inputFileRootNode.getChildAt(2);               // 'LEVEL1B'
+            final TreeNode level1bNode = inputFileRootNode.getChildAt(1);               // 'LEVEL1B'
             // todo: do we need any metadata from this group?
             // todo: extract lat/lon info from LN1/LT1 and set up tie point geocoding
             // careful: we have different lat/lon tie point grids again for blue/nir/red vs. SWIR
@@ -223,10 +224,12 @@ public class ProbaVProductReader extends AbstractProductReader {
 
             final TreeNode level1cNode = inputFileRootNode.getChildAt(2);               // 'LEVEL1C'
 
-            final int width = (int) getH5ScalarDS(level1cNode.getChildAt(0).getChildAt(0)).getDims()[0];
-            final int height = (int) getH5ScalarDS(level1cNode.getChildAt(0).getChildAt(0)).getDims()[1];
+            // we want to have the SWIR band sizes as reference: first SWIR node is level1cNode.getChildAt(3)
+            final int height = (int) getH5ScalarDS(level1cNode.getChildAt(3).getChildAt(0)).getDims()[0];
+            final int width = (int) getH5ScalarDS(level1cNode.getChildAt(3).getChildAt(0)).getDims()[1];
             product = new Product(inputFile.getName(), "PROBA-V L1C", width, height);
-            product.setAutoGrouping("TOA_REFL:BLUE:NIR:RED:SWIR1:SWIR2:SWIR3");
+            product.setAutoGrouping("BLUE:NIR:RED:SWIR1:SWIR2:SWIR3");
+            setL1cGeoCoding(product, level1bNode);
 
             for (int i = 0; i < level1cNode.getChildCount(); i++) {
                 final TreeNode level1cChildNode = level1cNode.getChildAt(i);
@@ -242,12 +245,13 @@ public class ProbaVProductReader extends AbstractProductReader {
                         final String radiometryBandName = level1cChildNodeName + "_" + level1cRadiometryChildNodeName;
                         if (level1cRadiometryChildNodeName.equals("Q")) {
                             // 8-bit unsigned character
+                            Product flagProduct = new Product(radiometryBandName, "flags", width, height);
                             final Band qBand =
-                                    createTargetBand(product, radiometryDS, radiometryBandName, ProductData.TYPE_UINT8);
+                                    createTargetBand(flagProduct, radiometryDS, radiometryBandName, ProductData.TYPE_UINT8);
                             final byte[] qualityData = (byte[]) radiometryDS.getData();
                             final ProbaVRasterImage image = new ProbaVRasterImage(qBand, qualityData);
                             qBand.setSourceImage(image);
-                            attachL1cQualityFlagBand(product);
+                            attachL1cQualityFlagBand(product, flagProduct, radiometryBandName);
                         } else if (level1cRadiometryChildNodeName.equals("TOA")) {
                             // 16-bit integer
                             final Band radiometryBand = createTargetBand(product,
@@ -300,12 +304,64 @@ public class ProbaVProductReader extends AbstractProductReader {
         }
     }
 
-    private void setL1cGeoCoding(Product product, TreeNode inputFileRootNode,
-                                 TreeNode level2ChildNode, TreeNode level3ChildNode) throws HDF5Exception {
-        // todo
+    private void setL1cGeoCoding(Product product, TreeNode level1bNode)
+            throws Exception {
+        int width = product.getSceneRasterWidth() / ProbaVConstants.L1C_TIEPOINT_SUBS_X + 1;      // the 'plus 1' is important!!!
+        int height = product.getSceneRasterHeight() / ProbaVConstants.L1C_TIEPOINT_SUBS_Y + 1;
+
+        for (int i = 0; i < level1bNode.getChildCount(); i++) {
+            final TreeNode level1bChildNode = level1bNode.getChildAt(i);
+            final String level1bChildNodeName = level1bChildNode.toString();
+            System.out.println("level1bChildNodeName = " + level1bChildNodeName);
+            if (level1bChildNodeName.startsWith("SWIR")) {     // todo: remove this when all bands are handled properly together
+                float[] lonData = new float[width * height];
+                float[] latData = new float[width * height];
+                for (int j = 0; j < level1bChildNode.getChildCount(); j++) {
+                    final TreeNode swirNode = level1bChildNode.getChildAt(j);
+                    final String swirChildNodeName = swirNode.toString();
+                    System.out.println("swirChildNodeName = " + swirChildNodeName);
+                    if (swirChildNodeName.equals("LN1")) {
+                        final H5ScalarDS lonDS = getH5ScalarDS(swirNode);
+                        for (int k = 0; k < Math.min(lonData.length, ((float[]) lonDS.getData()).length); k++) {
+                            lonData[k] = ((float[]) lonDS.getData())[k];
+                        }
+                    } else if (swirChildNodeName.equals("LT1")) {
+                        final H5ScalarDS latDS = getH5ScalarDS(swirNode);
+                        for (int k = 0; k < Math.min(latData.length, ((float[]) latDS.getData()).length); k++) {
+                            latData[k] = ((float[]) latDS.getData())[k];
+                        }
+                    }
+                }
+                final TiePointGrid latGrid = new TiePointGrid(level1bChildNodeName + "_" + "LT1",
+                                                              width, height,
+                                                              ProbaVConstants.L1C_TIEPOINT_OFFS_X,
+                                                              ProbaVConstants.L1C_TIEPOINT_OFFS_Y,
+                                                              ProbaVConstants.L1C_TIEPOINT_SUBS_X,
+                                                              ProbaVConstants.L1C_TIEPOINT_SUBS_Y,
+                                                              latData);
+                final TiePointGrid lonGrid = new TiePointGrid(level1bChildNodeName + "_" + "LN1",
+                                                              width, height,
+                                                              ProbaVConstants.L1C_TIEPOINT_OFFS_X,
+                                                              ProbaVConstants.L1C_TIEPOINT_OFFS_Y,
+                                                              ProbaVConstants.L1C_TIEPOINT_SUBS_X,
+                                                              ProbaVConstants.L1C_TIEPOINT_SUBS_Y,
+                                                              lonData);
+                product.addTiePointGrid(latGrid);
+                product.addTiePointGrid(lonGrid);
+
+                if (level1bChildNodeName.equals("SWIR2")) {
+                    // from the camera setup, SWIR2 seems to be the most reasonable geocoding with
+                    // regard to the 'center' of all camera swaths
+                    // todo: discuss! This is somehow bizarre, as the swaths differ quite strongly from each other...
+                    // see e.g. PROBAV_L1C_20150128_114238_2_V001.HDF5
+                    GeoCoding gc = new TiePointGeoCoding(latGrid, lonGrid);
+                    product.setGeoCoding(gc);
+                }
+            }
+        }
     }
 
-    private static void attachSynthesisQualityFlagBand(Product probavProduct) {
+    private static void attachSynthesisQualityFlagBand(Product probavProduct, Product flagProduct) {
         FlagCoding probavSmFlagCoding = new FlagCoding(ProbaVConstants.SM_FLAG_BAND_NAME);
         ProbaVUtils.addSynthesisQualityFlags(probavSmFlagCoding);
         ProbaVUtils.addSynthesisQualityMasks(probavProduct);
@@ -317,25 +373,29 @@ public class ProbaVProductReader extends AbstractProductReader {
 
         ProbaVSynthesisBitMaskOp bitMaskOp = new ProbaVSynthesisBitMaskOp();
         bitMaskOp.setParameterDefaultValues();
-        bitMaskOp.setSourceProduct("sourceProduct", probavProduct);
+        bitMaskOp.setSourceProduct("sourceProduct", flagProduct);
         Product bitMaskProduct = bitMaskOp.getTargetProduct();
         smFlagBand.setSourceImage(bitMaskProduct.getBand(ProbaVConstants.SM_FLAG_BAND_NAME).getSourceImage());
     }
 
-    private static void attachL1cQualityFlagBand(Product probavProduct) {
-        FlagCoding probavL1cQualityFlagCoding = new FlagCoding(ProbaVConstants.Q_FLAG_BAND_NAME);
-        ProbaVUtils.addL1cQualityFlags(probavL1cQualityFlagCoding);
-        ProbaVUtils.addL1cQualityMasks(probavProduct);
+    private static void attachL1cQualityFlagBand(Product probavProduct, Product flagProduct, String sourceQualityBandName) {
+        final String targetQualityFlagBandName = sourceQualityBandName + "_FLAGS";
+        FlagCoding probavL1cQualityFlagCoding = new FlagCoding(targetQualityFlagBandName);
+        ProbaVUtils.addL1cQualityFlags(probavL1cQualityFlagCoding, sourceQualityBandName);
+        ProbaVUtils.addL1cQualityMasks(probavProduct, sourceQualityBandName, targetQualityFlagBandName);
         probavProduct.getFlagCodingGroup().add(probavL1cQualityFlagCoding);
-        final Band l1cQualityFlagBand = probavProduct.addBand(ProbaVConstants.Q_FLAG_BAND_NAME, ProductData.TYPE_INT16);
+
+        final Band l1cQualityFlagBand = probavProduct.addBand(targetQualityFlagBandName, ProductData.TYPE_INT8);
         l1cQualityFlagBand.setDescription("PROBA-V L1C Quality Flags");
         l1cQualityFlagBand.setSampleCoding(probavL1cQualityFlagCoding);
 
         ProbaVL1cBitMaskOp bitMaskOp = new ProbaVL1cBitMaskOp();
         bitMaskOp.setParameterDefaultValues();
-        bitMaskOp.setSourceProduct("sourceProduct", probavProduct);
+        bitMaskOp.setParameter("sourceQualityBandName", sourceQualityBandName);
+        bitMaskOp.setParameter("targetQualityFlagBandName", targetQualityFlagBandName);
+        bitMaskOp.setSourceProduct("sourceProduct", flagProduct);
         Product bitMaskProduct = bitMaskOp.getTargetProduct();
-        l1cQualityFlagBand.setSourceImage(bitMaskProduct.getBand(ProbaVConstants.Q_FLAG_BAND_NAME).getSourceImage());
+        l1cQualityFlagBand.setSourceImage(bitMaskProduct.getBand(targetQualityFlagBandName).getSourceImage());
     }
 
     private boolean isSynthesisViewAngleGroupNode(String level3GeometryChildNodeName) {

@@ -151,25 +151,25 @@ public class ProbaVUtils {
     public static void addSynthesisQualityMasks(Product probavProduct) {
         ProductNodeGroup<Mask> maskGroup = probavProduct.getMaskGroup();
         addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.SM_CLEAR_FLAG_NAME,
-                ProbaVConstants.SM_CLEAR_FLAG_DESCR, ProbaVConstants.SM_COLORS[0], 0.5f);
+                ProbaVConstants.SM_CLEAR_FLAG_DESCR, ProbaVConstants.FLAG_COLORS[0], 0.5f);
         addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.SM_UNDEFINED_FLAG_NAME,
-                ProbaVConstants.SM_UNDEFINED_FLAG_DESCR, ProbaVConstants.SM_COLORS[1], 0.5f);
+                ProbaVConstants.SM_UNDEFINED_FLAG_DESCR, ProbaVConstants.FLAG_COLORS[1], 0.5f);
         addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.SM_CLOUD_FLAG_NAME,
-                ProbaVConstants.SM_CLOUD_FLAG_DESCR, ProbaVConstants.SM_COLORS[2], 0.5f);
+                ProbaVConstants.SM_CLOUD_FLAG_DESCR, ProbaVConstants.FLAG_COLORS[2], 0.5f);
         addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.SM_SNOWICE_FLAG_NAME,
-                ProbaVConstants.SM_SNOWICE_FLAG_DESCR, ProbaVConstants.SM_COLORS[3], 0.5f);
+                ProbaVConstants.SM_SNOWICE_FLAG_DESCR, ProbaVConstants.FLAG_COLORS[3], 0.5f);
         addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.SM_CLOUD_SHADOW_FLAG_NAME,
-                ProbaVConstants.SM_CLOUD_SHADOW_FLAG_DESCR, ProbaVConstants.SM_COLORS[4], 0.5f);
+                ProbaVConstants.SM_CLOUD_SHADOW_FLAG_DESCR, ProbaVConstants.FLAG_COLORS[4], 0.5f);
         addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.SM_LAND_FLAG_NAME,
-                ProbaVConstants.SM_LAND_FLAG_DESCR, ProbaVConstants.SM_COLORS[5], 0.5f);
+                ProbaVConstants.SM_LAND_FLAG_DESCR, ProbaVConstants.FLAG_COLORS[5], 0.5f);
         addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.SM_GOOD_SWIR_FLAG_NAME,
-                ProbaVConstants.SM_GOOD_SWIR_FLAG_DESCR, ProbaVConstants.SM_COLORS[6], 0.5f);
+                ProbaVConstants.SM_GOOD_SWIR_FLAG_DESCR, ProbaVConstants.FLAG_COLORS[6], 0.5f);
         addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.SM_GOOD_NIR_FLAG_NAME,
-                ProbaVConstants.SM_GOOD_NIR_FLAG_DESCR, ProbaVConstants.SM_COLORS[7], 0.5f);
+                ProbaVConstants.SM_GOOD_NIR_FLAG_DESCR, ProbaVConstants.FLAG_COLORS[7], 0.5f);
         addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.SM_GOOD_RED_FLAG_NAME,
-                ProbaVConstants.SM_GOOD_RED_FLAG_DESCR, ProbaVConstants.SM_COLORS[8], 0.5f);
+                ProbaVConstants.SM_GOOD_RED_FLAG_DESCR, ProbaVConstants.FLAG_COLORS[8], 0.5f);
         addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.SM_GOOD_BLUE_FLAG_NAME,
-                ProbaVConstants.SM_GOOD_BLUE_FLAG_DESCR, ProbaVConstants.SM_COLORS[9], 0.5f);
+                ProbaVConstants.SM_GOOD_BLUE_FLAG_DESCR, ProbaVConstants.FLAG_COLORS[9], 0.5f);
     }
 
     public static void addSynthesisQualityFlags(FlagCoding probavSmFlagCoding) {
@@ -205,62 +205,53 @@ public class ProbaVUtils {
                                    ProbaVConstants.SM_GOOD_BLUE_FLAG_DESCR);
     }
 
-    public static void addL1cQualityMasks(Product probavProduct) {
+    public static void addL1cQualityMasks(Product probavProduct, String sourceQualityBandName, String targetQualityFlagBandName) {
         ProductNodeGroup<Mask> maskGroup = probavProduct.getMaskGroup();
-        addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.SM_CLEAR_FLAG_NAME,
-                ProbaVConstants.SM_CLEAR_FLAG_DESCR, ProbaVConstants.SM_COLORS[0], 0.5f);
-        addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.SM_UNDEFINED_FLAG_NAME,
-                ProbaVConstants.SM_UNDEFINED_FLAG_DESCR, ProbaVConstants.SM_COLORS[1], 0.5f);
-        addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.SM_CLOUD_FLAG_NAME,
-                ProbaVConstants.SM_CLOUD_FLAG_DESCR, ProbaVConstants.SM_COLORS[2], 0.5f);
-        addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.SM_SNOWICE_FLAG_NAME,
-                ProbaVConstants.SM_SNOWICE_FLAG_DESCR, ProbaVConstants.SM_COLORS[3], 0.5f);
-        addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.SM_CLOUD_SHADOW_FLAG_NAME,
-                ProbaVConstants.SM_CLOUD_SHADOW_FLAG_DESCR, ProbaVConstants.SM_COLORS[4], 0.5f);
-        addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.SM_LAND_FLAG_NAME,
-                ProbaVConstants.SM_LAND_FLAG_DESCR, ProbaVConstants.SM_COLORS[5], 0.5f);
-        addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.SM_GOOD_SWIR_FLAG_NAME,
-                ProbaVConstants.SM_GOOD_SWIR_FLAG_DESCR, ProbaVConstants.SM_COLORS[6], 0.5f);
-        addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.SM_GOOD_NIR_FLAG_NAME,
-                ProbaVConstants.SM_GOOD_NIR_FLAG_DESCR, ProbaVConstants.SM_COLORS[7], 0.5f);
-        addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.SM_GOOD_RED_FLAG_NAME,
-                ProbaVConstants.SM_GOOD_RED_FLAG_DESCR, ProbaVConstants.SM_COLORS[8], 0.5f);
-        addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.SM_GOOD_BLUE_FLAG_NAME,
-                ProbaVConstants.SM_GOOD_BLUE_FLAG_DESCR, ProbaVConstants.SM_COLORS[9], 0.5f);
+        addMask(probavProduct, maskGroup, targetQualityFlagBandName,
+                sourceQualityBandName + "_" + ProbaVConstants.Q_CORRECT_FLAG_NAME,
+                ProbaVConstants.Q_CORRECT_FLAG_DESCR, ProbaVConstants.FLAG_COLORS[0], 0.5f);
+        addMask(probavProduct, maskGroup, targetQualityFlagBandName,
+                sourceQualityBandName + "_" + ProbaVConstants.Q_MISSING_FLAG_NAME,
+                ProbaVConstants.Q_MISSING_FLAG_DESCR, ProbaVConstants.FLAG_COLORS[1], 0.5f);
+        addMask(probavProduct, maskGroup, targetQualityFlagBandName,
+                sourceQualityBandName + "_" + ProbaVConstants.Q_WAS_SATURATED_FLAG_NAME,
+                ProbaVConstants.Q_WAS_SATURATED_FLAG_DESCR, ProbaVConstants.FLAG_COLORS[2], 0.5f);
+        addMask(probavProduct, maskGroup, targetQualityFlagBandName,
+                sourceQualityBandName + "_" + ProbaVConstants.Q_BECAME_SATURATED_FLAG_NAME,
+                ProbaVConstants.Q_BECAME_SATURATED_FLAG_DESCR, ProbaVConstants.FLAG_COLORS[3], 0.5f);
+        addMask(probavProduct, maskGroup, targetQualityFlagBandName,
+                sourceQualityBandName + "_" + ProbaVConstants.Q_BECAME_NEGATIVE_FLAG_NAME,
+                ProbaVConstants.Q_BECAME_NEGATIVE_FLAG_DESCR, ProbaVConstants.FLAG_COLORS[4], 0.5f);
+        addMask(probavProduct, maskGroup, targetQualityFlagBandName,
+                sourceQualityBandName + "_" + ProbaVConstants.Q_INTERPOLATED_FLAG_NAME,
+                ProbaVConstants.Q_INTERPOLATED_FLAG_DESCR, ProbaVConstants.FLAG_COLORS[5], 0.5f);
+        addMask(probavProduct, maskGroup, targetQualityFlagBandName,
+                sourceQualityBandName + "_" + ProbaVConstants.Q_BORDER_COMPRESSED_FLAG_NAME,
+                ProbaVConstants.Q_BORDER_COMPRESSED_FLAG_DESCR, ProbaVConstants.FLAG_COLORS[6], 0.5f);
     }
 
-
-    public static void addL1cQualityFlags(FlagCoding probavSmFlagCoding) {
-        probavSmFlagCoding.addFlag(ProbaVConstants.SM_CLEAR_FLAG_NAME,
-                                   BitSetter.setFlag(0, ProbaVConstants.SM_CLEAR_BIT_INDEX),
-                                   ProbaVConstants.SM_CLEAR_FLAG_DESCR);
-        probavSmFlagCoding.addFlag(ProbaVConstants.SM_UNDEFINED_FLAG_NAME,
-                                   BitSetter.setFlag(0, ProbaVConstants.SM_UNDEFINED_BIT_INDEX),
-                                   ProbaVConstants.SM_UNDEFINED_FLAG_DESCR);
-        probavSmFlagCoding.addFlag(ProbaVConstants.SM_CLOUD_FLAG_NAME,
-                                   BitSetter.setFlag(0, ProbaVConstants.SM_CLOUD_BIT_INDEX),
-                                   ProbaVConstants.SM_CLOUD_FLAG_DESCR);
-        probavSmFlagCoding.addFlag(ProbaVConstants.SM_SNOWICE_FLAG_NAME,
-                                   BitSetter.setFlag(0, ProbaVConstants.SM_SNOWICE_INDEX),
-                                   ProbaVConstants.SM_SNOWICE_FLAG_DESCR);
-        probavSmFlagCoding.addFlag(ProbaVConstants.SM_CLOUD_SHADOW_FLAG_NAME,
-                                   BitSetter.setFlag(0, ProbaVConstants.SM_CLOUD_SHADOW_BIT_INDEX),
-                                   ProbaVConstants.SM_CLOUD_SHADOW_FLAG_DESCR);
-        probavSmFlagCoding.addFlag(ProbaVConstants.SM_LAND_FLAG_NAME,
-                                   BitSetter.setFlag(0, ProbaVConstants.SM_LAND_BIT_INDEX),
-                                   ProbaVConstants.SM_LAND_FLAG_DESCR);
-        probavSmFlagCoding.addFlag(ProbaVConstants.SM_GOOD_SWIR_FLAG_NAME,
-                                   BitSetter.setFlag(0, ProbaVConstants.SM_GOOD_SWIR_INDEX),
-                                   ProbaVConstants.SM_GOOD_SWIR_FLAG_DESCR);
-        probavSmFlagCoding.addFlag(ProbaVConstants.SM_GOOD_NIR_FLAG_NAME,
-                                   BitSetter.setFlag(0, ProbaVConstants.SM_GOOD_NIR_BIT_INDEX),
-                                   ProbaVConstants.SM_GOOD_NIR_FLAG_DESCR);
-        probavSmFlagCoding.addFlag(ProbaVConstants.SM_GOOD_RED_FLAG_NAME,
-                                   BitSetter.setFlag(0, ProbaVConstants.SM_GOOD_RED_BIT_INDEX),
-                                   ProbaVConstants.SM_GOOD_RED_FLAG_DESCR);
-        probavSmFlagCoding.addFlag(ProbaVConstants.SM_GOOD_BLUE_FLAG_NAME,
-                                   BitSetter.setFlag(0, ProbaVConstants.SM_GOOD_BLUE_BIT_INDEX),
-                                   ProbaVConstants.SM_GOOD_BLUE_FLAG_DESCR);
+    public static void addL1cQualityFlags(FlagCoding probavSmFlagCoding, String sourceQualityBandName) {
+        probavSmFlagCoding.addFlag(sourceQualityBandName + "_" + ProbaVConstants.Q_CORRECT_FLAG_NAME,
+                                   BitSetter.setFlag(0, ProbaVConstants.Q_CORRECT_BIT_INDEX),
+                                   ProbaVConstants.Q_CORRECT_FLAG_DESCR);
+        probavSmFlagCoding.addFlag(sourceQualityBandName + "_" + ProbaVConstants.Q_MISSING_FLAG_NAME,
+                                   BitSetter.setFlag(0, ProbaVConstants.Q_MISSING_BIT_INDEX),
+                                   ProbaVConstants.Q_MISSING_FLAG_DESCR);
+        probavSmFlagCoding.addFlag(sourceQualityBandName + "_" + ProbaVConstants.Q_WAS_SATURATED_FLAG_NAME,
+                                   BitSetter.setFlag(0, ProbaVConstants.Q_WAS_SATURATED_BIT_INDEX),
+                                   ProbaVConstants.Q_WAS_SATURATED_FLAG_DESCR);
+        probavSmFlagCoding.addFlag(sourceQualityBandName + "_" + ProbaVConstants.Q_BECAME_SATURATED_FLAG_NAME,
+                                   BitSetter.setFlag(0, ProbaVConstants.Q_BECAME_SATURATED_INDEX),
+                                   ProbaVConstants.Q_BECAME_SATURATED_FLAG_DESCR);
+        probavSmFlagCoding.addFlag(sourceQualityBandName + "_" + ProbaVConstants.Q_BECAME_NEGATIVE_FLAG_NAME,
+                                   BitSetter.setFlag(0, ProbaVConstants.Q_BECAME_NEGATIVE_BIT_INDEX),
+                                   ProbaVConstants.Q_BECAME_NEGATIVE_FLAG_DESCR);
+        probavSmFlagCoding.addFlag(sourceQualityBandName + "_" + ProbaVConstants.Q_INTERPOLATED_FLAG_NAME,
+                                   BitSetter.setFlag(0, ProbaVConstants.Q_INTERPOLATED_BIT_INDEX),
+                                   ProbaVConstants.Q_INTERPOLATED_FLAG_DESCR);
+        probavSmFlagCoding.addFlag(sourceQualityBandName + "_" + ProbaVConstants.Q_BORDER_COMPRESSED_FLAG_NAME,
+                                   BitSetter.setFlag(0, ProbaVConstants.Q_BORDER_COMPRESSED_INDEX),
+                                   ProbaVConstants.Q_BORDER_COMPRESSED_FLAG_DESCR);
     }
 
 

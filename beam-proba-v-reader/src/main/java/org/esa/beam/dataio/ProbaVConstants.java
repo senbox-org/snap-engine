@@ -17,6 +17,13 @@ public class ProbaVConstants {
 
     public static final int L1C_PRODUCT_SWIR_SWATH_WIDTH = 1024;
 
+    public static final int L1C_TIEPOINT_OFFS_X = 0;
+    public static final int L1C_TIEPOINT_OFFS_Y = 0;
+    public static final int L1C_TIEPOINT_SUBS_X = 8;
+//    public static final int L1C_TIEPOINT_SUBS_X = 1;
+    public static final int L1C_TIEPOINT_SUBS_Y = 8;
+//    public static final int L1C_TIEPOINT_SUBS_Y = 1;
+
     public static final String SM_BAND_NAME = "SM";
     public static final String SM_FLAG_BAND_NAME = "SM_FLAGS";
 
@@ -53,7 +60,7 @@ public class ProbaVConstants {
     public static final String SM_GOOD_RED_FLAG_DESCR = "Pixel with good RED data";
     public static final String SM_GOOD_BLUE_FLAG_DESCR = "Pixel with good BLUE data";
 
-    public static final Color[] SM_COLORS = {
+    public static final Color[] FLAG_COLORS = {
             new Color(120, 255, 180),
             new Color(255, 255, 0),
             new Color(0, 255, 255),
