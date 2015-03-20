@@ -26,7 +26,6 @@ import org.esa.beam.util.io.BeamFileFilter;
 import org.esa.beam.visat.VisatApp;
 import org.esa.snap.dat.dialogs.PromptDialog;
 import org.esa.snap.db.CommonReaders;
-import org.esa.snap.gpf.ProductSetReaderOp;
 import org.esa.snap.gpf.ProductSetReaderOpUI;
 import org.esa.snap.gpf.ui.SourceUI;
 import org.esa.snap.gpf.ui.UIValidation;
@@ -401,8 +400,7 @@ public class GraphBuilderDialog extends ModelessDialog implements Observer {
      * @param productFileList the product files
      */
     public void setInputFiles(final File[] productFileList) {
-        final GraphNode productSetNode = graphEx.getGraphNodeList().findGraphNodeByOperator(
-                ProductSetReaderOp.Spi.getOperatorAlias(ProductSetReaderOp.class));
+        final GraphNode productSetNode = graphEx.getGraphNodeList().findGraphNodeByOperator("ProductSet-Reader");
         if (productSetNode != null) {
             ProductSetReaderOpUI ui = (ProductSetReaderOpUI) productSetNode.GetOperatorUI();
             ui.setProductFileList(productFileList);
