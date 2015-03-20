@@ -20,7 +20,6 @@ import org.esa.beam.dataio.s3.Sentinel3ProductReader;
 import org.esa.beam.dataio.s3.SourceImageScaler;
 import org.esa.beam.dataio.s3.util.S3NetcdfReader;
 import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.MetadataElement;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.RasterDataNode;
 import org.esa.beam.framework.datamodel.TiePointGeoCoding;
