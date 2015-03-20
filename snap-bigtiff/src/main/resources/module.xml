@@ -37,23 +37,23 @@
 
     <categories>Reader,Writer,GeoTIFF</categories>
 
-    <extension point="beam-ui:actions">
+    <extension point="snap-ui:actions">
         <action>
             <id>importBigGeoTIFFProduct</id>
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
-            <formatName>BigGeoTiff</formatName>
+            <formatName>GeoTIFF-BigTIFF</formatName>
             <useAllFileFilter>true</useAllFileFilter>
             <mnemonic>O</mnemonic>
             <shortDescr>Import a GeoTIFF/BigGeoTIFF data product or product subset.</shortDescr>
+            <parent>importFileFormats</parent>
             <!--<helpId>importBigGeoTIFFProduct</helpId>-->
         </action>
         <action>
             <id>exportBigGeoTIFFProduct</id>
             <class>org.esa.beam.visat.actions.ProductExportAction</class>
-            <formatName>BigGeoTIFF</formatName>
+            <formatName>GeoTIFF-BigTIFF</formatName>
             <useAllFileFilter>true</useAllFileFilter>
             <mnemonic>O</mnemonic>
-            <text>BigGeoTIFF</text>
             <shortDescr>Export a BigGeoTiff/GeoTIFF data product or product subset.</shortDescr>
             <!--<helpId>exportBigGeoTIFFProduct</helpId>-->
         </action>

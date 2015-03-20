@@ -69,7 +69,7 @@
         <!-- BEAM Plugin Modules -->
 
         <module>snap-arcbingrid-reader</module>
-        <!--module>snap-bigtiff</module-->
+        <module>snap-bigtiff</module>
         <!--module>snap-binning</module-->
         <module>snap-cluster-analysis</module>
         <!--module>snap-collocation</module-->

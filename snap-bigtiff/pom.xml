@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>snap-bigtiff</artifactId>
-    <packaging>nbm</packaging>
+    <packaging>jar</packaging>
 
     <name>SNAP GeoTIFF/BigTIFF Product Reader</name>
     <description>Enables SNAP to read GeoTiff data products.</description>
@@ -47,7 +47,7 @@
 
     <build>
         <plugins>
-            <plugin>
+            <!--plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>nbm-maven-plugin</artifactId>
             </plugin>
@@ -57,7 +57,7 @@
                 <configuration>
                     <useDefaultManifestFile>true</useDefaultManifestFile>
                 </configuration>
-            </plugin>
+            </plugin-->
         </plugins>
     </build>
 

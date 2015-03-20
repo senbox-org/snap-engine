@@ -182,8 +182,10 @@ public class ProductFunctions {
      */
     public static long getRawStorageSize(final Product product) {
         long size = 0;
-        for (Band band : product.getBands()) {
-            size += band.getRawStorageSize(null);
+        if(product != null) {
+            for (Band band : product.getBands()) {
+                size += band.getRawStorageSize(null);
+            }
         }
         return size;
     }
