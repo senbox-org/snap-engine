@@ -17,6 +17,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 import java.io.File;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -33,6 +34,8 @@ public class ProbaVProductReader extends AbstractProductReader {
     private int productWidth;
     private int productHeight;
 
+    private File probavFile;
+
     /**
      * Constructs a new abstract product reader.
      *
@@ -46,8 +49,8 @@ public class ProbaVProductReader extends AbstractProductReader {
     @Override
     protected Product readProductNodesImpl() throws IOException {
         final Object inputObject = getInput();
-        final File inputFile = ProbaVProductReaderPlugIn.getFileInput(inputObject);
-        final String fileName = inputFile.getName();
+        probavFile = ProbaVProductReaderPlugIn.getFileInput(inputObject);
+        final String fileName = probavFile.getName();
 
         Product targetProduct = null;
 
@@ -55,7 +58,7 @@ public class ProbaVProductReader extends AbstractProductReader {
             FileFormat h5FileFormat = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5);
             FileFormat h5File = null;
             try {
-                h5File = h5FileFormat.createInstance(inputFile.getAbsolutePath(), FileFormat.READ);
+                h5File = h5FileFormat.createInstance(probavFile.getAbsolutePath(), FileFormat.READ);
                 final int h5FileId = h5File.open();
                 System.out.println("h5FileId = " + h5FileId);
 
@@ -63,11 +66,11 @@ public class ProbaVProductReader extends AbstractProductReader {
 
                 // check of which of the supported product types the input is:
                 if (ProbaVProductReaderPlugIn.isProbaL1CProduct(fileName)) {
-                    targetProduct = createTargetProductFromL1C(inputFile, rootNode);
+                    targetProduct = createTargetProductFromL1C(probavFile, rootNode);
                 } else if (ProbaVProductReaderPlugIn.isProbaSynthesisProduct(fileName)) {
-                    targetProduct = createTargetProductFromSynthesis(inputFile, rootNode);
+                    targetProduct = createTargetProductFromSynthesis(probavFile, rootNode);
                 } else if (ProbaVProductReaderPlugIn.isProbaS10TocNdviProduct(fileName)) {
-                    targetProduct = createTargetProductFromS10TocNdvi(inputFile, rootNode);
+                    targetProduct = createTargetProductFromS10TocNdvi(probavFile, rootNode);
                 }
             } catch (Exception e) {
                 e.printStackTrace();      // todo
@@ -94,9 +97,7 @@ public class ProbaVProductReader extends AbstractProductReader {
 
         if (inputFileRootNode != null) {
 
-
             // todo (see e.g. Chris-Proba reader):
-            // - start/stop times
             // - product metadata
             // - band properties and metadata
             // - exception handling
@@ -110,6 +111,11 @@ public class ProbaVProductReader extends AbstractProductReader {
             productHeight = (int) getH5ScalarDS(level3Node.getChildAt(0).getChildAt(0)).getDims()[1];
             product = new Product(inputFile.getName(), "PROBA-V SYNTHESIS", productWidth, productHeight);
             product.setAutoGrouping("TOA_REFL:TOC_REFL:VAA:VZA");
+
+            final H5Group rootGroup = (H5Group) ((DefaultMutableTreeNode) inputFileRootNode).getUserObject();
+            final List rootMetadata = rootGroup.getMetadata();
+            product.setDescription(ProbaVUtils.getProductDescription(rootMetadata));
+            product.setFileLocation(inputFile);
 
             for (int i = 0; i < level3Node.getChildCount(); i++) {
                 // we have: 'GEOMETRY', 'NDVI', 'QUALITY', 'RADIOMETRY', 'TIME'
@@ -199,6 +205,14 @@ public class ProbaVProductReader extends AbstractProductReader {
                         final short[] timeData = (short[]) timeDS.getData();
                         final ProbaVRasterImage timeImage = new ProbaVRasterImage(timeBand, timeData);
                         timeBand.setSourceImage(timeImage);
+
+                        // add start/end time to product:
+                        final H5Group timeGroup = (H5Group) ((DefaultMutableTreeNode) level3ChildNode).getUserObject();
+                        final List timeMetadata = timeGroup.getMetadata();
+                        product.setStartTime(ProductData.UTC.parse(ProbaVUtils.getStartEndTime(timeMetadata)[0],
+                                                                   ProbaVConstants.PROBAV_DATE_FORMAT_PATTERN));
+                        product.setEndTime(ProductData.UTC.parse(ProbaVUtils.getStartEndTime(timeMetadata)[1],
+                                                                 ProbaVConstants.PROBAV_DATE_FORMAT_PATTERN));
                         break;
                     default:
                         break;
@@ -210,72 +224,141 @@ public class ProbaVProductReader extends AbstractProductReader {
     }
 
     private Product createTargetProductFromL1C(File inputFile, TreeNode inputFileRootNode) throws Exception {
+        // todo: we need more detailed specifications how to handle the setup of the different cameras and bands
+        // of the L1C products (see Fig. 2 in Product User Manual). Everything below was just experimental so far.
+        // Note that the products may also be very large (~60000 x 5200 size of full raster)
+
         Product product = null;
+//        Product[] swirProduct = new Product[3];
+//        int swirProductIndex = 0;
+//
+//        if (inputFileRootNode != null) {
+//            final TreeNode level1aNode = inputFileRootNode.getChildAt(0);               // 'LEVEL1A'
+//            // todo: do we need any metadata from this group?
+//
+//            final TreeNode level1bNode = inputFileRootNode.getChildAt(1);               // 'LEVEL1B'
+//            // todo: do we need any metadata from this group?
+//            // todo: extract lat/lon info from LN1/LT1 and set up tie point geocoding
+//            // careful: we have different lat/lon tie point grids again for blue/nir/red vs. SWIR
+//            // also, downscaling factor with regard to the L1C raster data is not integer!
+//
+//            final TreeNode level1cNode = inputFileRootNode.getChildAt(2);               // 'LEVEL1C'
+//
+//            // when setting up the product, we want to have the SWIR band sizes as reference:
+//            int swirHeight = -1;
+//            int swirWidth = -1;
+//            int highResHeight = -1;
+//            int highResWidth = -1;
+//            for (int i = 0; i < level1cNode.getChildCount(); i++) {
+//                final TreeNode level1cChildNode = level1cNode.getChildAt(i);
+//                final String level1cChildNodeName = level1cChildNode.toString();
+//                final boolean isSwirBand = level1cChildNodeName.startsWith("SWIR");
+//                if (product == null && !isSwirBand) {
+//                    final H5ScalarDS ds = getH5ScalarDS(level1cNode.getChildAt(i).getChildAt(0));
+//                    highResHeight = (int) ds.getDims()[0];
+//                    highResWidth = (int) ds.getDims()[1];
+//                    product = new Product(inputFile.getName(), "PROBA-V L1C", highResWidth, highResHeight);
+//                    product.setAutoGrouping("BLUE:NIR:RED:SWIR1:SWIR2:SWIR3");
+//                    setL1cGeoCoding(product, level1bNode);   // todo (see below)
+//                    ds.clear();
+//                    ds.close(0);
+//                } else if (isSwirBand) {
+////                    swirHeight = (int) ds.getDims()[0];
+////                    swirWidth = (int) ds.getDims()[1];
+//                }
+////                ds.clear();
+////                ds.close(0);
+//            }
+//
+//            for (int i = 0; i < level1cNode.getChildCount(); i++) {
+//                final TreeNode level1cChildNode = level1cNode.getChildAt(i);
+//                final String level1cChildNodeName = level1cChildNode.toString();
+//                for (int j = 0; j < level1cChildNode.getChildCount(); j++) {
+//                    // we have 'Q' and 'TOA'
+//                    final TreeNode level1cRadiometryChildNode = level1cChildNode.getChildAt(j);
+//                    final String level1cRadiometryChildNodeName = level1cRadiometryChildNode.toString();
+//                    System.out.println("level1cRadiometryChildNode = " + level1cRadiometryChildNodeName);
+//                    final H5ScalarDS radiometryDS = getH5ScalarDS(level1cRadiometryChildNode);
+//                    final String radiometryBandName = level1cChildNodeName + "_" + level1cRadiometryChildNodeName;
+//                    if (level1cRadiometryChildNodeName.equals("Q")) {
+//                        // 8-bit unsigned character
+//                        if (!level1cChildNodeName.startsWith("SWIR")) {
+//                            // on the high-res grid, we have: 'BLUE', 'NIR', 'RED'
+//                            Product flagProduct = new Product(radiometryBandName, "flags", highResWidth, highResHeight);
+//                            final Band qBand =
+//                                    createTargetBand(flagProduct, radiometryDS, radiometryBandName, ProductData.TYPE_UINT8);
+//                            final byte[] qualityData = (byte[]) radiometryDS.getData();
+//                            final ProbaVRasterImage image = new ProbaVRasterImage(qBand, qualityData);
+//                            qBand.setSourceImage(image);
+//                            attachL1cQualityFlagBand(product, flagProduct, radiometryBandName);
+//                        } else {
+//                            // todo, see below
+//                        }
+//                    } else if (level1cRadiometryChildNodeName.equals("TOA")) {
+//                        // 16-bit integer
+//                        if (!level1cChildNodeName.startsWith("SWIR")) {
+//                            // on the high-res grid, we have: 'BLUE', 'NIR', 'RED'
+//                            final Band radiometryBand = createTargetBand(product,
+//                                                                         radiometryDS,
+//                                                                         radiometryBandName + "_REFL",
+//                                                                         ProductData.TYPE_INT16);
+//                            final short[] radiometryData = (short[]) radiometryDS.getData();
+//                            // on the low-res grid, we have: 'SWIR1', 'SWIR2', 'SWIR3'
+//                            final ProbaVRasterImage radiometryImage = new ProbaVRasterImage(radiometryBand, radiometryData);
+//                            radiometryBand.setSourceImage(radiometryImage);
+//                        } else {
+//                            // todo: in L1C product we have two different sizes:
+//                            // blue, nir, red: e.g. 18984 x 5200 (y=5200 is fix)
+//                            // swir 1-3:   9492*1024 (y=1024 is fix)
+//                            // --> BEAM: downscale the blue, nir, red bands, as e.g. in Modis35ProductReader (GA)
+//                            // --> SNAP: use new functionality for different raster sizes
+//
+//                            swirProduct[swirProductIndex] =
+//                                    new Product(radiometryBandName, "flags", swirWidth, swirHeight);
+//                            final Band swirBand = createTargetBand(swirProduct[swirProductIndex],
+//                                                                         radiometryDS,
+//                                                                         radiometryBandName + "_REFL",
+//                                                                         ProductData.TYPE_INT16);
+//                            final short[] swirData = (short[]) radiometryDS.getData();
+//                            final TiePointGrid latTpg = product.getTiePointGrid(level1cChildNodeName + "_LT1");
+//                            final TiePointGrid lonTpg = product.getTiePointGrid(level1cChildNodeName + "_LN1");
+//                            swirProduct[swirProductIndex].addTiePointGrid(latTpg);
+//                            swirProduct[swirProductIndex].addTiePointGrid(lonTpg);
+//                            product.removeTiePointGrid(latTpg);
+//                            product.removeTiePointGrid(lonTpg);
+//                            swirProduct[swirProductIndex].setGeoCoding(new TiePointGeoCoding(latTpg, lonTpg));
+//                            final ProbaVRasterImage radiometryImage = new ProbaVRasterImage(swirBand, swirData);
+//                            swirBand.setSourceImage(radiometryImage);
+//                            swirProductIndex++;
+//                        }
+//                    }
+//                    radiometryDS.clear();
+//                    radiometryDS.close(0);
+//                }
+//            }
+//        }
+//
+//        // todo: do collocation with SWIR 'single band' temporal products here ?? weird!
+////        Product collocateSwirProduct = null;
+////        collocateSwirProduct = collocateL1cRadiometryProducts(product, swirProduct[0], "SWIR" + 0);
+////        collocateSwirProduct.setAutoGrouping("BLUE:NIR:RED:SWIR1:SWIR2:SWIR3");
+////        for (int i=0; i<3; i++) {
+////            collocateSwirProduct = collocateL1cRadiometryProducts(product, swirProduct[i], "SWIR" + i);
+////        }
 
-        if (inputFileRootNode != null) {
-            final TreeNode level1aNode = inputFileRootNode.getChildAt(0);               // 'LEVEL1A'
-            // todo: do we need any metadata from this group?
-
-            final TreeNode level1bNode = inputFileRootNode.getChildAt(1);               // 'LEVEL1B'
-            // todo: do we need any metadata from this group?
-            // todo: extract lat/lon info from LN1/LT1 and set up tie point geocoding
-            // careful: we have different lat/lon tie point grids again for blue/nir/red vs. SWIR
-            // also, downscaling factor with regard to the L1C raster data is not integer!
-
-            final TreeNode level1cNode = inputFileRootNode.getChildAt(2);               // 'LEVEL1C'
-
-            // we want to have the SWIR band sizes as reference: first SWIR node is level1cNode.getChildAt(3)
-            final int height = (int) getH5ScalarDS(level1cNode.getChildAt(3).getChildAt(0)).getDims()[0];
-            final int width = (int) getH5ScalarDS(level1cNode.getChildAt(3).getChildAt(0)).getDims()[1];
-            product = new Product(inputFile.getName(), "PROBA-V L1C", width, height);
-            product.setAutoGrouping("BLUE:NIR:RED:SWIR1:SWIR2:SWIR3");
-            setL1cGeoCoding(product, level1bNode);
-
-            for (int i = 0; i < level1cNode.getChildCount(); i++) {
-                final TreeNode level1cChildNode = level1cNode.getChildAt(i);
-                final String level1cChildNodeName = level1cChildNode.toString();
-                if (level1cChildNodeName.startsWith("SWIR")) {
-                    // on the smaller grid, we have: 'BLUE', 'NIR', 'RED'
-                    for (int j = 0; j < level1cChildNode.getChildCount(); j++) {
-                        // we have 'Q' and 'TOA'
-                        final TreeNode level1cRadiometryChildNode = level1cChildNode.getChildAt(j);
-                        final String level1cRadiometryChildNodeName = level1cRadiometryChildNode.toString();
-                        System.out.println("level1cRadiometryChildNode = " + level1cRadiometryChildNodeName);
-                        final H5ScalarDS radiometryDS = getH5ScalarDS(level1cRadiometryChildNode);
-                        final String radiometryBandName = level1cChildNodeName + "_" + level1cRadiometryChildNodeName;
-                        if (level1cRadiometryChildNodeName.equals("Q")) {
-                            // 8-bit unsigned character
-                            Product flagProduct = new Product(radiometryBandName, "flags", width, height);
-                            final Band qBand =
-                                    createTargetBand(flagProduct, radiometryDS, radiometryBandName, ProductData.TYPE_UINT8);
-                            final byte[] qualityData = (byte[]) radiometryDS.getData();
-                            final ProbaVRasterImage image = new ProbaVRasterImage(qBand, qualityData);
-                            qBand.setSourceImage(image);
-                            attachL1cQualityFlagBand(product, flagProduct, radiometryBandName);
-                        } else if (level1cRadiometryChildNodeName.equals("TOA")) {
-                            // 16-bit integer
-                            final Band radiometryBand = createTargetBand(product,
-                                                                         radiometryDS,
-                                                                         radiometryBandName + "_REFL",
-                                                                         ProductData.TYPE_INT16);
-                            final short[] radiometryData = (short[]) radiometryDS.getData();
-                            final ProbaVRasterImage radiometryImage = new ProbaVRasterImage(radiometryBand, radiometryData);
-                            radiometryBand.setSourceImage(radiometryImage);
-                        }
-                    }
-                } else {
-                    // todo: in L1C product we have two different sizes:
-                    // blue, nir, red: e.g. 18984 x 5200 (y=5200 is fix)
-                    // swir 1-3:   9492*1024 (y=1024 is fix)
-                    // --> BEAM: downscale the blue, nir, red bands, as e.g. in Modis35ProductReader (GA)
-                    // --> SNAP: use new functionality for different raster sizes
-                }
-            }
-        }
-
+//        return collocateSwirProduct;
         return product;
     }
 
+//    private Product collocateL1cRadiometryProducts(Product probavProduct, Product swirRadiometryProduct, String radiometryBandName) {
+//        CollocateOp collocateOp = new CollocateOp();
+//        collocateOp.setParameterDefaultValues();
+//        collocateOp.setMasterProduct(probavProduct);
+//        collocateOp.setSlaveProduct(swirRadiometryProduct);
+//        collocateOp.setRenameMasterComponents(false);
+//        collocateOp.setRenameSlaveComponents(false);
+//        return collocateOp.getTargetProduct();
+//    }
 
     private void setSynthesisGeoCoding(Product product, TreeNode inputFileRootNode, TreeNode level3ChildNode)
             throws HDF5Exception {
@@ -313,7 +396,9 @@ public class ProbaVProductReader extends AbstractProductReader {
             final TreeNode level1bChildNode = level1bNode.getChildAt(i);
             final String level1bChildNodeName = level1bChildNode.toString();
             System.out.println("level1bChildNodeName = " + level1bChildNodeName);
-            if (level1bChildNodeName.startsWith("SWIR")) {     // todo: remove this when all bands are handled properly together
+            if (!level1bChildNodeName.startsWith("CONTOUR")) {
+//            if (!level1bChildNodeName.startsWith("SWIR") && !level1bChildNodeName.startsWith("CONTOUR")) {
+                    // todo: remove this when all bands are handled properly together
                 float[] lonData = new float[width * height];
                 float[] latData = new float[width * height];
                 for (int j = 0; j < level1bChildNode.getChildCount(); j++) {
@@ -349,11 +434,15 @@ public class ProbaVProductReader extends AbstractProductReader {
                 product.addTiePointGrid(latGrid);
                 product.addTiePointGrid(lonGrid);
 
-                if (level1bChildNodeName.equals("SWIR2")) {
+                if (level1bChildNodeName.equals("RED")) {
                     // from the camera setup, SWIR2 seems to be the most reasonable geocoding with
                     // regard to the 'center' of all camera swaths
-                    // todo: discuss! This is somehow bizarre, as the swaths differ quite strongly from each other...
-                    // see e.g. PROBAV_L1C_20150128_114238_2_V001.HDF5
+                    // note that the swaths differ quite strongly from each other!
+                    // see e.g. PROBAV_L1C_20150128_114238_2_V001.HDF5, and PUM, Fig. 2!
+
+                    // --> TODO: for 'center' product, use the swath of red/blue/nir bands once we have them!! see PUM, Fig. 2!
+                    // however, for left/right products, all single-camera swaths contribute to 'full' satellite swath!
+
                     GeoCoding gc = new TiePointGeoCoding(latGrid, lonGrid);
                     product.setGeoCoding(gc);
                 }
@@ -423,6 +512,89 @@ public class ProbaVProductReader extends AbstractProductReader {
         scalarDS.read();
         return scalarDS;
     }
+
+    private void addSynthesisRootMetadataElements(final Product product) {
+        final MetadataElement mph = new MetadataElement(ProbaVConstants.MPH_NAME);
+
+        // todo
+//        for (final String name : chrisFile.getGlobalAttributeNames()) {
+//            if (ProbaVConstants.ATTR_NAME_KEY_TO_MASK.equals(name)) {
+//                continue;
+//            }
+//            final String globalAttribute = chrisFile.getGlobalAttribute(name);
+//            mph.addAttribute(new MetadataAttribute(name, ProductData.createInstance(globalAttribute), true));
+//
+//            if (ProbaVConstants.ATTR_NAME_SOLAR_ZENITH_ANGLE.equals(name)) {
+//                addSolarAzimuthAngleIfPossible(product, mph);
+//            }
+//        }
+//
+//        mph.addAttribute(new MetadataAttribute(ProbaVConstants.ATTR_NAME_NOISE_REDUCTION,
+//                                               ProductData.createInstance("None"), true));
+
+        final MetadataElement bandInfo = createBandInfo();
+
+        product.getMetadataRoot().addElement(mph);
+        product.getMetadataRoot().addElement(bandInfo);
+    }
+
+    private MetadataElement createBandInfo() {
+        // todo
+        final MetadataElement bandInfo = new MetadataElement(ProbaVConstants.BAND_INFORMATION_NAME);
+//        for (int i = 0; i < chrisFile.getSpectralBandCount(); i++) {
+//            final String name = MessageFormat.format("radiance_{0}", i + 1);
+//            final MetadataElement element = new MetadataElement(name);
+//
+//            MetadataAttribute attribute = new MetadataAttribute("Cut-on Wavelength", ProductData.TYPE_FLOAT32);
+//            attribute.getData().setElemFloat(chrisFile.getCutOnWavelength(i));
+//            attribute.setDescription("Cut-on wavelength");
+//            attribute.setUnit("nm");
+//            element.addAttribute(attribute);
+//
+//            attribute = new MetadataAttribute("Cut-off Wavelength", ProductData.TYPE_FLOAT32);
+//            attribute.getData().setElemFloat(chrisFile.getCutOffWavelength(i));
+//            attribute.setDescription("Cut-off wavelength");
+//            attribute.setUnit("nm");
+//            element.addAttribute(attribute);
+//
+//            attribute = new MetadataAttribute("Central Wavelength", ProductData.TYPE_FLOAT32);
+//            attribute.getData().setElemFloat(chrisFile.getWavelength(i));
+//            attribute.setDescription("Central wavelength");
+//            attribute.setUnit("nm");
+//            element.addAttribute(attribute);
+//
+//            attribute = new MetadataAttribute("Bandwidth", ProductData.TYPE_FLOAT32);
+//            attribute.getData().setElemFloat(chrisFile.getBandwidth(i));
+//            attribute.setDescription("Cut-off minus cut-on wavelength");
+//            attribute.setUnit("nm");
+//            element.addAttribute(attribute);
+//
+//            attribute = new MetadataAttribute("Gain Setting", ProductData.TYPE_INT32);
+//            attribute.getData().setElemInt(chrisFile.getGainSetting(i));
+//            attribute.setDescription("CHRIS analogue electronics gain setting");
+//            element.addAttribute(attribute);
+//
+//            attribute = new MetadataAttribute("Gain Value", ProductData.TYPE_FLOAT32);
+//            attribute.getData().setElemFloat(chrisFile.getGainValue(i));
+//            attribute.setDescription("Relative analogue gain");
+//            element.addAttribute(attribute);
+//
+//            attribute = new MetadataAttribute("Low Row", ProductData.TYPE_INT32);
+//            attribute.getData().setElemInt(chrisFile.getLowRow(i));
+//            attribute.setDescription("CCD row number for the cut-on wavelength");
+//            element.addAttribute(attribute);
+//
+//            attribute = new MetadataAttribute("High Row", ProductData.TYPE_INT32);
+//            attribute.getData().setElemInt(chrisFile.getHighRow(i));
+//            attribute.setDescription("CCD row number for the cut-off wavelength");
+//            element.addAttribute(attribute);
+//
+//            bandInfo.addElement(element);
+//        }
+        return bandInfo;
+    }
+
+
 
     @Override
     protected void readBandRasterDataImpl(int sourceOffsetX, int sourceOffsetY, int sourceWidth, int sourceHeight, int sourceStepX, int sourceStepY, Band destBand, int destOffsetX, int destOffsetY, int destWidth, int destHeight, ProductData destBuffer, ProgressMonitor pm) throws IOException {

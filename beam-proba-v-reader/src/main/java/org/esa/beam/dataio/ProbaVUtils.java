@@ -20,6 +20,8 @@ import java.util.logging.Level;
  */
 public class ProbaVUtils {
 
+    // todo: implement tests!!!
+
     public static String getAttributeValue(Attribute attribute) {
         String result = "";
         switch (attribute.getType().getDatatypeClass()) {
@@ -59,6 +61,21 @@ public class ProbaVUtils {
 //
 //        return array2D;
 //    }
+
+    public static String getProductDescription(List<Attribute> metadata) {
+        String description = null;
+        for (Attribute attribute : metadata) {
+            if (attribute.getName().equals("DESCRIPTION")) {
+                try {
+                    description = getAttributeValue(attribute);
+                } catch (NumberFormatException e) {
+                    BeamLogManager.getSystemLogger().log(Level.WARNING, "Cannot parse product description string: " +
+                            e.getMessage());
+                }
+            }
+        }
+        return description;
+    }
 
     public static float getScaleFactor(List<Attribute> metadata) {
         float scaleFactor = 1.0f;
@@ -116,6 +133,30 @@ public class ProbaVUtils {
             }
         }
         return crsString;
+    }
+
+    public static String[] getStartEndTime(List<Attribute> metadata) {
+        String[] startStopTimes = new String[2];
+        String startDate = "";
+        String startTime = "";
+        String endDate = "";
+        String endTime = "";
+        for (Attribute attribute : metadata) {
+            if (attribute.getName().equals("OBSERVATION_START_DATE")) {
+                startDate = getAttributeValue(attribute);
+            } else if (attribute.getName().equals("OBSERVATION_START_TIME")) {
+                startTime = getAttributeValue(attribute);
+            } else if (attribute.getName().equals("OBSERVATION_END_DATE")) {
+                endDate = getAttributeValue(attribute);
+            } else if (attribute.getName().equals("OBSERVATION_END_TIME")) {
+                endTime = getAttributeValue(attribute);
+            }
+        }
+
+        // format is 'yyyy-mm-dd hh:mm:ss'
+        startStopTimes[0] = startDate + " " + startTime;
+        startStopTimes[1] = endDate + " " + endTime;
+        return startStopTimes;
     }
 
     public static float[] getNdviAsFloat(Band ndviBand, byte[] ndviData) {

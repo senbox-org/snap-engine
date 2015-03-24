@@ -37,12 +37,6 @@ public class ProbaVRasterImage extends RasterDataNodeOpImage {
         this.shortDataValues = dataValues;
     }
 
-    protected ProbaVRasterImage(Band band, int[] dataValues) {
-        super(band, ResolutionLevel.MAXRES);
-        initialize(band);
-        this.intDataValues = dataValues;
-    }
-
     protected ProbaVRasterImage(Band band, float[] dataValues) {
         super(band, ResolutionLevel.MAXRES);
         initialize(band);

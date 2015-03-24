@@ -120,7 +120,8 @@ public class ProbaVProductReaderPlugIn implements ProductReaderPlugIn {
     }
 
     private boolean isInputProbaVFileNameValid(String fileName) {
-        return isProbaL1CProduct(fileName) ||
+        return
+//                isProbaL1CProduct(fileName) ||           // todo: for L1C we need more detailed specifications first!
                 isProbaS1ToaProduct(fileName) ||
                 isProbaS1TocProduct(fileName) ||
                 isProbaS10TocProduct(fileName) ||
