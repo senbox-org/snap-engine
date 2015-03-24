@@ -133,7 +133,7 @@ public class ReadOp extends Operator {
         try {
             productReader.readBandRasterData(band, rectangle.x, rectangle.y, rectangle.width,
                                              rectangle.height, dataBuffer, pm);
-            //targetTile.setRawSamples(dataBuffer);
+            targetTile.setRawSamples(dataBuffer);
         } catch (IOException e) {
             throw new OperatorException(e);
         }
