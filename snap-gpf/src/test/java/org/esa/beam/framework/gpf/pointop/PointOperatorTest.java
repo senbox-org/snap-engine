@@ -14,12 +14,14 @@ import org.junit.Test;
 
 import javax.media.jai.JAI;
 import javax.media.jai.operator.ConstantDescriptor;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.Raster;
 import java.text.ParseException;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class PointOperatorTest {
 

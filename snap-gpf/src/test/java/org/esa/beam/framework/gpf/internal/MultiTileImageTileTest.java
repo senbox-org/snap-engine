@@ -16,8 +16,7 @@
 
 package org.esa.beam.framework.gpf.internal;
 
-import java.awt.Dimension;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.Raster;
 
 public class MultiTileImageTileTest extends AbstractTileImageTileTest {

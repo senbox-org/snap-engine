@@ -56,7 +56,7 @@
                     <type>float32</type>
                     <value>882.8275</value>
                 </variable>
-                 <variable>
+                <variable>
                     <name>PI</name>
                     <type>float64</type>
                     <value>3.1415</value>

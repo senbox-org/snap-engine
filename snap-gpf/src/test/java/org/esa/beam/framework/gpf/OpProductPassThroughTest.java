@@ -26,7 +26,6 @@ import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 
 import javax.media.jai.operator.ConstantDescriptor;
-import java.awt.image.RenderedImage;
 import java.util.Arrays;
 
 /**

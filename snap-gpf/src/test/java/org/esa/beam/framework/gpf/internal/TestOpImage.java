@@ -19,10 +19,8 @@ package org.esa.beam.framework.gpf.internal;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.jai.BandOpImage;
 
-import javax.media.jai.JAI;
 import javax.media.jai.PlanarImage;
-import java.awt.Rectangle;
-import java.awt.image.Raster;
+import java.awt.*;
 import java.awt.image.WritableRaster;
 import java.util.HashMap;
 
