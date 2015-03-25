@@ -21,7 +21,6 @@ import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.graph.Graph;
 import org.esa.beam.framework.gpf.graph.Node;
 import org.esa.beam.gpf.operators.standard.ReadOp;
-import org.esa.snap.gpf.ProductSetReaderOp;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,8 +43,7 @@ public class ProductSetHandler {
     }
 
     private GraphNode[] replaceProductSetReaders() {
-        final ProductSetData[] productSetDataList =
-                findProductSets(OperatorSpi.getOperatorAlias(ProductSetReaderOp.class));
+        final ProductSetData[] productSetDataList = findProductSets("ProductSet-Reader");
         final List<GraphNode> savedProductSetList = new ArrayList<>();
 
         int cnt = 0;

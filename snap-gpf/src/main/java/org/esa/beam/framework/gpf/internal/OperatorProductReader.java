@@ -27,7 +27,7 @@ import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.util.io.BeamFileFilter;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.io.IOException;

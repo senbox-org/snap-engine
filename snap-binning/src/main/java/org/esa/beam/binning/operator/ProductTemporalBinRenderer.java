@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Brockmann Consult GmbH (info@brockmann-consult.de) 
+ * Copyright (C) 2015 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -35,6 +35,9 @@ import org.opengis.referencing.operation.TransformException;
 import java.awt.Rectangle;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * A renderer that renders temporal bins into {@link Product}s.
@@ -48,6 +51,7 @@ public final class ProductTemporalBinRenderer implements TemporalBinRenderer {
     private final ProductData numObsLine;
     private final ProductData numPassesLine;
     private final Band[] outputBands;
+    private final List<Band> customizerBands;
     private final ProductData[] outputLines;
     private final Band numObsBand;
     private final Band numPassesBand;
@@ -78,6 +82,7 @@ public final class ProductTemporalBinRenderer implements TemporalBinRenderer {
         CrsGeoCoding geoCoding = createMapGeoCoding(outputRegion, pixelSize);
 
         product = new Product(outputFile.getName(), "BINNED-L3", outputRegion.width, outputRegion.height);
+        product.setProductWriter(productWriter);
         product.setPreferredTileSize(64, 64);
         product.setGeoCoding(geoCoding);
         product.setStartTime(startTime);
@@ -94,24 +99,46 @@ public final class ProductTemporalBinRenderer implements TemporalBinRenderer {
         localNumPassesBand.setNoDataValue(-1);
         localNumPassesBand.setNoDataValueUsed(true);
 
+        boolean numObsIsFeature = false;
+        boolean numPassesIsFeature = false;
         for (String name : featureNames) {
-            Band band = product.addBand(name, ProductData.TYPE_FLOAT32);
-            band.setNoDataValue(Float.NaN);
-            band.setNoDataValueUsed(true);
+            switch (name) {
+                case "num_obs":
+                    numObsIsFeature = true;
+                    break;
+                case "num_passes":
+                    numPassesIsFeature = true;
+                    break;
+                default:
+                    Band band = product.addBand(name, ProductData.TYPE_FLOAT32);
+                    band.setNoDataValue(Float.NaN);
+                    band.setNoDataValueUsed(true);
+                    break;
+            }
         }
 
         if (productCustomizer != null) {
             productCustomizer.customizeProduct(product);
+            customizerBands = new ArrayList<>(product.getNumBands());
+            Collections.addAll(customizerBands, product.getBands());
+        } else {
+             customizerBands = Collections.emptyList();
         }
         numObsBand = product.getBand("num_obs");
-        if (numObsBand != null) {
+        if (numObsBand != null && !numObsIsFeature) {
             numObsLine = numObsBand.createCompatibleRasterData(outputRegion.width, 1);
+            if (!customizerBands.isEmpty()) {
+                customizerBands.remove(numObsBand);
+            }
         } else {
             numObsLine = null;
         }
         numPassesBand = product.getBand("num_passes");
-        if (numPassesBand != null) {
+        if (numPassesBand != null && !numPassesIsFeature) {
             numPassesLine = numPassesBand.createCompatibleRasterData(outputRegion.width, 1);
+            if (!customizerBands.isEmpty()) {
+                customizerBands.remove(numPassesBand);
+            }
         } else {
             numPassesLine = null;
         }
@@ -122,6 +149,9 @@ public final class ProductTemporalBinRenderer implements TemporalBinRenderer {
             String name = featureNames[i];
             outputBands[i] = product.getBand(name);
             outputLines[i] = outputBands[i].createCompatibleRasterData(outputRegion.width, 1);
+            if (!customizerBands.isEmpty()) {
+                customizerBands.remove(outputBands[i]);
+            }
         }
 
         this.rasterWidth = outputRegion.width;
@@ -150,6 +180,11 @@ public final class ProductTemporalBinRenderer implements TemporalBinRenderer {
     @Override
     public void end() throws IOException {
         completeLine();
+        for (Band band : customizerBands) {
+            if (productWriter.shouldWrite(band)) {
+                band.writeRasterDataFully(ProgressMonitor.NULL);
+            }
+        }
         productWriter.close();
         product.closeIO();
     }
@@ -178,10 +213,10 @@ public final class ProductTemporalBinRenderer implements TemporalBinRenderer {
     }
 
     private void writeLine(int y) throws IOException {
-        if (numObsBand != null) {
+        if (numObsBand != null && numObsLine != null) {
             productWriter.writeBandRasterData(numObsBand, 0, y, rasterWidth, 1, numObsLine, ProgressMonitor.NULL);
         }
-        if (numPassesBand != null) {
+        if (numPassesBand != null && numPassesLine != null) {
             productWriter.writeBandRasterData(numPassesBand, 0, y, rasterWidth, 1, numPassesLine, ProgressMonitor.NULL);
         }
         for (int i = 0; i < outputBands.length; i++) {

@@ -29,7 +29,6 @@ import org.esa.beam.gpf.operators.standard.WriteOp;
 import org.esa.beam.util.io.BeamFileFilter;
 import org.esa.beam.util.io.FileUtils;
 import org.esa.beam.visat.VisatApp;
-import org.esa.snap.gpf.GPFProcessor;
 import org.esa.snap.gpf.ReaderUtils;
 import org.esa.snap.gpf.ui.DefaultUI;
 import org.esa.snap.gpf.ui.OperatorUI;

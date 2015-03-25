@@ -21,8 +21,7 @@ import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
 
-import java.awt.Dimension;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.Raster;
 import java.util.HashMap;
 

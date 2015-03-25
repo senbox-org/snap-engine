@@ -26,7 +26,7 @@ import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 
 import javax.media.jai.BorderExtenderConstant;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.Raster;
 
 

@@ -29,8 +29,7 @@ import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 
-import java.awt.Dimension;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.util.ArrayList;
 
 public class GraphProcessingObserverTest extends TestCase {

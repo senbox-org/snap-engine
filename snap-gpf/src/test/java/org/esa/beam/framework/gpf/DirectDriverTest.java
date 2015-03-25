@@ -13,7 +13,7 @@ import org.esa.beam.framework.gpf.internal.DefaultTileIterator;
 import org.esa.beam.util.BitSetter;
 
 import javax.media.jai.operator.ConstantDescriptor;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.util.Iterator;
 
 

@@ -24,7 +24,7 @@ import org.esa.beam.framework.datamodel.RasterDataNode;
 import org.esa.beam.framework.gpf.internal.OperatorContext;
 
 import javax.media.jai.BorderExtender;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.text.MessageFormat;
 import java.util.Map;
 import java.util.logging.Logger;

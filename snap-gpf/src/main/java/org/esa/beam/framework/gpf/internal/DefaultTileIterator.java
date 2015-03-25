@@ -17,7 +17,7 @@ package org.esa.beam.framework.gpf.internal;
 
 import org.esa.beam.framework.gpf.Tile;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 

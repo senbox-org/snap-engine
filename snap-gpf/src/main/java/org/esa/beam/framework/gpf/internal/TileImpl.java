@@ -23,7 +23,7 @@ import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.util.BitSetter;
 import org.esa.beam.util.ImageUtils;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.ComponentSampleModel;
 import java.awt.image.DataBuffer;
 import java.awt.image.Raster;

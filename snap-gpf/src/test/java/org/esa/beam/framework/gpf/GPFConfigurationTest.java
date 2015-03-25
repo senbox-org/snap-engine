@@ -11,7 +11,9 @@ import org.junit.Test;
 import javax.media.jai.OpImage;
 import java.awt.image.RenderedImage;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class GPFConfigurationTest {
 

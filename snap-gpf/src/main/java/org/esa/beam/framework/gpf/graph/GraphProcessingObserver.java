@@ -16,7 +16,7 @@
 
 package org.esa.beam.framework.gpf.graph;
 
-import java.awt.Rectangle;
+import java.awt.*;
 
 /**
  * This interface can be implemented and added to the {@link GraphProcessor} to get informed

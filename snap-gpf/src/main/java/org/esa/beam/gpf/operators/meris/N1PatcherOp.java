@@ -32,7 +32,7 @@ import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.FileImageOutputStream;
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 

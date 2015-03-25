@@ -34,7 +34,7 @@ import org.esa.beam.framework.gpf.annotations.TargetProperty;
 import org.esa.beam.util.converters.JtsGeometryConverter;
 import org.geotools.referencing.CRS;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.util.Map;
 
 @SuppressWarnings("UnusedDeclaration")

@@ -22,7 +22,7 @@ import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.internal.OperatorContext;
-import org.esa.beam.util.logging.BeamLogManager;
+import org.esa.beam.util.SystemUtils;
 import org.esa.beam.util.math.MathUtils;
 import org.esa.beam.framework.gpf.internal.StdOutProgressMonitor;
 
@@ -32,9 +32,7 @@ import javax.media.jai.TileComputationListener;
 import javax.media.jai.TileRequest;
 import javax.media.jai.TileScheduler;
 import javax.media.jai.util.ImagingListener;
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.Raster;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -67,7 +65,7 @@ public class GraphProcessor {
      */
     public GraphProcessor() {
         observerList = new ArrayList<GraphProcessingObserver>(3);
-        logger = BeamLogManager.getSystemLogger();
+        logger = SystemUtils.LOG;
     }
 
     /**
@@ -233,7 +231,6 @@ public class GraphProcessor {
                                 }
                             }
 
-                            //System.out.println("Tile "+(cnt++)+" of "+ numYTiles*numXTiles);
                             pm.worked(1);
                         }
                         fireTileStopped(graphContext, tileRectangle);

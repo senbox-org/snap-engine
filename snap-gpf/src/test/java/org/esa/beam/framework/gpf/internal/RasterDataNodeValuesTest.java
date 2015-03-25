@@ -15,12 +15,11 @@
  */
 package org.esa.beam.framework.gpf.internal;
 
+import junit.framework.TestCase;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Mask;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
-
-import junit.framework.TestCase;
 
 public class RasterDataNodeValuesTest extends TestCase {
 

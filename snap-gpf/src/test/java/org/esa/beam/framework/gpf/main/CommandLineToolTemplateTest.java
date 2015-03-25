@@ -15,7 +15,9 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Map;
 
-import static junit.framework.Assert.*;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
 
 /**
  * @author Norman Fomferra

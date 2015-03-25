@@ -1,6 +1,10 @@
 package org.esa.beam.framework.gpf.annotations;
 
-import com.bc.ceres.binding.*;
+import com.bc.ceres.binding.BindingException;
+import com.bc.ceres.binding.ConversionException;
+import com.bc.ceres.binding.PropertyContainer;
+import com.bc.ceres.binding.PropertySet;
+import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.binding.dom.DefaultDomConverter;
 import com.bc.ceres.binding.dom.DomElement;
 import com.bc.ceres.binding.dom.XppDomElement;

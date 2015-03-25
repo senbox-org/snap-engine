@@ -104,11 +104,13 @@ public class ProductFunctions {
     public static void scanForValidProducts(final File inputFolder, final ArrayList<String> pathList) {
         final ValidProductFileFilter dirFilter = new ValidProductFileFilter();
         final File[] files = inputFolder.listFiles(dirFilter);
-        for (File file : files) {
-            if (file.isDirectory()) {
-                scanForValidProducts(file, pathList);
-            } else if (isValidProduct(file)) {
-                pathList.add(file.getAbsolutePath());
+        if(files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    scanForValidProducts(file, pathList);
+                } else if (isValidProduct(file)) {
+                    pathList.add(file.getAbsolutePath());
+                }
             }
         }
     }

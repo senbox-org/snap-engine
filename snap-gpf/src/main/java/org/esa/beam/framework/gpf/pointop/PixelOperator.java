@@ -5,8 +5,7 @@ import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.Tile;
 
-import java.awt.Point;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.util.Map;
 
 /**

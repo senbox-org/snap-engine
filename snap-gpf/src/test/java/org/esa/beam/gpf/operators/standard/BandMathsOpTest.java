@@ -39,7 +39,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.io.InputStreamReader;
 import java.text.ParseException;
@@ -47,7 +47,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class BandMathsOpTest {
 

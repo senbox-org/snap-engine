@@ -16,14 +16,24 @@
 
 package org.esa.beam.gpf.operators.standard.reproject;
 
-import org.esa.beam.framework.datamodel.*;
+import org.esa.beam.framework.datamodel.Band;
+import org.esa.beam.framework.datamodel.GeoPos;
+import org.esa.beam.framework.datamodel.PinDescriptor;
+import org.esa.beam.framework.datamodel.PixelPos;
+import org.esa.beam.framework.datamodel.Placemark;
+import org.esa.beam.framework.datamodel.PlacemarkDescriptor;
+import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.TiePointGrid;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class ReprojectionOpTest extends AbstractReprojectionOpTest {
 

@@ -16,7 +16,11 @@
 
 package org.esa.beam.framework.gpf.doclet;
 
-import com.sun.javadoc.*;
+import com.sun.javadoc.AnnotationDesc;
+import com.sun.javadoc.AnnotationTypeElementDoc;
+import com.sun.javadoc.ClassDoc;
+import com.sun.javadoc.FieldDoc;
+import com.sun.javadoc.RootDoc;
 
 import java.util.HashMap;
 import java.util.Map;

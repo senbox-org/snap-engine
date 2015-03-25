@@ -5,7 +5,7 @@ import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.Tile;
 
-import java.awt.Point;
+import java.awt.*;
 
 /**
  * A {@code SampleOperator} may serve as a handy base class for an operator that computes a single target sample from

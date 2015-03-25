@@ -25,8 +25,7 @@ import org.esa.beam.framework.gpf.internal.OperatorSpiRegistryImpl;
 import org.esa.beam.gpf.operators.standard.WriteOp;
 import org.esa.beam.util.Guardian;
 
-import java.awt.Dimension;
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;

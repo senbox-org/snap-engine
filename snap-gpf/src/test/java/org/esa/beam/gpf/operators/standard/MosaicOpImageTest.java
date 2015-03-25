@@ -16,7 +16,6 @@
 
 package org.esa.beam.gpf.operators.standard;
 
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -27,6 +26,8 @@ import javax.media.jai.operator.MosaicDescriptor;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
 
 public class MosaicOpImageTest {
 

@@ -31,7 +31,7 @@ import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
 
-import java.awt.Rectangle;
+import java.awt.*;
 
 @OperatorMetadata(alias = "RRToFRS", internal = true)
 public class RRToFRSOp extends Operator {

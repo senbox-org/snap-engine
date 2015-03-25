@@ -13,7 +13,7 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-package org.esa.snap.gpf;
+package org.esa.snap.dat.graphbuilder;
 
 import com.bc.ceres.binding.dom.DefaultDomElement;
 import com.bc.ceres.binding.dom.DomElement;

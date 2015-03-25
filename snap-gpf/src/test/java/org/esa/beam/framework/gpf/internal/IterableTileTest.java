@@ -21,7 +21,7 @@ import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.Tile;
 
-import java.awt.Point;
+import java.awt.*;
 import java.awt.image.DataBuffer;
 import java.awt.image.WritableRaster;
 

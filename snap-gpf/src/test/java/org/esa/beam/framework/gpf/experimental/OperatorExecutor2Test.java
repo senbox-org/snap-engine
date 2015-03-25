@@ -26,10 +26,12 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.media.jai.operator.ConstantDescriptor;
-import java.awt.Dimension;
+import java.awt.*;
 import java.util.ArrayList;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Requirements:

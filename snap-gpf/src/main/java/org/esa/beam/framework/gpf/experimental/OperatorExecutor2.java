@@ -22,9 +22,7 @@ import org.esa.beam.framework.datamodel.ProductData;
 import javax.media.jai.JAI;
 import javax.media.jai.PlanarImage;
 import javax.media.jai.TileRequest;
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.Raster;
 
 /**

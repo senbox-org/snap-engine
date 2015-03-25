@@ -19,7 +19,7 @@ package org.esa.beam.framework.gpf.internal;
 import junit.framework.TestCase;
 import org.esa.beam.framework.gpf.Tile;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.util.NoSuchElementException;
 
 public class DefaultTileIteratorTest extends TestCase {

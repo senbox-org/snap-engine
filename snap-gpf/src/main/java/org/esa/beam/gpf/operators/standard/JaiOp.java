@@ -27,7 +27,7 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.internal.JaiHelper;
 
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.text.MessageFormat;
 import java.util.HashMap;
 

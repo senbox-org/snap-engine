@@ -19,7 +19,7 @@ import javax.media.jai.OpImage;
 import javax.media.jai.PixelAccessor;
 import javax.media.jai.UnpackedImageData;
 import javax.media.jai.Warp;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
 

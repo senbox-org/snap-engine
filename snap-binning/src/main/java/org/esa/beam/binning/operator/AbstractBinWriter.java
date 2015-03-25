@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (C) 2015 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -21,8 +21,8 @@ import org.esa.beam.binning.TemporalBin;
 import org.esa.beam.binning.support.SEAGrid;
 import org.esa.beam.binning.support.SeadasGrid;
 import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.util.SystemUtils;
 import org.esa.beam.util.io.FileUtils;
-import org.esa.beam.util.logging.BeamLogManager;
 import ucar.ma2.Array;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFileWriteable;
@@ -55,7 +55,7 @@ public abstract class AbstractBinWriter implements BinWriter {
         this.region = region;
         this.startTime = startTime;
         this.stopTime = stopTime;
-        this.logger = BeamLogManager.getSystemLogger();
+        this.logger = SystemUtils.LOG;
     }
 
     @Override
@@ -132,9 +132,9 @@ public abstract class AbstractBinWriter implements BinWriter {
         final int[] origin0 = {0};
         final int[] shape = {bufferIndex};
         for (BinListVar var : vars) {
-            netcdfFile.write(var.variable.getFullName(),
-                    origin,
-                    var.buffer.section(origin0, shape));
+            String fullName = var.variable.getFullName();
+            Array valuesToWrite = var.buffer.sectionNoReduce(origin0, shape, null);
+            netcdfFile.write(fullName, origin, valuesToWrite);
         }
     }
 
