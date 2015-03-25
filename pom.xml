@@ -286,7 +286,7 @@
                         <licenseName>GPL 3</licenseName>
                         <licenseFile>${project.basedir}/../LICENSE.html</licenseFile>
                         <cluster>${brandingToken}</cluster>
-                        <nbmBuildDir>${project.basedir}/../target/nbmCluster</nbmBuildDir>
+                        <nbmBuildDir>${project.basedir}/../target/nbm</nbmBuildDir>
                         <brandingToken>${brandingToken}</brandingToken>
                         <useOSGiDependencies>false</useOSGiDependencies>
                         <requiresRestart>false</requiresRestart>
