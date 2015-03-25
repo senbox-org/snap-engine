@@ -33,7 +33,7 @@ import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.StringUtils;
 
-import java.awt.Rectangle;
+import java.awt.*;
 
 @OperatorMetadata(alias = "L3ToL1", internal = true)
 public class L3ToL1Op extends MerisBasisOp {

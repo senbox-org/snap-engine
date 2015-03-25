@@ -19,7 +19,7 @@ package org.esa.beam.framework.gpf;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.datamodel.RasterDataNode;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.util.Iterator;
 
 

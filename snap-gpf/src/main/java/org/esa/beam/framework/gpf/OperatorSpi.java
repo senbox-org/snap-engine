@@ -32,7 +32,7 @@ import org.esa.beam.framework.gpf.descriptor.SourceProductsDescriptor;
 import org.esa.beam.framework.gpf.descriptor.TargetProductDescriptor;
 import org.esa.beam.framework.gpf.descriptor.TargetPropertyDescriptor;
 
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.net.URL;
 import java.util.Map;
 import java.util.logging.Logger;
