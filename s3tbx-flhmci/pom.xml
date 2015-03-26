@@ -61,6 +61,11 @@
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-visat-rcp</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

@@ -43,6 +43,11 @@
             <groupId>org.xeustechnologies</groupId>
             <artifactId>jtar</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

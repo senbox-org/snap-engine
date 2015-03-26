@@ -192,6 +192,13 @@
                 <version>4.12</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>org.esa.snap</groupId>
+                <artifactId>snap-core</artifactId>
+                <version>${snap.version}</version>
+                <type>test-jar</type>
+            </dependency>
+
 
             <!-- NetBeans Modules -->
 
