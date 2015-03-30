@@ -25,7 +25,7 @@
     <artifactId>s3tbx-flhmci-ui</artifactId>
     <packaging>nbm</packaging>
 
-    <name>MERIS FLH/MCI Processor</name>
+    <name>MERIS FLH/MCI Processor GUI</name>
     <description>The MERIS FLH/MCI Processor calculates the Fluorescence Line Height and the Maximum Chlorophyll Index by exploiting the height of a measurement over a specific baseline.</description>
 
     <dependencies>
