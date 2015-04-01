@@ -43,6 +43,7 @@ final class PodGeoCoding extends TiePointGeoCoding {
     private transient PixelPosEstimator pixelPosEstimator;
     private transient PodPixelFinder pixelFinder;
     private transient GeoApproximation[] approximations;
+    private transient PlanarImage latImage;
 
     PodGeoCoding(TiePointGrid latGrid, TiePointGrid lonGrid) {
         this(latGrid, lonGrid, createApproximations(lonGrid.getGeophysicalImage(), latGrid.getGeophysicalImage()));
@@ -53,7 +54,7 @@ final class PodGeoCoding extends TiePointGeoCoding {
         this.approximations = approximations;
 
         final PlanarImage lonImage = lonGrid.getGeophysicalImage();
-        final PlanarImage latImage = latGrid.getGeophysicalImage();
+        latImage = latGrid.getGeophysicalImage();
 
         final Rectangle bounds = new Rectangle(0, 0, lonGrid.getSceneRasterWidth(), lonGrid.getSceneRasterHeight());
         pixelPosEstimator = new PixelPosEstimator(approximations, bounds);
@@ -73,8 +74,22 @@ final class PodGeoCoding extends TiePointGeoCoding {
             }
             pixelPosEstimator.getPixelPos(geoPos, pixelPos);
             if (pixelPos.isValid()) {
-                pixelFinder.findPixelPos(geoPos, pixelPos);
+                // check that LAT displacement is less than 0.5
+                int x = (int) Math.floor(pixelPos.x);
+                int y = (int) Math.floor(pixelPos.y);
+                try {
+                    double lat = latImage.getData(new Rectangle(x, y, 1, 1)).getSampleDouble(x, y, 0);
+                    if (Math.abs(lat - geoPos.getLat()) > 0.5) {
+                        pixelPos.setInvalid();
+                    }
+                } catch (IllegalArgumentException iae) {
+                    pixelPosEstimator.getPixelPos(geoPos, pixelPos);
+                }
+
             }
+//            if (pixelPos.isValid()) {
+//                pixelFinder.findPixelPos(geoPos, pixelPos);
+//            }
         } else {
             super.getPixelPos(geoPos, pixelPos);
         }
@@ -120,5 +135,6 @@ final class PodGeoCoding extends TiePointGeoCoding {
         pixelFinder = null;
         pixelPosEstimator = null;
         approximations = null;
+        latImage = null;
     }
 }
