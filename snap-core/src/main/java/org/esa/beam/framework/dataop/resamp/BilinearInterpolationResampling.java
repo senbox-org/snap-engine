@@ -43,10 +43,10 @@ public final class BilinearInterpolationResampling implements Resampling {
         index.i0 = i0;
         index.j0 = j0;
         index.i[0] = i0;
-        index.i[1] = i0 + 1;
+        index.i[1] = Math.min(i0 + 1, width - 1);
         index.ki[0] = x - i0;
         index.j[0] = j0;
-        index.j[1] = j0 + 1;
+        index.j[1] = Math.min(j0 + 1, height - 1);
         index.kj[0] = y - j0;
 
         /*
