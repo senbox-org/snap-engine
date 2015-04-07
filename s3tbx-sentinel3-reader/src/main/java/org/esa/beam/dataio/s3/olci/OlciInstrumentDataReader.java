@@ -35,11 +35,14 @@ public class OlciInstrumentDataReader extends S3NetcdfReader {
         final List<Variable> variables = netcdfFile.getVariables();
         for (final Variable variable : variables) {
             final int bandsDimensionIndex = variable.findDimensionIndex("bands");
-            if (bandsDimensionIndex != -1 && variable.findDimensionIndex("detectors") != -1) {
+            final int detectorsDimensionIndex = variable.findDimensionIndex("detectors");
+            if (bandsDimensionIndex != -1 && detectorsDimensionIndex != -1) {
                 final int numBands = variable.getDimension(bandsDimensionIndex).getLength();
                 for (int i = 1; i <= numBands; i++) {
                     addVariableAsBand(product, variable, variable.getFullName() + "_band_" + i, true);
                 }
+            } else if (variable.getDimensions().size() == 1 && detectorsDimensionIndex != -1) {
+                addVariableAsBand(product, variable, variable.getFullName(), true);
             }
             addVariableMetadata(variable, product);
         }

@@ -22,7 +22,7 @@ public class S3ReferencingVariableOpImage extends S3VariableOpImage {
 
     private final Variable referencedIndexVariable;
     private final VariableIF variable;
-    private float[] dimensionValues;
+    private final DimensionValuesProvider dimensionValuesProvider;
 
     //todo use this to display fires in SLSTR L2 LST products when data is available
     public S3ReferencingVariableOpImage(VariableIF variable, int dataBufferType, int sourceWidth, int sourceHeight,
@@ -31,24 +31,28 @@ public class S3ReferencingVariableOpImage extends S3VariableOpImage {
                                         String nameOfDisplayedDimension) {
         super(variable, dataBufferType, sourceWidth, sourceHeight, tileSize, level, "", dimensionIndex, false);
         this.variable = variable;
+        dimensionValuesProvider = getDimensionValuesProvider();
         int displayedDimensionIndex = variable.findDimensionIndex(nameOfDisplayedDimension);
         int referencingDimensionIndex = variable.findDimensionIndex(nameOfReferencingDimension);
         this.referencedIndexVariable = referencedIndexVariable;
         final int numDetectors = variable.getDimension(referencingDimensionIndex).getLength();
-        int[] variableOrigin = new int[2];
-        variableOrigin[displayedDimensionIndex] = dimensionIndex;
-        variableOrigin[referencingDimensionIndex] = 0;
-        int[] variableShape = new int[2];
-        variableShape[displayedDimensionIndex] = 1;
-        variableShape[referencingDimensionIndex] = numDetectors;
-        try {
-            final Section detectorSection = new Section(variableOrigin, variableShape);
-            final Array dimensionValuesArray = variable.read(detectorSection);
-            dimensionValues = (float[])dimensionValuesArray.copyTo1DJavaArray();
-        } catch (InvalidRangeException | IOException e) {
-            throw new RuntimeException(e);
+        if (displayedDimensionIndex >= 0) {
+            int[] variableOrigin = new int[2];
+            variableOrigin[displayedDimensionIndex] = dimensionIndex;
+            variableOrigin[referencingDimensionIndex] = 0;
+            int[] variableShape = new int[2];
+            variableShape[displayedDimensionIndex] = 1;
+            variableShape[referencingDimensionIndex] = numDetectors;
+            dimensionValuesProvider.readValues(variableOrigin, variableShape);
+        } else {
+            int[] variableOrigin = new int[1];
+            variableOrigin[referencingDimensionIndex] = 0;
+            int[] variableShape = new int[1];
+            variableShape[referencingDimensionIndex] = numDetectors;
+            dimensionValuesProvider.readValues(variableOrigin, variableShape);
         }
     }
+
 
     @Override
     protected void computeRect(PlanarImage[] sourceImages, WritableRaster tile, Rectangle rectangle) {
@@ -79,20 +83,22 @@ public class S3ReferencingVariableOpImage extends S3VariableOpImage {
             try {
                 final Section section = new Section(origin, shape, stride);
                 referencedValues = referencedIndexVariable.read(section);
-                final float noDataValue = getNoDataValue(referencedIndexVariable).floatValue();
-                for(int i = 0; i < referencedValues.getSize(); i++) {
-                    final int detectorIndex = referencedValues.getInt(i);
-                    if(detectorIndex > - 1) {
-                        variableValues.setFloat(i, dimensionValues[detectorIndex]);
-                    } else {
-                        variableValues.setFloat(i, noDataValue);
-                    }
-                }
+                dimensionValuesProvider.setVariableValues(referencedValues, variableValues);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }
         tile.setDataElements(rectangle.x, rectangle.y, rectangle.width, rectangle.height, transformStorage(variableValues));
+    }
+
+    private DimensionValuesProvider getDimensionValuesProvider() {
+        switch (variable.getDataType()) {
+            case FLOAT:
+                return new FloatDimensionValuesProvider();
+            case SHORT:
+                return new ShortDimensionValuesProvider();
+        }
+        return new NullDimensionValuesProvider();
     }
 
     //copied from CfBandPart
@@ -119,6 +125,79 @@ public class S3ReferencingVariableOpImage extends S3VariableOpImage {
         } else {
             return attribute.getNumericValue();
         }
+    }
+
+    interface DimensionValuesProvider {
+
+        void readValues(int[] variableOrigin, int[] variableShape);
+
+        void setVariableValues(Array referencedValues, Array variableValues);
+    }
+
+    private class FloatDimensionValuesProvider implements DimensionValuesProvider {
+
+        private float[] dimensionValues;
+
+        @Override
+        public void readValues(int[] variableOrigin, int[] variableShape) {
+            try {
+                final Section detectorSection = new Section(variableOrigin, variableShape);
+                final Array dimensionValuesArray = variable.read(detectorSection);
+                dimensionValues = (float[]) dimensionValuesArray.copyTo1DJavaArray();
+            } catch (InvalidRangeException | IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public void setVariableValues(Array referencedValues, Array variableValues) {
+            final float noDataValue = getNoDataValue(referencedIndexVariable).floatValue();
+            for (int i = 0; i < referencedValues.getSize(); i++) {
+                final int detectorIndex = referencedValues.getInt(i);
+                if (detectorIndex > -1) {
+                    variableValues.setFloat(i, dimensionValues[detectorIndex]);
+                } else {
+                    variableValues.setFloat(i, noDataValue);
+                }
+            }
+        }
+    }
+
+    private class ShortDimensionValuesProvider implements DimensionValuesProvider {
+
+        private short[] dimensionValues;
+
+        @Override
+        public void readValues(int[] variableOrigin, int[] variableShape) {
+            try {
+                final Section detectorSection = new Section(variableOrigin, variableShape);
+                final Array dimensionValuesArray = variable.read(detectorSection);
+                dimensionValues = (short[]) dimensionValuesArray.copyTo1DJavaArray();
+            } catch (InvalidRangeException | IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public void setVariableValues(Array referencedValues, Array variableValues) {
+            final short noDataValue = getNoDataValue(referencedIndexVariable).shortValue();
+            for (int i = 0; i < referencedValues.getSize(); i++) {
+                final int detectorIndex = referencedValues.getInt(i);
+                if (detectorIndex > -1) {
+                    variableValues.setShort(i, dimensionValues[detectorIndex]);
+                } else {
+                    variableValues.setShort(i, noDataValue);
+                }
+            }
+        }
+    }
+
+    private class NullDimensionValuesProvider implements DimensionValuesProvider {
+        @Override
+        public void readValues(int[] variableOrigin, int[] variableShape) {}
+
+        @Override
+        public void setVariableValues(Array referencedValues, Array variableValues) {}
     }
 
 }
