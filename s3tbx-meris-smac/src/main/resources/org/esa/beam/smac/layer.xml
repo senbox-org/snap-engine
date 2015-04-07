@@ -31,7 +31,7 @@
 
     <folder name="Services">
         <folder name="JavaHelp">
-            <file name="helpset.xml" url="helpset.xml">
+            <file name="org-esa-s3tbx-s3tbx-meris-smac-helpset.xml" url="helpset.xml">
                 <attr name="position" intvalue="4500"/>
             </file>
         </folder>
