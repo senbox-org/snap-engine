@@ -28,7 +28,7 @@
         "name": "radiance_4",
         "description": "Near-Infrared (30m)",
         "geophysicalUnit": "W/(m^2*sr*µm)",
-        "noDataValue": "-0.7913385826771654",
+        "noDataValue": "-0.791",
         "noDataValueUsed": "true",
         "spectralWavelength": "830.0",
         "spectralBandwidth": "128.0",
@@ -36,12 +36,12 @@
           {
             "x": 1411,
             "y": 646,
-            "value": 56.97638
+            "value": 56.951999
           },
           {
             "x": 2598,
             "y": 3157,
-            "value": 52.228348
+            "value": 52.206001
           }
         ]
       },
@@ -49,7 +49,7 @@
         "name": "radiance_5",
         "description": "Near-Infrared (30m)",
         "geophysicalUnit": "W/(m^2*sr*µm)",
-        "noDataValue": "8.461417322834645",
+        "noDataValue": "8.461",
         "noDataValueUsed": "true",
         "spectralWavelength": "1670.0",
         "spectralBandwidth": "217.0",
@@ -57,12 +57,12 @@
           {
             "x": 1411,
             "y": 646,
-            "value": 37.83622
+            "value": 37.854999
           },
           {
             "x": 2598,
             "y": 3157,
-            "value": 41.667717
+            "value": 41.688999
           }
         ]
       },
@@ -70,7 +70,7 @@
         "name": "radiance_6",
         "description": "Thermal (120m)",
         "geophysicalUnit": "W/(m^2*sr*µm)",
-        "noDataValue": "-9.069291338582678",
+        "noDataValue": "-9.069",
         "noDataValueUsed": "true",
         "spectralWavelength": "11500.0",
         "spectralBandwidth": "1000.0",
@@ -78,12 +78,12 @@
           {
             "x": 1411,
             "y": 646,
-            "value": 6.993701
+            "value": 6.986999
           },
           {
             "x": 2598,
             "y": 3157,
-            "value": 45.143307
+            "value": 45.119998
           }
         ]
       },
@@ -91,7 +91,7 @@
         "name": "radiance_7",
         "description": "Mid-Infrared (30m)",
         "geophysicalUnit": "W/(m^2*sr*µm)",
-        "noDataValue": "-0.6259842519685039",
+        "noDataValue": "-0.626",
         "noDataValueUsed": "true",
         "spectralWavelength": "2240.0",
         "spectralBandwidth": "252.0",
@@ -99,12 +99,12 @@
           {
             "x": 1411,
             "y": 646,
-            "value": 11.267716
+            "value": 11.267999
           },
           {
             "x": 2598,
             "y": 3157,
-            "value": 48.200787
+            "value": 48.201999
           }
         ]
       }

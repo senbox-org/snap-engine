@@ -28,7 +28,7 @@
         "name": "radiance_4",
         "description": "Near-Infrared (30m)",
         "geophysicalUnit": "W/(m^2*sr*µm)",
-        "noDataValue": "2.690551181102362",
+        "noDataValue": "2.69055",
         "noDataValueUsed": "true",
         "spectralWavelength": "830.0",
         "spectralBandwidth": "128.0",
@@ -41,7 +41,7 @@
           {
             "x": 2864,
             "y": 3206,
-            "value": 120.9189
+            "value": 120.860549
           }
         ]
       },
@@ -49,7 +49,7 @@
         "name": "radiance_5",
         "description": "Near-Infrared (30m)",
         "geophysicalUnit": "W/(m^2*sr*µm)",
-        "noDataValue": "2.164566929133858",
+        "noDataValue": "2.16457",
         "noDataValueUsed": "true",
         "spectralWavelength": "1670.0",
         "spectralBandwidth": "217.0",
@@ -57,12 +57,12 @@
           {
             "x": 1216,
             "y": 968,
-            "value": 2.8
+            "value": 2.799570
           },
           {
             "x": 2552,
             "y": 1377,
-            "value": 66.34331
+            "value": 66.299568
           }
         ]
       },
@@ -70,7 +70,7 @@
         "name": "radiance_6",
         "description": "Thermal (120m)",
         "geophysicalUnit": "W/(m^2*sr*µm)",
-        "noDataValue": "2.3358267716535432",
+        "noDataValue": "2.33583",
         "noDataValueUsed": "true",
         "spectralWavelength": "11500.0",
         "spectralBandwidth": "1000.0",
@@ -78,12 +78,12 @@
           {
             "x": 2299,
             "y": 2809,
-            "value": 80.755905
+            "value": 80.731826
           },
           {
             "x": 2543,
             "y": 3500,
-            "value": 51.4189
+            "value": 51.403831
           }
         ]
       },
@@ -91,7 +91,7 @@
         "name": "radiance_7",
         "description": "Mid-Infrared (30m)",
         "geophysicalUnit": "W/(m^2*sr*µm)",
-        "noDataValue": "0.5248031496062993",
+        "noDataValue": "0.52480",
         "noDataValueUsed": "true",
         "spectralWavelength": "2240.0",
         "spectralBandwidth": "252.0",
@@ -99,12 +99,12 @@
           {
             "x": 661,
             "y": 2511,
-            "value": 1.0
+            "value": 0.999800
           },
           {
             "x": 2170,
             "y": 3443,
-            "value": 32.36299
+            "value": 32.349800
           }
         ]
       }

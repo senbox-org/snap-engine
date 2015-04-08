@@ -127,7 +127,7 @@
         "name": "coastal_aerosol",
         "description": "Coastal Aerosol (Operational Land Imager (OLI))",
         "geophysicalUnit": "W/(m^2*sr*µm)",
-        "noDataValue": "-63.508831766411326",
+        "noDataValue": "-63.50883",
         "noDataValueUsed": "true",
         "spectralWavelength": "440.0",
         "spectralBandwidth": "20.0",
@@ -135,22 +135,12 @@
           {
             "x": 2066,
             "y": 11631,
-            "value": 72.616
+            "value": 72.618507
           },
           {
             "x": 15684,
             "y": 69,
             "value": "NaN"
-          },
-          {
-            "x": 9248,
-            "y": 4841,
-            "value": 68.52603
-          },
-          {
-            "x": 8237,
-            "y": 8249,
-            "value": 57.80574
           }
         ]
       },
@@ -158,7 +148,7 @@
         "name": "blue",
         "description": "Blue (OLI)",
         "geophysicalUnit": "W/(m^2*sr*µm)",
-        "noDataValue": "-64.76229245872372",
+        "noDataValue": "-64.76229",
         "noDataValueUsed": "true",
         "spectralWavelength": "480.0",
         "spectralBandwidth": "60.0",
@@ -166,22 +156,12 @@
           {
             "x": 2066,
             "y": 11631,
-            "value": 60.384365
+            "value": 60.379932
           },
           {
             "x": 15684,
             "y": 69,
             "value": "NaN"
-          },
-          {
-            "x": 9248,
-            "y": 4841,
-            "value": 60.42322
-          },
-          {
-            "x": 8237,
-            "y": 8249,
-            "value": 47.30238
           }
         ]
       },
@@ -189,7 +169,7 @@
         "name": "green",
         "description": "Green (OLI)",
         "geophysicalUnit": "W/(m^2*sr*µm)",
-        "noDataValue": "-59.30042008316293",
+        "noDataValue": "-59.30041",
         "noDataValueUsed": "true",
         "spectralWavelength": "560.0",
         "spectralBandwidth": "60.0",
@@ -197,22 +177,12 @@
           {
             "x": 2066,
             "y": 11631,
-            "value": 36.63579
+            "value": 36.635131
           },
           {
             "x": 15684,
             "y": 69,
             "value": "NaN"
-          },
-          {
-            "x": 9248,
-            "y": 4841,
-            "value": 51.79298
-          },
-          {
-            "x": 8237,
-            "y": 8249,
-            "value": 28.653957
           }
         ]
       },
@@ -220,7 +190,7 @@
         "name": "red",
         "description": "Red (OLI)",
         "geophysicalUnit": "W/(m^2*sr*µm)",
-        "noDataValue": "-50.22382476439711",
+        "noDataValue": "-50.22382",
         "noDataValueUsed": "true",
         "spectralWavelength": "655.0",
         "spectralBandwidth": "30.0",
@@ -228,22 +198,12 @@
           {
             "x": 2066,
             "y": 11631,
-            "value": 22.681076
+            "value": 22.682790
           },
           {
             "x": 15684,
             "y": 69,
             "value": "NaN"
-          },
-          {
-            "x": 9248,
-            "y": 4841,
-            "value": 39.676815
-          },
-          {
-            "x": 8237,
-            "y": 8249,
-            "value": 14.484548
           }
         ]
       },
@@ -251,7 +211,7 @@
         "name": "near_infrared",
         "description": "Near-Infrared (NIR) (OLI)",
         "geophysicalUnit": "W/(m^2*sr*µm)",
-        "noDataValue": "-30.476375274666584",
+        "noDataValue": "-30.47637",
         "noDataValueUsed": "true",
         "spectralWavelength": "865.0",
         "spectralBandwidth": "30.0",
@@ -259,22 +219,12 @@
           {
             "x": 2066,
             "y": 11631,
-            "value": 9.953582
+            "value": 9.953754
           },
           {
             "x": 15684,
             "y": 69,
             "value": "NaN"
-          },
-          {
-            "x": 9248,
-            "y": 4841,
-            "value": 94.684
-          },
-          {
-            "x": 8237,
-            "y": 8249,
-            "value": 4.1935472
           }
         ]
       },
@@ -282,7 +232,7 @@
         "name": "swir_1",
         "description": "Short Wavelength Infrared (SWIR) 1 (OLI)",
         "geophysicalUnit": "W/(m^2*sr*µm)",
-        "noDataValue": "-7.678525704977569",
+        "noDataValue": "-7.67852",
         "noDataValueUsed": "true",
         "spectralWavelength": "1610.0",
         "spectralBandwidth": "80.0",
@@ -290,22 +240,12 @@
           {
             "x": 2066,
             "y": 11631,
-            "value": 1.2070633
+            "value": 1.207040
           },
           {
             "x": 15684,
             "y": 69,
             "value": "NaN"
-          },
-          {
-            "x": 9248,
-            "y": 4841,
-            "value": 15.071408
-          },
-          {
-            "x": 8237,
-            "y": 8249,
-            "value": 0.45149645
           }
         ]
       },
@@ -313,7 +253,7 @@
         "name": "swir_2",
         "description": "SWIR 2 (OLI)",
         "geophysicalUnit": "W/(m^2*sr*µm)",
-        "noDataValue": "-2.497809561906797",
+        "noDataValue": "-2.49781",
         "noDataValueUsed": "true",
         "spectralWavelength": "2200.0",
         "spectralBandwidth": "180.0",
@@ -321,22 +261,12 @@
           {
             "x": 2066,
             "y": 11631,
-            "value": 0.3062314
+            "value": 0.306220
           },
           {
             "x": 15684,
             "y": 69,
             "value": "NaN"
-          },
-          {
-            "x": 9248,
-            "y": 4841,
-            "value": 2.612209
-          },
-          {
-            "x": 8237,
-            "y": 8249,
-            "value": 0.10640666
           }
         ]
       },
@@ -344,7 +274,7 @@
         "name": "panchromatic",
         "description": "Panchromatic (OLI)",
         "geophysicalUnit": "W/(m^2*sr*µm)",
-        "noDataValue": "-56.573954791711174",
+        "noDataValue": "-56.57396",
         "noDataValueUsed": "true",
         "spectralWavelength": "590.0",
         "spectralBandwidth": "180.0",
@@ -352,22 +282,12 @@
           {
             "x": 2066,
             "y": 11631,
-            "value": 31.296717
+            "value": 31.298330
           },
           {
             "x": 15684,
             "y": 69,
             "value": "NaN"
-          },
-          {
-            "x": 9248,
-            "y": 4841,
-            "value": 45.202595
-          },
-          {
-            "x": 8237,
-            "y": 8249,
-            "value": 23.104809
           }
         ]
       },
@@ -375,7 +295,7 @@
         "name": "cirrus",
         "description": "Cirrus (OLI)",
         "geophysicalUnit": "W/(m^2*sr*µm)",
-        "noDataValue": "-12.52400480117191",
+        "noDataValue": "-12.52401",
         "noDataValueUsed": "true",
         "spectralWavelength": "1370.0",
         "spectralBandwidth": "20.0",
@@ -383,22 +303,12 @@
           {
             "x": 2066,
             "y": 11631,
-            "value": 0.3256252
+            "value": 0.325614
           },
           {
             "x": 15684,
             "y": 69,
             "value": "NaN"
-          },
-          {
-            "x": 9248,
-            "y": 4841,
-            "value": 0.12023152
-          },
-          {
-            "x": 8237,
-            "y": 8249,
-            "value": 0.060116287
           }
         ]
       },
@@ -406,7 +316,7 @@
         "name": "thermal_infrared_(tirs)_1",
         "description": "Thermal Infrared Sensor (TIRS) 1",
         "geophysicalUnit": "W/(m^2*sr*µm)",
-        "noDataValue": "0.09999579989013337",
+        "noDataValue": "0.1",
         "noDataValueUsed": "true",
         "spectralWavelength": "10895.0",
         "spectralBandwidth": "590.0",
@@ -414,22 +324,12 @@
           {
             "x": 2066,
             "y": 11631,
-            "value": 6.4260697
+            "value": 6.426071
           },
           {
             "x": 15684,
             "y": 69,
             "value": "NaN"
-          },
-          {
-            "x": 9248,
-            "y": 4841,
-            "value": 8.353402
-          },
-          {
-            "x": 8237,
-            "y": 8249,
-            "value": 7.0403295
           }
         ]
       },
@@ -437,7 +337,7 @@
         "name": "thermal_infrared_(tirs)_2",
         "description": "TIRS 2",
         "geophysicalUnit": "W/(m^2*sr*µm)",
-        "noDataValue": "0.09999579989013337",
+        "noDataValue": "0.1",
         "noDataValueUsed": "true",
         "spectralWavelength": "12005.0",
         "spectralBandwidth": "1010.0",
@@ -445,22 +345,12 @@
           {
             "x": 2066,
             "y": 11631,
-            "value": 6.3488693
+            "value": 6.348871
           },
           {
             "x": 15684,
             "y": 69,
             "value": "NaN"
-          },
-          {
-            "x": 9248,
-            "y": 4841,
-            "value": 7.8353915
-          },
-          {
-            "x": 8237,
-            "y": 8249,
-            "value": 6.8401437
           }
         ]
       },

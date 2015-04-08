@@ -28,12 +28,12 @@
         "name": "radiance_1",
         "description": "Visible (30m)",
         "geophysicalUnit": "W/(m^2*sr*µm)",
-        "noDataValue": "-2.1992125984251967",
+        "noDataValue": "-2.19921",
         "expectedPixels": [
           {
             "x": "4984",
             "y": "2943",
-            "value": "47.38331"
+            "value": "47.367790"
           }
         ]
       },
@@ -41,12 +41,12 @@
         "name": "radiance_2",
         "description": "Visible (30m)",
         "geophysicalUnit": "W/(m^2*sr*µm)",
-        "noDataValue": "-4.174015748031496",
+        "noDataValue": "-4.17402",
         "expectedPixels": [
           {
             "x": "4984",
             "y": "2943",
-            "value": "37.180473"
+            "value": "37.179981"
           }
         ]
       },
@@ -54,12 +54,12 @@
         "name": "radiance_3",
         "description": "Visible (30m)",
         "geophysicalUnit": "W/(m^2*sr*µm)",
-        "noDataValue": "-2.1746062992125985",
+        "noDataValue": "-2.17461",
         "expectedPixels": [
           {
             "x": "4984",
             "y": "2943",
-            "value": "26.958977"
+            "value": "26.970390"
           }
         ]
       },
@@ -67,12 +67,12 @@
         "name": "radiance_4",
         "description": "Near-Infrared (30m)",
         "geophysicalUnit": "W/(m^2*sr*µm)",
-        "noDataValue": "-2.386023622047244",
+        "noDataValue": "-2.38602",
         "expectedPixels": [
           {
             "x": "4984",
             "y": "2943",
-            "value": "51.05142"
+            "value": "51.049980"
           }
         ]
       },
@@ -80,12 +80,12 @@
         "name": "radiance_5",
         "description": "Near-Infrared (30m)",
         "geophysicalUnit": "W/(m^2*sr*µm)",
-        "noDataValue": "-0.4950787401574803",
+        "noDataValue": "-0.49508",
         "expectedPixels": [
           {
             "x": "7228",
             "y": "2880",
-            "value": "7.8851967"
+            "value": "7.879920"
           }
         ]
       },
@@ -93,12 +93,12 @@
         "name": "radiance_6",
         "description": "Thermal (120m)",
         "geophysicalUnit": "W/(m^2*sr*µm)",
-        "noDataValue": "1.1826259842519684",
+        "noDataValue": "1.18243",
         "expectedPixels": [
           {
             "x": "7228",
             "y": "2880",
-            "value": "7.4952636"
+            "value": "7.452429"
           }
         ]
       },
@@ -106,7 +106,7 @@
         "name": "radiance_7",
         "description": "Mid-Infrared (30m)",
         "geophysicalUnit": "W/(m^2*sr*µm)",
-        "noDataValue": "-0.21594488188976377",
+        "noDataValue": "-0.21594",
         "expectedPixels": [
           {
             "x": "7228",

@@ -235,14 +235,14 @@
         "name": "thermal_infrared_(tirs)_1",
         "description": "Thermal Infrared Sensor (TIRS) 1",
         "geophysicalUnit": "W/(m^2*sr*µm)",
-        "noDataValue": "0.09999579989013337",
+        "noDataValue": "0.1",
         "spectralWavelength": "10895.0",
         "spectralBandwidth": "590.0",
         "expectedPixels": [
           {
             "x": "2678",
             "y": "2012",
-            "value": "5.149425"
+            "value": "5.149427"
           },
           {
             "x": "191",
@@ -255,14 +255,14 @@
         "name": "thermal_infrared_(tirs)_2",
         "description": "TIRS 2",
         "geophysicalUnit": "W/(m^2*sr*µm)",
-        "noDataValue": "0.09999579989013337",
+        "noDataValue": "0.1",
         "spectralWavelength": "12005.0",
         "spectralBandwidth": "1010.0",
         "expectedPixels": [
           {
             "x": "5691",
             "y": "4953",
-            "value": "5.2961392"
+            "value": "5.296141"
           },
           {
             "x": "6258",

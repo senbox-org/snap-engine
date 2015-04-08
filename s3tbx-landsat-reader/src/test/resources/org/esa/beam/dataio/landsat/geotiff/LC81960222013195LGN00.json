@@ -225,12 +225,12 @@
         "name": "coastal_aerosol",
         "description": "Coastal Aerosol (Operational Land Imager (OLI))",
         "geophysicalUnit": "W/(m^2*sr*µm)",
-        "noDataValue": "-62.44129825891903",
+        "noDataValue": "-62.4413",
         "expectedPixels": [
           {
             "x": "13876",
             "y": "4362",
-            "value": "101.32973"
+            "value": "101.326332"
           }
         ]
       },
@@ -238,12 +238,12 @@
         "name": "blue",
         "description": "Blue (OLI)",
         "geophysicalUnit": "W/(m^2*sr*µm)",
-        "noDataValue": "-63.67368473754082",
+        "noDataValue": "-63.67369",
         "expectedPixels": [
           {
             "x": "4680",
             "y": "3958",
-            "value": "314.70084"
+            "value": "314.708618"
           }
         ]
       },
@@ -251,12 +251,12 @@
         "name": "green",
         "description": "Green (OLI)",
         "geophysicalUnit": "W/(m^2*sr*µm)",
-        "noDataValue": "-58.303620723593866",
+        "noDataValue": "-58.30362",
         "expectedPixels": [
           {
             "x": "11673",
             "y": "8716",
-            "value": "251.11368"
+            "value": "251.121017"
           }
         ]
       },
@@ -264,12 +264,12 @@
         "name": "red",
         "description": "Red (OLI)",
         "geophysicalUnit": "W/(m^2*sr*µm)",
-        "noDataValue": "-49.37959591891232",
+        "noDataValue": "-49.3796",
         "expectedPixels": [
           {
             "x": "2848",
             "y": "9556",
-            "value": "243.08586"
+            "value": "243.085296"
           }
         ]
       },
@@ -277,12 +277,12 @@
         "name": "near_infrared",
         "description": "Near-Infrared (NIR) (OLI)",
         "geophysicalUnit": "W/(m^2*sr*µm)",
-        "noDataValue": "-29.964092818079166",
+        "noDataValue": "-29.96409",
         "expectedPixels": [
           {
             "x": "11808",
             "y": "10716",
-            "value": "106.15678"
+            "value": "106.156372"
           }
         ]
       },
@@ -290,12 +290,12 @@
         "name": "swir_1",
         "description": "Short Wavelength Infrared (SWIR) 1 (OLI)",
         "geophysicalUnit": "W/(m^2*sr*µm)",
-        "noDataValue": "-7.549449890896328",
+        "noDataValue": "-7.54945",
         "expectedPixels": [
           {
             "x": "9639",
             "y": "3757",
-            "value": "17.004396"
+            "value": "17.004543"
           },
           {
             "x": "712",
@@ -308,12 +308,12 @@
         "name": "swir_2",
         "description": "SWIR 2 (OLI)",
         "geophysicalUnit": "W/(m^2*sr*µm)",
-        "noDataValue": "-2.4558211647389143",
+        "noDataValue": "-2.45582",
         "expectedPixels": [
           {
             "x": "14548",
             "y": "4580",
-            "value": "0.6498135"
+            "value": "0.649784"
           }
         ]
       },
@@ -321,12 +321,12 @@
         "name": "panchromatic",
         "description": "Panchromatic (OLI)",
         "geophysicalUnit": "W/(m^2*sr*µm)",
-        "noDataValue": "-55.622994598223826",
+        "noDataValue": "-55.62299",
         "expectedPixels": [
           {
             "x": "1386",
             "y": "10027",
-            "value": "211.66772"
+            "value": "211.677383"
           }
         ]
       },
@@ -334,12 +334,12 @@
         "name": "cirrus",
         "description": "Cirrus (OLI)",
         "geophysicalUnit": "W/(m^2*sr*µm)",
-        "noDataValue": "-12.31348269737846",
+        "noDataValue": "-12.31349",
         "expectedPixels": [
           {
             "x": "6559",
             "y": "5214",
-            "value": "10.766917"
+            "value": "10.766934"
           }
         ]
       },
@@ -347,12 +347,12 @@
         "name": "thermal_infrared_(tirs)_1",
         "description": "Thermal Infrared Sensor (TIRS) 1",
         "geophysicalUnit": "W/(m^2*sr*µm)",
-        "noDataValue": "0.09999579989013337",
+        "noDataValue": "0.1",
         "expectedPixels": [
           {
             "x": "7942",
             "y": "8144",
-            "value": "5.444524"
+            "value": "5.444526"
           }
         ]
       },
@@ -360,12 +360,12 @@
         "name": "thermal_infrared_(tirs)_2",
         "description": "TIRS 2",
         "geophysicalUnit": "W/(m^2*sr*µm)",
-        "noDataValue": "0.09999579989013337",
+        "noDataValue": "0.1",
         "expectedPixels": [
           {
             "x": "8782",
             "y": "4076",
-            "value": "4.2547717"
+            "value": "4.254774"
           }
         ]
       },
