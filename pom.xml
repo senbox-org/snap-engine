@@ -197,6 +197,7 @@
                 <artifactId>snap-core</artifactId>
                 <version>${snap.version}</version>
                 <type>test-jar</type>
+                <scope>test</scope>
             </dependency>
 
 
