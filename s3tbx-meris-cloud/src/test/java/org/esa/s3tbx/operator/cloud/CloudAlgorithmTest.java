@@ -35,7 +35,7 @@ public class CloudAlgorithmTest {
     }
 
     /*
-      * Test method for 'org.esa.beam.processor.cloud.CloudAlgorithm.computeCloud(double[])'
+      * Test method for 'org.esa.snap.processor.cloud.CloudAlgorithm.computeCloud(double[])'
       */
     @Test
     public void testComputeCloud() {
@@ -49,7 +49,7 @@ public class CloudAlgorithmTest {
     }
 
     /*
-      * Test method for 'org.esa.beam.processor.cloud.CloudAlgorithm.nn2Probability(double)'
+      * Test method for 'org.esa.s3tbx.processor.cloud.CloudAlgorithm.nn2Probability(double)'
       */
     @Test
     public void testNn2Probability() {

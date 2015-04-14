@@ -38,7 +38,7 @@ import java.util.Map;
  * A ProcessingNode takes a single input product and creates an output product
  * using the same pixel resolution and the same spatial reference system as the input product.
  * <p/>
- * The method {@link #readFrameData(org.esa.beam.framework.datamodel.Band, int, int, int, int, org.esa.beam.framework.datamodel.ProductData)}
+ * The method {@link #readFrameData(org.esa.snap.framework.datamodel.Band, int, int, int, int, org.esa.snap.framework.datamodel.ProductData)}
  * will continue using pre-cached and pre-computed data as long as the frame rectangle will not change.
  * <p>If the frame rectangle changes, the {@link #processFrame(int, int, int, int, ProgressMonitor)} method is called in order
  * to compute the data frame for each of the bands contained in the target product.

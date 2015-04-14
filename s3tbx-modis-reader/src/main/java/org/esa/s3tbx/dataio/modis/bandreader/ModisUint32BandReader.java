@@ -39,7 +39,7 @@ public class ModisUint32BandReader extends ModisBandReader {
     /**
      * Retrieves the data type of the band
      *
-     * @return always {@link org.esa.beam.framework.datamodel.ProductData#TYPE_UINT16}
+     * @return always {@link org.esa.snap.framework.datamodel.ProductData#TYPE_UINT16}
      */
     @Override
     public int getDataType() {

@@ -433,37 +433,37 @@
         "masks": [
             {
                 "name": "QUALITY_ERROR",
-                "type": "org.esa.beam.framework.datamodel.Mask$BandMathsType",
+                "type": "org.esa.snap.framework.datamodel.Mask$BandMathsType",
                 "color": "128,128,255",
                 "description": "Set if any of the bits from the quality indicator bit-field are set"
             },
             {
                 "name": "SCANLINE_ERROR",
-                "type": "org.esa.beam.framework.datamodel.Mask$BandMathsType",
+                "type": "org.esa.snap.framework.datamodel.Mask$BandMathsType",
                 "color": "238,17,191",
                 "description": "Set if any of the bits from the scanline quality flags are set"
             },
             {
                 "name": "CALIB_CH_3B_ERROR",
-                "type": "org.esa.beam.framework.datamodel.Mask$BandMathsType",
+                "type": "org.esa.snap.framework.datamodel.Mask$BandMathsType",
                 "color": "238,17,64",
                 "description": "Set if any of the bits from the scanline quality flags are set"
             },
             {
                 "name": "CALIB_CH_4_ERROR",
-                "type": "org.esa.beam.framework.datamodel.Mask$BandMathsType",
+                "type": "org.esa.snap.framework.datamodel.Mask$BandMathsType",
                 "color": "128,128,0",
                 "description": "Set if any of the bits from the scanline quality flags are set"
             },
             {
                 "name": "CALIB_CH_5_ERROR",
-                "type": "org.esa.beam.framework.datamodel.Mask$BandMathsType",
+                "type": "org.esa.snap.framework.datamodel.Mask$BandMathsType",
                 "color": "17,238,64",
                 "description": "Set if any of the bits from the scanline quality flags are set"
             },
             {
                 "name": "FRAME_SYNC_ERROR",
-                "type": "org.esa.beam.framework.datamodel.Mask$BandMathsType",
+                "type": "org.esa.snap.framework.datamodel.Mask$BandMathsType",
                 "color": "17,238,191",
                 "description": "Set if there are bit errors in the frame sync"
             }

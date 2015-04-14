@@ -107,7 +107,7 @@ public class SpotVgtProductReaderPlugIn implements ProductReaderPlugIn {
     }
 
     /**
-     * Gets an instance of {@link org.esa.beam.util.io.BeamFileFilter} for use in a {@link javax.swing.JFileChooser JFileChooser}.
+     * Gets an instance of {@link org.esa.snap.util.io.BeamFileFilter} for use in a {@link javax.swing.JFileChooser JFileChooser}.
      *
      * @return a file filter
      */

@@ -149,7 +149,7 @@ public abstract class AbstractBowtieGeoCoding extends AbstractGeoCoding {
     }
 
     /**
-     * Gets the datum, the reference point or surface against which {@link org.esa.beam.framework.datamodel.GeoPos} measurements are made.
+     * Gets the datum, the reference point or surface against which {@link org.esa.snap.framework.datamodel.GeoPos} measurements are made.
      *
      * @return the datum
      */

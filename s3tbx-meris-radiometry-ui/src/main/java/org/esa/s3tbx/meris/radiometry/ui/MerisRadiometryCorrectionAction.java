@@ -30,7 +30,7 @@ import java.awt.event.ActionEvent;
 
 @ActionID(
         category = "Processing",
-        id = "org.esa.beam.meris.radiometry.ui.MerisRadiometryCorrectionAction"
+        id = "org.esa.s3tbx.meris.radiometry.ui.MerisRadiometryCorrectionAction"
 )
 @ActionRegistration(displayName = "#CTL_MerisRadiometryCorrectionAction_Text")
 @ActionReference(

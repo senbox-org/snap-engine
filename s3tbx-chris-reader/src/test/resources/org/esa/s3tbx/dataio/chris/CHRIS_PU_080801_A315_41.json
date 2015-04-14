@@ -197,91 +197,91 @@
         "masks": [
             {
                 "name": "spectrum_dropout",
-                "type": "org.esa.beam.framework.datamodel.Mask$BandMathsType",
+                "type": "org.esa.snap.framework.datamodel.Mask$BandMathsType",
                 "color": "255,0,0",
                 "description": "Spectrum contains a dropout pixel"
             },
             {
                 "name": "spectrum_saturated",
-                "type": "org.esa.beam.framework.datamodel.Mask$BandMathsType",
+                "type": "org.esa.snap.framework.datamodel.Mask$BandMathsType",
                 "color": "255,200,0",
                 "description": "Spectrum contains a saturated pixel"
             },
             {
                 "name": "spectrum_dropout_corrected",
-                "type": "org.esa.beam.framework.datamodel.Mask$BandMathsType",
+                "type": "org.esa.snap.framework.datamodel.Mask$BandMathsType",
                 "color": "0,255,0",
                 "description": "Spectrum contains a corrected dropout pixel"
             },
             {
                 "name": "radiance_1_dropout",
-                "type": "org.esa.beam.framework.datamodel.Mask$BandMathsType",
+                "type": "org.esa.snap.framework.datamodel.Mask$BandMathsType",
                 "color": "255,0,0",
                 "description": "Dropout pixel"
             },
             {
                 "name": "radiance_1_saturated",
-                "type": "org.esa.beam.framework.datamodel.Mask$BandMathsType",
+                "type": "org.esa.snap.framework.datamodel.Mask$BandMathsType",
                 "color": "255,200,0",
                 "description": "Saturated pixel"
             },
             {
                 "name": "radiance_1_dropout_corrected",
-                "type": "org.esa.beam.framework.datamodel.Mask$BandMathsType",
+                "type": "org.esa.snap.framework.datamodel.Mask$BandMathsType",
                 "color": "0,255,0",
                 "description": "Corrected dropout pixel"
             },
             {
                 "name": "radiance_2_dropout",
-                "type": "org.esa.beam.framework.datamodel.Mask$BandMathsType",
+                "type": "org.esa.snap.framework.datamodel.Mask$BandMathsType",
                 "color": "255,0,0",
                 "description": "Dropout pixel"
             },
             {
                 "name": "radiance_2_saturated",
-                "type": "org.esa.beam.framework.datamodel.Mask$BandMathsType",
+                "type": "org.esa.snap.framework.datamodel.Mask$BandMathsType",
                 "color": "255,200,0",
                 "description": "Saturated pixel"
             },
             {
                 "name": "radiance_2_dropout_corrected",
-                "type": "org.esa.beam.framework.datamodel.Mask$BandMathsType",
+                "type": "org.esa.snap.framework.datamodel.Mask$BandMathsType",
                 "color": "0,255,0",
                 "description": "Corrected dropout pixel"
             },
             {
                 "name": "radiance_3_dropout",
-                "type": "org.esa.beam.framework.datamodel.Mask$BandMathsType",
+                "type": "org.esa.snap.framework.datamodel.Mask$BandMathsType",
                 "color": "255,0,0",
                 "description": "Dropout pixel"
             },
             {
                 "name": "radiance_3_saturated",
-                "type": "org.esa.beam.framework.datamodel.Mask$BandMathsType",
+                "type": "org.esa.snap.framework.datamodel.Mask$BandMathsType",
                 "color": "255,200,0",
                 "description": "Saturated pixel"
             },
             {
                 "name": "radiance_3_dropout_corrected",
-                "type": "org.esa.beam.framework.datamodel.Mask$BandMathsType",
+                "type": "org.esa.snap.framework.datamodel.Mask$BandMathsType",
                 "color": "0,255,0",
                 "description": "Corrected dropout pixel"
             },
             {
                 "name": "radiance_4_dropout",
-                "type": "org.esa.beam.framework.datamodel.Mask$BandMathsType",
+                "type": "org.esa.snap.framework.datamodel.Mask$BandMathsType",
                 "color": "255,0,0",
                 "description": "Dropout pixel"
             },
             {
                 "name": "radiance_4_saturated",
-                "type": "org.esa.beam.framework.datamodel.Mask$BandMathsType",
+                "type": "org.esa.snap.framework.datamodel.Mask$BandMathsType",
                 "color": "255,200,0",
                 "description": "Saturated pixel"
             },
             {
                 "name": "radiance_4_dropout_corrected",
-                "type": "org.esa.beam.framework.datamodel.Mask$BandMathsType",
+                "type": "org.esa.snap.framework.datamodel.Mask$BandMathsType",
                 "color": "0,255,0",
                 "description": "Corrected dropout pixel"
             }

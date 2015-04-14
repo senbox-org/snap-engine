@@ -18,7 +18,7 @@ import java.beans.PropertyChangeListener;
 
 @ActionID(
         category = "Processing",
-        id = "org.esa.beam.processor.flh_mci.visat.FlhMciAction"
+        id = "org.esa.s3tbx.processor.flh_mci.visat.FlhMciAction"
 )
 @ActionRegistration(displayName = "#CTL_FlhMciAction_Text")
 @ActionReference(

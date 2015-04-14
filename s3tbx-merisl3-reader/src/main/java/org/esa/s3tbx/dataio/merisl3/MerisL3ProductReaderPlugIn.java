@@ -34,7 +34,7 @@ import java.util.Locale;
  *
  * @author Norman Fomferra
  * @version $Revision$ $Date$
- * @see org.esa.beam.dataio.merisl3.MerisL3ProductReader
+ * @see org.esa.snap.dataio.merisl3.MerisL3ProductReader
  */
 public class MerisL3ProductReaderPlugIn implements ProductReaderPlugIn {
 
@@ -102,7 +102,7 @@ public class MerisL3ProductReaderPlugIn implements ProductReaderPlugIn {
      * <code>InvalidArgumentException</code> in this case).
      *
      * @return an array containing valid input types, never <code>null</code>
-     * @see org.esa.beam.framework.dataio.AbstractProductReader#readProductNodes
+     * @see org.esa.snap.framework.dataio.AbstractProductReader#readProductNodes
      */
     public Class[] getInputTypes() {
         return new Class[]{String.class, File.class};

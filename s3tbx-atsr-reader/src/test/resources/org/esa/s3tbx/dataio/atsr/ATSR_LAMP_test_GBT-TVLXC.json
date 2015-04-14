@@ -778,25 +778,25 @@
         "masks": [
             {
                 "name": "fire_nadir_1",
-                "type": "org.esa.beam.framework.datamodel.Mask$BandMathsType",
+                "type": "org.esa.snap.framework.datamodel.Mask$BandMathsType",
                 "color": "255,0,0",
                 "description": "ATSR active fire (ALGO1)"
             },
             {
                 "name": "fire_nadir_2",
-                "type": "org.esa.beam.framework.datamodel.Mask$BandMathsType",
+                "type": "org.esa.snap.framework.datamodel.Mask$BandMathsType",
                 "color": "178,0,0",
                 "description": "ATSR active fire (ALGO2)"
             },
             {
                 "name": "fire_fward_1",
-                "type": "org.esa.beam.framework.datamodel.Mask$BandMathsType",
+                "type": "org.esa.snap.framework.datamodel.Mask$BandMathsType",
                 "color": "255,0,0",
                 "description": "ATSR active fire (ALGO1)"
             },
             {
                 "name": "fire_fward_2",
-                "type": "org.esa.beam.framework.datamodel.Mask$BandMathsType",
+                "type": "org.esa.snap.framework.datamodel.Mask$BandMathsType",
                 "color": "178,0,0",
                 "description": "ATSR active fire (ALGO2)"
             }

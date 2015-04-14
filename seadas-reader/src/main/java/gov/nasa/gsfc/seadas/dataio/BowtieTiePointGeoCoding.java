@@ -157,8 +157,8 @@ public class BowtieTiePointGeoCoding extends AbstractBowtieGeoCoding {
     }
 
     /**
-     * Transfers the geo-coding of the {@link org.esa.beam.framework.datamodel.Scene srcScene} to the {@link org.esa.beam.framework.datamodel.Scene destScene} with respect to the given
-     * {@link org.esa.beam.framework.dataio.ProductSubsetDef subsetDef}.
+     * Transfers the geo-coding of the {@link org.esa.snap.framework.datamodel.Scene srcScene} to the {@link org.esa.snap.framework.datamodel.Scene destScene} with respect to the given
+     * {@link org.esa.snap.framework.dataio.ProductSubsetDef subsetDef}.
      *
      * @param srcScene  the source scene
      * @param destScene the destination scene

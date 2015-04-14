@@ -46,7 +46,7 @@ import java.util.Map;
  *
  * @author Norman Fomferra
  * @version $Revision$ $Date$
- * @see org.esa.beam.dataio.merisl3.MerisL3ProductReaderPlugIn
+ * @see org.esa.snap.dataio.merisl3.MerisL3ProductReaderPlugIn
  */
 public class MerisL3ProductReader extends AbstractProductReader {
 
@@ -122,11 +122,11 @@ public class MerisL3ProductReader extends AbstractProductReader {
     }
 
     /**
-     * The template method which is called by the {@link org.esa.beam.framework.dataio.AbstractProductReader#readBandRasterDataImpl(int, int, int, int, int, int, org.esa.beam.framework.datamodel.Band, int, int, int, int, org.esa.beam.framework.datamodel.ProductData, com.bc.ceres.core.ProgressMonitor)} }
+     * The template method which is called by the {@link org.esa.snap.framework.dataio.AbstractProductReader#readBandRasterDataImpl(int, int, int, int, int, int, org.esa.snap.framework.datamodel.Band, int, int, int, int, org.esa.snap.framework.datamodel.ProductData, com.bc.ceres.core.ProgressMonitor)} }
      * method after an optional spatial subset has been applied to the input parameters.
      * <p>
      * <p>The destination band, buffer and region parameters are exactly the ones passed to the original {@link
-     * org.esa.beam.framework.dataio.AbstractProductReader#readBandRasterDataImpl} call. Since the
+     * org.esa.snap.framework.dataio.AbstractProductReader#readBandRasterDataImpl} call. Since the
      * <code>destOffsetX</code> and <code>destOffsetY</code> parameters are already taken into acount in the
      * <code>sourceOffsetX</code> and <code>sourceOffsetY</code> parameters, an implementor of this method is free to
      * ignore them.

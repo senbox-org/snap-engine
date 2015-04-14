@@ -95,7 +95,7 @@ public class SeabassReader extends LineNumberReader {
         readHeader();
 
         SimpleFeatureTypeBuilder ftb = new SimpleFeatureTypeBuilder();
-        //ftb.setName("org.esa.beam.TrackPoint");
+        //ftb.setName("org.esa.snap.TrackPoint");
         ftb.setName("gov.nasa.gsfc.seabass.vectorData");
         /*0*/
         ftb.add("pixelPos", Point.class, geoCoding.getImageCRS());
