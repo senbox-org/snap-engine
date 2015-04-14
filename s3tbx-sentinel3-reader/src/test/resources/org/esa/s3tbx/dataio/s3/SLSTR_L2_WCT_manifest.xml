@@ -1,0 +1,965 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- manually written, for unit testing only! no manifest files were included in current WCT/WST test packages! -->
+
+<!-- SENTINEL 3 SLSTR WCT Level 2 archive
+This document is a sample manifest file of a SAFE archive. -->
+
+<xfdu:XFDU xmlns:xfdu='urn:ccsds:schema:xfdu:1'
+           xmlns:safe='http://www.esa.int/safe/1.2'
+
+           version='esa/safe/1.2/sentinel-3/slstr/wct/level-2'>
+
+    <!-- ============================================ 
+      INFORMATION PACKAGE MAP SECTION
+   ============================================ -->
+    <informationPackageMap>
+        <xfdu:contentUnit
+                unitType='Sentinel 3 Information Package'
+                textInfo='Sentinel 3 SLST Level 2 WCT'
+                pdiID='processing'
+                dmdID='acquisitionPeriod platform'>
+
+            <!-- Measurement Data Sets -->
+            <xfdu:contentUnit
+                    unitType='Measurement Data Unit'
+                    textInfo='Nadir View Two Channel SST'
+                    dmdID='nadirFlags indices timeCoordinates geodeticDataCoordinates cartesianDataCoordinates nadirSolarViewGeometry geodeticTiepointCoordinates cartesianTiepointsCoordinates meteorologicalData'
+                    repID='N2_SST_schema'>
+                <dataObjectPointer
+                        dataObjectID='N2_SST_data'/>
+            </xfdu:contentUnit>
+
+            <xfdu:contentUnit
+                    unitType='Measurement Data Unit'
+                    textInfo='Nadir View Three Channel Robust SST'
+                    dmdID='nadirFlags indices timeCoordinates geodeticDataCoordinates cartesianDataCoordinates nadirSolarViewGeometry geodeticTiepointCoordinates cartesianTiepointsCoordinates meteorologicalData'
+                    repID='N3R_SST_schema'>
+                <dataObjectPointer
+                        dataObjectID='N3R_SST_data'/>
+            </xfdu:contentUnit>
+
+            <xfdu:contentUnit
+                    unitType='Measurement Data Unit'
+                    textInfo='Nadir View Three Channel SST'
+                    dmdID='nadirFlags indices timeCoordinates geodeticDataCoordinates cartesianDataCoordinates nadirSolarViewGeometry geodeticTiepointCoordinates cartesianTiepointsCoordinates meteorologicalData'
+                    repID='N3_SST_schema'>
+                <dataObjectPointer
+                        dataObjectID='N3_SST_data'/>
+            </xfdu:contentUnit>
+
+            <xfdu:contentUnit
+                    unitType='Measurement Data Unit'
+                    textInfo='Dual View Two Channel SST'
+                    dmdID='nadirFlags obliqueFlags indices timeCoordinates geodeticDataCoordinates cartesianDataCoordinates nadirSolarViewGeometry obliqueSolarViewGeometry geodeticTiepointCoordinates cartesianTiepointsCoordinates meteorologicalData'
+                    repID='D2_SST_schema'>
+                <dataObjectPointer
+                        dataObjectID='D2_SST_data'/>
+            </xfdu:contentUnit>
+
+            <xfdu:contentUnit
+                    unitType='Measurement Data Unit'
+                    textInfo='Dual View Three Channel SST'
+                    dmdID='nadirFlags obliqueFlags indices timeCoordinates geodeticDataCoordinates cartesianDataCoordinates nadirSolarViewGeometry obliqueSolarViewGeometry geodeticTiepointCoordinates cartesianTiepointsCoordinates meteorologicalData'
+                    repID='D3_SST_schema'>
+                <dataObjectPointer
+                        dataObjectID='D3_SST_data'/>
+            </xfdu:contentUnit>
+
+            <!-- Virtual Measurement Data Sets -->
+            <xfdu:contentUnit
+                    unitType='Measurement Data Unit'
+                    textInfo='Nadir View Two Channel SST'
+                    dmdID='nadirFlags nadirSolarViewGeometry geodeticTiepointCoordinates cartesianTiepointsCoordinates meteorologicalData'
+                    repID='virtualDataSchema'>
+                <dataObjectPointer
+                        dataObjectID='v_N2_SST_data'/>
+            </xfdu:contentUnit>
+
+            <xfdu:contentUnit
+                    unitType='Measurement Data Unit'
+                    textInfo='Nadir View Three Channel Robust SST'
+                    dmdID='nadirFlags nadirSolarViewGeometry geodeticTiepointCoordinates cartesianTiepointsCoordinates meteorologicalData'
+                    repID='virtualDataSchema'>
+                <dataObjectPointer
+                        dataObjectID='v_N3R_SST_data'/>
+            </xfdu:contentUnit>
+
+            <xfdu:contentUnit
+                    unitType='Measurement Data Unit'
+                    textInfo='Nadir View Three Channel SST'
+                    dmdID='nadirFlags nadirSolarViewGeometry geodeticTiepointCoordinates cartesianTiepointsCoordinates meteorologicalData'
+                    repID='virtualDataSchema'>
+                <dataObjectPointer
+                        dataObjectID='v_N3_SST_data'/>
+            </xfdu:contentUnit>
+
+            <xfdu:contentUnit
+                    unitType='Measurement Data Unit'
+                    textInfo='Dual View Two Channel SST'
+                    dmdID='nadirFlags obliqueFlags nadirSolarViewGeometry obliqueSolarViewGeometry geodeticTiepointCoordinates cartesianTiepointsCoordinates meteorologicalData'
+                    repID='virtualDataSchema'>
+                <dataObjectPointer
+                        dataObjectID='v_D2_SST_data'/>
+            </xfdu:contentUnit>
+
+            <xfdu:contentUnit
+                    unitType='Measurement Data Unit'
+                    textInfo='Dual View Three Channel SST'
+                    dmdID='nadirFlags obliqueFlags indices timeCoordinates geodeticDataCoordinates cartesianDataCoordinates nadirSolarViewGeometry obliqueSolarViewGeometry geodeticTiepointCoordinates cartesianTiepointsCoordinates meteorologicalData'
+                    repID='virtualDataSchema'>
+                <dataObjectPointer
+                        dataObjectID='v_D3_SST_data'/>
+            </xfdu:contentUnit>
+
+
+            <!-- Annotation Data Set -->
+            <xfdu:contentUnit
+                    unitType='Metadata Unit'
+                    textInfo='Nadir Flags'
+                    repID='nadirFlagsSchema'>
+                <dataObjectPointer
+                        dataObjectID='nadirFlagsAnnotation'/>
+            </xfdu:contentUnit>
+
+            <xfdu:contentUnit
+                    unitType='Metadata Unit'
+                    textInfo='Oblique Flags'
+                    repID='obliqueFlagsSchema'>
+                <dataObjectPointer
+                        dataObjectID='obliqueFlags'/>
+            </xfdu:contentUnit>
+
+            <xfdu:contentUnit
+                    unitType='Metadata Unit'
+                    textInfo='Scan, Pixel, Detector Indices'
+                    repID='indicesSchema'>
+                <dataObjectPointer
+                        dataObjectID='indicesAnnotation'/>
+            </xfdu:contentUnit>
+
+            <xfdu:contentUnit
+                    unitType='Metadata Unit'
+                    textInfo='Time Coordinates'
+                    repID='timeCoordinateSchema'>
+                <dataObjectPointer
+                        dataObjectID='timeCoordinatesAnnotation'/>
+            </xfdu:contentUnit>
+
+            <xfdu:contentUnit
+                    unitType='Metadata Unit'
+                    textInfo='Geodetic Data Coordinates'
+                    repID='geodeticDataCoordinatesSchema'>
+                <dataObjectPointer
+                        dataObjectID='geodeticDataCoordinatesAnnotation'/>
+            </xfdu:contentUnit>
+
+            <xfdu:contentUnit
+                    unitType='Metadata Unit'
+                    textInfo='Cartesian Data Coordinates'
+                    repID='cartesianDataCoordinatesSchema'>
+                <dataObjectPointer
+                        dataObjectID='cartesianDataCoordinatesAnnotation'/>
+            </xfdu:contentUnit>
+
+            <xfdu:contentUnit
+                    unitType='Metadata Unit'
+                    textInfo='Geodetic Tie Point Coordinates'
+                    repID='geodeticTiepointCoordinatesSchema'>
+                <dataObjectPointer
+                        dataObjectID='geodeticTiepointCoordinatesAnnotation'/>
+            </xfdu:contentUnit>
+
+            <xfdu:contentUnit
+                    unitType='Metadata Unit'
+                    textInfo='Cartesian Tie Point Coordinates'
+                    repID='cartesianTiepointCoordinatesSchema'>
+                <dataObjectPointer
+                        dataObjectID='cartesianTiepointCoordinatesAnnotation'/>
+            </xfdu:contentUnit>
+
+            <xfdu:contentUnit
+                    unitType='Metadata Unit'
+                    textInfo='Meteorological Fields'
+                    repID='meteorologicalDataSchema'>
+                <dataObjectPointer
+                        dataObjectID='meteorologicalDataAnnotation'/>
+            </xfdu:contentUnit>
+
+            <xfdu:contentUnit
+                    unitType='Metadata Unit'
+                    textInfo='Nadir Solar and Viewing Geometry'
+                    repID='nadirSolarViewGeometrySchema'>
+                <dataObjectPointer
+                        dataObjectID='nadirSolarViewGeometryAnnotation'/>
+            </xfdu:contentUnit>
+
+            <xfdu:contentUnit
+                    unitType='Metadata Unit'
+                    textInfo='Oblique Solar and Viewing Geometry'
+                    repID='obliqueSolarViewGeometrySchema'>
+                <dataObjectPointer
+                        dataObjectID='obliqueSolarViewGeometry'/>
+            </xfdu:contentUnit>
+
+        </xfdu:contentUnit>
+
+    </informationPackageMap>
+
+
+    <!-- ========================================
+   METADATA OBJECT SECTION
+   ======================================== -->
+    <metadataSection>
+
+        <!-- PRODUCT GENERAL METADATA =========== -->
+        <!-- Platform Description -->
+        <metadataObject
+                ID='platform'
+                classification='DESCRIPTION'
+                category='DMD'>
+            <metadataWrap
+                    textinfo='Platform Description'
+                    vocabularyName='SAFE'
+                    mimeType='text/xml'>
+                <xmlData>
+                    <safe:platform>
+                        <!-- Platform Identification -->
+                        <safe:nssdcIdentifier>YYYY-XXXX</safe:nssdcIdentifier>
+                        <safe:familyName>SENTINEL</safe:familyName>
+                        <safe:Number>3A</safe:Number>
+                        <!-- Instrument Identification -->
+                        <safe:instrument>
+                            <safe:familyName abbreviation='SLSTR'>
+                                Sea Land Surface Temperature Radiometer
+                            </safe:familyName>
+                        </safe:instrument>
+                    </safe:platform>
+                </xmlData>
+            </metadataWrap>
+        </metadataObject>
+
+        <!-- Processing -->
+        <metadataObject
+                ID='processing'
+                classification='PROVENANCE'
+                category='PDI'>
+            <metadataWrap
+                    textinfo='Processing Information'
+                    vocabularyName='SAFE'
+                    mimeType='text/xml'>
+                <xmlData>
+                    <safe:processing
+                            name='L2 Processing'
+                            start='2011-10-25T16:30:20Z'>
+                        <safe:facility
+                                country='UK'
+                                name='ARGANS'
+                                organisation='ARGANS'
+                                site='Plymouth'>
+                            <safe:software
+                                    name='slstr'
+                                    version='v0.1'/>
+                        </safe:facility>
+                        <safe:resource
+                                name='S3-L2-SD-07-T-RAL-DPM_DetailedProcessingModel_v2.4-110527'
+                                role='Applicable Document'>
+                        </safe:resource>
+                        <safe:resource
+                                name='Test Data Set'
+                                role='Input Data'>
+                            <safe:processing
+                                    name='L1B Processing'
+                                    start='2011-10-25T10:01:11Z'>
+                                <safe:facility
+                                        country='UK'
+                                        name='RAL'
+                                        organisation='RAL'>
+                                    <safe:software
+                                            name=''
+                                            version=''/>
+                                </safe:facility>
+                            </safe:processing>
+                        </safe:resource>
+                        <safe:resource
+                                name='BP-L2_com_6_12-1_att.xml'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='BP-L2_l2p_5_5-1_att.xml'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='BP-L2_sst_6_2-1_att.xml'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='D2_coeff_aux.cdl'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='D2_coeff_aux.nc'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='D2_SST_att.xml'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='D3_coeff_aux.cdl'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='D3_coeff_aux.nc'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='D3_SST_att.xml'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='L2P_SDI2_aux.cdl'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='L2P_SDI2_aux.nc'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='L2P_SDI3_aux.cdl'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='L2P_SDI3_aux.nc'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='L2P_SSES_aux.cdl'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='L2P_SSES_aux.nc'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='L2P_SST_att.xml'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='L2P_SST_aux.cdl'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='L2P_SST_aux.nc'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='L4_SST_aux.cdl'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='L4_SST_aux.nc'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='leap_seconds_aux.cdl'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='leap_seconds_aux.nc'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='N2_coeff_aux.cdl'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='N2_coeff_aux.nc'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='N2_SST_att.xml'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='N3_coeff_aux.cdl'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='N3_coeff_aux.nc'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='N3_SST_att.xml'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='N3R_coeff_aux.cdl'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='N3R_coeff_aux.nc'
+                                role='Auxiliary Data'/>
+                        <safe:resource
+                                name='N3R_SST_att.xml'
+                                role='Auxiliary Data'/>
+                    </safe:processing>
+                </xmlData>
+            </metadataWrap>
+        </metadataObject>
+
+        <!-- Acquisition Period -->
+        <metadataObject
+                ID='acquisitionPeriod'
+                classification='DESCRIPTION'
+                category='DMD'>
+            <metadataWrap
+                    textInfo='Acquisition Period'
+                    vocabularyName='SAFE'
+                    mimeType='text/xml'>
+                <xmlData>
+                    <safe:acquisitionPeriod>
+                        <safe:startTime>2007-09-10T09:51:30.389847Z</safe:startTime>
+                        <safe:stopTime>2007-09-10T09:54:41.864790Z</safe:stopTime>
+                    </safe:acquisitionPeriod>
+                </xmlData>
+            </metadataWrap>
+        </metadataObject>
+
+
+        <!-- MEASUREMENT METADATA =============== -->
+
+        <!-- None Defined for SLSTR in IODD Part 0 -->
+
+        <!-- ANNOTATION METADATA COMPONENTS ===== -->
+        <metadataObject
+                ID='obliqueFlags'
+                classification='DESCRIPTION'
+                category='DMD'>
+            <dataObjectPointer
+                    dataObjectID='obliqueFlagsAnnotation'/>
+        </metadataObject>
+
+        <metadataObject
+                ID='obliqueSolarViewGeometry'
+                classification='DESCRIPTION'
+                category='DMD'>
+            <dataObjectPointer
+                    dataObjectID='obliqueSolarViewGeometryAnnotation'/>
+        </metadataObject>
+
+
+        <metadataObject
+                ID='indices'
+                classification='DESCRIPTION'
+                category='DMD'>
+            <dataObjectPointer
+                    dataObjectID='indicesAnnotation'/>
+        </metadataObject>
+
+        <metadataObject
+                ID='timeCoordinates'
+                classification='DESCRIPTION'
+                category='DMD'>
+            <dataObjectPointer
+                    dataObjectID='timeCoordinatesAnnotation'/>
+        </metadataObject>
+
+        <metadataObject
+                ID='geodeticDataCoordinates'
+                classification='DESCRIPTION'
+                category='DMD'>
+            <dataObjectPointer
+                    dataObjectID='geodeticDataCoordinatesAnnotation'/>
+        </metadataObject>
+
+        <metadataObject
+                ID='cartesianDataCoordinates'
+                classification='DESCRIPTION'
+                category='DMD'>
+            <dataObjectPointer
+                    dataObjectID='cartesianDataCoordinatesAnnotation'/>
+        </metadataObject>
+
+        <metadataObject
+                ID='nadirSolarViewGeometry'
+                classification='DESCRIPTION'
+                category='DMD'>
+            <dataObjectPointer
+                    dataObjectID='nadirSolarViewGeometryAnnotation'/>
+        </metadataObject>
+
+        <metadataObject
+                ID='geodeticTiepointCoordinates'
+                classification='DESCRIPTION'
+                category='DMD'>
+            <dataObjectPointer
+                    dataObjectID='geodeticTiepointCoordinatesAnnotation'/>
+        </metadataObject>
+
+        <metadataObject
+                ID='cartesianTiepointCoordinates'
+                classification='DESCRIPTION'
+                category='DMD'>
+            <dataObjectPointer
+                    dataObjectID='cartesianTiepointCoordinatesAnnotation'/>
+        </metadataObject>
+
+        <metadataObject
+                ID='meteorologicalData'
+                classification='DESCRIPTION'
+                category='DMD'>
+            <dataObjectPointer
+                    dataObjectID='meteorologicalDataAnnotation'/>
+        </metadataObject>
+
+
+        <!-- XML SCHEMA FOR DATA COMPONENTS ===== -->
+        <metadataObject
+                ID='nadirFlagsSchema'
+                classification='SYNTAX'
+                category='REP'>
+            <metadataReference
+                    locatorType='URL'
+                    href='schema/nadirFlagsSchemaSchema.xsd'
+                    vocabularyName='SDF'
+                    mimeType='text/xml'/>
+        </metadataObject>
+
+        <metadataObject
+                ID='indicesSchema'
+                classification='SYNTAX'
+                category='REP'>
+            <metadataReference
+                    locatorType='URL'
+                    href='schema/indicesSchema.xsd'
+                    vocabularyName='SDF'
+                    mimeType='text/xml'/>
+        </metadataObject>
+
+        <metadataObject
+                ID='timeCoordinatesSchema'
+                classification='SYNTAX'
+                category='REP'>
+            <metadataReference
+                    locatorType='URL'
+                    href='schema/timeCoordinatesSchema.xsd'
+                    vocabularyName='SDF'
+                    mimeType='text/xml'/>
+        </metadataObject>
+
+        <metadataObject
+                ID='geodeticDataCoordinatesSchema'
+                classification='SYNTAX'
+                category='REP'>
+            <metadataReference
+                    locatorType='URL'
+                    href='schema/geodeticDataCoordinatesSchema.xsd'
+                    vocabularyName='SDF'
+                    mimeType='text/xml'/>
+        </metadataObject>
+
+        <metadataObject
+                ID='cartesianDataCoordinatesSchema'
+                classification='SYNTAX'
+                category='REP'>
+            <metadataReference
+                    locatorType='URL'
+                    href='schema/cartesianDataCoordinatesSchema.xsd'
+                    vocabularyName='SDF'
+                    mimeType='text/xml'/>
+        </metadataObject>
+
+        <metadataObject
+                ID='nadirSolarViewGeometrySchema'
+                classification='SYNTAX'
+                category='REP'>
+            <metadataReference
+                    locatorType='URL'
+                    href='schema/nadirSolarViewGeometrySchema.xsd'
+                    vocabularyName='SDF'
+                    mimeType='text/xml'/>
+        </metadataObject>
+
+        <metadataObject
+                ID='geodeticTiepointCoordinatesSchema'
+                classification='SYNTAX'
+                category='REP'>
+            <metadataReference
+                    locatorType='URL'
+                    href='schema/geodeticTiepointCoordinatesSchema.xsd'
+                    vocabularyName='SDF'
+                    mimeType='text/xml'/>
+        </metadataObject>
+
+        <metadataObject
+                ID='cartesianTiepointCoordinatesSchema'
+                classification='SYNTAX'
+                category='REP'>
+            <metadataReference
+                    locatorType='URL'
+                    href='schema/cartesianTiepointsCoordinatesSchema.xsd'
+                    vocabularyName='SDF'
+                    mimeType='text/xml'/>
+        </metadataObject>
+
+        <metadataObject
+                ID='meteorologicalDataSchema'
+                classification='SYNTAX'
+                category='REP'>
+            <metadataReference
+                    locatorType='URL'
+                    href='schema/meteorologicalDataSchema.xsd'
+                    vocabularyName='SDF'
+                    mimeType='text/xml'/>
+        </metadataObject>
+
+        <metadataObject
+                ID='virtualDataSchema'
+                classification='SYNTAX'
+                category='REP'>
+            <metadataReference
+                    locatorType='URL'
+                    href='schema/virtualDataSchema.xsd'
+                    vocabularyName='SDF'
+                    mimeType='text/xml'/>
+        </metadataObject>
+
+        <metadataObject
+                ID='obliqueFlagsSchema'
+                classification='SYNTAX'
+                category='REP'>
+            <metadataReference
+                    locatorType='URL'
+                    href='schema/obliqueFlagsSchema.xsd'
+                    vocabularyName='SDF'
+                    mimeType='text/xml'/>
+        </metadataObject>
+
+        <metadataObject
+                ID='obliqueSolarViewGeometrySchema'
+                classification='SYNTAX'
+                category='REP'>
+            <metadataReference
+                    locatorType='URL'
+                    href='schema/obliqueSolarViewGeometrySchema.xsd'
+                    vocabularyName='SDF'
+                    mimeType='text/xml'/>
+        </metadataObject>
+
+        <metadataObject
+                ID='N2_SST_schema'
+                classification='SYNTAX'
+                category='REP'>
+            <metadataReference
+                    locatorType='URL'
+                    href='schema/N2SSTSchema.xsd'
+                    vocabularyName='SDF'
+                    mimeType='text/xml'/>
+        </metadataObject>
+
+        <metadataObject
+                ID='N3R_SST_schema'
+                classification='SYNTAX'
+                category='REP'>
+            <metadataReference
+                    locatorType='URL'
+                    href='schema/N3RSSTSchema.xsd'
+                    vocabularyName='SDF'
+                    mimeType='text/xml'/>
+        </metadataObject>
+
+        <metadataObject
+                ID='N3_SST_schema'
+                classification='SYNTAX'
+                category='REP'>
+            <metadataReference
+                    locatorType='URL'
+                    href='schema/N3SSTSchema.xsd'
+                    vocabularyName='SDF'
+                    mimeType='text/xml'/>
+        </metadataObject>
+
+        <metadataObject
+                ID='D2_SST_schema'
+                classification='SYNTAX'
+                category='REP'>
+            <metadataReference
+                    locatorType='URL'
+                    href='schema/D2SSTSchema.xsd'
+                    vocabularyName='SDF'
+                    mimeType='text/xml'/>
+        </metadataObject>
+
+        <metadataObject
+                ID='D3_SST_schema'
+                classification='SYNTAX'
+                category='REP'>
+            <metadataReference
+                    locatorType='URL'
+                    href='schema/D3SSTSchema.xsd'
+                    vocabularyName='SDF'
+                    mimeType='text/xml'/>
+        </metadataObject>
+
+    </metadataSection>
+
+
+    <!-- ========================================
+   DATA OBJECT SECTION
+   ======================================== -->
+    <dataObjectSection>
+
+        <!-- DATA COMPONENTS ==================== -->
+        <dataObject
+                ID='N2_SST_data'
+                repID='N2_SST_schema'>
+            <byteStream mimeType='application/octetstream'>
+                <fileLocation
+                        locatorType='URL'
+                        href='N2_SST_in.nc'/>
+                <checksum checksumName='MD5'>
+                    24396a21013dc67ccfcf6fa564f19313
+                </checksum>
+            </byteStream>
+        </dataObject>
+
+        <dataObject
+                ID='N3R_SST_data'
+                repID='N3R_SST_schema'>
+            <byteStream mimeType='application/octetstream'>
+                <fileLocation
+                        locatorType='URL'
+                        href='N3R_SST_in.nc'/>
+                <checksum checksumName='MD5'>
+                    24396a21013dc67ccfcf6fa564f19313
+                </checksum>
+            </byteStream>
+        </dataObject>
+
+        <dataObject
+                ID='N3_SST_data'
+                repID='N3_SST_schema'>
+            <byteStream mimeType='application/octetstream'>
+                <fileLocation
+                        locatorType='URL'
+                        href='N3_SST_in.nc'/>
+                <checksum checksumName='MD5'>
+                    24396a21013dc67ccfcf6fa564f19313
+                </checksum>
+            </byteStream>
+        </dataObject>
+
+        <dataObject
+                ID='D2_SST_data'
+                repID='D2_SST_schema'>
+            <byteStream mimeType='application/octetstream'>
+                <fileLocation
+                        locatorType='URL'
+                        href='D2_SST_io.nc'/>
+                <checksum checksumName='MD5'>
+                    24396a21013dc67ccfcf6fa564f19313
+                </checksum>
+            </byteStream>
+        </dataObject>
+
+        <dataObject
+                ID='D3_SST_data'
+                repID='D3_SST_schema'>
+            <byteStream mimeType='application/octetstream'>
+                <fileLocation
+                        locatorType='URL'
+                        href='D3_SST_io.nc'/>
+                <checksum checksumName='MD5'>
+                    24396a21013dc67ccfcf6fa564f19313
+                </checksum>
+            </byteStream>
+        </dataObject>
+
+
+        <!-- VIRTUAL DATA COMPONENTS ============ -->
+        <dataObject
+                ID='v_N2_SST_data'
+                repID='virtualDataSchema'>
+            <byteStream mimeType='application/octetstream'>
+                <fileLocation
+                        locatorType='URL'
+                        href='N2_SST_in.ncml'/>
+                <checksum checksumName='MD5'>
+                    24396a21013dc67ccfcf6fa564f19313
+                </checksum>
+            </byteStream>
+        </dataObject>
+
+        <dataObject
+                ID='v_N3R_SST_data'
+                repID='virtualDataSchema'>
+            <byteStream mimeType='application/octetstream'>
+                <fileLocation
+                        locatorType='URL'
+                        href='N3R_SST_in.ncml'/>
+                <checksum checksumName='MD5'>
+                    24396a21013dc67ccfcf6fa564f19313
+                </checksum>
+            </byteStream>
+        </dataObject>
+
+        <dataObject
+                ID='v_N3_SST_data'
+                repID='virtualDataSchema'>
+            <byteStream mimeType='application/octetstream'>
+                <fileLocation
+                        locatorType='URL'
+                        href='N3_SST_in.ncml'/>
+                <checksum checksumName='MD5'>
+                    24396a21013dc67ccfcf6fa564f19313
+                </checksum>
+            </byteStream>
+        </dataObject>
+
+        <dataObject
+                ID='v_D2_SST_data'
+                repID='virtualDataSchema'>
+            <byteStream mimeType='application/octetstream'>
+                <fileLocation
+                        locatorType='URL'
+                        href='D2_SST_io.ncml'/>
+                <checksum checksumName='MD5'>
+                    24396a21013dc67ccfcf6fa564f19313
+                </checksum>
+            </byteStream>
+        </dataObject>
+
+        <dataObject
+                ID='v_D3_SST_data'
+                repID='virtualDataSchema'>
+            <byteStream mimeType='application/octetstream'>
+                <fileLocation
+                        locatorType='URL'
+                        href='D3_SST_io.ncml'/>
+                <checksum checksumName='MD5'>
+                    24396a21013dc67ccfcf6fa564f19313
+                </checksum>
+            </byteStream>
+        </dataObject>
+
+        <!--  ANNOTATION COMPONENTS ============= -->
+
+        <dataObject
+                ID='nadirFlagsAnnotation'
+                repID='nadirFlagsSchema'>
+            <byteStream mimeType='application/octetstream'>
+                <fileLocation
+                        locatorType='URL'
+                        href='flags_in.nc'/>
+                <checksum checksumName='MD5'>
+                    2821892127ecd8ffdc88cf852bc26d05
+                </checksum>
+            </byteStream>
+        </dataObject>
+
+        <dataObject
+                ID='obliqueFlagsAnnotation'
+                repID='obliqueFlagsSchema'>
+            <byteStream mimeType='application/octetstream'>
+                <fileLocation
+                        locatorType='URL'
+                        href='flags_io.nc'/>
+                <checksum checksumName='MD5'>
+                    2821892127ecd8ffdc88cf852bc26d05
+                </checksum>
+            </byteStream>
+        </dataObject>
+
+        <dataObject
+                ID='indicesAnnotation'
+                repID='indicesSchema'>
+            <byteStream mimeType='application/octetstream'>
+                <fileLocation
+                        locatorType='URL'
+                        href='indices_in.nc'/>
+                <checksum checksumName='MD5'>
+                    2363d22c04fc22d96174afaa1ab11d7f
+                </checksum>
+            </byteStream>
+        </dataObject>
+
+        <dataObject
+                ID='geodeticDataCoordinatesAnnotation'
+                repID='geodeticDataCoordinatesSchema'>
+            <byteStream mimeType='application/octetstream'>
+                <fileLocation
+                        locatorType='URL'
+                        href='geodetic_in.nc'/>
+                <checksum checksumName='MD5'>
+                    567301787bf4c7cbd15d9bb1ce501a51
+                </checksum>
+            </byteStream>
+        </dataObject>
+
+        <dataObject
+                ID='cartesianDataCoordinatesAnnotation'
+                repID='cartesianDataCoordinatesSchema'>
+            <byteStream mimeType='application/octetstream'>
+                <fileLocation
+                        locatorType='URL'
+                        href='cartesian_in.nc'/>
+                <checksum checksumName='MD5'>
+                    b9678f826fcab53776709464467da633
+                </checksum>
+            </byteStream>
+        </dataObject>
+
+        <dataObject
+                ID='nadirSolarViewGeometryAnnotation'
+                repID='nadirSolarViewGeometrySchema'>
+            <byteStream mimeType='application/octetstream'>
+                <fileLocation
+                        locatorType='URL'
+                        href='geometry_in.nc'/>
+                <checksum checksumName='MD5'>
+                    567301787bf4c7cbd15d9bb1ce501a51
+                </checksum>
+            </byteStream>
+        </dataObject>
+
+        <dataObject
+                ID='obliqueSolarViewGeometryAnnotation'
+                repID='obliqueSolarViewGeometrySchema'>
+            <byteStream mimeType='application/octetstream'>
+                <fileLocation
+                        locatorType='URL'
+                        href='geometry_io.nc'/>
+                <checksum checksumName='MD5'>
+                    567301787bf4c7cbd15d9bb1ce501a51
+                </checksum>
+            </byteStream>
+        </dataObject>
+
+        <dataObject
+                ID='geodeticTiepointCoordinatesAnnotation'
+                repID='geodeticTiepointCoordinatesSchema'>
+            <byteStream mimeType='application/octetstream'>
+                <fileLocation
+                        locatorType='URL'
+                        href='geodetic_tx.nc'/>
+                <checksum checksumName='MD5'>
+                    289244d9daac13119fbd1831910f7be9
+                </checksum>
+            </byteStream>
+        </dataObject>
+
+        <dataObject
+                ID='cartesianTiepointCoordinatesAnnotation'
+                repID='cartesianTiepointCoordinatesSchema'>
+            <byteStream mimeType='application/octetstream'>
+                <fileLocation
+                        locatorType='URL'
+                        href='cartesian_tx.nc'/>
+                <checksum checksumName='MD5'>
+                    c20998c5795ec958d7fa2942aa357014
+                </checksum>
+            </byteStream>
+        </dataObject>
+
+        <dataObject
+                ID='meteorologicalDataAnnotation'
+                repID='meteorologicalDataSchema'>
+            <byteStream mimeType='application/octetstream'>
+                <fileLocation
+                        locatorType='URL'
+                        href='met_tx.nc'/>
+                <checksum checksumName='MD5'>
+                    7c2c838875e56dc4e8e6e52ade3ffe89
+                </checksum>
+            </byteStream>
+        </dataObject>
+
+        <dataObject
+                ID='timeCoordinates'
+                repID='timeCoordinatesSchema'>
+            <byteStream mimeType='application/octetstream'>
+                <fileLocation
+                        locatorType='URL'
+                        href='time_in.nc'/>
+                <checksum checksumName='MD5'>
+                    28a3b8166d81863c7911f1154faa0db1
+                </checksum>
+            </byteStream>
+        </dataObject>
+
+    </dataObjectSection>
+
+</xfdu:XFDU>
+    

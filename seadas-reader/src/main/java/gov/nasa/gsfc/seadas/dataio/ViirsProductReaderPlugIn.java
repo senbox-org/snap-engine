@@ -15,11 +15,11 @@
  */
 package gov.nasa.gsfc.seadas.dataio;
 
-import org.esa.beam.dataio.netcdf.util.NetcdfFileOpener;
-import org.esa.beam.framework.dataio.DecodeQualification;
-import org.esa.beam.framework.dataio.ProductReader;
-import org.esa.beam.framework.dataio.ProductReaderPlugIn;
-import org.esa.beam.util.io.BeamFileFilter;
+import org.esa.snap.dataio.netcdf.util.NetcdfFileOpener;
+import org.esa.snap.framework.dataio.DecodeQualification;
+import org.esa.snap.framework.dataio.ProductReader;
+import org.esa.snap.framework.dataio.ProductReaderPlugIn;
+import org.esa.snap.util.io.BeamFileFilter;
 import ucar.nc2.Attribute;
 import ucar.nc2.Group;
 import ucar.nc2.NetcdfFile;

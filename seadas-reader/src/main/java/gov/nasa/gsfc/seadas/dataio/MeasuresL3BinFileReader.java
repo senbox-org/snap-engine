@@ -1,12 +1,12 @@
 package gov.nasa.gsfc.seadas.dataio;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.dataio.merisl3.ISINGrid;
-import org.esa.beam.framework.dataio.ProductIOException;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.CrsGeoCoding;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.s3tbx.dataio.merisl3.ISINGrid;
+import org.esa.snap.framework.dataio.ProductIOException;
+import org.esa.snap.framework.datamodel.Band;
+import org.esa.snap.framework.datamodel.CrsGeoCoding;
+import org.esa.snap.framework.datamodel.Product;
+import org.esa.snap.framework.datamodel.ProductData;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;

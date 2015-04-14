@@ -16,15 +16,15 @@
 package gov.nasa.gsfc.seadas.dataio;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.beam.framework.dataio.ProductSubsetDef;
-import org.esa.beam.framework.datamodel.GeoCoding;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.Scene;
-import org.esa.beam.framework.datamodel.TiePointGeoCoding;
-import org.esa.beam.framework.datamodel.TiePointGrid;
-import org.esa.beam.util.Guardian;
-import org.esa.beam.util.math.IndexValidator;
-import org.esa.beam.util.math.Range;
+import org.esa.snap.framework.dataio.ProductSubsetDef;
+import org.esa.snap.framework.datamodel.GeoCoding;
+import org.esa.snap.framework.datamodel.Product;
+import org.esa.snap.framework.datamodel.Scene;
+import org.esa.snap.framework.datamodel.TiePointGeoCoding;
+import org.esa.snap.framework.datamodel.TiePointGrid;
+import org.esa.snap.util.Guardian;
+import org.esa.snap.util.math.IndexValidator;
+import org.esa.snap.util.math.Range;
 
 import java.awt.Rectangle;
 import java.io.IOException;

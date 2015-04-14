@@ -15,13 +15,13 @@
  */
 package gov.nasa.gsfc.seadas.dataio;
 
-import org.esa.beam.framework.datamodel.AbstractGeoCoding;
-import org.esa.beam.framework.datamodel.GeoCoding;
-import org.esa.beam.framework.datamodel.GeoPos;
-import org.esa.beam.framework.datamodel.PixelPos;
-import org.esa.beam.framework.datamodel.ProductNode;
-import org.esa.beam.framework.datamodel.TiePointGrid;
-import org.esa.beam.framework.dataop.maptransf.Datum;
+import org.esa.snap.framework.datamodel.AbstractGeoCoding;
+import org.esa.snap.framework.datamodel.GeoCoding;
+import org.esa.snap.framework.datamodel.GeoPos;
+import org.esa.snap.framework.datamodel.PixelPos;
+import org.esa.snap.framework.datamodel.ProductNode;
+import org.esa.snap.framework.datamodel.TiePointGrid;
+import org.esa.snap.framework.dataop.maptransf.Datum;
 
 import java.awt.Rectangle;
 import java.awt.geom.Line2D;

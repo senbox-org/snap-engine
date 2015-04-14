@@ -1,12 +1,12 @@
 package gov.nasa.gsfc.seadas.dataio;
 
-import org.esa.beam.dataio.netcdf.util.NetcdfFileOpener;
-import org.esa.beam.framework.dataio.ProductIOException;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.FlagCoding;
-import org.esa.beam.framework.datamodel.Mask;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.snap.dataio.netcdf.util.NetcdfFileOpener;
+import org.esa.snap.framework.dataio.ProductIOException;
+import org.esa.snap.framework.datamodel.Band;
+import org.esa.snap.framework.datamodel.FlagCoding;
+import org.esa.snap.framework.datamodel.Mask;
+import org.esa.snap.framework.datamodel.Product;
+import org.esa.snap.framework.datamodel.ProductData;
 import ucar.ma2.Array;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;

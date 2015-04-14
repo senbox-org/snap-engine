@@ -1,0 +1,2 @@
+org.esa.s3tbx.dataio.avhrr.AvhrrReaderPlugIn
+org.esa.s3tbx.dataio.avhrr.noaa.pod.PodAvhrrReaderPlugIn

@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 AutoUpdate-Show-In-Client: false
 AutoUpdate-Essential-Module: true
-OpenIDE-Module-Layer: org/esa/beam/dataio/merisl3/layer.xml
+OpenIDE-Module-Layer: org/esa/s3tbx/dataio/merisl3/layer.xml
 OpenIDE-Module-Java-Dependencies: Java > 1.8
 OpenIDE-Module-Display-Category: SNAP
 OpenIDE-Module-Long-Description: <p>A reader for MERIS Binned Level-3 
