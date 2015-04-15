@@ -239,7 +239,9 @@ public class SmacOperator extends Operator {
     void installAuxdata() {
         setAuxdataInstallDir(SMAC_AUXDATA_DIR_PROPERTY, getDefaultAuxdataInstallDir());
         try {
-            installAuxdata(ResourceInstaller.findModuleCodeBasePath(getClass()), "auxdata/", auxdataInstallDir.toPath());
+            Path sourceDirPath = ResourceInstaller.findModuleCodeBasePath(getClass()).resolve("auxdata/");
+            Path targetDirPath = auxdataInstallDir.toPath();
+            new ResourceInstaller(sourceDirPath, targetDirPath).install(".*", ProgressMonitor.NULL);
         } catch (IOException e) {
             throw new OperatorException("Failed to install auxdata into " + auxdataInstallDir, e);
         }
@@ -473,10 +475,6 @@ public class SmacOperator extends Operator {
 
     private File getDefaultAuxdataInstallDir() {
         return new File(SystemUtils.getApplicationDataDir(), PROCESSOR_SYMBOLIC_NAME + "/auxdata");
-    }
-
-    private void installAuxdata(Path sourceLocation, String sourceRelPath, Path targetDirPath) throws IOException {
-        new ResourceInstaller(sourceLocation, sourceRelPath, targetDirPath).install(".*", ProgressMonitor.NULL);
     }
 
     private void createOutputProduct() throws IOException {

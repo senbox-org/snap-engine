@@ -225,8 +225,8 @@ public class SmileCorrectionAuxdata {
                                                    defaultAuxdataInstallDir.getAbsolutePath());
         Path auxdataDirectory = Paths.get(auxdataDirPath);
 
-        Path sourceUrl = ResourceInstaller.findModuleCodeBasePath(SmileCorrectionAuxdata.class);
-        final ResourceInstaller resourceInstaller = new ResourceInstaller(sourceUrl, "auxdata/smile", auxdataDirectory);
+        Path sourceBasePath = ResourceInstaller.findModuleCodeBasePath(SmileCorrectionAuxdata.class);
+        final ResourceInstaller resourceInstaller = new ResourceInstaller(sourceBasePath.resolve("auxdata/smile"), auxdataDirectory);
         resourceInstaller.install(".*", ProgressMonitor.NULL);
         return auxdataDirectory;
     }

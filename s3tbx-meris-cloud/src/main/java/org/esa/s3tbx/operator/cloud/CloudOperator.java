@@ -111,17 +111,14 @@ public class CloudOperator extends Operator {
     void installAuxdata() throws IOException {
         String auxdataDirPath = getAuxdataInstallationPath();
         final Path targetDir = Paths.get(auxdataDirPath);
-        installAuxdata(ResourceInstaller.findModuleCodeBasePath(getClass()), "auxdata/", targetDir);
+        Path sourcePath = ResourceInstaller.findModuleCodeBasePath(getClass()).resolve("auxdata/");
+        new ResourceInstaller(sourcePath, targetDir).install(".*", ProgressMonitor.NULL);
     }
 
     // package local for testing purposes
     String getAuxdataInstallationPath() {
         Path defaultAuxdataDir = Paths.get(SystemUtils.getApplicationDataDir().getAbsolutePath(), AUXDATA_DIR);
         return System.getProperty(CloudPN.CLOUD_AUXDATA_DIR_PROPERTY, defaultAuxdataDir.toString());
-    }
-
-    private void installAuxdata(Path sourceLocation, String sourceRelPath, Path targetDirPath) throws IOException {
-        new ResourceInstaller(sourceLocation, sourceRelPath, targetDirPath).install(".*", ProgressMonitor.NULL);
     }
 
     /**

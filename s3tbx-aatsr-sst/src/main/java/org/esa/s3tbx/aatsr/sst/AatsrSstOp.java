@@ -448,7 +448,7 @@ public class AatsrSstOp extends PixelOperator {
         final File targetDir = new File(targetPath);
 
         final Path path = ResourceInstaller.findModuleCodeBasePath(getClass());
-        final ResourceInstaller installer = new ResourceInstaller(path, "auxdata/aatsr/sst", targetDir.toPath());
+        final ResourceInstaller installer = new ResourceInstaller(path.resolve("auxdata/aatsr/sst"), targetDir.toPath());
         try {
             installer.install(".*", ProgressMonitor.NULL);
         } catch (IOException e) {
