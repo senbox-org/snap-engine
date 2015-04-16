@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (C) 2015 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -125,7 +125,7 @@ public class CfGeocodingPart extends ProfilePartIO {
     @Override
     public void encode(ProfileWriteContext ctx, Product product) throws IOException {
         NFileWriteable ncFile = ctx.getNetcdfFileWriteable();
-        if (!isLatLonPresent(ncFile)) {
+        if (isLatLonPresent(ncFile)) {
             return;
         }
         final int h = product.getSceneRasterHeight();
