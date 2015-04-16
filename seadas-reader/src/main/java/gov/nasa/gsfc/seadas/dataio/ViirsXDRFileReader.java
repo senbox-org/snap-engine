@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (C) 2015 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -33,7 +33,6 @@ import ucar.nc2.Variable;
 import java.awt.Color;
 import java.io.File;
 import java.io.FilenameFilter;
-import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
@@ -281,6 +280,12 @@ public class ViirsXDRFileReader extends SeadasFileReader {
                     String[] geofilelist = geodir.list(filter);
 
                     for (String gf:geofilelist){
+
+                        // check to make sure the geo file name is the same length as the input file
+                        if(strlen != gf.length()) {
+                            continue;
+                        }
+
                         if (!gf.startsWith("ICDBG")){
                             if (!gf.startsWith("G")){
                                 continue;
@@ -330,27 +335,15 @@ public class ViirsXDRFileReader extends SeadasFileReader {
                 throw new ProductIOException(e.getMessage());
             }
         }
-        try {
 
-            if (dsType.equals("GEO")){
-                geocollection = ncFile.getRootGroup().findGroup("All_Data").getGroups().get(0);
-            } else {
-                if (geofile != null) {
-                    geocollection = geofile.getRootGroup().findGroup("All_Data").getGroups().get(0);
-                }
-            }
-            Variable nscans = null;
-            if (geocollection != null){
-                nscans = geocollection.findVariable("NumberOfScans");
-                if (nscans == null){
-                    nscans = geocollection.findVariable("act_scans");
-                }
-            }
-            Array ns = nscans.read();
-            detectorsInScan = product.getSceneRasterHeight() / ns.getInt(0);
-        } catch (IOException e) {
-            throw new ProductIOException("Could not find the number of detectors in a scan");
+        // see if we have M, I or day/night bands in this file
+        // M and day/night bands are 16 detectors/scan (default)
+        // I bands are 32 detectors/scan
+        detectorsInScan = 16;
+        if(shortName.startsWith("VIIRS-I") && shortName.endsWith("-SDR")) {
+            detectorsInScan = 32;
         }
+
         try{
             final String longitude = "Longitude";
             final String latitude = "Latitude";

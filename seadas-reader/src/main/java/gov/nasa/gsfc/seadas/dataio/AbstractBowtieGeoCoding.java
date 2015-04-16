@@ -255,6 +255,7 @@ public abstract class AbstractBowtieGeoCoding extends AbstractGeoCoding {
             } else if (direction == -1) {
                 index++;
                 direction = +1;
+                index = getNextCenterLineIndex(index, direction);
                 if (index == _biggestValidIndex) {
                     return index;
                 }

@@ -266,8 +266,8 @@ public class BowtiePixelGeoCoding extends AbstractBowtieGeoCoding {
             _gcList.add(gc);
             _centerLineList.add(createCenterPolyLine(gc, stripeW, stripeH));
         } else {
-            _gcList.add(null);
-            _centerLineList.add(null);
+            _gcList.add(_gcList.size(), null);
+            _centerLineList.add(_centerLineList.size(), null);
         }
     }
 
@@ -276,9 +276,7 @@ public class BowtiePixelGeoCoding extends AbstractBowtieGeoCoding {
         if (range.getMin() < -90) {
             return null;
         } else {
-            final ModisTiePointGrid latGrid = new ModisTiePointGrid("lat" + y, stripeW, stripeH, 0, 0, 1, 1, lats);
-            final ModisTiePointGrid lonGrid = new ModisTiePointGrid("lon" + y, stripeW, stripeH, 0, 0, 1, 1, lons, TiePointGrid.DISCONT_AT_180);
-            final TiePointGeoCoding geoCoding = new TiePointGeoCoding(latGrid, lonGrid, getDatum());
+            final BowtiePixelScanGeoCoding geoCoding = new BowtiePixelScanGeoCoding(lats, lons, stripeW, stripeH);
             _cross180 = _cross180 || geoCoding.isCrossingMeridianAt180();
             return geoCoding;
         }
