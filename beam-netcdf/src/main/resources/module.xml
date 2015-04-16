@@ -17,7 +17,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>beam-netcdf</symbolicName>
-    <version>5.0.4</version>
+    <version>5.0.5</version>
     <name>NetCDF Product Reader and Writer</name>
     <description>
         A product reader and writer for NetCDF files. It supports metadata profiles for CF, BEAM, HDF-EOS, ODESA.
@@ -31,6 +31,9 @@
 
     <changelog>
         <![CDATA[
+        <b>Changes in 5.0.5</b><br/>
+        netcdf3: do not pre-fill file, speedup
+        write lan lon bands only, if they are not already present
         <b>Changes in 5.0.4</b><br/>
         [BEAM-1741] Calculation of pixel size could be wrong in certain cases<br/>
         <b>Changes in 5.0.3</b><br/>
