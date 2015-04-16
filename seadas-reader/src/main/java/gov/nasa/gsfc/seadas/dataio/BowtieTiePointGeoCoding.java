@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (C) 2015 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -290,7 +290,7 @@ public class BowtieTiePointGeoCoding extends AbstractBowtieGeoCoding {
             return null;
         } else {
             final ModisTiePointGrid latGrid = new ModisTiePointGrid("lat" + y, stripeW, stripeH, offsetX, offsetY, subSamplingX, subSamplingY, lats);
-            final ModisTiePointGrid lonGrid = new ModisTiePointGrid("lon" + y, stripeW, stripeH, offsetX, offsetY, subSamplingX, subSamplingY, lons);
+            final ModisTiePointGrid lonGrid = new ModisTiePointGrid("lon" + y, stripeW, stripeH, offsetX, offsetY, subSamplingX, subSamplingY, lons, TiePointGrid.DISCONT_AT_180);
             final TiePointGeoCoding geoCoding = new TiePointGeoCoding(latGrid, lonGrid, getDatum());
             _cross180 = _cross180 || geoCoding.isCrossingMeridianAt180();
             return geoCoding;
