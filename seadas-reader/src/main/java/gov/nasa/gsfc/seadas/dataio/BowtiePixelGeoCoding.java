@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (C) 2014 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -17,15 +17,12 @@ package gov.nasa.gsfc.seadas.dataio;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.framework.dataio.ProductSubsetDef;
-import org.esa.snap.framework.datamodel.Band;
-import org.esa.snap.framework.datamodel.GeoCoding;
-import org.esa.snap.framework.datamodel.Scene;
-import org.esa.snap.framework.datamodel.TiePointGeoCoding;
+import org.esa.snap.framework.datamodel.*;
 import org.esa.snap.util.Guardian;
+import org.esa.snap.util.ProductUtils;
 import org.esa.snap.util.math.IndexValidator;
 import org.esa.snap.util.math.Range;
 
-import java.awt.Rectangle;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -42,6 +39,8 @@ import java.util.ArrayList;
 public class BowtiePixelGeoCoding extends AbstractBowtieGeoCoding {
     private Band _latBand;
     private Band _lonBand;
+    int _scanlineHeight;
+    int _scanlineOffset;
 
     /**
      * Constructs geo-coding based on two given tie-point grids.
@@ -49,10 +48,9 @@ public class BowtiePixelGeoCoding extends AbstractBowtieGeoCoding {
      * @param latBand       the latitude band, must not be <code>null</code>
      * @param lonBand       the longitude band, must not be <code>null</code>
      * @param scanlineHeight the number of detectors in a scan
-     * @param scanlineOffsetY the Y offset into the scanline where the data starts
      */
-    public BowtiePixelGeoCoding(Band latBand, Band lonBand, int scanlineHeight, int scanlineOffsetY) {
-        super(scanlineHeight, scanlineOffsetY);
+    public BowtiePixelGeoCoding(Band latBand, Band lonBand, int scanlineHeight) {
+        super();
         Guardian.assertNotNull("latBand", latBand);
         Guardian.assertNotNull("lonBand", lonBand);
         if (latBand.getRasterWidth() != lonBand.getRasterWidth() ||
@@ -62,11 +60,37 @@ public class BowtiePixelGeoCoding extends AbstractBowtieGeoCoding {
         _latBand = latBand;
         _lonBand = lonBand;
         setGridOwner(_lonBand.getOwner());
+        _scanlineHeight = scanlineHeight;
+        _scanlineOffset = 0;
         try {
             init();
         } catch (IOException e) {
             throw new IllegalArgumentException("can not init geocode");
         }
+    }
+
+    /**
+     * get the number of line in the whole scene
+     * @return lines in the scene
+     */
+    public int getSceneHeight() {
+        return _lonBand.getRasterHeight();
+    }
+
+    /**
+     * get the number of lines (num detectors) in a scan
+     * @return number of lines in a scan
+     */
+    public int getScanlineHeight() {
+        return _scanlineHeight;
+    }
+
+    /**
+     * get the number of lines between the start of a scan and the first line of data
+     * @return scan line offset
+     */
+    public int getScanlineOffset() {
+        return _scanlineOffset;
     }
 
     @Override
@@ -116,6 +140,43 @@ public class BowtiePixelGeoCoding extends AbstractBowtieGeoCoding {
         _lonBand = null;
     }
 
+    /**
+     * walk through the latitude and find the edge of the scan
+     * where the lat overlaps the previous lat.  set _scanlineOffset
+     */
+    private void calculateScanlineOffset() {
+        int start = -1;
+
+        // look at first pixel in each line
+        for(int i=1; i<_latBand.getSceneRasterHeight(); i++) {
+            if(_latBand.getPixelFloat(0, i-1) < _latBand.getPixelFloat(0, i)) {
+                start = i;
+                break;
+            }
+        }
+        // if not found try end of line
+        if(start == -1) {
+            int x = _latBand.getSceneRasterWidth() - 1;
+            for(int i=1; i<_latBand.getSceneRasterHeight(); i++) {
+                if(_latBand.getPixelFloat(x, i-1) < _latBand.getPixelFloat(x, i)) {
+                    start = i;
+                    break;
+                }
+            }
+        }
+
+        if(start == -1) {       // did not find an overlap
+            _scanlineOffset = 0;
+        } else {
+            start = start % _scanlineHeight;
+            if(start == 0) {
+                _scanlineOffset = 0;
+            } else {
+                _scanlineOffset = _scanlineHeight - start;
+            }
+        }
+    }
+
     private void init() throws IOException {
         _gcList = new ArrayList<GeoCoding>();
         _centerLineList = new ArrayList<PolyLine>();
@@ -126,85 +187,74 @@ public class BowtiePixelGeoCoding extends AbstractBowtieGeoCoding {
         final float[] latFloats = (float[]) _latBand.getDataElems();
         final float[] lonFloats = (float[]) _lonBand.getDataElems();
 
-        final int stripeW = _lonBand.getRasterWidth();
-        final int rasterHeight = _lonBand.getRasterHeight();
-        final int stripeH = getScanlineHeight();
+        calculateScanlineOffset();
 
-        final int gcRawWidth = stripeW * stripeH;
+        final int scanW = _lonBand.getRasterWidth();
+        final int sceneH = _lonBand.getRasterHeight();
+
+        final int gcRawWidth = scanW * _scanlineHeight;
 
         int firstY = 0;
-        // create placeholder for first stripe if needed
-        if (getScanlineOffsetY() != 0) {
-            _gcList.add(null);
-            _centerLineList.add(null);
-            firstY = stripeH - getScanlineOffsetY();
-        }
 
-        for (int y = firstY; y + stripeH <= rasterHeight; y += stripeH) {
-            final float[] lats = new float[gcRawWidth];
-            final float[] lons = new float[gcRawWidth];
-            System.arraycopy(lonFloats, y * stripeW, lons, 0, gcRawWidth);
-            System.arraycopy(latFloats, y * stripeW, lats, 0, gcRawWidth);
-            addStripeGeocode(lats, lons, y, stripeW, stripeH);
-        }
-
-        // create first and last stripe if needed
+        // create first if needed
         // use the delta from the neighboring stripe to extrapolate the data
-        if (getScanlineOffsetY() != 0) {
-
-            // create first stripe
+        if (_scanlineOffset != 0) {
+            firstY = _scanlineHeight - _scanlineOffset;
             final float[] lats = new float[gcRawWidth];
             final float[] lons = new float[gcRawWidth];
-            System.arraycopy(lonFloats, 0, lons, getScanlineOffsetY() * stripeW, (stripeH - getScanlineOffsetY()) * stripeW);
-            System.arraycopy(latFloats, 0, lats, getScanlineOffsetY() * stripeW, (stripeH - getScanlineOffsetY()) * stripeW);
-            for (int x = 0; x < stripeW; x++) {
-                int y1 = stripeH - getScanlineOffsetY(); // coord of first y in next stripe
-                int y2 = y1 + stripeH - 1;         // coord of last y in next stripe
-                int index1 = y1 * stripeW + x;
-                int index2 = y2 * stripeW + x;
-                double deltaLat = (latFloats[index2] - latFloats[index1]) / (stripeH - 1);
-                double deltaLon = (lonFloats[index2] - lonFloats[index1]) / (stripeH - 1);
+            System.arraycopy(lonFloats, 0, lons, _scanlineOffset * scanW, firstY * scanW);
+            System.arraycopy(latFloats, 0, lats, _scanlineOffset * scanW, firstY * scanW);
+            for (int x = 0; x < scanW; x++) {
+                int y1 = firstY;                    // coord of first y in next scan
+                int y2 = y1 + _scanlineHeight - 1;  // coord of last y in next scan
+                int index1 = y1 * scanW + x;
+                int index2 = y2 * scanW + x;
+                double deltaLat = (latFloats[index2] - latFloats[index1]) / (_scanlineHeight - 1);
+                double deltaLon = (lonFloats[index2] - lonFloats[index1]) / (_scanlineHeight - 1);
                 double refLat = latFloats[x];
                 double refLon = lonFloats[x];
 
-                for (int y = 0; y < getScanlineOffsetY(); y++) {
-                    lons[y * stripeW + x] = (float)(refLon - (deltaLon * (getScanlineOffsetY() - y)));
-                    lats[y * stripeW + x] = (float)(refLat - (deltaLat * (getScanlineOffsetY() - y)));
+                for (int y = 0; y < _scanlineOffset; y++) {
+                    lons[y * scanW + x] = (float)(refLon - (deltaLon * (_scanlineOffset - y)));
+                    lats[y * scanW + x] = (float)(refLat - (deltaLat * (_scanlineOffset - y)));
                 }
             }
-            GeoCoding gc = createStripeGeocode(lats, lons, 0, stripeW, stripeH);
-            if (gc != null) {
-                _gcList.add(0, gc);
-                _centerLineList.add(0, createCenterPolyLine(gc, stripeW, stripeH));
-            }
+            addStripeGeocode(lats, lons, 0, scanW, _scanlineHeight);
+        }
+
+        // add all of the normal scans
+        for (int y = firstY; y + _scanlineHeight <= sceneH; y += _scanlineHeight) {
+            final float[] lats = new float[gcRawWidth];
+            final float[] lons = new float[gcRawWidth];
+            System.arraycopy(lonFloats, y * scanW, lons, 0, gcRawWidth);
+            System.arraycopy(latFloats, y * scanW, lats, 0, gcRawWidth);
+            addStripeGeocode(lats, lons, y, scanW, _scanlineHeight);
         }
 
         // create last stripe
-        int lastStripeH = (rasterHeight - stripeH + getScanlineOffsetY()) % stripeH;
+        int lastStripeH = (sceneH - firstY) % _scanlineHeight;
         if (lastStripeH != 0) {
-
-            int lastStripeY = rasterHeight - lastStripeH - 1; // y coord of first y of last stripe
+            int lastStripeY = sceneH - lastStripeH; // y coord of first y of last stripe
             final float[] lats = new float[gcRawWidth];
             final float[] lons = new float[gcRawWidth];
-            System.arraycopy(lonFloats, lastStripeY * stripeW, lons, 0, lastStripeH * stripeW);
-            System.arraycopy(latFloats, lastStripeY * stripeW, lats, 0, lastStripeH * stripeW);
-            for (int x = 0; x < stripeW; x++) {
-                int y1 = lastStripeY - stripeH; // coord of first y in next stripe
-                int y2 = lastStripeY - 1;         // coord of last y in next stripe
-                int index1 = y1 * stripeW + x;
-                int index2 = y2 * stripeW + x;
-                float deltaLat = (latFloats[index2] - latFloats[index1]) / (stripeH - 1);
-                float deltaLon = (lonFloats[index2] - lonFloats[index1]) / (stripeH - 1);
-                float refLat = latFloats[lastStripeY * stripeW + x];
-                float refLon = lonFloats[lastStripeY * stripeW + x];
+            System.arraycopy(lonFloats, lastStripeY * scanW, lons, 0, lastStripeH * scanW);
+            System.arraycopy(latFloats, lastStripeY * scanW, lats, 0, lastStripeH * scanW);
+            for (int x = 0; x < scanW; x++) {
+                int y1 = lastStripeY - _scanlineHeight; // coord of first y in previous stripe
+                int y2 = lastStripeY - 1;               // coord of last y in previous stripe
+                int index1 = y1 * scanW + x;
+                int index2 = y2 * scanW + x;
+                float deltaLat = (latFloats[index2] - latFloats[index1]) / (_scanlineHeight - 1);
+                float deltaLon = (lonFloats[index2] - lonFloats[index1]) / (_scanlineHeight - 1);
+                float refLat = latFloats[(sceneH-1) * scanW + x];
+                float refLon = lonFloats[(sceneH-1) * scanW + x];
 
-                for (int y = lastStripeH; y < stripeH; y++) {
-                    lons[y * stripeW + x] = refLon - (deltaLon * (y - lastStripeH + 1));
-                    lats[y * stripeW + x] = refLat - (deltaLat * (y - lastStripeH + 1));
+                for (int y = lastStripeH; y < _scanlineHeight; y++) {
+                    lons[y * scanW + x] = refLon + (deltaLon * (y - lastStripeH + 1));
+                    lats[y * scanW + x] = refLat + (deltaLat * (y - lastStripeH + 1));
                 }
             }
-            addStripeGeocode(lats, lons, lastStripeY, stripeW, stripeH);
-
+            addStripeGeocode(lats, lons, lastStripeY, scanW, _scanlineHeight);
         }
 
         initSmallestAndLargestValidGeocodingIndices();
@@ -247,24 +297,36 @@ public class BowtiePixelGeoCoding extends AbstractBowtieGeoCoding {
     public boolean transferGeoCoding(final Scene srcScene, final Scene destScene, final ProductSubsetDef subsetDef) {
 
         BowtiePixelGeoCoding srcGeocoding = (BowtiePixelGeoCoding)srcScene.getGeoCoding();
-        final String latBandName = _latBand.getName();
-        final String lonBandName = _lonBand.getName();
-        final int srcStripeOffsetY = srcGeocoding.getScanlineOffsetY();
-        int destStripeOffsetY = srcStripeOffsetY;
+        final String latBandName = srcGeocoding._latBand.getName();
+        final String lonBandName = srcGeocoding._lonBand.getName();
+
+        ensureLatLonBands(destScene);
+        final Band targetLatBand = destScene.getProduct().getBand(latBandName);
+        final Band targetLonBand = destScene.getProduct().getBand(lonBandName);
         if(subsetDef != null) {
-            Rectangle region = subsetDef.getRegion();
-            if(region != null) {
-                destStripeOffsetY = (srcStripeOffsetY+region.y) % getScanlineHeight();
+            if(subsetDef.getSubSamplingY() != 1) {
+                destScene.setGeoCoding(GeoCodingFactory.createPixelGeoCoding(targetLatBand, targetLonBand, null, 5));
+                return true;
             }
         }
-        final Band latBand = destScene.getProduct().getBand(latBandName);
-        final Band lonBand = destScene.getProduct().getBand(lonBandName);
 
-        if (latBand != null && lonBand != null) {
-            destScene.setGeoCoding(new BowtiePixelGeoCoding(latBand, lonBand, getScanlineHeight(), destStripeOffsetY));
+        if (targetLatBand != null && targetLonBand != null) {
+            destScene.setGeoCoding(new BowtiePixelGeoCoding(targetLatBand, targetLonBand, srcGeocoding._scanlineHeight));
             return true;
         }
         return false;
     }
+
+    private void ensureLatLonBands(Scene destScene) {
+         ensureBand(destScene, _latBand);
+         ensureBand(destScene, _lonBand);
+     }
+
+     private static void ensureBand(Scene destScene, Band sourceBand) {
+         Band band = destScene.getProduct().getBand(sourceBand.getName());
+         if (band == null) {
+             ProductUtils.copyBand(sourceBand.getName(), sourceBand.getProduct(), destScene.getProduct(), true);
+          }
+      }
 
 }

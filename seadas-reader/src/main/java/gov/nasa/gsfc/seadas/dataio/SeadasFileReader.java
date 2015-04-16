@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2014 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ */
+
 package gov.nasa.gsfc.seadas.dataio;
 
 import com.bc.ceres.core.ProgressMonitor;
@@ -74,6 +90,11 @@ public abstract class SeadasFileReader {
             sourceOffsetX = destBand.getSceneRasterWidth() - (sourceOffsetX + sourceWidth);
         }
         sourceOffsetY += leadLineSkip;
+        int widthRemainder = destBand.getSceneRasterWidth() - (sourceOffsetX + sourceWidth);
+        
+        if (widthRemainder < 0){
+            sourceWidth += widthRemainder;
+        } 
         start[0] = sourceOffsetY;
         start[1] = sourceOffsetX;
         stride[0] = sourceStepY;
@@ -106,7 +127,12 @@ public abstract class SeadasFileReader {
                 storage = array.copyTo1DJavaArray();
             }
 
-            arraycopy(storage, 0, buffer, 0, destBuffer.getNumElems());
+            if (widthRemainder < 0){
+                arraycopy(storage, 0, buffer, 0, destBuffer.getNumElems() + widthRemainder);
+            }else{
+                arraycopy(storage, 0, buffer, 0, destBuffer.getNumElems());
+
+            }
         } finally {
             pm.done();
         }
@@ -644,7 +670,7 @@ public abstract class SeadasFileReader {
                         minmax[0] += band.getScalingOffset();
                         minmax[1] += band.getScalingOffset();
                     }
-                    String validExp = format("%s >= %.2f && %s <= %.2f", name, minmax[0], name, minmax[1]);
+                    String validExp = format("%s >= %.05f && %s <= %.05f", name, minmax[0], name, minmax[1]);
                     band.setValidPixelExpression(validExp);//.format(name, validMinMax[0], name, validMinMax[1]));
                 }
             }
@@ -927,22 +953,13 @@ public abstract class SeadasFileReader {
 
             final DateFormat dateFormat = ProductData.UTC.createDateFormat("yyyyDDDHHmmssSSS");
 
-            final DateFormat dateFormatISO = ProductData.UTC.createDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-            // only needed as a stop-gap to handle an intermediate version of l2gen metadata
-            final DateFormat dateFormatISOnopunc = ProductData.UTC.createDateFormat("yyyyMMdd'T'HHmmss'Z'");
+            final DateFormat dateFormatISO = ProductData.UTC.createDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
             final DateFormat dateFormatModis = ProductData.UTC.createDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSS");
             final DateFormat dateFormatOcts = ProductData.UTC.createDateFormat("yyyyMMdd HH:mm:ss.SSSSSS");
             try {
                 if (isISO) {
-                    Date date;
-                    try {
-                        date = dateFormatISO.parse(timeString);
-                    } catch (Exception e) {
-                        date = dateFormatISOnopunc.parse(timeString);
-                    }
-
-//                    String milliSeconds = timeString.substring(timeString.length());
+                    Date date = dateFormatISO.parse(timeString);
                     return ProductData.UTC.create(date, 0);
                 } else if (isModis) {
                     final Date date = dateFormatModis.parse(timeString);

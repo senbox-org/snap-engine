@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2014 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ */
+
 package gov.nasa.gsfc.seadas.dataio;
 
 import org.esa.snap.dataio.netcdf.util.NetcdfFileOpener;
@@ -132,7 +148,11 @@ public class ViirsXDRFileReader extends SeadasFileReader {
             final int height = dimensions[0];
             final int width = dimensions[1];
             if (height == sceneRasterHeight && width == sceneRasterWidth) {
-                final String name = variable.getShortName();
+                String name;
+
+                String groupName = variable.getGroup().getShortName();
+                name = groupName + '.'+ variable.getShortName();
+
                 final int dataType = getProductDataType(variable);
                 band = new Band(name, dataType, width, height);
 
@@ -157,9 +177,9 @@ public class ViirsXDRFileReader extends SeadasFileReader {
                         }
                     }
                     //todo Add valid expression - _FillValue is not working properly - viirs uses more than one...ugh.
-                    if (varname.equals("Chlorophyll_a")) {
-                        band.setValidPixelExpression("Chlorophyll_a > 0.0 && Chlorophyll_a < 100.0");
-                    }
+//                    if (varname.equals("Chlorophyll_a")) {
+//                        band.setValidPixelExpression("Chlorophyll_a > 0.0 && Chlorophyll_a < 100.0");
+//                    }
 
                     band.setNoDataValue((double) variable.findAttribute("_FillValue").getNumericValue().floatValue());
                 } catch (Exception ignored) {
@@ -360,10 +380,9 @@ public class ViirsXDRFileReader extends SeadasFileReader {
                 ProductData lons = ProductData.createInstance(longitudes);
                 lonBand.setData(lons);
 
-                //product.setGeoCoding(new PixelGeoCoding(latBand, lonBand, null, 5, ProgressMonitor.NULL));
-                product.setGeoCoding(new BowtiePixelGeoCoding(latBand, lonBand, detectorsInScan, 0));
+                product.setGeoCoding(new BowtiePixelGeoCoding(latBand, lonBand, detectorsInScan));
             } else {
-                product.setGeoCoding(new BowtiePixelGeoCoding(product.getBand(latitude), product.getBand(longitude), detectorsInScan, 0));
+                product.setGeoCoding(new BowtiePixelGeoCoding(product.getBand(latitude), product.getBand(longitude), detectorsInScan));
             }
         }catch (Exception e) {
             throw new ProductIOException(e.getMessage());
@@ -458,452 +477,465 @@ public class ViirsXDRFileReader extends SeadasFileReader {
 
     @Override
     protected void addFlagsAndMasks(Product product) {
-        Band QFBand = product.getBand("QF1_VIIRSOCCEDR");
-        if (QFBand != null) {
-            FlagCoding flagCoding = new FlagCoding("QF1");
-            flagCoding.addFlag("412Qual", 0x01, "412nm OC quality");
-            flagCoding.addFlag("445Qual", 0x02, "445nm OC quality");
-            flagCoding.addFlag("488Qual", 0x04, "488nm OC quality");
-            flagCoding.addFlag("555Qual", 0x08, "555nm OC quality");
-            flagCoding.addFlag("672Qual", 0x10, "672nm OC quality");
-            flagCoding.addFlag("ChlQual", 0x20, "Chlorophyll a quality");
-            flagCoding.addFlag("IOP412aQual", 0x40, "IOP (a) 412nm quality");
-            flagCoding.addFlag("IOP412sQual", 0x80, "IOP (s) 412nm quality");
+        String[] bandNames = product.getBandNames();
+        for (String band : bandNames) {
 
-            product.getFlagCodingGroup().add(flagCoding);
-            QFBand.setSampleCoding(flagCoding);
+            Band QFBand;
+            String bandID = null;
+            String[] nameParts = band.split("-");
+            if (nameParts.length > 1) {
+                bandID = nameParts[1];
+            }
+            if (band.endsWith("QF1_VIIRSOCCEDR")){
+                QFBand = product.getBand(band);
 
+                FlagCoding flagCoding = new FlagCoding(band);
+                flagCoding.addFlag(bandID+"-412Qual", 0x01, "412nm OC quality");
+                flagCoding.addFlag(bandID+"-445Qual", 0x02, "445nm OC quality");
+                flagCoding.addFlag(bandID+"-488Qual", 0x04, "488nm OC quality");
+                flagCoding.addFlag(bandID+"-555Qual", 0x08, "555nm OC quality");
+                flagCoding.addFlag(bandID+"-672Qual", 0x10, "672nm OC quality");
+                flagCoding.addFlag(bandID+"-ChlQual", 0x20, "Chlorophyll a quality");
+                flagCoding.addFlag(bandID+"-IOP412aQual", 0x40, "IOP (a) 412nm quality");
+                flagCoding.addFlag(bandID+"-IOP412sQual", 0x80, "IOP (s) 412nm quality");
 
-            product.getMaskGroup().add(Mask.BandMathsType.create("412Qual", "Quality flag (poor): nLw at 412nm",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF1_VIIRSOCCEDR.412Qual ",
-                    Color.YELLOW, 0.2));
-            product.getMaskGroup().add(Mask.BandMathsType.create("445Qual", "Quality flag (poor): nLw at 445nm",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF1_VIIRSOCCEDR.445Qual ",
-                    Color.CYAN, 0.2));
-            product.getMaskGroup().add(Mask.BandMathsType.create("488Qual", "Quality flag (poor): nLw at 488nm",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF1_VIIRSOCCEDR.488Qual ",
-                    Color.LIGHT_GRAY, 0.2));
-            product.getMaskGroup().add(Mask.BandMathsType.create("555Qual", "Quality flag (poor): nLw at 555nm",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF1_VIIRSOCCEDR.555Qual ",
-                    Color.MAGENTA, 0.2));
-            product.getMaskGroup().add(Mask.BandMathsType.create("672Qual", "Quality flag (poor): nLw at 672nm",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF1_VIIRSOCCEDR.672Qual ",
-                    Color.BLUE, 0.2));
-            product.getMaskGroup().add(Mask.BandMathsType.create("ChlQual", "Quality flag (poor): Chlorophyll a",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF1_VIIRSOCCEDR.ChlQual ",
-                    Color.GREEN, 0.2));
-            product.getMaskGroup().add(Mask.BandMathsType.create("IOP412aQual", "Quality flag (poor): IOP (absorption) at 412nm",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF1_VIIRSOCCEDR.IOP412aQual ",
-                    Color.ORANGE, 0.2));
-            product.getMaskGroup().add(Mask.BandMathsType.create("IOP412sQual", "Quality flag (poor): IOP (absorption) at 412nm",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF1_VIIRSOCCEDR.IOP412sQual ",
-                    Color.PINK, 0.2));
-
-        }
-        QFBand = product.getBand("QF2_VIIRSOCCEDR");
-        if (QFBand != null) {
-            FlagCoding flagCoding = new FlagCoding("QF2");
-            flagCoding.addFlag("IOP445aQual", 0x01, "IOP (a) 445nm quality");
-            flagCoding.addFlag("IOP445sQual", 0x02, "IOP (s) 445nm quality");
-            flagCoding.addFlag("IOP488aQual", 0x04, "IOP (a) 488nm quality");
-            flagCoding.addFlag("IOP488sQual", 0x08, "IOP (s) 488nm quality");
-            flagCoding.addFlag("IOP555aQual", 0x10, "IOP (a) 555nm quality");
-            flagCoding.addFlag("IOP555sQual", 0x20, "IOP (s) 555nm quality");
-            flagCoding.addFlag("IOP672aQual", 0x40, "IOP (a) 672nm quality");
-            flagCoding.addFlag("IOP672sQual", 0x80, "IOP (s) 672nm quality");
-            product.getFlagCodingGroup().add(flagCoding);
-            QFBand.setSampleCoding(flagCoding);
+                product.getFlagCodingGroup().add(flagCoding);
+                QFBand.setSampleCoding(flagCoding);
 
 
-            product.getMaskGroup().add(Mask.BandMathsType.create("IOP445aQual", "Quality flag (poor): IOP (absorption) at 445nm",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF2_VIIRSOCCEDR.IOP445aQual ",
-                    Color.YELLOW, 0.2));
-            product.getMaskGroup().add(Mask.BandMathsType.create("IOP445sQual", "Quality flag (poor): IOP (scattering) at 445nm",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF2_VIIRSOCCEDR.IOP445sQual ",
-                    Color.CYAN, 0.2));
-            product.getMaskGroup().add(Mask.BandMathsType.create("IOP488aQual", "Quality flag (poor): IOP (absorption) at 488nm",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF2_VIIRSOCCEDR.IOP488aQual ",
-                    Color.LIGHT_GRAY, 0.2));
-            product.getMaskGroup().add(Mask.BandMathsType.create("IOP488sQual", "Quality flag (poor): IOP (scattering) at 488nm",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF2_VIIRSOCCEDR.IOP488sQual ",
-                    Color.MAGENTA, 0.2));
-            product.getMaskGroup().add(Mask.BandMathsType.create("IOP555aQual", "Quality flag (poor): IOP (absorption) at 555nm",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF2_VIIRSOCCEDR.IOP555aQual ",
-                    Color.BLUE, 0.2));
-            product.getMaskGroup().add(Mask.BandMathsType.create("IOP555sQual", "Quality flag (poor): IOP (scattering) at 555nm",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF2_VIIRSOCCEDR.IOP555sQual ",
-                    Color.GREEN, 0.2));
-            product.getMaskGroup().add(Mask.BandMathsType.create("IOP672aQual", "Quality flag (poor): IOP (absorption) at 672nm",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF2_VIIRSOCCEDR.IOP672aQual ",
-                    Color.ORANGE, 0.2));
-            product.getMaskGroup().add(Mask.BandMathsType.create("IOP672sQual", "Quality flag (poor): IOP (scattering) at 672nm",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF2_VIIRSOCCEDR.IOP672sQual ",
-                    Color.PINK, 0.2));
-        }
-        QFBand = product.getBand("QF3_VIIRSOCCEDR");
-        if (QFBand != null) {
-            FlagCoding flagCoding = new FlagCoding("QF3");
-            flagCoding.addFlag("SDRQual", 0x01, "Input radiance quality");
-            flagCoding.addFlag("O3Qual", 0x02, "Input total Ozone Column quality");
-            flagCoding.addFlag("WindSpeed", 0x04, "Wind speed > 8m/s (possible whitecap formation)");
-            flagCoding.addFlag("AtmWarn", 0x08, "Epsilon value out-of-range for aerosol models (0.85 > eps > 1.35)");
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-412Qual", "Quality flag (poor): nLw at 412nm",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s.%s-412Qual' ",band,bandID),
+                        Color.YELLOW, 0.2));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-445Qual", "Quality flag (poor): nLw at 445nm",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s.%s-445Qual' ",band,bandID),
+                        Color.CYAN, 0.2));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-488Qual", "Quality flag (poor): nLw at 488nm",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s.%s-488Qual' ",band,bandID),
+                        Color.LIGHT_GRAY, 0.2));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-555Qual", "Quality flag (poor): nLw at 555nm",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s.%s-555Qual' ",band,bandID),
+                        Color.MAGENTA, 0.2));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-672Qual", "Quality flag (poor): nLw at 672nm",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s.%s-672Qual' ",band,bandID),
+                        Color.BLUE, 0.2));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-ChlQual", "Quality flag (poor): Chlorophyll a",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s.%s-ChlQual' ",band,bandID),
+                        Color.GREEN, 0.2));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-IOP412aQual", "Quality flag (poor): IOP (absorption) at 412nm",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s.%s-IOP412aQual' ",band,bandID),
+                        Color.ORANGE, 0.2));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-IOP412sQual", "Quality flag (poor): IOP (absorption) at 412nm",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s.%s-IOP412sQual' ",band,bandID),
+                        Color.PINK, 0.2));
 
-            product.getFlagCodingGroup().add(flagCoding);
-            QFBand.setSampleCoding(flagCoding);
+            }
+            if (band.endsWith("QF2_VIIRSOCCEDR")){
+                QFBand = product.getBand(band);
 
-
-            product.getMaskGroup().add(Mask.BandMathsType.create("SDRQual", "Input radiance quality (poor)",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF3_VIIRSOCCEDR.SDRQual",
-                    Color.YELLOW, 0.2));
-            product.getMaskGroup().add(Mask.BandMathsType.create("O3Qual", "Input Ozone quality (poor)",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF3_VIIRSOCCEDR.O3Qual",
-                    Color.CYAN, 0.2));
-            product.getMaskGroup().add(Mask.BandMathsType.create("WindSpeed", "Wind speed > 8m/s",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF3_VIIRSOCCEDR.WindSpeed",
-                    Color.LIGHT_GRAY, 0.2));
-            product.getMaskGroup().add(Mask.BandMathsType.create("AtmWarn", "Atmospheric correction warning",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF3_VIIRSOCCEDR.AtmWarn",
-                    Color.MAGENTA, 0.25));
-            product.getMaskGroup().add(Mask.BandMathsType.create("AtmFail_O3", "Atmospheric correction failure - Ozone correction",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF3_VIIRSOCCEDR & 0x70 ==  0x10",
-                    SeadasFileReader.FailRed, 0.5));
-            product.getMaskGroup().add(Mask.BandMathsType.create("AtmFail_WC", "Atmospheric correction failure - Whitecap correction",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF3_VIIRSOCCEDR & 0x70 ==  0x20",
-                    SeadasFileReader.FailRed, 0.5));
-            product.getMaskGroup().add(Mask.BandMathsType.create("AtmFail_pol", "Atmospheric correction failure - Polarization correction",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF3_VIIRSOCCEDR & 0x70 ==  0x30",
-                    SeadasFileReader.FailRed, 0.5));
-            product.getMaskGroup().add(Mask.BandMathsType.create("AtmFail_rayleigh", "Atmospheric correction failure - Rayliegh correction",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF3_VIIRSOCCEDR & 0x70 ==  0x40",
-                    SeadasFileReader.FailRed, 0.5));
-            product.getMaskGroup().add(Mask.BandMathsType.create("AtmFail_aerosol", "Atmospheric correction failure - Aerosol correction",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF3_VIIRSOCCEDR & 0x70 ==  0x50",
-                    SeadasFileReader.FailRed, 0.5));
-            product.getMaskGroup().add(Mask.BandMathsType.create("AtmFail_difftran", "Atmospheric correction failure - Diffuse transmission zero",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF3_VIIRSOCCEDR. & 0x70 ==  0x60",
-                    SeadasFileReader.FailRed, 0.5));
-            product.getMaskGroup().add(Mask.BandMathsType.create("AtmFail_NO", "Atmospheric correction failure - no correction possible",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF3_VIIRSOCCEDR & 0x70 ==  0x70",
-                    SeadasFileReader.FailRed, 0.0));
-        }
-
-        QFBand = product.getBand("QF4_VIIRSOCCEDR");
-        if (QFBand != null) {
-            FlagCoding flagCoding = new FlagCoding("QF4");
-
-            flagCoding.addFlag("Ice_Snow", 0x04, "Snow or Ice detected");
-            flagCoding.addFlag("HighSolZ", 0x08, "Solar Zenith Angle > 70 deg.");
-            flagCoding.addFlag("Glint", 0x10, "Sun Glint");
-            flagCoding.addFlag("HighSenZ", 0x20, "Senzor Zenith Angle > 53 deg.");
-            flagCoding.addFlag("Shallow", 0x40, "Shallow Water");
-
-            product.getFlagCodingGroup().add(flagCoding);
-            QFBand.setSampleCoding(flagCoding);
+                FlagCoding flagCoding = new FlagCoding(band);
+                flagCoding.addFlag(bandID+"-IOP445aQual", 0x01, "IOP (a) 445nm quality");
+                flagCoding.addFlag(bandID+"-IOP445sQual", 0x02, "IOP (s) 445nm quality");
+                flagCoding.addFlag(bandID+"-IOP488aQual", 0x04, "IOP (a) 488nm quality");
+                flagCoding.addFlag(bandID+"-IOP488sQual", 0x08, "IOP (s) 488nm quality");
+                flagCoding.addFlag(bandID+"-IOP555aQual", 0x10, "IOP (a) 555nm quality");
+                flagCoding.addFlag(bandID+"-IOP555sQual", 0x20, "IOP (s) 555nm quality");
+                flagCoding.addFlag(bandID+"-IOP672aQual", 0x40, "IOP (a) 672nm quality");
+                flagCoding.addFlag(bandID+"-IOP672sQual", 0x80, "IOP (s) 672nm quality");
+                product.getFlagCodingGroup().add(flagCoding);
+                QFBand.setSampleCoding(flagCoding);
 
 
-            product.getMaskGroup().add(Mask.BandMathsType.create("Ocean", "Ocean",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF4_VIIRSOCCEDR & 0x03 == 0x00",
-                    Color.BLUE, 0.7));
-            product.getMaskGroup().add(Mask.BandMathsType.create("CoastalWater", "Coastal Water mask",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF4_VIIRSOCCEDR & 0x03 == 0x01",
-                    Color.GRAY, 0.5));
-            product.getMaskGroup().add(Mask.BandMathsType.create("InlandWater", "Inland water mask",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF4_VIIRSOCCEDR & 0x03 == 0x02",
-                    Color.DARK_GRAY, 0.5));
-            product.getMaskGroup().add(Mask.BandMathsType.create("Land", "Land mask",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF4_VIIRSOCCEDR & 0x03 == 0x03",
-                    SeadasFileReader.LandBrown, 0.0));
-            product.getMaskGroup().add(Mask.BandMathsType.create("Ice/Snow", "Ice/snow mask.",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF4_VIIRSOCCEDR.Ice_Snow",
-                    Color.lightGray, 0.2));
-            product.getMaskGroup().add(Mask.BandMathsType.create("HighSolZ", "Solar Zenith angle > 70 deg.",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF4_VIIRSOCCEDR.HighSolZ",
-                    SeadasFileReader.Purple, 0.2));
-            product.getMaskGroup().add(Mask.BandMathsType.create("Glint", "Sun Glint.",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF4_VIIRSOCCEDR.Glint",
-                    SeadasFileReader.BrightPink, 0.1));
-            product.getMaskGroup().add(Mask.BandMathsType.create("HighSenZ", "Sensor Zenith angle > 53 deg.",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF4_VIIRSOCCEDR.HighSenZ",
-                    SeadasFileReader.LightCyan, 0.5));
-            product.getMaskGroup().add(Mask.BandMathsType.create("ShallowWater", "Shallow Water mask.",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF4_VIIRSOCCEDR.Shallow",
-                    SeadasFileReader.BurntUmber, 0.5));
-        }
-        QFBand = product.getBand("QF5_VIIRSOCCEDR");
-        if (QFBand != null) {
-            FlagCoding flagCoding = new FlagCoding("QF5");
-            flagCoding.addFlag("Straylight", 0x04, "Adjacent pixel not clear, possible straylight contaminated");
-            flagCoding.addFlag("Cirrus", 0x08, "Thin Cirrus cloud detected");
-            flagCoding.addFlag("Shadow", 0x10, "Cloud shadow detected");
-            flagCoding.addFlag("HighAer", 0x20, "Non-cloud obstruction (heavy aerosol load) detected");
-            flagCoding.addFlag("AbsAer", 0x40, "Strongly absorbing aerosol detected");
-            flagCoding.addFlag("HighAOT", 0x80, "Aerosol optical thickness @ 555nm > 0.3");
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-IOP445aQual", "Quality flag (poor): IOP (absorption) at 445nm",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s.%s-IOP445aQual' ",band,bandID),
+                        Color.YELLOW, 0.2));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-IOP445sQual", "Quality flag (poor): IOP (scattering) at 445nm",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s.%s-IOP445sQual' ",band,bandID),
+                        Color.CYAN, 0.2));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-IOP488aQual", "Quality flag (poor): IOP (absorption) at 488nm",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s.%s-IOP488aQual' ",band,bandID),
+                        Color.LIGHT_GRAY, 0.2));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-IOP488sQual", "Quality flag (poor): IOP (scattering) at 488nm",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s.%s-IOP488sQual' ",band,bandID),
+                        Color.MAGENTA, 0.2));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-IOP555aQual", "Quality flag (poor): IOP (absorption) at 555nm",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s.%s-IOP555aQual' ",band,bandID),
+                        Color.BLUE, 0.2));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-IOP555sQual", "Quality flag (poor): IOP (scattering) at 555nm",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s.%s-IOP555sQual' ",band,bandID),
+                        Color.GREEN, 0.2));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-IOP672aQual", "Quality flag (poor): IOP (absorption) at 672nm",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s.%s-IOP672aQual' ",band,bandID),
+                        Color.ORANGE, 0.2));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-IOP672sQual", "Quality flag (poor): IOP (scattering) at 672nm",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s.%s-IOP672sQual' ",band,bandID),
+                        Color.PINK, 0.2));
+            }
+            if (band.endsWith("QF3_VIIRSOCCEDR")){
+                QFBand = product.getBand(band);
 
-            product.getFlagCodingGroup().add(flagCoding);
-            QFBand.setSampleCoding(flagCoding);
+                FlagCoding flagCoding = new FlagCoding(band);
+                flagCoding.addFlag(bandID+"-SDRQual", 0x01, "Input radiance quality");
+                flagCoding.addFlag(bandID+"-O3Qual", 0x02, "Input total Ozone Column quality");
+                flagCoding.addFlag(bandID+"-WindSpeed", 0x04, "Wind speed > 8m/s (possible whitecap formation)");
+                flagCoding.addFlag(bandID+"-AtmWarn", 0x08, "Epsilon value out-of-range for aerosol models (0.85 > eps > 1.35)");
+
+                product.getFlagCodingGroup().add(flagCoding);
+                QFBand.setSampleCoding(flagCoding);
 
 
-            product.getMaskGroup().add(Mask.BandMathsType.create("Clear", "Confidently Cloud-free.",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF5_VIIRSOCCEDR & 0x03 == 0x00",
-                    SeadasFileReader.Cornflower, 0.5));
-            product.getMaskGroup().add(Mask.BandMathsType.create("LikelyClear", "Probably cloud-free",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF5_VIIRSOCCEDR & 0x03 == 0x01",
-                    Color.LIGHT_GRAY, 0.5));
-            product.getMaskGroup().add(Mask.BandMathsType.create("LikelyCloud", "Probably cloud contaminated.",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF5_VIIRSOCCEDR & 0x03 == 0x02",
-                    Color.DARK_GRAY, 0.25));
-            product.getMaskGroup().add(Mask.BandMathsType.create("Cloud", "Confidently Cloudy.",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF5_VIIRSOCCEDR & 0x03 == 0x03",
-                    Color.WHITE, 0.0));
-            product.getMaskGroup().add(Mask.BandMathsType.create("Straylight", "Adjacent pixel not clear, possible straylight contaminated.",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF5_VIIRSOCCEDR.Straylight",
-                    Color.YELLOW, 0.5));
-            product.getMaskGroup().add(Mask.BandMathsType.create("Cirrus", "Thin Cirrus cloud detected.",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF5_VIIRSOCCEDR.Cirrus",
-                    Color.BLUE, 0.5));
-            product.getMaskGroup().add(Mask.BandMathsType.create("CloudShadow", "Cloud shadow detected.",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF5_VIIRSOCCEDR.Shadow",
-                    Color.GRAY, 0.5));
-            product.getMaskGroup().add(Mask.BandMathsType.create("HighAer", "Non-cloud obstruction (heavy aerosol load) detected.",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF5_VIIRSOCCEDR.HighAer",
-                    SeadasFileReader.LightPink, 0.5));
-            product.getMaskGroup().add(Mask.BandMathsType.create("AbsAer", "Strongly absorbing aerosol detected.",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF5_VIIRSOCCEDR.AbsAer",
-                    Color.ORANGE, 0.5));
-            product.getMaskGroup().add(Mask.BandMathsType.create("HighAOT", "Aerosol optical thickness @ 555nm > 0.3.",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF5_VIIRSOCCEDR.HighAOT",
-                    Color.MAGENTA, 0.5));
-        }
-        QFBand = product.getBand("QF6_VIIRSOCCEDR");
-        if (QFBand != null) {
-            FlagCoding flagCoding = new FlagCoding("QF6");
-            flagCoding.addFlag("Turbid", 0x01, "Turbid water detected (Rrs @ 555nm > 0.012)");
-            flagCoding.addFlag("Coccolithophore", 0x02, "Coccolithophores detected");
-            flagCoding.addFlag("HighCDOM", 0x04, "CDOM absorption @ 410nm > 2 m^-1");
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-SDRQual", "Input radiance quality (poor)",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s.%s-SDRQual'",band,bandID),
+                        Color.YELLOW, 0.2));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-O3Qual", "Input Ozone quality (poor)",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s.%s-O3Qual'",band,bandID),
+                        Color.CYAN, 0.2));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-WindSpeed", "Wind speed > 8m/s",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s.%s-WindSpeed'",band,bandID),
+                        Color.LIGHT_GRAY, 0.2));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-AtmWarn", "Atmospheric correction warning",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s.%s-AtmWarn'",band,bandID),
+                        Color.MAGENTA, 0.25));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-AtmFail_O3", "Atmospheric correction failure - Ozone correction",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s' & 0x70 ==  0x10",band),
+                        SeadasFileReader.FailRed, 0.5));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-AtmFail_WC", "Atmospheric correction failure - Whitecap correction",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s' & 0x70 ==  0x20",band),
+                        SeadasFileReader.FailRed, 0.5));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-AtmFail_pol", "Atmospheric correction failure - Polarization correction",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s' & 0x70 ==  0x30",band),
+                        SeadasFileReader.FailRed, 0.5));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-AtmFail_rayleigh", "Atmospheric correction failure - Rayliegh correction",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s' & 0x70 ==  0x40",band),
+                        SeadasFileReader.FailRed, 0.5));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-AtmFail_aerosol", "Atmospheric correction failure - Aerosol correction",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s' & 0x70 ==  0x50",band),
+                        SeadasFileReader.FailRed, 0.5));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-AtmFail_difftran", "Atmospheric correction failure - Diffuse transmission zero",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s' & 0x70 ==  0x60",band),
+                        SeadasFileReader.FailRed, 0.5));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-AtmFail_NO", "Atmospheric correction failure - no correction possible",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s' & 0x70 ==  0x70",band),
+                        SeadasFileReader.FailRed, 0.0));
+            }
 
-            product.getFlagCodingGroup().add(flagCoding);
-            QFBand.setSampleCoding(flagCoding);
+            if (band.endsWith("QF4_VIIRSOCCEDR")){
+                QFBand = product.getBand(band);
+                FlagCoding flagCoding = new FlagCoding(band);
 
+                flagCoding.addFlag(bandID+"-Ice_Snow", 0x04, "Snow or Ice detected");
+                flagCoding.addFlag(bandID+"-HighSolZ", 0x08, "Solar Zenith Angle > 70 deg.");
+                flagCoding.addFlag(bandID+"-Glint", 0x10, "Sun Glint");
+                flagCoding.addFlag(bandID+"-HighSenZ", 0x20, "Senzor Zenith Angle > 53 deg.");
+                flagCoding.addFlag(bandID+"-Shallow", 0x40, "Shallow Water");
 
-            product.getMaskGroup().add(Mask.BandMathsType.create("Turbid", "Turbid water detected (Rrs @ 555nm > 0.012)",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF6_VIIRSOCCEDR.Turbid ",
-                    SeadasFileReader.LightBrown, 0.5));
-            product.getMaskGroup().add(Mask.BandMathsType.create("Coccolithophore", "Coccolithophores detected",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF6_VIIRSOCCEDR.Coccolithophore ",
-                    Color.CYAN, 0.2));
-            product.getMaskGroup().add(Mask.BandMathsType.create("HighCDOM", "CDOM absorption @ 410nm > 2 m^-1.",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF6_VIIRSOCCEDR.HighCDOM ",
-                    SeadasFileReader.Mustard, 0.5));
-            product.getMaskGroup().add(Mask.BandMathsType.create("ChlFail", "No Chlorophyll retrieval possible.",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF6_VIIRSOCCEDR & 0x18 == 0x00",
-                    SeadasFileReader.FailRed, 0.0));
-            product.getMaskGroup().add(Mask.BandMathsType.create("LowChl", "Chlorophyll < 1 mg m^-3",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF6_VIIRSOCCEDR & 0x18 == 0x08",
-                    SeadasFileReader.Coral, 0.5));
-            product.getMaskGroup().add(Mask.BandMathsType.create("ModChl", "Chlorophyll between 1 and 10 mg m^-3",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF6_VIIRSOCCEDR  & 0x18 == 0x10",
-                    SeadasFileReader.DarkGreen, 0.5));
-            product.getMaskGroup().add(Mask.BandMathsType.create("HighChl", "Chlorphyll > 10 mg m^-3",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF6_VIIRSOCCEDR   & 0x18 == 0x10",
-                    Color.RED, 0.5));
-            product.getMaskGroup().add(Mask.BandMathsType.create("CarderEmp", "Carder Empirical algorithm used.",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF6_VIIRSOCCEDR & 0xE0 == 0x20",
-                    SeadasFileReader.NewGreen, 0.5));
-            product.getMaskGroup().add(Mask.BandMathsType.create("UnpackPig", "Phytoplankton with packaged pigment",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF6_VIIRSOCCEDR & 0xE0 == 0x40",
-                    SeadasFileReader.TealGreen, 0.5));
-            product.getMaskGroup().add(Mask.BandMathsType.create("WtPigGlobal", "Weighted packaged pigment - global",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF6_VIIRSOCCEDR & 0xE0 == 0x80",
-                    Color.GRAY, 0.5));
-            product.getMaskGroup().add(Mask.BandMathsType.create("WtPigFull", "Weighted fully packaged pigment",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF6_VIIRSOCCEDR & 0xE0 == 0xA0",
-                    Color.LIGHT_GRAY, 0.5));
-            product.getMaskGroup().add(Mask.BandMathsType.create("FullPackPig", "Phytoplankton with fully packaged pigment",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF6_VIIRSOCCEDR & 0xE0 == 0xC0",
-                    SeadasFileReader.TealBlue, 0.5));
-            product.getMaskGroup().add(Mask.BandMathsType.create("NoOCC", "No ocean color chlorphyll retrieval",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF6_VIIRSOCCEDR & 0xE0 == 0xE0",
-                    Color.BLACK, 0.1));
-        }
-        QFBand = product.getBand("QF7_VIIRSOCCEDR");
-        if (QFBand != null) {
-            FlagCoding flagCoding = new FlagCoding("QF7");
-            flagCoding.addFlag("nLwWarn", 0x01, "nLw out-of-range (< 0.1 or > 40 W m^-2 um^-1 sr^-1)");
-            flagCoding.addFlag("ChlWarn", 0x02, "Chlorophyll out-of-range (< 0.05 or > 50 mg m^-3)");
-            flagCoding.addFlag("IOPaWarn", 0x04, "IOP absorption out-of-range (< 0.01 or  > 10 m^-1)");
-            flagCoding.addFlag("IOPsWarn", 0x08, "IOP scattering out-of-range (< 0.01 or  > 50 m^-1)");
-            flagCoding.addFlag("SSTWarn", 0x10, "Input Skin SST poor quality");
-            flagCoding.addFlag("Bright", 0x20, "Bright Target flag");
+                product.getFlagCodingGroup().add(flagCoding);
+                QFBand.setSampleCoding(flagCoding);
 
 
-            product.getFlagCodingGroup().add(flagCoding);
-            QFBand.setSampleCoding(flagCoding);
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-Ocean", "Ocean",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s' & 0x03 == 0x00",band),
+                        Color.BLUE, 0.7));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-CoastalWater", "Coastal Water mask",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s' & 0x03 == 0x01",band),
+                        Color.GRAY, 0.5));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-InlandWater", "Inland water mask",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s' & 0x03 == 0x02",band),
+                        Color.DARK_GRAY, 0.5));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-Land", "Land mask",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s' & 0x03 == 0x03",band),
+                        SeadasFileReader.LandBrown, 0.0));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-Ice/Snow", "Ice/snow mask.",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s.%s-Ice_Snow'",band,bandID),
+                        Color.lightGray, 0.2));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-HighSolZ", "Solar Zenith angle > 70 deg.",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s.%s-HighSolZ'",band,bandID),
+                        SeadasFileReader.Purple, 0.2));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-Glint", "Sun Glint.",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s.%s-Glint'",band,bandID),
+                        SeadasFileReader.BrightPink, 0.1));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-HighSenZ", "Sensor Zenith angle > 53 deg.",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s.%s-HighSenZ'",band,bandID),
+                        SeadasFileReader.LightCyan, 0.5));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-ShallowWater", "Shallow Water mask.",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s.%s-Shallow'",band,bandID),
+                        SeadasFileReader.BurntUmber, 0.5));
+            }
+            if (band.endsWith("QF5_VIIRSOCCEDR")){
+                QFBand = product.getBand(band);
+                FlagCoding flagCoding = new FlagCoding(band);
+                flagCoding.addFlag(bandID+"-Straylight", 0x04, "Adjacent pixel not clear, possible straylight contaminated");
+                flagCoding.addFlag(bandID+"-Cirrus", 0x08, "Thin Cirrus cloud detected");
+                flagCoding.addFlag(bandID+"-Shadow", 0x10, "Cloud shadow detected");
+                flagCoding.addFlag(bandID+"-HighAer", 0x20, "Non-cloud obstruction (heavy aerosol load) detected");
+                flagCoding.addFlag(bandID+"-AbsAer", 0x40, "Strongly absorbing aerosol detected");
+                flagCoding.addFlag(bandID+"-HighAOT", 0x80, "Aerosol optical thickness @ 555nm > 0.3");
+
+                product.getFlagCodingGroup().add(flagCoding);
+                QFBand.setSampleCoding(flagCoding);
 
 
-            product.getMaskGroup().add(Mask.BandMathsType.create("nLwWarn", "nLw out-of-range (< 0.1 or > 40 W m^-2 um^-1 sr^-1)",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF7_VIIRSOCCEDR.nLwWarn",
-                    Color.BLUE, 0.2));
-            product.getMaskGroup().add(Mask.BandMathsType.create("ChlWarn", "Chlorophyll out-of-range (< 0.05 or > 50 mg m^-3)",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF7_VIIRSOCCEDR.ChlWarn",
-                    Color.LIGHT_GRAY, 0.2));
-            product.getMaskGroup().add(Mask.BandMathsType.create("IOPaWarn", "IOP absorption out-of-range (< 0.01 or  > 10 m^-1)",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF7_VIIRSOCCEDR.IOPaWarn",
-                    Color.DARK_GRAY, 0.2));
-            product.getMaskGroup().add(Mask.BandMathsType.create("IOPsWarn", "IOP scattering out-of-range (< 0.01 or  > 50 m^-1)",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF7_VIIRSOCCEDR.IOPsWarn",
-                    Color.GREEN, 0.2));
-            product.getMaskGroup().add(Mask.BandMathsType.create("SSTWarn", "Input Skin SST poor quality.",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF7_VIIRSOCCEDR.SSTWarn",
-                    Color.LIGHT_GRAY, 0.2));
-            product.getMaskGroup().add(Mask.BandMathsType.create("Bright", "Bright Target flag",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF7_VIIRSOCCEDR.Bright",
-                    Color.GRAY, 0.2));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-Clear", "Confidently Cloud-free.",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s' & 0x03 == 0x00",band),
+                        SeadasFileReader.Cornflower, 0.5));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-LikelyClear", "Probably cloud-free",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s' & 0x03 == 0x01",band),
+                        Color.LIGHT_GRAY, 0.5));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-LikelyCloud", "Probably cloud contaminated.",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s' & 0x03 == 0x02",band),
+                        Color.DARK_GRAY, 0.25));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-Cloud", "Confidently Cloudy.",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s' & 0x03 == 0x03",band),
+                        Color.WHITE, 0.0));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-Straylight", "Adjacent pixel not clear, possible straylight contaminated.",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s.%s-Straylight'",band,bandID),
+                        Color.YELLOW, 0.5));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-Cirrus", "Thin Cirrus cloud detected.",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s.%s-Cirrus'",band,bandID),
+                        Color.BLUE, 0.5));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-CloudShadow", "Cloud shadow detected.",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s.%s-Shadow'",band,bandID),
+                        Color.GRAY, 0.5));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-HighAer", "Non-cloud obstruction (heavy aerosol load) detected.",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s.%s-HighAer'",band,bandID),
+                        SeadasFileReader.LightPink, 0.5));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-AbsAer", "Strongly absorbing aerosol detected.",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s.%s-AbsAer'",band,bandID),
+                        Color.ORANGE, 0.5));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-HighAOT", "Aerosol optical thickness @ 555nm > 0.3.",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s.%s-HighAOT'",band,bandID),
+                        Color.MAGENTA, 0.5));
+            }
+            if (band.endsWith("QF6_VIIRSOCCEDR")){
+                QFBand = product.getBand(band);
+                FlagCoding flagCoding = new FlagCoding(band);
+                flagCoding.addFlag(bandID+"-Turbid", 0x01, "Turbid water detected (Rrs @ 555nm > 0.012)");
+                flagCoding.addFlag(bandID+"-Coccolithophore", 0x02, "Coccolithophores detected");
+                flagCoding.addFlag(bandID+"-HighCDOM", 0x04, "CDOM absorption @ 410nm > 2 m^-1");
 
-        }
-        QFBand = product.getBand("QF1_VIIRSMBANDSDR");
-        if (QFBand != null) {
-            FlagCoding flagCoding = new FlagCoding("QF1SDR");
-            flagCoding.addFlag("CalQualGood", 0x00, "Calibration quality - Good");
-            flagCoding.addFlag("CalQualBad", 0x01, "Calibration quality - Bad");
-            flagCoding.addFlag("NoCal", 0x02, "No Calibration");
-            flagCoding.addFlag("NoSatPix", 0x03, "No saturated");
-            flagCoding.addFlag("LowSatPix", 0x03, "Some pixels saturated");
-            flagCoding.addFlag("SatPix", 0x03, "All pixels saturated");
-            flagCoding.addFlag("DataOK", 0x04, "All required data available");
-            flagCoding.addFlag("BadEvRDR", 0x08, "Missing EV RDR data.");
-            flagCoding.addFlag("BadCalData", 0x10, "Missing cal data (SV, CV, SD, etc)");
-            flagCoding.addFlag("BadTherm", 0x20, "Missing Thermistor data");
-            flagCoding.addFlag("InRange", 0x40, "All calibrated data within LUT thresholds");
-            flagCoding.addFlag("BadRad", 0x40, "Radiance out-of-range LUT threshold");
-            flagCoding.addFlag("BadRef", 0x40, "Reflectance out-of-range LUT threshold");
-            flagCoding.addFlag("BadRadRef", 0x40, "Both Radiance & Reflectance out-of-range LUT threshold");
+                product.getFlagCodingGroup().add(flagCoding);
+                QFBand.setSampleCoding(flagCoding);
 
 
-            product.getFlagCodingGroup().add(flagCoding);
-            QFBand.setSampleCoding(flagCoding);
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-Turbid", "Turbid water detected (Rrs @ 555nm > 0.012)",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s.%s-Turbid'",band,bandID),
+                        SeadasFileReader.LightBrown, 0.5));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-Coccolithophore", "Coccolithophores detected",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s.%s-Coccolithophore'",band,bandID),
+                        Color.CYAN, 0.2));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-HighCDOM", "CDOM absorption @ 410nm > 2 m^-1.",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s.%s-HighCDOM'",band,bandID),
+                        SeadasFileReader.Mustard, 0.5));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-ChlFail", "No Chlorophyll retrieval possible.",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s' & 0x18 == 0x00",band),
+                        SeadasFileReader.FailRed, 0.0));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-LowChl", "Chlorophyll < 1 mg m^-3",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s' & 0x18 == 0x08",band),
+                        SeadasFileReader.Coral, 0.5));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-ModChl", "Chlorophyll between 1 and 10 mg m^-3",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s'  & 0x18 == 0x10",band),
+                        SeadasFileReader.DarkGreen, 0.5));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-HighChl", "Chlorphyll > 10 mg m^-3",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s'   & 0x18 == 0x10",band),
+                        Color.RED, 0.5));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-CarderEmp", "Carder Empirical algorithm used.",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s' & 0xE0 == 0x20",band),
+                        SeadasFileReader.NewGreen, 0.5));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-UnpackPig", "Phytoplankton with packaged pigment",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s' & 0xE0 == 0x40",band),
+                        SeadasFileReader.TealGreen, 0.5));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-WtPigGlobal", "Weighted packaged pigment - global",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s' & 0xE0 == 0x80",band),
+                        Color.GRAY, 0.5));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-WtPigFull", "Weighted fully packaged pigment",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s' & 0xE0 == 0xA0",band),
+                        Color.LIGHT_GRAY, 0.5));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-FullPackPig", "Phytoplankton with fully packaged pigment",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s' & 0xE0 == 0xC0",band),
+                        SeadasFileReader.TealBlue, 0.5));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-NoOCC", "No ocean color chlorphyll retrieval",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s' & 0xE0 == 0xE0",band),
+                        Color.BLACK, 0.1));
+            }
+            if (band.endsWith("QF7_VIIRSOCCEDR")){
+                QFBand = product.getBand(band);
+                FlagCoding flagCoding = new FlagCoding(band);
+                flagCoding.addFlag(bandID+"-nLwWarn", 0x01, "nLw out-of-range (< 0.1 or > 40 W m^-2 um^-1 sr^-1)");
+                flagCoding.addFlag(bandID+"-ChlWarn", 0x02, "Chlorophyll out-of-range (< 0.05 or > 50 mg m^-3)");
+                flagCoding.addFlag(bandID+"-IOPaWarn", 0x04, "IOP absorption out-of-range (< 0.01 or  > 10 m^-1)");
+                flagCoding.addFlag(bandID+"-IOPsWarn", 0x08, "IOP scattering out-of-range (< 0.01 or  > 50 m^-1)");
+                flagCoding.addFlag(bandID+"-SSTWarn", 0x10, "Input Skin SST poor quality");
+                flagCoding.addFlag(bandID+"-Bright", 0x20, "Bright Target flag");
 
 
-            product.getMaskGroup().add(Mask.BandMathsType.create("CalQualGood", "Calibration quality - Good",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF1_VIIRSMBANDSDR & 0x02 == 0x00",
-                    Color.BLUE, 0.5));
-            product.getMaskGroup().add(Mask.BandMathsType.create("CalQualBad", "Calibration quality - Bad",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF1_VIIRSMBANDSDR & 0x02 == 0x01",
-                    Color.GRAY, 0.5));
-            product.getMaskGroup().add(Mask.BandMathsType.create("NoCal", "No Calibration",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF1_VIIRSMBANDSDR & 0x02 == 0x02",
-                    Color.DARK_GRAY, 0.5));
-            product.getMaskGroup().add(Mask.BandMathsType.create("NoSatPix", "No saturated",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF1_VIIRSMBANDSDR & 0x0C == 0x00",
-                    Color.GREEN, 0.5));
-            product.getMaskGroup().add(Mask.BandMathsType.create("LowSatPix", "Some pixels saturated.",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF1_VIIRSMBANDSDR & 0x0C == 0x04",
-                    Color.lightGray, 0.5));
-            product.getMaskGroup().add(Mask.BandMathsType.create("SatPix", "All pixels saturated",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF1_VIIRSMBANDSDR & 0x0C == 0x08",
-                    Color.MAGENTA, 0.5));
-            product.getMaskGroup().add(Mask.BandMathsType.create("DataOK", "All required data available",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF1_VIIRSMBANDSDR & 0x30 == 0x00",
-                    Color.YELLOW, 0.5));
-            product.getMaskGroup().add(Mask.BandMathsType.create("BadEvRDR", "Missing EV RDR data.",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF1_VIIRSMBANDSDR & 0x30 == 0x10",
-                    Color.orange, 0.5));
-            product.getMaskGroup().add(Mask.BandMathsType.create("BadCalData", "Missing cal data (SV, CV, SD, etc).",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF1_VIIRSMBANDSDR & 0x30 == 0x20",
-                    Color.BLUE, 0.5));
-            product.getMaskGroup().add(Mask.BandMathsType.create("BadTherm", "Missing Thermistor data.",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF1_VIIRSMBANDSDR & 0x30 == 0x30",
-                    Color.BLUE, 0.5));
-            product.getMaskGroup().add(Mask.BandMathsType.create("InRange", "All calibrated data within LUT thresholds.",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF1_VIIRSMBANDSDR & 0xC0 == 0x00",
-                    Color.BLUE, 0.5));
-            product.getMaskGroup().add(Mask.BandMathsType.create("BadRad", "Radiance out-of-range LUT threshold.",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF1_VIIRSMBANDSDR & 0xC0 == 0x40",
-                    Color.BLUE, 0.5));
-            product.getMaskGroup().add(Mask.BandMathsType.create("BadRef", "Reflectance out-of-range LUT threshold.",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF1_VIIRSMBANDSDR & 0xC0 == 0x80",
-                    Color.BLUE, 0.5));
-            product.getMaskGroup().add(Mask.BandMathsType.create("BadRadRef", "Both Radiance & Reflectance out-of-range LUT threshold.",
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(), "QF1_VIIRSMBANDSDR & 0xC0 == 0xC0",
-                    Color.BLUE, 0.5));
+                product.getFlagCodingGroup().add(flagCoding);
+                QFBand.setSampleCoding(flagCoding);
+
+
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-nLwWarn", "nLw out-of-range (< 0.1 or > 40 W m^-2 um^-1 sr^-1)",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s.%s-nLwWarn'",band,bandID),
+                        Color.BLUE, 0.2));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-ChlWarn", "Chlorophyll out-of-range (< 0.05 or > 50 mg m^-3)",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s.%s-ChlWarn'",band,bandID),
+                        Color.LIGHT_GRAY, 0.2));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-IOPaWarn", "IOP absorption out-of-range (< 0.01 or  > 10 m^-1)",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s.%s-IOPaWarn'",band,bandID),
+                        Color.DARK_GRAY, 0.2));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-IOPsWarn", "IOP scattering out-of-range (< 0.01 or  > 50 m^-1)",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s.%s-IOPsWarn'",band,bandID),
+                        Color.GREEN, 0.2));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-SSTWarn", "Input Skin SST poor quality.",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s.%s-SSTWarn'",band,bandID),
+                        Color.LIGHT_GRAY, 0.2));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"-Bright", "Bright Target flag",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s.%s-Bright'",band,bandID),
+                        Color.GRAY, 0.2));
+
+            }
+            if (band.endsWith("QF1_VIIRSMBANDSDR")){
+                QFBand = product.getBand(band);
+                FlagCoding flagCoding = new FlagCoding(band);
+                flagCoding.addFlag(bandID+"-CalQualGood", 0x00, "Calibration quality - Good");
+                flagCoding.addFlag(bandID+"-CalQualBad", 0x01, "Calibration quality - Bad");
+                flagCoding.addFlag(bandID+"-NoCal", 0x02, "No Calibration");
+                flagCoding.addFlag(bandID+"-NoSatPix", 0x03, "No saturated");
+                flagCoding.addFlag(bandID+"-LowSatPix", 0x03, "Some pixels saturated");
+                flagCoding.addFlag(bandID+"-SatPix", 0x03, "All pixels saturated");
+                flagCoding.addFlag(bandID+"-DataOK", 0x04, "All required data available");
+                flagCoding.addFlag(bandID+"-BadEvRDR", 0x08, "Missing EV RDR data.");
+                flagCoding.addFlag(bandID+"-BadCalData", 0x10, "Missing cal data (SV, CV, SD, etc)");
+                flagCoding.addFlag(bandID+"-BadTherm", 0x20, "Missing Thermistor data");
+                flagCoding.addFlag(bandID+"-InRange", 0x40, "All calibrated data within LUT thresholds");
+                flagCoding.addFlag(bandID+"-BadRad", 0x40, "Radiance out-of-range LUT threshold");
+                flagCoding.addFlag(bandID+"-BadRef", 0x40, "Reflectance out-of-range LUT threshold");
+                flagCoding.addFlag(bandID+"-BadRadRef", 0x40, "Both Radiance & Reflectance out-of-range LUT threshold");
+
+
+                product.getFlagCodingGroup().add(flagCoding);
+                QFBand.setSampleCoding(flagCoding);
+
+
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"CalQualGood", "Calibration quality - Good",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s' & 0x02 == 0x00", band),
+                        Color.BLUE, 0.5));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"CalQualBad", "Calibration quality - Bad",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s' & 0x02 == 0x01", band),
+                        Color.GRAY, 0.5));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"NoCal", "No Calibration",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s' & 0x02 == 0x02", band),
+                        Color.DARK_GRAY, 0.5));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"NoSatPix", "No saturated",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s' & 0x0C == 0x00", band),
+                        Color.GREEN, 0.5));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"LowSatPix", "Some pixels saturated.",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s' & 0x0C == 0x04", band),
+                        Color.lightGray, 0.5));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"SatPix", "All pixels saturated",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s' & 0x0C == 0x08", band),
+                        Color.MAGENTA, 0.5));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"DataOK", "All required data available",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s' & 0x30 == 0x00", band),
+                        Color.YELLOW, 0.5));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"BadEvRDR", "Missing EV RDR data.",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s' & 0x30 == 0x10", band),
+                        Color.orange, 0.5));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"BadCalData", "Missing cal data (SV, CV, SD, etc).",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s' & 0x30 == 0x20", band),
+                        Color.BLUE, 0.5));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"BadTherm", "Missing Thermistor data.",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s' & 0x30 == 0x30", band),
+                        Color.BLUE, 0.5));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"InRange", "All calibrated data within LUT thresholds.",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s' & 0xC0 == 0x00", band),
+                        Color.BLUE, 0.5));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"BadRad", "Radiance out-of-range LUT threshold.",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s' & 0xC0 == 0x40", band),
+                        Color.BLUE, 0.5));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"BadRef", "Reflectance out-of-range LUT threshold.",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s' & 0xC0 == 0x80", band),
+                        Color.BLUE, 0.5));
+                product.getMaskGroup().add(Mask.BandMathsType.create(bandID+"BadRadRef", "Both Radiance & Reflectance out-of-range LUT threshold.",
+                        product.getSceneRasterWidth(),
+                        product.getSceneRasterHeight(), String.format("'%s' & 0xC0 == 0xC0", band),
+                        Color.BLUE, 0.5));
+            }
         }
     }
 }

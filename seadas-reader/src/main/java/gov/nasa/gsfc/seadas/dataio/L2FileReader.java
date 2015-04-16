@@ -1,9 +1,24 @@
+/*
+ * Copyright (C) 2014 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 3 of the License, or (at your option)
+ * any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ */
+
 package gov.nasa.gsfc.seadas.dataio;
 
-import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.framework.dataio.ProductIOException;
 import org.esa.snap.framework.datamodel.Band;
-import org.esa.snap.framework.datamodel.PixelGeoCoding;
+import org.esa.snap.framework.datamodel.GeoCodingFactory;
 import org.esa.snap.framework.datamodel.Product;
 import org.esa.snap.framework.datamodel.ProductData;
 import org.esa.snap.framework.datamodel.TiePointGrid;
@@ -35,10 +50,13 @@ public class L2FileReader extends SeadasFileReader {
 
         List<Dimension> dims = ncFile.getDimensions();
         for (Dimension d: dims){
-            if (d.getShortName().equalsIgnoreCase("Number_of_Scan_Lines")){
+            if ((d.getShortName().equalsIgnoreCase("number_of_lines"))
+            ||(d.getShortName().equalsIgnoreCase("Number_of_Scan_Lines")))
+                    {
                 sceneHeight = d.getLength();
             }
-            if (d.getShortName().equalsIgnoreCase("Pixels_per_Scan_Line")){
+            if ((d.getShortName().equalsIgnoreCase("pixels_per_line"))
+            || (d.getShortName().equalsIgnoreCase("Pixels_per_Scan_Line"))){
                 sceneWidth = d.getLength();
             }
         }
@@ -88,10 +106,6 @@ public class L2FileReader extends SeadasFileReader {
             utcStart = getUTCAttribute("Start_Time");
             utcEnd = getUTCAttribute("End_Time");
         }
-        // only needed as a stop-gap to handle an intermediate version of l2gen metadata
-        if (utcEnd == null){
-            utcEnd = getUTCAttribute("time_coverage_stop");
-        }
 
         if (utcStart != null) {
             if (mustFlipY){
@@ -132,15 +146,19 @@ public class L2FileReader extends SeadasFileReader {
         String res = null;
         String sensor = null;
         try {
-            sensor = product.getMetadataRoot().getElement("Global_Attributes").getAttribute("Sensor_Name").getData().getElemString();
+            sensor = product.getMetadataRoot().getElement("Global_Attributes").getAttribute("instrument").getData().getElemString();
         } catch (Exception ignore) {
             try{
-                sensor = product.getMetadataRoot().getElement("Global_Attributes").getAttribute("instrument").getData().getElemString();
+                sensor = product.getMetadataRoot().getElement("Global_Attributes").getAttribute("Sensor_Name").getData().getElemString();
             } catch(Exception ignored) {}
         }
         try {
-            res = product.getMetadataRoot().getElement("Input_Parameters").getAttribute("RESOLUTION").getData().getElemString();
-        } catch (Exception ignored) {}
+            res = product.getMetadataRoot().getElement("Global_Attributes").getAttribute("spatialResolution").getData().getElemString();
+        } catch (Exception ignore) {
+            try{
+                res = product.getMetadataRoot().getElement("Input_Parameters").getAttribute("RESOLUTION").getData().getElemString();
+            } catch(Exception ignored) {}
+        }
 
         if(sensor != null) {
             sensor = sensor.toLowerCase();
@@ -150,9 +168,9 @@ public class L2FileReader extends SeadasFileReader {
             } else if(sensor.contains("modis")) {
                 int scanHeight = 10;
                 if(res != null) {
-                    if(res.equals("500")) {
+                    if(res.equals("500 m") || res.equals("500")) {
                         scanHeight = 20;
-                    } else if(res.equals("250")) {
+                    } else if(res.equals("250 m") || res.equals("250")) {
                         scanHeight = 40;
                     }
                 }
@@ -166,40 +184,39 @@ public class L2FileReader extends SeadasFileReader {
     public void addBowtieGeocoding(final Product product, int scanHeight) throws ProductIOException {
         final String longitude = "longitude";
         final String latitude = "latitude";
-        Band latBand;
-        Band lonBand;
 
         if (product.containsBand(latitude) && product.containsBand(longitude)) {
-            latBand = product.getBand(latitude);
-            lonBand = product.getBand(longitude);
+            Band latBand = product.getBand(latitude);
+            Band lonBand = product.getBand(longitude);
             latBand.setNoDataValue(-999.);
             lonBand.setNoDataValue(-999.);
             latBand.setNoDataValueUsed(true);
             lonBand.setNoDataValueUsed(true);
-            product.setGeoCoding(new BowtiePixelGeoCoding(latBand, lonBand, scanHeight, 0));
+            product.setGeoCoding(new BowtiePixelGeoCoding(latBand, lonBand, scanHeight));
         } else {
-            String navGroup = "Navigation_Data";
+            String navGroup = "navigation_data";
             final String cntlPoints = "cntl_pt_cols";
-            int cntl_lat_ix;
-            int cntl_lon_ix;
-            float offsetY;
+            int subSampleY;
+            int subSampleX;
             if (ncFile.findGroup(navGroup) == null) {
-                if (ncFile.findGroup("Navigation") != null) {
-                    navGroup = "Navigation";
+                if (ncFile.findGroup("Navigation_Data") != null) {
+                    navGroup = "Navigation_Data";
                 }
             }
-            int scanCntlPts = getIntAttribute("Number_of_Scan_Control_Points");
-            int pixelCntlPts = getIntAttribute("Number_of_Pixel_Control_Points");
-            cntl_lat_ix = product.getSceneRasterHeight() / scanCntlPts;
-            cntl_lon_ix = Math.round((float) product.getSceneRasterWidth() / pixelCntlPts);
-            if (scanHeight == 20) {
-                offsetY = 0.5f;
-            } else if (scanHeight == 40) {
+            int scanCntlPts;
+            int pixelCntlPts;
 
-                offsetY = 1.5f;
-            } else {
-                offsetY = 0f;
+            try {
+                scanCntlPts = getIntAttribute("scan_control_points");
+                pixelCntlPts = getIntAttribute("pixel_control_points");
+            } catch (ProductIOException e) {
+                scanCntlPts = getIntAttribute("Number_of_Scan_Control_Points");
+                pixelCntlPts = getIntAttribute("Number_of_Pixel_Control_Points");
             }
+
+            subSampleY = product.getSceneRasterHeight() / scanCntlPts;
+            subSampleX = Math.round((float) product.getSceneRasterWidth() / pixelCntlPts);
+
             try {
                 Variable lats = ncFile.findVariable(navGroup + "/" + latitude);
                 Variable lons = ncFile.findVariable(navGroup + "/" + longitude);
@@ -212,21 +229,26 @@ public class L2FileReader extends SeadasFileReader {
                     Array latarr = lats.read();
                     Array lonarr = lons.read();
 
-
                     if (mustFlipX && mustFlipY) {
                         latTiePoints = (float[]) latarr.flip(0).flip(1).copyTo1DJavaArray();
                         lonTiePoints = (float[]) lonarr.flip(0).flip(1).copyTo1DJavaArray();
+                    } else if (!mustFlipX && mustFlipY) {
+                            latTiePoints = (float[]) latarr.flip(0).copyTo1DJavaArray();
+                            lonTiePoints = (float[]) lonarr.flip(0).copyTo1DJavaArray();
+                    } else if (mustFlipX && !mustFlipY) {
+                            latTiePoints = (float[]) latarr.flip(1).copyTo1DJavaArray();
+                            lonTiePoints = (float[]) lonarr.flip(1).copyTo1DJavaArray();
                     } else {
                         latTiePoints = (float[]) latarr.getStorage();
                         lonTiePoints = (float[]) lonarr.getStorage();
                     }
 
-                    final TiePointGrid latGrid = new TiePointGrid("latitude", dims[1], dims[0], 0, offsetY,
-                            cntl_lon_ix, cntl_lat_ix, latTiePoints);
+                    final TiePointGrid latGrid = new TiePointGrid("latitude", dims[1], dims[0], 0, 0,
+                            subSampleX, subSampleY, latTiePoints);
                     product.addTiePointGrid(latGrid);
 
-                    final TiePointGrid lonGrid = new TiePointGrid("longitude", dims[1], dims[0], 0, offsetY,
-                            cntl_lon_ix, cntl_lat_ix, lonTiePoints);
+                    final TiePointGrid lonGrid = new TiePointGrid("longitude", dims[1], dims[0], 0, 0,
+                            subSampleX, subSampleY, lonTiePoints);
                     product.addTiePointGrid(lonGrid);
 
                     product.setGeoCoding(new BowtieTiePointGeoCoding(latGrid, lonGrid, scanHeight));
@@ -274,15 +296,15 @@ public class L2FileReader extends SeadasFileReader {
                 try {
                     lonRaw = lonVar.read();
                     latRaw = latVar.read();
-                    if (mustFlipX && !mustFlipY) {
-                        latRawData= (float[]) latRaw.flip(1).copyTo1DJavaArray();
-                        lonRawData= (float[]) lonRaw.flip(1).copyTo1DJavaArray();
+                    if (mustFlipX && mustFlipY) {
+                        latRawData= (float[]) latRaw.flip(0).flip(1).copyTo1DJavaArray();
+                        lonRawData= (float[]) lonRaw.flip(0).flip(1).copyTo1DJavaArray();
                     } else if (!mustFlipX && mustFlipY) {
                         latRawData= (float[]) latRaw.flip(0).copyTo1DJavaArray();
                         lonRawData= (float[]) lonRaw.flip(0).copyTo1DJavaArray();
-                    } else if (mustFlipX && mustFlipY) {
-                        latRawData= (float[]) latRaw.flip(0).flip(1).copyTo1DJavaArray();
-                        lonRawData= (float[]) lonRaw.flip(0).flip(1).copyTo1DJavaArray();
+                    } else if (mustFlipX && !mustFlipY) {
+                        latRawData= (float[]) latRaw.flip(1).copyTo1DJavaArray();
+                        lonRawData= (float[]) lonRaw.flip(1).copyTo1DJavaArray();
                     } else {
                         latRawData= (float[]) latRaw.copyTo1DJavaArray();
                         lonRawData= (float[]) lonRaw.copyTo1DJavaArray();
@@ -311,13 +333,8 @@ public class L2FileReader extends SeadasFileReader {
                 }
             }
         }
-        try {
-            if (latBand != null) {
-                product.setGeoCoding(new PixelGeoCoding(latBand, lonBand, null, 5, ProgressMonitor.NULL));
-            }
-        } catch (IOException e) {
-            throw new ProductIOException(e.getMessage());
+        if (latBand != null) {
+            product.setGeoCoding(GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, null, 5));
         }
-
     }
 }

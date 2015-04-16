@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (C) 2014 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -44,40 +44,36 @@ public abstract class AbstractBowtieGeoCoding extends AbstractGeoCoding {
     protected List<GeoCoding> _gcList;
     protected boolean _cross180;
     protected List<PolyLine> _centerLineList;
-    private int _lastCenterLineIndex;
+    private int _lastCenterLineIndex;           // index found on the previous search
     private int _smallestValidIndex;
     private int _biggestValidIndex;
-    private int _scanlineHeight;
-    private int _scanlineOffsetY;
     private ProductNode _gridOwner;
 
     /**
      * Constructs geo-coding with MODIS Bowtie correction.
      *
      */
-    public AbstractBowtieGeoCoding(int scanlineHeight) {
-        this(scanlineHeight, 0);
+    public AbstractBowtieGeoCoding() {
+        _lastCenterLineIndex = 0;
     }
 
     /**
-     * Constructs geo-coding with MODIS Bowtie correction.
-     *
-     * @param scanlineHeight the number of detectors in a scan line
-     * @param scanlineOffsetY the Y offset into the stripe where the data starts
+     * get the number of line in the whole scene
+     * @return lines in the scene
      */
-    public AbstractBowtieGeoCoding(int scanlineHeight, int scanlineOffsetY) {
-        _lastCenterLineIndex = 0;
-        _scanlineHeight = scanlineHeight;
-        _scanlineOffsetY = scanlineOffsetY;
-    }
+    abstract public int getSceneHeight();
 
-    public int getScanlineHeight() {
-        return _scanlineHeight;
-    }
+    /**
+     * get the number of lines (num detectors) in a scan
+     * @return number of lines in a scan
+     */
+    abstract public int getScanlineHeight();
 
-    public int getScanlineOffsetY() {
-        return _scanlineOffsetY;
-    }
+    /**
+     * get the number of lines between the start of a scan and the first line of data
+     * @return scan line offset
+     */
+    abstract public int getScanlineOffset();
 
     /**
      * Checks whether or not this geo-coding can determine the pixel position from a geodetic position.
@@ -100,8 +96,8 @@ public abstract class AbstractBowtieGeoCoding extends AbstractGeoCoding {
     /**
      * Returns the pixel co-ordinates as x/y for a given geographical position given as lat/lon.
      *
-     * @param geoPos   the geographical position as lat/lon in the coodinate system determined by {@link #getDatum()}
-     * @param pixelPos an instance of <code>Point</code> to be used as retun value. If this parameter is
+     * @param geoPos   the geographical position as lat/lon in the coordinate system determined by {@link #getDatum()}
+     * @param pixelPos an instance of <code>Point</code> to be used as return value. If this parameter is
      *                 <code>null</code>, the method creates a new instance which it then returns.
      * @return the pixel co-ordinates as x/y
      */
@@ -109,8 +105,7 @@ public abstract class AbstractBowtieGeoCoding extends AbstractGeoCoding {
         if (pixelPos == null) {
             pixelPos = new PixelPos();
         }
-        pixelPos.x = -1;
-        pixelPos.y = -1;
+        pixelPos.setInvalid();
 
         final int index = getGeoCodingIndexfor(geoPos);
         _lastCenterLineIndex = index;
@@ -119,10 +114,11 @@ public abstract class AbstractBowtieGeoCoding extends AbstractGeoCoding {
             gc.getPixelPos(geoPos, pixelPos);
         }
 
-        if (pixelPos.x == -1 || pixelPos.y == -1) {
-            return pixelPos;
+        if (pixelPos.isValid()) {
+            pixelPos.y += (index * getScanlineHeight()) - getScanlineOffset();
+            if(pixelPos.y < 0 || pixelPos.y >= getSceneHeight())
+                pixelPos.setInvalid();
         }
-        pixelPos.y += (index * _scanlineHeight) - _scanlineOffsetY;
         return pixelPos;
     }
 
@@ -138,7 +134,7 @@ public abstract class AbstractBowtieGeoCoding extends AbstractGeoCoding {
         final int index = computeIndex(pixelPos);
         final GeoCoding gc = _gcList.get(index);
         if (gc != null) {
-            return gc.getGeoPos(new PixelPos(pixelPos.x, pixelPos.y - _scanlineHeight * index + _scanlineOffsetY), geoPos);
+            return gc.getGeoPos(new PixelPos(pixelPos.x, pixelPos.y - getScanlineHeight() * index + getScanlineOffset()), geoPos);
         } else {
             if (geoPos == null) {
                 geoPos = new GeoPos();
@@ -223,8 +219,8 @@ public abstract class AbstractBowtieGeoCoding extends AbstractGeoCoding {
     }
 
     private int computeIndex(PixelPos pixelPos) {
-        final int y = (int) pixelPos.getY() + _scanlineOffsetY;
-        final int index = y / _scanlineHeight;
+        final int y = (int) pixelPos.getY() + getScanlineOffset();
+        final int index = y / getScanlineHeight();
         if (index < _smallestValidIndex) {
             return _smallestValidIndex;
         } else if (index > _biggestValidIndex) {

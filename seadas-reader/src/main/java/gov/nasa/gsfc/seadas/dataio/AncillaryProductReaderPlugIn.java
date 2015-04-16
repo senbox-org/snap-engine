@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (C) 2014 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -49,6 +49,7 @@ public class AncillaryProductReaderPlugIn implements ProductReaderPlugIn {
             "SeaWiFS Climatological Ancillary Data",
             "Daily-OI",
             "ETOPO1 Ice Surface Global Relief Model",
+            "NCEP Reanalysis 2 Ancillary Data",
     };
     private static final Set<String> supportedProductTypeSet = new HashSet<String>(Arrays.asList(supportedProductTypes));
 

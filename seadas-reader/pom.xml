@@ -53,6 +53,11 @@
             <artifactId>s3tbx-merisl3-reader</artifactId>
             <version>${snap.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (C) 2014 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -44,6 +44,8 @@ public class BowtieTiePointGeoCoding extends AbstractBowtieGeoCoding {
 
     private TiePointGrid _latGrid;
     private TiePointGrid _lonGrid;
+    int _scanlineHeight;
+    int _scanlineOffset;
 
     /**
      * Constructs geo-coding based on two given tie-point grids.
@@ -52,7 +54,7 @@ public class BowtieTiePointGeoCoding extends AbstractBowtieGeoCoding {
      * @param lonGrid the longitude grid, must not be <code>null</code>
      */
     public BowtieTiePointGeoCoding(TiePointGrid latGrid, TiePointGrid lonGrid, int scanlineHeight) {
-        super(scanlineHeight);
+        super();
         Guardian.assertNotNull("latGrid", latGrid);
         Guardian.assertNotNull("lonGrid", lonGrid);
         if (latGrid.getRasterWidth() != lonGrid.getRasterWidth() ||
@@ -66,7 +68,37 @@ public class BowtieTiePointGeoCoding extends AbstractBowtieGeoCoding {
         _latGrid = latGrid;
         _lonGrid = lonGrid;
         setGridOwner(_lonGrid.getOwner());
-        init();
+        _scanlineHeight = scanlineHeight;
+        _scanlineOffset = 0;
+        try {
+            init();
+        } catch (IOException e) {
+            throw new IllegalArgumentException("can not init geocode");
+        }
+    }
+
+    /**
+     * get the number of line in the whole scene
+     * @return lines in the scene
+     */
+    public int getSceneHeight() {
+        return _lonGrid.getSceneRasterHeight();
+    }
+
+    /**
+     * get the number of lines (num detectors) in a scan
+     * @return number of lines in a scan
+     */
+    public int getScanlineHeight() {
+        return _scanlineHeight;
+    }
+
+    /**
+     * get the number of lines between the start of a scan and the first line of data
+     * @return scan line offset
+     */
+    public int getScanlineOffset() {
+        return _scanlineOffset;
     }
 
     @Override
@@ -116,7 +148,46 @@ public class BowtieTiePointGeoCoding extends AbstractBowtieGeoCoding {
         _lonGrid = null;
     }
 
-    private void init() {
+    /**
+     * walk through the latitude and find the edge of the scan
+     * where the lat overlaps the previous lat.  set _scanlineOffset
+     */
+    private void calculateScanlineOffset() {
+        int start = -1;
+        final float[] latPoints = _latGrid.getTiePoints();
+        int latWidth = _latGrid.getRasterWidth();
+
+        // look at first pixel in each line
+        for(int i=1; i<_latGrid.getRasterHeight(); i++) {
+            if(latPoints[(i-1)*latWidth] < latPoints[i*latWidth]) {
+                start = (int)(i*_latGrid.getSubSamplingY());
+                break;
+            }
+        }
+        // if not found try end of line
+        if(start == -1) {
+            for(int i=1; i<_latGrid.getRasterHeight(); i++) {
+                if(latPoints[i*latWidth-1] < latPoints[(i+1)*latWidth-1]) {
+                    start = (int)(i*_latGrid.getSubSamplingY());
+                    break;
+                }
+            }
+        }
+
+        if(start == -1) {       // did not find an overlap
+            _scanlineOffset = 0;
+        } else {
+            start = start % _scanlineHeight;
+            if(start == 0) {
+                _scanlineOffset = 0;
+            } else {
+                _scanlineOffset = _scanlineHeight - start;
+            }
+        }
+    }
+
+
+    private void init() throws IOException {
         _gcList = new ArrayList<GeoCoding>();
         _centerLineList = new ArrayList<PolyLine>();
         final double osX = _lonGrid.getOffsetX();
@@ -127,33 +198,103 @@ public class BowtieTiePointGeoCoding extends AbstractBowtieGeoCoding {
         final float[] latFloats = (float[]) _latGrid.getDataElems();
         final float[] lonFloats = (float[]) _lonGrid.getDataElems();
 
-        final int stripeW = _lonGrid.getRasterWidth();
-        final int gcStripeSceneWidth = _lonGrid.getSceneRasterWidth();
-        final int tpRasterHeight = _lonGrid.getRasterHeight();
-        final int stripeH = (int) (getScanlineHeight() / ssY);
+        calculateScanlineOffset();
 
-        final int gcRawWidth = stripeW * stripeH;
-        for (int y = 0; y < tpRasterHeight; y += stripeH) {
+        final int gridW = _lonGrid.getRasterWidth();
+        final int gridH = _lonGrid.getRasterHeight();
+
+        final int gcRawWidth = gridW * _scanlineHeight;
+
+        int firstY = 0;
+
+        // create first if needed
+        // use the delta from the neighboring stripe to extrapolate the data
+        if (_scanlineOffset != 0) {
+            firstY = _scanlineHeight - _scanlineOffset;
             final float[] lats = new float[gcRawWidth];
             final float[] lons = new float[gcRawWidth];
-            System.arraycopy(lonFloats, y * stripeW, lons, 0, gcRawWidth);
-            System.arraycopy(latFloats, y * stripeW, lats, 0, gcRawWidth);
+            System.arraycopy(lonFloats, 0, lons, _scanlineOffset * gridW, (_scanlineHeight - _scanlineOffset) * gridW);
+            System.arraycopy(latFloats, 0, lats, _scanlineOffset * gridW, (_scanlineHeight - _scanlineOffset) * gridW);
+            for (int x = 0; x < gridW; x++) {
+                int y1 = _scanlineHeight - _scanlineOffset; // coord of first y in next stripe
+                int y2 = y1 + _scanlineHeight - 1;         // coord of last y in next stripe
+                int index1 = y1 * gridW + x;
+                int index2 = y2 * gridW + x;
+                float deltaLat = (latFloats[index2] - latFloats[index1]) / (_scanlineHeight - 1);
+                float deltaLon = (lonFloats[index2] - lonFloats[index1]) / (_scanlineHeight - 1);
+                float refLat = latFloats[x];
+                float refLon = lonFloats[x];
 
-            final Range range = Range.computeRangeFloat(lats, IndexValidator.TRUE, null, ProgressMonitor.NULL);
-            if (range.getMin() < -90) {
-                _gcList.add(null);
-                _centerLineList.add(null);
-            } else {
-                final ModisTiePointGrid latTPG = new ModisTiePointGrid("lat" + y, stripeW, stripeH, osX, osY, ssX, ssY, lats);
-                final ModisTiePointGrid lonTPG = new ModisTiePointGrid("lon" + y, stripeW, stripeH, osX, osY, ssX, ssY, lons, true);
-
-                final TiePointGeoCoding geoCoding = new TiePointGeoCoding(latTPG, lonTPG, getDatum());
-                _cross180 = _cross180 || geoCoding.isCrossingMeridianAt180();
-                _gcList.add(geoCoding);
-                _centerLineList.add(createCenterPolyLine(geoCoding, gcStripeSceneWidth, getScanlineHeight()));
+                for (int y = 0; y < _scanlineOffset; y++) {
+                    lons[y * gridW + x] = refLon - (deltaLon * (_scanlineOffset - y));
+                    lats[y * gridW + x] = refLat - (deltaLat * (_scanlineOffset - y));
+                }
             }
+            addStripeGeocode(lats, lons, 0, gridW, _scanlineHeight, osX, osY, ssX, ssY);
         }
+
+        // add all of the normal scans
+        for (int y = firstY; y + _scanlineHeight <= gridH; y += _scanlineHeight) {
+            final float[] lats = new float[gcRawWidth];
+            final float[] lons = new float[gcRawWidth];
+            System.arraycopy(lonFloats, y * gridW, lons, 0, gcRawWidth);
+            System.arraycopy(latFloats, y * gridW, lats, 0, gcRawWidth);
+            addStripeGeocode(lats, lons, y, gridW, _scanlineHeight, osX, osY, ssX, ssY);
+        }
+
+        // create last stripe
+        int lastStripeH = (gridH - _scanlineHeight + _scanlineOffset) % _scanlineHeight;
+        if (lastStripeH != 0) {
+            int lastStripeY = gridH - lastStripeH - 1; // y coord of first y of last stripe
+            final float[] lats = new float[gcRawWidth];
+            final float[] lons = new float[gcRawWidth];
+            System.arraycopy(lonFloats, lastStripeY * gridW, lons, 0, lastStripeH * gridW);
+            System.arraycopy(latFloats, lastStripeY * gridW, lats, 0, lastStripeH * gridW);
+            for (int x = 0; x < gridW; x++) {
+                int y1 = lastStripeY - _scanlineHeight; // coord of first y in next stripe
+                int y2 = lastStripeY - 1;         // coord of last y in next stripe
+                int index1 = y1 * gridW + x;
+                int index2 = y2 * gridW + x;
+                float deltaLat = (latFloats[index2] - latFloats[index1]) / (_scanlineHeight - 1);
+                float deltaLon = (lonFloats[index2] - lonFloats[index1]) / (_scanlineHeight - 1);
+                float refLat = latFloats[lastStripeY * gridW + x];
+                float refLon = lonFloats[lastStripeY * gridW + x];
+
+                for (int y = lastStripeH; y < _scanlineHeight; y++) {
+                    lons[y * gridW + x] = refLon - (deltaLon * (y - lastStripeH + 1));
+                    lats[y * gridW + x] = refLat - (deltaLat * (y - lastStripeH + 1));
+                }
+            }
+            addStripeGeocode(lats, lons, lastStripeY, gridW, _scanlineHeight, osX, osY, ssX, ssY);
+        }
+
         initSmallestAndLargestValidGeocodingIndices();
+    }
+
+    private void addStripeGeocode(float[] lats, float[] lons, int y, int stripeW, int stripeH,
+                                  double offsetX, double offsetY, double subSamplingX, double subSamplingY) throws IOException {
+        GeoCoding gc = createStripeGeocode(lats, lons, y, stripeW, stripeH, offsetX, offsetY, subSamplingX, subSamplingY);
+        if (gc != null) {
+            _gcList.add(gc);
+            _centerLineList.add(createCenterPolyLine(gc, stripeW, stripeH));
+        } else {
+            _gcList.add(null);
+            _centerLineList.add(null);
+        }
+    }
+
+    private GeoCoding createStripeGeocode(float[] lats, float[] lons, int y, int stripeW, int stripeH,
+                                          double offsetX, double offsetY, double subSamplingX, double subSamplingY) throws IOException {
+        final Range range = Range.computeRangeFloat(lats, IndexValidator.TRUE, null, ProgressMonitor.NULL);
+        if (range.getMin() < -90) {
+            return null;
+        } else {
+            final ModisTiePointGrid latGrid = new ModisTiePointGrid("lat" + y, stripeW, stripeH, offsetX, offsetY, subSamplingX, subSamplingY, lats);
+            final ModisTiePointGrid lonGrid = new ModisTiePointGrid("lon" + y, stripeW, stripeH, offsetX, offsetY, subSamplingX, subSamplingY, lons);
+            final TiePointGeoCoding geoCoding = new TiePointGeoCoding(latGrid, lonGrid, getDatum());
+            _cross180 = _cross180 || geoCoding.isCrossingMeridianAt180();
+            return geoCoding;
+        }
     }
 
     /**
