@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (C) 2015 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -33,7 +33,7 @@ public class N3FileWriteable implements NFileWriteable {
     private final NetcdfFileWriteable netcdfFileWriteable;
 
     public static NFileWriteable create(String filename) throws IOException {
-        NetcdfFileWriteable writeable = NetcdfFileWriteable.createNew(filename);
+        NetcdfFileWriteable writeable = NetcdfFileWriteable.createNew(filename, false);
         writeable.setLargeFile(true);
         return new N3FileWriteable(writeable);
     }
