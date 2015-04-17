@@ -53,11 +53,20 @@ public class SMIFileReader extends SeadasFileReader {
         } else {
             if (geodata != null){
                 dims = geodata.getVariables().get(0).getShape();
+                sceneHeight = dims[0];
+                sceneWidth = dims[1];
             } else {
-                dims = ncFile.getVariables().get(0).getShape();
+                ucar.nc2.Dimension latdim = ncFile.findDimension("lat");
+                ucar.nc2.Dimension londim = ncFile.findDimension("lon");
+                if (latdim != null) {
+                    sceneHeight = latdim.getLength();
+                    sceneWidth = londim.getLength(); 
+                } else {
+                    dims = ncFile.getVariables().get(0).getShape();
+                    sceneHeight = dims[0];
+                    sceneWidth = dims[1];
+                }
             }
-            sceneHeight = dims[0];
-            sceneWidth = dims[1];
         }
 
         String productName = productReader.getInputFile().getName();
@@ -374,13 +383,25 @@ public class SMIFileReader extends SeadasFileReader {
 
     public void addSmiMetadata(final Product product) {
 //        Variable l3mvar = ncFile.findVariable("l3m_data");
-        Variable l3mvar = ncFile.getVariables().get(0);
-        List<Attribute> variableAttributes = l3mvar.getAttributes();
-        final MetadataElement smiElement = new MetadataElement("SMI Product Parameters");
-        addAttributesToElement(variableAttributes, smiElement);
+        final MetadataElement bandAttributes = new MetadataElement("Band_Attributes");
+        List<Variable> variables = ncFile.getVariables();
+        for (Variable variable : variables) {
+            final String name = variable.getShortName();
+            final MetadataElement sdsElement = new MetadataElement(name);
+            final int dataType = getProductDataType(variable);
+            final MetadataAttribute prodtypeattr = new MetadataAttribute("data_type", dataType);
 
+            sdsElement.addAttribute(prodtypeattr);
+            bandAttributes.addElement(sdsElement);
+
+            final List<Attribute> list = variable.getAttributes();
+            for (Attribute varAttribute : list) {
+                addAttributeToElement(sdsElement, varAttribute);
+            }
+        }
         final MetadataElement metadataRoot = product.getMetadataRoot();
-        metadataRoot.addElement(smiElement);
+        metadataRoot.addElement(bandAttributes);
+        
     }
 
     @Override
@@ -388,14 +409,10 @@ public class SMIFileReader extends SeadasFileReader {
         Band QFBand = product.getBand("l3m_qual");
         if (QFBand != null) {
             FlagCoding flagCoding = new FlagCoding("SST_Quality");
-            flagCoding.addFlag("QualityLevel", 0, "Best quality");
-//            flagCoding.addFlag("Best", 0, "Best quality");
-//            flagCoding.addFlag("Good", 0x01, "Good quality");
-//            flagCoding.addFlag("Questionable", 0x02, "Questionable quality");
-//            flagCoding.addFlag("Bad", 0x03, "Bad quality");
-//            flagCoding.addFlag("NoValue", 4, "Not Processed");
-
-
+            flagCoding.addFlag("Best", 0x00, "Highest quality retrieval");
+            flagCoding.addFlag("Good", 0x01, "Good quality retrieval");
+            flagCoding.addFlag("Questionable", 0x02, "Questionable quality retrieval");
+            flagCoding.addFlag("Bad", 0x03, "Bad quality retrieval");
             product.getFlagCodingGroup().add(flagCoding);
             QFBand.setSampleCoding(flagCoding);
 
@@ -415,11 +432,69 @@ public class SMIFileReader extends SeadasFileReader {
                     product.getSceneRasterWidth(),
                     product.getSceneRasterHeight(), "l3m_qual == 3",
                     SeadasFileReader.FailRed, 0.6));
-//           product.getMaskGroup().add(Mask.BandMathsType.create("NoValue", "No Retrieval",
-//                                                                product.getSceneRasterWidth(),
-//                                                                product.getSceneRasterHeight(), "l3m_qual.NotComputed",
-//                                                                SeadasFileReader.BrightPink, 0.6));
 
+        }
+        QFBand = product.getBand("qual_sst");
+        if (QFBand != null) {
+            FlagCoding flagCoding = new FlagCoding("SST_Quality");
+            flagCoding.addFlag("Best", 0x00, "Highest quality retrieval");
+            flagCoding.addFlag("Good", 0x01, "Good quality retrieval");
+            flagCoding.addFlag("Questionable", 0x02, "Questionable quality retrieval");
+            flagCoding.addFlag("Bad", 0x03, "Bad quality retrieval");
+            product.getFlagCodingGroup().add(flagCoding);
+            QFBand.setSampleCoding(flagCoding);
+
+            product.getMaskGroup().add(Mask.BandMathsType.create("Best", "Highest quality retrieval",
+                    product.getSceneRasterWidth(),
+                    product.getSceneRasterHeight(), "qual_sst == 0",
+                    SeadasFileReader.Cornflower, 0.6));
+            product.getMaskGroup().add(Mask.BandMathsType.create("Good", "Good quality retrieval",
+                    product.getSceneRasterWidth(),
+                    product.getSceneRasterHeight(), "qual_sst == 1",
+                    SeadasFileReader.LightPurple, 0.6));
+            product.getMaskGroup().add(Mask.BandMathsType.create("Questionable", "Questionable quality retrieval",
+                    product.getSceneRasterWidth(),
+                    product.getSceneRasterHeight(), "qual_sst == 2",
+                    SeadasFileReader.BurntUmber, 0.6));
+            product.getMaskGroup().add(Mask.BandMathsType.create("Bad", "Bad quality retrieval",
+                    product.getSceneRasterWidth(),
+                    product.getSceneRasterHeight(), "qual_sst == 3",
+                    SeadasFileReader.FailRed, 0.6));
+            product.getMaskGroup().add(Mask.BandMathsType.create("No Data", "No data retrieval",
+                    product.getSceneRasterWidth(),
+                    product.getSceneRasterHeight(), "qual_sst == -1",
+                    SeadasFileReader.MediumGray, 0.6));
+        }
+        QFBand = product.getBand("qual_sst4");
+        if (QFBand != null) {
+            FlagCoding flagCoding = new FlagCoding("SST_Quality");
+            flagCoding.addFlag("Best", 0x00, "Highest quality retrieval");
+            flagCoding.addFlag("Good", 0x01, "Good quality retrieval");
+            flagCoding.addFlag("Questionable", 0x02, "Questionable quality retrieval");
+            flagCoding.addFlag("Bad", 0x03, "Bad quality retrieval");
+            product.getFlagCodingGroup().add(flagCoding);
+            QFBand.setSampleCoding(flagCoding);
+
+            product.getMaskGroup().add(Mask.BandMathsType.create("Best", "Highest quality retrieval",
+                    product.getSceneRasterWidth(),
+                    product.getSceneRasterHeight(), "qual_sst4 == 0",
+                    SeadasFileReader.Cornflower, 0.6));
+            product.getMaskGroup().add(Mask.BandMathsType.create("Good", "Good quality retrieval",
+                    product.getSceneRasterWidth(),
+                    product.getSceneRasterHeight(), "qual_sst4 == 1",
+                    SeadasFileReader.LightPurple, 0.6));
+            product.getMaskGroup().add(Mask.BandMathsType.create("Questionable", "Questionable quality retrieval",
+                    product.getSceneRasterWidth(),
+                    product.getSceneRasterHeight(), "qual_sst4 == 2",
+                    SeadasFileReader.BurntUmber, 0.6));
+            product.getMaskGroup().add(Mask.BandMathsType.create("Bad", "Bad quality retrieval",
+                    product.getSceneRasterWidth(),
+                    product.getSceneRasterHeight(), "qual_sst4 == 3",
+                    SeadasFileReader.FailRed, 0.6));
+            product.getMaskGroup().add(Mask.BandMathsType.create("No Data", "No data retrieval",
+                    product.getSceneRasterWidth(),
+                    product.getSceneRasterHeight(), "qual_sst4 == -1",
+                    SeadasFileReader.MediumGray, 0.6));
         }
     }
 }
