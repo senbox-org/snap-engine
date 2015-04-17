@@ -141,7 +141,6 @@ public class ImportSeabassAction extends AbstractSnapAction implements ContextAw
             state = product != null && product.getGeoCoding() != null;
         }
         setEnabled(state);
-
     }
 
     private static FeatureCollection<SimpleFeatureType, SimpleFeature> readTrack(File file, GeoCoding geoCoding) throws IOException {
