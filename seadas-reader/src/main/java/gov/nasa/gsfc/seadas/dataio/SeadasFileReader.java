@@ -757,7 +757,7 @@ public abstract class SeadasFileReader {
             List<Variable> variables = group.getVariables();
             for (Variable variable : variables) {
                 final String name = variable.getShortName();
-                final MetadataElement sdsElement = new MetadataElement(name + ".attributes");
+                final MetadataElement sdsElement = new MetadataElement(name);
                 final int dataType = getProductDataType(variable);
                 final MetadataAttribute prodtypeattr = new MetadataAttribute("data_type", dataType);
 
