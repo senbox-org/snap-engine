@@ -162,15 +162,26 @@ public class ProbaVUtils {
     public static float[] getNdviAsFloat(Band ndviBand, byte[] ndviData) {
         float[] ndviFloatData = new float[ndviData.length];
 
+        // apply scaling to physical values manually
         for (int i = 0; i < ndviFloatData.length; i++) {
-            ndviFloatData[i] = (float) ((ndviData[i] - ndviBand.getScalingOffset()) * ndviBand.getScalingFactor());
+            float ndviTmp = (float) ndviData[i];
+            ndviTmp += 256.0f;
+            if (ndviTmp >= 256.0f) {
+                ndviTmp -= 256.0f;
+            }
+            if (ndviTmp == 255.0f) {
+                ndviFloatData[i] = Float.NaN;
+            } else {
+                ndviFloatData[i] = (float) ((ndviTmp - ndviBand.getScalingOffset()) * ndviBand.getScalingFactor());
+            }
         }
+
+        // set scaling to neutral values:
         ndviBand.setScalingFactor(1.0);
         ndviBand.setScalingOffset(0.0);
 
         return ndviFloatData;
     }
-
 
     public static int getSynthesisProductRasterDimension(String productName) {
         // we have the products:

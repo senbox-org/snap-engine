@@ -12,19 +12,11 @@ import java.text.MessageFormat;
 import java.util.Locale;
 
 /**
- * todo: add comment
- * To change this template use File | Settings | File Templates.
- * Date: 11.03.2015
- * Time: 16:21
+ * Reader plug-in for Proba-V products
  *
  * @author olafd
  */
 public class ProbaVProductReaderPlugIn implements ProductReaderPlugIn {
-
-    // todo: implement
-
-    public static final String HDF5_FORMAT_NAME = "HDF5";
-    public static final String HDF5_FILE_EXTENSION = ".h5";
 
     private static final String _H5_CLASS_NAME = "ncsa.hdf.hdf5lib.H5";
 
@@ -51,7 +43,7 @@ public class ProbaVProductReaderPlugIn implements ProductReaderPlugIn {
     private static final String PROBAV_S10_TOC_1KM_FILENAME_REGEXP =
             "PROBAV_S10_TOC_X[0-9]{2}Y[0-9]{2}_[0-9]{8}_1KM_V[0-9]{3}.(?i)(hdf5)";
     private static final String PROBAV_S10_TOC_NDVI_FILENAME_REGEXP =
-            "PROBAV_S1_TOA_X[0-9]{2}Y[0-9]{2}_[0-9]{8}_333M_NDVI_V[0-9]{3}.(?i)(hdf5)";   // todo: shall this be supported?
+            "PROBAV_S10_TOC_X[0-9]{2}Y[0-9]{2}_[0-9]{8}_333M_NDVI_V[0-9]{3}.(?i)(hdf5)";
 
     private static boolean hdf5LibAvailable = false;
 

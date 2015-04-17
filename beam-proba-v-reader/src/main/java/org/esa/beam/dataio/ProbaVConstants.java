@@ -103,39 +103,39 @@ public class ProbaVConstants {
     public static final String PROBAV_DATE_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss";
 
     // root metadata:
-    public static final String MPH_NAME = "MPH";
-    public static final String SPH_NAME = "SPH";
-    public static final String BAND_INFORMATION_NAME = "Band_Information";
-    // Meta data attributes
-    public static final String ATTR_NAME_SENSOR_TYPE = "Sensor_Type";
-    public static final String ATTR_NAME_DATA_RIGHTS = "Data_Rights";
-    public static final String ATTR_NAME_TARGET_NAME = "Target_Name";
-    public static final String ATTR_NAME_IMAGE_DATE = "Image_Date";
-    public static final String ATTR_NAME_IMAGE_NUMBER = "Image_Number";
-    public static final String ATTR_NAME_IMAGE_TAG = "Image_Tag";
-    public static final String ATTR_NAME_TARGET_LON = "Target_Longitude";
-    public static final String ATTR_NAME_TARGET_LAT = "Target_Latitude";
-    public static final String ATTR_NAME_TARGET_ALT = "Target_Altitude";
-    public static final String ATTR_NAME_FLY_BY_ZENITH_ANGLE = "Fly-by_Zenith_Angle";
-    public static final String ATTR_NAME_MINIMUM_ZENITH_ANGLE = "Minimum_Zenith_Angle";
-    public static final String ATTR_NAME_SOLAR_ZENITH_ANGLE = "Solar_Zenith_Angle";
-    public static final String ATTR_NAME_SOLAR_AZIMUTH_ANGLE = "Solar_Azimuth_Angle";
-    public static final String ATTR_NAME_FLY_BY_TIME = "Fly-by_Time";
-    public static final String ATTR_NAME_IMAGE_CENTRE_TIME = "Calculated_Image_Centre_Time";
-    public static final String ATTR_NAME_OBSERVATION_ZENITH_ANGLE = "Observation_Zenith_Angle";
-    public static final String ATTR_NAME_OBSERVATION_AZIMUTH_ANGLE = "Observation_Azimuth_Angle";
-    public static final String ATTR_NAME_CHRIS_MODE = "CHRIS_Mode";
-    public static final String ATTR_NAME_NUMBER_OF_SAMPLES = "Number_of_Samples";
-    public static final String ATTR_NAME_NUMBER_OF_GROUND_LINES = "Number_of_Ground_Lines";
-    public static final String ATTR_NAME_NUMBER_OF_BANDS = "Number_of_Bands";
-    public static final String ATTR_NAME_PLATFORM_ALTITUDE = "Platform_Altitude";
-    public static final String ATTR_NAME_RESPONSE_FILE_CREATION_TIME = "Response_File_Creation_Time";
-    public static final String ATTR_NAME_DARK_FILE_CREATION_TIME = "Dark_File_Creation_Time";
-    public static final String ATTR_NAME_CALIBRATION_DATA_UNITS = "Calibration_Data_Units";
-    public static final String ATTR_NAME_CHRIS_TEMPERATURE = "CHRIS_Temperature";
-    public static final String ATTR_NAME_KEY_TO_MASK = "Key_to_Mask";
-    public static final String ATTR_NAME_IMAGE_FLIPPED_ALONG_TRACK = "Image_Flipped_Along-Track";
 
-    public static final String ATTR_NAME_NOISE_REDUCTION = "Noise Reduction";
+    // we have these root metadata:
+//        Group size = 1
+//        Number of attributes = 13
+//        DESCRIPTION = PROBA-V Level3 Top Of Atmosphere Daily Synthesis at 333M resolution
+//        INSTRUMENT = VEGETATION
+//        MAP_PROJECTION_FAMILY = GEOGRAPHIC
+//        MAP_PROJECTION_NAME = GEOGRAPHIC_LAT_LON_WGS84
+//        MAP_PROJECTION_REFERENCE = EPSG:4326
+//        MAP_PROJECTION_UNITS = DEGREES
+//        MAP_PROJECTION_WKT = GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.01745329251994328,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]]
+//        PLATFORM = PROBA-1
+//        PROCESSING_DATE = 2014-07-07
+//        PROCESSING_TIME = 15:44:26
+//        PRODUCT_REFERENCE = Synthesis_PROBAV_20131025_S1_TOA_333M_V003
+//        PRODUCT_VERSION = 3
+//        SYNTHESIS_PERIOD = 1
+
+    public static final String MPH_NAME = "MPH";
+    public static final String BAND_INFORMATION_NAME = "Band_Information";
+    // Meta data root attributes
+    public static final String ATTR_NAME_DESCRIPTION = "Product_Description";
+    public static final String ATTR_NAME_INSTRUMENT = "Instrument";
+    public static final String ATTR_NAME_MAP_PROJECTION_FAMILY = "Map_Projection_Family";
+    public static final String ATTR_NAME_MAP_PROJECTION_NAME = "Map_Projection_Name";
+    public static final String ATTR_NAME_MAP_PROJECTION_REFERENCE = "Map_Projection_Reference";
+    public static final String ATTR_NAME_MAP_PROJECTION_UNITS = "Map_Projection_Units";
+    public static final String ATTR_NAME_MAP_PROJECTION_WKT = "Map_Projection_Wkt";
+    public static final String ATTR_NAME_PLATFORM = "Platform";
+    public static final String ATTR_NAME_PROCESSING_DATE = "Processing_Date";
+    public static final String ATTR_NAME_PROCESSING_TIME = "Processing_Time";
+    public static final String ATTR_NAME_PRODUCT_REFERENCE = "Product_Reference";
+    public static final String ATTR_NAME_PRODUCT_VERSION = "Product_Version";
+    public static final String ATTR_NAME_SYNTHESIS_PERIOD = "Synthesis_Period";
 
 }

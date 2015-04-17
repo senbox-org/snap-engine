@@ -17,15 +17,11 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 import java.io.File;
 import java.io.IOException;
-import java.text.MessageFormat;
 import java.util.List;
 import java.util.logging.Level;
 
 /**
- * todo: add comment
- * To change this template use File | Settings | File Templates.
- * Date: 11.03.2015
- * Time: 16:25
+ * Reader for Proba-V products
  *
  * @author olafd
  */
@@ -87,9 +83,71 @@ public class ProbaVProductReader extends AbstractProductReader {
         return targetProduct;
     }
 
-    private Product createTargetProductFromS10TocNdvi(File inputFile, TreeNode rootNode) {
-        // todo: do we need this?
-        return null;
+    @Override
+    public void close() throws IOException {
+        // todo: anything else?
+        super.close();
+    }
+
+    private Product createTargetProductFromS10TocNdvi(File inputFile, TreeNode inputFileRootNode) throws Exception {
+
+        Product product = null;
+        if (inputFileRootNode != null) {
+
+            // todo:
+            // - product metadata
+            // - band properties and metadata
+            // - exception handling
+            // - closing of files/products
+            // - extract constants
+            // - no data values
+
+            final TreeNode level3Node = inputFileRootNode.getChildAt(0);        // 'LEVEL3'
+            productWidth = (int) getH5ScalarDS(level3Node.getChildAt(1).getChildAt(0)).getDims()[0];
+            productHeight = (int) getH5ScalarDS(level3Node.getChildAt(1).getChildAt(0)).getDims()[1];
+            product = new Product(inputFile.getName(), "PROBA-V SYNTHESIS", productWidth, productHeight);
+
+            final H5Group rootGroup = (H5Group) ((DefaultMutableTreeNode) inputFileRootNode).getUserObject();
+            final List rootMetadata = rootGroup.getMetadata();
+            addSynthesisRootMetadataElements(rootMetadata, product);
+            product.setDescription(ProbaVUtils.getProductDescription(rootMetadata));
+            product.setFileLocation(inputFile);
+
+            for (int i = 0; i < level3Node.getChildCount(); i++) {
+                // we have: 'GEOMETRY', 'NDVI', 'QUALITY', 'TIME'
+                final TreeNode level3ChildNode = level3Node.getChildAt(i);
+                final String level3ChildNodeName = level3ChildNode.toString();
+
+                switch (level3ChildNodeName) {
+                    case "GEOMETRY":
+                        setSynthesisGeoCoding(product, inputFileRootNode, level3ChildNode);
+                        break;
+
+                    case "NDVI":
+                        // 8-bit unsigned character
+                        setNdviBand(product, level3ChildNode);
+                        break;
+
+                    case "QUALITY":
+                        // todo: extract attributes if they are of interest
+                        break;
+
+                    case "TIME":
+                        // add start/end time to product:
+                        final H5Group timeGroup = (H5Group) ((DefaultMutableTreeNode) level3ChildNode).getUserObject();
+                        final List timeMetadata = timeGroup.getMetadata();
+                        product.setStartTime(ProductData.UTC.parse(ProbaVUtils.getStartEndTime(timeMetadata)[0],
+                                                                   ProbaVConstants.PROBAV_DATE_FORMAT_PATTERN));
+                        product.setEndTime(ProductData.UTC.parse(ProbaVUtils.getStartEndTime(timeMetadata)[1],
+                                                                 ProbaVConstants.PROBAV_DATE_FORMAT_PATTERN));
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+        }
+        return product;
     }
 
     private Product createTargetProductFromSynthesis(File inputFile, TreeNode inputFileRootNode) throws Exception {
@@ -97,7 +155,7 @@ public class ProbaVProductReader extends AbstractProductReader {
 
         if (inputFileRootNode != null) {
 
-            // todo (see e.g. Chris-Proba reader):
+            // todo:
             // - product metadata
             // - band properties and metadata
             // - exception handling
@@ -114,6 +172,7 @@ public class ProbaVProductReader extends AbstractProductReader {
 
             final H5Group rootGroup = (H5Group) ((DefaultMutableTreeNode) inputFileRootNode).getUserObject();
             final List rootMetadata = rootGroup.getMetadata();
+            addSynthesisRootMetadataElements(rootMetadata, product);
             product.setDescription(ProbaVUtils.getProductDescription(rootMetadata));
             product.setFileLocation(inputFile);
 
@@ -155,19 +214,12 @@ public class ProbaVProductReader extends AbstractProductReader {
                             }
                         }
                         break;
+
                     case "NDVI":
                         // 8-bit unsigned character
-                        final H5ScalarDS ndviDS = getH5ScalarDS(level3ChildNode.getChildAt(0));
-//                        final Band ndviBand = createTargetBand(product, ndviDS, "NDVI", ProductData.TYPE_UINT8);
-                        final Band ndviBand = createTargetBand(product, ndviDS, "NDVI", ProductData.TYPE_FLOAT32);
-                        final byte[] ndviData = (byte[]) ndviDS.getData();
-                        // todo: the scaling with the original data looks weird, check why!
-                        // for the moment use workaround: convert to scaled floats manually
-                        final float[] ndviFloatData = ProbaVUtils.getNdviAsFloat(ndviBand, ndviData);
-//                        final ProbaVRasterImage ndviImage = new ProbaVRasterImage(ndviBand, ndviData);
-                        final ProbaVRasterImage ndviImage = new ProbaVRasterImage(ndviBand, ndviFloatData);
-                        ndviBand.setSourceImage(ndviImage);
+                        setNdviBand(product, level3ChildNode);
                         break;
+
                     case "QUALITY":
                         // 8-bit unsigned character
                         final H5ScalarDS qualityDS = getH5ScalarDS(level3ChildNode.getChildAt(0));
@@ -179,6 +231,7 @@ public class ProbaVProductReader extends AbstractProductReader {
                         smBand.setSourceImage(image);
                         attachSynthesisQualityFlagBand(product, flagProduct);
                         break;
+
                     case "RADIOMETRY":
                         // 16-bit integer
                         //  blue, nir, red, swir:
@@ -198,6 +251,7 @@ public class ProbaVProductReader extends AbstractProductReader {
                             radiometryBand.setSourceImage(radiometryImage);
                         }
                         break;
+
                     case "TIME":
                         // 16-bit unsigned integer
                         final H5ScalarDS timeDS = getH5ScalarDS(level3ChildNode.getChildAt(0));
@@ -214,6 +268,7 @@ public class ProbaVProductReader extends AbstractProductReader {
                         product.setEndTime(ProductData.UTC.parse(ProbaVUtils.getStartEndTime(timeMetadata)[1],
                                                                  ProbaVConstants.PROBAV_DATE_FORMAT_PATTERN));
                         break;
+
                     default:
                         break;
                 }
@@ -221,6 +276,21 @@ public class ProbaVProductReader extends AbstractProductReader {
         }
 
         return product;
+    }
+
+    private void setNdviBand(Product product, TreeNode level3ChildNode) throws Exception {
+        final H5ScalarDS ndviDS = getH5ScalarDS(level3ChildNode.getChildAt(0));
+        final Band ndviBand = createTargetBand(product, ndviDS, "NDVI", ProductData.TYPE_FLOAT32);
+        ndviBand.setDescription("Normalized Difference Vegetation Index");
+        ndviBand.setUnit("dl");
+        ndviBand.setNoDataValue(Float.NaN);
+        ndviBand.setNoDataValueUsed(true);
+        final byte[] ndviData = (byte[]) ndviDS.getData();
+        // todo: the scaling with the original data looks weird, check why!
+        // for the moment use workaround: convert to scaled floats manually
+        final float[] ndviFloatData = ProbaVUtils.getNdviAsFloat(ndviBand, ndviData);
+        final ProbaVRasterImage ndviImage = new ProbaVRasterImage(ndviBand, ndviFloatData);
+        ndviBand.setSourceImage(ndviImage);
     }
 
     private Product createTargetProductFromL1C(File inputFile, TreeNode inputFileRootNode) throws Exception {
@@ -398,7 +468,7 @@ public class ProbaVProductReader extends AbstractProductReader {
             System.out.println("level1bChildNodeName = " + level1bChildNodeName);
             if (!level1bChildNodeName.startsWith("CONTOUR")) {
 //            if (!level1bChildNodeName.startsWith("SWIR") && !level1bChildNodeName.startsWith("CONTOUR")) {
-                    // todo: remove this when all bands are handled properly together
+                // todo: remove this when all bands are handled properly together
                 float[] lonData = new float[width * height];
                 float[] latData = new float[width * height];
                 for (int j = 0; j < level1bChildNode.getChildCount(); j++) {
@@ -513,29 +583,14 @@ public class ProbaVProductReader extends AbstractProductReader {
         return scalarDS;
     }
 
-    private void addSynthesisRootMetadataElements(final Product product) {
+    private void addSynthesisRootMetadataElements(List<Attribute> rootMetadata, final Product product) {
         final MetadataElement mph = new MetadataElement(ProbaVConstants.MPH_NAME);
 
-        // todo
-//        for (final String name : chrisFile.getGlobalAttributeNames()) {
-//            if (ProbaVConstants.ATTR_NAME_KEY_TO_MASK.equals(name)) {
-//                continue;
-//            }
-//            final String globalAttribute = chrisFile.getGlobalAttribute(name);
-//            mph.addAttribute(new MetadataAttribute(name, ProductData.createInstance(globalAttribute), true));
-//
-//            if (ProbaVConstants.ATTR_NAME_SOLAR_ZENITH_ANGLE.equals(name)) {
-//                addSolarAzimuthAngleIfPossible(product, mph);
-//            }
-//        }
-//
-//        mph.addAttribute(new MetadataAttribute(ProbaVConstants.ATTR_NAME_NOISE_REDUCTION,
-//                                               ProductData.createInstance("None"), true));
-
-        final MetadataElement bandInfo = createBandInfo();
-
+        for (Attribute attribute : rootMetadata) {
+            mph.addAttribute(new MetadataAttribute(attribute.getName(),
+                                                   ProductData.createInstance(ProbaVUtils.getAttributeValue(attribute)), true));
+        }
         product.getMetadataRoot().addElement(mph);
-        product.getMetadataRoot().addElement(bandInfo);
     }
 
     private MetadataElement createBandInfo() {
@@ -593,7 +648,6 @@ public class ProbaVProductReader extends AbstractProductReader {
 //        }
         return bandInfo;
     }
-
 
 
     @Override
