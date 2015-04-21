@@ -4,6 +4,7 @@ import org.esa.s3tbx.dataio.s3.AbstractProductFactory;
 import org.esa.s3tbx.dataio.s3.Manifest;
 import org.esa.s3tbx.dataio.s3.Sentinel3ProductReader;
 import org.esa.s3tbx.dataio.s3.util.S3NetcdfReader;
+import org.esa.s3tbx.dataio.s3.util.S3NetcdfReaderFactory;
 import org.esa.snap.framework.datamodel.Band;
 import org.esa.snap.framework.datamodel.MetadataElement;
 import org.esa.snap.framework.datamodel.Product;
@@ -157,7 +158,7 @@ abstract class OlciProductFactory extends AbstractProductFactory {
     @Override
     protected Product readProduct(String fileName) throws IOException {
         final File file = new File(getInputFileParentDirectory(), fileName);
-        final S3NetcdfReader reader = OlciLNetcdfReaderFactory.createOlciNetcdfReader(file);
+        final S3NetcdfReader reader = S3NetcdfReaderFactory.createS3NetcdfReader(file);
         return reader.readProduct();
     }
 

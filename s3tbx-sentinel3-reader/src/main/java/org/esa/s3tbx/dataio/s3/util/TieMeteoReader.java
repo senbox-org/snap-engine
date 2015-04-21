@@ -1,7 +1,5 @@
-package org.esa.s3tbx.dataio.s3.olci;
+package org.esa.s3tbx.dataio.s3.util;
 
-import org.esa.s3tbx.dataio.s3.util.S3MultiLevelOpImage;
-import org.esa.s3tbx.dataio.s3.util.S3NetcdfReader;
 import org.esa.snap.framework.datamodel.Band;
 import org.esa.snap.framework.datamodel.MetadataAttribute;
 import org.esa.snap.framework.datamodel.MetadataElement;
@@ -15,9 +13,9 @@ import java.io.IOException;
 /**
  * @author Tonio Fincke
  */
-class OlciTieMeteoReader extends S3NetcdfReader {
+public class TieMeteoReader extends S3NetcdfReader {
 
-    public OlciTieMeteoReader(String pathToFile) throws IOException {
+    public TieMeteoReader(String pathToFile) throws IOException {
         super(pathToFile);
     }
 

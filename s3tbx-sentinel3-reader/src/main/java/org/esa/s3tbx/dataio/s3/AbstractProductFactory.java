@@ -175,7 +175,7 @@ public abstract class AbstractProductFactory implements ProductFactory {
         final double maxValue = band.getStx().getMaximum();
         double colorDist = (maxValue - minValue) / (uncertainty_colors.length - 1);
         final ColorPaletteDef.Point[] points = new ColorPaletteDef.Point[uncertainty_colors.length];
-        for(int i = 0; i < points.length; i++) {
+        for (int i = 0; i < points.length; i++) {
             points[i] = new ColorPaletteDef.Point(minValue + (i * colorDist), uncertainty_colors[i]);
         }
         band.setImageInfo(new ImageInfo(new ColorPaletteDef(points)));
@@ -249,7 +249,7 @@ public abstract class AbstractProductFactory implements ProductFactory {
         openProductList.clear();
     }
 
-    private Band addBand(Band sourceBand, Product targetProduct) {
+    protected Band addBand(Band sourceBand, Product targetProduct) {
         return copyBand(sourceBand, targetProduct, true);
     }
 
@@ -279,11 +279,10 @@ public abstract class AbstractProductFactory implements ProductFactory {
     protected void addDataNodes(Product masterProduct, Product targetProduct) throws IOException {
         final int w = targetProduct.getSceneRasterWidth();
         final int h = targetProduct.getSceneRasterHeight();
-
         for (final Product sourceProduct : openProductList) {
             final Map<String, String> mapping = new HashMap<String, String>();
             for (final Band sourceBand : sourceProduct.getBands()) {
-                if(!sourceBand.getName().contains("orphan")) {
+                if (!sourceBand.getName().contains("orphan")) {
                     final RasterDataNode targetNode;
                     if (sourceBand.getSceneRasterWidth() == w && sourceBand.getSceneRasterHeight() == h) {
                         targetNode = addBand(sourceBand, targetProduct);

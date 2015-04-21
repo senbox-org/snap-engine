@@ -36,7 +36,10 @@ public class Sentinel3ProductReaderPlugIn implements ProductReaderPlugIn {
     private final String[] formatNames;
 
     public Sentinel3ProductReaderPlugIn() {
-        this(FORMAT_NAME, "Sentinel-3 products", "S3.?_(OL_1_E[FR]R|OL_2_(L[FR]R|W[FR]R)|SL_1_RBT|SL_2_(LST|WCT|WST)|SY_2_(VGP|SYN)|SY_[23]_VG1)_.*(.SEN3)?", "xfdumanifest", ".xml");
+        this(FORMAT_NAME, "Sentinel-3 products",
+             "(S3.?_(OL_1_E[FR]R|OL_2_(L[FR]R|W[FR]R)|SL_1_RBT|SL_2_(LST|WCT|WST)|SY_2_(VGP|SYN)|SY_[23]_VG1)_.*(.SEN3)?)|" +
+                     "(ENV_ME_(1|2)_RRG____.*______ACR_R_NT____.SEN3)",
+             "xfdumanifest", ".xml");
     }
 
     private Sentinel3ProductReaderPlugIn(String formatName,

@@ -15,6 +15,8 @@ package org.esa.s3tbx.dataio.s3;/*
  */
 
 import com.bc.ceres.core.ProgressMonitor;
+import org.esa.s3tbx.dataio.s3.meris.MerisLevel1ProductFactory;
+import org.esa.s3tbx.dataio.s3.meris.MerisLevel2ProductFactory;
 import org.esa.s3tbx.dataio.s3.olci.OlciLevel1ProductFactory;
 import org.esa.s3tbx.dataio.s3.olci.OlciLevel2LProductFactory;
 import org.esa.s3tbx.dataio.s3.olci.OlciLevel2WProductFactory;
@@ -44,7 +46,6 @@ public class Sentinel3ProductReader extends AbstractProductReader {
     @Override
     protected final Product readProductNodesImpl() throws IOException {
         final String dirName = getInputFileParentDirectory().getName();
-
         if (dirName.matches("S3.?_OL_1_E[RF]R_.*.SEN3")) { // OLCI L1b
             factory = new OlciLevel1ProductFactory(this);
         } else if (dirName.matches("S3.?_OL_2_(L[FR]R)_.*.SEN3")) { // OLCI L2 L -
@@ -58,11 +59,15 @@ public class Sentinel3ProductReader extends AbstractProductReader {
         } else if (dirName.matches("S3.?_SL_2_WST_.*.SEN3")) { // SLSTR L2 WST
             factory = new SlstrWstProductFactory(this);
         } else if (dirName.matches("S3.?_SL_2_WCT_.*.SEN3")) { // SLSTR L2 WCT
-                factory = new SlstrSstProductFactory(this);
+            factory = new SlstrSstProductFactory(this);
         } else if (dirName.matches("S3.?_SY_2_SYN_.*.SEN3")) { // SYN L2
             factory = new SynLevel2ProductFactory(this);
         } else if (dirName.matches("S3.?_SY_(2_VGP|[23]_VG1)_.*.SEN3")) { // SYN VGT
             factory = new VgtProductFactory(this);
+        } else if (dirName.matches("ENV_ME_1_RRG____.*______ACR_R_NT____.SEN3")) {
+            factory= new MerisLevel1ProductFactory(this);
+        } else if (dirName.matches("ENV_ME_2_RRG____.*______ACR_R_NT____.SEN3")) {
+            factory= new MerisLevel2ProductFactory(this);
         }
         if (factory == null) {
             throw new IOException("Cannot read product file '" + getInputFile() + "'.");
