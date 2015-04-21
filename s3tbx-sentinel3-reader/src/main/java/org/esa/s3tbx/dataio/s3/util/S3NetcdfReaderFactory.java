@@ -1,7 +1,5 @@
 package org.esa.s3tbx.dataio.s3.util;
 
-import org.esa.s3tbx.dataio.s3.olci.OlciInstrumentDataReader;
-
 import java.io.File;
 import java.io.IOException;
 
