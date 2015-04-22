@@ -33,14 +33,14 @@ class CameraImageMosaic {
 
     private static final Interpolation INTERPOLATION = Interpolation.getInstance(Interpolation.INTERP_NEAREST);
 
-    public static RenderedImage create(RenderedImage... sourceImages) {
-        for (int i = 1, t = 0; i < sourceImages.length; i++) {
+    //package local for testing
+    static RenderedImage create(RenderedImage... sourceImages) {
+        int t = 0;
+        for (int i = 1; i < sourceImages.length; i++) {
             t += sourceImages[i - 1].getWidth();
-            sourceImages[i] = TranslateDescriptor.create(sourceImages[i], (float) t, 0.0f, INTERPOLATION, null);
+                sourceImages[i] = TranslateDescriptor.create(sourceImages[i], (float) t, 0.0f, INTERPOLATION, null);
         }
-
-        return MosaicDescriptor.create(sourceImages, MosaicDescriptor.MOSAIC_TYPE_OVERLAY,
-                                       null, null, new double[][]{{Double.NEGATIVE_INFINITY}}, null, null);
+        return MosaicDescriptor.create(sourceImages, MosaicDescriptor.MOSAIC_TYPE_OVERLAY, null, null, null, null, null);
     }
 
     public static MultiLevelImage create(final MultiLevelImage... sourceImages) {

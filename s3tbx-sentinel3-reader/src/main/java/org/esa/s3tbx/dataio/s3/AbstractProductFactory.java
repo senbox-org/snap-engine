@@ -376,6 +376,9 @@ public abstract class AbstractProductFactory implements ProductFactory {
         final InputStream inputStream = new FileInputStream(file);
         try {
             final Document xmlDocument = createXmlDocument(inputStream);
+            if (file.getName().equals("L1c_Manifest.xml")) {
+                return EarthExplorerManifest.createManifest(xmlDocument);
+            }
             return XfduManifest.createManifest(xmlDocument);
         } finally {
             inputStream.close();

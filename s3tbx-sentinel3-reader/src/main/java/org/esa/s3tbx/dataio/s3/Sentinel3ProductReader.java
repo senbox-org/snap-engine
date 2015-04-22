@@ -24,6 +24,7 @@ import org.esa.s3tbx.dataio.s3.slstr.SlstrLevel1ProductFactory;
 import org.esa.s3tbx.dataio.s3.slstr.SlstrLstProductFactory;
 import org.esa.s3tbx.dataio.s3.slstr.SlstrSstProductFactory;
 import org.esa.s3tbx.dataio.s3.slstr.SlstrWstProductFactory;
+import org.esa.s3tbx.dataio.s3.synergy.SynL1CProductFactory;
 import org.esa.s3tbx.dataio.s3.synergy.SynLevel2ProductFactory;
 import org.esa.s3tbx.dataio.s3.synergy.VgtProductFactory;
 import org.esa.snap.framework.dataio.AbstractProductReader;
@@ -60,6 +61,9 @@ public class Sentinel3ProductReader extends AbstractProductReader {
             factory = new SlstrWstProductFactory(this);
         } else if (dirName.matches("S3.?_SL_2_WCT_.*.SEN3")) { // SLSTR L2 WCT
             factory = new SlstrSstProductFactory(this);
+//        } else if (dirName.matches("S3.?_SY_1_SYN_.*.SEN3")) { // SYN L2
+        } else if (dirName.matches("S3.?_SY_1_SYN_.*")) { // SYN L2
+            factory = new SynL1CProductFactory(this);
         } else if (dirName.matches("S3.?_SY_2_SYN_.*.SEN3")) { // SYN L2
             factory = new SynLevel2ProductFactory(this);
         } else if (dirName.matches("S3.?_SY_(2_VGP|[23]_VG1)_.*.SEN3")) { // SYN VGT

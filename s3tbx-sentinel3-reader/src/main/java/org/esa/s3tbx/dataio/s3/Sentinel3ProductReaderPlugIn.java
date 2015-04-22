@@ -30,6 +30,7 @@ public class Sentinel3ProductReaderPlugIn implements ProductReaderPlugIn {
 
     private final String formatName;
     private final String manifestFileBasename;
+    private final String alternativeManifestFileBasename;
     private final String[] fileExtensions;
     private final Pattern directoryNamePattern;
     private final String description;
@@ -37,15 +38,16 @@ public class Sentinel3ProductReaderPlugIn implements ProductReaderPlugIn {
 
     public Sentinel3ProductReaderPlugIn() {
         this(FORMAT_NAME, "Sentinel-3 products",
-             "(S3.?_(OL_1_E[FR]R|OL_2_(L[FR]R|W[FR]R)|SL_1_RBT|SL_2_(LST|WCT|WST)|SY_2_(VGP|SYN)|SY_[23]_VG1)_.*(.SEN3)?)|" +
+             "(S3.?_(OL_1_E[FR]R|OL_2_(L[FR]R|W[FR]R)|SL_1_RBT|SL_2_(LST|WCT|WST)|SY_1_SYN|SY_2_(VGP|SYN)|SY_[23]_VG1)_.*(.SEN3)?)|" +
                      "(ENV_ME_(1|2)_RRG____.*______ACR_R_NT____.SEN3)",
-             "xfdumanifest", ".xml");
+             "xfdumanifest", "L1c_Manifest",".xml");
     }
 
     private Sentinel3ProductReaderPlugIn(String formatName,
                                          String description,
                                          String directoryNamePattern,
                                          String manifestFileBasename,
+                                         String alternativeManifestFileBasename,
                                          String... fileExtensions) {
         this.formatName = formatName;
         this.fileExtensions = fileExtensions;
@@ -53,6 +55,7 @@ public class Sentinel3ProductReaderPlugIn implements ProductReaderPlugIn {
         this.description = description;
         this.formatNames = new String[]{formatName};
         this.manifestFileBasename = manifestFileBasename;
+        this.alternativeManifestFileBasename = alternativeManifestFileBasename;
     }
 
     @Override
@@ -97,7 +100,8 @@ public class Sentinel3ProductReaderPlugIn implements ProductReaderPlugIn {
     private boolean isValidInputFileName(String name) {
         for (final String fileExtension : fileExtensions) {
             final String manifestFileName = manifestFileBasename + fileExtension;
-            if (manifestFileName.equalsIgnoreCase(name)) {
+            final String alternativeManifestFileName = alternativeManifestFileBasename + fileExtension;
+            if (manifestFileName.equalsIgnoreCase(name) || alternativeManifestFileName.equalsIgnoreCase(name)) {
                 return true;
             }
         }
@@ -109,7 +113,9 @@ public class Sentinel3ProductReaderPlugIn implements ProductReaderPlugIn {
         final File parentFile = inputFile.getParentFile();
         return parentFile != null && (isValidInputFileName(inputFile.getName()) && isValidDirectoryName(
                 parentFile.getName()) ||
-                (isValidDirectoryName(inputFile.getName())) && new File(inputFile, "xfdumanifest.xml").exists());
+                (isValidDirectoryName(inputFile.getName())) && new File(inputFile, "xfdumanifest.xml").exists() ||
+                (isValidDirectoryName(inputFile.getName())) && new File(inputFile, "L1c_Manifest.xml").exists()
+        );
     }
 
     private boolean isValidDirectoryName(String name) {
