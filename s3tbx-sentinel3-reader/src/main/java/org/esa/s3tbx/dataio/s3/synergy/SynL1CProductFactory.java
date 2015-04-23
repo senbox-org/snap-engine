@@ -4,6 +4,7 @@ import com.bc.ceres.glevel.MultiLevelImage;
 import org.esa.s3tbx.dataio.s3.AbstractProductFactory;
 import org.esa.s3tbx.dataio.s3.Manifest;
 import org.esa.s3tbx.dataio.s3.Sentinel3ProductReader;
+import org.esa.s3tbx.dataio.s3.util.S3NetcdfReader;
 import org.esa.snap.framework.datamodel.Band;
 import org.esa.snap.framework.datamodel.IndexCoding;
 import org.esa.snap.framework.datamodel.Product;
@@ -11,6 +12,7 @@ import org.esa.snap.framework.datamodel.ProductData;
 import org.esa.snap.framework.datamodel.VirtualBand;
 import org.esa.snap.util.ProductUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,7 +36,7 @@ public class SynL1CProductFactory extends AbstractProductFactory {
             if (manifestFileName.contains("/")) {
                 manifestFileName = manifestFileName.substring(manifestFileName.lastIndexOf("/") + 1);
             }
-            if (!manifestFileName.startsWith("MISREGIST") && !manifestFileName.contains("QUALITY_INFO")) {
+            if (!manifestFileName.equals("MISREGIST_OLC_Oref_O17.nc") && !manifestFileName.contains("QUALITY_INFO")) {
                 fileNames.add(manifestFileName);
             }
         }
@@ -109,10 +111,14 @@ public class SynL1CProductFactory extends AbstractProductFactory {
         return super.addBand(sourceBand, targetProduct);
     }
 
-//    @Override
-//    protected Product readProduct(String fileName) throws IOException {
-//        final File file = new File(getInputFileParentDirectory(), fileName);
-//        final S3NetcdfReader synNetcdfReader = SynNetcdfReaderFactory.createSynNetcdfReader(file);
-//        return synNetcdfReader.readProduct();
-//    }
+    @Override
+    protected Product readProduct(String fileName) throws IOException {
+//        if (!fileName.startsWith("MISREGIST")) {
+//            return super.readProduct(fileName);
+//        }
+        final File file = new File(getInputFileParentDirectory(), fileName);
+        final S3NetcdfReader synNetcdfReader = SynNetcdfReaderFactory.createSynNetcdfReader(file);
+        return synNetcdfReader.readProduct();
+    }
+
 }

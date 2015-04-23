@@ -12,13 +12,12 @@ public class SynNetcdfReaderFactory {
 
     public static S3NetcdfReader createSynNetcdfReader(File file) throws IOException {
         final String fileName = file.getName();
-//        if(fileName.equals("tie_meteo.nc")) {
-//            return new TieMeteoReader(file.getAbsolutePath());
-//        } else if (fileName.equals("instrument_data.nc")) {
-//            return new InstrumentDataReader(file.getAbsolutePath());
-//        } else {
+        if(fileName.startsWith("OLC_RADIANCE_") || fileName.startsWith("MISREGIST") ||
+                fileName.startsWith("SLST_NAD")) {
+            return new SynOlcRadReader(file.getAbsolutePath());
+        } else {
             return new S3NetcdfReader(file.getAbsolutePath());
-//        }
+        }
     }
 
 }
