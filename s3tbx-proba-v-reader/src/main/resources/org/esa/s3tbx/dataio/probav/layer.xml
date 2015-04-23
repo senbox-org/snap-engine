@@ -1,0 +1,36 @@
+<filesystem>
+    <folder name="Actions">
+        <folder name="Readers">
+            <file name="org-esa-s3tbx-dataio-probav-ImportProbaVProduct.instance">
+                <attr name="instanceCreate"
+                      methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
+                <attr name="delegate"
+                      methodvalue="org.esa.snap.rcp.actions.file.ImportProductAction.create"/>
+                <attr name="displayName"
+                      stringvalue="ProbaV"/>
+                <attr name="formatName"
+                      stringvalue="ProbaV"/>
+                <attr name="useAllFileFilter"
+                      boolvalue="true"/>
+                <attr name="helpId"
+                      stringvalue="importProbaVProduct"/>
+                <attr name="ShortDescription"
+                      stringvalue="Import a ProbaV data product."/>
+            </file>
+        </folder>
+    </folder>
+
+    <folder name="Menu">
+        <folder name="File">
+            <folder name="Import">
+                <folder name="Optical Sensors">
+                    <file name="org-esa-s3tbx-dataio-probav-ImportProbaVProduct.shadow">
+                        <attr name="originalFile"
+                              stringvalue="Actions/Readers/org-esa-s3tbx-dataio-probav-ImportProbaVProduct.instance"/>
+                    </file>
+                </folder>
+            </folder>
+        </folder>
+    </folder>
+
+</filesystem>

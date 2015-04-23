@@ -94,6 +94,11 @@
             <artifactId>s3tbx-modis-reader</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.esa.s3tbx</groupId>
+            <artifactId>s3tbx-proba-v-reader</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
     </dependencies>
 
