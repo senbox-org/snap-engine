@@ -138,4 +138,11 @@ public class ProbaVConstants {
     public static final String ATTR_NAME_PRODUCT_VERSION = "Product_Version";
     public static final String ATTR_NAME_SYNTHESIS_PERIOD = "Synthesis_Period";
 
+    public static final float SAA_NO_DATA_VALUE = Float.NaN;
+    public static final float VAA_NO_DATA_VALUE = 382.49808f;
+    public static final float VZA_NO_DATA_VALUE = 127.5f;
+    public static final float SZA_NO_DATA_VALUE = 127.5f;
+    public static final float NDVI_NO_DATA_VALUE = Float.NaN;
+    public static final float REFL_NO_DATA_VALUE = -5.0E-4f;
+    public static final float TIME_NO_DATA_VALUE = Float.NaN;
 }

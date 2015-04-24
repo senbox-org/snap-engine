@@ -110,7 +110,7 @@ public class ProbaVProductReader extends AbstractProductReader {
             final H5Group rootGroup = (H5Group) ((DefaultMutableTreeNode) inputFileRootNode).getUserObject();
             final List rootMetadata = rootGroup.getMetadata();
             addSynthesisRootMetadataElements(rootMetadata, product);
-            product.setDescription(ProbaVUtils.getProductDescription(rootMetadata));
+            product.setDescription(ProbaVUtils.getDescriptionFromAttributes(rootMetadata));
             product.setFileLocation(inputFile);
 
             for (int i = 0; i < level3Node.getChildCount(); i++) {
@@ -136,9 +136,9 @@ public class ProbaVProductReader extends AbstractProductReader {
                         // add start/end time to product:
                         final H5Group timeGroup = (H5Group) ((DefaultMutableTreeNode) level3ChildNode).getUserObject();
                         final List timeMetadata = timeGroup.getMetadata();
-                        product.setStartTime(ProductData.UTC.parse(ProbaVUtils.getStartEndTime(timeMetadata)[0],
+                        product.setStartTime(ProductData.UTC.parse(ProbaVUtils.getStartEndTimeFromAttributes(timeMetadata)[0],
                                                                    ProbaVConstants.PROBAV_DATE_FORMAT_PATTERN));
-                        product.setEndTime(ProductData.UTC.parse(ProbaVUtils.getStartEndTime(timeMetadata)[1],
+                        product.setEndTime(ProductData.UTC.parse(ProbaVUtils.getStartEndTimeFromAttributes(timeMetadata)[1],
                                                                  ProbaVConstants.PROBAV_DATE_FORMAT_PATTERN));
                         break;
 
@@ -173,7 +173,7 @@ public class ProbaVProductReader extends AbstractProductReader {
             final H5Group rootGroup = (H5Group) ((DefaultMutableTreeNode) inputFileRootNode).getUserObject();
             final List rootMetadata = rootGroup.getMetadata();
             addSynthesisRootMetadataElements(rootMetadata, product);
-            product.setDescription(ProbaVUtils.getProductDescription(rootMetadata));
+            product.setDescription(ProbaVUtils.getDescriptionFromAttributes(rootMetadata));
             product.setFileLocation(inputFile);
 
             for (int i = 0; i < level3Node.getChildCount(); i++) {
@@ -193,6 +193,8 @@ public class ProbaVProductReader extends AbstractProductReader {
                                 final H5ScalarDS sunAngleDS = getH5ScalarDS(level3GeometryChildNode);
                                 final Band sunAngleBand = createTargetBand(product, sunAngleDS, level3GeometryChildNodeName,
                                                                            ProductData.TYPE_UINT8);
+                                setBandProperties(sunAngleDS, sunAngleBand);
+//                                sunAngleBand.setNoDataValue(ProbaVUtils.getAngleNoDataValue(level3GeometryChildNodeName));
                                 final byte[] sunAngleData = (byte[]) sunAngleDS.getData();
                                 final ProbaVRasterImage ndviImage = new ProbaVRasterImage(sunAngleBand, sunAngleData);
                                 sunAngleBand.setSourceImage(ndviImage);
@@ -206,6 +208,8 @@ public class ProbaVProductReader extends AbstractProductReader {
                                                                                         geometryViewAngleDS,
                                                                                         level3GeometryViewAngleChildNodeName + "_" + level3GeometryChildNodeName,
                                                                                         ProductData.TYPE_UINT8);
+                                    setBandProperties(geometryViewAngleDS, geometryViewAngleBand);
+//                                    geometryViewAngleBand.setNoDataValue(ProbaVUtils.getAngleNoDataValue(level3GeometryChildNodeName));
                                     final byte[] geometryViewAngleData = (byte[]) geometryViewAngleDS.getData();
                                     final ProbaVRasterImage geometryViewAngleImage =
                                             new ProbaVRasterImage(geometryViewAngleBand, geometryViewAngleData);
@@ -226,6 +230,7 @@ public class ProbaVProductReader extends AbstractProductReader {
                         Product flagProduct = new Product("QUALITY", "flags", productWidth, productHeight);
                         final Band smBand =
                                 createTargetBand(flagProduct, qualityDS, ProbaVConstants.SM_BAND_NAME, ProductData.TYPE_UINT8);
+                        setBandProperties(qualityDS, smBand);
                         final byte[] qualityData = (byte[]) qualityDS.getData();
                         final ProbaVRasterImage image = new ProbaVRasterImage(smBand, qualityData);
                         smBand.setSourceImage(image);
@@ -239,13 +244,15 @@ public class ProbaVProductReader extends AbstractProductReader {
                             final TreeNode level3RadiometryChildNode = level3ChildNode.getChildAt(j);
                             final H5ScalarDS radiometryDS = getH5ScalarDS(level3RadiometryChildNode.getChildAt(0));
                             final String level3RadiometryChildNodeName = level3RadiometryChildNode.toString();
-                            final String radiometryBandPrefix =
-                                    (ProbaVProductReaderPlugIn.isProbaS1ToaProduct(inputFile.getName())) ?
-                                            "TOA_REFL_" : "TOC_REFL_";
+                            final String radiometryBandPrePrefix =
+                                    (ProbaVProductReaderPlugIn.isProbaS1ToaProduct(inputFile.getName())) ? "TOA" : "TOC";
+                            final String radiometryBandPrefix = radiometryBandPrePrefix + "_REFL_";
                             final Band radiometryBand = createTargetBand(product,
                                                                          radiometryDS,
                                                                          radiometryBandPrefix + level3RadiometryChildNodeName,
                                                                          ProductData.TYPE_INT16);
+                            setBandProperties(radiometryDS, radiometryBand);
+//                            radiometryBand.setNoDataValue(ProbaVConstants.REFL_NO_DATA_VALUE);
                             final short[] radiometryData = (short[]) radiometryDS.getData();
                             final ProbaVRasterImage radiometryImage = new ProbaVRasterImage(radiometryBand, radiometryData);
                             radiometryBand.setSourceImage(radiometryImage);
@@ -256,6 +263,8 @@ public class ProbaVProductReader extends AbstractProductReader {
                         // 16-bit unsigned integer
                         final H5ScalarDS timeDS = getH5ScalarDS(level3ChildNode.getChildAt(0));
                         final Band timeBand = createTargetBand(product, timeDS, "TIME", ProductData.TYPE_UINT16);
+                        setBandProperties(timeDS, timeBand);
+//                        timeBand.setNoDataValue(ProbaVConstants.TIME_NO_DATA_VALUE);
                         final short[] timeData = (short[]) timeDS.getData();
                         final ProbaVRasterImage timeImage = new ProbaVRasterImage(timeBand, timeData);
                         timeBand.setSourceImage(timeImage);
@@ -263,9 +272,9 @@ public class ProbaVProductReader extends AbstractProductReader {
                         // add start/end time to product:
                         final H5Group timeGroup = (H5Group) ((DefaultMutableTreeNode) level3ChildNode).getUserObject();
                         final List timeMetadata = timeGroup.getMetadata();
-                        product.setStartTime(ProductData.UTC.parse(ProbaVUtils.getStartEndTime(timeMetadata)[0],
+                        product.setStartTime(ProductData.UTC.parse(ProbaVUtils.getStartEndTimeFromAttributes(timeMetadata)[0],
                                                                    ProbaVConstants.PROBAV_DATE_FORMAT_PATTERN));
-                        product.setEndTime(ProductData.UTC.parse(ProbaVUtils.getStartEndTime(timeMetadata)[1],
+                        product.setEndTime(ProductData.UTC.parse(ProbaVUtils.getStartEndTimeFromAttributes(timeMetadata)[1],
                                                                  ProbaVConstants.PROBAV_DATE_FORMAT_PATTERN));
                         break;
 
@@ -281,16 +290,24 @@ public class ProbaVProductReader extends AbstractProductReader {
     private void setNdviBand(Product product, TreeNode level3ChildNode) throws Exception {
         final H5ScalarDS ndviDS = getH5ScalarDS(level3ChildNode.getChildAt(0));
         final Band ndviBand = createTargetBand(product, ndviDS, "NDVI", ProductData.TYPE_FLOAT32);
+//        setBandProperties(ndviDS, ndviBand);
         ndviBand.setDescription("Normalized Difference Vegetation Index");
         ndviBand.setUnit("dl");
         ndviBand.setNoDataValue(Float.NaN);
-        ndviBand.setNoDataValueUsed(true);
+//        ndviBand.setNoDataValue(ProbaVConstants.NDVI_NO_DATA_VALUE);
         final byte[] ndviData = (byte[]) ndviDS.getData();
         // todo: the scaling with the original data looks weird, check why!
         // for the moment use workaround: convert to scaled floats manually
         final float[] ndviFloatData = ProbaVUtils.getNdviAsFloat(ndviBand, ndviData);
         final ProbaVRasterImage ndviImage = new ProbaVRasterImage(ndviBand, ndviFloatData);
         ndviBand.setSourceImage(ndviImage);
+    }
+
+    private void setBandProperties(H5ScalarDS ds, Band band) throws HDF5Exception {
+        band.setDescription(ProbaVUtils.getDescriptionFromAttributes(ds.getMetadata()));
+        band.setUnit(ProbaVUtils.getUnitFromAttributes(ds.getMetadata()));
+        band.setNoDataValue(ProbaVUtils.getNoDataValueFromAttributes(ds.getMetadata()));
+        band.setNoDataValueUsed(true);
     }
 
     private Product createTargetProductFromL1C(File inputFile, TreeNode inputFileRootNode) throws Exception {
@@ -435,19 +452,19 @@ public class ProbaVProductReader extends AbstractProductReader {
 
         final H5Group h5GeometryGroup = (H5Group) ((DefaultMutableTreeNode) level3ChildNode).getUserObject();
         final List geometryMetadata = h5GeometryGroup.getMetadata();
-        final double easting = ProbaVUtils.getGeometryCoordinateValue(geometryMetadata, "TOP_LEFT_LONGITUDE");
-        final double northing = ProbaVUtils.getGeometryCoordinateValue(geometryMetadata, "TOP_LEFT_LATITUDE");
+        final double easting = ProbaVUtils.getGeometryCoordinateValueFromAttributes(geometryMetadata, "TOP_LEFT_LONGITUDE");
+        final double northing = ProbaVUtils.getGeometryCoordinateValueFromAttributes(geometryMetadata, "TOP_LEFT_LATITUDE");
         // pixel size: 10deg/rasterDim, it is also in the 6th and 7th value of MAPPING attribute in the raster nodes
         final double topLeftLon = easting;
-        final double topRightLon = ProbaVUtils.getGeometryCoordinateValue(geometryMetadata, "TOP_RIGHT_LONGITUDE");
+        final double topRightLon = ProbaVUtils.getGeometryCoordinateValueFromAttributes(geometryMetadata, "TOP_RIGHT_LONGITUDE");
         final double pixelSizeX = Math.abs(topRightLon - topLeftLon) / productWidth;
         final double topLeftLat = northing;
-        final double bottomLeftLat = ProbaVUtils.getGeometryCoordinateValue(geometryMetadata, "BOTTOM_LEFT_LATITUDE");
+        final double bottomLeftLat = ProbaVUtils.getGeometryCoordinateValueFromAttributes(geometryMetadata, "BOTTOM_LEFT_LATITUDE");
         final double pixelSizeY = (topLeftLat - bottomLeftLat) / productHeight;
 
         final H5Group h5RootGroup = (H5Group) ((DefaultMutableTreeNode) inputFileRootNode).getUserObject();
         final List rootMetadata = h5RootGroup.getMetadata();
-        final String crsString = ProbaVUtils.getGeometryCrsString(rootMetadata);
+        final String crsString = ProbaVUtils.getGeometryCrsStringFromAttributes(rootMetadata);
         try {
             final CoordinateReferenceSystem crs = CRS.parseWKT(crsString);
             final CrsGeoCoding geoCoding = new CrsGeoCoding(crs, productWidth, productHeight, easting, northing, pixelSizeX, pixelSizeY);
@@ -567,8 +584,8 @@ public class ProbaVProductReader extends AbstractProductReader {
 
     private Band createTargetBand(Product product, H5ScalarDS scalarDS, String bandName, int dataType) throws Exception {
         final List<Attribute> metadata = scalarDS.getMetadata();
-        final float scaleFactor = ProbaVUtils.getScaleFactor(metadata);
-        final float scaleOffset = ProbaVUtils.getScaleOffset(metadata);
+        final float scaleFactor = ProbaVUtils.getScaleFactorFromAttributes(metadata);
+        final float scaleOffset = ProbaVUtils.getScaleOffsetFromAttributes(metadata);
         final Band band = product.addBand(bandName, dataType);
         band.setScalingFactor(scaleFactor);
         band.setScalingOffset(scaleOffset);

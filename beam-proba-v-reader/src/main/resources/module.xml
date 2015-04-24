@@ -51,10 +51,25 @@
         <action>
             <id>importProbaVProduct</id>
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
-            <formatName>PROBAV</formatName>
+            <formatName>PROBA-V</formatName>
             <useAllFileFilter>false</useAllFileFilter>
             <shortDescr>Import a Proba V data product.</shortDescr>
         </action>
+    </extension>
+
+    <extension point="beam-core:rgbProfiles">
+        <rgbProfile>
+            <name>PROBA-V TOA RGB</name>
+            <red>TOA_REFL_NIR</red>
+            <green>TOA_REFL_RED</green>
+            <blue>TOA_REFL_BLUE</blue>
+        </rgbProfile>
+        <rgbProfile>
+            <name>PROBA-V TOC RGB</name>
+            <red>TOC_REFL_NIR</red>
+            <green>TOC_REFL_RED</green>
+            <blue>TOC_REFL_BLUE</blue>
+        </rgbProfile>
     </extension>
 
 </module>

@@ -62,7 +62,7 @@ public class ProbaVUtils {
 //        return array2D;
 //    }
 
-    public static String getProductDescription(List<Attribute> metadata) {
+    public static String getDescriptionFromAttributes(List<Attribute> metadata) {
         String description = null;
         for (Attribute attribute : metadata) {
             if (attribute.getName().equals("DESCRIPTION")) {
@@ -77,7 +77,57 @@ public class ProbaVUtils {
         return description;
     }
 
-    public static float getScaleFactor(List<Attribute> metadata) {
+    public static String getUnitFromAttributes(List<Attribute> metadata) {
+        String unit = null;
+        for (Attribute attribute : metadata) {
+            if (attribute.getName().equals("UNITS")) {
+                try {
+                    unit = getAttributeValue(attribute);
+                } catch (NumberFormatException e) {
+                    BeamLogManager.getSystemLogger().log(Level.WARNING, "Cannot parse units string: " +
+                            e.getMessage());
+                }
+            }
+        }
+        if (unit != null && unit.contains("-")) {
+            return "dl";
+        } else {
+            return unit;
+        }
+    }
+
+    public static float getAngleNoDataValue(String identifier) {
+        switch (identifier) {
+            case "SZA":
+                return ProbaVConstants.SZA_NO_DATA_VALUE;
+            case "VZA":
+                return ProbaVConstants.SZA_NO_DATA_VALUE;
+            case "SAA":
+                return ProbaVConstants.SZA_NO_DATA_VALUE;
+            case "VAA":
+                return ProbaVConstants.SZA_NO_DATA_VALUE;
+            default:
+                break;
+        }
+        return Float.NaN;
+    }
+
+    public static float getNoDataValueFromAttributes(List<Attribute> metadata) {
+        float noDataValue = Float.NaN;
+        for (Attribute attribute : metadata) {
+            if (attribute.getName().equals("NO_DATA")) {
+                try {
+                    noDataValue = Float.parseFloat(getAttributeValue(attribute));
+                } catch (NumberFormatException e) {
+                    BeamLogManager.getSystemLogger().log(Level.WARNING, "Cannot parse product noDataValue string: " +
+                            e.getMessage());
+                }
+            }
+        }
+        return noDataValue / getScaleFactorFromAttributes(metadata);
+    }
+
+    public static float getScaleFactorFromAttributes(List<Attribute> metadata) {
         float scaleFactor = 1.0f;
         for (Attribute attribute : metadata) {
             if (attribute.getName().equals("SCALE")) {
@@ -91,7 +141,7 @@ public class ProbaVUtils {
         return 1.0f / scaleFactor;
     }
 
-    public static float getScaleOffset(List<Attribute> metadata) {
+    public static float getScaleOffsetFromAttributes(List<Attribute> metadata) {
         float scaleOffset = 0.0f;
         for (Attribute attribute : metadata) {
             if (attribute.getName().equals("OFFSET")) {
@@ -105,7 +155,7 @@ public class ProbaVUtils {
         return scaleOffset;
     }
 
-    public static double getGeometryCoordinateValue(List<Attribute> metadata, String coordinateName) {
+    public static double getGeometryCoordinateValueFromAttributes(List<Attribute> metadata, String coordinateName) {
         double coordValue = Double.NaN;
         for (Attribute attribute : metadata) {
             if (attribute.getName().equals(coordinateName)) {
@@ -120,7 +170,7 @@ public class ProbaVUtils {
         return coordValue;
     }
 
-    public static String getGeometryCrsString(List<Attribute> metadata) {
+    public static String getGeometryCrsStringFromAttributes(List<Attribute> metadata) {
         String crsString = null;
         for (Attribute attribute : metadata) {
             if (attribute.getName().equals("MAP_PROJECTION_WKT")) {
@@ -135,7 +185,7 @@ public class ProbaVUtils {
         return crsString;
     }
 
-    public static String[] getStartEndTime(List<Attribute> metadata) {
+    public static String[] getStartEndTimeFromAttributes(List<Attribute> metadata) {
         String[] startStopTimes = new String[2];
         String startDate = "";
         String startTime = "";

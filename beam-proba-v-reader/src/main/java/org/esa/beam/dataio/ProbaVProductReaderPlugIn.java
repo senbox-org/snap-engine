@@ -3,6 +3,8 @@ package org.esa.beam.dataio;
 import org.esa.beam.framework.dataio.DecodeQualification;
 import org.esa.beam.framework.dataio.ProductReader;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
+import org.esa.beam.framework.datamodel.RGBImageProfile;
+import org.esa.beam.framework.datamodel.RGBImageProfileManager;
 import org.esa.beam.util.SystemUtils;
 import org.esa.beam.util.io.BeamFileFilter;
 import org.esa.beam.util.logging.BeamLogManager;
@@ -49,6 +51,14 @@ public class ProbaVProductReaderPlugIn implements ProductReaderPlugIn {
 
     static {
         hdf5LibAvailable = loadHdf5Lib(ProbaVProductReaderPlugIn.class) != null;
+    }
+
+    public ProbaVProductReaderPlugIn() {
+        RGBImageProfileManager manager = RGBImageProfileManager.getInstance();
+        manager.addProfile(new RGBImageProfile("PROBA-V TOA RGB",
+                                               new String[] {"TOA_REFL_NIR", "TOA_REFL_RED", "TOA_REFL_BLUE"}));
+        manager.addProfile(new RGBImageProfile("PROBA-V TOC RGB",
+                                               new String[] {"TOC_REFL_NIR", "TOC_REFL_RED", "TOC_REFL_BLUE"}));
     }
 
     @Override

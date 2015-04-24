@@ -45,14 +45,14 @@
             <version>2.7</version>
         </dependency>
         <dependency>
-        <groupId>ncsa.hdf</groupId>
-        <artifactId>jhdf</artifactId>
-        <version>2.7</version>
+            <groupId>ncsa.hdf</groupId>
+            <artifactId>jhdf</artifactId>
+            <version>2.7</version>
         </dependency>
         <dependency>
-        <groupId>ncsa.hdf</groupId>
-        <artifactId>jhdf5</artifactId>
-        <version>2.7</version>
+            <groupId>ncsa.hdf</groupId>
+            <artifactId>jhdf5</artifactId>
+            <version>2.7</version>
         </dependency>
         <dependency>
             <groupId>ncsa.hdf</groupId>
