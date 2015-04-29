@@ -40,25 +40,25 @@ public class DBSearch {
 
         final GeoPos centerGeoPos = srcProduct.getGeoCoding().getGeoPos(
                 new PixelPos(srcProduct.getSceneRasterWidth() / 2, srcProduct.getSceneRasterHeight() / 2), null);
-        final ProductEntry masterEntry = new ProductEntry(srcProduct);
-        return findCCDPairs(ProductDB.instance(), masterEntry, centerGeoPos, 1, false);
+        return findCCDPairs(ProductDB.instance(), srcProduct, centerGeoPos, 1, false);
     }
 
-    private static ProductEntry[] findCCDPairs(final ProductDB db, final ProductEntry master, final GeoPos centerGeoPos,
+    private static ProductEntry[] findCCDPairs(final ProductDB db, final Product srcProduct, final GeoPos centerGeoPos,
                                                final int maxSlaves, final boolean anyDate) throws SQLException {
 
+        final ProductEntry masterEntry = new ProductEntry(srcProduct);
         final DBQuery dbQuery = new DBQuery();
-        dbQuery.setFreeQuery(AbstractMetadata.PRODUCT + " <> '" + master.getName() + '\'');
+        dbQuery.setFreeQuery(AbstractMetadata.PRODUCT + " <> '" + masterEntry.getName() + '\'');
         dbQuery.setSelectionRect(new GeoPos[]{centerGeoPos, centerGeoPos, centerGeoPos, centerGeoPos});
         dbQuery.setReturnAllIfNoIntersection(false);
-        dbQuery.setSelectedPass(master.getPass());
-        dbQuery.setStartEndDate(null, master.getFirstLineTime().getAsCalendar());
-        dbQuery.setSelectedProductTypes(new String[]{master.getProductType()});
+        dbQuery.setSelectedPass(masterEntry.getPass());
+        dbQuery.setStartEndDate(null, masterEntry.getFirstLineTime().getAsCalendar());
+        dbQuery.setSelectedProductTypes(new String[]{masterEntry.getProductType()});
 
         final ProductEntry[] entries = dbQuery.queryDatabase(db);
         if (entries.length == 0)
             return entries;
-        return getClosestDatePairs(entries, master, dbQuery, maxSlaves, anyDate);
+        return getClosestDatePairs(entries, masterEntry, dbQuery, maxSlaves, anyDate);
     }
 
     private static ProductEntry[] getClosestDatePairs(final ProductEntry[] entries,
