@@ -9,17 +9,8 @@ import ncsa.hdf.hdf5lib.HDF5Constants;
 import ncsa.hdf.hdf5lib.exceptions.HDF5Exception;
 import ncsa.hdf.hdf5lib.exceptions.HDF5LibraryException;
 import ncsa.hdf.object.Attribute;
-import ncsa.hdf.object.Datatype;
 import ncsa.hdf.object.FileFormat;
-import ncsa.hdf.object.h4.H4GRImage;
 import ncsa.hdf.object.h5.H5ScalarDS;
-import org.esa.beam.framework.dataio.ProductIOException;
-import org.junit.Ignore;
-import org.junit.Test;
-
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreeNode;
-import java.util.List;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
@@ -33,12 +24,12 @@ import java.util.List;
  *
  * @author olafd
  */
-public class ProbaVProductReaderTest {
+public class ProbaVSynthesisProductReaderTest {
 
     @Test
     @Ignore
     public void testReadH5() throws ProductIOException {
-        ProbaVProductReaderPlugIn.loadHdf5Lib(ProbaVProductReaderPlugIn.class);
+        ProbaVSynthesisProductReaderPlugIn.loadHdf5Lib(ProbaVSynthesisProductReaderPlugIn.class);
         try {
             H5.H5open();
             String path = "C:\\Users\\olafd\\proba_v_reader\\PROBAV_L1C_20131025_115650_2_V003.HDF5";
@@ -58,7 +49,7 @@ public class ProbaVProductReaderTest {
     @Test
     @Ignore
     public void testReadH5_2() throws Exception {
-        final Class<?> aClass = ProbaVProductReaderPlugIn.loadHdf5Lib(ProbaVProductReaderPlugIn.class);
+        final Class<?> aClass = ProbaVSynthesisProductReaderPlugIn.loadHdf5Lib(ProbaVSynthesisProductReaderPlugIn.class);
 //        String path = "C:\\Users\\olafd\\bc\\proba-v-reader\\PROBAV_L1C_20131025_115650_2_V003.HDF5";
         String path = "C:\\Users\\olafd\\proba_v_reader\\HDF5_LSASAF_MSG_ALBEDO_Euro_200601020000";
         FileFormat h5FileFormat = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5);
@@ -88,7 +79,7 @@ public class ProbaVProductReaderTest {
         h5File.close();
     }
 
-    // print out the data object recusively
+    // print out the data object recursively
     private static void printNode(javax.swing.tree.TreeNode node, String indent) {
         System.out.println(indent + node);
 

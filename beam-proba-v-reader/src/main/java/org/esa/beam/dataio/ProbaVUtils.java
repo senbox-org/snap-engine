@@ -11,10 +11,7 @@ import java.util.List;
 import java.util.logging.Level;
 
 /**
- * todo: add comment
- * To change this template use File | Settings | File Templates.
- * Date: 12.03.2015
- * Time: 09:53
+ * Proba-V utility methods
  *
  * @author olafd
  */
@@ -94,22 +91,6 @@ public class ProbaVUtils {
         } else {
             return unit;
         }
-    }
-
-    public static float getAngleNoDataValue(String identifier) {
-        switch (identifier) {
-            case "SZA":
-                return ProbaVConstants.SZA_NO_DATA_VALUE;
-            case "VZA":
-                return ProbaVConstants.SZA_NO_DATA_VALUE;
-            case "SAA":
-                return ProbaVConstants.SZA_NO_DATA_VALUE;
-            case "VAA":
-                return ProbaVConstants.SZA_NO_DATA_VALUE;
-            default:
-                break;
-        }
-        return Float.NaN;
     }
 
     public static float getNoDataValueFromAttributes(List<Attribute> metadata) {
@@ -220,7 +201,7 @@ public class ProbaVUtils {
                 ndviTmp -= 256.0f;
             }
             if (ndviTmp == 255.0f) {
-                ndviFloatData[i] = Float.NaN;
+                ndviFloatData[i] = ndviTmp;
             } else {
                 ndviFloatData[i] = (float) ((ndviTmp - ndviBand.getScalingOffset()) * ndviBand.getScalingFactor());
             }
@@ -233,21 +214,8 @@ public class ProbaVUtils {
         return ndviFloatData;
     }
 
-    public static int getSynthesisProductRasterDimension(String productName) {
-        // we have the products:
-        // PROBAV_S1_TOA_X07Y04_20131025_1KM_V003
-        // PROBAV_S1_TOA_X00Y01_20131025_333M_V003
-        // PROBAV_S1_TOC_X07Y04_20131025_1KM_V003
-        // PROBAV_S1_TOC_X00Y01_20131025_333M_V003
-        // PROBAV_S10_TOC_X07Y04_20131025_1KM_V003
-        // PROBAV_S10_TOC_X00Y01_20131025_333M_V003
-        //
-        return (isSynthesis1kmProduct(productName) ? ProbaVConstants.SYNTHESIS_PRODUCT_DIMENSION_1km :
-                ProbaVConstants.SYNTHESIS_PRODUCT_DIMENSION_333m);
-    }
-
-    public static boolean isSynthesis1kmProduct(String productName) {
-        return productName.toUpperCase().contains("_1KM_");
+    public static boolean isGeometryBand(String bandName) {
+        return bandName.equals("SZA") || bandName.startsWith("VZA") || bandName.equals("SAA") || bandName.startsWith("VAA");
     }
 
     public static void addSynthesisQualityMasks(Product probavProduct) {
@@ -355,6 +323,7 @@ public class ProbaVUtils {
                                    BitSetter.setFlag(0, ProbaVConstants.Q_BORDER_COMPRESSED_INDEX),
                                    ProbaVConstants.Q_BORDER_COMPRESSED_FLAG_DESCR);
     }
+
 
 
     private static void addMask(Product mod35Product, ProductNodeGroup<Mask> maskGroup,

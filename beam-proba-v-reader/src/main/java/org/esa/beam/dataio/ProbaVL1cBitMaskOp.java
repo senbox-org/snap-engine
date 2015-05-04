@@ -40,7 +40,7 @@ public class ProbaVL1cBitMaskOp extends PixelOperator {
         super.configureTargetProduct(productConfigurer);
 
         final Product targetProduct = productConfigurer.getTargetProduct();
-        targetProduct.addBand(targetQualityFlagBandName, ProductData.TYPE_INT8);
+        targetProduct.addBand(targetQualityFlagBandName, ProductData.TYPE_INT16);
     }
 
     @Override

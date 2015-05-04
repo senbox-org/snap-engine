@@ -56,16 +56,16 @@ public class ProbaVSynthesisBitMaskOp extends PixelOperator {
     }
 
     private void computeSynthesisSmMask(int srcValue, WritableSample[] targetSamples) {
-        targetSamples[TRG_FLAG].set(ProbaVConstants.SM_CLEAR_BIT_INDEX, isClear(srcValue));
         targetSamples[TRG_FLAG].set(ProbaVConstants.SM_UNDEFINED_BIT_INDEX, isUndefined(srcValue));
-        targetSamples[TRG_FLAG].set(ProbaVConstants.SM_CLOUD_BIT_INDEX, isCloud(srcValue));
-        targetSamples[TRG_FLAG].set(ProbaVConstants.SM_SNOWICE_INDEX, isSnowIce(srcValue));
-        targetSamples[TRG_FLAG].set(ProbaVConstants.SM_CLOUD_SHADOW_BIT_INDEX, isCloudShadow(srcValue));
-        targetSamples[TRG_FLAG].set(ProbaVConstants.SM_LAND_BIT_INDEX, isLand(srcValue));
-        targetSamples[TRG_FLAG].set(ProbaVConstants.SM_GOOD_SWIR_INDEX, isGoodSwir(srcValue));
-        targetSamples[TRG_FLAG].set(ProbaVConstants.SM_GOOD_NIR_BIT_INDEX, isGoodNir(srcValue));
-        targetSamples[TRG_FLAG].set(ProbaVConstants.SM_GOOD_RED_BIT_INDEX, isGoodRed(srcValue));
-        targetSamples[TRG_FLAG].set(ProbaVConstants.SM_GOOD_BLUE_BIT_INDEX, isGoodBlue(srcValue));
+        targetSamples[TRG_FLAG].set(ProbaVConstants.SM_CLEAR_BIT_INDEX, isClear(srcValue) && !isUndefined(srcValue));
+        targetSamples[TRG_FLAG].set(ProbaVConstants.SM_CLOUD_BIT_INDEX, isCloud(srcValue) && !isUndefined(srcValue));
+        targetSamples[TRG_FLAG].set(ProbaVConstants.SM_SNOWICE_INDEX, isSnowIce(srcValue) && !isUndefined(srcValue));
+        targetSamples[TRG_FLAG].set(ProbaVConstants.SM_CLOUD_SHADOW_BIT_INDEX, isCloudShadow(srcValue) && !isUndefined(srcValue));
+        targetSamples[TRG_FLAG].set(ProbaVConstants.SM_LAND_BIT_INDEX, isLand(srcValue) && !isUndefined(srcValue));
+        targetSamples[TRG_FLAG].set(ProbaVConstants.SM_GOOD_SWIR_INDEX, isGoodSwir(srcValue) && !isUndefined(srcValue));
+        targetSamples[TRG_FLAG].set(ProbaVConstants.SM_GOOD_NIR_BIT_INDEX, isGoodNir(srcValue) && !isUndefined(srcValue));
+        targetSamples[TRG_FLAG].set(ProbaVConstants.SM_GOOD_RED_BIT_INDEX, isGoodRed(srcValue) && !isUndefined(srcValue));
+        targetSamples[TRG_FLAG].set(ProbaVConstants.SM_GOOD_BLUE_BIT_INDEX, isGoodBlue(srcValue) && !isUndefined(srcValue));
 
     }
 

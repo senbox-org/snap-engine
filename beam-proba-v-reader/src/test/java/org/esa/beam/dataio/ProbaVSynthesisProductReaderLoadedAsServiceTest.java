@@ -21,16 +21,16 @@ import org.esa.beam.framework.dataio.ProductReaderPlugIn;
 
 import java.util.Iterator;
 
-public class ProbaVProductReaderLoadedAsServiceTest extends TestCase {
+public class ProbaVSynthesisProductReaderLoadedAsServiceTest extends TestCase {
 
     public void testReaderIsLoaded() {
 
         ProductIOPlugInManager plugInManager = ProductIOPlugInManager.getInstance();
-        Iterator readerPlugIns = plugInManager.getReaderPlugIns("PROBA-V");
+        Iterator readerPlugIns = plugInManager.getReaderPlugIns("PROBA-V-Synthesis");
 
         if (readerPlugIns.hasNext()) {
             ProductReaderPlugIn plugIn = (ProductReaderPlugIn) readerPlugIns.next();
-            assertEquals(ProbaVProductReaderPlugIn.class, plugIn.getClass());
+            assertEquals(ProbaVSynthesisProductReaderPlugIn.class, plugIn.getClass());
         }
     }
 }

@@ -9,10 +9,7 @@ import java.awt.*;
 import java.io.IOException;
 
 /**
- * todo: add comment
- * To change this template use File | Settings | File Templates.
- * Date: 11.03.2015
- * Time: 18:08
+ * Proba-V raster data node implementation
  *
  * @author olafd
  */
@@ -20,15 +17,17 @@ public class ProbaVRasterImage extends RasterDataNodeOpImage {
 
     private byte[] byteDataValues = null;
     private short[] shortDataValues = null;
-    private int[] intDataValues = null;
     private float[] floatDataValues = null;
+
+    private String byteNodeName;
 
     private Band band;
 
-    protected ProbaVRasterImage(Band band, byte[] dataValues) {
+    protected ProbaVRasterImage(Band band, byte[] dataValues, String byteNodeName) {
         super(band, ResolutionLevel.MAXRES);
         initialize(band);
         this.byteDataValues = dataValues;
+        this.byteNodeName = byteNodeName;
     }
 
     protected ProbaVRasterImage(Band band, short[] dataValues) {
@@ -51,55 +50,75 @@ public class ProbaVRasterImage extends RasterDataNodeOpImage {
 
     @Override
     protected void computeProductData(ProductData outputData, Rectangle region) throws IOException {
-//        System.out.println("region = " + region);
 
         switch (band.getDataType()) {
-            case ProductData.TYPE_INT8:
-                for (int y = 0; y < region.height; y++) {
-                    for (int x = 0; x < region.width; x++) {
-                        final int indexInTile = y * region.width + x;
-                        final int indexInImage = (region.y + y) * width + (region.x + x);
-                        outputData.setElemIntAt(indexInTile, byteDataValues[indexInImage]);
-                    }
-                }
-                break;
 
             case ProductData.TYPE_UINT8:
-                for (int y = 0; y < region.height; y++) {
-                    for (int x = 0; x < region.width; x++) {
-                        final int indexInTile = y * region.width + x;
-                        final int indexInImage = (region.y + y) * width + (region.x + x);
-                        outputData.setElemUIntAt(indexInTile, byteDataValues[indexInImage]);
+                // related to TIME (100m), QUALITY and GEOMETRY variables
+                if (ProbaVUtils.isGeometryBand(byteNodeName)) {
+                    for (int y = 0; y < region.height; y++) {
+                        for (int x = 0; x < region.width; x++) {
+                            final int indexInTile = y * region.width + x;
+                            final int indexInImage = (region.y + y) * width + (region.x + x);
+                            final byte value = byteDataValues[indexInImage];
+                            outputData.setElemUIntAt(indexInTile, value < 255 ? value :
+                                    ProbaVConstants.GEOMETRY_NO_DATA_VALUE);
+                        }
+                    }
+                } else if (byteNodeName.equals("TIME")) {
+                    for (int y = 0; y < region.height; y++) {
+                        for (int x = 0; x < region.width; x++) {
+                            final int indexInTile = y * region.width + x;
+                            final int indexInImage = (region.y + y) * width + (region.x + x);
+                            final byte value = byteDataValues[indexInImage];
+                            outputData.setElemUIntAt(indexInTile, value > 0 && value < 255 ? value :
+                                    ProbaVConstants.TIME_NO_DATA_VALUE_UINT8);
+                        }
+                    }
+                } else if (byteNodeName.equals("QUALITY")) {
+                    for (int y = 0; y < region.height; y++) {
+                        for (int x = 0; x < region.width; x++) {
+                            final int indexInTile = y * region.width + x;
+                            final int indexInImage = (region.y + y) * width + (region.x + x);
+                            final byte value = byteDataValues[indexInImage];
+                            outputData.setElemUIntAt(indexInTile, value);
+                        }
                     }
                 }
                 break;
 
             case ProductData.TYPE_INT16:
-            for (int y = 0; y < region.height; y++) {
-                for (int x = 0; x < region.width; x++) {
-                    final int indexInTile = y * region.width + x;
-                    final int indexInImage = (region.y + y) * width + (region.x + x);
-                    outputData.setElemIntAt(indexInTile, shortDataValues[indexInImage]);
-                }
-            }
-            break;
-
-            case ProductData.TYPE_UINT16:
+                // related to RADIOMETRY variables
                 for (int y = 0; y < region.height; y++) {
                     for (int x = 0; x < region.width; x++) {
                         final int indexInTile = y * region.width + x;
                         final int indexInImage = (region.y + y) * width + (region.x + x);
-                        outputData.setElemUIntAt(indexInTile, shortDataValues[indexInImage]);
+                        final short value = shortDataValues[indexInImage];
+                        outputData.setElemIntAt(indexInTile, value > 0 ? value : ProbaVConstants.RADIOMETRY_NO_DATA_VALUE);
+                    }
+                }
+                break;
+
+            case ProductData.TYPE_UINT16:
+                // related to TIME variable
+                for (int y = 0; y < region.height; y++) {
+                    for (int x = 0; x < region.width; x++) {
+                        final int indexInTile = y * region.width + x;
+                        final int indexInImage = (region.y + y) * width + (region.x + x);
+                        final short value = shortDataValues[indexInImage];
+                        outputData.setElemUIntAt(indexInTile, value > 0 ? value : ProbaVConstants.TIME_NO_DATA_VALUE_UINT16);
                     }
                 }
                 break;
 
             case ProductData.TYPE_FLOAT32:
+                // related to NDVI variable
                 for (int y = 0; y < region.height; y++) {
                     for (int x = 0; x < region.width; x++) {
                         final int indexInTile = y * region.width + x;
                         final int indexInImage = (region.y + y) * width + (region.x + x);
-                        outputData.setElemFloatAt(indexInTile, floatDataValues[indexInImage]);
+                        final float value = floatDataValues[indexInImage];
+                        outputData.setElemFloatAt(indexInTile, value < 255 ? value : ProbaVConstants.NDVI_NO_DATA_VALUE);
                     }
                 }
                 break;
