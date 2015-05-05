@@ -339,9 +339,9 @@ public class SMIFileReader extends SeadasFileReader {
             }
 
             final MetadataElement globalAttributes = product.getMetadataRoot().getElement("Global_Attributes");
-            easting = (float) globalAttributes.getAttribute(west).getData().getElemDouble();
-            float westing = (float) globalAttributes.getAttribute(east).getData().getElemDouble();
-            pixelSizeX = (westing - easting) / product.getSceneRasterWidth();
+            easting = (float) globalAttributes.getAttribute(east).getData().getElemDouble();
+            float westing = (float) globalAttributes.getAttribute(west).getData().getElemDouble();
+            pixelSizeX = Math.abs(easting - westing) / product.getSceneRasterWidth();
             northing = (float) globalAttributes.getAttribute(north).getData().getElemDouble();
             float southing = (float) globalAttributes.getAttribute(south).getData().getElemDouble();
             if (northing < southing) {
@@ -349,10 +349,10 @@ public class SMIFileReader extends SeadasFileReader {
                 northing = (float) globalAttributes.getAttribute(south).getData().getElemDouble();
                 southing = (float) globalAttributes.getAttribute(north).getData().getElemDouble();
             }
-            pixelSizeY = (northing - southing) / product.getSceneRasterHeight();
+            pixelSizeY = Math.abs(northing - southing) / product.getSceneRasterHeight();
             if (pixelRegistered) {
-                northing -= pixelSizeX / 2.0;
-                easting += pixelSizeY / 2.0;
+                northing -= pixelSizeY / 2.0;
+                westing += pixelSizeX / 2.0;
             } else {
                 pixelX = 0.0;
                 pixelY = 0.0;
@@ -361,7 +361,7 @@ public class SMIFileReader extends SeadasFileReader {
                 product.setGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84,
                         product.getSceneRasterWidth(),
                         product.getSceneRasterHeight(),
-                        easting, northing,
+                        westing, northing,
                         pixelSizeX, pixelSizeY,
                         pixelX, pixelY));
             } catch (FactoryException e) {
