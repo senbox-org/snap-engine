@@ -4,6 +4,7 @@ import com.bc.ceres.core.ProgressMonitor;
 import ncsa.hdf.hdf5lib.exceptions.HDF5Exception;
 import ncsa.hdf.object.Attribute;
 import ncsa.hdf.object.FileFormat;
+import ncsa.hdf.object.h5.H5Datatype;
 import ncsa.hdf.object.h5.H5Group;
 import ncsa.hdf.object.h5.H5ScalarDS;
 import org.esa.beam.framework.dataio.AbstractProductReader;
@@ -69,7 +70,7 @@ public class ProbaVSynthesisProductReader extends AbstractProductReader {
                     targetProduct = createTargetProductFromSynthesisNdvi(probavFile, rootNode);
                 }
             } catch (Exception e) {
-                throw new IOException("Failed to open file " + probavFile.getPath());
+                throw new IOException("Failed to open file '" + probavFile.getPath() + "': " + e.getMessage());
             } finally {
                 if (h5File != null) {
                     try {
@@ -209,7 +210,10 @@ public class ProbaVSynthesisProductReader extends AbstractProductReader {
                         final H5ScalarDS timeDS = getH5ScalarDS(level3ChildNode.getChildAt(0));
                         final Band timeBand;
                         ProbaVRasterImage timeImage;
-                        if (ProbaVSynthesisProductReaderPlugIn.isProbaSynthesisS1ToaToc100mProduct(inputFile.getName())) {
+                        // NOTE: it seems that identical product types may have different data types here. E.g.:
+                        // PROBAV_S1_TOC_X18Y06_20140316_100M_V001.HDF5 has 8-bit unsigned char (CLASS_CHAR), but
+                        // PROBAV_S1_TOA_X18Y02_20140902_100M_V001.HDF5 has 16-bit unsigned integer (CLASS_INTEGER)
+                        if (timeDS.getDatatype().getDatatypeClass() == H5Datatype.CLASS_CHAR) {
                             // 8-bit unsigned character in this case
                             timeBand = createTargetBand(product, timeDS, "TIME", ProductData.TYPE_UINT8);
                             timeBand.setNoDataValue(ProbaVConstants.TIME_NO_DATA_VALUE_UINT8);

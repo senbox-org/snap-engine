@@ -125,12 +125,6 @@ public class ProbaVSynthesisProductReaderPlugIn implements ProductReaderPlugIn {
         return isInputProbaVFileNameValid(fileName) && fileName.contains("_NDVI_");
     }
 
-    static boolean isProbaSynthesisS1ToaToc100mProduct(String fileName) {
-        return isInputProbaVFileNameValid(fileName) &&
-                (fileName.startsWith("PROBAV_S1_TOA_") || fileName.startsWith("PROBAV_S1_TOC_")) &&
-                fileName.contains("_100M_");
-    }
-
     static Class<?> loadHdf5Lib(Class<?> callerClass) {
         return loadClassWithNativeDependencies(callerClass, _H5_CLASS_NAME, "{0}: HDF-5 library not available: {1}: {2}");
     }
