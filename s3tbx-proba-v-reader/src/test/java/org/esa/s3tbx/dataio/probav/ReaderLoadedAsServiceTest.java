@@ -27,7 +27,7 @@ public class ReaderLoadedAsServiceTest extends TestCase {
         int readerCount = 0;
 
         ProductIOPlugInManager plugInManager = ProductIOPlugInManager.getInstance();
-        Iterator readerPlugIns = plugInManager.getReaderPlugIns("PROBA-V");
+        Iterator readerPlugIns = plugInManager.getReaderPlugIns("PROBA-V-Synthesis");
 
         while (readerPlugIns.hasNext()) {
             readerCount++;

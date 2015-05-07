@@ -11,16 +11,11 @@ import java.util.List;
 import java.util.logging.Level;
 
 /**
- * todo: add comment
- * To change this template use File | Settings | File Templates.
- * Date: 12.03.2015
- * Time: 09:53
+ * Proba-V utility methods
  *
  * @author olafd
  */
 public class ProbaVUtils {
-
-    // todo: implement tests!!!
 
     public static String getAttributeValue(Attribute attribute) {
         String result = "";
@@ -62,7 +57,7 @@ public class ProbaVUtils {
 //        return array2D;
 //    }
 
-    public static String getProductDescription(List<Attribute> metadata) {
+    public static String getDescriptionFromAttributes(List<Attribute> metadata) {
         String description = null;
         for (Attribute attribute : metadata) {
             if (attribute.getName().equals("DESCRIPTION")) {
@@ -77,7 +72,41 @@ public class ProbaVUtils {
         return description;
     }
 
-    public static float getScaleFactor(List<Attribute> metadata) {
+    public static String getUnitFromAttributes(List<Attribute> metadata) {
+        String unit = null;
+        for (Attribute attribute : metadata) {
+            if (attribute.getName().equals("UNITS")) {
+                try {
+                    unit = getAttributeValue(attribute);
+                } catch (NumberFormatException e) {
+                    SystemUtils.LOG.log(Level.WARNING, "Cannot parse units string: " +
+                            e.getMessage());
+                }
+            }
+        }
+        if (unit != null && unit.contains("-")) {
+            return "dl";
+        } else {
+            return unit;
+        }
+    }
+
+    public static float getNoDataValueFromAttributes(List<Attribute> metadata) {
+        float noDataValue = Float.NaN;
+        for (Attribute attribute : metadata) {
+            if (attribute.getName().equals("NO_DATA")) {
+                try {
+                    noDataValue = Float.parseFloat(getAttributeValue(attribute));
+                } catch (NumberFormatException e) {
+                    SystemUtils.LOG.log(Level.WARNING, "Cannot parse product noDataValue string: " +
+                            e.getMessage());
+                }
+            }
+        }
+        return noDataValue / getScaleFactorFromAttributes(metadata);
+    }
+
+    public static float getScaleFactorFromAttributes(List<Attribute> metadata) {
         float scaleFactor = 1.0f;
         for (Attribute attribute : metadata) {
             if (attribute.getName().equals("SCALE")) {
@@ -91,7 +120,7 @@ public class ProbaVUtils {
         return 1.0f / scaleFactor;
     }
 
-    public static float getScaleOffset(List<Attribute> metadata) {
+    public static float getScaleOffsetFromAttributes(List<Attribute> metadata) {
         float scaleOffset = 0.0f;
         for (Attribute attribute : metadata) {
             if (attribute.getName().equals("OFFSET")) {
@@ -105,7 +134,7 @@ public class ProbaVUtils {
         return scaleOffset;
     }
 
-    public static double getGeometryCoordinateValue(List<Attribute> metadata, String coordinateName) {
+    public static double getGeometryCoordinateValueFromAttributes(List<Attribute> metadata, String coordinateName) {
         double coordValue = Double.NaN;
         for (Attribute attribute : metadata) {
             if (attribute.getName().equals(coordinateName)) {
@@ -120,7 +149,7 @@ public class ProbaVUtils {
         return coordValue;
     }
 
-    public static String getGeometryCrsString(List<Attribute> metadata) {
+    public static String getGeometryCrsStringFromAttributes(List<Attribute> metadata) {
         String crsString = null;
         for (Attribute attribute : metadata) {
             if (attribute.getName().equals("MAP_PROJECTION_WKT")) {
@@ -135,7 +164,7 @@ public class ProbaVUtils {
         return crsString;
     }
 
-    public static String[] getStartEndTime(List<Attribute> metadata) {
+    public static String[] getStartEndTimeFromAttributes(List<Attribute> metadata) {
         String[] startStopTimes = new String[2];
         String startDate = "";
         String startTime = "";
@@ -170,7 +199,7 @@ public class ProbaVUtils {
                 ndviTmp -= 256.0f;
             }
             if (ndviTmp == 255.0f) {
-                ndviFloatData[i] = Float.NaN;
+                ndviFloatData[i] = ndviTmp;
             } else {
                 ndviFloatData[i] = (float) ((ndviTmp - ndviBand.getScalingOffset()) * ndviBand.getScalingFactor());
             }
@@ -183,21 +212,8 @@ public class ProbaVUtils {
         return ndviFloatData;
     }
 
-    public static int getSynthesisProductRasterDimension(String productName) {
-        // we have the products:
-        // PROBAV_S1_TOA_X07Y04_20131025_1KM_V003
-        // PROBAV_S1_TOA_X00Y01_20131025_333M_V003
-        // PROBAV_S1_TOC_X07Y04_20131025_1KM_V003
-        // PROBAV_S1_TOC_X00Y01_20131025_333M_V003
-        // PROBAV_S10_TOC_X07Y04_20131025_1KM_V003
-        // PROBAV_S10_TOC_X00Y01_20131025_333M_V003
-        //
-        return (isSynthesis1kmProduct(productName) ? ProbaVConstants.SYNTHESIS_PRODUCT_DIMENSION_1km :
-                ProbaVConstants.SYNTHESIS_PRODUCT_DIMENSION_333m);
-    }
-
-    public static boolean isSynthesis1kmProduct(String productName) {
-        return productName.toUpperCase().contains("_1KM_");
+    public static boolean isGeometryBand(String bandName) {
+        return bandName.equals("SZA") || bandName.startsWith("VZA") || bandName.equals("SAA") || bandName.startsWith("VAA");
     }
 
     public static void addSynthesisQualityMasks(Product probavProduct) {
@@ -305,6 +321,7 @@ public class ProbaVUtils {
                                    BitSetter.setFlag(0, ProbaVConstants.Q_BORDER_COMPRESSED_INDEX),
                                    ProbaVConstants.Q_BORDER_COMPRESSED_FLAG_DESCR);
     }
+
 
 
     private static void addMask(Product mod35Product, ProductNodeGroup<Mask> maskGroup,

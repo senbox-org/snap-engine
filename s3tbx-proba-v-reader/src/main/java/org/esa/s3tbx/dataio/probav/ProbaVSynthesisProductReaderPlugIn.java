@@ -15,11 +15,11 @@ import java.util.Locale;
  *
  * @author olafd
  */
-public class ProbaVProductReaderPlugIn implements ProductReaderPlugIn {
+public class ProbaVSynthesisProductReaderPlugIn implements ProductReaderPlugIn {
 
     private static final String _H5_CLASS_NAME = "ncsa.hdf.hdf5lib.H5";
 
-    public static final String FORMAT_NAME_PROBA_V = "PROBA-V";
+    public static final String FORMAT_NAME_PROBA_V = "PROBA-V-Synthesis";
 
     private static final Class[] SUPPORTED_INPUT_TYPES = new Class[]{String.class, File.class};
     private static final String DESCRIPTION = "PROBA-V Format";
@@ -27,27 +27,10 @@ public class ProbaVProductReaderPlugIn implements ProductReaderPlugIn {
     private static final String[] DEFAULT_FILE_EXTENSIONS = new String[]{FILE_EXTENSION};
     private static final String[] FORMAT_NAMES = new String[]{FORMAT_NAME_PROBA_V};
 
-    private static final String PROBAV_L1C_FILENAME_REGEXP =
-            "PROBAV_L1C_[0-9]{8}_[0-9]{6}_[0-2]{1}_V[0-9]{3}.(?i)(hdf5)";
-    private static final String PROBAV_S1_TOA_333M_FILENAME_REGEXP =
-            "PROBAV_S1_TOA_X[0-9]{2}Y[0-9]{2}_[0-9]{8}_333M_V[0-9]{3}.(?i)(hdf5)";
-    private static final String PROBAV_S1_TOA_1KM_FILENAME_REGEXP =
-            "PROBAV_S1_TOA_X[0-9]{2}Y[0-9]{2}_[0-9]{8}_1KM_V[0-9]{3}.(?i)(hdf5)";
-    private static final String PROBAV_S1_TOC_333M_FILENAME_REGEXP =
-            "PROBAV_S1_TOC_X[0-9]{2}Y[0-9]{2}_[0-9]{8}_333M_V[0-9]{3}.(?i)(hdf5)";
-    private static final String PROBAV_S1_TOC_1KM_FILENAME_REGEXP =
-            "PROBAV_S1_TOC_X[0-9]{2}Y[0-9]{2}_[0-9]{8}_1KM_V[0-9]{3}.(?i)(hdf5)";
-    private static final String PROBAV_S10_TOC_333M_FILENAME_REGEXP =
-            "PROBAV_S10_TOC_X[0-9]{2}Y[0-9]{2}_[0-9]{8}_333M_V[0-9]{3}.(?i)(hdf5)";
-    private static final String PROBAV_S10_TOC_1KM_FILENAME_REGEXP =
-            "PROBAV_S10_TOC_X[0-9]{2}Y[0-9]{2}_[0-9]{8}_1KM_V[0-9]{3}.(?i)(hdf5)";
-    private static final String PROBAV_S10_TOC_NDVI_FILENAME_REGEXP =
-            "PROBAV_S10_TOC_X[0-9]{2}Y[0-9]{2}_[0-9]{8}_333M_NDVI_V[0-9]{3}.(?i)(hdf5)";
-
     private static boolean hdf5LibAvailable = false;
 
     static {
-        hdf5LibAvailable = loadHdf5Lib(ProbaVProductReaderPlugIn.class) != null;
+        hdf5LibAvailable = loadHdf5Lib(ProbaVSynthesisProductReaderPlugIn.class) != null;
     }
 
     @Override
@@ -82,7 +65,7 @@ public class ProbaVProductReaderPlugIn implements ProductReaderPlugIn {
 
     @Override
     public ProductReader createReaderInstance() {
-        return new ProbaVProductReader(this);
+        return new ProbaVSynthesisProductReader(this);
     }
 
     @Override
@@ -105,49 +88,34 @@ public class ProbaVProductReaderPlugIn implements ProductReaderPlugIn {
         return new BeamFileFilter(FORMAT_NAMES[0], FILE_EXTENSION, DESCRIPTION);
     }
 
-    private boolean isInputValid(Object input) {
+    static boolean isInputValid(Object input) {
         File inputFile = new File(input.toString());
         return isInputProbaVFileNameValid(inputFile.getName());
     }
 
-    private boolean isInputProbaVFileNameValid(String fileName) {
-        return
-//                isProbaL1CProduct(fileName) ||           // todo: for L1C we need more detailed specifications first!
-                isProbaS1ToaProduct(fileName) ||
-                isProbaS1TocProduct(fileName) ||
-                isProbaS10TocProduct(fileName) ||
-                isProbaS10TocNdviProduct(fileName);
+    static boolean isInputProbaVFileNameValid(String fileName) {
+        return fileName.toUpperCase().endsWith(".HDF5") &&
+                (fileName.startsWith("PROBAV_S1_") ||
+                        fileName.startsWith("PROBAV_S5_") ||
+                        fileName.startsWith("PROBAV_S10_"));
     }
 
-    static boolean isProbaS10TocProduct(String fileName) {
-        return fileName.matches(PROBAV_S10_TOC_333M_FILENAME_REGEXP) || fileName.matches(PROBAV_S10_TOC_1KM_FILENAME_REGEXP);
+    static boolean isProbaSynthesisToaProduct(String fileName) {
+        return isInputProbaVFileNameValid(fileName) &&
+                fileName.contains("_TOA_") && !isProbaSynthesisNdviProduct(fileName);
     }
 
-    static boolean isProbaS1TocProduct(String fileName) {
-        return fileName.matches(PROBAV_S1_TOC_333M_FILENAME_REGEXP) || fileName.matches(PROBAV_S1_TOC_1KM_FILENAME_REGEXP);
+    static boolean isProbaSynthesisTocProduct(String fileName) {
+        return isInputProbaVFileNameValid(fileName) &&
+                fileName.contains("_TOC_") && !isProbaSynthesisNdviProduct(fileName);
     }
 
-    static boolean isProbaS1ToaProduct(String fileName) {
-        return fileName.matches(PROBAV_S1_TOA_333M_FILENAME_REGEXP) || fileName.matches(PROBAV_S1_TOA_1KM_FILENAME_REGEXP);
+    static boolean isProbaSynthesisNdviProduct(String fileName) {
+        return isInputProbaVFileNameValid(fileName) && fileName.contains("_NDVI_");
     }
-
-    static boolean isProbaSynthesisProduct(String fileName) {
-        return isProbaS1ToaProduct(fileName) || isProbaS1TocProduct(fileName) || isProbaS10TocProduct(fileName);
-    }
-
-    static boolean isProbaL1CProduct(String fileName) {
-        return fileName.matches(PROBAV_L1C_FILENAME_REGEXP);
-    }
-
-    static boolean isProbaS10TocNdviProduct(String fileName) {
-        return fileName.matches(PROBAV_S10_TOC_NDVI_FILENAME_REGEXP);
-    }
-
 
     static Class<?> loadHdf5Lib(Class<?> callerClass) {
-        return loadClassWithNativeDependencies(callerClass,
-                                               _H5_CLASS_NAME,
-                                               "{0}: HDF-5 library not available: {1}: {2}");
+        return loadClassWithNativeDependencies(callerClass, _H5_CLASS_NAME, "{0}: HDF-5 library not available: {1}: {2}");
     }
 
     private static Class<?> loadClassWithNativeDependencies(Class<?> callerClass, String className, String warningPattern) {

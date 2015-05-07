@@ -12,15 +12,10 @@ import java.awt.*;
  */
 public class ProbaVConstants {
 
-    public static final int SYNTHESIS_PRODUCT_DIMENSION_1km = 1120;
-    public static final int SYNTHESIS_PRODUCT_DIMENSION_333m = 3360;
-
-    public static final int L1C_PRODUCT_SWIR_SWATH_WIDTH = 1024;
-
     public static final int L1C_TIEPOINT_OFFS_X = 0;
     public static final int L1C_TIEPOINT_OFFS_Y = 0;
     public static final int L1C_TIEPOINT_SUBS_X = 8;
-//    public static final int L1C_TIEPOINT_SUBS_X = 1;
+    //    public static final int L1C_TIEPOINT_SUBS_X = 1;
     public static final int L1C_TIEPOINT_SUBS_Y = 8;
 //    public static final int L1C_TIEPOINT_SUBS_Y = 1;
 
@@ -73,9 +68,6 @@ public class ProbaVConstants {
             new Color(0, 255, 0)
     };
 
-    public static final String Q_BAND_NAME = "Q";
-    public static final String Q_FLAG_BAND_NAME = "Q_FLAGS";
-
     public static final int Q_CORRECT_BIT_INDEX = 0;
     public static final int Q_MISSING_BIT_INDEX = 1;
     public static final int Q_WAS_SATURATED_BIT_INDEX = 2;
@@ -102,40 +94,14 @@ public class ProbaVConstants {
 
     public static final String PROBAV_DATE_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss";
 
-    // root metadata:
-
-    // we have these root metadata:
-//        Group size = 1
-//        Number of attributes = 13
-//        DESCRIPTION = PROBA-V Level3 Top Of Atmosphere Daily Synthesis at 333M resolution
-//        INSTRUMENT = VEGETATION
-//        MAP_PROJECTION_FAMILY = GEOGRAPHIC
-//        MAP_PROJECTION_NAME = GEOGRAPHIC_LAT_LON_WGS84
-//        MAP_PROJECTION_REFERENCE = EPSG:4326
-//        MAP_PROJECTION_UNITS = DEGREES
-//        MAP_PROJECTION_WKT = GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.01745329251994328,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]]
-//        PLATFORM = PROBA-1
-//        PROCESSING_DATE = 2014-07-07
-//        PROCESSING_TIME = 15:44:26
-//        PRODUCT_REFERENCE = Synthesis_PROBAV_20131025_S1_TOA_333M_V003
-//        PRODUCT_VERSION = 3
-//        SYNTHESIS_PERIOD = 1
-
     public static final String MPH_NAME = "MPH";
-    public static final String BAND_INFORMATION_NAME = "Band_Information";
-    // Meta data root attributes
-    public static final String ATTR_NAME_DESCRIPTION = "Product_Description";
-    public static final String ATTR_NAME_INSTRUMENT = "Instrument";
-    public static final String ATTR_NAME_MAP_PROJECTION_FAMILY = "Map_Projection_Family";
-    public static final String ATTR_NAME_MAP_PROJECTION_NAME = "Map_Projection_Name";
-    public static final String ATTR_NAME_MAP_PROJECTION_REFERENCE = "Map_Projection_Reference";
-    public static final String ATTR_NAME_MAP_PROJECTION_UNITS = "Map_Projection_Units";
-    public static final String ATTR_NAME_MAP_PROJECTION_WKT = "Map_Projection_Wkt";
-    public static final String ATTR_NAME_PLATFORM = "Platform";
-    public static final String ATTR_NAME_PROCESSING_DATE = "Processing_Date";
-    public static final String ATTR_NAME_PROCESSING_TIME = "Processing_Time";
-    public static final String ATTR_NAME_PRODUCT_REFERENCE = "Product_Reference";
-    public static final String ATTR_NAME_PRODUCT_VERSION = "Product_Version";
-    public static final String ATTR_NAME_SYNTHESIS_PERIOD = "Synthesis_Period";
+    public static final String QUALITY_NAME = "QUALITY";
 
+    public static final int GEOMETRY_NO_DATA_VALUE = 255;
+    public static final float NDVI_NO_DATA_VALUE = Float.NaN;
+    public static final int RADIOMETRY_NO_DATA_VALUE = -1;
+    public static final int TIME_NO_DATA_VALUE_UINT16 = 0;
+    public static final int TIME_NO_DATA_VALUE_UINT8 = 255;
+
+    public static final int[] RADIOMETRY_CHILD_INDEX = {0, 2, 1, 3};
 }
