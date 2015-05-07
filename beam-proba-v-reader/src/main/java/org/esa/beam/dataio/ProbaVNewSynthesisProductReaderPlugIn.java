@@ -18,11 +18,11 @@ import java.util.Locale;
  *
  * @author olafd
  */
-public class ProbaVSynthesisProductReaderPlugIn implements ProductReaderPlugIn {
+public class ProbaVNewSynthesisProductReaderPlugIn implements ProductReaderPlugIn {
 
     private static final String _H5_CLASS_NAME = "ncsa.hdf.hdf5lib.H5";
 
-    public static final String FORMAT_NAME_PROBA_V = "PROBA-V-Synthesis";
+    public static final String FORMAT_NAME_PROBA_V = "PROBA-V-Synthesis-New";
 
     private static final Class[] SUPPORTED_INPUT_TYPES = new Class[]{String.class, File.class};
     private static final String DESCRIPTION = "PROBA-V Format";
@@ -33,10 +33,10 @@ public class ProbaVSynthesisProductReaderPlugIn implements ProductReaderPlugIn {
     private static boolean hdf5LibAvailable = false;
 
     static {
-        hdf5LibAvailable = loadHdf5Lib(ProbaVSynthesisProductReaderPlugIn.class) != null;
+        hdf5LibAvailable = loadHdf5Lib(ProbaVNewSynthesisProductReaderPlugIn.class) != null;
     }
 
-    public ProbaVSynthesisProductReaderPlugIn() {
+    public ProbaVNewSynthesisProductReaderPlugIn() {
         RGBImageProfileManager manager = RGBImageProfileManager.getInstance();
         manager.addProfile(new RGBImageProfile("PROBA-V TOA RGB",
                                                new String[] {"TOA_REFL_NIR", "TOA_REFL_RED", "TOA_REFL_BLUE"}));
@@ -46,14 +46,11 @@ public class ProbaVSynthesisProductReaderPlugIn implements ProductReaderPlugIn {
 
     @Override
     public DecodeQualification getDecodeQualification(Object input) {
-//        if (isInputValid(input)) {
-//            return DecodeQualification.INTENDED;
-//        } else {
-//            return DecodeQualification.UNABLE;
-//        }
-
-        // deactivate for the moment
-        return DecodeQualification.UNABLE;
+        if (isInputValid(input)) {
+            return DecodeQualification.INTENDED;
+        } else {
+            return DecodeQualification.UNABLE;
+        }
     }
 
     static File getFileInput(Object input) {
@@ -79,7 +76,7 @@ public class ProbaVSynthesisProductReaderPlugIn implements ProductReaderPlugIn {
 
     @Override
     public ProductReader createReaderInstance() {
-        return new ProbaVSynthesisProductReader(this);
+        return new ProbaVNewSynthesisProductReader(this);
     }
 
     @Override

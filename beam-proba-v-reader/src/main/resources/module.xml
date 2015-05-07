@@ -51,7 +51,7 @@
         <action>
             <id>importProbaVProduct</id>
             <class>org.esa.beam.visat.actions.ProductImportAction</class>
-            <formatName>PROBA-V-Synthesis</formatName>
+            <formatName>PROBA-V-Synthesis-New</formatName>
             <useAllFileFilter>false</useAllFileFilter>
             <shortDescr>Import a Proba V data product.</shortDescr>
         </action>
