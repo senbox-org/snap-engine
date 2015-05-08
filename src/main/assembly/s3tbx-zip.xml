@@ -10,15 +10,18 @@
     <files>
         <file>
             <source>README.md</source>
+            <outputDirectory>s3tbx</outputDirectory>
             <lineEnding>unix</lineEnding>
             <filtered>true</filtered>
         </file>
         <file>
             <source>VERSION.txt</source>
+            <outputDirectory>s3tbx</outputDirectory>
             <filtered>true</filtered>
         </file>
         <file>
             <source>LICENSE.html</source>
+            <outputDirectory>s3tbx</outputDirectory>
         </file>
     </files>
 
