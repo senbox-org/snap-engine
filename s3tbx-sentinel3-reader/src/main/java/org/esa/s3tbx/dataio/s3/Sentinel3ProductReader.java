@@ -68,9 +68,9 @@ public class Sentinel3ProductReader extends AbstractProductReader {
             factory = new SynLevel2ProductFactory(this);
         } else if (dirName.matches("S3.?_SY_(2_VGP|[23]_VG1)_.*.SEN3")) { // SYN VGT
             factory = new VgtProductFactory(this);
-        } else if (dirName.matches("ENV_ME_1_RRG____.*______ACR_R_NT____.SEN3")) {
+        } else if (dirName.matches("ENV_ME_1_RR(G|P)____.*______ACR_R_NT____.SEN3")) {
             factory= new MerisLevel1ProductFactory(this);
-        } else if (dirName.matches("ENV_ME_2_RRG____.*______ACR_R_NT____.SEN3")) {
+        } else if (dirName.matches("ENV_ME_2_RR(G|P)____.*______ACR_R_NT____.SEN3")) {
             factory= new MerisLevel2ProductFactory(this);
         }
         if (factory == null) {
