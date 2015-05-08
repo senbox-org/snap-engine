@@ -1,23 +1,19 @@
 package org.esa.beam.dataio;
 
 import com.bc.ceres.core.ProgressMonitor;
-import com.bc.ceres.glevel.MultiLevelModel;
-import com.bc.ceres.glevel.MultiLevelSource;
-import com.bc.ceres.glevel.support.AbstractMultiLevelSource;
-import com.bc.ceres.glevel.support.DefaultMultiLevelImage;
 import ncsa.hdf.hdf5lib.H5;
 import ncsa.hdf.hdf5lib.HDF5Constants;
 import ncsa.hdf.hdf5lib.exceptions.HDF5Exception;
-import ncsa.hdf.hdf5lib.exceptions.HDF5LibraryException;
 import ncsa.hdf.object.Attribute;
 import ncsa.hdf.object.FileFormat;
+import ncsa.hdf.object.h5.H5Datatype;
 import ncsa.hdf.object.h5.H5Group;
 import ncsa.hdf.object.h5.H5ScalarDS;
 import org.esa.beam.framework.dataio.AbstractProductReader;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
 import org.esa.beam.framework.datamodel.*;
-import org.esa.beam.jai.ImageManager;
-import org.esa.beam.jai.ResolutionLevel;
+import org.esa.beam.util.ImageUtils;
+import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.logging.BeamLogManager;
 import org.geotools.referencing.CRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -33,6 +29,10 @@ import java.util.logging.Level;
 
 /**
  * Reader for Proba-V Synthesis products
+ * NOTE: In future, this reader will require a performance improvement.
+ * ProbaVNewSynthesisProductReader is an experimental version which reduces memory allocation by about 50%
+ * compared to ProbaVSynthesisProductReader. However, operations on the large Synthesis 100m products may still fail
+ * on machines with too little memory available.
  *
  * @author olafd
  */
@@ -42,6 +42,7 @@ public class ProbaVNewSynthesisProductReader extends AbstractProductReader {
     private int productHeight;
 
     private File probavFile;
+    private int file_id;
 
     /**
      * Constructs a new abstract product reader.
@@ -65,9 +66,9 @@ public class ProbaVNewSynthesisProductReader extends AbstractProductReader {
             FileFormat h5FileFormat = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5);
             FileFormat h5File = null;
             try {
-                final int file_id = H5.H5Fopen(probavFile.getAbsolutePath(),  // Name of the file to access.
-                                               HDF5Constants.H5F_ACC_RDONLY,  // File access flag
-                                               HDF5Constants.H5P_DEFAULT);    // access_id, se H5P_DEFAULT for default access properties.
+                file_id = H5.H5Fopen(probavFile.getAbsolutePath(),  // Name of the file to access.
+                                     HDF5Constants.H5F_ACC_RDONLY,  // File access flag
+                                     HDF5Constants.H5P_DEFAULT);
 
                 h5File = h5FileFormat.createInstance(probavFile.getAbsolutePath(), FileFormat.READ);
                 h5File.open();
@@ -77,9 +78,9 @@ public class ProbaVNewSynthesisProductReader extends AbstractProductReader {
                 // check of which of the supported product types the input is:
                 if (ProbaVNewSynthesisProductReaderPlugIn.isProbaSynthesisToaProduct(fileName) ||
                         ProbaVNewSynthesisProductReaderPlugIn.isProbaSynthesisTocProduct(fileName)) {
-//                    targetProduct = createTargetProductFromSynthesis(probavFile, rootNode);
+                    targetProduct = createTargetProductFromSynthesis(probavFile, rootNode);
                 } else if (ProbaVNewSynthesisProductReaderPlugIn.isProbaSynthesisNdviProduct(fileName)) {
-                    targetProduct = createTargetProductFromSynthesisNdvi(probavFile, rootNode, file_id);
+                    targetProduct = createTargetProductFromSynthesisNdvi(probavFile, rootNode);
                 }
             } catch (Exception e) {
                 throw new IOException("Failed to open file '" + probavFile.getPath() + "': " + e.getMessage());
@@ -97,27 +98,266 @@ public class ProbaVNewSynthesisProductReader extends AbstractProductReader {
     }
 
     @Override
-    protected void readBandRasterDataImpl(int sourceOffsetX, int sourceOffsetY, int sourceWidth, int sourceHeight, int sourceStepX, int sourceStepY, Band destBand, int destOffsetX, int destOffsetY, int destWidth, int destHeight, ProductData destBuffer, ProgressMonitor pm) throws IOException {
+    protected void readBandRasterDataImpl(int sourceOffsetX, int sourceOffsetY,
+                                          int sourceWidth, int sourceHeight,
+                                          int sourceStepX, int sourceStepY,
+                                          Band destBand,
+                                          int destOffsetX, int destOffsetY,
+                                          int destWidth, int destHeight,
+                                          ProductData destBuffer,
+                                          ProgressMonitor pm) throws IOException {
+
         throw new IllegalStateException(String.format("No source to read for band '%s'.", destBand.getName()));
     }
 
     //////////// private methods //////////////////
 
-    private Product createTargetProductFromSynthesisNdvi(File inputFile, TreeNode inputFileRootNode, int file_id) throws Exception {
+    private ProductData getProbaVRasterData(int sourceWidth, int sourceHeight, String datasetName, int datatypeClass) {
+        try {
+            final int dataset_id = H5.H5Dopen(file_id,                       // Location identifier
+                                              datasetName, // Dataset name
+                                              HDF5Constants.H5P_DEFAULT);    // Identifier of dataset access property list
+
+            final int dataspace_id = H5.H5Dget_space(dataset_id);
+
+            final long[] offset = {0L, 0L};
+            final long[] count = {sourceWidth, sourceHeight};
+
+            H5.H5Sselect_hyperslab(dataspace_id,                   // Identifier of dataspace selection to modify
+                                   HDF5Constants.H5S_SELECT_SET,   // Operation to perform on current selection.
+                                   offset,                         // Offset of start of hyperslab
+                                   null,                           // Hyperslab stride.
+                                   count,                          // Number of blocks included in hyperslab.
+                                   null);                          // Size of block in hyperslab.
+
+            final int memspace_id = H5.H5Screate_simple(count.length, // Number of dimensions of dataspace.
+                                                        count,        // An array of the size of each dimension.
+                                                        null);       // An array of the maximum size of each dimension.
+
+            final long[] offset_out = {0L, 0L};
+            H5.H5Sselect_hyperslab(memspace_id,                   // Identifier of dataspace selection to modify
+                                   HDF5Constants.H5S_SELECT_SET,   // Operation to perform on current selection.
+                                   offset_out,                         // Offset of start of hyperslab
+                                   null,                           // Hyperslab stride.
+                                   count,                          // Number of blocks included in hyperslab.
+                                   null);                          // Size of block in hyperslab.
+
+            int dataType = ProbaVUtils.getDatatypeForH5Dread(datatypeClass);
+            ProductData destBuffer = ProbaVUtils.getDataBufferForH5Dread(datatypeClass, sourceWidth, sourceHeight);
+
+            H5.H5Dread(dataset_id,                    // Identifier of the dataset read from.
+                       dataType,                      // Identifier of the memory datatype.
+                       memspace_id,                   //  Identifier of the memory dataspace.
+                       dataspace_id,                  // Identifier of the dataset's dataspace in the file.
+                       HDF5Constants.H5P_DEFAULT,     // Identifier of a transfer property list for this I/O operation.
+                       destBuffer.getElems());        // Buffer to store data read from the file.
+
+            H5.H5Dclose(dataset_id);
+            H5.H5Sclose(memspace_id);
+
+            return destBuffer;
+        } catch (Exception e) {
+            e.printStackTrace();      // todo
+        }
+
+        return null;
+    }
+
+    private Product createTargetProductFromSynthesis(File inputFile, TreeNode inputFileRootNode) throws Exception {
+        Product product = null;
+
+        if (inputFileRootNode != null) {
+
+            final TreeNode level3Node = inputFileRootNode.getChildAt(0);        // 'LEVEL3'
+            productWidth = (int) getH5ScalarDS(level3Node.getChildAt(0).getChildAt(0)).getDims()[0];
+            productHeight = (int) getH5ScalarDS(level3Node.getChildAt(0).getChildAt(0)).getDims()[1];
+            product = new Product(inputFile.getName(), "PROBA-V SYNTHESIS", productWidth, productHeight);
+            product.setAutoGrouping("TOA_REFL:TOC_REFL:VAA:VZA");
+
+            final H5Group rootGroup = (H5Group) ((DefaultMutableTreeNode) inputFileRootNode).getUserObject();
+            final List rootMetadata = rootGroup.getMetadata();
+            addSynthesisMetadataElement(rootMetadata, product, ProbaVConstants.MPH_NAME);
+            product.setDescription(ProbaVUtils.getDescriptionFromAttributes(rootMetadata));
+            product.setFileLocation(inputFile);
+
+            for (int i = 0; i < level3Node.getChildCount(); i++) {
+                // we have: 'GEOMETRY', 'NDVI', 'QUALITY', 'RADIOMETRY', 'TIME'
+                final TreeNode level3ChildNode = level3Node.getChildAt(i);
+                final String level3ChildNodeName = level3ChildNode.toString();
+
+                switch (level3ChildNodeName) {
+                    case "GEOMETRY":
+                        setSynthesisGeoCoding(product, inputFileRootNode, level3ChildNode);
+                        // 8-bit unsigned character
+                        for (int j = 0; j < level3ChildNode.getChildCount(); j++) {
+                            final TreeNode level3GeometryChildNode = level3ChildNode.getChildAt(j);
+                            final String level3GeometryChildNodeName = level3GeometryChildNode.toString();
+                            if (isSynthesisSunAngleDataNode(level3GeometryChildNodeName)) {
+                                final H5ScalarDS sunAngleDS = getH5ScalarDS(level3GeometryChildNode);
+                                final Band sunAngleBand = createTargetBand(product,
+                                                                           sunAngleDS,
+                                                                           level3GeometryChildNodeName,
+                                                                           ProductData.TYPE_UINT8);
+                                setBandUnitAndDescription(sunAngleDS, sunAngleBand);
+                                sunAngleBand.setNoDataValue(ProbaVConstants.GEOMETRY_NO_DATA_VALUE);
+                                sunAngleBand.setNoDataValueUsed(true);
+
+                                final String sunAngleDatasetName = "/LEVEL3/GEOMETRY/" + level3GeometryChildNodeName;
+                                final int sunAngleDatatypeClass = sunAngleDS.getDatatype().getDatatypeClass();   // 0
+                                final ProductData sunAngleRasterData = getProbaVRasterData(productWidth, productHeight,
+                                                                                           sunAngleDatasetName,
+                                                                                           sunAngleDatatypeClass);
+                                final RenderedImage sunAngleImage = ImageUtils.createRenderedImage(productWidth,
+                                                                                                   productHeight,
+                                                                                                   sunAngleRasterData);
+                                sunAngleBand.setSourceImage(sunAngleImage);
+                            } else if (isSynthesisViewAngleGroupNode(level3GeometryChildNodeName)) {
+                                for (int k = 0; k < level3GeometryChildNode.getChildCount(); k++) {
+                                    final TreeNode level3GeometryViewAngleChildNode = level3GeometryChildNode.getChildAt(k);
+                                    final H5ScalarDS viewAngleDS = getH5ScalarDS(level3GeometryViewAngleChildNode);
+                                    final String level3GeometryViewAngleChildNodeName =
+                                            level3GeometryViewAngleChildNode.toString();
+                                    final String viewAnglebandName = level3GeometryViewAngleChildNodeName + "_" +
+                                            level3GeometryChildNodeName;
+                                    final Band viewAngleBand = createTargetBand(product,
+                                                                                viewAngleDS,
+                                                                                viewAnglebandName,
+                                                                                ProductData.TYPE_UINT8);
+                                    setBandUnitAndDescription(viewAngleDS, viewAngleBand);
+                                    viewAngleBand.setNoDataValue(ProbaVConstants.GEOMETRY_NO_DATA_VALUE);
+                                    viewAngleBand.setNoDataValueUsed(true);
+
+                                    final String viewAngleDatasetName = "/LEVEL3/GEOMETRY/" +
+                                            level3GeometryChildNodeName + "/" + level3GeometryViewAngleChildNodeName;
+                                    final int viewAngleDatatypeClass = viewAngleDS.getDatatype().getDatatypeClass();   // 0
+                                    final ProductData viewAngleRasterData = getProbaVRasterData(productWidth, productHeight,
+                                                                                                viewAngleDatasetName,
+                                                                                                viewAngleDatatypeClass);
+                                    final RenderedImage viewAngleImage = ImageUtils.createRenderedImage(productWidth,
+                                                                                                        productHeight,
+                                                                                                        viewAngleRasterData);
+                                    viewAngleBand.setSourceImage(viewAngleImage);
+                                }
+                            }
+                        }
+                        break;
+
+                    case "NDVI":
+                        // 8-bit unsigned character
+                        setNdviBand(product, level3ChildNode);
+                        break;
+
+                    case "QUALITY":
+                        // 8-bit unsigned character
+                        final H5ScalarDS qualityDS = getH5ScalarDS(level3ChildNode.getChildAt(0));
+                        Product flagProduct = new Product("QUALITY", "flags", productWidth, productHeight);
+                        ProductUtils.copyGeoCoding(product, flagProduct);
+                        final Band smBand =
+                                createTargetBand(flagProduct, qualityDS, ProbaVConstants.SM_BAND_NAME, ProductData.TYPE_UINT8);
+                        setBandUnitAndDescription(qualityDS, smBand);
+
+                        final String qualityDatasetName = "/LEVEL3/QUALITY/" + ProbaVConstants.SM_BAND_NAME;
+                        final int qualityDatatypeClass = qualityDS.getDatatype().getDatatypeClass();
+                        final ProductData qualityRasterData = getProbaVRasterData(productWidth, productHeight,
+                                                                                  qualityDatasetName,
+                                                                                  qualityDatatypeClass);
+                        final RenderedImage qualityImage = ImageUtils.createRenderedImage(productWidth,
+                                                                                          productHeight,
+                                                                                          qualityRasterData);
+                        smBand.setSourceImage(qualityImage);
+
+                        // attach flag band:
+                        attachSynthesisQualityFlagBand(product, flagProduct);
+
+                        // metadata:
+                        addQualityMetadata(product, (DefaultMutableTreeNode) level3ChildNode);
+
+                        break;
+
+                    case "RADIOMETRY":
+                        // 16-bit integer
+                        //  blue, nir, red, swir:
+                        for (int j = 0; j < level3ChildNode.getChildCount(); j++) {
+                            // we want the sequence BLUE, RED, NIR, SWIR, rather than original BLUE, NIR, RED, SWIR...
+                            final int k = ProbaVConstants.RADIOMETRY_CHILD_INDEX[j];
+                            final TreeNode level3RadiometryChildNode = level3ChildNode.getChildAt(k);
+                            final H5ScalarDS radiometryDS = getH5ScalarDS(level3RadiometryChildNode.getChildAt(0));
+                            final String level3RadiometryChildNodeName = level3RadiometryChildNode.toString();
+                            final String radiometryBandPrePrefix =
+                                    (ProbaVSynthesisProductReaderPlugIn.isProbaSynthesisToaProduct(inputFile.getName())) ? "TOA" : "TOC";
+                            final String radiometryBandPrefix = radiometryBandPrePrefix + "_REFL_";
+                            final Band radiometryBand = createTargetBand(product,
+                                                                         radiometryDS,
+                                                                         radiometryBandPrefix + level3RadiometryChildNodeName,
+                                                                         ProductData.TYPE_INT16);
+                            setBandUnitAndDescription(radiometryDS, radiometryBand);
+                            setSpectralBandProperties(radiometryBand);
+                            radiometryBand.setNoDataValue(ProbaVConstants.RADIOMETRY_NO_DATA_VALUE);
+                            radiometryBand.setNoDataValueUsed(true);
+
+                            final String radiometryDatasetName = "/LEVEL3/RADIOMETRY/" +
+                                    level3RadiometryChildNodeName + "/" + radiometryBandPrePrefix;
+                            final int radiometryDatatypeClass = radiometryDS.getDatatype().getDatatypeClass();
+                            final ProductData radiometryRasterData = getProbaVRasterData(productWidth, productHeight,
+                                                                                         radiometryDatasetName,
+                                                                                         radiometryDatatypeClass);
+                            final RenderedImage radiometryImage = ImageUtils.createRenderedImage(productWidth,
+                                                                                                 productHeight,
+                                                                                                 radiometryRasterData);
+
+                            radiometryBand.setSourceImage(radiometryImage);
+                        }
+                        break;
+
+                    case "TIME":
+                        final H5ScalarDS timeDS = getH5ScalarDS(level3ChildNode.getChildAt(0));
+                        final Band timeBand;
+                        // NOTE: it seems that identical product types may have different data types here. E.g.:
+                        // PROBAV_S1_TOC_X18Y06_20140316_100M_V001.HDF5 has 8-bit unsigned char (CLASS_CHAR), but
+                        // PROBAV_S1_TOA_X18Y02_20140902_100M_V001.HDF5 has 16-bit unsigned integer (CLASS_INTEGER)
+                        final int timeDatatypeClass = timeDS.getDatatype().getDatatypeClass();   // 0
+                        if (timeDatatypeClass == H5Datatype.CLASS_CHAR) {
+                            // 8-bit unsigned character in this case
+                            timeBand = createTargetBand(product, timeDS, "TIME", ProductData.TYPE_UINT8);
+                            timeBand.setNoDataValue(ProbaVConstants.TIME_NO_DATA_VALUE_UINT8);
+                        } else {
+                            // 16-bit unsigned integer
+                            timeBand = createTargetBand(product, timeDS, "TIME", ProductData.TYPE_UINT16);
+                            timeBand.setNoDataValue(ProbaVConstants.TIME_NO_DATA_VALUE_UINT16);
+                        }
+                        setBandUnitAndDescription(timeDS, timeBand);
+                        timeBand.setNoDataValueUsed(true);
+
+                        final String timeDatasetName = "/LEVEL3/TIME/TIME";
+                        final ProductData timeRasterData = getProbaVRasterData(productWidth, productHeight,
+                                                                               timeDatasetName,
+                                                                               timeDatatypeClass);
+                        final RenderedImage radiometryImage = ImageUtils.createRenderedImage(productWidth,
+                                                                                             productHeight,
+                                                                                             timeRasterData);
+                        timeBand.setSourceImage(radiometryImage);
+
+                        // add start/end time to product:
+                        addStartStopTimes(product, (DefaultMutableTreeNode) level3ChildNode);
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+        }
+
+        return product;
+    }
+
+    private Product createTargetProductFromSynthesisNdvi(File inputFile, TreeNode inputFileRootNode) throws Exception {
 
         Product product = null;
         if (inputFileRootNode != null) {
             final TreeNode level3Node = inputFileRootNode.getChildAt(0);        // 'LEVEL3'
-            final H5ScalarDS ds =
-                    (H5ScalarDS) ((DefaultMutableTreeNode) level3Node.getChildAt(1).getChildAt(0)).getUserObject();
-            ds.open();
-            ds.read();
-            productWidth = (int) ds.getDims()[0];
-            productHeight = (int) ds.getDims()[1];
+            productWidth = (int) getH5ScalarDS(level3Node.getChildAt(1).getChildAt(0)).getDims()[0];
+            productHeight = (int) getH5ScalarDS(level3Node.getChildAt(1).getChildAt(0)).getDims()[1];
             product = new Product(inputFile.getName(), "PROBA-V SYNTHESIS NDVI", productWidth, productHeight);
-            final int tileSize = productWidth / 10;    // todo discuss
-            product.setPreferredTileSize(tileSize, tileSize);
-            product.setNumResolutionsMax(6);  // todo discuss
 
             final H5Group rootGroup = (H5Group) ((DefaultMutableTreeNode) inputFileRootNode).getUserObject();
             final List rootMetadata = rootGroup.getMetadata();
@@ -137,7 +377,7 @@ public class ProbaVNewSynthesisProductReader extends AbstractProductReader {
 
                     case "NDVI":
                         // 8-bit unsigned character
-                        setNdviBand(product, level3ChildNode, file_id);
+                        setNdviBand(product, level3ChildNode);
                         break;
 
                     case "QUALITY":
@@ -157,7 +397,7 @@ public class ProbaVNewSynthesisProductReader extends AbstractProductReader {
         return product;
     }
 
-    private void setNdviBand(Product product, TreeNode level3ChildNode, int file_id) throws Exception {
+    private void setNdviBand(Product product, TreeNode level3ChildNode) throws Exception {
         final H5ScalarDS ndviDS = (H5ScalarDS) ((DefaultMutableTreeNode) level3ChildNode.getChildAt(0)).getUserObject();
         final Band ndviBand = createTargetBand(product, ndviDS, "NDVI", ProductData.TYPE_FLOAT32);
 
@@ -166,36 +406,17 @@ public class ProbaVNewSynthesisProductReader extends AbstractProductReader {
         ndviBand.setNoDataValue(ProbaVConstants.NDVI_NO_DATA_VALUE);
         ndviBand.setNoDataValueUsed(true);
 
-        // for all H5.* stuff see https://www.hdfgroup.org/products/java/hdf-java-html/javadocs/ncsa/hdf/hdf5lib/H5.html
+        final String ndviDatasetName = "/LEVEL3/NDVI/NDVI";
+        final int ndviDatatypeClass = ndviDS.getDatatype().getDatatypeClass();
+        final ProductData ndviRasterData = getProbaVRasterData(productWidth, productHeight,
+                                                               ndviDatasetName, ndviDatatypeClass);
 
-//        final long[] dims = {productWidth, productHeight};
-//        final int dataspace_id = H5.H5Screate_simple(dims.length, // Number of dimensions of dataspace.
-//                                                     dims,        // An array of the size of each dimension.
-//                                                     null);       // An array of the maximum size of each dimension. // todo: why null?
+        final ProductData ndviFloatRasterData = ProbaVUtils.getNdviProductDataAsFloats(ndviBand, ndviRasterData);
+        final RenderedImage ndviImage = ImageUtils.createRenderedImage(productWidth,
+                                                                       productHeight,
+                                                                       ndviFloatRasterData);
+        ndviBand.setSourceImage(ndviImage);
 
-//        final int dataset_id = H5.H5Dcreate(file_id,                       // Location identifier
-//                                            "NDVI",                        // Dataset name
-//                                            HDF5Constants.H5T_STD_I32BE,   // Datatype identifier
-//                                            dataspace_id,                  // Dataspace identifier
-//                                            HDF5Constants.H5P_DEFAULT,     // Identifier of link creation property list.
-//                                            HDF5Constants.H5P_DEFAULT,     // Identifier of dataset creation property list.
-//                                            HDF5Constants.H5P_DEFAULT);    // Identifier of dataset access property list
-
-        final int dataset_id = H5.H5Dopen(file_id,                       // Location identifier
-                                            "/LEVEL3/NDVI/NDVI",           // Dataset name
-                                            HDF5Constants.H5P_DEFAULT);    // Identifier of dataset access property list
-        final int dataspace_id = H5.H5Dget_space(dataset_id);
-
-        MultiLevelModel multiLevelModel = ImageManager.getMultiLevelModel(ndviBand);
-        MultiLevelSource ndviMultiLevelImage = new AbstractMultiLevelSource(multiLevelModel) {
-
-            @Override
-            protected RenderedImage createImage(int level) {
-                return new ProbaVNewRasterImage(ndviBand, ResolutionLevel.create(getModel(), level), dataset_id, dataspace_id);
-            }
-        };
-
-        ndviBand.setSourceImage(new DefaultMultiLevelImage(ndviMultiLevelImage));
     }
 
 
@@ -302,7 +523,6 @@ public class ProbaVNewSynthesisProductReader extends AbstractProductReader {
         return band;
     }
 
-    // we don't want scalarDS.read(), as it reads the whole dataset into memory
     private H5ScalarDS getH5ScalarDS(TreeNode level3BandsChildNode) throws HDF5Exception {
         H5ScalarDS scalarDS = (H5ScalarDS) ((DefaultMutableTreeNode) level3BandsChildNode).getUserObject();
         scalarDS.open();

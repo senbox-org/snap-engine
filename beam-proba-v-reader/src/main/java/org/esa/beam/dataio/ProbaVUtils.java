@@ -1,7 +1,9 @@
 package org.esa.beam.dataio;
 
+import ncsa.hdf.hdf5lib.HDF5Constants;
 import ncsa.hdf.object.Attribute;
 import ncsa.hdf.object.Datatype;
+import ncsa.hdf.object.h5.H5Datatype;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.util.BitSetter;
 import org.esa.beam.util.logging.BeamLogManager;
@@ -46,18 +48,6 @@ public class ProbaVUtils {
 
         return result;
     }
-
-    // not needed?
-//    public static short[][] convert1Dto2DShort(final short[] array1D, final int rows, final int cols) {
-//        if (array1D.length != (rows * cols))
-//            throw new IllegalArgumentException("Invalid array1D length");
-//
-//        short[][] array2D = new short[rows][cols];
-//        for (int i = 0; i < rows; i++)
-//            System.arraycopy(array1D, (i * cols), array2D[i], 0, cols);
-//
-//        return array2D;
-//    }
 
     public static String getDescriptionFromAttributes(List<Attribute> metadata) {
         String description = null;
@@ -201,7 +191,7 @@ public class ProbaVUtils {
                 ndviTmp -= 256.0f;
             }
             if (ndviTmp == 255.0f) {
-                ndviFloatData[i] = ndviTmp;
+                ndviFloatData[i] = ProbaVConstants.NDVI_NO_DATA_VALUE;
             } else {
                 ndviFloatData[i] = (float) ((ndviTmp - ndviBand.getScalingOffset()) * ndviBand.getScalingFactor());
             }
@@ -212,6 +202,12 @@ public class ProbaVUtils {
         ndviBand.setScalingOffset(0.0);
 
         return ndviFloatData;
+    }
+
+    public static ProductData getNdviProductDataAsFloats(Band ndviBand, ProductData ndviRasterData) {
+        final byte[] ndviRasterDataElems = (byte[]) ndviRasterData.getElems();
+        final float[] ndviFloatRasterDataElems = getNdviAsFloat(ndviBand, ndviRasterDataElems);
+        return ProductData.createInstance(ndviFloatRasterDataElems);
     }
 
     public static boolean isGeometryBand(String bandName) {
@@ -338,5 +334,35 @@ public class ProbaVUtils {
         maskGroup.add(mask);
     }
 
+    public static int getDatatypeForH5Dread(int datatypeClass) {
+        switch (datatypeClass) {
+            case H5Datatype.CLASS_BITFIELD:
+                return HDF5Constants.H5T_NATIVE_UINT8;
+            case H5Datatype.CLASS_CHAR:
+                return HDF5Constants.H5T_NATIVE_UINT8;
+            case H5Datatype.CLASS_FLOAT:
+                return HDF5Constants.H5T_NATIVE_FLOAT;
+            case H5Datatype.CLASS_INTEGER:
+                return HDF5Constants.H5T_NATIVE_INT16;
+            default:
+                break;
+        }
+        return -1;
+    }
+
+    public static ProductData getDataBufferForH5Dread(int datatypeClass, int width, int height) {
+        switch (datatypeClass) {
+            case H5Datatype.CLASS_CHAR:
+//                return ProductData.createUnsignedInstance(new byte[width * height]);
+                return ProductData.createInstance(new byte[width * height]);
+            case H5Datatype.CLASS_FLOAT:
+                return ProductData.createInstance(new float[width*height]);
+            case H5Datatype.CLASS_INTEGER:
+                return ProductData.createInstance(new short[width*height]);
+            default:
+                break;
+        }
+        return null;
+    }
 
 }
