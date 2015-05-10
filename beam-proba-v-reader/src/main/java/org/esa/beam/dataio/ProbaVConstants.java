@@ -97,7 +97,7 @@ public class ProbaVConstants {
     public static final String QUALITY_NAME = "QUALITY";
 
     public static final int GEOMETRY_NO_DATA_VALUE = 255;
-    public static final float NDVI_NO_DATA_VALUE = Float.NaN;
+    public static final float NDVI_NO_DATA_VALUE = 255;
     public static final int RADIOMETRY_NO_DATA_VALUE = -1;
     public static final int TIME_NO_DATA_VALUE_UINT16 = 0;
     public static final int TIME_NO_DATA_VALUE_UINT8 = 255;

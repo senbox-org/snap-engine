@@ -1,6 +1,8 @@
 package org.esa.beam.dataio;
 
 import com.bc.ceres.core.ProgressMonitor;
+import ncsa.hdf.hdf5lib.H5;
+import ncsa.hdf.hdf5lib.HDF5Constants;
 import ncsa.hdf.hdf5lib.exceptions.HDF5Exception;
 import ncsa.hdf.object.Attribute;
 import ncsa.hdf.object.FileFormat;
@@ -9,18 +11,15 @@ import ncsa.hdf.object.h5.H5ScalarDS;
 import org.esa.beam.framework.dataio.AbstractProductReader;
 import org.esa.beam.framework.dataio.ProductReaderPlugIn;
 import org.esa.beam.framework.datamodel.*;
-import org.esa.beam.util.ProductUtils;
-import org.esa.beam.util.logging.BeamLogManager;
-import org.geotools.referencing.CRS;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.esa.beam.util.ImageUtils;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
+import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
-import java.util.logging.Level;
 
 /**
  * Reader for Proba-V L1c products
@@ -34,6 +33,7 @@ public class ProbaVL1cProductReader extends AbstractProductReader {
     private int productHeight;
 
     private File probavFile;
+    private int file_id;
 
     /**
      * Constructs a new abstract product reader.
@@ -57,6 +57,10 @@ public class ProbaVL1cProductReader extends AbstractProductReader {
             FileFormat h5FileFormat = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5);
             FileFormat h5File = null;
             try {
+                file_id = H5.H5Fopen(probavFile.getAbsolutePath(),  // Name of the file to access.
+                                        HDF5Constants.H5F_ACC_RDONLY,  // File access flag
+                                        HDF5Constants.H5P_DEFAULT);
+
                 h5File = h5FileFormat.createInstance(probavFile.getAbsolutePath(), FileFormat.READ);
                 h5File.open();
 
@@ -85,9 +89,9 @@ public class ProbaVL1cProductReader extends AbstractProductReader {
         final H5Group timeGroup = (H5Group) level3ChildNode.getUserObject();
         final List timeMetadata = timeGroup.getMetadata();
         product.setStartTime(ProductData.UTC.parse(ProbaVUtils.getStartEndTimeFromAttributes(timeMetadata)[0],
-                                                   ProbaVConstants.PROBAV_DATE_FORMAT_PATTERN));
+                ProbaVConstants.PROBAV_DATE_FORMAT_PATTERN));
         product.setEndTime(ProductData.UTC.parse(ProbaVUtils.getStartEndTimeFromAttributes(timeMetadata)[1],
-                                                 ProbaVConstants.PROBAV_DATE_FORMAT_PATTERN));
+                ProbaVConstants.PROBAV_DATE_FORMAT_PATTERN));
     }
 
     private void addQualityMetadata(Product product, DefaultMutableTreeNode level3ChildNode) throws HDF5Exception {
@@ -97,17 +101,36 @@ public class ProbaVL1cProductReader extends AbstractProductReader {
     }
 
     private void setNdviBand(Product product, TreeNode level3ChildNode) throws Exception {
-        final H5ScalarDS ndviDS = getH5ScalarDS(level3ChildNode.getChildAt(0));
-        final Band ndviBand = createTargetBand(product, ndviDS, "NDVI", ProductData.TYPE_FLOAT32);
+//        final H5ScalarDS ndviDS = getH5ScalarDS(level3ChildNode.getChildAt(0));
+//        final Band ndviBand = createTargetBand(product, ndviDS, "NDVI", ProductData.TYPE_FLOAT32);
+//        ndviBand.setDescription("Normalized Difference Vegetation Index");
+//        ndviBand.setUnit("dl");
+//        ndviBand.setNoDataValue(ProbaVConstants.NDVI_NO_DATA_VALUE);
+//        ndviBand.setNoDataValueUsed(true);
+//        final byte[] ndviData = (byte[]) ndviDS.getData();
+//        // the scaling does not work properly with the original data, convert to scaled floats manually
+//        final float[] ndviFloatData = ProbaVUtils.getNdviAsFloat(ndviBand, ndviData);
+//        final ProbaVRasterImage ndviImage = new ProbaVRasterImage(ndviBand, ndviFloatData);
+//        ndviBand.setSourceImage(ndviImage);
+
+        final H5ScalarDS ndviDS = (H5ScalarDS) ((DefaultMutableTreeNode) level3ChildNode.getChildAt(0)).getUserObject();
+        final Band ndviBand = createTargetBand(product, ndviDS, "NDVI", ProductData.TYPE_UINT8);
+
         ndviBand.setDescription("Normalized Difference Vegetation Index");
         ndviBand.setUnit("dl");
         ndviBand.setNoDataValue(ProbaVConstants.NDVI_NO_DATA_VALUE);
         ndviBand.setNoDataValueUsed(true);
-        final byte[] ndviData = (byte[]) ndviDS.getData();
-        // the scaling does not work properly with the original data, convert to scaled floats manually
-        final float[] ndviFloatData = ProbaVUtils.getNdviAsFloat(ndviBand, ndviData);
-        final ProbaVRasterImage ndviImage = new ProbaVRasterImage(ndviBand, ndviFloatData);
+
+        final String ndviDatasetName = "/LEVEL3/NDVI/NDVI";
+        final int ndviDatatypeClass = ndviDS.getDatatype().getDatatypeClass();
+        final ProductData ndviRasterData = ProbaVUtils.getProbaVRasterData(file_id, productWidth, productHeight,
+                ndviDatasetName, ndviDatatypeClass);
+
+        final RenderedImage ndviImage = ImageUtils.createRenderedImage(productWidth,
+                productHeight,
+                ndviRasterData);
         ndviBand.setSourceImage(ndviImage);
+
     }
 
     private void setBandProperties(H5ScalarDS ds, Band band) throws HDF5Exception {
@@ -306,19 +329,19 @@ public class ProbaVL1cProductReader extends AbstractProductReader {
                     }
                 }
                 final TiePointGrid latGrid = new TiePointGrid(level1bChildNodeName + "_" + "LT1",
-                                                              width, height,
-                                                              ProbaVConstants.L1C_TIEPOINT_OFFS_X,
-                                                              ProbaVConstants.L1C_TIEPOINT_OFFS_Y,
-                                                              ProbaVConstants.L1C_TIEPOINT_SUBS_X,
-                                                              ProbaVConstants.L1C_TIEPOINT_SUBS_Y,
-                                                              latData);
+                        width, height,
+                        ProbaVConstants.L1C_TIEPOINT_OFFS_X,
+                        ProbaVConstants.L1C_TIEPOINT_OFFS_Y,
+                        ProbaVConstants.L1C_TIEPOINT_SUBS_X,
+                        ProbaVConstants.L1C_TIEPOINT_SUBS_Y,
+                        latData);
                 final TiePointGrid lonGrid = new TiePointGrid(level1bChildNodeName + "_" + "LN1",
-                                                              width, height,
-                                                              ProbaVConstants.L1C_TIEPOINT_OFFS_X,
-                                                              ProbaVConstants.L1C_TIEPOINT_OFFS_Y,
-                                                              ProbaVConstants.L1C_TIEPOINT_SUBS_X,
-                                                              ProbaVConstants.L1C_TIEPOINT_SUBS_Y,
-                                                              lonData);
+                        width, height,
+                        ProbaVConstants.L1C_TIEPOINT_OFFS_X,
+                        ProbaVConstants.L1C_TIEPOINT_OFFS_Y,
+                        ProbaVConstants.L1C_TIEPOINT_SUBS_X,
+                        ProbaVConstants.L1C_TIEPOINT_SUBS_Y,
+                        lonData);
                 product.addTiePointGrid(latGrid);
                 product.addTiePointGrid(lonGrid);
 
@@ -383,7 +406,7 @@ public class ProbaVL1cProductReader extends AbstractProductReader {
 
         for (Attribute attribute : rootMetadata) {
             metadataElement.addAttribute(new MetadataAttribute(attribute.getName(),
-                                                   ProductData.createInstance(ProbaVUtils.getAttributeValue(attribute)), true));
+                    ProductData.createInstance(ProbaVUtils.getAttributeValue(attribute)), true));
         }
         product.getMetadataRoot().addElement(metadataElement);
     }

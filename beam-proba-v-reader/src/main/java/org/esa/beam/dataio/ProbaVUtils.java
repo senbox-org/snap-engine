@@ -1,5 +1,6 @@
 package org.esa.beam.dataio;
 
+import ncsa.hdf.hdf5lib.H5;
 import ncsa.hdf.hdf5lib.HDF5Constants;
 import ncsa.hdf.object.Attribute;
 import ncsa.hdf.object.Datatype;
@@ -109,7 +110,7 @@ public class ProbaVUtils {
                 }
             }
         }
-        return 1.0f / scaleFactor;
+        return scaleFactor;
     }
 
     public static float getScaleOffsetFromAttributes(List<Attribute> metadata) {
@@ -202,12 +203,6 @@ public class ProbaVUtils {
         ndviBand.setScalingOffset(0.0);
 
         return ndviFloatData;
-    }
-
-    public static ProductData getNdviProductDataAsFloats(Band ndviBand, ProductData ndviRasterData) {
-        final byte[] ndviRasterDataElems = (byte[]) ndviRasterData.getElems();
-        final float[] ndviFloatRasterDataElems = getNdviAsFloat(ndviBand, ndviRasterDataElems);
-        return ProductData.createInstance(ndviFloatRasterDataElems);
     }
 
     public static boolean isGeometryBand(String bandName) {
@@ -364,5 +359,58 @@ public class ProbaVUtils {
         }
         return null;
     }
+
+    public static ProductData getProbaVRasterData(int file_id,
+                                                  int sourceWidth, int sourceHeight,
+                                                  String datasetName, int datatypeClass) {
+            try {
+                final int dataset_id = H5.H5Dopen(file_id,                       // Location identifier
+                        datasetName, // Dataset name
+                        HDF5Constants.H5P_DEFAULT);    // Identifier of dataset access property list
+
+                final int dataspace_id = H5.H5Dget_space(dataset_id);
+
+                final long[] offset = {0L, 0L};
+                final long[] count = {sourceWidth, sourceHeight};
+
+                H5.H5Sselect_hyperslab(dataspace_id,                   // Identifier of dataspace selection to modify
+                        HDF5Constants.H5S_SELECT_SET,   // Operation to perform on current selection.
+                        offset,                         // Offset of start of hyperslab
+                        null,                           // Hyperslab stride.
+                        count,                          // Number of blocks included in hyperslab.
+                        null);                          // Size of block in hyperslab.
+
+                final int memspace_id = H5.H5Screate_simple(count.length, // Number of dimensions of dataspace.
+                        count,        // An array of the size of each dimension.
+                        null);       // An array of the maximum size of each dimension.
+
+                final long[] offset_out = {0L, 0L};
+                H5.H5Sselect_hyperslab(memspace_id,                   // Identifier of dataspace selection to modify
+                        HDF5Constants.H5S_SELECT_SET,   // Operation to perform on current selection.
+                        offset_out,                         // Offset of start of hyperslab
+                        null,                           // Hyperslab stride.
+                        count,                          // Number of blocks included in hyperslab.
+                        null);                          // Size of block in hyperslab.
+
+                int dataType = ProbaVUtils.getDatatypeForH5Dread(datatypeClass);
+                ProductData destBuffer = ProbaVUtils.getDataBufferForH5Dread(datatypeClass, sourceWidth, sourceHeight);
+
+                H5.H5Dread(dataset_id,                    // Identifier of the dataset read from.
+                        dataType,                      // Identifier of the memory datatype.
+                        memspace_id,                   //  Identifier of the memory dataspace.
+                        dataspace_id,                  // Identifier of the dataset's dataspace in the file.
+                        HDF5Constants.H5P_DEFAULT,     // Identifier of a transfer property list for this I/O operation.
+                        destBuffer.getElems());        // Buffer to store data read from the file.
+
+                H5.H5Dclose(dataset_id);
+                H5.H5Sclose(memspace_id);
+
+                return destBuffer;
+            } catch (Exception e) {
+                e.printStackTrace();      // todo
+            }
+
+            return null;
+        }
 
 }
