@@ -1,7 +1,10 @@
 package org.esa.s3tbx.dataio.probav;
 
+import ncsa.hdf.hdf5lib.H5;
+import ncsa.hdf.hdf5lib.HDF5Constants;
 import ncsa.hdf.object.Attribute;
 import ncsa.hdf.object.Datatype;
+import ncsa.hdf.object.h5.H5Datatype;
 import org.esa.snap.framework.datamodel.*;
 import org.esa.snap.util.BitSetter;
 import org.esa.snap.util.SystemUtils;
@@ -23,145 +26,55 @@ public class ProbaVUtils {
             case Datatype.CLASS_INTEGER:
                 int[] ivals = (int[]) attribute.getValue();
                 for (int ival : ivals) {
-                    result = result.concat(Integer.toString(ival) + "  ");
+                    result = result.concat(Integer.toString(ival) + " ");
                 }
                 break;
             case Datatype.CLASS_FLOAT:
                 float[] fvals = (float[]) attribute.getValue();
                 for (float fval : fvals) {
-                    result = result.concat(Float.toString(fval) + "  ");
+                    result = result.concat(Float.toString(fval) + " ");
                 }
                 break;
             case Datatype.CLASS_STRING:
                 String[] svals = (String[]) attribute.getValue();
                 for (String sval : svals) {
-                    result = result.concat(sval + "  ");
+                    result = result.concat(sval + " ");
                 }
                 break;
             default:
                 break;
         }
 
-        return result;
+        return result.trim();
     }
 
-    // not needed?
-//    public static short[][] convert1Dto2DShort(final short[] array1D, final int rows, final int cols) {
-//        if (array1D.length != (rows * cols))
-//            throw new IllegalArgumentException("Invalid array1D length");
-//
-//        short[][] array2D = new short[rows][cols];
-//        for (int i = 0; i < rows; i++)
-//            System.arraycopy(array1D, (i * cols), array2D[i], 0, cols);
-//
-//        return array2D;
-//    }
-
-    public static String getDescriptionFromAttributes(List<Attribute> metadata) {
-        String description = null;
+    public static String getStringAttributeValue(List<Attribute> metadata, String attributeName) {
+        String stringAttr = null;
         for (Attribute attribute : metadata) {
-            if (attribute.getName().equals("DESCRIPTION")) {
+            if (attribute.getName().equals(attributeName)) {
                 try {
-                    description = getAttributeValue(attribute);
+                    stringAttr = getAttributeValue(attribute);
                 } catch (NumberFormatException e) {
-                    SystemUtils.LOG.log(Level.WARNING, "Cannot parse product description string: " +
+                    SystemUtils.LOG.log(Level.WARNING, "Cannot parse string attribute: " +
                             e.getMessage());
                 }
             }
         }
-        return description;
+        return stringAttr;
     }
 
-    public static String getUnitFromAttributes(List<Attribute> metadata) {
-        String unit = null;
+    public static float getFloatAttributeValue(List<Attribute> metadata, String attributeName) {
+        float floatAttr = Float.NaN;
         for (Attribute attribute : metadata) {
-            if (attribute.getName().equals("UNITS")) {
+            if (attribute.getName().equals(attributeName)) {
                 try {
-                    unit = getAttributeValue(attribute);
+                    floatAttr = Float.parseFloat(getAttributeValue(attribute));
                 } catch (NumberFormatException e) {
-                    SystemUtils.LOG.log(Level.WARNING, "Cannot parse units string: " +
-                            e.getMessage());
+                    SystemUtils.LOG.log(Level.WARNING, "Cannot parse float attribute: " + e.getMessage());
                 }
             }
         }
-        if (unit != null && unit.contains("-")) {
-            return "dl";
-        } else {
-            return unit;
-        }
-    }
-
-    public static float getNoDataValueFromAttributes(List<Attribute> metadata) {
-        float noDataValue = Float.NaN;
-        for (Attribute attribute : metadata) {
-            if (attribute.getName().equals("NO_DATA")) {
-                try {
-                    noDataValue = Float.parseFloat(getAttributeValue(attribute));
-                } catch (NumberFormatException e) {
-                    SystemUtils.LOG.log(Level.WARNING, "Cannot parse product noDataValue string: " +
-                            e.getMessage());
-                }
-            }
-        }
-        return noDataValue / getScaleFactorFromAttributes(metadata);
-    }
-
-    public static float getScaleFactorFromAttributes(List<Attribute> metadata) {
-        float scaleFactor = 1.0f;
-        for (Attribute attribute : metadata) {
-            if (attribute.getName().equals("SCALE")) {
-                try {
-                    scaleFactor = Float.parseFloat(getAttributeValue(attribute));
-                } catch (NumberFormatException e) {
-                    SystemUtils.LOG.log(Level.WARNING, "Cannot parse scale factor: " + e.getMessage());
-                }
-            }
-        }
-        return 1.0f / scaleFactor;
-    }
-
-    public static float getScaleOffsetFromAttributes(List<Attribute> metadata) {
-        float scaleOffset = 0.0f;
-        for (Attribute attribute : metadata) {
-            if (attribute.getName().equals("OFFSET")) {
-                try {
-                    scaleOffset = Float.parseFloat(getAttributeValue(attribute));
-                } catch (NumberFormatException e) {
-                    SystemUtils.LOG.log(Level.WARNING, "Cannot parse scale offset: " + e.getMessage());
-                }
-            }
-        }
-        return scaleOffset;
-    }
-
-    public static double getGeometryCoordinateValueFromAttributes(List<Attribute> metadata, String coordinateName) {
-        double coordValue = Double.NaN;
-        for (Attribute attribute : metadata) {
-            if (attribute.getName().equals(coordinateName)) {
-                try {
-                    coordValue = Float.parseFloat(getAttributeValue(attribute));
-                } catch (NumberFormatException e) {
-                    SystemUtils.LOG.log(Level.WARNING, "Cannot parse geometry coordinate: " +
-                            e.getMessage());
-                }
-            }
-        }
-        return coordValue;
-    }
-
-    public static String getGeometryCrsStringFromAttributes(List<Attribute> metadata) {
-        String crsString = null;
-        for (Attribute attribute : metadata) {
-            if (attribute.getName().equals("MAP_PROJECTION_WKT")) {
-                try {
-                    crsString = getAttributeValue(attribute);
-                } catch (NumberFormatException e) {
-                    SystemUtils.LOG.log(Level.WARNING, "Cannot parse CRS WKT string: " +
-                            e.getMessage());
-                }
-            }
-        }
-        return crsString;
+        return floatAttr;
     }
 
     public static String[] getStartEndTimeFromAttributes(List<Attribute> metadata) {
@@ -186,34 +99,6 @@ public class ProbaVUtils {
         startStopTimes[0] = startDate + " " + startTime;
         startStopTimes[1] = endDate + " " + endTime;
         return startStopTimes;
-    }
-
-    public static float[] getNdviAsFloat(Band ndviBand, byte[] ndviData) {
-        float[] ndviFloatData = new float[ndviData.length];
-
-        // apply scaling to physical values manually
-        for (int i = 0; i < ndviFloatData.length; i++) {
-            float ndviTmp = (float) ndviData[i];
-            ndviTmp += 256.0f;
-            if (ndviTmp >= 256.0f) {
-                ndviTmp -= 256.0f;
-            }
-            if (ndviTmp == 255.0f) {
-                ndviFloatData[i] = ndviTmp;
-            } else {
-                ndviFloatData[i] = (float) ((ndviTmp - ndviBand.getScalingOffset()) * ndviBand.getScalingFactor());
-            }
-        }
-
-        // set scaling to neutral values:
-        ndviBand.setScalingFactor(1.0);
-        ndviBand.setScalingOffset(0.0);
-
-        return ndviFloatData;
-    }
-
-    public static boolean isGeometryBand(String bandName) {
-        return bandName.equals("SZA") || bandName.startsWith("VZA") || bandName.equals("SAA") || bandName.startsWith("VAA");
     }
 
     public static void addSynthesisQualityMasks(Product probavProduct) {
@@ -323,6 +208,88 @@ public class ProbaVUtils {
     }
 
 
+    public static ProductData getProbaVRasterData(int file_id,
+                                                  int sourceWidth, int sourceHeight,
+                                                  String datasetName, int datatypeClass) {
+        try {
+            final int dataset_id = H5.H5Dopen(file_id,                       // Location identifier
+                                              datasetName, // Dataset name
+                                              HDF5Constants.H5P_DEFAULT);    // Identifier of dataset access property list
+
+            final int dataspace_id = H5.H5Dget_space(dataset_id);
+
+            final long[] offset = {0L, 0L};
+            final long[] count = {sourceWidth, sourceHeight};
+
+            H5.H5Sselect_hyperslab(dataspace_id,                   // Identifier of dataspace selection to modify
+                                   HDF5Constants.H5S_SELECT_SET,   // Operation to perform on current selection.
+                                   offset,                         // Offset of start of hyperslab
+                                   null,                           // Hyperslab stride.
+                                   count,                          // Number of blocks included in hyperslab.
+                                   null);                          // Size of block in hyperslab.
+
+            final int memspace_id = H5.H5Screate_simple(count.length, // Number of dimensions of dataspace.
+                                                        count,        // An array of the size of each dimension.
+                                                        null);       // An array of the maximum size of each dimension.
+
+            final long[] offset_out = {0L, 0L};
+            H5.H5Sselect_hyperslab(memspace_id,                   // Identifier of dataspace selection to modify
+                                   HDF5Constants.H5S_SELECT_SET,   // Operation to perform on current selection.
+                                   offset_out,                         // Offset of start of hyperslab
+                                   null,                           // Hyperslab stride.
+                                   count,                          // Number of blocks included in hyperslab.
+                                   null);                          // Size of block in hyperslab.
+
+            int dataType = ProbaVUtils.getDatatypeForH5Dread(datatypeClass);
+            ProductData destBuffer = ProbaVUtils.getDataBufferForH5Dread(datatypeClass, sourceWidth, sourceHeight);
+
+            H5.H5Dread(dataset_id,                    // Identifier of the dataset read from.
+                       dataType,                      // Identifier of the memory datatype.
+                       memspace_id,                   //  Identifier of the memory dataspace.
+                       dataspace_id,                  // Identifier of the dataset's dataspace in the file.
+                       HDF5Constants.H5P_DEFAULT,     // Identifier of a transfer property list for this I/O operation.
+                       destBuffer.getElems());        // Buffer to store data read from the file.
+
+            H5.H5Dclose(dataset_id);
+            H5.H5Sclose(memspace_id);
+
+            return destBuffer;
+        } catch (Exception e) {
+            SystemUtils.LOG.log(Level.SEVERE, "Cannot read ProbaV raster data '" + datasetName + "': " + e.getMessage());
+        }
+
+        return null;
+    }
+
+    private static int getDatatypeForH5Dread(int datatypeClass) {
+        switch (datatypeClass) {
+            case H5Datatype.CLASS_BITFIELD:
+                return HDF5Constants.H5T_NATIVE_UINT8;
+            case H5Datatype.CLASS_CHAR:
+                return HDF5Constants.H5T_NATIVE_UINT8;
+            case H5Datatype.CLASS_FLOAT:
+                return HDF5Constants.H5T_NATIVE_FLOAT;
+            case H5Datatype.CLASS_INTEGER:
+                return HDF5Constants.H5T_NATIVE_INT16;
+            default:
+                break;
+        }
+        return -1;
+    }
+
+    private static ProductData getDataBufferForH5Dread(int datatypeClass, int width, int height) {
+        switch (datatypeClass) {
+            case H5Datatype.CLASS_CHAR:
+                return ProductData.createInstance(new byte[width * height]);
+            case H5Datatype.CLASS_FLOAT:
+                return ProductData.createInstance(new float[width * height]);
+            case H5Datatype.CLASS_INTEGER:
+                return ProductData.createInstance(new short[width * height]);
+            default:
+                break;
+        }
+        return null;
+    }
 
     private static void addMask(Product mod35Product, ProductNodeGroup<Mask> maskGroup,
                                 String bandName, String flagName, String description, Color color, float transparency) {
@@ -335,6 +302,5 @@ public class ProbaVUtils {
                                               color, transparency);
         maskGroup.add(mask);
     }
-
 
 }

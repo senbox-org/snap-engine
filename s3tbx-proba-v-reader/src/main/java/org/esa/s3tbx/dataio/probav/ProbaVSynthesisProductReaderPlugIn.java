@@ -3,6 +3,8 @@ package org.esa.s3tbx.dataio.probav;
 import org.esa.snap.framework.dataio.DecodeQualification;
 import org.esa.snap.framework.dataio.ProductReader;
 import org.esa.snap.framework.dataio.ProductReaderPlugIn;
+import org.esa.snap.framework.datamodel.RGBImageProfile;
+import org.esa.snap.framework.datamodel.RGBImageProfileManager;
 import org.esa.snap.util.SystemUtils;
 import org.esa.snap.util.io.BeamFileFilter;
 
@@ -31,6 +33,16 @@ public class ProbaVSynthesisProductReaderPlugIn implements ProductReaderPlugIn {
 
     static {
         hdf5LibAvailable = loadHdf5Lib(ProbaVSynthesisProductReaderPlugIn.class) != null;
+    }
+
+    public ProbaVSynthesisProductReaderPlugIn() {
+        RGBImageProfile toaProfile = new RGBImageProfile("PROBA-V TOA RGB",
+                                               new String[] {"TOA_REFL_NIR", "TOA_REFL_RED", "TOA_REFL_BLUE"});
+        RGBImageProfile tocProfile = new RGBImageProfile("PROBA-V TOC RGB",
+                                               new String[] {"TOC_REFL_NIR", "TOC_REFL_RED", "TOC_REFL_BLUE"});
+        RGBImageProfileManager manager = RGBImageProfileManager.getInstance();
+        manager.addProfile(toaProfile);
+        manager.addProfile(tocProfile);
     }
 
     @Override
