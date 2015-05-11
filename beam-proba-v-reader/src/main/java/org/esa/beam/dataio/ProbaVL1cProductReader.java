@@ -134,9 +134,9 @@ public class ProbaVL1cProductReader extends AbstractProductReader {
     }
 
     private void setBandProperties(H5ScalarDS ds, Band band) throws HDF5Exception {
-        band.setDescription(ProbaVUtils.getDescriptionFromAttributes(ds.getMetadata()));
-        band.setUnit(ProbaVUtils.getUnitFromAttributes(ds.getMetadata()));
-        band.setNoDataValue(ProbaVUtils.getNoDataValueFromAttributes(ds.getMetadata()));
+        band.setDescription(ProbaVUtils.getStringAttributeValue(ds.getMetadata(), "DESCRIPTION"));
+        band.setUnit(ProbaVUtils.getStringAttributeValue(ds.getMetadata(), "UNITS"));
+        band.setNoDataValue(ProbaVUtils.getFloatAttributeValue(ds.getMetadata(), "NO_DATA"));
         band.setNoDataValueUsed(true);
         setSpectralProperties(band);
     }
@@ -383,8 +383,10 @@ public class ProbaVL1cProductReader extends AbstractProductReader {
 
     private Band createTargetBand(Product product, H5ScalarDS scalarDS, String bandName, int dataType) throws Exception {
         final List<Attribute> metadata = scalarDS.getMetadata();
-        final float scaleFactor = ProbaVUtils.getScaleFactorFromAttributes(metadata);
-        final float scaleOffset = ProbaVUtils.getScaleOffsetFromAttributes(metadata);
+        final float scaleFactorAttr = ProbaVUtils.getFloatAttributeValue(metadata, "SCALE");
+        final float scaleFactor = Float.isNaN(scaleFactorAttr) ? 1.0f : scaleFactorAttr;
+        final float scaleOffsetAttr = ProbaVUtils.getFloatAttributeValue(metadata, "OFFSET");
+        final float scaleOffset = Float.isNaN(scaleOffsetAttr) ? 0.0f : scaleOffsetAttr;
         final Band band = product.addBand(bandName, dataType);
         band.setScalingFactor(scaleFactor);
         band.setScalingOffset(scaleOffset);

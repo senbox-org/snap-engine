@@ -46,14 +46,11 @@ public class ProbaVSynthesisProductReaderPlugIn implements ProductReaderPlugIn {
 
     @Override
     public DecodeQualification getDecodeQualification(Object input) {
-//        if (isInputValid(input)) {
-//            return DecodeQualification.INTENDED;
-//        } else {
-//            return DecodeQualification.UNABLE;
-//        }
-
-        // deactivate for the moment
-        return DecodeQualification.UNABLE;
+        if (isInputValid(input)) {
+            return DecodeQualification.INTENDED;
+        } else {
+            return DecodeQualification.UNABLE;
+        }
     }
 
     static File getFileInput(Object input) {
@@ -110,8 +107,8 @@ public class ProbaVSynthesisProductReaderPlugIn implements ProductReaderPlugIn {
     static boolean isInputProbaVFileNameValid(String fileName) {
         return fileName.toUpperCase().endsWith(".HDF5") &&
                 (fileName.startsWith("PROBAV_S1_") ||
-                fileName.startsWith("PROBAV_S5_") ||
-                fileName.startsWith("PROBAV_S10_"));
+                        fileName.startsWith("PROBAV_S5_") ||
+                        fileName.startsWith("PROBAV_S10_"));
     }
 
     static boolean isProbaSynthesisToaProduct(String fileName) {

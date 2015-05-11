@@ -27,10 +27,13 @@ public class ProbaVSynthesisProductReaderLoadedAsServiceTest extends TestCase {
 
         ProductIOPlugInManager plugInManager = ProductIOPlugInManager.getInstance();
         Iterator readerPlugIns = plugInManager.getReaderPlugIns("PROBA-V-Synthesis");
+        int readerCount = 0;
 
         if (readerPlugIns.hasNext()) {
+            readerCount++;
             ProductReaderPlugIn plugIn = (ProductReaderPlugIn) readerPlugIns.next();
             assertEquals(ProbaVSynthesisProductReaderPlugIn.class, plugIn.getClass());
         }
+        assertEquals(1, readerCount);
     }
 }

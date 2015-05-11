@@ -20,141 +20,61 @@ import java.util.logging.Level;
  */
 public class ProbaVUtils {
 
-    // todo: implement tests!!!
-
     public static String getAttributeValue(Attribute attribute) {
         String result = "";
         switch (attribute.getType().getDatatypeClass()) {
             case Datatype.CLASS_INTEGER:
                 int[] ivals = (int[]) attribute.getValue();
                 for (int ival : ivals) {
-                    result = result.concat(Integer.toString(ival) + "  ");
+                    result = result.concat(Integer.toString(ival) + " ");
                 }
                 break;
             case Datatype.CLASS_FLOAT:
                 float[] fvals = (float[]) attribute.getValue();
                 for (float fval : fvals) {
-                    result = result.concat(Float.toString(fval) + "  ");
+                    result = result.concat(Float.toString(fval) + " ");
                 }
                 break;
             case Datatype.CLASS_STRING:
                 String[] svals = (String[]) attribute.getValue();
                 for (String sval : svals) {
-                    result = result.concat(sval + "  ");
+                    result = result.concat(sval + " ");
                 }
                 break;
             default:
                 break;
         }
 
-        return result;
+        return result.trim();
     }
 
-    public static String getDescriptionFromAttributes(List<Attribute> metadata) {
-        String description = null;
+    public static String getStringAttributeValue(List<Attribute> metadata, String attributeName) {
+        String stringAttr = null;
         for (Attribute attribute : metadata) {
-            if (attribute.getName().equals("DESCRIPTION")) {
+            if (attribute.getName().equals(attributeName)) {
                 try {
-                    description = getAttributeValue(attribute);
+                    stringAttr = getAttributeValue(attribute);
                 } catch (NumberFormatException e) {
-                    BeamLogManager.getSystemLogger().log(Level.WARNING, "Cannot parse product description string: " +
+                    BeamLogManager.getSystemLogger().log(Level.WARNING, "Cannot parse string attribute: " +
                             e.getMessage());
                 }
             }
         }
-        return description;
+        return stringAttr;
     }
 
-    public static String getUnitFromAttributes(List<Attribute> metadata) {
-        String unit = null;
+    public static float getFloatAttributeValue(List<Attribute> metadata, String attributeName) {
+        float floatAttr = Float.NaN;
         for (Attribute attribute : metadata) {
-            if (attribute.getName().equals("UNITS")) {
+            if (attribute.getName().equals(attributeName)) {
                 try {
-                    unit = getAttributeValue(attribute);
+                    floatAttr = Float.parseFloat(getAttributeValue(attribute));
                 } catch (NumberFormatException e) {
-                    BeamLogManager.getSystemLogger().log(Level.WARNING, "Cannot parse units string: " +
-                            e.getMessage());
+                    BeamLogManager.getSystemLogger().log(Level.WARNING, "Cannot parse float attribute: " + e.getMessage());
                 }
             }
         }
-        if (unit != null && unit.contains("-")) {
-            return "dl";
-        } else {
-            return unit;
-        }
-    }
-
-    public static float getNoDataValueFromAttributes(List<Attribute> metadata) {
-        float noDataValue = Float.NaN;
-        for (Attribute attribute : metadata) {
-            if (attribute.getName().equals("NO_DATA")) {
-                try {
-                    noDataValue = Float.parseFloat(getAttributeValue(attribute));
-                } catch (NumberFormatException e) {
-                    BeamLogManager.getSystemLogger().log(Level.WARNING, "Cannot parse product noDataValue string: " +
-                            e.getMessage());
-                }
-            }
-        }
-        return noDataValue / getScaleFactorFromAttributes(metadata);
-    }
-
-    public static float getScaleFactorFromAttributes(List<Attribute> metadata) {
-        float scaleFactor = 1.0f;
-        for (Attribute attribute : metadata) {
-            if (attribute.getName().equals("SCALE")) {
-                try {
-                    scaleFactor = Float.parseFloat(getAttributeValue(attribute));
-                } catch (NumberFormatException e) {
-                    BeamLogManager.getSystemLogger().log(Level.WARNING, "Cannot parse scale factor: " + e.getMessage());
-                }
-            }
-        }
-        return scaleFactor;
-    }
-
-    public static float getScaleOffsetFromAttributes(List<Attribute> metadata) {
-        float scaleOffset = 0.0f;
-        for (Attribute attribute : metadata) {
-            if (attribute.getName().equals("OFFSET")) {
-                try {
-                    scaleOffset = Float.parseFloat(getAttributeValue(attribute));
-                } catch (NumberFormatException e) {
-                    BeamLogManager.getSystemLogger().log(Level.WARNING, "Cannot parse scale offset: " + e.getMessage());
-                }
-            }
-        }
-        return scaleOffset;
-    }
-
-    public static double getGeometryCoordinateValueFromAttributes(List<Attribute> metadata, String coordinateName) {
-        double coordValue = Double.NaN;
-        for (Attribute attribute : metadata) {
-            if (attribute.getName().equals(coordinateName)) {
-                try {
-                    coordValue = Float.parseFloat(getAttributeValue(attribute));
-                } catch (NumberFormatException e) {
-                    BeamLogManager.getSystemLogger().log(Level.WARNING, "Cannot parse geometry coordinate: " +
-                            e.getMessage());
-                }
-            }
-        }
-        return coordValue;
-    }
-
-    public static String getGeometryCrsStringFromAttributes(List<Attribute> metadata) {
-        String crsString = null;
-        for (Attribute attribute : metadata) {
-            if (attribute.getName().equals("MAP_PROJECTION_WKT")) {
-                try {
-                    crsString = getAttributeValue(attribute);
-                } catch (NumberFormatException e) {
-                    BeamLogManager.getSystemLogger().log(Level.WARNING, "Cannot parse CRS WKT string: " +
-                            e.getMessage());
-                }
-            }
-        }
-        return crsString;
+        return floatAttr;
     }
 
     public static String[] getStartEndTimeFromAttributes(List<Attribute> metadata) {
@@ -179,34 +99,6 @@ public class ProbaVUtils {
         startStopTimes[0] = startDate + " " + startTime;
         startStopTimes[1] = endDate + " " + endTime;
         return startStopTimes;
-    }
-
-    public static float[] getNdviAsFloat(Band ndviBand, byte[] ndviData) {
-        float[] ndviFloatData = new float[ndviData.length];
-
-        // apply scaling to physical values manually
-        for (int i = 0; i < ndviFloatData.length; i++) {
-            float ndviTmp = (float) ndviData[i];
-            ndviTmp += 256.0f;
-            if (ndviTmp >= 256.0f) {
-                ndviTmp -= 256.0f;
-            }
-            if (ndviTmp == 255.0f) {
-                ndviFloatData[i] = ProbaVConstants.NDVI_NO_DATA_VALUE;
-            } else {
-                ndviFloatData[i] = (float) ((ndviTmp - ndviBand.getScalingOffset()) * ndviBand.getScalingFactor());
-            }
-        }
-
-        // set scaling to neutral values:
-        ndviBand.setScalingFactor(1.0);
-        ndviBand.setScalingOffset(0.0);
-
-        return ndviFloatData;
-    }
-
-    public static boolean isGeometryBand(String bandName) {
-        return bandName.equals("SZA") || bandName.startsWith("VZA") || bandName.equals("SAA") || bandName.startsWith("VAA");
     }
 
     public static void addSynthesisQualityMasks(Product probavProduct) {
@@ -316,20 +208,61 @@ public class ProbaVUtils {
     }
 
 
+    public static ProductData getProbaVRasterData(int file_id,
+                                                  int sourceWidth, int sourceHeight,
+                                                  String datasetName, int datatypeClass) {
+        try {
+            final int dataset_id = H5.H5Dopen(file_id,                       // Location identifier
+                                              datasetName, // Dataset name
+                                              HDF5Constants.H5P_DEFAULT);    // Identifier of dataset access property list
 
-    private static void addMask(Product mod35Product, ProductNodeGroup<Mask> maskGroup,
-                                String bandName, String flagName, String description, Color color, float transparency) {
-        int width = mod35Product.getSceneRasterWidth();
-        int height = mod35Product.getSceneRasterHeight();
-        String maskPrefix = "";
-        Mask mask = Mask.BandMathsType.create(maskPrefix + flagName,
-                                              description, width, height,
-                                              bandName + "." + flagName,
-                                              color, transparency);
-        maskGroup.add(mask);
+            final int dataspace_id = H5.H5Dget_space(dataset_id);
+
+            final long[] offset = {0L, 0L};
+            final long[] count = {sourceWidth, sourceHeight};
+
+            H5.H5Sselect_hyperslab(dataspace_id,                   // Identifier of dataspace selection to modify
+                                   HDF5Constants.H5S_SELECT_SET,   // Operation to perform on current selection.
+                                   offset,                         // Offset of start of hyperslab
+                                   null,                           // Hyperslab stride.
+                                   count,                          // Number of blocks included in hyperslab.
+                                   null);                          // Size of block in hyperslab.
+
+            final int memspace_id = H5.H5Screate_simple(count.length, // Number of dimensions of dataspace.
+                                                        count,        // An array of the size of each dimension.
+                                                        null);       // An array of the maximum size of each dimension.
+
+            final long[] offset_out = {0L, 0L};
+            H5.H5Sselect_hyperslab(memspace_id,                   // Identifier of dataspace selection to modify
+                                   HDF5Constants.H5S_SELECT_SET,   // Operation to perform on current selection.
+                                   offset_out,                         // Offset of start of hyperslab
+                                   null,                           // Hyperslab stride.
+                                   count,                          // Number of blocks included in hyperslab.
+                                   null);                          // Size of block in hyperslab.
+
+            int dataType = ProbaVUtils.getDatatypeForH5Dread(datatypeClass);
+            ProductData destBuffer = ProbaVUtils.getDataBufferForH5Dread(datatypeClass, sourceWidth, sourceHeight);
+
+            H5.H5Dread(dataset_id,                    // Identifier of the dataset read from.
+                       dataType,                      // Identifier of the memory datatype.
+                       memspace_id,                   //  Identifier of the memory dataspace.
+                       dataspace_id,                  // Identifier of the dataset's dataspace in the file.
+                       HDF5Constants.H5P_DEFAULT,     // Identifier of a transfer property list for this I/O operation.
+                       destBuffer.getElems());        // Buffer to store data read from the file.
+
+            H5.H5Dclose(dataset_id);
+            H5.H5Sclose(memspace_id);
+
+            return destBuffer;
+        } catch (Exception e) {
+            BeamLogManager.getSystemLogger().log(Level.SEVERE,
+                                                 "Cannot read ProbaV raster data '" + datasetName + "': " + e.getMessage());
+        }
+
+        return null;
     }
 
-    public static int getDatatypeForH5Dread(int datatypeClass) {
+    private static int getDatatypeForH5Dread(int datatypeClass) {
         switch (datatypeClass) {
             case H5Datatype.CLASS_BITFIELD:
                 return HDF5Constants.H5T_NATIVE_UINT8;
@@ -345,72 +278,30 @@ public class ProbaVUtils {
         return -1;
     }
 
-    public static ProductData getDataBufferForH5Dread(int datatypeClass, int width, int height) {
+    private static ProductData getDataBufferForH5Dread(int datatypeClass, int width, int height) {
         switch (datatypeClass) {
             case H5Datatype.CLASS_CHAR:
-//                return ProductData.createUnsignedInstance(new byte[width * height]);
                 return ProductData.createInstance(new byte[width * height]);
             case H5Datatype.CLASS_FLOAT:
-                return ProductData.createInstance(new float[width*height]);
+                return ProductData.createInstance(new float[width * height]);
             case H5Datatype.CLASS_INTEGER:
-                return ProductData.createInstance(new short[width*height]);
+                return ProductData.createInstance(new short[width * height]);
             default:
                 break;
         }
         return null;
     }
 
-    public static ProductData getProbaVRasterData(int file_id,
-                                                  int sourceWidth, int sourceHeight,
-                                                  String datasetName, int datatypeClass) {
-            try {
-                final int dataset_id = H5.H5Dopen(file_id,                       // Location identifier
-                        datasetName, // Dataset name
-                        HDF5Constants.H5P_DEFAULT);    // Identifier of dataset access property list
-
-                final int dataspace_id = H5.H5Dget_space(dataset_id);
-
-                final long[] offset = {0L, 0L};
-                final long[] count = {sourceWidth, sourceHeight};
-
-                H5.H5Sselect_hyperslab(dataspace_id,                   // Identifier of dataspace selection to modify
-                        HDF5Constants.H5S_SELECT_SET,   // Operation to perform on current selection.
-                        offset,                         // Offset of start of hyperslab
-                        null,                           // Hyperslab stride.
-                        count,                          // Number of blocks included in hyperslab.
-                        null);                          // Size of block in hyperslab.
-
-                final int memspace_id = H5.H5Screate_simple(count.length, // Number of dimensions of dataspace.
-                        count,        // An array of the size of each dimension.
-                        null);       // An array of the maximum size of each dimension.
-
-                final long[] offset_out = {0L, 0L};
-                H5.H5Sselect_hyperslab(memspace_id,                   // Identifier of dataspace selection to modify
-                        HDF5Constants.H5S_SELECT_SET,   // Operation to perform on current selection.
-                        offset_out,                         // Offset of start of hyperslab
-                        null,                           // Hyperslab stride.
-                        count,                          // Number of blocks included in hyperslab.
-                        null);                          // Size of block in hyperslab.
-
-                int dataType = ProbaVUtils.getDatatypeForH5Dread(datatypeClass);
-                ProductData destBuffer = ProbaVUtils.getDataBufferForH5Dread(datatypeClass, sourceWidth, sourceHeight);
-
-                H5.H5Dread(dataset_id,                    // Identifier of the dataset read from.
-                        dataType,                      // Identifier of the memory datatype.
-                        memspace_id,                   //  Identifier of the memory dataspace.
-                        dataspace_id,                  // Identifier of the dataset's dataspace in the file.
-                        HDF5Constants.H5P_DEFAULT,     // Identifier of a transfer property list for this I/O operation.
-                        destBuffer.getElems());        // Buffer to store data read from the file.
-
-                H5.H5Dclose(dataset_id);
-                H5.H5Sclose(memspace_id);
-
-                return destBuffer;
-            } catch (Exception e) {
-                e.printStackTrace();      // todo
-            }
-
-            return null;
-        }
+    private static void addMask(Product mod35Product, ProductNodeGroup<Mask> maskGroup,
+                                String bandName, String flagName, String description, Color color, float transparency) {
+        int width = mod35Product.getSceneRasterWidth();
+        int height = mod35Product.getSceneRasterHeight();
+        String maskPrefix = "";
+        Mask mask = Mask.BandMathsType.create(maskPrefix + flagName,
+                                              description, width, height,
+                                              bandName + "." + flagName,
+                                              color, transparency);
+        maskGroup.add(mask);
+    }
 
 }
