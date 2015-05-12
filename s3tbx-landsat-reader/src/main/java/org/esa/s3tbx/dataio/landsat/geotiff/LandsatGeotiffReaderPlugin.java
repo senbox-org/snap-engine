@@ -145,7 +145,7 @@ public class LandsatGeotiffReaderPlugin implements ProductReaderPlugIn {
     static VirtualDir getInput(Object input) throws IOException {
         File inputFile = getFileInput(input);
 
-        if (inputFile.isFile() && !isCompressedFile(inputFile)) {
+        if (inputFile != null && inputFile.isFile() && !isCompressedFile(inputFile)) {
             final File absoluteFile = inputFile.getAbsoluteFile();
             inputFile = absoluteFile.getParentFile();
             if (inputFile == null) {
