@@ -18,6 +18,7 @@ package org.esa.s3tbx.dataio.atsr;
 import org.esa.snap.framework.dataio.DecodeQualification;
 import org.esa.snap.framework.dataio.ProductReader;
 import org.esa.snap.framework.dataio.ProductReaderPlugIn;
+import org.esa.snap.util.io.SnapFileFilter;
 
 import javax.imageio.stream.ImageInputStream;
 import java.io.File;

@@ -4,6 +4,7 @@ import org.esa.snap.dataio.netcdf.util.NetcdfFileOpener;
 import org.esa.snap.framework.dataio.DecodeQualification;
 import org.esa.snap.framework.dataio.ProductReader;
 import org.esa.snap.framework.dataio.ProductReaderPlugIn;
+import org.esa.snap.util.io.SnapFileFilter;
 import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
 
