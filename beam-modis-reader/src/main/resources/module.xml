@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>beam-modis-reader</symbolicName>
-    <version>5.0</version>
+    <version>5.0.1-SNAPSHOT</version>
     <name>MODIS (MOD,MXD,MYD) Product Reader</name>
 
 
@@ -15,6 +15,8 @@
 
     <changelog>
         <![CDATA[
+        Changes in 5.0.1:<br/>
+        Made reader more strict to avoid unwanted reading of AVHRR LTDR products</i><br/>
         Changes in 5.0:<br/>
         Changed decoding capability for DAAC format files from <i>intended</i> to <i>suitable</i><br/>
         ]]>

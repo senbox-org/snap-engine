@@ -177,6 +177,15 @@ public class ModisProductReaderPlugIn implements ProductReaderPlugIn {
     static boolean isValidInputFile(File inputFile) {
         return inputFile != null &&
                 inputFile.isFile() &&
-                hasHdfFileExtension(inputFile);
+                hasHdfFileExtension(inputFile) &&
+                !isFileToIgnore(inputFile.getName());
+    }
+
+    private static boolean isFileToIgnore(String filename) {
+        // e.g. we must not read AVHRR LTDR land surface products with this reader
+        // (http://ltdr.nascom.nasa.gov/ltdr/docs/AVHRR_LTDR_V4_Document_AV02C1.pdf)
+        // Otherwise, these products cause a NPE in ucar hdf-eos part while reading.
+        // todo: add more exceptions here, or make this MODIS reader more strict. Currently it is very tolerant.
+        return filename.toUpperCase().startsWith("AVH02");
     }
 }
