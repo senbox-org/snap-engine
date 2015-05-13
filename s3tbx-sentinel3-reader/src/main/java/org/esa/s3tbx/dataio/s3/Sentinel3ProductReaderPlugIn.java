@@ -17,7 +17,7 @@ package org.esa.s3tbx.dataio.s3;/*
 import org.esa.snap.framework.dataio.DecodeQualification;
 import org.esa.snap.framework.dataio.ProductReader;
 import org.esa.snap.framework.dataio.ProductReaderPlugIn;
-import org.esa.snap.util.io.BeamFileFilter;
+import org.esa.snap.util.io.SnapFileFilter;
 
 import java.io.File;
 import java.util.Locale;
@@ -93,8 +93,8 @@ public class Sentinel3ProductReaderPlugIn implements ProductReaderPlugIn {
     }
 
     @Override
-    public final BeamFileFilter getProductFileFilter() {
-        return new BeamFileFilter(formatName, fileExtensions, description);
+    public final SnapFileFilter getProductFileFilter() {
+        return new SnapFileFilter(formatName, fileExtensions, description);
     }
 
     private boolean isValidInputFileName(String name) {

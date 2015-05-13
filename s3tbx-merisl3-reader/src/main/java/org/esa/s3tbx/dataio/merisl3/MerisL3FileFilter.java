@@ -16,11 +16,11 @@
 
 package org.esa.s3tbx.dataio.merisl3;
 
-import org.esa.snap.util.io.BeamFileFilter;
+import org.esa.snap.util.io.SnapFileFilter;
 
 import java.io.File;
 
-public class MerisL3FileFilter extends BeamFileFilter {
+public class MerisL3FileFilter extends SnapFileFilter {
 
     public MerisL3FileFilter() {
         super(MerisL3ProductReaderPlugIn.FORMAT_NAME,

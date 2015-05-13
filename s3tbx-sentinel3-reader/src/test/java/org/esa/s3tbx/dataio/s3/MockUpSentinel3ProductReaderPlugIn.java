@@ -3,7 +3,7 @@ package org.esa.s3tbx.dataio.s3;
 import org.esa.snap.framework.dataio.DecodeQualification;
 import org.esa.snap.framework.dataio.ProductReader;
 import org.esa.snap.framework.dataio.ProductReaderPlugIn;
-import org.esa.snap.util.io.BeamFileFilter;
+import org.esa.snap.util.io.SnapFileFilter;
 
 import java.io.File;
 import java.util.Locale;
@@ -47,8 +47,8 @@ public class MockUpSentinel3ProductReaderPlugIn implements ProductReaderPlugIn {
     }
 
     @Override
-    public BeamFileFilter getProductFileFilter() {
-        return new BeamFileFilter(getFormatNames()[0],
+    public SnapFileFilter getProductFileFilter() {
+        return new SnapFileFilter(getFormatNames()[0],
                                   getDefaultFileExtensions()[0],
                                   getDescription(null));
     }

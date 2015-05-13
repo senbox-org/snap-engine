@@ -19,7 +19,6 @@ import org.esa.snap.dataio.netcdf.GenericNetCdfReaderPlugIn;
 import org.esa.snap.dataio.netcdf.util.NetcdfFileOpener;
 import org.esa.snap.framework.dataio.DecodeQualification;
 import org.esa.snap.framework.dataio.ProductReader;
-import org.esa.snap.util.io.BeamFileFilter;
 import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.iosp.hdf5.H5iosp;
@@ -141,13 +140,13 @@ public class L1BGociProductReaderPlugIn extends GenericNetCdfReaderPlugIn {
     }
 
     @Override
-    public BeamFileFilter getProductFileFilter() {
+    public SnapFileFilter getProductFileFilter() {
         String[] formatNames = getFormatNames();
         String formatName = "";
         if (formatNames.length > 0) {
             formatName = formatNames[0];
         }
-        return new BeamFileFilter(formatName, getDefaultFileExtensions(), getDescription(null));
+        return new SnapFileFilter(formatName, getDefaultFileExtensions(), getDescription(null));
     }
 
     /**

@@ -2,7 +2,6 @@ package org.esa.s3tbx.dataio.modis;
 
 import junit.framework.TestCase;
 import org.esa.snap.framework.dataio.ProductReader;
-import org.esa.snap.util.io.BeamFileFilter;
 
 import java.io.File;
 import java.io.IOException;
@@ -77,7 +76,7 @@ public class ModisProductReaderPluginTest extends TestCase {
     }
 
     public void testGetProductFileFilter() {
-        final BeamFileFilter productFileFilter = plugIn.getProductFileFilter();
+        final SnapFileFilter productFileFilter = plugIn.getProductFileFilter();
         assertNotNull(productFileFilter);
 
         assertEquals("MODIS", productFileFilter.getFormatName());

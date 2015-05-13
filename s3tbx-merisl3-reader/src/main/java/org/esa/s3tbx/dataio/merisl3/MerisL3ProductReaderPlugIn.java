@@ -20,7 +20,7 @@ import org.esa.snap.dataio.netcdf.util.NetcdfFileOpener;
 import org.esa.snap.framework.dataio.DecodeQualification;
 import org.esa.snap.framework.dataio.ProductReader;
 import org.esa.snap.framework.dataio.ProductReaderPlugIn;
-import org.esa.snap.util.io.BeamFileFilter;
+import org.esa.snap.util.io.SnapFileFilter;
 import ucar.nc2.NetcdfFile;
 
 import java.io.File;
@@ -117,7 +117,7 @@ public class MerisL3ProductReaderPlugIn implements ProductReaderPlugIn {
         return new MerisL3ProductReader(this);
     }
 
-    public BeamFileFilter getProductFileFilter() {
+    public SnapFileFilter getProductFileFilter() {
         return new MerisL3FileFilter();
 
     }

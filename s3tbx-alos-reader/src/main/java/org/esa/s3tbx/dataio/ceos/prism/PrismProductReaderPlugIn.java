@@ -19,7 +19,6 @@ import org.esa.s3tbx.dataio.ceos.CeosHelper;
 import org.esa.snap.framework.dataio.DecodeQualification;
 import org.esa.snap.framework.dataio.ProductReader;
 import org.esa.snap.framework.dataio.ProductReaderPlugIn;
-import org.esa.snap.util.io.BeamFileFilter;
 import org.esa.snap.util.io.FileUtils;
 
 import java.io.File;
@@ -91,7 +90,7 @@ public class PrismProductReaderPlugIn implements ProductReaderPlugIn {
         return new PrismProductReader(this);
     }
 
-    public BeamFileFilter getProductFileFilter() {
+    public SnapFileFilter getProductFileFilter() {
         return new PrismFileFilter();
     }
 
@@ -130,7 +129,7 @@ public class PrismProductReaderPlugIn implements ProductReaderPlugIn {
         return PrismConstants.PLUGIN_DESCRIPTION;
     }
 
-    public static class PrismFileFilter extends BeamFileFilter {
+    public static class PrismFileFilter extends SnapFileFilter {
 
         public PrismFileFilter() {
             super();

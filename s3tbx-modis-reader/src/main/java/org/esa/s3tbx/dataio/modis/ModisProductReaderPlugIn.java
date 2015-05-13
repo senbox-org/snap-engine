@@ -26,7 +26,7 @@ import org.esa.snap.framework.dataio.ProductReader;
 import org.esa.snap.framework.dataio.ProductReaderPlugIn;
 import org.esa.snap.framework.datamodel.RGBImageProfile;
 import org.esa.snap.framework.datamodel.RGBImageProfileManager;
-import org.esa.snap.util.io.BeamFileFilter;
+import org.esa.snap.util.io.SnapFileFilter;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
@@ -116,13 +116,13 @@ public class ModisProductReaderPlugIn implements ProductReaderPlugIn {
         return new ModisProductReader(this);
     }
 
-    public BeamFileFilter getProductFileFilter() {
+    public SnapFileFilter getProductFileFilter() {
         String[] formatNames = getFormatNames();
         String formatName = "";
         if (formatNames.length > 0) {
             formatName = formatNames[0];
         }
-        return new BeamFileFilter(formatName, getDefaultFileExtensions(), getDescription(null));
+        return new SnapFileFilter(formatName, getDefaultFileExtensions(), getDescription(null));
     }
 
     /**

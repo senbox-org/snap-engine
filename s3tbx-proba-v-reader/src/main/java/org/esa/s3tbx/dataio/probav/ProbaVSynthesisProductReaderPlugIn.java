@@ -6,7 +6,7 @@ import org.esa.snap.framework.dataio.ProductReaderPlugIn;
 import org.esa.snap.framework.datamodel.RGBImageProfile;
 import org.esa.snap.framework.datamodel.RGBImageProfileManager;
 import org.esa.snap.util.SystemUtils;
-import org.esa.snap.util.io.BeamFileFilter;
+import org.esa.snap.util.io.SnapFileFilter;
 
 import java.io.File;
 import java.text.MessageFormat;
@@ -96,8 +96,8 @@ public class ProbaVSynthesisProductReaderPlugIn implements ProductReaderPlugIn {
     }
 
     @Override
-    public BeamFileFilter getProductFileFilter() {
-        return new BeamFileFilter(FORMAT_NAMES[0], FILE_EXTENSION, DESCRIPTION);
+    public SnapFileFilter getProductFileFilter() {
+        return new SnapFileFilter(FORMAT_NAMES[0], FILE_EXTENSION, DESCRIPTION);
     }
 
     static boolean isInputValid(Object input) {

@@ -22,8 +22,8 @@ import org.esa.snap.framework.dataio.ProductReader;
 import org.esa.snap.framework.dataio.ProductReaderPlugIn;
 import org.esa.snap.framework.datamodel.RGBImageProfile;
 import org.esa.snap.framework.datamodel.RGBImageProfileManager;
-import org.esa.snap.util.io.BeamFileFilter;
 import org.esa.snap.util.io.FileUtils;
+import org.esa.snap.util.io.SnapFileFilter;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -93,7 +93,7 @@ public class Avnir2ProductReaderPlugIn implements ProductReaderPlugIn {
         return new Avnir2ProductReader(this);
     }
 
-    public BeamFileFilter getProductFileFilter() {
+    public SnapFileFilter getProductFileFilter() {
         return new Avnir2FileFilter();
     }
 
@@ -131,7 +131,7 @@ public class Avnir2ProductReaderPlugIn implements ProductReaderPlugIn {
         return Avnir2Constants.PLUGIN_DESCRIPTION;
     }
 
-    public static class Avnir2FileFilter extends BeamFileFilter {
+    public static class Avnir2FileFilter extends SnapFileFilter {
 
         public Avnir2FileFilter() {
             super();

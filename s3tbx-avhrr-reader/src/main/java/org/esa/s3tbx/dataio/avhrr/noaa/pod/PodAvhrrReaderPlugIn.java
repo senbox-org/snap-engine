@@ -17,14 +17,11 @@
 package org.esa.s3tbx.dataio.avhrr.noaa.pod;
 
 import com.bc.ceres.binio.IOHandler;
-import com.bc.ceres.binio.util.ImageIOHandler;
 import com.bc.ceres.binio.util.RandomAccessFileIOHandler;
 import org.esa.snap.framework.dataio.DecodeQualification;
 import org.esa.snap.framework.dataio.ProductReader;
 import org.esa.snap.framework.dataio.ProductReaderPlugIn;
-import org.esa.snap.util.io.BeamFileFilter;
 
-import javax.imageio.stream.ImageInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -93,8 +90,8 @@ public final class PodAvhrrReaderPlugIn implements ProductReaderPlugIn {
     }
 
     @Override
-    public BeamFileFilter getProductFileFilter() {
-        return new BeamFileFilter(getFormatNames()[0], getDefaultFileExtensions(), getDescription(null));
+    public SnapFileFilter getProductFileFilter() {
+        return new SnapFileFilter(getFormatNames()[0], getDefaultFileExtensions(), getDescription(null));
     }
 
     @Override

@@ -19,7 +19,7 @@ import org.esa.snap.dataio.netcdf.util.NetcdfFileOpener;
 import org.esa.snap.framework.dataio.DecodeQualification;
 import org.esa.snap.framework.dataio.ProductReader;
 import org.esa.snap.framework.dataio.ProductReaderPlugIn;
-import org.esa.snap.util.io.BeamFileFilter;
+import org.esa.snap.util.io.SnapFileFilter;
 import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
 
@@ -150,13 +150,13 @@ public class AncillaryProductReaderPlugIn implements ProductReaderPlugIn {
     }
 
     @Override
-    public BeamFileFilter getProductFileFilter() {
+    public SnapFileFilter getProductFileFilter() {
         String[] formatNames = getFormatNames();
         String formatName = "";
         if (formatNames.length > 0) {
             formatName = formatNames[0];
         }
-        return new BeamFileFilter(formatName, getDefaultFileExtensions(), getDescription(null));
+        return new SnapFileFilter(formatName, getDefaultFileExtensions(), getDescription(null));
     }
 
     /**

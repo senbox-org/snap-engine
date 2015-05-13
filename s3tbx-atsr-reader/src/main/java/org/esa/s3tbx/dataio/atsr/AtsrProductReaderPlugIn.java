@@ -18,7 +18,6 @@ package org.esa.s3tbx.dataio.atsr;
 import org.esa.snap.framework.dataio.DecodeQualification;
 import org.esa.snap.framework.dataio.ProductReader;
 import org.esa.snap.framework.dataio.ProductReaderPlugIn;
-import org.esa.snap.util.io.BeamFileFilter;
 
 import javax.imageio.stream.ImageInputStream;
 import java.io.File;
@@ -110,7 +109,7 @@ public class AtsrProductReaderPlugIn implements ProductReaderPlugIn {
         return new AtsrProductReader(this);
     }
 
-    public BeamFileFilter getProductFileFilter() {
-        return new BeamFileFilter(getFormatNames()[0], getDefaultFileExtensions(), getDescription(null));
+    public SnapFileFilter getProductFileFilter() {
+        return new SnapFileFilter(getFormatNames()[0], getDefaultFileExtensions(), getDescription(null));
     }
 }

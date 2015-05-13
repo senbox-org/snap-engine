@@ -24,7 +24,6 @@ import org.esa.snap.framework.dataio.ProductReader;
 import org.esa.snap.framework.dataio.ProductReaderPlugIn;
 import org.esa.snap.framework.datamodel.RGBImageProfile;
 import org.esa.snap.framework.datamodel.RGBImageProfileManager;
-import org.esa.snap.util.io.BeamFileFilter;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -107,13 +106,13 @@ public class SpotVgtProductReaderPlugIn implements ProductReaderPlugIn {
     }
 
     /**
-     * Gets an instance of {@link org.esa.snap.util.io.BeamFileFilter} for use in a {@link javax.swing.JFileChooser JFileChooser}.
+     * Gets an instance of {@link SnapFileFilter} for use in a {@link javax.swing.JFileChooser JFileChooser}.
      *
      * @return a file filter
      */
     @Override
-    public BeamFileFilter getProductFileFilter() {
-        return new BeamFileFilter(SpotVgtConstants.FORMAT_NAME,
+    public SnapFileFilter getProductFileFilter() {
+        return new SnapFileFilter(SpotVgtConstants.FORMAT_NAME,
                                   getDefaultFileExtensions(),
                                   getDescription(null));
     }

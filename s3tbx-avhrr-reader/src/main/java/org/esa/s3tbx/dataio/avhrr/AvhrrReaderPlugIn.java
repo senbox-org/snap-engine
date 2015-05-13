@@ -21,7 +21,7 @@ import org.esa.snap.framework.dataio.ProductReader;
 import org.esa.snap.framework.dataio.ProductReaderPlugIn;
 import org.esa.snap.framework.datamodel.RGBImageProfile;
 import org.esa.snap.framework.datamodel.RGBImageProfileManager;
-import org.esa.snap.util.io.BeamFileFilter;
+import org.esa.snap.util.io.SnapFileFilter;
 
 import java.io.File;
 import java.util.Locale;
@@ -76,8 +76,8 @@ public class AvhrrReaderPlugIn implements ProductReaderPlugIn {
     }
 
     @Override
-    public BeamFileFilter getProductFileFilter() {
-        return new BeamFileFilter(getFormatNames()[0], getDefaultFileExtensions(), getDescription(null));
+    public SnapFileFilter getProductFileFilter() {
+        return new SnapFileFilter(getFormatNames()[0], getDefaultFileExtensions(), getDescription(null));
     }
 
     @Override

@@ -22,8 +22,8 @@ import org.esa.snap.framework.dataio.DecodeQualification;
 import org.esa.snap.framework.dataio.ProductReader;
 import org.esa.snap.framework.dataio.ProductReaderPlugIn;
 import org.esa.snap.util.StringUtils;
-import org.esa.snap.util.io.BeamFileFilter;
 import org.esa.snap.util.io.FileUtils;
+import org.esa.snap.util.io.SnapFileFilter;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -138,8 +138,8 @@ public class LandsatGeotiffReaderPlugin implements ProductReaderPlugIn {
     }
 
     @Override
-    public BeamFileFilter getProductFileFilter() {
-        return new BeamFileFilter(FORMAT_NAMES[0], DEFAULT_FILE_EXTENSIONS, READER_DESCRIPTION);
+    public SnapFileFilter getProductFileFilter() {
+        return new SnapFileFilter(FORMAT_NAMES[0], DEFAULT_FILE_EXTENSIONS, READER_DESCRIPTION);
     }
 
     static VirtualDir getInput(Object input) throws IOException {
