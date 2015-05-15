@@ -1,2 +1,4 @@
 org.esa.s3tbx.dataio.landsat.geotiff.LandsatGeotiffReaderPlugin
+org.esa.s3tbx.dataio.landsat.geotiff.Landsat8Geotiff15mReaderPlugin
+org.esa.s3tbx.dataio.landsat.geotiff.Landsat8Geotiff30mReaderPlugin
 org.esa.s3tbx.dataio.landsat.LandsatTMReaderPlugIn

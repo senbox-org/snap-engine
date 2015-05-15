@@ -31,18 +31,18 @@ import org.esa.snap.framework.datamodel.MetadataElement;
 import org.esa.snap.framework.datamodel.Product;
 import org.esa.snap.framework.datamodel.ProductData;
 import org.esa.snap.jai.ImageManager;
+import org.esa.snap.jai.SourceImageScaler;
+import org.geotools.referencing.operation.transform.AffineTransform2D;
+import org.opengis.referencing.operation.MathTransform2D;
 
 import javax.media.jai.ImageLayout;
 import javax.media.jai.Interpolation;
 import javax.media.jai.JAI;
 import javax.media.jai.PlanarImage;
-import javax.media.jai.RenderedOp;
-import javax.media.jai.operator.CropDescriptor;
-import javax.media.jai.operator.ScaleDescriptor;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.RenderingHints;
-import java.awt.image.RenderedImage;
+import java.awt.geom.AffineTransform;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -58,19 +58,32 @@ import java.util.regex.Pattern;
  */
 public class LandsatGeotiffReader extends AbstractProductReader {
 
+    enum Resolution {
+        DEFAULT,
+        L8_PANCHROMATIC,
+        L8_REFLECTIVE,
+
+    }
+
     private static final Logger LOG = Logger.getLogger(LandsatGeotiffReader.class.getName());
 
     static final String SYSPROP_READ_AS = "s3tbx.landsat.readAs";
-    private static final String SYSPROP_DO_NOT_SCALE_TO_PAN_RESOLUTION = "s3tbx.landsat.doNotScaleToPanResolution";
     private static final String RADIANCE_UNITS = "W/(m^2*sr*µm)";
     private static final String REFLECTANCE_UNITS = "dl";
+
+    private final Resolution targetResolution;
 
     private LandsatMetadata landsatMetadata;
     private List<Product> bandProducts;
     private VirtualDir input;
 
     public LandsatGeotiffReader(ProductReaderPlugIn readerPlugin) {
+        this(readerPlugin, Resolution.DEFAULT);
+    }
+
+    public LandsatGeotiffReader(ProductReaderPlugIn readerPlugin, Resolution targetResolution) {
         super(readerPlugin);
+        this.targetResolution = targetResolution;
     }
 
     @Override
@@ -92,14 +105,16 @@ public class LandsatGeotiffReader extends AbstractProductReader {
             throw new IOException("Can not read metadata file: " + mtlFile.getAbsolutePath());
         }
         landsatMetadata = LandsatMetadataFactory.create(mtlFile);
-        Dimension refDim = landsatMetadata.getReflectanceDim();
-        Dimension thmDim = landsatMetadata.getThermalDim();
-        Dimension panDim = landsatMetadata.getPanchromaticDim();
-        Dimension productDim = new Dimension(0, 0);
-        productDim = max(productDim, refDim);
-        productDim = max(productDim, thmDim);
-        if (!Boolean.getBoolean(SYSPROP_DO_NOT_SCALE_TO_PAN_RESOLUTION)) {
-            productDim = max(productDim, panDim);
+        Dimension productDim;
+        switch (targetResolution) {
+            case L8_REFLECTIVE:
+                productDim = landsatMetadata.getReflectanceDim();
+                break;
+            case L8_PANCHROMATIC:
+                productDim = landsatMetadata.getPanchromaticDim();
+                break;
+            default:
+                productDim = landsatMetadata.getPanchromaticDim();
         }
 
         MetadataElement metadataElement = landsatMetadata.getMetaDataElementRoot();
@@ -122,15 +137,6 @@ public class LandsatGeotiffReader extends AbstractProductReader {
         return filename.substring(0, extensionIndex);
     }
 
-    private static Dimension max(Dimension dim1, Dimension dim2) {
-        if (dim2 != null) {
-            int width = Math.max(dim1.width, dim2.width);
-            int height = Math.max(dim1.height, dim2.height);
-            return new Dimension(width, height);
-        }
-        return dim1;
-    }
-
     private void addBands(Product product, VirtualDir folder) throws IOException {
         final GeoTiffProductReaderPlugIn plugIn = new GeoTiffProductReaderPlugIn();
         final MetadataAttribute[] productAttributes = landsatMetadata.getProductMetadata().getAttributes();
@@ -151,7 +157,7 @@ public class LandsatGeotiffReader extends AbstractProductReader {
                     bandProducts.add(bandProduct);
                     Band srcBand = bandProduct.getBandAt(0);
                     String bandName = landsatMetadata.getBandNamePrefix(bandNumber);
-                    Band band = product.addBand(bandName, srcBand.getDataType());
+                    Band band = addBandToProduct(bandName, srcBand, product);
                     band.setScalingFactor(landsatMetadata.getScalingFactor(bandNumber));
                     band.setScalingOffset(landsatMetadata.getScalingOffset(bandNumber));
 
@@ -186,7 +192,7 @@ public class LandsatGeotiffReader extends AbstractProductReader {
                     Band srcBand = bandProduct.getBandAt(0);
                     String bandName = "flags";
 
-                    Band band = product.addBand(bandName, srcBand.getDataType());
+                    Band band = addBandToProduct(bandName, srcBand, product);
                     band.setNoDataValue(0.0);
                     band.setNoDataValueUsed(true);
                     band.setDescription("Quality Band");
@@ -210,7 +216,7 @@ public class LandsatGeotiffReader extends AbstractProductReader {
                 product.getSceneRasterHeight() == bandProduct.getSceneRasterHeight()) {
                 product.setGeoCoding(bandProduct.getGeoCoding());
                 Dimension tileSize = bandProduct.getPreferredTileSize();
-                if (tileSize != null) {
+                if (tileSize == null) {
                     tileSize = ImageManager.getPreferredTileSize(bandProduct);
                 }
                 product.setPreferredTileSize(tileSize);
@@ -221,25 +227,69 @@ public class LandsatGeotiffReader extends AbstractProductReader {
         }
 
 
-        for (int i = 0; i < bandProducts.size(); i++) {
-            Product bandProduct = bandProducts.get(i);
-            Band band = product.getBandAt(i);
-            final MultiLevelImage sourceImage = bandProduct.getBandAt(0).getSourceImage();
-            if (product.getSceneRasterWidth() == bandProduct.getSceneRasterWidth() &&
-                product.getSceneRasterHeight() == bandProduct.getSceneRasterHeight()) {
+        if (Resolution.DEFAULT.equals(targetResolution)) {
+            for (int i = 0; i < bandProducts.size(); i++) {
+                Product bandProduct = bandProducts.get(i);
+                Band band = product.getBandAt(i);
+                final MultiLevelImage sourceImage = bandProduct.getBandAt(0).getSourceImage();
                 band.setSourceImage(sourceImage);
-            } else {
+                band.setGeoCoding(bandProduct.getGeoCoding());
+                if (band.getRasterSize().equals(product.getSceneRasterSize())) {
+                    band.setSceneRasterTransform(SceneRasterTransform.IDENTITY);
+                } else {
+                    band.setSceneRasterTransform(new SceneRasterTransform(band.getRasterSize(), product.getSceneRasterSize()));
+                }
+            }
+        }else {
+            MultiLevelImage targetImage = null;
+            for (Product bandProduct : bandProducts) {
+                if (product.getSceneRasterWidth() == bandProduct.getSceneRasterWidth() &&
+                    product.getSceneRasterHeight() == bandProduct.getSceneRasterHeight()) {
+                    targetImage = bandProduct.getBandAt(0).getSourceImage();
+                    break;
+                }
+            }
+            if(targetImage == null) {
+                throw new IllegalStateException("Could not determine target image");
+            }
+            for (int i = 0; i < bandProducts.size(); i++) {
+                Product bandProduct = bandProducts.get(i);
+                final MultiLevelImage sourceImage = bandProduct.getBandAt(0).getSourceImage();
                 final RenderingHints renderingHints = new RenderingHints(JAI.KEY_IMAGE_LAYOUT, imageLayout);
-                PlanarImage image = createScaledImage(product.getSceneRasterWidth(), product.getSceneRasterHeight(),
-                                                      bandProduct.getSceneRasterWidth(), bandProduct.getSceneRasterHeight(),
-                                                      sourceImage, renderingHints);
+                float[] scalings = new float[2];
+                scalings[0] = product.getSceneRasterWidth() / (float) bandProduct.getSceneRasterWidth();
+                scalings[1] = product.getSceneRasterHeight() / (float) bandProduct.getSceneRasterHeight();
+
+                Band band = product.getBandAt(i);
+                PlanarImage image = SourceImageScaler.scaleMultiLevelImage(targetImage, sourceImage, scalings, null, renderingHints,
+                                                                          band.getNoDataValue(),
+                                                                          Interpolation.getInstance(Interpolation.INTERP_NEAREST));
+                band.setSceneRasterTransform(SceneRasterTransform.IDENTITY);
                 band.setSourceImage(image);
             }
         }
     }
 
+    private Band addBandToProduct(String bandName, Band srcBand, Product product) {
+        Dimension bandDimension = getBandDimension(srcBand, targetResolution);
+        Band band = new Band(bandName, srcBand.getDataType(), bandDimension.width, bandDimension.height);
+        product.addBand(band);
+        return band;
+    }
+
+    private Dimension getBandDimension(Band srcBand, Resolution targetResolution) {
+        switch (targetResolution) {
+            case L8_REFLECTIVE:
+                return landsatMetadata.getReflectanceDim();
+            case L8_PANCHROMATIC:
+                return landsatMetadata.getPanchromaticDim();
+            default:
+                return srcBand.getRasterSize();
+        }
+    }
+
     private List<Mask> createMasks(Product product) {
-        ArrayList<Mask> masks = new ArrayList<Mask>();
+        ArrayList<Mask> masks = new ArrayList<>();
         final int width = product.getSceneRasterWidth();
         final int height = product.getSceneRasterHeight();
 
@@ -271,7 +321,7 @@ public class LandsatGeotiffReader extends AbstractProductReader {
     }
 
     private List<Mask> createConfidenceMasks(String flagMaskBaseName, String descriptionBaseName, int width, int height) {
-        List<Mask> masks = new ArrayList<Mask>();
+        List<Mask> masks = new ArrayList<>();
         masks.add(Mask.BandMathsType.create(flagMaskBaseName + "_low",
                                             descriptionBaseName + " 0-35%",
                                             width, height,
@@ -314,17 +364,6 @@ public class LandsatGeotiffReader extends AbstractProductReader {
         return flagCoding;
     }
 
-    private static RenderedOp createScaledImage(int targetWidth, int targetHeight, int sourceWidth, int sourceHeight, RenderedImage srcImg,
-                                                RenderingHints renderingHints) {
-        float xScale = (float) targetWidth / (float) sourceWidth;
-        float yScale = (float) targetHeight / (float) sourceHeight;
-
-        RenderedOp tempImg = ScaleDescriptor.create(srcImg, xScale, yScale, 0.5f, 0.5f,
-                                                    Interpolation.getInstance(Interpolation.INTERP_NEAREST),
-                                                    renderingHints);
-        return CropDescriptor.create(tempImg, 0f, 0f, (float) targetWidth, (float) targetHeight, renderingHints);
-    }
-
     @Override
     protected void readBandRasterDataImpl(int sourceOffsetX, int sourceOffsetY, int sourceWidth, int sourceHeight, int sourceStepX, int sourceStepY,
                                           Band destBand, int destOffsetX, int destOffsetY, int destWidth, int destHeight, ProductData destBuffer,
@@ -355,7 +394,7 @@ public class LandsatGeotiffReader extends AbstractProductReader {
         static Iterator<Color> colorIterator;
 
         static {
-            colors = new ArrayList<Color>();
+            colors = new ArrayList<>();
             colors.add(Color.red);
             colors.add(Color.red);
             colors.add(Color.red);
@@ -382,6 +421,29 @@ public class LandsatGeotiffReader extends AbstractProductReader {
                 colorIterator = colors.iterator();
             }
             return colorIterator.next();
+        }
+    }
+
+    static class SceneRasterTransform implements org.esa.snap.framework.datamodel.SceneRasterTransform {
+
+        private Dimension sourceDimension;
+        private Dimension targetDimension;
+
+        public SceneRasterTransform(Dimension sourceDimension, Dimension targetDimension) {
+            this.sourceDimension = sourceDimension;
+            this.targetDimension = targetDimension;
+        }
+
+        @Override
+        public MathTransform2D getForward() {
+            return new AffineTransform2D(AffineTransform.getScaleInstance(targetDimension.getWidth() / sourceDimension.getWidth(),
+                                                                          targetDimension.getHeight() / sourceDimension.getHeight()));
+        }
+
+        @Override
+        public MathTransform2D getInverse() {
+            return new AffineTransform2D(AffineTransform.getScaleInstance(sourceDimension.getWidth() / targetDimension.getWidth(),
+                                                                          sourceDimension.getHeight() / targetDimension.getHeight()));
         }
     }
 

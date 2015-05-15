@@ -61,6 +61,11 @@ public class LandsatGeotiffReaderPlugin implements ProductReaderPlugIn {
             return DecodeQualification.UNABLE;
         }
 
+        return getDecodeQualification(virtualDir);
+
+    }
+
+    static DecodeQualification getDecodeQualification(VirtualDir virtualDir) {
         if (virtualDir == null) {
             return DecodeQualification.UNABLE;
         }
@@ -87,7 +92,6 @@ public class LandsatGeotiffReaderPlugin implements ProductReaderPlugIn {
         }
         // didn't find the expected metadata file
         return DecodeQualification.UNABLE;
-
     }
 
     static boolean isMetadataFile(File file) {
