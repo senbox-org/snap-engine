@@ -17,7 +17,6 @@ package org.esa.s3tbx.dataio.s3.slstr;/*
 import com.bc.ceres.glevel.MultiLevelImage;
 import org.esa.s3tbx.dataio.s3.AbstractProductFactory;
 import org.esa.s3tbx.dataio.s3.Sentinel3ProductReader;
-import org.esa.s3tbx.dataio.s3.SourceImageScaler;
 import org.esa.s3tbx.dataio.s3.util.S3NetcdfReader;
 import org.esa.snap.framework.datamodel.Band;
 import org.esa.snap.framework.datamodel.Product;
@@ -25,6 +24,7 @@ import org.esa.snap.framework.datamodel.RasterDataNode;
 import org.esa.snap.framework.datamodel.TiePointGeoCoding;
 import org.esa.snap.framework.datamodel.TiePointGrid;
 import org.esa.snap.jai.ImageManager;
+import org.esa.snap.jai.SourceImageScaler;
 
 import javax.media.jai.BorderExtender;
 import javax.media.jai.ImageLayout;
