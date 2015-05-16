@@ -61,11 +61,11 @@ public class LandsatGeotiffReaderPluginTest {
         assertTrue(LandsatGeotiffReaderPlugin.isLandsat5Filename("LT51231232013068GSI01_MTL.txt"));
         assertTrue(LandsatGeotiffReaderPlugin.isLandsat5Filename("LT51231232013068GSI01_MTL.TXT"));
         assertTrue(LandsatGeotiffReaderPlugin.isLandsat5Filename("LT51920342011274MPS00.tar.gz"));
+        assertTrue(LandsatGeotiffReaderPlugin.isLandsat5Filename("LT51920342011274MPS00.tgz")); // 'tar.gz' expected as extension
 
         assertFalse(LandsatGeotiffReaderPlugin.isLandsat5Filename("LT51231232013068GSI01_B3.txt")); // is a band name, not the metadata file
         assertFalse(LandsatGeotiffReaderPlugin.isLandsat5Filename("L5196030_03020031023_MTL.txt"));  // Sensor type missing
         assertFalse(LandsatGeotiffReaderPlugin.isLandsat5Filename("LT71920342011274MPS00.tar.gz")); // '5' expected after 'LT'
-        assertFalse(LandsatGeotiffReaderPlugin.isLandsat5Filename("LT51920342011274MPS00.tgz")); // 'tar.gz' expected as extension
     }
 
     @Test
@@ -73,11 +73,11 @@ public class LandsatGeotiffReaderPluginTest {
         assertTrue(LandsatGeotiffReaderPlugin.isLandsat7Filename("LE71890342011277ASN00_MTL.txt"));
         assertTrue(LandsatGeotiffReaderPlugin.isLandsat7Filename("LE71890342011277ASN00_MTL.TXT"));
         assertTrue(LandsatGeotiffReaderPlugin.isLandsat7Filename("LE71890342011277ASN00.tar.gz"));
+        assertTrue(LandsatGeotiffReaderPlugin.isLandsat7Filename("LE71890342011277ASN00.tgz")); // 'tar.gz' expected as extension
 
         assertFalse(LandsatGeotiffReaderPlugin.isLandsat7Filename("LE71890342011277ASN00_B3.txt")); // is a band name, not the metadata file
         assertFalse(LandsatGeotiffReaderPlugin.isLandsat7Filename("L71890342011277ASN00.txt"));  // Sensor type missing
         assertFalse(LandsatGeotiffReaderPlugin.isLandsat7Filename("LE81890342011277ASN00_MTL.txt")); // '7' expected after 'LT'
-        assertFalse(LandsatGeotiffReaderPlugin.isLandsat7Filename("LE71890342011277ASN00.tgz")); // 'tar.gz' expected as extension
     }
 
     @Test
@@ -87,10 +87,10 @@ public class LandsatGeotiffReaderPluginTest {
         assertTrue(LandsatGeotiffReaderPlugin.isLandsat8Filename("LC82160332013191LGN00.tar.gz"));
         assertTrue(LandsatGeotiffReaderPlugin.isLandsat8Filename("LO82160332013191LGN00.tar.gz"));
         assertTrue(LandsatGeotiffReaderPlugin.isLandsat8Filename("LT82160332013191LGN00.tar.gz"));
+        assertTrue(LandsatGeotiffReaderPlugin.isLandsat8Filename("LT82160332013191LGN00.tgz")); // 'tar.gz' expected as extension
 
         assertFalse(LandsatGeotiffReaderPlugin.isLandsat8Filename("L8196030_03020031023_MTL.txt"));  // Sensor type missing
         assertFalse(LandsatGeotiffReaderPlugin.isLandsat8Filename("LT52160332013191LGN00.tar.gz")); // '8' expected after 'LT'
-        assertFalse(LandsatGeotiffReaderPlugin.isLandsat8Filename("LT82160332013191LGN00.tgz")); // 'tar.gz' expected as extension
     }
 
     @Test
@@ -144,7 +144,7 @@ public class LandsatGeotiffReaderPluginTest {
 
     @Test
     public void testGetDefaultFileExtensions() throws Exception {
-        assertArrayEquals(new String[]{".txt", ".TXT", ".gz"}, plugin.getDefaultFileExtensions());
+        assertArrayEquals(new String[]{".txt", ".TXT", ".gz", ".tgz"}, plugin.getDefaultFileExtensions());
     }
 
     @Test

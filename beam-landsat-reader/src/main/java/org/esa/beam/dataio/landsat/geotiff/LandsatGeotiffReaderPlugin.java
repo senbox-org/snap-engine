@@ -38,7 +38,7 @@ public class LandsatGeotiffReaderPlugin implements ProductReaderPlugIn {
 
     private static final Class[] READER_INPUT_TYPES = new Class[]{String.class, File.class};
     private static final String[] FORMAT_NAMES = new String[]{"LandsatGeoTIFF"};
-    private static final String[] DEFAULT_FILE_EXTENSIONS = new String[]{".txt", ".TXT", ".gz"};
+    private static final String[] DEFAULT_FILE_EXTENSIONS = new String[]{".txt", ".TXT", ".gz", ".tgz"};
     private static final String READER_DESCRIPTION = "Landsat Data Products (GeoTIFF)";
 
     @Override
@@ -179,7 +179,7 @@ public class LandsatGeotiffReaderPlugin implements ProductReaderPlugIn {
     static boolean isLandsat4Filename(String filename) {
         if (filename.matches("LT4\\d{13}\\w{3}\\d{2}_MTL.(txt|TXT)")) {
             return true;
-        } else if (filename.matches("LT4\\d{13}\\w{3}\\d{2}\\.tar\\.gz")) {
+        } else if (filename.matches("LT4\\d{13}\\w{3}\\d{2}\\.(tar\\.gz|tgz)")) {
             return true;
         }
         return false;
@@ -188,7 +188,7 @@ public class LandsatGeotiffReaderPlugin implements ProductReaderPlugIn {
     static boolean isLandsat5Filename(String filename) {
         if (filename.matches("LT5\\d{13}.{3}\\d{2}_MTL.(txt|TXT)")) {
             return true;
-        } else if (filename.matches("LT5\\d{13}.{3}\\d{2}\\.tar\\.gz")) {
+        } else if (filename.matches("LT5\\d{13}.{3}\\d{2}\\.(tar\\.gz|tgz)")) {
             return true;
         } else {
             return false;
@@ -198,7 +198,7 @@ public class LandsatGeotiffReaderPlugin implements ProductReaderPlugIn {
     static boolean isLandsat7Filename(String filename) {
         if (filename.matches("LE7\\d{13}.{3}\\d{2}_MTL.(txt|TXT)")) {
             return true;
-        } else if (filename.matches("LE7\\d{13}.{3}\\d{2}\\.tar\\.gz")) {
+        } else if (filename.matches("LE7\\d{13}.{3}\\d{2}\\.(tar\\.gz|tgz)")) {
             return true;
         } else {
             return false;
@@ -208,7 +208,7 @@ public class LandsatGeotiffReaderPlugin implements ProductReaderPlugIn {
     static boolean isLandsat8Filename(String filename) {
         if (filename.matches("L[O,T,C]8\\d{13}.{3}\\d{2}_MTL.(txt|TXT)")) {
             return true;
-        } else if (filename.matches("L[O,T,C]8\\d{13}.{3}\\d{2}\\.tar\\.gz")) {
+        } else if (filename.matches("L[O,T,C]8\\d{13}.{3}\\d{2}\\.(tar\\.gz|tgz)")) {
             return true;
         } else {
             return false;
