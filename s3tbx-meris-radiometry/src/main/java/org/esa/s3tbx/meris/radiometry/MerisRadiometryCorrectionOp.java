@@ -73,6 +73,7 @@ import static org.esa.snap.dataio.envisat.EnvisatConstants.*;
         description = "Performs radiometric corrections on MERIS L1b data products.",
         authors = "Marc Bouvet (ESTEC); Marco Peters, Ralf Quast, Thomas Storm, Marco Zuehlke (Brockmann Consult)",
         copyright = "(c) 2015 by Brockmann Consult",
+        category = "Optical Processing/Pre-Processing",
         version = "1.2")
 public class MerisRadiometryCorrectionOp extends SampleOperator {
 
