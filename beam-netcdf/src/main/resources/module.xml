@@ -17,7 +17,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>snap-netcdf</symbolicName>
-    <version>1.0.1</version>
+    <version>1.0.2-SNAPSHOT</version>
     <name>NetCDF Product Reader and Writer</name>
     <description>
         A product reader and writer for NetCDF files. It supports metadata profiles for CF, BEAM, HDF-EOS, ODESA.
@@ -38,6 +38,13 @@
     </dependency>
 
     <categories>Reader,NetCDF,HDF,CF,EOS</categories>
+
+    <changelog>
+        <![CDATA[
+        Changes in version 1.0.2<br/>
+        [SNAP-95] Allow '%3a' as splitter in NetCDF metadata attributes<br/>
+        ]]>
+    </changelog>
 
 
     <extension point="snap-ui:actions">

@@ -26,6 +26,7 @@
     </parent>
 
     <artifactId>snap-netcdf</artifactId>
+    <version>1.0.2-SNAPSHOT</version>
     <name>SNAP NetCDF Product Reader and Writer</name>
 
     <dependencies>
