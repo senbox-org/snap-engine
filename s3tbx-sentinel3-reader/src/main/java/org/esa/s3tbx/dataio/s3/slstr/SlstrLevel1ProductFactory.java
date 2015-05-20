@@ -186,4 +186,51 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
                                               "radiance_co:S*BT_in*:" +
                                               "S*BT_io*:" + bandGrouping);
     }
+
+    @Override
+    protected void setBandGeoCodings(Product product) {
+//        final Band[] bands = product.getBands();
+//        for (Band band : bands) {
+//            final String end = band.getName().substring(band.getName().length() - 2);
+//            Band latBand = null;
+//            Band lonBand = null;
+//            switch (end) {
+//                case "an":
+//                    latBand = product.getBand("geodetic_an_latitude_an");
+//                    lonBand = product.getBand("geodetic_an_longitude_an");
+//                    break;
+//                case "ao":
+//                    latBand = product.getBand("geodetic_ao_latitude_ao");
+//                    lonBand = product.getBand("geodetic_ao_latitude_ao");
+//                    break;
+//                case "bn":
+//                    latBand = product.getBand("geodetic_bn_latitude_bn");
+//                    lonBand = product.getBand("geodetic_bn_latitude_bn");
+//                    break;
+//                case "bo":
+//                    latBand = product.getBand("geodetic_bo_latitude_bo");
+//                    lonBand = product.getBand("geodetic_bo_longitude_bo");
+//                    break;
+//                case "cn":
+//                    latBand = product.getBand("geodetic_cn_latitude_cn");
+//                    lonBand = product.getBand("geodetic_cn_longitude_cn");
+//                    break;
+//                case "co":
+//                    latBand = product.getBand("geodetic_co_latitude_co");
+//                    lonBand = product.getBand("geodetic_co_longitude_co");
+//                    break;
+//                case "in":
+//                    latBand = product.getBand("geodetic_in_latitude_in");
+//                    lonBand = product.getBand("geodetic_in_longitude_in");
+//                    break;
+//                case "io":
+//                    latBand = product.getBand("geodetic_io_latitude_io");
+//                    lonBand = product.getBand("geodetic_io_longitude_io");
+//                    break;
+//            }
+//            if(latBand != null && lonBand != null) {
+//                band.setGeoCoding(new PixelGeoCoding(latBand, lonBand, "", 5));
+//            }
+//        }
+    }
 }

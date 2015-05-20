@@ -1,1 +1,3 @@
 org.esa.s3tbx.dataio.s3.Sentinel3ProductReaderPlugIn
+org.esa.s3tbx.dataio.s3.slstr.SlstrLevel1B1kmProductReaderPlugIn
+org.esa.s3tbx.dataio.s3.slstr.SlstrLevel1B500mProductReaderPlugIn

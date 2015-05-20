@@ -50,7 +50,7 @@ public abstract class SlstrProductFactory extends AbstractProductFactory {
         final String sourceBandName = sourceBand.getName();
         final int sourceBandNameLength = sourceBandName.length();
         String gridIndex = sourceBandName;
-        if(sourceBandNameLength > 1) {
+        if (sourceBandNameLength > 1) {
             gridIndex = sourceBandName.substring(sourceBandNameLength - 2);
         }
         final Integer sourceStartOffset = getStartOffset(gridIndex);
@@ -60,12 +60,19 @@ public abstract class SlstrProductFactory extends AbstractProductFactory {
             if (gridIndex.startsWith("t")) {
                 return copyTiePointGrid(sourceBand, targetProduct, sourceStartOffset, sourceTrackOffset, sourceResolutions);
             } else {
-                final Band targetBand = copyBand(sourceBand, targetProduct, false);
-                final float[] offsets = getOffsets(sourceStartOffset, sourceTrackOffset, sourceResolutions);
-                final RenderedImage sourceImage = createSourceImage(masterProduct, sourceBand, offsets, targetBand,
-                                                                    sourceResolutions);
-                targetBand.setSourceImage(sourceImage);
-                return targetBand;
+                //todo change these...currently they are needed to ensure that images are displayed correctly
+                sourceBand.setValidPixelExpression("");
+                sourceBand.setNoDataValueUsed(false);
+                return copyBand(sourceBand, targetProduct, true);
+//                final Band targetBand = new Band(sourceBandName, sourceBand.getDataType(),
+//                                                 sourceBand.getRasterWidth(), sourceBand.getRasterHeight());
+//                targetProduct.addBand(targetBand);
+//                ProductUtils.copyRasterDataNodeProperties(sourceBand, targetBand);
+//                targetBand.setValidPixelExpression("");
+//                targetBand.setNoDataValueUsed(false);
+//                targetBand.setSourceImage(sourceBand.getSourceImage());
+//                return targetBand;
+
             }
         }
         return sourceBand;
@@ -99,8 +106,8 @@ public abstract class SlstrProductFactory extends AbstractProductFactory {
         referenceResolutions = resolutions;
     }
 
-    private RenderedImage createSourceImage(Product masterProduct, Band sourceBand, float[] offsets,
-                                            Band targetBand, short[] sourceResolutions) {
+    protected RenderedImage createSourceImage(Product masterProduct, Band sourceBand, float[] offsets,
+                                              Band targetBand, short[] sourceResolutions) {
         final ImageLayout imageLayout = ImageManager.createSingleBandedImageLayout(targetBand);
         final RenderingHints renderingHints = new RenderingHints(JAI.KEY_IMAGE_LAYOUT, imageLayout);
         renderingHints.add(new RenderingHints(JAI.KEY_BORDER_EXTENDER,
@@ -119,14 +126,14 @@ public abstract class SlstrProductFactory extends AbstractProductFactory {
     }
 
     protected float[] getOffsets(double sourceStartOffset, double sourceTrackOffset, short[] sourceResolutions) {
-        float offsetX = (float) (referenceTrackOffset - sourceTrackOffset * (sourceResolutions[0] / referenceResolutions[0]));
-        float offsetY = (float) (sourceStartOffset * (sourceResolutions[1] / referenceResolutions[1]) - referenceStartOffset);
+        float offsetX = (float) (referenceTrackOffset - sourceTrackOffset * (sourceResolutions[0] / (float) referenceResolutions[0]));
+        float offsetY = (float) (sourceStartOffset * (sourceResolutions[1] / (float) referenceResolutions[1]) - referenceStartOffset);
         return new float[]{offsetX, offsetY};
     }
 
     @Deprecated // scale images instead
-    private RasterDataNode copyTiePointGrid(Band sourceBand, Product targetProduct, double sourceStartOffset,
-                                            double sourceTrackOffset, short[] sourceResolutions) {
+    protected RasterDataNode copyTiePointGrid(Band sourceBand, Product targetProduct, double sourceStartOffset,
+                                              double sourceTrackOffset, short[] sourceResolutions) {
         final int subSamplingX = sourceResolutions[0] / referenceResolutions[0];
         final int subSamplingY = sourceResolutions[1] / referenceResolutions[1];
         final float[] tiePointGridOffsets = getTiePointGridOffsets(sourceStartOffset, sourceTrackOffset,

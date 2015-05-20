@@ -43,7 +43,7 @@ public class Sentinel3ProductReaderPlugIn implements ProductReaderPlugIn {
              "xfdumanifest", "L1c_Manifest",".xml");
     }
 
-    private Sentinel3ProductReaderPlugIn(String formatName,
+    protected Sentinel3ProductReaderPlugIn(String formatName,
                                          String description,
                                          String directoryNamePattern,
                                          String manifestFileBasename,

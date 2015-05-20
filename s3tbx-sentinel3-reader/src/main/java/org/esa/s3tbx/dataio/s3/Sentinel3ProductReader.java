@@ -20,6 +20,10 @@ import org.esa.s3tbx.dataio.s3.meris.MerisLevel2ProductFactory;
 import org.esa.s3tbx.dataio.s3.olci.OlciLevel1ProductFactory;
 import org.esa.s3tbx.dataio.s3.olci.OlciLevel2LProductFactory;
 import org.esa.s3tbx.dataio.s3.olci.OlciLevel2WProductFactory;
+import org.esa.s3tbx.dataio.s3.slstr.SlstrLevel1B1kmProductFactory;
+import org.esa.s3tbx.dataio.s3.slstr.SlstrLevel1B1kmProductReaderPlugIn;
+import org.esa.s3tbx.dataio.s3.slstr.SlstrLevel1B500mProductFactory;
+import org.esa.s3tbx.dataio.s3.slstr.SlstrLevel1B500mProductReaderPlugIn;
 import org.esa.s3tbx.dataio.s3.slstr.SlstrLevel1ProductFactory;
 import org.esa.s3tbx.dataio.s3.slstr.SlstrLstProductFactory;
 import org.esa.s3tbx.dataio.s3.slstr.SlstrSstProductFactory;
@@ -45,7 +49,7 @@ public class Sentinel3ProductReader extends AbstractProductReader {
     }
 
     @Override
-    protected final Product readProductNodesImpl() throws IOException {
+    protected Product readProductNodesImpl() throws IOException {
         final String dirName = getInputFileParentDirectory().getName();
         if (dirName.matches("S3.?_OL_1_E[RF]R_.*.SEN3")) { // OLCI L1b
             factory = new OlciLevel1ProductFactory(this);
@@ -54,15 +58,21 @@ public class Sentinel3ProductReader extends AbstractProductReader {
         } else if (dirName.matches("S3.?_OL_2_(W[FR]R)_.*.SEN3")) { // OLCI L2 W -
             factory = new OlciLevel2WProductFactory(this);
         } else if (dirName.matches("S3.?_SL_1_RBT.*")) { // SLSTR L1b
-            factory = new SlstrLevel1ProductFactory(this);
+            final ProductReaderPlugIn readerPlugIn = getReaderPlugIn();
+            if (readerPlugIn instanceof SlstrLevel1B1kmProductReaderPlugIn) {
+                factory = new SlstrLevel1B1kmProductFactory(this);
+            } else if (readerPlugIn instanceof SlstrLevel1B500mProductReaderPlugIn) {
+                factory = new SlstrLevel1B500mProductFactory(this);
+            } else {
+                factory = new SlstrLevel1ProductFactory(this);
+            }
         } else if (dirName.matches("S3.?_SL_2_LST_.*.SEN3")) { // SLSTR L2 LST
             factory = new SlstrLstProductFactory(this);
         } else if (dirName.matches("S3.?_SL_2_WST_.*.SEN3")) { // SLSTR L2 WST
             factory = new SlstrWstProductFactory(this);
         } else if (dirName.matches("S3.?_SL_2_WCT_.*.SEN3")) { // SLSTR L2 WCT
             factory = new SlstrSstProductFactory(this);
-//        } else if (dirName.matches("S3.?_SY_1_SYN_.*.SEN3")) { // SYN L2
-        } else if (dirName.matches("S3.?_SY_1_SYN_.*")) { // SYN L2
+        } else if (dirName.matches("S3.?_SY_1_SYN_.*")) { // SYN L1
             factory = new SynL1CProductFactory(this);
         } else if (dirName.matches("S3.?_SY_2_SYN_.*.SEN3")) { // SYN L2
             factory = new SynLevel2ProductFactory(this);

@@ -117,6 +117,7 @@ public abstract class AbstractProductFactory implements ProductFactory {
         final int w = getSceneRasterWidth(masterProduct);
         final int h = masterProduct.getSceneRasterHeight();
         final Product targetProduct = new Product(productName, productType, w, h, productReader);
+        changeTargetProductName(targetProduct);
         targetProduct.setFileLocation(getInputFile());
         targetProduct.setNumResolutionsMax(masterProduct.getNumResolutionsMax());
 
@@ -146,10 +147,17 @@ public abstract class AbstractProductFactory implements ProductFactory {
         if (targetProduct.getGeoCoding() == null) {
             setGeoCoding(targetProduct);
         }
+        setBandGeoCodings(targetProduct);
         final Product[] sourceProducts = openProductList.toArray(new Product[openProductList.size()]);
         setAutoGrouping(sourceProducts, targetProduct);
 
         return targetProduct;
+    }
+
+    protected void changeTargetProductName(Product targetProduct) {
+    }
+
+    protected void setBandGeoCodings(Product product) {
     }
 
     protected void setUncertaintyBands(Product product) {
