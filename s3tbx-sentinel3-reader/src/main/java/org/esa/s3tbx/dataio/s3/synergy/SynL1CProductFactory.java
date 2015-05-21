@@ -9,6 +9,7 @@ import org.esa.snap.framework.datamodel.Band;
 import org.esa.snap.framework.datamodel.IndexCoding;
 import org.esa.snap.framework.datamodel.Product;
 import org.esa.snap.framework.datamodel.ProductData;
+import org.esa.snap.framework.datamodel.SceneRasterTransform;
 import org.esa.snap.framework.datamodel.VirtualBand;
 import org.esa.snap.util.ProductUtils;
 
@@ -58,23 +59,73 @@ public class SynL1CProductFactory extends AbstractProductFactory {
                 final String targetBandName = sourceProduct.getName() + "_" + entry.getKey();
                 final List<String> sourceBandNames = entry.getValue();
                 final String sourceBandName = sourceBandNames.get(0);
-                final Band targetBand = ProductUtils.copyBand(sourceBandName, sourceProduct, targetBandName,
-                                                              targetProduct, false);
-                //todo change this later
-                targetBand.setNoDataValueUsed(false);
-                targetBand.setValidPixelExpression("");
+                final Band sourceBand = sourceProduct.getBand(sourceBandName);
                 final MultiLevelImage[] sourceImages = new MultiLevelImage[sourceBandNames.size()];
                 for (int i = 0; i < sourceImages.length; i++) {
                     sourceImages[i] = sourceProduct.getBand(sourceBandNames.get(i)).getSourceImage();
                 }
-                targetBand.setSourceImage(CameraImageMosaic.create(sourceImages));
-                final Band sourceBand = sourceProduct.getBand(sourceBandName);
+                final MultiLevelImage sourceImage = CameraImageMosaic.create(sourceImages);
+                Band targetBand;
+                if (targetBandName.startsWith("MISREGIST_OLC_Oref")) {
+                    targetBand = new Band(targetBandName, sourceBand.getDataType(),
+                             sourceImage.getWidth(), sourceImage.getHeight());
+                    ProductUtils.copyRasterDataNodeProperties(sourceBand, targetBand);
+                    targetProduct.addBand(targetBand);
+                } else {
+                    targetBand = ProductUtils.copyBand(sourceBandName, sourceProduct, targetBandName,
+                                                                  targetProduct, false);
+                }
+                //todo change this later
+                targetBand.setNoDataValueUsed(false);
+                targetBand.setValidPixelExpression("");
+                targetBand.setSourceImage(sourceImage);
                 configureTargetNode(sourceBand, targetBand);
                 mapping.put(sourceBand.getName(), targetBand.getName());
             }
             copyMasks(targetProduct, sourceProduct, mapping);
         }
         addCameraIndexBand(targetProduct, masterProduct.getSceneRasterWidth());
+    }
+
+    @Override
+    protected void setSceneRasterTransforms(Product product) {
+        final Band[] bands = product.getBands();
+        for (Band band: bands) {
+            final String bandName = band.getName();
+            if (bandName.startsWith("OLC_RADIANCE") && !bandName.contains("17")) {
+                int end = 16;
+                if(bandName.substring(15, 16).equals("_")) {
+                    end = 15;
+                }
+                final String identifier = bandName.substring(14, end);
+                final Band rowMisregistrationBand = product.getBand("MISREGIST_OLC_Oref_O" + identifier + "_delta_row");
+                final Band columnMisregistrationBand = product.getBand("MISREGIST_OLC_Oref_O" + identifier + "_delta_col");
+                final SceneRasterTransform sceneRasterTransform =
+                        new SynL1COlciSceneRasterTransform(columnMisregistrationBand, rowMisregistrationBand);
+                band.setSceneRasterTransform(sceneRasterTransform);
+            } else if (bandName.startsWith("SLST_NAD_RADIANCE")) {
+                final String identifier = bandName.substring(19, 20);
+                final Band columnCorrespondenceBand = product.getBand("MISREGIST_SLST_NAD_Oref_S" + identifier + "_col_corresp");
+                final Band rowCorrespondenceBand = product.getBand("MISREGIST_SLST_NAD_Oref_S" + identifier + "_row_corresp");
+                final SceneRasterTransform sceneRasterTransform =
+                        new SynL1CSlstrSceneRasterTransform(columnCorrespondenceBand, rowCorrespondenceBand);
+                band.setSceneRasterTransform(sceneRasterTransform);
+            } else if (bandName.startsWith("SLST_NAD_BT_S")) {
+                final String identifier = bandName.substring(13, 14);
+                final Band columnCorrespondenceBand = product.getBand("MISREGIST_SLST_NAD_Oref_S" + identifier + "_col_corresp");
+                final Band rowCorrespondenceBand = product.getBand("MISREGIST_SLST_NAD_Oref_S" + identifier + "_row_corresp");
+                final SceneRasterTransform sceneRasterTransform =
+                        new SynL1CSlstrSceneRasterTransform(columnCorrespondenceBand, rowCorrespondenceBand);
+                band.setSceneRasterTransform(sceneRasterTransform);
+            } else if (bandName.startsWith("SLST_NAD_BT_F")) {
+                final String identifier = bandName.substring(13, 14);
+                final Band columnCorrespondenceBand = product.getBand("MISREGIST_SLST_NAD_Oref_F" + identifier + "_col_corresp");
+                final Band rowCorrespondenceBand = product.getBand("MISREGIST_SLST_NAD_Oref_F" + identifier + "_row_corresp");
+                final SceneRasterTransform sceneRasterTransform =
+                        new SynL1CSlstrSceneRasterTransform(columnCorrespondenceBand, rowCorrespondenceBand);
+                band.setSceneRasterTransform(sceneRasterTransform);
+            }
+        }
     }
 
     private void addCameraIndexBand(Product targetProduct, int cameraImageWidth) {

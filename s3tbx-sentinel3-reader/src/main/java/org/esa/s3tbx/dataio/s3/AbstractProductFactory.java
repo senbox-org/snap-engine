@@ -148,6 +148,7 @@ public abstract class AbstractProductFactory implements ProductFactory {
             setGeoCoding(targetProduct);
         }
         setBandGeoCodings(targetProduct);
+        setSceneRasterTransforms(targetProduct);
         final Product[] sourceProducts = openProductList.toArray(new Product[openProductList.size()]);
         setAutoGrouping(sourceProducts, targetProduct);
 
@@ -158,6 +159,9 @@ public abstract class AbstractProductFactory implements ProductFactory {
     }
 
     protected void setBandGeoCodings(Product product) {
+    }
+
+    protected void setSceneRasterTransforms(Product product) {
     }
 
     protected void setUncertaintyBands(Product product) {
