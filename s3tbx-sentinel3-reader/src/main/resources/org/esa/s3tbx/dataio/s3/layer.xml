@@ -18,6 +18,24 @@
                 <attr name="ShortDescription"
                       stringvalue="Import a data product in Sentinel-3 Format."/>
             </file>
+            <file name="org-esa-s3tbx-dataio-s3-slstr-ImportSlstrL1B500mProduct.instance">
+                <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
+                <attr name="delegate" methodvalue="org.esa.snap.rcp.actions.file.ImportProductAction.create"/>
+                <attr name="displayName" stringvalue="Sentinel-3 SLSTR L1B (500m) Format"/>
+                <attr name="formatName" stringvalue="S3 SLSTR L1B (500m)"/>
+                <attr name="useAllFileFilter" boolvalue="true"/>
+                <attr name="helpId" stringvalue="importSlstrL1B1kmProduct"/>
+                <attr name="ShortDescription" stringvalue="Import a Sentinel-3 SLSTR L1B data product in 500m resolution."/>
+            </file>
+            <file name="org-esa-s3tbx-dataio-s3-slstr-ImportSlstrL1B1kmProduct.instance">
+                <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
+                <attr name="delegate" methodvalue="org.esa.snap.rcp.actions.file.ImportProductAction.create"/>
+                <attr name="displayName" stringvalue="Sentinel-3 SLSTR L1B (1km) Format"/>
+                <attr name="formatName" stringvalue="S3 SLSTR L1B (1km)"/>
+                <attr name="useAllFileFilter" boolvalue="true"/>
+                <attr name="helpId" stringvalue="importSlstrL1B1kmProduct"/>
+                <attr name="ShortDescription" stringvalue="Import a Sentinel-3 SLSTR L1B data product in 1km resolution."/>
+            </file>
         </folder>
     </folder>
 
@@ -28,6 +46,14 @@
                     <file name="org-esa-s3tbx-dataio-s3-ImportSentinel3Product.shadow">
                         <attr name="originalFile"
                               stringvalue="Actions/Readers/org-esa-s3tbx-dataio-s3-ImportSentinel3Product.instance"/>
+                    </file>
+                    <file name="org-esa-s3tbx-dataio-s3-slstr-ImportSlstrL1B500mProduct.shadow">
+                        <attr name="originalFile"
+                              stringvalue="Actions/Readers/org-esa-s3tbx-dataio-s3-slstr-ImportSlstrL1B500mProduct.instance"/>
+                    </file>
+                    <file name="org-esa-s3tbx-dataio-s3-slstr-ImportSlstrL1B1kmProduct.shadow">
+                        <attr name="originalFile"
+                              stringvalue="Actions/Readers/org-esa-s3tbx-dataio-s3-slstr-ImportSlstrL1B1kmProduct.instance"/>
                     </file>
                 </folder>
             </folder>
