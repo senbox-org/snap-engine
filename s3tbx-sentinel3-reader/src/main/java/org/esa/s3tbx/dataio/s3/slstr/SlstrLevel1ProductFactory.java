@@ -20,7 +20,10 @@ import org.esa.snap.framework.datamodel.Band;
 import org.esa.snap.framework.datamodel.MetadataElement;
 import org.esa.snap.framework.datamodel.Product;
 import org.esa.snap.framework.datamodel.RasterDataNode;
+import org.esa.snap.framework.datamodel.TiePointGrid;
 
+import java.awt.geom.AffineTransform;
+import java.awt.geom.NoninvertibleTransformException;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Arrays;
@@ -189,48 +192,43 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
 
     @Override
     protected void setBandGeoCodings(Product product) {
-//        final Band[] bands = product.getBands();
-//        for (Band band : bands) {
-//            final String end = band.getName().substring(band.getName().length() - 2);
-//            Band latBand = null;
-//            Band lonBand = null;
-//            switch (end) {
-//                case "an":
-//                    latBand = product.getBand("geodetic_an_latitude_an");
-//                    lonBand = product.getBand("geodetic_an_longitude_an");
-//                    break;
-//                case "ao":
-//                    latBand = product.getBand("geodetic_ao_latitude_ao");
-//                    lonBand = product.getBand("geodetic_ao_latitude_ao");
-//                    break;
-//                case "bn":
-//                    latBand = product.getBand("geodetic_bn_latitude_bn");
-//                    lonBand = product.getBand("geodetic_bn_latitude_bn");
-//                    break;
-//                case "bo":
-//                    latBand = product.getBand("geodetic_bo_latitude_bo");
-//                    lonBand = product.getBand("geodetic_bo_longitude_bo");
-//                    break;
-//                case "cn":
-//                    latBand = product.getBand("geodetic_cn_latitude_cn");
-//                    lonBand = product.getBand("geodetic_cn_longitude_cn");
-//                    break;
-//                case "co":
-//                    latBand = product.getBand("geodetic_co_latitude_co");
-//                    lonBand = product.getBand("geodetic_co_longitude_co");
-//                    break;
-//                case "in":
-//                    latBand = product.getBand("geodetic_in_latitude_in");
-//                    lonBand = product.getBand("geodetic_in_longitude_in");
-//                    break;
-//                case "io":
-//                    latBand = product.getBand("geodetic_io_latitude_io");
-//                    lonBand = product.getBand("geodetic_io_longitude_io");
-//                    break;
-//            }
-//            if(latBand != null && lonBand != null) {
-//                band.setGeoCoding(new PixelGeoCoding(latBand, lonBand, "", 5));
-//            }
-//        }
+        TiePointGrid origLatGrid = null;
+        TiePointGrid origLonGrid = null;
+        for (final TiePointGrid grid : product.getTiePointGrids()) {
+            if (origLatGrid == null && grid.getName().endsWith("latitude_tx")) {
+                origLatGrid = grid;
+            }
+            if (origLonGrid == null && grid.getName().endsWith("longitude_tx")) {
+                origLonGrid = grid;
+            }
+        }
+        if (origLatGrid == null || origLonGrid == null) {
+            return;
+        }
+        final Band[] bands = product.getBands();
+        final short[] referenceResolutions = getReferenceResolutions();
+        for (Band band : bands) {
+            final String gridIndex = band.getName().substring(band.getName().length() - 2);
+            final short[] sourceResolutions = getResolutions(gridIndex);
+            final Integer sourceStartOffset = getStartOffset(gridIndex);
+            final Integer sourceTrackOffset = getTrackOffset(gridIndex);
+            if (sourceStartOffset != null && sourceTrackOffset != null) {
+                final float[] offsets = getOffsets(sourceStartOffset, sourceTrackOffset, sourceResolutions);
+                final float[] scalings = new float[]{
+                        ((float) sourceResolutions[0]) / referenceResolutions[0],
+                        ((float) sourceResolutions[1]) / referenceResolutions[1]
+                };
+                final AffineTransform transform = new AffineTransform();
+                transform.translate(offsets[0], offsets[1]);
+                transform.scale(scalings[0], scalings[1]);
+                try {
+                    final SlstrTiePointGeoCoding geoCoding =
+                            new SlstrTiePointGeoCoding(origLatGrid, origLonGrid, transform);
+                    band.setGeoCoding(geoCoding);
+                } catch (NoninvertibleTransformException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 }

@@ -106,6 +106,10 @@ public abstract class SlstrProductFactory extends AbstractProductFactory {
         referenceResolutions = resolutions;
     }
 
+    protected short[] getReferenceResolutions() {
+        return referenceResolutions;
+    }
+
     protected RenderedImage createSourceImage(Product masterProduct, Band sourceBand, float[] offsets,
                                               Band targetBand, short[] sourceResolutions) {
         final ImageLayout imageLayout = ImageManager.createSingleBandedImageLayout(targetBand);
