@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
 public class Sentinel3ProductReaderPlugIn implements ProductReaderPlugIn {
 
     private static final Class[] SUPPORTED_INPUT_TYPES = new Class[]{String.class, File.class};
-    private static final String FORMAT_NAME = "SENTINEL-3";
+    private static final String FORMAT_NAME = "Sen3";
 
     private final String formatName;
     private final String manifestFileBasename;
@@ -38,17 +38,16 @@ public class Sentinel3ProductReaderPlugIn implements ProductReaderPlugIn {
 
     public Sentinel3ProductReaderPlugIn() {
         this(FORMAT_NAME, "Sentinel-3 products",
-             "(S3.?_(OL_1_E[FR]R|OL_2_(L[FR]R|W[FR]R)|SL_1_RBT|SL_2_(LST|WCT|WST)|SY_1_SYN|SY_2_(VGP|SYN)|SY_[23]_VG1)_.*(.SEN3)?)|" +
-                     "(ENV_ME_(1|2)_RR(G|P)____.*______ACR_R_NT____.SEN3)",
-             "xfdumanifest", "L1c_Manifest",".xml");
+             "S3.?_(OL_1_E[FR]R|OL_2_(L[FR]R|W[FR]R)|SL_1_RBT|SL_2_(LST|WCT|WST)|SY_1_SYN|SY_2_(VGP|SYN)|SY_[23]_VG1)_.*(.SEN3)?",
+             "xfdumanifest", "L1c_Manifest", ".xml");
     }
 
     protected Sentinel3ProductReaderPlugIn(String formatName,
-                                         String description,
-                                         String directoryNamePattern,
-                                         String manifestFileBasename,
-                                         String alternativeManifestFileBasename,
-                                         String... fileExtensions) {
+                                           String description,
+                                           String directoryNamePattern,
+                                           String manifestFileBasename,
+                                           String alternativeManifestFileBasename,
+                                           String... fileExtensions) {
         this.formatName = formatName;
         this.fileExtensions = fileExtensions;
         this.directoryNamePattern = Pattern.compile(directoryNamePattern);
@@ -73,7 +72,7 @@ public class Sentinel3ProductReaderPlugIn implements ProductReaderPlugIn {
     }
 
     @Override
-    public final ProductReader createReaderInstance() {
+    public ProductReader createReaderInstance() {
         return new Sentinel3ProductReader(this);
     }
 
