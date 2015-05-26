@@ -38,7 +38,7 @@ public class Sentinel3ProductReaderPlugInTest {
     @Test
     public void testIfPlugInIsLoaded() {
         final ProductIOPlugInManager ioPlugInManager = ProductIOPlugInManager.getInstance();
-        final Iterator<ProductReaderPlugIn> readerPlugIns = ioPlugInManager.getReaderPlugIns("SENTINEL-3");
+        final Iterator<ProductReaderPlugIn> readerPlugIns = ioPlugInManager.getReaderPlugIns("Sen3");
         assertTrue(readerPlugIns.hasNext());
         assertTrue(readerPlugIns.next() instanceof Sentinel3ProductReaderPlugIn);
     }
