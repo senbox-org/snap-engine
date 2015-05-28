@@ -35,9 +35,9 @@ public class ProductSetHandler {
 
     private final Graph graph;
 
-    private final static String PRODUCT_SET_READER_NAME = "ProductSet-Reader";
-    private final static String SEPARATOR = ",";
-    private final static String SEPARATOR_ESC = "\\u002C"; // Unicode escape repr. of ','
+    public final static String PRODUCT_SET_READER_NAME = "ProductSet-Reader";
+    public final static String SEPARATOR = ",";
+    public final static String SEPARATOR_ESC = "\\u002C"; // Unicode escape repr. of ','
 
     public ProductSetHandler(final Graph graph) {
         this.graph = graph;
@@ -101,7 +101,8 @@ public class ProductSetHandler {
             final Node psNode = graph.getNode(psData.getNodeID());
             for(String filePath : psData.fileList) {
 
-                ReplaceProductSetWithReaders(graph, psNode, "inserted--"+psNode.getId()+"--"+ cnt++, filePath);
+                ReplaceProductSetWithReaders(graph, psNode, cnt, "inserted--"+psNode.getId()+"--"+cnt, filePath);
+                ++cnt;
             }
             if(!psData.fileList.isEmpty()) {
                 for(Node n : graph.getNodes()) {
@@ -112,7 +113,8 @@ public class ProductSetHandler {
         }
     }
 
-    private static void ReplaceProductSetWithReaders(final Graph graph, final Node psNode, final String id, String value) {
+    private static void ReplaceProductSetWithReaders(final Graph graph, final Node psNode, final int newNodeCnt,
+                                                     final String id, String value) {
 
         final Node newNode = new Node(id, OperatorSpi.getOperatorAlias(ReadOp.class));
         final XppDomElement config = new XppDomElement("parameters");
@@ -122,13 +124,13 @@ public class ProductSetHandler {
         newNode.setConfiguration(config);
 
         graph.addNode(newNode);
-        switchConnections(graph, newNode, psNode);
+        switchConnections(graph, newNode, newNodeCnt, psNode);
     }
 
-    private static void switchConnections(final Graph graph, final Node newNode, final Node oldNode) {
+    private static void switchConnections(final Graph graph, final Node newNode, final int newNodeCnt, final Node oldNode) {
         for(Node n : graph.getNodes()) {
             if(isNodeSource(n, oldNode)) {
-                final NodeSource ns = new NodeSource("sourceProduct", newNode.getId());
+                final NodeSource ns = new NodeSource("sourceProduct." + newNodeCnt, newNode.getId());
                 n.addSource(ns);
             }
         }
