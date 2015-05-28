@@ -7,10 +7,12 @@ import org.esa.snap.framework.datamodel.MetadataAttribute;
 import org.esa.snap.framework.datamodel.MetadataElement;
 import org.esa.snap.framework.datamodel.Product;
 import org.esa.snap.framework.datamodel.ProductData;
+import ucar.nc2.Dimension;
 import ucar.nc2.Variable;
 
 import java.awt.image.RenderedImage;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * @author Tonio Fincke
@@ -55,19 +57,23 @@ class MetTxReader extends S3NetcdfReader {
     @Override
     protected void addVariableMetadata(Variable variable, Product product) {
         super.addVariableMetadata(variable, product);
-        if (variable.getFullName().equals("atmospheric_temperature_profile")) {
-            final MetadataElement atmosphericTemperatureProfileElement =
-                    product.getMetadataRoot().getElement("Variable_Attributes").getElement("atmospheric_temperature_profile");
+        List<Dimension> variableDimensions = variable.getDimensions();
+        if (variableDimensions.size() == 1) {
+            MetadataElement variableElement =
+                    product.getMetadataRoot().getElement("Variable_Attributes").getElement(variable.getFullName());
             try {
-                final Variable referencePressureLevelVariable =
-                        getNetcdfFile().findVariable("reference_pressure_level");
-                final ProductData referencePressureLevelData =
-                        ProductData.createInstance((float[]) referencePressureLevelVariable.read().copyTo1DJavaArray());
-                final MetadataAttribute referencePressureLevelAttribute =
-                        new MetadataAttribute("reference_pressure_level", referencePressureLevelData, true);
-                referencePressureLevelAttribute.setUnit(referencePressureLevelVariable.getUnitsString());
-                referencePressureLevelAttribute.setDescription(referencePressureLevelVariable.getDescription());
-                atmosphericTemperatureProfileElement.addAttribute(referencePressureLevelAttribute);
+                Object data = variable.read().copyTo1DJavaArray();
+                ProductData variableData;
+                if (data instanceof float[]) {
+                    variableData = ProductData.createInstance((float[]) data);
+                } else {
+                    variableData = ProductData.createInstance((short[]) data);
+                }
+                final MetadataAttribute variableAttribute =
+                        new MetadataAttribute("values", variableData, true);
+                variableAttribute.setUnit(variable.getUnitsString());
+                variableAttribute.setDescription(variable.getDescription());
+                variableElement.addAttribute(variableAttribute);
             } catch (IOException e) {
                 e.printStackTrace();
             }
