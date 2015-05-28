@@ -23,6 +23,7 @@ import ucar.nc2.Variable;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -68,11 +69,11 @@ public class S3NetcdfReader {
 
     }
 
-    protected String[] getSeparatingThirdDimensions() {
+    protected String[] getSeparatingDimensions() {
         return new String[0];
     }
 
-    protected String[] getSuffixesForSeparatingThirdDimensions() {
+    protected String[] getSuffixesForSeparatingDimensions() {
         return new String[0];
     }
 
@@ -89,28 +90,50 @@ public class S3NetcdfReader {
             variableName = variableName.substring(0, variableName.indexOf("_msb"));
         }
         Variable variable = null;
-        int dimensionIndex = -1;
-        String dimensionName = "";
-        final String[] separatingDimensions = getSeparatingThirdDimensions();
-        final String[] suffixesForSeparatingThirdDimensions = getSuffixesForSeparatingThirdDimensions();
+        List<String> dimensionNameList = new ArrayList();
+        List<Integer> dimensionIndexList = new ArrayList();
+        final String[] separatingDimensions = getSeparatingDimensions();
+        final String[] suffixesForSeparatingThirdDimensions = getSuffixesForSeparatingDimensions();
+        int lowestSuffixIndex = Integer.MAX_VALUE;
         for (int i = 0; i < separatingDimensions.length; i++) {
             final String dimension = separatingDimensions[i];
             final String suffix = suffixesForSeparatingThirdDimensions[i];
             if (bandName.contains(suffix)) {
-                variableName = bandName.substring(0, variableName.indexOf(suffix) - 1);
-                variable = netcdfFile.findVariable(variableName);
-                dimensionName = dimension;
-                dimensionIndex = Integer.parseInt(bandName.substring(bandName.lastIndexOf("_") + 1)) - 1;
+                final int suffixIndex = bandName.indexOf(suffix) - 1;
+                if (suffixIndex < lowestSuffixIndex) {
+                    lowestSuffixIndex = suffixIndex;
+                }
+                dimensionNameList.add(dimension);
+                dimensionIndexList.add(getDimensionIndexFromBandName(bandName));
             }
+        }
+        if (lowestSuffixIndex < bandName.length()) {
+            variableName = bandName.substring(0, lowestSuffixIndex);
+            variable = netcdfFile.findVariable(variableName);
         }
         if (variable == null) {
             variable = netcdfFile.findVariable(variableName);
         }
-        return createImage(band, variable, dimensionName, dimensionIndex);
+        Dimension widthDimension = getWidthDimension();
+        int xIndex = -1;
+        int yIndex = -1;
+        if (widthDimension != null) {
+            xIndex = variable.findDimensionIndex(widthDimension.getFullName());
+        }
+        Dimension heightDimension = getHeightDimension();
+        if (heightDimension != null) {
+            yIndex = variable.findDimensionIndex(heightDimension.getFullName());
+        }
+        String[] dimensionNames = dimensionNameList.toArray(new String[dimensionNameList.size()]);
+        int[] dimensionIndexes = new int[dimensionIndexList.size()];
+        for (int i = 0; i < dimensionIndexList.size(); i++) {
+            dimensionIndexes[i] = dimensionIndexList.get(i);
+        }
+        return new S3MultiLevelOpImage(band, variable, dimensionNames, dimensionIndexes, xIndex, yIndex);
     }
 
-    protected RenderedImage createImage(Band band, Variable variable, String dimensionName, int dimensionIndex) {
-        return new S3MultiLevelOpImage(band, variable, dimensionName, dimensionIndex, false);
+    protected int getDimensionIndexFromBandName(String bandName) {
+        return Integer.parseInt(bandName.substring(bandName.lastIndexOf("_") + 1)) - 1;
     }
 
     private void addGlobalMetadata(Product product) {
@@ -136,8 +159,8 @@ public class S3NetcdfReader {
                 if (variable.findDimensionIndex(rowColumnNamePair[0]) != -1 &&
                         variable.findDimensionIndex(rowColumnNamePair[1]) != -1) {
                     final String variableName = variable.getFullName();
-                    final String[] dimensions = getSeparatingThirdDimensions();
-                    final String[] suffixes = getSuffixesForSeparatingThirdDimensions();
+                    final String[] dimensions = getSeparatingDimensions();
+                    final String[] suffixes = getSuffixesForSeparatingDimensions();
                     boolean variableHasBeenAdded = false;
                     for (int i = 0; i < dimensions.length; i++) {
                         String dimensionName = dimensions[i];
@@ -503,25 +526,41 @@ public class S3NetcdfReader {
     }
 
     int getWidth() {
-        final String[][] rowColumnNamePairs = getRowColumnNamePairs();
-        for (String[] rowColumnNamePair : rowColumnNamePairs) {
-            final Dimension widthDimension = netcdfFile.findDimension(rowColumnNamePair[1]);
-            if (widthDimension != null) {
-                return widthDimension.getLength();
-            }
+        Dimension widthDimension = getWidthDimension();
+        if(widthDimension != null) {
+            return widthDimension.getLength();
         }
         return 0;
     }
 
+    private Dimension getWidthDimension() {
+        final String[][] rowColumnNamePairs = getRowColumnNamePairs();
+        for (String[] rowColumnNamePair : rowColumnNamePairs) {
+            final Dimension widthDimension = netcdfFile.findDimension(rowColumnNamePair[1]);
+            if (widthDimension != null) {
+                return widthDimension;
+            }
+        }
+        return null;
+    }
+
     int getHeight() {
+        Dimension heightDimension = getHeightDimension();
+        if(heightDimension != null) {
+            return heightDimension.getLength();
+        }
+        return 0;
+    }
+
+    private Dimension getHeightDimension() {
         final String[][] rowColumnNamePairs = getRowColumnNamePairs();
         for (String[] rowColumnNamePair : rowColumnNamePairs) {
             final Dimension heightDimension = netcdfFile.findDimension(rowColumnNamePair[0]);
             if (heightDimension != null) {
-                return heightDimension.getLength();
+                return heightDimension;
             }
         }
-        return 0;
+        return null;
     }
 
     String readProductType() {

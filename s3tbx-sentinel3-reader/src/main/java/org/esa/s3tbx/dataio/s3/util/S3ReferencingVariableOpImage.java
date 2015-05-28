@@ -2,7 +2,9 @@ package org.esa.s3tbx.dataio.s3.util;
 
 import org.esa.snap.dataio.netcdf.util.Constants;
 import org.esa.snap.jai.ResolutionLevel;
+import org.esa.snap.jai.SingleBandedOpImage;
 import ucar.ma2.Array;
+import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
 import ucar.ma2.Section;
 import ucar.nc2.Attribute;
@@ -18,7 +20,7 @@ import java.io.IOException;
 /**
  * @author Tonio Fincke
  */
-public class S3ReferencingVariableOpImage extends S3VariableOpImage {
+public class S3ReferencingVariableOpImage extends SingleBandedOpImage {
 
     private final Variable referencedIndexVariable;
     private final VariableIF variable;
@@ -26,10 +28,10 @@ public class S3ReferencingVariableOpImage extends S3VariableOpImage {
 
     //todo use this to display fires in SLSTR L2 LST products when data is available
     public S3ReferencingVariableOpImage(VariableIF variable, int dataBufferType, int sourceWidth, int sourceHeight,
-                                        Dimension tileSize, ResolutionLevel level, int dimensionIndex,
+                                        Dimension tileSize, ResolutionLevel level, int[] additionalDimensionIndexes,
                                         Variable referencedIndexVariable, String nameOfReferencingDimension,
                                         String nameOfDisplayedDimension) {
-        super(variable, dataBufferType, sourceWidth, sourceHeight, tileSize, level, "", dimensionIndex, false);
+        super(dataBufferType, sourceWidth, sourceHeight, tileSize, null, level);
         this.variable = variable;
         dimensionValuesProvider = getDimensionValuesProvider();
         int displayedDimensionIndex = variable.findDimensionIndex(nameOfDisplayedDimension);
@@ -38,7 +40,7 @@ public class S3ReferencingVariableOpImage extends S3VariableOpImage {
         final int numDetectors = variable.getDimension(referencingDimensionIndex).getLength();
         if (displayedDimensionIndex >= 0) {
             int[] variableOrigin = new int[2];
-            variableOrigin[displayedDimensionIndex] = dimensionIndex;
+            variableOrigin[displayedDimensionIndex] = additionalDimensionIndexes[0];
             variableOrigin[referencingDimensionIndex] = 0;
             int[] variableShape = new int[2];
             variableShape[displayedDimensionIndex] = 1;
@@ -51,8 +53,8 @@ public class S3ReferencingVariableOpImage extends S3VariableOpImage {
             variableShape[referencingDimensionIndex] = numDetectors;
             dimensionValuesProvider.readValues(variableOrigin, variableShape);
         }
-    }
 
+    }
 
     @Override
     protected void computeRect(PlanarImage[] sourceImages, WritableRaster tile, Rectangle rectangle) {
@@ -91,6 +93,14 @@ public class S3ReferencingVariableOpImage extends S3VariableOpImage {
         tile.setDataElements(rectangle.x, rectangle.y, rectangle.width, rectangle.height, transformStorage(variableValues));
     }
 
+    protected int getIndexX(int rank) {
+        return rank - 1;
+    }
+
+    protected int getIndexY(int rank) {
+        return rank - 2;
+    }
+
     private DimensionValuesProvider getDimensionValuesProvider() {
         switch (variable.getDataType()) {
             case FLOAT:
@@ -99,6 +109,45 @@ public class S3ReferencingVariableOpImage extends S3VariableOpImage {
                 return new ShortDimensionValuesProvider();
         }
         return new NullDimensionValuesProvider();
+    }
+
+    /**
+     * Returns the origin of the x dimension of the variable, which
+     * provides the image data.
+     *
+     * @return the origin of the x dimension.
+     */
+    protected int getSourceOriginX() {
+        return 0;
+    }
+
+    /**
+     * Returns the origin of the y dimension of the variable, which
+     * provides the image data.
+     *
+     * @return the origin of the y dimension.
+     */
+    protected int getSourceOriginY() {
+        return 0;
+    }
+
+    /**
+     * Transforms the primitive storage of the array supplied as argument.
+     * <p>
+     * The default implementation merely returns the primitive storage of
+     * the array supplied as argument, which is fine when the sequence of
+     * variable dimensions is (..., y, x).
+     * <p>
+     * Implementations have to transpose the storage when the sequence of
+     * variable dimensions is (..., x, y) instead of (..., y, x).
+     * <p>
+     *
+     * @param array An array.
+     * @return the transformed primitive storage of the array supplied as
+     * argument.
+     */
+    protected Object transformStorage(Array array) {
+        return array.getStorage();
     }
 
     //copied from CfBandPart

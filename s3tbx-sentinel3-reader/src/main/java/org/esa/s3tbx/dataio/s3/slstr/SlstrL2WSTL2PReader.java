@@ -14,12 +14,12 @@ public class SlstrL2WSTL2PReader extends S3NetcdfReader {
     }
 
     @Override
-    protected String[] getSeparatingThirdDimensions() {
+    protected String[] getSeparatingDimensions() {
         return new String[]{"channel"};
     }
 
     @Override
-    protected String[] getSuffixesForSeparatingThirdDimensions() {
+    protected String[] getSuffixesForSeparatingDimensions() {
         return new String[]{"channel"};
     }
 }

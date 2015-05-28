@@ -1,5 +1,7 @@
-package org.esa.s3tbx.dataio.s3.util;
+package org.esa.s3tbx.dataio.s3.slstr;
 
+import org.esa.s3tbx.dataio.s3.util.S3MultiLevelOpImage;
+import org.esa.s3tbx.dataio.s3.util.S3NetcdfReader;
 import org.esa.snap.framework.datamodel.Band;
 import org.esa.snap.framework.datamodel.MetadataAttribute;
 import org.esa.snap.framework.datamodel.MetadataElement;
@@ -13,24 +15,41 @@ import java.io.IOException;
 /**
  * @author Tonio Fincke
  */
-public class TieMeteoReader extends S3NetcdfReader {
+class MetTxReader extends S3NetcdfReader {
 
-    public TieMeteoReader(String pathToFile) throws IOException {
+    MetTxReader(String pathToFile) throws IOException {
         super(pathToFile);
     }
 
     @Override
     protected String[] getSeparatingDimensions() {
-//        return new String[]{"wind_vectors"};
-        //todo use this later - currently it slows the reader down during product opening
-        return new String[]{"wind_vectors", "tie_pressure_levels"};
+//        return new String[]{"n_bound", "t_single", "t_series", "p_atmos"};
+        return new String[]{"n_bound", "t_series", "p_atmos"};
     }
 
     @Override
     protected String[] getSuffixesForSeparatingDimensions() {
-//        return new String[]{"vector"};
-        //todo use this later - currently it slows the reader down during product opening
-                return new String[]{"vector", "pressure_level"};
+//        return new String[]{"bound", "time_single", "time_series", "pressure_level"};
+        return new String[]{"bound", "time_series", "pressure_level"};
+    }
+
+    @Override
+    protected void addVariableAsBand(Product product, Variable variable, String variableName, boolean synthetic) {
+        String[] suffixesForSeparatingDimensions = getSuffixesForSeparatingDimensions();
+        for (String suffixForSeparatingDimension : suffixesForSeparatingDimensions) {
+            if (variableName.contains(suffixForSeparatingDimension)) {
+                variableName = variableName + "_tx";
+                break;
+            }
+        }
+        super.addVariableAsBand(product, variable, variableName, synthetic);
+    }
+
+    @Override
+    protected int getDimensionIndexFromBandName(String bandName) {
+        final int end = bandName.lastIndexOf("_");
+        final int start = bandName.substring(0, end).lastIndexOf("_");
+        return Integer.parseInt(bandName.substring(start + 1, end)) - 1;
     }
 
     @Override

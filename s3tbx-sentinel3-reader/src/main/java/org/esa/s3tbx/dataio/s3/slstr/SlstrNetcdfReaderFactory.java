@@ -18,6 +18,8 @@ public class SlstrNetcdfReaderFactory {
             return new SlstrL2WSTL2PReader(file.getAbsolutePath());
         } else if(fileName.equals("LST_ancillary_ds.nc")) {
             return new SlstrLSTAncillaryDsReader(file.getAbsolutePath());
+        } else if(fileName.equals("met_tx.nc")) {
+            return new MetTxReader(file.getAbsolutePath());
         } else {
             return new S3NetcdfReader(file.getAbsolutePath());
         }
