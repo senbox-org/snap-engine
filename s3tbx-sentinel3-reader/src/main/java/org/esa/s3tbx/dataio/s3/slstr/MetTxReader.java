@@ -70,7 +70,7 @@ class MetTxReader extends S3NetcdfReader {
                     variableData = ProductData.createInstance((short[]) data);
                 }
                 final MetadataAttribute variableAttribute =
-                        new MetadataAttribute("values", variableData, true);
+                        new MetadataAttribute("value", variableData, true);
                 variableAttribute.setUnit(variable.getUnitsString());
                 variableAttribute.setDescription(variable.getDescription());
                 variableElement.addAttribute(variableAttribute);
