@@ -465,6 +465,30 @@ public class S3NetcdfReader {
                 variableElement.addAttribute(metadataAttribute);
             }
         }
+        List<Dimension> variableDimensions = variable.getDimensions();
+        if (variableDimensions.size() == 1) {
+            try {
+                Object data = variable.read().copyTo1DJavaArray();
+                MetadataAttribute variableAttribute = null;
+                if (data instanceof float[]) {
+                    variableAttribute =
+                            new MetadataAttribute("value", ProductData.createInstance((float[]) data), true);
+                } else if (data instanceof short[]){
+                    variableAttribute =
+                            new MetadataAttribute("value", ProductData.createInstance((short[]) data), true);
+                } else if (data instanceof long[]){
+                    variableAttribute =
+                            new MetadataAttribute("value", ProductData.createInstance((long[]) data), true);
+                }
+                if (variableAttribute != null) {
+                    variableAttribute.setUnit(variable.getUnitsString());
+                    variableAttribute.setDescription(variable.getDescription());
+                    variableElement.addAttribute(variableAttribute);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         product.getMetadataRoot().getElement("Variable_Attributes").addElement(variableElement);
     }
 

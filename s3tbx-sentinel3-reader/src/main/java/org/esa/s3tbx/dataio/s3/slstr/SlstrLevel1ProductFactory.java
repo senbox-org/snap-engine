@@ -148,7 +148,7 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
                 return name.endsWith(".nc") &&
                         (name.contains("radiance") || name.contains("flags")
                         || name.contains("geodetic") || name.contains("BT") || name.contains("cartesian")
-                        || name.contains("indices") || name.contains("met")
+                        || name.contains("indices") || name.contains("met") || name.contains("time")
                 );
             }
         });

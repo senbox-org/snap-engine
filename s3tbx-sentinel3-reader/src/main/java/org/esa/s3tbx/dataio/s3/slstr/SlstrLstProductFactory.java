@@ -40,7 +40,7 @@ public class SlstrLstProductFactory extends SlstrL2ProductFactory {
         final String[] fileNames = directory.list(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
-                return name.endsWith(".nc") && !name.equals("time_in.nc");
+                return name.endsWith(".nc");
             }
         });
         //todo read from manifest as soon as it contains all files
