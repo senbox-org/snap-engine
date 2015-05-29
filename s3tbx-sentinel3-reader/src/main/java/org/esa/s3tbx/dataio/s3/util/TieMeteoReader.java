@@ -15,22 +15,27 @@ import java.io.IOException;
  */
 public class TieMeteoReader extends S3NetcdfReader {
 
-    public TieMeteoReader(String pathToFile) throws IOException {
+    private final boolean isFullResolutionProduct;
+
+    public TieMeteoReader(String pathToFile, boolean isFullResolutionProduct) throws IOException {
         super(pathToFile);
+        this.isFullResolutionProduct = isFullResolutionProduct;
     }
 
     @Override
     protected String[] getSeparatingDimensions() {
-//        return new String[]{"wind_vectors"};
-        //todo use this later - currently it slows the reader down during product opening
+        if (isFullResolutionProduct) {
+            return new String[]{"wind_vectors"};
+        }
         return new String[]{"wind_vectors", "tie_pressure_levels"};
     }
 
     @Override
     protected String[] getSuffixesForSeparatingDimensions() {
-//        return new String[]{"vector"};
-        //todo use this later - currently it slows the reader down during product opening
-                return new String[]{"vector", "pressure_level"};
+        if (isFullResolutionProduct) {
+            return new String[]{"vector"};
+        }
+        return new String[]{"vector", "pressure_level"};
     }
 
     @Override
