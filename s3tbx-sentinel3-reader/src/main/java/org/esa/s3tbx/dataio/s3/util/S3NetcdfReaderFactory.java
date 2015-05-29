@@ -8,10 +8,10 @@ import java.io.IOException;
  */
 public class S3NetcdfReaderFactory {
 
-    public static S3NetcdfReader createS3NetcdfReader(File file) throws IOException {
+    public static S3NetcdfReader createS3NetcdfReader(File file, boolean isFullResolutionProduct) throws IOException {
         final String fileName = file.getName();
-        if(fileName.equals("tie_meteo.nc")) {
-            return new TieMeteoReader(file.getAbsolutePath());
+        if (fileName.equals("tie_meteo.nc")) {
+            return new TieMeteoReader(file.getAbsolutePath(), isFullResolutionProduct);
         } else if (fileName.equals("instrument_data.nc")) {
             return new InstrumentDataReader(file.getAbsolutePath());
         } else {
