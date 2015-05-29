@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
  */
 abstract class OlciProductFactory extends AbstractProductFactory {
 
-    private final static String[] excludedIDs = new String[]{"timeCoordinatesData", "removedPixelsData"};
+    private final static String[] excludedIDs = new String[]{"removedPixelsData"};
 
     private Map<String, Float> nameToWavelengthMap;
     private Map<String, Float> nameToBandwidthMap;

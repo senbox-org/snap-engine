@@ -20,22 +20,17 @@ public class TieMeteoReader extends S3NetcdfReader {
     }
 
     @Override
-    protected String[] getSeparatingThirdDimensions() {
-        return new String[]{"wind_vectors"};
+    protected String[] getSeparatingDimensions() {
+//        return new String[]{"wind_vectors"};
         //todo use this later - currently it slows the reader down during product opening
-//        return new String[]{"wind_vectors", "tie_pressure_levels"};
+        return new String[]{"wind_vectors", "tie_pressure_levels"};
     }
 
     @Override
-    protected String[] getSuffixesForSeparatingThirdDimensions() {
-        return new String[]{"vector"};
+    protected String[] getSuffixesForSeparatingDimensions() {
+//        return new String[]{"vector"};
         //todo use this later - currently it slows the reader down during product opening
-        //        return new String[]{"vector", "pressure_level"};
-    }
-
-    @Override
-    protected RenderedImage createImage(Band band, Variable variable, String dimensionName, int dimensionIndex) {
-        return new S3MultiLevelOpImage(band, variable, dimensionName, dimensionIndex, true);
+                return new String[]{"vector", "pressure_level"};
     }
 
     @Override

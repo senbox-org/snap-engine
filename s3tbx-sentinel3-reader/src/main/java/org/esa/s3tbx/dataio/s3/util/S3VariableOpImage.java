@@ -18,38 +18,48 @@ import java.awt.image.WritableRaster;
 public class S3VariableOpImage extends SingleBandedOpImage {
 
     private final VariableIF variable;
-    private final int dimensionIndex;
-    private final String dimensionName;
-    private boolean dimensionsSequenceIsWrong;
     private ArrayConverter converter;
+    private int xIndex;
+    private int yIndex;
+    private int[] additionalDimensionIndexes;
+    private String[] additionalDimensionNames;
 
     public S3VariableOpImage(VariableIF variable, int dataBufferType, int sourceWidth, int sourceHeight,
-                         Dimension tileSize, ResolutionLevel level, String dimensionName, int dimensionIndex,
-                         boolean dimensionsSequenceIsWrong) {
-        this(variable, dataBufferType, sourceWidth, sourceHeight, tileSize, level, dimensionName, dimensionIndex,
-             dimensionsSequenceIsWrong, ArrayConverter.IDENTITY);
+                         Dimension tileSize, ResolutionLevel level,
+                             String[] additionalDimensionNames, int[] additionalDimensionIndexes,
+                             int xIndex, int yIndex
+    ) {
+        this(variable, dataBufferType, sourceWidth, sourceHeight, tileSize, level,
+             additionalDimensionNames, additionalDimensionIndexes, xIndex, yIndex,
+             ArrayConverter.IDENTITY);
     }
 
     static S3VariableOpImage createS3VariableOpImage(VariableIF variable, int dataBufferType, int sourceWidth, int sourceHeight,
-                                   Dimension tileSize, ResolutionLevel level, String dimensionName, int dimensionIndex,
-                                   boolean dimensionsSequenceIsWrong, boolean msb) {
+                                   Dimension tileSize, ResolutionLevel level,
+                                                     String[] additionalDimensionNames, int[] additionalDimensionIndexes,
+                                                     int xIndex, int yIndex,
+                                                     boolean msb) {
         if(msb) {
             return new S3VariableOpImage(variable, dataBufferType, sourceWidth, sourceHeight, tileSize, level,
-                                         dimensionName, dimensionIndex, dimensionsSequenceIsWrong, ArrayConverter.MSB);
+                                         additionalDimensionNames, additionalDimensionIndexes, xIndex, yIndex,
+                                         ArrayConverter.MSB);
         } else {
             return new S3VariableOpImage(variable, dataBufferType, sourceWidth, sourceHeight, tileSize, level,
-                                         dimensionName, dimensionIndex, dimensionsSequenceIsWrong, ArrayConverter.LSB);
+                                         additionalDimensionNames, additionalDimensionIndexes, xIndex, yIndex,
+                                         ArrayConverter.LSB);
         }
     }
 
     private S3VariableOpImage(VariableIF variable, int dataBufferType, int sourceWidth, int sourceHeight,
-                             Dimension tileSize, ResolutionLevel level, String dimensionName, int dimensionIndex,
-                             boolean dimensionsSequenceIsWrong, ArrayConverter converter) {
+                             Dimension tileSize, ResolutionLevel level,
+                              String[] additionalDimensionNames, int[] additionalDimensionIndexes,
+                              int xIndex, int yIndex, ArrayConverter converter) {
         super(dataBufferType, sourceWidth, sourceHeight, tileSize, null, level);
         this.variable = variable;
-        this.dimensionName = dimensionName;
-        this.dimensionIndex = dimensionIndex;
-        this.dimensionsSequenceIsWrong = dimensionsSequenceIsWrong;
+        this.additionalDimensionNames = additionalDimensionNames;
+        this.additionalDimensionIndexes = additionalDimensionIndexes;
+        this.xIndex = xIndex;
+        this.yIndex = yIndex;
         this.converter = converter;
     }
 
@@ -64,8 +74,8 @@ public class S3VariableOpImage extends SingleBandedOpImage {
             origin[i] = 0;
             stride[i] = 1;
         }
-        final int indexX = getIndexX(rank);
-        final int indexY = getIndexY(rank);
+        final int indexX = xIndex;
+        final int indexY = yIndex;
 
         shape[indexX] = getSourceWidth(rectangle.width);
         shape[indexY] = getSourceHeight(rectangle.height);
@@ -77,9 +87,9 @@ public class S3VariableOpImage extends SingleBandedOpImage {
         stride[indexX] = (int) scale;
         stride[indexY] = (int) scale;
 
-        if(dimensionIndex >= 0) {
-            final int dimensionIndex1 = variable.findDimensionIndex(dimensionName);
-            origin[dimensionIndex1] = dimensionIndex;
+        for (int i = 0; i < additionalDimensionIndexes.length; i++) {
+            final int dimensionIndex1 = variable.findDimensionIndex(additionalDimensionNames[i]);
+            origin[dimensionIndex1] = additionalDimensionIndexes[i];
             stride[dimensionIndex1] = (int) scale;
         }
 
@@ -134,20 +144,6 @@ public class S3VariableOpImage extends SingleBandedOpImage {
      */
     protected Object transformStorage(Array array) {
         return array.getStorage();
-    }
-
-    protected int getIndexX(int rank) {
-        if (dimensionsSequenceIsWrong) {
-            return 1;
-        }
-        return rank - 1;
-    }
-
-    protected int getIndexY(int rank) {
-        if(dimensionsSequenceIsWrong) {
-            return 0;
-        }
-        return rank - 2;
     }
 
     private interface ArrayConverter {

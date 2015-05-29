@@ -65,7 +65,7 @@ public class InstrumentDataReader extends S3NetcdfReader {
         } else {
             variable = getNetcdfFile().findVariable(variableName);
         }
-        return new S3MultiLevelOpImage(band, variable, dimensionName, dimensionIndex,
+        return new S3MultiLevelOpImage(band, variable, new String[]{dimensionName}, new int[]{dimensionIndex},
                                        detectorIndexVariable, "detectors", dimensionName);
     }
 

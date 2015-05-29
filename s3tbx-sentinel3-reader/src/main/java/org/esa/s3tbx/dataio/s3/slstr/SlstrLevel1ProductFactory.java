@@ -146,10 +146,9 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
             @Override
             public boolean accept(File dir, String name) {
                 return name.endsWith(".nc") &&
-                        !name.contains("tx") &&
                         (name.contains("radiance") || name.contains("flags")
                         || name.contains("geodetic") || name.contains("BT") || name.contains("cartesian")
-                        || name.contains("indices") || name.contains("met")
+                        || name.contains("indices") || name.contains("met") || name.contains("time")
                 );
             }
         });
