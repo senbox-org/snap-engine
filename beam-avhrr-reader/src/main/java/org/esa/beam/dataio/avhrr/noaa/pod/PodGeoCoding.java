@@ -58,7 +58,7 @@ final class PodGeoCoding extends TiePointGeoCoding {
 
         final Rectangle bounds = new Rectangle(0, 0, lonGrid.getSceneRasterWidth(), lonGrid.getSceneRasterHeight());
         pixelPosEstimator = new PixelPosEstimator(approximations, bounds);
-        pixelFinder = new PodPixelFinder(lonImage, latImage, null, 0.01);
+        pixelFinder = new PodPixelFinder(lonImage, latImage, null, 0.025);  // slightly more than 2 km, half a border pixel
     }
 
     @Override
@@ -74,16 +74,20 @@ final class PodGeoCoding extends TiePointGeoCoding {
             }
             pixelPosEstimator.getPixelPos(geoPos, pixelPos);
             if (pixelPos.isValid()) {
-                // check that LAT displacement is less than 0.5
+                pixelFinder.findPixelPos(geoPos, pixelPos);
+            }
+            if (pixelPos.isValid()) {
+                // do not fill gap, check that LAT displacement is less than 0.05, about 4 km
                 int x = (int) Math.floor(pixelPos.x);
                 int y = (int) Math.floor(pixelPos.y);
                 try {
                     double lat = latImage.getData(new Rectangle(x, y, 1, 1)).getSampleDouble(x, y, 0);
-                    if (Math.abs(lat - geoPos.getLat()) > 0.5) {
+                    if (Math.abs(lat - geoPos.getLat()) > 0.05) {
                         pixelPos.setInvalid();
                     }
                 } catch (IllegalArgumentException iae) {
-                    pixelPosEstimator.getPixelPos(geoPos, pixelPos);
+                    //pixelPosEstimator.getPixelPos(geoPos, pixelPos);
+                    pixelPos.setInvalid();
                 }
 
             }
