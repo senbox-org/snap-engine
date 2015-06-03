@@ -164,9 +164,6 @@ public class SynL1CProductFactory extends AbstractProductFactory {
 
     @Override
     protected Product readProduct(String fileName) throws IOException {
-//        if (!fileName.startsWith("MISREGIST")) {
-//            return super.readProduct(fileName);
-//        }
         final File file = new File(getInputFileParentDirectory(), fileName);
         final S3NetcdfReader synNetcdfReader = SynNetcdfReaderFactory.createSynNetcdfReader(file);
         return synNetcdfReader.readProduct();
