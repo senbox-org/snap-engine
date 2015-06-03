@@ -222,7 +222,7 @@ public class S3NetcdfReader {
         }
     }
 
-    private void addFillValue(Band band, Variable variable) {
+    protected void addFillValue(Band band, Variable variable) {
         final Attribute fillValueAttribute = variable.findAttribute(fillValue);
         if (fillValueAttribute != null) {
             //todo double is not always correct
@@ -231,7 +231,7 @@ public class S3NetcdfReader {
         }
     }
 
-    private void addSampleCodings(Product product, Band band, Variable variable, boolean msb) {
+    protected void addSampleCodings(Product product, Band band, Variable variable, boolean msb) {
         final Attribute flagValuesAttribute = variable.findAttribute(flag_values);
         final Attribute flagMasksAttribute = variable.findAttribute(flag_masks);
         final Attribute flagMeaningsAttribute = variable.findAttribute(flag_meanings);
@@ -402,7 +402,7 @@ public class S3NetcdfReader {
         return flagName.replaceAll("\\W+", "_");
     }
 
-    private static double getScalingFactor(Variable variable) {
+    protected static double getScalingFactor(Variable variable) {
         Attribute attribute = variable.findAttribute(Constants.SCALE_FACTOR_ATT_NAME);
         if (attribute == null) {
             attribute = variable.findAttribute(Constants.SLOPE_ATT_NAME);
@@ -416,7 +416,7 @@ public class S3NetcdfReader {
         return 1.0;
     }
 
-    private static double getAddOffset(Variable variable) {
+    protected static double getAddOffset(Variable variable) {
         Attribute attribute = variable.findAttribute(Constants.ADD_OFFSET_ATT_NAME);
         if (attribute == null) {
             attribute = variable.findAttribute(Constants.INTERCEPT_ATT_NAME);

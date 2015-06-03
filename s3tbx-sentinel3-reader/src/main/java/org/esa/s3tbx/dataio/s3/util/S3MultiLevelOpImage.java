@@ -1,13 +1,14 @@
 package org.esa.s3tbx.dataio.s3.util;
 
 import org.esa.snap.dataio.netcdf.util.AbstractNetcdfMultiLevelImage;
+import org.esa.snap.framework.datamodel.ProductData;
 import org.esa.snap.framework.datamodel.RasterDataNode;
 import org.esa.snap.jai.ImageManager;
 import org.esa.snap.jai.ResolutionLevel;
 import ucar.nc2.Variable;
-import ucar.nc2.VariableIF;
 
 import java.awt.Dimension;
+import java.awt.image.DataBuffer;
 import java.awt.image.RenderedImage;
 
 /**
@@ -71,9 +72,15 @@ public class S3MultiLevelOpImage extends AbstractNetcdfMultiLevelImage {
                                                              sceneRasterHeight, imageTileSize, resolutionLevel,
                                                              dimensionNames, dimensionIndexes, xIndex, yIndex, true);
         }
-        return new S3VariableOpImage(variable, dataBufferType, sceneRasterWidth, sceneRasterHeight, imageTileSize,
-                              resolutionLevel, dimensionNames, dimensionIndexes, xIndex, yIndex);
-
+        if ((variable.getFullName().contains("row_corresp") || (variable.getFullName().contains("col_corresp"))) &&
+                rasterDataNode.getDataType() == ProductData.TYPE_UINT32) {
+            return new S3VariableOpImage(variable, DataBuffer.TYPE_FLOAT, sceneRasterWidth, sceneRasterHeight, imageTileSize,
+                                         resolutionLevel, dimensionNames, dimensionIndexes, xIndex, yIndex,
+                                         S3VariableOpImage.ArrayConverter.UINTCONVERTER);
+        } else {
+            return new S3VariableOpImage(variable, dataBufferType, sceneRasterWidth, sceneRasterHeight, imageTileSize,
+                                         resolutionLevel, dimensionNames, dimensionIndexes, xIndex, yIndex);
+        }
     }
 
 }

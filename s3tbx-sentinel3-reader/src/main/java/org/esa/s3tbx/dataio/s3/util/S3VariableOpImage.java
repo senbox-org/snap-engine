@@ -50,7 +50,7 @@ public class S3VariableOpImage extends SingleBandedOpImage {
         }
     }
 
-    private S3VariableOpImage(VariableIF variable, int dataBufferType, int sourceWidth, int sourceHeight,
+    public S3VariableOpImage(VariableIF variable, int dataBufferType, int sourceWidth, int sourceHeight,
                              Dimension tileSize, ResolutionLevel level,
                               String[] additionalDimensionNames, int[] additionalDimensionIndexes,
                               int xIndex, int yIndex, ArrayConverter converter) {
@@ -146,7 +146,7 @@ public class S3VariableOpImage extends SingleBandedOpImage {
         return array.getStorage();
     }
 
-    private interface ArrayConverter {
+    interface ArrayConverter {
 
         public ArrayConverter IDENTITY = new ArrayConverter() {
             @Override
@@ -172,6 +172,17 @@ public class S3VariableOpImage extends SingleBandedOpImage {
                 final Array convertedArray = Array.factory(DataType.INT, array.getShape());
                 for (int i = 0; i < convertedArray.getSize(); i++) {
                     convertedArray.setInt(i, (int) (array.getLong(i) >>> 32));
+                }
+                return convertedArray;
+            }
+        };
+
+        public ArrayConverter UINTCONVERTER = new ArrayConverter() {
+            @Override
+            public Array convert(Array array) {
+                final Array convertedArray = Array.factory(DataType.FLOAT, array.getShape());
+                for (int i = 0; i < convertedArray.getSize(); i++) {
+                    convertedArray.setFloat(i, array.getFloat(i));
                 }
                 return convertedArray;
             }
