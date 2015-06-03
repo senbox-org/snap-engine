@@ -115,6 +115,9 @@ public class LandsatGeotiffReader extends AbstractProductReader {
                 break;
             default:
                 productDim = landsatMetadata.getPanchromaticDim();
+                if(productDim == null) {
+                    productDim = landsatMetadata.getReflectanceDim();
+                }
         }
 
         MetadataElement metadataElement = landsatMetadata.getMetaDataElementRoot();
