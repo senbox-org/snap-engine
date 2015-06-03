@@ -73,7 +73,7 @@ public class S3NetcdfReader {
         return new String[0];
     }
 
-    protected String[] getSuffixesForSeparatingDimensions() {
+    public String[] getSuffixesForSeparatingDimensions() {
         return new String[0];
     }
 
@@ -161,7 +161,7 @@ public class S3NetcdfReader {
                     final String variableName = variable.getFullName();
                     final String[] dimensions = getSeparatingDimensions();
                     final String[] suffixes = getSuffixesForSeparatingDimensions();
-                    boolean variableHasBeenAdded = false;
+                    boolean variableMustStillBeAdded = true;
                     for (int i = 0; i < dimensions.length; i++) {
                         String dimensionName = dimensions[i];
                         if (variable.findDimensionIndex(dimensionName) != -1) {
@@ -170,11 +170,11 @@ public class S3NetcdfReader {
                             for (int j = 0; j < dimension.getLength(); j++) {
                                 addVariableAsBand(product, variable, variableName + "_" + suffixes[i] + "_" + (j + 1), false);
                             }
-                            variableHasBeenAdded = true;
+                            variableMustStillBeAdded = false;
                             break;
                         }
                     }
-                    if (!variableHasBeenAdded) {
+                    if (variableMustStillBeAdded) {
                         addVariableAsBand(product, variable, variableName, false);
                     }
                 }
@@ -290,8 +290,8 @@ public class S3NetcdfReader {
             switch (sampleValues.getDataType()) {
                 case BYTE:
                     sampleCoding.addSample(sampleName,
-                                            DataType.unsignedByteToShort(sampleValues.getNumericValue(i).byteValue()),
-                                            null);
+                                           DataType.unsignedByteToShort(sampleValues.getNumericValue(i).byteValue()),
+                                           null);
                     break;
                 case SHORT:
                     sampleCoding.addSample(sampleName,
@@ -328,7 +328,7 @@ public class S3NetcdfReader {
                 case BYTE:
                     int[] byteValues = {DataType.unsignedByteToShort(sampleMasks.getNumericValue(i).byteValue()),
                             DataType.unsignedByteToShort(sampleValues.getNumericValue(i).byteValue())};
-                    if(byteValues[0] == byteValues[1]) {
+                    if (byteValues[0] == byteValues[1]) {
                         sampleCoding.addSample(sampleName, byteValues[0], null);
                     } else {
                         sampleCoding.addSamples(sampleName, byteValues, null);
@@ -337,7 +337,7 @@ public class S3NetcdfReader {
                 case SHORT:
                     int[] shortValues = {DataType.unsignedShortToInt(sampleMasks.getNumericValue(i).shortValue()),
                             DataType.unsignedShortToInt(sampleValues.getNumericValue(i).shortValue())};
-                    if(shortValues[0] == shortValues[1]) {
+                    if (shortValues[0] == shortValues[1]) {
                         sampleCoding.addSample(sampleName, shortValues[0], null);
                     } else {
                         sampleCoding.addSamples(sampleName, shortValues, null);
@@ -346,7 +346,7 @@ public class S3NetcdfReader {
                 case INT:
                     int[] intValues = {sampleMasks.getNumericValue(i).intValue(),
                             sampleValues.getNumericValue(i).intValue()};
-                    if(intValues[0] == intValues[1]) {
+                    if (intValues[0] == intValues[1]) {
                         sampleCoding.addSample(sampleName, intValues[0], null);
                     } else {
                         sampleCoding.addSamples(sampleName, intValues, null);
@@ -358,9 +358,9 @@ public class S3NetcdfReader {
                             sampleValues.getNumericValue(i).longValue()};
                     if (msb) {
                         int[] intLongValues =
-                                {(int)(longValues[0] >>> 32), (int)(longValues[1] >>> 32)};
+                                {(int) (longValues[0] >>> 32), (int) (longValues[1] >>> 32)};
                         if (longValues[0] > 0) {
-                            if(intLongValues[0] == intLongValues[1]) {
+                            if (intLongValues[0] == intLongValues[1]) {
                                 sampleCoding.addSample(sampleName, intLongValues[0], null);
                             } else {
                                 sampleCoding.addSamples(sampleName, intLongValues, null);
@@ -368,9 +368,9 @@ public class S3NetcdfReader {
                         }
                     } else {
                         int[] intLongValues =
-                                {(int)(longValues[0] & 0x00000000FFFFFFFFL), (int)(longValues[1] & 0x00000000FFFFFFFFL)};
+                                {(int) (longValues[0] & 0x00000000FFFFFFFFL), (int) (longValues[1] & 0x00000000FFFFFFFFL)};
                         if (intLongValues[0] > 0 || longValues[0] == 0L) {
-                            if(intLongValues[0] == intLongValues[1]) {
+                            if (intLongValues[0] == intLongValues[1]) {
                                 sampleCoding.addSample(sampleName, intLongValues[0], null);
                             } else {
                                 sampleCoding.addSamples(sampleName, intLongValues, null);
@@ -473,10 +473,10 @@ public class S3NetcdfReader {
                 if (data instanceof float[]) {
                     variableAttribute =
                             new MetadataAttribute("value", ProductData.createInstance((float[]) data), true);
-                } else if (data instanceof short[]){
+                } else if (data instanceof short[]) {
                     variableAttribute =
                             new MetadataAttribute("value", ProductData.createInstance((short[]) data), true);
-                } else if (data instanceof long[]){
+                } else if (data instanceof long[]) {
                     variableAttribute =
                             new MetadataAttribute("value", ProductData.createInstance((long[]) data), true);
                 }
@@ -551,7 +551,7 @@ public class S3NetcdfReader {
 
     int getWidth() {
         Dimension widthDimension = getWidthDimension();
-        if(widthDimension != null) {
+        if (widthDimension != null) {
             return widthDimension.getLength();
         }
         return 0;
@@ -570,7 +570,7 @@ public class S3NetcdfReader {
 
     int getHeight() {
         Dimension heightDimension = getHeightDimension();
-        if(heightDimension != null) {
+        if (heightDimension != null) {
             return heightDimension.getLength();
         }
         return 0;

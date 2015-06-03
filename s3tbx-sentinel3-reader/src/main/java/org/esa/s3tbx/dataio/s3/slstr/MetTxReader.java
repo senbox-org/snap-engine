@@ -21,7 +21,7 @@ class MetTxReader extends S3NetcdfReader {
     }
 
     @Override
-    protected String[] getSuffixesForSeparatingDimensions() {
+    public String[] getSuffixesForSeparatingDimensions() {
         return new String[]{"bound", "time", "pressure_level"};
     }
 

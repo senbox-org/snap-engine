@@ -1,13 +1,11 @@
 package org.esa.s3tbx.dataio.s3.util;
 
-import org.esa.snap.framework.datamodel.Band;
 import org.esa.snap.framework.datamodel.MetadataAttribute;
 import org.esa.snap.framework.datamodel.MetadataElement;
 import org.esa.snap.framework.datamodel.Product;
 import org.esa.snap.framework.datamodel.ProductData;
 import ucar.nc2.Variable;
 
-import java.awt.image.RenderedImage;
 import java.io.IOException;
 
 /**
@@ -15,26 +13,17 @@ import java.io.IOException;
  */
 public class TieMeteoReader extends S3NetcdfReader {
 
-    private final boolean isFullResolutionProduct;
-
-    public TieMeteoReader(String pathToFile, boolean isFullResolutionProduct) throws IOException {
+    public TieMeteoReader(String pathToFile) throws IOException {
         super(pathToFile);
-        this.isFullResolutionProduct = isFullResolutionProduct;
     }
 
     @Override
     protected String[] getSeparatingDimensions() {
-        if (isFullResolutionProduct) {
-            return new String[]{"wind_vectors"};
-        }
         return new String[]{"wind_vectors", "tie_pressure_levels"};
     }
 
     @Override
-    protected String[] getSuffixesForSeparatingDimensions() {
-        if (isFullResolutionProduct) {
-            return new String[]{"vector"};
-        }
+    public String[] getSuffixesForSeparatingDimensions() {
         return new String[]{"vector", "pressure_level"};
     }
 

@@ -19,7 +19,7 @@ public class SlstrL2WSTL2PReader extends S3NetcdfReader {
     }
 
     @Override
-    protected String[] getSuffixesForSeparatingDimensions() {
+    public String[] getSuffixesForSeparatingDimensions() {
         return new String[]{"channel"};
     }
 }

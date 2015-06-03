@@ -28,6 +28,7 @@ import org.esa.snap.framework.datamodel.ProductNodeGroup;
 import org.esa.snap.framework.datamodel.RasterDataNode;
 import org.esa.snap.framework.datamodel.SampleCoding;
 import org.esa.snap.framework.datamodel.TiePointGrid;
+import org.esa.snap.runtime.Config;
 import org.esa.snap.util.ProductUtils;
 import org.esa.snap.util.io.FileUtils;
 import org.w3c.dom.Document;
@@ -63,12 +64,14 @@ public abstract class AbstractProductFactory implements ProductFactory {
             new Color(255, 127, 0),
             new Color(255, 0, 0)
     };
+    private final List<String> separatingDimensions;
 
     private volatile Manifest manifest;
 
     public AbstractProductFactory(Sentinel3ProductReader productReader) {
         this.productReader = productReader;
         this.logger = Logger.getLogger(getClass().getSimpleName());
+        separatingDimensions = new ArrayList<>();
     }
 
     protected final Logger getLogger() {
@@ -289,16 +292,18 @@ public abstract class AbstractProductFactory implements ProductFactory {
     }
 
     protected void addDataNodes(Product masterProduct, Product targetProduct) throws IOException {
+        final boolean loadProfileTiepoints =
+                Config.instance().preferences().getBoolean("s3tbx.reader.loadProfileTiepoints", false);
         final int w = targetProduct.getSceneRasterWidth();
         final int h = targetProduct.getSceneRasterHeight();
         for (final Product sourceProduct : openProductList) {
             final Map<String, String> mapping = new HashMap<String, String>();
             for (final Band sourceBand : sourceProduct.getBands()) {
                 if (!sourceBand.getName().contains("orphan")) {
-                    final RasterDataNode targetNode;
+                    RasterDataNode targetNode = null;
                     if (sourceBand.getSceneRasterWidth() == w && sourceBand.getSceneRasterHeight() == h) {
                         targetNode = addBand(sourceBand, targetProduct);
-                    } else {
+                    } else if (loadProfileTiepoints || !isProfileNode(sourceBand.getName())) {
                         targetNode = addSpecialNode(masterProduct, sourceBand, targetProduct);
                     }
                     if (targetNode != null) {
@@ -380,6 +385,24 @@ public abstract class AbstractProductFactory implements ProductFactory {
 
     protected final String getProductName() {
         return FileUtils.getFilenameWithoutExtension(getInputFileParentDirectory());
+    }
+
+
+    protected void addSeparatingDimensions(String[] suffixesForSeparatingDimensions) {
+        for (String suffixForSeparatingDimension : suffixesForSeparatingDimensions) {
+            if (!separatingDimensions.contains(suffixForSeparatingDimension)) {
+                separatingDimensions.add(suffixForSeparatingDimension);
+            }
+        }
+    }
+
+    private boolean isProfileNode(String targetNodeName) {
+        for (String suffixForSeparatingDimension : separatingDimensions) {
+            if (targetNodeName.contains("_" + suffixForSeparatingDimension + "_")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     protected abstract List<String> getFileNames(Manifest manifest);

@@ -157,10 +157,9 @@ abstract class OlciProductFactory extends AbstractProductFactory {
 
     @Override
     protected Product readProduct(String fileName) throws IOException {
-        String productName = getProductName();
-        boolean isFullResolutionProduct = productName.contains("FR");
         final File file = new File(getInputFileParentDirectory(), fileName);
-        final S3NetcdfReader reader = S3NetcdfReaderFactory.createS3NetcdfReader(file, isFullResolutionProduct);
+        final S3NetcdfReader reader = S3NetcdfReaderFactory.createS3NetcdfReader(file);
+        addSeparatingDimensions(reader.getSuffixesForSeparatingDimensions());
         return reader.readProduct();
     }
 

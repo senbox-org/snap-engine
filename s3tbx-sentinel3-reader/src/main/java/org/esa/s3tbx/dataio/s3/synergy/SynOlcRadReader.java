@@ -29,7 +29,7 @@ public class SynOlcRadReader extends S3NetcdfReader {
     }
 
     @Override
-    protected String[] getSuffixesForSeparatingDimensions() {
+    public String[] getSuffixesForSeparatingDimensions() {
         return new String[]{"CAM"};
     }
 
