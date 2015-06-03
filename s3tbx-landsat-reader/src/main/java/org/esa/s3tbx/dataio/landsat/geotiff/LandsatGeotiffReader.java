@@ -109,6 +109,9 @@ public class LandsatGeotiffReader extends AbstractProductReader {
         switch (targetResolution) {
             case L8_REFLECTIVE:
                 productDim = landsatMetadata.getReflectanceDim();
+                if(productDim == null) {
+                    productDim = landsatMetadata.getThermalDim();
+                }
                 break;
             case L8_PANCHROMATIC:
                 productDim = landsatMetadata.getPanchromaticDim();
