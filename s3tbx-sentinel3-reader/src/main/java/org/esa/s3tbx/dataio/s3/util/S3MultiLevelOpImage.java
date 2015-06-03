@@ -72,6 +72,7 @@ public class S3MultiLevelOpImage extends AbstractNetcdfMultiLevelImage {
                                                              sceneRasterHeight, imageTileSize, resolutionLevel,
                                                              dimensionNames, dimensionIndexes, xIndex, yIndex, true);
         }
+        //todo remove references to specific band names
         if ((variable.getFullName().contains("row_corresp") || (variable.getFullName().contains("col_corresp"))) &&
                 rasterDataNode.getDataType() == ProductData.TYPE_UINT32) {
             return new S3VariableOpImage(variable, DataBuffer.TYPE_FLOAT, sceneRasterWidth, sceneRasterHeight, imageTileSize,
