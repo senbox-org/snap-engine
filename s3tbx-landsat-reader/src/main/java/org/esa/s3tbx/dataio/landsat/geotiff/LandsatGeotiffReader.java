@@ -105,6 +105,7 @@ public class LandsatGeotiffReader extends AbstractProductReader {
             throw new IOException("Can not read metadata file: " + mtlFile.getAbsolutePath());
         }
         landsatMetadata = LandsatMetadataFactory.create(mtlFile);
+        // todo - retrieving the product dimension needs a revision
         Dimension productDim;
         switch (targetResolution) {
             case L8_REFLECTIVE:
@@ -120,6 +121,9 @@ public class LandsatGeotiffReader extends AbstractProductReader {
                 productDim = landsatMetadata.getPanchromaticDim();
                 if(productDim == null) {
                     productDim = landsatMetadata.getReflectanceDim();
+                }
+                if(productDim == null) {
+                    productDim = landsatMetadata.getThermalDim();
                 }
         }
 
