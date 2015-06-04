@@ -45,18 +45,23 @@
         <folder name="File">
             <folder name="Import">
                 <folder name="Optical Sensors">
-                    <file name="org-esa-s3tbx-dataio-landsat-ImportLandsatFASTProduct.shadow">
-                        <attr name="originalFile" stringvalue="Actions/Readers/org-esa-s3tbx-dataio-landsat-ImportLandsatFASTProduct.instance"/>
-                    </file>
-                    <file name="org-esa-s3tbx-dataio-landsat-ImportLandsatGeoTIFFProduct.shadow">
-                        <attr name="originalFile" stringvalue="Actions/Readers/org-esa-s3tbx-dataio-landsat-ImportLandsatGeoTIFFProduct.instance"/>
-                    </file>
-                    <file name="org-esa-s3tbx-dataio-landsat-ImportLandsat815GeoTIFFProduct.shadow">
-                        <attr name="originalFile" stringvalue="Actions/Readers/org-esa-s3tbx-dataio-landsat-ImportLandsat815GeoTIFFProduct.instance"/>
-                    </file>
-                    <file name="org-esa-s3tbx-dataio-landsat-ImportLandsat830GeoTIFFProduct.shadow">
-                        <attr name="originalFile" stringvalue="Actions/Readers/org-esa-s3tbx-dataio-landsat-ImportLandsat830GeoTIFFProduct.instance"/>
-                    </file>
+                    <folder name="Landsat">
+                        <file name="org-esa-s3tbx-dataio-landsat-ImportLandsatFASTProduct.shadow">
+                            <attr name="originalFile" stringvalue="Actions/Readers/org-esa-s3tbx-dataio-landsat-ImportLandsatFASTProduct.instance"/>
+                        </file>
+                        <file name="org-esa-s3tbx-dataio-landsat-ImportLandsatGeoTIFFProduct.shadow">
+                            <attr name="originalFile"
+                                  stringvalue="Actions/Readers/org-esa-s3tbx-dataio-landsat-ImportLandsatGeoTIFFProduct.instance"/>
+                        </file>
+                        <file name="org-esa-s3tbx-dataio-landsat-ImportLandsat815GeoTIFFProduct.shadow">
+                            <attr name="originalFile"
+                                  stringvalue="Actions/Readers/org-esa-s3tbx-dataio-landsat-ImportLandsat815GeoTIFFProduct.instance"/>
+                        </file>
+                        <file name="org-esa-s3tbx-dataio-landsat-ImportLandsat830GeoTIFFProduct.shadow">
+                            <attr name="originalFile"
+                                  stringvalue="Actions/Readers/org-esa-s3tbx-dataio-landsat-ImportLandsat830GeoTIFFProduct.instance"/>
+                        </file>
+                    </folder>
                 </folder>
             </folder>
         </folder>

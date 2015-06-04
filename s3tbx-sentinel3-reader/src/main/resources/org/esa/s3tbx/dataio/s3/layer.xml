@@ -61,18 +61,20 @@
         <folder name="File">
             <folder name="Import">
                 <folder name="Optical Sensors">
-                    <file name="org-esa-s3tbx-dataio-s3-ImportSentinel3Product.shadow">
-                        <attr name="originalFile"
-                              stringvalue="Actions/Readers/org-esa-s3tbx-dataio-s3-ImportSentinel3Product.instance"/>
-                    </file>
-                    <file name="org-esa-s3tbx-dataio-s3-slstr-ImportSlstrL1B500mProduct.shadow">
-                        <attr name="originalFile"
-                              stringvalue="Actions/Readers/org-esa-s3tbx-dataio-s3-slstr-ImportSlstrL1B500mProduct.instance"/>
-                    </file>
-                    <file name="org-esa-s3tbx-dataio-s3-slstr-ImportSlstrL1B1kmProduct.shadow">
-                        <attr name="originalFile"
-                              stringvalue="Actions/Readers/org-esa-s3tbx-dataio-s3-slstr-ImportSlstrL1B1kmProduct.instance"/>
-                    </file>
+                    <folder name="Sentinel-3">
+                        <file name="org-esa-s3tbx-dataio-s3-ImportSentinel3Product.shadow">
+                            <attr name="originalFile"
+                                  stringvalue="Actions/Readers/org-esa-s3tbx-dataio-s3-ImportSentinel3Product.instance"/>
+                        </file>
+                        <file name="org-esa-s3tbx-dataio-s3-slstr-ImportSlstrL1B500mProduct.shadow">
+                            <attr name="originalFile"
+                                  stringvalue="Actions/Readers/org-esa-s3tbx-dataio-s3-slstr-ImportSlstrL1B500mProduct.instance"/>
+                        </file>
+                        <file name="org-esa-s3tbx-dataio-s3-slstr-ImportSlstrL1B1kmProduct.shadow">
+                            <attr name="originalFile"
+                                  stringvalue="Actions/Readers/org-esa-s3tbx-dataio-s3-slstr-ImportSlstrL1B1kmProduct.instance"/>
+                        </file>
+                    </folder>
                     <file name="org-esa-s3tbx-dataio-s3-meris-ImportMerisL1InS3FormatProduct.shadow">
                         <attr name="originalFile"
                               stringvalue="Actions/Readers/org-esa-s3tbx-dataio-s3-meris-ImportMerisL1InS3FormatProduct.instance"/>

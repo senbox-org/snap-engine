@@ -20,7 +20,8 @@
                 <attr name="formatName" stringvalue="SeaDAS-L2"/>
                 <attr name="useAllFileFilter" boolvalue="true"/>
                 <attr name="helpId" stringvalue="importSeadasL2Product"/>
-                <attr name="ShortDescription" stringvalue="Import a SeaDAS-supported Level 2 (CZCS, OCTS, SeaWiFS, MODIS, VIIRS, etc.) data product."/>
+                <attr name="ShortDescription"
+                      stringvalue="Import a SeaDAS-supported Level 2 (CZCS, OCTS, SeaWiFS, MODIS, VIIRS, etc.) data product."/>
             </file>
             <file name="gov-nasa-gsfc-seadas-dataio-ImportSeadasL3Product.instance">
                 <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
@@ -29,7 +30,8 @@
                 <attr name="formatName" stringvalue="SeaDAS-L3"/>
                 <attr name="useAllFileFilter" boolvalue="true"/>
                 <attr name="helpId" stringvalue="importSeadasL3Product"/>
-                <attr name="ShortDescription" stringvalue="Import a SeaDAS-supported Level 3 (CZCS, OCTS, SeaWiFS, MODIS, VIIRS, etc.) data product."/>
+                <attr name="ShortDescription"
+                      stringvalue="Import a SeaDAS-supported Level 3 (CZCS, OCTS, SeaWiFS, MODIS, VIIRS, etc.) data product."/>
             </file>
             <file name="gov-nasa-gsfc-seadas-dataio-ImportAquariusProduct.instance">
                 <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
@@ -92,18 +94,25 @@
         <folder name="File">
             <folder name="Import">
                 <folder name="Optical Sensors">
-                    <file name="gov-nasa-gsfc-seadas-dataio-ImportSeadasL1Product.shadow">
-                        <attr name="originalFile"
-                              stringvalue="Actions/Readers/gov-nasa-gsfc-seadas-dataio-ImportSeadasL1Product.instance"/>
-                    </file>
-                    <file name="gov-nasa-gsfc-seadas-dataio-ImportSeadasL2Product.shadow">
-                        <attr name="originalFile"
-                              stringvalue="Actions/Readers/gov-nasa-gsfc-seadas-dataio-ImportSeadasL2Product.instance"/>
-                    </file>
-                    <file name="gov-nasa-gsfc-seadas-dataio-ImportSeadasL3Product.shadow">
-                        <attr name="originalFile"
-                              stringvalue="Actions/Readers/gov-nasa-gsfc-seadas-dataio-ImportSeadasL3Product.instance"/>
-                    </file>
+                    <folder name="Seadas">
+                        <file name="gov-nasa-gsfc-seadas-dataio-ImportSeadasL1Product.shadow">
+                            <attr name="originalFile"
+                                  stringvalue="Actions/Readers/gov-nasa-gsfc-seadas-dataio-ImportSeadasL1Product.instance"/>
+                        </file>
+                        <file name="gov-nasa-gsfc-seadas-dataio-ImportSeadasL2Product.shadow">
+                            <attr name="originalFile"
+                                  stringvalue="Actions/Readers/gov-nasa-gsfc-seadas-dataio-ImportSeadasL2Product.instance"/>
+                        </file>
+                        <file name="gov-nasa-gsfc-seadas-dataio-ImportSeadasL3Product.shadow">
+                            <attr name="originalFile"
+                                  stringvalue="Actions/Readers/gov-nasa-gsfc-seadas-dataio-ImportSeadasL3Product.instance"/>
+                        </file>
+                        <file name="gov-nasa-gsfc-seadas-dataio-ImportSeadasBrowseProduct.shadow">
+                            <attr name="originalFile"
+                                  stringvalue="Actions/Readers/gov-nasa-gsfc-seadas-dataio-ImportSeadasBrowseProduct.instance"/>
+                        </file>
+                    </folder>
+
                     <file name="gov-nasa-gsfc-seadas-dataio-ImportAquariusProduct.shadow">
                         <attr name="originalFile"
                               stringvalue="Actions/Readers/gov-nasa-gsfc-seadas-dataio-ImportAquariusProduct.instance"/>
@@ -123,10 +132,6 @@
                     <file name="gov-nasa-gsfc-seadas-dataio-ImportViirsProduct.shadow">
                         <attr name="originalFile"
                               stringvalue="Actions/Readers/gov-nasa-gsfc-seadas-dataio-ImportViirsProduct.instance"/>
-                    </file>
-                    <file name="gov-nasa-gsfc-seadas-dataio-ImportSeadasBrowseProduct.shadow">
-                        <attr name="originalFile"
-                              stringvalue="Actions/Readers/gov-nasa-gsfc-seadas-dataio-ImportSeadasBrowseProduct.instance"/>
                     </file>
                 </folder>
             </folder>
