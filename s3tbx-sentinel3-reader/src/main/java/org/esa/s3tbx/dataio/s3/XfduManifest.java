@@ -1,11 +1,11 @@
 package org.esa.s3tbx.dataio.s3;
 
-import com.sun.org.apache.xerces.internal.dom.DeferredElementImpl;
 import org.esa.s3tbx.dataio.util.XPathHelper;
 import org.esa.snap.framework.datamodel.MetadataAttribute;
 import org.esa.snap.framework.datamodel.MetadataElement;
 import org.esa.snap.framework.datamodel.ProductData;
 import org.esa.snap.util.ArrayUtils;
+import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -50,7 +50,7 @@ public class XfduManifest implements Manifest {
 
     @Override
     public List<String> getFileNames(final String schema) {
-        final List<String> fileNameList = new ArrayList<String>();
+        final List<String> fileNameList = new ArrayList<>();
 
         getFileNames("dataObjectSection/dataObject", fileNameList);
         getFileNames("metadataSection/metadataObject", fileNameList);
@@ -60,16 +60,20 @@ public class XfduManifest implements Manifest {
 
     @Override
     public List<String> getFileNames(String[] excluded) {
-        final ArrayList<String> fileNameList = new ArrayList<String>();
-        final NodeList nodeList = xPathHelper.getNodeList(
-                "/XFDU/dataObjectSection/dataObject", doc);
+        final ArrayList<String> fileNameList = new ArrayList<>();
+        final NodeList nodeList = xPathHelper.getNodeList("/XFDU/dataObjectSection/dataObject", doc);
         for (int i = 0; i < nodeList.getLength(); i++) {
             final Node item = nodeList.item(i);
-            String id = ((DeferredElementImpl)item).getAttribute("ID");
-            if (!ArrayUtils.isMemberOf(id, excluded)) {
-                final String fileName = xPathHelper.getString("./byteStream/fileLocation/@href", item);
-                if (!fileNameList.contains(fileName)) {
-                    fileNameList.add(fileName);
+            final NamedNodeMap attributes = item.getAttributes();
+            if (attributes != null) {
+                Attr attr = (Attr) (attributes.getNamedItem("ID"));
+                String id = (attr == null) ? "" : attr.getValue();
+
+                if (!ArrayUtils.isMemberOf(id, excluded)) {
+                    final String fileName = xPathHelper.getString("./byteStream/fileLocation/@href", item);
+                    if (!fileNameList.contains(fileName)) {
+                        fileNameList.add(fileName);
+                    }
                 }
             }
         }
