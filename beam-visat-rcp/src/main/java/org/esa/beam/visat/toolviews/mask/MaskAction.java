@@ -43,7 +43,9 @@ abstract class MaskAction extends AbstractAction {
     MaskAction(MaskForm maskForm, String iconPath, String buttonName, String description) {
         this.maskForm = maskForm;
         putValue(ACTION_COMMAND_KEY, getClass().getName());
-        putValue(LARGE_ICON_KEY, loadIcon(iconPath));
+        if (!iconPath.isEmpty()) {
+            putValue(LARGE_ICON_KEY, loadIcon(iconPath));
+        }
         putValue(SHORT_DESCRIPTION, description);
         putValue("componentName", buttonName);
     }
