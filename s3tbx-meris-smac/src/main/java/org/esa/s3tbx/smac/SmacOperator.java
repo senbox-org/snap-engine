@@ -474,7 +474,7 @@ public class SmacOperator extends Operator {
     }
 
     private File getDefaultAuxdataInstallDir() {
-        return new File(SystemUtils.getApplicationDataDir(), PROCESSOR_SYMBOLIC_NAME + "/auxdata");
+        return SystemUtils.getAuxDataPath().resolve(PROCESSOR_SYMBOLIC_NAME).toFile();
     }
 
     private void createOutputProduct() throws IOException {
