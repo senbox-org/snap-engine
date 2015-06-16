@@ -17,7 +17,8 @@ package org.esa.s3tbx.dataio.s3.slstr;
 
 import org.esa.s3tbx.dataio.s3.Sentinel3ProductReader;
 import org.esa.snap.framework.datamodel.Band;
-import org.esa.snap.framework.datamodel.PixelGeoCoding;
+import org.esa.snap.framework.datamodel.BasicPixelGeoCoding;
+import org.esa.snap.framework.datamodel.GeoCodingFactory;
 import org.esa.snap.framework.datamodel.Product;
 import org.esa.snap.framework.datamodel.RasterDataNode;
 
@@ -53,7 +54,8 @@ public class SlstrWstProductFactory extends SlstrSstProductFactory {
             }
         }
         if (latBand != null && lonBand != null) {
-            final PixelGeoCoding geoCoding = new PixelGeoCoding(latBand, lonBand, null, 5);
+            final BasicPixelGeoCoding geoCoding = GeoCodingFactory.createPixelGeoCoding(latBand, lonBand,
+                                                                                        "!l2p_flags.N3_retrieval", 5);
             targetProduct.setGeoCoding(geoCoding);
         }
     }
