@@ -20,11 +20,12 @@ public class MerisLevel2ProductFactory extends MerisProductFactory {
 
     @Override
     protected Band addBand(Band sourceBand, Product targetProduct) {
-        if (sourceBand.getName().equals("IWV")) {
+        final String sourceBandName = sourceBand.getName();
+        if (sourceBandName.startsWith("IWV")) {
             if(sourceBand.getProduct().getName().startsWith("l")) {
-                sourceBand.setName("L_IWV");
+                sourceBand.setName("L_" + sourceBandName);
             } else { // masterProduct.getName().startsWith("w")
-                sourceBand.setName("W_IWV");
+                sourceBand.setName("W_" + sourceBandName);
             }
         }
         return super.addBand(sourceBand, targetProduct);
@@ -35,7 +36,7 @@ public class MerisLevel2ProductFactory extends MerisProductFactory {
         if (targetNode.getName().matches("M[0-1][0-9].*")) {
             if (targetNode instanceof Band) {
                 final Band targetBand = (Band) targetNode;
-                String partialName = targetBand.getName().substring(1, 3);
+                String partialName = targetBand.getName().substring(0, 3);
                 targetBand.setSpectralBandIndex(getBandindex(partialName));
                 targetBand.setSpectralWavelength(getWavelength(partialName));
                 targetBand.setSpectralBandwidth(getBandwidth(partialName));

@@ -21,10 +21,10 @@ public class MerisLevel1ProductFactory extends MerisProductFactory {
         if (targetNode.getName().matches("M[0-1][0-9].*")) {
             if (targetNode instanceof Band) {
                 final Band targetBand = (Band) targetNode;
-                String name = targetBand.getName();
-                targetBand.setSpectralBandIndex(getBandindex(name));
-                targetBand.setSpectralWavelength(getWavelength(name));
-                targetBand.setSpectralBandwidth(getBandwidth(name));
+                String partialName = targetBand.getName().substring(0, 3);
+                targetBand.setSpectralBandIndex(getBandindex(partialName));
+                targetBand.setSpectralWavelength(getWavelength(partialName));
+                targetBand.setSpectralBandwidth(getBandwidth(partialName));
             }
         }
         targetNode.setValidPixelExpression(getValidExpression());
