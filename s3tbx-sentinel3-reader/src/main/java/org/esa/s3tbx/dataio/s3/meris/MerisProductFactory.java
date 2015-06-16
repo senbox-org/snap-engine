@@ -23,7 +23,6 @@ import java.util.Map;
  */
 public class MerisProductFactory extends AbstractProductFactory {
 
-    private final static String[] excludedIDs = new String[]{"timeCoordinatesData"};
     private Map<String, Float> nameToWavelengthMap;
     private Map<String, Float> nameToBandwidthMap;
     private Map<String, Integer> nameToIndexMap;
@@ -39,7 +38,7 @@ public class MerisProductFactory extends AbstractProductFactory {
 
     @Override
     protected List<String> getFileNames(Manifest manifest) {
-        return manifest.getFileNames(excludedIDs);
+        return manifest.getFileNames(new String[0]);
     }
 
     @Override
