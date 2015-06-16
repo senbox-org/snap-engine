@@ -63,7 +63,8 @@ import java.io.Reader;
         popupText = "#CTL_ImportSeabassActionText"
 )
 @ActionReference(
-        path = "Menu/File/Import/Vector Data"
+        path = "Menu/File/Import/Vector Data",
+        position = 100
 )
 @NbBundle.Messages({
         "CTL_ImportSeabassActionText=SeaBASS Data",
