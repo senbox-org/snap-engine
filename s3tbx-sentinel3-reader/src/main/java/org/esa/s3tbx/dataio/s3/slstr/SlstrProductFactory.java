@@ -25,6 +25,7 @@ import org.esa.snap.framework.datamodel.TiePointGeoCoding;
 import org.esa.snap.framework.datamodel.TiePointGrid;
 import org.esa.snap.jai.ImageManager;
 import org.esa.snap.jai.SourceImageScaler;
+import org.esa.snap.util.ProductUtils;
 
 import javax.media.jai.BorderExtender;
 import javax.media.jai.ImageLayout;
@@ -60,18 +61,12 @@ public abstract class SlstrProductFactory extends AbstractProductFactory {
             if (gridIndex.startsWith("t")) {
                 return copyTiePointGrid(sourceBand, targetProduct, sourceStartOffset, sourceTrackOffset, sourceResolutions);
             } else {
-                //todo change these...currently they are needed to ensure that images are displayed correctly
-                sourceBand.setValidPixelExpression("");
-                sourceBand.setNoDataValueUsed(false);
-                return copyBand(sourceBand, targetProduct, true);
-//                final Band targetBand = new Band(sourceBandName, sourceBand.getDataType(),
-//                                                 sourceBand.getRasterWidth(), sourceBand.getRasterHeight());
-//                targetProduct.addBand(targetBand);
-//                ProductUtils.copyRasterDataNodeProperties(sourceBand, targetBand);
-//                targetBand.setValidPixelExpression("");
-//                targetBand.setNoDataValueUsed(false);
-//                targetBand.setSourceImage(sourceBand.getSourceImage());
-//                return targetBand;
+                final Band targetBand = new Band(sourceBandName, sourceBand.getDataType(),
+                                                 sourceBand.getRasterWidth(), sourceBand.getRasterHeight());
+                targetProduct.addBand(targetBand);
+                ProductUtils.copyRasterDataNodeProperties(sourceBand, targetBand);
+                targetBand.setSourceImage(sourceBand.getSourceImage());
+                return targetBand;
 
             }
         }
