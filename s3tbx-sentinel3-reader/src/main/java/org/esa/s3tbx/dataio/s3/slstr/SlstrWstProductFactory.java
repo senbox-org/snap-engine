@@ -20,7 +20,6 @@ import org.esa.snap.framework.datamodel.Band;
 import org.esa.snap.framework.datamodel.BasicPixelGeoCoding;
 import org.esa.snap.framework.datamodel.GeoCodingFactory;
 import org.esa.snap.framework.datamodel.Product;
-import org.esa.snap.framework.datamodel.RasterDataNode;
 
 import java.io.IOException;
 
@@ -59,9 +58,6 @@ public class SlstrWstProductFactory extends SlstrSstProductFactory {
             targetProduct.setGeoCoding(geoCoding);
         }
     }
-
-    @Override
-    protected void configureTargetNode(Band sourceBand, RasterDataNode targetNode) {}
 
     @Override
     protected void setAutoGrouping(Product[] sourceProducts, Product targetProduct) {

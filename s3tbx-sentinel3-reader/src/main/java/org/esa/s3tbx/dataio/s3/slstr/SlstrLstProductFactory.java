@@ -51,9 +51,6 @@ public class SlstrLstProductFactory extends SlstrL2ProductFactory {
     }
 
     @Override
-    protected void configureTargetNode(Band sourceBand, RasterDataNode targetNode) {}
-
-    @Override
     protected void setAutoGrouping(Product[] sourceProducts, Product targetProduct) {}
 
     @Override

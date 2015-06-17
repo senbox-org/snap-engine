@@ -150,24 +150,6 @@ public abstract class SlstrProductFactory extends AbstractProductFactory {
     }
 
     @Override
-    protected void configureTargetNode(Band sourceBand, RasterDataNode targetNode) {
-        final String sourceBandName = sourceBand.getName();
-        final String sourceProductName = sourceBand.getProduct().getName();
-        if (sourceProductName.contains(sourceBandName)) {
-            targetNode.setName(sourceProductName);
-        } else {
-            targetNode.setName(sourceProductName + "_" + sourceBandName);
-        }
-//        final String targetNodeName = targetNode.getName();
-//        final String targetNodeNameStart = targetNodeName.substring(0, 2);
-//        if (nameToWavelengthMap.containsKey(targetNodeNameStart)) {
-//            ((Band) targetNode).setSpectralWavelength(nameToWavelengthMap.get(targetNodeNameStart));
-//            ((Band) targetNode).setSpectralBandIndex(nameToIndexMap.get(targetNodeNameStart));
-//            ((Band) targetNode).setSpectralBandwidth(nameToBandwidthMap.get(targetNodeNameStart));
-//        }
-    }
-
-    @Override
     protected void setGeoCoding(Product targetProduct) throws IOException {
         TiePointGrid latGrid = null;
         TiePointGrid lonGrid = null;

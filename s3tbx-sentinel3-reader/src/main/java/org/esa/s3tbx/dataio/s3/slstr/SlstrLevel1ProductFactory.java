@@ -128,7 +128,6 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
 
     @Override
     protected void configureTargetNode(Band sourceBand, RasterDataNode targetNode) {
-        super.configureTargetNode(sourceBand, targetNode);
         final String sourceBandName = sourceBand.getName();
         final String sourceBandNameStart = sourceBandName.substring(0, 2);
         if (nameToWavelengthMap.containsKey(sourceBandNameStart)) {

@@ -66,7 +66,6 @@ public class SlstrLevel1B1kmProductFactory extends SlstrLevel1ProductFactory {
 
     @Override
     protected void configureTargetNode(Band sourceBand, RasterDataNode targetNode) {
-        super.configureTargetNode(sourceBand, targetNode);
         final String targetNodeName = targetNode.getName();
         if (targetNodeName.endsWith("an") ||
                 targetNodeName.endsWith("ao") ||
