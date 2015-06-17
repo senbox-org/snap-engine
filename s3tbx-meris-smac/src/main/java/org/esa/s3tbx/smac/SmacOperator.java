@@ -33,7 +33,6 @@ import org.esa.snap.framework.gpf.annotations.TargetProduct;
 import org.esa.snap.util.ObjectUtils;
 import org.esa.snap.util.ProductUtils;
 import org.esa.snap.util.ResourceInstaller;
-import org.esa.snap.util.StringUtils;
 import org.esa.snap.util.SystemUtils;
 import org.esa.snap.util.converters.BooleanExpressionConverter;
 import org.esa.snap.util.math.RsMathUtils;
@@ -65,8 +64,6 @@ public class SmacOperator extends Operator {
     private static final String DEFAULT_FORWARD_FLAGS_VALUE = "cloud_flags_fward.LAND and not cloud_flags_fward.CLOUDY";
     private static final String DEFAULT_NADIR_FLAGS_VALUE = "cloud_flags_nadir.LAND and not cloud_flags_nadir.CLOUDY";
     private static final String LOG_MSG_LOADED = "Loaded ";
-    static final String SMAC_AUXDATA_DIR_PROPERTY = "smac.auxdata.dir";
-    private static final String PROCESSOR_SYMBOLIC_NAME = "beam-meris-smac";
 
     private static final int merisSzaIndex = 6;
     private static final int merisSaaIndex = 7;
@@ -95,7 +92,7 @@ public class SmacOperator extends Operator {
     private final Logger logger;
     private String sensorType;
 
-    private File auxdataInstallDir;
+    private Path auxdataInstallDir;
     private Map<String, String> bandNameMapping;
     private HashMap<String, SmacSensorCoefficients> coefficients;
 
@@ -237,18 +234,17 @@ public class SmacOperator extends Operator {
 
     // package private for testing reasons only
     void installAuxdata() {
-        setAuxdataInstallDir(SMAC_AUXDATA_DIR_PROPERTY, getDefaultAuxdataInstallDir());
+        auxdataInstallDir = initAuxdataInstallDir();
         try {
             Path sourceDirPath = ResourceInstaller.findModuleCodeBasePath(getClass()).resolve("auxdata/");
-            Path targetDirPath = auxdataInstallDir.toPath();
-            new ResourceInstaller(sourceDirPath, targetDirPath).install(".*", ProgressMonitor.NULL);
+            new ResourceInstaller(sourceDirPath, auxdataInstallDir).install(".*", ProgressMonitor.NULL);
         } catch (IOException e) {
-            throw new OperatorException("Failed to install auxdata into " + auxdataInstallDir, e);
+            throw new OperatorException("Failed to install auxdata into " + auxdataInstallDir.toString(), e);
         }
     }
 
     // package private for testing reasons only
-    File getAuxdataInstallDir() {
+    Path getAuxdataInstallDir() {
         return auxdataInstallDir;
     }
 
@@ -467,14 +463,8 @@ public class SmacOperator extends Operator {
         forwardMask.setValidPixelExpression(maskExpressionForward);
     }
 
-    private void setAuxdataInstallDir(String auxdataDirPropertyName, File defaultAuxdataInstallDir) {
-        Assert.argument(StringUtils.isNotNullAndNotEmpty(auxdataDirPropertyName), "auxdataDirPropertyName is not null and not empty");
-        String auxdataDirPath = System.getProperty(auxdataDirPropertyName, defaultAuxdataInstallDir.getAbsolutePath());
-        auxdataInstallDir = new File(auxdataDirPath);
-    }
-
-    private File getDefaultAuxdataInstallDir() {
-        return SystemUtils.getAuxDataPath().resolve(PROCESSOR_SYMBOLIC_NAME).toFile();
+    private Path initAuxdataInstallDir() {
+        return SystemUtils.getAuxDataPath().resolve("smac").toAbsolutePath();
     }
 
     private void createOutputProduct() throws IOException {
@@ -686,14 +676,12 @@ public class SmacOperator extends Operator {
     }
 
     private SensorCoefficientManager getSensorCoefficientManager() {
-        File smacAuxDir = auxdataInstallDir;
-        String auxPathString = smacAuxDir.toString();
         SensorCoefficientManager coeffMgr = null;
         try {
-            coeffMgr = new SensorCoefficientManager(smacAuxDir.toURI().toURL());
-            logger.fine("Using auxiliary data path: " + auxPathString);
+            coeffMgr = new SensorCoefficientManager(auxdataInstallDir.toUri().toURL());
+            logger.fine("Using auxiliary data path: " + auxdataInstallDir.toString());
         } catch (IOException e) {
-            logger.severe("Error reading coefficients from: " + auxPathString);
+            logger.severe("Error reading coefficients from: " + auxdataInstallDir.toString());
             logger.severe(e.getMessage());
             logger.log(Level.FINE, e.getMessage(), e);
         }

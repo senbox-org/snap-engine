@@ -31,7 +31,6 @@ public class SmileCorrectionAuxdataTest {
     private static SmileCorrectionAuxdata frData;
     private static Path auxdataDir;
 
-
     @BeforeClass
     public static void beforeClass() throws Exception {
         auxdataDir = SmileCorrectionAuxdata.installAuxdata();

@@ -57,11 +57,10 @@ import java.nio.file.Path;
 public class AatsrSstOp extends PixelOperator {
 
     private static final float COEFF_0_SCALE = 1.0f;
-
-    private static final String SST_AUXDATA_DIR_PROPERTY = "sst.auxdata.dir";
     private static final String NADIR_SST_BAND_NAME = "nadir_sst";
     private static final String DUAL_SST_BAND_NAME = "dual_sst";
 
+    @SuppressWarnings("unused")
     private enum Files {
         AVERAGE_POLAR_DUAL_VIEW("Average polar dual view", "AV_POL_DUAL.coef"),
         AVERAGE_TEMPERATE_DUAL_VIEW("Average temperate dual view", "AV_TEM_DUAL.coef"),
@@ -80,7 +79,7 @@ public class AatsrSstOp extends PixelOperator {
         private final String label;
         private final String filename;
 
-        private Files(String label, String filename) {
+        Files(String label, String filename) {
             this.label = label;
             this.filename = filename;
         }
@@ -443,19 +442,17 @@ public class AatsrSstOp extends PixelOperator {
     }
 
     private File installAuxiliaryData() {
-        final File defaultTargetDir = new File(SystemUtils.getApplicationDataDir(), "beam-aatsr-sst/auxdata/aatsr/sst");
-        final String targetPath = System.getProperty(SST_AUXDATA_DIR_PROPERTY, defaultTargetDir.getAbsolutePath());
-        final File targetDir = new File(targetPath);
+        Path auxDataDir = SystemUtils.getAuxDataPath().resolve("aatsr-sst").toAbsolutePath();
 
-        final Path path = ResourceInstaller.findModuleCodeBasePath(getClass());
-        final ResourceInstaller installer = new ResourceInstaller(path.resolve("auxdata/aatsr/sst"), targetDir.toPath());
+        Path sourcePath = ResourceInstaller.findModuleCodeBasePath(getClass()).resolve("auxdata/aatsr/sst");
+        ResourceInstaller installer = new ResourceInstaller(sourcePath, auxDataDir);
         try {
             installer.install(".*", ProgressMonitor.NULL);
         } catch (IOException e) {
             throw new OperatorException(e);
         }
 
-        return targetDir;
+        return auxDataDir.toFile();
     }
 
     private static boolean isMasked(final OpImage maskOpImage, final int x, final int y) {

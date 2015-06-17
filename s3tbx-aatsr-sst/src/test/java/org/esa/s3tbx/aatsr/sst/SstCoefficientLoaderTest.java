@@ -28,9 +28,9 @@ import java.net.URL;
 
 public class SstCoefficientLoaderTest extends TestCase {
 
-    private static final String _expNadirDesc = "test coefficients nadir";
-    private static final String _expDualDesc = "test coefficients dual";
-    private SstCoefficientLoader _loader;
+    private static final String expNadirDesc = "test coefficients nadir";
+    private static final String expDualDesc = "test coefficients dual";
+    private SstCoefficientLoader loader;
 
     public SstCoefficientLoaderTest(String testName) {
         super(testName);
@@ -42,8 +42,8 @@ public class SstCoefficientLoaderTest extends TestCase {
 
     @Override
     protected void setUp() {
-        _loader = new SstCoefficientLoader();
-        assertNotNull(_loader);
+        loader = new SstCoefficientLoader();
+        assertNotNull(loader);
     }
 
     /**
@@ -53,18 +53,20 @@ public class SstCoefficientLoaderTest extends TestCase {
 
         // shall not accept null arguments
         try {
-            _loader.load(null);
+            loader.load(null);
             fail("IllegalArgumentException expected");
         } catch (IllegalArgumentException e) {
+            //ignore
         }
 
         // shall throw IOException when fed with nonexistent URL
         URL noneExistent = createNonExistentUrl();
 
         try {
-            _loader.load(noneExistent);
+            loader.load(noneExistent);
             fail("IOException expected");
         } catch (IOException e) {
+            //ignore
         }
     }
 
@@ -76,11 +78,11 @@ public class SstCoefficientLoaderTest extends TestCase {
         URL dualCoeff = createDualCoeffUrl();
         SstCoefficientSet coeffs;
 
-        coeffs = _loader.load(nadirCoeff);
+        coeffs = loader.load(nadirCoeff);
         // we expect something in return
         assertNotNull(coeffs);
 
-        coeffs = _loader.load(dualCoeff);
+        coeffs = loader.load(dualCoeff);
         // we expect something in return
         assertNotNull(coeffs);
     }
@@ -94,12 +96,12 @@ public class SstCoefficientLoaderTest extends TestCase {
         SstCoefficientSet coeffSet;
         SstCoefficients coeffs;
 
-        coeffSet = _loader.load(nadirCoeff);
+        coeffSet = loader.load(nadirCoeff);
         // we expect something in return
         assertNotNull(coeffSet);
 
         // we expect a correct description string
-        assertEquals(_expNadirDesc, coeffSet.getDescription());
+        assertEquals(expNadirDesc, coeffSet.getDescription());
 
         // we expect two parameter ranges
         // 0: 0 - 124
@@ -185,12 +187,12 @@ public class SstCoefficientLoaderTest extends TestCase {
         SstCoefficientSet coeffSet;
         SstCoefficients coeffs;
 
-        coeffSet = _loader.load(dualCoeff);
+        coeffSet = loader.load(dualCoeff);
         // we expect something in return
         assertNotNull(coeffSet);
 
         // we expect a correct description string
-        assertEquals(_expDualDesc, coeffSet.getDescription());
+        assertEquals(expDualDesc, coeffSet.getDescription());
 
         // we expect two parameter ranges
         // 0: 0 - 255
@@ -269,7 +271,7 @@ public class SstCoefficientLoaderTest extends TestCase {
 
         SstCoefficientSet coeffs;
 
-        coeffs = _loader.load(noDescFile);
+        coeffs = loader.load(noDescFile);
         // we expect something in return
         assertNotNull(coeffs);
 
@@ -285,21 +287,21 @@ public class SstCoefficientLoaderTest extends TestCase {
         URL illegalFile = createOneMapTooMuchUrl();
 
         try {
-            _loader.load(illegalFile);
+            loader.load(illegalFile);
             fail("OperatorException expected");
         } catch (OperatorException e) {
         }
 
         illegalFile = createMapOverlapUrl();
         try {
-            _loader.load(illegalFile);
+            loader.load(illegalFile);
             fail("OperatorException expected");
         } catch (OperatorException e) {
         }
 
         illegalFile = create_A_and_D_Url();
         try {
-            _loader.load(illegalFile);
+            loader.load(illegalFile);
             fail("OperatorException expected");
         } catch (OperatorException e) {
         }
@@ -310,14 +312,14 @@ public class SstCoefficientLoaderTest extends TestCase {
      */
     public void testLoadDescriptionInterface() throws IOException {
         try {
-            _loader.getDescription(null);
+            loader.getDescription(null);
             fail("IllegalArgumentException expected");
         } catch (IllegalArgumentException e) {
         }
 
         URL nonExistent = createNonExistentUrl();
 
-        String description = _loader.getDescription(nonExistent);
+        String description = loader.getDescription(nonExistent);
         assertEquals("", description);
     }
 
@@ -329,12 +331,12 @@ public class SstCoefficientLoaderTest extends TestCase {
         URL url;
 
         url = createDualCoeffUrl();
-        description = _loader.getDescription(url);
-        assertEquals(_expDualDesc, description);
+        description = loader.getDescription(url);
+        assertEquals(expDualDesc, description);
 
         url = createNadirCoeffUrl();
-        description = _loader.getDescription(url);
-        assertEquals(_expNadirDesc, description);
+        description = loader.getDescription(url);
+        assertEquals(expNadirDesc, description);
     }
 
     ///////////////////////////////////////////////////////////////////////////

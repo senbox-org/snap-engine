@@ -46,8 +46,6 @@ import java.util.logging.Logger;
  */
 class CloudPN extends ProcessingNode {
 
-    public static final String CLOUD_AUXDATA_DIR_PROPERTY = "cloud.auxdata.dir";
-
     public static final String CONFIG_FILE_NAME = "config_file_name";
     public static final String INVALID_EXPRESSION = "invalid_expression";
 

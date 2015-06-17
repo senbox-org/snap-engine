@@ -21,11 +21,9 @@ import org.esa.snap.util.ResourceInstaller;
 import org.esa.snap.util.SystemUtils;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.StringTokenizer;
 
 /**
@@ -40,26 +38,24 @@ import java.util.StringTokenizer;
  */
 public class SmileCorrectionAuxdata {
 
-    private static final String _BAND_INFO_FILENAME = "band_info.txt";
-    private static final String _CENTRAL_WAVELEN_FR_FILENAME = "central_wavelen_fr.txt";
-    private static final String _CENTRAL_WAVELEN_RR_FILENAME = "central_wavelen_rr.txt";
-    private static final String _SUN_SPECTRAL_FLUX_FR_FILENAME = "sun_spectral_flux_fr.txt";
-    private static final String _SUN_SPECTRAL_FLUX_RR_FILENAME = "sun_spectral_flux_rr.txt";
-    private static final int _NUM_DETECTORS_FR = 3700;
-    private static final int _NUM_DETECTORS_RR = 925;
+    private static final String BAND_INFO_FILENAME = "band_info.txt";
+    private static final String CENTRAL_WAVELEN_FR_FILENAME = "central_wavelen_fr.txt";
+    private static final String CENTRAL_WAVELEN_RR_FILENAME = "central_wavelen_rr.txt";
+    private static final String SUN_SPECTRAL_FLUX_FR_FILENAME = "sun_spectral_flux_fr.txt";
+    private static final String SUN_SPECTRAL_FLUX_RR_FILENAME = "sun_spectral_flux_rr.txt";
+    private static final int NUM_DETECTORS_FR = 3700;
+    private static final int NUM_DETECTORS_RR = 925;
 
-    static final String AUXDATA_DIR_PROPERTY = "smile.auxdata.dir";
-
-    private boolean[/*15*/] _radCorrFlagsLand;
-    private int[/*15*/] _lowerBandIndexesLand;
-    private int[/*15*/] _upperBandIndexesLand;
-    private boolean[/*15*/] _radCorrFlagsWater;
-    private int[/*15*/] _lowerBandIndexesWater;
-    private int[/*15*/] _upperBandIndexesWater;
-    private double[/*15*/] _theoreticalWavelengths;
-    private double[/*15*/] _theoreticalSunSpectralFluxes;
-    private double[][/*15*/] _detectorWavelengths;
-    private double[][/*15*/] _detectorSunSpectralFluxes;
+    private boolean[/*15*/] radCorrFlagsLand;
+    private int[/*15*/] lowerBandIndexesLand;
+    private int[/*15*/] upperBandIndexesLand;
+    private boolean[/*15*/] radCorrFlagsWater;
+    private int[/*15*/] lowerBandIndexesWater;
+    private int[/*15*/] upperBandIndexesWater;
+    private double[/*15*/] theoreticalWavelengths;
+    private double[/*15*/] theoreticalSunSpectralFluxes;
+    private double[][/*15*/] detectorWavelengths;
+    private double[][/*15*/] detectorSunSpectralFluxes;
     private final Path auxdataDir;
 
     private SmileCorrectionAuxdata(Path auxdataDir,
@@ -85,82 +81,82 @@ public class SmileCorrectionAuxdata {
     }
 
     public boolean[/*15*/] getRadCorrFlagsWater() {
-        return _radCorrFlagsWater;
+        return radCorrFlagsWater;
     }
 
     public int[/*15*/] getLowerBandIndexesWater() {
-        return _lowerBandIndexesWater;
+        return lowerBandIndexesWater;
     }
 
     public int[/*15*/] getUpperBandIndexesWater() {
-        return _upperBandIndexesWater;
+        return upperBandIndexesWater;
     }
 
     public boolean[/*15*/] getRadCorrFlagsLand() {
-        return _radCorrFlagsLand;
+        return radCorrFlagsLand;
     }
 
     public int[/*15*/] getLowerBandIndexesLand() {
-        return _lowerBandIndexesLand;
+        return lowerBandIndexesLand;
     }
 
     public int[/*15*/] getUpperBandIndexesLand() {
-        return _upperBandIndexesLand;
+        return upperBandIndexesLand;
     }
 
     public double[] getTheoreticalWavelengths() {
-        return _theoreticalWavelengths;
+        return theoreticalWavelengths;
     }
 
     public double[] getTheoreticalSunSpectralFluxes() {
-        return _theoreticalSunSpectralFluxes;
+        return theoreticalSunSpectralFluxes;
     }
 
     public double[][] getDetectorWavelengths() {
-        return _detectorWavelengths;
+        return detectorWavelengths;
     }
 
     public double[][] getDetectorSunSpectralFluxes() {
-        return _detectorSunSpectralFluxes;
+        return detectorSunSpectralFluxes;
     }
 
     public static SmileCorrectionAuxdata loadRRAuxdata(Path auxdataDir) throws IOException {
         return new SmileCorrectionAuxdata(auxdataDir,
-                                          _CENTRAL_WAVELEN_RR_FILENAME,
-                                          _SUN_SPECTRAL_FLUX_RR_FILENAME,
-                                          _NUM_DETECTORS_RR,
+                                          CENTRAL_WAVELEN_RR_FILENAME,
+                                          SUN_SPECTRAL_FLUX_RR_FILENAME,
+                                          NUM_DETECTORS_RR,
                                           EnvisatConstants.MERIS_L1B_NUM_SPECTRAL_BANDS);
     }
 
     public static SmileCorrectionAuxdata loadFRAuxdata(Path auxdataDir) throws IOException {
         return new SmileCorrectionAuxdata(auxdataDir,
-                                          _CENTRAL_WAVELEN_FR_FILENAME,
-                                          _SUN_SPECTRAL_FLUX_FR_FILENAME,
-                                          _NUM_DETECTORS_FR,
+                                          CENTRAL_WAVELEN_FR_FILENAME,
+                                          SUN_SPECTRAL_FLUX_FR_FILENAME,
+                                          NUM_DETECTORS_FR,
                                           EnvisatConstants.MERIS_L1B_NUM_SPECTRAL_BANDS);
     }
 
     private void loadBandInfos() throws IOException {
-        final double[][] table = loadFlatAuxDataFile(_BAND_INFO_FILENAME, 15, 8);
+        final double[][] table = loadFlatAuxDataFile(BAND_INFO_FILENAME, 15, 8);
         final int n = EnvisatConstants.MERIS_L1B_NUM_SPECTRAL_BANDS;
-        _radCorrFlagsLand = new boolean[n];
-        _lowerBandIndexesLand = new int[n];
-        _upperBandIndexesLand = new int[n];
-        _radCorrFlagsWater = new boolean[n];
-        _lowerBandIndexesWater = new int[n];
-        _upperBandIndexesWater = new int[n];
-        _theoreticalWavelengths = new double[n];
-        _theoreticalSunSpectralFluxes = new double[n];
+        radCorrFlagsLand = new boolean[n];
+        lowerBandIndexesLand = new int[n];
+        upperBandIndexesLand = new int[n];
+        radCorrFlagsWater = new boolean[n];
+        lowerBandIndexesWater = new int[n];
+        upperBandIndexesWater = new int[n];
+        theoreticalWavelengths = new double[n];
+        theoreticalSunSpectralFluxes = new double[n];
         for (int i = 0; i < n; i++) {
             final double[] row = table[i];
-            _radCorrFlagsLand[i] = row[0] != 0.0;
-            _lowerBandIndexesLand[i] = (int) row[1] - 1;
-            _upperBandIndexesLand[i] = (int) row[2] - 1;
-            _radCorrFlagsWater[i] = row[3] != 0.0;
-            _lowerBandIndexesWater[i] = (int) row[4] - 1;
-            _upperBandIndexesWater[i] = (int) row[5] - 1;
-            _theoreticalWavelengths[i] = row[6];
-            _theoreticalSunSpectralFluxes[i] = row[7];
+            radCorrFlagsLand[i] = row[0] != 0.0;
+            lowerBandIndexesLand[i] = (int) row[1] - 1;
+            upperBandIndexesLand[i] = (int) row[2] - 1;
+            radCorrFlagsWater[i] = row[3] != 0.0;
+            lowerBandIndexesWater[i] = (int) row[4] - 1;
+            upperBandIndexesWater[i] = (int) row[5] - 1;
+            theoreticalWavelengths[i] = row[6];
+            theoreticalSunSpectralFluxes[i] = row[7];
         }
     }
 
@@ -168,8 +164,8 @@ public class SmileCorrectionAuxdata {
                                   final String detectorSunSpectralFluxesFilename,
                                   final int numRows,
                                   final int numCols) throws IOException {
-        _detectorWavelengths = loadFlatAuxDataFile(detectorWavelengthsFilename, numRows, numCols);
-        _detectorSunSpectralFluxes = loadFlatAuxDataFile(detectorSunSpectralFluxesFilename, numRows, numCols);
+        detectorWavelengths = loadFlatAuxDataFile(detectorWavelengthsFilename, numRows, numCols);
+        detectorSunSpectralFluxes = loadFlatAuxDataFile(detectorSunSpectralFluxesFilename, numRows, numCols);
     }
 
     private double[][] loadFlatAuxDataFile(final String auxFileName, final int numRows, final int numCols) throws
@@ -219,14 +215,9 @@ public class SmileCorrectionAuxdata {
     }
 
     static Path installAuxdata() throws IOException {
-        File defaultAuxdataInstallDir = new File(SystemUtils.getApplicationDataDir(),
-                                                 "beam-meris-radiometry/smile-correction/auxdata");
-        String auxdataDirPath = System.getProperty(AUXDATA_DIR_PROPERTY,
-                                                   defaultAuxdataInstallDir.getAbsolutePath());
-        Path auxdataDirectory = Paths.get(auxdataDirPath);
-
-        Path sourceBasePath = ResourceInstaller.findModuleCodeBasePath(SmileCorrectionAuxdata.class);
-        final ResourceInstaller resourceInstaller = new ResourceInstaller(sourceBasePath.resolve("auxdata/smile"), auxdataDirectory);
+        Path auxdataDirectory = SystemUtils.getAuxDataPath().resolve("smile-correction");
+        final Path sourceDirPath = ResourceInstaller.findModuleCodeBasePath(SmileCorrectionAuxdata.class).resolve("auxdata/smile");
+        final ResourceInstaller resourceInstaller = new ResourceInstaller(sourceDirPath, auxdataDirectory);
         resourceInstaller.install(".*", ProgressMonitor.NULL);
         return auxdataDirectory;
     }

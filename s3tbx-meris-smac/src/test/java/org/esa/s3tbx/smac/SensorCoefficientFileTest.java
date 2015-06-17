@@ -16,41 +16,25 @@
 
 package org.esa.s3tbx.smac;
 
-import org.esa.snap.util.io.FileUtils;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.junit.Assert.*;
 
 public class SensorCoefficientFileTest {
 
-    private File smacAuxDir;
-    private String oldAuxdataPath;
-    private Path testAuxdataPath;
-
+    private Path smacAuxDir;
 
     @Before
     public void setUp() throws Exception {
-        oldAuxdataPath = System.getProperty(SmacOperator.SMAC_AUXDATA_DIR_PROPERTY, "");
-        testAuxdataPath = Files.createTempDirectory(SensorCoefficientFileTest.class.getName());
-        System.setProperty(SmacOperator.SMAC_AUXDATA_DIR_PROPERTY, testAuxdataPath.toString());
         SmacOperator op = new SmacOperator();
         op.installAuxdata(); // just to extract auxdata
         smacAuxDir = op.getAuxdataInstallDir();
-        assertEquals(testAuxdataPath.toString(), smacAuxDir.getPath());
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        System.setProperty(SmacOperator.SMAC_AUXDATA_DIR_PROPERTY, oldAuxdataPath);
-        FileUtils.deleteTree(testAuxdataPath.toFile());
     }
 
     @Test
@@ -73,7 +57,7 @@ public class SensorCoefficientFileTest {
         // now read an existing file
         try {
 
-            File toRead = new File(smacAuxDir, "coef_ASTER1_DES.dat");
+            File toRead = smacAuxDir.resolve("coef_ASTER1_DES.dat").toFile();
             file.readFile(toRead.toString());
         } catch (FileNotFoundException e) {
             fail("must be able to read this file");

@@ -36,7 +36,7 @@ public class CloudPNTest {
         operator.installAuxdata(); // just to extract auxdata
         Map<String,String> cloudConfig = new HashMap<>();
         cloudConfig.put(CloudPN.CONFIG_FILE_NAME, "cloud_config.txt");
-        cloudPn = new CloudPN(operator.getAuxdataInstallationPath());
+        cloudPn = new CloudPN(operator.getAuxdataInstallationPath().toString());
         cloudPn.setUp(cloudConfig);
     }
 

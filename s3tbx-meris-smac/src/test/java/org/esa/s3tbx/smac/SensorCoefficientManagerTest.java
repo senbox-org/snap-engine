@@ -16,42 +16,25 @@
 
 package org.esa.s3tbx.smac;
 
-import org.esa.snap.util.io.FileUtils;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.junit.Assert.*;
 
 public class SensorCoefficientManagerTest {
 
-    private File auxdataDir;
-    private String oldAuxdataPath;
-    private Path testAuxdataPath;
+    private Path auxdataDir;
 
 
     @Before
     public void setUp() throws Exception {
-        oldAuxdataPath = System.getProperty(SmacOperator.SMAC_AUXDATA_DIR_PROPERTY, "");
-        testAuxdataPath = Files.createTempDirectory(SensorCoefficientFileTest.class.getName());
-        System.setProperty(SmacOperator.SMAC_AUXDATA_DIR_PROPERTY, testAuxdataPath.toString());
         SmacOperator op = new SmacOperator();
         op.installAuxdata(); // just to extract auxdata
         auxdataDir = op.getAuxdataInstallDir();
-        assertEquals(testAuxdataPath.toString(), auxdataDir.getPath());
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        System.setProperty(SmacOperator.SMAC_AUXDATA_DIR_PROPERTY, oldAuxdataPath);
-        FileUtils.deleteTree(testAuxdataPath.toFile());
-
     }
 
     @Test
@@ -71,16 +54,14 @@ public class SensorCoefficientManagerTest {
     @Test
     public void testSensorCoefficientManagerWithValidURL() throws IOException {
         // when inserting a valid url, we shall retrieve a coefficient file
-        URL url = auxdataDir.toURI().toURL();
-        SensorCoefficientManager mgr = new SensorCoefficientManager(url);
+        SensorCoefficientManager mgr = new SensorCoefficientManager(auxdataDir.toUri().toURL());
         assertNotNull(mgr.getCoefficientFile("MERIS", "radiance_2", AEROSOL_TYPE.DESERT));
 
     }
 
     @Test
     public void testGetCoefficientFile() throws IOException {
-        URL url = auxdataDir.toURI().toURL();
-        SensorCoefficientManager mgr = new SensorCoefficientManager(url);
+        SensorCoefficientManager mgr = new SensorCoefficientManager(auxdataDir.toUri().toURL());
         assertNotNull(mgr.getCoefficientFile("MERIS", "radiance_2", AEROSOL_TYPE.DESERT));
     }
 
@@ -96,7 +77,7 @@ public class SensorCoefficientManagerTest {
         SensorCoefficientManager mgr = new SensorCoefficientManager();
 
         // if we set a valid url - return something when we ask for it :-)
-        URL url = auxdataDir.toURI().toURL();
+        URL url = auxdataDir.toUri().toURL();
         mgr.setURL(url);
         assertNotNull(mgr.getCoefficientFile("MERIS", "radiance_3", AEROSOL_TYPE.CONTINENTAL));
     }

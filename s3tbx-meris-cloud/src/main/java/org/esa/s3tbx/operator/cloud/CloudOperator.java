@@ -35,27 +35,23 @@ import org.esa.snap.util.SystemUtils;
 import java.awt.Rectangle;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
 /**
  * The <code>CloudProcessor</code> implements all specific functionality to calculate a cloud probability.
- *
  */
 @SuppressWarnings({"UnusedDeclaration", "FieldCanBeLocal"})
 @OperatorMetadata(alias = "CloudProb",
-                  category = "Optical Processing/Pre-Processing",
-                  version = "1.7",
-                  authors = "Rene Preusker (Algorithm), Tom Block (BEAM Implementation), Thomas Storm (GPF conversion)",
-                  copyright = "Copyright (C) 2004-2014 by ESA, FUB and Brockmann Consult",
-                  description = "Applies a clear sky conservative cloud detection algorithm.")
+        category = "Optical Processing/Pre-Processing",
+        version = "1.7",
+        authors = "Rene Preusker (Algorithm), Tom Block (BEAM Implementation), Thomas Storm (GPF conversion)",
+        copyright = "Copyright (C) 2004-2014 by ESA, FUB and Brockmann Consult",
+        description = "Applies a clear sky conservative cloud detection algorithm.")
 public class CloudOperator extends Operator {
 
-    public static final String AUXDATA_DIR = "snap-meris-cloud/auxdata";
-
-    @SourceProduct(alias = "source", label = "Source product", description="The MERIS Level 1b source product.")
+    @SourceProduct(alias = "source", label = "Source product", description = "The MERIS Level 1b source product.")
     private Product l1bProduct;
 
     @TargetProduct(label = "Cloud product")
@@ -65,7 +61,7 @@ public class CloudOperator extends Operator {
     private Product tempCloudProduct;
 
     @Override
-    public void initialize()  {
+    public void initialize() {
         setLogger(Logger.getLogger(CloudConstants.LOGGER_NAME));
         getLogger().info("Starting request...");
         initCloudNode();
@@ -99,7 +95,7 @@ public class CloudOperator extends Operator {
         final Map<String, String> cloudConfig = new HashMap<>();
         cloudConfig.put(CloudPN.CONFIG_FILE_NAME, "cloud_config.txt");
         cloudConfig.put(CloudPN.INVALID_EXPRESSION, "l1_flags.INVALID");
-        cloudNode = new CloudPN(getAuxdataInstallationPath());
+        cloudNode = new CloudPN(getAuxdataInstallationPath().toString());
         try {
             cloudNode.setUp(cloudConfig);
         } catch (IOException e) {
@@ -109,16 +105,14 @@ public class CloudOperator extends Operator {
 
     // package local for testing purposes
     void installAuxdata() throws IOException {
-        String auxdataDirPath = getAuxdataInstallationPath();
-        final Path targetDir = Paths.get(auxdataDirPath);
+        Path auxdataDirPath = getAuxdataInstallationPath();
         Path sourcePath = ResourceInstaller.findModuleCodeBasePath(getClass()).resolve("auxdata/");
-        new ResourceInstaller(sourcePath, targetDir).install(".*", ProgressMonitor.NULL);
+        new ResourceInstaller(sourcePath, auxdataDirPath).install(".*", ProgressMonitor.NULL);
     }
 
     // package local for testing purposes
-    String getAuxdataInstallationPath() {
-        Path defaultAuxdataDir = Paths.get(SystemUtils.getApplicationDataDir().getAbsolutePath(), AUXDATA_DIR);
-        return System.getProperty(CloudPN.CLOUD_AUXDATA_DIR_PROPERTY, defaultAuxdataDir.toString());
+    Path getAuxdataInstallationPath() {
+        return SystemUtils.getAuxDataPath().resolve("meris-cloud").toAbsolutePath();
     }
 
     /**
@@ -127,11 +121,11 @@ public class CloudOperator extends Operator {
     private void initOutputProduct() throws IOException, ParseException {
         if (!EnvisatConstants.MERIS_L1_TYPE_PATTERN.matcher(l1bProduct.getProductType()).matches()) {
             throw new OperatorException("Product type '" + l1bProduct.getProductType() + "' is not supported." +
-                                                 "It must be a MERIS Level 1b product.");
+                                        "It must be a MERIS Level 1b product.");
         }
         tempCloudProduct = cloudNode.readProductNodes(l1bProduct, null);
         targetProduct = cloudNode.createTargetProductImpl();
-        
+
         ProductUtils.copyFlagBands(l1bProduct, targetProduct, true);
         ProductUtils.copyTiePointGrids(l1bProduct, targetProduct);
 
