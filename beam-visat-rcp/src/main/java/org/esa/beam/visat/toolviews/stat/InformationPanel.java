@@ -45,9 +45,12 @@ class InformationPanel extends TablePagePanel {
     private static final String DEFAULT_INFORMATION_TEXT = "No information available.";
     private static final String TITLE_PREFIX = "Information";
     private static final String NO_PRODUCT_READER_MESSAGE = "No product reader set";
+    private static final int index_of_name_column = 0;
+    private static final int index_of_value_and_unit_column = 1;
 
     private InformationTableModel tableModel;
-    private int minWidthOfNameColumn = -1;
+    private int widthOfNameColumn = -1;
+    private int widthOfValueAndUnitColumn = -1;
 
     InformationPanel(ToolView parentDialog, String helpId) {
         super(parentDialog, helpId, TITLE_PREFIX, DEFAULT_INFORMATION_TEXT);
@@ -61,6 +64,7 @@ class InformationPanel extends TablePagePanel {
         getTable().setShowGrid(false);
         getTable().setRowSelectionAllowed(false);
         getTable().setColumnSelectionAllowed(false);
+        getTable().setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         add(new JScrollPane(getTable()));
     }
 
@@ -84,6 +88,8 @@ class InformationPanel extends TablePagePanel {
     @Override
     protected void updateComponents() {
         tableModel.clear();
+        widthOfNameColumn = -1;
+        widthOfValueAndUnitColumn = -1;
         if (getRaster() instanceof AbstractBand) {
             final Band band = (Band) getRaster();
 
@@ -161,20 +167,24 @@ class InformationPanel extends TablePagePanel {
     private void ensureTableModel() {
         if (getTable().getModel() != tableModel) {
             getTable().setModel(tableModel);
-            getTable().setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
-            getTable().getColumnModel().getColumn(0).setPreferredWidth(minWidthOfNameColumn);
-            getTable().getColumnModel().getColumn(0).setMinWidth(minWidthOfNameColumn);
-            getTable().getColumnModel().getColumn(0).setMaxWidth(minWidthOfNameColumn);
-            setColumnRenderer(0, RendererFactory.createRenderer(RendererFactory.ALTERNATING_ROWS));
-            setColumnRenderer(1, RendererFactory.createRenderer(RendererFactory.ALTERNATING_ROWS
-                                                                | RendererFactory.TOOLTIP_AWARE));
+            getTable().setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         }
+        getTable().getColumnModel().getColumn(index_of_name_column).setPreferredWidth(widthOfNameColumn);
+        getTable().getColumnModel().getColumn(index_of_name_column).setMinWidth(widthOfNameColumn);
+        getTable().getColumnModel().getColumn(index_of_name_column).setMaxWidth(widthOfNameColumn);
+        getTable().getColumnModel().getColumn(index_of_value_and_unit_column).setPreferredWidth(widthOfValueAndUnitColumn);
+        getTable().getColumnModel().getColumn(index_of_value_and_unit_column).setMinWidth(widthOfValueAndUnitColumn);
+        getTable().getColumnModel().getColumn(index_of_value_and_unit_column).setMaxWidth(widthOfValueAndUnitColumn);
+        setColumnRenderer(0, RendererFactory.createRenderer(RendererFactory.ALTERNATING_ROWS));
+        setColumnRenderer(1, RendererFactory.createRenderer(RendererFactory.ALTERNATING_ROWS
+                                                                | RendererFactory.TOOLTIP_AWARE));
     }
 
     private void addEntry(final String label, final String value, final String unit) {
         String formattedLabel = String.format("%1$-30s \t", label);
-        minWidthOfNameColumn =
-                getFontMetrics(getFont()).stringWidth(formattedLabel) + 10; // needs a bit of cushion, obviously...
+        widthOfNameColumn = Math.max(widthOfNameColumn, getFontMetrics(getFont()).stringWidth(formattedLabel) + 10);
+        widthOfValueAndUnitColumn = Math.max(widthOfValueAndUnitColumn, getFontMetrics(getFont()).stringWidth(
+                value + (StringUtils.isNotNullAndNotEmpty(unit) ? " " + unit : "")) + 10);
         TableRow row = new InformationTableRow(formattedLabel, value, unit);
         tableModel.addRow(row);
     }
@@ -270,9 +280,9 @@ class InformationPanel extends TablePagePanel {
         @Override
         public String getColumnName(int columnIndex) {
             switch (columnIndex) {
-                case 0:
+                case index_of_name_column:
                     return "Name";
-                case 1:
+                case index_of_value_and_unit_column:
                     return "Value and Unit";
             }
             throw new IllegalStateException("Should never come here");
@@ -286,9 +296,9 @@ class InformationPanel extends TablePagePanel {
             }
             InformationTableRow tableRow = (InformationTableRow) row;
             switch (columnIndex) {
-                case 0:
+                case index_of_name_column:
                     return tableRow.label;
-                case 1:
+                case index_of_value_and_unit_column:
                     return tableRow.value +
                            (StringUtils.isNotNullAndNotEmpty(tableRow.unit) ? " " + tableRow.unit : "");
             }
