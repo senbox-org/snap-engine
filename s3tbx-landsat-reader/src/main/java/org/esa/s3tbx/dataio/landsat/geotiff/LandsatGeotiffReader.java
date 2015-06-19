@@ -32,6 +32,7 @@ import org.esa.snap.framework.datamodel.Product;
 import org.esa.snap.framework.datamodel.ProductData;
 import org.esa.snap.jai.ImageManager;
 import org.esa.snap.jai.SourceImageScaler;
+import org.esa.snap.runtime.Config;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.opengis.referencing.operation.MathTransform2D;
 
@@ -49,6 +50,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.prefs.Preferences;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -179,7 +181,8 @@ public class LandsatGeotiffReader extends AbstractProductReader {
 
                     band.setDescription(landsatMetadata.getBandDescription(bandNumber));
                     band.setUnit(RADIANCE_UNITS);
-                    final String readAs = System.getProperty(LandsatGeotiffReader.SYSPROP_READ_AS);
+                    final Preferences preferences = Config.instance("s3tbx").load().preferences();
+                    final String readAs = preferences.get(LandsatGeotiffReader.SYSPROP_READ_AS, null);
                     if (readAs != null) {
                         switch (readAs.toLowerCase()) {
                             case "reflectance":

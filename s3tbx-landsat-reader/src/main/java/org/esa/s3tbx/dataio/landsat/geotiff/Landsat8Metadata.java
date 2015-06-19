@@ -18,11 +18,13 @@ package org.esa.s3tbx.dataio.landsat.geotiff;
 
 import org.esa.snap.framework.datamodel.MetadataElement;
 import org.esa.snap.framework.datamodel.ProductData;
+import org.esa.snap.runtime.Config;
 
 import java.awt.Dimension;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.logging.Logger;
+import java.util.prefs.Preferences;
 import java.util.regex.Pattern;
 
 /**
@@ -32,6 +34,7 @@ class Landsat8Metadata extends AbstractLandsatMetadata {
     private static final double DEFAULT_SCALE_FACTOR = 1.0;
     private static final double DEFAULT_OFFSET = 0.0;
 
+    private static final Preferences PREFERENCES = Config.instance("s3tbx").load().preferences();
     private static final Logger LOG = Logger.getLogger(Landsat8Metadata.class.getName());
 
     private static final String[] BAND_DESCRIPTIONS = {
@@ -196,7 +199,8 @@ class Landsat8Metadata extends AbstractLandsatMetadata {
     }
 
     static String getSpectralInputString() {
-        final String readAs = System.getProperty(LandsatGeotiffReader.SYSPROP_READ_AS);
+        final Preferences preferences = Config.instance("s3tbx").load().preferences();
+        final String readAs = preferences.get(LandsatGeotiffReader.SYSPROP_READ_AS, null);
         String spectralInput;
         if (readAs != null) {
             switch (readAs.toLowerCase()) {
