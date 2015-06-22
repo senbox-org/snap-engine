@@ -32,7 +32,7 @@ public class SlstrTiePointGeoCoding extends TiePointGeoCoding {
 
     @Override
     public PixelPos getPixelPos(GeoPos geoPos, PixelPos pixelPos) {
-        super.getPixelPos(geoPos, pixelPos);
+        pixelPos = super.getPixelPos(geoPos, pixelPos);
         PixelPos transformedPixelPos = new PixelPos();
         inverse.transform(pixelPos, transformedPixelPos);
         pixelPos.setLocation(transformedPixelPos);
