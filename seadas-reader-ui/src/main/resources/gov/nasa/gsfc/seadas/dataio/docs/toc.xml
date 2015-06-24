@@ -9,8 +9,10 @@
     <tocitem text="Sentinel Toolbox Application">
         <tocitem text="Import and Export">
             <tocitem text="Import Raster Data">
-                <tocitem text="NASA Ocean Color" target="importNasaObpgProduct">
-                </tocitem>
+				<tocitem text="Optical Sensors">
+					<tocitem text="NASA Ocean Color" target="importNasaObpgProduct">
+					</tocitem>
+				</tocitem>
             </tocitem>
             <tocitem text="Import Vector Data">
                 <tocitem text="SeaBASS File Format" target="importSeabass">
