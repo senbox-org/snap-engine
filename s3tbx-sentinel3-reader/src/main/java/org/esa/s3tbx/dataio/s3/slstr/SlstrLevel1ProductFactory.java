@@ -17,10 +17,14 @@ package org.esa.s3tbx.dataio.s3.slstr;/*
 import org.esa.s3tbx.dataio.s3.Manifest;
 import org.esa.s3tbx.dataio.s3.Sentinel3ProductReader;
 import org.esa.snap.framework.datamodel.Band;
+import org.esa.snap.framework.datamodel.BasicPixelGeoCoding;
+import org.esa.snap.framework.datamodel.GeoCoding;
+import org.esa.snap.framework.datamodel.GeoCodingFactory;
 import org.esa.snap.framework.datamodel.MetadataElement;
 import org.esa.snap.framework.datamodel.Product;
 import org.esa.snap.framework.datamodel.RasterDataNode;
 import org.esa.snap.framework.datamodel.TiePointGrid;
+import org.esa.snap.runtime.Config;
 
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
@@ -39,6 +43,7 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
     private Map<String, Float> nameToWavelengthMap;
     private Map<String, Float> nameToBandwidthMap;
     private Map<String, Integer> nameToIndexMap;
+    private Map<String, GeoCoding> geoCodingMap;
 
     public SlstrLevel1ProductFactory(Sentinel3ProductReader productReader) {
         super(productReader);
@@ -53,6 +58,7 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
         nameToWavelengthMap = new HashMap<>();
         nameToBandwidthMap = new HashMap<>();
         nameToIndexMap = new HashMap<>();
+        geoCodingMap = new HashMap<>();
     }
 
     protected Integer getStartOffset(String gridIndex) {
@@ -73,7 +79,7 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
             final MetadataElement slstrElement = slstrInformationElement.getElementAt(i);
             final String slstrElementName = slstrElement.getName();
             if (slstrElementName.endsWith("ImageSize")) {
-                if(slstrElement.containsAttribute("grid")) {
+                if (slstrElement.containsAttribute("grid")) {
                     final String firstLetter =
                             gridTypeToGridIndex.get(slstrElement.getAttribute("grid").getData().getElemString());
                     String index;
@@ -110,12 +116,12 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
                     float wavelength =
                             Float.parseFloat(bandElement.getAttribute("centralWavelength").getData().getElemString());
                     //consider case that wavelength is given in micro meters
-                    if(wavelength < 100) {
+                    if (wavelength < 100) {
                         wavelength *= 1000;
                     }
                     float bandWidth =
                             Float.parseFloat(bandElement.getAttribute("bandWidth").getData().getElemString());
-                    if(bandWidth <= 1.0) {
+                    if (bandWidth <= 1.0) {
                         bandWidth *= 1000;
                     }
                     nameToWavelengthMap.put(bandName, wavelength);
@@ -146,9 +152,9 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
             public boolean accept(File dir, String name) {
                 return name.endsWith(".nc") &&
                         (name.contains("radiance") || name.contains("flags")
-                        || name.contains("geodetic") || name.contains("BT") || name.contains("cartesian")
-                        || name.contains("indices") || name.contains("met") || name.contains("time")
-                );
+                                || name.contains("geodetic") || name.contains("BT") || name.contains("cartesian")
+                                || name.contains("indices") || name.contains("met") || name.contains("time")
+                        );
             }
         });
 
@@ -192,6 +198,17 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
 
     @Override
     protected void setBandGeoCodings(Product product) {
+        //todo use pixelgeocoding every time as soon as it works better
+        final boolean loadPixelGeoCodings =
+                Config.instance().preferences().getBoolean("s3tbx.reader.slstrl1b.pixelgeocodings", false);
+        if (loadPixelGeoCodings) {
+            setPixelBandGeoCodings(product);
+        } else {
+            setTiePointBandGeoCodings(product);
+        }
+    }
+
+    private void setTiePointBandGeoCodings(Product product) {
         TiePointGrid origLatGrid = null;
         TiePointGrid origLonGrid = null;
         for (final TiePointGrid grid : product.getTiePointGrids()) {
@@ -231,4 +248,58 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
             }
         }
     }
+
+    private void setPixelBandGeoCodings(Product product) {
+        final Band[] bands = product.getBands();
+        for (Band band : bands) {
+            final String end = band.getName().substring(band.getName().length() - 2);
+            if (geoCodingMap.containsKey(end)) {
+                band.setGeoCoding(geoCodingMap.get(end));
+            } else {
+                Band latBand = null;
+                Band lonBand = null;
+                switch (end) {
+                    case "an":
+                        latBand = product.getBand("latitude_an");
+                        lonBand = product.getBand("longitude_an");
+                        break;
+                    case "ao":
+                        latBand = product.getBand("latitude_ao");
+                        lonBand = product.getBand("latitude_ao");
+                        break;
+                    case "bn":
+                        latBand = product.getBand("latitude_bn");
+                        lonBand = product.getBand("latitude_bn");
+                        break;
+                    case "bo":
+                        latBand = product.getBand("latitude_bo");
+                        lonBand = product.getBand("longitude_bo");
+                        break;
+                    case "cn":
+                        latBand = product.getBand("latitude_cn");
+                        lonBand = product.getBand("longitude_cn");
+                        break;
+                    case "co":
+                        latBand = product.getBand("latitude_co");
+                        lonBand = product.getBand("longitude_co");
+                        break;
+                    case "in":
+                        latBand = product.getBand("latitude_in");
+                        lonBand = product.getBand("longitude_in");
+                        break;
+                    case "io":
+                        latBand = product.getBand("latitude_io");
+                        lonBand = product.getBand("longitude_io");
+                        break;
+                }
+                if (latBand != null && lonBand != null) {
+                    final BasicPixelGeoCoding geoCoding = GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, "", 5);
+                    band.setGeoCoding(geoCoding);
+                    geoCodingMap.put(end, geoCoding);
+                }
+            }
+        }
+
+    }
+
 }

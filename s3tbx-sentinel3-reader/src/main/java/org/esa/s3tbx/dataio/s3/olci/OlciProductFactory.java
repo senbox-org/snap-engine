@@ -6,10 +6,12 @@ import org.esa.s3tbx.dataio.s3.Sentinel3ProductReader;
 import org.esa.s3tbx.dataio.s3.util.S3NetcdfReader;
 import org.esa.s3tbx.dataio.s3.util.S3NetcdfReaderFactory;
 import org.esa.snap.framework.datamodel.Band;
+import org.esa.snap.framework.datamodel.GeoCodingFactory;
 import org.esa.snap.framework.datamodel.MetadataElement;
 import org.esa.snap.framework.datamodel.Product;
 import org.esa.snap.framework.datamodel.RasterDataNode;
 import org.esa.snap.framework.datamodel.TiePointGeoCoding;
+import org.esa.snap.runtime.Config;
 
 import java.io.File;
 import java.io.IOException;
@@ -90,21 +92,33 @@ abstract class OlciProductFactory extends AbstractProductFactory {
 
     @Override
     protected void setGeoCoding(Product targetProduct) throws IOException {
-        //todo use this later - currently it slows the reader down during product opening
-
-//        final Band latBand = targetProduct.getBand("latitude");
-//        final Band lonBand = targetProduct.getBand("longitude");
-//        if (latBand != null && lonBand != null) {
-//            targetProduct.setGeoCoding(
-//                    GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, getValidExpression(), 5));
-//        }
-//        if (targetProduct.getGeoCoding() == null) {
-        if (targetProduct.getTiePointGrid("latitude") != null && targetProduct.getTiePointGrid(
-                "longitude") != null) {
-            targetProduct.setGeoCoding(new TiePointGeoCoding(targetProduct.getTiePointGrid("latitude"),
-                                                             targetProduct.getTiePointGrid("longitude")));
+        //todo use pixelgeocoding every time as soon as it is not that slow anymore
+        final boolean loadPixelGeoCodings =
+                Config.instance().preferences().getBoolean("s3tbx.reader.olci.pixelgeocoding", false);
+        if (loadPixelGeoCodings) {
+            setPixelGeoCoding(targetProduct);
+        } else {
+            setTiePointGeoCoding(targetProduct);
         }
-//        }
+    }
+
+    private void setPixelGeoCoding(Product targetProduct) {
+        final Band latBand = targetProduct.getBand("latitude");
+        final Band lonBand = targetProduct.getBand("longitude");
+        if (latBand != null && lonBand != null) {
+            targetProduct.setGeoCoding(
+                    GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, getValidExpression(), 5));
+        }
+    }
+
+    private void setTiePointGeoCoding(Product targetProduct) {
+        if (targetProduct.getGeoCoding() == null) {
+            if (targetProduct.getTiePointGrid("latitude") != null && targetProduct.getTiePointGrid(
+                    "longitude") != null) {
+                targetProduct.setGeoCoding(new TiePointGeoCoding(targetProduct.getTiePointGrid("latitude"),
+                                                                 targetProduct.getTiePointGrid("longitude")));
+            }
+        }
         if (targetProduct.getGeoCoding() == null) {
             if (targetProduct.getTiePointGrid("TP_latitude") != null && targetProduct.getTiePointGrid(
                     "TP_longitude") != null) {
@@ -129,10 +143,10 @@ abstract class OlciProductFactory extends AbstractProductFactory {
         // the unit string follows the CF conventions.
         // See: http://www.unidata.ucar.edu/software/udunits/udunits-2.0.4/udunits2lib.html#Syntax
         if (targetNode.getName().startsWith("ADG443_NN") ||
-            targetNode.getName().startsWith("CHL_NN") ||
-            targetNode.getName().startsWith("CHL_OC4ME") ||
-            targetNode.getName().startsWith("KD490_M07")  ||
-            targetNode.getName().startsWith("TSM_NN")) {
+                targetNode.getName().startsWith("CHL_NN") ||
+                targetNode.getName().startsWith("CHL_OC4ME") ||
+                targetNode.getName().startsWith("KD490_M07") ||
+                targetNode.getName().startsWith("TSM_NN")) {
             if (targetNode instanceof Band) {
                 final Band targetBand = (Band) targetNode;
                 String unit = targetBand.getUnit();
