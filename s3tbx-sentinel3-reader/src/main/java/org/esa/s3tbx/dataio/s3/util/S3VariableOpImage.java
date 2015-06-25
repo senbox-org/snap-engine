@@ -25,7 +25,7 @@ public class S3VariableOpImage extends SingleBandedOpImage {
     private String[] additionalDimensionNames;
 
     public S3VariableOpImage(VariableIF variable, int dataBufferType, int sourceWidth, int sourceHeight,
-                         Dimension tileSize, ResolutionLevel level,
+                             Dimension tileSize, ResolutionLevel level,
                              String[] additionalDimensionNames, int[] additionalDimensionIndexes,
                              int xIndex, int yIndex
     ) {
@@ -35,11 +35,11 @@ public class S3VariableOpImage extends SingleBandedOpImage {
     }
 
     static S3VariableOpImage createS3VariableOpImage(VariableIF variable, int dataBufferType, int sourceWidth, int sourceHeight,
-                                   Dimension tileSize, ResolutionLevel level,
+                                                     Dimension tileSize, ResolutionLevel level,
                                                      String[] additionalDimensionNames, int[] additionalDimensionIndexes,
                                                      int xIndex, int yIndex,
                                                      boolean msb) {
-        if(msb) {
+        if (msb) {
             return new S3VariableOpImage(variable, dataBufferType, sourceWidth, sourceHeight, tileSize, level,
                                          additionalDimensionNames, additionalDimensionIndexes, xIndex, yIndex,
                                          ArrayConverter.MSB);
@@ -52,8 +52,8 @@ public class S3VariableOpImage extends SingleBandedOpImage {
 
     public S3VariableOpImage(VariableIF variable, int dataBufferType, int sourceWidth, int sourceHeight,
                              Dimension tileSize, ResolutionLevel level,
-                              String[] additionalDimensionNames, int[] additionalDimensionIndexes,
-                              int xIndex, int yIndex, ArrayConverter converter) {
+                             String[] additionalDimensionNames, int[] additionalDimensionIndexes,
+                             int xIndex, int yIndex, ArrayConverter converter) {
         super(dataBufferType, sourceWidth, sourceHeight, tileSize, null, level);
         this.variable = variable;
         this.additionalDimensionNames = additionalDimensionNames;
@@ -65,6 +65,8 @@ public class S3VariableOpImage extends SingleBandedOpImage {
 
     @Override
     protected void computeRect(PlanarImage[] sourceImages, WritableRaster tile, Rectangle rectangle) {
+//        System.out.println(variable.getFullName() + ": " + tile.getMinX() + ", " + tile.getMinY() + ", " +
+//                                   tile.getWidth() + ", " + tile.getHeight());
         final int rank = variable.getRank();
         final int[] origin = new int[rank];
         final int[] shape = new int[rank];
@@ -128,17 +130,16 @@ public class S3VariableOpImage extends SingleBandedOpImage {
 
     /**
      * Transforms the primitive storage of the array supplied as argument.
-     * <p/>
+     * <p>
      * The default implementation merely returns the primitive storage of
      * the array supplied as argument, which is fine when the sequence of
      * variable dimensions is (..., y, x).
-     * <p/>
+     * <p>
      * Implementations have to transpose the storage when the sequence of
      * variable dimensions is (..., x, y) instead of (..., y, x).
-     * <p/>
+     * <p>
      *
      * @param array An array.
-     *
      * @return the transformed primitive storage of the array supplied as
      * argument.
      */
