@@ -265,11 +265,11 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
                         break;
                     case "ao":
                         latBand = product.getBand("latitude_ao");
-                        lonBand = product.getBand("latitude_ao");
+                        lonBand = product.getBand("longitude_ao");
                         break;
                     case "bn":
                         latBand = product.getBand("latitude_bn");
-                        lonBand = product.getBand("latitude_bn");
+                        lonBand = product.getBand("longitude_bn");
                         break;
                     case "bo":
                         latBand = product.getBand("latitude_bo");
