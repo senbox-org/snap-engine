@@ -236,7 +236,7 @@ public class SmacOperator extends Operator {
     void installAuxdata() {
         auxdataInstallDir = initAuxdataInstallDir();
         try {
-            Path sourceDirPath = ResourceInstaller.findModuleCodeBasePath(getClass()).resolve("auxdata/");
+            Path sourceDirPath = ResourceInstaller.findModuleCodeBasePath(getClass()).resolve("auxdata");
             new ResourceInstaller(sourceDirPath, auxdataInstallDir).install(".*", ProgressMonitor.NULL);
         } catch (IOException e) {
             throw new OperatorException("Failed to install auxdata into " + auxdataInstallDir.toString(), e);

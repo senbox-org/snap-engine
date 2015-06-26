@@ -106,7 +106,7 @@ public class CloudOperator extends Operator {
     // package local for testing purposes
     void installAuxdata() throws IOException {
         Path auxdataDirPath = getAuxdataInstallationPath();
-        Path sourcePath = ResourceInstaller.findModuleCodeBasePath(getClass()).resolve("auxdata/");
+        Path sourcePath = ResourceInstaller.findModuleCodeBasePath(getClass()).resolve("auxdata");
         new ResourceInstaller(sourcePath, auxdataDirPath).install(".*", ProgressMonitor.NULL);
     }
 
