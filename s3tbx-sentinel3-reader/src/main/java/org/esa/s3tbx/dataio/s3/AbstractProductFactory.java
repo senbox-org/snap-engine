@@ -175,11 +175,11 @@ public abstract class AbstractProductFactory implements ProductFactory {
             final String uncertaintyBandName = bandName + "_uncertainty";
             if (product.containsBand(errorBandName)) {
                 final Band errorBand = product.getBand(errorBandName);
-                band.setAncillaryBand("error", errorBand);
+                band.addAncillaryVariable(errorBand, "error");
                 addUncertaintyImageInfo(errorBand);
             } else if (product.containsBand(uncertaintyBandName)) {
                 final Band uncertaintyBand = product.getBand(uncertaintyBandName);
-                band.setAncillaryBand("uncertainty", uncertaintyBand);
+                band.addAncillaryVariable(uncertaintyBand, "uncertainty");
                 addUncertaintyImageInfo(uncertaintyBand);
             }
         }
