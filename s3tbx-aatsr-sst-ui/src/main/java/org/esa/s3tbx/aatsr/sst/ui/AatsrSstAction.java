@@ -33,7 +33,7 @@ import java.awt.event.ActionEvent;
 )
 @ActionRegistration(displayName = "#CTL_AatsrSstActionText")
 @ActionReference(
-        path = "Menu/Processing/Thematic Water Processing",
+        path = "Menu/Optical/Thematic Water Processing",
         position = 100
 )
 @NbBundle.Messages({"CTL_AatsrSstActionText=(A)ATSR SST Processor"})

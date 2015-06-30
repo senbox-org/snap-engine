@@ -22,7 +22,7 @@ import java.beans.PropertyChangeListener;
 )
 @ActionRegistration(displayName = "#CTL_FlhMciAction_Text")
 @ActionReference(
-        path = "Menu/Processing/Thematic Water Processing",
+        path = "Menu/Optical/Thematic Water Processing",
         position = 200
 )
 @NbBundle.Messages({"CTL_FlhMciAction_Text=FLH/MCI Processor"})

@@ -34,7 +34,7 @@ import java.awt.event.ActionEvent;
 )
 @ActionRegistration(displayName = "#CTL_MerisRadiometryCorrectionAction_Text")
 @ActionReference(
-        path = "Menu/Processing/Preprocessing",
+        path = "Menu/Optical/Preprocessing",
         position = 100
 )
 @NbBundle.Messages({"CTL_MerisRadiometryCorrectionAction_Text=MERIS Radiometric Correction"})

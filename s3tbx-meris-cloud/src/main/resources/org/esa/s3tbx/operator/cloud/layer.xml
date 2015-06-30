@@ -17,7 +17,7 @@
     </folder>
 
     <folder name="Menu">
-        <folder name="Processing">
+        <folder name="Optical">
             <folder name="Preprocessing">
                 <file name="org-esa-s3tbx-operator-cloud-MerisCloudOpAction.shadow">
                     <attr name="originalFile" stringvalue="Actions/Operators/org-esa-s3tbx-operator-cloud-MerisCloudOpAction.instance"/>

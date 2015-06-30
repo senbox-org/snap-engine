@@ -19,7 +19,7 @@
     </folder>
 
     <folder name="Menu">
-        <folder name="Processing">
+        <folder name="Optical">
             <folder name="Thematic Land Processing">
                 <file name="org-esa-s3tbx-smac-MerisSmacOpAction.shadow">
                     <attr name="originalFile" stringvalue="Actions/Operators/org-esa-s3tbx-smac-MerisSmacOpAction.instance"/>
