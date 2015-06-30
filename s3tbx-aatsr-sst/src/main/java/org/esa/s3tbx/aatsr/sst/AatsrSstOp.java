@@ -49,7 +49,7 @@ import java.nio.file.Path;
  * @author Ralf Quast
  */
 @OperatorMetadata(alias = "Aatsr.SST",
-                  category = "Optical Processing/Thematic Water Processing",
+                  category = "Optical/Thematic Water Processing",
                   authors = "Tom Block, Ralf Quast",
                   copyright = "Brockmann Consult GmbH",
                   version = "2.0",
