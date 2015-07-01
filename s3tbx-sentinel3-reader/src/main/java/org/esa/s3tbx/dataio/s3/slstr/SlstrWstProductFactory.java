@@ -79,7 +79,7 @@ public class SlstrWstProductFactory extends SlstrSstProductFactory {
                 String bandName = bandNames[i];
                 if(product.containsBand(bandName)) {
                     final Band band = product.getBand(bandName);
-                    seaSurfaceTemperatureBand.setAncillaryBand(roles[i], band);
+                    seaSurfaceTemperatureBand.addAncillaryVariable(band, roles[i]);
                     addUncertaintyImageInfo(band);
                 }
             }
