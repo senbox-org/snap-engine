@@ -28,15 +28,9 @@ import javax.swing.Action;
 import java.awt.event.ActionEvent;
 
 
-@ActionID(
-        category = "Processing",
-        id = "org.esa.s3tbx.meris.radiometry.ui.MerisRadiometryCorrectionAction"
-)
+@ActionID(category = "Processing", id = "org.esa.s3tbx.meris.radiometry.ui.MerisRadiometryCorrectionAction" )
 @ActionRegistration(displayName = "#CTL_MerisRadiometryCorrectionAction_Text")
-@ActionReference(
-        path = "Menu/Optical/Preprocessing",
-        position = 100
-)
+@ActionReference(path = "Menu/Optical/Preprocessing", position = 100 )
 @NbBundle.Messages({"CTL_MerisRadiometryCorrectionAction_Text=MERIS Radiometric Correction"})
 public class MerisRadiometryCorrectionAction extends AbstractSnapAction {
 
