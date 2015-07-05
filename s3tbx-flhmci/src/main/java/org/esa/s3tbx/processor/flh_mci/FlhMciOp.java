@@ -33,14 +33,9 @@ import org.esa.snap.framework.gpf.pointop.Sample;
 import org.esa.snap.framework.gpf.pointop.SourceSampleConfigurer;
 import org.esa.snap.framework.gpf.pointop.TargetSampleConfigurer;
 import org.esa.snap.framework.gpf.pointop.WritableSample;
-import org.esa.snap.jai.ResolutionLevel;
-import org.esa.snap.jai.VirtualBandOpImage;
 import org.esa.snap.util.ProductUtils;
 import org.esa.snap.util.StringUtils;
 import org.esa.snap.util.converters.BooleanExpressionConverter;
-
-import javax.media.jai.OpImage;
-import java.awt.image.Raster;
 
 /**
  * An operator for computing fluorescence line height (FLH) or maximum chlorophyll index (MCI).
@@ -115,12 +110,10 @@ public class FlhMciOp extends PixelOperator {
 
     @Override
     protected void configureSourceSamples(SourceSampleConfigurer sc) throws OperatorException {
+        sc.setValidPixelMask(maskExpression);
         sc.defineSample(0, signalBandName);
         sc.defineSample(1, lowerBaselineBandName);
         sc.defineSample(2, upperBaselineBandName);
-        if (maskExpression != null && !maskExpression.trim().isEmpty()) {
-            sc.defineValidPixelMask(maskExpression);
-        }
     }
 
     @Override
