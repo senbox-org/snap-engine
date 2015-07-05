@@ -6,7 +6,12 @@ import org.esa.snap.framework.gpf.OperatorException;
 import org.esa.snap.framework.gpf.OperatorSpi;
 import org.esa.snap.framework.gpf.annotations.OperatorMetadata;
 import org.esa.snap.framework.gpf.annotations.SourceProduct;
-import org.esa.snap.framework.gpf.pointop.*;
+import org.esa.snap.framework.gpf.pointop.PixelOperator;
+import org.esa.snap.framework.gpf.pointop.ProductConfigurer;
+import org.esa.snap.framework.gpf.pointop.Sample;
+import org.esa.snap.framework.gpf.pointop.SourceSampleConfigurer;
+import org.esa.snap.framework.gpf.pointop.TargetSampleConfigurer;
+import org.esa.snap.framework.gpf.pointop.WritableSample;
 import org.esa.snap.util.BitSetter;
 
 /**
@@ -40,12 +45,12 @@ public class ProbaVSynthesisBitMaskOp extends PixelOperator {
     }
 
     @Override
-    protected void configureSourceSamples(SampleConfigurer sampleConfigurer) throws OperatorException {
+    protected void configureSourceSamples(SourceSampleConfigurer sampleConfigurer) throws OperatorException {
         sampleConfigurer.defineSample(SRC_FLAG, ProbaVConstants.SM_BAND_NAME);
     }
 
     @Override
-    protected void configureTargetSamples(SampleConfigurer sampleConfigurer) throws OperatorException {
+    protected void configureTargetSamples(TargetSampleConfigurer sampleConfigurer) throws OperatorException {
         sampleConfigurer.defineSample(TRG_FLAG, TARGET_FLAG_BAND_NAME);
     }
 

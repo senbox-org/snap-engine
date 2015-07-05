@@ -30,7 +30,8 @@ import org.esa.snap.framework.gpf.annotations.SourceProduct;
 import org.esa.snap.framework.gpf.pointop.PixelOperator;
 import org.esa.snap.framework.gpf.pointop.ProductConfigurer;
 import org.esa.snap.framework.gpf.pointop.Sample;
-import org.esa.snap.framework.gpf.pointop.SampleConfigurer;
+import org.esa.snap.framework.gpf.pointop.SourceSampleConfigurer;
+import org.esa.snap.framework.gpf.pointop.TargetSampleConfigurer;
 import org.esa.snap.framework.gpf.pointop.WritableSample;
 import org.esa.snap.jai.ResolutionLevel;
 import org.esa.snap.jai.VirtualBandOpImage;
@@ -87,7 +88,6 @@ public class FlhMciOp extends PixelOperator {
     private float invalidFlhMciValue;
 
     private transient BaselineAlgorithm algorithm;
-    private transient OpImage maskOpImage;
 
     private transient int currentPixel = 0;
 
@@ -99,16 +99,9 @@ public class FlhMciOp extends PixelOperator {
         final float lower = sourceSamples[1].getFloat();
         final float upper = sourceSamples[2].getFloat();
 
-        if (isMasked(maskOpImage, x, y)) {
-            targetSamples[0].set(algorithm.computeLineHeight(lower, upper, signal));
-            if (slope) {
-                targetSamples[1].set(algorithm.computeSlope(lower, upper));
-            }
-        } else {
-            targetSamples[0].set(invalidFlhMciValue);
-            if (slope) {
-                targetSamples[1].set(invalidFlhMciValue);
-            }
+        targetSamples[0].set(algorithm.computeLineHeight(lower, upper, signal));
+        if (slope) {
+            targetSamples[1].set(algorithm.computeSlope(lower, upper));
         }
     }
 
@@ -121,17 +114,20 @@ public class FlhMciOp extends PixelOperator {
     }
 
     @Override
-    protected void configureSourceSamples(SampleConfigurer sampleConfigurer) throws OperatorException {
-        sampleConfigurer.defineSample(0, signalBandName);
-        sampleConfigurer.defineSample(1, lowerBaselineBandName);
-        sampleConfigurer.defineSample(2, upperBaselineBandName);
+    protected void configureSourceSamples(SourceSampleConfigurer sc) throws OperatorException {
+        sc.defineSample(0, signalBandName);
+        sc.defineSample(1, lowerBaselineBandName);
+        sc.defineSample(2, upperBaselineBandName);
+        if (maskExpression != null && !maskExpression.trim().isEmpty()) {
+            sc.defineValidPixelMask(maskExpression);
+        }
     }
 
     @Override
-    protected void configureTargetSamples(SampleConfigurer sampleConfigurer) throws OperatorException {
-        sampleConfigurer.defineSample(0, lineHeightBandName);
+    protected void configureTargetSamples(TargetSampleConfigurer sc) throws OperatorException {
+        sc.defineSample(0, lineHeightBandName);
         if (slope) {
-            sampleConfigurer.defineSample(1, slopeBandName);
+            sc.defineSample(1, slopeBandName);
         }
     }
 
@@ -157,7 +153,7 @@ public class FlhMciOp extends PixelOperator {
             slopeBand.setUnit(signalBand.getUnit() + " nm-1");
             slopeBand.setDescription("Baseline slope band");
             slopeBand.setNoDataValueUsed(true);
-            slopeBand.setNoDataValue(Double.NaN);
+            slopeBand.setNoDataValue(invalidFlhMciValue);
             slopeBand.setValidPixelExpression(validPixelExpression);
         }
 
@@ -165,10 +161,7 @@ public class FlhMciOp extends PixelOperator {
     }
 
     private String createValidMaskExpression() {
-        if (maskExpression != null && !maskExpression.trim().isEmpty()) {
-            return maskExpression;
-        }
-        final String expression;
+        String expression;
         if (sourceProduct.getBand("l1_flags") != null && sourceProduct.getFlagCodingGroup().get("l1_flags") != null) {
             expression = "!l1_flags.INVALID && !l1_flags.LAND_OCEAN";
         } else if (sourceProduct.getBand("l2_flags") != null && sourceProduct.getFlagCodingGroup().get("l2_flags") != null) {
@@ -180,29 +173,17 @@ public class FlhMciOp extends PixelOperator {
     }
 
     @Override
-    public void dispose() {
-        super.dispose();
-        if (maskOpImage != null) {
-            maskOpImage.dispose();
-        }
-    }
-
-    @Override
     protected void prepareInputs() throws OperatorException {
         super.prepareInputs();
         validateParameters();
 
-        final float lambda1 = getWavelength(lowerBaselineBandName);
-        final float lambda2 = getWavelength(signalBandName);
-        final float lambda3 = getWavelength(upperBaselineBandName);
+        float lambda1 = getWavelength(lowerBaselineBandName);
+        float lambda2 = getWavelength(signalBandName);
+        float lambda3 = getWavelength(upperBaselineBandName);
 
         algorithm = new BaselineAlgorithm();
         algorithm.setWavelengths(lambda1, lambda3, lambda2);
         algorithm.setCloudCorrectionFactor(cloudCorrectionFactor);
-
-        if (maskExpression != null && !maskExpression.isEmpty()) {
-            maskOpImage = VirtualBandOpImage.createMask(maskExpression, sourceProduct, ResolutionLevel.MAXRES);
-        }
     }
 
     private void validateParameters() throws OperatorException {
@@ -230,29 +211,18 @@ public class FlhMciOp extends PixelOperator {
         return wavelength;
     }
 
-    private static boolean isMasked(OpImage maskOpImage, int x, int y) {
-        if (maskOpImage == null) {
-            return true;
-        }
-        final int tileX = maskOpImage.XToTileX(x);
-        final int tileY = maskOpImage.YToTileY(y);
-        final Raster tile = maskOpImage.getTile(tileX, tileY);
+    public static class NodeNameValidator implements Validator {
 
-        return tile.getSample(x, y, 0) != 0;
+        @Override
+        public void validateValue(Property property, Object value) throws ValidationException {
+            ProductNode.isValidNodeName(value.toString());
+        }
     }
 
     public static class Spi extends OperatorSpi {
 
         public Spi() {
             super(FlhMciOp.class);
-        }
-    }
-
-    public static class NodeNameValidator implements Validator {
-
-        @Override
-        public void validateValue(Property property, Object value) throws ValidationException {
-            ProductNode.isValidNodeName(value.toString());
         }
     }
 }

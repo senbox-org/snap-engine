@@ -32,8 +32,9 @@ import org.esa.snap.framework.gpf.annotations.Parameter;
 import org.esa.snap.framework.gpf.annotations.SourceProduct;
 import org.esa.snap.framework.gpf.pointop.ProductConfigurer;
 import org.esa.snap.framework.gpf.pointop.Sample;
-import org.esa.snap.framework.gpf.pointop.SampleConfigurer;
 import org.esa.snap.framework.gpf.pointop.SampleOperator;
+import org.esa.snap.framework.gpf.pointop.SourceSampleConfigurer;
+import org.esa.snap.framework.gpf.pointop.TargetSampleConfigurer;
 import org.esa.snap.framework.gpf.pointop.WritableSample;
 import org.esa.snap.util.ProductUtils;
 import org.esa.snap.util.math.RsMathUtils;
@@ -160,7 +161,7 @@ public class MerisRadiometryCorrectionOp extends SampleOperator {
     }
 
     @Override
-    protected void configureSourceSamples(SampleConfigurer sampleConfigurer) {
+    protected void configureSourceSamples(SourceSampleConfigurer sampleConfigurer) {
         int i = -1;
         // define samples corresponding to spectral bands, using the spectral band index as sample index
         for (final Band band : getSourceProduct().getBands()) {
@@ -187,7 +188,7 @@ public class MerisRadiometryCorrectionOp extends SampleOperator {
     }
 
     @Override
-    protected void configureTargetSamples(SampleConfigurer sampleConfigurer) {
+    protected void configureTargetSamples(TargetSampleConfigurer sampleConfigurer) {
         // define samples corresponding to spectral bands, using the spectral band index as sample index
         for (final Band band : getTargetProduct().getBands()) { // pitfall: using targetProduct field here throws NPE
             final int spectralBandIndex = band.getSpectralBandIndex();

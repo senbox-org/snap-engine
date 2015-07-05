@@ -27,7 +27,8 @@ import org.esa.snap.framework.gpf.annotations.SourceProduct;
 import org.esa.snap.framework.gpf.pointop.PixelOperator;
 import org.esa.snap.framework.gpf.pointop.ProductConfigurer;
 import org.esa.snap.framework.gpf.pointop.Sample;
-import org.esa.snap.framework.gpf.pointop.SampleConfigurer;
+import org.esa.snap.framework.gpf.pointop.SourceSampleConfigurer;
+import org.esa.snap.framework.gpf.pointop.TargetSampleConfigurer;
 import org.esa.snap.framework.gpf.pointop.WritableSample;
 import org.esa.snap.jai.ResolutionLevel;
 import org.esa.snap.jai.VirtualBandOpImage;
@@ -165,28 +166,16 @@ public class AatsrSstOp extends PixelOperator {
     private transient int[] nadirCoefficientIndexes;
     private transient int[] dualCoefficientIndexes;
 
-    private transient OpImage nadirMaskOpImage;
-    private transient OpImage dualMaskOpImage;
+    private transient int nadirMaskIndex;
+    private transient int dualMaskIndex;
 
     private transient int currentPixel = 0;
-
-    @Override
-    public void dispose() {
-        super.dispose();
-
-        if (nadirMaskOpImage != null) {
-            nadirMaskOpImage.dispose();
-        }
-        if (dualMaskOpImage != null) {
-            dualMaskOpImage.dispose();
-        }
-    }
 
     @Override
     protected void computePixel(int x, int y, Sample[] sourceSamples, WritableSample[] targetSamples) {
         checkCancellation();
         if (nadir) {
-            if (isMasked(nadirMaskOpImage, x, y)) {
+            if (nadirMaskIndex >= 0 && sourceSamples[nadirMaskIndex].getBoolean()) {
                 final float ir37 = sourceSamples[0].getFloat();
                 final float ir11 = sourceSamples[1].getFloat();
                 final float ir12 = sourceSamples[2].getFloat();
@@ -201,7 +190,7 @@ public class AatsrSstOp extends PixelOperator {
             }
         }
         if (dual) {
-            if (isMasked(dualMaskOpImage, x, y)) {
+            if (dualMaskIndex >= 0 && sourceSamples[dualMaskIndex].getBoolean()) {
                 final float ir37N = sourceSamples[0].getFloat();
                 final float ir11N = sourceSamples[1].getFloat();
                 final float ir12N = sourceSamples[2].getFloat();
@@ -250,27 +239,39 @@ public class AatsrSstOp extends PixelOperator {
     }
 
     @Override
-    protected void configureSourceSamples(SampleConfigurer sampleConfigurer) throws OperatorException {
-        sampleConfigurer.defineSample(0, SstConstants.NADIR_370_BAND);
-        sampleConfigurer.defineSample(1, SstConstants.NADIR_1100_BAND);
-        sampleConfigurer.defineSample(2, SstConstants.NADIR_1200_BAND);
-        sampleConfigurer.defineSample(3, SstConstants.SUN_ELEV_NADIR);
+    protected void configureSourceSamples(SourceSampleConfigurer sc) throws OperatorException {
+        sc.defineSample(0, SstConstants.NADIR_370_BAND);
+        sc.defineSample(1, SstConstants.NADIR_1100_BAND);
+        sc.defineSample(2, SstConstants.NADIR_1200_BAND);
+        sc.defineSample(3, SstConstants.SUN_ELEV_NADIR);
 
         if (dual) {
-            sampleConfigurer.defineSample(4, SstConstants.FORWARD_370_BAND);
-            sampleConfigurer.defineSample(5, SstConstants.FORWARD_1100_BAND);
-            sampleConfigurer.defineSample(6, SstConstants.FORWARD_1200_BAND);
-            sampleConfigurer.defineSample(7, SstConstants.SUN_ELEV_FORWARD);
+            sc.defineSample(4, SstConstants.FORWARD_370_BAND);
+            sc.defineSample(5, SstConstants.FORWARD_1100_BAND);
+            sc.defineSample(6, SstConstants.FORWARD_1200_BAND);
+            sc.defineSample(7, SstConstants.SUN_ELEV_FORWARD);
+        }
+
+        nadirMaskIndex = -1;
+        if (nadirMaskExpression != null && !nadirMaskExpression.trim().isEmpty()) {
+            nadirMaskIndex = 8;
+            sc.defineComputedSample(nadirMaskIndex, ProductData.TYPE_UINT8, nadirMaskExpression);
+        }
+
+        dualMaskIndex = -1;
+        if (dualMaskExpression != null && !dualMaskExpression.trim().isEmpty()) {
+            dualMaskIndex = 9;
+            sc.defineComputedSample(dualMaskIndex, ProductData.TYPE_UINT8, dualMaskExpression);
         }
     }
 
     @Override
-    protected void configureTargetSamples(SampleConfigurer sampleConfigurer) throws OperatorException {
+    protected void configureTargetSamples(TargetSampleConfigurer sc) throws OperatorException {
         if (nadir) {
-            sampleConfigurer.defineSample(0, NADIR_SST_BAND_NAME);
+            sc.defineSample(0, NADIR_SST_BAND_NAME);
         }
         if (dual) {
-            sampleConfigurer.defineSample(1, DUAL_SST_BAND_NAME);
+            sc.defineSample(1, DUAL_SST_BAND_NAME);
         }
     }
 
@@ -301,17 +302,9 @@ public class AatsrSstOp extends PixelOperator {
         final File auxdataDir = installAuxiliaryData();
         if (nadir) {
             initNadirCoefficients(auxdataDir);
-            if (nadirMaskExpression != null && !nadirMaskExpression.isEmpty()) {
-                nadirMaskOpImage = VirtualBandOpImage.createMask(nadirMaskExpression, sourceProduct,
-                                                                 ResolutionLevel.MAXRES);
-            }
         }
         if (dual) {
             initDualCoefficients(auxdataDir);
-            if (dualMaskExpression != null && !dualMaskExpression.isEmpty()) {
-                dualMaskOpImage = VirtualBandOpImage.createMask(dualMaskExpression, sourceProduct,
-                                                                ResolutionLevel.MAXRES);
-            }
         }
     }
 
