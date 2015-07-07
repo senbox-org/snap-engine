@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (C) 2015 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -40,7 +40,7 @@ public class L3ProductReaderPlugIn implements ProductReaderPlugIn {
     private static final boolean DEBUG = false;
 
     private static final String DEFAULT_FILE_EXTENSION = ".hdf";
-    private static final String DEFAULT_L3B_FILE_EXTENSION = ".main";
+    private static final String DEFAULT_L3B_FILE_EXTENSION = ".L3b*";
     private static final String DEFAULT_L3M_FILE_EXTENSION = ".L3m*";
 
 
@@ -61,23 +61,6 @@ public class L3ProductReaderPlugIn implements ProductReaderPlugIn {
             "VIIRS Level-3 Standard Mapped Image",
             "OCRVC Level-3 Standard Mapped Image",
             "Level-3 Standard Mapped Image",
-            " Level-3 Standard Mapped Image",
-            "SeaWiFS Level-3 Binned Data",
-            "CZCS Level-3 Binned Data",
-            "OCTS Level-3 Binned Data",
-            "HMODISA Level-3 Binned Data",
-            "HMODIST Level-3 Binned Data",
-            "MODISA Level-3 Binned Data",
-            "MODIST Level-3 Binned Data",
-            "MERIS Level-3 Binned Data",
-            "MODIS Level-3 Binned Data",
-            "OSMI Level-3 Binned Data",
-            "OCM2 Level-3 Binned Data",
-            "Level-3 Binned Data",
-            "VIIRSN Level-3 Binned Data",
-            "VIIRS Level-3 Binned Data",
-            "OCRVC Level-3 Binned Data",
-            "GSM bin composite",
             "GSM mapped",
     };
     private static final Set<String> supportedProductTypeSet = new HashSet<String>(Arrays.asList(supportedProductTypes));
@@ -119,11 +102,13 @@ public class L3ProductReaderPlugIn implements ProductReaderPlugIn {
 
                 if (titleAttribute != null ) {
                         final String title = titleAttribute.getStringValue();
-                        if (!title.contains("Mapped") && ncfile.findGroup("Level-3_Binned_Data") == null) {
-                            return DecodeQualification.UNABLE;
-                        }
                         if (title != null) {
-                            if (supportedProductTypeSet.contains(title.trim())) {
+                            if (title.matches(".*Level-3 Binned Data")){
+                                System.out.println("Support for visualization of L3 bin files has been disabled.");
+                                ncfile.close();
+                                return DecodeQualification.UNABLE;
+                            }
+                            if(title.matches(".*Level-3 Standard Mapped Image")){
                                 if (DEBUG) {
                                     System.out.println(file);
                                 }
