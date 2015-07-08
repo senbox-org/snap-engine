@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>seadas-reader</symbolicName>
-    <version>1.5.6</version>
+    <version>1.5.7</version>
     <name>NASA OBPG Ocean Color Product Reader</name>
     <description>A reader for Ocean Color Data Products supported the NASA Ocean Biology Processing Group</description>
 
@@ -14,6 +14,14 @@
 
     <changelog>
         <![CDATA[
+        Changes in 1.5.7:</br>
+        fix product time parsing for VIIRS products, simplify detection
+        Fixed orientation of SMI file reader and got rid of a NPE when loading a really old obscure SMI file.
+        removed a and bb from product groupings
+        fixed validExpression for HDF4 files - don't apply scaling as min/max values are in geophysical units (unlike the netCDF files).
+        modified L3 reader to be less specific on title for mapped data identification;removed support for L3 bin files
+        updated grouping names to prevent topography from getting lumped in with aph
+        updated SMI reader to handle OPeNDAP files from oceandata server updated SMI flag codings for SST updated band metadata for SMI and L2 files
         Changes in 1.5.6:</br>
         Fixed a swapped geospatial_lon_min/max issue</br>
         Fixed VIIRS Aggrigation zone geolocation problem. Can now tolerate missing geolocation scans in the middle of a file.</br>
