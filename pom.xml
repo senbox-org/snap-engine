@@ -33,10 +33,10 @@
         <module>s3tbx-atsr-reader</module>
         <module>s3tbx-avhrr-reader</module>
         <module>s3tbx-chris-reader</module>
-        <module>s3tbx-kit</module>
-        <module>s3tbx-landsat-reader</module>
         <module>s3tbx-flhmci</module>
         <module>s3tbx-flhmci-ui</module>
+        <module>s3tbx-kit</module>
+        <module>s3tbx-landsat-reader</module>
         <module>s3tbx-meris-cloud</module>
         <module>s3tbx-meris-radiometry</module>
         <module>s3tbx-meris-radiometry-ui</module>
@@ -56,6 +56,7 @@
         <snap.version>2.0.0-SNAPSHOT</snap.version>
         <netbeans.version>RELEASE802</netbeans.version>
         <javahelp.version>2.0.05</javahelp.version>
+        <seadas.reader.version>1.5.6</seadas.reader.version>
         <brandingToken>s3tbx</brandingToken>
     </properties>
 
@@ -303,7 +304,6 @@
                         <licenseName>GPL 3</licenseName>
                         <licenseFile>${project.basedir}/../LICENSE.html</licenseFile>
                         <cluster>${brandingToken}</cluster>
-                        <nbmBuildDir>${project.basedir}/../target/nbm</nbmBuildDir>
                         <brandingToken>${brandingToken}</brandingToken>
                         <useOSGiDependencies>false</useOSGiDependencies>
                         <requiresRestart>true</requiresRestart>

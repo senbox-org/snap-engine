@@ -22,6 +22,16 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>nbm-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>nbm</goal>
+                            <goal>cluster</goal>
+                            <goal>autoupdate</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -34,9 +44,19 @@
 
     <dependencies>
 
+        <!--
+             Make sure the list of dependencies reflects the wanted contents of the S3TBX.
+             Use same order as in the <modules> tag of the parent POM.
+        -->
+
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-sentinel3-reader</artifactId>
+            <artifactId>s3tbx-aatsr-sst</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.s3tbx</groupId>
+            <artifactId>s3tbx-aatsr-sst-ui</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -51,17 +71,12 @@
         </dependency>
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
+            <artifactId>s3tbx-avhrr-reader</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.s3tbx</groupId>
             <artifactId>s3tbx-chris-reader</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-aatsr-sst</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-aatsr-sst-ui</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -72,6 +87,11 @@
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
             <artifactId>s3tbx-flhmci-ui</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.s3tbx</groupId>
+            <artifactId>s3tbx-landsat-reader</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -91,6 +111,16 @@
         </dependency>
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
+            <artifactId>s3tbx-meris-smac</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.s3tbx</groupId>
+            <artifactId>s3tbx-merisl3-reader</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.s3tbx</groupId>
             <artifactId>s3tbx-modis-reader</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -98,6 +128,26 @@
             <groupId>org.esa.s3tbx</groupId>
             <artifactId>s3tbx-proba-v-reader</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.s3tbx</groupId>
+            <artifactId>s3tbx-sentinel3-reader</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.s3tbx</groupId>
+            <artifactId>s3tbx-spot-vgt-reader</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap.seadas</groupId>
+            <artifactId>seadas-reader</artifactId>
+            <version>${seadas.reader.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap.seadas</groupId>
+            <artifactId>seadas-reader-ui</artifactId>
+            <version>${seadas.reader.version}</version>
         </dependency>
 
     </dependencies>
