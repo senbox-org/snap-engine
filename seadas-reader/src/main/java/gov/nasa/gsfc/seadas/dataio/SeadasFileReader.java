@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (C) 2015 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -33,7 +33,6 @@ import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;
@@ -940,50 +939,38 @@ public abstract class SeadasFileReader {
 
     private ProductData.UTC getUTCAttribute(String key, List<Attribute> globalAttributes) {
         Attribute attribute = findAttribute(key, globalAttributes);
-        Boolean isModis = false;
-        Boolean isISO = false;
-        try {
-            isModis = findAttribute("MODIS_Resolution", globalAttributes).isString();
-        } catch (Exception ignored) { }
-        try {
-            isISO = findAttribute("time_coverage_start", globalAttributes).isString();
-        } catch (Exception ignored) { }
-
-        if (attribute != null) {
+         if (attribute != null) {
             String timeString = attribute.getStringValue().trim();
+             return parseUtcDate(timeString);
+        }
+        return null;
+    }
 
-            final DateFormat dateFormat = ProductData.UTC.createDateFormat("yyyyDDDHHmmssSSS");
-
-            final DateFormat dateFormatISO = ProductData.UTC.createDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-            // only needed as a stop-gap to handle an intermediate version of l2gen metadata
-            final DateFormat dateFormatISOnopunc = ProductData.UTC.createDateFormat("yyyyMMdd'T'HHmmss'Z'");
-
-            final DateFormat dateFormatModis = ProductData.UTC.createDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSS");
-            final DateFormat dateFormatOcts = ProductData.UTC.createDateFormat("yyyyMMdd HH:mm:ss.SSSSSS");
-            try {
-                if (isISO) {
-                    Date date;
-                    try {
-                        date = dateFormatISO.parse(timeString);
-                    } catch (Exception e) {
-                        date = dateFormatISOnopunc.parse(timeString);
-                    }
-                    return ProductData.UTC.create(date, 0);
-                } else if (isModis) {
-                    final Date date = dateFormatModis.parse(timeString);
-                    String milliSeconds = timeString.substring(timeString.length() - 3);
-                    return ProductData.UTC.create(date, Long.parseLong(milliSeconds) * 1000);
-                } else if (productReader.getProductType() == SeadasProductReader.ProductType.Level1A_OCTS) {
-                    final Date date = dateFormatOcts.parse(timeString);
-                    String milliSeconds = timeString.substring(timeString.length() - 3);
-                    return ProductData.UTC.create(date, Long.parseLong(milliSeconds) * 1000);
-                } else  {
-                    final Date date = dateFormat.parse(timeString);
-                    String milliSeconds = timeString.substring(timeString.length() - 3);
-                    return ProductData.UTC.create(date, Long.parseLong(milliSeconds) * 1000);
-                }
-            } catch (ParseException ignored) {
+    static ProductData.UTC parseUtcDate(String timeString) {
+        try {
+            if (timeString.matches("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z")) {
+                // ISO
+                return ProductData.UTC.parse(timeString, "yyyy-MM-dd'T'HH:mm:ss'Z'");
+            } else if (timeString.matches("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z")) {
+                // ISO with micros
+                timeString = timeString.substring(0, timeString.length() - 1);
+                return ProductData.UTC.parse(timeString, "yyyy-MM-dd'T'HH:mm:ss");
+            } else if (timeString.matches("\\d{4}\\d{2}\\d{2}T\\d{6}Z")) {
+                // ISO no-punctation
+                return ProductData.UTC.parse(timeString, "yyyyMMdd'T'HHmmss'Z'");
+            } else if (timeString.matches("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{6}")) {
+                // MODIS
+                return ProductData.UTC.parse(timeString, "yyyy-MM-dd HH:mm:ss");
+            } else if (timeString.matches("\\d{4}\\d{2}\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{6}")) {
+                // OCTS
+                return ProductData.UTC.parse(timeString, "yyyyMMdd HH:mm:ss");
+            } else if (timeString.matches("\\d{4}\\d{3}\\d{2}\\d{2}\\d{2}\\d{3}")) {
+                Date date = ProductData.UTC.createDateFormat("yyyyDDDHHmmssSSS").parse(timeString);
+                String milliSeconds = timeString.substring(timeString.length() - 3);
+                return ProductData.UTC.create(date, Long.parseLong(milliSeconds) * 1000);
             }
+        } catch (ParseException ignored) {
+            ignored.printStackTrace();
         }
         return null;
     }
