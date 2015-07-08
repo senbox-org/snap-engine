@@ -5,6 +5,7 @@ import org.esa.snap.framework.datamodel.Band;
 import org.esa.snap.framework.datamodel.CrsGeoCoding;
 import org.esa.snap.framework.datamodel.FlagCoding;
 import org.esa.snap.framework.datamodel.Mask;
+import org.esa.snap.framework.datamodel.MetadataAttribute;
 import org.esa.snap.framework.datamodel.MetadataElement;
 import org.esa.snap.framework.datamodel.Product;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
