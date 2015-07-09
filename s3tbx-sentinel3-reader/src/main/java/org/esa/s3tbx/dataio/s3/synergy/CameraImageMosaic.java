@@ -27,6 +27,7 @@ import javax.media.jai.operator.ScaleDescriptor;
 import javax.media.jai.operator.TranslateDescriptor;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
+import java.awt.image.DataBuffer;
 import java.awt.image.RenderedImage;
 
 class CameraImageMosaic {
@@ -35,12 +36,35 @@ class CameraImageMosaic {
 
     //package local for testing
     static RenderedImage create(RenderedImage... sourceImages) {
+        double[][] sourceThresholds = new double[sourceImages.length][1];
+        sourceThresholds[0][0] = determineSourceThreshold(sourceImages[0]);
         int t = 0;
         for (int i = 1; i < sourceImages.length; i++) {
             t += sourceImages[i - 1].getWidth();
-                sourceImages[i] = TranslateDescriptor.create(sourceImages[i], (float) t, 0.0f, INTERPOLATION, null);
+            sourceImages[i] = TranslateDescriptor.create(sourceImages[i], (float) t, 0.0f, INTERPOLATION, null);
+            sourceThresholds[i][0] = determineSourceThreshold(sourceImages[i]);
         }
-        return MosaicDescriptor.create(sourceImages, MosaicDescriptor.MOSAIC_TYPE_OVERLAY, null, null, null, null, null);
+        return MosaicDescriptor.create(sourceImages, MosaicDescriptor.MOSAIC_TYPE_OVERLAY, null, null,
+                                       sourceThresholds, null, null);
+    }
+
+    private static double determineSourceThreshold(RenderedImage image) {
+        final int dataType = image.getSampleModel().getDataType();
+        switch (dataType) {
+            case (DataBuffer.TYPE_BYTE):
+                return Byte.MIN_VALUE;
+            case (DataBuffer.TYPE_USHORT):
+                return 1.0;
+            case (DataBuffer.TYPE_SHORT):
+                return Short.MIN_VALUE + 1;
+            case (DataBuffer.TYPE_INT):
+                return Integer.MIN_VALUE + 1;
+            case (DataBuffer.TYPE_FLOAT):
+                return Float.MIN_VALUE + 1;
+            case (DataBuffer.TYPE_DOUBLE):
+                return Double.MIN_VALUE + 1;
+        }
+        return 0.0;
     }
 
     public static MultiLevelImage create(final MultiLevelImage... sourceImages) {

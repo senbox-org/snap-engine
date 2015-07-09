@@ -6,9 +6,12 @@ import org.esa.s3tbx.dataio.s3.Manifest;
 import org.esa.s3tbx.dataio.s3.Sentinel3ProductReader;
 import org.esa.s3tbx.dataio.s3.util.S3NetcdfReader;
 import org.esa.snap.framework.datamodel.Band;
+import org.esa.snap.framework.datamodel.BasicPixelGeoCoding;
+import org.esa.snap.framework.datamodel.GeoCodingFactory;
 import org.esa.snap.framework.datamodel.IndexCoding;
 import org.esa.snap.framework.datamodel.Product;
 import org.esa.snap.framework.datamodel.ProductData;
+import org.esa.snap.framework.datamodel.ProductNodeGroup;
 import org.esa.snap.framework.datamodel.SceneRasterTransform;
 import org.esa.snap.framework.datamodel.VirtualBand;
 import org.esa.snap.util.ProductUtils;
@@ -41,6 +44,7 @@ public class SynL1CProductFactory extends AbstractProductFactory {
                 fileNames.add(manifestFileName);
             }
         }
+        fileNames.add("GEOLOCATION_REF.nc");
         return fileNames;
     }
 
@@ -167,6 +171,17 @@ public class SynL1CProductFactory extends AbstractProductFactory {
         final File file = new File(getInputFileParentDirectory(), fileName);
         final S3NetcdfReader synNetcdfReader = SynNetcdfReaderFactory.createSynNetcdfReader(file);
         return synNetcdfReader.readProduct();
+    }
+
+    @Override
+    protected void setGeoCoding(Product targetProduct) throws IOException {
+        final ProductNodeGroup<Band> bandGroup = targetProduct.getBandGroup();
+        if (bandGroup.contains("GEOLOCATION_REF_latitude") && bandGroup.contains("GEOLOCATION_REF_longitude")) {
+            final BasicPixelGeoCoding pixelGeoCoding =
+                    GeoCodingFactory.createPixelGeoCoding(bandGroup.get("GEOLOCATION_REF_latitude"),
+                                                          bandGroup.get("GEOLOCATION_REF_longitude"), "", 5);
+            targetProduct.setGeoCoding(pixelGeoCoding);
+        }
     }
 
 }
