@@ -435,7 +435,7 @@ public class AatsrSstOp extends PixelOperator {
     }
 
     private File installAuxiliaryData() {
-        Path auxDataDir = SystemUtils.getAuxDataPath().resolve("aatsr-sst").toAbsolutePath();
+        Path auxDataDir = SystemUtils.getAuxDataPath().resolve("aatsr/sst").toAbsolutePath();
 
         Path sourcePath = ResourceInstaller.findModuleCodeBasePath(getClass()).resolve("auxdata/aatsr/sst");
         ResourceInstaller installer = new ResourceInstaller(sourcePath, auxDataDir);

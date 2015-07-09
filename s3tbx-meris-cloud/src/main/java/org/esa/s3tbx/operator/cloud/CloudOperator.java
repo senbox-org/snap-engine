@@ -112,7 +112,7 @@ public class CloudOperator extends Operator {
 
     // package local for testing purposes
     Path getAuxdataInstallationPath() {
-        return SystemUtils.getAuxDataPath().resolve("meris-cloud").toAbsolutePath();
+        return SystemUtils.getAuxDataPath().resolve("meris/cloud-op").toAbsolutePath();
     }
 
     /**

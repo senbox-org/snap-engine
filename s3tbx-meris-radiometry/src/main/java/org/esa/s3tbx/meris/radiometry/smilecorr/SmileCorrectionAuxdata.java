@@ -215,7 +215,7 @@ public class SmileCorrectionAuxdata {
     }
 
     static Path installAuxdata() throws IOException {
-        Path auxdataDirectory = SystemUtils.getAuxDataPath().resolve("smile-correction");
+        Path auxdataDirectory = SystemUtils.getAuxDataPath().resolve("meris/smile-correction");
         final Path sourceDirPath = ResourceInstaller.findModuleCodeBasePath(SmileCorrectionAuxdata.class).resolve("auxdata/smile");
         final ResourceInstaller resourceInstaller = new ResourceInstaller(sourceDirPath, auxdataDirectory);
         resourceInstaller.install(".*", ProgressMonitor.NULL);
