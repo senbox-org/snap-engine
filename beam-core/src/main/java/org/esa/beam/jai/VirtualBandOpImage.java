@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (C) 2015 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -272,7 +272,7 @@ public class VirtualBandOpImage extends SingleBandedOpImage {
             term = BandArithmetic.parseExpression(expression, products, defaultProductIndex);
         } catch (ParseException e) {
             throw new RuntimeException(MessageFormat.format(
-                    "Could not parse expression: ''{0}''.", expression), e);
+                    "Could not parse expression: ''{0}''. {1}", expression, e.getMessage()), e);
         }
         final ImageManager imageManager = ImageManager.getInstance();
         for (final RasterDataSymbol symbol : BandArithmetic.getRefRasterDataSymbols(term)) {

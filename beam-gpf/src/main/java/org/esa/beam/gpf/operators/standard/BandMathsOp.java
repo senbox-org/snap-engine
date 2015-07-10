@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (C) 2015 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -43,6 +43,7 @@ import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.StringUtils;
 
 import java.awt.Rectangle;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -403,7 +404,8 @@ public class BandMathsOp extends Operator {
             Parser parser = new ParserImpl(namespace, false);
             term = parser.parse(expression);
         } catch (ParseException e) {
-            throw new OperatorException("Could not parse expression: " + expression, e);
+            String msg = MessageFormat.format("Could not parse expression: ''{0}''. {1}", expression, e.getMessage());
+            throw new OperatorException(msg, e);
         }
         return term;
     }
