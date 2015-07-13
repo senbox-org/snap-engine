@@ -18,9 +18,9 @@
         </folder>
     </folder>
 
-<!--
-SNAP autoupdate extensions
--->
+    <!--
+        SNAP autoupdate extensions
+    -->
     <folder name="Services">
         <folder name="AutoupdateType">
             <file name="s3tbx_update_center.instance">
