@@ -1,0 +1,8 @@
+﻿Developed under contract to ESA by 
+Brockmann Consult GmbH (prime contractor),
+University of Reading, 
+CS Communication & Systèmes,
+ACRI-ST, Arrays Systems
+
+© 2014-2017 by Brockmann Consult GmbH
+and others
