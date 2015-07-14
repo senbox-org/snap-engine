@@ -60,7 +60,7 @@ the option *Create module groups for multi-module Maven projects*. Everything ca
     --userdir
     "${snap}/s3tbx/target/userdir"
     --clusters
-    "${snap}/s3tbx/target/nbm/netbeans/s3tbx"
+    "${snap}/s3tbx/s3tbx-kit/target/netbeans_clusters/s3tbx"
     --patches
     "${snap}/snap-engine/$/target/classes;${snap}/s3tbx/$/target/classes"
     **Working directory:** ${snap}/snap-desktop/snap-application/target/snap/
