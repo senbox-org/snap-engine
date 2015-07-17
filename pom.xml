@@ -44,6 +44,7 @@
         <module>s3tbx-merisl3-reader</module>
         <module>s3tbx-modis-reader</module>
         <module>s3tbx-proba-v-reader</module>
+        <module>s3tbx-regridding</module>
         <module>s3tbx-sentinel3-reader</module>
         <module>s3tbx-spot-vgt-reader</module>
         <module>seadas-reader</module>
@@ -229,6 +230,11 @@
                 <artifactId>org-netbeans-modules-javahelp</artifactId>
                 <version>${netbeans.version}</version>
             </dependency>
+            <!--<dependency>-->
+                <!--<groupId>org.netbeans.api</groupId>-->
+                <!--<artifactId>org-netbeans-modules-options-api</artifactId>-->
+                <!--<version>${netbeans.version}</version>-->
+            <!--</dependency>-->
 
             <!-- TAR archive support  -->
 
