@@ -30,8 +30,6 @@ import org.esa.snap.framework.gpf.pointop.Sample;
 import org.esa.snap.framework.gpf.pointop.SourceSampleConfigurer;
 import org.esa.snap.framework.gpf.pointop.TargetSampleConfigurer;
 import org.esa.snap.framework.gpf.pointop.WritableSample;
-import org.esa.snap.jai.ResolutionLevel;
-import org.esa.snap.jai.VirtualBandOpImage;
 import org.esa.snap.util.ResourceInstaller;
 import org.esa.snap.util.SystemUtils;
 
