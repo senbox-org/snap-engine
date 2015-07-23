@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (C) 2015 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -22,6 +22,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import org.esa.beam.binning.AggregatorConfig;
 import org.esa.beam.binning.BinningContext;
 import org.esa.beam.binning.CellProcessorConfig;
+import org.esa.beam.binning.CompositingType;
 import org.esa.beam.binning.DataPeriod;
 import org.esa.beam.binning.ProductCustomizerConfig;
 import org.esa.beam.binning.SpatialBin;
@@ -47,7 +48,6 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProducts;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.gpf.operators.standard.SubsetOp;
-import org.esa.beam.util.Debug;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.StopWatch;
 import org.esa.beam.util.converters.JtsGeometryConverter;
@@ -231,6 +231,7 @@ public class BinningOp extends Operator {
     private transient Area regionArea;
     private transient MetadataAggregator metadataAggregator;
     private transient String planetaryGridClass;
+    private transient CompositingType compositingType;
 
     private final Map<Product, List<Band>> addedVariableBands;
     private Product writtenProduct;
@@ -366,6 +367,10 @@ public class BinningOp extends Operator {
         this.planetaryGridClass = planetaryGridClass;
     }
 
+    public void setCompositingType(CompositingType compositingType) {
+        this.compositingType = compositingType;
+    }
+
     /**
      * Processes all source products and writes the output file.
      * The target product represents the written output file
@@ -473,6 +478,9 @@ public class BinningOp extends Operator {
         config.setRegion(region);
         if (planetaryGridClass != null) {
             config.setPlanetaryGrid(planetaryGridClass);
+        }
+        if (compositingType!= null) {
+            config.setCompositingType(compositingType);
         }
         return config;
     }
