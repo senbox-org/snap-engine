@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (C) 2015 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -119,6 +119,14 @@ public class FormatterConfig {
 
     public void setBandConfigurations(BinningOp.BandConfiguration... bandConfigurations) {
         this.bandConfigurations = bandConfigurations;
+    }
+
+    public ProductCustomizerConfig getProductCustomizerConfig() {
+        return productCustomizerConfig;
+    }
+
+    public void setProductCustomizerConfig(ProductCustomizerConfig productCustomizerConfig) {
+        this.productCustomizerConfig = productCustomizerConfig;
     }
 
     public ProductCustomizer getProductCustomizer() {
