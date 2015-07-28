@@ -17,7 +17,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>beam-gpf</symbolicName>
-    <version>5.0.5</version>
+    <version>5.0.6</version>
     <name>BEAM Graph Processing Framework (GPF)</name>
 
     <description>The basic framework for processing using Operators and the GPT.</description>
@@ -30,6 +30,8 @@
 
     <changelog>
         <![CDATA[
+         <b>Changes in 5.0.6</b><br/>
+            [BEAM-1771] BooleanExpressionConverter is located in UI package<br/>
          <b>Changes in 5.0.5</b><br/>
             [BEAM-1738] Provide time usage per operator in GPT<br/>
             [BEAM-1736] GPT should allow setting system properties<br/>

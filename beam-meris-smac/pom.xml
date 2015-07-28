@@ -29,7 +29,7 @@
 
     <name>BEAM MERIS SMAC Atmospheric Correction</name>
     <artifactId>beam-meris-smac</artifactId>
-    <version>5.0</version>
+    <version>5.0.1-SNAPSHOT</version>
 
     <dependencies>
         <dependency>

@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>beam-flhmci</symbolicName>
-    <version>5.0</version>
+    <version>5.0.1</version>
     <name>MERIS FLH/MCI Processor</name>
 
     <description>
@@ -22,6 +22,8 @@
 
     <changelog>
         <![CDATA[
+        <b>Changes in 5.0.1</b><br/>
+        [BEAM-1771] BooleanExpressionConverter is located in UI package<br/>
         <b>Changes in 5.0</b><br/>
         [BEAM-1494] FLH/MCI operator misses parameter description<br/>
         [BEAM-1528] FLH/MCI operator does not set valid mask of output bands<br/>

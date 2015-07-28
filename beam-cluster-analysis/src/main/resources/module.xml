@@ -2,7 +2,7 @@
     <manifestVersion>1.0.0</manifestVersion>
 
     <symbolicName>beam-cluster-analysis</symbolicName>
-    <version>5.0</version>
+    <version>5.0.1</version>
     <name>BEAM Cluster Analysis</name>
 
     <description>
@@ -11,7 +11,8 @@
 
     <changelog>
         <![CDATA[
-
+            <b>Changes in 5.0.1</b><br/>
+            [BEAM-1771] BooleanExpressionConverter is located in UI package<br/>
         ]]>
     </changelog>
 

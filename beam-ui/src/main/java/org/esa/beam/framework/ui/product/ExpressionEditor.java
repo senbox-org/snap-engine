@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (C) 2015 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -15,6 +15,7 @@
  */
 package org.esa.beam.framework.ui.product;
 
+import com.bc.ceres.binding.Converter;
 import com.bc.ceres.binding.Property;
 import com.bc.ceres.binding.PropertyDescriptor;
 import com.bc.ceres.swing.binding.Binding;
@@ -23,10 +24,10 @@ import com.bc.ceres.swing.binding.ComponentAdapter;
 import com.bc.ceres.swing.binding.PropertyEditor;
 import com.bc.ceres.swing.binding.internal.TextComponentAdapter;
 import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.ui.BooleanExpressionConverter;
-import org.esa.beam.framework.ui.GeneralExpressionConverter;
 import org.esa.beam.framework.ui.ModalDialog;
 import org.esa.beam.framework.ui.UIUtils;
+import org.esa.beam.util.converters.BooleanExpressionConverter;
+import org.esa.beam.util.converters.GeneralExpressionConverter;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -91,7 +92,9 @@ public abstract class ExpressionEditor extends PropertyEditor {
 
         @Override
         public boolean isValidFor(PropertyDescriptor propertyDescriptor) {
-            return propertyDescriptor.getConverter() instanceof GeneralExpressionConverter;
+            Converter<?> converter = propertyDescriptor.getConverter();
+            return converter instanceof GeneralExpressionConverter ||
+                    converter instanceof org.esa.beam.framework.ui.GeneralExpressionConverter;
         }
 
         @Override
@@ -105,7 +108,9 @@ public abstract class ExpressionEditor extends PropertyEditor {
 
         @Override
         public boolean isValidFor(PropertyDescriptor propertyDescriptor) {
-            return propertyDescriptor.getConverter() instanceof BooleanExpressionConverter;
+            Converter<?> converter = propertyDescriptor.getConverter();
+            return converter instanceof BooleanExpressionConverter ||
+                    converter instanceof org.esa.beam.framework.ui.BooleanExpressionConverter;
         }
 
         @Override

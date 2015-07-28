@@ -42,6 +42,7 @@
     <changelog>
         <![CDATA[
         <b>Changes in 5.0.5</b><br/>
+        [BEAM-1771] BooleanExpressionConverter is located in UI package<br/>
         [BEAM-1751] Write/Read GeoCodings using DimapPersitables<br/>
         <b>Changes in 5.0.4</b><br/>
         [BEAM-1735] Pixel Geo Coding with fractional accuracy is wrong at the dateline<br/>

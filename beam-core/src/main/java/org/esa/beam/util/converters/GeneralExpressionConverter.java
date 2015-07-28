@@ -14,7 +14,7 @@
  * with this program; if not, see http://www.gnu.org/licenses/
  */
 
-package org.esa.beam.framework.ui;
+package org.esa.beam.util.converters;
 
 import com.bc.ceres.binding.converters.StringConverter;
 
@@ -27,10 +27,7 @@ import com.bc.ceres.binding.converters.StringConverter;
  * UI-component.
  *
  * @author Thomas Storm
- *
- * @deprecated use {@link org.esa.beam.util.converters.GeneralExpressionConverter} instead
  */
-@Deprecated
 public class GeneralExpressionConverter extends StringConverter {
 
 }

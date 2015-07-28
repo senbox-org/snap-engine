@@ -17,7 +17,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>beam-ui</symbolicName>
-    <version>5.0.1</version>
+    <version>5.0.2</version>
     <name>BEAM User Interface Library</name>
     <activator>org.esa.beam.BeamUiActivator</activator>
 
@@ -25,6 +25,8 @@
     <description>This module provides user interface components used e.g. by VISAT.</description>
     <changelog>
         <![CDATA[
+        <b>Changes in 5.0.2</b><br/>
+        [BEAM-1771] BooleanExpressionConverter is located in UI package<br/>
         <b>Changes in 5.0.1</b><br/>
         [BEAM-1669] The button 'Define Subset...' is disabled in certain cases<br/>
         Harmonisation with NEST: Add drag and drop transfer handling to product browser<br/>

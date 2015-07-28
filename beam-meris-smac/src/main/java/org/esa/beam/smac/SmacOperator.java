@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (C) 2015 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -30,7 +30,7 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.beam.framework.ui.BooleanExpressionConverter;
+import org.esa.beam.util.converters.BooleanExpressionConverter;
 import org.esa.beam.util.ObjectUtils;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.ResourceInstaller;

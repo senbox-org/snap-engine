@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Brockmann Consult GmbH (info@brockmann-consult.de)
+ * Copyright (C) 2015 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -32,7 +32,7 @@ import org.esa.beam.framework.gpf.pointop.ProductConfigurer;
 import org.esa.beam.framework.gpf.pointop.Sample;
 import org.esa.beam.framework.gpf.pointop.SampleConfigurer;
 import org.esa.beam.framework.gpf.pointop.WritableSample;
-import org.esa.beam.framework.ui.BooleanExpressionConverter;
+import org.esa.beam.util.converters.BooleanExpressionConverter;
 import org.esa.beam.jai.ResolutionLevel;
 import org.esa.beam.jai.VirtualBandOpImage;
 import org.esa.beam.util.ProductUtils;

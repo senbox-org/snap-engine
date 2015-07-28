@@ -14,7 +14,7 @@
  * with this program; if not, see http://www.gnu.org/licenses/
  */
 
-package org.esa.beam.framework.ui;
+package org.esa.beam.util.converters;
 
 import com.bc.ceres.binding.converters.StringConverter;
 
@@ -22,15 +22,12 @@ import com.bc.ceres.binding.converters.StringConverter;
  *
  * Empty marker subclass for StringConverter.
  *
- * Purpose: use as converter for band maths expressions in the
+ * Purpose: use as converter for valid pixel expressions in the
  * {@link org.esa.beam.framework.gpf.annotations.Parameter}-annotation in order to allow for generating a decent
  * UI-component.
  *
  * @author Thomas Storm
- *
- * @deprecated use {@link org.esa.beam.util.converters.GeneralExpressionConverter} instead
  */
-@Deprecated
-public class GeneralExpressionConverter extends StringConverter {
+public class BooleanExpressionConverter extends StringConverter {
 
 }
