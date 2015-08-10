@@ -211,6 +211,8 @@ try:
     PixelPos = jpy.get_type('org.esa.beam.framework.datamodel.PixelPos')
     FlagCoding = jpy.get_type('org.esa.beam.framework.datamodel.FlagCoding')
     ProductNodeGroup = jpy.get_type('org.esa.beam.framework.datamodel.ProductNodeGroup')
+    MetadataElement = jpy.get_type('org.esa.beam.framework.datamodel.MetadataElement')
+    MetadataAttribute = jpy.get_type('org.esa.beam.framework.datamodel.MetadataAttribute')
 
     ProductUtils = jpy.get_type('org.esa.beam.util.ProductUtils')
 
