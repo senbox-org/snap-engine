@@ -31,6 +31,8 @@
 
     <changelog>
         <![CDATA[
+        <b>Changes in 5.0.7</b><br/>
+        moved writing pixel geocoding bands into BEAM band part
         <b>Changes in 5.0.6</b><br/>
         write lan lon bands only, if they are not already present (fixed)
         <b>Changes in 5.0.5</b><br/>
