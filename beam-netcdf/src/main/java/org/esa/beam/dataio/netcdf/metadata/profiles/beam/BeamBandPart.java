@@ -103,9 +103,6 @@ public class BeamBandPart extends ProfilePartIO {
         final NFileWriteable ncFile = ctx.getNetcdfFileWriteable();
         final String dimensions = ncFile.getDimensions();
         for (Band band : p.getBands()) {
-            if (isPixelGeoCodingBand(band)) {
-                continue;
-            }
             int dataType;
             if (band.isLog10Scaled()) {
                 dataType = band.getGeophysicalDataType();

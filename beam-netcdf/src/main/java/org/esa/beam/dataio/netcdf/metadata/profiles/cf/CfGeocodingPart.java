@@ -121,7 +121,7 @@ public class CfGeocodingPart extends ProfilePartIO {
     }
 
     private boolean isLatLonPresent(NFileWriteable ncFile) {
-        return ncFile.findVariable("lat") != null && ncFile.findVariable("lon") != null;
+        return ncFile.findVariable(Constants.LAT_VAR_NAME) != null && ncFile.findVariable(Constants.LON_VAR_NAME) != null;
     }
 
     @Override
@@ -180,14 +180,14 @@ public class CfGeocodingPart extends ProfilePartIO {
     }
 
     private void addGeographicCoordinateVariables(NFileWriteable ncFile, GeoPos ul, GeoPos br) throws IOException {
-        final NVariable lat = ncFile.addVariable("lat", DataType.FLOAT, null, "lat");
+        final NVariable lat = ncFile.addVariable(Constants.LAT_VAR_NAME, DataType.FLOAT, null, "lat");
         lat.addAttribute("units", "degrees_north");
         lat.addAttribute("long_name", "latitude");
         lat.addAttribute("standard_name", "latitude");
         lat.addAttribute(Constants.VALID_MIN_ATT_NAME, br.getLat());
         lat.addAttribute(Constants.VALID_MAX_ATT_NAME, ul.getLat());
 
-        final NVariable lon = ncFile.addVariable("lon", DataType.FLOAT, null, "lon");
+        final NVariable lon = ncFile.addVariable(Constants.LON_VAR_NAME, DataType.FLOAT, null, "lon");
         lon.addAttribute("units", "degrees_east");
         lon.addAttribute("long_name", "longitude");
         lon.addAttribute("standard_name", "longitude");
@@ -196,12 +196,12 @@ public class CfGeocodingPart extends ProfilePartIO {
     }
 
     private void addLatLonBands(final NFileWriteable ncFile, Dimension tileSize) throws IOException {
-        final NVariable lat = ncFile.addVariable("lat", DataType.FLOAT, tileSize, "y x");
+        final NVariable lat = ncFile.addVariable(Constants.LAT_VAR_NAME, DataType.FLOAT, tileSize, "y x");
         lat.addAttribute("units", "degrees_north");
         lat.addAttribute("long_name", "latitude coordinate");
         lat.addAttribute("standard_name", "latitude");
 
-        final NVariable lon = ncFile.addVariable("lon", DataType.FLOAT, tileSize, "y x");
+        final NVariable lon = ncFile.addVariable(Constants.LON_VAR_NAME, DataType.FLOAT, tileSize, "y x");
         lon.addAttribute("units", "degrees_east");
         lon.addAttribute("long_name", "longitude coordinate");
         lon.addAttribute("standard_name", "longitude");
