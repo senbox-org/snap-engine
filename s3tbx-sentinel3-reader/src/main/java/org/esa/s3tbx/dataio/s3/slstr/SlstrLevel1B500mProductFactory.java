@@ -4,6 +4,7 @@ import org.esa.s3tbx.dataio.s3.Sentinel3ProductReader;
 import org.esa.snap.framework.datamodel.Band;
 import org.esa.snap.framework.datamodel.Product;
 import org.esa.snap.framework.datamodel.RasterDataNode;
+import org.esa.snap.util.ProductUtils;
 
 import java.awt.image.RenderedImage;
 import java.util.List;
@@ -49,7 +50,10 @@ public class SlstrLevel1B500mProductFactory extends SlstrLevel1ProductFactory {
             if (gridIndex.startsWith("t")) {
                 return copyTiePointGrid(sourceBand, targetProduct, sourceStartOffset, sourceTrackOffset, sourceResolutions);
             } else {
-                final Band targetBand = copyBand(sourceBand, targetProduct, false);
+                final Band targetBand = new Band(sourceBandName, sourceBand.getDataType(),
+                                                 targetProduct.getSceneRasterWidth(), targetProduct.getSceneRasterHeight());
+                ProductUtils.copyRasterDataNodeProperties(sourceBand, targetBand);
+                targetProduct.addBand(targetBand);
                 final float[] offsets = getOffsets(sourceStartOffset, sourceTrackOffset, sourceResolutions);
                 final RenderedImage sourceImage = createSourceImage(masterProduct, sourceBand, offsets, targetBand,
                                                                     sourceResolutions);
