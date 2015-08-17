@@ -69,16 +69,10 @@ public class SynL1CProductFactory extends AbstractProductFactory {
                     sourceImages[i] = sourceProduct.getBand(sourceBandNames.get(i)).getSourceImage();
                 }
                 final MultiLevelImage sourceImage = CameraImageMosaic.create(sourceImages);
-                Band targetBand;
-                if (targetBandName.startsWith("MISREGIST_OLC_Oref")) {
-                    targetBand = new Band(targetBandName, sourceBand.getDataType(),
-                             sourceImage.getWidth(), sourceImage.getHeight());
-                    ProductUtils.copyRasterDataNodeProperties(sourceBand, targetBand);
-                    targetProduct.addBand(targetBand);
-                } else {
-                    targetBand = ProductUtils.copyBand(sourceBandName, sourceProduct, targetBandName,
-                                                                  targetProduct, false);
-                }
+                Band targetBand = new Band(targetBandName, sourceBand.getDataType(),
+                                           sourceImage.getWidth(), sourceImage.getHeight());
+                ProductUtils.copyRasterDataNodeProperties(sourceBand, targetBand);
+                targetProduct.addBand(targetBand);
                 //todo change this later
                 targetBand.setNoDataValueUsed(false);
                 targetBand.setValidPixelExpression("");
@@ -94,11 +88,11 @@ public class SynL1CProductFactory extends AbstractProductFactory {
     @Override
     protected void setSceneRasterTransforms(Product product) {
         final Band[] bands = product.getBands();
-        for (Band band: bands) {
+        for (Band band : bands) {
             final String bandName = band.getName();
             if (bandName.startsWith("OLC_RADIANCE") && !bandName.contains("17")) {
                 int end = 16;
-                if(bandName.substring(15, 16).equals("_")) {
+                if (bandName.substring(15, 16).equals("_")) {
                     end = 15;
                 }
                 final String identifier = bandName.substring(14, end);
