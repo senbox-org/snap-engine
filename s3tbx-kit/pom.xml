@@ -40,6 +40,30 @@
                 </configuration>
             </plugin>
         </plugins>
+
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>src/main/nbm</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>manifest.mf</include>
+                </includes>
+                <targetPath>nbm</targetPath>
+            </resource>
+
+            <resource>
+                <directory>src/main/resources/org/esa/s3tbx</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>layer.xml</include>
+                </includes>
+                <targetPath>org/esa/s3tbx</targetPath>
+            </resource>
+        </resources>
+
     </build>
 
     <dependencies>
@@ -163,6 +187,7 @@
     </dependencies>
 
     <properties>
+        <s3tbx.updatecenter>file:///C://nbuc//s3tbx-kit//netbeans_site//updates.xml.gz</s3tbx.updatecenter>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
