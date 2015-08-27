@@ -3,7 +3,7 @@ AutoUpdate-Show-In-Client: false
 AutoUpdate-Essential-Module: true
 OpenIDE-Module-Java-Dependencies: Java > 1.8
 OpenIDE-Module-Display-Category: Sentinel-3 Toolbox
-OpenIDE-Module-Specification-Version: ${snap.specVersion}
+OpenIDE-Module-Specification-Version: ${netbeans.specVersion}
 OpenIDE-Module-Long-Description: <p>Performs radiometric corrections o
  n MERIS L1b data products.</p><p><b>Vendor:</b> Brockmann Consult Gmb
  H</p><p><b>Contact address:</b> Max-Planck-Str. 2, 21502 Geesthacht (
