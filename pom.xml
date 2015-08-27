@@ -55,6 +55,8 @@
 
     <properties>
         <snap.version>2.0.0-SNAPSHOT</snap.version>
+        <!-- netbeans.specVersion is used to filter manifest.mf and set the the OpenIDE-Module-Specification-Version attribute.
+             This is necessary to make netbeans modules updatable and independent from maven version. -->
         <netbeans.specVersion>1.0</netbeans.specVersion>
         <netbeans.version>RELEASE802</netbeans.version>
         <javahelp.version>2.0.05</javahelp.version>
@@ -283,7 +285,6 @@
                         </configuration>
                     </execution>
                 </executions>
-
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
