@@ -251,11 +251,6 @@
                 <artifactId>org-netbeans-modules-javahelp</artifactId>
                 <version>${netbeans.version}</version>
             </dependency>
-            <!--<dependency>-->
-                <!--<groupId>org.netbeans.api</groupId>-->
-                <!--<artifactId>org-netbeans-modules-options-api</artifactId>-->
-                <!--<version>${netbeans.version}</version>-->
-            <!--</dependency>-->
 
             <!-- TAR archive support  -->
 
@@ -286,6 +281,29 @@
                 <configuration>
                     <encoding>UTF-8</encoding>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>file-manifest</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${build.directory}/nbm</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/nbm</directory>
+                                    <filtering>true</filtering>
+                                    <includes>
+                                        <include>manifest.mf</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+
+                        </configuration>
+                    </execution>
+                </executions>
+
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -342,7 +360,7 @@
                         <keystore>${project.basedir}/../keystore/s3tbx.ks</keystore>
                         <keystorealias>snap</keystorealias>
                         <keystorepassword>snap-123</keystorepassword>
-                        <sourceManifestFile>target/classes/nbm/manifest.mf</sourceManifestFile>
+                        <sourceManifestFile>target/nbm/manifest.mf</sourceManifestFile>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -377,21 +395,6 @@
 
             </plugins>
         </pluginManagement>
-
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-            </resource>
-            <resource>
-                <directory>src/main/nbm</directory>
-                <filtering>true</filtering>
-                <includes>
-                    <include>manifest.mf</include>
-                </includes>
-                <targetPath>nbm</targetPath>
-            </resource>
-        </resources>
-
     </build>
 
     <developers>
