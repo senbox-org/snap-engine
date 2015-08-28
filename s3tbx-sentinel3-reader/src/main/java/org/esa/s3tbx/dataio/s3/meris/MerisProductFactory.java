@@ -11,6 +11,7 @@ import org.esa.snap.framework.datamodel.MetadataElement;
 import org.esa.snap.framework.datamodel.Product;
 import org.esa.snap.framework.datamodel.RasterDataNode;
 import org.esa.snap.framework.datamodel.TiePointGeoCoding;
+import org.esa.snap.runtime.Config;
 
 import java.io.File;
 import java.io.IOException;
@@ -74,11 +75,13 @@ public class MerisProductFactory extends AbstractProductFactory {
 
     @Override
     protected void setGeoCoding(Product targetProduct) throws IOException {
-        final Band latBand = targetProduct.getBand("latitude");
-        final Band lonBand = targetProduct.getBand("longitude");
-        if (latBand != null && lonBand != null) {
-            targetProduct.setGeoCoding(
-                    GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, getValidExpression(), 5));
+        if (Config.instance().preferences().getBoolean("s3tbx.reader.meris.pixelGeoCoding", false)) {
+            final Band latBand = targetProduct.getBand("latitude");
+            final Band lonBand = targetProduct.getBand("longitude");
+            if (latBand != null && lonBand != null) {
+                targetProduct.setGeoCoding(
+                        GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, getValidExpression(), 5));
+            }
         }
         if (targetProduct.getGeoCoding() == null) {
             if (targetProduct.getTiePointGrid("latitude") != null && targetProduct.getTiePointGrid(

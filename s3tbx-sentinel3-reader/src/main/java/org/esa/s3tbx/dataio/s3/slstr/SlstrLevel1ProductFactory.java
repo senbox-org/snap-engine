@@ -198,10 +198,7 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
 
     @Override
     protected void setBandGeoCodings(Product product) {
-        //todo use pixelgeocoding every time as soon as it works better
-        final boolean loadPixelGeoCodings =
-                Config.instance().preferences().getBoolean("s3tbx.reader.slstrl1b.pixelgeocodings", false);
-        if (loadPixelGeoCodings) {
+        if (Config.instance().preferences().getBoolean("s3tbx.reader.slstrl1b.pixelGeoCodings", false)) {
             setPixelBandGeoCodings(product);
         } else {
             setTiePointBandGeoCodings(product);

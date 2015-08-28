@@ -293,7 +293,7 @@ public abstract class AbstractProductFactory implements ProductFactory {
 
     protected void addDataNodes(Product masterProduct, Product targetProduct) throws IOException {
         final boolean loadProfileTiepoints =
-                Config.instance().preferences().getBoolean("s3tbx.reader.loadProfileTiepoints", false);
+                Config.instance().preferences().getBoolean("s3tbx.reader.loadProfileTiePoints", false);
         final int w = targetProduct.getSceneRasterWidth();
         final int h = targetProduct.getSceneRasterHeight();
         for (final Product sourceProduct : openProductList) {

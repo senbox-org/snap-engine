@@ -92,10 +92,7 @@ abstract class OlciProductFactory extends AbstractProductFactory {
 
     @Override
     protected void setGeoCoding(Product targetProduct) throws IOException {
-        //todo use pixelgeocoding every time as soon as it is not that slow anymore
-        final boolean loadPixelGeoCodings =
-                Config.instance().preferences().getBoolean("s3tbx.reader.olci.pixelgeocoding", false);
-        if (loadPixelGeoCodings) {
+        if (Config.instance().preferences().getBoolean("s3tbx.reader.olci.pixelGeoCoding", false)) {
             setPixelGeoCoding(targetProduct);
         } else {
             setTiePointGeoCoding(targetProduct);

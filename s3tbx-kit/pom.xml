@@ -127,17 +127,22 @@
         </dependency>
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-regridding</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
             <artifactId>s3tbx-proba-v-reader</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
             <artifactId>s3tbx-sentinel3-reader</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.s3tbx</groupId>
+            <artifactId>s3tbx-sentinel3-reader-ui</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.s3tbx</groupId>
+            <artifactId>s3tbx-slstr-regrid</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -155,7 +160,6 @@
             <artifactId>seadas-reader-ui</artifactId>
             <version>${seadas.reader.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-openide-modules</artifactId>
