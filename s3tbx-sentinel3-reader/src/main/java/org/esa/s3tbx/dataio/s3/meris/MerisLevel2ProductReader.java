@@ -18,7 +18,7 @@ public class MerisLevel2ProductReader extends Sentinel3ProductReader {
     @Override
     protected Product readProductNodesImpl() throws IOException {
         final String dirName = getInputFileParentDirectory().getName();
-        if (dirName.matches("ENV_ME_2_RR(G|P)____.*______ACR_R_NT____.SEN3")) {
+        if (dirName.matches("ENV_ME_2_(F|R)R(G|P)____.*______ACR_R_NT____.SEN3")) {
             setFactory(new MerisLevel2ProductFactory(this));
         }
         return createProduct();
