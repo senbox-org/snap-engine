@@ -4,7 +4,7 @@ AutoUpdate-Essential-Module: true
 OpenIDE-Module-Layer: org/esa/s3tbx/dataio/merisl3/layer.xml
 OpenIDE-Module-Java-Dependencies: Java > 1.8
 OpenIDE-Module-Display-Category: Sentinel-3 Toolbox
-OpenIDE-Module-Specification-Version: ${snap.nbmSpecVersion}
+OpenIDE-Module-Specification-Version: ${s3tbx.nbmSpecVersion}
 OpenIDE-Module-Long-Description: <p>A reader for MERIS Binned Level-3
  (netCDF) data products.</p><p><b>Vendor:</b> Brockmann Consult GmbH</
  p><p><b>Contact address:</b> Max-Planck-Str. 2, 21502 Geesthacht (Ger

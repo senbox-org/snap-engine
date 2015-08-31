@@ -4,7 +4,7 @@ AutoUpdate-Essential-Module: true
 OpenIDE-Module-Layer: org/esa/s3tbx/dataio/spot/layer.xml
 OpenIDE-Module-Java-Dependencies: Java > 1.8
 OpenIDE-Module-Display-Category: Sentinel-3 Toolbox
-OpenIDE-Module-Specification-Version: ${snap.nbmSpecVersion}
+OpenIDE-Module-Specification-Version: ${s3tbx.nbmSpecVersion}
 OpenIDE-Module-Long-Description: <p>Enables SNAP to read SPOT VGT data
   products.</p><p><b>Vendor:</b> Brockmann Consult GmbH</p><p><b>Conta
  ct address:</b> Max-Planck-Str. 2, 21502 Geesthacht (Germany)</p><p><
