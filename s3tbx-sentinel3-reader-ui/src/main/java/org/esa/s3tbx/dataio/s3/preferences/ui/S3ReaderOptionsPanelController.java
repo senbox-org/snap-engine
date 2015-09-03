@@ -22,7 +22,7 @@ import java.beans.PropertyChangeSupport;
 )
 @org.openide.util.NbBundle.Messages({
         "LBL_Sentinel3ToolboxReaderOption_DisplayName=Sentinel-3 Readers",
-        "LBL_Sentinel3ToolboxReaderOption_Keywords=s3tbx"
+        "LBL_Sentinel3ToolboxReaderOption_Keywords=S3TBX"
 })
 public final class S3ReaderOptionsPanelController extends OptionsPanelController {
 
