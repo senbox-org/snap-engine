@@ -205,6 +205,7 @@ try:
     RasterDataNode = jpy.get_type('org.esa.beam.framework.datamodel.RasterDataNode')
     AbstractBand = jpy.get_type('org.esa.beam.framework.datamodel.AbstractBand')
     Band = jpy.get_type('org.esa.beam.framework.datamodel.Band')
+    TiePointGrid = jpy.get_type('org.esa.beam.framework.datamodel.TiePointGrid')
     VirtualBand = jpy.get_type('org.esa.beam.framework.datamodel.VirtualBand')
     GeoCoding = jpy.get_type('org.esa.beam.framework.datamodel.GeoCoding')
     GeoPos = jpy.get_type('org.esa.beam.framework.datamodel.GeoPos')
