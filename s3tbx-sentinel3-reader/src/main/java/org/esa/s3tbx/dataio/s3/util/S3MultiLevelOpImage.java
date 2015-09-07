@@ -70,7 +70,7 @@ public class S3MultiLevelOpImage extends AbstractNetcdfMultiLevelImage {
         } else if(rasterDataNode.getName().endsWith("_lsb")) {
             return S3VariableOpImage.createS3VariableOpImage(variable, dataBufferType, sceneRasterWidth,
                                                              sceneRasterHeight, imageTileSize, resolutionLevel,
-                                                             dimensionNames, dimensionIndexes, xIndex, yIndex, true);
+                                                             dimensionNames, dimensionIndexes, xIndex, yIndex, false);
         }
         //todo remove references to specific band names
         if ((variable.getFullName().contains("row_corresp") || (variable.getFullName().contains("col_corresp"))) &&
