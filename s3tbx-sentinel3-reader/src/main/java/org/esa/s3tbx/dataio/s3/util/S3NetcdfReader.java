@@ -193,6 +193,7 @@ public class S3NetcdfReader {
 
     protected void addVariableAsBand(Product product, Variable variable, String variableName, boolean synthetic) {
         int type = getRasterDataType(variable);
+        //todo if the datatype is unsigned long it might even be necessary to split it into three bands. This case is yet theoretical, though
         if (variable.getDataType() == DataType.LONG) {
             final Band lowerBand = product.addBand(variableName + "_lsb", type);
             lowerBand.setDescription(variable.getDescription() + "(least significant bytes)");
