@@ -4,6 +4,8 @@ import org.esa.snap.framework.datamodel.GeoPos;
 import org.esa.snap.framework.datamodel.PixelPos;
 import org.esa.snap.framework.datamodel.TiePointGeoCoding;
 import org.esa.snap.framework.datamodel.TiePointGrid;
+import org.geotools.referencing.operation.transform.AffineTransform2D;
+import org.opengis.referencing.operation.MathTransform;
 
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
@@ -13,10 +15,10 @@ import java.awt.geom.NoninvertibleTransformException;
  */
 public class SlstrTiePointGeoCoding extends TiePointGeoCoding {
 
-    private final AffineTransform transform;
+    private final AffineTransform2D transform;
     private final AffineTransform inverse;
 
-    public SlstrTiePointGeoCoding(TiePointGrid latGrid, TiePointGrid lonGrid, AffineTransform transform)
+    public SlstrTiePointGeoCoding(TiePointGrid latGrid, TiePointGrid lonGrid, AffineTransform2D transform)
             throws NoninvertibleTransformException {
         super(latGrid, lonGrid);
         this.transform = transform;
@@ -37,5 +39,10 @@ public class SlstrTiePointGeoCoding extends TiePointGeoCoding {
         inverse.transform(pixelPos, transformedPixelPos);
         pixelPos.setLocation(transformedPixelPos);
         return transformedPixelPos;
+    }
+
+    @Override
+    public MathTransform getImageToMapTransform() {
+        return transform;
     }
 }
