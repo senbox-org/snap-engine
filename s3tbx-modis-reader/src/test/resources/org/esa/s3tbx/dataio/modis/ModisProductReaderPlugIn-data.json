@@ -11,17 +11,17 @@
             "description": "HDF4_Version: 4.2.5 (HDF Version 4.2 Release 5, February 17, 2010)"
         },
         {
-            "id": "MOD02HKM_A2012136_2330_005_2012137073318",
+            "id": "MOD02HKM_A2012136_2330_005_2012137073318_modis",
             "relativePath": "sensors_platforms/MODIS/old/MOD02HKM/HDF4/MOD02HKM.A2012136.2330.005.2012137073318.hdf",
             "description": "HDF4_Version: 4.2.5 (HDF Version 4.2 Release 5, February 17, 2010)"
         },
         {
-            "id": "MOD02QKM_A2012133_2240_005_2012134074758",
+            "id": "MOD02QKM_A2012133_2240_005_2012134074758_modis",
             "relativePath": "sensors_platforms/MODIS/old/MOD02QKM/HDF4/MOD02QKM.A2012133.2240.005.2012134074758.hdf",
             "description": "HDF4_Version: 4.2.5 (HDF Version 4.2 Release 5, February 17, 2010)"
         },
         {
-             "id": "MOD_SS_MOD09GA_A2009242_cs_armcart_005_2009244131940",
+             "id": "MOD_SS_MOD09GA_A2009242_cs_armcart_005_2009244131940_modis",
              "relativePath": "sensors_platforms/MODIS/old/MOD09/HDF4/MOD09GA.A2009242.cs_armcart.005.2009244131940.hdf",
              "description": "HDF4_Version: 4.1.5 (NCSA HDF Version 4.1 Release 5, November 5, 2001)"
         },
