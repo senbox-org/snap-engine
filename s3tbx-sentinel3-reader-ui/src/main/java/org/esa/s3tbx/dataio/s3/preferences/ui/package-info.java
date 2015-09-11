@@ -9,7 +9,7 @@
         iconBase = "org/esa/s3tbx/dataio/s3/preferences/s3tbx_new_32.png",
         keywords = "#LBL_S3TBXOptionsCategory_Keywords",
         keywordsCategory = "S3TBX",
-        position = 30
+        position = 1000
 )
 @NbBundle.Messages(value = {
     "LBL_S3TBXOptionsCategory_Name=S3TBX",
