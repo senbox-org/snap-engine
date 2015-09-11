@@ -63,7 +63,7 @@
             This is necessary to make NetBeans modules updatable and independent from the Maven version (= snap.version).
         -->
         <s3tbx.version>2.0.0-SNAPSHOT</s3tbx.version>
-        <s3tbx.nbmSpecVersion>2.0.0.6</s3tbx.nbmSpecVersion>
+        <s3tbx.nbmSpecVersion>2.0.0.7</s3tbx.nbmSpecVersion>
         <netbeans.version>RELEASE802</netbeans.version>
         <javahelp.version>2.0.05</javahelp.version>
         <seadas.reader.version>1.5.6</seadas.reader.version>
