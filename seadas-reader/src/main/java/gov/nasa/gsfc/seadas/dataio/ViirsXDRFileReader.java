@@ -375,12 +375,22 @@ public class ViirsXDRFileReader extends SeadasFileReader {
 
                 product.setGeoCoding(new BowtiePixelGeoCoding(latBand, lonBand, detectorsInScan));
             } else {
-                product.setGeoCoding(new BowtiePixelGeoCoding(product.getBand(latitude), product.getBand(longitude), detectorsInScan));
+                product.setGeoCoding(new BowtiePixelGeoCoding(findBand(product, latitude), findBand(product, longitude), detectorsInScan));
             }
         }catch (Exception e) {
             throw new ProductIOException(e.getMessage());
         }
 
+    }
+
+    private Band findBand(Product product, String requestedBandName) {
+        for (String productBandName : product.getBandNames()) {
+            final String[] splitProductBandName = productBandName.split("\\.");
+            if (splitProductBandName[splitProductBandName.length - 1].equals(requestedBandName)) {
+                return product.getBand(productBandName);
+            }
+        }
+        return null;
     }
 
     public boolean mustFlipVIIRS() throws ProductIOException {
