@@ -7,6 +7,7 @@ import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
+import org.junit.Test;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
@@ -40,7 +41,7 @@ public class CommandLineToolTemplateTest {
         tool = new CommandLineTool(context);
     }
 
-    @Ignore
+    @Test
     public void testTemplateMergingWithOpName() throws Exception {
         String metadataPath = "test.properties";
         String parameterPath = "params.xml";
@@ -134,7 +135,7 @@ public class CommandLineToolTemplateTest {
                      context.writers.get("20120607-CHL-1D-op-metadata.html").toString());
     }
 
-    @Ignore
+    @Test
     public void testTemplateMergingWithGraphXml() throws Exception {
 
         String metadataPath = "test.properties";
@@ -198,15 +199,15 @@ public class CommandLineToolTemplateTest {
                      "\n" +
                      "    <sources>\n" +
                      "        <product>\n" +
-                     "        <src>MERIS</src>\n" +
+                     "            <src>MERIS</src>\n" +
                      "        </product>\n" +
                      "        <metadata>\n" +
-                     "          <metadata>\n" +
+                     "                <metadata>\n" +
                      "    <product>\n" +
                      "        <name>test-product</name>\n" +
                      "    </product>\n" +
                      "</metadata>\n" +
-                     "           </metadata>\n" +
+                     "        </metadata>\n" +
                      "    </sources>\n" +
                      "\n" +
                      "    <target>\n" +
