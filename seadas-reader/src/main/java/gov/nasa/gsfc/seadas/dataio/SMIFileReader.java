@@ -42,6 +42,9 @@ public class SMIFileReader extends SeadasFileReader {
         int sceneHeight = 0;
         int sceneWidth = 0;
         Group geodata = ncFile.findGroup("geophysical_data");
+        if (geodata == null) {
+            geodata = ncFile.findGroup("Geophysical_Data");
+        }
         if (productReader.getProductType() == SeadasProductReader.ProductType.OISST) {
             dims = ncFile.getVariables().get(4).getShape();
             sceneHeight = dims[2];
@@ -66,7 +69,7 @@ public class SMIFileReader extends SeadasFileReader {
                 ucar.nc2.Dimension londim = ncFile.findDimension("lon");
                 if (latdim != null) {
                     sceneHeight = latdim.getLength();
-                    sceneWidth = londim.getLength(); 
+                    sceneWidth = londim.getLength();
                 } else {
                     dims = ncFile.getVariables().get(0).getShape();
                     sceneHeight = dims[0];
@@ -407,7 +410,7 @@ public class SMIFileReader extends SeadasFileReader {
         }
         final MetadataElement metadataRoot = product.getMetadataRoot();
         metadataRoot.addElement(bandAttributes);
-        
+
     }
 
     @Override
