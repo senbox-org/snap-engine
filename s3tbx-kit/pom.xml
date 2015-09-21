@@ -178,7 +178,6 @@
     </dependencies>
 
     <properties>
-        <s3tbx.updatecenter>file:///C://nbuc//s3tbx-kit//netbeans_site//updates.xml.gz</s3tbx.updatecenter>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
