@@ -7,15 +7,15 @@
                 <attr name="delegate"
                       methodvalue="org.esa.snap.rcp.actions.file.ImportProductAction.create"/>
                 <attr name="displayName"
-                      stringvalue="ProbaV"/>
+                      stringvalue="PROBA-V Synthesis"/>
                 <attr name="formatName"
-                      stringvalue="ProbaV"/>
+                      stringvalue="PROBA-V-Synthesis"/>
                 <attr name="useAllFileFilter"
                       boolvalue="true"/>
                 <attr name="helpId"
                       stringvalue="importProbaVProduct"/>
                 <attr name="ShortDescription"
-                      stringvalue="Import a ProbaV data product."/>
+                      stringvalue="Import a PROBA-V Synthesis data product."/>
             </file>
         </folder>
     </folder>
