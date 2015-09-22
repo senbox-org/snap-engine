@@ -36,6 +36,9 @@ public class SMIFileReader extends SeadasFileReader {
         int sceneHeight = 0;
         int sceneWidth = 0;
         Group geodata = ncFile.findGroup("geophysical_data");
+        if (geodata == null) {
+            geodata = ncFile.findGroup("Geophysical_Data");
+        }
         if (productReader.getProductType() == SeadasProductReader.ProductType.OISST) {
             dims = ncFile.getVariables().get(4).getShape();
             sceneHeight = dims[2];
@@ -84,6 +87,9 @@ public class SMIFileReader extends SeadasFileReader {
         product.setFileLocation(productReader.getInputFile());
         product.setProductReader(productReader);
 
+        setStartTime(product);
+        setEndTime(product);
+
         addGlobalMetadata(product);
         addSmiMetadata(product);
 //        variableMap = addBands(product, ncFile.getVariables());
@@ -104,7 +110,7 @@ public class SMIFileReader extends SeadasFileReader {
     protected Map<Band, Variable> addSmiBands(Product product, List<Variable> variables) {
         final int sceneRasterWidth = product.getSceneRasterWidth();
         final int sceneRasterHeight = product.getSceneRasterHeight();
-        Map<Band, Variable> bandToVariableMap = new HashMap<Band, Variable>();
+        Map<Band, Variable> bandToVariableMap = new HashMap<>();
         for (Variable variable : variables) {
             int variableRank = variable.getRank();
             if (variableRank == 2) {
@@ -309,9 +315,7 @@ public class SMIFileReader extends SeadasFileReader {
                         easting, northing,
                         pixelSizeX, pixelSizeY,
                         pixelX, pixelY));
-            } catch (FactoryException e) {
-                throw new IllegalStateException(e);
-            } catch (TransformException e) {
+            } catch (FactoryException | TransformException e) {
                 throw new IllegalStateException(e);
             }
 
@@ -364,11 +368,23 @@ public class SMIFileReader extends SeadasFileReader {
                         westing, northing,
                         pixelSizeX, pixelSizeY,
                         pixelX, pixelY));
-            } catch (FactoryException e) {
-                throw new IllegalStateException(e);
-            } catch (TransformException e) {
+            } catch (FactoryException | TransformException e) {
                 throw new IllegalStateException(e);
             }
+        }
+    }
+
+    private void setEndTime(Product product) {
+        ProductData.UTC coverageEndTime = getUTCAttribute("time_coverage_end");
+        if(coverageEndTime != null) {
+            product.setEndTime(coverageEndTime);
+        }
+    }
+
+    private void setStartTime(Product product) {
+        ProductData.UTC coverageStartTime = getUTCAttribute("time_coverage_start");
+        if(coverageStartTime != null) {
+            product.setStartTime(coverageStartTime);
         }
     }
 

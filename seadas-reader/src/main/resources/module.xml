@@ -15,6 +15,7 @@
     <changelog>
         <![CDATA[
         Changes in 1.5.7:</br>
+        [BEAM-1777] MODIS AQUA SST L3 products have no time information
         fix product time parsing for VIIRS products, simplify detection
         Fixed orientation of SMI file reader and got rid of a NPE when loading a really old obscure SMI file.
         removed a and bb from product groupings
