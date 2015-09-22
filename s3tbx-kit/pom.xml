@@ -168,7 +168,7 @@
         <dependency>
             <groupId>org.esa.snap.seadas</groupId>
             <artifactId>seadas-reader-ui</artifactId>
-            <version>${seadas.reader.version}</version>
+            <version>${seadas.reader.ui.version}</version>
         </dependency>
         <dependency>
             <groupId>org.netbeans.api</groupId>
