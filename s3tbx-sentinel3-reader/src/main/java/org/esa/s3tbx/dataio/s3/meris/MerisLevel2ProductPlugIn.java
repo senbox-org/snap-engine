@@ -12,7 +12,7 @@ public class MerisLevel2ProductPlugIn extends Sentinel3ProductReaderPlugIn {
 
     public MerisLevel2ProductPlugIn() {
         super(format_name, "MERIS Level 2 in Sentinel-3 product format",
-              "ENV_ME_1_(F|R)R(G|P).*.SEN3", "xfdumanifest", "L1c_Manifest", ".xml");
+              "ENV_ME_2_(F|R)R(G|P).*.SEN3", "xfdumanifest", "L1c_Manifest", ".xml");
     }
 
     @Override
