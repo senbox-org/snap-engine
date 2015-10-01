@@ -29,17 +29,27 @@ public class MerisProductFactory extends AbstractProductFactory {
     private Map<String, Integer> nameToIndexMap;
     private int subSamplingX;
     private int subSamplingY;
+    private int rows;
+    private int columns;
 
     public MerisProductFactory(Sentinel3ProductReader productReader) {
         super(productReader);
         nameToWavelengthMap = new HashMap<>();
         nameToBandwidthMap = new HashMap<>();
         nameToIndexMap = new HashMap<>();
+        rows = -1;
+        columns = -1;
     }
 
     @Override
     protected List<String> getFileNames(Manifest manifest) {
-        return manifest.getFileNames(new String[0]);
+        final List<String> fileNames = manifest.getFileNames(new String[0]);
+        final MetadataElement metadataElement = manifest.getMetadata().getElement("metadataSection");
+        final MetadataElement merisInformationElement = metadataElement.getElement("merisProductInformation");
+        final MetadataElement imageSizeElement = merisInformationElement.getElement("imageSize");
+        rows = Integer.parseInt(imageSizeElement.getAttribute("rows").getData().toString());
+        columns = Integer.parseInt(imageSizeElement.getAttribute("columns").getData().toString());
+        return fileNames;
     }
 
     @Override
@@ -62,6 +72,37 @@ public class MerisProductFactory extends AbstractProductFactory {
                 nameToIndexMap.put(bandName, i);
             }
         }
+    }
+
+    @Override
+    protected Product findMasterProduct() {
+        final List<Product> productList = getOpenProductList();
+        Product masterProduct = null;
+        if (rows > 0 && columns > 0) {
+            for (Product product : productList) {
+                if (product.getSceneRasterWidth() == columns &&
+                        product.getSceneRasterHeight() == rows) {
+                    masterProduct = product;
+                }
+            }
+        }
+        if (masterProduct == null) {
+            int masterproductWidth = -1;
+            int masterproductHeight = -1;
+            for (Product product : productList) {
+                if (product.getSceneRasterWidth() > masterproductWidth &&
+                        product.getSceneRasterHeight() > masterproductHeight &&
+                        !product.getName().contains("flags") &&
+                        !product.getName().contains("time") &&
+                        !product.getName().contains("tie")
+                        ) {
+                    masterProduct = product;
+                    masterproductWidth = product.getSceneRasterWidth();
+                    masterproductHeight = product.getSceneRasterHeight();
+                }
+            }
+        }
+        return masterProduct;
     }
 
     @Override
