@@ -35,7 +35,7 @@
     </description>
 
     <properties>
-        <s3tbx.nbmSpecVersion>2.0.0.8</s3tbx.nbmSpecVersion>
+        <s3tbx.nbmSpecVersion>2.0.0.9</s3tbx.nbmSpecVersion>
     </properties>
 
     <dependencies>
