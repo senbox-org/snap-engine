@@ -28,6 +28,9 @@ public class InstrumentDataReader extends S3NetcdfReader {
     protected void addBands(Product product) {
         final NetcdfFile netcdfFile = getNetcdfFile();
         detectorIndexVariable = netcdfFile.findVariable(detector_index_name);
+        if (detectorIndexVariable == null) {
+            return;
+        }
         addVariableAsBand(product, detectorIndexVariable, detector_index_name, false);
         addVariableMetadata(detectorIndexVariable, product);
         final List<Variable> variables = netcdfFile.getVariables();
