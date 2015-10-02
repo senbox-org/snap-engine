@@ -19,6 +19,7 @@ import org.esa.snap.framework.dataio.ProductIOPlugInManager;
 import org.esa.snap.framework.dataio.ProductReader;
 import org.esa.snap.framework.dataio.ProductReaderPlugIn;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -127,6 +128,96 @@ public class Sentinel3ProductReaderPlugInTest {
     }
 
     @Test
+    public void testDecodeQualificationFromXfduManifestOnly_Nonsense() {
+        final String path = Sentinel3ProductReaderPlugInTest.class.getResource("nonsense/xfdumanifest.xml").getFile();
+        assertEquals(DecodeQualification.UNABLE, plugIn.getDecodeQualification(path));
+    }
+
+    @Test
+    @Ignore
+    public void testDecodeQualificationFromXfduManifestOnly_Olcil1fr() {
+        final String path = Sentinel3ProductReaderPlugInTest.class.getResource("olcil1fr/xfdumanifest.xml").getFile();
+        assertEquals(DecodeQualification.INTENDED, plugIn.getDecodeQualification(path));
+    }
+
+    @Test
+    @Ignore
+    public void testDecodeQualificationFromXfduManifestOnly_Olcil1rr() {
+        final String path = Sentinel3ProductReaderPlugInTest.class.getResource("olcil1rr/xfdumanifest.xml").getFile();
+        assertEquals(DecodeQualification.INTENDED, plugIn.getDecodeQualification(path));
+    }
+
+    @Test
+    @Ignore
+    public void testDecodeQualificationFromXfduManifestOnly_Olcill2fr() {
+        final String path = Sentinel3ProductReaderPlugInTest.class.getResource("olcil2lfr/xfdumanifest.xml").getFile();
+        assertEquals(DecodeQualification.INTENDED, plugIn.getDecodeQualification(path));
+    }
+
+    @Test
+    @Ignore
+    public void testDecodeQualificationFromXfduManifestOnly_Olcil2lrr() {
+        final String path = Sentinel3ProductReaderPlugInTest.class.getResource("olcil2lrr/xfdumanifest.xml").getFile();
+        assertEquals(DecodeQualification.INTENDED, plugIn.getDecodeQualification(path));
+    }
+
+    @Test
+    @Ignore
+    public void testDecodeQualificationFromXfduManifestOnly_Olcil2wfr() {
+        final String path = Sentinel3ProductReaderPlugInTest.class.getResource("olcil2wfr/xfdumanifest.xml").getFile();
+        assertEquals(DecodeQualification.INTENDED, plugIn.getDecodeQualification(path));
+    }
+
+    @Test
+    @Ignore
+    public void testDecodeQualificationFromXfduManifestOnly_Olcil2wrr() {
+        final String path = Sentinel3ProductReaderPlugInTest.class.getResource("olcil2wrr/xfdumanifest.xml").getFile();
+        assertEquals(DecodeQualification.INTENDED, plugIn.getDecodeQualification(path));
+    }
+
+    @Test
+    @Ignore
+    public void testDecodeQualificationFromXfduManifestOnly_SlstrL1() {
+        final String path = Sentinel3ProductReaderPlugInTest.class.getResource("slstrl1/xfdumanifest.xml").getFile();
+        assertEquals(DecodeQualification.INTENDED, plugIn.getDecodeQualification(path));
+    }
+
+    @Test
+    @Ignore
+    public void testDecodeQualificationFromXfduManifestOnly_SlstrL2LST() {
+        final String path = Sentinel3ProductReaderPlugInTest.class.getResource("slstrl2lst/xfdumanifest.xml").getFile();
+        assertEquals(DecodeQualification.INTENDED, plugIn.getDecodeQualification(path));
+    }
+
+    @Test
+    @Ignore
+    public void testDecodeQualificationFromXfduManifestOnly_SlstrL2WST() {
+        final String path = Sentinel3ProductReaderPlugInTest.class.getResource("slstrl2wst/xfdumanifest.xml").getFile();
+        assertEquals(DecodeQualification.INTENDED, plugIn.getDecodeQualification(path));
+    }
+
+    @Test
+    @Ignore
+    public void testDecodeQualificationFromXfduManifestOnly_SynL2() {
+        final String path = Sentinel3ProductReaderPlugInTest.class.getResource("synl2/xfdumanifest.xml").getFile();
+        assertEquals(DecodeQualification.INTENDED, plugIn.getDecodeQualification(path));
+    }
+
+    @Test
+    @Ignore
+    public void testDecodeQualificationFromXfduManifestOnly_SynVG1() {
+        final String path = Sentinel3ProductReaderPlugInTest.class.getResource("synvg1/xfdumanifest.xml").getFile();
+        assertEquals(DecodeQualification.INTENDED, plugIn.getDecodeQualification(path));
+    }
+
+    @Test
+    @Ignore
+    public void testDecodeQualificationFromXfduManifestOnly_SynVGP() {
+        final String path = Sentinel3ProductReaderPlugInTest.class.getResource("synvgp/xfdumanifest.xml").getFile();
+        assertEquals(DecodeQualification.INTENDED, plugIn.getDecodeQualification(path));
+    }
+
+    @Test
     public void testSupportedInputTypes() {
         Class[] inputTypes = plugIn.getInputTypes();
         assertEquals(2, inputTypes.length);
@@ -143,9 +234,6 @@ public class Sentinel3ProductReaderPlugInTest {
     }
 
     private static String createManifestFilePath(String sensorId, String levelId, String productId, String suffix) {
-
-//        "S3.?_(OL_1_E[FR]R|OL_2_(L[FR]R|W[FR]R)|SL_1_RBT|SL_2_(LST|WCT|WST)|SY_2_(VGP|SYN)|SY_[23]_VG1)_.*(.SEN3)?"
-
         String validParentDirectory = String.format("/S3_%s_%s_%s_TTTTTTTTTTTT_.*%s/", sensorId,
                                                     levelId, productId, suffix);
         String manifestFile = "xfdumanifest.xml";
