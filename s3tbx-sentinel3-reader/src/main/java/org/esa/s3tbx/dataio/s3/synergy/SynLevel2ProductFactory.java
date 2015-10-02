@@ -173,6 +173,9 @@ public class SynLevel2ProductFactory extends AbstractProductFactory {
     @Override
     protected Product readProduct(String fileName) throws IOException {
         final File file = new File(getInputFileParentDirectory(), fileName);
+        if (!file.exists()) {
+            return null;
+        }
         final S3NetcdfReader reader = new S3NetcdfReader(file.getAbsolutePath());
         return reader.readProduct();
     }

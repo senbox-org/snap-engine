@@ -212,6 +212,9 @@ public abstract class SlstrProductFactory extends AbstractProductFactory {
     @Override
     protected Product readProduct(String fileName) throws IOException {
         final File file = new File(getInputFileParentDirectory(), fileName);
+        if (!file.exists()) {
+            return null;
+        }
         final S3NetcdfReader slstrNetcdfReader = SlstrNetcdfReaderFactory.createSlstrNetcdfReader(file);
         addSeparatingDimensions(slstrNetcdfReader.getSuffixesForSeparatingDimensions());
         return slstrNetcdfReader.readProduct();

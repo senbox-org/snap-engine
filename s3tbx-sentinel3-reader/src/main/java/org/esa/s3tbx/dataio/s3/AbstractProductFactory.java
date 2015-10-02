@@ -347,14 +347,27 @@ public abstract class AbstractProductFactory implements ProductFactory {
         return maskGroup;
     }
 
-    private void readProducts(List<String> fileNames) throws IOException {
+    private void readProducts(List<String> fileNames) {
         for (final String fileName : fileNames) {
-            openProductList.add(readProduct(fileName));
+            Product product = null;
+            try {
+                product = readProduct(fileName);
+            } catch (IOException ioe) {
+                logger.log(Level.WARNING, "Could not read " + fileName + "due to IOException");
+            }
+            if (product != null) {
+                openProductList.add(product);
+            } else {
+                logger.log(Level.WARNING, "Could not find " + fileName);
+            }
         }
     }
 
     protected Product readProduct(String fileName) throws IOException {
         final File file = new File(getInputFileParentDirectory(), fileName);
+        if (!file.exists()) {
+            return null;
+        }
         final ProductReader reader = ProductIO.getProductReaderForInput(file);
         if (reader == null) {
             final String msg = MessageFormat.format("Cannot read file ''{0}''. No appropriate reader found.", fileName);

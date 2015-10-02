@@ -143,6 +143,9 @@ public class MerisProductFactory extends AbstractProductFactory {
     @Override
     protected Product readProduct(String fileName) throws IOException {
         final File file = new File(getInputFileParentDirectory(), fileName);
+        if (!file.exists()) {
+            return null;
+        }
         final S3NetcdfReader reader = S3NetcdfReaderFactory.createS3NetcdfReader(file);
         addSeparatingDimensions(reader.getSuffixesForSeparatingDimensions());
         return reader.readProduct();

@@ -163,6 +163,9 @@ public class SynL1CProductFactory extends AbstractProductFactory {
     @Override
     protected Product readProduct(String fileName) throws IOException {
         final File file = new File(getInputFileParentDirectory(), fileName);
+        if (!file.exists()) {
+            return null;
+        }
         final S3NetcdfReader synNetcdfReader = SynNetcdfReaderFactory.createSynNetcdfReader(file);
         return synNetcdfReader.readProduct();
     }

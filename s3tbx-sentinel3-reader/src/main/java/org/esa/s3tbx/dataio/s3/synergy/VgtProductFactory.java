@@ -88,6 +88,9 @@ public class VgtProductFactory extends AbstractProductFactory {
     @Override
     protected Product readProduct(String fileName) throws IOException {
         final File file = new File(getInputFileParentDirectory(), fileName);
+        if (!file.exists()) {
+            return null;
+        }
         final VgtReader reader = new VgtReader(file.getAbsolutePath());
         return reader.readProduct();
     }
