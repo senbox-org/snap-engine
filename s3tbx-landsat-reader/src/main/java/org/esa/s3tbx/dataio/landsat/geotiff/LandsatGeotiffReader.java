@@ -33,8 +33,6 @@ import org.esa.snap.framework.datamodel.ProductData;
 import org.esa.snap.jai.ImageManager;
 import org.esa.snap.jai.SourceImageScaler;
 import org.esa.snap.runtime.Config;
-import org.geotools.referencing.operation.transform.AffineTransform2D;
-import org.opengis.referencing.operation.MathTransform2D;
 
 import javax.media.jai.ImageLayout;
 import javax.media.jai.Interpolation;
@@ -43,7 +41,6 @@ import javax.media.jai.PlanarImage;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.RenderingHints;
-import java.awt.geom.AffineTransform;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -428,29 +425,6 @@ public class LandsatGeotiffReader extends AbstractProductReader {
                 colorIterator = colors.iterator();
             }
             return colorIterator.next();
-        }
-    }
-
-    static class SceneRasterTransform implements org.esa.snap.framework.datamodel.SceneRasterTransform {
-
-        private Dimension sourceDimension;
-        private Dimension targetDimension;
-
-        public SceneRasterTransform(Dimension sourceDimension, Dimension targetDimension) {
-            this.sourceDimension = sourceDimension;
-            this.targetDimension = targetDimension;
-        }
-
-        @Override
-        public MathTransform2D getForward() {
-            return new AffineTransform2D(AffineTransform.getScaleInstance(targetDimension.getWidth() / sourceDimension.getWidth(),
-                                                                          targetDimension.getHeight() / sourceDimension.getHeight()));
-        }
-
-        @Override
-        public MathTransform2D getInverse() {
-            return new AffineTransform2D(AffineTransform.getScaleInstance(sourceDimension.getWidth() / targetDimension.getWidth(),
-                                                                          sourceDimension.getHeight() / targetDimension.getHeight()));
         }
     }
 
