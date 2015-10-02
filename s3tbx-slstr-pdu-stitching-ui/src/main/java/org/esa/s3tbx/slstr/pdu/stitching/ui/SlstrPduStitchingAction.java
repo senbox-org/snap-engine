@@ -4,7 +4,6 @@ import org.esa.snap.framework.gpf.GPF;
 import org.esa.snap.framework.ui.ModelessDialog;
 import org.esa.snap.rcp.actions.AbstractSnapAction;
 import org.openide.awt.ActionID;
-import org.openide.awt.ActionReference;
 import org.openide.awt.ActionRegistration;
 import org.openide.util.NbBundle;
 
@@ -15,7 +14,7 @@ import java.awt.event.ActionEvent;
  */
 @ActionID(category = "Processing", id = "org.esa.s3tbx.slstr.pdu.stitching.ui.SlstrPduStitchingAction")
 @ActionRegistration(displayName = "#CTL_SlstrPduStitchingAction_Name", lazy = false)
-@ActionReference(path = "Menu/Raster/Geometric Operations", position = 10)
+//@ActionReference(path = "Menu/Raster/Geometric Operations", position = 10)
 @NbBundle.Messages({
         "CTL_SlstrPduStitchingAction_Name=SLSTR PDU Stitching",
         "CTL_SlstrPduStitchingAction_Description=Stitches multiple Sentinel-3 SLSTR L1B products into a single one.",
