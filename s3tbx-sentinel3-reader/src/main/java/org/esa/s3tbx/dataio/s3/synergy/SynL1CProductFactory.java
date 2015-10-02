@@ -64,11 +64,16 @@ public class SynL1CProductFactory extends AbstractProductFactory {
                 final List<String> sourceBandNames = entry.getValue();
                 final String sourceBandName = sourceBandNames.get(0);
                 final Band sourceBand = sourceProduct.getBand(sourceBandName);
-                final MultiLevelImage[] sourceImages = new MultiLevelImage[sourceBandNames.size()];
-                for (int i = 0; i < sourceImages.length; i++) {
-                    sourceImages[i] = sourceProduct.getBand(sourceBandNames.get(i)).getSourceImage();
+                MultiLevelImage sourceImage;
+                if (sourceBandNames.size() > 1) {
+                    final MultiLevelImage[] sourceImages = new MultiLevelImage[sourceBandNames.size()];
+                    for (int i = 0; i < sourceImages.length; i++) {
+                        sourceImages[i] = sourceProduct.getBand(sourceBandNames.get(i)).getSourceImage();
+                    }
+                    sourceImage = CameraImageMosaic.create(sourceImages);
+                } else {
+                    sourceImage = sourceBand.getSourceImage();
                 }
-                final MultiLevelImage sourceImage = CameraImageMosaic.create(sourceImages);
                 Band targetBand = new Band(targetBandName, sourceBand.getDataType(),
                                            sourceImage.getWidth(), sourceImage.getHeight());
                 ProductUtils.copyRasterDataNodeProperties(sourceBand, targetBand);

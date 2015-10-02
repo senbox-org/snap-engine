@@ -25,6 +25,8 @@ import org.esa.snap.framework.datamodel.Product;
 import org.esa.snap.framework.datamodel.RasterDataNode;
 import org.esa.snap.framework.datamodel.TiePointGrid;
 import org.esa.snap.runtime.Config;
+import org.geotools.referencing.operation.transform.AffineTransform2D;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
@@ -236,8 +238,9 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
                 transform.translate(offsets[0], offsets[1]);
                 transform.scale(scalings[0], scalings[1]);
                 try {
+                    final CoordinateReferenceSystem modelCRS = product.getGeoCoding().getImageCRS();
                     final SlstrTiePointGeoCoding geoCoding =
-                            new SlstrTiePointGeoCoding(origLatGrid, origLonGrid, transform);
+                            new SlstrTiePointGeoCoding(origLatGrid, origLonGrid, new AffineTransform2D(transform), modelCRS);
                     band.setGeoCoding(geoCoding);
                 } catch (NoninvertibleTransformException e) {
                     e.printStackTrace();
