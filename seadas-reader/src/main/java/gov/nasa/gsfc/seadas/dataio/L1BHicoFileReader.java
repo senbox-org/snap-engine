@@ -23,7 +23,6 @@ import org.esa.snap.framework.datamodel.GeoCodingFactory;
 import org.esa.snap.framework.datamodel.Mask;
 import org.esa.snap.framework.datamodel.MetadataAttribute;
 import org.esa.snap.framework.datamodel.MetadataElement;
-import org.esa.snap.framework.datamodel.PixelGeoCoding;
 import org.esa.snap.framework.datamodel.Product;
 import org.esa.snap.framework.datamodel.ProductData;
 import ucar.ma2.Array;

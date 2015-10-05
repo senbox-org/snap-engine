@@ -17,7 +17,6 @@
 package org.esa.s3tbx.dataio.avhrr.noaa.pod;
 
 import com.bc.ceres.binio.IOHandler;
-import com.bc.ceres.binio.util.ImageIOHandler;
 import com.bc.ceres.binio.util.RandomAccessFileIOHandler;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.s3tbx.dataio.avhrr.BandReader;
@@ -26,7 +25,6 @@ import org.esa.snap.framework.datamodel.Band;
 import org.esa.snap.framework.datamodel.Product;
 import org.esa.snap.framework.datamodel.ProductData;
 
-import javax.imageio.stream.ImageInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
