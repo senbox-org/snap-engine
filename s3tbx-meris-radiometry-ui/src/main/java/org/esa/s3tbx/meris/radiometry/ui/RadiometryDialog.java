@@ -18,13 +18,13 @@ package org.esa.s3tbx.meris.radiometry.ui;
 
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.OperatorSpi;
+import org.esa.snap.core.gpf.ui.OperatorMenu;
+import org.esa.snap.core.gpf.ui.OperatorParameterSupport;
+import org.esa.snap.core.gpf.ui.SingleTargetProductDialog;
+import org.esa.snap.core.gpf.ui.TargetProductSelectorModel;
 import org.esa.snap.dataio.envisat.EnvisatConstants;
 import org.esa.snap.framework.dataio.ProductReader;
 import org.esa.snap.framework.datamodel.Product;
-import org.esa.snap.framework.gpf.ui.OperatorMenu;
-import org.esa.snap.framework.gpf.ui.OperatorParameterSupport;
-import org.esa.snap.framework.gpf.ui.SingleTargetProductDialog;
-import org.esa.snap.framework.gpf.ui.TargetProductSelectorModel;
 import org.esa.snap.framework.ui.AppContext;
 import org.esa.snap.util.ArrayUtils;
 
