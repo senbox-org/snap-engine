@@ -17,8 +17,6 @@ package org.esa.s3tbx.operator.cloud;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
-import com.bc.jexp.ParseException;
-import com.bc.jexp.Term;
 import org.esa.s3tbx.operator.cloud.internal.ProcessingNode;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.FlagCoding;
@@ -27,6 +25,8 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.jexp.ParseException;
+import org.esa.snap.core.jexp.Term;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.dataio.envisat.EnvisatConstants;

@@ -1,6 +1,5 @@
 package org.esa.s3tbx.meris.radiometry;
 
-import com.bc.jexp.ParseException;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.Mask;
@@ -12,6 +11,7 @@ import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.ProductNodeGroup;
 import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.jexp.ParseException;
 
 import java.awt.Color;
 

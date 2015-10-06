@@ -16,7 +16,6 @@
 package org.esa.s3tbx.operator.cloud;
 
 import com.bc.ceres.core.ProgressMonitor;
-import com.bc.jexp.ParseException;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
@@ -27,6 +26,7 @@ import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
+import org.esa.snap.core.jexp.ParseException;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.ResourceInstaller;
 import org.esa.snap.core.util.SystemUtils;
