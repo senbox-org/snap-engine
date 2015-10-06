@@ -18,7 +18,7 @@ package org.esa.s3tbx.aatsr.sst;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import org.esa.snap.framework.gpf.OperatorException;
+import org.esa.snap.core.gpf.OperatorException;
 
 import java.io.File;
 import java.io.IOException;

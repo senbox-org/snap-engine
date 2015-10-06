@@ -1,6 +1,6 @@
 package org.esa.s3tbx.slstr.pdu.stitching.ui;
 
-import org.esa.snap.framework.gpf.GPF;
+import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.framework.ui.ModelessDialog;
 import org.esa.snap.rcp.actions.AbstractSnapAction;
 import org.openide.awt.ActionID;

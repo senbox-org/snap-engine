@@ -18,7 +18,7 @@ package org.esa.s3tbx.processor.flh_mci;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import org.esa.snap.framework.gpf.OperatorException;
+import org.esa.snap.core.gpf.OperatorException;
 
 public class BaselineAlgorithmTest extends TestCase {
 

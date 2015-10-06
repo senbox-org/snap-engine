@@ -15,7 +15,7 @@
  */
 package org.esa.s3tbx.processor.flh_mci;
 
-import org.esa.snap.framework.gpf.OperatorException;
+import org.esa.snap.core.gpf.OperatorException;
 
 /**
  * Implements a general baseline height algorithm with optional baseline slope calculation.

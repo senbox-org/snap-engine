@@ -15,7 +15,7 @@
  */
 package org.esa.s3tbx.aatsr.sst;
 
-import org.esa.snap.framework.gpf.OperatorException;
+import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.util.Guardian;
 import org.esa.snap.util.StringUtils;
 
