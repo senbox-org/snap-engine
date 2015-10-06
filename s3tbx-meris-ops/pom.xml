@@ -23,7 +23,7 @@
         <version>2.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>s3tbx-meris-operator</artifactId>
+    <artifactId>s3tbx-meris-ops</artifactId>
     <packaging>nbm</packaging>
 
     <name>MERIS Common Operators</name>
