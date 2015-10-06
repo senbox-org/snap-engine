@@ -4,8 +4,8 @@ import com.bc.ceres.swing.TableLayout;
 import org.esa.snap.core.gpf.ui.TargetProductSelector;
 import org.esa.snap.framework.dataio.ProductIO;
 import org.esa.snap.framework.datamodel.Product;
-import org.esa.snap.framework.ui.AppContext;
-import org.esa.snap.framework.ui.io.FileArrayEditor;
+import org.esa.snap.ui.AppContext;
+import org.esa.snap.ui.io.FileArrayEditor;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
