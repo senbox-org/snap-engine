@@ -6,7 +6,7 @@
         <folder name="Operators">
             <file name="org-esa-s3tbx-smac-MerisSmacOpAction.instance">
                 <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
-                <attr name="delegate" methodvalue="org.esa.snap.rcp.actions.DefaultOperatorAction.create"/>
+                <attr name="delegate" methodvalue="org.esa.snap.core.gpf.ui.DefaultOperatorAction.create"/>
                 <attr name="displayName" stringvalue="MERIS/(A)ATSR SMAC Atmospheric Correction"/>
                 <attr name="operatorName" stringvalue="SmacOp"/>
                 <attr name="dialogTitle" stringvalue="MERIS/(A)ATSR SMAC Atmospheric Correction"/>

@@ -5,7 +5,7 @@
         <folder name="Operators">
             <file name="org-esa-s3tbx-operator-cloud-MerisCloudOpAction.instance">
                 <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
-                <attr name="delegate" methodvalue="org.esa.snap.rcp.actions.DefaultOperatorAction.create"/>
+                <attr name="delegate" methodvalue="org.esa.snap.core.gpf.ui.DefaultOperatorAction.create"/>
                 <attr name="displayName" stringvalue="MERIS Cloud Probability Processor"/>
                 <attr name="operatorName" stringvalue="CloudProb"/>
                 <attr name="dialogTitle" stringvalue="MERIS Cloud Probability Processor"/>
