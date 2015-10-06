@@ -400,8 +400,8 @@ public class LandsatGeotiffReader extends AbstractProductReader {
         static {
             colors = new ArrayList<>();
             colors.add(Color.red);
-            colors.add(Color.red);
-            colors.add(Color.red);
+            colors.add(Color.red.darker());
+            colors.add(Color.red.darker().darker());
             colors.add(Color.blue);
             colors.add(Color.blue.darker());
             colors.add(Color.blue.darker().darker());
