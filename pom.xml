@@ -41,6 +41,7 @@
         <module>s3tbx-meris-radiometry</module>
         <module>s3tbx-meris-radiometry-ui</module>
         <module>s3tbx-meris-smac</module>
+        <module>s3tbx-meris-ops</module>
         <module>s3tbx-merisl3-reader</module>
         <module>s3tbx-modis-reader</module>
         <module>s3tbx-proba-v-reader</module>
