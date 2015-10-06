@@ -26,9 +26,9 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
-import org.esa.snap.jai.ImageManager;
-import org.esa.snap.jai.SourceImageScaler;
-import org.esa.snap.util.ProductUtils;
+import org.esa.snap.core.image.ImageManager;
+import org.esa.snap.core.image.SourceImageScaler;
+import org.esa.snap.core.util.ProductUtils;
 
 import javax.media.jai.BorderExtender;
 import javax.media.jai.ImageLayout;

@@ -4,8 +4,8 @@ import org.esa.s3tbx.dataio.s3.Sentinel3ProductReaderPlugIn;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.util.StopWatch;
-import org.esa.snap.util.io.FileUtils;
+import org.esa.snap.core.util.StopWatch;
+import org.esa.snap.core.util.io.FileUtils;
 
 import java.io.BufferedWriter;
 import java.io.File;

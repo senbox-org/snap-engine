@@ -34,11 +34,11 @@ import org.esa.snap.core.dataop.maptransf.MapTransform;
 import org.esa.snap.core.dataop.maptransf.MapTransformFactory;
 import org.esa.snap.core.dataop.maptransf.StereographicDescriptor;
 import org.esa.snap.core.dataop.maptransf.UTM;
-import org.esa.snap.util.Debug;
-import org.esa.snap.util.Guardian;
-import org.esa.snap.util.StringUtils;
-import org.esa.snap.util.TreeNode;
-import org.esa.snap.util.math.FXYSum;
+import org.esa.snap.core.util.Debug;
+import org.esa.snap.core.util.Guardian;
+import org.esa.snap.core.util.StringUtils;
+import org.esa.snap.core.util.TreeNode;
+import org.esa.snap.core.util.math.FXYSum;
 
 import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;

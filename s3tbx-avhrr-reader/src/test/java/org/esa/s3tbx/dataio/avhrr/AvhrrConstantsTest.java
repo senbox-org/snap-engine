@@ -17,7 +17,7 @@
 package org.esa.s3tbx.dataio.avhrr;
 
 import junit.framework.TestCase;
-import org.esa.snap.util.BeamConstants;
+import org.esa.snap.core.util.BeamConstants;
 
 public class AvhrrConstantsTest extends TestCase {
 

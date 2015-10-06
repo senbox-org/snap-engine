@@ -36,8 +36,8 @@ import org.esa.snap.core.gpf.pointop.SampleOperator;
 import org.esa.snap.core.gpf.pointop.SourceSampleConfigurer;
 import org.esa.snap.core.gpf.pointop.TargetSampleConfigurer;
 import org.esa.snap.core.gpf.pointop.WritableSample;
-import org.esa.snap.util.ProductUtils;
-import org.esa.snap.util.math.RsMathUtils;
+import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.core.util.math.RsMathUtils;
 
 import java.io.File;
 import java.io.FileInputStream;

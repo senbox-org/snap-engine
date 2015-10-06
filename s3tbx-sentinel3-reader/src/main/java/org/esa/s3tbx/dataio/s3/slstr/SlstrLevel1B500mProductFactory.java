@@ -4,7 +4,7 @@ import org.esa.s3tbx.dataio.s3.Sentinel3ProductReader;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.RasterDataNode;
-import org.esa.snap.util.ProductUtils;
+import org.esa.snap.core.util.ProductUtils;
 
 import java.awt.image.RenderedImage;
 import java.util.List;

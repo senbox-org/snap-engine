@@ -16,8 +16,8 @@
 
 package org.esa.s3tbx.dataio.chris;
 
+import org.esa.snap.core.util.io.CsvReader;
 import org.esa.snap.dataio.netcdf.util.NetcdfFileOpener;
-import org.esa.snap.util.io.CsvReader;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;

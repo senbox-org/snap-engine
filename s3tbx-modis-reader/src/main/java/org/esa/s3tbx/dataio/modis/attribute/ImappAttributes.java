@@ -10,9 +10,9 @@ import org.esa.s3tbx.dataio.modis.netcdf.NetCDFUtils;
 import org.esa.s3tbx.dataio.modis.netcdf.NetCDFVariables;
 import org.esa.snap.core.dataio.ProductIOException;
 import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.util.StringUtils;
-import org.esa.snap.util.SystemUtils;
-import org.esa.snap.util.io.FileUtils;
+import org.esa.snap.core.util.StringUtils;
+import org.esa.snap.core.util.SystemUtils;
+import org.esa.snap.core.util.io.FileUtils;
 import ucar.nc2.Attribute;
 import ucar.nc2.Variable;
 

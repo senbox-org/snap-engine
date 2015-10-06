@@ -15,10 +15,10 @@
  */
 package org.esa.s3tbx.smac;
 
-import org.esa.snap.util.Guardian;
-import org.esa.snap.util.ObjectUtils;
-import org.esa.snap.util.SystemUtils;
-import org.esa.snap.util.io.CsvReader;
+import org.esa.snap.core.util.Guardian;
+import org.esa.snap.core.util.ObjectUtils;
+import org.esa.snap.core.util.SystemUtils;
+import org.esa.snap.core.util.io.CsvReader;
 
 import java.io.IOException;
 import java.io.InputStream;

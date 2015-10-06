@@ -1,10 +1,9 @@
 package org.esa.s3tbx.dataio.s3.util;
 
+import org.esa.snap.core.image.ResolutionLevel;
+import org.esa.snap.core.image.SingleBandedOpImage;
 import org.esa.snap.dataio.netcdf.util.Constants;
-import org.esa.snap.jai.ResolutionLevel;
-import org.esa.snap.jai.SingleBandedOpImage;
 import ucar.ma2.Array;
-import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
 import ucar.ma2.Section;
 import ucar.nc2.Attribute;

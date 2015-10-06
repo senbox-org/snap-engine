@@ -17,7 +17,7 @@ package org.esa.s3tbx.dataio.avhrr.calibration;
 
 import org.esa.s3tbx.dataio.avhrr.AvhrrConstants;
 import org.esa.s3tbx.dataio.avhrr.AvhrrReader;
-import org.esa.snap.util.Guardian;
+import org.esa.snap.core.util.Guardian;
 
 /**
  * Computes radiances for the visual AVHRR channels 1, 2 and 3a.

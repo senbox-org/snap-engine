@@ -1,7 +1,7 @@
 package org.esa.s3tbx.dataio.s3.util;
 
-import org.esa.snap.jai.ResolutionLevel;
-import org.esa.snap.jai.SingleBandedOpImage;
+import org.esa.snap.core.image.ResolutionLevel;
+import org.esa.snap.core.image.SingleBandedOpImage;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.ma2.Section;

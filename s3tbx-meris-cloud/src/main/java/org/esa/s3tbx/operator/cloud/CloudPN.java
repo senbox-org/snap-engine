@@ -27,9 +27,9 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.util.SystemUtils;
+import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.dataio.envisat.EnvisatConstants;
-import org.esa.snap.util.SystemUtils;
-import org.esa.snap.util.math.MathUtils;
 
 import java.awt.Color;
 import java.io.File;

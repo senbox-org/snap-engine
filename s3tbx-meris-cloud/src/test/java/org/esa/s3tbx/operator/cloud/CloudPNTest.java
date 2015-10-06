@@ -16,7 +16,7 @@
 
 package org.esa.s3tbx.operator.cloud;
 
-import org.esa.snap.util.math.MathUtils;
+import org.esa.snap.core.util.math.MathUtils;
 import org.junit.Before;
 import org.junit.Test;
 

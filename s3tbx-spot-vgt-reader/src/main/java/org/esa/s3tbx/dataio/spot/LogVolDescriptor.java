@@ -20,7 +20,7 @@ import com.bc.ceres.binding.PropertySet;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.util.Debug;
+import org.esa.snap.core.util.Debug;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.referencing.FactoryException;

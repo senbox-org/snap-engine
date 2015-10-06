@@ -17,7 +17,7 @@
 package org.esa.s3tbx.dataio.landsat.tgz;
 
 import com.bc.ceres.core.VirtualDir;
-import org.esa.snap.util.io.FileUtils;
+import org.esa.snap.core.util.io.FileUtils;
 import org.xeustechnologies.jtar.TarEntry;
 import org.xeustechnologies.jtar.TarInputStream;
 

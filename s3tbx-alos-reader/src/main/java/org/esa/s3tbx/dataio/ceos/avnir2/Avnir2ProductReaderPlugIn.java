@@ -22,8 +22,8 @@ import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.datamodel.RGBImageProfile;
 import org.esa.snap.core.datamodel.RGBImageProfileManager;
-import org.esa.snap.util.io.FileUtils;
-import org.esa.snap.util.io.SnapFileFilter;
+import org.esa.snap.core.util.io.FileUtils;
+import org.esa.snap.core.util.io.SnapFileFilter;
 
 import java.io.File;
 import java.io.FilenameFilter;

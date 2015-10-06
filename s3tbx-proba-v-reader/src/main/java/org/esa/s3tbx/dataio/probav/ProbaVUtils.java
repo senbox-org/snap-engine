@@ -10,8 +10,8 @@ import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.ProductNodeGroup;
-import org.esa.snap.util.BitSetter;
-import org.esa.snap.util.SystemUtils;
+import org.esa.snap.core.util.BitSetter;
+import org.esa.snap.core.util.SystemUtils;
 
 import java.awt.Color;
 import java.util.List;

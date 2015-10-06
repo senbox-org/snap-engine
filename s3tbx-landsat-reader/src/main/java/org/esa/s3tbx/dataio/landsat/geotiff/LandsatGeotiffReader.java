@@ -29,9 +29,9 @@ import org.esa.snap.core.datamodel.MetadataAttribute;
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.image.ImageManager;
+import org.esa.snap.core.image.SourceImageScaler;
 import org.esa.snap.dataio.geotiff.GeoTiffProductReaderPlugIn;
-import org.esa.snap.jai.ImageManager;
-import org.esa.snap.jai.SourceImageScaler;
 import org.esa.snap.runtime.Config;
 
 import javax.media.jai.ImageLayout;

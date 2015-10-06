@@ -17,7 +17,7 @@
 package org.esa.s3tbx.dataio.modis;
 
 import junit.framework.TestCase;
-import org.esa.snap.util.math.Range;
+import org.esa.snap.core.util.math.Range;
 
 public class ModisUtilsTest extends TestCase {
 

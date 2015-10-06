@@ -21,7 +21,7 @@ import org.esa.snap.core.datamodel.GeoCodingFactory;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.dataop.maptransf.Datum;
-import org.esa.snap.util.math.MathUtils;
+import org.esa.snap.core.util.math.MathUtils;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 

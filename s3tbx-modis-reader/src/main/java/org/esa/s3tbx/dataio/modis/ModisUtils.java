@@ -15,10 +15,10 @@
  */
 package org.esa.s3tbx.dataio.modis;
 
-import org.esa.snap.util.DateTimeUtils;
-import org.esa.snap.util.Guardian;
-import org.esa.snap.util.StringUtils;
-import org.esa.snap.util.math.Range;
+import org.esa.snap.core.util.DateTimeUtils;
+import org.esa.snap.core.util.Guardian;
+import org.esa.snap.core.util.StringUtils;
+import org.esa.snap.core.util.math.Range;
 
 import java.text.ParseException;
 import java.util.Date;

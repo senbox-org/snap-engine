@@ -16,7 +16,7 @@
 
 package org.esa.s3tbx.dataio.landsat;
 
-import org.esa.snap.util.Guardian;
+import org.esa.snap.core.util.Guardian;
 
 import javax.imageio.ImageIO;
 import javax.imageio.stream.FileImageInputStream;

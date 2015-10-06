@@ -16,7 +16,7 @@
 
 package org.esa.s3tbx.dataio.landsat;
 
-import org.esa.snap.util.io.FileUtils;
+import org.esa.snap.core.util.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;

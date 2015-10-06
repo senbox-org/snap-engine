@@ -16,8 +16,8 @@
 package org.esa.s3tbx.aatsr.sst;
 
 import org.esa.snap.core.gpf.OperatorException;
-import org.esa.snap.util.Guardian;
-import org.esa.snap.util.StringUtils;
+import org.esa.snap.core.util.Guardian;
+import org.esa.snap.core.util.StringUtils;
 
 import java.io.File;
 import java.io.FileInputStream;

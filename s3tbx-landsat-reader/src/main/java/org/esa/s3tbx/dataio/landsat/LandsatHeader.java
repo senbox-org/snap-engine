@@ -19,8 +19,8 @@ package org.esa.s3tbx.dataio.landsat;
 import org.esa.s3tbx.dataio.landsat.fast.Landsat5FASTConstants;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.ProductData.UTC;
-import org.esa.snap.util.Debug;
-import org.esa.snap.util.io.FileUtils;
+import org.esa.snap.core.util.Debug;
+import org.esa.snap.core.util.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;

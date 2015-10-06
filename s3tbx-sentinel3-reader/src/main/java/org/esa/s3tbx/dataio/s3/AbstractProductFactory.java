@@ -28,9 +28,9 @@ import org.esa.snap.core.datamodel.ProductNodeGroup;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.datamodel.SampleCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.runtime.Config;
-import org.esa.snap.util.ProductUtils;
-import org.esa.snap.util.io.FileUtils;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 

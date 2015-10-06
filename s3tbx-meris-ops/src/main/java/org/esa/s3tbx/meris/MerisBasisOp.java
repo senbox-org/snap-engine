@@ -19,7 +19,7 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.annotations.Parameter;
-import org.esa.snap.util.ProductUtils;
+import org.esa.snap.core.util.ProductUtils;
 
 
 public abstract class MerisBasisOp extends Operator {

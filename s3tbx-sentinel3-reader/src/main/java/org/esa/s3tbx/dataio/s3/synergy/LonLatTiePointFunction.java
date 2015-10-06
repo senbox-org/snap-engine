@@ -16,7 +16,7 @@ package org.esa.s3tbx.dataio.s3.synergy;
  */
 
 import org.esa.s3tbx.dataio.s3.LonLatFunction;
-import org.esa.snap.util.math.DistanceMeasure;
+import org.esa.snap.core.util.math.DistanceMeasure;
 
 import java.util.Arrays;
 import java.util.Comparator;

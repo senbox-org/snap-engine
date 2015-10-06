@@ -16,7 +16,7 @@
 
 package org.esa.s3tbx.meris.radiometry.equalization;
 
-import org.esa.snap.util.io.CsvReader;
+import org.esa.snap.core.util.io.CsvReader;
 
 import java.io.IOException;
 import java.io.Reader;

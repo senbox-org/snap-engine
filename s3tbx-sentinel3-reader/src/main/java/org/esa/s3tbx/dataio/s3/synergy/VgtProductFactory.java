@@ -23,7 +23,7 @@ import org.esa.snap.core.datamodel.MetadataAttribute;
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.RasterDataNode;
-import org.esa.snap.jai.SourceImageScaler;
+import org.esa.snap.core.image.SourceImageScaler;
 
 import javax.media.jai.BorderExtender;
 import javax.media.jai.Interpolation;

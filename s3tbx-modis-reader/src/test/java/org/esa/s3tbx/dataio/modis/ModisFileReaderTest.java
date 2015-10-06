@@ -9,7 +9,7 @@ import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.util.math.Range;
+import org.esa.snap.core.util.math.Range;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.awt.Dimension;

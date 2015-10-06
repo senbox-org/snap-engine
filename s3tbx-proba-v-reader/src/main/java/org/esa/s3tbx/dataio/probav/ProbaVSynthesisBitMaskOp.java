@@ -12,7 +12,7 @@ import org.esa.snap.core.gpf.pointop.Sample;
 import org.esa.snap.core.gpf.pointop.SourceSampleConfigurer;
 import org.esa.snap.core.gpf.pointop.TargetSampleConfigurer;
 import org.esa.snap.core.gpf.pointop.WritableSample;
-import org.esa.snap.util.BitSetter;
+import org.esa.snap.core.util.BitSetter;
 
 /**
  * This Operator extracts and interprets the relevant bit information stored in SM mask.

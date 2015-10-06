@@ -9,8 +9,8 @@ import org.esa.s3tbx.dataio.modis.hdf.HdfEosStructMetadata;
 import org.esa.s3tbx.dataio.modis.netcdf.NetCDFVariables;
 import org.esa.snap.core.dataio.ProductIOException;
 import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.util.StringUtils;
-import org.esa.snap.util.io.FileUtils;
+import org.esa.snap.core.util.StringUtils;
+import org.esa.snap.core.util.io.FileUtils;
 import ucar.nc2.Variable;
 
 import java.awt.Dimension;

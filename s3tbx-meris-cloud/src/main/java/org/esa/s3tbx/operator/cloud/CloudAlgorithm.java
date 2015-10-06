@@ -18,7 +18,7 @@ package org.esa.s3tbx.operator.cloud;
 import com.bc.jnn.Jnn;
 import com.bc.jnn.JnnException;
 import com.bc.jnn.JnnNet;
-import org.esa.snap.util.SystemUtils;
+import org.esa.snap.core.util.SystemUtils;
 
 import java.io.File;
 import java.io.FileInputStream;

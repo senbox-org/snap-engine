@@ -20,7 +20,7 @@ package org.esa.s3tbx.dataio.modis.bandreader;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.s3tbx.dataio.modis.ModisConstants;
 import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.util.math.Range;
+import org.esa.snap.core.util.math.Range;
 import ucar.nc2.Variable;
 
 import java.io.IOException;

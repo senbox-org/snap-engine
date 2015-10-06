@@ -16,9 +16,9 @@
 package org.esa.s3tbx.meris.radiometry.smilecorr;
 
 import com.bc.ceres.core.ProgressMonitor;
+import org.esa.snap.core.util.ResourceInstaller;
+import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.dataio.envisat.EnvisatConstants;
-import org.esa.snap.util.ResourceInstaller;
-import org.esa.snap.util.SystemUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;

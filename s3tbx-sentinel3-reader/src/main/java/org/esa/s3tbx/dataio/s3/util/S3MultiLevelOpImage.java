@@ -2,9 +2,9 @@ package org.esa.s3tbx.dataio.s3.util;
 
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.RasterDataNode;
+import org.esa.snap.core.image.ImageManager;
+import org.esa.snap.core.image.ResolutionLevel;
 import org.esa.snap.dataio.netcdf.util.AbstractNetcdfMultiLevelImage;
-import org.esa.snap.jai.ImageManager;
-import org.esa.snap.jai.ResolutionLevel;
 import ucar.nc2.Variable;
 
 import java.awt.Dimension;

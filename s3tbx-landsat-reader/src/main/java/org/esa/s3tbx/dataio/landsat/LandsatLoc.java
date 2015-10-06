@@ -17,8 +17,8 @@
 package org.esa.s3tbx.dataio.landsat;
 
 import org.esa.s3tbx.dataio.landsat.fast.Landsat5FASTConstants;
-import org.esa.snap.util.Debug;
-import org.esa.snap.util.Guardian;
+import org.esa.snap.core.util.Debug;
+import org.esa.snap.core.util.Guardian;
 
 import java.util.ArrayList;
 import java.util.Iterator;

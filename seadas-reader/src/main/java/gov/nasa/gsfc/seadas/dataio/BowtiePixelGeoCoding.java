@@ -21,10 +21,10 @@ import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.GeoCodingFactory;
 import org.esa.snap.core.datamodel.Scene;
-import org.esa.snap.util.Guardian;
-import org.esa.snap.util.ProductUtils;
-import org.esa.snap.util.math.IndexValidator;
-import org.esa.snap.util.math.Range;
+import org.esa.snap.core.util.Guardian;
+import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.core.util.math.IndexValidator;
+import org.esa.snap.core.util.math.Range;
 
 import java.io.IOException;
 import java.util.ArrayList;

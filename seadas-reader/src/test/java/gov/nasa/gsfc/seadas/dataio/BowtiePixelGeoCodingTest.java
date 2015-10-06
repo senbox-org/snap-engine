@@ -18,7 +18,7 @@ package gov.nasa.gsfc.seadas.dataio;
 
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.util.ProductUtils;
+import org.esa.snap.core.util.ProductUtils;
 import org.junit.Test;
 
 import java.io.File;

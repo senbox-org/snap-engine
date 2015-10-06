@@ -29,7 +29,7 @@ import org.esa.snap.core.dataop.maptransf.MapTransform;
 import org.esa.snap.core.dataop.maptransf.MapTransformDescriptor;
 import org.esa.snap.core.dataop.maptransf.MapTransformUI;
 import org.esa.snap.core.param.Parameter;
-import org.esa.snap.util.StringUtils;
+import org.esa.snap.core.util.StringUtils;
 
 import java.awt.Dimension;
 import java.awt.geom.Point2D;

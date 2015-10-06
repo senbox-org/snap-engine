@@ -27,9 +27,9 @@ import org.esa.snap.core.datamodel.Scene;
 import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.dataop.maptransf.Datum;
-import org.esa.snap.util.Guardian;
-import org.esa.snap.util.math.IndexValidator;
-import org.esa.snap.util.math.Range;
+import org.esa.snap.core.util.Guardian;
+import org.esa.snap.core.util.math.IndexValidator;
+import org.esa.snap.core.util.math.Range;
 
 import java.awt.Rectangle;
 import java.awt.geom.Line2D;

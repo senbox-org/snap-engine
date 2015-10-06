@@ -18,7 +18,7 @@ package org.esa.s3tbx.meris.radiometry.equalization;
 
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.util.StringUtils;
+import org.esa.snap.core.util.StringUtils;
 
 @SuppressWarnings({"UnusedDeclaration"})
 public enum ReprocessingVersion {

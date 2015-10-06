@@ -15,7 +15,7 @@
  */
 package org.esa.s3tbx.aatsr.sst;
 
-import org.esa.snap.util.Guardian;
+import org.esa.snap.core.util.Guardian;
 
 import java.util.Vector;
 

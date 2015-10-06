@@ -2,7 +2,7 @@ package org.esa.s3tbx.dataio.modis;
 
 import junit.framework.TestCase;
 import org.esa.snap.core.dataio.ProductReader;
-import org.esa.snap.util.io.SnapFileFilter;
+import org.esa.snap.core.util.io.SnapFileFilter;
 
 import java.io.File;
 import java.io.IOException;

@@ -17,10 +17,10 @@ package org.esa.s3tbx.dataio.modis.productdb;
 
 import org.esa.s3tbx.dataio.modis.ModisConstants;
 import org.esa.snap.core.dataio.ProductIOException;
-import org.esa.snap.util.Debug;
-import org.esa.snap.util.Guardian;
-import org.esa.snap.util.SystemUtils;
-import org.esa.snap.util.io.CsvReader;
+import org.esa.snap.core.util.Debug;
+import org.esa.snap.core.util.Guardian;
+import org.esa.snap.core.util.SystemUtils;
+import org.esa.snap.core.util.io.CsvReader;
 
 import java.io.IOException;
 import java.io.InputStreamReader;

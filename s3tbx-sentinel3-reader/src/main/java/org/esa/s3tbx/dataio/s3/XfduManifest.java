@@ -4,7 +4,7 @@ import org.esa.s3tbx.dataio.util.XPathHelper;
 import org.esa.snap.core.datamodel.MetadataAttribute;
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.util.ArrayUtils;
+import org.esa.snap.core.util.ArrayUtils;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;

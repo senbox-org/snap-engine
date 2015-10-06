@@ -17,8 +17,8 @@
 package org.esa.s3tbx.dataio.landsat;
 
 import org.esa.s3tbx.dataio.landsat.fast.Landsat5FASTConstants;
-import org.esa.snap.util.Guardian;
-import org.esa.snap.util.io.FileUtils;
+import org.esa.snap.core.util.Guardian;
+import org.esa.snap.core.util.io.FileUtils;
 
 import javax.imageio.ImageIO;
 import java.io.ByteArrayInputStream;

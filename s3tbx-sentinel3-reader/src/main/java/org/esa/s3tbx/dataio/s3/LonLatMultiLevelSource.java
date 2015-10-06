@@ -16,7 +16,7 @@ package org.esa.s3tbx.dataio.s3;/*
 
 import com.bc.ceres.glevel.MultiLevelSource;
 import com.bc.ceres.glevel.support.GenericMultiLevelSource;
-import org.esa.snap.util.jai.SingleBandedSampleModel;
+import org.esa.snap.core.util.jai.SingleBandedSampleModel;
 
 import javax.media.jai.ImageLayout;
 import java.awt.image.RenderedImage;

@@ -15,8 +15,8 @@
  */
 package org.esa.s3tbx.dataio.modis.productdb;
 
-import org.esa.snap.util.Debug;
-import org.esa.snap.util.Guardian;
+import org.esa.snap.core.util.Debug;
+import org.esa.snap.core.util.Guardian;
 
 import java.util.HashMap;
 import java.util.Vector;

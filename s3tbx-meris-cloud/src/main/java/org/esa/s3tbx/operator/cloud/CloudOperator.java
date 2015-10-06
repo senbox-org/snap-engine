@@ -27,10 +27,10 @@ import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
+import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.core.util.ResourceInstaller;
+import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.dataio.envisat.EnvisatConstants;
-import org.esa.snap.util.ProductUtils;
-import org.esa.snap.util.ResourceInstaller;
-import org.esa.snap.util.SystemUtils;
 
 import java.awt.Rectangle;
 import java.io.IOException;

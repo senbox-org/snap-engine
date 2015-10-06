@@ -15,7 +15,7 @@
  */
 package org.esa.s3tbx.smac;
 
-import org.esa.snap.util.Guardian;
+import org.esa.snap.core.util.Guardian;
 
 /**
  * Implements the SMAC algorithm as specified by the original source code of H.Rahman and G.Dedieu.

@@ -15,8 +15,8 @@
  */
 package org.esa.s3tbx.smac;
 
+import org.esa.snap.core.util.Guardian;
 import org.esa.snap.dataio.envisat.EnvisatConstants;
-import org.esa.snap.util.Guardian;
 
 import java.util.regex.Pattern;
 
