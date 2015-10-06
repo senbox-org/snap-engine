@@ -17,9 +17,9 @@
 package org.esa.s3tbx.meris.radiometry.equalization;
 
 import com.bc.ceres.core.Assert;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.gpf.OperatorException;
-import org.esa.snap.framework.datamodel.Product;
-import org.esa.snap.framework.datamodel.ProductData;
 
 import java.io.IOException;
 import java.io.InputStream;

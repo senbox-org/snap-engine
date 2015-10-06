@@ -18,9 +18,9 @@ package org.esa.s3tbx.dataio.avhrr.noaa.pod;
 
 import com.bc.ceres.binio.IOHandler;
 import com.bc.ceres.binio.util.RandomAccessFileIOHandler;
-import org.esa.snap.framework.dataio.DecodeQualification;
-import org.esa.snap.framework.dataio.ProductReader;
-import org.esa.snap.framework.dataio.ProductReaderPlugIn;
+import org.esa.snap.core.dataio.DecodeQualification;
+import org.esa.snap.core.dataio.ProductReader;
+import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.util.io.SnapFileFilter;
 
 import java.io.File;

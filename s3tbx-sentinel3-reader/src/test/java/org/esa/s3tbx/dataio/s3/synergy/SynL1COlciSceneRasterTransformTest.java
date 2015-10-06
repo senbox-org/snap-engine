@@ -1,13 +1,13 @@
 package org.esa.s3tbx.dataio.s3.synergy;
 
-import org.esa.snap.framework.datamodel.Band;
-import org.esa.snap.framework.datamodel.PixelPos;
-import org.esa.snap.framework.datamodel.ProductData;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Before;
 import org.junit.Test;
 import org.opengis.referencing.operation.MathTransform2D;
 
-import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.*;
 
 /**
  * @author Tonio Fincke

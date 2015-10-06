@@ -16,10 +16,10 @@
 
 package org.esa.s3tbx.dataio.avhrr.noaa.pod;
 
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.dataio.dimap.DimapProductConstants;
 import org.esa.snap.dataio.dimap.spi.DimapPersistable;
-import org.esa.snap.framework.datamodel.Product;
-import org.esa.snap.framework.datamodel.TiePointGrid;
 import org.jdom.Element;
 
 public class PodGeoCodingPersistable implements DimapPersistable {

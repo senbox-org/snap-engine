@@ -4,11 +4,11 @@ import junit.framework.TestCase;
 import org.esa.s3tbx.dataio.modis.hdf.HdfDataField;
 import org.esa.s3tbx.dataio.modis.productdb.ModisBandDescription;
 import org.esa.s3tbx.dataio.modis.productdb.ModisSpectralInfo;
-import org.esa.snap.framework.dataio.ProductIOException;
-import org.esa.snap.framework.datamodel.Band;
-import org.esa.snap.framework.datamodel.GeoCoding;
-import org.esa.snap.framework.datamodel.Product;
-import org.esa.snap.framework.datamodel.ProductData;
+import org.esa.snap.core.dataio.ProductIOException;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.util.math.Range;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 

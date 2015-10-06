@@ -16,8 +16,8 @@
 
 package org.esa.s3tbx.meris.radiometry.equalization;
 
-import org.esa.snap.framework.datamodel.MetadataElement;
-import org.esa.snap.framework.datamodel.Product;
+import org.esa.snap.core.datamodel.MetadataElement;
+import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.util.StringUtils;
 
 @SuppressWarnings({"UnusedDeclaration"})

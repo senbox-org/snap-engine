@@ -16,7 +16,7 @@
 
 package org.esa.s3tbx.dataio.ceos.prism;
 
-import org.esa.snap.framework.datamodel.ProductData;
+import org.esa.snap.core.datamodel.ProductData;
 
 import java.awt.Dimension;
 import java.awt.Point;

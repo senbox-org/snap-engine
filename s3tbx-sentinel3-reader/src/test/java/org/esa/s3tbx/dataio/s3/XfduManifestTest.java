@@ -1,7 +1,7 @@
 package org.esa.s3tbx.dataio.s3;
 
 import junit.framework.TestCase;
-import org.esa.snap.framework.datamodel.ProductData;
+import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;

@@ -17,7 +17,7 @@ package org.esa.s3tbx.dataio.modis;
 
 import org.esa.s3tbx.dataio.modis.netcdf.NetCDFVariables;
 import org.esa.s3tbx.dataio.modis.productdb.ModisProductDb;
-import org.esa.snap.framework.dataio.ProductIOException;
+import org.esa.snap.core.dataio.ProductIOException;
 import ucar.nc2.Variable;
 
 import java.io.IOException;

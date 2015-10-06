@@ -14,8 +14,8 @@ package org.esa.s3tbx.dataio.s3;/*
  * with this program; if not, see http://www.gnu.org/licenses/
  */
 
-import org.esa.snap.framework.datamodel.MetadataElement;
-import org.esa.snap.framework.datamodel.ProductData;
+import org.esa.snap.core.datamodel.MetadataElement;
+import org.esa.snap.core.datamodel.ProductData;
 
 import java.util.List;
 

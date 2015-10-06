@@ -1,7 +1,7 @@
 package org.esa.s3tbx.meris.radiometry;
 
-import org.esa.snap.framework.datamodel.Band;
-import org.esa.snap.framework.datamodel.Product;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.Product;
 import org.junit.Test;
 
 public class MerisRadiometryCorrectionOpTest {

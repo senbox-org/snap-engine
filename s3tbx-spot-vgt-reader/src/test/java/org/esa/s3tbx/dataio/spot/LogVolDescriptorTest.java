@@ -16,7 +16,7 @@
 
 package org.esa.s3tbx.dataio.spot;
 
-import org.esa.snap.framework.datamodel.ProductData;
+import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 

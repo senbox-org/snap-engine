@@ -1,11 +1,11 @@
 package org.esa.s3tbx.meris.radiometry.calibration;
 
+import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.dataio.envisat.Field;
 import org.esa.snap.dataio.envisat.MerisRacProductFile;
 import org.esa.snap.dataio.envisat.ProductFile;
 import org.esa.snap.dataio.envisat.Record;
 import org.esa.snap.dataio.envisat.RecordReader;
-import org.esa.snap.framework.datamodel.ProductData;
 
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.MemoryCacheImageInputStream;

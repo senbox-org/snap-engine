@@ -18,7 +18,7 @@ package org.esa.s3tbx.dataio.ceos;
 import org.esa.s3tbx.dataio.ceos.records.FilePointerRecord;
 import org.esa.s3tbx.dataio.ceos.records.TextRecord;
 import org.esa.s3tbx.dataio.ceos.records.VolumeDescriptorRecord;
-import org.esa.snap.framework.datamodel.ProductData;
+import org.esa.snap.core.datamodel.ProductData;
 
 import java.io.File;
 import java.io.FilenameFilter;

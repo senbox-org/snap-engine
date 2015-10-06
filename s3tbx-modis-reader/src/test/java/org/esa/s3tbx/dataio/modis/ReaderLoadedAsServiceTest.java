@@ -16,8 +16,8 @@
 package org.esa.s3tbx.dataio.modis;
 
 import junit.framework.TestCase;
-import org.esa.snap.framework.dataio.ProductIOPlugInManager;
-import org.esa.snap.framework.dataio.ProductReaderPlugIn;
+import org.esa.snap.core.dataio.ProductIOPlugInManager;
+import org.esa.snap.core.dataio.ProductReaderPlugIn;
 
 import java.util.Iterator;
 

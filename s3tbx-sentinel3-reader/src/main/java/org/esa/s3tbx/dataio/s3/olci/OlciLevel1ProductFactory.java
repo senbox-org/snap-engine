@@ -15,9 +15,9 @@ package org.esa.s3tbx.dataio.s3.olci;/*
  */
 
 import org.esa.s3tbx.dataio.s3.Sentinel3ProductReader;
-import org.esa.snap.framework.datamodel.Mask;
-import org.esa.snap.framework.datamodel.Product;
-import org.esa.snap.framework.datamodel.ProductNodeGroup;
+import org.esa.snap.core.datamodel.Mask;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductNodeGroup;
 
 public class OlciLevel1ProductFactory extends OlciProductFactory {
 

@@ -17,7 +17,7 @@
 package org.esa.s3tbx.dataio.landsat;
 
 import org.esa.s3tbx.dataio.landsat.LandsatConstants.Points;
-import org.esa.snap.framework.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.util.Guardian;
 
 import java.io.IOException;

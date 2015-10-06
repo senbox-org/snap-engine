@@ -23,8 +23,8 @@ import org.esa.s3tbx.dataio.landsat.LandsatHeader;
 import org.esa.s3tbx.dataio.landsat.LandsatLoc;
 import org.esa.s3tbx.dataio.landsat.LandsatTMBand;
 import org.esa.s3tbx.dataio.landsat.LandsatTMMetadata;
-import org.esa.snap.framework.datamodel.MetadataAttribute;
-import org.esa.snap.framework.datamodel.MetadataElement;
+import org.esa.snap.core.datamodel.MetadataAttribute;
+import org.esa.snap.core.datamodel.MetadataElement;
 
 import java.util.ArrayList;
 import java.util.List;

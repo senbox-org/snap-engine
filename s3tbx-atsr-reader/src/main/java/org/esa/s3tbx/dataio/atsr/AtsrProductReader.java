@@ -16,11 +16,11 @@
 package org.esa.s3tbx.dataio.atsr;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.snap.framework.dataio.AbstractProductReader;
-import org.esa.snap.framework.datamodel.Band;
-import org.esa.snap.framework.datamodel.FlagCoding;
-import org.esa.snap.framework.datamodel.Product;
-import org.esa.snap.framework.datamodel.ProductData;
+import org.esa.snap.core.dataio.AbstractProductReader;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.FlagCoding;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.util.StringUtils;
 
 import javax.imageio.stream.ImageInputStream;

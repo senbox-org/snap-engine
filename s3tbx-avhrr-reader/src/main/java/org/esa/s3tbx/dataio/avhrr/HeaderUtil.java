@@ -15,8 +15,8 @@
  */
 package org.esa.s3tbx.dataio.avhrr;
 
-import org.esa.snap.framework.datamodel.MetadataAttribute;
-import org.esa.snap.framework.datamodel.ProductData;
+import org.esa.snap.core.datamodel.MetadataAttribute;
+import org.esa.snap.core.datamodel.ProductData;
 
 import java.util.Calendar;
 

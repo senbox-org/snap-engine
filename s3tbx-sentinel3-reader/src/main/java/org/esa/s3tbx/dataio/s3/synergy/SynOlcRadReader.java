@@ -1,9 +1,9 @@
 package org.esa.s3tbx.dataio.s3.synergy;
 
 import org.esa.s3tbx.dataio.s3.util.S3NetcdfReader;
-import org.esa.snap.framework.datamodel.Band;
-import org.esa.snap.framework.datamodel.Product;
-import org.esa.snap.framework.datamodel.ProductData;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
 import ucar.nc2.Variable;
 
 import java.io.IOException;

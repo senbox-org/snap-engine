@@ -15,7 +15,7 @@
  */
 package org.esa.s3tbx.dataio.landsat.geotiff;
 
-import org.esa.snap.framework.dataio.ProductIOException;
+import org.esa.snap.core.dataio.ProductIOException;
 
 import java.io.BufferedReader;
 import java.io.File;

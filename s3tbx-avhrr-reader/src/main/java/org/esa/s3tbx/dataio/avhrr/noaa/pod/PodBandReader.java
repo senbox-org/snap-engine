@@ -4,7 +4,7 @@ import com.bc.ceres.binio.SequenceData;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.s3tbx.dataio.avhrr.BandReader;
 import org.esa.s3tbx.dataio.avhrr.calibration.Calibrator;
-import org.esa.snap.framework.datamodel.ProductData;
+import org.esa.snap.core.datamodel.ProductData;
 
 import java.io.IOException;
 

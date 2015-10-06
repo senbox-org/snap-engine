@@ -18,7 +18,7 @@ package org.esa.s3tbx.dataio.modis;
 
 import junit.framework.TestCase;
 import org.esa.s3tbx.dataio.modis.productdb.ModisProductDb;
-import org.esa.snap.framework.dataio.ProductIOException;
+import org.esa.snap.core.dataio.ProductIOException;
 
 public class ModisDaacUtilsTest_extractProductType extends TestCase {
 

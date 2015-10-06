@@ -17,8 +17,8 @@
 package org.esa.s3tbx.dataio.modis;
 
 import org.esa.s3tbx.dataio.modis.hdf.HdfDataField;
-import org.esa.snap.framework.dataio.ProductIOException;
-import org.esa.snap.framework.datamodel.GeoCoding;
+import org.esa.snap.core.dataio.ProductIOException;
+import org.esa.snap.core.datamodel.GeoCoding;
 
 import java.awt.Dimension;
 import java.io.IOException;

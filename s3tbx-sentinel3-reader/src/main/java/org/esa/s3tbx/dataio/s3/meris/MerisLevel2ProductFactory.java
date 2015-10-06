@@ -1,9 +1,9 @@
 package org.esa.s3tbx.dataio.s3.meris;
 
 import org.esa.s3tbx.dataio.s3.Sentinel3ProductReader;
-import org.esa.snap.framework.datamodel.Band;
-import org.esa.snap.framework.datamodel.Product;
-import org.esa.snap.framework.datamodel.RasterDataNode;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.RasterDataNode;
 
 import java.util.logging.Level;
 import java.util.regex.Matcher;

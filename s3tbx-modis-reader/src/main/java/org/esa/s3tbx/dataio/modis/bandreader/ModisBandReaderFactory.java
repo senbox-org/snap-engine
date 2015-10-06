@@ -18,8 +18,8 @@ package org.esa.s3tbx.dataio.modis.bandreader;
 import org.esa.s3tbx.dataio.modis.ModisUtils;
 import org.esa.s3tbx.dataio.modis.netcdf.NetCDFVariables;
 import org.esa.s3tbx.dataio.modis.productdb.ModisBandDescription;
+import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.dataio.netcdf.util.DataTypeUtils;
-import org.esa.snap.framework.datamodel.ProductData;
 import ucar.nc2.Dimension;
 import ucar.nc2.Variable;
 

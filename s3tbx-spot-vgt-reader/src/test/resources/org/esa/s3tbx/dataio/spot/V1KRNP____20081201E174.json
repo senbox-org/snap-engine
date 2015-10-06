@@ -322,67 +322,67 @@
     "masks": [
       {
         "name": "B0_BAD",
-        "type": "org.esa.snap.framework.datamodel.Mask$BandMathsType",
+        "type": "org.esa.snap.core.datamodel.Mask$BandMathsType",
         "color": "255,0,0",
         "description": "Radiometric quality for band B0 is bad."
       },
       {
         "name": "B2_BAD",
-        "type": "org.esa.snap.framework.datamodel.Mask$BandMathsType",
+        "type": "org.esa.snap.core.datamodel.Mask$BandMathsType",
         "color": "255,0,0",
         "description": "Radiometric quality for band B2 is bad."
       },
       {
         "name": "B3_BAD",
-        "type": "org.esa.snap.framework.datamodel.Mask$BandMathsType",
+        "type": "org.esa.snap.core.datamodel.Mask$BandMathsType",
         "color": "255,0,0",
         "description": "Radiometric quality for band B3 is bad."
       },
       {
         "name": "MIR_BAD",
-        "type": "org.esa.snap.framework.datamodel.Mask$BandMathsType",
+        "type": "org.esa.snap.core.datamodel.Mask$BandMathsType",
         "color": "255,0,0",
         "description": "Radiometric quality for band MIR is bad."
       },
       {
         "name": "LAND",
-        "type": "org.esa.snap.framework.datamodel.Mask$BandMathsType",
+        "type": "org.esa.snap.core.datamodel.Mask$BandMathsType",
         "color": "0,255,0",
         "description": "Land mask."
       },
       {
         "name": "WATER",
-        "type": "org.esa.snap.framework.datamodel.Mask$BandMathsType",
+        "type": "org.esa.snap.core.datamodel.Mask$BandMathsType",
         "color": "0,0,255",
         "description": "Water mask."
       },
       {
         "name": "ICE_SNOW",
-        "type": "org.esa.snap.framework.datamodel.Mask$BandMathsType",
+        "type": "org.esa.snap.core.datamodel.Mask$BandMathsType",
         "color": "255,0,255",
         "description": "Ice/snow mask."
       },
       {
         "name": "CLEAR",
-        "type": "org.esa.snap.framework.datamodel.Mask$BandMathsType",
+        "type": "org.esa.snap.core.datamodel.Mask$BandMathsType",
         "color": "255,200,0",
         "description": "Clear sky."
       },
       {
         "name": "CLOUD_SHADOW",
-        "type": "org.esa.snap.framework.datamodel.Mask$BandMathsType",
+        "type": "org.esa.snap.core.datamodel.Mask$BandMathsType",
         "color": "0,255,255",
         "description": "Cloud shadow."
       },
       {
         "name": "CLOUD_UNCERTAIN",
-        "type": "org.esa.snap.framework.datamodel.Mask$BandMathsType",
+        "type": "org.esa.snap.core.datamodel.Mask$BandMathsType",
         "color": "255,200,0",
         "description": "Cloud uncertain."
       },
       {
         "name": "CLOUD",
-        "type": "org.esa.snap.framework.datamodel.Mask$BandMathsType",
+        "type": "org.esa.snap.core.datamodel.Mask$BandMathsType",
         "color": "255,255,0",
         "description": "Cloud certain."
       }

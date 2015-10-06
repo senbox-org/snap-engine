@@ -14,7 +14,7 @@ package org.esa.s3tbx.dataio.s3;/*
  * with this program; if not, see http://www.gnu.org/licenses/
  */
 
-import org.esa.snap.framework.datamodel.Product;
+import org.esa.snap.core.datamodel.Product;
 
 import java.io.IOException;
 

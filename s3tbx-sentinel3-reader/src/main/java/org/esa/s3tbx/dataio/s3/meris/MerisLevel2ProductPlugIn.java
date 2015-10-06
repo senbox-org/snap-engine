@@ -1,7 +1,7 @@
 package org.esa.s3tbx.dataio.s3.meris;
 
 import org.esa.s3tbx.dataio.s3.Sentinel3ProductReaderPlugIn;
-import org.esa.snap.framework.dataio.ProductReader;
+import org.esa.snap.core.dataio.ProductReader;
 
 /**
  * @author Tonio Fincke

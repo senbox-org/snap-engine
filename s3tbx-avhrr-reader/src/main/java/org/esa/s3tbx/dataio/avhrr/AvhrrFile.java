@@ -15,8 +15,8 @@
  */
 package org.esa.s3tbx.dataio.avhrr;
 
-import org.esa.snap.framework.datamodel.MetadataElement;
-import org.esa.snap.framework.datamodel.ProductData;
+import org.esa.snap.core.datamodel.MetadataElement;
+import org.esa.snap.core.datamodel.ProductData;
 
 import java.io.IOException;
 

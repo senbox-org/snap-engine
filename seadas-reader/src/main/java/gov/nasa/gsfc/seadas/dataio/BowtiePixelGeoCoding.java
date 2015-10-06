@@ -16,8 +16,11 @@
 package gov.nasa.gsfc.seadas.dataio;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.snap.framework.dataio.ProductSubsetDef;
-import org.esa.snap.framework.datamodel.*;
+import org.esa.snap.core.dataio.ProductSubsetDef;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.GeoCodingFactory;
+import org.esa.snap.core.datamodel.Scene;
 import org.esa.snap.util.Guardian;
 import org.esa.snap.util.ProductUtils;
 import org.esa.snap.util.math.IndexValidator;
@@ -283,8 +286,8 @@ public class BowtiePixelGeoCoding extends AbstractBowtieGeoCoding {
     }
 
     /**
-     * Transfers the geo-coding of the {@link org.esa.snap.framework.datamodel.Scene srcScene} to the {@link org.esa.snap.framework.datamodel.Scene destScene} with respect to the given
-     * {@link org.esa.snap.framework.dataio.ProductSubsetDef subsetDef}.
+     * Transfers the geo-coding of the {@link Scene srcScene} to the {@link Scene destScene} with respect to the given
+     * {@link ProductSubsetDef subsetDef}.
      *
      * @param srcScene  the source scene
      * @param destScene the destination scene

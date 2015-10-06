@@ -29,7 +29,7 @@ import org.esa.s3tbx.dataio.landsat.LandsatTMData;
 import org.esa.s3tbx.dataio.landsat.LandsatTMFile;
 import org.esa.s3tbx.dataio.landsat.LandsatUtils;
 import org.esa.s3tbx.dataio.landsat.RadiometricData;
-import org.esa.snap.framework.datamodel.Band;
+import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.util.Debug;
 
 import java.io.IOException;

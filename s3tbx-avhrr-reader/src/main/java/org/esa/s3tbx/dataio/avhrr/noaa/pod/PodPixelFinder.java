@@ -16,8 +16,8 @@
 
 package org.esa.s3tbx.dataio.avhrr.noaa.pod;
 
-import org.esa.snap.framework.datamodel.GeoPos;
-import org.esa.snap.framework.datamodel.PixelPos;
+import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.util.math.CosineDistance;
 import org.esa.snap.util.math.DistanceMeasure;
 

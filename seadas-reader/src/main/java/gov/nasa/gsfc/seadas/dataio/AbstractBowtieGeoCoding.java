@@ -15,13 +15,13 @@
  */
 package gov.nasa.gsfc.seadas.dataio;
 
-import org.esa.snap.framework.datamodel.AbstractGeoCoding;
-import org.esa.snap.framework.datamodel.GeoCoding;
-import org.esa.snap.framework.datamodel.GeoPos;
-import org.esa.snap.framework.datamodel.PixelPos;
-import org.esa.snap.framework.datamodel.ProductNode;
-import org.esa.snap.framework.datamodel.TiePointGrid;
-import org.esa.snap.framework.dataop.maptransf.Datum;
+import org.esa.snap.core.datamodel.AbstractGeoCoding;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.core.datamodel.ProductNode;
+import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.dataop.maptransf.Datum;
 
 import java.awt.Rectangle;
 import java.awt.geom.Line2D;
@@ -145,7 +145,7 @@ public abstract class AbstractBowtieGeoCoding extends AbstractGeoCoding {
     }
 
     /**
-     * Gets the datum, the reference point or surface against which {@link org.esa.snap.framework.datamodel.GeoPos} measurements are made.
+     * Gets the datum, the reference point or surface against which {@link GeoPos} measurements are made.
      *
      * @return the datum
      */

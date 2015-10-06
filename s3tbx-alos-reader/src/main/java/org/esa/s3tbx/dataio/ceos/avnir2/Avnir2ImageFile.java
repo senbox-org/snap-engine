@@ -21,7 +21,7 @@ import org.esa.s3tbx.dataio.ceos.CeosFileReader;
 import org.esa.s3tbx.dataio.ceos.IllegalCeosFormatException;
 import org.esa.s3tbx.dataio.ceos.avnir2.records.Avnir2ImageFDR;
 import org.esa.s3tbx.dataio.ceos.records.ImageRecord;
-import org.esa.snap.framework.datamodel.ProductData;
+import org.esa.snap.core.datamodel.ProductData;
 
 import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;

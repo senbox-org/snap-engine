@@ -29,8 +29,8 @@ import org.esa.s3tbx.dataio.avhrr.calibration.IrRadianceCalibrator;
 import org.esa.s3tbx.dataio.avhrr.calibration.IrTemperatureCalibrator;
 import org.esa.s3tbx.dataio.avhrr.calibration.ReflectanceFactorCalibrator;
 import org.esa.s3tbx.dataio.avhrr.calibration.VisibleRadianceCalibrator;
-import org.esa.snap.framework.datamodel.MetadataElement;
-import org.esa.snap.framework.datamodel.ProductData;
+import org.esa.snap.core.datamodel.MetadataElement;
+import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.util.Debug;
 
 import java.io.File;

@@ -1,8 +1,8 @@
 package org.esa.s3tbx.dataio.s3.synergy;
 
 import org.esa.s3tbx.dataio.s3.util.S3NetcdfReader;
-import org.esa.snap.framework.datamodel.CrsGeoCoding;
-import org.esa.snap.framework.datamodel.Product;
+import org.esa.snap.core.datamodel.CrsGeoCoding;
+import org.esa.snap.core.datamodel.Product;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;

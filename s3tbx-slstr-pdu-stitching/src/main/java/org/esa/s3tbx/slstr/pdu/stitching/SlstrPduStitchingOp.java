@@ -1,11 +1,11 @@
 package org.esa.s3tbx.slstr.pdu.stitching;
 
+import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
-import org.esa.snap.framework.datamodel.Product;
 
 /**
  * @author Tonio Fincke

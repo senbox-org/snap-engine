@@ -1,6 +1,6 @@
 package org.esa.s3tbx.dataio.modis;
 
-import org.esa.snap.framework.dataio.ProductSubsetDef;
+import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.junit.Assert;
 import org.junit.Test;
 

@@ -1,8 +1,8 @@
 package org.esa.s3tbx.dataio.s3.slstr;
 
 import org.esa.s3tbx.dataio.s3.util.S3NetcdfReader;
-import org.esa.snap.framework.datamodel.MetadataElement;
-import org.esa.snap.framework.datamodel.Product;
+import org.esa.snap.core.datamodel.MetadataElement;
+import org.esa.snap.core.datamodel.Product;
 import ucar.ma2.Array;
 import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;

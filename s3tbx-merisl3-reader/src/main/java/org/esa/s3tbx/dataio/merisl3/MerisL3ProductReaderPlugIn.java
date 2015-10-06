@@ -16,10 +16,11 @@
 
 package org.esa.s3tbx.dataio.merisl3;
 
+import org.esa.snap.core.dataio.AbstractProductReader;
+import org.esa.snap.core.dataio.DecodeQualification;
+import org.esa.snap.core.dataio.ProductReader;
+import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.dataio.netcdf.util.NetcdfFileOpener;
-import org.esa.snap.framework.dataio.DecodeQualification;
-import org.esa.snap.framework.dataio.ProductReader;
-import org.esa.snap.framework.dataio.ProductReaderPlugIn;
 import org.esa.snap.util.io.SnapFileFilter;
 import ucar.nc2.NetcdfFile;
 
@@ -102,7 +103,7 @@ public class MerisL3ProductReaderPlugIn implements ProductReaderPlugIn {
      * <code>InvalidArgumentException</code> in this case).
      *
      * @return an array containing valid input types, never <code>null</code>
-     * @see org.esa.snap.framework.dataio.AbstractProductReader#readProductNodes
+     * @see AbstractProductReader#readProductNodes
      */
     public Class[] getInputTypes() {
         return new Class[]{String.class, File.class};

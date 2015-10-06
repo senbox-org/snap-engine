@@ -1,7 +1,7 @@
 package org.esa.s3tbx.dataio.s3.slstr;
 
 import org.esa.s3tbx.dataio.s3.util.S3NetcdfReader;
-import org.esa.snap.framework.datamodel.Product;
+import org.esa.snap.core.datamodel.Product;
 import ucar.nc2.Variable;
 
 import java.io.IOException;

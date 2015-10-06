@@ -22,7 +22,7 @@ import org.esa.s3tbx.dataio.ceos.IllegalCeosFormatException;
 import org.esa.s3tbx.dataio.ceos.records.FilePointerRecord;
 import org.esa.s3tbx.dataio.ceos.records.TextRecord;
 import org.esa.s3tbx.dataio.ceos.records.VolumeDescriptorRecord;
-import org.esa.snap.framework.datamodel.MetadataElement;
+import org.esa.snap.core.datamodel.MetadataElement;
 
 import javax.imageio.stream.FileImageInputStream;
 import java.io.File;

@@ -18,7 +18,7 @@ package org.esa.s3tbx.dataio.atsr;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import org.esa.snap.framework.dataio.ProductReader;
+import org.esa.snap.core.dataio.ProductReader;
 
 import javax.imageio.stream.ImageInputStream;
 import java.io.File;

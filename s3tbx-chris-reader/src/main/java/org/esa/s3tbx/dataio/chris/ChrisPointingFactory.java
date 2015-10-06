@@ -16,11 +16,11 @@
 
 package org.esa.s3tbx.dataio.chris;
 
-import org.esa.snap.framework.datamodel.Pointing;
-import org.esa.snap.framework.datamodel.PointingFactory;
-import org.esa.snap.framework.datamodel.Product;
-import org.esa.snap.framework.datamodel.RasterDataNode;
-import org.esa.snap.framework.datamodel.TiePointGridPointing;
+import org.esa.snap.core.datamodel.Pointing;
+import org.esa.snap.core.datamodel.PointingFactory;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.RasterDataNode;
+import org.esa.snap.core.datamodel.TiePointGridPointing;
 
 public final class ChrisPointingFactory implements PointingFactory {
 

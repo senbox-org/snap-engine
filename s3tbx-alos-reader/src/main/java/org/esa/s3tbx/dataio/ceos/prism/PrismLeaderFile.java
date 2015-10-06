@@ -23,7 +23,7 @@ import org.esa.s3tbx.dataio.ceos.prism.records.PrismAncillary2Record;
 import org.esa.s3tbx.dataio.ceos.prism.records.SceneHeaderRecord;
 import org.esa.s3tbx.dataio.ceos.records.Ancillary1Record;
 import org.esa.s3tbx.dataio.ceos.records.Ancillary3Record;
-import org.esa.snap.framework.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.GeoPos;
 
 import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;

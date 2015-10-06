@@ -16,7 +16,7 @@
 
 package org.esa.s3tbx.dataio.modis.bandreader;
 
-import org.esa.snap.framework.datamodel.ProductData;
+import org.esa.snap.core.datamodel.ProductData;
 import ucar.ma2.Array;
 import ucar.ma2.InvalidRangeException;
 import ucar.ma2.Section;
@@ -40,7 +40,7 @@ public class ModisInt16BandReader extends ModisBandReader {
     /**
      * Retrieves the data type of the band
      *
-     * @return always {@link org.esa.snap.framework.datamodel.ProductData#TYPE_INT8}
+     * @return always {@link ProductData#TYPE_INT8}
      */
     @Override
     public int getDataType() {

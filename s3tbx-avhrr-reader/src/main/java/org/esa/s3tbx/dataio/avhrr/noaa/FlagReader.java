@@ -21,7 +21,7 @@ import com.bc.ceres.core.ProgressMonitor;
 import org.esa.s3tbx.dataio.avhrr.AvhrrConstants;
 import org.esa.s3tbx.dataio.avhrr.AvhrrFile;
 import org.esa.s3tbx.dataio.avhrr.BandReader;
-import org.esa.snap.framework.datamodel.ProductData;
+import org.esa.snap.core.datamodel.ProductData;
 
 import java.io.IOException;
 

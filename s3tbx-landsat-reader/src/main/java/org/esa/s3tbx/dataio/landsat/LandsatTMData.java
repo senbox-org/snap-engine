@@ -20,7 +20,7 @@
 package org.esa.s3tbx.dataio.landsat;
 
 import org.esa.s3tbx.dataio.landsat.LandsatConstants.ConstBand;
-import org.esa.snap.framework.datamodel.Band;
+import org.esa.snap.core.datamodel.Band;
 
 import java.io.IOException;
 import java.util.List;

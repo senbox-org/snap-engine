@@ -1,9 +1,9 @@
 package org.esa.s3tbx.dataio;
 
 import org.esa.s3tbx.dataio.s3.Sentinel3ProductReaderPlugIn;
-import org.esa.snap.framework.dataio.ProductIO;
-import org.esa.snap.framework.dataio.ProductReader;
-import org.esa.snap.framework.datamodel.Product;
+import org.esa.snap.core.dataio.ProductIO;
+import org.esa.snap.core.dataio.ProductReader;
+import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.util.StopWatch;
 import org.esa.snap.util.io.FileUtils;
 

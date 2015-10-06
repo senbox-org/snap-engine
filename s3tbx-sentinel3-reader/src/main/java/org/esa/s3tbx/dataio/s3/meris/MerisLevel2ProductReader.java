@@ -1,8 +1,8 @@
 package org.esa.s3tbx.dataio.s3.meris;
 
 import org.esa.s3tbx.dataio.s3.Sentinel3ProductReader;
-import org.esa.snap.framework.dataio.ProductReaderPlugIn;
-import org.esa.snap.framework.datamodel.Product;
+import org.esa.snap.core.dataio.ProductReaderPlugIn;
+import org.esa.snap.core.datamodel.Product;
 
 import java.io.IOException;
 

@@ -19,7 +19,7 @@ package org.esa.s3tbx.dataio.landsat;
 
 import org.esa.s3tbx.dataio.landsat.ceos.Landsat5CEOS;
 import org.esa.s3tbx.dataio.landsat.fast.Landsat5FAST;
-import org.esa.snap.framework.dataio.IllegalFileFormatException;
+import org.esa.snap.core.dataio.IllegalFileFormatException;
 
 import java.io.File;
 import java.io.IOException;

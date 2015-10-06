@@ -15,7 +15,7 @@
  */
 package org.esa.s3tbx.dataio.atsr;
 
-import org.esa.snap.framework.dataio.DecodeQualification;
+import org.esa.snap.core.dataio.DecodeQualification;
 import org.esa.snap.util.Debug;
 
 import javax.imageio.stream.FileImageInputStream;

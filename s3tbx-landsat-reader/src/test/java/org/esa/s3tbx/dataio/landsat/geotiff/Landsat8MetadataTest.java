@@ -16,7 +16,7 @@
 
 package org.esa.s3tbx.dataio.landsat.geotiff;
 
-import org.esa.snap.framework.datamodel.ProductData;
+import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Before;
 import org.junit.Test;
 

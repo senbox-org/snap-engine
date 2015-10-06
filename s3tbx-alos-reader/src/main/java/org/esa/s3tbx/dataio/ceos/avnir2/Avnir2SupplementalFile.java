@@ -17,7 +17,7 @@
 package org.esa.s3tbx.dataio.ceos.avnir2;
 
 import org.esa.s3tbx.dataio.ceos.CeosFileReader;
-import org.esa.snap.framework.datamodel.MetadataElement;
+import org.esa.snap.core.datamodel.MetadataElement;
 
 import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;

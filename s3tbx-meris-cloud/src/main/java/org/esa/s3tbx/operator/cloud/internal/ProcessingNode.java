@@ -17,12 +17,12 @@
 package org.esa.s3tbx.operator.cloud.internal;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.snap.framework.dataio.ProductReader;
-import org.esa.snap.framework.dataio.ProductReaderPlugIn;
-import org.esa.snap.framework.dataio.ProductSubsetDef;
-import org.esa.snap.framework.datamodel.Band;
-import org.esa.snap.framework.datamodel.Product;
-import org.esa.snap.framework.datamodel.ProductData;
+import org.esa.snap.core.dataio.ProductReader;
+import org.esa.snap.core.dataio.ProductReaderPlugIn;
+import org.esa.snap.core.dataio.ProductSubsetDef;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
 
 import java.awt.Rectangle;
 import java.io.IOException;
@@ -38,7 +38,7 @@ import java.util.Map;
  * A ProcessingNode takes a single input product and creates an output product
  * using the same pixel resolution and the same spatial reference system as the input product.
  * <p/>
- * The method {@link #readFrameData(org.esa.snap.framework.datamodel.Band, int, int, int, int, org.esa.snap.framework.datamodel.ProductData)}
+ * The method {@link #readFrameData(Band, int, int, int, int, ProductData)}
  * will continue using pre-cached and pre-computed data as long as the frame rectangle will not change.
  * <p>If the frame rectangle changes, the {@link #processFrame(int, int, int, int, ProgressMonitor)} method is called in order
  * to compute the data frame for each of the bands contained in the target product.

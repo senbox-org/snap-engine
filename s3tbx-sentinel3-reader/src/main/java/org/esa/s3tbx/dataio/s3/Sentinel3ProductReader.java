@@ -29,11 +29,11 @@ import org.esa.s3tbx.dataio.s3.slstr.SlstrWstProductFactory;
 import org.esa.s3tbx.dataio.s3.synergy.SynL1CProductFactory;
 import org.esa.s3tbx.dataio.s3.synergy.SynLevel2ProductFactory;
 import org.esa.s3tbx.dataio.s3.synergy.VgtProductFactory;
-import org.esa.snap.framework.dataio.AbstractProductReader;
-import org.esa.snap.framework.dataio.ProductReaderPlugIn;
-import org.esa.snap.framework.datamodel.Band;
-import org.esa.snap.framework.datamodel.Product;
-import org.esa.snap.framework.datamodel.ProductData;
+import org.esa.snap.core.dataio.AbstractProductReader;
+import org.esa.snap.core.dataio.ProductReaderPlugIn;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
 
 import java.io.File;
 import java.io.IOException;

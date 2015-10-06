@@ -16,15 +16,15 @@
 
 package org.esa.s3tbx.dataio.avhrr.noaa.pod;
 
-import org.esa.snap.framework.dataio.ProductSubsetDef;
-import org.esa.snap.framework.datamodel.GeoApproximation;
-import org.esa.snap.framework.datamodel.GeoPos;
-import org.esa.snap.framework.datamodel.PixelPos;
-import org.esa.snap.framework.datamodel.PixelPosEstimator;
-import org.esa.snap.framework.datamodel.Product;
-import org.esa.snap.framework.datamodel.Scene;
-import org.esa.snap.framework.datamodel.TiePointGeoCoding;
-import org.esa.snap.framework.datamodel.TiePointGrid;
+import org.esa.snap.core.dataio.ProductSubsetDef;
+import org.esa.snap.core.datamodel.GeoApproximation;
+import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.core.datamodel.PixelPosEstimator;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.Scene;
+import org.esa.snap.core.datamodel.TiePointGeoCoding;
+import org.esa.snap.core.datamodel.TiePointGrid;
 
 import javax.media.jai.PlanarImage;
 import java.awt.Rectangle;

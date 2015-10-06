@@ -16,7 +16,7 @@
 
 package org.esa.s3tbx.dataio.chris;
 
-import org.esa.snap.framework.datamodel.PointingFactoryRegistry;
+import org.esa.snap.core.datamodel.PointingFactoryRegistry;
 import org.junit.Test;
 
 import static org.junit.Assert.*;

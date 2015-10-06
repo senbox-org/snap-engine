@@ -16,7 +16,7 @@
 package org.esa.s3tbx.dataio.modis.productdb;
 
 import org.esa.s3tbx.dataio.modis.ModisConstants;
-import org.esa.snap.framework.dataio.ProductIOException;
+import org.esa.snap.core.dataio.ProductIOException;
 import org.esa.snap.util.Debug;
 import org.esa.snap.util.Guardian;
 import org.esa.snap.util.SystemUtils;

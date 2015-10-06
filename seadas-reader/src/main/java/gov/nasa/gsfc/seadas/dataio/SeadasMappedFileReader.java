@@ -1,8 +1,8 @@
 package gov.nasa.gsfc.seadas.dataio;
 
-import org.esa.snap.framework.dataio.ProductIOException;
-import org.esa.snap.framework.datamodel.CrsGeoCoding;
-import org.esa.snap.framework.datamodel.Product;
+import org.esa.snap.core.dataio.ProductIOException;
+import org.esa.snap.core.datamodel.CrsGeoCoding;
+import org.esa.snap.core.datamodel.Product;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;

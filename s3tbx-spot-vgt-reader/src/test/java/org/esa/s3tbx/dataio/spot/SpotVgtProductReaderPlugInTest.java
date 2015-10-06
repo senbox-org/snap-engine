@@ -18,10 +18,10 @@ package org.esa.s3tbx.dataio.spot;
 
 import com.bc.ceres.binding.Property;
 import com.bc.ceres.binding.PropertySet;
-import org.esa.snap.framework.dataio.DecodeQualification;
-import org.esa.snap.framework.dataio.ProductIO;
-import org.esa.snap.framework.datamodel.Band;
-import org.esa.snap.framework.datamodel.Product;
+import org.esa.snap.core.dataio.DecodeQualification;
+import org.esa.snap.core.dataio.ProductIO;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.Product;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 

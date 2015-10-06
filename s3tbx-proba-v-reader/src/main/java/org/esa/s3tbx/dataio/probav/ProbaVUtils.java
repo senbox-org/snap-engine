@@ -5,11 +5,15 @@ import ncsa.hdf.hdf5lib.HDF5Constants;
 import ncsa.hdf.object.Attribute;
 import ncsa.hdf.object.Datatype;
 import ncsa.hdf.object.h5.H5Datatype;
-import org.esa.snap.framework.datamodel.*;
+import org.esa.snap.core.datamodel.FlagCoding;
+import org.esa.snap.core.datamodel.Mask;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.ProductNodeGroup;
 import org.esa.snap.util.BitSetter;
 import org.esa.snap.util.SystemUtils;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.List;
 import java.util.logging.Level;
 

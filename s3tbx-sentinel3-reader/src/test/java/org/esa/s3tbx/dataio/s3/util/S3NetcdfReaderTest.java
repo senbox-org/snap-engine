@@ -1,6 +1,6 @@
 package org.esa.s3tbx.dataio.s3.util;
 
-import org.esa.snap.framework.datamodel.Product;
+import org.esa.snap.core.datamodel.Product;
 import org.junit.Before;
 import org.junit.Test;
 

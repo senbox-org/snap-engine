@@ -16,19 +16,19 @@
 package org.esa.s3tbx.dataio.modis.hdf;
 
 import org.esa.s3tbx.dataio.modis.ModisConstants;
-import org.esa.snap.framework.dataio.IllegalFileFormatException;
-import org.esa.snap.framework.dataio.ProductIOException;
-import org.esa.snap.framework.datamodel.GeoCoding;
-import org.esa.snap.framework.datamodel.GeoPos;
-import org.esa.snap.framework.datamodel.MapGeoCoding;
-import org.esa.snap.framework.dataop.maptransf.CartographicMapTransform;
-import org.esa.snap.framework.dataop.maptransf.Datum;
-import org.esa.snap.framework.dataop.maptransf.MapInfo;
-import org.esa.snap.framework.dataop.maptransf.MapProjection;
-import org.esa.snap.framework.dataop.maptransf.MapTransform;
-import org.esa.snap.framework.dataop.maptransf.MapTransformDescriptor;
-import org.esa.snap.framework.dataop.maptransf.MapTransformUI;
-import org.esa.snap.framework.param.Parameter;
+import org.esa.snap.core.dataio.IllegalFileFormatException;
+import org.esa.snap.core.dataio.ProductIOException;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.MapGeoCoding;
+import org.esa.snap.core.dataop.maptransf.CartographicMapTransform;
+import org.esa.snap.core.dataop.maptransf.Datum;
+import org.esa.snap.core.dataop.maptransf.MapInfo;
+import org.esa.snap.core.dataop.maptransf.MapProjection;
+import org.esa.snap.core.dataop.maptransf.MapTransform;
+import org.esa.snap.core.dataop.maptransf.MapTransformDescriptor;
+import org.esa.snap.core.dataop.maptransf.MapTransformUI;
+import org.esa.snap.core.param.Parameter;
 import org.esa.snap.util.StringUtils;
 
 import java.awt.Dimension;

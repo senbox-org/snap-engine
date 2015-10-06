@@ -1,7 +1,7 @@
 package org.esa.s3tbx.dataio.modis;
 
-import org.esa.snap.framework.dataio.DecodeQualification;
-import org.esa.snap.framework.datamodel.Product;
+import org.esa.snap.core.dataio.DecodeQualification;
+import org.esa.snap.core.datamodel.Product;
 
 import java.io.IOException;
 

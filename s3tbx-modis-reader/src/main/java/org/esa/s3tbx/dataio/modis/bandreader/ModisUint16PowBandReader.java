@@ -15,7 +15,7 @@
  */
 package org.esa.s3tbx.dataio.modis.bandreader;
 
-import org.esa.snap.framework.datamodel.ProductData;
+import org.esa.snap.core.datamodel.ProductData;
 import ucar.ma2.Array;
 import ucar.ma2.InvalidRangeException;
 import ucar.ma2.Section;

@@ -23,10 +23,10 @@ import org.esa.s3tbx.dataio.ceos.avnir2.records.Avnir2Ancillary2Record;
 import org.esa.s3tbx.dataio.ceos.avnir2.records.Avnir2LeaderFDR;
 import org.esa.s3tbx.dataio.ceos.avnir2.records.Avnir2SceneHeaderRecord;
 import org.esa.s3tbx.dataio.ceos.records.Ancillary3Record;
-import org.esa.snap.framework.datamodel.GeoPos;
-import org.esa.snap.framework.datamodel.MetadataAttribute;
-import org.esa.snap.framework.datamodel.MetadataElement;
-import org.esa.snap.framework.datamodel.ProductData;
+import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.MetadataAttribute;
+import org.esa.snap.core.datamodel.MetadataElement;
+import org.esa.snap.core.datamodel.ProductData;
 
 import javax.imageio.stream.ImageInputStream;
 import java.io.IOException;

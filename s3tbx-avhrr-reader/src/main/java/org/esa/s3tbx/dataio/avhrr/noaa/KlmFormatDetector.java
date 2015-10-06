@@ -25,7 +25,7 @@ import com.bc.ceres.binio.SequenceData;
 import com.bc.ceres.binio.SimpleType;
 import com.bc.ceres.binio.util.RandomAccessFileIOHandler;
 import org.esa.s3tbx.dataio.avhrr.AvhrrConstants;
-import org.esa.snap.framework.dataio.DecodeQualification;
+import org.esa.snap.core.dataio.DecodeQualification;
 
 import java.io.File;
 import java.io.FileNotFoundException;

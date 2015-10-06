@@ -16,7 +16,7 @@
 
 package org.esa.s3tbx.dataio.landsat;
 
-import org.esa.snap.framework.datamodel.Band;
+import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.util.Debug;
 import org.esa.snap.util.Guardian;
 

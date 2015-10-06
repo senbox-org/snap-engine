@@ -20,7 +20,7 @@ import com.bc.ceres.binio.SimpleType;
 import com.bc.ceres.binio.Type;
 import org.esa.s3tbx.dataio.avhrr.BandReader;
 import org.esa.s3tbx.dataio.avhrr.calibration.Calibrator;
-import org.esa.snap.framework.dataio.ProductIOException;
+import org.esa.snap.core.dataio.ProductIOException;
 
 /**
  * Differentiates the binary formats for AVHRR NOAA products.
