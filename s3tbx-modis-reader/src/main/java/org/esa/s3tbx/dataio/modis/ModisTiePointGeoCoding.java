@@ -67,20 +67,8 @@ public class ModisTiePointGeoCoding extends AbstractGeoCoding {
      * @param lonGrid the longitude grid, must not be <code>null</code>
      */
     public ModisTiePointGeoCoding(TiePointGrid latGrid, TiePointGrid lonGrid) {
-        this(latGrid, lonGrid, Datum.WGS_84); // todo  - check datum, is it really WGS84 for MODIS?
-    }
-
-    /**
-     * Constructs geo-coding based on two given tie-point grids.
-     *
-     * @param latGrid the latitude grid, must not be <code>null</code>
-     * @param lonGrid the longitude grid, must not be <code>null</code>
-     * @param datum   the datum (f.e. WGS84)
-     */
-    public ModisTiePointGeoCoding(TiePointGrid latGrid, TiePointGrid lonGrid, final Datum datum) {
         Guardian.assertNotNull("latGrid", latGrid);
         Guardian.assertNotNull("lonGrid", lonGrid);
-        Guardian.assertNotNull("datum", datum);
         if (latGrid.getRasterWidth() != lonGrid.getRasterWidth() ||
                 latGrid.getRasterHeight() != lonGrid.getRasterHeight() ||
                 latGrid.getOffsetX() != lonGrid.getOffsetX() ||
@@ -91,7 +79,8 @@ public class ModisTiePointGeoCoding extends AbstractGeoCoding {
         }
         latgrid = latGrid;
         this.lonGrid = lonGrid;
-        this.datum = datum;
+        // todo  - check datum, is it really WGS84 for MODIS?
+        this.datum = Datum.WGS_84;
         lastCenterLineIndex = 0;
         init();
     }
@@ -117,7 +106,7 @@ public class ModisTiePointGeoCoding extends AbstractGeoCoding {
     /**
      * Returns the pixel co-ordinates as x/y for a given geographical position given as lat/lon.
      *
-     * @param geoPos   the geographical position as lat/lon in the coodinate system determined by {@link #getDatum()}
+     * @param geoPos   the geographical position as lat/lon in the coodinate system determined by {@link #getGeoCRS()}
      * @param pixelPos an instance of <code>Point</code> to be used as retun value. If this parameter is
      *                 <code>null</code>, the method creates a new instance which it then returns.
      * @return the pixel co-ordinates as x/y
@@ -163,7 +152,7 @@ public class ModisTiePointGeoCoding extends AbstractGeoCoding {
      * @param pixelPos the pixel's co-ordinates given as x,y
      * @param geoPos   an instance of <code>GeoPos</code> to be used as retun value. If this parameter is
      *                 <code>null</code>, the method creates a new instance which it then returns.
-     * @return the geographical position as lat/lon in the coodinate system determined by {@link #getDatum()}
+     * @return the geographical position as lat/lon in the coodinate system determined by {@link #getGeoCRS()}
      */
     public GeoPos getGeoPos(PixelPos pixelPos, GeoPos geoPos) {
         final int index = computeIndex(pixelPos);
@@ -503,7 +492,7 @@ public class ModisTiePointGeoCoding extends AbstractGeoCoding {
         final TiePointGrid latGrid = destScene.getProduct().getTiePointGrid(latGridName);
         final TiePointGrid lonGrid = destScene.getProduct().getTiePointGrid(lonGridName);
         if (latGrid != null && lonGrid != null) {
-            destScene.setGeoCoding(new ModisTiePointGeoCoding(latGrid, lonGrid, getDatum()));
+            destScene.setGeoCoding(new ModisTiePointGeoCoding(latGrid, lonGrid));
             return true;
         }
         return false;
