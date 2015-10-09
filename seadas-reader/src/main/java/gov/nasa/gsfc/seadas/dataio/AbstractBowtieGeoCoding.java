@@ -96,7 +96,7 @@ public abstract class AbstractBowtieGeoCoding extends AbstractGeoCoding {
     /**
      * Returns the pixel co-ordinates as x/y for a given geographical position given as lat/lon.
      *
-     * @param geoPos   the geographical position as lat/lon in the coordinate system determined by {@link #getDatum()}
+     * @param geoPos   the geographical position as lat/lon in the coordinate system determined by {@link #getGeoCRS()}
      * @param pixelPos an instance of <code>Point</code> to be used as return value. If this parameter is
      *                 <code>null</code>, the method creates a new instance which it then returns.
      * @return the pixel co-ordinates as x/y
@@ -128,7 +128,7 @@ public abstract class AbstractBowtieGeoCoding extends AbstractGeoCoding {
      * @param pixelPos the pixel's co-ordinates given as x,y
      * @param geoPos   an instance of <code>GeoPos</code> to be used as retun value. If this parameter is
      *                 <code>null</code>, the method creates a new instance which it then returns.
-     * @return the geographical position as lat/lon in the coodinate system determined by {@link #getDatum()}
+     * @return the geographical position as lat/lon in the coodinate system determined by {@link #getGeoCRS()}
      */
     public GeoPos getGeoPos(PixelPos pixelPos, GeoPos geoPos) {
         final int index = computeIndex(pixelPos);
