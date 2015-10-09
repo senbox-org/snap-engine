@@ -81,18 +81,19 @@ final class S3ReaderOptionsPanel extends javax.swing.JPanel {
     }
 
     void load() {
+        final Preferences preferences = Config.instance("s3tbx").preferences();
         slstrL1BPixelGeocodingsCheckBox.setSelected(
-                Config.instance().preferences().getBoolean(SlstrLevel1ProductFactory.SLSTR_L1B_USE_PIXELGEOCODINGS, false));
+                preferences.getBoolean(SlstrLevel1ProductFactory.SLSTR_L1B_USE_PIXELGEOCODINGS, false));
         olciPixelGeocodingsCheckBox.setSelected(
-                Config.instance().preferences().getBoolean(OlciProductFactory.OLCI_USE_PIXELGEOCODING, false));
+                preferences.getBoolean(OlciProductFactory.OLCI_USE_PIXELGEOCODING, false));
         merisPixelGeocodingsCheckBox.setSelected(
-                Config.instance().preferences().getBoolean(MerisProductFactory.MERIS_SAFE_USE_PIXELGEOCODING, false));
+                preferences.getBoolean(MerisProductFactory.MERIS_SAFE_USE_PIXELGEOCODING, false));
         loadProfileTiePointsCheckBox.setSelected(
-                Config.instance().preferences().getBoolean(AbstractProductFactory.LOAD_PROFILE_TIE_POINTS, false));
+                preferences.getBoolean(AbstractProductFactory.LOAD_PROFILE_TIE_POINTS, false));
     }
 
     void store() {
-        final Preferences preferences = Config.instance().preferences();
+        final Preferences preferences = Config.instance("s3tbx").preferences();
         preferences.putBoolean(SlstrLevel1ProductFactory.SLSTR_L1B_USE_PIXELGEOCODINGS,
                                slstrL1BPixelGeocodingsCheckBox.isSelected());
         preferences.putBoolean(OlciProductFactory.OLCI_USE_PIXELGEOCODING, olciPixelGeocodingsCheckBox.isSelected());
