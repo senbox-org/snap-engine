@@ -5,6 +5,10 @@
  */
 package org.esa.s3tbx.dataio.s3.preferences.ui;
 
+import org.esa.s3tbx.dataio.s3.AbstractProductFactory;
+import org.esa.s3tbx.dataio.s3.meris.MerisProductFactory;
+import org.esa.s3tbx.dataio.s3.olci.OlciProductFactory;
+import org.esa.s3tbx.dataio.s3.slstr.SlstrLevel1ProductFactory;
 import org.esa.snap.rcp.SnapApp;
 import org.esa.snap.runtime.Config;
 import org.openide.awt.Mnemonics;
@@ -14,11 +18,6 @@ import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
 final class S3ReaderOptionsPanel extends javax.swing.JPanel {
-
-    private static String readSlstrL1BPixelGeoCodings = "s3tbx.reader.slstrl1b.pixelGeoCodings";
-    private static String readOlciPixelGeoCoding = "s3tbx.reader.olci.pixelGeoCoding";
-    private static String readMerisPixelGeoCoding = "s3tbx.reader.meris.pixelGeoCoding";
-    private static String loadProfileTiePointData = "s3tbx.reader.loadProfileTiePoints";
 
     private javax.swing.JCheckBox slstrL1BPixelGeocodingsCheckBox;
     private javax.swing.JCheckBox olciPixelGeocodingsCheckBox;
@@ -83,25 +82,22 @@ final class S3ReaderOptionsPanel extends javax.swing.JPanel {
 
     void load() {
         slstrL1BPixelGeocodingsCheckBox.setSelected(
-                Config.instance().preferences().getBoolean(readSlstrL1BPixelGeoCodings, false));
+                Config.instance().preferences().getBoolean(SlstrLevel1ProductFactory.SLSTR_L1B_USE_PIXELGEOCODINGS, false));
         olciPixelGeocodingsCheckBox.setSelected(
-                Config.instance().preferences().getBoolean(readOlciPixelGeoCoding, false));
+                Config.instance().preferences().getBoolean(OlciProductFactory.OLCI_USE_PIXELGEOCODING, false));
         merisPixelGeocodingsCheckBox.setSelected(
-                Config.instance().preferences().getBoolean(readMerisPixelGeoCoding, false));
+                Config.instance().preferences().getBoolean(MerisProductFactory.MERIS_SAFE_USE_PIXELGEOCODING, false));
         loadProfileTiePointsCheckBox.setSelected(
-                Config.instance().preferences().getBoolean(loadProfileTiePointData, false));
+                Config.instance().preferences().getBoolean(AbstractProductFactory.LOAD_PROFILE_TIE_POINTS, false));
     }
 
     void store() {
         final Preferences preferences = Config.instance().preferences();
-        preferences.putBoolean(
-                readSlstrL1BPixelGeoCodings, slstrL1BPixelGeocodingsCheckBox.isSelected());
-        preferences.putBoolean(
-                readOlciPixelGeoCoding, olciPixelGeocodingsCheckBox.isSelected());
-        preferences.putBoolean(
-                readMerisPixelGeoCoding, merisPixelGeocodingsCheckBox.isSelected());
-        preferences.putBoolean(
-                loadProfileTiePointData, loadProfileTiePointsCheckBox.isSelected());
+        preferences.putBoolean(SlstrLevel1ProductFactory.SLSTR_L1B_USE_PIXELGEOCODINGS,
+                               slstrL1BPixelGeocodingsCheckBox.isSelected());
+        preferences.putBoolean(OlciProductFactory.OLCI_USE_PIXELGEOCODING, olciPixelGeocodingsCheckBox.isSelected());
+        preferences.putBoolean(MerisProductFactory.MERIS_SAFE_USE_PIXELGEOCODING, merisPixelGeocodingsCheckBox.isSelected());
+        preferences.putBoolean(AbstractProductFactory.LOAD_PROFILE_TIE_POINTS, loadProfileTiePointsCheckBox.isSelected());
         try {
             preferences.flush();
         } catch (BackingStoreException e) {

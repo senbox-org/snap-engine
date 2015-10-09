@@ -47,6 +47,8 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
     private Map<String, Integer> nameToIndexMap;
     private Map<String, GeoCoding> geoCodingMap;
 
+    public final static String SLSTR_L1B_USE_PIXELGEOCODINGS = "s3tbx.reader.slstrl1b.pixelGeoCodings";
+
     public SlstrLevel1ProductFactory(Sentinel3ProductReader productReader) {
         super(productReader);
         gridTypeToGridIndex = new HashMap<>();
@@ -200,7 +202,7 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
 
     @Override
     protected void setBandGeoCodings(Product product) {
-        if (Config.instance().preferences().getBoolean("s3tbx.reader.slstrl1b.pixelGeoCodings", false)) {
+        if (Config.instance().preferences().getBoolean(SLSTR_L1B_USE_PIXELGEOCODINGS, false)) {
             setPixelBandGeoCodings(product);
         } else {
             setTiePointBandGeoCodings(product);

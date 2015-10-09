@@ -67,6 +67,7 @@ public abstract class AbstractProductFactory implements ProductFactory {
     private final List<String> separatingDimensions;
 
     private volatile Manifest manifest;
+    public final static String LOAD_PROFILE_TIE_POINTS = "s3tbx.reader.loadProfileTiePoints";
 
     public AbstractProductFactory(Sentinel3ProductReader productReader) {
         this.productReader = productReader;
@@ -292,8 +293,7 @@ public abstract class AbstractProductFactory implements ProductFactory {
     }
 
     protected void addDataNodes(Product masterProduct, Product targetProduct) throws IOException {
-        final boolean loadProfileTiepoints =
-                Config.instance().preferences().getBoolean("s3tbx.reader.loadProfileTiePoints", false);
+        final boolean loadProfileTiepoints = Config.instance().preferences().getBoolean(LOAD_PROFILE_TIE_POINTS, false);
         final int w = targetProduct.getSceneRasterWidth();
         final int h = targetProduct.getSceneRasterHeight();
         for (final Product sourceProduct : openProductList) {

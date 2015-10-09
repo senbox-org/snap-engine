@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
 /**
  * @author Tonio Fincke
  */
-abstract class OlciProductFactory extends AbstractProductFactory {
+public abstract class OlciProductFactory extends AbstractProductFactory {
 
     private final static String[] excludedIDs = new String[]{"removedPixelsData"};
 
@@ -34,6 +34,8 @@ abstract class OlciProductFactory extends AbstractProductFactory {
     private Map<String, Integer> nameToIndexMap;
     private int subSamplingX;
     private int subSamplingY;
+
+    public final static String OLCI_USE_PIXELGEOCODING = "s3tbx.reader.olci.pixelGeoCoding";
 
     public OlciProductFactory(Sentinel3ProductReader productReader) {
         super(productReader);
@@ -92,7 +94,7 @@ abstract class OlciProductFactory extends AbstractProductFactory {
 
     @Override
     protected void setGeoCoding(Product targetProduct) throws IOException {
-        if (Config.instance().preferences().getBoolean("s3tbx.reader.olci.pixelGeoCoding", false)) {
+        if (Config.instance().preferences().getBoolean(OLCI_USE_PIXELGEOCODING, false)) {
             setPixelGeoCoding(targetProduct);
         } else {
             setTiePointGeoCoding(targetProduct);
