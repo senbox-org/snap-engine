@@ -16,8 +16,8 @@
 
 package org.esa.s3tbx.dataio.avhrr.noaa.pod;
 
-import org.esa.snap.dataio.dimap.spi.DimapPersistable;
-import org.esa.snap.dataio.dimap.spi.DimapPersistableSpi;
+import org.esa.snap.core.dataio.dimap.spi.DimapPersistable;
+import org.esa.snap.core.dataio.dimap.spi.DimapPersistableSpi;
 import org.jdom.Element;
 
 public class PodGeoCodingPersistableSpi implements DimapPersistableSpi {
