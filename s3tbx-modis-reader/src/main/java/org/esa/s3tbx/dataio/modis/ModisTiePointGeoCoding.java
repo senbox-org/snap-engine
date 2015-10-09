@@ -278,7 +278,7 @@ public class ModisTiePointGeoCoding extends AbstractGeoCoding {
                 final ModisTiePointGrid latTPG = new ModisTiePointGrid("lat" + y, stripeW, stripeH, osX, osY, ssX, ssY, lats);
                 final ModisTiePointGrid lonTPG = new ModisTiePointGrid("lon" + y, stripeW, stripeH, osX, osY, ssX, ssY, lons, true);
 
-                final TiePointGeoCoding geoCoding = new TiePointGeoCoding(latTPG, lonTPG, datum);
+                final TiePointGeoCoding geoCoding = new TiePointGeoCoding(latTPG, lonTPG, getGeoCRS());
                 cross180 = cross180 || geoCoding.isCrossingMeridianAt180();
                 gcList.add(geoCoding);
                 centerLineList.add(createCenterPolyLine(geoCoding, gcStripeSceneWidth, gcStripeSceneHeight));
