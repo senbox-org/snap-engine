@@ -21,7 +21,6 @@ import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
-import org.esa.snap.core.dataop.maptransf.Datum;
 
 import javax.imageio.stream.ImageInputStream;
 import java.io.File;
@@ -239,7 +238,7 @@ abstract class AtsrFile {
         lonGrid.setUnit(AtsrConstants.ANGLE_UNIT);
         _header.addTiePointGrid(lonGrid);
 
-        _geoCoding = new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84);
+        _geoCoding = new TiePointGeoCoding(latGrid, lonGrid);
     }
 
     /**

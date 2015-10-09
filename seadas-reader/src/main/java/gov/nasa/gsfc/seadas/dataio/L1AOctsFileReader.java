@@ -22,7 +22,6 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
-import org.esa.snap.core.dataop.maptransf.Datum;
 import ucar.ma2.Array;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
@@ -111,7 +110,7 @@ public class L1AOctsFileReader extends SeadasFileReader {
 
             product.addTiePointGrid(lonGrid);
 
-            product.setGeoCoding(new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84));
+            product.setGeoCoding(new TiePointGeoCoding(latGrid, lonGrid));
 
         } catch (IOException e) {
             throw new ProductIOException(e.getMessage());

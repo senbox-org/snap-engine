@@ -40,7 +40,7 @@ import java.util.List;
 /**
  * The <code>ModisTiePointGeoCoding</code> class is a special geo-coding for
  * MODIS Level-1B and Level-2 swath products.
- * <p/>
+ * <p>
  * <p>It enables BEAM to transform the MODIS swaths to uniformly gridded
  * image that is geographically referenced according to user-specified
  * projection and resampling parameters.
@@ -224,7 +224,7 @@ public class ModisTiePointGeoCoding extends AbstractGeoCoding {
     /**
      * Releases all of the resources used by this object instance and all of its owned children. Its primary use is to
      * allow the garbage collector to perform a vanilla job.
-     * <p/>
+     * <p>
      * <p>This method should be called only if it is for sure that this object instance will never be used again. The
      * results of referencing an instance of this class after a call to <code>dispose()</code> are undefined.
      */
