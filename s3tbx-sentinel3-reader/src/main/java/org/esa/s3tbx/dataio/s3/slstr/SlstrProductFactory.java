@@ -178,7 +178,7 @@ public abstract class SlstrProductFactory extends AbstractProductFactory {
             }
         }
         if (latGrid != null && lonGrid != null) {
-            targetProduct.setGeoCoding(new TiePointGeoCoding(latGrid, lonGrid));
+            targetProduct.setSceneGeoCoding(new TiePointGeoCoding(latGrid, lonGrid));
         }
     }
 

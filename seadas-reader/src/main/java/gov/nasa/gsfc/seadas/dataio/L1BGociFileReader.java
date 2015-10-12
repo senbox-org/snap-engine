@@ -99,11 +99,11 @@ public class L1BGociFileReader extends GenericNetCdfReader {
 
             double pixelSize = Math.round((sceneCenter[0]-sceneTopRight[0])/(product.getSceneRasterWidth()/2.0));
 
-            product.setGeoCoding(new CrsGeoCoding(orthoCRS,
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(),
-                    easting, northing,pixelSize,pixelSize,
-                    pixelX, pixelY));
+            product.setSceneGeoCoding(new CrsGeoCoding(orthoCRS,
+                                                       product.getSceneRasterWidth(),
+                                                       product.getSceneRasterHeight(),
+                                                       easting, northing, pixelSize, pixelSize,
+                                                       pixelX, pixelY));
         } catch (FactoryException e) {
             throw new IllegalStateException(e);
         } catch (TransformException e) {

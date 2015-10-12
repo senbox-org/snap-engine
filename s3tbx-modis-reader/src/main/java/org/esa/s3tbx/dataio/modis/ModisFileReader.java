@@ -313,7 +313,7 @@ class ModisFileReader {
 
                 // and create geo coding
                 GeoCoding coding = new ModisTiePointGeoCoding(latGrid, lonGrid);
-                product.setGeoCoding(coding);
+                product.setSceneGeoCoding(coding);
             }
         }
     }
@@ -596,7 +596,7 @@ class ModisFileReader {
     }
 
     private void addMapGeocoding(final Product product, final ModisGlobalAttributes globalAttribs) {
-        product.setGeoCoding(globalAttribs.createGeocoding());
+        product.setSceneGeoCoding(globalAttribs.createGeocoding());
     }
 
     private boolean isImappFormat(NetCDFVariables netCDFQCVariables) {

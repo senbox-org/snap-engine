@@ -111,7 +111,7 @@ public class AquariusL2FileReader extends SeadasFileReader {
             lonBand = product.getBand(longitude);
         }
         if (latBand != null && lonBand != null) {
-            product.setGeoCoding(GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, null, 5));
+            product.setSceneGeoCoding(GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, null, 5));
         }
     }
 }

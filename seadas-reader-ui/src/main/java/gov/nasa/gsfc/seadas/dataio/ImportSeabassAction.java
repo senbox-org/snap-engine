@@ -110,7 +110,7 @@ public class ImportSeabassAction extends AbstractSnapAction implements ContextAw
 
         FeatureCollection<SimpleFeatureType, SimpleFeature> featureCollection;
         try {
-            featureCollection = readTrack(file, product.getGeoCoding());
+            featureCollection = readTrack(file, product.getSceneGeoCoding());
         } catch (Exception e) {
             SnapDialogs.showError(Bundle.CTL_ImportSeabassDialogTitle(), "Failed to load SeaBASS file:\n" + e.getMessage());
             return;
@@ -139,7 +139,7 @@ public class ImportSeabassAction extends AbstractSnapAction implements ContextAw
         ProductNode productNode = lkp.lookup(ProductNode.class);
         if (productNode != null) {
             Product product = productNode.getProduct();
-            state = product != null && product.getGeoCoding() != null;
+            state = product != null && product.getSceneGeoCoding() != null;
         }
         setEnabled(state);
     }

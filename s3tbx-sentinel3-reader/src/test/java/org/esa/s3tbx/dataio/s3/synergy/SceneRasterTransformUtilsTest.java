@@ -35,7 +35,7 @@ public class SceneRasterTransformUtilsTest {
         TiePointGrid lon = new TiePointGrid("lon", 2, 2, 0, 0, 4, 8, new float[]{1f, 1f, 9f, 9f});
         product.addTiePointGrid(lat);
         product.addTiePointGrid(lon);
-        product.setGeoCoding(new TiePointGeoCoding(lat, lon));
+        product.setSceneGeoCoding(new TiePointGeoCoding(lat, lon));
         TiePointGrid lat2 = new TiePointGrid("lat2", 2, 2, 0, 0, 8, 16, new float[]{1f, 5f, 1f, 5f});
         TiePointGrid lon2 = new TiePointGrid("lon2", 2, 2, 0, 0, 8, 16, new float[]{1f, 1f, 9f, 9f});
         product.addTiePointGrid(lat2);
@@ -203,7 +203,7 @@ public class SceneRasterTransformUtilsTest {
         TiePointGrid lon = new TiePointGrid("lon", 2, 2, 0, 0, 2, 4, new float[]{1f, 1f, 9f, 9f});
         product.addTiePointGrid(lat);
         product.addTiePointGrid(lon);
-        product.setGeoCoding(new TiePointGeoCoding(lat, lon));
+        product.setSceneGeoCoding(new TiePointGeoCoding(lat, lon));
         TiePointGrid lat2 = new TiePointGrid("lat2", 2, 2, 0, 0, 4, 8, new float[]{1f, 5f, 1f, 5f});
         TiePointGrid lon2 = new TiePointGrid("lon2", 2, 2, 0, 0, 4, 8, new float[]{1f, 1f, 9f, 9f});
         product.addTiePointGrid(lat2);

@@ -61,11 +61,11 @@ public class VgtReader extends S3NetcdfReader {
             if (pixelSizeX <= 0 || pixelSizeY <= 0) {
                 return;
             }
-            product.setGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84,
-                                                  sceneRasterWidth, sceneRasterHeight,
-                                                  easting, northing,
-                                                  pixelSizeX, pixelSizeY,
-                                                  pixelX, pixelY));
+            product.setSceneGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84,
+                                                       sceneRasterWidth, sceneRasterHeight,
+                                                       easting, northing,
+                                                       pixelSizeX, pixelSizeY,
+                                                       pixelX, pixelY));
         } catch (IOException | TransformException | FactoryException e) {
             e.printStackTrace();
         }

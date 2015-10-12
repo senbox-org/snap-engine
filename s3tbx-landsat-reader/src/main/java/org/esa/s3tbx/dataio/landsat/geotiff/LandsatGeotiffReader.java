@@ -221,10 +221,10 @@ public class LandsatGeotiffReader extends AbstractProductReader {
 
         ImageLayout imageLayout = new ImageLayout();
         for (Product bandProduct : bandProducts) {
-            if (product.getGeoCoding() == null &&
+            if (product.getSceneGeoCoding() == null &&
                     product.getSceneRasterWidth() == bandProduct.getSceneRasterWidth() &&
                     product.getSceneRasterHeight() == bandProduct.getSceneRasterHeight()) {
-                product.setGeoCoding(bandProduct.getGeoCoding());
+                product.setSceneGeoCoding(bandProduct.getSceneGeoCoding());
                 Dimension tileSize = bandProduct.getPreferredTileSize();
                 if (tileSize == null) {
                     tileSize = ImageManager.getPreferredTileSize(bandProduct);
@@ -243,7 +243,7 @@ public class LandsatGeotiffReader extends AbstractProductReader {
                 Band band = product.getBandAt(i);
                 final MultiLevelImage sourceImage = bandProduct.getBandAt(0).getSourceImage();
                 band.setSourceImage(sourceImage);
-                band.setGeoCoding(bandProduct.getGeoCoding());
+                band.setGeoCoding(bandProduct.getSceneGeoCoding());
             }
         } else {
             MultiLevelImage targetImage = null;

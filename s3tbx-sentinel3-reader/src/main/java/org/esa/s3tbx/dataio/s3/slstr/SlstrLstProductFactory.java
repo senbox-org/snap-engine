@@ -58,14 +58,14 @@ public class SlstrLstProductFactory extends SlstrL2ProductFactory {
         final Band latBand = targetProduct.getBand("latitude_in");
         final Band lonBand = targetProduct.getBand("longitude_in");
         if (latBand != null && lonBand != null) {
-            targetProduct.setGeoCoding(
+            targetProduct.setSceneGeoCoding(
                     GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, "!confidence_in_duplicate", 5));
         }
-        if (targetProduct.getGeoCoding() == null) {
+        if (targetProduct.getSceneGeoCoding() == null) {
             if (targetProduct.getTiePointGrid("latitude_tx") != null && targetProduct.getTiePointGrid(
                     "longitude_tx") != null) {
-                targetProduct.setGeoCoding(new TiePointGeoCoding(targetProduct.getTiePointGrid("latitude_tx"),
-                                                                 targetProduct.getTiePointGrid("longitude_tx")));
+                targetProduct.setSceneGeoCoding(new TiePointGeoCoding(targetProduct.getTiePointGrid("latitude_tx"),
+                                                                      targetProduct.getTiePointGrid("longitude_tx")));
             }
         }
     }

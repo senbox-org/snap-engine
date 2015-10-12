@@ -431,7 +431,7 @@ public class ProbaVSynthesisProductReader extends AbstractProductReader {
         try {
             final CoordinateReferenceSystem crs = CRS.parseWKT(crsString);
             final CrsGeoCoding geoCoding = new CrsGeoCoding(crs, productWidth, productHeight, easting, northing, pixelSizeX, pixelSizeY);
-            product.setGeoCoding(geoCoding);
+            product.setSceneGeoCoding(geoCoding);
         } catch (Exception e) {
             SystemUtils.LOG.log(Level.WARNING, "Cannot attach geocoding: " + e.getMessage());
         }

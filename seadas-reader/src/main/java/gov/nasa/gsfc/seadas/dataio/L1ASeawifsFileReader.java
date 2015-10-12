@@ -82,7 +82,7 @@ public class L1ASeawifsFileReader extends SeadasFileReader {
         latBand.setData(lats);
         ProductData lons = ProductData.createInstance(longitudes);
         lonBand.setData(lons);
-        product.setGeoCoding(GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, null, 10));
+        product.setSceneGeoCoding(GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, null, 10));
         
         addFlagsAndMasks(product);
 

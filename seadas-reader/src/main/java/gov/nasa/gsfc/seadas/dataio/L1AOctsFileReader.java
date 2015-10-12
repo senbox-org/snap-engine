@@ -110,7 +110,7 @@ public class L1AOctsFileReader extends SeadasFileReader {
 
             product.addTiePointGrid(lonGrid);
 
-            product.setGeoCoding(new TiePointGeoCoding(latGrid, lonGrid));
+            product.setSceneGeoCoding(new TiePointGeoCoding(latGrid, lonGrid));
 
         } catch (IOException e) {
             throw new ProductIOException(e.getMessage());

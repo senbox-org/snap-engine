@@ -32,14 +32,14 @@ public class BowtiePixelGeoCodingTest {
     @Test
     public void testTransferGeoCoding() throws URISyntaxException, IOException {
         Product product = ProductIO.readProduct(new File(getClass().getResource("bowtiepixelgeocoding_test_product.L2_sub").toURI()));
-        assertTrue(product.getGeoCoding() instanceof BowtiePixelGeoCoding);
+        assertTrue(product.getSceneGeoCoding() instanceof BowtiePixelGeoCoding);
 
         Product targetProduct = new Product("name", "type", product.getSceneRasterWidth(), product.getSceneRasterHeight());
 
-        assertNull(targetProduct.getGeoCoding());
+        assertNull(targetProduct.getSceneGeoCoding());
         ProductUtils.copyGeoCoding(product, targetProduct);
 
-        assertNotNull(targetProduct.getGeoCoding());
-        assertTrue(targetProduct.getGeoCoding() instanceof BowtiePixelGeoCoding);
+        assertNotNull(targetProduct.getSceneGeoCoding());
+        assertTrue(targetProduct.getSceneGeoCoding() instanceof BowtiePixelGeoCoding);
     }
 }

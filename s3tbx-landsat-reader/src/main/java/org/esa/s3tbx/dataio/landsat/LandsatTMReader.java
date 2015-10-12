@@ -184,7 +184,7 @@ final class LandsatTMReader extends AbstractProductReader {
         map.setSceneHeight(height);
         map.setOrientation(geoData.getLookAngle() * -1);
         final MapGeoCoding mapGeocoding = new MapGeoCoding(map);
-        product.setGeoCoding(mapGeocoding);
+        product.setSceneGeoCoding(mapGeocoding);
     }
 
     /**

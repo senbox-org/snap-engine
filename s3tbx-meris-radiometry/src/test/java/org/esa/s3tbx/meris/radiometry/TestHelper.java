@@ -110,11 +110,11 @@ class TestHelper {
         product.getMetadataRoot().addElement(dsd);
 
         if (isFSG) {
-            product.setGeoCoding(new PixelGeoCoding(product.getBand("corr_latitude"),
-                                                    product.getBand("corr_longitude"), null, 3));
+            product.setSceneGeoCoding(new PixelGeoCoding(product.getBand("corr_latitude"),
+                                                         product.getBand("corr_longitude"), null, 3));
         } else {
-            product.setGeoCoding(new TiePointGeoCoding(product.getTiePointGrid("latitude"),
-                                                       product.getTiePointGrid("longitude")));
+            product.setSceneGeoCoding(new TiePointGeoCoding(product.getTiePointGrid("latitude"),
+                                                            product.getTiePointGrid("longitude")));
 
         }
 

@@ -217,7 +217,7 @@ class Avnir2ProductDirectory {
             mapInfo.setOrientation(-orientationAngle);
             mapInfo.setSceneWidth(sceneWidth);
             mapInfo.setSceneHeight(sceneHeight);
-            product.setGeoCoding(new MapGeoCoding(mapInfo));
+            product.setSceneGeoCoding(new MapGeoCoding(mapInfo));
 
 
         } else if (Avnir2Constants.MAP_PROJECTION_PS.equalsIgnoreCase(usedProjection)) {
@@ -247,7 +247,7 @@ class Avnir2ProductDirectory {
             mapInfo.setOrientation((float) leaderFile.getPSOrientationAngle());
             mapInfo.setSceneWidth(sceneRasterWidth);
             mapInfo.setSceneHeight(sceneRasterHeight);
-            product.setGeoCoding(new MapGeoCoding(mapInfo));
+            product.setSceneGeoCoding(new MapGeoCoding(mapInfo));
 
             // Alternative geo-coding for polar-stereographic
 //            final double[][] l1B2Coeffs = _leaderFile.getCorrectedTransformationCoeffs();

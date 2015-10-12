@@ -111,7 +111,7 @@ public class L1BOcm2FileReader extends SeadasFileReader {
         latBand.setNoDataValueUsed(true);
         lonBand.setNoDataValueUsed(true);
 
-        product.setGeoCoding(GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, null, 5));
+        product.setSceneGeoCoding(GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, null, 5));
     }
 }
 

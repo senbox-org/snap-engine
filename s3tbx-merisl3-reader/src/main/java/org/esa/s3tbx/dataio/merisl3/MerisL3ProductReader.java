@@ -299,11 +299,11 @@ public class MerisL3ProductReader extends AbstractProductReader {
         float pixelSizeX = 360.0f / _sceneRasterWidth;
         float pixelSizeY = 180.0f / _sceneRasterHeight;
         try {
-            _product.setGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84,
-                                                   _sceneRasterWidth, _sceneRasterHeight,
-                                                   easting, northing,
-                                                   pixelSizeX, pixelSizeY,
-                                                   pixelX, pixelY));
+            _product.setSceneGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84,
+                                                        _sceneRasterWidth, _sceneRasterHeight,
+                                                        easting, northing,
+                                                        pixelSizeX, pixelSizeY,
+                                                        pixelX, pixelY));
         } catch (FactoryException e) {
             throw new IOException(e);
         } catch (TransformException e) {

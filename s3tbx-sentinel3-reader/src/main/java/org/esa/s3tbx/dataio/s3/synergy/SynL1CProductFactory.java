@@ -184,7 +184,7 @@ public class SynL1CProductFactory extends AbstractProductFactory {
             final BasicPixelGeoCoding pixelGeoCoding =
                     GeoCodingFactory.createPixelGeoCoding(bandGroup.get("GEOLOCATION_REF_latitude"),
                                                           bandGroup.get("GEOLOCATION_REF_longitude"), "", 5);
-            targetProduct.setGeoCoding(pixelGeoCoding);
+            targetProduct.setSceneGeoCoding(pixelGeoCoding);
         }
     }
 

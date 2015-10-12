@@ -325,7 +325,7 @@ public class AvhrrReader extends AbstractProductReader implements AvhrrConstants
 
         GeoCoding geoCoding = new TiePointGeoCoding(grid[numGrids - 2],
                                                     grid[numGrids - 1], Datum.WGS_72);
-        product.setGeoCoding(geoCoding);
+        product.setSceneGeoCoding(geoCoding);
         }
 
     public static String format(String pattern, String arg) {

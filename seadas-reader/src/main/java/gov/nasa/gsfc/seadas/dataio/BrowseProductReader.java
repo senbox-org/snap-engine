@@ -234,7 +234,7 @@ public class BrowseProductReader extends SeadasFileReader {
 
         try {
 
-            product.setGeoCoding(new PixelGeoCoding(latBand, lonBand, null, 5, ProgressMonitor.NULL));
+            product.setSceneGeoCoding(new PixelGeoCoding(latBand, lonBand, null, 5, ProgressMonitor.NULL));
 
         } catch (IOException e) {
             throw new ProductIOException(e.getMessage());

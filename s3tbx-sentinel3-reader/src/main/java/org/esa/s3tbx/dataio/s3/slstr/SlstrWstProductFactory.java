@@ -55,7 +55,7 @@ public class SlstrWstProductFactory extends SlstrSstProductFactory {
         if (latBand != null && lonBand != null) {
             final BasicPixelGeoCoding geoCoding = GeoCodingFactory.createPixelGeoCoding(latBand, lonBand,
                                                                                         "!l2p_flags.N3_retrieval", 5);
-            targetProduct.setGeoCoding(geoCoding);
+            targetProduct.setSceneGeoCoding(geoCoding);
         }
     }
 

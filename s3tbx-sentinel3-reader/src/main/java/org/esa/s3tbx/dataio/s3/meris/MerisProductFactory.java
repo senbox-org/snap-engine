@@ -121,22 +121,22 @@ public class MerisProductFactory extends AbstractProductFactory {
             final Band latBand = targetProduct.getBand("latitude");
             final Band lonBand = targetProduct.getBand("longitude");
             if (latBand != null && lonBand != null) {
-                targetProduct.setGeoCoding(
+                targetProduct.setSceneGeoCoding(
                         GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, getValidExpression(), 5));
             }
         }
-        if (targetProduct.getGeoCoding() == null) {
+        if (targetProduct.getSceneGeoCoding() == null) {
             if (targetProduct.getTiePointGrid("latitude") != null && targetProduct.getTiePointGrid(
                     "longitude") != null) {
-                targetProduct.setGeoCoding(new TiePointGeoCoding(targetProduct.getTiePointGrid("latitude"),
-                                                                 targetProduct.getTiePointGrid("longitude")));
+                targetProduct.setSceneGeoCoding(new TiePointGeoCoding(targetProduct.getTiePointGrid("latitude"),
+                                                                      targetProduct.getTiePointGrid("longitude")));
             }
         }
-        if (targetProduct.getGeoCoding() == null) {
+        if (targetProduct.getSceneGeoCoding() == null) {
             if (targetProduct.getTiePointGrid("TP_latitude") != null && targetProduct.getTiePointGrid(
                     "TP_longitude") != null) {
-                targetProduct.setGeoCoding(new TiePointGeoCoding(targetProduct.getTiePointGrid("TP_latitude"),
-                                                                 targetProduct.getTiePointGrid("TP_longitude")));
+                targetProduct.setSceneGeoCoding(new TiePointGeoCoding(targetProduct.getTiePointGrid("TP_latitude"),
+                                                                      targetProduct.getTiePointGrid("TP_longitude")));
             }
         }
     }

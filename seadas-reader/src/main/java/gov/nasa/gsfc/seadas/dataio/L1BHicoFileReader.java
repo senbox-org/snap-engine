@@ -376,7 +376,7 @@ public class L1BHicoFileReader extends SeadasFileReader {
             latBand.setData(latRawData);
             lonBand.setData(lonRawData);
 
-            product.setGeoCoding(GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, null, 5));
+            product.setSceneGeoCoding(GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, null, 5));
             
         }
     }

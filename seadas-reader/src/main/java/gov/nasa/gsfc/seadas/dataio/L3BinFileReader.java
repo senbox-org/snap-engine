@@ -286,11 +286,11 @@ public class L3BinFileReader extends SeadasFileReader {
         float pixelSizeX = 360.0f / sceneWidth;
         float pixelSizeY = 180.0f / sceneHeight;
         try {
-            product.setGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84,
-                    sceneWidth, sceneHeight,
-                    easting, northing,
-                    pixelSizeX, pixelSizeY,
-                    pixelX, pixelY));
+            product.setSceneGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84,
+                                                       sceneWidth, sceneHeight,
+                                                       easting, northing,
+                                                       pixelSizeX, pixelSizeY,
+                                                       pixelX, pixelY));
         } catch (FactoryException e) {
             throw new IOException(e);
         } catch (TransformException e) {

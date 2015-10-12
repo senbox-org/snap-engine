@@ -314,7 +314,7 @@ public class SpotVgtProductReader extends AbstractProductReader {
     private void addGeoCoding(Product product, LogVolDescriptor logVolDescriptor) {
         GeoCoding geoCoding = logVolDescriptor.getGeoCoding();
         if (geoCoding != null) {
-            product.setGeoCoding(geoCoding);
+            product.setSceneGeoCoding(geoCoding);
         }
     }
 

@@ -83,7 +83,7 @@ public final class ChrisPointingFactory implements PointingFactory {
     @Override
     public Pointing createPointing(final RasterDataNode raster) {
         final Product product = raster.getProduct();
-        return new TiePointGridPointing(product.getGeoCoding(),
+        return new TiePointGridPointing(product.getSceneGeoCoding(),
                                         null,
                                         null,
                                         product.getTiePointGrid("vza"),

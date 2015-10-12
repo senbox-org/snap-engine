@@ -238,7 +238,7 @@ final class PodAvhrrFile implements VideoDataProvider, CalibrationCoefficientsPr
                                                      PodTypes.getLonMetadata().getUnits(),
                                                      tiePointGridHeight, gridData[2], TiePointGrid.DISCONT_AT_180);
 
-        product.setGeoCoding(new PodGeoCoding(latGrid, lonGrid));
+        product.setSceneGeoCoding(new PodGeoCoding(latGrid, lonGrid));
     }
 
 

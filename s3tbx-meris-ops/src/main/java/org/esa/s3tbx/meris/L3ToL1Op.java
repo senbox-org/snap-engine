@@ -54,8 +54,8 @@ public class L3ToL1Op extends MerisBasisOp {
 
     @Override
     public void initialize() throws OperatorException {
-        l3GeoCoding = l3Product.getGeoCoding();
-        l1GeoCoding = l1Product.getGeoCoding();
+        l3GeoCoding = l3Product.getSceneGeoCoding();
+        l1GeoCoding = l1Product.getSceneGeoCoding();
         targetProduct = createCompatibleProduct(l1Product, "l3tol1", "L3");
 
         Band[] l3Bands = l3Product.getBands();

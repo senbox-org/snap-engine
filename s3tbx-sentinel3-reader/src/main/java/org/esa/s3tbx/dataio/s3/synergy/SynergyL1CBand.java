@@ -73,7 +73,7 @@ public class SynergyL1CBand extends VirtualBand {
     protected void computeSceneRasterTransform() {
         Product product = getProduct();
         if (product != null) {
-            GeoCoding pgc = product.getGeoCoding();
+            GeoCoding pgc = product.getSceneGeoCoding();
             GeoCoding rgc = getGeoCoding();
             if (pgc == rgc || pgc != null && rgc == null) {
                 sceneRasterTransform = SceneRasterTransform.IDENTITY;

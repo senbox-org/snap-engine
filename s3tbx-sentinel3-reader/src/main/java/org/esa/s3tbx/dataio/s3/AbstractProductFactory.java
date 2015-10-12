@@ -125,7 +125,7 @@ public abstract class AbstractProductFactory implements ProductFactory {
         targetProduct.setFileLocation(getInputFile());
         targetProduct.setNumResolutionsMax(masterProduct.getNumResolutionsMax());
 
-        if (masterProduct.getGeoCoding() instanceof CrsGeoCoding) {
+        if (masterProduct.getSceneGeoCoding() instanceof CrsGeoCoding) {
             ProductUtils.copyGeoCoding(masterProduct, targetProduct);
         }
         targetProduct.getMetadataRoot().addElement(manifest.getMetadata());
@@ -148,7 +148,7 @@ public abstract class AbstractProductFactory implements ProductFactory {
         setMasks(targetProduct);
         setTimes(targetProduct);
         setUncertaintyBands(targetProduct);
-        if (targetProduct.getGeoCoding() == null) {
+        if (targetProduct.getSceneGeoCoding() == null) {
             setGeoCoding(targetProduct);
         }
         setBandGeoCodings(targetProduct);

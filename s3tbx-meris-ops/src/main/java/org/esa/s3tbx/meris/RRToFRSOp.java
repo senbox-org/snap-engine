@@ -48,8 +48,8 @@ public class RRToFRSOp extends Operator {
 
     @Override
     public void initialize() throws OperatorException {
-        rrGeoCoding = rrProduct.getGeoCoding();
-        frsGeoCoding = frsProduct.getGeoCoding();
+        rrGeoCoding = rrProduct.getSceneGeoCoding();
+        frsGeoCoding = frsProduct.getSceneGeoCoding();
         final int width = frsProduct.getSceneRasterWidth();
         final int height = frsProduct.getSceneRasterHeight();
         checkThatRRContainsFRSData(width, height);

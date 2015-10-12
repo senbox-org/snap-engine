@@ -196,7 +196,7 @@ public class L2FileReader extends SeadasFileReader {
             lonBand.setNoDataValue(-999.);
             latBand.setNoDataValueUsed(true);
             lonBand.setNoDataValueUsed(true);
-            product.setGeoCoding(new BowtiePixelGeoCoding(latBand, lonBand, scanHeight));
+            product.setSceneGeoCoding(new BowtiePixelGeoCoding(latBand, lonBand, scanHeight));
         } else {
             String navGroup = "navigation_data";
             final String cntlPoints = "cntl_pt_cols";
@@ -255,7 +255,7 @@ public class L2FileReader extends SeadasFileReader {
                             subSampleX, subSampleY, lonTiePoints);
                     product.addTiePointGrid(lonGrid);
 
-                    product.setGeoCoding(new BowtieTiePointGeoCoding(latGrid, lonGrid, scanHeight));
+                    product.setSceneGeoCoding(new BowtieTiePointGeoCoding(latGrid, lonGrid, scanHeight));
 
                 }
             } catch (IOException e) {
@@ -338,7 +338,7 @@ public class L2FileReader extends SeadasFileReader {
             }
         }
         if (latBand != null) {
-            product.setGeoCoding(GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, null, 5));
+            product.setSceneGeoCoding(GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, null, 5));
         }
     }
 }

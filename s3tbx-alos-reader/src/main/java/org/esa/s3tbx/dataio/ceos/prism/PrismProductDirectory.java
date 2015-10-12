@@ -239,7 +239,7 @@ class PrismProductDirectory {
                 codingWrappers[i] = new CombinedFXYGeoCoding.CodingWrapper(gc, offset, 0, width, height);
             }
             final GeoCoding gc = new CombinedFXYGeoCoding(codingWrappers);
-            product.setGeoCoding(gc);
+            product.setSceneGeoCoding(gc);
 
         } else if (MAP_PROJECTION_CODE_UTM.equalsIgnoreCase(projectionCode)) {
             final int meterPerKilometer = 1000;
@@ -263,7 +263,7 @@ class PrismProductDirectory {
             mapInfo.setOrientation(-orientationAngle);
             mapInfo.setSceneWidth(sceneWidth);
             mapInfo.setSceneHeight(sceneHeight);
-            product.setGeoCoding(new MapGeoCoding(mapInfo));
+            product.setSceneGeoCoding(new MapGeoCoding(mapInfo));
 
         } else if (MAP_PROJECTION_CODE_PS.equalsIgnoreCase(projectionCode)) {
             final double[] parameterValues = StereographicDescriptor.PARAMETER_DEFAULT_VALUES;
@@ -292,7 +292,7 @@ class PrismProductDirectory {
             mapInfo.setOrientation((float) leaderFile.getPSOrientationAngle());
             mapInfo.setSceneWidth(sceneRasterWidth);
             mapInfo.setSceneHeight(sceneRasterHeight);
-            product.setGeoCoding(new MapGeoCoding(mapInfo));
+            product.setSceneGeoCoding(new MapGeoCoding(mapInfo));
 
             // Alternative geo-coding for polar-stereographic
 //            final double[][] l1B2Coeffs = _leaderFile.getCorrectedTransformationCoeffs();

@@ -240,7 +240,7 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
                 transform.translate(offsets[0], offsets[1]);
                 transform.scale(scalings[0], scalings[1]);
                 try {
-                    final CoordinateReferenceSystem modelCRS = product.getGeoCoding().getImageCRS();
+                    final CoordinateReferenceSystem modelCRS = product.getSceneGeoCoding().getImageCRS();
                     final SlstrTiePointGeoCoding geoCoding =
                             new SlstrTiePointGeoCoding(origLatGrid, origLonGrid, new AffineTransform2D(transform), modelCRS);
                     band.setGeoCoding(geoCoding);

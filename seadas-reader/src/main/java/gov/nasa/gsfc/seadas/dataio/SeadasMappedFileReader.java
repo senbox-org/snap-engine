@@ -59,12 +59,12 @@ public class SeadasMappedFileReader extends SeadasFileReader {
         float pixelSizeY = (northing - southing) / product.getSceneRasterHeight();
 
         try {
-            product.setGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84,
-                    product.getSceneRasterWidth(),
-                    product.getSceneRasterHeight(),
-                    westing, northing,
-                    pixelSizeX, pixelSizeY,
-                    pixelX, pixelY));
+            product.setSceneGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84,
+                                                       product.getSceneRasterWidth(),
+                                                       product.getSceneRasterHeight(),
+                                                       westing, northing,
+                                                       pixelSizeX, pixelSizeY,
+                                                       pixelX, pixelY));
         } catch (FactoryException e) {
             throw new IllegalStateException(e);
         } catch (TransformException e) {

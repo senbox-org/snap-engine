@@ -316,12 +316,12 @@ public class SMIFileReader extends SeadasFileReader {
             easting += pixelSizeY / 2.0;
 
             try {
-                product.setGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84,
-                        product.getSceneRasterWidth(),
-                        product.getSceneRasterHeight(),
-                        easting, northing,
-                        pixelSizeX, pixelSizeY,
-                        pixelX, pixelY));
+                product.setSceneGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84,
+                                                           product.getSceneRasterWidth(),
+                                                           product.getSceneRasterHeight(),
+                                                           easting, northing,
+                                                           pixelSizeX, pixelSizeY,
+                                                           pixelX, pixelY));
             } catch (FactoryException | TransformException e) {
                 throw new IllegalStateException(e);
             }
@@ -369,12 +369,12 @@ public class SMIFileReader extends SeadasFileReader {
                 pixelY = 0.0;
             }
             try {
-                product.setGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84,
-                        product.getSceneRasterWidth(),
-                        product.getSceneRasterHeight(),
-                        westing, northing,
-                        pixelSizeX, pixelSizeY,
-                        pixelX, pixelY));
+                product.setSceneGeoCoding(new CrsGeoCoding(DefaultGeographicCRS.WGS84,
+                                                           product.getSceneRasterWidth(),
+                                                           product.getSceneRasterHeight(),
+                                                           westing, northing,
+                                                           pixelSizeX, pixelSizeY,
+                                                           pixelX, pixelY));
             } catch (FactoryException | TransformException e) {
                 throw new IllegalStateException(e);
             }

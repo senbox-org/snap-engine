@@ -182,7 +182,7 @@ public class AtsrProductReader extends AbstractProductReader {
      * Adds the geocoding to the product
      */
     private void addGeoCoding(Product prodRet) {
-        prodRet.setGeoCoding(_file.getGeoCoding());
+        prodRet.setSceneGeoCoding(_file.getGeoCoding());
     }
 
     /**

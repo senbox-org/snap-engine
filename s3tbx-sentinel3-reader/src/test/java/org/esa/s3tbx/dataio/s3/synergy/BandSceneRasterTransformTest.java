@@ -45,7 +45,7 @@ public class BandSceneRasterTransformTest {
         TiePointGrid lon = new TiePointGrid("lon", 2, 2, 0, 0, 10 - 1, 20 - 1, new float[]{1f, 2f, 3f, 4f});
         product.addTiePointGrid(lat);
         product.addTiePointGrid(lon);
-        product.setGeoCoding(new TiePointGeoCoding(lat, lon));
+        product.setSceneGeoCoding(new TiePointGeoCoding(lat, lon));
 
         SynergyL1CBand band1 = new SynergyL1CBand("B1", ProductData.TYPE_INT16, 10, 20, "X");
         SynergyL1CBand band2 = new SynergyL1CBand("B2", ProductData.TYPE_INT16, 5, 10, "Y");
