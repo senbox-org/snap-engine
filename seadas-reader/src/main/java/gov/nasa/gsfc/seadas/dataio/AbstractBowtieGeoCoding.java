@@ -41,20 +41,20 @@ import java.util.List;
 public abstract class AbstractBowtieGeoCoding extends AbstractGeoCoding {
 
     private Datum _datum = Datum.WGS_84;
-    protected List<GeoCoding> _gcList;
-    protected boolean _cross180;
-    protected List<PolyLine> _centerLineList;
-    private int _lastCenterLineIndex;           // index found on the previous search
-    private int _smallestValidIndex;
-    private int _biggestValidIndex;
-    private ProductNode _gridOwner;
+    protected List<GeoCoding> gcList;
+    protected boolean cross180;
+    protected List<PolyLine> centerLineList;
+    private int lastCenterLineIndex;           // index found on the previous search
+    private int smallestValidIndex;
+    private int biggestValidIndex;
+    private ProductNode gridOwner;
 
     /**
      * Constructs geo-coding with MODIS Bowtie correction.
      *
      */
     public AbstractBowtieGeoCoding() {
-        _lastCenterLineIndex = 0;
+        lastCenterLineIndex = 0;
     }
 
     /**
@@ -108,8 +108,8 @@ public abstract class AbstractBowtieGeoCoding extends AbstractGeoCoding {
         pixelPos.setInvalid();
 
         final int index = getGeoCodingIndexfor(geoPos);
-        _lastCenterLineIndex = index;
-        final GeoCoding gc = _gcList.get(index);
+        lastCenterLineIndex = index;
+        final GeoCoding gc = gcList.get(index);
         if (gc != null) {
             gc.getPixelPos(geoPos, pixelPos);
         }
@@ -132,7 +132,7 @@ public abstract class AbstractBowtieGeoCoding extends AbstractGeoCoding {
      */
     public GeoPos getGeoPos(PixelPos pixelPos, GeoPos geoPos) {
         final int index = computeIndex(pixelPos);
-        final GeoCoding gc = _gcList.get(index);
+        final GeoCoding gc = gcList.get(index);
         if (gc != null) {
             return gc.getGeoPos(new PixelPos(pixelPos.x, pixelPos.y - getScanlineHeight() * index + getScanlineOffset()), geoPos);
         } else {
@@ -162,12 +162,12 @@ public abstract class AbstractBowtieGeoCoding extends AbstractGeoCoding {
      */
     @Override
     public void dispose() {
-        for (GeoCoding gc : _gcList) {
+        for (GeoCoding gc : gcList) {
             if (gc != null) {
                 gc.dispose();
             }
         }
-        _gcList.clear();
+        gcList.clear();
     }
 
     /**
@@ -176,19 +176,19 @@ public abstract class AbstractBowtieGeoCoding extends AbstractGeoCoding {
      * @return <code>true</code>, if so
      */
     public boolean isCrossingMeridianAt180() {
-        return _cross180;
+        return cross180;
     }
 
     protected void initSmallestAndLargestValidGeocodingIndices() {
-        for (int i = 0; i < _gcList.size(); i++) {
-            if (_gcList.get(i) != null) {
-                _smallestValidIndex = i;
+        for (int i = 0; i < gcList.size(); i++) {
+            if (gcList.get(i) != null) {
+                smallestValidIndex = i;
                 break;
             }
         }
-        for (int i = _gcList.size() - 1; i > 0; i--) {
-            if (_gcList.get(i) != null) {
-                _biggestValidIndex = i;
+        for (int i = gcList.size() - 1; i > 0; i--) {
+            if (gcList.get(i) != null) {
+                biggestValidIndex = i;
                 break;
             }
         }
@@ -221,33 +221,33 @@ public abstract class AbstractBowtieGeoCoding extends AbstractGeoCoding {
     private int computeIndex(PixelPos pixelPos) {
         final int y = (int) pixelPos.getY() + getScanlineOffset();
         final int index = y / getScanlineHeight();
-        if (index < _smallestValidIndex) {
-            return _smallestValidIndex;
-        } else if (index > _biggestValidIndex) {
-            return _biggestValidIndex;
+        if (index < smallestValidIndex) {
+            return smallestValidIndex;
+        } else if (index > biggestValidIndex) {
+            return biggestValidIndex;
         } else {
             return index;
         }
     }
 
     private int getGeoCodingIndexfor(final GeoPos geoPos) {
-        int index = _lastCenterLineIndex;
+        int index = lastCenterLineIndex;
         index = getNextCenterLineIndex(index, 1);
-        final PolyLine centerLine1 = _centerLineList.get(index);
+        final PolyLine centerLine1 = centerLineList.get(index);
         double v = centerLine1.getDistance(geoPos.lon, geoPos.lat);
         int vIndex = index;
 
         int direction = -1;
-        if (index == _smallestValidIndex) {
+        if (index == smallestValidIndex) {
             direction = +1;
         }
         while (true) {
             index += direction;
             index = getNextCenterLineIndex(index, direction);
-            final PolyLine centerLine2 = _centerLineList.get(index);
+            final PolyLine centerLine2 = centerLineList.get(index);
             final double v2 = centerLine2.getDistance(geoPos.lon, geoPos.lat);
             if (v2 < v) {
-                if (index == _smallestValidIndex || index == _biggestValidIndex) {
+                if (index == smallestValidIndex || index == biggestValidIndex) {
                     return index;
                 }
                 v = v2;
@@ -256,7 +256,7 @@ public abstract class AbstractBowtieGeoCoding extends AbstractGeoCoding {
                 index++;
                 direction = +1;
                 index = getNextCenterLineIndex(index, direction);
-                if (index == _biggestValidIndex) {
+                if (index == biggestValidIndex) {
                     return index;
                 }
             } else if (direction == +1) {
@@ -266,12 +266,12 @@ public abstract class AbstractBowtieGeoCoding extends AbstractGeoCoding {
     }
 
     private int getNextCenterLineIndex(int index, final int direction) {
-        while (_centerLineList.get(index) == null) {
+        while (centerLineList.get(index) == null) {
             index += direction;
-            if (index < _smallestValidIndex) {
-                index = _biggestValidIndex;
-            } else if (index > _biggestValidIndex) {
-                index = _smallestValidIndex;
+            if (index < smallestValidIndex) {
+                index = biggestValidIndex;
+            } else if (index > biggestValidIndex) {
+                index = smallestValidIndex;
             }
         }
         return index;
@@ -334,7 +334,7 @@ public abstract class AbstractBowtieGeoCoding extends AbstractGeoCoding {
     }
 
     protected void setGridOwner(ProductNode gridOwner) {
-        _gridOwner = gridOwner;
+        this.gridOwner = gridOwner;
     }
 
     protected class ModisTiePointGrid extends TiePointGrid {
@@ -349,7 +349,7 @@ public abstract class AbstractBowtieGeoCoding extends AbstractGeoCoding {
 
         @Override
         public ProductNode getOwner() {
-            return _gridOwner;
+            return gridOwner;
         }
     }
 

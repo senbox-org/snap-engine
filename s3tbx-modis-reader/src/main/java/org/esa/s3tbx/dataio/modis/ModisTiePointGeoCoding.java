@@ -69,8 +69,8 @@ public class ModisTiePointGeoCoding extends AbstractGeoCoding {
     public ModisTiePointGeoCoding(TiePointGrid latGrid, TiePointGrid lonGrid) {
         Guardian.assertNotNull("latGrid", latGrid);
         Guardian.assertNotNull("lonGrid", lonGrid);
-        if (latGrid.getRasterWidth() != lonGrid.getRasterWidth() ||
-                latGrid.getRasterHeight() != lonGrid.getRasterHeight() ||
+        if (latGrid.getGridWidth() != lonGrid.getGridWidth() ||
+                latGrid.getGridHeight() != lonGrid.getGridHeight() ||
                 latGrid.getOffsetX() != lonGrid.getOffsetX() ||
                 latGrid.getOffsetY() != lonGrid.getOffsetY() ||
                 latGrid.getSubSamplingX() != lonGrid.getSubSamplingX() ||
@@ -250,9 +250,9 @@ public class ModisTiePointGeoCoding extends AbstractGeoCoding {
         final float[] latFloats = (float[]) latgrid.getDataElems();
         final float[] lonFloats = (float[]) lonGrid.getDataElems();
 
-        final int stripeW = lonGrid.getRasterWidth();
+        final int stripeW = lonGrid.getGridWidth();
         final int gcStripeSceneWidth = lonGrid.getSceneRasterWidth();
-        final int tpRasterHeight = lonGrid.getRasterHeight();
+        final int tpRasterHeight = lonGrid.getGridHeight();
         final int sceneHeight = lonGrid.getSceneRasterHeight();
         final int stripeH;
         if (isHighResolution(sceneHeight, tpRasterHeight)) {
@@ -434,9 +434,9 @@ public class ModisTiePointGeoCoding extends AbstractGeoCoding {
 
         final Product srcProduct = srcScene.getProduct();
         final int sceneRasterHeight = srcProduct.getSceneRasterHeight();
-        final int tpRasterHeight = srcProduct.getTiePointGrid(lonGridName).getRasterHeight();
+        final int tpGridHeight = srcProduct.getTiePointGrid(lonGridName).getGridHeight();
         final int scanlineHeight;
-        if (isHighResolution(sceneRasterHeight, tpRasterHeight)) {
+        if (isHighResolution(sceneRasterHeight, tpGridHeight)) {
             scanlineHeight = 20;
         } else {
             scanlineHeight = 10;
@@ -504,8 +504,8 @@ public class ModisTiePointGeoCoding extends AbstractGeoCoding {
 
     // note: this relation is ONLY valid for original Modis products, i.e. products that have not been
     // subsetted or subsampled . tb 2012-06-15
-    static boolean isHighResolution(int sceneHeight, int tpRasterHeight) {
-        return sceneHeight / tpRasterHeight == 2;
+    static boolean isHighResolution(int sceneHeight, int tpGridHeight) {
+        return sceneHeight / tpGridHeight == 2;
     }
 
     static int calculateStartLine(int scanlineHeight, Rectangle region) {

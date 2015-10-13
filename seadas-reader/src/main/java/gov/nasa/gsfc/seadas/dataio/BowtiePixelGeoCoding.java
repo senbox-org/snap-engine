@@ -181,8 +181,8 @@ public class BowtiePixelGeoCoding extends AbstractBowtieGeoCoding {
     }
 
     private void init() throws IOException {
-        _gcList = new ArrayList<GeoCoding>();
-        _centerLineList = new ArrayList<PolyLine>();
+        gcList = new ArrayList<GeoCoding>();
+        centerLineList = new ArrayList<PolyLine>();
 
         _latBand.readRasterDataFully(ProgressMonitor.NULL);
         _lonBand.readRasterDataFully(ProgressMonitor.NULL);
@@ -266,11 +266,11 @@ public class BowtiePixelGeoCoding extends AbstractBowtieGeoCoding {
     private void addStripeGeocode(float[] lats, float[] lons, int y, int stripeW, int stripeH) throws IOException {
         GeoCoding gc = createStripeGeocode(lats, lons, y, stripeW, stripeH);
         if (gc != null) {
-            _gcList.add(gc);
-            _centerLineList.add(createCenterPolyLine(gc, stripeW, stripeH));
+            gcList.add(gc);
+            centerLineList.add(createCenterPolyLine(gc, stripeW, stripeH));
         } else {
-            _gcList.add(_gcList.size(), null);
-            _centerLineList.add(_centerLineList.size(), null);
+            gcList.add(gcList.size(), null);
+            centerLineList.add(centerLineList.size(), null);
         }
     }
 
@@ -280,7 +280,7 @@ public class BowtiePixelGeoCoding extends AbstractBowtieGeoCoding {
             return null;
         } else {
             final BowtiePixelScanGeoCoding geoCoding = new BowtiePixelScanGeoCoding(lats, lons, stripeW, stripeH);
-            _cross180 = _cross180 || geoCoding.isCrossingMeridianAt180();
+            cross180 = cross180 || geoCoding.isCrossingMeridianAt180();
             return geoCoding;
         }
     }
