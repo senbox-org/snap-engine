@@ -28,7 +28,7 @@
 
     <artifactId>beam-landsat-reader</artifactId>
     <name>BEAM Landsat Reader</name>
-    <version>5.0.6</version>
+    <version>5.0.7-SNAPSHOT</version>
 
     <dependencies>
         <dependency>
@@ -39,6 +39,11 @@
             <groupId>org.esa.beam</groupId>
             <artifactId>beam-geotiff</artifactId>
             <version>${beam.versionRange}</version>
+        </dependency>
+        <!-- for bzip2 de-compression-->
+        <dependency>
+            <groupId>edu.ucar</groupId>
+            <artifactId>netcdf</artifactId>
         </dependency>
         <dependency>
             <groupId>org.xeustechnologies</groupId>

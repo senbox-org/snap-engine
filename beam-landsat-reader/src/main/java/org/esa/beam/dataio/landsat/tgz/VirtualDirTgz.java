@@ -20,6 +20,7 @@ import com.bc.ceres.core.VirtualDir;
 import org.esa.beam.util.io.FileUtils;
 import org.xeustechnologies.jtar.TarEntry;
 import org.xeustechnologies.jtar.TarInputStream;
+import ucar.unidata.io.bzip2.CBZip2InputStream;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -29,6 +30,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.GZIPInputStream;
 
 public class VirtualDirTgz extends VirtualDir {
@@ -72,6 +75,20 @@ public class VirtualDirTgz extends VirtualDir {
     }
 
     @Override
+    public String[] listAllFiles() throws IOException {
+        final TarInputStream tis = getTarInputStream();
+
+        TarEntry entry;
+        List<String> entryNames = new ArrayList<>();
+        while ((entry = tis.getNextEntry()) != null) {
+            if (!entry.isDirectory()) {
+                entryNames.add(entry.getName());
+            }
+        }
+        return entryNames.toArray(new String[entryNames.size()]);
+    }
+
+    @Override
     public void close() {
         if (extractDir != null) {
             FileUtils.deleteTree(extractDir);
@@ -81,7 +98,7 @@ public class VirtualDirTgz extends VirtualDir {
 
     @Override
     public boolean isCompressed() {
-        return isTgz(archiveFile.getName());
+        return isTgz(archiveFile.getName()) || isTbz(archiveFile.getName());
     }
 
     @Override
@@ -113,67 +130,79 @@ public class VirtualDirTgz extends VirtualDir {
     }
 
     static boolean isTgz(String filename) {
-        final String extension = FileUtils.getExtension(filename);
-        return (".tgz".equals(extension) || ".gz".equals(extension));
+        String lcName = filename.toLowerCase();
+        return lcName.endsWith(".tar.gz") || lcName.endsWith(".tgz");
+    }
+
+    static boolean isTbz(String filename) {
+        String lcName = filename.toLowerCase();
+        return lcName.endsWith(".tar.bz") || lcName.endsWith(".tbz") ||
+               lcName.endsWith(".tar.bz2") || lcName.endsWith(".tbz2");
     }
 
     private void ensureUnpacked() throws IOException {
         if (extractDir == null) {
             extractDir = VirtualDir.createUniqueTempDir();
 
-            final TarInputStream tis;
-            if (isTgz(archiveFile.getName())) {
-                tis = new TarInputStream(
-                        new GZIPInputStream(new BufferedInputStream(new FileInputStream(archiveFile))));
-            } else {
-                tis = new TarInputStream(new BufferedInputStream(new FileInputStream(archiveFile)));
-            }
-            TarEntry entry;
+            try (TarInputStream tis = getTarInputStream()) {
+                TarEntry entry;
 
-            while ((entry = tis.getNextEntry()) != null) {
-                final String entryName = entry.getName();
-                if (entry.isDirectory()) {
-                    final File directory = new File(extractDir, entryName);
-                    ensureDirectory(directory);
-                    continue;
+                while ((entry = tis.getNextEntry()) != null) {
+                    final String entryName = entry.getName();
+                    if (entry.isDirectory()) {
+                        final File directory = new File(extractDir, entryName);
+                        ensureDirectory(directory);
+                        continue;
+                    }
+
+                    final String fileNameFromPath = getFilenameFromPath(entryName);
+                    final int pathIndex = entryName.indexOf(fileNameFromPath);
+                    String tarPath = null;
+                    if (pathIndex > 0) {
+                        tarPath = entryName.substring(0, pathIndex - 1);
+                    }
+
+                    File targetDir;
+                    if (tarPath != null) {
+                        targetDir = new File(extractDir, tarPath);
+                    } else {
+                        targetDir = extractDir;
+                    }
+
+                    ensureDirectory(targetDir);
+                    final File targetFile = new File(targetDir, fileNameFromPath);
+                    if (targetFile.isFile()) {
+                        continue;
+                    }
+
+                    if (!targetFile.createNewFile()) {
+                        throw new IOException("Unable to create file: " + targetFile.getAbsolutePath());
+                    }
+
+                    try (OutputStream outStream = new BufferedOutputStream(new FileOutputStream(targetFile))) {
+                        final byte data[] = new byte[1024 * 1024];
+                        int count;
+                        while ((count = tis.read(data)) != -1) {
+                            outStream.write(data, 0, count);
+                        }
+                    }
                 }
-
-                final String fileNameFromPath = getFilenameFromPath(entryName);
-                final int pathIndex = entryName.indexOf(fileNameFromPath);
-                String tarPath = null;
-                if (pathIndex > 0) {
-                    tarPath = entryName.substring(0, pathIndex - 1);
-                }
-
-                File targetDir;
-                if (tarPath != null) {
-                    targetDir = new File(extractDir, tarPath);
-                } else {
-                    targetDir = extractDir;
-                }
-
-                ensureDirectory(targetDir);
-                final File targetFile = new File(targetDir, fileNameFromPath);
-                if (targetFile.isFile()) {
-                    continue;
-                }
-
-                if (!targetFile.createNewFile()) {
-                    throw new IOException("Unable to create file: " + targetFile.getAbsolutePath());
-                }
-
-                final OutputStream outStream = new BufferedOutputStream(new FileOutputStream(targetFile));
-                final byte data[] = new byte[1024 * 1024];
-                int count;
-                while ((count = tis.read(data)) != -1) {
-                    outStream.write(data, 0, count);
-                }
-
-                // @todo 3 tb/tb try finally - make sure everything is closed
-                outStream.flush();
-                outStream.close();
             }
         }
+    }
+
+    private TarInputStream getTarInputStream() throws IOException {
+        TarInputStream tis;
+        if (isTgz(archiveFile.getName())) {
+            tis = new TarInputStream(
+                        new GZIPInputStream(new BufferedInputStream(new FileInputStream(archiveFile))));
+        } else if (isTbz(archiveFile.getName())) {
+            BufferedInputStream bstream = new BufferedInputStream(new FileInputStream(archiveFile));
+            tis = new TarInputStream(new CBZip2InputStream(bstream, true));
+        } else {
+            tis = new TarInputStream(new BufferedInputStream(new FileInputStream(archiveFile)));
+        }
+        return tis;
     }
 
     private void ensureDirectory(File targetDir) throws IOException {

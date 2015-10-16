@@ -19,10 +19,10 @@ public class TestUtil {
     }
 
     private static File getTestFileOrDirectory(String file) {
-        File testTgz = new File("./beam-landsat-reader/src/test/resources/org/esa/beam/dataio/landsat/" + file);
-        if (!testTgz.exists()) {
-            testTgz = new File("./src/test/resources/org/esa/beam/dataio/landsat/" + file);
+        File testArchiveFile = new File("./beam-landsat-reader/src/test/resources/org/esa/beam/dataio/landsat/" + file);
+        if (!testArchiveFile.exists()) {
+            testArchiveFile = new File("./src/test/resources/org/esa/beam/dataio/landsat/" + file);
         }
-        return testTgz;
+        return testArchiveFile;
     }
 }

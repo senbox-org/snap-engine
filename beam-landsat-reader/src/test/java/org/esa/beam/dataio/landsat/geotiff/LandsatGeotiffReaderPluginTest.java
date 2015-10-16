@@ -16,13 +16,14 @@
 
 package org.esa.beam.dataio.landsat.geotiff;
 
+import static org.junit.Assert.*;
+
 import org.esa.beam.framework.dataio.ProductReader;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
-
-import static org.junit.Assert.*;
+import java.io.InputStream;
 
 /**
  * @author Thomas Storm
@@ -51,6 +52,8 @@ public class LandsatGeotiffReaderPluginTest {
         assertTrue(LandsatGeotiffReaderPlugin.isLandsat4Filename("LT40140341983030XXX13_MTL.txt"));
         assertTrue(LandsatGeotiffReaderPlugin.isLandsat4Filename("LT40140341982315PAC00_MTL.txt"));
         assertTrue(LandsatGeotiffReaderPlugin.isLandsat4Filename("LT41160361989137XXX02_MTL.txt"));
+        assertTrue(LandsatGeotiffReaderPlugin.isLandsat4Filename("LT41730601990155XXX01.tar.bz")); // 'tar.bz' expected as extension
+        assertTrue(LandsatGeotiffReaderPlugin.isLandsat4Filename("LT41930241992221XXX02.tar.gz")); // 'tar.gz' expected as extension
 
         assertFalse(LandsatGeotiffReaderPlugin.isLandsat4Filename("LT40140341982315PAC00_B1.TIF"));
         assertFalse(LandsatGeotiffReaderPlugin.isLandsat4Filename("LT51920342011274MPS00.tgz"));
@@ -62,6 +65,9 @@ public class LandsatGeotiffReaderPluginTest {
         assertTrue(LandsatGeotiffReaderPlugin.isLandsat5Filename("LT51231232013068GSI01_MTL.TXT"));
         assertTrue(LandsatGeotiffReaderPlugin.isLandsat5Filename("LT51920342011274MPS00.tar.gz"));
         assertTrue(LandsatGeotiffReaderPlugin.isLandsat5Filename("LT51920342011274MPS00.tgz")); // 'tar.gz' expected as extension
+        assertTrue(LandsatGeotiffReaderPlugin.isLandsat5Filename("LT51700572011312MLK00.tar.bz")); // 'tar.bz' expected as extension
+        assertTrue(LandsatGeotiffReaderPlugin.isLandsat5Filename("LT51940252011320KIS00.tar.gz")); // 'tar.gz' expected as extension
+        assertTrue(LandsatGeotiffReaderPlugin.isLandsat5Filename("LT51970241984299FUI00.ZIP")); // 'zip' expected as extension
 
         assertFalse(LandsatGeotiffReaderPlugin.isLandsat5Filename("LT51231232013068GSI01_B3.txt")); // is a band name, not the metadata file
         assertFalse(LandsatGeotiffReaderPlugin.isLandsat5Filename("L5196030_03020031023_MTL.txt"));  // Sensor type missing
@@ -74,6 +80,9 @@ public class LandsatGeotiffReaderPluginTest {
         assertTrue(LandsatGeotiffReaderPlugin.isLandsat7Filename("LE71890342011277ASN00_MTL.TXT"));
         assertTrue(LandsatGeotiffReaderPlugin.isLandsat7Filename("LE71890342011277ASN00.tar.gz"));
         assertTrue(LandsatGeotiffReaderPlugin.isLandsat7Filename("LE71890342011277ASN00.tgz")); // 'tar.gz' expected as extension
+        assertTrue(LandsatGeotiffReaderPlugin.isLandsat7Filename("LE71710602000329EDC00.tar.bz")); // 'tar.bz' expected as extension
+        assertTrue(LandsatGeotiffReaderPlugin.isLandsat7Filename("LE71920252000332NSG00.ZIP")); // 'zip' expected as extension
+        assertTrue(LandsatGeotiffReaderPlugin.isLandsat7Filename("LE71940272000330EDC00.tar.gz"));
 
         assertFalse(LandsatGeotiffReaderPlugin.isLandsat7Filename("LE71890342011277ASN00_B3.txt")); // is a band name, not the metadata file
         assertFalse(LandsatGeotiffReaderPlugin.isLandsat7Filename("L71890342011277ASN00.txt"));  // Sensor type missing
@@ -88,6 +97,7 @@ public class LandsatGeotiffReaderPluginTest {
         assertTrue(LandsatGeotiffReaderPlugin.isLandsat8Filename("LO82160332013191LGN00.tar.gz"));
         assertTrue(LandsatGeotiffReaderPlugin.isLandsat8Filename("LT82160332013191LGN00.tar.gz"));
         assertTrue(LandsatGeotiffReaderPlugin.isLandsat8Filename("LT82160332013191LGN00.tgz")); // 'tar.gz' expected as extension
+        assertTrue(LandsatGeotiffReaderPlugin.isLandsat8Filename("LC81970232013266LGN00.tar.bz")); // 'tar.bz' expected as extension
 
         assertFalse(LandsatGeotiffReaderPlugin.isLandsat8Filename("L8196030_03020031023_MTL.txt"));  // Sensor type missing
         assertFalse(LandsatGeotiffReaderPlugin.isLandsat8Filename("LT52160332013191LGN00.tar.gz")); // '8' expected after 'LT'
@@ -158,13 +168,18 @@ public class LandsatGeotiffReaderPluginTest {
     }
 
     @Test
-    public void testIsMetadataFile() throws Exception {
-        File positiveFile1 = new File(getClass().getResource("test_L8_MTL.txt").getFile());
-        assertTrue(LandsatGeotiffReaderPlugin.isMetadataFile(positiveFile1));
-        File positiveFile2 = new File(getClass().getResource("test_legacy_L5_WithTrailingWhiteSpace_MTL.txt").getFile());
-        assertTrue(LandsatGeotiffReaderPlugin.isMetadataFile(positiveFile2));
-        File negativeFile = new File(getClass().getResource("test_MTL_L7.txt").getFile());
-        assertFalse(LandsatGeotiffReaderPlugin.isMetadataFile(negativeFile));
+    public void testIsMetadataFilename() throws Exception {
+        assertTrue(LandsatGeotiffReaderPlugin.isMetadataFilename("test_L8_MTL.txt"));
+        assertTrue(LandsatGeotiffReaderPlugin.isMetadataFilename("test_legacy_L5_WithTrailingWhiteSpace_MTL.txt"));
+        assertFalse(LandsatGeotiffReaderPlugin.isMetadataFilename("test_MTL_L7.txt"));
+    }
 
+    @Test
+    public void testIsMetadataFile() throws Exception {
+        InputStream positiveFile1 = getClass().getResourceAsStream("test_L8_MTL.txt");
+        assertTrue(LandsatGeotiffReaderPlugin.isMetadataFile(positiveFile1));
+
+        InputStream positiveFile2 = getClass().getResourceAsStream("test_legacy_L5_WithTrailingWhiteSpace_MTL.txt");
+        assertTrue(LandsatGeotiffReaderPlugin.isMetadataFile(positiveFile2));
     }
 }
