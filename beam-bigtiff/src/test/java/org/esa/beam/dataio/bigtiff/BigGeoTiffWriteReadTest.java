@@ -48,6 +48,7 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 
 import static org.junit.Assert.*;
 
@@ -62,16 +63,13 @@ public class BigGeoTiffWriteReadTest {
     private static final String LAMBERT_CONIC_CONFORMAL_1SP = "EPSG:9801";
     private static final String ALBERS_CONIC_EQUAL_AREA = "Albers_Conic_Equal_Area";
 
-    private final static File TEST_DIR = new File("test_data");
-
+    private File testDataDir;
     private Product outProduct;
     private File location;
 
     @Before
-    public void setup() {
-        if (!TEST_DIR.mkdirs()) {
-            fail("unable to create test directory");
-        }
+    public void setup() throws IOException {
+        testDataDir = Files.createTempDirectory("test_data").toFile();
         final int width = 14;
         final int height = 14;
         outProduct = new Product("P", "T", width, height);
@@ -82,7 +80,7 @@ public class BigGeoTiffWriteReadTest {
 
     @After
     public void tearDown() {
-        if (!FileUtils.deleteTree(TEST_DIR)) {
+        if (!FileUtils.deleteTree(testDataDir)) {
             fail("unable to delete test directory");
         }
     }
@@ -565,7 +563,7 @@ public class BigGeoTiffWriteReadTest {
     }
 
     private Product writeReadProduct() throws IOException {
-        location = new File(TEST_DIR, "test_product.tif");
+        location = new File(testDataDir, "test_product.tif");
 
         final String bigGeoTiffFormatName = "BigGeoTiff";
         ProductIO.writeProduct(outProduct, location.getAbsolutePath(), bigGeoTiffFormatName);
