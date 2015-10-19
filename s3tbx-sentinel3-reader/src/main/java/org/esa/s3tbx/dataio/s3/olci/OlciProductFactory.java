@@ -9,6 +9,8 @@ import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.GeoCodingFactory;
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.RGBImageProfile;
+import org.esa.snap.core.datamodel.RGBImageProfileManager;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.runtime.Config;
@@ -42,6 +44,7 @@ public abstract class OlciProductFactory extends AbstractProductFactory {
         nameToWavelengthMap = new HashMap<String, Float>();
         nameToBandwidthMap = new HashMap<String, Float>();
         nameToIndexMap = new HashMap<String, Integer>();
+        registerRGBProfiles();
     }
 
     @Override
@@ -177,6 +180,62 @@ public abstract class OlciProductFactory extends AbstractProductFactory {
         final S3NetcdfReader reader = S3NetcdfReaderFactory.createS3NetcdfReader(file);
         addSeparatingDimensions(reader.getSuffixesForSeparatingDimensions());
         return reader.readProduct();
+    }
+
+    private static void registerRGBProfiles() {
+        RGBImageProfileManager manager = RGBImageProfileManager.getInstance();
+        manager.addProfile(new RGBImageProfile("OLCI L1 - Tristimulus",
+                                               new String[]{
+                                                       "log(1.0 + 0.35 * Oa03_radiance + 0.60 * Oa06_radiance + Oa07_radiance + 0.13 * Oa08_radiance)",
+                                                       "log(1.0 + 0.21 * Oa04_radiance + 0.50 * Oa05_radiance + Oa06_radiance + 0.38 * Oa07_radiance)",
+                                                       "log(1.0 + 0.21 * Oa02_radiance + 1.75 * Oa03_radiance + 0.47 * Oa04_radiance + 0.16 * Oa05_radiance)"
+                                               },
+                                               new String[]{
+                                                       "S3*_OL_1*",
+                                                       "S3*_OL_1*",
+                                                       "",
+                                               }
+        ));
+        manager.addProfile(new RGBImageProfile("OLCI L2 W - Tristimulus",
+                                               new String[]{
+                                                       "log(0.05 + 0.35 * Oa03_reflectance + 0.60 * Oa06_reflectance + Oa07_reflectance + 0.13 * Oa08_reflectance)",
+                                                       "log(0.05 + 0.21 * Oa04_reflectance + 0.50 * Oa05_reflectance + Oa06_reflectance + 0.38 * Oa07_reflectance)",
+                                                       "log(0.05 + 0.21 * Oa02_reflectance + 1.75 * Oa03_reflectance + 0.47 * Oa04_reflectance + 0.16 * Oa05_reflectance)"
+                                               },
+                                               new String[]{
+                                                       "S3*OL_2_W*",
+                                                       "S3*OL_2_W*",
+                                                       "",
+                                               }
+        ));
+        manager.addProfile(new RGBImageProfile("OLCI L1 - 17,6,3",
+                                               new String[]{
+                                                       "Oa17_radiance",
+                                                       "Oa06_radiance",
+                                                       "Oa03_radiance"
+                                               }
+        ));
+        manager.addProfile(new RGBImageProfile("OLCI L1 - 17,5,2",
+                                               new String[]{
+                                                       "Oa17_radiance",
+                                                       "Oa05_radiance",
+                                                       "Oa02_radiance"
+                                               }
+        ));
+        manager.addProfile(new RGBImageProfile("OLCI L2W - 17,6,3",
+                                               new String[]{
+                                                       "Oa17_reflectance",
+                                                       "Oa06_reflectance",
+                                                       "Oa03_reflectance"
+                                               }
+        ));
+        manager.addProfile(new RGBImageProfile("OLCI L2W - 17,5,2",
+                                               new String[]{
+                                                       "Oa17_reflectance",
+                                                       "Oa05_reflectance",
+                                                       "Oa02_reflectance"
+                                               }
+        ));
     }
 
 }
