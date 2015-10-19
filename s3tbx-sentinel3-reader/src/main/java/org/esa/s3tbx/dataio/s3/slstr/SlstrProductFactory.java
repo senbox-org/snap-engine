@@ -146,7 +146,6 @@ public abstract class SlstrProductFactory extends AbstractProductFactory {
         return new float[]{offsetX, offsetY};
     }
 
-    @Deprecated // scale images instead
     protected RasterDataNode copyTiePointGrid(Band sourceBand, Product targetProduct, double sourceStartOffset,
                                               double sourceTrackOffset, short[] sourceResolutions) {
         final int subSamplingX = sourceResolutions[0] / referenceResolutions[0];
