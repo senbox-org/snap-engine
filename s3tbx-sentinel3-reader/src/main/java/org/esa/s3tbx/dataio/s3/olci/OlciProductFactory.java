@@ -186,9 +186,13 @@ public abstract class OlciProductFactory extends AbstractProductFactory {
         RGBImageProfileManager manager = RGBImageProfileManager.getInstance();
         manager.addProfile(new RGBImageProfile("OLCI L1 - Tristimulus",
                                                new String[]{
-                                                       "log(1.0 + 0.35 * Oa03_radiance + 0.60 * Oa06_radiance + Oa07_radiance + 0.13 * Oa08_radiance)",
-                                                       "log(1.0 + 0.21 * Oa04_radiance + 0.50 * Oa05_radiance + Oa06_radiance + 0.38 * Oa07_radiance)",
-                                                       "log(1.0 + 0.21 * Oa02_radiance + 1.75 * Oa03_radiance + 0.47 * Oa04_radiance + 0.16 * Oa05_radiance)"
+                                                       "log(1.0 + 0.01 * Oa01_radiance + 0.09 * Oa02_radiance + 0.35 * Oa03_radiance + 0.04 * Oa04_radiance + " +
+                                                               "0.01 * Oa05_radiance + 0.59 * Oa06_radiance + 0.85 * Oa07_radiance + 0.12 * Oa08_radiance + " +
+                                                               "0.07 * Oa09_radiance + 0.04 * Oa10_radiance)",
+                                                       "log(1.0 + 0.26 * Oa03_radiance + 0.21 * Oa04_radiance + 0.50 * Oa05_radiance + Oa06_radiance + " +
+                                                               "0.38 * Oa07_radiance + 0.04 * Oa08_radiance + 0.03 * Oa09_radiance + 0.02 * Oa10_radiance)",
+                                                       "log(1.0 + 0.07 * Oa01_radiance + 0.28 * Oa02_radiance + 1.77 * Oa03_radiance + 0.47 * Oa04_radiance + " +
+                                                               "0.16 * Oa05_radiance)"
                                                },
                                                new String[]{
                                                        "S3*_OL_1*",
@@ -198,9 +202,15 @@ public abstract class OlciProductFactory extends AbstractProductFactory {
         ));
         manager.addProfile(new RGBImageProfile("OLCI L2 W - Tristimulus",
                                                new String[]{
-                                                       "log(0.05 + 0.35 * Oa03_reflectance + 0.60 * Oa06_reflectance + Oa07_reflectance + 0.13 * Oa08_reflectance)",
-                                                       "log(0.05 + 0.21 * Oa04_reflectance + 0.50 * Oa05_reflectance + Oa06_reflectance + 0.38 * Oa07_reflectance)",
-                                                       "log(0.05 + 0.21 * Oa02_reflectance + 1.75 * Oa03_reflectance + 0.47 * Oa04_reflectance + 0.16 * Oa05_reflectance)"
+                                                       "log(0.05 + 0.01 * Oa01_reflectance + 0.09 * Oa02_reflectance + 0.35 * Oa03_reflectance + " +
+                                                               "0.04 * Oa04_reflectance + 0.01 * Oa05_reflectance + 0.59 * Oa06_reflectance + " +
+                                                               "0.85 * Oa07_reflectance + 0.12 * Oa08_reflectance + 0.07 * Oa09_reflectance + " +
+                                                               "0.04 * Oa10_reflectance)",
+                                                       "log(0.05 + 0.26 * Oa03_reflectance + 0.21 * Oa04_reflectance + 0.50 * Oa05_reflectance + " +
+                                                               "Oa06_reflectance + 0.38 * Oa07_reflectance + 0.04 * Oa08_reflectance + " +
+                                                               "0.03 * Oa09_reflectance + 0.02 * Oa10_reflectance)",
+                                                       "log(0.05 + 0.07 * Oa01_reflectance + 0.28 * Oa02_reflectance + 1.77 * Oa03_reflectance + " +
+                                                               "0.47 * Oa04_reflectance + 0.16 * Oa05_reflectance)"
                                                },
                                                new String[]{
                                                        "S3*OL_2_W*",
