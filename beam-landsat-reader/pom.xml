@@ -28,7 +28,7 @@
 
     <artifactId>beam-landsat-reader</artifactId>
     <name>BEAM Landsat Reader</name>
-    <version>5.0.7-SNAPSHOT</version>
+    <version>5.0.7</version>
 
     <dependencies>
         <dependency>
