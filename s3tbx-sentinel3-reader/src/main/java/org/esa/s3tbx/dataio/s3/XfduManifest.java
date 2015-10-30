@@ -24,7 +24,7 @@ public class XfduManifest implements Manifest {
     private final Document doc;
     private final XPathHelper xPathHelper;
 
-    static Manifest createManifest(Document manifestDocument) {
+    public static Manifest createManifest(Document manifestDocument) {
         return new XfduManifest(manifestDocument);
     }
 
