@@ -227,7 +227,7 @@ public class SlstrPduStitcherTest {
     }
 
     private static File getResource(String fileName) {
-        return new File(SlstrPduStitcherTest.class.getResource(fileName + "//xfdumanifest.xml").getFile());
+        return new File(SlstrPduStitcherTest.class.getResource(fileName + "/xfdumanifest.xml").getFile());
     }
 
 }

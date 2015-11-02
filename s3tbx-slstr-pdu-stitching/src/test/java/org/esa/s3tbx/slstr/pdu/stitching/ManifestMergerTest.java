@@ -101,6 +101,6 @@ public class ManifestMergerTest {
     }
 
     private static File getManifestFile(String fileName) {
-        return new File(SlstrPduStitcherTest.class.getResource(fileName + "//xfdumanifest.xml").getFile());
+        return new File(ManifestMergerTest.class.getResource(fileName + "/xfdumanifest.xml").getFile());
     }
 }
