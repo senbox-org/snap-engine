@@ -133,7 +133,9 @@ public class SlstrPduStitcher {
                     }
                 }
                 imageSizes = newImageSizes;
-                targetImageSize = createTargetImageSize(imageSizes);
+                if (imageSizes.length > 0) {
+                    targetImageSize = createTargetImageSize(imageSizes);
+                }
             }
             try {
                 NcFileStitcher.stitchNcFiles(ncFileName, stitchedProductFileParentDirectory, now,

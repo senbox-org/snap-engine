@@ -148,16 +148,14 @@ public class NcFileStitcherTest {
     }
 
     @Test
-//    @Ignore //set to ignore as test takes a few seconds
-    public void testStitchF1_BT_in() throws Exception {
-        final String ncFileName = "F1_BT_in.nc";
-        final ImageSize targetImageSize = new ImageSize("in", 21687, 998, 6000, 1500);
-        final ImageSize[] imageSizes = new ImageSize[3];
-        imageSizes[0] = new ImageSize("in", 21687, 998, 2000, 1500);
-        imageSizes[1] = new ImageSize("in", 23687, 998, 2000, 1500);
-        imageSizes[2] = new ImageSize("in", 25687, 998, 2000, 1500);
+    @Ignore //set to ignore as test takes a few seconds
+    public void testStitchF1_BT_io() throws Exception {
+        final String ncFileName = "F1_BT_io.nc";
+        final ImageSize targetImageSize = new ImageSize("io", 21687, 450, 6000, 900);
+        final ImageSize[] imageSizes = new ImageSize[1];
+        imageSizes[0] = new ImageSize("io", 23687, 450, 2000, 900);
         final Date now = Calendar.getInstance().getTime();
-        final File[] ncFiles = getNcFiles(ncFileName);
+        final File[] ncFiles = new File[]{getSecondNcFile(ncFileName)};
 
         final File stitchedFile = NcFileStitcher.stitchNcFiles(ncFileName, targetDirectory, now, ncFiles,
                                                                targetImageSize, imageSizes);
@@ -169,75 +167,73 @@ public class NcFileStitcherTest {
         assertNotNull(netcdfFile);
         final List<Variable> variables = netcdfFile.getVariables();
         assertEquals(4, variables.size());
-        assertEquals("F1_BT_in", variables.get(0).getFullName());
+        assertEquals("F1_BT_io", variables.get(0).getFullName());
         assertEquals(DataType.SHORT, variables.get(0).getDataType());
         assertEquals("rows columns", variables.get(0).getDimensionsString());
-        final List<Attribute> F1_BT_in_attributes = variables.get(0).getAttributes();
-        assertEquals("standard_name", F1_BT_in_attributes.get(0).getFullName());
-        assertEquals("toa_brightness_temperature", F1_BT_in_attributes.get(0).getStringValue());
-        assertEquals("long_name", F1_BT_in_attributes.get(1).getFullName());
-        assertEquals("Gridded pixel brightness temperature for channel F1(1km TIR grid, nadir view)",
-                     F1_BT_in_attributes.get(1).getStringValue());
-        assertEquals("units", F1_BT_in_attributes.get(2).getFullName());
-        assertEquals("K", F1_BT_in_attributes.get(2).getStringValue());
-        assertEquals("_FillValue", F1_BT_in_attributes.get(3).getFullName());
-        assertEquals((short) -32768, F1_BT_in_attributes.get(3).getNumericValue());
-        assertEquals("scale_factor", F1_BT_in_attributes.get(4).getFullName());
-        assertEquals(0.01, F1_BT_in_attributes.get(4).getNumericValue());
-        assertEquals("add_offset", F1_BT_in_attributes.get(5).getFullName());
-        assertEquals(283.73, F1_BT_in_attributes.get(5).getNumericValue());
+        final List<Attribute> F1_BT_io_attributes = variables.get(0).getAttributes();
+        assertEquals("standard_name", F1_BT_io_attributes.get(0).getFullName());
+        assertEquals("toa_brightness_temperature", F1_BT_io_attributes.get(0).getStringValue());
+        assertEquals("long_name", F1_BT_io_attributes.get(1).getFullName());
+        assertEquals("Gridded pixel brightness temperature for channel F1 (1km TIR grid, oblique view)",
+                     F1_BT_io_attributes.get(1).getStringValue());
+        assertEquals("units", F1_BT_io_attributes.get(2).getFullName());
+        assertEquals("K", F1_BT_io_attributes.get(2).getStringValue());
+        assertEquals("_FillValue", F1_BT_io_attributes.get(3).getFullName());
+        assertEquals((short) -32768, F1_BT_io_attributes.get(3).getNumericValue());
+        assertEquals("scale_factor", F1_BT_io_attributes.get(4).getFullName());
+        assertEquals(0.01, F1_BT_io_attributes.get(4).getNumericValue());
+        assertEquals("add_offset", F1_BT_io_attributes.get(5).getFullName());
+        assertEquals(283.73, F1_BT_io_attributes.get(5).getNumericValue());
 
-        assertEquals("F1_exception_in", variables.get(1).getFullName());
-        assertEquals("F1_BT_orphan_in", variables.get(2).getFullName());
+        assertEquals("F1_exception_io", variables.get(1).getFullName());
+        assertEquals("F1_BT_orphan_io", variables.get(2).getFullName());
 
-        assertEquals("F1_exception_orphan_in", variables.get(3).getFullName());
+        assertEquals("F1_exception_orphan_io", variables.get(3).getFullName());
         assertEquals(DataType.BYTE, variables.get(3).getDataType());
         assertEquals(true, variables.get(3).isUnsigned());
         assertEquals("rows orphan_pixels", variables.get(3).getDimensionsString());
-        final List<Attribute> F1_exception_orphan_in_attributes = variables.get(3).getAttributes();
-        assertEquals("standard_name", F1_exception_orphan_in_attributes.get(0).getFullName());
-        assertEquals("toa_brightness_temperature_status_flag", F1_exception_orphan_in_attributes.get(0).getStringValue());
-        assertEquals("flag_masks", F1_exception_orphan_in_attributes.get(1).getFullName());
-        assertEquals(true, F1_exception_orphan_in_attributes.get(1).isArray());
-        final Array F1_exception_orphan_in_values = F1_exception_orphan_in_attributes.get(1).getValues();
-        assertEquals(8, F1_exception_orphan_in_values.getSize());
-        assertEquals(true, F1_exception_orphan_in_values.isUnsigned());
-        assertEquals((byte) 1, F1_exception_orphan_in_values.getByte(0));
-        assertEquals((byte) 2, F1_exception_orphan_in_values.getByte(1));
-        assertEquals((byte) 4, F1_exception_orphan_in_values.getByte(2));
-        assertEquals((byte) 8, F1_exception_orphan_in_values.getByte(3));
-        assertEquals((byte) 16, F1_exception_orphan_in_values.getByte(4));
-        assertEquals((byte) 32, F1_exception_orphan_in_values.getByte(5));
-        assertEquals((byte) 64, F1_exception_orphan_in_values.getByte(6));
-        assertEquals((byte) 128, F1_exception_orphan_in_values.getByte(7));
-        assertEquals("flag_meanings", F1_exception_orphan_in_attributes.get(2).getFullName());
+        final List<Attribute> F1_exception_orphan_io_attributes = variables.get(3).getAttributes();
+        assertEquals("standard_name", F1_exception_orphan_io_attributes.get(0).getFullName());
+        assertEquals("toa_brightness_temperature_status_flag", F1_exception_orphan_io_attributes.get(0).getStringValue());
+        assertEquals("flag_masks", F1_exception_orphan_io_attributes.get(1).getFullName());
+        assertEquals(true, F1_exception_orphan_io_attributes.get(1).isArray());
+        final Array F1_exception_orphan_io_values = F1_exception_orphan_io_attributes.get(1).getValues();
+        assertEquals(8, F1_exception_orphan_io_values.getSize());
+        assertEquals(true, F1_exception_orphan_io_values.isUnsigned());
+        assertEquals((byte) 1, F1_exception_orphan_io_values.getByte(0));
+        assertEquals((byte) 2, F1_exception_orphan_io_values.getByte(1));
+        assertEquals((byte) 4, F1_exception_orphan_io_values.getByte(2));
+        assertEquals((byte) 8, F1_exception_orphan_io_values.getByte(3));
+        assertEquals((byte) 16, F1_exception_orphan_io_values.getByte(4));
+        assertEquals((byte) 32, F1_exception_orphan_io_values.getByte(5));
+        assertEquals((byte) 64, F1_exception_orphan_io_values.getByte(6));
+        assertEquals((byte) 128, F1_exception_orphan_io_values.getByte(7));
+        assertEquals("flag_meanings", F1_exception_orphan_io_attributes.get(2).getFullName());
         assertEquals("ISP_absent pixel_absent not_decompressed no_signal saturation invalid_radiance no_parameters unfilled_pixel",
-                     F1_exception_orphan_in_attributes.get(2).getStringValue());
-        assertEquals("_FillValue", F1_exception_orphan_in_attributes.get(3).getFullName());
-        assertEquals((byte) -128, F1_exception_orphan_in_attributes.get(3).getNumericValue());
+                     F1_exception_orphan_io_attributes.get(2).getStringValue());
+        assertEquals("_FillValue", F1_exception_orphan_io_attributes.get(3).getFullName());
+        assertEquals((byte) -128, F1_exception_orphan_io_attributes.get(3).getNumericValue());
 
-        final List<Variable>[] inputFileVariables = new ArrayList[3];
-        for (int i = 0; i < 3; i++) {
+        List<Variable> inputFileVariables = new ArrayList<>();
+        for (int i = 0; i < 1; i++) {
             final NetcdfFile ncfile = NetcdfFileOpener.open(ncFiles[i]);
             assertNotNull(ncfile);
-            inputFileVariables[i] = ncfile.getVariables();
+            inputFileVariables = ncfile.getVariables();
         }
         for (int i = 0; i < variables.size(); i++) {
             Variable variable = variables.get(i);
-            for (int j = 0; j < inputFileVariables.length; j++) {
-                int offset = j * 2000;
-                final Section section = new Section(new int[]{offset, 0}, new int[]{2000, variable.getDimension(1).getLength()});
-                final Array stitchedArrayPart = variable.read(section);
-                final Array fileArray = inputFileVariables[j].get(i).read();
-                if (variable.getDataType() == DataType.SHORT) {
-                    final short[] expectedArray = (short[]) fileArray.copyTo1DJavaArray();
-                    final short[] actualArray = (short[]) stitchedArrayPart.copyTo1DJavaArray();
-                    assertArrayEquals(expectedArray, actualArray);
-                } else {
-                    final byte[] expectedArray = (byte[]) fileArray.copyTo1DJavaArray();
-                    final byte[] actualArray = (byte[]) stitchedArrayPart.copyTo1DJavaArray();
-                    assertArrayEquals(expectedArray, actualArray);
-                }
+            int offset = 2000;
+            final Section section = new Section(new int[]{offset, 0}, new int[]{offset, variable.getDimension(1).getLength()});
+            final Array stitchedArrayPart = variable.read(section);
+            final Array fileArray = inputFileVariables.get(i).read();
+            if (variable.getDataType() == DataType.SHORT) {
+                final short[] expectedArray = (short[]) fileArray.copyTo1DJavaArray();
+                final short[] actualArray = (short[]) stitchedArrayPart.copyTo1DJavaArray();
+                assertArrayEquals(expectedArray, actualArray);
+            } else {
+                final byte[] expectedArray = (byte[]) fileArray.copyTo1DJavaArray();
+                final byte[] actualArray = (byte[]) stitchedArrayPart.copyTo1DJavaArray();
+                assertArrayEquals(expectedArray, actualArray);
             }
         }
     }
@@ -474,12 +470,12 @@ public class NcFileStitcherTest {
 
     @Test
     public void testDetermineSourceOffsets() throws IOException {
-        final File f1_BT_in_file = getFirstNcFile("F1_BT_in.nc");
-        final NetcdfFile f1_BT_in_netcdfFile = NetcdfFileOpener.open(f1_BT_in_file);
-        assertNotNull(f1_BT_in_netcdfFile);
-        final Variable f1_BT_in_variable = f1_BT_in_netcdfFile.getVariables().get(0);
+        final File f1_BT_io_file = getSecondNcFile("F1_BT_io.nc");
+        final NetcdfFile f1_BT_io_netcdfFile = NetcdfFileOpener.open(f1_BT_io_file);
+        assertNotNull(f1_BT_io_netcdfFile);
+        final Variable f1_BT_io_variable = f1_BT_io_netcdfFile.getVariables().get(0);
 
-        assertArrayEquals(new int[]{0}, NcFileStitcher.determineSourceOffsets(3000000, f1_BT_in_variable));
+        assertArrayEquals(new int[]{0}, NcFileStitcher.determineSourceOffsets(1800000, f1_BT_io_variable));
 
         final File met_tx_file = getFirstNcFile("met_tx.nc");
         final NetcdfFile met_tx_netcdfFile = NetcdfFileOpener.open(met_tx_file);
@@ -492,12 +488,12 @@ public class NcFileStitcherTest {
 
     @Test
     public void testDetermineSectionSize() throws IOException {
-        final File f1_BT_in_file = getFirstNcFile("F1_BT_in.nc");
-        final NetcdfFile f1_BT_in_netcdfFile = NetcdfFileOpener.open(f1_BT_in_file);
-        assertNotNull(f1_BT_in_netcdfFile);
-        final Variable f1_BT_in_variable = f1_BT_in_netcdfFile.getVariables().get(0);
+        final File f1_BT_io_file = getSecondNcFile("F1_BT_io.nc");
+        final NetcdfFile f1_BT_io_netcdfFile = NetcdfFileOpener.open(f1_BT_io_file);
+        assertNotNull(f1_BT_io_netcdfFile);
+        final Variable f1_BT_io_variable = f1_BT_io_netcdfFile.getVariables().get(0);
 
-        assertEquals(3000000, NcFileStitcher.determineSectionSize(0, f1_BT_in_variable));
+        assertEquals(1800000, NcFileStitcher.determineSectionSize(0, f1_BT_io_variable));
 
         final File met_tx_file = getFirstNcFile("met_tx.nc");
         final NetcdfFile met_tx_netcdfFile = NetcdfFileOpener.open(met_tx_file);

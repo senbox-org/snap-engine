@@ -85,6 +85,7 @@ public class SlstrPduStitcherTest {
         final File stitchedProductFileParentDirectory = stitchedProductFile.getParentFile();
         assert(new File(stitchedProductFileParentDirectory, "xfdumanifest.xml").exists());
         assert(new File(stitchedProductFileParentDirectory, "F1_BT_in.nc").exists());
+        assert(new File(stitchedProductFileParentDirectory, "F1_BT_io.nc").exists());
         assert(new File(stitchedProductFileParentDirectory, "met_tx.nc").exists());
         assertEquals(targetDirectory, stitchedProductFileParentDirectory.getParentFile());
     }
@@ -176,9 +177,10 @@ public class SlstrPduStitcherTest {
             SlstrPduStitcher.collectFiles(ncFiles, createXmlDocument(new FileInputStream(slstrFile)));
         }
 
-        assertEquals(2, ncFiles.size());
+        assertEquals(3, ncFiles.size());
         assertEquals("F1_BT_in.nc", ncFiles.get(0));
         assertEquals("met_tx.nc", ncFiles.get(1));
+        assertEquals("F1_BT_io.nc", ncFiles.get(2));
     }
 
     @Test

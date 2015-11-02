@@ -5,6 +5,9 @@
             <xfdu:contentUnit ID="SLSTR_F1_BT_IN_Unit" unitType="Measurement Data Unit" textInfo="Gridded pixel brightness temperature for channel F1(1km TIR grid, nadir view)" dmdID="SLSTR_F1_QUALITY_IN_Annotation SLSTR_FLAGS_IN_Annotation SLSTR_INDICES_IN_Annotation SLSTR_CARTESIAN_IN_Annotation SLSTR_GEODETIC_IN_Annotation SLSTR_TIME_I_Annotation SLSTR_GEOMETRY_TN_Annotation SLSTR_MET_TX_Annotation SLSTR_GEODETIC_TX_Annotation">
                 <dataObjectPointer dataObjectID="SLSTR_F1_BT_IN_Data"/>
             </xfdu:contentUnit>
+            <xfdu:contentUnit ID="SLSTR_F1_BT_IO_Unit" unitType="Measurement Data Unit" textInfo="Gridded pixel brightness temperature for channel F1 (1km TIR grid, oblique view)" dmdID="SLSTR_F1_QUALITY_IO_Annotation SLSTR_FLAGS_IO_Annotation SLSTR_INDICES_IO_Annotation SLSTR_CARTESIAN_IO_Annotation SLSTR_GEODETIC_IO_Annotation SLSTR_GEOMETRY_TO_Annotation SLSTR_MET_TX_Annotation SLSTR_GEODETIC_TX_Annotation">
+                <dataObjectPointer dataObjectID="SLSTR_F1_BT_IO_Data"/>
+            </xfdu:contentUnit>
             <xfdu:contentUnit ID="SLSTR_MET_TX_Unit" unitType="Annotation Data Unit" textInfo="Meteorological parameters regridded onto the 16km tie points">
                 <dataObjectPointer dataObjectID="SLSTR_MET_TX_Data"/>
             </xfdu:contentUnit>
@@ -738,12 +741,21 @@
         <metadataObject ID="SLSTR_F1_QUALITY_IN_Annotation" classification="DESCRIPTION" category="DMD">
             <dataObjectPointer dataObjectID="SLSTR_F1_QUALITY_IN_Data"/>
         </metadataObject>
+        <metadataObject ID="SLSTR_F1_QUALITY_IO_Annotation" classification="DESCRIPTION" category="DMD">
+            <dataObjectPointer dataObjectID="SLSTR_F1_QUALITY_IO_Data"/>
+        </metadataObject>
     </metadataSection>
     <dataObjectSection>
         <dataObject ID="SLSTR_F1_BT_IN_Data">
             <byteStream mimeType="application/x-netcdf" size="10134680">
                 <fileLocation locatorType="URL" href="F1_BT_in.nc"/>
                 <checksum checksumName="MD5">735b1f499c64e5f93426a2d16e77669e</checksum>
+            </byteStream>
+        </dataObject>
+        <dataObject ID="SLSTR_F1_BT_IO_Data">
+            <byteStream mimeType="application/x-netcdf" size="6084685">
+                <fileLocation locatorType="URL" href="F1_BT_io.nc"/>
+                <checksum checksumName="MD5">b7fadb3d1a17f287c7881f5d023e65d9</checksum>
             </byteStream>
         </dataObject>
         <dataObject ID="SLSTR_MET_TX_Data">
