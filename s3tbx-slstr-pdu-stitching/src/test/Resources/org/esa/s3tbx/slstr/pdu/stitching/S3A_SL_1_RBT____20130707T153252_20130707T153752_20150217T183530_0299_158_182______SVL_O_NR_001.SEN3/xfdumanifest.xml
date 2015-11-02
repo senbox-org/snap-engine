@@ -739,7 +739,7 @@
       <dataObjectPointer dataObjectID="SLSTR_F1_QUALITY_IN_Data"/>
     </metadataObject>
   </metadataSection>
-  <dataObjectSection>    
+  <dataObjectSection>
     <dataObject ID="SLSTR_F1_BT_IN_Data">
       <byteStream mimeType="application/x-netcdf" size="10134680">
         <fileLocation locatorType="URL" href="F1_BT_in.nc"/>
