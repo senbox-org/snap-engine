@@ -4,6 +4,7 @@ import org.esa.snap.core.util.io.FileUtils;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -77,7 +78,7 @@ public class SlstrPduStitcherTest {
     }
 
     @Test
-//    @Ignore
+    @Ignore
     public void testStitchPDUs_AllSlstrL1BProductFiles() throws IOException, PDUStitchingException {
         final File[] slstrFiles = getSlstrFiles();
         final File stitchedProductFile = SlstrPduStitcher.createStitchedSlstrL1BFile(targetDirectory, slstrFiles);
