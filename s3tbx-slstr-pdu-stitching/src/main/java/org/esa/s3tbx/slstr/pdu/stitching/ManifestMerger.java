@@ -44,25 +44,23 @@ class ManifestMerger {
         return manifest;
     }
 
-    private static boolean hasChildOfName(Node node, Node newNode) {
+    private static boolean hasIdenticalChild(Node node, Node newNode) {
+        String[] discerningAttributesNames = {"ID", "name", "grid", "view", "element", "type"};
         for (int i = 0; i < node.getChildNodes().getLength(); i++) {
             final Node nodeToBeChecked = node.getChildNodes().item(i);
             if (nodeToBeChecked.getNodeName().equals(newNode.getNodeName())) {
                 final NamedNodeMap nodeToBeCheckedAttributes = nodeToBeChecked.getAttributes();
                 final NamedNodeMap attributes = newNode.getAttributes();
                 if (nodeToBeCheckedAttributes != null && attributes != null) {
-                    final Node idAttributeToBeChecked = nodeToBeCheckedAttributes.getNamedItem("ID");
-                    final Node nameAttributeToBeChecked = nodeToBeCheckedAttributes.getNamedItem("name");
-                    final Node idAttribute = attributes.getNamedItem("ID");
-                    final Node nameAttribute = attributes.getNamedItem("name");
-                    if (idAttributeToBeChecked != null && idAttribute != null) {
-                        return idAttributeToBeChecked.getNodeValue().equals(idAttribute.getNodeValue());
-                    } else if (nameAttributeToBeChecked != null && nameAttribute != null) {
-                        return nameAttributeToBeChecked.getNodeValue().equals(nameAttribute.getNodeValue());
+                    for (String name : discerningAttributesNames) {
+                        final Node attributeToBeChecked = nodeToBeCheckedAttributes.getNamedItem(name);
+                        final Node attribute = attributes.getNamedItem(name);
+                        if (attributeToBeChecked != null && attribute != null &&
+                                !attributeToBeChecked.getNodeValue().equals(attribute.getNodeValue())) {
+                            return false;
+                        }
                     }
-                    {
-                        return true;
-                    }
+                    return true;
                 } else {
                     return true;
                 }
@@ -91,7 +89,7 @@ class ManifestMerger {
                         toParent.appendChild(textNode);
                     }
                 } else {
-                    if (!hasChildOfName(toParent, item)) {
+                    if (!hasIdenticalChild(toParent, item)) {
                         List<Node> itemNodes = new ArrayList<>();
                         itemNodes.add(item);
                         final String nodeValue = item.getNodeValue();
