@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -227,7 +228,9 @@ public class SlstrPduStitcherTest {
     }
 
     private static File getResource(String fileName) {
-        return new File(SlstrPduStitcherTest.class.getResource(fileName + "/xfdumanifest.xml").getFile());
+        final String fullFileName = fileName + "/xfdumanifest.xml";
+        final URL resource = SlstrPduStitcherTest.class.getResource(fullFileName);
+        return new File(resource.getFile());
     }
 
 }

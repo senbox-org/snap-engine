@@ -16,6 +16,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 
 import static org.junit.Assert.fail;
 
@@ -101,6 +102,8 @@ public class ManifestMergerTest {
     }
 
     private static File getManifestFile(String fileName) {
-        return new File(ManifestMergerTest.class.getResource(fileName + "/xfdumanifest.xml").getFile());
+        final String fullFileName = fileName + "/xfdumanifest.xml";
+        final URL resource = ManifestMergerTest.class.getResource(fullFileName);
+        return new File(resource.getFile());
     }
 }

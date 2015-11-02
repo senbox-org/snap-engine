@@ -24,6 +24,7 @@ import ucar.nc2.Variable;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -520,6 +521,8 @@ public class NcFileStitcherTest {
     }
 
     private static File getNcFile(String fileName, String name) {
-        return new File(SlstrPduStitcherTest.class.getResource(fileName + "//" + name).getFile());
+        final String fullFileName = fileName + "/" + name;
+        final URL resource = NcFileStitcherTest.class.getResource(fullFileName);
+        return new File(resource.getFile());
     }
 }
