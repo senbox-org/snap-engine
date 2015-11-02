@@ -152,11 +152,6 @@
         </dependency>
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-slstr-pdu-stitching-ui</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
             <artifactId>s3tbx-slstr-regrid</artifactId>
             <version>${project.version}</version>
         </dependency>

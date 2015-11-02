@@ -48,7 +48,6 @@
         <module>s3tbx-sentinel3-reader</module>
         <module>s3tbx-sentinel3-reader-ui</module>
         <module>s3tbx-slstr-pdu-stitching</module>
-        <module>s3tbx-slstr-pdu-stitching-ui</module>
         <module>s3tbx-slstr-regrid</module>
         <module>s3tbx-spot-vgt-reader</module>
         <module>seadas-reader</module>
