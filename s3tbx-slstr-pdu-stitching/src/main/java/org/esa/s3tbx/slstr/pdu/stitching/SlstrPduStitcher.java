@@ -10,6 +10,11 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -36,7 +41,7 @@ public class SlstrPduStitcher {
             new DateFormatConverter(new SimpleDateFormat("yyyyMMdd'T'HHmmss"));
     private static final ImageSize NULL_IMAGE_SIZE = new ImageSize("null", 0, 0, 0, 0);
 
-    public static File createStitchedSlstrL1BFile(File targetDirectory, File[] slstrProductFiles) throws IllegalArgumentException, IOException, PDUStitchingException {
+    public static File createStitchedSlstrL1BFile(File targetDirectory, File[] slstrProductFiles) throws IllegalArgumentException, IOException, PDUStitchingException, ParserConfigurationException, TransformerException {
         Assert.notNull(slstrProductFiles);
         if (slstrProductFiles.length == 0) {
             throw new IllegalArgumentException("No product files provided");
@@ -51,21 +56,17 @@ public class SlstrPduStitcher {
             }
         }
         if (slstrProductFiles.length == 1) {
-            try {
-                final File originalParentDirectory = slstrProductFiles[0].getParentFile();
-                final String parentDirectoryName = originalParentDirectory.getName();
-                final File stitchedParentDirectory = new File(targetDirectory, parentDirectoryName);
-                Files.copy(originalParentDirectory.getParentFile().toPath(), stitchedParentDirectory.toPath());
-                final File[] files = originalParentDirectory.listFiles();
-                if (files != null) {
-                    for (File originalFile : files) {
-                        Files.copy(originalFile.toPath(), new File(stitchedParentDirectory, originalFile.getName()).toPath());
-                    }
+            final File originalParentDirectory = slstrProductFiles[0].getParentFile();
+            final String parentDirectoryName = originalParentDirectory.getName();
+            final File stitchedParentDirectory = new File(targetDirectory, parentDirectoryName);
+            Files.copy(originalParentDirectory.getParentFile().toPath(), stitchedParentDirectory.toPath());
+            final File[] files = originalParentDirectory.listFiles();
+            if (files != null) {
+                for (File originalFile : files) {
+                    Files.copy(originalFile.toPath(), new File(stitchedParentDirectory, originalFile.getName()).toPath());
                 }
-                return new File(stitchedParentDirectory, "xfdumanifest.xml");
-            } catch (IOException e) {
-                e.printStackTrace();
             }
+            return createManifestFile(slstrProductFiles, stitchedParentDirectory);
         }
         final Date now = Calendar.getInstance().getTime();
         SlstrNameDecomposition[] slstrNameDecompositions = new SlstrNameDecomposition[slstrProductFiles.length];
@@ -144,11 +145,19 @@ public class SlstrPduStitcher {
                 e.printStackTrace();
             }
         }
-        File stitchedProductFile = new File(stitchedProductFileParentDirectory, "xfdumanifest.xml");
-        if (!stitchedProductFile.createNewFile()) {
-            throw new PDUStitchingException("Could not create manifest file");
-        }
-        return stitchedProductFile;
+        return createManifestFile(slstrProductFiles, stitchedProductFileParentDirectory);
+
+    }
+
+    private static File createManifestFile(File[] manifestFiles, File stitchedParentDirectory)
+            throws ParserConfigurationException, PDUStitchingException, IOException, TransformerException {
+        final Document document = ManifestMerger.mergeManifests(manifestFiles);
+        final Transformer transformer = TransformerFactory.newInstance().newTransformer();
+        final DOMSource domSource = new DOMSource(document);
+        final File manifestFile = new File(stitchedParentDirectory, "xfdumanifest.xml");
+        final StreamResult streamResult = new StreamResult(manifestFile);
+        transformer.transform(domSource, streamResult);
+        return manifestFile;
     }
 
     static ImageSize createTargetImageSize(ImageSize[] imageSizes) {
