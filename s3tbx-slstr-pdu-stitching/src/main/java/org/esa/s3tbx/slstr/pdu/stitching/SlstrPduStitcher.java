@@ -99,7 +99,6 @@ public class SlstrPduStitcher {
         }
         for (int i = 0; i < ncFileNames.size(); i++) {
             List<File> ncFiles = new ArrayList<>();
-            List<Integer> indexesOfMissingFiles = new ArrayList<>();
             final String ncFileName = ncFileNames.get(i);
             String id = ncFileName.substring(ncFileName.length() - 5, ncFileName.length() - 3);
             if (id.equals("tx")) {
@@ -114,30 +113,16 @@ public class SlstrPduStitcher {
             if (targetImageSize == null) {
                 targetImageSize = NULL_IMAGE_SIZE;
             }
-            for (int j = 0; j < slstrProductFiles.length; j++) {
-                File ncFile = new File(slstrProductFiles[i].getParentFile(), ncFileName);
+            for (File slstrProductFile : slstrProductFiles) {
+                File ncFile = new File(slstrProductFile.getParentFile(), ncFileName);
                 if (ncFile.exists()) {
                     ncFiles.add(ncFile);
-                } else {
-                    indexesOfMissingFiles.add(j);
                 }
+            }
+            if (ncFiles.size() == 0) {
+                break;
             }
             final File[] ncFilesArray = ncFiles.toArray(new File[ncFiles.size()]);
-            if (indexesOfMissingFiles.size() > 0) {
-                ImageSize[] newImageSizes = new ImageSize[ncFiles.size()];
-                int missingFileCounter = 0;
-                for (int k = 0; k < imageSizes.length; k++) {
-                    if (k != missingFileCounter) {
-                        newImageSizes[k - missingFileCounter] = imageSizes[k];
-                    } else {
-                        missingFileCounter++;
-                    }
-                }
-                imageSizes = newImageSizes;
-                if (imageSizes.length > 0) {
-                    targetImageSize = createTargetImageSize(imageSizes);
-                }
-            }
             try {
                 NcFileStitcher.stitchNcFiles(ncFileName, stitchedProductFileParentDirectory, now,
                                              ncFilesArray, targetImageSize, imageSizes);
