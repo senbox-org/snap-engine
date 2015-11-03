@@ -1,5 +1,7 @@
 package org.esa.s3tbx.slstr.pdu.stitching;
 
+import com.bc.ceres.binding.ConversionException;
+import com.bc.ceres.binding.converters.DateFormatConverter;
 import com.sun.org.apache.xerces.internal.dom.DeferredTextImpl;
 import com.sun.org.apache.xerces.internal.dom.TextImpl;
 import org.w3c.dom.Document;
@@ -17,7 +19,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -25,27 +29,26 @@ import java.util.List;
  */
 class ManifestMerger {
 
-    static Document mergeManifests(File[] manifestFiles) throws IOException, ParserConfigurationException {
-//        XPathHelper xPathHelper = new XPathHelper(XPathFactory.newInstance().newXPath());
-//        Document[] manifestDocuments = new Document[manifestFiles.length];
+    private static final String[] discerningAttributesNames = {"ID", "name", "grid", "view", "element", "type"};
+    private static final DateFormatConverter SLSTR_DATE_FORMAT_CONVERTER =
+            new DateFormatConverter(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
+
+    static Document mergeManifests(File[] manifestFiles) throws IOException, ParserConfigurationException, PDUStitchingException {
         List<Node> manifestList = new ArrayList<>();
         for (File manifestFile : manifestFiles) {
-//            manifestDocuments[i] = createXmlDocument(new FileInputStream(manifestFiles[i]));
             manifestList.add(createXmlDocument(new FileInputStream(manifestFile)));
         }
         final DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         final Document manifest = documentBuilder.newDocument();
         manifest.setXmlStandalone(true);
-//        final Text newLineNode = manifest.createTextNode("\n");
-//        manifest.appendChild(newLineNode);
-//        copyNode(manifestDocuments[0], manifest, manifest);
-        copyNode(manifestList, manifest, manifest);
-//        xPathHelper.getNode()
+        mergeDefaultNodes(manifestList, manifest, manifest);
         return manifest;
     }
 
     private static boolean hasIdenticalChild(Node node, Node newNode) {
-        String[] discerningAttributesNames = {"ID", "name", "grid", "view", "element", "type"};
+        if (newNode.getNodeName().equals("sentinel-safe:ephemeris")) {
+            return false;
+        }
         for (int i = 0; i < node.getChildNodes().getLength(); i++) {
             final Node nodeToBeChecked = node.getChildNodes().item(i);
             if (nodeToBeChecked.getNodeName().equals(newNode.getNodeName())) {
@@ -69,83 +72,39 @@ class ManifestMerger {
         return false;
     }
 
-    private static void copyNode(List<Node> fromParents, Node toParent, Document toDocument) {
+    private static void mergeDefaultNodes(List<Node> fromParents, Node toParent, Document toDocument) throws PDUStitchingException {
         NodeList[] childNodeLists = new NodeList[fromParents.size()];
         for (int i = 0; i < childNodeLists.length; i++) {
             childNodeLists[i] = fromParents.get(i).getChildNodes();
         }
         for (int j = 0; j < fromParents.size(); j++) {
             for (int i = 0; i < childNodeLists[j].getLength(); i++) {
-                final Node item = childNodeLists[j].item(i);
-                if (item instanceof TextImpl && item.getTextContent().contains("\n")) {
+                final Node child = childNodeLists[j].item(i);
+                if (child instanceof TextImpl && child.getTextContent().contains("\n")) {
                     final Node lastChild = toParent.getLastChild();
                     if (!(lastChild instanceof TextImpl)) {
-                        final String textContent = item.getTextContent();
+                        final String textContent = child.getTextContent();
                         final Text textNode = toDocument.createTextNode(textContent);
                         toParent.appendChild(textNode);
                     } else if (!lastChild.getTextContent().contains("\n")) {
-                        final String textContent = item.getTextContent();
+                        final String textContent = child.getTextContent();
                         final Text textNode = toDocument.createTextNode(textContent);
                         toParent.appendChild(textNode);
                     }
                 } else {
-                    if (!hasIdenticalChild(toParent, item)) {
-                        List<Node> itemNodes = new ArrayList<>();
-                        itemNodes.add(item);
-                        final String nodeValue = item.getNodeValue();
-                        if (i < childNodeLists.length - 1) {
-                            for (int k = j + 1; k < childNodeLists.length; k++) {
-                                for (int l = 0; l < childNodeLists[k].getLength(); l++) {
-                                    if (childNodeLists[k].item(l).getNodeName().equals(item.getNodeName())) {
-                                        final String otherNodeValue = childNodeLists[k].item(l).getNodeValue();
-                                        if ((otherNodeValue != null && nodeValue == null) ||
-                                                (otherNodeValue == null && nodeValue != null) ||
-                                                (otherNodeValue != null && !otherNodeValue.trim().equals(nodeValue.trim()))) {
-                                            //todo throw Exception when no problems excepted
-                                            System.out.println("Different values for node " + item.getParentNode().getNodeName() + ": "
-                                                                       + otherNodeValue + ", " + nodeValue);
-                                        } else {
-                                            itemNodes.add(childNodeLists[k].item(l));
-                                        }
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                        if (item instanceof DeferredTextImpl) {
-                            final String textContent = item.getTextContent();
+                    if (!hasIdenticalChild(toParent, child)) {
+                        final String nodeValue = child.getNodeValue();
+                        final List<Node> childNodes = collectChildNodes(child, childNodeLists, j);
+                        if (child instanceof DeferredTextImpl) {
+                            final String textContent = child.getTextContent();
                             final Text textNode = toDocument.createTextNode(textContent);
                             toParent.appendChild(textNode);
                         } else {
-                            final Element manifestElement = toDocument.createElement(item.getNodeName());
+                            final Element manifestElement = toDocument.createElement(child.getNodeName());
                             manifestElement.setNodeValue(nodeValue);
-                            for (int n = 0; n < itemNodes.size(); n++) {
-                                final Node currentItem = itemNodes.get(n);
-                                final NamedNodeMap attributes = currentItem.getAttributes();
-
-                                if (attributes != null) {
-                                    for (int k = 0; k < attributes.getLength(); k++) {
-                                        final Node attribute = attributes.item(k);
-                                        if (!manifestElement.hasAttribute(attribute.getNodeName())) {
-                                            if (n < itemNodes.size() - 1) {
-                                                for (int m = n + 1; m < itemNodes.size(); m++) {
-                                                    final NamedNodeMap otherItemAttributes = itemNodes.get(m).getAttributes();
-                                                    final Node otherAttribute = otherItemAttributes.getNamedItem(attribute.getNodeName());
-                                                    if (otherAttribute != null && !otherAttribute.getNodeValue().equals(attribute.getNodeValue())) {
-                                                        //todo throw Exception when no problems excepted
-                                                        System.out.println("Different values for attribute " + attribute.getNodeName() +
-                                                                                   " of node " + currentItem.getNodeName());
-                                                    }
-                                                }
-                                            }
-
-                                            manifestElement.setAttribute(attribute.getNodeName(), attribute.getNodeValue().trim());
-                                        }
-                                    }
-                                }
-                            }
+                            copyAttributes(childNodes, manifestElement);
                             toParent.appendChild(manifestElement);
-                            copyNode(itemNodes, manifestElement, toDocument);
+                            mergeChildNodes(childNodes, manifestElement, toDocument);
                         }
                     }
                 }
@@ -153,46 +112,138 @@ class ManifestMerger {
         }
     }
 
-//    private static boolean equalsNodesFromOtherLists(Node node, NodeList[] childNodeLists, int indexOfCurrentList) {
-//        for (int i = indexOfCurrentList; i < childNodeLists.length; ++i) {
-//            for (int j = 0; j < childNodeLists[i].getLength(); j++) {
-//                final Node toCompare = childNodeLists[i].item(j);
-//                if (toCompare.getNodeName().equals(node.getNodeName())) {
-//                    if (!areEqual(toCompare, node)) {
-//                        return false;
-//                    }
+    static void mergeChildNodes(List<Node> fromParents, Node toParent, Document toDocument) throws PDUStitchingException {
+        if (toParent.getNodeName().equals("checksum")) {
+            setChecksum(toParent);
+        } else if (toParent.getNodeName().equals("slstr:classificationSummary")) {
+            mergeSlstrClassificationSummaryNodes(fromParents, toParent, toDocument);
+        } else {
+            mergeDefaultNodes(fromParents, toParent, toDocument);
+        }
+    }
+
+    static void setChecksum(Node toParent) throws PDUStitchingException {
+        //todo get full path to file
+//        Node sibling = toParent;
+//        try {
+//            while (!sibling.getNodeName().equals("fileLocation")) {
+//                sibling = sibling.getPreviousSibling();
+//
+//            }
+//            final NamedNodeMap attributes = sibling.getAttributes();
+//            if (attributes != null) {
+//                final Node hrefAttribute = attributes.getNamedItem("href");
+//                if (hrefAttribute != null) {
+//                    final String fileName = hrefAttribute.getNodeValue();
+//                    final MessageDigest md5 = MessageDigest.getInstance("MD5");
+//                    final DigestInputStream digestInputStream = new DigestInputStream(Files.newInputStream(Paths.get(fileName)), md5);
+//                    digestInputStream.read();
+//                    toParent.setNodeValue(new String(md5.digest()));
 //                }
 //            }
+//        } catch (NullPointerException | NoSuchAlgorithmException | IOException npe) {
+//            throw new PDUStitchingException("Could not create checksum");
 //        }
-//        return true;
-//    }
+        toParent.setNodeValue("");
+    }
 
-//    private static boolean areEqual(Node node1, Node node2) {
-//        if (!node1.getNodeValue().equals(node2.getNodeValue())) {
-//            return false;
-//        }
-//        final NamedNodeMap node1Attributes = node1.getAttributes();
-//        final NamedNodeMap node2Attributes = node2.getAttributes();
-//
-//    }
+    static void mergeSlstrClassificationSummaryNodes(List<Node> fromParents, Node toParent, Document toDocument) throws PDUStitchingException {
+        mergeDefaultNodes(fromParents, toParent, toDocument);
+    }
 
-    private static void copyNode(Node fromParent, Node toParent, Document toDocument) {
-        for (int i = 0; i < fromParent.getChildNodes().getLength(); i++) {
-            final Node item = fromParent.getChildNodes().item(i);
-            if (item instanceof DeferredTextImpl) {
-                final Text textNode = toDocument.createTextNode(item.getTextContent());
-                toParent.appendChild(textNode);
-            } else {
-                final Element manifestElement = toDocument.createElement(item.getNodeName());
-                manifestElement.setNodeValue(item.getNodeValue());
-                final NamedNodeMap attributes = item.getAttributes();
-                for (int j = 0; j < attributes.getLength(); j++) {
-                    final Node attribute = attributes.item(j);
-                    manifestElement.setAttribute(attribute.getNodeName(), attribute.getNodeValue());
+    private static List<Node> collectChildNodes(Node child, NodeList[] childNodeLists, int indexOfCurrentParent)
+            throws PDUStitchingException {
+        List<Node> itemNodes = new ArrayList<>();
+        itemNodes.add(child);
+        final String nodeValue = child.getNodeValue();
+        if (indexOfCurrentParent < childNodeLists.length - 1) {
+            for (int k = indexOfCurrentParent + 1; k < childNodeLists.length; k++) {
+                for (int l = 0; l < childNodeLists[k].getLength(); l++) {
+                    if (childNodeLists[k].item(l).getNodeName().equals(child.getNodeName())) {
+                        boolean discerningAttributesAreDifferent = false;
+                        final NamedNodeMap attributes = child.getAttributes();
+                        final NamedNodeMap otherAttributes = childNodeLists[k].item(l).getAttributes();
+                        if (attributes != null && otherAttributes != null) {
+                            for (String name : discerningAttributesNames) {
+                                final Node attributeToBeChecked = attributes.getNamedItem(name);
+                                final Node attribute = otherAttributes.getNamedItem(name);
+                                if (attributeToBeChecked != null && attribute != null &&
+                                        !attributeToBeChecked.getNodeValue().equals(attribute.getNodeValue())) {
+                                    discerningAttributesAreDifferent = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (!discerningAttributesAreDifferent) {
+                            final String otherNodeValue = childNodeLists[k].item(l).getNodeValue();
+                            if ((otherNodeValue != null && nodeValue == null) ||
+                                    (otherNodeValue == null && nodeValue != null) ||
+                                    (otherNodeValue != null && !otherNodeValue.trim().equals(nodeValue.trim()))) {
+                                throw new PDUStitchingException("Different values for node " + child.getParentNode().getNodeName() + ": "
+                                                                        + otherNodeValue + ", " + nodeValue);
+                            } else {
+                                itemNodes.add(childNodeLists[k].item(l));
+                            }
+                        }
+                        break;
+                    }
                 }
-                toParent.appendChild(manifestElement);
-                copyNode(item, manifestElement, toDocument);
             }
+        }
+        return itemNodes;
+    }
+
+    private static void copyAttributes(List<Node> itemNodes, Element manifestElement) throws PDUStitchingException {
+        for (int n = 0; n < itemNodes.size(); n++) {
+            final Node currentItem = itemNodes.get(n);
+            final NamedNodeMap attributes = currentItem.getAttributes();
+            if (attributes != null) {
+                for (int k = 0; k < attributes.getLength(); k++) {
+                    final Node attribute = attributes.item(k);
+                    final String attributeName = attribute.getNodeName();
+                    if (!manifestElement.hasAttribute(attributeName)) {
+                        String attributeValue = attribute.getNodeValue();
+                        if (n < itemNodes.size() - 1) {
+                            for (int m = n + 1; m < itemNodes.size(); m++) {
+                                final NamedNodeMap otherItemAttributes = itemNodes.get(m).getAttributes();
+                                final Node otherAttribute = otherItemAttributes.getNamedItem(attributeName);
+                                if (otherAttribute != null) {
+                                    final String otherAttributeValue = otherAttribute.getNodeValue();
+                                    if (attributeName.equals("start")) {
+                                        final Date startValue = parseDate(attributeValue);
+                                        final Date otherStartValue = parseDate(otherAttributeValue);
+                                        if (otherStartValue.before(startValue)) {
+                                            attributeValue = otherAttributeValue;
+                                        }
+                                    } else if (attributeName.equals("stop")) {
+                                        final Date startValue = parseDate(attributeValue);
+                                        final Date otherStartValue = parseDate(otherAttributeValue);
+                                        if (otherStartValue.after(startValue)) {
+                                            attributeValue = otherAttributeValue;
+                                        }
+                                    } else if (!otherAttributeValue.equals(attributeValue)) {
+                                        throw new PDUStitchingException("Different values for attribute " + attributeName +
+                                                                                " of node " + currentItem.getNodeName());
+                                    }
+                                }
+                            }
+                        }
+                        manifestElement.setAttribute(attributeName, attributeValue.trim());
+                    }
+                }
+            }
+        }
+    }
+
+    private static Date parseDate(String text) throws PDUStitchingException {
+        String subDate = text;
+        if (text.endsWith("Z")) {
+            subDate = text.substring(0, 23) + "Z";
+        }
+        try {
+            return SLSTR_DATE_FORMAT_CONVERTER.parse(subDate);
+        } catch (ConversionException e) {
+            throw new PDUStitchingException("Error while parsing start time: " + e.getMessage());
         }
     }
 
