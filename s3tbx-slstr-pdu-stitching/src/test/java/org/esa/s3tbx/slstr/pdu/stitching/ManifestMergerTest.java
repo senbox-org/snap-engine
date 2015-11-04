@@ -9,6 +9,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -84,7 +85,6 @@ public class ManifestMergerTest {
         final Document manifest = ManifestMerger.mergeManifests(getManifestFiles());
         final Transformer transformer = TransformerFactory.newInstance().newTransformer();
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-//        transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
         transformer.setOutputProperty(OutputKeys.STANDALONE, "no");
         final DOMSource manifestSource = new DOMSource(manifest);
         final File manifestFile = new File(targetDirectory, "xfdumanifest.xml");
@@ -98,7 +98,7 @@ public class ManifestMergerTest {
         List<Node> fromParents = new ArrayList<>();
         fromParents.add(createNode(
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                "          <sentinel-safe:processing name=\"DataProcessing\" outputLevel=\"1\" start=\"2015-02-17T18:35:19.139217Z\" stop=\"2015-02-17T18:58:46.896371Z\">\n" +
+                        "          <sentinel-safe:processing name=\"DataProcessing\" outputLevel=\"1\" start=\"2015-02-17T18:35:19.139217Z\" stop=\"2015-02-17T18:58:46.896371Z\">\n" +
                         "          </sentinel-safe:processing>"));
         fromParents.add(createNode(
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
@@ -128,9 +128,94 @@ public class ManifestMergerTest {
     }
 
     @Test
-    public void testMergeSlstrClassificationSummaryNodes() {
-        final Element manifestElement = manifest.createElement("slstr:classificationSummary");
-//        ManifestMerger.mergeSlstrClassificationSummaryNodes(, manifestElement, manifest);
+    public void testMergeImageSizeNodes() throws ParserConfigurationException, SAXException, IOException, PDUStitchingException {
+        List<Node> fromParents = new ArrayList<>();
+        fromParents.add(createNode(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                        "            <slstr:nadirImageSize grid=\"Tie Points\">\n" +
+                        "              <sentinel3:startOffset>21687</sentinel3:startOffset>\n" +
+                        "              <sentinel3:trackOffset>64</sentinel3:trackOffset>\n" +
+                        "              <sentinel3:rows>2000</sentinel3:rows>\n" +
+                        "              <sentinel3:columns>130</sentinel3:columns>\n" +
+                        "            </slstr:nadirImageSize>").getFirstChild());
+        fromParents.add(createNode(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                        "                        <slstr:nadirImageSize grid=\"Tie Points\">\n" +
+                        "                            <sentinel3:startOffset>23687</sentinel3:startOffset>\n" +
+                        "                            <sentinel3:trackOffset>64</sentinel3:trackOffset>\n" +
+                        "                            <sentinel3:rows>2000</sentinel3:rows>\n" +
+                        "                            <sentinel3:columns>130</sentinel3:columns>\n" +
+                        "                        </slstr:nadirImageSize>").getFirstChild());
+        fromParents.add(createNode(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                        "        <slstr:nadirImageSize grid=\"Tie Points\">\n" +
+                        "        <sentinel3:startOffset>25687</sentinel3:startOffset>\n" +
+                        "        <sentinel3:trackOffset>64</sentinel3:trackOffset>\n" +
+                        "        <sentinel3:rows>2000</sentinel3:rows>\n" +
+                        "        <sentinel3:columns>130</sentinel3:columns>\n" +
+                        "        </slstr:nadirImageSize>").getFirstChild());
+
+        final Element manifestElement = manifest.createElement("slstr:nadirImageSize");
+        manifest.appendChild(manifestElement);
+
+        ManifestMerger.mergeImageSizeNodes(fromParents, manifestElement, manifest);
+
+        assertEquals(1, manifestElement.getAttributes().getLength());
+        assert(manifestElement.hasAttribute("grid"));
+        assertEquals("Tie Points", manifestElement.getAttribute("grid"));
+
+        final NodeList childNodes = manifestElement.getChildNodes();
+        assertEquals(4, childNodes.getLength());
+        assertEquals("sentinel3:startOffset", childNodes.item(0).getNodeName());
+        assertEquals("21687", childNodes.item(0).getFirstChild().getNodeValue());
+        assertEquals("sentinel3:trackOffset", childNodes.item(1).getNodeName());
+        assertEquals("64", childNodes.item(1).getFirstChild().getNodeValue());
+        assertEquals("sentinel3:rows", childNodes.item(2).getNodeName());
+        assertEquals("6000", childNodes.item(2).getFirstChild().getNodeValue());
+        assertEquals("sentinel3:columns", childNodes.item(3).getNodeName());
+        assertEquals("130", childNodes.item(3).getFirstChild().getNodeValue());
+    }
+
+    @Test
+    public void testMergeStartTimeNodes() throws ParserConfigurationException, SAXException, IOException, PDUStitchingException {
+        List<Node> fromParents = new ArrayList<>();
+        fromParents.add(createNode(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                        "<sentinel-safe:startTime>2013-07-07T15:32:52.300000Z</sentinel-safe:startTime>").getFirstChild());
+        fromParents.add(createNode(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                        "<sentinel-safe:startTime>2013-07-07T15:37:52.300000Z</sentinel-safe:startTime>\n").getFirstChild());
+        fromParents.add(createNode(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                        "<sentinel-safe:startTime>2013-07-07T15:42:52.300000Z</sentinel-safe:startTime>\n").getFirstChild());
+        final Element manifestElement = manifest.createElement("sentinel-safe:startTime");
+
+        ManifestMerger.mergeStartTimeNodes(fromParents, manifestElement, manifest);
+
+        assertEquals(0, manifestElement.getAttributes().getLength());
+        assertEquals(1, manifestElement.getChildNodes().getLength());
+        assertEquals("2013-07-07T15:32:52.300000Z", manifestElement.getFirstChild().getNodeValue());
+    }
+
+    @Test
+    public void testMergeStopTimeNodes() throws ParserConfigurationException, SAXException, IOException, PDUStitchingException {
+        List<Node> fromParents = new ArrayList<>();
+        fromParents.add(createNode(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                        "<sentinel-safe:stopTime>2013-07-07T15:37:52.000014Z</sentinel-safe:stopTime>").getFirstChild());
+        fromParents.add(createNode(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                        "<sentinel-safe:stopTime>2013-07-07T15:42:52.000014Z</sentinel-safe:stopTime>").getFirstChild());
+        fromParents.add(createNode(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                        "<sentinel-safe:stopTime>2013-07-07T15:47:52.000014Z</sentinel-safe:stopTime>").getFirstChild());
+        final Element manifestElement = manifest.createElement("sentinel-safe:stopTime");
+
+        ManifestMerger.mergeStopTimeNodes(fromParents, manifestElement, manifest);
+
+        assertEquals(0, manifestElement.getAttributes().getLength());
+        assertEquals(1, manifestElement.getChildNodes().getLength());
+        assertEquals("2013-07-07T15:47:52.000014Z", manifestElement.getFirstChild().getNodeValue());
     }
 
     private static File[] getManifestFiles() {

@@ -149,7 +149,6 @@ public class NcFileStitcherTest {
     }
 
     @Test
-    @Ignore //set to ignore as test takes a few seconds
     public void testStitchF1_BT_io() throws Exception {
         final String ncFileName = "F1_BT_io.nc";
         final ImageSize targetImageSize = new ImageSize("io", 21687, 450, 6000, 900);

@@ -29,7 +29,7 @@ import java.util.List;
  */
 class ManifestMerger {
 
-    private static final String[] discerningAttributesNames = {"ID", "name", "grid", "view", "element", "type"};
+    private static final String[] discerningAttributesNames = {"ID", "name", "grid", "view", "element", "type", "role"};
     private static final DateFormatConverter SLSTR_DATE_FORMAT_CONVERTER =
             new DateFormatConverter(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
 
@@ -94,7 +94,7 @@ class ManifestMerger {
                 } else {
                     if (!hasIdenticalChild(toParent, child)) {
                         final String nodeValue = child.getNodeValue();
-                        final List<Node> childNodes = collectChildNodes(child, childNodeLists, j);
+                        List<Node> childNodes = collectChildNodes(child, childNodeLists, j);
                         if (child instanceof DeferredTextImpl) {
                             final String textContent = child.getTextContent();
                             final Text textNode = toDocument.createTextNode(textContent);
@@ -112,9 +112,34 @@ class ManifestMerger {
         }
     }
 
-    static void mergeChildNodes(List<Node> fromParents, Node toParent, Document toDocument) throws PDUStitchingException {
+    static void mergeChildNodes(List<Node> fromParents, Element toParent, Document toDocument) throws PDUStitchingException {
         if (toParent.getNodeName().equals("checksum")) {
             setChecksum(toParent);
+        } else if (toParent.getNodeName().equals("slstr:nadirImageSize") ||
+                toParent.getNodeName().equals("slstr:obliqueImageSize")) {
+            mergeImageSizeNodes(fromParents, toParent, toDocument);
+        } else if (toParent.getNodeName().equals("sentinel-safe:startTime")) {
+            mergeStartTimeNodes(fromParents, toParent, toDocument);
+        } else if (toParent.getNodeName().equals("sentinel-safe:stopTime")) {
+            mergeStopTimeNodes(fromParents, toParent, toDocument);
+        } else if (toParent.getNodeName().equals("slstr:classificationSummary")) {
+            //todo implement
+        } else if (toParent.getNodeName().equals("slstr:pixelQualitySummary")) {
+            //todo implement
+        } else if (toParent.getNodeName().equals("slstr:missingElements")) {
+            //todo implement
+        } else if (toParent.getNodeName().equals("sentinel-safe:footPrint")) {
+            //todo implement
+        } else if (toParent.getNodeName().equals("sentinel3:creationTime")) {
+            //todo implement
+        } else if (toParent.getNodeName().equals("sentinel3:granuleNumber")) {
+            //todo implement
+        } else if (toParent.getNodeName().equals("sentinel3:productName")) {
+            //todo implement
+        } else if (toParent.getNodeName().equals("sentinel3:receivingStartTime")) {
+            //todo implement
+        } else if (toParent.getNodeName().equals("sentinel3:receivingStopTime")) {
+            //todo implement
         } else if (toParent.getNodeName().equals("slstr:classificationSummary")) {
             mergeSlstrClassificationSummaryNodes(fromParents, toParent, toDocument);
         } else {
@@ -147,7 +172,76 @@ class ManifestMerger {
         toParent.setNodeValue("");
     }
 
+    //package local for testing
+    static void mergeStartTimeNodes(List<Node> fromParents, Element toParent, Document toDocument) throws PDUStitchingException {
+        String earliestDateAsNodeValue = fromParents.get(0).getFirstChild().getNodeValue();
+        Date earliestDate = parseDate(earliestDateAsNodeValue);
+        if (fromParents.size() > 1) {
+            for (int i = 1; i < fromParents.size(); i++) {
+                final String nodeValue = fromParents.get(i).getFirstChild().getNodeValue();
+                final Date date = parseDate(nodeValue);
+                if (date.before(earliestDate)) {
+                    earliestDateAsNodeValue = nodeValue;
+                    earliestDate = date;
+                }
+            }
+        }
+        final Text textNode = toDocument.createTextNode(earliestDateAsNodeValue);
+        toParent.appendChild(textNode);
+    }
+
+    //package local for testing
+    static void mergeStopTimeNodes(List<Node> fromParents, Element toParent, Document toDocument) throws PDUStitchingException {
+        String latetDateAsNodeValue = fromParents.get(0).getFirstChild().getNodeValue();
+        Date latestDate = parseDate(latetDateAsNodeValue);
+        if (fromParents.size() > 1) {
+            for (int i = 1; i < fromParents.size(); i++) {
+                final String nodeValue = fromParents.get(i).getFirstChild().getNodeValue();
+                final Date date = parseDate(nodeValue);
+                if (date.after(latestDate)) {
+                    latetDateAsNodeValue = nodeValue;
+                    latestDate = date;
+                }
+            }
+        }
+        final Text textNode = toDocument.createTextNode(latetDateAsNodeValue);
+        toParent.appendChild(textNode);
+    }
+
+    //package local for testing
+    static void mergeImageSizeNodes(List<Node> fromParents, Element toParent, Document toDocument) throws PDUStitchingException {
+        ImageSize[] imageSizes = new ImageSize[fromParents.size()];
+        for (int i = 0; i < imageSizes.length; i++) {
+            imageSizes[i] = ImageSizeHandler.extractImageSizeFromNode(fromParents.get(i), "");
+        }
+        final ImageSize targetImageSize = ImageSizeHandler.createTargetImageSize(imageSizes);
+        final String grid = fromParents.get(0).getAttributes().item(0).getNodeValue();
+        toParent.setAttribute("grid", grid);
+        toParent.appendChild(toDocument.createTextNode("\n"));
+        final Element startOffsetElement = toDocument.createElement("sentinel3:startOffset");
+        final Text startOffsetTextNode = toDocument.createTextNode("" + targetImageSize.getStartOffset());
+        startOffsetElement.appendChild(startOffsetTextNode);
+        toParent.appendChild(startOffsetElement);
+        toParent.appendChild(toDocument.createTextNode("\n"));
+        final Element trackOffsetElement = toDocument.createElement("sentinel3:trackOffset");
+        final Text trackOffsetTextNode = toDocument.createTextNode("" + targetImageSize.getTrackOffset());
+        trackOffsetElement.appendChild(trackOffsetTextNode);
+        toParent.appendChild(trackOffsetElement);
+        toParent.appendChild(toDocument.createTextNode("\n"));
+        final Element rowsElement = toDocument.createElement("sentinel3:rows");
+        final Text rowsTextNode = toDocument.createTextNode("" + targetImageSize.getRows());
+        rowsElement.appendChild(rowsTextNode);
+        toParent.appendChild(rowsElement);
+        toParent.appendChild(toDocument.createTextNode("\n"));
+        final Element columnsElement = toDocument.createElement("sentinel3:columns");
+        final Text columnsTextNode = toDocument.createTextNode("" + targetImageSize.getColumns());
+        columnsElement.appendChild(columnsTextNode);
+        toParent.appendChild(columnsElement);
+        toParent.appendChild(toDocument.createTextNode("\n"));
+    }
+
     static void mergeSlstrClassificationSummaryNodes(List<Node> fromParents, Node toParent, Document toDocument) throws PDUStitchingException {
+        //todo implement
         mergeDefaultNodes(fromParents, toParent, toDocument);
     }
 
@@ -155,6 +249,10 @@ class ManifestMerger {
             throws PDUStitchingException {
         List<Node> itemNodes = new ArrayList<>();
         itemNodes.add(child);
+        //todo handle this more gracefully
+        if (child.getNodeName().equals("sentinel-safe:orbitReference")) {
+            return itemNodes;
+        }
         final String nodeValue = child.getNodeValue();
         if (indexOfCurrentParent < childNodeLists.length - 1) {
             for (int k = indexOfCurrentParent + 1; k < childNodeLists.length; k++) {
@@ -170,7 +268,6 @@ class ManifestMerger {
                                 if (attributeToBeChecked != null && attribute != null &&
                                         !attributeToBeChecked.getNodeValue().equals(attribute.getNodeValue())) {
                                     discerningAttributesAreDifferent = true;
-                                    break;
                                 }
                             }
                         }
@@ -183,9 +280,9 @@ class ManifestMerger {
                                                                         + otherNodeValue + ", " + nodeValue);
                             } else {
                                 itemNodes.add(childNodeLists[k].item(l));
+                                break;
                             }
                         }
-                        break;
                     }
                 }
             }

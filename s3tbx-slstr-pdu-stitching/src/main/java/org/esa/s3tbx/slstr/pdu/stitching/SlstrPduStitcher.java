@@ -4,7 +4,6 @@ import com.bc.ceres.binding.ConversionException;
 import com.bc.ceres.binding.converters.DateFormatConverter;
 import com.bc.ceres.core.Assert;
 import org.w3c.dom.Document;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -76,7 +75,7 @@ public class SlstrPduStitcher {
         for (int i = 0; i < slstrProductFiles.length; i++) {
             slstrNameDecompositions[i] = decomposeSlstrName(slstrProductFiles[i].getParentFile().getName());
             manifestDocuments[i] = createXmlDocument(new FileInputStream(slstrProductFiles[i]));
-            final ImageSize[] imageSizes = extractImageSizes(manifestDocuments[i]);
+            final ImageSize[] imageSizes = ImageSizeHandler.extractImageSizes(manifestDocuments[i]);
             for (ImageSize imageSize : imageSizes) {
                 if (idToImageSizes.containsKey(imageSize.getIdentifier())) {
                     idToImageSizes.get(imageSize.getIdentifier())[i] = imageSize;
@@ -95,39 +94,42 @@ public class SlstrPduStitcher {
         }
         Map<String, ImageSize> idToTargetImageSize = new HashMap<>();
         for (String id : idToImageSizes.keySet()) {
-            idToTargetImageSize.put(id, createTargetImageSize(idToImageSizes.get(id)));
+            idToTargetImageSize.put(id, ImageSizeHandler.createTargetImageSize(idToImageSizes.get(id)));
         }
         for (int i = 0; i < ncFileNames.size(); i++) {
             List<File> ncFiles = new ArrayList<>();
+            List<ImageSize> imageSizeList = new ArrayList<>();
             final String ncFileName = ncFileNames.get(i);
             String id = ncFileName.substring(ncFileName.length() - 5, ncFileName.length() - 3);
             if (id.equals("tx")) {
                 id = "tn";
+            }
+            ImageSize targetImageSize = idToTargetImageSize.get(id);
+            if (targetImageSize == null) {
+                targetImageSize = NULL_IMAGE_SIZE;
             }
             ImageSize[] imageSizes = idToImageSizes.get(id);
             if (imageSizes == null) {
                 imageSizes = new ImageSize[ncFileNames.size()];
                 Arrays.fill(imageSizes, NULL_IMAGE_SIZE);
             }
-            ImageSize targetImageSize = idToTargetImageSize.get(id);
-            if (targetImageSize == null) {
-                targetImageSize = NULL_IMAGE_SIZE;
-            }
-            for (File slstrProductFile : slstrProductFiles) {
+            for (int j = 0; j < slstrProductFiles.length; j++) {
+                File slstrProductFile = slstrProductFiles[j];
                 File ncFile = new File(slstrProductFile.getParentFile(), ncFileName);
                 if (ncFile.exists()) {
                     ncFiles.add(ncFile);
+                    imageSizeList.add(imageSizes[j]);
                 }
             }
-            if (ncFiles.size() == 0) {
-                break;
-            }
-            final File[] ncFilesArray = ncFiles.toArray(new File[ncFiles.size()]);
-            try {
-                NcFileStitcher.stitchNcFiles(ncFileName, stitchedProductFileParentDirectory, now,
-                                             ncFilesArray, targetImageSize, imageSizes);
-            } catch (PDUStitchingException e) {
-                e.printStackTrace();
+            if (ncFiles.size() > 0) {
+                final File[] ncFilesArray = ncFiles.toArray(new File[ncFiles.size()]);
+                final ImageSize[] imageSizeArray = imageSizeList.toArray(new ImageSize[imageSizeList.size()]);
+                try {
+                    NcFileStitcher.stitchNcFiles(ncFileName, stitchedProductFileParentDirectory, now,
+                                                 ncFilesArray, targetImageSize, imageSizeArray);
+                } catch (PDUStitchingException e) {
+                    e.printStackTrace();
+                }
             }
         }
         return createManifestFile(slstrProductFiles, stitchedProductFileParentDirectory);
@@ -145,28 +147,6 @@ public class SlstrPduStitcher {
         return manifestFile;
     }
 
-    static ImageSize createTargetImageSize(ImageSize[] imageSizes) {
-        int startOffset = Integer.MAX_VALUE;
-        int trackOffset = Integer.MAX_VALUE;
-        int highestStart = Integer.MIN_VALUE;
-        int highestTrack = Integer.MIN_VALUE;
-        for (ImageSize imageSize : imageSizes) {
-            if (imageSize.getStartOffset() < startOffset) {
-                startOffset = imageSize.getStartOffset();
-            }
-            if (imageSize.getTrackOffset() < trackOffset) {
-                trackOffset = imageSize.getTrackOffset();
-            }
-            if (imageSize.getStartOffset() + imageSize.getRows() > highestStart) {
-                highestStart = imageSize.getStartOffset() + imageSize.getRows();
-            }
-            if (imageSize.getTrackOffset() + imageSize.getColumns() > highestTrack) {
-                highestTrack = imageSize.getTrackOffset() + imageSize.getColumns();
-            }
-        }
-        return new ImageSize(imageSizes[0].getIdentifier(), startOffset, trackOffset, highestStart - startOffset, highestTrack - trackOffset);
-    }
-
     static void collectFiles(List<String> ncFileNames, Document manifestDocument) {
         final NodeList fileLocationNodes = manifestDocument.getElementsByTagName("fileLocation");
         for (int i = 0; i < fileLocationNodes.getLength(); i++) {
@@ -174,58 +154,6 @@ public class SlstrPduStitcher {
             if (!ncFileNames.contains(ncFileName)) {
                 ncFileNames.add(ncFileName);
             }
-        }
-    }
-
-    static ImageSize[] extractImageSizes(Document manifestDocument) {
-        final NodeList nadirElements = manifestDocument.getElementsByTagName("slstr:nadirImageSize");
-        final NodeList obliqueElements = manifestDocument.getElementsByTagName("slstr:obliqueImageSize");
-        final ImageSize[] imageSizes = new ImageSize[obliqueElements.getLength() + obliqueElements.getLength()];
-        for (int i = 0; i < nadirElements.getLength(); i++) {
-            imageSizes[i] = extractImageSizeFromNode(nadirElements.item(i), "n");
-        }
-        for (int i = 0; i < obliqueElements.getLength(); i++) {
-            imageSizes[nadirElements.getLength() + i] = extractImageSizeFromNode(obliqueElements.item(i), "o");
-        }
-        return imageSizes;
-    }
-
-    private static ImageSize extractImageSizeFromNode(Node element, String idExtension) {
-        String id = getId(element.getAttributes().getNamedItem("grid").getNodeValue()) + idExtension;
-        int startOffset = -1;
-        int trackOffset = -1;
-        int rows = -1;
-        int columns = -1;
-        final NodeList elementChildNodes = element.getChildNodes();
-        for (int j = 0; j < elementChildNodes.getLength(); j++) {
-            final Node node = elementChildNodes.item(j);
-            if (node.getNodeName().equals("sentinel3:startOffset")) {
-                startOffset = Integer.parseInt(node.getChildNodes().item(0).getNodeValue());
-            } else if (node.getNodeName().equals("sentinel3:trackOffset")) {
-                trackOffset = Integer.parseInt(node.getChildNodes().item(0).getNodeValue());
-            } else if (node.getNodeName().equals("sentinel3:rows")) {
-                rows = Integer.parseInt(node.getChildNodes().item(0).getNodeValue());
-            } else if (node.getNodeName().equals("sentinel3:columns")) {
-                columns = Integer.parseInt(node.getChildNodes().item(0).getNodeValue());
-            }
-        }
-        return new ImageSize(id, startOffset, trackOffset, rows, columns);
-    }
-
-    private static String getId(String gridName) {
-        switch (gridName) {
-            case "1 km":
-                return "i";
-            case "0.5 km stripe A":
-                return "a";
-            case "0.5 km stripe B":
-                return "b";
-            case "0.5 km TDI":
-                return "c";
-            case "Tie Points":
-                return "t";
-            default:
-                return "";
         }
     }
 
