@@ -97,7 +97,7 @@ public abstract class OlciProductFactory extends AbstractProductFactory {
 
     @Override
     protected void setGeoCoding(Product targetProduct) throws IOException {
-        if (Config.instance().preferences().getBoolean(OLCI_USE_PIXELGEOCODING, false)) {
+        if (Config.instance("s3tbx").load().preferences().getBoolean(OLCI_USE_PIXELGEOCODING, false)) {
             setPixelGeoCoding(targetProduct);
         } else {
             setTiePointGeoCoding(targetProduct);
