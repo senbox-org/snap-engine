@@ -35,7 +35,7 @@ public class SlstrTiePointGeoCodingTest {
         referenceGeoCoding.getGeoPos(pixelPos, referenceGeoPos);
 
         final SlstrTiePointGeoCoding slstrTiePointGeoCoding =
-                new SlstrTiePointGeoCoding(lat, lon, new AffineTransform2D(new AffineTransform()), null);
+                new SlstrTiePointGeoCoding(lat, lon, new AffineTransform2D(new AffineTransform()));
         final GeoPos slstrGeoPos = new GeoPos();
         slstrTiePointGeoCoding.getGeoPos(pixelPos, slstrGeoPos);
 
@@ -50,7 +50,7 @@ public class SlstrTiePointGeoCodingTest {
         referenceGeoCoding.getPixelPos(geoPos, referencePixelPos);
 
         final SlstrTiePointGeoCoding slstrTiePointGeoCoding =
-                new SlstrTiePointGeoCoding(lat, lon, new AffineTransform2D(new AffineTransform()), null);
+                new SlstrTiePointGeoCoding(lat, lon, new AffineTransform2D(new AffineTransform()));
         final PixelPos slstrPixelPos = new PixelPos();
         slstrTiePointGeoCoding.getPixelPos(geoPos, slstrPixelPos);
 
@@ -74,7 +74,7 @@ public class SlstrTiePointGeoCodingTest {
         transform.scale(2.0, 2.0);
         transform.translate(1.0, 1.0);
         final SlstrTiePointGeoCoding slstrTiePointGeoCoding =
-                new SlstrTiePointGeoCoding(lat, lon, new AffineTransform2D(transform), null);
+                new SlstrTiePointGeoCoding(lat, lon, new AffineTransform2D(transform));
         final GeoPos slstrGeoPos1 = new GeoPos();
         final GeoPos slstrGeoPos2 = new GeoPos();
         final GeoPos slstrGeoPos3 = new GeoPos();
@@ -108,7 +108,7 @@ public class SlstrTiePointGeoCodingTest {
         transform.scale(2.0, 2.0);
         transform.translate(1.0, 1.0);
         final SlstrTiePointGeoCoding slstrTiePointGeoCoding =
-                new SlstrTiePointGeoCoding(lat, lon, new AffineTransform2D(transform), null);
+                new SlstrTiePointGeoCoding(lat, lon, new AffineTransform2D(transform));
         final PixelPos slstrPixelPos1 = new PixelPos();
         final PixelPos slstrPixelPos2 = new PixelPos();
         final PixelPos slstrPixelPos3 = new PixelPos();
