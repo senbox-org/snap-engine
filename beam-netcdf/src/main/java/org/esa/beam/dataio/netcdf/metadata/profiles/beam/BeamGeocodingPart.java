@@ -20,8 +20,11 @@ import org.esa.beam.dataio.netcdf.ProfileWriteContext;
 import org.esa.beam.dataio.netcdf.metadata.profiles.cf.CfGeocodingPart;
 import org.esa.beam.dataio.netcdf.nc.NFileWriteable;
 import org.esa.beam.dataio.netcdf.nc.NVariable;
+import org.esa.beam.dataio.netcdf.util.Constants;
+import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.CrsGeoCoding;
 import org.esa.beam.framework.datamodel.GeoCoding;
+import org.esa.beam.framework.datamodel.GeoCodingFactory;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.TiePointGeoCoding;
 import org.esa.beam.framework.datamodel.TiePointGrid;
@@ -52,7 +55,12 @@ public class BeamGeocodingPart extends CfGeocodingPart {
         NetcdfFile netcdfFile = ctx.getNetcdfFile();
         final Attribute tpCoordinatesAtt = netcdfFile.findGlobalAttribute(TIEPOINT_COORDINATES);
         GeoCoding geoCoding = null;
-        if (tpCoordinatesAtt != null) {
+        Band lonBand = p.getBand(Constants.LON_VAR_NAME);
+        Band latBand = p.getBand(Constants.LAT_VAR_NAME);
+        if (latBand != null && lonBand != null) {
+            geoCoding = GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, latBand.getValidMaskExpression(), 5);
+        }
+        if (geoCoding == null && tpCoordinatesAtt != null) {
             final String[] tpGridNames = tpCoordinatesAtt.getStringValue().split(" ");
             if (tpGridNames.length == 2
                 && p.containsTiePointGrid(tpGridNames[LON_INDEX])
