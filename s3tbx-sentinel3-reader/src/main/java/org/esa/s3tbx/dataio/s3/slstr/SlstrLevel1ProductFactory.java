@@ -46,7 +46,6 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
     private Map<String, Float> nameToWavelengthMap;
     private Map<String, Float> nameToBandwidthMap;
     private Map<String, Integer> nameToIndexMap;
-//    private Map<String, GeoCoding> geoCodingMap;
     private Map<String, GeoCoding> geoCodingMap;
 
     public final static String SLSTR_L1B_USE_PIXELGEOCODINGS = "s3tbx.reader.slstrl1b.pixelGeoCodings";
