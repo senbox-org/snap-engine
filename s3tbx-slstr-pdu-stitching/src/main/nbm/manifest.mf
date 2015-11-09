@@ -4,3 +4,12 @@ OpenIDE-Module-Display-Category: Sentinel-3 Toolbox
 OpenIDE-Module-Specification-Version: ${s3tbx.nbmSpecVersion}
 AutoUpdate-Show-In-Client: false
 AutoUpdate-Essential-Module: true
+OpenIDE-Module-Layer: org/esa/s3tbx/slstr/pdu/stitching/layer.xml
+OpenIDE-Module-Long-Description: <p>Stitches multiple SLSTR L1B product
+ dissemination units (PDUs) of the same orbit to a single product.</p>
+ <p><b>Vendor:</b> Brockmann Consult GmbH</p><p><b>Contact address:
+ </b> Max-Planck-Str. 2, 21502 Geesthacht (Germany)</p><p><b>
+ Copyright:</b> (C) 2014 by Brockmann Consult GmbH</p><p><b>Vendor:</b
+ > Brockmann Consult GmbH</p><p><b>License:</b> http://www.gnu.org/lic
+ enses/gpl.html</p>
+

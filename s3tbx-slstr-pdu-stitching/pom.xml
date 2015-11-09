@@ -15,6 +15,10 @@
 
     <packaging>nbm</packaging>
 
+    <description>
+        Stitches multiple SLSTR L1B product dissemination units (PDUs) of the same orbit to a single product.
+    </description>
+
     <dependencies>
         <dependency>
             <groupId>org.esa.snap</groupId>

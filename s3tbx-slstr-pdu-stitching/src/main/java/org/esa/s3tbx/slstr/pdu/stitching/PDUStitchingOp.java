@@ -18,7 +18,7 @@ import java.io.IOException;
  * @author Tonio Fincke
  */
 @OperatorMetadata(alias = "PduStitchingOp",
-        category = "Optical/Thematic Land Processing",
+        category = "Optical",
         version = "1.0",
         authors = "Tonio Fincke",
         copyright = "Copyright (C) 2015 by Brockmann Consult (info@brockmann-consult.de)",

@@ -5,9 +5,9 @@
             <file name="org-esa-s3tbx-slstr-pdu-stitching-PDUStitchingOpAction.instance">
                 <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
                 <attr name="delegate" methodvalue="org.esa.snap.core.gpf.ui.DefaultOperatorAction.create"/>
-                <attr name="displayName" stringvalue="Sentinel-3 SLSTR L1b PDU Stitching"/>
+                <attr name="displayName" stringvalue="Sentinel-3 SLSTR L1B PDU Stitching"/>
                 <attr name="operatorName" stringvalue="PduStitchingOp"/>
-                <attr name="dialogTitle" stringvalue="Sentinel-3 SLSTR L1b PDU Stitching"/>
+                <attr name="dialogTitle" stringvalue="Sentinel-3 SLSTR L1B PDU Stitching"/>
                 <attr name="ShortDescription"
                       stringvalue="Stitches multiple SLSTR L1B product dissemination units (PDUs) of the same orbit to a single product."/>
             </file>
@@ -16,13 +16,11 @@
 
     <folder name="Menu">
         <folder name="Optical">
-            <folder name="Thematic Land Processing">
-                <file name="org-esa-s3tbx-slstr-pdu-stitching-PDUStitchingOpAction.shadow">
-                    <attr name="originalFile"
+            <file name="org-esa-s3tbx-slstr-pdu-stitching-PDUStitchingOpAction.shadow">
+                <attr name="originalFile"
                       stringvalue="Actions/Operators/org-esa-s3tbx-slstr-pdu-stitching-PDUStitchingOpAction.instance"/>
-                    <attr name="position" intvalue="100"/>
-                </file>
-            </folder>
+                <attr name="position" intvalue="100"/>
+            </file>
         </folder>
     </folder>
 
