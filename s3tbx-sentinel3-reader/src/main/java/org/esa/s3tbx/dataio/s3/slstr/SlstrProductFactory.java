@@ -15,18 +15,21 @@ package org.esa.s3tbx.dataio.s3.slstr;/*
  */
 
 import com.bc.ceres.glevel.MultiLevelImage;
+import com.bc.ceres.glevel.support.DefaultMultiLevelImage;
+import com.bc.ceres.glevel.support.DefaultMultiLevelModel;
+import com.bc.ceres.glevel.support.DefaultMultiLevelSource;
 import org.esa.s3tbx.dataio.s3.AbstractProductFactory;
 import org.esa.s3tbx.dataio.s3.Sentinel3ProductReader;
 import org.esa.s3tbx.dataio.s3.util.S3NetcdfReader;
 import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.DefaultSceneRasterTransform;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.RasterDataNode;
+import org.esa.snap.core.datamodel.SceneRasterTransform;
 import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.image.SourceImageScaler;
-import org.geotools.referencing.operation.transform.AffineTransform2D;
+import org.esa.snap.core.util.ProductUtils;
 
 import javax.media.jai.BorderExtender;
 import javax.media.jai.ImageLayout;
@@ -34,7 +37,6 @@ import javax.media.jai.Interpolation;
 import javax.media.jai.JAI;
 import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.NoninvertibleTransformException;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
@@ -64,24 +66,25 @@ public abstract class SlstrProductFactory extends AbstractProductFactory {
             if (gridIndex.startsWith("t")) {
                 return copyTiePointGrid(sourceBand, targetProduct, sourceStartOffset, sourceTrackOffset, sourceResolutions);
             } else {
-                final Band targetBand = copyBand(sourceBand, targetProduct, true);
-                final AffineTransform forward = new AffineTransform();
+                final Band targetBand = new Band(sourceBandName, sourceBand.getDataType(),
+                                                 sourceBand.getRasterWidth(), sourceBand.getRasterHeight());
+                targetProduct.addBand(targetBand);
+                ProductUtils.copyRasterDataNodeProperties(sourceBand, targetBand);
+                final RenderedImage sourceRenderedImage = sourceBand.getSourceImage().getImage(0);
+                final AffineTransform imageToModelTransform = new AffineTransform();
                 final float[] offsets = getOffsets(sourceStartOffset, sourceTrackOffset, sourceResolutions);
-                forward.translate(offsets[0], offsets[1]);
+                imageToModelTransform.translate(offsets[0], offsets[1]);
                 final int subSamplingX = sourceResolutions[0] / referenceResolutions[0];
                 final int subSamplingY = sourceResolutions[1] / referenceResolutions[1];
-                forward.scale(subSamplingX, subSamplingY);
-                final AffineTransform inverse;
-                try {
-                    inverse = forward.createInverse();
-                } catch (NoninvertibleTransformException e) {
-                    throw new IllegalStateException("Could not invert affine transform: " + e.getMessage());
-                }
-                final DefaultSceneRasterTransform sceneRasterTransform =
-                        new DefaultSceneRasterTransform(new AffineTransform2D(forward), new AffineTransform2D(inverse));
-                targetBand.setSceneRasterTransform(sceneRasterTransform);
+                imageToModelTransform.scale(subSamplingX, subSamplingY);
+                final DefaultMultiLevelModel targetModel =
+                        new DefaultMultiLevelModel(imageToModelTransform,
+                                                   sourceRenderedImage.getWidth(), sourceRenderedImage.getHeight());
+                final DefaultMultiLevelSource targetMultiLevelSource =
+                        new DefaultMultiLevelSource(sourceRenderedImage, targetModel);
+                targetBand.setSourceImage(new DefaultMultiLevelImage(targetMultiLevelSource));
+                targetBand.setSceneRasterTransform(SceneRasterTransform.IDENTITY);
                 return targetBand;
-
             }
         }
         return sourceBand;
