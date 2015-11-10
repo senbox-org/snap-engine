@@ -14,14 +14,14 @@
         </folder>
     </folder>
 
-    <folder name="Menu">
-        <folder name="Optical">
-            <file name="org-esa-s3tbx-slstr-pdu-stitching-PDUStitchingOpAction.shadow">
-                <attr name="originalFile"
-                      stringvalue="Actions/Operators/org-esa-s3tbx-slstr-pdu-stitching-PDUStitchingOpAction.instance"/>
-                <attr name="position" intvalue="100"/>
-            </file>
-        </folder>
-    </folder>
+    <!--<folder name="Menu">-->
+        <!--<folder name="Optical">-->
+            <!--<file name="org-esa-s3tbx-slstr-pdu-stitching-PDUStitchingOpAction.shadow">-->
+                <!--<attr name="originalFile"-->
+                      <!--stringvalue="Actions/Operators/org-esa-s3tbx-slstr-pdu-stitching-PDUStitchingOpAction.instance"/>-->
+                <!--<attr name="position" intvalue="100"/>-->
+            <!--</file>-->
+        <!--</folder>-->
+    <!--</folder>-->
 
 </filesystem>
