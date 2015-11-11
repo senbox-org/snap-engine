@@ -5,7 +5,6 @@ import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
-import org.opengis.referencing.operation.MathTransform;
 
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
@@ -41,8 +40,4 @@ public class SlstrTiePointGeoCoding extends TiePointGeoCoding {
         return transformedPixelPos;
     }
 
-    @Override
-    public MathTransform getImageToMapTransform() {
-        return transform;
-    }
 }
