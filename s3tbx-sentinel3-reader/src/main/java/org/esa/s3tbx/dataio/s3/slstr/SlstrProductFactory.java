@@ -25,6 +25,7 @@ import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.DefaultSceneRasterTransform;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.RasterDataNode;
+import org.esa.snap.core.datamodel.SceneRasterTransform;
 import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.image.ImageManager;
@@ -85,14 +86,16 @@ public abstract class SlstrProductFactory extends AbstractProductFactory {
                 final DefaultMultiLevelSource targetMultiLevelSource =
                         new DefaultMultiLevelSource(sourceRenderedImage, targetModel);
                 targetBand.setSourceImage(new DefaultMultiLevelImage(targetMultiLevelSource));
-                AffineTransform modelToImageTransform;
+                AffineTransform2D modelToImageTransform;
+                SceneRasterTransform sceneRasterTransform;
                 try {
-                    modelToImageTransform = imageToModelTransform.createInverse();
+                     modelToImageTransform = new AffineTransform2D(imageToModelTransform.createInverse());
                 } catch (NoninvertibleTransformException e) {
                     modelToImageTransform = null;
                 }
-                targetBand.setSceneRasterTransform(new DefaultSceneRasterTransform(new AffineTransform2D(imageToModelTransform),
-                                                                                   new AffineTransform2D(modelToImageTransform)));
+                sceneRasterTransform = new DefaultSceneRasterTransform(new AffineTransform2D(imageToModelTransform),
+                                                                       modelToImageTransform);
+                targetBand.setSceneRasterTransform(sceneRasterTransform);
                 return targetBand;
             }
         }
