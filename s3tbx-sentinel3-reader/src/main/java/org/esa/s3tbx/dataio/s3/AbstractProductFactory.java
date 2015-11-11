@@ -301,7 +301,7 @@ public abstract class AbstractProductFactory implements ProductFactory {
             for (final Band sourceBand : sourceProduct.getBands()) {
                 if (!sourceBand.getName().contains("orphan")) {
                     RasterDataNode targetNode = null;
-                    if (sourceBand.getSceneRasterWidth() == w && sourceBand.getSceneRasterHeight() == h) {
+                    if (sourceBand.getRasterWidth() == w && sourceBand.getRasterHeight() == h) {
                         targetNode = addBand(sourceBand, targetProduct);
                     } else if (loadProfileTiepoints || !isProfileNode(sourceBand.getName())) {
                         targetNode = addSpecialNode(masterProduct, sourceBand, targetProduct);

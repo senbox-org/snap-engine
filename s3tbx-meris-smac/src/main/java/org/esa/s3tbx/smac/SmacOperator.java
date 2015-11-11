@@ -510,8 +510,8 @@ public class SmacOperator extends Operator {
             }
             Band outBand = new Band(newBandName,
                                     inBand.getGeophysicalDataType(),
-                                    inBand.getSceneRasterWidth(),
-                                    inBand.getSceneRasterHeight());
+                                    inBand.getRasterWidth(),
+                                    inBand.getRasterHeight());
             outBand.setUnit(bandUnit);
             outBand.setDescription(description + inBand.getName());
             ProductUtils.copySpectralBandProperties(inBand, outBand);

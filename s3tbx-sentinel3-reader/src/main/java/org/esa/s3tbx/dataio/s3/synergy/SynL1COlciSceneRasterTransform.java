@@ -92,12 +92,12 @@ class SynL1COlciSceneRasterTransform implements SceneRasterTransform {
         }
 
         private int[] createMisRegistrationArray(Band misregistrationBand) {
-            int[] misregistrationArray = new int[misregistrationBand.getSceneRasterWidth()];
+            int[] misregistrationArray = new int[misregistrationBand.getRasterWidth()];
             Arrays.fill(misregistrationArray, invalid_value);
             int[] forwardRegistration = new int[misregistrationArray.length];
             try {
-                misregistrationBand.readPixels(0, 0, misregistrationBand.getSceneRasterWidth(),
-                                               misregistrationBand.getSceneRasterHeight(), forwardRegistration);
+                misregistrationBand.readPixels(0, 0, misregistrationBand.getRasterWidth(),
+                                               misregistrationBand.getRasterHeight(), forwardRegistration);
             } catch (IOException e) {
                 e.printStackTrace();
             }

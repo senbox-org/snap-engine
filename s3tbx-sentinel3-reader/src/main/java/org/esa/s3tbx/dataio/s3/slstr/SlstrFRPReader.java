@@ -34,8 +34,8 @@ class SlstrFRPReader extends S3NetcdfReader {
 
 //    protected RenderedImage createSourceImage(Band band) {
 //        final int bufferType = ImageManager.getDataBufferType(band.getDataType());
-//        final int sourceWidth = band.getSceneRasterWidth();
-//        final int sourceHeight = band.getSceneRasterHeight();
+//        final int sourceWidth = band.getRasterWidth();
+//        final int sourceHeight = band.getRasterHeight();
 //        final java.awt.Dimension tileSize = band.getProduct().getPreferredTileSize();
 //        final String bandName = band.getName();
 //        String variableName = bandName;

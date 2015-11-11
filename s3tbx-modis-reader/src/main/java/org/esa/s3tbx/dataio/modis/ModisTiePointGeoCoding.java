@@ -251,9 +251,9 @@ public class ModisTiePointGeoCoding extends AbstractGeoCoding {
         final float[] lonFloats = (float[]) lonGrid.getDataElems();
 
         final int stripeW = lonGrid.getGridWidth();
-        final int gcStripeSceneWidth = lonGrid.getSceneRasterWidth();
+        final int gcStripeSceneWidth = lonGrid.getRasterWidth();
         final int tpRasterHeight = lonGrid.getGridHeight();
-        final int sceneHeight = lonGrid.getSceneRasterHeight();
+        final int sceneHeight = lonGrid.getRasterHeight();
         final int stripeH;
         if (isHighResolution(sceneHeight, tpRasterHeight)) {
             stripeH = 10;

@@ -53,8 +53,8 @@ public class S3MultiLevelOpImage extends AbstractNetcdfMultiLevelImage {
     protected RenderedImage createImage(int level) {
         RasterDataNode rasterDataNode = getRasterDataNode();
         int dataBufferType = ImageManager.getDataBufferType(rasterDataNode.getDataType());
-        int sceneRasterWidth = rasterDataNode.getSceneRasterWidth();
-        int sceneRasterHeight = rasterDataNode.getSceneRasterHeight();
+        int sceneRasterWidth = rasterDataNode.getRasterWidth();
+        int sceneRasterHeight = rasterDataNode.getRasterHeight();
         ResolutionLevel resolutionLevel = ResolutionLevel.create(getModel(), level);
         Dimension imageTileSize = new Dimension(getTileWidth(), getTileHeight());
         if(referencedIndexVariable  != null && nameOfReferencingIndexDimension != null && nameOfDisplayedDimension != null) {
