@@ -117,7 +117,7 @@ public class MerisProductFactory extends AbstractProductFactory {
 
     @Override
     protected void setGeoCoding(Product targetProduct) throws IOException {
-        if (Config.instance().preferences().getBoolean(MERIS_SAFE_USE_PIXELGEOCODING, false)) {
+        if (Config.instance("s3tbx").load().preferences().getBoolean(MERIS_SAFE_USE_PIXELGEOCODING, false)) {
             final Band latBand = targetProduct.getBand("latitude");
             final Band lonBand = targetProduct.getBand("longitude");
             if (latBand != null && lonBand != null) {

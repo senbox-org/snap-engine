@@ -56,7 +56,7 @@ final class PodGeoCoding extends TiePointGeoCoding {
         final PlanarImage lonImage = lonGrid.getGeophysicalImage();
         latImage = latGrid.getGeophysicalImage();
 
-        final Rectangle bounds = new Rectangle(0, 0, lonGrid.getSceneRasterWidth(), lonGrid.getSceneRasterHeight());
+        final Rectangle bounds = new Rectangle(0, 0, lonGrid.getRasterWidth(), lonGrid.getRasterHeight());
         pixelPosEstimator = new PixelPosEstimator(approximations, bounds);
         pixelFinder = new PodPixelFinder(lonImage, latImage, null, 0.01);
     }

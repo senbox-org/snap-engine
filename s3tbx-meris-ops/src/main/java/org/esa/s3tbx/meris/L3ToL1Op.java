@@ -145,7 +145,7 @@ public class L3ToL1Op extends MerisBasisOp {
         l3Rectangle.add(l3PixelPos.x, l3PixelPos.y);
 
         l3Rectangle.grow(2, 2);
-        Rectangle sceneRectangle = new Rectangle(srcBand.getSceneRasterWidth(), srcBand.getSceneRasterHeight());
+        Rectangle sceneRectangle = new Rectangle(srcBand.getRasterWidth(), srcBand.getRasterHeight());
         return l3Rectangle.intersection(sceneRectangle);
     }
 

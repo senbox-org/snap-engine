@@ -20,13 +20,14 @@ import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.BasicPixelGeoCoding;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.GeoCodingFactory;
+import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductNodeGroup;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.runtime.Config;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
@@ -202,7 +203,7 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
 
     @Override
     protected void setBandGeoCodings(Product product) {
-        if (Config.instance().preferences().getBoolean(SLSTR_L1B_USE_PIXELGEOCODINGS, false)) {
+        if (Config.instance("s3tbx").load().preferences().getBoolean(SLSTR_L1B_USE_PIXELGEOCODINGS, false)) {
             setPixelBandGeoCodings(product);
         } else {
             setTiePointBandGeoCodings(product);
@@ -210,23 +211,27 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
     }
 
     private void setTiePointBandGeoCodings(Product product) {
-        TiePointGrid origLatGrid = null;
-        TiePointGrid origLonGrid = null;
-        for (final TiePointGrid grid : product.getTiePointGrids()) {
-            if (origLatGrid == null && grid.getName().endsWith("latitude_tx")) {
-                origLatGrid = grid;
-            }
-            if (origLonGrid == null && grid.getName().endsWith("longitude_tx")) {
-                origLonGrid = grid;
-            }
-        }
-        if (origLatGrid == null || origLonGrid == null) {
-            return;
-        }
         final Band[] bands = product.getBands();
-        final short[] referenceResolutions = getReferenceResolutions();
         for (Band band : bands) {
-            final String gridIndex = band.getName().substring(band.getName().length() - 2);
+            setTiePointBandGeoCoding(product, band, band.getName().substring(band.getName().length() - 2));
+        }
+        final ProductNodeGroup<Mask> maskGroup = product.getMaskGroup();
+        for (int i = 0; i < maskGroup.getNodeCount(); i++) {
+            final Mask mask = maskGroup.get(i);
+            setTiePointBandGeoCoding(product, mask, getGridIndexFromMask(mask));
+        }
+    }
+
+    private void setTiePointBandGeoCoding(Product product, Band band, String gridIndex) {
+        if (geoCodingMap.containsKey(gridIndex)) {
+            band.setGeoCoding(geoCodingMap.get(gridIndex));
+        } else {
+            final TiePointGrid origLatGrid = product.getTiePointGrid("latitude_tx");
+            final TiePointGrid origLonGrid = product.getTiePointGrid("longitude_tx");
+            if (origLatGrid == null || origLonGrid == null) {
+                return;
+            }
+            final short[] referenceResolutions = getReferenceResolutions();
             final short[] sourceResolutions = getResolutions(gridIndex);
             final Integer sourceStartOffset = getStartOffset(gridIndex);
             final Integer sourceTrackOffset = getTrackOffset(gridIndex);
@@ -240,10 +245,10 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
                 transform.translate(offsets[0], offsets[1]);
                 transform.scale(scalings[0], scalings[1]);
                 try {
-                    final CoordinateReferenceSystem modelCRS = product.getSceneGeoCoding().getImageCRS();
                     final SlstrTiePointGeoCoding geoCoding =
-                            new SlstrTiePointGeoCoding(origLatGrid, origLonGrid, new AffineTransform2D(transform), modelCRS);
+                            new SlstrTiePointGeoCoding(origLatGrid, origLonGrid, new AffineTransform2D(transform));
                     band.setGeoCoding(geoCoding);
+                    geoCodingMap.put(gridIndex, geoCoding);
                 } catch (NoninvertibleTransformException e) {
                     e.printStackTrace();
                 }
@@ -254,54 +259,83 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
     private void setPixelBandGeoCodings(Product product) {
         final Band[] bands = product.getBands();
         for (Band band : bands) {
-            final String end = band.getName().substring(band.getName().length() - 2);
-            if (geoCodingMap.containsKey(end)) {
-                band.setGeoCoding(geoCodingMap.get(end));
-            } else {
-                Band latBand = null;
-                Band lonBand = null;
-                switch (end) {
-                    case "an":
-                        latBand = product.getBand("latitude_an");
-                        lonBand = product.getBand("longitude_an");
-                        break;
-                    case "ao":
-                        latBand = product.getBand("latitude_ao");
-                        lonBand = product.getBand("longitude_ao");
-                        break;
-                    case "bn":
-                        latBand = product.getBand("latitude_bn");
-                        lonBand = product.getBand("longitude_bn");
-                        break;
-                    case "bo":
-                        latBand = product.getBand("latitude_bo");
-                        lonBand = product.getBand("longitude_bo");
-                        break;
-                    case "cn":
-                        latBand = product.getBand("latitude_cn");
-                        lonBand = product.getBand("longitude_cn");
-                        break;
-                    case "co":
-                        latBand = product.getBand("latitude_co");
-                        lonBand = product.getBand("longitude_co");
-                        break;
-                    case "in":
-                        latBand = product.getBand("latitude_in");
-                        lonBand = product.getBand("longitude_in");
-                        break;
-                    case "io":
-                        latBand = product.getBand("latitude_io");
-                        lonBand = product.getBand("longitude_io");
-                        break;
-                }
-                if (latBand != null && lonBand != null) {
-                    final BasicPixelGeoCoding geoCoding = GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, "", 5);
-                    band.setGeoCoding(geoCoding);
-                    geoCodingMap.put(end, geoCoding);
-                }
+            setBandGeoCoding(product, band, band.getName().substring(band.getName().length() - 2));
+        }
+        final ProductNodeGroup<Mask> maskGroup = product.getMaskGroup();
+        for (int i = 0; i < maskGroup.getNodeCount(); i++) {
+            final Mask mask = maskGroup.get(i);
+            setBandGeoCoding(product, mask, getGridIndexFromMask(mask));
+        }
+    }
+
+    private void setBandGeoCoding(Product product, Band band, String end) {
+        if (geoCodingMap.containsKey(end)) {
+            band.setGeoCoding(geoCodingMap.get(end));
+        } else {
+            Band latBand = null;
+            Band lonBand = null;
+            switch (end) {
+                case "an":
+                    latBand = product.getBand("latitude_an");
+                    lonBand = product.getBand("longitude_an");
+                    break;
+                case "ao":
+                    latBand = product.getBand("latitude_ao");
+                    lonBand = product.getBand("longitude_ao");
+                    break;
+                case "bn":
+                    latBand = product.getBand("latitude_bn");
+                    lonBand = product.getBand("longitude_bn");
+                    break;
+                case "bo":
+                    latBand = product.getBand("latitude_bo");
+                    lonBand = product.getBand("longitude_bo");
+                    break;
+                case "cn":
+                    latBand = product.getBand("latitude_cn");
+                    lonBand = product.getBand("longitude_cn");
+                    break;
+                case "co":
+                    latBand = product.getBand("latitude_co");
+                    lonBand = product.getBand("longitude_co");
+                    break;
+                case "in":
+                    latBand = product.getBand("latitude_in");
+                    lonBand = product.getBand("longitude_in");
+                    break;
+                case "io":
+                    latBand = product.getBand("latitude_io");
+                    lonBand = product.getBand("longitude_io");
+                    break;
+            }
+            if (latBand != null && lonBand != null) {
+                final BasicPixelGeoCoding geoCoding = GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, "", 5);
+                band.setGeoCoding(geoCoding);
+                geoCodingMap.put(end, geoCoding);
             }
         }
+    }
 
+    private String getGridIndexFromMask(Mask mask) {
+        final String maskName = mask.getName();
+        if (maskName.contains("_an_")) {
+            return "an";
+        } else if (maskName.contains("_ao_")) {
+            return "ao";
+        } else if (maskName.contains("_bn_")) {
+            return "bn";
+        } else if (maskName.contains("_bo_")) {
+            return "bo";
+        } else if (maskName.contains("_cn_")) {
+            return "cn";
+        } else if (maskName.contains("_co_")) {
+            return "co";
+        } else if (maskName.contains("_in_")) {
+            return "in";
+        } else if (maskName.contains("_io_")) {
+            return "io";
+        }
+        return "";
     }
 
 }

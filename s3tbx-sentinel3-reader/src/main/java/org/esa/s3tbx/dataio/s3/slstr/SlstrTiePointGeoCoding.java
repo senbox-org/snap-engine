@@ -5,8 +5,6 @@ import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.operation.MathTransform;
 
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
@@ -18,14 +16,12 @@ public class SlstrTiePointGeoCoding extends TiePointGeoCoding {
 
     private final AffineTransform2D transform;
     private final AffineTransform inverse;
-    private final CoordinateReferenceSystem mapCrs;
 
-    public SlstrTiePointGeoCoding(TiePointGrid latGrid, TiePointGrid lonGrid, AffineTransform2D transform, CoordinateReferenceSystem modelCRS)
+    public SlstrTiePointGeoCoding(TiePointGrid latGrid, TiePointGrid lonGrid, AffineTransform2D transform)
             throws NoninvertibleTransformException {
         super(latGrid, lonGrid);
         this.transform = transform;
         inverse = transform.createInverse();
-        this.mapCrs = modelCRS;
     }
 
     @Override
@@ -44,13 +40,4 @@ public class SlstrTiePointGeoCoding extends TiePointGeoCoding {
         return transformedPixelPos;
     }
 
-    @Override
-    public MathTransform getImageToMapTransform() {
-        return transform;
-    }
-
-    @Override
-    public CoordinateReferenceSystem getMapCRS() {
-        return mapCrs;
-    }
 }

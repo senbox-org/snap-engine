@@ -83,13 +83,13 @@ public abstract class SeadasFileReader {
                              ProgressMonitor pm) throws IOException, InvalidRangeException {
 
         if (mustFlipY) {
-            sourceOffsetY = destBand.getSceneRasterHeight() - (sourceOffsetY + sourceHeight);
+            sourceOffsetY = destBand.getRasterHeight() - (sourceOffsetY + sourceHeight);
         }
         if (mustFlipX) {
-            sourceOffsetX = destBand.getSceneRasterWidth() - (sourceOffsetX + sourceWidth);
+            sourceOffsetX = destBand.getRasterWidth() - (sourceOffsetX + sourceWidth);
         }
         sourceOffsetY += leadLineSkip;
-        int widthRemainder = destBand.getSceneRasterWidth() - (sourceOffsetX + sourceWidth);
+        int widthRemainder = destBand.getRasterWidth() - (sourceOffsetX + sourceWidth);
         
         if (widthRemainder < 0){
             sourceWidth += widthRemainder;

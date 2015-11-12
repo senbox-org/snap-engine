@@ -1,5 +1,6 @@
 package org.esa.s3tbx.dataio.s3.slstr;
 
+import org.esa.s3tbx.dataio.s3.Manifest;
 import org.esa.s3tbx.dataio.s3.Sentinel3ProductReader;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
@@ -7,6 +8,8 @@ import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.util.ProductUtils;
 
 import java.awt.image.RenderedImage;
+import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -16,6 +19,15 @@ public class SlstrLevel1B1kmProductFactory extends SlstrLevel1ProductFactory {
 
     public SlstrLevel1B1kmProductFactory(Sentinel3ProductReader productReader) {
         super(productReader);
+    }
+
+    @Override
+    protected List<String> getFileNames(Manifest manifest) {
+        final File directory = getInputFileParentDirectory();
+        final String[] fileNames = directory.list((dir, name) -> name.endsWith("in.nc") || name.endsWith("io.nc") || name.endsWith("tx.nc") ||
+                name.endsWith("tn.nc") || name.endsWith("to.nc")
+        );
+        return Arrays.asList(fileNames);
     }
 
     @Override
@@ -44,7 +56,7 @@ public class SlstrLevel1B1kmProductFactory extends SlstrLevel1ProductFactory {
         final String sourceBandName = sourceBand.getName();
         final int sourceBandNameLength = sourceBandName.length();
         String gridIndex = sourceBandName;
-        if(sourceBandNameLength > 1) {
+        if (sourceBandNameLength > 1) {
             gridIndex = sourceBandName.substring(sourceBandNameLength - 2);
         }
         final Integer sourceStartOffset = getStartOffset(gridIndex);

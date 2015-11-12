@@ -83,7 +83,7 @@ public class BowtieTiePointGeoCoding extends AbstractBowtieGeoCoding {
      * @return lines in the scene
      */
     public int getSceneHeight() {
-        return lonGrid.getSceneRasterHeight();
+        return lonGrid.getRasterHeight();
     }
 
     /**

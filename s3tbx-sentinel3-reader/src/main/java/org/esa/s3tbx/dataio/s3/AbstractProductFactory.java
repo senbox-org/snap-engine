@@ -293,7 +293,7 @@ public abstract class AbstractProductFactory implements ProductFactory {
     }
 
     protected void addDataNodes(Product masterProduct, Product targetProduct) throws IOException {
-        final boolean loadProfileTiepoints = Config.instance().preferences().getBoolean(LOAD_PROFILE_TIE_POINTS, false);
+        final boolean loadProfileTiepoints = Config.instance("s3tbx").load().preferences().getBoolean(LOAD_PROFILE_TIE_POINTS, false);
         final int w = targetProduct.getSceneRasterWidth();
         final int h = targetProduct.getSceneRasterHeight();
         for (final Product sourceProduct : openProductList) {
@@ -301,7 +301,7 @@ public abstract class AbstractProductFactory implements ProductFactory {
             for (final Band sourceBand : sourceProduct.getBands()) {
                 if (!sourceBand.getName().contains("orphan")) {
                     RasterDataNode targetNode = null;
-                    if (sourceBand.getSceneRasterWidth() == w && sourceBand.getSceneRasterHeight() == h) {
+                    if (sourceBand.getRasterWidth() == w && sourceBand.getRasterHeight() == h) {
                         targetNode = addBand(sourceBand, targetProduct);
                     } else if (loadProfileTiepoints || !isProfileNode(sourceBand.getName())) {
                         targetNode = addSpecialNode(masterProduct, sourceBand, targetProduct);

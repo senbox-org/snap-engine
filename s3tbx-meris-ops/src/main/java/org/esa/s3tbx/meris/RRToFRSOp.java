@@ -109,7 +109,7 @@ public class RRToFRSOp extends Operator {
         final int yStart = (int)Math.round(rrPixelPos.y);
         Rectangle rrRectangle = new Rectangle(xStart, yStart, frsRectangle.width / 4, frsRectangle.height / 4);
         rrRectangle.grow(4, 4);
-        Rectangle sceneRectangle = new Rectangle(rrSrcBand.getSceneRasterWidth(), rrSrcBand.getSceneRasterHeight());
+        Rectangle sceneRectangle = new Rectangle(rrSrcBand.getRasterWidth(), rrSrcBand.getRasterHeight());
         rrRectangle = rrRectangle.intersection(sceneRectangle);
 
         Tile srcTile = getSourceTile(rrSrcBand, rrRectangle);

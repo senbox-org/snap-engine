@@ -1,0 +1,54 @@
+package org.esa.s3tbx.slstr.pdu.stitching;
+
+/**
+ * @author Tonio Fincke
+ */
+class ImageSize {
+
+    private final String identifier;
+    private final int startOffset;
+    private final int trackOffset;
+    private final int rows;
+    private final int columns;
+
+    ImageSize(String identifier, int startOffset, int trackOffset, int rows, int columns) {
+        this.identifier = identifier;
+        this.startOffset = startOffset;
+        this.trackOffset = trackOffset;
+        this.rows = rows;
+        this.columns = columns;
+    }
+
+    String getIdentifier() {
+        return identifier;
+    }
+
+    int getStartOffset() {
+        return startOffset;
+    }
+
+    int getTrackOffset() {
+        return trackOffset;
+    }
+
+    int getRows() {
+        return rows;
+    }
+
+    int getColumns() {
+        return columns;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (!(object instanceof ImageSize)) {
+            return false;
+        }
+        ImageSize imageSize = (ImageSize) object;
+        return identifier.equals(imageSize.getIdentifier()) &&
+                    startOffset == imageSize.startOffset &&
+                    trackOffset == imageSize.trackOffset &&
+                    rows == imageSize.rows &&
+                    columns == imageSize.columns;
+    }
+}

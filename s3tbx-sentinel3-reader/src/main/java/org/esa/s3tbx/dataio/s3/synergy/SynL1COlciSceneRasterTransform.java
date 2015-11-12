@@ -1,6 +1,7 @@
 package org.esa.s3tbx.dataio.s3.synergy;
 
 import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.SceneRasterTransform;
 import org.geotools.referencing.operation.transform.AbstractMathTransform;
 import org.opengis.referencing.operation.MathTransform2D;
 import org.opengis.referencing.operation.NoninvertibleTransformException;
@@ -91,12 +92,12 @@ class SynL1COlciSceneRasterTransform implements SceneRasterTransform {
         }
 
         private int[] createMisRegistrationArray(Band misregistrationBand) {
-            int[] misregistrationArray = new int[misregistrationBand.getSceneRasterWidth()];
+            int[] misregistrationArray = new int[misregistrationBand.getRasterWidth()];
             Arrays.fill(misregistrationArray, invalid_value);
             int[] forwardRegistration = new int[misregistrationArray.length];
             try {
-                misregistrationBand.readPixels(0, 0, misregistrationBand.getSceneRasterWidth(),
-                                               misregistrationBand.getSceneRasterHeight(), forwardRegistration);
+                misregistrationBand.readPixels(0, 0, misregistrationBand.getRasterWidth(),
+                                               misregistrationBand.getRasterHeight(), forwardRegistration);
             } catch (IOException e) {
                 e.printStackTrace();
             }
