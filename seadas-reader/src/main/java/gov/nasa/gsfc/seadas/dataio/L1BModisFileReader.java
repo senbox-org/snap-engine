@@ -1,10 +1,8 @@
 package gov.nasa.gsfc.seadas.dataio;
 
 import org.esa.snap.core.dataio.ProductIOException;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.dataop.maptransf.Datum;
 import org.esa.snap.dataio.netcdf.metadata.profiles.hdfeos.HdfEosUtils;
 import org.esa.snap.dataio.netcdf.util.NetcdfFileOpener;
 import org.jdom2.Element;
@@ -33,6 +31,19 @@ public class L1BModisFileReader extends SeadasFileReader {
             748, 869, 905, 936, 940, 3750, 3959, 3959, 4050, 4465, 4515, 1375, 6715, 7325, 8550, 9730, 11030, 12020,
             13335, 13635, 13935, 14235};
 
+    protected String resolution = "1km";
+    protected int pixelMultiplier = 1;
+    protected int scanMultiplier = 10;
+    protected int tpSubSample = 5;
+    protected int numPixels = 0;
+    protected int numScans = 0;
+    protected int numLines = 0;
+    protected int tpNumPixels = 0;
+    protected int tpNumLines = 0;
+    protected float tpOffsetX = 0;
+    protected float tpOffsetY = 0;
+
+
     L1BModisFileReader(SeadasProductReader productReader) {
         super(productReader);
     }
@@ -42,28 +53,55 @@ public class L1BModisFileReader extends SeadasFileReader {
 
         addGlobalAttributeModisL1B();
         String productName = getStringAttribute("Product_Name");
-        int pixelmultiplier = 1;
-        int scanmultiplier = 10;
 
-        for (Attribute attribute : globalAttributes) {
-            if (attribute.getShortName().equals("MODIS_Resolution")) {
-                String resolution = attribute.getStringValue();
-                if (resolution.equals("500m")) {
-                    pixelmultiplier = 2;
-                    scanmultiplier = 20;
-                } else if (resolution.equals("250m")) {
-                    pixelmultiplier = 4;
-                    scanmultiplier = 40;
-                }
-            }
+        resolution = getStringAttribute("MODIS_Resolution");
+        if (resolution.equals("500m")) {
+            pixelMultiplier = 2;
+            scanMultiplier = 20;
+            tpSubSample = 2;
+            tpOffsetX = -0.5f;
+            tpOffsetY = 0;
+            numPixels = getDimension("MODIS_SWATH_Type_L1B_Data_Fields_2*Max_EV_frames");
+            numScans = getDimension("number_of_scans");
+            numLines = getDimension("MODIS_SWATH_Type_L1B_Data_Fields_20*nscans");
+            tpNumPixels = getDimension("MODIS_SWATH_Type_L1B_Max_EV_frames");
+            tpNumLines = getDimension("MODIS_SWATH_Type_L1B_10*nscans");
+        } else if (resolution.equals("250m")) {
+            pixelMultiplier = 4;
+            scanMultiplier = 40;
+            tpSubSample = 4;
+            tpOffsetX = -0.5f;
+            tpOffsetY = 1;
+            numPixels = getDimension("MODIS_SWATH_Type_L1B_Data_Fields_4*Max_EV_frames");
+            numScans = getDimension("number_of_scans");
+            numLines = getDimension("MODIS_SWATH_Type_L1B_Data_Fields_40*nscans");
+            tpNumPixels = getDimension("MODIS_SWATH_Type_L1B_Max_EV_frames");
+            tpNumLines = getDimension("MODIS_SWATH_Type_L1B_10*nscans");
+        } else {
+            pixelMultiplier = 1;
+            scanMultiplier = 10;
+            tpSubSample = 5;
+            tpOffsetX = 1.5f;
+            tpOffsetY = 1.5f;
+            numPixels = getDimension("MODIS_SWATH_Type_L1B_Data_Fields_Max_EV_frames");
+            numScans = getDimension("number_of_scans");
+            numLines = getDimension("MODIS_SWATH_Type_L1B_Data_Fields_10*nscans");
+            tpNumPixels = getDimension("MODIS_SWATH_Type_L1B_1KM_geo_dim");
+            tpNumLines = getDimension("MODIS_SWATH_Type_L1B_2*nscans");
         }
-        int sceneWidth = getIntAttribute("Max_Earth_View_Frames", globalAttributes) * pixelmultiplier;
-        int sceneHeight = getIntAttribute("Number_of_Scans", globalAttributes) * scanmultiplier;
 
         mustFlipX = mustFlipY = mustFlipMODIS();
+        //mustFlipX = mustFlipY = false;
+
+        // fix the tie-point offsets if we flipped the data
+        if(mustFlipX) {
+            tpOffsetX = numPixels-1 - ((tpNumPixels-1) * tpSubSample + tpOffsetX);
+            tpOffsetY = numLines-1 - ((tpNumLines-1) * tpSubSample + tpOffsetY);
+        }
+
         SeadasProductReader.ProductType productType = productReader.getProductType();
 
-        Product product = new Product(productName, productType.toString(), sceneWidth, sceneHeight);
+        Product product = new Product(productName, productType.toString(), numPixels, numLines);
         product.setDescription(productName);
 
         ProductData.UTC utcStart = getUTCAttribute("Start_Time");
@@ -103,13 +141,11 @@ public class L1BModisFileReader extends SeadasFileReader {
 
     private void addTiePointGrids(Product product, List<Variable> variables) throws ProductIOException {
 
-        final int tpHeight = getDimension("MODIS_SWATH_Type_L1B_2*nscans");
-        final int tpWidth = getDimension("MODIS_SWATH_Type_L1B_1KM_geo_dim");
         for (Variable variable : variables) {
             final int variableRank = variable.getRank();
             if (variableRank == 2) {
                 final int[] dimensions = variable.getShape();
-                if (dimensions[0] != tpHeight || dimensions[1] != tpWidth) {
+                if (dimensions[0] != tpNumLines || dimensions[1] != tpNumPixels) {
                     continue;   // sort out all variables that have different sizes
                 }
                 if (!variable.getGroup().getShortName().equals("Data_Fields")) {
@@ -137,22 +173,8 @@ public class L1BModisFileReader extends SeadasFileReader {
                         float_data[i] = float_data_raw[i] * scale_factor;
                     }
 
-                    int subSampling;
-                    float offsetY;
-                    String resolution = getStringAttribute("MODIS_Resolution");
-                    if (resolution.equals("500m")) {
-                        subSampling = 2;
-                        offsetY = 0.5f;
-                    } else if (resolution.equals("250m")) {
-                        subSampling = 4;
-                        offsetY = 1.5f;
-                    } else {
-                        subSampling = 5;
-                        offsetY = 0f;
-                    }
-
-                    final TiePointGrid tiePointGrid = new TiePointGrid(variable.getShortName(), tpWidth, tpHeight, 0, offsetY,
-                            subSampling, subSampling, float_data);
+                    final TiePointGrid tiePointGrid = new TiePointGrid(variable.getShortName(), tpNumPixels, tpNumLines, 0, tpOffsetY,
+                            tpSubSample, tpSubSample, float_data);
                     product.addTiePointGrid(tiePointGrid);
 
                 } catch (IOException e) {
@@ -263,41 +285,24 @@ public class L1BModisFileReader extends SeadasFileReader {
     public void addGeocoding(final Product product) throws ProductIOException {
 
         // read latitudes and longitudes
-        int cntl_lat_ix;
-        int cntl_lon_ix;
-        float offsetY;
+        int subSample = tpSubSample;
+        float offsetX = tpOffsetX;
+        float offsetY = tpOffsetY;
         boolean externalGeo = false;
         NetcdfFile geoNcFile = null;
         Variable lats = null;
         Variable lons = null;
-        int scanHeight;
 
         try {
-            String resolution = getStringAttribute("MODIS_Resolution");
-            if (resolution.equals("500m")) {
-                scanHeight = 20;
-                cntl_lat_ix = 2;
-                cntl_lon_ix = 2;
-                offsetY = 0.5f;
-            } else if (resolution.equals("250m")) {
-                scanHeight = 40;
-                cntl_lat_ix = 4;
-                cntl_lon_ix = 4;
-                offsetY = 1.5f;
-            } else {
-                scanHeight = 10;
-                cntl_lat_ix = 5;
-                cntl_lon_ix = 5;
-                offsetY = 0f;
-
+            if (resolution.equals("1km")) {
                 File inputFile = productReader.getInputFile();
                 String geoFileName = getStringAttribute("Geolocation_File");
                 String path = inputFile.getParent();
                 File geocheck = new File(path, geoFileName);
                 if (geocheck.exists()) {
                     externalGeo = true;
-                    cntl_lat_ix = 1;
-                    cntl_lon_ix = 1;
+                    subSample = 1;
+                    offsetX = 0f;
                     offsetY = 0f;
                     geoNcFile = NetcdfFileOpener.open(geocheck.getPath());
                 }
@@ -329,15 +334,15 @@ public class L1BModisFileReader extends SeadasFileReader {
                 geoNcFile.close();
             }
 
-            final TiePointGrid latGrid = new TiePointGrid("latitude", dims[1], dims[0], 0, offsetY,
-                    cntl_lon_ix, cntl_lat_ix, latTiePoints);
+            final TiePointGrid latGrid = new TiePointGrid("latitude", dims[1], dims[0], offsetX, offsetY,
+                    subSample, subSample, latTiePoints);
             product.addTiePointGrid(latGrid);
 
-            final TiePointGrid lonGrid = new TiePointGrid("longitude", dims[1], dims[0], 0, offsetY,
-                    cntl_lon_ix, cntl_lat_ix, lonTiePoints);
+            final TiePointGrid lonGrid = new TiePointGrid("longitude", dims[1], dims[0], offsetX, offsetY,
+                    subSample, subSample, lonTiePoints);
             product.addTiePointGrid(lonGrid);
 
-            product.setSceneGeoCoding(new BowtieTiePointGeoCoding(latGrid, lonGrid, scanHeight));
+            product.setSceneGeoCoding(new BowtieTiePointGeoCoding(latGrid, lonGrid, scanMultiplier));
             //product.setGeoCoding(new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84));
 
         } catch (Exception e) {
@@ -446,8 +451,6 @@ public class L1BModisFileReader extends SeadasFileReader {
                 return dimension.getLength();
             }
         }
-//        MODIS_SWATH_Type_L1B_2*nscans
-//        dimension = MODIS_SWATH_Type_L1B_1KM_geo_dim
         return -1;
     }
 }
