@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>seadas-reader</symbolicName>
-    <version>1.5.7</version>
+    <version>1.5.8</version>
     <name>NASA OBPG Ocean Color Product Reader</name>
     <description>A reader for Ocean Color Data Products supported the NASA Ocean Biology Processing Group</description>
 
@@ -14,6 +14,8 @@
 
     <changelog>
         <![CDATA[
+        Changes in 1.5.8:</br>
+        fixed the geolocation for bowtie instruments with tiepoints like MODIS L1B.
         Changes in 1.5.7:</br>
         [BEAM-1777] MODIS AQUA SST L3 products have no time information
         fix product time parsing for VIIRS products, simplify detection
