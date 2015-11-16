@@ -46,18 +46,26 @@ public class SlstrPduStitcher {
             throw new IllegalArgumentException("No product files provided");
         }
         final Pattern slstrNamePattern = Pattern.compile(SLSTR_L1B_NAME_PATTERN);
-        for (File slstrProductFile : slstrProductFiles) {
-            if (slstrProductFile == null ||
-                    !slstrProductFile.getName().equals("xfdumanifest.xml") ||
-                    slstrProductFile.getParentFile() == null ||
-                    !slstrNamePattern.matcher(slstrProductFile.getParentFile().getName()).matches()) {
-                throw new IllegalArgumentException("The PDU Stitcher only supports Slstr L1B products");
+        for (int i = 0; i < slstrProductFiles.length; i++) {
+            if (slstrProductFiles[i] == null) {
+                throw new PDUStitchingException("File must not be null");
+            }
+            if (!slstrProductFiles[i].getName().equals("xfdumanifest.xml")) {
+                slstrProductFiles[i] = new File(slstrProductFiles[i], "xfdumanifest.xml");
+            }
+            if (!slstrProductFiles[i].getName().equals("xfdumanifest.xml") ||
+                    slstrProductFiles[i].getParentFile() == null ||
+                    !slstrNamePattern.matcher(slstrProductFiles[i].getParentFile().getName()).matches()) {
+                throw new IllegalArgumentException("The PDU Stitcher only supports SLSTR L1B products");
             }
         }
         if (slstrProductFiles.length == 1) {
             final File originalParentDirectory = slstrProductFiles[0].getParentFile();
             final String parentDirectoryName = originalParentDirectory.getName();
             final File stitchedParentDirectory = new File(targetDirectory, parentDirectoryName);
+            if (stitchedParentDirectory.exists()) {
+                throw new PDUStitchingException("Target file directory already exists");
+            }
             Files.copy(originalParentDirectory.getParentFile().toPath(), stitchedParentDirectory.toPath());
             final File[] files = originalParentDirectory.listFiles();
             if (files != null) {
@@ -89,6 +97,9 @@ public class SlstrPduStitcher {
         }
         final String stitchedProductFileName = createParentDirectoryNameOfStitchedFile(slstrNameDecompositions, now);
         File stitchedProductFileParentDirectory = new File(targetDirectory, stitchedProductFileName);
+        if (stitchedProductFileParentDirectory.exists()) {
+            throw new PDUStitchingException("Target file directory already exists");
+        }
         if (!stitchedProductFileParentDirectory.mkdirs()) {
             throw new PDUStitchingException("Could not create product directory");
         }
@@ -100,6 +111,10 @@ public class SlstrPduStitcher {
             List<File> ncFiles = new ArrayList<>();
             List<ImageSize> imageSizeList = new ArrayList<>();
             final String ncFileName = ncFileNames.get(i);
+            if (ncFileName.equals("viscal.nc")) {
+                //todo stitch viscal.nc
+                break;
+            }
             String id = ncFileName.substring(ncFileName.length() - 5, ncFileName.length() - 3);
             if (id.equals("tx")) {
                 id = "tn";
@@ -124,16 +139,11 @@ public class SlstrPduStitcher {
             if (ncFiles.size() > 0) {
                 final File[] ncFilesArray = ncFiles.toArray(new File[ncFiles.size()]);
                 final ImageSize[] imageSizeArray = imageSizeList.toArray(new ImageSize[imageSizeList.size()]);
-                try {
-                    NcFileStitcher.stitchNcFiles(ncFileName, stitchedProductFileParentDirectory, now,
-                                                 ncFilesArray, targetImageSize, imageSizeArray);
-                } catch (PDUStitchingException e) {
-                    e.printStackTrace();
-                }
+                NcFileStitcher.stitchNcFiles(ncFileName, stitchedProductFileParentDirectory, now,
+                                             ncFilesArray, targetImageSize, imageSizeArray);
             }
         }
         return createManifestFile(slstrProductFiles, stitchedProductFileParentDirectory);
-
     }
 
     private static File createManifestFile(File[] manifestFiles, File stitchedParentDirectory)
