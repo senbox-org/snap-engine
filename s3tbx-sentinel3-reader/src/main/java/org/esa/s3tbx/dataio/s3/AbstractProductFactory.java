@@ -14,6 +14,7 @@ package org.esa.s3tbx.dataio.s3;/*
  * with this program; if not, see http://www.gnu.org/licenses/
  */
 
+import com.bc.ceres.glevel.MultiLevelImage;
 import org.esa.s3tbx.dataio.s3.util.ColorProvider;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductReader;
@@ -37,7 +38,6 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.awt.Color;
-import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -86,7 +86,7 @@ public abstract class AbstractProductFactory implements ProductFactory {
     protected static TiePointGrid copyBandAsTiePointGrid(Band sourceBand, Product targetProduct, int subSamplingX,
                                                          int subSamplingY,
                                                          float offsetX, float offsetY) {
-        final RenderedImage sourceImage = sourceBand.getGeophysicalImage();
+        final MultiLevelImage sourceImage = sourceBand.getGeophysicalImage();
         final int w = sourceImage.getWidth();
         final int h = sourceImage.getHeight();
         final float[] tiePoints = sourceImage.getData().getSamples(0, 0, w, h, 0, new float[w * h]);
@@ -104,6 +104,7 @@ public abstract class AbstractProductFactory implements ProductFactory {
         tiePointGrid.setGeophysicalNoDataValue(sourceBand.getGeophysicalNoDataValue());
         tiePointGrid.setUnit(unit);
         targetProduct.addTiePointGrid(tiePointGrid);
+        sourceImage.dispose();
 
         return tiePointGrid;
     }
