@@ -7,7 +7,6 @@ import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
-import org.esa.snap.core.gpf.annotations.SourceProducts;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -26,20 +25,17 @@ import java.io.IOException;
         autoWriteDisabled = true)
 public class PDUStitchingOp extends Operator {
 
-    @SourceProducts
-    private Product[] sourceProducts;
+    @Parameter
+    private File[] sourceProductFiles;
 
     @Parameter
     private File targetDir;
 
     @Override
     public void initialize() throws OperatorException {
-        final File[] files = new File[sourceProducts.length];
-        for (int i = 0; i < sourceProducts.length; i++) {
-            files[i] = sourceProducts[i].getFileLocation();
-        }
+
         try {
-            SlstrPduStitcher.createStitchedSlstrL1BFile(targetDir, files);
+            SlstrPduStitcher.createStitchedSlstrL1BFile(targetDir, sourceProductFiles);
             setDummyTargetProduct();
         } catch (IOException | PDUStitchingException | ParserConfigurationException | TransformerException e) {
             throw new OperatorException(e.getMessage());
