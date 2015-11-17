@@ -45,6 +45,7 @@ public class PDUStitchingOp extends Operator {
 
     @Override
     public void initialize() throws OperatorException {
+        setDummyTargetProduct();
         final Set<File> fileSet = getSourceProductFileSet(sourceProductPaths, getLogger());
         final File[] files = fileSet.toArray(new File[fileSet.size()]);
         if (files.length == 0) {
@@ -55,7 +56,6 @@ public class PDUStitchingOp extends Operator {
         }
         try {
             SlstrPduStitcher.createStitchedSlstrL1BFile(targetDir, files);
-            setDummyTargetProduct();
         } catch (IOException | PDUStitchingException | ParserConfigurationException | TransformerException e) {
             throw new OperatorException(e.getMessage());
         }
