@@ -168,12 +168,7 @@ public class BowtiePixelGeoCoding extends AbstractBowtieGeoCoding {
         if(start == -1) {       // did not find an overlap
             _scanlineOffset = 0;
         } else {
-            start = start % _scanlineHeight;
-            if(start == 0) {
-                _scanlineOffset = 0;
-            } else {
-                _scanlineOffset = _scanlineHeight - start;
-            }
+            _scanlineOffset = (_scanlineHeight - start) % _scanlineHeight;
         }
     }
 
