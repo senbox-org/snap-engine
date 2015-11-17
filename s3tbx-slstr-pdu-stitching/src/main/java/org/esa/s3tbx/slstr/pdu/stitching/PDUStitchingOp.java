@@ -35,7 +35,7 @@ public class PDUStitchingOp extends Operator {
     @Parameter(description = "A comma-separated list of file paths specifying the source products.\n" +
             "Each path may contain the wildcards '**' (matches recursively any directory),\n" +
             "'*' (matches any character sequence in path names) and\n" +
-            "'?' (matches any single character).")
+            "'?' (matches any single character).", notNull = true)
     String[] sourceProductPaths;
 
     @Parameter(description = "The directory to which the stitched product shall be written. Within this directory, a folder" +
