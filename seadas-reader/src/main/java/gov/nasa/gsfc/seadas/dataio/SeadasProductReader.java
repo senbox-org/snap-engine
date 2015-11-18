@@ -303,7 +303,7 @@ public class SeadasProductReader extends AbstractProductReader {
                 return ProductType.ANCCLIM;
             } else if (title.contains("Level-3 Standard Mapped Image")) {
                 return ProductType.SMI;
-            } else if (title.contains("Level-3 Binned Data")) {
+            } else if (title.contains("Level-3 Binned Data") || title.contains("level-3_binned_data")) {
                 return ProductType.Level3_Bin;
             } else if (title.contains("GSM") && (tmp = checkMEaSUREs()) != ProductType.UNKNOWN) {
                 return tmp;

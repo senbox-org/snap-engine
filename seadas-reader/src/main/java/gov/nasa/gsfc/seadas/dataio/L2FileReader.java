@@ -252,7 +252,7 @@ public class L2FileReader extends SeadasFileReader {
                     product.addTiePointGrid(latGrid);
 
                     final TiePointGrid lonGrid = new TiePointGrid("longitude", dims[1], dims[0], 0, 0,
-                            subSampleX, subSampleY, lonTiePoints);
+			    subSampleX, subSampleY, lonTiePoints, TiePointGrid.DISCONT_AT_180);
                     product.addTiePointGrid(lonGrid);
 
                     product.setSceneGeoCoding(new BowtieTiePointGeoCoding(latGrid, lonGrid, scanHeight));
