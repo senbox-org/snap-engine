@@ -204,7 +204,7 @@ public class BowtieTiePointGeoCoding extends AbstractBowtieGeoCoding {
 
         final int gridScanlineHeight = (int)(scanlineHeight / ssY);
         final int gridScanlineOffset = (int)(scanlineOffset / ssY);
-        final int gcRawWidth = gridW * scanlineHeight;
+        final int gcRawWidth = gridW * gridScanlineHeight;
 
         int firstY = 0;
 
@@ -374,17 +374,17 @@ public class BowtieTiePointGeoCoding extends AbstractBowtieGeoCoding {
             tmpStripeFloats = stripeGc.getLonGrid().getPixels(region.x, newScanlineOffset, region.width, copyH, tmpStripeFloats);
             System.arraycopy(tmpStripeFloats, 0, newLonFloats, 0, copyH*region.width);
 
-            firstY += scanlineHeight-newScanlineOffset;
+            firstY += scanlineHeight -newScanlineOffset;
             gcIndex++;
         }
 
         // copy all the middle stripes
-        while((firstY+scanlineHeight) <= (region.y+region.height)) {
+        while((firstY+ scanlineHeight) <= (region.y+region.height)) {
             TiePointGeoCoding stripeGc = (TiePointGeoCoding) gcList.get(gcIndex);
             tmpStripeFloats = stripeGc.getLatGrid().getPixels(region.x, 0, region.width, scanlineHeight, tmpStripeFloats);
-            System.arraycopy(tmpStripeFloats, 0, newLatFloats, (firstY-region.y)*region.width, scanlineHeight*region.width);
+            System.arraycopy(tmpStripeFloats, 0, newLatFloats, (firstY-region.y)*region.width, scanlineHeight *region.width);
             tmpStripeFloats = stripeGc.getLonGrid().getPixels(region.x, 0, region.width, scanlineHeight, tmpStripeFloats);
-            System.arraycopy(tmpStripeFloats, 0, newLonFloats, (firstY-region.y)*region.width, scanlineHeight*region.width);
+            System.arraycopy(tmpStripeFloats, 0, newLonFloats, (firstY-region.y)*region.width, scanlineHeight *region.width);
 
             firstY += scanlineHeight;
             gcIndex++;
