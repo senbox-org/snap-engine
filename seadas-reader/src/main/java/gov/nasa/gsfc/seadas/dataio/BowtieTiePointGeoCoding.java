@@ -394,7 +394,7 @@ public class BowtieTiePointGeoCoding extends AbstractBowtieGeoCoding {
         }
 
         TiePointGrid latGrid = new TiePointGrid(latGridName, region.width, region.height, 0.5f, 0.5f, 1, 1, newLatFloats);
-        TiePointGrid lonGrid = new TiePointGrid(lonGridName, region.width, region.height, 0.5f, 0.5f, 1, 1, newLonFloats);
+        TiePointGrid lonGrid = new TiePointGrid(lonGridName, region.width, region.height, 0.5f, 0.5f, 1, 1, newLonFloats, TiePointGrid.DISCONT_AT_180);
 
         destProduct.addTiePointGrid(latGrid);
         destProduct.addTiePointGrid(lonGrid);

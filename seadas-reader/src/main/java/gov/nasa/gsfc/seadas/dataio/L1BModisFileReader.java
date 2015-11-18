@@ -341,7 +341,7 @@ public class L1BModisFileReader extends SeadasFileReader {
             product.addTiePointGrid(latGrid);
 
             final TiePointGrid lonGrid = new TiePointGrid("longitude", dims[1], dims[0], offsetX, offsetY,
-                    subSample, subSample, lonTiePoints);
+                    subSample, subSample, lonTiePoints, TiePointGrid.DISCONT_AT_180);
             product.addTiePointGrid(lonGrid);
 
             product.setGeoCoding(new BowtieTiePointGeoCoding(latGrid, lonGrid, scanMultiplier));
