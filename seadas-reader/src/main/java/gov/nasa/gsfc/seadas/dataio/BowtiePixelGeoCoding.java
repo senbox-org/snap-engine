@@ -200,15 +200,17 @@ public class BowtiePixelGeoCoding extends AbstractBowtieGeoCoding {
             System.arraycopy(lonFloats, 0, lons, _scanlineOffset * scanW, firstY * scanW);
             System.arraycopy(latFloats, 0, lats, _scanlineOffset * scanW, firstY * scanW);
             for (int x = 0; x < scanW; x++) {
-                int y1 = firstY;                    // coord of first y in next scan
-                int y2 = y1 + _scanlineHeight - 1;  // coord of last y in next scan
-                int index1 = y1 * scanW + x;
-                int index2 = y2 * scanW + x;
-                float deltaLat = (latFloats[index2] - latFloats[index1]) / (_scanlineHeight - 1);
-                float deltaLon = (lonFloats[index2] - lonFloats[index1]) / (_scanlineHeight - 1);
+                float deltaLat;
+                float deltaLon;
                 float refLat = latFloats[x];
                 float refLon = lonFloats[x];
-
+                if(firstY > 1) {
+                    deltaLat = latFloats[scanW + x] - latFloats[x];
+                    deltaLon = lonFloats[scanW + x] - lonFloats[x];
+                } else {
+                    deltaLat = latFloats[(firstY+1)*scanW + x] - latFloats[firstY*scanW + x];
+                    deltaLon = lonFloats[(firstY+1)*scanW + x] - lonFloats[firstY*scanW + x];
+                }
                 for (int y = 0; y < _scanlineOffset; y++) {
                     lons[y * scanW + x] = refLon - (deltaLon * (_scanlineOffset - y));
                     lats[y * scanW + x] = refLat - (deltaLat * (_scanlineOffset - y));
@@ -218,35 +220,37 @@ public class BowtiePixelGeoCoding extends AbstractBowtieGeoCoding {
         }
 
         // add all of the normal scans
-        for (int y = firstY; y + _scanlineHeight <= sceneH; y += _scanlineHeight) {
+        for (; firstY + _scanlineHeight <= sceneH; firstY += _scanlineHeight) {
             final float[] lats = new float[gcRawWidth];
             final float[] lons = new float[gcRawWidth];
-            System.arraycopy(lonFloats, y * scanW, lons, 0, gcRawWidth);
-            System.arraycopy(latFloats, y * scanW, lats, 0, gcRawWidth);
-            addStripeGeocode(lats, lons, y, scanW, _scanlineHeight);
+            System.arraycopy(lonFloats, firstY * scanW, lons, 0, gcRawWidth);
+            System.arraycopy(latFloats, firstY * scanW, lats, 0, gcRawWidth);
+            addStripeGeocode(lats, lons, firstY, scanW, _scanlineHeight);
         }
 
         // create last stripe
-        int lastStripeH = (sceneH - firstY) % _scanlineHeight;
-        if (lastStripeH != 0) {
+        int lastStripeH = sceneH - firstY;
+        if (lastStripeH > 0) {
             int lastStripeY = sceneH - lastStripeH; // y coord of first y of last stripe
             final float[] lats = new float[gcRawWidth];
             final float[] lons = new float[gcRawWidth];
             System.arraycopy(lonFloats, lastStripeY * scanW, lons, 0, lastStripeH * scanW);
             System.arraycopy(latFloats, lastStripeY * scanW, lats, 0, lastStripeH * scanW);
             for (int x = 0; x < scanW; x++) {
-                int y1 = lastStripeY - _scanlineHeight; // coord of first y in previous stripe
-                int y2 = lastStripeY - 1;               // coord of last y in previous stripe
-                int index1 = y1 * scanW + x;
-                int index2 = y2 * scanW + x;
-                float deltaLat = (latFloats[index2] - latFloats[index1]) / (_scanlineHeight - 1);
-                float deltaLon = (lonFloats[index2] - lonFloats[index1]) / (_scanlineHeight - 1);
+                float deltaLat;
+                float deltaLon;
                 float refLat = latFloats[(sceneH-1) * scanW + x];
                 float refLon = lonFloats[(sceneH-1) * scanW + x];
-
-                for (int y = lastStripeH; y < _scanlineHeight; y++) {
-                    lons[y * scanW + x] = refLon + (deltaLon * (y - lastStripeH + 1));
-                    lats[y * scanW + x] = refLat + (deltaLat * (y - lastStripeH + 1));
+                if(lastStripeH > 1) {
+                    deltaLat = refLat - latFloats[(sceneH-2) * scanW + x];
+                    deltaLon = refLon - lonFloats[(sceneH-2) * scanW + x];
+                } else {
+                    deltaLat = latFloats[(firstY-1) * scanW + x] - latFloats[(firstY-2) * scanW + x];
+                    deltaLon = lonFloats[(firstY-1) * scanW + x] - lonFloats[(firstY-2) * scanW + x];
+                }
+                for (int y = 0; y < _scanlineHeight-lastStripeH; y++) {
+                    lats[(y+lastStripeH) * scanW + x] = refLat + (deltaLat * y);
+                    lons[(y+lastStripeH) * scanW + x] = refLon + (deltaLon * y);
                 }
             }
             addStripeGeocode(lats, lons, lastStripeY, scanW, _scanlineHeight);

@@ -206,14 +206,14 @@ public class BowtieTiePointGeoCoding extends AbstractBowtieGeoCoding {
             firstY = gridScanlineHeight - gridScanlineOffset;
             final float[] lats = new float[gcRawWidth];
             final float[] lons = new float[gcRawWidth];
-            System.arraycopy(lonFloats, 0, lons, gridScanlineOffset * gridW, (gridScanlineHeight - gridScanlineOffset) * gridW);
-            System.arraycopy(latFloats, 0, lats, gridScanlineOffset * gridW, (gridScanlineHeight - gridScanlineOffset) * gridW);
+            System.arraycopy(lonFloats, 0, lons, gridScanlineOffset * gridW, firstY * gridW);
+            System.arraycopy(latFloats, 0, lats, gridScanlineOffset * gridW, firstY * gridW);
             for (int x = 0; x < gridW; x++) {
                 float deltaLat;
                 float deltaLon;
                 float refLat = latFloats[x];
                 float refLon = lonFloats[x];
-                if((gridScanlineHeight - gridScanlineOffset) > 1) {
+                if(firstY > 1) {
                     deltaLat = latFloats[gridW + x] - latFloats[x];
                     deltaLon = lonFloats[gridW + x] - lonFloats[x];
                 } else {
@@ -358,13 +358,16 @@ public class BowtieTiePointGeoCoding extends AbstractBowtieGeoCoding {
         // copy first partial stripe
         if(newScanlineOffset != 0) {
             int copyH = _scanlineHeight-newScanlineOffset;
+            if (copyH > region.height) {
+                copyH = region.height;
+            }
             TiePointGeoCoding stripeGc = (TiePointGeoCoding) _gcList.get(gcIndex);
             tmpStripeFloats = stripeGc.getLatGrid().getPixels(region.x, newScanlineOffset, region.width, copyH, tmpStripeFloats);
             System.arraycopy(tmpStripeFloats, 0, newLatFloats, 0, copyH*region.width);
             tmpStripeFloats = stripeGc.getLonGrid().getPixels(region.x, newScanlineOffset, region.width, copyH, tmpStripeFloats);
             System.arraycopy(tmpStripeFloats, 0, newLonFloats, 0, copyH*region.width);
 
-            firstY += copyH;
+            firstY += _scanlineHeight-newScanlineOffset;
             gcIndex++;
         }
 
