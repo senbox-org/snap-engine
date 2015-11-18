@@ -23,7 +23,7 @@ import java.util.logging.Logger;
 /**
  * @author Tonio Fincke
  */
-@OperatorMetadata(alias = "PduStitchingOp",
+@OperatorMetadata(alias = "PduStitching",
         category = "Optical",
         version = "1.0",
         authors = "Tonio Fincke",
