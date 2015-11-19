@@ -2,10 +2,10 @@ package org.esa.s3tbx.meris.radiometry;
 
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.FlagCoding;
+import org.esa.snap.core.datamodel.GeoCodingFactory;
 import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.MetadataAttribute;
 import org.esa.snap.core.datamodel.MetadataElement;
-import org.esa.snap.core.datamodel.PixelGeoCoding;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.ProductNodeGroup;
@@ -39,8 +39,8 @@ class TestHelper {
         addBandToProduct(product, "l1_flags", ProductData.TYPE_INT8);
         addBandToProduct(product, "detector_index", ProductData.TYPE_UINT16);
         if (isFSG) {
-            product.addBand("corr_longitude", "X/10");
-            product.addBand("corr_latitude", "60 - Y/10");
+            product.addBand("corr_longitude", "X/10", ProductData.TYPE_FLOAT64);
+            product.addBand("corr_latitude", "60 - Y/10", ProductData.TYPE_FLOAT64);
             product.addBand("altitude", "10", ProductData.TYPE_INT16);
         }
 
@@ -110,8 +110,8 @@ class TestHelper {
         product.getMetadataRoot().addElement(dsd);
 
         if (isFSG) {
-            product.setSceneGeoCoding(new PixelGeoCoding(product.getBand("corr_latitude"),
-                                                         product.getBand("corr_longitude"), null, 3));
+            product.setSceneGeoCoding(GeoCodingFactory.createPixelGeoCoding(product.getBand("corr_latitude"),
+                                                                            product.getBand("corr_longitude"), null, 3));
         } else {
             product.setSceneGeoCoding(new TiePointGeoCoding(product.getTiePointGrid("latitude"),
                                                             product.getTiePointGrid("longitude")));
