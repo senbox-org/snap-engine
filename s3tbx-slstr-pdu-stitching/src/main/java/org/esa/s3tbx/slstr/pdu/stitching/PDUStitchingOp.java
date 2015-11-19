@@ -51,7 +51,7 @@ public class PDUStitchingOp extends Operator {
         if (files.length == 0) {
             return;
         }
-        if (StringUtils.isNullOrEmpty(targetDir.getAbsolutePath())) {
+        if (targetDir == null || StringUtils.isNullOrEmpty(targetDir.getAbsolutePath())) {
             targetDir = new File(SystemUtils.getUserHomeDir().getPath());
         }
         try {
