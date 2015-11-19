@@ -21,6 +21,7 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
+import java.util.StringTokenizer;
 
 /**
  * Helper class providing some utilities for Swing programming.
@@ -76,5 +77,45 @@ public class SwingHelper {
         }
 
         comp.setLocation(x1, y1);
+    }
+
+    /**
+     *
+     * @param text
+     * @return
+     */
+    public static String createWordWrappedHtmlTextForSwingComponents(String text) {
+        final int defaultMaxLength = 120;
+        return createWordWrappedHtmlTextForSwingComponents(text, defaultMaxLength);
+    }
+
+    /**
+     *
+     * @param text
+     * @param maxLength
+     * @return
+     */
+    public static String createWordWrappedHtmlTextForSwingComponents(String text, int maxLength) {
+        final StringBuilder builder = new StringBuilder("<html>");
+        if (text.trim().length() <= maxLength) {
+            builder.append(text);
+        } else {
+            StringTokenizer tokenizer = new StringTokenizer(text," ",true);
+            int length = 0;
+            while (tokenizer.hasMoreTokens()) {
+                String string = tokenizer.nextToken();
+                if (length == 0 && string.trim().length()==0) {
+                    continue;
+                }
+                length += string.length();
+                builder.append(string);
+                if (length >= maxLength) {
+                    builder.append("<br>");
+                    length = 0;
+                }
+            }
+        }
+        builder.append("</html>");
+        return builder.toString();
     }
 }
