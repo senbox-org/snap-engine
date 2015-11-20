@@ -211,8 +211,9 @@ public class LandsatGeotiffReader extends AbstractProductReader {
                     band.setSampleCoding(flagCoding);
                     product.getFlagCodingGroup().add(flagCoding);
                     List<Mask> masks;
-                    if (Resolution.DEFAULT.equals(targetResolution)) {
-                        masks = createMasks(landsatMetadata.getReflectanceDim());
+                    final Dimension reflectanceDim = landsatMetadata.getReflectanceDim();
+                    if (Resolution.DEFAULT.equals(targetResolution) && reflectanceDim != null) {
+                        masks = createMasks(reflectanceDim);
                     }else {
                         masks = createMasks(product.getSceneRasterSize());
                     }
