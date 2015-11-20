@@ -877,16 +877,12 @@ public class Product extends ProductNode {
             return false;
         }
 
-        for (int i = 0; i < getNumBands(); i++) {
-            if (!geoCoding.equals(getBandAt(i).getGeoCoding())) {
+        final List<RasterDataNode> rasterDataNodes = getRasterDataNodes();
+        for (RasterDataNode rasterDataNode : rasterDataNodes) {
+            if (geoCoding != rasterDataNode.getGeoCoding()) {
                 return false;
             }
-        }
 
-        for (int i = 0; i < getNumTiePointGrids(); i++) {
-            if (!geoCoding.equals(getTiePointGridAt(i).getGeoCoding())) {
-                return false;
-            }
         }
         return true;
     }
@@ -925,13 +921,8 @@ public class Product extends ProductNode {
     }
 
     public boolean isMultiSizeProduct() {
-        final ProductNodeGroup<Mask> maskGroup = getMaskGroup();
-        final Stream<RasterDataNode> masks = Arrays.stream(maskGroup.toArray(new Mask[maskGroup.getNodeCount()]));
-        final Stream<RasterDataNode> bands = Arrays.stream(getBands());
-        final Stream<RasterDataNode> tpg = Arrays.stream(getTiePointGrids());
-        final RasterDataNode[] rdns = Stream.concat(Stream.concat(masks, bands), tpg).toArray(RasterDataNode[]::new);
-
-        return !ProductUtils.areRastersEqualInSize(rdns);
+        final List<RasterDataNode> rasterDataNodes = getRasterDataNodes();
+        return !ProductUtils.areRastersEqualInSize(rasterDataNodes.toArray(new RasterDataNode[rasterDataNodes.size()]));
     }
 
     /**
@@ -2373,7 +2364,10 @@ public class Product extends ProductNode {
      * @return the new mask which has just been added
      * @since BEAM 4.10
      */
-    public Mask addMask(String maskName, VectorDataNode vectorDataNode, String description, Color color,
+    public Mask addMask(String maskName,
+                        VectorDataNode vectorDataNode,
+                        String description,
+                        Color color,
                         double transparency) {
         final Mask mask = new Mask(maskName,
                                    getSceneRasterWidth(),
@@ -2383,6 +2377,40 @@ public class Product extends ProductNode {
         mask.setDescription(description);
         mask.setImageColor(color);
         mask.setImageTransparency(transparency);
+        addMask(mask);
+        return mask;
+    }
+
+    /**
+     * Creates a new mask based on the geometries contained in a vector data node,
+     * adds it to this product and returns it.
+     *
+     * @param maskName                the new mask's name
+     * @param vectorDataNode          the vector data node
+     * @param description             the mask's description
+     * @param color                   the display color
+     * @param transparency            the display transparency
+     * @param prototypeRasterDataNode a raster data node used to serve as a prototypeRasterDataNode for image layout and geo-coding. May be {@code null}.
+     * @return the new mask which has just been added
+     * @since SNAP 2.0
+     */
+    public Mask addMask(String maskName,
+                        VectorDataNode vectorDataNode,
+                        String description,
+                        Color color,
+                        double transparency,
+                        RasterDataNode prototypeRasterDataNode) {
+        final Mask mask = new Mask(maskName,
+                                   prototypeRasterDataNode != null ? prototypeRasterDataNode.getRasterWidth() : getSceneRasterWidth(),
+                                   prototypeRasterDataNode != null ? prototypeRasterDataNode.getRasterHeight() : getSceneRasterHeight(),
+                                   Mask.VectorDataType.INSTANCE);
+        Mask.VectorDataType.setVectorData(mask, vectorDataNode);
+        mask.setDescription(description);
+        mask.setImageColor(color);
+        mask.setImageTransparency(transparency);
+        if (prototypeRasterDataNode != null) {
+            ProductUtils.copyImageGeometry(prototypeRasterDataNode, mask, false);
+        }
         addMask(mask);
         return mask;
     }

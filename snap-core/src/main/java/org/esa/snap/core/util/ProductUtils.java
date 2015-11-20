@@ -982,9 +982,7 @@ public class ProductUtils {
         if (copySourceImage) {
             targetBand.setSourceImage(sourceBand.getSourceImage());
         }
-        if (sourceBand.getGeoCoding() != sourceProduct.getSceneGeoCoding()) {
-            copyGeoCoding(sourceBand, targetBand);
-        }
+        copyImageGeometry(sourceBand, targetBand, true);
         return targetBand;
     }
 
@@ -1073,7 +1071,7 @@ public class ProductUtils {
     }
 
     /**
-     * Copies the geocoding from the source product to target product.
+     * Copies the geo-coding from the source product to target product.
      *
      * @param sourceProduct the source product
      * @param targetProduct the target product
@@ -1086,19 +1084,44 @@ public class ProductUtils {
     }
 
     /**
-     * Copies the geocoding from the source raster to target raster.
+     * Deeply copies the geo-coding from the source raster data node to the target raster data node.
      *
-     * @param sourceRaster the source raster
-     * @param targetRaster the target raster
+     * @param sourceRaster the source raster data node
+     * @param targetRaster the target raster data node
      * @throws IllegalArgumentException if one of the params is {@code null}.
+     * @since SNAP 2.0
      */
     public static void copyGeoCoding(RasterDataNode sourceRaster, RasterDataNode targetRaster) {
-        Guardian.assertNotNull("sourceRaster", sourceRaster);
-        Guardian.assertNotNull("targetRaster", targetRaster);
         final Scene srcScene = SceneFactory.createScene(sourceRaster);
         final Scene destScene = SceneFactory.createScene(targetRaster);
         if (srcScene != null && destScene != null) {
             srcScene.transferGeoCodingTo(destScene, null);
+        }
+    }
+
+    /**
+     * Copies the geo-coding and image-to-model transformation from the source raster data node to
+     * the  target raster data node.
+     *
+     * @param sourceRaster the source raster data node
+     * @param targetRaster the target raster data node
+     * @param deepCopy if {@code true} {@link #copyGeoCoding(RasterDataNode, RasterDataNode)} is called, otherwise
+     *                      the target reference is set.
+     * @since SNAP 2.0
+     */
+    public static void copyImageGeometry(RasterDataNode sourceRaster, RasterDataNode targetRaster, boolean deepCopy) {
+        if (sourceRaster.getRasterSize().equals(targetRaster.getRasterSize())) {
+            if (sourceRaster.getGeoCoding() != targetRaster.getGeoCoding()) {
+                if (deepCopy) {
+                    copyGeoCoding(sourceRaster, targetRaster);
+                } else {
+                    targetRaster.setGeoCoding(sourceRaster.getGeoCoding());
+                }
+            }
+            if (!targetRaster.isSourceImageSet()
+                    && !sourceRaster.getImageToModelTransform().equals(targetRaster.getImageToModelTransform())) {
+                targetRaster.setImageToModelTransform(sourceRaster.getImageToModelTransform());
+            }
         }
     }
 

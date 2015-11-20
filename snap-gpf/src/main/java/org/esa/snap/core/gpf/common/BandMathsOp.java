@@ -21,6 +21,7 @@ import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.IndexCoding;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.dataop.barithm.BandArithmetic;
 import org.esa.snap.core.dataop.barithm.ProductNamespacePrefixProvider;
 import org.esa.snap.core.dataop.barithm.RasterDataEvalEnv;
@@ -269,19 +270,13 @@ public class BandMathsOp extends Operator {
             }
             final RasterDataSymbol[] rasterDataSymbols = BandArithmetic.getRefRasterDataSymbols(targetTerm);
             Dimension targetBandDimension = findTargetBandSize(rasterDataSymbols);
-
             final Band targetBand = createBand(bandDescriptor, targetBandDimension);
-
-            if (!targetBandDimension.equals(targetProduct.getSceneRasterSize())) {
-                if (rasterDataSymbols.length > 0) {
-                    ProductUtils.copyGeoCoding(rasterDataSymbols[0].getRaster(), targetBand);
-                }
-            }
-
             targetProduct.addBand(targetBand);
+            if (rasterDataSymbols.length > 0) {
+                ProductUtils.copyImageGeometry(rasterDataSymbols[0].getRaster(), targetBand, true);
+            }
             descriptorMap.put(targetBand, bandDescriptor);
         }
-
 
         ProductUtils.copyMetadata(sourceProducts[0], targetProduct);
         ProductUtils.copyTiePointGrids(sourceProducts[0], targetProduct);
