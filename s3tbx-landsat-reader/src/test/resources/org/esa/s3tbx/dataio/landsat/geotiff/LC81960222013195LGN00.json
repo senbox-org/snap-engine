@@ -120,13 +120,13 @@
       {
         "name": "dropped_frame",
         "type": "org.esa.snap.core.datamodel.Mask$BandMathsType",
-        "color": "255,0,0",
+        "color": "178,0,0",
         "description": "Dropped Frame"
       },
       {
         "name": "terrain_occlusion",
         "type": "org.esa.snap.core.datamodel.Mask$BandMathsType",
-        "color": "255,0,0",
+        "color": "124,0,0",
         "description": "Terrain Occlusion"
       },
       {
