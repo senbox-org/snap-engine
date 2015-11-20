@@ -24,7 +24,7 @@
     <version>2.0.0-SNAPSHOT</version>
     <name>Sentinel-3 Toolbox</name>
     <description>Tools for the Sentinel-3 Satellite</description>
-    <url>https://github.com/bcdev/s3tbx</url>
+    <url>https://github.com/senbox-org/s3tbx</url>
 
     <modules>
         <module>s3tbx-aatsr-sst</module>
