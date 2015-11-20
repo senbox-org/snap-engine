@@ -34,10 +34,6 @@
         VGT.
     </description>
 
-    <properties>
-        <s3tbx.nbmSpecVersion>2.0.0.10</s3tbx.nbmSpecVersion>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.esa.snap</groupId>
