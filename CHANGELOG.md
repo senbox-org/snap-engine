@@ -6,15 +6,16 @@ New Features and Improvements
 -----------------------------
 
 * Updated Sentinel-3 OLCI and SLSTR data readers
-  - to work with latest TDS 
-  - to work with SLSTR L1b multi-size/-resolutions 
-  - new OLCI RGB profiles
-  - to work with new uncertainty propagation in band-maths
-  - drag-and-drop of OLCI and SLSTR manifest files or directories
-    into SNAP Desktop
+  - to work with latest TDS; 
+  - to work with SLSTR L1b multi-size/-resolutions; 
+  - new OLCI RGB profiles;
+  - to work with new uncertainty propagation in band-maths;
+  - drag-and-drop of OLCI and SLSTR manifest files or directories into SNAP Desktop.
 * Added new data reader for Envisat MERIS in SAFE format (= "Sentinels format")
 * Added new preliminary data reader for Sentinel-3 L1C Synergy data products
 * Added new Sentinel-3 Toolbox settings page in Tools / Options dialog
+  - switch to either read all profile tie-point data or only the first grid;
+  - switch to either use tie-point based or per-pixel geo-coding, and others.
 * New Sentinel-3 SLSTR PDU Stitching Tool (command-line and GUI)
 * New PROBA-V data product reader
 * Updated Landsat-8 data reader w.r.t. multi-size bands support 
