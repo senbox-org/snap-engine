@@ -12,6 +12,7 @@ import org.esa.snap.rcp.util.Dialogs;
 import org.esa.snap.ui.AppContext;
 import org.esa.snap.ui.ModelessDialog;
 
+import javax.swing.AbstractButton;
 import java.util.Map;
 
 /**
@@ -37,6 +38,9 @@ public class PDUStitchingDialog extends ModelessDialog {
                                                      appContext,
                                                      helpID);
         getJDialog().setJMenuBar(operatorMenu.createDefaultMenu());
+        AbstractButton button = getButton(ID_APPLY);
+        button.setText("Run");
+        button.setMnemonic('R');
         setContent(new PDUStitchingPanel(appContext, formModel));
     }
 
