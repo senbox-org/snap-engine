@@ -211,9 +211,13 @@ public class LandsatGeotiffReader extends AbstractProductReader {
                     band.setSampleCoding(flagCoding);
                     product.getFlagCodingGroup().add(flagCoding);
                     List<Mask> masks;
-                    final Dimension reflectanceDim = landsatMetadata.getReflectanceDim();
-                    if (Resolution.DEFAULT.equals(targetResolution) && reflectanceDim != null) {
-                        masks = createMasks(reflectanceDim);
+
+                    if (Resolution.DEFAULT.equals(targetResolution) ) {
+                        Dimension dimension = landsatMetadata.getReflectanceDim();
+                        if(dimension == null) {
+                            dimension = landsatMetadata.getThermalDim();
+                        }
+                        masks = createMasks(dimension != null ? dimension : product.getSceneRasterSize());
                     }else {
                         masks = createMasks(product.getSceneRasterSize());
                     }
