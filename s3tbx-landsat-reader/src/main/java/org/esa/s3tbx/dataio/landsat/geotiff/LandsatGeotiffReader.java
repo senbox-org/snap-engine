@@ -210,7 +210,12 @@ public class LandsatGeotiffReader extends AbstractProductReader {
                     FlagCoding flagCoding = createFlagCoding(bandName);
                     band.setSampleCoding(flagCoding);
                     product.getFlagCodingGroup().add(flagCoding);
-                    List<Mask> masks = createMasks(product);
+                    List<Mask> masks;
+                    if (Resolution.DEFAULT.equals(targetResolution)) {
+                        masks = createMasks(landsatMetadata.getReflectanceDim());
+                    }else {
+                        masks = createMasks(product.getSceneRasterSize());
+                    }
                     for (Mask mask : masks) {
                         product.getMaskGroup().add(mask);
                     }
@@ -292,10 +297,10 @@ public class LandsatGeotiffReader extends AbstractProductReader {
         }
     }
 
-    private List<Mask> createMasks(Product product) {
+    private List<Mask> createMasks(Dimension size) {
         ArrayList<Mask> masks = new ArrayList<>();
-        final int width = product.getSceneRasterWidth();
-        final int height = product.getSceneRasterHeight();
+        final int width = size.width;
+        final int height = size.height;
 
         masks.add(Mask.BandMathsType.create("designated_fill",
                                             "Designated Fill",
