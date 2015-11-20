@@ -8,7 +8,7 @@ import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.ui.OperatorMenu;
 import org.esa.snap.core.gpf.ui.OperatorParameterSupport;
 import org.esa.snap.core.gpf.ui.ParameterUpdater;
-import org.esa.snap.rcp.SnapDialogs;
+import org.esa.snap.rcp.util.Dialogs;
 import org.esa.snap.ui.AppContext;
 import org.esa.snap.ui.ModelessDialog;
 
@@ -45,11 +45,11 @@ public class PDUStitchingDialog extends ModelessDialog {
         try {
             GPF.createProduct("PduStitching", formModel.getParameterMap());
         } catch (OperatorException e) {
-            SnapDialogs.showInformation("SLSTR L1B PDU Stitching", "Could not create stitched SLSTR L1B product", null);
+            Dialogs.showInformation("SLSTR L1B PDU Stitching", "Could not create stitched SLSTR L1B product", null);
             return;
         }
-        SnapDialogs.showInformation("SLSTR L1B PDU Stitching",
-                                    "Stitched SLSTR L1B product has been successfully created in the target directory.", null);
+        Dialogs.showInformation("SLSTR L1B PDU Stitching",
+                                "Stitched SLSTR L1B product has been successfully created in the target directory.", null);
     }
 
     private class StitchingParametersUpdater implements ParameterUpdater {

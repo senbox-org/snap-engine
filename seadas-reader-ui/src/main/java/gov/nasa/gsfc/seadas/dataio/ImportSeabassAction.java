@@ -22,8 +22,8 @@ import org.esa.snap.core.datamodel.PlacemarkDescriptorRegistry;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductNode;
 import org.esa.snap.core.datamodel.VectorDataNode;
-import org.esa.snap.rcp.SnapDialogs;
 import org.esa.snap.rcp.actions.AbstractSnapAction;
+import org.esa.snap.rcp.util.Dialogs;
 import org.esa.snap.ui.product.ProductSceneView;
 import org.geotools.feature.FeatureCollection;
 import org.opengis.feature.simple.SimpleFeature;
@@ -101,7 +101,7 @@ public class ImportSeabassAction extends AbstractSnapAction implements ContextAw
     @Override
     public void actionPerformed(ActionEvent event) {
 
-        File file = SnapDialogs.requestFileForOpen(Bundle.CTL_ImportSeabassDialogTitle(), false, null, "importSeabass.lastDir");
+        File file = Dialogs.requestFileForOpen(Bundle.CTL_ImportSeabassDialogTitle(), false, null, "importSeabass.lastDir");
         if (file == null) {
             return;
         }
@@ -112,12 +112,12 @@ public class ImportSeabassAction extends AbstractSnapAction implements ContextAw
         try {
             featureCollection = readTrack(file, product.getSceneGeoCoding());
         } catch (Exception e) {
-            SnapDialogs.showError(Bundle.CTL_ImportSeabassDialogTitle(), "Failed to load SeaBASS file:\n" + e.getMessage());
+            Dialogs.showError(Bundle.CTL_ImportSeabassDialogTitle(), "Failed to load SeaBASS file:\n" + e.getMessage());
             return;
         }
 
         if (featureCollection.isEmpty()) {
-            SnapDialogs.showError(Bundle.CTL_ImportSeabassDialogTitle(), "No records found.");
+            Dialogs.showError(Bundle.CTL_ImportSeabassDialogTitle(), "No records found.");
             return;
         }
 
