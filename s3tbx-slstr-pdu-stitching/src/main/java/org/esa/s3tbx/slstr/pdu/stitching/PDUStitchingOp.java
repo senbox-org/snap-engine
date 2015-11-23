@@ -38,9 +38,9 @@ public class PDUStitchingOp extends Operator {
             "'?' (matches any single character).", notNull = true)
     String[] sourceProductPaths;
 
-    @Parameter(description = "The directory to which the stitched product shall be written. Within this directory, a folder" +
-            "of the SLSTR L1B naming format will be created. If no target directory is given, the product will be written to" +
-            "the user directory.")
+    @Parameter(description = "The directory to which the stitched product shall be written.\n" +
+            "Within this directory, a folder of the SLSTR L1B naming format will be created.\n" +
+            "If no target directory is given, the product will be written to the user directory.")
     private File targetDir;
 
     @Override
