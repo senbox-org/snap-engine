@@ -25,8 +25,8 @@
     </parent>
 
     <artifactId>beam-proba-v-reader</artifactId>
-    <name>PROBA V Product Reader</name>
-    <version>5.0</version>
+    <name>BEAM PROBA V Product Reader</name>
+    <version>5.0.1-SNAPSHOT</version>
 
     <dependencies>
         <dependency>
