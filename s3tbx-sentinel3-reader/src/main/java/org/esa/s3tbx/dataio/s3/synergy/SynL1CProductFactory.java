@@ -186,4 +186,8 @@ public class SynL1CProductFactory extends AbstractProductFactory {
         }
     }
 
+    @Override
+    protected void setAutoGrouping(Product[] sourceProducts, Product targetProduct) {
+        targetProduct.setAutoGrouping("Meas:error_estimates:exception:MISREGIST_OLC:MISREGIST_SLST:GEOLOCATION_REF");
+    }
 }
