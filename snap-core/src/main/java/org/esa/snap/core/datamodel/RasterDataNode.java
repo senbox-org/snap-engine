@@ -95,6 +95,7 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
     public static final String PROPERTY_NAME_ANCILLARY_VARIABLES = "ancillaryVariables";
     public static final String PROPERTY_NAME_ANCILLARY_RELATIONS = "ancillaryRelations";
     public static final String PROPERTY_NAME_IMAGE_TO_MODEL_TRANSFORM = "imageToModelTransform";
+    public static final String PROPERTY_NAME_SCENE_RASTER_TRANSFORM = "sceneRasterTransform";
 
 
     /**
@@ -332,7 +333,9 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
      */
     public void setSceneRasterTransform(SceneRasterTransform sceneRasterTransform) {
         Assert.notNull(sceneRasterTransform, "sceneRasterTransform");
+        SceneRasterTransform oldTransform = this.sceneRasterTransform;
         this.sceneRasterTransform = sceneRasterTransform;
+        fireProductNodeChanged(PROPERTY_NAME_SCENE_RASTER_TRANSFORM, oldTransform, sceneRasterTransform);
     }
 
     /**
@@ -1828,7 +1831,7 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
         final ColorPaletteDef colorPaletteDef = ColorPaletteDef.loadColorPaletteDef(filePath.toFile());
         final ImageInfo info = new ImageInfo(colorPaletteDef);
         final Range autoStretchRange = histogram.findRangeFor95Percent();
-        info.setColorPaletteDef(colorPaletteDef, autoStretchRange.getMin(), autoStretchRange.getMax(), true);
+        info.setColorPaletteDef(colorPaletteDef, autoStretchRange.getMin(), autoStretchRange.getMax(), colorPaletteDef.isAutoDistribute());
         return info;
     }
 
@@ -2403,7 +2406,7 @@ public abstract class RasterDataNode extends DataNode implements Scaling {
             return new RasterDataNode[0];
         }
         if (relations.length == 0) {
-            return ancillaryVariables.toArray(new RasterDataNode[0]);
+            return ancillaryVariables.toArray(new RasterDataNode[ancillaryVariables.getNodeCount()]);
         }
         assertRelationsAreAllNoneNull(relations);
         ArrayList<RasterDataNode> rasterDataNodes = new ArrayList<>();
