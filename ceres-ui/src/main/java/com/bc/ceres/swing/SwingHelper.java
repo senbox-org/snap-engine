@@ -85,7 +85,7 @@ public class SwingHelper {
      * @return
      */
     public static String createWordWrappedHtmlTextForSwingComponents(String text) {
-        final int defaultMaxLength = 120;
+        final int defaultMaxLength = 120; // 120 characters
         return createWordWrappedHtmlTextForSwingComponents(text, defaultMaxLength);
     }
 
@@ -96,25 +96,25 @@ public class SwingHelper {
      * @return
      */
     public static String createWordWrappedHtmlTextForSwingComponents(String text, int maxLength) {
+        if (text.trim().length() <= maxLength) return text;
+
         final StringBuilder builder = new StringBuilder("<html>");
-        if (text.trim().length() <= maxLength) {
-            builder.append(text);
-        } else {
-            StringTokenizer tokenizer = new StringTokenizer(text," ",true);
-            int length = 0;
-            while (tokenizer.hasMoreTokens()) {
-                String string = tokenizer.nextToken();
-                if (length == 0 && string.trim().length()==0) {
-                    continue;
-                }
-                length += string.length();
-                builder.append(string);
-                if (length >= maxLength) {
-                    builder.append("<br>");
-                    length = 0;
-                }
+
+        StringTokenizer tokenizer = new StringTokenizer(text, " ", true);
+        int length = 0;
+        while (tokenizer.hasMoreTokens()) {
+            String string = tokenizer.nextToken();
+            if (length == 0 && string.trim().length() == 0) {
+                continue;
+            }
+            length += string.length();
+            builder.append(string);
+            if (length >= maxLength) {
+                builder.append("<br>");
+                length = 0;
             }
         }
+
         builder.append("</html>");
         return builder.toString();
     }
