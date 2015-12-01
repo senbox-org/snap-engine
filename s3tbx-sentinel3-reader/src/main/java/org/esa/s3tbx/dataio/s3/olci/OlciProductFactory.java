@@ -163,10 +163,9 @@ public abstract class OlciProductFactory extends AbstractProductFactory {
                 } else {
                     getLogger().log(Level.WARNING, "Unit extraction not working for band " + targetNode.getName());
                 }
-
+                targetNode.setValidPixelExpression(getValidExpression());
             }
         }
-        targetNode.setValidPixelExpression(getValidExpression());
     }
 
     protected abstract String getValidExpression();
