@@ -8,6 +8,9 @@
       <xfdu:contentUnit ID="SLSTR_MET_TX_Unit" unitType="Annotation Data Unit" textInfo="Meteorological parameters regridded onto the 16km tie points">
         <dataObjectPointer dataObjectID="SLSTR_MET_TX_Data"/>
       </xfdu:contentUnit>
+      <xfdu:contentUnit ID="ADFUnit" unitType="Annotation Data Unit" textInfo="VISCAL data obtained from input VISCAL ADF">
+        <dataObjectPointer dataObjectID="ADFData"/>
+      </xfdu:contentUnit>
     </xfdu:contentUnit>
   </informationPackageMap>
   <metadataSection>
@@ -750,6 +753,12 @@
       <byteStream mimeType="application/x-netcdf" size="32423">
         <fileLocation locatorType="URL" href="met_tx.nc"/>
         <checksum checksumName="MD5">0f9a756c6c7be058d7712432bf0348ca</checksum>
+      </byteStream>
+    </dataObject>
+    <dataObject ID="ADFData">
+      <byteStream mimeType="application/x-netcdf" size="36985">
+        <fileLocation locatorType="URL" href="viscal.nc"/>
+        <checksum checksumName="MD5">b12d0db5bbfdc22ea728219511894868</checksum>
       </byteStream>
     </dataObject>
   </dataObjectSection>

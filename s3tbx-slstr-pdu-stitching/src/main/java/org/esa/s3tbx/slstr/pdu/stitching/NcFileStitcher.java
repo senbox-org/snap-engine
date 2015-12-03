@@ -6,6 +6,7 @@ import org.esa.snap.dataio.netcdf.nc.NVariable;
 import org.esa.snap.dataio.netcdf.nc.NWritableFactory;
 import org.esa.snap.dataio.netcdf.util.NetcdfFileOpener;
 import ucar.ma2.Array;
+import ucar.ma2.IndexIterator;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
 import ucar.nc2.NetcdfFile;
@@ -69,13 +70,11 @@ class NcFileStitcher {
                 //todo maybe there is a need to support variables without dimensions
                 if (!namesOfAddedVariables.contains(variableName) && variable.getDimensions().size() > 0) {
                     checkWhetherVariableHasSameDimensionsAcrossFiles(i, variable, variableLists);
-                    netcdfWriteable.addVariable(variable.getFullName(), variable.getDataType(), variable.isUnsigned(),
-                                                null,
-                                                variable.getDimensionsString());
+                    addVariableToWritable(netcdfWriteable, variable);
                     final NVariable nVariable = netcdfWriteable.findVariable(variableName);
                     final int indexOfRowDimension = getIndexOfRowDimension(variable.getDimensions());
                     if (indexOfRowDimension < 0) {
-                        variableToArray.put(variableName, variable.read());
+                        variableToArray.put(variableName, getValidArrayFromVariable(variable));
                     } else {
                         Array nVariableArray =
                                 createStitchedArray(variable, targetImageSize, imageSizes, indexOfRowDimension, variableLists);
@@ -87,6 +86,29 @@ class NcFileStitcher {
             }
         }
         return variableToArray;
+    }
+
+    private static Array getValidArrayFromVariable(Variable variable) throws IOException {
+        final Array array = variable.read();
+        if (variable.getDataType().isString()) {
+            final IndexIterator indexIterator = array.getIndexIterator();
+            while (indexIterator.hasNext()) {
+                if (indexIterator.next() == null) {
+                    indexIterator.setObjectCurrent("");
+                }
+            }
+        }
+        return array;
+    }
+
+    private static void addVariableToWritable(NFileWriteable netcdfWriteable, Variable variable) throws IOException {
+        if (variable.getDataType().isString()) {
+            netcdfWriteable.addVariable(variable.getFullName(), variable.getDataType(), variable.isUnsigned(),
+                                        null, variable.getDimensionsString(), 0);
+        } else {
+            netcdfWriteable.addVariable(variable.getFullName(), variable.getDataType(), variable.isUnsigned(),
+                                        null, variable.getDimensionsString());
+        }
     }
 
     private static Array createStitchedArray(Variable variable, ImageSize targetImageSize, ImageSize[] imageSizes,

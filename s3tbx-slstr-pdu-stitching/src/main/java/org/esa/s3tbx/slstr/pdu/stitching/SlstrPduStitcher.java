@@ -111,10 +111,6 @@ public class SlstrPduStitcher {
             List<File> ncFiles = new ArrayList<>();
             List<ImageSize> imageSizeList = new ArrayList<>();
             final String ncFileName = ncFileNames.get(i);
-            if (ncFileName.equals("viscal.nc")) {
-                //todo stitch viscal.nc
-                break;
-            }
             String id = ncFileName.substring(ncFileName.length() - 5, ncFileName.length() - 3);
             if (id.equals("tx")) {
                 id = "tn";
