@@ -80,9 +80,14 @@ public class SwingHelper {
     }
 
     /**
+     * Creates a &lt;html&gt; wrapped text with line breaks (&lt;br&gt;) which then can be used for example to
+     * display word wrapped multi line tool tips. If the number of characters in a line exceeds 120
+     * a line brake is inserted at the end of the current word. If you need a line break after an
+     * other number of characters use {@link #createWordWrappedHtmlTextForSwingComponents(String, int)}
      *
-     * @param text
-     * @return
+     * @param text to be wrapped
+     * @return &lt;html&gt; wrapped text
+     * @see #createWordWrappedHtmlTextForSwingComponents(String, int)
      */
     public static String createWordWrappedHtmlTextForSwingComponents(String text) {
         final int defaultMaxLength = 120; // 120 characters
@@ -90,10 +95,15 @@ public class SwingHelper {
     }
 
     /**
+     * Creates a &lt;html&gt; wrapped text with line breaks (&lt;br&gt;) which then can be used for example to
+     * display word wrapped multi line tool tips. If the number of characters in a line exceeds the given maxLength
+     * a line brake is inserted at the end of the current word. You can also use the default line break after
+     * exceeding a count of 120 characters ... use {@link #createWordWrappedHtmlTextForSwingComponents(String)}
      *
-     * @param text
-     * @param maxLength
-     * @return
+     * @param text to be wrapped
+     * @param maxLength num of characters
+     * @return &lt;html&gt; wrapped text
+     * @see #createWordWrappedHtmlTextForSwingComponents(String)
      */
     public static String createWordWrappedHtmlTextForSwingComponents(String text, int maxLength) {
         if (text.trim().length() <= maxLength) return text;
