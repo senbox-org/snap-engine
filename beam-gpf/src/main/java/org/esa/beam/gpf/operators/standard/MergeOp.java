@@ -171,7 +171,7 @@ public class MergeOp extends Operator {
 
     private void validateSourceProducts() {
         for (Product sourceProduct : getSourceProducts()) {
-            if (!targetProduct.isCompatibleProduct(sourceProduct, geographicError)) {
+            if (!Float.isNaN(geographicError) && !targetProduct.isCompatibleProduct(sourceProduct, geographicError)) {
                 throw new OperatorException(String.format("Product [%s] is not compatible to master product.",
                                                           getSourceProductId(sourceProduct)));
             }
