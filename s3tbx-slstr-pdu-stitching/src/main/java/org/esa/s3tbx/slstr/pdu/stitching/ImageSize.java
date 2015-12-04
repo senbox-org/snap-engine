@@ -3,7 +3,7 @@ package org.esa.s3tbx.slstr.pdu.stitching;
 /**
  * @author Tonio Fincke
  */
-class ImageSize {
+public class ImageSize {
 
     private final String identifier;
     private final int startOffset;
@@ -11,7 +11,7 @@ class ImageSize {
     private final int rows;
     private final int columns;
 
-    ImageSize(String identifier, int startOffset, int trackOffset, int rows, int columns) {
+    public ImageSize(String identifier, int startOffset, int trackOffset, int rows, int columns) {
         this.identifier = identifier;
         this.startOffset = startOffset;
         this.trackOffset = trackOffset;
@@ -23,19 +23,19 @@ class ImageSize {
         return identifier;
     }
 
-    int getStartOffset() {
+    public int getStartOffset() {
         return startOffset;
     }
 
-    int getTrackOffset() {
+    public int getTrackOffset() {
         return trackOffset;
     }
 
-    int getRows() {
+    public int getRows() {
         return rows;
     }
 
-    int getColumns() {
+    public int getColumns() {
         return columns;
     }
 

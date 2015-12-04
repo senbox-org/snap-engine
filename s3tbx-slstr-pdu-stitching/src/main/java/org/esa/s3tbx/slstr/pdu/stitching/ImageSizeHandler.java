@@ -9,7 +9,7 @@ import org.w3c.dom.NodeList;
  */
 public class ImageSizeHandler {
 
-    static ImageSize createTargetImageSize(ImageSize[] imageSizes) {
+    public static ImageSize createTargetImageSize(ImageSize[] imageSizes) {
         int startOffset = Integer.MAX_VALUE;
         int trackOffset = Integer.MAX_VALUE;
         int highestStart = Integer.MIN_VALUE;
@@ -44,7 +44,7 @@ public class ImageSizeHandler {
         return imageSizes;
     }
 
-    static ImageSize extractImageSizeFromNode(Node element, String idExtension) {
+    public static ImageSize extractImageSizeFromNode(Node element, String idExtension) {
         String id = getId(element.getAttributes().getNamedItem("grid").getNodeValue()) + idExtension;
         int startOffset = -1;
         int trackOffset = -1;

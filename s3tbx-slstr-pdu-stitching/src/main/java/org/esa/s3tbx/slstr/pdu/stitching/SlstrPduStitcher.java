@@ -3,6 +3,7 @@ package org.esa.s3tbx.slstr.pdu.stitching;
 import com.bc.ceres.binding.ConversionException;
 import com.bc.ceres.binding.converters.DateFormatConverter;
 import com.bc.ceres.core.Assert;
+import org.esa.s3tbx.slstr.pdu.stitching.manifest.ManifestMerger;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -59,6 +60,7 @@ public class SlstrPduStitcher {
                 throw new IllegalArgumentException("The PDU Stitcher only supports SLSTR L1B products");
             }
         }
+        final Date now = Calendar.getInstance().getTime();
         if (slstrProductFiles.length == 1) {
             final File originalParentDirectory = slstrProductFiles[0].getParentFile();
             final String parentDirectoryName = originalParentDirectory.getName();
@@ -73,9 +75,8 @@ public class SlstrPduStitcher {
                     Files.copy(originalFile.toPath(), new File(stitchedParentDirectory, originalFile.getName()).toPath());
                 }
             }
-            return createManifestFile(slstrProductFiles, stitchedParentDirectory);
+            return createManifestFile(slstrProductFiles, stitchedParentDirectory, now);
         }
-        final Date now = Calendar.getInstance().getTime();
         SlstrNameDecomposition[] slstrNameDecompositions = new SlstrNameDecomposition[slstrProductFiles.length];
         Document[] manifestDocuments = new Document[slstrProductFiles.length];
         List<String> ncFileNames = new ArrayList<>();
@@ -139,12 +140,12 @@ public class SlstrPduStitcher {
                                              ncFilesArray, targetImageSize, imageSizeArray);
             }
         }
-        return createManifestFile(slstrProductFiles, stitchedProductFileParentDirectory);
+        return createManifestFile(slstrProductFiles, stitchedProductFileParentDirectory, now);
     }
 
-    private static File createManifestFile(File[] manifestFiles, File stitchedParentDirectory)
+    private static File createManifestFile(File[] manifestFiles, File stitchedParentDirectory, Date now)
             throws ParserConfigurationException, PDUStitchingException, IOException, TransformerException {
-        final Document document = ManifestMerger.mergeManifests(manifestFiles);
+        final Document document = new ManifestMerger().mergeManifests(manifestFiles, now);
         final Transformer transformer = TransformerFactory.newInstance().newTransformer();
         final DOMSource domSource = new DOMSource(document);
         final File manifestFile = new File(stitchedParentDirectory, "xfdumanifest.xml");
