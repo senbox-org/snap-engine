@@ -3,6 +3,7 @@ Sentinel-3 Toolbox (S3TBX)
 
 A toolbox for the OLCI and SLSTR instruments on board of ESA's Sentinel-3 satellite.
 
+[![Build Status](https://travis-ci.org/senbox-org/s3tbx.svg?branch=master)](https://travis-ci.org/senbox-org/s3tbx)
 
 Building S3TBX from the source
 ------------------------------
