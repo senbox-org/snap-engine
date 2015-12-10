@@ -11,8 +11,8 @@ before_install:
   # so we just completely remove the default repositories settings
   - sed -i -n '/<repositories>/{p; :a; N; /<\/repositories>/!ba; s/.*\n//}; p' ~/.m2/settings.xml
 
-before_script:
-  # Avoid "java.lang.IllegalStateException: endPosTable already set"
-  # by cleaning up the target dirs before building
-  - mvn clean
+install:
+  - true
 
+script:
+  - mvn clean install -B -V
