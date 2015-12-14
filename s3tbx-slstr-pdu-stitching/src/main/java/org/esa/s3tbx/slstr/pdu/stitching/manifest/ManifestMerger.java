@@ -30,9 +30,11 @@ public class ManifestMerger {
     private Date creationTime;
     private static DefaultMerger defaultMerger;
     private static final ElementMerger NULL_MERGER = new NullMerger();
+    private String productName;
 
-    public Document mergeManifests(File[] manifestFiles, Date creationTime) throws IOException, PDUStitchingException, ParserConfigurationException {
+    public Document mergeManifests(File[] manifestFiles, Date creationTime, String productName) throws IOException, PDUStitchingException, ParserConfigurationException {
         this.creationTime = creationTime;
+        this.productName = productName;
         List<Node> manifestList = new ArrayList<>();
         for (File manifestFile : manifestFiles) {
             manifestList.add(createXmlDocument(new FileInputStream(manifestFile)));
@@ -107,8 +109,7 @@ public class ManifestMerger {
             //todo implement
             return NULL_MERGER;
         } else if (elementName.equals("sentinel3:productName")) {
-            //todo implement
-            return NULL_MERGER;
+            return new ProductNameMerger(productName);
         } else if (elementName.equals("sentinel3:receivingStartTime")) {
             //todo implement
             return NULL_MERGER;

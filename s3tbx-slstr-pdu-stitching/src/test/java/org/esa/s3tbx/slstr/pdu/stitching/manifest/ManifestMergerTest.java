@@ -69,7 +69,8 @@ public class ManifestMergerTest {
     public void testMergeManifests_OneFile() throws IOException, ParserConfigurationException, TransformerException, PDUStitchingException {
         final File inputManifest = getManifestFile(TestConstants.FIRST_FILE_NAME);
         final Date now = Calendar.getInstance().getTime();
-        final Document manifest = manifestMerger.mergeManifests(new File[]{inputManifest}, now);
+        final String productName = "gef6hj";
+        final Document manifest = manifestMerger.mergeManifests(new File[]{inputManifest}, now, productName);
         final Transformer transformer = TransformerFactory.newInstance().newTransformer();
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
         transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
@@ -84,7 +85,8 @@ public class ManifestMergerTest {
     @Test
     public void testMergeManifests_MultipleFiles() throws IOException, ParserConfigurationException, TransformerException, PDUStitchingException {
         final Date now = Calendar.getInstance().getTime();
-        final Document manifest = manifestMerger.mergeManifests(getManifestFiles(), now);
+        final String productName = "gef6hj";
+        final Document manifest = manifestMerger.mergeManifests(getManifestFiles(), now, productName);
         final Transformer transformer = TransformerFactory.newInstance().newTransformer();
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
         transformer.setOutputProperty(OutputKeys.STANDALONE, "no");
