@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<meris_l2_config>
+
+    <aux_data_config dir="./auxdata/meris_l2">
+
+        <aux_data_defaults>
+            <aux_database name="aeroclim" file="aeroclim.20.08.prd"/>
+            <!-- 1,208 -->
+            <aux_database name="lv2conf" file="lv2conf.41.08.prd"/>
+            <!-- 558 -->
+            <aux_database name="atmosphere" file="atmosphere.32.04.prd"/>
+            <!-- 1,111 -->
+            <aux_database name="landaero" file="landaero.42.02.prd"/>
+            <!-- 2,157 -->
+            <aux_database name="case1" file="case1.60.04.prd"/>
+            <!-- 2,576 -->
+            <aux_database name="case2" file="case2.42.00.prd"/>
+            <!-- 19,268 -->
+            <aux_database name="cloud" file=""/>
+            <!-- 79,465 -->
+            <aux_database name="vegetation" file=""/>
+            <!-- 2 -->
+            <aux_database name="conf_map" file="conf_map.20.00.prd"/>
+            <!-- 7,433 -->
+            <aux_database name="oceanaer" file="oceanaero.40.02.02.prd"/>
+            <!-- 46,426 -->
+            <aux_database name="vapour" file=""/>
+            <!-- 32,657 -->
+        </aux_data_defaults>
+
+        <aux_data_overrides
+                aquisition_start="2002-04-29"
+                aquisition_end="2002-12-24">
+
+            <aux_database name="lv2conf" file="lv2conf.41.07.prd"/>
+            <!-- 558 -->
+            <aux_database name="atmosphere" file="atmosphere.32.03.prd"/>
+            <!-- 1,111 -->
+        </aux_data_overrides>
+
+    </aux_data_config>
+
+</meris_l2_config>

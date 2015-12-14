@@ -38,6 +38,9 @@
         <module>s3tbx-kit</module>
         <module>s3tbx-landsat-reader</module>
         <module>s3tbx-meris-cloud</module>
+        <module>s3tbx-meris-brr</module>
+        <module>s3tbx-meris-sdr</module>
+        <module>s3tbx-meris-l2auxdata</module>
         <module>s3tbx-meris-radiometry</module>
         <module>s3tbx-meris-radiometry-ui</module>
         <module>s3tbx-meris-smac</module>

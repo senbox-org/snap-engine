@@ -1,0 +1,5 @@
+org.esa.s3tbx.meris.brr.CloudClassificationOp$Spi
+org.esa.s3tbx.meris.brr.GaseousCorrectionOp$Spi
+org.esa.s3tbx.meris.brr.LandClassificationOp$Spi
+org.esa.s3tbx.meris.brr.RayleighCorrectionOp$Spi
+org.esa.s3tbx.meris.brr.SmileCorrectionOp$Spi

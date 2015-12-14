@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<graph id="brrTestGraph">
+<version>1.0</version>
+<node id="brrTestNode">
+    <operator>Meris.Brr</operator>
+    <sources>
+        <merisL1bProduct>${merisL1bProduct}</merisL1bProduct>
+    </sources>
+    <parameters>
+        <copyAllTiePoints>false</copyAllTiePoints>
+        <copyL1Flags>true</copyL1Flags>
+        <outputToar>true</outputToar>
+        <correctionSurface>ALL_SURFACES</correctionSurface>
+    </parameters>
+</node>
+</graph>

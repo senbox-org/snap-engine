@@ -1,0 +1,72 @@
+<!--
+  ~ Copyright (C) 2013 Brockmann Consult GmbH (info@brockmann-consult.de)
+  ~
+  ~ This program is free software; you can redistribute it and/or modify it
+  ~ under the terms of the GNU General Public License as published by the Free
+  ~ Software Foundation; either version 3 of the License, or (at your option)
+  ~ any later version.
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+  ~ more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License along
+  ~ with this program; if not, see http://www.gnu.org/licenses/
+  -->
+
+<html>
+<head>
+    <title>BRR Processing Tool</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+
+<table class="header">
+    <tr class="header">
+        <td class="header" align="left">&nbsp;
+            <b>The BRR Processing Tool</b>
+        </td>
+        <td class="header" align="right"><a href="../general/BeamOverview.html"><img src="../images/BeamHeader.jpg"
+                                                                                     border=0></a>
+        </td>
+    </tr>
+</table>
+<br>
+
+<h3>Summary</h3>
+
+<p>
+    The <em>Rayleigh Correction</em> processing is organised in several steps. First the Rayleigh
+    reflectance is computed for every 4x4 pixels window. Then, Rayleigh transmittance and Rayleigh
+    spherical albedo are computed for every 4x4 pixels window. Then, the TOA apparent reflectance
+    corrected for gaseous absorption &#961;<sub>ng</sub> is corrected for Rayleigh contributions for each pixel in order
+    to
+    derive the top of aerosol reflectance r<sub>top</sub>. The 4x4 pixels windows do not overlap.
+</p>
+
+<p align="center">
+    <img src="images/ray_corr_flow_small.png" alt="Rayleigh Correction Processing Flow"/>
+
+<div style="text-align: center;"><it>The Rayleigh Correction Processing Flow (taken from [1]).</it></div>
+</p>
+<br>
+
+<h3>Algorithms</h3>
+
+<p>
+    The underlying algorithms are presented in detail in the MERIS Level 2 Detailed Processing Model [1].
+</p>
+<br>
+
+<h3>References</h3>
+
+<p class="i1">
+    <b>[1]</b>
+    Bourg, L. (2009): MERIS Level 2 Detailed Processing Model. ACRI-ST, Document No. PO-TN-MEL-GS-0006, 15 July 2009.
+</p>
+<br>
+
+</body>
+
+</html>

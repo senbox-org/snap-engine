@@ -1,0 +1,12 @@
+org.esa.s3tbx.meris.aerosol.AerosolMergerOp$Spi
+org.esa.s3tbx.meris.aerosol.ModisAerosolOp$Spi
+org.esa.s3tbx.meris.brr.operator.BrrOp$Spi
+org.esa.s3tbx.meris.cloud.BlueBandOp$Spi
+org.esa.s3tbx.meris.cloud.CloudProbabilityOp$Spi
+org.esa.s3tbx.meris.cloud.CloudShadowOp$Spi
+org.esa.s3tbx.meris.cloud.CloudTopPressureOp$Spi
+org.esa.s3tbx.meris.cloud.CombinedCloudOp$Spi
+org.esa.s3tbx.meris.sdr.SdrOp$Spi
+org.esa.s3tbx.meris.FillAerosolOp$Spi
+org.esa.s3tbx.meris.FillBandOp$Spi
+org.esa.s3tbx.meris.GapLessSdrOp$Spi

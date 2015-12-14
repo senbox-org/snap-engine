@@ -1,0 +1,275 @@
+<!--
+  ~ Copyright (C) 2013 Brockmann Consult GmbH (info@brockmann-consult.de)
+  ~
+  ~ This program is free software; you can redistribute it and/or modify it
+  ~ under the terms of the GNU General Public License as published by the Free
+  ~ Software Foundation; either version 3 of the License, or (at your option)
+  ~ any later version.
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+  ~ more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License along
+  ~ with this program; if not, see http://www.gnu.org/licenses/
+  -->
+
+<html>
+<head>
+    <title>MERIS BRR Processing Tool</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+
+<table class="header">
+    <tr class="header">
+        <td class="header">&nbsp;
+            MERIS BRR Processing
+        </td>
+        <td class="header" align="right"><a href="../general/BeamOverview.html"><img src="../images/BeamHeader.jpg"
+                                                                                     border=0></a>
+        </td>
+    </tr>
+</table>
+
+<h3>User Interfaces</h3>
+
+<p>
+    The BRR Processing Tool can be invoked from the VISAT tool menu by selecting
+    the <b>Compute Rayleigh correction from a MERIS L1b product...</b> entry, or in batch mode by using the command line
+    tool <i><code>gpt</code></i> (Graph Processing Tool) which is located
+    in the BEAM <code>bin</code> directory.
+</p>
+
+<br>
+<hr>
+
+
+<!-------- BRR Processor --------------------------------------->
+<h3>MERIS BRR Processor</h3>
+
+<h4>I/O Parameters</h4>
+
+<p>
+    Selecting the <b>Compute Rayleigh correction from a MERIS L1b product...</b> entry from the VISAT tool menu pops up the
+    following dialog:
+</p>
+
+<p align="center">
+    <img src="images/BrrProcessingDialog_io.png" alt="BRR Processing Dialog"/>
+</p>
+
+<h5>Source Products:</h5>
+
+<p class="i1">
+    <b>MERIS_L1b:</b>
+    Here the user specifies the MERIS L1b source product. The combo box presents
+    a list of all products open in VISAT. The user may select one of these
+    or, by clicking on the button next to the combo box, choose a product
+    from the file system.
+</p>
+
+<h5>Target Product Group</h5>
+
+<p class="i1">
+    <b>Name:</b>
+    Used to specify the name of the target product.
+</p>
+
+<p class="i1">
+    <b>Save to:</b>
+    Used to specify whether the target product should be saved to the file system. The
+    combo box presents a list of file formats, currently
+    BEAM-DIMAP, GeoTIFF, and HDF5.
+</p>
+
+<p class="i1">
+    <b>Open in VISAT:</b>
+    Used to specify whether the target product should be opened in VISAT. When the
+    the target product is not saved, it is opened in VISAT automatically.
+</p>
+
+
+<h4>Processing Parameters</h4>
+
+<p>
+    Selecting the <b>Processing Parameters</b> tab in the
+    MERIS BRR Processing Dialog switches to the following view:
+</p>
+
+<p align="center">
+    <img src="images/BrrProcessingDialog_procparms.png" alt="BRR Processing Parameters"/>
+</p>
+
+<h5>Parameters</h5>
+
+<p class="i1">
+    <b>Write all tie points to the target product:</b>
+    This checkbox indicates if all MERIS tie points shall be written to the target product.
+    If not selected, only latitude and longitude tie point grids will be written.
+</p>
+
+<p class="i1">
+    <b>Write all L1 flags to the target product:</b>
+    This checkbox indicates if the MERIS L1 flags shall be written to the target product.
+</p>
+
+<p class="i1">
+    <b>Write TOA reflectances to the target product:</b>
+    This checkbox indicates if the TOA reflectances (not Rayleigh corrected) shall also be written to the target product.
+</p>
+
+<p class="i1">
+    <b>Perform Rayleigh correction over:</b>
+    From this drop-down menu, the user can select the surface where the Rayleigh correction shall be performed
+    (over all surfaces, only over water, or only over land).
+    .
+</p>
+
+<br>
+
+<h4>Menu Bar</h4>
+<h5>'File' Menu</h5>
+
+<p>
+    Selecting the <b>File</b> entry in the Menu Bar opens the following view:
+</p>
+
+<p align="center">
+    <img src="images/file_menu.png" alt="File Menu"/>
+</p>
+
+<p class="i1">
+    <b>Open Parameters...:</b>
+    When this entry is selected, an 'Open File' dialog will appear.
+    Here, a BEAM GPF parameters XML file can be selected, containing
+    MERIS BRR processing parameters which were saved earlier.
+    These parameters will be loaded and applied for an upcoming processing.
+</p>
+
+<p class="i1">
+    <b>Save Parameters...:</b>
+    When this entry is selected, a 'Save File' dialog will appear.
+    Here, the current set of MERIS BRR processing parameters can be saved into a
+    BEAM GPF parameters XML file for later re-usage.
+</p>
+
+<p class="i1">
+    <b>Display Parameters...:</b>
+    When this entry is selected, the current set of MERIS BRR processing parameters
+    will be displayed in XML format (see below).
+</p>
+
+<p align="center">
+    <img src="images/file_menu_display_params.png" alt="File Menu Display Parms"/>
+</p>
+
+
+<h5>'Help' Menu</h5>
+
+<p>
+    Selecting the <b>Help</b> entry in the Menu Bar opens the following view:
+</p>
+
+<p align="center">
+    <img src="images/help_menu.png" alt="Help Menu"/>
+</p>
+
+<p class="i1">
+    <b>Help:</b>
+    When this entry is selected, this online help is opened
+    in a separate window.
+</p>
+
+<p class="i1">
+    <b>About...:</b>
+    When this entry is selected, an 'About' dialog for the current
+    processor is opened (see below).
+</p>
+
+<p align="center">
+    <img src="images/help_menu_about.png" alt="Help Menu About"/>
+</p>
+
+
+<h4>Button Group</h4>
+
+<p align="center">
+    <img src="images/button_group.png" alt="Button Group"/>
+</p>
+
+<p class="i1">
+    <b>Run:</b>
+    When this button is clicked, the processing will be started with the selected
+    parameters.
+</p>
+
+<p class="i1">
+    <b>Close:</b>
+    When this button is clicked, the processor toolwindow will be closed.
+</p>
+
+
+<br>
+<hr>
+
+<!-------- Command line --------------------------------------->
+<h3>Processing from Command Line</h3>
+
+Since the MERIS BRR Processor makes use of the BEAM graph processing framework, it can be
+used also with the 'gpt' command line tool outside BEAM-VISAT. The graph processing is invoked
+by the command
+<div class="itemizedlist">
+    <ul type="bullet">
+        <li style="list-style-type: disc">
+            ${BEAM-INSTALL-DIR}/bin/gpt
+        </li>
+    </ul>
+</div>
+
+To obtain general help on the graph processing, use the command
+<div class="itemizedlist">
+    <ul type="bullet">
+        <li style="list-style-type: disc">
+            ${BEAM-INSTALL-DIR}/bin/gpt -h
+        </li>
+    </ul>
+</div>
+
+Specific help on the MERIS BRR processor can be obtained with
+<div class="itemizedlist">
+    <ul type="bullet">
+        <li style="list-style-type: disc">
+            ${BEAM-INSTALL-DIR}/bin/gpt -h Meris.Brr
+        </li>
+    </ul>
+</div>
+Information on the usage and a list of all available parameters are given.
+
+<p align="center">
+    <img src="images/gpt_brr.png" alt="BRR Processing Parameters"/>
+</p>
+<br>
+
+<br><br>
+The processing from the command line can also be invoked using graph XML files.
+For example, a MERIS BRR computation could be started with
+<div class="itemizedlist">
+    <ul type="bullet">
+        <li style="list-style-type: disc">
+            ${BEAM-INSTALL-DIR}/bin/gpt test_BRR.xml -SmerisL1bProduct=./MER_BRR_test.dim
+
+        </li>
+    </ul>
+</div>
+with a MERIS L1b input file 'MER_BRR_test.dim' (given in BEAM Dimap format) in the current directory,
+and a graph XML file 'test_BRR.xml' as shown below.
+
+<p align="center">
+    <img src="images/gpt_brr_xml.png" alt="BRR XML Processing"/>
+</p>
+
+<hr>
+</body>
+</html>
