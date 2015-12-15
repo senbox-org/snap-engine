@@ -32,30 +32,20 @@ public class DataObjectMerger extends AbstractElementMerger {
     public void mergeNodes(List<Node> fromParents, Element toParent, Document toDocument) throws PDUStitchingException {
         final String fileName = getFileName(fromParents, toParent);
         final File file = getFile(fileName, toParent);
-//        for (int i = 0; i < fromParents.size(); i++) {
-//        final NodeList dataObjectChildNodes = fromParents.get(0).getChildNodes();
-//        for (int l = 0; l < dataObjectChildNodes.getLength(); l++) {
-//            if (dataObjectChildNodes.item(l).getNodeName().equals("byteStream")) {
         final long size = file.length();
         appendLineBreakAndIndent(toParent, toDocument, 3);
         final Element byteStreamElement = toDocument.createElement("byteStream");
         toParent.appendChild(byteStreamElement);
         byteStreamElement.setAttribute("mimeType", "application/x-netcdf");
         byteStreamElement.setAttribute("size", String.valueOf(size));
-//                final NodeList byteStreamChildNodes = dataObjectChildNodes.item(l).getChildNodes();
-//                for (int k = 0; k < byteStreamChildNodes.getLength(); k++) {
-//                    if (byteStreamChildNodes.item(k).getNodeName().equals("fileLocation")) {
         final Element fileLocationElement = toDocument.createElement("fileLocation");
         appendLineBreakAndIndent(byteStreamElement, toDocument, 4);
         byteStreamElement.appendChild(fileLocationElement);
-//        appendLineBreakAndIndent(byteStreamElement, toDocument, 4);
         fileLocationElement.setAttribute("locatorType", "URL");
         fileLocationElement.setAttribute("href", fileName);
-//                    } else if (byteStreamChildNodes.item(k).getNodeName().equals("checksum")) {
         final Element checksumElement = toDocument.createElement("checksum");
         appendLineBreakAndIndent(byteStreamElement, toDocument, 4);
         byteStreamElement.appendChild(checksumElement);
-//        appendLineBreakAndIndent(byteStreamElement, toDocument, 4);
         checksumElement.setAttribute("checksumName", "MD5");
         final String checksum;
         try {
@@ -66,38 +56,9 @@ public class DataObjectMerger extends AbstractElementMerger {
         addTextToNode(checksumElement, checksum, toDocument);
         appendLineBreakAndIndent(byteStreamElement, toDocument, 3);
         appendLineBreakAndIndent(toParent, toDocument, 2);
-//                    } else {
-//                        final String textContent = byteStreamChildNodes.item(k).getTextContent();
-//                        final Text textNode = toDocument.createTextNode(textContent);
-//                        byteStreamElement.appendChild(textNode);
-//                    }
-//                            final NamedNodeMap fileLocationAttributes = byteStreamChildNodes.item(k).getAttributes();
-//                            final Node hrefAttribute = fileLocationAttributes.getNamedItem("href");
-//                            if (hrefAttribute != null) {
-//                                if (i == 0) {
-//                                    fileName = hrefAttribute.getNodeValue();
-//                                } else {
-//                                    if (!fileName.equals(hrefAttribute.getNodeValue())) {
-//                                        throw new PDUStitchingException(
-//                                                "Different href attributes given for dataObject with ID " + toParent.getAttribute("ID"));
-//                                    }
-//                                }
-//                            } else {
-//                                throw new PDUStitchingException(
-//                                        "No href attribute given for dataObject with ID " + toParent.getAttribute("ID"));
-//                            }
-//                            break;
-//                        }
-//                }
-//            } else {
-//                final String textContent = dataObjectChildNodes.item(l).getTextContent();
-//                final Text textNode = toDocument.createTextNode(textContent);
-//                toParent.appendChild(textNode);
-//            }
     }
 
     private void appendLineBreakAndIndent(Element toParent, Document toDocument, int treeDepth) {
-//        final String textContent = dataObjectChildNodes.item(l).getTextContent();
         StringBuilder stringBuilder = new StringBuilder("\n");
         for (int i = 0; i < 2 * treeDepth; i++) {
             stringBuilder.append(" ");
@@ -105,11 +66,6 @@ public class DataObjectMerger extends AbstractElementMerger {
         final Text textNode = toDocument.createTextNode(stringBuilder.toString());
         toParent.appendChild(textNode);
     }
-
-//}
-
-
-//}
 
     private File getFile(String fileName, Element toParent) throws PDUStitchingException {
         if (StringUtils.isNullOrEmpty(fileName)) {
