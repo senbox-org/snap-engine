@@ -742,18 +742,4 @@
       <dataObjectPointer dataObjectID="SLSTR_F1_QUALITY_IN_Data"/>
     </metadataObject>
   </metadataSection>
-  <dataObjectSection>
-    <dataObject ID="SLSTR_MET_TX_Data">
-      <byteStream mimeType="application/x-netcdf" size="32423">
-        <fileLocation locatorType="URL" href="met_tx.nc"/>
-        <checksum checksumName="MD5">0f9a756c6c7be058d7712432bf0348ca</checksum>
-      </byteStream>
-    </dataObject>
-    <dataObject ID="ADFData">
-      <byteStream mimeType="application/x-netcdf" size="36985">
-        <fileLocation locatorType="URL" href="viscal.nc"/>
-        <checksum checksumName="MD5">b12d0db5bbfdc22ea728219511894868</checksum>
-      </byteStream>
-    </dataObject>
-  </dataObjectSection>
 </xfdu:XFDU>

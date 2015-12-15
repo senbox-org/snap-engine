@@ -17,7 +17,7 @@
     <metadataObject ID="processing" classification="PROVENANCE" category="PDI">
       <metadataWrap mimeType="text/xml" vocabularyName="Sentinel-SAFE" textInfo="Processing">
         <xmlData>
-          <sentinel-safe:processing name="DataProcessing" outputLevel="1" start="2015-02-17T18:35:25.916879Z" stop="2015-02-17T18:58:50.564464Z">
+          <sentinel-safe:processing name="DataProcessing" outputLevel="1" start="2015-02-17T18:35:19.139217Z" stop="2015-02-17T18:58:46.896371Z">
             <sentinel-safe:facility name="Svalbard Satellite Core Ground Station" organisation="European Space Agency" site="Svalbard" country="Norway">
               <sentinel-safe:hardware name="OPE"/>
               <sentinel-safe:software name="IPF-SL-1" version="05.00"/>
@@ -95,24 +95,24 @@
                 </sentinel-safe:facility>
               </sentinel-safe:processing>
             </sentinel-safe:resource>
+            <sentinel-safe:resource name="S3A_SL_0_SLT____20130707T152752_20130707T153252_20150217T182818_0299_158_182______SVL_O_NR_001.SEN3" role="L0 Product">
+              <sentinel-safe:processing name="DataProcessing" outputLevel="0" start="2015-02-17T18:28:17.755949Z" stop="2015-02-17T18:28:19.670197Z">
+                <sentinel-safe:facility name="Svalbard Satellite Core Ground Station" organisation="European Space Agency" site="Svalbard" country="Norway">
+                  <sentinel-safe:hardware name="OPE"/>
+                  <sentinel-safe:software name="IPF-0" version="05.01"/>
+                </sentinel-safe:facility>
+              </sentinel-safe:processing>
+            </sentinel-safe:resource>
+            <sentinel-safe:resource name="S3A_SL_0_SLT____20130707T153252_20130707T153752_20150217T182819_0299_158_182______SVL_O_NR_001.SEN3" role="L0 Product">
+              <sentinel-safe:processing name="DataProcessing" outputLevel="0" start="2015-02-17T18:28:17.841464Z" stop="2015-02-17T18:28:19.730554Z">
+                <sentinel-safe:facility name="Svalbard Satellite Core Ground Station" organisation="European Space Agency" site="Svalbard" country="Norway">
+                  <sentinel-safe:hardware name="OPE"/>
+                  <sentinel-safe:software name="IPF-0" version="05.01"/>
+                </sentinel-safe:facility>
+              </sentinel-safe:processing>
+            </sentinel-safe:resource>
             <sentinel-safe:resource name="S3A_SL_0_SLT____20130707T153752_20130707T154252_20150217T182844_0299_158_182______SVL_O_NR_001.SEN3" role="L0 Product">
               <sentinel-safe:processing name="DataProcessing" outputLevel="0" start="2015-02-17T18:28:43.753748Z" stop="2015-02-17T18:28:45.660124Z">
-                <sentinel-safe:facility name="Svalbard Satellite Core Ground Station" organisation="European Space Agency" site="Svalbard" country="Norway">
-                  <sentinel-safe:hardware name="OPE"/>
-                  <sentinel-safe:software name="IPF-0" version="05.01"/>
-                </sentinel-safe:facility>
-              </sentinel-safe:processing>
-            </sentinel-safe:resource>
-            <sentinel-safe:resource name="S3A_SL_0_SLT____20130707T154252_20130707T154752_20150217T182843_0299_158_182______SVL_O_NR_001.SEN3" role="L0 Product">
-              <sentinel-safe:processing name="DataProcessing" outputLevel="0" start="2015-02-17T18:28:41.814928Z" stop="2015-02-17T18:28:43.707752Z">
-                <sentinel-safe:facility name="Svalbard Satellite Core Ground Station" organisation="European Space Agency" site="Svalbard" country="Norway">
-                  <sentinel-safe:hardware name="OPE"/>
-                  <sentinel-safe:software name="IPF-0" version="05.01"/>
-                </sentinel-safe:facility>
-              </sentinel-safe:processing>
-            </sentinel-safe:resource>
-            <sentinel-safe:resource name="S3A_SL_0_SLT____20130707T154752_20130707T155252_20150217T182900_0299_158_182______SVL_O_NR_001.SEN3" role="L0 Product">
-              <sentinel-safe:processing name="DataProcessing" outputLevel="0" start="2015-02-17T18:28:59.737805Z" stop="2015-02-17T18:29:01.722887Z">
                 <sentinel-safe:facility name="Svalbard Satellite Core Ground Station" organisation="European Space Agency" site="Svalbard" country="Norway">
                   <sentinel-safe:hardware name="OPE"/>
                   <sentinel-safe:software name="IPF-0" version="05.01"/>
@@ -417,8 +417,8 @@
       <metadataWrap mimeType="text/xml" vocabularyName="Sentinel-SAFE" textInfo="Acquisition Period">
         <xmlData>
           <sentinel-safe:acquisitionPeriod>
-            <sentinel-safe:startTime>2013-07-07T15:42:52.300000Z</sentinel-safe:startTime>
-            <sentinel-safe:stopTime>2013-07-07T15:47:52.000014Z</sentinel-safe:stopTime>
+            <sentinel-safe:startTime>2013-07-07T15:32:52.300000Z</sentinel-safe:startTime>
+            <sentinel-safe:stopTime>2013-07-07T15:37:52.000014Z</sentinel-safe:stopTime>
           </sentinel-safe:acquisitionPeriod>
         </xmlData>
       </metadataWrap>
@@ -442,19 +442,19 @@
       <metadataWrap mimeType="text/xml" vocabularyName="Sentinel-SAFE" textInfo="General Product Information">
         <xmlData>
           <sentinel3:generalProductInformation>
-            <sentinel3:productName>S3A_SL_1_RBT____20130707T154252_20130707T154752_20150217T183537_0299_158_182______SVL_O_NR_001.SEN3</sentinel3:productName>
+            <sentinel3:productName>S3A_SL_1_RBT____20130707T153252_20130707T153752_20150217T183530_0299_158_182______SVL_O_NR_001.SEN3</sentinel3:productName>
             <sentinel3:productType>SL_1_RBT___</sentinel3:productType>
             <sentinel3:timeliness>NR</sentinel3:timeliness>
             <sentinel3:baselineCollection>001</sentinel3:baselineCollection>
-            <sentinel3:creationTime>20150217T183537</sentinel3:creationTime>
+            <sentinel3:creationTime>20150217T183530</sentinel3:creationTime>
             <sentinel3:productSize>2879317399</sentinel3:productSize>
             <sentinel3:dumpInformation>
-              <sentinel3:granuleNumber>6</sentinel3:granuleNumber>
+              <sentinel3:granuleNumber>4</sentinel3:granuleNumber>
               <sentinel3:granulePosition>NONE</sentinel3:granulePosition>
               <sentinel3:dumpStart>2013-07-07T15:12:52.000000Z</sentinel3:dumpStart>
               <sentinel3:receivingGroundStation>CGS</sentinel3:receivingGroundStation>
-              <sentinel3:receivingStartTime>2015-02-17T18:27:24.399655Z</sentinel3:receivingStartTime>
-              <sentinel3:receivingStopTime>2015-02-17T18:27:37.861849Z</sentinel3:receivingStopTime>
+              <sentinel3:receivingStartTime>2015-02-17T18:26:57.418621Z</sentinel3:receivingStartTime>
+              <sentinel3:receivingStopTime>2015-02-17T18:27:10.880813Z</sentinel3:receivingStopTime>
             </sentinel3:dumpInformation>
           </sentinel3:generalProductInformation>
         </xmlData>
@@ -525,7 +525,7 @@
         <xmlData>
           <sentinel-safe:frameSet>
             <sentinel-safe:footPrint srsName="http://www.opengis.net/def/crs/EPSG/0/4326">
-              <gml:posList>10.4877 -93.5354 8.73433 -93.8863 6.98131 -94.2441 5.22872 -94.6089 3.47666 -94.9812 1.72525 -95.3614 -0.0253962 -95.7499 -1.77517 -96.1472 -3.52393 -96.5539 -5.27155 -96.9704 -7.00916 -97.3953 -7.4229 -95.7069 -7.83021 -94.0154 -8.2307 -92.3206 -8.62401 -90.6225 -9.00979 -88.9209 -9.38767 -87.2157 -9.75731 -85.5068 -10.1184 -83.7943 -10.4705 -82.0779 -10.8133 -80.3577 -11.0642 -79.065 -9.31249 -78.7172 -7.56084 -78.3625 -5.80935 -78.0007 -4.05812 -77.6313 -2.30726 -77.254 -0.556876 -76.8684 1.19291 -76.474 2.94196 -76.0702 4.69016 -75.6566 6.42861 -75.2346 6.84022 -76.9214 7.24588 -78.6111 7.64525 -80.3038 8.03795 -81.9996 8.42364 -83.6987 8.80195 -85.4011 9.17254 -87.1069 9.53507 -88.8162 9.8892 -90.5291 10.2346 -92.2456 10.4877 -93.5354</gml:posList>
+              <gml:posList>45.5154 -87.5954 43.7689 -87.8511 42.0217 -88.1109 40.2738 -88.375 38.5253 -88.6431 36.7761 -88.9153 35.0263 -89.1916 33.2759 -89.4719 31.525 -89.7564 29.7735 -90.0451 28.0304 -90.3366 27.761 -88.4102 27.4648 -86.4938 27.1425 -84.5879 26.7944 -82.6935 26.4212 -80.8109 26.0233 -78.9409 25.6013 -77.0837 25.1559 -75.24 24.6877 -73.4099 24.1973 -71.5937 23.8153 -70.2409 25.5389 -69.6432 27.2588 -69.0219 28.9746 -68.3749 30.686 -67.7003 32.3925 -66.9955 34.0937 -66.2579 35.7889 -65.4847 37.4776 -64.6724 39.1592 -63.8174 40.8246 -62.92 41.4768 -65.0384 42.0891 -67.1983 42.66 -69.3987 43.1878 -71.6382 43.6709 -73.915 44.108 -76.2268 44.4976 -78.571 44.8384 -80.9447 45.1293 -83.3445 45.3693 -85.7666 45.5154 -87.5954</gml:posList>
             </sentinel-safe:footPrint>
           </sentinel-safe:frameSet>
         </xmlData>
@@ -536,35 +536,35 @@
         <xmlData>
           <slstr:slstrProductInformation>
             <slstr:classificationSummary grid="1 km">
-              <sentinel3:salineWaterPixels percentage="76.334869"/>
-              <sentinel3:landPixels percentage="0.352250"/>
-              <sentinel3:coastalPixels percentage="0.041999"/>
-              <sentinel3:freshInlandWaterPixels percentage="0.000383"/>
-              <sentinel3:tidalRegionPixels percentage="41.587013"/>
-              <sentinel3:cloudyPixels percentage="46.897827"/>
+              <sentinel3:salineWaterPixels percentage="29.595219"/>
+              <sentinel3:landPixels percentage="47.091896"/>
+              <sentinel3:coastalPixels percentage="0.465542"/>
+              <sentinel3:freshInlandWaterPixels percentage="3.184458"/>
+              <sentinel3:tidalRegionPixels percentage="1.462398"/>
+              <sentinel3:cloudyPixels percentage="42.695602"/>
             </slstr:classificationSummary>
             <slstr:classificationSummary grid="0.5 km stripe A">
-              <sentinel3:salineWaterPixels percentage="76.335510"/>
-              <sentinel3:landPixels percentage="0.351604"/>
-              <sentinel3:coastalPixels percentage="0.042600"/>
-              <sentinel3:freshInlandWaterPixels percentage="0.000396"/>
-              <sentinel3:tidalRegionPixels percentage="41.588295"/>
+              <sentinel3:salineWaterPixels percentage="29.597284"/>
+              <sentinel3:landPixels percentage="47.089832"/>
+              <sentinel3:coastalPixels percentage="0.468264"/>
+              <sentinel3:freshInlandWaterPixels percentage="3.182458"/>
+              <sentinel3:tidalRegionPixels percentage="1.461593"/>
               <sentinel3:cloudyPixels percentage="0.000000"/>
             </slstr:classificationSummary>
             <slstr:classificationSummary grid="0.5 km stripe B">
-              <sentinel3:salineWaterPixels percentage="76.335281"/>
-              <sentinel3:landPixels percentage="0.351834"/>
-              <sentinel3:coastalPixels percentage="0.042766"/>
-              <sentinel3:freshInlandWaterPixels percentage="0.000415"/>
-              <sentinel3:tidalRegionPixels percentage="41.588650"/>
+              <sentinel3:salineWaterPixels percentage="29.598530"/>
+              <sentinel3:landPixels percentage="47.088585"/>
+              <sentinel3:coastalPixels percentage="0.467574"/>
+              <sentinel3:freshInlandWaterPixels percentage="3.182483"/>
+              <sentinel3:tidalRegionPixels percentage="1.461292"/>
               <sentinel3:cloudyPixels percentage="0.000000"/>
             </slstr:classificationSummary>
             <slstr:classificationSummary grid="0.5 km TDI">
-              <sentinel3:salineWaterPixels percentage="76.341148"/>
-              <sentinel3:landPixels percentage="0.357464"/>
-              <sentinel3:coastalPixels percentage="0.055815"/>
-              <sentinel3:freshInlandWaterPixels percentage="0.000620"/>
-              <sentinel3:tidalRegionPixels percentage="41.596050"/>
+              <sentinel3:salineWaterPixels percentage="29.643660"/>
+              <sentinel3:landPixels percentage="47.134960"/>
+              <sentinel3:coastalPixels percentage="0.536803"/>
+              <sentinel3:freshInlandWaterPixels percentage="3.366820"/>
+              <sentinel3:tidalRegionPixels percentage="1.465075"/>
               <sentinel3:cloudyPixels percentage="0.000000"/>
             </slstr:classificationSummary>
             <slstr:resolution grid="1 km">
@@ -583,61 +583,61 @@
               <slstr:spatialResolution>16000</slstr:spatialResolution>
             </slstr:resolution>
             <slstr:nadirImageSize grid="1 km">
-              <sentinel3:startOffset>25687</sentinel3:startOffset>
+              <sentinel3:startOffset>21687</sentinel3:startOffset>
               <sentinel3:trackOffset>998</sentinel3:trackOffset>
               <sentinel3:rows>2000</sentinel3:rows>
               <sentinel3:columns>1500</sentinel3:columns>
             </slstr:nadirImageSize>
             <slstr:nadirImageSize grid="0.5 km stripe A">
-              <sentinel3:startOffset>51374</sentinel3:startOffset>
+              <sentinel3:startOffset>43374</sentinel3:startOffset>
               <sentinel3:trackOffset>1996</sentinel3:trackOffset>
               <sentinel3:rows>4000</sentinel3:rows>
               <sentinel3:columns>3000</sentinel3:columns>
             </slstr:nadirImageSize>
             <slstr:nadirImageSize grid="0.5 km stripe B">
-              <sentinel3:startOffset>51374</sentinel3:startOffset>
+              <sentinel3:startOffset>43374</sentinel3:startOffset>
               <sentinel3:trackOffset>1996</sentinel3:trackOffset>
               <sentinel3:rows>4000</sentinel3:rows>
               <sentinel3:columns>3000</sentinel3:columns>
             </slstr:nadirImageSize>
             <slstr:nadirImageSize grid="0.5 km TDI">
-              <sentinel3:startOffset>51374</sentinel3:startOffset>
+              <sentinel3:startOffset>43374</sentinel3:startOffset>
               <sentinel3:trackOffset>1996</sentinel3:trackOffset>
               <sentinel3:rows>4000</sentinel3:rows>
               <sentinel3:columns>3000</sentinel3:columns>
             </slstr:nadirImageSize>
             <slstr:nadirImageSize grid="Tie Points">
-              <sentinel3:startOffset>25687</sentinel3:startOffset>
+              <sentinel3:startOffset>21687</sentinel3:startOffset>
               <sentinel3:trackOffset>64</sentinel3:trackOffset>
               <sentinel3:rows>2000</sentinel3:rows>
               <sentinel3:columns>130</sentinel3:columns>
             </slstr:nadirImageSize>
             <slstr:obliqueImageSize grid="1 km">
-              <sentinel3:startOffset>25687</sentinel3:startOffset>
+              <sentinel3:startOffset>21687</sentinel3:startOffset>
               <sentinel3:trackOffset>450</sentinel3:trackOffset>
               <sentinel3:rows>2000</sentinel3:rows>
               <sentinel3:columns>900</sentinel3:columns>
             </slstr:obliqueImageSize>
             <slstr:obliqueImageSize grid="0.5 km stripe A">
-              <sentinel3:startOffset>51374</sentinel3:startOffset>
+              <sentinel3:startOffset>43374</sentinel3:startOffset>
               <sentinel3:trackOffset>900</sentinel3:trackOffset>
               <sentinel3:rows>4000</sentinel3:rows>
               <sentinel3:columns>1800</sentinel3:columns>
             </slstr:obliqueImageSize>
             <slstr:obliqueImageSize grid="0.5 km stripe B">
-              <sentinel3:startOffset>51374</sentinel3:startOffset>
+              <sentinel3:startOffset>43374</sentinel3:startOffset>
               <sentinel3:trackOffset>900</sentinel3:trackOffset>
               <sentinel3:rows>4000</sentinel3:rows>
               <sentinel3:columns>1800</sentinel3:columns>
             </slstr:obliqueImageSize>
             <slstr:obliqueImageSize grid="0.5 km TDI">
-              <sentinel3:startOffset>51374</sentinel3:startOffset>
+              <sentinel3:startOffset>43374</sentinel3:startOffset>
               <sentinel3:trackOffset>900</sentinel3:trackOffset>
               <sentinel3:rows>4000</sentinel3:rows>
               <sentinel3:columns>1800</sentinel3:columns>
             </slstr:obliqueImageSize>
             <slstr:obliqueImageSize grid="Tie Points">
-              <sentinel3:startOffset>25687</sentinel3:startOffset>
+              <sentinel3:startOffset>21687</sentinel3:startOffset>
               <sentinel3:trackOffset>64</sentinel3:trackOffset>
               <sentinel3:rows>2000</sentinel3:rows>
               <sentinel3:columns>130</sentinel3:columns>
@@ -645,26 +645,26 @@
             <slstr:measurementAccuracy>~2% S1-S6, ~0.1K S7-S9, ~1K F1-F2</slstr:measurementAccuracy>
             <slstr:accuracyReference>[PDS-SL]</slstr:accuracyReference>
             <slstr:pixelQualitySummary grid="1 km">
-              <slstr:cosmeticPixels value="607994" percentage="15.000000"/>
-              <slstr:duplicatedPixels value="143779" percentage="3.000000"/>
+              <slstr:cosmeticPixels value="610155" percentage="15.000000"/>
+              <slstr:duplicatedPixels value="147506" percentage="3.000000"/>
               <slstr:saturatedPixels value="0" percentage="0.000000"/>
               <slstr:outOfRangePixels value="0" percentage="0.000000"/>
             </slstr:pixelQualitySummary>
             <slstr:pixelQualitySummary grid="0.5 km stripe A">
               <slstr:cosmeticPixels value="0" percentage="0.000000"/>
-              <slstr:duplicatedPixels value="511867" percentage="3.000000"/>
+              <slstr:duplicatedPixels value="520107" percentage="3.000000"/>
               <slstr:saturatedPixels value="0" percentage="0.000000"/>
               <slstr:outOfRangePixels value="0" percentage="0.000000"/>
             </slstr:pixelQualitySummary>
             <slstr:pixelQualitySummary grid="0.5 km stripe B">
               <slstr:cosmeticPixels value="0" percentage="0.000000"/>
-              <slstr:duplicatedPixels value="506710" percentage="3.000000"/>
+              <slstr:duplicatedPixels value="521718" percentage="3.000000"/>
               <slstr:saturatedPixels value="0" percentage="0.000000"/>
               <slstr:outOfRangePixels value="0" percentage="0.000000"/>
             </slstr:pixelQualitySummary>
             <slstr:pixelQualitySummary grid="0.5 km TDI">
               <slstr:cosmeticPixels value="0" percentage="0.000000"/>
-              <slstr:duplicatedPixels value="511665" percentage="3.000000"/>
+              <slstr:duplicatedPixels value="522931" percentage="3.000000"/>
               <slstr:saturatedPixels value="0" percentage="0.000000"/>
               <slstr:outOfRangePixels value="0" percentage="0.000000"/>
             </slstr:pixelQualitySummary>
@@ -724,10 +724,10 @@
               <slstr:globalInfo grid="0.5 km stripe A" view="Oblique" value="4000" over="4000" percentage="100.000000"/>
               <slstr:globalInfo grid="0.5 km stripe B" view="Oblique" value="4000" over="4000" percentage="100.000000"/>
               <slstr:globalInfo grid="0.5 km TDI" view="Oblique" value="4000" over="4000" percentage="100.000000"/>
-              <slstr:elementMissing grid="0.5 km stripe A, 0.5 km stripe B, 0.5 km TDI" view="Nadir" startTime="2013-07-07T15:42:52.300000Z" stopTime="2013-07-07T15:47:52.300000Z" percentage="100.000000">
+              <slstr:elementMissing grid="0.5 km stripe A, 0.5 km stripe B, 0.5 km TDI" view="Nadir" startTime="2013-07-07T15:32:52.300000Z" stopTime="2013-07-07T15:37:52.300000Z" percentage="100.000000">
                 <slstr:bandSet/>
               </slstr:elementMissing>
-              <slstr:elementMissing grid="0.5 km stripe A, 0.5 km stripe B, 0.5 km TDI" view="Oblique" startTime="2013-07-07T15:42:52.283435Z" stopTime="2013-07-07T15:47:52.208435Z" percentage="100.000000">
+              <slstr:elementMissing grid="0.5 km stripe A, 0.5 km stripe B, 0.5 km TDI" view="Oblique" startTime="2013-07-07T15:32:52.283435Z" stopTime="2013-07-07T15:37:52.208435Z" percentage="100.000000">
                 <slstr:bandSet/>
               </slstr:elementMissing>
             </slstr:missingElements>
@@ -742,18 +742,4 @@
       <dataObjectPointer dataObjectID="SLSTR_F1_QUALITY_IN_Data"/>
     </metadataObject>
   </metadataSection>
-  <dataObjectSection>
-    <dataObject ID="SLSTR_MET_TX_Data">
-      <byteStream mimeType="application/x-netcdf" size="32423">
-        <fileLocation locatorType="URL" href="met_tx.nc"/>
-        <checksum checksumName="MD5">0f9a756c6c7be058d7712432bf0348ca</checksum>
-      </byteStream>
-    </dataObject>
-    <dataObject ID="ADFData">
-      <byteStream mimeType="application/x-netcdf" size="36985">
-        <fileLocation locatorType="URL" href="viscal.nc"/>
-        <checksum checksumName="MD5">b12d0db5bbfdc22ea728219511894868</checksum>
-      </byteStream>
-    </dataObject>
-  </dataObjectSection>
 </xfdu:XFDU>

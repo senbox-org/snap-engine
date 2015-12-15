@@ -30,11 +30,11 @@ public class ManifestMerger {
     private Date creationTime;
     private static DefaultMerger defaultMerger;
     private static final ElementMerger NULL_MERGER = new NullMerger();
-    private String productName;
+    private File productDir;
 
-    public Document mergeManifests(File[] manifestFiles, Date creationTime, String productName) throws IOException, PDUStitchingException, ParserConfigurationException {
+    public Document mergeManifests(File[] manifestFiles, Date creationTime, File productDir) throws IOException, PDUStitchingException, ParserConfigurationException {
         this.creationTime = creationTime;
-        this.productName = productName;
+        this.productDir = productDir;
         List<Node> manifestList = new ArrayList<>();
         for (File manifestFile : manifestFiles) {
             manifestList.add(createXmlDocument(new FileInputStream(manifestFile)));
@@ -46,31 +46,6 @@ public class ManifestMerger {
         return document;
     }
 
-//    void setChecksum(Node toParent) throws PDUStitchingException {
-    //todo get full path to file
-//        Node sibling = toParent;
-//        try {
-//            while (!sibling.getNodeName().equals("fileLocation")) {
-//                sibling = sibling.getPreviousSibling();
-//
-//            }
-//            final NamedNodeMap attributes = sibling.getAttributes();
-//            if (attributes != null) {
-//                final Node hrefAttribute = attributes.getNamedItem("href");
-//                if (hrefAttribute != null) {
-//                    final String fileName = hrefAttribute.getNodeValue();
-//                    final MessageDigest md5 = MessageDigest.getInstance("MD5");
-//                    final DigestInputStream digestInputStream = new DigestInputStream(Files.newInputStream(Paths.get(fileName)), md5);
-//                    digestInputStream.read();
-//                    toParent.setNodeValue(new String(md5.digest()));
-//                }
-//            }
-//        } catch (NullPointerException | NoSuchAlgorithmException | IOException npe) {
-//            throw new PDUStitchingException("Could not create checksum");
-//        }
-//        toParent.setNodeValue("");
-//    }
-
     private static Document createXmlDocument(InputStream inputStream) throws IOException {
         final String msg = "Cannot create document from manifest XML file.";
         try {
@@ -81,9 +56,8 @@ public class ManifestMerger {
     }
 
     private ElementMerger getElementMerger(String elementName) {
-        if (elementName.equals("checksum")) {
-            //todo implement
-            return NULL_MERGER;
+        if (elementName.equals("dataObject")) {
+            return new DataObjectMerger(productDir.getAbsolutePath());
         } else if (elementName.equals("slstr:nadirImageSize") ||
                 elementName.equals("slstr:obliqueImageSize")) {
             return new ImageSizesMerger();
@@ -105,18 +79,9 @@ public class ManifestMerger {
             return NULL_MERGER;
         } else if (elementName.equals("sentinel3:creationTime")) {
             return new CreationTimeMerger(creationTime);
-        } else if (elementName.equals("sentinel3:granuleNumber")) {
-            //todo implement
-            return NULL_MERGER;
         } else if (elementName.equals("sentinel3:productName")) {
-            return new ProductNameMerger(productName);
-        } else if (elementName.equals("sentinel3:receivingStartTime")) {
-            //todo implement
-            return NULL_MERGER;
-        } else if (elementName.equals("sentinel3:receivingStopTime")) {
-            //todo implement
-            return NULL_MERGER;
-        } else if (elementName.equals("slstr:classificationSummary")) {
+            return new ProductNameMerger(productDir.getName());
+        } else if (elementName.equals("sentinel3:dumpInformation")) {
             //todo implement
             return NULL_MERGER;
         }
@@ -232,15 +197,19 @@ public class ManifestMerger {
                     final NamedNodeMap nodeToBeCheckedAttributes = nodeToBeChecked.getAttributes();
                     final NamedNodeMap attributes = newNode.getAttributes();
                     if (nodeToBeCheckedAttributes != null && attributes != null) {
+                        boolean atLeastOneDiscerningAttributeIsDifferent = false;
                         for (String name : discerningAttributesNames) {
                             final Node attributeToBeChecked = nodeToBeCheckedAttributes.getNamedItem(name);
                             final Node attribute = attributes.getNamedItem(name);
                             if (attributeToBeChecked != null && attribute != null &&
                                     !attributeToBeChecked.getNodeValue().equals(attribute.getNodeValue())) {
-                                return false;
+                                atLeastOneDiscerningAttributeIsDifferent = true;
+                                break;
                             }
                         }
-                        return true;
+                        if (!atLeastOneDiscerningAttributeIsDifferent) {
+                            return true;
+                        }
                     } else {
                         return true;
                     }
@@ -249,47 +218,6 @@ public class ManifestMerger {
             return false;
         }
 
-        private void copyAttributes(List<Node> itemNodes, Element manifestElement) throws PDUStitchingException {
-            for (int n = 0; n < itemNodes.size(); n++) {
-                final Node currentItem = itemNodes.get(n);
-                final NamedNodeMap attributes = currentItem.getAttributes();
-                if (attributes != null) {
-                    for (int k = 0; k < attributes.getLength(); k++) {
-                        final Node attribute = attributes.item(k);
-                        final String attributeName = attribute.getNodeName();
-                        if (!manifestElement.hasAttribute(attributeName)) {
-                            String attributeValue = attribute.getNodeValue();
-                            if (n < itemNodes.size() - 1) {
-                                for (int m = n + 1; m < itemNodes.size(); m++) {
-                                    final NamedNodeMap otherItemAttributes = itemNodes.get(m).getAttributes();
-                                    final Node otherAttribute = otherItemAttributes.getNamedItem(attributeName);
-                                    if (otherAttribute != null) {
-                                        final String otherAttributeValue = otherAttribute.getNodeValue();
-                                        if (attributeName.equals("start")) {
-                                            final Date startValue = parseDate(attributeValue);
-                                            final Date otherStartValue = parseDate(otherAttributeValue);
-                                            if (otherStartValue.before(startValue)) {
-                                                attributeValue = otherAttributeValue;
-                                            }
-                                        } else if (attributeName.equals("stop")) {
-                                            final Date startValue = parseDate(attributeValue);
-                                            final Date otherStartValue = parseDate(otherAttributeValue);
-                                            if (otherStartValue.after(startValue)) {
-                                                attributeValue = otherAttributeValue;
-                                            }
-                                        } else if (!otherAttributeValue.equals(attributeValue)) {
-                                            throw new PDUStitchingException("Different values for attribute " + attributeName +
-                                                                                    " of node " + currentItem.getNodeName());
-                                        }
-                                    }
-                                }
-                            }
-                            manifestElement.setAttribute(attributeName, attributeValue.trim());
-                        }
-                    }
-                }
-            }
-        }
     }
 
     private static class NullMerger implements ElementMerger {

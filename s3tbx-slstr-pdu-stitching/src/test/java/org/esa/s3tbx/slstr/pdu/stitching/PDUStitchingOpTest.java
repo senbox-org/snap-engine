@@ -95,6 +95,7 @@ public class PDUStitchingOpTest {
         assertEquals(3, productContents.length);
         assert(ArrayUtils.isMemberOf("F1_BT_io.nc", productContents));
         assert(ArrayUtils.isMemberOf("met_tx.nc", productContents));
+        assert(ArrayUtils.isMemberOf("viscal.nc", productContents));
         assert(ArrayUtils.isMemberOf("xfdumanifest.xml", productContents));
     }
 

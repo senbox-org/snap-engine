@@ -133,11 +133,10 @@ public class SlstrPduStitcherTest {
             SlstrPduStitcher.collectFiles(ncFiles, createXmlDocument(new FileInputStream(slstrFile)));
         }
 
-        assertEquals(4, ncFiles.size());
-        assertEquals("F1_BT_in.nc", ncFiles.get(0));
-        assertEquals("met_tx.nc", ncFiles.get(1));
-        assertEquals("viscal.nc", ncFiles.get(2));
-        assertEquals("F1_BT_io.nc", ncFiles.get(3));
+        assertEquals(3, ncFiles.size());
+        assertEquals("met_tx.nc", ncFiles.get(0));
+        assertEquals("viscal.nc", ncFiles.get(1));
+        assertEquals("F1_BT_io.nc", ncFiles.get(2));
     }
 
     private static Document createXmlDocument(InputStream inputStream) throws IOException {

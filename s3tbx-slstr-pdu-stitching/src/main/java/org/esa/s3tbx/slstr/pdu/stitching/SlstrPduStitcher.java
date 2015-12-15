@@ -145,7 +145,7 @@ public class SlstrPduStitcher {
 
     private static File createManifestFile(File[] manifestFiles, File stitchedParentDirectory, Date now)
             throws ParserConfigurationException, PDUStitchingException, IOException, TransformerException {
-        final Document document = new ManifestMerger().mergeManifests(manifestFiles, now);
+        final Document document = new ManifestMerger().mergeManifests(manifestFiles, now, stitchedParentDirectory);
         final Transformer transformer = TransformerFactory.newInstance().newTransformer();
         final DOMSource domSource = new DOMSource(document);
         final File manifestFile = new File(stitchedParentDirectory, "xfdumanifest.xml");
