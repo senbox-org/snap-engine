@@ -114,9 +114,7 @@ public class ModisAerosolOp extends MerisBasisOp {
     @Override
     public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle rectangle, ProgressMonitor pm) throws OperatorException {
         // OLD Beam:
-//        final GeoCoding geoCoding = sourceProduct.getGeoCoding();
-        // todo: make sure this is ok:
-        final GeoCoding geoCoding = sourceProduct.getBandAt(0).getGeoCoding();
+        final GeoCoding geoCoding = sourceProduct.getSceneGeoCoding();
         final GeoPos geoPos = new GeoPos();
         final PixelPos pixelPos = new PixelPos();
         final FractIndex[] indexes = FractIndex.createArray(3);

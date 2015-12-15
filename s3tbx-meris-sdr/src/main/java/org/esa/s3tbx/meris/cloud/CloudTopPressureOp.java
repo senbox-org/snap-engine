@@ -222,8 +222,7 @@ public class CloudTopPressureOp extends MerisBasisOp {
                     final double toar11XY_corrected = toar11.getSampleDouble(x, y) + stray;
 
                     if (l1bFlags.getSampleBit(x, y, Constants.L1_F_LAND)) {
-//                        final GeoPos geoPos =  sourceProduct.getGeoCoding().getGeoPos(new PixelPos(x,y), null);
-                        final GeoPos geoPos =  sourceProduct.getBandAt(0).getGeoCoding().getGeoPos(new PixelPos(x, y), null);
+                        final GeoPos geoPos =  sourceProduct.getSceneGeoCoding().getGeoPos(new PixelPos(x, y), null);
                         nnInLand[0] = computeSurfAlbedo((float) geoPos.getLat(), (float) geoPos.getLon()); // albedo
                         nnInLand[1] = toar10.getSampleDouble(x, y);
                         nnInLand[2] = toar11XY_corrected / toar10.getSampleDouble(x, y);

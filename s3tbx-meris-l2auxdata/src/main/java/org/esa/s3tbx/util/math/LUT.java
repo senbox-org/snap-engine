@@ -51,6 +51,16 @@ public class LUT {
     }
 
     /**
+     * Constructs a LUT from the given dimension sizes and flat <code>double</code> array.
+     *
+     * @param sizes    the dimension sizes describing the memory layout of the given flat array
+     * @param elements a flat <code>double</code> array
+     */
+    public LUT(final int[] sizes, final double[] elements) {
+        this(new MDArray(double.class, sizes, elements));
+    }
+
+    /**
      * Constructs a LUT from the given dimension sizes and flat <code>float</code> array.
      *
      * @param sizes    the dimension sizes describing the memory layout of the given flat array

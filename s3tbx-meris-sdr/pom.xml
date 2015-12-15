@@ -73,7 +73,8 @@
                 <artifactId>nbm-maven-plugin</artifactId>
                 <configuration>
                     <publicPackages>
-                        <publicPackage>org.esa.s3tbx.meris.radiometry.*</publicPackage>
+                        <publicPackage>org.esa.s3tbx.meris.cloud.*</publicPackage>
+                        <publicPackage>org.esa.s3tbx.meris.brr.*</publicPackage>
                     </publicPackages>
                 </configuration>
             </plugin>

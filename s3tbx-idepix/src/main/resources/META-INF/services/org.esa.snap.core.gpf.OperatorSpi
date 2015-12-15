@@ -1,0 +1,6 @@
+org.esa.s3tbx.idepix.algorithms.meris.MerisOp$Spi
+org.esa.s3tbx.idepix.algorithms.landsat8.Landsat8Op$Spi
+org.esa.s3tbx.idepix.algorithms.landsat8.OtsuBinarizeOp$Spi
+org.esa.s3tbx.idepix.algorithms.landsat8.ClostOp$Spi
+org.esa.s3tbx.idepix.algorithms.landsat8.Landsat8PostProcessOp$Spi
+org.esa.s3tbx.idepix.algorithms.landsat8.Landsat8ClassificationOp$Spi

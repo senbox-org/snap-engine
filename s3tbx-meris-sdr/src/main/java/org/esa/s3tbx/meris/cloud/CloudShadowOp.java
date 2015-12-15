@@ -77,9 +77,7 @@ public class CloudShadowOp extends MerisBasisOp {
         }
         rectCalculator = new RectangleExtender(new Rectangle(l1bProduct.getSceneRasterWidth(), l1bProduct.getSceneRasterHeight()), shadowWidth,
                                                shadowWidth);
-//        geoCoding = l1bProduct.getGeoCoding();
-        // todo: check if this is ok!
-        geoCoding = l1bProduct.getBandAt(0).getGeoCoding();
+        geoCoding = l1bProduct.getSceneGeoCoding();
     }
 
     @Override
