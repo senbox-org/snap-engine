@@ -4,3 +4,4 @@ OpenIDE-Module-Display-Category: Sentinel-3 Toolbox
 OpenIDE-Module-Specification-Version: ${s3tbx.nbmSpecVersion}
 AutoUpdate-Show-In-Client: false
 AutoUpdate-Essential-Module: true
+OpenIDE-Module-Layer: org/esa/s3tbx/aatsr/regrid/layer.xml
