@@ -7,7 +7,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.Text;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -56,15 +55,6 @@ public class DataObjectMerger extends AbstractElementMerger {
         addTextToNode(checksumElement, checksum, toDocument);
         appendLineBreakAndIndent(byteStreamElement, toDocument, 3);
         appendLineBreakAndIndent(toParent, toDocument, 2);
-    }
-
-    private void appendLineBreakAndIndent(Element toParent, Document toDocument, int treeDepth) {
-        StringBuilder stringBuilder = new StringBuilder("\n");
-        for (int i = 0; i < 2 * treeDepth; i++) {
-            stringBuilder.append(" ");
-        }
-        final Text textNode = toDocument.createTextNode(stringBuilder.toString());
-        toParent.appendChild(textNode);
     }
 
     private File getFile(String fileName, Element toParent) throws PDUStitchingException {

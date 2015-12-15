@@ -26,6 +26,15 @@ public abstract class AbstractElementMerger implements ElementMerger {
         node.appendChild(textNode);
     }
 
+    protected void appendLineBreakAndIndent(Node toParent, Document toDocument, int treeDepth) {
+        StringBuilder stringBuilder = new StringBuilder("\n");
+        for (int i = 0; i < 2 * treeDepth; i++) {
+            stringBuilder.append(" ");
+        }
+        final Text textNode = toDocument.createTextNode(stringBuilder.toString());
+        toParent.appendChild(textNode);
+    }
+
     protected static Date parseDate(String text) throws PDUStitchingException {
         String subDate = text;
         if (text.endsWith("Z")) {

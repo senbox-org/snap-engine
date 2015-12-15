@@ -82,8 +82,7 @@ public class ManifestMerger {
         } else if (elementName.equals("sentinel3:productName")) {
             return new ProductNameMerger(productDir.getName());
         } else if (elementName.equals("sentinel3:dumpInformation")) {
-            //todo implement
-            return NULL_MERGER;
+            return new DumpInformationMerger();
         }
         return defaultMerger;
     }
