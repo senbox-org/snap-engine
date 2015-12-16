@@ -2,17 +2,25 @@ package org.esa.s3tbx.idepix.ui.actions;
 
 import org.esa.s3tbx.idepix.algorithms.seawifs.SeaWifsOp;
 import org.esa.s3tbx.idepix.ui.IdepixDefaultDialog;
-import org.esa.snap.core.gpf.OperatorSpi;
+import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.rcp.actions.AbstractSnapAction;
+import org.openide.awt.ActionID;
+import org.openide.awt.ActionReference;
+import org.openide.awt.ActionRegistration;
+import org.openide.util.NbBundle;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 
 /**
- * Idepix action for  MODIS/SeaWiFS algorithm.
+ * Idepix action for SeaWiFS algorithm.
  *
  * @author Olaf Danne
  */
+@ActionID(category = "Processing", id = "org.esa.s3tbx.idepix.ui.actions.IdepixSeawifsAction")
+@ActionRegistration(displayName = "#CTL_IdepixSeawifsAction_Text")
+@ActionReference(path = "Menu/Optical/Preprocessing/IdePix Pixel Classification", position = 200)
+@NbBundle.Messages({"CTL_IdepixSeawifsAction_Text=SeaWiFS"})
 public class IdepixSeawifsAction extends AbstractSnapAction {
 
     public IdepixSeawifsAction() {
@@ -22,12 +30,13 @@ public class IdepixSeawifsAction extends AbstractSnapAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        final IdepixDefaultDialog dialog =
-                new IdepixDefaultDialog(OperatorSpi.getOperatorAlias(SeaWifsOp.class),
-                                        getAppContext(),
-                                        "IDEPIX Pixel Identification Tool - SeaWiFS" +
-                                                " Algorithm",
-                                        "idepixChain","");
+        final OperatorMetadata opMetadata = SeaWifsOp.class.getAnnotation(OperatorMetadata.class);
+        final IdepixDefaultDialog dialog = new IdepixDefaultDialog(opMetadata.alias(),
+                                                                   getAppContext(),
+                                                                   "Idepix - Pixel Identification and Classification (SeaWiFS mode)",
+                                                                   "IdepixPlugIn",
+                                                                   "_IDEPIX");
+        dialog.getJDialog().pack();
         dialog.show();
     }
 }
