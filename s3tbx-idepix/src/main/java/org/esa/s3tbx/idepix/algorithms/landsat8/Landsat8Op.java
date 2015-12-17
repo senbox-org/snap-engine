@@ -29,8 +29,9 @@ import java.util.Map;
 @SuppressWarnings({"FieldCanBeLocal"})
 @OperatorMetadata(alias = "idepix.landsat8",
         category = "Optical/Pre-Processing",
-        version = "2.3",
-        copyright = "(c) 2014 by Brockmann Consult",
+        version = "1.0",
+        authors = "Olaf Danne",
+        copyright = "(c) 2015 by Brockmann Consult",
         description = "Pixel identification for Landsat 8.")
 public class Landsat8Op extends Operator {
 
@@ -249,7 +250,7 @@ public class Landsat8Op extends Operator {
     private Product classificationProduct;
     private Product postProcessingProduct;
 
-//    private Product waterMaskProduct;
+    private Product waterMaskProduct;
 
     private Map<String, Product> classificationInputProducts;
     private Map<String, Object> classificationParameters;
@@ -285,7 +286,8 @@ public class Landsat8Op extends Operator {
             otsuProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(OtsuBinarizeOp.class), otsuParameters, otsuInput);
         }
 
-        preProcess();
+//        preProcess();
+        preProcessWatermask();
         computeCloudProduct();
         postProcess();
 
@@ -310,6 +312,15 @@ public class Landsat8Op extends Operator {
         waterMaskParameters.put("subSamplingFactorX", OVERSAMPLING_FACTOR_X);
         waterMaskParameters.put("subSamplingFactorY", OVERSAMPLING_FACTOR_Y);
 //        waterMaskProduct = GPF.createProduct("LandWaterMask", waterMaskParameters, sourceProduct);
+    }
+
+    private void preProcessWatermask() {
+        HashMap<String, Object> waterMaskParameters = new HashMap<>();
+        final String[] sourceBandNames = {Landsat8Constants.LANDSAT8_RED_BAND_NAME};
+        waterMaskParameters.put("sourceBandNames", sourceBandNames);
+        waterMaskParameters.put("landMask", false);
+//        waterMaskParameters.put("sourceBandNames", Landsat8Constants.LANDSAT8_SPECTRAL_BAND_NAMES);
+        waterMaskProduct = GPF.createProduct("Land-Sea-Mask", waterMaskParameters, sourceProduct);
     }
 
     private void setClassificationParameters() {
@@ -359,7 +370,7 @@ public class Landsat8Op extends Operator {
         classificationInputProducts = new HashMap<>();
         classificationInputProducts.put("l8source", sourceProduct);
         classificationInputProducts.put("otsu", otsuProduct);
-//        classificationInputProducts.put("waterMask", waterMaskProduct);
+        classificationInputProducts.put("waterMask", waterMaskProduct);
         classificationProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(Landsat8ClassificationOp.class),
                                                   classificationParameters, classificationInputProducts);
     }
@@ -368,7 +379,7 @@ public class Landsat8Op extends Operator {
         HashMap<String, Product> input = new HashMap<>();
         input.put("l1b", sourceProduct);
         input.put("landsatCloud", classificationProduct);
-//        input.put("waterMask", waterMaskProduct);
+        input.put("waterMask", waterMaskProduct);
 
         Map<String, Object> params = new HashMap<>();
         params.put("cloudBufferWidth", cloudBufferWidth);

@@ -234,7 +234,11 @@ public class Landsat8ClassificationOp extends Operator {
         createTargetProduct();
 
         if (waterMaskProduct != null) {
-            landWaterBand = waterMaskProduct.getBand("land_water_fraction");
+            // BEAM: todo reactivate this once we have our SRTM mask in SNAP
+//            landWaterBand = waterMaskProduct.getBand("land_water_fraction");
+
+            // meanwhile use the 'Land-Sea-Mask' operator by Array (Jun Lu, Luis Veci):
+            landWaterBand = waterMaskProduct.getBand(Landsat8Constants.LANDSAT8_RED_BAND_NAME);
         }
         if (otsuProduct != null) {
             clostBand = otsuProduct.getBand(ClostOp.CLOST_BAND_NAME);
@@ -281,9 +285,9 @@ public class Landsat8ClassificationOp extends Operator {
     @Override
     public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle rectangle, ProgressMonitor pm) throws OperatorException {
         // MERIS variables
-        Tile waterFractionTile = null;
+        Tile landWaterTile = null;
         if (waterMaskProduct != null) {
-            waterFractionTile = getSourceTile(landWaterBand, rectangle);
+            landWaterTile = getSourceTile(landWaterBand, rectangle);
         }
 
         Tile clostTile = null;
@@ -314,7 +318,7 @@ public class Landsat8ClassificationOp extends Operator {
                     Landsat8Algorithm landsat8Algorithm = createLandsat8Algorithm(
                             l8ReflectanceTiles,
                             l8FlagTile,
-                            waterFractionTile,
+                            landWaterTile,
                             clostTile,
                             otsuTile,
                             x, y
@@ -331,7 +335,8 @@ public class Landsat8ClassificationOp extends Operator {
         }
     }
 
-    private boolean isLandPixel(int x, int y, Tile l8FlagTile, int waterFraction) {
+    private boolean isLandPixelSrtmBeam(int x, int y, Tile l8FlagTile, int waterFraction) {
+        // this uses the SRTM Land/Water mask as implemented as BEAM plugin
         if (getGeoPos(x, y).lat > WATER_MASK_SOUTH_BOUND) {
             // values bigger than 100 indicate no data
             if (waterFraction <= 100) {
@@ -379,7 +384,7 @@ public class Landsat8ClassificationOp extends Operator {
 
     private Landsat8Algorithm createLandsat8Algorithm(Tile[] l8ReflectanceTiles,
                                                       Tile l8FlagTile,
-                                                      Tile waterFractionTile,
+                                                      Tile landWaterTile,
                                                       Tile clostTile,
                                                       Tile otsuTile,
                                                       int x, int y) {
@@ -387,8 +392,13 @@ public class Landsat8ClassificationOp extends Operator {
 
         boolean isLand = false;
         if (waterMaskProduct != null) {
-            final int waterFraction = waterFractionTile.getSampleInt(x, y);
-            isLand = isLandPixel(x, y, l8FlagTile, waterFraction);
+            // BEAM: todo reactivate this once we have our SRTM mask in SNAP
+//            final int waterFraction = landWaterTile.getSampleInt(x, y);
+//            isLand = isLandPixelSrtmBeam(x, y, l8FlagTile, waterFraction);
+
+            // meanwhile use the 'Land-Sea-Mask' operator by Array (Jun Lu, Luis Veci):
+            final float maskValue = landWaterTile.getSampleFloat(x, y);
+            isLand = maskValue > 0.0f;
         }
 
         float[] l8Reflectance = new float[Landsat8Constants.LANDSAT8_NUM_SPECTRAL_BANDS];
