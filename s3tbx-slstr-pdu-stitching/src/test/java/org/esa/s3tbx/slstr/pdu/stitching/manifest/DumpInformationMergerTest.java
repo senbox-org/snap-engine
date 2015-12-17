@@ -73,7 +73,7 @@ public class DumpInformationMergerTest {
         assertEquals(0, actual.getAttributes().getLength());
         final NodeList expectedChildNodes = expected.getChildNodes();
         final NodeList actualChildNodes = actual.getChildNodes();
-        assertEquals(expectedChildNodes.getLength() - 1, actualChildNodes.getLength());
+        assertEquals(expectedChildNodes.getLength(), actualChildNodes.getLength());
         for (int i = 0; i < actualChildNodes.getLength() / 2; i++) {
             final Node expectedItem = expectedChildNodes.item((2 * i) + 1);
             final Node actualItem = actualChildNodes.item((2 * i) + 1);
