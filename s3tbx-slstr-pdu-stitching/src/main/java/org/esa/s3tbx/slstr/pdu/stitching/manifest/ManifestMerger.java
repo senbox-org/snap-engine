@@ -75,8 +75,7 @@ public class ManifestMerger {
             //todo implement
             return NULL_MERGER;
         } else if (elementName.equals("sentinel-safe:footPrint")) {
-            //todo implement
-            return NULL_MERGER;
+            return new FootprintMerger(productDir);
         } else if (elementName.equals("sentinel3:creationTime")) {
             return new CreationTimeMerger(creationTime);
         } else if (elementName.equals("sentinel3:productName")) {
