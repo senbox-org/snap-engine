@@ -88,6 +88,7 @@ public class SlstrPduStitcherTest {
         assert(new File(stitchedProductFileParentDirectory, "xfdumanifest.xml").exists());
         assert(new File(stitchedProductFileParentDirectory, "F1_BT_io.nc").exists());
         assert(new File(stitchedProductFileParentDirectory, "met_tx.nc").exists());
+        assert(new File(stitchedProductFileParentDirectory, "viscal.nc").exists());
         assertEquals(targetDirectory, stitchedProductFileParentDirectory.getParentFile());
     }
 
