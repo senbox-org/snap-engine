@@ -3,7 +3,6 @@ package org.esa.s3tbx.slstr.pdu.stitching;
 import org.esa.snap.core.util.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -79,7 +78,7 @@ public class SlstrPduStitcherTest {
     }
 
     @Test
-    @Ignore
+//    @Ignore
     public void testStitchPDUs_AllSlstrL1BProductFiles() throws IOException, PDUStitchingException, TransformerException, ParserConfigurationException {
         final File[] slstrFiles = getSlstrFiles();
         final File stitchedProductFile = SlstrPduStitcher.createStitchedSlstrL1BFile(targetDirectory, slstrFiles);

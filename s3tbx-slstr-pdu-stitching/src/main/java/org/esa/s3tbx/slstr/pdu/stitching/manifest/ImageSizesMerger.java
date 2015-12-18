@@ -26,27 +26,22 @@ public class ImageSizesMerger extends AbstractElementMerger {
         final String grid = fromParents.get(0).getAttributes().item(0).getNodeValue();
 
         toParent.setAttribute("grid", grid);
-        toParent.appendChild(toDocument.createTextNode("\n"));
         final Element startOffsetElement = toDocument.createElement("sentinel3:startOffset");
         final Text startOffsetTextNode = toDocument.createTextNode("" + targetImageSize.getStartOffset());
         startOffsetElement.appendChild(startOffsetTextNode);
         toParent.appendChild(startOffsetElement);
-        toParent.appendChild(toDocument.createTextNode("\n"));
         final Element trackOffsetElement = toDocument.createElement("sentinel3:trackOffset");
         final Text trackOffsetTextNode = toDocument.createTextNode("" + targetImageSize.getTrackOffset());
         trackOffsetElement.appendChild(trackOffsetTextNode);
         toParent.appendChild(trackOffsetElement);
-        toParent.appendChild(toDocument.createTextNode("\n"));
         final Element rowsElement = toDocument.createElement("sentinel3:rows");
         final Text rowsTextNode = toDocument.createTextNode("" + targetImageSize.getRows());
         rowsElement.appendChild(rowsTextNode);
         toParent.appendChild(rowsElement);
-        toParent.appendChild(toDocument.createTextNode("\n"));
         final Element columnsElement = toDocument.createElement("sentinel3:columns");
         final Text columnsTextNode = toDocument.createTextNode("" + targetImageSize.getColumns());
         columnsElement.appendChild(columnsTextNode);
         toParent.appendChild(columnsElement);
-        toParent.appendChild(toDocument.createTextNode("\n"));
     }
 
 }

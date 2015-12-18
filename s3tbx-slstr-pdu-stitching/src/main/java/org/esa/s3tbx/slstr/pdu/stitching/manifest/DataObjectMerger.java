@@ -32,18 +32,15 @@ public class DataObjectMerger extends AbstractElementMerger {
         final String fileName = getFileName(fromParents, toParent);
         final File file = getFile(fileName, toParent);
         final long size = file.length();
-        appendLineBreakAndIndent(toParent, toDocument, 3);
         final Element byteStreamElement = toDocument.createElement("byteStream");
         toParent.appendChild(byteStreamElement);
         byteStreamElement.setAttribute("mimeType", "application/x-netcdf");
         byteStreamElement.setAttribute("size", String.valueOf(size));
         final Element fileLocationElement = toDocument.createElement("fileLocation");
-        appendLineBreakAndIndent(byteStreamElement, toDocument, 4);
         byteStreamElement.appendChild(fileLocationElement);
         fileLocationElement.setAttribute("locatorType", "URL");
         fileLocationElement.setAttribute("href", fileName);
         final Element checksumElement = toDocument.createElement("checksum");
-        appendLineBreakAndIndent(byteStreamElement, toDocument, 4);
         byteStreamElement.appendChild(checksumElement);
         checksumElement.setAttribute("checksumName", "MD5");
         final String checksum;
@@ -53,8 +50,6 @@ public class DataObjectMerger extends AbstractElementMerger {
             throw new PDUStitchingException("Could not create checksum for file " + fileName);
         }
         addTextToNode(checksumElement, checksum, toDocument);
-        appendLineBreakAndIndent(byteStreamElement, toDocument, 3);
-        appendLineBreakAndIndent(toParent, toDocument, 2);
     }
 
     private File getFile(String fileName, Element toParent) throws PDUStitchingException {

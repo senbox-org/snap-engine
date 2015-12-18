@@ -15,12 +15,7 @@ import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -70,15 +65,7 @@ public class ManifestMergerTest {
         final File inputManifest = getManifestFile(TestConstants.FIRST_FILE_NAME);
         final Date now = Calendar.getInstance().getTime();
         final File productDir = new File(ManifestMergerTest.class.getResource("").getFile());
-        final Document manifest = manifestMerger.mergeManifests(new File[]{inputManifest}, now, productDir);
-        final Transformer transformer = TransformerFactory.newInstance().newTransformer();
-        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-        transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-        transformer.setOutputProperty(OutputKeys.STANDALONE, "no");
-        final DOMSource manifestSource = new DOMSource(manifest);
-        final File manifestFile = new File(targetDirectory, "xfdumanifest.xml");
-        final StreamResult streamResult = new StreamResult(manifestFile);
-        transformer.transform(manifestSource, streamResult);
+        final File manifestFile = manifestMerger.createMergedManifest(new File[]{inputManifest}, now, productDir);
         //todo assert something
     }
 
@@ -86,14 +73,15 @@ public class ManifestMergerTest {
     public void testMergeManifests_MultipleFiles() throws IOException, ParserConfigurationException, TransformerException, PDUStitchingException {
         final Date now = Calendar.getInstance().getTime();
         final File productDir = new File(ManifestMergerTest.class.getResource("").getFile());
-        final Document manifest = manifestMerger.mergeManifests(getManifestFiles(), now, productDir);
-        final Transformer transformer = TransformerFactory.newInstance().newTransformer();
-        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-        transformer.setOutputProperty(OutputKeys.STANDALONE, "no");
-        final DOMSource manifestSource = new DOMSource(manifest);
-        final File manifestFile = new File(targetDirectory, "xfdumanifest.xml");
-        final StreamResult streamResult = new StreamResult(manifestFile);
-        transformer.transform(manifestSource, streamResult);
+        final File manifestFile = manifestMerger.createMergedManifest(getManifestFiles(), now, productDir);
+//        final Document manifest = manifestMerger.mergeManifests(getManifestFiles(), now, productDir);
+//        final Transformer transformer = TransformerFactory.newInstance().newTransformer();
+//        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+//        transformer.setOutputProperty(OutputKeys.STANDALONE, "no");
+//        final DOMSource manifestSource = new DOMSource(manifest);
+//        final File manifestFile = new File(targetDirectory, "xfdumanifest.xml");
+//        final StreamResult streamResult = new StreamResult(manifestFile);
+//        transformer.transform(manifestSource, streamResult);
         //todo assert something
     }
 

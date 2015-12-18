@@ -13,10 +13,18 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -32,7 +40,30 @@ public class ManifestMerger {
     private static final ElementMerger NULL_MERGER = new NullMerger();
     private File productDir;
 
-    public Document mergeManifests(File[] manifestFiles, Date creationTime, File productDir) throws IOException, PDUStitchingException, ParserConfigurationException {
+    public File createMergedManifest(File[] manifestFiles, Date creationTime, File productDir)
+            throws IOException, TransformerException, PDUStitchingException, ParserConfigurationException {
+        final Document document = mergeManifests(manifestFiles, creationTime, productDir);
+        final File manifestFile = new File(productDir, "xfdumanifest.xml");
+        final TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        transformerFactory.setAttribute("indent-number", 2);
+        final Transformer transformer = transformerFactory.newTransformer();
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+        transformer.setOutputProperty(OutputKeys.STANDALONE, "no");
+        transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+        final DOMSource domSource = new DOMSource(document);
+        final StringWriter stringWriter = new StringWriter();
+        final StreamResult streamResult = new StreamResult(stringWriter);
+        transformer.transform(domSource, streamResult);
+        String docAsString = stringWriter.toString();
+        docAsString = docAsString.replace(" standalone=\"no\"", "");
+        final FileWriter fileWriter = new FileWriter(manifestFile);
+        fileWriter.write(docAsString);
+        fileWriter.close();
+        return manifestFile;
+    }
+
+    private Document mergeManifests(File[] manifestFiles, Date creationTime, File productDir) throws IOException, PDUStitchingException, ParserConfigurationException {
         this.creationTime = creationTime;
         this.productDir = productDir;
         List<Node> manifestList = new ArrayList<>();
@@ -40,7 +71,6 @@ public class ManifestMerger {
             manifestList.add(createXmlDocument(new FileInputStream(manifestFile)));
         }
         Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
-        document.setXmlStandalone(true);
         defaultMerger = new DefaultMerger();
         defaultMerger.mergeNodes(manifestList, document, document);
         return document;
@@ -56,32 +86,33 @@ public class ManifestMerger {
     }
 
     private ElementMerger getElementMerger(String elementName) {
-        if (elementName.equals("dataObject")) {
-            return new DataObjectMerger(productDir.getAbsolutePath());
-        } else if (elementName.equals("slstr:nadirImageSize") ||
-                elementName.equals("slstr:obliqueImageSize")) {
-            return new ImageSizesMerger();
-        } else if (elementName.equals("sentinel-safe:startTime")) {
-            return new StartTimesMerger();
-        } else if (elementName.equals("sentinel-safe:stopTime")) {
-            return new StopTimesMerger();
-        } else if (elementName.equals("slstr:classificationSummary")) {
-            //todo implement
-            return NULL_MERGER;
-        } else if (elementName.equals("slstr:pixelQualitySummary")) {
-            //todo implement
-            return NULL_MERGER;
-        } else if (elementName.equals("slstr:missingElements")) {
-            //todo implement
-            return NULL_MERGER;
-        } else if (elementName.equals("sentinel-safe:footPrint")) {
-            return new FootprintMerger(productDir);
-        } else if (elementName.equals("sentinel3:creationTime")) {
-            return new CreationTimeMerger(creationTime);
-        } else if (elementName.equals("sentinel3:productName")) {
-            return new ProductNameMerger(productDir.getName());
-        } else if (elementName.equals("sentinel3:dumpInformation")) {
-            return new DumpInformationMerger();
+        switch (elementName) {
+            case "dataObject":
+                return new DataObjectMerger(productDir.getAbsolutePath());
+            case "slstr:nadirImageSize":
+            case "slstr:obliqueImageSize":
+                return new ImageSizesMerger();
+            case "sentinel-safe:startTime":
+                return new StartTimesMerger();
+            case "sentinel-safe:stopTime":
+                return new StopTimesMerger();
+            case "slstr:classificationSummary":
+                //todo implement
+                return NULL_MERGER;
+            case "slstr:pixelQualitySummary":
+                //todo implement
+                return NULL_MERGER;
+            case "slstr:missingElements":
+                //todo implement
+                return NULL_MERGER;
+            case "sentinel-safe:footPrint":
+                return new FootprintMerger(productDir);
+            case "sentinel3:creationTime":
+                return new CreationTimeMerger(creationTime);
+            case "sentinel3:productName":
+                return new ProductNameMerger(productDir.getName());
+            case "sentinel3:dumpInformation":
+                return new DumpInformationMerger();
         }
         return defaultMerger;
     }
@@ -102,18 +133,7 @@ public class ManifestMerger {
             for (int j = 0; j < fromParents.size(); j++) {
                 for (int i = 0; i < childNodeLists[j].getLength(); i++) {
                     final Node child = childNodeLists[j].item(i);
-                    if (child instanceof TextImpl && child.getTextContent().contains("\n")) {
-                        final Node lastChild = toParent.getLastChild();
-                        if (!(lastChild instanceof TextImpl)) {
-                            final String textContent = child.getTextContent();
-                            final Text textNode = toDocument.createTextNode(textContent);
-                            toParent.appendChild(textNode);
-                        } else if (!lastChild.getTextContent().contains("\n")) {
-                            final String textContent = child.getTextContent();
-                            final Text textNode = toDocument.createTextNode(textContent);
-                            toParent.appendChild(textNode);
-                        }
-                    } else {
+                    if (!(child instanceof TextImpl) || !child.getTextContent().contains("\n")) {
                         if (!hasIdenticalChild(toParent, child)) {
                             final String nodeValue = child.getNodeValue();
                             List<Node> childNodes = collectChildNodes(child, childNodeLists, j);

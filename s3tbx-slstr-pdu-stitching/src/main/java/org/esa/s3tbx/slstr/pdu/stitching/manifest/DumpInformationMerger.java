@@ -20,14 +20,11 @@ public class DumpInformationMerger extends AbstractElementMerger {
         final Node actualParent = toParent.getParentNode();
         actualParent.removeChild(toParent);
         for (Node fromParent : fromParents) {
-            appendLineBreakAndIndent(actualParent, toDocument, 6);
-            final Node origElement = fromParent;
-            final Element newDumpElement = toDocument.createElement(origElement.getNodeName());
-            final NodeList origChildNodes = origElement.getChildNodes();
+            final Element newDumpElement = toDocument.createElement(fromParent.getNodeName());
+            final NodeList origChildNodes = fromParent.getChildNodes();
             for (int j = 0; j < origChildNodes.getLength(); j++) {
                 final Node origChild = origChildNodes.item(j);
                 if (!(origChild instanceof TextImpl) && !origChild.getTextContent().contains("\n")) {
-                    appendLineBreakAndIndent(newDumpElement, toDocument, 7);
                     final Element dumpChildElement = toDocument.createElement(origChild.getNodeName());
                     final String textContent = origChild.getTextContent();
                     final Text textNode = toDocument.createTextNode(textContent);
@@ -35,7 +32,6 @@ public class DumpInformationMerger extends AbstractElementMerger {
                     newDumpElement.appendChild(dumpChildElement);
                 }
             }
-            appendLineBreakAndIndent(newDumpElement, toDocument, 6);
             actualParent.appendChild(newDumpElement);
         }
     }

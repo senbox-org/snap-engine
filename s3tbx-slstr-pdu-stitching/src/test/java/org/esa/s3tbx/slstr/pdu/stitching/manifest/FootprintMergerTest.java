@@ -47,8 +47,8 @@ public class FootprintMergerTest {
         new FootprintMerger(new File(FootprintMergerTest.class.getResource("").getFile())).mergeNodes(fromParents, manifestElement, manifest);
 
         final NodeList manifestElementChildNodes = manifestElement.getChildNodes();
-        assertEquals(3, manifestElementChildNodes.getLength());
-        final Node posListNode = manifestElementChildNodes.item(1);
+        assertEquals(1, manifestElementChildNodes.getLength());
+        final Node posListNode = manifestElementChildNodes.item(0);
         assertEquals("gml:posList", posListNode.getNodeName());
         assertEquals("45.5154 -87.5954 43.7689 -87.8511 42.0217 -88.1109 40.2738 -88.3750 38.5253 -88.6431 36.7761 -88.9153 " +
                              "35.0263 -89.1916 33.2759 -89.4719 31.5250 -89.7564 29.7735 -90.0451 28.0304 -90.3366 " +
@@ -88,8 +88,8 @@ public class FootprintMergerTest {
         new FootprintMerger(new File(FootprintMergerTest.class.getResource("..\\").getFile())).mergeNodes(fromParents, manifestElement, manifest);
 
         final NodeList manifestElementChildNodes = manifestElement.getChildNodes();
-        assertEquals(3, manifestElementChildNodes.getLength());
-        final Node posListNode = manifestElementChildNodes.item(1);
+        assertEquals(1, manifestElementChildNodes.getLength());
+        final Node posListNode = manifestElementChildNodes.item(0);
         assertEquals("gml:posList", posListNode.getNodeName());
         assertEquals("45.5154 -87.5954 43.7689 -87.8511 42.0217 -88.1109 40.2738 -88.375 38.5253 -88.6431 36.7761 " +
                              "-88.9153 35.0263 -89.1916 33.2759 -89.4719 31.525 -89.7564 29.7735 -90.0451 28.0304 " +

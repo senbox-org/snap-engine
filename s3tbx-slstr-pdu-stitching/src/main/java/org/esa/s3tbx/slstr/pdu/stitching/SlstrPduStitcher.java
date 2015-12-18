@@ -10,11 +10,7 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -145,13 +141,7 @@ public class SlstrPduStitcher {
 
     private static File createManifestFile(File[] manifestFiles, File stitchedParentDirectory, Date now)
             throws ParserConfigurationException, PDUStitchingException, IOException, TransformerException {
-        final Document document = new ManifestMerger().mergeManifests(manifestFiles, now, stitchedParentDirectory);
-        final Transformer transformer = TransformerFactory.newInstance().newTransformer();
-        final DOMSource domSource = new DOMSource(document);
-        final File manifestFile = new File(stitchedParentDirectory, "xfdumanifest.xml");
-        final StreamResult streamResult = new StreamResult(manifestFile);
-        transformer.transform(domSource, streamResult);
-        return manifestFile;
+        return new ManifestMerger().createMergedManifest(manifestFiles, now, stitchedParentDirectory);
     }
 
     static void collectFiles(List<String> ncFileNames, Document manifestDocument) {

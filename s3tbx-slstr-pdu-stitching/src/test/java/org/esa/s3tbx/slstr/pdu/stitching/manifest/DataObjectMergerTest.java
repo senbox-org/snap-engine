@@ -60,8 +60,8 @@ public class DataObjectMergerTest {
         dataObjectMerger.mergeNodes(fromParents, manifestElement, manifest);
 
         final NodeList manifestChilds = manifestElement.getChildNodes();
-        assertEquals(3, manifestChilds.getLength());
-        final Node byteStreamElement = manifestChilds.item(1);
+        assertEquals(1, manifestChilds.getLength());
+        final Node byteStreamElement = manifestChilds.item(0);
         assertEquals("byteStream", byteStreamElement.getNodeName());
         final NamedNodeMap byteStreamElementAttributes = byteStreamElement.getAttributes();
         assertEquals(2, byteStreamElementAttributes.getLength());
@@ -73,9 +73,9 @@ public class DataObjectMergerTest {
         assertEquals("30", sizeAttribute.getNodeValue());
 
         final NodeList byteStreamChildren = byteStreamElement.getChildNodes();
-        assertEquals(5, byteStreamChildren.getLength());
+        assertEquals(2, byteStreamChildren.getLength());
 
-        final Node fileLocationElement = byteStreamChildren.item(1);
+        final Node fileLocationElement = byteStreamChildren.item(0);
         assertEquals("fileLocation", fileLocationElement.getNodeName());
         final NamedNodeMap fileLocationElementAttributes = fileLocationElement.getAttributes();
         assertEquals(2, fileLocationElementAttributes.getLength());
@@ -86,7 +86,7 @@ public class DataObjectMergerTest {
         assertNotNull(hrefAttribute);
         assertEquals("viscal.nc", hrefAttribute.getNodeValue());
 
-        final Node checksumElement = byteStreamChildren.item(3);
+        final Node checksumElement = byteStreamChildren.item(1);
         assertEquals("checksum", checksumElement.getNodeName());
         final NamedNodeMap checksumElementAttributes = checksumElement.getAttributes();
         assertEquals(1, checksumElementAttributes.getLength());

@@ -43,13 +43,11 @@ class FootprintMerger extends AbstractElementMerger {
 
     @Override
     public void mergeNodes(List<Node> fromParents, Element toParent, Document toDocument) throws PDUStitchingException {
-        appendLineBreakAndIndent(toParent, toDocument, 7);
         final Element posListElement = toDocument.createElement("gml:posList");
         String footprint;
         footprint = createFootprint(fromParents);
         addTextToNode(posListElement, footprint, toDocument);
         toParent.appendChild(posListElement);
-        appendLineBreakAndIndent(toParent, toDocument, 6);
     }
 
     private String createFootprint(List<Node> fromParents) {

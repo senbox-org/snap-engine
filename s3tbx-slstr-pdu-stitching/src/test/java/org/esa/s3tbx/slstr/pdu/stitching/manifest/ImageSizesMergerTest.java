@@ -55,14 +55,14 @@ public class ImageSizesMergerTest {
         assertEquals("Tie Points", manifestElement.getAttribute("grid"));
 
         final NodeList childNodes = manifestElement.getChildNodes();
-        assertEquals(9, childNodes.getLength());
-        assertEquals("sentinel3:startOffset", childNodes.item(1).getNodeName());
-        assertEquals("21687", childNodes.item(1).getFirstChild().getNodeValue());
-        assertEquals("sentinel3:trackOffset", childNodes.item(3).getNodeName());
-        assertEquals("64", childNodes.item(3).getFirstChild().getNodeValue());
-        assertEquals("sentinel3:rows", childNodes.item(5).getNodeName());
-        assertEquals("6000", childNodes.item(5).getFirstChild().getNodeValue());
-        assertEquals("sentinel3:columns", childNodes.item(7).getNodeName());
-        assertEquals("130", childNodes.item(7).getFirstChild().getNodeValue());
+        assertEquals(4, childNodes.getLength());
+        assertEquals("sentinel3:startOffset", childNodes.item(0).getNodeName());
+        assertEquals("21687", childNodes.item(0).getFirstChild().getNodeValue());
+        assertEquals("sentinel3:trackOffset", childNodes.item(1).getNodeName());
+        assertEquals("64", childNodes.item(1).getFirstChild().getNodeValue());
+        assertEquals("sentinel3:rows", childNodes.item(2).getNodeName());
+        assertEquals("6000", childNodes.item(2).getFirstChild().getNodeValue());
+        assertEquals("sentinel3:columns", childNodes.item(3).getNodeName());
+        assertEquals("130", childNodes.item(3).getFirstChild().getNodeValue());
     }
 }
