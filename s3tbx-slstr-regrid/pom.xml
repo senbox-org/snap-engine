@@ -9,8 +9,10 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+
     <artifactId>s3tbx-slstr-regrid</artifactId>
     <name>SLSTR/AATSR Regridding Tool</name>
+    <packaging>nbm</packaging>
     <description>
         Tool used to reconstruct the original nadir and forward view images
         of Sentinel-3 SLSTR an Envisat AATSR L1B products.
