@@ -179,7 +179,7 @@ public class ManifestMerger {
                                     final Node attributeToBeChecked = attributes.getNamedItem(name);
                                     final Node attribute = otherAttributes.getNamedItem(name);
                                     if (attributeToBeChecked != null && attribute != null &&
-                                            !attributeToBeChecked.getNodeValue().equals(attribute.getNodeValue())) {
+                                            !attributeToBeChecked.getNodeValue().trim().equals(attribute.getNodeValue().trim())) {
                                         discerningAttributesAreDifferent = true;
                                     }
                                 }
@@ -204,9 +204,6 @@ public class ManifestMerger {
         }
 
         private boolean hasIdenticalChild(Node node, Node newNode) {
-            if (newNode.getNodeName().equals("sentinel-safe:ephemeris")) {
-                return false;
-            }
             for (int i = 0; i < node.getChildNodes().getLength(); i++) {
                 final Node nodeToBeChecked = node.getChildNodes().item(i);
                 if (nodeToBeChecked.getNodeName().equals(newNode.getNodeName())) {
@@ -218,7 +215,7 @@ public class ManifestMerger {
                             final Node attributeToBeChecked = nodeToBeCheckedAttributes.getNamedItem(name);
                             final Node attribute = attributes.getNamedItem(name);
                             if (attributeToBeChecked != null && attribute != null &&
-                                    !attributeToBeChecked.getNodeValue().equals(attribute.getNodeValue())) {
+                                    !attributeToBeChecked.getNodeValue().trim().equals(attribute.getNodeValue().trim())) {
                                 atLeastOneDiscerningAttributeIsDifferent = true;
                                 break;
                             }
