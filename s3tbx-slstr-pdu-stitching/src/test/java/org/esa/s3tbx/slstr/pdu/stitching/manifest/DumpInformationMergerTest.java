@@ -17,7 +17,6 @@ import static junit.framework.TestCase.assertEquals;
 public class DumpInformationMergerTest {
 
     @Test
-//    @Ignore
     public void testMergeNodes() throws Exception {
         List<Node> fromParents = new ArrayList<>();
         fromParents.add(ManifestTestUtils.createNode(
