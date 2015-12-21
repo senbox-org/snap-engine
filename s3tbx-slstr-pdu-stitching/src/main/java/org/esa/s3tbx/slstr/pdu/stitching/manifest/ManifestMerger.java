@@ -113,6 +113,8 @@ public class ManifestMerger {
                 return new ProductNameMerger(productDir.getName());
             case "sentinel3:dumpInformation":
                 return new DumpInformationMerger();
+            case "sentinel-safe:orbitReference":
+                return new OrbitReferenceMerger();
         }
         return defaultMerger;
     }
@@ -164,10 +166,6 @@ public class ManifestMerger {
                 throws PDUStitchingException {
             List<Node> itemNodes = new ArrayList<>();
             itemNodes.add(child);
-            //todo handle this more gracefully -> own elementmerger?
-            if (child.getNodeName().equals("sentinel-safe:orbitReference")) {
-                return itemNodes;
-            }
             final String nodeValue = child.getNodeValue();
             if (indexOfCurrentParent < childNodeLists.length - 1) {
                 for (int k = indexOfCurrentParent + 1; k < childNodeLists.length; k++) {
