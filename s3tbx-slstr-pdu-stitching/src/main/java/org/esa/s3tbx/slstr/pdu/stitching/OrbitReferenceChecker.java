@@ -2,11 +2,30 @@ package org.esa.s3tbx.slstr.pdu.stitching;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * @author Tonio Fincke
  */
 public class OrbitReferenceChecker {
+
+    public static void validateOrbitReference(File[] manifestFiles) throws IOException {
+        final String msg = "Cannot create document from manifest XML file.";
+        Document[] manifests = new Document[manifestFiles.length];
+        try {
+            for (int i = 0; i < manifestFiles.length; i++) {
+                manifests[i] = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(manifestFiles[i]);
+            }
+            validateOrbitReference(manifests);
+        } catch (SAXException | ParserConfigurationException | PDUStitchingException e) {
+            throw new IOException(msg + ": " + e.getMessage());
+        }
+    }
 
     public static void validateOrbitReference(Document[] manifests) throws PDUStitchingException {
         //todo maybe compare ephemeris too?

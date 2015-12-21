@@ -1,7 +1,9 @@
 package org.esa.s3tbx.slstr.pdu.stitching.ui;
 
 import com.bc.ceres.swing.TableLayout;
+import org.esa.s3tbx.slstr.pdu.stitching.OrbitReferenceChecker;
 import org.esa.snap.core.util.SystemUtils;
+import org.esa.snap.rcp.util.Dialogs;
 import org.esa.snap.ui.AppContext;
 import org.esa.snap.ui.io.FileArrayEditor;
 
@@ -9,6 +11,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingWorker;
@@ -16,10 +19,14 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Insets;
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 /**
@@ -28,20 +35,29 @@ import java.util.regex.Pattern;
 class PDUStitchingPanel extends JPanel {
 
     private static final String INPUT_PRODUCT_DIR_KEY = "gpf.slstr.pdu.stitching.input.product.dir";
+    private static final String NO_SOURCE_PRODUCTS_TEXT = "No Product Dissemination Units selected";
+    private static final String VALID_SOURCE_PRODUCTS_TEXT = "Selection of Product Dissemination Units is valid";
+    private static final String INVALID_ORBIT_REFERENCES_TEXT = "Selection of Product Dissemination Units is invalid due to different or invalid orbit references";
 
     private final AppContext appContext;
     private final FileArrayEditor fileArrayEditor;
     private final PDUStitchingModel model;
+    private JLabel statusLabel;
+    private final Pattern directoryNamePattern;
+    private boolean isReactingToChange;
 
     PDUStitchingPanel(AppContext appContext, PDUStitchingModel model) {
         this.appContext = appContext;
         this.model = model;
+        isReactingToChange = false;
+        directoryNamePattern = Pattern.compile("S3.?_SL_1_RBT_.*(.SEN3)?");
         final FileArrayEditor.EditorParent context = new FileArrayEditorContext(appContext);
         fileArrayEditor = new FileArrayEditor(context, "Source files") {
             @Override
             protected JFileChooser createFileChooserDialog() {
                 final JFileChooser fileChooser = super.createFileChooserDialog();
-                fileChooser.addChoosableFileFilter(new SlstrL1BFileFilter());
+                fileChooser.setAcceptAllFileFilterUsed(false);
+                fileChooser.setFileFilter(new SlstrL1BFileFilter());
                 fileChooser.setDialogTitle("SLSTR L1B PDU Stitching - Product Dissemination Units");
                 return fileChooser;
             }
@@ -56,11 +72,43 @@ class PDUStitchingPanel extends JPanel {
             final SwingWorker worker = new SwingWorker() {
                 @Override
                 protected Object doInBackground() throws Exception {
-                    String[] fileNames = new String[files.length];
-                    for (int i = 0; i < files.length; i++) {
-                        fileNames[i] = files[i].getAbsolutePath();
+                    if (!isReactingToChange) {
+                        isReactingToChange = true;
+                        String[] fileNames;
+                        if (files.length == 0) {
+                            statusLabel.setForeground(Color.BLACK);
+                            statusLabel.setText(NO_SOURCE_PRODUCTS_TEXT);
+                            fileNames = new String[0];
+                        } else {
+                            List<File> fileList = new ArrayList<>();
+                            List<String> fileNameList = new ArrayList<>();
+                            for (File file : files) {
+                                final String fileName = file.getAbsolutePath();
+                                if (fileNameList.contains(fileName)) {
+                                    Dialogs.showInformation("Removed duplicate occurence of " + fileName + " from selection.");
+                                } else if (!isValidSlstrL1BFile(file)){
+                                    Dialogs.showInformation(fileName + " is not a valid SLSTR L1B product. Removed from selection.");
+                                } else {
+                                    fileList.add(file);
+                                    fileNameList.add(fileName);
+                                }
+                            }
+                            if (files.length != fileList.size()) {
+                                fileArrayEditor.setFiles(fileList);
+                            }
+                            fileNames = fileNameList.toArray(new String[fileNameList.size()]);
+                            try {
+                                OrbitReferenceChecker.validateOrbitReference(files);
+                                statusLabel.setForeground(Color.GREEN.darker());
+                                statusLabel.setText(VALID_SOURCE_PRODUCTS_TEXT);
+                            } catch (IOException e) {
+                                statusLabel.setForeground(Color.RED);
+                                statusLabel.setText(INVALID_ORBIT_REFERENCES_TEXT);
+                            }
+                        }
+                        model.setPropertyValue(PDUStitchingModel.PROPERTY_SOURCE_PRODUCT_PATHS, fileNames);
+                        isReactingToChange = false;
                     }
-                    model.setPropertyValue(PDUStitchingModel.PROPERTY_SOURCE_PRODUCT_PATHS, fileNames);
                     return null;
                 }
 
@@ -97,6 +145,10 @@ class PDUStitchingPanel extends JPanel {
         final JComponent fileArrayComponent = fileArrayEditor.createFileArrayComponent();
         tableLayout.setRowWeightY(1, 1.0);
         sourceFilesPanel.add(fileArrayComponent);
+
+        statusLabel = new JLabel(NO_SOURCE_PRODUCTS_TEXT);
+        tableLayout.setRowWeightY(2, 0.0);
+        sourceFilesPanel.add(statusLabel);
 
         return sourceFilesPanel;
     }
@@ -145,28 +197,27 @@ class PDUStitchingPanel extends JPanel {
         return targetDirPanel;
     }
 
-    private static class SlstrL1BFileFilter extends FileFilter {
+    boolean isValidSlstrL1BFile(File f) {
+        return (f.getName().equals("xfdumanifest.xml") && isValidDirectoryName(f.getParentFile().getName()) ||
+                f.isDirectory());
+    }
 
-        private final Pattern directoryNamePattern;
+    private boolean isValidDirectoryName(String name) {
+        return directoryNamePattern.matcher(name).matches();
+    }
 
-        SlstrL1BFileFilter() {
-            directoryNamePattern = Pattern.compile("S3.?_SL_1_RBT_.*(.SEN3)?");
-        }
+    private class SlstrL1BFileFilter extends FileFilter {
 
         @Override
         public boolean accept(File f) {
-            return (f.getName().equals("xdumanifest.xml") && isValidDirectoryName(f.getParentFile().getName())) ||
-                    (isValidDirectoryName(f.getName()) && new File(f, "xfdumanifest.xml").exists());
+            return isValidSlstrL1BFile(f);
         }
 
         @Override
         public String getDescription() {
-            return "Slstr L1B";
+            return "Slstr L1B manifest";
         }
 
-        private boolean isValidDirectoryName(String name) {
-            return directoryNamePattern.matcher(name).matches();
-        }
     }
 
     private static class FileArrayEditorContext implements FileArrayEditor.EditorParent {
