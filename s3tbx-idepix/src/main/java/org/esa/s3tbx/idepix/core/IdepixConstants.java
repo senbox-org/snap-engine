@@ -34,8 +34,6 @@ public class IdepixConstants {
 
     public static final String AVHRR_L1b_PRODUCT_TYPE = "AVHRR";
     public static final String AVHRR_L1b_USGS_PRODUCT_TYPE = "NOAA_POD_AVHRR_HRPT";
-    public static final String AVHRR_L1b_AVISA_PRODUCT_TYPE = "AVHRR_3_L1B";
-    public static final String AVHRR_L1b_UNIDATA_PRODUCT_TYPE = "CF-1.6, Unidata Observation Dataset v1.1";
 
     public static final int PRODUCT_TYPE_INVALID = -1;
     public static final int PRODUCT_TYPE_MERIS = 0;

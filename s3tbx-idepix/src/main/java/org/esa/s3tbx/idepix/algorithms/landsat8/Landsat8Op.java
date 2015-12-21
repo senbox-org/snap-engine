@@ -306,13 +306,13 @@ public class Landsat8Op extends Operator {
         }
     }
 
-    private void preProcess() {
-        HashMap<String, Object> waterMaskParameters = new HashMap<>();
-        waterMaskParameters.put("resolution", LAND_WATER_MASK_RESOLUTION);
-        waterMaskParameters.put("subSamplingFactorX", OVERSAMPLING_FACTOR_X);
-        waterMaskParameters.put("subSamplingFactorY", OVERSAMPLING_FACTOR_Y);
+//    private void preProcess() {
+//        HashMap<String, Object> waterMaskParameters = new HashMap<>();
+//        waterMaskParameters.put("resolution", LAND_WATER_MASK_RESOLUTION);
+//        waterMaskParameters.put("subSamplingFactorX", OVERSAMPLING_FACTOR_X);
+//        waterMaskParameters.put("subSamplingFactorY", OVERSAMPLING_FACTOR_Y);
 //        waterMaskProduct = GPF.createProduct("LandWaterMask", waterMaskParameters, sourceProduct);
-    }
+//    }
 
     private void preProcessWatermask() {
         HashMap<String, Object> waterMaskParameters = new HashMap<>();

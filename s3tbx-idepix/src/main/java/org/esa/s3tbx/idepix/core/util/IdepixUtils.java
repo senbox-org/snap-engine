@@ -121,65 +121,11 @@ public class IdepixUtils {
 
     public static boolean isValidAvhrrProduct(Product product) {
         return product.getProductType().equalsIgnoreCase(IdepixConstants.AVHRR_L1b_PRODUCT_TYPE) ||
-                product.getProductType().equalsIgnoreCase(IdepixConstants.AVHRR_L1b_AVISA_PRODUCT_TYPE) ||
-                product.getProductType().equalsIgnoreCase(IdepixConstants.AVHRR_L1b_UNIDATA_PRODUCT_TYPE) ||
                 product.getProductType().equalsIgnoreCase(IdepixConstants.AVHRR_L1b_USGS_PRODUCT_TYPE);
-    }
-
-    public static boolean isAvhrrTimelineProduct(Product product) {
-        final MetadataElement globalAttributes = product.getMetadataRoot().getElement("Global_Attributes");
-        if (globalAttributes != null) {
-            final MetadataAttribute projectAttr = globalAttributes.getAttribute("project");
-            if (projectAttr != null) {
-                return (projectAttr.getData() != null && "TIMELINE".equals(projectAttr.getData().toString()));
-            }
-        }
-        return false;
-    }
-
-    public static String getAvhrrTimelineNoaaId(Product product) {
-        if (isAvhrrTimelineProduct(product)) {
-            final MetadataElement globalAttributes = product.getMetadataRoot().getElement("Global_Attributes");
-            if (globalAttributes != null) {
-                final MetadataAttribute platformAttr = globalAttributes.getAttribute("platform");
-                if (platformAttr != null && platformAttr.getData() != null) {
-                    final String platform = platformAttr.getData().toString();
-                    if ((platform.length() == 6 || platform.length() == 7) && platform.startsWith("NOAA_")) {
-                        return platform.substring(5, platform.length());
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
-    public static boolean isAvhrrAvisaProduct(Product product) {
-        final MetadataElement headerRecordAttributes = product.getMetadataRoot().getElement("HeaderRecord");
-        if (headerRecordAttributes != null) {
-            final MetadataElement dataSetQualityIndicatorsAttributes = product.getMetadataRoot().getElement("DATA_SET_QUALITY_INDICATORS");
-            if (dataSetQualityIndicatorsAttributes != null) {
-                final MetadataAttribute noaa17Attr = headerRecordAttributes.getAttribute("NOAA_SPACECRAFT_IDENTIFICATION_CODE");
-                if (noaa17Attr != null) {
-                    return (noaa17Attr.getData() != null && "NOAA-17 (NOAA-M)".equals(noaa17Attr.getData().toString()));
-                }
-            }
-        }
-        return false;
     }
 
     public static boolean isAvhrrUsgsProduct(Product product) {
         return true;  // todo
-    }
-
-    public static boolean isAvhrrOldTestProduct(Product product) {
-        final MetadataElement globalAttributes = product.getMetadataRoot().getElement("Header");
-        if (globalAttributes != null) {
-            final MetadataAttribute descriptionAttr = globalAttributes.getAttribute("description");
-            if (descriptionAttr != null) {
-                return (descriptionAttr.getData() != null && "noaa-14 L1B".equals(descriptionAttr.getData().toString()));
-            }
-        }
-        return false;
     }
 
     public static boolean isValidLandsat8Product(Product product) {
@@ -467,18 +413,6 @@ public class IdepixUtils {
         gaCloudProduct.getMaskGroup().add(index++, mask);
 
         return index;
-    }
-
-    public static Endmember[] setupCCSpectralUnmixingEndmembers() {
-        Endmember[] endmembers = new Endmember[IdepixConstants.SMA_ENDMEMBER_NAMES.length];
-        for (int i = 0; i < endmembers.length; i++) {
-            endmembers[i] = new Endmember(IdepixConstants.SMA_ENDMEMBER_NAMES[i],
-                                          IdepixConstants.SMA_ENDMEMBER_WAVELENGTHS,
-                                          IdepixConstants.SMA_ENDMEMBER_RADIATIONS[i]);
-
-        }
-
-        return endmembers;
     }
 
     public static double convertGeophysicalToMathematicalAngle(double inAngle) {

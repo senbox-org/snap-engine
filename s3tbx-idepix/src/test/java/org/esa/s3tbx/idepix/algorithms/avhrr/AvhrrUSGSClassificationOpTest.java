@@ -20,7 +20,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
-public class AvhrrAcUSGSClassificationOpTest {
+public class AvhrrUSGSClassificationOpTest {
 
 
     private double latPoint;

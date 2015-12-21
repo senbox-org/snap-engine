@@ -142,41 +142,6 @@ public class IdepixUtilsTest {
     }
 
     @Test
-    public void testIsAvhrrTimelineProduct() {
-        final Product product = new Product("tl", "tl", 1, 1);
-        final MetadataElement globalAttrElem = new MetadataElement("Global_Attributes");
-        product.getMetadataRoot().addElement(globalAttrElem);
-        globalAttrElem.setAttributeString("project", "TIMELINE");
-        assertTrue(IdepixUtils.isAvhrrTimelineProduct(product));
-
-        globalAttrElem.setAttributeString("project", "blubb");
-        assertFalse(IdepixUtils.isAvhrrTimelineProduct(product));
-    }
-
-    @Test
-    public void testGetAvhrrTimelineNoaaId() {
-        final Product product = new Product("tl", "tl", 1, 1);
-        final MetadataElement globalAttrElem = new MetadataElement("Global_Attributes");
-        globalAttrElem.setAttributeString("project", "TIMELINE");
-        globalAttrElem.setAttributeString("platform", "NOAA_14");
-        product.getMetadataRoot().addElement(globalAttrElem);
-        String noaaId = IdepixUtils.getAvhrrTimelineNoaaId(product);
-        assertNotNull(noaaId);
-        assertEquals("14", noaaId);
-
-        globalAttrElem.setAttributeString("platform", "NOAA_8");
-        product.getMetadataRoot().addElement(globalAttrElem);
-        noaaId = IdepixUtils.getAvhrrTimelineNoaaId(product);
-        assertNotNull(noaaId);
-        assertEquals("8", noaaId);
-
-        globalAttrElem.setAttributeString("platform", "blabla");
-        product.getMetadataRoot().addElement(globalAttrElem);
-        noaaId = IdepixUtils.getAvhrrTimelineNoaaId(product);
-        assertNull(noaaId);
-    }
-
-    @Test
     public void testIsValidLandsat8Product() {
         final Product product = new Product("l8", "l8", 1, 1);
         product.addBand("coastal_aerosol", ProductData.TYPE_FLOAT32);
