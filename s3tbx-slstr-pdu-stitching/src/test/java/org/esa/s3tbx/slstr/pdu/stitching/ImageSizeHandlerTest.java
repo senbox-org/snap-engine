@@ -92,15 +92,15 @@ public class ImageSizeHandlerTest {
     }
 
     private static File getFirstSlstrFile() {
-        return getResource(TestConstants.FIRST_FILE_NAME);
+        return getResource(TestUtils.FIRST_FILE_NAME);
     }
 
     private static File getSecondSlstrFile() {
-        return getResource(TestConstants.SECOND_FILE_NAME);
+        return getResource(TestUtils.SECOND_FILE_NAME);
     }
 
     private static File getThirdSlstrFile() {
-        return getResource(TestConstants.THIRD_FILE_NAME);
+        return getResource(TestUtils.THIRD_FILE_NAME);
     }
 
     private static File getResource(String fileName) {

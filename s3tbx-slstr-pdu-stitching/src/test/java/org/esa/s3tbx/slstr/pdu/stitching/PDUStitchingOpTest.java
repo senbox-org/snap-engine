@@ -56,9 +56,9 @@ public class PDUStitchingOpTest {
         Map<String, Object> parameterMap = new HashMap<>();
         parameterMap.put("targetDir", targetDirectory);
         String[] productPaths = new String[3];
-        productPaths[0]= getResource(TestConstants.FIRST_FILE_NAME).getAbsolutePath();
-        productPaths[1] = getResource(TestConstants.SECOND_FILE_NAME).getAbsolutePath();
-        productPaths[2]= getResource(TestConstants.THIRD_FILE_NAME).getAbsolutePath();
+        productPaths[0]= getResource(TestUtils.FIRST_FILE_NAME).getAbsolutePath();
+        productPaths[1] = getResource(TestUtils.SECOND_FILE_NAME).getAbsolutePath();
+        productPaths[2]= getResource(TestUtils.THIRD_FILE_NAME).getAbsolutePath();
         parameterMap.put("sourceProductPaths", productPaths);
 
         assertEquals(0, targetDirectory.list().length);

@@ -3,7 +3,6 @@ package org.esa.s3tbx.slstr.pdu.stitching;
 import org.esa.snap.core.util.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -15,7 +14,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -63,7 +61,7 @@ public class SlstrPduStitcherTest {
 
     @Test
     public void testStitchPDUs_OnlyOneSlstrL1BProductFile() throws Exception {
-        final File firstSlstrFile = getFirstSlstrFile();
+        final File firstSlstrFile = TestUtils.getFirstSlstrFile();
 
         final File stitchedProductFile = SlstrPduStitcher.createStitchedSlstrL1BFile(targetDirectory, new File[]{firstSlstrFile});
 
@@ -79,9 +77,9 @@ public class SlstrPduStitcherTest {
     }
 
     @Test
-    @Ignore
+//    @Ignore
     public void testStitchPDUs_AllSlstrL1BProductFiles() throws IOException, PDUStitchingException, TransformerException, ParserConfigurationException {
-        final File[] slstrFiles = getSlstrFiles();
+        final File[] slstrFiles = TestUtils.getSlstrFiles();
         final File stitchedProductFile = SlstrPduStitcher.createStitchedSlstrL1BFile(targetDirectory, slstrFiles);
 
         final File stitchedProductFileParentDirectory = stitchedProductFile.getParentFile();
@@ -95,7 +93,7 @@ public class SlstrPduStitcherTest {
     @Test
     public void testDecomposeSlstrName() {
         final SlstrPduStitcher.SlstrNameDecomposition firstSlstrNameDecomposition =
-                SlstrPduStitcher.decomposeSlstrName(getFirstSlstrFile().getParentFile().getName());
+                SlstrPduStitcher.decomposeSlstrName(TestUtils.getFirstSlstrFile().getParentFile().getName());
 
         Date startTime = new GregorianCalendar(2013, 6, 7, 15, 32, 52).getTime();
         Date stopTime = new GregorianCalendar(2013, 6, 7, 15, 37, 52).getTime();
@@ -114,9 +112,9 @@ public class SlstrPduStitcherTest {
     @Test
     public void testCreateParentDirectoryNameOfStitchedFile() {
         SlstrPduStitcher.SlstrNameDecomposition[] decompositions = new SlstrPduStitcher.SlstrNameDecomposition[3];
-        decompositions[0] = SlstrPduStitcher.decomposeSlstrName(getFirstSlstrFile().getParentFile().getName());
-        decompositions[1] = SlstrPduStitcher.decomposeSlstrName(getSecondSlstrFile().getParentFile().getName());
-        decompositions[2] = SlstrPduStitcher.decomposeSlstrName(getThirdSlstrFile().getParentFile().getName());
+        decompositions[0] = SlstrPduStitcher.decomposeSlstrName(TestUtils.getFirstSlstrFile().getParentFile().getName());
+        decompositions[1] = SlstrPduStitcher.decomposeSlstrName(TestUtils.getSecondSlstrFile().getParentFile().getName());
+        decompositions[2] = SlstrPduStitcher.decomposeSlstrName(TestUtils.getThirdSlstrFile().getParentFile().getName());
 
         final String parentDirectoryNameOfStitchedFile =
                 SlstrPduStitcher.createParentDirectoryNameOfStitchedFile(decompositions, Calendar.getInstance().getTime());
@@ -129,7 +127,7 @@ public class SlstrPduStitcherTest {
     @Test
     public void testCollectFiles() throws IOException {
         List<String> ncFiles = new ArrayList<>();
-        final File[] slstrFiles = getSlstrFiles();
+        final File[] slstrFiles = TestUtils.getSlstrFiles();
         for (File slstrFile : slstrFiles) {
             SlstrPduStitcher.collectFiles(ncFiles, createXmlDocument(new FileInputStream(slstrFile)));
         }
@@ -147,28 +145,6 @@ public class SlstrPduStitcherTest {
         } catch (SAXException | ParserConfigurationException e) {
             throw new IOException(msg, e);
         }
-    }
-
-    private static File[] getSlstrFiles() {
-        return new File[]{getFirstSlstrFile(), getSecondSlstrFile(), getThirdSlstrFile()};
-    }
-
-    private static File getFirstSlstrFile() {
-        return getResource(TestConstants.FIRST_FILE_NAME);
-    }
-
-    private static File getSecondSlstrFile() {
-        return getResource(TestConstants.SECOND_FILE_NAME);
-    }
-
-    private static File getThirdSlstrFile() {
-        return getResource(TestConstants.THIRD_FILE_NAME);
-    }
-
-    private static File getResource(String fileName) {
-        final String fullFileName = fileName + "/xfdumanifest.xml";
-        final URL resource = SlstrPduStitcherTest.class.getResource(fullFileName);
-        return new File(resource.getFile());
     }
 
 }

@@ -2,7 +2,7 @@ package org.esa.s3tbx.slstr.pdu.stitching.manifest;
 
 
 import org.esa.s3tbx.slstr.pdu.stitching.PDUStitchingException;
-import org.esa.s3tbx.slstr.pdu.stitching.TestConstants;
+import org.esa.s3tbx.slstr.pdu.stitching.TestUtils;
 import org.esa.snap.core.util.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -62,7 +62,7 @@ public class ManifestMergerTest {
 
     @Test
     public void testMergeManifests_OneFile() throws IOException, ParserConfigurationException, TransformerException, PDUStitchingException {
-        final File inputManifest = getManifestFile(TestConstants.FIRST_FILE_NAME);
+        final File inputManifest = getManifestFile(TestUtils.FIRST_FILE_NAME);
         final Date now = Calendar.getInstance().getTime();
         final File productDir = new File(ManifestMergerTest.class.getResource("").getFile());
         final File manifestFile = manifestMerger.createMergedManifest(new File[]{inputManifest}, now, productDir);
@@ -123,9 +123,9 @@ public class ManifestMergerTest {
     }
 
     private static File[] getManifestFiles() {
-        return new File[]{getManifestFile(TestConstants.FIRST_FILE_NAME),
-                getManifestFile(TestConstants.SECOND_FILE_NAME),
-                getManifestFile(TestConstants.THIRD_FILE_NAME)
+        return new File[]{getManifestFile(TestUtils.FIRST_FILE_NAME),
+                getManifestFile(TestUtils.SECOND_FILE_NAME),
+                getManifestFile(TestUtils.THIRD_FILE_NAME)
         };
     }
 

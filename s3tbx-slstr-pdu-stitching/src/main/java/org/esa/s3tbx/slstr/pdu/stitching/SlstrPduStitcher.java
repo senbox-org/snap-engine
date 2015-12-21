@@ -92,6 +92,7 @@ public class SlstrPduStitcher {
             }
             collectFiles(ncFileNames, manifestDocuments[i]);
         }
+        OrbitReferenceChecker.validateOrbitReference(manifestDocuments);
         final String stitchedProductFileName = createParentDirectoryNameOfStitchedFile(slstrNameDecompositions, now);
         File stitchedProductFileParentDirectory = new File(targetDirectory, stitchedProductFileName);
         if (stitchedProductFileParentDirectory.exists()) {

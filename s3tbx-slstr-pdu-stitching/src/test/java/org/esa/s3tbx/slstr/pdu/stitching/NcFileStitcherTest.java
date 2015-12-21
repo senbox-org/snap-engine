@@ -535,15 +535,15 @@ public class NcFileStitcherTest {
     }
 
     private static File getFirstNcFile(String fileName) {
-        return getNcFile(TestConstants.FIRST_FILE_NAME, fileName);
+        return getNcFile(TestUtils.FIRST_FILE_NAME, fileName);
     }
 
     private static File getSecondNcFile(String fileName) {
-        return getNcFile(TestConstants.SECOND_FILE_NAME, fileName);
+        return getNcFile(TestUtils.SECOND_FILE_NAME, fileName);
     }
 
     private static File getThirdNcFile(String fileName) {
-        return getNcFile(TestConstants.THIRD_FILE_NAME, fileName);
+        return getNcFile(TestUtils.THIRD_FILE_NAME, fileName);
     }
 
     private static File getNcFile(String fileName, String name) {
