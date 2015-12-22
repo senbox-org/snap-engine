@@ -20,9 +20,11 @@ class PDUStitchingModel {
 
     private final PropertySet container;
     private final Map<String, Object> parameterMap = new HashMap<>();
+    private boolean openInApp;
 
     PDUStitchingModel() {
         container = ParameterDescriptorFactory.createMapBackedOperatorPropertyContainer("PduStitching", parameterMap);
+        openInApp = false;
         addTransientProperty(PROPERTY_SOURCE_PRODUCT_PATHS, String[].class);
         addTransientProperty(PROPERTY_TARGET_DIR, File.class);
     }
@@ -50,6 +52,12 @@ class PDUStitchingModel {
         container.setValue(propertyName, value);
     }
 
+    public void setOpenInApp(boolean openInApp) {
+        this.openInApp = openInApp;
+    }
 
+    public boolean openInApp() {
+        return openInApp;
+    }
 
 }

@@ -9,6 +9,7 @@ import org.esa.snap.ui.io.FileArrayEditor;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
@@ -23,6 +24,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -194,6 +197,14 @@ class PDUStitchingPanel extends JPanel {
             }
         });
         targetDirPanel.add(etcButton, BorderLayout.EAST);
+        final JCheckBox openInAppCheckBox = new JCheckBox("Open in " + appContext.getApplicationName());
+        openInAppCheckBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                model.setOpenInApp(openInAppCheckBox.isSelected());
+            }
+        });
+        targetDirPanel.add(openInAppCheckBox, BorderLayout.SOUTH);
         return targetDirPanel;
     }
 

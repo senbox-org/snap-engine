@@ -49,6 +49,11 @@
             <version>${s3tbx.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.esa.s3tbx</groupId>
+            <artifactId>s3tbx-sentinel3-reader</artifactId>
+            <version>${s3tbx.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-netbeans-modules-options-api</artifactId>
         </dependency>
