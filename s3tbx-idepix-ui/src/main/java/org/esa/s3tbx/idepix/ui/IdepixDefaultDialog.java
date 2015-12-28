@@ -69,18 +69,6 @@ public class IdepixDefaultDialog extends SingleTargetProductDialog {
         super.hide();
     }
 
-    @Override
-    protected boolean verifyUserInput() {
-        final HashMap<String, Product> sourceProducts = createSourceProductsMap();
-        Product sourceProduct = sourceProducts.get("source");
-        if (sourceProduct == null) {
-            showErrorDialog("No input product specified!");
-            return false;
-        } else {
-            return IdepixUtils.isInputValid(sourceProduct);
-        }
-    }
-
     ///////////// END OF PUBLIC //////////////
 
     private void initialize(String operatorName) {

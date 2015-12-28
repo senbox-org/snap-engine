@@ -367,7 +367,12 @@ public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
         for (int i = 0; i < 3; i++) {
             sampleConfigurer.defineSample(index++, AvhrrConstants.AVHRR_AC_RADIANCE_BAND_NAMES[i + 2]);
         }
-        sampleConfigurer.defineSample(index, AvhrrConstants.LAND_WATER_FRACTION_BAND_NAME, waterMaskProduct);
+
+        // BEAM: todo reactivate this once we have our SRTM mask in SNAP
+//        sampleConfigurer.defineSample(index, AvhrrConstants.LAND_WATER_FRACTION_BAND_NAME, waterMaskProduct);
+
+        // meanwhile use the 'Land-Sea-Mask' operator by Array (Jun Lu, Luis Veci):
+        sampleConfigurer.defineSample(index, AvhrrConstants.AVHRR_AC_ALBEDO_1_BAND_NAME, waterMaskProduct);
     }
 
     @Override

@@ -156,7 +156,7 @@ public class AvhrrOp extends BasisOp {
 //        waterParameters.put("subSamplingFactorY", 3);
 //        waterMaskProduct = GPF.createProduct("LandWaterMask", waterParameters, sourceProduct);
         HashMap<String, Object> waterMaskParameters = new HashMap<>();
-        final String[] sourceBandNames = {AvhrrConstants.AVHRR_AC_RADIANCE_1_BAND_NAME};
+        final String[] sourceBandNames = {AvhrrConstants.AVHRR_AC_ALBEDO_1_BAND_NAME};
         waterMaskParameters.put("sourceBandNames", sourceBandNames);
         waterMaskParameters.put("landMask", false);
         waterMaskProduct = GPF.createProduct("Land-Sea-Mask", waterMaskParameters, sourceProduct);

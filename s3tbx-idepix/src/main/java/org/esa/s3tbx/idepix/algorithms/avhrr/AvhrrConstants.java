@@ -12,8 +12,8 @@ public class AvhrrConstants {
     public static final String CLASSIF_BAND_NAME = "pixel_classif_flags";
     public static final String LAND_WATER_FRACTION_BAND_NAME = "land_water_fraction";
 
-    private static final String AVHRR_AC_ALBEDO_1_BAND_NAME = "albedo_1";
-    private static final String AVHRR_AC_ALBEDO_2_BAND_NAME = "albedo_2";
+    public static final String AVHRR_AC_ALBEDO_1_BAND_NAME = "albedo_1";
+    public static final String AVHRR_AC_ALBEDO_2_BAND_NAME = "albedo_2";
 
     public static final String[] AVHRR_AC_ALBEDO_BAND_NAMES = {
             AVHRR_AC_ALBEDO_1_BAND_NAME,

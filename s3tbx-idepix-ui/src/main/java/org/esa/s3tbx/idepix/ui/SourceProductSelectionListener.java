@@ -28,7 +28,7 @@ class SourceProductSelectionListener implements SelectionChangeListener {
 
         if (selectedProduct != null) {
             // convert to IDEPIX specific product name
-            String idepixName = selectedProduct.getName() + "_IDEPIX";
+            final String idepixName = selectedProduct.getName();
             targetProductSelectorModel.setProductName(idepixName + targetProductNameSuffix);
         }
     }

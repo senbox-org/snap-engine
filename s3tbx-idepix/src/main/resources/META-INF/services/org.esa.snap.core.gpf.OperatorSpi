@@ -1,4 +1,7 @@
 org.esa.s3tbx.idepix.algorithms.avhrr.AvhrrOp$Spi
+org.esa.s3tbx.idepix.algorithms.avhrr.AbstractAvhrrClassificationOp$Spi
+org.esa.s3tbx.idepix.algorithms.avhrr.AvhrrPostProcessOp$Spi
+org.esa.s3tbx.idepix.algorithms.avhrr.AvhrrUSGSClassificationOp$Spi
 org.esa.s3tbx.idepix.algorithms.landsat8.Landsat8Op$Spi
 org.esa.s3tbx.idepix.algorithms.landsat8.OtsuBinarizeOp$Spi
 org.esa.s3tbx.idepix.algorithms.landsat8.ClostOp$Spi

@@ -57,7 +57,7 @@ public class AvhrrPostProcessOp extends Operator {
     @SourceProduct(alias = "waterMask", optional=true)
     private Product waterMaskProduct;
 
-    private Band waterFractionBand;
+    private Band landWaterBand;
     private Band origCloudFlagBand;
     private Band rt3Band;
     private Band bt4Band;
@@ -76,7 +76,11 @@ public class AvhrrPostProcessOp extends Operator {
             Product postProcessedCloudProduct = OperatorUtils.createCompatibleProduct(avhrrCloudProduct,
                                                                     "postProcessedCloud", "postProcessedCloud");
 
-            waterFractionBand = waterMaskProduct.getBand("land_water_fraction");
+            // BEAM: todo reactivate this once we have our SRTM mask in SNAP
+//            landWaterBand = waterMaskProduct.getBand("land_water_fraction");
+
+            // meanwhile use the 'Land-Sea-Mask' operator by Array (Jun Lu, Luis Veci):
+            landWaterBand = waterMaskProduct.getBand(AvhrrConstants.AVHRR_AC_ALBEDO_1_BAND_NAME);
 
             geoCoding = l1bProduct.getSceneGeoCoding();
 
@@ -107,7 +111,7 @@ public class AvhrrPostProcessOp extends Operator {
         final Rectangle srcRectangle = rectCalculator.extend(targetRectangle);
 
         final Tile sourceFlagTile = getSourceTile(origCloudFlagBand, srcRectangle);
-        final Tile waterFractionTile = getSourceTile(waterFractionBand, srcRectangle);
+        final Tile waterFractionTile = getSourceTile(landWaterBand, srcRectangle);
 
         final Tile rt3Tile = getSourceTile(rt3Band, srcRectangle);
         final Tile bt4Tile = getSourceTile(bt4Band, srcRectangle);
