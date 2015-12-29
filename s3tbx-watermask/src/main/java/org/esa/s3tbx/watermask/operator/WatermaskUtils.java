@@ -1,6 +1,6 @@
 package org.esa.s3tbx.watermask.operator;
 
-import org.esa.snap.core.dataop.downloadable.FtpUtils;
+import org.esa.snap.core.dataop.downloadable.FtpDownloader;
 import org.esa.snap.core.dataop.downloadable.StatusProgressMonitor;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.util.SystemUtils;
@@ -64,7 +64,7 @@ public class WatermaskUtils {
         return result.toString();
     }
 
-    public static boolean installRemoteFTPFiles(FtpUtils ftpDownloader, final String remotePath) throws IOException {
+    public static boolean installRemoteFTPFiles(FtpDownloader ftpDownloader, final String remotePath) throws IOException {
         try {
             Map<String, Long> fileSizeMap = ftpDownloader.readRemoteFileListNoCache(remotePath);
 
@@ -74,8 +74,8 @@ public class WatermaskUtils {
 
                 if (!localZipFile.exists() || localZipFile.length() != fileSize) {
                     SystemUtils.LOG.info("Downloading auxdata file '" + localZipFile.getName() + "' ...'");
-                    final FtpUtils.FTPError result = ftpDownloader.retrieveFile(remotePath + remoteFileName, localZipFile, fileSize);
-                    if (result == FtpUtils.FTPError.OK) {
+                    final FtpDownloader.FTPError result = ftpDownloader.retrieveFile(remotePath + remoteFileName, localZipFile, fileSize);
+                    if (result == FtpDownloader.FTPError.OK) {
                         SystemUtils.LOG.info("Downloaded file '" + localZipFile.getName() + "' to local auxdata path '" +
                                                      WatermaskConstants.LOCAL_AUXDATA_PATH + "'.");
                     } else {
@@ -100,7 +100,7 @@ public class WatermaskUtils {
         return false;
     }
 
-    private static void disposeFtp(FtpUtils ftp) {
+    private static void disposeFtp(FtpDownloader ftp) {
         try {
             if (ftp != null) {
                 ftp.disconnect();

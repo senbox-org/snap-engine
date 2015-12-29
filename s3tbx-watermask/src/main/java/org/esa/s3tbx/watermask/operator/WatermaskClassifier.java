@@ -21,7 +21,7 @@ import org.esa.s3tbx.watermask.util.ImageDescriptorBuilder;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
-import org.esa.snap.core.dataop.downloadable.FtpUtils;
+import org.esa.snap.core.dataop.downloadable.FtpDownloader;
 import org.geotools.resources.image.ImageUtilities;
 
 import javax.imageio.ImageIO;
@@ -225,7 +225,7 @@ public class WatermaskClassifier {
 //        final String ftpUser = WatermaskConstants.FTP_USER;
 //        final String ftpPassword = WatermaskConstants.FTP_PASSWORD;
 //
-//        FtpUtils ftpDownloader = new FtpUtils(remoteFTPHost, ftpUser, ftpPassword);  // todo: FtpUtils is a weird class name, discuss!
+//        FtpDownloader ftpDownloader = new FtpDownloader(remoteFTPHost, ftpUser, ftpPassword);
 //        WatermaskUtils.installRemoteFTPFiles(ftpDownloader, remoteFtpPath);
 
         final String remoteHTTPHost = WatermaskConstants.REMOTE_HTTP_HOST;
