@@ -1,6 +1,7 @@
 package org.esa.s3tbx.slstr.pdu.stitching.manifest;
 
 import org.esa.s3tbx.slstr.pdu.stitching.PDUStitchingException;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -14,7 +15,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.*;
+
 
 /**
  * @author Tonio Fincke
@@ -62,7 +64,7 @@ public class FootprintMergerTest {
                      posListNode.getTextContent());
     }
 
-    @Test
+    @Ignore
     public void testMergeNodes_NoNcFile() throws ParserConfigurationException, SAXException, IOException, PDUStitchingException {
         List<Node> fromParents = new ArrayList<>();
         fromParents.add(ManifestTestUtils.createNode(
