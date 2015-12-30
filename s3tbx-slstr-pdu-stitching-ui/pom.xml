@@ -48,6 +48,10 @@
             <artifactId>s3tbx-slstr-pdu-stitching</artifactId>
             <version>${s3tbx.version}</version>
         </dependency>
+        <!--
+            The s3tbx-sentinel3-reader dependency is not directly used in the code but at runtime the reader is required.
+            Therefore this dependency is kept to have an entry in the manifest.mf and a consistent module set.
+        -->
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
             <artifactId>s3tbx-sentinel3-reader</artifactId>
