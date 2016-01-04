@@ -25,6 +25,8 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 /**
@@ -39,6 +41,7 @@ public class SlstrPduStitcher {
 
     public static File createStitchedSlstrL1BFile(File targetDirectory, File[] slstrProductFiles) throws IllegalArgumentException, IOException, PDUStitchingException, ParserConfigurationException, TransformerException {
         Assert.notNull(slstrProductFiles);
+        final Logger logger = Logger.getLogger(SlstrPduStitcher.class.getName());
         if (slstrProductFiles.length == 0) {
             throw new IllegalArgumentException("No product files provided");
         }
@@ -133,10 +136,12 @@ public class SlstrPduStitcher {
             if (ncFiles.size() > 0) {
                 final File[] ncFilesArray = ncFiles.toArray(new File[ncFiles.size()]);
                 final ImageSize[] imageSizeArray = imageSizeList.toArray(new ImageSize[imageSizeList.size()]);
+                logger.log(Level.INFO, "Stitch " + ncFileName);
                 NcFileStitcher.stitchNcFiles(ncFileName, stitchedProductFileParentDirectory, now,
                                              ncFilesArray, targetImageSize, imageSizeArray);
             }
         }
+        logger.log(Level.INFO, "Stitch manifest");
         return createManifestFile(slstrProductFiles, stitchedProductFileParentDirectory, now);
     }
 
