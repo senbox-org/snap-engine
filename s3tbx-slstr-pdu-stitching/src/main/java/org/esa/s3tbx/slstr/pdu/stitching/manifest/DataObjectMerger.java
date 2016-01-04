@@ -11,7 +11,8 @@ import org.w3c.dom.NodeList;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.security.DigestInputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
@@ -44,9 +45,8 @@ public class DataObjectMerger extends AbstractElementMerger {
         byteStreamElement.appendChild(checksumElement);
         checksumElement.setAttribute("checksumName", "MD5");
         final String checksum;
-        try {
-            checksum = getChecksum(file);
-        } catch (NoSuchAlgorithmException | IOException e) {
+        checksum = getChecksum(file);
+        if (checksum.equals("")) {
             throw new PDUStitchingException("Could not create checksum for file " + fileName);
         }
         addTextToNode(checksumElement, checksum, toDocument);
@@ -99,20 +99,36 @@ public class DataObjectMerger extends AbstractElementMerger {
         return fileName;
     }
 
-    static String getChecksum(File file) throws NoSuchAlgorithmException, IOException {
-        final MessageDigest md = MessageDigest.getInstance("MD5");
-        final DigestInputStream digestInputStream = new DigestInputStream(new FileInputStream(file), md);
-        int read = digestInputStream.read();
-        while (read >= 0) {
-            read = digestInputStream.read();
+    //package local for testing
+    static String getChecksum(File file) {
+        FileInputStream inputStream = null;
+        try {
+            inputStream = new FileInputStream(file);
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            FileChannel channel = inputStream.getChannel();
+            ByteBuffer buff = ByteBuffer.allocate(2048);
+            while (channel.read(buff) != -1) {
+                buff.flip();
+                md.update(buff);
+                buff.clear();
+            }
+            final byte[] digest = md.digest();
+            StringBuilder digestResult = new StringBuilder();
+            for (byte aDigest : digest) {
+                digestResult.append(Integer.toString((aDigest & 0xff) + 0x100, 16).substring(1));
+            }
+            return digestResult.toString();
+        } catch (NoSuchAlgorithmException | IOException e) {
+            return "";
+        } finally {
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+
+                }
+            }
         }
-        digestInputStream.close();
-        final byte[] digest = md.digest();
-        StringBuilder digestResult = new StringBuilder();
-        for (byte aDigest : digest) {
-            digestResult.append(Integer.toString((aDigest & 0xff) + 0x100, 16).substring(1));
-        }
-        return digestResult.toString();
     }
 
 }

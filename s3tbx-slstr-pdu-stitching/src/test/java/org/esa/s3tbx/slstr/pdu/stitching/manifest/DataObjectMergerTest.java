@@ -1,5 +1,6 @@
 package org.esa.s3tbx.slstr.pdu.stitching.manifest;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -8,15 +9,11 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
-import static junit.framework.TestCase.fail;
 
 /**
  * @author Tonio Fincke
@@ -97,7 +94,7 @@ public class DataObjectMergerTest {
     }
 
     @Test
-    public void testGetChecksum() throws IOException, NoSuchAlgorithmException {
+    public void testGetChecksum() {
         File file = new File(DataObjectMergerTest.class.getResource("justSomeDummyFileForCreatingAChecksum").getFile());
 
         final String checksum = DataObjectMerger.getChecksum(file);
@@ -106,13 +103,26 @@ public class DataObjectMergerTest {
     }
 
     @Test
-    public void testGetChecksum_NotWorking() throws NoSuchAlgorithmException, IOException {
-        try {
-            final String checksum = DataObjectMerger.getChecksum(new File(""));
-            fail("Exception expected");
-        } catch (FileNotFoundException fe) {
-            //expected
+    @Ignore
+    public void testGetChecksum_speedTest() {
+        File file = new File(DataObjectMergerTest.class.getResource("justSomeDummyFileForCreatingAChecksum").getFile());
+
+        long total = 0;
+        long start;
+        long end;
+        for (int i = 0; i < 100; i++) {
+            start = System.currentTimeMillis();
+            final String checksum = DataObjectMerger.getChecksum(file);
+            end = System.currentTimeMillis();
+            total += (end - start);
         }
+        System.out.println("1: " + (double) (total) / 100 + " ms");
+    }
+
+    @Test
+    public void testGetChecksum_NotWorking() {
+        final String checksum = DataObjectMerger.getChecksum(new File(""));
+        assertEquals("", checksum);
 
     }
 }
