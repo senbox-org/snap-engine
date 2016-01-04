@@ -1,7 +1,6 @@
 package org.esa.s3tbx.slstr.pdu.stitching.manifest;
 
 import org.esa.s3tbx.slstr.pdu.stitching.PDUStitchingException;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -15,7 +14,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 
 /**
@@ -64,7 +63,7 @@ public class FootprintMergerTest {
                      posListNode.getTextContent());
     }
 
-    @Ignore
+    @Test
     public void testMergeNodes_NoNcFile() throws ParserConfigurationException, SAXException, IOException, PDUStitchingException {
         List<Node> fromParents = new ArrayList<>();
         fromParents.add(ManifestTestUtils.createNode(
@@ -87,7 +86,7 @@ public class FootprintMergerTest {
         final Element manifestElement = manifest.createElement("sentinel-safe:footprint");
         manifest.appendChild(manifestElement);
 
-        new FootprintMerger(new File(FootprintMergerTest.class.getResource("..\\").getFile())).mergeNodes(fromParents, manifestElement, manifest);
+        new FootprintMerger(new File(FootprintMergerTest.class.getResource("../").getFile())).mergeNodes(fromParents, manifestElement, manifest);
 
         final NodeList manifestElementChildNodes = manifestElement.getChildNodes();
         assertEquals(1, manifestElementChildNodes.getLength());
