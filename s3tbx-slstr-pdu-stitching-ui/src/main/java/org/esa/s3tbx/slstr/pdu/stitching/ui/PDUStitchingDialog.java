@@ -93,7 +93,7 @@ public class PDUStitchingDialog extends ModelessDialog {
         final ProductIOPlugInManager ioPlugInManager = ProductIOPlugInManager.getInstance();
         final Iterator<ProductReaderPlugIn> sen3ReaderPlugins = ioPlugInManager.getReaderPlugIns("Sen3");
         if(!sen3ReaderPlugins.hasNext()) {
-            throw new IllegalStateException("No appropriate reader for reading Sentinel-2 products found");
+            throw new IllegalStateException("No appropriate reader for reading Sentinel-3 products found");
         }
         return sen3ReaderPlugins.next();
     }
