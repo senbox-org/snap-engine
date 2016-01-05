@@ -23,17 +23,14 @@
     <tocitem text="Sentinel Toolbox Application">
         <tocitem text="Optical">
             <tocitem text="Pre-Processing">
-                <tocitem text="MERIS L1b Radiometry Correction" target="merisRadiometryCorrection">
-                    <tocitem text="Overview" target="merisRadiometryCorrection"/>
-                    <tocitem text="Processor Description" target="merisRadiometryCorrectionProcessorDescription"/>
-                    <tocitem text="Command Line Description" target="merisRadiometryCommandLine"/>
-                    <tocitem text="Equalization Algorithm Specification" target="merisEqualizationAlgorithmSpecification"/>
-                    <tocitem text="Radiometry Recalibration Algorithm Specification"
-                             target="merisRecalibrationAlgorithmSpecification"/>
-                    <tocitem text="Smile Correction Algorithm Specification"
-                             target="merisSmileCorrectionAlgorithmSpecification"/>
-                    <tocitem text="Radiance-to-Reflectance Algorithm Specification"
-                             target="merisRadToReflAlgorithmSpecification"/>
+                <tocitem text="IdePix Generic Classification of Pixels" target="pixelIdentification">
+                    <tocitem text="AVHRR" target="avhrrAlgorithm"/>
+                    <tocitem text="Landsat 8" target="landsat8Algorithm"/>
+                    <tocitem text="MODIS" target="modisAlgorithm"/>
+                    <tocitem text="S2 MSI" target="msiAlgorithm"/>
+                    <tocitem text="Proba-V" target="probavAlgorithm"/>
+                    <tocitem text="SeaWiFS" target="seawifsAlgorithm"/>
+                    <tocitem text="VGT" target="vgtAlgorithm"/>
                 </tocitem>
             </tocitem>
         </tocitem>

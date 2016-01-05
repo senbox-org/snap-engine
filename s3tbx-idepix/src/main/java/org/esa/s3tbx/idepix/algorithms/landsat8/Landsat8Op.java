@@ -261,7 +261,7 @@ public class Landsat8Op extends Operator {
     public void initialize() throws OperatorException {
         System.out.println("Running IDEPIX Landsat 8 - source product: " + sourceProduct.getName());
 
-        final boolean inputProductIsValid = IdepixUtils.validateInputProduct(sourceProduct, AlgorithmSelector.Landsat8);
+        final boolean inputProductIsValid = IdepixUtils.validateInputProduct(sourceProduct, AlgorithmSelector.LANDSAT8);
         if (!inputProductIsValid) {
             throw new OperatorException(IdepixConstants.INPUT_INCONSISTENCY_ERROR_MESSAGE);
         }
@@ -286,8 +286,8 @@ public class Landsat8Op extends Operator {
             otsuProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(OtsuBinarizeOp.class), otsuParameters, otsuInput);
         }
 
-//        preProcess();
-        preProcessWatermask();
+        preProcess();
+//        preProcessWatermask();
         computeCloudProduct();
         postProcess();
 
@@ -306,22 +306,23 @@ public class Landsat8Op extends Operator {
         }
     }
 
-//    private void preProcess() {
-//        HashMap<String, Object> waterMaskParameters = new HashMap<>();
-//        waterMaskParameters.put("resolution", LAND_WATER_MASK_RESOLUTION);
-//        waterMaskParameters.put("subSamplingFactorX", OVERSAMPLING_FACTOR_X);
-//        waterMaskParameters.put("subSamplingFactorY", OVERSAMPLING_FACTOR_Y);
-//        waterMaskProduct = GPF.createProduct("LandWaterMask", waterMaskParameters, sourceProduct);
-//    }
-
-    private void preProcessWatermask() {
+    private void preProcess() {
         HashMap<String, Object> waterMaskParameters = new HashMap<>();
-        final String[] sourceBandNames = {Landsat8Constants.LANDSAT8_RED_BAND_NAME};
-        waterMaskParameters.put("sourceBandNames", sourceBandNames);
-        waterMaskParameters.put("landMask", false);
-//        waterMaskParameters.put("sourceBandNames", Landsat8Constants.LANDSAT8_SPECTRAL_BAND_NAMES);
-        waterMaskProduct = GPF.createProduct("Land-Sea-Mask", waterMaskParameters, sourceProduct);
+        waterMaskParameters.put("resolution", LAND_WATER_MASK_RESOLUTION);
+        waterMaskParameters.put("subSamplingFactorX", OVERSAMPLING_FACTOR_X);
+        waterMaskParameters.put("subSamplingFactorY", OVERSAMPLING_FACTOR_Y);
+        waterMaskProduct = GPF.createProduct("LandWaterMask", waterMaskParameters, sourceProduct);
     }
+
+    // this is the Land-Sea-Mask by Array (Jun Lu, Luis Veci). Actually we went back to our SRTM mask.
+//    private void preProcessWatermask() {
+//        HashMap<String, Object> waterMaskParameters = new HashMap<>();
+//        final String[] sourceBandNames = {Landsat8Constants.LANDSAT8_RED_BAND_NAME};
+//        waterMaskParameters.put("sourceBandNames", sourceBandNames);
+//        waterMaskParameters.put("landMask", false);
+////        waterMaskParameters.put("sourceBandNames", Landsat8Constants.LANDSAT8_SPECTRAL_BAND_NAMES);
+//        waterMaskProduct = GPF.createProduct("Land-Sea-Mask", waterMaskParameters, sourceProduct);
+//    }
 
     private void setClassificationParameters() {
         classificationParameters = new HashMap<>();

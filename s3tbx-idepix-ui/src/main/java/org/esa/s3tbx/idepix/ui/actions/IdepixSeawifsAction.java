@@ -23,8 +23,9 @@ import java.awt.event.ActionEvent;
 @NbBundle.Messages({"CTL_IdepixSeawifsAction_Text=SeaWiFS"})
 public class IdepixSeawifsAction extends AbstractSnapAction {
 
+    private static final String HELP_ID = "idepixPixelIdentification";
+
     public IdepixSeawifsAction() {
-        setHelpId("idepix");
         putValue(Action.SHORT_DESCRIPTION, "Performs pixel classification on a SeaWiFS data product.");
     }
 
@@ -34,8 +35,8 @@ public class IdepixSeawifsAction extends AbstractSnapAction {
         final IdepixDefaultDialog dialog = new IdepixDefaultDialog(opMetadata.alias(),
                                                                    getAppContext(),
                                                                    "Idepix - Pixel Identification and Classification (SeaWiFS mode)",
-                                                                   "IdepixPlugIn",
-                                                                   "_IDEPIX");
+                                                                   HELP_ID,
+                                                                   "_idepix");
         dialog.getJDialog().pack();
         dialog.show();
     }

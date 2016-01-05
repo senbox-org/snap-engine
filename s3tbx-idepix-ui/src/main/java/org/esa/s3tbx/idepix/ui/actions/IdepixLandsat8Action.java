@@ -38,6 +38,8 @@ import java.awt.event.ActionEvent;
 @NbBundle.Messages({"CTL_IdepixLandsat8Action_Text=Landsat8"})
 public class IdepixLandsat8Action extends AbstractSnapAction {
 
+    private static final String HELP_ID = "idepixPixelIdentification";
+
     public IdepixLandsat8Action() {
         setHelpId("idepix");
         putValue(Action.SHORT_DESCRIPTION, "Performs pixel classification on a Landsat8 data product.");
@@ -55,7 +57,7 @@ public class IdepixLandsat8Action extends AbstractSnapAction {
         final IdepixLandsat8Dialog dialog = new IdepixLandsat8Dialog(opMetadata.alias(),
                                                                      getAppContext(),
                                                                      "Idepix - Pixel Identification and Classification (Landsat8 mode)",
-                                                                     "IdepixPlugIn");
+                                                                     HELP_ID);
         dialog.setTargetProductNameSuffix("_IDEPIX");
         dialog.getJDialog().pack();
         dialog.show();

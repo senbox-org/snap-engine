@@ -8,6 +8,8 @@ org.esa.s3tbx.idepix.algorithms.landsat8.ClostOp$Spi
 org.esa.s3tbx.idepix.algorithms.landsat8.Landsat8PostProcessOp$Spi
 org.esa.s3tbx.idepix.algorithms.landsat8.Landsat8ClassificationOp$Spi
 org.esa.s3tbx.idepix.algorithms.modis.ModisOp$Spi
+org.esa.s3tbx.idepix.algorithms.modis.ModisClassificationOp$Spi
+org.esa.s3tbx.idepix.algorithms.modis.ModisPostProcessingOp$Spi
 org.esa.s3tbx.idepix.algorithms.msi.MsiOp$Spi
 org.esa.s3tbx.idepix.algorithms.probav.ProbaVOp$Spi
 org.esa.s3tbx.idepix.algorithms.seawifs.SeaWifsOp$Spi

@@ -21,18 +21,13 @@
 
 <map version="2.0">
 
-    <mapID target="merisRadiometryCorrection" url="radiometry/MerisRadiometryProcessor.html"/>
-    <mapID target="merisRadiometryCorrectionProcessorDescription"
-           url="radiometry/MerisRadiometryProcessorDescription.html"/>
-    <mapID target="merisRadiometryCommandLine"
-           url="radiometry/MerisRadiometryCommandLine.html"/>
-    <mapID target="merisEqualizationAlgorithmSpecification"
-           url="radiometry/MerisEqualizationAlgorithmSpecification.html"/>
-    <mapID target="merisRecalibrationAlgorithmSpecification"
-           url="radiometry/RadioRecalibrationAlgorithmSpecification.html"/>
-    <mapID target="merisSmileCorrectionAlgorithmSpecification"
-           url="radiometry/SmileCorrectionAlgorithmSpecification.html"/>
-    <mapID target="merisRadToReflAlgorithmSpecification"
-           url="radiometry/RadToReflAlgorithmSpecification.html"/>
+    <mapID target="idepixPixelIdentification" url="idepix/PixelIdentification.html"/>
+    <mapID target="avhrrAlgorithm" url="idepix/AvhrrPixelIdentification.html"/>
+    <mapID target="landsat8Algorithm" url="idepix/Landsat8PixelIdentification.html"/>
+    <mapID target="modisAlgorithm" url="idepix/ModisPixelIdentification.html"/>
+    <mapID target="msiAlgorithm" url="idepix/MsiPixelIdentification.html"/>
+    <mapID target="probavAlgorithm" url="idepix/ProbavPixelIdentification.html"/>
+    <mapID target="seawifsAlgorithm" url="idepix/SeawifsPixelIdentification.html"/>
+    <mapID target="vgtAlgorithm" url="idepix/VgtPixelIdentification.html"/>
 
 </map>

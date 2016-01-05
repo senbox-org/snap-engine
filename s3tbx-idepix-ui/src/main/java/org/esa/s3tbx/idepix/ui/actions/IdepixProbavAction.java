@@ -37,8 +37,9 @@ import java.awt.event.ActionEvent;
 @NbBundle.Messages({"CTL_IdepixProbavAction_Text=PROBA-V"})
 public class IdepixProbavAction extends AbstractSnapAction {
 
+    private static final String HELP_ID = "idepixPixelIdentification";
+
     public IdepixProbavAction() {
-        setHelpId("idepix");
         putValue(Action.SHORT_DESCRIPTION, "Performs pixel classification on a PROBA-V data product.");
     }
 
@@ -48,8 +49,8 @@ public class IdepixProbavAction extends AbstractSnapAction {
         final IdepixDefaultDialog dialog = new IdepixDefaultDialog(opMetadata.alias(),
                                                                    getAppContext(),
                                                                    "Idepix - Pixel Identification and Classification (PROBA-V mode)",
-                                                                   "IdepixPlugIn",
-                                                                   "_IDEPIX");
+                                                                   HELP_ID,
+                                                                   "_idepix");
         dialog.getJDialog().pack();
         dialog.show();
     }

@@ -37,8 +37,9 @@ import java.awt.event.ActionEvent;
 @NbBundle.Messages({"CTL_IdepixVgtAction_Text=VGT"})
 public class IdepixVgtAction extends AbstractSnapAction {
 
+    private static final String HELP_ID = "idepixPixelIdentification";
+
     public IdepixVgtAction() {
-        setHelpId("idepix");
         putValue(Action.SHORT_DESCRIPTION, "Performs pixel classification on a VGT data product.");
     }
 
@@ -48,8 +49,8 @@ public class IdepixVgtAction extends AbstractSnapAction {
         final IdepixDefaultDialog dialog = new IdepixDefaultDialog(opMetadata.alias(),
                                                                    getAppContext(),
                                                                    "Idepix - Pixel Identification and Classification (VGT mode)",
-                                                                   "IdepixPlugIn",
-                                                                   "_IDEPIX");
+                                                                   HELP_ID,
+                                                                   "_idepix");
         dialog.getJDialog().pack();
         dialog.show();
     }

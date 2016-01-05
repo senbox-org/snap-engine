@@ -234,11 +234,10 @@ public class Landsat8ClassificationOp extends Operator {
         createTargetProduct();
 
         if (waterMaskProduct != null) {
-            // BEAM: todo reactivate this once we have our SRTM mask in SNAP
-//            landWaterBand = waterMaskProduct.getBand("land_water_fraction");
+            landWaterBand = waterMaskProduct.getBand("land_water_fraction");
 
-            // meanwhile use the 'Land-Sea-Mask' operator by Array (Jun Lu, Luis Veci):
-            landWaterBand = waterMaskProduct.getBand(Landsat8Constants.LANDSAT8_RED_BAND_NAME);
+            // this is the 'Land-Sea-Mask' operator by Array (Jun Lu, Luis Veci):
+//            landWaterBand = waterMaskProduct.getBand(Landsat8Constants.LANDSAT8_RED_BAND_NAME);
         }
         if (otsuProduct != null) {
             clostBand = otsuProduct.getBand(ClostOp.CLOST_BAND_NAME);
@@ -392,13 +391,12 @@ public class Landsat8ClassificationOp extends Operator {
 
         boolean isLand = false;
         if (waterMaskProduct != null) {
-            // BEAM: todo reactivate this once we have our SRTM mask in SNAP
-//            final int waterFraction = landWaterTile.getSampleInt(x, y);
-//            isLand = isLandPixelSrtmBeam(x, y, l8FlagTile, waterFraction);
+            final int waterFraction = landWaterTile.getSampleInt(x, y);
+            isLand = isLandPixelSrtmBeam(x, y, l8FlagTile, waterFraction);
 
-            // meanwhile use the 'Land-Sea-Mask' operator by Array (Jun Lu, Luis Veci):
-            final float maskValue = landWaterTile.getSampleFloat(x, y);
-            isLand = maskValue > 0.0f;
+            // this is the 'Land-Sea-Mask' operator by Array (Jun Lu, Luis Veci):
+//            final float maskValue = landWaterTile.getSampleFloat(x, y);
+//            isLand = maskValue > 0.0f;
         }
 
         float[] l8Reflectance = new float[Landsat8Constants.LANDSAT8_NUM_SPECTRAL_BANDS];

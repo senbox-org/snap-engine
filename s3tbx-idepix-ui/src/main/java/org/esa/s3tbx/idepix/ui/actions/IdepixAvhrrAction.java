@@ -37,8 +37,9 @@ import java.awt.event.ActionEvent;
 @NbBundle.Messages({"CTL_IdepixAvhrrAction_Text=Avhrr"})
 public class IdepixAvhrrAction extends AbstractSnapAction {
 
+    private static final String HELP_ID = "idepixPixelIdentification";
+
     public IdepixAvhrrAction() {
-        setHelpId("idepix");
         putValue(Action.SHORT_DESCRIPTION, "Performs pixel classification on an AVHRR data product.");
     }
 
@@ -46,10 +47,10 @@ public class IdepixAvhrrAction extends AbstractSnapAction {
     public void actionPerformed(ActionEvent e) {
         final OperatorMetadata opMetadata = AvhrrOp.class.getAnnotation(OperatorMetadata.class);
         final IdepixDefaultDialog dialog = new IdepixDefaultDialog(opMetadata.alias(),
-                                                                     getAppContext(),
-                                                                     "Idepix - Pixel Identification and Classification (AVHRR mode)",
-                                                                     "IdepixPlugIn",
-                                                                    "_IDEPIX");
+                                                                   getAppContext(),
+                                                                   "Idepix - Pixel Identification and Classification (AVHRR mode)",
+                                                                   HELP_ID,
+                                                                   "_idepix");
         dialog.getJDialog().pack();
         dialog.show();
     }

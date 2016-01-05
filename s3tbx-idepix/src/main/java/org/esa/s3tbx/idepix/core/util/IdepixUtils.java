@@ -4,10 +4,9 @@ package org.esa.s3tbx.idepix.core.util;
 import org.esa.s3tbx.idepix.core.AlgorithmSelector;
 import org.esa.s3tbx.idepix.core.IdepixConstants;
 import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.util.BitSetter;
 import org.esa.snap.core.util.ProductUtils;
-import org.esa.snap.dataio.envisat.EnvisatConstants;
-import org.esa.snap.unmixing.Endmember;
 
 import javax.swing.*;
 import java.awt.*;
@@ -93,39 +92,21 @@ public class IdepixUtils {
     }
 
     public static boolean isInputValid(Product inputProduct) {
-        if (!isValidMerisProduct(inputProduct) &&
-                !isValidAatsrProduct(inputProduct) &&
-                !isValidVgtProduct(inputProduct) &&
-                !isValidProbavProduct(inputProduct) &&
-                !isValidAvhrrProduct(inputProduct) &&
+        if (!isValidAvhrrProduct(inputProduct) &&
                 !isValidLandsat8Product(inputProduct) &&
+                !isValidProbavProduct(inputProduct) &&
                 !isValidModisProduct(inputProduct) &&
+                !isValidMsiProduct(inputProduct) &&
                 !isValidSeawifsProduct(inputProduct) &&
-                !isValidMerisAatsrSynergyProduct(inputProduct)) {
+                !isValidVgtProduct(inputProduct)) {
             logErrorMessage("Input sensor must be either MERIS, AATSR, AVHRR, colocated MERIS/AATSR, MODIS/SeaWiFS, PROBA-V or VGT!");
         }
         return true;
     }
 
-    public static boolean isValidMerisProduct(Product product) {
-        final boolean merisL1TypePatternMatches = EnvisatConstants.MERIS_L1_TYPE_PATTERN.matcher(product.getProductType()).matches();
-        // accept also ICOL L1N products...
-        final boolean merisIcolTypePatternMatches = isValidMerisIcolL1NProduct(product);
-        final boolean merisCCL1PTypePatternMatches = isValidMerisCCL1PProduct(product);
-        return merisL1TypePatternMatches || merisIcolTypePatternMatches || merisCCL1PTypePatternMatches;
-    }
-
-    public static boolean isValidAatsrProduct(Product product) {
-        return product.getProductType().startsWith(EnvisatConstants.AATSR_L1B_TOA_PRODUCT_TYPE_NAME);
-    }
-
     public static boolean isValidAvhrrProduct(Product product) {
         return product.getProductType().equalsIgnoreCase(IdepixConstants.AVHRR_L1b_PRODUCT_TYPE) ||
                 product.getProductType().equalsIgnoreCase(IdepixConstants.AVHRR_L1b_USGS_PRODUCT_TYPE);
-    }
-
-    public static boolean isAvhrrUsgsProduct(Product product) {
-        return true;  // todo
     }
 
     public static boolean isValidLandsat8Product(Product product) {
@@ -152,6 +133,11 @@ public class IdepixUtils {
                 product.getName().contains("L1B_"));  // seems that we have various extensions :-(
     }
 
+    private static boolean isValidMsiProduct(Product inputProduct) {
+        // todo
+        return false;
+    }
+
     public static boolean isValidSeawifsProduct(Product product) {
 //        S2006131120520.L1B_LAC
 //        S2005141121515.L1B_MLAC
@@ -161,59 +147,31 @@ public class IdepixUtils {
                 product.getName().matches("S[0-9]{13}.(?i)(L1C)"));
     }
 
-
-    public static boolean isValidMerisAatsrSynergyProduct(Product product) {
-        // todo: needs to be more strict, but for the moment we assume this is enough...
-        return product.getName().contains("COLLOC") || product.getProductType().contains("COLLOC");
-    }
-
-    private static boolean isValidMerisIcolL1NProduct(Product product) {
-        final String icolProductType = product.getProductType();
-        if (icolProductType.endsWith("_1N")) {
-            int index = icolProductType.indexOf("_1");
-            final String merisProductType = icolProductType.substring(0, index) + "_1P";
-            return (EnvisatConstants.MERIS_L1_TYPE_PATTERN.matcher(merisProductType).matches());
-        } else {
-            return false;
-        }
-    }
-
-    private static boolean isValidMerisCCL1PProduct(Product product) {
-        return IdepixConstants.MERIS_CCL1P_TYPE_PATTERN.matcher(product.getProductType()).matches();
+    public static boolean isValidProbavProduct(Product product) {
+        return product.getProductType().startsWith(IdepixConstants.PROBAV_PRODUCT_TYPE_PREFIX);
     }
 
     public static boolean isValidVgtProduct(Product product) {
         return product.getProductType().startsWith(IdepixConstants.SPOT_VGT_PRODUCT_TYPE_PREFIX);
     }
 
-    public static boolean isValidProbavProduct(Product product) {
-        return product.getProductType().startsWith(IdepixConstants.PROBAV_PRODUCT_TYPE_PREFIX);
-    }
-
     private static boolean isInputConsistent(Product sourceProduct, AlgorithmSelector algorithm) {
-        if (AlgorithmSelector.IPF == algorithm ||
-                AlgorithmSelector.CoastColour == algorithm ||
-                AlgorithmSelector.GlobCover == algorithm ||
-                AlgorithmSelector.MagicStick == algorithm ||
-                AlgorithmSelector.Schiller == algorithm ||
-                AlgorithmSelector.FubScapeM == algorithm) {
-            return (isValidMerisProduct(sourceProduct));
-        } else if (AlgorithmSelector.Cawa == algorithm) {
-            return (isValidMerisProduct(sourceProduct));
-        } else if (AlgorithmSelector.Landsat8 == algorithm) {
+        if (AlgorithmSelector.AVHRR == algorithm) {
+            return (isValidAvhrrProduct(sourceProduct));
+        } else if (AlgorithmSelector.LANDSAT8 == algorithm) {
             return (isValidLandsat8Product(sourceProduct));
-        } else if (AlgorithmSelector.GlobAlbedo == algorithm) {
-            return (isValidMerisProduct(sourceProduct) ||
-                    isValidAatsrProduct(sourceProduct) ||
-                    isValidVgtProduct(sourceProduct) ||
-                    isValidProbavProduct(sourceProduct) ||
-                    isValidMerisAatsrSynergyProduct(sourceProduct));
-        } else if (AlgorithmSelector.Occci == algorithm) {
-            return (isValidModisProduct(sourceProduct) ||
-                    isValidMerisProduct(sourceProduct) ||
-                    isValidSeawifsProduct(sourceProduct));
+        } else if (AlgorithmSelector.MODIS == algorithm) {
+            return (isValidModisProduct(sourceProduct));
+        } else if (AlgorithmSelector.MSI == algorithm) {
+            return (isValidMsiProduct(sourceProduct));
+        } else if (AlgorithmSelector.PROBAV == algorithm) {
+            return (isValidProbavProduct(sourceProduct));
+        } else if (AlgorithmSelector.SEAWIFS == algorithm) {
+            return (isValidSeawifsProduct(sourceProduct));
+        } else if (AlgorithmSelector.VGT == algorithm) {
+            return (isValidVgtProduct(sourceProduct));
         } else {
-            return AlgorithmSelector.AvhrrAc == algorithm && (isValidAvhrrProduct(sourceProduct));
+            throw new OperatorException("Algorithm " + algorithm.toString() + "not supported.");
         }
     }
 

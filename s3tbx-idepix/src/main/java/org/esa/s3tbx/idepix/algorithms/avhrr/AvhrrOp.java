@@ -24,6 +24,7 @@ import java.util.Map;
  */
 @SuppressWarnings({"FieldCanBeLocal"})
 @OperatorMetadata(alias = "idepix.avhrr",
+        category = "Optical/Pre-Processing",
         version = "1.0",
         authors = "Olaf Danne, Grit Kirches",
         copyright = "(c) 2015 by Brockmann Consult",
@@ -81,7 +82,7 @@ public class AvhrrOp extends BasisOp {
 
     @Override
     public void initialize() throws OperatorException {
-        final boolean inputProductIsValid = IdepixUtils.validateInputProduct(sourceProduct, AlgorithmSelector.AvhrrAc);
+        final boolean inputProductIsValid = IdepixUtils.validateInputProduct(sourceProduct, AlgorithmSelector.AVHRR);
         if (!inputProductIsValid) {
             throw new OperatorException(IdepixConstants.INPUT_INCONSISTENCY_ERROR_MESSAGE);
         }
@@ -108,13 +109,7 @@ public class AvhrrOp extends BasisOp {
 
 
     private void processAvhrrAc() {
-        AbstractAvhrrClassificationOp acClassificationOp;
-        if (IdepixUtils.isAvhrrUsgsProduct(sourceProduct)) {
-            // todo: merge with abstract class if we have only USGS products
-            acClassificationOp = new AvhrrUSGSClassificationOp();
-        }  else {
-            throw new OperatorException("Input product is not a valid AVHRR product.");
-        }
+        AbstractAvhrrClassificationOp acClassificationOp = new AvhrrUSGSClassificationOp();
 
         acClassificationOp.setParameterDefaultValues();
         for (String key : aacCloudClassificationParameters.keySet()) {
@@ -128,7 +123,7 @@ public class AvhrrOp extends BasisOp {
         postProcess();
 
         targetProduct = IdepixUtils.cloneProduct(classificationProduct);
-        targetProduct.setName(sourceProduct.getName()+".idepix");
+        targetProduct.setName(sourceProduct.getName() + ".idepix");
 
         Band cloudFlagBand;
         cloudFlagBand = targetProduct.getBand(IdepixUtils.IDEPIX_PIXEL_CLASSIF_FLAGS);

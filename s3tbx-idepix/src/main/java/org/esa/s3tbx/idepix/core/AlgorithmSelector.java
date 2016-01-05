@@ -7,14 +7,11 @@ package org.esa.s3tbx.idepix.core;
  * @version $Revision: $ $Date:  $
  */
 public enum AlgorithmSelector {
-    IPF,
-    GlobAlbedo,
-    AvhrrAc,
-    Cawa,
-    GlobCover,
-    CoastColour,
-    MagicStick,
-    Schiller,
-    Occci,
-    Landsat8, FubScapeM
+    AVHRR,
+    LANDSAT8,
+    MODIS,
+    MSI,
+    PROBAV,
+    SEAWIFS,
+    VGT
 }
