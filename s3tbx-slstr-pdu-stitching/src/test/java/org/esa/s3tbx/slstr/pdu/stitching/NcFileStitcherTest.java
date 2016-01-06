@@ -67,6 +67,33 @@ public class NcFileStitcherTest {
     }
 
     @Test
+    public void testStitchViscal() throws IOException, PDUStitchingException {
+        final String ncFileName = "viscal.nc";
+        final ImageSize targetImageSize = new ImageSize("xx", 0, 0, 0, 0);
+        final ImageSize[] imageSizes = new ImageSize[3];
+        imageSizes[0] = new ImageSize("xx", 0, 0, 0, 0);
+        imageSizes[1] = new ImageSize("xx", 0, 0, 0, 0);
+        imageSizes[2] = new ImageSize("xx", 0, 0, 0, 0);
+        final Date now = Calendar.getInstance().getTime();
+        final File[] ncFiles = getNcFiles(ncFileName);
+
+        final File stitchedFile = NcFileStitcher.stitchNcFiles(ncFileName, targetDirectory, now, ncFiles,
+                                                               targetImageSize, imageSizes);
+
+        assert (stitchedFile != null);
+        assert (stitchedFile.exists());
+        assertEquals(ncFileName, stitchedFile.getName());
+        netcdfFile = NetcdfFileOpener.open(stitchedFile);
+        assertNotNull(netcdfFile);
+        final List<Variable> variables = netcdfFile.getVariables();
+        assertEquals(40, variables.size());
+        assertEquals("ANX_time", variables.get(0).getFullName());
+        assertEquals(DataType.STRING, variables.get(0).getDataType());
+        assertEquals("calibration_time", variables.get(1).getFullName());
+        assertEquals(DataType.STRING, variables.get(1).getDataType());
+    }
+
+    @Test
     @Ignore //set to ignore as test takes a few seconds
     public void testStitchMet_tx() throws IOException, PDUStitchingException, InvalidRangeException {
         final String ncFileName = "met_tx.nc";
@@ -508,15 +535,15 @@ public class NcFileStitcherTest {
     }
 
     private static File getFirstNcFile(String fileName) {
-        return getNcFile(TestConstants.FIRST_FILE_NAME, fileName);
+        return getNcFile(TestUtils.FIRST_FILE_NAME, fileName);
     }
 
     private static File getSecondNcFile(String fileName) {
-        return getNcFile(TestConstants.SECOND_FILE_NAME, fileName);
+        return getNcFile(TestUtils.SECOND_FILE_NAME, fileName);
     }
 
     private static File getThirdNcFile(String fileName) {
-        return getNcFile(TestConstants.THIRD_FILE_NAME, fileName);
+        return getNcFile(TestUtils.THIRD_FILE_NAME, fileName);
     }
 
     private static File getNcFile(String fileName, String name) {

@@ -3,17 +3,14 @@ package org.esa.s3tbx.slstr.pdu.stitching;
 import com.bc.ceres.binding.ConversionException;
 import com.bc.ceres.binding.converters.DateFormatConverter;
 import com.bc.ceres.core.Assert;
+import org.esa.s3tbx.slstr.pdu.stitching.manifest.ManifestMerger;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -28,6 +25,8 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 /**
@@ -42,6 +41,7 @@ public class SlstrPduStitcher {
 
     public static File createStitchedSlstrL1BFile(File targetDirectory, File[] slstrProductFiles) throws IllegalArgumentException, IOException, PDUStitchingException, ParserConfigurationException, TransformerException {
         Assert.notNull(slstrProductFiles);
+        final Logger logger = Logger.getLogger(SlstrPduStitcher.class.getName());
         if (slstrProductFiles.length == 0) {
             throw new IllegalArgumentException("No product files provided");
         }
@@ -59,6 +59,7 @@ public class SlstrPduStitcher {
                 throw new IllegalArgumentException("The PDU Stitcher only supports SLSTR L1B products");
             }
         }
+        final Date now = Calendar.getInstance().getTime();
         if (slstrProductFiles.length == 1) {
             final File originalParentDirectory = slstrProductFiles[0].getParentFile();
             final String parentDirectoryName = originalParentDirectory.getName();
@@ -73,9 +74,8 @@ public class SlstrPduStitcher {
                     Files.copy(originalFile.toPath(), new File(stitchedParentDirectory, originalFile.getName()).toPath());
                 }
             }
-            return createManifestFile(slstrProductFiles, stitchedParentDirectory);
+            return createManifestFile(slstrProductFiles, stitchedParentDirectory, now);
         }
-        final Date now = Calendar.getInstance().getTime();
         SlstrNameDecomposition[] slstrNameDecompositions = new SlstrNameDecomposition[slstrProductFiles.length];
         Document[] manifestDocuments = new Document[slstrProductFiles.length];
         List<String> ncFileNames = new ArrayList<>();
@@ -95,6 +95,7 @@ public class SlstrPduStitcher {
             }
             collectFiles(ncFileNames, manifestDocuments[i]);
         }
+        OrbitReferenceChecker.validateOrbitReference(manifestDocuments);
         final String stitchedProductFileName = createParentDirectoryNameOfStitchedFile(slstrNameDecompositions, now);
         File stitchedProductFileParentDirectory = new File(targetDirectory, stitchedProductFileName);
         if (stitchedProductFileParentDirectory.exists()) {
@@ -111,10 +112,6 @@ public class SlstrPduStitcher {
             List<File> ncFiles = new ArrayList<>();
             List<ImageSize> imageSizeList = new ArrayList<>();
             final String ncFileName = ncFileNames.get(i);
-            if (ncFileName.equals("viscal.nc")) {
-                //todo stitch viscal.nc
-                break;
-            }
             String id = ncFileName.substring(ncFileName.length() - 5, ncFileName.length() - 3);
             if (id.equals("tx")) {
                 id = "tn";
@@ -139,22 +136,18 @@ public class SlstrPduStitcher {
             if (ncFiles.size() > 0) {
                 final File[] ncFilesArray = ncFiles.toArray(new File[ncFiles.size()]);
                 final ImageSize[] imageSizeArray = imageSizeList.toArray(new ImageSize[imageSizeList.size()]);
+                logger.log(Level.INFO, "Stitch " + ncFileName);
                 NcFileStitcher.stitchNcFiles(ncFileName, stitchedProductFileParentDirectory, now,
                                              ncFilesArray, targetImageSize, imageSizeArray);
             }
         }
-        return createManifestFile(slstrProductFiles, stitchedProductFileParentDirectory);
+        logger.log(Level.INFO, "Stitch manifest");
+        return createManifestFile(slstrProductFiles, stitchedProductFileParentDirectory, now);
     }
 
-    private static File createManifestFile(File[] manifestFiles, File stitchedParentDirectory)
+    private static File createManifestFile(File[] manifestFiles, File stitchedParentDirectory, Date now)
             throws ParserConfigurationException, PDUStitchingException, IOException, TransformerException {
-        final Document document = ManifestMerger.mergeManifests(manifestFiles);
-        final Transformer transformer = TransformerFactory.newInstance().newTransformer();
-        final DOMSource domSource = new DOMSource(document);
-        final File manifestFile = new File(stitchedParentDirectory, "xfdumanifest.xml");
-        final StreamResult streamResult = new StreamResult(manifestFile);
-        transformer.transform(domSource, streamResult);
-        return manifestFile;
+        return new ManifestMerger().createMergedManifest(manifestFiles, now, stitchedParentDirectory);
     }
 
     static void collectFiles(List<String> ncFileNames, Document manifestDocument) {
