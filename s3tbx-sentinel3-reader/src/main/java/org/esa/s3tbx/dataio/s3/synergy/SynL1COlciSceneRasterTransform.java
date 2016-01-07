@@ -53,6 +53,9 @@ class SynL1COlciSceneRasterTransform implements SceneRasterTransform {
                 final int secondIndex = firstIndex + 1;
                 final double srcPtX = srcPts[srcOff + firstIndex];
                 final double srcPtY = srcPts[srcOff + secondIndex];
+                if (srcPtX < 0 || srcPtX >= columnMisregistrationBand.getRasterWidth()) {
+                    throw new TransformException("Could not transform");
+                }
                 final int columnMisregistration =
                         columnMisregistrationBand.getSampleInt((int) srcPtX, 0);
                 final int rowMisregistration =

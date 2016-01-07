@@ -49,6 +49,10 @@ public class SynL1CSlstrSceneRasterTransform implements SceneRasterTransform {
                 final int secondIndex = firstIndex + 1;
                 final double srcPtX = srcPts[srcOff + firstIndex];
                 final double srcPtY = srcPts[srcOff + secondIndex];
+                if (srcPtX < 0 || srcPtX >= colCorrespondenceBand.getRasterWidth() ||
+                        srcPtY < 0 || srcPtY >= colCorrespondenceBand.getRasterHeight()) {
+                    throw new TransformException("Could not transform");
+                }
                 final int columnCorresponce =
                         colCorrespondenceBand.getSampleInt((int) srcPtX, (int) srcPtY);
                 final int rowCorrespondence =
