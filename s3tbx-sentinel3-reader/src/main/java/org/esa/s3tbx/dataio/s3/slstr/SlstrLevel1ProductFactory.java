@@ -250,7 +250,7 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
                     band.setGeoCoding(geoCoding);
                     geoCodingMap.put(gridIndex, geoCoding);
                 } catch (NoninvertibleTransformException e) {
-                    e.printStackTrace();
+                    //todo handle exception - tf 20160106
                 }
             }
         }
