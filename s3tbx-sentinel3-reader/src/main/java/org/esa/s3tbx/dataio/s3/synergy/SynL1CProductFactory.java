@@ -187,6 +187,17 @@ public class SynL1CProductFactory extends AbstractProductFactory {
     }
 
     @Override
+    protected void setBandGeoCodings(Product targetProduct) {
+        final Band[] bands = targetProduct.getBands();
+        for (Band band : bands) {
+            if (band.getSceneRasterTransform() != SceneRasterTransform.IDENTITY) {
+                band.setGeoCoding(new SceneRasterTransformGeoCoding(targetProduct.getSceneGeoCoding(),
+                                                                    band.getSceneRasterTransform()));
+            }
+        }
+    }
+
+    @Override
     protected void setAutoGrouping(Product[] sourceProducts, Product targetProduct) {
         targetProduct.setAutoGrouping("Meas:error_estimates:exception:MISREGIST_OLC:MISREGIST_SLST:GEOLOCATION_REF");
     }
