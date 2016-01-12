@@ -5,6 +5,10 @@ sudo: false
 jdk:
   - oraclejdk8
 
+env:
+  global:
+   - secure: "EQkF23GyEHt1bfI_F-FkNg"
+
 addons:
   coverity_scan:
     project:
