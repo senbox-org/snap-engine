@@ -1,15 +1,12 @@
 package org.esa.s3tbx.watermask.operator;
 
-import org.esa.snap.core.dataop.downloadable.FtpDownloader;
 import org.esa.snap.core.dataop.downloadable.StatusProgressMonitor;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.util.SystemUtils;
 
 import java.io.*;
-import java.net.SocketException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Map;
 
 public class WatermaskUtils {
 
@@ -64,64 +61,67 @@ public class WatermaskUtils {
         return result.toString();
     }
 
-    public static boolean installRemoteFTPFiles(FtpDownloader ftpDownloader, final String remotePath) throws IOException {
-        try {
-            Map<String, Long> fileSizeMap = ftpDownloader.readRemoteFileListNoCache(remotePath);
-
-            for (String remoteFileName: fileSizeMap.keySet()) {
-                final File localZipFile = new File(WatermaskConstants.LOCAL_AUXDATA_PATH.toString(), remoteFileName);
-                final Long fileSize = fileSizeMap.get(remoteFileName);
-
-                if (!localZipFile.exists() || localZipFile.length() != fileSize) {
-                    SystemUtils.LOG.info("Downloading auxdata file '" + localZipFile.getName() + "' ...'");
-                    final FtpDownloader.FTPError result = ftpDownloader.retrieveFile(remotePath + remoteFileName, localZipFile, fileSize);
-                    if (result == FtpDownloader.FTPError.OK) {
-                        SystemUtils.LOG.info("Downloaded file '" + localZipFile.getName() + "' to local auxdata path '" +
-                                                     WatermaskConstants.LOCAL_AUXDATA_PATH + "'.");
-                    } else {
-                        disposeFtp(ftpDownloader);
-                        localZipFile.delete();
-                        final String message = "Mandatory auxdata file '" + localZipFile.getName() +
-                                "' could not be downloaded.";
-                        throw new OperatorException(message);
-                    }
-                } else {
-                    SystemUtils.LOG.info("Auxdata file '" + localZipFile.getName() + "' found in local auxdata path '" +
-                                                 WatermaskConstants.LOCAL_AUXDATA_PATH + "'.");
-                }
-            }
-            return true;
-        } catch (SocketException e) {
-            throw e;
-        } catch (Exception e) {
-            SystemUtils.LOG.info(e.getMessage());
-            disposeFtp(ftpDownloader);
-        }
-        return false;
-    }
-
-    private static void disposeFtp(FtpDownloader ftp) {
-        try {
-            if (ftp != null) {
-                ftp.disconnect();
-                ftp = null;
-            }
-        } catch (Exception ignore) {
-            //
-        }
-    }
+    // currently not used, as we do http only
+//    public static boolean installRemoteFTPFiles(FtpDownloader ftpDownloader, final String remotePath) throws IOException {
+//        try {
+//            Map<String, Long> fileSizeMap = ftpDownloader.readRemoteFileListNoCache(remotePath);
+//
+//            for (String remoteFileName: fileSizeMap.keySet()) {
+//                final File localZipFile = new File(WatermaskConstants.LOCAL_AUXDATA_PATH.toString(), remoteFileName);
+//                final Long fileSize = fileSizeMap.get(remoteFileName);
+//
+//                if (!localZipFile.exists() || localZipFile.length() != fileSize) {
+//                    SystemUtils.LOG.info("Downloading auxdata file '" + localZipFile.getName() + "' ...'");
+//                    final FtpDownloader.FTPError result = ftpDownloader.retrieveFile(remotePath + remoteFileName, localZipFile, fileSize);
+//                    if (result == FtpDownloader.FTPError.OK) {
+//                        SystemUtils.LOG.info("Downloaded file '" + localZipFile.getName() + "' to local auxdata path '" +
+//                                                     WatermaskConstants.LOCAL_AUXDATA_PATH + "'.");
+//                    } else {
+//                        disposeFtp(ftpDownloader);
+//                        localZipFile.delete();
+//                        final String message = "Mandatory auxdata file '" + localZipFile.getName() +
+//                                "' could not be downloaded.";
+//                        throw new OperatorException(message);
+//                    }
+//                } else {
+//                    SystemUtils.LOG.info("Auxdata file '" + localZipFile.getName() + "' found in local auxdata path '" +
+//                                                 WatermaskConstants.LOCAL_AUXDATA_PATH + "'.");
+//                }
+//            }
+//            return true;
+//        } catch (SocketException e) {
+//            throw e;
+//        } catch (Exception e) {
+//            SystemUtils.LOG.info(e.getMessage());
+//            disposeFtp(ftpDownloader);
+//        }
+//        return false;
+//    }
+//
+//    private static void disposeFtp(FtpDownloader ftp) {
+//        try {
+//            if (ftp != null) {
+//                ftp.disconnect();
+//                ftp = null;
+//            }
+//        } catch (Exception ignore) {
+//        }
+//    }
 
     public static boolean  installRemoteHttpFiles(final String baseUrl) throws IOException {
 
         for (String remoteFileName: WatermaskConstants.AUXDATA_FILENAMES) {
             final File localZipFile = new File(WatermaskConstants.LOCAL_AUXDATA_PATH.toString(), remoteFileName);
             final String remotePath = baseUrl + localZipFile.getName();
-            SystemUtils.LOG.info("http retrieving " + remotePath);
+            SystemUtils.LOG.info("Checking for '" + localZipFile.getName() + "' ...");
             try {
                 final URL fileUrl = new URL(remotePath);
                 final URLConnection urlConnection = fileUrl.openConnection();
                 if (!localZipFile.exists() || localZipFile.length() != urlConnection.getContentLength()) {
+                    SystemUtils.LOG.info("http retrieving " + remotePath);
                     downloadHttpFile(fileUrl, urlConnection, localZipFile);
+                } else {
+                    SystemUtils.LOG.info("Found '" + localZipFile.getName() + "'.");
                 }
             } catch (Exception e) {
                 final String message = "Mandatory auxdata file '" + localZipFile.getName() +

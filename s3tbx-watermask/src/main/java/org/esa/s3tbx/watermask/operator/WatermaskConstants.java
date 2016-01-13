@@ -13,20 +13,22 @@ import java.nio.file.Path;
  * @author olafd
  */
 public class WatermaskConstants {
-    public static final String AUXDATA_VERSION = "3.0.0";
+//    public static final String AUXDATA_VERSION = "3.0.0";
+//    public static final String AUXDATA_FILE_EXT = ".zip";
 
-    // todo: this is a test setup!!!
-    public static final String REMOTE_FTP_HOST = "ftp.brockmann-consult.de";
-    public static final String REMOTE_FTP_PATH = "/temp/olaf/s3tbx-watermask-aux/auxdata_" + AUXDATA_VERSION + "/images/";
-    public static final String FTP_USER = "diversity";
-    public static final String FTP_PASSWORD = "diversity!";
+    // test setup, not (yet) used
+//    public static final String REMOTE_FTP_HOST = "ftp.brockmann-consult.de";
+//    public static final String REMOTE_FTP_PATH = "/temp/olaf/s3tbx-watermask-aux/auxdata_" + AUXDATA_VERSION + "/images/";
+//    public static final String FTP_USER = "diversity";
 
+//    public static final String FTP_PASSWORD = "diversity!";
     // preliminary test HTTP location:
-    public static final String REMOTE_HTTP_HOST = "http://gws-access.cems.rl.ac.uk";
-    public static final String REMOTE_HTTP_PATH = "/public/globalbedo/olafd/s3tbx-watermask-aux_" + AUXDATA_VERSION + "/images/";
-    // the final location should be at
-//    public static final String REMOTE_HTTP_HOST = "step.esa.int";
-//    public static final String REMOTE_HTTP_PATH = "/auxdata/s3tbx-watermask-aux_" + AUXDATA_VERSION + "/images/";
+//    public static final String REMOTE_HTTP_HOST = "http://gws-access.cems.rl.ac.uk";
+//    public static final String REMOTE_HTTP_PATH = "/public/globalbedo/olafd/s3tbx-watermask-aux_" + AUXDATA_VERSION + "/images/";
+    // the 'preliminary final' HTTP location (might get a versioning later, tbd):
+    public static final String REMOTE_HTTP_HOST = "http://step.esa.int";
+
+    public static final String REMOTE_HTTP_PATH = "/auxdata/watermask-aux/images/";
 
     public static final Path LOCAL_AUXDATA_PATH = SystemUtils.getAuxDataPath().resolve("s3tbx/watermask").toAbsolutePath();
 
@@ -42,6 +44,4 @@ public class WatermaskConstants {
             "GC_water_mask.zip",
             "MODIS_north_water_mask.zip",
             "MODIS_south_water_mask.zip"};
-
-    public static final String AUXDATA_FILE_EXT = ".zip";
 }
