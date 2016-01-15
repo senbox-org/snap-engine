@@ -46,6 +46,7 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
+import org.esa.beam.gpf.operators.standard.internal.RectangleConverter;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.converters.JtsGeometryConverter;
 
@@ -82,9 +83,11 @@ public class SubsetOp extends Operator {
     @TargetProduct
     private Product targetProduct;
 
-    @Parameter(description = "The subset region in pixel coordinates.\n" +
-                             "If not given, the entire scene is used. The 'geoRegion' parameter has precedence over this parameter.")
-    private Rectangle region;
+    @Parameter(converter = RectangleConverter.class,
+            description = "The subset region in pixel coordinates.\n" +
+                    "Use the following format: <x>,<y>,<width>,<height>\n" +
+                    "If not given, the entire scene is used. The 'geoRegion' parameter has precedence over this parameter.")
+    private Rectangle region = null;
     @Parameter(converter = JtsGeometryConverter.class,
                description = "The subset region in geographical coordinates using WKT-format,\n" +
                              "e.g. POLYGON((<lon1> <lat1>, <lon2> <lat2>, ..., <lon1> <lat1>))\n" +
@@ -193,6 +196,12 @@ public class SubsetOp extends Operator {
             region = new Rectangle(0, region.y, sourceProduct.getSceneRasterWidth(), region.height);
         }
         if (region != null) {
+            if (region.width == 0 || region.x + region.width > sourceProduct.getSceneRasterWidth()) {
+                region.width = sourceProduct.getSceneRasterWidth() - region.x;
+            }
+            if (region.height == 0 || region.y + region.height > sourceProduct.getSceneRasterHeight()) {
+                region.height = sourceProduct.getSceneRasterHeight() - region.y;
+            }
             if (region.isEmpty()) {
                 throw new OperatorException("No intersection with source product boundary.");
             }
