@@ -3,7 +3,7 @@ package org.esa.s3tbx.dataio.s3.synergy;
 import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.datamodel.AbstractGeoCoding;
 import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.core.datamodel.GeoCodingMathTransform;
+import org.esa.snap.core.transform.GeoCodingMathTransform;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Scene;

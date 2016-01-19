@@ -1,9 +1,9 @@
 package org.esa.s3tbx.dataio.s3.synergy;
 
 import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.transform.MathTransform2D;
 import org.esa.snap.core.datamodel.SceneRasterTransform;
 import org.geotools.referencing.operation.transform.AbstractMathTransform;
-import org.opengis.referencing.operation.MathTransform2D;
 import org.opengis.referencing.operation.NoninvertibleTransformException;
 import org.opengis.referencing.operation.TransformException;
 
