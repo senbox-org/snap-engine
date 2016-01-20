@@ -12,9 +12,9 @@ import org.esa.snap.core.datamodel.IndexCoding;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.ProductNodeGroup;
-import org.esa.snap.core.datamodel.SceneRasterTransform;
 import org.esa.snap.core.datamodel.SceneTransformProvider;
 import org.esa.snap.core.datamodel.VirtualBand;
+import org.esa.snap.core.transform.MathTransform2D;
 import org.esa.snap.core.util.ProductUtils;
 
 import java.io.File;
@@ -188,9 +188,12 @@ public class SynL1CProductFactory extends AbstractProductFactory {
     protected void setBandGeoCodings(Product targetProduct) {
         final Band[] bands = targetProduct.getBands();
         for (Band band : bands) {
-            if (band.getSceneRasterTransform() != SceneRasterTransform.IDENTITY) {
-                band.setGeoCoding(new SceneRasterTransformGeoCoding(targetProduct.getSceneGeoCoding(),
-                                                                    band.getSceneRasterTransform()));
+            final MathTransform2D sceneToModelTransform = band.getSceneToModelTransform();
+            final MathTransform2D modelToSceneTransform = band.getModelToSceneTransform();
+            if (sceneToModelTransform != MathTransform2D.IDENTITY || modelToSceneTransform != MathTransform2D.IDENTITY) {
+                band.setGeoCoding(new SynL1CSceneTransformGeoCoding(targetProduct.getSceneGeoCoding(),
+                                                                    sceneToModelTransform,
+                                                                    modelToSceneTransform));
             }
         }
     }
