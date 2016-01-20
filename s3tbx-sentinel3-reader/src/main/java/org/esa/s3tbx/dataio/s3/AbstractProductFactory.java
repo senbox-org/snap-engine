@@ -152,7 +152,7 @@ public abstract class AbstractProductFactory implements ProductFactory {
         if (targetProduct.getSceneGeoCoding() == null) {
             setGeoCoding(targetProduct);
         }
-        setSceneRasterTransforms(targetProduct);
+        setSceneTransforms(targetProduct);
         setBandGeoCodings(targetProduct);
         final Product[] sourceProducts = openProductList.toArray(new Product[openProductList.size()]);
         setAutoGrouping(sourceProducts, targetProduct);
@@ -163,7 +163,7 @@ public abstract class AbstractProductFactory implements ProductFactory {
     protected void changeTargetProductName(Product targetProduct) {
     }
 
-    protected void setSceneRasterTransforms(Product product) {
+    protected void setSceneTransforms(Product product) {
     }
 
     protected void setBandGeoCodings(Product targetProduct) {
