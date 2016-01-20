@@ -4,6 +4,7 @@ import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.SceneTransformProvider;
 import org.esa.snap.core.transform.AbstractTransform2D;
 import org.esa.snap.core.transform.MathTransform2D;
+import org.esa.snap.core.transform.NullTransform2D;
 import org.opengis.referencing.operation.NoninvertibleTransformException;
 import org.opengis.referencing.operation.TransformException;
 
@@ -22,7 +23,7 @@ public class SynL1CSlstrSceneTransformProvider implements SceneTransformProvider
 
     @Override
     public MathTransform2D getModelToSceneTransform() {
-        return null;
+        return new NullTransform2D();
     }
 
     @Override
