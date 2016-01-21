@@ -36,12 +36,12 @@ public class SynL1CSceneTransformGeoCoding extends AbstractGeoCoding {
 
     @Override
     public boolean canGetPixelPos() {
-        return sceneToModelTransform != null && wrappedGeoCoding.canGetPixelPos();
+        return sceneToModelTransform != MathTransform2D.NULL && wrappedGeoCoding.canGetPixelPos();
     }
 
     @Override
     public boolean canGetGeoPos() {
-        return modelToSceneTransform != null && wrappedGeoCoding.canGetGeoPos();
+        return modelToSceneTransform != MathTransform2D.NULL && wrappedGeoCoding.canGetGeoPos();
     }
 
     @Override
