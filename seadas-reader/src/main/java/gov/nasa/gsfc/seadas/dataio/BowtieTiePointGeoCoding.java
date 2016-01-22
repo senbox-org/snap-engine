@@ -74,7 +74,7 @@ public class BowtieTiePointGeoCoding extends AbstractBowtieGeoCoding {
         try {
             init();
         } catch (IOException e) {
-            throw new IllegalArgumentException("can not init geocode");
+            throw new IllegalArgumentException("can not init geocode", e);
         }
     }
 

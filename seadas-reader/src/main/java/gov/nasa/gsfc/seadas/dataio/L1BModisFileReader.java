@@ -178,7 +178,7 @@ public class L1BModisFileReader extends SeadasFileReader {
                     product.addTiePointGrid(tiePointGrid);
 
                 } catch (IOException e) {
-                    throw new ProductIOException(e.getMessage());
+                    throw new ProductIOException(e.getMessage(), e);
                 }
             }
         }
@@ -346,7 +346,7 @@ public class L1BModisFileReader extends SeadasFileReader {
             //product.setGeoCoding(new TiePointGeoCoding(latGrid, lonGrid, Datum.WGS_84));
 
         } catch (Exception e) {
-            throw new ProductIOException(e.getMessage());
+            throw new ProductIOException(e.getMessage(), e);
         }
 
     }

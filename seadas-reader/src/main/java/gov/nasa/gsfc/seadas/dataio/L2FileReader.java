@@ -259,7 +259,7 @@ public class L2FileReader extends SeadasFileReader {
 
                 }
             } catch (IOException e) {
-                throw new ProductIOException(e.getMessage());
+                throw new ProductIOException(e.getMessage(), e);
             }
         }
     }
@@ -314,7 +314,7 @@ public class L2FileReader extends SeadasFileReader {
                         lonRawData= (float[]) lonRaw.copyTo1DJavaArray();
                     }
                 } catch (IOException e) {
-                    throw new ProductIOException(e.getMessage());
+                    throw new ProductIOException(e.getMessage(), e);
                 }
 
 
@@ -333,7 +333,7 @@ public class L2FileReader extends SeadasFileReader {
                             latRawData, lonRawData, colPoints);
 
                 } catch (IOException e) {
-                   throw new ProductIOException(e.getMessage());
+                   throw new ProductIOException(e.getMessage(), e);
                 }
             }
         }

@@ -113,7 +113,7 @@ public class L1AOctsFileReader extends SeadasFileReader {
             product.setSceneGeoCoding(new TiePointGeoCoding(latGrid, lonGrid));
 
         } catch (IOException e) {
-            throw new ProductIOException(e.getMessage());
+            throw new ProductIOException(e.getMessage(), e);
         }
     }
 
