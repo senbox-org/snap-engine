@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * @author Tonio Fincke
  */
-public abstract class AbstractElementMerger implements ElementMerger {
+abstract class AbstractElementMerger implements ElementMerger {
 
     protected static final DateFormatConverter SLSTR_DATE_FORMAT_CONVERTER =
             new DateFormatConverter(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
