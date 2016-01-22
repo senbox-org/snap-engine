@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * @author Tonio Fincke
  */
-public class StopTimesMerger extends AbstractElementMerger {
+class StopTimesMerger extends AbstractElementMerger {
 
     @Override
     public void mergeNodes(List<Node> fromParents, Element toParent, Document toDocument) throws PDUStitchingException {
