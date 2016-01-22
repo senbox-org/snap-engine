@@ -363,6 +363,19 @@ class NcFileStitcher {
                             }
                         }
                         nFileWriteable.addGlobalAttribute(globalAttributeName, values.toString());
+                    } else if (globalAttribute.getDataType().isNumeric()) {
+                        final Number value = globalAttribute.getNumericValue();
+                        for (int j = i; j < globalAttributeLists.length; j++) {
+                            final Attribute otherGlobalAttribute =
+                                    getAttributeFromList(globalAttributeName, globalAttributeLists[j]);
+                            if (otherGlobalAttribute != null && !value.equals(otherGlobalAttribute.getNumericValue())) {
+                                //todo write this as numeric, not as string - tf 20160122
+                                nFileWriteable.addGlobalAttribute(globalAttributeName + "_" + j,
+                                                                  otherGlobalAttribute.getNumericValue().toString());
+                                break;
+                            }
+                        }
+                        nFileWriteable.addGlobalAttribute(globalAttributeName, value.toString());
                     } else {
                         final String value = globalAttribute.getStringValue();
                         for (int j = i; j < globalAttributeLists.length; j++) {
