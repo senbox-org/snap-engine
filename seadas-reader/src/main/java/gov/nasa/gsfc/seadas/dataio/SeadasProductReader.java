@@ -169,7 +169,7 @@ public class SeadasProductReader extends AbstractProductReader {
             return product;
 
         } catch (IOException e) {
-            throw new ProductIOException(e.getMessage());
+            throw new ProductIOException(e.getMessage(), e);
         }
     }
 

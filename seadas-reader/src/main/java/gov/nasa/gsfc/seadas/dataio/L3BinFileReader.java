@@ -266,7 +266,7 @@ public class L3BinFileReader extends SeadasFileReader {
                 band.setDataElems(buffer);
             }
         } catch (IOException e){
-            throw new IOException("Could not map product " + product.getName());
+            throw new IOException("Could not map product " + product.getName(), e);
         }
     }
 

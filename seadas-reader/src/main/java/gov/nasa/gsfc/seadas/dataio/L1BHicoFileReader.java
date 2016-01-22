@@ -336,7 +336,7 @@ public class L1BHicoFileReader extends SeadasFileReader {
             array = variable.read();
             storage = array.flip(0).copyTo1DJavaArray();
         } catch (IOException e) {
-            throw new ProductIOException(e.getMessage());
+            throw new ProductIOException(e.getMessage(), e);
         }
         return ProductData.createInstance(dataType, storage);
     }

@@ -102,7 +102,7 @@ public class ViirsXDRFileReader extends SeadasFileReader {
             setSpectralBand(product);
             return product;
         } catch (Exception e) {
-            throw new ProductIOException(e.getMessage());
+            throw new ProductIOException(e.getMessage(), e);
         }
     }
 
@@ -325,7 +325,7 @@ public class ViirsXDRFileReader extends SeadasFileReader {
                     }
                 }
             } catch (Exception e) {
-                throw new ProductIOException(e.getMessage());
+                throw new ProductIOException(e.getMessage(), e);
             }
         }
 
@@ -371,7 +371,7 @@ public class ViirsXDRFileReader extends SeadasFileReader {
                 product.setGeoCoding(new BowtiePixelGeoCoding(product.getBand(latitude), product.getBand(longitude), detectorsInScan));
             }
         }catch (Exception e) {
-            throw new ProductIOException(e.getMessage());
+            throw new ProductIOException(e.getMessage(), e);
         }
 
     }
@@ -420,7 +420,7 @@ public class ViirsXDRFileReader extends SeadasFileReader {
                     }
 
                 } catch (ParseException e) {
-                    throw new ProductIOException("Unable to parse start/end time attributes");
+                    throw new ProductIOException("Unable to parse start/end time attributes", e);
                 }
 
             }

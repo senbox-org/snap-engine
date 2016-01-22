@@ -153,7 +153,7 @@ public class SeabassReader extends LineNumberReader {
                         missingValue = Double.valueOf(value);
                         missingValueFound = true;
                     } catch (NumberFormatException e) {
-                        throw new IOException("/missing is not a valid number");
+                        throw new IOException("/missing is not a valid number", e);
                     }
                 } else if (key.equals("/fields")) {
                     fieldStr = value;
@@ -220,13 +220,13 @@ public class SeabassReader extends LineNumberReader {
         try {
             lat = Float.parseFloat(record[latIndex]);
         } catch (Exception e) {
-            throw new IOException("lat is not a valid float on line " + getLineNumber());
+            throw new IOException("lat is not a valid float on line " + getLineNumber(), e);
         }
 
         try {
             lon = Float.parseFloat(record[lonIndex]);
         } catch (Exception e) {
-            throw new IOException("lon is not a valid float on line " + getLineNumber());
+            throw new IOException("lon is not a valid float on line " + getLineNumber(), e);
         }
 
         PixelPos pixelPos = geoCoding.getPixelPos(new GeoPos(lat, lon), null);
@@ -256,7 +256,7 @@ public class SeabassReader extends LineNumberReader {
                             + Integer.toString(i)
                             + "("
                             + info.getName()
-                            + ")");
+                            + ")", e);
                 }
             }
         }
