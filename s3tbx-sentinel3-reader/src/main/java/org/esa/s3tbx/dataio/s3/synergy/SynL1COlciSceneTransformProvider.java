@@ -53,11 +53,15 @@ class SynL1COlciSceneTransformProvider implements SceneTransformProvider {
             }
             final int columnMisregistration = columnMisregistrationBand.getSampleInt((int) srcPtX, 0);
             final int rowMisregistration = rowMisregistrationBand.getSampleInt((int) srcPtX, 0);
-            if (ptDst != null) {
-                ptDst.setLocation(srcPtX + columnMisregistration, srcPtY + rowMisregistration);
-            } else {
-                ptDst = new Point2D.Double(srcPtX + columnMisregistration, srcPtY + rowMisregistration);
+            double x = srcPtX + columnMisregistration;
+            double y = srcPtY + rowMisregistration;
+            if (x < 0 || y < 0) {
+                throw new TransformException("Could not transform");
             }
+            if (ptDst == null) {
+                ptDst = new Point2D.Double();
+            }
+            ptDst.setLocation(x, y);
             return ptDst;
         }
 
@@ -70,7 +74,6 @@ class SynL1COlciSceneTransformProvider implements SceneTransformProvider {
 
     private class SynL1COlciSceneToModelTransform extends AbstractTransform2D {
 
-        private static final int dims = 2;
         private final int[] columnMisregistration;
         private final int[] rowMisregistration;
 
@@ -135,11 +138,15 @@ class SynL1COlciSceneTransformProvider implements SceneTransformProvider {
             if (srcPtX < 0 || srcPtX >= columnMisregistration.length) {
                 throw new TransformException("Could not transform");
             }
-            if (ptDst != null) {
-                ptDst.setLocation(srcPtX + columnMisregistration[(int) srcPtX], srcPtY + rowMisregistration[(int) srcPtX]);
-            } else {
-                ptDst = new Point2D.Double(srcPtX + columnMisregistration[(int) srcPtX], srcPtY + rowMisregistration[(int) srcPtX]);
+            double x = srcPtX + columnMisregistration[(int) srcPtX];
+            double y = srcPtY + rowMisregistration[(int) srcPtX];
+            if (x < 0 || y < 0) {
+                throw new TransformException("Could not transform");
             }
+            if (ptDst == null) {
+                ptDst = new Point2D.Double();
+            }
+            ptDst.setLocation(x, y);
             return ptDst;
         }
 

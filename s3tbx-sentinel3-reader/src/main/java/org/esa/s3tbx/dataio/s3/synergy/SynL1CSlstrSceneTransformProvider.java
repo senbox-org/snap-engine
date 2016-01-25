@@ -52,11 +52,13 @@ public class SynL1CSlstrSceneTransformProvider implements SceneTransformProvider
                     colCorrespondenceBand.getSampleInt((int) srcPtX, (int) srcPtY);
             final int rowCorrespondence =
                     rowCorrespondenceBand.getSampleInt((int) srcPtX, (int) srcPtY);
-            if (ptDst != null) {
-                ptDst.setLocation(columnCorrespondence, rowCorrespondence);
-            } else {
-                ptDst = new Point2D.Double(columnCorrespondence, rowCorrespondence);
+            if (columnCorrespondence < 0 || rowCorrespondence < 0) {
+                throw new TransformException("Could not transform");
             }
+            if (ptDst == null) {
+                ptDst = new Point2D.Double();
+            }
+            ptDst.setLocation(columnCorrespondence, rowCorrespondence);
             return ptDst;
         }
 
