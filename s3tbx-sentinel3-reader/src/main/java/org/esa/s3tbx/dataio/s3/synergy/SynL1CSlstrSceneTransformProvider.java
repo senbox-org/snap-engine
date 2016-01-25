@@ -44,7 +44,7 @@ public class SynL1CSlstrSceneTransformProvider implements SceneTransformProvider
         public Point2D transform(Point2D ptSrc, Point2D ptDst) throws TransformException {
             final double srcPtX = ptSrc.getX();
             final double srcPtY = ptSrc.getY();
-            if (srcPtX < 0 || srcPtX >= colCorrespondenceBand.getRasterWidth() ||
+            if (Double.isNaN(srcPtX) || Double.isNaN(srcPtY) || srcPtX < 0 || srcPtX >= colCorrespondenceBand.getRasterWidth() ||
                     srcPtY < 0 || srcPtY >= colCorrespondenceBand.getRasterHeight()) {
                 throw new TransformException("Could not transform");
             }
@@ -67,6 +67,17 @@ public class SynL1CSlstrSceneTransformProvider implements SceneTransformProvider
             throw new NoninvertibleTransformException("Cannot invert transformation");
         }
 
+        @Override
+        public boolean equals(Object object) {
+            if (this == object) {
+                return true;
+            }
+            if (!(object instanceof SynL1CSceneToModelTransform)) {
+                return false;
+            }
+            return ((SynL1CSceneToModelTransform) object).colCorrespondenceBand == colCorrespondenceBand &&
+                    ((SynL1CSceneToModelTransform) object).rowCorrespondenceBand == rowCorrespondenceBand;
+        }
     }
 
 }

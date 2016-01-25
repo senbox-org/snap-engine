@@ -48,7 +48,8 @@ class SynL1COlciSceneTransformProvider implements SceneTransformProvider {
         public Point2D transform(Point2D ptSrc, Point2D ptDst) throws TransformException {
             final double srcPtX = ptSrc.getX();
             final double srcPtY = ptSrc.getY();
-            if (srcPtX < 0 || srcPtX >= columnMisregistrationBand.getRasterWidth()) {
+            if (Double.isNaN(srcPtX) || Double.isNaN(srcPtY) ||
+                    srcPtX < 0 || srcPtX >= columnMisregistrationBand.getRasterWidth()) {
                 throw new TransformException("Could not transform");
             }
             final int columnMisregistration = columnMisregistrationBand.getSampleInt((int) srcPtX, 0);
@@ -70,6 +71,17 @@ class SynL1COlciSceneTransformProvider implements SceneTransformProvider {
             return sceneToModelTransform;
         }
 
+        @Override
+        public boolean equals(Object object) {
+            if (this == object) {
+                return true;
+            }
+            if (!(object instanceof SynL1COlciModelToSceneTransform)) {
+                return false;
+            }
+            return ((SynL1COlciModelToSceneTransform) object).columnMisregistrationBand == columnMisregistrationBand &&
+                    ((SynL1COlciModelToSceneTransform) object).rowMisregistrationBand == rowMisregistrationBand;
+        }
     }
 
     private class SynL1COlciSceneToModelTransform extends AbstractTransform2D {
@@ -135,7 +147,8 @@ class SynL1COlciSceneTransformProvider implements SceneTransformProvider {
         public Point2D transform(Point2D ptSrc, Point2D ptDst) throws TransformException {
             final double srcPtX = ptSrc.getX();
             final double srcPtY = ptSrc.getY();
-            if (srcPtX < 0 || srcPtX >= columnMisregistration.length) {
+            if (Double.isNaN(srcPtX) || Double.isNaN(srcPtY) ||
+                    srcPtX < 0 || srcPtX >= columnMisregistration.length) {
                 throw new TransformException("Could not transform");
             }
             double x = srcPtX + columnMisregistration[(int) srcPtX];
@@ -153,6 +166,36 @@ class SynL1COlciSceneTransformProvider implements SceneTransformProvider {
         @Override
         public MathTransform2D inverse() throws NoninvertibleTransformException {
             return modelToSceneTransform;
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (this == object) {
+                return true;
+            }
+            if (!(object instanceof SynL1COlciSceneToModelTransform)) {
+                return false;
+            }
+            return equalArrays(((SynL1COlciSceneToModelTransform) object).columnMisregistration, columnMisregistration) &&
+                    equalArrays(((SynL1COlciSceneToModelTransform) object).rowMisregistration, rowMisregistration);
+        }
+
+        private boolean equalArrays(int[] array1, int[] array2) {
+            if (array1 == array2) {
+                return true;
+            }
+            if (array1 == null || array2 == null) {
+                return false;
+            }
+            if (array1.length != array2.length) {
+                return false;
+            }
+            for (int i = 0; i < array1.length; i++) {
+                if (array1[i] != array2[i]) {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 
