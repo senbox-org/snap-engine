@@ -37,6 +37,7 @@
         <module>s3tbx-flhmci-ui</module>
         <module>s3tbx-idepix</module>
         <module>s3tbx-idepix-ui</module>
+        <module>s3tbx-insitu-client-ui</module>
         <module>s3tbx-kit</module>
         <module>s3tbx-landsat-reader</module>
         <module>s3tbx-meris-cloud</module>

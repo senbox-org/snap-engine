@@ -102,6 +102,11 @@
         </dependency>
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
+            <artifactId>s3tbx-insitu-client-ui</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.s3tbx</groupId>
             <artifactId>s3tbx-landsat-reader</artifactId>
             <version>${project.version}</version>
         </dependency>
