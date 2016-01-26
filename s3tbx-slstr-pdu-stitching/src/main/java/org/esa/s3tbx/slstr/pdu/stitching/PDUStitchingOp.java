@@ -11,8 +11,6 @@ import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.io.WildcardMatcher;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
 import java.io.File;
 import java.io.IOException;
 import java.util.Set;
@@ -56,7 +54,7 @@ public class PDUStitchingOp extends Operator {
         }
         try {
             SlstrPduStitcher.createStitchedSlstrL1BFile(targetDir, files);
-        } catch (IOException | PDUStitchingException | ParserConfigurationException | TransformerException e) {
+        } catch (Exception e) {
             throw new OperatorException(e.getMessage());
         }
     }
