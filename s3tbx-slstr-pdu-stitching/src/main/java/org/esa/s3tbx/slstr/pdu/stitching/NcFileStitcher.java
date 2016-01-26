@@ -147,7 +147,7 @@ class NcFileStitcher {
             final Variable fileVariable = fileVariables[j];
             if (fileVariable != null) {
                 final Array fileArray = fileVariable.read();
-                for (int l = 0; l < sourceOffsets.length; l++) {
+                for (int l = 0; l < sourceOffsets[j].length; l++) {
                     Array.arraycopy(fileArray, sourceOffsets[j][l], nVariableArray,
                                     destinationOffsets[j][l], sectionSize);
                 }
