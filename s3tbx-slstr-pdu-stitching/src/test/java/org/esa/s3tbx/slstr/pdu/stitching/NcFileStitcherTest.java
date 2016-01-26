@@ -479,19 +479,53 @@ public class NcFileStitcherTest {
     }
 
     @Test
-    public void testDetermineDestinationOffsets() throws IOException {
+    public void testDetermineDestinationOffsets_f1_BT_in() throws IOException {
         int[][] expected_f1_BT_in_DestinationOffsets = {{0}, {3000000}, {6000000}};
+
+        int[] rowOffsets = new int[] {0, 2000, 4000};
+        int[] numberOfRows = new int[]{2000, 2000, 2000};
+        int[] sectionSizes_f1_BT_in = new int[]{3000000, 3000000, 3000000};
+        int[][] sourceOffsets = new int[][]{{0}, {0}, {0}};
+
         final int[][] actual_f1_BT_in_DestinationOffsets =
-                NcFileStitcher.determineDestinationOffsets(1, new int[]{0, 1, 2}, 3, 3000000);
+                NcFileStitcher.determineDestinationOffsets(rowOffsets, numberOfRows, sectionSizes_f1_BT_in, sourceOffsets);
+
         for (int i = 0; i < expected_f1_BT_in_DestinationOffsets.length; i++) {
             assertArrayEquals(expected_f1_BT_in_DestinationOffsets[i], actual_f1_BT_in_DestinationOffsets[i]);
         }
+    }
+
+    @Test
+    public void testDetermineDestinationOffsets_met_tx() throws IOException {
         int[][] expected_met_tx_DestinationOffsets = {{0, 780000, 1560000, 2340000, 3120000},
                 {260000, 1040000, 1820000, 2600000, 3380000}, {520000, 1300000, 2080000, 2860000, 3640000}};
+        int[] sectionSizes_met_tx = new int[]{260000, 260000, 260000};
+        int[] rowOffsets = new int[] {0, 2000, 4000};
+        int[] numberOfRows = new int[]{2000, 2000, 2000};
+        int[][] sourceOffsets = new int[][]{{0, 260000, 520000, 780000, 1040000}, {0, 260000, 520000, 780000, 1040000},
+                {0, 260000, 520000, 780000, 1040000}};
+
         final int[][] actual_met_tx_DestinationOffsets =
-                NcFileStitcher.determineDestinationOffsets(5, new int[]{0, 1, 2}, 3, 260000);
+                NcFileStitcher.determineDestinationOffsets(rowOffsets, numberOfRows, sectionSizes_met_tx, sourceOffsets);
+
         for (int i = 0; i < expected_met_tx_DestinationOffsets.length; i++) {
             assertArrayEquals(expected_met_tx_DestinationOffsets[i], actual_met_tx_DestinationOffsets[i]);
+        }
+    }
+
+    @Test
+    public void testDetermineDestinationOffsets_differentSectionSizes() throws IOException {
+        int[][] expectedDestinationOffsets = {{0}, {2000000}, {6500000}};
+        int[] rowOffsets = new int[] {0, 2000, 6500};
+        int[] numberOfRows = new int[]{2000, 4500, 1500};
+        int[] sectionSizes = new int[]{2000000, 4500000, 1500000};
+        int[][] sourceOffsets = new int[][]{{0}, {0}, {0}};
+
+        final int[][] actual_f1_BT_in_DestinationOffsets =
+                NcFileStitcher.determineDestinationOffsets(rowOffsets, numberOfRows, sectionSizes, sourceOffsets);
+
+        for (int i = 0; i < expectedDestinationOffsets.length; i++) {
+            assertArrayEquals(expectedDestinationOffsets[i], actual_f1_BT_in_DestinationOffsets[i]);
         }
     }
 
