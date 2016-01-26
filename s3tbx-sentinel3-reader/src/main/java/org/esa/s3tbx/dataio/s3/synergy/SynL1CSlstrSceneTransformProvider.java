@@ -78,6 +78,11 @@ public class SynL1CSlstrSceneTransformProvider implements SceneTransformProvider
             return ((SynL1CSceneToModelTransform) object).colCorrespondenceBand == colCorrespondenceBand &&
                     ((SynL1CSceneToModelTransform) object).rowCorrespondenceBand == rowCorrespondenceBand;
         }
+
+        @Override
+        public int hashCode() {
+            return colCorrespondenceBand.getName().hashCode() + rowCorrespondenceBand.getName().hashCode();
+        }
     }
 
 }

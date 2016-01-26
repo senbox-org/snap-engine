@@ -82,6 +82,11 @@ class SynL1COlciSceneTransformProvider implements SceneTransformProvider {
             return ((SynL1COlciModelToSceneTransform) object).columnMisregistrationBand == columnMisregistrationBand &&
                     ((SynL1COlciModelToSceneTransform) object).rowMisregistrationBand == rowMisregistrationBand;
         }
+
+        @Override
+        public int hashCode() {
+            return columnMisregistrationBand.getName().hashCode() + rowMisregistrationBand.getName().hashCode();
+        }
     }
 
     private class SynL1COlciSceneToModelTransform extends AbstractTransform2D {
@@ -196,6 +201,16 @@ class SynL1COlciSceneTransformProvider implements SceneTransformProvider {
                 }
             }
             return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int hashCode = 0;
+            for (int i = 0; i < columnMisregistration.length; i++) {
+                hashCode += columnMisregistration[i];
+                hashCode += rowMisregistration[i];
+            }
+            return hashCode;
         }
     }
 
