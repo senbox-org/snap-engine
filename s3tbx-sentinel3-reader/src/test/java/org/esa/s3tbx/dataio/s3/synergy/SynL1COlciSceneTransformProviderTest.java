@@ -23,7 +23,7 @@ public class SynL1COlciSceneTransformProviderTest {
                 1, 2, 1, 2, 1, 2, 1, 2});
         colMisregistrationBand.setData(colMisRegistrationData);
         final Band rowMisregistrationBand = new Band("rowMisregistrationBand", ProductData.TYPE_INT32, 16, 1);
-        final ProductData rowMisRegistrationData = ProductData.createInstance(new int[]{-1, -2, -1, -2, -1, -2, -1, -2,
+        final ProductData rowMisRegistrationData = ProductData.createInstance(new int[]{1, -2, -1, -2, -1, -2, -1, -2,
                 -1, -2, -1, -2, -1, -2, -1, -2});
         rowMisregistrationBand.setData(rowMisRegistrationData);
         provider = new SynL1COlciSceneTransformProvider(colMisregistrationBand, rowMisregistrationBand);
@@ -34,7 +34,7 @@ public class SynL1COlciSceneTransformProviderTest {
         PixelPos resultPos = new PixelPos();
         provider.getModelToSceneTransform().transform(new PixelPos(0, 0), resultPos);
         assertEquals(1, (int)resultPos.getX());
-        assertEquals(-1, (int)resultPos.getY());
+        assertEquals(1, (int)resultPos.getY());
 
         provider.getModelToSceneTransform().transform(new PixelPos(2, 2), resultPos);
         assertEquals(3, (int)resultPos.getX());
@@ -57,9 +57,6 @@ public class SynL1COlciSceneTransformProviderTest {
     public void testGetInverse() throws Exception {
         PixelPos resultPos = new PixelPos();
         final MathTransform2D sceneToModelTransform = provider.getSceneToModelTransform();
-        sceneToModelTransform.transform(new PixelPos(0, 0), resultPos);
-        assertEquals(-1, (int)resultPos.getX());
-        assertEquals(2, (int)resultPos.getY());
 
         sceneToModelTransform.transform(new PixelPos(1, 1), resultPos);
         assertEquals(0, (int)resultPos.getX());

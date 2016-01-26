@@ -20,8 +20,10 @@ public class SynL1CSlstrSceneTransformProviderTest {
                 1, 2, 1, 2, 1, 2, 1, 3});
         colMisregistrationBand.setData(colMisRegistrationData);
         final Band rowMisregistrationBand = new Band("rowMisregistrationBand", ProductData.TYPE_INT32, 4, 4);
-        final ProductData rowMisRegistrationData = ProductData.createInstance(new int[]{-1, -2, -1, -2, -1, -2, -1, -2,
-                -1, -2, -1, -2, -1, -2, -1, -3});
+//        final ProductData rowMisRegistrationData = ProductData.createInstance(new int[]{-1, -2, -1, -2, -1, -2, -1, -2,
+//                -1, -2, -1, -2, -1, -2, -1, -3});
+        final ProductData rowMisRegistrationData = ProductData.createInstance(new int[]{0, 1, 0, 1, 0, 1, 0, 1,
+                0, 1, 0, 1, 0, 1, 0, 2});
         rowMisregistrationBand.setData(rowMisRegistrationData);
         final SynL1CSlstrSceneTransformProvider provider =
                 new SynL1CSlstrSceneTransformProvider(colMisregistrationBand, rowMisregistrationBand);
@@ -31,18 +33,18 @@ public class SynL1CSlstrSceneTransformProviderTest {
         PixelPos resultPos = new PixelPos();
         sceneToModelTransform.transform(new PixelPos(0, 0), resultPos);
         assertEquals(1, (int)resultPos.getX());
-        assertEquals(-1, (int)resultPos.getY());
+        assertEquals(0, (int)resultPos.getY());
 
         sceneToModelTransform.transform(new PixelPos(2, 1), resultPos);
         assertEquals(1, (int)resultPos.getX());
-        assertEquals(-1, (int)resultPos.getY());
+        assertEquals(0, (int)resultPos.getY());
 
         sceneToModelTransform.transform(new PixelPos(1, 2), resultPos);
         assertEquals(2, (int)resultPos.getX());
-        assertEquals(-2, (int)resultPos.getY());
+        assertEquals(1, (int)resultPos.getY());
 
         sceneToModelTransform.transform(new PixelPos(3, 3), resultPos);
         assertEquals(3, (int)resultPos.getX());
-        assertEquals(-3, (int)resultPos.getY());
+        assertEquals(2, (int)resultPos.getY());
     }
 }
