@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * @author Tonio Fincke
  */
-public class OrbitReferenceMerger extends AbstractElementMerger {
+class OrbitReferenceMerger extends AbstractElementMerger {
 
     @Override
     public void mergeNodes(List<Node> fromParents, Element toParent, Document toDocument) throws PDUStitchingException {

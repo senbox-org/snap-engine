@@ -12,8 +12,9 @@ import org.esa.snap.core.datamodel.IndexCoding;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.ProductNodeGroup;
-import org.esa.snap.core.datamodel.SceneRasterTransform;
+import org.esa.snap.core.datamodel.SceneTransformProvider;
 import org.esa.snap.core.datamodel.VirtualBand;
+import org.esa.snap.core.transform.MathTransform2D;
 import org.esa.snap.core.util.ProductUtils;
 
 import java.io.File;
@@ -91,10 +92,11 @@ public class SynL1CProductFactory extends AbstractProductFactory {
     }
 
     @Override
-    protected void setSceneRasterTransforms(Product product) {
+    protected void setSceneTransforms(Product product) {
         final Band[] bands = product.getBands();
         for (Band band : bands) {
             final String bandName = band.getName();
+            SceneTransformProvider sceneTransformProvider = null;
             if (bandName.startsWith("OLC_RADIANCE") && !bandName.contains("17")) {
                 int end = 16;
                 if (bandName.substring(15, 16).equals("_")) {
@@ -103,30 +105,26 @@ public class SynL1CProductFactory extends AbstractProductFactory {
                 final String identifier = bandName.substring(14, end);
                 final Band rowMisregistrationBand = product.getBand("MISREGIST_OLC_Oref_O" + identifier + "_delta_row");
                 final Band columnMisregistrationBand = product.getBand("MISREGIST_OLC_Oref_O" + identifier + "_delta_col");
-                final SceneRasterTransform sceneRasterTransform =
-                        new SynL1COlciSceneRasterTransform(columnMisregistrationBand, rowMisregistrationBand);
-                band.setSceneRasterTransform(sceneRasterTransform);
+                sceneTransformProvider = new SynL1COlciSceneTransformProvider(columnMisregistrationBand, rowMisregistrationBand);
             } else if (bandName.startsWith("SLST_NAD_RADIANCE")) {
                 final String identifier = bandName.substring(19, 20);
                 final Band columnCorrespondenceBand = product.getBand("MISREGIST_SLST_NAD_Oref_S" + identifier + "_col_corresp");
                 final Band rowCorrespondenceBand = product.getBand("MISREGIST_SLST_NAD_Oref_S" + identifier + "_row_corresp");
-                final SceneRasterTransform sceneRasterTransform =
-                        new SynL1CSlstrSceneRasterTransform(columnCorrespondenceBand, rowCorrespondenceBand);
-                band.setSceneRasterTransform(sceneRasterTransform);
+                sceneTransformProvider = new SynL1CSlstrSceneTransformProvider(columnCorrespondenceBand, rowCorrespondenceBand);
             } else if (bandName.startsWith("SLST_NAD_BT_S")) {
                 final String identifier = bandName.substring(13, 14);
                 final Band columnCorrespondenceBand = product.getBand("MISREGIST_SLST_NAD_Oref_S" + identifier + "_col_corresp");
                 final Band rowCorrespondenceBand = product.getBand("MISREGIST_SLST_NAD_Oref_S" + identifier + "_row_corresp");
-                final SceneRasterTransform sceneRasterTransform =
-                        new SynL1CSlstrSceneRasterTransform(columnCorrespondenceBand, rowCorrespondenceBand);
-                band.setSceneRasterTransform(sceneRasterTransform);
+                sceneTransformProvider = new SynL1CSlstrSceneTransformProvider(columnCorrespondenceBand, rowCorrespondenceBand);
             } else if (bandName.startsWith("SLST_NAD_BT_F")) {
                 final String identifier = bandName.substring(13, 14);
                 final Band columnCorrespondenceBand = product.getBand("MISREGIST_SLST_NAD_Oref_F" + identifier + "_col_corresp");
                 final Band rowCorrespondenceBand = product.getBand("MISREGIST_SLST_NAD_Oref_F" + identifier + "_row_corresp");
-                final SceneRasterTransform sceneRasterTransform =
-                        new SynL1CSlstrSceneRasterTransform(columnCorrespondenceBand, rowCorrespondenceBand);
-                band.setSceneRasterTransform(sceneRasterTransform);
+                sceneTransformProvider = new SynL1CSlstrSceneTransformProvider(columnCorrespondenceBand, rowCorrespondenceBand);
+            }
+            if (sceneTransformProvider != null) {
+                band.setModelToSceneTransform(sceneTransformProvider.getModelToSceneTransform());
+                band.setSceneToModelTransform(sceneTransformProvider.getSceneToModelTransform());
             }
         }
     }
@@ -183,6 +181,20 @@ public class SynL1CProductFactory extends AbstractProductFactory {
                     GeoCodingFactory.createPixelGeoCoding(bandGroup.get("GEOLOCATION_REF_latitude"),
                                                           bandGroup.get("GEOLOCATION_REF_longitude"), "", 5);
             targetProduct.setSceneGeoCoding(pixelGeoCoding);
+        }
+    }
+
+    @Override
+    protected void setBandGeoCodings(Product targetProduct) {
+        final Band[] bands = targetProduct.getBands();
+        for (Band band : bands) {
+            final MathTransform2D sceneToModelTransform = band.getSceneToModelTransform();
+            final MathTransform2D modelToSceneTransform = band.getModelToSceneTransform();
+            if (sceneToModelTransform != MathTransform2D.IDENTITY || modelToSceneTransform != MathTransform2D.IDENTITY) {
+                band.setGeoCoding(new SynL1CSceneTransformGeoCoding(targetProduct.getSceneGeoCoding(),
+                                                                    sceneToModelTransform,
+                                                                    modelToSceneTransform));
+            }
         }
     }
 

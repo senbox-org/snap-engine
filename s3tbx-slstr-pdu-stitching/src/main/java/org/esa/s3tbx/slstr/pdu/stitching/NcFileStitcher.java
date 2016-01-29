@@ -114,15 +114,25 @@ class NcFileStitcher {
     private static Array createStitchedArray(Variable variable, ImageSize targetImageSize, ImageSize[] imageSizes,
                                              int indexOfRowDimension, List<Variable>[] variableLists) throws IOException {
         final String variableName = variable.getFullName();
-        final int sectionSize = determineSectionSize(indexOfRowDimension, variable);
-        final int[] sourceOffsets = determineSourceOffsets(sectionSize, variable);
-        int[] inputFileOffsets = new int[imageSizes.length];
-        for (int j = 0; j < imageSizes.length; j++) {
-            inputFileOffsets[j] = (imageSizes[j].getStartOffset() - targetImageSize.getStartOffset()) /
-                    imageSizes[j].getRows();
+        final int[] sectionSizes = new int[variableLists.length];
+        final int[][] sourceOffsets = new int[variableLists.length][];
+        final Variable[] fileVariables = new Variable[variableLists.length];
+        for (int i = 0; i < variableLists.length; i++) {
+            final Variable fileVariable = getVariableFromList(variableName, variableLists[i]);
+            if (fileVariable != null) {
+                fileVariables[i] = fileVariable;
+                sectionSizes[i] = determineSectionSize(indexOfRowDimension, fileVariable);
+                sourceOffsets[i] = determineSourceOffsets(sectionSizes[i], fileVariable);
+            }
         }
-        final int[][] destinationOffsets =
-                determineDestinationOffsets(sourceOffsets.length, inputFileOffsets, variableLists.length, sectionSize);
+        final int sectionSize = determineSectionSize(indexOfRowDimension, variable);
+        int[] rowOffsets = new int[imageSizes.length];
+        int[] numberofRows = new int[imageSizes.length];
+        for (int j = 0; j < imageSizes.length; j++) {
+            rowOffsets[j] = (imageSizes[j].getStartOffset() - targetImageSize.getStartOffset());
+            numberofRows[j] = imageSizes[j].getRows();
+        }
+        final int[][] destinationOffsets = determineDestinationOffsets(rowOffsets, numberofRows, sectionSizes, sourceOffsets);
         int[] nVariableShape = new int[variable.getDimensions().size()];
         for (int j = 0; j < nVariableShape.length; j++) {
             if (variable.getDimensions().get(j).getFullName().equals("rows")) {
@@ -134,11 +144,11 @@ class NcFileStitcher {
         final Array nVariableArray = Array.factory(variable.getDataType(), nVariableShape);
         //todo prefill array with no data value
         for (int j = 0; j < variableLists.length; j++) {
-            final Variable fileVariable = getVariableFromList(variableName, variableLists[j]);
+            final Variable fileVariable = fileVariables[j];
             if (fileVariable != null) {
                 final Array fileArray = fileVariable.read();
-                for (int l = 0; l < sourceOffsets.length; l++) {
-                    Array.arraycopy(fileArray, sourceOffsets[l], nVariableArray,
+                for (int l = 0; l < sourceOffsets[j].length; l++) {
+                    Array.arraycopy(fileArray, sourceOffsets[j][l], nVariableArray,
                                     destinationOffsets[j][l], sectionSize);
                 }
             }
@@ -241,13 +251,14 @@ class NcFileStitcher {
         return null;
     }
 
-    static int[][] determineDestinationOffsets(int numberOfSections, int[] inputFileOffsets,
-                                               int numberOfFrames, int sectionSize) {
-        int[][] destinationOffsets = new int[inputFileOffsets.length][numberOfSections];
-        int sectionOffset = sectionSize * numberOfFrames;
-        for (int i = 0; i < inputFileOffsets.length; i++) {
-            int fileOffset = inputFileOffsets[i] * sectionSize;
-            for (int j = 0; j < numberOfSections; j++) {
+    static int[][] determineDestinationOffsets(int[] rowOffsets, int[] numberOfRows,
+                                               int[] sectionSizes, int[][] sourceOffsets) {
+        int[][] destinationOffsets = new int[sectionSizes.length][];
+        for (int i = 0; i < sectionSizes.length; i++) {
+            final int fileOffset = rowOffsets[i] * (sectionSizes[i] / numberOfRows[i]);
+            int sectionOffset = sectionSizes[i] * sectionSizes.length;
+            destinationOffsets[i] = new int[sourceOffsets[i].length];
+            for (int j = 0; j < sourceOffsets[i].length; j++) {
                 destinationOffsets[i][j] = fileOffset + j * sectionOffset;
             }
         }
@@ -363,6 +374,19 @@ class NcFileStitcher {
                             }
                         }
                         nFileWriteable.addGlobalAttribute(globalAttributeName, values.toString());
+                    } else if (globalAttribute.getDataType().isNumeric()) {
+                        final Number value = globalAttribute.getNumericValue();
+                        for (int j = i; j < globalAttributeLists.length; j++) {
+                            final Attribute otherGlobalAttribute =
+                                    getAttributeFromList(globalAttributeName, globalAttributeLists[j]);
+                            if (otherGlobalAttribute != null && !value.equals(otherGlobalAttribute.getNumericValue())) {
+                                //todo write this as numeric, not as string - tf 20160122
+                                nFileWriteable.addGlobalAttribute(globalAttributeName + "_" + j,
+                                                                  otherGlobalAttribute.getNumericValue().toString());
+                                break;
+                            }
+                        }
+                        nFileWriteable.addGlobalAttribute(globalAttributeName, value.toString());
                     } else {
                         final String value = globalAttribute.getStringValue();
                         for (int j = i; j < globalAttributeLists.length; j++) {

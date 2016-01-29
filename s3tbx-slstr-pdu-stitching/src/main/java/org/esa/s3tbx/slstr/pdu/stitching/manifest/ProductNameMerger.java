@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * @author Tonio Fincke
  */
-public class ProductNameMerger extends AbstractElementMerger {
+class ProductNameMerger extends AbstractElementMerger {
 
     private final String productName;
 

@@ -19,7 +19,7 @@ public class ImageSize {
         this.columns = columns;
     }
 
-    String getIdentifier() {
+    public String getIdentifier() {
         return identifier;
     }
 
