@@ -28,7 +28,7 @@
 
     <artifactId>beam-avhrr-reader</artifactId>
     <name>BEAM AVHRR Product Reader</name>
-    <version>5.0.3-SNAPSHOT</version>
+    <version>5.0.3</version>
 
     <packaging>jar</packaging>
 
