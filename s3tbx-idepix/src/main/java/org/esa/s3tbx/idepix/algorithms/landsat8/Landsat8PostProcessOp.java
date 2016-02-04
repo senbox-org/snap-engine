@@ -29,7 +29,7 @@ import java.awt.*;
  * @author olafd
  * @since Idepix 2.1
  */
-@OperatorMetadata(alias = "idepix.landsat.postprocess",
+@OperatorMetadata(alias = "idepix.landsat8.postprocess",
         version = "2.2",
         internal = true,
         authors = "Marco Peters, Marco Zuehlke, Olaf Danne",

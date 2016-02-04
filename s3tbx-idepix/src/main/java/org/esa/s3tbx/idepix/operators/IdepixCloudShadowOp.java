@@ -24,7 +24,7 @@ import java.awt.*;
  * @author Olaf Danne
  * @version $Revision: $ $Date:  $
  */
-@OperatorMetadata(alias = "idepix.operators.CloudShadow",
+@OperatorMetadata(alias = "idepix.operators.cloudshadow",
         version = "2.2",
         internal = true,
         authors = "Olaf Danne",

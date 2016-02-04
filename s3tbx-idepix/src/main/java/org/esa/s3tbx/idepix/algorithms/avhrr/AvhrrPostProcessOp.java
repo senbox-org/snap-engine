@@ -27,7 +27,7 @@ import java.awt.*;
  * @author olafd
  * @since Idepix 2.1
  */
-@OperatorMetadata(alias = "idepix.avhrrac.postprocess",
+@OperatorMetadata(alias = "idepix.avhrr.postprocess",
                   version = "2.2",
                   internal = true,
                   authors = "Marco Peters, Marco Zuehlke, Olaf Danne",

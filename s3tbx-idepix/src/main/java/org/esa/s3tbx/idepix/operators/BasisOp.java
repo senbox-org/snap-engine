@@ -9,7 +9,7 @@ import org.esa.snap.core.util.ProductUtils;
 
 
 @SuppressWarnings("JavaDoc")
-@OperatorMetadata(alias = "idepix.operators.Basis",
+@OperatorMetadata(alias = "idepix.operators.basis",
                   version = "2.2",
                   internal = true,
                   authors = "Olaf Danne",

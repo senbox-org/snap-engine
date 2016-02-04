@@ -27,7 +27,7 @@ import java.awt.*;
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "idepix.modis.classification.post",
+@OperatorMetadata(alias = "idepix.modis.postprocess",
                   version = "2.2",
                   copyright = "(c) 2014 by Brockmann Consult",
                   description = "OC-CCI post processing operator.",

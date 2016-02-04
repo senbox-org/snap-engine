@@ -26,7 +26,7 @@ import java.io.InputStream;
  * @author Olaf Danne
  * @version $Revision: $ $Date:  $
  */
-@OperatorMetadata(alias = "idepix.avhrrac.usgs.classification",
+@OperatorMetadata(alias = "idepix.avhrr.usgs.classification",
         version = "2.2",
         internal = true,
         authors = "Olaf Danne",
