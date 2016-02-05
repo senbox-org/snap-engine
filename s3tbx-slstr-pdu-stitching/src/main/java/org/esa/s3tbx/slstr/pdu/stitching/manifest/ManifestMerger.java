@@ -2,6 +2,8 @@ package org.esa.s3tbx.slstr.pdu.stitching.manifest;
 
 import com.sun.org.apache.xerces.internal.dom.DeferredTextImpl;
 import com.sun.org.apache.xerces.internal.dom.TextImpl;
+import org.esa.s3tbx.slstr.pdu.stitching.ImageSize;
+import org.esa.s3tbx.slstr.pdu.stitching.ImageSizeHandler;
 import org.esa.s3tbx.slstr.pdu.stitching.PDUStitchingException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -34,11 +36,13 @@ import java.util.List;
  */
 public class ManifestMerger {
 
-    private static final String[] discerningAttributesNames = {"ID", "name", "grid", "view", "element", "type", "role"};
     private Date creationTime;
     private static DefaultMerger defaultMerger;
     private static final ElementMerger NULL_MERGER = new NullMerger();
     private File productDir;
+    private ImageSize[][] imageSizes;
+
+    private static final String[] discerningAttributesNames = {"ID", "name", "grid", "view", "element", "type", "role"};
 
     public File createMergedManifest(File[] manifestFiles, Date creationTime, File productDir)
             throws IOException, TransformerException, PDUStitchingException, ParserConfigurationException {
@@ -67,8 +71,12 @@ public class ManifestMerger {
         this.creationTime = creationTime;
         this.productDir = productDir;
         List<Node> manifestList = new ArrayList<>();
-        for (File manifestFile : manifestFiles) {
-            manifestList.add(createXmlDocument(new FileInputStream(manifestFile)));
+        imageSizes = new ImageSize[manifestFiles.length][];
+        for (int i = 0; i < manifestFiles.length; i++) {
+            File manifestFile = manifestFiles[i];
+            final Document xmlDocument = createXmlDocument(new FileInputStream(manifestFile));
+            imageSizes[i] = ImageSizeHandler.extractImageSizes(xmlDocument);
+            manifestList.add(xmlDocument);
         }
         Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
         defaultMerger = new DefaultMerger();
@@ -97,8 +105,7 @@ public class ManifestMerger {
             case "sentinel-safe:stopTime":
                 return new StopTimesMerger();
             case "slstr:classificationSummary":
-                //todo implement
-                return NULL_MERGER;
+                return new ClassificationSummaryMerger(imageSizes);
             case "slstr:pixelQualitySummary":
                 //todo implement
                 return NULL_MERGER;
@@ -111,6 +118,9 @@ public class ManifestMerger {
                 return new CreationTimeMerger(creationTime);
             case "sentinel3:productName":
                 return new ProductNameMerger(productDir.getName());
+            case "sentinel3:productSize":
+                //todo implement
+                return NULL_MERGER;
             case "sentinel3:dumpInformation":
                 return new DumpInformationMerger();
             case "sentinel-safe:orbitReference":

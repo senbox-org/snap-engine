@@ -29,7 +29,7 @@ import java.util.Calendar;
  * @author Olaf Danne
  * @version $Revision: $ $Date:  $
  */
-@OperatorMetadata(alias = "idepix.avhrrac.abstract.classification",
+@OperatorMetadata(alias = "idepix.avhrr.abstract.classification",
         version = "2.2",
         internal = true,
         authors = "Olaf Danne",

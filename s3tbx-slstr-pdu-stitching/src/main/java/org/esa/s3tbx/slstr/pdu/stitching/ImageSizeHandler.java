@@ -31,7 +31,7 @@ public class ImageSizeHandler {
         return new ImageSize(imageSizes[0].getIdentifier(), startOffset, trackOffset, highestStart - startOffset, highestTrack - trackOffset);
     }
 
-    static ImageSize[] extractImageSizes(Document manifestDocument) {
+    public static ImageSize[] extractImageSizes(Document manifestDocument) {
         final NodeList nadirElements = manifestDocument.getElementsByTagName("slstr:nadirImageSize");
         final NodeList obliqueElements = manifestDocument.getElementsByTagName("slstr:obliqueImageSize");
         final ImageSize[] imageSizes = new ImageSize[obliqueElements.getLength() + obliqueElements.getLength()];

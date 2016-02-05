@@ -2,8 +2,8 @@ package org.esa.s3tbx.slstr.pdu.stitching.ui;
 
 import com.bc.ceres.binding.ConversionException;
 import com.bc.ceres.binding.ValidationException;
+import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductIOPlugInManager;
-import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.GPF;
@@ -63,18 +63,16 @@ public class PDUStitchingDialog extends ModelessDialog {
                     before = targetDir.list();
                 }
             }
-            final ProductReaderPlugIn sen3ReaderPlugIn = getSentinel3ReaderPlugin();
             GPF.createProduct("PduStitching", formModel.getParameterMap());
             if (formModel.openInApp()) {
                 final String[] after = targetDir.list();
                 for (String inTargetDir : after) {
                     if (!ArrayUtils.isMemberOf(inTargetDir, before)) {
                         try {
-                            final ProductReader reader = sen3ReaderPlugIn.createReaderInstance();
-                            final Product product = reader.readProductNodes(new File(targetDir, inTargetDir), null);
+                            final Product product = ProductIO.readProduct(new File(targetDir, inTargetDir));
                             SnapApp.getDefault().getProductManager().addProduct(product);
                         } catch (IOException e) {
-                            e.printStackTrace();
+                            Dialogs.showError("Could not open stitched product " + inTargetDir + ": " + e.getMessage());
                         }
                         break;
                     }

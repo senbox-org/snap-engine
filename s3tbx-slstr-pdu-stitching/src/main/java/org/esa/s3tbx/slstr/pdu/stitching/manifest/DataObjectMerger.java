@@ -20,7 +20,7 @@ import java.util.List;
 /**
  * @author Tonio Fincke
  */
-public class DataObjectMerger extends AbstractElementMerger {
+class DataObjectMerger extends AbstractElementMerger {
 
     private final String fileLocation;
 

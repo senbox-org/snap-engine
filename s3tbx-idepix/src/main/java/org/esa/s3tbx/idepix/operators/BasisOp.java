@@ -7,14 +7,6 @@ import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.util.ProductUtils;
 
-
-@SuppressWarnings("JavaDoc")
-@OperatorMetadata(alias = "idepix.operators.Basis",
-                  version = "2.2",
-                  internal = true,
-                  authors = "Olaf Danne",
-                  copyright = "(c) 2012 by Brockmann Consult",
-                  description = "Idepix operator for basic product generation.")
 public abstract class BasisOp extends Operator {
 
     /**

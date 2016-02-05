@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * @author Tonio Fincke
  */
-public class ImageSizesMerger extends AbstractElementMerger {
+class ImageSizesMerger extends AbstractElementMerger {
 
     @Override
     public void mergeNodes(List<Node> fromParents, Element toParent, Document toDocument) throws PDUStitchingException {
