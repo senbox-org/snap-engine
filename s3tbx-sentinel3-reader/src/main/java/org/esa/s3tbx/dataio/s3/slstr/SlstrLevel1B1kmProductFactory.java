@@ -86,6 +86,10 @@ public class SlstrLevel1B1kmProductFactory extends SlstrLevel1ProductFactory {
     }
 
     @Override
+    protected void setSceneTransforms(Product product) {
+    }
+
+    @Override
     protected void setBandGeoCodings(Product product) {
     }
 }
