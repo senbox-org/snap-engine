@@ -21,7 +21,7 @@
 
     <groupId>org.esa.s3tbx</groupId>
     <artifactId>s3tbx</artifactId>
-    <version>2.0.1</version>
+    <version>2.0.2-SNAPSHOT</version>
     <name>Sentinel-3 Toolbox</name>
     <description>Tools for the Sentinel-3 Satellite</description>
     <url>https://github.com/senbox-org/s3tbx</url>
@@ -65,7 +65,7 @@
             It is used to filter manifest.mf and set the manifest's "OpenIDE-Module-Specification-Version" header.
             This is necessary to make NetBeans modules updatable and independent from the Maven version (= snap.version).
         -->
-        <s3tbx.version>2.0.1-SNAPSHOT</s3tbx.version>
+        <s3tbx.version>[2.0.0, 3.0.0-SNAPSHOT)</s3tbx.version>
         <s3tbx.nbmSpecVersion>2.0.1.0</s3tbx.nbmSpecVersion>
         <netbeans.version>RELEASE802</netbeans.version>
         <javahelp.version>2.0.05</javahelp.version>
