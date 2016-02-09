@@ -50,12 +50,12 @@ public class SynL1CSceneTransformGeoCoding extends AbstractGeoCoding {
         //this works because for syn l1c the imagetomodeltransforms are all identity transforms. If this code should
         //ever be used for another product, make sure that imagetomodeltransfroms are 0. If they are not, transform
         //the pixels to model coordinates (and back from scene coordinates).
+        if (pixelPos == null) {
+            pixelPos = new PixelPos();
+        }
         try {
             sceneToModelTransform.transform(wrappedPixelPos, pixelPos);
         } catch (TransformException e) {
-            if (pixelPos == null) {
-                pixelPos = new PixelPos();
-            }
             pixelPos.setLocation(Double.NaN, Double.NaN);
         }
         return pixelPos;
@@ -66,14 +66,14 @@ public class SynL1CSceneTransformGeoCoding extends AbstractGeoCoding {
         //this works because for syn l1c the imagetomodeltransforms are all identity transforms. If this code should
         //ever be used for another product, make sure that imagetomodeltransfroms are 0. If they are not, transform
         //the pixels to model coordinates (and back from scene coordinates).
+        if (geoPos == null) {
+            geoPos = new GeoPos();
+        }
         try {
             final PixelPos modelPixelPos = new PixelPos();
             modelToSceneTransform.transform(pixelPos, modelPixelPos);
             geoPos = wrappedGeoCoding.getGeoPos(modelPixelPos, geoPos);
         } catch (TransformException e) {
-            if (geoPos == null) {
-                geoPos = new GeoPos();
-            }
             geoPos.setLocation(Double.NaN, Double.NaN);
         }
         return geoPos;
