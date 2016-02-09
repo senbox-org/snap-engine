@@ -57,16 +57,17 @@ import java.util.regex.Pattern;
  */
 public class LandsatGeotiffReader extends AbstractProductReader {
 
+    static final String SYSPROP_READ_AS = "s3tbx.landsat.readAs";
+
     enum Resolution {
         DEFAULT,
         L8_PANCHROMATIC,
         L8_REFLECTIVE,
-
     }
 
+    private static final String READ_AS_REFLECTANCE = "reflectance";
     private static final Logger LOG = Logger.getLogger(LandsatGeotiffReader.class.getName());
 
-    static final String SYSPROP_READ_AS = "s3tbx.landsat.readAs";
     private static final String RADIANCE_UNITS = "W/(m^2*sr*µm)";
     private static final String REFLECTANCE_UNITS = "dl";
 
@@ -182,7 +183,7 @@ public class LandsatGeotiffReader extends AbstractProductReader {
                     final String readAs = preferences.get(LandsatGeotiffReader.SYSPROP_READ_AS, null);
                     if (readAs != null) {
                         switch (readAs.toLowerCase()) {
-                            case "reflectance":
+                            case READ_AS_REFLECTANCE:
                                 band.setDescription(landsatMetadata.getBandDescription(bandNumber) + " , as TOA Reflectance");
                                 band.setUnit(REFLECTANCE_UNITS);
                                 break;
