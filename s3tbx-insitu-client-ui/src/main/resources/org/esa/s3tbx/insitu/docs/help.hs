@@ -4,7 +4,7 @@
         "http://java.sun.com/products/javahelp/helpset_2_0.dtd">
 
 <helpset version="2.0">
-    <title>FlhMci Processor Help</title>
+    <title>In-Situ Data Access Help</title>
     <maps>
         <homeID>top</homeID>
         <mapref location="map.jhm"/>
