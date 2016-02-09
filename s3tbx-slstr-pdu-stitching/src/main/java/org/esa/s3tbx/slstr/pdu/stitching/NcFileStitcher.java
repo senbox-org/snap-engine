@@ -125,14 +125,13 @@ class NcFileStitcher {
                 sourceOffsets[i] = determineSourceOffsets(sectionSizes[i], fileVariable);
             }
         }
-        final int sectionSize = determineSectionSize(indexOfRowDimension, variable);
         int[] rowOffsets = new int[imageSizes.length];
-        int[] numberofRows = new int[imageSizes.length];
+        int[] numberOfRows = new int[imageSizes.length];
         for (int j = 0; j < imageSizes.length; j++) {
             rowOffsets[j] = (imageSizes[j].getStartOffset() - targetImageSize.getStartOffset());
-            numberofRows[j] = imageSizes[j].getRows();
+            numberOfRows[j] = imageSizes[j].getRows();
         }
-        final int[][] destinationOffsets = determineDestinationOffsets(rowOffsets, numberofRows, sectionSizes, sourceOffsets);
+        final int[][] destinationOffsets = determineDestinationOffsets(rowOffsets, numberOfRows, sectionSizes, sourceOffsets);
         int[] nVariableShape = new int[variable.getDimensions().size()];
         for (int j = 0; j < nVariableShape.length; j++) {
             if (variable.getDimensions().get(j).getFullName().equals("rows")) {
@@ -149,7 +148,7 @@ class NcFileStitcher {
                 final Array fileArray = fileVariable.read();
                 for (int l = 0; l < sourceOffsets[j].length; l++) {
                     Array.arraycopy(fileArray, sourceOffsets[j][l], nVariableArray,
-                                    destinationOffsets[j][l], sectionSize);
+                                    destinationOffsets[j][l], sectionSizes[j]);
                 }
             }
         }
@@ -254,12 +253,15 @@ class NcFileStitcher {
     static int[][] determineDestinationOffsets(int[] rowOffsets, int[] numberOfRows,
                                                int[] sectionSizes, int[][] sourceOffsets) {
         int[][] destinationOffsets = new int[sectionSizes.length][];
+        int allSectionsSize = 0;
+        for (int sectionSize : sectionSizes) {
+            allSectionsSize += sectionSize;
+        }
         for (int i = 0; i < sectionSizes.length; i++) {
             final int fileOffset = rowOffsets[i] * (sectionSizes[i] / numberOfRows[i]);
-            int sectionOffset = sectionSizes[i] * sectionSizes.length;
             destinationOffsets[i] = new int[sourceOffsets[i].length];
             for (int j = 0; j < sourceOffsets[i].length; j++) {
-                destinationOffsets[i][j] = fileOffset + j * sectionOffset;
+                destinationOffsets[i][j] = fileOffset + j * allSectionsSize;
             }
         }
         return destinationOffsets;

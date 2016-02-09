@@ -15,9 +15,6 @@ package org.esa.s3tbx.dataio.s3.slstr;/*
  */
 
 import com.bc.ceres.glevel.MultiLevelImage;
-import com.bc.ceres.glevel.support.DefaultMultiLevelImage;
-import com.bc.ceres.glevel.support.DefaultMultiLevelModel;
-import com.bc.ceres.glevel.support.DefaultMultiLevelSource;
 import org.esa.s3tbx.dataio.s3.AbstractProductFactory;
 import org.esa.s3tbx.dataio.s3.Sentinel3ProductReader;
 import org.esa.s3tbx.dataio.s3.util.S3NetcdfReader;
@@ -28,14 +25,12 @@ import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.image.SourceImageScaler;
-import org.esa.snap.core.util.ProductUtils;
 
 import javax.media.jai.BorderExtender;
 import javax.media.jai.ImageLayout;
 import javax.media.jai.Interpolation;
 import javax.media.jai.JAI;
 import java.awt.RenderingHints;
-import java.awt.geom.AffineTransform;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
@@ -48,44 +43,6 @@ public abstract class SlstrProductFactory extends AbstractProductFactory {
 
     protected SlstrProductFactory(Sentinel3ProductReader productReader) {
         super(productReader);
-    }
-
-    @Override
-    protected RasterDataNode addSpecialNode(Product masterProduct, Band sourceBand, Product targetProduct) {
-        final String sourceBandName = sourceBand.getName();
-        final int sourceBandNameLength = sourceBandName.length();
-        String gridIndex = sourceBandName;
-        if (sourceBandNameLength > 1) {
-            gridIndex = sourceBandName.substring(sourceBandNameLength - 2);
-        }
-        final Integer sourceStartOffset = getStartOffset(gridIndex);
-        final Integer sourceTrackOffset = getTrackOffset(gridIndex);
-        if (sourceStartOffset != null && sourceTrackOffset != null) {
-            final short[] sourceResolutions = getResolutions(gridIndex);
-            if (gridIndex.startsWith("t")) {
-                return copyTiePointGrid(sourceBand, targetProduct, sourceStartOffset, sourceTrackOffset, sourceResolutions);
-            } else {
-                final Band targetBand = new Band(sourceBandName, sourceBand.getDataType(),
-                                                 sourceBand.getRasterWidth(), sourceBand.getRasterHeight());
-                targetProduct.addBand(targetBand);
-                ProductUtils.copyRasterDataNodeProperties(sourceBand, targetBand);
-                final RenderedImage sourceRenderedImage = sourceBand.getSourceImage().getImage(0);
-                final AffineTransform imageToModelTransform = new AffineTransform();
-                final float[] offsets = getOffsets(sourceStartOffset, sourceTrackOffset, sourceResolutions);
-                imageToModelTransform.translate(offsets[0], offsets[1]);
-                final int subSamplingX = sourceResolutions[0] / referenceResolutions[0];
-                final int subSamplingY = sourceResolutions[1] / referenceResolutions[1];
-                imageToModelTransform.scale(subSamplingX, subSamplingY);
-                final DefaultMultiLevelModel targetModel =
-                        new DefaultMultiLevelModel(imageToModelTransform,
-                                                   sourceRenderedImage.getWidth(), sourceRenderedImage.getHeight());
-                final DefaultMultiLevelSource targetMultiLevelSource =
-                        new DefaultMultiLevelSource(sourceRenderedImage, targetModel);
-                targetBand.setSourceImage(new DefaultMultiLevelImage(targetMultiLevelSource));
-                return targetBand;
-            }
-        }
-        return sourceBand;
     }
 
     protected abstract Integer getStartOffset(String gridIndex);

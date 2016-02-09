@@ -514,6 +514,26 @@ public class NcFileStitcherTest {
     }
 
     @Test
+    public void testDetermineDestinationOffsets_S1_quality_an() throws IOException {
+        int[][] expectedDestinationOffsets =
+                {{0, 3396, 6792, 10188, 13584, 16980, 20376, 23772},
+                {1601, 4997, 8393, 11789, 15185, 18581, 21977, 25373},
+                {3201, 6597, 9993, 13389, 16785, 20181, 23577, 26973}};
+        int[] sectionSizes = new int[]{1601, 1600, 195};
+        int[] rowOffsets = new int[] {0, 1601, 3201};
+        int[] numberOfRows = new int[]{1601, 1600, 195};
+        int[][] sourceOffsets = new int[][]{{0, 1601, 3202, 4803, 6404, 8005, 9606, 11207},
+                {0, 1600, 3200, 4800, 6400, 8000, 9600, 11200}, {0, 195, 390, 585, 780, 975, 1170, 1365}};
+
+        final int[][] actualDestinationOffsets =
+                NcFileStitcher.determineDestinationOffsets(rowOffsets, numberOfRows, sectionSizes, sourceOffsets);
+
+        for (int i = 0; i < expectedDestinationOffsets.length; i++) {
+            assertArrayEquals(expectedDestinationOffsets[i], actualDestinationOffsets[i]);
+        }
+    }
+
+    @Test
     public void testDetermineDestinationOffsets_differentSectionSizes() throws IOException {
         int[][] expectedDestinationOffsets = {{0}, {2000000}, {6500000}};
         int[] rowOffsets = new int[] {0, 2000, 6500};

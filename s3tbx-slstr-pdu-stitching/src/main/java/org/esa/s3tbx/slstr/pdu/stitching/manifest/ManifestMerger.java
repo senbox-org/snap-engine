@@ -121,6 +121,12 @@ public class ManifestMerger {
             case "sentinel3:productSize":
                 //todo implement
                 return NULL_MERGER;
+            case "slstr:min":
+                //todo implement
+                return NULL_MERGER;
+            case "slstr:max":
+                //todo implement
+                return NULL_MERGER;
             case "sentinel3:dumpInformation":
                 return new DumpInformationMerger();
             case "sentinel-safe:orbitReference":
