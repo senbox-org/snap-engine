@@ -14,6 +14,9 @@ package org.esa.s3tbx.dataio.s3.slstr;/*
  * with this program; if not, see http://www.gnu.org/licenses/
  */
 
+import com.bc.ceres.glevel.support.DefaultMultiLevelImage;
+import com.bc.ceres.glevel.support.DefaultMultiLevelModel;
+import com.bc.ceres.glevel.support.DefaultMultiLevelSource;
 import org.esa.s3tbx.dataio.s3.Manifest;
 import org.esa.s3tbx.dataio.s3.Sentinel3ProductReader;
 import org.esa.snap.core.datamodel.Band;
@@ -26,11 +29,13 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductNodeGroup;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.runtime.Config;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
 
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
+import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Arrays;
@@ -183,6 +188,50 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
     }
 
     @Override
+    protected RasterDataNode addSpecialNode(Product masterProduct, Band sourceBand, Product targetProduct) {
+        final String sourceBandName = sourceBand.getName();
+        final int sourceBandNameLength = sourceBandName.length();
+        String gridIndex = sourceBandName;
+        if (sourceBandNameLength > 1) {
+            gridIndex = sourceBandName.substring(sourceBandNameLength - 2);
+        }
+        final Integer sourceStartOffset = getStartOffset(gridIndex);
+        final Integer sourceTrackOffset = getTrackOffset(gridIndex);
+        if (sourceStartOffset != null && sourceTrackOffset != null) {
+            final short[] sourceResolutions = getResolutions(gridIndex);
+            if (gridIndex.startsWith("t")) {
+                return copyTiePointGrid(sourceBand, targetProduct, sourceStartOffset, sourceTrackOffset, sourceResolutions);
+            } else {
+                final Band targetBand = new Band(sourceBandName, sourceBand.getDataType(),
+                                                 sourceBand.getRasterWidth(), sourceBand.getRasterHeight());
+                targetProduct.addBand(targetBand);
+                ProductUtils.copyRasterDataNodeProperties(sourceBand, targetBand);
+                final RenderedImage sourceRenderedImage = sourceBand.getSourceImage().getImage(0);
+                //if pixel band geo-codings are used, scenetransforms are set
+                if (Config.instance("s3tbx").load().preferences().getBoolean(SLSTR_L1B_USE_PIXELGEOCODINGS, false)) {
+                    targetBand.setSourceImage(sourceRenderedImage);
+                } else {
+                    final AffineTransform imageToModelTransform = new AffineTransform();
+                    final float[] offsets = getOffsets(sourceStartOffset, sourceTrackOffset, sourceResolutions);
+                    imageToModelTransform.translate(offsets[0], offsets[1]);
+                    final short[] referenceResolutions = getReferenceResolutions();
+                    final int subSamplingX = sourceResolutions[0] / referenceResolutions[0];
+                    final int subSamplingY = sourceResolutions[1] / referenceResolutions[1];
+                    imageToModelTransform.scale(subSamplingX, subSamplingY);
+                    final DefaultMultiLevelModel targetModel =
+                            new DefaultMultiLevelModel(imageToModelTransform,
+                                                       sourceRenderedImage.getWidth(), sourceRenderedImage.getHeight());
+                    final DefaultMultiLevelSource targetMultiLevelSource =
+                            new DefaultMultiLevelSource(sourceRenderedImage, targetModel);
+                    targetBand.setSourceImage(new DefaultMultiLevelImage(targetMultiLevelSource));
+                }
+                return targetBand;
+            }
+        }
+        return sourceBand;
+    }
+
+    @Override
     protected void setAutoGrouping(Product[] sourceProducts, Product targetProduct) {
         String bandGrouping = getAutoGroupingString(sourceProducts);
         String[] unwantedGroups = new String[]{"F1_BT", "F2_BT", "S1_radiance", "S2_radiance", "S3_radiance",
@@ -199,6 +248,30 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
                                               "radiance_bo:radiance_cn:" +
                                               "radiance_co:S*BT_in*:" +
                                               "S*BT_io*:" + bandGrouping);
+    }
+
+    @Override
+    protected void setSceneTransforms(Product product) {
+        //if tie point band geo-codings are used, imagetomodeltransforms are set
+        if (Config.instance("s3tbx").load().preferences().getBoolean(SLSTR_L1B_USE_PIXELGEOCODINGS, false)) {
+            final Band[] bands = product.getBands();
+            for (Band band : bands) {
+                final GeoCoding bandGeoCoding = getBandGeoCoding(product, band.getName().substring(band.getName().length() - 2));
+                final SlstrGeoCodingSceneTransformProvider transformProvider =
+                        new SlstrGeoCodingSceneTransformProvider(product.getSceneGeoCoding(), bandGeoCoding);
+                band.setModelToSceneTransform(transformProvider.getModelToSceneTransform());
+                band.setSceneToModelTransform(transformProvider.getSceneToModelTransform());
+            }
+            final ProductNodeGroup<Mask> maskGroup = product.getMaskGroup();
+            for (int i = 0; i < maskGroup.getNodeCount(); i++) {
+                final Mask mask = maskGroup.get(i);
+                final GeoCoding bandGeoCoding = getBandGeoCoding(product, mask.getName().substring(mask.getName().length() - 2));
+                final SlstrGeoCodingSceneTransformProvider transformProvider =
+                        new SlstrGeoCodingSceneTransformProvider(product.getSceneGeoCoding(), bandGeoCoding);
+                mask.setModelToSceneTransform(transformProvider.getModelToSceneTransform());
+                mask.setSceneToModelTransform(transformProvider.getSceneToModelTransform());
+            }
+        }
     }
 
     @Override
@@ -259,18 +332,20 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
     private void setPixelBandGeoCodings(Product product) {
         final Band[] bands = product.getBands();
         for (Band band : bands) {
-            setBandGeoCoding(product, band, band.getName().substring(band.getName().length() - 2));
+            final GeoCoding bandGeoCoding = getBandGeoCoding(product, band.getName().substring(band.getName().length() - 2));
+            band.setGeoCoding(bandGeoCoding);
         }
         final ProductNodeGroup<Mask> maskGroup = product.getMaskGroup();
         for (int i = 0; i < maskGroup.getNodeCount(); i++) {
             final Mask mask = maskGroup.get(i);
-            setBandGeoCoding(product, mask, getGridIndexFromMask(mask));
+            final GeoCoding bandGeoCoding = getBandGeoCoding(product, mask.getName().substring(mask.getName().length() - 2));
+            mask.setGeoCoding(bandGeoCoding);
         }
     }
 
-    private void setBandGeoCoding(Product product, Band band, String end) {
+    private GeoCoding getBandGeoCoding(Product product, String end) {
         if (geoCodingMap.containsKey(end)) {
-            band.setGeoCoding(geoCodingMap.get(end));
+            return geoCodingMap.get(end);
         } else {
             Band latBand = null;
             Band lonBand = null;
@@ -310,10 +385,11 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
             }
             if (latBand != null && lonBand != null) {
                 final BasicPixelGeoCoding geoCoding = GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, "", 5);
-                band.setGeoCoding(geoCoding);
                 geoCodingMap.put(end, geoCoding);
+                return geoCoding;
             }
         }
+        return null;
     }
 
     private String getGridIndexFromMask(Mask mask) {
