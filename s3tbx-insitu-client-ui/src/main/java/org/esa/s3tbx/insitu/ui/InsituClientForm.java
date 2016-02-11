@@ -89,12 +89,12 @@ public class InsituClientForm extends JPanel {
         layout.setCellWeightX(3, 3, 1.0);
         add(new JLabel("Start time:"));
         utcCalendar.add(Calendar.DAY_OF_YEAR, -1);
-        add(new DateTimePicker(utcCalendar.getTime(), Locale.getDefault(),
-                               new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss"), new SimpleDateFormat("HH:mm:ss")));
+        final SimpleDateFormat defaultDateFormat = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss");
+        final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
+        add(new DateTimePicker(utcCalendar.getTime(), Locale.getDefault(), defaultDateFormat, timeFormat));
         utcCalendar.add(Calendar.DAY_OF_YEAR, 2);
         add(new JLabel("End time:"));
-        add(new DateTimePicker(utcCalendar.getTime(), Locale.getDefault(), new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss"),
-                               new SimpleDateFormat("HH:mm:ss")));
+        add(new DateTimePicker(utcCalendar.getTime(), Locale.getDefault(), defaultDateFormat, timeFormat));
 
         layout.setCellWeightX(4, 1, 1.0);
         layout.setCellWeightX(4, 3, 1.0);
