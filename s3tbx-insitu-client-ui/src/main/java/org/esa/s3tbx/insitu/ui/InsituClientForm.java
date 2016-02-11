@@ -1,6 +1,7 @@
 package org.esa.s3tbx.insitu.ui;
 
 import com.bc.ceres.swing.TableLayout;
+import com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
 import org.esa.snap.rcp.actions.help.HelpAction;
 import org.esa.snap.rcp.util.DateTimePicker;
 import org.esa.snap.tango.TangoIcons;
@@ -19,6 +20,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
@@ -164,16 +167,18 @@ public class InsituClientForm extends JPanel {
         buttonPanel.add(buttonLayout.createVerticalSpacer());
         AbstractButton helpButton = ToolButtonFactory.createButton(new HelpAction(helpCtx), false);
         helpButton.setName("helpButton");
+        buttonPanel.add(helpButton);
         contentPanel.add(buttonPanel, BorderLayout.EAST);
 
         return contentPanel;
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            Locale.setDefault(Locale.ENGLISH);
-            TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+    public static void main(String[] args) throws UnsupportedLookAndFeelException {
+        UIManager.setLookAndFeel(new WindowsLookAndFeel());
+        Locale.setDefault(Locale.ENGLISH);
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 
+        SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame();
             final ImageIcon imageIcon = UIUtils.loadImageIcon("/org/esa/s3tbx/insitu/insitu24.png", InsituClientForm.class);
             if (imageIcon != null) {
