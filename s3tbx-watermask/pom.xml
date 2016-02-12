@@ -12,8 +12,8 @@
     <artifactId>s3tbx-watermask</artifactId>
     <packaging>nbm</packaging>
 
-    <name>S3TBX Watermask Operator</name>
-    <description>Provides an API as well as an operator for creating an accurate, shapefile-based land-water mask.
+    <name>Watermask Operator</name>
+    <description>Provides an API as well as an operator for creating an accurate and fractional land-water mask.
     </description>
 	
     <dependencies>
