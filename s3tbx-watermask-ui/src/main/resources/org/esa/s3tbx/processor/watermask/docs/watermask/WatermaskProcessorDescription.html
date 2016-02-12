@@ -37,19 +37,65 @@
 
 <p>
     The Land/Water Mask processor can be invoked in the Sentinel Toolbox from tool menu by selecting
-    <b>Optical->Preprocessing->Land/Water Mask</b>.
+    <b>Raster->Mask->Land/Water Mask</b>.
     On the command line the Land/Water Mask processor is available by means of the Graph Processing Tool <code>gpt</code>
     which is located in the Sentinel Toolbox <code>bin</code> directory.
     Typing <code>gpt LandWaterMask -h</code> displays further information.
 </p>
 
-<p>
-    Selecting the <b>Land/Water Mask Processor</b> command from the Sentinel Toolbox tool menu pops up the following dialog:
+<h4>I/O Parameters Panel</h4>
+<p align="center"><img src="images/LandWaterMaskIOParameters.png" alt="I/O Parameters of LandWaterMask Processor"></p>
+
+<h5>Source Product Group</h5>
+
+<p class="i1">
+    <b>Source product:</b>
+    Here the user specifies the source product.
+    The combo box presents a list of all products opened in the VISAT.
+    The user may select one of these or, by clicking on the button next to the combo box, choose a product
+    from the file system.
 </p>
 
-<p>
-    todo: continue
+<h5>Target Product Group</h5>
+
+<p class="i1">
+    <b>Name:</b>
+    Used to specify the name of the target product.
 </p>
+
+<p class="i1">
+    <b>Save as:</b>
+    Used to specify whether the target product should be saved to the file system. The
+    combo box presents a list of available file formats.
+    The text field or the button next to it allow to specify a target directory.
+</p>
+
+<p class="i1">
+    <b>Open in VISAT:</b>
+    Used to specify whether the target product should be opened in VISAT.
+    When the target product is not saved, it is opened in VISAT automatically.
+</p>
+
+<h4>Processing Parameters Panel</h4>
+<p align="center"><img src="images/LandWaterMaskProcParameters.png" alt="Processing Parameters of LandWaterMask Processor"></p>
+
+<p class="i1">
+    <b>Resolution:</b> Select one of the available resolutions from the predefined list.
+    Defines the resolution and the origin of the source land/water map. Available resolutions are 50 meter,
+    150 meter and 100 meter per pixel. For more explanation on the source data see the
+    <a href="WatermaskAlgorithmSpecification.html">Land/Water Mask Algorithm Specification</a>
+</p>
+
+<p class="i1">
+    <b>Subsampling factor x:</b>
+    Specifies in how many sub-pixel each pixel of the input is sub-sampled in x-direction. A value of '1' means no sub-sampling at all.
+</p>
+
+<p class="i1">
+    <b>Subsampling factor y:</b>
+    Specifies in how many sub-pixel each pixel of the input is sub-sampled in y-direction. A value of '1' means no sub-sampling at all.
+</p>
+
 
 <hr>
 </body>

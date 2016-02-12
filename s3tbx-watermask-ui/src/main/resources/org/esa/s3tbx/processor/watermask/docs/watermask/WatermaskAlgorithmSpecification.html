@@ -25,19 +25,54 @@
 <table class="header">
     <tr class="header">
         <td class="header">&nbsp;
-            Land/Water Mask Algorithm Specification</td>
-        <td class="header" align="right"><a href="nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/general/overview/SnapOverview.html"><img src="../images/snap_header.jpg" border=0></a>
+            Land/Water Mask Algorithm Specification
+        </td>
+        <td class="header" align="right"><a href="nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/general/overview/SnapOverview.html"><img
+                src="../images/snap_header.jpg" border=0></a>
         </td>
     </tr>
 </table>
 
-<p>Algorithm Specification of the science processors of the MERIS/(A)ATSR Toolbox</p>
-
-<h3>Land/Water Mask</h3>
-
+<h3>Algorithm Specification</h3>
 <p>
-    todo
+    The Land/Water Mask Algorithm takes the geographic bounds of the input product and creates a new
+    product covering the same area. The output product contains a single band, which indicates if a pixel is land or water.
+    For each pixel, it contains the fraction of water; a value of 0.0 indicates land, a value of 100.0 indicates water,
+    and every value in between indicates a mixed pixel.<br>
+    Since the base data may exhibit a higher resolution than the input product, a subsampling &ge;1 may be specified. In this case for each
+    resulting sub-pixel the it is computed if its land or water. Averaging the sub-pixel gives the fraction of water covered by the macro-pixel.<br>
+    There are two auxiliary data sets on which the watermask can be based.
 </p>
+
+
+<h4>High-Resolution Dataset</h4>
+<p>The high-res dataset is based on data given by
+    <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer">
+        <param name="content" value="http://www2.jpl.nasa.gov/srtm/">
+        <param name="text" value="<html>SRTM</html>">
+        <a href="http://www2.jpl.nasa.gov/srtm/">SRTM</a>
+    </object>
+    -shapefiles between 60° north and 58° south, and by the
+    <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer">
+        <param name="content" value="http://due.esrin.esa.int/page_globcover.php">
+        <param name="text" value="<html>GlobCover</html>">
+        <a href="http://due.esrin.esa.int/page_globcover.php">GlobCover</a></object>
+    world map above 60° north.
+    Below 58° south, this dataset does not contain any data, so the resulting product will contain the fill value for these parts.
+    This high-res dataset will be employed when the resolution parameter is set to 50m or 150m.
+</p>
+<p align="center"><img src="images/hi-res-source-data.png"></p>
+
+<h4>Low-Resolution Data Set</h4>
+<p>The second dataset is based on
+    <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer">
+        <param name="content" value="http://www.ngdc.noaa.gov/mgg/shorelines/gshhs.html">
+        <param name="text" value="<html>GSHHS</html>">
+        <a href="http://www.ngdc.noaa.gov/mgg/shorelines/gshhs.html">GSHHS</a></object>
+    data in a resolution of 1 km. It covers the whole earth, and will be employed
+    when the resolution parameter is set to 1000.
+</p>
+
 
 <hr>
 </body>
