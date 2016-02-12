@@ -22,8 +22,12 @@ import org.esa.snap.core.util.ImageUtils;
 
 import javax.media.jai.JAI;
 import javax.media.jai.SourcelessOpImage;
-import java.awt.*;
-import java.awt.image.*;
+import java.awt.Point;
+import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferByte;
+import java.awt.image.Raster;
+import java.awt.image.SampleModel;
+import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -108,10 +112,9 @@ public class SRTMOpImage extends SourcelessOpImage {
             }
         }
 
-        final InputStream inputStream = createInputStream(imgFileName);
         final WritableRaster targetRaster = createWritableRaster(rawImgSampleModel, location);
         final byte[] data = ((DataBufferByte) targetRaster.getDataBuffer()).getData();
-        try {
+        try (InputStream inputStream = createInputStream(imgFileName)) {
             int count = 0;
             int amount = data.length;
             while (count < data.length) {
@@ -121,8 +124,6 @@ public class SRTMOpImage extends SourcelessOpImage {
                 count += inputStream.read(data, count, amount);
             }
             Assert.state(count == data.length, "Not all data have been read.");
-        } finally {
-            inputStream.close();
         }
         return targetRaster;
     }
