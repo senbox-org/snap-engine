@@ -28,7 +28,7 @@ public class WatermaskConstants {
     // the 'preliminary final' HTTP location (might get a versioning later, tbd):
     public static final String REMOTE_HTTP_HOST = "http://step.esa.int";
 
-    public static final String REMOTE_HTTP_PATH = "/auxdata/watermask-aux/images/";
+    public static final String REMOTE_HTTP_PATH = "/auxdata/watermask/images/";
 
     public static final Path LOCAL_AUXDATA_PATH = SystemUtils.getAuxDataPath().resolve("s3tbx/watermask").toAbsolutePath();
 
