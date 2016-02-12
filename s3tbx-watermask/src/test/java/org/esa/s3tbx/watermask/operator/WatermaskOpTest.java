@@ -16,7 +16,11 @@
 
 package org.esa.s3tbx.watermask.operator;
 
-import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.dataop.maptransf.Datum;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.OperatorSpi;
@@ -44,7 +48,7 @@ public class WatermaskOpTest {
     public void setUp() throws Exception {
         sourceProduct = new Product("dummy", "type", 1, 1);
         sourceProduct.setSceneGeoCoding(new MyGeoCoding());
-        parameters = new HashMap<String, Object>();
+        parameters = new HashMap<>();
         GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis();
     }
 
