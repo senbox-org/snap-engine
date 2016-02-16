@@ -31,7 +31,7 @@ public class MinMergerTest {
         final Document manifest = ManifestTestUtils.createDocument();
         final Element manifestElement = manifest.createElement("slstr:min");
 
-        new MinMerger().mergeNodes(fromParents, manifestElement, manifest);
+        new MinMerger_2().mergeNodes(fromParents, manifestElement, manifest);
 
         assertEquals(0, manifestElement.getAttributes().getLength());
         assertEquals(1, manifestElement.getChildNodes().getLength());

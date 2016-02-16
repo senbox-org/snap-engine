@@ -121,7 +121,7 @@ public class ManifestMerger {
                 //todo implement
                 return NULL_MERGER;
             case "slstr:min":
-                return new MinMerger();
+                return new MinMerger_2();
             case "slstr:max":
                 return new MaxMerger();
             case "sentinel3:dumpInformation":
