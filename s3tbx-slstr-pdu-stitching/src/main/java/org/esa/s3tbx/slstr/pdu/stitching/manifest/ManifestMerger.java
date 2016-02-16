@@ -122,11 +122,9 @@ public class ManifestMerger {
                 //todo implement
                 return NULL_MERGER;
             case "slstr:min":
-                //todo implement
-                return NULL_MERGER;
+                return new MinMerger();
             case "slstr:max":
-                //todo implement
-                return NULL_MERGER;
+                return new MaxMerger();
             case "sentinel3:dumpInformation":
                 return new DumpInformationMerger();
             case "sentinel-safe:orbitReference":
