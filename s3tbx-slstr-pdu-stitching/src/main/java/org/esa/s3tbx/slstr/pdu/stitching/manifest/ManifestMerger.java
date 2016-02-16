@@ -107,8 +107,7 @@ public class ManifestMerger {
             case "slstr:classificationSummary":
                 return new ClassificationSummaryMerger(imageSizes);
             case "slstr:pixelQualitySummary":
-                //todo implement
-                return NULL_MERGER;
+                return new PixelQualitySummaryMerger();
             case "slstr:missingElements":
                 //todo implement
                 return NULL_MERGER;
