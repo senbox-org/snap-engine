@@ -1,6 +1,7 @@
 package org.esa.s3tbx.processor.rad2refl;
 
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.pointop.Sample;
 import org.esa.snap.core.util.math.RsMathUtils;
 
@@ -23,7 +24,7 @@ public class MerisRadReflConverter implements RadReflConverter {
         try {
             rad2ReflAuxdata = Rad2ReflAuxdata.loadAuxdata(sourceProduct.getProductType());
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new OperatorException("Cannot load Radiance-to-Reflectance auxdata for MERIS: " + e.getMessage());
         }
     }
 
@@ -35,14 +36,14 @@ public class MerisRadReflConverter implements RadReflConverter {
 
         final int detectorIndex = sourceSamples[Sensor.MERIS.getNumSpectralBands() + 1].getInt();
         if (detectorIndex >= 0) {
-            double[] solarFluxes = getMerisSolarFluxes(detectorIndex);
+            double[] solarFluxes = rad2ReflAuxdata.getDetectorSunSpectralFluxes()[detectorIndex];
 
             for (int i = 0; i < Sensor.MERIS.getNumSpectralBands(); i++) {
                 spectralInputValues[i] = sourceSamples[i].getFloat();
                 if (conversionMode.equals("RAD_TO_REFL")) {
-                    spectralOutputValues[i] = radianceToReflectance(spectralInputValues[i], sza, (float) solarFluxes[i]);
+                    spectralOutputValues[i] = RsMathUtils.radianceToReflectance(spectralInputValues[i], sza, (float) solarFluxes[i]);
                 } else {
-                    spectralOutputValues[i] = reflectanceToRadiance(spectralInputValues[i], sza, (float) solarFluxes[i]);
+                    spectralOutputValues[i] = RsMathUtils.reflectanceToRadiance(spectralInputValues[i], sza, (float) solarFluxes[i]);
                 }
             }
         }
@@ -54,15 +55,4 @@ public class MerisRadReflConverter implements RadReflConverter {
         return conversionMode.equals("RAD_TO_REFL") ? Sensor.MERIS.getReflAutogroupingString() : Sensor.MERIS.getRadAutogroupingString();
     }
 
-    public float radianceToReflectance(float rad, float sza, float solarFlux) {
-        return RsMathUtils.radianceToReflectance(rad, sza, solarFlux);
-    }
-
-    public float reflectanceToRadiance(float refl, float sza, float solarFlux) {
-        return RsMathUtils.reflectanceToRadiance(refl, sza, solarFlux);
-    }
-
-    private double[] getMerisSolarFluxes(int detectorIndex) {
-        return rad2ReflAuxdata.getDetectorSunSpectralFluxes()[detectorIndex];
-    }
 }

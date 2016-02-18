@@ -30,8 +30,7 @@ import static org.esa.snap.dataio.envisat.EnvisatConstants.MERIS_DETECTOR_INDEX_
 
 /**
  * An operator to provide conversion from radiances to reflectances or backwards.
- * todo: for the moment, implement for MERIS and OLCI.
- * todo: for SLSTR, check where to get solar fluxes from
+ * Currently supports MERIS, OLCI and SLSTR 500m L1 products.
  *
  * @author Olaf Danne
  * @author Marco Peters
@@ -45,7 +44,7 @@ import static org.esa.snap.dataio.envisat.EnvisatConstants.MERIS_DETECTOR_INDEX_
 public class Rad2ReflOp extends PixelOperator {
 
     @Parameter(defaultValue = "OLCI",
-            description = "The sensor", valueSet = {"MERIS", "OLCI", "SLSTR"})
+            description = "The sensor", valueSet = {"MERIS", "OLCI", "SLSTR_500m"})
     private Sensor sensor;
 
     @Parameter(description = "Conversion mode: from rad to refl, or backwards", valueSet = {"RAD_TO_REFL", "REFL_TO_RAD"},
@@ -85,7 +84,7 @@ public class Rad2ReflOp extends PixelOperator {
         }
 
         sc.defineSample(index++, sensor.getSzaBandNames()[0]);
-        if (sensor == Sensor.SLSTR) {
+        if (sensor == Sensor.SLSTR_500m) {
             sc.defineSample(index++, sensor.getSzaBandNames()[1]);  // nadir and oblique
         }
 
@@ -114,8 +113,8 @@ public class Rad2ReflOp extends PixelOperator {
         final Product targetProduct = productConfigurer.getTargetProduct();
 
         for (int i = 0; i < sensor.getNumSpectralBands(); i++) {
+            spectralInputBands[i] = sourceProduct.getBand(spectralInputBandNames[i]);
             if (spectralInputBands[i] != null) {
-                spectralInputBands[i] = sourceProduct.getBand(spectralInputBandNames[i]);
                 final Band bandToConvert = targetProduct.addBand(spectralOutputBandNames[i], ProductData.TYPE_FLOAT32);
                 String descr = spectralInputBands[i].getDescription();
                 String descrToConvert = descr;
@@ -175,7 +174,7 @@ public class Rad2ReflOp extends PixelOperator {
         } else if (sensor == Sensor.OLCI) {
             converter = new OlciRadReflConverter(conversionMode);
             autogroupingString = ((OlciRadReflConverter) converter).getSpectralBandAutogroupingString();
-        } else if (sensor == Sensor.SLSTR) {
+        } else if (sensor == Sensor.SLSTR_500m) {
             converter = new SlstrRadReflConverter(conversionMode);
             autogroupingString = ((SlstrRadReflConverter) converter).getSpectralBandAutogroupingString();
         } else {

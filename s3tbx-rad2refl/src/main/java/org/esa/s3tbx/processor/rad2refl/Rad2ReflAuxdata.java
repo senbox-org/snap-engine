@@ -12,7 +12,7 @@ import java.nio.file.Path;
 import java.util.StringTokenizer;
 
 /**
- * Radiance/reflectance conversion auxdata
+ * Radiance/reflectance conversion auxdata for MERIS (i.e. solar fluxes)
  *
  * @author olafd
  */
