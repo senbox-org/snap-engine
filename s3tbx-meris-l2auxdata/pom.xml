@@ -11,7 +11,7 @@
     <packaging>nbm</packaging>
 
     <name>MERIS L2 Auxdata</name>
-    <description>MERIS L12 Auxdata.</description>
+    <description>MERIS L2 Auxdata</description>
 
     <dependencies>
         <dependency>

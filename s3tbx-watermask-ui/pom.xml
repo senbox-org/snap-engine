@@ -25,8 +25,8 @@
     <artifactId>s3tbx-watermask-ui</artifactId>
     <packaging>nbm</packaging>
 
-    <name>S3TBX Watermask Operator GUI</name>
-    <description>Provides an API as well as an operator for creating an accurate, shapefile-based land-water mask.</description>
+    <name>Watermask Operator GUI</name>
+    <description>Provides an API as well as an operator for creating an accurate and fractional land-water mask.</description>
 
     <dependencies>
         <dependency>

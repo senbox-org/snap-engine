@@ -51,6 +51,8 @@
         <module>s3tbx-merisl3-reader</module>
         <module>s3tbx-modis-reader</module>
         <module>s3tbx-proba-v-reader</module>
+        <module>s3tbx-rad2refl</module>
+        <module>s3tbx-rad2refl-ui</module>
         <module>s3tbx-sentinel3-reader</module>
         <module>s3tbx-sentinel3-reader-ui</module>
         <module>s3tbx-slstr-pdu-stitching</module>

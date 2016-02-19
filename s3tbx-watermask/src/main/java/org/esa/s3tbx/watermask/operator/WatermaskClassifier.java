@@ -21,7 +21,6 @@ import org.esa.s3tbx.watermask.util.ImageDescriptorBuilder;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
-import org.esa.snap.core.dataop.downloadable.FtpDownloader;
 import org.geotools.resources.image.ImageUtilities;
 
 import javax.imageio.ImageIO;
@@ -49,8 +48,6 @@ public class WatermaskClassifier {
     static final int GC_TILE_HEIGHT = 491;
     static final int GC_IMAGE_WIDTH = 129600;
     static final int GC_IMAGE_HEIGHT = 10800;
-
-    static final String AUXDATA_VERSION = "v1.3";
 
     private final ImageSource imageSource;
     private float[] samplingStepsX;
@@ -219,15 +216,6 @@ public class WatermaskClassifier {
     }
 
     private void installAuxdata() throws IOException {
-        // todo: finally replace by http download from step.esa.int
-//        final String remoteFTPHost = WatermaskConstants.REMOTE_FTP_HOST;
-//        final String remoteFtpPath = WatermaskConstants.REMOTE_FTP_PATH;
-//        final String ftpUser = WatermaskConstants.FTP_USER;
-//        final String ftpPassword = WatermaskConstants.FTP_PASSWORD;
-//
-//        FtpDownloader ftpDownloader = new FtpDownloader(remoteFTPHost, ftpUser, ftpPassword);
-//        WatermaskUtils.installRemoteFTPFiles(ftpDownloader, remoteFtpPath);
-
         final String remoteHTTPHost = WatermaskConstants.REMOTE_HTTP_HOST;
         final String remoteHTTPPath = WatermaskConstants.REMOTE_HTTP_PATH;
         final String baseURL = remoteHTTPHost + remoteHTTPPath;
@@ -292,7 +280,7 @@ public class WatermaskClassifier {
                         .build();
     }
 
-    private static interface ImageSource {
+    private interface ImageSource {
 
         float getLonWidth();
         float getLatHeight(float lat);
@@ -357,16 +345,13 @@ public class WatermaskClassifier {
             if (image != null) {
                 return image;
             }
-            final URL url = getClass().getResource("water.png");
-            BufferedImage waterImage = null;
             try {
-                waterImage = ImageIO.read(url);
+                BufferedImage waterImage = ImageIO.read(getClass().getResourceAsStream("water.png"));
+                image = new NullOpImage(waterImage, ImageUtilities.getImageLayout(waterImage), null, OpImage.OP_COMPUTE_BOUND);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            NullOpImage opImage = new NullOpImage(waterImage, ImageUtilities.getImageLayout(waterImage), null, OpImage.OP_COMPUTE_BOUND);
-            image = opImage;
-            return opImage;
+            return image;
         }
     }
 
