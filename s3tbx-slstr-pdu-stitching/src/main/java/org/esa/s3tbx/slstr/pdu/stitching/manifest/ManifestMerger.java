@@ -107,8 +107,7 @@ public class ManifestMerger {
             case "slstr:classificationSummary":
                 return new ClassificationSummaryMerger(imageSizes);
             case "slstr:pixelQualitySummary":
-                //todo implement
-                return NULL_MERGER;
+                return new PixelQualitySummaryMerger();
             case "slstr:missingElements":
                 //todo implement
                 return NULL_MERGER;
@@ -122,11 +121,9 @@ public class ManifestMerger {
                 //todo implement
                 return NULL_MERGER;
             case "slstr:min":
-                //todo implement
-                return NULL_MERGER;
+                return new MinMerger();
             case "slstr:max":
-                //todo implement
-                return NULL_MERGER;
+                return new MaxMerger();
             case "sentinel3:dumpInformation":
                 return new DumpInformationMerger();
             case "sentinel-safe:orbitReference":
