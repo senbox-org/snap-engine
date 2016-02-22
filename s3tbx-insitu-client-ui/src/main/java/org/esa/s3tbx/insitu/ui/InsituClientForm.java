@@ -82,8 +82,13 @@ public class InsituClientForm extends JPanel {
 
         layout.setCellWeightX(2, 1, 1.0);
         layout.setCellColspan(2, 1, 3);
+        layout.setCellFill(2, 3, TableLayout.Fill.BOTH);
+        layout.setRowWeightY(2, 0.6);
         add(new JLabel("Product:"));
-        add(new JComboBox<>(new String[]{"S3A_OL_2_WFR____20100602T094537_20100602T094837_2015070..."}));
+        final JList<String> productList = new JList<>(new String[]{"S3A_OL_2_WFR____20100602T094537_20100602T094837_2015070..."});
+        productList.setVisibleRowCount(6);
+        add(new JScrollPane(productList));
+
 
         layout.setCellWeightX(3, 1, 1.0);
         layout.setCellWeightX(3, 3, 1.0);
