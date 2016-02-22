@@ -1,9 +1,5 @@
-package org.esa.s3tbx.processor.rad2refl.visat;
+package org.esa.s3tbx.processor.rad2refl.ui;
 
-import com.bc.ceres.binding.Property;
-import com.bc.ceres.binding.PropertyContainer;
-import com.bc.ceres.binding.PropertySet;
-import com.bc.ceres.swing.binding.BindingContext;
 import org.esa.snap.core.gpf.ui.DefaultSingleTargetProductDialog;
 import org.esa.snap.rcp.actions.AbstractSnapAction;
 import org.esa.snap.ui.AppContext;
@@ -13,18 +9,10 @@ import org.openide.awt.ActionRegistration;
 import org.openide.util.NbBundle;
 
 import java.awt.event.ActionEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 
-@ActionID(
-        category = "Processing",
-        id = "org.esa.s3tbx.processor.rad2refl.visat.Rad2ReflAction"
-)
+@ActionID(category = "Processing", id = "org.esa.s3tbx.processor.rad2refl.ui.Rad2ReflAction" )
 @ActionRegistration(displayName = "#CTL_Rad2ReflAction_Text")
-@ActionReference(
-        path = "Menu/Optical/Preprocessing",
-        position = 400
-)
+@ActionReference(path = "Menu/Optical/Preprocessing", position = 400 )
 @NbBundle.Messages({"CTL_Rad2ReflAction_Text=Radiance-to-Reflectance Processor"})
 public class Rad2ReflAction extends AbstractSnapAction {
 
