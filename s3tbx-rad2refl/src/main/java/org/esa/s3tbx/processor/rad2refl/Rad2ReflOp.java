@@ -56,7 +56,7 @@ public class Rad2ReflOp extends PixelOperator {
             defaultValue = "RAD_TO_REFL")
     private String conversionMode;
 
-    @SourceProduct(alias = "source", label = "Source product", description = "The source product.")
+    @SourceProduct(alias = "source", label = "Name", description = "The source product.")
     private Product sourceProduct;
 
     @Parameter(defaultValue = "false",
