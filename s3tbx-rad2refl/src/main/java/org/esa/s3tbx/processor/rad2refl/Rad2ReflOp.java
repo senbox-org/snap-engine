@@ -23,10 +23,15 @@ import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
-import org.esa.snap.core.gpf.pointop.*;
+import org.esa.snap.core.gpf.pointop.PixelOperator;
+import org.esa.snap.core.gpf.pointop.ProductConfigurer;
+import org.esa.snap.core.gpf.pointop.Sample;
+import org.esa.snap.core.gpf.pointop.SourceSampleConfigurer;
+import org.esa.snap.core.gpf.pointop.TargetSampleConfigurer;
+import org.esa.snap.core.gpf.pointop.WritableSample;
 import org.esa.snap.core.util.ProductUtils;
 
-import static org.esa.snap.dataio.envisat.EnvisatConstants.MERIS_DETECTOR_INDEX_DS_NAME;
+import static org.esa.snap.dataio.envisat.EnvisatConstants.*;
 
 /**
  * An operator to provide conversion from radiances to reflectances or backwards.
@@ -152,7 +157,7 @@ public class Rad2ReflOp extends PixelOperator {
         targetProduct.setProductType(sourceProduct.getProductType());
         targetProduct.setStartTime(sourceProduct.getStartTime());
         targetProduct.setEndTime(sourceProduct.getEndTime());
-        ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
+        ProductUtils.copyFlagBands(sourceProduct, targetProduct, true);
         ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
         ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
 
