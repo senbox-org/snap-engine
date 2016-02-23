@@ -1,6 +1,6 @@
 package org.esa.s3tbx.insitu.server;
 
-import org.esa.s3tbx.insitu.TestInsituServerX;
+import org.esa.s3tbx.insitu.TestInsituServer;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -12,7 +12,7 @@ public class InsituServerTest {
 
     @Test
     public void testMethod() throws Exception {
-        final InsituServerX server = new TestInsituServerX.Spi().createServer();
+        final InsituServer server = new TestInsituServer.Spi().createServer();
         final Query builder = new Query();
         builder.subject("interest");
         builder.campaign("Muscheln");

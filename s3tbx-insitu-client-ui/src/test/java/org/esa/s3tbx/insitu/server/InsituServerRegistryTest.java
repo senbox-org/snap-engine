@@ -1,6 +1,6 @@
 package org.esa.s3tbx.insitu.server;
 
-import org.esa.s3tbx.insitu.TestInsituServerX;
+import org.esa.s3tbx.insitu.TestInsituServer;
 import org.junit.Test;
 
 import java.util.List;
@@ -11,26 +11,26 @@ import static org.junit.Assert.*;
 /**
  * @author Marco Peters
  */
-public class InsituServerRegistryXTest {
+public class InsituServerRegistryTest {
 
     @Test
     public void testCreation() {
-        final InsituServerRegistryX registry = InsituServerRegistryX.getInstance();
-        final List<InsituServerSpiX> registeredServers = registry.getRegisteredServers();
+        final InsituServerRegistry registry = InsituServerRegistry.getInstance();
+        final List<InsituServerSpi> registeredServers = registry.getRegisteredServers();
         assertTrue(registeredServers.size() >= 1);
     }
 
     @Test(expected = UnsupportedOperationException.class)
     public void testAddingServerToReturnedList() {
-        final InsituServerRegistryX registry = InsituServerRegistryX.getInstance();
-        final List<InsituServerSpiX> registeredServers = registry.getRegisteredServers();
-        registeredServers.add(new TestInsituServerX.Spi());
+        final InsituServerRegistry registry = InsituServerRegistry.getInstance();
+        final List<InsituServerSpi> registeredServers = registry.getRegisteredServers();
+        registeredServers.add(new TestInsituServer.Spi());
     }
 
     @Test
     public void testAddingAndRemovingServer() {
-        final InsituServerRegistryX registry = InsituServerRegistryX.getInstance();
-        final TestInsituServerX.Spi serverSpi = new TestInsituServerX.Spi();
+        final InsituServerRegistry registry = InsituServerRegistry.getInstance();
+        final TestInsituServer.Spi serverSpi = new TestInsituServer.Spi();
         final int serverCount = registry.getRegisteredServers().size();
 
         registry.addServer(serverSpi);

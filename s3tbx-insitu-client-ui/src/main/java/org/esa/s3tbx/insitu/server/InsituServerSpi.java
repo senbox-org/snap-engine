@@ -3,11 +3,11 @@ package org.esa.s3tbx.insitu.server;
 /**
  * @author Marco Peters
  */
-public interface InsituServerSpiX {
+public interface InsituServerSpi {
 
     String getName();
 
     String getDescription();
 
-    InsituServerX createServer() throws Exception;
+    InsituServer createServer() throws Exception;
 }

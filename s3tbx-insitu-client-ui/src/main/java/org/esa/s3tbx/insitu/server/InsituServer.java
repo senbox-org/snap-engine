@@ -3,7 +3,7 @@ package org.esa.s3tbx.insitu.server;
 /**
  * @author Marco Peters
  */
-public interface InsituServerX {
+public interface InsituServer {
 
     InsituResponse query(Query query);
 
