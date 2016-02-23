@@ -12,6 +12,15 @@ public class InSituServerRegistry {
 
     List<InSituServerSpi> serverList;
 
+    /**
+     * Gets the singleton instance of the registry.
+     *
+     * @return The instance.
+     */
+    public static InSituServerRegistry getInstance() {
+        return Holder.instance;
+    }
+
     private InSituServerRegistry() {
         serverList = new ArrayList<>();
         serverList.add(new MermaidInSituServer.Spi());
@@ -22,14 +31,12 @@ public class InSituServerRegistry {
     }
 
     boolean addServer(InSituServerSpi serverSpi) {
-        final Optional<InSituServerSpi> first = serverList.stream().filter(
-                inSituServerSpi -> inSituServerSpi.getName().equals(serverSpi.getName())).findFirst();
+        final Optional<InSituServerSpi> first = findSpi(serverSpi.getName());
         return !first.isPresent() && serverList.add(serverSpi);
     }
 
     boolean removeServer(String serverName) {
-        final Optional<InSituServerSpi> first = serverList.stream().filter(
-                inSituServerSpi -> inSituServerSpi.getName().equals(serverName)).findFirst();
+        final Optional<InSituServerSpi> first = findSpi(serverName);
         return first.isPresent() && removeServer(first.get());
     }
 
@@ -37,20 +44,12 @@ public class InSituServerRegistry {
         return serverList.contains(serverSpi) && serverList.remove(serverSpi);
     }
 
-    /**
-     * Gets the singleton instance of the registry.
-     *
-     * @return The instance.
-     */
-    public static InSituServerRegistry getInstance() {
-        return Holder.instance;
+    private Optional<InSituServerSpi> findSpi(String name) {
+        return serverList.stream().filter(inSituServerSpi -> inSituServerSpi.getName().equals(name)).findFirst();
     }
-
 
     private static class Holder {
         private static final InSituServerRegistry instance = new InSituServerRegistry();
     }
-
-
 
 }
