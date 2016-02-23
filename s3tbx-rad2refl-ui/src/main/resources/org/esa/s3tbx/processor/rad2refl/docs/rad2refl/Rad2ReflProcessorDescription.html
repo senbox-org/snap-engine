@@ -37,7 +37,7 @@
 
 <h4>I/O Parameters Tab</h4>
 
-<p align="center"><img src="images/IOParameters.png"></p>
+<p align="center"><img src="images/Rad2ReflPaths.png"></p>
 
 <h5>Source Product Group</h5>
 
@@ -58,7 +58,7 @@
 <p class="i1">
     <b>Save to:</b>
     Used to specify whether the target product should be saved to the file system. The
-    combo box presents a list of file formats. If ENVISAT is selected the source product must be in ENVISAT format too.
+    combo box presents a list of file formats.
 </p>
 
 <p class="i1">
@@ -69,54 +69,28 @@
 
 <h3>The Processing Parameters</h3>
 
-<p align="center"><img src="images/ProcessingParameters.png"></p>
+<p align="center"><img src="images/Rad2ReflParameter.png"></p>
 
 <p class="i1">
-    <b>Perform calibration: </b><br>
-    Performs a recalibration of the MERIS data. The coefficients given by the 'Source radiometric
-    correction file' are applied to withdraw the calibration. Afterwards the coefficients of the 'Target radiometric
-    correction file' are applied.
+    <b>Sensor: </b><br>
+    The corresponding sensor. The processor currently supports OLCI, SLSTR and MERIS.
+    The sensor must be selected from the drop-down menu. The default sensor is 'OLCI'.
 </p>
 
 <p class="i1">
-    <b>Source radiometric correction file: </b><br>
-    A MERIS Auxiliary Data File specifying the coefficients to revert the calibration. Files of the 2nd reprocessing
-    can be found at the ESA site <a href="http://earth.eo.esa.int/services/auxiliary_data/meris/_previous/">MERIS
-    Auxiliary Data Files</a>.
-    As default the <i>"MER_RAC_AXVIEC20050708_135553_20021224_121445_20041213_220000"</i> file is used.
+    <b>Conversion mode: </b><br>
+    Specifies if the conversion shall be from radiances to reflectances or backwards.
+    The conversion mode has one of the values 'RAD_TO_REFL', 'REFL_TO_RAD' and must be selected
+    from the drop-down menu. The default conversion mode is 'RAD_TO_REFL'. (Currently the 'REFL_TO_RAD'
+    mode is just a placeholder and only supports input products which were generated with this
+    processor using the 'RAD_TO_REFL' mode.)
 </p>
 
 <p class="i1">
-    <b>Target radiometric correction file: </b><br>
-    A MERIS Auxiliary Data File specifying the coefficients to be applied to the target product. Files of the 3nd
-    reprocessing
-    can be found at the ESA site <a href="http://earth.eo.esa.int/services/auxiliary_data/meris/">MERIS Auxiliary Data
-    Files</a>.
-    As default the <i>"MER_RAC_AXVACR20091016_154511_20021224_121445_20041213_220000"</i> file is used.
+    <b>Copy non spectral bands: </b><br>
+    If set, all non-spectral bands from the source product are written to target product.
+    The default value is 'false'.
 </p>
-
-<p class="i1">
-    <b>Perform Smile-effect correction: </b><br>
-    Enables or disables the correction of the Smile-effect.
-</p>
-
-<p class="i1">
-    <b>Perform equalisation: </b><br>
-    Enables or disables the removal of detector-to-detector systematic radiometric differences.
-</p>
-
-<p class="i1">
-    <b>Reprocessing version: </b><br>
-    Specifies from which reprocessing the source product comes from. Possible values are AUTO_DETECT,
-    REPROCESSING_2 and REPROCESSING_3.
-</p>
-
-<p class="i1">
-    <b>Perform radiance-to-reflectance conversion: </b><br>
-    Perform a conversion from radiance to reflectance values. This can not be selected if ENVISAT is chosen as
-    output format and will be disabled.
-</p>
-
 
 <hr>
 </body>

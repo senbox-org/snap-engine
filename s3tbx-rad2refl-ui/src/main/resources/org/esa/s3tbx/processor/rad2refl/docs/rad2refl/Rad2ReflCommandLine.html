@@ -1,0 +1,96 @@
+<!--
+  ~ Copyright (C) 2011 Brockmann Consult GmbH (info@brockmann-consult.de)
+  ~
+  ~ This program is free software; you can redistribute it and/or modify it
+  ~ under the terms of the GNU General Public License as published by the Free
+  ~ Software Foundation; either version 3 of the License, or (at your option)
+  ~ any later version.
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+  ~ more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License along
+  ~ with this program; if not, see http://www.gnu.org/licenses/
+  -->
+
+<html>
+<head>
+    <title>SNAP Data Processors - Radiance-to-Reflectance Processor - Command Line Description</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+
+<table class="header">
+    <tr class="header">
+        <td class="header">&nbsp;
+            Radiance-to-Reflectance Processor - Command Line Description
+        </td>
+        <td class="header" align="right"><a href="nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/general/overview/SnapOverview.html"><img src="../images/snap_header.jpg"
+                                                                                     border=0></a>
+        </td>
+    </tr>
+</table>
+
+<h3>Processor Description</h3>
+
+Since the Radiance-to-Reflectance processor makes use of the SNAP graph processing framework, it can be
+used also as a command line tool. The graph processing is invoked
+by the command
+<ul>
+    <li>
+        ${S3TBX-INSTALL-DIR}/bin/gpt
+    </li>
+</ul>
+
+To obtain general help on the graph processing, use the command
+<ul>
+    <li>
+        ${S3TBX-INSTALL-DIR}/bin/gpt -h
+    </li>
+</ul>
+
+Specific help on the Radiance-to-Reflectance processor can be obtained with
+<ul>
+    <li>
+        ${S3TBX-INSTALL-DIR}/bin/gpt -h Rad2Refl
+    </li>
+</ul>
+In this case, information on the usage and a list of all available parameters are given.
+<p align="center"><img src="images/Rad2ReflCommandLine.png"></p>
+
+The Radiance-to-Reflectance processor parameters can also be specified via a graph xml file.
+A possible graph xml file could look like the following. (Note that in principle it is not necessary
+to explicitly set parameters if default values shall be used).
+<pre>
+
+    &lt;graph id="RadianceToReflectanceOlciTest"&gt;
+        &lt;version&gt;1.0&lt;/version&gt;
+        &lt;node id="rad2refl"&gt;
+            &lt;operator&gt;Rad2Refl&lt;/operator&gt;
+            &lt;sources&gt;
+                &lt;source&gt;${olciProduct}&lt;/source&gt;
+            &lt;/sources&gt;
+            &lt;parameters&gt;
+                &lt;sensor&gt;OLCI&lt;/sensor&gt;
+            &lt;/parameters&gt;
+            &lt;parameters&gt;
+                &lt;conversionMode&gt;RAD_TO_REFL&lt;/conversionMode&gt;
+            &lt;/parameters&gt;
+            &lt;parameters&gt;
+                &lt;copyNonSpectralBands&gt;true&lt;/copyNonSpectralBands&gt;
+            &lt;/parameters&gt;
+        &lt;/node&gt;
+    &lt;/graph&gt;
+
+</pre>
+
+This graph can be invoked by the following call on the command line:
+<pre>
+  gpt &lt;graph-file.xml&gt; -SolciProduct=&lt;path-to-source-file&gt;
+</pre>
+
+<hr>
+</body>
+</html>
