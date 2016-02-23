@@ -10,7 +10,7 @@ import java.util.Optional;
  */
 public class InSituServerRegistry {
 
-    List<InSituServerSpi> serverList;
+    private List<InSituServerSpi> serverList;
 
     /**
      * Gets the singleton instance of the registry.
