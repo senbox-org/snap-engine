@@ -5,6 +5,6 @@ package org.esa.s3tbx.insitu.server;
  */
 public interface InsituServer {
 
-    InsituResponse query(InsituQuery query);
+    InsituResponse query(InsituQuery query) throws InsituServerException;
 
 }

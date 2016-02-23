@@ -13,7 +13,7 @@ import static org.junit.Assert.*;
 /**
  * @author Marco Peters
  */
-public class MermaidInsituQueryBuilderTest {
+public class MermaidQueryFormatterTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
@@ -39,15 +39,15 @@ public class MermaidInsituQueryBuilderTest {
         query.limit(10);
         query.shift(5);
         query.countOnly(true);
-        String queryString = MermaidQueryBuilder.formatQuery(query);
+        String queryString = MermaidQueryFormatter.format(query);
         assertTrue(queryString.startsWith("/interest?"));
         assertTrue(queryString.contains("campaign=Muscheln"));
-        assertTrue(queryString.contains("latMin=-10.943"));
-        assertTrue(queryString.contains("lonMin=5.0"));
-        assertTrue(queryString.contains("latMax=46.12"));
-        assertTrue(queryString.contains("lonMax=15.36"));
-        assertTrue(queryString.contains("startDate=2014-01-01 00:00:00"));
-        assertTrue(queryString.contains("stopDate=2015-12-31 00:00:00"));
+        assertTrue(queryString.contains("lat_min=-10.943"));
+        assertTrue(queryString.contains("lon_min=5.0"));
+        assertTrue(queryString.contains("lat_max=46.12"));
+        assertTrue(queryString.contains("lon_max=15.36"));
+        assertTrue(queryString.contains("start_date=2014-01-01 00:00:00"));
+        assertTrue(queryString.contains("stop_date=2015-12-31 00:00:00"));
         assertTrue(queryString.contains("param=param1,param2,param3"));
         assertTrue(queryString.contains("limit=10"));
         assertTrue(queryString.contains("shift=5"));

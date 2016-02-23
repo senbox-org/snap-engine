@@ -3,6 +3,8 @@ package org.esa.s3tbx.insitu.server.mermaid;
 import org.esa.s3tbx.insitu.server.InsituQuery;
 import org.esa.snap.core.util.StringUtils;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -11,14 +13,14 @@ import java.util.List;
 /**
  * @author Marco Peters
  */
-class MermaidQueryBuilder {
+class MermaidQueryFormatter {
 
-    private static final String PARAM_LON_MIN = "lonMin";
-    private static final String PARAM_LAT_MIN = "latMin";
-    private static final String PARAM_LON_MAX = "lonMax=";
-    private static final String PARAM_LAT_MAX = "latMax";
-    private static final String PARAM_START_DATE = "startDate";
-    private static final String PARAM_STOP_DATE = "stopDate";
+    private static final String PARAM_LON_MIN = "lon_min";
+    private static final String PARAM_LAT_MIN = "lat_min";
+    private static final String PARAM_LON_MAX = "lon_max=";
+    private static final String PARAM_LAT_MAX = "lat_max";
+    private static final String PARAM_START_DATE = "start_date";
+    private static final String PARAM_STOP_DATE = "stop_date";
     private static final String PARAM_PARAM = "param";
     private static final String PARAM_CAMPAIGN = "campaign";
     private static final String PARAM_SHIFT = "shift";
@@ -27,7 +29,7 @@ class MermaidQueryBuilder {
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 
-    public static String formatQuery(InsituQuery query) {
+    public static String format(InsituQuery query) {
         List<String> queryParams= new ArrayList<>();
 
         if(query.lonMin() != null) {
@@ -43,10 +45,18 @@ class MermaidQueryBuilder {
             queryParams.add(PARAM_LAT_MAX + "=" + query.latMax());
         }
         if(query.startDate() != null) {
-            queryParams.add(PARAM_START_DATE + "=" + DATE_FORMAT.format(query.startDate()));
+            try {
+                queryParams.add(PARAM_START_DATE + "=" + URLEncoder.encode(DATE_FORMAT.format(query.startDate()), "UTF-8"));
+            } catch (UnsupportedEncodingException e) {
+                throw new IllegalArgumentException("start date could not be encoded", e);
+            }
         }
         if(query.stopDate() != null) {
-            queryParams.add(PARAM_STOP_DATE + "=" + DATE_FORMAT.format(query.stopDate()));
+            try {
+                queryParams.add(PARAM_STOP_DATE + "=" + URLEncoder.encode(DATE_FORMAT.format(query.stopDate()), "UTF-8"));
+            } catch (UnsupportedEncodingException e) {
+                throw new IllegalArgumentException("stop date could not be encoded", e);
+            }
         }
         if(query.param() != null) {
             queryParams.add(PARAM_PARAM + "=" + StringUtils.arrayToCsv(query.param()));
