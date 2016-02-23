@@ -1,5 +1,6 @@
-package org.esa.s3tbx.insitu;
+package org.esa.s3tbx.insitu.server;
 
+import org.esa.s3tbx.insitu.TestInSituServer;
 import org.junit.Test;
 
 import java.util.List;

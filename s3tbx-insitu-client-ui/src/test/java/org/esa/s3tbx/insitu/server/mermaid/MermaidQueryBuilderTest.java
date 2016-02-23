@@ -1,4 +1,4 @@
-package org.esa.s3tbx.insitu;
+package org.esa.s3tbx.insitu.server.mermaid;
 
 import org.esa.snap.core.datamodel.ProductData;
 import org.junit.BeforeClass;
@@ -12,7 +12,7 @@ import static org.junit.Assert.*;
 /**
  * @author Marco Peters
  */
-public class QueryBuilderTest {
+public class MermaidQueryBuilderTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
@@ -22,7 +22,8 @@ public class QueryBuilderTest {
 
     @Test
     public void testQueryCreation() throws Exception {
-        final QueryBuilder builder = new QueryBuilder("interest");
+        final MermaidQueryBuilder builder = new MermaidQueryBuilder();
+        builder.subject("interest");
         builder.campaign("Muscheln");
         builder.latMin(-10.943);
         builder.latMax(46.12);

@@ -1,4 +1,6 @@
-package org.esa.s3tbx.insitu;
+package org.esa.s3tbx.insitu.server;
+
+import org.esa.s3tbx.insitu.server.mermaid.MermaidInSituServer;
 
 import java.util.ArrayList;
 import java.util.Collections;

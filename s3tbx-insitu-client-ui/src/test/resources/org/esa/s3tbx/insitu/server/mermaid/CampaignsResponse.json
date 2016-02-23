@@ -1,0 +1,9 @@
+{
+  "response": "OK",
+  "Campaigns": [
+    {
+      "Identifier": "BOUSSOLE",
+      "PI": "David Antoine"
+    }
+  ]
+}

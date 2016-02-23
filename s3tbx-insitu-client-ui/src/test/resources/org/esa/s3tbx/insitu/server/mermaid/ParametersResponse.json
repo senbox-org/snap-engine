@@ -1,0 +1,143 @@
+{
+  "response": "OK",
+  "Parameters": [
+    {
+      "name": "chlorophyll_a_total",
+      "type": "concentration",
+      "unit": "mg.m-3",
+      "description": "Chlorphyll a concentration"
+    },
+    {
+      "name": "es_412",
+      "type": "radiance",
+      "unit": "mW.m-2.nm-1",
+      "description": "Sea-level solar illumination at 412nm"
+    },
+    {
+      "name": "es_443",
+      "type": "radiance",
+      "unit": "mW.m-2.nm-1",
+      "description": "Sea-level solar illumination at 443nm"
+    },
+    {
+      "name": "es_490",
+      "type": "radiance",
+      "unit": "mW.m-2.nm-1",
+      "description": "Sea-level solar illumination at 490nm"
+    },
+    {
+      "name": "es_510",
+      "type": "radiance",
+      "unit": "mW.m-2.nm-1",
+      "description": "Sea-level solar illumination at 510nm"
+    },
+    {
+      "name": "es_560",
+      "type": "radiance",
+      "unit": "mW.m-2.nm-1",
+      "description": "Sea-level solar illumination at 560nm"
+    },
+    {
+      "name": "es_665",
+      "type": "radiance",
+      "unit": "mW.m-2.nm-1",
+      "description": "Sea-level solar illumination at 665nm"
+    },
+    {
+      "name": "es_683",
+      "type": "radiance",
+      "unit": "mW.m-2.nm-1",
+      "description": "Sea-level solar illumination at 683nm"
+    },
+    {
+      "name": "kd_412",
+      "type": "transaparency",
+      "unit": "m-1",
+      "description": "Diffuse attenuation coefficient for downwelling irradiance at 412nm"
+    },
+    {
+      "name": "kd_443",
+      "type": "transaparency",
+      "unit": "m-1",
+      "description": "Diffuse attenuation coefficient for downwelling irradiance at 443nm"
+    },
+    {
+      "name": "kd_490",
+      "type": "transaparency",
+      "unit": "m-1",
+      "description": "Diffuse attenuation coefficient for downwelling irradiance at 490nm"
+    },
+    {
+      "name": "kd_510",
+      "type": "transaparency",
+      "unit": "m-1",
+      "description": "Diffuse attenuation coefficient for downwelling irradiance at 510nm"
+    },
+    {
+      "name": "kd_560",
+      "type": "transaparency",
+      "unit": "m-1",
+      "description": "Diffuse attenuation coefficient for downwelling irradiance at 560nm"
+    },
+    {
+      "name": "kd_665",
+      "type": "transaparency",
+      "unit": "m-1",
+      "description": "Diffuse attenuation coefficient for downwelling irradiance at 665nm"
+    },
+    {
+      "name": "kd_683",
+      "type": "transaparency",
+      "unit": "m-1",
+      "description": "Diffuse attenuation coefficient for downwelling irradiance at 683nm"
+    },
+    {
+      "name": "rho_wn_412",
+      "type": "reflectance",
+      "unit": "dl",
+      "description": "Fully normalised water-leaving reflectance at 412nm"
+    },
+    {
+      "name": "rho_wn_443",
+      "type": "reflectance",
+      "unit": "dl",
+      "description": "Fully normalised water-leaving reflectance at 443nm"
+    },
+    {
+      "name": "rho_wn_490",
+      "type": "reflectance",
+      "unit": "dl",
+      "description": "Fully normalised water-leaving reflectance at 490nm"
+    },
+    {
+      "name": "rho_wn_510",
+      "type": "reflectance",
+      "unit": "dl",
+      "description": "Fully normalised water-leaving reflectance at 510nm"
+    },
+    {
+      "name": "rho_wn_560",
+      "type": "reflectance",
+      "unit": "dl",
+      "description": "Fully normalised water-leaving reflectance at 560nm"
+    },
+    {
+      "name": "rho_wn_665",
+      "type": "reflectance",
+      "unit": "dl",
+      "description": "Fully normalised water-leaving reflectance at 665nm"
+    },
+    {
+      "name": "rho_wn_683",
+      "type": "reflectance",
+      "unit": "dl",
+      "description": "Fully normalised water-leaving reflectance at 683nm"
+    },
+    {
+      "name": "sun_zenith_angle",
+      "type": "angle",
+      "unit": "Deg",
+      "description": "Pixel solar zenith angle"
+    }
+  ]
+}
