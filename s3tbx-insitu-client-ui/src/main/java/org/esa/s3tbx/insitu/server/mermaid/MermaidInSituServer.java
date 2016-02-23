@@ -19,17 +19,17 @@ public class MermaidInSituServer implements InSituServer {
     private final URL baseURL;
     private final Gson gson;
 
-    private MermaidInSituServer(URL baseURL){
+    private MermaidInSituServer(URL baseURL) {
         this.baseURL = baseURL;
         final GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(Date.class, new UtcDateTypeAdapter());
         gson = gsonBuilder.create();
     }
 
-     @Override
-     public QueryBuilder getQueryBuilder() {
-         return new MermaidQueryBuilder();
-     }
+    @Override
+    public QueryBuilder getQueryBuilder() {
+        return new MermaidQueryBuilder();
+    }
 
     @Override
     public InsituResponse query(QueryBuilder builder) {
