@@ -1,6 +1,6 @@
 package org.esa.s3tbx.insitu.server.mermaid;
 
-import org.esa.s3tbx.insitu.server.QueryBuilder;
+import org.esa.s3tbx.insitu.server.Query;
 import org.esa.snap.core.util.StringUtils;
 
 import java.text.DateFormat;
@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * @author Marco Peters
  */
-class MermaidQueryBuilder extends QueryBuilder {
+class MermaidQueryBuilder {
 
     private static final String PARAM_LON_MIN = "lonMin";
     private static final String PARAM_LAT_MIN = "latMin";
@@ -27,45 +27,45 @@ class MermaidQueryBuilder extends QueryBuilder {
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 
-    public String createQuery() {
+    public static String formatQuery(Query query) {
         List<String> queryParams= new ArrayList<>();
 
-        if(lonMin != null) {
-            queryParams.add(PARAM_LON_MIN + "=" + lonMin);
+        if(query.lonMin() != null) {
+            queryParams.add(PARAM_LON_MIN + "=" + query.lonMin());
         }
-        if(latMin != null) {
-            queryParams.add(PARAM_LAT_MIN + "=" + latMin);
+        if(query.latMin() != null) {
+            queryParams.add(PARAM_LAT_MIN + "=" + query.latMin());
         }
-        if(lonMax != null) {
-            queryParams.add(PARAM_LON_MAX + lonMax);
+        if(query.lonMax() != null) {
+            queryParams.add(PARAM_LON_MAX + query.lonMax());
         }
-        if(latMax != null) {
-            queryParams.add(PARAM_LAT_MAX + "=" + latMax);
+        if(query.latMax() != null) {
+            queryParams.add(PARAM_LAT_MAX + "=" + query.latMax());
         }
-        if(startDate != null) {
-            queryParams.add(PARAM_START_DATE + "=" + DATE_FORMAT.format(startDate.getAsDate()));
+        if(query.startDate() != null) {
+            queryParams.add(PARAM_START_DATE + "=" + DATE_FORMAT.format(query.startDate()));
         }
-        if(stopDate != null) {
-            queryParams.add(PARAM_STOP_DATE + "=" + DATE_FORMAT.format(stopDate.getAsDate()));
+        if(query.stopDate() != null) {
+            queryParams.add(PARAM_STOP_DATE + "=" + DATE_FORMAT.format(query.stopDate()));
         }
-        if(param != null) {
-            queryParams.add(PARAM_PARAM + "=" + StringUtils.arrayToCsv(param));
+        if(query.param() != null) {
+            queryParams.add(PARAM_PARAM + "=" + StringUtils.arrayToCsv(query.param()));
         }
-        if(campaign != null) {
-            queryParams.add(PARAM_CAMPAIGN + "=" + campaign);
+        if(query.campaign() != null) {
+            queryParams.add(PARAM_CAMPAIGN + "=" + query.campaign());
         }
-        if(shift > 0) {
-            queryParams.add(PARAM_SHIFT + "=" + shift);
+        if(query.shift() > 0) {
+            queryParams.add(PARAM_SHIFT + "=" + query.shift());
         }
-        if(limit > 0) {
-            queryParams.add(PARAM_LIMIT + "=" + limit);
+        if(query.limit() > 0) {
+            queryParams.add(PARAM_LIMIT + "=" + query.limit());
         }
-        if(countOnly) {
+        if(query.countOnly()) {
             queryParams.add(PARAM_COUNT_ONLY);
         }
 
         final StringBuilder sb = new StringBuilder();
-        sb.append("/").append(subject).append("?");
+        sb.append("/").append(query.subject()).append("?");
 
         for (int i = 0; i < queryParams.size(); i++) {
             String queryParam = queryParams.get(i);

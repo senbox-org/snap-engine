@@ -32,6 +32,11 @@ public class InSituServerRegistry {
         return Collections.unmodifiableList(serverList);
     }
 
+    public InSituServerSpi getRegisteredServers(String serverName) {
+        final Optional<InSituServerSpi> optional = findSpi(serverName);
+        return optional.isPresent() ? optional.get() : null;
+    }
+
     boolean addServer(InSituServerSpi serverSpi) {
         final Optional<InSituServerSpi> first = findSpi(serverSpi.getName());
         return !first.isPresent() && serverList.add(serverSpi);

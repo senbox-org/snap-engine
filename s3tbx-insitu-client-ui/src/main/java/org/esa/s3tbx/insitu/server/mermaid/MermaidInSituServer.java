@@ -5,7 +5,7 @@ import com.google.gson.GsonBuilder;
 import org.esa.s3tbx.insitu.server.InSituServer;
 import org.esa.s3tbx.insitu.server.InSituServerSpi;
 import org.esa.s3tbx.insitu.server.InsituResponse;
-import org.esa.s3tbx.insitu.server.QueryBuilder;
+import org.esa.s3tbx.insitu.server.Query;
 
 import java.net.URL;
 import java.util.Date;
@@ -27,12 +27,7 @@ public class MermaidInSituServer implements InSituServer {
     }
 
     @Override
-    public QueryBuilder getQueryBuilder() {
-        return new MermaidQueryBuilder();
-    }
-
-    @Override
-    public InsituResponse query(QueryBuilder builder) {
+    public InsituResponse query(Query builder) {
         return null;
     }
 
@@ -41,6 +36,11 @@ public class MermaidInSituServer implements InSituServer {
         @Override
         public String getName() {
             return "MERMAID";
+        }
+
+        @Override
+        public String getDescription() {
+            return "A server giving access to the MERMAID in-situ database.";
         }
 
         @Override
