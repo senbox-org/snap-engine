@@ -13,7 +13,7 @@ public class InsituServerTest {
     @Test
     public void testMethod() throws Exception {
         final InsituServer server = new TestInsituServer.Spi().createServer();
-        final Query builder = new Query();
+        final InsituQuery builder = new InsituQuery();
         builder.subject("interest");
         builder.campaign("Muscheln");
         builder.latMin(-10.943);

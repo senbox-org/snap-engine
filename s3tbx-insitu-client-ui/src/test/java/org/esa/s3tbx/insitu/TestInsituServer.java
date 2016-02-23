@@ -3,10 +3,10 @@ package org.esa.s3tbx.insitu;
 import org.esa.s3tbx.insitu.server.InsituDataset;
 import org.esa.s3tbx.insitu.server.InsituDatasetDescr;
 import org.esa.s3tbx.insitu.server.InsituParameter;
+import org.esa.s3tbx.insitu.server.InsituQuery;
 import org.esa.s3tbx.insitu.server.InsituResponse;
 import org.esa.s3tbx.insitu.server.InsituServer;
 import org.esa.s3tbx.insitu.server.InsituServerSpi;
-import org.esa.s3tbx.insitu.server.Query;
 
 import java.util.List;
 
@@ -20,7 +20,7 @@ public class TestInsituServer implements InsituServer {
     }
 
     @Override
-    public InsituResponse query(Query query) {
+    public InsituResponse query(InsituQuery query) {
         return new DummyResponse();
     }
 

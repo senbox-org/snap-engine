@@ -5,7 +5,7 @@ import java.util.Date;
 /**
  * @author Marco Peters
  */
-public class Query {
+public class InsituQuery {
 
     protected String subject;
     protected Double lonMin;

@@ -1,6 +1,6 @@
 package org.esa.s3tbx.insitu.server.mermaid;
 
-import org.esa.s3tbx.insitu.server.Query;
+import org.esa.s3tbx.insitu.server.InsituQuery;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -13,7 +13,7 @@ import static org.junit.Assert.*;
 /**
  * @author Marco Peters
  */
-public class MermaidQueryBuilderTest {
+public class MermaidInsituQueryBuilderTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
@@ -26,7 +26,7 @@ public class MermaidQueryBuilderTest {
         final SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss");
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
-        final Query query= new Query();
+        final InsituQuery query= new InsituQuery();
         query.subject("interest");
         query.campaign("Muscheln");
         query.latMin(-10.943);

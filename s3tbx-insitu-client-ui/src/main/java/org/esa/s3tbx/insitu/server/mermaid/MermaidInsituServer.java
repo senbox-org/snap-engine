@@ -2,10 +2,10 @@ package org.esa.s3tbx.insitu.server.mermaid;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.esa.s3tbx.insitu.server.InsituQuery;
 import org.esa.s3tbx.insitu.server.InsituResponse;
 import org.esa.s3tbx.insitu.server.InsituServer;
 import org.esa.s3tbx.insitu.server.InsituServerSpi;
-import org.esa.s3tbx.insitu.server.Query;
 
 import java.net.URL;
 import java.util.Date;
@@ -27,7 +27,7 @@ public class MermaidInsituServer implements InsituServer {
     }
 
     @Override
-    public InsituResponse query(Query builder) {
+    public InsituResponse query(InsituQuery builder) {
         return null;
     }
 

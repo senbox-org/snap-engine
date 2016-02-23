@@ -1,6 +1,6 @@
 package org.esa.s3tbx.insitu.server.mermaid;
 
-import org.esa.s3tbx.insitu.server.Query;
+import org.esa.s3tbx.insitu.server.InsituQuery;
 import org.esa.snap.core.util.StringUtils;
 
 import java.text.DateFormat;
@@ -27,7 +27,7 @@ class MermaidQueryBuilder {
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 
-    public static String formatQuery(Query query) {
+    public static String formatQuery(InsituQuery query) {
         List<String> queryParams= new ArrayList<>();
 
         if(query.lonMin() != null) {
