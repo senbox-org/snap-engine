@@ -1,8 +1,8 @@
 package org.esa.s3tbx.insitu.server.mermaid;
 
-import org.esa.s3tbx.insitu.server.InSituServer;
-import org.esa.s3tbx.insitu.server.InSituServerRegistry;
-import org.esa.s3tbx.insitu.server.InSituServerSpi;
+import org.esa.s3tbx.insitu.server.InsituServerRegistryX;
+import org.esa.s3tbx.insitu.server.InsituServerSpiX;
+import org.esa.s3tbx.insitu.server.InsituServerX;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -15,9 +15,9 @@ public class MermaidServerTest {
 
     @Test
     public void testMermaidServer() throws Exception {
-        final InSituServerRegistry registry = InSituServerRegistry.getInstance();
-        final InSituServerSpi serverSpi = registry.getRegisteredServers("MERMAID");
-        final InSituServer server = serverSpi.createServer();
+        final InsituServerRegistryX registry = InsituServerRegistryX.getInstance();
+        final InsituServerSpiX serverSpi = registry.getRegisteredServers("MERMAID");
+        final InsituServerX server = serverSpi.createServer();
 
     }
 }

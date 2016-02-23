@@ -1,6 +1,6 @@
 package org.esa.s3tbx.insitu.server;
 
-import org.esa.s3tbx.insitu.server.mermaid.MermaidInSituServer;
+import org.esa.s3tbx.insitu.server.mermaid.MermaidInsituServerX;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,53 +10,53 @@ import java.util.Optional;
 /**
  * @author Marco Peters
  */
-public class InSituServerRegistry {
+public class InsituServerRegistryX {
 
-    private List<InSituServerSpi> serverList;
+    private List<InsituServerSpiX> serverList;
 
     /**
      * Gets the singleton instance of the registry.
      *
      * @return The instance.
      */
-    public static InSituServerRegistry getInstance() {
+    public static InsituServerRegistryX getInstance() {
         return Holder.instance;
     }
 
-    private InSituServerRegistry() {
+    private InsituServerRegistryX() {
         serverList = new ArrayList<>();
-        serverList.add(new MermaidInSituServer.Spi());
+        serverList.add(new MermaidInsituServerX.Spi());
     }
 
-    public List<InSituServerSpi> getRegisteredServers() {
+    public List<InsituServerSpiX> getRegisteredServers() {
         return Collections.unmodifiableList(serverList);
     }
 
-    public InSituServerSpi getRegisteredServers(String serverName) {
-        final Optional<InSituServerSpi> optional = findSpi(serverName);
+    public InsituServerSpiX getRegisteredServers(String serverName) {
+        final Optional<InsituServerSpiX> optional = findSpi(serverName);
         return optional.isPresent() ? optional.get() : null;
     }
 
-    boolean addServer(InSituServerSpi serverSpi) {
-        final Optional<InSituServerSpi> first = findSpi(serverSpi.getName());
+    boolean addServer(InsituServerSpiX serverSpi) {
+        final Optional<InsituServerSpiX> first = findSpi(serverSpi.getName());
         return !first.isPresent() && serverList.add(serverSpi);
     }
 
     boolean removeServer(String serverName) {
-        final Optional<InSituServerSpi> first = findSpi(serverName);
+        final Optional<InsituServerSpiX> first = findSpi(serverName);
         return first.isPresent() && removeServer(first.get());
     }
 
-    boolean removeServer(InSituServerSpi serverSpi) {
+    boolean removeServer(InsituServerSpiX serverSpi) {
         return serverList.contains(serverSpi) && serverList.remove(serverSpi);
     }
 
-    private Optional<InSituServerSpi> findSpi(String name) {
+    private Optional<InsituServerSpiX> findSpi(String name) {
         return serverList.stream().filter(inSituServerSpi -> inSituServerSpi.getName().equals(name)).findFirst();
     }
 
     private static class Holder {
-        private static final InSituServerRegistry instance = new InSituServerRegistry();
+        private static final InsituServerRegistryX instance = new InsituServerRegistryX();
     }
 
 }

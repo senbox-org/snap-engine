@@ -1,11 +1,11 @@
 package org.esa.s3tbx.insitu;
 
-import org.esa.s3tbx.insitu.server.InSituServer;
-import org.esa.s3tbx.insitu.server.InSituServerSpi;
 import org.esa.s3tbx.insitu.server.InsituDataset;
 import org.esa.s3tbx.insitu.server.InsituDatasetDescr;
 import org.esa.s3tbx.insitu.server.InsituParameter;
 import org.esa.s3tbx.insitu.server.InsituResponse;
+import org.esa.s3tbx.insitu.server.InsituServerSpiX;
+import org.esa.s3tbx.insitu.server.InsituServerX;
 import org.esa.s3tbx.insitu.server.Query;
 
 import java.util.List;
@@ -13,10 +13,10 @@ import java.util.List;
 /**
  * @author Marco Peters
  */
-public class TestInSituServer implements InSituServer {
+public class TestInsituServerX implements InsituServerX {
 
 
-    private TestInSituServer(){
+    private TestInsituServerX(){
     }
 
     @Override
@@ -24,7 +24,7 @@ public class TestInSituServer implements InSituServer {
         return new DummyResponse();
     }
 
-    public static class Spi implements InSituServerSpi {
+    public static class Spi implements InsituServerSpiX {
 
         @Override
         public String getName() {
@@ -37,8 +37,8 @@ public class TestInSituServer implements InSituServer {
         }
 
         @Override
-        public InSituServer createServer() throws Exception {
-            return new TestInSituServer();
+        public InsituServerX createServer() throws Exception {
+            return new TestInsituServerX();
         }
     }
 
