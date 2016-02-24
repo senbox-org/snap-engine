@@ -82,8 +82,8 @@ public class InsituClientForm extends JPanel {
 
         layout.setCellWeightX(2, 1, 1.0);
         layout.setCellColspan(2, 1, 3);
-        layout.setCellFill(2, 3, TableLayout.Fill.BOTH);
-        layout.setRowWeightY(2, 0.6);
+        layout.setCellFill(2, 2, TableLayout.Fill.BOTH);
+        layout.setCellWeightY(2, 2, 1.0);
         add(new JLabel("Product:"));
         final JList<String> productList = new JList<>(new String[]{"S3A_OL_2_WFR____20100602T094537_20100602T094837_2015070..."});
         productList.setVisibleRowCount(6);
@@ -103,27 +103,56 @@ public class InsituClientForm extends JPanel {
 
         layout.setCellWeightX(4, 1, 1.0);
         layout.setCellWeightX(4, 3, 1.0);
-        add(new JLabel("West Bound:"));
+        add(new JLabel("Min longitude:"));
         add(new JTextField());
-        add(new JLabel("East Bound:"));
+        add(new JLabel("Max longitude:"));
         add(new JTextField());
 
         layout.setCellWeightX(5, 1, 1.0);
         layout.setCellWeightX(5, 3, 1.0);
-        add(new JLabel("North Bound:"));
+        add(new JLabel("Min latitude:"));
         add(new JTextField());
-        add(new JLabel("South Bound:"));
+        add(new JLabel("Max latitude:"));
         add(new JTextField());
 
         layout.setCellColspan(6, 0, 4);
         layout.setRowWeightX(6, 1.0);
         layout.setRowWeightY(6, 1.0);
         layout.setRowFill(6, TableLayout.Fill.BOTH);
-        add(createPreviewPanel(helpCtx));
+        add(createStatusPanel(helpCtx));
+        // maybe later we will add a preview table of the data
+//        add(createPreviewTablePanel(helpCtx));
 
     }
 
-    private Component createPreviewPanel(HelpCtx helpCtx) {
+    private Component createStatusPanel(HelpCtx helpCtx) {
+        final TableLayout layout = new TableLayout(4);
+        layout.setTableFill(TableLayout.Fill.HORIZONTAL);
+        layout.setTableWeightX(0.5);
+        layout.setCellWeightX(0, 2, 2.0);
+        layout.setCellWeightX(0, 3, 0.0);
+        layout.setTableAnchor(TableLayout.Anchor.NORTHWEST);
+        layout.setTablePadding(4, 4);
+
+        final JPanel contentPanel = new JPanel(layout);
+        final AbstractButton refreshButton = ToolButtonFactory.createButton(TangoIcons.actions_view_refresh(TangoIcons.Res.R22), false);
+        refreshButton.setText("#Obs: 486");
+        refreshButton.setName("refreshButton");
+        contentPanel.add(refreshButton);
+        final AbstractButton downloadButton = ToolButtonFactory.createButton(TangoIcons.actions_document_save(TangoIcons.Res.R22), false);
+        downloadButton.setText("Download");
+        downloadButton.setName("downloadButton");
+        contentPanel.add(downloadButton);
+        contentPanel.add(layout.createHorizontalSpacer());
+
+        AbstractButton helpButton = ToolButtonFactory.createButton(new HelpAction(helpCtx), false);
+        helpButton.setName("helpButton");
+        contentPanel.add(helpButton);
+
+        return contentPanel;
+    }
+
+    private Component createPreviewTablePanel(HelpCtx helpCtx) {
         final JPanel contentPanel = new JPanel(new BorderLayout(4, 4));
 
         final JPanel tablePanel = new JPanel(new BorderLayout(4, 4));

@@ -25,11 +25,11 @@ import java.awt.BorderLayout;
 
 @TopComponent.Description(
         preferredID = "InsituClientTopComponent",
-        iconBase = "org/esa/s3tbx/insitu/insitu.png",
+        iconBase = "org/esa/s3tbx/insitu/insitu24.png",
         persistenceType = TopComponent.PERSISTENCE_ALWAYS
 )
 @TopComponent.Registration(mode = "rightSlidingSide", openAtStartup = false, position = 150)
-@ActionID(category = "Window", id = "org.esa.s3tbx.insitu.ui.InsituClientTopComponent")
+@ActionID(category = "Window", id = "InsituClientTopComponent")
 @ActionReference(path = "Menu/View/Tool Windows")
 @TopComponent.OpenActionRegistration(
         displayName = "#CTL_InsituClientTopComponent_Name",
