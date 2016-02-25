@@ -46,8 +46,8 @@ public class MermaidQueryFormatterTest {
         assertTrue(queryString.contains("lon_min=5.0"));
         assertTrue(queryString.contains("lat_max=46.12"));
         assertTrue(queryString.contains("lon_max=15.36"));
-        assertTrue(queryString.contains("start_date=2014-01-01 00:00:00"));
-        assertTrue(queryString.contains("stop_date=2015-12-31 00:00:00"));
+        assertTrue(queryString.contains("start_date=2014-01-01+00%3A00%3A00")); // URL encoded
+        assertTrue(queryString.contains("stop_date=2015-12-31+00%3A00%3A00")); // URL encoded
         assertTrue(queryString.contains("param=param1,param2,param3"));
         assertTrue(queryString.contains("limit=10"));
         assertTrue(queryString.contains("shift=5"));
