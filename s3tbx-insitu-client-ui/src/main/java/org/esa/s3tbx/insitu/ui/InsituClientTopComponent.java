@@ -15,26 +15,24 @@
  */
 package org.esa.s3tbx.insitu.ui;
 
-import org.openide.awt.ActionID;
-import org.openide.awt.ActionReference;
 import org.openide.util.HelpCtx;
 import org.openide.util.NbBundle;
 import org.openide.windows.TopComponent;
 
 import java.awt.BorderLayout;
 
-@TopComponent.Description(
-        preferredID = "InsituClientTopComponent",
-        iconBase = "org/esa/s3tbx/insitu/insitu24.png",
-        persistenceType = TopComponent.PERSISTENCE_ALWAYS
-)
-@TopComponent.Registration(mode = "rightSlidingSide", openAtStartup = false, position = 150)
-@ActionID(category = "Window", id = "InsituClientTopComponent")
-@ActionReference(path = "Menu/View/Tool Windows")
-@TopComponent.OpenActionRegistration(
-        displayName = "#CTL_InsituClientTopComponent_Name",
-        preferredID = "InsituClientTopComponent"
-)
+//@TopComponent.Description(
+//        preferredID = "InsituClientTopComponent",
+//        iconBase = "org/esa/s3tbx/insitu/insitu24.png",
+//        persistenceType = TopComponent.PERSISTENCE_ALWAYS
+//)
+//@TopComponent.Registration(mode = "rightSlidingSide", openAtStartup = false, position = 150)
+//@ActionID(category = "Window", id = "InsituClientTopComponent")
+//@ActionReference(path = "Menu/View/Tool Windows")
+//@TopComponent.OpenActionRegistration(
+//        displayName = "#CTL_InsituClientTopComponent_Name",
+//        preferredID = "InsituClientTopComponent"
+//)
 @NbBundle.Messages({"CTL_InsituClientTopComponent_Name=In-Situ Data Access"})
 public class InsituClientTopComponent extends TopComponent implements HelpCtx.Provider {
 

@@ -17,13 +17,11 @@
 package org.esa.s3tbx.insitu.ui;
 
 import org.esa.snap.rcp.actions.AbstractSnapAction;
-import org.esa.snap.rcp.util.Dialogs;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.awt.ActionRegistration;
 import org.openide.util.NbBundle;
 
-import javax.swing.JOptionPane;
 import java.awt.event.ActionEvent;
 
 @ActionID(category = "Tools", id = "org.esa.s3tbx.insitu.ui.InsituClientAction" )
@@ -32,14 +30,16 @@ import java.awt.event.ActionEvent;
 @NbBundle.Messages({"CTL_InsituClientAction_Text=In-Situ Client"})
 public class InsituClientAction extends AbstractSnapAction {
 
+    private static final String INSITU_TOOL_HELP_ID = "insituClientTool";
+
     public InsituClientAction() {
         putValue(SHORT_DESCRIPTION, "Obtain In-Situ data from a web service");
-        putValue(HELP_ID, "insituClientTool");
+        putValue(HELP_ID, INSITU_TOOL_HELP_ID);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        Dialogs.showMessage(Bundle.CTL_InsituClientAction_Text(), "Still to be implemented!", JOptionPane.INFORMATION_MESSAGE, null);
+        new InsituClientDialog(getAppContext().getApplicationWindow(), "In-Situ Data Access", INSITU_TOOL_HELP_ID).show();
     }
 
 }
