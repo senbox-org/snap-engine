@@ -115,11 +115,11 @@ public class InsituClientForm extends JPanel {
         add(new JLabel("Max latitude:"));
         add(new JTextField());
 
-        layout.setCellColspan(6, 0, 4);
-        layout.setRowWeightX(6, 1.0);
-        layout.setRowWeightY(6, 1.0);
-        layout.setRowFill(6, TableLayout.Fill.BOTH);
-        add(createStatusPanel(helpCtx));
+//        layout.setCellColspan(6, 0, 4);
+//        layout.setRowWeightX(6, 1.0);
+//        layout.setRowWeightY(6, 1.0);
+//        layout.setRowFill(6, TableLayout.Fill.BOTH);
+//        add(createStatusPanel(helpCtx));
         // maybe later we will add a preview table of the data
 //        add(createPreviewTablePanel(helpCtx));
 
