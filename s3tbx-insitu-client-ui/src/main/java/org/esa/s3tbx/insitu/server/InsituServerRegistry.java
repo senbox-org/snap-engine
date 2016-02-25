@@ -1,18 +1,19 @@
 package org.esa.s3tbx.insitu.server;
 
-import org.esa.s3tbx.insitu.server.mermaid.MermaidInsituServer;
+import com.bc.ceres.core.ServiceRegistry;
+import com.bc.ceres.core.ServiceRegistryManager;
+import org.esa.snap.SnapCoreActivator;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * @author Marco Peters
  */
 public class InsituServerRegistry {
 
-    private List<InsituServerSpi> serverList;
+    private ServiceRegistry<InsituServerSpi> registry;
 
     /**
      * Gets the singleton instance of the registry.
@@ -24,12 +25,12 @@ public class InsituServerRegistry {
     }
 
     private InsituServerRegistry() {
-        serverList = new ArrayList<>();
-        serverList.add(new MermaidInsituServer.Spi());
+        registry = ServiceRegistryManager.getInstance().getServiceRegistry(InsituServerSpi.class);
+        SnapCoreActivator.loadServices(registry);
     }
 
-    public List<InsituServerSpi> getRegisteredServers() {
-        return Collections.unmodifiableList(serverList);
+    public Set<InsituServerSpi> getRegisteredServers() {
+        return Collections.unmodifiableSet(registry.getServices());
     }
 
     public InsituServerSpi getRegisteredServers(String serverName) {
@@ -39,7 +40,7 @@ public class InsituServerRegistry {
 
     boolean addServer(InsituServerSpi serverSpi) {
         final Optional<InsituServerSpi> first = findSpi(serverSpi.getName());
-        return !first.isPresent() && serverList.add(serverSpi);
+        return !first.isPresent() && registry.addService(serverSpi);
     }
 
     boolean removeServer(String serverName) {
@@ -48,11 +49,11 @@ public class InsituServerRegistry {
     }
 
     boolean removeServer(InsituServerSpi serverSpi) {
-        return serverList.contains(serverSpi) && serverList.remove(serverSpi);
+        return registry.removeService(serverSpi);
     }
 
     private Optional<InsituServerSpi> findSpi(String name) {
-        return serverList.stream().filter(inSituServerSpi -> inSituServerSpi.getName().equals(name)).findFirst();
+        return registry.getServices().stream().filter(inSituServerSpi -> inSituServerSpi.getName().equals(name)).findFirst();
     }
 
     private static class Holder {

@@ -3,7 +3,7 @@ package org.esa.s3tbx.insitu.server;
 import org.esa.s3tbx.insitu.TestInsituServer;
 import org.junit.Test;
 
-import java.util.List;
+import java.util.Set;
 
 import static org.junit.Assert.*;
 
@@ -16,14 +16,14 @@ public class InsituServerRegistryTest {
     @Test
     public void testCreation() {
         final InsituServerRegistry registry = InsituServerRegistry.getInstance();
-        final List<InsituServerSpi> registeredServers = registry.getRegisteredServers();
+        final Set<InsituServerSpi> registeredServers = registry.getRegisteredServers();
         assertTrue(registeredServers.size() >= 1);
     }
 
     @Test(expected = UnsupportedOperationException.class)
     public void testAddingServerToReturnedList() {
         final InsituServerRegistry registry = InsituServerRegistry.getInstance();
-        final List<InsituServerSpi> registeredServers = registry.getRegisteredServers();
+        final Set<InsituServerSpi> registeredServers = registry.getRegisteredServers();
         registeredServers.add(new TestInsituServer.Spi());
     }
 
