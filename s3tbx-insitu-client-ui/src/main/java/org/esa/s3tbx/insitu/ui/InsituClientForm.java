@@ -182,69 +182,7 @@ public class InsituClientForm extends JPanel {
         maxLatField.addActionListener(e -> maxLat = (double) maxLatField.getValue());
         add(maxLatField);
 
-//        layout.setCellColspan(6, 0, 4);
-//        layout.setRowWeightX(6, 1.0);
-//        layout.setRowWeightY(6, 1.0);
-//        layout.setRowFill(6, TableLayout.Fill.BOTH);
-        // maybe later we will add a preview table of the data
-//        add(createPreviewTablePanel(helpCtx));
-
     }
-
-//    private Component createPreviewTablePanel(HelpCtx helpCtx) {
-//        final JPanel contentPanel = new JPanel(new BorderLayout(4, 4));
-//
-//        final JPanel tablePanel = new JPanel(new BorderLayout(4, 4));
-//        tablePanel.setBorder(new TitledBorder("Observations"));
-//        final JTable jTable = new JTable(15, 6);
-//        jTable.setFillsViewportHeight(false);
-//        tablePanel.add(new JScrollPane(jTable), BorderLayout.CENTER);
-//        final TableLayout navigationLayout = new TableLayout(8);
-//        navigationLayout.setTableFill(TableLayout.Fill.HORIZONTAL);
-//        navigationLayout.setTableAnchor(TableLayout.Anchor.NORTHWEST);
-//        navigationLayout.setTablePadding(4, 4);
-//        final JPanel navigationPanel = new JPanel(navigationLayout);
-//        navigationPanel.add(new JLabel("#Observations:"));
-//        final JLabel numObsLabel = new JLabel("468");
-//        navigationPanel.add(numObsLabel);
-//        navigationPanel.add(navigationLayout.createHorizontalSpacer());
-//        final AbstractButton goFirstButton = ToolButtonFactory.createButton(TangoIcons.actions_go_first(TangoIcons.Res.R16), false);
-//        goFirstButton.setName("goFirstButton");
-//        navigationPanel.add(goFirstButton);
-//        final AbstractButton goPreviousButton = ToolButtonFactory.createButton(TangoIcons.actions_go_previous(TangoIcons.Res.R16), false);
-//        goFirstButton.setName("goPreviousButton");
-//        navigationPanel.add(goPreviousButton);
-//        navigationPanel.add(new JLabel("3 / 6"));
-//        final AbstractButton goNextButton = ToolButtonFactory.createButton(TangoIcons.actions_go_next(TangoIcons.Res.R16), false);
-//        goFirstButton.setName("goNextButton");
-//        navigationPanel.add(goNextButton);
-//        final AbstractButton goLastButton = ToolButtonFactory.createButton(TangoIcons.actions_go_last(TangoIcons.Res.R16), false);
-//        goLastButton.setName("goLastButton");
-//        navigationPanel.add(goLastButton);
-//        tablePanel.add(navigationPanel, BorderLayout.SOUTH);
-//        contentPanel.add(tablePanel, BorderLayout.CENTER);
-//
-//        final JPanel buttonPanel = new JPanel();
-//        final TableLayout buttonLayout = new TableLayout(1);
-//        buttonLayout.setTableFill(TableLayout.Fill.HORIZONTAL);
-//        buttonLayout.setTableAnchor(TableLayout.Anchor.NORTHWEST);
-//        buttonLayout.setTablePadding(4, 4);
-//        buttonLayout.setTableWeightX(1.0);
-//        buttonPanel.setLayout(buttonLayout);
-//        final AbstractButton refreshButton = ToolButtonFactory.createButton(TangoIcons.actions_view_refresh(TangoIcons.Res.R22), false);
-//        refreshButton.setName("refreshButton");
-//        buttonPanel.add(refreshButton);
-//        final AbstractButton downloadButton = ToolButtonFactory.createButton(TangoIcons.actions_document_save(TangoIcons.Res.R22), false);
-//        downloadButton.setName("downloadButton");
-//        buttonPanel.add(downloadButton);
-//        buttonPanel.add(buttonLayout.createVerticalSpacer());
-//        AbstractButton helpButton = ToolButtonFactory.createButton(new HelpAction(helpCtx), false);
-//        helpButton.setName("helpButton");
-//        buttonPanel.add(helpButton);
-//        contentPanel.add(buttonPanel, BorderLayout.EAST);
-//
-//        return contentPanel;
-//    }
 
     public static void main(String[] args) throws UnsupportedLookAndFeelException {
         UIManager.setLookAndFeel(new WindowsLookAndFeel());
