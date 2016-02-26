@@ -25,15 +25,15 @@ import org.openide.util.NbBundle;
 import java.awt.event.ActionEvent;
 
 @ActionID(category = "Tools", id = "org.esa.s3tbx.insitu.ui.InsituClientAction" )
-@ActionRegistration(displayName = "#CTL_InsituClientAction_Text")
-@ActionReference(path = "Menu/Vector/Import", position = 0)
+@ActionRegistration(displayName = "#CTL_InsituClientAction_Text", iconBase = "org/esa/s3tbx/insitu/insitu16.png")
+@ActionReference(path = "Menu/Vector/Import", position = 500)
 @NbBundle.Messages({"CTL_InsituClientAction_Text=In-Situ Client"})
 public class InsituClientAction extends AbstractSnapAction {
 
     private static final String INSITU_TOOL_HELP_ID = "insituClientTool";
 
     public InsituClientAction() {
-        putValue(SHORT_DESCRIPTION, "Obtain In-Situ data from a web service");
+        putValue(SHORT_DESCRIPTION, "Access to remote in-situ data service");
         putValue(HELP_ID, INSITU_TOOL_HELP_ID);
     }
 
