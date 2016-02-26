@@ -31,7 +31,7 @@ public class MermaidServerTest {
 
         final InsituQuery query = new InsituQuery();
 
-//        http://mermaid.acri.fr/s3tbx/v1/observations?lon_min=20.5&lat_min=3.2&lon_max=80.9&lat_max=9.7&start_date=2003-09-01 17:20:11&stop_date=2003-09-23 12:15:36&param=es_412,es_443
+//        http://mermaid.acri.fr/s3tbx/v2/observations?lon_min=20.5&lat_min=3.2&lon_max=80.9&lat_max=9.7&start_date=2003-09-01 17:20:11&stop_date=2003-09-23 12:15:36&param=es_412,es_443
         query.lonMin(20.5);
         query.lonMax(80.9);
         query.latMin(3.2);
