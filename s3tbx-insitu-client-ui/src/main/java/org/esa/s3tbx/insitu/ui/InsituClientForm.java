@@ -68,7 +68,7 @@ public class InsituClientForm extends JPanel {
         layout.setCellFill(1, 1, TableLayout.Fill.BOTH);
         layout.setCellFill(1, 3, TableLayout.Fill.BOTH);
         layout.setRowWeightY(1, 0.6);
-        add(new JLabel("Campaign:"));
+        add(new JLabel("Dataset:"));
         final JList<String> campaignList = new JList<>(new String[]{"BUSSOLE", "AERONET"});
         campaignList.setVisibleRowCount(6);
         add(new JScrollPane(campaignList));
