@@ -26,7 +26,7 @@ public class MermaidServerTest {
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
         final InsituServerRegistry registry = InsituServerRegistry.getInstance();
-        final InsituServerSpi serverSpi = registry.getRegisteredServers("MERMAID");
+        final InsituServerSpi serverSpi = registry.getRegisteredServer("MERMAID");
         final InsituServer server = serverSpi.createServer();
 
         final InsituQuery query = new InsituQuery();

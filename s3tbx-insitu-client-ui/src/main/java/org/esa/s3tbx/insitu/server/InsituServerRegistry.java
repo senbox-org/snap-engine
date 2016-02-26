@@ -29,11 +29,11 @@ public class InsituServerRegistry {
         SnapCoreActivator.loadServices(registry);
     }
 
-    public Set<InsituServerSpi> getRegisteredServers() {
+    public Set<InsituServerSpi> getAllRegisteredServers() {
         return Collections.unmodifiableSet(registry.getServices());
     }
 
-    public InsituServerSpi getRegisteredServers(String serverName) {
+    public InsituServerSpi getRegisteredServer(String serverName) {
         final Optional<InsituServerSpi> optional = findSpi(serverName);
         return optional.isPresent() ? optional.get() : null;
     }
