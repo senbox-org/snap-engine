@@ -5,7 +5,15 @@ package org.esa.s3tbx.insitu.server;
  */
 public interface InsituDatasetDescr {
 
-    String getIdentifier();
+    String getName();
 
     String getPi();
+
+    String getContact();
+
+    String getDescription();
+
+    String getPolicy();
+
+    String getWebsite();
 }

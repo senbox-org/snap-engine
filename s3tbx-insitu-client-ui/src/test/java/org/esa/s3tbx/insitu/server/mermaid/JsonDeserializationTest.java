@@ -42,10 +42,22 @@ public class JsonDeserializationTest {
         assertNull(response.getFailureReasons());
         final List<CampaignDescr> campaigns = response.getCampaignDescriptions();
         assertNotNull(campaigns);
-        assertEquals(1, campaigns.size());
-        final CampaignDescr campaignDescr = campaigns.get(0);
-        assertEquals("BOUSSOLE", campaignDescr.getIdentifier());
-        assertEquals("David Antoine", campaignDescr.getPi());
+        assertEquals(2, campaigns.size());
+        final CampaignDescr aeronetDescr = campaigns.get(0);
+        assertEquals("AERONET", aeronetDescr.getName());
+        assertEquals("Giuseppe Zibordi", aeronetDescr.getPi());
+        assertNull(aeronetDescr.getWebsite());
+        assertEquals("giuseppe.zibordi@jrc.it", aeronetDescr.getContact());
+        assertTrue(aeronetDescr.getPolicy().startsWith("The AAOT AERONET-OC insitu dataset"));
+        assertTrue(aeronetDescr.getDescription().startsWith("The network AERONET - Ocean Color"));
+        final CampaignDescr boussoleDescr = campaigns.get(1);
+        assertEquals("BOUSSOLE", boussoleDescr.getName());
+        assertEquals("David Antoine", boussoleDescr.getPi());
+        assertEquals("http://www.obs-vlfr.fr/Boussole/", boussoleDescr.getWebsite());
+        assertEquals("antoine@obs-vlfr.fr", boussoleDescr.getContact());
+        assertTrue(boussoleDescr.getPolicy().startsWith("The BOUSSOLE insitu dataset"));
+        assertTrue(boussoleDescr.getDescription().startsWith("The BOUSSOLE project provides"));
+
     }
 
     @Test

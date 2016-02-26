@@ -2,8 +2,20 @@
   "response": "OK",
   "Campaigns": [
     {
-      "Identifier": "BOUSSOLE",
-      "PI": "David Antoine"
+      "name": "AERONET",
+      "pi": "Giuseppe Zibordi",
+      "contact": "giuseppe.zibordi@jrc.it",
+      "website": null,
+      "policy": "The AAOT AERONET-OC insitu dataset should only be used for validation purpose. In particular redistribution of data directly or through external facilities (databases...) is forbidden. If you intend to use AAOT AERONET-OC dataset in a publication or a report, please:(1)Consult the Principle Investigator (PI) via e-mail (giuseppe.zibordi@jrc.it) to get approval of in situ data use, inform him of his data usage and offer co-authorship.(2)Acknowledge the PIs and associated projects, e.g.: We thank Giuzeppe Zibordi from JRC for the access to AAOT AERONET-OC dataset.(3)Acknowledge the MERMAID facility and services, e.g.: We thank ACRI-ST, ARGANS and ESA for access to the MERMAID system (http:\/\/hermes.acri.fr\/mermaid).",
+      "description": "The network AERONET - Ocean Color (AERONET-OC) provides the capability of measuring the radiance emerging from the sea (i.e., water-leaving radiance) with sun-photometers installed on offshore platforms like lighthouses, oceanographic and oil towers."
+    },
+    {
+      "name": "BOUSSOLE",
+      "pi": "David Antoine",
+      "contact": "antoine@obs-vlfr.fr",
+      "website": "http:\/\/www.obs-vlfr.fr\/Boussole\/",
+      "policy": "The BOUSSOLE insitu dataset should only be used for validation purpose. In particular redistribution of data directly or through external facilities (databases...) is forbidden. If you intend to use BOUSSOLE dataset in a publication or a report, please:(1)Consult the Principle Investigator (PI) via e-mail (David Antoine <antoine@obs-vlfr.fr>) to get approval of in situ data use, inform him of his data usage and offer co-authorship.(2)Acknowledge the PIs and associated projects, e.g.: We thank David Antoine from LOV for the access to BOUSSOLE dataset.(3)Acknowledge the MERMAID facility and services, e.g.: We thank ACRI-ST, ARGANS and ESA for access to the MERMAID system (http:\/\/hermes.acri.fr\/mermaid).",
+      "description": "The BOUSSOLE project provides a time series of optical properties in oceanic waters collected from buoy and monthly cruises located in the Ligurian sea."
     }
   ]
 }
