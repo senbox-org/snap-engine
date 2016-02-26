@@ -40,7 +40,7 @@ public class InsituClientTopComponent extends TopComponent implements HelpCtx.Pr
 
     public InsituClientTopComponent() {
         setName(Bundle.CTL_InsituClientTopComponent_Name());
-        InsituClientForm icf = new InsituClientForm(getHelpCtx());
+        InsituClientForm icf = new InsituClientForm();
         setLayout(new BorderLayout());
         add(icf, BorderLayout.CENTER);
     }

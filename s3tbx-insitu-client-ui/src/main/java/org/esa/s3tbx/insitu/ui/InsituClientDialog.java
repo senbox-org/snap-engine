@@ -4,7 +4,6 @@ import org.esa.snap.tango.TangoIcons;
 import org.esa.snap.ui.ModelessDialog;
 import org.esa.snap.ui.UIUtils;
 import org.esa.snap.ui.tool.ToolButtonFactory;
-import org.openide.util.HelpCtx;
 
 import javax.swing.AbstractButton;
 import javax.swing.ImageIcon;
@@ -28,7 +27,7 @@ public class InsituClientDialog extends ModelessDialog {
         final AbstractButton refreshButton = ToolButtonFactory.createButton(TangoIcons.actions_view_refresh(TangoIcons.Res.R22), false);
         getButtonPanel().add(refreshButton, 0);
 
-        setContent(new InsituClientForm(new HelpCtx(helpID)));
+        setContent(new InsituClientForm());
     }
 
     @Override

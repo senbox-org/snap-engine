@@ -37,11 +37,11 @@ import java.util.TimeZone;
  */
 public class InsituClientForm extends JPanel {
 
-    public InsituClientForm(HelpCtx helpCtx) {
-        initForm(helpCtx);
+    public InsituClientForm() {
+        initForm();
     }
 
-    private void initForm(HelpCtx helpCtx) {
+    private void initForm() {
         final Calendar utcCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         utcCalendar.set(Calendar.HOUR_OF_DAY, 12);
         utcCalendar.set(Calendar.MINUTE, 0);
@@ -220,7 +220,7 @@ public class InsituClientForm extends JPanel {
             }
             frame.setTitle("In-Situ Data Access");
             frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-            frame.getContentPane().add(new InsituClientForm(new HelpCtx("insituClientTool")));
+            frame.getContentPane().add(new InsituClientForm());
             frame.pack();
             frame.setVisible(true);
         });
