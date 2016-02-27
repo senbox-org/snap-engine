@@ -58,7 +58,8 @@ import java.text.MessageFormat;
                   internal = false,
                   authors = "Thomas Storm",
                   copyright = "(c) 2011-2014 by Brockmann Consult",
-                  description = "Operator creating a target product with a single band containing a land/water-mask.")
+                  description = "Operator creating a target product with a single band containing a land/water-mask.",
+                  category = "Raster/Masks")
 public class WatermaskOp extends Operator {
 
     @SourceProduct(alias = "source", description = "The Product the land/water-mask shall be computed for.",
