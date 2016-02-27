@@ -37,4 +37,11 @@
         </folder>
     </folder>
 
+    <folder name="OperatorUIs">
+        <file name="org.esa.s3tbx.smac">
+            <attr name="operatorName" stringvalue="SmacOp"/>
+            <attr name="disableFromGraphBuilder" stringvalue="true"/>
+        </file>
+    </folder>
+
 </filesystem>
