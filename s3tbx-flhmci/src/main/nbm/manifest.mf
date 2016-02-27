@@ -4,6 +4,7 @@ AutoUpdate-Essential-Module: true
 OpenIDE-Module-Java-Dependencies: Java > 1.8
 OpenIDE-Module-Display-Category: Sentinel-3 Toolbox
 OpenIDE-Module-Specification-Version: ${s3tbx.nbmSpecVersion}
+OpenIDE-Module-Layer: org/esa/s3tbx/processor/flh_mci/layer.xml
 OpenIDE-Module-Long-Description: <p>The MERIS FLH/MCI Processor calcul
  ates the Fluorescence Line Height and the Maximum Chlorophyll Index b
  y exploiting the height of a measurement over a specific baseline.</p
