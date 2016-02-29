@@ -82,6 +82,7 @@ public class InsituClientForm extends JPanel {
         add(new JScrollPane(campaignList));
         add(new JLabel("Parameter:"));
         final JList<InsituParameter> paramList = new JList<>(model.getParameterModel());
+        paramList.setCellRenderer(new ParameterListCellRenderer());
         paramList.setVisibleRowCount(6);
         add(new JScrollPane(paramList));
 
@@ -180,6 +181,27 @@ public class InsituClientForm extends JPanel {
                                               datasetDescr.getContact(),
                                               datasetDescr.getWebsite(),
                                               datasetDescr.getDescription());
+            label.setToolTipText(text);
+
+            return label;
+        }
+    }
+    private static class ParameterListCellRenderer extends DefaultListCellRenderer {
+
+        @Override
+        public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+            final JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            final InsituParameter insituParameter = (InsituParameter) value;
+            label.setText(insituParameter.getName());
+            label.setToolTipText(insituParameter.getDescription());
+            final String text = String.format("<html>" +
+                                              "<b>Type: </b>%s<br>" +
+                                              "<b>Unit: </b>%s<br>" +
+                                              "<b>Description: </b>%s",
+                                              insituParameter.getType(),
+                                              insituParameter.getUnit(),
+                                              insituParameter.getDescription());
+
             label.setToolTipText(text);
 
             return label;
