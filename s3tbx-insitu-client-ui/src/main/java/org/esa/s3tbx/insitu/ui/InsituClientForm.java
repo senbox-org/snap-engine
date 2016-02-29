@@ -48,6 +48,7 @@ public class InsituClientForm extends JPanel {
     private static final SimpleDateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss");
     private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("HH:mm:ss");
     private static final DecimalFormatter DECIMAL_FORMATTER = new DecimalFormatter("###0.0##");
+    private static final InsituServerSpi NO_SELECTION_SERVER_SPI = new NoSelectionInsituServerSpi();
 
     private DefaultComboBoxModel<InsituServerSpi> insituServerModel;
     private DefaultListModel<InsituDataset> datasetModel;
@@ -70,7 +71,7 @@ public class InsituClientForm extends JPanel {
         final Set<InsituServerSpi> allRegisteredServers = InsituServerRegistry.getInstance().getAllRegisteredServers();
         InsituServerSpi[] servers = allRegisteredServers.toArray(new InsituServerSpi[0]);
         insituServerModel = new DefaultComboBoxModel<>(servers);
-        insituServerModel.insertElementAt(NO_SELECTION, 0);
+        insituServerModel.insertElementAt(NO_SELECTION_SERVER_SPI, 0);
         datasetModel = new DefaultListModel<>();
         parameterModel = new DefaultListModel<>();
         productListModel = new DefaultListModel<>();
@@ -99,7 +100,7 @@ public class InsituClientForm extends JPanel {
         add(new JLabel("In-Situ Database:"));
 
         final JComboBox<InsituServerSpi> insituServerComboBox = new JComboBox<>(insituServerModel);
-        insituServerComboBox.setPrototypeDisplayValue(new InsituPrototype());
+        insituServerComboBox.setPrototypeDisplayValue(NO_SELECTION_SERVER_SPI);
         insituServerComboBox.setRenderer(new InsituServerListCellRenderer());
         insituServerComboBox.addItemListener(new ItemListener() {
             @Override
@@ -217,16 +218,16 @@ public class InsituClientForm extends JPanel {
         }
     }
 
-    private static class InsituPrototype implements InsituServerSpi {
+    private static class NoSelectionInsituServerSpi implements InsituServerSpi {
 
         @Override
         public String getName() {
-            return "THIS_IS_A_PROTOTYPE_NAME";
+            return "<NO_SERVER_CURRENTLY_SELECTED>";
         }
 
         @Override
         public String getDescription() {
-            return "SOME_PROTOTYPE_DESCRIPTION";
+            return "Please select one of the available in-situ server";
         }
 
         @Override
@@ -234,21 +235,4 @@ public class InsituClientForm extends JPanel {
             return null;
         }
     }
-
-    private static final InsituServerSpi NO_SELECTION = new InsituServerSpi() {
-        @Override
-        public String getName() {
-            return "<NO_SERVER_SELECTED>";
-        }
-
-        @Override
-        public String getDescription() {
-            return "SOME_PROTOTYPE_DESCRIPTION";
-        }
-
-        @Override
-        public InsituServer createServer() throws Exception {
-            return null;
-        }
-    };
 }
