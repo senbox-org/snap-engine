@@ -9,10 +9,11 @@
 
     <tocitem text="Sentinel Toolbox Application">
         <tocitem text="Optical">
-            <tocitem text="Preprocessing">
+            <tocitem text="Pre-Processing">
                 <tocitem text="Radiance-to-Reflectance Processor" target="rad2ReflScientificTool">
-                    <tocitem text="Algorithm Specification" target="rad2ReflAlgorithmSpec"/>
                     <tocitem text="Processor Description" target="rad2ReflProcessorDesc"/>
+                    <tocitem text="Command Line Description" target="rad2ReflCommandLine"/>
+                    <tocitem text="Algorithm Specification" target="rad2ReflAlgorithmSpec"/>
                 </tocitem>
             </tocitem>
         </tocitem>

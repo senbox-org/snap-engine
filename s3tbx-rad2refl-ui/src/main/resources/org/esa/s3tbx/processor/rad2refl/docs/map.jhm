@@ -8,5 +8,6 @@
     <mapID target="rad2ReflScientificTool" url="rad2refl/Rad2ReflTool.html"/>
     <mapID target="rad2ReflAlgorithmSpec" url="rad2refl/Rad2ReflAlgorithmSpecification.html"/>
     <mapID target="rad2ReflProcessorDesc" url="rad2refl/Rad2ReflProcessorDescription.html"/>
+    <mapID target="rad2ReflCommandLine" url="rad2refl/Rad2ReflCommandLine.html"/>
 
 </map>

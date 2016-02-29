@@ -4,7 +4,7 @@
         <folder name="Operators">
             <file name="org-esa-s3tbx-aatsr-regrid-AatsrUngriddingOpAction.instance">
                 <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
-                <attr name="delegate" methodvalue="org.esa.snap.graphbuilder.rcp.actions.OperatorAction.create"/>
+                <attr name="delegate" methodvalue="org.esa.snap.core.gpf.ui.DefaultOperatorAction.create"/>
                 <attr name="displayName" stringvalue="Ungrid Aatsr"/>
                 <attr name="operatorName" stringvalue="AATSR.Ungrid"/>
                 <attr name="dialogTitle" stringvalue="Ungrid Aatsr"/>

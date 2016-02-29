@@ -207,10 +207,11 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
                 targetProduct.addBand(targetBand);
                 ProductUtils.copyRasterDataNodeProperties(sourceBand, targetBand);
                 final RenderedImage sourceRenderedImage = sourceBand.getSourceImage().getImage(0);
+                //todo remove commented lines when resampling works with scenetransforms
                 //if pixel band geo-codings are used, scenetransforms are set
-                if (Config.instance("s3tbx").load().preferences().getBoolean(SLSTR_L1B_USE_PIXELGEOCODINGS, false)) {
-                    targetBand.setSourceImage(sourceRenderedImage);
-                } else {
+//                if (Config.instance("s3tbx").load().preferences().getBoolean(SLSTR_L1B_USE_PIXELGEOCODINGS, false)) {
+//                    targetBand.setSourceImage(sourceRenderedImage);
+//                } else {
                     final AffineTransform imageToModelTransform = new AffineTransform();
                     final float[] offsets = getOffsets(sourceStartOffset, sourceTrackOffset, sourceResolutions);
                     imageToModelTransform.translate(offsets[0], offsets[1]);
@@ -224,7 +225,7 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
                     final DefaultMultiLevelSource targetMultiLevelSource =
                             new DefaultMultiLevelSource(sourceRenderedImage, targetModel);
                     targetBand.setSourceImage(new DefaultMultiLevelImage(targetMultiLevelSource));
-                }
+//                }
                 return targetBand;
             }
         }
@@ -253,25 +254,26 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
     @Override
     protected void setSceneTransforms(Product product) {
         //if tie point band geo-codings are used, imagetomodeltransforms are set
-        if (Config.instance("s3tbx").load().preferences().getBoolean(SLSTR_L1B_USE_PIXELGEOCODINGS, false)) {
-            final Band[] bands = product.getBands();
-            for (Band band : bands) {
-                final GeoCoding bandGeoCoding = getBandGeoCoding(product, band.getName().substring(band.getName().length() - 2));
-                final SlstrGeoCodingSceneTransformProvider transformProvider =
-                        new SlstrGeoCodingSceneTransformProvider(product.getSceneGeoCoding(), bandGeoCoding);
-                band.setModelToSceneTransform(transformProvider.getModelToSceneTransform());
-                band.setSceneToModelTransform(transformProvider.getSceneToModelTransform());
-            }
-            final ProductNodeGroup<Mask> maskGroup = product.getMaskGroup();
-            for (int i = 0; i < maskGroup.getNodeCount(); i++) {
-                final Mask mask = maskGroup.get(i);
-                final GeoCoding bandGeoCoding = getBandGeoCoding(product, mask.getName().substring(mask.getName().length() - 2));
-                final SlstrGeoCodingSceneTransformProvider transformProvider =
-                        new SlstrGeoCodingSceneTransformProvider(product.getSceneGeoCoding(), bandGeoCoding);
-                mask.setModelToSceneTransform(transformProvider.getModelToSceneTransform());
-                mask.setSceneToModelTransform(transformProvider.getSceneToModelTransform());
-            }
-        }
+        //todo remove commented lines when resampling works with scenetransforms
+//        if (Config.instance("s3tbx").load().preferences().getBoolean(SLSTR_L1B_USE_PIXELGEOCODINGS, false)) {
+//            final Band[] bands = product.getBands();
+//            for (Band band : bands) {
+//                final GeoCoding bandGeoCoding = getBandGeoCoding(product, band.getName().substring(band.getName().length() - 2));
+//                final SlstrGeoCodingSceneTransformProvider transformProvider =
+//                        new SlstrGeoCodingSceneTransformProvider(product.getSceneGeoCoding(), bandGeoCoding);
+//                band.setModelToSceneTransform(transformProvider.getModelToSceneTransform());
+//                band.setSceneToModelTransform(transformProvider.getSceneToModelTransform());
+//            }
+//            final ProductNodeGroup<Mask> maskGroup = product.getMaskGroup();
+//            for (int i = 0; i < maskGroup.getNodeCount(); i++) {
+//                final Mask mask = maskGroup.get(i);
+//                final GeoCoding bandGeoCoding = getBandGeoCoding(product, mask.getName().substring(mask.getName().length() - 2));
+//                final SlstrGeoCodingSceneTransformProvider transformProvider =
+//                        new SlstrGeoCodingSceneTransformProvider(product.getSceneGeoCoding(), bandGeoCoding);
+//                mask.setModelToSceneTransform(transformProvider.getModelToSceneTransform());
+//                mask.setSceneToModelTransform(transformProvider.getSceneToModelTransform());
+//            }
+//        }
     }
 
     @Override

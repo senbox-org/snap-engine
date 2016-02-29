@@ -43,7 +43,7 @@ import static org.esa.snap.dataio.envisat.EnvisatConstants.*;
 @OperatorMetadata(alias = "Rad2Refl",
         authors = "Olaf Danne, Marco Peters",
         copyright = "Brockmann Consult GmbH",
-        category = "Pre-Processing",
+        category = "Optical/Pre-Processing",
         version = "2.0",
         description = "Provides conversion from radiances to reflectances or backwards.")
 public class Rad2ReflOp extends PixelOperator {

@@ -188,6 +188,16 @@ public class FlhMciOp extends PixelOperator {
         }
     }
 
+    private void assertBandValid(String bandName) throws OperatorException {
+        final Band band = sourceProduct.getBand(bandName);
+        if (band == null) {
+            throw new OperatorException(bandName + " can not be found in source product");
+        }
+        if (!band.getRasterSize().equals(sourceProduct.getSceneRasterSize())) {
+            throw new OperatorException(bandName + " is not of same size as source product");
+        }
+    }
+
     private void assertParameterBandNameValid(String parameterValue, String parameterName) {
         if (StringUtils.isNullOrEmpty(parameterValue)) {
             throw new OperatorException(String.format("Parameter '%s' not specified", parameterName));

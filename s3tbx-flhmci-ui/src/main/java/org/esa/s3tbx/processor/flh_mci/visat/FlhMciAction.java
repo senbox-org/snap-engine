@@ -4,8 +4,11 @@ import com.bc.ceres.binding.Property;
 import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.binding.PropertySet;
 import com.bc.ceres.swing.binding.BindingContext;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.ui.DefaultSingleTargetProductDialog;
 import org.esa.snap.rcp.actions.AbstractSnapAction;
+import org.esa.snap.rcp.util.ResamplingIssue;
 import org.esa.snap.ui.AppContext;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
@@ -30,6 +33,9 @@ public class FlhMciAction extends AbstractSnapAction {
 
     private static final String OPERATOR_ALIAS = "FlhMci";
     private static final String HELP_ID = "flhMciScientificTool";
+    private static final String LOWER_BASELINE_BAND_NAME = "lowerBaselineBandName";
+    private static final String UPPER_BASE_LINE_BAND_NAME = "upperBaselineBandName";
+    private static final String SIGNAL_BAND_NAME = "signalBandName";
 
     public FlhMciAction() {
         putValue(SHORT_DESCRIPTION, "Generates florescence line height (FLH) / maximum chlorophyll index (MCI) from spectral bands.");
@@ -52,9 +58,9 @@ public class FlhMciAction extends AbstractSnapAction {
             public void propertyChange(PropertyChangeEvent evt) {
                 final Presets preset = (Presets) evt.getNewValue();
                 if (preset != Presets.NONE) {
-                    setValueIfValid(propertySet, "lowerBaselineBandName", preset.getLowerBaselineBandName());
-                    setValueIfValid(propertySet, "upperBaselineBandName", preset.getUpperBaselineBandName());
-                    setValueIfValid(propertySet, "signalBandName", preset.getSignalBandName());
+                    setValueIfValid(propertySet, LOWER_BASELINE_BAND_NAME, preset.getLowerBaselineBandName());
+                    setValueIfValid(propertySet, UPPER_BASE_LINE_BAND_NAME, preset.getUpperBaselineBandName());
+                    setValueIfValid(propertySet, SIGNAL_BAND_NAME, preset.getSignalBandName());
                     propertySet.setValue("lineHeightBandName", preset.getLineHeightBandName());
                     propertySet.setValue("slopeBandName", preset.getSlopeBandName());
                     propertySet.setValue("maskExpression", preset.getMaskExpression());
@@ -67,6 +73,9 @@ public class FlhMciAction extends AbstractSnapAction {
                 }
             }
         });
+        bindingContext.addPropertyChangeListener(LOWER_BASELINE_BAND_NAME, new BandPropertyChangeListener(propertySet));
+        bindingContext.addPropertyChangeListener(UPPER_BASE_LINE_BAND_NAME, new BandPropertyChangeListener(propertySet));
+        bindingContext.addPropertyChangeListener(SIGNAL_BAND_NAME, new BandPropertyChangeListener(propertySet));
 
         dialog.setTargetProductNameSuffix("_flhmci");
         dialog.getJDialog().pack();
@@ -81,6 +90,25 @@ public class FlhMciAction extends AbstractSnapAction {
         propertySet.removeProperties(properties);
         propertySet.addProperty(presetPropertySet.getProperty("preset"));
         propertySet.addProperties(properties);
+    }
+
+    private class BandPropertyChangeListener implements PropertyChangeListener {
+
+        private final PropertySet propertySet;
+
+        BandPropertyChangeListener(PropertySet propertySet) {
+            this.propertySet = propertySet;
+        }
+
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            final Product sourceProduct = propertySet.getValue("SOURCE_PRODUCT");
+            final String bandName = (String) evt.getNewValue();
+            final Band band = sourceProduct.getBand(bandName);
+            if (band != null && !band.getRasterSize().equals(sourceProduct.getSceneRasterSize())) {
+                ResamplingIssue.showResamplingIssueNotification(true);
+            }
+        }
     }
 
     private static class PresetContainer {

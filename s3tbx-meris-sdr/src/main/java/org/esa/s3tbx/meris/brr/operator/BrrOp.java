@@ -28,7 +28,8 @@ import java.util.Map;
                   version = "2.4",
                   authors = "R. Santer, M. Zuehlke, T. Block, O. Danne",
                   copyright = "(c) European Space Agency",
-                  description = "Performs the Rayleigh correction on a MERIS L1b product.")
+                  description = "Performs the Rayleigh correction on a MERIS L1b product.",
+                  category = "Optical/Pre-Processing")
 public class BrrOp extends BrrBasisOp {
 
     private static final float NODATA_VALUE = -1.0f;
