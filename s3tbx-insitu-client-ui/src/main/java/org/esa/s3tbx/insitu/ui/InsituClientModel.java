@@ -1,14 +1,19 @@
 package org.esa.s3tbx.insitu.ui;
 
-import org.esa.s3tbx.insitu.server.InsituDataset;
+import org.esa.s3tbx.insitu.server.InsituDatasetDescr;
 import org.esa.s3tbx.insitu.server.InsituParameter;
+import org.esa.s3tbx.insitu.server.InsituQuery;
+import org.esa.s3tbx.insitu.server.InsituResponse;
 import org.esa.s3tbx.insitu.server.InsituServer;
+import org.esa.s3tbx.insitu.server.InsituServerException;
 import org.esa.s3tbx.insitu.server.InsituServerRegistry;
 import org.esa.s3tbx.insitu.server.InsituServerSpi;
 import org.esa.snap.core.datamodel.Product;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
 import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
@@ -20,10 +25,10 @@ public class InsituClientModel implements Serializable {
 
     static final InsituServerSpi NO_SELECTION_SERVER_SPI = new NoSelectionInsituServerSpi();
 
-    private DefaultComboBoxModel<InsituServerSpi> insituServerModel;
-    private DefaultListModel<InsituDataset> datasetModel;
-    private DefaultListModel<InsituParameter> parameterModel;
-    private DefaultListModel<Product> productListModel;
+    private final DefaultComboBoxModel<InsituServerSpi> insituServerModel;
+    private final DefaultListModel<InsituDatasetDescr> datasetModel;
+    private final DefaultListModel<InsituParameter> parameterModel;
+    private final DefaultListModel<Product> productListModel;
     private Date startDate;
     private Date stopDate;
     private double minLon;
@@ -31,12 +36,15 @@ public class InsituClientModel implements Serializable {
     private double minLat;
     private double maxLat;
 
+    private InsituServer selectedServer;
+
     public InsituClientModel() {
         final Set<InsituServerSpi> allRegisteredServers = InsituServerRegistry.getInstance().getAllRegisteredServers();
         InsituServerSpi[] servers = allRegisteredServers.toArray(new InsituServerSpi[0]);
         insituServerModel = new DefaultComboBoxModel<>(servers);
         insituServerModel.insertElementAt(NO_SELECTION_SERVER_SPI, 0);
         insituServerModel.setSelectedItem(NO_SELECTION_SERVER_SPI);
+        insituServerModel.addListDataListener(new ServerListener());
         datasetModel = new DefaultListModel<>();
         parameterModel = new DefaultListModel<>();
         productListModel = new DefaultListModel<>();
@@ -54,7 +62,7 @@ public class InsituClientModel implements Serializable {
         return insituServerModel;
     }
 
-    public DefaultListModel<InsituDataset> getDatasetModel() {
+    public DefaultListModel<InsituDatasetDescr> getDatasetModel() {
         return datasetModel;
     }
 
@@ -139,6 +147,55 @@ public class InsituClientModel implements Serializable {
         @Override
         public InsituServer createServer() throws Exception {
             return null;
+        }
+    }
+
+    private class ServerListener implements ListDataListener {
+
+        @Override
+        public void intervalAdded(ListDataEvent e) {
+            // don't care for add
+        }
+
+        @Override
+        public void intervalRemoved(ListDataEvent e) {
+            // don't care for remove
+        }
+
+        @Override
+        public void contentsChanged(ListDataEvent event) {
+            if(event.getIndex0() == -1 && event.getIndex1() == -1) {
+                // selection changed if both indices are -1
+                final InsituServerSpi insituServerSpi = (InsituServerSpi) insituServerModel.getSelectedItem();
+                try {
+                    selectedServer = insituServerSpi.createServer();
+                    // todo (mp/29.02.2016) - use Progress Monitor
+                    updateDatasetModel();
+                    updateParameterModel();
+                } catch (Exception e) {
+                    insituServerModel.setSelectedItem(NO_SELECTION_SERVER_SPI);
+                    throw new IllegalStateException("Could not create server instance for server '" + insituServerSpi.getName() + "'", e);
+                }
+            }
+
+        }
+    }
+
+    private void updateDatasetModel() throws InsituServerException {
+        getDatasetModel().clear();
+        InsituQuery query = new InsituQuery().subject(InsituQuery.SUBJECT.DATASETS);
+        final InsituResponse insituResponse = selectedServer.query(query);
+        for (InsituDatasetDescr insituDataset : insituResponse.getDatasetDescriptions()) {
+            datasetModel.addElement(insituDataset);
+        }
+    }
+
+    private void updateParameterModel() throws InsituServerException {
+        getParameterModel().clear();
+        InsituQuery query = new InsituQuery().subject(InsituQuery.SUBJECT.PARAMETERS);
+        final InsituResponse insituResponse = selectedServer.query(query);
+        for (InsituParameter insituParameter : insituResponse.getParameters()) {
+            parameterModel.addElement(insituParameter);
         }
     }
 }

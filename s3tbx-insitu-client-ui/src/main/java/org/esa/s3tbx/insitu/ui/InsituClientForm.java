@@ -2,7 +2,7 @@ package org.esa.s3tbx.insitu.ui;
 
 import com.bc.ceres.swing.TableLayout;
 import com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
-import org.esa.s3tbx.insitu.server.InsituDataset;
+import org.esa.s3tbx.insitu.server.InsituDatasetDescr;
 import org.esa.s3tbx.insitu.server.InsituParameter;
 import org.esa.s3tbx.insitu.server.InsituServerSpi;
 import org.esa.snap.core.datamodel.Product;
@@ -99,7 +99,7 @@ public class InsituClientForm extends JPanel {
         layout.setCellFill(1, 3, TableLayout.Fill.BOTH);
         layout.setRowWeightY(1, 0.6);
         add(new JLabel("Dataset:"));
-        final JList<InsituDataset> campaignList = new JList<>(model.getDatasetModel());
+        final JList<InsituDatasetDescr> campaignList = new JList<>(model.getDatasetModel());
         campaignList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         campaignList.setVisibleRowCount(6);
         add(new JScrollPane(campaignList));
