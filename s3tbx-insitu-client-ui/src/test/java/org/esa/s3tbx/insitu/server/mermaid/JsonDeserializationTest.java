@@ -40,7 +40,7 @@ public class JsonDeserializationTest {
 
         assertEquals(InsituResponse.STATUS_CODE.OK, response.getStatus());
         assertNull(response.getFailureReasons());
-        final List<CampaignDescr> campaigns = response.getCampaignDescriptions();
+        final List<CampaignDescr> campaigns = response.getDatasetDescriptions();
         assertNotNull(campaigns);
         assertEquals(2, campaigns.size());
         final CampaignDescr aeronetDescr = campaigns.get(0);
@@ -90,7 +90,7 @@ public class JsonDeserializationTest {
         assertEquals(InsituResponse.STATUS_CODE.OK, response.getStatus());
         assertNull(response.getFailureReasons());
         assertEquals(484, response.getObservationCount());
-        final List<Campaign> campaignList = response.getCampaignList();
+        final List<Campaign> campaignList = response.getDatasetList();
         assertNotNull(campaignList);
         assertEquals(2, campaignList.size());
 

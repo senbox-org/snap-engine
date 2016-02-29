@@ -39,12 +39,12 @@ class MermaidResponse implements InsituResponse {
     }
 
     @Override
-    public List<CampaignDescr> getCampaignDescriptions() {
+    public List<CampaignDescr> getDatasetDescriptions() {
         return campaignDescriptions;
     }
 
     @Override
-    public List<Campaign> getCampaignList() {
+    public List<Campaign> getDatasetList() {
         return campaign;
     }
 

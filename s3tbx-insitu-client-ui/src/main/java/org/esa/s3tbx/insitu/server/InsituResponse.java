@@ -15,9 +15,9 @@ public interface InsituResponse {
 
     List<? extends InsituParameter> getParameters();
 
-    List<? extends InsituDatasetDescr> getCampaignDescriptions();
+    List<? extends InsituDatasetDescr> getDatasetDescriptions();
 
-    List<? extends InsituDataset> getCampaignList();
+    List<? extends InsituDataset> getDatasetList();
 
     enum STATUS_CODE {
         OK,

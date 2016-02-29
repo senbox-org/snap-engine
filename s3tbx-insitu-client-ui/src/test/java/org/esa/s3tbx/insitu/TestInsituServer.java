@@ -65,12 +65,12 @@ public class TestInsituServer implements InsituServer {
         }
 
         @Override
-        public List<? extends InsituDatasetDescr> getCampaignDescriptions() {
+        public List<? extends InsituDatasetDescr> getDatasetDescriptions() {
             return null;
         }
 
         @Override
-        public List<? extends InsituDataset> getCampaignList() {
+        public List<? extends InsituDataset> getDatasetList() {
             return null;
         }
     }
