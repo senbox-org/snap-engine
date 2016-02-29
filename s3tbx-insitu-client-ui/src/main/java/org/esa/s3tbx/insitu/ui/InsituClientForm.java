@@ -4,17 +4,13 @@ import com.bc.ceres.swing.TableLayout;
 import com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
 import org.esa.s3tbx.insitu.server.InsituDataset;
 import org.esa.s3tbx.insitu.server.InsituParameter;
-import org.esa.s3tbx.insitu.server.InsituServer;
-import org.esa.s3tbx.insitu.server.InsituServerRegistry;
 import org.esa.s3tbx.insitu.server.InsituServerSpi;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.rcp.util.DateTimePicker;
 import org.esa.snap.ui.DecimalFormatter;
 import org.esa.snap.ui.UIUtils;
 
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
-import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
@@ -34,10 +30,8 @@ import java.awt.ItemSelectable;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-import java.util.Set;
 import java.util.TimeZone;
 
 /**
@@ -48,38 +42,12 @@ public class InsituClientForm extends JPanel {
     private static final SimpleDateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss");
     private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("HH:mm:ss");
     private static final DecimalFormatter DECIMAL_FORMATTER = new DecimalFormatter("###0.0##");
-    private static final InsituServerSpi NO_SELECTION_SERVER_SPI = new NoSelectionInsituServerSpi();
 
-    private DefaultComboBoxModel<InsituServerSpi> insituServerModel;
-    private DefaultListModel<InsituDataset> datasetModel;
-    private DefaultListModel<InsituParameter> parameterModel;
-    private DefaultListModel<Product> productListModel;
-    private Date startDate;
-    private Date stopDate;
-    private double minLon;
-    private double maxLon;
-    private double minLat;
-    private double maxLat;
+    private final InsituClientModel model;
 
     public InsituClientForm() {
-        Calendar utcCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        utcCalendar.set(Calendar.HOUR_OF_DAY, 12);
-        utcCalendar.set(Calendar.MINUTE, 0);
-        utcCalendar.set(Calendar.SECOND, 0);
-        utcCalendar.set(Calendar.MILLISECOND, 0);
 
-        final Set<InsituServerSpi> allRegisteredServers = InsituServerRegistry.getInstance().getAllRegisteredServers();
-        InsituServerSpi[] servers = allRegisteredServers.toArray(new InsituServerSpi[0]);
-        insituServerModel = new DefaultComboBoxModel<>(servers);
-        insituServerModel.insertElementAt(NO_SELECTION_SERVER_SPI, 0);
-        datasetModel = new DefaultListModel<>();
-        parameterModel = new DefaultListModel<>();
-        productListModel = new DefaultListModel<>();
-        utcCalendar.add(Calendar.DAY_OF_YEAR, -1);
-        startDate = utcCalendar.getTime();
-        utcCalendar.add(Calendar.DAY_OF_YEAR, 2);
-        stopDate = utcCalendar.getTime();
-
+        model = new InsituClientModel();
         initForm();
     }
 
@@ -99,8 +67,8 @@ public class InsituClientForm extends JPanel {
         layout.setCellColspan(0, 1, 3);
         add(new JLabel("In-Situ Database:"));
 
-        final JComboBox<InsituServerSpi> insituServerComboBox = new JComboBox<>(insituServerModel);
-        insituServerComboBox.setPrototypeDisplayValue(NO_SELECTION_SERVER_SPI);
+        final JComboBox<InsituServerSpi> insituServerComboBox = new JComboBox<>(model.getInsituServerModel());
+        insituServerComboBox.setPrototypeDisplayValue(InsituClientModel.NO_SELECTION_SERVER_SPI);
         insituServerComboBox.setRenderer(new InsituServerListCellRenderer());
         insituServerComboBox.addItemListener(new ItemListener() {
             @Override
@@ -131,12 +99,12 @@ public class InsituClientForm extends JPanel {
         layout.setCellFill(1, 3, TableLayout.Fill.BOTH);
         layout.setRowWeightY(1, 0.6);
         add(new JLabel("Dataset:"));
-        final JList<InsituDataset> campaignList = new JList<>(datasetModel);
+        final JList<InsituDataset> campaignList = new JList<>(model.getDatasetModel());
         campaignList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         campaignList.setVisibleRowCount(6);
         add(new JScrollPane(campaignList));
         add(new JLabel("Parameter:"));
-        final JList<InsituParameter> paramList = new JList<>(parameterModel);
+        final JList<InsituParameter> paramList = new JList<>(model.getParameterModel());
         paramList.setVisibleRowCount(6);
         add(new JScrollPane(paramList));
 
@@ -145,42 +113,42 @@ public class InsituClientForm extends JPanel {
         layout.setCellFill(2, 2, TableLayout.Fill.BOTH);
         layout.setCellWeightY(2, 2, 1.0);
         add(new JLabel("Product:"));
-        final JList<Product> productList = new JList<>(productListModel);
+        final JList<Product> productList = new JList<>(model.getProductListModel());
         productList.setVisibleRowCount(6);
         add(new JScrollPane(productList));
 
         layout.setCellWeightX(3, 1, 1.0);
         layout.setCellWeightX(3, 3, 1.0);
         add(new JLabel("Start time:"));
-        final DateTimePicker startDatePicker = new DateTimePicker(startDate, Locale.getDefault(), DEFAULT_DATE_FORMAT, TIME_FORMAT);
-        startDatePicker.addPropertyChangeListener("date", evt -> startDate = (Date)evt.getNewValue());
+        final DateTimePicker startDatePicker = new DateTimePicker(model.getStartDate(), Locale.getDefault(), DEFAULT_DATE_FORMAT, TIME_FORMAT);
+        startDatePicker.addPropertyChangeListener("date", evt -> model.setStartDate((Date) evt.getNewValue()));
         add(startDatePicker);
 
         add(new JLabel("Stop time:"));
-        final DateTimePicker stopDatePicker = new DateTimePicker(stopDate, Locale.getDefault(), DEFAULT_DATE_FORMAT, TIME_FORMAT);
-        stopDatePicker.addPropertyChangeListener("date", evt -> stopDate = (Date)evt.getNewValue());
+        final DateTimePicker stopDatePicker = new DateTimePicker(model.getStopDate(), Locale.getDefault(), DEFAULT_DATE_FORMAT, TIME_FORMAT);
+        stopDatePicker.addPropertyChangeListener("date", evt -> model.setStopDate((Date) evt.getNewValue()));
         add(stopDatePicker);
 
         layout.setCellWeightX(4, 1, 1.0);
         layout.setCellWeightX(4, 3, 1.0);
         add(new JLabel("Min longitude:"));
         final JFormattedTextField minLonField = new JFormattedTextField(DECIMAL_FORMATTER);
-        minLonField.addActionListener(e -> minLon = (double) minLonField.getValue());
+        minLonField.addActionListener(e -> model.setMinLon((double) minLonField.getValue()));
         add(minLonField);
         add(new JLabel("Max longitude:"));
         final JFormattedTextField maxLonField = new JFormattedTextField(DECIMAL_FORMATTER);
-        maxLonField.addActionListener(e -> maxLon = (double) maxLonField.getValue());
+        maxLonField.addActionListener(e -> model.setMaxLon((double) maxLonField.getValue()));
         add(maxLonField);
 
         layout.setCellWeightX(5, 1, 1.0);
         layout.setCellWeightX(5, 3, 1.0);
         add(new JLabel("Min latitude:"));
         final JFormattedTextField minLatField = new JFormattedTextField(DECIMAL_FORMATTER);
-        minLatField.addActionListener(e -> minLat = (double) minLatField.getValue());
+        minLatField.addActionListener(e -> model.setMinLat((double) minLatField.getValue()));
         add(minLatField);
         add(new JLabel("Max latitude:"));
         final JFormattedTextField maxLatField = new JFormattedTextField(DECIMAL_FORMATTER);
-        maxLatField.addActionListener(e -> maxLat = (double) maxLatField.getValue());
+        maxLatField.addActionListener(e -> model.setMaxLat((double) maxLatField.getValue()));
         add(maxLatField);
 
     }
@@ -218,21 +186,4 @@ public class InsituClientForm extends JPanel {
         }
     }
 
-    private static class NoSelectionInsituServerSpi implements InsituServerSpi {
-
-        @Override
-        public String getName() {
-            return "<NO_SERVER_CURRENTLY_SELECTED>";
-        }
-
-        @Override
-        public String getDescription() {
-            return "Please select one of the available in-situ server";
-        }
-
-        @Override
-        public InsituServer createServer() throws Exception {
-            return null;
-        }
-    }
 }
