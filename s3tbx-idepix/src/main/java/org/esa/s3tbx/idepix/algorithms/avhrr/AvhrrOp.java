@@ -154,7 +154,7 @@ public class AvhrrOp extends BasisOp {
         final String[] sourceBandNames = {AvhrrConstants.AVHRR_AC_ALBEDO_1_BAND_NAME};
         waterMaskParameters.put("sourceBandNames", sourceBandNames);
         waterMaskParameters.put("landMask", false);
-        waterMaskProduct = GPF.createProduct("Land-Sea-Mask", waterMaskParameters, sourceProduct);
+        waterMaskProduct = GPF.createProduct("LandWaterMask", waterMaskParameters, sourceProduct);
     }
 
 

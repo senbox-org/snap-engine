@@ -34,7 +34,7 @@ import java.awt.event.ActionEvent;
 @ActionID(category = "Processing", id = "org.esa.s3tbx.idepix.ui.actions.IdepixVgtAction")
 @ActionRegistration(displayName = "#CTL_IdepixVgtAction_Text")
 @ActionReference(path = "Menu/Optical/Preprocessing/IdePix Pixel Classification", position = 200)
-@NbBundle.Messages({"CTL_IdepixVgtAction_Text=VGT"})
+@NbBundle.Messages({"CTL_IdepixVgtAction_Text=SPOT-VGT"})
 public class IdepixVgtAction extends AbstractSnapAction {
 
     private static final String HELP_ID = "idepixPixelIdentification";

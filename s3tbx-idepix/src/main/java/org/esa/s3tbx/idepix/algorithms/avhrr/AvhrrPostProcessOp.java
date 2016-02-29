@@ -77,10 +77,10 @@ public class AvhrrPostProcessOp extends Operator {
                                                                     "postProcessedCloud", "postProcessedCloud");
 
             // BEAM: todo reactivate this once we have our SRTM mask in SNAP
-//            landWaterBand = waterMaskProduct.getBand("land_water_fraction");
+            landWaterBand = waterMaskProduct.getBand("land_water_fraction");
 
             // meanwhile use the 'Land-Sea-Mask' operator by Array (Jun Lu, Luis Veci):
-            landWaterBand = waterMaskProduct.getBand(AvhrrConstants.AVHRR_AC_ALBEDO_1_BAND_NAME);
+//            landWaterBand = waterMaskProduct.getBand(AvhrrConstants.AVHRR_AC_ALBEDO_1_BAND_NAME);
 
             geoCoding = l1bProduct.getSceneGeoCoding();
 

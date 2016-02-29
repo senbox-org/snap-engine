@@ -167,7 +167,6 @@ public class ModisAlgorithm {
         if (isLand()) {
             isCloudSureFromWhitenesses = m > 0.7 && c1 > 0.96 && c2 > 0.93 && c3 > 0.95 && c1 < 1.04 && c2 < 1.05 && c3 < 1.05;
         } else {
-//            isCloudSureFromWhitenesses = m > 0.3 && c1 > 0.87 && c2 > 0.9 && c3 > 0.97;
             isCloudSureFromWhitenesses = c1 > 0.87 && c2 > 0.9 && c3 > 0.97;
         }
         isCloudSureFromWhitenesses = isCloudSureFromWhitenesses && refl[1] > modisGlintThresh859;

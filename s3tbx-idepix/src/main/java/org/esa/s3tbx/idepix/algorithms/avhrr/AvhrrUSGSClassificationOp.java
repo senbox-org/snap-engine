@@ -369,10 +369,10 @@ public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
         }
 
         // BEAM: todo reactivate this once we have our SRTM mask in SNAP
-//        sampleConfigurer.defineSample(index, AvhrrConstants.LAND_WATER_FRACTION_BAND_NAME, waterMaskProduct);
+        sampleConfigurer.defineSample(index, AvhrrConstants.LAND_WATER_FRACTION_BAND_NAME, waterMaskProduct);
 
         // meanwhile use the 'Land-Sea-Mask' operator by Array (Jun Lu, Luis Veci):
-        sampleConfigurer.defineSample(index, AvhrrConstants.AVHRR_AC_ALBEDO_1_BAND_NAME, waterMaskProduct);
+//        sampleConfigurer.defineSample(index, AvhrrConstants.AVHRR_AC_ALBEDO_1_BAND_NAME, waterMaskProduct);
     }
 
     @Override

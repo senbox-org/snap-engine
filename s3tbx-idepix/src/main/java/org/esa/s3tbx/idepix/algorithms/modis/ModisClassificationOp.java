@@ -18,56 +18,54 @@ import java.io.InputStream;
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "idepix.modis.classification",
+@OperatorMetadata(alias = "Idepix.Modis.Classification",
         version = "2.2",
-        copyright = "(c) 2014 by Brockmann Consult",
+        copyright = "(c) 2016 by Brockmann Consult",
         description = "OC-CCI pixel classification operator.",
         internal = true)
 public class ModisClassificationOp extends PixelOperator {
+
+    @Parameter(defaultValue = "true",
+            label = " Apply brightness test",
+            description = "Apply brightness test: EV_250_Aggr1km_RefSB_1 > THRESH.")
+    private boolean applyBrightnessTest;
+
+    @Parameter(defaultValue = "true",
+            label = " Apply 'OR' logic in cloud test",
+            description = "Apply 'OR' logic instead of 'AND' logic in cloud test.")
+    private boolean applyOrLogicInCloudTest;
+
+    @Parameter(defaultValue = "0.15",
+            label = " 'Dark glint' threshold at 859nm",
+            description = "'Dark glint' threshold: Cloud possible only if EV_250_Aggr1km_RefSB_2 > THRESH.")
+    private double ocModisGlintThresh859 = 0.15;
+
+    @Parameter(defaultValue = "1", label = " Width of cloud buffer (# of pixels)")
+    private int cloudBufferWidth;
+
+    @Parameter(defaultValue = "150", valueSet = {"1000", "150", "50"},
+            label = " Resolution of used land-water mask in m/pixel",
+            description = "Resolution in m/pixel")
+    private int waterMaskResolution;
+
+    @Parameter(defaultValue = "true",
+            label = " Write reflective solar bands",
+            description = "Write TOA reflective solar bands (RefSB) to target product.")
+    private boolean outputRad2Refl = true;
+
+    @Parameter(defaultValue = "false",
+            label = " Write emissive bands",
+            description = "Write 'Emissive' bands to target product.")
+    private boolean outputEmissive = false;
+
+
+
 
     @SourceProduct(alias = "refl", description = "MODIS L1b reflectance product")
     private Product reflProduct;
 
     @SourceProduct(alias = "waterMask")
     private Product waterMaskProduct;
-
-    @Parameter(defaultValue = "2", label = " Width of cloud buffer (# of pixels)")
-    private int cloudBufferWidth;
-
-    @Parameter(defaultValue = "50", valueSet = {"50", "150"}, label = " Resolution of used land-water mask in m/pixel",
-            description = "Resolution in m/pixel")
-    private int wmResolution;
-
-    @Parameter(defaultValue = "false",
-            label = " Debug bands",
-            description = "Write further useful bands to target product.")
-    private boolean ocOutputDebug = false;
-
-    @Parameter(defaultValue = "true",
-            label = " Apply brightness test (MODIS)",
-            description = "Apply brightness test: EV_250_Aggr1km_RefSB_1 > THRESH (MODIS).")
-    private boolean ocModisApplyBrightnessTest = true;
-
-    @Parameter(defaultValue = "true",
-            label = " Apply 'OR' logic in cloud test (MODIS)",
-            description = "Apply 'OR' logic instead of 'AND' logic in cloud test (MODIS).")
-    private boolean ocModisApplyOrLogicInCloudTest = true;
-
-    //    @Parameter(defaultValue = "0.15",
-//               label = " Brightness test threshold (MODIS)",
-//               description = "Brightness test threshold: EV_250_Aggr1km_RefSB_1 > THRESH (MODIS).")
-    private double ocModisBrightnessThreshCloudSure = 0.15;
-
-    //    @Parameter(defaultValue = "0.07",
-//               label = " Brightness test 'cloud ambiguous' threshold (MODIS)",
-//               description = "Brightness test 'cloud ambiguous' threshold: EV_250_Aggr1km_RefSB_1 > THRESH (MODIS).")
-    private double ocModisBrightnessThreshCloudAmbiguous = 0.125;
-
-    @Parameter(defaultValue = "0.15",
-            label = " 'Dark glint' threshold at 859nm (MODIS)",
-            description = "'Dark glint' threshold: Cloud possible only if EV_250_Aggr1km_RefSB_2 > THRESH.")
-    private double ocModisGlintThresh859 = 0.15;
-
 
     public static final String SCHILLER_MODIS_WATER_NET_NAME = "9x7x5x3_130.3_water.net";
     public static final String SCHILLER_MODIS_LAND_NET_NAME = "8x6x4x2_290.4_land.net";
@@ -98,7 +96,7 @@ public class ModisClassificationOp extends PixelOperator {
         try (
                 InputStream isMW = getClass().getResourceAsStream(SCHILLER_MODIS_WATER_NET_NAME);
                 InputStream isML = getClass().getResourceAsStream(SCHILLER_MODIS_LAND_NET_NAME);
-                InputStream isMA = getClass().getResourceAsStream(SCHILLER_MODIS_ALL_NET_NAME);
+                InputStream isMA = getClass().getResourceAsStream(SCHILLER_MODIS_ALL_NET_NAME)
         ) {
             modisWaterNeuralNet = SchillerNeuralNetWrapper.create(isMW);
             modisLandNeuralNet = SchillerNeuralNetWrapper.create(isML);
@@ -142,12 +140,16 @@ public class ModisClassificationOp extends PixelOperator {
         }
         modisAlgorithm.setWaterFraction(waterFraction);
 
-        modisAlgorithm.setModisApplyBrightnessTest(ocModisApplyBrightnessTest);
+//        modisAlgorithm.setModisApplyBrightnessTest(applyBrightnessTest);
+        modisAlgorithm.setModisApplyBrightnessTest(false);
+        final double ocModisBrightnessThreshCloudSure = 0.15;
         modisAlgorithm.setModisBrightnessThreshCloudSure(ocModisBrightnessThreshCloudSure);
+        final double ocModisBrightnessThreshCloudAmbiguous = 0.125;
         modisAlgorithm.
                 setModisBrightnessThreshCloudAmbiguous(ocModisBrightnessThreshCloudAmbiguous);
+        double ocModisGlintThresh859 = 0.15;
         modisAlgorithm.setModisGlintThresh859(ocModisGlintThresh859);
-        modisAlgorithm.setModisApplyOrLogicInCloudTest(ocModisApplyOrLogicInCloudTest);
+        modisAlgorithm.setModisApplyOrLogicInCloudTest(applyOrLogicInCloudTest);
 
         double[] modisNeuralNetInput = modisAllNeuralNet.get().getInputVector();
         modisNeuralNetInput[0] = Math.sqrt(sourceSamples[0].getFloat());    // EV_250_Aggr1km_RefSB.1 (645nm)
@@ -229,8 +231,6 @@ public class ModisClassificationOp extends PixelOperator {
         classifFlagBand.setSampleCoding(flagCoding);
         getTargetProduct().getFlagCodingGroup().add(flagCoding);
 
-//        productConfigurer.copyGeoCoding();
-//        ProductUtils.copyGeoCoding(reflProduct, getTargetProduct());
         getTargetProduct().setSceneGeoCoding(reflProduct.getSceneGeoCoding());
         ModisUtils.setupClassifBitmask(getTargetProduct());
 

@@ -34,7 +34,7 @@ import java.awt.event.ActionEvent;
 @ActionID(category = "Processing", id = "org.esa.s3tbx.idepix.ui.actions.IdepixMsiAction")
 @ActionRegistration(displayName = "#CTL_IdepixMsiAction_Text")
 @ActionReference(path = "Menu/Optical/Preprocessing/IdePix Pixel Classification", position = 200)
-@NbBundle.Messages({"CTL_IdepixMsiAction_Text=MSI"})
+@NbBundle.Messages({"CTL_IdepixMsiAction_Text=Sentinel-2"})
 public class IdepixMsiAction extends AbstractSnapAction {
 
     private static final String HELP_ID = "idepixPixelIdentification";
@@ -55,3 +55,4 @@ public class IdepixMsiAction extends AbstractSnapAction {
         dialog.show();
     }
 }
+
