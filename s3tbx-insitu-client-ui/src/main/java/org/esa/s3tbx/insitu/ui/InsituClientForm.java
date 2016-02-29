@@ -26,9 +26,6 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 import java.awt.Component;
-import java.awt.ItemSelectable;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -70,27 +67,6 @@ public class InsituClientForm extends JPanel {
         final JComboBox<InsituServerSpi> insituServerComboBox = new JComboBox<>(model.getInsituServerModel());
         insituServerComboBox.setPrototypeDisplayValue(InsituClientModel.NO_SELECTION_SERVER_SPI);
         insituServerComboBox.setRenderer(new InsituServerListCellRenderer());
-        insituServerComboBox.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                final ItemSelectable itemSelectable = e.getItemSelectable();
-                System.out.println("itemSelectable = " + itemSelectable);
-                final Object item = e.getItem();
-                System.out.println("item = " + item);
-                if(e.getID() == ItemEvent.DESELECTED) {
-                    System.out.println("eventId = DESELECTED");
-                }else if(e.getID() == ItemEvent.SELECTED){
-                    System.out.println("eventId = SELECTED");
-                }else if(e.getID() == ItemEvent.ITEM_STATE_CHANGED){
-                    System.out.println("eventId = ITEM_STATE_CHANGED");
-                }
-                // todo
-                // - get datasets from server
-                // - get parameters from server
-                // todo
-
-            }
-        });
         add(insituServerComboBox);
 
         layout.setCellWeightX(1, 1, 1.0);
@@ -100,6 +76,7 @@ public class InsituClientForm extends JPanel {
         layout.setRowWeightY(1, 0.6);
         add(new JLabel("Dataset:"));
         final JList<InsituDatasetDescr> campaignList = new JList<>(model.getDatasetModel());
+        campaignList.setCellRenderer(new DatasetDescrListCellRenderer());
         campaignList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         campaignList.setVisibleRowCount(6);
         add(new JScrollPane(campaignList));
@@ -179,11 +156,33 @@ public class InsituClientForm extends JPanel {
                                                       boolean isSelected,
                                                       boolean cellHasFocus) {
             final JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-            final InsituServerSpi server = (InsituServerSpi)value;
+            final InsituServerSpi server = (InsituServerSpi) value;
             label.setText(server.getName());
             label.setToolTipText(server.getDescription());
             return label;
         }
     }
 
+    private static class DatasetDescrListCellRenderer extends DefaultListCellRenderer {
+
+        @Override
+        public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+            final JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            final InsituDatasetDescr datasetDescr = (InsituDatasetDescr) value;
+            label.setText(datasetDescr.getName());
+            label.setToolTipText(datasetDescr.getDescription());
+            final String text = String.format("<html>" +
+                                              "<b>PI: </b>%s<br>" +
+                                              "<b>Contact: </b>%s<br>" +
+                                              "<b>Website: </b>%s<br>" +
+                                              "<b>Description: </b>%s",
+                                              datasetDescr.getPi(),
+                                              datasetDescr.getContact(),
+                                              datasetDescr.getWebsite(),
+                                              datasetDescr.getDescription());
+            label.setToolTipText(text);
+
+            return label;
+        }
+    }
 }
