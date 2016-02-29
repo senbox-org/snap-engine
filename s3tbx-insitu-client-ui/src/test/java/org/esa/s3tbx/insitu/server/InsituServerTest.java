@@ -13,14 +13,9 @@ public class InsituServerTest {
     @Test
     public void testMethod() throws Exception {
         final InsituServer server = new TestInsituServer.Spi().createServer();
-        final InsituQuery builder = new InsituQuery();
-        builder.subject("interest");
-        builder.campaign("Muscheln");
-        builder.latMin(-10.943);
-        builder.latMax(46.12);
-        builder.lonMin(5.0);
-        builder.lonMax(15.36);
-        final InsituResponse response = server.query(builder);
+        final InsituQuery query = new InsituQuery().subject(InsituQuery.SUBJECT.DATASETS).campaign("Muscheln");
+        query.latMin(-10.943).latMax(46.12).lonMin(5.0).lonMax(15.36);
+        final InsituResponse response = server.query(query);
 
         Assert.assertNotNull(response);
 

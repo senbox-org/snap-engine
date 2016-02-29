@@ -7,7 +7,13 @@ import java.util.Date;
  */
 public class InsituQuery {
 
-    protected String subject;
+    public enum SUBJECT {
+        DATASETS,
+        PARAMETERS,
+        OBSERVATIONS;
+    }
+
+    protected SUBJECT subject;
     protected Double lonMin;
     protected Double latMin;
     protected Double lonMax;
@@ -20,96 +26,108 @@ public class InsituQuery {
     protected int limit;
     protected boolean countOnly;
 
-    public void subject(String subject) {
+    public InsituQuery subject(SUBJECT subject) {
         this.subject = subject;
+        return this;
     }
 
-    public String subject() {
+    public SUBJECT subject() {
         return subject;
     }
 
-    public void lonMin(Double lonMin) {
+    public InsituQuery lonMin(Double lonMin) {
         this.lonMin = lonMin;
+        return this;
     }
 
     public Double lonMin() {
         return lonMin;
     }
 
-    public void latMin(Double latMin) {
+    public InsituQuery latMin(Double latMin) {
         this.latMin = latMin;
+        return this;        
     }
 
     public Double latMin() {
         return latMin;
     }
 
-    public void lonMax(Double lonMax) {
+    public InsituQuery lonMax(Double lonMax) {
         this.lonMax = lonMax;
+        return this;
     }
 
     public Double lonMax() {
         return lonMax;
     }
 
-    public void latMax(Double latMax) {
+    public InsituQuery latMax(Double latMax) {
         this.latMax = latMax;
+        return this;
     }
 
     public Double latMax() {
         return latMax;
     }
 
-    public void startDate(Date startDate) {
+    public InsituQuery startDate(Date startDate) {
         this.startDate = startDate;
+        return this;
     }
 
     public Date startDate() {
         return startDate;
     }
 
-    public void stopDate(Date stopDate) {
+    public InsituQuery stopDate(Date stopDate) {
         this.stopDate = stopDate;
+        return this;
     }
 
     public Date stopDate() {
         return stopDate;
     }
 
-    public void param(String[] parameters) {
+    public InsituQuery param(String[] parameters) {
         this.param = parameters;
+        return this;
     }
 
     public String[] param() {
         return param;
     }
 
-    public void campaign(String campaign) {
+    public InsituQuery campaign(String campaign) {
         this.campaign = campaign;
+        return this;
     }
 
     public String campaign() {
         return campaign;
     }
 
-    public void shift(int shift) {
+    public InsituQuery shift(int shift) {
         this.shift = shift;
+        return this;
     }
 
     public int shift() {
         return shift;
     }
 
-    public void limit(int limit) {
+    public InsituQuery limit(int limit) {
         this.limit = limit;
+        return this;
     }
 
     public int limit() {
         return limit;
     }
 
-    public void countOnly(boolean countOnly) {
+    public InsituQuery countOnly(boolean countOnly) {
         this.countOnly = countOnly;
+        return this;
     }
 
     public boolean countOnly() {

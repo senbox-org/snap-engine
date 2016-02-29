@@ -27,7 +27,7 @@ public class MermaidQueryFormatterTest {
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
         final InsituQuery query= new InsituQuery();
-        query.subject("interest");
+        query.subject(InsituQuery.SUBJECT.PARAMETERS);
         query.campaign("Muscheln");
         query.latMin(-10.943);
         query.latMax(46.12);
@@ -40,7 +40,7 @@ public class MermaidQueryFormatterTest {
         query.shift(5);
         query.countOnly(true);
         String queryString = MermaidQueryFormatter.format(query);
-        assertTrue(queryString.startsWith("/interest?"));
+        assertTrue(queryString.startsWith("/parameters?"));
         assertTrue(queryString.contains("campaign=Muscheln"));
         assertTrue(queryString.contains("lat_min=-10.943"));
         assertTrue(queryString.contains("lon_min=5.0"));

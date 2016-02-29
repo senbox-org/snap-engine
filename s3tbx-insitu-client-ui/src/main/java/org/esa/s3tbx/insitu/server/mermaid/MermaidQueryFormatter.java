@@ -15,6 +15,10 @@ import java.util.List;
  */
 class MermaidQueryFormatter {
 
+    private static final String PARAMETERS_SUBJECT = "parameters";
+    private static final String CAMPAIGNS_SUBJECT = "campaigns";
+    private static final String OBSERVATIONS_SUBJECT = "observations";
+
     private static final String PARAM_LON_MIN = "lon_min";
     private static final String PARAM_LAT_MIN = "lat_min";
     private static final String PARAM_LON_MAX = "lon_max=";
@@ -74,8 +78,23 @@ class MermaidQueryFormatter {
             queryParams.add(PARAM_COUNT_ONLY);
         }
 
+        if(query.subject() == null) {
+            throw new IllegalArgumentException("subject must be specified");
+        }
         final StringBuilder sb = new StringBuilder();
-        sb.append("/").append(query.subject()).append("?");
+        sb.append("/");
+        switch (query.subject()) {
+            case DATASETS:
+                sb.append(CAMPAIGNS_SUBJECT);
+                break;
+            case PARAMETERS:
+                sb.append(PARAMETERS_SUBJECT);
+                break;
+            case OBSERVATIONS:
+                sb.append(OBSERVATIONS_SUBJECT);
+                break;
+        }
+        sb.append("?");
 
         for (int i = 0; i < queryParams.size(); i++) {
             String queryParam = queryParams.get(i);
