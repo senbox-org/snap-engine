@@ -45,19 +45,14 @@ public class Landsat8Op extends Operator {
 
     // overall parameters
 
-    @Parameter(defaultValue = "true",
-            description = "Write source bands to the target product.",
-            label = " Write source bands to the target product")
-    private boolean outputSourceBands;
-
 //    @Parameter(defaultValue = "false",
 //            label = " Compute cloud shadow",
 //            description = " Compute cloud shadow with the algorithm from 'Fronts' project")
 //    private boolean computeCloudShadow;  // todo: later if we find a way how to compute
 
-    @Parameter(defaultValue = "true",
-            label = " Compute a cloud buffer")
-    private boolean computeCloudBuffer;
+//    @Parameter(defaultValue = "true",
+//            label = " Compute a cloud buffer")
+    private boolean computeCloudBuffer = true;
 
     @Parameter(defaultValue = "2",
             interval = "[0,100]",
@@ -67,14 +62,14 @@ public class Landsat8Op extends Operator {
 
     @Parameter(defaultValue = "true",
             label = " Refine pixel classification near coastlines",
-            description = "Refine pixel classification near coastlines. ")
+            description = "Refine pixel classification near coastlines (time consuming operation!). Improves distinction of clouds and bright beaches. ")
     private boolean refineClassificationNearCoastlines;
 
-    @Parameter(defaultValue = "865",
-            valueSet = {"440", "480", "560", "655", "865", "1610", "2200", "590", "1370", "10895", "12005"},
+    @Parameter(defaultValue = "480",
+            valueSet = {"440", "480", "560", "655", "865", "1610", "2200", "590 (PANCHROMATIC)", "1370", "10895", "12005"},
             description = "Wavelength for brightness computation br = R(wvl) over land.",
             label = "Wavelength for brightness computation over land")
-    private int brightnessBandLand;
+    private String brightnessBandLandString;
 
     @Parameter(defaultValue = "0.5",
             description = "Threshold T for brightness classification over land: bright if br[reflectance] > T.",
@@ -82,10 +77,10 @@ public class Landsat8Op extends Operator {
     private float brightnessThreshLand;
 
     @Parameter(defaultValue = "655",
-            valueSet = {"440", "480", "560", "655", "865", "1610", "2200", "590", "1370", "10895", "12005"},
+            valueSet = {"440", "480", "560", "655", "865", "1610", "2200", "590 (PANCHROMATIC)", "1370", "10895", "12005"},
             description = "Wavelength 1 for brightness computation over water.",
             label = "Wavelength 1 for brightness computation over water")
-    private int brightnessBand1Water;
+    private String brightnessBand1WaterString;
 
     @Parameter(defaultValue = "1.0",
             description = "Weight A for wavelength 1 for brightness computation (br[reflectance] = A*R(wvl_1) + B*R(wvl_2)) over water.",
@@ -93,10 +88,10 @@ public class Landsat8Op extends Operator {
     private float brightnessWeightBand1Water;
 
     @Parameter(defaultValue = "865",
-            valueSet = {"440", "480", "560", "655", "865", "1610", "2200", "590", "1370", "10895", "12005"},
+            valueSet = {"440", "480", "560", "655", "865", "1610", "2200", "590 (PANCHROMATIC)", "1370", "10895", "12005"},
             description = "Wavelength 2 for brightness computation over water.",
             label = "Wavelength 1 for brightness computation over water")
-    private int brightnessBand2Water;
+    private String brightnessBand2WaterString;
 
     @Parameter(defaultValue = "1.0",
             description = "Weight B for wavelength 2 for brightness computation (br[reflectance] = A*R(wvl_1) + B*R(wvl_2)) over water.",
@@ -109,16 +104,16 @@ public class Landsat8Op extends Operator {
     private float brightnessThreshWater;
 
     @Parameter(defaultValue = "655",
-            valueSet = {"440", "480", "560", "655", "865", "1610", "2200", "590", "1370", "10895", "12005"},
+            valueSet = {"440", "480", "560", "655", "865", "1610", "2200", "590 (PANCHROMATIC)", "1370", "10895", "12005"},
             description = "Wavelength 1 for whiteness computation (wh = R(wvl_1) / R(wvl_2)) over land.",
             label = "Wavelength 1 for whiteness computation over land")
-    private int whitenessBand1Land;
+    private String whitenessBand1LandString;
 
     @Parameter(defaultValue = "865",
-            valueSet = {"440", "480", "560", "655", "865", "1610", "2200", "590", "1370", "10895", "12005"},
+            valueSet = {"440", "480", "560", "655", "865", "1610", "2200", "590 (PANCHROMATIC)", "1370", "10895", "12005"},
             description = "Wavelength 2 for whiteness computation (wh = R(wvl_1) / R(wvl_2)) over land.",
             label = "Wavelength 2 for whiteness computation over land")
-    private int whitenessBand2Land;
+    private String whitenessBand2LandString;
 
     @Parameter(defaultValue = "2.0",
             description = "Threshold T for whiteness classification over land: white if wh < T.",
@@ -126,16 +121,16 @@ public class Landsat8Op extends Operator {
     private float whitenessThreshLand;
 
     @Parameter(defaultValue = "655",
-            valueSet = {"440", "480", "560", "655", "865", "1610", "2200", "590", "1370", "10895", "12005"},
+            valueSet = {"440", "480", "560", "655", "865", "1610", "2200", "590 (PANCHROMATIC)", "1370", "10895", "12005"},
             description = "Wavelength 1 for whiteness computation (wh = R(wvl_1) / R(wvl_2)) over water.",
             label = "Wavelength 1 for whiteness computation over water")
-    private int whitenessBand1Water;
+    private String whitenessBand1WaterString;
 
     @Parameter(defaultValue = "865",
-            valueSet = {"440", "480", "560", "655", "865", "1610", "2200", "590", "1370", "10895", "12005"},
+            valueSet = {"440", "480", "560", "655", "865", "1610", "2200", "590 (PANCHROMATIC)", "1370", "10895", "12005"},
             description = "Wavelength 2 for whiteness computation (wh = R(wvl_1) / R(wvl_2)) over water.",
             label = "Wavelength 2 for whiteness computation over water")
-    private int whitenessBand2Water;
+    private String whitenessBand2WaterString;
 
     @Parameter(defaultValue = "2.0",
             description = "Threshold T for whiteness classification over water: white if wh < T.",
@@ -148,10 +143,10 @@ public class Landsat8Op extends Operator {
     private double darkGlintThreshTest1;
 
     @Parameter(defaultValue = "865",
-            valueSet = {"440", "480", "560", "655", "865", "1610", "2200", "590", "1370", "10895", "12005"},
+            valueSet = {"440", "480", "560", "655", "865", "1610", "2200", "590 (PANCHROMATIC)", "1370", "10895", "12005"},
             description = "Wavelength 2 for whiteness computation (wh = R(wvl_1) / R(wvl_2)) over water.",
             label = "Wavelength used for Dark Glint Test 1")
-    private int darkGlintThreshTest1Wavelength;
+    private String darkGlintThreshTest1WavelengthString;
 
     @Parameter(defaultValue = "0.15",
             label = "Dark Glint Test 2",
@@ -159,10 +154,10 @@ public class Landsat8Op extends Operator {
     private double darkGlintThreshTest2;
 
     @Parameter(defaultValue = "1610",
-            valueSet = {"440", "480", "560", "655", "865", "1610", "2200", "590", "1370", "10895", "12005"},
+            valueSet = {"440", "480", "560", "655", "865", "1610", "2200", "590 (PANCHROMATIC)", "1370", "10895", "12005"},
             description = "Wavelength 2 for whiteness computation (wh = R(wvl_1) / R(wvl_2)) over water.",
             label = "Wavelength used for Dark Glint Test 2")
-    private int darkGlintThreshTest2Wavelength;
+    private String darkGlintThreshTest2WavelengthString;
 
     // currently not used todo: clarify if needed
 //    @Parameter(defaultValue = "2.0",
@@ -242,6 +237,12 @@ public class Landsat8Op extends Operator {
             description = "If computed, write OTSU bands (Clost and binary) to the target product.",
             label = " Write OTSU bands (Clost and binary) bands to the target product")
     private boolean outputOtsuBands;
+
+    @Parameter(defaultValue = "true",
+            description = "Write source bands to the target product.",
+            label = " Write source bands to the target product")
+    private boolean outputSourceBands;
+
 
     private static final int LAND_WATER_MASK_RESOLUTION = 50;
     private static final int OVERSAMPLING_FACTOR_X = 3;
@@ -327,19 +328,25 @@ public class Landsat8Op extends Operator {
     private void setClassificationParameters() {
         classificationParameters = new HashMap<>();
         classificationParameters.put("brightnessThreshLand", brightnessThreshLand);
-        classificationParameters.put("brightnessBandLand", brightnessBandLand);
+        classificationParameters.put("brightnessBandLand", Landsat8Utils.getWavelengthFromString(brightnessBandLandString));
         classificationParameters.put("brightnessThreshWater", brightnessThreshWater);
-        classificationParameters.put("brightnessBand1Water", brightnessBand1Water);
-        classificationParameters.put("brightnessBand2Water", brightnessBand2Water);
+        classificationParameters.put("brightnessBand1Water",
+                                     Landsat8Utils.getWavelengthFromString(brightnessBand1WaterString));
+        classificationParameters.put("brightnessBand2Water",
+                                     Landsat8Utils.getWavelengthFromString(brightnessBand2WaterString));
         classificationParameters.put("brightnessWeightBand1Water", brightnessWeightBand1Water);
         classificationParameters.put("brightnessWeightBand2Water", brightnessWeightBand2Water);
 
         classificationParameters.put("whitenessThreshLand", whitenessThreshLand);
-        classificationParameters.put("whitenessBand1Land", whitenessBand1Land);
-        classificationParameters.put("whitenessBand2Land", whitenessBand2Land);
+        classificationParameters.put("whitenessBand1Land",
+                                     Landsat8Utils.getWavelengthFromString(whitenessBand1LandString));
+        classificationParameters.put("whitenessBand2Land",
+                                     Landsat8Utils.getWavelengthFromString(whitenessBand2LandString));
         classificationParameters.put("whitenessThreshWater", whitenessThreshWater);
-        classificationParameters.put("whitenessBand1Water", whitenessBand1Water);
-        classificationParameters.put("whitenessBand2Water", whitenessBand2Water);
+        classificationParameters.put("whitenessBand1Water",
+                                     Landsat8Utils.getWavelengthFromString(whitenessBand1WaterString));
+        classificationParameters.put("whitenessBand2Water",
+                                     Landsat8Utils.getWavelengthFromString(whitenessBand2WaterString));
 
         classificationParameters.put("applyShimezCloudTest", applyShimezCloudTest);
         classificationParameters.put("shimezDiffThresh", shimezDiffThresh);
@@ -356,9 +363,11 @@ public class Landsat8Op extends Operator {
         classificationParameters.put("nnCloudSureSnowSeparationValue", nnCloudSureSnowSeparationValue);
 
         classificationParameters.put("darkGlintThreshTest1", darkGlintThreshTest1);
-        classificationParameters.put("darkGlintThreshTest1Wavelength", darkGlintThreshTest1Wavelength);
+        classificationParameters.put("darkGlintThreshTest1Wavelength",
+                                     Landsat8Utils.getWavelengthFromString(darkGlintThreshTest1WavelengthString));
         classificationParameters.put("darkGlintThreshTest2", darkGlintThreshTest2);
-        classificationParameters.put("darkGlintThreshTest2Wavelength", darkGlintThreshTest2Wavelength);
+        classificationParameters.put("darkGlintThreshTest2Wavelength",
+                                     Landsat8Utils.getWavelengthFromString(darkGlintThreshTest2WavelengthString));
 
         // currently not used todo: clarify if needed
 //        classificationParameters.put("alternativeFirstClassBoundary", alternativeFirstClassBoundary);

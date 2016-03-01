@@ -30,47 +30,29 @@ import java.util.Map;
         description = "Pixel identification and classification for MODIS.")
 public class ModisOp extends BasisOp {
 
-    @Parameter(defaultValue = "true",
-            label = " Reflective solar bands (MODIS)",
-            description = "Write TOA reflective solar bands (RefSB) to target product (MODIS).")
-    private boolean outputRad2Refl = true;
-
-    @Parameter(defaultValue = "false",
-            label = " Emissive bands (MODIS)",
-            description = "Write 'Emissive' bands to target product (MODIS).")
-    private boolean outputEmissive = false;
-
-    //    @Parameter(defaultValue = "0.15",
-//               label = " Brightness test threshold (MODIS)",
-//               description = "Brightness test threshold: EV_250_Aggr1km_RefSB_1 > THRESH (MODIS).")
-    private double brightnessThreshCloudSure = 0.15;
-
-    @Parameter(defaultValue = "0.15",
-            label = " 'Dark glint' threshold at 859nm (MODIS)",
-            description = "'Dark glint' threshold: Cloud possible only if EV_250_Aggr1km_RefSB_2 > THRESH.")
-    private double glintThresh859 = 0.15;
-
-    @Parameter(defaultValue = "true",
-            label = " Apply brightness test (MODIS)",
-            description = "Apply brightness test: EV_250_Aggr1km_RefSB_1 > THRESH (MODIS).")
-    private boolean applyBrightnessTest = true;
-
-    @Parameter(defaultValue = "true",
-            label = " Apply 'OR' logic in cloud test (MODIS)",
-            description = "Apply 'OR' logic instead of 'AND' logic in cloud test (MODIS).")
-    private boolean applyOrLogicInCloudTest = true;
-
-    //    @Parameter(defaultValue = "0.07",
-//               label = " Brightness test 'cloud ambiguous' threshold (MODIS)",
-//               description = "Brightness test 'cloud ambiguous' threshold: EV_250_Aggr1km_RefSB_1 > THRESH (MODIS).")
-    private double brightnessThreshCloudAmbiguous = 0.125;
+    @Parameter(defaultValue = "CLEAR_SKY_CONSERVATIVE",
+            valueSet = {"CLEAR_SKY_CONSERVATIVE", "CLOUD_CONSERVATIVE"},
+            label = " Strength of cloud flagging",
+            description = "Strength of cloud flagging. In case of 'CLOUD_CONSERVATIVE', more pixels might be flagged as cloud.")
+    private String cloudFlaggingStrength;
 
     @Parameter(defaultValue = "1", label = " Width of cloud buffer (# of pixels)")
     private int cloudBufferWidth;
 
-    @Parameter(defaultValue = "50", valueSet = {"50", "150"}, label = " Resolution of used land-water mask in m/pixel",
+    @Parameter(defaultValue = "150", valueSet = {"1000", "150", "50"},
+            label = " Resolution of used land-water mask in m/pixel",
             description = "Resolution in m/pixel")
     private int waterMaskResolution;
+
+    @Parameter(defaultValue = "true",
+            label = " Write reflective solar bands",
+            description = "Write TOA reflective solar bands (RefSB) to target product.")
+    private boolean outputRad2Refl = true;
+
+    @Parameter(defaultValue = "false",
+            label = " Write emissive bands",
+            description = "Write 'Emissive' bands to target product.")
+    private boolean outputEmissive = false;
 
 
     @SourceProduct(alias = "source", label = "Name (MODIS L1b product)", description = "The source product.")
@@ -80,9 +62,17 @@ public class ModisOp extends BasisOp {
     private Product classifProduct;
     private Map<String, Object> waterClassificationParameters;
 
+    private boolean applyOrLogicInCloudTest;
+
+    // former user options, now fixed
+    private boolean applyBrightnessTest = true;
+    private final double glintThresh859 = 0.15;
+
 
     @Override
     public void initialize() throws OperatorException {
+        applyOrLogicInCloudTest = cloudFlaggingStrength.equals("CLOUD_CONSERVATIVE");
+
         // todo - take from OccciOp in BEAM Idepix
         final boolean inputProductIsValid = IdepixUtils.validateInputProduct(sourceProduct, AlgorithmSelector.MODIS);
         if (!inputProductIsValid) {
@@ -112,6 +102,8 @@ public class ModisOp extends BasisOp {
 
         Product postProcessProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(ModisPostProcessingOp.class),
                                                        postProcessParameters, postProcessInput);
+
+        ProductUtils.copyMetadata(sourceProduct,postProcessProduct);
         setTargetProduct(postProcessProduct);
         addBandsToTargetProduct(postProcessProduct);
     }
@@ -136,8 +128,6 @@ public class ModisOp extends BasisOp {
         occciCloudClassificationParameters.put("cloudBufferWidth", cloudBufferWidth);
         occciCloudClassificationParameters.put("wmResolution", waterMaskResolution);
         occciCloudClassificationParameters.put("applyBrightnessTest", applyBrightnessTest);
-        occciCloudClassificationParameters.put("brightnessThreshCloudSure", brightnessThreshCloudSure);
-        occciCloudClassificationParameters.put("brightnessThreshCloudAmbiguous", brightnessThreshCloudAmbiguous);
         occciCloudClassificationParameters.put("glintThresh859", glintThresh859);
         occciCloudClassificationParameters.put("applyOrLogicInCloudTest", applyOrLogicInCloudTest);
 

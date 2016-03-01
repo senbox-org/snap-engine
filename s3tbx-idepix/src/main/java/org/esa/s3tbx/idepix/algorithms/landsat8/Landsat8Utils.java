@@ -179,6 +179,14 @@ public class Landsat8Utils {
 //        return mean + Math.sqrt(2.0*stdev*stdev*Math.log(100.0/percent));
     }
 
+    public static int getWavelengthFromString(String wvlString) {
+        if (wvlString.toUpperCase().contains("PANCHROMATIC")) {
+            return 590;
+        } else {
+            return Integer.parseInt(wvlString);
+        }
+    }
+
     private static double getHistogramPeakValue(Histogram h) {
         int peakValue = 0;
         for (int i = 0; i < h.getNumBins(0); i++) {
