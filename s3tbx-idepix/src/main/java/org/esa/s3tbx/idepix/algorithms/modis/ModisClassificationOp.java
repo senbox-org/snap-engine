@@ -21,7 +21,7 @@ import java.io.InputStream;
 @OperatorMetadata(alias = "Idepix.Modis.Classification",
         version = "2.2",
         copyright = "(c) 2016 by Brockmann Consult",
-        description = "OC-CCI pixel classification operator.",
+        description = "MODIS pixel classification operator.",
         internal = true)
 public class ModisClassificationOp extends PixelOperator {
 

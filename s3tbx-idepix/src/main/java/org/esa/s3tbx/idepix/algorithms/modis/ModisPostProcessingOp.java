@@ -27,10 +27,10 @@ import java.awt.*;
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "idepix.modis.postprocess",
+@OperatorMetadata(alias = "Idepix.Modis.Postprocess",
                   version = "2.2",
-                  copyright = "(c) 2014 by Brockmann Consult",
-                  description = "OC-CCI post processing operator.",
+                  copyright = "(c) 2016 by Brockmann Consult",
+                  description = "Refines the MODIS pixel classification.",
                   internal = true)
 public class ModisPostProcessingOp extends BasisOp {
 

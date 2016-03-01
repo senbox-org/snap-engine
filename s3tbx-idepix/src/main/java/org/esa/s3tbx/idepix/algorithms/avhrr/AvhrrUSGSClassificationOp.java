@@ -26,11 +26,11 @@ import java.io.InputStream;
  * @author Olaf Danne
  * @version $Revision: $ $Date:  $
  */
-@OperatorMetadata(alias = "idepix.avhrr.usgs.classification",
+@OperatorMetadata(alias = "Idepix.Avhrr.Usgs.Classification",
         version = "2.2",
         internal = true,
         authors = "Olaf Danne",
-        copyright = "(c) 2014 by Brockmann Consult",
+        copyright = "(c) 2016 by Brockmann Consult",
         description = "Basic operator for pixel classification from AVHRR L1b data.")
 public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
 

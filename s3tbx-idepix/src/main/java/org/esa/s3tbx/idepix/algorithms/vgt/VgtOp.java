@@ -10,7 +10,7 @@ import org.esa.snap.core.gpf.annotations.OperatorMetadata;
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "idepix.vgt",
+@OperatorMetadata(alias = "Idepix.Vgt",
         category = "Optical/Pre-Processing",
         version = "1.0",
         authors = "Olaf Danne",

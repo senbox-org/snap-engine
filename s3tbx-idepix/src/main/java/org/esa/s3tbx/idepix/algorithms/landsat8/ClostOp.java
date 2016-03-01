@@ -21,11 +21,11 @@ import java.awt.image.RenderedImage;
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "idepix.landsat8.clost",
-                  version = "2.2.1",
+@OperatorMetadata(alias = "Idepix.Landsat8.Clost",
+                  version = "2.2",
                   internal = true,
                   authors = "Olaf Danne",
-                  copyright = "(c) 2015 by Brockmann Consult",
+                  copyright = "(c) 2016 by Brockmann Consult",
                   description = "Landsat 8 CLOST: provides product from blue, aerosol, pan and cirrus images.")
 public class ClostOp extends Operator {
 

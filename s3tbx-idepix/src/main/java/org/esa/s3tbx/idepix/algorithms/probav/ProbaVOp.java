@@ -10,9 +10,9 @@ import org.esa.snap.core.gpf.annotations.OperatorMetadata;
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "idepix.probav",
+@OperatorMetadata(alias = "Idepix.Probav",
         category = "Optical/Pre-Processing",
-        version = "1.0",
+        version = "2.2",
         authors = "Olaf Danne",
         copyright = "(c) 2016 by Brockmann Consult",
         description = "Pixel identification and classification for PROBA-V.")

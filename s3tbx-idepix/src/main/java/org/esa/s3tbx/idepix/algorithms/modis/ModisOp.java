@@ -22,11 +22,11 @@ import java.util.Map;
  * @author olafd
  */
 @SuppressWarnings({"FieldCanBeLocal"})
-@OperatorMetadata(alias = "idepix.modis",
+@OperatorMetadata(alias = "Idepix.Modis",
         category = "Optical/Pre-Processing",
-        version = "1.0",
+        version = "2.2",
         authors = "Olaf Danne, Marco Zuehlke",
-        copyright = "(c) 2015 by Brockmann Consult",
+        copyright = "(c) 2016 by Brockmann Consult",
         description = "Pixel identification and classification for MODIS.")
 public class ModisOp extends BasisOp {
 
