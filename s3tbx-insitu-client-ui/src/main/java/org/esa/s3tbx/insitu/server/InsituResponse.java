@@ -1,11 +1,44 @@
 package org.esa.s3tbx.insitu.server;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
  * @author Marco Peters
  */
 public interface InsituResponse {
+
+    InsituResponse EMPTY_RESPONSE = new InsituResponse() {
+        @Override
+        public STATUS_CODE getStatus() {
+            return STATUS_CODE.OK;
+        }
+
+        @Override
+        public List<String> getFailureReasons() {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public long getObservationCount() {
+            return 0;
+        }
+
+        @Override
+        public List<? extends InsituParameter> getParameters() {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public List<? extends InsituDatasetDescr> getDatasetDescriptions() {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public List<? extends InsituDataset> getDatasetList() {
+            return Collections.emptyList();
+        }
+    };
 
     STATUS_CODE getStatus();
 
@@ -23,4 +56,5 @@ public interface InsituResponse {
         OK,
         NOK
     }
+
 }
