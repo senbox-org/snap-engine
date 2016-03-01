@@ -37,7 +37,7 @@ package org.esa.s3tbx.idepix.ui.actions;
 //@NbBundle.Messages({"CTL_IdepixAvhrrAction_Text=Avhrr"})
 //public class IdepixAvhrrAction extends AbstractSnapAction {
 //
-//    private static final String HELP_ID = "idepixPixelIdentification";
+//    private static final String HELP_ID = "idepixTool";
 //
 //    public IdepixAvhrrAction() {
 //        putValue(Action.SHORT_DESCRIPTION, "Performs pixel classification on an AVHRR data product.");

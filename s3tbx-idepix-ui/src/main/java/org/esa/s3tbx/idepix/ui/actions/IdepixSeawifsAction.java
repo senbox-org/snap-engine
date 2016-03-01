@@ -23,7 +23,7 @@ package org.esa.s3tbx.idepix.ui.actions;
 //@NbBundle.Messages({"CTL_IdepixSeawifsAction_Text=SeaWiFS"})
 //public class IdepixSeawifsAction extends AbstractSnapAction {
 //
-//    private static final String HELP_ID = "idepixPixelIdentification";
+//    private static final String HELP_ID = "idepixTool";
 //
 //    public IdepixSeawifsAction() {
 //        putValue(Action.SHORT_DESCRIPTION, "Performs pixel classification on a SeaWiFS data product.");

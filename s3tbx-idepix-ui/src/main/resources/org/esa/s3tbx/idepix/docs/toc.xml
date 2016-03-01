@@ -23,14 +23,16 @@
     <tocitem text="Sentinel Toolbox Application">
         <tocitem text="Optical">
             <tocitem text="Pre-Processing">
-                <tocitem text="IdePix Generic Classification of Pixels" target="pixelIdentification">
-                    <tocitem text="AVHRR" target="avhrrAlgorithm"/>
-                    <tocitem text="Landsat 8" target="landsat8Algorithm"/>
-                    <tocitem text="MODIS" target="modisAlgorithm"/>
-                    <tocitem text="S2 MSI" target="msiAlgorithm"/>
-                    <tocitem text="Proba-V" target="probavAlgorithm"/>
-                    <tocitem text="SeaWiFS" target="seawifsAlgorithm"/>
-                    <tocitem text="VGT" target="vgtAlgorithm"/>
+                <tocitem text="Idepix Classification of Pixels" target="idepixTool">
+                    <tocitem text="Idepix Processor Descriptions" target="idepixProcessorDesc">
+                        <tocitem text="Landsat-8" target="landsat8ProcessorDesc"/>
+                        <tocitem text="MODIS" target="modisProcessorDesc"/>
+                    </tocitem>
+                    <tocitem text="Command Line Description" target="rad2ReflCommandLine"/>
+                    <tocitem text="Algorithm Specifications" target="idepixAlgorithmSpec">
+                        <tocitem text="Landsat-8" target="landsat8AlgorithmSpec"/>
+                        <tocitem text="MODIS" target="modisAlgorithmSpec"/>
+                    </tocitem>
                 </tocitem>
             </tocitem>
         </tocitem>

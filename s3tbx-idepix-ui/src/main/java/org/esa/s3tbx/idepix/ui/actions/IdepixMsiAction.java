@@ -37,7 +37,7 @@ package org.esa.s3tbx.idepix.ui.actions;
 //@NbBundle.Messages({"CTL_IdepixMsiAction_Text=Sentinel-2"})
 //public class IdepixMsiAction extends AbstractSnapAction {
 //
-//    private static final String HELP_ID = "idepixPixelIdentification";
+//    private static final String HELP_ID = "idepixTool";
 //
 //    public IdepixMsiAction() {
 //        putValue(Action.SHORT_DESCRIPTION, "Performs pixel classification on a MSI product.");

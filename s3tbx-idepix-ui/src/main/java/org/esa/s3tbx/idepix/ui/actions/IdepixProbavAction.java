@@ -37,7 +37,7 @@ package org.esa.s3tbx.idepix.ui.actions;
 //@NbBundle.Messages({"CTL_IdepixProbavAction_Text=PROBA-V"})
 //public class IdepixProbavAction extends AbstractSnapAction {
 //
-//    private static final String HELP_ID = "idepixPixelIdentification";
+//    private static final String HELP_ID = "idepixTool";
 //
 //    public IdepixProbavAction() {
 //        putValue(Action.SHORT_DESCRIPTION, "Performs pixel classification on a PROBA-V data product.");

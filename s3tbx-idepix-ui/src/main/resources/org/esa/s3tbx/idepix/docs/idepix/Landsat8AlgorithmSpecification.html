@@ -1,0 +1,50 @@
+
+<html>
+<head>
+    <title>SNAP Data Processors - Radiance-to-Reflectance Conversion Algorithm Specification</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+<table class="header">
+    <tr class="header">
+        <td class="header">&nbsp;
+            SNAP Data Processors - Radiance-To-Reflectance Conversion Algorithm Specification
+        </td>
+        <td class="header" align="right"><a href="nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/general/overview/SnapOverview.html"><img src="../images/snap_header.jpg"
+                                                                                                                                                       border=0></a>
+        </td>
+    </tr>
+</table>
+
+<h3>Algorithm Specification</h3>
+
+<p>
+    The conversion from TOA radiance (<i>L</i><sub>TOA</sub>) to TOA reflectances (<i>R</i><sub>TOA</sub>) done by the
+    following equation:
+</p>
+
+<p align="center">
+    <img src="images/RadToReflEquation.png" border="0">
+</p>
+
+<p>
+    where <i>E</i><sub>0</sub> and &theta; are the solar spectral
+    irradiance and the sun zenith angle, respectively.
+</p>
+
+<p>
+    The conversion from reflectances to radiances simply follows the inverse of this equation.
+</p>
+
+<p>
+    For all sensors supported by the Radiance-to-Reflectance Processor, the sun zenith angle is provided per pixel
+    with the L1b products. The solar spectral irradiance values are also provided per pixel in case of OLCI L1b products,
+    whereas for SLSTR MERIS they are taken from auxiliary data.
+</p>
+
+
+<hr>
+</body>
+</html>

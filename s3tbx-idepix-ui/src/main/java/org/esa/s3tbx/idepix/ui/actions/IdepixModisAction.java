@@ -37,7 +37,7 @@ import java.awt.event.ActionEvent;
 @NbBundle.Messages({"CTL_IdepixModisAction_Text=MODIS"})
 public class IdepixModisAction extends AbstractSnapAction {
 
-    private static final String HELP_ID = "idepixPixelIdentification";
+    private static final String HELP_ID = "idepixTool";
 
     public IdepixModisAction() {
         putValue(Action.SHORT_DESCRIPTION, "Performs pixel classification on a MODIS data product.");

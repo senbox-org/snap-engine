@@ -37,7 +37,7 @@ package org.esa.s3tbx.idepix.ui.actions;
 //@NbBundle.Messages({"CTL_IdepixVgtAction_Text=SPOT-VGT"})
 //public class IdepixVgtAction extends AbstractSnapAction {
 //
-//    private static final String HELP_ID = "idepixPixelIdentification";
+//    private static final String HELP_ID = "idepixTool";
 //
 //    public IdepixVgtAction() {
 //        putValue(Action.SHORT_DESCRIPTION, "Performs pixel classification on a VGT data product.");
