@@ -74,8 +74,8 @@ public class InsituClientForm extends JPanel {
         layout.setRowWeightY(1, 0.6);
         add(new JLabel("Dataset:"));
         final JList<InsituDatasetDescr> datasetList = new JList<>(model.getDatasetModel());
-        datasetList.setCellRenderer(new DatasetDescrListCellRenderer());
         datasetList.setSelectionModel(model.getDatasetSelectionModel());
+        datasetList.setCellRenderer(new DatasetDescrListCellRenderer());
         datasetList.setVisibleRowCount(6);
         add(new JScrollPane(datasetList));
         add(new JLabel("Parameter:"));
@@ -193,6 +193,7 @@ public class InsituClientForm extends JPanel {
             return label;
         }
     }
+
     private static class ParameterListCellRenderer extends DefaultListCellRenderer {
 
         @Override
@@ -216,14 +217,13 @@ public class InsituClientForm extends JPanel {
     }
 
     private class ProductListCellRenderer extends DefaultListCellRenderer {
+
         @Override
         public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
             final JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
             final Product product = (Product) value;
             label.setText(product.getDisplayName());
-            if (product.getDescription() != null) {
-                label.setToolTipText(product.getDescription());
-            }
+            label.setToolTipText(product.getDescription());
 
             return label;
         }

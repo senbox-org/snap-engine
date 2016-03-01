@@ -9,7 +9,10 @@ import org.esa.s3tbx.insitu.server.InsituServer;
 import org.esa.s3tbx.insitu.server.InsituServerException;
 import org.esa.s3tbx.insitu.server.InsituServerRegistry;
 import org.esa.s3tbx.insitu.server.InsituServerSpi;
+import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.ProductManager;
 import org.esa.snap.rcp.SnapApp;
 import org.esa.snap.rcp.util.ProgressHandleMonitor;
@@ -23,13 +26,15 @@ import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import java.io.Serializable;
+import java.beans.PropertyChangeSupport;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
 
-public class InsituClientModel implements Serializable {
+public class InsituClientModel {
 
 
     static final InsituServerSpi NO_SELECTION_SERVER_SPI = new NoSelectionInsituServerSpi();
@@ -39,6 +44,7 @@ public class InsituClientModel implements Serializable {
     private final ListSelectionModel datasetSelectionModel;
     private final DefaultListModel<InsituParameter> parameterModel;
     private final DefaultListModel<Product> productListModel;
+    private final DefaultListSelectionModel productSelectionModel;
     private Date startDate;
     private Date stopDate;
     private double minLon;
@@ -48,6 +54,7 @@ public class InsituClientModel implements Serializable {
 
     private InsituServer selectedServer;
     private PMListener productManagerListener;
+    private PropertyChangeSupport changeSupport;
 
     public InsituClientModel() {
         final Set<InsituServerSpi> allRegisteredServers = InsituServerRegistry.getInstance().getAllRegisteredServers();
@@ -56,15 +63,22 @@ public class InsituClientModel implements Serializable {
         insituServerModel.insertElementAt(NO_SELECTION_SERVER_SPI, 0);
         insituServerModel.setSelectedItem(NO_SELECTION_SERVER_SPI);
         insituServerModel.addListDataListener(new ServerListener());
+
         datasetModel = new DefaultListModel<>();
         datasetSelectionModel = new DefaultListSelectionModel();
         datasetSelectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         datasetSelectionModel.addListSelectionListener(new DatasetListSelectionListener());
+
         parameterModel = new DefaultListModel<>();
+
         productListModel = new DefaultListModel<>();
+        productSelectionModel = new DefaultListSelectionModel();
+        productSelectionModel.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        productSelectionModel.addListSelectionListener(new ProductListSelectionListener());
         final ProductManager productManager = SnapApp.getDefault().getProductManager();
         productManagerListener = new PMListener(productManager);
         productManager.addListener(productManagerListener);
+
         Calendar utcCalendar = createUtcCalendar();
         startDate = utcCalendar.getTime();
         utcCalendar.add(Calendar.DAY_OF_YEAR, 2);
@@ -73,6 +87,12 @@ public class InsituClientModel implements Serializable {
         maxLon = 180.0;
         minLat = -90.0;
         maxLat = 90.0;
+
+        changeSupport = new PropertyChangeSupport(this);
+    }
+
+    public PropertyChangeSupport getChangeSupport() {
+        return changeSupport;
     }
 
     public DefaultComboBoxModel<InsituServerSpi> getInsituServerModel() {
@@ -93,6 +113,10 @@ public class InsituClientModel implements Serializable {
 
     public DefaultListModel<Product> getProductListModel() {
         return productListModel;
+    }
+
+    public DefaultListSelectionModel getProductSelectionModel() {
+        return productSelectionModel;
     }
 
     public Date getStartDate() {
@@ -116,7 +140,13 @@ public class InsituClientModel implements Serializable {
     }
 
     public void setMinLon(double minLon) {
+        if (this.minLon == minLon) {
+            return;
+        }
+        double oldValue = this.minLon;
         this.minLon = minLon;
+        changeSupport.firePropertyChange("minLon", minLon, oldValue);
+
     }
 
     public double getMaxLon() {
@@ -124,7 +154,12 @@ public class InsituClientModel implements Serializable {
     }
 
     public void setMaxLon(double maxLon) {
+        if (this.maxLon == maxLon) {
+            return;
+        }
+        double oldValue = this.maxLon;
         this.maxLon = maxLon;
+        changeSupport.firePropertyChange("maxLon", maxLon, oldValue);
     }
 
     public double getMinLat() {
@@ -132,7 +167,13 @@ public class InsituClientModel implements Serializable {
     }
 
     public void setMinLat(double minLat) {
+        if (this.minLat == minLat) {
+            return;
+        }
+        double oldValue = this.minLat;
         this.minLat = minLat;
+        changeSupport.firePropertyChange("minLat", minLat, oldValue);
+
     }
 
     public double getMaxLat() {
@@ -140,7 +181,12 @@ public class InsituClientModel implements Serializable {
     }
 
     public void setMaxLat(double maxLat) {
+        if (this.maxLat == maxLat) {
+            return;
+        }
+        double oldValue = this.maxLat;
         this.maxLat = maxLat;
+        changeSupport.firePropertyChange("maxLat", maxLat, oldValue);
     }
 
     private static Calendar createUtcCalendar() {
@@ -238,7 +284,7 @@ public class InsituClientModel implements Serializable {
     private void updateParameterModel() throws InsituServerException {
         getParameterModel().clear();
         InsituQuery query = new InsituQuery().subject(InsituQuery.SUBJECT.PARAMETERS);
-        if(!datasetSelectionModel.isSelectionEmpty()) {
+        if (!datasetSelectionModel.isSelectionEmpty()) {
             final int selectionIndex = datasetSelectionModel.getLeadSelectionIndex();
             final InsituDatasetDescr datasetDescr = datasetModel.get(selectionIndex);
             query.dataset(datasetDescr.getName());
@@ -281,6 +327,78 @@ public class InsituClientModel implements Serializable {
             final Product product = event.getProduct();
             final int productIndex = productManager.getProductIndex(product);
             productListModel.remove(productIndex);
+        }
+    }
+
+    private class ProductListSelectionListener implements ListSelectionListener {
+
+        @Override
+        public void valueChanged(ListSelectionEvent e) {
+            final List<Product> products = getSelectedProducts();
+
+            ProductData.UTC startDate = new ProductData.UTC(Double.MAX_VALUE);
+            ProductData.UTC stopDate = new ProductData.UTC(Double.MIN_VALUE);
+            double minLat = -90.0;
+            double maxLat = 90.0;
+            double minLon = -180.0;
+            double maxLon = 180.0;
+            for (Product product : products) {
+                startDate = min(startDate, product.getStartTime());
+                stopDate = max(stopDate, product.getEndTime());
+                if(product.getSceneGeoCoding() != null) {
+                    final GeoPos[] corners = createCornerCoordinates(product);
+                    for (GeoPos corner : corners) {
+                        minLat = Math.min(minLat, corner.getLat());
+                        maxLat = Math.min(maxLat, corner.getLat());
+                        minLon = Math.min(minLon, corner.getLon());
+                        maxLon = Math.min(maxLon, corner.getLon());
+                    }
+                }
+            }
+            setMinLat(minLat);
+            setMaxLat(maxLat);
+            setMinLon(minLon);
+            setMaxLon(maxLon);
+        }
+
+        private GeoPos[] createCornerCoordinates(Product product) {
+            PixelPos sceneUL = new  PixelPos(0 + 0.5f, 0 + 0.5f);
+            PixelPos sceneUR = new  PixelPos(product.getSceneRasterWidth() - 1 + 0.5f, 0 + 0.5f);
+            PixelPos sceneLL = new  PixelPos(0 + 0.5f, product.getSceneRasterHeight() - 1 + 0.5f);
+            PixelPos sceneLR = new  PixelPos(product.getSceneRasterWidth() - 1 + 0.5f, product.getSceneRasterHeight() - 1 + 0.5f);
+            GeoPos geoPosUL = product.getSceneGeoCoding().getGeoPos(sceneUL, null);
+            GeoPos geoPosUR = product.getSceneGeoCoding().getGeoPos(sceneUR, null);
+            GeoPos geoPosLL = product.getSceneGeoCoding().getGeoPos(sceneLL, null);
+            GeoPos geoPosLR = product.getSceneGeoCoding().getGeoPos(sceneLR, null);
+            return new GeoPos[]{geoPosUL, geoPosUR, geoPosLL, geoPosLR};
+        }
+
+
+        private ProductData.UTC min(ProductData.UTC startDate1, ProductData.UTC startDate2) {
+            return startDate1.getAsDate().before(startDate2.getAsDate()) ? startDate1 : startDate2;
+        }
+
+        private ProductData.UTC max(ProductData.UTC startDate1, ProductData.UTC startDate2) {
+            return startDate1.getAsDate().after(startDate2.getAsDate()) ? startDate1 : startDate2;
+        }
+
+        private List<Product> getSelectedProducts() {
+            int iMin = productSelectionModel.getMinSelectionIndex();
+            int iMax = productSelectionModel.getMaxSelectionIndex();
+
+            final ArrayList<Product> productList = new ArrayList<>();
+//            if (iMin < 0 || iMax < 0) {
+//                return productList;
+//            }
+
+            for (int i = iMin; i < iMax; i++) {
+                if (productSelectionModel.isSelectedIndex(i)) {
+                    productList.add(productList.get(i));
+                }
+
+            }
+
+            return productList;
         }
     }
 }
