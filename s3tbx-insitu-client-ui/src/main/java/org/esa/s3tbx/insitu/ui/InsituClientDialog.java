@@ -15,6 +15,8 @@ import java.awt.Window;
  */
 public class InsituClientDialog extends ModelessDialog {
 
+    private InsituClientModel model;
+
     public InsituClientDialog(Window parent, String title, String helpID) {
         super(parent, title, ID_OK | ID_CANCEL | ID_HELP, helpID);
         final ImageIcon imageIcon = UIUtils.loadImageIcon("/org/esa/s3tbx/insitu/insitu.png", InsituClientDialog.class);
@@ -27,7 +29,8 @@ public class InsituClientDialog extends ModelessDialog {
         final AbstractButton refreshButton = ToolButtonFactory.createButton(TangoIcons.actions_view_refresh(TangoIcons.Res.R22), false);
         getButtonPanel().add(refreshButton, 0);
 
-        setContent(new InsituClientForm());
+        model = new InsituClientModel();
+        setContent(new InsituClientForm(model));
     }
 
     @Override
@@ -38,6 +41,12 @@ public class InsituClientDialog extends ModelessDialog {
     @Override
     public void onCancel() {
         hide();
+    }
+
+    @Override
+    public void hide() {
+        super.hide();
+        model.dispose();
     }
 
     @Override

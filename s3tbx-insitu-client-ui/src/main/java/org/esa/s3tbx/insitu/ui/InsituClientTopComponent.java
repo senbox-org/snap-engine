@@ -46,12 +46,10 @@ import java.awt.Component;
 public class InsituClientTopComponent extends TopComponent implements HelpCtx.Provider {
 
     private static final String HELP_ID = "insituClientTool";
+    private InsituClientModel insituClientModel;
 
     public InsituClientTopComponent() {
         setName(Bundle.CTL_InsituClientTopComponent_Name());
-        setLayout(new BorderLayout());
-        add(new InsituClientForm(), BorderLayout.CENTER);
-        add(createStatusPanel(new HelpCtx(HELP_ID)), BorderLayout.SOUTH);
     }
 
     private Component createStatusPanel(HelpCtx helpCtx) {
@@ -79,6 +77,21 @@ public class InsituClientTopComponent extends TopComponent implements HelpCtx.Pr
         contentPanel.add(helpButton);
 
         return contentPanel;
+    }
+
+    @Override
+    protected void componentOpened() {
+        super.componentOpened();
+        insituClientModel = new InsituClientModel();
+        setLayout(new BorderLayout());
+        add(new InsituClientForm(insituClientModel), BorderLayout.CENTER);
+        add(createStatusPanel(new HelpCtx(HELP_ID)), BorderLayout.SOUTH);
+    }
+
+    @Override
+    protected void componentClosed() {
+        super.componentClosed();
+        insituClientModel.dispose();
     }
 
     @Override

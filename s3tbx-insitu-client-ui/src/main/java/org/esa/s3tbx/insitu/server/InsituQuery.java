@@ -21,7 +21,7 @@ public class InsituQuery {
     protected Date startDate;
     protected Date stopDate;
     protected String[] param;
-    protected String campaign;
+    protected String dataset;
     protected int shift;
     protected int limit;
     protected boolean countOnly;
@@ -98,13 +98,13 @@ public class InsituQuery {
         return param;
     }
 
-    public InsituQuery campaign(String campaign) {
-        this.campaign = campaign;
+    public InsituQuery dataset(String dataset) {
+        this.dataset = dataset;
         return this;
     }
 
-    public String campaign() {
-        return campaign;
+    public String dataset() {
+        return dataset;
     }
 
     public InsituQuery shift(int shift) {

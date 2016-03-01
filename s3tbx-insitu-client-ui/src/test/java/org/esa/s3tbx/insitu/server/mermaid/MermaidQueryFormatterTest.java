@@ -28,7 +28,7 @@ public class MermaidQueryFormatterTest {
 
         final InsituQuery query= new InsituQuery();
         query.subject(InsituQuery.SUBJECT.PARAMETERS);
-        query.campaign("Muscheln");
+        query.dataset("Muscheln");
         query.latMin(-10.943);
         query.latMax(46.12);
         query.lonMin(5.0);

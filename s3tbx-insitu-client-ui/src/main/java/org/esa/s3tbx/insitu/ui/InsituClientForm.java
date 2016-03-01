@@ -19,7 +19,6 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -42,9 +41,8 @@ public class InsituClientForm extends JPanel {
 
     private final InsituClientModel model;
 
-    public InsituClientForm() {
-
-        model = new InsituClientModel();
+    public InsituClientForm(InsituClientModel model) {
+        this.model = model;
         initForm();
     }
 
@@ -75,11 +73,11 @@ public class InsituClientForm extends JPanel {
         layout.setCellFill(1, 3, TableLayout.Fill.BOTH);
         layout.setRowWeightY(1, 0.6);
         add(new JLabel("Dataset:"));
-        final JList<InsituDatasetDescr> campaignList = new JList<>(model.getDatasetModel());
-        campaignList.setCellRenderer(new DatasetDescrListCellRenderer());
-        campaignList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        campaignList.setVisibleRowCount(6);
-        add(new JScrollPane(campaignList));
+        final JList<InsituDatasetDescr> datasetList = new JList<>(model.getDatasetModel());
+        datasetList.setCellRenderer(new DatasetDescrListCellRenderer());
+        datasetList.setSelectionModel(model.getDatasetSelectionModel());
+        datasetList.setVisibleRowCount(6);
+        add(new JScrollPane(datasetList));
         add(new JLabel("Parameter:"));
         final JList<InsituParameter> paramList = new JList<>(model.getParameterModel());
         paramList.setCellRenderer(new ParameterListCellRenderer());
@@ -88,10 +86,11 @@ public class InsituClientForm extends JPanel {
 
         layout.setCellWeightX(2, 1, 1.0);
         layout.setCellColspan(2, 1, 3);
-        layout.setCellFill(2, 2, TableLayout.Fill.BOTH);
-        layout.setCellWeightY(2, 2, 1.0);
+        layout.setCellFill(2, 1, TableLayout.Fill.BOTH);
+        layout.setCellWeightY(2, 1, 1.0);
         add(new JLabel("Product:"));
         final JList<Product> productList = new JList<>(model.getProductListModel());
+        productList.setCellRenderer(new ProductListCellRenderer());
         productList.setVisibleRowCount(6);
         add(new JScrollPane(productList));
 
@@ -131,6 +130,14 @@ public class InsituClientForm extends JPanel {
 
     }
 
+    public void prepareHide() {
+        model.dispose();
+    }
+
+    public void prepareShow() {
+
+    }
+
     public static void main(String[] args) throws UnsupportedLookAndFeelException {
         UIManager.setLookAndFeel(new WindowsLookAndFeel());
         Locale.setDefault(Locale.ENGLISH);
@@ -144,7 +151,7 @@ public class InsituClientForm extends JPanel {
             }
             frame.setTitle("In-Situ Data Access");
             frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-            frame.getContentPane().add(new InsituClientForm());
+            frame.getContentPane().add(new InsituClientForm(new InsituClientModel()));
             frame.pack();
             frame.setVisible(true);
         });
@@ -206,5 +213,20 @@ public class InsituClientForm extends JPanel {
 
             return label;
         }
+    }
+
+    private class ProductListCellRenderer extends DefaultListCellRenderer {
+        @Override
+        public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+            final JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            final Product product = (Product) value;
+            label.setText(product.getDisplayName());
+            if (product.getDescription() != null) {
+                label.setToolTipText(product.getDescription());
+            }
+
+            return label;
+        }
+
     }
 }

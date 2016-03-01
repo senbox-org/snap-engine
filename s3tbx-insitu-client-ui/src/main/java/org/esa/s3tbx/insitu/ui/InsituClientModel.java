@@ -1,5 +1,6 @@
 package org.esa.s3tbx.insitu.ui;
 
+import com.bc.ceres.core.ProgressMonitor;
 import org.esa.s3tbx.insitu.server.InsituDatasetDescr;
 import org.esa.s3tbx.insitu.server.InsituParameter;
 import org.esa.s3tbx.insitu.server.InsituQuery;
@@ -9,11 +10,19 @@ import org.esa.s3tbx.insitu.server.InsituServerException;
 import org.esa.s3tbx.insitu.server.InsituServerRegistry;
 import org.esa.s3tbx.insitu.server.InsituServerSpi;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductManager;
+import org.esa.snap.rcp.SnapApp;
+import org.esa.snap.rcp.util.ProgressHandleMonitor;
+import org.netbeans.api.progress.ProgressUtils;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
+import javax.swing.DefaultListSelectionModel;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
@@ -27,6 +36,7 @@ public class InsituClientModel implements Serializable {
 
     private final DefaultComboBoxModel<InsituServerSpi> insituServerModel;
     private final DefaultListModel<InsituDatasetDescr> datasetModel;
+    private final ListSelectionModel datasetSelectionModel;
     private final DefaultListModel<InsituParameter> parameterModel;
     private final DefaultListModel<Product> productListModel;
     private Date startDate;
@@ -37,6 +47,7 @@ public class InsituClientModel implements Serializable {
     private double maxLat;
 
     private InsituServer selectedServer;
+    private PMListener productManagerListener;
 
     public InsituClientModel() {
         final Set<InsituServerSpi> allRegisteredServers = InsituServerRegistry.getInstance().getAllRegisteredServers();
@@ -46,8 +57,14 @@ public class InsituClientModel implements Serializable {
         insituServerModel.setSelectedItem(NO_SELECTION_SERVER_SPI);
         insituServerModel.addListDataListener(new ServerListener());
         datasetModel = new DefaultListModel<>();
+        datasetSelectionModel = new DefaultListSelectionModel();
+        datasetSelectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        datasetSelectionModel.addListSelectionListener(new DatasetListSelectionListener());
         parameterModel = new DefaultListModel<>();
         productListModel = new DefaultListModel<>();
+        final ProductManager productManager = SnapApp.getDefault().getProductManager();
+        productManagerListener = new PMListener(productManager);
+        productManager.addListener(productManagerListener);
         Calendar utcCalendar = createUtcCalendar();
         startDate = utcCalendar.getTime();
         utcCalendar.add(Calendar.DAY_OF_YEAR, 2);
@@ -64,6 +81,10 @@ public class InsituClientModel implements Serializable {
 
     public DefaultListModel<InsituDatasetDescr> getDatasetModel() {
         return datasetModel;
+    }
+
+    public ListSelectionModel getDatasetSelectionModel() {
+        return datasetSelectionModel;
     }
 
     public DefaultListModel<InsituParameter> getParameterModel() {
@@ -132,6 +153,10 @@ public class InsituClientModel implements Serializable {
         return utcCalendar;
     }
 
+    public void dispose() {
+        SnapApp.getDefault().getProductManager().removeListener(productManagerListener);
+    }
+
     private static class NoSelectionInsituServerSpi implements InsituServerSpi {
 
         @Override
@@ -146,8 +171,9 @@ public class InsituClientModel implements Serializable {
 
         @Override
         public InsituServer createServer() throws Exception {
-            return null;
+            return query -> InsituResponse.EMPTY_RESPONSE;
         }
+
     }
 
     private class ServerListener implements ListDataListener {
@@ -164,20 +190,39 @@ public class InsituClientModel implements Serializable {
 
         @Override
         public void contentsChanged(ListDataEvent event) {
-            if(event.getIndex0() == -1 && event.getIndex1() == -1) {
+            if (event.getIndex0() == -1 && event.getIndex1() == -1) {
                 // selection changed if both indices are -1
                 final InsituServerSpi insituServerSpi = (InsituServerSpi) insituServerModel.getSelectedItem();
                 try {
                     selectedServer = insituServerSpi.createServer();
-                    // todo (mp/29.02.2016) - use Progress Monitor
-                    updateDatasetModel();
-                    updateParameterModel();
+                    ProgressHandleMonitor handle = ProgressHandleMonitor.create("Contacting " + insituServerSpi.getName() + " in-situ server");
+                    ProgressUtils.runOffEventThreadWithProgressDialog(() -> updateModel(handle),
+                                                                      "In-Situ Data Access",
+                                                                      handle.getProgressHandle(),
+                                                                      true,
+                                                                      50,
+                                                                      1000);
+
                 } catch (Exception e) {
                     insituServerModel.setSelectedItem(NO_SELECTION_SERVER_SPI);
                     throw new IllegalStateException("Could not create server instance for server '" + insituServerSpi.getName() + "'", e);
                 }
             }
 
+        }
+
+        private void updateModel(ProgressMonitor pm) {
+            pm.beginTask("Retrieving metadata from server", 2);
+            try {
+                InsituClientModel.this.updateDatasetModel();
+                pm.worked(1);
+                InsituClientModel.this.updateParameterModel();
+                pm.worked(1);
+            } catch (Exception e) {
+                SnapApp.getDefault().handleError("Failed to retrieve metadata from server", e);
+            } finally {
+                pm.done();
+            }
         }
     }
 
@@ -193,9 +238,49 @@ public class InsituClientModel implements Serializable {
     private void updateParameterModel() throws InsituServerException {
         getParameterModel().clear();
         InsituQuery query = new InsituQuery().subject(InsituQuery.SUBJECT.PARAMETERS);
+        if(!datasetSelectionModel.isSelectionEmpty()) {
+            final int selectionIndex = datasetSelectionModel.getLeadSelectionIndex();
+            final InsituDatasetDescr datasetDescr = datasetModel.get(selectionIndex);
+            query.dataset(datasetDescr.getName());
+        }
         final InsituResponse insituResponse = selectedServer.query(query);
         for (InsituParameter insituParameter : insituResponse.getParameters()) {
             parameterModel.addElement(insituParameter);
+        }
+    }
+
+    private class DatasetListSelectionListener implements ListSelectionListener {
+
+        @Override
+        public void valueChanged(ListSelectionEvent event) {
+            try {
+                updateParameterModel();
+            } catch (InsituServerException e) {
+                SnapApp.getDefault().handleError("Failed to retrieve metadata from server", e);
+            }
+        }
+    }
+
+    private class PMListener implements ProductManager.Listener {
+
+        private final ProductManager productManager;
+
+        public PMListener(ProductManager productManager) {
+            this.productManager = productManager;
+        }
+
+        @Override
+        public void productAdded(ProductManager.Event event) {
+            final Product product = event.getProduct();
+            final int productIndex = productManager.getProductIndex(product);
+            productListModel.add(productIndex, product);
+        }
+
+        @Override
+        public void productRemoved(ProductManager.Event event) {
+            final Product product = event.getProduct();
+            final int productIndex = productManager.getProductIndex(product);
+            productListModel.remove(productIndex);
         }
     }
 }
