@@ -17,7 +17,7 @@ public class InsituClientDialog extends ModelessDialog {
 
     public InsituClientDialog(Window parent, String title, String helpID) {
         super(parent, title, ID_OK | ID_CANCEL | ID_HELP, helpID);
-        final ImageIcon imageIcon = UIUtils.loadImageIcon("/org/esa/s3tbx/insitu/insitu16.png", InsituClientDialog.class);
+        final ImageIcon imageIcon = UIUtils.loadImageIcon("/org/esa/s3tbx/insitu/insitu.png", InsituClientDialog.class);
         if (imageIcon != null) {
             getJDialog().setIconImage(imageIcon.getImage());
         }

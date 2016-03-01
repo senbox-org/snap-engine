@@ -25,7 +25,7 @@ import org.openide.util.NbBundle;
 import java.awt.event.ActionEvent;
 
 @ActionID(category = "Tools", id = "org.esa.s3tbx.insitu.ui.InsituClientAction" )
-@ActionRegistration(displayName = "#CTL_InsituClientAction_Text", iconBase = "org/esa/s3tbx/insitu/insitu16.png")
+@ActionRegistration(displayName = "#CTL_InsituClientAction_Text", iconBase = "org/esa/s3tbx/insitu/insitu.png")
 @ActionReference(path = "Menu/Vector/Import", position = 500)
 @NbBundle.Messages({"CTL_InsituClientAction_Text=In-Situ Client"})
 public class InsituClientAction extends AbstractSnapAction {
