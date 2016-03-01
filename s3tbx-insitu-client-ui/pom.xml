@@ -70,11 +70,6 @@
 
         <dependency>
             <groupId>org.netbeans.api</groupId>
-            <artifactId>org-openide-windows</artifactId>
-            <version>${netbeans.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.netbeans.api</groupId>
             <artifactId>org-openide-awt</artifactId>
         </dependency>
         <dependency>
@@ -93,6 +88,18 @@
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-netbeans-modules-javahelp</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-api-progress</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-windows</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
+
 
         <dependency>
             <groupId>com.google.code.gson</groupId>
