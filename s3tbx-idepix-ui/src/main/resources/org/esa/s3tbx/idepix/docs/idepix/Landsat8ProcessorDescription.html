@@ -1,0 +1,97 @@
+<!--
+  ~ Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+  ~
+  ~ This program is free software; you can redistribute it and/or modify it
+  ~ under the terms of the GNU General Public License as published by the Free
+  ~ Software Foundation; either version 3 of the License, or (at your option)
+  ~ any later version.
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+  ~ more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License along
+  ~ with this program; if not, see http://www.gnu.org/licenses/
+  -->
+
+<html>
+<head>
+    <title>SNAP Data Processors - Idepix Processor - Landsat-8 Processor Description</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+
+<table class="header">
+    <tr class="header">
+        <td class="header">&nbsp;
+            SNAP Data Processors - Idepix Processor - Landsat-8 Processor Description
+        </td>
+        <td class="header" align="right"><a href="nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/general/overview/SnapOverview.html"><img src="../images/snap_header.jpg"
+                                                                                                                                                       border=0></a>
+        </td>
+    </tr>
+</table>
+
+<h3>Processor Description</h3>
+
+<h4>I/O Parameters Tab</h4>
+
+<p align="center"><img src="images/IdepixPathsLandsat8.png"></p>
+
+<h5>Source Product Group</h5>
+
+<p class="i1">
+    <b>Name: </b>
+    Used to select the spectral source product. The source product shall
+    contain spectral bands providing a source spectrum at each pixel. Use the <b>...</b> button to
+    open a data product currently not opened in the Sentinel Toolbox.
+</p>
+
+<h5>Target Product Group</h5>
+
+<p class="i1">
+    <b>Name:</b>
+    Used to specify the name of the target product.
+</p>
+
+<p class="i1">
+    <b>Save to:</b>
+    Used to specify whether the target product should be saved to the file system. The
+    combo box presents a list of file formats.
+</p>
+
+<p class="i1">
+    <b>Open in SNAP:</b>
+    Used to specify whether the target product should be opened in the Sentinel Toolbox.
+    When the target product is not saved, it is opened in the Sentinel Toolbox automatically.
+</p>
+
+<h3>The Processing Parameters</h3>
+
+<p align="center"><img src="images/IdepixParameterLandsat8.png"></p>
+
+<p class="i1">
+    <b>Sensor: </b><br>
+    The corresponding sensor. The processor currently supports OLCI, SLSTR and MERIS.
+    The sensor must be selected from the drop-down menu. The default sensor is 'OLCI'.
+</p>
+
+<p class="i1">
+    <b>Conversion mode: </b><br>
+    Specifies if the conversion shall be from radiances to reflectances or backwards.
+    The conversion mode has one of the values 'RAD_TO_REFL', 'REFL_TO_RAD' and must be selected
+    from the drop-down menu. The default conversion mode is 'RAD_TO_REFL'. (Currently the 'REFL_TO_RAD'
+    mode is just a placeholder and only supports input products which were generated with this
+    processor using the 'RAD_TO_REFL' mode.)
+</p>
+
+<p class="i1">
+    <b>Copy non spectral bands: </b><br>
+    If set, all non-spectral bands from the source product are written to target product.
+    The default value is 'false'.
+</p>
+
+<hr>
+</body>
+</html>

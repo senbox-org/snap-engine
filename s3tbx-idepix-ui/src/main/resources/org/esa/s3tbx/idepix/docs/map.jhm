@@ -20,14 +20,13 @@
         "http://java.sun.com/products/javahelp/map_2_0.dtd">
 
 <map version="2.0">
-
-    <mapID target="idepixPixelIdentification" url="idepix/PixelIdentification.html"/>
-    <mapID target="avhrrAlgorithm" url="idepix/AvhrrPixelIdentification.html"/>
-    <mapID target="landsat8Algorithm" url="idepix/Landsat8PixelIdentification.html"/>
-    <mapID target="modisAlgorithm" url="idepix/ModisPixelIdentification.html"/>
-    <mapID target="msiAlgorithm" url="idepix/MsiPixelIdentification.html"/>
-    <mapID target="probavAlgorithm" url="idepix/ProbavPixelIdentification.html"/>
-    <mapID target="seawifsAlgorithm" url="idepix/SeawifsPixelIdentification.html"/>
-    <mapID target="vgtAlgorithm" url="idepix/VgtPixelIdentification.html"/>
+    <mapID target="idepixTool" url="idepix/IdepixTool.html"/>
+    <mapID target="idepixProcessorDesc" url="idepix/IdepixProcessorDescription.html"/>
+    <mapID target="landsat8ProcessorDesc" url="idepix/Landsat8ProcessorDescription.html"/>
+    <mapID target="modisProcessorDesc" url="idepix/ModisProcessorDescription.html"/>
+    <mapID target="idepixAlgorithmSpec" url="idepix/IdepixAlgorithmSpecification.html"/>
+    <mapID target="landsat8AlgorithmSpec" url="idepix/Landsat8AlgorithmSpecification.html"/>
+    <mapID target="modisAlgorithmSpec" url="idepix/ModisAlgorithmSpecification.html"/>
+    <mapID target="idepixCommandLine" url="idepix/IdepixCommandLine.html"/>
 
 </map>

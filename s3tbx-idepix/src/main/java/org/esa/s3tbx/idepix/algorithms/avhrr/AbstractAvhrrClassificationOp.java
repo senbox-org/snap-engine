@@ -29,11 +29,11 @@ import java.util.Calendar;
  * @author Olaf Danne
  * @version $Revision: $ $Date:  $
  */
-@OperatorMetadata(alias = "idepix.avhrr.abstract.classification",
+@OperatorMetadata(alias = "Idepix.Avhrr.Abstract.Classification",
         version = "2.2",
         internal = true,
         authors = "Olaf Danne",
-        copyright = "(c) 2014 by Brockmann Consult",
+        copyright = "(c) 2016 by Brockmann Consult",
         description = "Abstract basic operator for pixel classification from AVHRR L1b data.")
 public abstract class AbstractAvhrrClassificationOp extends PixelOperator {
 

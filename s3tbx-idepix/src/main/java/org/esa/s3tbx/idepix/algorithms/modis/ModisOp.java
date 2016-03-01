@@ -22,11 +22,11 @@ import java.util.Map;
  * @author olafd
  */
 @SuppressWarnings({"FieldCanBeLocal"})
-@OperatorMetadata(alias = "idepix.modis",
+@OperatorMetadata(alias = "Idepix.Modis",
         category = "Optical/Pre-Processing",
-        version = "1.0",
+        version = "2.2",
         authors = "Olaf Danne, Marco Zuehlke",
-        copyright = "(c) 2015 by Brockmann Consult",
+        copyright = "(c) 2016 by Brockmann Consult",
         description = "Pixel identification and classification for MODIS.")
 public class ModisOp extends BasisOp {
 
@@ -40,8 +40,8 @@ public class ModisOp extends BasisOp {
     private int cloudBufferWidth;
 
     @Parameter(defaultValue = "150", valueSet = {"1000", "150", "50"},
-            label = " Resolution of used land-water mask in m/pixel",
-            description = "Resolution in m/pixel")
+            label = " Resolution of land-water mask (m/pixel)",
+            description = "Resolution of used land-water mask in meters per pixel")
     private int waterMaskResolution;
 
     @Parameter(defaultValue = "true",

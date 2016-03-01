@@ -106,7 +106,7 @@ public class FlhMciAction extends AbstractSnapAction {
             final String bandName = (String) evt.getNewValue();
             final Band band = sourceProduct.getBand(bandName);
             if (band != null && !band.getRasterSize().equals(sourceProduct.getSceneRasterSize())) {
-                ResamplingIssue.showResamplingIssueNotification(true);
+                ResamplingIssue.showResamplingIssueNotification(sourceProduct);
             }
         }
     }

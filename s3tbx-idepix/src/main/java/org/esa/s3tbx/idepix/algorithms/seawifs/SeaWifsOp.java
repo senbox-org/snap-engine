@@ -14,11 +14,11 @@ import org.esa.snap.core.gpf.annotations.SourceProduct;
  * @author olafd
  */
 @SuppressWarnings({"FieldCanBeLocal"})
-@OperatorMetadata(alias = "idepix.seawifs",
+@OperatorMetadata(alias = "Idepix.Seawifs",
         category = "Optical/Pre-Processing",
-        version = "1.0",
+        version = "2.2",
         authors = "Olaf Danne, Marco Zuehlke",
-        copyright = "(c) 2015 by Brockmann Consult",
+        copyright = "(c) 2016 by Brockmann Consult",
         description = "Pixel identification and classification for SeaWiFS.")
 public class SeaWifsOp extends BasisOp {
 

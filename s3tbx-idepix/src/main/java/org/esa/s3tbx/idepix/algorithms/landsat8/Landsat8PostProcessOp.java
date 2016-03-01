@@ -29,12 +29,12 @@ import java.awt.*;
  * @author olafd
  * @since Idepix 2.1
  */
-@OperatorMetadata(alias = "idepix.landsat8.postprocess",
+@OperatorMetadata(alias = "Idepix.Landsat8.Postprocess",
         version = "2.2",
         internal = true,
         authors = "Marco Peters, Marco Zuehlke, Olaf Danne",
-        copyright = "(c) 2015 by Brockmann Consult",
-        description = "Refines the Landsat cloud classification.")
+        copyright = "(c) 2016 by Brockmann Consult",
+        description = "Refines the Landsat-8 pixel classification.")
 public class Landsat8PostProcessOp extends Operator {
 
     @Parameter(defaultValue = "2", label = "Width of cloud buffer (# of pixels)")

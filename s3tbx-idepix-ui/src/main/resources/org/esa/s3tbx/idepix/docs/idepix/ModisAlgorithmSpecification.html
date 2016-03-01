@@ -1,0 +1,73 @@
+
+<html>
+<head>
+    <title>SNAP Data Processors - Idepix MODIS Algorithm Specification</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+<table class="header">
+    <tr class="header">
+        <td class="header">&nbsp;
+            SNAP Data Processors - Idepix MODIS Algorithm Specification
+        </td>
+        <td class="header" align="right"><a href="nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/general/overview/SnapOverview.html"><img src="../images/snap_header.jpg"
+                                                                                                                                                       border=0></a>
+        </td>
+    </tr>
+</table>
+
+<h3>Algorithm Specification</h3>
+
+<p>
+    The Idepix classification algorithm for MODIS is based on a neural network approach. The neural net used was trained
+    to finally provide per pixel one of the properties CLEAR, CLOUD_AMBIGUOUS, CLOUD_SURE, SNOW_ICE. The following
+    MODIS bands are used as input for the neural net:
+    <ul>
+        <li>EV_250_Aggr1km_RefSB.1</li>
+        <li>EV_500_Aggr1km_RefSB.3</li>
+        <li>EV_500_Aggr1km_RefSB.4</li>
+        <li>EV_500_Aggr1km_RefSB.5</li>
+        <li>EV_500_Aggr1km_RefSB.7</li>
+        <li>EV_1KM_Emissive.23</li>
+        <li>EV_1KM_Emissive.25</li>
+        <li>sqrt_EV_1KM_RefSB.26</li>
+        <li>EV_250_Aggr1km_RefSB.1</li>
+        <li>EV_250_Aggr1km_RefSB.1</li>
+        <li>EV_250_Aggr1km_RefSB.1</li>
+    </ul>
+</p>
+
+<p>
+    In a second step, the neural network classification is refined using two additional quantities, the 'whiteness' and
+    the 'brightness', based on the approach described in more detail in [1].
+    ((Discriminating clear sky from clouds with MODIS. Algorithm Theoritical Basis Document (MOD35), Ackerman, S. A.,
+    Strabala, K. I., Menzel, W. P., Frey, R. A.,Moeller, C. C., Gumley, L. E., Baum, B.,Wetzel-Seeman, S.,
+    and Zhang, H., 2002.))
+
+</p>
+
+<p align="center">
+    <img src="images/RadToReflEquation.png" border="0">
+</p>
+
+<p>
+    where <i>E</i><sub>0</sub> and &theta; are the solar spectral
+    irradiance and the sun zenith angle, respectively.
+</p>
+
+<p>
+    The conversion from reflectances to radiances simply follows the inverse of this equation.
+</p>
+
+<p>
+    For all sensors supported by the Radiance-to-Reflectance Processor, the sun zenith angle is provided per pixel
+    with the L1b products. The solar spectral irradiance values are also provided per pixel in case of OLCI L1b products,
+    whereas for SLSTR MERIS they are taken from auxiliary data.
+</p>
+
+
+<hr>
+</body>
+</html>

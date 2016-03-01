@@ -23,11 +23,11 @@ import java.util.Map;
  * @author olafd
  */
 @SuppressWarnings({"FieldCanBeLocal"})
-@OperatorMetadata(alias = "idepix.avhrr",
+@OperatorMetadata(alias = "Idepix.Avhrr",
         category = "Optical/Pre-Processing",
         version = "1.0",
         authors = "Olaf Danne, Grit Kirches",
-        copyright = "(c) 2015 by Brockmann Consult",
+        copyright = "(c) 2016 by Brockmann Consult",
         description = "Pixel identification and classification for AVHRR.")
 public class AvhrrOp extends BasisOp {
 

@@ -21,7 +21,7 @@ import java.io.InputStream;
 @OperatorMetadata(alias = "Idepix.Modis.Classification",
         version = "2.2",
         copyright = "(c) 2016 by Brockmann Consult",
-        description = "OC-CCI pixel classification operator.",
+        description = "MODIS pixel classification operator.",
         internal = true)
 public class ModisClassificationOp extends PixelOperator {
 
@@ -44,8 +44,8 @@ public class ModisClassificationOp extends PixelOperator {
     private int cloudBufferWidth;
 
     @Parameter(defaultValue = "150", valueSet = {"1000", "150", "50"},
-            label = " Resolution of used land-water mask in m/pixel",
-            description = "Resolution in m/pixel")
+            label = " Resolution of land-water mask (m/pixel)",
+            description = "Resolution of used land-water mask in meters per pixel")
     private int waterMaskResolution;
 
     @Parameter(defaultValue = "true",
@@ -140,8 +140,7 @@ public class ModisClassificationOp extends PixelOperator {
         }
         modisAlgorithm.setWaterFraction(waterFraction);
 
-//        modisAlgorithm.setModisApplyBrightnessTest(applyBrightnessTest);
-        modisAlgorithm.setModisApplyBrightnessTest(false);
+        modisAlgorithm.setModisApplyBrightnessTest(applyBrightnessTest);
         final double ocModisBrightnessThreshCloudSure = 0.15;
         modisAlgorithm.setModisBrightnessThreshCloudSure(ocModisBrightnessThreshCloudSure);
         final double ocModisBrightnessThreshCloudAmbiguous = 0.125;

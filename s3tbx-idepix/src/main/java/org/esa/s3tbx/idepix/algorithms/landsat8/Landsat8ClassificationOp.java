@@ -24,12 +24,12 @@ import java.util.Map;
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "idepix.landsat8.classification",
-        version = "2.3",
+@OperatorMetadata(alias = "Idepix.Landsat8.Classification",
+        version = "2.2",
         internal = true,
         authors = "Olaf Danne",
-        copyright = "(c) 2015 by Brockmann Consult",
-        description = "Landsat 8 water pixel classification operator.")
+        copyright = "(c) 2016 by Brockmann Consult",
+        description = "Landsat 8 pixel classification operator.")
 public class Landsat8ClassificationOp extends Operator {
 
     // the water mask ends at 59 Degree south, stop earlier to avoid artefacts

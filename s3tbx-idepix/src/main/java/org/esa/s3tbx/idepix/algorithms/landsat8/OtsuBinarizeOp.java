@@ -33,11 +33,11 @@ import java.io.IOException;
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "idepix.landsat8.otsu",
-        version = "2.2.1",
+@OperatorMetadata(alias = "Idepix.Landsat8.Otsu",
+        version = "2.2",
         internal = true,
         authors = "Olaf Danne",
-        copyright = "(c) 2015 by Brockmann Consult",
+        copyright = "(c) 2016 by Brockmann Consult",
         description = "Landsat 8 Otsu binarization: provides product with binarized R, G, and B image.")
 public class OtsuBinarizeOp extends Operator {
 

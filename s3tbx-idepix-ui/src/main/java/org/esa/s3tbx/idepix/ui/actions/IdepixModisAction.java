@@ -33,11 +33,11 @@ import java.awt.event.ActionEvent;
  */
 @ActionID(category = "Processing", id = "org.esa.s3tbx.idepix.ui.actions.IdepixModisAction")
 @ActionRegistration(displayName = "#CTL_IdepixModisAction_Text")
-@ActionReference(path = "Menu/Optical/Preprocessing/IdePix Pixel Classification", position = 200)
+@ActionReference(path = "Menu/Optical/Preprocessing/IdePix Pixel Classification", position = 0)
 @NbBundle.Messages({"CTL_IdepixModisAction_Text=MODIS"})
 public class IdepixModisAction extends AbstractSnapAction {
 
-    private static final String HELP_ID = "idepixPixelIdentification";
+    private static final String HELP_ID = "idepixTool";
 
     public IdepixModisAction() {
         putValue(Action.SHORT_DESCRIPTION, "Performs pixel classification on a MODIS data product.");

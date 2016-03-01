@@ -1,4 +1,4 @@
-package org.esa.s3tbx.idepix.algorithms.msi;
+package org.esa.s3tbx.idepix.algorithms.sentinel2;
 
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
@@ -10,13 +10,13 @@ import org.esa.snap.core.gpf.annotations.OperatorMetadata;
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "idepix.msi",
+@OperatorMetadata(alias = "Idepix.Sentinel2",
         category = "Optical/Pre-Processing",
         version = "1.0",
         authors = "Olaf Danne",
         copyright = "(c) 2016 by Brockmann Consult",
-        description = "Pixel identification and classification for S2-MSI.")
-public class MsiOp extends Operator {
+        description = "Pixel identification and classification for Sentinel-2.")
+public class Sentinel2Op extends Operator {
     @Override
     public void initialize() throws OperatorException {
         // todo - new implementation for Sentinel-2 MSI instrument
@@ -29,7 +29,7 @@ public class MsiOp extends Operator {
     public static class Spi extends OperatorSpi {
 
         public Spi() {
-            super(MsiOp.class);
+            super(Sentinel2Op.class);
         }
     }
 }
