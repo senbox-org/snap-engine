@@ -90,6 +90,7 @@ public class InsituClientForm extends JPanel {
         layout.setCellWeightY(2, 1, 1.0);
         add(new JLabel("Product:"));
         final JList<Product> productList = new JList<>(model.getProductListModel());
+        productList.setSelectionModel(model.getProductSelectionModel());
         productList.setCellRenderer(new ProductListCellRenderer());
         productList.setVisibleRowCount(6);
         add(new JScrollPane(productList));
@@ -99,42 +100,44 @@ public class InsituClientForm extends JPanel {
         add(new JLabel("Start time:"));
         final DateTimePicker startDatePicker = new DateTimePicker(model.getStartDate(), Locale.getDefault(), DEFAULT_DATE_FORMAT, TIME_FORMAT);
         startDatePicker.addPropertyChangeListener("date", evt -> model.setStartDate((Date) evt.getNewValue()));
+        model.getChangeSupport().addPropertyChangeListener(InsituClientModel.PROPERTY_START_DATE, evt -> startDatePicker.setDateTime(model.getStartDate()));
         add(startDatePicker);
 
         add(new JLabel("Stop time:"));
         final DateTimePicker stopDatePicker = new DateTimePicker(model.getStopDate(), Locale.getDefault(), DEFAULT_DATE_FORMAT, TIME_FORMAT);
         stopDatePicker.addPropertyChangeListener("date", evt -> model.setStopDate((Date) evt.getNewValue()));
+        model.getChangeSupport().addPropertyChangeListener(InsituClientModel.PROPERTY_STOP_DATE, evt -> stopDatePicker.setDateTime(model.getStopDate()));
         add(stopDatePicker);
 
         layout.setCellWeightX(4, 1, 1.0);
         layout.setCellWeightX(4, 3, 1.0);
         add(new JLabel("Min longitude:"));
         final JFormattedTextField minLonField = new JFormattedTextField(DECIMAL_FORMATTER);
+        minLonField.setValue(model.getMinLon());
         minLonField.addActionListener(e -> model.setMinLon((double) minLonField.getValue()));
+        model.getChangeSupport().addPropertyChangeListener(InsituClientModel.PROPERTY_MIN_LON, evt -> minLonField.setValue(evt.getNewValue()));
         add(minLonField);
         add(new JLabel("Max longitude:"));
         final JFormattedTextField maxLonField = new JFormattedTextField(DECIMAL_FORMATTER);
+        maxLonField.setValue(model.getMaxLon());
         maxLonField.addActionListener(e -> model.setMaxLon((double) maxLonField.getValue()));
+        model.getChangeSupport().addPropertyChangeListener(InsituClientModel.PROPERTY_MAX_LON, evt -> maxLonField.setValue(evt.getNewValue()));
         add(maxLonField);
 
         layout.setCellWeightX(5, 1, 1.0);
         layout.setCellWeightX(5, 3, 1.0);
         add(new JLabel("Min latitude:"));
         final JFormattedTextField minLatField = new JFormattedTextField(DECIMAL_FORMATTER);
+        minLatField.setValue(model.getMinLat());
         minLatField.addActionListener(e -> model.setMinLat((double) minLatField.getValue()));
+        model.getChangeSupport().addPropertyChangeListener(InsituClientModel.PROPERTY_MIN_LAT, evt -> minLatField.setValue(evt.getNewValue()));
         add(minLatField);
         add(new JLabel("Max latitude:"));
         final JFormattedTextField maxLatField = new JFormattedTextField(DECIMAL_FORMATTER);
+        maxLatField.setValue(model.getMaxLat());
         maxLatField.addActionListener(e -> model.setMaxLat((double) maxLatField.getValue()));
+        model.getChangeSupport().addPropertyChangeListener(InsituClientModel.PROPERTY_MAX_LAT, evt -> maxLatField.setValue(evt.getNewValue()));
         add(maxLatField);
-
-    }
-
-    public void prepareHide() {
-        model.dispose();
-    }
-
-    public void prepareShow() {
 
     }
 
@@ -160,9 +163,7 @@ public class InsituClientForm extends JPanel {
     private static class InsituServerListCellRenderer extends DefaultListCellRenderer {
 
         @Override
-        public Component getListCellRendererComponent(JList list, Object value, int index,
-                                                      boolean isSelected,
-                                                      boolean cellHasFocus) {
+        public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
             final JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
             final InsituServerSpi server = (InsituServerSpi) value;
             label.setText(server.getName());

@@ -9,6 +9,7 @@ import org.esa.s3tbx.insitu.server.InsituServer;
 import org.esa.s3tbx.insitu.server.InsituServerException;
 import org.esa.s3tbx.insitu.server.InsituServerRegistry;
 import org.esa.s3tbx.insitu.server.InsituServerSpi;
+import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
@@ -29,6 +30,7 @@ import javax.swing.event.ListSelectionListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -38,6 +40,12 @@ public class InsituClientModel {
 
 
     static final InsituServerSpi NO_SELECTION_SERVER_SPI = new NoSelectionInsituServerSpi();
+    static final String PROPERTY_START_DATE = "startDate";
+    static final String PROPERTY_STOP_DATE = "stopDate";
+    static final String PROPERTY_MIN_LON = "minLon";
+    static final String PROPERTY_MAX_LON = "maxLon";
+    static final String PROPERTY_MIN_LAT = "minLat";
+    static final String PROPERTY_MAX_LAT = "maxLat";
 
     private final DefaultComboBoxModel<InsituServerSpi> insituServerModel;
     private final DefaultListModel<InsituDatasetDescr> datasetModel;
@@ -76,12 +84,17 @@ public class InsituClientModel {
         productSelectionModel.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         productSelectionModel.addListSelectionListener(new ProductListSelectionListener());
         final ProductManager productManager = SnapApp.getDefault().getProductManager();
+        Product[] products = productManager.getProducts();
+        for (Product product : products) {
+            productListModel.addElement(product);
+        }
         productManagerListener = new PMListener(productManager);
         productManager.addListener(productManagerListener);
-
+        TimeSpan.create(Collections.emptyList());
         Calendar utcCalendar = createUtcCalendar();
+        utcCalendar.add(Calendar.DAY_OF_YEAR, -1);
         startDate = utcCalendar.getTime();
-        utcCalendar.add(Calendar.DAY_OF_YEAR, 2);
+        utcCalendar.add(Calendar.DAY_OF_YEAR, 1);
         stopDate = utcCalendar.getTime();
         minLon = -180.0;
         maxLon = 180.0;
@@ -124,7 +137,12 @@ public class InsituClientModel {
     }
 
     public void setStartDate(Date startDate) {
+        if (this.startDate.equals(startDate)) {
+            return;
+        }
+        Date oldValue = this.startDate;
         this.startDate = startDate;
+        changeSupport.firePropertyChange(PROPERTY_START_DATE, startDate, oldValue);
     }
 
     public Date getStopDate() {
@@ -132,7 +150,12 @@ public class InsituClientModel {
     }
 
     public void setStopDate(Date stopDate) {
+        if (this.stopDate.equals(stopDate)) {
+            return;
+        }
+        Date oldValue = this.stopDate;
         this.stopDate = stopDate;
+        changeSupport.firePropertyChange(PROPERTY_STOP_DATE, stopDate, oldValue);
     }
 
     public double getMinLon() {
@@ -145,8 +168,7 @@ public class InsituClientModel {
         }
         double oldValue = this.minLon;
         this.minLon = minLon;
-        changeSupport.firePropertyChange("minLon", minLon, oldValue);
-
+        changeSupport.firePropertyChange(PROPERTY_MIN_LON, minLon, oldValue);
     }
 
     public double getMaxLon() {
@@ -159,7 +181,7 @@ public class InsituClientModel {
         }
         double oldValue = this.maxLon;
         this.maxLon = maxLon;
-        changeSupport.firePropertyChange("maxLon", maxLon, oldValue);
+        changeSupport.firePropertyChange(PROPERTY_MAX_LON, maxLon, oldValue);
     }
 
     public double getMinLat() {
@@ -172,7 +194,7 @@ public class InsituClientModel {
         }
         double oldValue = this.minLat;
         this.minLat = minLat;
-        changeSupport.firePropertyChange("minLat", minLat, oldValue);
+        changeSupport.firePropertyChange(PROPERTY_MIN_LAT, minLat, oldValue);
 
     }
 
@@ -186,16 +208,15 @@ public class InsituClientModel {
         }
         double oldValue = this.maxLat;
         this.maxLat = maxLat;
-        changeSupport.firePropertyChange("maxLat", maxLat, oldValue);
+        changeSupport.firePropertyChange(PROPERTY_MAX_LAT, maxLat, oldValue);
     }
 
-    private static Calendar createUtcCalendar() {
+    static Calendar createUtcCalendar() {
         Calendar utcCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         utcCalendar.set(Calendar.HOUR_OF_DAY, 12);
         utcCalendar.set(Calendar.MINUTE, 0);
         utcCalendar.set(Calendar.SECOND, 0);
         utcCalendar.set(Calendar.MILLISECOND, 0);
-        utcCalendar.add(Calendar.DAY_OF_YEAR, -1);
         return utcCalendar;
     }
 
@@ -336,50 +357,14 @@ public class InsituClientModel {
         public void valueChanged(ListSelectionEvent e) {
             final List<Product> products = getSelectedProducts();
 
-            ProductData.UTC startDate = new ProductData.UTC(Double.MAX_VALUE);
-            ProductData.UTC stopDate = new ProductData.UTC(Double.MIN_VALUE);
-            double minLat = -90.0;
-            double maxLat = 90.0;
-            double minLon = -180.0;
-            double maxLon = 180.0;
-            for (Product product : products) {
-                startDate = min(startDate, product.getStartTime());
-                stopDate = max(stopDate, product.getEndTime());
-                if(product.getSceneGeoCoding() != null) {
-                    final GeoPos[] corners = createCornerCoordinates(product);
-                    for (GeoPos corner : corners) {
-                        minLat = Math.min(minLat, corner.getLat());
-                        maxLat = Math.min(maxLat, corner.getLat());
-                        minLon = Math.min(minLon, corner.getLon());
-                        maxLon = Math.min(maxLon, corner.getLon());
-                    }
-                }
-            }
-            setMinLat(minLat);
-            setMaxLat(maxLat);
-            setMinLon(minLon);
-            setMaxLon(maxLon);
-        }
-
-        private GeoPos[] createCornerCoordinates(Product product) {
-            PixelPos sceneUL = new  PixelPos(0 + 0.5f, 0 + 0.5f);
-            PixelPos sceneUR = new  PixelPos(product.getSceneRasterWidth() - 1 + 0.5f, 0 + 0.5f);
-            PixelPos sceneLL = new  PixelPos(0 + 0.5f, product.getSceneRasterHeight() - 1 + 0.5f);
-            PixelPos sceneLR = new  PixelPos(product.getSceneRasterWidth() - 1 + 0.5f, product.getSceneRasterHeight() - 1 + 0.5f);
-            GeoPos geoPosUL = product.getSceneGeoCoding().getGeoPos(sceneUL, null);
-            GeoPos geoPosUR = product.getSceneGeoCoding().getGeoPos(sceneUR, null);
-            GeoPos geoPosLL = product.getSceneGeoCoding().getGeoPos(sceneLL, null);
-            GeoPos geoPosLR = product.getSceneGeoCoding().getGeoPos(sceneLR, null);
-            return new GeoPos[]{geoPosUL, geoPosUR, geoPosLL, geoPosLR};
-        }
-
-
-        private ProductData.UTC min(ProductData.UTC startDate1, ProductData.UTC startDate2) {
-            return startDate1.getAsDate().before(startDate2.getAsDate()) ? startDate1 : startDate2;
-        }
-
-        private ProductData.UTC max(ProductData.UTC startDate1, ProductData.UTC startDate2) {
-            return startDate1.getAsDate().after(startDate2.getAsDate()) ? startDate1 : startDate2;
+            TimeSpan timeSpan = TimeSpan.create(products);
+            setStartDate(timeSpan.getStartDate());
+            setStopDate(timeSpan.getStopDate());
+            MinMaxGeoCoordinates minMaxGeoCoordinates = MinMaxGeoCoordinates.create(products);
+            setMinLat(minMaxGeoCoordinates.getMinLat());
+            setMaxLat(minMaxGeoCoordinates.getMaxLat());
+            setMinLon(minMaxGeoCoordinates.getMinLon());
+            setMaxLon(minMaxGeoCoordinates.getMaxLon());
         }
 
         private List<Product> getSelectedProducts() {
@@ -387,9 +372,9 @@ public class InsituClientModel {
             int iMax = productSelectionModel.getMaxSelectionIndex();
 
             final ArrayList<Product> productList = new ArrayList<>();
-//            if (iMin < 0 || iMax < 0) {
-//                return productList;
-//            }
+            if (iMin < 0 || iMax < 0) {
+                return productList;
+            }
 
             for (int i = iMin; i < iMax; i++) {
                 if (productSelectionModel.isSelectedIndex(i)) {
@@ -400,5 +385,133 @@ public class InsituClientModel {
 
             return productList;
         }
+
+    }
+
+    static class MinMaxGeoCoordinates {
+
+        private double minLat;
+        private double maxLat;
+        private double minLon;
+        private double maxLon;
+
+        private MinMaxGeoCoordinates() {
+        }
+
+        public double getMinLat() {
+            return minLat;
+        }
+
+        public double getMaxLat() {
+            return maxLat;
+        }
+
+        public double getMinLon() {
+            return minLon;
+        }
+
+        public double getMaxLon() {
+            return maxLon;
+        }
+
+        public static MinMaxGeoCoordinates create(List<Product> products) {
+            MinMaxGeoCoordinates coordinates = new MinMaxGeoCoordinates();
+            coordinates.minLat = 90.0;
+            coordinates.maxLat = -90.0;
+            coordinates.minLon = 180.0;
+            coordinates.maxLon = -180.0;
+            for (Product product : products) {
+                if (product.getSceneGeoCoding() != null) {
+                    final GeoPos[] corners = createCornerCoordinates(product);
+                    for (GeoPos corner : corners) {
+                        coordinates.minLat = Math.min(coordinates.minLat, corner.getLat());
+                        coordinates.maxLat = Math.max(coordinates.maxLat, corner.getLat());
+                        coordinates.minLon = Math.min(coordinates.minLon, corner.getLon());
+                        coordinates.maxLon = Math.max(coordinates.maxLon, corner.getLon());
+                    }
+                }
+            }
+            if (coordinates.maxLat < coordinates.minLat) {
+                double temp = coordinates.maxLat;
+                coordinates.maxLat = coordinates.minLat;
+                coordinates.minLat = temp;
+            }
+            if (coordinates.maxLon < coordinates.minLon) {
+                double temp = coordinates.maxLon;
+                coordinates.maxLon = coordinates.minLon;
+                coordinates.minLon = temp;
+            }
+            return coordinates;
+        }
+
+        private static GeoPos[] createCornerCoordinates(Product product) {
+            PixelPos sceneUL = new PixelPos(0, 0);
+            PixelPos sceneUR = new PixelPos(product.getSceneRasterWidth(), 0);
+            PixelPos sceneLL = new PixelPos(0, product.getSceneRasterHeight());
+            PixelPos sceneLR = new PixelPos(product.getSceneRasterWidth(), product.getSceneRasterHeight());
+            GeoCoding sceneGeoCoding = product.getSceneGeoCoding();
+            GeoPos geoPosUL = sceneGeoCoding.getGeoPos(sceneUL, null);
+            GeoPos geoPosUR = sceneGeoCoding.getGeoPos(sceneUR, null);
+            GeoPos geoPosLL = sceneGeoCoding.getGeoPos(sceneLL, null);
+            GeoPos geoPosLR = sceneGeoCoding.getGeoPos(sceneLR, null);
+            return new GeoPos[]{geoPosUL, geoPosUR, geoPosLL, geoPosLR};
+        }
+
+    }
+
+    static class TimeSpan {
+
+        private Date startDate;
+        private Date stopDate;
+
+        private TimeSpan() {
+        }
+
+        public Date getStartDate() {
+            return startDate;
+        }
+
+        public Date getStopDate() {
+            return stopDate;
+        }
+
+        static TimeSpan create(List<Product> products) {
+            TimeSpan timeSpan = new TimeSpan();
+            Calendar utcCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            utcCalendar.set(Calendar.HOUR_OF_DAY, 12);
+            utcCalendar.set(Calendar.MINUTE, 0);
+            utcCalendar.set(Calendar.SECOND, 0);
+            utcCalendar.set(Calendar.MILLISECOND, 0);
+            timeSpan.startDate = utcCalendar.getTime();
+            utcCalendar.set(1970, Calendar.JANUARY, 1);
+            timeSpan.stopDate = utcCalendar.getTime();
+            for (Product product : products) {
+                ProductData.UTC startTime = product.getStartTime();
+                if (startTime != null) {
+                    timeSpan.startDate = min(timeSpan.startDate, startTime.getAsDate());
+                }
+                ProductData.UTC endTime = product.getEndTime();
+                if (endTime != null) {
+                    timeSpan.stopDate = max(timeSpan.stopDate, endTime.getAsDate());
+                }
+            }
+
+            if (timeSpan.stopDate.before(timeSpan.startDate)) {
+                Date temp = timeSpan.stopDate;
+                timeSpan.stopDate = timeSpan.startDate;
+                timeSpan.startDate = temp;
+            }
+            return timeSpan;
+        }
+
+        private static Date min(Date date1, Date date2) {
+            return date1.before(date2) ? date1 : date2;
+        }
+
+        private static Date max(Date date1, Date date2) {
+            return date1.after(date2) ? date1 : date2;
+        }
+
+
     }
 }
