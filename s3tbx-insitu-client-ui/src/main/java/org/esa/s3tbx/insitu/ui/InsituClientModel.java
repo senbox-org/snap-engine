@@ -140,7 +140,7 @@ public class InsituClientModel {
         }
         Date oldValue = this.startDate;
         this.startDate = startDate;
-        changeSupport.firePropertyChange(PROPERTY_START_DATE, startDate, oldValue);
+        changeSupport.firePropertyChange(PROPERTY_START_DATE, oldValue, startDate);
     }
 
     public Date getStopDate() {
@@ -153,7 +153,7 @@ public class InsituClientModel {
         }
         Date oldValue = this.stopDate;
         this.stopDate = stopDate;
-        changeSupport.firePropertyChange(PROPERTY_STOP_DATE, stopDate, oldValue);
+        changeSupport.firePropertyChange(PROPERTY_STOP_DATE, oldValue, stopDate);
     }
 
     public double getMinLon() {
@@ -166,7 +166,7 @@ public class InsituClientModel {
         }
         double oldValue = this.minLon;
         this.minLon = minLon;
-        changeSupport.firePropertyChange(PROPERTY_MIN_LON, minLon, oldValue);
+        changeSupport.firePropertyChange(PROPERTY_MIN_LON, oldValue, minLon);
     }
 
     public double getMaxLon() {
@@ -179,7 +179,7 @@ public class InsituClientModel {
         }
         double oldValue = this.maxLon;
         this.maxLon = maxLon;
-        changeSupport.firePropertyChange(PROPERTY_MAX_LON, maxLon, oldValue);
+        changeSupport.firePropertyChange(PROPERTY_MAX_LON, oldValue, maxLon);
     }
 
     public double getMinLat() {
@@ -192,7 +192,7 @@ public class InsituClientModel {
         }
         double oldValue = this.minLat;
         this.minLat = minLat;
-        changeSupport.firePropertyChange(PROPERTY_MIN_LAT, minLat, oldValue);
+        changeSupport.firePropertyChange(PROPERTY_MIN_LAT, oldValue, minLat);
 
     }
 
@@ -206,7 +206,7 @@ public class InsituClientModel {
         }
         double oldValue = this.maxLat;
         this.maxLat = maxLat;
-        changeSupport.firePropertyChange(PROPERTY_MAX_LAT, maxLat, oldValue);
+        changeSupport.firePropertyChange(PROPERTY_MAX_LAT, oldValue, maxLat);
     }
 
     static Calendar createUtcCalendar() {
@@ -353,6 +353,9 @@ public class InsituClientModel {
 
         @Override
         public void valueChanged(ListSelectionEvent e) {
+            if(e.getValueIsAdjusting()) {
+                return;
+            }
             final List<Product> products = getSelectedProducts();
 
             TimeSpan timeSpan = TimeSpan.create(products);
@@ -374,11 +377,10 @@ public class InsituClientModel {
                 return productList;
             }
 
-            for (int i = iMin; i < iMax; i++) {
+            for (int i = iMin; i <= iMax; i++) {
                 if (productSelectionModel.isSelectedIndex(i)) {
-                    productList.add(productList.get(i));
+                    productList.add(productListModel.get(i));
                 }
-
             }
 
             return productList;
