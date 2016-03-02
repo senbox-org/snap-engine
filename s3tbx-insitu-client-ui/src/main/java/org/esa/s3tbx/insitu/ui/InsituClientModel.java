@@ -90,16 +90,14 @@ public class InsituClientModel {
         }
         productManagerListener = new PMListener(productManager);
         productManager.addListener(productManagerListener);
-        TimeSpan.create(Collections.emptyList());
-        Calendar utcCalendar = createUtcCalendar();
-        utcCalendar.add(Calendar.DAY_OF_YEAR, -1);
-        startDate = utcCalendar.getTime();
-        utcCalendar.add(Calendar.DAY_OF_YEAR, 1);
-        stopDate = utcCalendar.getTime();
-        minLon = -180.0;
-        maxLon = 180.0;
-        minLat = -90.0;
-        maxLat = 90.0;
+        TimeSpan timeSpan = TimeSpan.create(Collections.emptyList());
+        startDate = timeSpan.startDate;
+        stopDate = timeSpan.stopDate;
+        MinMaxGeoCoordinates minMaxGeoCoordinates = MinMaxGeoCoordinates.create(Collections.emptyList());
+        minLon = minMaxGeoCoordinates.getMinLon();
+        maxLon = minMaxGeoCoordinates.getMaxLon();
+        minLat = minMaxGeoCoordinates.getMinLat();
+        maxLat = minMaxGeoCoordinates.getMaxLat();
 
         changeSupport = new PropertyChangeSupport(this);
     }
