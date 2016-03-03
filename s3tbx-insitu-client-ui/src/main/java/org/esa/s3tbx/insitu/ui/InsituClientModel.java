@@ -17,7 +17,6 @@ import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.ProductManager;
 import org.esa.snap.rcp.SnapApp;
 import org.esa.snap.rcp.util.ProgressHandleMonitor;
-import org.netbeans.api.progress.ProgressUtils;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
@@ -28,7 +27,6 @@ import javax.swing.event.ListDataListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.beans.PropertyChangeSupport;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -36,7 +34,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
 
-public class InsituClientModel {
+class InsituClientModel {
 
 
     static final InsituServerSpi NO_SELECTION_SERVER_SPI = new NoSelectionInsituServerSpi();
@@ -51,6 +49,7 @@ public class InsituClientModel {
     private final DefaultListModel<InsituDatasetDescr> datasetModel;
     private final ListSelectionModel datasetSelectionModel;
     private final DefaultListModel<InsituParameter> parameterModel;
+    private final DefaultListSelectionModel parameterSelectionModel;
     private final DefaultListModel<Product> productListModel;
     private final DefaultListSelectionModel productSelectionModel;
     private Date startDate;
@@ -78,6 +77,7 @@ public class InsituClientModel {
         datasetSelectionModel.addListSelectionListener(new DatasetListSelectionListener());
 
         parameterModel = new DefaultListModel<>();
+        parameterSelectionModel = new DefaultListSelectionModel();
 
         productListModel = new DefaultListModel<>();
         productSelectionModel = new DefaultListSelectionModel();
@@ -110,6 +110,10 @@ public class InsituClientModel {
         return insituServerModel;
     }
 
+    public InsituServerSpi getSelectedServerSpi() {
+        return (InsituServerSpi) insituServerModel.getSelectedItem();
+    }
+
     public DefaultListModel<InsituDatasetDescr> getDatasetModel() {
         return datasetModel;
     }
@@ -118,8 +122,24 @@ public class InsituClientModel {
         return datasetSelectionModel;
     }
 
+    public InsituDatasetDescr getSelectedDataset() {
+        if(!datasetSelectionModel.isSelectionEmpty()) {
+            final int selectionIndex = datasetSelectionModel.getLeadSelectionIndex();
+            return datasetModel.get(selectionIndex);
+        }
+        return null;
+    }
+
     public DefaultListModel<InsituParameter> getParameterModel() {
         return parameterModel;
+    }
+
+    public DefaultListSelectionModel getParameterSelectionModel() {
+        return parameterSelectionModel;
+    }
+
+    public List<InsituParameter> getSelectedParameters() {
+        return Utils.getSelectedItems(parameterModel, parameterSelectionModel);
     }
 
     public DefaultListModel<Product> getProductListModel() {
@@ -257,12 +277,12 @@ public class InsituClientModel {
         public void contentsChanged(ListDataEvent event) {
             if (event.getIndex0() == -1 && event.getIndex1() == -1) {
                 // selection changed if both indices are -1
-                final InsituServerSpi insituServerSpi = (InsituServerSpi) insituServerModel.getSelectedItem();
+                final InsituServerSpi insituServerSpi = getSelectedServerSpi();
                 try {
                     selectedServer = insituServerSpi.createServer();
                     ProgressHandleMonitor handle = ProgressHandleMonitor.create("Contacting " + insituServerSpi.getName() + " in-situ server");
                     Runnable runnable = () -> updateModel(handle);
-                    runWithProgress(runnable, handle);
+                    Utils.runWithProgress(runnable, handle);
                 } catch (Exception e) {
                     insituServerModel.setSelectedItem(NO_SELECTION_SERVER_SPI);
                     throw new IllegalStateException("Could not create server instance for server '" + insituServerSpi.getName() + "'", e);
@@ -286,15 +306,6 @@ public class InsituClientModel {
         }
     }
 
-    private void runWithProgress(Runnable runnable, ProgressHandleMonitor handle) {
-        ProgressUtils.runOffEventThreadWithProgressDialog(runnable,
-                                                          "In-Situ Data Access",
-                                                          handle.getProgressHandle(),
-                                                          true,
-                                                          50,
-                                                          1000);
-    }
-
     private void updateDatasetModel() throws InsituServerException {
         getDatasetModel().clear();
         InsituQuery query = new InsituQuery().subject(InsituQuery.SUBJECT.DATASETS);
@@ -307,9 +318,8 @@ public class InsituClientModel {
     private void updateParameterModel() throws InsituServerException {
         getParameterModel().clear();
         InsituQuery query = new InsituQuery().subject(InsituQuery.SUBJECT.PARAMETERS);
-        if (!datasetSelectionModel.isSelectionEmpty()) {
-            final int selectionIndex = datasetSelectionModel.getLeadSelectionIndex();
-            final InsituDatasetDescr datasetDescr = datasetModel.get(selectionIndex);
+        final InsituDatasetDescr datasetDescr = getSelectedDataset();
+        if (datasetDescr != null) {
             query.dataset(datasetDescr.getName());
         }
         final InsituResponse insituResponse = selectedServer.query(query);
@@ -362,14 +372,13 @@ public class InsituClientModel {
             }
             ProgressHandleMonitor handle = ProgressHandleMonitor.create("In-Situ Data Access");
             Runnable runnable = () -> updateTemporalAndSpatialBounds(handle);
-            runWithProgress(runnable, handle);
-
+            Utils.runWithProgress(runnable, handle);
         }
 
         private void updateTemporalAndSpatialBounds(ProgressMonitor pm) {
             pm.beginTask("Computing temporal and spatial bounds", 2);
             try {
-                final List<Product> products = getSelectedProducts();
+                final List<Product> products = Utils.getSelectedItems(productListModel, productSelectionModel);
 
                 TimeSpan timeSpan = TimeSpan.create(products);
                 pm.worked(1);
@@ -387,23 +396,6 @@ public class InsituClientModel {
             }
         }
 
-        private List<Product> getSelectedProducts() {
-            int iMin = productSelectionModel.getMinSelectionIndex();
-            int iMax = productSelectionModel.getMaxSelectionIndex();
-
-            final ArrayList<Product> productList = new ArrayList<>();
-            if (iMin < 0 || iMax < 0) {
-                return productList;
-            }
-
-            for (int i = iMin; i <= iMax; i++) {
-                if (productSelectionModel.isSelectedIndex(i)) {
-                    productList.add(productListModel.get(i));
-                }
-            }
-
-            return productList;
-        }
 
     }
 

@@ -13,7 +13,7 @@ import java.awt.Window;
 /**
  * @author Marco Peters
  */
-public class InsituClientDialog extends ModelessDialog {
+class InsituClientDialog extends ModelessDialog {
 
     private InsituClientModel model;
 

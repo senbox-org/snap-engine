@@ -15,8 +15,17 @@
  */
 package org.esa.s3tbx.insitu.ui;
 
+import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.swing.TableLayout;
+import org.esa.s3tbx.insitu.server.InsituDatasetDescr;
+import org.esa.s3tbx.insitu.server.InsituParameter;
+import org.esa.s3tbx.insitu.server.InsituQuery;
+import org.esa.s3tbx.insitu.server.InsituResponse;
+import org.esa.s3tbx.insitu.server.InsituServer;
+import org.esa.s3tbx.insitu.server.InsituServerSpi;
+import org.esa.snap.rcp.SnapApp;
 import org.esa.snap.rcp.actions.help.HelpAction;
+import org.esa.snap.rcp.util.ProgressHandleMonitor;
 import org.esa.snap.tango.TangoIcons;
 import org.esa.snap.ui.tool.ToolButtonFactory;
 import org.openide.awt.ActionID;
@@ -29,6 +38,8 @@ import javax.swing.AbstractButton;
 import javax.swing.JPanel;
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.util.List;
+import java.util.stream.Stream;
 
 @TopComponent.Description(
         preferredID = "InsituClientTopComponent",
@@ -46,7 +57,8 @@ import java.awt.Component;
 public class InsituClientTopComponent extends TopComponent implements HelpCtx.Provider {
 
     private static final String HELP_ID = "insituClientTool";
-    private InsituClientModel insituClientModel;
+    private InsituClientModel insituModel;
+    private AbstractButton refreshButton;
 
     public InsituClientTopComponent() {
         setName(Bundle.CTL_InsituClientTopComponent_Name());
@@ -62,8 +74,13 @@ public class InsituClientTopComponent extends TopComponent implements HelpCtx.Pr
         layout.setTablePadding(4, 4);
 
         final JPanel contentPanel = new JPanel(layout);
-        final AbstractButton refreshButton = ToolButtonFactory.createButton(TangoIcons.actions_view_refresh(TangoIcons.Res.R22), false);
-        refreshButton.setText("#Obs: 486");
+        refreshButton = ToolButtonFactory.createButton(TangoIcons.actions_view_refresh(TangoIcons.Res.R22), false);
+        refreshButton.addActionListener(e -> {
+            ProgressHandleMonitor handle = ProgressHandleMonitor.create("In-Situ Data Access");
+            // todo (mp/03.03.2016) - enhance this operation. Similar to org.esa.snap.rcp.actions.file.WriteProductOperation
+            Runnable runnable = () -> updateNumObs(handle);
+            Utils.runWithProgress(runnable, handle);
+        });
         refreshButton.setName("refreshButton");
         contentPanel.add(refreshButton);
         final AbstractButton downloadButton = ToolButtonFactory.createButton(TangoIcons.actions_document_save(TangoIcons.Res.R22), false);
@@ -79,19 +96,66 @@ public class InsituClientTopComponent extends TopComponent implements HelpCtx.Pr
         return contentPanel;
     }
 
+    private void updateNumObs(ProgressMonitor pm) {
+        pm.beginTask("Retrieving number of observation matching the query settings", ProgressMonitor.UNKNOWN);
+        try {
+            InsituServerSpi serverSpi = insituModel.getSelectedServerSpi();
+            InsituServer server = serverSpi.createServer();
+
+            InsituQuery query = new InsituQuery();
+            query.subject(InsituQuery.SUBJECT.OBSERVATIONS).countOnly(true);
+            query.latMin(insituModel.getMinLat()).latMax(insituModel.getMaxLat());
+            query.lonMin(insituModel.getMinLon()).lonMax(insituModel.getMaxLon());
+            query.startDate(insituModel.getStartDate()).stopDate(insituModel.getStopDate());
+            InsituDatasetDescr selectedDataset = insituModel.getSelectedDataset();
+            if (selectedDataset != null) {
+                query.dataset(selectedDataset.getName());
+            }
+            Stream<InsituParameter> stream = insituModel.getSelectedParameters().stream();
+            String[] parameterNames = stream.map(InsituParameter::getName).toArray(String[]::new);
+            query.param(parameterNames);
+
+            InsituResponse response = server.query(query);
+            if(response.getStatus().equals(InsituResponse.STATUS_CODE.NOK)) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("Query not successful. Server responded with failure(s): \n");
+                List<String> failureReasons = response.getFailureReasons();
+                for (String failureReason : failureReasons) {
+                    sb.append(failureReason);
+                }
+                throw new IllegalStateException(sb.toString());
+            }
+            setNumObs(response.getObservationCount());
+        } catch (Exception e) {
+            SnapApp.getDefault().handleError("Could not update number of observations", e);
+        }finally {
+            pm.done();
+        }
+
+    }
+
+    private void setNumObs(long observationCount) {
+        if (observationCount < 0) {
+            refreshButton.setText("#Obs: UNKNOWN");
+        }else {
+            refreshButton.setText("#Obs: " + observationCount);
+        }
+    }
+
     @Override
     protected void componentOpened() {
         super.componentOpened();
-        insituClientModel = new InsituClientModel();
+        insituModel = new InsituClientModel();
         setLayout(new BorderLayout());
-        add(new InsituClientForm(insituClientModel), BorderLayout.CENTER);
+        add(new InsituClientForm(insituModel), BorderLayout.CENTER);
         add(createStatusPanel(new HelpCtx(HELP_ID)), BorderLayout.SOUTH);
+        setNumObs(-1);
     }
 
     @Override
     protected void componentClosed() {
         super.componentClosed();
-        insituClientModel.dispose();
+        insituModel.dispose();
     }
 
     @Override

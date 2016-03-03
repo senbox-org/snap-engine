@@ -33,7 +33,7 @@ import java.util.TimeZone;
 /**
  * @author Marco Peters
  */
-public class InsituClientForm extends JPanel {
+class InsituClientForm extends JPanel {
 
     private static final SimpleDateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss");
     private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("HH:mm:ss");
@@ -80,6 +80,7 @@ public class InsituClientForm extends JPanel {
         add(new JScrollPane(datasetList));
         add(new JLabel("Parameter:"));
         final JList<InsituParameter> paramList = new JList<>(model.getParameterModel());
+        paramList.setSelectionModel(model.getParameterSelectionModel());
         paramList.setCellRenderer(new ParameterListCellRenderer());
         paramList.setVisibleRowCount(6);
         add(new JScrollPane(paramList));
