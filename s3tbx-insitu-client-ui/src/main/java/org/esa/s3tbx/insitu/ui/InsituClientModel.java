@@ -261,13 +261,8 @@ public class InsituClientModel {
                 try {
                     selectedServer = insituServerSpi.createServer();
                     ProgressHandleMonitor handle = ProgressHandleMonitor.create("Contacting " + insituServerSpi.getName() + " in-situ server");
-                    ProgressUtils.runOffEventThreadWithProgressDialog(() -> updateModel(handle),
-                                                                      "In-Situ Data Access",
-                                                                      handle.getProgressHandle(),
-                                                                      true,
-                                                                      50,
-                                                                      1000);
-
+                    Runnable runnable = () -> updateModel(handle);
+                    runWithProgress(runnable, handle);
                 } catch (Exception e) {
                     insituServerModel.setSelectedItem(NO_SELECTION_SERVER_SPI);
                     throw new IllegalStateException("Could not create server instance for server '" + insituServerSpi.getName() + "'", e);
@@ -279,9 +274,9 @@ public class InsituClientModel {
         private void updateModel(ProgressMonitor pm) {
             pm.beginTask("Retrieving metadata from server", 2);
             try {
-                InsituClientModel.this.updateDatasetModel();
+                updateDatasetModel();
                 pm.worked(1);
-                InsituClientModel.this.updateParameterModel();
+                updateParameterModel();
                 pm.worked(1);
             } catch (Exception e) {
                 SnapApp.getDefault().handleError("Failed to retrieve metadata from server", e);
@@ -289,6 +284,15 @@ public class InsituClientModel {
                 pm.done();
             }
         }
+    }
+
+    private void runWithProgress(Runnable runnable, ProgressHandleMonitor handle) {
+        ProgressUtils.runOffEventThreadWithProgressDialog(runnable,
+                                                          "In-Situ Data Access",
+                                                          handle.getProgressHandle(),
+                                                          true,
+                                                          50,
+                                                          1000);
     }
 
     private void updateDatasetModel() throws InsituServerException {
@@ -356,16 +360,31 @@ public class InsituClientModel {
             if(e.getValueIsAdjusting()) {
                 return;
             }
-            final List<Product> products = getSelectedProducts();
+            ProgressHandleMonitor handle = ProgressHandleMonitor.create("In-Situ Data Access");
+            Runnable runnable = () -> updateTemporalAndSpatialBounds(handle);
+            runWithProgress(runnable, handle);
 
-            TimeSpan timeSpan = TimeSpan.create(products);
-            setStartDate(timeSpan.getStartDate());
-            setStopDate(timeSpan.getStopDate());
-            MinMaxGeoCoordinates minMaxGeoCoordinates = MinMaxGeoCoordinates.create(products);
-            setMinLat(minMaxGeoCoordinates.getMinLat());
-            setMaxLat(minMaxGeoCoordinates.getMaxLat());
-            setMinLon(minMaxGeoCoordinates.getMinLon());
-            setMaxLon(minMaxGeoCoordinates.getMaxLon());
+        }
+
+        private void updateTemporalAndSpatialBounds(ProgressMonitor pm) {
+            pm.beginTask("Computing temporal and spatial bounds", 2);
+            try {
+                final List<Product> products = getSelectedProducts();
+
+                TimeSpan timeSpan = TimeSpan.create(products);
+                pm.worked(1);
+                MinMaxGeoCoordinates minMaxGeoCoordinates = MinMaxGeoCoordinates.create(products);
+                pm.worked(1);
+
+                setStartDate(timeSpan.getStartDate());
+                setStopDate(timeSpan.getStopDate());
+                setMinLat(minMaxGeoCoordinates.getMinLat());
+                setMaxLat(minMaxGeoCoordinates.getMaxLat());
+                setMinLon(minMaxGeoCoordinates.getMinLon());
+                setMaxLon(minMaxGeoCoordinates.getMaxLon());
+            } finally {
+                pm.done();
+            }
         }
 
         private List<Product> getSelectedProducts() {
