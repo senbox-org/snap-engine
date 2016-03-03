@@ -9,5 +9,5 @@ public interface InsituServerSpi {
 
     String getDescription();
 
-    InsituServer createServer() throws Exception;
+    InsituServer createServer() throws InsituServerException;
 }

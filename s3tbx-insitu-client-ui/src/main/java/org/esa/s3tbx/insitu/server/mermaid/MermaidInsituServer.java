@@ -87,7 +87,7 @@ public class MermaidInsituServer implements InsituServer {
         }
 
         @Override
-        public InsituServer createServer() throws Exception {
+        public InsituServer createServer() throws InsituServerException {
             return new MermaidInsituServer();
         }
     }

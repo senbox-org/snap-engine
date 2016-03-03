@@ -6,6 +6,7 @@ import org.esa.s3tbx.insitu.server.InsituParameter;
 import org.esa.s3tbx.insitu.server.InsituQuery;
 import org.esa.s3tbx.insitu.server.InsituResponse;
 import org.esa.s3tbx.insitu.server.InsituServer;
+import org.esa.s3tbx.insitu.server.InsituServerException;
 import org.esa.s3tbx.insitu.server.InsituServerSpi;
 
 import java.util.List;
@@ -37,7 +38,7 @@ public class TestInsituServer implements InsituServer {
         }
 
         @Override
-        public InsituServer createServer() throws Exception {
+        public InsituServer createServer() throws InsituServerException {
             return new TestInsituServer();
         }
     }

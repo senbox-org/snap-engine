@@ -255,7 +255,7 @@ class InsituClientModel {
         }
 
         @Override
-        public InsituServer createServer() throws Exception {
+        public InsituServer createServer() throws InsituServerException {
             return query -> InsituResponse.EMPTY_RESPONSE;
         }
 
