@@ -233,7 +233,7 @@ public class InsituClientTopComponent extends TopComponent implements HelpCtx.Pr
         @Override
         public void actionPerformed(ActionEvent e) {
             ProgressHandleMonitor handle = ProgressHandleMonitor.create("In-Situ Data Access");
-            InsituServer server = InsituClientTopComponent.this.getServer();
+            InsituServer server = getServer();
             if (server == null) {
                 return;
             }
@@ -241,11 +241,11 @@ public class InsituClientTopComponent extends TopComponent implements HelpCtx.Pr
             InsituServerRunnable runnable = new InsituServerRunnable(handle, server, factory.create());
             Utils.runWithProgress(runnable, handle);
 
-            if (InsituClientTopComponent.this.hasExceptionOccured(runnable)) {
+            if (hasExceptionOccured(runnable)) {
                 return;
             }
             InsituResponse response = runnable.getResponse();
-            if (InsituClientTopComponent.this.isRepsonseValid(response)) {
+            if (isRepsonseValid(response)) {
                 return;
             }
             handler.handle(response);
