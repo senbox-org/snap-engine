@@ -22,6 +22,7 @@ import org.esa.s3tbx.insitu.server.InsituParameter;
 import org.esa.s3tbx.insitu.server.InsituQuery;
 import org.esa.s3tbx.insitu.server.InsituResponse;
 import org.esa.s3tbx.insitu.server.InsituServer;
+import org.esa.s3tbx.insitu.server.InsituServerException;
 import org.esa.s3tbx.insitu.server.InsituServerSpi;
 import org.esa.snap.rcp.SnapApp;
 import org.esa.snap.rcp.actions.help.HelpAction;
@@ -39,6 +40,8 @@ import javax.swing.AbstractButton;
 import javax.swing.JPanel;
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.stream.Stream;
 
 @TopComponent.Description(
@@ -75,30 +78,21 @@ public class InsituClientTopComponent extends TopComponent implements HelpCtx.Pr
 
         final JPanel contentPanel = new JPanel(layout);
         refreshButton = ToolButtonFactory.createButton(TangoIcons.actions_view_refresh(TangoIcons.Res.R22), false);
-        refreshButton.addActionListener(e -> {
-            ProgressHandleMonitor handle = ProgressHandleMonitor.create("In-Situ Data Access");
-            InsituServerRunnable runnable = new InsituServerRunnable(handle);
-
-            Utils.runWithProgress(runnable, handle);
-            InsituResponse response = runnable.getResponse();
-            if(InsituResponse.STATUS_CODE.NOK.equals(response.getStatus())) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Query not successful. Server responded with failure(s): \n");
-                response.getFailureReasons().forEach(sb::append);
-                SnapApp.getDefault().handleError(sb.toString(), null);
-                return;
-            }
-            if(runnable.getException() != null) {
-                SnapApp.getDefault().handleError("Could not update number of observations", runnable.getException());
-                return;
-            }
-            setNumObs(response.getObservationCount());
-        });
         refreshButton.setName("refreshButton");
+        refreshButton.addActionListener(new ServerButtonActionListener(() -> createObservationQuery().countOnly(true),
+                                                                 response -> setNumObs(response.getObservationCount())));
+
         contentPanel.add(refreshButton);
         final AbstractButton downloadButton = ToolButtonFactory.createButton(TangoIcons.actions_document_save(TangoIcons.Res.R22), false);
         downloadButton.setText("Download");
         downloadButton.setName("downloadButton");
+        downloadButton.addActionListener(new ServerButtonActionListener(this::createObservationQuery, response -> {
+            // TODO (mp/03.03.2016) - set observations to products
+//            List<Product> selectedProducts = insituModel.getSelectedProducts();
+//            List<? extends InsituDataset> datasetList = response.getDatasetList();
+//            datasetList.get(0).getObservations()
+
+        }));
         contentPanel.add(downloadButton);
         contentPanel.add(layout.createHorizontalSpacer());
 
@@ -107,6 +101,51 @@ public class InsituClientTopComponent extends TopComponent implements HelpCtx.Pr
         contentPanel.add(helpButton);
 
         return contentPanel;
+    }
+
+    private boolean isRepsonseValid(InsituResponse response) {
+        if(InsituResponse.STATUS_CODE.NOK.equals(response.getStatus())) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Query not successful. Server responded with failure(s): \n");
+            response.getFailureReasons().forEach(sb::append);
+            SnapApp.getDefault().handleError(sb.toString(), null);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean hasExceptionOccured(InsituServerRunnable runnable) {
+        if(runnable.getException() != null) {
+            SnapApp.getDefault().handleError("Could not update number of observations", runnable.getException());
+            return true;
+        }
+        return false;
+    }
+
+    private InsituQuery createObservationQuery() {
+        InsituQuery query = new InsituQuery();
+        query.subject(InsituQuery.SUBJECT.OBSERVATIONS);
+        query.latMin(insituModel.getMinLat()).latMax(insituModel.getMaxLat());
+        query.lonMin(insituModel.getMinLon()).lonMax(insituModel.getMaxLon());
+        query.startDate(insituModel.getStartDate()).stopDate(insituModel.getStopDate());
+        InsituDatasetDescr selectedDataset = insituModel.getSelectedDataset();
+        if (selectedDataset != null) {
+            query.dataset(selectedDataset.getName());
+        }
+        Stream<InsituParameter> stream = insituModel.getSelectedParameters().stream();
+        String[] parameterNames = stream.map(InsituParameter::getName).toArray(String[]::new);
+        query.param(parameterNames);
+        return query;
+    }
+
+    private InsituServer getServer() {
+        try {
+            InsituServerSpi serverSpi = insituModel.getSelectedServerSpi();
+            return serverSpi.createServer();
+        } catch (InsituServerException ise) {
+            SnapApp.getDefault().handleError("Could not contact server.", ise);
+            return null;
+        }
     }
 
     private void setNumObs(long observationCount) {
@@ -144,10 +183,14 @@ public class InsituClientTopComponent extends TopComponent implements HelpCtx.Pr
         InsituResponse response;
 
         private final ProgressHandleMonitor handle;
+        private final InsituServer server;
+        private final InsituQuery query;
         private Exception exception;
 
-        public InsituServerRunnable(ProgressHandleMonitor handle) {
+        public InsituServerRunnable(ProgressHandleMonitor handle, InsituServer server, InsituQuery query) {
             this.handle = handle;
+            this.server = server;
+            this.query = query;
         }
 
         public InsituResponse getResponse() {
@@ -166,22 +209,6 @@ public class InsituClientTopComponent extends TopComponent implements HelpCtx.Pr
         public void run(ProgressMonitor pm) {
             pm.beginTask("Contacting in-situ server", ProgressMonitor.UNKNOWN);
             try {
-                InsituServerSpi serverSpi = insituModel.getSelectedServerSpi();
-                InsituServer server = serverSpi.createServer();
-
-                InsituQuery query = new InsituQuery();
-                query.subject(InsituQuery.SUBJECT.OBSERVATIONS).countOnly(true);
-                query.latMin(insituModel.getMinLat()).latMax(insituModel.getMaxLat());
-                query.lonMin(insituModel.getMinLon()).lonMax(insituModel.getMaxLon());
-                query.startDate(insituModel.getStartDate()).stopDate(insituModel.getStopDate());
-                InsituDatasetDescr selectedDataset = insituModel.getSelectedDataset();
-                if (selectedDataset != null) {
-                    query.dataset(selectedDataset.getName());
-                }
-                Stream<InsituParameter> stream = insituModel.getSelectedParameters().stream();
-                String[] parameterNames = stream.map(InsituParameter::getName).toArray(String[]::new);
-                query.param(parameterNames);
-
                 response = server.query(query);
             } catch (Exception e) {
                 exception = e;
@@ -193,7 +220,53 @@ public class InsituClientTopComponent extends TopComponent implements HelpCtx.Pr
 
         @Override
         public boolean cancel() {
-            return true;
+            return handle.cancel();
         }
+    }
+
+    private class ServerButtonActionListener implements ActionListener {
+
+        private final QueryFactory factory;
+        private final ResponseHandler handler;
+
+        public ServerButtonActionListener(QueryFactory factory, ResponseHandler handler) {
+            this.factory = factory;
+            this.handler = handler;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            ProgressHandleMonitor handle = ProgressHandleMonitor.create("In-Situ Data Access");
+            InsituServer server = InsituClientTopComponent.this.getServer();
+            if (server == null) {
+                return;
+            }
+
+            InsituServerRunnable runnable = new InsituServerRunnable(handle, server, factory.create());
+            Utils.runWithProgress(runnable, handle);
+
+            if (InsituClientTopComponent.this.hasExceptionOccured(runnable)) {
+                return;
+            }
+            InsituResponse response = runnable.getResponse();
+            if (InsituClientTopComponent.this.isRepsonseValid(response)) {
+                return;
+            }
+            handler.handle(response);
+        }
+    }
+
+    @FunctionalInterface
+    private interface QueryFactory {
+
+        InsituQuery create();
+
+    }
+
+    @FunctionalInterface
+    private interface ResponseHandler {
+
+        void handle(InsituResponse response);
+
     }
 }
