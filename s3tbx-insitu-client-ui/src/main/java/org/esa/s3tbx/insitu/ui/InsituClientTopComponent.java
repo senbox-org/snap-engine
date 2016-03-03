@@ -30,6 +30,7 @@ import org.esa.snap.tango.TangoIcons;
 import org.esa.snap.ui.tool.ToolButtonFactory;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
+import org.openide.util.Cancellable;
 import org.openide.util.HelpCtx;
 import org.openide.util.NbBundle;
 import org.openide.windows.TopComponent;
@@ -38,7 +39,6 @@ import javax.swing.AbstractButton;
 import javax.swing.JPanel;
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.util.List;
 import java.util.stream.Stream;
 
 @TopComponent.Description(
@@ -77,9 +77,22 @@ public class InsituClientTopComponent extends TopComponent implements HelpCtx.Pr
         refreshButton = ToolButtonFactory.createButton(TangoIcons.actions_view_refresh(TangoIcons.Res.R22), false);
         refreshButton.addActionListener(e -> {
             ProgressHandleMonitor handle = ProgressHandleMonitor.create("In-Situ Data Access");
-            // todo (mp/03.03.2016) - enhance this operation. Similar to org.esa.snap.rcp.actions.file.WriteProductOperation
-            Runnable runnable = () -> updateNumObs(handle);
+            InsituServerRunnable runnable = new InsituServerRunnable(handle);
+
             Utils.runWithProgress(runnable, handle);
+            InsituResponse response = runnable.getResponse();
+            if(InsituResponse.STATUS_CODE.NOK.equals(response.getStatus())) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("Query not successful. Server responded with failure(s): \n");
+                response.getFailureReasons().forEach(sb::append);
+                SnapApp.getDefault().handleError(sb.toString(), null);
+                return;
+            }
+            if(runnable.getException() != null) {
+                SnapApp.getDefault().handleError("Could not update number of observations", runnable.getException());
+                return;
+            }
+            setNumObs(response.getObservationCount());
         });
         refreshButton.setName("refreshButton");
         contentPanel.add(refreshButton);
@@ -94,44 +107,6 @@ public class InsituClientTopComponent extends TopComponent implements HelpCtx.Pr
         contentPanel.add(helpButton);
 
         return contentPanel;
-    }
-
-    private void updateNumObs(ProgressMonitor pm) {
-        pm.beginTask("Retrieving number of observation matching the query settings", ProgressMonitor.UNKNOWN);
-        try {
-            InsituServerSpi serverSpi = insituModel.getSelectedServerSpi();
-            InsituServer server = serverSpi.createServer();
-
-            InsituQuery query = new InsituQuery();
-            query.subject(InsituQuery.SUBJECT.OBSERVATIONS).countOnly(true);
-            query.latMin(insituModel.getMinLat()).latMax(insituModel.getMaxLat());
-            query.lonMin(insituModel.getMinLon()).lonMax(insituModel.getMaxLon());
-            query.startDate(insituModel.getStartDate()).stopDate(insituModel.getStopDate());
-            InsituDatasetDescr selectedDataset = insituModel.getSelectedDataset();
-            if (selectedDataset != null) {
-                query.dataset(selectedDataset.getName());
-            }
-            Stream<InsituParameter> stream = insituModel.getSelectedParameters().stream();
-            String[] parameterNames = stream.map(InsituParameter::getName).toArray(String[]::new);
-            query.param(parameterNames);
-
-            InsituResponse response = server.query(query);
-            if(response.getStatus().equals(InsituResponse.STATUS_CODE.NOK)) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Query not successful. Server responded with failure(s): \n");
-                List<String> failureReasons = response.getFailureReasons();
-                for (String failureReason : failureReasons) {
-                    sb.append(failureReason);
-                }
-                throw new IllegalStateException(sb.toString());
-            }
-            setNumObs(response.getObservationCount());
-        } catch (Exception e) {
-            SnapApp.getDefault().handleError("Could not update number of observations", e);
-        }finally {
-            pm.done();
-        }
-
     }
 
     private void setNumObs(long observationCount) {
@@ -164,4 +139,61 @@ public class InsituClientTopComponent extends TopComponent implements HelpCtx.Pr
     }
 
 
+    private class InsituServerRunnable implements Runnable, Cancellable {
+
+        InsituResponse response;
+
+        private final ProgressHandleMonitor handle;
+        private Exception exception;
+
+        public InsituServerRunnable(ProgressHandleMonitor handle) {
+            this.handle = handle;
+        }
+
+        public InsituResponse getResponse() {
+            return response;
+        }
+
+        public Exception getException() {
+            return exception;
+        }
+
+        @Override
+        public final void run() {
+            run(handle);
+        }
+
+        public void run(ProgressMonitor pm) {
+            pm.beginTask("Contacting in-situ server", ProgressMonitor.UNKNOWN);
+            try {
+                InsituServerSpi serverSpi = insituModel.getSelectedServerSpi();
+                InsituServer server = serverSpi.createServer();
+
+                InsituQuery query = new InsituQuery();
+                query.subject(InsituQuery.SUBJECT.OBSERVATIONS).countOnly(true);
+                query.latMin(insituModel.getMinLat()).latMax(insituModel.getMaxLat());
+                query.lonMin(insituModel.getMinLon()).lonMax(insituModel.getMaxLon());
+                query.startDate(insituModel.getStartDate()).stopDate(insituModel.getStopDate());
+                InsituDatasetDescr selectedDataset = insituModel.getSelectedDataset();
+                if (selectedDataset != null) {
+                    query.dataset(selectedDataset.getName());
+                }
+                Stream<InsituParameter> stream = insituModel.getSelectedParameters().stream();
+                String[] parameterNames = stream.map(InsituParameter::getName).toArray(String[]::new);
+                query.param(parameterNames);
+
+                response = server.query(query);
+            } catch (Exception e) {
+                exception = e;
+            }finally {
+                pm.done();
+            }
+
+        }
+
+        @Override
+        public boolean cancel() {
+            return true;
+        }
+    }
 }
