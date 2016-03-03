@@ -25,6 +25,8 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 import java.awt.Component;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -115,14 +117,14 @@ class InsituClientForm extends JPanel {
         add(new JLabel("Min longitude:"));
         final JFormattedTextField minLonField = new JFormattedTextField(DECIMAL_FORMATTER);
         minLonField.setValue(model.getMinLon());
-        minLonField.addActionListener(e -> model.setMinLon((double) minLonField.getValue()));
-        model.getChangeSupport().addPropertyChangeListener(InsituClientModel.PROPERTY_MIN_LON, evt -> minLonField.setValue(evt.getNewValue()));
+        minLonField.addPropertyChangeListener("value", e -> model.setMinLon((double) minLonField.getValue()));
+        model.getChangeSupport().addPropertyChangeListener(InsituClientModel.PROPERTY_MIN_LON, new JFormattedTextFieldChangeListener(minLonField));
         add(minLonField);
         add(new JLabel("Max longitude:"));
         final JFormattedTextField maxLonField = new JFormattedTextField(DECIMAL_FORMATTER);
         maxLonField.setValue(model.getMaxLon());
-        maxLonField.addActionListener(e -> model.setMaxLon((double) maxLonField.getValue()));
-        model.getChangeSupport().addPropertyChangeListener(InsituClientModel.PROPERTY_MAX_LON, evt -> maxLonField.setValue(evt.getNewValue()));
+        maxLonField.addPropertyChangeListener("value", e -> model.setMaxLon((double) maxLonField.getValue()));
+        model.getChangeSupport().addPropertyChangeListener(InsituClientModel.PROPERTY_MAX_LON, new JFormattedTextFieldChangeListener(maxLonField));
         add(maxLonField);
 
         layout.setCellWeightX(5, 1, 1.0);
@@ -130,14 +132,14 @@ class InsituClientForm extends JPanel {
         add(new JLabel("Min latitude:"));
         final JFormattedTextField minLatField = new JFormattedTextField(DECIMAL_FORMATTER);
         minLatField.setValue(model.getMinLat());
-        minLatField.addActionListener(e -> model.setMinLat((double) minLatField.getValue()));
-        model.getChangeSupport().addPropertyChangeListener(InsituClientModel.PROPERTY_MIN_LAT, evt -> minLatField.setValue(evt.getNewValue()));
+        minLatField.addPropertyChangeListener("value", e -> model.setMinLat((double) minLatField.getValue()));
+        model.getChangeSupport().addPropertyChangeListener(InsituClientModel.PROPERTY_MIN_LAT, new JFormattedTextFieldChangeListener(minLatField));
         add(minLatField);
         add(new JLabel("Max latitude:"));
         final JFormattedTextField maxLatField = new JFormattedTextField(DECIMAL_FORMATTER);
         maxLatField.setValue(model.getMaxLat());
-        maxLatField.addActionListener(e -> model.setMaxLat((double) maxLatField.getValue()));
-        model.getChangeSupport().addPropertyChangeListener(InsituClientModel.PROPERTY_MAX_LAT, evt -> maxLatField.setValue(evt.getNewValue()));
+        maxLatField.addPropertyChangeListener("value", e -> model.setMaxLat((double) maxLatField.getValue()));
+        model.getChangeSupport().addPropertyChangeListener(InsituClientModel.PROPERTY_MAX_LAT, new JFormattedTextFieldChangeListener(maxLatField));
         add(maxLatField);
 
     }
@@ -215,6 +217,22 @@ class InsituClientForm extends JPanel {
             label.setToolTipText(text);
 
             return label;
+        }
+    }
+
+    private static class JFormattedTextFieldChangeListener implements PropertyChangeListener {
+
+        private final JFormattedTextField textField;
+
+        public JFormattedTextFieldChangeListener(JFormattedTextField textField) {
+            this.textField = textField;
+        }
+
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            if (!textField.getValue().equals(evt.getNewValue())) {
+                textField.setValue(evt.getNewValue());
+            }
         }
     }
 
