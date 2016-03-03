@@ -21,6 +21,8 @@ import java.util.Date;
  */
 public class MermaidInsituServer implements InsituServer {
 
+    private static final String SERVER_NAME = "MERMAID";
+    private static final String SERVER_DESCRIPTION = "A server providing access to the MERMAID in-situ database.";
     private static final String SERVER_BASE_URL_STRING = "http://mermaid.acri.fr/s3tbx/v2";
     private static final int HTTP_OK_CODE = 200;
     private final Gson gson;
@@ -29,6 +31,12 @@ public class MermaidInsituServer implements InsituServer {
         final GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(Date.class, new UtcDateTypeAdapter());
         gson = gsonBuilder.create();
+    }
+
+
+    @Override
+    public String getName() {
+        return SERVER_NAME;
     }
 
     @Override
@@ -78,12 +86,12 @@ public class MermaidInsituServer implements InsituServer {
 
         @Override
         public String getName() {
-            return "MERMAID";
+            return SERVER_NAME;
         }
 
         @Override
         public String getDescription() {
-            return "A server providing access to the MERMAID in-situ database.";
+            return SERVER_DESCRIPTION;
         }
 
         @Override

@@ -80,7 +80,7 @@ public class InsituClientTopComponent extends TopComponent implements HelpCtx.Pr
         refreshButton = ToolButtonFactory.createButton(TangoIcons.actions_view_refresh(TangoIcons.Res.R22), false);
         refreshButton.setName("refreshButton");
         refreshButton.addActionListener(new ServerButtonActionListener(() -> createObservationQuery().countOnly(true),
-                                                                 response -> setNumObs(response.getObservationCount())));
+                                                                       response -> setNumObs(response.getObservationCount())));
 
         contentPanel.add(refreshButton);
         final AbstractButton downloadButton = ToolButtonFactory.createButton(TangoIcons.actions_document_save(TangoIcons.Res.R22), false);
@@ -104,7 +104,7 @@ public class InsituClientTopComponent extends TopComponent implements HelpCtx.Pr
     }
 
     private boolean isRepsonseValid(InsituResponse response) {
-        if(InsituResponse.STATUS_CODE.NOK.equals(response.getStatus())) {
+        if (InsituResponse.STATUS_CODE.NOK.equals(response.getStatus())) {
             StringBuilder sb = new StringBuilder();
             sb.append("Query not successful. Server responded with failure(s): \n");
             response.getFailureReasons().forEach(sb::append);
@@ -115,7 +115,7 @@ public class InsituClientTopComponent extends TopComponent implements HelpCtx.Pr
     }
 
     private boolean hasExceptionOccured(InsituServerRunnable runnable) {
-        if(runnable.getException() != null) {
+        if (runnable.getException() != null) {
             SnapApp.getDefault().handleError("Could not update number of observations", runnable.getException());
             return true;
         }
@@ -151,7 +151,7 @@ public class InsituClientTopComponent extends TopComponent implements HelpCtx.Pr
     private void setNumObs(long observationCount) {
         if (observationCount < 0) {
             refreshButton.setText("#Obs: UNKNOWN");
-        }else {
+        } else {
             refreshButton.setText("#Obs: " + observationCount);
         }
     }
@@ -180,17 +180,17 @@ public class InsituClientTopComponent extends TopComponent implements HelpCtx.Pr
 
     private class InsituServerRunnable implements Runnable, Cancellable {
 
-        InsituResponse response;
-
         private final ProgressHandleMonitor handle;
         private final InsituServer server;
         private final InsituQuery query;
         private Exception exception;
+        private InsituResponse response;
 
         public InsituServerRunnable(ProgressHandleMonitor handle, InsituServer server, InsituQuery query) {
             this.handle = handle;
             this.server = server;
             this.query = query;
+            response = InsituResponse.EMPTY_RESPONSE;
         }
 
         public InsituResponse getResponse() {
@@ -203,17 +203,13 @@ public class InsituClientTopComponent extends TopComponent implements HelpCtx.Pr
 
         @Override
         public final void run() {
-            run(handle);
-        }
-
-        public void run(ProgressMonitor pm) {
-            pm.beginTask("Contacting in-situ server", ProgressMonitor.UNKNOWN);
+            handle.beginTask("Contacting " + server.getName() + " in-situ server", ProgressMonitor.UNKNOWN);
             try {
                 response = server.query(query);
             } catch (Exception e) {
                 exception = e;
-            }finally {
-                pm.done();
+            } finally {
+                handle.done();
             }
 
         }

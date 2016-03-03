@@ -260,7 +260,17 @@ class InsituClientModel {
 
         @Override
         public InsituServer createServer() throws InsituServerException {
-            return query -> InsituResponse.EMPTY_RESPONSE;
+            return new InsituServer() {
+                @Override
+                public String getName() {
+                    return "NO_SERVER";
+                }
+
+                @Override
+                public InsituResponse query(InsituQuery query) throws InsituServerException {
+                    return InsituResponse.EMPTY_RESPONSE;
+                }
+            };
         }
 
     }

@@ -21,6 +21,11 @@ public class TestInsituServer implements InsituServer {
     }
 
     @Override
+    public String getName() {
+        return "TestDummy";
+    }
+
+    @Override
     public InsituResponse query(InsituQuery query) {
         return new DummyResponse();
     }
@@ -29,7 +34,7 @@ public class TestInsituServer implements InsituServer {
 
         @Override
         public String getName() {
-            return "TEST";
+            return "TestDummy";
         }
 
         @Override
