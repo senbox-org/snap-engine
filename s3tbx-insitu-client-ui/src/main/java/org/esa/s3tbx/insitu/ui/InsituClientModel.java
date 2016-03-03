@@ -150,6 +150,10 @@ class InsituClientModel {
         return productSelectionModel;
     }
 
+    public List<Product> getSelectedProducts() {
+        return Utils.getSelectedItems(productListModel, productSelectionModel);
+    }
+
     public Date getStartDate() {
         return startDate;
     }
@@ -374,7 +378,7 @@ class InsituClientModel {
         private void updateTemporalAndSpatialBounds(ProgressMonitor pm) {
             pm.beginTask("Computing temporal and spatial bounds", 2);
             try {
-                final List<Product> products = Utils.getSelectedItems(productListModel, productSelectionModel);
+                final List<Product> products = getSelectedProducts();
 
                 TimeSpan timeSpan = TimeSpan.create(products);
                 pm.worked(1);
@@ -391,8 +395,6 @@ class InsituClientModel {
                 pm.done();
             }
         }
-
-
     }
 
     static class MinMaxGeoCoordinates {
