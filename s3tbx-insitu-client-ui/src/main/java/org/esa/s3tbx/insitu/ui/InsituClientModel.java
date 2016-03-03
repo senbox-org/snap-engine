@@ -310,9 +310,7 @@ class InsituClientModel {
         getDatasetModel().clear();
         InsituQuery query = new InsituQuery().subject(InsituQuery.SUBJECT.DATASETS);
         final InsituResponse insituResponse = selectedServer.query(query);
-        for (InsituDatasetDescr insituDataset : insituResponse.getDatasetDescriptions()) {
-            datasetModel.addElement(insituDataset);
-        }
+        insituResponse.getDatasetDescriptions().forEach(datasetModel::addElement);
     }
 
     private void updateParameterModel() throws InsituServerException {
@@ -323,9 +321,7 @@ class InsituClientModel {
             query.dataset(datasetDescr.getName());
         }
         final InsituResponse insituResponse = selectedServer.query(query);
-        for (InsituParameter insituParameter : insituResponse.getParameters()) {
-            parameterModel.addElement(insituParameter);
-        }
+        insituResponse.getParameters().forEach(parameterModel::addElement);
     }
 
     private class DatasetListSelectionListener implements ListSelectionListener {
