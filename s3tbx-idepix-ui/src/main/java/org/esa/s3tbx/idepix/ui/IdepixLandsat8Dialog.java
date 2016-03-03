@@ -53,7 +53,7 @@ public class IdepixLandsat8Dialog extends SingleTargetProductDialog {
     private JComboBox nnSelectionComboBox;
 
     public IdepixLandsat8Dialog(String operatorName, AppContext appContext, String title, String helpID) {
-        super(appContext, title, ID_APPLY_CLOSE, helpID);
+        super(appContext, title, helpID);
         this.operatorName = operatorName;
         targetProductNameSuffix = "";
 

@@ -68,7 +68,8 @@ public class ModisAlgorithm {
 //        final boolean isSnowIceFromRGB = reflR > 0.3 && reflR/reflG > 2.0 && reflR/reflB > 3.0;
         final boolean isSnowIceFromRGB = false;
 
-        return isSnowIceFromNN || isSnowIceFromReflRatio || isSnowIceFromRGB;
+//        return isSnowIceFromNN || isSnowIceFromReflRatio || isSnowIceFromRGB;
+        return isSnowIceFromNN;
     }
 
     public boolean isCloud() {

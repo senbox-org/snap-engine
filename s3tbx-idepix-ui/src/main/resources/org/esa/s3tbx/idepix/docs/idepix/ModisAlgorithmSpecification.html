@@ -1,4 +1,3 @@
-
 <html>
 <head>
     <title>SNAP Data Processors - Idepix MODIS Algorithm Specification</title>
@@ -12,60 +11,191 @@
         <td class="header">&nbsp;
             SNAP Data Processors - Idepix MODIS Algorithm Specification
         </td>
-        <td class="header" align="right"><a href="nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/general/overview/SnapOverview.html"><img src="../images/snap_header.jpg"
-                                                                                                                                                       border=0></a>
+        <td class="header" align="right"><a
+                href="nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/general/overview/SnapOverview.html"><img
+                src="../images/snap_header.jpg"
+                border=0></a>
         </td>
     </tr>
 </table>
 
 <h3>Algorithm Specification</h3>
 
+<h4>Neural network classification</h4>
+
 <p>
-    The Idepix classification algorithm for MODIS is based on a neural network approach. The neural net used was trained
-    to finally provide per pixel one of the properties CLEAR, CLOUD_AMBIGUOUS, CLOUD_SURE, SNOW_ICE. The following
+    The Idepix classification algorithm for MODIS is based on a neural network approach. The following
     MODIS bands are used as input for the neural net:
-    <ul>
-        <li>EV_250_Aggr1km_RefSB.1</li>
-        <li>EV_500_Aggr1km_RefSB.3</li>
-        <li>EV_500_Aggr1km_RefSB.4</li>
-        <li>EV_500_Aggr1km_RefSB.5</li>
-        <li>EV_500_Aggr1km_RefSB.7</li>
-        <li>EV_1KM_Emissive.23</li>
-        <li>EV_1KM_Emissive.25</li>
-        <li>sqrt_EV_1KM_RefSB.26</li>
-        <li>EV_250_Aggr1km_RefSB.1</li>
-        <li>EV_250_Aggr1km_RefSB.1</li>
-        <li>EV_250_Aggr1km_RefSB.1</li>
-    </ul>
-</p>
+
+<ul>
+    <li>EV_250_Aggr1km_RefSB.1</li>
+    <li>EV_500_Aggr1km_RefSB.3</li>
+    <li>EV_500_Aggr1km_RefSB.4</li>
+    <li>EV_500_Aggr1km_RefSB.5</li>
+    <li>EV_500_Aggr1km_RefSB.7</li>
+    <li>EV_1KM_Emissive.23</li>
+    <li>EV_1KM_Emissive.25</li>
+    <li>EV_1KM_RefSB.26</li>
+    <li>EV_250_Aggr1km_RefSB.1</li>
+    <li>EV_250_Aggr1km_RefSB.1</li>
+    <li>EV_250_Aggr1km_RefSB.1</li>
+</ul>
+
+As output, the neural net finally provides per pixel one of the properties 'clear', 'cloud sure',
+'cloud ambiguous' or 'snow/ice'.
+
+<h4>Brightness and whiteness</h4>
 
 <p>
-    In a second step, the neural network classification is refined using two additional quantities, the 'whiteness' and
-    the 'brightness', based on the approach described in more detail in [1].
-    ((Discriminating clear sky from clouds with MODIS. Algorithm Theoritical Basis Document (MOD35), Ackerman, S. A.,
-    Strabala, K. I., Menzel, W. P., Frey, R. A.,Moeller, C. C., Gumley, L. E., Baum, B.,Wetzel-Seeman, S.,
-    and Zhang, H., 2002.))
-
-</p>
-
-<p align="center">
-    <img src="images/RadToReflEquation.png" border="0">
-</p>
-
-<p>
-    where <i>E</i><sub>0</sub> and &theta; are the solar spectral
-    irradiance and the sun zenith angle, respectively.
-</p>
-
-<p>
-    The conversion from reflectances to radiances simply follows the inverse of this equation.
-</p>
+    In a second step, two additional quantities, the 'whiteness' and
+    the 'brightness', are introduced to derive a 'bright' flag as well as additional cloud indicators:
+<ul>
+    <li>
+        'cloudSureFromWhiteness'
+    </li>
+    <li>
+        'cloudSureFromBrightness'
+    </li>
+    <li>
+        'cloudAmbiguousFromWhiteness'
+    </li>
+    <li>
+        'cloudAmbiguousFromBrightness'
+    </li>
+</ul>
 
 <p>
-    For all sensors supported by the Radiance-to-Reflectance Processor, the sun zenith angle is provided per pixel
-    with the L1b products. The solar spectral irradiance values are also provided per pixel in case of OLCI L1b products,
-    whereas for SLSTR MERIS they are taken from auxiliary data.
+    A bright spectrum means that the intensity of the spectral curve (related to the albedo) should present relatively
+    high values. Therefore, cloud brightness is calculated for each pixel as the integral of spectrum, and differs from
+    the average of the spectral channels since it takes into account the distribution of the energy along the spectrum.
 </p>
+<p>
+    A white spectrum means that the spectral signature must be flat along the spectrum. The first derivative of the
+    spectral curve should present low values, but noise and calibration errors may reduce the accuracy in the estimation
+    of the spectrum flatness when computing the spectral derivative in channels with similar wavelengths.
+</p>
+<p>
+    This retrieval mainly follows the approach described in more detail in [1].
+</p>
+
+<h4>Cloud flagging modes</h4>
+
+<p>
+    The final cloud flagging can be performed in two 'strengths', depending on the combination of the three indicators
+    'cloudFromNeuralNet (cNN)', 'cloudFromWhiteness (cWhi)' and 'cloudFromBrightness (cBri)':
+<ul>
+    <li>
+        'CLEAR_SKY_CONSERVATIVE': 'cloud' if 'cNN' OR ('cWhi' AND 'cBri')
+    </li>
+    <li>
+        'CLOUD_SKY_CONSERVATIVE': 'cloud' if 'cNN' OR 'cWhi' OR 'cBri'
+    </li>
+</ul>
+Consequently, the 'CLEAR_SKY_CONSERVATIVE' usually results in overall 'less clouds', and the 'CLOUD_SKY_CONSERVATIVE'
+results in 'more clouds'.
+
+<h4>Additional properties</h4>
+<p>
+    The following additional pixel properties are provided from the classification:
+<ul>
+    <li>
+        'cloud_buffer': The pixel is located in a 'safety buffer' around an area classified as cloud. The width of
+        the buffer is given in pixels.
+    </li>
+    <li>
+        'land': the pixel is located over land
+    </li>
+    <li>
+        'coastline': the pixel is a coastline pixel
+    </li>
+</ul>
+
+The 'land' and 'coastline' pixels are identified from an SRTM land/water mask [2].
+
+<h4>Final classification flags</h4>
+<p>
+    From the algorithm steps outlined above, the following final classification flags are provided for MODIS:
+<ul>
+    <li>
+        'INVALID' (input invalid or no classification possible)
+    </li>
+    <li>
+        'CLOUD_AMBIGUOUS'
+    </li>
+    <li>
+        'CLOUD_SURE'
+    </li>
+    <li>
+        'CLOUD' (which means either CLOUD_AMBIGUOUS or CLOUD_SURE)
+    </li>
+    <li>
+        'CLOUD_BUFFER'
+    </li>
+    <li>
+        'SNOW_ICE'
+    </li>
+    <li>
+        'COASTLINE'
+    </li>
+    <li>
+        'LAND'
+    </li>
+    <li>
+        'BRIGHT'
+    </li>
+</ul>
+
+The following pixel properties are currently NOT provided for MODIS:
+<ul>
+    <li>
+        'CLOUD_SHADOW'
+    </li>
+    <li>
+        'MIXED_PIXEL'
+    </li>
+    <li>
+        'GLINT_RISK'
+    </li>
+</ul>
+
+<h4>Known issues</h4>
+<p>
+    The pixel classification algorithm for MODIS has been developed and optimized mainly for ocean applications,
+    e.g. the OceanColour project, [3].
+    Therefore, the classification results may be poor under certain conditions over land.
+</p>
+<p>
+The following pixel properties are currently NOT provided for MODIS:
+<ul>
+    <li>
+        'CLOUD_SHADOW'
+    </li>
+    <li>
+        'MIXED_PIXEL'
+    </li>
+    <li>
+        'GLINT_RISK'
+    </li>
+</ul>
+
+<h3>References</h3>
+
+<p class="i1">
+    <b>[1]</b>
+    Ackerman, S. A., Strabala, K. I., Menzel, W. P., Frey, R. A.,Moeller, C. C., Gumley, L. E., Baum, B.,
+    Wetzel-Seeman, S., and Zhang, H.:
+    Discriminating clear sky from clouds with MODIS. Algorithm Theoritical Basis Document (MOD35).
+    Version 6.1, October 2010<br><br>
+
+    <b>[2]</b>
+    Farr, T. G., et al. (2007), The Shuttle Radar Topography Mission, Rev. Geophys., 45, RG2004,
+    doi:10.1029/2005RG000183.
+    <br><br>
+
+    <b>[3]</b>
+    OceanColour Project Web Site: <a href="http://www.esa-oceancolour-cci.org/">www.esa-oceancolour-cci.org</a><br><br>
+</p>
+<br>
 
 
 <hr>

@@ -1,7 +1,6 @@
 package org.esa.s3tbx.idepix.ui;
 
 import com.bc.ceres.swing.TableLayout;
-import org.esa.s3tbx.idepix.core.util.IdepixUtils;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductFilter;
 import org.esa.snap.core.gpf.GPF;
@@ -32,8 +31,6 @@ public class IdepixDefaultDialog extends SingleTargetProductDialog {
     private String targetProductNameSuffix;
     private AppContext appContext;
 
-    public static final int DIALOG_WIDTH = 650;
-    public static final int DIALOG_HEIGHT = 560;
     private OperatorSpi operatorSpi;
     private String helpID;
 

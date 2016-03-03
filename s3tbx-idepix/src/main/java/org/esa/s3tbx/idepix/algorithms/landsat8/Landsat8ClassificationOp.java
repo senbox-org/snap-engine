@@ -174,17 +174,6 @@ public class Landsat8ClassificationOp extends Operator {
             label = " Apply OTSU cloud test")
     private boolean applyOtsuCloudTest;
 
-    // currently not used todo: clarify if needed
-//    @Parameter(defaultValue = "2.0",
-//            label = "Alternative for first classification boundary ")
-//    private double alternativeFirstClassBoundary;
-//    @Parameter(defaultValue = "3.6",
-//            label = "Alternative for second classification boundary ")
-//    private double alternativeSecondClassBoundary;
-//    @Parameter(defaultValue = "4.2",
-//            label = "Alternative for third classification boundary ")
-//    private double alternativeThirdClassBoundary;
-
     @Parameter(defaultValue = "ALL", valueSet = {"ALL", "LAND", "LAND_USE_THERMAL",
             "WATER", "WATER_NOTIDAL", "WATER_USE_THERMAL", "WATER_NOTIDAL_USE_THERMAL"},
             label = "Neural Net to be applied",
@@ -266,11 +255,12 @@ public class Landsat8ClassificationOp extends Operator {
         targetProduct.getFlagCodingGroup().add(flagCoding);
 
         // todo - temporarily added the bands for testing. Shall be removed later. (mp/08.09.2015)
+        // but keep the NN result band! (od/02.03.2016)
         targetProduct.addBand(NN_RESULT_BAND_NAME, ProductData.TYPE_FLOAT32);
-        final Band dgt1 = targetProduct.addBand(DARK_GLINT_TEST_ONE_BAND_NAME, ProductData.TYPE_INT8);
-        dgt1.setDescription(String.format("Dark Glint Test 1 @%d", darkGlintThreshTest1Wavelength));
-        final Band dgt2 = targetProduct.addBand(DARK_Glint_TEST_TWO_BAND_NAME, ProductData.TYPE_INT8);
-        dgt2.setDescription(String.format("Dark Glint Test 2 @%d", darkGlintThreshTest2Wavelength));
+//        final Band dgt1 = targetProduct.addBand(DARK_GLINT_TEST_ONE_BAND_NAME, ProductData.TYPE_INT8);
+//        dgt1.setDescription(String.format("Dark Glint Test 1 @%d", darkGlintThreshTest1Wavelength));
+//        final Band dgt2 = targetProduct.addBand(DARK_Glint_TEST_TWO_BAND_NAME, ProductData.TYPE_INT8);
+//        dgt2.setDescription(String.format("Dark Glint Test 2 @%d", darkGlintThreshTest2Wavelength));
 
         ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
 
@@ -306,8 +296,8 @@ public class Landsat8ClassificationOp extends Operator {
 
         final Tile cloudFlagTargetTile = targetTiles.get(targetProduct.getBand(cloudFlagBandName));
         final Tile nnResultTargetTile = targetTiles.get(targetProduct.getBand(NN_RESULT_BAND_NAME));
-        final Tile darkGlintTest1TargetTile = targetTiles.get(targetProduct.getBand(DARK_GLINT_TEST_ONE_BAND_NAME));
-        final Tile darkGlintTest2TargetTile = targetTiles.get(targetProduct.getBand(DARK_Glint_TEST_TWO_BAND_NAME));
+//        final Tile darkGlintTest1TargetTile = targetTiles.get(targetProduct.getBand(DARK_GLINT_TEST_ONE_BAND_NAME));
+//        final Tile darkGlintTest2TargetTile = targetTiles.get(targetProduct.getBand(DARK_Glint_TEST_TWO_BAND_NAME));
 
         try {
             for (int y = rectangle.y; y < rectangle.y + rectangle.height; y++) {
@@ -325,8 +315,8 @@ public class Landsat8ClassificationOp extends Operator {
 
                     setCloudFlag(cloudFlagTargetTile, x, y, landsat8Algorithm);
                     nnResultTargetTile.setSample(x, y, landsat8Algorithm.getNnResult()[0]);
-                    darkGlintTest1TargetTile.setSample(x, y, landsat8Algorithm.isDarkGlintTest1());
-                    darkGlintTest2TargetTile.setSample(x, y, landsat8Algorithm.isDarkGlintTest2());
+//                    darkGlintTest1TargetTile.setSample(x, y, landsat8Algorithm.isDarkGlintTest1());
+//                    darkGlintTest2TargetTile.setSample(x, y, landsat8Algorithm.isDarkGlintTest2());
                 }
             }
         } catch (Exception e) {

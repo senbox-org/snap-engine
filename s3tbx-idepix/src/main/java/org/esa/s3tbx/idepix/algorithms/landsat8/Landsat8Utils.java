@@ -95,12 +95,12 @@ public class Landsat8Utils {
 //                "cloud_classif_flags.F_CLOUD_SHADOW",
 //                Color.red.darker(), 0.5f);
 //        cloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("landsat8_bright",
+        mask = Mask.BandMathsType.create("landsat8_bright_experimental",
                                          Landsat8Constants.F_BRIGHT_DESCR_TEXT, w, h,
                                          "cloud_classif_flags.F_BRIGHT",
                                          Color.yellow.darker(), 0.5f);
         cloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("landsat8_white",
+        mask = Mask.BandMathsType.create("landsat8_white_experimental",
                                          Landsat8Constants.F_WHITE_DESCR_TEXT, w, h,
                                          "cloud_classif_flags.F_WHITE",
                                          Color.red.brighter(), 0.5f);

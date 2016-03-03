@@ -128,7 +128,7 @@ public class IdepixUtils {
         //        return (product.getName().matches("MOD021KM.A[0-9]{7}.[0-9]{4}.[0-9]{3}.[0-9]{13}.(?i)(hdf)") ||
         //                product.getName().matches("MOD021KM.A[0-9]{7}.[0-9]{4}.[0-9]{3}.[0-9]{13}") ||
         //                product.getName().matches("A[0-9]{13}.(?i)(L1B_LAC)"));
-        return (product.getName().contains("MOD021KM") ||
+        return (product.getName().contains("MOD021KM") || product.getName().contains("MYD021KM") ||
                 //                product.getName().contains("L1B_LAC"));
                 product.getName().contains("L1B_"));  // seems that we have various extensions :-(
     }

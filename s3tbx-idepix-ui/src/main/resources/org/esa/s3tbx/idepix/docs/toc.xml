@@ -25,14 +25,14 @@
             <tocitem text="Pre-Processing">
                 <tocitem text="Idepix Classification of Pixels" target="idepixTool">
                     <tocitem text="Idepix Processor Descriptions" target="idepixProcessorDesc">
-                        <tocitem text="Landsat-8" target="landsat8ProcessorDesc"/>
                         <tocitem text="MODIS" target="modisProcessorDesc"/>
+                        <tocitem text="Landsat-8" target="landsat8ProcessorDesc"/>
+                    </tocitem>
+                    <tocitem text="Algorithm Specifications" target="idepixAlgorithmSpec">
+                        <tocitem text="MODIS" target="modisAlgorithmSpec"/>
+                        <tocitem text="Landsat-8" target="landsat8AlgorithmSpec"/>
                     </tocitem>
                     <tocitem text="Command Line Description" target="rad2ReflCommandLine"/>
-                    <tocitem text="Algorithm Specifications" target="idepixAlgorithmSpec">
-                        <tocitem text="Landsat-8" target="landsat8AlgorithmSpec"/>
-                        <tocitem text="MODIS" target="modisAlgorithmSpec"/>
-                    </tocitem>
                 </tocitem>
             </tocitem>
         </tocitem>
