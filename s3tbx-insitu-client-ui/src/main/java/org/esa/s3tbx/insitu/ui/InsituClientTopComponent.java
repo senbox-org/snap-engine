@@ -194,7 +194,7 @@ public class InsituClientTopComponent extends TopComponent implements HelpCtx.Pr
         query.startDate(insituModel.getStartDate()).stopDate(insituModel.getStopDate());
         InsituDataset selectedDataset = insituModel.getSelectedDataset();
         if (selectedDataset != null) {
-            query.dataset(selectedDataset.getName());
+            query.datasets(new String[]{selectedDataset.getName()});
         }
         Stream<InsituParameter> stream = insituModel.getSelectedParameters().stream();
         String[] parameterNames = stream.map(InsituParameter::getName).toArray(String[]::new);

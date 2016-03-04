@@ -28,7 +28,7 @@ public class MermaidQueryFormatterTest {
 
         final InsituQuery query= new InsituQuery();
         query.subject(InsituQuery.SUBJECT.PARAMETERS);
-        query.dataset("Muscheln");
+        query.datasets(new String[]{"Muscheln", "Robben"});
         query.latMin(-10.943);
         query.latMax(46.12);
         query.lonMin(5.0);
@@ -41,7 +41,7 @@ public class MermaidQueryFormatterTest {
         query.countOnly(true);
         String queryString = MermaidQueryFormatter.format(query);
         assertTrue(queryString.startsWith("/parameters?"));
-        assertTrue(queryString.contains("campaign=Muscheln"));
+        assertTrue(queryString.contains("campaign=Muscheln,Robben"));
         assertTrue(queryString.contains("lat_min=-10.943"));
         assertTrue(queryString.contains("lon_min=5.0"));
         assertTrue(queryString.contains("lat_max=46.12"));

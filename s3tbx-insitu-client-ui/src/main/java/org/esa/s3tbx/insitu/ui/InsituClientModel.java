@@ -74,6 +74,7 @@ class InsituClientModel {
 
         datasetModel = new DefaultListModel<>();
         datasetSelectionModel = new DefaultListSelectionModel();
+        // todo (mp/20160304) - change to multiple selection
         datasetSelectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         datasetSelectionModel.addListSelectionListener(new DatasetListSelectionListener());
 
@@ -317,9 +318,9 @@ class InsituClientModel {
     private void updateParameterModel(InsituServer server) throws InsituServerException {
         getParameterModel().clear();
         InsituQuery query = new InsituQuery().subject(InsituQuery.SUBJECT.PARAMETERS);
-        final InsituDataset datasetDescr = getSelectedDataset();
-        if (datasetDescr != null) {
-            query.dataset(datasetDescr.getName());
+        final InsituDataset dataset = getSelectedDataset();
+        if (dataset != null) {
+            query.datasets(new String[]{dataset.getName()});
         }
         final InsituResponse insituResponse = server.query(query);
         insituResponse.getParameters().forEach(parameterModel::addElement);
