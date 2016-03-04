@@ -18,7 +18,7 @@ class Utils {
 
     static void runWithProgress(Runnable runnable, ProgressHandleMonitor handle) {
         ProgressUtils.runOffEventThreadWithProgressDialog(runnable,
-                                                          "In-Situ Data Access",
+                                                          "In-Situ Client",
                                                           handle.getProgressHandle(),
                                                           true,
                                                           50,
@@ -42,4 +42,5 @@ class Utils {
 
         return itemList;
     }
+
 }

@@ -8,6 +8,7 @@ import org.esa.s3tbx.insitu.server.InsituResponse;
 import org.esa.s3tbx.insitu.server.InsituServer;
 import org.esa.s3tbx.insitu.server.InsituServerException;
 import org.esa.s3tbx.insitu.server.InsituServerRegistry;
+import org.esa.s3tbx.insitu.server.InsituServerRunnable;
 import org.esa.s3tbx.insitu.server.InsituServerSpi;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.GeoPos;
@@ -294,47 +295,33 @@ class InsituClientModel {
                 final InsituServerSpi insituServerSpi = getSelectedServerSpi();
                 try {
                     selectedServer = insituServerSpi.createServer();
-                    ProgressHandleMonitor handle = ProgressHandleMonitor.create("Contacting " + insituServerSpi.getName() + " in-situ server");
-                    Runnable runnable = () -> updateModel(handle);
-                    Utils.runWithProgress(runnable, handle);
+                    updateDatasetModel(selectedServer);
+                    updateParameterModel(selectedServer);
                 } catch (Exception e) {
                     insituServerModel.setSelectedItem(NO_SELECTION_SERVER_SPI);
                     throw new IllegalStateException("Could not create server instance for server '" + insituServerSpi.getName() + "'", e);
                 }
             }
-
-        }
-
-        private void updateModel(ProgressMonitor pm) {
-            pm.beginTask("Retrieving metadata from server", 2);
-            try {
-                updateDatasetModel();
-                pm.worked(1);
-                updateParameterModel();
-                pm.worked(1);
-            } catch (Exception e) {
-                SnapApp.getDefault().handleError("Failed to retrieve metadata from server", e);
-            } finally {
-                pm.done();
-            }
         }
     }
 
-    private void updateDatasetModel() throws InsituServerException {
+    private void updateDatasetModel(InsituServer server) throws InsituServerException {
         getDatasetModel().clear();
         InsituQuery query = new InsituQuery().subject(InsituQuery.SUBJECT.DATASETS);
-        final InsituResponse insituResponse = selectedServer.query(query);
-        insituResponse.getDatasetDescriptions().forEach(datasetModel::addElement);
+        InsituServerRunnable runnable = new InsituServerRunnable(server, query);
+        InsituServer.runWithProgress(runnable);
+
+        runnable.getResponse().getDatasetDescriptions().forEach(datasetModel::addElement);
     }
 
-    private void updateParameterModel() throws InsituServerException {
+    private void updateParameterModel(InsituServer server) throws InsituServerException {
         getParameterModel().clear();
         InsituQuery query = new InsituQuery().subject(InsituQuery.SUBJECT.PARAMETERS);
         final InsituDatasetDescr datasetDescr = getSelectedDataset();
         if (datasetDescr != null) {
             query.dataset(datasetDescr.getName());
         }
-        final InsituResponse insituResponse = selectedServer.query(query);
+        final InsituResponse insituResponse = server.query(query);
         insituResponse.getParameters().forEach(parameterModel::addElement);
     }
 
@@ -343,7 +330,9 @@ class InsituClientModel {
         @Override
         public void valueChanged(ListSelectionEvent event) {
             try {
-                updateParameterModel();
+                if (selectedServer != null) {
+                    updateParameterModel(selectedServer);
+                }
             } catch (InsituServerException e) {
                 SnapApp.getDefault().handleError("Failed to retrieve metadata from server", e);
             }
