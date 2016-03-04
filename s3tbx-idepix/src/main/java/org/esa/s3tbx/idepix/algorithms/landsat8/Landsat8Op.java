@@ -58,7 +58,7 @@ public class Landsat8Op extends Operator {
             label = "Width of cloud buffer (# of pixels)")
     private int cloudBufferWidth;
 
-    @Parameter(defaultValue = "true",
+    @Parameter(defaultValue = "false",
             label = " Refine pixel classification near coastlines",
             description = "Refine pixel classification near coastlines (time consuming operation!). Improves distinction of clouds and bright beaches. ")
     private boolean refineClassificationNearCoastlines;
@@ -126,10 +126,11 @@ public class Landsat8Op extends Operator {
 //               label = "OTSU processing mode (grey or binary target image)")
     private String otsuMode = "BINARY";
 
-    @Parameter(defaultValue = "false",
-            description = "If computed, write OTSU bands (Clost and binary) to the target product.",
-            label = " Write OTSU bands (Clost and binary) to the target product")
-    private boolean outputOtsuBands;
+//    @Parameter(defaultValue = "false",
+//            description = "If computed, write OTSU bands (Clost and binary) to the target product.",
+//            label = " Write OTSU bands (Clost and binary) to the target product")
+//    private boolean outputOtsuBands;
+    private boolean outputOtsuBands = false;  // todo: discuss if needed
 
     @Parameter(defaultValue = "true",
             description = "Write source bands to the target product.",

@@ -415,14 +415,14 @@ public class ProbaVSynthesisProductReader extends AbstractProductReader {
 
         final H5Group h5GeometryGroup = (H5Group) ((DefaultMutableTreeNode) level3ChildNode).getUserObject();
         final List geometryMetadata = h5GeometryGroup.getMetadata();
-        final double easting = ProbaVUtils.getFloatAttributeValue(geometryMetadata, "TOP_LEFT_LONGITUDE");
-        final double northing = ProbaVUtils.getFloatAttributeValue(geometryMetadata, "TOP_LEFT_LATITUDE");
+        final double easting = ProbaVUtils.getDoubleAttributeValue(geometryMetadata, "TOP_LEFT_LONGITUDE");
+        final double northing = ProbaVUtils.getDoubleAttributeValue(geometryMetadata, "TOP_LEFT_LATITUDE");
         // pixel size: 10deg/rasterDim, it is also in the 6th and 7th value of MAPPING attribute in the raster nodes
         final double topLeftLon = easting;
-        final double topRightLon = ProbaVUtils.getFloatAttributeValue(geometryMetadata, "TOP_RIGHT_LONGITUDE");
+        final double topRightLon = ProbaVUtils.getDoubleAttributeValue(geometryMetadata, "TOP_RIGHT_LONGITUDE");
         final double pixelSizeX = Math.abs(topRightLon - topLeftLon) / productWidth;
         final double topLeftLat = northing;
-        final double bottomLeftLat = ProbaVUtils.getFloatAttributeValue(geometryMetadata, "BOTTOM_LEFT_LATITUDE");
+        final double bottomLeftLat = ProbaVUtils.getDoubleAttributeValue(geometryMetadata, "BOTTOM_LEFT_LATITUDE");
         final double pixelSizeY = (topLeftLat - bottomLeftLat) / productHeight;
 
         final H5Group h5RootGroup = (H5Group) ((DefaultMutableTreeNode) inputFileRootNode).getUserObject();
@@ -464,10 +464,10 @@ public class ProbaVSynthesisProductReader extends AbstractProductReader {
 
     private Band createTargetBand(Product product, H5ScalarDS scalarDS, String bandName, int dataType) throws Exception {
         final List<Attribute> metadata = scalarDS.getMetadata();
-        final float scaleFactorAttr = ProbaVUtils.getFloatAttributeValue(metadata, "SCALE");
-        final float scaleFactor = Float.isNaN(scaleFactorAttr) ? 1.0f : scaleFactorAttr;
-        final float scaleOffsetAttr = ProbaVUtils.getFloatAttributeValue(metadata, "OFFSET");
-        final float scaleOffset = Float.isNaN(scaleOffsetAttr) ? 0.0f : scaleOffsetAttr;
+        final double scaleFactorAttr = ProbaVUtils.getDoubleAttributeValue(metadata, "SCALE");
+        final double scaleFactor = Double.isNaN(scaleFactorAttr) ? 1.0f : scaleFactorAttr;
+        final double scaleOffsetAttr = ProbaVUtils.getDoubleAttributeValue(metadata, "OFFSET");
+        final double scaleOffset = Double.isNaN(scaleOffsetAttr) ? 0.0f : scaleOffsetAttr;
         final Band band = product.addBand(bandName, dataType);
         band.setScalingFactor(1.0 / scaleFactor);
         band.setScalingOffset(-1.0 * scaleOffset / scaleFactor);
