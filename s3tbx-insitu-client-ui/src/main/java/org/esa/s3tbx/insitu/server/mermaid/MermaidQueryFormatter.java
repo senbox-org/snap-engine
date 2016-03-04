@@ -62,7 +62,7 @@ class MermaidQueryFormatter {
                 throw new IllegalArgumentException("stop date could not be encoded", e);
             }
         }
-        if(query.param() != null) {
+        if(query.param() != null && query.param().length > 0) {
             queryParams.add(PARAM_PARAM + "=" + StringUtils.arrayToCsv(query.param()));
         }
         if(query.dataset() != null) {

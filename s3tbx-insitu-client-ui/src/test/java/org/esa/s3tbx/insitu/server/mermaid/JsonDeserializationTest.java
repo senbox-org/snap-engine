@@ -40,17 +40,17 @@ public class JsonDeserializationTest {
 
         assertEquals(InsituResponse.STATUS_CODE.OK, response.getStatus());
         assertNull(response.getFailureReasons());
-        final List<CampaignDescr> campaigns = response.getDatasetDescriptions();
+        final List<Campaign> campaigns = response.getDatasets();
         assertNotNull(campaigns);
         assertEquals(2, campaigns.size());
-        final CampaignDescr aeronetDescr = campaigns.get(0);
+        final Campaign aeronetDescr = campaigns.get(0);
         assertEquals("AERONET", aeronetDescr.getName());
         assertEquals("Giuseppe Zibordi", aeronetDescr.getPi());
         assertNull(aeronetDescr.getWebsite());
         assertEquals("giuseppe.zibordi@jrc.it", aeronetDescr.getContact());
         assertTrue(aeronetDescr.getPolicy().startsWith("The AAOT AERONET-OC insitu dataset"));
         assertTrue(aeronetDescr.getDescription().startsWith("The network AERONET - Ocean Color"));
-        final CampaignDescr boussoleDescr = campaigns.get(1);
+        final Campaign boussoleDescr = campaigns.get(1);
         assertEquals("BOUSSOLE", boussoleDescr.getName());
         assertEquals("David Antoine", boussoleDescr.getPi());
         assertEquals("http://www.obs-vlfr.fr/Boussole/", boussoleDescr.getWebsite());
@@ -90,7 +90,7 @@ public class JsonDeserializationTest {
         assertEquals(InsituResponse.STATUS_CODE.OK, response.getStatus());
         assertNull(response.getFailureReasons());
         assertEquals(484, response.getObservationCount());
-        final List<Campaign> campaignList = response.getDatasetList();
+        final List<Campaign> campaignList = response.getDatasets();
         assertNotNull(campaignList);
         assertEquals(2, campaignList.size());
 

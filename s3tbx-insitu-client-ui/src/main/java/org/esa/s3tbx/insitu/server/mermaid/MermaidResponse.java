@@ -13,10 +13,8 @@ class MermaidResponse implements InsituResponse {
     @SerializedName("response") private STATUS_CODE status;
     private List<String> reasons;
     @SerializedName("nb_obs") private long observationCount;
-
     @SerializedName("Parameters") private List<MermaidParameter> parameters;
-    @SerializedName("Campaigns") private List<CampaignDescr> campaignDescriptions;
-    @SerializedName("Campaign") private List<Campaign> campaign;
+    @SerializedName("Campaigns") private List<Campaign> campaigns;
 
     @Override
     public STATUS_CODE getStatus() {
@@ -39,13 +37,8 @@ class MermaidResponse implements InsituResponse {
     }
 
     @Override
-    public List<CampaignDescr> getDatasetDescriptions() {
-        return campaignDescriptions;
-    }
-
-    @Override
-    public List<Campaign> getDatasetList() {
-        return campaign;
+    public List<Campaign> getDatasets() {
+        return campaigns;
     }
 
 }

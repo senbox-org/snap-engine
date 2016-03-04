@@ -16,7 +16,11 @@
 package org.esa.s3tbx.insitu.ui;
 
 import com.bc.ceres.swing.TableLayout;
-import org.esa.s3tbx.insitu.server.InsituDatasetDescr;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
+import org.esa.s3tbx.insitu.server.InsituDataset;
+import org.esa.s3tbx.insitu.server.InsituObservation;
 import org.esa.s3tbx.insitu.server.InsituParameter;
 import org.esa.s3tbx.insitu.server.InsituQuery;
 import org.esa.s3tbx.insitu.server.InsituResponse;
@@ -24,10 +28,27 @@ import org.esa.s3tbx.insitu.server.InsituServer;
 import org.esa.s3tbx.insitu.server.InsituServerException;
 import org.esa.s3tbx.insitu.server.InsituServerRunnable;
 import org.esa.s3tbx.insitu.server.InsituServerSpi;
+import org.esa.snap.core.datamodel.CrsGeoCoding;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.core.datamodel.PlacemarkDescriptor;
+import org.esa.snap.core.datamodel.PlacemarkDescriptorRegistry;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductNodeGroup;
+import org.esa.snap.core.datamodel.VectorDataNode;
+import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.rcp.SnapApp;
 import org.esa.snap.rcp.actions.help.HelpAction;
 import org.esa.snap.tango.TangoIcons;
 import org.esa.snap.ui.tool.ToolButtonFactory;
+import org.geotools.data.collection.ListFeatureCollection;
+import org.geotools.feature.FeatureCollection;
+import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.util.HelpCtx;
@@ -40,6 +61,8 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Date;
+import java.util.List;
 import java.util.stream.Stream;
 
 @TopComponent.Description(
@@ -85,11 +108,28 @@ public class InsituClientTopComponent extends TopComponent implements HelpCtx.Pr
         downloadButton.setText("Download");
         downloadButton.setName("downloadButton");
         downloadButton.addActionListener(new ServerButtonActionListener(this::createObservationQuery, response -> {
-            // TODO (mp/03.03.2016) - set observations to products
-//            List<Product> selectedProducts = insituModel.getSelectedProducts();
-//            List<? extends InsituDataset> datasetList = response.getDatasetList();
-//            datasetList.get(0).getObservations()
 
+            List<Product> selectedProducts = insituModel.getSelectedProducts();
+            List<? extends InsituDataset> datasetList = response.getDatasets();
+            for (InsituDataset insituDataset : datasetList) {
+                List<? extends InsituObservation> observations = insituDataset.getObservations();
+                String datasetName = insituDataset.getName();
+                for (Product product : selectedProducts) {
+                    SimpleFeatureType featureType = createInsituFeatureType(product.getSceneGeoCoding());
+                    FeatureCollection<SimpleFeatureType, SimpleFeature> featureCollection = new ListFeatureCollection(featureType);
+                    for (int i = 0; i < observations.size(); i++) {
+                        InsituObservation observation = observations.get(i);
+                        featureCollection.add(createFeature(featureType, product.getSceneGeoCoding(), i, observation));
+                    }
+                    final PlacemarkDescriptor placemarkDescriptor = PlacemarkDescriptorRegistry.getInstance().getPlacemarkDescriptor(featureCollection.getSchema());
+                    placemarkDescriptor.setUserDataOf(featureCollection.getSchema());
+
+                    ProductNodeGroup<VectorDataNode> vectorDataGroup = product.getVectorDataGroup();
+                    String nodeName = ProductUtils.getAvailableNodeName(datasetName, vectorDataGroup);
+                    VectorDataNode vectorDataNode = new VectorDataNode(nodeName, featureCollection, placemarkDescriptor);
+                    vectorDataGroup.add(vectorDataNode);
+                }
+            }
         }));
         contentPanel.add(downloadButton);
         contentPanel.add(layout.createHorizontalSpacer());
@@ -101,13 +141,58 @@ public class InsituClientTopComponent extends TopComponent implements HelpCtx.Pr
         return contentPanel;
     }
 
+    private static SimpleFeatureType createInsituFeatureType(GeoCoding geoCoding) {
+        SimpleFeatureTypeBuilder ftb = new SimpleFeatureTypeBuilder();
+        ftb.setName("org.esa.snap.Insitu");
+        /*0*/
+        ftb.add("parameter", String.class);
+        /*1*/
+        ftb.add("pixelPos", Point.class, geoCoding.getImageCRS());
+        /*2*/
+        ftb.add("geoPos", Point.class, DefaultGeographicCRS.WGS84);
+        /*3*/
+        ftb.add("date", Date.class);
+        /*4*/
+        ftb.add("value", Double.class);
+        ftb.setDefaultGeometry(geoCoding instanceof CrsGeoCoding ? "geoPos" : "pixelPos");
+        return ftb.buildFeatureType();
+        // todo - Maybe later the user can decide if the observations shall be treated as track points
+        // GeoTools Bug: this doesn't work
+//        ftb.userData("trackPoints", "true");
+//        ft.getUserData().put("trackPoints", "true");
+//        return ft;
+    }
+
+    private static SimpleFeature createFeature(SimpleFeatureType type, GeoCoding geoCoding, int pointIndex, InsituObservation observation) {
+        double lat = observation.getLat();
+        double lon = observation.getLon();
+        PixelPos pixelPos = geoCoding.getPixelPos(new GeoPos(lat, lon), null);
+        if (!pixelPos.isValid()) {
+            return null;
+        }
+        SimpleFeatureBuilder fb = new SimpleFeatureBuilder(type);
+        GeometryFactory gf = new GeometryFactory();
+        /*0*/
+        fb.add(observation.getParam());
+        /*1*/
+        fb.add(gf.createPoint(new Coordinate(pixelPos.x, pixelPos.y)));
+        /*2*/
+        fb.add(gf.createPoint(new Coordinate(lon, lat)));
+        /*3*/
+        fb.add(observation.getDate());
+        /*4*/
+        fb.add(observation.getValue());
+        return fb.buildFeature(String.format("ID%08d", pointIndex));
+    }
+
+
     private InsituQuery createObservationQuery() {
         InsituQuery query = new InsituQuery();
         query.subject(InsituQuery.SUBJECT.OBSERVATIONS);
         query.latMin(insituModel.getMinLat()).latMax(insituModel.getMaxLat());
         query.lonMin(insituModel.getMinLon()).lonMax(insituModel.getMaxLon());
         query.startDate(insituModel.getStartDate()).stopDate(insituModel.getStopDate());
-        InsituDatasetDescr selectedDataset = insituModel.getSelectedDataset();
+        InsituDataset selectedDataset = insituModel.getSelectedDataset();
         if (selectedDataset != null) {
             query.dataset(selectedDataset.getName());
         }

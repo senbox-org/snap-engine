@@ -10,11 +10,40 @@ import java.util.List;
  */
 class Campaign implements InsituDataset {
     private String name;
+    private String pi;
+    private String contact;
+    private String website;
+    private String policy;
+    private String description;
     @SerializedName("Observations") private List<MermaidObservation> observations;
 
-    @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    public String getPi() {
+        return pi;
+    }
+
+    @Override
+    public String getContact() {
+        return contact;
+    }
+
+    @Override
+    public String getDescription() {
+        return description;
+    }
+
+    @Override
+    public String getPolicy() {
+        return policy;
+    }
+
+    @Override
+    public String getWebsite() {
+        return website;
     }
 
     @Override

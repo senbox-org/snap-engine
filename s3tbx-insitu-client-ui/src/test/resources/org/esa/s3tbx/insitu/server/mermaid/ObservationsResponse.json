@@ -1,7 +1,7 @@
 {
   "response": "OK",
   "nb_obs": 484,
-  "Campaign": [
+  "Campaigns": [
     {
       "name": "AERONET",
       "Observations": [

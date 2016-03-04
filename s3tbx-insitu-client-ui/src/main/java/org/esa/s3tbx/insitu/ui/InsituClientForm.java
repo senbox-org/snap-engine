@@ -2,7 +2,7 @@ package org.esa.s3tbx.insitu.ui;
 
 import com.bc.ceres.swing.TableLayout;
 import com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
-import org.esa.s3tbx.insitu.server.InsituDatasetDescr;
+import org.esa.s3tbx.insitu.server.InsituDataset;
 import org.esa.s3tbx.insitu.server.InsituParameter;
 import org.esa.s3tbx.insitu.server.InsituServerSpi;
 import org.esa.snap.core.datamodel.Product;
@@ -75,9 +75,9 @@ class InsituClientForm extends JPanel {
         layout.setCellFill(1, 3, TableLayout.Fill.BOTH);
         layout.setRowWeightY(1, 0.6);
         add(new JLabel("Dataset:"));
-        final JList<InsituDatasetDescr> datasetList = new JList<>(model.getDatasetModel());
+        final JList<InsituDataset> datasetList = new JList<>(model.getDatasetModel());
         datasetList.setSelectionModel(model.getDatasetSelectionModel());
-        datasetList.setCellRenderer(new DatasetDescrListCellRenderer());
+        datasetList.setCellRenderer(new DatasetListCellRenderer());
         datasetList.setVisibleRowCount(6);
         add(new JScrollPane(datasetList));
         add(new JLabel("Parameter:"));
@@ -175,12 +175,12 @@ class InsituClientForm extends JPanel {
         }
     }
 
-    private static class DatasetDescrListCellRenderer extends DefaultListCellRenderer {
+    private static class DatasetListCellRenderer extends DefaultListCellRenderer {
 
         @Override
         public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
             final JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-            final InsituDatasetDescr datasetDescr = (InsituDatasetDescr) value;
+            final InsituDataset datasetDescr = (InsituDataset) value;
             label.setText(datasetDescr.getName());
             label.setToolTipText(datasetDescr.getDescription());
             final String text = String.format("<html>" +

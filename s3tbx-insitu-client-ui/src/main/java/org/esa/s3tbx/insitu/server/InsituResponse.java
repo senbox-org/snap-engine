@@ -30,12 +30,7 @@ public interface InsituResponse {
         }
 
         @Override
-        public List<? extends InsituDatasetDescr> getDatasetDescriptions() {
-            return Collections.emptyList();
-        }
-
-        @Override
-        public List<? extends InsituDataset> getDatasetList() {
+        public List<? extends InsituDataset> getDatasets() {
             return Collections.emptyList();
         }
     };
@@ -48,9 +43,7 @@ public interface InsituResponse {
 
     List<? extends InsituParameter> getParameters();
 
-    List<? extends InsituDatasetDescr> getDatasetDescriptions();
-
-    List<? extends InsituDataset> getDatasetList();
+    List<? extends InsituDataset> getDatasets();
 
     enum STATUS_CODE {
         OK,

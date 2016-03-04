@@ -1,7 +1,7 @@
 package org.esa.s3tbx.insitu.ui;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.s3tbx.insitu.server.InsituDatasetDescr;
+import org.esa.s3tbx.insitu.server.InsituDataset;
 import org.esa.s3tbx.insitu.server.InsituParameter;
 import org.esa.s3tbx.insitu.server.InsituQuery;
 import org.esa.s3tbx.insitu.server.InsituResponse;
@@ -47,7 +47,7 @@ class InsituClientModel {
     static final String PROPERTY_MAX_LAT = "maxLat";
 
     private final DefaultComboBoxModel<InsituServerSpi> insituServerModel;
-    private final DefaultListModel<InsituDatasetDescr> datasetModel;
+    private final DefaultListModel<InsituDataset> datasetModel;
     private final ListSelectionModel datasetSelectionModel;
     private final DefaultListModel<InsituParameter> parameterModel;
     private final DefaultListSelectionModel parameterSelectionModel;
@@ -115,7 +115,7 @@ class InsituClientModel {
         return (InsituServerSpi) insituServerModel.getSelectedItem();
     }
 
-    public DefaultListModel<InsituDatasetDescr> getDatasetModel() {
+    public DefaultListModel<InsituDataset> getDatasetModel() {
         return datasetModel;
     }
 
@@ -123,7 +123,7 @@ class InsituClientModel {
         return datasetSelectionModel;
     }
 
-    public InsituDatasetDescr getSelectedDataset() {
+    public InsituDataset getSelectedDataset() {
         if(!datasetSelectionModel.isSelectionEmpty()) {
             final int selectionIndex = datasetSelectionModel.getLeadSelectionIndex();
             return datasetModel.get(selectionIndex);
@@ -311,13 +311,13 @@ class InsituClientModel {
         InsituServerRunnable runnable = new InsituServerRunnable(server, query);
         InsituServer.runWithProgress(runnable);
 
-        runnable.getResponse().getDatasetDescriptions().forEach(datasetModel::addElement);
+        runnable.getResponse().getDatasets().forEach(datasetModel::addElement);
     }
 
     private void updateParameterModel(InsituServer server) throws InsituServerException {
         getParameterModel().clear();
         InsituQuery query = new InsituQuery().subject(InsituQuery.SUBJECT.PARAMETERS);
-        final InsituDatasetDescr datasetDescr = getSelectedDataset();
+        final InsituDataset datasetDescr = getSelectedDataset();
         if (datasetDescr != null) {
             query.dataset(datasetDescr.getName());
         }

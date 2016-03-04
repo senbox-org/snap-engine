@@ -45,6 +45,7 @@ public class MermaidServerTest {
 
         assertEquals(InsituResponse.STATUS_CODE.OK, response.getStatus());
         assertEquals(12, response.getObservationCount());
+        assertEquals(1, response.getDatasets().size());
     }
 
     @Test
@@ -54,7 +55,7 @@ public class MermaidServerTest {
         final InsituResponse response = server.query(query);
 
         assertEquals(InsituResponse.STATUS_CODE.OK, response.getStatus());
-        assertEquals(2, response.getDatasetDescriptions().size());
+        assertEquals(2, response.getDatasets().size());
     }
 
     @Test

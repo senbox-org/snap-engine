@@ -7,6 +7,7 @@ import org.esa.s3tbx.insitu.server.InsituResponse;
 import org.esa.s3tbx.insitu.server.InsituServer;
 import org.esa.s3tbx.insitu.server.InsituServerException;
 import org.esa.s3tbx.insitu.server.InsituServerSpi;
+import org.esa.snap.runtime.Engine;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -43,6 +44,10 @@ public class MermaidInsituServer implements InsituServer {
     public InsituResponse query(InsituQuery query) throws InsituServerException {
         URL url = createQueryUrl(query);
         HttpURLConnection conn = null;
+        Engine engine = Engine.getInstance();
+        if(engine != null && engine.getConfig().debug()) {
+            System.out.println("url = " + url);
+        }
         try {
             conn = establishConnection(url);
             BufferedReader br = getContentReader(conn);

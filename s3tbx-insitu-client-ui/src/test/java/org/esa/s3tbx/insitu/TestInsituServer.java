@@ -1,7 +1,6 @@
 package org.esa.s3tbx.insitu;
 
 import org.esa.s3tbx.insitu.server.InsituDataset;
-import org.esa.s3tbx.insitu.server.InsituDatasetDescr;
 import org.esa.s3tbx.insitu.server.InsituParameter;
 import org.esa.s3tbx.insitu.server.InsituQuery;
 import org.esa.s3tbx.insitu.server.InsituResponse;
@@ -71,12 +70,7 @@ public class TestInsituServer implements InsituServer {
         }
 
         @Override
-        public List<? extends InsituDatasetDescr> getDatasetDescriptions() {
-            return null;
-        }
-
-        @Override
-        public List<? extends InsituDataset> getDatasetList() {
+        public List<? extends InsituDataset> getDatasets() {
             return null;
         }
     }
