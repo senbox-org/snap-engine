@@ -65,7 +65,7 @@ class MermaidQueryFormatter {
         if(query.param() != null && query.param().length > 0) {
             queryParams.add(PARAM_PARAM + "=" + StringUtils.arrayToCsv(query.param()));
         }
-        if(query.datasets() != null && query.param().length > 0) {
+        if(query.datasets() != null && query.datasets().length > 0) {
             queryParams.add(PARAM_CAMPAIGN + "=" + StringUtils.arrayToCsv(query.datasets()));
         }
         if(query.shift() > 0) {
