@@ -63,6 +63,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Stream;
 
 @TopComponent.Description(
@@ -116,21 +118,26 @@ public class InsituClientTopComponent extends TopComponent implements HelpCtx.Pr
                 String datasetName = insituDataset.getName();
                 for (Product product : selectedProducts) {
                     SimpleFeatureType featureType = createInsituFeatureType(product.getSceneGeoCoding());
-                    FeatureCollection<SimpleFeatureType, SimpleFeature> featureCollection = new ListFeatureCollection(featureType);
+                    TreeMap<String, FeatureCollection<SimpleFeatureType, SimpleFeature>> fcMap = new TreeMap<>();
                     for (int i = 0; i < observations.size(); i++) {
                         InsituObservation observation = observations.get(i);
                         SimpleFeature feature = createFeature(featureType, product.getSceneGeoCoding(), i, observation);
                         if (feature != null) {
-                            featureCollection.add(feature);
+                            FeatureCollection<SimpleFeatureType, SimpleFeature> fc = getFeatureCollection(datasetName, observation, featureType, fcMap);
+                            fc.add(feature);
                         }
                     }
-                    final PlacemarkDescriptor placemarkDescriptor = PlacemarkDescriptorRegistry.getInstance().getPlacemarkDescriptor(featureCollection.getSchema());
-                    placemarkDescriptor.setUserDataOf(featureCollection.getSchema());
 
-                    ProductNodeGroup<VectorDataNode> vectorDataGroup = product.getVectorDataGroup();
-                    String nodeName = ProductUtils.getAvailableNodeName(datasetName, vectorDataGroup);
-                    VectorDataNode vectorDataNode = new VectorDataNode(nodeName, featureCollection, placemarkDescriptor);
-                    vectorDataGroup.add(vectorDataNode);
+                    for (Map.Entry<String, FeatureCollection<SimpleFeatureType, SimpleFeature>> entry : fcMap.entrySet()) {
+                        FeatureCollection<SimpleFeatureType, SimpleFeature> fc = entry.getValue();
+                        String name = entry.getKey();
+                        final PlacemarkDescriptor placemarkDescriptor = PlacemarkDescriptorRegistry.getInstance().getPlacemarkDescriptor(fc.getSchema());
+                        placemarkDescriptor.setUserDataOf(fc.getSchema());
+                        ProductNodeGroup<VectorDataNode> vectorDataGroup = product.getVectorDataGroup();
+                        String nodeName = ProductUtils.getAvailableNodeName(name, vectorDataGroup);
+                        VectorDataNode vectorDataNode = new VectorDataNode(nodeName, fc, placemarkDescriptor);
+                        vectorDataGroup.add(vectorDataNode);
+                    }
                 }
             }
         }));
@@ -142,6 +149,19 @@ public class InsituClientTopComponent extends TopComponent implements HelpCtx.Pr
         contentPanel.add(helpButton);
 
         return contentPanel;
+    }
+
+    private FeatureCollection<SimpleFeatureType, SimpleFeature> getFeatureCollection(String datasetName,
+                                                                                     InsituObservation observation,
+                                                                                     SimpleFeatureType featureType,
+                                                                                     TreeMap<String, FeatureCollection<SimpleFeatureType, SimpleFeature>> map) {
+        String fcKey = datasetName + "_" + observation.getParam();
+        FeatureCollection<SimpleFeatureType, SimpleFeature> fc = map.get(fcKey);
+        if (fc == null) {
+            fc = new ListFeatureCollection(featureType);
+            map.put(fcKey, fc);
+        }
+        return fc;
     }
 
     private static SimpleFeatureType createInsituFeatureType(GeoCoding geoCoding) {
