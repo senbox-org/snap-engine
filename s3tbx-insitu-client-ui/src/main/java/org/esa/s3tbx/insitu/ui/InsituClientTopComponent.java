@@ -109,38 +109,7 @@ public class InsituClientTopComponent extends TopComponent implements HelpCtx.Pr
         final AbstractButton downloadButton = ToolButtonFactory.createButton(TangoIcons.actions_document_save(TangoIcons.Res.R22), false);
         downloadButton.setText("Download");
         downloadButton.setName("downloadButton");
-        downloadButton.addActionListener(new ServerButtonActionListener(this::createObservationQuery, response -> {
-
-            List<Product> selectedProducts = insituModel.getSelectedProducts();
-            List<? extends InsituDataset> datasetList = response.getDatasets();
-            for (InsituDataset insituDataset : datasetList) {
-                List<? extends InsituObservation> observations = insituDataset.getObservations();
-                String datasetName = insituDataset.getName();
-                for (Product product : selectedProducts) {
-                    SimpleFeatureType featureType = createInsituFeatureType(product.getSceneGeoCoding());
-                    TreeMap<String, FeatureCollection<SimpleFeatureType, SimpleFeature>> fcMap = new TreeMap<>();
-                    for (int i = 0; i < observations.size(); i++) {
-                        InsituObservation observation = observations.get(i);
-                        SimpleFeature feature = createFeature(featureType, product.getSceneGeoCoding(), i, observation);
-                        if (feature != null) {
-                            FeatureCollection<SimpleFeatureType, SimpleFeature> fc = getFeatureCollection(datasetName, observation, featureType, fcMap);
-                            fc.add(feature);
-                        }
-                    }
-
-                    for (Map.Entry<String, FeatureCollection<SimpleFeatureType, SimpleFeature>> entry : fcMap.entrySet()) {
-                        FeatureCollection<SimpleFeatureType, SimpleFeature> fc = entry.getValue();
-                        String name = entry.getKey();
-                        final PlacemarkDescriptor placemarkDescriptor = PlacemarkDescriptorRegistry.getInstance().getPlacemarkDescriptor(fc.getSchema());
-                        placemarkDescriptor.setUserDataOf(fc.getSchema());
-                        ProductNodeGroup<VectorDataNode> vectorDataGroup = product.getVectorDataGroup();
-                        String nodeName = ProductUtils.getAvailableNodeName(name, vectorDataGroup);
-                        VectorDataNode vectorDataNode = new VectorDataNode(nodeName, fc, placemarkDescriptor);
-                        vectorDataGroup.add(vectorDataNode);
-                    }
-                }
-            }
-        }));
+        downloadButton.addActionListener(new ServerButtonActionListener(this::createObservationQuery, new DownloadResponseHandler()));
         contentPanel.add(downloadButton);
         contentPanel.add(layout.createHorizontalSpacer());
 
@@ -303,5 +272,44 @@ public class InsituClientTopComponent extends TopComponent implements HelpCtx.Pr
 
         void handle(InsituResponse response);
 
+    }
+
+    private class DownloadResponseHandler implements ResponseHandler {
+
+        @Override
+        public void handle(InsituResponse response) {
+
+            List<Product> selectedProducts = insituModel.getSelectedProducts();
+            List<? extends InsituDataset> datasetList = response.getDatasets();
+            for (InsituDataset insituDataset : datasetList) {
+                List<? extends InsituObservation> observations = insituDataset.getObservations();
+                String datasetName = insituDataset.getName();
+                for (Product product : selectedProducts) {
+                    SimpleFeatureType featureType = createInsituFeatureType(product.getSceneGeoCoding());
+                    TreeMap<String, FeatureCollection<SimpleFeatureType, SimpleFeature>> fcMap = new TreeMap<>();
+                    for (int i = 0; i < observations.size(); i++) {
+                        InsituObservation observation = observations.get(i);
+                        SimpleFeature feature = createFeature(featureType, product.getSceneGeoCoding(), i, observation);
+                        if (feature != null) {
+                            FeatureCollection<SimpleFeatureType, SimpleFeature> fc = InsituClientTopComponent.this.getFeatureCollection(
+                                    datasetName, observation, featureType, fcMap);
+                            fc.add(feature);
+                        }
+                    }
+
+                    for (Map.Entry<String, FeatureCollection<SimpleFeatureType, SimpleFeature>> entry : fcMap.entrySet()) {
+                        FeatureCollection<SimpleFeatureType, SimpleFeature> fc = entry.getValue();
+                        String name = entry.getKey();
+                        final PlacemarkDescriptor placemarkDescriptor = PlacemarkDescriptorRegistry.getInstance().getPlacemarkDescriptor(
+                                fc.getSchema());
+                        placemarkDescriptor.setUserDataOf(fc.getSchema());
+                        ProductNodeGroup<VectorDataNode> vectorDataGroup = product.getVectorDataGroup();
+                        String nodeName = ProductUtils.getAvailableNodeName(name, vectorDataGroup);
+                        VectorDataNode vectorDataNode = new VectorDataNode(nodeName, fc, placemarkDescriptor);
+                        vectorDataGroup.add(vectorDataNode);
+                    }
+                }
+            }
+        }
     }
 }
