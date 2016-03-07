@@ -330,12 +330,12 @@ class InsituClientModel {
 
         @Override
         public void valueChanged(ListSelectionEvent event) {
-            try {
-                if (selectedServer != null) {
+            if (!event.getValueIsAdjusting() && selectedServer != null) {
+                try {
                     updateParameterModel(selectedServer);
+                } catch (InsituServerException e) {
+                    SnapApp.getDefault().handleError("Failed to retrieve metadata from server", e);
                 }
-            } catch (InsituServerException e) {
-                SnapApp.getDefault().handleError("Failed to retrieve metadata from server", e);
             }
         }
     }
@@ -367,7 +367,7 @@ class InsituClientModel {
 
         @Override
         public void valueChanged(ListSelectionEvent e) {
-            if(e.getValueIsAdjusting()) {
+            if (e.getValueIsAdjusting()) {
                 return;
             }
             ProgressHandleMonitor handle = ProgressHandleMonitor.create("In-Situ Data Access");
