@@ -50,15 +50,38 @@ public class MermaidServerTest {
 
     @Test
     public void testMermaidServer_Observations_WithCamapigns() throws Exception {
-        // http://mermaid.acri.fr/s3tbx/v2/observations?lon_min=20.5&lat_min=3.2&lon_max=80.9&lat_max=9.7&start_date=2003-09-01 17:20:11&stop_date=2003-09-23 12:15:36&param=es_412,es_443
-        final InsituQuery query = new InsituQuery().datasets(new String[]{"BOUSSOLE"});
+        InsituQuery query;
+        InsituResponse response;
+
+        // http://mermaid.acri.fr/s3tbx/v2/observations?lon_min=20.5&lat_min=3.2&lon_max=80.9&lat_max=9.7&start_date=2003-09-01 17:20:11&stop_date=2003-09-23 12:15:36&param=es_412,es_443,camapign=AERONET
+        query = new InsituQuery().datasets(new String[]{"AERONET"});
         query.param(new String[]{"es_412", "es_443"});
         query.subject(InsituQuery.SUBJECT.OBSERVATIONS);
-        final InsituResponse response = server.query(query);
+        response = server.query(query);
+
+        assertEquals(InsituResponse.STATUS_CODE.OK, response.getStatus());
+        assertEquals(200, response.getObservationCount());
+        assertEquals(1, response.getDatasets().size());
+
+        // http://mermaid.acri.fr/s3tbx/v2/observations?lon_min=20.5&lat_min=3.2&lon_max=80.9&lat_max=9.7&start_date=2003-09-01 17:20:11&stop_date=2003-09-23 12:15:36&param=es_412,es_443,camapign=BOUSSOLE
+        query = new InsituQuery().datasets(new String[]{"BOUSSOLE"});
+        query.param(new String[]{"es_412", "es_443"});
+        query.subject(InsituQuery.SUBJECT.OBSERVATIONS);
+        response = server.query(query);
 
         assertEquals(InsituResponse.STATUS_CODE.OK, response.getStatus());
         assertEquals(188, response.getObservationCount());
         assertEquals(1, response.getDatasets().size());
+
+        // http://mermaid.acri.fr/s3tbx/v2/observations?lon_min=20.5&lat_min=3.2&lon_max=80.9&lat_max=9.7&start_date=2003-09-01 17:20:11&stop_date=2003-09-23 12:15:36&param=es_412,es_443,camapign=BOUSSOLE,AERONET
+        query = new InsituQuery().datasets(new String[]{"BOUSSOLE", "AERONET"});
+        query.param(new String[]{"es_412", "es_443"});
+        query.subject(InsituQuery.SUBJECT.OBSERVATIONS);
+        response = server.query(query);
+
+        assertEquals(InsituResponse.STATUS_CODE.OK, response.getStatus());
+        assertEquals(388, response.getObservationCount());
+        assertEquals(2, response.getDatasets().size());
     }
 
     @Test
@@ -80,4 +103,35 @@ public class MermaidServerTest {
         assertEquals(InsituResponse.STATUS_CODE.OK, response.getStatus());
         assertEquals(30, response.getParameters().size());
     }
+
+    @Test
+    public void testMermaidServer_Parameters_withCampaigns() throws Exception {
+        InsituQuery query;
+        InsituResponse response;
+        // http://mermaid.acri.fr/s3tbx/v2/parameters?campaign=BOUSSOLE
+        query = new InsituQuery().subject(InsituQuery.SUBJECT.PARAMETERS);
+        query.datasets(new String[]{"BOUSSOLE"});
+        response = server.query(query);
+
+        assertEquals(InsituResponse.STATUS_CODE.OK, response.getStatus());
+        assertEquals(23, response.getParameters().size());
+
+        // http://mermaid.acri.fr/s3tbx/v2/parameters?campaign=AERONET
+        query = new InsituQuery().subject(InsituQuery.SUBJECT.PARAMETERS);
+        query.datasets(new String[]{"AERONET"});
+        response = server.query(query);
+
+        assertEquals(InsituResponse.STATUS_CODE.OK, response.getStatus());
+        assertEquals(17, response.getParameters().size());
+
+        // http://mermaid.acri.fr/s3tbx/v2/parameters?campaign=BOUSSOLE,AERONET
+        query = new InsituQuery().subject(InsituQuery.SUBJECT.PARAMETERS);
+        query.datasets(new String[]{"BOUSSOLE", "AERONET"});
+        response = server.query(query);
+
+        assertEquals(InsituResponse.STATUS_CODE.OK, response.getStatus());
+        assertEquals(30, response.getParameters().size());
+    }
+
+
 }
