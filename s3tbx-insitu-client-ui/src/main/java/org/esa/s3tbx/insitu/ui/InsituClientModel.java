@@ -358,7 +358,7 @@ class InsituClientModel {
         @Override
         public void productRemoved(ProductManager.Event event) {
             final Product product = event.getProduct();
-            final int productIndex = productManager.getProductIndex(product);
+            final int productIndex = productListModel.indexOf(product);
             productListModel.remove(productIndex);
         }
     }
@@ -454,10 +454,10 @@ class InsituClientModel {
         }
 
         private static GeoPos[] createCornerCoordinates(Product product) {
-            PixelPos sceneUL = new PixelPos(0, 0);
-            PixelPos sceneUR = new PixelPos(product.getSceneRasterWidth(), 0);
-            PixelPos sceneLL = new PixelPos(0, product.getSceneRasterHeight());
-            PixelPos sceneLR = new PixelPos(product.getSceneRasterWidth(), product.getSceneRasterHeight());
+            PixelPos sceneUL = new  PixelPos(0 + 0.5f, 0 + 0.5f);
+            PixelPos sceneUR = new  PixelPos(product.getSceneRasterWidth() - 1 + 0.5f, 0 + 0.5f);
+            PixelPos sceneLL = new  PixelPos(0 + 0.5f, product.getSceneRasterHeight() - 1 + 0.5f);
+            PixelPos sceneLR = new  PixelPos(product.getSceneRasterWidth() - 1 + 0.5f, product.getSceneRasterHeight() - 1 + 0.5f);
             GeoCoding sceneGeoCoding = product.getSceneGeoCoding();
             GeoPos geoPosUL = sceneGeoCoding.getGeoPos(sceneUL, null);
             GeoPos geoPosUR = sceneGeoCoding.getGeoPos(sceneUR, null);
