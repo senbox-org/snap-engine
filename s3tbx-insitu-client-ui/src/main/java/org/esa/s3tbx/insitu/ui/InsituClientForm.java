@@ -52,7 +52,7 @@ class InsituClientForm extends JPanel {
 
         final TableLayout layout = new TableLayout(4);
         layout.setTableFill(TableLayout.Fill.HORIZONTAL);
-        layout.setTableAnchor(TableLayout.Anchor.NORTHWEST);
+        layout.setTableAnchor(TableLayout.Anchor.WEST);
         layout.setTablePadding(4, 4);
         layout.setTableWeightX(0.1);
         layout.setTableWeightY(0.0);
@@ -72,7 +72,9 @@ class InsituClientForm extends JPanel {
         layout.setCellWeightX(1, 1, 1.0);
         layout.setCellWeightX(1, 3, 1.0);
         layout.setCellFill(1, 1, TableLayout.Fill.BOTH);
+        layout.setCellAnchor(1, 1, TableLayout.Anchor.NORTHWEST);
         layout.setCellFill(1, 3, TableLayout.Fill.BOTH);
+        layout.setCellAnchor(1, 3, TableLayout.Anchor.NORTHWEST);
         layout.setRowWeightY(1, 0.6);
         add(new JLabel("Dataset:"));
         final JList<InsituDataset> datasetList = new JList<>(model.getDatasetModel());
@@ -90,6 +92,7 @@ class InsituClientForm extends JPanel {
         layout.setCellWeightX(2, 1, 1.0);
         layout.setCellColspan(2, 1, 3);
         layout.setCellFill(2, 1, TableLayout.Fill.BOTH);
+        layout.setCellAnchor(2, 1, TableLayout.Anchor.NORTHWEST);
         layout.setCellWeightY(2, 1, 1.0);
         add(new JLabel("Product:"));
         final JList<Product> productList = new JList<>(model.getProductListModel());

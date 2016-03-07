@@ -40,13 +40,16 @@ import org.esa.snap.core.datamodel.VectorDataNode;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.rcp.SnapApp;
 import org.esa.snap.rcp.actions.help.HelpAction;
+import org.esa.snap.rcp.util.Dialogs;
 import org.esa.snap.tango.TangoIcons;
+import org.esa.snap.ui.ModalDialog;
 import org.esa.snap.ui.tool.ToolButtonFactory;
 import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.jdesktop.swingx.VerticalLayout;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.openide.awt.ActionID;
@@ -56,11 +59,20 @@ import org.openide.util.NbBundle;
 import org.openide.windows.TopComponent;
 
 import javax.swing.AbstractButton;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -279,6 +291,60 @@ public class InsituClientTopComponent extends TopComponent implements HelpCtx.Pr
         @Override
         public void handle(InsituResponse response) {
 
+            if (InsituResponse.STATUS_CODE.OK.equals(response.getStatus()) && response.getObservationCount() > 0) {
+                List<? extends InsituDataset> datasetList = response.getDatasets();
+                JPanel content = new JPanel(new VerticalLayout(4));
+                List<DataPolicyPanel> policyPanels = new ArrayList<>();
+                for (InsituDataset insituDataset : datasetList) {
+                    DataPolicyPanel datasetPolicyPanel = new DataPolicyPanel(insituDataset);
+                    content.add(datasetPolicyPanel);
+                    policyPanels.add(datasetPolicyPanel);
+                }
+                ModalDialog policyDialog = new ModalDialog(null, "In-Situ Data", new JScrollPane(content), ModalDialog.ID_OK_CANCEL, null);
+                JPanel buttonPanel = policyDialog.getButtonPanel();
+                JCheckBox acceptAll = new JCheckBox("Accept All");
+                acceptAll.addActionListener(e -> {
+                    for (DataPolicyPanel policyPanel : policyPanels) {
+                        policyPanel.setAccepted(acceptAll.isSelected());
+                    }
+                });
+                buttonPanel.add(acceptAll, 0);
+                JButton saveButton = new JButton("Save data policies");
+                saveButton.addActionListener(e -> {
+                    File file = Dialogs.requestFileForSave("Save Data Policy File", false, null, ".txt", "insitu-policy", null,
+                                                           "s3tbx.insitu.policyExport");
+                    if (file == null) {
+                        return;
+                    }
+                    Path path = file.toPath();
+                    try (PrintWriter w = new PrintWriter(Files.newBufferedWriter(path), false)) {
+                        for (InsituDataset insituDataset : datasetList) {
+                            w.printf("Name: %s%n", insituDataset.getName());
+                            w.printf("Pi: %s%n", insituDataset.getPi());
+                            w.printf("Contact: %s%n", insituDataset.getContact());
+                            w.printf("Website: %s%n", insituDataset.getWebsite());
+                            w.printf("Data Policy: %s%n", insituDataset.getPolicy());
+                            w.println();
+                            w.flush();
+                        }
+                    } catch (IOException ioe) {
+                        SnapApp.getDefault().handleError("Could not write data policy file.", ioe);
+                    }
+                });
+                buttonPanel.add(saveButton, 0);
+                if (ModalDialog.ID_CANCEL == policyDialog.show()) {
+                    return;
+                }
+
+                for (DataPolicyPanel policyPanel : policyPanels) {
+                    if (!policyPanel.isAccepted()) {
+                        Dialogs.showWarning("In-Situ Data", "Not all data policies have been accepted.", null);
+                        return;
+                    }
+                }
+            }
+
+
             List<Product> selectedProducts = insituModel.getSelectedProducts();
             List<? extends InsituDataset> datasetList = response.getDatasets();
             for (InsituDataset insituDataset : datasetList) {
@@ -309,7 +375,10 @@ public class InsituClientTopComponent extends TopComponent implements HelpCtx.Pr
                         vectorDataGroup.add(vectorDataNode);
                     }
                 }
+
+                // todo (mp/20160307) - Show message that download was successful.
             }
         }
+
     }
 }
