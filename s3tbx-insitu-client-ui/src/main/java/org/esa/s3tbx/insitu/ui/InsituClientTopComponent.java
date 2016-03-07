@@ -119,7 +119,10 @@ public class InsituClientTopComponent extends TopComponent implements HelpCtx.Pr
                     FeatureCollection<SimpleFeatureType, SimpleFeature> featureCollection = new ListFeatureCollection(featureType);
                     for (int i = 0; i < observations.size(); i++) {
                         InsituObservation observation = observations.get(i);
-                        featureCollection.add(createFeature(featureType, product.getSceneGeoCoding(), i, observation));
+                        SimpleFeature feature = createFeature(featureType, product.getSceneGeoCoding(), i, observation);
+                        if (feature != null) {
+                            featureCollection.add(feature);
+                        }
                     }
                     final PlacemarkDescriptor placemarkDescriptor = PlacemarkDescriptorRegistry.getInstance().getPlacemarkDescriptor(featureCollection.getSchema());
                     placemarkDescriptor.setUserDataOf(featureCollection.getSchema());
