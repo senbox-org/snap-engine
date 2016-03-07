@@ -74,8 +74,7 @@ class InsituClientModel {
 
         datasetModel = new DefaultListModel<>();
         datasetSelectionModel = new DefaultListSelectionModel();
-        // todo (mp/20160304) - change to multiple selection
-        datasetSelectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        datasetSelectionModel.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         datasetSelectionModel.addListSelectionListener(new DatasetListSelectionListener());
 
         parameterModel = new DefaultListModel<>();
@@ -124,12 +123,13 @@ class InsituClientModel {
         return datasetSelectionModel;
     }
 
-    public InsituDataset getSelectedDataset() {
-        if(!datasetSelectionModel.isSelectionEmpty()) {
-            final int selectionIndex = datasetSelectionModel.getLeadSelectionIndex();
-            return datasetModel.get(selectionIndex);
-        }
-        return null;
+    public List<InsituDataset> getSelectedDatasets() {
+        return Utils.getSelectedItems(datasetModel, datasetSelectionModel);
+    }
+
+    public String[] getSelectedDatasetNames() {
+        List<InsituDataset> datasets = getSelectedDatasets();
+        return datasets.stream().map(InsituDataset::getName).toArray(String[]::new);
     }
 
     public DefaultListModel<InsituParameter> getParameterModel() {
@@ -318,9 +318,9 @@ class InsituClientModel {
     private void updateParameterModel(InsituServer server) throws InsituServerException {
         getParameterModel().clear();
         InsituQuery query = new InsituQuery().subject(InsituQuery.SUBJECT.PARAMETERS);
-        final InsituDataset dataset = getSelectedDataset();
-        if (dataset != null) {
-            query.datasets(new String[]{dataset.getName()});
+        String[] datasetNames = getSelectedDatasetNames();
+        if (datasetNames.length > 0) {
+            query.datasets(datasetNames);
         }
         final InsituResponse insituResponse = server.query(query);
         insituResponse.getParameters().forEach(parameterModel::addElement);

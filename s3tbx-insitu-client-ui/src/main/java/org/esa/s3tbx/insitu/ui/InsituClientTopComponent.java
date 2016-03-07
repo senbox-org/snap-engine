@@ -192,9 +192,9 @@ public class InsituClientTopComponent extends TopComponent implements HelpCtx.Pr
         query.latMin(insituModel.getMinLat()).latMax(insituModel.getMaxLat());
         query.lonMin(insituModel.getMinLon()).lonMax(insituModel.getMaxLon());
         query.startDate(insituModel.getStartDate()).stopDate(insituModel.getStopDate());
-        InsituDataset selectedDataset = insituModel.getSelectedDataset();
-        if (selectedDataset != null) {
-            query.datasets(new String[]{selectedDataset.getName()});
+        String[] datasetNames = insituModel.getSelectedDatasetNames();
+        if (datasetNames.length > 0) {
+            query.datasets(datasetNames);
         }
         Stream<InsituParameter> stream = insituModel.getSelectedParameters().stream();
         String[] parameterNames = stream.map(InsituParameter::getName).toArray(String[]::new);

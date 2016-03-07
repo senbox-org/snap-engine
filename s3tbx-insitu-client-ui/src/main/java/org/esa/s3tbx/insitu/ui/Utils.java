@@ -4,7 +4,7 @@ import org.esa.snap.rcp.util.ProgressHandleMonitor;
 import org.netbeans.api.progress.ProgressUtils;
 
 import javax.swing.DefaultListModel;
-import javax.swing.DefaultListSelectionModel;
+import javax.swing.ListSelectionModel;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +25,7 @@ class Utils {
                                                           1000);
     }
 
-    static <T> List<T> getSelectedItems(DefaultListModel<T> listModel, DefaultListSelectionModel selectionModel) {
+    static <T> List<T> getSelectedItems(DefaultListModel<T> listModel, ListSelectionModel selectionModel) {
         int iMin = selectionModel.getMinSelectionIndex();
         int iMax = selectionModel.getMaxSelectionIndex();
 
