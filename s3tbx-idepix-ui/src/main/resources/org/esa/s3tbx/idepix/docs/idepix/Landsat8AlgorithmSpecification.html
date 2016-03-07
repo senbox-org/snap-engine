@@ -1,7 +1,6 @@
-
 <html>
 <head>
-    <title>SNAP Data Processors - Radiance-to-Reflectance Conversion Algorithm Specification</title>
+    <title>SNAP Data Processors - Idepix Landsat-8 Algorithm Specification</title>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
     <link rel="stylesheet" href="../style.css">
 </head>
@@ -10,71 +9,223 @@
 <table class="header">
     <tr class="header">
         <td class="header">&nbsp;
-            SNAP Data Processors - Radiance-To-Reflectance Conversion Algorithm Specification
+            SNAP Data Processors - Idepix Landsat-8 Algorithm Specification
         </td>
-        <td class="header" align="right"><a href="nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/general/overview/SnapOverview.html"><img src="../images/snap_header.jpg"
-                                                                                                                                                       border=0></a>
+        <td class="header" align="right"><a
+                href="nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/general/overview/SnapOverview.html"><img
+                src="../images/snap_header.jpg"
+                border=0></a>
         </td>
     </tr>
 </table>
 
 <h3>Algorithm Specification</h3>
 
-<p>
-    The conversion from TOA radiance (<i>L</i><sub>TOA</sub>) to TOA reflectances (<i>R</i><sub>TOA</sub>) done by the
-    following equation:
-</p>
-
-<p align="center">
-    <img src="images/RadToReflEquation.png" border="0">
-</p>
+<h4>Neural network classification</h4>
 
 <p>
-    where <i>E</i><sub>0</sub> and &theta; are the solar spectral
-    irradiance and the sun zenith angle, respectively.
+    The Idepix classification algorithm for Landsat-8 is primarily based on a neural network approach.
+    Depending on the given scene, the user can select different neural nets for the processing, i.e. if the
+    scene mainly consists of land or water pixels.
+
+    As input, all spectral bands in the visible and near-infrared range are used: A few nets also
+    use the thermal infrared spectral bands. The following neural nets are available:
+
+<ul>
+    <li>"ALL": a standard neural net applicable for most conditions</li>
+    <li>"LAND": a neural net for use preferrably over land</li>
+    <li>"LAND_USE_THERMAL": a neural net for use preferrably over land, uses also thermal infrared bands as input</li>
+    <li>"WATER": a neural net for use preferrably over water</li>
+    <li>"WATER_NOTIDAL": a neural net for use preferrably over nontidal water</li>
+    <li>"WATER_USE_THERMAL": a neural net for use preferrably over water, uses also thermal infrared bands as input</li>
+    <li>"WATER_NOTIDAL_USE_THERMAL": a neural net for use preferrably over notidal water, uses also thermal infrared
+        bands
+        as input
+    </li>
+</ul>
+
+As output, the neural net finally provides per pixel one of the properties 'clear sky', 'cloud sure',
+'cloud ambiguous' or 'snow/ice'.
+
+<h4>Additional cloud tests</h4>
+
+The classification algorithm for Landsat-8 provides a couple of further cloud tests which can be applied optionally.
+These are:
+
+<ul>
+    <li>the "SHIMEZ" test [1]</li>
+    <li>the "HOT" test [1]</li>
+    <li>the "OTSU" test [2]</li>
+    <li>the "CLOST" test [3]</li>
+</ul>
+
+<h5>The SHIMEZ cloud test</h5>
+<p>
+
 </p>
 
+<h5>The HOT cloud test</h5>
 <p>
-    The conversion from reflectances to radiances simply follows the inverse of this equation.
+
 </p>
 
+<h5>The OTSU cloud test</h5>
 <p>
-    For all sensors supported by the Radiance-to-Reflectance Processor, the sun zenith angle is provided per pixel
-    with the L1b products. The solar spectral irradiance values are also provided per pixel in case of OLCI L1b products,
-    whereas for SLSTR MERIS they are taken from auxiliary data.
+
 </p>
+
+<h5>The CLOST cloud test</h5>
+<p>
+
+</p>
+
+<h4>Brightness and whiteness</h4>
+
+<p>
+    In a second step, two additional quantities, the 'whiteness' and
+    the 'brightness', are introduced to derive a 'bright' flag as well as additional cloud indicators:
+<ul>
+    <li>
+        'cloudSureFromWhiteness'
+    </li>
+    <li>
+        'cloudSureFromBrightness'
+    </li>
+    <li>
+        'cloudAmbiguousFromWhiteness'
+    </li>
+    <li>
+        'cloudAmbiguousFromBrightness'
+    </li>
+</ul>
+
+<p>
+    A bright spectrum means that the intensity of the spectral curve (related to the albedo) should present relatively
+    high values. Therefore, cloud brightness is calculated for each pixel as the integral of spectrum, and differs from
+    the average of the spectral channels since it takes into account the distribution of the energy along the spectrum.
+</p>
+<p>
+    A white spectrum means that the spectral signature must be flat along the spectrum. The first derivative of the
+    spectral curve should present low values, but noise and calibration errors may reduce the accuracy in the estimation
+    of the spectrum flatness when computing the spectral derivative in channels with similar wavelengths.
+</p>
+<p>
+    This retrieval mainly follows the approach described in more detail in [1].
+</p>
+
+<h4>Cloud flagging modes</h4>
+
+<p>
+    The final cloud flagging can be performed in two 'strengths', depending on the combination of the three indicators
+    'cloudFromNeuralNet (cNN)', 'cloudFromWhiteness (cWhi)' and 'cloudFromBrightness (cBri)':
+<ul>
+    <li>
+        'CLEAR_SKY_CONSERVATIVE': 'cloud' if 'cNN' OR ('cWhi' AND 'cBri')
+    </li>
+    <li>
+        'CLOUD_SKY_CONSERVATIVE': 'cloud' if 'cNN' OR 'cWhi' OR 'cBri'
+    </li>
+</ul>
+Consequently, the 'CLEAR_SKY_CONSERVATIVE' usually results in overall 'less clouds', and the 'CLOUD_SKY_CONSERVATIVE'
+results in 'more clouds'.
+
+<h4>Additional properties</h4>
+<p>
+    The following additional pixel properties are provided from the classification:
+<ul>
+    <li>
+        'cloud_buffer': The pixel is located in a 'safety buffer' around an area classified as cloud. The width of
+        the buffer is given in pixels.
+    </li>
+    <li>
+        'land': the pixel is located over land
+    </li>
+    <li>
+        'coastline': the pixel is a coastline pixel
+    </li>
+</ul>
+
+The 'land' and 'coastline' pixels are identified from an SRTM land/water mask [2].
+
+<h4>Final classification flags</h4>
+<p>
+    From the algorithm steps outlined above, the following final classification flags are provided for MODIS:
+<ul>
+    <li>
+        'INVALID' (input invalid or no classification possible)
+    </li>
+    <li>
+        'CLOUD_AMBIGUOUS'
+    </li>
+    <li>
+        'CLOUD_SURE'
+    </li>
+    <li>
+        'CLOUD' (which means either CLOUD_AMBIGUOUS or CLOUD_SURE)
+    </li>
+    <li>
+        'CLOUD_BUFFER'
+    </li>
+    <li>
+        'SNOW_ICE'
+    </li>
+    <li>
+        'COASTLINE'
+    </li>
+    <li>
+        'LAND'
+    </li>
+    <li>
+        'BRIGHT'
+    </li>
+</ul>
+
+The following pixel properties are currently NOT provided for MODIS:
+<ul>
+    <li>
+        'CLOUD_SHADOW'
+    </li>
+    <li>
+        'MIXED_PIXEL'
+    </li>
+    <li>
+        'GLINT_RISK'
+    </li>
+</ul>
+
+<h4>Known issues</h4>
+<p>
+    The pixel classification algorithm for MODIS has been developed and optimized mainly for ocean applications,
+    e.g. the OceanColour project, [3].
+    Therefore, the classification results may be poor under certain conditions over land.
+</p>
+<p>
+    The following pixel properties are currently NOT provided for MODIS:
+<ul>
+    <li>
+        'CLOUD_SHADOW'
+    </li>
+    <li>
+        'MIXED_PIXEL'
+    </li>
+    <li>
+        'GLINT_RISK'
+    </li>
+</ul>
 
 <h3>References</h3>
 
 <p class="i1">
     <b>[1]</b>
-    CoastColour Project Web Site: <a href="http://www.coastcolour.org">www.coastcolour.org</a><br><br>
+    Zhe Zhu, Curtis E. Woodcock, ?Object-based cloud and cloud shadow detection in Landsat imagery.? (2011)<br><br>
 
     <b>[2]</b>
-    OceanColour Project Web Site: <a href="http://www.esa-oceancolour-cci.org/">www.esa-oceancolour-cci.org</a><br><br>
-
-    <b>[3]</b>
-    Bourg, L. (2009): MERIS Level 2 Detailed Processing Model. ACRI-ST, Document No. PO-TN-MEL-GS-0006, 15 July 2009.<br><br>
-
-    <b>[4]</b>
-    BEAM Spectral Unmixing Tool Help Documentation:
-    <a href="http://www.brockmann-consult.de/beam/doc/help/unmixing/SpectralUnmixingTool.html">www.brockmann-consult.de/beam/doc/help/unmixing/SpectralUnmixingTool.html</a>
+    Cloud detection in Landsat imagery of ice sheets using shadow matching technique and automatic normalized
+    difference snow index threshold value decision? (2004)
     <br><br>
 
-    <b>[5]</b>
-    GlobAlbedo Project Web Site: <a href="http://globalbedo.org/">http://globalbedo.org</a><br><br>
-
-    <b>[6]</b>
-    GlobAlbedo ATBD 'Pixel Classification'. Version 4.1, 26 June 2012.<br><br>
-
-    <b>[7]</b>
-    LandCover Project Web Site: <a href="http://www.esa-landcover-cci.org/">www.esa-landcover-cci.org</a><br><br>
-
-    <b>[8]</b>
-    LandCover CCI ATBD. Version 1.0, 28 June 2012.<br><br>
-
-    <b>[9]</b>
-    Farr, T. G., et al. (2007), The Shuttle Radar Topography Mission, Rev. Geophys., 45, RG2004, doi:10.1029/2005RG000183.
+    <b>[3]</b>
+    M. Paperin (Brockmann Consult), personal communication.</a><br><br>
 </p>
 <br>
 

@@ -32,7 +32,7 @@
                         <tocitem text="MODIS" target="modisAlgorithmSpec"/>
                         <tocitem text="Landsat-8" target="landsat8AlgorithmSpec"/>
                     </tocitem>
-                    <tocitem text="Command Line Description" target="rad2ReflCommandLine"/>
+                    <tocitem text="Command Line Description" target="idepixCommandLine"/>
                 </tocitem>
             </tocitem>
         </tocitem>

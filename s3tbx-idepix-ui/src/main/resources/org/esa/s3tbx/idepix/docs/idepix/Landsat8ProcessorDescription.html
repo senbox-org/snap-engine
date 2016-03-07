@@ -132,15 +132,53 @@ The following Landsat-8 source products are supported for Idepix classification:
 </p>
 
 <p class="i1">
-    <b>Copy non spectral bands: </b><br>
-    If set, all non-spectral bands from the source product are written to target product.
-    The default value is 'false'.
+    <b>Apply SHIMEZ cloud test: </b><br>
+    If set, the SHIMEZ cloud test (see algorithm specification for details) is applied for the cloud classification
+    in addition to the neural network. The default value is 'true'.
 </p>
 
 <p class="i1">
-    <b>Copy non spectral bands: </b><br>
-    If set, all non-spectral bands from the source product are written to target product.
-    The default value is 'false'.
+    <b>Threshold A for SHIMEZ cloud test: </b><br>
+    The threshold A in the SHIMEZ cloud test (see algorithm specification for details). The default value is 0.1.
+</p>
+
+<p class="i1">
+    <b>Threshold B for SHIMEZ cloud test: </b><br>
+    The threshold B in the SHIMEZ cloud test (see algorithm specification for details). The default value is 0.25.
+</p>
+
+<p class="i1">
+    <b>Apply HOT cloud test: </b><br>
+    If set, the HOT cloud test (see algorithm specification for details) is applied for the cloud classification
+    in addition to the neural network. The default value is 'false'.
+</p>
+
+<p class="i1">
+    <b>Threshold A for HOT cloud test: </b><br>
+    The threshold A in the HOT cloud test (see algorithm specification for details). The default value is 0.1.
+</p>
+
+<p class="i1">
+    <b>Apply CLOST cloud test: </b><br>
+    If set, the CLOST cloud test (see algorithm specification for details) is applied for the cloud classification
+    in addition to the neural network. The default value is 'true'.
+</p>
+
+<p class="i1">
+    <b>Threshold A for CLOST cloud test: </b><br>
+    The threshold A in the CLOST cloud test (see algorithm specification for details). The default value is 0.001.
+</p>
+
+<p class="i1">
+    <b>Apply OTSU cloud test: </b><br>
+    If set, the OTSU cloud test (see algorithm specification for details) is applied for the cloud classification
+    in addition to the neural network. The default value is 'true'.
+</p>
+
+<p class="i1">
+    <b>Write source bands to the target product: </b><br>
+    If set, all bands from the source product are written to target product.
+    The default value is 'true'.
 </p>
 
 <hr>
