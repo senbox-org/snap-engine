@@ -24,7 +24,7 @@ public class MermaidInsituServer implements InsituServer {
 
     private static final String SERVER_NAME = "MERMAID";
     private static final String SERVER_DESCRIPTION = "A server providing access to the MERMAID in-situ database.";
-    private static final String SERVER_BASE_URL_STRING = "http://mermaid.acri.fr/s3tbx/v2";
+    private static final String SERVER_BASE_URL_STRING = "http://mermaid.acri.fr/s3tbx/v3";
     private static final int HTTP_OK_CODE = 200;
     private final Gson gson;
 
