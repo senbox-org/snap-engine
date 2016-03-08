@@ -290,8 +290,10 @@ public class InsituClientTopComponent extends TopComponent implements HelpCtx.Pr
 
         @Override
         public void handle(InsituResponse response) {
-
-            if (InsituResponse.STATUS_CODE.OK.equals(response.getStatus()) && response.getObservationCount() > 0) {
+            if(!(response.getObservationCount() > 0 && response.getDatasets() != null)) {
+                return;
+            }
+            if (InsituResponse.STATUS_CODE.OK.equals(response.getStatus())) {
                 List<? extends InsituDataset> datasetList = response.getDatasets();
                 JPanel content = new JPanel(new VerticalLayout(4));
                 List<DataPolicyPanel> policyPanels = new ArrayList<>();
