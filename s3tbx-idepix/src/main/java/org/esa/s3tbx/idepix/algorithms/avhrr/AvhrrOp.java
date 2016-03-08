@@ -24,6 +24,7 @@ import java.util.Map;
  */
 @SuppressWarnings({"FieldCanBeLocal"})
 @OperatorMetadata(alias = "Idepix.Avhrr",
+        internal = true, // todo: remove when activated
         category = "Optical/Pre-Processing",
         version = "1.0",
         authors = "Olaf Danne, Grit Kirches",

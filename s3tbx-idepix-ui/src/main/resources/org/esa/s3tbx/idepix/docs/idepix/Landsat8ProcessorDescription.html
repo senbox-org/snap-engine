@@ -15,17 +15,12 @@
   -->
 
 <html>
-<head>
-    <title>SNAP Data Processors - Idepix Processor - Landsat-8 Processor Description</title>
-    <link rel="stylesheet" href="../style.css">
-</head>
-
 <body>
 
 <table class="header">
     <tr class="header">
         <td class="header">&nbsp;
-            SNAP Data Processors - Idepix Processor - Landsat-8 Processor Description
+            SNAP Data Processors - Idepix Processor - MODIS Processor Description
         </td>
         <td class="header" align="right"><a href="nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/general/overview/SnapOverview.html"><img src="../images/snap_header.jpg"
                                                                                                                                                        border=0></a>
@@ -81,6 +76,26 @@ The following Landsat-8 source products are supported for Idepix classification:
 
 <h3>The Processing Parameters</h3>
 
+
+<p>
+    <b>NOTE: </b> The pixel classification for Landsat-8, i.e. all the cloud tests, work on TOA reflectances rather than
+    radiances. As the Landsat-8 product reader by default interprets the spectral band values as radiances, a
+    specific property must be set to read the data as reflectances before using Idepix:
+</p>
+<ul>
+    <li>
+        if not present, create a file 's3tbx.properties' in the folder [USER_HOME]/.snap/etc
+    </li>
+    <li>
+        in this file 's3tbx.properties' add the entry
+        <ul>
+            <li>
+                s3tbx.landsat.readAs=reflectance
+            </li>
+        </ul>
+    </li>
+</ul>
+
 <p align="center"><img src="images/IdepixParameterLandsat8.png"></p>
 
 <p class="i1">
@@ -115,10 +130,12 @@ The following Landsat-8 source products are supported for Idepix classification:
 
 <p class="i1">
     <b>NN cloud ambiguous/sure separation value: </b><br>
-    The boundary of the neural network output value where pixels are regarded as either 'cloud ambiguous' (NN output lower
+    The boundary of the neural network output value where pixels are regarded as either 'cloud ambiguous' (NN output
+    lower
     than boundary) or 'cloud sure' (NN output higher than boundary). The output value of the neural network
     (floating point number on the interval [0.0, 5.0]) is written to the target product in a band 'nnResult'.
-    Providing the NN cloud ambiguous/sure separation value as user option allows a fine tuning of the pixel classification
+    Providing the NN cloud ambiguous/sure separation value as user option allows a fine tuning of the pixel
+    classification
     under certain conditions. The default value is 3.45.
 </p>
 

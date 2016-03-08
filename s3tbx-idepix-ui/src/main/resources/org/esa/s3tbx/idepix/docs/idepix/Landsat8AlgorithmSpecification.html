@@ -24,7 +24,7 @@
 <h4>Neural network classification</h4>
 
 <p>
-    The Idepix classification algorithm for Landsat-8 is primarily based on a neural network approach.
+    The Idepix classification algorithm for Landsat-8 is primarily based on a neural network approach [1].
     Depending on the given scene, the user can select different neural nets for the processing, i.e. if the
     scene mainly consists of land or water pixels.
 
@@ -53,51 +53,76 @@ The classification algorithm for Landsat-8 provides a couple of further cloud te
 These are:
 
 <ul>
-    <li>the "SHIMEZ" test [1]</li>
-    <li>the "HOT" test [1]</li>
-    <li>the "OTSU" test [2]</li>
-    <li>the "CLOST" test [3]</li>
+    <li>the "SHIMEZ" test</li>
+    <li>the "HOT" test</li>
+    <li>the "CLOST" test</li>
+    <li>the "OTSU" test</li>
 </ul>
 
 <h5>The SHIMEZ cloud test</h5>
 <p>
-
+    The basic ideas behind the SHIMEZ cloud test are described in more detail in [2]. Finally, a cloud indicator
+    from this test is derived as follows:
+</p>
+<p>
+    The three spectral bands at 480nm, 560nm and 655nm are considered. A blue/green ratio is defined as
+</p>
+<p align="center"><img src="images/formulaRatioBlueGreen.png"></p>
+<p>
+    and a red/green ratio as
+</p>
+<p align="center"><img src="images/formulaRatioRedGreen.png"></p>
+<p>
+    and finally a red/green/blue mean value as
+</p>
+<p align="center"><img src="images/formulaMean.png"></p>
+<p>
+    The SHIMEZ cloud indicator is then given by the boolean exppression
+</p>
+<p align="center"><img src="images/formulaShimez.png"></p>
+<p>
+    where A and B are user options for fine-tuning.
 </p>
 
 <h5>The HOT cloud test</h5>
 <p>
-
+    The basic ideas behind the HOT cloud test are also described in more detail in [2]. A cloud indicator
+    from this test is simply given as:
 </p>
-
-<h5>The OTSU cloud test</h5>
+<p align="center"><img src="images/formulaHot.png"></p>
 <p>
-
+    where A is another user option for fine-tuning.
 </p>
 
 <h5>The CLOST cloud test</h5>
 <p>
-
+    The CLOST cloud test has been provided by [3]. A cloud indicator from this test is given as:
+</p>
+<p align="center"><img src="images/formulaClost.png"></p>
+<p>
+    where A is another user option for fine-tuning.
 </p>
 
-<h4>Brightness and whiteness</h4>
-
+<h5>The OTSU cloud test</h5>
 <p>
-    In a second step, two additional quantities, the 'whiteness' and
-    the 'brightness', are introduced to derive a 'bright' flag as well as additional cloud indicators:
-<ul>
-    <li>
-        'cloudSureFromWhiteness'
-    </li>
-    <li>
-        'cloudSureFromBrightness'
-    </li>
-    <li>
-        'cloudAmbiguousFromWhiteness'
-    </li>
-    <li>
-        'cloudAmbiguousFromBrightness'
-    </li>
-</ul>
+    The basic ideas behind the OTSU cloud test are described in more detail in [4]. A cloud indicator
+    from this test is simply given as:
+</p>
+<p align="center"><img src="images/formulaOtsu.png"></p>
+<p>
+    where <b>br</b> is a 'brightness' value on a grey-scale interval [0, 255].
+</p>
+
+<h5>Final cloud flag</h5>
+<p>
+    A pixel is finally classified as 'cloud sure' if the neural network test indicates the pixel as 'cloud sure'
+    and one of the applied additional tests (SHIMEZ, HOT, CLOST, OTSU) indicates the pixel as cloudy.
+    A pixel is finally classified as 'cloud ambiguous' if the neural network test indicates
+    the pixel as 'cloud ambiguous'. The additional tests are not considered here.
+</p>
+
+
+<h4>Brightness and whiteness</h4>
 
 <p>
     A bright spectrum means that the intensity of the spectral curve (related to the albedo) should present relatively
@@ -109,25 +134,15 @@ These are:
     spectral curve should present low values, but noise and calibration errors may reduce the accuracy in the estimation
     of the spectrum flatness when computing the spectral derivative in channels with similar wavelengths.
 </p>
+
 <p>
-    This retrieval mainly follows the approach described in more detail in [1].
+    In another classification step, , the spectral bands at 480nm, 655nm and 865nm are used to compute the 'whiteness' and
+    the 'brightness', and to provide corresponding 'white' and a 'bright' flags:
 </p>
+<p align="center"><img src="images/formulaBrightLand.png"></p>
+<p align="center"><img src="images/formulaBrightWater.png"></p>
+<p align="center"><img src="images/formulaWhite.png"></p>
 
-<h4>Cloud flagging modes</h4>
-
-<p>
-    The final cloud flagging can be performed in two 'strengths', depending on the combination of the three indicators
-    'cloudFromNeuralNet (cNN)', 'cloudFromWhiteness (cWhi)' and 'cloudFromBrightness (cBri)':
-<ul>
-    <li>
-        'CLEAR_SKY_CONSERVATIVE': 'cloud' if 'cNN' OR ('cWhi' AND 'cBri')
-    </li>
-    <li>
-        'CLOUD_SKY_CONSERVATIVE': 'cloud' if 'cNN' OR 'cWhi' OR 'cBri'
-    </li>
-</ul>
-Consequently, the 'CLEAR_SKY_CONSERVATIVE' usually results in overall 'less clouds', and the 'CLOUD_SKY_CONSERVATIVE'
-results in 'more clouds'.
 
 <h4>Additional properties</h4>
 <p>
@@ -145,11 +160,11 @@ results in 'more clouds'.
     </li>
 </ul>
 
-The 'land' and 'coastline' pixels are identified from an SRTM land/water mask [2].
+The 'land' and 'coastline' pixels are identified from an SRTM land/water mask [5].
 
 <h4>Final classification flags</h4>
 <p>
-    From the algorithm steps outlined above, the following final classification flags are provided for MODIS:
+    From the algorithm steps outlined above, the following final classification flags are provided for Landsat-8:
 <ul>
     <li>
         'INVALID' (input invalid or no classification possible)
@@ -161,7 +176,7 @@ The 'land' and 'coastline' pixels are identified from an SRTM land/water mask [2
         'CLOUD_SURE'
     </li>
     <li>
-        'CLOUD' (which means either CLOUD_AMBIGUOUS or CLOUD_SURE)
+        'CLOUD' (equal to CLOUD_SURE here)
     </li>
     <li>
         'CLOUD_BUFFER'
@@ -178,29 +193,18 @@ The 'land' and 'coastline' pixels are identified from an SRTM land/water mask [2
     <li>
         'BRIGHT'
     </li>
-</ul>
-
-The following pixel properties are currently NOT provided for MODIS:
-<ul>
     <li>
-        'CLOUD_SHADOW'
-    </li>
-    <li>
-        'MIXED_PIXEL'
-    </li>
-    <li>
-        'GLINT_RISK'
+        'WHITE'
     </li>
 </ul>
 
 <h4>Known issues</h4>
 <p>
-    The pixel classification algorithm for MODIS has been developed and optimized mainly for ocean applications,
-    e.g. the OceanColour project, [3].
-    Therefore, the classification results may be poor under certain conditions over land.
+    Due to the large number of pixels in Landsat-8 products and the variety of classification tests,
+    the pixel classification is usually rather time-consuming.
 </p>
 <p>
-    The following pixel properties are currently NOT provided for MODIS:
+    The following pixel properties are currently NOT provided for Landsat-8:
 <ul>
     <li>
         'CLOUD_SHADOW'
@@ -217,15 +221,24 @@ The following pixel properties are currently NOT provided for MODIS:
 
 <p class="i1">
     <b>[1]</b>
-    Zhe Zhu, Curtis E. Woodcock, ?Object-based cloud and cloud shadow detection in Landsat imagery.? (2011)<br><br>
+    H. Schiller (Brockmann Consult), personal communication.</a><br><br>
 
     <b>[2]</b>
-    Cloud detection in Landsat imagery of ice sheets using shadow matching technique and automatic normalized
-    difference snow index threshold value decision? (2004)
-    <br><br>
+    Zhe Zhu, Curtis E. Woodcock, ?Object-based cloud and cloud shadow detection in Landsat imagery. (2011)<br><br>
 
     <b>[3]</b>
     M. Paperin (Brockmann Consult), personal communication.</a><br><br>
+
+    <b>[4]</b>
+    Cloud detection in Landsat imagery of ice sheets using shadow matching technique and automatic normalized
+    difference snow index threshold value decision. (2004)
+    <br><br>
+
+    <b>[5]</b>
+    Farr, T. G., et al. (2007), The Shuttle Radar Topography Mission, Rev. Geophys., 45, RG2004,
+    doi:10.1029/2005RG000183.
+    <br><br>
+
 </p>
 <br>
 

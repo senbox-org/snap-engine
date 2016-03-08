@@ -15,6 +15,7 @@ import org.esa.snap.core.gpf.annotations.SourceProduct;
  */
 @SuppressWarnings({"FieldCanBeLocal"})
 @OperatorMetadata(alias = "Idepix.Seawifs",
+        internal = true, // todo: remove when activated
         category = "Optical/Pre-Processing",
         version = "2.2",
         authors = "Olaf Danne, Marco Zuehlke",

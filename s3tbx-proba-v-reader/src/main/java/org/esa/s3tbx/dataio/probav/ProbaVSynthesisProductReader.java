@@ -122,6 +122,7 @@ public class ProbaVSynthesisProductReader extends AbstractProductReader {
             final TreeNode level3Node = inputFileRootNode.getChildAt(0);        // 'LEVEL3'
             productWidth = (int) getH5ScalarDS(level3Node.getChildAt(0).getChildAt(0)).getDims()[0];
             productHeight = (int) getH5ScalarDS(level3Node.getChildAt(0).getChildAt(0)).getDims()[1];
+            product.setPreferredTileSize(productWidth, 16);
             product = new Product(inputFile.getName(), "PROBA-V SYNTHESIS", productWidth, productHeight);
             product.setAutoGrouping("TOA_REFL:TOC_REFL:VAA:VZA");
 
@@ -310,6 +311,7 @@ public class ProbaVSynthesisProductReader extends AbstractProductReader {
             final TreeNode level3Node = inputFileRootNode.getChildAt(0);        // 'LEVEL3'
             productWidth = (int) getH5ScalarDS(level3Node.getChildAt(1).getChildAt(0)).getDims()[0];
             productHeight = (int) getH5ScalarDS(level3Node.getChildAt(1).getChildAt(0)).getDims()[1];
+            product.setPreferredTileSize(productWidth, 16);
             product = new Product(inputFile.getName(), "PROBA-V SYNTHESIS NDVI", productWidth, productHeight);
 
             final H5Group rootGroup = (H5Group) ((DefaultMutableTreeNode) inputFileRootNode).getUserObject();

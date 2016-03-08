@@ -12,6 +12,7 @@ import org.esa.snap.core.gpf.annotations.OperatorMetadata;
  */
 @OperatorMetadata(alias = "Idepix.Probav",
         category = "Optical/Pre-Processing",
+        internal = true, // todo: remove when activated
         version = "2.2",
         authors = "Olaf Danne",
         copyright = "(c) 2016 by Brockmann Consult",
