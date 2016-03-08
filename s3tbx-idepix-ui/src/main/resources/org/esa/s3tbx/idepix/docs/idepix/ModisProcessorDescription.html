@@ -48,6 +48,24 @@
     open a data product currently not opened in the Sentinel Toolbox.
 </p>
 
+<h5>Supported MODIS Source Products</h5>
+    From the existing MODIS L1b products, the following are supported for Idepix classification:
+    <ul>
+        <li>
+            SSS021KM.Ayyyyddd.hhmm.vvv.yyyydddHHMMSS:<br>
+            MODIS Aqua/Terra Calibrated Radiances 5-Min L1B Swath 1km, with SSS = MOD (Terra) or SSS = MYD (Aqua);
+            yyyy = year; ddd = Julian day; hhmm = acquisition hour and minute in GMT; vvv = version (collection);
+            yyyydddHHMMSS = production date. See e.g.
+            http://gcmd.nasa.gov/records/GCMD_MOD021KM.html, https://ladsweb.nascom.nasa.gov/.
+        </li>
+        <li>
+            Syyyydddhhmmss.L1b_LAC:<br>
+            Local Area Coverage files (1km), with S = T (Terra) or S = A (Aqua); yyyy = year; ddd = Julian day;
+            hhmmss = time in GMT of the start of the pass. See e.g. http://oceandata.sci.gsfc.nasa.gov/.
+        </li>
+    </ul>
+
+
 <h5>Target Product Group</h5>
 
 <p class="i1">
@@ -76,7 +94,7 @@
     The strength of the cloud flagging.
     The processor currently supports CLEAR_SKY_CONSERVATIVE and CLOUD_CONSERVATIVE.
     In case of 'CLOUD_CONSERVATIVE', more pixels might be flagged as cloud.
-    The value must be selected from the drop-down menu. The default sensor is 'CLEAR_SKY_CONSERVATIVE'.
+    The value must be selected from the drop-down menu. The default value is 'CLEAR_SKY_CONSERVATIVE'.
 </p>
 
 <p class="i1">
@@ -100,6 +118,24 @@
     If set, all emissive bands from the source product are written to target product.
     The default value is 'false'.
 </p>
+<br>
+
+<h3>The Processing Result</h3>
+The Idepix classification result is written into the target product as a flag band named 'pixel_classif_flags'.
+This band holds integer values which follow the flag coding shown below.
+
+<p align="center">
+    <img src="images/IdepixFlagCoding.png" border="0">
+</p>
+<br>
+
+The target product also provides a corresponding flag mask to visualize the pixel classification through the
+SNAP Mask Manager:
+
+<p align="center">
+    <img src="images/IdepixMaskManager.png" border="0">
+</p>
+
 
 <hr>
 </body>

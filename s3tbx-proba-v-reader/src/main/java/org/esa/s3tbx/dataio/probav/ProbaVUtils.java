@@ -67,18 +67,32 @@ public class ProbaVUtils {
         return stringAttr;
     }
 
-    public static float getFloatAttributeValue(List<Attribute> metadata, String attributeName) {
-        float floatAttr = Float.NaN;
+//    public static float getFloatAttributeValue(List<Attribute> metadata, String attributeName) {
+//        float floatAttr = Float.NaN;
+//        for (Attribute attribute : metadata) {
+//            if (attribute.getName().equals(attributeName)) {
+//                try {
+//                    floatAttr = Float.parseFloat(getAttributeValue(attribute));
+//                } catch (NumberFormatException e) {
+//                    SystemUtils.LOG.log(Level.WARNING, "Cannot parse float attribute: " + e.getMessage());
+//                }
+//            }
+//        }
+//        return floatAttr;
+//    }
+
+    public static double getDoubleAttributeValue(List<Attribute> metadata, String attributeName) {
+        double doubleAttr = Double.NaN;
         for (Attribute attribute : metadata) {
             if (attribute.getName().equals(attributeName)) {
                 try {
-                    floatAttr = Float.parseFloat(getAttributeValue(attribute));
+                    doubleAttr = Double.parseDouble(getAttributeValue(attribute));
                 } catch (NumberFormatException e) {
                     SystemUtils.LOG.log(Level.WARNING, "Cannot parse float attribute: " + e.getMessage());
                 }
             }
         }
-        return floatAttr;
+        return doubleAttr;
     }
 
     public static String[] getStartEndTimeFromAttributes(List<Attribute> metadata) {

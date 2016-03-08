@@ -191,16 +191,18 @@ public class Landsat8Algorithm implements Landsat8PixelProperties {
         }
     }
 
-    public boolean isDarkGlintTest1() {
-        Integer darkGlintTest1Index = Landsat8Constants.LANDSAT8_SPECTRAL_WAVELENGTH_MAP.get(darkGlintThresholdTest1Wvl);
-        return l8SpectralBandData[darkGlintTest1Index] > darkGlintThresholdTest1;
-    }
+    // currently not used (20160303)
+//    public boolean isDarkGlintTest1() {
+//        Integer darkGlintTest1Index = Landsat8Constants.LANDSAT8_SPECTRAL_WAVELENGTH_MAP.get(darkGlintThresholdTest1Wvl);
+//        return l8SpectralBandData[darkGlintTest1Index] > darkGlintThresholdTest1;
+//    }
+//
+//    public boolean isDarkGlintTest2() {
+//        Integer darkGlintTest2Index = Landsat8Constants.LANDSAT8_SPECTRAL_WAVELENGTH_MAP.get(darkGlintThresholdTest2Wvl);
+//        return l8SpectralBandData[darkGlintTest2Index] > darkGlintThresholdTest2;
+//
+//    }
 
-    public boolean isDarkGlintTest2() {
-        Integer darkGlintTest2Index = Landsat8Constants.LANDSAT8_SPECTRAL_WAVELENGTH_MAP.get(darkGlintThresholdTest2Wvl);
-        return l8SpectralBandData[darkGlintTest2Index] > darkGlintThresholdTest2;
-
-    }
     // setter methods
 
     public void setL8SpectralBandData(float[] l8SpectralBandData) {

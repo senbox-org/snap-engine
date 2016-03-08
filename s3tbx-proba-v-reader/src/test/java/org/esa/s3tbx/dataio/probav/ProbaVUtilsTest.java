@@ -53,29 +53,29 @@ public class ProbaVUtilsTest extends TestCase {
 
     }
 
-    public void testGetFloatAttributes() {
+    public void testGetDoubleAttributes() {
         List<Attribute> attrList = new ArrayList<>();
-        final H5Datatype floatDatatype = new H5Datatype(H5Datatype.CLASS_FLOAT, H5Datatype.NATIVE, H5Datatype.NATIVE, -1);
-        final Attribute dummyAttr = new Attribute("dummy", floatDatatype, new long[]{1L});
+        final H5Datatype datatype = new H5Datatype(H5Datatype.CLASS_FLOAT, H5Datatype.NATIVE, H5Datatype.NATIVE, -1);
+        final Attribute dummyAttr = new Attribute("dummy", datatype, new long[]{1L});
         attrList.add(dummyAttr);
-        assertTrue(Float.isNaN(ProbaVUtils.getFloatAttributeValue(attrList, "blubb")));
+        assertTrue(Double.isNaN(ProbaVUtils.getDoubleAttributeValue(attrList, "blubb")));
 
-        final Attribute unitsAttr = new Attribute("NO_DATA", floatDatatype, new long[]{1L});
+        final Attribute unitsAttr = new Attribute("NO_DATA", datatype, new long[]{1L});
         unitsAttr.setValue(new float[]{Float.NaN});
         attrList.add(unitsAttr);
-        final float noDataFromAttributes = ProbaVUtils.getFloatAttributeValue(attrList, "NO_DATA");
-        assertTrue(Float.isNaN(noDataFromAttributes));
+        final double noDataFromAttributes = ProbaVUtils.getDoubleAttributeValue(attrList, "NO_DATA");
+        assertTrue(Double.isNaN(noDataFromAttributes));
 
-        final Attribute scaleAttr = new Attribute("SCALE", floatDatatype, new long[]{1L});
+        final Attribute scaleAttr = new Attribute("SCALE", datatype, new long[]{1L});
         scaleAttr.setValue(new float[]{250.0f});
         attrList.add(scaleAttr);
-        final float scaleFromAttributes = ProbaVUtils.getFloatAttributeValue(attrList, "SCALE");
-        assertEquals(250.0f, scaleFromAttributes);
+        final double scaleFromAttributes = ProbaVUtils.getDoubleAttributeValue(attrList, "SCALE");
+        assertEquals(250.0, scaleFromAttributes);
 
-        final Attribute topLeftLatAttr = new Attribute("TOP_LEFT_LONGITUDE", floatDatatype, new long[]{1L});
+        final Attribute topLeftLatAttr = new Attribute("TOP_LEFT_LONGITUDE", datatype, new long[]{1L});
         topLeftLatAttr.setValue(new float[]{87.3f});
         attrList.add(topLeftLatAttr);
-        final float topLeftLatFromAttributes = ProbaVUtils.getFloatAttributeValue(attrList, "TOP_LEFT_LONGITUDE");
-        assertEquals(87.3f, topLeftLatFromAttributes);
+        final double topLeftLatFromAttributes = ProbaVUtils.getDoubleAttributeValue(attrList, "TOP_LEFT_LONGITUDE");
+        assertEquals(87.3, topLeftLatFromAttributes);
     }
 }

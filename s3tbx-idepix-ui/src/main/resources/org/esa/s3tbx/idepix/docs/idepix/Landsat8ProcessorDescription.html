@@ -48,6 +48,18 @@
     open a data product currently not opened in the Sentinel Toolbox.
 </p>
 
+<h5>Supported Landsat-8 Source Products</h5>
+The following Landsat-8 source products are supported for Idepix classification:
+<ul>
+    <li>
+        Ls8ppprrrYYYYDDDGGGVV_MTL.txt:<br>
+        Landsat-8 Level 1 T- Terrain Corrected products (30/15m), for detailed product description and
+        file naming convention see USGS Landsat Product Handbook, section4
+        (http://landsat.usgs.gov/l8handbook_section4.php).
+    </li>
+</ul>
+
+
 <h5>Target Product Group</h5>
 
 <p class="i1">
@@ -72,24 +84,101 @@
 <p align="center"><img src="images/IdepixParameterLandsat8.png"></p>
 
 <p class="i1">
-    <b>Sensor: </b><br>
-    The corresponding sensor. The processor currently supports OLCI, SLSTR and MERIS.
-    The sensor must be selected from the drop-down menu. The default sensor is 'OLCI'.
+    <b>Width of cloud buffer (# of pixels): </b><br>
+    The width of the cloud buffer in # of pixels. The default value is 1.
 </p>
 
 <p class="i1">
-    <b>Conversion mode: </b><br>
-    Specifies if the conversion shall be from radiances to reflectances or backwards.
-    The conversion mode has one of the values 'RAD_TO_REFL', 'REFL_TO_RAD' and must be selected
-    from the drop-down menu. The default conversion mode is 'RAD_TO_REFL'. (Currently the 'REFL_TO_RAD'
-    mode is just a placeholder and only supports input products which were generated with this
-    processor using the 'RAD_TO_REFL' mode.)
+    <b>Refine pixel classification near coastlines: </b><br>
+    If set, the pixel classification near coastlines is refined using a spatial filtering.
+    This improves distinction of clouds and bright beaches. Note that this is a time consuming operation
+    for Landsat-8 products, as this filtering also considers neighbourhood pixels of the pixel being
+    classified. The default value is 'false'.
 </p>
 
 <p class="i1">
-    <b>Copy non spectral bands: </b><br>
-    If set, all non-spectral bands from the source product are written to target product.
-    The default value is 'false'.
+    <b>Neural Net to be applied: </b><br>
+    Specifies the neural net which is applied for the pixel classification. The user can select between a
+    standard neural net ('ALL') suitable for most conditions, and various other neural nets for certain conditions,
+    i.e. if land or water is dominant in the given scene. The neural nets with the suffix '_USE_THERMAL'
+    explicitly use the thermal infrared bands at 10895nm and 12005nm as input. The default neural net is 'ALL'.
+</p>
+
+<p class="i1">
+    <b>NN cloud ambiguous lower boundary: </b><br>
+    The boundary of the neural network output value where pixels are regarded as either clear (NN output lower
+    than boundary) or 'cloud ambiguous' (NN output higher than boundary). The output value of the neural network
+    (floating point number on the interval [0.0, 5.0]) is written to the target product in a band 'nnResult'.
+    Providing the NN cloud ambiguous lower boundary as user option allows a fine tuning of the pixel classification
+    under certain conditions. The default value is 1.95.
+</p>
+
+<p class="i1">
+    <b>NN cloud ambiguous/sure separation value: </b><br>
+    The boundary of the neural network output value where pixels are regarded as either 'cloud ambiguous' (NN output lower
+    than boundary) or 'cloud sure' (NN output higher than boundary). The output value of the neural network
+    (floating point number on the interval [0.0, 5.0]) is written to the target product in a band 'nnResult'.
+    Providing the NN cloud ambiguous/sure separation value as user option allows a fine tuning of the pixel classification
+    under certain conditions. The default value is 3.45.
+</p>
+
+<p class="i1">
+    <b>NN cloud sure /snow separation value: </b><br>
+    The boundary of the neural network output value where pixels are regarded as either 'cloud sure' (NN output lower
+    than boundary) or 'snow' (NN output higher than boundary). The output value of the neural network
+    (floating point number on the interval [0.0, 5.0]) is written to the target product in a band 'nnResult'.
+    Providing the NN cloud sure / snow separation value as user option allows a fine tuning of the pixel classification
+    under certain conditions. The default value is 4.3.
+</p>
+
+<p class="i1">
+    <b>Apply SHIMEZ cloud test: </b><br>
+    If set, the SHIMEZ cloud test (see algorithm specification for details) is applied for the cloud classification
+    in addition to the neural network. The default value is 'true'.
+</p>
+
+<p class="i1">
+    <b>Threshold A for SHIMEZ cloud test: </b><br>
+    The threshold A in the SHIMEZ cloud test (see algorithm specification for details). The default value is 0.1.
+</p>
+
+<p class="i1">
+    <b>Threshold B for SHIMEZ cloud test: </b><br>
+    The threshold B in the SHIMEZ cloud test (see algorithm specification for details). The default value is 0.25.
+</p>
+
+<p class="i1">
+    <b>Apply HOT cloud test: </b><br>
+    If set, the HOT cloud test (see algorithm specification for details) is applied for the cloud classification
+    in addition to the neural network. The default value is 'false'.
+</p>
+
+<p class="i1">
+    <b>Threshold A for HOT cloud test: </b><br>
+    The threshold A in the HOT cloud test (see algorithm specification for details). The default value is 0.1.
+</p>
+
+<p class="i1">
+    <b>Apply CLOST cloud test: </b><br>
+    If set, the CLOST cloud test (see algorithm specification for details) is applied for the cloud classification
+    in addition to the neural network. The default value is 'true'.
+</p>
+
+<p class="i1">
+    <b>Threshold A for CLOST cloud test: </b><br>
+    The threshold A in the CLOST cloud test (see algorithm specification for details). The default value is 0.001.
+</p>
+
+<p class="i1">
+    <b>Apply OTSU cloud test: </b><br>
+    If set, the OTSU cloud test (see algorithm specification for details) is applied for the cloud classification
+    in addition to the neural network. The default value is 'true'.
+</p>
+
+<p class="i1">
+    <b>Write source bands to the target product: </b><br>
+    If set, all bands from the source product are written to target product.
+    The default value is 'true'.
 </p>
 
 <hr>
