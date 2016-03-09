@@ -55,6 +55,7 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
+import org.openide.awt.ActionReferences;
 import org.openide.util.HelpCtx;
 import org.openide.util.NbBundle;
 import org.openide.windows.TopComponent;
@@ -87,7 +88,9 @@ import java.util.stream.Stream;
 )
 @TopComponent.Registration(mode = "explorer", openAtStartup = false, position = 150)
 @ActionID(category = "Window", id = "InsituClientTopComponent")
-@ActionReference(path = "Menu/View/Tool Windows")
+@ActionReferences({
+        @ActionReference(path = "Menu/View/Tool Windows"),
+        @ActionReference(path = "Menu/Vector/Import")})
 @TopComponent.OpenActionRegistration(
         displayName = "#CTL_InsituClientTopComponent_Name",
         preferredID = "InsituClientTopComponent"
@@ -107,9 +110,7 @@ public class InsituClientTopComponent extends TopComponent implements HelpCtx.Pr
         final TableLayout layout = new TableLayout(4);
         layout.setTableFill(TableLayout.Fill.HORIZONTAL);
         layout.setTableWeightX(0.5);
-        layout.setCellWeightX(0, 2, 2.0);
-        layout.setCellWeightX(0, 3, 0.0);
-        layout.setTableAnchor(TableLayout.Anchor.NORTHWEST);
+        layout.setTableAnchor(TableLayout.Anchor.WEST);
         layout.setTablePadding(4, 4);
 
         final JPanel contentPanel = new JPanel(layout);
