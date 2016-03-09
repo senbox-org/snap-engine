@@ -22,11 +22,15 @@
 </head>
 
 <body>
+
+<p>
 <table class="header">
     <tr class="header">
         <td class="header">&nbsp;
-            In-Situ Client (Demonstrator)</td>
-        <td class="header" align="right"><a href="nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/general/overview/SnapOverview.html"><img src="../images/snap_header.jpg" border=0></a>
+            In-Situ Client (Demonstrator)
+        </td>
+        <td class="header" align="right"><a href="nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/general/overview/SnapOverview.html"><img
+                src="../images/snap_header.jpg" border=0></a>
         </td>
     </tr>
 </table>
@@ -40,19 +44,24 @@
     <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer">
         <param name="content" value="http://forum.step.esa.int/">
         <param name="text" value="<html>our forum</html>">
-        <a href="http://forum.step.esa.int/" target="_blank">our forum</a>
-    </object>.
+    </object>
+    .
 </p>
 
 <p>
     Currently the In-Situ Client gives only limited access to the
     <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer">
-    <param name="content" value="http://mermaid.acri.fr/home/home.php">
-    <param name="text" value="<html>MERMAID In-situ Database</html>">
-    <a href="http://mermaid.acri.fr/home/home.php">MERMAID In-situ Database</a></object>.
+        <param name="content" value="http://mermaid.acri.fr/home/home.php">
+        <param name="text" value="<html>MERMAID In-situ Database</html>"></object> hosted by
+    <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer">
+        <param name="content" value="http://www.acri.fr">
+        <param name="text" value="<html>ACRI-ST</html>"></object>.
     Two datasets are available , namely BOUSSOLE and AERONET-OC.
 </p>
+
+<p align="center">
 <table>
+    <thead>
     <tr>
         <th>Dataset</th>
         <th>Latitude</th>
@@ -60,6 +69,8 @@
         <th>Start Date</th>
         <th>End Date</th>
     </tr>
+    </thead>
+    <tbody>
     <tr>
         <td>AERONET-OC</td>
         <td>43.367</td>
@@ -74,8 +85,81 @@
         <td>23/09/2003</td>
         <td>01/10/2003</td>
     </tr>
+    </tbody>
 </table>
+<br>
+<img src="../images/SatelliteImage.png"/><br/>
+<span style="font-size: x-small; ">The AERONET-OC (yellow) and BOUSSOLE (red) stations</span>
 
+<h3>The User Interface</h3>
+
+<p>
+    The user interface of the In-Situ Client allows
+<ul>
+    <li>to select the in-situ database to get the observations from.</li>
+    <li>to select the datasets and paramets the user is interested in.</li>
+    <li>to select the products which shall be provided with the in-situ observation data.</li>
+    <li>to specify the temporal extent search for observations. The start and end date are updated by the selected products.</li>
+    <li>to specify the spatial extent search for observations. The latitude and longitude boundaries are updated by the selected products.</li>
+</ul>
+
+<p align="center">
+    <img src="../images/InsituClient.png"/><br/>
+</p>
+
+<p class="i1">
+    <b>In-Situ Database:</b>
+    Select the In-Situ Database the client shall connect to.
+</p>
+
+<p class="i1">
+    <b>Dataset:</b>
+    After connected to the In-Situ Database the user can select one or multiple of the offered datasets. No selection means all datasets.
+</p>
+
+<p class="i1">
+    <b>Parameter:</b>
+    After connected to the In-Situ Database the user can select one or multiple of the offered parameter. The list depends also on the selected
+    datasets as different datasets offer differend parameters. No selection means all parameter.
+</p>
+
+<p class="i1">
+    <b>Product:</b>
+    The user can select one or multiple of the currently opened data products. The selected products will span the temporal and the spatial extent
+    for the in-situ data search.
+</p>
+
+<p class="i1">
+    <b>Start time:</b>
+    Specifies the start time of the temporal extent.
+</p>
+
+<p class="i1">
+    <b>End time:</b>
+    Specifies the end time of the temporal extent.
+</p>
+
+<p class="i1">
+    <b>Min longitude:</b>
+    Specifies the minimum longitude value of the spatial extent.
+</p>
+<p class="i1">
+    <b>Max longitude:</b>
+    Specifies the maximum longitude value of the spatial extent.
+</p>
+
+<p class="i1">
+    <b>Min latitude:</b>
+    Specifies the minimum latitude value of the spatial extent.
+</p>
+<p class="i1">
+    <b>Max latitude:</b>
+    Specifies the maximum latitude value of the spatial extent.
+</p>
+
+<img src="nbdocs://org.esa.snap.snap.tango/tango/22x22/actions/view-refresh.png">
+<img src="nbdocs://org.esa.snap.snap.tango/tango/22x22/actions/document-save.png">
+<img src="nbdocs://org.esa.snap.snap.tango/tango/22x22/apps/help-browser.png">
 
 <hr>
 </body>
