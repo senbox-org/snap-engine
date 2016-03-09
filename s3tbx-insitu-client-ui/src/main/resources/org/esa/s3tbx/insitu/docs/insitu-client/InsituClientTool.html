@@ -102,6 +102,10 @@
     <li>to specify the temporal extent search for observations. The start and end date are updated by the selected products.</li>
     <li>to specify the spatial extent search for observations. The latitude and longitude boundaries are updated by the selected products.</li>
 </ul>
+<p>
+    After downloading in-situ observations they are stored in the vector data nodes in each selected product if the geo-location of the
+    observation is contained in the product.
+</p>
 
 <p align="center">
     <img src="../images/InsituClient.png"/><br/>
@@ -170,8 +174,23 @@
 </p>
 
 <a name="dataPolicyWindow"><h3>Data Policy Window</h3></a>
+<p>
+    Before downloading the data a window is displayed in which you have to accept the data policy for each dataset which requires it.
+    You can also save all data policies to one file for later use when you want to acknowledge and cite the dataset.
+    If you don't accept the data policies or cancel the dialog the in-situ observations are not downloaded.
+</p>
 <p align="center">
     <img src="../images/DataPolicyWindow.png"/><br/>
+</p>
+
+
+<h3>Result</h3>
+<p>
+    The downloaded in-situ observations are stored in vector data nodes. For each parameter of each dataset one vector data node is created.
+    The following screen shot gives an overview how a product equiped with in-situ observations looks like.
+</p>
+<p align="center">
+    <img src="../images/ResultScreenshot.png"/><br/>
 </p>
 
 <hr>
