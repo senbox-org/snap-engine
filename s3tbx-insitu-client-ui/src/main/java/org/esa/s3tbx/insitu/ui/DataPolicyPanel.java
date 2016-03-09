@@ -10,7 +10,8 @@ import javax.swing.ButtonModel;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
+import javax.swing.border.LineBorder;
+import java.awt.Color;
 import java.awt.Cursor;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -66,8 +67,9 @@ class DataPolicyPanel extends JPanel {
         MultilineLabel policyTextArea = new MultilineLabel();
         policyTextArea.setColumns(80);
         policyTextArea.setRows(6);
+        policyTextArea.setBorder(new LineBorder(Color.BLACK));
         policyTextArea.setText(insituDataset.getPolicy());
-        add(new JScrollPane(policyTextArea));
+        add(policyTextArea);
     }
 
     public boolean isAccepted() {
