@@ -38,6 +38,7 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductNodeGroup;
 import org.esa.snap.core.datamodel.VectorDataNode;
 import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.rcp.SnapApp;
 import org.esa.snap.rcp.actions.help.HelpAction;
 import org.esa.snap.rcp.util.Dialogs;
@@ -54,6 +55,7 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
+import org.openide.awt.ActionReferences;
 import org.openide.util.HelpCtx;
 import org.openide.util.NbBundle;
 import org.openide.windows.TopComponent;
@@ -86,7 +88,9 @@ import java.util.stream.Stream;
 )
 @TopComponent.Registration(mode = "explorer", openAtStartup = false, position = 150)
 @ActionID(category = "Window", id = "InsituClientTopComponent")
-@ActionReference(path = "Menu/View/Tool Windows")
+@ActionReferences({
+        @ActionReference(path = "Menu/View/Tool Windows"),
+        @ActionReference(path = "Menu/Vector/Import")})
 @TopComponent.OpenActionRegistration(
         displayName = "#CTL_InsituClientTopComponent_Name",
         preferredID = "InsituClientTopComponent"
@@ -106,9 +110,7 @@ public class InsituClientTopComponent extends TopComponent implements HelpCtx.Pr
         final TableLayout layout = new TableLayout(4);
         layout.setTableFill(TableLayout.Fill.HORIZONTAL);
         layout.setTableWeightX(0.5);
-        layout.setCellWeightX(0, 2, 2.0);
-        layout.setCellWeightX(0, 3, 0.0);
-        layout.setTableAnchor(TableLayout.Anchor.NORTHWEST);
+        layout.setTableAnchor(TableLayout.Anchor.WEST);
         layout.setTablePadding(4, 4);
 
         final JPanel contentPanel = new JPanel(layout);
@@ -298,54 +300,58 @@ public class InsituClientTopComponent extends TopComponent implements HelpCtx.Pr
                 JPanel content = new JPanel(new VerticalLayout(4));
                 List<DataPolicyPanel> policyPanels = new ArrayList<>();
                 for (InsituDataset insituDataset : datasetList) {
-                    DataPolicyPanel datasetPolicyPanel = new DataPolicyPanel(insituDataset);
-                    content.add(datasetPolicyPanel);
-                    policyPanels.add(datasetPolicyPanel);
+                    String policy = insituDataset.getPolicy();
+                    if (StringUtils.isNotNullAndNotEmpty(policy)) {
+                        DataPolicyPanel datasetPolicyPanel = new DataPolicyPanel(insituDataset);
+                        content.add(datasetPolicyPanel);
+                        policyPanels.add(datasetPolicyPanel);
+                    }
                 }
-                ModalDialog policyDialog = new ModalDialog(null, "In-Situ Data", new JScrollPane(content), ModalDialog.ID_OK_CANCEL, null);
-                JPanel buttonPanel = policyDialog.getButtonPanel();
-                JCheckBox acceptAll = new JCheckBox("Accept All");
-                acceptAll.addActionListener(e -> {
-                    for (DataPolicyPanel policyPanel : policyPanels) {
-                        policyPanel.setAccepted(acceptAll.isSelected());
-                    }
-                });
-                buttonPanel.add(acceptAll, 0);
-                JButton saveButton = new JButton("Save data policies");
-                saveButton.addActionListener(e -> {
-                    File file = Dialogs.requestFileForSave("Save Data Policy File", false, null, ".txt", "insitu-policy", null,
-                                                           "s3tbx.insitu.policyExport");
-                    if (file == null) {
-                        return;
-                    }
-                    Path path = file.toPath();
-                    try (PrintWriter w = new PrintWriter(Files.newBufferedWriter(path), false)) {
-                        for (InsituDataset insituDataset : datasetList) {
-                            w.printf("Name: %s%n", insituDataset.getName());
-                            w.printf("Pi: %s%n", insituDataset.getPi());
-                            w.printf("Contact: %s%n", insituDataset.getContact());
-                            w.printf("Website: %s%n", insituDataset.getWebsite());
-                            w.printf("Data Policy: %s%n", insituDataset.getPolicy());
-                            w.println();
-                            w.flush();
+                if (!policyPanels.isEmpty()) {
+                    ModalDialog policyDialog = new ModalDialog(null, "In-Situ Data", new JScrollPane(content), ModalDialog.ID_OK_CANCEL, null);
+                    JPanel buttonPanel = policyDialog.getButtonPanel();
+                    JCheckBox acceptAll = new JCheckBox("Accept All");
+                    acceptAll.addActionListener(e -> {
+                        for (DataPolicyPanel policyPanel : policyPanels) {
+                            policyPanel.setAccepted(acceptAll.isSelected());
                         }
-                    } catch (IOException ioe) {
-                        SnapApp.getDefault().handleError("Could not write data policy file.", ioe);
-                    }
-                });
-                buttonPanel.add(saveButton, 0);
-                if (ModalDialog.ID_CANCEL == policyDialog.show()) {
-                    return;
-                }
-
-                for (DataPolicyPanel policyPanel : policyPanels) {
-                    if (!policyPanel.isAccepted()) {
-                        Dialogs.showWarning("In-Situ Data", "Not all data policies have been accepted.", null);
+                    });
+                    buttonPanel.add(acceptAll, 0);
+                    JButton saveButton = new JButton("Save data policies");
+                    saveButton.addActionListener(e -> {
+                        File file = Dialogs.requestFileForSave("Save Data Policy File", false, null, ".txt", "insitu-policy", null,
+                                                               "s3tbx.insitu.policyExport");
+                        if (file == null) {
+                            return;
+                        }
+                        Path path = file.toPath();
+                        try (PrintWriter w = new PrintWriter(Files.newBufferedWriter(path), false)) {
+                            for (InsituDataset insituDataset : datasetList) {
+                                w.printf("Name: %s%n", insituDataset.getName());
+                                w.printf("Pi: %s%n", insituDataset.getPi());
+                                w.printf("Contact: %s%n", insituDataset.getContact());
+                                w.printf("Website: %s%n", insituDataset.getWebsite());
+                                w.printf("Data Policy: %s%n", insituDataset.getPolicy());
+                                w.println();
+                                w.flush();
+                            }
+                        } catch (IOException ioe) {
+                            SnapApp.getDefault().handleError("Could not write data policy file.", ioe);
+                        }
+                    });
+                    buttonPanel.add(saveButton, 0);
+                    if (ModalDialog.ID_CANCEL == policyDialog.show()) {
                         return;
+                    }
+
+                    for (DataPolicyPanel policyPanel : policyPanels) {
+                        if (!policyPanel.isAccepted()) {
+                            Dialogs.showWarning("In-Situ Data", "Not all data policies have been accepted.", null);
+                            return;
+                        }
                     }
                 }
             }
-
 
             List<Product> selectedProducts = insituModel.getSelectedProducts();
             List<? extends InsituDataset> datasetList = response.getDatasets();
