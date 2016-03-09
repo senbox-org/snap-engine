@@ -83,6 +83,9 @@ public class OtsuBinarizeOp extends Operator {
             BufferedImage clostImageRgb = ProductUtils.createRgbImage(rgbChannelNodes, clostImageInfo, ProgressMonitor.NULL);
             final BufferedImage clostImageGray = OtsuBinarize.toGray(clostImageRgb);
             final BufferedImage clostImageBinarized = OtsuBinarize.binarize(clostImageGray);
+            System.out.println("clostImageRgbSize = " + clostImageRgb.getWidth() + "," + clostImageRgb.getHeight());
+            System.out.println("clostImageBinarizedSize = " + clostImageBinarized.getWidth() + "," + clostImageBinarized.getHeight());
+            System.out.println("clostImageGreySize = " + clostImageGray.getWidth() + "," + clostImageGray.getHeight());
             Product otsuProduct;
             if (otsuMode.equals("GREY")) {
                 otsuProduct = createGreyProduct(clostImageGray);

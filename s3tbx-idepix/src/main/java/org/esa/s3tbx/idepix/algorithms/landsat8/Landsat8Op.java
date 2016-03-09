@@ -1,13 +1,11 @@
 package org.esa.s3tbx.idepix.algorithms.landsat8;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.glayer.tools.Tools;
 import org.esa.s3tbx.idepix.core.AlgorithmSelector;
 import org.esa.s3tbx.idepix.core.IdepixConstants;
 import org.esa.s3tbx.idepix.core.util.IdepixUtils;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.Stx;
-import org.esa.snap.core.datamodel.StxFactory;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
@@ -17,7 +15,9 @@ import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.ProductUtils;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
+import javax.media.jai.RenderedOp;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,7 +45,7 @@ public class Landsat8Op extends Operator {
 
     // overall parameters
 
-//    @Parameter(defaultValue = "false",
+    //    @Parameter(defaultValue = "false",
 //            label = " Compute cloud shadow",
 //            description = " Compute cloud shadow with the algorithm from 'Fronts' project")
 //    private boolean computeCloudShadow;  // todo: later if we find a way how to compute
@@ -126,7 +126,7 @@ public class Landsat8Op extends Operator {
 //               label = "OTSU processing mode (grey or binary target image)")
     private String otsuMode = "BINARY";
 
-//    @Parameter(defaultValue = "false",
+    //    @Parameter(defaultValue = "false",
 //            description = "If computed, write OTSU bands (Clost and binary) to the target product.",
 //            label = " Write OTSU bands (Clost and binary) to the target product")
 //    private boolean outputOtsuBands;
@@ -171,18 +171,28 @@ public class Landsat8Op extends Operator {
     private final double darkGlintThreshTest2 = 0.15;
     private String darkGlintThreshTest2WavelengthString = "1610";
 
+    private int standardBandWidth;
+    private int standardBandHeight;
 
     @Override
     public void initialize() throws OperatorException {
         System.out.println("Running IDEPIX Landsat 8 - source product: " + sourceProduct.getName());
 
+
         final boolean inputProductIsValid = IdepixUtils.validateInputProduct(sourceProduct, AlgorithmSelector.LANDSAT8);
         if (!inputProductIsValid) {
             throw new OperatorException(IdepixConstants.INPUT_INCONSISTENCY_ERROR_MESSAGE);
         }
+        standardBandWidth =
+                sourceProduct.getBand(Landsat8Constants.LANDSAT8_BLUE_BAND_NAME).getSourceImage().getWidth();
+        standardBandHeight =
+                sourceProduct.getBand(Landsat8Constants.LANDSAT8_BLUE_BAND_NAME).getSourceImage().getHeight();
+
         checkIfLandsatIsReadAsReflectance();
 
         if (applyClostCloudTest || applyOtsuCloudTest) {
+            rescalePanchromaticBand();
+
             HashMap<String, Product> clostInput = new HashMap<>();
             clostInput.put("l8source", sourceProduct);
             clostProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(ClostOp.class), GPF.NO_PARAMS, clostInput);
@@ -202,16 +212,34 @@ public class Landsat8Op extends Operator {
         }
 
         preProcess();
-//        preProcessWatermask();
         computeCloudProduct();
         postProcess();
 
-        targetProduct = IdepixUtils.cloneProduct(classificationProduct);
+        targetProduct = IdepixUtils.cloneProduct(classificationProduct, standardBandWidth, standardBandHeight, false);
 
         Band cloudFlagBand = targetProduct.getBand(IdepixUtils.IDEPIX_CLOUD_FLAGS);
         cloudFlagBand.setSourceImage(postProcessingProduct.getBand(IdepixUtils.IDEPIX_CLOUD_FLAGS).getSourceImage());
 
         copyOutputBands();
+    }
+
+    private void rescalePanchromaticBand() {
+        final Band panBand = sourceProduct.getBand(Landsat8Constants.LANDSAT8_PANCHROMATIC_BAND_NAME);
+
+        final int panBandImageWidth = panBand.getSourceImage().getWidth();
+        final int panBandImageHeight = panBand.getSourceImage().getHeight();
+        if (standardBandWidth != panBandImageWidth || standardBandHeight != panBandImageHeight) {
+            final float scaleFactorW = (float) (standardBandWidth * 1.0 / panBandImageWidth);
+            final RenderedOp scaledPanImage = Tools.scaleImage(panBand.getSourceImage(), scaleFactorW);
+            if (scaledPanImage.getWidth() == standardBandWidth && scaledPanImage.getHeight() == standardBandHeight) {
+                panBand.setSourceImage(scaledPanImage);
+            } else {
+                System.out.println
+                        ("WARNING: cannot rescale panchromatic band properly - will skip CLOST and OTSU cloud tests.");
+                applyClostCloudTest = false;
+                applyOtsuCloudTest = false;
+            }
+        }
     }
 
     private void checkIfLandsatIsReadAsReflectance() {
@@ -228,16 +256,6 @@ public class Landsat8Op extends Operator {
         waterMaskParameters.put("subSamplingFactorY", OVERSAMPLING_FACTOR_Y);
         waterMaskProduct = GPF.createProduct("LandWaterMask", waterMaskParameters, sourceProduct);
     }
-
-    // this is the Land-Sea-Mask by Array (Jun Lu, Luis Veci). Actually we went back to our SRTM mask.
-//    private void preProcessWatermask() {
-//        HashMap<String, Object> waterMaskParameters = new HashMap<>();
-//        final String[] sourceBandNames = {Landsat8Constants.LANDSAT8_RED_BAND_NAME};
-//        waterMaskParameters.put("sourceBandNames", sourceBandNames);
-//        waterMaskParameters.put("landMask", false);
-////        waterMaskParameters.put("sourceBandNames", Landsat8Constants.LANDSAT8_SPECTRAL_BAND_NAMES);
-//        waterMaskProduct = GPF.createProduct("Land-Sea-Mask", waterMaskParameters, sourceProduct);
-//    }
 
     private void setClassificationParameters() {
         classificationParameters = new HashMap<>();
@@ -282,11 +300,6 @@ public class Landsat8Op extends Operator {
         classificationParameters.put("darkGlintThreshTest2", darkGlintThreshTest2);
         classificationParameters.put("darkGlintThreshTest2Wavelength",
                                      Landsat8Utils.getWavelengthFromString(darkGlintThreshTest2WavelengthString));
-
-        // currently not used todo: clarify if needed
-//        classificationParameters.put("alternativeFirstClassBoundary", alternativeFirstClassBoundary);
-//        classificationParameters.put("alternativeSecondClassBoundary", alternativeSecondClassBoundary);
-//        classificationParameters.put("alternativeThirdClassBoundary", alternativeThirdClassBoundary);
     }
 
     private void computeCloudProduct() {
@@ -301,7 +314,6 @@ public class Landsat8Op extends Operator {
 
     private void postProcess() {
         HashMap<String, Product> input = new HashMap<>();
-        input.put("l1b", sourceProduct);
         input.put("landsatCloud", classificationProduct);
         input.put("waterMask", waterMaskProduct);
 
@@ -317,9 +329,11 @@ public class Landsat8Op extends Operator {
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
         Landsat8Utils.setupLandsat8Bitmasks(targetProduct);
         if (outputSourceBands) {
+            ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
             for (Band sourceBand : sourceProduct.getBands()) {
-                ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
-                ProductUtils.copyBand(sourceBand.getName(), sourceProduct, targetProduct, true);
+                if (!sourceBand.getName().equals(Landsat8Constants.LANDSAT8_PANCHROMATIC_BAND_NAME)) {
+                    ProductUtils.copyBand(sourceBand.getName(), sourceProduct, targetProduct, true);
+                }
             }
         }
 

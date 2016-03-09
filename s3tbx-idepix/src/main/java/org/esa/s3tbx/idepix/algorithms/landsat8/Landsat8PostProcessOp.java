@@ -56,8 +56,6 @@ public class Landsat8PostProcessOp extends Operator {
     @Parameter(label = " Cloud classification band suffix")
     private String cloudClassifBandSuffix;
 
-    @SourceProduct(alias = "l1b")
-    private Product l1bProduct;
     @SourceProduct(alias = "landsatCloud")
     private Product landsatCloudProduct;
     @SourceProduct(alias = "waterMask", optional=true)
@@ -82,7 +80,7 @@ public class Landsat8PostProcessOp extends Operator {
                 waterFractionBand = waterMaskProduct.getBand("land_water_fraction");
             }
 
-            geoCoding = l1bProduct.getSceneGeoCoding();
+            geoCoding = landsatCloudProduct.getSceneGeoCoding();
 
             final String cloudClassifBandName = IdepixUtils.IDEPIX_CLOUD_FLAGS;
             origCloudFlagBand = landsatCloudProduct.getBand(cloudClassifBandName);
@@ -135,47 +133,7 @@ public class Landsat8PostProcessOp extends Operator {
         }
 
         if (computeCloudShadow) {
-            // todo: we need something modified, as we have no CTP
-//            CloudShadowFronts cloudShadowFronts = new CloudShadowFronts(
-//                    geoCoding,
-//                    srcRectangle,
-//                    targetRectangle,
-//                    szaTile, saaTile, ctpTile, altTile) {
-//
-//
-//                @Override
-//                protected boolean isCloudForShadow(int x, int y) {
-//                    final boolean is_cloud_current;
-//                    if (!targetTile.getRectangle().contains(x, y)) {
-//                        is_cloud_current = sourceFlagTile.getSampleBit(x, y, Landsat8Constants.F_CLOUD);
-//                    } else {
-//                        is_cloud_current = targetTile.getSampleBit(x, y, Landsat8Constants.F_CLOUD);
-//                    }
-//                    if (is_cloud_current) {
-//                        final boolean isNearCoastline = isNearCoastline(x, y, waterFractionTile, srcRectangle);
-//                        if (!isNearCoastline) {
-//                            return true;
-//                        }
-//                    }
-//                    return false;
-//                }
-//
-//                @Override
-//                protected boolean isCloudFree(int x, int y) {
-//                    return !sourceFlagTile.getSampleBit(x, y, Landsat8Constants.F_CLOUD);
-//                }
-//
-//                @Override
-//                protected boolean isSurroundedByCloud(int x, int y) {
-//                    return isPixelSurrounded(x, y, sourceFlagTile, Landsat8Constants.F_CLOUD);
-//                }
-//
-//                @Override
-//                protected void setCloudShadow(int x, int y) {
-//                    targetTile.setSample(x, y, Landsat8Constants.F_CLOUD_SHADOW, true);
-//                }
-//            };
-//            cloudShadowFronts.computeCloudShadow();
+            // todo: algorithm needed
         }
     }
 
@@ -243,8 +201,8 @@ public class Landsat8PostProcessOp extends Operator {
         for (int i = LEFT_BORDER; i <= RIGHT_BORDER; i++) {
             for (int j = TOP_BORDER; j <= BOTTOM_BORDER; j++) {
                 if (rectangle.contains(i, j)) {
-                    if (!(l1bProduct.getSceneGeoCoding() instanceof TiePointGeoCoding) &&
-                            !(l1bProduct.getSceneGeoCoding() instanceof CrsGeoCoding)) {
+                    if (!(landsatCloudProduct.getSceneGeoCoding() instanceof TiePointGeoCoding) &&
+                            !(landsatCloudProduct.getSceneGeoCoding() instanceof CrsGeoCoding)) {
                         if (waterFractionTile.getSampleInt(i, j) != waterFractionCenter) {
                             return true;
                         }

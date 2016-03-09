@@ -123,7 +123,7 @@ public class AvhrrOp extends BasisOp {
         classificationProduct = acClassificationOp.getTargetProduct();
         postProcess();
 
-        targetProduct = IdepixUtils.cloneProduct(classificationProduct);
+        targetProduct = IdepixUtils.cloneProduct(classificationProduct, true);
         targetProduct.setName(sourceProduct.getName() + ".idepix");
 
         Band cloudFlagBand;

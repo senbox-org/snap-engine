@@ -17,6 +17,7 @@ package org.esa.s3tbx.idepix.ui.actions;
 import org.esa.s3tbx.idepix.algorithms.modis.ModisOp;
 import org.esa.s3tbx.idepix.ui.IdepixDefaultDialog;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
+import org.esa.snap.core.gpf.ui.DefaultSingleTargetProductDialog;
 import org.esa.snap.rcp.actions.AbstractSnapAction;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
@@ -46,11 +47,20 @@ public class IdepixModisAction extends AbstractSnapAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         final OperatorMetadata opMetadata = ModisOp.class.getAnnotation(OperatorMetadata.class);
-        final IdepixDefaultDialog dialog = new IdepixDefaultDialog(opMetadata.alias(),
-                                                                   getAppContext(),
-                                                                   "Idepix - Pixel Identification and Classification (MODIS mode)",
-                                                                   HELP_ID,
-                                                                   "_idepix");
+
+        final DefaultSingleTargetProductDialog dialog =
+                new DefaultSingleTargetProductDialog(opMetadata.alias(),
+                                                     getAppContext(),
+                                                     "Idepix - Pixel Identification and Classification (MODIS mode)",
+                                                     HELP_ID);
+
+//        final IdepixDefaultDialog dialog = new IdepixDefaultDialog(opMetadata.alias(),
+//                                                                   getAppContext(),
+//                                                                   "Idepix - Pixel Identification and Classification (MODIS mode)",
+//                                                                   HELP_ID,
+//                                                                   "_idepix");
+
+        dialog.setTargetProductNameSuffix("_IDEPIX");
         dialog.getJDialog().pack();
         dialog.show();
     }

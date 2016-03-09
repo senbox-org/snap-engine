@@ -26,6 +26,9 @@ public class Landsat8Utils {
         int h = cloudProduct.getSceneRasterHeight();
         Mask mask;
 
+        System.out.println("setupLandsat8Bitmasks: w = " + w);
+        System.out.println("setupLandsat8Bitmasks: h = " + h);
+
         mask = Mask.BandMathsType.create("landsat8_invalid",
                                          Landsat8Constants.F_INVALID_DESCR_TEXT, w, h,
                                          "cloud_classif_flags.F_INVALID",

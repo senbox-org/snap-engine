@@ -46,11 +46,15 @@ public class IdepixUtils {
     private IdepixUtils() {
     }
 
-    public static Product cloneProduct(Product sourceProduct) {
+    public static Product cloneProduct(Product sourceProduct, boolean copySourceBands) {
+        return cloneProduct(sourceProduct, sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight(), copySourceBands);
+    }
+
+    public static Product cloneProduct(Product sourceProduct, int width, int height, boolean copySourceBands) {
         Product clonedProduct = new Product(sourceProduct.getName(),
                                             sourceProduct.getProductType(),
-                                            sourceProduct.getSceneRasterWidth(),
-                                            sourceProduct.getSceneRasterHeight());
+                                            width,
+                                            height);
 
         ProductUtils.copyMetadata(sourceProduct, clonedProduct);
         ProductUtils.copyGeoCoding(sourceProduct, clonedProduct);
@@ -60,23 +64,24 @@ public class IdepixUtils {
         clonedProduct.setStartTime(sourceProduct.getStartTime());
         clonedProduct.setEndTime(sourceProduct.getEndTime());
 
-        // copy all bands from source product
-        for (Band b : sourceProduct.getBands()) {
-            if (!clonedProduct.containsBand(b.getName())) {
-                ProductUtils.copyBand(b.getName(), sourceProduct, clonedProduct, true);
-                if (isIdepixSpectralBand(b)) {
-                    ProductUtils.copyRasterDataNodeProperties(b, clonedProduct.getBand(b.getName()));
+        if (copySourceBands) {
+            // copy all bands from source product
+            for (Band b : sourceProduct.getBands()) {
+                if (!clonedProduct.containsBand(b.getName())) {
+                    ProductUtils.copyBand(b.getName(), sourceProduct, clonedProduct, true);
+                    if (isIdepixSpectralBand(b)) {
+                        ProductUtils.copyRasterDataNodeProperties(b, clonedProduct.getBand(b.getName()));
+                    }
+                }
+            }
+
+            for (int i = 0; i < sourceProduct.getNumTiePointGrids(); i++) {
+                TiePointGrid srcTPG = sourceProduct.getTiePointGridAt(i);
+                if (!clonedProduct.containsTiePointGrid(srcTPG.getName())) {
+                    clonedProduct.addTiePointGrid(srcTPG.cloneTiePointGrid());
                 }
             }
         }
-
-        for (int i = 0; i < sourceProduct.getNumTiePointGrids(); i++) {
-            TiePointGrid srcTPG = sourceProduct.getTiePointGridAt(i);
-            if (!clonedProduct.containsTiePointGrid(srcTPG.getName())) {
-                clonedProduct.addTiePointGrid(srcTPG.cloneTiePointGrid());
-            }
-        }
-
 
         return clonedProduct;
     }

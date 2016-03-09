@@ -1,5 +1,7 @@
 package org.esa.s3tbx.idepix.algorithms.landsat8;
 
+import com.bc.ceres.glayer.tools.Tools;
+import com.bc.ceres.glevel.MultiLevelImage;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
@@ -9,9 +11,12 @@ import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
+import org.esa.snap.core.gpf.common.resample.ResamplingOp2;
 
+import javax.media.jai.Interpolation;
 import javax.media.jai.RenderedOp;
 import javax.media.jai.operator.MultiplyDescriptor;
+import javax.media.jai.operator.ScaleDescriptor;
 import java.awt.image.RenderedImage;
 
 /**
@@ -62,8 +67,8 @@ public class ClostOp extends Operator {
 
         Product product = new Product(sourceProduct.getName() + "_clost",
                                       sourceProduct.getProductType() + " (clost)",
-                                      sourceProduct.getSceneRasterWidth(),
-                                      sourceProduct.getSceneRasterHeight());
+                                      blueAerosolPanCirrusImage.getWidth(),
+                                      blueAerosolPanCirrusImage.getHeight());
 
         product.setSceneGeoCoding(sourceProduct.getSceneGeoCoding());
         product.setDescription("Product holding Clost Image");

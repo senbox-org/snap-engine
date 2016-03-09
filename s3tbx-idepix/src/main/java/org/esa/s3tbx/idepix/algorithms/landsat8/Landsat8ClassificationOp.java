@@ -242,8 +242,13 @@ public class Landsat8ClassificationOp extends Operator {
     }
 
     void createTargetProduct() throws OperatorException {
-        int sceneWidth = sourceProduct.getSceneRasterWidth();
-        int sceneHeight = sourceProduct.getSceneRasterHeight();
+        // this does not work if panchromatic band has different size than others:
+//        int sceneWidth = sourceProduct.getSceneRasterWidth();
+//        int sceneHeight = sourceProduct.getSceneRasterHeight();
+        // use this instead:
+        final Band blueBand = sourceProduct.getBand(Landsat8Constants.LANDSAT8_BLUE_BAND_NAME);
+        int sceneWidth = blueBand.getRasterWidth();
+        int sceneHeight = blueBand.getRasterHeight();
 
         targetProduct = new Product(sourceProduct.getName(), sourceProduct.getProductType(), sceneWidth, sceneHeight);
 
@@ -257,14 +262,13 @@ public class Landsat8ClassificationOp extends Operator {
         // todo - temporarily added the bands for testing. Shall be removed later. (mp/08.09.2015)
         // but keep the NN result band! (od/02.03.2016)
         targetProduct.addBand(NN_RESULT_BAND_NAME, ProductData.TYPE_FLOAT32);
-//        final Band dgt1 = targetProduct.addBand(DARK_GLINT_TEST_ONE_BAND_NAME, ProductData.TYPE_INT8);
-//        dgt1.setDescription(String.format("Dark Glint Test 1 @%d", darkGlintThreshTest1Wavelength));
-//        final Band dgt2 = targetProduct.addBand(DARK_Glint_TEST_TWO_BAND_NAME, ProductData.TYPE_INT8);
-//        dgt2.setDescription(String.format("Dark Glint Test 2 @%d", darkGlintThreshTest2Wavelength));
 
-        ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
-
-        ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
+        final Scene srcScene = SceneFactory.createScene(blueBand);
+        final Scene destScene = SceneFactory.createScene(targetProduct);
+        if (srcScene != null && destScene != null) {
+            srcScene.transferGeoCodingTo(destScene, null);
+        }
+//        ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
         targetProduct.setStartTime(sourceProduct.getStartTime());
         targetProduct.setEndTime(sourceProduct.getEndTime());
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
