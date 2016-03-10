@@ -18,16 +18,13 @@ import org.esa.snap.core.util.RectangleExtender;
 
 import java.awt.*;
 
-//import org.esa.s3tbx.idepix.core.IdepixConstants;
-
 /**
  * Operator used to consolidate cloud flag for Landsat 8:
  * - coastline refinement
  * - cloud buffer (LC algo as default)
- * - cloud shadow (from Fronts)
+ * - cloud shadow (tbd)
  *
  * @author olafd
- * @since Idepix 2.1
  */
 @OperatorMetadata(alias = "Idepix.Landsat8.Postprocess",
         version = "2.2",
@@ -49,7 +46,7 @@ public class Landsat8PostProcessOp extends Operator {
     private boolean computeCloudShadow = false;   // todo: we have no info at all for this (pressure, height, temperature)
 
     @Parameter(defaultValue = "false",
-            label = " Refine pixel classification near coastlines",
+            label = " Refine pixel classification near coastlines (time consuming!)",
             description = "Refine pixel classification near coastlines. ")
     private boolean refineClassificationNearCoastlines;
 
@@ -82,7 +79,7 @@ public class Landsat8PostProcessOp extends Operator {
 
             geoCoding = landsatCloudProduct.getSceneGeoCoding();
 
-            final String cloudClassifBandName = IdepixUtils.IDEPIX_CLOUD_FLAGS;
+            final String cloudClassifBandName = IdepixUtils.IDEPIX_CLASSIF_FLAGS;
             origCloudFlagBand = landsatCloudProduct.getBand(cloudClassifBandName);
             int extendedWidth = 64;
             int extendedHeight = 64; // todo: what do we need?

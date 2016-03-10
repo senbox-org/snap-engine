@@ -12,7 +12,13 @@ import java.awt.image.BufferedImage;
 
 public class OtsuBinarize {
 
-    // Return histogram of grayscale image
+    /**
+     * Provides a histogram of the grayscale image
+     *
+     * @param input - the grayscale image
+     *
+     * @return - the histogram
+     */
     public static int[] imageHistogram(BufferedImage input) {
 
         int[] histogram = new int[256];
@@ -30,7 +36,13 @@ public class OtsuBinarize {
 
     }
 
-    // The luminance method
+    /**
+     * Provides grayscale from original image (luminance method)
+     *
+     * @param original - original image
+     *
+     * @return - grayscale image
+     */
     public static BufferedImage toGray(BufferedImage original) {
 
         int alpha, red, green, blue;
@@ -58,6 +70,43 @@ public class OtsuBinarize {
         }
 
         return lum;
+
+    }
+
+    /**
+     * Provides binarized from original image (luminance method)
+     *
+     * @param original - original image
+     *
+     * @return - binarized image
+     */
+    public static BufferedImage binarize(BufferedImage original) {
+
+        int red;
+        int newPixel;
+
+        int threshold = otsuTreshold(original);
+
+        BufferedImage binarized = new BufferedImage(original.getWidth(), original.getHeight(), original.getType());
+
+        for (int i = 0; i < original.getWidth(); i++) {
+            for (int j = 0; j < original.getHeight(); j++) {
+
+                // Get pixels
+                red = new Color(original.getRGB(i, j)).getRed();
+                int alpha = new Color(original.getRGB(i, j)).getAlpha();
+                if (red > threshold) {
+                    newPixel = 255;
+                } else {
+                    newPixel = 1;
+//                    newPixel = 0;
+                }
+                newPixel = colorToRGB(alpha, newPixel, newPixel, newPixel);
+                binarized.setRGB(i, j, newPixel);
+            }
+        }
+
+        return binarized;
 
     }
 
@@ -97,36 +146,6 @@ public class OtsuBinarize {
         }
 
         return threshold;
-
-    }
-
-    public static BufferedImage binarize(BufferedImage original) {
-
-        int red;
-        int newPixel;
-
-        int threshold = otsuTreshold(original);
-
-        BufferedImage binarized = new BufferedImage(original.getWidth(), original.getHeight(), original.getType());
-
-        for (int i = 0; i < original.getWidth(); i++) {
-            for (int j = 0; j < original.getHeight(); j++) {
-
-                // Get pixels
-                red = new Color(original.getRGB(i, j)).getRed();
-                int alpha = new Color(original.getRGB(i, j)).getAlpha();
-                if (red > threshold) {
-                    newPixel = 255;
-                } else {
-                    newPixel = 1;
-//                    newPixel = 0;
-                }
-                newPixel = colorToRGB(alpha, newPixel, newPixel, newPixel);
-                binarized.setRGB(i, j, newPixel);
-            }
-        }
-
-        return binarized;
 
     }
 

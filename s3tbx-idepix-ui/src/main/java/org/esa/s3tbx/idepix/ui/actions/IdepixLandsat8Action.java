@@ -15,9 +15,8 @@
 package org.esa.s3tbx.idepix.ui.actions;
 
 import org.esa.s3tbx.idepix.algorithms.landsat8.Landsat8Op;
-import org.esa.snap.core.gpf.OperatorSpi;
+import org.esa.s3tbx.idepix.ui.IdepixLandsat8Dialog;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
-import org.esa.snap.core.gpf.ui.DefaultSingleTargetProductDialog;
 import org.esa.snap.rcp.actions.AbstractSnapAction;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
@@ -48,16 +47,16 @@ public class IdepixLandsat8Action extends AbstractSnapAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         final OperatorMetadata opMetadata = Landsat8Op.class.getAnnotation(OperatorMetadata.class);
-        final DefaultSingleTargetProductDialog dialog =
-                new DefaultSingleTargetProductDialog(opMetadata.alias(),
-                                                     getAppContext(),
-                                                     "Idepix - Pixel Identification and Classification (Landsat-8 mode)",
-                                                     HELP_ID);
+//        final DefaultSingleTargetProductDialog dialog =
+//                new DefaultSingleTargetProductDialog(opMetadata.alias(),
+//                                                     getAppContext(),
+//                                                     "Idepix - Pixel Identification and Classification (Landsat-8 mode)",
+//                                                     HELP_ID);
 
-//        final IdepixLandsat8Dialog dialog = new IdepixLandsat8Dialog(opMetadata.alias(),
-//                                                                     getAppContext(),
-//                                                                     "Idepix - Pixel Identification and Classification (Landsat-8 mode)",
-//                                                                     HELP_ID);
+        final IdepixLandsat8Dialog dialog = new IdepixLandsat8Dialog(opMetadata.alias(),
+                                                                     getAppContext(),
+                                                                     "Idepix - Pixel Identification and Classification (Landsat-8 mode)",
+                                                                     HELP_ID);
         dialog.setTargetProductNameSuffix("_IDEPIX");
         dialog.getJDialog().pack();
         dialog.show();

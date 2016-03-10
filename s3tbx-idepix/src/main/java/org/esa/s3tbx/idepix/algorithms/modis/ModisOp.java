@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * The Idepix pixel classification for MODIS products
+ * Idepix operator for pixel identification and classification for MODIS
  *
  * @author olafd
  */
@@ -64,7 +64,7 @@ public class ModisOp extends BasisOp {
 
     private boolean applyOrLogicInCloudTest;
 
-    // former user options, now fixed
+    // former user options, now fix
     private boolean applyBrightnessTest = true;
     private final double glintThresh859 = 0.15;
 

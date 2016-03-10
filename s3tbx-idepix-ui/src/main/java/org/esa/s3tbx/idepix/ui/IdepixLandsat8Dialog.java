@@ -24,16 +24,13 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 /**
- * todo: add comment
- * To change this template use File | Settings | File Templates.
- * Date: 19.11.2015
- * Time: 10:43
+ * Specific Idepix dialog for Landsat 8.
+ * Exceeds standard functionality: NN default separation values are dynamically updated in GUI if NN is changed.
  *
  * @author olafd
  */
@@ -53,7 +50,7 @@ public class IdepixLandsat8Dialog extends SingleTargetProductDialog {
     private JComboBox nnSelectionComboBox;
 
     public IdepixLandsat8Dialog(String operatorName, AppContext appContext, String title, String helpID) {
-        super(appContext, title, helpID);
+        super(appContext, title, ID_APPLY_CLOSE, helpID);
         this.operatorName = operatorName;
         targetProductNameSuffix = "";
 
@@ -217,18 +214,15 @@ public class IdepixLandsat8Dialog extends SingleTargetProductDialog {
             Selection selection = event.getSelection();
             if (selection != null) {
                 final Product selectedProduct = (Product) selection.getSelectedValue();
-                if (selectedProduct != null) {
-                    String productType = selectedProduct.getProductType();
-                    if (selectedProduct != currentProduct) {
-                        if (currentProduct != null) {
-                            currentProduct.removeProductNodeListener(this);
-                        }
-                        currentProduct = selectedProduct;
-                        currentProduct.addProductNodeListener(this);
-                        updateTargetProductName();
-                        updateValueSets(currentProduct);
-                        updateSourceProduct();
+                if (selectedProduct != null && selectedProduct != currentProduct) {
+                    if (currentProduct != null) {
+                        currentProduct.removeProductNodeListener(this);
                     }
+                    currentProduct = selectedProduct;
+                    currentProduct.addProductNodeListener(this);
+                    updateTargetProductName();
+                    updateValueSets(currentProduct);
+                    updateSourceProduct();
                 }
             }
         }
@@ -288,28 +282,6 @@ public class IdepixLandsat8Dialog extends SingleTargetProductDialog {
                 }
             }
             propertyDescriptor.setValueSet(new ValueSet(values));
-        }
-    }
-
-    private class NNSelectionChangedHandler extends AbstractSelectionChangeListener {
-        File currentNNFile;
-
-        @Override
-        public void selectionChanged(SelectionChangeEvent event) {
-            Selection selection = event.getSelection();
-            if (selection != null) {
-                final File selectedNNFile = (File) selection.getSelectedValue();
-                if (selectedNNFile != null) {
-                    if (selectedNNFile != currentNNFile) {
-                        currentNNFile = selectedNNFile;
-                    }
-                    checkComponentsToChange(selectedNNFile);
-                }
-            }
-        }
-
-        private void checkComponentsToChange(File selectedNNFile) {
-            System.out.println("CHANGE: selectedNNFile = " + selectedNNFile.getName());
         }
     }
 

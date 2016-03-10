@@ -84,7 +84,7 @@ public class AvhrrPostProcessOp extends Operator {
 
             geoCoding = l1bProduct.getSceneGeoCoding();
 
-            origCloudFlagBand = avhrrCloudProduct.getBand(IdepixUtils.IDEPIX_PIXEL_CLASSIF_FLAGS);
+            origCloudFlagBand = avhrrCloudProduct.getBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS);
             rt3Band = avhrrCloudProduct.getBand("rt_3");
             bt4Band = avhrrCloudProduct.getBand("bt_4");
             refl1Band = avhrrCloudProduct.getBand("refl_1");
@@ -100,7 +100,7 @@ public class AvhrrPostProcessOp extends Operator {
             );
 
 
-            ProductUtils.copyBand(IdepixUtils.IDEPIX_PIXEL_CLASSIF_FLAGS, avhrrCloudProduct, postProcessedCloudProduct, false);
+            ProductUtils.copyBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS, avhrrCloudProduct, postProcessedCloudProduct, false);
             setTargetProduct(postProcessedCloudProduct);
         }
     }

@@ -34,10 +34,10 @@ public class Landsat8ClassificationOp extends Operator {
 
     // the water mask ends at 59 Degree south, stop earlier to avoid artefacts
     private static final float WATER_MASK_SOUTH_BOUND = -58.0f;
-    // todo - temporary bands; should be removed when algorithm is stable (mp/10.09.2015)
     private static final String NN_RESULT_BAND_NAME = "nnResult";
-    private static final String DARK_GLINT_TEST_ONE_BAND_NAME = "darkGlintTest1";
-    private static final String DARK_Glint_TEST_TWO_BAND_NAME = "darkGlintTest2";
+    // currently not used:
+//    private static final String DARK_GLINT_TEST_ONE_BAND_NAME = "darkGlintTest1";
+//    private static final String DARK_Glint_TEST_TWO_BAND_NAME = "darkGlintTest2";
 
 
     @Parameter(defaultValue = "865",
@@ -150,7 +150,7 @@ public class Landsat8ClassificationOp extends Operator {
     private float shimezMeanThresh;
 
     // HOT parameters:
-    @Parameter(defaultValue = "true",
+    @Parameter(defaultValue = "false",
             label = " Apply HOT cloud test")
     private boolean applyHotCloudTest;
 
@@ -160,7 +160,7 @@ public class Landsat8ClassificationOp extends Operator {
     private float hotThresh;
 
     // CLOST parameters:
-    @Parameter(defaultValue = "true",
+    @Parameter(defaultValue = "false",
             label = " Apply CLOST cloud test")
     private boolean applyClostCloudTest;
 
@@ -170,7 +170,7 @@ public class Landsat8ClassificationOp extends Operator {
     private double clostThresh;
 
     // OTSU parameters:
-    @Parameter(defaultValue = "true",
+    @Parameter(defaultValue = "false",
             label = " Apply OTSU cloud test")
     private boolean applyOtsuCloudTest;
 
@@ -212,8 +212,6 @@ public class Landsat8ClassificationOp extends Operator {
     static final int L8_F_WATER_CONFIDENCE_HIGH = 5;  // todo: do we need this?
     private String cloudFlagBandName;
 
-
-//    private static final String LANDSAT8_CLOUD_NET_NAME = "8x5x3_342.3.net";
     private ThreadLocal<SchillerNeuralNetWrapper> landsat8CloudNet;
 
     @Override
@@ -224,56 +222,12 @@ public class Landsat8ClassificationOp extends Operator {
 
         if (waterMaskProduct != null) {
             landWaterBand = waterMaskProduct.getBand("land_water_fraction");
-
-            // this is the 'Land-Sea-Mask' operator by Array (Jun Lu, Luis Veci):
-//            landWaterBand = waterMaskProduct.getBand(Landsat8Constants.LANDSAT8_RED_BAND_NAME);
         }
         if (otsuProduct != null) {
             clostBand = otsuProduct.getBand(ClostOp.CLOST_BAND_NAME);
             otsuBand = otsuProduct.getBand(OtsuBinarizeOp.OTSU_BINARY_BAND_NAME);
         }
     }
-
-    public void setBands() {
-        l8ReflectanceBands = new Band[Landsat8Constants.LANDSAT8_NUM_SPECTRAL_BANDS];
-        for (int i = 0; i < Landsat8Constants.LANDSAT8_NUM_SPECTRAL_BANDS; i++) {
-            l8ReflectanceBands[i] = sourceProduct.getBand(Landsat8Constants.LANDSAT8_SPECTRAL_BAND_NAMES[i]);
-        }
-    }
-
-    void createTargetProduct() throws OperatorException {
-        // this does not work if panchromatic band has different size than others:
-//        int sceneWidth = sourceProduct.getSceneRasterWidth();
-//        int sceneHeight = sourceProduct.getSceneRasterHeight();
-        // use this instead:
-        final Band blueBand = sourceProduct.getBand(Landsat8Constants.LANDSAT8_BLUE_BAND_NAME);
-        int sceneWidth = blueBand.getRasterWidth();
-        int sceneHeight = blueBand.getRasterHeight();
-
-        targetProduct = new Product(sourceProduct.getName(), sourceProduct.getProductType(), sceneWidth, sceneHeight);
-
-        // shall be the only target band!!
-        cloudFlagBandName = IdepixUtils.IDEPIX_CLOUD_FLAGS;
-        Band cloudFlagBand = targetProduct.addBand(cloudFlagBandName, ProductData.TYPE_INT32);
-        FlagCoding flagCoding = Landsat8Utils.createLandsat8FlagCoding(cloudFlagBandName);
-        cloudFlagBand.setSampleCoding(flagCoding);
-        targetProduct.getFlagCodingGroup().add(flagCoding);
-
-        // todo - temporarily added the bands for testing. Shall be removed later. (mp/08.09.2015)
-        // but keep the NN result band! (od/02.03.2016)
-        targetProduct.addBand(NN_RESULT_BAND_NAME, ProductData.TYPE_FLOAT32);
-
-        final Scene srcScene = SceneFactory.createScene(blueBand);
-        final Scene destScene = SceneFactory.createScene(targetProduct);
-        if (srcScene != null && destScene != null) {
-            srcScene.transferGeoCodingTo(destScene, null);
-        }
-//        ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
-        targetProduct.setStartTime(sourceProduct.getStartTime());
-        targetProduct.setEndTime(sourceProduct.getEndTime());
-        ProductUtils.copyMetadata(sourceProduct, targetProduct);
-    }
-
 
     @Override
     public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle rectangle, ProgressMonitor pm) throws OperatorException {
@@ -326,6 +280,42 @@ public class Landsat8ClassificationOp extends Operator {
         } catch (Exception e) {
             throw new OperatorException("Failed to provide Landsat8 cloud screening:\n" + e.getMessage(), e);
         }
+    }
+
+
+    private void setBands() {
+        l8ReflectanceBands = new Band[Landsat8Constants.LANDSAT8_NUM_SPECTRAL_BANDS];
+        for (int i = 0; i < Landsat8Constants.LANDSAT8_NUM_SPECTRAL_BANDS; i++) {
+            l8ReflectanceBands[i] = sourceProduct.getBand(Landsat8Constants.LANDSAT8_SPECTRAL_BAND_NAMES[i]);
+        }
+    }
+
+    private void createTargetProduct() throws OperatorException {
+        // this does not work if panchromatic band has different size than others:
+//        int sceneWidth = sourceProduct.getSceneRasterWidth();
+//        int sceneHeight = sourceProduct.getSceneRasterHeight();
+        // use this instead:
+        final Band blueBand = sourceProduct.getBand(Landsat8Constants.LANDSAT8_BLUE_BAND_NAME);
+        int sceneWidth = blueBand.getRasterWidth();
+        int sceneHeight = blueBand.getRasterHeight();
+
+        targetProduct = new Product(sourceProduct.getName(), sourceProduct.getProductType(), sceneWidth, sceneHeight);
+
+        // shall be the only target band!!
+        cloudFlagBandName = IdepixUtils.IDEPIX_CLASSIF_FLAGS;
+        Band cloudFlagBand = targetProduct.addBand(cloudFlagBandName, ProductData.TYPE_INT32);
+        FlagCoding flagCoding = Landsat8Utils.createLandsat8FlagCoding(cloudFlagBandName);
+        cloudFlagBand.setSampleCoding(flagCoding);
+        targetProduct.getFlagCodingGroup().add(flagCoding);
+
+        // todo - temporarily added the bands for testing. Shall be removed later. (mp/08.09.2015)
+        // but keep the NN result band! (od/02.03.2016)
+        targetProduct.addBand(NN_RESULT_BAND_NAME, ProductData.TYPE_FLOAT32);
+
+        IdepixUtils.copyGeocodingFromBandToProduct(blueBand, targetProduct);
+        targetProduct.setStartTime(sourceProduct.getStartTime());
+        targetProduct.setEndTime(sourceProduct.getEndTime());
+        ProductUtils.copyMetadata(sourceProduct, targetProduct);
     }
 
     private boolean isLandPixelSrtmBeam(int x, int y, Tile l8FlagTile, int waterFraction) {
@@ -387,10 +377,6 @@ public class Landsat8ClassificationOp extends Operator {
         if (waterMaskProduct != null) {
             final int waterFraction = landWaterTile.getSampleInt(x, y);
             isLand = isLandPixelSrtmBeam(x, y, l8FlagTile, waterFraction);
-
-            // this is the 'Land-Sea-Mask' operator by Array (Jun Lu, Luis Veci):
-//            final float maskValue = landWaterTile.getSampleFloat(x, y);
-//            isLand = maskValue > 0.0f;
         }
 
         float[] l8Reflectance = new float[Landsat8Constants.LANDSAT8_NUM_SPECTRAL_BANDS];
@@ -444,22 +430,6 @@ public class Landsat8ClassificationOp extends Operator {
         return l8Algorithm;
     }
 
-    private double[] calcNeuralNetResultOld(float[] l8Reflectance) {
-        SchillerNeuralNetWrapper neuralNetWrapper = landsat8CloudNet.get();
-        double[] cloudNetInput = neuralNetWrapper.getInputVector();
-        for (int i = 0; i < Landsat8Constants.LANDSAT8_NUM_SPECTRAL_BANDS; i++) {
-            double sqrtRefl = Math.sqrt(l8Reflectance[i]);
-            if (i == 8) {
-                // cirrus band can have negative values
-                // --> not allowing values lower as the net minimum
-                cloudNetInput[8] = Math.max(sqrtRefl, neuralNetWrapper.getNeuralNet().getInmin()[8]);
-            } else {
-                cloudNetInput[i] = sqrtRefl;
-            }
-        }
-        return neuralNetWrapper.getNeuralNet().calc(cloudNetInput);
-    }
-
     private double[] calcNeuralNetResult(float[] l8Reflectance) {
         SchillerNeuralNetWrapper neuralNetWrapper = landsat8CloudNet.get();
         double[] cloudNetInput = neuralNetWrapper.getInputVector();
@@ -476,7 +446,6 @@ public class Landsat8ClassificationOp extends Operator {
 
 
     private void initCloudNet() {
-//        try (InputStream cloudNet = getClass().getResourceAsStream(LANDSAT8_CLOUD_NET_NAME)) {
         // use selected new NN (20151119), chosen from 6 different nets:
         try (InputStream cloudNet = getClass().getResourceAsStream(nnSelector.getNnFileName())) {
             landsat8CloudNet = SchillerNeuralNetWrapper.create(cloudNet);

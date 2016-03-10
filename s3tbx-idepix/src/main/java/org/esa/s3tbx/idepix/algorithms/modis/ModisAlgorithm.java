@@ -2,17 +2,11 @@ package org.esa.s3tbx.idepix.algorithms.modis;
 
 /**
  * IDEPIX pixel identification algorithm for OC-CCI/MODIS
- * todo: complete
  *
  * @author olafd
  */
 public class ModisAlgorithm {
 
-    // as long as we have no Schiller, CLOUD thresholds experimentally selected just from A2009125001500.L1B_LAC:
-    private static final double THRESH_BRIGHT_CLOUD_AMBIGUOUS = 0.07;
-    private static final double THRESH_BRIGHT_CLOUD_SURE = 0.15;
-    // SNOW_ICE thresholds experimentally selected just from MOD021KM.A2014121.0155.006.2014121132820.hdf
-    // more investigations needed
     private static final double THRESH_BRIGHT_SNOW_ICE = 0.25;
     private static final double THRESH_NDSI_SNOW_ICE = 0.8;
 
@@ -25,10 +19,12 @@ public class ModisAlgorithm {
     float waterFraction;
     double[] refl;
     double[] nnOutput;
-    double ambiguousThresh;
-    double sureThresh;
 
-
+    /**
+     * Provides snow/ice identification (still experimental)
+     *
+     * @return boolean
+     */
     public boolean isSnowIce() {
 
         // for MODIS ALL NN, nnOutput has one element:
@@ -72,10 +68,20 @@ public class ModisAlgorithm {
         return isSnowIceFromNN;
     }
 
+    /**
+     * Provides cloud identification
+     *
+     * @return boolean
+     */
     public boolean isCloud() {
         return isCloudAmbiguous() || isCloudSure();
     }
 
+    /**
+     * Provides cloud ambiguous identification
+     *
+     * @return boolean
+     */
     public boolean isCloudAmbiguous() {
         if (isCloudSure() || isSnowIce()) {   // this check has priority
             return false;
@@ -127,6 +133,11 @@ public class ModisAlgorithm {
         }
     }
 
+    /**
+     * Provides cloud sure identification
+     *
+     * @return boolean
+     */
     public boolean isCloudSure() {
         if (isSnowIce()) {   // this has priority
             return false;
@@ -222,8 +233,7 @@ public class ModisAlgorithm {
         return brightValue() > modisBrightnessThreshCloudSure;
     }
 
-    ///////////////////////////////////////////////////////////////////////
-    // feature values
+    ///////////////// feature values ////////////////////////////////////////
 
     public float brightValue() {
         return (float) refl[0];   //  EV_250_Aggr1km_RefSB_1 (645nm)
@@ -241,8 +251,7 @@ public class ModisAlgorithm {
     }
 
     
-    ///////////////////////////////////////////////////////////////////////
-    // setters
+    ///////////////// further setter methods ////////////////////////////////////////
     public void setWaterFraction(float waterFraction) {
         this.waterFraction = waterFraction;
     }

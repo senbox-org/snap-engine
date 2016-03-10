@@ -6,7 +6,6 @@ import java.util.regex.Pattern;
  * IDEPIX constants
  *
  * @author Olaf Danne
- * @version $Revision: $ $Date:  $
  */
 public class IdepixConstants {
 

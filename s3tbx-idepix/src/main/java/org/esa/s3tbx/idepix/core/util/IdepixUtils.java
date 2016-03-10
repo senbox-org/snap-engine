@@ -40,10 +40,24 @@ public class IdepixUtils {
 
     private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger("idepix");
 
-    public static final String IDEPIX_CLOUD_FLAGS = "cloud_classif_flags";
-    public static final String IDEPIX_PIXEL_CLASSIF_FLAGS = "pixel_classif_flags";
+    public static final String IDEPIX_CLASSIF_FLAGS = "pixel_classif_flags";
 
     private IdepixUtils() {
+    }
+
+    /**
+     * copies a geocoding from a given reference band as scene geocoding to a given product
+     * todo: move to a more general place?!
+     *
+     * @param referenceBand - the reference band
+     * @param product - the product where the geocoding shall be copied
+     */
+    public static void copyGeocodingFromBandToProduct(Band referenceBand, Product product) {
+        final Scene srcScene = SceneFactory.createScene(referenceBand);
+        final Scene destScene = SceneFactory.createScene(product);
+        if (srcScene != null && destScene != null) {
+            srcScene.transferGeoCodingTo(destScene, null);
+        }
     }
 
     public static Product cloneProduct(Product sourceProduct, boolean copySourceBands) {

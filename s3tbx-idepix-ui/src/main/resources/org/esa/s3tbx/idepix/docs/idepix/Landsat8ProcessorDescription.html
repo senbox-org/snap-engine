@@ -109,7 +109,7 @@ The following Landsat-8 source products are supported for Idepix classification:
 </p>
 
 <p class="i1">
-    <b>Refine pixel classification near coastlines: </b><br>
+    <b>Refine pixel classification near coastlines (time consuming!): </b><br>
     If set, the pixel classification near coastlines is refined using a spatial filtering.
     This improves distinction of clouds and bright beaches. Note that this is a time consuming operation
     for Landsat-8 products, as this filtering also considers neighbourhood pixels of the pixel being
@@ -183,7 +183,7 @@ The following Landsat-8 source products are supported for Idepix classification:
 <p class="i1">
     <b>Apply CLOST cloud test: </b><br>
     If set, the CLOST cloud test (see algorithm specification for details) is applied for the cloud classification
-    in addition to the neural network. The default value is 'true'.
+    in addition to the neural network. The default value is 'false'.
 </p>
 
 <p class="i1">
@@ -194,13 +194,29 @@ The following Landsat-8 source products are supported for Idepix classification:
 <p class="i1">
     <b>Apply OTSU cloud test: </b><br>
     If set, the OTSU cloud test (see algorithm specification for details) is applied for the cloud classification
-    in addition to the neural network. The default value is 'true'.
+    in addition to the neural network. The default value is 'false'.
 </p>
 
 <p class="i1">
     <b>Write source bands to the target product: </b><br>
     If set, all bands from the source product are written to target product.
     The default value is 'true'.
+</p>
+
+<h3>The Processing Result</h3>
+The Idepix classification result is written into the target product as a flag band named 'pixel_classif_flags'.
+This band holds integer values which for Landsat-8 follow the flag coding shown below.
+
+<p align="center">
+    <img src="images/Landsat8FlagCoding.png" border="0">
+</p>
+<br>
+
+The target product also provides a corresponding flag mask to visualize the pixel classification through the
+SNAP Mask Manager:
+
+<p align="center">
+    <img src="images/Landsat8MaskManager.png" border="0">
 </p>
 
 <hr>

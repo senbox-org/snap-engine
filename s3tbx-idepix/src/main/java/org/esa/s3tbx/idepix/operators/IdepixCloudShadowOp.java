@@ -24,7 +24,7 @@ import java.awt.*;
  * @author Olaf Danne
  * @version $Revision: $ $Date:  $
  */
-@OperatorMetadata(alias = "idepix.operators.cloudshadow",
+@OperatorMetadata(alias = "Idepix.Operators.Cloudshadow",
         version = "2.2",
         internal = true,
         authors = "Olaf Danne",
@@ -99,8 +99,8 @@ public class IdepixCloudShadowOp extends Operator {
 
         targetProduct = new Product(cloudProduct.getName(), cloudProduct.getProductType(), sceneWidth, sceneHeight);
 
-        cloudFlagBand = targetProduct.addBand(IdepixUtils.IDEPIX_CLOUD_FLAGS, ProductData.TYPE_INT32);
-        FlagCoding flagCoding = IdepixUtils.createIdepixFlagCoding(IdepixUtils.IDEPIX_CLOUD_FLAGS);
+        cloudFlagBand = targetProduct.addBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS, ProductData.TYPE_INT32);
+        FlagCoding flagCoding = IdepixUtils.createIdepixFlagCoding(IdepixUtils.IDEPIX_CLASSIF_FLAGS);
         cloudFlagBand.setSampleCoding(flagCoding);
         targetProduct.getFlagCodingGroup().add(flagCoding);
 
@@ -152,7 +152,7 @@ public class IdepixCloudShadowOp extends Operator {
             Rectangle targetRectangle = targetTile.getRectangle();
             Rectangle sourceRectangle = rectCalculator.extend(targetRectangle);
 
-            Tile inputCloudTile = getSourceTile(cloudProduct.getBand(IdepixUtils.IDEPIX_CLOUD_FLAGS),
+            Tile inputCloudTile = getSourceTile(cloudProduct.getBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS),
                     sourceRectangle);
             copyInputCloudFlags(targetTile, targetRectangle, inputCloudTile);
 

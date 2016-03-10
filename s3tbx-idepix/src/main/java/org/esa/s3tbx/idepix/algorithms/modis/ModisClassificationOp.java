@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Operator for MODIS cloud screening
+ * MODIS pixel classification operator.
  *
  * @author olafd
  */
@@ -90,6 +90,61 @@ public class ModisClassificationOp extends PixelOperator {
     protected void computePixel(int x, int y, Sample[] sourceSamples, WritableSample[] targetSamples) {
         final ModisAlgorithm algorithm = createModisAlgorithm(x, y, sourceSamples, targetSamples);
         setClassifFlag(targetSamples, algorithm);
+    }
+
+    @Override
+    protected void configureSourceSamples(SourceSampleConfigurer sampleConfigurer) throws OperatorException {
+        for (int i = 0; i < ModisConstants.MODIS_L1B_NUM_SPECTRAL_BANDS; i++) {
+            if (reflProduct.containsBand(ModisConstants.MODIS_L1B_SPECTRAL_BAND_NAMES[i])) {
+                sampleConfigurer.defineSample(i, ModisConstants.MODIS_L1B_SPECTRAL_BAND_NAMES[i], reflProduct);
+            } else {
+                sampleConfigurer.defineSample(i, ModisConstants.MODIS_L1B_SPECTRAL_BAND_NAMES[i].replace(".", "_"),
+                                              reflProduct);
+            }
+        }
+        for (int i = 0; i < ModisConstants.MODIS_L1B_NUM_EMISSIVE_BANDS; i++) {
+            if (reflProduct.containsBand(ModisConstants.MODIS_L1B_EMISSIVE_BAND_NAMES[i])) {
+                sampleConfigurer.defineSample(ModisConstants.MODIS_SRC_RAD_OFFSET + i,
+                                              ModisConstants.MODIS_L1B_EMISSIVE_BAND_NAMES[i], reflProduct);
+            } else {
+                final String newEmissiveBandName = ModisConstants.MODIS_L1B_EMISSIVE_BAND_NAMES[i].replace(".", "_");
+                final Band emissiveBand = reflProduct.getBand(newEmissiveBandName);
+                emissiveBand.setScalingFactor(1.0);      // todo: we do this to come back to counts with SeaDAS reader,
+                // as the NN was also trained with counts
+                emissiveBand.setScalingOffset(0.0);
+                sampleConfigurer.defineSample(ModisConstants.MODIS_SRC_RAD_OFFSET + i, newEmissiveBandName, reflProduct);
+            }
+        }
+
+        int index = ModisConstants.MODIS_SRC_RAD_OFFSET + ModisConstants.MODIS_L1B_NUM_SPECTRAL_BANDS + 1;
+        sampleConfigurer.defineSample(index, ModisConstants.LAND_WATER_FRACTION_BAND_NAME, waterMaskProduct);
+    }
+
+    @Override
+    protected void configureTargetSamples(TargetSampleConfigurer sampleConfigurer) throws OperatorException {
+        // the only standard band:
+        sampleConfigurer.defineSample(0, ModisConstants.CLASSIF_BAND_NAME);
+        sampleConfigurer.defineSample(1, ModisConstants.SCHILLER_NN_OUTPUT_BAND_NAME);
+    }
+
+    @Override
+    protected void configureTargetProduct(ProductConfigurer productConfigurer) {
+        productConfigurer.copyTimeCoding();
+        productConfigurer.copyTiePointGrids();
+        Band classifFlagBand = productConfigurer.addBand(ModisConstants.CLASSIF_BAND_NAME, ProductData.TYPE_INT16);
+
+        classifFlagBand.setDescription("Pixel classification flag");
+        classifFlagBand.setUnit("dl");
+        FlagCoding flagCoding = ModisUtils.createOccciFlagCoding(ModisConstants.CLASSIF_BAND_NAME);
+        classifFlagBand.setSampleCoding(flagCoding);
+        getTargetProduct().getFlagCodingGroup().add(flagCoding);
+
+        getTargetProduct().setSceneGeoCoding(reflProduct.getSceneGeoCoding());
+        ModisUtils.setupClassifBitmask(getTargetProduct());
+
+        Band nnValueBand = productConfigurer.addBand(ModisConstants.SCHILLER_NN_OUTPUT_BAND_NAME, ProductData.TYPE_FLOAT32);
+        nnValueBand.setDescription("Schiller NN output value");
+        nnValueBand.setUnit("dl");
     }
 
     private void readSchillerNets() {
@@ -183,60 +238,6 @@ public class ModisClassificationOp extends PixelOperator {
         return geoPos;
     }
 
-    @Override
-    protected void configureSourceSamples(SourceSampleConfigurer sampleConfigurer) throws OperatorException {
-        for (int i = 0; i < ModisConstants.MODIS_L1B_NUM_SPECTRAL_BANDS; i++) {
-            if (reflProduct.containsBand(ModisConstants.MODIS_L1B_SPECTRAL_BAND_NAMES[i])) {
-                sampleConfigurer.defineSample(i, ModisConstants.MODIS_L1B_SPECTRAL_BAND_NAMES[i], reflProduct);
-            } else {
-                sampleConfigurer.defineSample(i, ModisConstants.MODIS_L1B_SPECTRAL_BAND_NAMES[i].replace(".", "_"),
-                                              reflProduct);
-            }
-        }
-        for (int i = 0; i < ModisConstants.MODIS_L1B_NUM_EMISSIVE_BANDS; i++) {
-            if (reflProduct.containsBand(ModisConstants.MODIS_L1B_EMISSIVE_BAND_NAMES[i])) {
-                sampleConfigurer.defineSample(ModisConstants.MODIS_SRC_RAD_OFFSET + i,
-                                              ModisConstants.MODIS_L1B_EMISSIVE_BAND_NAMES[i], reflProduct);
-            } else {
-                final String newEmissiveBandName = ModisConstants.MODIS_L1B_EMISSIVE_BAND_NAMES[i].replace(".", "_");
-                final Band emissiveBand = reflProduct.getBand(newEmissiveBandName);
-                emissiveBand.setScalingFactor(1.0);      // todo: we do this to come back to counts with SeaDAS reader,
-                // as the NN was also trained with counts
-                emissiveBand.setScalingOffset(0.0);
-                sampleConfigurer.defineSample(ModisConstants.MODIS_SRC_RAD_OFFSET + i, newEmissiveBandName, reflProduct);
-            }
-        }
-
-        int index = ModisConstants.MODIS_SRC_RAD_OFFSET + ModisConstants.MODIS_L1B_NUM_SPECTRAL_BANDS + 1;
-        sampleConfigurer.defineSample(index, ModisConstants.LAND_WATER_FRACTION_BAND_NAME, waterMaskProduct);
-    }
-
-    @Override
-    protected void configureTargetSamples(TargetSampleConfigurer sampleConfigurer) throws OperatorException {
-        // the only standard band:
-        sampleConfigurer.defineSample(0, ModisConstants.CLASSIF_BAND_NAME);
-        sampleConfigurer.defineSample(1, ModisConstants.SCHILLER_NN_OUTPUT_BAND_NAME);
-    }
-
-    @Override
-    protected void configureTargetProduct(ProductConfigurer productConfigurer) {
-        productConfigurer.copyTimeCoding();
-        productConfigurer.copyTiePointGrids();
-        Band classifFlagBand = productConfigurer.addBand(ModisConstants.CLASSIF_BAND_NAME, ProductData.TYPE_INT16);
-
-        classifFlagBand.setDescription("Pixel classification flag");
-        classifFlagBand.setUnit("dl");
-        FlagCoding flagCoding = ModisUtils.createOccciFlagCoding(ModisConstants.CLASSIF_BAND_NAME);
-        classifFlagBand.setSampleCoding(flagCoding);
-        getTargetProduct().getFlagCodingGroup().add(flagCoding);
-
-        getTargetProduct().setSceneGeoCoding(reflProduct.getSceneGeoCoding());
-        ModisUtils.setupClassifBitmask(getTargetProduct());
-
-        Band nnValueBand = productConfigurer.addBand(ModisConstants.SCHILLER_NN_OUTPUT_BAND_NAME, ProductData.TYPE_FLOAT32);
-        nnValueBand.setDescription("Schiller NN output value");
-        nnValueBand.setUnit("dl");
-    }
 
     /**
      * The Service Provider Interface (SPI) for the operator.

@@ -15,7 +15,6 @@ import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.ProductUtils;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import javax.media.jai.RenderedOp;
 import java.util.HashMap;
@@ -59,7 +58,7 @@ public class Landsat8Op extends Operator {
     private int cloudBufferWidth;
 
     @Parameter(defaultValue = "false",
-            label = " Refine pixel classification near coastlines",
+            label = " Refine pixel classification near coastlines (time consuming!)",
             description = "Refine pixel classification near coastlines (time consuming operation!). Improves distinction of clouds and bright beaches. ")
     private boolean refineClassificationNearCoastlines;
 
@@ -105,7 +104,7 @@ public class Landsat8Op extends Operator {
     private float hotThresh;
 
     // CLOST parameters:
-    @Parameter(defaultValue = "true",
+    @Parameter(defaultValue = "false",
             label = " Apply CLOST cloud test")
     private boolean applyClostCloudTest;
 
@@ -115,11 +114,11 @@ public class Landsat8Op extends Operator {
     private double clostThresh;
 
     // OTSU parameters:
-    @Parameter(defaultValue = "true",
+    @Parameter(defaultValue = "false",
             label = " Apply OTSU cloud test")
     private boolean applyOtsuCloudTest;
 
-    // todo: maybe activate
+    // todo: discuss if needed
 //    @Parameter(defaultValue = "GREY",
 //               valueSet = {"GREY", "BINARY"},
 //               description = "OTSU processing mode (grey or binary target image)",
@@ -217,8 +216,8 @@ public class Landsat8Op extends Operator {
 
         targetProduct = IdepixUtils.cloneProduct(classificationProduct, standardBandWidth, standardBandHeight, false);
 
-        Band cloudFlagBand = targetProduct.getBand(IdepixUtils.IDEPIX_CLOUD_FLAGS);
-        cloudFlagBand.setSourceImage(postProcessingProduct.getBand(IdepixUtils.IDEPIX_CLOUD_FLAGS).getSourceImage());
+        Band cloudFlagBand = targetProduct.getBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS);
+        cloudFlagBand.setSourceImage(postProcessingProduct.getBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS).getSourceImage());
 
         copyOutputBands();
     }
@@ -245,7 +244,7 @@ public class Landsat8Op extends Operator {
     private void checkIfLandsatIsReadAsReflectance() {
         if (!sourceProduct.getBandAt(0).getDescription().toLowerCase().contains("reflectance")) {
             throw new OperatorException("The landsat source product must provide reflectances. " +
-                                                "Consider setting system property landsat.reader.readAs=reflectance.");
+                                                "For configuration instructions see Idepix help documentation, Processor description for Landsat-8.");
         }
     }
 
@@ -254,7 +253,12 @@ public class Landsat8Op extends Operator {
         waterMaskParameters.put("resolution", LAND_WATER_MASK_RESOLUTION);
         waterMaskParameters.put("subSamplingFactorX", OVERSAMPLING_FACTOR_X);
         waterMaskParameters.put("subSamplingFactorY", OVERSAMPLING_FACTOR_Y);
-        waterMaskProduct = GPF.createProduct("LandWaterMask", waterMaskParameters, sourceProduct);
+
+        // The land/water mask operator needs as input a product with just correct size and geocoding...
+        final Product resizedProduct = new Product("dummy", "dummy", standardBandWidth, standardBandHeight);
+        final Band blueBand = sourceProduct.getBand(Landsat8Constants.LANDSAT8_BLUE_BAND_NAME);
+        IdepixUtils.copyGeocodingFromBandToProduct(blueBand, resizedProduct);
+        waterMaskProduct = GPF.createProduct("LandWaterMask", waterMaskParameters, resizedProduct);
     }
 
     private void setClassificationParameters() {

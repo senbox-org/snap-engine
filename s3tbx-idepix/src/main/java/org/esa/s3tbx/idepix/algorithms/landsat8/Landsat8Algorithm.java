@@ -80,58 +80,6 @@ public class Landsat8Algorithm implements Landsat8PixelProperties {
         return !isInvalid() && (isCloudShimez || isCloudClost || isCloudOtsu || (nnCloud && !isLand()));
     }
 
-    public void setNnResult(double[] nnResult) {
-        this.nnResult = nnResult;
-    }
-
-    public double[] getNnResult() {
-        return nnResult;
-    }
-
-    public int[] getNnClassification() {
-        return classifyNNResult(nnResult);
-        // todo: discuss logic, then apply separation values from new NNs, 20151119
-    }
-
-    public boolean isCloudShimez() {
-        // make sure we have reflectances here!!
-
-        // this is the latest correction from MPa , 20150330:
-//        abs(blue/red-1)<A &&
-//                abs(blue/green-1)<A &&
-//                abs(red/green-1)<A &&
-//                (red+green+blue)/3 > 0.35
-//                  A = 0.1 over the day
-//                  A = 0.2 if twilight
-
-        final double blueGreenRatio = l8SpectralBandData[1] / l8SpectralBandData[2];
-        final double redGreenRatio = l8SpectralBandData[3] / l8SpectralBandData[2];
-        final double mean = (l8SpectralBandData[1] + l8SpectralBandData[2] + l8SpectralBandData[3]) / 3.0;
-
-        return Math.abs(blueGreenRatio - 1.0) < shimezDiffThresh &&
-                Math.abs(redGreenRatio - 1.0) < shimezDiffThresh &&
-                mean > shimezMeanThresh;
-    }
-
-    public boolean isCloudHot() {
-        final double hot = l8SpectralBandData[1] - 0.5 * l8SpectralBandData[3];
-        return hot > hotThresh;
-    }
-
-    public boolean isCloudClost() {
-        if (applyOtsuCloudTest) {
-            return clostValue > clostThresh;
-        } else {
-            final double clost = l8SpectralBandData[0] * l8SpectralBandData[1] * l8SpectralBandData[7] * l8SpectralBandData[8];
-            return clost > clostThresh;
-        }
-    }
-
-    public boolean isCloudOtsu() {
-        // todo
-        return otsuValue > 128;
-    }
-
     @Override
     public boolean isCloudBuffer() {
         return false;   // in post-processing
@@ -191,6 +139,95 @@ public class Landsat8Algorithm implements Landsat8PixelProperties {
         }
     }
 
+
+    /**
+     * Setter for neural net result
+     *
+     * @param nnResult - the neural net result
+     */
+    public void setNnResult(double[] nnResult) {
+        this.nnResult = nnResult;
+    }
+
+    /**
+     * Getter for neural net result
+     *
+     * @return - the neural net result
+     */
+    public double[] getNnResult() {
+        return nnResult;
+    }
+
+    /**
+     * Getter for pixel classification from neural net
+     *
+     * @return - the classification result (int array of length of neural net result)
+     */
+    public int[] getNnClassification() {
+        return classifyNNResult(nnResult);
+        // todo: discuss logic, then apply separation values from new NNs, 20151119
+    }
+
+    /**
+     * Performs SHIMEZ cloud test
+     *
+     * @return boolean
+     */
+    public boolean isCloudShimez() {
+        // make sure we have reflectances here!!
+
+        // this is the latest correction from MPa , 20150330:
+//        abs(blue/red-1)<A &&
+//                abs(blue/green-1)<A &&
+//                abs(red/green-1)<A &&
+//                (red+green+blue)/3 > 0.35
+//                  A = 0.1 over the day
+//                  A = 0.2 if twilight
+
+        final double blueGreenRatio = l8SpectralBandData[1] / l8SpectralBandData[2];
+        final double redGreenRatio = l8SpectralBandData[3] / l8SpectralBandData[2];
+        final double mean = (l8SpectralBandData[1] + l8SpectralBandData[2] + l8SpectralBandData[3]) / 3.0;
+
+        return Math.abs(blueGreenRatio - 1.0) < shimezDiffThresh &&
+                Math.abs(redGreenRatio - 1.0) < shimezDiffThresh &&
+                mean > shimezMeanThresh;
+    }
+
+    /**
+     * Performs HOT cloud test
+     *
+     * @return boolean
+     */
+    public boolean isCloudHot() {
+        final double hot = l8SpectralBandData[1] - 0.5 * l8SpectralBandData[3];
+        return hot > hotThresh;
+    }
+
+    /**
+     * Performs CLOST cloud test
+     *
+     * @return boolean
+     */
+    public boolean isCloudClost() {
+        if (applyOtsuCloudTest) {
+            return clostValue > clostThresh;
+        } else {
+            final double clost = l8SpectralBandData[0] * l8SpectralBandData[1] * l8SpectralBandData[7] * l8SpectralBandData[8];
+            return clost > clostThresh;
+        }
+    }
+
+    /**
+     * Performs OTSU cloud test
+     *
+     * @return boolean
+     */
+    public boolean isCloudOtsu() {
+        // todo
+        return otsuValue > 128;
+    }
+
+
     // currently not used (20160303)
 //    public boolean isDarkGlintTest1() {
 //        Integer darkGlintTest1Index = Landsat8Constants.LANDSAT8_SPECTRAL_WAVELENGTH_MAP.get(darkGlintThresholdTest1Wvl);
@@ -203,7 +240,7 @@ public class Landsat8Algorithm implements Landsat8PixelProperties {
 //
 //    }
 
-    // setter methods
+    ///////////////// further setter methods ////////////////////////////////////////
 
     public void setL8SpectralBandData(float[] l8SpectralBandData) {
         this.l8SpectralBandData = l8SpectralBandData;

@@ -67,16 +67,6 @@ public class ModisPostProcessingOp extends BasisOp {
     public void initialize() throws OperatorException {
         createTargetProduct();
 
-        int extendedWidth;
-        int extendedHeight;
-        if (reflProduct.getProductType().startsWith("MER_F")) {
-            extendedWidth = 64;
-            extendedHeight = 64;
-        } else {
-            extendedWidth = 16;
-            extendedHeight = 16;
-        }
-
         rectCalculator = new RectangleExtender(new Rectangle(reflProduct.getSceneRasterWidth(),
                                                              reflProduct.getSceneRasterHeight()),
                                                cloudBufferWidth, cloudBufferWidth
@@ -182,12 +172,8 @@ public class ModisPostProcessingOp extends BasisOp {
         } else {
             for (int i = LEFT_BORDER; i <= RIGHT_BORDER; i++) {
                 for (int j = TOP_BORDER; j <= BOTTOM_BORDER; j++) {
-                    if (i < 0 || j < 0) {
-                        System.out.println("i,j = " + i + "," + j);
-                    }
                     if (rectangle.contains(i, j)) {
-                        boolean isAlreadyCoastline = false;
-                        isAlreadyCoastline = sourceFlagTile.getSampleBit(i, j, ModisConstants.F_COASTLINE);
+                        boolean isAlreadyCoastline = sourceFlagTile.getSampleBit(i, j, ModisConstants.F_COASTLINE);
                         if (isAlreadyCoastline) {
                             return true;
                         }
@@ -285,8 +271,8 @@ public class ModisPostProcessingOp extends BasisOp {
         for (int i = LEFT_BORDER; i <= RIGHT_BORDER; i++) {
             for (int j = TOP_BORDER; j <= BOTTOM_BORDER; j++) {
                 boolean is_already_cloud = sourceFlagTile.getSampleBit(i, j, ModisConstants.F_CLOUD);
-                boolean is_land = sourceFlagTile.getSampleBit(i, j, ModisConstants.F_LAND);
-                if (!is_already_cloud && !is_land && rectangle.contains(i, j)) {
+//                boolean is_land = sourceFlagTile.getSampleBit(i, j, ModisConstants.F_LAND);
+                if (!is_already_cloud && rectangle.contains(i, j)) {
                     targetTile.setSample(i, j, ModisConstants.F_CLOUD_BUFFER, true);
                 }
             }
