@@ -1,0 +1,153 @@
+<!--
+  ~ Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+  ~
+  ~ This program is free software; you can redistribute it and/or modify it
+  ~ under the terms of the GNU General Public License as published by the Free
+  ~ Software Foundation; either version 3 of the License, or (at your option)
+  ~ any later version.
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+  ~ more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License along
+  ~ with this program; if not, see http://www.gnu.org/licenses/
+  -->
+
+<html>
+<head>
+    <title>SNAP Data Processors - Creating new ARC coefficient files</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+<table class="header">
+    <tr class="header">
+        <td class="header">&nbsp;
+            ARC SST Processor - Creating new coefficient files
+        </td>
+        <td class="header" align="right"><a href="nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/general/overview/SnapOverview.html"><img src="../images/snap_header.jpg"
+                                                                                     border=0></a>
+        </td>
+    </tr>
+</table>
+
+<p>
+    The ARC SST Tool uses coefficient files during the SST and ASDI processing.<br>
+    These files are located in:</p>
+<blockquote>
+    <code>&lt;SNAP-USERHOME&gt;/auxdata/arc</code>
+</blockquote>
+<p><code>&lt;SNAP-USERHOME&gt;</code> is the <code>.snap</code> folder located in the in the user home directory.</p>
+
+<p>
+    A coefficient file is a standard java properties file consisting of key/value
+    pairs and comments. When the SST processor starts up, it scans the SST auxiliary data
+    directory for coefficient files and shows these in the GUI as entries in the
+    coefficient file list for both nadir and dual views. It is possible to add any
+    number of customized coefficient files to these folders when following the simple syntax:
+</p>
+
+<p>
+    A comment line begins with a "#" and is ignored during the parsing operation.
+</p>
+
+<p>
+    Each coefficient file should contain a band name and short description, denoted as:
+</p>
+
+<pre>
+    name = short_name
+    description = my coefficient description
+</pre>
+
+<p>
+    The description string is shown in the user interface coefficient selection box.
+</p>
+
+<p>
+    The coefficient file defines a multi-dimensional lookup table of linear retrieval
+    coefficients to use at specified viewing geometry (nadir and forward view path
+    length) and TCWV values. It is necessary to specify the full set of coefficients at
+    at-least two points along each axis. For cases where the coefficients do not vary
+    with a particular parameter such as the ASDI coefficients the coefficients should
+    simply be repeated to indicate that the coefficients do not vary along that axis.
+</p>
+
+<p>
+    The three axis for the lookup table are: nadir path length, forward path length, TCWV.
+</p>
+
+<p>Example:
+<pre>
+    secnad = 1, 1.0743021
+    secfwd = 0, 1
+    wvband = 0, 1
+</pre>
+
+<p>
+    indicates that coefficients will be specified at nadir path lengths of 1 and 1.07
+    (the centre and edge of the ATSR nadir-view), forward-view path lengths of 0 and 1
+    (these are unphysical values used for a coefficient set which does not vary with
+    forward-view path length), and TCWV values of 0 and 1 (again this set of coefficients
+    does not depend on TCWV)
+</p>
+
+<p>
+    For every combination of lookup parameters there must be a corresponding set of
+    coefficients. The example above specifies the smallest possibly lookup table:
+    2x2x2 with a total of 8 coefficients required. The coefficients are specified in
+    standard array order, with secnad the fastest varying axis, then secfwd, and wvband
+    the slowest varying axis.
+</p>
+
+<p>
+    For each combination of lookup parameters there must be a set of 7 coefficients
+    (corresponding to the 3.7n, 11n, 12n, 3.7f, 11f, 12f, and constant terms).
+    Coefficient values consist of a number of comma separated floating point values.
+    It is recommended that 7 values are printed on each line
+</p>
+
+<p>Example:
+<pre>
+    coeffs = 0.0, 0.39602999, 0.0, 0.0,-0.75792998, 0.3619000,-0.01226863, \
+             0.0, 0.34224000, 0.0, 0.0,-0.58267001, 0.2404300,-0.01465179, \
+             0.0, 0.39602999, 0.0, 0.0,-0.75792998, 0.3619000,-0.01226863, \
+             0.0, 0.34224000, 0.0, 0.0,-0.58267001, 0.2404300,-0.01465179, \
+             0.0, 0.39602999, 0.0, 0.0,-0.75792998, 0.3619000,-0.01226863, \
+             0.0, 0.34224000, 0.0, 0.0,-0.58267001, 0.2404300,-0.01465179, \
+             0.0, 0.39602999, 0.0, 0.0,-0.75792998, 0.3619000,-0.01226863, \
+             0.0, 0.34224000, 0.0, 0.0,-0.58267001, 0.2404300,-0.01465179
+</pre>
+
+<p>
+    which are the coefficients for the AATSR ASDI. This set only uses three channels:
+    11 micron nadir, 11 micron forward, and 12 micron forward. The coefficients only
+    depend on the nadir-view path length, with the first two lines specifiying the
+    coefficients at the centre swath (secnad=1) and edge of swath (secnad=1.07). The
+    same coefficients are then repeated a further three times for the unused dimensions
+    (secfwd and wvband).
+</p>
+
+<p>Here is a complete coefficent file as example:
+<pre>
+    # Source file: ASDI_AATSR.coef
+    name = ASDI
+    description = AATSR Saharan Dust Index
+    secnad = 1, 1.0743021
+    secfwd = 0, 1
+    wvband = 0, 1
+    coeffs = 0.0, 0.39602999, 0.0, 0.0,-0.75792998, 0.3619000,-0.01226863, \
+             0.0, 0.34224000, 0.0, 0.0,-0.58267001, 0.2404300,-0.01465179, \
+             0.0, 0.39602999, 0.0, 0.0,-0.75792998, 0.3619000,-0.01226863, \
+             0.0, 0.34224000, 0.0, 0.0,-0.58267001, 0.2404300,-0.01465179, \
+             0.0, 0.39602999, 0.0, 0.0,-0.75792998, 0.3619000,-0.01226863, \
+             0.0, 0.34224000, 0.0, 0.0,-0.58267001, 0.2404300,-0.01465179, \
+             0.0, 0.39602999, 0.0, 0.0,-0.75792998, 0.3619000,-0.01226863, \
+             0.0, 0.34224000, 0.0, 0.0,-0.58267001, 0.2404300,-0.01465179
+</pre>
+
+<hr>
+</body>
+</html>

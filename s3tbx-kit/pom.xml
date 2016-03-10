@@ -67,6 +67,16 @@
         </dependency>
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
+            <artifactId>s3tbx-arc</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.s3tbx</groupId>
+            <artifactId>s3tbx-arc-ui</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.s3tbx</groupId>
             <artifactId>s3tbx-atsr-reader</artifactId>
             <version>${project.version}</version>
         </dependency>

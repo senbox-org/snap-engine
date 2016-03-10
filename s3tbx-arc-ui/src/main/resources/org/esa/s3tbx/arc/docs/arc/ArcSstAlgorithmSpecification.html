@@ -1,0 +1,86 @@
+<!--
+  ~ Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+  ~
+  ~ This program is free software; you can redistribute it and/or modify it
+  ~ under the terms of the GNU General Public License as published by the Free
+  ~ Software Foundation; either version 3 of the License, or (at your option)
+  ~ any later version.
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+  ~ more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License along
+  ~ with this program; if not, see http://www.gnu.org/licenses/
+  -->
+
+<html>
+<head>
+    <title>SNAP Data Processors - ARC Algorithm Specification </title>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+<table class="header">
+    <tr class="header">
+        <td class="header">&nbsp;
+            ARC - Algorithm Specification</td>
+        <td class="header" align="right"><a href="nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/general/overview/SnapOverview.html"><img src="../images/snap_header.jpg" border=0></a>
+        </td>
+    </tr>
+</table>
+
+<p>Algorithm Specification of the science processors of the SNAP Toolbox</p>
+
+<h3>Saharan Dust Detection</h3>
+
+<p>
+    Dust aerosol can be a problem for some satellite SST products as infrared SST
+    retrievals are biased cold in the presence of dust. While very high dust loadings
+    are often (incorrectly) flagged as "cloud", more moderate amounts are passed as
+    "clear" and impact the resulting SST fields. This is a particular problem over the
+    Atlantic in the summer months when desert dust is lifted from the Saharan desert and
+    transported west over the ocean.
+</p>
+
+<p>
+    Desert dust is detected using the ATSR Saharan Dust Index (ASDI) method described in
+    <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer">
+        <param name="content" value="http://dx.doi.org/10.1016/j.rse.2010.06.016">
+        <param name="text" value="<html>Good et al. (2011)</html>">
+    </object>.
+    This functions as a dual-view retrieval of dust index using the 11 and 12 micron channels
+    which can therefore be used both day and night.
+</p>
+
+<h3>SST Retrieval</h3>
+
+<p>
+    ARC SSTs are estimated using a coefficient-based retrieval scheme (
+    <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer">
+        <param name="content" value="http://dx.doi.org/10.1016/j.rse.2010.11.020">
+        <param name="text" value="<html>Embury and Merchant 2011</html>">
+    </object>) which is robust to the presence of stratospheric aerosol from the Mount Pinatubo
+    eruption in 1991. The coefficients are banded by: total column water vapour (TCWV)
+    to reduce the effects of atmospheric variability on the nadir and day-time
+    retrievals; satellite zenith angle to reduce viewing angle dependent biases from the
+    dual-view geometry.
+</p>
+
+<h3>SNAP implementation</h3>
+
+<p>
+    In the SNAP implementation the dependence on TCWV is not fully implemented. The
+    coefficients include the dependence, but current ATSR L1b files do not include the
+    required data. As a result the user must select a constant value to use for
+    processing the scene.<br>
+    In future versions of the SNAP ARC processor it will be possible to specify TCWV
+    as a per-pixel field, use the TCWV supplied with SLSTR data, or make use of globally
+    defined coefficients (globally defined coefficients will be less accurate).
+</p>
+
+<hr>
+
+</body>
+</html>
