@@ -77,12 +77,12 @@
     higher bound of the range (borders are included).
 </p>
 
-<p style="margin-bottom:3;">Example:</p>
-<ul style="margin-top:3;">
-    map.0=0,123<br>
-    map.1=124,325<br>
+<p>Example:
+<pre>
+    map.0=0,123
+    map.1=124,325
     map.2=326,511
-</ul>
+</pre>
 
 <p>
     devides each scanline into three non-overlapping pixel ranges.
@@ -105,56 +105,53 @@
     floating point values.
 </p>
 
-<p style="margin-bottom:3;">Example:</p>
-<ul style="margin-top:3;">
-    <pre style="margin-top:3;">a.1=1.0, 2.0, 3.0
-        c.6=1.0, 2.0, 3.0, 4.0, 5.0</pre>
-</ul>
+<p>Example:
+<pre>
+    a.1=1.0, 2.0, 3.0
+    c.6=1.0, 2.0, 3.0, 4.0, 5.0
+</pre>
 
-<p style="margin-bottom:3;">
+<p>
     The number of coefficient values is defined by the sst algorithm as follows:
-</p>
-
-<ul style="margin-top:3;">
-    <pre style="margin-top:3;">a.x coefficients contain three values
-        b.x coefficients contain four values
-        c.x coefficients contain five values
-        d.x coefficients contain seven values</pre>
-</ul>
+<pre>
+    a.x coefficients contain three values
+    b.x coefficients contain four values
+    c.x coefficients contain five values
+    d.x coefficients contain seven values
+</pre>
 
 <p>
     The coefficient file parser checks the number of coefficients and the
     associations and notifies the user on such errors.
 </p>
 
-<p style="margin-bottom:3;">Here is a valid coefficent file as example:</p>
-<ul style="margin-top:3;">
-    <pre style="margin-top:3;">
-        # Source file: ATS_SST_AXVIEC20051205_102103_20020101_000000_20200101_000000.htm
-        # Coefficients taken from record #77 of dataset AVERAGE_LUT which corresponds to
-        # - latitude zone POLAR_INDEX
-        # - across track band index 0 (center pixel)
-        # For more information see http://envisat.esa.int/dataproducts/aatsr/CNTR2-7-1.htm
-        #
-        # This file uses Java property file syntax. It is
-        # composed of lines which are key-value pairs in the form
-        # &lt;key&gt; = &ltvalue&gt;
-        # The supported keys are:
-        # description - a short description of the coefficient set
-        # map.&lt;x&gt; - definition of the coefficient map &ltx&gt; as a
-        # range of zero-based, scanline column indices
-        # &lt;set&gt;.&ltx&gt; - coefficient set corresponding to map.&ltx&gt;
-        # where &ltset&gt; is one of c (day) or d (night).
+<p>Here is a valid coefficent file as example:</p>
+<pre>
+    # Source file: ATS_SST_AXVIEC20051205_102103_20020101_000000_20200101_000000.htm
+    # Coefficients taken from record #77 of dataset AVERAGE_LUT which corresponds to
+    # - latitude zone POLAR_INDEX
+    # - across track band index 0 (center pixel)
+    # For more information see http://envisat.esa.int/dataproducts/aatsr/CNTR2-7-1.htm
+    #
+    # This file uses Java property file syntax. It is
+    # composed of lines which are key-value pairs in the form
+    # &lt;key&gt; = &ltvalue&gt;
+    # The supported keys are:
+    # description - a short description of the coefficient set
+    # map.&lt;x&gt; - definition of the coefficient map &ltx&gt; as a
+    # range of zero-based, scanline column indices
+    # &lt;set&gt;.&ltx&gt; - coefficient set corresponding to map.&ltx&gt;
+    # where &ltset&gt; is one of c (day) or d (night).
 
 
-        description = Average Polar Dual View
+    description = Average Polar Dual View
 
-        # Map 0
-        map.0 = 0, 511
-        c.0 = 4.55397, 5.59769, -3.26962, -3.30387, 1.95733
-        d.0 = 0.952765, 0.437266, -0.653424, 2.61203, -0.229391, 0.357714, -1.5279
-    </pre>
-</ul>
+    # Map 0
+    map.0 = 0, 511
+    c.0 = 4.55397, 5.59769, -3.26962, -3.30387, 1.95733
+    d.0 = 0.952765, 0.437266, -0.653424, 2.61203, -0.229391, 0.357714, -1.5279
+</pre>
+
 <hr>
 </body>
 </html>
