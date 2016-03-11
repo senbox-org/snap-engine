@@ -4,11 +4,8 @@ import com.bc.ceres.binding.Property;
 import com.bc.ceres.binding.PropertyContainer;
 import com.bc.ceres.binding.PropertySet;
 import com.bc.ceres.swing.binding.BindingContext;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.ui.DefaultSingleTargetProductDialog;
 import org.esa.snap.rcp.actions.AbstractSnapAction;
-import org.esa.snap.rcp.util.MultiSizeIssue;
 import org.esa.snap.ui.AppContext;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
@@ -19,15 +16,9 @@ import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-@ActionID(
-        category = "Processing",
-        id = "org.esa.s3tbx.processor.flh_mci.visat.FlhMciAction"
-)
+@ActionID(category = "Processing", id = "org.esa.s3tbx.processor.flh_mci.visat.FlhMciAction" )
 @ActionRegistration(displayName = "#CTL_FlhMciAction_Text")
-@ActionReference(
-        path = "Menu/Optical/Thematic Water Processing",
-        position = 200
-)
+@ActionReference(path = "Menu/Optical/Thematic Water Processing", position = 200 )
 @NbBundle.Messages({"CTL_FlhMciAction_Text=FLH/MCI Processor"})
 public class FlhMciAction extends AbstractSnapAction {
 
@@ -73,9 +64,6 @@ public class FlhMciAction extends AbstractSnapAction {
                 }
             }
         });
-        bindingContext.addPropertyChangeListener(LOWER_BASELINE_BAND_NAME, new BandPropertyChangeListener(propertySet));
-        bindingContext.addPropertyChangeListener(UPPER_BASE_LINE_BAND_NAME, new BandPropertyChangeListener(propertySet));
-        bindingContext.addPropertyChangeListener(SIGNAL_BAND_NAME, new BandPropertyChangeListener(propertySet));
 
         dialog.setTargetProductNameSuffix("_flhmci");
         dialog.getJDialog().pack();
@@ -90,25 +78,6 @@ public class FlhMciAction extends AbstractSnapAction {
         propertySet.removeProperties(properties);
         propertySet.addProperty(presetPropertySet.getProperty("preset"));
         propertySet.addProperties(properties);
-    }
-
-    private class BandPropertyChangeListener implements PropertyChangeListener {
-
-        private final PropertySet propertySet;
-
-        BandPropertyChangeListener(PropertySet propertySet) {
-            this.propertySet = propertySet;
-        }
-
-        @Override
-        public void propertyChange(PropertyChangeEvent evt) {
-            final Product sourceProduct = propertySet.getValue("SOURCE_PRODUCT");
-            final String bandName = (String) evt.getNewValue();
-            final Band band = sourceProduct.getBand(bandName);
-            if (band != null && !band.getRasterSize().equals(sourceProduct.getSceneRasterSize())) {
-                MultiSizeIssue.maybeResample(sourceProduct);
-            }
-        }
     }
 
     private static class PresetContainer {
