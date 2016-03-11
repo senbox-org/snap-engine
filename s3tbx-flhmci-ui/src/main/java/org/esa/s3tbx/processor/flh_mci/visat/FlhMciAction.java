@@ -8,7 +8,7 @@ import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.ui.DefaultSingleTargetProductDialog;
 import org.esa.snap.rcp.actions.AbstractSnapAction;
-import org.esa.snap.rcp.util.MultisizeIssue;
+import org.esa.snap.rcp.util.MultiSizeIssue;
 import org.esa.snap.ui.AppContext;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
@@ -106,7 +106,7 @@ public class FlhMciAction extends AbstractSnapAction {
             final String bandName = (String) evt.getNewValue();
             final Band band = sourceProduct.getBand(bandName);
             if (band != null && !band.getRasterSize().equals(sourceProduct.getSceneRasterSize())) {
-                MultisizeIssue.maybeResample(sourceProduct);
+                MultiSizeIssue.maybeResample(sourceProduct);
             }
         }
     }
