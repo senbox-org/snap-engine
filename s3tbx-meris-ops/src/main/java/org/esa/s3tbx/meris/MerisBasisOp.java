@@ -28,11 +28,11 @@ public abstract class MerisBasisOp extends Operator {
     private boolean copyAllTiePoints = false;
 
     /**
-     * creates a new product with the same size
+     * Creates a new product with the same size
      *
-     * @param sourceProduct
-     * @param name
-     * @param type
+     * @param sourceProduct the source product
+     * @param name the name of the newly created target product
+     * @param type the product type of the newly created target product
      * @return targetProduct
      */
     public Product createCompatibleProduct(Product sourceProduct, String name, String type) {
@@ -47,8 +47,8 @@ public abstract class MerisBasisOp extends Operator {
     /**
      * Copies basic information for a MERIS product to the target product
      *
-     * @param sourceProduct
-     * @param targetProduct
+     * @param sourceProduct the source product
+     * @param targetProduct the target product to copy the trunc to
      */
     public void copyProductTrunk(Product sourceProduct,
                                  Product targetProduct) {
@@ -56,12 +56,6 @@ public abstract class MerisBasisOp extends Operator {
         copyBaseGeoInfo(sourceProduct, targetProduct);
     }
 
-    /**
-     * Copies the tie point data.
-     *
-     * @param sourceProduct
-     * @param targetProduct
-     */
     private void copyTiePoints(Product sourceProduct,
                                Product targetProduct) {
         if (copyAllTiePoints) {
@@ -77,12 +71,6 @@ public abstract class MerisBasisOp extends Operator {
         }
     }
 
-    /**
-     * Copies geocoding and the start and stop time.
-     *
-     * @param sourceProduct
-     * @param targetProduct
-     */
     private void copyBaseGeoInfo(Product sourceProduct,
                                  Product targetProduct) {
         // copy geo-coding to the output product

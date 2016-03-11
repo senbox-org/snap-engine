@@ -6,6 +6,7 @@ import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.util.ProductUtils;
 
+// todo (mp/20160311) BrrBasisOp, MerisBasisOp and BasisOp are all more or less the same --> harmonize
 /**
  * Meris BRR basis abstract operator
  *
