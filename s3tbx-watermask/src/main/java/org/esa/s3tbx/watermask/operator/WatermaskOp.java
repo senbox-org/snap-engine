@@ -31,7 +31,7 @@ import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.ProductUtils;
 
-import java.awt.*;
+import java.awt.Rectangle;
 import java.io.IOException;
 import java.text.MessageFormat;
 
@@ -124,6 +124,7 @@ public class WatermaskOp extends Operator {
     }
 
     private void validateSourceProduct() {
+        ensureSingleRasterSize(sourceProduct);
         final GeoCoding geoCoding = sourceProduct.getSceneGeoCoding();
         if (geoCoding == null) {
             throw new OperatorException("The source product must be geo-coded.");
