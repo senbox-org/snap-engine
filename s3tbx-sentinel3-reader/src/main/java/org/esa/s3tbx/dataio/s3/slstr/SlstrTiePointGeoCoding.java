@@ -40,6 +40,7 @@ public class SlstrTiePointGeoCoding extends TiePointGeoCoding {
 
     @Override
     public boolean transferGeoCoding(Scene srcScene, Scene destScene, ProductSubsetDef subsetDef) {
+        //todo implement - tf 20160313
         return false;
     }
 }
