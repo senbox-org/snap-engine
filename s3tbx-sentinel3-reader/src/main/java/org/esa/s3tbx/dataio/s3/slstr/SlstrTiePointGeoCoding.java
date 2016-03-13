@@ -1,9 +1,7 @@
 package org.esa.s3tbx.dataio.s3.slstr;
 
-import org.esa.snap.core.datamodel.GeoPos;
-import org.esa.snap.core.datamodel.PixelPos;
-import org.esa.snap.core.datamodel.TiePointGeoCoding;
-import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.dataio.ProductSubsetDef;
+import org.esa.snap.core.datamodel.*;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
 
 import java.awt.geom.AffineTransform;
@@ -40,4 +38,8 @@ public class SlstrTiePointGeoCoding extends TiePointGeoCoding {
         return transformedPixelPos;
     }
 
+    @Override
+    public boolean transferGeoCoding(Scene srcScene, Scene destScene, ProductSubsetDef subsetDef) {
+        return false;
+    }
 }
