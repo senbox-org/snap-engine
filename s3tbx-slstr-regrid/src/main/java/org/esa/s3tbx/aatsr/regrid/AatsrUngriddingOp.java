@@ -21,7 +21,7 @@ import org.esa.snap.core.gpf.pointop.WritableSample;
  */
 @OperatorMetadata(description = "Ungrids ATSR L1B products and extracts geolocation and pixel field of view data.",
         alias = "AATSR.Ungrid", authors = "Alasdhair Beaton, Philip Beavis",
-        category = "Raster", label = "AATSR Ungridding"
+        category = "Raster", label = "AATSR Ungridding", internal = true //todo remove internal = true - tf 20160314
 )
 public class AatsrUngriddingOp extends PixelOperator {
 
