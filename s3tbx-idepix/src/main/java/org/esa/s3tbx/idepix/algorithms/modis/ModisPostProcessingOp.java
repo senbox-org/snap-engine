@@ -250,8 +250,7 @@ public class ModisPostProcessingOp extends BasisOp {
         ProductUtils.copyFlagBands(reflProduct, targetProduct, true);
         ProductUtils.copyFlagCodings(reflProduct, targetProduct);
         ProductUtils.copyFlagCodings(classifProduct, targetProduct);
-//        ProductUtils.copyGeoCoding(reflProduct, targetProduct);
-        targetProduct.setSceneGeoCoding(reflProduct.getSceneGeoCoding());
+        ProductUtils.copyGeoCoding(reflProduct, targetProduct);
 
         ModisUtils.setupClassifBitmask(targetProduct);
     }
