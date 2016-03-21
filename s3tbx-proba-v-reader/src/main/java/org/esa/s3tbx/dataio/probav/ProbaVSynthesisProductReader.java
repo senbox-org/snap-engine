@@ -79,7 +79,7 @@ public class ProbaVSynthesisProductReader extends AbstractProductReader {
 
                 // check of which of the supported product types the input is:
                 if (ProbaVSynthesisProductReaderPlugIn.isProbaSynthesisToaProduct(fileName) ||
-                        ProbaVSynthesisProductReaderPlugIn.isProbaSynthesisTocProduct(fileName)) {
+                    ProbaVSynthesisProductReaderPlugIn.isProbaSynthesisTocProduct(fileName)) {
                     targetProduct = createTargetProductFromSynthesis(probavFile, rootNode);
                 } else if (ProbaVSynthesisProductReaderPlugIn.isProbaSynthesisNdviProduct(fileName)) {
                     targetProduct = createTargetProductFromSynthesisNdvi(probavFile, rootNode);
@@ -172,7 +172,7 @@ public class ProbaVSynthesisProductReader extends AbstractProductReader {
                                     final String level3GeometryViewAngleChildNodeName =
                                             level3GeometryViewAngleChildNode.toString();
                                     final String viewAnglebandName = level3GeometryViewAngleChildNodeName + "_" +
-                                            level3GeometryChildNodeName;
+                                                                     level3GeometryChildNodeName;
                                     final Band viewAngleBand = createTargetBand(product,
                                                                                 viewAngleDS,
                                                                                 viewAnglebandName,
@@ -182,7 +182,7 @@ public class ProbaVSynthesisProductReader extends AbstractProductReader {
                                     viewAngleBand.setNoDataValueUsed(true);
 
                                     final String viewAngleDatasetName = "/LEVEL3/GEOMETRY/" +
-                                            level3GeometryChildNodeName + "/" + level3GeometryViewAngleChildNodeName;
+                                                                        level3GeometryChildNodeName + "/" + level3GeometryViewAngleChildNodeName;
                                     final int viewAngleDatatypeClass = viewAngleDS.getDatatype().getDatatypeClass();   // 0
                                     final ProductData viewAngleRasterData = ProbaVUtils.getProbaVRasterData(file_id, productWidth, productHeight,
                                                                                                             viewAngleDatasetName,
@@ -250,7 +250,7 @@ public class ProbaVSynthesisProductReader extends AbstractProductReader {
                             radiometryBand.setNoDataValueUsed(true);
 
                             final String radiometryDatasetName = "/LEVEL3/RADIOMETRY/" +
-                                    level3RadiometryChildNodeName + "/" + radiometryBandPrePrefix;
+                                                                 level3RadiometryChildNodeName + "/" + radiometryBandPrePrefix;
                             final int radiometryDatatypeClass = radiometryDS.getDatatype().getDatatypeClass();
                             final ProductData radiometryRasterData = ProbaVUtils.getProbaVRasterData(file_id, productWidth, productHeight,
                                                                                                      radiometryDatasetName,
@@ -422,10 +422,10 @@ public class ProbaVSynthesisProductReader extends AbstractProductReader {
         // pixel size: 10deg/rasterDim, it is also in the 6th and 7th value of MAPPING attribute in the raster nodes
         final double topLeftLon = easting;
         final double topRightLon = ProbaVUtils.getDoubleAttributeValue(geometryMetadata, "TOP_RIGHT_LONGITUDE");
-        final double pixelSizeX = Math.abs(topRightLon - topLeftLon) / productWidth;
+        final double pixelSizeX = Math.abs(topRightLon - topLeftLon) / (productWidth - 1);
         final double topLeftLat = northing;
         final double bottomLeftLat = ProbaVUtils.getDoubleAttributeValue(geometryMetadata, "BOTTOM_LEFT_LATITUDE");
-        final double pixelSizeY = (topLeftLat - bottomLeftLat) / productHeight;
+        final double pixelSizeY = (topLeftLat - bottomLeftLat) / (productHeight - 1);
 
         final H5Group h5RootGroup = (H5Group) ((DefaultMutableTreeNode) inputFileRootNode).getUserObject();
         final List rootMetadata = h5RootGroup.getMetadata();
