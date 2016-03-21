@@ -414,10 +414,10 @@ public class ProbaVSynthesisProductReader extends AbstractProductReader {
         // pixel size: 10deg/rasterDim, it is also in the 6th and 7th value of MAPPING attribute in the raster nodes
         final double topLeftLon = easting;
         final double topRightLon = ProbaVUtils.getFloatAttributeValue(geometryMetadata, "TOP_RIGHT_LONGITUDE");
-        final double pixelSizeX = Math.abs(topRightLon - topLeftLon) / productWidth;
+        final double pixelSizeX = Math.abs(topRightLon - topLeftLon) / (productWidth - 1);
         final double topLeftLat = northing;
         final double bottomLeftLat = ProbaVUtils.getFloatAttributeValue(geometryMetadata, "BOTTOM_LEFT_LATITUDE");
-        final double pixelSizeY = (topLeftLat - bottomLeftLat) / productHeight;
+        final double pixelSizeY = (topLeftLat - bottomLeftLat) / (productHeight - 1);
 
         final H5Group h5RootGroup = (H5Group) ((DefaultMutableTreeNode) inputFileRootNode).getUserObject();
         final List rootMetadata = h5RootGroup.getMetadata();
