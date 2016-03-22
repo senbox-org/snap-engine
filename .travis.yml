@@ -7,7 +7,9 @@ jdk:
 
 env:
   global:
-   - secure: "EQkF23GyEHt1bfI_F-FkNg"
+   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+   #   via the "travis encrypt" command using the project repo's public key
+   - secure: "EiQTFg+2gLBHZNXZ8kECrOQj8KaXM+/L1yydRpefFhc0Nu44eq5ZDyN1AsgvhrINfw5Fm6opE8YjGkB6h6cDVFDUg1gPahL4QC7ovR1nbxDlbsljY4S+i26SZLjCzw0Jh7PUt/IcXaOVwSghQOD/9kWm/77Zi1FMpQJMft5CKQ4="
 
 addons:
   coverity_scan:
@@ -15,7 +17,8 @@ addons:
       name: "senbox-org/s3tbx"
       description: "Build submitted via Travis CI"
     notification_email: stb-coverity@thor.si.c-s.fr
-    build_command:   "mvn -DskipTests=true clean compile"
+    build_command_prepend: ""
+    build_command: "mvn -DskipTests=true clean compile"
     branch_pattern: coverity_scan
 
 before_install:
