@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>beam-proba-v-reader</symbolicName>
-    <version>5.0.1</version>
+    <version>5.0.2</version>
     <name>Proba V Product Reader</name>
     <packaging>dir</packaging>
     <funding>ESA</funding>
@@ -18,6 +18,8 @@
 
     <changelog>
         <![CDATA[
+          <b>Changes in 5.0.2</b><br/>
+          [SIIITBX-94] Proba-V reader does not correctly compute pixel size<br/>
           <b>Changes in 5.0</b><br/>
           Initial release <br/>
         ]]>
