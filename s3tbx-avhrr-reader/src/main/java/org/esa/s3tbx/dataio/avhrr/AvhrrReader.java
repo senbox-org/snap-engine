@@ -256,16 +256,16 @@ public class AvhrrReader extends AbstractProductReader implements AvhrrConstants
         FlagCoding fc = new FlagCoding(bandReader.getBandName());
         fc.setDescription("Flag coding for AVHRR data quality");
 
+        flagsBand.setSampleCoding(fc);
+        product.getFlagCodingGroup().add(fc);
+        product.addBand(flagsBand);
+
         addFlagAndBitmaskDef(fc, FLAG_QS, FLAG_QS_DESC, 0);
         addFlagAndBitmaskDef(fc, FLAG_SCANLINE, FLAG_SCANLINE_DESC, 1);
         addFlagAndBitmaskDef(fc, FLAG_3B, FLAG_SCANLINE_DESC, 2);
         addFlagAndBitmaskDef(fc, FLAG_4, FLAG_SCANLINE_DESC, 3);
         addFlagAndBitmaskDef(fc, FLAG_5, FLAG_SCANLINE_DESC, 4);
         addFlagAndBitmaskDef(fc, FLAG_SYNC, FLAG_SYNC_DESC, 5);
-
-        flagsBand.setSampleCoding(fc);
-        product.getFlagCodingGroup().add(fc);
-        product.addBand(flagsBand);
 
         bandReaders.put(flagsBand, bandReader);
     }
