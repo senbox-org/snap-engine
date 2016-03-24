@@ -164,8 +164,7 @@ class CloudPN extends ProcessingNode {
         outputProduct.addBand(cloudBand);
 
         // create and add the flags coding
-        FlagCoding cloudFlagCoding = createCloudFlagCoding(outputProduct);
-        outputProduct.getFlagCodingGroup().add(cloudFlagCoding);
+        FlagCoding cloudFlagCoding = addCloudFlagCoding(outputProduct);
 
         // create and add the SDR flags dataset
         cloudFlagBand = new Band(CLOUD_FLAG_BAND, ProductData.TYPE_UINT8, sceneWidth, sceneHeight);
@@ -177,10 +176,11 @@ class CloudPN extends ProcessingNode {
         return outputProduct;
     }
 
-    private static FlagCoding createCloudFlagCoding(Product outputProduct) {
+    private static FlagCoding addCloudFlagCoding(Product outputProduct) {
         MetadataAttribute cloudAttr;
         final FlagCoding flagCoding = new FlagCoding(CLOUD_FLAG_BAND);
         flagCoding.setDescription("Cloud Flag Coding");
+        outputProduct.getFlagCodingGroup().add(flagCoding);
 
         cloudAttr = new MetadataAttribute("cloudy", ProductData.TYPE_UINT8);
         cloudAttr.getData().setElemInt(FLAG_CLOUDY);
