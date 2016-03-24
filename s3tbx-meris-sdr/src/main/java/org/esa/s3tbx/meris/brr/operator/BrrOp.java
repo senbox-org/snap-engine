@@ -1,7 +1,13 @@
 package org.esa.s3tbx.meris.brr.operator;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.s3tbx.meris.brr.dpm.*;
+import org.esa.s3tbx.meris.brr.dpm.AtmosphericCorrectionLand;
+import org.esa.s3tbx.meris.brr.dpm.CloudClassification;
+import org.esa.s3tbx.meris.brr.dpm.DpmPixel;
+import org.esa.s3tbx.meris.brr.dpm.GaseousAbsorptionCorrection;
+import org.esa.s3tbx.meris.brr.dpm.L1bDataExtraction;
+import org.esa.s3tbx.meris.brr.dpm.PixelIdentification;
+import org.esa.s3tbx.meris.brr.dpm.RayleighCorrection;
 import org.esa.s3tbx.meris.l2auxdata.Constants;
 import org.esa.s3tbx.meris.l2auxdata.L2AuxData;
 import org.esa.s3tbx.meris.l2auxdata.L2AuxDataProvider;
@@ -20,11 +26,12 @@ import org.esa.snap.core.util.BitSetter;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.dataio.envisat.EnvisatConstants;
 
-import java.awt.*;
+import java.awt.Rectangle;
 import java.util.Map;
 
 
 @OperatorMetadata(alias = "Meris.Brr",
+                  internal = true,
                   version = "2.4",
                   authors = "R. Santer, M. Zuehlke, T. Block, O. Danne",
                   copyright = "(c) European Space Agency",
