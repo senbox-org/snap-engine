@@ -276,6 +276,7 @@ public class AvhrrReader extends AbstractProductReader implements AvhrrConstants
             Band cloudMaskBand = new Band(cloudReader.getBandName(),
                                           cloudReader.getDataType(), avhrrFile.getProductWidth(),
                                           avhrrFile.getProductHeight());
+            product.addBand(cloudMaskBand);
 
             final String cloudBandName = cloudReader.getBandName();
             product.addMask("clear", cloudBandName + "==0", "", Color.LIGHT_GRAY, 0.4);
@@ -283,7 +284,6 @@ public class AvhrrReader extends AbstractProductReader implements AvhrrConstants
             product.addMask("probably_cloudy", cloudBandName + "==2", "", Color.ORANGE, 0.4);
             product.addMask("cloudy", cloudBandName + "==3", "", Color.RED, 0.4);
 
-            product.addBand(cloudMaskBand);
             bandReaders.put(cloudMaskBand, cloudReader);
         }
     }
