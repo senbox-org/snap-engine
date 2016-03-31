@@ -5,7 +5,7 @@
     <parent>
         <artifactId>s3tbx</artifactId>
         <groupId>org.esa.s3tbx</groupId>
-        <version>3.0.0</version>
+        <version>3.0.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -42,7 +42,7 @@
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
             <artifactId>s3tbx-sentinel3-reader</artifactId>
-            <version>3.0.0</version>
+            <version>${s3tbx.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
