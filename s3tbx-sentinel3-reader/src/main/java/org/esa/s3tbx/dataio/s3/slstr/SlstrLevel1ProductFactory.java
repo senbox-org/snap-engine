@@ -36,9 +36,6 @@ import org.geotools.referencing.operation.transform.AffineTransform2D;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.image.RenderedImage;
-import java.io.File;
-import java.io.FilenameFilter;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +51,22 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
     private Map<String, GeoCoding> geoCodingMap;
 
     public final static String SLSTR_L1B_USE_PIXELGEOCODINGS = "s3tbx.reader.slstrl1b.pixelGeoCodings";
+
+    //todo read all these as metadata - tf 20160401
+    private final static String[] EXCLUDED_IDS = new String[] {"ADFData", "SLSTR_F1_QUALITY_IN_Data",
+            "SLSTR_F1_QUALITY_IO_Data", "SLSTR_F2_QUALITY_IN_Data", "SLSTR_F2_QUALITY_IO_Data",
+            "SLSTR_S1_QUALITY_AN_Data", "SLSTR_S1_QUALITY_AO_Data", "SLSTR_S2_QUALITY_AN_Data",
+            "SLSTR_S2_QUALITY_AO_Data", "SLSTR_S3_QUALITY_AN_Data", "SLSTR_S3_QUALITY_AO_Data",
+            "SLSTR_S4_QUALITY_AN_Data", "SLSTR_S4_QUALITY_AO_Data", "SLSTR_S4_QUALITY_BN_Data",
+            "SLSTR_S4_QUALITY_BO_Data", "SLSTR_S4_QUALITY_CN_Data", "SLSTR_S4_QUALITY_CO_Data",
+            "SLSTR_S5_QUALITY_AN_Data", "SLSTR_S5_QUALITY_AO_Data", "SLSTR_S5_QUALITY_BN_Data",
+            "SLSTR_S5_QUALITY_BO_Data", "SLSTR_S5_QUALITY_CN_Data", "SLSTR_S5_QUALITY_CO_Data",
+            "SLSTR_S6_QUALITY_AN_Data", "SLSTR_S6_QUALITY_AO_Data", "SLSTR_S6_QUALITY_BN_Data",
+            "SLSTR_S6_QUALITY_BO_Data", "SLSTR_S6_QUALITY_CN_Data", "SLSTR_S6_QUALITY_CO_Data",
+            "SLSTR_S7_QUALITY_IN_Data", "SLSTR_S7_QUALITY_IO_Data", "SLSTR_S8_QUALITY_IN_Data",
+            "SLSTR_S8_QUALITY_IO_Data", "SLSTR_S9_QUALITY_IN_Data", "SLSTR_S9_QUALITY_IO_Data"
+    };
+
 
     public SlstrLevel1ProductFactory(Sentinel3ProductReader productReader) {
         super(productReader);
@@ -155,21 +168,7 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
 
     @Override
     protected List<String> getFileNames(Manifest manifest) {
-        final File directory = getInputFileParentDirectory();
-
-        final String[] fileNames = directory.list(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.endsWith(".nc") &&
-                        (name.contains("radiance") || name.contains("flags")
-                                || name.contains("geodetic") || name.contains("BT") || name.contains("cartesian")
-                                || name.contains("indices") || name.contains("met") || name.contains("time")
-                        );
-            }
-        });
-
-
-        return Arrays.asList(fileNames);
+        return manifest.getFileNames(EXCLUDED_IDS);
     }
 
     @Override

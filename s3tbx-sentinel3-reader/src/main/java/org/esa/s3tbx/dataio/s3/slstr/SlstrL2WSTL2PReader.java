@@ -22,4 +22,8 @@ public class SlstrL2WSTL2PReader extends S3NetcdfReader {
     public String[] getSuffixesForSeparatingDimensions() {
         return new String[]{"channel"};
     }
+
+    protected String[][] getRowColumnNamePairs() {
+        return new String[][]{{"nj", "ni"}};
+    }
 }

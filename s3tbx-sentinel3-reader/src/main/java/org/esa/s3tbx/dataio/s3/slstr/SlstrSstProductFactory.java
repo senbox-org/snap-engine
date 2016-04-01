@@ -16,6 +16,8 @@ package org.esa.s3tbx.dataio.s3.slstr;/*
 
 import org.esa.s3tbx.dataio.s3.Manifest;
 import org.esa.s3tbx.dataio.s3.Sentinel3ProductReader;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.Product;
 
 import java.util.List;
 
@@ -31,6 +33,15 @@ public class SlstrSstProductFactory extends SlstrL2ProductFactory {
         // TODO - not clear how to represent time data
         // todo read l2p_flags as flag band (and index band)
         return manifest.getFileNames(new String[0]);
+    }
+
+    @Override
+    protected Band addBand(Band sourceBand, Product targetProduct) {
+        final String sourceBandName = sourceBand.getName();
+        if (sourceBand.getProduct().getName().contains("SST")) {
+            sourceBand.setName(sourceBand.getProduct().getName() + "_" + sourceBandName);
+        }
+        return super.addBand(sourceBand, targetProduct);
     }
 
 }
