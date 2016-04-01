@@ -14,11 +14,12 @@ it contains the fraction of water; a value of 0.0 indicates land, a value of 100
 a mixed pixel.
 
 A comprehensive list of all issues resolved in this version of the Sentinel-3 Toolbox can be found in our 
-[issue tracking system](https://senbox.atlassian.net/projects/SIIITBX/versions/11100)
+[issue tracking system](https://senbox.atlassian.net/issues/?filter=11509)
 
 #Release notes of former versions
 
-* [Resolved issues in version 2.0](https://senbox.atlassian.net/projects/SIIITBX/versions/10208)
-* [Resolved issues in version 2.0 beta](https://senbox.atlassian.net/projects/SIIITBX/versions/10900)
-* [Resolved issues in version 1.0.1](https://senbox.atlassian.net/projects/SIIITBX/versions/10202)
+* [Resolved issues in version 2.x](https://senbox.atlassian.net/issues/?filter=11508)
+* [Resolved issues in version 2.0](https://senbox.atlassian.net/issues/?filter=11507)
+* [Resolved issues in version 2.0 beta](https://senbox.atlassian.net/issues/?filter=11506)
+* [Resolved issues in version 1.0.1](https://senbox.atlassian.net/issues/?filter=11505)
 
