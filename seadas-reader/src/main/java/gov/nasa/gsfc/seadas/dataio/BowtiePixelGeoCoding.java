@@ -20,6 +20,7 @@ import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.GeoCodingFactory;
+import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.Scene;
 import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.ProductUtils;
@@ -40,8 +41,8 @@ import java.util.ArrayList;
  * (off-nadir) scan angle is performed (correction for bow-tie effect).
  */
 public class BowtiePixelGeoCoding extends AbstractBowtieGeoCoding {
-    private Band _latBand;
-    private Band _lonBand;
+    private Band latBand;
+    private Band lonBand;
     int _scanlineHeight;
     int _scanlineOffset;
 
@@ -60,9 +61,9 @@ public class BowtiePixelGeoCoding extends AbstractBowtieGeoCoding {
                 latBand.getRasterHeight() != lonBand.getRasterHeight()) {
             throw new IllegalArgumentException("latBand is not compatible with lonBand");
         }
-        _latBand = latBand;
-        _lonBand = lonBand;
-        setGridOwner(_lonBand.getOwner());
+        this.latBand = latBand;
+        this.lonBand = lonBand;
+        setGridOwner(this.lonBand.getOwner());
         _scanlineHeight = scanlineHeight;
         _scanlineOffset = 0;
         try {
@@ -77,7 +78,7 @@ public class BowtiePixelGeoCoding extends AbstractBowtieGeoCoding {
      * @return lines in the scene
      */
     public int getSceneHeight() {
-        return _lonBand.getRasterHeight();
+        return lonBand.getRasterHeight();
     }
 
     /**
@@ -106,16 +107,16 @@ public class BowtiePixelGeoCoding extends AbstractBowtieGeoCoding {
         }
 
         BowtiePixelGeoCoding that = (BowtiePixelGeoCoding) o;
-        if (_latBand == null || that._latBand == null) {
+        if (latBand == null || that.latBand == null) {
             return false;
         }
-        if (!_latBand.equals(that._latBand)) {
+        if (!latBand.equals(that.latBand)) {
             return false;
         }
-        if (_lonBand == null || that._lonBand == null) {
+        if (lonBand == null || that.lonBand == null) {
             return false;
         }
-        if (!_lonBand.equals(that._lonBand)) {
+        if (!lonBand.equals(that.lonBand)) {
             return false;
         }
 
@@ -124,8 +125,8 @@ public class BowtiePixelGeoCoding extends AbstractBowtieGeoCoding {
 
     @Override
     public int hashCode() {
-        int result = _latBand != null ? _latBand.hashCode() : 0;
-        result = 31 * result + (_lonBand != null ? _lonBand.hashCode() : 0);
+        int result = latBand != null ? latBand.hashCode() : 0;
+        result = 31 * result + (lonBand != null ? lonBand.hashCode() : 0);
         return result;
     }
 
@@ -139,8 +140,8 @@ public class BowtiePixelGeoCoding extends AbstractBowtieGeoCoding {
     @Override
     public void dispose() {
         super.dispose();
-        _latBand = null;
-        _lonBand = null;
+        latBand = null;
+        lonBand = null;
     }
 
     /**
@@ -151,17 +152,17 @@ public class BowtiePixelGeoCoding extends AbstractBowtieGeoCoding {
         int start = -1;
 
         // look at first pixel in each line
-        for(int i = 1; i< _latBand.getRasterHeight(); i++) {
-            if(_latBand.getPixelFloat(0, i-1) < _latBand.getPixelFloat(0, i)) {
+        for(int i = 1; i < latBand.getRasterHeight(); i++) {
+            if(latBand.getPixelFloat(0, i - 1) < latBand.getPixelFloat(0, i)) {
                 start = i;
                 break;
             }
         }
         // if not found try end of line
         if(start == -1) {
-            int x = _latBand.getRasterWidth() - 1;
-            for(int i = 1; i< _latBand.getRasterHeight(); i++) {
-                if(_latBand.getPixelFloat(x, i-1) < _latBand.getPixelFloat(x, i)) {
+            int x = latBand.getRasterWidth() - 1;
+            for(int i = 1; i < latBand.getRasterHeight(); i++) {
+                if(latBand.getPixelFloat(x, i - 1) < latBand.getPixelFloat(x, i)) {
                     start = i;
                     break;
                 }
@@ -179,16 +180,16 @@ public class BowtiePixelGeoCoding extends AbstractBowtieGeoCoding {
         gcList = new ArrayList<GeoCoding>();
         centerLineList = new ArrayList<PolyLine>();
 
-        _latBand.readRasterDataFully(ProgressMonitor.NULL);
-        _lonBand.readRasterDataFully(ProgressMonitor.NULL);
+        latBand.readRasterDataFully(ProgressMonitor.NULL);
+        lonBand.readRasterDataFully(ProgressMonitor.NULL);
 
-        final float[] latFloats = (float[]) _latBand.getDataElems();
-        final float[] lonFloats = (float[]) _lonBand.getDataElems();
+        final float[] latFloats = (float[]) latBand.getDataElems();
+        final float[] lonFloats = (float[]) lonBand.getDataElems();
 
         calculateScanlineOffset();
 
-        final int scanW = _lonBand.getRasterWidth();
-        final int sceneH = _lonBand.getRasterHeight();
+        final int scanW = lonBand.getRasterWidth();
+        final int sceneH = lonBand.getRasterHeight();
 
         final int gcRawWidth = scanW * _scanlineHeight;
 
@@ -297,10 +298,14 @@ public class BowtiePixelGeoCoding extends AbstractBowtieGeoCoding {
     public boolean transferGeoCoding(final Scene srcScene, final Scene destScene, final ProductSubsetDef subsetDef) {
 
         BowtiePixelGeoCoding srcGeocoding = (BowtiePixelGeoCoding)srcScene.getGeoCoding();
-        final String latBandName = srcGeocoding._latBand.getName();
-        final String lonBandName = srcGeocoding._lonBand.getName();
+        final String latBandName = srcGeocoding.latBand.getName();
+        final String lonBandName = srcGeocoding.lonBand.getName();
 
-        ensureLatLonBands(destScene);
+        try {
+            ensureLatLonBands(destScene, subsetDef);
+        } catch (IOException e) {
+            return false;
+        }
         final Band targetLatBand = destScene.getProduct().getBand(latBandName);
         final Band targetLonBand = destScene.getProduct().getBand(lonBandName);
         if(subsetDef != null) {
@@ -317,16 +322,30 @@ public class BowtiePixelGeoCoding extends AbstractBowtieGeoCoding {
         return false;
     }
 
-    private void ensureLatLonBands(Scene destScene) {
-         ensureBand(destScene, _latBand);
-         ensureBand(destScene, _lonBand);
-     }
+    private void ensureLatLonBands(Scene destScene, ProductSubsetDef subsetDef) throws IOException {
+        Band destLatBand = destScene.getProduct().getBand(latBand.getName());
+        Band destLonBand = destScene.getProduct().getBand(lonBand.getName());
+        if (destLatBand == null || destLonBand == null) {
+            Band tempLatBand;
+            Band tempLonBand;
+            if (subsetDef != null) {
+                ProductSubsetDef bandSubset = new ProductSubsetDef();
+                bandSubset.addNodeName(latBand.getName());
+                bandSubset.addNodeName(lonBand.getName());
+                bandSubset.setRegion(subsetDef.getRegion());
+                bandSubset.setSubSampling(subsetDef.getSubSamplingX(), subsetDef.getSubSamplingY());
+                Product temp = latBand.getProduct().createSubset(bandSubset, "__temp", "");
+                tempLatBand = temp.getBand(latBand.getName());
+                tempLonBand = temp.getBand(lonBand.getName());
+            }else {
+                tempLatBand = latBand;
+                tempLonBand = lonBand;
+            }
 
-     private static void ensureBand(Scene destScene, Band sourceBand) {
-         Band band = destScene.getProduct().getBand(sourceBand.getName());
-         if (band == null) {
-             ProductUtils.copyBand(sourceBand.getName(), sourceBand.getProduct(), destScene.getProduct(), true);
-          }
-      }
+
+            ProductUtils.copyBand(tempLatBand.getName(), tempLatBand.getProduct(), destScene.getProduct(), true);
+            ProductUtils.copyBand(tempLonBand.getName(), tempLonBand.getProduct(), destScene.getProduct(), true);
+        }
+     }
 
 }

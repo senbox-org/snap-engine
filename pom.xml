@@ -81,7 +81,7 @@
         <s3tbx.nbmSpecVersion>3.0.1</s3tbx.nbmSpecVersion>
         <netbeans.version>RELEASE802</netbeans.version>
         <javahelp.version>2.0.05</javahelp.version>
-        <seadas.reader.version>1.5.7</seadas.reader.version>
+        <seadas.reader.version>1.5.7.1-SNAPSHOT</seadas.reader.version>
         <seadas.reader.ui.version>1.5.6</seadas.reader.ui.version>
         <brandingToken>s3tbx</brandingToken>
         <user.language>en</user.language>
