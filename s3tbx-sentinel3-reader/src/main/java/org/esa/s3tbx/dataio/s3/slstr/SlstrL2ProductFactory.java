@@ -33,7 +33,7 @@ public abstract class SlstrL2ProductFactory extends SlstrProductFactory {
                     nadirTrackOffset = trackOffset;
                     setReferenceStartOffset(startOffset);
                     setReferenceTrackOffset(trackOffset);
-                    setReferenceResolutions(getResolutions("n"));
+                    setReferenceResolutions(getResolutions("in"));
                 } else {
                     obliqueStartOffset = startOffset;
                     obliqueTrackOffset = trackOffset;

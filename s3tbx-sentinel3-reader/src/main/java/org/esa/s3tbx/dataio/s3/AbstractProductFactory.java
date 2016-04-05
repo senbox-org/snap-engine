@@ -166,7 +166,7 @@ public abstract class AbstractProductFactory implements ProductFactory {
     protected void setSceneTransforms(Product product) {
     }
 
-    protected void setBandGeoCodings(Product targetProduct) {
+    protected void setBandGeoCodings(Product targetProduct) throws IOException {
     }
 
     protected void setUncertaintyBands(Product product) {
@@ -354,12 +354,12 @@ public abstract class AbstractProductFactory implements ProductFactory {
             try {
                 product = readProduct(fileName);
             } catch (IOException ioe) {
-                logger.log(Level.WARNING, "Could not read " + fileName + "due to IOException");
+                logger.log(Level.WARNING, ioe.getMessage());
             }
             if (product != null) {
                 openProductList.add(product);
             } else {
-                logger.log(Level.WARNING, "Could not find " + fileName);
+                logger.log(Level.WARNING, MessageFormat.format("Could not find ''{0}''.", fileName));
             }
         }
     }

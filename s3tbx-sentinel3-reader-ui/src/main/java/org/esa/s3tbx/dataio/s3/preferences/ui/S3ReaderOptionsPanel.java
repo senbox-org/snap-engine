@@ -9,6 +9,7 @@ import org.esa.s3tbx.dataio.s3.AbstractProductFactory;
 import org.esa.s3tbx.dataio.s3.meris.MerisProductFactory;
 import org.esa.s3tbx.dataio.s3.olci.OlciProductFactory;
 import org.esa.s3tbx.dataio.s3.slstr.SlstrLevel1ProductFactory;
+import org.esa.s3tbx.dataio.s3.slstr.SlstrSstProductFactory;
 import org.esa.snap.rcp.SnapApp;
 import org.esa.snap.runtime.Config;
 import org.openide.awt.Mnemonics;
@@ -20,6 +21,7 @@ import java.util.prefs.Preferences;
 final class S3ReaderOptionsPanel extends javax.swing.JPanel {
 
     private javax.swing.JCheckBox slstrL1BPixelGeocodingsCheckBox;
+    private javax.swing.JCheckBox slstrL2SSTPixelGeocodingsCheckBox;
     private javax.swing.JCheckBox olciPixelGeocodingsCheckBox;
     private javax.swing.JCheckBox merisPixelGeocodingsCheckBox;
     private javax.swing.JCheckBox loadProfileTiePointsCheckBox;
@@ -28,6 +30,7 @@ final class S3ReaderOptionsPanel extends javax.swing.JPanel {
         initComponents();
         // listen to changes in form fields and call controller.changed()
         slstrL1BPixelGeocodingsCheckBox.addItemListener(e -> controller.changed());
+        slstrL2SSTPixelGeocodingsCheckBox.addItemListener(e -> controller.changed());
         olciPixelGeocodingsCheckBox.addItemListener(e -> controller.changed());
         merisPixelGeocodingsCheckBox.addItemListener(e -> controller.changed());
         loadProfileTiePointsCheckBox.addItemListener(e -> controller.changed());
@@ -38,6 +41,10 @@ final class S3ReaderOptionsPanel extends javax.swing.JPanel {
         Mnemonics.setLocalizedText(slstrL1BPixelGeocodingsCheckBox,
                                    NbBundle.getMessage(S3ReaderOptionsPanel.class,
                                                        "S3TBXReaderOptionsPanel.slstrL1BPixelGeocodingsCheckBox.text")); // NOI18N
+        slstrL2SSTPixelGeocodingsCheckBox = new javax.swing.JCheckBox();
+        Mnemonics.setLocalizedText(slstrL2SSTPixelGeocodingsCheckBox,
+                                   NbBundle.getMessage(S3ReaderOptionsPanel.class,
+                                                       "S3TBXReaderOptionsPanel.slstrL2SSTPixelGeocodingsCheckBox.text")); // NOI18N
         olciPixelGeocodingsCheckBox = new javax.swing.JCheckBox();
         Mnemonics.setLocalizedText(olciPixelGeocodingsCheckBox,
                                    NbBundle.getMessage(S3ReaderOptionsPanel.class,
@@ -59,6 +66,8 @@ final class S3ReaderOptionsPanel extends javax.swing.JPanel {
                                           .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                                             .addComponent(slstrL1BPixelGeocodingsCheckBox)
                                                             .addGap(0, 512, Short.MAX_VALUE)
+                                                            .addComponent(slstrL2SSTPixelGeocodingsCheckBox)
+                                                            .addGap(0, 512, Short.MAX_VALUE)
                                                             .addComponent(olciPixelGeocodingsCheckBox)
                                                             .addGap(0, 512, Short.MAX_VALUE)
                                                             .addComponent(merisPixelGeocodingsCheckBox)
@@ -70,6 +79,8 @@ final class S3ReaderOptionsPanel extends javax.swing.JPanel {
                 layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addGroup(layout.createSequentialGroup()
                                           .addComponent(slstrL1BPixelGeocodingsCheckBox)
+                                          .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                          .addComponent(slstrL2SSTPixelGeocodingsCheckBox)
                                           .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                           .addComponent(olciPixelGeocodingsCheckBox)
                                           .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -84,6 +95,8 @@ final class S3ReaderOptionsPanel extends javax.swing.JPanel {
         final Preferences preferences = Config.instance("s3tbx").load().preferences();
         slstrL1BPixelGeocodingsCheckBox.setSelected(
                 preferences.getBoolean(SlstrLevel1ProductFactory.SLSTR_L1B_USE_PIXELGEOCODINGS, false));
+        slstrL2SSTPixelGeocodingsCheckBox.setSelected(
+                preferences.getBoolean(SlstrSstProductFactory.SLSTR_L2_SST_USE_PIXELGEOCODINGS, false));
         olciPixelGeocodingsCheckBox.setSelected(
                 preferences.getBoolean(OlciProductFactory.OLCI_USE_PIXELGEOCODING, false));
         merisPixelGeocodingsCheckBox.setSelected(
@@ -96,6 +109,8 @@ final class S3ReaderOptionsPanel extends javax.swing.JPanel {
         final Preferences preferences = Config.instance("s3tbx").load().preferences();
         preferences.putBoolean(SlstrLevel1ProductFactory.SLSTR_L1B_USE_PIXELGEOCODINGS,
                                slstrL1BPixelGeocodingsCheckBox.isSelected());
+        preferences.putBoolean(SlstrSstProductFactory.SLSTR_L2_SST_USE_PIXELGEOCODINGS,
+                               slstrL2SSTPixelGeocodingsCheckBox.isSelected());
         preferences.putBoolean(OlciProductFactory.OLCI_USE_PIXELGEOCODING, olciPixelGeocodingsCheckBox.isSelected());
         preferences.putBoolean(MerisProductFactory.MERIS_SAFE_USE_PIXELGEOCODING, merisPixelGeocodingsCheckBox.isSelected());
         preferences.putBoolean(AbstractProductFactory.LOAD_PROFILE_TIE_POINTS, loadProfileTiePointsCheckBox.isSelected());
