@@ -81,6 +81,10 @@ public class SlstrLevel1B1kmProductFactory extends SlstrLevel1ProductFactory {
     }
 
     @Override
+    protected void configureDescription(Band sourceBand, RasterDataNode targetNode) {
+    }
+
+    @Override
     protected void changeTargetProductName(Product targetProduct) {
         targetProduct.setName(targetProduct.getName() + "_1km");
     }

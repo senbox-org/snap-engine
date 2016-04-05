@@ -65,6 +65,10 @@ public class SlstrLevel1B500mProductFactory extends SlstrLevel1ProductFactory {
     }
 
     @Override
+    protected void configureDescription(Band sourceBand, RasterDataNode targetNode) {
+    }
+
+    @Override
     protected void changeTargetProductName(Product targetProduct) {
         targetProduct.setName(targetProduct.getName() + "_500m");
     }

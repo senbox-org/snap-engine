@@ -164,6 +164,28 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
             ((Band) targetNode).setSpectralBandIndex(nameToIndexMap.get(sourceBandNameStart));
             ((Band) targetNode).setSpectralBandwidth(nameToBandwidthMap.get(sourceBandNameStart));
         }
+        configureDescription(sourceBand, targetNode);
+    }
+
+    protected void configureDescription(Band sourceBand, RasterDataNode targetNode) {
+        final String sourceBandName = sourceBand.getName();
+        final String sourceBandNameEnd = sourceBandName.substring(sourceBandName.length() - 2);
+        if (sourceBandNameEnd.startsWith("i")) {
+            String description = sourceBand.getDescription();
+            if (description == null) {
+                targetNode.setDescription("(1 km)");
+            } else {
+                targetNode.setDescription(description + " (1 km)");
+            }
+        } else if (sourceBandNameEnd.startsWith("a") || sourceBandName.startsWith("b") ||
+                sourceBandName.startsWith("c")) {
+            String description = sourceBand.getDescription();
+            if (description == null) {
+                targetNode.setDescription("(500 m)");
+            } else {
+                targetNode.setDescription(description + " (500 m)");
+            }
+        }
     }
 
     @Override
