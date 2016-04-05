@@ -29,26 +29,21 @@ public class MerisRadReflConverter implements RadReflConverter {
     }
 
     @Override
-    public float[] convert(Product sourceProduct, Sample[] sourceSamples) {
+    public float convert(Product sourceProduct, Sample[] sourceSamples, int bandIndex) {
         final float sza = sourceSamples[Sensor.MERIS.getNumSpectralBands()].getFloat(); // in degrees
-        float[] spectralInputValues = new float[Sensor.MERIS.getNumSpectralBands()];
-        float[] spectralOutputValues = new float[Sensor.MERIS.getNumSpectralBands()];
 
         final int detectorIndex = sourceSamples[Sensor.MERIS.getNumSpectralBands() + 1].getInt();
         if (detectorIndex >= 0) {
-            double[] solarFluxes = rad2ReflAuxdata.getDetectorSunSpectralFluxes()[detectorIndex];
+            double solarFlux = rad2ReflAuxdata.getDetectorSunSpectralFluxes()[detectorIndex][bandIndex];
 
-            for (int i = 0; i < Sensor.MERIS.getNumSpectralBands(); i++) {
-                spectralInputValues[i] = sourceSamples[i].getFloat();
-                if (conversionMode.equals("RAD_TO_REFL")) {
-                    spectralOutputValues[i] = RsMathUtils.radianceToReflectance(spectralInputValues[i], sza, (float) solarFluxes[i]);
-                } else {
-                    spectralOutputValues[i] = RsMathUtils.reflectanceToRadiance(spectralInputValues[i], sza, (float) solarFluxes[i]);
-                }
+            final float spectralInputValue = sourceSamples[bandIndex].getFloat();
+            if (conversionMode.equals("RAD_TO_REFL")) {
+                return RsMathUtils.radianceToReflectance(spectralInputValue, sza, (float) solarFlux);
+            } else {
+                return RsMathUtils.reflectanceToRadiance(spectralInputValue, sza, (float) solarFlux);
             }
         }
-
-        return spectralOutputValues;
+        return -1.0f;
     }
 
     public String getSpectralBandAutogroupingString() {

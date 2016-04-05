@@ -62,26 +62,26 @@
             <version>${snap.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-meris-brr</artifactId>
-            <version>${snap.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-meris-sdr</artifactId>
-            <version>${snap.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-meris-l2auxdata</artifactId>
-            <version>${snap.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-meris-ops</artifactId>
-            <version>${snap.version}</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.esa.s3tbx</groupId>-->
+            <!--<artifactId>s3tbx-meris-brr</artifactId>-->
+            <!--<version>${snap.version}</version>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>org.esa.s3tbx</groupId>-->
+            <!--<artifactId>s3tbx-meris-sdr</artifactId>-->
+            <!--<version>${snap.version}</version>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>org.esa.s3tbx</groupId>-->
+            <!--<artifactId>s3tbx-meris-l2auxdata</artifactId>-->
+            <!--<version>${snap.version}</version>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>org.esa.s3tbx</groupId>-->
+            <!--<artifactId>s3tbx-meris-ops</artifactId>-->
+            <!--<version>${snap.version}</version>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
             <artifactId>s3tbx-watermask</artifactId>
