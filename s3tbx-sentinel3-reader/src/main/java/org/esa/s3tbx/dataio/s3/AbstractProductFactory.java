@@ -348,7 +348,7 @@ public abstract class AbstractProductFactory implements ProductFactory {
         return maskGroup;
     }
 
-    private void readProducts(List<String> fileNames) {
+    private void readProducts(List<String> fileNames) throws IOException {
         for (final String fileName : fileNames) {
             Product product = null;
             try {
@@ -361,6 +361,9 @@ public abstract class AbstractProductFactory implements ProductFactory {
             } else {
                 logger.log(Level.WARNING, MessageFormat.format("Could not find ''{0}''.", fileName));
             }
+        }
+        if (openProductList.isEmpty()) {
+            throw new IOException("Could not find or read any valid products.");
         }
     }
 
