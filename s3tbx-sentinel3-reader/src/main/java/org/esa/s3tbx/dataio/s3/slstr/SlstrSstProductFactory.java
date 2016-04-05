@@ -148,7 +148,7 @@ public class SlstrSstProductFactory extends SlstrL2ProductFactory {
     private void setTiePointBandGeoCodings(Product product) throws IOException {
         final Band[] bands = product.getBands();
         for (Band band : bands) {
-            setTiePointBandGeoCoding(product, band, band.getName().substring(band.getName().length() - 2));
+            setTiePointBandGeoCoding(product, band, getIdentifier(band.getName()));
         }
         final ProductNodeGroup<Mask> maskGroup = product.getMaskGroup();
         for (int i = 0; i < maskGroup.getNodeCount(); i++) {
