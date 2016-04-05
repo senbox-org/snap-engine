@@ -23,15 +23,10 @@ import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
-import org.esa.snap.core.gpf.pointop.PixelOperator;
-import org.esa.snap.core.gpf.pointop.ProductConfigurer;
-import org.esa.snap.core.gpf.pointop.Sample;
-import org.esa.snap.core.gpf.pointop.SourceSampleConfigurer;
-import org.esa.snap.core.gpf.pointop.TargetSampleConfigurer;
-import org.esa.snap.core.gpf.pointop.WritableSample;
+import org.esa.snap.core.gpf.pointop.*;
 import org.esa.snap.core.util.ProductUtils;
 
-import static org.esa.snap.dataio.envisat.EnvisatConstants.*;
+import static org.esa.snap.dataio.envisat.EnvisatConstants.MERIS_DETECTOR_INDEX_DS_NAME;
 
 /**
  * An operator to provide conversion from radiances to reflectances or backwards.
@@ -46,7 +41,7 @@ import static org.esa.snap.dataio.envisat.EnvisatConstants.*;
         category = "Optical/Pre-Processing",
         version = "2.0",
         description = "Provides conversion from radiances to reflectances or backwards.")
-public class Rad2ReflOp extends PixelOperator {
+public class Rad2ReflOp extends SampleOperator {
 
     @Parameter(defaultValue = "OLCI",
             description = "The sensor", valueSet = {"MERIS", "OLCI", "SLSTR_500m"})
@@ -64,6 +59,7 @@ public class Rad2ReflOp extends PixelOperator {
     private boolean copyNonSpectralBands;
 
     private RadReflConverter converter;
+    private transient int currentPixel = 0;
 
     Band[] spectralInputBands;
     String[] spectralInputBandNames;
@@ -71,14 +67,15 @@ public class Rad2ReflOp extends PixelOperator {
     private String spectralInputBandPrefix;
     private String autogroupingString;
 
+
     @Override
-    protected void computePixel(int x, int y, Sample[] sourceSamples, WritableSample[] targetSamples) {
-        float[] convertedValues = converter.convert(sourceProduct, sourceSamples);
-        for (int i = 0; i < sensor.getNumSpectralBands(); i++) {
-            final float result = convertedValues[i] > 0.0f ? convertedValues[i] :
-                    (float) spectralInputBands[i].getNoDataValue();
-            targetSamples[i].set(result);
-        }
+    protected void computeSample(int x, int y, Sample[] sourceSamples, WritableSample targetSample) {
+        checkCancellation();
+        final int bandIndex = targetSample.getIndex();
+        final float convertedValue = converter.convert(sourceProduct, sourceSamples, bandIndex);
+        final float result = convertedValue > 0.0f ? convertedValue :
+                (float) spectralInputBands[bandIndex].getNoDataValue();
+        targetSample.set(result);
     }
 
     @Override
@@ -192,6 +189,14 @@ public class Rad2ReflOp extends PixelOperator {
         Product.AutoGrouping autoGrouping = product.getAutoGrouping();
         String stringPattern = autoGrouping != null ? autoGrouping.toString() + ":" + groupPattern : groupPattern;
         product.setAutoGrouping(stringPattern);
+    }
+
+    private void checkCancellation() {
+        if (currentPixel % 1000 == 0) {
+            checkForCancellation();
+            currentPixel = 0;
+        }
+        currentPixel++;
     }
 
 

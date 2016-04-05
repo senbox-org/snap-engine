@@ -18,32 +18,24 @@ public class SlstrRadReflConverter implements RadReflConverter {
     }
 
     @Override
-    public float[] convert(Product sourceProduct, Sample[] sourceSamples) {
-
+    public float convert(Product sourceProduct, Sample[] sourceSamples, int bandIndex) {
         final float szaNadir = sourceSamples[Sensor.SLSTR_500m.getNumSpectralBands()].getFloat(); // in degrees
         final float szaOblique = sourceSamples[Sensor.SLSTR_500m.getNumSpectralBands() + 1].getFloat(); // in degrees
-        float[] spectralInputValues = new float[Sensor.SLSTR_500m.getNumSpectralBands()];
-        float[] spectralOutputValues = new float[Sensor.SLSTR_500m.getNumSpectralBands()];
-        float[] solarFluxes = new float[Sensor.SLSTR_500m.getNumSpectralBands()];
 
-        for (int i = 0; i < Sensor.SLSTR_500m.getNumSpectralBands(); i++) {
-            float sza;
-            if (Sensor.SLSTR_500m.getRadBandNames()[i].endsWith("_o")) {
-                sza = szaOblique;
-            } else {
-                sza = szaNadir;
-            }
-            spectralInputValues[i] = sourceSamples[i].getFloat();
-//            solarFluxes[i] = sourceSamples[Sensor.SLSTR.getNumSpectralBands() + 1 + i].getFloat();
-            solarFluxes[i] = getSolarFlux(i); // todo: we have to wait until we have solar fluxes in test data or real data
-            if (conversionMode.equals("RAD_TO_REFL")) {
-                spectralOutputValues[i] = RsMathUtils.radianceToReflectance(spectralInputValues[i], sza, solarFluxes[i]);
-            } else {
-                spectralOutputValues[i] = RsMathUtils.reflectanceToRadiance(spectralInputValues[i], sza, solarFluxes[i]);
-            }
+        float sza;
+        if (Sensor.SLSTR_500m.getRadBandNames()[bandIndex].endsWith("_o")) {
+            sza = szaOblique;
+        } else {
+            sza = szaNadir;
         }
-
-        return spectralOutputValues;
+        final float spectralInputValue = sourceSamples[bandIndex].getFloat();
+//            solarFluxes[i] = sourceSamples[Sensor.SLSTR.getNumSpectralBands() + 1 + i].getFloat();
+        final float solarFlux = getSolarFlux(bandIndex); // todo: we have to wait until we have solar fluxes in test data or real data
+        if (conversionMode.equals("RAD_TO_REFL")) {
+            return RsMathUtils.radianceToReflectance(spectralInputValue, sza, solarFlux);
+        } else {
+            return RsMathUtils.reflectanceToRadiance(spectralInputValue, sza, solarFlux);
+        }
     }
 
     public String getSpectralBandAutogroupingString() {

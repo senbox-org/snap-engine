@@ -18,27 +18,21 @@ public class OlciRadReflConverter implements RadReflConverter {
     }
 
     @Override
-    public float[] convert(Product sourceProduct, Sample[] sourceSamples) {
-
+    public float convert(Product sourceProduct, Sample[] sourceSamples, int bandIndex) {
         final float sza = sourceSamples[Sensor.OLCI.getNumSpectralBands()].getFloat(); // in degrees
-        float[] spectralInputValues = new float[Sensor.OLCI.getNumSpectralBands()];
-        float[] spectralOutputValues = new float[Sensor.OLCI.getNumSpectralBands()];
-        float[] solarFluxes = new float[Sensor.OLCI.getNumSpectralBands()];
 
         final int detectorIndex = sourceSamples[Sensor.MERIS.getNumSpectralBands() + 1].getInt();
         if (detectorIndex >= 0) {
-            for (int i = 0; i < Sensor.OLCI.getNumSpectralBands(); i++) {
-                spectralInputValues[i] = sourceSamples[i].getFloat();
-                solarFluxes[i] = sourceSamples[Sensor.OLCI.getNumSpectralBands() + 1 + i].getFloat();
-                if (conversionMode.equals("RAD_TO_REFL")) {
-                    spectralOutputValues[i] = RsMathUtils.radianceToReflectance(spectralInputValues[i], sza, solarFluxes[i]);
-                } else {
-                    spectralOutputValues[i] = RsMathUtils.reflectanceToRadiance(spectralInputValues[i], sza, solarFluxes[i]);
-                }
+            final float spectralInputValue = sourceSamples[bandIndex].getFloat();
+            final float solarFlux = sourceSamples[Sensor.OLCI.getNumSpectralBands() + 1 + bandIndex].getFloat();
+            if (conversionMode.equals("RAD_TO_REFL")) {
+                return RsMathUtils.radianceToReflectance(spectralInputValue, sza, solarFlux);
+            } else {
+                return RsMathUtils.reflectanceToRadiance(spectralInputValue, sza, solarFlux);
             }
         }
 
-        return spectralOutputValues;
+        return -1.0f;
     }
 
     public String getSpectralBandAutogroupingString() {

@@ -11,12 +11,11 @@ import org.esa.snap.core.gpf.pointop.Sample;
 public interface RadReflConverter {
 
     /**
-     * Provides Conversion from radiance to reflectance or backwards.
      *
      * @param sourceProduct - the source product
      * @param sourceSamples - the source data samples per pixel
-     *
-     * @return the converted values for the spectral bands of the sensor
+     * @param bandIndex - the band index
+     * @return the converted value for the spectral band with given band index
      */
-    float[] convert(Product sourceProduct, Sample[] sourceSamples);
+    float convert(Product sourceProduct, Sample[] sourceSamples, int bandIndex);
 }
