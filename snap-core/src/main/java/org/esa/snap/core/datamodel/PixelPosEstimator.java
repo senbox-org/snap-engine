@@ -34,13 +34,22 @@ public class PixelPosEstimator {
 
     private static final boolean EXTRAPOLATE = false;
 
-    private final GeoApproximation[] approximations;
+    private GeoApproximation[] approximations;
     private final Rectangle bounds;
 
+    private final PlanarImage lonImage, latImage, maskImage;
+    private final double accuracy;
+    private final SteppingFactory steppingFactory;
 
     public PixelPosEstimator(GeoApproximation[] approximations, Rectangle bounds) {
         this.approximations = approximations;
         this.bounds = bounds;
+
+        this.lonImage = null;
+        this.latImage = null;
+        this.maskImage = null;
+        this.accuracy = 0;
+        this.steppingFactory = null;
     }
 
     PixelPosEstimator(PlanarImage lonImage, PlanarImage latImage, PlanarImage maskImage, double accuracy) {
@@ -49,8 +58,14 @@ public class PixelPosEstimator {
 
     private PixelPosEstimator(PlanarImage lonImage, PlanarImage latImage, PlanarImage maskImage, double accuracy,
                               SteppingFactory steppingFactory) {
-        approximations = createApproximations(lonImage, latImage, maskImage, accuracy, steppingFactory);
+        approximations = null;  // lazy creation when used
         bounds = lonImage.getBounds();
+
+        this.lonImage = lonImage;
+        this.latImage = latImage;
+        this.maskImage = maskImage;
+        this.accuracy = accuracy;
+        this.steppingFactory = steppingFactory;
     }
 
     public final boolean canGetPixelPos() {
@@ -66,6 +81,9 @@ public class PixelPosEstimator {
      * @return an approximate pixel position.
      */
     public GeoApproximation getPixelPos(GeoPos g, PixelPos p) {
+        if (approximations == null) {
+            approximations = createApproximations(lonImage, latImage, maskImage, accuracy, steppingFactory);
+        }
         GeoApproximation approximation = null;
         if (approximations != null) {
             if (g.isValid()) {
@@ -91,6 +109,9 @@ public class PixelPosEstimator {
     }
 
     GeoApproximation getGeoPos(PixelPos p, GeoPos g) {
+        if (approximations == null) {
+            approximations = createApproximations(lonImage, latImage, maskImage, accuracy, steppingFactory);
+        }
         GeoApproximation approximation = null;
         if (approximations != null) {
             if (g == null) {
