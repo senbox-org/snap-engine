@@ -8,26 +8,28 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
+import java.text.MessageFormat;
 
 /**
  * @author Tonio Fincke
  */
-public class OrbitReferenceChecker {
+public class Validator {
 
-    public static void validateOrbitReference(File[] manifestFiles) throws IOException {
-        final String msg = "Cannot create document from manifest XML file.";
+    public static void validate(File[] manifestFiles) throws IOException {
+        final String msg = "Cannot create document from manifest XML file";
         Document[] manifests = new Document[manifestFiles.length];
         try {
             for (int i = 0; i < manifestFiles.length; i++) {
                 manifests[i] = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(manifestFiles[i]);
             }
             validateOrbitReference(manifests);
+            validateMissingElements(manifests);
         } catch (SAXException | ParserConfigurationException | PDUStitchingException e) {
-            throw new IOException(msg + ": " + e.getMessage());
+            throw new IOException(MessageFormat.format("{0}: {1}", msg, e.getMessage()));
         }
     }
 
-    public static void validateOrbitReference(Document[] manifests) throws PDUStitchingException {
+    static void validateOrbitReference(Document[] manifests) throws PDUStitchingException {
         if (manifests.length < 2) {
             return;
         }
@@ -50,6 +52,15 @@ public class OrbitReferenceChecker {
                         throw new PDUStitchingException("Invalid orbit reference due to different element " + tagName);
                     }
                 }
+            }
+        }
+    }
+
+    static void validateMissingElements(Document[] manifests) throws PDUStitchingException {
+        for (Document manifest : manifests) {
+            final NodeList missingElements = manifest.getElementsByTagName("slstr:missingElements");
+            if (missingElements.getLength() > 0) {
+                throw new PDUStitchingException("Manifest contains missing elements");
             }
         }
     }

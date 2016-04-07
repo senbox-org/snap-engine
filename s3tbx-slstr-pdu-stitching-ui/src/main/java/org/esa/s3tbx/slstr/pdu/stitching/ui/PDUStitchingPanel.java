@@ -1,7 +1,7 @@
 package org.esa.s3tbx.slstr.pdu.stitching.ui;
 
 import com.bc.ceres.swing.TableLayout;
-import org.esa.s3tbx.slstr.pdu.stitching.OrbitReferenceChecker;
+import org.esa.s3tbx.slstr.pdu.stitching.Validator;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.rcp.util.Dialogs;
 import org.esa.snap.ui.AppContext;
@@ -40,7 +40,7 @@ class PDUStitchingPanel extends JPanel {
     private static final String INPUT_PRODUCT_DIR_KEY = "gpf.slstr.pdu.stitching.input.product.dir";
     private static final String NO_SOURCE_PRODUCTS_TEXT = "No Product Dissemination Units selected";
     private static final String VALID_SOURCE_PRODUCTS_TEXT = "Selection of Product Dissemination Units is valid";
-    private static final String INVALID_ORBIT_REFERENCES_TEXT = "Selection of Product Dissemination Units is invalid due to different or invalid orbit references";
+    private static final String INVALID_SELECTION_TEXT = "Selection of Product Dissemination Units is invalid: ";
 
     private final AppContext appContext;
     private final FileArrayEditor fileArrayEditor;
@@ -101,12 +101,12 @@ class PDUStitchingPanel extends JPanel {
                             }
                             fileNames = fileNameList.toArray(new String[fileNameList.size()]);
                             try {
-                                OrbitReferenceChecker.validateOrbitReference(files);
+                                Validator.validate(files);
                                 statusLabel.setForeground(Color.GREEN.darker());
                                 statusLabel.setText(VALID_SOURCE_PRODUCTS_TEXT);
                             } catch (IOException e) {
                                 statusLabel.setForeground(Color.RED);
-                                statusLabel.setText(INVALID_ORBIT_REFERENCES_TEXT);
+                                statusLabel.setText(INVALID_SELECTION_TEXT + e.getMessage());
                             }
                         }
                         model.setPropertyValue(PDUStitchingModel.PROPERTY_SOURCE_PRODUCT_PATHS, fileNames);
