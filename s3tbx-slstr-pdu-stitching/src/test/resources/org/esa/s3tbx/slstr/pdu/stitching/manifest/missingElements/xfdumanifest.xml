@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xfdu:XFDU xmlns:xfdu="urn:ccsds:schema:xfdu:1" xmlns:sentinel-safe="http://www.esa.int/safe/sentinel/1.1" xmlns:gml="http://www.opengis.net/gml" xmlns:sentinel3="http://www.esa.int/safe/sentinel/sentinel-3/1.0" xmlns:slstr="http://www.esa.int/safe/sentinel/sentinel-3/slstr/1.0" version="esa/safe/sentinel/sentinel-3/slstr/level-1/1.0">
+    <sentinel-safe:startTime>2013-07-07T15:32:52.300000Z</sentinel-safe:startTime>
+    <slstr:missingElements threshold="75.000000">
+        <slstr:globalInfo grid="0.5 km stripe A" view="Nadir" value="4000" over="4000" percentage="100.000000"/>
+        <slstr:globalInfo grid="0.5 km stripe B" view="Nadir" value="4000" over="4000" percentage="100.000000"/>
+        <slstr:globalInfo grid="0.5 km TDI" view="Nadir" value="4000" over="4000" percentage="100.000000"/>
+        <slstr:globalInfo grid="0.5 km stripe A" view="Oblique" value="4000" over="4000" percentage="100.000000"/>
+        <slstr:globalInfo grid="0.5 km stripe B" view="Oblique" value="4000" over="4000" percentage="100.000000"/>
+        <slstr:globalInfo grid="0.5 km TDI" view="Oblique" value="4000" over="4000" percentage="100.000000"/>
+        <slstr:elementMissing grid="0.5 km stripe A, 0.5 km stripe B, 0.5 km TDI" view="Nadir" startTime="2013-07-07T15:42:52.300000Z" stopTime="2013-07-07T15:47:52.300000Z" percentage="100.000000">
+            <slstr:bandSet>S1, S2, S3, S4, S5, S6</slstr:bandSet>
+        </slstr:elementMissing>
+        <slstr:elementMissing grid="0.5 km stripe A, 0.5 km stripe B, 0.5 km TDI" view="Oblique" startTime="2013-07-07T15:42:52.283435Z" stopTime="2013-07-07T15:47:52.208435Z" percentage="100.000000">
+            <slstr:bandSet>S1, S2, S3, S4, S5, S6</slstr:bandSet>
+        </slstr:elementMissing>
+    </slstr:missingElements>
+</xfdu:XFDU>
