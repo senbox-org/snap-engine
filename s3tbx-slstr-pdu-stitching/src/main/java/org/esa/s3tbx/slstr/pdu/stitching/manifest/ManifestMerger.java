@@ -93,7 +93,7 @@ public class ManifestMerger {
         }
     }
 
-    private ElementMerger getElementMerger(String elementName) {
+    private ElementMerger getElementMerger(String elementName) throws PDUStitchingException {
         switch (elementName) {
             case "dataObject":
                 return new DataObjectMerger(productDir.getAbsolutePath());
@@ -109,8 +109,7 @@ public class ManifestMerger {
             case "slstr:pixelQualitySummary":
                 return new PixelQualitySummaryMerger();
             case "slstr:missingElements":
-                //todo implement
-                return NULL_MERGER;
+                throw new PDUStitchingException("Missing elements found in manifest. Stitching aborted.");
             case "sentinel-safe:footPrint":
                 return new FootprintMerger(productDir);
             case "sentinel3:creationTime":
