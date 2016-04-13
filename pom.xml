@@ -78,7 +78,6 @@
             This is necessary to make NetBeans modules updatable and independent from the Maven version (= snap.version).
         -->
         <s3tbx.version>4.0.0-SNAPSHOT</s3tbx.version>
-        <s3tbx.nbmSpecVersion>4.0.0</s3tbx.nbmSpecVersion>
         <netbeans.version>RELEASE802</netbeans.version>
         <javahelp.version>2.0.05</javahelp.version>
         <seadas.reader.version>1.5.8-SNAPSHOT</seadas.reader.version>
@@ -371,6 +370,27 @@
                         <sourceManifestFile>target/nbm/manifest.mf</sourceManifestFile>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>1.10</version>
+                    <executions>
+                        <execution>
+                            <id>regex-property</id>
+                            <goals>
+                                <goal>regex-property</goal>
+                            </goals>
+                            <configuration>
+                                <name>s3tbx.nbmSpecVersion</name>
+                                <value>${project.version}</value>
+                                <regex>-SNAPSHOT</regex>
+                                <replacement>.0</replacement>
+                                <failIfNoMatch>false</failIfNoMatch>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
