@@ -7,6 +7,7 @@ import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.util.BitSetter;
 import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.dataio.envisat.EnvisatConstants;
 
 import javax.swing.*;
 import java.awt.*;
@@ -121,6 +122,29 @@ public class IdepixUtils {
             logErrorMessage("Input sensor must be either MERIS, AATSR, AVHRR, colocated MERIS/AATSR, MODIS/SeaWiFS, PROBA-V or VGT!");
         }
         return true;
+    }
+
+    public static boolean isValidMerisProduct(Product product) {
+        final boolean merisL1TypePatternMatches = EnvisatConstants.MERIS_L1_TYPE_PATTERN.matcher(product.getProductType()).matches();
+        // accept also ICOL L1N products...
+        final boolean merisIcolTypePatternMatches = isValidMerisIcolL1NProduct(product);
+        final boolean merisCCL1PTypePatternMatches = isValidMerisCCL1PProduct(product);
+        return merisL1TypePatternMatches || merisIcolTypePatternMatches || merisCCL1PTypePatternMatches;
+    }
+
+    private static boolean isValidMerisIcolL1NProduct(Product product) {
+        final String icolProductType = product.getProductType();
+        if (icolProductType.endsWith("_1N")) {
+            int index = icolProductType.indexOf("_1");
+            final String merisProductType = icolProductType.substring(0, index) + "_1P";
+            return (EnvisatConstants.MERIS_L1_TYPE_PATTERN.matcher(merisProductType).matches());
+        } else {
+            return false;
+        }
+    }
+
+    private static boolean isValidMerisCCL1PProduct(Product product) {
+        return IdepixConstants.MERIS_CCL1P_TYPE_PATTERN.matcher(product.getProductType()).matches();
     }
 
     public static boolean isValidAvhrrProduct(Product product) {
