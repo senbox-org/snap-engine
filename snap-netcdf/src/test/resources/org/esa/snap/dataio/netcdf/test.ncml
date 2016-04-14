@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ncml:netcdf xmlns:ncml="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2" location="test.nc">
+  <ncml:variable name="CHL1_renamed" orgName="CHL1_value" />
+</ncml:netcdf>

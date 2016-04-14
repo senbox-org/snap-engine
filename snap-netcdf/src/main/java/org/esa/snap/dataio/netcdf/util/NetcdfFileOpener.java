@@ -18,6 +18,7 @@ package org.esa.snap.dataio.netcdf.util;
 
 import org.esa.snap.core.util.SystemUtils;
 import ucar.nc2.NetcdfFile;
+import ucar.nc2.dataset.NetcdfDataset;
 import ucar.nc2.iosp.IOServiceProvider;
 import ucar.nc2.iosp.hdf4.H4iosp;
 import ucar.nc2.iosp.hdf5.H5header;
@@ -112,6 +113,16 @@ public class NetcdfFileOpener {
                     if (!(input instanceof ImageInputStream)) {
                         rafForTesting.close();
                     }
+                }
+                String filePath = null;
+                if (input instanceof File) {
+                    final File file = (File) input;
+                    filePath = file.getAbsolutePath();
+                } else if (input instanceof String){
+                    filePath = (String) input;
+                }
+                if (filePath != null && filePath.toLowerCase().endsWith(".ncml")) {
+                    return NetcdfDataset.acquireFile(filePath, null);
                 }
             }
         } catch (IOException ioe) {
