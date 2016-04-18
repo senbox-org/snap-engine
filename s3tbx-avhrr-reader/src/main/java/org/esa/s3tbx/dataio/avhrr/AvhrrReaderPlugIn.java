@@ -27,7 +27,7 @@ import java.io.File;
 import java.util.Locale;
 
 /**
- * The plug-in class for the {@link org.esa.snap.dataio.avhrr.AvhrrReader AVHRR/3 Level-1b reader}.
+ * The plug-in class for the {@link org.esa.s3tbx.dataio.avhrr.AvhrrReader AVHRR/3 Level-1b reader}.
  *
  * @see <a href="http://www2.ncdc.noaa.gov/doc/klm/">NOAA KLM User's Guide</a>
  */
