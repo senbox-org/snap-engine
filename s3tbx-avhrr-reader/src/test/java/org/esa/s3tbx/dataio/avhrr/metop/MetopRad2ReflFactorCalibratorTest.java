@@ -1,4 +1,4 @@
-package org.esa.s3tbx.dataio.avhrr.calibration;
+package org.esa.s3tbx.dataio.avhrr.metop;
 
 import org.esa.s3tbx.dataio.avhrr.metop.MetopRad2ReflFactorCalibrator;
 import org.junit.Test;
