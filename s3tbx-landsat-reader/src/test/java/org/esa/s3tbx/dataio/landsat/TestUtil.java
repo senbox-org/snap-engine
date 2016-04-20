@@ -6,6 +6,9 @@ import static org.junit.Assert.*;
 
 public class TestUtil {
 
+    private static final String[] DIRS_TO_CHECK = new String[]{".", "s3tbx", "s3tbx-landsat-reader", "s3tbx/s3tbx-landsat-reader"};
+    private static final String REL_PATH_TEST_RESOURCES = "src/test/resources/org/esa/s3tbx/dataio/landsat/";
+
     public static File getTestFile(String file) {
         final File testTgz = getTestFileOrDirectory(file);
         assertTrue(testTgz.isFile());
@@ -19,10 +22,15 @@ public class TestUtil {
     }
 
     private static File getTestFileOrDirectory(String file) {
-        File testTgz = new File("./beam-landsat-reader/src/test/resources/org/esa/s3tbx/dataio/landsat/" + file);
-        if (!testTgz.exists()) {
-            testTgz = new File("./src/test/resources/org/esa/s3tbx/dataio/landsat/" + file);
+        String relFilePath = REL_PATH_TEST_RESOURCES + file;
+        for (String dirPath : DIRS_TO_CHECK) {
+            File currentDir = new File(dirPath);
+            File currentFile = new File(currentDir, relFilePath);
+            if(currentFile.exists()) {
+                return currentFile;
+            }
+
         }
-        return testTgz;
+        return null;
     }
 }
