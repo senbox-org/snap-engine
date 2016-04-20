@@ -12,7 +12,7 @@
     <packaging>nbm</packaging>
 
     <name>AVHRR Product Reader</name>
-    <description>Enables SNAP to read AVHRR/3 Level-1b data products.</description>
+    <description>Enables SNAP to read NOAA and METOP AVHRR/3 Level-1b data products.</description>
 
     <dependencies>
         <dependency>
