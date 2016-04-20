@@ -89,21 +89,8 @@ public class LandsatGeotiffReader extends AbstractProductReader {
     @Override
     protected Product readProductNodesImpl() throws IOException {
         input = LandsatGeotiffReaderPlugin.getInput(getInput());
-        String[] list = input.list("");
-        File mtlFile = null;
-        for (String fileName : list) {
-            final File file = input.getFile(fileName);
-            if (isMetadataFile(file)) {
-                mtlFile = file;
-                break;
-            }
-        }
-        if (mtlFile == null) {
-            throw new IOException("Can not find metadata file.");
-        }
-        if (!mtlFile.canRead()) {
-            throw new IOException("Can not read metadata file: " + mtlFile.getAbsolutePath());
-        }
+
+        File mtlFile = getMtlFile();
         landsatMetadata = LandsatMetadataFactory.create(mtlFile);
         // todo - retrieving the product dimension needs a revision
         Dimension productDim;
@@ -139,6 +126,29 @@ public class LandsatGeotiffReader extends AbstractProductReader {
         addBands(product, input);
 
         return product;
+    }
+
+    protected File getMtlFile() throws IOException {
+        File mtlFile = null;
+        File fileInput = LandsatGeotiffReaderPlugin.getFileInput(getInput());
+        if (fileInput != null && fileInput.exists() && isMetadataFile(fileInput.getName())) {
+            mtlFile = fileInput;
+        } else {
+            String[] list = input.list("");
+            for (String fileName : list) {
+                if (isMetadataFile(fileName)) {
+                    mtlFile = input.getFile(fileName);
+                    break;
+                }
+            }
+        }
+        if (mtlFile == null) {
+            throw new IOException("Can not find metadata file.");
+        }
+        if (!mtlFile.canRead()) {
+            throw new IOException("Can not read metadata file: " + mtlFile.getAbsolutePath());
+        }
+        return mtlFile;
     }
 
     private static String getProductName(File mtlfile) {
@@ -213,13 +223,13 @@ public class LandsatGeotiffReader extends AbstractProductReader {
                     product.getFlagCodingGroup().add(flagCoding);
                     List<Mask> masks;
 
-                    if (Resolution.DEFAULT.equals(targetResolution) ) {
+                    if (Resolution.DEFAULT.equals(targetResolution)) {
                         Dimension dimension = landsatMetadata.getReflectanceDim();
-                        if(dimension == null) {
+                        if (dimension == null) {
                             dimension = landsatMetadata.getThermalDim();
                         }
                         masks = createMasks(dimension != null ? dimension : product.getSceneRasterSize());
-                    }else {
+                    } else {
                         masks = createMasks(product.getSceneRasterSize());
                     }
                     for (Mask mask : masks) {
@@ -233,8 +243,8 @@ public class LandsatGeotiffReader extends AbstractProductReader {
         ImageLayout imageLayout = new ImageLayout();
         for (Product bandProduct : bandProducts) {
             if (product.getSceneGeoCoding() == null &&
-                    product.getSceneRasterWidth() == bandProduct.getSceneRasterWidth() &&
-                    product.getSceneRasterHeight() == bandProduct.getSceneRasterHeight()) {
+                product.getSceneRasterWidth() == bandProduct.getSceneRasterWidth() &&
+                product.getSceneRasterHeight() == bandProduct.getSceneRasterHeight()) {
                 product.setSceneGeoCoding(bandProduct.getSceneGeoCoding());
                 Dimension tileSize = bandProduct.getPreferredTileSize();
                 if (tileSize == null) {
@@ -260,7 +270,7 @@ public class LandsatGeotiffReader extends AbstractProductReader {
             MultiLevelImage targetImage = null;
             for (Product bandProduct : bandProducts) {
                 if (product.getSceneRasterWidth() == bandProduct.getSceneRasterWidth() &&
-                        product.getSceneRasterHeight() == bandProduct.getSceneRasterHeight()) {
+                    product.getSceneRasterHeight() == bandProduct.getSceneRasterHeight()) {
                     targetImage = bandProduct.getBandAt(0).getSourceImage();
                     break;
                 }
@@ -398,9 +408,8 @@ public class LandsatGeotiffReader extends AbstractProductReader {
         super.close();
     }
 
-    static boolean isMetadataFile(File file) {
-        final String filename = file.getName().toLowerCase();
-        return filename.endsWith("_mtl.txt");
+    static boolean isMetadataFile(String filename) {
+        return filename.toLowerCase().endsWith("_mtl.txt");
     }
 
     private static class ColorIterator {
