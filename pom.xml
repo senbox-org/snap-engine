@@ -55,6 +55,8 @@
         <module>s3tbx-proba-v-reader</module>
         <module>s3tbx-rad2refl</module>
         <module>s3tbx-rad2refl-ui</module>
+        <!--In progress-->
+        <!--<module>s3tbx-olci-radiometry</module>-->
         <module>s3tbx-sentinel3-reader</module>
         <module>s3tbx-sentinel3-reader-ui</module>
         <module>s3tbx-slstr-pdu-stitching</module>

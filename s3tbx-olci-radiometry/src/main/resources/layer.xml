@@ -1,0 +1,53 @@
+<!--
+  ~ /*
+  ~  * Copyright (C) 2012 Brockmann Consult GmbH (info@brockmann-consult.de)
+  ~  *
+  ~  * This program is free software; you can redistribute it and/or modify it
+  ~  * under the terms of the GNU General Public License as published by the Free
+  ~  * Software Foundation; either version 3 of the License, or (at your option)
+  ~  * any later version.
+  ~  * This program is distributed in the hope that it will be useful, but WITHOUT
+  ~  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+  ~  * more details.
+  ~  *
+  ~  * You should have received a copy of the GNU General Public License along
+  ~  * with this program; if not, see http://www.gnu.org/licenses/
+  ~  */
+  -->
+
+<filesystem>
+
+    <folder name="Actions">
+        <folder name="Operators">
+            <file name="org-esa-s3tbx-olci-radiometry-operator-OLCIRadiometryCorrectionOpAction.instance">
+                <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
+                <attr name="delegate" methodvalue="org.esa.snap.core.gpf.ui.DefaultOperatorAction.create"/>
+                <attr name="displayName" stringvalue="OLCI Radiometric Correction"/>
+                <attr name="dialogTitle" stringvalue="OLCI Radiometric Correction"/>
+                <attr name="operatorName" stringvalue="Olci.CorrectRadiometry"/>
+                <attr name="helpId" stringvalue="olci_radiometric"/>
+                <attr name="targetProductNameSuffix" stringvalue="_olci_radiometry"/>
+            </file>
+        </folder>
+    </folder>
+    <folder name="Menu">
+        <folder name="Preprocessing">
+                <file name="org-esa-s3tbx-olci-radiometry-operator-OLCIRadiometryCorrectionOpAction.shadow">
+                    <attr name="originalFile" stringvalue="Actions/Operators/org-esa-s3tbx-olci-radiometry-operator-OLCIRadiometryCorrectionOpAction.instance"/>
+                    <attr name="position" intvalue="10000"/>
+                </file>
+        </folder>
+    </folder>
+
+
+
+    <folder name="Services">
+        <folder name="JavaHelp">
+            <file name="org-esa-s3tbx-olci-radiometry-helpset.xml" url="helpset.xml">
+                <attr name="position" intvalue="4600"/>
+            </file>
+        </folder>
+    </folder>
+
+</filesystem>
