@@ -82,7 +82,10 @@ public class Rad2ReflOp extends SampleOperator {
     protected void configureSourceSamples(SourceSampleConfigurer sc) throws OperatorException {
         int index = 0;
         for (int i = 0; i < sensor.getNumSpectralBands(); i++) {
-            sc.defineSample(index++, spectralInputBandNames[i]);
+            spectralInputBands[i] = sourceProduct.getBand(spectralInputBandNames[i]);
+            if (spectralInputBands[i] != null) {
+                sc.defineSample(index++, spectralInputBandNames[i]);
+            }
         }
 
         sc.defineSample(index++, sensor.getSzaBandNames()[0]);
