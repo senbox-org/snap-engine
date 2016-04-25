@@ -33,10 +33,14 @@ public class SmileCorrectionAlgorithm {
         this.auxdata = auxdata;
     }
 
-    public double spectralDerivative(double[] reflectanceSamples) {
+    protected double spectralDerivative(double[] reflectanceSamples) {
         final double[] refCentralWaveLenghts = auxdata.getRefCentralWaveLenghts();
         return (reflectanceSamples[1] - reflectanceSamples[0]) / (refCentralWaveLenghts[2] - refCentralWaveLenghts[1]);
     }
 
 
+    public double getReflectanceCorrection(int index) {
+
+        return 0;
+    }
 }
