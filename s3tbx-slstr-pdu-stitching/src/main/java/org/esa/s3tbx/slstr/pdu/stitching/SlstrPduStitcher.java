@@ -69,12 +69,15 @@ public class SlstrPduStitcher {
             }
             Files.copy(originalParentDirectory.getParentFile().toPath(), stitchedParentDirectory.toPath());
             final File[] files = originalParentDirectory.listFiles();
+            long productSize = 0;
             if (files != null) {
                 for (File originalFile : files) {
-                    Files.copy(originalFile.toPath(), new File(stitchedParentDirectory, originalFile.getName()).toPath());
+                    final File newFile = new File(stitchedParentDirectory, originalFile.getName());
+                    Files.copy(originalFile.toPath(), newFile.toPath());
+                    productSize += newFile.length();
                 }
             }
-            return createManifestFile(slstrProductFiles, stitchedParentDirectory, now);
+            return createManifestFile(slstrProductFiles, stitchedParentDirectory, now, productSize);
         }
         SlstrNameDecomposition[] slstrNameDecompositions = new SlstrNameDecomposition[slstrProductFiles.length];
         Document[] manifestDocuments = new Document[slstrProductFiles.length];
@@ -109,6 +112,7 @@ public class SlstrPduStitcher {
         for (String id : idToImageSizes.keySet()) {
             idToTargetImageSize.put(id, ImageSizeHandler.createTargetImageSize(idToImageSizes.get(id)));
         }
+        long productSize = 0;
         for (int i = 0; i < ncFileNames.size(); i++) {
             List<File> ncFiles = new ArrayList<>();
             List<ImageSize> imageSizeList = new ArrayList<>();
@@ -140,15 +144,16 @@ public class SlstrPduStitcher {
                 logger.log(Level.INFO, "Stitch " + ncFileName);
                 NcFileStitcher.stitchNcFiles(ncFileName, stitchedProductFileParentDirectory, now,
                                              ncFilesArray, targetImageSize, imageSizeArray);
+                productSize += new File(stitchedProductFileParentDirectory, ncFileName).length();
             }
         }
         logger.log(Level.INFO, "Stitch manifest");
-        return createManifestFile(slstrProductFiles, stitchedProductFileParentDirectory, now);
+        return createManifestFile(slstrProductFiles, stitchedProductFileParentDirectory, now, productSize);
     }
 
-    private static File createManifestFile(File[] manifestFiles, File stitchedParentDirectory, Date now)
+    private static File createManifestFile(File[] manifestFiles, File stitchedParentDirectory, Date now, long productSize)
             throws ParserConfigurationException, PDUStitchingException, IOException, TransformerException {
-        return new ManifestMerger().createMergedManifest(manifestFiles, now, stitchedParentDirectory);
+        return new ManifestMerger().createMergedManifest(manifestFiles, now, stitchedParentDirectory, productSize);
     }
 
     static void collectFiles(List<String> ncFileNames, Document manifestDocument) {

@@ -38,15 +38,15 @@ public class ManifestMerger {
 
     private Date creationTime;
     private static DefaultMerger defaultMerger;
-    private static final ElementMerger NULL_MERGER = new NullMerger();
     private File productDir;
-    private ImageSize[][] imageSizes;
+    private long productSize;
 
+    private ImageSize[][] imageSizes;
     private static final String[] discerningAttributesNames = {"ID", "name", "grid", "view", "element", "type", "role"};
 
-    public File createMergedManifest(File[] manifestFiles, Date creationTime, File productDir)
+    public File createMergedManifest(File[] manifestFiles, Date creationTime, File productDir, long productSize)
             throws IOException, TransformerException, PDUStitchingException, ParserConfigurationException {
-        final Document document = mergeManifests(manifestFiles, creationTime, productDir);
+        final Document document = mergeManifests(manifestFiles, creationTime, productDir, productSize);
         final File manifestFile = new File(productDir, "xfdumanifest.xml");
         final TransformerFactory transformerFactory = TransformerFactory.newInstance();
         transformerFactory.setAttribute("indent-number", 2);
@@ -67,9 +67,10 @@ public class ManifestMerger {
         return manifestFile;
     }
 
-    private Document mergeManifests(File[] manifestFiles, Date creationTime, File productDir) throws IOException, PDUStitchingException, ParserConfigurationException {
+    private Document mergeManifests(File[] manifestFiles, Date creationTime, File productDir, long productSize) throws IOException, PDUStitchingException, ParserConfigurationException {
         this.creationTime = creationTime;
         this.productDir = productDir;
+        this.productSize = productSize;
         List<Node> manifestList = new ArrayList<>();
         imageSizes = new ImageSize[manifestFiles.length][];
         for (int i = 0; i < manifestFiles.length; i++) {
@@ -117,8 +118,7 @@ public class ManifestMerger {
             case "sentinel3:productName":
                 return new ProductNameMerger(productDir.getName());
             case "sentinel3:productSize":
-                //todo implement
-                return NULL_MERGER;
+                return new ProductSizeMerger(productSize);
             case "slstr:min":
                 return new MinMerger();
             case "slstr:max":
@@ -243,13 +243,6 @@ public class ManifestMerger {
             return false;
         }
 
-    }
-
-    private static class NullMerger implements ElementMerger {
-
-        @Override
-        public void mergeNodes(List<Node> fromParents, Element toParent, Document toDocument) throws PDUStitchingException {
-        }
     }
 
 }
