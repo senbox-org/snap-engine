@@ -16,29 +16,19 @@
  *
  */
 
-package org.esa.s3tbx.olci.radiometry.smilecorr;
+package org.esa.s3tbx.olci.radiometry.operator;
 
+import org.esa.s3tbx.olci.radiometry.smilecorr.SmileCorrectionAlgorithm;
+import org.esa.s3tbx.olci.radiometry.smilecorr.SmileCorrectionAuxdata;
+import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.when;
 
 /**
  * @author muhammad.bc.
  */
-public class SmileCorrectionAlgorithmTest {
-
-
-    @Test
-    public void testSpectralDerivative() throws Exception {
-        SmileCorrectionAuxdata correctionAuxdata = Mockito.mock(SmileCorrectionAuxdata.class);
-        when(correctionAuxdata.getRefCentralWaveLenghts()).thenReturn(new double[]{1, 2, 3});
-        SmileCorrectionAlgorithm correctionAlgorithm = new SmileCorrectionAlgorithm(correctionAuxdata);
-
-        final double spectralDerivative = correctionAlgorithm.spectralDerivative(10, 5, 2, 1);
-        assertEquals(5, spectralDerivative, 1e-8);
-    }
+public class OLCIRadiometryCorrectionOpTest {
 
 
 }

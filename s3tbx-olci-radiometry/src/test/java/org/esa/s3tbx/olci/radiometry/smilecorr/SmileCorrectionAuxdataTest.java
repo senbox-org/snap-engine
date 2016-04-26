@@ -76,7 +76,7 @@ public class SmileCorrectionAuxdataTest {
         assertArrayEquals(expectedWaterUpper, smileCorrectionAuxdata.getWater_UpperBands(), 1e-8);
 
         double[] expectedLandLowerBands = {1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 0, 0, 0, 16, 16, 17, 0, 0, 18, 0.0};
-        assertArrayEquals(expectedLandLowerBands, smileCorrectionAuxdata.getLand_LowerBands(), 1e-8);
+        assertArrayEquals(expectedLandLowerBands, smileCorrectionAuxdata.getLandLowerBands(), 1e-8);
 
         double[] expectedLandUpperBands = {400, 412.5, 442.5, 490, 510, 560, 620, 665, 673.75, 681.25, 708.75, 753.75, 761.25, 764.37, 767.5, 778.75, 865, 885, 900, 940, 1020, 0};
         assertArrayEquals(expectedLandUpperBands, smileCorrectionAuxdata.getRefCentralWaveLenghts(), 1e-8);
