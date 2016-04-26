@@ -17,6 +17,8 @@
 package org.esa.s3tbx.olci.radiometry.smilecorr;
 
 
+import org.esa.snap.core.gpf.pointop.Sample;
+
 /**
  * Applies a SMILE correction on the given OLCI L1b sample.
  */
@@ -33,14 +35,18 @@ public class SmileCorrectionAlgorithm {
         this.auxdata = auxdata;
     }
 
-    protected double spectralDerivative(double[] reflectanceSamples) {
+    protected double spectralDerivative(double reflectanceSampleUpper, double reflectanceSampleLower, int upperRefBand, int lowerRefBand) {
         final double[] refCentralWaveLenghts = auxdata.getRefCentralWaveLenghts();
-        return (reflectanceSamples[1] - reflectanceSamples[0]) / (refCentralWaveLenghts[2] - refCentralWaveLenghts[1]);
+        return (reflectanceSampleUpper - reflectanceSampleLower) / (refCentralWaveLenghts[upperRefBand] - refCentralWaveLenghts[lowerRefBand]);
     }
 
 
-    public double getReflectanceCorrection(int index) {
+    public double getReflectanceCorrection(Sample sourceSampleUpper, Sample sourceSampleLower, int upperBandIndex, int lowerBandIndex) {
+        double sourceSampleLowerDouble = sourceSampleLower.getDouble();
+        double sourceSampleUpperDouble = sourceSampleUpper.getDouble();
 
-        return 0;
+        return spectralDerivative(sourceSampleUpperDouble, sourceSampleLowerDouble, upperBandIndex, lowerBandIndex);
     }
+
+
 }

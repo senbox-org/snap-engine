@@ -91,11 +91,11 @@ public class SmileCorrectionAuxdata {
         return landRefCorrectionSwitchs;
     }
 
-    public double[] getLand_LowerBands() {
+    public double[] getLandLowerBands() {
         return land_LowerBands;
     }
 
-    public double[] getLand_UpperBands() {
+    public double[] getLandUpperBands() {
         return land_UpperBands;
     }
 
