@@ -21,7 +21,8 @@ public class OlciRadReflConverter implements RadReflConverter {
     public float convert(Product sourceProduct, Sample[] sourceSamples, int bandIndex) {
         final float sza = sourceSamples[Sensor.OLCI.getNumSpectralBands()].getFloat(); // in degrees
 
-        final int detectorIndex = sourceSamples[Sensor.MERIS.getNumSpectralBands() + 1].getInt();
+        final int detectorIndex = sourceSamples[Sensor.OLCI.getSolarFluxBandNames().length +
+                Sensor.OLCI.getNumSpectralBands() + 1].getInt();
         if (detectorIndex >= 0) {
             final float spectralInputValue = sourceSamples[bandIndex].getFloat();
             final float solarFlux = sourceSamples[Sensor.OLCI.getNumSpectralBands() + 1 + bandIndex].getFloat();
