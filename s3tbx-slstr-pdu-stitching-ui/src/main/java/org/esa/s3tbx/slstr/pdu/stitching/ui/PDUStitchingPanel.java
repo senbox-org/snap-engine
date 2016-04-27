@@ -1,11 +1,13 @@
 package org.esa.s3tbx.slstr.pdu.stitching.ui;
 
-import com.bc.ceres.swing.TableLayout;
+import org.esa.s3tbx.slstr.pdu.stitching.PDUStitchingOp;
 import org.esa.s3tbx.slstr.pdu.stitching.Validator;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductFilter;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.rcp.util.Dialogs;
 import org.esa.snap.ui.AppContext;
-import org.esa.snap.ui.io.FileArrayEditor;
+import org.esa.snap.ui.product.SourceProductList;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -18,18 +20,19 @@ import javax.swing.JTextField;
 import javax.swing.SwingWorker;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.filechooser.FileFilter;
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 /**
@@ -43,117 +46,146 @@ class PDUStitchingPanel extends JPanel {
     private static final String INVALID_SELECTION_TEXT = "Selection of Product Dissemination Units is invalid: ";
 
     private final AppContext appContext;
-    private final FileArrayEditor fileArrayEditor;
     private final PDUStitchingModel model;
     private JLabel statusLabel;
     private final Pattern directoryNamePattern;
     private boolean isReactingToChange;
+    private SourceProductList sourceProductList;
 
     PDUStitchingPanel(AppContext appContext, PDUStitchingModel model) {
         this.appContext = appContext;
         this.model = model;
         isReactingToChange = false;
         directoryNamePattern = Pattern.compile("S3.?_SL_1_RBT_.*(.SEN3)?");
-        final FileArrayEditor.EditorParent context = new FileArrayEditorContext(appContext);
-        fileArrayEditor = new FileArrayEditor(context, "Source files") {
-            @Override
-            protected JFileChooser createFileChooserDialog() {
-                final JFileChooser fileChooser = super.createFileChooserDialog();
-                fileChooser.setAcceptAllFileFilterUsed(false);
-                fileChooser.setFileFilter(new SlstrL1BFileFilter());
-                fileChooser.setDialogTitle("SLSTR L1B PDU Stitching - Product Dissemination Units");
-                return fileChooser;
-            }
-        };
         setLayout(new BorderLayout());
         add(createSourceProductsPanel(), BorderLayout.CENTER);
         add(createTargetDirPanel(), BorderLayout.SOUTH);
     }
 
     private JPanel createSourceProductsPanel() {
-        final FileArrayEditor.FileArrayEditorListener listener = files -> {
-            final SwingWorker worker = new SwingWorker() {
-                @Override
-                protected Object doInBackground() throws Exception {
-                    if (!isReactingToChange) {
-                        isReactingToChange = true;
-                        String[] fileNames;
-                        if (files.length == 0) {
-                            statusLabel.setForeground(Color.BLACK);
-                            statusLabel.setText(NO_SOURCE_PRODUCTS_TEXT);
-                            fileNames = new String[0];
-                        } else {
-                            List<File> fileList = new ArrayList<>();
-                            List<String> fileNameList = new ArrayList<>();
-                            for (File file : files) {
-                                final String fileName = file.getAbsolutePath();
-                                if (fileNameList.contains(fileName)) {
-                                    Dialogs.showInformation("Removed duplicate occurence of " + fileName + " from selection.");
-                                } else if (!isValidSlstrL1BFile(file)){
-                                    Dialogs.showInformation(fileName + " is not a valid SLSTR L1B product. Removed from selection.");
-                                } else {
-                                    fileList.add(file);
-                                    fileNameList.add(fileName);
+        ListDataListener changeListener = new ListDataListener() {
+
+            @Override
+            public void contentsChanged(ListDataEvent event) {
+                final SwingWorker worker = new SwingWorker() {
+                    @Override
+                    protected Object doInBackground() throws Exception {
+                        if (!isReactingToChange) {
+                            isReactingToChange = true;
+                            final Product[] sourceProducts = sourceProductList.getSourceProducts();
+                            final String[] filePaths = (String[]) model.getPropertyValue(PDUStitchingModel.PROPERTY_SOURCE_PRODUCT_PATHS);
+                            File[] productFiles = new File[sourceProducts.length];
+                            for (int i = 0; i < sourceProducts.length; i++) {
+                                productFiles[i] = sourceProducts[i].getFileLocation();
+                            }
+                            final Logger logger = Logger.getLogger(PDUStitchingPanel.class.getName());
+                            final Set<File> dissolvedFilePaths = PDUStitchingOp.getSourceProductsPathFileSet(filePaths, logger);
+                            File[] pathFiles = dissolvedFilePaths.toArray(new File[dissolvedFilePaths.size()]);
+                            Product[] validatedProducts = new Product[0];
+                            String[] validatedPaths = new String[0];
+                            if (productFiles.length == 0 && pathFiles.length == 0) {
+                                statusLabel.setForeground(Color.BLACK);
+                                statusLabel.setText(NO_SOURCE_PRODUCTS_TEXT);
+                            } else {
+                                List<String> validatedFileNamesList = new ArrayList<>();
+                                List<Product> validatedProductsList = new ArrayList<>();
+                                List<String> validatedPathsList = new ArrayList<>();
+                                for (int i = 0; i < productFiles.length; i++) {
+                                    final String fileName = productFiles[i].getAbsolutePath();
+                                    if (validatedFileNamesList.contains(fileName)) {
+                                        Dialogs.showInformation("Removed duplicate occurence of " + fileName + " from selection.");
+                                    } else if (!isValidSlstrL1BFile(productFiles[i])) {
+                                        Dialogs.showInformation(fileName + " is not a valid SLSTR L1B product. Removed from selection.");
+                                    } else {
+                                        validatedFileNamesList.add(fileName);
+                                        validatedProductsList.add(sourceProducts[i]);
+                                    }
+                                }
+                                for (File file : pathFiles) {
+                                    final String fileName = file.getAbsolutePath();
+                                    if (validatedFileNamesList.contains(fileName)) {
+                                        Dialogs.showInformation("Removed duplicate occurence of " + fileName + " from selection.");
+                                    } else if (!isValidSlstrL1BFile(file)) {
+                                        Dialogs.showInformation(fileName + " is not a valid SLSTR L1B product. Removed from selection.");
+                                    } else {
+                                        validatedFileNamesList.add(fileName);
+                                        validatedPathsList.add(fileName);
+                                    }
+                                }
+                                if (validatedProductsList.size() > 0) {
+                                    validatedProducts = validatedProductsList.toArray(new Product[validatedProductsList.size()]);
+                                }
+                                if (validatedPathsList.size() > 0) {
+                                    validatedPaths = validatedPathsList.toArray(new String[validatedPathsList.size()]);
+                                }
+                                try {
+                                    Validator.validate(productFiles);
+                                    Validator.validate(pathFiles);
+                                    statusLabel.setForeground(Color.GREEN.darker());
+                                    statusLabel.setText(VALID_SOURCE_PRODUCTS_TEXT);
+                                } catch (IOException e) {
+                                    statusLabel.setForeground(Color.RED);
+                                    statusLabel.setText(INVALID_SELECTION_TEXT + e.getMessage());
                                 }
                             }
-                            if (files.length != fileList.size()) {
-                                fileArrayEditor.setFiles(fileList);
+                            model.setPropertyValue(PDUStitchingModel.PROPERTY_SOURCE_PRODUCTS, validatedProducts);
+                            if (validatedPaths.length != filePaths.length) {
+                                model.setPropertyValue(PDUStitchingModel.PROPERTY_SOURCE_PRODUCT_PATHS, validatedPaths);
                             }
-                            fileNames = fileNameList.toArray(new String[fileNameList.size()]);
-                            try {
-                                Validator.validate(files);
-                                statusLabel.setForeground(Color.GREEN.darker());
-                                statusLabel.setText(VALID_SOURCE_PRODUCTS_TEXT);
-                            } catch (IOException e) {
-                                statusLabel.setForeground(Color.RED);
-                                statusLabel.setText(INVALID_SELECTION_TEXT + e.getMessage());
-                            }
+                            sourceProductList.bindComponents();
+                            isReactingToChange = false;
                         }
-                        model.setPropertyValue(PDUStitchingModel.PROPERTY_SOURCE_PRODUCT_PATHS, fileNames);
-                        isReactingToChange = false;
+                        return null;
                     }
-                    return null;
-                }
 
-                @Override
-                protected void done() {
-                    try {
-                        get();
-                    } catch (Exception e) {
-                        final String msg = String.format("Cannot display source product files.\n%s", e.getMessage());
-                        appContext.handleError(msg, e);
+                    @Override
+                    protected void done() {
+                        try {
+                            get();
+                        } catch (Exception e) {
+                            final String msg = String.format("Cannot display source product files.\n%s", e.getMessage());
+                            appContext.handleError(msg, e);
+                        }
                     }
-                }
-            };
-            worker.execute();
+                };
+                worker.execute();
+            }
+
+            @Override
+            public void intervalAdded(ListDataEvent e) {
+                contentsChanged(e);
+            }
+
+            @Override
+            public void intervalRemoved(ListDataEvent e) {
+                contentsChanged(e);
+            }
         };
-        fileArrayEditor.setListener(listener);
-        JButton addFileButton = fileArrayEditor.createAddFileButton();
-        JButton removeFileButton = fileArrayEditor.createRemoveFileButton();
-        final TableLayout tableLayout = new TableLayout(1);
-        tableLayout.setTablePadding(4, 4);
-        tableLayout.setTableWeightX(1.0);
-        tableLayout.setTableWeightY(0.0);
-        tableLayout.setTableAnchor(TableLayout.Anchor.WEST);
-        tableLayout.setTableFill(TableLayout.Fill.BOTH);
 
-        final JPanel sourceFilesPanel = new JPanel(tableLayout);
-        sourceFilesPanel.setBorder(BorderFactory.createTitledBorder("SLSTR L1B Product Dissemination Units"));
-        final JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        buttonPanel.add(addFileButton);
-        buttonPanel.add(removeFileButton);
-        tableLayout.setRowPadding(0, new Insets(1, 4, 1, 4));
-        sourceFilesPanel.add(buttonPanel);
+        sourceProductList = new SourceProductList(appContext);
+        sourceProductList.setPropertyNameLastOpenInputDir(INPUT_PRODUCT_DIR_KEY);
+        sourceProductList.setPropertyNameLastOpenedFormat("Sen3");
+        sourceProductList.addChangeListener(changeListener);
+        sourceProductList.setXAxis(false);
+        sourceProductList.setExplicitPattern("xfdumanifest.xml");
+        sourceProductList.setProductFilter(new ProductFilter() {
+            @Override
+            public boolean accept(Product product) {
+                return isValidDirectoryName(product.getName());
+            }
+        });
 
-        final JComponent fileArrayComponent = fileArrayEditor.createFileArrayComponent();
-        tableLayout.setRowWeightY(1, 1.0);
-        sourceFilesPanel.add(fileArrayComponent);
+        model.getBindingContext().bind(PDUStitchingModel.PROPERTY_SOURCE_PRODUCT_PATHS, sourceProductList);
+        JComponent[] panels = sourceProductList.getComponents();
+
+        final JPanel sourceProductPanel = new JPanel(new BorderLayout());
+        sourceProductPanel.add(panels[0], BorderLayout.CENTER);
+        sourceProductPanel.add(panels[1], BorderLayout.EAST);
 
         statusLabel = new JLabel(NO_SOURCE_PRODUCTS_TEXT);
-        tableLayout.setRowWeightY(2, 0.0);
-        sourceFilesPanel.add(statusLabel);
+        sourceProductPanel.add(statusLabel, BorderLayout.SOUTH);
 
-        return sourceFilesPanel;
+        return sourceProductPanel;
     }
 
     private JPanel createTargetDirPanel() {
@@ -208,62 +240,13 @@ class PDUStitchingPanel extends JPanel {
         return targetDirPanel;
     }
 
-    boolean isValidSlstrL1BFile(File f) {
+    private boolean isValidSlstrL1BFile(File f) {
         return (f.getName().equals("xfdumanifest.xml") && isValidDirectoryName(f.getParentFile().getName()) ||
                 f.isDirectory());
     }
 
     private boolean isValidDirectoryName(String name) {
         return directoryNamePattern.matcher(name).matches();
-    }
-
-    private class SlstrL1BFileFilter extends FileFilter {
-
-        @Override
-        public boolean accept(File f) {
-            return isValidSlstrL1BFile(f);
-        }
-
-        @Override
-        public String getDescription() {
-            return "Slstr L1B manifest";
-        }
-
-    }
-
-    private static class FileArrayEditorContext implements FileArrayEditor.EditorParent {
-
-        private final AppContext applicationContext;
-
-        private FileArrayEditorContext(AppContext applicationContext) {
-            this.applicationContext = applicationContext;
-        }
-
-        @Override
-        public File getUserInputDir() {
-            return getInputProductDir();
-        }
-
-        @Override
-        public void setUserInputDir(File newDir) {
-            setInputProductDir(newDir);
-        }
-
-        private void setInputProductDir(final File currentDirectory) {
-            applicationContext.getPreferences().setPropertyString(INPUT_PRODUCT_DIR_KEY, currentDirectory.getAbsolutePath());
-        }
-
-        private File getInputProductDir() {
-            final String path = applicationContext.getPreferences().getPropertyString(INPUT_PRODUCT_DIR_KEY);
-            final File inputProductDir;
-            if (path != null) {
-                inputProductDir = new File(path);
-            } else {
-                inputProductDir = null;
-            }
-            return inputProductDir;
-        }
-
     }
 
 }

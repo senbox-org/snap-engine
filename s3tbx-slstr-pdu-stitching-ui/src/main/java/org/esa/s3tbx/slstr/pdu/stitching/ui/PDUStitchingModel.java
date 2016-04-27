@@ -4,6 +4,8 @@ import com.bc.ceres.binding.Property;
 import com.bc.ceres.binding.PropertyDescriptor;
 import com.bc.ceres.binding.PropertySet;
 import com.bc.ceres.binding.accessors.MapEntryAccessor;
+import com.bc.ceres.swing.binding.BindingContext;
+import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.annotations.ParameterDescriptorFactory;
 
 import java.io.File;
@@ -15,9 +17,11 @@ import java.util.Map;
  */
 class PDUStitchingModel {
 
+    public static final String PROPERTY_SOURCE_PRODUCTS = "sourceProducts";
     public static final String PROPERTY_SOURCE_PRODUCT_PATHS = "sourceProductPaths";
     public static final String PROPERTY_TARGET_DIR = "targetDir";
 
+    private BindingContext bindingContext;
     private final PropertySet container;
     private final Map<String, Object> parameterMap = new HashMap<>();
     private boolean openInApp;
@@ -25,6 +29,7 @@ class PDUStitchingModel {
     PDUStitchingModel() {
         container = ParameterDescriptorFactory.createMapBackedOperatorPropertyContainer("PduStitching", parameterMap);
         openInApp = false;
+        addTransientProperty(PROPERTY_SOURCE_PRODUCTS, Product[].class);
         addTransientProperty(PROPERTY_SOURCE_PRODUCT_PATHS, String[].class);
         addTransientProperty(PROPERTY_TARGET_DIR, File.class);
     }
@@ -58,6 +63,21 @@ class PDUStitchingModel {
 
     public boolean openInApp() {
         return openInApp;
+    }
+
+    public Product[] getSourceProducts() {
+        final Product[] products = (Product[]) getPropertyValue(PROPERTY_SOURCE_PRODUCTS);
+        if (products == null) {
+            return new Product[0];
+        }
+        return products;
+    }
+
+    public BindingContext getBindingContext() {
+        if (bindingContext == null) {
+            bindingContext = new BindingContext(container);
+        }
+        return bindingContext;
     }
 
 }
