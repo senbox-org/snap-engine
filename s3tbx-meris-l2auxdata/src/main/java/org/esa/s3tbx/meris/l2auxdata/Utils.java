@@ -8,6 +8,15 @@ package org.esa.s3tbx.meris.l2auxdata;
 
 import org.esa.snap.core.datamodel.Product;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
 public class Utils {
 
     private Utils() {
@@ -33,5 +42,28 @@ public class Utils {
     public static boolean isProductFR(Product product) {
         return (product.getProductType().indexOf("_FR") > 0) ||
                 (product.getProductType().indexOf("_FS") > 0);
+    }
+
+    static void downloadAndInstallAuxdata(Path targetDir, URL remoteZipFileUrl) throws L2AuxDataException {
+        final URL fileUrl;
+        try {
+            fileUrl = remoteZipFileUrl;
+            final URLConnection urlConnection = fileUrl.openConnection();
+            InputStream inputStream = urlConnection.getInputStream();
+            ZipInputStream zis = new ZipInputStream(inputStream);
+            ZipEntry entry;
+            while((entry = zis.getNextEntry()) != null) {
+                Path filepath = targetDir.resolve(entry.getName());
+                if (!entry.isDirectory()) {
+                    // if the entry is a file, extracts it
+                    Files.copy(zis, filepath);
+                } else {
+                    // if the entry is a directory, make the directory
+                    Files.createDirectories(filepath);
+                }
+            }
+        } catch (IOException e) {
+            throw new L2AuxDataException("Not able to download auxillary data.", e);
+        }
     }
 }

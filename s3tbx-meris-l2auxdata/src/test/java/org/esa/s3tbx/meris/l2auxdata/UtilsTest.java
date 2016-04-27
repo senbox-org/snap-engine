@@ -6,10 +6,30 @@
  */
 package org.esa.s3tbx.meris.l2auxdata;
 
+import com.google.common.jimfs.Jimfs;
 import junit.framework.TestCase;
+
+import java.nio.file.FileSystem;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class UtilsTest extends TestCase {
 
+    public void testDownloadAndInstall() throws Exception {
+        FileSystem fs = Jimfs.newFileSystem();
+        Path target = fs.getPath("target");
+        Utils.downloadAndInstallAuxdata(target, UtilsTest.class.getResource("zip.zip"));
+        Path zipDir = target.resolve("zip");
+        assertTrue(Files.isDirectory(zipDir));
+        Path imageFile = zipDir.resolve("image.png");
+        assertTrue(Files.isRegularFile(imageFile));
+        assertEquals(45088, Files.size(imageFile));
+        Path textFile = zipDir.resolve("folder").resolve("text.txt");
+        assertTrue(Files.isRegularFile(textFile));
+        assertEquals(1710, Files.size(textFile));
+
+        fs.close();
+    }
 
     public void testSeasonalFactorComputation() {
         double meanEarthSunDist = 149.60e+06 * 1000;
