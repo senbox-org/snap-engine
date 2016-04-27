@@ -46,6 +46,12 @@ public class MerisRadReflConverter implements RadReflConverter {
         return -1.0f;
     }
 
+    @Override
+    public float convert(float spectralInputValue, float sza, float solarFlux) {
+        return 0;
+    }
+
+
     public String getSpectralBandAutogroupingString() {
         return conversionMode.equals("RAD_TO_REFL") ? Sensor.MERIS.getReflAutogroupingString() : Sensor.MERIS.getRadAutogroupingString();
     }

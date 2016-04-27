@@ -16,13 +16,17 @@
 
 package org.esa.s3tbx.olci.radiometry.operator;
 
+import com.bc.ceres.core.ProgressMonitor;
 import org.esa.s3tbx.olci.radiometry.smilecorr.SmileCorrectionAlgorithm;
 import org.esa.s3tbx.olci.radiometry.smilecorr.SmileCorrectionAuxdata;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.gpf.GPF;
+import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
+import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
@@ -35,7 +39,10 @@ import org.esa.snap.core.gpf.pointop.WritableSample;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.math.RsMathUtils;
 
+import java.awt.*;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 
 /**
@@ -47,9 +54,10 @@ import java.util.HashMap;
         copyright = "(c) 2015 by Brockmann Consult",
         category = "Optical/Pre-Processing",
         version = "1.2")
-public class OLCIRadiometryCorrectionOp extends SampleOperator {
+public class OLCIRadiometryCorrectionOp extends Operator {
 
 
+    public static final String LAND_EXPRESSION = "quality_flags_land";
     @Parameter(defaultValue = "false",
             label = "Perform radiance-to-reflectance conversion")
     private boolean doRadToRefl;
@@ -70,57 +78,17 @@ public class OLCIRadiometryCorrectionOp extends SampleOperator {
     private static SmileCorrectionAuxdata auxdata = new SmileCorrectionAuxdata();
     private SmileCorrectionAlgorithm correctionAlgorithm;
     private Product radReflProduct;
-
-
-    @Override
-    protected void prepareInputs() throws OperatorException {
-        System.out.println("huhu ======================================== ");
-        correctionAlgorithm = new SmileCorrectionAlgorithm(auxdata);
-        HashMap<String, Object> parameters = new HashMap<>();
-        parameters.put("sensor", "OLCI");
-        radReflProduct = GPF.createProduct("Rad2Refl", parameters, sourceProduct);
-    }
+    private Product targetProduct;
+    private final List<Band> sourceBandList = new ArrayList<>();
+    private final List<Band> sourceSolarFluxList = new ArrayList<>();
 
     @Override
-    protected void configureSourceSamples(SourceSampleConfigurer sampleConfigurer) {
-        String landExpression = null;
-        if (sourceProduct.isCompatibleBandArithmeticExpression("quality_flags_land")) {
-            landExpression = "quality_flags_land";
-        }
-        if (landExpression != null) {
-            int countIndex = 0;
-            for (; countIndex < SOURCE_RADIANCE_NAMES.length; countIndex++) {
-                sampleConfigurer.defineSample(countIndex, SOURCE_RADIANCE_NAMES[countIndex]);
-            }
-            for (String SOURCE_SOLAR_FLUX_NAME : SOURCE_SOLAR_FLUX_NAMES) {
-                sampleConfigurer.defineSample(countIndex++, SOURCE_SOLAR_FLUX_NAME);
-            }
-            sampleConfigurer.defineSample(countIndex, "SZA");
-            sampleConfigurer.setValidPixelMask(landExpression);
-        }
+    public void initialize() throws OperatorException {
+        preparedInput();
 
-    }
-
-    private double rad2Refl(float rad, float sza, float solarFlux) {
-        return RsMathUtils.radianceToReflectance(rad, sza, solarFlux);
-    }
-
-    @Override
-    protected void configureTargetSamples(TargetSampleConfigurer sampleConfigurer) {
-        for (final Band band : getTargetProduct().getBands()) {
-            final int spectralBandIndex = band.getSpectralBandIndex();
-            if (spectralBandIndex != -1) {
-                sampleConfigurer.defineSample(spectralBandIndex, band.getName()); // name open
-            }
-        }
-    }
-
-    @Override
-    protected void configureTargetProduct(ProductConfigurer productConfigurer) {
-        super.configureTargetProduct(productConfigurer);
-
-        Product targetProduct = productConfigurer.getTargetProduct();
-
+        // Configure the target
+        targetProduct = new Product(sourceProduct.getName(), sourceProduct.getProductType(),
+                sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
         for (Band band : radReflProduct.getBands()) {
             final Band targetBand = targetProduct.addBand(band.getName(), band.getDataType());
             ProductUtils.copyRasterDataNodeProperties(band, targetBand);
@@ -130,24 +98,51 @@ public class OLCIRadiometryCorrectionOp extends SampleOperator {
         ProductUtils.copyMasks(sourceProduct, targetProduct);
         ProductUtils.copyFlagBands(sourceProduct, targetProduct, true);
         targetProduct.setAutoGrouping(sourceProduct.getAutoGrouping());
+        setTargetProduct(targetProduct);
+
 
     }
 
-    @Override
-    protected void computeSample(int x, int y, Sample[] sourceSamples, WritableSample targetSample) {
-        final int targetSampleIndex = targetSample.getIndex();
-        final int lowerBandIndex = getLowerBand(targetSampleIndex);
-        final int upperBandIndex = getUpperBand(targetSampleIndex);
-        if (lowerBandIndex != -1 && upperBandIndex != -1) {
-            Sample radiance = sourceSamples[targetSampleIndex];
-            Sample sza = sourceSamples[42];
-            Sample solarFlux = sourceSamples[targetSampleIndex+21];
-            double reflectance = rad2Refl(radiance.getFloat(), sza.getFloat(), solarFlux.getFloat());
-            final Sample sourceSampleUpper = sourceSamples[upperBandIndex];
-            final Sample sourceSampleLower = sourceSamples[lowerBandIndex];
-            final double reflectanceCorrection = correctionAlgorithm.getReflectanceCorrection(sourceSampleUpper, sourceSampleLower, upperBandIndex, lowerBandIndex);
-            targetSample.set(reflectance + reflectanceCorrection);
+    private void setSoureSolarFlux() {
+        for (String sourceSolarFluxName : SOURCE_SOLAR_FLUX_NAMES) {
+            sourceSolarFluxList.add(radReflProduct.getBand(sourceSolarFluxName));
         }
+    }
+
+    private void setSourceBands() {
+
+        for (String sourceRadianceName : SOURCE_RADIANCE_NAMES) {
+            sourceBandList.add(radReflProduct.getBand(sourceRadianceName));
+        }
+    }
+
+    private void preparedInput() {
+        correctionAlgorithm = new SmileCorrectionAlgorithm(auxdata);
+        HashMap<String, Object> parameters = new HashMap<>();
+        parameters.put("sensor", "OLCI");
+        radReflProduct = GPF.createProduct("Rad2Refl", parameters, sourceProduct);
+        if (!radReflProduct.isCompatibleBandArithmeticExpression(LAND_EXPRESSION)) {
+            throw new OperatorException("Expresssion '" + LAND_EXPRESSION + "'not compatible");
+        }
+    }
+
+    @Override
+    public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
+        Rectangle rectangle = targetTile.getRectangle();
+        Band band = radReflProduct.getBand(targetBand.getName());
+        Tile sourceTile = getSourceTile(band, rectangle);
+        if (sourceTile != null) {
+            for (int y = rectangle.y; y < sourceTile.getHeight(); y++) {
+                for (int x = rectangle.x; x < sourceTile.getWidth(); x++) {
+                    targetTile.setSample(x, y, sourceTile.getSampleDouble(x, y));
+                }
+            }
+        }
+
+    }
+
+    private double rad2Refl(float rad, float sza, float solarFlux) {
+        return RsMathUtils.radianceToReflectance(rad, sza, solarFlux);
     }
 
     private int getLowerBand(int index) {
