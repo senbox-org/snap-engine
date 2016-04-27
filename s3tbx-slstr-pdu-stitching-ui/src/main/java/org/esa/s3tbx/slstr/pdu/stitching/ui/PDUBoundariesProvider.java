@@ -20,11 +20,15 @@ import java.util.List;
 class PDUBoundariesProvider {
 
     private List<String> names;
+    private List<Object> inputs;
     private List<GeoPos[]> geoBoundaries;
+    private List<Boolean> selected;
 
     PDUBoundariesProvider() {
         names = new ArrayList<>();
+        inputs = new ArrayList<>();
         geoBoundaries = new ArrayList<>();
+        selected = new ArrayList<>();
     }
 
     int getNumberOfElements() {
@@ -33,10 +37,12 @@ class PDUBoundariesProvider {
 
     void clear() {
         names.clear();
+        inputs.clear();
         geoBoundaries.clear();
+        selected.clear();
     }
 
-    void extractBoundaryFromFile(File file) {
+    void extractBoundaryFromFile(File file, Object input, boolean isSelected) {
         final String fileName = file.getName();
         String directoryName;
         File metadataFile;
@@ -67,6 +73,8 @@ class PDUBoundariesProvider {
             }
             names.add(directoryName);
             geoBoundaries.add(geoBoundary);
+            selected.add(isSelected);
+            inputs.add(input);
         } catch (IOException | ParserConfigurationException | SAXException e) {
             //do not extract then
         }
@@ -80,4 +88,13 @@ class PDUBoundariesProvider {
         return geoBoundaries.get(index);
     }
 
+    boolean isSelected(int index) {
+        return selected.get(index);
+    }
+
+    void setSelected(List selectedValuesList) {
+        for (int i = 0; i < selected.size(); i++) {
+            selected.set(i, selectedValuesList.contains(inputs.get(i)));
+        }
+    }
 }

@@ -55,13 +55,13 @@ public class PDUBoundariesProviderTest {
         final File nonsense1File = new File(PDUBoundariesProviderTest.class.getResource(NONSENSE_1_FILE + "/xfdumanifest.xml").getFile());
         final File nonsense2File = new File(PDUBoundariesProviderTest.class.getResource(NONSENSE_2_FILE).getFile());
 
-        provider.extractBoundaryFromFile(firstFile);
+        provider.extractBoundaryFromFile(firstFile, firstFile, false);
         assertEquals(1, provider.getNumberOfElements());
-        provider.extractBoundaryFromFile(secondFile);
+        provider.extractBoundaryFromFile(secondFile, secondFile, false);
         assertEquals(2, provider.getNumberOfElements());
-        provider.extractBoundaryFromFile(nonsense1File);
+        provider.extractBoundaryFromFile(nonsense1File, nonsense1File, false);
         assertEquals(2, provider.getNumberOfElements());
-        provider.extractBoundaryFromFile(nonsense2File);
+        provider.extractBoundaryFromFile(nonsense2File, nonsense2File, false);
         assertEquals(2, provider.getNumberOfElements());
 
         assertEquals(FIRST_FILE, provider.getName(0));

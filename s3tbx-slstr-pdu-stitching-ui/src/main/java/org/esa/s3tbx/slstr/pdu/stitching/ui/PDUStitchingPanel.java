@@ -17,6 +17,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
@@ -25,6 +26,8 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -103,7 +106,8 @@ class PDUStitchingPanel extends JPanel {
                                     } else {
                                         validatedFileNamesList.add(fileName);
                                         validatedProductsList.add(sourceProducts[i]);
-                                        boundariesProvider.extractBoundaryFromFile(productFiles[i]);
+                                        final boolean selected = sourceProductList.isSelected(sourceProducts[i]);
+                                        boundariesProvider.extractBoundaryFromFile(productFiles[i], sourceProducts[i], selected);
                                     }
                                 }
                                 for (File file : pathFiles) {
@@ -115,7 +119,8 @@ class PDUStitchingPanel extends JPanel {
                                     } else {
                                         validatedFileNamesList.add(fileName);
                                         validatedPathsList.add(fileName);
-                                        boundariesProvider.extractBoundaryFromFile(file);
+                                        final boolean selected = sourceProductList.isSelected(file);
+                                        boundariesProvider.extractBoundaryFromFile(file, file, selected);
                                     }
                                 }
                                 if (validatedProductsList.size() > 0) {
@@ -182,7 +187,17 @@ class PDUStitchingPanel extends JPanel {
                 return SlstrL1bFileNameValidator.isValidDirectoryName(product.getName());
             }
         });
-
+        sourceProductList.addSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                if (e.getSource() instanceof JList) {
+                    final JList list = (JList) e.getSource();
+                    final List selectedValuesList = list.getSelectedValuesList();
+                    boundariesProvider.setSelected(selectedValuesList);
+                    worldMapPane.repaint();
+                }
+            }
+        });
         model.getBindingContext().bind(PDUStitchingModel.PROPERTY_SOURCE_PRODUCT_PATHS, sourceProductList);
         JComponent[] panels = sourceProductList.getComponents();
 

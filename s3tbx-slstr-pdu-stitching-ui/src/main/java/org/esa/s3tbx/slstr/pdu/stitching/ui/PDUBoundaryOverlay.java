@@ -30,7 +30,8 @@ class PDUBoundaryOverlay implements LayerCanvas.Overlay {
         for (int i = 0; i < provider.getNumberOfElements(); i++) {
             final String name = provider.getName(i);
             final GeoPos[] geoBoundary = provider.getGeoBoundary(i);
-            drawGeoBoundary(rendering.getGraphics(), geoBoundary, false, name);
+            final boolean selected = provider.isSelected(i);
+            drawGeoBoundary(rendering.getGraphics(), geoBoundary, selected, name);
         }
     }
 
@@ -39,7 +40,7 @@ class PDUBoundaryOverlay implements LayerCanvas.Overlay {
         final GeneralPath gp = convertToPixelPath(geoBoundary);
         drawPath(isCurrent, g2d, gp, 0.0f);
         final PixelPos boundaryCenter = getBoundaryCenter(geoBoundary);
-        drawText(g2d, text, boundaryCenter, 0.0f);
+        drawText(g2d, text, boundaryCenter, 0.0f, isCurrent);
     }
 
     private void drawPath(final boolean isCurrent, Graphics2D g2d, final GeneralPath gp, final float offsetX) {
@@ -74,14 +75,18 @@ class PDUBoundaryOverlay implements LayerCanvas.Overlay {
         return gp;
     }
 
-    private void drawText(Graphics2D g2d, final String text, final PixelPos textCenter, final float offsetX) {
+    private void drawText(Graphics2D g2d, final String text, final PixelPos textCenter, final float offsetX, boolean isCurrent) {
         if (text == null || textCenter == null) {
             return;
         }
         g2d = prepareGraphics2D(offsetX, g2d);
         final FontMetrics fontMetrics = g2d.getFontMetrics();
         final Color color = g2d.getColor();
-        g2d.setColor(Color.white);
+        if (isCurrent) {
+            g2d.setColor(new Color(255, 0, 0));
+        } else {
+            g2d.setColor(Color.WHITE);
+        }
 
         g2d.drawString(text,
                        (float) (textCenter.x - fontMetrics.stringWidth(text) / 2.0f),
