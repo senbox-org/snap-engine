@@ -7,6 +7,8 @@ import org.esa.snap.core.datamodel.ProductFilter;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.rcp.util.Dialogs;
 import org.esa.snap.ui.AppContext;
+import org.esa.snap.ui.WorldMapPane;
+import org.esa.snap.ui.WorldMapPaneDataModel;
 import org.esa.snap.ui.product.SourceProductList;
 
 import javax.swing.BorderFactory;
@@ -16,6 +18,7 @@ import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.SwingWorker;
 import javax.swing.event.DocumentEvent;
@@ -33,7 +36,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
-import java.util.regex.Pattern;
 
 /**
  * @author Tonio Fincke
@@ -48,17 +50,18 @@ class PDUStitchingPanel extends JPanel {
     private final AppContext appContext;
     private final PDUStitchingModel model;
     private JLabel statusLabel;
-    private final Pattern directoryNamePattern;
     private boolean isReactingToChange;
     private SourceProductList sourceProductList;
+    private PDUBoundariesProvider boundariesProvider;
+    private WorldMapPane worldMapPane;
 
     PDUStitchingPanel(AppContext appContext, PDUStitchingModel model) {
         this.appContext = appContext;
         this.model = model;
         isReactingToChange = false;
-        directoryNamePattern = Pattern.compile("S3.?_SL_1_RBT_.*(.SEN3)?");
         setLayout(new BorderLayout());
-        add(createSourceProductsPanel(), BorderLayout.CENTER);
+        final JSplitPane pane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, createSourceProductsPanel(), createWorldMapPanel());
+        add(pane, BorderLayout.CENTER);
         add(createTargetDirPanel(), BorderLayout.SOUTH);
     }
 
@@ -72,6 +75,7 @@ class PDUStitchingPanel extends JPanel {
                     protected Object doInBackground() throws Exception {
                         if (!isReactingToChange) {
                             isReactingToChange = true;
+                            boundariesProvider.clear();
                             final Product[] sourceProducts = sourceProductList.getSourceProducts();
                             final String[] filePaths = (String[]) model.getPropertyValue(PDUStitchingModel.PROPERTY_SOURCE_PRODUCT_PATHS);
                             File[] productFiles = new File[sourceProducts.length];
@@ -94,22 +98,24 @@ class PDUStitchingPanel extends JPanel {
                                     final String fileName = productFiles[i].getAbsolutePath();
                                     if (validatedFileNamesList.contains(fileName)) {
                                         Dialogs.showInformation("Removed duplicate occurence of " + fileName + " from selection.");
-                                    } else if (!isValidSlstrL1BFile(productFiles[i])) {
+                                    } else if (!SlstrL1bFileNameValidator.isValidSlstrL1BFile(productFiles[i])) {
                                         Dialogs.showInformation(fileName + " is not a valid SLSTR L1B product. Removed from selection.");
                                     } else {
                                         validatedFileNamesList.add(fileName);
                                         validatedProductsList.add(sourceProducts[i]);
+                                        boundariesProvider.extractBoundaryFromFile(productFiles[i]);
                                     }
                                 }
                                 for (File file : pathFiles) {
                                     final String fileName = file.getAbsolutePath();
                                     if (validatedFileNamesList.contains(fileName)) {
                                         Dialogs.showInformation("Removed duplicate occurence of " + fileName + " from selection.");
-                                    } else if (!isValidSlstrL1BFile(file)) {
+                                    } else if (!SlstrL1bFileNameValidator.isValidSlstrL1BFile(file)) {
                                         Dialogs.showInformation(fileName + " is not a valid SLSTR L1B product. Removed from selection.");
                                     } else {
                                         validatedFileNamesList.add(fileName);
                                         validatedPathsList.add(fileName);
+                                        boundariesProvider.extractBoundaryFromFile(file);
                                     }
                                 }
                                 if (validatedProductsList.size() > 0) {
@@ -119,6 +125,7 @@ class PDUStitchingPanel extends JPanel {
                                     validatedPaths = validatedPathsList.toArray(new String[validatedPathsList.size()]);
                                 }
                                 try {
+                                    //todo validate against sub lists
                                     Validator.validate(productFiles);
                                     Validator.validate(pathFiles);
                                     statusLabel.setForeground(Color.GREEN.darker());
@@ -142,6 +149,7 @@ class PDUStitchingPanel extends JPanel {
                     protected void done() {
                         try {
                             get();
+                            worldMapPane.repaint();
                         } catch (Exception e) {
                             final String msg = String.format("Cannot display source product files.\n%s", e.getMessage());
                             appContext.handleError(msg, e);
@@ -171,7 +179,7 @@ class PDUStitchingPanel extends JPanel {
         sourceProductList.setProductFilter(new ProductFilter() {
             @Override
             public boolean accept(Product product) {
-                return isValidDirectoryName(product.getName());
+                return SlstrL1bFileNameValidator.isValidDirectoryName(product.getName());
             }
         });
 
@@ -186,6 +194,13 @@ class PDUStitchingPanel extends JPanel {
         sourceProductPanel.add(statusLabel, BorderLayout.SOUTH);
 
         return sourceProductPanel;
+    }
+
+    private JPanel createWorldMapPanel() {
+        boundariesProvider = new PDUBoundariesProvider();
+        final PDUBoundaryOverlay pduBoundaryOverlay = new PDUBoundaryOverlay(boundariesProvider);
+        worldMapPane = new WorldMapPane(new WorldMapPaneDataModel(), pduBoundaryOverlay);
+        return worldMapPane;
     }
 
     private JPanel createTargetDirPanel() {
@@ -238,15 +253,6 @@ class PDUStitchingPanel extends JPanel {
         });
         targetDirPanel.add(openInAppCheckBox, BorderLayout.SOUTH);
         return targetDirPanel;
-    }
-
-    private boolean isValidSlstrL1BFile(File f) {
-        return (f.getName().equals("xfdumanifest.xml") && isValidDirectoryName(f.getParentFile().getName()) ||
-                f.isDirectory());
-    }
-
-    private boolean isValidDirectoryName(String name) {
-        return directoryNamePattern.matcher(name).matches();
     }
 
 }
