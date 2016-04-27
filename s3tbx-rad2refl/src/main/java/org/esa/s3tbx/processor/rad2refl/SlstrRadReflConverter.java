@@ -38,6 +38,12 @@ public class SlstrRadReflConverter implements RadReflConverter {
         }
     }
 
+    @Override
+    public float convert(float spectralInputValue, float sza, float solarFlux) {
+        return 0;
+    }
+
+
     public String getSpectralBandAutogroupingString() {
         return conversionMode.equals("RAD_TO_REFL") ? Sensor.SLSTR_500m.getReflAutogroupingString() :
                 Sensor.SLSTR_500m.getRadAutogroupingString();
