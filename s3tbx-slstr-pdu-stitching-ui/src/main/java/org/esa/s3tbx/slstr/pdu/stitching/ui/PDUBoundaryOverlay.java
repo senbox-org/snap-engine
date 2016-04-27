@@ -30,15 +30,16 @@ class PDUBoundaryOverlay implements LayerCanvas.Overlay {
         for (int i = 0; i < provider.getNumberOfElements(); i++) {
             final String name = provider.getName(i);
             final GeoPos[] geoBoundary = provider.getGeoBoundary(i);
-            drawGeoBoundary(rendering.getGraphics(), geoBoundary, false, name, null);
+            drawGeoBoundary(rendering.getGraphics(), geoBoundary, false, name);
         }
     }
 
     private void drawGeoBoundary(final Graphics2D g2d, final GeoPos[] geoBoundary, final boolean isCurrent,
-                                 final String text, final PixelPos textCenter) {
+                                 final String text) {
         final GeneralPath gp = convertToPixelPath(geoBoundary);
         drawPath(isCurrent, g2d, gp, 0.0f);
-        drawText(g2d, text, textCenter, 0.0f);
+        final PixelPos boundaryCenter = getBoundaryCenter(geoBoundary);
+        drawText(g2d, text, boundaryCenter, 0.0f);
     }
 
     private void drawPath(final boolean isCurrent, Graphics2D g2d, final GeneralPath gp, final float offsetX) {
@@ -80,11 +81,11 @@ class PDUBoundaryOverlay implements LayerCanvas.Overlay {
         g2d = prepareGraphics2D(offsetX, g2d);
         final FontMetrics fontMetrics = g2d.getFontMetrics();
         final Color color = g2d.getColor();
-        g2d.setColor(Color.black);
+        g2d.setColor(Color.white);
 
         g2d.drawString(text,
-                       (float)(textCenter.x - fontMetrics.stringWidth(text) / 2.0f),
-                       (float)(textCenter.y + fontMetrics.getAscent() / 2.0f));
+                       (float) (textCenter.x - fontMetrics.stringWidth(text) / 2.0f),
+                       (float) (textCenter.y + fontMetrics.getAscent() / 2.0f));
         g2d.setColor(color);
     }
 
@@ -98,6 +99,20 @@ class PDUBoundaryOverlay implements LayerCanvas.Overlay {
             g2d.setTransform(transform);
         }
         return g2d;
+    }
+
+    private PixelPos getBoundaryCenter(final GeoPos[] geoBoundary) {
+        final AffineTransform transform = layerCanvas.getViewport().getModelToViewTransform();
+        double meanX = 0;
+        double meanY = 0;
+        for (GeoPos geoPos : geoBoundary) {
+            final Point2D point2D = transform.transform(new Point2D.Double(geoPos.getLon(), geoPos.getLat()), null);
+            meanX += point2D.getX();
+            meanY += point2D.getY();
+        }
+        meanX /= geoBoundary.length;
+        meanY /= geoBoundary.length;
+        return new PixelPos(meanX, meanY);
     }
 
 }
