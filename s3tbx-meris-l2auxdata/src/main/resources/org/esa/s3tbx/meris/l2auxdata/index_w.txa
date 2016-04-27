@@ -1,0 +1,60 @@
+W000       0 1.000000e+00  0     62      0      0      62  0   0  1 -
+Product file name
+-
+ 
+W106     305 1.000000e+00  0     11      0      0      11  0   0  0 -
+Number of Data Set Records
+-
+ 
+W200       0 1.000000e+00 10      1      0      0       1  1   1  1 -
+blue wavelength band number (with bands starting at 1) for TOAVI computation
+dl
+ 
+W201       1 1.000000e+00 10      1      0      0       1  1   1  1 -
+red wavelength band number (with bands starting at 1) for TOAVI computation
+dl
+ 
+W202       2 1.000000e+00 10      1      0      0       1  1   1  1 -
+near infrared wavelength band number (with bands starting at 1) for TOAVI computation
+dl
+ 
+W203       3 1.000000e+00  4      3      0      0      12  1   1  1 -
+k_i parameters for blue, red and near infrared channels for TOAVI computation
+dl
+ 
+W204      15 1.000000e+00  4      3      0      0      12  1   1  1 -
+theta_i parameters for blue, red and near infrared channels for TOAVI computation
+dl
+ 
+W205      27 1.000000e+00  4      3      0      0      12  1   1  1 -
+rho_i parameters for blue, red and near infrared channels for TOAVI computation
+dl
+ 
+W206      39 1.000000e+00  4      3      0      0      12  1   1  1 -
+maximum reflectances for blue, red and near infrared channels for TOAVI computation
+dl
+ 
+W207      51 1.000000e+00  4      3     12      0     144  1   1  1 -
+toavi polynomial coefficients for blue, red and near infrared channels for TOAVI computation
+dl
+ 
+W208     195 1.000000e+00  4      1      0      0       4  1   1  1 -
+infrared to near infrared reflectance ratio threshold for TOAVI computation
+dl
+ 
+W209     199 1.000000e+00 10      1      0      0       1  1   1  1 -
+red wavelength band number (with bands starting at 1) for BOAVI computation
+dl
+ 
+W20A     200 1.000000e+00 10      1      0      0       1  1   1  1 -
+infrared wavelength band #1 (with bands starting at 1) for BOAVI computation
+dl
+ 
+W20B     201 1.000000e+00 10      1      0      0       1  1   1  1 -
+infrared wavelength band #2 (with bands starting at 1) for BOAVI computation
+dl
+ 
+W20C     202 1.000000e+00  4      2      0      0       8  1   1  1 -
+BOAVI acceptable range [min,max]
+dl
+ 

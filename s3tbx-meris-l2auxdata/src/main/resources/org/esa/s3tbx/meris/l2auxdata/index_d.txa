@@ -1,0 +1,428 @@
+D000       0 1.000000e+00  0     62      0      0      62  0   0  1 -
+Product file name - V. 30
+-
+
+D106     305 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+D10E     585 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+D10M     865 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+D10U    1145 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+D112    1425 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+D11A    1705 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+D11I    1985 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+D11Q    2265 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+D11Y    2545 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+D126    2825 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+D12E    3105 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+D12M    3385 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+D12U    3665 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+D132    3945 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+D13A    4225 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+D13I    4505 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+D13Q    4785 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+D13Y    5065 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+D200       0 1.000000e+00  3      1      0      0       4  1   1  1 -
+Millisecond to Julian days conversion factor
+dl
+
+D201       4 1.000000e+00 10      1      0      0       1  1   1  1 -
+Max number of missing packets allowed
+nd
+
+D400       0 1.000000e+00  4     15      0      0      60  1   2  1 -
+solar reference values
+IU
+
+D401      60 1.000000e+00  4      1      0      0       4  1   2  1 -
+square of Sun-Earth distance at reference date
+m2
+
+D600       0 1.000000e+00  4     15      0      0      60  1   2  1 -
+Default radiance values for saturated samples
+LU
+
+D601      60 1.000000e+00  4     15      0      0      60  1   2  1 -
+Default radiance value for above range samples
+LU
+
+D700       0 1.000000e+00 20     16      0      0      32  1   1  1 -
+blank sample threshold
+dl
+
+D701      32 1.000000e+00 20     16      0      0      32  1   1  1 -
+blank sample difference threshold
+dl
+
+D702      64 1.000000e+00 20      1      0      0       2  1   1  1 -
+scaling factor for floating point values coding
+dl
+
+D800       0 1.000000e+00 30      1      0      0       4  1   1  1 -
+Mean Earth Radius
+m
+
+D801       4 1.000000e+00 20      1      0      0       2  1   1  1 -
+Number of tie points per frame for full swath
+-
+
+D802       6 1.000000e+00 20      1      0      0       2  1   1  1 -
+AC distance between tie points
+m
+
+D803       8 1.000000e+00  4      1      0      0       4  1   2  1 -
+FR product AC pixel size
+m
+
+D804      12 1.000000e+00  4      1      0      0       4  1   2  1 -
+RR product AC pixel size
+m
+
+D900       0 1.000000e+00 20      1      0      0       2  1   1  1 -
+width of blooming contamination for FR
+-
+
+D901       2 1.000000e+00 20      1      0      0       2  1   1  1 -
+width of blooming contamination for RR
+-
+
+D902       4 1.000000e+00 20      1      0      0       2  1   1  1 -
+saturation recovery width for FR
+-
+
+D903       6 1.000000e+00 20      1      0      0       2  1   1  1 -
+saturation recovery width for RR
+-
+
+D904       8 1.000000e-06 30      1      0      0       4  1   2  1 -
+azimuth angle range for sun glint risk
+deg
+
+D905      12 1.000000e-06 30      1      0      0       4  1   2  1 -
+zenithal angle range for sun glint risk
+deg
+
+D906      16 1.000000e+00 20     16      0      0      32  1   1  1 -
+band saturation levels for FR samples
+nc
+
+D907      48 1.000000e+00  4     15      0      0      60  1   2  1 -
+max valid radiance
+LU
+
+D908     108 1.000000e+00 20      1      0      0       2  1   1  1 -
+threshold value for percentage of out of range image samples
+%
+
+D909     110 1.000000e+00 20      1      0      0       2  1   1  1 -
+threshold value for percentage of out of range blank samples
+%
+
+D90A     112 1.000000e+00 10     15      0      0      15  1   1  1 -
+Land Processing bands (1=yes)
+nd
+
+D90B     127 1.000000e+00  4      1      0      0       4  1   2  1 -
+Threshold for setting Transmission errors flag (mean number of errors per packet)
+nd
+
+D90C     131 1.000000e+00  4      1      0      0       4  1   2  1 -
+Threshold for setting Format errors flag (mean number of errors per packet)
+nd
+
+DA00       0 1.000000e+00 10      1      0      0       1  1   1  1 -
+Switch enabling FR non-linearity corr.
+dl
+
+DA01       1 1.000000e+00 10      1      0      0       1  1   1  1 -
+Switch enabling RR non-linearity corr.
+dl
+
+DA02       2 1.000000e+00 10      1      0      0       1  1   1  1 -
+Switch enabling AC straylight corr.
+dl
+
+DA03       3 1.000000e+00 10      1      0      0       1  1   1  1 -
+Switch enabling AL straylight corr.
+dl
+
+DB00       0 1.000000e-06 30     12      0      0      48  1   2  1 -
+qV vector
+deg
+
+DB01      48 1.000000e-06 30     12      0      0      48  1   2  1 -
+qS vector
+deg
+
+DB02      96 1.000000e-06 30     19      0      0      76  1   2  1 -
+Df vector
+deg
+
+DB03     172 1.000000e+00  4     10      0      0      40  1   2  1 -
+Spare
+dl
+
+DB04     212 1.000000e+00 10      3      0      0       3  1   2  1 -
+Spare
+dl
+
+DB05     215 1.000000e+00  4      1      0      0       4  1   2  1 -
+Spare
+dl
+
+DB06     219 1.000000e+00  4      1      0      0       4  1   2  1 -
+Spare
+dl
+
+DB07     223 1.000000e+00 10      1      0      0       1  1   2  1 -
+index of band for radiometric threshold
+dl
+
+DB08     224 1.000000e+00 10      4      0      0       4  1   1  1 -
+Spare
+dl
+
+DC00       0 1.000000e+00 10      1      0      0       1  1   1  1 -
+resampling switch
+dl
+
+DC01       1 1.000000e+00 20      1      0      0       2  1   1  1 -
+number of AC samples used in product FR Imagette
+-
+
+DC02       3 1.000000e+00 20      1      0      0       2  1   1  1 -
+number of AC samples used in product FR scene
+-
+
+DC03       5 1.000000e+00 20      1      0      0       2  1   1  1 -
+number of AC samples used in product RR
+-
+
+DC04       7 1.000000e+00 10      1      0      0       1  1   1  1 -
+FR pixel to tie point sub-sampling factor
+dl
+
+DC05       8 1.000000e+00 10      1      0      0       1  1   1  1 -
+RR pixel to tie point sub-sampling factor
+dl
+
+DC06       9 1.000000e+00 10      1      0      0       1  1   1  1 -
+FR frame to tie frame sub-sampling factor
+dl
+
+DC07      10 1.000000e+00 10      1      0      0       1  1   1  1 -
+RR frame to tie frame sub-sampling factor
+dl
+
+DC08      11 1.000000e+00 10      1      0      0       1  1   1  1 -
+Tie Frame to Summary Quality ADS frame sub-sampling factor
+dl
+
+DC09      12 1.000000e-06 30      1      0      0       4  1   2  1 -
+Maximum across-track angular distance allowing pixel selection in FR
+deg
+
+DC0A      16 1.000000e-06 30      1      0      0       4  1   2  1 -
+Maximum across-track angular distance allowing pixel selection in RR
+deg
+
+DD00       0 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - altitude
+dl
+
+DD01       4 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - roughness
+dl
+
+DD02       8 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - zonal wind
+dl
+
+DD03      12 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - meridional wind
+dl
+
+DD04      16 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - atmospheric pressure
+dl
+
+DD05      20 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - ozone
+dl
+
+DD06      24 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - relative humidity
+dl
+
+DD07      28 1.000000e+00  4     15      0      0      60  1   2  1 -
+scaling factor - radiances
+dl
+
+DE00       0 1.000000e+00 20      1      0      0       2  0   1  1 [5,5]
+Number of spectral regions
+-
+
+DE01       2 1.000000e+00 20      1      0      0       2  1   1  1 -
+band index of default radiance for pixels with all bands saturated (1-based)
+-
+
+DE02       4 1.000000e+00  4      1      0      0       4  1   2  1 -
+default radiance for pixels with all bands saturated
+LU
+
+DE03       8 1.000000e+00  4     11      0      0      44  1   2  1 -
+spare
+dl
+
+DE04      52 1.000000e+00  4      5      0      0      20  1   2  1 -
+spare
+dl
+
+DE05      72 1.000000e+00  4     15      5      0     300  2   2  1 -
+interpolation coefficients for spectral region flux estimation
+dl
+
+DE06     372 1.000000e+00 20      1      0      0       2  1   1  1 -
+Flag register showing bands that can be used for radiance estimation of saturated samples (bits 0-14 for bands 1-15, bit 15 is spare)
+-
+
+DE07     374 1.000000e+00 20      1      0      0       2  1   1  1 -
+FR threshold on saturated samples count to flag for straylight risk
+nd
+
+DE08     376 1.000000e+00 20      1      0      0       2  1   1  1 -
+RR threshold on saturated samples count to flag for straylight risk
+nd
+
+DI00       0 1.000000e+00  4     12     12     19   10944  2   2  1 -
+Rad. thresholds LUT
+dl
+
+DJ00       0 1.000000e+00  4     16      0      0      64  2   2  1 -
+Red band composition 1 parameter for Land
+-
+
+DJ01      64 1.000000e+00  4     16      0      0      64  2   2  1 -
+Green band composition 1 parameter for Land
+-
+
+DJ02     128 1.000000e+00  4     16      0      0      64  2   2  1 -
+Blue band composition 1 parameter for Land
+-
+
+DJ03     192 1.000000e+00  4     16      0      0      64  2   2  1 -
+Red band composition 1 parameter for Ocean
+-
+
+DJ04     256 1.000000e+00  4     16      0      0      64  2   2  1 -
+Green band composition 1 parameter for Ocean
+-
+
+DJ05     320 1.000000e+00  4     16      0      0      64  2   2  1 -
+Blue band composition 1 parameter for Ocean
+-
+
+DJ06     384 1.000000e+00  4     16      0      0      64  2   2  1 -
+Red band composition 2 parameter for Land
+-
+
+DJ07     448 1.000000e+00  4     16      0      0      64  2   2  1 -
+Green band composition 2 parameter for Land
+-
+
+DJ08     512 1.000000e+00  4     16      0      0      64  2   2  1 -
+Blue band composition 2 parameter for Land
+-
+
+DJ09     576 1.000000e+00  4     16      0      0      64  2   2  1 -
+Red band composition 2 parameter for Ocean
+-
+
+DJ0A     640 1.000000e+00  4     16      0      0      64  2   2  1 -
+Green band composition 2 parameter for Ocean
+-
+
+DJ0B     704 1.000000e+00  4     16      0      0      64  2   2  1 -
+Blue band composition 2 parameter for Ocean
+-
+
+DJ0C     768 1.000000e+00 20      3      0      0       6  2   1  1 -
+Histogram Equalization Input Red Boundaries
+-
+
+DJ0D     774 1.000000e+00 20      3      0      0       6  2   1  1 -
+Histogram Equalization Input Green Boundaries
+-
+
+DJ0E     780 1.000000e+00 20      3      0      0       6  2   1  1 -
+Histogram Equalization Input Blue Boundaries
+-
+
+DJ0F     786 1.000000e+00 20      3      0      0       6  2   1  1 -
+Histogram Equalization Output Red Boundaries
+-
+
+DJ0G     792 1.000000e+00 20      3      0      0       6  2   1  1 -
+Histogram Equalization Output Green Boundaries
+-
+
+DJ0H     798 1.000000e+00 20      3      0      0       6  2   1  1 -
+Histogram Equalization Output Blue Boundaries
+-
+
+DJ0I     804 1.000000e+00 20      6      0      0      12  2   1  1 -
+unknown
+-
+

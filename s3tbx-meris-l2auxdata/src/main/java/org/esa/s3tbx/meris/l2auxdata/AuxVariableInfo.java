@@ -30,20 +30,40 @@ public class AuxVariableInfo {
         _datasetInfo = datasetInfo;
     }
 
+    public AuxFileInfo getFileInfo() {
+        return _datasetInfo.getFileInfo();
+    }
+
     public AuxDatasetInfo getDatasetInfo() {
         return _datasetInfo;
+    }
+
+    public String getComment() {
+        return _comment;
     }
 
     void setComment(String comment) {
         _comment = comment;
     }
 
+    public int getDim1() {
+        return _dim1;
+    }
+
     void setDim1(int dim1) {
         _dim1 = dim1;
     }
 
+    public int getDim2() {
+        return _dim2;
+    }
+
     void setDim2(int dim2) {
         _dim2 = dim2;
+    }
+
+    public int getDim3() {
+        return _dim3;
     }
 
     void setDim3(int dim3) {
@@ -61,12 +81,24 @@ public class AuxVariableInfo {
         return numElements;
     }
 
+    public int getDisplayType() {
+        return _displayType;
+    }
+
     void setDisplayType(int displayType) {
         _displayType = displayType;
     }
 
+    public int getEditFlag() {
+        return _editFlag;
+    }
+
     void setEditFlag(int editFlag) {
         _editFlag = editFlag;
+    }
+
+    public int getEditType() {
+        return _editType;
     }
 
     void setEditType(int editType) {
@@ -87,6 +119,10 @@ public class AuxVariableInfo {
 
     void setOffset(int offset) {
         _offset = offset;
+    }
+
+    public String getRange() {
+        return _range;
     }
 
     void setRange(String range) {

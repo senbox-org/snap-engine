@@ -1,0 +1,547 @@
+#-----------------------------------------------------------------------
+# Database global description file for MERIS Ground Segment
+# Format :
+# line 1    : database index
+# line 2    : database info : edit (0/1) import (0/1) rep. name
+# line 3    : database description
+# line 4    : number of tables in the database
+# line 5    : index of the tables in the database (in order)
+# line 6    : type of the tables in the database :
+#             0 (MPH)   1 (SPH)   2 (GADS)   3 (MDS)   4 (ADS)
+# line 7    : size of the tables or of the ADS/MDS records
+# line 8    : variable id. giving the number of records
+#             (for ADS/MDS). O if none.
+# lines 9-N : tables descriptor
+# line N+1  : empty line
+#-----------------------------------------------------------------------
+0
+0 1 l0_rr
+Level 0 Reduced Resolution Product - V. 3
+3
+        0        1        2
+        0        1        3
+     1247     1956     2174
+        0        0     010U
+MPH
+SPH
+MERIS_SOURCE_PACKETS 
+---------------------------------------------------------------------------------------------------
+3
+0 1 l1_rr
+Level 1b Reduced Resolution Segment product - V. 6
+21
+        0        1        2        3        4        5        6        7        8        9       10       11       12       13       14       15       16       17       18       19       20
+        0        1        4        2        4        3        3        3        3        3        3        3        3        3        3        3        3        3        3        3        3
+     1247     9942       33      292     3563     2255     2255     2255     2255     2255     2255     2255     2255     2255     2255     2255     2255     2255     2255     2255     3376
+        0        0     311F     311N     311V     3123     312B     312J     312R     312Z     3137     313F     313N     313V     3143     314B     314J     314R     314Z     3157     315F
+MPH
+SPH
+Quality ADS
+Scaling Factor GADS
+Tie points ADS
+Radiance MDS(1)
+Radiance MDS(2)
+Radiance MDS(3)
+Radiance MDS(4)
+Radiance MDS(5)
+Radiance MDS(6)
+Radiance MDS(7)
+Radiance MDS(8)
+Radiance MDS(9)
+Radiance MDS(10)
+Radiance MDS(11)
+Radiance MDS(12)
+Radiance MDS(13)
+Radiance MDS(14)
+Radiance MDS(15)
+Flags MDS(16)
+---------------------------------------------------------------------------------------------------
+4
+0 0 l2_rr
+Level 2 Reduced Resolution Segment product - V. 6
+25
+        0        1        2        3        4        5        6        7        8        9       10       11       12       13       14       15       16       17       18       19       20       21       22       23       24
+        0        1        4        2        4        3        3        3        3        3        3        3        3        3        3        3        3        3        3        3        3        3        3        3        3
+     1247    11622       32      440     3563     2255     2255     2255     2255     2255     2255     2255     2255     2255     2255     2255     2255     2255     1134     1134     2255     1134     1134     2255     3376
+        0        0     411F        0     411V     4123     412B     412J     412R     412Z     4137     413F     413N     413V     4143     414B     414J     414R     414Z     4157     415F     415N     415V     4163     416B
+MPH
+SPH
+Quality ADS
+Scaling Factor GADS
+Tie points ADS
+Norm. rho_surf - MDS(1)
+Norm. rho_surf - MDS(2)
+Norm. rho_surf - MDS(3)
+Norm. rho_surf - MDS(4)
+Norm. rho_surf - MDS(5)
+Norm. rho_surf - MDS(6)
+Norm. rho_surf - MDS(7)
+Norm. rho_surf - MDS(8)
+Norm. rho_surf - MDS(9)
+Norm. rho_surf - MDS(10)
+Norm. rho_surf - MDS(11)
+Norm. rho_surf - MDS(12)
+Norm. rho_surf - MDS(13)
+Vapour Content - MDS(14)
+Chl_1, TOAVI   - MDS(15)
+YS, SPM, Rect. Rho- MDS(16)
+Chl_2, BOAVI   - MDS(17)
+Press PAR Alb  - MDS(18)
+Alpha, OPT     - MDS(19)
+Flags          - MDS(20)
+------------------------------------------------------------------------------------------
+9
+0 1 l0_fr
+Level 0 Full Resolution Product - V. 3
+3
+        0        1        2
+        0        1        3
+     1247     1956     7724
+        0        0     910U
+MPH
+SPH
+MERIS_SOURCE_PACKETS
+---------------------------------------------------------------------------------------------------
+A
+0 1 l1_fr
+Level 1b Full Resolution product - V. 6
+21
+        0        1        2        3        4        5        6        7        8        9       10       11       12       13       14       15       16       17       18       19       20
+        0        1        4        2        4        3        3        3        3        3        3        3        3        3        3        3        3        3        3        3        3
+     1247     9942       33      292     1813     4495     4495     4495     4495     4495     4495     4495     4495     4495     4495     4495     4495     4495     4495     4495     6736
+        0        0     A11F        0     A11V     A123     A12B     A12J     A12R     A12Z     A137     A13F     A13N     A13V     A143     A14B     A14J     A14R     A14Z     A157     A15F
+MPH
+SPH
+Quality ADS
+Scaling Factor GADS
+Tie points ADS
+Radiance MDS(1)
+Radiance MDS(2)
+Radiance MDS(3)
+Radiance MDS(4)
+Radiance MDS(5)
+Radiance MDS(6)
+Radiance MDS(7)
+Radiance MDS(8)
+Radiance MDS(9)
+Radiance MDS(10)
+Radiance MDS(11)
+Radiance MDS(12)
+Radiance MDS(13)
+Radiance MDS(14)
+Radiance MDS(15)
+Flags MDS(16)
+---------------------------------------------------------------------------------------------------
+B
+0 0 l2_fr
+Level 2 Full Resolution - V. 6
+25
+        0        1        2        3        4        5        6        7        8        9       10       11       12       13       14       15       16       17       18       19       20       21       22       23       24
+        0        1        4        2        4        3        3        3        3        3        3        3        3        3        3        3        3        3        3        3        3        3        3        3        3
+     1247    11622       32      440     1813     4495     4495     4495     4495     4495     4495     4495     4495     4495     4495     4495     4495     4495     2254     2254     4495     2254     2254     4495     6736
+        0        0     B11F        0     B11V     B123     B12B     B12J     B12R     B12Z     B137     B13F     B13N     B13V     B143     B14B     B14J     B14R     B14Z     B157     B15F     B15N     B15V     B163     B16B
+MPH
+SPH
+Quality ADS
+Scaling Factor GADS
+Tie points ADS
+Norm. rho_surf - MDS(1)
+Norm. rho_surf - MDS(2)
+Norm. rho_surf - MDS(3)
+Norm. rho_surf - MDS(4)
+Norm. rho_surf - MDS(5)
+Norm. rho_surf - MDS(6)
+Norm. rho_surf - MDS(7)
+Norm. rho_surf - MDS(8)
+Norm. rho_surf - MDS(9)
+Norm. rho_surf - MDS(10)
+Norm. rho_surf - MDS(11)
+Norm. rho_surf - MDS(12)
+Norm. rho_surf - MDS(13)
+Vapour Content - MDS(14)
+Chl_1, TOAVI   - MDS(15)
+YS, SPM, Rect. Rho- MDS(16)
+Chl_2, BOAVI   - MDS(17)
+Press PAR Alb  - MDS(18)
+Alpha, OPT     - MDS(19)
+Flags          - MDS(20)
+---------------------------------------------------------------------------------------------------
+C
+1 1 ic
+instrument characterization - V. 20
+12
+        0        1        2        3        4        5        6        7        8        9       10       11
+        0        1        2        2        2        2        4        4        4        4        2        2
+     1247     2898       68      223    25904     6479    91764    22944      208      208     3700      925
+        0        0        0        0        0        0     C112     C11A     C11I     C11Q        0        0
+MPH
+SPH
+GADS Config. references
+GADS Instrumental params
+GADS FR Pixel Pointing
+GADS RR Pixel Pointing
+ADS FR SRDF
+ADS RR SRDF
+ADS spare nb 1
+ADS spare nb 2
+GADS FR Spectral Shift
+GADS RR Spectral Shift
+---------------------------------------------------------------------------------------------------
+D
+1 1 procl1par
+processing level 1b parameters - V. 30
+15
+        0        1        2        4        6        7        8        9       10       11       12       13       14       18       19
+        0        1        2        2        2        2        2        2        2        2        2        2        2        2        2
+     1247     5138        5       64      120       66       16      135        4      228       20       88      378    10944      816
+        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0
+MPH
+SPH
+GADS General
+GADS Solar Parameters
+GADS Exception Handling
+GADS Level 0 Extraction
+GADS Geolocation
+GADS Flagging
+GADS Radiometric
+GADS Classification
+GADS Resampling
+GADS Scaling Factors
+GADS Straylight Parameters
+GADS Radiometric Threshold
+GADS Browse configuration
+---------------------------------------------------------------------------------------------------
+E
+1 1 rcal
+radiometric calibration product - V. 50
+12
+        0        1        2        3        4        5        6        7        8        9       10       11
+        0        1        2        4        4        4        4        4        4        4        4        4
+     1247     2898     4377    14800     3700    14800     3700   262144    14800     3700    44412    11112
+        0        0        0     E10E     E10M     E10U     E112     E11A     E11I     E11Q     E11Y     E126
+MPH
+SPH
+GADS Corr. Control Params
+ADS Gain FR
+ADS Gain RR
+ADS Offset FR
+ADS Offset RR
+ADS Non Linearity LUT
+ADS OpticsxCCD response FR
+ADS OpticsxCCD response RR
+ADS Degradation FR
+ADS Degradation RR
+---------------------------------------------------------------------------------------------------
+F
+0 1 dem
+Digital Elevation Model Product - V. 2
+4
+        0        1        2        0
+        0        1        2        2
+     1247      658      259 37324800
+        0        0        0        0
+MPH
+SPH
+OCEAN_DEPTH_LAND_HEADER
+OCEAN_DEPTH_LAND_ELEVATION
+---------------------------------------------------------------------------------------------------
+G
+0 0 drm
+Digital Roughness Model Product - V. 20
+4
+        0        1        2        0
+        0        1        2        2
+     1247      658      259 37324800
+        0        0        0        0
+MPH
+SPH
+GADS General
+GADS DRM
+---------------------------------------------------------------------------------------------------
+H
+0 1 clo
+coastline/land/ocean data product - V. 20
+8
+        0        1        2        3        4        5        6        7
+        0        1        4        4        4        4        4        4
+     1247     1778      720      400       14      720      400       14
+        0        0     H106     H10E     H10M     H10U     H112     H11A
+MPH
+SPH
+ADS Surface Flag 1 deg
+ADS Surface Flag .1 deg
+ADS Surface Flag .01 deg
+ADS Coastline Flag 1 deg
+ADS Coastline Flag .1 deg
+ADS Coastline Flag .01 deg
+---------------------------------------------------------------------------------------------------
+I            
+0 1 press    
+Pressure Product - V. 1
+1            
+        0    
+        2    
+   130440    
+        0    
+Pressure GADS
+---------------------------------------------------------------------------------------------------
+J            
+0 1 humidity 
+Humidity Product - V. 1
+1            
+        0    
+        2    
+  1641600    
+        0    
+Humidity GADS
+---------------------------------------------------------------------------------------------------
+K            
+0 1 ozone    
+Ozone Product - V. 1
+1            
+        0    
+        2    
+  1640128    
+        0    
+Ozone GADS   
+---------------------------------------------------------------------------------------------------
+L
+1 1 aeroclim
+Aerosol Climatology Data Product - V. 20
+6
+        0        1        2        3        4        5
+        0        1        2        4        4        4
+     1247     1498     2244   129600    64800    64800
+        0        0        0     L10E     L10M     L10U
+MPH
+SPH
+GADS General
+ADS Aer. Clim.
+ADS Volcanic Aer. Clim.
+ADS Aer. Clim. Over Ocean
+---------------------------------------------------------------------------------------------------
+M            
+0 1 precise_orbit
+DORIS Precise Orbit - V. 1
+1            
+        0    
+        2    
+   170228  
+        0    
+State Vectors GADS    
+---------------------------------------------------------------------------------------------------
+N
+1 1 attitude
+ENVISAT1 Platform Attitude - V. 10
+10
+        0        1        2        3        4        5        6        7        8        9
+        0        1        2        4        4        4        4        4        4        4
+     1247     2338       12       20       20       20       20       20       20       20
+        0        0        0     N10E     N10M     N10U     N112     N11A     N11I     N11Q
+MPH
+SPH
+GADS AOCS Parameters
+ADS RA2 Attitude Errors
+ADS MERIS Attitude Errors
+ADS AATSR Attitude Errors
+ADS MIPAS Attitude Errors
+ADS SIAMACHY Attitude Errors
+ADS GOMOS Attitude Errors
+ADS ASAR Attitude Errors
+---------------------------------------------------------------------------------------------------
+O
+1 1 lv2conf
+Level 2 Control Parameters Data Product - V. 41
+7
+        0        1        2        3        4        5        6
+        0        1        2        2        2        2        4
+     1247     1498      307   555214      300      817     5928
+        0        0        0        0        0        0     O112
+MPH
+SPH
+GADS General
+GADS Smile Correction
+GADS Atm. Corr. - Case 1
+GADS Classification Param.
+ADS Reflect. Thresholds
+---------------------------------------------------------------------------------------------------
+P
+1 1 atmosphere
+Atmosphere Parameters Product - V. 32
+12
+        0        1        2        3        4        5        6        7        8        9       10       11
+        0        1        2        2        2        2        2        2        2        2        4        2
+     1247     2898     1192      300      912     3744       68      624     3748     3120    30000   640000
+        0        0        0        0        0        0        0        0        0        0     P11Y        0
+MPH
+SPH
+GADS General
+GADS Optical Thicknesses
+GADS Polynomial Coefs
+GADS Rayl. Scatter. Function
+GADS Rayl. Spher. Albedo
+GADS Press. Thresholds
+GADS Press. Retr. Param.
+GADS spare
+ADS  Rayl. Refl. over Ocean
+GADS PAR
+---------------------------------------------------------------------------------------------------
+Q
+1 1 vapour
+Water Vapour Parameters Product - V. 20
+8
+        0        1        2        3        4        5        6        7
+        0        1        2        4        4        4        4        4
+     1247     1778      540    37800   540000  1080000     7200     5400
+        0        0        0     Q10E     Q10M     Q10U     Q112     Q11A
+MPH
+SPH
+GADS General
+ADS Land Coeff.
+ADS Ocean (no glint)  Coeff.
+ADS Cloud  Coeff.
+ADS Albedo Corr. Coeff.
+ADS Aerosol Corr. Coeff.
+---------------------------------------------------------------------------------------------------
+R
+1 1 oceanaer
+Ocean Aerosol Product - V. 40
+9
+        0        1        2        3        4        5        6        7        8
+        0        1        2        2        2        2        2        2        4
+     1247     2338     1342    10200      680     2040     2040    16000    90000
+        0        0        0        0        0        0        0        0     R11I
+MPH
+SPH
+GADS General
+GADS Spectral OT
+GADS Aer. OT at 865 nm
+GADS Aer. Single Scatt. Alb.
+GADS Aer. Scatt. Probability
+GADS spare
+ADS (rT/rR) to Aer. OT rel.
+---------------------------------------------------------------------------------------------------
+S
+1 1 landaero
+Land Aerosol Product - V. 42
+16
+        0        1        2        3        4        5        6        7        8        9       10       11       12       13       14       15
+        0        1        2        2        4        4        4        4        4        4        4        4        4        2        4        4        
+     1247     4018    11404    11864     5928    35568       64      768     7488      332       60      720     5040    64800   365196      208
+        0        0        0        0     S10M     S10U     S112     S11A     S11I     S11Q     S11Y     S126     S12E        0     S12U     S132
+MPH
+SPH
+GADS General
+GADS Inland Waters and Islands Thresholds
+ADS ARVI DDV Thresholds
+ADS DDV rho_surf ranges
+ADS Aer. Spherical Albedo
+ADS Aer. Transmittance
+ADS Aer. Mult. Scatt. Func.
+ADS Aer. Phase Func. x SA 
+ADS Volc. Aer. Spherical Alb
+ADS Volc. Aer. Transm.
+ADS Volc. Aer. Reflect.
+GADS DDV climatology
+ADS DDV bi-dir Param.
+ADS Aer. bi-dir Param.
+---------------------------------------------------------------------------------------------------
+T
+1 1 case1
+Ocean 1 Parameters Product - V. 60
+9
+        0        1        2        3        4        5        6        7        8
+        0        1        2        2        2        2        4        4        4
+     1247     2058    12977      304    51336       76   131040    66500  4194304
+        0        0        0        0        0        0     T112     T11A     T11I
+MPH
+SPH
+GADS General
+GADS Geometrical Factor
+GADS Thresholds
+GADS Log10 Polynomial Coeff.
+ADS F1/Q Factor
+ADS Glint Reflectance
+ADS 510nm mean water leaving reflectance
+---------------------------------------------------------------------------------------------------
+U
+1 1 case2
+Ocean 2 Parameters Product - V. 41
+8
+        0        1        2        3        4        5        6        7
+        0        1        2        2        2        2        4        2
+     1247     1778     1087       56   197600     8200   194560   262144
+        0        0        0        0        0        0     U112        0
+MPH
+SPH
+GADS General
+GADS Case 2 YS Det. Coeff.
+GADS Anom. Scatt. Detection
+GADS IOP v/ Geochem. Var.
+ADS  Reflectance v/ IOP
+GADS Neural Network
+---------------------------------------------------------------------------------------------------
+V
+1 1 cloud
+Cloud Measurement Parameters Product - V. 40
+9
+        0        1        2        3        4        5        6        7        8
+        0        1        2        4        4        4        4        4        2
+     1247     2058    22087  6480000   48600    64800   262144   262144      100
+        0        0        0     V10E     V10M     V10U     V112     V11A        0
+MPH
+SPH
+GADS General
+ADS Surface Albedo
+ADS Cloud Albedo Coeff.
+ADS Cloud Opt. Thick. Coeff.
+ADS NN when SA not null
+ADS NN when SA null
+GADS Cloud type index
+---------------------------------------------------------------------------------------------------
+W
+1 1 vegetation
+Land Vegetation Parameters Product - V. 20
+3
+        0        1        2
+        0        1        2
+     1247      378      210
+        0        0        0
+MPH
+SPH
+GADS General
+---------------------------------------------------------------------------------------------------
+X
+0 1 conf_map
+surface confidence map data product - V. 20
+5
+        0        1        2        3        4
+        0        1        4        4        4
+     1247      938      720      400       14
+        0        0     X106     X10E     X10M
+MPH
+SPH
+ADS Surf. Confidence 1 deg
+ADS Surf. Confidence .1 deg
+ADS Surf. Confidence .01 deg
+---------------------------------------------------------------------------------------------------
+Y            
+0 1 windu    
+Zonal Wind Product - V. 1
+1            
+        0    
+        2    
+   130440    
+        0    
+wind GADS    
+---------------------------------------------------------------------------------------------------
+Z            
+0 1 windv    
+Meridional Wind Product - V. 1
+1            
+        0    
+        2    
+   130440    
+        0    
+winds GADS
+---------------------------------------------------------------------------------------------------

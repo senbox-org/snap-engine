@@ -1,0 +1,28 @@
+X000       0 1.000000e+00  0     62      0      0      62  0   0  1 -
+Product file name - V. 20
+-
+
+X106     305 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+X10E     585 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+X10M     865 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+X200       0 1.000000e+00  2    360      0      0     720  0   1  1 -
+surface confidence flag 1 degree
+nd
+
+X300       0 1.000000e+00  3    100      0      0     400  0   1  1 -
+surface confidence flag 0.1 degree
+nd
+
+X400       0 1.000000e+00 10     14      0      0      14  0   1  1 -
+surface confidence flag 0.01 degree
+nd
+

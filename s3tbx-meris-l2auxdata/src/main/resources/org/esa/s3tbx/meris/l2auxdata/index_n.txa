@@ -1,0 +1,160 @@
+N000       0 1.000000e+00  0     62      0      0      62  0   0  1 -
+Product file name - V. 10
+-
+
+N106     305 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+N10E     585 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+N10M     865 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+N10U    1145 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+N112    1425 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+N11A    1705 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+N11I    1985 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+N11Q    2265 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+N200       0 1.000000e-06  3      1      0      0       4  1   1  1 -
+AOCS Cx parameter [pitch]
+deg
+
+N201       4 1.000000e-06  3      1      0      0       4  1   1  1 -
+AOCS Cy parameter [roll]
+deg
+
+N202       8 1.000000e-06  3      1      0      0       4  1   1  1 -
+AOCS Cz parameter [yaw]
+deg
+
+N300       0 1.000000e+00 30      2      0      0       8  1   1  1 -
+RA2 Sample time relative to ascending node : microseconds
+microsec
+
+N301       8 1.000000e-06  3      1      0      0       4  1   1  1 -
+RA2 Pitch mispointing angle in satellite reference CS
+deg
+
+N302      12 1.000000e-06  3      1      0      0       4  1   1  1 -
+RA2 Roll mispointing angle in satellite reference CS
+deg
+
+N303      16 1.000000e-06  3      1      0      0       4  1   1  1 -
+RA2 Yaw mispointing angle in satellite reference CS
+deg
+
+N400       0 1.000000e+00 30      2      0      0       8  1   1  1 -
+MERIS Sample time relative to ascending node : microseconds
+microsec
+
+N401       8 1.000000e-06  3      1      0      0       4  1   1  1 -
+MERIS Pitch mispointing angle in satellite reference CS
+deg
+
+N402      12 1.000000e-06  3      1      0      0       4  1   1  1 -
+MERIS Roll mispointing angle in satellite reference CS
+deg
+
+N403      16 1.000000e-06  3      1      0      0       4  1   1  1 -
+MERIS Yaw mispointing angle in satellite reference CS
+deg
+
+N500       0 1.000000e+00 30      2      0      0       8  1   1  1 -
+AATSR Sample time relative to ascending node : microseconds
+microsec
+
+N501       8 1.000000e-06  3      1      0      0       4  1   1  1 -
+AATSR Pitch mispointing angle in satellite reference CS
+deg
+
+N502      12 1.000000e-06  3      1      0      0       4  1   1  1 -
+AATSR Roll mispointing angle in satellite reference CS
+deg
+
+N503      16 1.000000e-06  3      1      0      0       4  1   1  1 -
+AATSR Yaw mispointing angle in satellite reference CS
+deg
+
+N600       0 1.000000e+00 30      2      0      0       8  1   1  1 -
+MIPAS Sample time relative to ascending node : microseconds
+microsec
+
+N601       8 1.000000e-06  3      1      0      0       4  1   1  1 -
+MIPAS Pitch mispointing angle in satellite reference CS
+deg
+
+N602      12 1.000000e-06  3      1      0      0       4  1   1  1 -
+MIPAS Roll mispointing angle in satellite reference CS
+deg
+
+N603      16 1.000000e-06  3      1      0      0       4  1   1  1 -
+MIPAS Yaw mispointing angle in satellite reference CS
+deg
+
+N700       0 1.000000e+00 30      2      0      0       8  1   1  1 -
+SCIAMACHY Sample time relative to ascending node : microseconds
+microsec
+
+N701       8 1.000000e-06  3      1      0      0       4  1   1  1 -
+SCIAMACHY Pitch mispointing angle in satellite reference CS
+deg
+
+N702      12 1.000000e-06  3      1      0      0       4  1   1  1 -
+SCIAMACHY Roll mispointing angle in satellite reference CS
+deg
+
+N703      16 1.000000e-06  3      1      0      0       4  1   1  1 -
+SCIAMACHY Yaw mispointing angle in satellite reference CS
+deg
+
+N800       0 1.000000e+00 30      2      0      0       8  1   1  1 -
+GOMOS Sample time relative to ascending node : microseconds
+microsec
+
+N801       8 1.000000e-06  3      1      0      0       4  1   1  1 -
+GOMOS Pitch mispointing angle in satellite reference CS
+deg
+
+N802      12 1.000000e-06  3      1      0      0       4  1   1  1 -
+GOMOS Roll mispointing angle in satellite reference CS
+deg
+
+N803      16 1.000000e-06  3      1      0      0       4  1   1  1 -
+GOMOS Yaw mispointing angle in satellite reference CS
+deg
+
+N900       0 1.000000e+00 30      2      0      0       8  1   1  1 -
+ASAR Sample time relative to ascending node : microseconds
+microsec
+
+N901       8 1.000000e-06  3      1      0      0       4  1   1  1 -
+ASAR Pitch mispointing angle in satellite reference CS
+deg
+
+N902      12 1.000000e-06  3      1      0      0       4  1   1  1 -
+ASAR Roll mispointing angle in satellite reference CS
+deg
+
+N903      16 1.000000e-06  3      1      0      0       4  1   1  1 -
+ASAR Yaw mispointing angle in satellite reference CS
+deg
+

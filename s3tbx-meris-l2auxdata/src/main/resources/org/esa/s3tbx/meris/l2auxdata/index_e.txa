@@ -1,0 +1,256 @@
+E000       0 1.000000e+00  0     62      0      0      62  0   0  1 -
+Product file name - V. 50
+-
+
+E106     305 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+E10E     585 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+E10M     865 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+E10U    1145 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+E112    1425 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+E11A    1705 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+E11I    1985 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+E11Q    2265 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+E11Y    2545 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+E126    2825 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+E200       0 1.000000e+00 20      1      0      0       2  1   1  1 -
+Ref. value for redundancy vector
+nd
+
+E201       2 1.000000e+00 10      1      0      0       1  0   1  1 [15,15]
+number of bands
+nd
+
+E202       3 1.000000e-03 30     15      0      0      60  1   2  1 -
+band wavelengths
+nm
+
+E203      63 1.000000e-03 20     15      0      0      30  1   2  1 [1,25]
+band width references
+nm
+
+E204      93 1.000000e+00 20     16      0      0      32  1   1  1 
+First (redest) CCD row of each band (in [1,520])
+-
+
+E205     125 1.000000e+00 20     16      0      0      32  1   1  1 -
+Number of microbands for each band
+-
+
+E206     157 1.000000e+00 20     16      0      0      32  1   1  1 -
+width of each band in CCD rows
+-
+
+E207     189 1.000000e+00  4     15      0      0      60  1   2  1 -
+smear weighting factor for RR (Ksm(b))
+dl
+
+E208     249 1.000000e+00  4     15      2      0     120  2   2  1 -
+smear weighting factor for FR (Ksm(b,j))
+dl
+
+E209     369 1.000000e+00 10      1      0      0       1  1   1  1 -
+OCL (Offset Control Loop) switch reference
+nd
+
+E20A     370 1.000000e+00 10      1      0      0       1  1   1  1 -
+on board correction switch reference
+nd
+
+E20B     371 1.000000e+00  4     16      0      0      64  1   2  1 -
+Weights for on-board spatial and temporal relaxation for each band
+dl
+
+E20C     435 1.000000e+00  4      1      0      0       4  1   2  1 -
+1 - order coeff. of gain Temp. correction g0
+dl
+
+E20D     439 1.000000e+00  4      1      0      0       4  1   2  1 -
+1st order coeff. of gain Temp. correction g1
+JD-1
+
+E20E     443 1.000000e+00  4      1      0      0       4  1   2  1 -
+2nd order coeff. of gain Temp. correction g2
+JD-2
+
+E20F     447 1.000000e+00  4      1      0      0       4  1   2  1 -
+0-order coeff. off dark temp. correction gc0
+dl
+
+E20G     451 1.000000e+00  4      1      0      0       4  1   2  1 -
+1-order coeff. off dark temp. correction gc1
+JD-1
+
+E20H     455 1.000000e+00  4      1      0      0       4  1   2  1 -
+2-order coeff. off dark temp. correction gc2
+JD-2
+
+E20I     459 1.000000e+00  5    366      0      0    2928  2   2  1 -
+Delay between ascending node and time corresponding to instrument reference temperature (related to Sun zenith angle)
+JD
+
+E20J    3387 1.000000e+00 10      5     16      0      80  2   1  1 -
+On board Gain settings (per band and per module with 12 values in [0,11])
+nd
+
+E20K    3467 1.000000e+00 20      5     45      0     450  2   1  1 -
+thresholds for coarse offsets
+dl
+
+E20L    3917 1.000000e+00 20      5     16      0     160  2   1  1 -
+Reference for on board absolute gain coefficients
+dl
+
+E20M    4077 1.000000e+00  4      5     15      0     300  2   2  1 -
+Inverse Mean Absolute Gain
+LU / nc
+
+E300       0 1.000000e+00  4      5    740      0   14800  2   2  1 -
+Inverse Absolute Radiometric Gain FR
+LU/nc
+
+E400       0 1.000000e+00  4      5    185      0    3700  2   2  1 -
+Inverse Absolute Radiometric Gain RR
+LU/nc
+
+E500       0 1.000000e+00  4      5    740      0   14800  2   2  1 -
+FR Dark signal char. data (C0b,k,m)
+nc
+
+E600       0 1.000000e+00  4      5    185      0    3700  2   2  1 -
+RR Dark signal char. data (C0b,k,m)
+nc
+
+E700       0 1.000000e+00  4   4096      0      0   16384  2   2  1 -
+Inverse non-linearity LUT for band 1
+dl
+
+E701   16384 1.000000e+00  4   4096      0      0   16384  2   2  1 -
+Inverse non-linearity LUT for band 2
+dl
+
+E702   32768 1.000000e+00  4   4096      0      0   16384  2   2  1 -
+Inverse non-linearity LUT for band 3
+dl
+
+E703   49152 1.000000e+00  4   4096      0      0   16384  2   2  1 -
+Inverse non-linearity LUT for band 4
+dl
+
+E704   65536 1.000000e+00  4   4096      0      0   16384  2   2  1 -
+Inverse non-linearity LUT for band 5
+dl
+
+E705   81920 1.000000e+00  4   4096      0      0   16384  2   2  1 -
+Inverse non-linearity LUT for band 6
+dl
+
+E706   98304 1.000000e+00  4   4096      0      0   16384  2   2  1 -
+Inverse non-linearity LUT for band 7
+dl
+
+E707  114688 1.000000e+00  4   4096      0      0   16384  2   2  1 -
+Inverse non-linearity LUT for band 8
+dl
+
+E708  131072 1.000000e+00  4   4096      0      0   16384  2   2  1 -
+Inverse non-linearity LUT for band 9
+dl
+
+E709  147456 1.000000e+00  4   4096      0      0   16384  2   2  1 -
+Inverse non-linearity LUT for band 10
+dl
+
+E70A  163840 1.000000e+00  4   4096      0      0   16384  2   2  1 -
+Inverse non-linearity LUT for band 11
+dl
+
+E70B  180224 1.000000e+00  4   4096      0      0   16384  2   2  1 -
+Inverse non-linearity LUT for band 12
+dl
+
+E70C  196608 1.000000e+00  4   4096      0      0   16384  2   2  1 -
+Inverse non-linearity LUT for band 13
+dl
+
+E70D  212992 1.000000e+00  4   4096      0      0   16384  2   2  1 -
+Inverse non-linearity LUT for band 14
+dl
+
+E70E  229376 1.000000e+00  4   4096      0      0   16384  2   2  1 -
+Inverse non-linearity LUT for band 15
+dl
+
+E70F  245760 1.000000e+00  4   4096      0      0   16384  2   2  1 -
+Inverse non-linearity LUT for smear band
+dl
+
+E800       0 1.000000e+00  4      5    740      0   14800  2   2  1 -
+Product of Optics transmission by CCD response FR
+e/W
+
+E900       0 1.000000e+00  4      5    185      0    3700  2   2  1 -
+Product of Optics transmission by CCD response RR
+e/W
+
+EA00       0 1.000000e+00 90      3      0      0      12  2   2  1 -
+reference time
+mjd
+
+EA01      12 1.000000e+00  4      5    740      0   14800  0   2  1 -
+beta
+dl
+
+EA02   14812 1.000000e+00  4      5    740      0   14800  0   2  1 -
+gamma
+dl
+
+EA03   29612 1.000000e+00  4      5    740      0   14800  0   2  1 -
+delta
+dl
+
+EB00       0 1.000000e+00 90      3      0      0      12  2   2  1 -
+reference time
+mjd
+
+EB01      12 1.000000e+00  4      5    185      0    3700  0   2  1 -
+beta
+dl
+
+EB02    3712 1.000000e+00  4      5    185      0    3700  0   2  1 -
+gamma
+dl
+
+EB03    7412 1.000000e+00  4      5    185      0    3700  0   2  1 -
+delta
+dl
+

@@ -1,0 +1,136 @@
+Q000       0 1.000000e+00  0     62      0      0      62  0   0  1 -
+Product file name
+-
+ 
+Q106     305 1.000000e+00  0     11      0      0      11  0   0  0 -
+Number of Data Set Records
+-
+ 
+Q10E     585 1.000000e+00  0     11      0      0      11  0   1  1 -
+Number of Data Set Records
+-
+ 
+Q10M     865 1.000000e+00  0     11      0      0      11  0   1  1 -
+Number of Data Set Records
+-
+ 
+Q10U    1145 1.000000e+00  0     11      0      0      11  0   1  1 -
+Number of Data Set Records
+-
+ 
+Q112    1425 1.000000e+00  0     11      0      0      11  0   1  1 -
+Number of Data Set Records
+-
+ 
+Q11A    1705 1.000000e+00  0     11      0      0      11  0   1  1 -
+Number of Data Set Records
+-
+ 
+Q200       0 1.000000e-06 30     27      0      0     108  1   1  1 -
+qs tabulated values
+deg
+ 
+Q201     108 1.000000e-06 30     18      0      0      72  1   1  1 -
+qv tabulated values
+deg
+ 
+Q202     180 1.000000e-06 30     25      0      0     100  1   1  1 -
+Df tabulated values
+deg
+ 
+Q203     280 1.000000e+00  4      1      0      0       4  1   1  1 -
+Threshold value on radiance at 885 nm for marking pixel as invalid for water vapour processing
+-
+ 
+Q204     284 1.000000e+00  4      1      0      0       4  1   1  1 -
+Minimum threshold for out of range output value of water vapour content
+g.cm-2
+ 
+Q205     288 1.000000e+00  4      1      0      0       4  1   1  1 -
+Maximum threshold for out of range output value of water vapour content
+g.cm-2
+ 
+Q206     292 1.000000e+00  4      7      0      0      28  1   1  1 -
+Pressure tabulated values
+hPa
+ 
+Q207     320 1.000000e+00  4     20      0      0      80  1   1  1 -
+Aerosol optical depth tabulated values
+dl
+ 
+Q208     400 1.000000e+00  4     10      0      0      40  1   1  1 -
+Surface Albedo tabulated values
+dl
+ 
+Q209     440 1.000000e+00  4     20      0      0      80  1   1  1 -
+Cloud optical depth tabulated values
+dl
+ 
+Q20A     520 1.000000e+00  4      5      0      0      20  1   1  1 -
+Wind modulus tabulated values
+dl
+ 
+Q300       0 1.000000e+00  4     18     25      7   12600  1   1  1 -
+k0 Polynomial Coefficients ( qv , Df, P )
+dl
+ 
+Q301   12600 1.000000e+00  4     18     25      7   12600  1   1  1 -
+k1 Polynomial Coefficients ( qv , Df, P )
+dl
+ 
+Q302   25200 1.000000e+00  4     18     25      7   12600  1   1  1 -
+k2 Polynomial Coefficients ( qv , Df, P )
+dl
+ 
+Q400       0 1.000000e+00  4     18     25    100  180000  1   1  1 -
+k0 Polynomial Coefficients ( qv , Df, d ,w)
+dl
+ 
+Q401  180000 1.000000e+00  4     18     25    100  180000  1   1  1 -
+k1 Polynomial Coefficients ( qv , Df, d ,w)
+dl
+ 
+Q402  360000 1.000000e+00  4     18     25    100  180000  1   1  1 -
+k2 Polynomial Coefficients ( qv , Df, d ,w)
+dl
+ 
+Q500       0 1.000000e+00  4     18     25    200  360000  1   1  1 -
+k0 Polynomial Coefficients ( qv , Df, a, d)
+dl
+ 
+Q501  360000 1.000000e+00  4     18     25    200  360000  1   1  1 -
+k1 Polynomial Coefficients ( qv , Df, a, d)
+dl
+ 
+Q502  720000 1.000000e+00  4     18     25    200  360000  1   1  1 -
+k2 Polynomial Coefficients ( qv , Df, a, d)
+dl
+ 
+Q600       0 1.000000e+00  4     18     25      0    1800  1   1  1 -
+S0 Coeffs. for reflect. slope corrections ( qv , Df)
+dl
+ 
+Q601    1800 1.000000e+00  4     18     25      0    1800  1   1  1 -
+S1 Coeffs. for reflect. slope corrections ( qv , Df)
+dl
+ 
+Q602    3600 1.000000e+00  4     18     25      0    1800  1   1  1 -
+S2 Coeffs. for reflect. slope corrections ( qv , Df)
+dl
+ 
+Q603    5400 1.000000e+00  4     18     25      0    1800  1   1  1 -
+S3 Coeffs. for reflect. slope corrections ( qv , Df)
+dl
+ 
+Q700       0 1.000000e+00  4     18     25      0    1800  1   1  1 -
+Aaer Coeffs. for aerosol corrections  ( qv , Df)
+dl
+ 
+Q701    1800 1.000000e+00  4     18     25      0    1800  1   1  1 -
+Baer Coeffs. for aerosol corrections  ( qv , Df)
+dl
+ 
+Q702    3600 1.000000e+00  4     18     25      0    1800  1   1  1 -
+Caer Coeffs. for aerosol corrections  ( qv , Df)
+dl
+ 

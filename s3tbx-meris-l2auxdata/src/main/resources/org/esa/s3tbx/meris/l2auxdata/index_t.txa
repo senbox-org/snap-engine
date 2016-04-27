@@ -1,0 +1,260 @@
+T000       0 1.000000e+00  0     62      0      0      62  0   0  1 -
+Product file name
+-
+ 
+T106     305 1.000000e+00  0     11      0      0      11  0   0  0 -
+Number of Data Set Records
+-
+ 
+T10E     585 1.000000e+00  0     11      0      0      11  0   0  0 -
+Number of Data Set Records
+-
+ 
+T10M     865 1.000000e+00  0     11      0      0      11  0   0  0 -
+Number of Data Set Records
+-
+ 
+T10U    1145 1.000000e+00  0     11      0      0      11  0   0  0 -
+Number of Data Set Records
+-
+ 
+T112    1425 1.000000e+00  0     11      0      0      11  0   0  0 -
+Number of Data Set Records
+-
+ 
+T11A    1705 1.000000e+00  0     11      0      0      11  0   0  0 -
+Number of Data Set Records
+-
+ 
+T11I    1985 1.000000e+00  0     11      0      0      11  0   0  0 -
+Number of Data Set Records
+-
+ 
+T200       0 1.000000e+00 10      4      0      0       4  1   1  1 -
+wind speed tabulated values for GADS - Geometrical factor R
+m.s-1
+ 
+T201       4 1.000000e+00  4      9      0      0      36  1   1  1 -
+l tabulated values for ADS f1/Q
+nm
+ 
+T202      40 1.000000e-06 30      6      0      0      24  1   1  1 -
+qs tabulated values for ADS f1/Q
+deg
+ 
+T203      64 1.000000e-06 30     27      0      0     108  1   1  1 -
+qs tabulated values for GADS Thresholds and ADS glint reflectance
+deg
+ 
+T204     172 1.000000e-06 30     14      0      0      56  1   1  1 -
+qv tabulated values for ADS f1/Q
+deg
+ 
+T205     228 1.000000e-06 30     19      0      0      76  1   1  1 -
+q'v tabulated values for ADS Geometrical factor R
+deg
+ 
+T206     304 1.000000e-06 30     19      0      0      76  1   1  1 -
+qv tabulated values for GADS Thresholds and ADS glint reflectance
+deg
+ 
+T207     380 1.000000e-06 30     13      0      0      52  1   1  1 -
+Df tabulated values for ADS f1/Q
+deg
+ 
+T208     432 1.000000e-06 30     25      0      0     100  1   1  1 -
+Df tabulated values for GADS Thresholds and glint reflectance
+deg
+ 
+T209     532 1.000000e-03  4      5      0      0      20  1   1  1 -
+Chl tabulated values for ADS f1/Q
+g.m-3
+ 
+T20A     552 1.000000e+00  4      2      0      0       8  1   1  1 -
+ta tabulated values for ADS f1/Q
+dl
+ 
+T20B     560 1.000000e+00  4      2      0      0       8  1   1  1 -
+wind speed tabulated values for the ADS - f1/Q factor
+m.s-1
+ 
+T20C     568 1.000000e+00  4      1      0      0       4  1   1  1 -
+Initial algal pigment index value used for f_over_q1
+dl
+ 
+T20D     572 1.000000e+00  4      6      0      0      24  1   1  1 -
+Ci constants for downward atmospheric transmittance
+dl
+ 
+T20E     596 1.000000e+00  4      1      0      0       4  1   1  1 -
+C7 constant for scattering detection
+dl
+ 
+T20F     600 1.000000e+00  4      1      0      0       4  1   1  1 -
+Factor relating bb/a to R (for qs = 0)
+dl
+ 
+T20G     604 1.000000e+00  4      5      0      0      20  1   1  1 -
+Wind speed tabulated values for GADS glint reflectance
+m.s-1
+ 
+T20H     624 1.000000e-06  4      7      0      0      28  1   1  1 -
+Wind azimuth c tabulated values for GADS glint reflectance
+deg
+ 
+T20I     652 1.000000e+00 10      1      0      0       1  1   1  1 -
+spare
+nd
+ 
+T20J     653 1.000000e+00  4      1      0      0       4  1   1  1 -
+Value of f/Q factor for Nadir angle at 510 nm
+dl
+ 
+T20K     657 1.000000e+00  4      1      0      0       4  1   1  1 -
+Mean value of Chlorophyll
+mg.m-3
+ 
+T20L     661 1.000000e+00  4      1      0      0       4  1   1  1 -
+Water refraction index
+dl
+ 
+T20M     665 1.000000e+00  4      1      0      0       4  1   1  1 -
+Value of Dr510 to set the annotation flag
+dl
+ 
+T20N     669 1.000000e-06 30      1      0      0       4  1   1  1 -
+Value of Qp for Nadir viewing
+deg
+ 
+T20O     673 1.000000e+00  4      1      0      0       4  1   1  1 -
+Scaling Factor for decoding rw510 mean value ADSR
+dl
+ 
+T20P     677 1.000000e+00  4      1      0      0       4  1   1  1 -
+Offset for decoding rw510 mean value ADSR
+dl
+ 
+T20Q     681 1.000000e+00  4      1      0      0       4  1   1  1 -
+Scaling Factor for decoding rw510 variability value ADSR
+dl
+ 
+T20R     685 1.000000e+00  4      1      0      0       4  1   1  1 -
+Offset for decoding rw510 variability value ADSR
+dl
+ 
+T20S     689 1.000000e-06  3   1024      0      0    4096  1   1  1 -
+Latitude tabulated values for rw510 mean values ADS
+deg
+ 
+T20T    4785 1.000000e-06  3   2048      0      0    8192  1   1  1 -
+Longitude tabulated values for rw510 mean values ADS
+deg
+ 
+T300       0 1.000000e+00  4     19      4      0     304  1   1  1 -
+Geometrical factor R(qv, wind speed)
+dl
+ 
+T400       0 1.000000e+00  4      1      0      0       4  1   1  1 -
+rw(560) threshold for input validity
+dl
+ 
+T401       4 1.000000e-03  4      1      0      0       4  1   1  1 -
+Chl1 threshold for output validity
+g.m-3
+ 
+T402       8 1.000000e-03  4      1      0      0       4  1   1  1 -
+Algal pigment index threshold 1
+g.m-3
+ 
+T403      12 1.000000e-03  4      1      0      0       4  1   1  1 -
+Algal pigment index threshold 2
+g.m-3
+ 
+T404      16 1.000000e+00  4      1      0      0       4  1   1  1 -
+Low Glint threshold
+dl
+ 
+T405      20 1.000000e+00  4      1      0      0       4  1   1  1 -
+Medium Glint threshold
+dl
+ 
+T406      24 1.000000e+00  4      1      0      0       4  1   1  1 -
+Wind speed threshold for whitecaps flagging
+m.s-1
+ 
+T407      28 1.000000e+00  4     27     19     25   51300  1   1  1 -
+Threshold on rw(560) values for Turbid water identification
+dl
+ 
+T408   51328 1.000000e+00  4      1      0      0       4  1   1  1 -
+water vapour high glint threshold
+dl
+ 
+T409   51332 1.000000e+00  4      1      0      0       4  1   1  1 -
+shallow waters depth threshold
+m
+ 
+T500       0 1.000000e+00  4      6      0      0      24  1   1  1 -
+log10 polynomial coefficients for l = 443 nm
+dl
+ 
+T501      24 1.000000e+00  4      6      0      0      24  1   1  1 -
+log10 polynomial coefficients for l = 490 nm
+dl
+ 
+T502      48 1.000000e+00  4      6      0      0      24  1   1  1 -
+log10 polynomial coefficients for l = 510 nm
+dl
+ 
+T503      72 1.000000e+00 10      1      0      0       1  1   1  1 -
+Highest order of log10 coefficients used in case 1 waters algorithm
+dl
+ 
+T504      73 1.000000e+00 10      3      0      0       3  1   1  1 -
+Band number selected for computation of Chl1 (band number starting at 1)
+dl
+ 
+T600       0 1.000000e+00  4      9    182      5   32760  1   1  1 -
+fl/Q factor( l , qv x Df , Chl ) for tA 1 & wind 1
+dl
+ 
+T601   32760 1.000000e+00  4      9    182      5   32760  1   1  1 -
+fl/Q factor( l , qv x Df , Chl ) for tA 2 & wind 1
+dl
+ 
+T602   65520 1.000000e+00  4      9    182      5   32760  1   1  1 -
+fl/Q factor( l , qv x Df , Chl ) for tA 1 & wind 2
+dl
+ 
+T603   98280 1.000000e+00  4      9    182      5   32760  1   1  1 -
+fl/Q factor( l , qv x Df , Chl ) for tA 2 & wind 2
+dl
+ 
+T700       0 1.000000e+00  4      7     19     25   13300  1   1  1 -
+Glint reflectance for wind 1
+dl
+ 
+T701   13300 1.000000e+00  4      7     19     25   13300  1   1  1 -
+Glint reflectance for wind 2
+dl
+ 
+T702   26600 1.000000e+00  4      7     19     25   13300  1   1  1 -
+Glint reflectance for wind 3
+dl
+ 
+T703   39900 1.000000e+00  4      7     19     25   13300  1   1  1 -
+Glint reflectance for wind 4
+dl
+ 
+T704   53200 1.000000e+00  4      7     19     25   13300  1   1  1 -
+Glint reflectance for wind 5
+dl
+ 
+T800       0 1.000000e+00 10   1024   2048      0 2097152  1   1  1 -
+Mean water leaving reflectance at 510nm (lat, lon)
+dl
+ 
+T801 2097152 1.000000e+00 10   1024   2048      0 2097152  1   1  1 -
+Variability of Mean water leaving reflectance at 510nm (lat, lon)
+dl
+ 

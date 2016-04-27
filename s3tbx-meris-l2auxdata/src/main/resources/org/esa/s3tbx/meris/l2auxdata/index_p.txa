@@ -1,0 +1,244 @@
+P000       0 1.000000e+00  0     62      0      0      62  0   0  1 -
+Product file name
+-
+ 
+P106     305 1.000000e+00  0     11      0      0      11  0   0  0 -
+Number of Data Set Records
+-
+ 
+P10E     585 1.000000e+00  0     11      0      0      11  0   0  0 -
+Number of Data Set Records
+-
+ 
+P10M     865 1.000000e+00  0     11      0      0      11  0   0  0 -
+Number of Data Set Records
+-
+ 
+P10U    1145 1.000000e+00  0     11      0      0      11  0   0  0 -
+Number of Data Set Records
+-
+ 
+P112    1425 1.000000e+00  0     11      0      0      11  0   0  0 -
+Number of Data Set Records
+-
+ 
+P11A    1705 1.000000e+00  0     11      0      0      11  0   0  0 -
+Number of Data Set Records
+-
+ 
+P11I    1985 1.000000e+00  0     11      0      0      11  0   0  0 -
+Number of Data Set Records
+-
+ 
+P11Q    2265 1.000000e+00  0     11      0      0      11  0   0  0 -
+Number of Data Set Records
+-
+ 
+P11Y    2545 1.000000e+00  0     11      0      0      11  0   1  1 -
+Number of Data Set Records
+-
+ 
+P126    2825 1.000000e+00  0     11      0      0      11  0   0  0 -
+Number of Data Set Records
+-
+ 
+P200       0 1.000000e+00  4      3      0      0      12  1   1  1 -
+TR Transmittance Coefficients
+dl
+ 
+P201      12 1.000000e+00  4     17      0      0      68  2   1  2 -
+tR (Rayleigh optical thickness) tabulated values
+dl
+ 
+P202      80 1.000000e+00  4     15      0      0      60  2   1  2 -
+l tabulated values
+nm
+ 
+P203     140 1.000000e-06 30     16      0      0      64  2   1  2 -
+qs tabulated values for GADS Rayleigh reflectances
+deg
+ 
+P204     204 1.000000e-06 30     10      0      0      40  2   1  2 -
+qv tabulated values for GADS Rayleigh reflectances
+deg
+ 
+P205     244 1.000000e-06 30     25      0      0     100  2   1  2 -
+Df tabulated values for GADS Rayleigh reflectances
+deg
+ 
+P206     344 1.000000e-06 30     12      0      0      48  2   1  2 -
+q, zenithal angles tabulated values for GADS Rayleigh Scattering Pressure thresholds
+deg
+ 
+P207     392 1.000000e+00 10     78      2      0     156  2   1  2 -
+qsxqv acceptable combinations for GADS Pressure thresholds
+dl
+ 
+P208     548 1.000000e+00  4      2      0      0       8  2   1  2 -
+Constants used for Rayleigh phase function (A,B)
+dl
+ 
+P209     556 1.000000e+00  4      6      0      0      24  2   1  2 -
+M=(cos qs)-1+(cos qv)-1  air mass tabulated values
+dl
+ 
+P20A     580 1.000000e+00  4      6      0      0      24  2   1  2 -
+spare
+dl
+ 
+P20B     604 1.000000e+00  4      6      0      0      24  2   1  2 -
+rTOA at 753.75 nm tabulated values after gaseous correction
+dl
+ 
+P20C     628 1.000000e+00  4      5      0      0      20  2   1  2 -
+spare
+dl
+ 
+P20D     648 1.000000e+00  4      4      0      0      16  2   1  2 -
+spare
+dl
+ 
+P20E     664 1.000000e+00  4      2      0      0       8  2   1  2 -
+spare
+dl
+ 
+P20F     672 1.000000e+00  4      1      0      0       4  2   1  2 -
+Threshold for flagging low pressure water
+hPa
+ 
+P20G     676 1.000000e+00  4      1      0      0       4  2   1  2 -
+Standard water vapour content
+g.cm-2
+ 
+P20H     680 1.000000e+00  4      1      0      0       4  2   1  2 -
+Standard ozone content
+cm.atm
+ 
+P20I     684 1.000000e+00  4      1      0      0       4  2   1  2 -
+Standard surface pressure
+hPa
+ 
+P20J     688 1.000000e+00  4      2      0      0       8  2   1  2 -
+Wind values for GADS Rayleigh reflectance
+m.s-1
+ 
+P20K     696 1.000000e+00  4      1      0      0       4  2   1  2 -
+Maximum allowed surface pressure
+hPa
+ 
+P20L     700 1.000000e+00  4     20      0      0      80  2   1  2 -
+Angstrom exponent tabulated values for PAR
+dl
+ 
+P20M     780 1.000000e+00  4     20      0      0      80  2   1  2 -
+Ozone concentration tabulated values for PAR
+DU
+ 
+P20N     860 1.000000e+00  4     20      0      0      80  2   1  2 -
+Aerosol Optical Thickness at 865 nm tabulated values for PAR
+m-1
+ 
+P20O     940 1.000000e+00  4     20      0      0      80  2   1  2 -
+Water vapour concentration tabulated values for PAR
+g.cm-2
+ 
+P20P    1020 1.000000e+00  4     21      0      0      84  2   1  2 -
+Reference wavelengths for fields “O2 Transmittance Polynomial Coefficients” and “Surface Pressure Retrieval Polynomial Coefficients”
+nm
+ 
+P20Q    1104 1.000000e+00  4     21      0      0      84  2   1  2 -
+Reference wavelengths for fields “H2O Transmittance Polynomial Coefficients”
+nm
+ 
+P20R    1188 1.000000e+00  4      1      0      0       4  2   1  2 -
+Pressure scale height to account for altitude
+m
+ 
+P300       0 1.000000e+00  4     15      0      0      60  1   1  1 -
+spare
+dl
+ 
+P301      60 1.000000e+00  4     15      0      0      60  1   1  1 -
+spare
+dl
+ 
+P302     120 1.000000e+00 10     60      0      0      60  1   1  1 -
+spare
+dl
+ 
+P303     180 1.000000e+00  4     15      0      0      60  1   1  1 -
+Rayleigh Optical Thicknesses(l) for standard pressure
+dl
+ 
+P304     240 1.000000e+00  4     15      0      0      60  1   1  1 -
+O3 Optical Thicknesses(l) for 1 cm.atm
+dl
+ 
+P400       0 1.000000e+00  4     21      4      0     336  1   1  1 -
+O2 Transmittance Polynomial Coefficients (lb761, order) for correction at all bands
+dl
+ 
+P401     336 1.000000e+00  4     21      4      0     336  1   1  1 -
+H2O Transmittance Polynomial Coefficients (lb709, order) for correction of b709
+dl
+ 
+P402     672 1.000000e+00  4     15      4      0     240  1   1  1 -
+H2O Transmitance Polynomial Coefficients (l, order) for correction at all bands, except b709
+dl
+ 
+P500       0 1.000000e+00  4     78      4      0    1248  2   1  2 -
+Rayl. Scatt. Fourier term 1 poly. Coeff. ( qsxqv , order)
+dl
+ 
+P501    1248 1.000000e+00  4     78      4      0    1248  2   1  2 -
+Rayl. Scatt. Fourier term 2 poly. Coeff. ( qsxqv , order)
+dl
+ 
+P502    2496 1.000000e+00  4     78      4      0    1248  2   1  2 -
+Rayl. Scatt. Fourier term 3 poly. Coeff. ( qsxqv , order)
+dl
+ 
+P600       0 1.000000e+00  4     17      0      0      68  1   1  1 -
+sR Rayleigh Spherical Albedo(tR)
+dl
+ 
+P700       0 1.000000e+00  4     78      0      0     312  1   1  1 -
+Thresholds on absolute difference in pressure for Cloud/Bright surfaces discrimination over land
+dl
+ 
+P701     312 1.000000e+00  4     78      0      0     312  1   1  1 -
+Thresholds on absolute difference in pressure for Cloud/Bright surfaces discrimination over ocean
+dl
+ 
+P800       0 1.000000e+00  4     21     12      0    1008  1   1  1 -
+Surface Pressure Retrieval Polynomial Coefficients (b761,order)
+dl
+ 
+P801    1008 1.000000e+00  4      1      0      0       4  1   1  1 -
+spare
+dl
+ 
+P802    1012 1.000000e+00  4     19      6      6    2736  1   1  1 -
+Surface Pressure Retrieval CorrectionFactors(iaer, M, rTOA(753.75 nm) )
+dl
+ 
+P900       0 1.000000e+00  4     78      5      0    1560  1   1  1 -
+spare
+-
+ 
+P901    1560 1.000000e+00  4     78      5      0    1560  1   1  1 -
+spare
+-
+ 
+PA00       0 1.000000e+00  4     15     10     25   15000  1   1  1 -
+Rayleigh reflectance over Ocean (l,qv,Df) case 1 wind
+dl
+ 
+PA01   15000 1.000000e+00  4     15     10     25   15000  1   1  1 -
+Rayleigh reflectance over Ocean (l,qv,Df) case 2 wind
+dl
+ 
+PB00       0 1.000000e+00  4 160000      0      0  640000  1   1  1 -
+PAR(angstrom exp.,ozone,tau_a865,vapour)
+microEinstein.m-2
+ 

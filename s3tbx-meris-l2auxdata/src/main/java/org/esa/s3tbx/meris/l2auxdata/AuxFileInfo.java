@@ -54,6 +54,10 @@ public class AuxFileInfo {
         _import = anImport;
     }
 
+    public boolean isEditable() {
+        return _editable;
+    }
+
     void setEditable(boolean editable) {
         _editable = editable;
     }
@@ -84,9 +88,32 @@ public class AuxFileInfo {
         return -1;
     }
 
+    public int getVariableCount() {
+        return _variableInfos.length;
+    }
+
     public AuxVariableInfo getVariableInfo(final int index) {
         return _variableInfos[index];
     }
+
+    public int getVariableIndex(final String id) {
+        for (int i = 0; i < getVariableCount(); i++) {
+            final AuxVariableInfo variableInfo = _variableInfos[i];
+            if (variableInfo.getId().equals(id)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public AuxVariableInfo getVariableInfo(final String id) {
+        final int index = getVariableIndex(id);
+        if (index == -1) {
+            throw new IllegalArgumentException("database " + getDirName() + ": invalid id: " + id);
+        }
+        return getVariableInfo(index);
+    }
+
 
     void setVariableInfos(AuxVariableInfo[] variableInfos) {
         _variableInfos = variableInfos;

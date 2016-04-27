@@ -1,0 +1,44 @@
+9000       0 1.000000e+00  0     62      0      0      62  0   0  1 -
+Product file name - V. 3
+-
+
+910U    1043 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+9112    1323 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+911A    1603 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+9200       0 1.000000e+00 90      3      0      0      12  0   1  1 -
+ISP Sensing Time
+mjd
+
+9201      12 1.000000e+00 90      3      0      0      12  0   1  1 -
+FEP Sensing Time
+mjd
+
+9202      24 1.000000e+00 20      1      0      0       2  0   1  1 -
+Length of ISP (excluding 6 bytes header)
+bytes
+
+9203      26 1.000000e+00 20      1      0      0       2  0   1  1 -
+Number of VCDU with CRC error
+VCDU
+
+9204      28 1.000000e+00 20      1      0      0       2  0   1  1 -
+Number of VCDU with RS Error
+VCDU
+
+9205      30 1.000000e+00  0      2      0      0       2  0   0  1 -
+Spare
+-
+
+9206      32 1.000000e+00  0   7692      0      0    7692  0   0  1 -
+Instrument Source Packet
+-
+

@@ -1,0 +1,244 @@
+S000       0 1.000000e+00  0     62      0      0      62  0   0  1 -
+Product file name
+-
+ 
+S106     305 1.000000e+00  0     11      0      0      11  0   0  0 -
+Number of Data Set Records
+-
+ 
+S10E     585 1.000000e+00  0     11      0      0      11  0   0  0 -
+Number of Data Set Records
+-
+ 
+S10M     865 1.000000e+00  0     11      0      0      11  0   1  1 -
+Number of Data Set Records
+-
+ 
+S10U    1145 1.000000e+00  0     11      0      0      11  0   1  1 -
+Number of Data Set Records
+-
+ 
+S112    1425 1.000000e+00  0     11      0      0      11  0   1  1 -
+Number of Data Set Records
+-
+ 
+S11A    1705 1.000000e+00  0     11      0      0      11  0   1  1 -
+Number of Data Set Records
+-
+ 
+S11I    1985 1.000000e+00  0     11      0      0      11  0   1  1 -
+Number of Data Set Records
+-
+ 
+S11Q    2265 1.000000e+00  0     11      0      0      11  0   1  1 -
+Number of Data Set Records
+-
+ 
+S11Y    2545 1.000000e+00  0     11      0      0      11  0   1  1 -
+Number of Data Set Records
+-
+ 
+S126    2825 1.000000e+00  0     11      0      0      11  0   1  1 -
+Number of Data Set Records
+-
+ 
+S12E    3105 1.000000e+00  0     11      0      0      11  0   1  1 -
+Number of Data Set Records
+-
+ 
+S12M    3385 1.000000e+00  0     11      0      0      11  0   1  1 -
+Number of Data Set Records
+-
+ 
+S12U    3665 1.000000e+00  0     11      0      0      11  0   1  1 -
+Number of Data Set Records
+-
+ 
+S132    3945 1.000000e+00  0     11      0      0      11  0   1  1 -
+Number of Data Set Records
+-
+ 
+S200       0 1.000000e-06 30     12      0      0      48  1   1  1 -
+q tabulated values used for specifying qsxqv acceptable combinations
+deg
+ 
+S201      48 1.000000e+00 10     78      2      0     156  1   1  1 -
+acceptable qs x qv values
+dl
+ 
+S202     204 1.000000e-06 30     19      0      0      76  1   1  1 -
+Df tabulated values
+deg
+ 
+S203     280 1.000000e+00  4     83      0      0     332  1   1  1 -
+scattering cosine tabulated values
+dl
+ 
+S204     612 1.000000e+00 20      2      0      0       4  1   1  1 -
+band index (starting at 1) numbers, for inland waters and island screening
+dl
+ 
+S205     616 1.000000e+00  4      1      0      0       4  1   1  1 -
+threshold for in-land waters screening spectral slope test
+dl
+ 
+S206     620 1.000000e+00  4      1      0      0       4  1   1  1 -
+threshold for island screening spectral slope test
+dl
+ 
+S207     624 1.000000e+00  4     78      2      0     624  1   1  1 -
+Aerosol properties (Aerosol model)
+dl
+ 
+S208    1248 1.000000e+00  4     16      0      0      64  1   1  1 -
+ta tabulated values at 550 nm
+dl
+ 
+S209    1312 1.000000e+00  4      1      0      0       4  1   1  1 -
+Gamma coefficient for ARVI computation
+dl
+ 
+S20A    1316 1.000000e+00  4      1      0      0       4  1   1  1 -
+Dta for iterative procedure
+dl
+ 
+S20B    1320 1.000000e+00 10     11     12      0     132  1   1  1 -
+Dense Dark Vegetation model LUT (biome, month)
+dl
+ 
+S20C    1452 1.000000e-06  3    180      0      0     720  1   1  1 -
+Latitude tabulated values for DDV climatology
+deg
+ 
+S20D    2172 1.000000e-06  3    360      0      0    1440  1   1  1 -
+Longitude tabulated values for DDV climatology
+deg
+ 
+S20E    3612 1.000000e+00 10     18      0      0      18  1   1  1 -
+effective radius tabulated values
+dl
+ 
+S20F    3630 1.000000e+00 10     18      0      0      18  1   1  1 -
+record number of the Multiplicative function to account for aerosol multiple scattering effects ADS associated to each volcanic aerosol model
+dl
+ 
+S20G    3648 1.000000e+00  4     18      0      0      72  1   1  1 -
+optical thickness tabulated values for volcanic aerosols
+dl
+ 
+S20H    3720 1.000000e+00  4     12     20      3    2880  1   1  1 -
+Monthly adjustment for bands 412, 443, and 670nm (month, DDV model, k)
+dl
+ 
+S20I    6600 1.000000e+00  4     12     20      3    2880  1   1  1 -
+Linear corrections for bands 412, 443, and 670nm (month, DDV model, k)
+dl
+ 
+S20J    9480 1.000000e+00  4     12     20      2    1920  1   1  1 -
+[DARVImin, DARVImax] (month, DDV model)
+dl
+ 
+S20K   11400 1.000000e+00  4      1      0      0       4  1   1  1 -
+865nm reflectance threshold for DDV screening
+dl
+ 
+S300       0 1.000000e+00  4      1      0      0       4  1   1  1 -
+a - constant applied to threshold for inland water discrimination
+dl
+ 
+S301       4 1.000000e+00  4     78     19      0    5928  1   1  1 -
+rT Thresholds for inland water discrimination
+dl
+ 
+S302    5932 1.000000e+00  4      1      0      0       4  1   1  1 -
+a - constant applied to threshold for islands discrimination
+dl
+ 
+S303    5936 1.000000e+00  4     78     19      0    5928  1   1  1 -
+rT Thresholds for islands discrimination
+dl
+ 
+S400       0 1.000000e+00  4     78     19      0    5928  1   1  1 -
+ARVI Thresholds
+dl
+ 
+S500       0 1.000000e+00  4     78     19      0    5928  1   1  1 -
+mean reflectance of DDV for l = 412 nm
+dl
+ 
+S501    5928 1.000000e+00  4     78     19      0    5928  1   1  1 -
+spare
+dl
+ 
+S502   11856 1.000000e+00  4     78     19      0    5928  1   1  1 -
+mean reflectance of DDV for l = 443 nm
+dl
+ 
+S503   17784 1.000000e+00  4     78     19      0    5928  1   1  1 -
+spare
+dl
+ 
+S504   23712 1.000000e+00  4     78     19      0    5928  1   1  1 -
+mean reflectance of DDV for l = 665 nm
+dl
+ 
+S505   29640 1.000000e+00  4     78     19      0    5928  1   1  1 -
+spare
+dl
+ 
+S600       0 1.000000e+00  4     16      0      0      64  1   1  1 -
+Aerosol Spherical Albedo Sa(tA)
+dl
+ 
+S700       0 1.000000e+00  4     12     16      0     768  1   1  1 -
+TA - Aerosol Transmittance(qs tA)
+dl
+ 
+S800       0 1.000000e+00  4     78      6      4    7488  1   1  1 -
+Fourier series term(a0, ..., a3) ...(f0, ..., f3)
+dl
+ 
+S900       0 1.000000e+00  4     83      0      0     332  1   1  1 -
+Aerosol Phase Function (scattering angle cosine)
+dl
+ 
+SA00       0 1.000000e+00  4     15      0      0      60  1   1  1 -
+Volcanic aerosol spherical albedo (band)
+dl
+ 
+SB00       0 1.000000e+00  4     15     12      0     720  1   1  1 -
+Volcanic aerosol transmittance (band, q)
+dl
+ 
+SC00       0 1.000000e+00  4     15     83      0    4980  1   1  1 -
+Phase function( band, Q )
+dl
+ 
+SC01    4980 1.000000e+00  4     15      0      0      60  1   1  1 -
+Spectral dependency of Optical Thickness
+dl
+ 
+SD00       0 1.000000e+00 10    180    360      0   64800  1   1  1 -
+biome index (lat, lon)
+dl
+ 
+SE00       0 1.000000e+00  4      3     12      0     144  1   1  1 -
+Ground bi-directionality term (band,q)
+dl
+ 
+SE01     144 1.000000e+00  4     15     78     78  365040  1   1  1 -
+Ground-aerosol coupling bi-directionality term (s,band,iaer,qsxqv)
+dl
+ 
+SE02  365184 1.000000e+00  4      3      0      0      12  1   1  1 -
+Ground Albedo(band)
+dl
+ 
+SF00       0 1.000000e+00  4     12      4      0     192  1   1  1 -
+Aerosol bi-directionality term (q,k)
+dl
+ 
+SF01     192 1.000000e+00  4      4      0      0      16  1   1  1 -
+spare
+-
+ 

@@ -1,0 +1,56 @@
+L000       0 1.000000e+00  0     62      0      0      62  0   0  1 -
+Product file name - V. 20
+-
+
+L106     305 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+L10E     585 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+L10M     865 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+L10U    1145 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+L112    1425 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+L200       0 1.000000e+00  4     12      0      0      48  1   2  1 -
+tA tabulated values
+dl
+
+L201      48 1.000000e-06  3    180      0      0     720  1   1  1 -
+Latitude tabulated values
+deg
+
+L202     768 1.000000e-06  3    360      0      0    1440  1   1  1 -
+Longitude tabulated values
+deg
+
+L203    2208 1.000000e+00  4      6      0      0      24  1   2  1 -
+Tabulated values of the volcanic aerosol optical thickness
+dl
+
+L204    2232 1.000000e+00  4      3      0      0      12  1   2  1 -
+Tabulated values of the volcanic aerosol effective radius
+micrometer
+
+L300       0 1.000000e+00 10    180    360      2  129600  2   1  1 -
+ta&model (Lat, Long,k={1,2})
+dl
+
+L400       0 1.000000e+00 10    180    360      0   64800  2   1  1 -
+Model Index (Lat, Long)
+dl
+
+L500       0 1.000000e+00 10    180    360      0   64800  2   1  1 -
+Model Index (Lat, Long)
+dl
+

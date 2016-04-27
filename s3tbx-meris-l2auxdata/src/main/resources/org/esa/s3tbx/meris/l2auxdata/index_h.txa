@@ -1,0 +1,52 @@
+H000       0 1.000000e+00  0     62      0      0      62  0   0  1 -
+Product file name - V. 20
+-
+
+H106     305 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+H10E     585 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+H10M     865 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+H10U    1145 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+H112    1425 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+H11A    1705 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+H200       0 1.000000e+00  2    360      0      0     720  0   1  1 -
+surface flag 1 degree
+nd
+
+H300       0 1.000000e+00  3    100      0      0     400  0   1  1 -
+surface flag 0.1 degree
+nd
+
+H400       0 1.000000e+00 10     14      0      0      14  0   1  1 -
+surface flag 0.01 degree
+nd
+
+H500       0 1.000000e+00  2    360      0      0     720  0   1  1 -
+coast flag 1 degree
+nd
+
+H600       0 1.000000e+00  3    100      0      0     400  0   1  1 -
+coast flag 0.1 degree
+nd
+
+H700       0 1.000000e+00 10     14      0      0      14  0   1  1 -
+coast flag 0.01 degree
+nd
+

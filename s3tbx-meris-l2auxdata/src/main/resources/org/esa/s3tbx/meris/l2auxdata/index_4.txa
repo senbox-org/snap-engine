@@ -1,0 +1,712 @@
+4000       0 1.000000e+00  0     62      0      0      62  0   0  1 -
+Product file name - V. 6
+-
+
+411F    1749 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+411N    2029 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+411V    2309 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+4123    2589 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+412B    2869 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+412J    3149 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+412R    3429 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+412Z    3709 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+4137    3989 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+413F    4269 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+413N    4549 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+413V    4829 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+4143    5109 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+414B    5389 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+414J    5669 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+414R    5949 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+414Z    6229 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+4157    6509 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+415F    6789 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+415N    7069 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+415V    7349 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+4163    7629 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+416B    7909 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+416J    8189 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+416R    8469 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+416Z    8749 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+4177    9029 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+417F    9309 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+417N    9589 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+417V    9869 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+4183   10149 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+418B   10429 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+418J   10709 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+418R   10989 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+418Z   11269 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+4197   11549 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+4200       0 1.000000e+00  3      3      0      0      12  1   1  1 -
+Start time of the measurement
+-
+
+4201      12 1.000000e+00 10      1      0      0       1  1   0  1 -
+Attachment Flag
+-
+
+4202      13 1.000000e+00 10      1      0      0       1  1   1  1 -
+% of ocean pixels having absorbing aerosols
+nd
+
+4203      14 1.000000e+00 10      1      0      0       1  1   1  1 -
+% of water pixels
+nd
+
+4204      15 1.000000e+00 10      1      0      0       1  1   1  1 -
+% of DDV land pixels
+nd
+
+4205      16 1.000000e+00 10      1      0      0       1  1   1  1 -
+% of land pixels
+nd
+
+4206      17 1.000000e+00 10      1      0      0       1  1   1  1 -
+% of cloud pixels
+nd
+
+4207      18 1.000000e+00 10      1      0      0       1  1   1  1 -
+% of pixels with low polynomial pressure
+nd
+
+4208      19 1.000000e+00 10      1      0      0       1  2   1  1 -
+% of pixels with low Neural Network pressure
+nd
+
+4209      20 1.000000e+00 10      1      0      0       1  1   1  1 -
+% of pixels with out of range inputs for water vapour proc.
+nd
+
+420A      21 1.000000e+00 10      1      0      0       1  1   1  1 -
+% of pixels with out of range outputs for water vapour proc.
+nd
+
+420B      22 1.000000e+00 10      1      0      0       1  2   1  1 -
+% of pixels with out of range inputs for Cloud proc.
+nd
+
+420C      23 1.000000e+00 10      1      0      0       1  1   1  1 -
+% of pixels with out of range outputs for Cloud proc.
+nd
+
+420D      24 1.000000e+00 10      1      0      0       1  1   1  1 -
+% of pixels with out of range inputs for Land proc.
+nd
+
+420E      25 1.000000e+00 10      1      0      0       1  1   1  1 -
+% of pixels with out of range outputs for Land proc.
+nd
+
+420F      26 1.000000e+00 10      1      0      0       1  1   1  1 -
+% of pixels with out of range inputs for Ocean proc.
+nd
+
+420G      27 1.000000e+00 10      1      0      0       1  1   1  1 -
+% of pixels with out of range outputs for Ocean proc.
+nd
+
+420H      28 1.000000e+00 10      1      0      0       1  1   1  1 -
+% of pixels with out of range inputs for Case 1 proc.
+nd
+
+420I      29 1.000000e+00 10      1      0      0       1  1   1  1 -
+% of pixels with out of range outputs for Case 1 proc.
+nd
+
+420J      30 1.000000e+00 10      1      0      0       1  1   1  1 -
+% of pixels with. out of range inputs for Case 2 proc.
+nd
+
+420K      31 1.000000e+00 10      1      0      0       1  1   1  1 -
+% of pixels with. out of range outputs for Case 2 proc.
+nd
+
+4300       0 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - altitude
+dl
+
+4301       4 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - roughness
+dl
+
+4302       8 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - zonal wind
+dl
+
+4303      12 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - meridional wind
+dl
+
+4304      16 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - atmospheric pressure
+dl
+
+4305      20 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - ozone
+dl
+
+4306      24 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - relative humidity
+dl
+
+4307      28 1.000000e+00  4     13      0      0      52  1   2  1 -
+scaling factor - reflectances
+dl
+
+4308      80 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - Algal pigment index
+dl
+
+4309      84 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - Yellow substance
+dl
+
+430A      88 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - Suspended sediment
+dl
+
+430B      92 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - Aerosol epsilon
+dl
+
+430C      96 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - Aerosol optical thickness
+dl
+
+430D     100 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - Cloud optical thickness
+dl
+
+430E     104 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - Surface pressure
+dl
+
+430F     108 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - Water vapour
+dl
+
+430G     112 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - Photosynthetically active radiation
+dl
+
+430H     116 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - TOA Vegetation index
+dl
+
+430I     120 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - BOA Vegetation index
+dl
+
+430J     124 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - Cloud Albedo
+dl
+
+430K     128 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - Cloud Top Pressure
+dl
+
+430L     132 1.000000e+00  4     13      0      0      52  1   2  1 -
+offset - reflectances
+dl
+
+430M     184 1.000000e+00  4      1      0      0       4  1   2  1 -
+offset - Algal pigment index
+mg.m-3 in Log10
+
+430N     188 1.000000e+00  4      1      0      0       4  1   2  1 -
+offset - Yellow substance
+m-1
+
+430O     192 1.000000e+00  4      1      0      0       4  1   2  1 -
+offset - Suspended sediment
+g.m-3 in Log10
+
+430P     196 1.000000e+00  4      1      0      0       4  1   2  1 -
+offset - Aerosol epsilon
+dl
+
+430Q     200 1.000000e+00  4      1      0      0       4  1   2  1 -
+offset - Aerosol optical thickness
+dl
+
+430R     204 1.000000e+00  4      1      0      0       4  1   2  1 -
+offset - Cloud optical thickness
+dl
+
+430S     208 1.000000e+00  4      1      0      0       4  1   2  1 -
+offset - Surface pressure
+hPa
+
+430T     212 1.000000e+00  4      1      0      0       4  1   2  1 -
+offset - Water vapour
+g.cm-2
+
+430U     216 1.000000e+00  4      1      0      0       4  1   2  1 -
+offset - Photosynthetically active radiation
+W.m-2
+
+430V     220 1.000000e+00  4      1      0      0       4  1   2  1 -
+offset - TOA Vegetation index
+dl
+
+430W     224 1.000000e+00  4      1      0      0       4  1   2  1 -
+offset - BOA Vegetation index
+dl
+
+430X     228 1.000000e+00  4      1      0      0       4  1   2  1 -
+offset - Cloud Albedo
+dl
+
+430Y     232 1.000000e+00  4      1      0      0       4  1   2  1 -
+offset - Cloud Top Pressure
+hPa
+
+430Z     236 1.000000e+00 10      5     16      0      80  1   2  1 
+Gain setting
+nd
+
+4310     316 1.000000e-06 30      1      0      0       4  1   2  1 
+Sampling rate
+sec
+
+4311     320 1.000000e+00  4     15      0      0      60  1   2  1 
+Sun Spectral Flux
+LU
+
+4312     380 1.000000e+00  4      1      0      0       4  1   2  1 
+scaling factor - rectified near infrared reflectance
+dl
+
+4313     384 1.000000e+00  4      1      0      0       4  1   2  1 
+offset - rectified near infrared reflectance
+dl
+
+4314     388 1.000000e+00  4      1      0      0       4  1   2  1 
+scaling factor - rectified infrared reflectance
+dl
+
+4315     392 1.000000e+00  4      1      0      0       4  1   2  1 
+offset - rectified infrared reflectance
+dl
+
+4316     396 1.000000e+00  0     44      0      0      44  1   0  1 
+spare
+-
+
+4400       0 1.000000e+00  3      3      0      0      12  1   1  1 -
+Start time of the measurement
+-
+
+4401      12 1.000000e+00 10      1      0      0       1  1   0  1 -
+Attachment Flag
+-
+
+4402      13 1.000000e-06  3     71      0      0     284  2   1  1 -
+latitude
+deg
+
+4403     297 1.000000e-06  3     71      0      0     284  2   1  1 -
+longitude
+deg
+
+4404     581 1.000000e+00  3     71      0      0     284  2   1  1 -
+DEM altitude
+m
+
+4405     865 1.000000e+00 30     71      0      0     284  2   1  1 -
+DEM roughness
+m
+
+4406    1149 1.000000e-06  3     71      0      0     284  2   1  1 -
+DEM latitude correction
+deg
+
+4407    1433 1.000000e-06  3     71      0      0     284  2   1  1 -
+DEM longitude correction
+deg
+
+4408    1717 1.000000e-06 30     71      0      0     284  2   1  1 -
+sun zenith angle
+deg
+
+4409    2001 1.000000e-06  3     71      0      0     284  2   1  1 -
+sun azimuth angle
+deg
+
+440A    2285 1.000000e-06 30     71      0      0     284  2   1  1 -
+viewing zenith angle
+deg
+
+440B    2569 1.000000e-06  3     71      0      0     284  2   1  1 -
+viewing azimuth angle
+deg
+
+440C    2853 1.000000e+00  2     71      0      0     142  2   1  1 -
+zonal wind
+m*s-1
+
+440D    2995 1.000000e+00  2     71      0      0     142  2   1  1 -
+meridional wind
+m*s-1
+
+440E    3137 1.000000e+00 20     71      0      0     142  2   1  1 -
+atmospheric pressure
+hPa
+
+440F    3279 1.000000e+00 20     71      0      0     142  2   1  1 -
+ozone
+DU
+
+440G    3421 1.000000e+00 20     71      0      0     142  2   1  1 -
+relative humidity
+%
+
+4500       0 1.000000e+00 90      3      0      0      12  1   1  1 -
+Start time of the Measurement
+mjd
+
+4501      12 1.000000e+00  1      1      0      0       1  1   0  1 -
+Quality Indicator
+-
+
+4502      13 1.000000e+00 20   1121      0      0    2242  2   1  1 -
+normalised surface reflectance close to 412 nm
+dl
+
+4600       0 1.000000e+00 90      3      0      0      12  1   1  1 -
+Start time of the Measurement
+mjd
+
+4601      12 1.000000e+00  1      1      0      0       1  1   0  1 -
+Quality Indicator
+-
+
+4602      13 1.000000e+00 20   1121      0      0    2242  2   1  1 -
+normalised surface reflectance close to 442 nm
+dl
+
+4700       0 1.000000e+00 90      3      0      0      12  1   1  1 -
+Start time of the Measurement
+mjd
+
+4701      12 1.000000e+00  1      1      0      0       1  1   0  1 -
+Quality Indicator
+-
+
+4702      13 1.000000e+00 20   1121      0      0    2242  2   1  1 -
+normalised surface reflectance close to 490 nm
+dl
+
+4800       0 1.000000e+00 90      3      0      0      12  1   1  1 -
+Start time of the Measurement
+mjd
+
+4801      12 1.000000e+00  1      1      0      0       1  1   0  1 -
+Quality Indicator
+-
+
+4802      13 1.000000e+00 20   1121      0      0    2242  2   1  1 -
+normalised surface reflectance close to 510 nm
+dl
+
+4900       0 1.000000e+00 90      3      0      0      12  1   1  1 -
+Start time of the Measurement
+mjd
+
+4901      12 1.000000e+00  1      1      0      0       1  1   0  1 -
+Quality Indicator
+-
+
+4902      13 1.000000e+00 20   1121      0      0    2242  2   1  1 -
+normalised surface reflectance close to 560 nm
+dl
+
+4A00       0 1.000000e+00 90      3      0      0      12  1   1  1 -
+Start time of the Measurement
+mjd
+
+4A01      12 1.000000e+00  1      1      0      0       1  1   0  1 -
+Quality Indicator
+-
+
+4A02      13 1.000000e+00 20   1121      0      0    2242  2   1  1 -
+normalised surface reflectance close to 620 nm
+dl
+
+4B00       0 1.000000e+00 90      3      0      0      12  1   1  1 -
+Start time of the Measurement
+mjd
+
+4B01      12 1.000000e+00  1      1      0      0       1  1   0  1 -
+Quality Indicator
+-
+
+4B02      13 1.000000e+00 20   1121      0      0    2242  2   1  1 -
+normalised surface reflectance close to 665 nm
+dl
+
+4C00       0 1.000000e+00 90      3      0      0      12  1   1  1 -
+Start time of the Measurement
+mjd
+
+4C01      12 1.000000e+00  1      1      0      0       1  1   0  1 -
+Quality Indicator
+-
+
+4C02      13 1.000000e+00 20   1121      0      0    2242  2   1  1 -
+normalised surface reflectance close to 681 nm
+dl
+
+4D00       0 1.000000e+00 90      3      0      0      12  1   1  1 -
+Start time of the Measurement
+mjd
+
+4D01      12 1.000000e+00  1      1      0      0       1  1   0  1 -
+Quality Indicator
+-
+
+4D02      13 1.000000e+00 20   1121      0      0    2242  2   1  1 -
+normalised surface reflectance close to 708 nm
+dl
+
+4E00       0 1.000000e+00 90      3      0      0      12  1   1  1 -
+Start time of the Measurement
+mjd
+
+4E01      12 1.000000e+00  1      1      0      0       1  1   0  1 -
+Quality Indicator
+-
+
+4E02      13 1.000000e+00 20   1121      0      0    2242  2   1  1 -
+normalised surface reflectance close to 754 nm
+dl
+
+4F00       0 1.000000e+00 90      3      0      0      12  1   1  1 -
+Start time of the Measurement
+mjd
+
+4F01      12 1.000000e+00  1      1      0      0       1  1   0  1 -
+Quality Indicator
+-
+
+4F02      13 1.000000e+00 20   1121      0      0    2242  2   1  1 -
+normalised surface reflectance close to 775 nm
+dl
+
+4G00       0 1.000000e+00 90      3      0      0      12  1   1  1 -
+Start time of the Measurement
+mjd
+
+4G01      12 1.000000e+00  1      1      0      0       1  1   0  1 -
+Quality Indicator
+-
+
+4G02      13 1.000000e+00 20   1121      0      0    2242  2   1  1 -
+normalised surface reflectance close to 865 nm
+dl
+
+4H00       0 1.000000e+00 90      3      0      0      12  1   1  1 -
+Start time of the Measurement
+mjd
+
+4H01      12 1.000000e+00  1      1      0      0       1  1   0  1 -
+Quality Indicator
+-
+
+4H02      13 1.000000e+00 20   1121      0      0    2242  2   1  1 -
+normalised surface reflectance close to 885 nm
+dl
+
+4I00       0 1.000000e+00 90      3      0      0      12  1   1  1 -
+Start time of the measurement
+mjd
+
+4I01      12 1.000000e+00  1      1      0      0       1  1   0  1 -
+Quality Indicator
+-
+
+4I02      13 1.000000e+00 10   1121      0      0    1121  2   1  1 -
+Water vapour content
+g.cm-2
+
+4J00       0 1.000000e+00 90      3      0      0      12  1   1  1 -
+Start time of the measurement
+mjd
+
+4J01      12 1.000000e+00  1      1      0      0       1  1   0  1 -
+Quality Indicator
+-
+
+4J02      13 1.000000e+00 10   1121      0      0    1121  2   1  1 -
+Algal I or TOAVI or cloud top pressure
+Log10[mg.m-3] / hPa
+
+4K00       0 1.000000e+00 90      3      0      0      12  1   1  1 -
+Start time of the measurement
+mjd
+
+4K01      12 1.000000e+00  1      1      0      0       1  1   0  1 -
+Quality Indicator
+-
+
+4K02      13 1.000000e+00 10   1121      2      0    2242  2   1  1 -
+(YS & SPM) or (NIR & IR rectified reflectance)
+m-1 & Log10[g.m-3] or dl
+
+4L00       0 1.000000e+00 90      3      0      0      12  1   1  1 -
+Start time of the measurement
+mjd
+
+4L01      12 1.000000e+00  1      1      0      0       1  1   0  1 -
+Quality Indicator
+-
+
+4L02      13 1.000000e+00 10   1121      0      0    1121  2   1  1 -
+Algal II or BOAVI
+Log10[mg.m-3] /dl
+
+4M00       0 1.000000e+00 90      3      0      0      12  1   1  1 -
+Start time of the measurement
+mjd
+
+4M01      12 1.000000e+00  1      1      0      0       1  1   0  1 -
+Quality Indicator
+-
+
+4M02      13 1.000000e+00 10   1121      0      0    1121  2   1  1 -
+Surface Pressure, PAR or cloud albedo
+hPa/W.m-2 /dl
+
+4N00       0 1.000000e+00 90      3      0      0      12  1   1  1 -
+Start time of the measurement
+mjd
+
+4N01      12 1.000000e+00  1      1      0      0       1  1   0  1 -
+Quality Indicator
+-
+
+4N02      13 1.000000e+00 10   1121      2      0    2242  2   1  1 -
+Aerosol epsilon or Cloud type & Optical Thickness
+dl
+
+4O00       0 1.000000e+00 90      3      0      0      12  1   1  1 -
+Start time of the measurement
+mjd
+
+4O01      12 1.000000e+00  1      1      0      0       1  1   0  1 -
+Quality Indicator
+-
+
+4O02      13 1.000000e+00 10   1121      3      0    3363  2   1  1 -
+Flags associated
+dl
+

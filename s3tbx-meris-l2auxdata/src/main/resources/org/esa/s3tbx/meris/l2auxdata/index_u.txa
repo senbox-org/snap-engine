@@ -1,0 +1,244 @@
+U000       0 1.000000e+00  0     62      0      0      62  0   0  1 -
+Product file name
+-
+ 
+U106     305 1.000000e+00  0     11      0      0      11  0   0  0 -
+Number of Data Set Records
+-
+ 
+U10E     585 1.000000e+00  0     11      0      0      11  0   0  0 -
+Number of Data Set Records
+-
+ 
+U10M     865 1.000000e+00  0     11      0      0      11  0   0  0 -
+Number of Data Set Records
+-
+ 
+U10U    1145 1.000000e+00  0     11      0      0      11  0   1  1 -
+Number of Data Set Records
+-
+ 
+U112    1425 1.000000e+00  0     11      0      0      11  0   1  1 -
+Number of Data Set Records
+-
+ 
+U11A    1705 1.000000e+00  0     11      0      0      11  0   0  0 -
+Number of Data Set Records
+-
+ 
+U200       0 1.000000e+00  4     10      0      0      40  1   1  1 -
+l tabulated values
+nm
+ 
+U201      40 1.000000e+00  4     31      0      0     124  1   1  1 -
+ODOCa(440) tabulated values
+m-1
+ 
+U202     164 1.000000e+00  4     41      0      0     164  1   1  1 -
+Chl tabulated values for GADS IOP versus Geochemical variables
+mg.m-3
+ 
+U203     328 1.000000e+00  4     41      0      0     164  1   1  1 -
+SPM tabulated values
+g.m-3
+ 
+U204     492 1.000000e+00  4     16      0      0      64  1   1  1 -
+a' tabulated values for ADS ref versus IOP
+m-1
+ 
+U205     556 1.000000e+00  4     16      0      0      64  1   1  1 -
+b' tabulated values for ADS ref versus IOP
+m-1
+ 
+U206     620 1.000000e-06 30     10      0      0      40  1   1  1 -
+qv tabulated values for GADS Anomalous Scattering Detection and ADS ref versus IOP
+deg
+ 
+U207     660 1.000000e-06 30     10      0      0      40  1   1  1 -
+qs tabulated values for GADS Anomalous Scattering Detection and ADS ref versus IOP
+deg
+ 
+U208     700 1.000000e-06 30     19      0      0      76  1   1  1 -
+Df tabulated values for GADS Anomalous Scattering Detection and ADS ref versus IOP
+deg
+ 
+U209     776 1.000000e+00  4      2      0      0       8  1   1  1 -
+Conversion factors for Chl2
+mg.m-3/dl
+ 
+U20A     784 1.000000e+00  4      1      0      0       4  1   1  1 -
+Conversion factors for SPM
+g.m-3
+ 
+U20B     788 1.000000e+00  4     10      0      0      40  1   1  1 -
+absorption of pure water
+m-1
+ 
+U20C     828 1.000000e+00  4     10      0      0      40  1   1  1 -
+back scattering of pure water
+m-1
+ 
+U20D     868 1.000000e+00  4     10      0      0      40  1   1  1 -
+specific back scattering of pure water
+m2.g-1
+ 
+U20E     908 1.000000e+00  4      1      0      0       4  1   1  1 -
+f over Q mean value in case 2 waters
+dl
+ 
+U20F     912 1.000000e+00 20      1      0      0       2  1   1  1 -
+Number of iterations in brigt pixel atmospheric corrections
+-
+ 
+U20G     914 1.000000e+00  4      1      0      0       4  1   1  1 -
+Threshold on TSM value to raise te CASE2_S flag
+g.m-3
+ 
+U20H     918 1.000000e+00  4      1      0      0       4  1   1  1 -
+Minimum Difference of two consecutive ra estimates used in iterative procedure
+dl
+ 
+U20I     922 1.000000e+00  4      1      0      0       4  1   1  1 -
+Minimum Difference of two consecutive SPM estimates used in iterative procedure
+g.m-3
+ 
+U20J     926 1.000000e+00 10      1      0      0       1  1   1  1 -
+Maximum number of iterations for atmospheric corrections above turbid waters
+dl
+ 
+U20K     927 1.000000e+00  4      2      0      0       8  1   1  1 -
+Constants used for SPM estimate
+dl
+ 
+U20L     935 1.000000e+00  4      1      0      0       4  1   1  1 -
+absorption at 865 nm for SPM = 1
+m-1
+ 
+U20M     939 1.000000e+00  4      1      0      0       4  1   1  1 -
+scattering at 865 nm for SPM = 1
+m-1
+ 
+U20N     943 1.000000e+00  4      1      0      0       4  1   1  1 -
+water absorption at 865 nm
+m-1
+ 
+U20O     947 1.000000e+00  4      1      0      0       4  1   1  1 -
+first guess of SPM concentration
+g.m-3
+ 
+U20P     951 1.000000e+00  4      1      0      0       4  1   1  1 -
+Angstrom exponent step
+dl
+ 
+U20Q     955 1.000000e+00  4      2      0      0       8  1   1  1 -
+SPM range limits in iterative procedure
+g.m-3
+ 
+U20R     963 1.000000e+00  4      2      0      0       8  1   1  1 -
+Angstrom exponent range limits in iterative procedure
+dl
+ 
+U20S     971 1.000000e+00  4      1      0      0       4  1   1  1 -
+Threshold for flagging Yellow Substance dominated waters
+dl
+ 
+U20T     975 1.000000e+00  4     26      0      0     104  1   1  1 -
+Chl tabulated values for GADS Anomalous Scattering Detection
+mg.m-3
+ 
+U20U    1079 1.000000e+00  4      2      0      0       8  1   1  1 -
+Floor values for NN inputs
+dl
+ 
+U300       0 1.000000e+00  4      2      0      0       8  1   1  1 -
+Bi constants
+dl
+ 
+U301       8 1.000000e+00  4      3      0      0      12  1   1  1 -
+Ai constants for H( 443 nm , 560 nm) estimation
+dl
+ 
+U302      20 1.000000e+00  4      3      0      0      12  1   1  1 -
+Ai constants for H( 490 nm , 560 nm) estimation
+dl
+ 
+U303      32 1.000000e+00  4      3      0      0      12  1   1  1 -
+Ai constants for H( 510 nm , 560 nm) estimation
+dl
+ 
+U304      44 1.000000e+00  4      3      0      0      12  1   1  1 -
+Ni exponents
+dl
+ 
+U400       0 1.000000e+00  4    100     19     26  197600  1   1  1 -
+Threshold on reflectance at 560 nm (qs, qv, Df, Chl)
+-
+ 
+U500       0 1.000000e+00  4     41     10      0    1640  1   1  1 -
+absorption a'  ( Chl ,l)
+m-1
+ 
+U501    1640 1.000000e+00  4     41     10      0    1640  1   1  1 -
+scattering b'  ( Chl, l )
+m-1
+ 
+U502    3280 1.000000e+00  4     41     10      0    1640  1   1  1 -
+absorption a'  ( SPM, l )
+m-1
+ 
+U503    4920 1.000000e+00  4     41     10      0    1640  1   1  1 -
+scattering b'  ( SPM, l )
+m-1
+ 
+U504    6560 1.000000e+00  4     31     10      0    1240  1   1  1 -
+absorption a'    ( ODOC, l )
+m-1
+ 
+U505    7800 1.000000e+00  0    400      0      0     400  1   1  1 -
+spare
+-
+ 
+U600       0 1.000000e+00  4     19     16     16   19456  1   1  1 -
+Reflectance table (Dj, a', b') for qv=qv0
+dl
+ 
+U601   19456 1.000000e+00  4     19     16     16   19456  1   1  1 -
+Reflectance table (Dj, a', b') for qv=qv1
+dl
+ 
+U602   38912 1.000000e+00  4     19     16     16   19456  1   1  1 -
+Reflectance table (Dj, a', b') for qv=qv2
+dl
+ 
+U603   58368 1.000000e+00  4     19     16     16   19456  1   1  1 -
+Reflectance table (Dj, a', b') for qv=qv3
+dl
+ 
+U604   77824 1.000000e+00  4     19     16     16   19456  1   1  1 -
+Reflectance table (Dj, a', b') for qv=qv4
+dl
+ 
+U605   97280 1.000000e+00  4     19     16     16   19456  1   1  1 -
+Reflectance table (Dj, a', b') for qv=qv5
+dl
+ 
+U606  116736 1.000000e+00  4     19     16     16   19456  1   1  1 -
+Reflectance table (Dj, a', b') for qv=qv6
+dl
+ 
+U607  136192 1.000000e+00  4     19     16     16   19456  1   1  1 -
+Reflectance table (Dj, a', b') for qv=qv7
+dl
+ 
+U608  155648 1.000000e+00  4     19     16     16   19456  1   1  1 -
+Reflectance table (Dj, a', b') for qv=qv8
+dl
+ 
+U609  175104 1.000000e+00  4     19     16     16   19456  1   1  1 -
+Reflectance table (Dj, a', b') for qv=qv9
+dl
+ 
+U700       0 1.000000e+00 10 262144      0      0  262144  1   1  1 -
+Neural Network parameters
+dl
+ 

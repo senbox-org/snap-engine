@@ -19,7 +19,7 @@ import java.util.StringTokenizer;
 import java.util.logging.Logger;
 
 /**
- * The <code>AuxDatabase</code> class provides access to the description of MERIS L1b and L2 auxiliary database files
+ * The {@code AuxDatabase} class provides access to the description of MERIS L1b and L2 auxiliary database files
  * and variables.
  * <p/>
  * It is implemented as a singleton, since all information provided by this class is globally accessible.
@@ -30,10 +30,19 @@ public class AuxDatabase {
 
     private static AuxDatabase _instance = new AuxDatabase();
     private AuxFileInfo[] _fileInfos;
-    private HashMap _varIdToVarInfoMap;
+    private HashMap<String, AuxVariableInfo> _varIdToVarInfoMap;
 
     /////////////////////////////////////////////////////////////////////////
     // Public methods
+
+    /**
+     * Gets the number of database files.
+     *
+     * @return the number of database files
+     */
+    public int getFileInfoCount() {
+        return _fileInfos.length;
+    }
 
     /**
      * Gets the one and only instance of this class.
@@ -42,6 +51,16 @@ public class AuxDatabase {
      */
     public static AuxDatabase getInstance() {
         return _instance;
+    }
+
+    /**
+     * Gets the file information at the given index.
+     *
+     * @param index the index
+     * @return the file information, never <code>null</code>
+     */
+    public AuxFileInfo getFileInfo(int index) {
+        return _fileInfos[index];
     }
 
     /**
@@ -66,7 +85,7 @@ public class AuxDatabase {
      * @return
      */
     public AuxVariableInfo getVariableInfo(String varId) {
-        return (AuxVariableInfo) _varIdToVarInfoMap.get(varId);
+        return _varIdToVarInfoMap.get(varId);
     }
 
     /**
@@ -75,7 +94,7 @@ public class AuxDatabase {
      * @return the logger
      */
     public static Logger getLogger() {
-        return Logger.getLogger("org.esa.beam.dataproc.meris.sdr.auxdata");
+        return Logger.getLogger(AuxDatabase.class.getName());
     }
 
     /////////////////////////////////////////////////////////////////////////
@@ -105,7 +124,7 @@ public class AuxDatabase {
     }
 
     private void initVariableInfos() throws IOException {
-        _varIdToVarInfoMap = new HashMap();
+        _varIdToVarInfoMap = new HashMap<>();
         for (final AuxFileInfo fileInfo : _fileInfos) {
             final String resourceName = "index_" + (fileInfo.getTypeId() + ".txa").toLowerCase();
             final InputStream istream = getResourceAsStream(resourceName);
@@ -125,7 +144,7 @@ public class AuxDatabase {
     }
 
     private static AuxFileInfo[] loadFileInfos(BufferedReader r) throws IOException {
-        final List fileInfoList = new ArrayList();
+        final List<AuxFileInfo> fileInfoList = new ArrayList<>();
         AuxFileInfo fileInfo = null;
         StringTokenizer st;
         int dataIndex = 0;
@@ -192,7 +211,7 @@ public class AuxDatabase {
 
 
     private static AuxVariableInfo[] loadVariableInfos(AuxFileInfo fileInfo, BufferedReader r) throws IOException {
-        final List variableInfoList = new ArrayList();
+        final List<AuxVariableInfo> variableInfoList = new ArrayList<>();
         AuxVariableInfo variableInfo = null;
         StringTokenizer st;
         int dataIndex = 0;

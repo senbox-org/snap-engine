@@ -1,0 +1,96 @@
+R000       0 1.000000e+00  0     62      0      0      62  0   0  1 -
+Product file name
+-
+ 
+R106     305 1.000000e+00  0     11      0      0      11  0   0  0 -
+Number of Data Set Records
+-
+ 
+R10E     585 1.000000e+00  0     11      0      0      11  0   0  0 -
+Number of Data Set Records
+-
+ 
+R10M     865 1.000000e+00  0     11      0      0      11  0   0  0 -
+Number of Data Set Records
+-
+ 
+R10U    1145 1.000000e+00  0     11      0      0      11  0   0  0 -
+Number of Data Set Records
+-
+ 
+R112    1425 1.000000e+00  0     11      0      0      11  0   0  0 -
+Number of Data Set Records
+-
+ 
+R11A    1705 1.000000e+00  0     11      0      0      11  0   0  0 -
+Number of Data Set Records
+-
+ 
+R11I    1985 1.000000e+00  0     11      0      0      11  0   1  1 -
+Number of Data Set Records
+-
+ 
+R11Q    2265 1.000000e+00  0     11      0      0      11  0   0  0 -
+Number of Data Set Records
+-
+ 
+R200       0 1.000000e+00  4     15      0      0      60  1   1  1 -
+l tabulated values
+nm
+ 
+R201      60 1.000000e+00  4      5      0      0      20  1   1  1 -
+spare
+-
+ 
+R202      80 1.000000e-06 30     16      0      0      64  1   1  1 -
+qs tabulated values
+deg
+ 
+R203     144 1.000000e-06 30     10      0      0      40  1   1  1 -
+qv tabulated values
+deg
+ 
+R204     184 1.000000e-06 30     25      0      0     100  1   1  1 -
+Df tabulated values
+deg
+ 
+R205     284 1.000000e+00  4      2      0      0       8  1   1  1 -
+wind tabulated values
+m.s-1
+ 
+R206     292 1.000000e+00  0     44      0      0      44  1   1  1 -
+spare
+-
+ 
+R207     336 1.000000e+00  0   1006      0      0    1006  1   1  1 -
+spare
+-
+ 
+R300       0 1.000000e+00  4     34     15      5   10200  1   1  1 -
+Spectral Optical Thickness (iaer, l ,ta)
+dl
+ 
+R400       0 1.000000e+00  4     34      5      0     680  1   1  1 -
+Aerosol Optical Thickness at 865 nm (iaer, ta)
+dl
+ 
+R500       0 1.000000e+00  4     34     15      0    2040  1   1  1 -
+Aerosol Single Scattering Albedo(iaer,lambda)
+dl
+ 
+R600       0 1.000000e+00  4     34     15      0    2040  1   1  1 -
+Aerosol Scattering Probability(iaer, l)
+dl
+ 
+R700       0 1.000000e+00  4     16     10     25   16000  1   1  1 -
+Blue ROGC Threshold (qs, qv, DF)
+dl
+ 
+R800       0 1.000000e+00  4      3     15    250   45000  1   1  1 -
+Coeffs of (rT/rR) to ta relation for case 1 wind
+dl
+ 
+R801   45000 1.000000e+00  4      3     15    250   45000  1   1  1 -
+Coeffs of (rT/rR) to ta relation for case 2 wind
+dl
+ 

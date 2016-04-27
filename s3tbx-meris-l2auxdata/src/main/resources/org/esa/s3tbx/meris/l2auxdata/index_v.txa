@@ -1,0 +1,172 @@
+V000       0 1.000000e+00  0     62      0      0      62  0   0  1 -
+Product file name - V. 40
+-
+
+V106     305 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+V10E     585 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+V10M     865 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+V10U    1145 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+V112    1425 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+V11A    1705 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+V11I    1985 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+V200       0 1.000000e-06  3   1800      0      0    7200  1   1  1 -
+Latitude tabulated values
+deg
+
+V201    7200 1.000000e-06  3   3600      0      0   14400  1   1  1 -
+Longitude tabulated values
+deg
+
+V202   21600 1.000000e-06 30     27      0      0     108  1   1  1 -
+qs tabulated values
+deg
+
+V203   21708 1.000000e-06 30     18      0      0      72  1   1  1 -
+qv tabulated values
+deg
+
+V204   21780 1.000000e-06 30     25      0      0     100  1   1  1 -
+Df tabulated values
+deg
+
+V205   21880 1.000000e+00  4      9      0      0      36  1   2  1 -
+Surface Albedo asurf tabulated values
+dl
+
+V206   21916 1.000000e+00  5      1      0      0       8  1   2  1 -
+Surface Albedo scaling factor
+dl
+
+V207   21924 1.000000e+00  4      2      0      0       8  1   2  1 -
+spare
+dl
+
+V208   21932 1.000000e+00  4      1      0      0       4  1   2  1 -
+Minimum acceptable value for TOAR 753.75 nm
+LU
+
+V209   21936 1.000000e+00  4      1      0      0       4  1   2  1 -
+Maximum acceptable value for TOAR 753.75 nm
+LU
+
+V20A   21940 1.000000e+00  4      1      0      0       4  1   2  1 -
+Minimum acceptable value for TOAR 760.625 nm
+LU
+
+V20B   21944 1.000000e+00  4      1      0      0       4  1   2  1 -
+Maximum acceptable value for TOAR 760.625 nm
+LU
+
+V20C   21948 1.000000e+00 30      1      0      0       4  1   1  1 -
+Switch to use spectral shift index
+dl
+
+V20D   21952 1.000000e+00  4      1      0      0       4  1   2  1 -
+spare
+dl
+
+V20E   21956 1.000000e+00  4      3      0      0      12  1   2  1 -
+spare
+dl
+
+V20F   21968 1.000000e+00  4      1      0      0       4  1   2  1 -
+spare
+dl
+
+V20G   21972 1.000000e+00  4      1      0      0       4  1   2  1 -
+spare
+dl
+
+V20H   21976 1.000000e+00  4      1      0      0       4  1   2  1 -
+Minimum acceptable value for Surface Albedo
+dl
+
+V20I   21980 1.000000e+00  4      1      0      0       4  1   2  1 -
+Maximum acceptable value for Surface Albedo
+dl
+
+V20J   21984 1.000000e+00  4     10      0      0      40  1   2  1 -
+Cloud top pressure tabulated values
+hPa
+
+V20K   22024 1.000000e+00  4     10      0      0      40  1   2  1 -
+Cloud optical thickness tabulated values
+dl
+
+V20L   22064 1.000000e+00 10      1      0      0       1  1   1  1 -
+Number of cloud top pressure tabulated values
+dl
+
+V20M   22065 1.000000e+00 10      1      0      0       1  1   1  1 -
+Number of cloud optical thickness tabulated values
+dl
+
+V20N   22066 1.000000e+00 10     21      0      0      21  1   1  1 -
+Spectral shift index for ADS Neural Net
+dl
+
+V300       0 1.000000e+00 10   1800   3600      0 6480000  1   1  1 -
+Surface Albedo Table ( Latitude , Longitude )
+dl
+
+V400       0 1.000000e+00  4     18     25      9   16200  1   2  1 -
+aal , 0 order coefficient ( qv , Df , asurf ) LUT
+dl
+
+V401   16200 1.000000e+00  4     18     25      9   16200  1   2  1 -
+bal , 1 order coefficient ( qv , Df , asurf ) LUT
+LU-1
+
+V402   32400 1.000000e+00  4     18     25      9   16200  1   2  1 -
+cal , 2 order coefficient ( qv , Df , asurf ) LUT
+LU-2
+
+V500       0 1.000000e+00  4     18     25      9   16200  1   2  1 -
+ath 0 order coefficient ( qv , Df, asurf )
+dl
+
+V501   16200 1.000000e+00  4     18     25      9   16200  1   2  1 -
+bth 1 order coefficient ( qv , Df, asurf )
+LU-1
+
+V502   32400 1.000000e+00  4     18     25      9   16200  1   2  1 -
+cth 2 order coefficient ( qv , Df, asurf )
+LU-2
+
+V503   48600 1.000000e+00  4     18     25      9   16200  1   2  1 -
+dth 3 order coefficient ( qv , Df, asurf )
+LU-3
+
+V600       0 1.000000e+00 10 262144      0      0  262144  2   0  1 -
+Neural Network parameters
+dl
+
+V700       0 1.000000e+00 10 262144      0      0  262144  2   0  1 -
+Neural Network parameters
+dl
+
+V800       0 1.000000e+00 10     10     10      0     100  1   1  1 -
+Cloud type index (cloud top pressure, optical thickness)
+dl
+

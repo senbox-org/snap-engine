@@ -1,0 +1,416 @@
+C000       9 1.000000e+00  0     62      0      0      62  0   0  1 -
+Product file name - V. 20
+-
+
+C106     305 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+C10E     585 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+C10M     865 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+C10U    1145 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+C112    1425 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+C11A    1705 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+C11I    1985 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+C11Q    2265 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+C11Y    2545 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+C126    2825 1.000000e+00  0     11      0      0      11  0   0  1 -
+Number of Data Set Records
+-
+
+C200       0 1.000000e+00 10      1      0      0       1  0   1  1 [0,4]
+number of APID valid values for FR
+nd
+
+C201       1 1.000000e+00 10      1      0      0       1  0   1  1 [0,8]
+number of APID valid values for RR
+nd
+
+C202       2 1.000000e+00 20      1      0      0       2  1   1  1 [1002,65536]
+ref. value for FR packet length
+nd
+
+C203       4 1.000000e+00 20      1      0      0       2  1   1  1 [1002,65536]
+ref. value for RR packet length
+nd
+
+C204       6 1.000000e+00 20      1      0      0       2  0   1  1 -
+Data Field Header length
+nd
+
+C205       8 1.000000e+00 20      1      0      0       2  0   1  1 -
+mode/format APID dependant bits mask
+nd
+
+C206      10 1.000000e+00 20      4      0      0       8  0   1  1 -
+FR APID possible values
+nd
+
+C207      18 1.000000e+00 20      4      0      0       8  0   1  1 -
+FR reference values for APID dependant bits
+nd
+
+C208      26 1.000000e+00 20      8      0      0      16  0   1  1 -
+RR APID possible values
+nd
+
+C209      42 1.000000e+00 20      8      0      0      16  0   1  1 -
+RR reference values for APID dependant bits
+nd
+
+C20A      58 1.000000e+00 20      1      0      0       2  0   1  1 -
+reference values for other bits
+nd
+
+C20B      60 1.000000e+00 20      1      0      0       2  1   1  1 [0,16384]
+packet counter wraparound value
+nd
+
+C20C      62 1.000000e+00 20      1      0      0       2  0   1  1 -
+Binary mask for the OCL dependant bits in the instrument mode field
+nd
+
+C20D      64 1.000000e+00 20      1      0      0       2  0   1  1 -
+Binary mask for the on board correction switch dependant bits in the instrument mode field
+nd
+
+C20E      66 1.000000e+00 20      1      0      0       2  0   1  1 -
+Binary mask for the other bits in the instrument mode field
+nd
+
+C300       0 1.000000e+00 10      1      0      0       1  0   1  1 [5,5]
+number of modules
+nd
+
+C301       1 1.000000e+00 20      1      0      0       2  0   1  1 [740,740]
+number of FR columns per modules
+nd
+
+C302       3 1.000000e+00 20      1      0      0       2  0   1  1 [185,185]
+number of RR columns per modules
+nd
+
+C303       5 1.000000e-06 30      1      0      0       4  1   2  1 -
+FR frame sampling time
+s
+
+C304       9 1.000000e-06 30      1      0      0       4  1   2  1 -
+RR frame sampling time
+s
+
+C305      13 1.000000e-06  3      1      0      0       4  1   1  1 -
+Offset time between acquisition and packet time tag FR
+s
+
+C306      17 1.000000e-06  3      1      0      0       4  1   1  1 -
+Offset time between acquisition and packet time tag RR
+s
+
+C307      21 1.000000e+00  4      1      0      0       4  1   2  1 -
+MERIS modules central column index
+nd
+
+C308      25 1.000000e+00 20      1      0      0       2  0   1  1 -
+number of SP regions for FR SRDF
+nd
+
+C309      27 1.000000e+00 20      1      0      0       2  0   1  1 -
+number of SP regions for RR SRDF
+nd
+
+C30A      29 1.000000e+00 20      1      0      0       2  1   1  1 -
+number of AC regions for FR PSF AL
+nd
+
+C30B      31 1.000000e+00 20      1      0      0       2  1   1  1 -
+number of SP regions for FR PSF AL
+nd
+
+C30C      33 1.000000e+00 20      1      0      0       2  1   1  1 -
+number of AC regions for RR PSF AL
+nd
+
+C30D      35 1.000000e+00 20      1      0      0       2  1   1  1 -
+number of SP regions for RR PSF AL
+nd
+
+C30E      37 1.000000e+00 20      1      0      0       2  1   1  1 -
+AC FR SRDF extent
+nd
+
+C30F      39 1.000000e+00 20      1      0      0       2  1   1  1 -
+AC FR SRDF origin
+nd
+
+C30G      41 1.000000e+00 20      1      0      0       2  1   1  1 -
+AC RR SRDF extent
+nd
+
+C30H      43 1.000000e+00 20      1      0      0       2  1   1  1 -
+AC RR SRDF origin
+nd
+
+C30I      45 1.000000e+00 20      1      0      0       2  1   1  1 -
+AL FR PSF extent
+nd
+
+C30J      47 1.000000e+00 20      1      0      0       2  1   1  1 -
+AL FR PSF origin
+nd
+
+C30K      49 1.000000e+00 20      1      0      0       2  1   1  1 -
+AL RR PSF extent
+nd
+
+C30L      51 1.000000e+00 20      1      0      0       2  1   1  1 -
+AL RR PSF origin
+nd
+
+C30M      53 1.000000e+00 20      1      0      0       2  1   1  1 -
+Number of blank pixels in one module
+nd
+
+C30N      55 1.000000e+00 20      1      0      0       2  1   1  1 -
+Number of rows (spectral samples) of a CCD
+nd
+
+C30O      57 1.000000e+00 20      1      0      0       2  1   1  1 
+Number of used Spectral Shift indices
+nd
+
+C30P      59 1.000000e+00  4     41      0      0     164  1   2  1 -
+Spectral shift values for each used index
+nm
+
+C400       0 1.000000e-06  3   3700      0      0   14800  2   1  1 -
+AC Pointing FR
+deg
+
+C401   14800 1.000000e+00  1   3700      0      0    3700  2   0  1 -
+AL Frame Offset FR
+nd
+
+C402   18500 1.000000e+00 20   3700      0      0    7400  2   1  1 -
+FR Pixel ID (GOOD/BAD for each band , Y/N for resampling)
+-
+
+C403   25900 1.000000e-06 30      1      0      0       4  1   2  1 -
+Instantaneous FR Field of View (FOV) of one pixel
+deg
+
+C500       0 1.000000e-06  3    925      0      0    3700  2   1  1 -
+AC Pointing RR
+deg
+
+C501    3700 1.000000e+00  1    925      0      0     925  2   0  1 -
+AL Frame Offset RR
+nd
+
+C502    4625 1.000000e+00 20    925      0      0    1850  2   1  1 -
+RR Pixel ID (GOOD/BAD for each band , Y/N for resampling)
+-
+
+C503    6475 1.000000e-06 30      1      0      0       4  1   2  1 -
+Instantaneous RR Field of View (FOV) of one pixel
+deg
+
+C600       0 1.000000e+00 20      1      0      0       2  1   1  1 -
+MERIS module index for FR SRDF
+-
+
+C601       2 1.000000e+00 20      1      0      0       2  1   1  1 
+SP region index for FR SRDF
+-
+
+C602       4 1.000000e+00  4   1480      0      0    5920  2   2  1 -
+SRDF FR for band 1
+dl
+
+C603    5924 1.000000e+00  4   1480      0      0    5920  2   2  1 -
+SRDF FR for band 2
+dl
+
+C604   11844 1.000000e+00  4   1480      0      0    5920  2   2  1 -
+SRDF FR for band 3
+dl
+
+C605   17764 1.000000e+00  4   1480      0      0    5920  2   2  1 -
+SRDF FR for band 4
+dl
+
+C606   23684 1.000000e+00  4   1480      0      0    5920  2   2  1 -
+SRDF FR for band 5
+dl
+
+C607   29604 1.000000e+00  4   1480      0      0    5920  2   2  1 -
+SRDF FR for band 6
+dl
+
+C608   35524 1.000000e+00  4   1480      0      0    5920  2   2  1 -
+SRDF FR for band 7
+dl
+
+C609   41444 1.000000e+00  4   1480      0      0    5920  2   2  1 -
+SRDF FR for band 8
+dl
+
+C60A   47364 1.000000e+00  4   1480      0      0    5920  2   2  1 -
+SRDF FR for band 9
+dl
+
+C60B   53284 1.000000e+00  4   1480      0      0    5920  2   2  1 -
+SRDF FR for band 10
+dl
+
+C60C   59204 1.000000e+00  4   1480      0      0    5920  2   2  1 -
+SRDF FR for band 11
+dl
+
+C60D   65124 1.000000e+00  4   1480      0      0    5920  2   2  1 -
+SRDF FR for band 12
+dl
+
+C60E   71044 1.000000e+00  4   1480      0      0    5920  2   2  1 -
+SRDF FR for band 13
+dl
+
+C60F   76964 1.000000e+00  4   1480      0      0    5920  2   2  1 -
+SRDF FR for band 14
+dl
+
+C60G   82884 1.000000e+00  4   1480      0      0    5920  2   2  1 -
+SRDF FR for band 15
+dl
+
+C60H   88804 1.000000e+00  4    740      0      0    2960  2   2  1 -
+FR across-track weighting for equivalent flux of current spectral region
+dl
+
+C700       0 1.000000e+00 20      1      0      0       2  1   1  1 -
+MERIS module index for RR SRDF
+-
+
+C701       2 1.000000e+00 20      1      0      0       2  2   2  1 -
+SP region index for RR SRDF
+-
+
+C702       4 1.000000e+00  4    370      0      0    1480  2   2  1 -
+SRDF RR for band 1
+dl
+
+C703    1484 1.000000e+00  4    370      0      0    1480  2   2  1 -
+SRDF RR for band 2
+dl
+
+C704    2964 1.000000e+00  4    370      0      0    1480  2   2  1 -
+SRDF RR for band 3
+dl
+
+C705    4444 1.000000e+00  4    370      0      0    1480  2   2  1 -
+SRDF RR for band 4
+dl
+
+C706    5924 1.000000e+00  4    370      0      0    1480  2   2  1 -
+SRDF RR for band 5
+dl
+
+C707    7404 1.000000e+00  4    370      0      0    1480  2   2  1 -
+SRDF RR for band 6
+dl
+
+C708    8884 1.000000e+00  4    370      0      0    1480  2   2  1 -
+SRDF RR for band 7
+dl
+
+C709   10364 1.000000e+00  4    370      0      0    1480  2   2  1 -
+SRDF RR for band 8
+dl
+
+C70A   11844 1.000000e+00  4    370      0      0    1480  2   2  1 -
+SRDF RR for band 9
+dl
+
+C70B   13324 1.000000e+00  4    370      0      0    1480  2   2  1 -
+SRDF RR for band 10
+dl
+
+C70C   14804 1.000000e+00  4    370      0      0    1480  2   2  1 -
+SRDF RR for band 11
+dl
+
+C70D   16284 1.000000e+00  4    370      0      0    1480  2   2  1 -
+SRDF RR for band 12
+dl
+
+C70E   17764 1.000000e+00  4    370      0      0    1480  2   2  1 -
+SRDF RR for band 13
+dl
+
+C70F   19244 1.000000e+00  4    370      0      0    1480  2   2  1 -
+SRDF RR for band 14
+dl
+
+C70G   20724 1.000000e+00  4    370      0      0    1480  2   2  1 -
+SRDF RR for band 15
+dl
+
+C70H   22204 1.000000e+00  4    185      0      0     740  2   2  1 -
+RR across-track weighting for equivalent flux of current spectral region
+dl
+
+C800       0 1.000000e+00 20      1      0      0       2  1   1  1 -
+AC region number for FR PSF AL
+-
+
+C801       2 1.000000e+00 20      1      0      0       2  1   1  1 -
+SP region number for FR PSF AL
+-
+
+C802       4 1.000000e+00  4     51      0      0     204  2   2  1 -
+FR PSF AL
+dl
+
+C900       0 1.000000e+00 20      1      0      0       2  1   1  1 -
+AC region number for RR PSF AL
+-
+
+C901       2 1.000000e+00 20      1      0      0       2  1   1  1 -
+SP region number for RR PSF AL
+-
+
+C902       4 1.000000e+00  4     51      0      0     204  2   2  1 -
+RR PSF AL
+dl
+
+CA00       0 1.000000e+00 10   3700      0      0    3700  2   2  2 [0,20]
+FR spectral shift index
+dl
+
+CB00       0 1.000000e+00 10    925      0      0     925  2   2  2 [0,20]
+RR spectral shift index
+dl
+

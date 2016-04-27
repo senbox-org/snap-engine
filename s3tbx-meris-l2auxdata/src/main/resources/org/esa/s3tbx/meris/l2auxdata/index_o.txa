@@ -1,0 +1,364 @@
+O000       0 1.000000e+00  0     62      0      0      62  0   0  1 -
+Product file name
+-
+ 
+O106     305 1.000000e+00  0     11      0      0      11  0   0  0 -
+Number of Data Set Records
+-
+ 
+O10E     585 1.000000e+00  0     11      0      0      11  0   0  0 -
+Number of Data Set Records
+-
+ 
+O10M     865 1.000000e+00  0     11      0      0      11  0   0  0 -
+Number of Data Set Records
+-
+ 
+O10U    1145 1.000000e+00  0     11      0      0      11  0   0  0 -
+Number of Data Set Records
+-
+ 
+O112    1425 1.000000e+00  0     11      0      0      11  0   1  1 -
+Number of Data Set Records
+-
+ 
+O200       0 1.000000e+00 20      1      0      0       2  1   1  1 -
+Number of iterations for chl1  calculation
+-
+ 
+O201       2 1.000000e+00 10      1      0      0       1  1   1  1 -
+Flag indicating the presence of stratospheric aerosols
+nd
+ 
+O202       3 1.000000e+00  4     15      0      0      60  1   2  1 -
+Default radiance for saturated pixels
+LU
+ 
+O203      63 1.000000e+00  4      1      0      0       4  1   2  1 -
+Maximum Optical Thickness for Land Aerosol
+-
+ 
+O204      67 1.000000e+00  4     15      0      0      60  1   2  1 -
+scaling factor -  Normalized Reflectances
+dl
+ 
+O205     127 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - Algal pigment index
+dl
+ 
+O206     131 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - Yellow substance
+dl
+ 
+O207     135 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - Suspended sediment
+dl
+ 
+O208     139 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - Aerosol epsilon
+dl
+ 
+O209     143 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - Aerosol optical thickness
+dl
+ 
+O20A     147 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - Cloud optical thickness
+dl
+ 
+O20B     151 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - Surface pressure
+dl
+ 
+O20C     155 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - Water vapour
+dl
+ 
+O20D     159 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - Photosynthetically active radiation
+dl
+ 
+O20E     163 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - TOA Vegetation index
+dl
+ 
+O20F     167 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - BOA Vegetation index
+dl
+ 
+O20G     171 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - Cloud Albedo
+dl
+ 
+O20H     175 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - Cloud Top Pressure
+dl
+ 
+O20I     179 1.000000e+00  4     15      0      0      60  1   2  1 -
+offset - Normalized Reflectances
+dl
+ 
+O20J     239 1.000000e+00  4      1      0      0       4  1   2  1 -
+offset - Algal pigment index
+mg.m-3 in Log10
+ 
+O20K     243 1.000000e+00  4      1      0      0       4  1   2  1 -
+offset - Yellow substance
+m-1
+ 
+O20L     247 1.000000e+00  4      1      0      0       4  1   2  1 -
+offset - Suspended sediment
+g.m-3 in Log10
+ 
+O20M     251 1.000000e+00  4      1      0      0       4  1   2  1 -
+offset - Aerosol epsilon
+dl
+ 
+O20N     255 1.000000e+00  4      1      0      0       4  1   2  1 -
+offset - Aerosol optical thickness
+dl
+ 
+O20O     259 1.000000e+00  4      1      0      0       4  1   2  1 -
+offset - Cloud optical thickness
+dl
+ 
+O20P     263 1.000000e+00  4      1      0      0       4  1   2  1 -
+offset - Surface pressure
+hPa
+ 
+O20Q     267 1.000000e+00  4      1      0      0       4  1   2  1 -
+offset - Water vapour
+g.cm-2
+ 
+O20R     271 1.000000e+00  4      1      0      0       4  1   2  1 -
+offset - Photosynthetically active radiation
+microEinstein.m-2
+ 
+O20S     275 1.000000e+00  4      1      0      0       4  1   2  1 -
+offset - TOA Vegetation index
+dl
+ 
+O20T     279 1.000000e+00  4      1      0      0       4  1   2  1 -
+offset - BOA Vegetation index
+dl
+ 
+O20U     283 1.000000e+00  4      1      0      0       4  1   2  1 -
+offset - Cloud Albedo
+dl
+ 
+O20V     287 1.000000e+00  4      1      0      0       4  1   2  1 -
+offset - Cloud Top Pressure
+hPa
+ 
+O20W     291 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - rectified near infrared reflectance
+dl
+ 
+O20X     295 1.000000e+00  4      1      0      0       4  1   2  1 -
+offset - rectified near infrared reflectance
+dl
+ 
+O20Y     299 1.000000e+00  4      1      0      0       4  1   2  1 -
+scaling factor - rectified  red reflectance
+dl
+ 
+O20Z     303 1.000000e+00  4      1      0      0       4  1   2  1 -
+offset - rectified  red reflectance
+dl
+ 
+O300       0 1.000000e+00  4      1      0      0       4  1   2  1 -
+Square of Sun-Earth distance at reference date
+m
+ 
+O301       4 1.000000e+00  0     15      0      0      15  1   1  1 -
+Array of per band switches enabling Smile Effect Correction for Land pixels reflectance
+-
+ 
+O302      19 1.000000e+00  0     15      0      0      15  1   1  1 -
+Array of per band switches enabling Smile Effect Correction for Water pixels reflectance
+-
+ 
+O303      34 1.000000e+00  0     15      2      0      30  1   1  1 -
+Array of pairs of band indices for estimation of reflectance spectral derivative (Land pixels)
+-
+ 
+O304      64 1.000000e+00  0     15      2      0      30  1   1  1 -
+Array of pairs of band indices for estimation of reflectance spectral derivative (Water pixels)
+-
+ 
+O305      94 1.000000e+00  4     15      0      0      60  1   1  1 -
+MERIS bands theoretical central wavelengths
+nm
+ 
+O306     154 1.000000e+00  4     15      0      0      60  1   1  1 -
+Reference Solar flux used in Look-up-tables generation
+EU
+ 
+O307     214 1.000000e+00  4     15    925      0   55500  2   1  2 -
+MERIS RR pixels characterised wavelengths
+nm
+ 
+O308   55714 1.000000e+00  4     15    925      0   55500  2   1  2 -
+Reference Solar flux for MERIS RR pixels
+EU
+ 
+O309  111214 1.000000e+00  4     15   3700      0  222000  2   1  2 -
+MERIS FR pixels characterised wavelengths
+nm
+ 
+O30A  333214 1.000000e+00  4     15   3700      0  222000  2   1  2 -
+Reference Solar flux for MERIS FR pixels
+EU
+ 
+O400       0 1.000000e+00  0      1      0      0       1  1   1  1 -
+spare
+-
+ 
+O401       1 1.000000e+00  4      1      0      0       4  1   1  1 -
+Threshold for dust-like aerosol test at 510 nm
+dl
+ 
+O402       5 1.000000e+00  4      1      0      0       4  1   1  1 -
+Threshold for blue-like aerosol test at 510 nm
+dl
+ 
+O403       9 1.000000e+00 10     10     20      0     200  2   1  2 -
+Lists of Aerosol Models indices
+nd
+ 
+O404     209 1.000000e+00 10      1      0      0       1  1   1  1 -
+Total number of aerosol models used
+nd
+ 
+O405     210 1.000000e+00 10      1      0      0       1  1   1  1 -
+Number of passes within the algorithm
+nd
+ 
+O406     211 1.000000e+00 10      1      0      0       1  1   1  1 -
+Number of polynomial coefficients  relating rpath/rR to the aerosol optical thickness
+nd
+ 
+O407     212 1.000000e+00 10     50      0      0      50  1   1  1 -
+Indices of models that shall trigger the AERO_BLUE flag
+nd
+ 
+O408     262 1.000000e+00 10      1      0      0       1  1   1  1 -
+spare
+nd
+ 
+O409     263 1.000000e+00 10      1      0      0       1  1   1  1 -
+spare
+nd
+ 
+O40A     264 1.000000e+00  4      1      0      0       4  1   1  1 -
+maximum allowed value for optical thickness
+dl
+ 
+O40B     268 1.000000e+00  4      1      0      0       4  1   1  1 -
+threshold on depth for flagging shallow water
+m
+ 
+O40C     272 1.000000e+00  4      1      0      0       4  1   1  1 -
+spare
+nd
+ 
+O40D     276 1.000000e+00  4      1      0      0       4  1   1  1 -
+Marine reflectance mean value at 705 nm
+dl
+ 
+O40E     280 1.000000e+00  4      1      0      0       4  1   1  1 -
+Threshold for flagging aerosol optical thickness
+dl
+ 
+O40F     284 1.000000e+00 10      1      0      0       1  1   1  1 -
+Switch to test for absorbing aerosols
+nd
+ 
+O40G     285 1.000000e-06 30      1      0      0       4  1   1  1 -
+sun zenith angle ceiling value for modifying annotation flag
+deg
+ 
+O40H     289 1.000000e+00 30      1      0      0       4  1   1  1 -
+spare
+nd
+ 
+O40I     293 1.000000e+00  4      1      0      0       4  1   1  1 -
+Threshold for pressure correction
+hPa
+ 
+O40J     297 1.000000e+00 10      1      0      0       1  1   1  1 -
+Number of wavelengths used in the LUTs
+nd
+ 
+O40K     298 1.000000e+00 10      1      0      0       1  1   1  1 -
+Number of aerosol models used at each pass
+nd
+ 
+O40L     299 1.000000e+00 10      1      0      0       1  1   1  1 -
+Switch to use aerosol Climatology
+nd
+ 
+O500       0 1.000000e+00  4      1      0      0       4  1   1  1 -
+Confidence interval between pressure estimates
+hPa
+ 
+O501       4 1.000000e+00 10      1      0      0       1  1   1  1 -
+Numerator band index for spectral ratio 1 (with band numbering starting at 1)
+nd
+ 
+O502       5 1.000000e+00 10      1      0      0       1  1   1  1 -
+Denominator band index for spectral ratio 1 (with band numbering starting at 1)
+nd
+ 
+O503       6 1.000000e+00  4      1      0      0       4  1   1  1 -
+Lower Threshold for spectral ratio 1
+dl
+ 
+O504      10 1.000000e+00  4      1      0      0       4  1   1  1 -
+Upper threshold for spectral ratio 1
+dl
+ 
+O505      14 1.000000e+00 10      1      0      0       1  1   1  1 -
+Numerator band index for spectral ratio 2 (with band numbering starting at 1)
+nd
+ 
+O506      15 1.000000e+00 10      1      0      0       1  1   1  1 -
+Denominator band index for spectral ratio 2 (with band numbering starting at 1)
+nd
+ 
+O507      16 1.000000e+00  4      1      0      0       4  1   1  1 -
+Lower Threshold for spectral ratio 2
+dl
+ 
+O508      20 1.000000e+00  4      1      0      0       4  1   1  1 -
+Upper threshold for spectral ratio 2
+dl
+ 
+O509      24 1.000000e+00 10    256      0      0     256  1   1  1 -
+Decision table for classification above water
+nd
+ 
+O50A     280 1.000000e+00 10    256      0      0     256  1   1  1 -
+Decision table for classification above land
+nd
+ 
+O50B     536 1.000000e+00 10      1      0      0       1  1   2  1 -
+Index of band for reflectance threshold test (with band numbering starting at 1)
+dl
+ 
+O50C     537 1.000000e-06 30     12      0      0      48  1   2  1 -
+q tabulated values for GADS reflectance threshold
+deg
+ 
+O50D     585 1.000000e+00 10     78      2      0     156  1   2  1 -
+Stored combinations of (qs, qv) for GADS reflectance threshold
+dl
+ 
+O50E     741 1.000000e-06 30     19      0      0      76  1   2  1 -
+Df tabulated values for GADS reflectance threshold
+deg
+ 
+O600       0 1.000000e+00  4     78     19      0    5928  1   1  1 -
+Threshold on Rayleigh-corrected reflectance (qsxqv,Df)
+dl
+ 
