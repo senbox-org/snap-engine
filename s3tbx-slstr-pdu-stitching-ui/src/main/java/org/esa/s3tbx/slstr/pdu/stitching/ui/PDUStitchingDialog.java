@@ -28,7 +28,7 @@ public class PDUStitchingDialog extends ModelessDialog {
 
     private final PDUStitchingModel formModel;
 
-    public PDUStitchingDialog(final String title, final String helpID, AppContext appContext) {
+    public PDUStitchingDialog(final String title, AppContext appContext, final String helpID) {
         super(appContext.getApplicationWindow(), title, ID_APPLY_CLOSE, helpID);
 
         final OperatorSpi operatorSpi = GPF.getDefaultInstance().getOperatorSpiRegistry().getOperatorSpi("PduStitching");
