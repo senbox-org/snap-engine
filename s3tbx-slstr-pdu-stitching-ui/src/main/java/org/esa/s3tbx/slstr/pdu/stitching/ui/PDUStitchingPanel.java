@@ -214,7 +214,7 @@ class PDUStitchingPanel extends JPanel {
     private JPanel createWorldMapPanel() {
         boundariesProvider = new PDUBoundariesProvider();
         final PDUBoundaryOverlay pduBoundaryOverlay = new PDUBoundaryOverlay(boundariesProvider);
-        worldMapPane = new WorldMapPane(new WorldMapPaneDataModel(), pduBoundaryOverlay);
+        worldMapPane = new PDUWorldMapPane(new WorldMapPaneDataModel(), boundariesProvider, pduBoundaryOverlay);
         return worldMapPane;
     }
 
