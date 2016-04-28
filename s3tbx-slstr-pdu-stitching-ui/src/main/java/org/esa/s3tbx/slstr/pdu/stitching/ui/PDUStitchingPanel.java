@@ -180,7 +180,7 @@ class PDUStitchingPanel extends JPanel {
         sourceProductList.setPropertyNameLastOpenedFormat("Sen3");
         sourceProductList.addChangeListener(changeListener);
         sourceProductList.setXAxis(false);
-        sourceProductList.setExplicitPattern("xfdumanifest.xml");
+        sourceProductList.setDefaultPattern("S3A_SL_1*.SEN3");
         sourceProductList.setProductFilter(new ProductFilter() {
             @Override
             public boolean accept(Product product) {
