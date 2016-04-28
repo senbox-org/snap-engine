@@ -99,37 +99,43 @@ class PDUStitchingPanel extends JPanel {
                                 List<String> validatedPathsList = new ArrayList<>();
                                 List<File> validatedFilesList = new ArrayList<>();
                                 for (int i = 0; i < productFiles.length; i++) {
-                                    final String fileName = productFiles[i].getAbsolutePath();
-                                    if (validatedFileNamesList.contains(fileName)) {
-                                        Dialogs.showInformation("Removed duplicate occurence of " + fileName + " from selection.");
-                                    } else if (!SlstrL1bFileNameValidator.isValidSlstrL1BFile(productFiles[i])) {
-                                        Dialogs.showInformation(fileName + " is not a valid SLSTR L1B product. Removed from selection.");
+                                    File adjustedFile;
+                                    if (productFiles[i].getName().equals("xfdumanifest.xml")) {
+                                        adjustedFile = productFiles[i];
                                     } else {
-                                        validatedFileNamesList.add(fileName);
+                                        adjustedFile = new File(productFiles[i], "xfdumanifest.xml");
+                                    }
+                                    String adjustedFileName = adjustedFile.getAbsolutePath();
+                                    final String origFileName = productFiles[i].getAbsolutePath();
+                                    if (validatedFileNamesList.contains(adjustedFileName)) {
+                                        Dialogs.showInformation("Removed duplicate occurence of " + origFileName + " from selection.");
+                                    } else if (!SlstrL1bFileNameValidator.isValidSlstrL1BFile(productFiles[i])) {
+                                        Dialogs.showInformation(origFileName + " is not a valid SLSTR L1B product. Removed from selection.");
+                                    } else {
+                                        validatedFileNamesList.add(adjustedFileName);
                                         validatedProductsList.add(sourceProducts[i]);
-                                        if (fileName.equals("xfdumanifest.xml")) {
-                                            validatedFilesList.add(productFiles[i]);
-                                        } else {
-                                            validatedFilesList.add(new File(productFiles[i], "xfdumanifest.xml"));
-                                        }
+                                        validatedFilesList.add(adjustedFile);
                                         final boolean selected = sourceProductList.isSelected(sourceProducts[i]);
                                         boundariesProvider.extractBoundaryFromFile(productFiles[i], sourceProducts[i], selected);
                                     }
                                 }
                                 for (File file : pathFiles) {
-                                    final String fileName = file.getAbsolutePath();
-                                    if (validatedFileNamesList.contains(fileName)) {
-                                        Dialogs.showInformation("Removed duplicate occurence of " + fileName + " from selection.");
-                                    } else if (!SlstrL1bFileNameValidator.isValidSlstrL1BFile(file)) {
-                                        Dialogs.showInformation(fileName + " is not a valid SLSTR L1B product. Removed from selection.");
+                                    File adjustedFile;
+                                    if (file.getName().equals("xfdumanifest.xml")) {
+                                        adjustedFile = file;
                                     } else {
-                                        validatedFileNamesList.add(fileName);
-                                        validatedPathsList.add(fileName);
-                                        if (fileName.equals("xfdumanifest.xml")) {
-                                            validatedFilesList.add(file);
-                                        } else {
-                                            validatedFilesList.add(new File(file, "xfdumanifest.xml"));
-                                        }
+                                        adjustedFile = new File(file, "xfdumanifest.xml");
+                                    }
+                                    final String adjustedFileName = adjustedFile.getAbsolutePath();
+                                    final String origFileName = file.getAbsolutePath();
+                                    if (validatedFileNamesList.contains(adjustedFileName)) {
+                                        Dialogs.showInformation("Removed duplicate occurence of " + origFileName + " from selection.");
+                                    } else if (!SlstrL1bFileNameValidator.isValidSlstrL1BFile(file)) {
+                                        Dialogs.showInformation(origFileName + " is not a valid SLSTR L1B product. Removed from selection.");
+                                    } else {
+                                        validatedFileNamesList.add(adjustedFileName);
+                                        validatedPathsList.add(origFileName);
+                                        validatedFilesList.add(adjustedFile);
                                         final boolean selected = sourceProductList.isSelected(file);
                                         boundariesProvider.extractBoundaryFromFile(file, file, selected);
                                     }
