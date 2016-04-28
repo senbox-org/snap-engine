@@ -17,7 +17,7 @@ import java.awt.event.ActionEvent;
 @ActionID(category = "Operators", id = "org.esa.s3tbx.slstr.pdu.stitching.PDUStitchingAction")
 @ActionRegistration(displayName = "#CTL_PDUStitchingAction_Name")
 @ActionReference(path = "Menu/Optical/Geometric", position = 8)
-@NbBundle.Messages("CTL_PDUStitchingAction_Name=SLSTR L1B PDU Stitching")
+@NbBundle.Messages("CTL_PDUStitchingAction_Name=SLSTR L1B Stitching")
 public class PDUStitchingAction extends AbstractSnapAction {
 
     private ModelessDialog dialog;
