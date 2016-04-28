@@ -1,6 +1,7 @@
 package org.esa.s3tbx.slstr.pdu.stitching;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -9,6 +10,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.Arrays;
 
 /**
  * @author Tonio Fincke
@@ -22,10 +24,15 @@ public class Validator {
             for (int i = 0; i < manifestFiles.length; i++) {
                 manifests[i] = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(manifestFiles[i]);
             }
+        } catch (SAXException | ParserConfigurationException e) {
+            throw new IOException(MessageFormat.format("{0}: {1}", msg, e.getMessage()));
+        }
+        try {
             validateOrbitReference(manifests);
             validateMissingElements(manifests);
-        } catch (SAXException | ParserConfigurationException | PDUStitchingException e) {
-            throw new IOException(MessageFormat.format("{0}: {1}", msg, e.getMessage()));
+            validateAdjacency(manifests);
+        } catch (PDUStitchingException e) {
+            throw new IOException(e.getMessage());
         }
     }
 
@@ -61,6 +68,39 @@ public class Validator {
             final NodeList missingElements = manifest.getElementsByTagName("slstr:missingElements");
             if (missingElements.getLength() > 0) {
                 throw new PDUStitchingException("Manifest contains missing elements");
+            }
+        }
+    }
+
+    static void validateAdjacency(Document[] manifests) throws PDUStitchingException {
+        int[] startOffsets = new int[manifests.length];
+        int[] endOffsets = new int[manifests.length];
+        for (int k = 0; k < manifests.length; k++) {
+            Document manifest = manifests[k];
+            final NodeList nadirImageSizes = manifest.getElementsByTagName("slstr:nadirImageSize");
+            for (int i = 0; i < nadirImageSizes.getLength(); i++) {
+                final Node nadirImageSize = nadirImageSizes.item(i);
+                final Node grid = nadirImageSize.getAttributes().getNamedItem("grid");
+                startOffsets[k] = -1;
+                endOffsets[k] = 0;
+                if (grid != null && grid.getNodeValue().equals("0.5 km stripe A")) {
+                    final NodeList childNodes = nadirImageSize.getChildNodes();
+                    for (int j = 0; j < childNodes.getLength(); j++) {
+                        if (childNodes.item(j).getNodeName().equals("sentinel3:startOffset")) {
+                            startOffsets[k] = Integer.parseInt(childNodes.item(j).getTextContent());
+                        } else if (childNodes.item(j).getNodeName().equals("sentinel3:rows")) {
+                            endOffsets[k] = startOffsets[k] + Integer.parseInt(childNodes.item(j).getTextContent());
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+        Arrays.sort(startOffsets);
+        Arrays.sort(endOffsets);
+        for (int i = 0; i < manifests.length - 1; i++) {
+            if (endOffsets[i] != startOffsets[i + 1]) {
+                throw new PDUStitchingException("Selected units must be adjacent");
             }
         }
     }

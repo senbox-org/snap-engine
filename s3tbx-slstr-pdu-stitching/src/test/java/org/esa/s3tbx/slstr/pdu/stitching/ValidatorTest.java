@@ -153,4 +153,20 @@ public class ValidatorTest {
         }
     }
 
+    @Test
+    public void testAdjacency_notAdjacent() throws ParserConfigurationException, IOException, SAXException {
+        final File firstSlstrFile = TestUtils.getFirstSlstrFile();
+        final File thirdSlstrFile = TestUtils.getThirdSlstrFile();
+        Document[] manifests = new Document[2];
+        manifests[0] = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(firstSlstrFile);
+        manifests[1] = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(thirdSlstrFile);
+
+        try {
+            Validator.validateAdjacency(manifests);
+            fail("Exception expected");
+        } catch (PDUStitchingException e) {
+            assertEquals("Selected units must be adjacent", e.getMessage());
+        }
+    }
+
 }
