@@ -64,153 +64,25 @@ class PDUStitchingPanel extends JPanel {
         isReactingToChange = false;
         setLayout(new BorderLayout());
         final JSplitPane pane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, createSourceProductsPanel(), createWorldMapPanel());
+        pane.setDividerLocation(0.35);
+        pane.setResizeWeight(0.35);
+        pane.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
         add(pane, BorderLayout.CENTER);
         add(createTargetDirPanel(), BorderLayout.SOUTH);
     }
 
     private JPanel createSourceProductsPanel() {
-        ListDataListener changeListener = new ListDataListener() {
-
-            @Override
-            public void contentsChanged(ListDataEvent event) {
-                final SwingWorker worker = new SwingWorker() {
-                    @Override
-                    protected Object doInBackground() throws Exception {
-                        if (!isReactingToChange) {
-                            isReactingToChange = true;
-                            boundariesProvider.clear();
-                            final Product[] sourceProducts = sourceProductList.getSourceProducts();
-                            final String[] filePaths = (String[]) model.getPropertyValue(PDUStitchingModel.PROPERTY_SOURCE_PRODUCT_PATHS);
-                            File[] productFiles = new File[sourceProducts.length];
-                            for (int i = 0; i < sourceProducts.length; i++) {
-                                productFiles[i] = sourceProducts[i].getFileLocation();
-                            }
-                            final Logger logger = Logger.getLogger(PDUStitchingPanel.class.getName());
-                            final Set<File> dissolvedFilePaths = PDUStitchingOp.getSourceProductsPathFileSet(filePaths, logger);
-                            File[] pathFiles = dissolvedFilePaths.toArray(new File[dissolvedFilePaths.size()]);
-                            Product[] validatedProducts = new Product[0];
-                            String[] validatedPaths = new String[0];
-                            if (productFiles.length == 0 && pathFiles.length == 0) {
-                                statusLabel.setForeground(Color.BLACK);
-                                statusLabel.setText(NO_SOURCE_PRODUCTS_TEXT);
-                            } else {
-                                List<String> validatedFileNamesList = new ArrayList<>();
-                                List<Product> validatedProductsList = new ArrayList<>();
-                                List<String> validatedPathsList = new ArrayList<>();
-                                List<File> validatedFilesList = new ArrayList<>();
-                                for (int i = 0; i < productFiles.length; i++) {
-                                    File adjustedFile;
-                                    if (productFiles[i].getName().equals("xfdumanifest.xml")) {
-                                        adjustedFile = productFiles[i];
-                                    } else {
-                                        adjustedFile = new File(productFiles[i], "xfdumanifest.xml");
-                                    }
-                                    String adjustedFileName = adjustedFile.getAbsolutePath();
-                                    final String origFileName = productFiles[i].getAbsolutePath();
-                                    if (validatedFileNamesList.contains(adjustedFileName)) {
-                                        Dialogs.showInformation("Removed duplicate occurence of " + origFileName + " from selection.");
-                                    } else if (!SlstrL1bFileNameValidator.isValidSlstrL1BFile(productFiles[i])) {
-                                        Dialogs.showInformation(origFileName + " is not a valid SLSTR L1B product. Removed from selection.");
-                                    } else {
-                                        validatedFileNamesList.add(adjustedFileName);
-                                        validatedProductsList.add(sourceProducts[i]);
-                                        validatedFilesList.add(adjustedFile);
-                                        final boolean selected = sourceProductList.isSelected(sourceProducts[i]);
-                                        boundariesProvider.extractBoundaryFromFile(productFiles[i], sourceProducts[i], selected);
-                                    }
-                                }
-                                for (File file : pathFiles) {
-                                    File adjustedFile;
-                                    if (file.getName().equals("xfdumanifest.xml")) {
-                                        adjustedFile = file;
-                                    } else {
-                                        adjustedFile = new File(file, "xfdumanifest.xml");
-                                    }
-                                    final String adjustedFileName = adjustedFile.getAbsolutePath();
-                                    final String origFileName = file.getAbsolutePath();
-                                    if (validatedFileNamesList.contains(adjustedFileName)) {
-                                        Dialogs.showInformation("Removed duplicate occurence of " + origFileName + " from selection.");
-                                    } else if (!SlstrL1bFileNameValidator.isValidSlstrL1BFile(file)) {
-                                        Dialogs.showInformation(origFileName + " is not a valid SLSTR L1B product. Removed from selection.");
-                                    } else {
-                                        validatedFileNamesList.add(adjustedFileName);
-                                        validatedPathsList.add(origFileName);
-                                        validatedFilesList.add(adjustedFile);
-                                        final boolean selected = sourceProductList.isSelected(file);
-                                        boundariesProvider.extractBoundaryFromFile(file, file, selected);
-                                    }
-                                }
-                                if (validatedProductsList.size() > 0) {
-                                    validatedProducts = validatedProductsList.toArray(new Product[validatedProductsList.size()]);
-                                }
-                                if (validatedPathsList.size() > 0) {
-                                    validatedPaths = validatedPathsList.toArray(new String[validatedPathsList.size()]);
-                                }
-                                try {
-                                    Validator.validate(validatedFilesList.toArray(new File[validatedFilesList.size()]));
-                                    statusLabel.setForeground(Color.GREEN.darker());
-                                    statusLabel.setText(VALID_SOURCE_PRODUCTS_TEXT);
-                                } catch (IOException e) {
-                                    statusLabel.setForeground(Color.RED);
-                                    statusLabel.setText(INVALID_SELECTION_TEXT + e.getMessage());
-                                }
-                            }
-                            model.setPropertyValue(PDUStitchingModel.PROPERTY_SOURCE_PRODUCTS, validatedProducts);
-                            if (validatedPaths.length != filePaths.length) {
-                                model.setPropertyValue(PDUStitchingModel.PROPERTY_SOURCE_PRODUCT_PATHS, validatedPaths);
-                            }
-                            sourceProductList.bindComponents();
-                            isReactingToChange = false;
-                        }
-                        return null;
-                    }
-
-                    @Override
-                    protected void done() {
-                        try {
-                            get();
-                            worldMapPane.repaint();
-                        } catch (Exception e) {
-                            final String msg = String.format("Cannot display source product files.\n%s", e.getMessage());
-                            appContext.handleError(msg, e);
-                        }
-                    }
-                };
-                worker.execute();
-            }
-
-            @Override
-            public void intervalAdded(ListDataEvent e) {
-                contentsChanged(e);
-            }
-
-            @Override
-            public void intervalRemoved(ListDataEvent e) {
-                contentsChanged(e);
-            }
-        };
-
         sourceProductList = new SourceProductList(appContext);
         sourceProductList.setPropertyNameLastOpenInputDir(INPUT_PRODUCT_DIR_KEY);
         sourceProductList.setPropertyNameLastOpenedFormat("Sen3");
-        sourceProductList.addChangeListener(changeListener);
+        sourceProductList.addChangeListener(new SourceListDataListener());
+        sourceProductList.addSelectionListener(new SourceListSelectionListener());
         sourceProductList.setXAxis(false);
         sourceProductList.setDefaultPattern("S3A_SL_1*.SEN3");
         sourceProductList.setProductFilter(new ProductFilter() {
             @Override
             public boolean accept(Product product) {
                 return SlstrL1bFileNameValidator.isValidDirectoryName(product.getName());
-            }
-        });
-        sourceProductList.addSelectionListener(new ListSelectionListener() {
-            @Override
-            public void valueChanged(ListSelectionEvent e) {
-                if (e.getSource() instanceof JList) {
-                    final JList list = (JList) e.getSource();
-                    final List selectedValuesList = list.getSelectedValuesList();
-                    boundariesProvider.setSelected(selectedValuesList);
-                    worldMapPane.repaint();
-                }
             }
         });
         model.getBindingContext().bind(PDUStitchingModel.PROPERTY_SOURCE_PRODUCT_PATHS, sourceProductList);
@@ -222,6 +94,7 @@ class PDUStitchingPanel extends JPanel {
 
         statusLabel = new JLabel(NO_SOURCE_PRODUCTS_TEXT);
         sourceProductPanel.add(statusLabel, BorderLayout.SOUTH);
+        sourceProductPanel.setBorder(BorderFactory.createTitledBorder("Product Dissemination Units"));
 
         return sourceProductPanel;
     }
@@ -230,6 +103,7 @@ class PDUStitchingPanel extends JPanel {
         boundariesProvider = new PDUBoundariesProvider();
         final PDUBoundaryOverlay pduBoundaryOverlay = new PDUBoundaryOverlay(boundariesProvider);
         worldMapPane = new PDUWorldMapPane(new WorldMapPaneDataModel(), boundariesProvider, pduBoundaryOverlay);
+        worldMapPane.setEnabled(false);
         return worldMapPane;
     }
 
@@ -283,6 +157,144 @@ class PDUStitchingPanel extends JPanel {
         });
         targetDirPanel.add(openInAppCheckBox, BorderLayout.SOUTH);
         return targetDirPanel;
+    }
+
+    private class SourceListSelectionListener implements ListSelectionListener {
+
+        @Override
+        public void valueChanged(ListSelectionEvent e) {
+            if (e.getSource() instanceof JList) {
+                final JList list = (JList) e.getSource();
+                final List selectedValuesList = list.getSelectedValuesList();
+                boundariesProvider.setSelected(selectedValuesList);
+                worldMapPane.repaint();
+            }
+        }
+
+    }
+
+    private class SourceListDataListener implements ListDataListener {
+
+        @Override
+        public void contentsChanged(ListDataEvent event) {
+            final SwingWorker worker = new SwingWorker() {
+                @Override
+                protected Object doInBackground() throws Exception {
+                    if (!isReactingToChange) {
+                        isReactingToChange = true;
+                        boundariesProvider.clear();
+                        final Product[] sourceProducts = sourceProductList.getSourceProducts();
+                        final String[] filePaths = (String[]) model.getPropertyValue(PDUStitchingModel.PROPERTY_SOURCE_PRODUCT_PATHS);
+                        File[] productFiles = new File[sourceProducts.length];
+                        for (int i = 0; i < sourceProducts.length; i++) {
+                            productFiles[i] = sourceProducts[i].getFileLocation();
+                        }
+                        final Logger logger = Logger.getLogger(PDUStitchingPanel.class.getName());
+                        final Set<File> dissolvedFilePaths = PDUStitchingOp.getSourceProductsPathFileSet(filePaths, logger);
+                        File[] pathFiles = dissolvedFilePaths.toArray(new File[dissolvedFilePaths.size()]);
+                        Product[] validatedProducts = new Product[0];
+                        String[] validatedPaths = new String[0];
+                        List<String> validatedFileNamesList = new ArrayList<>();
+                        List<Product> validatedProductsList = new ArrayList<>();
+                        List<String> validatedPathsList = new ArrayList<>();
+                        List<File> validatedFilesList = new ArrayList<>();
+                        for (int i = 0; i < productFiles.length; i++) {
+                            File adjustedFile;
+                            if (productFiles[i].getName().equals("xfdumanifest.xml")) {
+                                adjustedFile = productFiles[i];
+                            } else {
+                                adjustedFile = new File(productFiles[i], "xfdumanifest.xml");
+                            }
+                            String adjustedFileName = adjustedFile.getAbsolutePath();
+                            final String origFileName = productFiles[i].getAbsolutePath();
+                            if (validatedFileNamesList.contains(adjustedFileName)) {
+                                Dialogs.showInformation("Removed duplicate occurence of " + origFileName + " from selection.");
+                            } else if (!SlstrL1bFileNameValidator.isValidSlstrL1BFile(productFiles[i])) {
+                                Dialogs.showInformation(origFileName + " is not a valid SLSTR L1B product. Removed from selection.");
+                            } else {
+                                validatedFileNamesList.add(adjustedFileName);
+                                validatedProductsList.add(sourceProducts[i]);
+                                validatedFilesList.add(adjustedFile);
+                                final boolean selected = sourceProductList.isSelected(sourceProducts[i]);
+                                boundariesProvider.extractBoundaryFromFile(productFiles[i], sourceProducts[i], selected);
+                            }
+                        }
+                        for (File file : pathFiles) {
+                            File adjustedFile;
+                            if (file.getName().equals("xfdumanifest.xml")) {
+                                adjustedFile = file;
+                            } else {
+                                adjustedFile = new File(file, "xfdumanifest.xml");
+                            }
+                            final String adjustedFileName = adjustedFile.getAbsolutePath();
+                            final String origFileName = file.getAbsolutePath();
+                            if (validatedFileNamesList.contains(adjustedFileName)) {
+                                Dialogs.showInformation("Removed duplicate occurence of " + origFileName + " from selection.");
+                            } else if (!SlstrL1bFileNameValidator.isValidSlstrL1BFile(file)) {
+                                Dialogs.showInformation(origFileName + " is not a valid SLSTR L1B product. Removed from selection.");
+                            } else {
+                                validatedFileNamesList.add(adjustedFileName);
+                                validatedPathsList.add(origFileName);
+                                validatedFilesList.add(adjustedFile);
+                                final boolean selected = sourceProductList.isSelected(file);
+                                boundariesProvider.extractBoundaryFromFile(file, file, selected);
+                            }
+                        }
+                        if (validatedProductsList.size() > 0) {
+                            validatedProducts = validatedProductsList.toArray(new Product[validatedProductsList.size()]);
+                        }
+                        if (validatedPathsList.size() > 0) {
+                            validatedPaths = validatedPathsList.toArray(new String[validatedPathsList.size()]);
+                        }
+                        if (validatedFilesList.size() == 0) {
+                            statusLabel.setForeground(Color.BLACK);
+                            statusLabel.setText(NO_SOURCE_PRODUCTS_TEXT);
+                            worldMapPane.setEnabled(false);
+                        } else {
+                            worldMapPane.setEnabled(true);
+                            try {
+                                Validator.validate(validatedFilesList.toArray(new File[validatedFilesList.size()]));
+                                statusLabel.setForeground(Color.GREEN.darker());
+                                statusLabel.setText(VALID_SOURCE_PRODUCTS_TEXT);
+                            } catch (IOException e) {
+                                statusLabel.setForeground(Color.RED);
+                                statusLabel.setText(INVALID_SELECTION_TEXT + e.getMessage());
+                            }
+                        }
+                        model.setPropertyValue(PDUStitchingModel.PROPERTY_SOURCE_PRODUCTS, validatedProducts);
+                        if (validatedPaths.length != filePaths.length) {
+                            model.setPropertyValue(PDUStitchingModel.PROPERTY_SOURCE_PRODUCT_PATHS, validatedPaths);
+                        }
+                        sourceProductList.bindComponents();
+                        isReactingToChange = false;
+                    }
+                    return null;
+                }
+
+                @Override
+                protected void done() {
+                    try {
+                        get();
+                        worldMapPane.repaint();
+                    } catch (Exception e) {
+                        final String msg = String.format("Cannot display source product files.\n%s", e.getMessage());
+                        appContext.handleError(msg, e);
+                    }
+                }
+            };
+            worker.execute();
+        }
+
+        @Override
+        public void intervalAdded(ListDataEvent e) {
+            contentsChanged(e);
+        }
+
+        @Override
+        public void intervalRemoved(ListDataEvent e) {
+            contentsChanged(e);
+        }
+
     }
 
 }
