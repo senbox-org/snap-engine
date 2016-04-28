@@ -97,6 +97,7 @@ class PDUStitchingPanel extends JPanel {
                                 List<String> validatedFileNamesList = new ArrayList<>();
                                 List<Product> validatedProductsList = new ArrayList<>();
                                 List<String> validatedPathsList = new ArrayList<>();
+                                List<File> validatedFilesList = new ArrayList<>();
                                 for (int i = 0; i < productFiles.length; i++) {
                                     final String fileName = productFiles[i].getAbsolutePath();
                                     if (validatedFileNamesList.contains(fileName)) {
@@ -106,6 +107,11 @@ class PDUStitchingPanel extends JPanel {
                                     } else {
                                         validatedFileNamesList.add(fileName);
                                         validatedProductsList.add(sourceProducts[i]);
+                                        if (fileName.equals("xfdumanifest.xml")) {
+                                            validatedFilesList.add(productFiles[i]);
+                                        } else {
+                                            validatedFilesList.add(new File(productFiles[i], "xfdumanifest.xml"));
+                                        }
                                         final boolean selected = sourceProductList.isSelected(sourceProducts[i]);
                                         boundariesProvider.extractBoundaryFromFile(productFiles[i], sourceProducts[i], selected);
                                     }
@@ -119,6 +125,11 @@ class PDUStitchingPanel extends JPanel {
                                     } else {
                                         validatedFileNamesList.add(fileName);
                                         validatedPathsList.add(fileName);
+                                        if (fileName.equals("xfdumanifest.xml")) {
+                                            validatedFilesList.add(file);
+                                        } else {
+                                            validatedFilesList.add(new File(file, "xfdumanifest.xml"));
+                                        }
                                         final boolean selected = sourceProductList.isSelected(file);
                                         boundariesProvider.extractBoundaryFromFile(file, file, selected);
                                     }
@@ -130,9 +141,7 @@ class PDUStitchingPanel extends JPanel {
                                     validatedPaths = validatedPathsList.toArray(new String[validatedPathsList.size()]);
                                 }
                                 try {
-                                    //todo validate against sub lists
-                                    Validator.validate(productFiles);
-                                    Validator.validate(pathFiles);
+                                    Validator.validate(validatedFilesList.toArray(new File[validatedFilesList.size()]));
                                     statusLabel.setForeground(Color.GREEN.darker());
                                     statusLabel.setText(VALID_SOURCE_PRODUCTS_TEXT);
                                 } catch (IOException e) {
