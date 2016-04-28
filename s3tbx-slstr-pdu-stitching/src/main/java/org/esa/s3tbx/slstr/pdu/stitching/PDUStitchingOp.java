@@ -1,5 +1,6 @@
 package org.esa.s3tbx.slstr.pdu.stitching;
 
+import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.gpf.Operator;
@@ -61,7 +62,7 @@ public class PDUStitchingOp extends Operator {
             targetDir = new File(SystemUtils.getUserHomeDir().getPath());
         }
         try {
-            SlstrPduStitcher.createStitchedSlstrL1BFile(targetDir, files);
+            SlstrPduStitcher.createStitchedSlstrL1BFile(targetDir, files, ProgressMonitor.NULL);
         } catch (Exception e) {
             throw new OperatorException(e.getMessage());
         }

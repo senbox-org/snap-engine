@@ -1,5 +1,6 @@
 package org.esa.s3tbx.slstr.pdu.stitching;
 
+import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.util.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -53,7 +54,7 @@ public class SlstrPduStitcherTest {
     @Test
     public void testStitchPDUs_NotEmpty() throws Exception {
         try {
-            SlstrPduStitcher.createStitchedSlstrL1BFile(targetDirectory, new File[0]);
+            SlstrPduStitcher.createStitchedSlstrL1BFile(targetDirectory, new File[0], ProgressMonitor.NULL);
             fail("Exception expected");
         } catch (Exception e) {
             assertEquals("No product files provided", e.getMessage());
@@ -64,7 +65,7 @@ public class SlstrPduStitcherTest {
     public void testStitchPDUs_OnlyOneSlstrL1BProductFile() throws Exception {
         final File firstSlstrFile = TestUtils.getFirstSlstrFile();
 
-        final File stitchedProductFile = SlstrPduStitcher.createStitchedSlstrL1BFile(targetDirectory, new File[]{firstSlstrFile});
+        final File stitchedProductFile = SlstrPduStitcher.createStitchedSlstrL1BFile(targetDirectory, new File[]{firstSlstrFile}, ProgressMonitor.NULL);
 
         final File slstrFileParentDirectory = firstSlstrFile.getParentFile();
         final File stitchedProductFileParentDirectory = stitchedProductFile.getParentFile();
@@ -81,7 +82,7 @@ public class SlstrPduStitcherTest {
     @Ignore
     public void testStitchPDUs_AllSlstrL1BProductFiles() throws IOException, PDUStitchingException, TransformerException, ParserConfigurationException {
         final File[] slstrFiles = TestUtils.getSlstrFiles();
-        final File stitchedProductFile = SlstrPduStitcher.createStitchedSlstrL1BFile(targetDirectory, slstrFiles);
+        final File stitchedProductFile = SlstrPduStitcher.createStitchedSlstrL1BFile(targetDirectory, slstrFiles, ProgressMonitor.NULL);
 
         final File stitchedProductFileParentDirectory = stitchedProductFile.getParentFile();
         assert(new File(stitchedProductFileParentDirectory, "xfdumanifest.xml").exists());
