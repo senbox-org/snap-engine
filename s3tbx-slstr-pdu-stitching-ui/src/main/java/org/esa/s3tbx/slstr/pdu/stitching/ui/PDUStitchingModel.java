@@ -8,7 +8,6 @@ import com.bc.ceres.swing.binding.BindingContext;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.annotations.ParameterDescriptorFactory;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,8 +29,6 @@ class PDUStitchingModel {
         container = ParameterDescriptorFactory.createMapBackedOperatorPropertyContainer("PduStitching", parameterMap);
         openInApp = false;
         addTransientProperty(PROPERTY_SOURCE_PRODUCTS, Product[].class);
-        addTransientProperty(PROPERTY_SOURCE_PRODUCT_PATHS, String[].class);
-        addTransientProperty(PROPERTY_TARGET_DIR, File.class);
     }
 
     private void addTransientProperty(String propertyName, Class<?> propertyType) {
