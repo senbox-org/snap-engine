@@ -78,8 +78,8 @@ public class Rad2ReflConstants {
 
     public final static String[] OLCI_SZA_BAND_NAMES = {"SZA"};
 
-    public static final String OLCI_AUTOGROUPING_RAD_STRING = "Oa*_radiance";
-    public static final String OLCI_AUTOGROUPING_REFL_STRING = "Oa*_reflectance";
+    public static final String OLCI_AUTOGROUPING_RAD_STRING = "Oa*_radiance:solar_flux";
+    public static final String OLCI_AUTOGROUPING_REFL_STRING = "Oa*_reflectance:solar_flux";
 
     public final static float[] OLCI_SOLAR_FLUXES_DEFAULT = {
             1714.9084f, //  0
