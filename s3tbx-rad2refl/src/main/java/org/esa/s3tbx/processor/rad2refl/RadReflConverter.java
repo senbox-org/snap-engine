@@ -19,4 +19,6 @@ public interface RadReflConverter {
     float convert(Product sourceProduct, Sample[] sourceSamples, int bandIndex);
 
     float convert(float spectralInputValue, float sza, float solarFlux);
+
+    float[] convert(float[] spectralInputValue, float[] sza, float[] solarFlux);
 }

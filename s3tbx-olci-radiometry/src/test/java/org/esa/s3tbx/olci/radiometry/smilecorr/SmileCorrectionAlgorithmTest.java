@@ -36,7 +36,7 @@ public class SmileCorrectionAlgorithmTest {
         when(correctionAuxdata.getRefCentralWaveLenghts()).thenReturn(new double[]{1, 2, 3});
         SmileCorrectionAlgorithm correctionAlgorithm = new SmileCorrectionAlgorithm(correctionAuxdata);
 
-        final double spectralDerivative = correctionAlgorithm.spectralDerivative(10, 5, 2, 1);
+        final double spectralDerivative = correctionAlgorithm.getReflectanceCorrection(10, 5, 2, 1);
         assertEquals(5, spectralDerivative, 1e-8);
     }
 

@@ -35,18 +35,16 @@ public class SmileCorrectionAlgorithm {
         this.auxdata = auxdata;
     }
 
-    protected double spectralDerivative(double reflectanceSampleUpper, double reflectanceSampleLower, int upperRefBand, int lowerRefBand) {
-        final double[] refCentralWaveLenghts = auxdata.getRefCentralWaveLenghts();
-        return (reflectanceSampleUpper - reflectanceSampleLower) / (refCentralWaveLenghts[upperRefBand] - refCentralWaveLenghts[lowerRefBand]);
-    }
-
-
     public double getReflectanceCorrection(Sample sourceSampleUpper, Sample sourceSampleLower, int upperBandIndex, int lowerBandIndex) {
         double sourceSampleLowerDouble = sourceSampleLower.getDouble();
         double sourceSampleUpperDouble = sourceSampleUpper.getDouble();
 
-        return spectralDerivative(sourceSampleUpperDouble, sourceSampleLowerDouble, upperBandIndex, lowerBandIndex);
+        return getReflectanceCorrection(sourceSampleUpperDouble, sourceSampleLowerDouble, upperBandIndex, lowerBandIndex);
     }
 
 
+    public double getReflectanceCorrection(double sampleFloatUpperBand, double sampleFloatLowerBand, int upperBandIndex,int lowerBandIndex) {
+        final double[] refCentralWaveLenghts = auxdata.getRefCentralWaveLenghts();
+        return (sampleFloatUpperBand - sampleFloatLowerBand) / (refCentralWaveLenghts[upperBandIndex] - refCentralWaveLenghts[lowerBandIndex]);
+    }
 }

@@ -2,7 +2,10 @@ package org.esa.s3tbx.processor.rad2refl;
 
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.pointop.Sample;
+import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.math.RsMathUtils;
+
+import java.util.Arrays;
 
 /**
  * Radiance/reflectance conversion for OLCI
@@ -44,6 +47,16 @@ public class OlciRadReflConverter implements RadReflConverter {
         } else {
             return RsMathUtils.reflectanceToRadiance(spectralInputValue, sza, solarFlux);
         }
+    }
+
+    @Override
+    public float[] convert(float[] radiances, float[] sza, float[] samplesFlux) {
+        float[] fRet= new float[radiances.length];
+        Arrays.fill(fRet, Float.NaN);
+        for (int i = 0; i < radiances.length; i++) {
+            fRet[i] = RsMathUtils.radianceToReflectance(radiances[i], sza[i], samplesFlux[i]);
+        }
+        return fRet;
     }
 
     public String getSpectralBandAutogroupingString() {

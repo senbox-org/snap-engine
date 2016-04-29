@@ -83,7 +83,7 @@ public class SmileCorrectionAuxdata {
         return water_LowerBands;
     }
 
-    public double[] getWater_UpperBands() {
+    public double[] getWaterUpperBands() {
         return water_UpperBands;
     }
 
