@@ -5,6 +5,6 @@
 
 <map version="2.0">
 
-    <mapID target="pdu_stitching" url="pdu_stitching.html"/>
+    <mapID target="pdu_stitching" url="pdu_stitching/pdu_stitching.html"/>
 
 </map>
