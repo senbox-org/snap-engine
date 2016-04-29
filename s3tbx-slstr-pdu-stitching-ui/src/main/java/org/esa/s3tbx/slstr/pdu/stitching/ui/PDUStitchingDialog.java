@@ -1,7 +1,5 @@
 package org.esa.s3tbx.slstr.pdu.stitching.ui;
 
-import com.bc.ceres.binding.ConversionException;
-import com.bc.ceres.binding.ValidationException;
 import org.esa.snap.core.dataio.ProductIOPlugInManager;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
@@ -11,7 +9,6 @@ import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.ui.OperatorMenu;
 import org.esa.snap.core.gpf.ui.OperatorParameterSupport;
-import org.esa.snap.core.gpf.ui.ParameterUpdater;
 import org.esa.snap.core.util.ArrayUtils;
 import org.esa.snap.rcp.SnapApp;
 import org.esa.snap.rcp.util.Dialogs;
@@ -31,7 +28,7 @@ public class PDUStitchingDialog extends ModelessDialog {
 
     private final PDUStitchingModel formModel;
 
-    public PDUStitchingDialog(final String title, final String helpID, AppContext appContext) {
+    public PDUStitchingDialog(final String title, AppContext appContext, final String helpID) {
         super(appContext.getApplicationWindow(), title, ID_APPLY_CLOSE, helpID);
 
         final OperatorSpi operatorSpi = GPF.getDefaultInstance().getOperatorSpiRegistry().getOperatorSpi("PduStitching");
@@ -39,7 +36,7 @@ public class PDUStitchingDialog extends ModelessDialog {
         OperatorParameterSupport parameterSupport = new OperatorParameterSupport(operatorSpi.getOperatorDescriptor(),
                                                                                  formModel.getPropertySet(),
                                                                                  formModel.getParameterMap(),
-                                                                                 new StitchingParametersUpdater());
+                                                                                 null);
 
         OperatorMenu operatorMenu = new OperatorMenu(this.getJDialog(),
                                                      operatorSpi.getOperatorDescriptor(),
@@ -64,7 +61,9 @@ public class PDUStitchingDialog extends ModelessDialog {
                 }
             }
             final ProductReaderPlugIn sen3ReaderPlugIn = getSentinel3ReaderPlugin();
-            GPF.createProduct("PduStitching", formModel.getParameterMap());
+            final Map<String, Object> parameterMap = formModel.getParameterMap();
+            parameterMap.remove(PDUStitchingModel.PROPERTY_SOURCE_PRODUCTS);
+            GPF.createProduct("PduStitching", parameterMap, formModel.getSourceProducts());
             if (formModel.openInApp()) {
                 final String[] after = targetDir.list();
                 for (String inTargetDir : after) {
@@ -96,25 +95,6 @@ public class PDUStitchingDialog extends ModelessDialog {
             throw new IllegalStateException("No appropriate reader for reading Sentinel-3 products found");
         }
         return sen3ReaderPlugins.next();
-    }
-
-    private class StitchingParametersUpdater implements ParameterUpdater {
-
-        @Override
-        public void handleParameterSaveRequest(Map<String, Object> parameterMap) throws ValidationException, ConversionException {
-        }
-
-        @Override
-        public void handleParameterLoadRequest(Map<String, Object> parameterMap) throws ValidationException, ConversionException {
-            if (parameterMap.containsKey(PDUStitchingModel.PROPERTY_SOURCE_PRODUCT_PATHS)) {
-                formModel.setPropertyValue(PDUStitchingModel.PROPERTY_SOURCE_PRODUCT_PATHS,
-                                           parameterMap.get(PDUStitchingModel.PROPERTY_SOURCE_PRODUCT_PATHS));
-            }
-            if (parameterMap.containsKey(PDUStitchingModel.PROPERTY_TARGET_DIR)) {
-                formModel.setPropertyValue(PDUStitchingModel.PROPERTY_TARGET_DIR,
-                                           parameterMap.get(PDUStitchingModel.PROPERTY_TARGET_DIR));
-            }
-        }
     }
 
 }

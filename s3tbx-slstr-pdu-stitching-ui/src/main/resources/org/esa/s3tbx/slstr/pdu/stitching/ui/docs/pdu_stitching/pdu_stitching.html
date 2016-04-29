@@ -1,0 +1,76 @@
+<!--
+  ~ Copyright (C) 2016 Brockmann Consult GmbH (info@brockmann-consult.de)
+  ~
+  ~ This program is free software; you can redistribute it and/or modify it
+  ~ under the terms of the GNU General Public License as published by the Free
+  ~ Software Foundation; either version 3 of the License, or (at your option)
+  ~ any later version.
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+  ~ more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License along
+  ~ with this program; if not, see http://www.gnu.org/licenses/
+  -->
+
+<html>
+<head>
+    <title>Sentinel-3 SLSTR L1B Product Dissemination Unit Stitching</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+<table class="header">
+    <tr class="header">
+        <td class="header">&nbsp;
+            Sentinel-3 SLSTR L1B Product Dissemination Unit Stitching Operator
+        </td>
+        <td class="header" align="right"><a href="nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/general/overview/SnapOverview.html"><img src="../images/snap_header.jpg"
+                                                                                                                                                       border=0></a>
+        </td>
+    </tr>
+</table>
+
+<h3>Introduction</h3>
+
+<p>The Sentinel-3 SLSTR L1B Product Dissemination Unit (PDU) Stitching operator concatenates multiple PDU's so that they form a single one.
+    Thus, the tool enables a user to reconstruct full orbit products.
+    A PDU is part of an orbit product and is in itself a fully functional SLSTR L1B product.
+</p>
+
+<p>
+    <img src="images/PDUStitchingTool.png">
+</p>
+
+<h4>Setting up the PDU's</h4>
+
+<p>
+    To use the tool it is necessary to define which PDU's shall be stitched together.
+    This can be achieved by adding or removing files, directories, or products that are already opened in the Sentinel-3 Toolbox.
+    A label below the list of PDU's will indicate whether the current selection is valid.
+    The selection of PDU's must be of the same orbit and do not show any gaps.
+    The world map shows the boundaries of the PDU's.
+    PDU's selected in the list will be highlighted in the map.
+    It is also possible to move in onto the selected PDU's.
+</p>
+
+<h4>Setting the target directory</h4>
+
+<p>
+    At the bottom of the dialog, the target directory can be specified.
+    The actual product name will be constructed from the selected PDU's according to the SLSTR L1B naming specification.
+    Additionally, one can choose whether the product shall be opened in SNAP after the stitching is finished.
+</p>
+
+<h4>Running the operator</h4>
+
+<p>
+    When the Run-button is clicked, the selected PDU's are stitched together and the resulting SLSTR L1B product is
+    saved at the specified target directory.
+</p>
+
+<hr>
+</body>
+</html>

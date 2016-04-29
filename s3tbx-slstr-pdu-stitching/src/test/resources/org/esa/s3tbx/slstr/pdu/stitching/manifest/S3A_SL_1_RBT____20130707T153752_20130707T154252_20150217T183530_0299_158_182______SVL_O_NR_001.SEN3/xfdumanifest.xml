@@ -720,20 +720,6 @@
                                 <sentinel3:bandwidth>0.380000</sentinel3:bandwidth>
                             </sentinel3:band>
                         </slstr:bandDescriptions>
-                        <slstr:missingElements threshold="75.000000">
-                            <slstr:globalInfo grid="0.5 km stripe A" view="Nadir" value="4000" over="4000" percentage="100.000000"/>
-                            <slstr:globalInfo grid="0.5 km stripe B" view="Nadir" value="4000" over="4000" percentage="100.000000"/>
-                            <slstr:globalInfo grid="0.5 km TDI" view="Nadir" value="4000" over="4000" percentage="100.000000"/>
-                            <slstr:globalInfo grid="0.5 km stripe A" view="Oblique" value="4000" over="4000" percentage="100.000000"/>
-                            <slstr:globalInfo grid="0.5 km stripe B" view="Oblique" value="4000" over="4000" percentage="100.000000"/>
-                            <slstr:globalInfo grid="0.5 km TDI" view="Oblique" value="4000" over="4000" percentage="100.000000"/>
-                            <slstr:elementMissing grid="0.5 km stripe A, 0.5 km stripe B, 0.5 km TDI" view="Nadir" startTime="2013-07-07T15:37:52.300000Z" stopTime="2013-07-07T15:42:52.300000Z" percentage="100.000000">
-                                <slstr:bandSet/>
-                            </slstr:elementMissing>
-                            <slstr:elementMissing grid="0.5 km stripe A, 0.5 km stripe B, 0.5 km TDI" view="Oblique" startTime="2013-07-07T15:37:52.283435Z" stopTime="2013-07-07T15:42:52.208435Z" percentage="100.000000">
-                                <slstr:bandSet/>
-                            </slstr:elementMissing>
-                        </slstr:missingElements>
                     </slstr:slstrProductInformation>
                 </xmlData>
             </metadataWrap>

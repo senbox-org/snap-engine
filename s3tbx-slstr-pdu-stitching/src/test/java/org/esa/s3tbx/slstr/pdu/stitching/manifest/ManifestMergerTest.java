@@ -65,7 +65,7 @@ public class ManifestMergerTest {
         final File inputManifest = getManifestFile(TestUtils.FIRST_FILE_NAME);
         final Date now = Calendar.getInstance().getTime();
         final File productDir = new File(ManifestMergerTest.class.getResource("").getFile());
-        final File manifestFile = manifestMerger.createMergedManifest(new File[]{inputManifest}, now, productDir);
+        final File manifestFile = manifestMerger.createMergedManifest(new File[]{inputManifest}, now, productDir, 5000);
         //todo assert something
     }
 
@@ -73,7 +73,7 @@ public class ManifestMergerTest {
     public void testMergeManifests_MultipleFiles() throws IOException, ParserConfigurationException, TransformerException, PDUStitchingException {
         final Date now = Calendar.getInstance().getTime();
         final File productDir = new File(ManifestMergerTest.class.getResource("").getFile());
-        final File manifestFile = manifestMerger.createMergedManifest(getManifestFiles(), now, productDir);
+        final File manifestFile = manifestMerger.createMergedManifest(getManifestFiles(), now, productDir, 5000);
 //        final Document manifest = manifestMerger.mergeManifests(getManifestFiles(), now, productDir);
 //        final Transformer transformer = TransformerFactory.newInstance().newTransformer();
 //        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
@@ -83,6 +83,19 @@ public class ManifestMergerTest {
 //        final StreamResult streamResult = new StreamResult(manifestFile);
 //        transformer.transform(manifestSource, streamResult);
         //todo assert something
+    }
+
+    @Test
+    public void testMergeManifests_FailsWhenMissingElementsArePresent() throws ParserConfigurationException, TransformerException, IOException {
+        final Date now = Calendar.getInstance().getTime();
+        final File productDir = new File(ManifestMergerTest.class.getResource("").getFile());
+        final File manifestFileWithMissingElements = getManifestFile("missingElements");
+        try {
+            manifestMerger.createMergedManifest(new File[]{manifestFileWithMissingElements}, now, productDir, 5000);
+            fail("Exception expected");
+        } catch (PDUStitchingException e) {
+            assertEquals("Missing elements found in manifest. Stitching aborted.", e.getMessage());
+        }
     }
 
     @Test
