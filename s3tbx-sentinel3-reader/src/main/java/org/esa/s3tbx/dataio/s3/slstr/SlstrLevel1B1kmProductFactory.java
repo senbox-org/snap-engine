@@ -68,8 +68,8 @@ public class SlstrLevel1B1kmProductFactory extends SlstrLevel1ProductFactory {
             } else {
                 final Band targetBand = new Band(sourceBandName, sourceBand.getDataType(),
                                                  targetProduct.getSceneRasterWidth(), targetProduct.getSceneRasterHeight());
-                ProductUtils.copyRasterDataNodeProperties(sourceBand, targetBand);
                 targetProduct.addBand(targetBand);
+                ProductUtils.copyRasterDataNodeProperties(sourceBand, targetBand);
                 final float[] offsets = getOffsets(sourceStartOffset, sourceTrackOffset, sourceResolutions);
                 final RenderedImage sourceImage = createSourceImage(masterProduct, sourceBand, offsets, targetBand,
                                                                     sourceResolutions);
