@@ -30,6 +30,7 @@ import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.util.ProductUtils;
 
 import java.awt.*;
+import java.io.IOException;
 
 import static org.esa.snap.dataio.envisat.EnvisatConstants.MERIS_DETECTOR_INDEX_DS_NAME;
 
@@ -48,28 +49,24 @@ import static org.esa.snap.dataio.envisat.EnvisatConstants.MERIS_DETECTOR_INDEX_
         description = "Provides conversion from radiances to reflectances or backwards.")
 public class Rad2ReflOp_Spec extends Operator {
 
+    String[] spectralInputBandNames;
+    String[] spectralOutputBandNames;
     @Parameter(defaultValue = "OLCI",
             description = "The sensor", valueSet = {"MERIS", "OLCI", "SLSTR_500m"})
     private Sensor sensor;
-
     @Parameter(description = "Conversion mode: from rad to refl, or backwards", valueSet = {"RAD_TO_REFL", "REFL_TO_RAD"},
             defaultValue = "RAD_TO_REFL")
     private String conversionMode;
-
     @SourceProduct(alias = "source", label = "Name", description = "The source product.")
     private Product sourceProduct;
-
     @Parameter(defaultValue = "false",
             description = "If set, non-spectral bands from source product are written to target product")
     private boolean copyNonSpectralBands;
-
     private RadReflConverter converter;
     private transient int currentPixel = 0;
-
-    String[] spectralInputBandNames;
-    String[] spectralOutputBandNames;
     private String spectralInputBandPrefix;
     private Product targetProduct;
+    private Rad2ReflAuxdata rad2ReflAuxdata;
 
 
     @Override
@@ -84,6 +81,11 @@ public class Rad2ReflOp_Spec extends Operator {
 
         if (sensor == Sensor.MERIS) {
             converter = new MerisRadReflConverter(sourceProduct, conversionMode);
+            try {
+                rad2ReflAuxdata = Rad2ReflAuxdata.loadAuxdata(sourceProduct.getProductType());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         } else if (sensor == Sensor.OLCI) {
             converter = new OlciRadReflConverter(conversionMode);
         } else if (sensor == Sensor.SLSTR_500m) {
@@ -91,10 +93,68 @@ public class Rad2ReflOp_Spec extends Operator {
         } else {
             throw new OperatorException("Sensor '" + sensor.getName() + "' not supported.");
         }
+
     }
 
-    private boolean isRadToReflMode() {
-        return conversionMode.equals("RAD_TO_REFL");
+    @Override
+    public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
+        checkCancellation();
+        int bandIndex = -1;
+        for (int i = 0; i < spectralOutputBandNames.length; i++) {
+            if (spectralOutputBandNames[i].equals(targetBand.getName())) {
+                bandIndex = i;
+            }
+        }
+
+        final Rectangle rectangle = targetTile.getRectangle();
+        final float[] samplesFluxes = getSampleFlux(bandIndex, rectangle);
+        final float[] samplesSZAs = getSampleSZA(rectangle);
+        final float[] radiances = getRadiances(bandIndex, rectangle);
+
+        final float[] reflectances = converter.convert(radiances, samplesSZAs, samplesFluxes);
+        targetTile.setSamples(reflectances);
+    }
+
+    private float[] getRadiances(int bandIndex, Rectangle rectangle) {
+        final Tile sourceTile = getSourceTile(sourceProduct.getBand(spectralInputBandNames[bandIndex]), rectangle);
+        return sourceTile.getSamplesFloat();
+    }
+
+
+    private float[] getSampleSZA(Rectangle rectangle) {
+        Tile sourceTileSza = null;
+        if (sensor.equals(Sensor.MERIS) || sensor.equals(Sensor.OLCI)) {
+            sourceTileSza = getSourceTile(sourceProduct.getTiePointGrid(sensor.getSzaBandNames()[0]), rectangle);
+        } else {
+            if (sourceProduct.getBandAt(0).getName().endsWith("_o")) {
+                sourceTileSza = getSourceTile(sourceProduct.getTiePointGrid(sensor.getSzaBandNames()[0]), rectangle);
+            } else {
+                sourceTileSza = getSourceTile(sourceProduct.getTiePointGrid(sensor.getSzaBandNames()[1]), rectangle);
+            }
+        }
+        if (sourceTileSza == null) {
+            // todo mba/*** the best message to write
+            throw new OperatorException("SZA is null ");
+        }
+        return sourceTileSza.getSamplesFloat();
+    }
+
+    private float[] getSampleFlux(int bandIndex, Rectangle rectangle) {
+        float[] samplesFlux = new float[0];
+        if (sensor.equals(Sensor.OLCI)) {
+            samplesFlux = getSourceTile(sourceProduct.getBand(sensor.getSolarFluxBandNames()[bandIndex]), rectangle).getSamplesFloat();
+        } else if (sensor.equals(Sensor.MERIS)) {
+            int[] samplesDetectorIndexName = getSourceTile(sourceProduct.getBand(MERIS_DETECTOR_INDEX_DS_NAME), rectangle).getSamplesInt();
+            for (int i = 0; i < samplesDetectorIndexName.length; i++) {
+                if (samplesDetectorIndexName[i] >= 0) {
+                    samplesFlux[i] = (float) rad2ReflAuxdata.getDetectorSunSpectralFluxes()[i][bandIndex];
+                }
+            }
+        } else if (sensor.equals(Sensor.SLSTR_500m)) {
+//            final int channel = Integer.parseInt(Sensor.SLSTR_500m.getRadBandNames()[allSpectralBandsIndex].substring(1, 2));
+        }
+        return samplesFlux;
+
     }
 
     private Product createTargetProduct() {
@@ -131,47 +191,9 @@ public class Rad2ReflOp_Spec extends Operator {
         return targetProduct;
     }
 
-
-    @Override
-    public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
-        checkCancellation();
-        int bandIndex = -1;
-        for (int i = 0; i < spectralOutputBandNames.length; i++) {
-            if (spectralOutputBandNames[i].equals(targetBand.getName())) {
-                bandIndex = i;
-            }
-        }
-
-        final Rectangle rectangle = targetTile.getRectangle();
-
-        final float[] samplesFlux = getSampleFlux(bandIndex, rectangle);
-        final float[] samplesSZA = getSampleSZA(rectangle);
-
-        final Tile sourceTile = getSourceTile(sourceProduct.getBand(spectralInputBandNames[bandIndex]), rectangle);
-        final float[] radiances = sourceTile.getSamplesFloat();
-
-        final float[] reflectances = converter.convert(radiances, samplesSZA, samplesFlux);
-        targetTile.setSamples(reflectances);
+    private boolean isRadToReflMode() {
+        return conversionMode.equals("RAD_TO_REFL");
     }
-
-
-    private float[] getSampleSZA(Rectangle rectangle) {
-        final Tile sourceTileSza = getSourceTile(sourceProduct.getTiePointGrid("SZA"), rectangle);
-        return sourceTileSza.getSamplesFloat();
-    }
-
-    private float[] getSampleFlux(int bandIndex, Rectangle rectangle) {
-        float[] samplesFlux = new float[0];
-        if (sensor.equals(Sensor.OLCI)) {
-            samplesFlux = getSourceTile(sourceProduct.getBand(sensor.getSolarFluxBandNames()[bandIndex]), rectangle).getSamplesFloat();
-        } else {
-//            final int detectorIndex = getSourceTile(sourceProduct.getBand(sensor.)).getInt();
-//            if (detectorIndex >= 0) {
-//                double solarFlux = rad2ReflAuxdata.getDetectorSunSpectralFluxes()[detectorIndex][bandIndex];
-        }
-        return samplesFlux;
-    }
-
 
     private void checkCancellation() {
         if (currentPixel % 1000 == 0) {
@@ -180,7 +202,6 @@ public class Rad2ReflOp_Spec extends Operator {
         }
         currentPixel++;
     }
-
 
     public static class Spi extends OperatorSpi {
 
