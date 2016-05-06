@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 /*
  *
  *  * Copyright (C) 2012 Brockmann Consult GmbH (info@brockmann-consult.de)
@@ -26,14 +26,9 @@ import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
-import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.util.ProductUtils;
-=======
-package org.esa.s3tbx.olci.radiometry.operator;
 
-import org.esa.s3tbx.olci.radiometry.smilecorr.BandToCompute;
->>>>>>> origin/Rad_Refoperator
 
 /**
  * @author muhammad.bc.

@@ -16,19 +16,14 @@
  *
  */
 
-package org.esa.s3tbx.olci.radiometry.operator;
-
-import org.esa.s3tbx.olci.radiometry.smilecorr.SmileCorrectionAlgorithm;
-import org.esa.s3tbx.olci.radiometry.smilecorr.SmileCorrectionAuxdata;
-import org.junit.Before;
-import org.junit.Test;
+package org.esa.s3tbx.processor.rad2refl;
 
 import static org.junit.Assert.*;
 
 /**
  * @author muhammad.bc.
  */
-public class OLCIRadiometryCorrectionOpTest {
+public class Rad2ReflOp_SpecTest {
 
 
 }

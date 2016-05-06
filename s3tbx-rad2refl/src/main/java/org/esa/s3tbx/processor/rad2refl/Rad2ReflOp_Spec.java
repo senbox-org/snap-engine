@@ -20,6 +20,7 @@ package org.esa.s3tbx.processor.rad2refl;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
@@ -31,9 +32,8 @@ import org.esa.snap.core.util.ProductUtils;
 
 import java.awt.*;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.stream.Collector;
+import java.util.*;
+import java.util.List;
 
 import static org.esa.snap.dataio.envisat.EnvisatConstants.MERIS_DETECTOR_INDEX_DS_NAME;
 
@@ -82,26 +82,42 @@ public class Rad2ReflOp_Spec extends Operator {
         Product targetProduct = createTargetProduct();
         setTargetProduct(targetProduct);
 
-        if (sensor == Sensor.MERIS) {
+        boolean checkSensor = checkSensor(spectralInputBandNames);
+        if (sensor == Sensor.MERIS && checkSensor) {
             converter = new MerisRadReflConverter(sourceProduct, conversionMode);
             try {
                 rad2ReflAuxdata = Rad2ReflAuxdata.loadAuxdata(sourceProduct.getProductType());
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } else if (sensor == Sensor.OLCI) {
+        } else if (sensor == Sensor.OLCI && checkSensor) {
             converter = new OlciRadReflConverter(conversionMode);
-        } else if (sensor == Sensor.SLSTR_500m) {
+        } else if (sensor == Sensor.SLSTR_500m && checkSensor) {
             converter = new SlstrRadReflConverter(conversionMode);
         } else {
-            throw new OperatorException("Sensor '" + sensor.getName() + "' not supported.");
+            throw new OperatorException("Sensor '" + sensor.getName() + "' not supported. Please check the sensor selection.");
         }
 
     }
 
+    //todo 2 mba/** write a testcase 06/05/2016
+    private boolean checkSensor(String[] firstBandName) {
+        List<String> allBandsName = Arrays.asList(sourceProduct.getBandNames());
+        boolean checker = false;
+        for (String bandName : firstBandName) {
+            if (allBandsName.contains(bandName)){
+                checker = true;
+            }else {
+                checker = false;
+            }
+        }
+
+        return checker;
+    }
+
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
-        checkCancellation();
+//        checkCancellation();
         int bandIndex = -1;
         for (int i = 0; i < spectralOutputBandNames.length; i++) {
             if (spectralOutputBandNames[i].equals(targetBand.getName())) {
@@ -127,10 +143,12 @@ public class Rad2ReflOp_Spec extends Operator {
     private float[] getSampleSZA(Rectangle rectangle) {
         Tile sourceTileSza = null;
         try {
-
-
             if (sensor.equals(Sensor.MERIS) || sensor.equals(Sensor.OLCI)) {
-                sourceTileSza = getSourceTile(sourceProduct.getTiePointGrid(sensor.getSzaBandNames()[0]), rectangle);
+                TiePointGrid tiePointGrid = sourceProduct.getTiePointGrid(sensor.getSzaBandNames()[0]);
+                if (tiePointGrid == null) {
+                    throw new OperatorException("SZA is null ");
+                }
+                sourceTileSza = getSourceTile(tiePointGrid, rectangle);
             } else {
                 if (sourceProduct.getBandAt(0).getName().endsWith("_o")) {
                     sourceTileSza = getSourceTile(sourceProduct.getTiePointGrid(sensor.getSzaBandNames()[0]), rectangle);
@@ -194,6 +212,18 @@ public class Rad2ReflOp_Spec extends Operator {
         if (sensor == Sensor.MERIS || sensor == Sensor.OLCI) {
             ProductUtils.copyBand(MERIS_DETECTOR_INDEX_DS_NAME, sourceProduct, targetProduct, true);
         }
+
+        if (copyNonSpectralBands) {
+            for (Band b : sourceProduct.getBands()) {
+                if (!b.getName().contains(spectralInputBandPrefix)) {
+                    ProductUtils.copyBand(b.getName(), sourceProduct, targetProduct, true);
+                    targetProduct.getBand(b.getName()).setGeoCoding(b.getGeoCoding());
+                }
+            }
+            targetProduct.setAutoGrouping(sourceProduct.getAutoGrouping());
+
+        }
+
 
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
         ProductUtils.copyMasks(sourceProduct, targetProduct);
