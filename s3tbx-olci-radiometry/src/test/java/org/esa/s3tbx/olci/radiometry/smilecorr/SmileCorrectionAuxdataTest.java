@@ -19,6 +19,7 @@
 package org.esa.s3tbx.olci.radiometry.smilecorr;
 
 import org.esa.snap.core.util.SystemUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.nio.file.Files;
@@ -34,6 +35,7 @@ import static org.junit.Assert.*;
 public class SmileCorrectionAuxdataTest {
 
 
+    @Ignore
     @Test
     public void testAuxDataIsInstall() throws Exception {
         SmileCorrectionAuxdata.installAuxdata();
