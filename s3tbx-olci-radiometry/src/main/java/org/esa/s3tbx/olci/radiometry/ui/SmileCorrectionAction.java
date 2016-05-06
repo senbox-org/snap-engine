@@ -32,12 +32,12 @@ import java.awt.event.ActionEvent;
  * @author muhammad.bc.
  */
 
-@ActionID(category = "Processing", id = "org.esa.s3tbx.olci.radiometry.ui.OLCIRadiometryCorrectionAction")
+@ActionID(category = "Processing", id = "org.esa.s3tbx.olci.radiometry.ui.SmileCorrectionAction")
 @ActionRegistration(displayName = "#CTL_OLCI_Smile_Correction_Text")
 @ActionReference(path = "Menu/Optical/Preprocessing", position = 400)
 @NbBundle.Messages({"CTL_OLCI_Smile_Correction_Text=OLCI Smile Correction..."})
 
-public class OLCIRadiometryCorrectionAction extends AbstractSnapAction {
+public class SmileCorrectionAction extends AbstractSnapAction {
 
     public static final String OLCI_CORRECT_RADIOMETRY_ALIAS = "Olci.CorrectRadiometry";
     public static final String OLCI_HELP_ID = "olci_help_ID";

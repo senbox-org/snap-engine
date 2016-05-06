@@ -49,7 +49,7 @@ import java.util.HashMap;
         copyright = "(c) 2015 by Brockmann Consult",
         category = "Optical/Pre-Processing",
         version = "1.2")
-public class OLCIRadiometryCorrectionOp extends SampleOperator {
+public class SmileCorrectionOp extends SampleOperator {
 
 
     @Parameter(defaultValue = "false",
@@ -172,7 +172,7 @@ public class OLCIRadiometryCorrectionOp extends SampleOperator {
 
     public static class Spi extends OperatorSpi {
         public Spi() {
-            super(OLCIRadiometryCorrectionOp.class);
+            super(SmileCorrectionOp.class);
         }
     }
 }
