@@ -18,26 +18,33 @@
 
 package org.esa.s3tbx.olci.radiometry.smilecorr;
 
-import org.junit.Test;
-import org.mockito.Mockito;
-
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.when;
-
 /**
  * @author muhammad.bc.
  */
-public class SmileCorrectionAlgorithmTest {
+public class GaseousAbsorptionAlgorithm {
+
+    public static double calMassAir(double sunAngle, double veiwAngle) {
+        return 1 / Math.cos(sunAngle) + 1 / Math.cos(veiwAngle);
+    }
+
+    private double calAtmosphericGas(String bandName) {
+        return 0;
+    }
+
+    //idea MPs use wavelength instance of name.
+    private double calNormalizedConcentration(String bandName) {
+        return 0;
+    }
 
 
-    @Test
-    public void testSpectralDerivative() throws Exception {
-        SmileCorrectionAuxdata correctionAuxdata = Mockito.mock(SmileCorrectionAuxdata.class);
-        when(correctionAuxdata.getRefCentralWaveLenghts()).thenReturn(new double[]{1, 2, 3});
-        SmileCorrectionAlgorithm correctionAlgorithm = new SmileCorrectionAlgorithm(correctionAuxdata);
+    public String[] gasToComputeForBand(String bandName) {
+        GasToCompute gasToCompute = GasToCompute.valueOf(bandName);
+        return gasToCompute.getGasBandToCompute();
+    }
 
-        final double spectralDerivative = correctionAlgorithm.getReflectanceCorrection(10, 5, 2, 1);
-        assertEquals(5, spectralDerivative, 1e-8);
+    public double calExponential(double atmosphericGas, double normConcentration, double massAir) {
+        final double calValue = -atmosphericGas * normConcentration * massAir;
+        return Math.exp(calValue);
     }
 
 

@@ -147,7 +147,7 @@ public class SmileCorrectionOp extends SampleOperator {
             double reflectance = rad2Refl(radiance.getFloat(), sza.getFloat(), solarFlux.getFloat());
             final Sample sourceSampleUpper = sourceSamples[upperBandIndex];
             final Sample sourceSampleLower = sourceSamples[lowerBandIndex];
-            final double reflectanceCorrection = correctionAlgorithm.getReflectanceCorrection(sourceSampleUpper, sourceSampleLower, upperBandIndex, lowerBandIndex);
+            final double reflectanceCorrection = correctionAlgorithm.getFiniteDifference(sourceSampleUpper, sourceSampleLower, upperBandIndex, lowerBandIndex);
             targetSample.set(reflectance + reflectanceCorrection);
         }
     }

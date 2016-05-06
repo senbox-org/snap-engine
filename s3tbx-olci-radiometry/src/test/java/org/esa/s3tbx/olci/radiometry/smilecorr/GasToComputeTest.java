@@ -7,11 +7,11 @@ import static org.junit.Assert.assertArrayEquals;
 /**
  * @author muhammad.bc.
  */
-public class BandToComputeTest {
+public class GasToComputeTest {
     @Test
     public void testCheckTheBandsToCompute() throws Exception {
-        BandToCompute bandToCompute = BandToCompute.valueOf("Oa01_radiance");
+        GasToCompute bandToCompute = GasToCompute.valueOf("Oa01_radiance");
         String[] gasToCompute = bandToCompute.getGasBandToCompute();
-        assertArrayEquals(new String[]{"H2O", "NO3","O3"}, gasToCompute);
+        assertArrayEquals(new String[]{"NO2"}, gasToCompute);
     }
 }

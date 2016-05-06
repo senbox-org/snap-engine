@@ -101,20 +101,24 @@ public class SmileCorretionOp_Spec extends Operator {
         final Tile sourceLowerBandTile = getSourceTile(radReflProduct.getBandAt(lowerBandIndex), rectangle);
         final Tile sourceUpperBandTile = getSourceTile(radReflProduct.getBandAt(upperBandIndex), rectangle);
 
-        for (int y = targetTile.getMinY(); y < targetTile.getMaxY(); y++) {
-            for (int x = targetTile.getMinX(); x < targetTile.getMaxX(); x++) {
+        for (int y = targetTile.getMinY(); y <= targetTile.getMaxY(); y++) {
+            for (int x = targetTile.getMinX(); x <= targetTile.getMaxX(); x++) {
                 if (lowerBandIndex != -1 && upperBandIndex != -1) {
                     final float sampleFloatUpperBand = sourceUpperBandTile.getSampleFloat(x, y);
                     final float sampleFloatLowerBand = sourceLowerBandTile.getSampleFloat(x, y);
 
-                    final double reflectanceCorrection = correctionAlgorithm.getReflectanceCorrection(sampleFloatUpperBand, sampleFloatLowerBand, upperBandIndex, lowerBandIndex);
-                    targetTile.setSample(x, y, reflectanceCorrection);
+                    final double firstOrderTaylorExpension = correctionAlgorithm.getFiniteDifference(sampleFloatUpperBand, sampleFloatLowerBand,upperBandIndex,lowerBandIndex);
+                    double refCorrection = sourceTargetBandTile.getSampleFloat(x, y) + firstOrderTaylorExpension;
+                    targetTile.setSample(x, y, refCorrection);
                 }
             }
         }
     }
 
     private int getLowerBand(int index) {
+        if (index > auxdata.getBands().length) {
+            throw new OperatorException("The band does not exist");
+        }
         boolean mustCorrect = auxdata.getLandRefCorrectionSwitchs()[index];
         int lowerBandIndex = -1;
         if (mustCorrect) {

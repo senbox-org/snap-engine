@@ -1,39 +1,69 @@
+/*
+ *
+ *  * Copyright (C) 2012 Brockmann Consult GmbH (info@brockmann-consult.de)
+ *  *
+ *  * This program is free software; you can redistribute it and/or modify it
+ *  * under the terms of the GNU General Public License as published by the Free
+ *  * Software Foundation; either version 3 of the License, or (at your option)
+ *  * any later version.
+ *  * This program is distributed in the hope that it will be useful, but WITHOUT
+ *  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ *  * more details.
+ *  *
+ *  * You should have received a copy of the GNU General Public License along
+ *  * with this program; if not, see http://www.gnu.org/licenses/
+ *
+ */
+
 package org.esa.s3tbx.olci.radiometry.operator;
 
-import org.esa.s3tbx.olci.radiometry.smilecorr.BandToCompute;
+import com.bc.ceres.core.ProgressMonitor;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.gpf.Operator;
+import org.esa.snap.core.gpf.OperatorException;
+import org.esa.snap.core.gpf.Tile;
+import org.esa.snap.core.gpf.annotations.OperatorMetadata;
+import org.esa.snap.core.gpf.annotations.Parameter;
+import org.esa.snap.core.gpf.annotations.SourceProduct;
+import org.esa.snap.core.util.ProductUtils;
 
 /**
  * @author muhammad.bc.
  */
-public class GaseousAbsorptionOp {
+@OperatorMetadata(alias = "OLCI.GaseousAsorption",
+        authors = "Marco Peters, Muhamamd Bala (Brockmann Consult)",
+        copyright = "(c) 2016 by Brockmann Consult",
+        description = "Correct the influence of atmospheric gas absorption for those OLCI channels.")
+public class GaseousAbsorptionOp extends Operator{
 
-    public String[] bandToCompute(String bandName){
-        BandToCompute bandToCompute = BandToCompute.valueOf(bandName);
-        String[] gasBandToCompute = bandToCompute.getGasBandToCompute();
-        return null;
-    }
-    public double calExponential(double h2O) {
-        return calExponential(h2O, 1, 1);
+    @SourceProduct(description = "OLCI Refelctance product")
+    Product sourceProduct;
+    private Product targetProduct;
+
+    @Override
+    public void initialize() throws OperatorException {
+        targetProduct = new Product(sourceProduct.getName(), sourceProduct.getProductType(),
+                sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
+
+        for (Band band : sourceProduct.getBands()) {
+            final Band targetBand = targetProduct.addBand(band.getName(), band.getDataType());
+            ProductUtils.copyRasterDataNodeProperties(band, targetBand);
+        }
+
+        ProductUtils.copyMetadata(sourceProduct, targetProduct);
+        ProductUtils.copyMasks(sourceProduct, targetProduct);
+        ProductUtils.copyFlagBands(sourceProduct, targetProduct, true);
+        targetProduct.setAutoGrouping(sourceProduct.getAutoGrouping());
+        setTargetProduct(targetProduct);
+
+
     }
 
-    public double calExponential(double h2O, double nO2) {
-        return calExponential(h2O, nO2, 1);
-    }
+    @Override
+    public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
 
-    public double calExponential(double h2O, double nO2, double o3) {
-        final double calValue = h2O * nO2 * o3;
-        return Math.exp(calValue);
-    }
 
-    public double ozone_O3() {
-        return 0;
-    }
-
-    public double h_2O() {
-        return 0;
-    }
-
-    public double n_02() {
-        return 0;
     }
 }
