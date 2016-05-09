@@ -35,7 +35,6 @@ import static org.junit.Assert.*;
 public class SmileCorrectionAuxdataTest {
 
 
-    @Ignore
     @Test
     public void testAuxDataIsInstall() throws Exception {
         SmileCorrectionAuxdata.installAuxdata();

@@ -20,6 +20,7 @@
 package org.esa.s3tbx.olci.radiometry.operator;
 
 import com.bc.ceres.core.ProgressMonitor;
+import org.esa.s3tbx.olci.radiometry.smilecorr.GaseousAbsorptionAlgorithm;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.Operator;
@@ -29,6 +30,8 @@ import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.util.ProductUtils;
 
+import java.awt.*;
+
 
 /**
  * @author muhammad.bc.
@@ -37,11 +40,12 @@ import org.esa.snap.core.util.ProductUtils;
         authors = "Marco Peters, Muhamamd Bala (Brockmann Consult)",
         copyright = "(c) 2016 by Brockmann Consult",
         description = "Correct the influence of atmospheric gas absorption for those OLCI channels.")
-public class GaseousAbsorptionOp extends Operator{
+public class GaseousAbsorptionOp extends Operator {
 
     @SourceProduct(description = "OLCI Refelctance product")
     Product sourceProduct;
     private Product targetProduct;
+    private GaseousAbsorptionAlgorithm gasAbsorptionAlgo = new GaseousAbsorptionAlgorithm();
 
     @Override
     public void initialize() throws OperatorException {
@@ -57,6 +61,14 @@ public class GaseousAbsorptionOp extends Operator{
         ProductUtils.copyMasks(sourceProduct, targetProduct);
         ProductUtils.copyFlagBands(sourceProduct, targetProduct, true);
         targetProduct.setAutoGrouping(sourceProduct.getAutoGrouping());
+
+//        VirtualBand virtualAirMass = new VirtualBand("__virtual_air_mass",
+//                ProductData.TYPE_FLOAT32,
+//                getSourceProduct().getSceneRasterWidth(),
+//                getSourceProduct().getSceneRasterHeight(),
+//                "1/cos(SZA) + 1/cos(OZA)");
+//        virtualAirMass.setOwner(getSourceProduct());
+//
         setTargetProduct(targetProduct);
 
 
@@ -64,7 +76,24 @@ public class GaseousAbsorptionOp extends Operator{
 
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
-
-
+        final Rectangle rectangle = targetTile.getRectangle();
+        final float[] computedGases = computeGas(targetBand.getName(), rectangle, sourceProduct);
+        targetTile.setSamples(computedGases);
+//        final int maxX = targetTile.getMaxX();
+//        int rowCount = 0;
+//        for (int y = targetTile.getMinY(); y <= targetTile.getMaxY(); y++) {
+//            rowCount++;
+//            for (int x = targetTile.getMinX(); x <= maxX; x++) {
+//
+//                targetTile.setSample(x, y, computedGases[(rowCount - 1) * maxX + x]);
+//            }
+//        }
     }
+
+    private float[] computeGas(String bandName, Rectangle rectangle, Product sourceProduct) {
+        float[] szas = getSourceTile(sourceProduct.getBand("SZA"), rectangle).getSamplesFloat();
+        float[] veiwAs = getSourceTile(sourceProduct.getBand("OVA"), rectangle).getSamplesFloat();
+        return gasAbsorptionAlgo.getTransmissionGas(bandName, szas, veiwAs);
+    }
+
 }

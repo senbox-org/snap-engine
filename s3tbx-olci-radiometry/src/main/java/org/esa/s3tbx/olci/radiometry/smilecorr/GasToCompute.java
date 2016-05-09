@@ -5,12 +5,12 @@ package org.esa.s3tbx.olci.radiometry.smilecorr;
  */
 public enum GasToCompute {
     Oa01_radiance(new String[]{"NO2"}),
-    Oa02_radiance(new String[]{"NO2",}),
+    Oa02_radiance(new String[]{"NO2"}),
     Oa03_radiance(new String[]{"NO2", "H2O", "O3"}),
     Oa04_radiance(new String[]{"O3"}),
     Oa05_radiance(new String[]{"H2O", "O3"}),
     Oa06_radiance(new String[]{"O3"}),
-    Oa07_radiance(new String[]{"O3 "}),
+    Oa07_radiance(new String[]{"O3"}),
     Oa08_radiance(new String[]{"H2O", "O3"}),
     Oa09_radiance(new String[]{"O3"}),
     Oa10_radiance(new String[]{"H2O", "O3"}),
@@ -35,4 +35,5 @@ public enum GasToCompute {
     public String[] getGasBandToCompute() {
         return gasToCompute;
     }
+
 }

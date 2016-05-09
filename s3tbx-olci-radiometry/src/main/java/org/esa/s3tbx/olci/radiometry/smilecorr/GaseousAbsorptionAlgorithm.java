@@ -18,22 +18,27 @@
 
 package org.esa.s3tbx.olci.radiometry.smilecorr;
 
+import java.util.ArrayList;
+
 /**
  * @author muhammad.bc.
  */
 public class GaseousAbsorptionAlgorithm {
 
-    public static double calMassAir(double sunAngle, double veiwAngle) {
-        return 1 / Math.cos(sunAngle) + 1 / Math.cos(veiwAngle);
-    }
-
-    private double calAtmosphericGas(String bandName) {
+    private float getAtmosphericGas(String bandName) {
         return 0;
     }
+
 
     //idea MPs use wavelength instance of name.
-    private double calNormalizedConcentration(String bandName) {
+    private float getNormalizedConcentration(String bandName) {
         return 0;
+    }
+
+    private float getExponential(float atmosphericGas, float normConcentration, float massAir) {
+        // to be confirm how the coofficient?
+        final double calValue = -atmosphericGas * normConcentration * massAir;
+        return (float) Math.exp(calValue);
     }
 
 
@@ -42,10 +47,46 @@ public class GaseousAbsorptionAlgorithm {
         return gasToCompute.getGasBandToCompute();
     }
 
-    public double calExponential(double atmosphericGas, double normConcentration, double massAir) {
-        final double calValue = -atmosphericGas * normConcentration * massAir;
-        return Math.exp(calValue);
+    public static float[] getMassAir(float[] sza, float[] sva) {
+        float[] massAirs = new float[sza.length];
+        for (int i = 0; i < sza.length; i++) {
+            massAirs[i] = (float) (1 / Math.cos(sza[i]) + 1 / Math.cos(sva[i]));
+        }
+        return massAirs;
+    }
+
+    public float[] getTransmissionGas(String bandName, float[] sza, float[] ova) {
+        float[] calMassAirs = getMassAir(sza, ova);
+        String[] gasesToCompute = gasToComputeForBand(bandName);
+        final ArrayList<float[]> arrayListExponential = new ArrayList();
+
+        for (String gas : gasesToCompute) {
+            final float calAtmosphericGas = getAtmosphericGas(gas);
+            final float normalizedConcentration = getNormalizedConcentration(gas);
+            final float[] calExponential = new float[ova.length];
+
+            for (int i = 0; i < sza.length; i++) {
+                calExponential[i] = getExponential(calAtmosphericGas, normalizedConcentration, calMassAirs[i]);
+            }
+            arrayListExponential.add(calExponential);
+        }
+
+        final int size = arrayListExponential.size();
+        float[] transmissionGas = new float[0];
+        if (size == 1) {
+            transmissionGas = arrayListExponential.get(0);
+        } else if (size == 2) {
+            float[] gas_1 = arrayListExponential.get(0);
+            float[] gas_2 = arrayListExponential.get(1);
+            transmissionGas = SmileUtils.multiple2ArrayFloat(gas_1, gas_2);
+        } else if (size == 3) {
+            transmissionGas = SmileUtils.multiple3ArrayFloat(arrayListExponential.get(0), arrayListExponential.get(1), arrayListExponential.get(2));
+        }
+        return transmissionGas;
     }
 
 
+    public static double getMassAir(double sunAngle, double veiwAngle) {
+        return 1 / Math.cos(sunAngle) + 1 / Math.cos(veiwAngle);
+    }
 }
