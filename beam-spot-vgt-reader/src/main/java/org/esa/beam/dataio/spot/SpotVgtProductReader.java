@@ -52,6 +52,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.MessageFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -231,7 +232,17 @@ public class SpotVgtProductReader extends AbstractProductReader {
     private Band addBand(Product product, int bandDataType, BandInfo bandInfo, NetcdfFile netcdfFile,
                          Variable variable) {
         Band band = product.addBand(bandInfo.name, bandDataType);
-        band.setScalingFactor(bandInfo.coefA);
+        if (! Boolean.getBoolean("beam.spotvgt.donotapplysolarilluminationfactor") &&
+                product.getName().matches("V.KRNP.*") &&
+                ("B0".equals(bandInfo.name) ||
+                 "B2".equals(bandInfo.name) ||
+                 "B3".equals(bandInfo.name) ||
+                 "MIR".equals(bandInfo.name))) {
+            int doy = product.getStartTime().getAsCalendar().get(Calendar.DAY_OF_YEAR);
+            band.setScalingFactor(bandInfo.coefA * SpotVgtConstants.SOLAR_ILLUMINATION_FACTOR[doy-1]);
+        } else {
+            band.setScalingFactor(bandInfo.coefA);
+        }
         band.setScalingOffset(bandInfo.offsetB);
         band.setUnit(bandInfo.unit);
         band.setDescription(bandInfo.description);
