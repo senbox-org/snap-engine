@@ -19,7 +19,6 @@
 package org.esa.s3tbx.olci.radiometry.smilecorr;
 
 import org.esa.snap.core.util.SystemUtils;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.nio.file.Files;
@@ -42,8 +41,8 @@ public class SmileCorrectionAuxdataTest {
         List<Path> collect = Files.list(auxDataPath).collect(Collectors.toList());
 
         assertTrue(auxDataPath.isAbsolute());
-        assertTrue(collect.get(0).getFileName().toString().equals("band_reflectance_config.txt"));
-        assertTrue(collect.get(1).getFileName().toString().equals("band_settings.txt"));
+        assertTrue(collect.stream().anyMatch(path -> path.getFileName().toString().equals("band_reflectance_config.txt")));
+        assertTrue(collect.stream().anyMatch(path -> path.getFileName().toString().equals("band_settings.txt")));
     }
 
     @Test
