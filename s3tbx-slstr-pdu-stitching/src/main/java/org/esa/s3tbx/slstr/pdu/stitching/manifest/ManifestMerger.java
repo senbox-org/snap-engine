@@ -110,7 +110,7 @@ public class ManifestMerger {
             case "slstr:pixelQualitySummary":
                 return new PixelQualitySummaryMerger();
             case "slstr:missingElements":
-                throw new PDUStitchingException("Missing elements found in manifest. Stitching aborted.");
+                return new MissingElementsMerger();
             case "sentinel-safe:footPrint":
                 return new FootprintMerger(productDir);
             case "sentinel3:creationTime":

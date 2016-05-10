@@ -29,7 +29,6 @@ public class Validator {
         }
         try {
             validateOrbitReference(manifests);
-            validateMissingElements(manifests);
             validateAdjacency(manifests);
         } catch (PDUStitchingException e) {
             throw new IOException(e.getMessage());
@@ -59,15 +58,6 @@ public class Validator {
                         throw new PDUStitchingException("Invalid orbit reference due to different element " + tagName);
                     }
                 }
-            }
-        }
-    }
-
-    static void validateMissingElements(Document[] manifests) throws PDUStitchingException {
-        for (Document manifest : manifests) {
-            final NodeList missingElements = manifest.getElementsByTagName("slstr:missingElements");
-            if (missingElements.getLength() > 0) {
-                throw new PDUStitchingException("Manifest contains missing elements");
             }
         }
     }

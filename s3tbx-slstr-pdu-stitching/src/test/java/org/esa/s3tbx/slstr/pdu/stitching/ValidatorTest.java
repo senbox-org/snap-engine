@@ -118,42 +118,6 @@ public class ValidatorTest {
     }
 
     @Test
-    public void testValidateMissingElements() throws ParserConfigurationException, IOException, SAXException {
-        final File[] slstrFiles = TestUtils.getSlstrFiles();
-        Document[] manifests = new Document[slstrFiles.length + 1];
-        for (int i = 0; i < slstrFiles.length; i++) {
-            manifests[i] = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(slstrFiles[i]);
-        }
-        String orbitRef =
-                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                        "<informationPackageMap>\n" +
-                        "  <slstr:missingElements threshold=\"75.000000\">\n" +
-                        "    <slstr:globalInfo grid=\"0.5 km stripe A\" view=\"Nadir\" value=\"4000\" over=\"4000\" percentage=\"100.000000\"/>\n" +
-                        "    <slstr:globalInfo grid=\"0.5 km stripe B\" view=\"Nadir\" value=\"4000\" over=\"4000\" percentage=\"100.000000\"/>\n" +
-                        "    <slstr:globalInfo grid=\"0.5 km TDI\" view=\"Nadir\" value=\"4000\" over=\"4000\" percentage=\"100.000000\"/>\n" +
-                        "    <slstr:globalInfo grid=\"0.5 km stripe A\" view=\"Oblique\" value=\"4000\" over=\"4000\" percentage=\"100.000000\"/>\n" +
-                        "    <slstr:globalInfo grid=\"0.5 km stripe B\" view=\"Oblique\" value=\"4000\" over=\"4000\" percentage=\"100.000000\"/>\n" +
-                        "    <slstr:globalInfo grid=\"0.5 km TDI\" view=\"Oblique\" value=\"4000\" over=\"4000\" percentage=\"100.000000\"/>\n" +
-                        "    <slstr:elementMissing grid=\"0.5 km stripe A, 0.5 km stripe B, 0.5 km TDI\" view=\"Nadir\" startTime=\"2013-07-07T15:42:52.300000Z\" stopTime=\"2013-07-07T15:47:52.300000Z\" percentage=\"100.000000\">\n" +
-                        "      <slstr:bandSet>S1, S2, S3, S4, S5, S6</slstr:bandSet>\n" +
-                        "    </slstr:elementMissing>\n" +
-                        "    <slstr:elementMissing grid=\"0.5 km stripe A, 0.5 km stripe B, 0.5 km TDI\" view=\"Oblique\" startTime=\"2013-07-07T15:42:52.283435Z\" stopTime=\"2013-07-07T15:47:52.208435Z\" percentage=\"100.000000\">\n" +
-                        "      <slstr:bandSet>S1, S2, S3, S4, S5, S6</slstr:bandSet>\n" +
-                        "    </slstr:elementMissing>\n" +
-                        "  </slstr:missingElements>\n" +
-                        "</informationPackageMap>";
-        final DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        manifests[manifests.length - 1] =
-                documentBuilder.parse(new InputSource(new ByteArrayInputStream(orbitRef.getBytes("utf-8"))));
-        try {
-            Validator.validateMissingElements(manifests);
-            fail("Exception expected");
-        } catch (PDUStitchingException e) {
-            assertEquals("Manifest contains missing elements", e.getMessage());
-        }
-    }
-
-    @Test
     public void testAdjacency_notAdjacent() throws ParserConfigurationException, IOException, SAXException {
         final File firstSlstrFile = TestUtils.getFirstSlstrFile();
         final File thirdSlstrFile = TestUtils.getThirdSlstrFile();

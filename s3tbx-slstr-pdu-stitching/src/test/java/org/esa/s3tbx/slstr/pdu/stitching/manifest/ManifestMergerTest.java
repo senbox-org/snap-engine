@@ -86,19 +86,6 @@ public class ManifestMergerTest {
     }
 
     @Test
-    public void testMergeManifests_FailsWhenMissingElementsArePresent() throws ParserConfigurationException, TransformerException, IOException {
-        final Date now = Calendar.getInstance().getTime();
-        final File productDir = new File(ManifestMergerTest.class.getResource("").getFile());
-        final File manifestFileWithMissingElements = getManifestFile("missingElements");
-        try {
-            manifestMerger.createMergedManifest(new File[]{manifestFileWithMissingElements}, now, productDir, 5000);
-            fail("Exception expected");
-        } catch (PDUStitchingException e) {
-            assertEquals("Missing elements found in manifest. Stitching aborted.", e.getMessage());
-        }
-    }
-
-    @Test
     @Ignore
     public void testMergeSentinelSafeProcessingNodes() throws IOException, ParserConfigurationException, SAXException, PDUStitchingException {
         //todo make this run -> own elementmerger?
