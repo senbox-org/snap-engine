@@ -34,7 +34,7 @@ public class GaseousAbsorptionAlgorithm {
 
     //idea MPs use wavelength instance of name.
     public float getNormalizedConcentration(String bandName) {
-        return 0;
+        return 1;
     }
 
     public float getExponential(float atmosphericGas, float normConcentration, float massAir) {
@@ -49,26 +49,26 @@ public class GaseousAbsorptionAlgorithm {
         return gasToCompute.getGasBandToCompute();
     }
 
-    public float[] getMassAir(float[] sza, float[] ova) {
+    public float[] getMassAir(float[] sza, float[] oza) {
         Assert.notNull(sza,"The sun zenith angel most not be null.");
-        Assert.notNull(ova);
+        Assert.notNull(oza);
 
         float[] massAirs = new float[sza.length];
         for (int i = 0; i < sza.length; i++) {
-            massAirs[i] = (float) (1 / Math.cos(sza[i]) + 1 / Math.cos(ova[i]));
+            massAirs[i] = (float) (1 / Math.cos(sza[i]) + 1 / Math.cos(oza[i]));
         }
         return massAirs;
     }
 
-    public float[] getTransmissionGas(String bandName, float[] sza, float[] ova) {
-        float[] calMassAirs = getMassAir(sza, ova);
+    public float[] getTransmissionGas(String bandName, float[] sza, float[] oza) {
+        float[] calMassAirs = getMassAir(sza, oza);
         String[] gasesToCompute = gasToComputeForBand(bandName);
         final ArrayList<float[]> arrayListExponential = new ArrayList();
 
         for (String gas : gasesToCompute) {
             final float calAtmosphericGas = getAtmosphericGas(gas);
             final float normalizedConcentration = getNormalizedConcentration(gas);
-            final float[] calExponential = new float[ova.length];
+            final float[] calExponential = new float[oza.length];
 
             for (int i = 0; i < sza.length; i++) {
                 calExponential[i] = getExponential(calAtmosphericGas, normalizedConcentration, calMassAirs[i]);

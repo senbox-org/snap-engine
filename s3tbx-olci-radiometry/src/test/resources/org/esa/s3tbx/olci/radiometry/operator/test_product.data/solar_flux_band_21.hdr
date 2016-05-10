@@ -1,0 +1,13 @@
+ENVI
+description = {In-band solar irradiance, seasonally corrected - Unit: mW.m-2.nm-1}
+samples = 4
+lines = 11
+bands = 1
+header offset = 0
+file type = ENVI Standard
+data type = 4
+interleave = bsq
+byte order = 1
+band names = { solar_flux_band_21 }
+data gain values = {1.0}
+data offset values = {0.0}

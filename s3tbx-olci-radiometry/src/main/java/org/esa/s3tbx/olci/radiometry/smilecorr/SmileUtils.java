@@ -27,12 +27,8 @@ import org.esa.snap.core.gpf.OperatorException;
 public class SmileUtils {
 
     public static float[] multiple2ArrayFloat(float[] array1, float[] array2) {
-        if (array1 == null || array2 == null) {
-            //todo mba/*** ask MarcoP if null is ok.
-            throw new OperatorException("d");
-        }
         if (array1.length != array2.length) {
-            throw new OperatorException("The arrrays most have the same index.");
+            throw new OperatorException("The arrays most have the same length.");
         }
         final float[] cal = new float[array1.length];
         for (int i = 0; i < array1.length; i++) {
@@ -42,10 +38,6 @@ public class SmileUtils {
     }
 
     public static float[] multiple3ArrayFloat(float[] array1, float[] array2, float[] array3) {
-        //todo mba/***Asked Marco P the message to display.
-        Assert.notNull(array1,"The arrrays most have the same index.");
-        Assert.notNull(array2);
-        Assert.notNull(array3);
         return multiple2ArrayFloat(multiple2ArrayFloat(array1, array2), array3);
     }
 }

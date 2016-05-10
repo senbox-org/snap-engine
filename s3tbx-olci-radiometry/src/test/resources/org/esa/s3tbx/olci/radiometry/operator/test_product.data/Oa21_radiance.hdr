@@ -1,0 +1,14 @@
+ENVI
+description = {TOA radiance for OLCI acquisition band Oa21 - Unit: mW.m-2.sr-1.nm-1 - Wavelength: 1020.0nm}
+samples = 4
+lines = 11
+bands = 1
+header offset = 0
+file type = ENVI Standard
+data type = 12
+interleave = bsq
+byte order = 1
+band names = { Oa21_radiance }
+wavelength = {1020.0}
+data gain values = {0.0024979400914162397}
+data offset values = {0.0}

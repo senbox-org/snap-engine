@@ -30,14 +30,7 @@ public class SmileUtilsTest {
 
     @Test
     public void testMultiple2ArrayNullAndNotNull() throws Exception {
-        try {
-            SmileUtils.multiple2ArrayFloat(null, null);
-            SmileUtils.multiple2ArrayFloat(null, new float[]{2, 45});
-            SmileUtils.multiple2ArrayFloat(new float[]{2, 4, 2}, new float[]{2, 45});
 
-            fail("The arrrays most have the same index.");
-        } catch (OperatorException e) {
-        }
         assertArrayEquals(new float[]{1, 4, 9}, SmileUtils.multiple2ArrayFloat(new float[]{1, 2, 3}, new float[]{1, 2, 3}), 0);
         assertArrayEquals(new float[]{0, 4, 10}, SmileUtils.multiple2ArrayFloat(new float[]{0, 1, 2}, new float[]{3, 4, 5}), 0);
         assertArrayEquals(new float[]{0, 4, 10, 10}, SmileUtils.multiple2ArrayFloat(new float[]{0, 1, 2, 1}, new float[]{3, 4, 5, 10}), 0);
@@ -46,19 +39,12 @@ public class SmileUtilsTest {
 
     @Test
     public void testMultiple3ArrayNullAndNotNull() throws Exception {
-        try {
-            SmileUtils.multiple3ArrayFloat(null, null, null);
-            SmileUtils.multiple3ArrayFloat(null, new float[]{2, 45}, null);
-            SmileUtils.multiple3ArrayFloat(new float[]{2, 4, 2}, new float[]{2, 45}, new float[]{4, 89, 10, 20});
 
-            fail("The arrrays most have the same index.");
-        } catch (OperatorException | NullPointerException e) {
-        }
         assertArrayEquals(new float[]{0, 4, 20}, SmileUtils.multiple3ArrayFloat(new float[]{0, 1, 2}, new float[]{3, 4, 5}, new float[]{0, 1, 2}), 0);
         assertArrayEquals(new float[]{0, 4, 10, 10}, SmileUtils.multiple3ArrayFloat(new float[]{0, 1, 2, 1}, new float[]{3, 4, 5, 10}, new float[]{1, 1, 1, 1}), 0);
 
         float[] actuals = SmileUtils.multiple3ArrayFloat(new float[]{1, 2, 3}, new float[]{4, 5, 6}, new float[]{7, 8, 9});
-        assertEquals(3,actuals.length);
+        assertEquals(3, actuals.length);
         assertArrayEquals(new float[]{28, 80, 162}, actuals, 0);
     }
 }

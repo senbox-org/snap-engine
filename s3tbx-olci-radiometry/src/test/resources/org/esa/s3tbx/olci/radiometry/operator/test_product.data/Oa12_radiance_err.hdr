@@ -1,0 +1,14 @@
+ENVI
+description = {Error estimate for OLCI acquisition band Oa12 - Unit: mW.m-2.sr-1.nm-1 - Wavelength: 753.75nm}
+samples = 4
+lines = 11
+bands = 1
+header offset = 0
+file type = ENVI Standard
+data type = 12
+interleave = bsq
+byte order = 1
+band names = { Oa12_radiance_err }
+wavelength = {753.75}
+data gain values = {0.005763419903814793}
+data offset values = {0.0}

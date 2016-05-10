@@ -47,14 +47,20 @@ public class GaseousAbsorptionOpTest {
         GPF.getDefaultInstance().getOperatorSpiRegistry().removeOperatorSpi(operatorSpi);
     }
 
-    @Ignore
     @Test
     public void testGaseousOp() throws Exception {
-        URL resource = GaseousAbsorptionOpTest.class.getResource("test.dim");
-        Product sourceProduct = ProductIO.readProduct(resource.getPath());
-        final HashMap<String, Object> parameters = new HashMap<>();
-        Product product = GPF.createProduct("OLCI.GaseousAsorption", parameters, sourceProduct);
-        assertNotNull(product);
+        final URL resource = GaseousAbsorptionOpTest.class.getResource("test_product.dim");
+        final Product sourceProduct = ProductIO.readProduct(resource.getPath());
+        assertNotNull(sourceProduct);
 
+        final HashMap<String, Object> parameters = new HashMap<>();
+        final Product gaseousAbsorptionProduct = GPF.createProduct("OLCI.GaseousAsorption", parameters, sourceProduct);
+        assertNotNull(gaseousAbsorptionProduct);
+
+        float sampleFloatSourceProduct = sourceProduct.getBandAt(0).getSampleFloat(0, 0);
+        float sampleFloatGas = gaseousAbsorptionProduct.getBandAt(0).getSampleFloat(0, 0);
+
+        assertEquals(413.5063171386719, sampleFloatSourceProduct, 1e-8);
+        assertEquals(1.3628956, sampleFloatGas, 1e-8);
     }
 }
