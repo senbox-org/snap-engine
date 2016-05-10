@@ -89,16 +89,26 @@ class NcFileStitcher {
     }
 
     private static Array getValidArrayFromVariable(Variable variable) throws IOException {
-        final Array array = variable.read();
         if (variable.getDataType().isString()) {
+            Array array;
+            try {
+                array = variable.read();
+            } catch (Exception e) {
+                if (e instanceof IOException) {
+                    throw e;
+                } else {
+                    array = Array.factory(variable.getDataType(), variable.getShape());
+                }
+            }
             final IndexIterator indexIterator = array.getIndexIterator();
             while (indexIterator.hasNext()) {
                 if (indexIterator.next() == null) {
                     indexIterator.setObjectCurrent("");
                 }
             }
+            return array;
         }
-        return array;
+        return variable.read();
     }
 
     private static void addVariableToWritable(NFileWriteable netcdfWriteable, Variable variable) throws IOException {
