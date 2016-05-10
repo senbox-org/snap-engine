@@ -23,6 +23,7 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.GPF;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.net.URL;
@@ -46,6 +47,7 @@ public class GaseousAbsorptionOpTest {
         GPF.getDefaultInstance().getOperatorSpiRegistry().removeOperatorSpi(operatorSpi);
     }
 
+    @Ignore
     @Test
     public void testGaseousOp() throws Exception {
         URL resource = GaseousAbsorptionOpTest.class.getResource("test.dim");
