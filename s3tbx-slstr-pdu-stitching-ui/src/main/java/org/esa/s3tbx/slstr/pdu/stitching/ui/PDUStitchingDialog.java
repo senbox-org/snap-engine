@@ -62,8 +62,8 @@ public class PDUStitchingDialog extends ModelessDialog {
             }
             final ProductReaderPlugIn sen3ReaderPlugIn = getSentinel3ReaderPlugin();
             final Map<String, Object> parameterMap = formModel.getParameterMap();
-            parameterMap.remove(PDUStitchingModel.PROPERTY_SOURCE_PRODUCTS);
-            GPF.createProduct("PduStitching", parameterMap, formModel.getSourceProducts());
+            final Product[] sourceProducts = formModel.getSourceProducts();
+            GPF.createProduct("PduStitching", parameterMap, sourceProducts);
             if (formModel.openInApp()) {
                 final String[] after = targetDir.list();
                 for (String inTargetDir : after) {
