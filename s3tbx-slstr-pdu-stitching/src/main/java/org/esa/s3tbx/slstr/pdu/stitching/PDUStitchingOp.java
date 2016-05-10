@@ -51,12 +51,16 @@ public class PDUStitchingOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
         setDummyTargetProduct();
+        if ((sourceProducts == null || sourceProducts.length == 0) &&
+                (sourceProductPaths == null || sourceProductPaths.length == 0)) {
+            throw new OperatorException("Either 'sourceProducts' pr 'sourceProductPaths' must be set");
+        }
         final Set<File> filesByProduct = getSourceProductsFileSet(sourceProducts);
         final Set<File> filesByPath = getSourceProductsPathFileSet(sourceProductPaths, getLogger());
         filesByPath.addAll(filesByProduct);
         final File[] files = filesByPath.toArray(new File[filesByPath.size()]);
         if (files.length == 0) {
-            return;
+            throw new OperatorException("No PDUs to be stitched could be found.");
         }
         if (targetDir == null || StringUtils.isNullOrEmpty(targetDir.getAbsolutePath())) {
             targetDir = new File(SystemUtils.getUserHomeDir().getPath());
