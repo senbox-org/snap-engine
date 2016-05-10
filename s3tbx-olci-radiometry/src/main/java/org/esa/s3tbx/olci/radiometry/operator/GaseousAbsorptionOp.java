@@ -25,6 +25,7 @@ import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
+import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
@@ -61,14 +62,6 @@ public class GaseousAbsorptionOp extends Operator {
         ProductUtils.copyMasks(sourceProduct, targetProduct);
         ProductUtils.copyFlagBands(sourceProduct, targetProduct, true);
         targetProduct.setAutoGrouping(sourceProduct.getAutoGrouping());
-
-//        VirtualBand virtualAirMass = new VirtualBand("__virtual_air_mass",
-//                ProductData.TYPE_FLOAT32,
-//                getSourceProduct().getSceneRasterWidth(),
-//                getSourceProduct().getSceneRasterHeight(),
-//                "1/cos(SZA) + 1/cos(OZA)");
-//        virtualAirMass.setOwner(getSourceProduct());
-//
         setTargetProduct(targetProduct);
 
 
@@ -79,21 +72,19 @@ public class GaseousAbsorptionOp extends Operator {
         final Rectangle rectangle = targetTile.getRectangle();
         final float[] computedGases = computeGas(targetBand.getName(), rectangle, sourceProduct);
         targetTile.setSamples(computedGases);
-//        final int maxX = targetTile.getMaxX();
-//        int rowCount = 0;
-//        for (int y = targetTile.getMinY(); y <= targetTile.getMaxY(); y++) {
-//            rowCount++;
-//            for (int x = targetTile.getMinX(); x <= maxX; x++) {
-//
-//                targetTile.setSample(x, y, computedGases[(rowCount - 1) * maxX + x]);
-//            }
-//        }
     }
 
     private float[] computeGas(String bandName, Rectangle rectangle, Product sourceProduct) {
         float[] szas = getSourceTile(sourceProduct.getBand("SZA"), rectangle).getSamplesFloat();
         float[] veiwAs = getSourceTile(sourceProduct.getBand("OVA"), rectangle).getSamplesFloat();
         return gasAbsorptionAlgo.getTransmissionGas(bandName, szas, veiwAs);
+    }
+
+    public static class Spi extends OperatorSpi {
+
+        public Spi() {
+            super(GaseousAbsorptionOp.class);
+        }
     }
 
 }

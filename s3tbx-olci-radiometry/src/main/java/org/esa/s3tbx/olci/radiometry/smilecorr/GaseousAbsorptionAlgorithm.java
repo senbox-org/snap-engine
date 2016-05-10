@@ -18,6 +18,8 @@
 
 package org.esa.s3tbx.olci.radiometry.smilecorr;
 
+import com.bc.ceres.core.Assert;
+
 import java.util.ArrayList;
 
 /**
@@ -25,19 +27,19 @@ import java.util.ArrayList;
  */
 public class GaseousAbsorptionAlgorithm {
 
-    private float getAtmosphericGas(String bandName) {
-        return 0;
+    public float getAtmosphericGas(String bandName) {
+        return 1;
     }
 
 
     //idea MPs use wavelength instance of name.
-    private float getNormalizedConcentration(String bandName) {
+    public float getNormalizedConcentration(String bandName) {
         return 0;
     }
 
-    private float getExponential(float atmosphericGas, float normConcentration, float massAir) {
+    public float getExponential(float atmosphericGas, float normConcentration, float massAir) {
         // to be confirm how the coofficient?
-        final double calValue = -atmosphericGas * normConcentration * massAir;
+        final float calValue = -atmosphericGas * normConcentration * massAir;
         return (float) Math.exp(calValue);
     }
 
@@ -47,10 +49,13 @@ public class GaseousAbsorptionAlgorithm {
         return gasToCompute.getGasBandToCompute();
     }
 
-    public static float[] getMassAir(float[] sza, float[] sva) {
+    public float[] getMassAir(float[] sza, float[] ova) {
+        Assert.notNull(sza,"The sun zenith angel most not be null.");
+        Assert.notNull(ova);
+
         float[] massAirs = new float[sza.length];
         for (int i = 0; i < sza.length; i++) {
-            massAirs[i] = (float) (1 / Math.cos(sza[i]) + 1 / Math.cos(sva[i]));
+            massAirs[i] = (float) (1 / Math.cos(sza[i]) + 1 / Math.cos(ova[i]));
         }
         return massAirs;
     }
@@ -76,9 +81,7 @@ public class GaseousAbsorptionAlgorithm {
         if (size == 1) {
             transmissionGas = arrayListExponential.get(0);
         } else if (size == 2) {
-            float[] gas_1 = arrayListExponential.get(0);
-            float[] gas_2 = arrayListExponential.get(1);
-            transmissionGas = SmileUtils.multiple2ArrayFloat(gas_1, gas_2);
+            transmissionGas = SmileUtils.multiple2ArrayFloat(arrayListExponential.get(0), arrayListExponential.get(1));
         } else if (size == 3) {
             transmissionGas = SmileUtils.multiple3ArrayFloat(arrayListExponential.get(0), arrayListExponential.get(1), arrayListExponential.get(2));
         }

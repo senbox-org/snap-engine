@@ -18,6 +18,7 @@
 
 package org.esa.s3tbx.olci.radiometry.smilecorr;
 
+import com.bc.ceres.core.Assert;
 import org.esa.snap.core.gpf.OperatorException;
 
 /**
@@ -31,7 +32,7 @@ public class SmileUtils {
             throw new OperatorException("d");
         }
         if (array1.length != array2.length) {
-            throw new OperatorException("The arrays are null.");
+            throw new OperatorException("The arrrays most have the same index.");
         }
         final float[] cal = new float[array1.length];
         for (int i = 0; i < array1.length; i++) {
@@ -41,6 +42,10 @@ public class SmileUtils {
     }
 
     public static float[] multiple3ArrayFloat(float[] array1, float[] array2, float[] array3) {
-        return array1;
+        //todo mba/***Asked Marco P the message to display.
+        Assert.notNull(array1,"The arrrays most have the same index.");
+        Assert.notNull(array2);
+        Assert.notNull(array3);
+        return multiple2ArrayFloat(multiple2ArrayFloat(array1, array2), array3);
     }
 }

@@ -52,24 +52,28 @@ import static org.esa.snap.dataio.envisat.EnvisatConstants.MERIS_DETECTOR_INDEX_
         description = "Provides conversion from radiances to reflectances or backwards.")
 public class Rad2ReflOp_Spec extends Operator {
 
-    String[] spectralInputBandNames;
-    String[] spectralOutputBandNames;
-    @Parameter(defaultValue = "OLCI",
-            description = "The sensor", valueSet = {"MERIS", "OLCI", "SLSTR_500m"})
+    @Parameter(defaultValue = "OLCI", description = "The sensor", valueSet = {"MERIS", "OLCI", "SLSTR_500m"})
     private Sensor sensor;
+
     @Parameter(description = "Conversion mode: from rad to refl, or backwards", valueSet = {"RAD_TO_REFL", "REFL_TO_RAD"},
             defaultValue = "RAD_TO_REFL")
     private String conversionMode;
+
     @SourceProduct(alias = "source", label = "Name", description = "The source product.")
     private Product sourceProduct;
-    @Parameter(defaultValue = "true",
-            description = "If set, non-spectral bands from source product are written to target product")
+
+    @Parameter(defaultValue = "true", description = "If set, non-spectral bands from source product are written to target product")
     private boolean copyNonSpectralBands;
+
     private RadReflConverter converter;
+
     private transient int currentPixel = 0;
     private String spectralInputBandPrefix;
     private Product targetProduct;
     private Rad2ReflAuxdata rad2ReflAuxdata;
+
+    private String[] spectralInputBandNames;
+    private String[] spectralOutputBandNames;
 
 
     @Override
@@ -105,11 +109,7 @@ public class Rad2ReflOp_Spec extends Operator {
         List<String> allBandsName = Arrays.asList(sourceProduct.getBandNames());
         boolean checker = false;
         for (String bandName : firstBandName) {
-            if (allBandsName.contains(bandName)){
-                checker = true;
-            }else {
-                checker = false;
-            }
+            checker = allBandsName.contains(bandName) ? true : false;
         }
 
         return checker;
@@ -117,7 +117,7 @@ public class Rad2ReflOp_Spec extends Operator {
 
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
-//        checkCancellation();
+        checkCancellation();
         int bandIndex = -1;
         for (int i = 0; i < spectralOutputBandNames.length; i++) {
             if (spectralOutputBandNames[i].equals(targetBand.getName())) {
@@ -213,16 +213,15 @@ public class Rad2ReflOp_Spec extends Operator {
             ProductUtils.copyBand(MERIS_DETECTOR_INDEX_DS_NAME, sourceProduct, targetProduct, true);
         }
 
-        if (copyNonSpectralBands) {
-            for (Band b : sourceProduct.getBands()) {
-                if (!b.getName().contains(spectralInputBandPrefix)) {
-                    ProductUtils.copyBand(b.getName(), sourceProduct, targetProduct, true);
-                    targetProduct.getBand(b.getName()).setGeoCoding(b.getGeoCoding());
-                }
-            }
-            targetProduct.setAutoGrouping(sourceProduct.getAutoGrouping());
-
-        }
+//        if (copyNonSpectralBands) {
+//            for (Band b : sourceProduct.getBands()) {
+//                if (!b.getName().contains(spectralInputBandPrefix)) {
+//                    ProductUtils.copyBand(b.getName(), sourceProduct, targetProduct, true);
+//                    targetProduct.getBand(b.getName()).setGeoCoding(b.getGeoCoding());
+//                }
+//            }
+//            targetProduct.setAutoGrouping(sourceProduct.getAutoGrouping());
+//        }
 
 
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
