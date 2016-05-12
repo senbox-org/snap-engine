@@ -27,14 +27,11 @@ abstract class AbstractElementMerger implements ElementMerger {
     }
 
     protected static Date parseDate(String text) throws PDUStitchingException {
-        String subDate = text;
-        if (text.endsWith("Z")) {
-            subDate = text.substring(0, 23) + "Z";
-        }
+        String subDate = text.substring(0, 23) + "Z";
         try {
             return SLSTR_DATE_FORMAT_CONVERTER.parse(subDate);
         } catch (ConversionException e) {
-            throw new PDUStitchingException("Error while parsing start time: " + e.getMessage());
+            throw new PDUStitchingException("Error while parsing time: " + e.getMessage());
         }
     }
 
