@@ -28,7 +28,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-public class SlstrLstProductFactory extends SlstrL2ProductFactory {
+public class SlstrLstProductFactory extends SlstrProductFactory {
 
     public SlstrLstProductFactory(Sentinel3ProductReader productReader) {
         super(productReader);

@@ -42,11 +42,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SlstrSstProductFactory extends SlstrL2ProductFactory {
+public class SlstrSstProductFactory extends SlstrProductFactory {
 
     public final static String SLSTR_L2_SST_USE_PIXELGEOCODINGS = "s3tbx.reader.slstrl2sst.pixelGeoCodings";
 
     private Map<String, GeoCoding> geoCodingMap;
+    private int nadirStartOffset;
+    private int nadirTrackOffset;
+    private int obliqueStartOffset;
+    private int obliqueTrackOffset;
 
     public SlstrSstProductFactory(Sentinel3ProductReader productReader) {
         super(productReader);
@@ -79,6 +83,45 @@ public class SlstrSstProductFactory extends SlstrL2ProductFactory {
             }
         }
         return masterProduct;
+    }
+
+    @Override
+    protected void processProductSpecificMetadata(MetadataElement metadataElement) {
+        final MetadataElement slstrInformationElement = metadataElement.getElement("slstrProductInformation");
+        for (int i = 0; i < slstrInformationElement.getNumElements(); i++) {
+            final MetadataElement slstrElement = slstrInformationElement.getElementAt(i);
+            final String slstrElementName = slstrElement.getName();
+            if (slstrElementName.endsWith("ImageSize")) {
+                final int startOffset =
+                        Integer.parseInt(slstrElement.getAttribute("startOffset").getData().getElemString());
+                final int trackOffset =
+                        Integer.parseInt(slstrElement.getAttribute("trackOffset").getData().getElemString());
+                if (slstrElementName.equals("nadirImageSize")) {
+                    nadirStartOffset = startOffset;
+                    nadirTrackOffset = trackOffset;
+                    setReferenceStartOffset(startOffset);
+                    setReferenceTrackOffset(trackOffset);
+                    setReferenceResolutions(getResolutions("in"));
+                } else {
+                    obliqueStartOffset = startOffset;
+                    obliqueTrackOffset = trackOffset;
+                }
+            }
+        }
+    }
+
+    protected Integer getStartOffset(String gridIndex) {
+        if(gridIndex.endsWith("o")) {
+            return obliqueStartOffset;
+        }
+        return nadirStartOffset;
+    }
+
+    protected Integer getTrackOffset(String gridIndex) {
+        if(gridIndex.endsWith("o")) {
+            return obliqueTrackOffset;
+        }
+        return nadirTrackOffset;
     }
 
     @Override
