@@ -127,6 +127,10 @@ public class ManifestMerger {
                 return new DumpInformationMerger();
             case "sentinel-safe:orbitReference":
                 return new OrbitReferenceMerger();
+            case "sentinel3:duration":
+                return new DurationMerger();
+            case "sentinel3:alongtrackCoordinate":
+                return new AlongTrackCoordinateMerger();
         }
         return defaultMerger;
     }
