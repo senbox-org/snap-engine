@@ -37,7 +37,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * The <code>CloudProcessor</code> implements all specific functionality to calculate a cloud probability.
@@ -62,7 +61,6 @@ public class CloudOperator extends Operator {
 
     @Override
     public void initialize() {
-        setLogger(Logger.getLogger(CloudConstants.LOGGER_NAME));
         getLogger().info("Starting request...");
         initCloudNode();
         try {
