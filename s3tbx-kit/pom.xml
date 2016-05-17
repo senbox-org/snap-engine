@@ -225,16 +225,6 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-watermask</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-watermask-ui</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.esa.snap.seadas</groupId>
             <artifactId>seadas-reader</artifactId>
             <version>${seadas.reader.version}</version>

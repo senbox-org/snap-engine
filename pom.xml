@@ -62,8 +62,6 @@
         <module>s3tbx-slstr-pdu-stitching-ui</module>
         <module>s3tbx-slstr-regrid</module>
         <module>s3tbx-spot-vgt-reader</module>
-        <module>s3tbx-watermask</module>
-        <module>s3tbx-watermask-ui</module>
         <module>seadas-reader</module>
         <module>seadas-reader-ui</module>
     </modules>

@@ -83,8 +83,8 @@
             <!--<version>${snap.version}</version>-->
         <!--</dependency>-->
         <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-watermask</artifactId>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-watermask</artifactId>
             <version>${snap.version}</version>
         </dependency>
 
