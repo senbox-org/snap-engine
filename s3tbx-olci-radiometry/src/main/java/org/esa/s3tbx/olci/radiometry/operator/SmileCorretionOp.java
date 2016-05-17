@@ -44,7 +44,7 @@ import java.util.HashMap;
         copyright = "(c) 2015 by Brockmann Consult",
         category = "Optical/Pre-Processing",
         version = "1.2")
-public class SmileCorretionOp_Spec extends Operator {
+public class SmileCorretionOp extends Operator {
 
 
     public static final String LAND_EXPRESSION = "quality_flags_land";
@@ -138,7 +138,7 @@ public class SmileCorretionOp_Spec extends Operator {
 
     public static class Spi extends OperatorSpi {
         public Spi() {
-            super(SmileCorretionOp_Spec.class);
+            super(SmileCorretionOp.class);
         }
     }
 }
