@@ -1,8 +1,7 @@
 package org.esa.s3tbx.olci.radiometry.operator;
 
 
-import org.esa.s3tbx.olci.radiometry.smilecorr.GaseousAbsorptionAlgorithm;
-import org.junit.Assert;
+import org.esa.s3tbx.olci.radiometry.gaseousabsorption.GaseousAbsorptionAlgorithm;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;

@@ -1,2 +1,2 @@
 org.esa.s3tbx.olci.radiometry.operator.SmileCorretionOp$Spi
-org.esa.s3tbx.olci.radiometry.operator.GaseousAbsorptionOp$Spi
+org.esa.s3tbx.olci.radiometry.gaseousabsorption.GaseousAbsorptionOp$Spi

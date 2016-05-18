@@ -17,10 +17,9 @@
  *
  */
 
-package org.esa.s3tbx.olci.radiometry.operator;
+package org.esa.s3tbx.olci.radiometry.gaseousabsorption;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.s3tbx.olci.radiometry.smilecorr.GaseousAbsorptionAlgorithm;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.Operator;

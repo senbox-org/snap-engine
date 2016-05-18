@@ -16,9 +16,10 @@
  *
  */
 
-package org.esa.s3tbx.olci.radiometry.smilecorr;
+package org.esa.s3tbx.olci.radiometry.gaseousabsorption;
 
 import com.bc.ceres.core.Assert;
+import org.esa.s3tbx.olci.radiometry.smilecorr.SmileUtils;
 
 import java.util.ArrayList;
 
