@@ -1,6 +1,7 @@
 package org.esa.s3tbx.olci.radiometry.rayleighcorrection;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -8,6 +9,7 @@ import static org.junit.Assert.*;
 /**
  * @author muhammad.bc.
  */
+@Ignore
 public class RayleighCorrAlgorithmTest {
 
     private RayleighCorrAlgorithm algo;
