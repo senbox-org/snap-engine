@@ -48,20 +48,19 @@ public class SmileCorretionOp extends Operator {
 
 
     public static final String LAND_EXPRESSION = "quality_flags_land";
+    private static SmileCorrectionAuxdata auxdata = new SmileCorrectionAuxdata();
     @Parameter(defaultValue = "false",
             label = "Perform radiance-to-reflectance conversion")
     private boolean doRadToRefl;
-
     @SourceProduct(alias = "source", label = "Name", description = "The source product.")
     private Product sourceProduct;
-
-    private static SmileCorrectionAuxdata auxdata = new SmileCorrectionAuxdata();
     private SmileCorrectionAlgorithm correctionAlgorithm;
     private Product radReflProduct;
     private Product targetProduct;
 
     @Override
     public void initialize() throws OperatorException {
+
         convertRadtoReflectance();
         correctionAlgorithm = new SmileCorrectionAlgorithm(auxdata);
         // Configure the target
@@ -75,6 +74,7 @@ public class SmileCorretionOp extends Operator {
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
         ProductUtils.copyMasks(sourceProduct, targetProduct);
         ProductUtils.copyFlagBands(sourceProduct, targetProduct, true);
+        ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
         targetProduct.setAutoGrouping(sourceProduct.getAutoGrouping());
         setTargetProduct(targetProduct);
 
@@ -107,7 +107,7 @@ public class SmileCorretionOp extends Operator {
                     final float sampleFloatUpperBand = sourceUpperBandTile.getSampleFloat(x, y);
                     final float sampleFloatLowerBand = sourceLowerBandTile.getSampleFloat(x, y);
 
-                    final double firstOrderTaylorExpension = correctionAlgorithm.getFiniteDifference(sampleFloatUpperBand, sampleFloatLowerBand,upperBandIndex,lowerBandIndex);
+                    final double firstOrderTaylorExpension = correctionAlgorithm.getFiniteDifference(sampleFloatUpperBand, sampleFloatLowerBand, upperBandIndex, lowerBandIndex);
                     double refCorrection = sourceTargetBandTile.getSampleFloat(x, y) + firstOrderTaylorExpension;
                     targetTile.setSample(x, y, refCorrection);
                 }

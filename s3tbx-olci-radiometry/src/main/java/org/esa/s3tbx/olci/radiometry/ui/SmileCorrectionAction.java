@@ -39,7 +39,8 @@ import java.awt.event.ActionEvent;
 
 public class SmileCorrectionAction extends AbstractSnapAction {
 
-    public static final String OLCI_CORRECT_RADIOMETRY_ALIAS = "Olci.CorrectRadiometry";
+//    public static final String OLCI_CORRECT_RADIOMETRY_ALIAS = "Olci.CorrectRadiometry";
+    public static final String OLCI_CORRECT_RADIOMETRY_ALIAS = "Olci.RayleighCorrection";
     public static final String OLCI_HELP_ID = "olci_help_ID";
 
     @Override
