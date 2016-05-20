@@ -56,8 +56,8 @@ public class RayleighCorrAlgorithm {
         final double sin_sun = Math.sin(sunZenithAngle);
         final double cos_azi_dif = Math.cos(azimuthDifferent);
 
-        return Math.acos((-cos_view * cos_sun) + (sin_view * sin_sun * cos_azi_dif));
-//        return (-cos_view * cos_sun) - (sin_view * sin_sun * cos_azi_dif);
+//        return Math.acos((-cos_view * cos_sun) + (sin_view * sin_sun * cos_azi_dif));
+        return (-cos_view * cos_sun) - (sin_view * sin_sun * cos_azi_dif);
     }
 
     public double[] getRayleighReflectance(double[] taurPoZ, double[] sunZenithAngles, double[] sunAzimuthAngles, double[] viewZenithAngles, double[] viewAzimuthAngles) {

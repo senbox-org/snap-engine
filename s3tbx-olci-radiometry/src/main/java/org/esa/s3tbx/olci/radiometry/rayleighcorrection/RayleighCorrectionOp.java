@@ -27,13 +27,10 @@ public class RayleighCorrectionOp extends Operator {
     @SourceProduct
     Product sourceProduct;
 
-    @Parameter(defaultValue = "false",
-            label = "Perform radiance-to-reflectance")
-    private boolean doRadToRefl;
-
     private Product targetProduct;
     private RayleighCorrAlgorithm algorithm;
     private double[] taur_std;
+    private String[] bandAndTiepoint = new String[]{"SAA", "SZA", "OZA", "OAA", "altitude", "sea_level_pressure"};
 
 
     @Override
@@ -41,9 +38,7 @@ public class RayleighCorrectionOp extends Operator {
         final Band[] sourceBands = sourceProduct.getBands();
         algorithm = new RayleighCorrAlgorithm();
         taur_std = getRots(sourceBands);
-        if(!(checkBandExist() && checkTiePointExist())){
-            throw new OperatorException("The required band or tie point is not in the product.");
-        }
+        checkRequireBandTiePont(bandAndTiepoint);
         targetProduct = new Product(sourceProduct.getName(), sourceProduct.getProductType(),
                 sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
 
@@ -59,12 +54,12 @@ public class RayleighCorrectionOp extends Operator {
         setTargetProduct(targetProduct);
     }
 
-    private boolean checkTiePointExist() {
-            return false;
-    }
-
-    private boolean checkBandExist() {
-        return false;
+    private void checkRequireBandTiePont(String[] bandTiepoints) {
+        for (final String bandTiepoint : bandTiepoints) {
+            if (!sourceProduct.containsRasterDataNode(bandTiepoint)) {
+                throw new OperatorException("The required band or tie point is not in the product.");
+            }
+        }
     }
 
     private double[] getRots(Band[] sourceBands) {
