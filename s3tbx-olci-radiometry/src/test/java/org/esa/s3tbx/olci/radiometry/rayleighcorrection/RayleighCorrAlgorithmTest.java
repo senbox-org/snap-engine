@@ -9,7 +9,6 @@ import static org.junit.Assert.*;
 /**
  * @author muhammad.bc.
  */
-@Ignore
 public class RayleighCorrAlgorithmTest {
 
     private RayleighCorrAlgorithm algo;
