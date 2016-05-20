@@ -8,7 +8,6 @@ import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
-import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.util.ProductUtils;
 
@@ -57,7 +56,7 @@ public class RayleighCorrectionOp extends Operator {
     private void checkRequireBandTiePont(String[] bandTiepoints) {
         for (final String bandTiepoint : bandTiepoints) {
             if (!sourceProduct.containsRasterDataNode(bandTiepoint)) {
-                throw new OperatorException("The required band or tie point is not in the product.");
+                throw new OperatorException("The required raster '" + bandTiepoint + "' is not in the product.");
             }
         }
     }
