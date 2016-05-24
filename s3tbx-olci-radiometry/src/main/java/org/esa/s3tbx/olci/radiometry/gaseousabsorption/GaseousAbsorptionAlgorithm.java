@@ -20,6 +20,7 @@ package org.esa.s3tbx.olci.radiometry.gaseousabsorption;
 
 import com.bc.ceres.core.Assert;
 import org.esa.s3tbx.olci.radiometry.smilecorr.SmileUtils;
+import org.esa.snap.core.gpf.OperatorException;
 
 import java.util.ArrayList;
 
@@ -32,7 +33,6 @@ public class GaseousAbsorptionAlgorithm {
         return 1;
     }
 
-
     //idea MPs use wavelength instance of name.
     public float getNormalizedConcentration(String bandName) {
         return 1;
@@ -44,14 +44,18 @@ public class GaseousAbsorptionAlgorithm {
         return (float) Math.exp(calValue);
     }
 
-
     public String[] gasToComputeForBand(String bandName) {
-        GasToCompute gasToCompute = GasToCompute.valueOf(bandName);
-        return gasToCompute.getGasBandToCompute();
+        try {
+            GasToCompute gasToCompute = GasToCompute.valueOf(bandName);
+            return gasToCompute.getGasBandToCompute();
+        } catch (IllegalArgumentException e) {
+
+        }
+        return null;
     }
 
     public float[] getMassAir(float[] sza, float[] oza) {
-        Assert.notNull(sza,"The sun zenith angel most not be null.");
+        Assert.notNull(sza, "The sun zenith angel most not be null.");
         Assert.notNull(oza);
 
         float[] massAirs = new float[sza.length];
@@ -64,6 +68,11 @@ public class GaseousAbsorptionAlgorithm {
     public float[] getTransmissionGas(String bandName, float[] sza, float[] oza) {
         float[] calMassAirs = getMassAir(sza, oza);
         String[] gasesToCompute = gasToComputeForBand(bandName);
+        //todo mba/**** Ask MP to just use warning massage.
+        if (gasesToCompute == null) {
+            return null;
+//            throw new OperatorException("Gaseous absorption can not be applied to the band.");
+        }
         final ArrayList<float[]> arrayListExponential = new ArrayList();
 
         for (String gas : gasesToCompute) {
@@ -87,10 +96,5 @@ public class GaseousAbsorptionAlgorithm {
             transmissionGas = SmileUtils.multiple3ArrayFloat(arrayListExponential.get(0), arrayListExponential.get(1), arrayListExponential.get(2));
         }
         return transmissionGas;
-    }
-
-
-    public static double getMassAir(double sunAngle, double veiwAngle) {
-        return 1 / Math.cos(sunAngle) + 1 / Math.cos(veiwAngle);
     }
 }

@@ -57,11 +57,13 @@ public class SmileCorretionOp extends Operator {
     private SmileCorrectionAlgorithm correctionAlgorithm;
     private Product radReflProduct;
     private Product targetProduct;
+    private Product gaseousAbsoprtionProduct;
 
     @Override
     public void initialize() throws OperatorException {
 
         convertRadtoReflectance();
+        appliedGaseouseAbsorption();
         correctionAlgorithm = new SmileCorrectionAlgorithm(auxdata);
         // Configure the target
         targetProduct = new Product(sourceProduct.getName(), sourceProduct.getProductType(),
@@ -81,6 +83,11 @@ public class SmileCorretionOp extends Operator {
 
     }
 
+    private Product appliedGaseouseAbsorption() {
+        HashMap<String, Object> parameters = new HashMap<>();
+         return GPF.createProduct("OLCI.GaseousAsorption", parameters, radReflProduct);
+    }
+
     private void convertRadtoReflectance() {
         HashMap<String, Object> parameters = new HashMap<>();
         parameters.put("sensor", "OLCI");
@@ -89,6 +96,7 @@ public class SmileCorretionOp extends Operator {
             throw new OperatorException("Expresssion '" + LAND_EXPRESSION + "'not compatible");
         }
     }
+
 
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {

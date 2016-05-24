@@ -3,6 +3,7 @@ package org.esa.s3tbx.olci.radiometry.rayleighcorrection;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
@@ -11,8 +12,10 @@ import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.rcp.SnapApp;
 
 import java.awt.Rectangle;
+import java.util.Arrays;
 
 /**
  * @author muhammad.bc.
@@ -42,14 +45,18 @@ public class RayleighCorrectionOp extends Operator {
         targetProduct = new Product(sourceProduct.getName(), sourceProduct.getProductType(),
                 sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
 
-        for (final Band band : sourceBands) {
-            Band targetBand = targetProduct.addBand(band.getName(), band.getDataType());
-            ProductUtils.copyRasterDataNodeProperties(band, targetBand);
+        for (int i = 1; i <= 21; i++) {
+            Band targetBand = targetProduct.addBand(String.format("refl_ray_%02d", i), ProductData.TYPE_FLOAT32);
+            Band sourceBand = sourceProduct.getBand(String.format("Oa%02d_radiance", i));
+            targetBand.setSpectralWavelength(sourceBand.getSpectralWavelength());
+            targetBand.setSpectralBandwidth(sourceBand.getSpectralBandwidth());
+            targetBand.setSpectralBandIndex(sourceBand.getSpectralBandIndex());
         }
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
         ProductUtils.copyMasks(sourceProduct, targetProduct);
         ProductUtils.copyFlagBands(sourceProduct, targetProduct, true);
         ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
+        ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
         targetProduct.setAutoGrouping(sourceProduct.getAutoGrouping());
         setTargetProduct(targetProduct);
     }
@@ -83,7 +90,6 @@ public class RayleighCorrectionOp extends Operator {
 
         double[] pressureAtSurface = algorithm.getPressureAtSurface(seaLevel, altitude);
         double[] taurPoZ = algorithm.getRayleighOpticalThickness(pressureAtSurface, taur_std[targetBand.getSpectralBandIndex()]);
-
 
         double[] reflRaly = algorithm.getRayleighReflectance(taurPoZ, sunZenithAngle, sunAzimuthAngle, viewZenithAngle, viewAzimuthAngle);
         targetTile.setSamples(reflRaly);

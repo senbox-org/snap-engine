@@ -1,4 +1,3 @@
-
 /*
  *
  *  * Copyright (C) 2012 Brockmann Consult GmbH (info@brockmann-consult.de)
@@ -59,6 +58,7 @@ public class GaseousAbsorptionOp extends Operator {
 
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
         ProductUtils.copyMasks(sourceProduct, targetProduct);
+        ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
         ProductUtils.copyFlagBands(sourceProduct, targetProduct, true);
         targetProduct.setAutoGrouping(sourceProduct.getAutoGrouping());
         setTargetProduct(targetProduct);
@@ -70,7 +70,9 @@ public class GaseousAbsorptionOp extends Operator {
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
         final Rectangle rectangle = targetTile.getRectangle();
         final float[] computedGases = computeGas(targetBand.getName(), rectangle, sourceProduct);
-        targetTile.setSamples(computedGases);
+        if (computedGases != null) {
+            targetTile.setSamples(computedGases);
+        }
     }
 
     private float[] computeGas(String bandName, Rectangle rectangle, Product sourceProduct) {

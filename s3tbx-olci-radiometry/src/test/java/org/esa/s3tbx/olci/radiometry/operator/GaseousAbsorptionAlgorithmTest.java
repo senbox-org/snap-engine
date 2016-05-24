@@ -2,6 +2,7 @@ package org.esa.s3tbx.olci.radiometry.operator;
 
 
 import org.esa.s3tbx.olci.radiometry.gaseousabsorption.GaseousAbsorptionAlgorithm;
+import org.esa.snap.core.gpf.OperatorException;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -9,6 +10,7 @@ import org.mockito.Mockito;
 
 import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
@@ -58,6 +60,12 @@ public class GaseousAbsorptionAlgorithmTest {
     }
 
     @Test
+    public void testGasToComputeDoesNotExist() throws Exception {
+        assertArrayEquals(null, gaseousAbsorptionAlgo.gasToComputeForBand("dummy1"));
+    }
+
+
+    @Test
     public void testGetMassAir() throws Exception {
         float[] massAir = gaseousAbsorptionAlgo.getMassAir(new float[]{1, 2}, new float[]{3, 4});
         assertEquals(2, massAir.length);
@@ -82,12 +90,24 @@ public class GaseousAbsorptionAlgorithmTest {
         assertArrayEquals(new float[]{2, 2}, massAir, 0);
     }
 
-    @Ignore
     @Test
-    public void testGetTransmissionGas() throws Exception {
-        GaseousAbsorptionAlgorithm mock = Mockito.mock(GaseousAbsorptionAlgorithm.class);
-        when(mock.getAtmosphericGas("H2O")).thenReturn(1f);
-        when(mock.getNormalizedConcentration("H20")).thenReturn(1f);
-        when(mock.gasToComputeForBand("band1")).thenReturn(new String[]{"H20"});
+    public void testGetTransmissionGasKnownBand() throws Exception {
+        GaseousAbsorptionAlgorithm algorithm = new GaseousAbsorptionAlgorithm();
+        float[] oza = {4, 5, 6};
+        float[] sza = {1, 2, 3};
+        float[] oa01_radiances = algorithm.getTransmissionGas("Oa01_radiance", sza, oza);
+        assertEquals(3, oa01_radiances.length);
+        assertEquals(0.725474f, oa01_radiances[0]);
+        assertEquals(0.32552302f, oa01_radiances[1]);
+        assertEquals(0.96911377f, oa01_radiances[2]);
+    }
+
+    @Test
+    public void testGetTransmissionGasUnKnownBand() {
+        GaseousAbsorptionAlgorithm algorithm = new GaseousAbsorptionAlgorithm();
+        float[] oza = {4, 5, 6};
+        float[] sza = {1, 2, 3};
+        float[] dummies = algorithm.getTransmissionGas("dummy", sza, oza);
+        assertNull(dummies);
     }
 }

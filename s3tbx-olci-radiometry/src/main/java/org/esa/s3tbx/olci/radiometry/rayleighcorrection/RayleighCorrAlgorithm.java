@@ -5,7 +5,7 @@ package org.esa.s3tbx.olci.radiometry.rayleighcorrection;
  */
 public class RayleighCorrAlgorithm {
 
-    public static final int STD_SEA_LEVEL_PRESSURE = 1013;
+    public static final double STD_SEA_LEVEL_PRESSURE = 1013.0;
 
     //Copied from org.esa.beam.meris.case2.MerisCase2BasisWaterOp
     protected double getAzimuthDifference(double viewAzimuthAngle, double sunAzimuthAngle) {
@@ -14,7 +14,7 @@ public class RayleighCorrAlgorithm {
         if (azi_diff_deg > 180.0) {
             azi_diff_deg = 360.0 - azi_diff_deg;
         }
-        azi_diff_deg = 180.0 - azi_diff_deg; /* different definitions in MERIS data and MC /HL simulation */
+//        azi_diff_deg = 180.0 - azi_diff_deg; /* different definitions in MERIS data and MC /HL simulation */
         return azi_diff_deg;
     }
 
@@ -46,6 +46,7 @@ public class RayleighCorrAlgorithm {
     protected double phaseRaylMin(double sunZenithAngle, double viewZenithAngle, double azimuthDifference) {
         double cosScatterAngle = cosScatterAngle(sunZenithAngle, viewZenithAngle, azimuthDifference);
         return 0.75 * (1.0 + cosScatterAngle * cosScatterAngle);
+//        return 0.75 * (1.0 + Math.cos(Math.toRadians(50)) * Math.cos(Math.toRadians(50)));
     }
 
     protected double cosScatterAngle(double sunZenithAngle, double viewZenithAngle, double azimuthDifferent) {
@@ -71,9 +72,12 @@ public class RayleighCorrAlgorithm {
             final double viewZenithAngle = viewZenithAngleRad[i];
 
             final double phaseRaylMin = phaseRaylMin(sunZenithAngle, viewZenithAngle, azimuthDifferenceRad);
-            final double cos_sun = Math.cos(sunZenithAngle);
-            final double cos_view = Math.cos(viewZenithAngle);
-            reflRaly[i] = cos_sun * taurPoZ[i] * phaseRaylMin / ((4 * Math.PI) * (1 / cos_view) * Math.PI);
+            final double cos_sunZenith = Math.cos(sunZenithAngle);
+            final double cos_viewZenith = Math.cos(viewZenithAngle);
+//            reflRaly[i] = cos_sunZenith * taurPoZ[i] * phaseRaylMin / (4 * Math.PI * cos_viewZenith * Math.PI);
+//            reflRaly[i] = cos_sunZenith * taurPoZ[i] * phaseRaylMin / ((4 * Math.PI) * (1 / cos_viewZenith) * Math.PI);
+            reflRaly[i] = cos_sunZenith * taurPoZ[i] * phaseRaylMin / (4 * Math.PI) * (1 / cos_viewZenith) * Math.PI;
+
         }
         return reflRaly;
     }
