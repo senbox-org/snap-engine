@@ -80,14 +80,14 @@ public class S3ReferencingVariableOpImage extends SingleBandedOpImage {
 
         Array referencedValues;
         final Array variableValues = Array.factory(variable.getDataType(), shape);
-        synchronized (referencedIndexVariable.getParentGroup().getNetcdfFile()) {
-            try {
-                final Section section = new Section(origin, shape, stride);
+        try {
+            final Section section = new Section(origin, shape, stride);
+            synchronized (referencedIndexVariable.getParentGroup().getNetcdfFile()) {
                 referencedValues = referencedIndexVariable.read(section);
                 dimensionValuesProvider.setVariableValues(referencedValues, variableValues);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
             }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
         tile.setDataElements(rectangle.x, rectangle.y, rectangle.width, rectangle.height, transformStorage(variableValues));
     }
@@ -190,8 +190,10 @@ public class S3ReferencingVariableOpImage extends SingleBandedOpImage {
         public void readValues(int[] variableOrigin, int[] variableShape) {
             try {
                 final Section detectorSection = new Section(variableOrigin, variableShape);
-                final Array dimensionValuesArray = variable.read(detectorSection);
-                dimensionValues = (float[]) dimensionValuesArray.copyTo1DJavaArray();
+                synchronized (variable.getParentGroup().getNetcdfFile()) {
+                    final Array dimensionValuesArray = variable.read(detectorSection);
+                    dimensionValues = (float[]) dimensionValuesArray.copyTo1DJavaArray();
+                }
             } catch (InvalidRangeException | IOException e) {
                 throw new RuntimeException(e);
             }
@@ -219,8 +221,10 @@ public class S3ReferencingVariableOpImage extends SingleBandedOpImage {
         public void readValues(int[] variableOrigin, int[] variableShape) {
             try {
                 final Section detectorSection = new Section(variableOrigin, variableShape);
-                final Array dimensionValuesArray = variable.read(detectorSection);
-                dimensionValues = (short[]) dimensionValuesArray.copyTo1DJavaArray();
+                synchronized (variable.getParentGroup().getNetcdfFile()) {
+                    final Array dimensionValuesArray = variable.read(detectorSection);
+                    dimensionValues = (short[]) dimensionValuesArray.copyTo1DJavaArray();
+                }
             } catch (InvalidRangeException | IOException e) {
                 throw new RuntimeException(e);
             }
@@ -241,11 +245,14 @@ public class S3ReferencingVariableOpImage extends SingleBandedOpImage {
     }
 
     private class NullDimensionValuesProvider implements DimensionValuesProvider {
-        @Override
-        public void readValues(int[] variableOrigin, int[] variableShape) {}
 
         @Override
-        public void setVariableValues(Array referencedValues, Array variableValues) {}
+        public void readValues(int[] variableOrigin, int[] variableShape) {
+        }
+
+        @Override
+        public void setVariableValues(Array referencedValues, Array variableValues) {
+        }
     }
 
 }

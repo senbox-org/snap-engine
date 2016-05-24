@@ -96,13 +96,13 @@ public class S3VariableOpImage extends SingleBandedOpImage {
         }
 
         Array array;
-        synchronized (variable.getParentGroup().getNetcdfFile()) {
-            try {
+        try {
+            synchronized (variable.getParentGroup().getNetcdfFile()) {
                 final Section section = new Section(origin, shape, stride);
                 array = variable.read(section);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
             }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
         array = converter.convert(array);
         tile.setDataElements(rectangle.x, rectangle.y, rectangle.width, rectangle.height, transformStorage(array));
