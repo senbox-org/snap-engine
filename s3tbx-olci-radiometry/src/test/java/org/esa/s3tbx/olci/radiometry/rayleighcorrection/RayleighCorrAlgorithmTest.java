@@ -1,5 +1,6 @@
 package org.esa.s3tbx.olci.radiometry.rayleighcorrection;
 
+import org.esa.s3tbx.olci.radiometry.smilecorr.SmileUtils;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -66,7 +67,7 @@ public class RayleighCorrAlgorithmTest {
 
     @Test
     public void testConvertToRadian() throws Exception {
-        double[] convertDegreesToRadians = algo.convertDegreesToRadians(new double[]{50, 30,-1});
+        double[] convertDegreesToRadians = SmileUtils.convertDegreesToRadians(new double[]{50, 30,-1});
         assertEquals(0.872664626, convertDegreesToRadians[0], 1e-8);
         assertEquals(0.5235987756, convertDegreesToRadians[1], 1e-8);
         assertEquals(-0.017453292519943295, convertDegreesToRadians[2], 1e-8);

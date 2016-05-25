@@ -40,4 +40,20 @@ public class SmileUtils {
     public static float[] multiple3ArrayFloat(float[] array1, float[] array2, float[] array3) {
         return multiple2ArrayFloat(multiple2ArrayFloat(array1, array2), array3);
     }
+
+    public static double[] convertDegreesToRadians(double[] angle) {
+        final double[] rads = new double[angle.length];
+        for (int i = 0; i < rads.length; i++) {
+            rads[i] = Math.toRadians(angle[i]);
+        }
+        return rads;
+    }
+
+    public static float[] convertDegreesToRadians(float[] angle) {
+        final float[] rads = new float[angle.length];
+        for (int i = 0; i < rads.length; i++) {
+            rads[i] = (float) Math.toRadians(angle[i]);
+        }
+        return rads;
+    }
 }

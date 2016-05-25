@@ -57,10 +57,12 @@ public class GaseousAbsorptionAlgorithm {
     public float[] getMassAir(float[] sza, float[] oza) {
         Assert.notNull(sza, "The sun zenith angel most not be null.");
         Assert.notNull(oza);
+        float[] szaRad = SmileUtils.convertDegreesToRadians(sza);
+        float[] ozaRad = SmileUtils.convertDegreesToRadians(oza);
 
         float[] massAirs = new float[sza.length];
         for (int i = 0; i < sza.length; i++) {
-            massAirs[i] = (float) (1 / Math.cos(sza[i]) + 1 / Math.cos(oza[i]));
+            massAirs[i] = (float) (1 / Math.cos(szaRad[i]) + 1 / Math.cos(ozaRad[i]));
         }
         return massAirs;
     }

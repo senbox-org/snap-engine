@@ -7,8 +7,8 @@
                 <attr name="delegate" methodvalue="org.esa.snap.core.gpf.ui.DefaultOperatorAction.create"/>
                 <attr name="displayName" stringvalue="Smile Correction"/>
                 <attr name="dialogTitle" stringvalue="Smile Correction"/>
-                <attr name="operatorName" stringvalue="Olci.CorrectRadiometry"/>
-                <attr name="helpId" stringvalue="Olci.CorrectRadiometry"/>
+                <attr name="operatorName" stringvalue="Olci.SmileCorrection"/>
+                <attr name="helpId" stringvalue="Olci.SmileCorrection"/>
                 <attr name="targetProductNameSuffix" stringvalue="_smile"/>
             </file>
 

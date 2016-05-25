@@ -1,5 +1,7 @@
 package org.esa.s3tbx.olci.radiometry.rayleighcorrection;
 
+import org.esa.s3tbx.olci.radiometry.smilecorr.SmileUtils;
+
 /**
  * @author muhammad.bc.
  */
@@ -18,7 +20,7 @@ public class RayleighCorrAlgorithm {
         return azi_diff_deg;
     }
 
-    protected double[] getTaurStd(double[] lam) {
+    public double[] getTaurStd(double[] lam) {
         final double[] taurs = new double[lam.length];
         for (int i = 0; i < lam.length; i++) {
             taurs[i] = Math.exp(-4.637) * Math.pow((lam[i] / 1000), -4.0679);
@@ -26,12 +28,16 @@ public class RayleighCorrAlgorithm {
         return taurs;
     }
 
-    protected double[] getPressureAtSurface(double[] seaLevelPressure, double[] height) {
+    public double[] getPressureAtSurface(double[] seaLevelPressure, double[] height) {
         double pressureAtms[] = new double[seaLevelPressure.length];
         for (int i = 0; i < seaLevelPressure.length; i++) {
             pressureAtms[i] = seaLevelPressure[i] * Math.exp(-height[i] / 8000);
         }
         return pressureAtms;
+    }
+
+    public double getPressureAtSurface(double seaLevelPressure, double height) {
+        return seaLevelPressure * Math.exp(-height / 8000);
     }
 
     public double[] getRayleighOpticalThickness(double[] pressureAtms, double taur_std) {
@@ -43,10 +49,13 @@ public class RayleighCorrAlgorithm {
         return thickness;
     }
 
+    public double getRayleighOpticalThickness(double pressureAtms, double taur_std) {
+        return pressureAtms * taur_std / STD_SEA_LEVEL_PRESSURE;
+    }
+
     protected double phaseRaylMin(double sunZenithAngle, double viewZenithAngle, double azimuthDifference) {
         double cosScatterAngle = cosScatterAngle(sunZenithAngle, viewZenithAngle, azimuthDifference);
         return 0.75 * (1.0 + cosScatterAngle * cosScatterAngle);
-//        return 0.75 * (1.0 + Math.cos(Math.toRadians(50)) * Math.cos(Math.toRadians(50)));
     }
 
     protected double cosScatterAngle(double sunZenithAngle, double viewZenithAngle, double azimuthDifferent) {
@@ -63,8 +72,8 @@ public class RayleighCorrAlgorithm {
 
         final double reflRaly[] = new double[viewZenithAngles.length];
 
-        double[] sunZenithAngleRad = convertDegreesToRadians(sunZenithAngles);
-        double[] viewZenithAngleRad = convertDegreesToRadians(viewZenithAngles);
+        double[] sunZenithAngleRad = SmileUtils.convertDegreesToRadians(sunZenithAngles);
+        double[] viewZenithAngleRad = SmileUtils.convertDegreesToRadians(viewZenithAngles);
 
         for (int i = 0; i < viewZenithAngles.length; i++) {
             final double azimuthDifferenceRad = Math.toRadians(getAzimuthDifference(viewAzimuthAngles[i], sunAzimuthAngles[i]));
@@ -74,19 +83,21 @@ public class RayleighCorrAlgorithm {
             final double phaseRaylMin = phaseRaylMin(sunZenithAngle, viewZenithAngle, azimuthDifferenceRad);
             final double cos_sunZenith = Math.cos(sunZenithAngle);
             final double cos_viewZenith = Math.cos(viewZenithAngle);
-//            reflRaly[i] = cos_sunZenith * taurPoZ[i] * phaseRaylMin / (4 * Math.PI * cos_viewZenith * Math.PI);
-//            reflRaly[i] = cos_sunZenith * taurPoZ[i] * phaseRaylMin / ((4 * Math.PI) * (1 / cos_viewZenith) * Math.PI);
             reflRaly[i] = cos_sunZenith * taurPoZ[i] * phaseRaylMin / (4 * Math.PI) * (1 / cos_viewZenith) * Math.PI;
 
         }
         return reflRaly;
     }
 
-    public double[] convertDegreesToRadians(double[] angle) {
-        final double[] rads = new double[angle.length];
-        for (int i = 0; i < rads.length; i++) {
-            rads[i] = Math.toRadians(angle[i]);
-        }
-        return rads;
+    public double getRayleighReflectance(double taurPoZ, double sunZenithAngles, double sunAzimuthAngles, double viewZenithAngles, double viewAzimuthAngles) {
+        final double sunZenithAngleRad = Math.toRadians(sunZenithAngles);
+        final double viewZenithAngleRad = Math.toRadians(viewZenithAngles);
+        final double azimuthDifferenceRad = Math.toRadians(getAzimuthDifference(viewAzimuthAngles, sunAzimuthAngles));
+
+        final double phaseRaylMin = phaseRaylMin(sunZenithAngleRad, viewZenithAngleRad, azimuthDifferenceRad);
+        final double cos_sunZenith = Math.cos(sunZenithAngleRad);
+        final double cos_viewZenith = Math.cos(viewZenithAngleRad);
+        return cos_sunZenith * taurPoZ * phaseRaylMin / (4 * Math.PI) * (1 / cos_viewZenith) * Math.PI;
     }
+
 }

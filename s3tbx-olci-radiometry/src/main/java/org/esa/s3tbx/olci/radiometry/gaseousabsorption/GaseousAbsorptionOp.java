@@ -21,6 +21,7 @@ package org.esa.s3tbx.olci.radiometry.gaseousabsorption;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
@@ -51,15 +52,20 @@ public class GaseousAbsorptionOp extends Operator {
         targetProduct = new Product(sourceProduct.getName(), sourceProduct.getProductType(),
                 sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
 
-        for (Band band : sourceProduct.getBands()) {
-            final Band targetBand = targetProduct.addBand(band.getName(), band.getDataType());
-            ProductUtils.copyRasterDataNodeProperties(band, targetBand);
+        for (int i = 1; i <= 21; i++) {
+//            Band targetBand = targetProduct.addBand(String.format("gaseous_absorp_%02d", i), ProductData.TYPE_FLOAT32);
+            Band targetBand = targetProduct.addBand(String.format("gaseous_absorp_%02d", i), ProductData.TYPE_FLOAT32);
+            Band sourceBand = sourceProduct.getBand(String.format("Oa%02d_radiance", i));
+            targetBand.setSpectralWavelength(sourceBand.getSpectralWavelength());
+            targetBand.setSpectralBandwidth(sourceBand.getSpectralBandwidth());
+            targetBand.setSpectralBandIndex(sourceBand.getSpectralBandIndex());
+            targetBand.setTimeCoding(sourceBand.getTimeCoding());
         }
-
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
         ProductUtils.copyMasks(sourceProduct, targetProduct);
-        ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
         ProductUtils.copyFlagBands(sourceProduct, targetProduct, true);
+        ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
+        ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
         targetProduct.setAutoGrouping(sourceProduct.getAutoGrouping());
         setTargetProduct(targetProduct);
 
@@ -69,10 +75,9 @@ public class GaseousAbsorptionOp extends Operator {
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
         final Rectangle rectangle = targetTile.getRectangle();
-        final float[] computedGases = computeGas(targetBand.getName(), rectangle, sourceProduct);
-        if (computedGases != null) {
-            targetTile.setSamples(computedGases);
-        }
+        String targetBandName = targetBand.getName();
+        final float[] computedGases = computeGas(targetBandName, rectangle, sourceProduct);
+        targetTile.setSamples(computedGases);
     }
 
     private float[] computeGas(String bandName, Rectangle rectangle, Product sourceProduct) {
