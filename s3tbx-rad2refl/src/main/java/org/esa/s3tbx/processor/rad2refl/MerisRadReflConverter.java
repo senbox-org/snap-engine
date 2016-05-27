@@ -31,29 +31,6 @@ public class MerisRadReflConverter implements RadReflConverter {
     }
 
     @Override
-    public float convert(Product sourceProduct, Sample[] sourceSamples, int bandIndex) {
-        final float sza = sourceSamples[Sensor.MERIS.getNumSpectralBands()].getFloat(); // in degrees
-
-        final int detectorIndex = sourceSamples[Sensor.MERIS.getNumSpectralBands() + 1].getInt();
-        if (detectorIndex >= 0) {
-            double solarFlux = rad2ReflAuxdata.getDetectorSunSpectralFluxes()[detectorIndex][bandIndex];
-
-            final float spectralInputValue = sourceSamples[bandIndex].getFloat();
-            if (conversionMode.equals("RAD_TO_REFL")) {
-                return RsMathUtils.radianceToReflectance(spectralInputValue, sza, (float) solarFlux);
-            } else {
-                return RsMathUtils.reflectanceToRadiance(spectralInputValue, sza, (float) solarFlux);
-            }
-        }
-        return -1.0f;
-    }
-
-    @Override
-    public float convert(float spectralInputValue, float sza, float solarFlux) {
-        return 0;
-    }
-
-    @Override
     public float[] convert(float[] spectralInputValue, float[] sza, float[] solarFlux) {
         float[] reflectance = new float[spectralInputValue.length];
         Arrays.fill(reflectance, Float.NaN);
@@ -65,11 +42,6 @@ public class MerisRadReflConverter implements RadReflConverter {
             }
         }
         return reflectance;
-    }
-
-
-    public String getSpectralBandAutogroupingString() {
-        return conversionMode.equals("RAD_TO_REFL") ? Sensor.MERIS.getReflAutogroupingString() : Sensor.MERIS.getRadAutogroupingString();
     }
 
 }

@@ -18,40 +18,8 @@ public class SlstrRadReflConverter implements RadReflConverter {
     }
 
     @Override
-    public float convert(Product sourceProduct, Sample[] sourceSamples, int bandIndex) {
-        final float szaNadir = sourceSamples[Sensor.SLSTR_500m.getNumSpectralBands()].getFloat(); // in degrees
-        final float szaOblique = sourceSamples[Sensor.SLSTR_500m.getNumSpectralBands() + 1].getFloat(); // in degrees
-
-        float sza;
-        if (Sensor.SLSTR_500m.getRadBandNames()[bandIndex].endsWith("_o")) {
-            sza = szaOblique;
-        } else {
-            sza = szaNadir;
-        }
-        final float spectralInputValue = sourceSamples[bandIndex].getFloat();
-//            solarFluxes[i] = sourceSamples[Sensor.SLSTR.getNumSpectralBands() + 1 + i].getFloat();
-        final float solarFlux = getSolarFlux(bandIndex); // todo: we have to wait until we have solar fluxes in test data or real data
-        if (conversionMode.equals("RAD_TO_REFL")) {
-            return RsMathUtils.radianceToReflectance(spectralInputValue, sza, solarFlux);
-        } else {
-            return RsMathUtils.reflectanceToRadiance(spectralInputValue, sza, solarFlux);
-        }
-    }
-
-    @Override
-    public float convert(float spectralInputValue, float sza, float solarFlux) {
-        return 0;
-    }
-
-    @Override
     public float[] convert(float[] spectralInputValue, float[] sza, float[] solarFlux) {
         return new float[0];
-    }
-
-
-    public String getSpectralBandAutogroupingString() {
-        return conversionMode.equals("RAD_TO_REFL") ? Sensor.SLSTR_500m.getReflAutogroupingString() :
-                Sensor.SLSTR_500m.getRadAutogroupingString();
     }
 
     float getSolarFlux(int allSpectralBandsIndex) {

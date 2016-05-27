@@ -10,15 +10,5 @@ import org.esa.snap.core.gpf.pointop.Sample;
  */
 public interface RadReflConverter {
 
-    /**
-     * @param sourceProduct - the source product
-     * @param sourceSamples - the source data samples per pixel
-     * @param bandIndex     - the band index
-     * @return the converted value for the spectral band with given band index
-     */
-    float convert(Product sourceProduct, Sample[] sourceSamples, int bandIndex);
-
-    float convert(float spectralInputValue, float sza, float solarFlux);
-
     float[] convert(float[] spectralInputValue, float[] sza, float[] solarFlux);
 }

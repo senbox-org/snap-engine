@@ -39,4 +39,9 @@ public class SmileCorrectionAlgorithm {
         final double[] refCentralWaveLenghts = auxdata.getRefCentralWaveLenghts();
         return (sampleFloatUpperBand - sampleFloatLowerBand) / (refCentralWaveLenghts[upperBandIndex] - refCentralWaveLenghts[lowerBandIndex]);
     }
+
+//    public double getFiniteDifference(float sampleFloatUpperBand, float sampleFloatLowerBand, int upperBandIndex, int lowerBandIndex) {
+//        final double[] refCentralWaveLenghts = auxdata.getRefCentralWaveLenghts();
+//        return (sampleFloatUpperBand - sampleFloatLowerBand) / (refCentralWaveLenghts[upperBandIndex] - refCentralWaveLenghts[lowerBandIndex]);
+//    }
 }
