@@ -113,7 +113,7 @@ public class SmileCorrectionAuxdata {
 
     public static List<String[]> loadAuxdata() throws IOException {
         final Path auxdataDir = installAuxdata();
-        CsvReader csvReader = new CsvReader(new FileReader(auxdataDir.resolve("band_reflectance_config.txt").toString()), new char[]{'|', '\t'});
+        CsvReader csvReader = new CsvReader(new FileReader(auxdataDir.resolve("reflconfig.txt").toString()), new char[]{'|', '\t'});
         List<String[]> readStringRecords = csvReader.readStringRecords();
         csvReader.close();
         return readStringRecords;

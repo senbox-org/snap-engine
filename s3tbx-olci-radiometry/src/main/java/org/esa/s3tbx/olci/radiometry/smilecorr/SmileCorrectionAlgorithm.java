@@ -17,8 +17,6 @@
 package org.esa.s3tbx.olci.radiometry.smilecorr;
 
 
-import org.esa.snap.core.gpf.pointop.Sample;
-
 /**
  * Applies a SMILE correction on the given OLCI L1b sample.
  */
@@ -35,13 +33,13 @@ public class SmileCorrectionAlgorithm {
         this.auxdata = auxdata;
     }
 
-    public double getFiniteDifference(float sampleFloatUpperBand, float sampleFloatLowerBand, int upperBandIndex, int lowerBandIndex) {
-        final double[] refCentralWaveLenghts = auxdata.getRefCentralWaveLenghts();
-        return (sampleFloatUpperBand - sampleFloatLowerBand) / (refCentralWaveLenghts[upperBandIndex] - refCentralWaveLenghts[lowerBandIndex]);
-    }
+//    loat correct = correctionAlgorithm.correct(sourceRef, refUpperBand, refLowerBand, lambdaLowerBand, lambdaUpperBand, lambdaActualBand, targetBandIndex)
+    public float correct(float sourceRef, float r2, float r1, float l1, float l2, float l_a, int targetBandIndex) {
+        final double[] refCentralWaveLengths = auxdata.getRefCentralWaveLenghts();
+        double centralWaveLength = refCentralWaveLengths[targetBandIndex];
+        double dl = (centralWaveLength - l_a) / (l2 - l1);
+        double dr = (r2 - r1) * dl;
 
-//    public double getFiniteDifference(float sampleFloatUpperBand, float sampleFloatLowerBand, int upperBandIndex, int lowerBandIndex) {
-//        final double[] refCentralWaveLenghts = auxdata.getRefCentralWaveLenghts();
-//        return (sampleFloatUpperBand - sampleFloatLowerBand) / (refCentralWaveLenghts[upperBandIndex] - refCentralWaveLenghts[lowerBandIndex]);
-//    }
+        return (float) (sourceRef + dr);
+    }
 }

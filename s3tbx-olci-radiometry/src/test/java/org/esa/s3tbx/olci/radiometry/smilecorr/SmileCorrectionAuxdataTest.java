@@ -41,7 +41,7 @@ public class SmileCorrectionAuxdataTest {
         List<Path> collect = Files.list(auxDataPath).collect(Collectors.toList());
 
         assertTrue(auxDataPath.isAbsolute());
-        assertTrue(collect.stream().anyMatch(path -> path.getFileName().toString().equals("band_reflectance_config.txt")));
+        assertTrue(collect.stream().anyMatch(path -> path.getFileName().toString().equals("reflconfig.txt")));
         assertTrue(collect.stream().anyMatch(path -> path.getFileName().toString().equals("band_value.txt")));
     }
 
