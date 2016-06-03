@@ -29,18 +29,18 @@ import java.util.StringTokenizer;
 public class SmileCorrectionAuxdata {
 
 
-    private double[] bands;
-    private double[] water_LowerBands;
-    private double[] water_UpperBands;
-    private boolean[] landRefCorrectionSwitchs;
-    private double[] land_LowerBands;
-    private double[] land_UpperBands;
-    private double[] solarIrradiances;
-    private double[] refCentralWaveLenghts;
-    private boolean[] waterRefCorrectionSwitchs;
+    private int[] bandIndices;
+    private boolean[] landRefCorrectionSwitches;
+    private boolean[] waterRefCorrectionSwitches;
+    private int[] waterLowerBands;
+    private int[] waterUpperBands;
+    private int[] landLowerBands;
+    private int[] landUpperBands;
+    private float[] refCentralWaveLengths;
+    private float[] solarIrradiances;
 
 
-    public SmileCorrectionAuxdata()  {
+    public SmileCorrectionAuxdata() {
         List<String[]> loadAuxdata = null;
         try {
             loadAuxdata = loadAuxdata();
@@ -50,72 +50,70 @@ public class SmileCorrectionAuxdata {
         final double[][] tableValue = auxDataInFlatTable(loadAuxdata);
         final int n = tableValue.length;
 
-        bands = new double[n];
-        water_LowerBands = new double[n];
-        water_UpperBands = new double[n];
-        land_LowerBands = new double[n];
-        land_UpperBands = new double[n];
-        landRefCorrectionSwitchs = new boolean[n];
-        waterRefCorrectionSwitchs = new boolean[n];
-        solarIrradiances = new double[n];
-        refCentralWaveLenghts = new double[n];
+        bandIndices = new int[n];
+        waterLowerBands = new int[n];
+        waterUpperBands = new int[n];
+        landLowerBands = new int[n];
+        landUpperBands = new int[n];
+        landRefCorrectionSwitches = new boolean[n];
+        waterRefCorrectionSwitches = new boolean[n];
+        solarIrradiances = new float[n];
+        refCentralWaveLengths = new float[n];
 
         for (int i = 0; i < tableValue.length; i++) {
             double[] row = tableValue[i];
-            bands[i] = row[0];
-            waterRefCorrectionSwitchs[i] = row[1] != 0.0;
-            water_LowerBands[i] = row[2];
-            water_UpperBands[i] = row[3];
-            landRefCorrectionSwitchs[i] = row[4] != 0.0;
-            land_LowerBands[i] = row[5];
-            land_UpperBands[i] = row[6];
-            refCentralWaveLenghts[i] = row[7];
-            solarIrradiances[i] = row[8];
+            bandIndices[i] = (int)row[0];
+            waterRefCorrectionSwitches[i] = row[1] != 0.0;
+            waterLowerBands[i] = (int) row[2];
+            waterUpperBands[i] = (int) row[3];
+            landRefCorrectionSwitches[i] = row[4] != 0.0;
+            landLowerBands[i] = (int) row[5];
+            landUpperBands[i] = (int) row[6];
+            refCentralWaveLengths[i] = (float)row[7];
+            solarIrradiances[i] = (float) row[8];
         }
     }
 
 
-    public double[] getBands() {
-        return bands;
+    public int[] getBandIndices() {
+        return bandIndices;
     }
 
-    public double[] getWater_LowerBands() {
-        return water_LowerBands;
+    public boolean[] getWaterRefCorrectionSwitches() {
+        return waterRefCorrectionSwitches;
     }
 
-    public double[] getWaterUpperBands() {
-        return water_UpperBands;
+    public boolean[] getLandRefCorrectionSwitches() {
+        return landRefCorrectionSwitches;
     }
 
-    public boolean[] getLandRefCorrectionSwitchs() {
-        return landRefCorrectionSwitchs;
+    public int[] getWaterLowerBands() {return waterLowerBands; }
+
+    public int[] getWaterUpperBands() {
+        return waterUpperBands;
     }
 
-    public double[] getLandLowerBands() {
-        return land_LowerBands;
+    public int[] getLandLowerBands() { return landLowerBands; }
+
+    public int[] getLandUpperBands() {
+        return landUpperBands;
     }
 
-    public double[] getLandUpperBands() {
-        return land_UpperBands;
+    public float[] getRefCentralWaveLengths() {
+        return refCentralWaveLengths;
     }
 
-    public double[] getSolarIrradiances() {
+    public float[] getSolarIrradiances() {
         return solarIrradiances;
     }
 
-    public double[] getRefCentralWaveLenghts() {
-        return refCentralWaveLenghts;
-    }
-
-    public boolean[] getWaterRefCorrectionSwitchs() {
-        return waterRefCorrectionSwitchs;
-    }
 
     public static List<String[]> loadAuxdata() throws IOException {
         final Path auxdataDir = installAuxdata();
-        CsvReader csvReader = new CsvReader(new FileReader(auxdataDir.resolve("reflconfig.txt").toString()), new char[]{'|', '\t'});
-        List<String[]> readStringRecords = csvReader.readStringRecords();
-        csvReader.close();
+        List<String[]> readStringRecords;
+        try (CsvReader csvReader = new CsvReader(new FileReader(auxdataDir.resolve("reflconfig.txt").toString()), new char[]{'|', '\t'})) {
+            readStringRecords = csvReader.readStringRecords();
+        }
         return readStringRecords;
     }
 

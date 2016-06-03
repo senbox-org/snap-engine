@@ -22,22 +22,11 @@ package org.esa.s3tbx.olci.radiometry.smilecorr;
  */
 public class SmileCorrectionAlgorithm {
 
-    private final SmileCorrectionAuxdata auxdata;
-
-    /**
-     * Creates an instance of this class with the given auxiliary data.
-     *
-     * @param auxdata the auxiliary data
-     */
-    public SmileCorrectionAlgorithm(SmileCorrectionAuxdata auxdata) {
-        this.auxdata = auxdata;
+    private SmileCorrectionAlgorithm() {
     }
 
-//    loat correct = correctionAlgorithm.correct(sourceRef, refUpperBand, refLowerBand, lambdaLowerBand, lambdaUpperBand, lambdaActualBand, targetBandIndex)
-    public float correct(float sourceRef, float r2, float r1, float l1, float l2, float l_a, int targetBandIndex) {
-        final double[] refCentralWaveLengths = auxdata.getRefCentralWaveLenghts();
-        double centralWaveLength = refCentralWaveLengths[targetBandIndex];
-        double dl = (centralWaveLength - l_a) / (l2 - l1);
+    public static float correct(float sourceRef, float r1, float r2, float l_a, float l1, float l2, double targetWaveLength) {
+        double dl = (targetWaveLength - l_a) / (l2 - l1);
         double dr = (r2 - r1) * dl;
 
         return (float) (sourceRef + dr);

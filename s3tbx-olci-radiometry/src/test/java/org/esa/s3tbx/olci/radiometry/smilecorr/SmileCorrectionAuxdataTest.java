@@ -63,23 +63,23 @@ public class SmileCorrectionAuxdataTest {
     public void testAuxDataValue() {
         SmileCorrectionAuxdata smileCorrectionAuxdata = new SmileCorrectionAuxdata();
 
-        double[] expectedBands = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 0.0};
-        assertArrayEquals(expectedBands, smileCorrectionAuxdata.getBands(), 1e-8);
+        int[] expectedBands = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 0};
+        assertArrayEquals(expectedBands, smileCorrectionAuxdata.getBandIndices());
 
-        double[] expectedWaterLower = {1, 1, 2, 3, 4, 5, 6, 7, 8, 0, 11, 11, 0, 0, 0, 16, 16, 17, 0, 0, 18, 0};
-        assertArrayEquals(expectedWaterLower, smileCorrectionAuxdata.getWater_LowerBands(), 1e-8);
+        int[] expectedWaterLower = {1, 1, 2, 3, 4, 5, 6, 7, 8, 0, 11, 11, 0, 0, 0, 16, 16, 17, 0, 0, 18, 0};
+        assertArrayEquals(expectedWaterLower, smileCorrectionAuxdata.getWaterLowerBands());
 
-        double[] expectedWaterUpper = {2, 3, 4, 5, 6, 7, 8, 9, 9, 0, 12, 12, 0, 0, 0, 17, 18, 18, 0, 0, 21, 0};
-        assertArrayEquals(expectedWaterUpper, smileCorrectionAuxdata.getWaterUpperBands(), 1e-8);
+        int[] expectedWaterUpper = {2, 3, 4, 5, 6, 7, 8, 9, 9, 0, 12, 12, 0, 0, 0, 17, 18, 18, 0, 0, 21, 0};
+        assertArrayEquals(expectedWaterUpper, smileCorrectionAuxdata.getWaterUpperBands());
 
-        double[] expectedLandLowerBands = {1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 0, 0, 0, 16, 16, 17, 0, 0, 18, 0.0};
-        assertArrayEquals(expectedLandLowerBands, smileCorrectionAuxdata.getLandLowerBands(), 1e-8);
+        int[] expectedLandLowerBands = {1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 0, 0, 0, 16, 16, 17, 0, 0, 18, 0};
+        assertArrayEquals(expectedLandLowerBands, smileCorrectionAuxdata.getLandLowerBands());
 
-        double[] expectedLandUpperBands = {400, 412.5, 442.5, 490, 510, 560, 620, 665, 673.75, 681.25, 708.75, 753.75, 761.25, 764.37, 767.5, 778.75, 865, 885, 900, 940, 1020, 0};
-        assertArrayEquals(expectedLandUpperBands, smileCorrectionAuxdata.getRefCentralWaveLenghts(), 1e-8);
+        float[] expectedCentralWvl = {400f, 412.5f, 442.5f, 490f, 510f, 560f, 620f, 665f, 673.75f, 681.25f, 708.75f, 753.75f, 761.25f, 764.37f, 767.5f, 778.75f, 865f, 885f, 900f, 940f, 1020f, 0f};
+        assertArrayEquals(expectedCentralWvl, smileCorrectionAuxdata.getRefCentralWaveLengths(), 1e-6f);
 
-        double[] expectedSolarIrradiance = {1441.8, 1685.2, 1864.1, 1923.7, 1943.5, 1804.4, 1653.4, 1532.3, 1497.9, 1472.4, 1408.4, 1265.9, 1252.1, 1248.5, 1222.1, 1184.5, 958.2, 929.5, 895.7, 824.7, 694.0, 0.0};
-        assertArrayEquals(expectedSolarIrradiance, smileCorrectionAuxdata.getSolarIrradiances(), 1e-8);
+        float[] expectedSolarIrradiance = {1441.8f, 1685.2f, 1864.1f, 1923.7f, 1943.5f, 1804.4f, 1653.4f, 1532.3f, 1497.9f, 1472.4f, 1408.4f, 1265.9f, 1252.1f, 1248.5f, 1222.1f, 1184.5f, 958.2f, 929.5f, 895.7f, 824.7f, 694.0f, 0.0f};
+        assertArrayEquals(expectedSolarIrradiance, smileCorrectionAuxdata.getSolarIrradiances(), 1e-6f);
 
     }
 }
