@@ -24,7 +24,6 @@ import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
@@ -34,7 +33,8 @@ import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.math.RsMathUtils;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Rectangle;
 import java.util.HashMap;
 
 
@@ -57,7 +57,7 @@ public class SmileCorretionOp extends Operator {
     public static final String OAA = "OAA";
     public static final String ALTITUDE = "altitude";
     public static final String SEA_LEVEL_PRESSURE = "sea_level_pressure";
-    private static SmileCorrectionAuxdata auxdata = new SmileCorrectionAuxdata();
+    private static SmileCorrectionAuxdata smileAuxdata = new SmileCorrectionAuxdata();
     public final static String[] OLCI_SOLAR_FLUX_BAND_NAMES = new String[]{
             "solar_flux_band_1", "solar_flux_band_2", "solar_flux_band_3", "solar_flux_band_4", "solar_flux_band_5",
             "solar_flux_band_6", "solar_flux_band_7", "solar_flux_band_8", "solar_flux_band_9", "solar_flux_band_10",
@@ -66,13 +66,13 @@ public class SmileCorretionOp extends Operator {
             "solar_flux_band_21"
     };
 
-    private SmileCorrectionAlgorithm correctionAlgorithm;
+    private SmileCorrectionAlgorithm smileAlgo;
 
     private Product radReflProduct;
     @SourceProduct(alias = "source", label = "Name", description = "The source product.")
     private Product sourceProduct;
     private double[] taur_std;
-    private RayleighCorrAlgorithm algorithm;
+    private RayleighCorrAlgorithm rayleighAlgor;
     private Mask waterMask;
     private HashMap<String, int[]> bandPositionLand;
     private HashMap<String, int[]> bandPositionWater;
@@ -85,9 +85,9 @@ public class SmileCorretionOp extends Operator {
             throw new OperatorException("Can not evaluate expression'" + WATER_EXPRESSION + "' on source product");
         }
         final Band[] sourceBands = sourceProduct.getBands();
-        algorithm = new RayleighCorrAlgorithm();
+        rayleighAlgor = new RayleighCorrAlgorithm();
         taur_std = getTaurStd(sourceBands);
-        correctionAlgorithm = new SmileCorrectionAlgorithm(auxdata);
+        smileAlgo = new SmileCorrectionAlgorithm(smileAuxdata);
         bandPositionLand = new HashMap<>();
         bandPositionWater = new HashMap<>();
         lambdaSearch = new HashMap<>();
@@ -96,7 +96,7 @@ public class SmileCorretionOp extends Operator {
 
         // Configure the target
         Product targetProduct = new Product(sourceProduct.getName(), sourceProduct.getProductType(),
-                sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
+                                            sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
         for (int i = 1; i <= 21; i++) {
             Band targetBand = targetProduct.addBand(String.format("Oa%02d_radiance", i), ProductData.TYPE_FLOAT32);
             Band sourceBand = sourceProduct.getBand(String.format("Oa%02d_radiance", i));
@@ -120,10 +120,10 @@ public class SmileCorretionOp extends Operator {
 
 
         waterMask = Mask.BandMathsType.create("__water_mask", null,
-                getSourceProduct().getSceneRasterWidth(),
-                getSourceProduct().getSceneRasterHeight(),
-                WATER_EXPRESSION,
-                Color.GREEN, 0.0);
+                                              getSourceProduct().getSceneRasterWidth(),
+                                              getSourceProduct().getSceneRasterHeight(),
+                                              WATER_EXPRESSION,
+                                              Color.GREEN, 0.0);
         waterMask.setOwner(getSourceProduct());
     }
 
@@ -132,7 +132,7 @@ public class SmileCorretionOp extends Operator {
         for (int i = 0; i < sourceBands.length; i++) {
             waveLenght[i] = sourceBands[i].getSpectralWavelength();
         }
-        return algorithm.getTaurStd(waveLenght);
+        return rayleighAlgor.getTaurStd(waveLenght);
     }
 
 
@@ -156,11 +156,11 @@ public class SmileCorretionOp extends Operator {
 
         boolean correctLand = true;
         boolean correctWater = true;
-        Tile lamdaLandLowerTile = null;
-        Tile lamdaLandUpperTile = null;
+        Tile lambdaLandLowerTile = null;
+        Tile lambdaLandUpperTile = null;
 
-        Tile lamdaWaterLowerTile = null;
-        Tile lamdaWaterUpperTile = null;
+        Tile lambdaWaterLowerTile = null;
+        Tile lambdaWaterUpperTile = null;
 
 
         if (landLowerBandIndex == -1 && landUpperBandIndex == -1 && waterLowerBandIndex == -1 && waterUpperBandIndex == -1) {
@@ -179,16 +179,16 @@ public class SmileCorretionOp extends Operator {
 
 
         if (correctWater) {
-            lamdaWaterLowerTile = getLambda(rectangle, waterLowerBandIndex);
-            lamdaWaterUpperTile = getLambda(rectangle, waterUpperBandIndex);
+            lambdaWaterLowerTile = getLambda(rectangle, waterLowerBandIndex);
+            lambdaWaterUpperTile = getLambda(rectangle, waterUpperBandIndex);
         }
 
         if (correctLand) {
-            lamdaLandLowerTile = getLambda(rectangle, landLowerBandIndex);
-            lamdaLandUpperTile = getLambda(rectangle, landUpperBandIndex);
+            lambdaLandLowerTile = getLambda(rectangle, landLowerBandIndex);
+            lambdaLandUpperTile = getLambda(rectangle, landUpperBandIndex);
         }
 
-        Tile lamdaTarget = getLambda(rectangle, targetBandIndex);
+        Tile lambdaTarget = getLambda(rectangle, targetBandIndex);
 
         final Tile waterTile = getSourceTile(waterMask, rectangle);
         float refLowerBand = 0;
@@ -204,22 +204,23 @@ public class SmileCorretionOp extends Operator {
                     System.out.println("radSample = " + radSample);
                 }
                 float sourceRef = convertRadToRefl(rectangle, targetBandIndex, x, y, sza, radSample);
-                float lambdaActualBand = lamdaTarget.getSampleFloat(x, y);
+                float lambdaActualBand = lambdaTarget.getSampleFloat(x, y);
 
 
                 if (waterTile.getSampleBoolean(x, y) && correctWater) {
                     refLowerBand = convertRadToRefl(rectangle, waterLowerBandIndex, x, y, sza, radSample);
                     refUpperBand = convertRadToRefl(rectangle, waterUpperBandIndex, x, y, sza, radSample);
-                    lambdaLowerBand = lamdaWaterLowerTile.getSampleFloat(x, y);
-                    lambdaUpperBand = lamdaWaterUpperTile.getSampleFloat(x, y);
+                    lambdaLowerBand = lambdaWaterLowerTile.getSampleFloat(x, y);
+                    lambdaUpperBand = lambdaWaterUpperTile.getSampleFloat(x, y);
                 } else if (correctLand) {
                     refLowerBand = convertRadToRefl(rectangle, landLowerBandIndex, x, y, sza, radSample);
                     refUpperBand = convertRadToRefl(rectangle, landUpperBandIndex, x, y, sza, radSample);
-                    lambdaLowerBand = lamdaLandLowerTile.getSampleFloat(x, y);
-                    lambdaUpperBand = lamdaLandUpperTile.getSampleFloat(x, y);
+                    lambdaLowerBand = lambdaLandLowerTile.getSampleFloat(x, y);
+                    lambdaUpperBand = lambdaLandUpperTile.getSampleFloat(x, y);
 
                 }
-                float correct = correctionAlgorithm.correct(sourceRef, refUpperBand, refLowerBand, lambdaLowerBand, lambdaUpperBand, lambdaActualBand, targetBandIndex);
+                float correct = smileAlgo.correct(sourceRef, refUpperBand, refLowerBand, lambdaLowerBand, lambdaUpperBand, lambdaActualBand,
+                                                  targetBandIndex);
                 float corrToRad = convertReflToRad(rectangle, correct, sza, targetBandIndex, x, y);
                 targetTile.setSample(x, y, corrToRad);
             }
@@ -261,53 +262,54 @@ public class SmileCorretionOp extends Operator {
 //            band = sourceProduct.getBand(sbandFluxName);
 //        }
 //        float sampleFlux = getSourceTile(band, rectangle).getSampleFloat(x, y);
-        float sampleFlux = (float) auxdata.getSolarIrradiances()[bandIndex];
+        float sampleFlux = (float) smileAuxdata.getSolarIrradiances()[bandIndex];
         return RsMathUtils.reflectanceToRadiance(refl, sza, sampleFlux);
     }
 
     private int getLandLowerBand(int index) {
-        if (index > auxdata.getBands().length) {
+        if (index > smileAuxdata.getBands().length) {
             throw new OperatorException("The band does not exist");
         }
-        boolean mustCorrect = auxdata.getLandRefCorrectionSwitchs()[index];
+        boolean mustCorrect = smileAuxdata.getLandRefCorrectionSwitchs()[index];
         int lowerBandIndex = -1;
         if (mustCorrect) {
-            lowerBandIndex = (int) auxdata.getLandLowerBands()[index] - 1;
+            lowerBandIndex = (int) smileAuxdata.getLandLowerBands()[index] - 1;
         }
         return lowerBandIndex;
     }
 
     protected int getLandUpperBand(int index) {
-        boolean toCorrectBand = auxdata.getLandRefCorrectionSwitchs()[index];
+        boolean toCorrectBand = smileAuxdata.getLandRefCorrectionSwitchs()[index];
         int upperBandIndex = -1;
         if (toCorrectBand) {
-            upperBandIndex = (int) auxdata.getLandUpperBands()[index] - 1;
+            upperBandIndex = (int) smileAuxdata.getLandUpperBands()[index] - 1;
         }
         return upperBandIndex;
     }
 
     private int getWaterLowerBand(int i) {
-        if (i > auxdata.getBands().length) {
+        if (i > smileAuxdata.getBands().length) {
             throw new OperatorException("The band does not exist");
         }
-        boolean mustCorrect = auxdata.getWaterRefCorrectionSwitchs()[i];
+        boolean mustCorrect = smileAuxdata.getWaterRefCorrectionSwitchs()[i];
         int lowerBandIndex = -1;
         if (mustCorrect) {
-            lowerBandIndex = (int) auxdata.getWater_LowerBands()[i] - 1;
+            lowerBandIndex = (int) smileAuxdata.getWater_LowerBands()[i] - 1;
         }
         return lowerBandIndex;
     }
 
     private int getWaterUpperBand(int index) {
-        boolean toCorrectBand = auxdata.getWaterRefCorrectionSwitchs()[index];
+        boolean toCorrectBand = smileAuxdata.getWaterRefCorrectionSwitchs()[index];
         int upperBandIndex = -1;
         if (toCorrectBand) {
-            upperBandIndex = (int) auxdata.getWaterUpperBands()[index] - 1;
+            upperBandIndex = (int) smileAuxdata.getWaterUpperBands()[index] - 1;
         }
         return upperBandIndex;
     }
 
     public static class Spi extends OperatorSpi {
+
         public Spi() {
             super(SmileCorretionOp.class);
         }
