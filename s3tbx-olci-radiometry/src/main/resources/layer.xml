@@ -12,25 +12,25 @@
                 <attr name="targetProductNameSuffix" stringvalue="_smile"/>
             </file>
 
-            <file name="org-esa-s3tbx-olci-radiometry-gaseousabsorption-GaseousAbsorptionOpAction.instance">
-                <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
-                <attr name="delegate" methodvalue="org.esa.snap.core.gpf.ui.DefaultOperatorAction.create"/>
-                <attr name="displayName" stringvalue="Gaseous Absorption"/>
-                <attr name="dialogTitle" stringvalue="Gaseous Absorption"/>
-                <attr name="operatorName" stringvalue="OLCI.GaseousAsorption"/>
-                <attr name="helpId" stringvalue="OLCI.GaseousAsorption"/>
-                <attr name="targetProductNameSuffix" stringvalue="_gaseous"/>
-            </file>
+            <!--<file name="org-esa-s3tbx-olci-radiometry-gaseousabsorption-GaseousAbsorptionOpAction.instance">-->
+                <!--<attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>-->
+                <!--<attr name="delegate" methodvalue="org.esa.snap.core.gpf.ui.DefaultOperatorAction.create"/>-->
+                <!--<attr name="displayName" stringvalue="Gaseous Absorption"/>-->
+                <!--<attr name="dialogTitle" stringvalue="Gaseous Absorption"/>-->
+                <!--<attr name="operatorName" stringvalue="OLCI.GaseousAsorption"/>-->
+                <!--<attr name="helpId" stringvalue="OLCI.GaseousAsorption"/>-->
+                <!--<attr name="targetProductNameSuffix" stringvalue="_gaseous"/>-->
+            <!--</file>-->
 
-            <file name="org-esa-s3tbx-olci-radiometry-rayleighcorrection-RayleighCorrectionOpAction.instance">
-                <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
-                <attr name="delegate" methodvalue="org.esa.snap.core.gpf.ui.DefaultOperatorAction.create"/>
-                <attr name="displayName" stringvalue="Rayleigh Correction"/>
-                <attr name="dialogTitle" stringvalue="Rayleigh Correction"/>
-                <attr name="operatorName" stringvalue="Olci.RayleighCorrection"/>
-                <attr name="helpId" stringvalue="Olci.RayleighCorrection"/>
-                <attr name="targetProductNameSuffix" stringvalue="_rayleigh"/>
-            </file>
+            <!--<file name="org-esa-s3tbx-olci-radiometry-rayleighcorrection-RayleighCorrectionOpAction.instance">-->
+                <!--<attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>-->
+                <!--<attr name="delegate" methodvalue="org.esa.snap.core.gpf.ui.DefaultOperatorAction.create"/>-->
+                <!--<attr name="displayName" stringvalue="Rayleigh Correction"/>-->
+                <!--<attr name="dialogTitle" stringvalue="Rayleigh Correction"/>-->
+                <!--<attr name="operatorName" stringvalue="Olci.RayleighCorrection"/>-->
+                <!--<attr name="helpId" stringvalue="Olci.RayleighCorrection"/>-->
+                <!--<attr name="targetProductNameSuffix" stringvalue="_rayleigh"/>-->
+            <!--</file>-->
 
         </folder>
     </folder>
