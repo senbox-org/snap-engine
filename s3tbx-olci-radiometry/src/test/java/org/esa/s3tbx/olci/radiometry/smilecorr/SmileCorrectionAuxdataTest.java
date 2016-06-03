@@ -53,13 +53,10 @@ public class SmileCorrectionAuxdataTest {
         assertEquals(9, auxDataInFlatTable[0].length);
 
         assertEquals(1, auxDataInFlatTable[0][0], 1e-8);
-        assertEquals(1.4418, auxDataInFlatTable[0][8], 1e-8);
+        assertEquals(1441.8, auxDataInFlatTable[0][8], 1e-8);
 
         assertEquals(6.0, auxDataInFlatTable[5][0], 1e-8);
-        assertEquals(1.8044, auxDataInFlatTable[5][8], 1e-8);
-
-
-
+        assertEquals(1804.4, auxDataInFlatTable[5][8], 1e-8);
     }
 
     @Test
@@ -81,7 +78,7 @@ public class SmileCorrectionAuxdataTest {
         double[] expectedLandUpperBands = {400, 412.5, 442.5, 490, 510, 560, 620, 665, 673.75, 681.25, 708.75, 753.75, 761.25, 764.37, 767.5, 778.75, 865, 885, 900, 940, 1020, 0};
         assertArrayEquals(expectedLandUpperBands, smileCorrectionAuxdata.getRefCentralWaveLenghts(), 1e-8);
 
-        double[] expectedSolarIrradiance = {1.4418, 1.6852, 1.8641, 1.9237, 1.9435, 1.8044, 1.6534, 1.5323, 1.4979, 1.4724, 1.4084, 1.2659, 1.2521, 1.2485, 1.2221, 1.1845, 0.9582, 0.9295, 0.8957, 0.8247, 0.6940, 0.0};
+        double[] expectedSolarIrradiance = {1441.8, 1685.2, 1864.1, 1923.7, 1943.5, 1804.4, 1653.4, 1532.3, 1497.9, 1472.4, 1408.4, 1265.9, 1252.1, 1248.5, 1222.1, 1184.5, 958.2, 929.5, 895.7, 824.7, 694.0, 0.0};
         assertArrayEquals(expectedSolarIrradiance, smileCorrectionAuxdata.getSolarIrradiances(), 1e-8);
 
     }
