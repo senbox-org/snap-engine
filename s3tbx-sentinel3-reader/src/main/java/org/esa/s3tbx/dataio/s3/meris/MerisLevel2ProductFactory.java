@@ -48,7 +48,8 @@ public class MerisLevel2ProductFactory extends MerisProductFactory {
         if (targetNode.getName().startsWith("ADG443_NN") ||
                 targetNode.getName().startsWith("CHL_NN") ||
                 targetNode.getName().startsWith("CHL_OC4ME") ||
-                targetNode.getName().startsWith("KD490_M07"))
+                targetNode.getName().startsWith("KD490_M07") ||
+                targetNode.getName().startsWith("TSM_NN"))
         {
             if (targetNode instanceof Band) {
                 final Band targetBand = (Band) targetNode;
