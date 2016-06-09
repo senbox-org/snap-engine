@@ -1,0 +1,25 @@
+<filesystem>
+
+    <folder name="Actions">
+        <folder name="Operators">
+            <file name="org-esa-s3tbx-olci-radiometry-operator-SmileCorrectionOpAction.instance">
+                <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
+                <attr name="delegate" methodvalue="org.esa.snap.core.gpf.ui.DefaultOperatorAction.create"/>
+                <attr name="displayName" stringvalue="Smile Correction"/>
+                <attr name="dialogTitle" stringvalue="Smile Correction"/>
+                <attr name="operatorName" stringvalue="Olci.SmileCorrection"/>
+                <attr name="helpId" stringvalue="Olci.SmileCorrection"/>
+                <attr name="targetProductNameSuffix" stringvalue="_smile"/>
+            </file>
+        </folder>
+    </folder>
+
+    <folder name="Services">
+        <folder name="JavaHelp">
+            <file name="org-esa-s3tbx-FuOp-helpset.xml" url="helpset.xml">
+                <attr name="position" intvalue="4600"/>
+            </file>
+        </folder>
+    </folder>
+
+</filesystem>
