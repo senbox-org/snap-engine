@@ -32,8 +32,7 @@ import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.math.RsMathUtils;
 
-import java.awt.Color;
-import java.awt.Rectangle;
+import java.awt.*;
 
 
 /**
@@ -158,7 +157,7 @@ public class SmileCorretionOp extends Operator {
         Band solarIrradianceLandUpperBand = sourceProduct.getBand(String.format(SOLAR_FLUX_BAND_NAME_PATTERN, landUpperBandIndex));
 
 
-        Band lambdaTargetBand = sourceProduct.getBand(String.format(LAMBDA0_BAND_NAME_PATTERN, targetBandIndex + 1));
+        Band lambdaSourceBand = sourceProduct.getBand(String.format(LAMBDA0_BAND_NAME_PATTERN, targetBandIndex + 1));
 
         boolean correctLand = smileAuxdata.getLandRefCorrectionSwitches()[targetBandIndex];
         boolean correctWater = smileAuxdata.getWaterRefCorrectionSwitches()[targetBandIndex];
@@ -180,7 +179,7 @@ public class SmileCorretionOp extends Operator {
                     radianceLandUpperBand, solarIrradianceLandUpperBand, rectangle);
         }
 
-        Tile lambdaTargetTile = getSourceTile(lambdaTargetBand, rectangle);
+        Tile lambdaSourceTile = getSourceTile(lambdaSourceBand, rectangle);
 
         final Tile waterMaskTile = getSourceTile(waterMask, rectangle);
         float refSolarIrradiance = smileAuxdata.getSolarIrradiances()[targetBandIndex];
@@ -203,7 +202,7 @@ public class SmileCorretionOp extends Operator {
 
                 if (waterMaskTile.getSampleBoolean(x, y)) {
                     if (correctWater) {
-                        float correctedRadiance = correctForSmileEffect(sourceRadiance, solarIrradianceTile, lambdaTargetTile,
+                        float correctedRadiance = correctForSmileEffect(sourceRadiance, solarIrradianceTile, lambdaSourceTile,
                                 refSolarIrradiance, refCentralWaveLength, waterTiles,
                                 szaTile, x, y);
                         targetTile.setSample(x, y, correctedRadiance);
@@ -212,7 +211,7 @@ public class SmileCorretionOp extends Operator {
                     }
                 } else {
                     if (correctLand) {
-                        float correctedRadiance = correctForSmileEffect(sourceRadiance, solarIrradianceTile, lambdaTargetTile,
+                        float correctedRadiance = correctForSmileEffect(sourceRadiance, solarIrradianceTile, lambdaSourceTile,
                                 refSolarIrradiance, refCentralWaveLength, landTiles,
                                 szaTile, x, y);
                         targetTile.setSample(x, y, correctedRadiance);
