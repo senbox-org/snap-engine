@@ -79,9 +79,9 @@ public class SmileCorretionOp extends Operator {
 
         copyTargetBands(targetProduct, OA_RADIANCE_BAND_NAME_PATTERN);
         copyTargetBands(targetProduct, OA_RADIANCE_ERR_BAND_NAME_PATTERN);
-        copyTargetBands(targetProduct, LAMBDA0_BAND_NAME_PATTERN);
-        copyTargetBands(targetProduct, FWHM_BAND_PATTERN);
-        copyTargetBands(targetProduct, SOLAR_FLUX_BAND_NAME_PATTERN);
+//        copyTargetBands(targetProduct, LAMBDA0_BAND_NAME_PATTERN);
+//        copyTargetBands(targetProduct, FWHM_BAND_PATTERN);
+//        copyTargetBands(targetProduct, SOLAR_FLUX_BAND_NAME_PATTERN);
         copyTargetBand(targetProduct, ALTITUDE_BAND);
         copyTargetBand(targetProduct, LATITUDE_BAND);
         copyTargetBand(targetProduct, LONGITUDE_BAND);
@@ -130,6 +130,9 @@ public class SmileCorretionOp extends Operator {
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
         Rectangle rectangle = targetTile.getRectangle();
         String targetBandName = targetBand.getName();
+        if (targetBandName.matches("")){
+
+        }
         int targetBandIndex = Integer.parseInt(targetBandName.substring(2, 4)) - 1;
 
 
@@ -228,7 +231,7 @@ public class SmileCorretionOp extends Operator {
                                         float refCentralWaveLength, SmileTiles smileTiles,
                                         Tile szaTile, int x, int y) {
         float sza = szaTile.getSampleFloat(x, y);
-        float sourceLambda = effectWavelengthTargetTile.getSampleFloat(x, y);
+        float sourceTargetLambda = effectWavelengthTargetTile.getSampleFloat(x, y);
 
         float sourceReflectance = convertRadToRefl(radiance, solarIrradianceTile.getSampleFloat(x, y), sza);
         float lowerReflectance = convertRadToRefl(smileTiles.getLowerRadianceTile().getSampleFloat(x, y),
@@ -239,9 +242,9 @@ public class SmileCorretionOp extends Operator {
                 sza);
         float lowerLambda = smileTiles.getLowerLambdaTile().getSampleFloat(x, y);
         float upperLambda = smileTiles.getUpperLambdaTile().getSampleFloat(x, y);
-        float correctedReflectance = SmileCorrectionAlgorithm.correct(sourceReflectance, lowerReflectance, upperReflectance,
-                sourceLambda, lowerLambda, upperLambda,
-                refCentralWaveLength);
+        float correctedReflectance = SmileCorrectionAlgorithm.correct(sourceReflectance, lowerReflectance,
+                upperReflectance,sourceTargetLambda, lowerLambda, upperLambda,refCentralWaveLength);
+
         return convertReflToRad(correctedReflectance, sza, refSolarIrradiance);
     }
 
