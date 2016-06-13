@@ -25,10 +25,25 @@ public class SmileCorrectionAlgorithm {
     private SmileCorrectionAlgorithm() {
     }
 
-    public static float correct(float sourceReflectance, float lowerReflectance, float upperReflectance,
-                                float sourceTargetLambda, float lowerLambda, float upperLambda, float refCentralWaveLength) {
+    public static float correctWithReflectance(float sourceReflectance, float lowerReflectance, float upperReflectance,
+                                               float sourceTargetLambda, float lowerLambda, float upperLambda, float refCentralWaveLength) {
         double dl = (refCentralWaveLength - sourceTargetLambda) / (upperLambda - lowerLambda);
         double dr = (upperReflectance - lowerReflectance) * dl;
         return (float) (sourceReflectance + dr);
     }
+
+    public static float correctionWithRAdiance(float sourceRadiance, float lowerRadiance, float upperRadiance,
+                                               float sourceTargetLambda, float lowerLambda, float upperLambda,
+                                               float refCentralWL, float sourceFlux, float E0, float E0L, float E0U) {
+        float r0 = sourceRadiance / sourceFlux;
+        float rc = r0 * E0;
+
+        float r2 = upperRadiance / E0U;
+        float r1 = lowerRadiance / E0L;
+
+        double dl = (refCentralWL - sourceTargetLambda) / (upperLambda - lowerLambda);
+        double dr = (r2 - r1) * dl * E0;
+        return (float) (rc + dr);
+    }
 }
+
