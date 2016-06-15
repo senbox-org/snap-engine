@@ -24,7 +24,7 @@ public class MerisLevel2ProductFactory extends MerisProductFactory {
         if (sourceBandName.startsWith("IWV")) {
             if(sourceBand.getProduct().getName().startsWith("l")) {
                 sourceBand.setName("L_" + sourceBandName);
-            } else { // masterProduct.getName().startsWith("w")
+            } else if(sourceBand.getProduct().getName().startsWith("w")) { // masterProduct.getName().startsWith("w")
                 sourceBand.setName("W_" + sourceBandName);
             }
         }
