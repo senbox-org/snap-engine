@@ -32,6 +32,8 @@ import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.math.RsMathUtils;
 
+import javax.media.jai.RenderedOp;
+import javax.media.jai.operator.ConstantDescriptor;
 import java.awt.*;
 
 
@@ -76,19 +78,19 @@ public class SmileCorretionOp extends Operator {
         Product targetProduct = new Product(sourceProduct.getName(), sourceProduct.getProductType(),
                 sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
 
-        copyTargetBands(targetProduct, OA_RADIANCE_BAND_NAME_PATTERN);
-        copyTargetBands(targetProduct, LAMBDA0_BAND_NAME_PATTERN);
+        createTargetBands(targetProduct, OA_RADIANCE_BAND_NAME_PATTERN);
+        createTargetLambda(targetProduct, LAMBDA0_BAND_NAME_PATTERN);
+        createTargetBands(targetProduct, SOLAR_FLUX_BAND_NAME_PATTERN);
 
         copyTargetBandsImage(targetProduct, OA_RADIANCE_ERR_BAND_NAME_PATTERN);
-        copyTargetBandsImage(targetProduct, SOLAR_FLUX_BAND_NAME_PATTERN);
         copyTargetBandsImage(targetProduct, FWHM_BAND_PATTERN);
 
-        copyTargetBand(targetProduct, ALTITUDE_BAND);
-        copyTargetBand(targetProduct, LATITUDE_BAND);
-        copyTargetBand(targetProduct, LONGITUDE_BAND);
-        copyTargetBand(targetProduct, DETECTOR_INDEX_BAND);
-        copyTargetBand(targetProduct, FRAME_OFFSET_BAND);
-        copyTargetBand(targetProduct, BEFORE_BAND);
+        copyTargetBandImage(targetProduct, ALTITUDE_BAND);
+        copyTargetBandImage(targetProduct, LATITUDE_BAND);
+        copyTargetBandImage(targetProduct, LONGITUDE_BAND);
+        copyTargetBandImage(targetProduct, DETECTOR_INDEX_BAND);
+        copyTargetBandImage(targetProduct, FRAME_OFFSET_BAND);
+        copyTargetBandImage(targetProduct, BEFORE_BAND);
 
 
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
@@ -108,29 +110,61 @@ public class SmileCorretionOp extends Operator {
         waterMask.setOwner(getSourceProduct());
     }
 
-    private void copyTargetBandsImage(Product targetProduct, String bandNamePattern) {
-        for (int i = 1; i <= 21; i++) {
-            String sourceBandName = String.format(bandNamePattern, i);
-            copyTargetBand(targetProduct, sourceBandName);
+    private void createTargetLambda(Product targetProduct, String lambda0BandNamePattern) {
+        boolean[] landRefCorrectionSwitches = smileAuxdata.getLandRefCorrectionSwitches();
+        boolean[] waterRefCorrectionSwitches = smileAuxdata.getWaterRefCorrectionSwitches();
+        float[] refCentralWaveLengths = smileAuxdata.getRefCentralWaveLengths();
+
+        for (int i = 0; i < refCentralWaveLengths.length; i++) {
+            String sourceBandName = String.format(lambda0BandNamePattern, i + 1);
+            if (landRefCorrectionSwitches[i] && waterRefCorrectionSwitches[i]) {
+                RenderedOp image = ConstantDescriptor.create((float) sourceProduct.getSceneRasterWidth(), (float) sourceProduct.getSceneRasterHeight(), new Float[]{refCentralWaveLengths[i]}, null);
+                ProductUtils.copyBand(sourceBandName, sourceProduct, targetProduct, false);
+                targetProduct.getBand(sourceBandName).setSourceImage(image);
+            } else if (!landRefCorrectionSwitches[i] && !waterRefCorrectionSwitches[i]) {
+                ProductUtils.copyBand(sourceBandName, sourceProduct, targetProduct, true);
+            } else {
+                createTargetBand(targetProduct, sourceBandName);
+            }
         }
     }
 
-    private void copyTargetBand(Product targetProduct, String bandName) {
+    private void copyTargetBandsImage(Product targetProduct, String bandNamePattern) {
+        for (int i = 1; i <= 21; i++) {
+            String sourceBandName = String.format(bandNamePattern, i);
+            copyTargetBandImage(targetProduct, sourceBandName);
+        }
+    }
+
+    private void copyTargetBandImage(Product targetProduct, String bandName) {
         if (sourceProduct.containsBand(bandName)) {
             ProductUtils.copyBand(bandName, sourceProduct, targetProduct, true);
         }
     }
 
-    private void copyTargetBands(Product targetProduct, String bandNamePattern) {
-        for (int i = 1; i <= 21; i++) {
-            Band targetBand = targetProduct.addBand(String.format(bandNamePattern, i), ProductData.TYPE_FLOAT32);
-            Band sourceBand = sourceProduct.getBand(String.format(bandNamePattern, i));
-            targetBand.setSpectralWavelength(sourceBand.getSpectralWavelength());
-            targetBand.setSpectralBandwidth(sourceBand.getSpectralBandwidth());
-            targetBand.setSpectralBandIndex(sourceBand.getSpectralBandIndex());
-            targetBand.setNoDataValueUsed(true);
-            targetBand.setNoDataValue(Double.NaN);
+    private void createTargetBands(Product targetProduct, String bandNamePattern) {
+        boolean[] landRefCorrectionSwitches = smileAuxdata.getLandRefCorrectionSwitches();
+        boolean[] waterRefCorrectionSwitches = smileAuxdata.getWaterRefCorrectionSwitches();
+        float[] refCentralWaveLengths = smileAuxdata.getRefCentralWaveLengths();
+
+        for (int i = 0; i < refCentralWaveLengths.length; i++) {
+            String sourceBandName = String.format(bandNamePattern, i + 1);
+            if (landRefCorrectionSwitches[i] || waterRefCorrectionSwitches[i]) {
+                createTargetBand(targetProduct, sourceBandName);
+            } else if (!landRefCorrectionSwitches[i] && !waterRefCorrectionSwitches[i]) {
+                ProductUtils.copyBand(sourceBandName, sourceProduct, targetProduct, true);
+            }
         }
+    }
+
+    private void createTargetBand(Product targetProduct, String bandNamePattern) {
+        Band targetBand = targetProduct.addBand(bandNamePattern, ProductData.TYPE_FLOAT32);
+        Band sourceBand = sourceProduct.getBand(bandNamePattern);
+        targetBand.setSpectralWavelength(sourceBand.getSpectralWavelength());
+        targetBand.setSpectralBandwidth(sourceBand.getSpectralBandwidth());
+        targetBand.setSpectralBandIndex(sourceBand.getSpectralBandIndex());
+        targetBand.setNoDataValueUsed(true);
+        targetBand.setNoDataValue(Double.NaN);
     }
 
     @Override
@@ -139,23 +173,86 @@ public class SmileCorretionOp extends Operator {
         String targetBandName = targetBand.getName();
         final float[] refCentralWaveLengths = smileAuxdata.getRefCentralWaveLengths();
 
-        String extractBandIndex = targetBandName.substring(2, 4);
-        if (isWholeNumber(extractBandIndex) && targetBandName.matches("Oa\\d{2}_radiance")) {
+        if (targetBandName.matches("Oa\\d{2}_radiance")) {
+            String extractBandIndex = targetBandName.substring(2, 4);
             correctRad(targetTile, pm, rectangle, targetBandName, extractBandIndex, refCentralWaveLengths);
         }
 
-        extractBandIndex = targetBandName.substring(13, targetBandName.length());
-        if (isWholeNumber(extractBandIndex) && targetBandName.matches("lambda0_band_\\d+")) {
-            int targetBandIndex = Integer.parseInt(extractBandIndex) - 1;
-            float refCentralWaveLength = refCentralWaveLengths[targetBandIndex];
+        if (targetBandName.matches("lambda0_band_\\d+")) {
+            correctLambda(targetTile, targetBandName, refCentralWaveLengths, rectangle);
+        }
 
-            for (int y = targetTile.getMinY(); y <= targetTile.getMaxY(); y++) {
-                for (int x = targetTile.getMinX(); x <= targetTile.getMaxX(); x++) {
-                    targetTile.setSample(x, y, refCentralWaveLength);
+        if (targetBandName.matches("solar_flux_band_\\d+")) {
+            correctSolorFlux(targetTile, targetBandName, rectangle);
+        }
+
+    }
+
+    private void correctSolorFlux(Tile targetTile, String targetBandName, Rectangle rectangle) {
+        String extractBandIndex = targetBandName.substring(16, targetBandName.length());
+        int targetBandIndex = Integer.parseInt(extractBandIndex) - 1;
+        Band effectiveSolarIrradianceBand = sourceProduct.getBand(targetBandName);
+        Tile solarIrradianceTile = getSourceTile(effectiveSolarIrradianceBand, rectangle);
+
+        Band lambdaSourceBand = sourceProduct.getBand(String.format(LAMBDA0_BAND_NAME_PATTERN, targetBandIndex + 1));
+        Tile sourceLambdaTile = getSourceTile(lambdaSourceBand, rectangle);
+        final Tile waterMaskTile = getSourceTile(waterMask, rectangle);
+        float refCentralWavelength = smileAuxdata.getRefCentralWaveLengths()[targetBandIndex];
+
+        boolean correctLand = smileAuxdata.getLandRefCorrectionSwitches()[targetBandIndex];
+        boolean correctWater = smileAuxdata.getWaterRefCorrectionSwitches()[targetBandIndex];
+        for (int y = targetTile.getMinY(); y <= targetTile.getMaxY(); y++) {
+            for (int x = targetTile.getMinX(); x <= targetTile.getMaxX(); x++) {
+                float solarIrradianceSample = solarIrradianceTile.getSampleFloat(x, y);
+                float sourceTargetLambda = sourceLambdaTile.getSampleFloat(x, y);
+                if (sourceTargetLambda == -1 || solarIrradianceSample == -1) {
+                    continue;
+                }
+                if (waterMaskTile.getSampleBoolean(x, y)) {
+                    if (correctWater) {
+                        float shiftedSolarIrradiance = shiftSolarIrradiance(solarIrradianceSample, sourceTargetLambda, refCentralWavelength);
+                        targetTile.setSample(x, y, shiftedSolarIrradiance);
+                    } else {
+                        targetTile.setSample(x, y, solarIrradianceSample);
+                    }
+                } else {
+                    if (correctLand) {
+                        float shiftedSolarIrradiance = shiftSolarIrradiance(solarIrradianceSample, sourceTargetLambda, refCentralWavelength);
+                        targetTile.setSample(x, y, shiftedSolarIrradiance);
+                    } else {
+                        targetTile.setSample(x, y, solarIrradianceSample);
+                    }
                 }
             }
         }
+    }
 
+    private void correctLambda(Tile targetTile, String targetBandName, float[] refCentralWaveLengths, Rectangle rectangle) {
+        Tile sourceLambdaTile = getSourceTile(sourceProduct.getBand(targetBandName), rectangle);
+        String extractBandIndex = targetBandName.substring(13, targetBandName.length());
+        int targetBandIndex = Integer.parseInt(extractBandIndex) - 1;
+        boolean correctLand = smileAuxdata.getLandRefCorrectionSwitches()[targetBandIndex];
+        boolean correctWater = smileAuxdata.getWaterRefCorrectionSwitches()[targetBandIndex];
+
+        float refCentralWaveLength = refCentralWaveLengths[targetBandIndex];
+        final Tile waterMaskTile = getSourceTile(waterMask, rectangle);
+        for (int y = targetTile.getMinY(); y <= targetTile.getMaxY(); y++) {
+            for (int x = targetTile.getMinX(); x <= targetTile.getMaxX(); x++) {
+                if (waterMaskTile.getSampleBoolean(x, y)) {
+                    if (correctWater) {
+                        targetTile.setSample(x, y, refCentralWaveLength);
+                    } else {
+                        targetTile.setSample(x, y, sourceLambdaTile.getSampleFloat(x, y));
+                    }
+                } else {
+                    if (correctLand) {
+                        targetTile.setSample(x, y, refCentralWaveLength);
+                    } else {
+                        targetTile.setSample(x, y, sourceLambdaTile.getSampleFloat(x, y));
+                    }
+                }
+            }
+        }
     }
 
     private void correctRad(Tile targetTile, ProgressMonitor pm, Rectangle rectangle, String targetBandName, String substring, float[] refCentralWaveLengths) {
@@ -210,7 +307,6 @@ public class SmileCorretionOp extends Operator {
         Tile lambdaSourceTile = getSourceTile(lambdaSourceBand, rectangle);
 
         final Tile waterMaskTile = getSourceTile(waterMask, rectangle);
-        float refSolarIrradiance = smileAuxdata.getSolarIrradiances()[targetBandIndex];
         float refCentralWaveLength = refCentralWaveLengths[targetBandIndex];
 
         for (int y = targetTile.getMinY(); y <= targetTile.getMaxY(); y++) {
@@ -225,7 +321,7 @@ public class SmileCorretionOp extends Operator {
                 if (waterMaskTile.getSampleBoolean(x, y)) {
                     if (correctWater) {
                         float correctedRadiance = correctForSmileEffect(sourceRadiance, solarIrradianceTile, lambdaSourceTile,
-                                refSolarIrradiance, refCentralWaveLength, waterTiles,
+                                refCentralWaveLength, waterTiles,
                                 szaTile, x, y);
                         targetTile.setSample(x, y, correctedRadiance);
                     } else {
@@ -234,7 +330,7 @@ public class SmileCorretionOp extends Operator {
                 } else {
                     if (correctLand) {
                         float correctedRadiance = correctForSmileEffect(sourceRadiance, solarIrradianceTile, lambdaSourceTile,
-                                refSolarIrradiance, refCentralWaveLength, landTiles,
+                                refCentralWaveLength, landTiles,
                                 szaTile, x, y);
                         targetTile.setSample(x, y, correctedRadiance);
                     } else {
@@ -247,17 +343,15 @@ public class SmileCorretionOp extends Operator {
         }
     }
 
-    protected boolean isWholeNumber(String substring) {
-        return substring.matches("\\d+");
-    }
-
-    private float correctForSmileEffect(float radiance, Tile solarIrradianceTile, Tile effectWavelengthTargetTile, float refSolarIrradiance,
+    private float correctForSmileEffect(float radiance, Tile solarIrradianceTile, Tile effectWavelengthTargetTile,
                                         float refCentralWaveLength, SmileTiles smileTiles,
                                         Tile szaTile, int x, int y) {
         float sza = szaTile.getSampleFloat(x, y);
         float sourceTargetLambda = effectWavelengthTargetTile.getSampleFloat(x, y);
 
-        float sourceReflectance = convertRadToRefl(radiance, solarIrradianceTile.getSampleFloat(x, y), sza);
+        float solarIrradiance = solarIrradianceTile.getSampleFloat(x, y);
+        float sourceReflectance = convertRadToRefl(radiance, solarIrradiance, sza);
+
         float lowerReflectance = convertRadToRefl(smileTiles.getLowerRadianceTile().getSampleFloat(x, y),
                 smileTiles.getLowerSolarIrradianceTile().getSampleFloat(x, y),
                 sza);
@@ -270,9 +364,22 @@ public class SmileCorretionOp extends Operator {
         float correctedReflectance = SmileCorrectionAlgorithm.correctWithReflectance(sourceReflectance, lowerReflectance,
                 upperReflectance, sourceTargetLambda, lowerLambda, upperLambda, refCentralWaveLength);
 
-
-        return convertReflToRad(correctedReflectance, sza, refSolarIrradiance);
+        float shiftedSolarIrradiance = shiftSolarIrradiance(solarIrradiance, sourceTargetLambda, refCentralWaveLength);
+        return convertReflToRad(correctedReflectance, sza, shiftedSolarIrradiance);
     }
+
+    private float shiftSolarIrradiance(float solarIrradiance, float sourceTargetLambda, float refCentralWaveLength) {
+        float x = sourceTargetLambda;
+//        poly =  2.329521314*10^(-10)* x^5 - 8.883158295*10^(-7)* x^4 + 1.341545977*10^(-3)*x^3 - 1.001512583* x^2 + 366.3249385* x - 50292.30277
+//        dy/dx = 5 * 2.329521314*10^(-10)* x^4 - 4 * 8.883158295*10^(-7)* x^3 + 3 * 1.341545977*10^(-3)*x^2 - 2 * 1.001512583* x + 366.3249385
+//        double forthDegree  = 5 * 2.329521314e-10 = 1.164760657E-9;
+//        double thirdDegree  = 4 * 8.883158295e-7  = 3.553263318E-6;
+//        double secondDegree = 3 * 1.341545977e-3 = 0.004024637931;
+//        double firstDegree  = 2 * 1.001512583 = 2.003025166;
+        double m = 1.164760657E-9 * Math.pow(x, 4) - 3.553263318E-6 * Math.pow(x, 3) + 0.004024637931 * Math.pow(x, 2) - 2.003025166 * Math.pow(x, 1) + 366.3249385;
+        return (float) (solarIrradiance + m * (refCentralWaveLength - sourceTargetLambda));
+    }
+
 
     private float convertRadToRefl(float radiance, float solarIrradiance, float sza) {
         return RsMathUtils.radianceToReflectance(radiance, sza, solarIrradiance);

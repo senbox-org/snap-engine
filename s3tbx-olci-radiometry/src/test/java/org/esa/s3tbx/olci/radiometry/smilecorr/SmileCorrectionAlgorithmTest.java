@@ -37,7 +37,7 @@ public class SmileCorrectionAlgorithmTest {
         float correctOLCI = SmileCorrectionAlgorithm.correctWithReflectance(targetRef, lowerRef, upperRef, 442.93088f, 411.735f, 490.3521f, 442.5f);
         float withConvertionRad2Ref = RsMathUtils.reflectanceToRadiance(correctOLCI, 41.63521f, 1864.1f);
 
-        float withoutConversion = SmileCorrectionAlgorithm.correctionWithRAdiance(98.60547f, 107.214905f, 79.279076f, 442.93088f, 411.735f, 490.3521f, 442.5f, 1913.8246f, 1864.1f, 1730.1123f, 1959.5077f);
+        float withoutConversion = SmileCorrectionAlgorithm.correctionWithRadiance(98.60547f, 107.214905f, 79.279076f, 442.93088f, 411.735f, 490.3521f, 442.5f, 1913.8246f, 1864.1f, 1730.1123f, 1959.5077f);
         assertEquals(withConvertionRad2Ref, withoutConversion, 1e-4);
     }
 }

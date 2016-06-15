@@ -32,7 +32,7 @@ public class SmileCorrectionAlgorithm {
         return (float) (sourceReflectance + dr);
     }
 
-    public static float correctionWithRAdiance(float sourceRadiance, float lowerRadiance, float upperRadiance,
+    public static float correctionWithRadiance(float sourceRadiance, float lowerRadiance, float upperRadiance,
                                                float sourceTargetLambda, float lowerLambda, float upperLambda,
                                                float refCentralWL, float sourceFlux, float E0, float E0L, float E0U) {
         float r0 = sourceRadiance / sourceFlux;

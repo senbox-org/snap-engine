@@ -236,6 +236,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.esa.s3tbx</groupId>
+            <artifactId>s3tbx-fu-operator</artifactId>
+            <version>0.11-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-rcp</artifactId>
             <version>${snap.version}</version>
