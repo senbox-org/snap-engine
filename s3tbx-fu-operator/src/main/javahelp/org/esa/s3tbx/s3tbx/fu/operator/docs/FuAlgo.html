@@ -1,0 +1,75 @@
+<!--
+  ~ Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+  ~
+  ~ This program is free software; you can redistribute it and/or modify it
+  ~ under the terms of the GNU General Public License as published by the Free
+  ~ Software Foundation; either version 3 of the License, or (at your option)
+  ~ any later version.
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+  ~ more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License along
+  ~ with this program; if not, see http://www.gnu.org/licenses/
+  -->
+
+<html>
+<head>
+    <title>FU Classification - Algorithm Specification</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+<table class="header">
+    <tr class="header">
+        <td class="header">FU Classification - Algorithm Specification</td>
+        <td class="header" align="right"><img src="images/snap_header.jpg" border=0></td>
+    </tr>
+</table>
+
+<h3>Introduction</h3>
+<p>This algorithm is used for deriving the hue angle and FU (Forel-Ule) value from OLCI, MERIS, SeaWiFS and MODIS data
+    with the use of weighted linear sum of the remote sensing reflectance in which visual bands plus a correction term
+    for the specific band-setting of each instrument. The algorithm is validated by a set of 603 hyperspectral
+    measurements from inland, coastal and near-ocean waters.
+    <br>
+    The algorithm is described in the following articels which are available online.</p>
+
+<dl>
+    <dt>The derivation of the hue angle for the instruments SeaWiFS, MODIS, MERIS and OLCI are described in:</dt>
+    <dd>
+        <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer">
+            <param name="content" value="http://www.mdpi.com/1424-8220/15/10/25663">
+            <param name="text" value="Van der Woerd, H.J., Wernand, M.R., 2015. True colour classification of natural
+    waters with medium-spectral resolution satellites: SeaWiFS, MODIS, MERIS and OLCI. Sensors 15, 25663-25680. doi:
+    10.3339/s151025663 (Open Access)">
+        </object>
+    </dd>
+
+    <dt>The conversion of the hue angle to the Forel-Ule number and the corresponding colour legend is based on:</dt>
+    <dd>
+        <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer">
+            <param name="content" value="http://www.jeos.org/index.php/jeos_rp/article/view/13057">
+            <param name="text" value="Novoa, S., Wernand, M.R, Van der Woerd, H.J., 2013. The Forel-Ule scale revisited
+    spectrally: preparation protocols, transmission measurements and chromaticity. JEOS RP 8, 13057.
+    DOI: http://dx.doi.org/10.2971/jeos.2013.13057 (Open Access)">
+        </object>
+    </dd>
+
+
+    <dt>This algorithm connects satellite ocean colour observations to historical in-situ colour observations:</dt>
+    <dd>
+        <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer">
+            <param name="content" value="http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0063766">
+            <param name="text" value="Wernand, M.R, Van der Woerd, H.J., Gieskes. W.W.C, 2013. Trends in ocean colour and
+    chlorophyll concentration from 1889 to present. Plos One. http://dx.plos.org/10.1371/journal.pone0063766 (open access)">
+        </object>
+    </dd>
+</dl>
+
+<br>
+<hr>
+</body>
+</html>

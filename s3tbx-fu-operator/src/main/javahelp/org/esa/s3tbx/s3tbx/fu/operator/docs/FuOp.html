@@ -1,0 +1,113 @@
+<!--
+  ~ Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+  ~
+  ~ This program is free software; you can redistribute it and/or modify it
+  ~ under the terms of the GNU General Public License as published by the Free
+  ~ Software Foundation; either version 3 of the License, or (at your option)
+  ~ any later version.
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+  ~ more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License along
+  ~ with this program; if not, see http://www.gnu.org/licenses/
+  -->
+
+<html>
+<head>
+    <title>FU Classification</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+<table class="header">
+    <tr class="header">
+        <td class="header">Forel-Ule Algorithm For True Color Classification</td>
+        <td class="header" align="right"><img src="images/snap_header.jpg" border=0></td>
+    </tr>
+</table>
+
+<p>True Colour Classification of Natural Waters with Medium-Spectral Resolution Satellites:
+    SeaWiFS, MODIS, MERIS and OLCI</p>
+
+<h2>User Interface</h2>
+
+FU classification can be invoked in the Sentinel Toolbox from tool menu by selecting
+<b>Optical -> Thematic Water Processing-> FU classification</b>.
+
+<br>
+<p align="center">
+    <img src="images/IOParameters.png" align="center">
+</p>
+
+<h4>Source Product Group</h4>
+
+<b>Source product:</b> Here the user specifies the source product reflectance. The combo box presents a list of all products opened
+in the Sentinel Toolbox. The user may select one of these or, by clicking on the button next to the combo box, choose a product
+from the file system.
+<br>
+
+<h4>Target Product Group</h4>
+<b>Name:</b> to specify the name of the target product.
+<br>
+<br>
+
+<b>Save as:</b> checkbox to specify whether the target product should be saved to the file system. The combo box presents a
+list of available file formats. The text field or the button next to it allow to specify a target directory.
+<br>
+<br>
+
+<b>Open in SNAP:</b> Used to specify whether the target product should be opened in the Sentinel Toolbox. When the
+target product is not saved, it is opened in the Sentinel Toolbox automatically.
+
+<p></p>
+
+<p align="center">
+    <img src="images/ProcessParameters.png" align="center">
+</p>
+
+<h4>Processing Parameters Panel</h4>
+<b>Copy all source bands:</b> Checking this option, will copy all the source bands to the target product.
+<br>
+<b>Multiply input reflectance with PI:</b> Checking this option will multiply the reflectance with PI.
+
+<br>
+<b>Valid expression:</b> is use in validating pixel in which the FU value will be applied to, if the user did not add any
+expression the default expression will be applied as in <a href="#valid_tab"> table 1</a>. If the expression is set to
+<b>TRUE</b> then all the pixel are consider to be valid. The button can be use in creating a valid express.
+<br>
+<br>
+<table id="valid_tab">
+    <thead>Default vaild expression.</thead>
+    <tr>
+        <td>MERIS</td>
+        <td>l2_flags.WATER", not l1p_flags.CC_LAND and not l1p_flags.CC_CLOUD, NOT l1_flags.LAND_OCEAN</td>
+    </tr>
+    <tr>
+        <td>OLCI</td>
+        <td>WQSF_lsb.WATER and not WQSF_lsb.CLOUD, LQSF_WATER</td>
+    </tr>
+    <tr>
+        <td>MODIS</td>
+        <td>not l2_flags.LAND and not l2_flags.CLDICE</td>
+    </tr>
+    <tr>
+        <td>SEAWIFS</td>
+        <td>not l2_flags.LAND and not l2_flags.CLDICE</td>
+    </tr>
+</table>
+
+<br>
+<br>
+<br>
+
+<b>Instrument :</b> To specify which instrument reflectance to use in computing the hue angle.
+
+<br>
+<br>
+<br>
+<hr>
+</body>
+</html>

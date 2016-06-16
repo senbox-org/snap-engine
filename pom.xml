@@ -37,6 +37,7 @@
         <module>s3tbx-chris-reader</module>
         <module>s3tbx-flhmci</module>
         <module>s3tbx-flhmci-ui</module>
+        <module>s3tbx-fu-operator</module>
         <module>s3tbx-idepix</module>
         <module>s3tbx-idepix-ui</module>
         <module>s3tbx-insitu-client-ui</module>

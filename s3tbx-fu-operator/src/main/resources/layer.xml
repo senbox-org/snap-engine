@@ -1,0 +1,36 @@
+<filesystem>
+
+    <folder name="Actions">
+        <folder name="Operators">
+            <file name="org-esa-s3tbx-FuOpAction.instance">
+                <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
+                <attr name="delegate" methodvalue="org.esa.snap.core.gpf.ui.DefaultOperatorAction.create"/>
+                <attr name="displayName" stringvalue="FU Classification"/>
+                <attr name="dialogTitle" stringvalue="FU Classification"/>
+                <attr name="operatorName" stringvalue="FuClassification"/>
+                <attr name="helpId" stringvalue="FuTool"/>
+                <attr name="targetProductNameSuffix" stringvalue="_fu"/>
+            </file>
+        </folder>
+    </folder>
+
+    <folder name="Menu">
+        <folder name="Optical">
+            <folder name="Thematic Water Processing">
+                <file name="org-esa-s3tbx-FuOpAction.shadow">
+                    <attr name="originalFile" stringvalue="Actions/Operators/org-esa-s3tbx-FuOpAction.instance"/>
+                    <attr name="position" intvalue="10000"/>
+                </file>
+            </folder>
+        </folder>
+    </folder>
+
+    <folder name="Services">
+        <folder name="JavaHelp">
+            <file name="org-esa-s3tbx-FuOp-helpset.xml" url="helpset.xml">
+                <attr name="position" intvalue="4600"/>
+            </file>
+        </folder>
+    </folder>
+
+</filesystem>
