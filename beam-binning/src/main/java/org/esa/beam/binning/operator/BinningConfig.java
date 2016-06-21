@@ -72,6 +72,10 @@ public class BinningConfig {
     @Parameter(description = "The square of the number of pixels used for super-sampling an input pixel into multiple sub-pixels", defaultValue = "1")
     private Integer superSampling;
 
+
+    @Parameter(description = "Skips binning of sub-pixel if distance on earth to the center of the main-pixel is larger as this value. A value <=0 disables this check", defaultValue = "-1")
+    private Integer maxDistanceOnEarth;
+
     /**
      * The band maths expression used to filter input pixels.
      */
@@ -175,6 +179,14 @@ public class BinningConfig {
 
     public void setSuperSampling(Integer superSampling) {
         this.superSampling = superSampling;
+    }
+
+    public Integer getMaxDistanceOnEarth() {
+        return maxDistanceOnEarth;
+    }
+
+    public void setMaxDistanceOnEarth(Integer maxDistanceOnEarth) {
+        this.maxDistanceOnEarth = maxDistanceOnEarth;
     }
 
     public CompositingType getCompositingType() {
@@ -281,6 +293,7 @@ public class BinningConfig {
                                       binManager,
                                       compositingType,
                                       getSuperSampling() != null ? getSuperSampling() : 1,
+                                      maxDistanceOnEarth,
                                       dataPeriod,
                                       region);
     }
