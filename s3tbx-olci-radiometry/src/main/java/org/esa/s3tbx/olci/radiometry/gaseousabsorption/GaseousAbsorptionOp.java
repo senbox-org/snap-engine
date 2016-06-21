@@ -42,6 +42,8 @@ import java.awt.*;
         description = "Correct the influence of atmospheric gas absorption for those OLCI channels.")
 public class GaseousAbsorptionOp extends Operator {
 
+    public static final String SZA = "SZA";
+    public static final String OZA = "OZA";
     @SourceProduct(description = "OLCI Refelctance product")
     Product sourceProduct;
     private Product targetProduct;
@@ -81,16 +83,14 @@ public class GaseousAbsorptionOp extends Operator {
     }
 
     private float[] computeGas(String bandName, Rectangle rectangle, Product sourceProduct) {
-        float[] szas = getSourceTile(sourceProduct.getTiePointGrid("SZA"), rectangle).getSamplesFloat();
-        float[] ozas = getSourceTile(sourceProduct.getTiePointGrid("OZA"), rectangle).getSamplesFloat();
+        float[] szas = getSourceTile(sourceProduct.getTiePointGrid(SZA), rectangle).getSamplesFloat();
+        float[] ozas = getSourceTile(sourceProduct.getTiePointGrid(OZA), rectangle).getSamplesFloat();
         return gasAbsorptionAlgo.getTransmissionGas(bandName, szas, ozas);
     }
 
     public static class Spi extends OperatorSpi {
-
         public Spi() {
             super(GaseousAbsorptionOp.class);
         }
     }
-
 }

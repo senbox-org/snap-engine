@@ -77,7 +77,6 @@ public class SmileCorretionOp extends Operator {
         // Configure the target
         Product targetProduct = new Product(sourceProduct.getName(), sourceProduct.getProductType(),
                 sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
-        ProductUtils.copyProductNodes(sourceProduct, targetProduct);
 
         boolean[] landRefCorrectionSwitches = smileAuxdata.getLandRefCorrectionSwitches();
         boolean[] waterRefCorrectionSwitches = smileAuxdata.getWaterRefCorrectionSwitches();
@@ -96,7 +95,9 @@ public class SmileCorretionOp extends Operator {
         copyTargetBandImage(targetProduct, DETECTOR_INDEX_BAND);
         copyTargetBandImage(targetProduct, FRAME_OFFSET_BAND);
         copyTargetBandImage(targetProduct, BEFORE_BAND);
+        ProductUtils.copyFlagBands(sourceProduct, targetProduct, true);
 
+        ProductUtils.copyProductNodes(sourceProduct, targetProduct);
 
         setTargetProduct(targetProduct);
 
@@ -299,6 +300,7 @@ public class SmileCorretionOp extends Operator {
         if (correctWater) {
             waterTiles = new SmileTiles(lambdaWaterLowerBand, radianceWaterLowerBand, solarIrradianceWaterLowerBand, lambdaWaterUpperBand,
                     radianceWaterUpperBand, solarIrradianceWaterUpperBand, rectangle);
+
         }
         SmileTiles landTiles = null;
         if (correctLand) {
@@ -371,14 +373,13 @@ public class SmileCorretionOp extends Operator {
     }
 
     private float shiftSolarIrradiance(float solarIrradiance, float sourceTargetLambda, float refCentralWaveLength) {
-        float x = sourceTargetLambda;
 //        poly =  2.329521314*10^(-10)* x^5 - 8.883158295*10^(-7)* x^4 + 1.341545977*10^(-3)*x^3 - 1.001512583* x^2 + 366.3249385* x - 50292.30277
 //        dy/dx = 5 * 2.329521314*10^(-10)* x^4 - 4 * 8.883158295*10^(-7)* x^3 + 3 * 1.341545977*10^(-3)*x^2 - 2 * 1.001512583* x + 366.3249385
 //        double forthDegree  = 5 * 2.329521314e-10 = 1.164760657E-9;
 //        double thirdDegree  = 4 * 8.883158295e-7  = 3.553263318E-6;
 //        double secondDegree = 3 * 1.341545977e-3 = 0.004024637931;
 //        double firstDegree  = 2 * 1.001512583 = 2.003025166;
-        double m = 1.164760657E-9 * Math.pow(x, 4) - 3.553263318E-6 * Math.pow(x, 3) + 0.004024637931 * Math.pow(x, 2) - 2.003025166 * Math.pow(x, 1) + 366.3249385;
+        double m = 1.164760657E-9 * Math.pow(sourceTargetLambda, 4) - 3.553263318E-6 * Math.pow(sourceTargetLambda, 3) + 0.004024637931 * Math.pow(sourceTargetLambda, 2) - 2.003025166 * Math.pow(sourceTargetLambda, 1) + 366.3249385;
         return (float) (solarIrradiance + m * (refCentralWaveLength - sourceTargetLambda));
     }
 
