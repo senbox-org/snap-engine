@@ -2,6 +2,7 @@ package org.esa.s3tbx.olci.radiometry.rayleighcorrection;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.gpf.Operator;
@@ -26,6 +27,9 @@ import java.util.Arrays;
         category = "Optical/Pre-Processing",
         version = "1.2")
 public class RayleighCorrectionOp extends Operator {
+    public static final String[] BAND_CATEGORIES = new String[]{"refl_ray_%02d", "rtoa_%02d", "taur_%02d", "rRayF1_%02d", "rRayF2_%02d", "rRayF3_%02d",
+            "transSRay_%02d", "transVRay_%02d", "transVRay_%02d", "sARay_%02d", "rtoaRay_%02d", "rBRR_%02d",
+            "sphericalAlbedoFactor_%02d", "RayleighSimple_%02d", "rtoa_ng_%02d", "taurS_%02d"};
     @SourceProduct
     Product sourceProduct;
 
@@ -60,6 +64,7 @@ public class RayleighCorrectionOp extends Operator {
         setTargetProduct(targetProduct);
     }
 
+
     private void checkRequireBandTiePont(String[] bandTiepoints) {
         for (final String bandTiepoint : bandTiepoints) {
             if (!sourceProduct.containsRasterDataNode(bandTiepoint)) {
@@ -80,14 +85,20 @@ public class RayleighCorrectionOp extends Operator {
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
         final Rectangle rectangle = targetTile.getRectangle();
 
+        double[] seaLevelPressures = getSourceTile(sourceProduct.getTiePointGrid("sea_level_pressure"), rectangle).getSamplesDouble();
+        double[] totalOzones = getSourceTile(sourceProduct.getTiePointGrid("total_ozone"), rectangle).getSamplesDouble();
+        double[] tpLongitudes = getSourceTile(sourceProduct.getTiePointGrid("TP_longitude"), rectangle).getSamplesDouble();
+        double[] tpLatitudes = getSourceTile(sourceProduct.getTiePointGrid("TP_latitude"), rectangle).getSamplesDouble();
+        double[] qualityFlags = getSourceTile(sourceProduct.getBand("quality_flags"), rectangle).getSamplesDouble();
+
+
         double[] sunZenithAngle = getSourceTile(sourceProduct.getTiePointGrid("SZA"), rectangle).getSamplesDouble();
         double[] sunAzimuthAngle = getSourceTile(sourceProduct.getTiePointGrid("SAA"), rectangle).getSamplesDouble();
         double[] viewZenithAngle = getSourceTile(sourceProduct.getTiePointGrid("OZA"), rectangle).getSamplesDouble();
         double[] viewAzimuthAngle = getSourceTile(sourceProduct.getTiePointGrid("OAA"), rectangle).getSamplesDouble();
         double[] altitude = getSourceTile(sourceProduct.getBand("altitude"), rectangle).getSamplesDouble();
-        double[] seaLevel = getSourceTile(sourceProduct.getTiePointGrid("sea_level_pressure"), rectangle).getSamplesDouble();
 
-        double[] pressureAtSurface = algorithm.getPressureAtSurface(seaLevel, altitude);
+        double[] pressureAtSurface = algorithm.getPressureAtSurface(seaLevelPressures, altitude);
         double[] taurPoZ = algorithm.getRayleighOpticalThickness(pressureAtSurface, taur_std[targetBand.getSpectralBandIndex()]);
 
         double[] reflRaly = algorithm.getRayleighReflectance(taurPoZ, sunZenithAngle, sunAzimuthAngle, viewZenithAngle, viewAzimuthAngle);
