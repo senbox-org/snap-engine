@@ -36,16 +36,17 @@ import java.awt.*;
 /**
  * @author muhammad.bc.
  */
-@OperatorMetadata(alias = "Olci.RayleighCorrection",
+@OperatorMetadata(alias = "Olci.RayleighCorrectionII",
         description = "Performs radiometric corrections on OLCI L1b data products.",
         authors = " Marco Peters ,Muhammad Bala (Brockmann Consult)",
         copyright = "(c) 2015 by Brockmann Consult",
         category = "Optical/Pre-Processing",
         version = "1.2")
 public class RayleighCorrectionOpII extends Operator {
-    public static final String[] BAND_CATEGORIES = new String[]{"refl_ray_%02d", "rtoa_%02d", "taur_%02d", "rRayF1_%02d", "rRayF2_%02d", "rRayF3_%02d",
-            "transSRay_%02d", "transVRay_%02d", "transVRay_%02d", "sARay_%02d", "rtoaRay_%02d", "rBRR_%02d",
-            "sphericalAlbedoFactor_%02d", "RayleighSimple_%02d", "rtoa_ng_%02d", "taurS_%02d"};
+    //rtoa:taur:rRay:transSRay:transVRay:sARay:rtoaRay:rBRR:sphericalAlbedoFactor:rtoa_ng
+    public static final String[] BAND_CATEGORIES = new String[]{"refl_ray_%02d", "rtoa_%02d", "taur_%02d",
+            "transSRay_%02d", "transVRay_%02d", "sARay_%02d", "rtoaRay_%02d", "rBRR_%02d",
+            "sphericalAlbedoFactor_%02d"};
     @SourceProduct
     Product sourceProduct;
 
@@ -77,16 +78,16 @@ public class RayleighCorrectionOpII extends Operator {
         targetProduct.addBand("azidiff", ProductData.TYPE_FLOAT32);
         targetProduct.addBand("altitude", ProductData.TYPE_FLOAT32);
 
-        Band raycorFlagBand = targetProduct.addBand("raycor_flags", ProductData.TYPE_FLOAT32);
+       /* Band raycorFlagBand = targetProduct.addBand("raycor_flags", ProductData.TYPE_FLOAT32);
         FlagCoding raycorFlags = new FlagCoding("raycor_flags");
         raycorFlags.addFlag("testflag_1", 1, "Flag 1 for Rayleigh Correction");
         raycorFlags.addFlag("testflag_2", 2, "Flag 2 for Rayleigh Correction");
-        raycorFlagBand.setSampleCoding(raycorFlags);
+        raycorFlagBand.setSampleCoding(raycorFlags);*/
 
 
         ProductUtils.copyFlagBands(sourceProduct, targetProduct, true);
         ProductUtils.copyProductNodes(sourceProduct, targetProduct);
-        targetProduct.setAutoGrouping(sourceProduct.getAutoGrouping());
+        targetProduct.setAutoGrouping("refl_ray:rtoa:taur:transSRay:transVRay:sARay:rtoaRay:rBRR:sphericalAlbedoFactor");
         setTargetProduct(targetProduct);
     }
 
@@ -111,23 +112,30 @@ public class RayleighCorrectionOpII extends Operator {
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
         final Rectangle rectangle = targetTile.getRectangle();
 
-        double[] sunZenithAngle = getSourceTile(sourceProduct.getTiePointGrid("SZA"), rectangle).getSamplesDouble();
-        double[] sunAzimuthAngle = getSourceTile(sourceProduct.getTiePointGrid("SAA"), rectangle).getSamplesDouble();
-        double[] viewZenithAngle = getSourceTile(sourceProduct.getTiePointGrid("OZA"), rectangle).getSamplesDouble();
-        double[] viewAzimuthAngle = getSourceTile(sourceProduct.getTiePointGrid("OAA"), rectangle).getSamplesDouble();
-        double[] altitude = getSourceTile(sourceProduct.getBand("altitude"), rectangle).getSamplesDouble();
-        double[] seaLevel = getSourceTile(sourceProduct.getTiePointGrid("sea_level_pressure"), rectangle).getSamplesDouble();
+        float[] sunZenithAngle = getSourceTile(sourceProduct.getTiePointGrid("SZA"), rectangle).getSamplesFloat();
+        float[] viewZenithAngle = getSourceTile(sourceProduct.getTiePointGrid("OZA"), rectangle).getSamplesFloat();
+        float[] sunAzimuthAngle = getSourceTile(sourceProduct.getTiePointGrid("SAA"), rectangle).getSamplesFloat();
+        float[] viewAzimuthAngle = getSourceTile(sourceProduct.getTiePointGrid("OAA"), rectangle).getSamplesFloat();
+        float[] altitude = getSourceTile(sourceProduct.getBand("altitude"), rectangle).getSamplesFloat();
+        float[] seaLevel = getSourceTile(sourceProduct.getTiePointGrid("sea_level_pressure"), rectangle).getSamplesFloat();
+        float[] totalOzones = getSourceTile(sourceProduct.getTiePointGrid("total_ozone"), rectangle).getSamplesFloat();
+        float[] tpLatitudes = getSourceTile(sourceProduct.getTiePointGrid("TP_latitude"), rectangle).getSamplesFloat();
+        float[] tpLongitudes = getSourceTile(sourceProduct.getTiePointGrid("TP_longitude"), rectangle).getSamplesFloat();
 
-        double[] pressureAtSurface = algorithm.getPressureAtSurface(seaLevel, altitude);
-        double[] taurPoZ = algorithm.getRayleighOpticalThickness(pressureAtSurface, taur_std[targetBand.getSpectralBandIndex()]);
+        float[] sourceSampleFloat = getSourceTile(sourceProduct.getBand(targetBand.getName()), rectangle).getSamplesFloat();
 
-        double[] reflRaly = algorithm.getRayleighReflectance(taurPoZ, sunZenithAngle, sunAzimuthAngle, viewZenithAngle, viewAzimuthAngle);
-        targetTile.setSamples(reflRaly);
+        float[] crossSectionSigma = algorithm.getCrossSectionSigma(sourceSampleFloat);
+        float[] corrOzone = algorithm.getCorrOzone(totalOzones);
+        float[] rayleighOpticalThickness = algorithm.getRayleighOpticalThickness(seaLevel, altitude, tpLatitudes, crossSectionSigma);
+        float[] rayleighPhaseMin = algorithm.getRayleighPhaseMin(sunZenithAngle, viewZenithAngle, sunAzimuthAngle, viewAzimuthAngle, rayleighOpticalThickness);
+
+        float[] correct = algorithm.correct(sourceSampleFloat, seaLevel, altitude, sunZenithAngle, viewZenithAngle, rayleighPhaseMin);
+        targetTile.setSamples(correct);
     }
 
     public static class Spi extends OperatorSpi {
         public Spi() {
-            super(RayleighCorrectionOp.class);
+            super(RayleighCorrectionOpII.class);
         }
     }
 }

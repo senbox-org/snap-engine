@@ -47,7 +47,7 @@ public class GaseousAbsorptionOp extends Operator {
     @SourceProduct(description = "OLCI Refelctance product")
     Product sourceProduct;
     private Product targetProduct;
-    private GaseousAbsorptionAlgorithm gasAbsorptionAlgo = new GaseousAbsorptionAlgorithm();
+    private GaseousAbsorptionAlgo gasAbsorptionAlgo = new GaseousAbsorptionAlgo();
 
     @Override
     public void initialize() throws OperatorException {

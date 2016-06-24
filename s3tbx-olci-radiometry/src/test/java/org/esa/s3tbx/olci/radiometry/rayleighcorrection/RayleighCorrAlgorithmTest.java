@@ -73,4 +73,11 @@ public class RayleighCorrAlgorithmTest {
         assertEquals(-0.017453292519943295, convertDegreesToRadians[2], 1e-8);
 
     }
+
+    @Ignore
+    @Test
+    public void testCalculateRayleighCrossSection() throws Exception {
+//        double crossSectionOnWavelength = algo.getCrossSectionSigma(2.98f);
+    }
+
 }

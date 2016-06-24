@@ -18,16 +18,12 @@
 
 package org.esa.s3tbx.olci.radiometry.rayleighcorrection;
 
-import org.esa.snap.dataio.netcdf.util.NetcdfFileOpener;
 import org.junit.Test;
-import ucar.nc2.NetcdfFile;
 
-import java.net.URL;
 import java.nio.file.Path;
-import java.util.Properties;
-import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author muhammad.bc.
@@ -41,9 +37,17 @@ public class RayleighCorrectionAuxTest {
     }
 
     @Test
-    public void testAuxValue() throws Exception {
-        Properties properties = RayleighCorrectionAux.loadAuxdata();
-        Set<String> strings = properties.stringPropertyNames();
+    public void testAuxData() throws Exception {
+        float[][][][] loadAuxdata = RayleighCorrectionAux.loadAuxdata();
+        assertEquals(3, loadAuxdata.length);
+        assertEquals(12, loadAuxdata[0].length);
+        assertEquals(12, loadAuxdata[0][1].length);
+        assertEquals(4, loadAuxdata[0][0][0].length);
+    }
 
+    @Test
+    public void testAuxDataII() throws Exception {
+        RayleighCorrectionAux aux = new RayleighCorrectionAux();
+        aux.readADF();
     }
 }

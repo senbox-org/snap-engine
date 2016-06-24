@@ -27,7 +27,7 @@ import java.util.ArrayList;
 /**
  * @author muhammad.bc.
  */
-public class GaseousAbsorptionAlgorithm {
+public class GaseousAbsorptionAlgo {
 
     public float getAtmosphericGas(String bandName) {
         return 1;
@@ -62,9 +62,13 @@ public class GaseousAbsorptionAlgorithm {
 
         float[] massAirs = new float[sza.length];
         for (int i = 0; i < sza.length; i++) {
-            massAirs[i] = (float) (1 / Math.cos(szaRad[i]) + 1 / Math.cos(ozaRad[i]));
+            massAirs[i] = getMassAir(szaRad[i], ozaRad[i]);
         }
         return massAirs;
+    }
+
+    public static float getMassAir(float szaRad, float ozaRad) {
+        return (float) (1 / Math.cos(szaRad) + 1 / Math.cos(ozaRad));
     }
 
     public float[] getTransmissionGas(String bandName, float[] sza, float[] oza) {

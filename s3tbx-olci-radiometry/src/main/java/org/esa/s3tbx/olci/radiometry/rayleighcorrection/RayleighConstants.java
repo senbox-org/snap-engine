@@ -21,17 +21,18 @@ package org.esa.s3tbx.olci.radiometry.rayleighcorrection;
 /**
  * @author muhammad.bc.
  */
-public class RayleighCorrectionConstants {
+public class RayleighConstants {
     static double AVOGADRO_NUMBER = 6.0221367E+23;
     static double MEAN_MOLECULAR_ZERO = 28.9595;
     static double ACCELERATION_GRAVITY_SEA_LEVEL_458_LATITUDE = 980.616;
-    static double Molecular_density_gas_molecules_cm3 = 2.5469E19;
+    static double Molecular_cm3 = 2.5469E19;
 
     // constants describing the state of the atmosphere and which we don't know; better values may be used if known
     static double CO2 = 3.E-4; // CO2 concentration at pixel; typical values are 300 to 360 ppm
-    static double CO2Concentration = CO2 * 100;  // CO2 concentration in ppm
-    static double meanMolecularWeight_C02 = 15.0556 * CO2 + MEAN_MOLECULAR_ZERO;
+    static double C_CO2 = CO2 * 100;  // CO2 concentration in ppm
+    static double MEAN_MOLECULAR_WEIGHT_C02 = 15.0556 * CO2 + MEAN_MOLECULAR_ZERO;
 
     static double PA = 0.9587256;
     static double PB = 1. - PA; // Rayleigh Phase function, molecular asymetry factor 2
+    double[] H2O_COR_POLY = new double[]{0.3832989, 1.6527957, -1.5635101, 0.5311913};  // Polynomial coefficients for WV transmission @ 709nm
 }

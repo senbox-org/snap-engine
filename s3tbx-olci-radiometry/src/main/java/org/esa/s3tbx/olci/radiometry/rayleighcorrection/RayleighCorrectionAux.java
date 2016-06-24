@@ -25,18 +25,16 @@ import org.esa.snap.core.util.SystemUtils;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.LineNumberReader;
 import java.nio.file.Path;
-import java.util.Properties;
+import java.util.Arrays;
 
 /**
  * @author muhammad.bc.
  */
 public class RayleighCorrectionAux {
 
-    public static Properties loadAuxdata() throws IOException {
+    public static float[][][][] loadAuxdata() throws IOException {
 
         int _OFFSET = 1247 + 2898 + 2772 + 300 + 912;
         int _NUM_THETA = 12;
@@ -47,26 +45,26 @@ public class RayleighCorrectionAux {
         final Path auxdataDir = installAuxdata();
         File file = auxdataDir.resolve("MER_ATP_AXVACR20091126_115724_20020429_041400_20021224_121445").toFile();
         FileInputStream fileInputStream = new FileInputStream(file);
-        DataInputStream dis = new DataInputStream(fileInputStream);
-        dis.skip(_OFFSET);
+        DataInputStream dataInputStream = new DataInputStream(fileInputStream);
+        dataInputStream.skip(_OFFSET);
         float i = 0;
 
-//        while ((i = dis.readFloat()) != Float.NaN) {
+//        while ((i = dataInputStream.readFloat()) != Float.NaN) {
         for (int j = 0; j < _ORDER; j++) {
             for (int k = 0; k < _NUM_THETA; k++) {
-                for (int l = k; l < _NUM_THETA; l++) {
+                for (int l = 0; l < _NUM_THETA; l++) {
                     for (int m = 0; m < _NUM_COEFFS; m++) {
-                        matrix[j][k][l][m] = dis.readFloat();
-                        if (k != l) {
+                        matrix[j][k][l][m] = dataInputStream.readFloat();
+                 /*       if (k != l) {
                             matrix[j][k][l][m] = matrix[j][l][k][m];
-                        }
+                        }*/
                     }
                 }
             }
         }
 
 //        }
-        return null;
+        return matrix;
     }
 
 
@@ -76,6 +74,44 @@ public class RayleighCorrectionAux {
         final ResourceInstaller resourceInstaller = new ResourceInstaller(sourceDirPath, auxdataDirectory);
         resourceInstaller.install(".*", ProgressMonitor.NULL);
         return auxdataDirectory;
+    }
+
+    public void readADF() throws IOException {
+        final Path auxdataDir = installAuxdata();
+        File file = auxdataDir.resolve("MER_ATP_AXVACR20091126_115724_20020429_041400_20021224_121445").toFile();
+        FileInputStream fileInputStream = new FileInputStream(file);
+        DataInputStream dataInputStream = new DataInputStream(fileInputStream);
+
+        dataInputStream.skip(1247 + 2898);
+        double[] tR = getDataValueFloat(dataInputStream, 3);
+        System.out.println(Arrays.toString(tR));
+        double[] taurTab = getDataValueFloat(dataInputStream, 17);
+        System.out.println(Arrays.toString(taurTab));
+        double[] lam = getDataValueFloat(dataInputStream, 15);
+        System.out.println(Arrays.toString(lam));
+        dataInputStream.skip(92 + 52 + 100);
+
+        double[] thetaL = getDataValueUnLong(dataInputStream, 12);
+        System.out.println(Arrays.toString(thetaL));
+
+
+    }
+
+    private double[] getDataValueUnLong(DataInputStream dataInputStream, int length ) throws IOException {
+        double[] value = new double[length];
+        for (int i = 0; i < value.length; i++) {
+            value[i] = dataInputStream.readInt();
+        }
+        return value;
+    }
+
+
+    private double[] getDataValueFloat(DataInputStream dataInputStream, int length) throws IOException {
+        double[] value = new double[length];
+        for (int i = 0; i < value.length; i++) {
+            value[i] = dataInputStream.readFloat();
+        }
+        return value;
     }
 
 }
