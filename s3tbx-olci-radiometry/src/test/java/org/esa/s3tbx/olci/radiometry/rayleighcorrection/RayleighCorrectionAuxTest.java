@@ -18,10 +18,16 @@
 
 package org.esa.s3tbx.olci.radiometry.rayleighcorrection;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.junit.Before;
 import org.junit.Test;
 
+import java.io.FileReader;
 import java.nio.file.Path;
+import java.util.ArrayList;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -29,25 +35,51 @@ import static org.junit.Assert.assertNotNull;
  * @author muhammad.bc.
  */
 public class RayleighCorrectionAuxTest {
-    @Test
-    public void testAuxDataExist() throws Exception {
-        Path path = RayleighCorrectionAux.installAuxdata();
-        Path aux = path.resolve("MER_ATP_AXVACR20091126_115724_20020429_041400_20021224_121445");
-        assertNotNull(aux);
+
+    private Path pathJSON;
+    private RayleighCorrectionAux rayleighCorrectionAux;
+
+    @Before
+    public void setUp() throws Exception {
+        rayleighCorrectionAux = new RayleighCorrectionAux();
+        Path installAuxdataPath = rayleighCorrectionAux.installAuxdata();
+        pathJSON = installAuxdataPath.resolve("matrix.txt");
     }
 
-    @Test
-    public void testAuxData() throws Exception {
-        float[][][][] loadAuxdata = RayleighCorrectionAux.loadAuxdata();
-        assertEquals(3, loadAuxdata.length);
-        assertEquals(12, loadAuxdata[0].length);
-        assertEquals(12, loadAuxdata[0][1].length);
-        assertEquals(4, loadAuxdata[0][0][0].length);
-    }
 
     @Test
-    public void testAuxDataII() throws Exception {
-        RayleighCorrectionAux aux = new RayleighCorrectionAux();
-        aux.readADF();
+    public void testGetJSONTheta() throws Exception {
+        JSONParser jsonObject = new JSONParser();
+        JSONObject parse = (JSONObject) jsonObject.parse(new FileReader(pathJSON.toString()));
+
+        double[] thetas = rayleighCorrectionAux.parseJSON1DimArray(parse, "theta");
+        double[] expectedThetas = {
+                2.840904951095581,
+                17.638418197631836,
+                28.7684268951416,
+                36.189727783203125,
+                43.61144256591797,
+                51.033390045166016,
+                58.45547866821289,
+                65.87765502929688,
+                69.58876037597656,
+                73.29988098144531,
+                77.0110092163086,
+                80.7221450805664
+        };
+
+        assertNotNull(thetas);
+        assertEquals(12, thetas.length);
+        assertArrayEquals(expectedThetas, thetas, 1e-8);
+    }
+
+
+    @Test
+    public void testGetJSONRay_Matrix() throws Exception {
+        JSONParser jsonObject = new JSONParser();
+        JSONObject parse = (JSONObject) jsonObject.parse(new FileReader(pathJSON.toString()));
+        ArrayList<double[][][]> ray_coeff_matrix = rayleighCorrectionAux.parseJSON3DimArray(parse, "ray_coeff_matrix");
+        assertNotNull(ray_coeff_matrix);
+        assertEquals(4, ray_coeff_matrix.size());
     }
 }

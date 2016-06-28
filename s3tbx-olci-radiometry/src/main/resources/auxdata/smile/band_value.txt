@@ -1,4 +1,4 @@
-Band first  number of    central       start        stop         spectral
+ first  number of    central       start        stop         spectral
 spectral    spectral     wavelength    wavelength   wavelength    width
 element     elements
 
