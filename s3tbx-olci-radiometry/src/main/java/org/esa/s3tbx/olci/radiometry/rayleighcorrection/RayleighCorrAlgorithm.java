@@ -1,12 +1,10 @@
 package org.esa.s3tbx.olci.radiometry.rayleighcorrection;
 
-import com.google.common.primitives.Floats;
 import org.apache.commons.math3.analysis.interpolation.BicubicSplineInterpolator;
 import org.apache.commons.math3.analysis.interpolation.BivariateGridInterpolator;
 import org.esa.s3tbx.olci.radiometry.gaseousabsorption.GaseousAbsorptionAlgo;
 import org.esa.s3tbx.olci.radiometry.smilecorr.SmileUtils;
 import org.esa.snap.core.gpf.Tile;
-import org.esa.snap.core.util.math.RsMathUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -137,15 +135,13 @@ public class RayleighCorrAlgorithm {
         return reflRaly;
     }
 
-    public double[] getPhaseRaylMin(double[] sunZenithAngles, double[] sunAzimuthAngles, double[] viewZenithAngles, double[] viewAzimuthAngles) {
+    public double[] getPhaseRaylMin(double[] sunZenithAngleRads, double[] sunAzimuthAngles, double[] viewZenithAngleRads, double[] viewAzimuthAngles) {
 
         double phaseRaylMin[] = new double[sunAzimuthAngles.length];
-        for (int i = 0; i < sunAzimuthAngles.length; i++) {
-            double sunZenithAngleRad = Math.toRadians(sunZenithAngles[i]);
-            double viewZenithAngleRad = Math.toRadians(viewZenithAngles[i]);
 
+        for (int i = 0; i < sunAzimuthAngles.length; i++) {
             double azimuthDifferenceRad = Math.toRadians(getAzimuthDifference(viewAzimuthAngles[i], sunAzimuthAngles[i]));
-            phaseRaylMin[i] = phaseRaylMin(sunZenithAngleRad, viewZenithAngleRad, azimuthDifferenceRad);
+            phaseRaylMin[i] = phaseRaylMin(sunZenithAngleRads[i], viewZenithAngleRads[i], azimuthDifferenceRad);
         }
         return phaseRaylMin;
     }
@@ -199,22 +195,13 @@ public class RayleighCorrAlgorithm {
         return rayeighOpticalThickness;
     }
 
-    public double[] getRHO_BRR(double[] sza, double[] oza, double[] saa, double[] aoo, double[] taur, Tile tile) {
-
+    public double[] getRHO_BRR(double[] szaRads, double[] ozaRads, double[] saaRads, double[] aooRads, double[] taur, Tile tile, double[] reflectance) {
         GaseousAbsorptionAlgo gaseousAbsorptionAlgo = new GaseousAbsorptionAlgo();
-        double[] ozaRads = SmileUtils.convertDegreesToRadians(oza);
-        double[] szaRads = SmileUtils.convertDegreesToRadians(sza);
-        double[] saaRads = SmileUtils.convertDegreesToRadians(saa);
-        double[] aooRads = SmileUtils.convertDegreesToRadians(aoo);
-
-        double[] rho_BRR = new double[oza.length];
-
-
+        double[] rho_BRR = new double[ozaRads.length];
         double[] fourierSeries = new double[3];
 
         double rho_Rm[] = new double[3];
         double sARay = 1;
-        double reflectance = 1;
         BivariateGridInterpolator gridInterpolator = new BicubicSplineInterpolator();
 
         for (int y = tile.getMinY(); y < tile.getMaxY(); y++) {
@@ -238,8 +225,8 @@ public class RayleighCorrAlgorithm {
 
                 double cosDelta = Math.cos(aooRads[index] - saaRads[index]);
                 double aziDiff = Math.acos(cosDelta); // in radian
-                float v1 = (float) sza[index];
-                float v2 = (float) oza[index];
+                float v1 = (float) szaRads[index];
+                float v2 = (float) ozaRads[index];
 
                 double massAir = gaseousAbsorptionAlgo.getMassAir(v1, v2);
 
@@ -248,8 +235,8 @@ public class RayleighCorrAlgorithm {
                 double c[] = new double[3];
                 double d[] = new double[3];
 
-                double yVal = oza[index];
-                double xVal = sza[index];
+                double yVal = ozaRads[index];
+                double xVal = szaRads[index];
                 for (int i = 0; i < a.length; i++) {
                     a[i] = gridInterpolator.interpolate(thetas, thetas, rayCooefMatrixA[i]).value(xVal, yVal);
                     b[i] = gridInterpolator.interpolate(thetas, thetas, rayCooefMatrixB[i]).value(xVal, yVal);
@@ -275,7 +262,7 @@ public class RayleighCorrAlgorithm {
                 double tRv = ((2. / 3. + cosOZARad) + (2. / 3. - cosOZARad) * Math.exp(-taur[index] / cosOZARad)) / (4. / 3. + taur[index]);
                 //#Rayleigh Transmittance surface - sensor
                 double tR_thetaV = tPoly[0] + tPoly[1] * tRv + tPoly[2] * Math.pow(tRv, 2);
-                double rho_toaR = (reflectance - rho_R) / (tR_thetaS * tR_thetaV); //toa reflectance corrected for Rayleigh scattering
+                double rho_toaR = (reflectance[index] - rho_R) / (tR_thetaS * tR_thetaV); //toa reflectance corrected for Rayleigh scattering
 
                 double sphericalFactor = 1.0 / (1.0 + sARay * rho_toaR); //#factor used in the next equation to account for the spherical albedo
                 //#top of aerosol reflectance, which is equal to bottom of Rayleigh reflectance
@@ -297,12 +284,8 @@ public class RayleighCorrAlgorithm {
         return rho_BRR;
     }
 
-    public double[] correct(double[] waveLenght, double[] seaAirPressure, double[] altitude, double[] sza, double[] oza, double[] ray_phase_min) {
-
-        double[] szaRads = SmileUtils.convertDegreesToRadians(sza);
-        double[] ozaRads = SmileUtils.convertDegreesToRadians(oza);
-        double[] rRaySimple = new double[oza.length];
-
+    public double[] correct(double[] waveLenght, double[] seaAirPressure, double[] altitude, double[] szaRads, double[] ozaRads, double[] ray_phase_min) {
+        double[] rRaySimple = new double[ozaRads.length];
         for (int i = 0; i < ray_phase_min.length; i++) {
             double taurS = Math.exp(-4.637) * Math.pow((waveLenght[i] / 1000.0), -4.0679);
             double pressureAtms = seaAirPressure[i] * Math.exp(-altitude[i] / 8000.0);

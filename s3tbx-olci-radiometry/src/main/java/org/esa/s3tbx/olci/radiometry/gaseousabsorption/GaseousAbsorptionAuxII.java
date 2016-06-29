@@ -97,7 +97,7 @@ public class GaseousAbsorptionAuxII {
     }
 
 
-    public double[] convolveInstrument(String instrument) {
+    public double[] absorptionOzone(String instrument) {
         List<Number> o3absorpInstrument = new ArrayList<>();
 
         double[] lamC;

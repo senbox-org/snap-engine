@@ -19,6 +19,8 @@
 package org.esa.s3tbx.olci.radiometry.rayleighcorrection;
 
 import com.bc.ceres.core.ProgressMonitor;
+import org.esa.s3tbx.olci.radiometry.gaseousabsorption.GaseousAbsorptionAuxII;
+import org.esa.s3tbx.olci.radiometry.smilecorr.SmileUtils;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
@@ -29,7 +31,6 @@ import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.util.ProductUtils;
-import org.esa.snap.core.util.math.RsMathUtils;
 
 import java.awt.*;
 
@@ -47,6 +48,9 @@ public class RayleighCorrectionOpII extends Operator {
     public static final String[] BAND_CATEGORIES = new String[]{"refl_ray_%02d", "rtoa_%02d", "taur_%02d",
             "transSRay_%02d", "transVRay_%02d", "sARay_%02d", "rtoaRay_%02d", "rBRR_%02d",
             "sphericalAlbedoFactor_%02d"};
+    double[] H2O_COR_POLY = new double[]{0.3832989, 1.6527957, -1.5635101, 0.5311913};  // Polynomial coefficients for WV transmission @ 709nm
+
+    public static final String OLCI = "OLCI";
     @SourceProduct
     Product sourceProduct;
 
@@ -55,12 +59,16 @@ public class RayleighCorrectionOpII extends Operator {
     private double[] taur_std;
     private String[] bandAndTiepoint = new String[]{"SAA", "SZA", "OZA", "OAA", "altitude", "total_ozone",
             "TP_latitude", "TP_longitude", "sea_level_pressure"};
+    private double[] absorpOzone;
 
 
     @Override
     public void initialize() throws OperatorException {
         final Band[] sourceBands = sourceProduct.getBands();
         algorithm = new RayleighCorrAlgorithm();
+        GaseousAbsorptionAuxII gaseousAbsorptionAuxII = new GaseousAbsorptionAuxII();
+        absorpOzone = gaseousAbsorptionAuxII.absorptionOzone(OLCI);
+
         taur_std = getRots(sourceBands);
         checkRequireBandTiePont(bandAndTiepoint);
         targetProduct = new Product(sourceProduct.getName(), sourceProduct.getProductType(),
@@ -111,6 +119,8 @@ public class RayleighCorrectionOpII extends Operator {
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
         final Rectangle rectangle = targetTile.getRectangle();
+        String targetBandName = targetBand.getName();
+        Band sourceProductBand = sourceProduct.getBand(targetBandName);
 
         double[] sunZenithAngle = getSourceTile(sourceProduct.getTiePointGrid("SZA"), rectangle).getSamplesDouble();
         double[] viewZenithAngle = getSourceTile(sourceProduct.getTiePointGrid("OZA"), rectangle).getSamplesDouble();
@@ -121,39 +131,60 @@ public class RayleighCorrectionOpII extends Operator {
         double[] totalOzones = getSourceTile(sourceProduct.getTiePointGrid("total_ozone"), rectangle).getSamplesDouble();
         double[] tpLatitudes = getSourceTile(sourceProduct.getTiePointGrid("TP_latitude"), rectangle).getSamplesDouble();
 
-//        double[] corrOzone = getCorrOzone(totalOzones);
 
-        double[] sourceSampleFloat = getSourceTile(sourceProduct.getBand(targetBand.getName()), rectangle).getSamplesDouble();
+        double[] sunAzimuthAngleRads = SmileUtils.convertDegreesToRadians(sunAzimuthAngle);
+        double[] viewAzimuthAngleRads = SmileUtils.convertDegreesToRadians(viewAzimuthAngle);
+        double[] sunZenithAngleRads = SmileUtils.convertDegreesToRadians(sunZenithAngle);
+        double[] viewZenithAngleRads = SmileUtils.convertDegreesToRadians(viewZenithAngle);
+
+        double[] sourceSampleFloat = getSourceTile(sourceProductBand, rectangle).getSamplesDouble();
+
         double[] crossSectionSigma = algorithm.getCrossSectionSigma(sourceSampleFloat);
         double[] rayleighOpticalThickness = algorithm.getRayleighOpticalThickness(seaLevel, altitude, tpLatitudes, crossSectionSigma);
-        double[] rho_brr = algorithm.getRHO_BRR(sunZenithAngle, viewZenithAngle, sunAzimuthAngle, viewAzimuthAngle, rayleighOpticalThickness, targetTile);
 
-        double[] phaseRaylMin = algorithm.getPhaseRaylMin(sunZenithAngle, sunAzimuthAngle, viewZenithAngle, viewAzimuthAngle);
-        double[] correct = algorithm.correct(sourceSampleFloat, seaLevel, altitude, sunZenithAngle, viewZenithAngle, phaseRaylMin);
-        targetTile.setSamples(correct);
+        double[] corrOzoneRefl = getCorrOzone(sourceProductBand, rectangle, null, totalOzones, sunZenithAngleRads, viewZenithAngleRads);
+
+        double[] rho_brr = algorithm.getRHO_BRR(sunZenithAngleRads, viewZenithAngleRads, sunAzimuthAngleRads, viewAzimuthAngleRads,
+                rayleighOpticalThickness, targetTile, corrOzoneRefl);
+
+        double[] phaseRaylMin = algorithm.getPhaseRaylMin(sunZenithAngleRads, sunAzimuthAngle, viewZenithAngleRads, viewAzimuthAngle);
+        double[] correct = algorithm.correct(sourceSampleFloat, seaLevel, altitude, sunZenithAngleRads, viewZenithAngleRads, phaseRaylMin);
+
+
+//        "refl_ray_%02d", "rtoa_%02d", "taur_%02d",
+//                "transSRay_%02d", "transVRay_%02d", "sARay_%02d", "rtoaRay_%02d", "rBRR_%02d",
+//                "sphericalAlbedoFactor_%02d"};
+        if (targetBandName.matches("refl_ray_\\d{2}")) {
+            targetTile.setSamples(correct);
+        } else if (targetBandName.matches("rBRR_\\d{2}")) {
+            targetTile.setSamples(rho_brr);
+        }
+
     }
 
-    public double[] getCorrOzone(Band sourceBand, Rectangle rectangle, double[] ozone, double[] sza, double[] solarIrradiance) {
+    public double[] getCorrOzone(Band sourceBand, Rectangle rectangle, double[] solarIrradiance, double[] ozone, double[] szaRads, double[] ozaRads) {
+//        float spectralWavelength = sourceBand.getSpectralWavelength();
+//        int X2 = 1;
+//        double trans709 = H2O_COR_POLY[0] + (H2O_COR_POLY[1] + (H2O_COR_POLY[2] + H2O_COR_POLY[3] * X2) * X2) * X2;
+//        double[] radiances = getSourceTile(sourceBand, rectangle).getSamplesDouble();
+//        float reflectance = RsMathUtils.radianceToReflectance((float) radiances[i], (float) szaRads[i], (float) solarIrradiance[i]);
+//        if (reflectance > 0) {
+//        }
+        double[] rho_ng = new double[ozone.length];
+        for (int i = 0; i < ozone.length; i++) {
+            double model_ozone = 0;
 
-        float spectralWavelength = sourceBand.getSpectralWavelength();
-        double[] radiances = getSourceTile(sourceBand, rectangle).getSamplesDouble();
-        for (int i = 0; i < radiances.length; i++) {
-            float reflectance = RsMathUtils.radianceToReflectance((float) radiances[i], (float) sza[i], (float) solarIrradiance[i]);
-//            if (reflectance > 0)
-//            for x in range(width):
-//            ts = math.radians(theta_s[x])  # sun zenith angle in radian
-//                    cts = math.cos(ts)  # cosine of sun zenith angle
-//                    sts = math.sin(ts)  # sinus of sun zenith angle
-//                    tv = math.radians(theta_v[x])  # view zenith angle in radian
-//                    ctv = math.cos(tv)  # cosine of view zenith angle
-//                    stv = math.sin(tv)  # sinus of view zenith angle
-//            for i in range(nbands):
-//            trans_ozoned12 = math.exp(-(absorb_ozon[i] * ozone[x] / 1000.0 - model_ozone) / cts)
-//            trans_ozoneu12 = math.exp(-(absorb_ozon[i] * ozone[x] / 1000.0 - model_ozone) / ctv)
-//            trans_ozone12 = trans_ozoned12 * trans_ozoneu12
-//            rho_ng[(i, x)] /= trans_ozone12
+            double cts = Math.cos(szaRads[i]); //#cosine of sun zenith angle
+            double ctv = Math.cos(ozaRads[i]);//#cosine of view zenith angle
+            double sts = Math.sin(szaRads[i]);//#sinus of sun zenith angle
+            double stv = Math.sin(ozaRads[i]);//#sinus of view zenith angle
+            double trans_ozoned12 = Math.exp(-(absorpOzone[i] * ozone[i] / 1000.0 - model_ozone) / cts);
+            double trans_ozoneu12 = Math.exp(-(absorpOzone[i] * ozone[i] / 1000.0 - model_ozone) / ctv);
+            double trans_ozone12 = trans_ozoned12 * trans_ozoneu12;
+            rho_ng[i] = trans_ozone12;
+//                rho_ng /= trans_ozone12;
         }
-        return new double[0];
+        return rho_ng;
     }
 
     public static class Spi extends OperatorSpi {

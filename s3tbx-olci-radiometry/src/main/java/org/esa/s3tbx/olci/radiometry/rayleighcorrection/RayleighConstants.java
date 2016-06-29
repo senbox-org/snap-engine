@@ -34,5 +34,5 @@ public class RayleighConstants {
 
     static double PA = 0.9587256;
     static double PB = 1. - PA; // Rayleigh Phase function, molecular asymetry factor 2
-    double[] H2O_COR_POLY = new double[]{0.3832989, 1.6527957, -1.5635101, 0.5311913};  // Polynomial coefficients for WV transmission @ 709nm
+
 }
