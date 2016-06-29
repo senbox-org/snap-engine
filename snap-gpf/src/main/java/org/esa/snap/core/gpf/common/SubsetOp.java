@@ -197,11 +197,6 @@ public class SubsetOp extends Operator {
 
         if (geoRegion != null) {
             region = computePixelRegion(sourceProduct, geoRegion, 0);
-        }
-        if (fullSwath) {
-            region = new Rectangle(0, region.y, sourceProduct.getSceneRasterWidth(), region.height);
-        }
-        if (region != null) {
             if (region.isEmpty()) {
                 targetProduct = new Product("empty", "EMPTY", 0, 0);
                 String msg = "No intersection with source product boundary " + sourceProduct.getName();
@@ -209,6 +204,11 @@ public class SubsetOp extends Operator {
                 getLogger().log(Level.WARNING, msg);
                 return;
             }
+        }
+        if (fullSwath) {
+            region = new Rectangle(0, region.y, sourceProduct.getSceneRasterWidth(), region.height);
+        }
+        if (region != null && !region.isEmpty()) {
             if (region.width == 0 || region.x + region.width > sourceProduct.getSceneRasterWidth()) {
                 region.width = sourceProduct.getSceneRasterWidth() - region.x;
             }
@@ -223,6 +223,7 @@ public class SubsetOp extends Operator {
 
         try {
             targetProduct = subsetReader.readProductNodes(sourceProduct, subsetDef);
+            targetProduct.setName("Subset_"+targetProduct.getName());
         } catch (Throwable t) {
             throw new OperatorException(t);
         }

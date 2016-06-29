@@ -311,7 +311,7 @@ public class DimapProductReader extends AbstractProductReader {
         final int sourceMaxX = sourceOffsetX + sourceWidth - 1;
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
 
-        final File dataFile = bandDataFiles.get(destBand);
+        final File dataFile = getBandDataFile(destBand);
         final ImageInputStream inputStream = getOrCreateImageInputStream(destBand, dataFile);
         if (inputStream == null) {
             return;
@@ -345,6 +345,15 @@ public class DimapProductReader extends AbstractProductReader {
         } finally {
             pm.done();
         }
+    }
+
+    private File getBandDataFile(final Band destBand) throws IOException {
+        for(Band band : bandDataFiles.keySet()) {
+            if(band.getName().equals(destBand.getName())) {
+                return bandDataFiles.get(band);
+            }
+        }
+        throw new IOException(destBand.getName() + " not found");
     }
 
     /**
