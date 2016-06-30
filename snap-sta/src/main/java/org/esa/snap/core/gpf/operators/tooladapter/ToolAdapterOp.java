@@ -153,12 +153,12 @@ public class ToolAdapterOp extends Operator {
         return this.isStopped;
     }
 
-    public void setAdapterFolder(File folder) {
-        /*
+    /*public void setAdapterFolder(File folder) {
+        *//*
       The folder where the tool descriptors reside.
-     */
+     *//*
         File adapterFolder = folder;
-    }
+    }*/
 
     /**
      * Gets the list of errors that have been produced during external tool execution
@@ -537,7 +537,7 @@ public class ToolAdapterOp extends Operator {
                 throw new OperatorException("Unexpected parameter: " + param.getName());
             }
             ToolParameterDescriptor paramDescriptor = descriptor.get();
-            if (paramDescriptor.isTemplateParameter()) {
+            if (paramDescriptor.isTemplateParameter() && !(paramDescriptor.isTemplateBefore() || paramDescriptor.isTemplateAfter())) {
                 try {
                     String transformedFile = transformTemplateParameter((TemplateParameterDescriptor) paramDescriptor);
                     parameters.put(param.getName(), transformedFile);

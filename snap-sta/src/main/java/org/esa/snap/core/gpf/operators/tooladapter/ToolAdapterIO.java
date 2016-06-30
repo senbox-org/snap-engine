@@ -169,7 +169,7 @@ public class ToolAdapterIO {
                 @Override
                 public Operator createOperator() throws OperatorException {
                     ToolAdapterOp toolOperator = (ToolAdapterOp) super.createOperator();
-                    toolOperator.setAdapterFolder(operatorFolder.toFile());
+                    //toolOperator.setAdapterFolder(operatorFolder.toFile());
                     toolOperator.setParameterDefaultValues();
                     return toolOperator;
                 }
@@ -238,7 +238,7 @@ public class ToolAdapterIO {
             @Override
             public Operator createOperator() throws OperatorException {
                 ToolAdapterOp toolOperator = (ToolAdapterOp) super.createOperator();
-                toolOperator.setAdapterFolder(moduleFolder.toFile());
+                //toolOperator.setAdapterFolder(moduleFolder.toFile());
                 toolOperator.setParameterDefaultValues();
                 return toolOperator;
             }
