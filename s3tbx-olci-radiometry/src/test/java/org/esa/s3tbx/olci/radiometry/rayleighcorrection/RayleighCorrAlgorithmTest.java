@@ -5,6 +5,8 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.util.Arrays;
+
 import static org.junit.Assert.*;
 
 /**
@@ -67,17 +69,50 @@ public class RayleighCorrAlgorithmTest {
 
     @Test
     public void testConvertToRadian() throws Exception {
-        double[] convertDegreesToRadians = SmileUtils.convertDegreesToRadians(new double[]{50, 30,-1});
+        double[] convertDegreesToRadians = SmileUtils.convertDegreesToRadians(new double[]{50, 30, -1});
         assertEquals(0.872664626, convertDegreesToRadians[0], 1e-8);
         assertEquals(0.5235987756, convertDegreesToRadians[1], 1e-8);
         assertEquals(-0.017453292519943295, convertDegreesToRadians[2], 1e-8);
 
     }
 
-    @Ignore
     @Test
     public void testCalculateRayleighCrossSection() throws Exception {
-//        double crossSectionOnWavelength = algo.getCrossSectionSigma(2.98f);
+        double[] sectionSigma = algo.getCrossSectionSigma(new double[]{1., 2.});
+        assertEquals(2, sectionSigma.length);
+        assertEquals(1.004158010817489E-9, sectionSigma[0], 1e-8);
+        assertEquals(3.9154039638717356E-12, sectionSigma[1], 1e-8);
     }
 
+    @Test
+    public void testThickness() throws Exception {
+        double[] unit = {1.};
+        double[] rayleighOpticalThicknessII = algo.getRayleighOpticalThicknessII(unit, unit, unit, new double[]{1.00415801077e-09});
+        System.out.println(Arrays.toString(rayleighOpticalThicknessII));
+    }
+
+
+    @Test
+    public void testCreateLineSpaceOfArrayElements() throws Exception {
+        double[] lineSpace = algo.getLineSpace(0, 10, 5);
+        assertNotNull(lineSpace);
+        assertEquals(5, lineSpace.length);
+        assertArrayEquals(new double[]{0.0, 2.5, 5.0, 7.5, 10.0}, lineSpace, 1e-8);
+
+        lineSpace = algo.getLineSpace(0, 1, 5);
+        assertEquals(5, lineSpace.length);
+        assertArrayEquals(new double[]{0.0, 0.25, 0.5, 0.75, 1.0}, lineSpace, 1e-8);
+
+        lineSpace = algo.getLineSpace(0, 0, 5);
+        assertEquals(5, lineSpace.length);
+        assertArrayEquals(new double[]{0.0, 0.0, 0.0, 0.0, 0.0}, lineSpace, 1e-8);
+
+        try {
+            lineSpace = algo.getLineSpace(0, 10, -5);
+            fail("Array cant have negative index");
+        } catch (NegativeArraySizeException ex) {
+
+        }
+
+    }
 }

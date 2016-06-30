@@ -1,10 +1,8 @@
 package org.esa.s3tbx.olci.radiometry.rayleighcorrection;
 
-import org.apache.commons.math3.analysis.interpolation.BicubicSplineInterpolator;
-import org.apache.commons.math3.analysis.interpolation.BivariateGridInterpolator;
-import org.esa.s3tbx.olci.radiometry.gaseousabsorption.GaseousAbsorptionAlgo;
+import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
+import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.esa.s3tbx.olci.radiometry.smilecorr.SmileUtils;
-import org.esa.snap.core.gpf.Tile;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -13,6 +11,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 
 /**
  * @author muhammad.bc.
@@ -30,8 +30,8 @@ public class RayleighCorrAlgorithm {
     private double[][][] rayCooefMatrixD;
 
     public RayleighCorrAlgorithm() {
+        rayleighCorrectionAux = new RayleighCorrectionAux();
         try {
-            rayleighCorrectionAux = new RayleighCorrectionAux();
             Path resolve = rayleighCorrectionAux.installAuxdata().resolve("matrix.txt");
 
             JSONParser jsonObject = new JSONParser();
@@ -159,21 +159,20 @@ public class RayleighCorrAlgorithm {
         for (int i = 0; i < sourceWL.length; i++) {
 
             double sourceWLmm = sourceWL[i] / 1000f;
-            double sourceWLcm = sourceWL[i] / 10000f;
+            double sourceWLcm = sourceWLmm / 10000f;
 
             double F_N2 = 1.034 + 0.000317 / Math.pow(sourceWLmm, 2);
             double F_O2 = 1.096 + 0.001385 / Math.pow(sourceWLmm, 2) + 0.0001448 / Math.pow(sourceWLmm, 4);
-            double F_air = (78.084 * F_N2 + 20.946 * F_O2 + 0.934 * 1 + RayleighConstants.C_CO2 * 1.15) / (78.084 + 20.946 + 0.934 + RayleighConstants.C_CO2);
+
+            double F_air = (78.084 * F_N2 + 20.946 * F_O2 + 0.934 * (1 + RayleighConstants.C_CO2) * 1.15) / (78.084 + 20.946 + 0.934 + RayleighConstants.C_CO2);
             double n_1_300 = (8060.51 + (2480990. / (132.274 - Math.pow(sourceWLmm, -2))) + (17455.7 / (39.32957 - Math.pow(sourceWLmm, -2)))) / 100000000.0;
             double nCO2 = n_ratio * (1 + n_1_300);
-
-
-            sigma[i] = (Math.pow((Math.pow(24 * Math.pow(Math.PI, 3) * Math.pow(nCO2, 2) - 1, 2) / Math.pow(sourceWLcm, 4) * molecularDen * Math.pow(nCO2, 2) + 2), 2) * F_air);
+            sigma[i] = 24 * Math.pow(Math.PI, 3) * Math.pow((Math.pow(nCO2, 2) - 1), 2) / (Math.pow(sourceWLcm, 4) * molecularDen * Math.pow((Math.pow(nCO2, 2) + 2), 2)) * F_air;
         }
         return sigma;
     }
 
-    public double[] getRayleighOpticalThickness(double seaLevelPressure[], double altitude[], double latitude[], double sigma[]) {
+    public double[] getRayleighOpticalThicknessII(double seaLevelPressure[], double altitude[], double latitude[], double sigma[]) {
 
         double rayeighOpticalThickness[] = new double[altitude.length];
         for (int i = 0; i < altitude.length; i++) {
@@ -188,113 +187,151 @@ public class RayleighCorrAlgorithm {
                     (0.00000000007254 + 0.0000000000001 * cos2LatRad) * Math.pow(effectiveMassWeightAltitude, 2) -
                     (1.517E-17 + 6E-20 * cos2LatRad) * Math.pow(effectiveMassWeightAltitude, 3);
 
-            double rayleighOptical = (airPressurePixelcm2 * RayleighConstants.AVOGADRO_NUMBER) / (RayleighConstants.MEAN_MOLECULAR_WEIGHT_C02 * g);
+            double factor = (airPressurePixelcm2 * RayleighConstants.AVOGADRO_NUMBER) / (RayleighConstants.MEAN_MOLECULAR_WEIGHT_C02 * g);
 
-            rayeighOpticalThickness[i] = (float) (rayleighOptical * sigma[i]);
+            rayeighOpticalThickness[i] = factor * sigma[i];
         }
         return rayeighOpticalThickness;
     }
 
-    public double[] getRHO_BRR(double[] szaRads, double[] ozaRads, double[] saaRads, double[] aooRads, double[] taur, Tile tile, double[] reflectance) {
-        GaseousAbsorptionAlgo gaseousAbsorptionAlgo = new GaseousAbsorptionAlgo();
-        double[] rho_BRR = new double[ozaRads.length];
-        double[] fourierSeries = new double[3];
+    public HashMap<String, double[]> getRHO_BRR(double[] szaRads, double[] ozaRads, double[] saaRads, double[] aooRads, double[] taur, double[] reflectance, double[] lineSpace) {
 
+        HashMap<String, double[]> rayleighHashMap = new HashMap<>();
+
+        double[] rho_BRR = new double[ozaRads.length];
+        double[] sphericalFactor = new double[ozaRads.length];
+        double[] rho_toaR = new double[ozaRads.length];
+        double[] tR_thetaV = new double[ozaRads.length];
+        double[] tR_thetaS = new double[ozaRads.length];
+
+        rayleighHashMap.put("rBRR", rho_BRR);
+        rayleighHashMap.put("sphericalAlbedoFactor", sphericalFactor);
+        rayleighHashMap.put("rtoaRay", rho_toaR);
+        rayleighHashMap.put("transVRay", tR_thetaV);
+        rayleighHashMap.put("transSRay", tR_thetaS);
+
+        /*
+        rhorF3Band.writePixels(0, y, width, 1, rho_Rm[2, i])
+        sARayBand = raycorProduct.getBand("sARay_" + str(i + 1))
+        sARayBand.writePixels(0, y, width, 1, sARay[i])
+        */
+
+
+        double[] fourierSeries = new double[3];
         double rho_Rm[] = new double[3];
         double sARay = 1;
-        BivariateGridInterpolator gridInterpolator = new BicubicSplineInterpolator();
 
-        for (int y = tile.getMinY(); y < tile.getMaxY(); y++) {
-            for (int x = tile.getMinX(); x < tile.getMaxX(); x++) {
-                int index = tile.getMaxY() * y + x;
+        double a[] = new double[3];
+        double b[] = new double[3];
+        double c[] = new double[3];
+        double d[] = new double[3];
+        Arrays.fill(a, 1);
+        Arrays.fill(b, 1);
+        Arrays.fill(c, 1);
+        Arrays.fill(d, 1);
 
-                // Fourier components of multiple scattering
-                double sinSZARad = Math.sin(szaRads[index]);
-                double cosSZARad = Math.cos(szaRads[index]);
-                double cosOZARad = Math.cos(ozaRads[index]);
-                double sinOZARad = Math.sin(ozaRads[index]);
+        for (int index = 0; index < ozaRads.length; index++) {
+            // Fourier components of multiple scattering
+            double sinSZARad = Math.sin(szaRads[index]);
+            double cosSZARad = Math.cos(szaRads[index]);
+            double cosOZARad = Math.cos(ozaRads[index]);
+            double sinOZARad = Math.sin(ozaRads[index]);
 
-                double sinSZA2 = Math.pow(sinSZARad, 2);
-                double sinOZA2 = Math.pow(sinOZARad, 2);
+            double sinSZA2 = Math.pow(sinSZARad, 2);
+            double sinOZA2 = Math.pow(sinOZARad, 2);
 
-                //Rayleigh Phase function, 3 Fourier terms
-                fourierSeries[0] = (float) (3 * RayleighConstants.PA /
-                        4 * (1 + Math.pow(cosSZARad, 2) * Math.pow(cosOZARad, 2) + (sinSZA2 * sinOZA2) / 2) + RayleighConstants.PB);
-                fourierSeries[1] = (float) (-3 * RayleighConstants.PA / 4 * cosSZARad * cosOZARad * sinSZARad * sinOZARad);
-                fourierSeries[2] = (float) (3 * RayleighConstants.PA / 16 * sinSZA2 * sinOZA2);
-
-                double cosDelta = Math.cos(aooRads[index] - saaRads[index]);
-                double aziDiff = Math.acos(cosDelta); // in radian
-                float v1 = (float) szaRads[index];
-                float v2 = (float) ozaRads[index];
-
-                double massAir = gaseousAbsorptionAlgo.getMassAir(v1, v2);
-
-                double a[] = new double[3];
-                double b[] = new double[3];
-                double c[] = new double[3];
-                double d[] = new double[3];
-
-                double yVal = ozaRads[index];
-                double xVal = szaRads[index];
-                for (int i = 0; i < a.length; i++) {
-                    a[i] = gridInterpolator.interpolate(thetas, thetas, rayCooefMatrixA[i]).value(xVal, yVal);
-                    b[i] = gridInterpolator.interpolate(thetas, thetas, rayCooefMatrixB[i]).value(xVal, yVal);
-                    c[i] = gridInterpolator.interpolate(thetas, thetas, rayCooefMatrixC[i]).value(xVal, yVal);
-                    d[i] = gridInterpolator.interpolate(thetas, thetas, rayCooefMatrixD[i]).value(xVal, yVal);
-                }
-                // Rayleigh primary scattering
-                for (int i = 0; i < fourierSeries.length; i++) {
-                    double rayPrimaryScatters = fourierSeries[i] / (4.0 * (cosSZARad + cosOZARad)) * (1. - Math.exp(-massAir * taur[index]));
-                    double v = a[i] + b[i] * taur[index] + c[i] * Math.pow(taur[index], 2) + d[i] * Math.pow(taur[index], 3);
-                    rho_Rm[i] = v * rayPrimaryScatters;
-                }
-
-
-                //sum of the fourier
-                double rho_R = rho_Rm[0] + 2.0 * rho_Rm[1] * Math.cos(aziDiff) + 2. * rho_Rm[2] * Math.cos(2. * aziDiff);
-                // polynomial coefficients tpoly0, tpoly1 and tpoly2 from MERIS LUT
-
-                double tRs = ((2. / 3. + cosSZARad) + (2. / 3. - cosSZARad) * Math.exp(-taur[index] / cosSZARad)) / (4. / 3. + taur[index]);
-
-                double tR_thetaS = tPoly[0] + tPoly[1] * tRs + tPoly[2] * Math.pow(tRs, 2);
-                //#Rayleigh Transmittance sun - surface
-                double tRv = ((2. / 3. + cosOZARad) + (2. / 3. - cosOZARad) * Math.exp(-taur[index] / cosOZARad)) / (4. / 3. + taur[index]);
-                //#Rayleigh Transmittance surface - sensor
-                double tR_thetaV = tPoly[0] + tPoly[1] * tRv + tPoly[2] * Math.pow(tRv, 2);
-                double rho_toaR = (reflectance[index] - rho_R) / (tR_thetaS * tR_thetaV); //toa reflectance corrected for Rayleigh scattering
-
-                double sphericalFactor = 1.0 / (1.0 + sARay * rho_toaR); //#factor used in the next equation to account for the spherical albedo
-                //#top of aerosol reflectance, which is equal to bottom of Rayleigh reflectance
-
-                rho_BRR[index] = (float) (rho_toaR * sphericalFactor);
-
-               /* double aziDiffDeg = Math.abs(aoo[index] - saa[index]);
-                if (aziDiffDeg > 180.0) {
-                    aziDiffDeg = 360.0 - aziDiffDeg;
-                }
-                double aziDiffRad = Math.toRadians(aziDiffDeg);
-                double cos_scat_ang = (-cosOZARad * cosSZARad) - (sinOZARad * sinSZARad * Math.cos(aziDiffRad));
-
-                phase_rayl_min = (float) (0.75 * (1.0 + cos_scat_ang * cos_scat_ang));*/
+            double taurVal = taur[index];
+            if (Double.isNaN(taurVal)) {
+                rho_BRR[index] = taurVal;
+                continue;
             }
+
+            //Rayleigh Phase function, 3 Fourier terms
+            fourierSeries[0] = (float) (3 * RayleighConstants.PA /
+                    4 * (1 + Math.pow(cosSZARad, 2) * Math.pow(cosOZARad, 2) + (sinSZA2 * sinOZA2) / 2) + RayleighConstants.PB);
+            fourierSeries[1] = (float) (-3 * RayleighConstants.PA / 4 * cosSZARad * cosOZARad * sinSZARad * sinOZARad);
+            fourierSeries[2] = (float) (3 * RayleighConstants.PA / 16 * sinSZA2 * sinOZA2);
+
+            double cosDelta = Math.cos(aooRads[index] - saaRads[index]);
+            double aziDiff = Math.acos(cosDelta); // in radian
+            double massAir = (1 / Math.cos(szaRads[index]) + 1 / Math.cos(ozaRads[index]));
+
+//            BivariateGridInterpolator gridInterpolator = new BicubicSplineInterpolator();
+//            double yVal = ozaRads[index];
+//            double xVal = szaRads[index];
+//            for (int i = 0; i < a.length; i++) {
+//                BivariateFunction interpolate = gridInterpolator.interpolate(thetas, thetas, rayCooefMatrixA[i]);
+//                a[i] = gridInterpolator.interpolate(thetas, thetas, rayCooefMatrixA[i]).value(xVal, yVal);
+//                b[i] = gridInterpolator.interpolate(thetas, thetas, rayCooefMatrixB[i]).value(xVal, yVal);
+//                c[i] = gridInterpolator.interpolate(thetas, thetas, rayCooefMatrixC[i]).value(xVal, yVal);
+//                d[i] = gridInterpolator.interpolate(thetas, thetas, rayCooefMatrixD[i]).value(xVal, yVal);
+//            }
+            // Rayleigh primary scattering
+
+            for (int i = 0; i < fourierSeries.length; i++) {
+                double rayPrimaryScatters = fourierSeries[i] / (4.0 * (cosSZARad + cosOZARad)) * (1. - Math.exp(-massAir * taurVal));
+                double v = a[i] + b[i] * taurVal + c[i] * Math.pow(taurVal, 2) + d[i] * Math.pow(taurVal, 3);
+                rho_Rm[i] = v * rayPrimaryScatters;
+            }
+            //sum of the fourier
+            double rho_R = rho_Rm[0] + 2.0 * rho_Rm[1] * Math.cos(aziDiff) + 2. * rho_Rm[2] * Math.cos(2. * aziDiff);
+            // polynomial coefficients tpoly0, tpoly1 and tpoly2 from MERIS LUT
+
+            double tRs = ((2. / 3. + cosSZARad) + (2. / 3. - cosSZARad) * Math.exp(-taur[index] / cosSZARad)) / (4. / 3. + taur[index]);
+
+            tR_thetaS[index] = tPoly[0] + tPoly[1] * tRs + tPoly[2] * Math.pow(tRs, 2);
+            //#Rayleigh Transmittance sun - surface
+            double tRv = ((2. / 3. + cosOZARad) + (2. / 3. - cosOZARad) * Math.exp(-taur[index] / cosOZARad)) / (4. / 3. + taur[index]);
+            //#Rayleigh Transmittance surface - sensor
+            tR_thetaV[index] = tPoly[0] + tPoly[1] * tRv + tPoly[2] * Math.pow(tRv, 2);
+
+            LinearInterpolator interpolator = new LinearInterpolator();
+            PolynomialSplineFunction interpolate = interpolator.interpolate(lineSpace, rayAlbedoLuts);
+//            ARay[(i, lineSpace)] = rayAlb_f(taur[(i, x)])  # Rayleigh spherical albedo
+//            taurTab = np.linspace(0.0, 1.0, num=dimTaur)
+//            rayAlb_f = interp1d(taurTab, rayADF['ray_albedo_lut'])
+//            sARay = np.zeros((nbands, width), dtype=np.float32)
+
+
+            rho_toaR[index] = (reflectance[index] - rho_R) / (tR_thetaS[index] * tR_thetaV[index]); //toa reflectance corrected for Rayleigh scattering
+
+            sphericalFactor[index] = 1.0 / (1.0 + sARay * rho_toaR[index]); //#factor used in the next equation to account for the spherical albedo
+            //#top of aerosol reflectance, which is equal to bottom of Rayleigh reflectance
+            rho_BRR[index] = (float) (rho_toaR[index] * sphericalFactor[index]);
         }
 
-
-        return rho_BRR;
+        return rayleighHashMap;
     }
 
-    public double[] correct(double[] waveLenght, double[] seaAirPressure, double[] altitude, double[] szaRads, double[] ozaRads, double[] ray_phase_min) {
+
+    public HashMap<String, double[]> correct(double[] reflectances, double[] seaAirPressure, double[] altitude, double[] szaRads, double[] ozaRads, double[] ray_phase_min) {
         double[] rRaySimple = new double[ozaRads.length];
+        double[] taurS = new double[ozaRads.length];
+        HashMap<String, double[]> rayHashMap = new HashMap<>();
+        rayHashMap.put("taurS",taurS);
+        rayHashMap.put("rRaySample",rRaySimple);
+
         for (int i = 0; i < ray_phase_min.length; i++) {
-            double taurS = Math.exp(-4.637) * Math.pow((waveLenght[i] / 1000.0), -4.0679);
+            double taurSLocal = Math.exp(-4.637) * Math.pow((reflectances[i] / 1000.0), -4.0679);
             double pressureAtms = seaAirPressure[i] * Math.exp(-altitude[i] / 8000.0);
-            double pressureFactor = taurS / 1013.0;
-            taurS = pressureAtms * pressureFactor;
-            rRaySimple[i] = (float) (Math.cos(szaRads[i]) * taurS * ray_phase_min[i] / (4 * 3.1415926) * (1 / Math.cos(ozaRads[i]) * 3.1415926));
+            double pressureFactor = taurSLocal / 1013.0;
+            taurS[i] = pressureAtms * pressureFactor;
+            rRaySimple[i] = (float) (Math.cos(szaRads[i]) * taurS[i] * ray_phase_min[i] / (4 * 3.1415926) * (1 / Math.cos(ozaRads[i]) * 3.1415926));
         }
-        return rRaySimple;
+
+        return rayHashMap;
     }
 
 
+    public double[] getLineSpace(double start, double end, int interval) {
+        if (interval < 0) {
+            throw new NegativeArraySizeException("Array cant have negative index");
+        }
+        double[] temp = new double[interval];
+        double steps = (end - start) / (interval - 1);
+        for (int i = 0; i < temp.length; i++) {
+            temp[i] = steps * i;
+        }
+        return temp;
+    }
 }
