@@ -56,7 +56,7 @@ import java.util.ArrayList;
 @OperatorMetadata(
         alias = "FuClassification",
         version = "0.11",
-        category = "Optical Processing/Thematic Water Processing",
+        category = "Optical/Thematic Water Processing",
         description = "MERIS-based ocean colour classification with the discrete Forel-Ule scale.",
         authors = " H.J van der Woerd (IVM), M.R. Wernand (NIOZ)), Muhammad Bala (BC), Marco Peters (BC)",
         copyright = "(c) 2016 by Brockmann Consult GmbH")
