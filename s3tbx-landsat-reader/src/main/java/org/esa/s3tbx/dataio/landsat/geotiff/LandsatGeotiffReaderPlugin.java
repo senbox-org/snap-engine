@@ -27,8 +27,9 @@ import org.esa.snap.core.util.io.SnapFileFilter;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Locale;
 
 /**
@@ -40,6 +41,10 @@ public class LandsatGeotiffReaderPlugin implements ProductReaderPlugIn {
     private static final String[] FORMAT_NAMES = new String[]{"LandsatGeoTIFF"};
     private static final String[] DEFAULT_FILE_EXTENSIONS = new String[]{".txt", ".TXT", ".gz"};
     private static final String READER_DESCRIPTION = "Landsat Data Products (GeoTIFF)";
+    private static final String L4_FILENAME_REGEX = "LT4\\d{13}\\w{3}\\d{2}";
+    private static final String L5_FILENAME_REGEX = "LT5\\d{13}.{3}\\d{2}";
+    private static final String L7_FILENAME_REGEX = "LE7\\d{13}.{3}\\d{2}";
+    private static final String L8_FILENAME_REGEX = "L[O,T,C]8\\d{13}.{3}\\d{2}";
 
     @Override
     public DecodeQualification getDecodeQualification(Object input) {
@@ -70,21 +75,23 @@ public class LandsatGeotiffReaderPlugin implements ProductReaderPlugIn {
             return DecodeQualification.UNABLE;
         }
 
-        String[] list;
+        String[] allFiles;
         try {
-            list = virtualDir.list("");
-            if (list == null || list.length == 0) {
+            allFiles = virtualDir.listAllFiles();
+            if (allFiles == null || allFiles.length == 0) {
                 return DecodeQualification.UNABLE;
             }
         } catch (IOException e) {
             return DecodeQualification.UNABLE;
         }
 
-        for (String fileName : list) {
+        for (String filePath : allFiles) {
             try {
-                File file = virtualDir.getFile(fileName);
-                if (isMetadataFile(file)) {
-                    return DecodeQualification.INTENDED;
+                if (isMetadataFilename(new File(filePath).getName())) {
+                    InputStream inputStream = virtualDir.getInputStream(filePath);
+                    if (isMetadataFile(inputStream)) {
+                        return DecodeQualification.INTENDED;
+                    }
                 }
             } catch (IOException ignore) {
                 // file is broken, but be tolerant here
@@ -94,26 +101,18 @@ public class LandsatGeotiffReaderPlugin implements ProductReaderPlugIn {
         return DecodeQualification.UNABLE;
     }
 
-    static boolean isMetadataFile(File file) {
-        if (!file.getName().toLowerCase().endsWith("_mtl.txt")) {
-            return false;
-        }
-        BufferedReader reader = null;
-        String line;
-        try {
-            reader = new BufferedReader(new FileReader(file));
-            line = reader.readLine();
+    static boolean isMetadataFilename(String filename) {
+        return filename.toLowerCase().endsWith("_mtl.txt");
+    }
+
+    static boolean isMetadataFile(InputStream inputStream) {
+        String firstLine;
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+            firstLine = reader.readLine();
         } catch (IOException e) {
             return false;
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException ignore) {
-                }
-            }
         }
-        return line != null && line.trim().matches("GROUP = L1_METADATA_FILE");
+        return firstLine != null && firstLine.trim().matches("GROUP = L1_METADATA_FILE");
     }
 
     @Override
@@ -149,6 +148,9 @@ public class LandsatGeotiffReaderPlugin implements ProductReaderPlugIn {
     static VirtualDir getInput(Object input) throws IOException {
         File inputFile = getFileInput(input);
 
+        if (inputFile == null) {
+            throw new IOException("Unknown input type.");
+        }
         if (inputFile != null && inputFile.isFile() && !isCompressedFile(inputFile)) {
             final File absoluteFile = inputFile.getAbsoluteFile();
             inputFile = absoluteFile.getParentFile();
@@ -174,25 +176,22 @@ public class LandsatGeotiffReaderPlugin implements ProductReaderPlugIn {
     }
 
     static boolean isLandsatMSSFilename(String filename) {
-        if (filename.matches("LM[1-5]\\d{13}\\w{3}\\d{2}_MTL.(txt|TXT)")) {
-            return true;
-        }
-        return false;
+        return filename.matches("LM[1-5]\\d{13}\\w{3}\\d{2}_MTL.(txt|TXT)");
     }
 
     static boolean isLandsat4Filename(String filename) {
-        if (filename.matches("LT4\\d{13}\\w{3}\\d{2}_MTL.(txt|TXT)")) {
+        if (filename.matches(L4_FILENAME_REGEX + "_MTL" + getTxtExtension())) {
             return true;
-        } else if (filename.matches("LT4\\d{13}\\w{3}\\d{2}\\.tar\\.gz")) {
+        } else if (filename.matches(L4_FILENAME_REGEX + getCompressionExtension())) {
             return true;
         }
         return false;
     }
 
     static boolean isLandsat5Filename(String filename) {
-        if (filename.matches("LT5\\d{13}.{3}\\d{2}_MTL.(txt|TXT)")) {
+        if (filename.matches(L5_FILENAME_REGEX + "_MTL" + getTxtExtension())) {
             return true;
-        } else if (filename.matches("LT5\\d{13}.{3}\\d{2}\\.tar\\.gz")) {
+        } else if (filename.matches(L5_FILENAME_REGEX + getCompressionExtension())) {
             return true;
         } else {
             return false;
@@ -200,9 +199,9 @@ public class LandsatGeotiffReaderPlugin implements ProductReaderPlugIn {
     }
 
     static boolean isLandsat7Filename(String filename) {
-        if (filename.matches("LE7\\d{13}.{3}\\d{2}_MTL.(txt|TXT)")) {
+        if (filename.matches(L7_FILENAME_REGEX + "_MTL" + getTxtExtension())) {
             return true;
-        } else if (filename.matches("LE7\\d{13}.{3}\\d{2}\\.tar\\.gz")) {
+        } else if (filename.matches(L7_FILENAME_REGEX + getCompressionExtension())) {
             return true;
         } else {
             return false;
@@ -210,9 +209,9 @@ public class LandsatGeotiffReaderPlugin implements ProductReaderPlugIn {
     }
 
     static boolean isLandsat8Filename(String filename) {
-        if (filename.matches("L[O,T,C]8\\d{13}.{3}\\d{2}_MTL.(txt|TXT)")) {
+        if (filename.matches(L8_FILENAME_REGEX + "_MTL" + getTxtExtension())) {
             return true;
-        } else if (filename.matches("L[O,T,C]8\\d{13}.{3}\\d{2}\\.tar\\.gz")) {
+        } else if (filename.matches(L8_FILENAME_REGEX + getCompressionExtension())) {
             return true;
         } else {
             return false;
@@ -252,8 +251,21 @@ public class LandsatGeotiffReaderPlugin implements ProductReaderPlugIn {
         extension = extension.toLowerCase();
 
         return extension.contains("zip")
+                || extension.contains("ZIP")
                 || extension.contains("tar")
                 || extension.contains("tgz")
-                || extension.contains("gz");
+                || extension.contains("gz")
+                || extension.contains("tbz")
+                || extension.contains("bz")
+                || extension.contains("tbz2")
+                || extension.contains("bz2");
+    }
+
+    private static String getCompressionExtension() {
+        return "\\.(tar\\.gz|tgz|tar\\.bz|tbz|tar\\.bz2|tbz2|zip|ZIP)";
+    }
+
+    private static String getTxtExtension() {
+        return "\\.(txt|TXT)";
     }
 }
