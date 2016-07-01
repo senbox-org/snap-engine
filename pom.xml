@@ -80,6 +80,7 @@
         <s3tbx.version>4.0.0-SNAPSHOT</s3tbx.version>
         <netbeans.version>RELEASE802</netbeans.version>
         <javahelp.version>2.0.05</javahelp.version>
+        <netcdf.version>4.3.22</netcdf.version>
         <seadas.reader.version>1.5.8-SNAPSHOT</seadas.reader.version>
         <seadas.reader.ui.version>1.5.6</seadas.reader.ui.version>
         <brandingToken>s3tbx</brandingToken>
@@ -268,7 +269,11 @@
             </dependency>
 
             <!-- TAR archive support  -->
-
+            <dependency>
+                <groupId>edu.ucar</groupId>
+                <artifactId>netcdf</artifactId>
+                <version>${netcdf.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.xeustechnologies</groupId>
                 <artifactId>jtar</artifactId>

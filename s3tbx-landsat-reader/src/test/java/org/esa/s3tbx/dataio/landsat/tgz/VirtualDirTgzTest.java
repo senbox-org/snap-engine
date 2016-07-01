@@ -1,8 +1,10 @@
 package org.esa.s3tbx.dataio.landsat.tgz;
 
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
+
 import org.esa.s3tbx.dataio.landsat.TestUtil;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.*;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -11,11 +13,52 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
-
 public class VirtualDirTgzTest {
 
     private VirtualDirTgz virtualDir;
+
+    @Test
+    public void testListAllTbz() throws IOException {
+        File testTgz = TestUtil.getTestFile("tbz/test-archive.tbz");
+        virtualDir = new VirtualDirTgz(testTgz);
+        String[] allFileArray = virtualDir.listAllFiles();
+        assertNotNull(allFileArray);
+        List<String> allFiles = Arrays.asList(allFileArray);
+
+        assertEquals(2, allFiles.size());
+        assertThat(allFiles, hasItem("dir1/file3.txt"));
+        assertThat(allFiles, hasItem("file1"));
+    }
+
+    @Test
+    public void testOpenTbz() throws IOException {
+        File testTgz = TestUtil.getTestFile("tbz/test-archive.tbz");
+        virtualDir = new VirtualDirTgz(testTgz);
+        assertEquals(testTgz.getPath(), virtualDir.getBasePath());
+
+        assertTrue(virtualDir.isCompressed());
+        assertTrue(virtualDir.isArchive());
+    }
+
+    @Test
+    public void testOpenTarBz() throws IOException {
+        File testTgz = TestUtil.getTestFile("tbz/test-archive.tar.bz");
+        virtualDir = new VirtualDirTgz(testTgz);
+        assertEquals(testTgz.getPath(), virtualDir.getBasePath());
+
+        assertTrue(virtualDir.isCompressed());
+        assertTrue(virtualDir.isArchive());
+    }
+
+    @Test
+    public void testOpenTarBz2() throws IOException {
+        File testTgz = TestUtil.getTestFile("tbz/test-archive.tar.bz2");
+        virtualDir = new VirtualDirTgz(testTgz);
+        assertEquals(testTgz.getPath(), virtualDir.getBasePath());
+
+        assertTrue(virtualDir.isCompressed());
+        assertTrue(virtualDir.isArchive());
+    }
 
     @Test
     public void testOpenTgz() throws IOException {
@@ -39,14 +82,9 @@ public class VirtualDirTgzTest {
         assertTrue(virtualDir.isArchive());
     }
 
-    @SuppressWarnings({"UnusedDeclaration"})
-    @Test
-    public void testOpenNull() throws IOException {
-        try {
-            final VirtualDirTgz vdTgz = new VirtualDirTgz(null);
-            fail("IllegalArgumentException expected");
-        } catch (IllegalArgumentException expected) {
-        }
+    @Test(expected = IllegalArgumentException.class)
+    public void testOpenNull() throws Exception {
+        new VirtualDirTgz(null);
     }
 
     @Test
@@ -65,20 +103,20 @@ public class VirtualDirTgzTest {
         assertExpectedInputStream();
     }
 
-    @Test
+    @Test(expected = IOException.class)
     public void testTar_getInputStream_invalidPath() throws IOException {
         final File testTgz = TestUtil.getTestFile("tgz/test-archive.tar");
 
         virtualDir = new VirtualDirTgz(testTgz);
-        assertInputStreamInvalidPath();
+        virtualDir.getInputStream("test-archive/invalid_dir/no.file");
     }
 
-    @Test
+    @Test(expected = IOException.class)
     public void testTgz_getInputStream_invalidPath() throws IOException {
         final File testTgz = TestUtil.getTestFile("tgz/test-archive.tgz");
 
         virtualDir = new VirtualDirTgz(testTgz);
-        assertInputStreamInvalidPath();
+        virtualDir.getInputStream("test-archive/invalid_dir/no.file");
     }
 
     @Test
@@ -86,7 +124,14 @@ public class VirtualDirTgzTest {
         final File testTgz = TestUtil.getTestFile("tgz/test-archive.tar");
 
         virtualDir = new VirtualDirTgz(testTgz);
-        assertExpectedFile();
+        assertExpectedFile("test-archive/dir1/file3.txt");
+    }
+
+    @Test
+    public void testTbz_getFile() throws IOException {
+        final File testTgz = TestUtil.getTestFile("tbz/test-archive.tar.bz2");
+        virtualDir = new VirtualDirTgz(testTgz);
+        assertExpectedFile("dir1/file3.txt");
     }
 
     @Test
@@ -94,7 +139,7 @@ public class VirtualDirTgzTest {
         final File testTgz = TestUtil.getTestFile("tgz/test-archive.tgz");
 
         virtualDir = new VirtualDirTgz(testTgz);
-        assertExpectedFile();
+        assertExpectedFile("test-archive/dir1/file3.txt");
     }
 
     @Test
@@ -106,20 +151,20 @@ public class VirtualDirTgzTest {
         assertNotNull(file_1);
     }
 
-    @Test
+    @Test(expected = IOException.class)
     public void testTar_getFile_invalidPath() throws IOException {
         final File testTgz = TestUtil.getTestFile("tgz/test-archive.tar");
 
         virtualDir = new VirtualDirTgz(testTgz);
-        assertGetFileInvalidPath();
+        virtualDir.getFile("test-archive/invalid_dir/missing.file");
     }
 
-    @Test
+    @Test(expected = IOException.class)
     public void testTgz_getFile_invalidPath() throws IOException {
         final File testTgz = TestUtil.getTestFile("tgz/test-archive.tgz");
 
         virtualDir = new VirtualDirTgz(testTgz);
-        assertGetFileInvalidPath();
+        virtualDir.getFile("test-archive/invalid_dir/missing.file");
     }
 
     @Test
@@ -138,20 +183,20 @@ public class VirtualDirTgzTest {
         assertCorrectList();
     }
 
-    @Test
+    @Test(expected = IOException.class)
     public void testTar_list_invalidPath() throws IOException {
         final File testTgz = TestUtil.getTestFile("tgz/test-archive.tar");
 
         virtualDir = new VirtualDirTgz(testTgz);
-        assertListInvalidPath();
+        virtualDir.list("in/valid/path");
     }
 
-    @Test
+    @Test(expected = IOException.class)
     public void testTgz_list_invalidPath() throws IOException {
         final File testTgz = TestUtil.getTestFile("tgz/test-archive.tgz");
 
         virtualDir = new VirtualDirTgz(testTgz);
-        assertListInvalidPath();
+        virtualDir.list("in/valid/path");
     }
 
     @Test
@@ -159,7 +204,7 @@ public class VirtualDirTgzTest {
         final File testTgz = TestUtil.getTestFile("tgz/test-archive.tgz");
 
         virtualDir = new VirtualDirTgz(testTgz);
-        assertExpectedFile();
+        assertExpectedFile("test-archive/dir1/file3.txt");
 
         final File tempDir = virtualDir.getTempDir();
         assertNotNull(tempDir);
@@ -227,35 +272,16 @@ public class VirtualDirTgzTest {
         }
     }
 
-    private void assertInputStreamInvalidPath() {
-        try {
-            virtualDir.getInputStream("test-archive/invalid_dir/no.file");
-            fail("IOException expected");
-        } catch (IOException expected) {
-        }
-    }
-
-    private void assertExpectedFile() throws IOException {
-        final File file = virtualDir.getFile("test-archive/dir1/file3.txt");
+    private void assertExpectedFile(String filePath) throws IOException {
+        final File file = virtualDir.getFile(filePath);
         assertNotNull(file);
         assertTrue((file.isFile()));
 
-        final FileInputStream inputStream = new FileInputStream(file);
-        try {
+        try (FileInputStream inputStream = new FileInputStream(file)) {
             final byte[] buffer = new byte[512];
             int bytesRead = inputStream.read(buffer);
             assertEquals(9, bytesRead);
             assertEquals("content3", new String(buffer).trim());
-        } finally {
-            inputStream.close();
-        }
-    }
-
-    private void assertGetFileInvalidPath() {
-        try {
-            virtualDir.getFile("test-archive/invalid_dir/missing.file");
-            fail("IOException expected");
-        } catch (IOException expected) {
         }
     }
 
@@ -278,11 +304,4 @@ public class VirtualDirTgzTest {
         assertTrue(dirList.contains("file3.txt"));
     }
 
-    private void assertListInvalidPath() {
-        try {
-            virtualDir.list("in/valid/path");
-            fail("IOException expected");
-        } catch (IOException expected) {
-        }
-    }
 }
