@@ -38,9 +38,7 @@ import javax.media.jai.ImageLayout;
 import javax.media.jai.Interpolation;
 import javax.media.jai.JAI;
 import javax.media.jai.PlanarImage;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -123,10 +121,7 @@ public class LandsatGeotiffReader extends AbstractProductReader {
         product.setStartTime(utcCenter);
         product.setEndTime(utcCenter);
 
-        String basePath = mtlFile.getParent();
-        basePath = basePath == null ? "" : basePath + "/";
-
-        addBands(product, input, basePath);
+        addBands(product, input);
 
         return product;
     }
@@ -137,7 +132,7 @@ public class LandsatGeotiffReader extends AbstractProductReader {
         if (fileInput != null && fileInput.exists() && LandsatGeotiffReaderPlugin.isMetadataFilename(fileInput.getName())) {
             mtlFile = fileInput;
         } else {
-            String[] fileList = input.list("");
+            String[] fileList = input.listAllFiles();
             for (String filePath : fileList) {
                 if (LandsatGeotiffReaderPlugin.isMetadataFilename(filePath)) {
                     mtlFile = input.getFile(filePath);
@@ -160,7 +155,7 @@ public class LandsatGeotiffReader extends AbstractProductReader {
         return filename.substring(0, extensionIndex);
     }
 
-    private void addBands(Product product, VirtualDir folder, String basePath) throws IOException {
+    private void addBands(Product product, VirtualDir folder) throws IOException {
         final GeoTiffProductReaderPlugIn plugIn = new GeoTiffProductReaderPlugIn();
         final MetadataAttribute[] productAttributes = landsatMetadata.getProductMetadata().getAttributes();
         final Pattern pattern = landsatMetadata.getOpticalBandFileNamePattern();
@@ -173,7 +168,7 @@ public class LandsatGeotiffReader extends AbstractProductReader {
                 String bandNumber = matcher.group(1);
                 String fileName = metadataAttribute.getData().getElemString();
 
-                File bandFile = folder.getFile(basePath + fileName);
+                File bandFile = folder.getFile(fileName);
                 ProductReader productReader = plugIn.createReaderInstance();
                 Product bandProduct = productReader.readProductNodes(bandFile, null);
                 if (bandProduct != null) {
