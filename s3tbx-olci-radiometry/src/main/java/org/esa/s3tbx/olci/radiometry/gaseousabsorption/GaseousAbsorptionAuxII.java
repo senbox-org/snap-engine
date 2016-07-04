@@ -28,7 +28,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -49,6 +48,7 @@ public class GaseousAbsorptionAuxII {
             CsvReader reader = new CsvReader(fileReader, new char[]{' ', '\t'});
             ozoneHighs = reader.readDoubleRecords();
             coeffhighres = getCoeffhighres(ozoneHighs);
+            fileReader.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -59,17 +59,17 @@ public class GaseousAbsorptionAuxII {
     }
 
     public List<double[]> getCoeffhighres(List<double[]> ozoneHighs) {
-        List<Double> O3wavelengthList = new ArrayList<>();
-        List<Double> O3absorptionList = new ArrayList<>();
+        List<Double> o3wavelengthList = new ArrayList<>();
+        List<Double> o3absorptionList = new ArrayList<>();
 
         for (double[] ozoneHigh : ozoneHighs) {
-            O3wavelengthList.add(ozoneHigh[0]);
-            O3absorptionList.add(ozoneHigh[1]);
+            o3wavelengthList.add(ozoneHigh[0]);
+            o3absorptionList.add(ozoneHigh[1]);
         }
         List<double[]> O3Main = new ArrayList<>();
 
-        O3Main.add(Doubles.toArray(O3wavelengthList));
-        O3Main.add(Doubles.toArray(O3absorptionList));
+        O3Main.add(Doubles.toArray(o3wavelengthList));
+        O3Main.add(Doubles.toArray(o3absorptionList));
         return O3Main;
     }
 
@@ -82,18 +82,19 @@ public class GaseousAbsorptionAuxII {
     }
 
 
-    public double convolve(double lower, double upper) {
-        double[] O3absorption = coeffhighres.get(1);
+    public double convolve(double lower, double upper, List<double[]> coeffhighres) {
+        double[] o3absorption = coeffhighres.get(1);
         double[] O3wavelength = coeffhighres.get(0);
-        int length = O3absorption.length;
+        int length = o3absorption.length;
         int weight = 0;
+        double totalValue = 0;
         for (int i = 0; i < length; i++) {
             if (O3wavelength[i] >= lower && O3wavelength[i] <= upper) {
                 weight += 1;
+                totalValue += o3absorption[i];
             }
         }
-        double O3value = Arrays.stream(O3absorption).sum() / weight;
-        return O3value;
+        return totalValue / weight;
     }
 
 
@@ -105,23 +106,23 @@ public class GaseousAbsorptionAuxII {
             double[] absorb_ozon = new double[]{0.0002174, 0.0034448, 0.0205669, 0.0400134, 0.105446, 0.1081787, 0.0501634, 0.0349671, 0.0187495, 0.0086322, 0.0000001, 0.0084989, 0.0018944, 0.0012369, 0.000001};
             lamC = new double[]{412.5, 442.0, 490.0, 510.0, 560.0, 620.0, 665.0, 681.25, 708.75, 753.0, 761.25, 779.0, 865.0,
                     885.0, 900};
-            double[] lamW = new double[]{10., 10., 10., 10., 10., 10., 10., 10., 10., 10., 3.75, 10., 20., 20., 40.};
+            double[] lamW = new double[]{10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 3.075, 10.0, 20.0, 20.0, 40.0};
             for (int i = 0; i < lamC.length; i++) {
                 double lower = lamC[i] - lamW[i] / 2;
                 double upper = lamC[i] + lamW[i] / 2;
-                o3absorpInstrument.add(convolve(lower, upper));
+                o3absorpInstrument.add(convolve(lower, upper, this.coeffhighres));
             }
         }
         if (instrument.equals("OLCI")) {
             lamC = new double[]{
                     400.0, 412.5, 442.0, 490.0, 510.0, 560.0, 620.0, 665.0, 673.75, 681.25, 708.75, 753.75, 761.25, 764.375, 767.5, 778.75, 865.0,
                     885.0, 900.0, 940.0, 1020.0};
-            double[] lamW = new double[]{15., 10., 10., 10., 10., 10., 10., 10., 7.5, 7.5, 10., 7.5, 2.5, 3.75, 2.5, 15., 20., 10., 10., 20., 40.};
+            double[] lamW = new double[]{15.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 7.05, 7.05, 10.0, 7.05, 2.05, 3.075, 2.05, 15.0, 20.0, 10.0, 10.0, 20.0, 40.0};
 
             for (int i = 0; i < lamC.length; i++) {
                 double lower = lamC[i] - lamW[i] / 2;
                 double upper = lamC[i] + lamW[i] / 2;
-                o3absorpInstrument.add(convolve(lower, upper));
+                o3absorpInstrument.add(convolve(lower, upper, this.coeffhighres));
             }
         }
         return Doubles.toArray(o3absorpInstrument);

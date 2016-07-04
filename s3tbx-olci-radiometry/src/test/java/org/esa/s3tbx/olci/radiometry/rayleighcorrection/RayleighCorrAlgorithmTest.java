@@ -6,6 +6,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.stream.DoubleStream;
 
 import static org.junit.Assert.*;
 
@@ -113,6 +114,27 @@ public class RayleighCorrAlgorithmTest {
         } catch (NegativeArraySizeException ex) {
 
         }
+    }
+
+    @Test
+    public void testCheckIn() throws Exception {
+        double[] n = new double[]{2.840904951095581,
+                17.638418197631836,
+                28.7684268951416,
+                36.189727783203125,
+                43.61144256591797,
+                51.033390045166016,
+                58.45547866821289,
+                65.87765502929688,
+                69.58876037597656,
+                73.29988098144531,
+                77.0110092163086,
+                80.7221450805664};
+
+        boolean b = DoubleStream.of(n).anyMatch(x -> x < 2.82 );
+        assertFalse(b);
+        boolean c = DoubleStream.of(n).anyMatch(x -> x > 2.82 && x < 80.7221450805664);
+        assertTrue(c);
 
     }
 }

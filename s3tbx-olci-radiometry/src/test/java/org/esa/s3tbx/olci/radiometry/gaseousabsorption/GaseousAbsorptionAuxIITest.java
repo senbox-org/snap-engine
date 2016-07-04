@@ -18,8 +18,12 @@
 
 package org.esa.s3tbx.olci.radiometry.gaseousabsorption;
 
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
@@ -29,11 +33,59 @@ import static junit.framework.Assert.assertNotNull;
  * @author muhammad.bc.
  */
 public class GaseousAbsorptionAuxIITest {
+
+    private GaseousAbsorptionAuxII absorptionAuxII;
+
+    @Before
+    public void setUp() throws Exception {
+        absorptionAuxII = new GaseousAbsorptionAuxII();
+    }
+
     @Test
     public void testGetOzoneHighAux() throws Exception {
-        GaseousAbsorptionAuxII absorptionAuxII = new GaseousAbsorptionAuxII();
         List<double[]> ozoneHighs = absorptionAuxII.getOzoneHighs();
         assertNotNull(ozoneHighs);
         assertEquals(592, ozoneHighs.size());
+    }
+
+
+    @Test
+    public void testGetConvolve() throws Exception {
+        ArrayList<double[]> coeffhighres = new ArrayList<>();
+        coeffhighres.add(new double[]{1, 2, 3, 4, 5, 6, 7, 8});
+        coeffhighres.add(new double[]{1, 2, 3, 4, 5, 6, 7, 8});
+        assertEquals(3.5, absorptionAuxII.convolve(3, 4, coeffhighres));
+        assertEquals(4.0, absorptionAuxII.convolve(3, 5, coeffhighres));
+        assertEquals(3.0, absorptionAuxII.convolve(1, 5, coeffhighres));
+    }
+
+    @Test
+    public void testGetAbsorptionOLCI() throws Exception {
+        double[] olciAbsorption = absorptionAuxII.absorptionOzone("OLCI");
+        double[] expectedArrays = new double[]{
+                6.666666666666667E-6,
+                3.1E-4,
+                0.003181818181818182,
+                0.021318181818181816,
+                0.04210909090909091,
+                0.10538181818181819,
+                0.10820909090909091,
+                0.050372727272727284,
+                0.041042857142857145,
+                0.035614285714285716,
+                0.019549999999999998,
+                0.009142857142857144,
+                0.0071,
+                0.006966666666666667,
+                0.0067,
+                0.007673333333333333,
+                0.002142857142857143,
+                0.001227272727272727,
+                0.0015,
+                7.095238095238095E-4,
+                0.0
+        };
+        assertEquals(21, olciAbsorption.length);
+        Assert.assertArrayEquals(expectedArrays, olciAbsorption, 1e-8);
     }
 }
