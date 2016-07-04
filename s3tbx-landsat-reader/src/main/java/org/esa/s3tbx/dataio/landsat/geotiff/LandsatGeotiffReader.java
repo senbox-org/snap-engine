@@ -73,7 +73,8 @@ public class LandsatGeotiffReader extends AbstractProductReader {
 
     private LandsatMetadata landsatMetadata;
     private List<Product> bandProducts;
-    private VirtualDir input;
+    private VirtualDir virtualDir;
+    private String basePath;
 
     public LandsatGeotiffReader(ProductReaderPlugIn readerPlugin) {
         this(readerPlugin, Resolution.DEFAULT);
@@ -86,7 +87,7 @@ public class LandsatGeotiffReader extends AbstractProductReader {
 
     @Override
     protected Product readProductNodesImpl() throws IOException {
-        input = LandsatGeotiffReaderPlugin.getInput(getInput());
+        virtualDir = LandsatGeotiffReaderPlugin.getInput(getInput());
 
         File mtlFile = getMtlFile();
         landsatMetadata = LandsatMetadataFactory.create(mtlFile);
@@ -121,7 +122,7 @@ public class LandsatGeotiffReader extends AbstractProductReader {
         product.setStartTime(utcCenter);
         product.setEndTime(utcCenter);
 
-        addBands(product, input);
+        addBands(product);
 
         return product;
     }
@@ -130,12 +131,16 @@ public class LandsatGeotiffReader extends AbstractProductReader {
         File mtlFile = null;
         File fileInput = LandsatGeotiffReaderPlugin.getFileInput(getInput());
         if (fileInput != null && fileInput.exists() && LandsatGeotiffReaderPlugin.isMetadataFilename(fileInput.getName())) {
+            basePath = "";
             mtlFile = fileInput;
         } else {
-            String[] fileList = input.listAllFiles();
+            String[] fileList = virtualDir.listAllFiles();
             for (String filePath : fileList) {
                 if (LandsatGeotiffReaderPlugin.isMetadataFilename(filePath)) {
-                    mtlFile = input.getFile(filePath);
+                    basePath = new File(filePath).getParent();
+                    basePath = basePath == null ? "" : basePath + "/";
+
+                    mtlFile = virtualDir.getFile(filePath);
                     break;
                 }
             }
@@ -155,7 +160,7 @@ public class LandsatGeotiffReader extends AbstractProductReader {
         return filename.substring(0, extensionIndex);
     }
 
-    private void addBands(Product product, VirtualDir folder) throws IOException {
+    private void addBands(Product product) throws IOException {
         final GeoTiffProductReaderPlugIn plugIn = new GeoTiffProductReaderPlugIn();
         final MetadataAttribute[] productAttributes = landsatMetadata.getProductMetadata().getAttributes();
         final Pattern pattern = landsatMetadata.getOpticalBandFileNamePattern();
@@ -168,7 +173,7 @@ public class LandsatGeotiffReader extends AbstractProductReader {
                 String bandNumber = matcher.group(1);
                 String fileName = metadataAttribute.getData().getElemString();
 
-                File bandFile = folder.getFile(fileName);
+                File bandFile = virtualDir.getFile(basePath + fileName);
                 ProductReader productReader = plugIn.createReaderInstance();
                 Product bandProduct = productReader.readProductNodes(bandFile, null);
                 if (bandProduct != null) {
@@ -203,7 +208,7 @@ public class LandsatGeotiffReader extends AbstractProductReader {
                 }
             } else if (attributeName.equals(landsatMetadata.getQualityBandNameKey())) {
                 String fileName = metadataAttribute.getData().getElemString();
-                File bandFile = folder.getFile(fileName);
+                File bandFile = virtualDir.getFile(basePath + fileName);
                 ProductReader productReader = plugIn.createReaderInstance();
                 Product bandProduct = productReader.readProductNodes(bandFile, null);
                 if (bandProduct != null) {
@@ -401,8 +406,8 @@ public class LandsatGeotiffReader extends AbstractProductReader {
             bandProduct.closeIO();
         }
         bandProducts.clear();
-        input.close();
-        input = null;
+        virtualDir.close();
+        virtualDir = null;
         super.close();
     }
 
