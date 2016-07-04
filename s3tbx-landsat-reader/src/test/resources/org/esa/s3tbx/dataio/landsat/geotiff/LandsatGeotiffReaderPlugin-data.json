@@ -64,6 +64,11 @@
       "id": "L5043033_03319950627",
       "relativePath": "sensors_platforms/LANDSAT/LANDSAT_5_TM/geotiff/L5_30m19950627/L5043033_03319950627_MTL.txt",
       "description": "Product type: Landsat5_TM_L1T, PROCESSING_SOFTWARE: LPGS_11.0.0"
+    },
+    {
+      "id": "LT51970241984299FUI00",
+      "relativePath": "sensors_platforms/LANDSAT/LANDSAT_5_TM/geotiff/LT51970241984299FUI00.ZIP",
+      "description": "Product type: Landsat5_TM_L1T, PROCESSING_SOFTWARE_VERSION: SLAP_03.03, by ESA"
     }
   ]
 }
