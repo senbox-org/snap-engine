@@ -3,39 +3,39 @@
     <!--todo include - tf 20160314-->
     <folder name="Actions">
         <folder name="Operators">
-            <file name="org-esa-s3tbx-aatsr-regrid-AatsrUngriddingOpAction.instance">
-                <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
-                <attr name="delegate" methodvalue="org.esa.snap.core.gpf.ui.DefaultOperatorAction.create"/>
-                <attr name="displayName" stringvalue="Ungrid Aatsr"/>
-                <attr name="operatorName" stringvalue="AATSR.Ungrid"/>
-                <attr name="dialogTitle" stringvalue="Ungrid Aatsr"/>
-                <attr name="targetProductNameSuffix" stringvalue="_ungridded"/>
-                <attr name="ShortDescription" stringvalue="Ungrids ATSR L1B products"/>
-            </file>
-            <file name="org-esa-s3tbx-aatsr-regrid-AatsrUngriddingOp2Action.instance">
-                <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
-                <attr name="delegate" methodvalue="org.esa.snap.core.gpf.ui.DefaultOperatorAction.create"/>
-                <attr name="displayName" stringvalue="Ungrid Aatsr 2"/>
-                <attr name="operatorName" stringvalue="AATSR.Ungrid.2"/>
-                <attr name="dialogTitle" stringvalue="Ungrid Aatsr 2"/>
-                <attr name="targetProductNameSuffix" stringvalue="_ungridded"/>
-                <attr name="ShortDescription" stringvalue="Ungrids ATSR L1B products"/>
-            </file>
+            <!--<file name="org-esa-s3tbx-aatsr-regrid-AatsrUngriddingOpAction.instance">-->
+                <!--<attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>-->
+                <!--<attr name="delegate" methodvalue="org.esa.snap.core.gpf.ui.DefaultOperatorAction.create"/>-->
+                <!--<attr name="displayName" stringvalue="Ungrid Aatsr"/>-->
+                <!--<attr name="operatorName" stringvalue="AATSR.Ungrid"/>-->
+                <!--<attr name="dialogTitle" stringvalue="Ungrid Aatsr"/>-->
+                <!--<attr name="targetProductNameSuffix" stringvalue="_ungridded"/>-->
+                <!--<attr name="ShortDescription" stringvalue="Ungrids ATSR L1B products"/>-->
+            <!--</file>-->
+            <!--<file name="org-esa-s3tbx-aatsr-regrid-AatsrUngriddingOp2Action.instance">-->
+                <!--<attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>-->
+                <!--<attr name="delegate" methodvalue="org.esa.snap.core.gpf.ui.DefaultOperatorAction.create"/>-->
+                <!--<attr name="displayName" stringvalue="Ungrid Aatsr 2"/>-->
+                <!--<attr name="operatorName" stringvalue="AATSR.Ungrid.2"/>-->
+                <!--<attr name="dialogTitle" stringvalue="Ungrid Aatsr 2"/>-->
+                <!--<attr name="targetProductNameSuffix" stringvalue="_ungridded"/>-->
+                <!--<attr name="ShortDescription" stringvalue="Ungrids ATSR L1B products"/>-->
+            <!--</file>-->
         </folder>
     </folder>
 
     <folder name="Menu">
         <folder name="Raster">
-            <file name="org-esa-s3tbx-aatsr-regrid-AatsrUngriddingOpAction.shadow">
-                <attr name="originalFile"
-                      stringvalue="Actions/Operators/org-esa-s3tbx-aatsr-regrid-AatsrUngriddingOpAction.instance"/>
-                <attr name="position" intvalue="75"/>
-            </file>
-            <file name="org-esa-s3tbx-aatsr-regrid-AatsrUngriddingOp2Action.shadow">
-                <attr name="originalFile"
-                      stringvalue="Actions/Operators/org-esa-s3tbx-aatsr-regrid-AatsrUngriddingOp2Action.instance"/>
-                <attr name="position" intvalue="85"/>
-            </file>
+            <!--<file name="org-esa-s3tbx-aatsr-regrid-AatsrUngriddingOpAction.shadow">-->
+                <!--<attr name="originalFile"-->
+                      <!--stringvalue="Actions/Operators/org-esa-s3tbx-aatsr-regrid-AatsrUngriddingOpAction.instance"/>-->
+                <!--<attr name="position" intvalue="75"/>-->
+            <!--</file>-->
+            <!--<file name="org-esa-s3tbx-aatsr-regrid-AatsrUngriddingOp2Action.shadow">-->
+                <!--<attr name="originalFile"-->
+                      <!--stringvalue="Actions/Operators/org-esa-s3tbx-aatsr-regrid-AatsrUngriddingOp2Action.instance"/>-->
+                <!--<attr name="position" intvalue="85"/>-->
+            <!--</file>-->
         </folder>
     </folder>
 
