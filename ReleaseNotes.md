@@ -1,4 +1,41 @@
-#New in Sentinel-3 Toolbox v3.0
+Sentinel-3 Toolbox Release Notes
+================================
+
+Changes in S3TBX 4.0
+--------------------
+
+###New Features and Important Changes
+* New colour classification based on the Forel–Ule scale has been implement for OLCI, MERIS, 
+  SeaWiFS and MODIS. Thanks to Hendrik Jan van der Woerd and Marcel R. Wernand from the Royal 
+  Netherlands Institute for Sea Research (NOIZ) for the algorithm and the validation. 
+* The Sentinel-3 Reader have been improved according errors and format changes have been adapted.
+* The fractional Land/Water Mask operator has been moved into SNAP because of its general usability.          
+
+### Solved issues
+####Bugs
+    [SIIITBX-096] - Read SLSTR L2 WCT oblique view bands
+    [SIIITBX-097] - Subset of SeaDas L2 files not correct
+    [SIIITBX-099] - Silent error on product type null or empty
+    [SIIITBX-102] - Apply solar illumination correction factors to SPOT VGT P products
+    [SIIITBX-108] - Reading from NetCDF file is not snychronised in all cases in OLCI reader
+    [SIIITBX-112] - Reprojecting SLSTR L1B products with tie-point geo-codings creates shifts within images
+    [SIIITBX-113] - S3 SLSTR WST should not use valid mask for its geo-coding
+
+####New Feature
+    [SIIITBX-114] - Integrate the colour classification based on discrete Forel–Ule scale
+
+####Task
+    [SIIITBX-107] - Move Land/water mask operator into SNAP
+
+####Improvement
+    [SIIITBX-098] - Rad2Refl operator is slow
+    [SIIITBX-100] - LandsatReader should not search mtl file if it is already specified
+    [SIIITBX-104] - Cloud operator should consistently use the system logger
+    [SIIITBX-111] - Transfer additional file formats (.tgz) solution for LandsatGeoTiffReader from BEAM to SNAP
+
+
+Changes in S3TBX 3.0
+--------------------
 
 ###New Features and Important Changes
 * The Idepix Processor provides a pixel classification into properties such as clear/cloudy, land/water, snow, ice etc. The processing 
