@@ -194,11 +194,11 @@
             <artifactId>s3tbx-rad2refl-ui</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.esa.s3tbx</groupId>
-            <artifactId>s3tbx-olci-radiometry</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.esa.s3tbx</groupId>-->
+            <!--<artifactId>s3tbx-olci-radiometry</artifactId>-->
+            <!--<version>${project.version}</version>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
             <artifactId>s3tbx-sentinel3-reader</artifactId>
