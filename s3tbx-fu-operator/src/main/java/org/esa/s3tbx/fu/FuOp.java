@@ -55,10 +55,10 @@ import java.util.ArrayList;
  */
 @OperatorMetadata(
         alias = "FuClassification",
-        version = "0.11",
+        version = "1.0",
         category = "Optical/Thematic Water Processing",
-        description = "MERIS-based ocean colour classification with the discrete Forel-Ule scale.",
-        authors = " H.J van der Woerd (IVM), M.R. Wernand (NIOZ)), Muhammad Bala (BC), Marco Peters (BC)",
+        description = "Colour classification based on the discrete Forel-Ule scale.",
+        authors = " H.J van der Woerd (IVM), M.R. Wernand (NIOZ), Muhammad Bala (BC), Marco Peters (BC)",
         copyright = "(c) 2016 by Brockmann Consult GmbH")
 public class FuOp extends PixelOperator {
 
