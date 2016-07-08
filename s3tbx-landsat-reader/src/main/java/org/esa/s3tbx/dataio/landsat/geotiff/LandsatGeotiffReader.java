@@ -38,7 +38,9 @@ import javax.media.jai.ImageLayout;
 import javax.media.jai.Interpolation;
 import javax.media.jai.JAI;
 import javax.media.jai.PlanarImage;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.RenderingHints;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -73,8 +75,7 @@ public class LandsatGeotiffReader extends AbstractProductReader {
 
     private LandsatMetadata landsatMetadata;
     private List<Product> bandProducts;
-    private VirtualDir virtualDir;
-    private String basePath;
+    private VirtualDir input;
 
     public LandsatGeotiffReader(ProductReaderPlugIn readerPlugin) {
         this(readerPlugin, Resolution.DEFAULT);
@@ -87,7 +88,7 @@ public class LandsatGeotiffReader extends AbstractProductReader {
 
     @Override
     protected Product readProductNodesImpl() throws IOException {
-        virtualDir = LandsatGeotiffReaderPlugin.getInput(getInput());
+        input = LandsatGeotiffReaderPlugin.getInput(getInput());
 
         File mtlFile = getMtlFile();
         landsatMetadata = LandsatMetadataFactory.create(mtlFile);
@@ -122,7 +123,7 @@ public class LandsatGeotiffReader extends AbstractProductReader {
         product.setStartTime(utcCenter);
         product.setEndTime(utcCenter);
 
-        addBands(product);
+        addBands(product, input);
 
         return product;
     }
@@ -130,17 +131,13 @@ public class LandsatGeotiffReader extends AbstractProductReader {
     protected File getMtlFile() throws IOException {
         File mtlFile = null;
         File fileInput = LandsatGeotiffReaderPlugin.getFileInput(getInput());
-        if (fileInput != null && fileInput.exists() && LandsatGeotiffReaderPlugin.isMetadataFilename(fileInput.getName())) {
-            basePath = "";
+        if (fileInput != null && fileInput.exists() && isMetadataFile(fileInput.getName())) {
             mtlFile = fileInput;
         } else {
-            String[] fileList = virtualDir.listAllFiles();
-            for (String filePath : fileList) {
-                if (LandsatGeotiffReaderPlugin.isMetadataFilename(filePath)) {
-                    basePath = new File(filePath).getParent();
-                    basePath = basePath == null ? "" : basePath + "/";
-
-                    mtlFile = virtualDir.getFile(filePath);
+            String[] list = input.list("");
+            for (String fileName : list) {
+                if (isMetadataFile(fileName)) {
+                    mtlFile = input.getFile(fileName);
                     break;
                 }
             }
@@ -160,7 +157,7 @@ public class LandsatGeotiffReader extends AbstractProductReader {
         return filename.substring(0, extensionIndex);
     }
 
-    private void addBands(Product product) throws IOException {
+    private void addBands(Product product, VirtualDir folder) throws IOException {
         final GeoTiffProductReaderPlugIn plugIn = new GeoTiffProductReaderPlugIn();
         final MetadataAttribute[] productAttributes = landsatMetadata.getProductMetadata().getAttributes();
         final Pattern pattern = landsatMetadata.getOpticalBandFileNamePattern();
@@ -173,7 +170,7 @@ public class LandsatGeotiffReader extends AbstractProductReader {
                 String bandNumber = matcher.group(1);
                 String fileName = metadataAttribute.getData().getElemString();
 
-                File bandFile = virtualDir.getFile(basePath + fileName);
+                File bandFile = folder.getFile(fileName);
                 ProductReader productReader = plugIn.createReaderInstance();
                 Product bandProduct = productReader.readProductNodes(bandFile, null);
                 if (bandProduct != null) {
@@ -208,7 +205,7 @@ public class LandsatGeotiffReader extends AbstractProductReader {
                 }
             } else if (attributeName.equals(landsatMetadata.getQualityBandNameKey())) {
                 String fileName = metadataAttribute.getData().getElemString();
-                File bandFile = virtualDir.getFile(basePath + fileName);
+                File bandFile = folder.getFile(fileName);
                 ProductReader productReader = plugIn.createReaderInstance();
                 Product bandProduct = productReader.readProductNodes(bandFile, null);
                 if (bandProduct != null) {
@@ -406,9 +403,13 @@ public class LandsatGeotiffReader extends AbstractProductReader {
             bandProduct.closeIO();
         }
         bandProducts.clear();
-        virtualDir.close();
-        virtualDir = null;
+        input.close();
+        input = null;
         super.close();
+    }
+
+    static boolean isMetadataFile(String filename) {
+        return filename.toLowerCase().endsWith("_mtl.txt");
     }
 
     private static class ColorIterator {

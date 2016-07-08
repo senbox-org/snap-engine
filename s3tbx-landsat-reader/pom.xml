@@ -39,11 +39,6 @@
             <artifactId>snap-geotiff</artifactId>
             <version>${snap.version}</version>
         </dependency>
-        <!-- for bzip2 de-compression-->
-        <dependency>
-            <groupId>edu.ucar</groupId>
-            <artifactId>netcdf</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.xeustechnologies</groupId>
             <artifactId>jtar</artifactId>
