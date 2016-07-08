@@ -31,7 +31,6 @@ Changes in S3TBX 4.0
     [SIIITBX-098] - Rad2Refl operator is slow
     [SIIITBX-100] - LandsatReader should not search mtl file if it is already specified
     [SIIITBX-104] - Cloud operator should consistently use the system logger
-    [SIIITBX-111] - Transfer additional file formats (.tgz) solution for LandsatGeoTiffReader from BEAM to SNAP
 
 
 Changes in S3TBX 3.0
