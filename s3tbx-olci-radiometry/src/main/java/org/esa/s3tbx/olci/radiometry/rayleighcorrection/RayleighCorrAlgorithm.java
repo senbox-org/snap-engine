@@ -22,7 +22,7 @@ import java.util.HashMap;
 public class RayleighCorrAlgorithm {
 
     public static final double STD_SEA_LEVEL_PRESSURE = 1013.0;
-    private double[] tPoly;
+    private double[] tau_ray;
     private double[] thetas;
     private double[] rayAlbedoLuts;
     private double[][][] rayCooefMatrixA;
@@ -33,12 +33,12 @@ public class RayleighCorrAlgorithm {
     public RayleighCorrAlgorithm() {
         RayleighCorrectionAux rayleighCorrectionAux = new RayleighCorrectionAux();
         try {
-            Path resolve = rayleighCorrectionAux.installAuxdata().resolve("matrix.txt");
+            Path coeffMatrix = rayleighCorrectionAux.installAuxdata().resolve("coeffMatrix.txt");
 
             JSONParser jsonObject = new JSONParser();
-            JSONObject parse = (JSONObject) jsonObject.parse(new FileReader(resolve.toString()));
+            JSONObject parse = (JSONObject) jsonObject.parse(new FileReader(coeffMatrix.toString()));
 
-            tPoly = rayleighCorrectionAux.parseJSON1DimArray(parse, "tau_ray");
+            tau_ray = rayleighCorrectionAux.parseJSON1DimArray(parse, "tau_ray");
             thetas = rayleighCorrectionAux.parseJSON1DimArray(parse, "theta");
             rayAlbedoLuts = rayleighCorrectionAux.parseJSON1DimArray(parse, "ray_albedo_lut");
             ArrayList<double[][][]> ray_coeff_matrix = rayleighCorrectionAux.parseJSON3DimArray(parse, "ray_coeff_matrix");
@@ -275,11 +275,11 @@ public class RayleighCorrAlgorithm {
 
             double tRs = ((2.0 / 3.0 + cosSZARad) + (2.0 / 3.0 - cosSZARad) * Math.exp(-taurVal / cosSZARad)) / (4.0 / 3.0 + taurVal);
 
-            tR_thetaS[index] = tPoly[0] + tPoly[1] * tRs + tPoly[2] * Math.pow(tRs, 2);
+            tR_thetaS[index] = tau_ray[0] + tau_ray[1] * tRs + tau_ray[2] * Math.pow(tRs, 2);
             //#Rayleigh Transmittance sun - surface
             double tRv = ((2.0 / 3.0 + cosOZARad) + (2.0 / 3.0 - cosOZARad) * Math.exp(-taurVal / cosOZARad)) / (4.0 / 3.0 + taurVal);
             //#Rayleigh Transmittance surface - sensor
-            tR_thetaV[index] = tPoly[0] + tPoly[1] * tRv + tPoly[2] * Math.pow(tRv, 2);
+            tR_thetaV[index] = tau_ray[0] + tau_ray[1] * tRv + tau_ray[2] * Math.pow(tRv, 2);
 
             sARay[index] = interpolate.value(taurVal);
 

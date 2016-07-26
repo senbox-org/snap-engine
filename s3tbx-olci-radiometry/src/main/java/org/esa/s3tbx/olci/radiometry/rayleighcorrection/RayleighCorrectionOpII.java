@@ -19,11 +19,19 @@
 package org.esa.s3tbx.olci.radiometry.rayleighcorrection;
 
 import com.bc.ceres.core.ProgressMonitor;
+import java.awt.Rectangle;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.esa.s3tbx.olci.radiometry.gaseousabsorption.GaseousAbsorptionAuxII;
 import org.esa.s3tbx.olci.radiometry.smilecorr.SmileUtils;
 import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.ProductNodeGroup;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
@@ -31,12 +39,6 @@ import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.util.ProductUtils;
-
-import java.awt.*;
-import java.util.*;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @author muhammad.bc.
@@ -48,9 +50,23 @@ import java.util.stream.Stream;
         category = "Optical/Pre-Processing",
         version = "1.2")
 public class RayleighCorrectionOpII extends Operator {
-    public static final String[] BAND_CATEGORIES = new String[]{"RayleighSimple_%02d", "rtoa_%02d", "taurS_%02d", "taur_%02d", "rtoa_ng_%02d",
-            "transSRay_%02d", "transVRay_%02d", "sARay_%02d", "rtoaRay_%02d", "rBRR_%02d",
-            "sphericalAlbedoFactor_%02d"};
+//    public static final String[] BAND_CATEGORIES = new String[]{"RayleighSimple_%02d", "rtoa_%02d", "taurS_%02d", "taur_%02d", "rtoa_ng_%02d",
+//            "transSRay_%02d", "transVRay_%02d", "sARay_%02d", "rtoaRay_%02d", "rBRR_%02d","sphericalAlbedoFactor_%02d"};
+
+    public static final String[] BAND_CATEGORIES = new String[]{
+            "taur_%02d",
+            "transSRay_%02d",
+            "transVRay_%02d",
+            "sARay_%02d",
+            "rtoaRay_%02d",
+            "rBRR_%02d",
+            "sphericalAlbedoFactor_%02d",
+            "RayleighSimple_%02d",
+            "rtoa_ng_%02d",
+            "taurS_%02d",
+            "rtoa_%02d"
+    };
+
     public static final String OLCI_RADIANCE_NAME_PATTERN = "Oa%02d_radiance";
     double[] H2O_COR_POLY = new double[]{0.3832989, 1.6527957, -1.5635101, 0.5311913};  // Polynomial coefficients for WV transmission @ 709nm
 
@@ -79,26 +95,25 @@ public class RayleighCorrectionOpII extends Operator {
             }
         }
 
-        /*targetProduct.addBand("airmass", ProductData.TYPE_FLOAT32);
+        targetProduct.addBand("airmass", ProductData.TYPE_FLOAT32);
         targetProduct.addBand("azidiff", ProductData.TYPE_FLOAT32);
-        targetProduct.addBand("altitude", ProductData.TYPE_FLOAT32);*/
+        targetProduct.addBand("altitude", ProductData.TYPE_FLOAT32);
 
         ProductUtils.copyBand("altitude", sourceProduct, targetProduct, true);
         ProductUtils.copyFlagBands(sourceProduct, targetProduct, true);
         ProductUtils.copyProductNodes(sourceProduct, targetProduct);
         targetProduct.setAutoGrouping("RayleighSimple:taurS:rtoa:taur:transSRay:rtoa_ng:transVRay:sARay:rtoaRay:rBRR:sphericalAlbedoFactor");
+
+
+        Band raycor_flags = targetProduct.addBand("raycor_flags", ProductData.TYPE_UINT8);
+        FlagCoding flagCoding = new FlagCoding("raycor_flags");
+        flagCoding.addFlag("testflag_1", 1, "Flag 1 for Rayleigh Correction");
+        flagCoding.addFlag("testflag_2", 2, "Flag 2 for Rayleigh Correction");
+        targetProduct.getFlagCodingGroup().add(flagCoding);
+        raycor_flags.setSampleCoding(flagCoding);
+
         setTargetProduct(targetProduct);
     }
-
-
-    private void checkRequireBandTiePont(String[] bandTiepoints) {
-        for (final String bandTiepoint : bandTiepoints) {
-            if (!sourceProduct.containsRasterDataNode(bandTiepoint)) {
-                throw new OperatorException("The required raster '" + bandTiepoint + "' is not in the product.");
-            }
-        }
-    }
-
 
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
@@ -270,7 +285,7 @@ public class RayleighCorrectionOpII extends Operator {
             return getPattern;
         }
 
-        Sensor(int numBands, String getPattern) {
+        Sensor(String getPattern, int numBands) {
             this.numBands = numBands;
             this.getPattern = getPattern;
         }

@@ -43,7 +43,7 @@ public class RayleighCorrectionAuxTest {
     public void setUp() throws Exception {
         rayleighCorrectionAux = new RayleighCorrectionAux();
         Path installAuxdataPath = rayleighCorrectionAux.installAuxdata();
-        pathJSON = installAuxdataPath.resolve("matrix.txt");
+        pathJSON = installAuxdataPath.resolve("coeffMatrix.txt");
     }
 
 
@@ -81,5 +81,10 @@ public class RayleighCorrectionAuxTest {
         ArrayList<double[][][]> ray_coeff_matrix = rayleighCorrectionAux.parseJSON3DimArray(parse, "ray_coeff_matrix");
         assertNotNull(ray_coeff_matrix);
         assertEquals(4, ray_coeff_matrix.size());
+
+        double[][][] doubles = ray_coeff_matrix.get(0);
+        assertEquals(1.0046205520629883, doubles[0][0][0], 1e-8);
+        assertEquals(1.0046125650405884, doubles[0][1][0], 1e-8);
+        assertEquals( 1.0045990943908691, doubles[0][2][0], 1e-8);
     }
 }
