@@ -21,7 +21,7 @@
 
     <groupId>org.esa.s3tbx</groupId>
     <artifactId>s3tbx</artifactId>
-    <version>4.0.0-SNAPSHOT</version>
+    <version>5.0.0-SNAPSHOT</version>
     <name>Sentinel-3 Toolbox</name>
     <description>Tools for the Sentinel-3 Satellite</description>
     <url>https://github.com/senbox-org/s3tbx</url>
@@ -56,7 +56,7 @@
         <module>s3tbx-proba-v-reader</module>
         <module>s3tbx-rad2refl</module>
         <module>s3tbx-rad2refl-ui</module>
-        <module>s3tbx-olci-radiometry</module>
+        <!--<module>s3tbx-olci-radiometry</module>-->
         <module>s3tbx-sentinel3-reader</module>
         <module>s3tbx-sentinel3-reader-ui</module>
         <module>s3tbx-slstr-pdu-stitching</module>
@@ -70,17 +70,18 @@
     <packaging>pom</packaging>
 
     <properties>
-        <snap.version>4.0.0-SNAPSHOT</snap.version>
+        <snap.version>5.0.0-SNAPSHOT</snap.version>
         <!--
             snap.version is the Maven module version.
             snap.nbmSpecVersion is the NetBeans module specification version.
             It is used to filter manifest.mf and set the manifest's "OpenIDE-Module-Specification-Version" header.
             This is necessary to make NetBeans modules updatable and independent from the Maven version (= snap.version).
         -->
-        <s3tbx.version>4.0.0-SNAPSHOT</s3tbx.version>
+        <s3tbx.version>5.0.0-SNAPSHOT</s3tbx.version>
         <netbeans.version>RELEASE802</netbeans.version>
         <javahelp.version>2.0.05</javahelp.version>
-        <seadas.reader.version>1.5.8-SNAPSHOT</seadas.reader.version>
+        <netcdf.version>4.3.22</netcdf.version>
+        <seadas.reader.version>1.5.8</seadas.reader.version>
         <seadas.reader.ui.version>1.5.6</seadas.reader.ui.version>
         <brandingToken>s3tbx</brandingToken>
         <user.language>en</user.language>
@@ -268,11 +269,15 @@
             </dependency>
 
             <!-- TAR archive support  -->
-
+            <dependency>
+                <groupId>edu.ucar</groupId>
+                <artifactId>netcdf</artifactId>
+                <version>${netcdf.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.xeustechnologies</groupId>
                 <artifactId>jtar</artifactId>
-                <version>1.0.4</version>
+                <version>1.1</version>
             </dependency>
 
         </dependencies>

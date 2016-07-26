@@ -140,11 +140,12 @@ public class S3NetcdfReader {
         final MetadataElement globalAttributesElement = new MetadataElement("Global_Attributes");
         final List<Attribute> globalAttributes = netcdfFile.getGlobalAttributes();
         for (final Attribute attribute : globalAttributes) {
-            int type = DataTypeUtils.getEquivalentProductDataType(attribute.getDataType(), false, false);
-            final ProductData attributeData = getAttributeData(attribute, type);
-            final MetadataAttribute metadataAttribute =
-                    new MetadataAttribute(attribute.getFullName(), attributeData, true);
-            globalAttributesElement.addAttribute(metadataAttribute);
+            if (attribute.getValues() != null) {
+                int type = DataTypeUtils.getEquivalentProductDataType(attribute.getDataType(), false, false);
+                final ProductData attributeData = getAttributeData(attribute, type);
+                final MetadataAttribute metadataAttribute = new MetadataAttribute(attribute.getFullName(), attributeData, true);
+                globalAttributesElement.addAttribute(metadataAttribute);
+            }
         }
         product.getMetadataRoot().addElement(globalAttributesElement);
         final MetadataElement variableAttributesElement = new MetadataElement("Variable_Attributes");
@@ -246,8 +247,7 @@ public class S3NetcdfReader {
                     getIndexCoding(product, band.getName(), flagMeaningsAttribute, flagValuesAttribute, msb);
             band.setSampleCoding(indexCoding);
         } else if (flagMasksAttribute != null) {
-            final FlagCoding flagCoding =
-                    getFlagCoding(product, band.getName(), flagMeaningsAttribute, flagMasksAttribute, msb);
+            final FlagCoding flagCoding = getFlagCoding(product, band.getName(), flagMeaningsAttribute, flagMasksAttribute, msb);
             band.setSampleCoding(flagCoding);
         }
     }
@@ -460,10 +460,11 @@ public class S3NetcdfReader {
                 if (type == -1 && attribute.getDataType() == DataType.LONG) {
                     type = variable.isUnsigned() ? ProductData.TYPE_UINT32 : ProductData.TYPE_INT32;
                 }
-                final ProductData attributeData = getAttributeData(attribute, type);
-                final MetadataAttribute metadataAttribute =
-                        new MetadataAttribute(attribute.getFullName(), attributeData, true);
-                variableElement.addAttribute(metadataAttribute);
+                if (attribute.getValues() != null) {
+                    final ProductData attributeData = getAttributeData(attribute, type);
+                    final MetadataAttribute metadataAttribute = new MetadataAttribute(attribute.getFullName(), attributeData, true);
+                    variableElement.addAttribute(metadataAttribute);
+                }
             }
         }
         List<Dimension> variableDimensions = variable.getDimensions();
@@ -590,19 +591,16 @@ public class S3NetcdfReader {
 
     String readProductType() {
         Attribute typeAttribute = netcdfFile.findGlobalAttribute(product_type);
-        String productType;
-        if (typeAttribute != null) {
-            productType = typeAttribute.getStringValue();
-            if (productType != null && productType.trim().length() > 0) {
-                productType = productType.trim();
-            }
-        } else {
+        if (typeAttribute == null) {
             typeAttribute = netcdfFile.findGlobalAttribute("Conventions");
-            if (typeAttribute != null) {
-                productType = typeAttribute.getStringValue();
-            } else {
-                productType = Constants.FORMAT_NAME;
-            }
+        }
+        String type = null;
+        if (typeAttribute != null) {
+            type = typeAttribute.getStringValue();
+        }
+        String productType = Constants.FORMAT_NAME;
+        if (type != null && type.trim().length() > 0) {
+            productType = type.trim();
         }
         return productType;
     }
