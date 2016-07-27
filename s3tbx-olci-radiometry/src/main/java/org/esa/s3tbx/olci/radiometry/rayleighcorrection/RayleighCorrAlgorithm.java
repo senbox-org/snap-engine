@@ -13,7 +13,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 
 /**
@@ -29,6 +28,8 @@ public class RayleighCorrAlgorithm {
     private double[][][] rayCooefMatrixB;
     private double[][][] rayCooefMatrixC;
     private double[][][] rayCooefMatrixD;
+    private PolynomialSplineFunction interpolate;
+    private BivariateGridInterpolator gridInterpolator;
 
     public RayleighCorrAlgorithm() {
         RayleighCorrectionAux rayleighCorrectionAux = new RayleighCorrectionAux();
@@ -48,13 +49,18 @@ public class RayleighCorrAlgorithm {
             rayCooefMatrixC = ray_coeff_matrix.get(2);
             rayCooefMatrixD = ray_coeff_matrix.get(3);
 
+
+            double[] lineSpace = getLineSpace(0, 1, 17);
+            interpolate = new LinearInterpolator().interpolate(lineSpace, rayAlbedoLuts);
+            gridInterpolator = new BicubicSplineInterpolator();
+
         } catch (IOException | ParseException e) {
             e.printStackTrace();
         }
     }
 
     //Copied from org.esa.beam.meris.case2.MerisCase2BasisWaterOp
-    protected double getAzimuthDifference(double viewAzimuthAngle, double sunAzimuthAngle) {
+    public double getAzimuthDifference(double viewAzimuthAngle, double sunAzimuthAngle) {
         double azi_diff_deg = Math.abs(viewAzimuthAngle - sunAzimuthAngle); /* azimuth difference */
               /* reverse azi difference */
         if (azi_diff_deg > 180.0) {
@@ -143,11 +149,6 @@ public class RayleighCorrAlgorithm {
         return phaseRaylMin;
     }
 
-
-    /**
-     * @param lambdas
-     * @return sigma
-     */
     public double[] getCrossSectionSigma(double[] lambdas) {
         double n_ratio = 1 + 0.54 * (RayleighConstants.CO2 - 0.0003);
         double molecularDen = Math.pow(RayleighConstants.Molecular_cm3, 2);
@@ -177,7 +178,7 @@ public class RayleighCorrAlgorithm {
             double airPressurePixelcm2 = seaLevelPressure[i] * Math.pow((1.0 - 0.0065 * altitude[i] / 288.15), 5.255) * 1000;
             double latRad = Math.toRadians(latitude[i]);
             double cos2LatRad = Math.cos(2 * latRad);
-            double g0 = RayleighConstants.ACCELERATION_GRAVITY_SEA_LEVEL_458_LATITUDE * (1 - 0.0026373 * cos2LatRad + 0.0000059 * Math.pow(cos2LatRad, 2));
+            double g0 = 980.616 * (1 - 0.0026373 * cos2LatRad + 0.0000059 * Math.pow(cos2LatRad, 2));
             double effectiveMassWeightAltitude = 0.73737 * altitude[i] + 5517.56;
 
             double g = g0 - (0.0003085462 + 0.000000227 * cos2LatRad) * effectiveMassWeightAltitude +
@@ -185,71 +186,58 @@ public class RayleighCorrAlgorithm {
                     (1.517E-17 + 6E-20 * cos2LatRad) * Math.pow(effectiveMassWeightAltitude, 3);
 
             double factor = (airPressurePixelcm2 * RayleighConstants.AVOGADRO_NUMBER) / (RayleighConstants.MEAN_MOLECULAR_WEIGHT_C02 * g);
-
             rayleighOpticalThickness[i] = factor * sigma[i];
         }
         return rayleighOpticalThickness;
     }
 
-    public HashMap<String, double[]> getRhoBrr(double[] sza, double[] oza, double[] saaRads, double[] aooRads, double[] taur, double[] reflectance) {
-        double[] szaRads = SmileUtils.convertDegreesToRadians(sza);
-        double[] ozaRads = SmileUtils.convertDegreesToRadians(oza);
-
+    public HashMap<String, double[]> getRhoBrr(double[] sza, double[] oza, double[] szaRads, double[] ozaRads, double[] saaRads, double[] aooRads, double[] taur, double[] reflectance) {
         HashMap<String, double[]> rayleighHashMap = new HashMap<>();
-
-        double[] rho_BRR = new double[ozaRads.length];
-        double[] sphericalFactor = new double[ozaRads.length];
-        double[] rho_toaR = new double[ozaRads.length];
-        double[] tR_thetaV = new double[ozaRads.length];
-        double[] tR_thetaS = new double[ozaRads.length];
-
+        int length = ozaRads.length;
+        double[] rho_BRR = new double[length];
+        double[] sphericalFactor = new double[length];
+        double[] rho_toaR = new double[length];
+        double[] tR_thetaV = new double[length];
+        double[] tR_thetaS = new double[length];
 
         double[] fourierSeries = new double[3];
         double rho_Rm[] = new double[3];
-
 
         double a[] = new double[3];
         double b[] = new double[3];
         double c[] = new double[3];
         double d[] = new double[3];
-        // todo mba** Not yet implement,need more details.
-        Arrays.fill(a, 1);
-        Arrays.fill(b, 1);
-        Arrays.fill(c, 1);
-        Arrays.fill(d, 1);
 
-        double[] lineSpace = getLineSpace(0, 1, 17);
-        LinearInterpolator interpolator = new LinearInterpolator();
-        PolynomialSplineFunction interpolate = interpolator.interpolate(lineSpace, rayAlbedoLuts);
-        double[] sARay = new double[ozaRads.length];
+        double[] sARay = new double[length];
 
-        BivariateGridInterpolator gridInterpolator = new BicubicSplineInterpolator();
-        for (int index = 0; index < sza.length; index++) {
-
-            // Fourier components of multiple scattering
-            double sinSZARad = Math.sin(szaRads[index]);
-            double cosSZARad = Math.cos(szaRads[index]);
-            double cosOZARad = Math.cos(ozaRads[index]);
-            double sinOZARad = Math.sin(ozaRads[index]);
-
-            double sinSZA2 = Math.pow(sinSZARad, 2);
-            double sinOZA2 = Math.pow(sinOZARad, 2);
-
+        for (int index = 0; index < length; index++) {
             double taurVal = taur[index];
             if (Double.isNaN(taurVal)) {
                 rho_BRR[index] = taurVal;
                 continue;
             }
+            // Fourier components of multiple scattering
+            double szaRad = szaRads[index];
+            double ozaRad = ozaRads[index];
+
+            double cosSZARad = Math.cos(szaRad);
+            double cosOZARad = Math.cos(ozaRad);
+
+            double sinSZARad = Math.sin(szaRad);
+            double sinOZARad = Math.sin(ozaRad);
+
+            double sinSZA2 = Math.pow(sinSZARad, 2);
+            double sinOZA2 = Math.pow(sinOZARad, 2);
+
 
             //Rayleigh Phase function, 3 Fourier terms
-            fourierSeries[0] = (float) (3.0 * RayleighConstants.PA /
-                    4.0 * (1 + Math.pow(cosSZARad, 2) * Math.pow(cosOZARad, 2) + (sinSZA2 * sinOZA2) / 2.0) + RayleighConstants.PB);
-            fourierSeries[1] = (float) (-3.0 * RayleighConstants.PA / 4.0 * cosSZARad * cosOZARad * sinSZARad * sinOZARad);
-            fourierSeries[2] = (float) (3.0 * RayleighConstants.PA / 16.0 * sinSZA2 * sinOZA2);
+            fourierSeries[0] = (3.0 * 0.9587256 / 4.0 * (1 + (cosSZARad * cosSZARad) * (cosOZARad * cosOZARad) + (sinSZA2 * sinOZA2) / 2.0) + (1.0 - 0.9587256));
+            fourierSeries[1] = (-3.0 * 0.9587256 / 4.0 * cosSZARad * cosOZARad * sinSZARad * sinOZARad);
+            fourierSeries[2] = (3.0 * 0.9587256 / 16.0 * sinSZA2 * sinOZA2);
 
             double cosDelta = Math.cos(aooRads[index] - saaRads[index]);
             double aziDiff = Math.acos(cosDelta); // in radian
-            double massAir = (1 / Math.cos(szaRads[index]) + 1 / Math.cos(ozaRads[index]));
+            double massAir = (1 / Math.cos(szaRad) + 1 / Math.cos(ozaRad));
 
             double yVal = oza[index];
             double xVal = sza[index];
@@ -263,11 +251,10 @@ public class RayleighCorrAlgorithm {
                 }
             }
             // Rayleigh primary scattering
-
             for (int i = 0; i < fourierSeries.length; i++) {
                 double rayPrimaryScatters = (fourierSeries[i] / (4.0 * (cosSZARad + cosOZARad))) * (1.0 - Math.exp(-massAir * taurVal));
-                double v = a[i] + b[i] * taurVal + c[i] * Math.pow(taurVal, 2) + d[i] * Math.pow(taurVal, 3);
-                rho_Rm[i] = v * rayPrimaryScatters;
+                double rayMultiCorr = a[i] + b[i] * taurVal + c[i] * Math.pow(taurVal, 2) + d[i] * Math.pow(taurVal, 3);
+                rho_Rm[i] = rayMultiCorr * rayPrimaryScatters;
             }
             //sum of the fourier
             double rho_R = rho_Rm[0] + 2.0 * rho_Rm[1] * Math.cos(aziDiff) + 2.0 * rho_Rm[2] * Math.cos(2.0 * aziDiff);
@@ -289,6 +276,7 @@ public class RayleighCorrAlgorithm {
             rho_BRR[index] = (rho_toaR[index] * sphericalFactor[index]);
         }
 
+
         rayleighHashMap.put("rBRR", rho_BRR);
         rayleighHashMap.put("sphericalAlbedoFactor", sphericalFactor);
         rayleighHashMap.put("rtoaRay", rho_toaR);
@@ -299,6 +287,80 @@ public class RayleighCorrAlgorithm {
         return rayleighHashMap;
     }
 
+
+    public RayleighBands getRhoBrr(double sza, double oza, double szaRad, double ozaRad, double taur, double reflectance, double aziDiff, double massAir) {
+        RayleighBands rayleighBands = new RayleighBands();
+        double[] fourierSeries = new double[3];
+        double rho_Rm[] = new double[3];
+
+        double a[] = new double[3];
+        double b[] = new double[3];
+        double c[] = new double[3];
+        double d[] = new double[3];
+
+        // Fourier components of multiple scattering
+        double cosSZARad = Math.cos(szaRad);
+        double cosOZARad = Math.cos(ozaRad);
+
+        double sinSZARad = Math.sin(szaRad);
+        double sinOZARad = Math.sin(ozaRad);
+
+        double sinSZA2 = Math.pow(sinSZARad, 2);
+        double sinOZA2 = Math.pow(sinOZARad, 2);
+
+        double rho_BRR;
+        if (Double.isNaN(taur)) {
+            rayleighBands.rho_BRR = taur;
+            return rayleighBands;
+        }
+
+        //Rayleigh Phase function, 3 Fourier terms
+        fourierSeries[0] = (3.0 * 0.9587256 / 4.0 * (1 + Math.pow(cosSZARad, 2) * Math.pow(cosOZARad, 2) + (sinSZA2 * sinOZA2) / 2.0) + (1.0 - 0.9587256));
+        fourierSeries[1] = (-3.0 * 0.9587256 / 4.0 * cosSZARad * cosOZARad * sinSZARad * sinOZARad);
+        fourierSeries[2] = (3.0 * 0.9587256 / 16.0 * sinSZA2 * sinOZA2);
+
+        if (oza > thetas[0] && oza < thetas[thetas.length - 1]) {
+            for (int i = 0; i < a.length; i++) {
+                a[i] = gridInterpolator.interpolate(thetas, thetas, rayCooefMatrixA[i]).value(sza, oza);
+                b[i] = gridInterpolator.interpolate(thetas, thetas, rayCooefMatrixB[i]).value(sza, oza);
+                c[i] = gridInterpolator.interpolate(thetas, thetas, rayCooefMatrixC[i]).value(sza, oza);
+                d[i] = gridInterpolator.interpolate(thetas, thetas, rayCooefMatrixD[i]).value(sza, oza);
+            }
+        }
+        // Rayleigh primary scattering
+        for (int i = 0; i < fourierSeries.length; i++) {
+            double rayPrimaryScatters = (fourierSeries[i] / (4.0 * (cosSZARad + cosOZARad))) * (1.0 - Math.exp(-massAir * taur));
+            double rayMultiCorr = a[i] + b[i] * taur + c[i] * Math.pow(taur, 2) + d[i] * Math.pow(taur, 3);
+            rho_Rm[i] = rayMultiCorr * rayPrimaryScatters;
+        }
+        //sum of the fourier
+        double rho_R = rho_Rm[0] + 2.0 * rho_Rm[1] * Math.cos(aziDiff) + 2.0 * rho_Rm[2] * Math.cos(2.0 * aziDiff);
+        // polynomial coefficients tpoly0, tpoly1 and tpoly2 from MERIS LUT
+
+        double tRs = ((2.0 / 3.0 + cosSZARad) + (2.0 / 3.0 - cosSZARad) * Math.exp(-taur / cosSZARad)) / (4.0 / 3.0 + taur);
+
+        double tR_thetaS = tau_ray[0] + tau_ray[1] * tRs + tau_ray[2] * Math.pow(tRs, 2);
+        //#Rayleigh Transmittance sun - surface
+        double tRv = ((2.0 / 3.0 + cosOZARad) + (2.0 / 3.0 - cosOZARad) * Math.exp(-taur / cosOZARad)) / (4.0 / 3.0 + taur);
+        //#Rayleigh Transmittance surface - sensor
+        double tR_thetaV = tau_ray[0] + tau_ray[1] * tRv + tau_ray[2] * Math.pow(tRv, 2);
+
+        double sARay = interpolate.value(taur);
+
+        double rho_toaR = (reflectance - rho_R) / (tR_thetaS * tR_thetaV); //toa reflectance corrected for Rayleigh scattering
+        double sphericalFactor = 1.0 / (1.0 + sARay * rho_toaR); //#factor used in the next equation to account for the spherical albedo
+        //#top of aerosol reflectance, which is equal to bottom of Rayleigh reflectance
+        rho_BRR = (rho_toaR * sphericalFactor);
+
+        rayleighBands.rho_BRR = rho_BRR;
+        rayleighBands.sphericalFactor = sphericalFactor;
+        rayleighBands.rho_toaR = rho_toaR;
+        rayleighBands.tR_thetaV = tR_thetaV;
+        rayleighBands.sARay = sARay;
+        rayleighBands.tR_thetaS = tR_thetaS;
+
+        return rayleighBands;
+    }
 
     public HashMap<String, double[]> correct(double[] lambda, double[] seaAirPressure, double[] altitude, double[] szaRads, double[] ozaRads, double[] ray_phase_min) {
         double[] rRaySimple = new double[ozaRads.length];
@@ -312,16 +374,15 @@ public class RayleighCorrAlgorithm {
             double pressureAtms = seaAirPressure[i] * Math.exp(-altitude[i] / 8000.0);
             double pressureFactor = taurSLocal / 1013.0;
             taurS[i] = pressureAtms * pressureFactor;
-            rRaySimple[i] = (float) (Math.cos(szaRads[i]) * taurS[i] * ray_phase_min[i] / (4 * Math.PI) * (1 / Math.cos(ozaRads[i]) * Math.PI));
+            rRaySimple[i] = Math.cos(szaRads[i]) * taurS[i] * ray_phase_min[i] / (4 * Math.PI) * (1 / Math.cos(ozaRads[i]) * Math.PI);
         }
 
         return rayHashMap;
     }
 
-
-    public double[] getLineSpace(double start, double end, int interval) {
+    double[] getLineSpace(double start, double end, int interval) {
         if (interval < 0) {
-            throw new NegativeArraySizeException("Array cant have negative index");
+            throw new NegativeArraySizeException("Array must not have negative index");
         }
         double[] temp = new double[interval];
         double steps = (end - start) / (interval - 1);

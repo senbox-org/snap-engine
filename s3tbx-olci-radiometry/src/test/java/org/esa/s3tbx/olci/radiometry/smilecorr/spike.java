@@ -16,22 +16,23 @@
  *
  */
 
-package org.esa.s3tbx.olci.radiometry.rayleighcorrection;
+package org.esa.s3tbx.olci.radiometry.smilecorr;
+
+import org.junit.Test;
+
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author muhammad.bc.
  */
-public class RayleighConstants {
-    static double AVOGADRO_NUMBER = 6.0221367E+23;
-    static double MEAN_MOLECULAR_ZERO = 28.9595;
-    static double Molecular_cm3 = 2.5469E19;
 
-    // constants describing the state of the atmosphere and which we don't know; better values may be used if known
-    static double CO2 = 3.0E-4; // CO2 concentration at pixel; typical values are 300 to 360 ppm
-    static double C_CO2 = CO2 * 100;  // CO2 concentration in ppm
-    static double MEAN_MOLECULAR_WEIGHT_C02 = 15.0556 * CO2 + MEAN_MOLECULAR_ZERO;
-
-    static double PA = 0.9587256;
-    static double PB = 1.0 - PA; // Rayleigh Phase function, molecular asymetry factor 2
-
+public class spike {
+    @Test
+    public void testCheck() throws Exception {
+        double CO2 = 3.E-4;
+        assertEquals(3.0e-4, CO2, 1e-4);
+        System.out.println(Math.ceil(708.75));
+        assertEquals(709, Math.ceil(708.75), 1e-1);
+    }
 }

@@ -1,14 +1,18 @@
 package org.esa.s3tbx.olci.radiometry.rayleighcorrection;
 
-import org.esa.s3tbx.olci.radiometry.smilecorr.SmileUtils;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-
 import java.util.Arrays;
 import java.util.stream.DoubleStream;
+import org.esa.s3tbx.olci.radiometry.smilecorr.SmileUtils;
+import org.junit.Before;
+import org.junit.Test;
 
-import static org.junit.Assert.*;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author muhammad.bc.
