@@ -70,7 +70,7 @@
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
             <artifactId>s3tbx-aatsr-sst</artifactId>
-            <version>${snap.version}</version>
+            <version>${s3tbx.version}</version>
         </dependency>
 
         <dependency>

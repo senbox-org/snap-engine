@@ -51,7 +51,7 @@
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
             <artifactId>s3tbx-merisl3-reader</artifactId>
-            <version>${snap.version}</version>
+            <version>${s3tbx.version}</version>
         </dependency>
 
         <dependency>
