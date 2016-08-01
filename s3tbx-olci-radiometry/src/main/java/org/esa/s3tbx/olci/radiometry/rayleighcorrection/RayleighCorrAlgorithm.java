@@ -23,7 +23,6 @@ public class RayleighCorrAlgorithm {
     public static final double STD_SEA_LEVEL_PRESSURE = 1013.0;
     private double[] tau_ray;
     private double[] thetas;
-    private double[] rayAlbedoLuts;
     private double[][][] rayCooefMatrixA;
     private double[][][] rayCooefMatrixB;
     private double[][][] rayCooefMatrixC;
@@ -41,7 +40,7 @@ public class RayleighCorrAlgorithm {
 
             tau_ray = rayleighCorrectionAux.parseJSON1DimArray(parse, "tau_ray");
             thetas = rayleighCorrectionAux.parseJSON1DimArray(parse, "theta");
-            rayAlbedoLuts = rayleighCorrectionAux.parseJSON1DimArray(parse, "ray_albedo_lut");
+            double[] rayAlbedoLuts = rayleighCorrectionAux.parseJSON1DimArray(parse, "ray_albedo_lut");
             ArrayList<double[][][]> ray_coeff_matrix = rayleighCorrectionAux.parseJSON3DimArray(parse, "ray_coeff_matrix");
 
             rayCooefMatrixA = ray_coeff_matrix.get(0);
@@ -191,6 +190,19 @@ public class RayleighCorrAlgorithm {
         return rayleighOpticalThickness;
     }
 
+    public double[] getCorrOzone(double[] rho_ng, double[] ozone, double[] szaRads, double[] ozaRads, double absorpO) {
+        for (int i = 0; i < ozone.length; i++) {
+            double model_ozone = 0;
+            double cts = Math.cos(szaRads[i]); //#cosine of sun zenith angle
+            double ctv = Math.cos(ozaRads[i]);//#cosine of view zenith angle
+            double trans_ozoned12 = Math.exp(-(absorpO * ozone[i] / 1000.0 - model_ozone) / cts);
+            double trans_ozoneu12 = Math.exp(-(absorpO * ozone[i] / 1000.0 - model_ozone) / ctv);
+            double trans_ozone12 = trans_ozoned12 * trans_ozoneu12;
+            rho_ng[i] = rho_ng[i] / trans_ozone12;
+        }
+        return rho_ng;
+    }
+
     public HashMap<String, double[]> getRhoBrr(double[] sza, double[] oza, double[] szaRads, double[] ozaRads, double[] saaRads, double[] aooRads, double[] taur, double[] reflectance) {
         HashMap<String, double[]> rayleighHashMap = new HashMap<>();
         int length = ozaRads.length;
@@ -286,7 +298,6 @@ public class RayleighCorrAlgorithm {
 
         return rayleighHashMap;
     }
-
 
     public RayleighBands getRhoBrr(double sza, double oza, double szaRad, double ozaRad, double taur, double reflectance, double aziDiff, double massAir) {
         RayleighBands rayleighBands = new RayleighBands();
@@ -390,5 +401,15 @@ public class RayleighCorrAlgorithm {
             temp[i] = steps * i;
         }
         return temp;
+    }
+
+    //todo mba/** write test
+    public double[] convertRadsToRefls(double[] radiance, double[] solarIrradiance, double[] sza) {
+        double[] ref = new double[radiance.length];
+        for (int i = 0; i < ref.length; i++) {
+//            ref[i] = RsMathUtils.radianceToReflectance((float) radiance[i], (float) sza[i], (float) solarIrradiance[i]);
+            ref[i] = (radiance[i] * Math.PI) / (solarIrradiance[i] * Math.cos(sza[i] * Math.PI / 180.0));
+        }
+        return ref;
     }
 }

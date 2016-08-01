@@ -18,18 +18,15 @@
 
 package org.esa.s3tbx.olci.radiometry.operator;
 
-import com.bc.ceres.core.ProgressMonitor;
+import java.util.HashMap;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
-import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.util.ProductUtils;
-
-import java.util.HashMap;
 
 /**
  * @author muhammad.bc.
@@ -49,9 +46,6 @@ public class Radiometry extends Operator {
 
     @Override
     public void initialize() throws OperatorException {
-
-        Product smileProduct = getSmileProduct(sourceProduct);
-
         targetProduct = new Product(sourceProduct.getName(), sourceProduct.getProductType(),
                 sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
         for (Band band : sourceProduct.getBands()) {

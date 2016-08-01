@@ -1,8 +1,8 @@
 package org.esa.s3tbx.olci.radiometry.rayleighcorrection;
 
 import com.bc.ceres.core.ProgressMonitor;
+import java.awt.Rectangle;
 import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.gpf.Operator;
@@ -12,10 +12,6 @@ import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.util.ProductUtils;
-import org.esa.snap.rcp.SnapApp;
-
-import java.awt.Rectangle;
-import java.util.Arrays;
 
 /**
  * @author muhammad.bc.
@@ -33,7 +29,6 @@ public class RayleighCorrectionOp extends Operator {
     @SourceProduct
     Product sourceProduct;
 
-    private Product targetProduct;
     private RayleighCorrAlgorithm algorithm;
     private double[] taur_std;
     private String[] bandAndTiepoint = new String[]{"SAA", "SZA", "OZA", "OAA", "altitude", "sea_level_pressure"};
@@ -45,7 +40,7 @@ public class RayleighCorrectionOp extends Operator {
         algorithm = new RayleighCorrAlgorithm();
         taur_std = getRots(sourceBands);
         checkRequireBandTiePont(bandAndTiepoint);
-        targetProduct = new Product(sourceProduct.getName(), sourceProduct.getProductType(),
+        Product targetProduct = new Product(sourceProduct.getName(), sourceProduct.getProductType(),
                 sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
 
         for (int i = 1; i <= 21; i++) {
@@ -86,12 +81,6 @@ public class RayleighCorrectionOp extends Operator {
         final Rectangle rectangle = targetTile.getRectangle();
 
         double[] seaLevelPressures = getSourceTile(sourceProduct.getTiePointGrid("sea_level_pressure"), rectangle).getSamplesDouble();
-        double[] totalOzones = getSourceTile(sourceProduct.getTiePointGrid("total_ozone"), rectangle).getSamplesDouble();
-        double[] tpLongitudes = getSourceTile(sourceProduct.getTiePointGrid("TP_longitude"), rectangle).getSamplesDouble();
-        double[] tpLatitudes = getSourceTile(sourceProduct.getTiePointGrid("TP_latitude"), rectangle).getSamplesDouble();
-        double[] qualityFlags = getSourceTile(sourceProduct.getBand("quality_flags"), rectangle).getSamplesDouble();
-
-
         double[] sunZenithAngle = getSourceTile(sourceProduct.getTiePointGrid("SZA"), rectangle).getSamplesDouble();
         double[] sunAzimuthAngle = getSourceTile(sourceProduct.getTiePointGrid("SAA"), rectangle).getSamplesDouble();
         double[] viewZenithAngle = getSourceTile(sourceProduct.getTiePointGrid("OZA"), rectangle).getSamplesDouble();

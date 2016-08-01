@@ -19,10 +19,8 @@
 package org.esa.s3tbx.olci.radiometry.gaseousabsorption;
 
 import com.bc.ceres.core.Assert;
-import org.esa.s3tbx.olci.radiometry.smilecorr.SmileUtils;
-import org.esa.snap.core.gpf.OperatorException;
-
 import java.util.ArrayList;
+import org.esa.s3tbx.olci.radiometry.smilecorr.SmileUtils;
 
 /**
  * @author muhammad.bc.
@@ -45,13 +43,8 @@ public class GaseousAbsorptionAlgo {
     }
 
     public String[] gasToComputeForBand(String bandName) {
-        try {
-            GasToCompute gasToCompute = GasToCompute.valueOf(bandName);
-            return gasToCompute.getGasBandToCompute();
-        } catch (IllegalArgumentException e) {
-
-        }
-        return null;
+        GasToCompute gasToCompute = GasToCompute.valueOf(bandName);
+        return gasToCompute.getGasBandToCompute();
     }
 
     public float[] getMassAir(float[] sza, float[] oza) {

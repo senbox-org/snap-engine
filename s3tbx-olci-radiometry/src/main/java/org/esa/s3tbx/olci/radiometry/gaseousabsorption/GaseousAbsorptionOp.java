@@ -36,7 +36,7 @@ import java.awt.*;
 /**
  * @author muhammad.bc.
  */
-@OperatorMetadata(alias = "OLCI.GaseousAsorption",
+@OperatorMetadata(alias =  "OLCI.GaseousAbsorption",
         authors = "Marco Peters, Muhamamd Bala (Brockmann Consult)",
         copyright = "(c) 2016 by Brockmann Consult",
         description = "Correct the influence of atmospheric gas absorption for those OLCI channels.")
@@ -44,7 +44,7 @@ public class GaseousAbsorptionOp extends Operator {
 
     public static final String SZA = "SZA";
     public static final String OZA = "OZA";
-    @SourceProduct(description = "OLCI Refelctance product")
+    @SourceProduct(description = "OLCI Reflectance product")
     Product sourceProduct;
     private Product targetProduct;
     private GaseousAbsorptionAlgo gasAbsorptionAlgo = new GaseousAbsorptionAlgo();

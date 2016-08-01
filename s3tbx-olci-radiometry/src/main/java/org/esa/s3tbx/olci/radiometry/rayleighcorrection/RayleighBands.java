@@ -42,7 +42,7 @@ public class RayleighBands {
         return rho_toaR;
     }
 
-    public double gettR_thetaV() {
+    public double getR_thetaV() {
         return tR_thetaV;
     }
 

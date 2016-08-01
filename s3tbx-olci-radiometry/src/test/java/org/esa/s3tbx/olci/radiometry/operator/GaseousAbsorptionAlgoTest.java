@@ -91,11 +91,11 @@ public class GaseousAbsorptionAlgoTest {
         GaseousAbsorptionAlgo algorithm = new GaseousAbsorptionAlgo();
         float[] oza = {4, 5, 6};
         float[] sza = {1, 2, 3};
-        float[] oa01_radiances = algorithm.getTransmissionGas("gaseous_absorp_01", sza, oza);
-        assertEquals(3, oa01_radiances.length);
-        assertEquals(0.13498464f, oa01_radiances[0]);
-        assertEquals(0.13473716f, oa01_radiances[1]);
-        assertEquals(0.1344073f, oa01_radiances[2]);
+        float[] oa01_radians = algorithm.getTransmissionGas("gaseous_absorp_01", sza, oza);
+        assertEquals(3, oa01_radians.length);
+        assertEquals(0.13498464f, oa01_radians[0]);
+        assertEquals(0.13473716f, oa01_radians[1]);
+        assertEquals(0.1344073f, oa01_radians[2]);
     }
 
     @Test

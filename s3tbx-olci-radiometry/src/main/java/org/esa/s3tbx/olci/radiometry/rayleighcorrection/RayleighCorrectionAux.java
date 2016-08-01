@@ -49,8 +49,7 @@ public class RayleighCorrectionAux {
     public double[] parseJSON1DimArray(JSONObject parse, String ray_coeff_matrix) {
         JSONArray theta = (JSONArray) parse.get(ray_coeff_matrix);
         List<Double> collect = (List<Double>) theta.stream().collect(Collectors.toList());
-        double[] doubles = Doubles.toArray(collect);
-        return doubles;
+        return Doubles.toArray(collect);
     }
 
     ArrayList<double[][][]> parseJSON3DimArray(JSONObject parse, String ray_coeff_matrix) {
