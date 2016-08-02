@@ -1,6 +1,9 @@
 package org.esa.s3tbx.olci.radiometry.rayleighcorrection;
 
+import java.awt.Rectangle;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.DoubleStream;
 import org.esa.s3tbx.olci.radiometry.smilecorr.SmileUtils;
 import org.junit.Before;
@@ -135,10 +138,9 @@ public class RayleighCorrAlgorithmTest {
                 77.0110092163086,
                 80.7221450805664};
 
-        boolean b = DoubleStream.of(n).anyMatch(x -> x < 2.82 );
+        boolean b = DoubleStream.of(n).anyMatch(x -> x < 2.82);
         assertFalse(b);
         boolean c = DoubleStream.of(n).anyMatch(x -> x > 2.82 && x < 80.7221450805664);
         assertTrue(c);
-
     }
 }
