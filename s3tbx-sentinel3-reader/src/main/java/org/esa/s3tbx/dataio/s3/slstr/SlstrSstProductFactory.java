@@ -47,10 +47,10 @@ public class SlstrSstProductFactory extends SlstrProductFactory {
     public final static String SLSTR_L2_SST_USE_PIXELGEOCODINGS = "s3tbx.reader.slstrl2sst.pixelGeoCodings";
 
     private Map<String, GeoCoding> geoCodingMap;
-    private int nadirStartOffset;
-    private int nadirTrackOffset;
-    private int obliqueStartOffset;
-    private int obliqueTrackOffset;
+    private Double nadirStartOffset;
+    private Double nadirTrackOffset;
+    private Double obliqueStartOffset;
+    private Double obliqueTrackOffset;
 
     public SlstrSstProductFactory(Sentinel3ProductReader productReader) {
         super(productReader);
@@ -92,10 +92,10 @@ public class SlstrSstProductFactory extends SlstrProductFactory {
             final MetadataElement slstrElement = slstrInformationElement.getElementAt(i);
             final String slstrElementName = slstrElement.getName();
             if (slstrElementName.endsWith("ImageSize")) {
-                final int startOffset =
-                        Integer.parseInt(slstrElement.getAttribute("startOffset").getData().getElemString());
-                final int trackOffset =
-                        Integer.parseInt(slstrElement.getAttribute("trackOffset").getData().getElemString());
+                final Double startOffset =
+                        Double.parseDouble(slstrElement.getAttribute("startOffset").getData().getElemString());
+                final Double trackOffset =
+                        Double.parseDouble(slstrElement.getAttribute("trackOffset").getData().getElemString());
                 if (slstrElementName.equals("nadirImageSize")) {
                     nadirStartOffset = startOffset;
                     nadirTrackOffset = trackOffset;
@@ -110,14 +110,14 @@ public class SlstrSstProductFactory extends SlstrProductFactory {
         }
     }
 
-    protected Integer getStartOffset(String gridIndex) {
+    protected Double getStartOffset(String gridIndex) {
         if(gridIndex.endsWith("o")) {
             return obliqueStartOffset;
         }
         return nadirStartOffset;
     }
 
-    protected Integer getTrackOffset(String gridIndex) {
+    protected Double getTrackOffset(String gridIndex) {
         if(gridIndex.endsWith("o")) {
             return obliqueTrackOffset;
         }
@@ -129,8 +129,8 @@ public class SlstrSstProductFactory extends SlstrProductFactory {
         final String sourceBandName = sourceBand.getName();
         final String sourceProductName = sourceBand.getProduct().getName();
         final String gridIndex = (sourceProductName).substring(sourceProductName.length() - 2);
-        Integer sourceStartOffset = getStartOffset(gridIndex);
-        Integer sourceTrackOffset = getTrackOffset(gridIndex);
+        Double sourceStartOffset = getStartOffset(gridIndex);
+        Double sourceTrackOffset = getTrackOffset(gridIndex);
         final short[] sourceResolutions = getResolutions(gridIndex);
         if (gridIndex.startsWith("t")) {
             final MetadataElement attributesElement =
@@ -139,11 +139,11 @@ public class SlstrSstProductFactory extends SlstrProductFactory {
             if (attributesElement != null) {
                 final MetadataAttribute startOffsetAttribute = attributesElement.getAttribute("start_offset");
                 if (startOffsetAttribute != null) {
-                    sourceStartOffset = startOffsetAttribute.getData().getElemInt();
+                    sourceStartOffset = startOffsetAttribute.getData().getElemDouble();
                 }
                 final MetadataAttribute trackOffsetAttribute = attributesElement.getAttribute("track_offset");
                 if (trackOffsetAttribute != null) {
-                    sourceTrackOffset = trackOffsetAttribute.getData().getElemInt();
+                    sourceTrackOffset = trackOffsetAttribute.getData().getElemDouble();
                 }
             }
         }
@@ -211,8 +211,8 @@ public class SlstrSstProductFactory extends SlstrProductFactory {
             }
             final short[] referenceResolutions = getReferenceResolutions();
             final short[] sourceResolutions = getResolutions(gridIndex);
-            final Integer sourceStartOffset = getStartOffset(gridIndex);
-            final Integer sourceTrackOffset = getTrackOffset(gridIndex);
+            final Double sourceStartOffset = getStartOffset(gridIndex);
+            final Double sourceTrackOffset = getTrackOffset(gridIndex);
             if (sourceStartOffset != null && sourceTrackOffset != null) {
                 final float[] offsets = getOffsets(sourceStartOffset, sourceTrackOffset, sourceResolutions);
                 final float[] scalings = new float[]{

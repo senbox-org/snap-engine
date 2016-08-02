@@ -43,8 +43,8 @@ import java.util.Map;
 public class SlstrLevel1ProductFactory extends SlstrProductFactory {
 
     private final Map<String, String> gridTypeToGridIndex;
-    private final Map<String, Integer> gridIndexToTrackOffset;
-    private final Map<String, Integer> gridIndexToStartOffset;
+    private final Map<String, Double> gridIndexToTrackOffset;
+    private final Map<String, Double> gridIndexToStartOffset;
     private Map<String, Float> nameToWavelengthMap;
     private Map<String, Float> nameToBandwidthMap;
     private Map<String, Integer> nameToIndexMap;
@@ -84,11 +84,11 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
         geoCodingMap = new HashMap<>();
     }
 
-    protected Integer getStartOffset(String gridIndex) {
+    protected Double getStartOffset(String gridIndex) {
         return gridIndexToStartOffset.get(gridIndex);
     }
 
-    protected Integer getTrackOffset(String gridIndex) {
+    protected Double getTrackOffset(String gridIndex) {
         return gridIndexToTrackOffset.get(gridIndex);
     }
 
@@ -111,10 +111,10 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
                     } else {
                         index = firstLetter + "o";
                     }
-                    final int startOffset =
-                            Integer.parseInt(slstrElement.getAttribute("startOffset").getData().getElemString());
-                    final int trackOffset =
-                            Integer.parseInt(slstrElement.getAttribute("trackOffset").getData().getElemString());
+                    final double startOffset =
+                            Double.parseDouble(slstrElement.getAttribute("startOffset").getData().getElemString());
+                    final double trackOffset =
+                            Double.parseDouble(slstrElement.getAttribute("trackOffset").getData().getElemString());
                     gridIndexToStartOffset.put(index, startOffset);
                     gridIndexToTrackOffset.put(index, trackOffset);
                     if (firstLetter.equals("t")) {
@@ -216,8 +216,8 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
         if (sourceBandNameLength > 1) {
             gridIndex = sourceBandName.substring(sourceBandNameLength - 2);
         }
-        final Integer sourceStartOffset = getStartOffset(gridIndex);
-        final Integer sourceTrackOffset = getTrackOffset(gridIndex);
+        final Double sourceStartOffset = getStartOffset(gridIndex);
+        final Double sourceTrackOffset = getTrackOffset(gridIndex);
         if (sourceStartOffset != null && sourceTrackOffset != null) {
             final short[] sourceResolutions = getResolutions(gridIndex);
             if (gridIndex.startsWith("t")) {
@@ -329,8 +329,8 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
             }
             final short[] referenceResolutions = getReferenceResolutions();
             final short[] sourceResolutions = getResolutions(gridIndex);
-            final Integer sourceStartOffset = getStartOffset(gridIndex);
-            final Integer sourceTrackOffset = getTrackOffset(gridIndex);
+            final Double sourceStartOffset = getStartOffset(gridIndex);
+            final Double sourceTrackOffset = getTrackOffset(gridIndex);
             if (sourceStartOffset != null && sourceTrackOffset != null) {
                 final float[] offsets = getOffsets(sourceStartOffset, sourceTrackOffset, sourceResolutions);
                 final float[] scalings = new float[]{

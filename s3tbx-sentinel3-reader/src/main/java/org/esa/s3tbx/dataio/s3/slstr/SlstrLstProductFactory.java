@@ -71,13 +71,13 @@ public class SlstrLstProductFactory extends SlstrProductFactory {
     }
 
     @Override
-    protected Integer getStartOffset(String gridIndex) {
-        return 0;
+    protected Double getStartOffset(String gridIndex) {
+        return 0.0;
     }
 
     @Override
-    protected Integer getTrackOffset(String gridIndex) {
-        return 0;
+    protected Double getTrackOffset(String gridIndex) {
+        return 0.0;
     }
 
     @Override

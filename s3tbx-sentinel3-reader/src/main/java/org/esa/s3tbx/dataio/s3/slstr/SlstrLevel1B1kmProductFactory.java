@@ -59,8 +59,8 @@ public class SlstrLevel1B1kmProductFactory extends SlstrLevel1ProductFactory {
         if (sourceBandNameLength > 1) {
             gridIndex = sourceBandName.substring(sourceBandNameLength - 2);
         }
-        final Integer sourceStartOffset = getStartOffset(gridIndex);
-        final Integer sourceTrackOffset = getTrackOffset(gridIndex);
+        final Double sourceStartOffset = getStartOffset(gridIndex);
+        final Double sourceTrackOffset = getTrackOffset(gridIndex);
         if (sourceStartOffset != null && sourceTrackOffset != null) {
             final short[] sourceResolutions = getResolutions(gridIndex);
             if (gridIndex.startsWith("t")) {

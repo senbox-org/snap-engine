@@ -45,9 +45,9 @@ public abstract class SlstrProductFactory extends AbstractProductFactory {
         super(productReader);
     }
 
-    protected abstract Integer getStartOffset(String gridIndex);
+    protected abstract Double getStartOffset(String gridIndex);
 
-    protected abstract Integer getTrackOffset(String gridIndex);
+    protected abstract Double getTrackOffset(String gridIndex);
 
     protected short[] getResolutions(String gridIndex) {
         short[] resolutions;
@@ -61,11 +61,11 @@ public abstract class SlstrProductFactory extends AbstractProductFactory {
         return resolutions;
     }
 
-    protected void setReferenceStartOffset(int startOffset) {
+    protected void setReferenceStartOffset(double startOffset) {
         referenceStartOffset = startOffset;
     }
 
-    protected void setReferenceTrackOffset(int trackOffset) {
+    protected void setReferenceTrackOffset(double trackOffset) {
         referenceTrackOffset = trackOffset;
     }
 
