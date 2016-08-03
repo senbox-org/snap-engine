@@ -13,35 +13,17 @@ import static junit.framework.TestCase.*;
  */
 public class S3NetcdfReaderTest {
 
+    private static final String NETCDF_FILE_PATH = S3NetcdfReader.class.getResource("../../s3/FRP_in.nc").getPath();
     private S3NetcdfReader reader;
 
     @Before
     public void setUp() throws IOException {
-        String netDCFFilePath = S3NetcdfReader.class.getResource("../../s3/FRP_in.nc").getPath();
-        reader = new S3NetcdfReader(netDCFFilePath);
-    }
-
-    @Test
-    public void testReadProductType() throws IOException {
-        final String productType = reader.readProductType();
-        assertEquals("NetCDF", productType);
-    }
-
-    @Test
-    public void testGetWidth() throws IOException {
-        final int width = reader.getWidth();
-        assertEquals(1568, width);
-    }
-
-    @Test
-    public void testGetHeight() throws IOException {
-        final int height = reader.getHeight();
-        assertEquals(266, height);
+        reader = new S3NetcdfReader();
     }
 
     @Test
     public void testReadProduct() throws Exception {
-        final Product product = reader.readProduct();
+        final Product product = reader.readProductNodes(NETCDF_FILE_PATH, null);
         assertNotNull(product);
         assertEquals("FRP_in", product.getName());
         assertEquals("NetCDF", product.getProductType());

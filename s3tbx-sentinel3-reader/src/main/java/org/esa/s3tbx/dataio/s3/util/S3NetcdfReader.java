@@ -1,5 +1,7 @@
 package org.esa.s3tbx.dataio.s3.util;
 
+import com.bc.ceres.core.ProgressMonitor;
+import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.IndexCoding;
@@ -23,13 +25,14 @@ import ucar.nc2.Variable;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author Tonio Fincke
  */
-public class S3NetcdfReader {
+public class S3NetcdfReader extends AbstractProductReader {
 
     //todo check whether this class is still necessary as most of its functionality is also provided by the default netcdf reader
     private static final String product_type = "product_type";
@@ -37,22 +40,27 @@ public class S3NetcdfReader {
     private static final String flag_masks = "flag_masks";
     private static final String flag_meanings = "flag_meanings";
     private static final String fillValue = "_FillValue";
-    private final NetcdfFile netcdfFile;
-    private final String pathToFile;
+    private NetcdfFile netcdfFile;
 
-    public S3NetcdfReader(String pathToFile) throws IOException {
-        netcdfFile = NetcdfFileOpener.open(pathToFile);
-        this.pathToFile = pathToFile;
+    public S3NetcdfReader() {
+        super(null);
     }
 
-    public Product readProduct() throws IOException {
+    public String[] getSuffixesForSeparatingDimensions() {
+        return new String[0];
+    }
+
+    @Override
+    protected Product readProductNodesImpl() throws IOException {
+        File inputFile = getInputFile();
+        netcdfFile = NetcdfFileOpener.open(inputFile);
+
         final String productType = readProductType();
         int productWidth = getWidth();
         int productHeight = getHeight();
-        final File file = new File(pathToFile);
 
-        final Product product = new Product(FileUtils.getFilenameWithoutExtension(file), productType, productWidth, productHeight);
-        product.setFileLocation(file);
+        final Product product = new Product(FileUtils.getFilenameWithoutExtension(inputFile), productType, productWidth, productHeight);
+        product.setFileLocation(inputFile);
         addGlobalMetadata(product);
         addBands(product);
         addGeoCoding(product);
@@ -65,15 +73,40 @@ public class S3NetcdfReader {
         return product;
     }
 
+    @Override
+    public void close() throws IOException {
+        if (netcdfFile != null) {
+            netcdfFile.close();
+            netcdfFile = null;
+        }
+        super.close();
+    }
+
+    @Override
+    protected void readBandRasterDataImpl(int sourceOffsetX, int sourceOffsetY, int sourceWidth, int sourceHeight, int sourceStepX, int sourceStepY,
+                                          Band destBand, int destOffsetX, int destOffsetY, int destWidth, int destHeight, ProductData destBuffer,
+                                          ProgressMonitor pm) throws IOException {
+        throw new IllegalStateException("All bands use images as source for its data, readBandRasterDataImpl should not be called.");
+    }
+
     protected void addGeoCoding(Product product) {
 
     }
 
-    protected String[] getSeparatingDimensions() {
-        return new String[0];
+    private File getInputFile() {
+        final Object input = getInput();
+
+        if (input instanceof String) {
+            return new File((String) input);
+        }
+        if (input instanceof File) {
+            return (File) input;
+        }
+
+        throw new IllegalArgumentException(MessageFormat.format("Illegal input: {0}", input));
     }
 
-    public String[] getSuffixesForSeparatingDimensions() {
+    protected String[] getSeparatingDimensions() {
         return new String[0];
     }
 
@@ -90,8 +123,8 @@ public class S3NetcdfReader {
             variableName = variableName.substring(0, variableName.indexOf("_msb"));
         }
         Variable variable = null;
-        List<String> dimensionNameList = new ArrayList();
-        List<Integer> dimensionIndexList = new ArrayList();
+        List<String> dimensionNameList = new ArrayList<>();
+        List<Integer> dimensionIndexList = new ArrayList<>();
         final String[] separatingDimensions = getSeparatingDimensions();
         final String[] suffixesForSeparatingThirdDimensions = getSuffixesForSeparatingDimensions();
         int lowestSuffixIndex = Integer.MAX_VALUE;
@@ -158,7 +191,7 @@ public class S3NetcdfReader {
             final String[][] rowColumnNamePairs = getRowColumnNamePairs();
             for (String[] rowColumnNamePair : rowColumnNamePairs) {
                 if (variable.findDimensionIndex(rowColumnNamePair[0]) != -1 &&
-                        variable.findDimensionIndex(rowColumnNamePair[1]) != -1) {
+                    variable.findDimensionIndex(rowColumnNamePair[1]) != -1) {
                     final String variableName = variable.getFullName();
                     final String[] dimensions = getSeparatingDimensions();
                     final String[] suffixes = getSuffixesForSeparatingDimensions();
@@ -327,8 +360,10 @@ public class S3NetcdfReader {
             final String sampleName = replaceNonWordCharacters(meanings[i]);
             switch (sampleMasks.getDataType()) {
                 case BYTE:
-                    int[] byteValues = {DataType.unsignedByteToShort(sampleMasks.getNumericValue(i).byteValue()),
-                            DataType.unsignedByteToShort(sampleValues.getNumericValue(i).byteValue())};
+                    int[] byteValues = {
+                            DataType.unsignedByteToShort(sampleMasks.getNumericValue(i).byteValue()),
+                            DataType.unsignedByteToShort(sampleValues.getNumericValue(i).byteValue())
+                    };
                     if (byteValues[0] == byteValues[1]) {
                         sampleCoding.addSample(sampleName, byteValues[0], null);
                     } else {
@@ -336,8 +371,10 @@ public class S3NetcdfReader {
                     }
                     break;
                 case SHORT:
-                    int[] shortValues = {DataType.unsignedShortToInt(sampleMasks.getNumericValue(i).shortValue()),
-                            DataType.unsignedShortToInt(sampleValues.getNumericValue(i).shortValue())};
+                    int[] shortValues = {
+                            DataType.unsignedShortToInt(sampleMasks.getNumericValue(i).shortValue()),
+                            DataType.unsignedShortToInt(sampleValues.getNumericValue(i).shortValue())
+                    };
                     if (shortValues[0] == shortValues[1]) {
                         sampleCoding.addSample(sampleName, shortValues[0], null);
                     } else {
@@ -345,8 +382,10 @@ public class S3NetcdfReader {
                     }
                     break;
                 case INT:
-                    int[] intValues = {sampleMasks.getNumericValue(i).intValue(),
-                            sampleValues.getNumericValue(i).intValue()};
+                    int[] intValues = {
+                            sampleMasks.getNumericValue(i).intValue(),
+                            sampleValues.getNumericValue(i).intValue()
+                    };
                     if (intValues[0] == intValues[1]) {
                         sampleCoding.addSample(sampleName, intValues[0], null);
                     } else {
@@ -355,8 +394,10 @@ public class S3NetcdfReader {
                     sampleCoding.addSamples(sampleName, intValues, null);
                     break;
                 case LONG:
-                    long[] longValues = {sampleMasks.getNumericValue(i).longValue(),
-                            sampleValues.getNumericValue(i).longValue()};
+                    long[] longValues = {
+                            sampleMasks.getNumericValue(i).longValue(),
+                            sampleValues.getNumericValue(i).longValue()
+                    };
                     if (msb) {
                         int[] intLongValues =
                                 {(int) (longValues[0] >>> 32), (int) (longValues[1] >>> 32)};
@@ -551,7 +592,7 @@ public class S3NetcdfReader {
         return productData;
     }
 
-    int getWidth() {
+    private int getWidth() {
         Dimension widthDimension = getWidthDimension();
         if (widthDimension != null) {
             return widthDimension.getLength();
@@ -570,7 +611,7 @@ public class S3NetcdfReader {
         return null;
     }
 
-    int getHeight() {
+    private int getHeight() {
         Dimension heightDimension = getHeightDimension();
         if (heightDimension != null) {
             return heightDimension.getLength();
@@ -589,7 +630,7 @@ public class S3NetcdfReader {
         return null;
     }
 
-    String readProductType() {
+    private String readProductType() {
         Attribute typeAttribute = netcdfFile.findGlobalAttribute(product_type);
         if (typeAttribute == null) {
             typeAttribute = netcdfFile.findGlobalAttribute("Conventions");

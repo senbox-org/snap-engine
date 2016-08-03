@@ -1,22 +1,11 @@
 package org.esa.s3tbx.dataio.s3.slstr;
 
 import org.esa.s3tbx.dataio.s3.util.S3NetcdfReader;
-import org.esa.snap.dataio.netcdf.util.NetcdfFileOpener;
-import ucar.nc2.NetcdfFile;
-
-import java.io.IOException;
 
 /**
  * @author Tonio Fincke
  */
 class SlstrFRPReader extends S3NetcdfReader {
-
-    private final NetcdfFile netcdfFile;
-
-    SlstrFRPReader(String pathToFile) throws IOException {
-        super(pathToFile);
-        netcdfFile = NetcdfFileOpener.open(pathToFile);
-    }
 
     //todo continue here as soon as valid test products are available
 

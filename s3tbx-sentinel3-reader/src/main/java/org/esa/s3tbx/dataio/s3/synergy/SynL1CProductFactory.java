@@ -170,7 +170,7 @@ public class SynL1CProductFactory extends AbstractProductFactory {
             return null;
         }
         final S3NetcdfReader synNetcdfReader = SynNetcdfReaderFactory.createSynNetcdfReader(file);
-        return synNetcdfReader.readProduct();
+        return synNetcdfReader.readProductNodes(file, null);
     }
 
     @Override

@@ -15,11 +15,7 @@ import java.io.IOException;
 /**
  * @author Tonio Fincke
  */
-public class VgtReader extends S3NetcdfReader {
-
-    public VgtReader(String pathToFile) throws IOException {
-        super(pathToFile);
-    }
+class VgtReader extends S3NetcdfReader {
 
     protected String[][] getRowColumnNamePairs() {
         return new String[][]{{"latitude", "longitude"}};

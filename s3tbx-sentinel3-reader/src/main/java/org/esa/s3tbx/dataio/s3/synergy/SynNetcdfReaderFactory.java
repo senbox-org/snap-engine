@@ -14,9 +14,9 @@ public class SynNetcdfReaderFactory {
         final String fileName = file.getName();
         if(fileName.startsWith("OLC_RADIANCE_") || fileName.startsWith("MISREGIST") ||
                 fileName.startsWith("SLST_NAD") || fileName.equals("GEOLOCATION_REF.nc")) {
-            return new SynOlcRadReader(file.getAbsolutePath());
+            return new SynOlcRadReader();
         } else {
-            return new S3NetcdfReader(file.getAbsolutePath());
+            return new S3NetcdfReader();
         }
     }
 

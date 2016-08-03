@@ -6,16 +6,10 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import ucar.nc2.Variable;
 
-import java.io.IOException;
-
 /**
  * @author Tonio Fincke
  */
-public class SynOlcRadReader extends S3NetcdfReader {
-
-    public SynOlcRadReader(String pathToFile) throws IOException {
-        super(pathToFile);
-    }
+class SynOlcRadReader extends S3NetcdfReader {
 
     @Override
     protected String[][] getRowColumnNamePairs() {

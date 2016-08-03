@@ -91,8 +91,7 @@ public class VgtProductFactory extends AbstractProductFactory {
         if (!file.exists()) {
             return null;
         }
-        final VgtReader reader = new VgtReader(file.getAbsolutePath());
-        return reader.readProduct();
+        return new VgtReader().readProductNodes(file, null);
     }
 
 }

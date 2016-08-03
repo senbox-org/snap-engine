@@ -147,9 +147,9 @@ public class MerisProductFactory extends AbstractProductFactory {
         if (!file.exists()) {
             return null;
         }
-        final S3NetcdfReader reader = S3NetcdfReaderFactory.createS3NetcdfReader(file);
+        final S3NetcdfReader reader = S3NetcdfReaderFactory.createS3NetcdfProduct(file);
         addSeparatingDimensions(reader.getSuffixesForSeparatingDimensions());
-        return reader.readProduct();
+        return reader.readProductNodes(file, null);
     }
 
     protected String getValidExpression() {

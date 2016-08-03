@@ -9,20 +9,15 @@ import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
 import java.awt.image.RenderedImage;
-import java.io.IOException;
 import java.util.List;
 
 /**
  * @author Tonio Fincke
  */
-public class InstrumentDataReader extends S3NetcdfReader {
+class InstrumentDataReader extends S3NetcdfReader {
 
     private final static String detector_index_name = "detector_index";
     private Variable detectorIndexVariable;
-
-    public InstrumentDataReader(String pathToFile) throws IOException {
-        super(pathToFile);
-    }
 
     @Override
     protected void addBands(Product product) {

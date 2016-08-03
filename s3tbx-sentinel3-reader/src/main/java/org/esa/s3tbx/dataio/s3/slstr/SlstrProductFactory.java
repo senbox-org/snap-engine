@@ -188,6 +188,6 @@ public abstract class SlstrProductFactory extends AbstractProductFactory {
         }
         final S3NetcdfReader slstrNetcdfReader = SlstrNetcdfReaderFactory.createSlstrNetcdfReader(file);
         addSeparatingDimensions(slstrNetcdfReader.getSuffixesForSeparatingDimensions());
-        return slstrNetcdfReader.readProduct();
+        return slstrNetcdfReader.readProductNodes(file, null);
     }
 }

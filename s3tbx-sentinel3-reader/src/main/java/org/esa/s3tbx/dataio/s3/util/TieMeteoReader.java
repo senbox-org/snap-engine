@@ -11,11 +11,7 @@ import java.io.IOException;
 /**
  * @author Tonio Fincke
  */
-public class TieMeteoReader extends S3NetcdfReader {
-
-    public TieMeteoReader(String pathToFile) throws IOException {
-        super(pathToFile);
-    }
+class TieMeteoReader extends S3NetcdfReader {
 
     @Override
     protected String[] getSeparatingDimensions() {

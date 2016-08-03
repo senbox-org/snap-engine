@@ -176,8 +176,8 @@ public class SynLevel2ProductFactory extends AbstractProductFactory {
         if (!file.exists()) {
             return null;
         }
-        final S3NetcdfReader reader = new S3NetcdfReader(file.getAbsolutePath());
-        return reader.readProduct();
+        final S3NetcdfReader reader = new S3NetcdfReader();
+        return reader.readProductNodes(file, null);
     }
 
 }

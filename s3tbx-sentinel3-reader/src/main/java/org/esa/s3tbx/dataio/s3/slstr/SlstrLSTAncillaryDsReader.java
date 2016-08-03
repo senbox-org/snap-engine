@@ -13,11 +13,7 @@ import java.io.IOException;
 /**
  * @author Tonio Fincke
  */
-public class SlstrLSTAncillaryDsReader extends S3NetcdfReader {
-
-    SlstrLSTAncillaryDsReader(String pathToFile) throws IOException {
-        super(pathToFile);
-    }
+class SlstrLSTAncillaryDsReader extends S3NetcdfReader {
 
     //todo continue when valid data is provided
 

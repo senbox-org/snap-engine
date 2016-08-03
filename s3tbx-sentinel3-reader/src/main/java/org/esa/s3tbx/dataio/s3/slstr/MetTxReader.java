@@ -4,16 +4,10 @@ import org.esa.s3tbx.dataio.s3.util.S3NetcdfReader;
 import org.esa.snap.core.datamodel.Product;
 import ucar.nc2.Variable;
 
-import java.io.IOException;
-
 /**
  * @author Tonio Fincke
  */
 class MetTxReader extends S3NetcdfReader {
-
-    MetTxReader(String pathToFile) throws IOException {
-        super(pathToFile);
-    }
 
     @Override
     protected String[] getSeparatingDimensions() {
