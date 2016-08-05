@@ -46,6 +46,27 @@ public class CloudBuffer {
         }
     }
 
+    public static void computeSimpleCloudBuffer(int x, int y,
+                                                Tile targetTile,
+                                                Rectangle extendedRectangle,
+                                                int cloudBufferWidth,
+                                                int cloudBufferFlagBit) {
+        Rectangle rectangle = targetTile.getRectangle();
+        int LEFT_BORDER = Math.max(x - cloudBufferWidth, extendedRectangle.x);
+        int RIGHT_BORDER = Math.min(x + cloudBufferWidth, extendedRectangle.x + extendedRectangle.width - 1);
+        int TOP_BORDER = Math.max(y - cloudBufferWidth, extendedRectangle.y);
+        int BOTTOM_BORDER = Math.min(y + cloudBufferWidth, extendedRectangle.y + extendedRectangle.height - 1);
+
+        for (int i = LEFT_BORDER; i <= RIGHT_BORDER; i++) {
+            for (int j = TOP_BORDER; j <= BOTTOM_BORDER; j++) {
+                if (rectangle.contains(i, j) && extendedRectangle.contains(i, j)) {
+                    targetTile.setSample(i, j, cloudBufferFlagBit, true);
+                }
+            }
+        }
+    }
+
+
     public static void computeCloudBufferLC(Tile targetTile, int cloudFlagBit, int cloudBufferFlagBit) {
         //  set alternative cloud buffer flag as used in LC-CCI project:
         // 1. use 2x2 square with reference pixel in upper left

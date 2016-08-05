@@ -5,6 +5,7 @@ import org.esa.s3tbx.idepix.core.AlgorithmSelector;
 import org.esa.s3tbx.idepix.core.IdepixConstants;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.OperatorException;
+import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.util.BitSetter;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.dataio.envisat.EnvisatConstants;
@@ -44,6 +45,49 @@ public class IdepixUtils {
     public static final String IDEPIX_CLASSIF_FLAGS = "pixel_classif_flags";
 
     private IdepixUtils() {
+    }
+
+    /**
+     * creates a new product with the same size
+     *
+     * @param sourceProduct
+     * @param name
+     * @param type
+     * @param copyAllTiePoints
+     * @return targetProduct
+     */
+    public static Product createCompatibleTargetProduct(Product sourceProduct, String name, String type,
+                                           boolean copyAllTiePoints) {
+        final int sceneWidth = sourceProduct.getSceneRasterWidth();
+        final int sceneHeight = sourceProduct.getSceneRasterHeight();
+
+        Product targetProduct = new Product(name, type, sceneWidth, sceneHeight);
+        copyTiePoints(sourceProduct, targetProduct, copyAllTiePoints);
+        ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
+        targetProduct.setStartTime(sourceProduct.getStartTime());
+        targetProduct.setEndTime(sourceProduct.getEndTime());
+        return targetProduct;
+    }
+
+    /**
+     * Copies the tie point data.
+     *  @param sourceProduct
+     * @param targetProduct
+     * @param copyAllTiePoints
+     */
+    public static void copyTiePoints(Product sourceProduct,
+                               Product targetProduct, boolean copyAllTiePoints) {
+        if (copyAllTiePoints) {
+            // copy all tie point grids to output product
+            ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
+        } else {
+            for (int i = 0; i < sourceProduct.getNumTiePointGrids(); i++) {
+                TiePointGrid srcTPG = sourceProduct.getTiePointGridAt(i);
+                if (srcTPG.getName().equals("latitude") || srcTPG.getName().equals("longitude")) {
+                    targetProduct.addTiePointGrid(srcTPG.cloneTiePointGrid());
+                }
+            }
+        }
     }
 
     /**
@@ -118,6 +162,7 @@ public class IdepixUtils {
                 !isValidModisProduct(inputProduct) &&
                 !isValidMsiProduct(inputProduct) &&
                 !isValidSeawifsProduct(inputProduct) &&
+                !isValidMerisProduct(inputProduct) &&
                 !isValidVgtProduct(inputProduct)) {
             logErrorMessage("Input sensor must be either MERIS, AATSR, AVHRR, colocated MERIS/AATSR, MODIS/SeaWiFS, PROBA-V or VGT!");
         }
@@ -211,10 +256,12 @@ public class IdepixUtils {
             return (isValidProbavProduct(sourceProduct));
         } else if (AlgorithmSelector.SEAWIFS == algorithm) {
             return (isValidSeawifsProduct(sourceProduct));
+        } else if (AlgorithmSelector.MERIS == algorithm) {
+            return (isValidMerisProduct(sourceProduct));
         } else if (AlgorithmSelector.VGT == algorithm) {
             return (isValidVgtProduct(sourceProduct));
         } else {
-            throw new OperatorException("Algorithm " + algorithm.toString() + "not supported.");
+            throw new OperatorException("Algorithm " + algorithm.toString() + " not supported.");
         }
     }
 
@@ -294,127 +341,127 @@ public class IdepixUtils {
         band.setNoDataValueUsed(useNoDataValue);
     }
 
-    public static FlagCoding createIdepixFlagCoding(String flagIdentifier) {
-        FlagCoding flagCoding = new FlagCoding(flagIdentifier);
-        flagCoding.addFlag("F_INVALID", BitSetter.setFlag(0, IdepixConstants.F_INVALID), F_INVALID_DESCR_TEXT);
-        flagCoding.addFlag("F_CLOUD", BitSetter.setFlag(0, IdepixConstants.F_CLOUD), F_CLOUD_DESCR_TEXT);
-        flagCoding.addFlag("F_CLOUD_AMBIGUOUS", BitSetter.setFlag(0, IdepixConstants.F_CLOUD_AMBIGUOUS), F_CLOUD_AMBIGUOUS_DESCR_TEXT);
-        flagCoding.addFlag("F_CLOUD_SURE", BitSetter.setFlag(0, IdepixConstants.F_CLOUD_SURE), F_CLOUD_SURE_DESCR_TEXT);
-        flagCoding.addFlag("F_CLOUD_BUFFER", BitSetter.setFlag(0, IdepixConstants.F_CLOUD_BUFFER), F_CLOUD_BUFFER_DESCR_TEXT);
-        flagCoding.addFlag("F_CLOUD_SHADOW", BitSetter.setFlag(0, IdepixConstants.F_CLOUD_SHADOW), F_CLOUD_SHADOW_DESCR_TEXT);
-        flagCoding.addFlag("F_COASTLINE", BitSetter.setFlag(0, IdepixConstants.F_COASTLINE), F_COASTLINE_DESCR_TEXT);
-        flagCoding.addFlag("F_CLEAR_SNOW", BitSetter.setFlag(0, IdepixConstants.F_CLEAR_SNOW), F_CLEAR_SNOW_DESCR_TEXT);
-        flagCoding.addFlag("F_CLEAR_LAND", BitSetter.setFlag(0, IdepixConstants.F_CLEAR_LAND), F_CLEAR_LAND_DESCR_TEXT);
-        flagCoding.addFlag("F_CLEAR_WATER", BitSetter.setFlag(0, IdepixConstants.F_CLEAR_WATER), F_CLEAR_WATER_DESCR_TEXT);
-        flagCoding.addFlag("F_LAND", BitSetter.setFlag(0, IdepixConstants.F_LAND), F_LAND_DESCR_TEXT);
-        flagCoding.addFlag("F_WATER", BitSetter.setFlag(0, IdepixConstants.F_WATER), F_WATER_DESCR_TEXT);
-        flagCoding.addFlag("F_BRIGHT", BitSetter.setFlag(0, IdepixConstants.F_BRIGHT), F_BRIGHT_DESCR_TEXT);
-        flagCoding.addFlag("F_WHITE", BitSetter.setFlag(0, IdepixConstants.F_WHITE), F_WHITE_DESCR_TEXT);
-        flagCoding.addFlag("F_BRIGHTWHITE", BitSetter.setFlag(0, IdepixConstants.F_BRIGHTWHITE), F_BRIGHTWHITE_DESCR_TEXT);
-        flagCoding.addFlag("F_HIGH", BitSetter.setFlag(0, IdepixConstants.F_HIGH), F_HIGH_DESCR_TEXT);
-        flagCoding.addFlag("F_VEG_RISK", BitSetter.setFlag(0, IdepixConstants.F_VEG_RISK), F_VEG_RISK_DESCR_TEXT);
-        flagCoding.addFlag("F_SEAICE", BitSetter.setFlag(0, IdepixConstants.F_SEAICE), F_SEAICE_DESCR_TEXT);
-
-        return flagCoding;
-    }
-
-
-    public static int setupIdepixCloudscreeningBitmasks(Product gaCloudProduct) {
-
-        int index = 0;
-        int w = gaCloudProduct.getSceneRasterWidth();
-        int h = gaCloudProduct.getSceneRasterHeight();
-        Mask mask;
-        Random r = new Random();
-
-        mask = Mask.BandMathsType.create("lc_invalid",
-                                         F_INVALID_DESCR_TEXT, w, h,
-                                         "cloud_classif_flags.F_INVALID",
-                                         getRandomColour(r), 0.5f);
-        gaCloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("lc_cloud",
-                                         F_CLOUD_DESCR_TEXT, w, h,
-                                         "cloud_classif_flags.F_CLOUD or cloud_classif_flags.F_CLOUD_SURE or cloud_classif_flags.F_CLOUD_AMBIGUOUS",
-                                         new Color(178, 178, 0), 0.5f);
-        gaCloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("lc_cloud_ambiguous",
-                                         F_CLOUD_AMBIGUOUS_DESCR_TEXT, w, h,
-                                         "cloud_classif_flags.F_CLOUD_AMBIGUOUS",
-                                         new Color(255, 219, 156), 0.5f);
-        gaCloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("lc_cloud_sure",
-                                         F_CLOUD_SURE_DESCR_TEXT, w, h,
-                                         "cloud_classif_flags.F_CLOUD_SURE",
-                                         new Color(224, 224, 30), 0.5f);
-        gaCloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("lc_cloud_buffer",
-                                         F_CLOUD_BUFFER_DESCR_TEXT, w, h,
-                                         "cloud_classif_flags.F_CLOUD_BUFFER",
-                                         Color.red, 0.5f);
-        gaCloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("lc_cloud_shadow",
-                                         F_CLOUD_SHADOW_DESCR_TEXT, w, h,
-                                         "cloud_classif_flags.F_CLOUD_SHADOW",
-                                         Color.cyan, 0.5f);
-        gaCloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("lc_coastline",
-                                         F_COASTLINE_DESCR_TEXT, w, h,
-                                         "cloud_classif_flags.F_COASTLINE",
-                                         getRandomColour(r), 0.5f);
-        gaCloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("lc_clear_snow",
-                                         F_CLEAR_SNOW_DESCR_TEXT, w, h,
-                                         "cloud_classif_flags.F_CLEAR_SNOW",
-                                         getRandomColour(r), 0.5f);
-        gaCloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("lc_clear_land",
-                                         F_CLEAR_LAND_DESCR_TEXT, w, h,
-                                         "cloud_classif_flags.F_CLEAR_LAND",
-                                         getRandomColour(r), 0.5f);
-        gaCloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("lc_clear_water",
-                                         F_CLEAR_WATER_DESCR_TEXT, w, h,
-                                         "cloud_classif_flags.F_CLEAR_WATER",
-                                         getRandomColour(r), 0.5f);
-        gaCloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("lc_land",
-                                         F_LAND_DESCR_TEXT, w, h,
-                                         "cloud_classif_flags.F_LAND",
-                                         getRandomColour(r), 0.5f);
-        gaCloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("lc_water",
-                                         F_WATER_DESCR_TEXT, w, h,
-                                         "cloud_classif_flags.F_WATER",
-                                         getRandomColour(r), 0.5f);
-        gaCloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("lc_bright",
-                                         F_BRIGHT_DESCR_TEXT, w, h,
-                                         "cloud_classif_flags.F_BRIGHT",
-                                         getRandomColour(r), 0.5f);
-        gaCloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("lc_white",
-                                         F_WHITE_DESCR_TEXT, w, h,
-                                         "cloud_classif_flags.F_WHITE",
-                                         getRandomColour(r), 0.5f);
-        gaCloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("lc_brightwhite",
-                                         F_BRIGHTWHITE_DESCR_TEXT, w, h,
-                                         "cloud_classif_flags.F_BRIGHTWHITE",
-                                         getRandomColour(r), 0.5f);
-        gaCloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("lc_high",
-                                         F_HIGH_DESCR_TEXT, w, h,
-                                         "cloud_classif_flags.F_HIGH",
-                                         getRandomColour(r), 0.5f);
-        gaCloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("lc_veg_risk",
-                                         F_VEG_RISK_DESCR_TEXT, w, h,
-                                         "cloud_classif_flags.F_VEG_RISK",
-                                         getRandomColour(r), 0.5f);
-        gaCloudProduct.getMaskGroup().add(index++, mask);
-
-        return index;
-    }
+//    public static FlagCoding createIdepixFlagCoding(String flagIdentifier) {
+//        FlagCoding flagCoding = new FlagCoding(flagIdentifier);
+//        flagCoding.addFlag("F_INVALID", BitSetter.setFlag(0, IdepixConstants.F_INVALID), F_INVALID_DESCR_TEXT);
+//        flagCoding.addFlag("F_CLOUD", BitSetter.setFlag(0, IdepixConstants.F_CLOUD), F_CLOUD_DESCR_TEXT);
+//        flagCoding.addFlag("F_CLOUD_AMBIGUOUS", BitSetter.setFlag(0, IdepixConstants.F_CLOUD_AMBIGUOUS), F_CLOUD_AMBIGUOUS_DESCR_TEXT);
+//        flagCoding.addFlag("F_CLOUD_SURE", BitSetter.setFlag(0, IdepixConstants.F_CLOUD_SURE), F_CLOUD_SURE_DESCR_TEXT);
+//        flagCoding.addFlag("F_CLOUD_BUFFER", BitSetter.setFlag(0, IdepixConstants.F_CLOUD_BUFFER), F_CLOUD_BUFFER_DESCR_TEXT);
+//        flagCoding.addFlag("F_CLOUD_SHADOW", BitSetter.setFlag(0, IdepixConstants.F_CLOUD_SHADOW), F_CLOUD_SHADOW_DESCR_TEXT);
+//        flagCoding.addFlag("F_COASTLINE", BitSetter.setFlag(0, IdepixConstants.F_COASTLINE), F_COASTLINE_DESCR_TEXT);
+//        flagCoding.addFlag("F_CLEAR_SNOW", BitSetter.setFlag(0, IdepixConstants.F_CLEAR_SNOW), F_CLEAR_SNOW_DESCR_TEXT);
+//        flagCoding.addFlag("F_CLEAR_LAND", BitSetter.setFlag(0, IdepixConstants.F_CLEAR_LAND), F_CLEAR_LAND_DESCR_TEXT);
+//        flagCoding.addFlag("F_CLEAR_WATER", BitSetter.setFlag(0, IdepixConstants.F_CLEAR_WATER), F_CLEAR_WATER_DESCR_TEXT);
+//        flagCoding.addFlag("F_LAND", BitSetter.setFlag(0, IdepixConstants.F_LAND), F_LAND_DESCR_TEXT);
+//        flagCoding.addFlag("F_WATER", BitSetter.setFlag(0, IdepixConstants.F_WATER), F_WATER_DESCR_TEXT);
+//        flagCoding.addFlag("F_BRIGHT", BitSetter.setFlag(0, IdepixConstants.F_BRIGHT), F_BRIGHT_DESCR_TEXT);
+//        flagCoding.addFlag("F_WHITE", BitSetter.setFlag(0, IdepixConstants.F_WHITE), F_WHITE_DESCR_TEXT);
+//        flagCoding.addFlag("F_BRIGHTWHITE", BitSetter.setFlag(0, IdepixConstants.F_BRIGHTWHITE), F_BRIGHTWHITE_DESCR_TEXT);
+//        flagCoding.addFlag("F_HIGH", BitSetter.setFlag(0, IdepixConstants.F_HIGH), F_HIGH_DESCR_TEXT);
+//        flagCoding.addFlag("F_VEG_RISK", BitSetter.setFlag(0, IdepixConstants.F_VEG_RISK), F_VEG_RISK_DESCR_TEXT);
+//        flagCoding.addFlag("F_SEAICE", BitSetter.setFlag(0, IdepixConstants.F_SEAICE), F_SEAICE_DESCR_TEXT);
+//
+//        return flagCoding;
+//    }
+//
+//
+//    public static int setupIdepixCloudscreeningBitmasks(Product gaCloudProduct) {
+//
+//        int index = 0;
+//        int w = gaCloudProduct.getSceneRasterWidth();
+//        int h = gaCloudProduct.getSceneRasterHeight();
+//        Mask mask;
+//        Random r = new Random();
+//
+//        mask = Mask.BandMathsType.create("lc_invalid",
+//                                         F_INVALID_DESCR_TEXT, w, h,
+//                                         "cloud_classif_flags.F_INVALID",
+//                                         getRandomColour(r), 0.5f);
+//        gaCloudProduct.getMaskGroup().add(index++, mask);
+//        mask = Mask.BandMathsType.create("lc_cloud",
+//                                         F_CLOUD_DESCR_TEXT, w, h,
+//                                         "cloud_classif_flags.F_CLOUD or cloud_classif_flags.F_CLOUD_SURE or cloud_classif_flags.F_CLOUD_AMBIGUOUS",
+//                                         new Color(178, 178, 0), 0.5f);
+//        gaCloudProduct.getMaskGroup().add(index++, mask);
+//        mask = Mask.BandMathsType.create("lc_cloud_ambiguous",
+//                                         F_CLOUD_AMBIGUOUS_DESCR_TEXT, w, h,
+//                                         "cloud_classif_flags.F_CLOUD_AMBIGUOUS",
+//                                         new Color(255, 219, 156), 0.5f);
+//        gaCloudProduct.getMaskGroup().add(index++, mask);
+//        mask = Mask.BandMathsType.create("lc_cloud_sure",
+//                                         F_CLOUD_SURE_DESCR_TEXT, w, h,
+//                                         "cloud_classif_flags.F_CLOUD_SURE",
+//                                         new Color(224, 224, 30), 0.5f);
+//        gaCloudProduct.getMaskGroup().add(index++, mask);
+//        mask = Mask.BandMathsType.create("lc_cloud_buffer",
+//                                         F_CLOUD_BUFFER_DESCR_TEXT, w, h,
+//                                         "cloud_classif_flags.F_CLOUD_BUFFER",
+//                                         Color.red, 0.5f);
+//        gaCloudProduct.getMaskGroup().add(index++, mask);
+//        mask = Mask.BandMathsType.create("lc_cloud_shadow",
+//                                         F_CLOUD_SHADOW_DESCR_TEXT, w, h,
+//                                         "cloud_classif_flags.F_CLOUD_SHADOW",
+//                                         Color.cyan, 0.5f);
+//        gaCloudProduct.getMaskGroup().add(index++, mask);
+//        mask = Mask.BandMathsType.create("lc_coastline",
+//                                         F_COASTLINE_DESCR_TEXT, w, h,
+//                                         "cloud_classif_flags.F_COASTLINE",
+//                                         getRandomColour(r), 0.5f);
+//        gaCloudProduct.getMaskGroup().add(index++, mask);
+//        mask = Mask.BandMathsType.create("lc_clear_snow",
+//                                         F_CLEAR_SNOW_DESCR_TEXT, w, h,
+//                                         "cloud_classif_flags.F_CLEAR_SNOW",
+//                                         getRandomColour(r), 0.5f);
+//        gaCloudProduct.getMaskGroup().add(index++, mask);
+//        mask = Mask.BandMathsType.create("lc_clear_land",
+//                                         F_CLEAR_LAND_DESCR_TEXT, w, h,
+//                                         "cloud_classif_flags.F_CLEAR_LAND",
+//                                         getRandomColour(r), 0.5f);
+//        gaCloudProduct.getMaskGroup().add(index++, mask);
+//        mask = Mask.BandMathsType.create("lc_clear_water",
+//                                         F_CLEAR_WATER_DESCR_TEXT, w, h,
+//                                         "cloud_classif_flags.F_CLEAR_WATER",
+//                                         getRandomColour(r), 0.5f);
+//        gaCloudProduct.getMaskGroup().add(index++, mask);
+//        mask = Mask.BandMathsType.create("lc_land",
+//                                         F_LAND_DESCR_TEXT, w, h,
+//                                         "cloud_classif_flags.F_LAND",
+//                                         getRandomColour(r), 0.5f);
+//        gaCloudProduct.getMaskGroup().add(index++, mask);
+//        mask = Mask.BandMathsType.create("lc_water",
+//                                         F_WATER_DESCR_TEXT, w, h,
+//                                         "cloud_classif_flags.F_WATER",
+//                                         getRandomColour(r), 0.5f);
+//        gaCloudProduct.getMaskGroup().add(index++, mask);
+//        mask = Mask.BandMathsType.create("lc_bright",
+//                                         F_BRIGHT_DESCR_TEXT, w, h,
+//                                         "cloud_classif_flags.F_BRIGHT",
+//                                         getRandomColour(r), 0.5f);
+//        gaCloudProduct.getMaskGroup().add(index++, mask);
+//        mask = Mask.BandMathsType.create("lc_white",
+//                                         F_WHITE_DESCR_TEXT, w, h,
+//                                         "cloud_classif_flags.F_WHITE",
+//                                         getRandomColour(r), 0.5f);
+//        gaCloudProduct.getMaskGroup().add(index++, mask);
+//        mask = Mask.BandMathsType.create("lc_brightwhite",
+//                                         F_BRIGHTWHITE_DESCR_TEXT, w, h,
+//                                         "cloud_classif_flags.F_BRIGHTWHITE",
+//                                         getRandomColour(r), 0.5f);
+//        gaCloudProduct.getMaskGroup().add(index++, mask);
+//        mask = Mask.BandMathsType.create("lc_high",
+//                                         F_HIGH_DESCR_TEXT, w, h,
+//                                         "cloud_classif_flags.F_HIGH",
+//                                         getRandomColour(r), 0.5f);
+//        gaCloudProduct.getMaskGroup().add(index++, mask);
+//        mask = Mask.BandMathsType.create("lc_veg_risk",
+//                                         F_VEG_RISK_DESCR_TEXT, w, h,
+//                                         "cloud_classif_flags.F_VEG_RISK",
+//                                         getRandomColour(r), 0.5f);
+//        gaCloudProduct.getMaskGroup().add(index++, mask);
+//
+//        return index;
+//    }
 
     public static double convertGeophysicalToMathematicalAngle(double inAngle) {
         if (0.0 <= inAngle && inAngle < 90.0) {
@@ -460,6 +507,18 @@ public class IdepixUtils {
         int gColor = random.nextInt(256);
         int bColor = random.nextInt(256);
         return new Color(rColor, gColor, bColor);
+    }
+
+    public static void combineFlags(int x, int y, Tile sourceFlagTile, Tile targetTile) {
+        int sourceFlags = sourceFlagTile.getSampleInt(x, y);
+        int computedFlags = targetTile.getSampleInt(x, y);
+        targetTile.setSample(x, y, sourceFlags | computedFlags);
+    }
+
+    public static void consolidateCloudAndBuffer(Tile targetTile, int x, int y) {
+        if (targetTile.getSampleBit(x, y, IdepixConstants.F_CLOUD)) {
+//            targetTile.setSample(x, y, IdepixConstants.F_CLOUD_BUFFER, false);
+        }
     }
 
 }

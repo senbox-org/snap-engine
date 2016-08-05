@@ -12,5 +12,6 @@ public enum AlgorithmSelector {
     MSI,
     PROBAV,
     SEAWIFS,
+    MERIS,
     VGT
 }

@@ -219,7 +219,7 @@ public class Rad2ReflOp extends Operator {
 
         if (copyNonSpectralBands) {
             for (Band b : sourceProduct.getBands()) {
-                if (!b.getName().contains(spectralInputBandPrefix)) {
+                if (!b.getName().contains(spectralInputBandPrefix) && !targetProduct.containsBand(b.getName())) {
                     ProductUtils.copyBand(b.getName(), sourceProduct, targetProduct, true);
                 }
             }
