@@ -112,25 +112,7 @@ public class RayleighCorrAlgorithm {
         return (-cos_view * cos_sun) - (sin_view * sin_sun * cos_azi_dif);
     }
 
-    public double[] getRayleighReflectance(double[] taurPoZ, double[] sunZenithAngles, double[] sunAzimuthAngles, double[] viewZenithAngles, double[] viewAzimuthAngles) {
-        final double reflRaly[] = new double[viewZenithAngles.length];
 
-        double[] sunZenithAngleRad = SmileUtils.convertDegreesToRadians(sunZenithAngles);
-        double[] viewZenithAngleRad = SmileUtils.convertDegreesToRadians(viewZenithAngles);
-
-        for (int i = 0; i < viewZenithAngles.length; i++) {
-            final double azimuthDifferenceRad = Math.toRadians(getAzimuthDifference(viewAzimuthAngles[i], sunAzimuthAngles[i]));
-            final double sunZenithAngle = sunZenithAngleRad[i];
-            final double viewZenithAngle = viewZenithAngleRad[i];
-
-            final double phaseRaylMin = phaseRaylMin(sunZenithAngle, viewZenithAngle, azimuthDifferenceRad);
-            final double cos_sunZenith = Math.cos(sunZenithAngle);
-            final double cos_viewZenith = Math.cos(viewZenithAngle);
-            reflRaly[i] = cos_sunZenith * taurPoZ[i] * phaseRaylMin / (4 * Math.PI) * (1 / cos_viewZenith) * Math.PI;
-
-        }
-        return reflRaly;
-    }
 
     public double[] getPhaseRaylMin(double[] sunZenithAngleRads, double[] sunAzimuthAngles, double[] viewZenithAngleRads, double[] viewAzimuthAngles) {
         double phaseRaylMin[] = new double[sunAzimuthAngles.length];
@@ -294,6 +276,26 @@ public class RayleighCorrAlgorithm {
         rayleighHashMap.put(String.format("transSRay_%02d", sourceBandIndex), tR_thetaS);
 
         return rayleighHashMap;
+    }
+
+    public double[] getRayleighReflectance(double[] taurPoZ, double[] sunZenithAngles, double[] sunAzimuthAngles, double[] viewZenithAngles, double[] viewAzimuthAngles) {
+        final double reflRaly[] = new double[viewZenithAngles.length];
+
+        double[] sunZenithAngleRad = SmileUtils.convertDegreesToRadians(sunZenithAngles);
+        double[] viewZenithAngleRad = SmileUtils.convertDegreesToRadians(viewZenithAngles);
+
+        for (int i = 0; i < viewZenithAngles.length; i++) {
+            final double azimuthDifferenceRad = Math.toRadians(getAzimuthDifference(viewAzimuthAngles[i], sunAzimuthAngles[i]));
+            final double sunZenithAngle = sunZenithAngleRad[i];
+            final double viewZenithAngle = viewZenithAngleRad[i];
+
+            final double phaseRaylMin = phaseRaylMin(sunZenithAngle, viewZenithAngle, azimuthDifferenceRad);
+            final double cos_sunZenith = Math.cos(sunZenithAngle);
+            final double cos_viewZenith = Math.cos(viewZenithAngle);
+            reflRaly[i] = cos_sunZenith * taurPoZ[i] * phaseRaylMin / (4 * Math.PI) * (1 / cos_viewZenith) * Math.PI;
+
+        }
+        return reflRaly;
     }
 
     public HashMap<String, double[]> correct(double[] lambda, double[] seaAirPressure, double[] altitude, double[] szaRads, double[] ozaRads, double[] ray_phase_min, int sourceBandIndex) {

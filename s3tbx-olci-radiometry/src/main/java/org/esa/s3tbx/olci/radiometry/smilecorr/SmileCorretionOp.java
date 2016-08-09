@@ -28,6 +28,7 @@ import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
+import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.math.RsMathUtils;
@@ -68,11 +69,15 @@ public class SmileCorretionOp extends Operator {
     @SourceProduct(alias = "source", label = "Name", description = "The source product.")
     private Product sourceProduct;
 
+    @Parameter(defaultValue = "false", description = "Execute Rayleigh Operator")
+    private boolean ralyeighOperator;
+
     @Override
     public void initialize() throws OperatorException {
         if (!sourceProduct.isCompatibleBandArithmeticExpression(WATER_EXPRESSION)) {
             throw new OperatorException("Can not evaluate expression'" + WATER_EXPRESSION + "' on source product");
         }
+
 
         // Configure the target
         Product targetProduct = new Product(sourceProduct.getName(), sourceProduct.getProductType(),
