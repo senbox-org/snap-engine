@@ -49,7 +49,7 @@ public class DpmConfig {
             try {
                 Utils.downloadAndInstallAuxdata(auxdataDirPath, new URL(REMOTE_AUXDATA_PATH));
             } catch (MalformedURLException e) {
-                throw new L2AuxDataException("Not able to download auxillary data.", e);
+                throw new L2AuxDataException("Not able to download auxiliary data.", e);
             }
         }
         auxdataTargetDir = auxdataDirPath.toFile();
