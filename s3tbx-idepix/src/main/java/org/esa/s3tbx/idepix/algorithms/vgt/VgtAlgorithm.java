@@ -36,6 +36,7 @@ public class VgtAlgorithm extends AbstractPixelProperties {
 
     public boolean isWater;
     public boolean usel1bLandWaterFlag;
+    private boolean isCoastline;
 
     public boolean isInvalid() {
         return !IdepixUtils.areAllReflectancesValid(refl);
@@ -262,6 +263,10 @@ public class VgtAlgorithm extends AbstractPixelProperties {
         this.smLand = smLand;
     }
 
+    public void setIsCoastline(boolean isCoastline) {
+        this.isCoastline = isCoastline;
+    }
+
     public void setIsWater(boolean isWater) {
         this.isWater = !isInvalid() && isWater;
     }
@@ -280,5 +285,9 @@ public class VgtAlgorithm extends AbstractPixelProperties {
 
     public double[] getNnOutput() {
         return nnOutput;
+    }
+
+    public boolean isCoastline() {
+        return isCoastline;
     }
 }

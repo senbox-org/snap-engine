@@ -18,4 +18,6 @@ org.esa.s3tbx.idepix.algorithms.meris.MerisWaterClassificationOp$Spi
 org.esa.s3tbx.idepix.algorithms.meris.MerisMergeLandWaterOp$Spi
 org.esa.s3tbx.idepix.algorithms.meris.MerisPostProcessOp$Spi
 org.esa.s3tbx.idepix.algorithms.vgt.VgtOp$Spi
+org.esa.s3tbx.idepix.algorithms.vgt.VgtClassificationOp$Spi
+org.esa.s3tbx.idepix.algorithms.vgt.VgtPostProcessOp$Spi
 org.esa.s3tbx.idepix.operators.CloudBufferOp$Spi

@@ -92,11 +92,10 @@ public class MerisOp extends BasisOp {
             description = " NN cloud ambiguous cloud sure/snow separation value (has only effect for MERIS L1b products)")
     double schillerLandNNCloudSureSnowSeparationValue;
 
-//    @Parameter(defaultValue = "true",
-//            label = " Compute cloud shadow",
-//            description = " Compute cloud shadow with the algorithm from 'Fronts' project")
-//    private boolean computeCloudShadow;
-    private boolean computeCloudShadow = false;   // as we have no CTP as L2 auxdata is not yet supported)
+    @Parameter(defaultValue = "true",
+            label = " Compute cloud shadow",
+            description = " Compute cloud shadow with the algorithm from 'Fronts' project")
+    private boolean computeCloudShadow;
 
     @Parameter(defaultValue = "true", label = " Compute a cloud buffer")
     private boolean computeCloudBuffer;
@@ -106,17 +105,13 @@ public class MerisOp extends BasisOp {
             label = "Width of cloud buffer (# of pixels)")
     private int cloudBufferWidth;
 
-
-    private static final int LAND_WATER_MASK_RESOLUTION = 50;
-    private static final int OVERSAMPLING_FACTOR_X = 3;
-    private static final int OVERSAMPLING_FACTOR_Y = 3;
-
     private Product waterClassificationProduct;
     private Product landClassificationProduct;
     private Product mergedClassificationProduct;
     private Product postProcessingProduct;
 
     private Product rad2reflProduct;
+    private Product ctpProduct;
     private Product waterMaskProduct;
 
     private Map<String, Product> classificationInputProducts;
@@ -154,11 +149,12 @@ public class MerisOp extends BasisOp {
 
     private void preProcess() {
         rad2reflProduct = IdepixProducts.computeRadiance2ReflectanceProduct(sourceProduct);
+        ctpProduct = IdepixProducts.computeCloudTopPressureProduct(sourceProduct);
 
         HashMap<String, Object> waterMaskParameters = new HashMap<>();
-        waterMaskParameters.put("resolution", LAND_WATER_MASK_RESOLUTION);
-        waterMaskParameters.put("subSamplingFactorX", OVERSAMPLING_FACTOR_X);
-        waterMaskParameters.put("subSamplingFactorY", OVERSAMPLING_FACTOR_Y);
+        waterMaskParameters.put("resolution", MerisConstants.LAND_WATER_MASK_RESOLUTION);
+        waterMaskParameters.put("subSamplingFactorX", MerisConstants.OVERSAMPLING_FACTOR_X);
+        waterMaskParameters.put("subSamplingFactorY", MerisConstants.OVERSAMPLING_FACTOR_Y);
         waterMaskProduct = GPF.createProduct("LandWaterMask", waterMaskParameters, sourceProduct);
     }
 
@@ -220,6 +216,7 @@ public class MerisOp extends BasisOp {
         HashMap<String, Product> input = new HashMap<>();
         input.put("l1b", sourceProduct);
         input.put("merisCloud", mergedClassificationProduct);
+        input.put("ctp", ctpProduct);
 
         Map<String, Object> params = new HashMap<>();
         params.put("computeCloudShadow", computeCloudShadow);

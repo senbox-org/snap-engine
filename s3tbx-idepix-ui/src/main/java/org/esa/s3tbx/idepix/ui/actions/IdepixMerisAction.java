@@ -15,7 +15,6 @@
 package org.esa.s3tbx.idepix.ui.actions;
 
 import org.esa.s3tbx.idepix.algorithms.meris.MerisOp;
-import org.esa.s3tbx.idepix.algorithms.modis.ModisOp;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.ui.DefaultSingleTargetProductDialog;
 import org.esa.snap.rcp.actions.AbstractSnapAction;

@@ -6,7 +6,12 @@ import org.esa.s3tbx.idepix.core.seaice.SeaIceClassification;
 import org.esa.s3tbx.idepix.core.seaice.SeaIceClassifier;
 import org.esa.s3tbx.idepix.core.util.IdepixUtils;
 import org.esa.s3tbx.idepix.core.util.SchillerNeuralNetWrapper;
+import org.esa.s3tbx.meris.l2auxdata.L2AuxData;
+import org.esa.s3tbx.meris.l2auxdata.L2AuxDataException;
+import org.esa.s3tbx.meris.l2auxdata.L2AuxDataProvider;
 import org.esa.s3tbx.processor.rad2refl.Rad2ReflConstants;
+import org.esa.s3tbx.util.math.FractIndex;
+import org.esa.s3tbx.util.math.Interp;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
@@ -96,12 +101,20 @@ public class MerisWaterClassificationOp extends Operator {
     ThreadLocal<SchillerNeuralNetWrapper> merisWaterNeuralNet;
     ThreadLocal<SchillerNeuralNetWrapper> merisAllNeuralNet;
 
+    private L2AuxData auxData;
+
     private static final double SEA_ICE_CLIM_THRESHOLD = 10.0;
 
     private RectangleExtender rectExtender;
 
     @Override
     public void initialize() throws OperatorException {
+        try {
+            auxData = L2AuxDataProvider.getInstance().getAuxdata(l1bProduct);
+        } catch (L2AuxDataException e) {
+            throw new OperatorException("Could not load L2Auxdata", e);
+        }
+
         readSchillerNets();
         createTargetProduct();
 
@@ -337,17 +350,14 @@ public class MerisWaterClassificationOp extends Operator {
     }
 
     private double glintRef(double thetas, double thetav, double delta, double windm, double chiw) {
-        // todo: before this can be activated, auxiliary data setup needs to be clarified.
-//        FractIndex[] rogIndex = FractIndex.createArray(5);
-//
-//        Interp.interpCoord(chiw, auxData.rog.getTab(0), rogIndex[0]);
-//        Interp.interpCoord(thetav, auxData.rog.getTab(1), rogIndex[1]);
-//        Interp.interpCoord(delta, auxData.rog.getTab(2), rogIndex[2]);
-//        Interp.interpCoord(windm, auxData.rog.getTab(3), rogIndex[3]);
-//        Interp.interpCoord(thetas, auxData.rog.getTab(4), rogIndex[4]);
-//        return Interp.interpolate(auxData.rog.getJavaArray(), rogIndex);
+        FractIndex[] rogIndex = FractIndex.createArray(5);
 
-        return 0.0;
+        Interp.interpCoord(chiw, auxData.rog.getTab(0), rogIndex[0]);
+        Interp.interpCoord(thetav, auxData.rog.getTab(1), rogIndex[1]);
+        Interp.interpCoord(delta, auxData.rog.getTab(2), rogIndex[2]);
+        Interp.interpCoord(windm, auxData.rog.getTab(3), rogIndex[3]);
+        Interp.interpCoord(thetas, auxData.rog.getTab(4), rogIndex[4]);
+        return Interp.interpolate(auxData.rog.getJavaArray(), rogIndex);
     }
 
     private boolean isPixelClassifiedAsSeaice(GeoPos geoPos) {

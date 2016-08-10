@@ -29,11 +29,11 @@ import java.util.HashMap;
         copyright = "(c) 2016 by Brockmann Consult",
         description = "Refines the MERIS pixel classification over both land and water.")
 public class MerisPostProcessOp extends Operator {
-//    @Parameter(defaultValue = "true",
-//            label = " Compute cloud shadow",
-//            description = " Compute cloud shadow with latest 'fronts' algorithm")
-//    private boolean computeCloudShadow;
-    private boolean computeCloudShadow = false;   // as we have no CTP as L2 auxdata is not yet supported)
+
+    @Parameter(defaultValue = "true",
+            label = " Compute cloud shadow",
+            description = " Compute cloud shadow with latest 'fronts' algorithm")
+    private boolean computeCloudShadow;
 
     @Parameter(defaultValue = "true",
             label = " Refine pixel classification near coastlines",
@@ -44,7 +44,8 @@ public class MerisPostProcessOp extends Operator {
     private Product l1bProduct;
     @SourceProduct(alias = "merisCloud")
     private Product merisCloudProduct;
-    @SourceProduct(alias = "ctp", optional = true)
+    //    @SourceProduct(alias = "ctp", optional = true)
+    @SourceProduct(alias = "ctp")
     private Product ctpProduct;
 
     private Band waterFractionBand;
@@ -77,9 +78,8 @@ public class MerisPostProcessOp extends Operator {
         szaTPG = l1bProduct.getTiePointGrid(EnvisatConstants.MERIS_SUN_ZENITH_DS_NAME);
         saaTPG = l1bProduct.getTiePointGrid(EnvisatConstants.MERIS_SUN_AZIMUTH_DS_NAME);
         altTPG = l1bProduct.getTiePointGrid(EnvisatConstants.MERIS_DEM_ALTITUDE_DS_NAME);
-        if (ctpProduct != null) {
-            ctpBand = ctpProduct.getBand("cloud_top_press");
-        }
+        ctpBand = ctpProduct.getBand("cloud_top_press");
+
         int extendedWidth;
         int extendedHeight;
         if (l1bProduct.getProductType().startsWith("MER_F")) {
@@ -108,10 +108,8 @@ public class MerisPostProcessOp extends Operator {
         final Tile sourceFlagTile = getSourceTile(origCloudFlagBand, srcRectangle);
         Tile szaTile = getSourceTile(szaTPG, srcRectangle);
         Tile saaTile = getSourceTile(saaTPG, srcRectangle);
-        Tile ctpTile = null;
-        if (ctpBand != null) {
-            ctpTile = getSourceTile(ctpBand, srcRectangle);
-        }
+        Tile ctpTile = getSourceTile(ctpBand, srcRectangle);
+
         Tile altTile = getSourceTile(altTPG, targetRectangle);
         final Tile waterFractionTile = getSourceTile(waterFractionBand, srcRectangle);
 
@@ -140,7 +138,7 @@ public class MerisPostProcessOp extends Operator {
             }
         }
 
-        if (computeCloudShadow && ctpProduct != null ) {
+        if (computeCloudShadow) {
             CloudShadowFronts cloudShadowFronts = new CloudShadowFronts(
                     geoCoding,
                     srcRectangle,

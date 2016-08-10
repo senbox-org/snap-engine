@@ -15,8 +15,6 @@ import java.awt.*;
  */
 public class MerisUtils {
 
-    // if possible, put here everything which is common for both land and water parts
-
     public static int setupMerisBitmasks(Product cloudProduct) {
 
         int index = 0;

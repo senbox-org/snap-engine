@@ -35,14 +35,11 @@ import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.gpf.common.BandMathsOp;
-import org.esa.snap.core.util.ResourceInstaller;
-import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.dataio.envisat.EnvisatConstants;
 
 import java.awt.*;
 import java.io.*;
-import java.nio.file.Path;
 import java.util.Calendar;
 
 /**
@@ -52,11 +49,11 @@ import java.util.Calendar;
  * @version $Revision: 1.2 $ $Date: 2007/03/30 15:11:20 $
  */
 @OperatorMetadata(alias = "Meris.CloudTopPressureOp",
-                  version = "2.3.4",
-                  internal = true,
-                  authors = "Marco Zühlke",
-                  copyright = "(c) 2007-2009 by Brockmann Consult",
-                  description = "Computes cloud top pressure with FUB NN.")
+        version = "2.3.4",
+        internal = true,
+        authors = "Marco Zühlke",
+        copyright = "(c) 2007-2009 by Brockmann Consult",
+        description = "Computes cloud top pressure with FUB NN.")
 public class CloudTopPressureOp extends MerisBasisOp {
 
     //    private static final String INVALID_EXPRESSION = "l1_flags.INVALID or not l1_flags.LAND_OCEAN";
@@ -117,27 +114,10 @@ public class CloudTopPressureOp extends MerisBasisOp {
     }
 
     private void loadNeuralNet() throws IOException, JnnException {
-//        String auxdataSrcPath = "auxdata/ctp";
-//        final String auxdataDestPath = ".beam/" + AlbedomapConstants.SYMBOLIC_NAME + "/" + auxdataSrcPath;
-//        File auxdataTargetDir = new File(SystemUtils.getUserHomeDir(), auxdataDestPath);
-//        URL sourceUrl = ResourceInstaller.getSourceUrl(this.getClass());
-//
-//        ResourceInstaller resourceInstaller = new ResourceInstaller(sourceUrl, auxdataSrcPath, auxdataTargetDir);
-//        resourceInstaller.install(".*", new NullProgressMonitor());
-
-        // todo: clarify if this is the right way in Snap/S3tbx:
-        final Path auxdataDirPath = SystemUtils.getAuxDataPath().resolve("ctp").toAbsolutePath();
-        File auxdataTargetDir = auxdataDirPath.toFile();
-        final Path sourcePath = ResourceInstaller.findModuleCodeBasePath(getClass()).resolve("auxdata");
-        try {
-            new ResourceInstaller(sourcePath, auxdataDirPath).install(".*", ProgressMonitor.NULL);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-//        File nnFile = new File(auxdataTargetDir, "ctp.nna");
-        final JnnNet neuralNetLand = readNeuralNet(new File(auxdataTargetDir, "ctp_NN_1.nna"));
-        final JnnNet neuralNetWater = readNeuralNet(new File(auxdataTargetDir, "ctp_NN_2.nna"));
+        final File neuralNetLandFile = new File(getClass().getResource("ctp_NN_1.nna").getPath());
+        final File neuralNetWaterFile = new File(getClass().getResource("ctp_NN_2.nna").getPath());
+        final JnnNet neuralNetLand = readNeuralNet(neuralNetLandFile);
+        final JnnNet neuralNetWater = readNeuralNet(neuralNetWaterFile);
         landNet = new ThreadLocal<JnnNet>() {
             @Override
             protected JnnNet initialValue() {
@@ -151,6 +131,42 @@ public class CloudTopPressureOp extends MerisBasisOp {
             }
         };
     }
+
+//    private void loadNeuralNet() throws IOException, JnnException {
+////        String auxdataSrcPath = "auxdata/ctp";
+////        final String auxdataDestPath = ".beam/" + AlbedomapConstants.SYMBOLIC_NAME + "/" + auxdataSrcPath;
+////        File auxdataTargetDir = new File(SystemUtils.getUserHomeDir(), auxdataDestPath);
+////        URL sourceUrl = ResourceInstaller.getSourceUrl(this.getClass());
+////
+////        ResourceInstaller resourceInstaller = new ResourceInstaller(sourceUrl, auxdataSrcPath, auxdataTargetDir);
+////        resourceInstaller.install(".*", new NullProgressMonitor());
+//
+//        // todo: clarify if this is the right way in Snap/S3tbx:
+//        final Path auxdataDirPath = SystemUtils.getAuxDataPath().resolve("ctp").toAbsolutePath();
+//        File auxdataTargetDir = auxdataDirPath.toFile();
+//        final Path sourcePath = ResourceInstaller.findModuleCodeBasePath(getClass()).resolve("auxdata");
+//        try {
+//            new ResourceInstaller(sourcePath, auxdataDirPath).install(".*", ProgressMonitor.NULL);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+////        File nnFile = new File(auxdataTargetDir, "ctp.nna");
+//        final JnnNet neuralNetLand = readNeuralNet(new File(auxdataTargetDir, "ctp_NN_1.nna"));
+//        final JnnNet neuralNetWater = readNeuralNet(new File(auxdataTargetDir, "ctp_NN_2.nna"));
+//        landNet = new ThreadLocal<JnnNet>() {
+//            @Override
+//            protected JnnNet initialValue() {
+//                return neuralNetLand.clone();
+//            }
+//        };
+//        waterNet = new ThreadLocal<JnnNet>() {
+//            @Override
+//            protected JnnNet initialValue() {
+//                return neuralNetWater.clone();
+//            }
+//        };
+//    }
 
 
     private void createTargetProduct() throws OperatorException {
@@ -222,14 +238,14 @@ public class CloudTopPressureOp extends MerisBasisOp {
                     final double toar11XY_corrected = toar11.getSampleDouble(x, y) + stray;
 
                     if (l1bFlags.getSampleBit(x, y, Constants.L1_F_LAND)) {
-                        final GeoPos geoPos =  sourceProduct.getSceneGeoCoding().getGeoPos(new PixelPos(x, y), null);
+                        final GeoPos geoPos = sourceProduct.getSceneGeoCoding().getGeoPos(new PixelPos(x, y), null);
                         nnInLand[0] = computeSurfAlbedo((float) geoPos.getLat(), (float) geoPos.getLon()); // albedo
                         nnInLand[1] = toar10.getSampleDouble(x, y);
                         nnInLand[2] = toar11XY_corrected / toar10.getSampleDouble(x, y);
                         nnInLand[3] = Math.cos(szaRad);
                         nnInLand[4] = Math.cos(vzaRad);
                         nnInLand[5] = Math.sin(vzaRad) *
-                                      Math.cos(MathUtils.DTOR * (vaa.getSampleFloat(x, y) - saa.getSampleFloat(x, y)));
+                                Math.cos(MathUtils.DTOR * (vaa.getSampleFloat(x, y) - saa.getSampleFloat(x, y)));
                         nnInLand[6] = lambda;
 
                         nnLand.process(nnInLand, nnOut);
@@ -239,7 +255,7 @@ public class CloudTopPressureOp extends MerisBasisOp {
                         nnInWater[2] = Math.cos(szaRad);
                         nnInWater[3] = Math.cos(vzaRad);
                         nnInWater[4] = Math.sin(vzaRad) *
-                                       Math.cos(MathUtils.DTOR * (vaa.getSampleFloat(x, y) - saa.getSampleFloat(x, y)));
+                                Math.cos(MathUtils.DTOR * (vaa.getSampleFloat(x, y) - saa.getSampleFloat(x, y)));
                         nnInWater[5] = lambda;
 
                         nnWater.process(nnInWater, nnOut);

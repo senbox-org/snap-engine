@@ -26,6 +26,10 @@ public class IdepixProducts {
         return GPF.createProduct(OperatorSpi.getOperatorAlias(Rad2ReflOp.class), params, sourceProduct);
     }
 
+    public static Product computeCloudTopPressureProduct(Product sourceProduct) {
+        return GPF.createProduct("Meris.CloudTopPressureOp", GPF.NO_PARAMS, sourceProduct);
+    }
+
     public static void addRadianceBands(Product l1bProduct, Product targetProduct) {
         for (String bandname : l1bProduct.getBandNames()) {
             if (!targetProduct.containsBand(bandname) && bandname.startsWith(Rad2ReflConstants.MERIS_AUTOGROUPING_RAD_STRING)) {

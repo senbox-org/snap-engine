@@ -14,6 +14,7 @@ import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
+import org.esa.snap.core.util.ProductUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,14 +34,19 @@ import java.util.Map;
 public class VgtOp extends BasisOp {
 
     @Parameter(defaultValue = "true",
-            label = " Write TOA Reflectances to the target product",
-            description = " Write TOA Reflectances to the target product")
+            label = " Write TOA reflectances to the target product",
+            description = " Write TOA reflectances to the target product")
     boolean copyToaReflectances = true;
 
     @Parameter(defaultValue = "false",
-            label = " Write input annotation bands to the target product (VGT only)",
-            description = " Write input annotation bands to the target product (has only effect for VGT L1b products)")
+            label = " Write input annotation bands to the target product",
+            description = " Write input annotation bands to the target product")
     boolean copyAnnotations;
+
+    @Parameter(defaultValue = "false",
+            label = " Write feature values to the target product",
+            description = " Write all feature values to the target product")
+    boolean copyFeatureValues = false;
 
     @Parameter(defaultValue = "false",
             label = " Write NN value to the target product.",
@@ -48,18 +54,18 @@ public class VgtOp extends BasisOp {
     private boolean outputSchillerNNValue;
 
     @Parameter(defaultValue = "1.1",
-            label = " NN cloud ambiguous lower boundary (VGT only)",
-            description = " NN cloud ambiguous lower boundary (has only effect for VGT L1b products)")
+            label = " NN cloud ambiguous lower boundary",
+            description = " NN cloud ambiguous lower boundary")
     private double nnCloudAmbiguousLowerBoundaryValue;
 
     @Parameter(defaultValue = "2.7",
-            label = " NN cloud ambiguous/sure separation value (VGT only)",
-            description = " NN cloud ambiguous cloud ambiguous/sure separation value (has only effect for VGT L1b products)")
+            label = " NN cloud ambiguous/sure separation value",
+            description = " NN cloud ambiguous cloud ambiguous/sure separation value")
     private double nnCloudAmbiguousSureSeparationValue;
 
     @Parameter(defaultValue = "4.6",
-            label = " NN cloud sure/snow separation value (VGT only)",
-            description = " NN cloud ambiguous cloud sure/snow separation value (has only effect for VGT L1b products)")
+            label = " NN cloud sure/snow separation value",
+            description = " NN cloud ambiguous cloud sure/snow separation value")
     private double nnCloudSureSnowSeparationValue;
 
     @Parameter(defaultValue = "true", label = " Compute a cloud buffer")
@@ -69,16 +75,6 @@ public class VgtOp extends BasisOp {
             description = "The width of a cloud 'safety buffer' around a pixel which was classified as cloudy.",
             label = "Width of cloud buffer (# of pixels)")
     private int cloudBufferWidth;
-
-    @Parameter(defaultValue = "false",
-            label = " Compute cloud shadow",
-            description = " Compute cloud shadow with the algorithm from 'Fronts' project")
-    private boolean computeCloudShadow;
-
-    @Parameter(defaultValue = "true",
-            label = " Refine pixel classification near coastlines",
-            description = "Refine pixel classification near coastlines. ")
-    private boolean refineClassificationNearCoastlines;
 
     @Parameter(defaultValue = "50", valueSet = {"50", "150"},
             label = " Resolution of used land-water mask in m/pixel",
@@ -93,7 +89,7 @@ public class VgtOp extends BasisOp {
 
     @SourceProduct(alias = "l1bProduct",
             label = "L1b product",
-            description = "The MERIS or SPOT-VGT L1b product.")
+            description = "The SPOT-VGT L1b product.")
     private Product sourceProduct;
 
     // skip for the moment, clarify if needed
@@ -107,6 +103,7 @@ public class VgtOp extends BasisOp {
 
     private Map<String, Object> cloudClassificationParameters;
     private Product cloudProduct;
+    private Product waterMaskProduct;
     private Product postProcessingProduct;
 
     @Override
@@ -117,37 +114,46 @@ public class VgtOp extends BasisOp {
             throw new OperatorException(IdepixConstants.INPUT_INCONSISTENCY_ERROR_MESSAGE);
         }
         processGlobAlbedoVgt();
+
+        ProductUtils.copyFlagBands(sourceProduct, targetProduct, true);   // we need the L1b flag!
+        ProductUtils.copyMetadata(sourceProduct, targetProduct);
+        VgtUtils.setupVgtBitmasks(targetProduct);
     }
 
     private void processGlobAlbedoVgt() {
+        // Water mask
+        HashMap<String, Object> waterMaskParameters = new HashMap<>();
+        waterMaskParameters.put("resolution", VgtConstants.LAND_WATER_MASK_RESOLUTION);
+        waterMaskParameters.put("subSamplingFactorX", VgtConstants.OVERSAMPLING_FACTOR_X);
+        waterMaskParameters.put("subSamplingFactorY", VgtConstants.OVERSAMPLING_FACTOR_Y);
+        waterMaskProduct = GPF.createProduct("LandWaterMask", waterMaskParameters, sourceProduct);
+
         // Cloud Classification
-        Map<String, Product> gaCloudInput = new HashMap<>(4);
-        gaCloudInput.put("gal1b", sourceProduct);
+        Map<String, Product> classificationInputProducts = new HashMap<>(4);
+        classificationInputProducts.put("gal1b", sourceProduct);
+        classificationInputProducts.put("waterMask", waterMaskProduct);
 
         cloudClassificationParameters = createVgtCloudClassificationParameters();
 
         cloudProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(VgtClassificationOp.class),
-                                           cloudClassificationParameters, gaCloudInput);
+                                         cloudClassificationParameters, classificationInputProducts);
 
 //        targetProduct = gaCloudProduct;
         // introduce post-processing as for Proba-V (request GK/JM 20160416)
-        if (computeCloudBuffer || computeCloudShadow || refineClassificationNearCoastlines) {
-            // Post Cloud Classification: coastline refinement, cloud shadow, cloud buffer
-            computeVgtPostProcessProduct();
+        // Post Cloud Classification: coastline refinement, cloud shadow, cloud buffer
+        computeVgtPostProcessProduct();
 
-            targetProduct = IdepixUtils.cloneProduct(cloudProduct, true);
+        targetProduct = IdepixUtils.cloneProduct(cloudProduct, true);
 
-            Band cloudFlagBand = targetProduct.getBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS);
-            cloudFlagBand.setSourceImage(postProcessingProduct.getBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS).getSourceImage());
-        } else {
-            targetProduct = cloudProduct;
-        }
+        Band cloudFlagBand = targetProduct.getBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS);
+        cloudFlagBand.setSourceImage(postProcessingProduct.getBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS).getSourceImage());
     }
 
     private Map<String, Object> createVgtCloudClassificationParameters() {
         Map<String, Object> gaCloudClassificationParameters = new HashMap<>(1);
         gaCloudClassificationParameters.put("copyToaReflectances", copyToaReflectances);
         gaCloudClassificationParameters.put("copyAnnotations", copyAnnotations);
+        gaCloudClassificationParameters.put("copyFeatureValues", copyFeatureValues);
         gaCloudClassificationParameters.put("outputSchillerNNValue", outputSchillerNNValue);
         gaCloudClassificationParameters.put("useL1bLandWaterFlag", useL1bLandWaterFlag);
         gaCloudClassificationParameters.put("nnCloudAmbiguousLowerBoundaryValue", nnCloudAmbiguousLowerBoundaryValue);
@@ -162,11 +168,6 @@ public class VgtOp extends BasisOp {
         input.put("l1b", sourceProduct);
         input.put("vgtCloud", cloudProduct);
 
-        // skip for the moment, clarify if needed
-//        final boolean isUrbanProductValid = isVgtUrbanProductValid(sourceProduct, urbanProduct);
-//        final Product validUrbanProduct = isUrbanProductValid ? urbanProduct : null;
-//        input.put("urban", validUrbanProduct);
-
         Map<String, Object> params = new HashMap<>();
         final Product classifiedProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(VgtPostProcessOp.class),
                                                             params, input);
@@ -177,7 +178,7 @@ public class VgtOp extends BasisOp {
             params = new HashMap<>();
             params.put("cloudBufferWidth", cloudBufferWidth);
             postProcessingProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(CloudBufferOp.class),
-                                                        params, input);
+                                                      params, input);
         } else {
             postProcessingProduct = classifiedProduct;
         }
