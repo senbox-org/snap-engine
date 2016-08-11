@@ -132,43 +132,6 @@ public class CloudTopPressureOp extends MerisBasisOp {
         };
     }
 
-//    private void loadNeuralNet() throws IOException, JnnException {
-////        String auxdataSrcPath = "auxdata/ctp";
-////        final String auxdataDestPath = ".beam/" + AlbedomapConstants.SYMBOLIC_NAME + "/" + auxdataSrcPath;
-////        File auxdataTargetDir = new File(SystemUtils.getUserHomeDir(), auxdataDestPath);
-////        URL sourceUrl = ResourceInstaller.getSourceUrl(this.getClass());
-////
-////        ResourceInstaller resourceInstaller = new ResourceInstaller(sourceUrl, auxdataSrcPath, auxdataTargetDir);
-////        resourceInstaller.install(".*", new NullProgressMonitor());
-//
-//        // todo: clarify if this is the right way in Snap/S3tbx:
-//        final Path auxdataDirPath = SystemUtils.getAuxDataPath().resolve("ctp").toAbsolutePath();
-//        File auxdataTargetDir = auxdataDirPath.toFile();
-//        final Path sourcePath = ResourceInstaller.findModuleCodeBasePath(getClass()).resolve("auxdata");
-//        try {
-//            new ResourceInstaller(sourcePath, auxdataDirPath).install(".*", ProgressMonitor.NULL);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//
-////        File nnFile = new File(auxdataTargetDir, "ctp.nna");
-//        final JnnNet neuralNetLand = readNeuralNet(new File(auxdataTargetDir, "ctp_NN_1.nna"));
-//        final JnnNet neuralNetWater = readNeuralNet(new File(auxdataTargetDir, "ctp_NN_2.nna"));
-//        landNet = new ThreadLocal<JnnNet>() {
-//            @Override
-//            protected JnnNet initialValue() {
-//                return neuralNetLand.clone();
-//            }
-//        };
-//        waterNet = new ThreadLocal<JnnNet>() {
-//            @Override
-//            protected JnnNet initialValue() {
-//                return neuralNetWater.clone();
-//            }
-//        };
-//    }
-
-
     private void createTargetProduct() throws OperatorException {
         targetProduct = createCompatibleProduct(sourceProduct, "MER_CTP", "MER_L2");
         if (straylightCorr) {

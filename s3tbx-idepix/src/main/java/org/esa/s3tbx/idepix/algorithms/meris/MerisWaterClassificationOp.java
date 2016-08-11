@@ -260,6 +260,10 @@ public class MerisWaterClassificationOp extends Operator {
         final boolean isCoastline = isCoastlinePixel(x, y, waterFraction);
         targetTile.setSample(x, y, MerisConstants.F_COASTLINE, isCoastline);
 
+        if (x == 220 && y == 290) {
+            System.out.println("x = " + x);
+        }
+
         boolean is_snow_ice;
         boolean is_glint_risk = !isCoastline && 
                 isGlintRisk(x, y, rhoToaTiles, winduTile, windvTile, szaTile, vzaTile, saaTile, vaaTile);
@@ -338,7 +342,7 @@ public class MerisWaterClassificationOp extends Operator {
 
     private double computeRhoGlint(int x, int y, Tile winduTile, Tile windvTile,
                                    Tile szaTile, Tile vzaTile, Tile saaTile, Tile vaaTile) {
-        final double chiw = computeChiW(x, y, saaTile, winduTile, windvTile);
+        final double chiw = computeChiW(x, y, winduTile, windvTile, saaTile);
         final float vaa = vaaTile.getSampleFloat(x, y);
         final float saa = saaTile.getSampleFloat(x, y);
         final double deltaAzimuth = (float) MerisUtils.computeAzimuthDifference(vaa, saa);
