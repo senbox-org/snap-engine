@@ -174,8 +174,7 @@ public class S3NetcdfReader extends AbstractProductReader {
         final List<Attribute> globalAttributes = netcdfFile.getGlobalAttributes();
         for (final Attribute attribute : globalAttributes) {
             if (attribute.getValues() != null) {
-                int type = DataTypeUtils.getEquivalentProductDataType(attribute.getDataType(), false, false);
-                final ProductData attributeData = getAttributeData(attribute, type);
+                final ProductData attributeData = getAttributeData(attribute);
                 final MetadataAttribute metadataAttribute = new MetadataAttribute(attribute.getFullName(), attributeData, true);
                 globalAttributesElement.addAttribute(metadataAttribute);
             }
@@ -497,12 +496,8 @@ public class S3NetcdfReader extends AbstractProductReader {
                     variableElement.addAttribute(metadataAttribute);
                 }
             } else {
-                int type = DataTypeUtils.getEquivalentProductDataType(attribute.getDataType(), false, false);
-                if (type == -1 && attribute.getDataType() == DataType.LONG) {
-                    type = variable.isUnsigned() ? ProductData.TYPE_UINT32 : ProductData.TYPE_INT32;
-                }
                 if (attribute.getValues() != null) {
-                    final ProductData attributeData = getAttributeData(attribute, type);
+                    final ProductData attributeData = getAttributeData(attribute);
                     final MetadataAttribute metadataAttribute = new MetadataAttribute(attribute.getFullName(), attributeData, true);
                     variableElement.addAttribute(metadataAttribute);
                 }
@@ -514,14 +509,11 @@ public class S3NetcdfReader extends AbstractProductReader {
                 Object data = variable.read().copyTo1DJavaArray();
                 MetadataAttribute variableAttribute = null;
                 if (data instanceof float[]) {
-                    variableAttribute =
-                            new MetadataAttribute("value", ProductData.createInstance((float[]) data), true);
+                    variableAttribute = new MetadataAttribute("value", ProductData.createInstance((float[]) data), true);
                 } else if (data instanceof short[]) {
-                    variableAttribute =
-                            new MetadataAttribute("value", ProductData.createInstance((short[]) data), true);
+                    variableAttribute = new MetadataAttribute("value", ProductData.createInstance((short[]) data), true);
                 } else if (data instanceof long[]) {
-                    variableAttribute =
-                            new MetadataAttribute("value", ProductData.createInstance((long[]) data), true);
+                    variableAttribute = new MetadataAttribute("value", ProductData.createInstance((long[]) data), true);
                 }
                 if (variableAttribute != null) {
                     variableAttribute.setUnit(variable.getUnitsString());
@@ -535,7 +527,12 @@ public class S3NetcdfReader extends AbstractProductReader {
         product.getMetadataRoot().getElement("Variable_Attributes").addElement(variableElement);
     }
 
-    protected ProductData getAttributeData(Attribute attribute, int type) {
+    private int getProductDataType(Attribute attribute) {
+        return DataTypeUtils.getEquivalentProductDataType(attribute.getDataType(), false, false);
+    }
+
+    protected ProductData getAttributeData(Attribute attribute) {
+        int type = getProductDataType(attribute);
         final Array attributeValues = attribute.getValues();
         ProductData productData = null;
         switch (type) {
@@ -552,29 +549,17 @@ public class S3NetcdfReader extends AbstractProductReader {
                 break;
             }
             case ProductData.TYPE_INT32: {
-                Object array = attributeValues.copyTo1DJavaArray();
-                if (array instanceof long[]) {
-                    long[] longArray = (long[]) array;
-                    int[] newArray = new int[longArray.length];
-                    for (int i = 0; i < longArray.length; i++) {
-                        newArray[i] = (int) longArray[i];
-                    }
-                    array = newArray;
-                }
+                Object array = convertLongToIntArray(attributeValues.copyTo1DJavaArray());
                 productData = ProductData.createInstance((int[]) array);
                 break;
             }
             case ProductData.TYPE_UINT32: {
-                Object array = attributeValues.copyTo1DJavaArray();
-                if (array instanceof long[]) {
-                    long[] longArray = (long[]) array;
-                    int[] newArray = new int[longArray.length];
-                    for (int i = 0; i < longArray.length; i++) {
-                        newArray[i] = (int) longArray[i];
-                    }
-                    array = newArray;
-                }
-                productData = ProductData.createInstance((int[]) array);
+                Object array = convertLongToIntArray(attributeValues.copyTo1DJavaArray());
+                productData = ProductData.createUnsignedInstance((int[]) array);
+                break;
+            }
+            case ProductData.TYPE_INT64: {
+                productData = ProductData.createInstance((long[]) attributeValues.copyTo1DJavaArray());
                 break;
             }
             case ProductData.TYPE_FLOAT32: {
@@ -590,6 +575,18 @@ public class S3NetcdfReader extends AbstractProductReader {
             }
         }
         return productData;
+    }
+
+    private Object convertLongToIntArray(Object array) {
+        if (array instanceof long[]) {
+            long[] longArray = (long[]) array;
+            int[] newArray = new int[longArray.length];
+            for (int i = 0; i < longArray.length; i++) {
+                newArray[i] = (int) longArray[i];
+            }
+            array = newArray;
+        }
+        return array;
     }
 
     private int getWidth() {
