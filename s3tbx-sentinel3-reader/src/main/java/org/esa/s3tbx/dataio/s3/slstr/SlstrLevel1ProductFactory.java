@@ -103,28 +103,23 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
             final String slstrElementName = slstrElement.getName();
             if (slstrElementName.endsWith("ImageSize")) {
                 if (slstrElement.containsAttribute("grid")) {
-                    final String firstLetter =
-                            gridTypeToGridIndex.get(slstrElement.getAttribute("grid").getData().getElemString());
+                    String firstLetter = gridTypeToGridIndex.get(slstrElement.getAttribute("grid").getData().getElemString());
                     String index;
                     if (slstrElementName.equals("nadirImageSize")) {
                         index = firstLetter + "n";
                     } else {
                         index = firstLetter + "o";
                     }
-                    final double startOffset =
-                            Double.parseDouble(slstrElement.getAttribute("startOffset").getData().getElemString());
-                    final double trackOffset =
-                            Double.parseDouble(slstrElement.getAttribute("trackOffset").getData().getElemString());
+                    double startOffset = Double.parseDouble(slstrElement.getAttribute("startOffset").getData().getElemString());
+                    double trackOffset = Double.parseDouble(slstrElement.getAttribute("trackOffset").getData().getElemString());
                     gridIndexToStartOffset.put(index, startOffset);
                     gridIndexToTrackOffset.put(index, trackOffset);
                     if (firstLetter.equals("t")) {
                         gridIndexToStartOffset.put("tx", startOffset);
                         gridIndexToTrackOffset.put("tx", trackOffset);
                     }
-                    final int numberOfRows =
-                            Integer.parseInt(slstrElement.getAttribute("rows").getData().getElemString());
-                    final int numberOfColumns =
-                            Integer.parseInt(slstrElement.getAttribute("columns").getData().getElemString());
+                    int numberOfRows = Integer.parseInt(slstrElement.getAttribute("rows").getData().getElemString());
+                    int numberOfColumns = Integer.parseInt(slstrElement.getAttribute("columns").getData().getElemString());
                     if (numberOfColumns == numberOfMasterColumns && numberOfRows == numberOfMasterRows) {
                         setReferenceStartOffset(startOffset);
                         setReferenceTrackOffset(trackOffset);
