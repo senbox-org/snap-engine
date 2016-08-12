@@ -174,7 +174,7 @@ public class S3NetcdfReader extends AbstractProductReader {
         final List<Attribute> globalAttributes = netcdfFile.getGlobalAttributes();
         for (final Attribute attribute : globalAttributes) {
             if (attribute.getValues() != null) {
-                int type = DataTypeUtils.getEquivalentProductDataType(attribute.getDataType(), false, false);
+                int type = getProductDataType(attribute);
                 final ProductData attributeData = getAttributeData(attribute, type);
                 final MetadataAttribute metadataAttribute = new MetadataAttribute(attribute.getFullName(), attributeData, true);
                 globalAttributesElement.addAttribute(metadataAttribute);
@@ -497,10 +497,7 @@ public class S3NetcdfReader extends AbstractProductReader {
                     variableElement.addAttribute(metadataAttribute);
                 }
             } else {
-                int type = DataTypeUtils.getEquivalentProductDataType(attribute.getDataType(), false, false);
-                if (type == -1 && attribute.getDataType() == DataType.LONG) {
-                    type = variable.isUnsigned() ? ProductData.TYPE_UINT32 : ProductData.TYPE_INT32;
-                }
+                int type = getProductDataType(attribute);
                 if (attribute.getValues() != null) {
                     final ProductData attributeData = getAttributeData(attribute, type);
                     final MetadataAttribute metadataAttribute = new MetadataAttribute(attribute.getFullName(), attributeData, true);
@@ -533,6 +530,14 @@ public class S3NetcdfReader extends AbstractProductReader {
             }
         }
         product.getMetadataRoot().getElement("Variable_Attributes").addElement(variableElement);
+    }
+
+    private int getProductDataType(Attribute attribute) {
+        int type = DataTypeUtils.getEquivalentProductDataType(attribute.getDataType(), false, false);
+        if (type == -1 && attribute.getDataType() == DataType.LONG) {
+            type = attribute.isUnsigned() ? ProductData.TYPE_UINT32 : ProductData.TYPE_INT32;
+        }
+        return type;
     }
 
     protected ProductData getAttributeData(Attribute attribute, int type) {
