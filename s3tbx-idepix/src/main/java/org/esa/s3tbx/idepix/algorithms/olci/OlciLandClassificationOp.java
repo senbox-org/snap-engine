@@ -1,4 +1,4 @@
-package org.esa.s3tbx.idepix.algorithms.meris;
+package org.esa.s3tbx.idepix.algorithms.olci;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.s3tbx.idepix.core.util.IdepixUtils;
@@ -14,26 +14,24 @@ import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.ProductUtils;
-import org.esa.snap.dataio.envisat.EnvisatConstants;
 
 import java.awt.*;
 import java.io.InputStream;
 import java.util.Map;
 
 /**
- * MERIS pixel classification operator.
- * Only land pixels are classified from NN approach (following BEAM Cawa algorithm).
+ * OLCI pixel classification operator.
+ * Only land pixels are classified from NN approach (following MERIS approach for BEAM Cawa algorithm).
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "Idepix.Meris.Land",
+@OperatorMetadata(alias = "Idepix.Olci.Land",
         version = "1.0",
         internal = true,
         authors = "Olaf Danne",
         copyright = "(c) 2016 by Brockmann Consult",
-        description = "Idepix land pixel classification operator for MERIS.")
-public class MerisLandClassificationOp extends Operator {
-
+        description = "Idepix land pixel classification operator for OLCI.")
+public class OlciLandClassificationOp extends Operator {
     @Parameter(defaultValue = "false",
             label = " Write NN value to the target product.",
             description = " If applied, write Schiller NN value to the target product ")
@@ -50,7 +48,7 @@ public class MerisLandClassificationOp extends Operator {
     double schillerNNCloudAmbiguousSureSeparationValue;
 
     @Parameter(defaultValue = "4.05",
-            label = " NN cloud sure/snow separation value (MERIS only)",
+            label = " NN cloud sure/snow separation value",
             description = " NN cloud ambiguous cloud sure/snow separation value")
     double schillerNNCloudSureSnowSeparationValue;
 
@@ -66,14 +64,11 @@ public class MerisLandClassificationOp extends Operator {
 
     Band cloudFlagBand;
 
-    private Band[] merisReflBands;
+    private Band[] olciReflBands;
     private Band landWaterBand;
 
-    public static final String SCHILLER_MERIS_LAND_NET_NAME = "11x8x5x3_1062.5_land.net";
-    ThreadLocal<SchillerNeuralNetWrapper> merisLandNeuralNet;
-
-//    static final int MERIS_L1B_F_LAND = 4;
-//    static final int MERIS_L1B_F_INVALID = 7;
+    public static final String SCHILLER_OLCI_LAND_NET_NAME = "11x8x5x3_1062.5_land.net";
+    ThreadLocal<SchillerNeuralNetWrapper> olciLandNeuralNet;
 
     @Override
     public void initialize() throws OperatorException {
@@ -86,16 +81,16 @@ public class MerisLandClassificationOp extends Operator {
     }
 
     private void readSchillerNeuralNets() {
-        InputStream merisLandIS = getClass().getResourceAsStream(SCHILLER_MERIS_LAND_NET_NAME);
-        merisLandNeuralNet = SchillerNeuralNetWrapper.create(merisLandIS);
+        InputStream olciLandIS = getClass().getResourceAsStream(SCHILLER_OLCI_LAND_NET_NAME);
+        olciLandNeuralNet = SchillerNeuralNetWrapper.create(olciLandIS);
     }
 
     public void setBands() {
-        merisReflBands = new Band[Rad2ReflConstants.MERIS_REFL_BAND_NAMES.length];
-        for (int i = 0; i < EnvisatConstants.MERIS_L1B_NUM_SPECTRAL_BANDS; i++) {
-            final int suffixStart = Rad2ReflConstants.MERIS_REFL_BAND_NAMES[i].indexOf("_");
-            final String reflBandname = Rad2ReflConstants.MERIS_REFL_BAND_NAMES[i].substring(0, suffixStart);
-            merisReflBands[i] = rad2reflProduct.getBand(reflBandname + "_" + (i + 1));
+        olciReflBands = new Band[Rad2ReflConstants.OLCI_REFL_BAND_NAMES.length];
+        for (int i = 0; i < Rad2ReflConstants.OLCI_REFL_BAND_NAMES.length; i++) {
+            final int suffixStart = Rad2ReflConstants.OLCI_REFL_BAND_NAMES[i].indexOf("_");
+            final String reflBandname = Rad2ReflConstants.OLCI_REFL_BAND_NAMES[i].substring(0, suffixStart);
+            olciReflBands[i] = rad2reflProduct.getBand(reflBandname + "_reflectance");
         }
     }
 
@@ -108,7 +103,7 @@ public class MerisLandClassificationOp extends Operator {
         // shall be the only target band!!
         cloudFlagBand = targetProduct.addBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS, ProductData.TYPE_INT16);
 //        cloudFlagBand = targetProduct.addBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS, ProductData.TYPE_INT8);
-        FlagCoding flagCoding = MerisUtils.createMerisFlagCoding(IdepixUtils.IDEPIX_CLASSIF_FLAGS);
+        FlagCoding flagCoding = OlciUtils.createOlciFlagCoding(IdepixUtils.IDEPIX_CLASSIF_FLAGS);
         cloudFlagBand.setSampleCoding(flagCoding);
         targetProduct.getFlagCodingGroup().add(flagCoding);
 
@@ -120,7 +115,7 @@ public class MerisLandClassificationOp extends Operator {
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
 
         if (outputSchillerNNValue) {
-            targetProduct.addBand(MerisConstants.SCHILLER_NN_OUTPUT_BAND_NAME, ProductData.TYPE_FLOAT32);
+            targetProduct.addBand(OlciConstants.SCHILLER_NN_OUTPUT_BAND_NAME, ProductData.TYPE_FLOAT32);
         }
     }
 
@@ -130,13 +125,13 @@ public class MerisLandClassificationOp extends Operator {
         // MERIS variables
         final Tile waterFractionTile = getSourceTile(landWaterBand, rectangle);
 
-        final Band merisL1bFlagBand = sourceProduct.getBand(EnvisatConstants.MERIS_L1B_FLAGS_DS_NAME);
-        final Tile merisL1bFlagTile = getSourceTile(merisL1bFlagBand, rectangle);
+        final Band olciQualityFlagBand = sourceProduct.getBand(OlciConstants.OLCI_QUALITY_FLAGS_BAND_NAME);
+        final Tile olciQualityFlagTile = getSourceTile(olciQualityFlagBand, rectangle);
 
-        Tile[] merisReflectanceTiles = new Tile[EnvisatConstants.MERIS_L1B_NUM_SPECTRAL_BANDS];
-        float[] merisReflectance = new float[EnvisatConstants.MERIS_L1B_NUM_SPECTRAL_BANDS];
-        for (int i = 0; i < EnvisatConstants.MERIS_L1B_NUM_SPECTRAL_BANDS; i++) {
-            merisReflectanceTiles[i] = getSourceTile(merisReflBands[i], rectangle);
+        Tile[] olciReflectanceTiles = new Tile[Rad2ReflConstants.OLCI_REFL_BAND_NAMES.length];
+        float[] olciReflectance = new float[Rad2ReflConstants.OLCI_REFL_BAND_NAMES.length];
+        for (int i = 0; i < Rad2ReflConstants.OLCI_REFL_BAND_NAMES.length; i++) {
+            olciReflectanceTiles[i] = getSourceTile(olciReflBands[i], rectangle);
         }
 
         final Band cloudFlagTargetBand = targetProduct.getBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS);
@@ -145,7 +140,7 @@ public class MerisLandClassificationOp extends Operator {
         Band nnTargetBand;
         Tile nnTargetTile = null;
         if (outputSchillerNNValue) {
-            nnTargetBand = targetProduct.getBand(MerisConstants.SCHILLER_NN_OUTPUT_BAND_NAME);
+            nnTargetBand = targetProduct.getBand(OlciConstants.SCHILLER_NN_OUTPUT_BAND_NAME);
             nnTargetTile = targetTiles.get(nnTargetBand);
         }
         try {
@@ -153,48 +148,49 @@ public class MerisLandClassificationOp extends Operator {
                 checkForCancellation();
                 for (int x = rectangle.x; x < rectangle.x + rectangle.width; x++) {
                     final int waterFraction = waterFractionTile.getSampleInt(x, y);
-                    initCloudFlag(merisL1bFlagTile, targetTiles.get(cloudFlagTargetBand), merisReflectance, y, x);
-                    if (!isLandPixel(x, y, merisL1bFlagTile, waterFraction)) {
-                        cloudFlagTargetTile.setSample(x, y, MerisConstants.F_LAND, false);
-                        cloudFlagTargetTile.setSample(x, y, MerisConstants.F_CLOUD, false);
-                        cloudFlagTargetTile.setSample(x, y, MerisConstants.F_SNOW_ICE, false);
+                    initCloudFlag(olciQualityFlagTile, targetTiles.get(cloudFlagTargetBand), olciReflectance, y, x);
+                    if (!isLandPixel(x, y, olciQualityFlagTile, waterFraction)) {
+                        cloudFlagTargetTile.setSample(x, y, OlciConstants.F_LAND, false);
+                        cloudFlagTargetTile.setSample(x, y, OlciConstants.F_CLOUD, false);
+                        cloudFlagTargetTile.setSample(x, y, OlciConstants.F_SNOW_ICE, false);
                         if (nnTargetTile != null) {
                             nnTargetTile.setSample(x, y, Float.NaN);
                         }
                     } else {
                         // only use Schiller NN approach...
-                        for (int i = 0; i < EnvisatConstants.MERIS_L1B_NUM_SPECTRAL_BANDS; i++) {
-                            merisReflectance[i] = merisReflectanceTiles[i].getSampleFloat(x, y);
+                        for (int i = 0; i < Rad2ReflConstants.OLCI_REFL_BAND_NAMES.length; i++) {
+                            olciReflectance[i] = olciReflectanceTiles[i].getSampleFloat(x, y);
                         }
 
-                        SchillerNeuralNetWrapper nnWrapper = merisLandNeuralNet.get();
+                        SchillerNeuralNetWrapper nnWrapper = olciLandNeuralNet.get();
                         double[] inputVector = nnWrapper.getInputVector();
                         for (int i = 0; i < inputVector.length; i++) {
-                            inputVector[i] = Math.sqrt(merisReflectance[i]);
+                            final int olciEquivalentWvlIndex = Rad2ReflConstants.OLCI_MERIS_EQUIVALENT_WVL_INDICES[i];
+                            inputVector[i] = Math.sqrt(olciReflectance[olciEquivalentWvlIndex]);
                         }
 
                         final double[] nnOutput = nnWrapper.getNeuralNet().calc(inputVector);
 
-                        if (!cloudFlagTargetTile.getSampleBit(x, y, MerisConstants.F_INVALID)) {
-                            cloudFlagTargetTile.setSample(x, y, MerisConstants.F_CLOUD_AMBIGUOUS, false);
-                            cloudFlagTargetTile.setSample(x, y, MerisConstants.F_CLOUD_SURE, false);
-                            cloudFlagTargetTile.setSample(x, y, MerisConstants.F_CLOUD, false);
-                            cloudFlagTargetTile.setSample(x, y, MerisConstants.F_SNOW_ICE, false);
+                        if (!cloudFlagTargetTile.getSampleBit(x, y, OlciConstants.F_INVALID)) {
+                            cloudFlagTargetTile.setSample(x, y, OlciConstants.F_CLOUD_AMBIGUOUS, false);
+                            cloudFlagTargetTile.setSample(x, y, OlciConstants.F_CLOUD_SURE, false);
+                            cloudFlagTargetTile.setSample(x, y, OlciConstants.F_CLOUD, false);
+                            cloudFlagTargetTile.setSample(x, y, OlciConstants.F_SNOW_ICE, false);
                             if (nnOutput[0] > schillerNNCloudAmbiguousLowerBoundaryValue &&
                                     nnOutput[0] <= schillerNNCloudAmbiguousSureSeparationValue) {
                                 // this would be as 'CLOUD_AMBIGUOUS'...
-                                cloudFlagTargetTile.setSample(x, y, MerisConstants.F_CLOUD_AMBIGUOUS, true);
-                                cloudFlagTargetTile.setSample(x, y, MerisConstants.F_CLOUD, true);
+                                cloudFlagTargetTile.setSample(x, y, OlciConstants.F_CLOUD_AMBIGUOUS, true);
+                                cloudFlagTargetTile.setSample(x, y, OlciConstants.F_CLOUD, true);
                             }
                             if (nnOutput[0] > schillerNNCloudAmbiguousSureSeparationValue &&
                                     nnOutput[0] <= schillerNNCloudSureSnowSeparationValue) {
                                 // this would be as 'CLOUD_SURE'...
-                                cloudFlagTargetTile.setSample(x, y, MerisConstants.F_CLOUD_SURE, true);
-                                cloudFlagTargetTile.setSample(x, y, MerisConstants.F_CLOUD, true);
+                                cloudFlagTargetTile.setSample(x, y, OlciConstants.F_CLOUD_SURE, true);
+                                cloudFlagTargetTile.setSample(x, y, OlciConstants.F_CLOUD, true);
                             }
                             if (nnOutput[0] > schillerNNCloudSureSnowSeparationValue) {
                                 // this would be as 'SNOW/ICE'...
-                                cloudFlagTargetTile.setSample(x, y, MerisConstants.F_SNOW_ICE, true);
+                                cloudFlagTargetTile.setSample(x, y, OlciConstants.F_SNOW_ICE, true);
                             }
                         }
 
@@ -209,7 +205,7 @@ public class MerisLandClassificationOp extends Operator {
         }
     }
 
-    private boolean isLandPixel(int x, int y, Tile merisL1bFlagTile, int waterFraction) {
+    private boolean isLandPixel(int x, int y, Tile olciL1bFlagTile, int waterFraction) {
         // the water mask ends at 59 Degree south, stop earlier to avoid artefacts
         if (getGeoPos(x, y).lat > -58f) {
             // values bigger than 100 indicate no data
@@ -218,10 +214,10 @@ public class MerisLandClassificationOp extends Operator {
                 // is always 0 or 100!! (TS, OD, 20140502)
                 return waterFraction == 0;
             } else {
-                return merisL1bFlagTile.getSampleBit(x, y, MerisConstants.L1_F_LAND);
+                return olciL1bFlagTile.getSampleBit(x, y, OlciConstants.L1_F_LAND);
             }
         } else {
-            return merisL1bFlagTile.getSampleBit(x, y, MerisConstants.L1_F_LAND);
+            return olciL1bFlagTile.getSampleBit(x, y, OlciConstants.L1_F_LAND);
         }
     }
 
@@ -233,26 +229,26 @@ public class MerisLandClassificationOp extends Operator {
         return geoPos;
     }
 
-    void initCloudFlag(Tile merisL1bFlagTile, Tile targetTile, float[] merisReflectances, int y, int x) {
+    void initCloudFlag(Tile olciL1bFlagTile, Tile targetTile, float[] olciReflectances, int y, int x) {
         // for given instrument, compute boolean pixel properties and write to cloud flag band
-        final boolean l1Invalid = merisL1bFlagTile.getSampleBit(x, y, MerisConstants.L1_F_INVALID);
-        final boolean reflectancesValid = IdepixUtils.areAllReflectancesValid(merisReflectances);
+        final boolean l1Invalid = olciL1bFlagTile.getSampleBit(x, y, OlciConstants.L1_F_INVALID);
+        final boolean reflectancesValid = IdepixUtils.areAllReflectancesValid(olciReflectances);
 
-        targetTile.setSample(x, y, MerisConstants.F_INVALID, l1Invalid || !reflectancesValid);
-        targetTile.setSample(x, y, MerisConstants.F_CLOUD, false);
-        targetTile.setSample(x, y, MerisConstants.F_CLOUD_SURE, false);
-        targetTile.setSample(x, y, MerisConstants.F_CLOUD_AMBIGUOUS, false);
-        targetTile.setSample(x, y, MerisConstants.F_SNOW_ICE, false);
-        targetTile.setSample(x, y, MerisConstants.F_CLOUD_BUFFER, false);
-        targetTile.setSample(x, y, MerisConstants.F_CLOUD_SHADOW, false);
-        targetTile.setSample(x, y, MerisConstants.F_GLINTRISK, false);
-        targetTile.setSample(x, y, MerisConstants.F_COASTLINE, false);
-        targetTile.setSample(x, y, MerisConstants.F_LAND, true);   // already checked
+        targetTile.setSample(x, y, OlciConstants.F_INVALID, l1Invalid || !reflectancesValid);
+        targetTile.setSample(x, y, OlciConstants.F_CLOUD, false);
+        targetTile.setSample(x, y, OlciConstants.F_CLOUD_SURE, false);
+        targetTile.setSample(x, y, OlciConstants.F_CLOUD_AMBIGUOUS, false);
+        targetTile.setSample(x, y, OlciConstants.F_SNOW_ICE, false);
+        targetTile.setSample(x, y, OlciConstants.F_CLOUD_BUFFER, false);
+        targetTile.setSample(x, y, OlciConstants.F_CLOUD_SHADOW, false);
+        targetTile.setSample(x, y, OlciConstants.F_GLINTRISK, false);
+        targetTile.setSample(x, y, OlciConstants.F_COASTLINE, false);
+        targetTile.setSample(x, y, OlciConstants.F_LAND, true);   // already checked
     }
 
     public static class Spi extends OperatorSpi {
         public Spi() {
-            super(MerisLandClassificationOp.class);
+            super(OlciLandClassificationOp.class);
         }
     }
 }

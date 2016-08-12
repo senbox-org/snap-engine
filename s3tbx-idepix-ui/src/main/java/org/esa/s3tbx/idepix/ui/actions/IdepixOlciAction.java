@@ -14,7 +14,7 @@
  */
 package org.esa.s3tbx.idepix.ui.actions;
 
-import org.esa.s3tbx.idepix.algorithms.meris.MerisOp;
+import org.esa.s3tbx.idepix.algorithms.olci.OlciOp;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.ui.DefaultSingleTargetProductDialog;
 import org.esa.snap.rcp.actions.AbstractSnapAction;
@@ -27,30 +27,30 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 
 /**
- * Idepix action for MERIS algorithm.
+ * Idepix action for OLCI algorithm.
  *
  * @author Olaf Danne
  */
-@ActionID(category = "Processing", id = "org.esa.s3tbx.idepix.ui.actions.IdepixMerisAction")
-@ActionRegistration(displayName = "#CTL_IdepixMerisAction_Text")
+@ActionID(category = "Processing", id = "org.esa.s3tbx.idepix.ui.actions.IdepixOlciAction")
+@ActionRegistration(displayName = "#CTL_IdepixOlciAction_Text")
 @ActionReference(path = "Menu/Optical/Preprocessing/IdePix Pixel Classification", position = 0)
-@NbBundle.Messages({"CTL_IdepixMerisAction_Text=MERIS"})
-public class IdepixMerisAction extends AbstractSnapAction {
+@NbBundle.Messages({"CTL_IdepixOlciAction_Text=OLCI"})
+public class IdepixOlciAction extends AbstractSnapAction {
 
     private static final String HELP_ID = "idepixTool";
 
-    public IdepixMerisAction() {
-        putValue(Action.SHORT_DESCRIPTION, "Performs pixel classification on a MERIS data product.");
+    public IdepixOlciAction() {
+        putValue(Action.SHORT_DESCRIPTION, "Performs pixel classification on a OLCI data product.");
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        final OperatorMetadata opMetadata = MerisOp.class.getAnnotation(OperatorMetadata.class);
+        final OperatorMetadata opMetadata = OlciOp.class.getAnnotation(OperatorMetadata.class);
 
         final DefaultSingleTargetProductDialog dialog =
                 new DefaultSingleTargetProductDialog(opMetadata.alias(),
                                                      getAppContext(),
-                                                     "Idepix - Pixel Identification and Classification (MERIS mode)",
+                                                     "Idepix - Pixel Identification and Classification (OLCI mode)",
                                                      HELP_ID);
 
         dialog.setTargetProductNameSuffix("_IDEPIX");

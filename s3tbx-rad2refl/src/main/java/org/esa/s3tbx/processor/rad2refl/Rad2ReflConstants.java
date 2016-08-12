@@ -52,6 +52,10 @@ public class Rad2ReflConstants {
             778.75f, 865.0f, 885.0f, 900.0f, 940.0f, 1020.0f
     };
 
+    public final static int[] OLCI_MERIS_EQUIVALENT_WVL_INDICES = {
+           1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 15, 16, 17, 18
+    };
+
     public final static int OLCI_NUM_SPECTRAL_BANDS = OLCI_WAVELENGHTS.length;
 
     public final static String[] OLCI_RAD_BAND_NAMES = new String[]{

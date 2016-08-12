@@ -19,9 +19,9 @@ import java.util.Map;
  * @author olafd
  */
 public class IdepixProducts {
-    public static Product computeRadiance2ReflectanceProduct(Product sourceProduct) {
+    public static Product computeRadiance2ReflectanceProduct(Product sourceProduct, Sensor sensor) {
         Map<String, Object> params = new HashMap<>(2);
-        params.put("sensor", Sensor.MERIS);
+        params.put("sensor", sensor);
         params.put("copyNonSpectralBands", false);
         return GPF.createProduct(OperatorSpi.getOperatorAlias(Rad2ReflOp.class), params, sourceProduct);
     }
@@ -35,24 +35,6 @@ public class IdepixProducts {
             if (!targetProduct.containsBand(bandname) && bandname.startsWith(Rad2ReflConstants.MERIS_AUTOGROUPING_RAD_STRING)) {
                 System.out.println("adding band: " + bandname);
                 ProductUtils.copyBand(bandname, l1bProduct, targetProduct, true);
-            }
-        }
-    }
-
-    public static void addRadiance2ReflectanceBands(Product rad2reflProduct, Product targetProduct) {
-        addRadiance2ReflectanceBands(rad2reflProduct, targetProduct, 1, 15);
-    }
-
-    public static void addRadiance2ReflectanceBands(Product rad2reflProduct, Product targetProduct, int minBand, int maxBand) {
-        for (int i = minBand; i <= maxBand; i++) {
-            for (String bandname : rad2reflProduct.getBandNames()) {
-                if (!targetProduct.containsBand(bandname) &&
-                        bandname.startsWith(Rad2ReflConstants.MERIS_AUTOGROUPING_REFL_STRING) &&
-                        bandname.endsWith("_" + String.valueOf(i))) {
-                    System.out.println("adding band: " + bandname);
-                    ProductUtils.copyBand(bandname, rad2reflProduct, targetProduct, true);
-                    targetProduct.getBand(bandname).setUnit("dl");
-                }
             }
         }
     }

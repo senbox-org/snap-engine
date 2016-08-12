@@ -8,6 +8,7 @@ import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.util.BitSetter;
 import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.dataio.envisat.EnvisatConstants;
 
 import javax.swing.*;
@@ -163,6 +164,7 @@ public class IdepixUtils {
                 !isValidMsiProduct(inputProduct) &&
                 !isValidSeawifsProduct(inputProduct) &&
                 !isValidMerisProduct(inputProduct) &&
+                !isValidOlciProduct(inputProduct) &&
                 !isValidVgtProduct(inputProduct)) {
             logErrorMessage("Input sensor must be either MERIS, AATSR, AVHRR, colocated MERIS/AATSR, MODIS/SeaWiFS, PROBA-V or VGT!");
         }
@@ -175,6 +177,10 @@ public class IdepixUtils {
         final boolean merisIcolTypePatternMatches = isValidMerisIcolL1NProduct(product);
         final boolean merisCCL1PTypePatternMatches = isValidMerisCCL1PProduct(product);
         return merisL1TypePatternMatches || merisIcolTypePatternMatches || merisCCL1PTypePatternMatches;
+    }
+
+    public static boolean isValidOlciProduct(Product product) {
+        return product.getProductType().startsWith("S3A_OL_");  // todo: clarify
     }
 
     private static boolean isValidMerisIcolL1NProduct(Product product) {
@@ -258,7 +264,9 @@ public class IdepixUtils {
             return (isValidSeawifsProduct(sourceProduct));
         } else if (AlgorithmSelector.MERIS == algorithm) {
             return (isValidMerisProduct(sourceProduct));
-        } else if (AlgorithmSelector.VGT == algorithm) {
+        } else if (AlgorithmSelector.OLCI == algorithm) {
+            return (isValidOlciProduct(sourceProduct));
+        }else if (AlgorithmSelector.VGT == algorithm) {
             return (isValidVgtProduct(sourceProduct));
         } else {
             throw new OperatorException("Algorithm " + algorithm.toString() + " not supported.");
@@ -502,13 +510,6 @@ public class IdepixUtils {
         return ((year % 400) == 0) || (((year % 4) == 0) && ((year % 100) != 0));
     }
 
-    private static Color getRandomColour(Random random) {
-        int rColor = random.nextInt(256);
-        int gColor = random.nextInt(256);
-        int bColor = random.nextInt(256);
-        return new Color(rColor, gColor, bColor);
-    }
-
     public static void combineFlags(int x, int y, Tile sourceFlagTile, Tile targetTile) {
         int sourceFlags = sourceFlagTile.getSampleInt(x, y);
         int computedFlags = targetTile.getSampleInt(x, y);
@@ -517,8 +518,18 @@ public class IdepixUtils {
 
     public static void consolidateCloudAndBuffer(Tile targetTile, int x, int y) {
         if (targetTile.getSampleBit(x, y, IdepixConstants.F_CLOUD)) {
-//            targetTile.setSample(x, y, IdepixConstants.F_CLOUD_BUFFER, false);
         }
+    }
+
+    /**
+     * Computes the azimuth difference from the given
+     *
+     * @param vaa viewing azimuth angle [degree]
+     * @param saa sun azimuth angle [degree]
+     * @return the azimuth difference [degree]
+     */
+    public static double computeAzimuthDifference(final double vaa, final double saa) {
+        return MathUtils.RTOD * Math.acos(Math.cos(MathUtils.DTOR * (vaa - saa)));
     }
 
 }

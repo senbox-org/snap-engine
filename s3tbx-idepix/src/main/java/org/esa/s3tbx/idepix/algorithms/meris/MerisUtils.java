@@ -1,10 +1,13 @@
 package org.esa.s3tbx.idepix.algorithms.meris;
 
+import org.esa.s3tbx.processor.rad2refl.Rad2ReflConstants;
 import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.util.BitSetter;
+import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.math.MathUtils;
+import org.esa.snap.dataio.envisat.EnvisatConstants;
 
 import java.awt.*;
 
@@ -91,14 +94,22 @@ public class MerisUtils {
         return flagCoding;
     }
 
-    /**
-     * Computes the azimuth difference from the given
-     *
-     * @param vaa viewing azimuth angle [degree]
-     * @param saa sun azimuth angle [degree]
-     * @return the azimuth difference [degree]
-     */
-    public static double computeAzimuthDifference(final double vaa, final double saa) {
-        return MathUtils.RTOD * Math.acos(Math.cos(MathUtils.DTOR * (vaa - saa)));
+    public static void addRadiance2ReflectanceBands(Product rad2reflProduct, Product targetProduct) {
+        addRadiance2ReflectanceBands(rad2reflProduct, targetProduct, 1, EnvisatConstants.MERIS_L1B_NUM_SPECTRAL_BANDS);
     }
+
+    public static void addRadiance2ReflectanceBands(Product rad2reflProduct, Product targetProduct, int minBand, int maxBand) {
+        for (int i = minBand; i <= maxBand; i++) {
+            for (String bandname : rad2reflProduct.getBandNames()) {
+                if (!targetProduct.containsBand(bandname) &&
+                        bandname.startsWith(Rad2ReflConstants.MERIS_AUTOGROUPING_REFL_STRING) &&
+                        bandname.endsWith("_" + String.valueOf(i))) {
+                    System.out.println("adding band: " + bandname);
+                    ProductUtils.copyBand(bandname, rad2reflProduct, targetProduct, true);
+                    targetProduct.getBand(bandname).setUnit("dl");
+                }
+            }
+        }
+    }
+
 }

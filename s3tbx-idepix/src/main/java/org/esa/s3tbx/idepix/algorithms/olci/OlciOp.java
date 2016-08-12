@@ -1,4 +1,4 @@
-package org.esa.s3tbx.idepix.algorithms.meris;
+package org.esa.s3tbx.idepix.algorithms.olci;
 
 import org.esa.s3tbx.idepix.core.AlgorithmSelector;
 import org.esa.s3tbx.idepix.core.IdepixConstants;
@@ -22,23 +22,31 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * The Idepix pixel classification operator for MERIS products.
+ * The Idepix pixel classification operator for OLCI products.
  *
+ * Initial implementation:
+ * - pure neural net approach which uses MERIS heritage bands only
+ * - no auxdata available yet (as 'L2 auxdata' for MERIS)
+ *
+ * Currently resulting known issues:
+ *    - no cloud shadow flag
+ *    - glint flag over water just taken from 'sun_glint_risk' in L1 'quality_flags' band
+ *
+ * Advanced algorithm making use of more bands to be defined.
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "Idepix.Meris",
+@OperatorMetadata(alias = "Idepix.Olci",
         category = "Optical/Pre-Processing",
         internal = true, // todo: remove when activated
         version = "1.0",
         authors = "Olaf Danne",
         copyright = "(c) 2016 by Brockmann Consult",
-        description = "Pixel identification and classification for MERIS.")
-public class MerisOp extends BasisOp {
-
+        description = "Pixel identification and classification for OLCI.")
+public class OlciOp extends BasisOp {
     @SourceProduct(alias = "l1bProduct",
-            label = "MERIS L1b product",
-            description = "The MERIS L1b source product.")
+            label = "OLCI L1b product",
+            description = "The OLCI L1b source product.")
     private Product sourceProduct;
 
     @TargetProduct(description = "The target product.")
@@ -91,11 +99,6 @@ public class MerisOp extends BasisOp {
             description = " NN cloud ambiguous cloud sure/snow separation value")
     double schillerLandNNCloudSureSnowSeparationValue;
 
-    @Parameter(defaultValue = "true",
-            label = " Compute cloud shadow",
-            description = " Compute cloud shadow with the algorithm from 'Fronts' project")
-    private boolean computeCloudShadow;
-
     @Parameter(defaultValue = "true", label = " Compute a cloud buffer")
     private boolean computeCloudBuffer;
 
@@ -110,7 +113,6 @@ public class MerisOp extends BasisOp {
     private Product postProcessingProduct;
 
     private Product rad2reflProduct;
-    private Product ctpProduct;
     private Product waterMaskProduct;
 
     private Map<String, Product> classificationInputProducts;
@@ -119,9 +121,9 @@ public class MerisOp extends BasisOp {
 
     @Override
     public void initialize() throws OperatorException {
-        System.out.println("Running IDEPIX MERIS - source product: " + sourceProduct.getName());
+        System.out.println("Running IDEPIX OLCI - source product: " + sourceProduct.getName());
 
-        final boolean inputProductIsValid = IdepixUtils.validateInputProduct(sourceProduct, AlgorithmSelector.MERIS);
+        final boolean inputProductIsValid = IdepixUtils.validateInputProduct(sourceProduct, AlgorithmSelector.OLCI);
         if (!inputProductIsValid) {
             throw new OperatorException(IdepixConstants.INPUT_INCONSISTENCY_ERROR_MESSAGE);
         }
@@ -135,25 +137,22 @@ public class MerisOp extends BasisOp {
         targetProduct = postProcessingProduct;
 
         targetProduct = IdepixUtils.cloneProduct(mergedClassificationProduct, true);
-        targetProduct.setAutoGrouping("radiance:reflectance");
+        targetProduct.setAutoGrouping("Oa*_radiance:Oa*_reflectance");
 
         Band cloudFlagBand = targetProduct.getBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS);
         cloudFlagBand.setSourceImage(postProcessingProduct.getBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS).getSourceImage());
 
         copyOutputBands();
         ProductUtils.copyFlagBands(sourceProduct, targetProduct, true);   // we need the L1b flag!
-
-//        targetProduct = waterClassificationProduct;
     }
 
     private void preProcess() {
-        rad2reflProduct = IdepixProducts.computeRadiance2ReflectanceProduct(sourceProduct, Sensor.MERIS);
-        ctpProduct = IdepixProducts.computeCloudTopPressureProduct(sourceProduct);
+        rad2reflProduct = IdepixProducts.computeRadiance2ReflectanceProduct(sourceProduct, Sensor.OLCI);
 
         HashMap<String, Object> waterMaskParameters = new HashMap<>();
-        waterMaskParameters.put("resolution", MerisConstants.LAND_WATER_MASK_RESOLUTION);
-        waterMaskParameters.put("subSamplingFactorX", MerisConstants.OVERSAMPLING_FACTOR_X);
-        waterMaskParameters.put("subSamplingFactorY", MerisConstants.OVERSAMPLING_FACTOR_Y);
+        waterMaskParameters.put("resolution", OlciConstants.LAND_WATER_MASK_RESOLUTION);
+        waterMaskParameters.put("subSamplingFactorX", OlciConstants.OVERSAMPLING_FACTOR_X);
+        waterMaskParameters.put("subSamplingFactorY", OlciConstants.OVERSAMPLING_FACTOR_Y);
         waterMaskProduct = GPF.createProduct("LandWaterMask", waterMaskParameters, sourceProduct);
     }
 
@@ -190,13 +189,13 @@ public class MerisOp extends BasisOp {
         classificationInputProducts.put("rhotoa", rad2reflProduct);
         classificationInputProducts.put("waterMask", waterMaskProduct);
 
-        waterClassificationProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(MerisWaterClassificationOp.class),
+        waterClassificationProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(OlciWaterClassificationOp.class),
                                                        waterClassificationParameters, classificationInputProducts);
     }
 
     private void computeLandCloudProduct() {
         setLandClassificationParameters();
-        landClassificationProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(MerisLandClassificationOp.class),
+        landClassificationProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(OlciLandClassificationOp.class),
                                                       landClassificationParameters, classificationInputProducts);
     }
 
@@ -207,21 +206,17 @@ public class MerisOp extends BasisOp {
 
         Map<String, Object> mergeClassificationParameters = new HashMap<>();
         mergeClassificationParameters.put("copyAllTiePoints", true);
-        mergedClassificationProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(MerisMergeLandWaterOp.class),
+        mergedClassificationProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(OlciMergeLandWaterOp.class),
                                                         mergeClassificationParameters, mergeInputProducts);
     }
 
     private void postProcess() {
         HashMap<String, Product> input = new HashMap<>();
         input.put("l1b", sourceProduct);
-        input.put("merisCloud", mergedClassificationProduct);
-        input.put("ctp", ctpProduct);
+        input.put("olciCloud", mergedClassificationProduct);
 
         Map<String, Object> params = new HashMap<>();
-        params.put("computeCloudShadow", computeCloudShadow);
-        params.put("refineClassificationNearCoastlines", true);  // always an improvement
-
-        final Product classifiedProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(MerisPostProcessOp.class),
+        final Product classifiedProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(OlciPostProcessOp.class),
                                                             params, input);
 
         if (computeCloudBuffer) {
@@ -238,12 +233,12 @@ public class MerisOp extends BasisOp {
 
     private void copyOutputBands() {
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
-        MerisUtils.setupMerisBitmasks(targetProduct);
+        OlciUtils.setupOlciBitmasks(targetProduct);
         if (outputRadiance) {
             IdepixProducts.addRadianceBands(sourceProduct, targetProduct);
         }
         if (outputRad2Refl) {
-            MerisUtils.addRadiance2ReflectanceBands(rad2reflProduct, targetProduct);
+            OlciUtils.addRadiance2ReflectanceBands(rad2reflProduct, targetProduct);
         }
     }
 
@@ -254,7 +249,7 @@ public class MerisOp extends BasisOp {
     public static class Spi extends OperatorSpi {
 
         public Spi() {
-            super(MerisOp.class);
+            super(OlciOp.class);
         }
     }
 }
