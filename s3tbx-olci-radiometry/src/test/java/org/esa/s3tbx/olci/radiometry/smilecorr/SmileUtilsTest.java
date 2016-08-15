@@ -18,8 +18,8 @@
 
 package org.esa.s3tbx.olci.radiometry.smilecorr;
 
-import org.esa.snap.core.gpf.OperatorException;
 import org.junit.Test;
+
 
 import static org.junit.Assert.*;
 
@@ -39,12 +39,28 @@ public class SmileUtilsTest {
 
     @Test
     public void testMultiple3ArrayNullAndNotNull() throws Exception {
-
         assertArrayEquals(new float[]{0, 4, 20}, SmileUtils.multiple3ArrayFloat(new float[]{0, 1, 2}, new float[]{3, 4, 5}, new float[]{0, 1, 2}), 0);
         assertArrayEquals(new float[]{0, 4, 10, 10}, SmileUtils.multiple3ArrayFloat(new float[]{0, 1, 2, 1}, new float[]{3, 4, 5, 10}, new float[]{1, 1, 1, 1}), 0);
-
         float[] actuals = SmileUtils.multiple3ArrayFloat(new float[]{1, 2, 3}, new float[]{4, 5, 6}, new float[]{7, 8, 9});
         assertEquals(3, actuals.length);
         assertArrayEquals(new float[]{28, 80, 162}, actuals, 0);
+    }
+
+    @Test
+    public void convertDegsToRads() throws Exception {
+        double[] degToRads = SmileUtils.convertDegreesToRadians(new double[]{1.0, 2.0, 3.0});
+        assertArrayEquals(new double[]{0.017453292519943295, 0.03490658503988659, 0.05235987755982988}, degToRads, 1e-8);
+    }
+
+    @Test
+    public void getAirMass() throws Exception {
+        double[] airMass = SmileUtils.getAirMass(new double[]{1.0, 2.0, 3}, new double[]{1.0, 2.0, 3});
+        assertArrayEquals(new double[]{2.0003046560878155, 2.0012190885976433, 2.002744691995842}, airMass, 1e-8);
+    }
+
+    @Test
+    public void getAziDiff() throws Exception {
+        double[] aziDiff = SmileUtils.getAziDiff(new double[]{2.0, 8.0, 10.0}, new double[]{4.0, 5.0, 6.0});
+        assertArrayEquals(new double[]{0.03490658503988567, 0.05235987755983066, 0.0698131700797739}, aziDiff, 1e-8);
     }
 }

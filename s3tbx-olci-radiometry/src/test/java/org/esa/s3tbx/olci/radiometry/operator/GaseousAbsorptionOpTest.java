@@ -56,7 +56,7 @@ public class GaseousAbsorptionOpTest {
         assertNotNull(sourceProduct);
 
         final HashMap<String, Object> parameters = new HashMap<>();
-        final Product gaseousAbsorptionProduct = GPF.createProduct("OLCI.GaseousAsorption", parameters, sourceProduct);
+        final Product gaseousAbsorptionProduct = GPF.createProduct("OLCI.GaseousAbsorption", parameters, sourceProduct);
         assertNotNull(gaseousAbsorptionProduct);
 
         float sampleFloatSourceProduct = sourceProduct.getBandAt(0).getSampleFloat(0, 0);

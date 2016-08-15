@@ -1,30 +1,28 @@
 package org.esa.s3tbx.olci.radiometry.operator;
 
 
-import org.esa.s3tbx.olci.radiometry.gaseousabsorption.GaseousAbsorptionAlgorithm;
-import org.esa.snap.core.gpf.OperatorException;
+import org.esa.s3tbx.olci.radiometry.gaseousabsorption.GaseousAbsorptionAlgo;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.mockito.Mockito;
+
 
 import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.when;
 
 
 /**
  * @author muhammad.bc.
  */
-public class GaseousAbsorptionAlgorithmTest {
+public class GaseousAbsorptionAlgoTest {
 
-    GaseousAbsorptionAlgorithm gaseousAbsorptionAlgo;
+    GaseousAbsorptionAlgo gaseousAbsorptionAlgo;
 
     @Before
     public void setUp() throws Exception {
-        gaseousAbsorptionAlgo = new GaseousAbsorptionAlgorithm();
+        gaseousAbsorptionAlgo = new GaseousAbsorptionAlgo();
     }
 
     @Test
@@ -61,7 +59,12 @@ public class GaseousAbsorptionAlgorithmTest {
 
     @Test
     public void testGasToComputeDoesNotExist() throws Exception {
-        assertArrayEquals(null, gaseousAbsorptionAlgo.gasToComputeForBand("dummy1"));
+        try {
+            assertArrayEquals(null, gaseousAbsorptionAlgo.gasToComputeForBand("dummy1"));
+            fail();
+        } catch (IllegalArgumentException e) {
+
+        }
     }
 
 
@@ -92,19 +95,20 @@ public class GaseousAbsorptionAlgorithmTest {
 
     @Test
     public void testGetTransmissionGasKnownBand() throws Exception {
-        GaseousAbsorptionAlgorithm algorithm = new GaseousAbsorptionAlgorithm();
+        GaseousAbsorptionAlgo algorithm = new GaseousAbsorptionAlgo();
         float[] oza = {4, 5, 6};
         float[] sza = {1, 2, 3};
-        float[] oa01_radiances = algorithm.getTransmissionGas("gaseous_absorp_01", sza, oza);
-        assertEquals(3, oa01_radiances.length);
-        assertEquals(0.13498464f, oa01_radiances[0]);
-        assertEquals(0.13473716f, oa01_radiances[1]);
-        assertEquals(0.1344073f, oa01_radiances[2]);
+        float[] oa01_radians = algorithm.getTransmissionGas("gaseous_absorp_01", sza, oza);
+        assertEquals(3, oa01_radians.length);
+        assertEquals(0.13498464f, oa01_radians[0]);
+        assertEquals(0.13473716f, oa01_radians[1]);
+        assertEquals(0.1344073f, oa01_radians[2]);
     }
 
     @Test
+    @Ignore
     public void testGetTransmissionGasUnKnownBand() {
-        GaseousAbsorptionAlgorithm algorithm = new GaseousAbsorptionAlgorithm();
+        GaseousAbsorptionAlgo algorithm = new GaseousAbsorptionAlgo();
         float[] oza = {4, 5, 6};
         float[] sza = {1, 2, 3};
         float[] dummies = algorithm.getTransmissionGas("dummy", sza, oza);

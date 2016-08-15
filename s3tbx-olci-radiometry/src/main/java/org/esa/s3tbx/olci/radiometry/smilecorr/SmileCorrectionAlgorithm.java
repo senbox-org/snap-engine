@@ -22,9 +22,6 @@ package org.esa.s3tbx.olci.radiometry.smilecorr;
  */
 public class SmileCorrectionAlgorithm {
 
-    private SmileCorrectionAlgorithm() {
-    }
-
     public static float correctWithReflectance(float sourceReflectance, float lowerReflectance, float upperReflectance,
                                                float sourceTargetLambda, float lowerLambda, float upperLambda, float refCentralWaveLength) {
         double dl = (refCentralWaveLength - sourceTargetLambda) / (upperLambda - lowerLambda);

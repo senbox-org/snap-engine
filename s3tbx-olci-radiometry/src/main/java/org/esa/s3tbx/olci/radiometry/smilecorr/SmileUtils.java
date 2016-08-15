@@ -18,7 +18,6 @@
 
 package org.esa.s3tbx.olci.radiometry.smilecorr;
 
-import com.bc.ceres.core.Assert;
 import org.esa.snap.core.gpf.OperatorException;
 
 /**
@@ -55,5 +54,28 @@ public class SmileUtils {
             rads[i] = (float) Math.toRadians(angle[i]);
         }
         return rads;
+    }
+
+    public static double[] getAirMass(double[] sunZenithAngles, double[] viewZenithAngles) {
+        double[] szaRads = convertDegreesToRadians(sunZenithAngles);
+        double[] ozaRads = convertDegreesToRadians(viewZenithAngles);
+        double massAir[] = new double[szaRads.length];
+        for (int index = 0; index < szaRads.length; index++) {
+            massAir[index] = 1 / Math.cos(szaRads[index]) + 1 / Math.cos(ozaRads[index]);
+        }
+        return massAir;
+
+    }
+
+    public static double[] getAziDiff(double[] sunAzimuthAngles, double[] viewAzimuthAngles) {
+        double[] saaRads = convertDegreesToRadians(sunAzimuthAngles);
+        double[] aooRads = convertDegreesToRadians(viewAzimuthAngles);
+        double[] aziDiff = new double[saaRads.length];
+        for (int index = 0; index < saaRads.length; index++) {
+            double a = aooRads[index] - saaRads[index];
+            double cosDelta = Math.cos(a);
+            aziDiff[index] = Math.acos(cosDelta);
+        }
+        return aziDiff;
     }
 }
