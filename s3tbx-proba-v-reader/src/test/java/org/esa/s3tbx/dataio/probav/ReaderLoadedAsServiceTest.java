@@ -23,11 +23,27 @@ import java.util.Iterator;
 
 public class ReaderLoadedAsServiceTest extends TestCase {
 
-    public void testReaderIsLoaded() {
+    public void testSynthesisReaderIsLoaded() {
         int readerCount = 0;
 
         ProductIOPlugInManager plugInManager = ProductIOPlugInManager.getInstance();
         Iterator readerPlugIns = plugInManager.getReaderPlugIns("PROBA-V-Synthesis");
+
+        while (readerPlugIns.hasNext()) {
+            readerCount++;
+            ProductReaderPlugIn plugIn = (ProductReaderPlugIn) readerPlugIns.next();
+            System.out.println("readerPlugIn.Class = " + plugIn.getClass());
+            System.out.println("readerPlugIn.Descr = " + plugIn.getDescription(null));
+        }
+
+        assertEquals(1, readerCount);
+    }
+
+    public void testL2AReaderIsLoaded() {
+        int readerCount = 0;
+
+        ProductIOPlugInManager plugInManager = ProductIOPlugInManager.getInstance();
+        Iterator readerPlugIns = plugInManager.getReaderPlugIns("PROBA-V-L2A");
 
         while (readerPlugIns.hasNext()) {
             readerCount++;

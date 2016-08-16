@@ -5,35 +5,36 @@ import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
+import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
-import org.esa.snap.core.gpf.pointop.PixelOperator;
-import org.esa.snap.core.gpf.pointop.ProductConfigurer;
-import org.esa.snap.core.gpf.pointop.Sample;
-import org.esa.snap.core.gpf.pointop.SourceSampleConfigurer;
-import org.esa.snap.core.gpf.pointop.TargetSampleConfigurer;
-import org.esa.snap.core.gpf.pointop.WritableSample;
+import org.esa.snap.core.gpf.pointop.*;
 import org.esa.snap.core.util.BitSetter;
 
 /**
- * This Operator extracts and interprets the relevant bit information stored in SM mask.
+ * This Operator extracts and interprets the relevant bit information stored in the Proba-V SM mask.
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "Probav.Synthesis.Bitmask",
+@OperatorMetadata(alias = "Probav.Bitmask",
         description = "extracts and interprets the relevant bit information stored in SM mask",
         authors = "Olaf Danne",
         version = "1.0",
         copyright = "(c) 2015 by Brockmann Consult",
         internal = true)
-public class ProbaVSynthesisBitMaskOp extends PixelOperator {
+public class ProbaVBitMaskOp extends PixelOperator {
 
-    private static final int SRC_FLAG = 0;
-    private static final int TRG_FLAG = 0;
+    static final int SRC_FLAG = 0;
+    static final int TRG_FLAG = 0;
+
+    @Parameter(defaultValue = "SYNTHESIS", valueSet = {"SYNTHESIS", "L2A"},
+            label = " Proba-V product type",
+            description = "Proba-V product type (currently SYNTHESIS and L2A products are supported).")
+    private String probavProductType;
 
     @SourceProduct
-    private Product sourceProduct;
+    Product sourceProduct;
 
-    private static final String TARGET_FLAG_BAND_NAME = ProbaVConstants.SM_FLAG_BAND_NAME;
+    static final String TARGET_FLAG_BAND_NAME = ProbaVConstants.SM_FLAG_BAND_NAME;
 
 
     @Override
@@ -57,10 +58,14 @@ public class ProbaVSynthesisBitMaskOp extends PixelOperator {
     @Override
     protected void computePixel(int x, int y, Sample[] sourceSamples, WritableSample[] targetSamples) {
         final int srcFlagValue = sourceSamples[SRC_FLAG].getInt();
-        computeSynthesisSmMask(srcFlagValue, targetSamples);
+        if (probavProductType.equals("SYNTHESIS")) {
+            computeSynthesisSmMask(srcFlagValue, targetSamples);
+        } else {
+            computeL2ASmMask(srcFlagValue, targetSamples);
+        }
     }
 
-    private void computeSynthesisSmMask(int srcValue, WritableSample[] targetSamples) {
+    void computeSynthesisSmMask(int srcValue, WritableSample[] targetSamples) {
         targetSamples[TRG_FLAG].set(ProbaVConstants.SM_CLEAR_BIT_INDEX, isClear(srcValue));
         targetSamples[TRG_FLAG].set(ProbaVConstants.SM_UNDEFINED_BIT_INDEX, isUndefined(srcValue));
         targetSamples[TRG_FLAG].set(ProbaVConstants.SM_CLOUD_BIT_INDEX, isCloud(srcValue));
@@ -71,62 +76,87 @@ public class ProbaVSynthesisBitMaskOp extends PixelOperator {
         targetSamples[TRG_FLAG].set(ProbaVConstants.SM_GOOD_NIR_BIT_INDEX, isGoodNir(srcValue));
         targetSamples[TRG_FLAG].set(ProbaVConstants.SM_GOOD_RED_BIT_INDEX, isGoodRed(srcValue));
         targetSamples[TRG_FLAG].set(ProbaVConstants.SM_GOOD_BLUE_BIT_INDEX, isGoodBlue(srcValue));
-
     }
 
-    private boolean isClear(int srcValue) {
+    void computeL2ASmMask(int srcValue, WritableSample[] targetSamples) {
+        computeSynthesisSmMask(srcValue, targetSamples);
+        targetSamples[TRG_FLAG].set(ProbaVConstants.SM_SWIR_COVERAGE_INDEX, isSwirCoverage(srcValue));
+        targetSamples[TRG_FLAG].set(ProbaVConstants.SM_NIR_COVERAGE_BIT_INDEX, isNirCoverage(srcValue));
+        targetSamples[TRG_FLAG].set(ProbaVConstants.SM_RED_COVERAGE_BIT_INDEX, isRedCoverage(srcValue));
+        targetSamples[TRG_FLAG].set(ProbaVConstants.SM_BLUE_COVERAGE_BIT_INDEX, isBlueCoverage(srcValue));
+    }
+
+
+    static boolean isClear(int srcValue) {
         return (!BitSetter.isFlagSet(srcValue, 0) &&
                 !BitSetter.isFlagSet(srcValue, 1) &&
                 !BitSetter.isFlagSet(srcValue, 2));
     }
 
-    private boolean isUndefined(int srcValue) {
+    static boolean isUndefined(int srcValue) {
         return (!BitSetter.isFlagSet(srcValue, 0) &&
                 BitSetter.isFlagSet(srcValue, 1) &&
                 !BitSetter.isFlagSet(srcValue, 2));
     }
 
-    private boolean isCloud(int srcValue) {
+    static boolean isCloud(int srcValue) {
         return (BitSetter.isFlagSet(srcValue, 0) &&
                 BitSetter.isFlagSet(srcValue, 1) &&
                 !BitSetter.isFlagSet(srcValue, 2));
     }
 
-    private boolean isSnowIce(int srcValue) {
+    static boolean isSnowIce(int srcValue) {
         return (!BitSetter.isFlagSet(srcValue, 0) &&
                 !BitSetter.isFlagSet(srcValue, 1) &&
                 BitSetter.isFlagSet(srcValue, 2));
     }
 
-    private boolean isCloudShadow(int srcValue) {
+    static boolean isCloudShadow(int srcValue) {
         return (BitSetter.isFlagSet(srcValue, 0) &&
                 !BitSetter.isFlagSet(srcValue, 1) &&
                 !BitSetter.isFlagSet(srcValue, 2));
     }
 
-    private boolean isLand(int srcValue) {
+    static boolean isLand(int srcValue) {
         return BitSetter.isFlagSet(srcValue, 3);
     }
 
-    private boolean isGoodSwir(int srcValue) {
+    static boolean isGoodSwir(int srcValue) {
         return BitSetter.isFlagSet(srcValue, 4);
     }
 
-    private boolean isGoodNir(int srcValue) {
+    static boolean isGoodNir(int srcValue) {
         return BitSetter.isFlagSet(srcValue, 5);
     }
 
-    private boolean isGoodRed(int srcValue) {
+    static boolean isGoodRed(int srcValue) {
         return BitSetter.isFlagSet(srcValue, 6);
     }
 
-    private boolean isGoodBlue(int srcValue) {
+    static boolean isGoodBlue(int srcValue) {
         return BitSetter.isFlagSet(srcValue, 7);
     }
 
+    static boolean isSwirCoverage(int srcValue) {
+        return BitSetter.isFlagSet(srcValue, 8);
+    }
+
+    static boolean isNirCoverage(int srcValue) {
+        return BitSetter.isFlagSet(srcValue, 9);
+    }
+
+    static boolean isRedCoverage(int srcValue) {
+        return BitSetter.isFlagSet(srcValue, 10);
+    }
+
+    static boolean isBlueCoverage(int srcValue) {
+        return BitSetter.isFlagSet(srcValue, 11);
+    }
+
+
     public static class Spi extends OperatorSpi {
         public Spi() {
-            super(ProbaVSynthesisBitMaskOp.class);
+            super(ProbaVBitMaskOp.class);
         }
     }
 }

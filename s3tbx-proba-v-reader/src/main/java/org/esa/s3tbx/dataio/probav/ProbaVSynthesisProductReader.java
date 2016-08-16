@@ -120,15 +120,15 @@ public class ProbaVSynthesisProductReader extends AbstractProductReader {
         if (inputFileRootNode != null) {
 
             final TreeNode level3Node = inputFileRootNode.getChildAt(0);        // 'LEVEL3'
-            productWidth = (int) getH5ScalarDS(level3Node.getChildAt(0).getChildAt(0)).getDims()[0];
-            productHeight = (int) getH5ScalarDS(level3Node.getChildAt(0).getChildAt(0)).getDims()[1];
+            productWidth = (int) ProbaVUtils.getH5ScalarDS(level3Node.getChildAt(0).getChildAt(0)).getDims()[0];
+            productHeight = (int) ProbaVUtils.getH5ScalarDS(level3Node.getChildAt(0).getChildAt(0)).getDims()[1];
             product = new Product(inputFile.getName(), "PROBA-V SYNTHESIS", productWidth, productHeight);
             product.setPreferredTileSize(productWidth, 16);
             product.setAutoGrouping("TOA_REFL:TOC_REFL:VAA:VZA");
 
             final H5Group rootGroup = (H5Group) ((DefaultMutableTreeNode) inputFileRootNode).getUserObject();
             final List rootMetadata = rootGroup.getMetadata();
-            addSynthesisMetadataElement(rootMetadata, product, ProbaVConstants.MPH_NAME);
+            ProbaVUtils.addProbaVMetadataElement(rootMetadata, product, ProbaVConstants.MPH_NAME);
             product.setDescription(ProbaVUtils.getStringAttributeValue(rootMetadata, "DESCRIPTION"));
             product.setFileLocation(inputFile);
 
@@ -144,13 +144,13 @@ public class ProbaVSynthesisProductReader extends AbstractProductReader {
                         for (int j = 0; j < level3ChildNode.getChildCount(); j++) {
                             final TreeNode level3GeometryChildNode = level3ChildNode.getChildAt(j);
                             final String level3GeometryChildNodeName = level3GeometryChildNode.toString();
-                            if (isSynthesisSunAngleDataNode(level3GeometryChildNodeName)) {
-                                final H5ScalarDS sunAngleDS = getH5ScalarDS(level3GeometryChildNode);
-                                final Band sunAngleBand = createTargetBand(product,
-                                                                           sunAngleDS,
+                            if (ProbaVUtils.isProbaVSunAngleDataNode(level3GeometryChildNodeName)) {
+                                final H5ScalarDS sunAngleDS = ProbaVUtils.getH5ScalarDS(level3GeometryChildNode);
+                                final Band sunAngleBand = ProbaVUtils.createTargetBand(product,
+                                                                           sunAngleDS.getMetadata(),
                                                                            level3GeometryChildNodeName,
                                                                            ProductData.TYPE_UINT8);
-                                setBandUnitAndDescription(sunAngleDS, sunAngleBand);
+                                ProbaVUtils.setBandUnitAndDescription(sunAngleDS.getMetadata(), sunAngleBand);
                                 sunAngleBand.setNoDataValue(ProbaVConstants.GEOMETRY_NO_DATA_VALUE);
                                 sunAngleBand.setNoDataValueUsed(true);
 
@@ -165,19 +165,19 @@ public class ProbaVSynthesisProductReader extends AbstractProductReader {
                                                                                                    productHeight,
                                                                                                    sunAngleRasterData);
                                 sunAngleBand.setSourceImage(sunAngleImage);
-                            } else if (isSynthesisViewAngleGroupNode(level3GeometryChildNodeName)) {
+                            } else if (ProbaVUtils.isProbaVViewAngleGroupNode(level3GeometryChildNodeName)) {
                                 for (int k = 0; k < level3GeometryChildNode.getChildCount(); k++) {
                                     final TreeNode level3GeometryViewAngleChildNode = level3GeometryChildNode.getChildAt(k);
-                                    final H5ScalarDS viewAngleDS = getH5ScalarDS(level3GeometryViewAngleChildNode);
+                                    final H5ScalarDS viewAngleDS = ProbaVUtils.getH5ScalarDS(level3GeometryViewAngleChildNode);
                                     final String level3GeometryViewAngleChildNodeName =
                                             level3GeometryViewAngleChildNode.toString();
                                     final String viewAnglebandName = level3GeometryViewAngleChildNodeName + "_" +
                                                                      level3GeometryChildNodeName;
-                                    final Band viewAngleBand = createTargetBand(product,
-                                                                                viewAngleDS,
+                                    final Band viewAngleBand = ProbaVUtils.createTargetBand(product,
+                                                                                viewAngleDS.getMetadata(),
                                                                                 viewAnglebandName,
                                                                                 ProductData.TYPE_UINT8);
-                                    setBandUnitAndDescription(viewAngleDS, viewAngleBand);
+                                    ProbaVUtils.setBandUnitAndDescription(viewAngleDS.getMetadata(), viewAngleBand);
                                     viewAngleBand.setNoDataValue(ProbaVConstants.GEOMETRY_NO_DATA_VALUE);
                                     viewAngleBand.setNoDataValueUsed(true);
 
@@ -203,12 +203,15 @@ public class ProbaVSynthesisProductReader extends AbstractProductReader {
 
                     case "QUALITY":
                         // 8-bit unsigned character
-                        final H5ScalarDS qualityDS = getH5ScalarDS(level3ChildNode.getChildAt(0));
+                        final H5ScalarDS qualityDS = ProbaVUtils.getH5ScalarDS(level3ChildNode.getChildAt(0));
                         Product flagProduct = new Product("QUALITY", "flags", productWidth, productHeight);
                         ProductUtils.copyGeoCoding(product, flagProduct);
                         final Band smBand =
-                                createTargetBand(flagProduct, qualityDS, ProbaVConstants.SM_BAND_NAME, ProductData.TYPE_UINT8);
-                        setBandUnitAndDescription(qualityDS, smBand);
+                                ProbaVUtils.createTargetBand(flagProduct,
+                                                             qualityDS.getMetadata(),
+                                                             ProbaVConstants.SM_BAND_NAME,
+                                                             ProductData.TYPE_UINT8);
+                        ProbaVUtils.setBandUnitAndDescription(qualityDS.getMetadata(), smBand);
 
                         final String qualityDatasetName = "/LEVEL3/QUALITY/" + ProbaVConstants.SM_BAND_NAME;
                         final int qualityDatatypeClass = qualityDS.getDatatype().getDatatypeClass();
@@ -224,7 +227,7 @@ public class ProbaVSynthesisProductReader extends AbstractProductReader {
                         attachSynthesisQualityFlagBand(product, flagProduct);
 
                         // metadata:
-                        addQualityMetadata(product, (DefaultMutableTreeNode) level3ChildNode);
+                        ProbaVUtils.addQualityMetadata(product, (DefaultMutableTreeNode) level3ChildNode);
 
                         break;
 
@@ -235,17 +238,17 @@ public class ProbaVSynthesisProductReader extends AbstractProductReader {
                             // we want the sequence BLUE, RED, NIR, SWIR, rather than original BLUE, NIR, RED, SWIR...
                             final int k = ProbaVConstants.RADIOMETRY_CHILD_INDEX[j];
                             final TreeNode level3RadiometryChildNode = level3ChildNode.getChildAt(k);
-                            final H5ScalarDS radiometryDS = getH5ScalarDS(level3RadiometryChildNode.getChildAt(0));
+                            final H5ScalarDS radiometryDS = ProbaVUtils.getH5ScalarDS(level3RadiometryChildNode.getChildAt(0));
                             final String level3RadiometryChildNodeName = level3RadiometryChildNode.toString();
                             final String radiometryBandPrePrefix =
                                     (ProbaVSynthesisProductReaderPlugIn.isProbaSynthesisToaProduct(inputFile.getName())) ? "TOA" : "TOC";
                             final String radiometryBandPrefix = radiometryBandPrePrefix + "_REFL_";
-                            final Band radiometryBand = createTargetBand(product,
-                                                                         radiometryDS,
+                            final Band radiometryBand = ProbaVUtils.createTargetBand(product,
+                                                                         radiometryDS.getMetadata(),
                                                                          radiometryBandPrefix + level3RadiometryChildNodeName,
                                                                          ProductData.TYPE_INT16);
-                            setBandUnitAndDescription(radiometryDS, radiometryBand);
-                            setSpectralBandProperties(radiometryBand);
+                            ProbaVUtils.setBandUnitAndDescription(radiometryDS.getMetadata(), radiometryBand);
+                            ProbaVUtils.setSpectralBandProperties(radiometryBand);
                             radiometryBand.setNoDataValue(ProbaVConstants.RADIOMETRY_NO_DATA_VALUE);
                             radiometryBand.setNoDataValueUsed(true);
 
@@ -264,7 +267,7 @@ public class ProbaVSynthesisProductReader extends AbstractProductReader {
                         break;
 
                     case "TIME":
-                        final H5ScalarDS timeDS = getH5ScalarDS(level3ChildNode.getChildAt(0));
+                        final H5ScalarDS timeDS = ProbaVUtils.getH5ScalarDS(level3ChildNode.getChildAt(0));
                         final Band timeBand;
                         // NOTE: it seems that identical product types may have different data types here. E.g.:
                         // PROBAV_S1_TOC_X18Y06_20140316_100M_V001.HDF5 has 8-bit unsigned char (CLASS_CHAR), but
@@ -272,14 +275,14 @@ public class ProbaVSynthesisProductReader extends AbstractProductReader {
                         final int timeDatatypeClass = timeDS.getDatatype().getDatatypeClass();   // 0
                         if (timeDatatypeClass == H5Datatype.CLASS_CHAR) {
                             // 8-bit unsigned character in this case
-                            timeBand = createTargetBand(product, timeDS, "TIME", ProductData.TYPE_UINT8);
+                            timeBand = ProbaVUtils.createTargetBand(product, timeDS.getMetadata(), "TIME", ProductData.TYPE_UINT8);
                             timeBand.setNoDataValue(ProbaVConstants.TIME_NO_DATA_VALUE_UINT8);
                         } else {
                             // 16-bit unsigned integer
-                            timeBand = createTargetBand(product, timeDS, "TIME", ProductData.TYPE_UINT16);
+                            timeBand = ProbaVUtils.createTargetBand(product, timeDS.getMetadata(), "TIME", ProductData.TYPE_UINT16);
                             timeBand.setNoDataValue(ProbaVConstants.TIME_NO_DATA_VALUE_UINT16);
                         }
-                        setBandUnitAndDescription(timeDS, timeBand);
+                        ProbaVUtils.setBandUnitAndDescription(timeDS.getMetadata(), timeBand);
                         timeBand.setNoDataValueUsed(true);
 
                         final String timeDatasetName = "/LEVEL3/TIME/TIME";
@@ -292,7 +295,7 @@ public class ProbaVSynthesisProductReader extends AbstractProductReader {
                         timeBand.setSourceImage(radiometryImage);
 
                         // add start/end time to product:
-                        addStartStopTimes(product, (DefaultMutableTreeNode) level3ChildNode);
+                        ProbaVUtils.addStartStopTimes(product, (DefaultMutableTreeNode) level3ChildNode);
                         break;
 
                     default:
@@ -309,14 +312,14 @@ public class ProbaVSynthesisProductReader extends AbstractProductReader {
         Product product = null;
         if (inputFileRootNode != null) {
             final TreeNode level3Node = inputFileRootNode.getChildAt(0);        // 'LEVEL3'
-            productWidth = (int) getH5ScalarDS(level3Node.getChildAt(1).getChildAt(0)).getDims()[0];
-            productHeight = (int) getH5ScalarDS(level3Node.getChildAt(1).getChildAt(0)).getDims()[1];
-            product.setPreferredTileSize(productWidth, 16);
+            productWidth = (int) ProbaVUtils.getH5ScalarDS(level3Node.getChildAt(1).getChildAt(0)).getDims()[0];
+            productHeight = (int) ProbaVUtils.getH5ScalarDS(level3Node.getChildAt(1).getChildAt(0)).getDims()[1];
             product = new Product(inputFile.getName(), "PROBA-V SYNTHESIS NDVI", productWidth, productHeight);
+            product.setPreferredTileSize(productWidth, 16);
 
             final H5Group rootGroup = (H5Group) ((DefaultMutableTreeNode) inputFileRootNode).getUserObject();
             final List rootMetadata = rootGroup.getMetadata();
-            addSynthesisMetadataElement(rootMetadata, product, ProbaVConstants.MPH_NAME);
+            ProbaVUtils.addProbaVMetadataElement(rootMetadata, product, ProbaVConstants.MPH_NAME);
             product.setDescription(ProbaVUtils.getStringAttributeValue(rootMetadata, "DESCRIPTION"));
             product.setFileLocation(inputFile);
 
@@ -336,12 +339,12 @@ public class ProbaVSynthesisProductReader extends AbstractProductReader {
                         break;
 
                     case "QUALITY":
-                        addQualityMetadata(product, (DefaultMutableTreeNode) level3ChildNode);
+                        ProbaVUtils.addQualityMetadata(product, (DefaultMutableTreeNode) level3ChildNode);
                         break;
 
                     case "TIME":
                         // add start/end time to product:
-                        addStartStopTimes(product, (DefaultMutableTreeNode) level3ChildNode);
+                        ProbaVUtils.addStartStopTimes(product, (DefaultMutableTreeNode) level3ChildNode);
                         break;
 
                     default:
@@ -354,7 +357,7 @@ public class ProbaVSynthesisProductReader extends AbstractProductReader {
 
     private void setNdviBand(Product product, TreeNode level3ChildNode) throws Exception {
         final H5ScalarDS ndviDS = (H5ScalarDS) ((DefaultMutableTreeNode) level3ChildNode.getChildAt(0)).getUserObject();
-        final Band ndviBand = createTargetBand(product, ndviDS, "NDVI", ProductData.TYPE_UINT8);
+        final Band ndviBand = ProbaVUtils.createTargetBand(product, ndviDS.getMetadata(), "NDVI", ProductData.TYPE_UINT8);
 
         ndviBand.setDescription("Normalized Difference Vegetation Index");
         ndviBand.setUnit("dl");
@@ -372,45 +375,45 @@ public class ProbaVSynthesisProductReader extends AbstractProductReader {
         ndviBand.setSourceImage(ndviImage);
     }
 
-    private void addStartStopTimes(Product product, DefaultMutableTreeNode level3ChildNode) throws HDF5Exception, ParseException {
-        final H5Group timeGroup = (H5Group) level3ChildNode.getUserObject();
-        final List timeMetadata = timeGroup.getMetadata();
-        product.setStartTime(ProductData.UTC.parse(ProbaVUtils.getStartEndTimeFromAttributes(timeMetadata)[0],
-                                                   ProbaVConstants.PROBAV_DATE_FORMAT_PATTERN));
-        product.setEndTime(ProductData.UTC.parse(ProbaVUtils.getStartEndTimeFromAttributes(timeMetadata)[1],
-                                                 ProbaVConstants.PROBAV_DATE_FORMAT_PATTERN));
-    }
-
-    private void addQualityMetadata(Product product, DefaultMutableTreeNode level3ChildNode) throws HDF5Exception {
-        final H5Group qualityGroup = (H5Group) level3ChildNode.getUserObject();
-        final List qualityMetadata = qualityGroup.getMetadata();
-        addSynthesisMetadataElement(qualityMetadata, product, ProbaVConstants.QUALITY_NAME);
-    }
-
-    private void setBandUnitAndDescription(H5ScalarDS ds, Band band) throws HDF5Exception {
-        band.setDescription(ProbaVUtils.getStringAttributeValue(ds.getMetadata(), "DESCRIPTION"));
-        band.setUnit(ProbaVUtils.getStringAttributeValue(ds.getMetadata(), "UNITS"));
-    }
-
-    private void setSpectralBandProperties(Band band) {
-        if (band.getName().endsWith("REFL_BLUE")) {
-            band.setSpectralBandIndex(0);
-            band.setSpectralWavelength(462.0f);
-            band.setSpectralBandwidth(48.0f);
-        } else if (band.getName().endsWith("REFL_RED")) {
-            band.setSpectralBandIndex(1);
-            band.setSpectralWavelength(655.5f);
-            band.setSpectralBandwidth(81.0f);
-        } else if (band.getName().endsWith("REFL_NIR")) {
-            band.setSpectralBandIndex(2);
-            band.setSpectralWavelength(843.0f);
-            band.setSpectralBandwidth(142.0f);
-        } else if (band.getName().endsWith("REFL_SWIR")) {
-            band.setSpectralBandIndex(3);
-            band.setSpectralWavelength(1599.0f);
-            band.setSpectralBandwidth(70.0f);
-        }
-    }
+//    private void addStartStopTimes(Product product, DefaultMutableTreeNode level3ChildNode) throws HDF5Exception, ParseException {
+//        final H5Group timeGroup = (H5Group) level3ChildNode.getUserObject();
+//        final List timeMetadata = timeGroup.getMetadata();
+//        product.setStartTime(ProductData.UTC.parse(ProbaVUtils.getStartEndTimeFromAttributes(timeMetadata)[0],
+//                                                   ProbaVConstants.PROBAV_DATE_FORMAT_PATTERN));
+//        product.setEndTime(ProductData.UTC.parse(ProbaVUtils.getStartEndTimeFromAttributes(timeMetadata)[1],
+//                                                 ProbaVConstants.PROBAV_DATE_FORMAT_PATTERN));
+//    }
+//
+//    private void addQualityMetadata(Product product, DefaultMutableTreeNode level3ChildNode) throws HDF5Exception {
+//        final H5Group qualityGroup = (H5Group) level3ChildNode.getUserObject();
+//        final List qualityMetadata = qualityGroup.getMetadata();
+//        addSynthesisMetadataElement(qualityMetadata, product, ProbaVConstants.QUALITY_NAME);
+//    }
+//
+//    private void setBandUnitAndDescription(H5ScalarDS ds, Band band) throws HDF5Exception {
+//        band.setDescription(ProbaVUtils.getStringAttributeValue(ds.getMetadata(), "DESCRIPTION"));
+//        band.setUnit(ProbaVUtils.getStringAttributeValue(ds.getMetadata(), "UNITS"));
+//    }
+//
+//    private void setSpectralBandProperties(Band band) {
+//        if (band.getName().endsWith("REFL_BLUE")) {
+//            band.setSpectralBandIndex(0);
+//            band.setSpectralWavelength(462.0f);
+//            band.setSpectralBandwidth(48.0f);
+//        } else if (band.getName().endsWith("REFL_RED")) {
+//            band.setSpectralBandIndex(1);
+//            band.setSpectralWavelength(655.5f);
+//            band.setSpectralBandwidth(81.0f);
+//        } else if (band.getName().endsWith("REFL_NIR")) {
+//            band.setSpectralBandIndex(2);
+//            band.setSpectralWavelength(843.0f);
+//            band.setSpectralBandwidth(142.0f);
+//        } else if (band.getName().endsWith("REFL_SWIR")) {
+//            band.setSpectralBandIndex(3);
+//            band.setSpectralWavelength(1599.0f);
+//            band.setSpectralBandwidth(70.0f);
+//        }
+//    }
 
     private void setSynthesisGeoCoding(Product product, TreeNode inputFileRootNode, TreeNode level3ChildNode)
             throws HDF5Exception {
@@ -449,51 +452,54 @@ public class ProbaVSynthesisProductReader extends AbstractProductReader {
         smFlagBand.setDescription("PROBA-V Synthesis SM Flags");
         smFlagBand.setSampleCoding(probavSmFlagCoding);
 
-        ProbaVSynthesisBitMaskOp bitMaskOp = new ProbaVSynthesisBitMaskOp();
+        ProbaVBitMaskOp bitMaskOp = new ProbaVBitMaskOp();
         bitMaskOp.setParameterDefaultValues();
         bitMaskOp.setSourceProduct("sourceProduct", flagProduct);
         Product bitMaskProduct = bitMaskOp.getTargetProduct();
         smFlagBand.setSourceImage(bitMaskProduct.getBand(ProbaVConstants.SM_FLAG_BAND_NAME).getSourceImage());
     }
 
-    private boolean isSynthesisViewAngleGroupNode(String level3GeometryChildNodeName) {
-        return level3GeometryChildNodeName.equals("SWIR") || level3GeometryChildNodeName.equals("VNIR");
-    }
+//    private boolean isSynthesisViewAngleGroupNode(String level3GeometryChildNodeName) {
+//        return level3GeometryChildNodeName.equals("SWIR") || level3GeometryChildNodeName.equals("VNIR");
+//    }
+//
+//    private boolean isSynthesisSunAngleDataNode(String level3GeometryChildNodeName) {
+//        return level3GeometryChildNodeName.equals("SAA") || level3GeometryChildNodeName.equals("SZA");
+//    }
 
-    private boolean isSynthesisSunAngleDataNode(String level3GeometryChildNodeName) {
-        return level3GeometryChildNodeName.equals("SAA") || level3GeometryChildNodeName.equals("SZA");
-    }
-
-    private Band createTargetBand(Product product, H5ScalarDS scalarDS, String bandName, int dataType) throws Exception {
-        final List<Attribute> metadata = scalarDS.getMetadata();
-        final double scaleFactorAttr = ProbaVUtils.getDoubleAttributeValue(metadata, "SCALE");
-        final double scaleFactor = Double.isNaN(scaleFactorAttr) ? 1.0f : scaleFactorAttr;
-        final double scaleOffsetAttr = ProbaVUtils.getDoubleAttributeValue(metadata, "OFFSET");
-        final double scaleOffset = Double.isNaN(scaleOffsetAttr) ? 0.0f : scaleOffsetAttr;
-        final Band band = product.addBand(bandName, dataType);
-        band.setScalingFactor(1.0 / scaleFactor);
-        band.setScalingOffset(-1.0 * scaleOffset / scaleFactor);
-
-        return band;
-    }
-
-    private H5ScalarDS getH5ScalarDS(TreeNode level3BandsChildNode) throws HDF5Exception {
-        H5ScalarDS scalarDS = (H5ScalarDS) ((DefaultMutableTreeNode) level3BandsChildNode).getUserObject();
-        scalarDS.open();
-        scalarDS.read();
-        return scalarDS;
-    }
-
-    private void addSynthesisMetadataElement(List<Attribute> rootMetadata,
-                                             final Product product,
-                                             String metadataElementName) {
-        final MetadataElement metadataElement = new MetadataElement(metadataElementName);
-
-        for (Attribute attribute : rootMetadata) {
-            metadataElement.addAttribute(new MetadataAttribute(attribute.getName(),
-                                                               ProductData.createInstance(ProbaVUtils.getAttributeValue(attribute)), true));
-        }
-        product.getMetadataRoot().addElement(metadataElement);
-    }
+//    private Band createTargetBand(Product product, H5ScalarDS scalarDS, String bandName, int dataType) throws Exception {
+//        final List<Attribute> metadata = scalarDS.getMetadata();
+//        final double scaleFactorAttr = ProbaVUtils.getDoubleAttributeValue(metadata, "SCALE");
+//        final double scaleFactor = Double.isNaN(scaleFactorAttr) ? 1.0f : scaleFactorAttr;
+//        final double scaleOffsetAttr = ProbaVUtils.getDoubleAttributeValue(metadata, "OFFSET");
+//        final double scaleOffset = Double.isNaN(scaleOffsetAttr) ? 0.0f : scaleOffsetAttr;
+//        final Band band = product.addBand(bandName, dataType);
+//        band.setScalingFactor(1.0 / scaleFactor);
+//        band.setScalingOffset(-1.0 * scaleOffset / scaleFactor);
+//
+//        return band;
+//    }
+//
+//    private H5ScalarDS getH5ScalarDS(TreeNode level3BandsChildNode) throws HDF5Exception {
+//        H5ScalarDS scalarDS = (H5ScalarDS) ((DefaultMutableTreeNode) level3BandsChildNode).getUserObject();
+//        scalarDS.open();
+//        scalarDS.read();
+//        // todo: how to optimize the chunk size???
+//        // H5.H5Pset_chunk(scalarDS.getFID(), 2, new long[]{1000, 1000});   // something like this does not work, see http://www.slideshare.net/HDFEOS/hdf5-advanced, p.18
+//        // H5.H5Pset_cache(0, 0, 0, 0, 0.0); // todo: what about this? Find suitable values.
+//        return scalarDS;
+//    }
+//
+//    private void addSynthesisMetadataElement(List<Attribute> rootMetadata,
+//                                             final Product product,
+//                                             String metadataElementName) {
+//        final MetadataElement metadataElement = new MetadataElement(metadataElementName);
+//
+//        for (Attribute attribute : rootMetadata) {
+//            metadataElement.addAttribute(new MetadataAttribute(attribute.getName(),
+//                                                               ProductData.createInstance(ProbaVUtils.getAttributeValue(attribute)), true));
+//        }
+//        product.getMetadataRoot().addElement(metadataElement);
+//    }
 
 }

@@ -7,9 +7,9 @@
                 <attr name="delegate"
                       methodvalue="org.esa.snap.rcp.actions.file.ImportProductAction.create"/>
                 <attr name="displayName"
-                      stringvalue="PROBA-V Synthesis"/>
+                      stringvalue="PROBA-V Synthesis/L2A"/>
                 <attr name="formatName"
-                      stringvalue="PROBA-V-Synthesis"/>
+                      stringvalue="PROBA-V-Synthesis/L2A"/>
                 <attr name="useAllFileFilter"
                       boolvalue="true"/>
                 <attr name="helpId"

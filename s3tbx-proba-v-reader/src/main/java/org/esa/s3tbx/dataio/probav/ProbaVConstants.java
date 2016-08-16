@@ -32,6 +32,10 @@ public class ProbaVConstants {
     public static final int SM_GOOD_NIR_BIT_INDEX = 7;
     public static final int SM_GOOD_RED_BIT_INDEX = 8;
     public static final int SM_GOOD_BLUE_BIT_INDEX = 9;
+    public static final int SM_SWIR_COVERAGE_INDEX = 10;
+    public static final int SM_NIR_COVERAGE_BIT_INDEX = 11;
+    public static final int SM_RED_COVERAGE_BIT_INDEX = 12;
+    public static final int SM_BLUE_COVERAGE_BIT_INDEX = 13;
 
     public static final String SM_CLEAR_FLAG_NAME = "CLEAR";
     public static final String SM_UNDEFINED_FLAG_NAME = "UNDEFINED";
@@ -43,6 +47,10 @@ public class ProbaVConstants {
     public static final String SM_GOOD_NIR_FLAG_NAME = "GOOD_NIR";
     public static final String SM_GOOD_RED_FLAG_NAME = "GOOD_RED";
     public static final String SM_GOOD_BLUE_FLAG_NAME = "GOOD_BLUE";
+    public static final String SM_SWIR_COVERAGE_FLAG_NAME = "SWIR_COVERAGE";
+    public static final String SM_NIR_COVERAGE_FLAG_NAME = "NIR_COVERAGE";
+    public static final String SM_RED_COVERAGE_FLAG_NAME = "RED_COVERAGE";
+    public static final String SM_BLUE_COVERAGE_FLAG_NAME = "BLUE_COVERAGE";
 
     public static final String SM_CLEAR_FLAG_DESCR = "Clear pixel";
     public static final String SM_UNDEFINED_FLAG_DESCR = "Pixel classified as undefined";
@@ -54,6 +62,10 @@ public class ProbaVConstants {
     public static final String SM_GOOD_NIR_FLAG_DESCR = "Pixel with good NIR data";
     public static final String SM_GOOD_RED_FLAG_DESCR = "Pixel with good RED data";
     public static final String SM_GOOD_BLUE_FLAG_DESCR = "Pixel with good BLUE data";
+    public static final String SM_SWIR_COVERAGE_FLAG_DESCR = "Pixel with SWIR coverage";
+    public static final String SM_NIR_COVERAGE_FLAG_DESCR = "Pixel with NIR coverage";
+    public static final String SM_RED_COVERAGE_FLAG_DESCR = "Pixel with RED coverage";
+    public static final String SM_BLUE_COVERAGE_FLAG_DESCR = "Pixel with BLUE coverage";
 
     public static final Color[] FLAG_COLORS = {
             new Color(120, 255, 180),
@@ -65,7 +77,11 @@ public class ProbaVConstants {
             new Color(0, 0, 255),
             new Color(180, 180, 255),
             new Color(255, 150, 100),
-            new Color(0, 255, 0)
+            new Color(0, 255, 0),
+            new Color(0, 120, 180),
+            new Color(180, 0, 255),
+            new Color(130, 200, 250),
+            new Color(50, 50, 100)
     };
 
     public static final int Q_CORRECT_BIT_INDEX = 0;
