@@ -37,12 +37,10 @@ public class PDUStitchingOpTest {
         if (!targetDirectory.mkdirs()) {
             fail("Unable to create test target directory");
         }
-        GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(new PDUStitchingOp.Spi());
     }
 
     @After
     public void tearDown() {
-        GPF.getDefaultInstance().getOperatorSpiRegistry().removeOperatorSpi(new PDUStitchingOp.Spi());
         if (targetDirectory.isDirectory()) {
             if (!FileUtils.deleteTree(targetDirectory)) {
                 fail("Unable to delete test directory");
@@ -51,7 +49,7 @@ public class PDUStitchingOpTest {
     }
 
     @Test
-    @Ignore //takes a few seconds
+    @Ignore("takes a few seconds")
     public void testOperator() throws IOException {
         Map<String, Object> parameterMap = new HashMap<>();
         parameterMap.put("targetDir", targetDirectory);
@@ -69,7 +67,7 @@ public class PDUStitchingOpTest {
     }
 
     @Test
-    @Ignore //takes a few seconds
+    @Ignore("takes a few seconds")
     public void testOperator_wildcards() throws IOException {
         Map<String, Object> parameterMap = new HashMap<>();
         parameterMap.put("targetDir", targetDirectory);
