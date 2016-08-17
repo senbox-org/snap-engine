@@ -9,14 +9,13 @@ import ncsa.hdf.object.h5.H5Datatype;
 import ncsa.hdf.object.h5.H5Group;
 import ncsa.hdf.object.h5.H5ScalarDS;
 import org.esa.snap.core.datamodel.*;
-import org.esa.snap.core.util.BitSetter;
 import org.esa.snap.core.util.SystemUtils;
+import org.geotools.referencing.CRS;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
-import java.awt.*;
 import java.text.ParseException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -27,6 +26,12 @@ import java.util.logging.Level;
  */
 public class ProbaVUtils {
 
+    /**
+     * Returns the value of a given HDF attribute
+     *
+     * @param attribute - input attribute
+     * @return the value as string
+     */
     public static String getAttributeValue(Attribute attribute) {
         String result = "";
         switch (attribute.getType().getDatatypeClass()) {
@@ -55,6 +60,13 @@ public class ProbaVUtils {
         return result.trim();
     }
 
+    /**
+     * Returns the value of an HDF string attribute with given name
+     *
+     * @param metadata - the metadata containing the attributes
+     * @param attributeName - the attribute name
+     * @return the value as string
+     */
     public static String getStringAttributeValue(List<Attribute> metadata, String attributeName) {
         String stringAttr = null;
         for (Attribute attribute : metadata) {
@@ -70,20 +82,13 @@ public class ProbaVUtils {
         return stringAttr;
     }
 
-//    public static float getFloatAttributeValue(List<Attribute> metadata, String attributeName) {
-//        float floatAttr = Float.NaN;
-//        for (Attribute attribute : metadata) {
-//            if (attribute.getName().equals(attributeName)) {
-//                try {
-//                    floatAttr = Float.parseFloat(getAttributeValue(attribute));
-//                } catch (NumberFormatException e) {
-//                    SystemUtils.LOG.log(Level.WARNING, "Cannot parse float attribute: " + e.getMessage());
-//                }
-//            }
-//        }
-//        return floatAttr;
-//    }
-
+    /**
+     * Returns the value of an HDF double attribute with given name
+     *
+     * @param metadata - the metadata containing the attributes
+     * @param attributeName - the attribute name
+     * @return the value as double
+     */
     public static double getDoubleAttributeValue(List<Attribute> metadata, String attributeName) {
         double doubleAttr = Double.NaN;
         for (Attribute attribute : metadata) {
@@ -98,6 +103,13 @@ public class ProbaVUtils {
         return doubleAttr;
     }
 
+    /**
+     * Returns product start/end times extracted from HDF attribute
+     *
+     * @param metadata- the metadata containing the attributes
+     *
+     * @return  start/end times as String[]
+     */
     public static String[] getStartEndTimeFromAttributes(List<Attribute> metadata) {
         String[] startStopTimes = new String[2];
         String startDate = "";
@@ -122,145 +134,18 @@ public class ProbaVUtils {
         return startStopTimes;
     }
 
-    public static void addSynthesisQualityMasks(Product probavProduct) {
-        ProductNodeGroup<Mask> maskGroup = probavProduct.getMaskGroup();
-        addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.SM_CLEAR_FLAG_NAME,
-                ProbaVConstants.SM_CLEAR_FLAG_DESCR, ProbaVConstants.FLAG_COLORS[0], 0.5f);
-        addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.SM_UNDEFINED_FLAG_NAME,
-                ProbaVConstants.SM_UNDEFINED_FLAG_DESCR, ProbaVConstants.FLAG_COLORS[1], 0.5f);
-        addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.SM_CLOUD_FLAG_NAME,
-                ProbaVConstants.SM_CLOUD_FLAG_DESCR, ProbaVConstants.FLAG_COLORS[2], 0.5f);
-        addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.SM_SNOWICE_FLAG_NAME,
-                ProbaVConstants.SM_SNOWICE_FLAG_DESCR, ProbaVConstants.FLAG_COLORS[3], 0.5f);
-        addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.SM_CLOUD_SHADOW_FLAG_NAME,
-                ProbaVConstants.SM_CLOUD_SHADOW_FLAG_DESCR, ProbaVConstants.FLAG_COLORS[4], 0.5f);
-        addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.SM_LAND_FLAG_NAME,
-                ProbaVConstants.SM_LAND_FLAG_DESCR, ProbaVConstants.FLAG_COLORS[5], 0.5f);
-        addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.SM_GOOD_SWIR_FLAG_NAME,
-                ProbaVConstants.SM_GOOD_SWIR_FLAG_DESCR, ProbaVConstants.FLAG_COLORS[6], 0.5f);
-        addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.SM_GOOD_NIR_FLAG_NAME,
-                ProbaVConstants.SM_GOOD_NIR_FLAG_DESCR, ProbaVConstants.FLAG_COLORS[7], 0.5f);
-        addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.SM_GOOD_RED_FLAG_NAME,
-                ProbaVConstants.SM_GOOD_RED_FLAG_DESCR, ProbaVConstants.FLAG_COLORS[8], 0.5f);
-        addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.SM_GOOD_BLUE_FLAG_NAME,
-                ProbaVConstants.SM_GOOD_BLUE_FLAG_DESCR, ProbaVConstants.FLAG_COLORS[9], 0.5f);
-    }
-
-    public static void addL2AQualityMasks(Product probavProduct) {
-        addSynthesisQualityMasks(probavProduct);
-        ProductNodeGroup<Mask> maskGroup = probavProduct.getMaskGroup();
-        addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.SM_SWIR_COVERAGE_FLAG_NAME,
-                ProbaVConstants.SM_SWIR_COVERAGE_FLAG_DESCR, ProbaVConstants.FLAG_COLORS[10], 0.5f);
-        addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.SM_NIR_COVERAGE_FLAG_NAME,
-                ProbaVConstants.SM_NIR_COVERAGE_FLAG_DESCR, ProbaVConstants.FLAG_COLORS[11], 0.5f);
-        addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.SM_RED_COVERAGE_FLAG_NAME,
-                ProbaVConstants.SM_RED_COVERAGE_FLAG_DESCR, ProbaVConstants.FLAG_COLORS[12], 0.5f);
-        addMask(probavProduct, maskGroup, ProbaVConstants.SM_FLAG_BAND_NAME, ProbaVConstants.SM_BLUE_COVERAGE_FLAG_NAME,
-                ProbaVConstants.SM_BLUE_COVERAGE_FLAG_DESCR, ProbaVConstants.FLAG_COLORS[13], 0.5f);
-    }
-
-    public static void addSynthesisQualityFlags(FlagCoding probavSmFlagCoding) {
-        probavSmFlagCoding.addFlag(ProbaVConstants.SM_CLEAR_FLAG_NAME,
-                                   BitSetter.setFlag(0, ProbaVConstants.SM_CLEAR_BIT_INDEX),
-                                   ProbaVConstants.SM_CLEAR_FLAG_DESCR);
-        probavSmFlagCoding.addFlag(ProbaVConstants.SM_UNDEFINED_FLAG_NAME,
-                                   BitSetter.setFlag(0, ProbaVConstants.SM_UNDEFINED_BIT_INDEX),
-                                   ProbaVConstants.SM_UNDEFINED_FLAG_DESCR);
-        probavSmFlagCoding.addFlag(ProbaVConstants.SM_CLOUD_FLAG_NAME,
-                                   BitSetter.setFlag(0, ProbaVConstants.SM_CLOUD_BIT_INDEX),
-                                   ProbaVConstants.SM_CLOUD_FLAG_DESCR);
-        probavSmFlagCoding.addFlag(ProbaVConstants.SM_SNOWICE_FLAG_NAME,
-                                   BitSetter.setFlag(0, ProbaVConstants.SM_SNOWICE_INDEX),
-                                   ProbaVConstants.SM_SNOWICE_FLAG_DESCR);
-        probavSmFlagCoding.addFlag(ProbaVConstants.SM_CLOUD_SHADOW_FLAG_NAME,
-                                   BitSetter.setFlag(0, ProbaVConstants.SM_CLOUD_SHADOW_BIT_INDEX),
-                                   ProbaVConstants.SM_CLOUD_SHADOW_FLAG_DESCR);
-        probavSmFlagCoding.addFlag(ProbaVConstants.SM_LAND_FLAG_NAME,
-                                   BitSetter.setFlag(0, ProbaVConstants.SM_LAND_BIT_INDEX),
-                                   ProbaVConstants.SM_LAND_FLAG_DESCR);
-        probavSmFlagCoding.addFlag(ProbaVConstants.SM_GOOD_SWIR_FLAG_NAME,
-                                   BitSetter.setFlag(0, ProbaVConstants.SM_GOOD_SWIR_INDEX),
-                                   ProbaVConstants.SM_GOOD_SWIR_FLAG_DESCR);
-        probavSmFlagCoding.addFlag(ProbaVConstants.SM_GOOD_NIR_FLAG_NAME,
-                                   BitSetter.setFlag(0, ProbaVConstants.SM_GOOD_NIR_BIT_INDEX),
-                                   ProbaVConstants.SM_GOOD_NIR_FLAG_DESCR);
-        probavSmFlagCoding.addFlag(ProbaVConstants.SM_GOOD_RED_FLAG_NAME,
-                                   BitSetter.setFlag(0, ProbaVConstants.SM_GOOD_RED_BIT_INDEX),
-                                   ProbaVConstants.SM_GOOD_RED_FLAG_DESCR);
-        probavSmFlagCoding.addFlag(ProbaVConstants.SM_GOOD_BLUE_FLAG_NAME,
-                                   BitSetter.setFlag(0, ProbaVConstants.SM_GOOD_BLUE_BIT_INDEX),
-                                   ProbaVConstants.SM_GOOD_BLUE_FLAG_DESCR);
-    }
-
-    public static void addL2AQualityFlags(FlagCoding probavSmFlagCoding) {
-        addSynthesisQualityFlags(probavSmFlagCoding);
-
-        probavSmFlagCoding.addFlag(ProbaVConstants.SM_SWIR_COVERAGE_FLAG_NAME,
-                                   BitSetter.setFlag(0, ProbaVConstants.SM_SWIR_COVERAGE_INDEX),
-                                   ProbaVConstants.SM_SWIR_COVERAGE_FLAG_DESCR);
-        probavSmFlagCoding.addFlag(ProbaVConstants.SM_NIR_COVERAGE_FLAG_NAME,
-                                   BitSetter.setFlag(0, ProbaVConstants.SM_NIR_COVERAGE_BIT_INDEX),
-                                   ProbaVConstants.SM_NIR_COVERAGE_FLAG_DESCR);
-        probavSmFlagCoding.addFlag(ProbaVConstants.SM_RED_COVERAGE_FLAG_NAME,
-                                   BitSetter.setFlag(0, ProbaVConstants.SM_RED_COVERAGE_BIT_INDEX),
-                                   ProbaVConstants.SM_RED_COVERAGE_FLAG_DESCR);
-        probavSmFlagCoding.addFlag(ProbaVConstants.SM_BLUE_COVERAGE_FLAG_NAME,
-                                   BitSetter.setFlag(0, ProbaVConstants.SM_BLUE_COVERAGE_BIT_INDEX),
-                                   ProbaVConstants.SM_BLUE_COVERAGE_FLAG_DESCR);
-    }
-
-    // not yet used
-//    public static void addL1cQualityMasks(Product probavProduct, String sourceQualityBandName, String targetQualityFlagBandName) {
-//        ProductNodeGroup<Mask> maskGroup = probavProduct.getMaskGroup();
-//        addMask(probavProduct, maskGroup, targetQualityFlagBandName,
-//                sourceQualityBandName + "_" + ProbaVConstants.Q_CORRECT_FLAG_NAME,
-//                ProbaVConstants.Q_CORRECT_FLAG_DESCR, ProbaVConstants.FLAG_COLORS[0], 0.5f);
-//        addMask(probavProduct, maskGroup, targetQualityFlagBandName,
-//                sourceQualityBandName + "_" + ProbaVConstants.Q_MISSING_FLAG_NAME,
-//                ProbaVConstants.Q_MISSING_FLAG_DESCR, ProbaVConstants.FLAG_COLORS[1], 0.5f);
-//        addMask(probavProduct, maskGroup, targetQualityFlagBandName,
-//                sourceQualityBandName + "_" + ProbaVConstants.Q_WAS_SATURATED_FLAG_NAME,
-//                ProbaVConstants.Q_WAS_SATURATED_FLAG_DESCR, ProbaVConstants.FLAG_COLORS[2], 0.5f);
-//        addMask(probavProduct, maskGroup, targetQualityFlagBandName,
-//                sourceQualityBandName + "_" + ProbaVConstants.Q_BECAME_SATURATED_FLAG_NAME,
-//                ProbaVConstants.Q_BECAME_SATURATED_FLAG_DESCR, ProbaVConstants.FLAG_COLORS[3], 0.5f);
-//        addMask(probavProduct, maskGroup, targetQualityFlagBandName,
-//                sourceQualityBandName + "_" + ProbaVConstants.Q_BECAME_NEGATIVE_FLAG_NAME,
-//                ProbaVConstants.Q_BECAME_NEGATIVE_FLAG_DESCR, ProbaVConstants.FLAG_COLORS[4], 0.5f);
-//        addMask(probavProduct, maskGroup, targetQualityFlagBandName,
-//                sourceQualityBandName + "_" + ProbaVConstants.Q_INTERPOLATED_FLAG_NAME,
-//                ProbaVConstants.Q_INTERPOLATED_FLAG_DESCR, ProbaVConstants.FLAG_COLORS[5], 0.5f);
-//        addMask(probavProduct, maskGroup, targetQualityFlagBandName,
-//                sourceQualityBandName + "_" + ProbaVConstants.Q_BORDER_COMPRESSED_FLAG_NAME,
-//                ProbaVConstants.Q_BORDER_COMPRESSED_FLAG_DESCR, ProbaVConstants.FLAG_COLORS[6], 0.5f);
-//    }
-
-    // not yet used
-//    public static void addL1cQualityFlags(FlagCoding probavSmFlagCoding, String sourceQualityBandName) {
-//        probavSmFlagCoding.addFlag(sourceQualityBandName + "_" + ProbaVConstants.Q_CORRECT_FLAG_NAME,
-//                                   BitSetter.setFlag(0, ProbaVConstants.Q_CORRECT_BIT_INDEX),
-//                                   ProbaVConstants.Q_CORRECT_FLAG_DESCR);
-//        probavSmFlagCoding.addFlag(sourceQualityBandName + "_" + ProbaVConstants.Q_MISSING_FLAG_NAME,
-//                                   BitSetter.setFlag(0, ProbaVConstants.Q_MISSING_BIT_INDEX),
-//                                   ProbaVConstants.Q_MISSING_FLAG_DESCR);
-//        probavSmFlagCoding.addFlag(sourceQualityBandName + "_" + ProbaVConstants.Q_WAS_SATURATED_FLAG_NAME,
-//                                   BitSetter.setFlag(0, ProbaVConstants.Q_WAS_SATURATED_BIT_INDEX),
-//                                   ProbaVConstants.Q_WAS_SATURATED_FLAG_DESCR);
-//        probavSmFlagCoding.addFlag(sourceQualityBandName + "_" + ProbaVConstants.Q_BECAME_SATURATED_FLAG_NAME,
-//                                   BitSetter.setFlag(0, ProbaVConstants.Q_BECAME_SATURATED_INDEX),
-//                                   ProbaVConstants.Q_BECAME_SATURATED_FLAG_DESCR);
-//        probavSmFlagCoding.addFlag(sourceQualityBandName + "_" + ProbaVConstants.Q_BECAME_NEGATIVE_FLAG_NAME,
-//                                   BitSetter.setFlag(0, ProbaVConstants.Q_BECAME_NEGATIVE_BIT_INDEX),
-//                                   ProbaVConstants.Q_BECAME_NEGATIVE_FLAG_DESCR);
-//        probavSmFlagCoding.addFlag(sourceQualityBandName + "_" + ProbaVConstants.Q_INTERPOLATED_FLAG_NAME,
-//                                   BitSetter.setFlag(0, ProbaVConstants.Q_INTERPOLATED_BIT_INDEX),
-//                                   ProbaVConstants.Q_INTERPOLATED_FLAG_DESCR);
-//        probavSmFlagCoding.addFlag(sourceQualityBandName + "_" + ProbaVConstants.Q_BORDER_COMPRESSED_FLAG_NAME,
-//                                   BitSetter.setFlag(0, ProbaVConstants.Q_BORDER_COMPRESSED_INDEX),
-//                                   ProbaVConstants.Q_BORDER_COMPRESSED_FLAG_DESCR);
-//    }
-
-
+    /**
+     * Reads data from a Proba-V HDF input file into a data buffer
+     *
+     * @param file_id - HDF file id
+     * @param width - buffer width
+     * @param height - buffer height
+     * @param offsetX - buffer X offset
+     * @param offsetY - buffer Y offset
+     * @param datasetName - the HDF dataset name
+     * @param datatypeClass - the HDF datatype
+     * @param destBuffer - the data buffer being filled
+     */
     public static void readProbaVData(int file_id,
                                       int width, int height, long offsetX, long offsetY,
                                       String datasetName, int datatypeClass,
@@ -287,57 +172,6 @@ public class ProbaVUtils {
                                                         null);       // An array of the maximum size of each dimension.
 
             final long[] offset_out = {0L, 0L};
-            H5.H5Sselect_hyperslab(                                    memspace_id,                   // Identifier of dataspace selection to modify
-                                   HDF5Constants.H5S_SELECT_SET,       // Operation to perform on current selection.
-                                   offset_out,                         // Offset of start of hyperslab
-                                   null,                               // Hyperslab stride.
-                                   count,                              // Number of blocks included in hyperslab.
-                                   null);                          // Size of block in hyperslab.
-
-            int dataType = ProbaVUtils.getDatatypeForH5Dread(datatypeClass);
-
-            if (destBuffer != null) {
-                H5.H5Dread(                               dataset_id,                    // Identifier of the dataset read from.
-                           dataType,                      // Identifier of the memory datatype.
-                           memspace_id,                   //  Identifier of the memory dataspace.
-                           dataspace_id,                  // Identifier of the dataset's dataspace in the file.
-                           HDF5Constants.H5P_DEFAULT,     // Identifier of a transfer property list for this I/O operation.
-                           destBuffer.getElems());        // Buffer to store data read from the file.
-
-                H5.H5Dclose(dataset_id);
-                H5.H5Sclose(memspace_id);
-            }
-
-        } catch (Exception e) {
-            SystemUtils.LOG.log(Level.SEVERE, "Cannot read ProbaV raster data '" + datasetName + "': " + e.getMessage());
-        }
-    }
-
-    public static ProductData getProbaVRasterData(int file_id,
-                                                  int sourceWidth, int sourceHeight,
-                                                  String datasetName, int datatypeClass) {
-        try {
-            final int dataset_id = H5.H5Dopen(file_id,                       // Location identifier
-                                              datasetName,                   // Dataset name
-                                              HDF5Constants.H5P_DEFAULT);    // Identifier of dataset access property list
-
-            final int dataspace_id = H5.H5Dget_space(dataset_id);
-
-            final long[] offset = {0L, 0L};
-            final long[] count = {sourceHeight, sourceWidth};
-
-            H5.H5Sselect_hyperslab(dataspace_id,                   // Identifier of dataspace selection to modify
-                                   HDF5Constants.H5S_SELECT_SET,   // Operation to perform on current selection.
-                                   offset,                         // Offset of start of hyperslab
-                                   null,                           // Hyperslab stride.
-                                   count,                          // Number of blocks included in hyperslab.
-                                   null);                          // Size of block in hyperslab.
-
-            final int memspace_id = H5.H5Screate_simple(count.length, // Number of dimensions of dataspace.
-                                                        count,        // An array of the size of each dimension.
-                                                        null);       // An array of the maximum size of each dimension.
-
-            final long[] offset_out = {0L, 0L};
             H5.H5Sselect_hyperslab(                                    memspace_id,                        // Identifier of dataspace selection to modify
                                    HDF5Constants.H5S_SELECT_SET,       // Operation to perform on current selection.
                                    offset_out,                         // Offset of start of hyperslab
@@ -346,7 +180,6 @@ public class ProbaVUtils {
                                    null);                          // Size of block in hyperslab.
 
             int dataType = ProbaVUtils.getDatatypeForH5Dread(datatypeClass);
-            ProductData destBuffer = ProbaVUtils.getDataBufferForH5Dread(datatypeClass, sourceWidth, sourceHeight);
 
             if (destBuffer != null) {
                 H5.H5Dread(                               dataset_id,                    // Identifier of the dataset read from.
@@ -360,23 +193,87 @@ public class ProbaVUtils {
                 H5.H5Sclose(memspace_id);
             }
 
-            return destBuffer;
         } catch (Exception e) {
             SystemUtils.LOG.log(Level.SEVERE, "Cannot read ProbaV raster data '" + datasetName + "': " + e.getMessage());
         }
-
-        return null;
     }
 
+    /**
+     * Checks by data set tree node inspection if a Proba-V product is a Level 3 NDVI product.
+     *
+     * @param productTypeNode - the data set tree node (starting at LEVEL3)
+     * @return boolean
+     */
+    public static boolean isLevel3Ndvi(TreeNode productTypeNode) {
+        boolean hasNdvi = false;
+        for (int i = 0; i < productTypeNode.getChildCount(); i++) {
+            // we have: 'GEOMETRY', 'NDVI', 'QUALITY', 'RADIOMETRY', 'TIME'
+            final TreeNode productTypeChildNode = productTypeNode.getChildAt(i);
+            final String productTypeChildNodeName = productTypeChildNode.toString();
 
-    public static boolean isProbaVViewAngleGroupNode(String level3GeometryChildNodeName) {
-        return level3GeometryChildNodeName.equals("SWIR") || level3GeometryChildNodeName.equals("VNIR");
+            if (productTypeChildNodeName.equals("NDVI")) {
+                hasNdvi = true;
+                break;
+            }
+        }
+
+        if (hasNdvi) {
+            for (int i = 0; i < productTypeNode.getChildCount(); i++) {
+                // check if GEOMETRY, QUALITY, RADIOMETRY, TIME are present but empty
+                final TreeNode productTypeChildNode = productTypeNode.getChildAt(i);
+                final String productTypeChildNodeName = productTypeChildNode.toString();
+                if (!productTypeChildNodeName.equals("NDVI")) {
+                    if (productTypeChildNode.getChildCount() > 0) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+        return false;
     }
 
-    public static boolean isProbaVSunAngleDataNode(String level3GeometryChildNodeName) {
-        return level3GeometryChildNodeName.equals("SAA") || level3GeometryChildNodeName.equals("SZA");
+    /**
+     * Checks by data set tree node inspection if a Proba-V product is a Level 3 TOC product.
+     *
+     * @param productTypeNode - the data set tree node (starting at LEVEL3)
+     * @return boolean
+     */
+    public static boolean isLevel3Toc(TreeNode productTypeNode) {
+        return isReflectanceType(productTypeNode, "TOC");
     }
 
+    /**
+     * Checks if tree child note corresponds to viewing angle group
+     *
+     * @param geometryChildNodeName - the tree child note
+     * @return boolean
+     */
+    public static boolean isProbaVViewAngleGroupNode(String geometryChildNodeName) {
+        return geometryChildNodeName.equals("SWIR") || geometryChildNodeName.equals("VNIR");
+    }
+
+    /**
+     * Checks if tree child note corresponds to sun angle group
+     *
+     * @param geometryChildNodeName - the tree child note
+     * @return boolean
+     */
+    public static boolean isProbaVSunAngleDataNode(String geometryChildNodeName) {
+        return geometryChildNodeName.equals("SAA") || geometryChildNodeName.equals("SZA");
+    }
+
+    /**
+     * Creates a target band matching given metadata information
+     *
+     * @param product - the target product
+     * @param metadata - the HDF metadata attributes
+     * @param bandName - band name
+     * @param dataType - data type
+     *
+     * @return the target band
+     * @throws Exception
+     */
     public static Band createTargetBand(Product product, List<Attribute> metadata, String bandName, int dataType) throws Exception {
         final double scaleFactorAttr = ProbaVUtils.getDoubleAttributeValue(metadata, "SCALE");
         final double scaleFactor = Double.isNaN(scaleFactorAttr) ? 1.0f : scaleFactorAttr;
@@ -389,6 +286,14 @@ public class ProbaVUtils {
         return band;
     }
 
+    /**
+     * Provides a HDF5 scalar dataset corresponding to given HDF product node
+     *
+     * @param level3BandsChildNode - the data node
+     *
+     * @return - the data set (H5ScalarDS)
+     * @throws HDF5Exception
+     */
     public static H5ScalarDS getH5ScalarDS(TreeNode level3BandsChildNode) throws HDF5Exception {
         H5ScalarDS scalarDS = (H5ScalarDS) ((DefaultMutableTreeNode) level3BandsChildNode).getUserObject();
         scalarDS.open();
@@ -396,6 +301,13 @@ public class ProbaVUtils {
         return scalarDS;
     }
 
+    /**
+     * Extracts a HDF metadata element and adds accordingly to given product
+     *
+     * @param rootMetadata - the HDF metadata
+     * @param product - the product
+     * @param metadataElementName - the element name
+     */
     public static void addProbaVMetadataElement(List<Attribute> rootMetadata,
                                                 final Product product,
                                                 String metadataElementName) {
@@ -408,6 +320,15 @@ public class ProbaVUtils {
         product.getMetadataRoot().addElement(metadataElement);
     }
 
+    /**
+     * Extracs start/stop times from HDF metadata and adds to given product
+     *
+     * @param product - the product
+     * @param level3ChildNode - the HDF node containing the time information
+     *
+     * @throws HDF5Exception
+     * @throws ParseException
+     */
     public static void addStartStopTimes(Product product, DefaultMutableTreeNode level3ChildNode) throws HDF5Exception, ParseException {
         final H5Group timeGroup = (H5Group) level3ChildNode.getUserObject();
         final List timeMetadata = timeGroup.getMetadata();
@@ -417,17 +338,38 @@ public class ProbaVUtils {
                                                  ProbaVConstants.PROBAV_DATE_FORMAT_PATTERN));
     }
 
+    /**
+     * Extracts quality info from HDF metadata and adds to given product
+     *
+     * @param product - the product
+     * @param level3ChildNode - the HDF node containing the time information
+     *
+     * @throws HDF5Exception
+     */
     public static void addQualityMetadata(Product product, DefaultMutableTreeNode level3ChildNode) throws HDF5Exception {
         final H5Group qualityGroup = (H5Group) level3ChildNode.getUserObject();
         final List qualityMetadata = qualityGroup.getMetadata();
         ProbaVUtils.addProbaVMetadataElement(qualityMetadata, product, ProbaVConstants.QUALITY_NAME);
     }
 
+    /**
+     * Extracts unit and description from HDF metadata and adds to given band
+     *
+     * @param metadata - HDF metadata
+     * @param band - the band
+     *
+     * @throws HDF5Exception
+     */
     public static void setBandUnitAndDescription(List<Attribute> metadata, Band band) throws HDF5Exception {
         band.setDescription(ProbaVUtils.getStringAttributeValue(metadata, "DESCRIPTION"));
         band.setUnit(ProbaVUtils.getStringAttributeValue(metadata, "UNITS"));
     }
 
+    /**
+     * Sets Proba-V spectral band properties
+     *
+     * @param band - the spectral band
+     */
     public static void setSpectralBandProperties(Band band) {
         if (band.getName().endsWith("REFL_BLUE")) {
             band.setSpectralBandIndex(0);
@@ -448,6 +390,83 @@ public class ProbaVUtils {
         }
     }
 
+    /**
+     * Sets the Proba-V geo coding to a product as extracted from HDF metadata information
+     *
+     * @param product - the product
+     * @param inputFileRootNode - HDF root tree node
+     * @param productTypeChildNode - the product type child node (LEVEL2A or LEVEL3)
+     * @param productWidth - product width
+     * @param productHeight - product height
+     *
+     * @throws HDF5Exception
+     */
+    public static void setProbaVGeoCoding(Product product, TreeNode inputFileRootNode, TreeNode productTypeChildNode,
+                                          int productWidth, int productHeight) throws HDF5Exception {
+
+        final H5Group h5GeometryGroup = (H5Group) ((DefaultMutableTreeNode) productTypeChildNode).getUserObject();
+        final List geometryMetadata = h5GeometryGroup.getMetadata();
+        final double easting = ProbaVUtils.getDoubleAttributeValue(geometryMetadata, "TOP_LEFT_LONGITUDE");
+        final double northing = ProbaVUtils.getDoubleAttributeValue(geometryMetadata, "TOP_LEFT_LATITUDE");
+        // pixel size: 10deg/rasterDim, it is also in the 6th and 7th value of MAPPING attribute in the raster nodes
+        final double topLeftLon = easting;
+        final double topRightLon = ProbaVUtils.getDoubleAttributeValue(geometryMetadata, "TOP_RIGHT_LONGITUDE");
+        final double pixelSizeX = Math.abs(topRightLon - topLeftLon) / (productWidth - 1);
+        final double topLeftLat = northing;
+        final double bottomLeftLat = ProbaVUtils.getDoubleAttributeValue(geometryMetadata, "BOTTOM_LEFT_LATITUDE");
+        final double pixelSizeY = (topLeftLat - bottomLeftLat) / (productHeight - 1);
+
+        final H5Group h5RootGroup = (H5Group) ((DefaultMutableTreeNode) inputFileRootNode).getUserObject();
+        final List rootMetadata = h5RootGroup.getMetadata();
+        final String crsString = ProbaVUtils.getStringAttributeValue(rootMetadata, "MAP_PROJECTION_WKT");
+        try {
+            final CoordinateReferenceSystem crs = CRS.parseWKT(crsString);
+            final CrsGeoCoding geoCoding = new CrsGeoCoding(crs, productWidth, productHeight, easting, northing, pixelSizeX, pixelSizeY);
+            product.setSceneGeoCoding(geoCoding);
+        } catch (Exception e) {
+            SystemUtils.LOG.log(Level.WARNING, "Cannot attach geocoding: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Provides a ProductData instance according to given HDF5 data type
+     *
+     * @param datatypeClass - the HDF5 data type
+     * @param width - buffer width
+     * @param height - buffer height
+     *
+     * @return the data buffer
+     */
+    public static ProductData getDataBufferForH5Dread(int datatypeClass, int width, int height) {
+        switch (datatypeClass) {
+            case H5Datatype.CLASS_CHAR:
+                return ProductData.createInstance(new byte[width * height]);
+            case H5Datatype.CLASS_FLOAT:
+                return ProductData.createInstance(new float[width * height]);
+            case H5Datatype.CLASS_INTEGER:
+                return ProductData.createInstance(new short[width * height]);
+            default:
+                break;
+        }
+        return null;
+    }
+
+    //// private methods ////
+
+    private static boolean isReflectanceType(TreeNode productTypeNode, String type) {
+        for (int i = 0; i < productTypeNode.getChildCount(); i++) {
+            // we have: 'GEOMETRY', 'NDVI', 'QUALITY', 'RADIOMETRY', 'TIME'
+            final TreeNode productTypeChildNode = productTypeNode.getChildAt(i);
+            final String productTypeChildNodeName = productTypeChildNode.toString();
+
+            if (productTypeChildNodeName.equals("RADIOMETRY")) {
+                // children are BLUE, RED, NIR, SWIR
+                final TreeNode radiometryChildNode = productTypeChildNode.getChildAt(0);
+                return radiometryChildNode.getChildAt(0).toString().equals(type);
+            }
+        }
+        return false;
+    }
 
     private static int getDatatypeForH5Dread(int datatypeClass) {
         switch (datatypeClass) {
@@ -463,32 +482,6 @@ public class ProbaVUtils {
                 break;
         }
         return -1;
-    }
-
-    static ProductData getDataBufferForH5Dread(int datatypeClass, int width, int height) {
-        switch (datatypeClass) {
-            case H5Datatype.CLASS_CHAR:
-                return ProductData.createInstance(new byte[width * height]);
-            case H5Datatype.CLASS_FLOAT:
-                return ProductData.createInstance(new float[width * height]);
-            case H5Datatype.CLASS_INTEGER:
-                return ProductData.createInstance(new short[width * height]);
-            default:
-                break;
-        }
-        return null;
-    }
-
-    private static void addMask(Product product, ProductNodeGroup<Mask> maskGroup,
-                                String bandName, String flagName, String description, Color color, float transparency) {
-        int width = product.getSceneRasterWidth();
-        int height = product.getSceneRasterHeight();
-        String maskPrefix = "";
-        Mask mask = Mask.BandMathsType.create(maskPrefix + flagName,
-                                              description, width, height,
-                                              bandName + "." + flagName,
-                                              color, transparency);
-        maskGroup.add(mask);
     }
 
 }

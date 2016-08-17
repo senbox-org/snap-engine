@@ -3,21 +3,11 @@ package org.esa.s3tbx.dataio.probav;
 import java.awt.*;
 
 /**
- * todo: add comment
- * To change this template use File | Settings | File Templates.
- * Date: 13.03.2015
- * Time: 11:14
+ * Constants for reading Proba-V products
  *
  * @author olafd
  */
 public class ProbaVConstants {
-
-    public static final int L1C_TIEPOINT_OFFS_X = 0;
-    public static final int L1C_TIEPOINT_OFFS_Y = 0;
-    public static final int L1C_TIEPOINT_SUBS_X = 8;
-    //    public static final int L1C_TIEPOINT_SUBS_X = 1;
-    public static final int L1C_TIEPOINT_SUBS_Y = 8;
-//    public static final int L1C_TIEPOINT_SUBS_Y = 1;
 
     public static final String SM_BAND_NAME = "SM";
     public static final String SM_FLAG_BAND_NAME = "SM_FLAGS";
@@ -83,30 +73,6 @@ public class ProbaVConstants {
             new Color(130, 200, 250),
             new Color(50, 50, 100)
     };
-
-    public static final int Q_CORRECT_BIT_INDEX = 0;
-    public static final int Q_MISSING_BIT_INDEX = 1;
-    public static final int Q_WAS_SATURATED_BIT_INDEX = 2;
-    public static final int Q_BECAME_SATURATED_INDEX = 3;
-    public static final int Q_BECAME_NEGATIVE_BIT_INDEX = 4;
-    public static final int Q_INTERPOLATED_BIT_INDEX = 5;
-    public static final int Q_BORDER_COMPRESSED_INDEX = 6;
-
-    public static final String Q_CORRECT_FLAG_NAME = "CORRECT";
-    public static final String Q_MISSING_FLAG_NAME = "MISSING";
-    public static final String Q_WAS_SATURATED_FLAG_NAME = "WAS_SATURATED";
-    public static final String Q_BECAME_SATURATED_FLAG_NAME = "BECAME_SATURATED";
-    public static final String Q_BECAME_NEGATIVE_FLAG_NAME = "BECAME_NEGATIVE";
-    public static final String Q_INTERPOLATED_FLAG_NAME = "INTERPOLATED";
-    public static final String Q_BORDER_COMPRESSED_FLAG_NAME = "BORDER_COMPRESSED";
-
-    public static final String Q_CORRECT_FLAG_DESCR = "Pixel has no bad quality indicators";
-    public static final String Q_MISSING_FLAG_DESCR = "Pixel value missing due to a bad detector";
-    public static final String Q_WAS_SATURATED_FLAG_DESCR = "Pixel DN value is equal to 4095 in 12-bits coding";
-    public static final String Q_BECAME_SATURATED_FLAG_DESCR = "Pixel value became 4095 during the TOA calculation";
-    public static final String Q_BECAME_NEGATIVE_FLAG_DESCR = "Pixel value became negative during the TOA calculation";
-    public static final String Q_INTERPOLATED_FLAG_DESCR = "Pixel value was interpolated using the neighbour pixels";
-    public static final String Q_BORDER_COMPRESSED_FLAG_DESCR = "Pixel value is uncertaion due to onboard compression artefacts";
 
     public static final String PROBAV_DATE_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss";
 
