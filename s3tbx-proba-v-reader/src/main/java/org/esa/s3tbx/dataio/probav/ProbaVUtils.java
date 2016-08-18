@@ -297,7 +297,7 @@ public class ProbaVUtils {
     public static H5ScalarDS getH5ScalarDS(TreeNode level3BandsChildNode) throws HDF5Exception {
         H5ScalarDS scalarDS = (H5ScalarDS) ((DefaultMutableTreeNode) level3BandsChildNode).getUserObject();
         scalarDS.open();
-        scalarDS.read();
+        scalarDS.init();
         return scalarDS;
     }
 
