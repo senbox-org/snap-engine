@@ -77,7 +77,7 @@ public class ProbaVProductReader extends AbstractProductReader {
 
                 targetProduct = createTargetProduct(probavFile, h5File.getRootNode());
             } catch (Exception e) {
-                throw new IOException("Failed to open file '" + probavFile.getPath() + "': " + e.getMessage());
+                throw new IOException("Failed to open file '" + probavFile.getPath() + "': " + e.getMessage(), e);
             } finally {
                 if (h5File != null) {
                     try {
@@ -170,6 +170,7 @@ public class ProbaVProductReader extends AbstractProductReader {
                 // we have: 'GEOMETRY', 'NDVI', 'QUALITY', 'RADIOMETRY', 'TIME'
                 final TreeNode productTypeChildNode = productTypeNode.getChildAt(i);
                 final String productTypeChildNodeName = productTypeChildNode.toString();
+
 
                 switch (productTypeChildNodeName) {
                     case "GEOMETRY":
