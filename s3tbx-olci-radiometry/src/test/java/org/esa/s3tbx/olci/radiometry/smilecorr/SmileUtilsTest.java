@@ -18,6 +18,8 @@
 
 package org.esa.s3tbx.olci.radiometry.smilecorr;
 
+import org.esa.s3tbx.olci.radiometry.rayleighcorrection.AuxiliaryValues;
+import org.junit.Before;
 import org.junit.Test;
 
 
@@ -27,6 +29,13 @@ import static org.junit.Assert.*;
  * @author muhammad.bc.
  */
 public class SmileUtilsTest {
+
+    private AuxiliaryValues auxiliaryValues;
+
+    @Before
+    public void setUp() throws Exception {
+        auxiliaryValues = new AuxiliaryValues();
+    }
 
     @Test
     public void testMultiple2ArrayNullAndNotNull() throws Exception {
@@ -54,13 +63,18 @@ public class SmileUtilsTest {
 
     @Test
     public void getAirMass() throws Exception {
-        double[] airMass = SmileUtils.getAirMass(new double[]{1.0, 2.0, 3}, new double[]{1.0, 2.0, 3});
+        auxiliaryValues.setSunAzimuthAngles(new double[]{1.0, 2.0, 3});
+        auxiliaryValues.setViewAzimuthAngles(new double[]{1.0, 2.0, 3});
+
+        double[] airMass = SmileUtils.getAirMass(auxiliaryValues);
         assertArrayEquals(new double[]{2.0003046560878155, 2.0012190885976433, 2.002744691995842}, airMass, 1e-8);
     }
 
     @Test
     public void getAziDiff() throws Exception {
-        double[] aziDiff = SmileUtils.getAziDiff(new double[]{2.0, 8.0, 10.0}, new double[]{4.0, 5.0, 6.0});
+        auxiliaryValues.setSunAzimuthAngles(new double[]{2.0, 8.0, 10.0});
+        auxiliaryValues.setViewAzimuthAngles(new double[]{4.0, 5.0, 6.0});
+        double[] aziDiff = SmileUtils.getAziDiff(auxiliaryValues);
         assertArrayEquals(new double[]{0.03490658503988567, 0.05235987755983066, 0.0698131700797739}, aziDiff, 1e-8);
     }
 }

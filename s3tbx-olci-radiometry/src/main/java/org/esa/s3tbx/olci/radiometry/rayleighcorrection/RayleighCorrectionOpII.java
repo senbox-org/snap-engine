@@ -19,7 +19,9 @@
 package org.esa.s3tbx.olci.radiometry.rayleighcorrection;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.google.common.primitives.Doubles;
 import java.awt.Rectangle;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -65,7 +67,25 @@ public class RayleighCorrectionOpII extends Operator {
     };
 
 
-    public static final String OLCI = "OLCI";
+    private final String OLCI = "OLCI";
+    private final String MERIS_DEM_ALT = "dem_alt";
+    private final String MERIS_SUN_AZIMUTH = "sun_azimuth";
+    private final String MERIS_SUN_ZENITH = "sun_zenith";
+    private final String MERIS_VIEW_ZENITH = "view_zenith";
+    private final String MERIS_VIEW_AZIMUTH = "view_azimuth";
+    private final String MERIS_ATM_PRESS = "atm_press";
+    private final String MERIS_OZONE = "ozone";
+    private final String MERIS_LATITUDE = "latitude";
+    private final String MERIS_LONGITUDE = "longitude";
+    private final String SZA = "SZA";
+    private final String OZA = "OZA";
+    private final String SAA = "SAA";
+    private final String OAA = "OAA";
+    private final String SEA_LEVEL_PRESSURE = "sea_level_pressure";
+    private final String TOTAL_OZONE = "total_ozone";
+    private final String TP_LATITUDE = "TP_latitude";
+    private final String TP_LONGITUDE = "TP_longitude";
+
     @SourceProduct
     Product sourceProduct;
 
@@ -73,6 +93,8 @@ public class RayleighCorrectionOpII extends Operator {
     GaseousAbsorptionAuxII gaseousAbsorptionAuxII;
     private Sensor sensor;
     private double[] absorpOzone;
+    private double[] crossSectionSigma;
+    private AuxiliaryValues auxiliaryValues = new AuxiliaryValues(AuxiliaryValues.GETASSE_30);
 
 
     @Override
@@ -102,6 +124,13 @@ public class RayleighCorrectionOpII extends Operator {
         ProductUtils.copyProductNodes(sourceProduct, targetProduct);
         targetProduct.setAutoGrouping("RayleighSimple:taurS:rtoa:taur:transSRay:rtoa_ng:transVRay:sARay:rtoaRay:rBRR:sphericalAlbedoFactor");
         setTargetProduct(targetProduct);
+
+        String getPattern = sensor.getGetPattern();
+        List<Double> waveLenght = new ArrayList<>();
+        for (int i = 1; i <= sensor.getNumBands(); i++) {
+            waveLenght.add((double) getSourceProduct().getBand(String.format(getPattern, i)).getSpectralWavelength());
+        }
+        crossSectionSigma = algorithm.getCrossSectionSigma(Doubles.toArray(waveLenght));
     }
 
     @Override
@@ -121,43 +150,30 @@ public class RayleighCorrectionOpII extends Operator {
                 sourceBandName = getSourceBand(spectralWavelength);
             }
 
+
             AuxiliaryValues auxiliaryValues = getRayleighValues(sensor, sourceBandName, targetRectangle);
-            double[] sunZenithAngles = auxiliaryValues.getSunZenithAngles();
-            double[] viewZenithAngles = auxiliaryValues.getViewZenithAngles();
-            double[] sunAzimuthAngles = auxiliaryValues.getSunAzimuthAngles();
-            double[] viewAzimuthAngles = auxiliaryValues.getViewAzimuthAngles();
-            double[] altitudes = auxiliaryValues.getAltitudes();
-            double[] latitudes = auxiliaryValues.getLatitudes();
-            double[] seaLevels = auxiliaryValues.getSeaLevels();
-            double[] solarFluxs = auxiliaryValues.getSolarFluxs();
-            double[] lambdaSource = auxiliaryValues.getLambdaSource();
-            double[] sourceSampleRad = auxiliaryValues.getSourceSampleRad();
-            double[] totalOzones = auxiliaryValues.getTotalOzones();
             int sourceBandIndex = auxiliaryValues.getSourceBandIndex();
 
-
             if (targetBandName.equals("airmass")) {
-                double[] massAirs = SmileUtils.getAirMass(sunZenithAngles, viewZenithAngles);
+                double[] massAirs = SmileUtils.getAirMass(auxiliaryValues);
                 targetTile.setSamples(massAirs);
                 continue;
             } else if (targetBandName.equals("azidiff")) {
-                double[] aziDifferences = SmileUtils.getAziDiff(sunAzimuthAngles, viewAzimuthAngles);
+                double[] aziDifferences = SmileUtils.getAziDiff(auxiliaryValues);
                 targetTile.setSamples(aziDifferences);
                 continue;
             }
-            double[] sunZenithAngleRads = SmileUtils.convertDegreesToRadians(sunZenithAngles);
-            double[] viewZenithAngleRads = SmileUtils.convertDegreesToRadians(viewZenithAngles);
-            double[] reflectances = algorithm.convertRadsToRefls(sourceSampleRad, solarFluxs, sunZenithAngles);
-            double[] crossSectionSigma = algorithm.getCrossSectionSigma(lambdaSource);
-            double[] rayleighOpticalThickness = algorithm.getRayleighOpticalThicknessII(seaLevels, altitudes, latitudes, crossSectionSigma);
+
+            double[] reflectance = algorithm.convertRadsToRefls(auxiliaryValues);
+            double[] rayleighOpticalThickness = algorithm.getRayleighOpticalThicknessII(auxiliaryValues, crossSectionSigma[sourceBandIndex - 1]);
 
             boolean isRayleighSample = targetBandName.matches("RayleighSimple_\\d{2}");
             boolean isTaurS = targetBandName.matches("taurS_\\d{2}");
 
             if (isRayleighSample || isTaurS) {
                 if (!correctHashMap.containsKey(targetBandName)) {
-                    double[] phaseRaylMin = algorithm.getPhaseRaylMin(sunZenithAngleRads, sunAzimuthAngles, viewZenithAngleRads, viewAzimuthAngles);
-                    correctHashMap = algorithm.correct(lambdaSource, seaLevels, altitudes, sunZenithAngleRads, viewZenithAngleRads, phaseRaylMin, sourceBandIndex);
+                    double[] phaseRaylMin = algorithm.getPhaseRaylMin(auxiliaryValues);
+                    correctHashMap = algorithm.correct(auxiliaryValues, phaseRaylMin, sourceBandIndex);
                 }
                 if (isRayleighSample) {
                     setSamples(correctHashMap, targetTile);
@@ -168,7 +184,7 @@ public class RayleighCorrectionOpII extends Operator {
                 }
 
             } else if (targetBandName.matches("rtoa_\\d{2}")) {
-                targetTile.setSamples(reflectances);
+                targetTile.setSamples(reflectance);
             } else if (targetBandName.matches("taur_\\d{2}")) {
                 targetTile.setSamples(rayleighOpticalThickness);
             } else {
@@ -177,24 +193,19 @@ public class RayleighCorrectionOpII extends Operator {
                     int[] upperLowerBounds = sensor.getUpperLowerBounds();
                     double[] bWVRefTile = getSourceTile(sourceProduct.getBand(String.format(bandNamePattern, upperLowerBounds[0])), targetRectangle).getSamplesDouble();
                     double[] bWVTile = getSourceTile(sourceProduct.getBand(String.format(bandNamePattern, upperLowerBounds[1])), targetRectangle).getSamplesDouble();
-                    waterVaporCorrection709(reflectances, bWVRefTile, bWVTile);
+                    waterVaporCorrection709(reflectance, bWVRefTile, bWVTile);
                 }
-                double absorpO = absorpOzone[sourceBandIndex - 1];
-                double[] corrOzoneRefl = algorithm.getCorrOzone(reflectances, totalOzones, sunZenithAngleRads, viewZenithAngleRads, absorpO);
+                double[] corrOzoneRefl = algorithm.getCorrOzone(auxiliaryValues, reflectance, absorpOzone[sourceBandIndex - 1]);
                 if (targetBandName.matches("rtoa_ng_\\d{2}")) {
                     targetTile.setSamples(corrOzoneRefl);
                     continue;
                 }
 
                 if (!rhoBrrHashMap.containsKey(targetBandName)) {
-                    double[] viewAzimuthAngleRads = SmileUtils.convertDegreesToRadians(viewAzimuthAngles);
-                    double[] sunAzimuthAngleRads = SmileUtils.convertDegreesToRadians(sunAzimuthAngles);
-                    rhoBrrHashMap = algorithm.getRhoBrr(sunZenithAngles, viewZenithAngles, sunZenithAngleRads, viewZenithAngleRads, sunAzimuthAngleRads,
-                            viewAzimuthAngleRads, rayleighOpticalThickness, corrOzoneRefl, sourceBandIndex);
+                    rhoBrrHashMap = algorithm.getRhoBrr(auxiliaryValues, rayleighOpticalThickness, corrOzoneRefl, sourceBandIndex);
                 }
                 setSamples(rhoBrrHashMap, targetTile);
             }
-
         }
     }
 
@@ -205,18 +216,19 @@ public class RayleighCorrectionOpII extends Operator {
     }
 
     private AuxiliaryValues getRayleighValues(Sensor sensor, String sourceBandName, Rectangle rectangle) {
-        AuxiliaryValues auxiliaryValues;
         if (sensor.equals(Sensor.MERIS)) {
-            auxiliaryValues = new AuxiliaryValues();
-            auxiliaryValues.setAltitudes(getSourceTile(sourceProduct.getTiePointGrid("dem_alt"), rectangle).getSamplesDouble());
-            auxiliaryValues.setSunAzimuthAngles(getSourceTile(sourceProduct.getTiePointGrid("sun_azimuth"), rectangle).getSamplesDouble());
-            auxiliaryValues.setAltitudes(getSourceTile(sourceProduct.getTiePointGrid("dem_alt"), rectangle).getSamplesDouble());
-            auxiliaryValues.setSunZenithAngles(getSourceTile(sourceProduct.getTiePointGrid("sun_zenith"), rectangle).getSamplesDouble());
-            auxiliaryValues.setViewZenithAngles(getSourceTile(sourceProduct.getTiePointGrid("view_zenith"), rectangle).getSamplesDouble());
-            auxiliaryValues.setViewAzimuthAngles(getSourceTile(sourceProduct.getTiePointGrid("view_azimuth"), rectangle).getSamplesDouble());
-            auxiliaryValues.setSeaLevels(getSourceTile(sourceProduct.getTiePointGrid("atm_press"), rectangle).getSamplesDouble());
-            auxiliaryValues.setTotalOzones(getSourceTile(sourceProduct.getTiePointGrid("ozone"), rectangle).getSamplesDouble());
-            auxiliaryValues.setLatitudes(getSourceTile(sourceProduct.getTiePointGrid("latitude"), rectangle).getSamplesDouble());
+            auxiliaryValues.setSunAzimuthAngles(getSourceTile(sourceProduct.getTiePointGrid(MERIS_SUN_AZIMUTH), rectangle).getSamplesDouble());
+            auxiliaryValues.setSunZenithAngles(getSourceTile(sourceProduct.getTiePointGrid(MERIS_SUN_ZENITH), rectangle).getSamplesDouble());
+            auxiliaryValues.setViewZenithAngles(getSourceTile(sourceProduct.getTiePointGrid(MERIS_VIEW_ZENITH), rectangle).getSamplesDouble());
+            auxiliaryValues.setViewAzimuthAngles(getSourceTile(sourceProduct.getTiePointGrid(MERIS_VIEW_AZIMUTH), rectangle).getSamplesDouble());
+            auxiliaryValues.setSeaLevels(getSourceTile(sourceProduct.getTiePointGrid(MERIS_ATM_PRESS), rectangle).getSamplesDouble());
+            auxiliaryValues.setTotalOzones(getSourceTile(sourceProduct.getTiePointGrid(MERIS_OZONE), rectangle).getSamplesDouble());
+
+            double[] latitude = getSourceTile(sourceProduct.getTiePointGrid(MERIS_LATITUDE), rectangle).getSamplesDouble();
+            double[] longitude = getSourceTile(sourceProduct.getTiePointGrid(MERIS_LONGITUDE), rectangle).getSamplesDouble();
+            auxiliaryValues.setLatitudes(latitude);
+            auxiliaryValues.setAltitudes(longitude, latitude);
+
 
             if (sourceBandName != null) {
                 Band sourceBand = sourceProduct.getBand(sourceBandName);
@@ -234,16 +246,17 @@ public class RayleighCorrectionOpII extends Operator {
             return auxiliaryValues;
 
         } else if (sensor.equals(Sensor.OLCI)) {
-            auxiliaryValues = new AuxiliaryValues();
+            auxiliaryValues.setSunZenithAngles(getSourceTile(sourceProduct.getTiePointGrid(SZA), rectangle).getSamplesDouble());
+            auxiliaryValues.setViewZenithAngles(getSourceTile(sourceProduct.getTiePointGrid(OZA), rectangle).getSamplesDouble());
+            auxiliaryValues.setSunAzimuthAngles(getSourceTile(sourceProduct.getTiePointGrid(SAA), rectangle).getSamplesDouble());
+            auxiliaryValues.setViewAzimuthAngles(getSourceTile(sourceProduct.getTiePointGrid(OAA), rectangle).getSamplesDouble());
+            auxiliaryValues.setSeaLevels(getSourceTile(sourceProduct.getTiePointGrid(SEA_LEVEL_PRESSURE), rectangle).getSamplesDouble());
+            auxiliaryValues.setTotalOzones(getSourceTile(sourceProduct.getTiePointGrid(TOTAL_OZONE), rectangle).getSamplesDouble());
 
-            auxiliaryValues.setSunZenithAngles(getSourceTile(sourceProduct.getTiePointGrid("SZA"), rectangle).getSamplesDouble());
-            auxiliaryValues.setViewZenithAngles(getSourceTile(sourceProduct.getTiePointGrid("OZA"), rectangle).getSamplesDouble());
-            auxiliaryValues.setSunAzimuthAngles(getSourceTile(sourceProduct.getTiePointGrid("SAA"), rectangle).getSamplesDouble());
-            auxiliaryValues.setViewAzimuthAngles(getSourceTile(sourceProduct.getTiePointGrid("OAA"), rectangle).getSamplesDouble());
-            auxiliaryValues.setAltitudes(getSourceTile(sourceProduct.getBand("altitude"), rectangle).getSamplesDouble());
-            auxiliaryValues.setSeaLevels(getSourceTile(sourceProduct.getTiePointGrid("sea_level_pressure"), rectangle).getSamplesDouble());
-            auxiliaryValues.setTotalOzones(getSourceTile(sourceProduct.getTiePointGrid("total_ozone"), rectangle).getSamplesDouble());
-            auxiliaryValues.setLatitudes(getSourceTile(sourceProduct.getTiePointGrid("TP_latitude"), rectangle).getSamplesDouble());
+            double[] tp_latitudes = getSourceTile(sourceProduct.getTiePointGrid(TP_LATITUDE), rectangle).getSamplesDouble();
+            double[] tp_longitude = getSourceTile(sourceProduct.getTiePointGrid(TP_LONGITUDE), rectangle).getSamplesDouble();
+            auxiliaryValues.setLatitudes(tp_latitudes);
+            auxiliaryValues.setAltitudes(tp_longitude, tp_latitudes);
 
             if (sourceBandName != null) {
                 String extractBandIndex = sourceBandName.substring(2, 4);
@@ -308,7 +321,6 @@ public class RayleighCorrectionOpII extends Operator {
         final int numBands;
         final String getPattern;
 
-
         public int getNumBands() {
             return numBands;
         }
@@ -329,5 +341,4 @@ public class RayleighCorrectionOpII extends Operator {
             super(RayleighCorrectionOpII.class);
         }
     }
-
 }

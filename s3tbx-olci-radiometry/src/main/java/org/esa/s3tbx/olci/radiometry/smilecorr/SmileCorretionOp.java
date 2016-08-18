@@ -182,6 +182,7 @@ public class SmileCorretionOp extends Operator {
             correctSolarFlux(targetTile, targetBandName, refCentralWaveLengths, pm);
         }
 
+
     }
 
     private void correctSolarFlux(Tile targetTile, String targetBandName, float[] refCentralWavelength, ProgressMonitor pm) {

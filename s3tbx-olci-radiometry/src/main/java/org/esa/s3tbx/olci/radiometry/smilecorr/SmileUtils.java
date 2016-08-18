@@ -18,6 +18,7 @@
 
 package org.esa.s3tbx.olci.radiometry.smilecorr;
 
+import org.esa.s3tbx.olci.radiometry.rayleighcorrection.AuxiliaryValues;
 import org.esa.snap.core.gpf.OperatorException;
 
 /**
@@ -56,9 +57,10 @@ public class SmileUtils {
         return rads;
     }
 
-    public static double[] getAirMass(double[] sunZenithAngles, double[] viewZenithAngles) {
-        double[] szaRads = convertDegreesToRadians(sunZenithAngles);
-        double[] ozaRads = convertDegreesToRadians(viewZenithAngles);
+    public static double[] getAirMass(AuxiliaryValues auxiliaryValues) {
+        double[] szaRads = auxiliaryValues.getSunAzimuthAnglesRad();
+        double[] ozaRads = auxiliaryValues.getViewAzimuthAnglesRad();
+
         double massAir[] = new double[szaRads.length];
         for (int index = 0; index < szaRads.length; index++) {
             massAir[index] = 1 / Math.cos(szaRads[index]) + 1 / Math.cos(ozaRads[index]);
@@ -67,9 +69,10 @@ public class SmileUtils {
 
     }
 
-    public static double[] getAziDiff(double[] sunAzimuthAngles, double[] viewAzimuthAngles) {
-        double[] saaRads = convertDegreesToRadians(sunAzimuthAngles);
-        double[] aooRads = convertDegreesToRadians(viewAzimuthAngles);
+    public static double[] getAziDiff(AuxiliaryValues auxiliaryValues) {
+        double[] saaRads = auxiliaryValues.getSunAzimuthAnglesRad();
+        double[] aooRads = auxiliaryValues.getViewAzimuthAnglesRad();
+
         double[] aziDiff = new double[saaRads.length];
         for (int index = 0; index < saaRads.length; index++) {
             double a = aooRads[index] - saaRads[index];

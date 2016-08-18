@@ -1,12 +1,9 @@
 package org.esa.s3tbx.olci.radiometry.rayleighcorrection;
 
-import java.awt.Rectangle;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.DoubleStream;
 import org.esa.s3tbx.olci.radiometry.smilecorr.SmileUtils;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 
@@ -92,11 +89,18 @@ public class RayleighCorrAlgorithmTest {
         assertEquals(3.9154039638717356E-12, sectionSigma[1], 1e-8);
     }
 
+    @Ignore
     @Test
     public void testThickness() throws Exception {
+        AuxiliaryValues auxiliaryValue = new AuxiliaryValues(AuxiliaryValues.GETASSE_30);
+
         double[] unit = {1.};
-        double[] rayleighOpticalThicknessII = algo.getRayleighOpticalThicknessII(unit, unit, unit, new double[]{1.00415801077e-09});
-        System.out.println(Arrays.toString(rayleighOpticalThicknessII));
+        auxiliaryValue.setSeaLevels(unit);
+        auxiliaryValue.setAltitudes(unit, unit);
+        auxiliaryValue.setLatitudes(unit);
+
+        double[] thickness = algo.getRayleighOpticalThicknessII(auxiliaryValue, 1.00415801077e-09);
+        assertArrayEquals(new double[]{2.1384283508996676E13}, thickness, 1e-8);
     }
 
 
