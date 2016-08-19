@@ -22,6 +22,11 @@ public class SlstrRadReflConverter implements RadReflConverter {
         return new float[0];
     }
 
+    @Override
+    public float convert(float spectralInputValue, float sza, float solarFlux) {
+        return 0;
+    }
+
     float getSolarFlux(int allSpectralBandsIndex) {
         final int channel = Integer.parseInt(Sensor.SLSTR_500m.getRadBandNames()[allSpectralBandsIndex].substring(1, 2));
         // channel is between 1 and 6

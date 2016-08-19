@@ -99,8 +99,9 @@ public class OlciOp extends BasisOp {
             description = " NN cloud ambiguous cloud sure/snow separation value")
     double schillerLandNNCloudSureSnowSeparationValue;
 
-    @Parameter(defaultValue = "true", label = " Compute a cloud buffer")
-    private boolean computeCloudBuffer;
+//    @Parameter(defaultValue = "true", label = " Compute a cloud buffer")
+//    private boolean computeCloudBuffer;
+    private boolean computeCloudBuffer = false;  // todo: much too slow, check why!!
 
     @Parameter(defaultValue = "2", interval = "[0,100]",
             description = "The width of a cloud 'safety buffer' around a pixel which was classified as cloudy.",
@@ -129,9 +130,11 @@ public class OlciOp extends BasisOp {
         }
 
         preProcess();
+
         computeWaterCloudProduct();
         computeLandCloudProduct();
         mergeLandWater();
+//        targetProduct = mergedClassificationProduct;
         postProcess();
 
         targetProduct = postProcessingProduct;
@@ -212,12 +215,14 @@ public class OlciOp extends BasisOp {
 
     private void postProcess() {
         HashMap<String, Product> input = new HashMap<>();
-        input.put("l1b", sourceProduct);
-        input.put("olciCloud", mergedClassificationProduct);
-
+//        input.put("l1b", sourceProduct);
+//        input.put("waterMask", waterMaskProduct);
+//        input.put("olciCloud", mergedClassificationProduct);
+//
         Map<String, Object> params = new HashMap<>();
-        final Product classifiedProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(OlciPostProcessOp.class),
-                                                            params, input);
+//        final Product classifiedProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(OlciPostProcessOp.class),
+//                                                            params, input);   // todo: much too slow, check!!
+        final Product classifiedProduct = mergedClassificationProduct;
 
         if (computeCloudBuffer) {
             input = new HashMap<>();

@@ -9,8 +9,8 @@ import org.esa.snap.dataio.envisat.EnvisatConstants;
  */
 public class Rad2ReflConstants {
 
-    public final static String RAD_UNIT = "mw.m-2.sr-1.nm-1";
-    public final static String REFL_UNIT = "dl";
+//    public final static String RAD_UNIT = "mw.m-2.sr-1.nm-1";
+//    public final static String REFL_UNIT = "dl";
 
     public final static int MERIS_NUM_SPECTRAL_BANDS = EnvisatConstants.MERIS_L1B_NUM_SPECTRAL_BANDS;
 
@@ -26,6 +26,8 @@ public class Rad2ReflConstants {
 
     public static final String MERIS_AUTOGROUPING_RAD_STRING = "radiance";
     public static final String MERIS_AUTOGROUPING_REFL_STRING = "reflectance";
+
+    public static final String MERIS_INVALID_PIXEL_EXPR = "l1_flags.INVALID";
 
     public final static float[] MERIS_SOLAR_FLUXES_DEFAULT = {
             1714.9084f, //  0
@@ -85,6 +87,8 @@ public class Rad2ReflConstants {
     public static final String OLCI_AUTOGROUPING_RAD_STRING = "Oa*_radiance:solar_flux";
     public static final String OLCI_AUTOGROUPING_REFL_STRING = "Oa*_reflectance:solar_flux";
 
+    public static final String OLCI_INVALID_PIXEL_EXPR = "quality_flags.invalid";
+
     public final static float[] OLCI_SOLAR_FLUXES_DEFAULT = {
             1714.9084f, //  0
             1872.3961f, //  1
@@ -136,6 +140,8 @@ public class Rad2ReflConstants {
             "radiance_an:radiance_ao:radiance_bn:radiance_bo:radiance_cn:radiance_co";
     public static final String SLSTR_AUTOGROUPING_REFL_STRING =
             "reflectance_an:reflectance_ao:reflectance_bn:reflectance_bo:reflectance_cn:reflectance_co";
+
+    public static final String SLSTR_INVALID_PIXEL_EXPR = "1 == 0"; // todo: define
 
     public final static float[] SLSTR_SOLAR_FLUXES_DEFAULT = {
             1837.39f,

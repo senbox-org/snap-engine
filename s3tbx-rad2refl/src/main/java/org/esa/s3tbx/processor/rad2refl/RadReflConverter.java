@@ -11,4 +11,6 @@ import org.esa.snap.core.gpf.pointop.Sample;
 public interface RadReflConverter {
 
     float[] convert(float[] spectralInputValue, float[] sza, float[] solarFlux);
+
+    float convert(float spectralInputValue, float sza, float solarFlux);
 }

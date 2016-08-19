@@ -23,7 +23,7 @@ public class Rad2ReflTest extends TestCase {
 
     public void testGetSolarFluxesMeris() {
         try {
-            Rad2ReflAuxdata auxdataRR = Rad2ReflAuxdata.loadAuxdata("MER_RR");
+            Rad2ReflAuxdata auxdataRR = Rad2ReflAuxdata.loadMERISAuxdata("MER_RR");
             assertNotNull(auxdataRR);
             final double[][] fluxesRR = auxdataRR.getDetectorSunSpectralFluxes();
             assertEquals(925, fluxesRR.length);
@@ -32,7 +32,7 @@ public class Rad2ReflTest extends TestCase {
             assertEquals(1177.575, fluxesRR[525][11], 1.E-3);
             assertEquals(1471.933, fluxesRR[37][7], 1.E-3);
 
-            Rad2ReflAuxdata auxdataFR = Rad2ReflAuxdata.loadAuxdata("MER_FR");
+            Rad2ReflAuxdata auxdataFR = Rad2ReflAuxdata.loadMERISAuxdata("MER_FR");
             assertNotNull(auxdataFR);
             final double[][] fluxesFR = auxdataFR.getDetectorSunSpectralFluxes();
             assertEquals(3700, fluxesFR.length);
