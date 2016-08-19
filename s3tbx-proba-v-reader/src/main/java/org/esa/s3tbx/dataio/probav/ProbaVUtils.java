@@ -63,7 +63,7 @@ public class ProbaVUtils {
     /**
      * Returns the value of an HDF string attribute with given name
      *
-     * @param metadata - the metadata containing the attributes
+     * @param metadata      - the metadata containing the attributes
      * @param attributeName - the attribute name
      * @return the value as string
      */
@@ -85,7 +85,7 @@ public class ProbaVUtils {
     /**
      * Returns the value of an HDF double attribute with given name
      *
-     * @param metadata - the metadata containing the attributes
+     * @param metadata      - the metadata containing the attributes
      * @param attributeName - the attribute name
      * @return the value as double
      */
@@ -107,11 +107,9 @@ public class ProbaVUtils {
      * Returns product start/end times extracted from HDF attribute
      *
      * @param metadata- the metadata containing the attributes
-     *
-     * @return  start/end times as String[]
+     * @return start/end times as String[]
      */
     public static String[] getStartEndTimeFromAttributes(List<Attribute> metadata) {
-        String[] startStopTimes = new String[2];
         String startDate = "";
         String startTime = "";
         String endDate = "";
@@ -128,7 +126,11 @@ public class ProbaVUtils {
             }
         }
 
+        if (startDate.isEmpty() || startTime.isEmpty() || endDate.isEmpty() || endTime.isEmpty()) {
+            return null;
+        }
         // format is 'yyyy-mm-dd hh:mm:ss'
+        String[] startStopTimes = new String[2];
         startStopTimes[0] = startDate + " " + startTime;
         startStopTimes[1] = endDate + " " + endTime;
         return startStopTimes;
@@ -137,14 +139,14 @@ public class ProbaVUtils {
     /**
      * Reads data from a Proba-V HDF input file into a data buffer
      *
-     * @param file_id - HDF file id
-     * @param width - buffer width
-     * @param height - buffer height
-     * @param offsetX - buffer X offset
-     * @param offsetY - buffer Y offset
-     * @param datasetName - the HDF dataset name
+     * @param file_id       - HDF file id
+     * @param width         - buffer width
+     * @param height        - buffer height
+     * @param offsetX       - buffer X offset
+     * @param offsetY       - buffer Y offset
+     * @param datasetName   - the HDF dataset name
      * @param datatypeClass - the HDF datatype
-     * @param destBuffer - the data buffer being filled
+     * @param destBuffer    - the data buffer being filled
      */
     public static void readProbaVData(int file_id,
                                       int width, int height, long offsetX, long offsetY,
@@ -160,7 +162,7 @@ public class ProbaVUtils {
             final long[] offset = {offsetY, offsetX};
             final long[] count = {height, width};
 
-            H5.H5Sselect_hyperslab(                                dataspace_id,                   // Identifier of dataspace selection to modify
+            H5.H5Sselect_hyperslab(dataspace_id,                   // Identifier of dataspace selection to modify
                                    HDF5Constants.H5S_SELECT_SET,   // Operation to perform on current selection.
                                    offset,                         // Offset of start of hyperslab
                                    null,                           // Hyperslab stride.
@@ -172,7 +174,7 @@ public class ProbaVUtils {
                                                         null);       // An array of the maximum size of each dimension.
 
             final long[] offset_out = {0L, 0L};
-            H5.H5Sselect_hyperslab(                                    memspace_id,                        // Identifier of dataspace selection to modify
+            H5.H5Sselect_hyperslab(memspace_id,                        // Identifier of dataspace selection to modify
                                    HDF5Constants.H5S_SELECT_SET,       // Operation to perform on current selection.
                                    offset_out,                         // Offset of start of hyperslab
                                    null,                               // Hyperslab stride.
@@ -182,7 +184,7 @@ public class ProbaVUtils {
             int dataType = ProbaVUtils.getDatatypeForH5Dread(datatypeClass);
 
             if (destBuffer != null) {
-                H5.H5Dread(                               dataset_id,                    // Identifier of the dataset read from.
+                H5.H5Dread(dataset_id,                    // Identifier of the dataset read from.
                            dataType,                      // Identifier of the memory datatype.
                            memspace_id,                   //  Identifier of the memory dataspace.
                            dataspace_id,                  // Identifier of the dataset's dataspace in the file.
@@ -266,11 +268,10 @@ public class ProbaVUtils {
     /**
      * Creates a target band matching given metadata information
      *
-     * @param product - the target product
+     * @param product  - the target product
      * @param metadata - the HDF metadata attributes
      * @param bandName - band name
      * @param dataType - data type
-     *
      * @return the target band
      * @throws Exception
      */
@@ -290,7 +291,6 @@ public class ProbaVUtils {
      * Provides a HDF5 scalar dataset corresponding to given HDF product node
      *
      * @param level3BandsChildNode - the data node
-     *
      * @return - the data set (H5ScalarDS)
      * @throws HDF5Exception
      */
@@ -304,8 +304,8 @@ public class ProbaVUtils {
     /**
      * Extracts a HDF metadata element and adds accordingly to given product
      *
-     * @param rootMetadata - the HDF metadata
-     * @param product - the product
+     * @param rootMetadata        - the HDF metadata
+     * @param product             - the product
      * @param metadataElementName - the element name
      */
     public static void addProbaVMetadataElement(List<Attribute> rootMetadata,
@@ -323,27 +323,28 @@ public class ProbaVUtils {
     /**
      * Extracs start/stop times from HDF metadata and adds to given product
      *
-     * @param product - the product
+     * @param product         - the product
      * @param level3ChildNode - the HDF node containing the time information
-     *
      * @throws HDF5Exception
      * @throws ParseException
      */
     public static void addStartStopTimes(Product product, DefaultMutableTreeNode level3ChildNode) throws HDF5Exception, ParseException {
         final H5Group timeGroup = (H5Group) level3ChildNode.getUserObject();
         final List timeMetadata = timeGroup.getMetadata();
-        product.setStartTime(ProductData.UTC.parse(ProbaVUtils.getStartEndTimeFromAttributes(timeMetadata)[0],
-                                                   ProbaVConstants.PROBAV_DATE_FORMAT_PATTERN));
-        product.setEndTime(ProductData.UTC.parse(ProbaVUtils.getStartEndTimeFromAttributes(timeMetadata)[1],
-                                                 ProbaVConstants.PROBAV_DATE_FORMAT_PATTERN));
+        String[] startEndTime = ProbaVUtils.getStartEndTimeFromAttributes(timeMetadata);
+        if (startEndTime != null) {
+            product.setStartTime(ProductData.UTC.parse(startEndTime[0],
+                                                       ProbaVConstants.PROBAV_DATE_FORMAT_PATTERN));
+            product.setEndTime(ProductData.UTC.parse(startEndTime[1],
+                                                     ProbaVConstants.PROBAV_DATE_FORMAT_PATTERN));
+        }
     }
 
     /**
      * Extracts quality info from HDF metadata and adds to given product
      *
-     * @param product - the product
+     * @param product         - the product
      * @param level3ChildNode - the HDF node containing the time information
-     *
      * @throws HDF5Exception
      */
     public static void addQualityMetadata(Product product, DefaultMutableTreeNode level3ChildNode) throws HDF5Exception {
@@ -356,8 +357,7 @@ public class ProbaVUtils {
      * Extracts unit and description from HDF metadata and adds to given band
      *
      * @param metadata - HDF metadata
-     * @param band - the band
-     *
+     * @param band     - the band
      * @throws HDF5Exception
      */
     public static void setBandUnitAndDescription(List<Attribute> metadata, Band band) throws HDF5Exception {
@@ -393,12 +393,11 @@ public class ProbaVUtils {
     /**
      * Sets the Proba-V geo coding to a product as extracted from HDF metadata information
      *
-     * @param product - the product
-     * @param inputFileRootNode - HDF root tree node
+     * @param product              - the product
+     * @param inputFileRootNode    - HDF root tree node
      * @param productTypeChildNode - the product type child node (LEVEL2A or LEVEL3)
-     * @param productWidth - product width
-     * @param productHeight - product height
-     *
+     * @param productWidth         - product width
+     * @param productHeight        - product height
      * @throws HDF5Exception
      */
     public static void setProbaVGeoCoding(Product product, TreeNode inputFileRootNode, TreeNode productTypeChildNode,
@@ -432,9 +431,8 @@ public class ProbaVUtils {
      * Provides a ProductData instance according to given HDF5 data type
      *
      * @param datatypeClass - the HDF5 data type
-     * @param width - buffer width
-     * @param height - buffer height
-     *
+     * @param width         - buffer width
+     * @param height        - buffer height
      * @return the data buffer
      */
     public static ProductData getDataBufferForH5Dread(int datatypeClass, int width, int height) {

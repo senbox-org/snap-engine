@@ -164,6 +164,7 @@ public class ProbaVProductReader extends AbstractProductReader {
             final List rootMetadata = rootGroup.getMetadata();
             ProbaVUtils.addProbaVMetadataElement(rootMetadata, product, ProbaVConstants.MPH_NAME);
             product.setDescription(ProbaVUtils.getStringAttributeValue(rootMetadata, "DESCRIPTION"));
+            ProbaVUtils.addStartStopTimes(product, (DefaultMutableTreeNode) inputFileRootNode);
             product.setFileLocation(inputFile);
 
             for (int i = 0; i < productTypeNode.getChildCount(); i++) {
