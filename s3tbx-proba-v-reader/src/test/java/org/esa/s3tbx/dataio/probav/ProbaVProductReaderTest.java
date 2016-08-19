@@ -28,7 +28,7 @@ public class ProbaVProductReaderTest {
     @Test
     @Ignore
     public void testReadH5() throws ProductIOException {
-        ProbaVSynthesisProductReaderPlugIn.loadHdf5Lib(ProbaVSynthesisProductReaderPlugIn.class);
+        ProbaVProductReaderPlugIn.loadHdf5Lib(ProbaVProductReaderPlugIn.class);
         try {
             H5.H5open();
             String path = "C:\\Users\\olafd\\proba_v_reader\\PROBAV_L1C_20131025_115650_2_V003.HDF5";
@@ -48,7 +48,7 @@ public class ProbaVProductReaderTest {
     @Test
     @Ignore
     public void testReadH5_2() throws Exception {
-        final Class<?> aClass = ProbaVSynthesisProductReaderPlugIn.loadHdf5Lib(ProbaVSynthesisProductReaderPlugIn.class);
+        final Class<?> aClass = ProbaVProductReaderPlugIn.loadHdf5Lib(ProbaVProductReaderPlugIn.class);
 //        String path = "C:\\Users\\olafd\\bc\\proba-v-reader\\PROBAV_L1C_20131025_115650_2_V003.HDF5";
         String path = "C:\\Users\\olafd\\proba_v_reader\\HDF5_LSASAF_MSG_ALBEDO_Euro_200601020000";
         FileFormat h5FileFormat = FileFormat.getFileFormat(FileFormat.FILE_TYPE_HDF5);
