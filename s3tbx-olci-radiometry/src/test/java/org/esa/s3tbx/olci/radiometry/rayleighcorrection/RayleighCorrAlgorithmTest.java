@@ -1,18 +1,17 @@
 package org.esa.s3tbx.olci.radiometry.rayleighcorrection;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.DoubleStream;
 import org.esa.s3tbx.olci.radiometry.smilecorr.SmileUtils;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * @author muhammad.bc.
@@ -89,44 +88,6 @@ public class RayleighCorrAlgorithmTest {
         assertEquals(3.9154039638717356E-12, sectionSigma[1], 1e-8);
     }
 
-    @Ignore
-    @Test
-    public void testThickness() throws Exception {
-        AuxiliaryValues auxiliaryValue = new AuxiliaryValues(AuxiliaryValues.GETASSE_30);
-
-        double[] unit = {1.};
-        auxiliaryValue.setSeaLevels(unit);
-        auxiliaryValue.setAltitudes(unit, unit);
-        auxiliaryValue.setLatitudes(unit);
-
-        double[] thickness = algo.getRayleighOpticalThicknessII(auxiliaryValue, 1.00415801077e-09);
-        assertArrayEquals(new double[]{2.1384283508996676E13}, thickness, 1e-8);
-    }
-
-
-    @Test
-    public void testCreateLineSpaceOfArrayElements() throws Exception {
-        double[] lineSpace = algo.getLineSpace(0, 10, 5);
-        assertNotNull(lineSpace);
-        assertEquals(5, lineSpace.length);
-        assertArrayEquals(new double[]{0.0, 2.5, 5.0, 7.5, 10.0}, lineSpace, 1e-8);
-
-        lineSpace = algo.getLineSpace(0, 1, 5);
-        assertEquals(5, lineSpace.length);
-        assertArrayEquals(new double[]{0.0, 0.25, 0.5, 0.75, 1.0}, lineSpace, 1e-8);
-
-        lineSpace = algo.getLineSpace(0, 0, 5);
-        assertEquals(5, lineSpace.length);
-        assertArrayEquals(new double[]{0.0, 0.0, 0.0, 0.0, 0.0}, lineSpace, 1e-8);
-
-        try {
-            lineSpace = algo.getLineSpace(0, 10, -5);
-            fail("Array cant have negative index");
-        } catch (NegativeArraySizeException ex) {
-
-        }
-    }
-
     @Test
     public void testCheckIn() throws Exception {
         double[] n = new double[]{2.840904951095581,
@@ -146,5 +107,17 @@ public class RayleighCorrAlgorithmTest {
         assertFalse(b);
         boolean c = DoubleStream.of(n).anyMatch(x -> x > 2.82 && x < 80.7221450805664);
         assertTrue(c);
+    }
+
+    @Test
+    public void spike() throws Exception {
+        Pattern compile = Pattern.compile("(\\d+)");
+        Matcher matcher = compile.matcher("solar_flux_band_01");
+        matcher.find();
+        String group = matcher.group(0);
+        System.out.println("group = " + group);
+        int i = Integer.parseInt(group);
+        System.out.println("i = " + i);
+
     }
 }

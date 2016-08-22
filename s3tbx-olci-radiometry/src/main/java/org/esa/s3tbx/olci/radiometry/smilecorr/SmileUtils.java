@@ -18,6 +18,7 @@
 
 package org.esa.s3tbx.olci.radiometry.smilecorr;
 
+import java.util.stream.IntStream;
 import org.esa.s3tbx.olci.radiometry.rayleighcorrection.AuxiliaryValues;
 import org.esa.snap.core.gpf.OperatorException;
 
@@ -31,9 +32,7 @@ public class SmileUtils {
             throw new OperatorException("The arrays most have the same length.");
         }
         final float[] cal = new float[array1.length];
-        for (int i = 0; i < array1.length; i++) {
-            cal[i] = array1[i] * array2[i];
-        }
+        IntStream.range(0, cal.length).forEach(value -> cal[value] = array1[value] * array2[value]);
         return cal;
     }
 
@@ -43,42 +42,35 @@ public class SmileUtils {
 
     public static double[] convertDegreesToRadians(double[] angle) {
         final double[] rads = new double[angle.length];
-        for (int i = 0; i < rads.length; i++) {
-            rads[i] = Math.toRadians(angle[i]);
-        }
+        IntStream.range(0, rads.length).forEach(value -> rads[value] = Math.toRadians(angle[value]));
         return rads;
     }
 
     public static float[] convertDegreesToRadians(float[] angle) {
         final float[] rads = new float[angle.length];
-        for (int i = 0; i < rads.length; i++) {
-            rads[i] = (float) Math.toRadians(angle[i]);
-        }
+        IntStream.range(0, rads.length).forEach(value -> rads[value] = (float) Math.toRadians(angle[value]));
         return rads;
     }
 
     public static double[] getAirMass(AuxiliaryValues auxiliaryValues) {
-        double[] szaRads = auxiliaryValues.getSunAzimuthAnglesRad();
-        double[] ozaRads = auxiliaryValues.getViewAzimuthAnglesRad();
+        double[] cosOZARads = auxiliaryValues.getCosOZARads();
+        double[] cosSZARads = auxiliaryValues.getCosSZARads();
+        double massAir[] = new double[cosOZARads.length];
 
-        double massAir[] = new double[szaRads.length];
-        for (int index = 0; index < szaRads.length; index++) {
-            massAir[index] = 1 / Math.cos(szaRads[index]) + 1 / Math.cos(ozaRads[index]);
-        }
+        IntStream.range(0, massAir.length).forEach(value -> massAir[value] = 1 / cosSZARads[value] + 1 / cosOZARads[value]);
         return massAir;
-
     }
 
     public static double[] getAziDiff(AuxiliaryValues auxiliaryValues) {
         double[] saaRads = auxiliaryValues.getSunAzimuthAnglesRad();
         double[] aooRads = auxiliaryValues.getViewAzimuthAnglesRad();
-
         double[] aziDiff = new double[saaRads.length];
-        for (int index = 0; index < saaRads.length; index++) {
-            double a = aooRads[index] - saaRads[index];
+
+        IntStream.range(0, aziDiff.length).forEach(value -> {
+            double a = aooRads[value] - saaRads[value];
             double cosDelta = Math.cos(a);
-            aziDiff[index] = Math.acos(cosDelta);
-        }
+            aziDiff[value] = Math.acos(cosDelta);
+        });
         return aziDiff;
     }
 }

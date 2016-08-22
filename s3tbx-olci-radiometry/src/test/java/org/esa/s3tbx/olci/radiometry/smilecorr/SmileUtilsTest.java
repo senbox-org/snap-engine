@@ -63,8 +63,16 @@ public class SmileUtilsTest {
 
     @Test
     public void getAirMass() throws Exception {
+        auxiliaryValues.setViewZenithAngles(new double[]{1.0, 2.0, 3});
+        auxiliaryValues.setSunZenithAngles(new double[]{1.0, 2.0, 3});
+
         auxiliaryValues.setSunAzimuthAngles(new double[]{1.0, 2.0, 3});
         auxiliaryValues.setViewAzimuthAngles(new double[]{1.0, 2.0, 3});
+
+        auxiliaryValues.setViewZenithAnglesRad();
+        auxiliaryValues.setSunZenithAnglesRad();
+        auxiliaryValues.setCosOZARads();
+        auxiliaryValues.setCosSZARads();
 
         double[] airMass = SmileUtils.getAirMass(auxiliaryValues);
         assertArrayEquals(new double[]{2.0003046560878155, 2.0012190885976433, 2.002744691995842}, airMass, 1e-8);
