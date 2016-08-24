@@ -33,7 +33,7 @@ public class Rad2ReflAuxdata {
         loadDetectorData(detectorSunSpectralFluxesFilename, numRows, numCols);
     }
 
-    public static Rad2ReflAuxdata loadAuxdata(String productType) throws IOException {
+    public static Rad2ReflAuxdata loadMERISAuxdata(String productType) throws IOException {
         final Path auxdataDir = installAuxdata();
 
         if (productType.startsWith("MER_F")) {

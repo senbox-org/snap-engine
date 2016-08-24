@@ -105,7 +105,7 @@ public class OlciUtils {
         for (int i = minBand; i <= maxBand; i++) {
             for (String bandname : rad2reflProduct.getBandNames()) {
                 // e.g. Oa01_reflectance
-                if (!targetProduct.containsBand(bandname) && bandname.equals("Oa" + String.format("%2d", i) + "_reflectance")) {
+                if (!targetProduct.containsBand(bandname) && bandname.equals("Oa" + String.format("%02d", i) + "_reflectance")) {
                     System.out.println("adding band: " + bandname);
                     ProductUtils.copyBand(bandname, rad2reflProduct, targetProduct, true);
                     targetProduct.getBand(bandname).setUnit("dl");

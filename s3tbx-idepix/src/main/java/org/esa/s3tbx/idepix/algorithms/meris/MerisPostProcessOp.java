@@ -47,6 +47,8 @@ public class MerisPostProcessOp extends Operator {
     //    @SourceProduct(alias = "ctp", optional = true)
     @SourceProduct(alias = "ctp")
     private Product ctpProduct;
+    @SourceProduct(alias = "waterMask")
+    private Product waterMaskProduct;
 
     private Band waterFractionBand;
     private Band origCloudFlagBand;
@@ -65,11 +67,6 @@ public class MerisPostProcessOp extends Operator {
                                                                                       "postProcessedCloud",
                                                                                       true);
 
-        HashMap<String, Object> waterParameters = new HashMap<>();
-        waterParameters.put("resolution", 50);
-        waterParameters.put("subSamplingFactorX", 3);
-        waterParameters.put("subSamplingFactorY", 3);
-        Product waterMaskProduct = GPF.createProduct("LandWaterMask", waterParameters, l1bProduct);
         waterFractionBand = waterMaskProduct.getBand("land_water_fraction");
 
         geoCoding = l1bProduct.getSceneGeoCoding();

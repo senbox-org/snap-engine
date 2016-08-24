@@ -1,8 +1,5 @@
 package org.esa.s3tbx.processor.rad2refl;
 
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.gpf.pointop.Sample;
-import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.math.RsMathUtils;
 
 import java.util.Arrays;
@@ -30,5 +27,8 @@ public class OlciRadReflConverter implements RadReflConverter {
         return fRet;
     }
 
-
+    @Override
+    public float convert(float radiance, float sza, float flux) {
+        return RsMathUtils.radianceToReflectance(radiance, sza, flux);
+    }
 }

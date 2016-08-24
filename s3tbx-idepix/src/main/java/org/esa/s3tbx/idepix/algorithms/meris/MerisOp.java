@@ -216,6 +216,7 @@ public class MerisOp extends BasisOp {
         input.put("l1b", sourceProduct);
         input.put("merisCloud", mergedClassificationProduct);
         input.put("ctp", ctpProduct);
+        input.put("waterMask", waterMaskProduct);
 
         Map<String, Object> params = new HashMap<>();
         params.put("computeCloudShadow", computeCloudShadow);

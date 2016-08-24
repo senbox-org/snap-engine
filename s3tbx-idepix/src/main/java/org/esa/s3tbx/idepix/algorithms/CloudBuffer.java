@@ -59,7 +59,8 @@ public class CloudBuffer {
 
         for (int i = LEFT_BORDER; i <= RIGHT_BORDER; i++) {
             for (int j = TOP_BORDER; j <= BOTTOM_BORDER; j++) {
-                if (rectangle.contains(i, j) && extendedRectangle.contains(i, j)) {
+//                if (rectangle.contains(i, j) && extendedRectangle.contains(i, j)) {
+                if (rectangle.contains(i, j)) {
                     targetTile.setSample(i, j, cloudBufferFlagBit, true);
                 }
             }
