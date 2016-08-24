@@ -1,7 +1,5 @@
 package org.esa.s3tbx.olci.radiometry.rayleighcorrection;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.DoubleStream;
 import org.esa.s3tbx.olci.radiometry.smilecorr.SmileUtils;
 import org.junit.Before;
@@ -109,15 +107,5 @@ public class RayleighCorrAlgorithmTest {
         assertTrue(c);
     }
 
-    @Test
-    public void spike() throws Exception {
-        Pattern compile = Pattern.compile("(\\d+)");
-        Matcher matcher = compile.matcher("solar_flux_band_01");
-        matcher.find();
-        String group = matcher.group(0);
-        System.out.println("group = " + group);
-        int i = Integer.parseInt(group);
-        System.out.println("i = " + i);
 
-    }
 }

@@ -19,7 +19,6 @@
 package org.esa.s3tbx.olci.radiometry.smilecorr;
 
 import java.util.stream.IntStream;
-import org.esa.s3tbx.olci.radiometry.rayleighcorrection.AuxiliaryValues;
 import org.esa.snap.core.gpf.OperatorException;
 
 /**
@@ -52,21 +51,16 @@ public class SmileUtils {
         return rads;
     }
 
-    public static double[] getAirMass(AuxiliaryValues auxiliaryValues) {
-        double[] cosOZARads = auxiliaryValues.getCosOZARads();
-        double[] cosSZARads = auxiliaryValues.getCosSZARads();
+    public static double[] getAirMass(double[] cosOZARads, double[] cosSZARads) {
         double massAir[] = new double[cosOZARads.length];
-
         IntStream.range(0, massAir.length).forEach(value -> massAir[value] = 1 / cosSZARads[value] + 1 / cosOZARads[value]);
         return massAir;
     }
 
-    public static double[] getAziDiff(AuxiliaryValues auxiliaryValues) {
-        double[] saaRads = auxiliaryValues.getSunAzimuthAnglesRad();
-        double[] aooRads = auxiliaryValues.getViewAzimuthAnglesRad();
-        double[] aziDiff = new double[saaRads.length];
-
-        IntStream.range(0, aziDiff.length).forEach(value -> {
+    public static double[] getAziDiff(double[] saaRads, double[] aooRads) {
+        int length = saaRads.length;
+        double[] aziDiff = new double[length];
+        IntStream.range(0, length).forEach(value -> {
             double a = aooRads[value] - saaRads[value];
             double cosDelta = Math.cos(a);
             aziDiff[value] = Math.acos(cosDelta);

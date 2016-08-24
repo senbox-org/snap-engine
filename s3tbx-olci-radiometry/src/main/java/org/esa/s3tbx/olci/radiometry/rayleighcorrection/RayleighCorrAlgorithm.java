@@ -48,10 +48,6 @@ public class RayleighCorrAlgorithm {
         return thickness;
     }
 
-    public double getRayleighOpticalThickness(double pressureAtms, double taur_std) {
-        return pressureAtms * taur_std / STD_SEA_LEVEL_PRESSURE;
-    }
-
     protected double phaseRaylMin(double sunZenithAngle, double viewZenithAngle, double azimuthDifference) {
         double cosScatterAngle = cosScatterAngle(sunZenithAngle, viewZenithAngle, azimuthDifference);
         return 0.75 * (1.0 + cosScatterAngle * cosScatterAngle);
@@ -244,9 +240,6 @@ public class RayleighCorrAlgorithm {
         rayleighHashMap.put(String.format("rRayF1_%02d", sourceBandIndex), rRayF1);
         rayleighHashMap.put(String.format("rRayF2_%02d", sourceBandIndex), rRayF2);
         rayleighHashMap.put(String.format("rRayF3_%02d", sourceBandIndex), rRayF3);
-
-
-
 
 
         return rayleighHashMap;
