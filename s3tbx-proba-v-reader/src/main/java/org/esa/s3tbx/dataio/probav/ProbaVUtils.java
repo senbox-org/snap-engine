@@ -36,9 +36,23 @@ public class ProbaVUtils {
         String result = "";
         switch (attribute.getType().getDatatypeClass()) {
             case Datatype.CLASS_INTEGER:
-                int[] ivals = (int[]) attribute.getValue();
-                for (int ival : ivals) {
-                    result = result.concat(Integer.toString(ival) + " ");
+                if (attribute.getValue().getClass() == Long.class) {
+                    long[] ivals = (long[]) attribute.getValue();
+                    for (long ival : ivals) {
+                        result = result.concat(Long.toString(ival) + " ");
+                    }
+                }
+                if (attribute.getValue().getClass() == Integer.class) {
+                    int[] ivals = (int[]) attribute.getValue();
+                    for (int ival : ivals) {
+                        result = result.concat(Integer.toString(ival) + " ");
+                    }
+                }
+                if (attribute.getValue().getClass() == Short.class) {
+                    short[] ivals = (short[]) attribute.getValue();
+                    for (short ival : ivals) {
+                        result = result.concat(Short.toString(ival) + " ");
+                    }
                 }
                 break;
             case Datatype.CLASS_FLOAT:
@@ -162,19 +176,19 @@ public class ProbaVUtils {
             final long[] offset = {offsetY, offsetX};
             final long[] count = {height, width};
 
-            H5.H5Sselect_hyperslab(dataspace_id,                   // Identifier of dataspace selection to modify
+            H5.H5Sselect_hyperslab(                                dataspace_id,                   // Identifier of dataspace selection to modify
                                    HDF5Constants.H5S_SELECT_SET,   // Operation to perform on current selection.
                                    offset,                         // Offset of start of hyperslab
                                    null,                           // Hyperslab stride.
                                    count,                          // Number of blocks included in hyperslab.
                                    null);                          // Size of block in hyperslab.
 
-            final int memspace_id = H5.H5Screate_simple(count.length, // Number of dimensions of dataspace.
+            final int memspace_id = H5.H5Screate_simple(              count.length, // Number of dimensions of dataspace.
                                                         count,        // An array of the size of each dimension.
                                                         null);       // An array of the maximum size of each dimension.
 
             final long[] offset_out = {0L, 0L};
-            H5.H5Sselect_hyperslab(memspace_id,                        // Identifier of dataspace selection to modify
+            H5.H5Sselect_hyperslab(                                    memspace_id,                        // Identifier of dataspace selection to modify
                                    HDF5Constants.H5S_SELECT_SET,       // Operation to perform on current selection.
                                    offset_out,                         // Offset of start of hyperslab
                                    null,                               // Hyperslab stride.
@@ -184,7 +198,7 @@ public class ProbaVUtils {
             int dataType = ProbaVUtils.getDatatypeForH5Dread(datatypeClass);
 
             if (destBuffer != null) {
-                H5.H5Dread(dataset_id,                    // Identifier of the dataset read from.
+                H5.H5Dread(                               dataset_id,                    // Identifier of the dataset read from.
                            dataType,                      // Identifier of the memory datatype.
                            memspace_id,                   //  Identifier of the memory dataspace.
                            dataspace_id,                  // Identifier of the dataset's dataspace in the file.
@@ -304,32 +318,45 @@ public class ProbaVUtils {
     /**
      * Extracts a HDF metadata element and adds accordingly to given product
      *
-     * @param rootMetadata        - the HDF metadata
-     * @param product             - the product
+     * @param metadataAttributes  - the HDF metadata attributes
+     * @param parentElement       - the parent metadata element
      * @param metadataElementName - the element name
      */
-    public static void addProbaVMetadataElement(List<Attribute> rootMetadata,
-                                                final Product product,
-                                                String metadataElementName) {
+    public static void addMetadataElementWithAttributes(List<Attribute> metadataAttributes,
+                                                        final MetadataElement parentElement,
+                                                        String metadataElementName) {
         final MetadataElement metadataElement = new MetadataElement(metadataElementName);
-
-        for (Attribute attribute : rootMetadata) {
+        for (Attribute attribute : metadataAttributes) {
             metadataElement.addAttribute(new MetadataAttribute(attribute.getName(),
                                                                ProductData.createInstance(ProbaVUtils.getAttributeValue(attribute)), true));
         }
-        product.getMetadataRoot().addElement(metadataElement);
+        parentElement.addElement(metadataElement);
+    }
+
+    /**
+     * Adds HDF metadata attributes to a given metadata element
+     *
+     * @param metadataAttributes - the HDF metadata attributes
+     * @param parentElement      - the parent metadata element
+     */
+    public static void addMetadataAttributes(List<Attribute> metadataAttributes,
+                                             final MetadataElement parentElement) {
+        for (Attribute attribute : metadataAttributes) {
+            parentElement.addAttribute(new MetadataAttribute(attribute.getName(),
+                                                             ProductData.createInstance(ProbaVUtils.getAttributeValue(attribute)), true));
+        }
     }
 
     /**
      * Extracs start/stop times from HDF metadata and adds to given product
      *
-     * @param product         - the product
-     * @param level3ChildNode - the HDF node containing the time information
+     * @param product  - the product
+     * @param timeNode - the HDF node containing the time information
      * @throws HDF5Exception
      * @throws ParseException
      */
-    public static void addStartStopTimes(Product product, DefaultMutableTreeNode level3ChildNode) throws HDF5Exception, ParseException {
-        final H5Group timeGroup = (H5Group) level3ChildNode.getUserObject();
+    public static void addStartStopTimes(Product product, DefaultMutableTreeNode timeNode) throws HDF5Exception, ParseException {
+        final H5Group timeGroup = (H5Group) timeNode.getUserObject();
         final List timeMetadata = timeGroup.getMetadata();
         String[] startEndTime = ProbaVUtils.getStartEndTimeFromAttributes(timeMetadata);
         if (startEndTime != null) {
@@ -341,16 +368,45 @@ public class ProbaVUtils {
     }
 
     /**
-     * Extracts quality info from HDF metadata and adds to given product
+     * Adds metadata which corresponds to a band subgroup (NDVI, QUALITY or TIME)
      *
-     * @param product         - the product
-     * @param level3ChildNode - the HDF node containing the time information
+     * @param product       - the product
+     * @param parentNode    - the HDF parent node
+     * @param bandGroupName - band subgroup name (should be NDVI, QUALITY or TIME)
      * @throws HDF5Exception
      */
-    public static void addQualityMetadata(Product product, DefaultMutableTreeNode level3ChildNode) throws HDF5Exception {
-        final H5Group qualityGroup = (H5Group) level3ChildNode.getUserObject();
-        final List qualityMetadata = qualityGroup.getMetadata();
-        ProbaVUtils.addProbaVMetadataElement(qualityMetadata, product, ProbaVConstants.QUALITY_NAME);
+    public static void addBandSubGroupMetadata(Product product, DefaultMutableTreeNode parentNode, String bandGroupName) throws HDF5Exception {
+        // NDVI, QUALITY, TIME
+        addRootMetadataElement(product, parentNode, bandGroupName);
+
+        final MetadataElement rootMetadataElement = product.getMetadataRoot().getElement(bandGroupName);
+
+        final TreeNode childNode = parentNode.getChildAt(0);
+        final String childNodeName = childNode.toString();
+        final MetadataElement childMetadataElement = new MetadataElement(childNodeName);
+
+        if (!bandGroupName.equals(ProbaVConstants.QUALITY_BAND_GROUP_NAME)) {
+            // skip the 'SM' metadata as it is not the original SM band
+            final H5ScalarDS ds = ProbaVUtils.getH5ScalarDS(childNode);
+            final List childMetadata = ds.getMetadata();
+            ProbaVUtils.addMetadataAttributes(childMetadata, rootMetadataElement);
+        }
+    }
+
+    /**
+     * Adds a metadata element with attributes to root node
+     *
+     * @param product - the product
+     * @param parentNode  - the HDF parent node
+     * @param elementName - the metadata element name
+     *
+     * @throws HDF5Exception
+     */
+    public static void addRootMetadataElement(Product product, DefaultMutableTreeNode parentNode, String elementName)
+            throws HDF5Exception {
+        final H5Group parentGeometryGroup = (H5Group) parentNode.getUserObject();
+        final List parentGeometryMetadata = parentGeometryGroup.getMetadata();
+        ProbaVUtils.addMetadataElementWithAttributes(parentGeometryMetadata, product.getMetadataRoot(), elementName);
     }
 
     /**
@@ -368,9 +424,14 @@ public class ProbaVUtils {
     /**
      * Sets Proba-V spectral band properties
      *
-     * @param band - the spectral band
+     * @param treeNode - node to extract metadata from
+     * @param band     - the spectral band
      */
-    public static void setSpectralBandProperties(Band band) {
+    public static void setSpectralBandProperties(DefaultMutableTreeNode treeNode, Band band) throws HDF5Exception {
+        final H5Group group = (H5Group) treeNode.getUserObject();
+        final List metadata = group.getMetadata();
+        final double solarIrradiance = ProbaVUtils.getDoubleAttributeValue(metadata, "SOLAR_IRRADIANCE");
+        band.setSolarFlux((float) solarIrradiance);
         if (band.getName().endsWith("REFL_BLUE")) {
             band.setSpectralBandIndex(0);
             band.setSpectralWavelength(462.0f);

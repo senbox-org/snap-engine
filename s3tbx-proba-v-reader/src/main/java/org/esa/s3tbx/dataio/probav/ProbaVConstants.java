@@ -77,7 +77,11 @@ public class ProbaVConstants {
     public static final String PROBAV_DATE_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss";
 
     public static final String MPH_NAME = "MPH";
-    public static final String QUALITY_NAME = "QUALITY";
+    public static final String QUALITY_BAND_GROUP_NAME = "QUALITY";
+    public static final String GEOMETRY_BAND_GROUP_NAME = "GEOMETRY";
+    public static final String NDVI_BAND_GROUP_NAME = "NDVI";
+    public static final String RADIOMETRY_BAND_GROUPNAME = "RADIOMETRY";
+    public static final String TIME_BAND_GROUPNAME = "TIME";
 
     public static final int GEOMETRY_NO_DATA_VALUE = 255;
     public static final float NDVI_NO_DATA_VALUE = Float.NaN;
