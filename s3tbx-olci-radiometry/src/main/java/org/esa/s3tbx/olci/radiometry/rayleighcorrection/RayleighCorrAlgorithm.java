@@ -53,27 +53,6 @@ public class RayleighCorrAlgorithm {
         return 0.75 * (1.0 + cosScatterAngle * cosScatterAngle);
     }
 
-    public double[] getPhaseRaylMin(AuxiliaryValues auxiliaryValues) {
-
-        double[] sunZenithAngleRads = auxiliaryValues.getSunZenithAnglesRad();
-        double[] sunAzimuthAngles = auxiliaryValues.getSunAzimuthAngles();
-
-        double[] viewZenithAngleRads = auxiliaryValues.getViewZenithAnglesRad();
-        double[] viewAzimuthAngles = auxiliaryValues.getViewAzimuthAngles();
-
-        double phaseRaylMin[] = new double[sunAzimuthAngles.length];
-        for (int i = 0; i < sunAzimuthAngles.length; i++) {
-            double azi_diff_deg = Math.abs(viewAzimuthAngles[i] - sunAzimuthAngles[i]); /* azimuth difference */
-              /* reverse azi difference */
-            if (azi_diff_deg > 180.0) {
-                azi_diff_deg = 360.0 - azi_diff_deg;
-            }
-            double cosScatterAngle = cosScatterAngle(sunZenithAngleRads[i], viewZenithAngleRads[i], Math.toRadians(azi_diff_deg));
-            phaseRaylMin[i] = 0.75 * (1.0 + cosScatterAngle * cosScatterAngle);
-        }
-        return phaseRaylMin;
-    }
-
 
     protected double cosScatterAngle(double sunZenithAngle, double viewZenithAngle, double azimuthDifferent) {
         final double cos_view = Math.cos(viewZenithAngle);
@@ -132,6 +111,7 @@ public class RayleighCorrAlgorithm {
         return rayleighOpticalThickness;
     }
 
+
     public double[] getCorrOzone(AuxiliaryValues auxiliaryValues, double[] rho_ng_ref, double absorpO) {
         double[] ozone = auxiliaryValues.getTotalOzones();
         double[] cosOZARads = auxiliaryValues.getCosOZARads();
@@ -149,7 +129,7 @@ public class RayleighCorrAlgorithm {
         return rho_ng_ref;
     }
 
-    public HashMap<String, double[]> getRhoBrr(AuxiliaryValues auxiliaryValues, double[] rayleighOpticalThickness, double[] reflectance, int sourceBandIndex) {
+    public double[] getRhoBrr(AuxiliaryValues auxiliaryValues, double[] rayleighOpticalThickness, double[] reflectance, int sourceBandIndex) {
         auxiliaryValues.setRayleighThickness(rayleighOpticalThickness);
 
         final double[] ozaRads = auxiliaryValues.getViewZenithAnglesRad();
@@ -164,19 +144,7 @@ public class RayleighCorrAlgorithm {
         final Map<Integer, List<double[]>> interpolation = auxiliaryValues.getInterpolation();
         final int length = ozaRads.length;
 
-
-        final HashMap<String, double[]> rayleighHashMap = new HashMap<>();
         final double[] rho_BRR = new double[length];
-        final double[] sphericalFactor = new double[length];
-        final double[] rho_toaR = new double[length];
-        final double[] tR_thetaV = new double[length];
-        final double[] tR_thetaS = new double[length];
-        final double[] rho_R = new double[length];
-
-        final double[] rRayF1 = new double[length];
-        final double[] rRayF2 = new double[length];
-        final double[] rRayF3 = new double[length];
-
         final double rho_Rm[] = new double[3];
 
         for (int index = 0; index < length; index++) {
@@ -205,46 +173,29 @@ public class RayleighCorrAlgorithm {
                 double rayMultiCorr = a + b * taurVal + c * Math.pow(taurVal, 2) + d * Math.pow(taurVal, 3);
                 rho_Rm[i] = rayMultiCorr * rayPrimaryScatters;
             }
-            // Fourier sum to get the Rayleigh Reflectance
-            rRayF1[index] = rho_Rm[0];
-            rRayF2[index] = rho_Rm[1];
-            rRayF3[index] = rho_Rm[2];
 
-            rho_R[index] = rho_Rm[0] + 2.0 * rho_Rm[1] * Math.cos(aziDiff) + 2.0 * rho_Rm[2] * Math.cos(2.0 * aziDiff);
+            double rho_R = rho_Rm[0] + 2.0 * rho_Rm[1] * Math.cos(aziDiff) + 2.0 * rho_Rm[2] * Math.cos(2.0 * aziDiff);
             // polynomial coefficients tpoly0, tpoly1 and tpoly2 from MERIS LUT
 
             double tRs = ((2.0 / 3.0 + cosSZARad) + (2.0 / 3.0 - cosSZARad) * Math.exp(-taurVal / cosSZARad)) / (4.0 / 3.0 + taurVal);
 
-            tR_thetaS[index] = tau_ray[0] + tau_ray[1] * tRs + tau_ray[2] * Math.pow(tRs, 2);
+            double tR_thetaS = tau_ray[0] + tau_ray[1] * tRs + tau_ray[2] * Math.pow(tRs, 2);
             //#Rayleigh Transmittance sun - surface
             double tRv = ((2.0 / 3.0 + cosOZARad) + (2.0 / 3.0 - cosOZARad) * Math.exp(-taurVal / cosOZARad)) / (4.0 / 3.0 + taurVal);
             //#Rayleigh Transmittance surface - sensor
-            tR_thetaV[index] = tau_ray[0] + tau_ray[1] * tRv + tau_ray[2] * Math.pow(tRv, 2);
+            double tR_thetaV = tau_ray[0] + tau_ray[1] * tRv + tau_ray[2] * Math.pow(tRv, 2);
 
             double saRay = sARay[index];
 
-            rho_toaR[index] = (reflectance[index] - rho_R[index]) / (tR_thetaS[index] * tR_thetaV[index]); //toa reflectance corrected for Rayleigh scattering
-            sphericalFactor[index] = 1.0 / (1.0 + saRay * rho_toaR[index]); //#factor used in the next equation to account for the spherical albedo
+            double rho_toaR = (reflectance[index] - rho_R) / (tR_thetaS * tR_thetaV); //toa reflectance corrected for Rayleigh scattering
+            double sphericalFactor = 1.0 / (1.0 + saRay * rho_toaR); //#factor used in the next equation to account for the spherical albedo
             //#top of aerosol reflectance, which is equal to bottom of Rayleigh reflectance
-            rho_BRR[index] = (rho_toaR[index] * sphericalFactor[index]);
+            rho_BRR[index] = (rho_toaR * sphericalFactor);
         }
-
-        rayleighHashMap.put(String.format("rBRR_%02d", sourceBandIndex), rho_BRR);
-        rayleighHashMap.put(String.format("sphericalAlbedoFactor_%02d", sourceBandIndex), sphericalFactor);
-        rayleighHashMap.put(String.format("rtoaRay_%02d", sourceBandIndex), rho_toaR);
-        rayleighHashMap.put(String.format("transVRay_%02d", sourceBandIndex), tR_thetaV);
-        rayleighHashMap.put(String.format("sARay_%02d", sourceBandIndex), sARay);
-        rayleighHashMap.put(String.format("transSRay_%02d", sourceBandIndex), tR_thetaS);
-        rayleighHashMap.put(String.format("rRay_%02d", sourceBandIndex), rho_R);
-
-        rayleighHashMap.put(String.format("rRayF1_%02d", sourceBandIndex), rRayF1);
-        rayleighHashMap.put(String.format("rRayF2_%02d", sourceBandIndex), rRayF2);
-        rayleighHashMap.put(String.format("rRayF3_%02d", sourceBandIndex), rRayF3);
-
-
-        return rayleighHashMap;
+        return rho_BRR;
     }
 
+    //mba old Rayleigh implementation
     public double[] getRayleighReflectance(double[] taurPoZ, double[] sunZenithAngles, double[] sunAzimuthAngles, double[] viewZenithAngles, double[] viewAzimuthAngles) {
         final double reflRaly[] = new double[viewZenithAngles.length];
 

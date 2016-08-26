@@ -27,7 +27,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.IntStream;
 import javax.media.jai.Interpolation;
 import org.apache.commons.math3.analysis.interpolation.BicubicSplineInterpolator;
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
@@ -49,9 +48,14 @@ import org.json.simple.parser.ParseException;
 public class AuxiliaryValues {
 
     public static final String GETASSE_30 = "GETASSE30";
-    static AuxiliaryValues instance;
-    private PolynomialSplineFunction interpolate;
-    private double[] tau_ray;
+    private static PolynomialSplineFunction interpolate;
+    private static double[] tau_ray;
+    private static ElevationModel elevationModel;
+    private static double[] thetas;
+    private static double[][][] rayCooefMatrixA;
+    private static double[][][] rayCooefMatrixB;
+    private static double[][][] rayCooefMatrixC;
+    private static double[][][] rayCooefMatrixD;
     private double[] sunZenithAngles;
     private double[] viewZenithAngles;
     private double[] sunAzimuthAngles;
@@ -63,12 +67,6 @@ public class AuxiliaryValues {
     private double[] lambdaSource;
     private double[] sourceSampleRad;
     private int sourceBandIndex;
-    private ElevationModel elevationModel;
-    private double[] thetas;
-    private double[][][] rayCooefMatrixA;
-    private double[][][] rayCooefMatrixB;
-    private double[][][] rayCooefMatrixC;
-    private double[][][] rayCooefMatrixD;
     private double[] rayleighThickness;
     private float waveLenght;
     private String sourceBandName;
@@ -91,14 +89,12 @@ public class AuxiliaryValues {
     public AuxiliaryValues() {
     }
 
-    public AuxiliaryValues(String getasse301) {
+    public static void initDefaultAuxiliary() {
         try {
-            ElevationModelDescriptor getasse30 = ElevationModelRegistry.getInstance().getDescriptor(getasse301);
+            ElevationModelDescriptor getasse30 = ElevationModelRegistry.getInstance().getDescriptor(GETASSE_30);
             elevationModel = getasse30.createDem(Resampling.NEAREST_NEIGHBOUR);
 
             RayleighCorrectionAux rayleighCorrectionAux = new RayleighCorrectionAux();
-
-
             Path coeffMatrix = rayleighCorrectionAux.installAuxdata().resolve("coeffMatrix.txt");
 
             JSONParser jsonObject = new JSONParser();
@@ -117,7 +113,6 @@ public class AuxiliaryValues {
             double[] rayAlbedoLuts = rayleighCorrectionAux.parseJSON1DimArray(parse, "ray_albedo_lut");
             interpolate = new LinearInterpolator().interpolate(lineSpace, rayAlbedoLuts);
 
-            sourceTileMap = new HashMap<>();
         } catch (IOException | ParseException e) {
             e.printStackTrace();
         }
@@ -131,17 +126,15 @@ public class AuxiliaryValues {
         this.lambdaSource = lambdaSource;
     }
 
+    public void setAltitudes(Tile altitude) {
+        this.altitudes = getSampleDoubles(altitude);
+    }
+
 
     double[] getTaur() {
         return tau_ray;
     }
 
-    public static AuxiliaryValues getInstance() {
-        if (Objects.isNull(instance)) {
-            instance = new AuxiliaryValues(AuxiliaryValues.GETASSE_30);
-        }
-        return instance;
-    }
 
     void setAltitudes() {
         double[] longitudes = getLongitude();
@@ -149,13 +142,13 @@ public class AuxiliaryValues {
 
         if (Objects.nonNull(longitudes) && Objects.nonNull(latitudes)) {
             double[] elevation = new double[latitudes.length];
-            IntStream.range(0, latitudes.length).forEach(i -> {
+            for (int i = 0; i < longitudes.length; i++) {
                 try {
                     elevation[i] = elevationModel.getElevation(new GeoPos(latitudes[i], longitudes[i]));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            });
+            }
             altitudes = elevation;
         }
     }
@@ -297,8 +290,7 @@ public class AuxiliaryValues {
         return sourceBandName;
     }
 
-    void setSunAzimuthAnglesRad() {
-        double[] sunAzimuthAngles = getSunAzimuthAngles();
+    void setSunAzimuthAnglesRad(double[] sunAzimuthAngles) {
         if (Objects.nonNull(sunAzimuthAngles)) {
             sunAzimuthAnglesRad = SmileUtils.convertDegreesToRadians(sunAzimuthAngles);
         }
@@ -311,8 +303,7 @@ public class AuxiliaryValues {
         throw new NullPointerException("The sun azimuth angles is null.");
     }
 
-    void setViewAzimuthAnglesRad() {
-        double[] viewAzimuthAngles = getViewAzimuthAngles();
+    void setViewAzimuthAnglesRad(double[] viewAzimuthAngles) {
         if (Objects.nonNull(viewAzimuthAngles)) {
             viewAzimuthAnglesRad = SmileUtils.convertDegreesToRadians(viewAzimuthAngles);
         }
@@ -325,11 +316,12 @@ public class AuxiliaryValues {
         throw new NullPointerException("The view azimuth angles is null.");
     }
 
-    void setSunZenithAnglesRad() {
-        double[] sunZenithAngles = getSunZenithAngles();
+    void setSunZenithAnglesRad(double[] sunZenithAngles) {
         if (Objects.nonNull(sunZenithAngles)) {
             sunZenithAnglesRad = SmileUtils.convertDegreesToRadians(sunZenithAngles);
         }
+        setCosSZARads(sunZenithAnglesRad);
+        setSinSZARads(sunZenithAnglesRad);
     }
 
     double[] getSunZenithAnglesRad() {
@@ -339,11 +331,12 @@ public class AuxiliaryValues {
         throw new NullPointerException("The sun zenith angles is null.");
     }
 
-    void setViewZenithAnglesRad() {
-        double[] viewZenithAngles = getViewZenithAngles();
+    void setViewZenithAnglesRad(double[] viewZenithAngles) {
         if (Objects.nonNull(viewZenithAngles)) {
             viewZenithAnglesRad = SmileUtils.convertDegreesToRadians(viewZenithAngles);
         }
+        setCosOZARads(viewZenithAnglesRad);
+        setSinOZARads(viewZenithAnglesRad);
     }
 
     double[] getViewZenithAnglesRad() {
@@ -372,8 +365,7 @@ public class AuxiliaryValues {
         return aziDiff;
     }
 
-    void setCosSZARads() {
-        double[] sunZenithAnglesRad = getSunZenithAnglesRad();
+    void setCosSZARads(double[] sunZenithAnglesRad) {
         if (Objects.nonNull(sunZenithAnglesRad)) {
             cosSZARads = Arrays.stream(sunZenithAnglesRad).map(Math::cos).toArray();
         }
@@ -386,8 +378,7 @@ public class AuxiliaryValues {
         throw new NullPointerException("The sun zenith angles is null.");
     }
 
-    void setCosOZARads() {
-        double[] zenithAnglesRad = getViewZenithAnglesRad();
+    void setCosOZARads(double[] zenithAnglesRad) {
         if (Objects.nonNull(zenithAnglesRad)) {
             cosOZARads = Arrays.stream(zenithAnglesRad).map(Math::cos).toArray();
         }
@@ -400,8 +391,7 @@ public class AuxiliaryValues {
         throw new NullPointerException("The view zenith angles is null.");
     }
 
-    void setSinSZARads() {
-        double[] sunZenithAnglesRad = getSunZenithAnglesRad();
+    void setSinSZARads(double[] sunZenithAnglesRad) {
         if (Objects.nonNull(sunZenithAnglesRad)) {
             sinSZARads = Arrays.stream(sunZenithAnglesRad).map(Math::sin).toArray();
         }
@@ -414,8 +404,7 @@ public class AuxiliaryValues {
         throw new NullPointerException("The sun zenith angles is null.");
     }
 
-    void setSinOZARads() {
-        double[] zenithAnglesRad = getViewZenithAnglesRad();
+    void setSinOZARads(double[] zenithAnglesRad) {
         if (Objects.nonNull(zenithAnglesRad)) {
             sinOZARads = Arrays.stream(zenithAnglesRad).map(Math::sin).toArray();
         }
@@ -434,6 +423,7 @@ public class AuxiliaryValues {
 
     void setSunZenithAngles(Tile sourceTile) {
         this.sunZenithAngles = getSampleDoubles(sourceTile);
+        setSunZenithAnglesRad(sunZenithAngles);
     }
 
     double[] getViewZenithAngles() {
@@ -442,6 +432,7 @@ public class AuxiliaryValues {
 
     void setViewZenithAngles(Tile sourceTile) {
         this.viewZenithAngles = getSampleDoubles(sourceTile);
+        setViewZenithAnglesRad(viewZenithAngles);
     }
 
     double[] getSunAzimuthAngles() {
@@ -450,6 +441,7 @@ public class AuxiliaryValues {
 
     public void setSunAzimuthAngles(Tile sourceTile) {
         this.sunAzimuthAngles = getSampleDoubles(sourceTile);
+        setSunAzimuthAnglesRad(sunAzimuthAngles);
     }
 
     double[] getLatitudes() {
@@ -466,6 +458,7 @@ public class AuxiliaryValues {
 
     void setViewAzimuthAngles(Tile sourceTile) {
         this.viewAzimuthAngles = getSampleDoubles(sourceTile);
+        setViewAzimuthAnglesRad(viewAzimuthAngles);
     }
 
     double[] getSeaLevels() {
@@ -544,7 +537,7 @@ public class AuxiliaryValues {
         throw new NullPointerException("The interpolate Rayleigh thickness is empty.");
     }
 
-    double[] getLineSpace(double start, double end, int interval) {
+    static double[] getLineSpace(double start, double end, int interval) {
         if (interval < 0) {
             throw new NegativeArraySizeException("Array must not have negative index");
         }
@@ -564,14 +557,14 @@ public class AuxiliaryValues {
         throw new NullPointerException("The array is null.");
     }
 
-    private double[] getSampleDoubles(Tile sourceTile) {
+    public static double[] getSampleDoubles(Tile sourceTile) {
         int maxX = sourceTile.getWidth();
-        int maxY = sourceTile.getWidth();
+        int maxY = sourceTile.getHeight();
 
         double[] val = new double[maxX * maxY];
         int index = 0;
-        for (int y = sourceTile.getMinY(); y <=sourceTile.getMaxY(); y++) {
-            for (int x = sourceTile.getMinX(); x <=sourceTile.getMaxX(); x++) {
+        for (int y = sourceTile.getMinY(); y <= sourceTile.getMaxY(); y++) {
+            for (int x = sourceTile.getMinX(); x <= sourceTile.getMaxX(); x++) {
                 val[index++] = sourceTile.getSampleDouble(x, y);
             }
         }

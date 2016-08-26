@@ -19,15 +19,12 @@
 package org.esa.s3tbx.olci.radiometry.rayleighcorrection;
 
 import com.bc.ceres.core.ProgressMonitor;
-import com.google.common.primitives.Doubles;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -40,6 +37,7 @@ import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
+import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.util.ProductUtils;
 
@@ -55,29 +53,17 @@ import org.esa.snap.core.util.ProductUtils;
 public class RayleighCorrectionOpII extends Operator {
     private static final String[] BAND_CATEGORIES = new String[]{
             "taur_%02d",
-            "transSRay_%02d",
-            "transVRay_%02d",
-            "sARay_%02d",
-            "rtoaRay_%02d",
             "rBRR_%02d",
-            "sphericalAlbedoFactor_%02d",
-            "RayleighSimple_%02d",
             "rtoa_ng_%02d",
-            "taurS_%02d",
             "rtoa_%02d",
-            "rRay_ % 02d",
-            "rRayF1_%02d",
-            "rRayF2_%02d",
-            "rRayF3__%02d"
     };
     private static final String AIRMASS = "airmass";
-    private static final String AZIDIFF = "azidiff";
     private static final String ALTITUDE = "altitude";
-    private static final String RAYLEIGH_SIMPLE_PATTERN = "RayleighSimple_\\d{2}";
-    private static final String TAUR_S_PATTERN = "taurS_\\d{2}";
     private static final String RTOA_PATTERN = "rtoa_\\d{2}";
     private static final String TAUR_D_PATTERN = "taur_\\d{2}";
     private static final String RTOA_NG_D_PATTERN = "rtoa_ng_\\d{2}";
+    public static final String R_BRR_D_PATTERN = "rBRR_\\d{2}";
+    public static final String AUTO_GROUPING = "rtoa:taur:rtoa_ng:rtoaRay:rBRR";
 
 
     private final String MERIS_SUN_AZIMUTH = "sun_azimuth";
@@ -100,147 +86,135 @@ public class RayleighCorrectionOpII extends Operator {
     @SourceProduct
     Product sourceProduct;
 
+    @Parameter(defaultValue = "false", label = "Add Rayleig optical thickness bands")
+    private boolean isTaurSelected;
+
+
+    @Parameter(defaultValue = "false", label = "Add bottom of Rayleigh reflectance bands")
+    private boolean isRBrr;
+
+    @Parameter(defaultValue = "false", label = "Add gaseous absorption corrected TOA reflectances bands")
+    private boolean isRtoa_ngSelected;
+
+    @Parameter(defaultValue = "false", label = "Add TOA reflectances bands")
+    private boolean isRtoaSelected;
+
+    @Parameter(defaultValue = "false", label = "Add air mass")
+    private boolean isAirMass;
+
+
     private RayleighCorrAlgorithm algorithm;
-    private GaseousAbsorptionAuxII gaseousAbsorptionAuxII;
     private Sensor sensor;
     private double[] absorpOzone;
     private double[] crossSectionSigma;
-    private HashMap<String, double[]> cache = new HashMap<>();
 
     @Override
     public void initialize() throws OperatorException {
         Product targetProduct = new Product(sourceProduct.getName(), sourceProduct.getProductType(),
                 sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
 
-
         sensor = getSensorPattern();
         algorithm = new RayleighCorrAlgorithm();
-        gaseousAbsorptionAuxII = new GaseousAbsorptionAuxII();
+        GaseousAbsorptionAuxII gaseousAbsorptionAuxII = new GaseousAbsorptionAuxII();
         absorpOzone = gaseousAbsorptionAuxII.absorptionOzone(sensor.toString());
-        targetProduct.addBand(AIRMASS, ProductData.TYPE_FLOAT32);
-        targetProduct.addBand(AZIDIFF, ProductData.TYPE_FLOAT32);
+        AuxiliaryValues.initDefaultAuxiliary();
 
-        for (String bandCategory : BAND_CATEGORIES) {
+        double[] waveLength = getAllWavelengths(getSourceProduct(), sensor.getNumBands(), sensor.getGetPattern());
+        crossSectionSigma = algorithm.getCrossSectionSigma(waveLength);
+
+        initBandGroup(targetProduct);
+        ProductUtils.copyBand(ALTITUDE, sourceProduct, targetProduct, true);
+        ProductUtils.copyFlagBands(sourceProduct, targetProduct, true);
+        ProductUtils.copyProductNodes(sourceProduct, targetProduct);
+        targetProduct.setAutoGrouping(AUTO_GROUPING);
+        setTargetProduct(targetProduct);
+    }
+
+    public double[] getAllWavelengths(Product sourceProduct, int numBands, String getPattern) {
+        double[] waveLenght = new double[numBands];
+        for (int i = 0; i < numBands; i++) {
+            waveLenght[i] = sourceProduct.getBand(String.format(getPattern, i+1)).getSpectralWavelength();
+        }
+        return waveLenght;
+    }
+
+    private void initBandGroup(Product targetProduct) {
+        List<String> bandsToInit = new ArrayList<>();
+        if (isTaurSelected) {
+            bandsToInit.add(BAND_CATEGORIES[0]);
+        }
+        if (isRBrr) {
+            bandsToInit.add(BAND_CATEGORIES[1]);
+        }
+        if (isRtoa_ngSelected) {
+            bandsToInit.add(BAND_CATEGORIES[2]);
+        }
+        if (isRtoaSelected) {
+            bandsToInit.add(BAND_CATEGORIES[3]);
+        }
+        if (isAirMass) {
+            targetProduct.addBand(AIRMASS, ProductData.TYPE_FLOAT32);
+        }
+        createBandGroup(targetProduct, bandsToInit);
+    }
+
+    private void createBandGroup(Product targetProduct, List<String> bandCategoryList) {
+        for (String bandCategory : bandCategoryList) {
             for (int i = 1; i <= sensor.getNumBands(); i++) {
                 Band sourceBand = sourceProduct.getBand(String.format(sensor.getPattern, i));
                 Band targetBand = targetProduct.addBand(String.format(bandCategory, i), ProductData.TYPE_FLOAT32);
                 ProductUtils.copySpectralBandProperties(sourceBand, targetBand);
             }
         }
-
-
-        ProductUtils.copyBand(ALTITUDE, sourceProduct, targetProduct, true);
-        ProductUtils.copyFlagBands(sourceProduct, targetProduct, true);
-        ProductUtils.copyProductNodes(sourceProduct, targetProduct);
-        targetProduct.setAutoGrouping("RayleighSimple:taurS:rtoa:taur:transSRay:transVRay:rtoa_ng:sARay:rtoaRay:rBRR:sphericalAlbedoFactor:rRay:rRayF1:rRayF2:rRayF3");
-        setTargetProduct(targetProduct);
-
-        String getPattern = sensor.getGetPattern();
-        List<Double> waveLenght = new ArrayList<>();
-        for (int i = 1; i <= sensor.getNumBands(); i++) {
-            waveLenght.add((double) getSourceProduct().getBand(String.format(getPattern, i)).getSpectralWavelength());
-        }
-        crossSectionSigma = algorithm.getCrossSectionSigma(Doubles.toArray(waveLenght));
     }
 
     @Override
     public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
         AuxiliaryValues auxiliaryValues = createAuxiliary(sensor, targetRectangle);
         Iterator<Band> iteratorBand = targetTiles.keySet().iterator();
-
         while (iteratorBand.hasNext()) {
             Band targetBand = iteratorBand.next();
-            initWithBandValues(auxiliaryValues, targetBand, targetRectangle);
-
             Tile targetTile = targetTiles.get(targetBand);
             String targetBandName = targetBand.getName();
 
-            if (targetBandName.equals(AIRMASS)) {
+            if (targetBandName.equals(AIRMASS) && isAirMass) {
                 double[] massAirs = auxiliaryValues.getAirMass();
                 targetTile.setSamples(massAirs);
                 continue;
             }
-
-            if (targetBandName.equals(AZIDIFF)) {
-                double[] aziDifferences = auxiliaryValues.getAziDifferent();
-                targetTile.setSamples(aziDifferences);
+            int sourceBandIndex = getSourceBandIndexAndinitAuxBand(auxiliaryValues, targetBand, targetRectangle);
+            if (sourceBandIndex == -1) {
                 continue;
             }
-
-            int sourceBandIndex = auxiliaryValues.getSourceBandIndex();
             double[] reflectance = algorithm.convertRadsToRefls(auxiliaryValues);
             double[] rayleighOpticalThickness = algorithm.getRayleighOpticalThicknessII(auxiliaryValues, crossSectionSigma[sourceBandIndex - 1]);
 
-            boolean isRayleighSample = targetBandName.matches(RAYLEIGH_SIMPLE_PATTERN);
-            boolean isTaurS = targetBandName.matches(TAUR_S_PATTERN);
-            if (isRayleighSample || isTaurS) {
-                if (!cache.containsKey(targetBandName)) {
-                    double[] phaseRaylMin = algorithm.getPhaseRaylMin(auxiliaryValues);
-                    HashMap<String, double[]> correct = algorithm.correct(auxiliaryValues, phaseRaylMin, sourceBandIndex);
-                    addToCache(correct);
-                }
-                setTargetSamples(cache, targetTile);
-            }
-
-            if (targetBandName.matches(RTOA_PATTERN)) {
+            if (targetBandName.matches(RTOA_PATTERN) && isRtoaSelected) {
                 targetTile.setSamples(reflectance);
-            } else if (targetBandName.matches(TAUR_D_PATTERN)) {
+            } else if (targetBandName.matches(TAUR_D_PATTERN) && isTaurSelected) {
                 targetTile.setSamples(rayleighOpticalThickness);
-            } else {
+            } else if (isRBrr || isRtoa_ngSelected) {
                 if (Math.ceil(auxiliaryValues.getWaveLenght()) == 709) { // band 709
-                    String bandNamePattern = sensor.getGetPattern();
-                    int[] upperLowerBounds = sensor.getUpperLowerBounds();
-                    double[] bWVRefTile = getSourceTile(sourceProduct.getBand(String.format(bandNamePattern, upperLowerBounds[0])), targetRectangle).getSamplesDouble();
-                    double[] bWVTile = getSourceTile(sourceProduct.getBand(String.format(bandNamePattern, upperLowerBounds[1])), targetRectangle).getSamplesDouble();
-                    waterVaporCorrection709(reflectance, bWVRefTile, bWVTile);
+                    reflectance = waterVaporCorrection709(reflectance, targetRectangle);
                 }
                 double[] corrOzoneRefl = algorithm.getCorrOzone(auxiliaryValues, reflectance, absorpOzone[sourceBandIndex - 1]);
-                if (targetBandName.matches(RTOA_NG_D_PATTERN)) {
+                if (targetBandName.matches(RTOA_NG_D_PATTERN) && isRtoa_ngSelected) {
                     targetTile.setSamples(corrOzoneRefl);
                     continue;
                 }
 
-                if (!cache.containsKey(targetBandName) || cache.size() <= 0) {
-                    HashMap<String, double[]> rhoBrr = algorithm.getRhoBrr(auxiliaryValues, rayleighOpticalThickness, corrOzoneRefl, sourceBandIndex);
-                    addToCache(rhoBrr);
+                if (targetBandName.matches(R_BRR_D_PATTERN) && isRBrr) {
+                    double[] rhoBrr = algorithm.getRhoBrr(auxiliaryValues, rayleighOpticalThickness, corrOzoneRefl, sourceBandIndex);
+                    targetTile.setSamples(rhoBrr);
                 }
-                setTargetSamples(cache, targetTile);
             }
         }
-        clearCache();
     }
 
-
-    private void addToCache(HashMap<String, double[]> correct) {
-        correct.keySet().stream().forEach(p -> {
-            double[] doubles = correct.get(p);
-            cache.put(p, doubles);
-        });
-    }
-
-    @Override
-    public void dispose() {
-        super.dispose();
-        clearCache();
-    }
-
-    private void clearCache() {
-        cache.clear();
-    }
-
-    private void setTargetSamples(HashMap<String, double[]> valHashMap, Tile targetTile) {
-        String targetBandNameKey = targetTile.getRasterDataNode().getName();
-        double[] transSRays = valHashMap.get(targetBandNameKey);
-        if (Objects.nonNull(transSRays)) {
-            targetTile.setSamples(transSRays);
-            valHashMap.remove(targetBandNameKey);
-        }
-    }
-
-    private void initWithBandValues(AuxiliaryValues auxiliaryValues, Band targetBandName, Rectangle rectangle) {
+    private int getSourceBandIndexAndinitAuxBand(AuxiliaryValues auxiliaryValues, Band targetBandName, Rectangle rectangle) {
         int sourceBandRefIndex = getSourceBandIndex(targetBandName.getName());
         if (sourceBandRefIndex == -1) {
-            return;
+            return -1;
         }
         String format = String.format(sensor.getGetPattern(), sourceBandRefIndex);
         Band band = getSourceProduct().getBand(format);
@@ -265,6 +239,7 @@ public class RayleighCorrectionOpII extends Operator {
             auxiliaryValues.setSolarFluxs(solarFluxs);
             auxiliaryValues.setLambdaSource(lambdaSource);
         }
+        return sourceBandRefIndex;
     }
 
     int getSourceBandIndex(String name) {
@@ -277,7 +252,7 @@ public class RayleighCorrectionOpII extends Operator {
     }
 
     private AuxiliaryValues createAuxiliary(Sensor sensor, Rectangle rectangle) {
-        AuxiliaryValues auxiliaryValues = AuxiliaryValues.getInstance();
+        AuxiliaryValues auxiliaryValues = new AuxiliaryValues();
         if (sensor.equals(Sensor.MERIS)) {
             auxiliaryValues.setSunAzimuthAngles(getSourceTile(sourceProduct.getTiePointGrid(MERIS_SUN_AZIMUTH), rectangle));
             auxiliaryValues.setSunZenithAngles(getSourceTile(sourceProduct.getTiePointGrid(MERIS_SUN_ZENITH), rectangle));
@@ -287,25 +262,8 @@ public class RayleighCorrectionOpII extends Operator {
             auxiliaryValues.setTotalOzones(getSourceTile(sourceProduct.getTiePointGrid(MERIS_OZONE), rectangle));
             auxiliaryValues.setLatitudes(getSourceTile(sourceProduct.getTiePointGrid(MERIS_LATITUDE), rectangle));
             auxiliaryValues.setLongitude(getSourceTile(sourceProduct.getTiePointGrid(MERIS_LONGITUDE), rectangle));
-
-            auxiliaryValues.setSunAzimuthAnglesRad();
-            auxiliaryValues.setViewAzimuthAnglesRad();
-            auxiliaryValues.setSunZenithAnglesRad();
-            auxiliaryValues.setViewZenithAnglesRad();
-            auxiliaryValues.setCosOZARads();
-            auxiliaryValues.setCosSZARads();
-            auxiliaryValues.setSinOZARads();
-            auxiliaryValues.setSinSZARads();
-            auxiliaryValues.setAirMass();
-            auxiliaryValues.setAziDifferent();
-
             auxiliaryValues.setAltitudes();
-            auxiliaryValues.setFourier();
-            auxiliaryValues.setInterpolation();
-//            auxiliaryValues.setInterpolationSpike();
 
-
-            return auxiliaryValues;
 
         } else if (sensor.equals(Sensor.OLCI)) {
             auxiliaryValues.setSunZenithAngles(getSourceTile(sourceProduct.getTiePointGrid(SZA), rectangle));
@@ -316,30 +274,26 @@ public class RayleighCorrectionOpII extends Operator {
             auxiliaryValues.setTotalOzones(getSourceTile(sourceProduct.getTiePointGrid(TOTAL_OZONE), rectangle));
             auxiliaryValues.setLatitudes(getSourceTile(sourceProduct.getTiePointGrid(TP_LATITUDE), rectangle));
             auxiliaryValues.setLongitude(getSourceTile(sourceProduct.getTiePointGrid(TP_LONGITUDE), rectangle));
+            auxiliaryValues.setAltitudes(getSourceTile(sourceProduct.getBand(ALTITUDE), rectangle));
+        }
 
-            auxiliaryValues.setSunAzimuthAnglesRad();
-            auxiliaryValues.setViewAzimuthAnglesRad();
-            auxiliaryValues.setSunZenithAnglesRad();
-            auxiliaryValues.setViewZenithAnglesRad();
-            auxiliaryValues.setCosOZARads();
-            auxiliaryValues.setCosSZARads();
-            auxiliaryValues.setSinOZARads();
-            auxiliaryValues.setSinSZARads();
+        if (isAirMass || isRBrr) {
             auxiliaryValues.setAirMass();
+        }
+
+        if (isRBrr) {
             auxiliaryValues.setAziDifferent();
-
-
-            auxiliaryValues.setAltitudes();
             auxiliaryValues.setFourier();
             auxiliaryValues.setInterpolation();
-
-
-            return auxiliaryValues;
         }
-        throw new IllegalArgumentException("Sensor is not supported");
+        return auxiliaryValues;
     }
 
-    private void waterVaporCorrection709(double[] reflectances, double[] bWVRefTile, double[] bWVTile) {
+    private double[] waterVaporCorrection709(double[] reflectances, Rectangle targetRectangle) {
+        String bandNamePattern = sensor.getGetPattern();
+        int[] upperLowerBounds = sensor.getUpperLowerBounds();
+        double[] bWVRefTile = AuxiliaryValues.getSampleDoubles(getSourceTile(sourceProduct.getBand(String.format(bandNamePattern, upperLowerBounds[0])), targetRectangle));
+        double[] bWVTile = AuxiliaryValues.getSampleDoubles(getSourceTile(sourceProduct.getBand(String.format(bandNamePattern, upperLowerBounds[1])), targetRectangle));
         double[] H2O_COR_POLY = new double[]{0.3832989, 1.6527957, -1.5635101, 0.5311913};  // Polynomial coefficients for WV transmission @ 709nm
         // in order to optimise performance we do:
         // trans709 = H2O_COR_POLY[0] + (H2O_COR_POLY[1] + (H2O_COR_POLY[2] + H2O_COR_POLY[3] * X2) * X2) * X2
@@ -353,6 +307,7 @@ public class RayleighCorrectionOpII extends Operator {
             }
             reflectances[i] = reflectances[i] / trans709;
         }
+        return reflectances;
     }
 
     private Sensor getSensorPattern() {

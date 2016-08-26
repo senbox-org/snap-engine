@@ -18,9 +18,13 @@
 
 package org.esa.s3tbx.olci.radiometry.rayleighcorrection;
 
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Test;
 
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -32,20 +36,33 @@ public class RayleighCorrectionOpIITest {
     @Test
     public void testGetBandIndex() throws Exception {
         assertEquals(8, rayleighCorrectionOpII.getSourceBandIndex("band_08"));
-
         assertEquals(-1, rayleighCorrectionOpII.getSourceBandIndex("band"));
-
         assertEquals(9, rayleighCorrectionOpII.getSourceBandIndex("09band"));
-
         assertEquals(5, rayleighCorrectionOpII.getSourceBandIndex("Bla05band"));
-
-
     }
 
 
     @Test
     public void testWaterVapor() throws Exception {
+        Product product = new Product("dummy", "dummy");
+        Band b1 = createBand("radiance_1", 1);
+        Band b2 = createBand("radiance_2", 2);
+        Band b3 = createBand("radiance_3", 3);
+        Band b4 = createBand("radiance_4", 4);
 
-//        rayleighCorrectionOpII.
+        product.addBand(b1);
+        product.addBand(b2);
+        product.addBand(b3);
+        product.addBand(b4);
+
+        double[] allWavelengths = rayleighCorrectionOpII.getAllWavelengths(product, 3, "radiance_%d");
+        assertArrayEquals(new double[]{1, 2, 3}, allWavelengths, 1e-8);
+
+    }
+
+    private Band createBand(String bandName, float waveLength) {
+        Band b1 = new Band(bandName, ProductData.TYPE_INT8, 1, 1);
+        b1.setSpectralWavelength(waveLength);
+        return b1;
     }
 }
