@@ -8,7 +8,12 @@ import ncsa.hdf.object.Datatype;
 import ncsa.hdf.object.h5.H5Datatype;
 import ncsa.hdf.object.h5.H5Group;
 import ncsa.hdf.object.h5.H5ScalarDS;
-import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.CrsGeoCoding;
+import org.esa.snap.core.datamodel.MetadataAttribute;
+import org.esa.snap.core.datamodel.MetadataElement;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.SystemUtils;
 import org.geotools.referencing.CRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -36,19 +41,19 @@ public class ProbaVUtils {
         String result = "";
         switch (attribute.getType().getDatatypeClass()) {
             case Datatype.CLASS_INTEGER:
-                if (attribute.getValue().getClass() == Long.class) {
+                if (attribute.getValue().getClass() == long[].class) {
                     long[] ivals = (long[]) attribute.getValue();
                     for (long ival : ivals) {
                         result = result.concat(Long.toString(ival) + " ");
                     }
                 }
-                if (attribute.getValue().getClass() == Integer.class) {
+                if (attribute.getValue().getClass() == int[].class) {
                     int[] ivals = (int[]) attribute.getValue();
                     for (int ival : ivals) {
                         result = result.concat(Integer.toString(ival) + " ");
                     }
                 }
-                if (attribute.getValue().getClass() == Short.class) {
+                if (attribute.getValue().getClass() == short[].class) {
                     short[] ivals = (short[]) attribute.getValue();
                     for (short ival : ivals) {
                         result = result.concat(Short.toString(ival) + " ");
