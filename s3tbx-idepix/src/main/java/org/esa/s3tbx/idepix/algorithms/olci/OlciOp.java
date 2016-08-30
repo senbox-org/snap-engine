@@ -99,9 +99,8 @@ public class OlciOp extends BasisOp {
             description = " NN cloud ambiguous cloud sure/snow separation value")
     double schillerLandNNCloudSureSnowSeparationValue;
 
-//    @Parameter(defaultValue = "true", label = " Compute a cloud buffer")
-//    private boolean computeCloudBuffer;
-    private boolean computeCloudBuffer = false;  // todo: much too slow, check why!!
+    @Parameter(defaultValue = "true", label = " Compute a cloud buffer")
+    private boolean computeCloudBuffer;
 
     @Parameter(defaultValue = "2", interval = "[0,100]",
             description = "The width of a cloud 'safety buffer' around a pixel which was classified as cloudy.",
@@ -111,7 +110,6 @@ public class OlciOp extends BasisOp {
     private Product waterClassificationProduct;
     private Product landClassificationProduct;
     private Product mergedClassificationProduct;
-    private Product postProcessingProduct;
 
     private Product rad2reflProduct;
     private Product waterMaskProduct;
@@ -131,19 +129,14 @@ public class OlciOp extends BasisOp {
 
         preProcess();
 
+        setClassificationInputProducts();
         computeWaterCloudProduct();
         computeLandCloudProduct();
         mergeLandWater();
-//        targetProduct = mergedClassificationProduct;
-        postProcess();
 
-        targetProduct = postProcessingProduct;
+        targetProduct = mergedClassificationProduct;
 
-        targetProduct = IdepixUtils.cloneProduct(mergedClassificationProduct, true);
         targetProduct.setAutoGrouping("Oa*_radiance:Oa*_reflectance");
-
-        Band cloudFlagBand = targetProduct.getBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS);
-        cloudFlagBand.setSourceImage(postProcessingProduct.getBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS).getSourceImage());
 
         copyOutputBands();
         ProductUtils.copyFlagBands(sourceProduct, targetProduct, true);   // we need the L1b flag!
@@ -187,13 +180,15 @@ public class OlciOp extends BasisOp {
 
     private void computeWaterCloudProduct() {
         setWaterClassificationParameters();
+        waterClassificationProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(OlciWaterClassificationOp.class),
+                                                       waterClassificationParameters, classificationInputProducts);
+    }
+
+    private void setClassificationInputProducts() {
         classificationInputProducts = new HashMap<>();
         classificationInputProducts.put("l1b", sourceProduct);
         classificationInputProducts.put("rhotoa", rad2reflProduct);
         classificationInputProducts.put("waterMask", waterMaskProduct);
-
-        waterClassificationProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(OlciWaterClassificationOp.class),
-                                                       waterClassificationParameters, classificationInputProducts);
     }
 
     private void computeLandCloudProduct() {
@@ -209,31 +204,10 @@ public class OlciOp extends BasisOp {
 
         Map<String, Object> mergeClassificationParameters = new HashMap<>();
         mergeClassificationParameters.put("copyAllTiePoints", true);
+        mergeClassificationParameters.put("computeCloudBuffer", computeCloudBuffer);
+        mergeClassificationParameters.put("cloudBufferWidth", cloudBufferWidth);
         mergedClassificationProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(OlciMergeLandWaterOp.class),
                                                         mergeClassificationParameters, mergeInputProducts);
-    }
-
-    private void postProcess() {
-        HashMap<String, Product> input = new HashMap<>();
-//        input.put("l1b", sourceProduct);
-//        input.put("waterMask", waterMaskProduct);
-//        input.put("olciCloud", mergedClassificationProduct);
-//
-        Map<String, Object> params = new HashMap<>();
-//        final Product classifiedProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(OlciPostProcessOp.class),
-//                                                            params, input);   // todo: much too slow, check!!
-        final Product classifiedProduct = mergedClassificationProduct;
-
-        if (computeCloudBuffer) {
-            input = new HashMap<>();
-            input.put("classifiedProduct", classifiedProduct);
-            params = new HashMap<>();
-            params.put("cloudBufferWidth", cloudBufferWidth);
-            postProcessingProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(CloudBufferOp.class),
-                                                      params, input);
-        } else {
-            postProcessingProduct = classifiedProduct;
-        }
     }
 
     private void copyOutputBands() {
