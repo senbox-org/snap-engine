@@ -24,6 +24,9 @@ public class SmileCorrectionAlgorithm {
 
     public static float correctWithReflectance(float sourceReflectance, float lowerReflectance, float upperReflectance,
                                                float sourceTargetLambda, float lowerLambda, float upperLambda, float refCentralWaveLength) {
+
+
+
         double dl = (refCentralWaveLength - sourceTargetLambda) / (upperLambda - lowerLambda);
         double dr = (upperReflectance - lowerReflectance) * dl;
         return (float) (sourceReflectance + dr);

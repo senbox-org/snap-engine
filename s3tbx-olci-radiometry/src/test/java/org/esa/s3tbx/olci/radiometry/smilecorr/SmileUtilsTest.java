@@ -18,7 +18,7 @@
 
 package org.esa.s3tbx.olci.radiometry.smilecorr;
 
-import org.esa.s3tbx.olci.radiometry.rayleighcorrection.AuxiliaryValues;
+import org.esa.s3tbx.olci.radiometry.rayleighcorrection.RayleighAux;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -31,11 +31,11 @@ import static org.junit.Assert.*;
  */
 public class SmileUtilsTest {
 
-    private AuxiliaryValues auxiliaryValues;
+    private RayleighAux rayleighAux;
 
     @Before
     public void setUp() throws Exception {
-        auxiliaryValues = new AuxiliaryValues();
+        rayleighAux = new RayleighAux();
     }
 
     @Test

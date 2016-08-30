@@ -30,71 +30,64 @@ import static org.junit.Assert.fail;
 /**
  * @author muhammad.bc.
  */
-@Ignore
-public class AuxiliaryValuesTest {
 
-    private AuxiliaryValues auxiliaryValues;
+public class RayleighAuxTest {
+
+    private RayleighAux rayleighAux;
     private double[] angleOne = {1, 2, 3};
     private double[] angleTwo = {4, 5, 6};
 
-/*    @Before
-    public void setUp() throws Exception {
-        auxiliaryValues = new AuxiliaryValues();
-        auxiliaryValues.setSunZenithAngles(angleOne, sourceTile);
-        auxiliaryValues.setViewZenithAngles(angleOne);
-        auxiliaryValues.setSunAzimuthAngles(angleOne);
-        auxiliaryValues.setViewAzimuthAngles(angleTwo);
-        auxiliaryValues.setViewZenithAnglesRad();
-        auxiliaryValues.setSunZenithAnglesRad();
-        auxiliaryValues.setViewAzimuthAnglesRad();
-        auxiliaryValues.setSunAzimuthAnglesRad();
-        auxiliaryValues.setCosOZARads();
-        auxiliaryValues.setCosSZARads();
+    @Test
+    public void testGetInterpolation() throws Exception {
+        
 
-        auxiliaryValues.setLatitudes(angleOne, sourceTile);
-        auxiliaryValues.setLongitude(angleOne);
-    }*/
+    }
 
+    @Ignore
     @Test
     public void testGetCosSZA() throws Exception {
-        assertArrayEquals(angleOne, auxiliaryValues.getSunZenithAngles(), 1e-8);
-        assertArrayEquals(new double[]{0.9998476951563913, 0.9993908270190958, 0.9986295347545738}, auxiliaryValues.getCosSZARads(), 1e-8);
+        assertArrayEquals(angleOne, rayleighAux.getSunZenithAngles(), 1e-8);
+        assertArrayEquals(new double[]{0.9998476951563913, 0.9993908270190958, 0.9986295347545738}, rayleighAux.getCosSZARads(), 1e-8);
     }
 
+    @Ignore
     @Test
     public void testGetSZARad() throws Exception {
-        assertArrayEquals(angleOne, auxiliaryValues.getSunZenithAngles(), 1e-8);
-        assertArrayEquals(new double[]{0.017453292519943295, 0.03490658504, 0.05235987756}, auxiliaryValues.getSunZenithAnglesRad(), 1e-8);
+        assertArrayEquals(angleOne, rayleighAux.getSunZenithAngles(), 1e-8);
+        assertArrayEquals(new double[]{0.017453292519943295, 0.03490658504, 0.05235987756}, rayleighAux.getSunZenithAnglesRad(), 1e-8);
     }
 
+    @Ignore
     @Test
     public void testGetAirMass() throws Exception {
-        auxiliaryValues.setAirMass();
-        assertArrayEquals(new double[]{2.0003046560878155, 2.0012190885976433, 2.002744691995842}, auxiliaryValues.getAirMass(), 1e-8);
+        rayleighAux.setAirMass();
+        assertArrayEquals(new double[]{2.0003046560878155, 2.0012190885976433, 2.002744691995842}, rayleighAux.getAirMass(), 1e-8);
     }
 
+    @Ignore
     @Test
     public void testAziDiff() throws Exception {
-        auxiliaryValues.setAziDifferent();
-        assertArrayEquals(new double[]{0.05235987755983066, 0.05235987755983066, 0.05235987755983066}, auxiliaryValues.getAziDifferent(), 1e-8);
+        rayleighAux.setAziDifferent();
+        assertArrayEquals(new double[]{0.05235987755983066, 0.05235987755983066, 0.05235987755983066}, rayleighAux.getAziDifferent(), 1e-8);
     }
 
+    @Ignore
     @Test
     public void testCreateLineSpaceOfArrayElements() throws Exception {
-        double[] lineSpace = auxiliaryValues.getLineSpace(0, 10, 5);
+        double[] lineSpace = rayleighAux.getLineSpace(0, 10, 5);
         assertNotNull(lineSpace);
         assertEquals(5, lineSpace.length);
         assertArrayEquals(new double[]{0.0, 2.5, 5.0, 7.5, 10.0}, lineSpace, 1e-8);
-        lineSpace = auxiliaryValues.getLineSpace(0, 1, 5);
+        lineSpace = rayleighAux.getLineSpace(0, 1, 5);
         assertEquals(5, lineSpace.length);
         assertArrayEquals(new double[]{0.0, 0.25, 0.5, 0.75, 1.0}, lineSpace, 1e-8);
 
-        lineSpace = auxiliaryValues.getLineSpace(0, 0, 5);
+        lineSpace = rayleighAux.getLineSpace(0, 0, 5);
         assertEquals(5, lineSpace.length);
         assertArrayEquals(new double[]{0.0, 0.0, 0.0, 0.0, 0.0}, lineSpace, 1e-8);
 
         try {
-            lineSpace = auxiliaryValues.getLineSpace(0, 10, -5);
+            lineSpace = rayleighAux.getLineSpace(0, 10, -5);
             fail("Array cant have negative index");
         } catch (NegativeArraySizeException ex) {
 

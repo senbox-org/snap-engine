@@ -1,70 +1,47 @@
 package org.esa.s3tbx.olci.radiometry.rayleighcorrection;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.esa.s3tbx.olci.radiometry.smilecorr.SmileUtils;
+import org.esa.s3tbx.olci.radiometry.smilecorr.RayleighSample;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.util.math.RsMathUtils;
 
 /**
  * @author muhammad.bc.
  */
 public class RayleighCorrAlgorithm {
 
-    public static final double STD_SEA_LEVEL_PRESSURE = 1013.0;
+    public static final int NUM_BANDS = 21;
+    public static final String BAND_NAME_PATTERN = "Oa%02d_radiance";
 
-    //Copied from org.esa.beam.meris.case2.MerisCase2BasisWaterOp
-    public double getAzimuthDifference(double viewAzimuthAngle, double sunAzimuthAngle) {
-        double azi_diff_deg = Math.abs(viewAzimuthAngle - sunAzimuthAngle); /* azimuth difference */
-              /* reverse azi difference */
-        if (azi_diff_deg > 180.0) {
-            azi_diff_deg = 360.0 - azi_diff_deg;
+    //todo mba/* write test
+    public double[] waterVaporCorrection709(double[] reflectances, double[] bWVRefTile, double[] bWVTile) {
+        double[] H2O_COR_POLY = new double[]{0.3832989, 1.6527957, -1.5635101, 0.5311913};  // Polynomial coefficients for WV transmission @ 709nm
+        // in order to optimise performance we do:
+        // trans709 = H2O_COR_POLY[0] + (H2O_COR_POLY[1] + (H2O_COR_POLY[2] + H2O_COR_POLY[3] * X2) * X2) * X2
+        // when X2 = 1
+        // trans709 = 0.3832989 + ( 1.6527957+ (-1.5635101+ 0.5311913*1)*1)*1
+        double trans709 = 1.0037757999999999;
+        for (int i = 0; i < bWVTile.length; i++) {
+            if (bWVRefTile[i] > 0) {
+                double X2 = bWVTile[i] / bWVRefTile[i];
+                trans709 = H2O_COR_POLY[0] + (H2O_COR_POLY[1] + (H2O_COR_POLY[2] + H2O_COR_POLY[3] * X2) * X2) * X2;
+            }
+            reflectances[i] = reflectances[i] / trans709;
         }
-//        azi_diff_deg = 180.0 - azi_diff_deg; /* different definitions in MERIS data and MC /HL simulation */
-        return azi_diff_deg;
+        return reflectances;
     }
 
-    public double[] getTaurStd(double[] lam) {
-        final double[] taurs = new double[lam.length];
-        for (int i = 0; i < lam.length; i++) {
-            taurs[i] = Math.exp(-4.637) * Math.pow((lam[i] / 1000), -4.0679);
+    public double[] getCrossSectionSigma(Product sourceProduct, int numBands, String getBandNamePattern) {
+        double[] waveLength = new double[numBands];
+        for (int i = 0; i < numBands; i++) {
+            waveLength[i] = sourceProduct.getBand(String.format(getBandNamePattern, i + 1)).getSpectralWavelength();
         }
-        return taurs;
+
+        return getCrossSection(waveLength);
     }
 
-    public double[] getPressureAtSurface(double[] seaLevelPressure, double[] height) {
-        double pressureAtms[] = new double[seaLevelPressure.length];
-        for (int i = 0; i < seaLevelPressure.length; i++) {
-            pressureAtms[i] = seaLevelPressure[i] * Math.exp(-height[i] / 8000);
-        }
-        return pressureAtms;
-    }
-
-    public double[] getRayleighOpticalThickness(double[] pressureAtms, double taur_std) {
-        final double thickness[] = new double[pressureAtms.length];
-        double pressureFactor = taur_std / STD_SEA_LEVEL_PRESSURE;
-        for (int i = 0; i < pressureAtms.length; i++) {
-            thickness[i] = pressureAtms[i] * pressureFactor;
-        }
-        return thickness;
-    }
-
-    protected double phaseRaylMin(double sunZenithAngle, double viewZenithAngle, double azimuthDifference) {
-        double cosScatterAngle = cosScatterAngle(sunZenithAngle, viewZenithAngle, azimuthDifference);
-        return 0.75 * (1.0 + cosScatterAngle * cosScatterAngle);
-    }
-
-
-    protected double cosScatterAngle(double sunZenithAngle, double viewZenithAngle, double azimuthDifferent) {
-        final double cos_view = Math.cos(viewZenithAngle);
-        final double cos_sun = Math.cos(sunZenithAngle);
-
-        final double sin_view = Math.sin(viewZenithAngle);
-        final double sin_sun = Math.sin(sunZenithAngle);
-        final double cos_azi_dif = Math.cos(azimuthDifferent);
-        return (-cos_view * cos_sun) - (sin_view * sin_sun * cos_azi_dif);
-    }
-
-    public double[] getCrossSectionSigma(double[] lambdas) {
+    public double[] getCrossSection(double[] lambdas) {
         double n_ratio = 1 + 0.54 * (RayleighConstants.CO2 - 0.0003);
         double molecularDen = Math.pow(RayleighConstants.Molecular_cm3, 2);
         double[] sigma = new double[lambdas.length];
@@ -87,67 +64,44 @@ public class RayleighCorrAlgorithm {
         return sigma;
     }
 
-    public double[] getRayleighOpticalThicknessII(AuxiliaryValues auxiliaryValues, double sigma) {
-        double seaLevelPressure[] = auxiliaryValues.getSeaLevels();
-        double altitude[] = auxiliaryValues.getAltitudes();
-        double latitude[] = auxiliaryValues.getLatitudes();
 
-        double rayleighOpticalThickness[] = new double[altitude.length];
-        for (int i = 0; i < altitude.length; i++) {
-
-            double P = seaLevelPressure[i] * Math.pow((1.0 - 0.0065 * altitude[i] / 288.15), 5.255) * 1000;
-            double latRad = Math.toRadians(latitude[i]);
-            double cos2LatRad = Math.cos(2 * latRad);
-            double g0 = 980.616 * (1 - 0.0026373 * cos2LatRad + 0.0000059 * Math.pow(cos2LatRad, 2));
-            double effectiveMassWeightAltitude = 0.73737 * altitude[i] + 5517.56;
-
-            double g = g0 - (0.0003085462 + 0.000000227 * cos2LatRad) * effectiveMassWeightAltitude +
-                    (0.00000000007254 + 0.0000000000001 * cos2LatRad) * Math.pow(effectiveMassWeightAltitude, 2) -
-                    (1.517E-17 + 6E-20 * cos2LatRad) * Math.pow(effectiveMassWeightAltitude, 3);
-
-            double factor = (P * RayleighConstants.AVOGADRO_NUMBER) / (RayleighConstants.MEAN_MOLECULAR_WEIGHT_C02 * g);
-            rayleighOpticalThickness[i] = factor * sigma;
-        }
-        return rayleighOpticalThickness;
-    }
-
-
-    public double[] getCorrOzone(AuxiliaryValues auxiliaryValues, double[] rho_ng_ref, double absorpO) {
-        double[] ozone = auxiliaryValues.getTotalOzones();
-        double[] cosOZARads = auxiliaryValues.getCosOZARads();
-        double[] cosSZARads = auxiliaryValues.getCosSZARads();
-
+    public double[] getCorrOzone(double[] rho_ng_ref, double absorpO, double[] ozones, double[] cosOZARads, double[] cosSZARads) {
         for (int i = 0; i < rho_ng_ref.length; i++) {
-            double model_ozone = 0;
             double cts = cosSZARads[i]; //#cosine of sun zenith angle
             double ctv = cosOZARads[i];//#cosine of view zenith angle
-            double trans_ozoned12 = Math.exp(-(absorpO * ozone[i] / 1000.0 - model_ozone) / cts);
-            double trans_ozoneu12 = Math.exp(-(absorpO * ozone[i] / 1000.0 - model_ozone) / ctv);
-            double trans_ozone12 = trans_ozoned12 * trans_ozoneu12;
-            rho_ng_ref[i] = rho_ng_ref[i] / trans_ozone12;
+            double ozone = ozones[i];
+            rho_ng_ref[i] = getCorrOzone(rho_ng_ref[i], absorpO, ozone, cts, ctv);
         }
         return rho_ng_ref;
     }
 
-    public double[] getRhoBrr(AuxiliaryValues auxiliaryValues, double[] rayleighOpticalThickness, double[] reflectance, int sourceBandIndex) {
-        auxiliaryValues.setRayleighThickness(rayleighOpticalThickness);
+    //todo mba/* write test
+    public double getCorrOzone(double rho_ng, double absorpO, double ozone, double cts, double ctv) {
+        double model_ozone = 0;
+        double trans_ozoned12 = Math.exp(-(absorpO * ozone / 1000.0 - model_ozone) / cts);
+        double trans_ozoneu12 = Math.exp(-(absorpO * ozone / 1000.0 - model_ozone) / ctv);
+        double trans_ozone12 = trans_ozoned12 * trans_ozoneu12;
+        double rho = rho_ng / trans_ozone12;
+        return rho;
+    }
 
-        final double[] ozaRads = auxiliaryValues.getViewZenithAnglesRad();
-        final double[] airMasses = auxiliaryValues.getAirMass();
-        final double[] aziDiffs = auxiliaryValues.getAziDifferent();
-        final double[] cosSZARads = auxiliaryValues.getCosSZARads();
-        final double[] cosOZARads = auxiliaryValues.getCosOZARads();
-        final double[] sARay = auxiliaryValues.getInterpolateRayleighThickness();
-        final double[] tau_ray = auxiliaryValues.getTaur();
+    public double[] getRhoBrr(RayleighAux rayleighAux, double[] rayleighOpticalThickness, double[] corrOzoneRefl) {
+        final double[] airMasses = rayleighAux.getAirMass();
+        final double[] aziDiffs = rayleighAux.getAziDifferent();
+        final double[] cosSZARads = rayleighAux.getCosSZARads();
+        final double[] cosOZARads = rayleighAux.getCosOZARads();
+        final double[] sARay = rayleighAux.getInterpolateRayleighThickness(rayleighOpticalThickness);
+        final double[] tau_ray = rayleighAux.getTaur();
 
-        final Map<Integer, double[]> fourier = auxiliaryValues.getFourier();
-        final Map<Integer, List<double[]>> interpolation = auxiliaryValues.getInterpolation();
-        final int length = ozaRads.length;
+        final Map<Integer, double[]> fourier = rayleighAux.getFourier();
+        final Map<Integer, List<double[]>> interpolation = rayleighAux.getInterpolation();
+        final int length = cosOZARads.length;
 
         final double[] rho_BRR = new double[length];
-        final double rho_Rm[] = new double[3];
+
 
         for (int index = 0; index < length; index++) {
+
             double taurVal = rayleighOpticalThickness[index];
             if (Double.isNaN(taurVal)) {
                 rho_BRR[index] = taurVal;
@@ -162,17 +116,7 @@ public class RayleighCorrAlgorithm {
             List<double[]> interpolateValues = interpolation.get(index);
             double[] fourierSeries = fourier.get(index);
 
-            for (int i = 0; i < fourierSeries.length; i++) {
-                double[] interpolatedValueABCD = interpolateValues.get(i);
-                double a = interpolatedValueABCD[0];
-                double b = interpolatedValueABCD[1];
-                double c = interpolatedValueABCD[2];
-                double d = interpolatedValueABCD[3];
-
-                double rayPrimaryScatters = (fourierSeries[i] / (4.0 * (cosSZARad + cosOZARad))) * (1.0 - Math.exp(-massAir * taurVal));
-                double rayMultiCorr = a + b * taurVal + c * Math.pow(taurVal, 2) + d * Math.pow(taurVal, 3);
-                rho_Rm[i] = rayMultiCorr * rayPrimaryScatters;
-            }
+            double[] rho_Rm = getFourierSeries(taurVal, massAir, cosOZARad, cosSZARad, interpolateValues, fourierSeries);
 
             double rho_R = rho_Rm[0] + 2.0 * rho_Rm[1] * Math.cos(aziDiff) + 2.0 * rho_Rm[2] * Math.cos(2.0 * aziDiff);
             // polynomial coefficients tpoly0, tpoly1 and tpoly2 from MERIS LUT
@@ -187,7 +131,7 @@ public class RayleighCorrAlgorithm {
 
             double saRay = sARay[index];
 
-            double rho_toaR = (reflectance[index] - rho_R) / (tR_thetaS * tR_thetaV); //toa reflectance corrected for Rayleigh scattering
+            double rho_toaR = (corrOzoneRefl[index] - rho_R) / (tR_thetaS * tR_thetaV); //toa corrOzoneRefl corrected for Rayleigh scattering
             double sphericalFactor = 1.0 / (1.0 + saRay * rho_toaR); //#factor used in the next equation to account for the spherical albedo
             //#top of aerosol reflectance, which is equal to bottom of Rayleigh reflectance
             rho_BRR[index] = (rho_toaR * sphericalFactor);
@@ -195,64 +139,118 @@ public class RayleighCorrAlgorithm {
         return rho_BRR;
     }
 
-    //mba old Rayleigh implementation
-    public double[] getRayleighReflectance(double[] taurPoZ, double[] sunZenithAngles, double[] sunAzimuthAngles, double[] viewZenithAngles, double[] viewAzimuthAngles) {
-        final double reflRaly[] = new double[viewZenithAngles.length];
+    private double[] getFourierSeries(double rayleighOpticalThickness, double massAir, double cosOZARad, double cosSZARad, List<double[]> interpolateValues, double[] fourierSeries) {
+        double rho_Rm[] = new double[fourierSeries.length];
+        for (int i = 0; i < fourierSeries.length; i++) {
+            double[] interpolatedValueABCD = interpolateValues.get(i);
+            double a = interpolatedValueABCD[0];
+            double b = interpolatedValueABCD[1];
+            double c = interpolatedValueABCD[2];
+            double d = interpolatedValueABCD[3];
 
-        double[] sunZenithAngleRad = SmileUtils.convertDegreesToRadians(sunZenithAngles);
-        double[] viewZenithAngleRad = SmileUtils.convertDegreesToRadians(viewZenithAngles);
-
-        for (int i = 0; i < viewZenithAngles.length; i++) {
-            final double azimuthDifferenceRad = Math.toRadians(getAzimuthDifference(viewAzimuthAngles[i], sunAzimuthAngles[i]));
-            final double sunZenithAngle = sunZenithAngleRad[i];
-            final double viewZenithAngle = viewZenithAngleRad[i];
-
-            final double phaseRaylMin = phaseRaylMin(sunZenithAngle, viewZenithAngle, azimuthDifferenceRad);
-            final double cos_sunZenith = Math.cos(sunZenithAngle);
-            final double cos_viewZenith = Math.cos(viewZenithAngle);
-            reflRaly[i] = cos_sunZenith * taurPoZ[i] * phaseRaylMin / (4 * Math.PI) * (1 / cos_viewZenith) * Math.PI;
-
+            double rayPrimaryScatters = (fourierSeries[i] / (4.0 * (cosSZARad + cosOZARad))) * (1.0 - Math.exp(-massAir * rayleighOpticalThickness));
+            double rayMultiCorr = a + b * rayleighOpticalThickness + c * Math.pow(rayleighOpticalThickness, 2) + d * Math.pow(rayleighOpticalThickness, 3);
+            rho_Rm[i] = rayMultiCorr * rayPrimaryScatters;
         }
-        return reflRaly;
+        return rho_Rm;
     }
 
+    //todo mba/* write test
+    public double getRhoBrr(double rayleighOpticalThicknes, double aziDiff1, double massAir1, double cosOZARad1,
+                            double cosSZARad1, List<double[]> interpolateValues1, double[] tau_ray,
+                            double saRay1, double[] fourierSeries1, double corrOzoneRefl) {
 
-    public HashMap<String, double[]> correct(AuxiliaryValues auxiliaryValues, double[] ray_phase_min, int sourceBandIndex) {
-
-        double[] lambda = auxiliaryValues.getLambdaSource();
-        double[] seaAirPressure = auxiliaryValues.getSeaLevels();
-        double[] altitude = auxiliaryValues.getAltitudes();
-        double[] szaRads = auxiliaryValues.getSunZenithAnglesRad();
-        double[] ozaRads = auxiliaryValues.getViewZenithAnglesRad();
-
-        double[] rRaySimple = new double[ozaRads.length];
-        double[] taurS = new double[ozaRads.length];
-        HashMap<String, double[]> rayHashMap = new HashMap<>();
-        rayHashMap.put(String.format("taurS_%02d", sourceBandIndex), taurS);
-        rayHashMap.put(String.format("RayleighSimple_%02d", sourceBandIndex), rRaySimple);
-
-        for (int i = 0; i < ray_phase_min.length; i++) {
-            double taurSLocal = Math.exp(-4.637) * Math.pow((lambda[i] / 1000.0), -4.0679);
-            double pressureAtms = seaAirPressure[i] * Math.exp(-altitude[i] / 8000.0);
-            double pressureFactor = taurSLocal / 1013.0;
-            taurS[i] = pressureAtms * pressureFactor;
-            rRaySimple[i] = Math.cos(szaRads[i]) * taurS[i] * ray_phase_min[i] / (4 * Math.PI) * (1 / Math.cos(ozaRads[i]) * Math.PI);
+        double taurVal = rayleighOpticalThicknes;
+        double rho_BRR;
+        if (Double.isNaN(taurVal)) {
+            return taurVal;
         }
+        double[] rho_Rm = getFourierSeries(rayleighOpticalThicknes, massAir1, cosOZARad1, cosSZARad1, interpolateValues1, fourierSeries1);
 
-        return rayHashMap;
+        double rho_R = rho_Rm[0] + 2.0 * rho_Rm[1] * Math.cos(aziDiff1) + 2.0 * rho_Rm[2] * Math.cos(2.0 * aziDiff1);
+        // polynomial coefficients tpoly0, tpoly1 and tpoly2 from MERIS LUT
+
+        double tRs = ((2.0 / 3.0 + cosSZARad1) + (2.0 / 3.0 - cosSZARad1) * Math.exp(-taurVal / cosSZARad1)) / (4.0 / 3.0 + taurVal);
+
+        double tR_thetaS = tau_ray[0] + tau_ray[1] * tRs + tau_ray[2] * Math.pow(tRs, 2);
+        //#Rayleigh Transmittance sun - surface
+        double tRv = ((2.0 / 3.0 + cosOZARad1) + (2.0 / 3.0 - cosOZARad1) * Math.exp(-taurVal / cosOZARad1)) / (4.0 / 3.0 + taurVal);
+        //#Rayleigh Transmittance surface - sensor
+        double tR_thetaV = tau_ray[0] + tau_ray[1] * tRv + tau_ray[2] * Math.pow(tRv, 2);
+
+        double rho_toaR = (corrOzoneRefl - rho_R) / (tR_thetaS * tR_thetaV); //toa reflectance corrected for Rayleigh scattering
+        double sphericalFactor = 1.0 / (1.0 + saRay1 * rho_toaR); //#factor used in the next equation to account for the spherical albedo
+        //#top of aerosol reflectance, which is equal to bottom of Rayleigh reflectance
+        rho_BRR = (rho_toaR * sphericalFactor);
+        return rho_BRR;
     }
 
+    public RayleighSample getRayleighReflectance(RayleighSample rayleighSample, RayleighAux rayleighAux, Product sourceProduct, int indexOfArray, double[] absorptionOfBand) {
 
-    //todo mba/** write test
-    public double[] convertRadsToRefls(AuxiliaryValues auxiliaryValues) {
+        double[] crossSectionSigma = getCrossSectionSigma(sourceProduct, NUM_BANDS, BAND_NAME_PATTERN);
 
-        double[] radiance = auxiliaryValues.getSourceSampleRad();
-        double[] solarIrradiance = auxiliaryValues.getSolarFluxs();
-        double[] sza = auxiliaryValues.getSunZenithAngles();
+        double sourceRayRefl = getRayleigh(rayleighAux, crossSectionSigma, absorptionOfBand, rayleighSample.getSourceReflectance(), rayleighSample.getSourceIndex(), indexOfArray);
+        double lowerRayRefl = getRayleigh(rayleighAux, crossSectionSigma, absorptionOfBand, rayleighSample.getLowerReflectance(),  rayleighSample.getLowerWaterIndex(), indexOfArray);
+        double upperRayRefl = getRayleigh(rayleighAux, crossSectionSigma, absorptionOfBand, rayleighSample.getUpperReflectance(), rayleighSample.getUpperWaterIndex(), indexOfArray);
+
+        rayleighSample.setSourceReflectance((float) sourceRayRefl);
+        rayleighSample.setLowerReflectance((float) lowerRayRefl);
+        rayleighSample.setUpperReflectance((float) upperRayRefl);
+        return rayleighSample;
+    }
+
+    private double getRayleigh(RayleighAux rayleighAux, double[] crossSectionSigma, double[] absorptionOfBand, double ref, int index, int indexOfArray) {
+
+        final Map<Integer, double[]> fourier = rayleighAux.getFourier();
+        final Map<Integer, List<double[]>> interpolation = rayleighAux.getInterpolation();
+
+        double sigma = crossSectionSigma[index];
+        double absorp = absorptionOfBand[index];
+        double ozone = rayleighAux.getTotalOzones()[indexOfArray];
+        double cosOZARad = rayleighAux.getCosOZARads()[indexOfArray];
+        double cosSZARad = rayleighAux.getCosSZARads()[indexOfArray];
+        double airMasses = rayleighAux.getAirMass()[indexOfArray];
+        double aziDiffs = rayleighAux.getAziDifferent()[indexOfArray];
+        double[] tau_ray = rayleighAux.getTaur();
+        List<double[]> interpolateValues = interpolation.get(indexOfArray);
+        double[] fourierSeries = fourier.get(indexOfArray);
+
+
+        float rayleighThickness = getRayleighThickness(rayleighAux, indexOfArray, sigma);
+        double sARay[] = rayleighAux.getInterpolateRayleighThickness(rayleighThickness);
+        double corrOzone = getCorrOzone(ref, absorp, ozone, cosSZARad, cosOZARad);
+        double rhoBrr = getRhoBrr(rayleighThickness, aziDiffs, airMasses, cosOZARad, cosSZARad, interpolateValues, tau_ray, sARay[0], fourierSeries, corrOzone);
+
+        return rhoBrr;
+    }
+
+    public float getRayleighThickness(RayleighAux rayleighAux, int indexOfArray, double sigma) {
+        double[] seaLevels = rayleighAux.getSeaLevels();
+        double[] latitudes = rayleighAux.getLatitudes();
+        double[] altitudes = rayleighAux.getAltitudes();
+        return (float) getRayleighOpticalThickness(sigma, seaLevels[indexOfArray], altitudes[indexOfArray], latitudes[indexOfArray]);
+    }
+
+    //todo mba/* write test
+    public double getRayleighOpticalThickness(double sigma, double seaLevelPressure, double altitude, double latitude) {
+        double P = seaLevelPressure * Math.pow((1.0 - 0.0065 * altitude / 288.15), 5.255) * 1000;
+        double latRad = Math.toRadians(latitude);
+        double cos2LatRad = Math.cos(2 * latRad);
+        double g0 = 980.616 * (1 - 0.0026373 * cos2LatRad + 0.0000059 * Math.pow(cos2LatRad, 2));
+        double effectiveMassWeightAltitude = 0.73737 * altitude + 5517.56;
+
+        double g = g0 - (0.0003085462 + 0.000000227 * cos2LatRad) * effectiveMassWeightAltitude +
+                (0.00000000007254 + 0.0000000000001 * cos2LatRad) * Math.pow(effectiveMassWeightAltitude, 2) -
+                (1.517E-17 + 6E-20 * cos2LatRad) * Math.pow(effectiveMassWeightAltitude, 3);
+
+        double factor = (P * RayleighConstants.AVOGADRO_NUMBER) / (RayleighConstants.MEAN_MOLECULAR_WEIGHT_C02 * g);
+        return factor * sigma;
+    }
+
+    public double[] convertRadsToRefls(double[] radiance, double[] solarIrradiance, double[] sza) {
         double[] ref = new double[radiance.length];
-        double v = Math.PI / 180.0;
         for (int i = 0; i < ref.length; i++) {
-            ref[i] = (radiance[i] * Math.PI) / (solarIrradiance[i] * Math.cos(sza[i] * v));
+            ref[i] = RsMathUtils.radianceToReflectance((float) radiance[i], (float) sza[i], (float) solarIrradiance[i]);
         }
         return ref;
     }

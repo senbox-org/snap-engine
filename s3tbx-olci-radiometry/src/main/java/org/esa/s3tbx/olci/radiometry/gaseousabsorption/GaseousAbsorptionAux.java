@@ -33,14 +33,14 @@ import java.util.List;
 /**
  * @author muhammad.bc.
  */
-public class GaseousAbsorptionAuxII {
+public class GaseousAbsorptionAux {
 
     private List<double[]> ozoneHighs;
 
 
     private List<double[]> coeffhighres = new ArrayList();
 
-    public GaseousAbsorptionAuxII() {
+    public GaseousAbsorptionAux() {
         try {
             Path installAuxdata = installAuxdata();
             Path resolve = installAuxdata.resolve("ozone-highres.txt");
@@ -75,7 +75,7 @@ public class GaseousAbsorptionAuxII {
 
     Path installAuxdata() throws IOException {
         Path auxdataDirectory = SystemUtils.getAuxDataPath().resolve("olci/smile-correction");
-        final Path sourceDirPath = ResourceInstaller.findModuleCodeBasePath(GaseousAbsorptionAuxII.class).resolve("auxdata/smile");
+        final Path sourceDirPath = ResourceInstaller.findModuleCodeBasePath(GaseousAbsorptionAux.class).resolve("auxdata/smile");
         final ResourceInstaller resourceInstaller = new ResourceInstaller(sourceDirPath, auxdataDirectory);
         resourceInstaller.install(".*", ProgressMonitor.NULL);
         return auxdataDirectory;

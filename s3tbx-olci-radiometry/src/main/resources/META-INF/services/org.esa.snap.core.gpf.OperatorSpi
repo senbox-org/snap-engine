@@ -1,4 +1,4 @@
 org.esa.s3tbx.olci.radiometry.smilecorr.SmileCorretionOp$Spi
-org.esa.s3tbx.olci.radiometry.rayleighcorrection.RayleighCorrectionOpII$Spi
+org.esa.s3tbx.olci.radiometry.rayleighcorrection.RayleighCorrectionOp$Spi
 #org.esa.s3tbx.olci.radiometry.gaseousabsorption.GaseousAbsorptionOp$Spi
 #org.esa.s3tbx.olci.radiometry.rayleighcorrection.RayleighCorrectionOp$Spi

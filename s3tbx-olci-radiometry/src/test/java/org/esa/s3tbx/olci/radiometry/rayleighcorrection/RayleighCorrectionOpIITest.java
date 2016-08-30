@@ -31,7 +31,7 @@ import static org.junit.Assert.assertEquals;
  * @author muhammad.bc.
  */
 public class RayleighCorrectionOpIITest {
-    RayleighCorrectionOpII rayleighCorrectionOpII = new RayleighCorrectionOpII();
+    RayleighCorrectionOp rayleighCorrectionOpII = new RayleighCorrectionOp();
 
     @Test
     public void testGetBandIndex() throws Exception {
@@ -43,7 +43,7 @@ public class RayleighCorrectionOpIITest {
 
 
     @Test
-    public void testWaterVapor() throws Exception {
+    public void testCrossSectionSigma() throws Exception {
         Product product = new Product("dummy", "dummy");
         Band b1 = createBand("radiance_1", 1);
         Band b2 = createBand("radiance_2", 2);
@@ -55,8 +55,8 @@ public class RayleighCorrectionOpIITest {
         product.addBand(b3);
         product.addBand(b4);
 
-        double[] allWavelengths = rayleighCorrectionOpII.getAllWavelengths(product, 3, "radiance_%d");
-        assertArrayEquals(new double[]{1, 2, 3}, allWavelengths, 1e-8);
+        double[] allWavelengths = rayleighCorrectionOpII.getCrossSectionSigma(product, 3, "radiance_%d");
+        assertArrayEquals(new double[]{1.0041580107718594E-9, 3.915403961025194E-12, 1.5231224042681756E-13}, allWavelengths, 1e-8);
 
     }
 

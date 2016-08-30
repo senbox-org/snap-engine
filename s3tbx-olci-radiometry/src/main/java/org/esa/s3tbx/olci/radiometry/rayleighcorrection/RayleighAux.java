@@ -27,7 +27,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import javax.media.jai.Interpolation;
 import org.apache.commons.math3.analysis.interpolation.BicubicSplineInterpolator;
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
@@ -45,7 +44,7 @@ import org.json.simple.parser.ParseException;
 /**
  * @author muhammad.bc.
  */
-public class AuxiliaryValues {
+public class RayleighAux {
 
     public static final String GETASSE_30 = "GETASSE30";
     private static PolynomialSplineFunction interpolate;
@@ -67,7 +66,6 @@ public class AuxiliaryValues {
     private double[] lambdaSource;
     private double[] sourceSampleRad;
     private int sourceBandIndex;
-    private double[] rayleighThickness;
     private float waveLenght;
     private String sourceBandName;
     private double[] longitude;
@@ -84,9 +82,8 @@ public class AuxiliaryValues {
     private double[] sinSZARads;
     private double[] cosOZARads;
     private double[] airMass;
-    private HashMap<String, double[]> sourceTileMap;
 
-    public AuxiliaryValues() {
+    public RayleighAux() {
     }
 
     public static void initDefaultAuxiliary() {
@@ -130,11 +127,13 @@ public class AuxiliaryValues {
         this.altitudes = getSampleDoubles(altitude);
     }
 
+    public void setSunZenithAngles(double... sunZenithAngles) {
+        this.sunZenithAngles = sunZenithAngles;
+    }
 
     double[] getTaur() {
         return tau_ray;
     }
-
 
     void setAltitudes() {
         double[] longitudes = getLongitude();
@@ -153,7 +152,7 @@ public class AuxiliaryValues {
         }
     }
 
-    double[] getAltitudes() {
+    public double[] getAltitudes() {
         return altitudes;
     }
 
@@ -162,6 +161,9 @@ public class AuxiliaryValues {
         Map<Integer, List<double[]>> interpolate = new HashMap<>();
         double[] sunZenithAngles = getSunZenithAngles();
         double[] viewZenithAngles = getViewZenithAngles();
+
+        //todo mba ask Mp if to use this approach.
+        assert sunZenithAngles != null;
 
         if (Objects.nonNull(sunZenithAngles) && Objects.nonNull(viewZenithAngles)) {
             for (int index = 0; index < sunZenithAngles.length; index++) {
@@ -180,10 +182,6 @@ public class AuxiliaryValues {
                         values[2] = gridInterpolator.interpolate(thetas, thetas, rayCooefMatrixC[i]).value(xVal, yVal);
                         values[3] = gridInterpolator.interpolate(thetas, thetas, rayCooefMatrixD[i]).value(xVal, yVal);
                         valueList.add(values);
-                    } else if (yVal <= thetaMin) {
-                        valueList.add(new double[]{thetaMin, thetaMin, thetaMin, thetaMin});
-                    } else if (yVal >= thetaMin) {
-                        valueList.add(new double[]{thetaMax, thetaMax, thetaMax, thetaMax});
                     } else {
                         valueList.add(new double[]{0, 0, 0, 0});
                     }
@@ -201,12 +199,10 @@ public class AuxiliaryValues {
         throw new NullPointerException("The interpolation is empty.");
     }
 
-    void setInterpolationSpike() {
+    public void setSpikeInterpolation() {
         double[] sunZenithAngles = getSunZenithAngles();
         double[] viewZenithAngles = getViewZenithAngles();
         Map<Integer, List<double[]>> interpolate = new HashMap<>();
-
-        Interpolation interpolation = Interpolation.getInstance(Interpolation.INTERP_BILINEAR);
 
         if (Objects.nonNull(sunZenithAngles) && Objects.nonNull(viewZenithAngles)) {
             for (int index = 0; index < sunZenithAngles.length; index++) {
@@ -215,12 +211,18 @@ public class AuxiliaryValues {
 
                 List<double[]> valueList = new ArrayList<>();
                 for (int i = 0; i < rayCooefMatrixA.length; i++) {
-                    double[] values = new double[4];
-                    values[0] = interpolation.interpolate(rayCooefMatrixA[i], (float) xVal, (float) yVal);
-                    values[1] = interpolation.interpolate(rayCooefMatrixB[i], (float) xVal, (float) yVal);
-                    values[2] = interpolation.interpolate(rayCooefMatrixC[i], (float) xVal, (float) yVal);
-                    values[3] = interpolation.interpolate(rayCooefMatrixD[i], (float) xVal, (float) yVal);
-                    valueList.add(values);
+                    double thetaMin = thetas[0];
+                    double thetaMax = thetas[thetas.length - 1];
+                    if (yVal > thetaMin && yVal < thetaMax) {
+                        double[] values = new double[4];
+                        values[0] = SpikeInterpolation.interpolate2D(rayCooefMatrixA[i], thetas, thetas, xVal, yVal);
+                        values[1] = SpikeInterpolation.interpolate2D(rayCooefMatrixB[i], thetas, thetas, xVal, yVal);
+                        values[2] = SpikeInterpolation.interpolate2D(rayCooefMatrixC[i], thetas, thetas, xVal, yVal);
+                        values[3] = SpikeInterpolation.interpolate2D(rayCooefMatrixD[i], thetas, thetas, xVal, yVal);
+                        valueList.add(values);
+                    } else {
+                        valueList.add(new double[]{0, 0, 0, 0});
+                    }
                 }
                 interpolate.put(index, valueList);
             }
@@ -228,7 +230,7 @@ public class AuxiliaryValues {
         interpolateMap = interpolate;
     }
 
-    void setFourier() {
+    public void setFourier() {
         // Fourier components of multiple scattering
         Map<Integer, double[]> fourierPoly = new HashMap<>();
         double[] sunZenithAnglesRad = getSunZenithAnglesRad();
@@ -267,7 +269,7 @@ public class AuxiliaryValues {
         }
     }
 
-    Map<Integer, double[]> getFourier() {
+    public Map<Integer, double[]> getFourier() {
         if (Objects.nonNull(fourierPoly)) {
             return fourierPoly;
         }
@@ -346,7 +348,7 @@ public class AuxiliaryValues {
         throw new NullPointerException("The view zenith angles is null.");
     }
 
-    void setAirMass() {
+    public void setAirMass() {
         airMass = SmileUtils.getAirMass(this.getCosOZARads(), this.getCosSZARads());
     }
 
@@ -357,7 +359,7 @@ public class AuxiliaryValues {
         throw new NullPointerException("The Airmass is null.");
     }
 
-    void setAziDifferent() {
+    public void setAziDifferent() {
         aziDiff = SmileUtils.getAziDiff(this.getSunAzimuthAnglesRad(), this.getViewAzimuthAnglesRad());
     }
 
@@ -421,16 +423,16 @@ public class AuxiliaryValues {
         return sunZenithAngles;
     }
 
-    void setSunZenithAngles(Tile sourceTile) {
+    public void setSunZenithAngles(Tile sourceTile) {
         this.sunZenithAngles = getSampleDoubles(sourceTile);
         setSunZenithAnglesRad(sunZenithAngles);
     }
 
-    double[] getViewZenithAngles() {
+    public double[] getViewZenithAngles() {
         return viewZenithAngles;
     }
 
-    void setViewZenithAngles(Tile sourceTile) {
+    public void setViewZenithAngles(Tile sourceTile) {
         this.viewZenithAngles = getSampleDoubles(sourceTile);
         setViewZenithAnglesRad(viewZenithAngles);
     }
@@ -444,36 +446,36 @@ public class AuxiliaryValues {
         setSunAzimuthAnglesRad(sunAzimuthAngles);
     }
 
-    double[] getLatitudes() {
+    public double[] getLatitudes() {
         return latitudes;
     }
 
-    void setLatitudes(Tile sourceTile) {
+    public void setLatitudes(Tile sourceTile) {
         this.latitudes = getSampleDoubles(sourceTile);
     }
 
-    double[] getViewAzimuthAngles() {
+    public double[] getViewAzimuthAngles() {
         return viewAzimuthAngles;
     }
 
-    void setViewAzimuthAngles(Tile sourceTile) {
+    public void setViewAzimuthAngles(Tile sourceTile) {
         this.viewAzimuthAngles = getSampleDoubles(sourceTile);
         setViewAzimuthAnglesRad(viewAzimuthAngles);
     }
 
-    double[] getSeaLevels() {
+    public double[] getSeaLevels() {
         return seaLevels;
     }
 
-    void setSeaLevels(Tile sourceTile) {
+    public void setSeaLevels(Tile sourceTile) {
         this.seaLevels = getSampleDoubles(sourceTile);
     }
 
-    double[] getTotalOzones() {
+    public double[] getTotalOzones() {
         return totalOzones;
     }
 
-    void setTotalOzones(Tile sourceTile) {
+    public void setTotalOzones(Tile sourceTile) {
         this.totalOzones = getSampleDoubles(sourceTile);
     }
 
@@ -513,20 +515,12 @@ public class AuxiliaryValues {
         return longitude;
     }
 
-    void setLongitude(Tile sourceTile) {
+    public void setLongitude(Tile sourceTile) {
         this.longitude = getSampleDoubles(sourceTile);
     }
 
-    void setRayleighThickness(double[] rayleighThickness) {
-        this.rayleighThickness = rayleighThickness;
-    }
 
-    double[] getRayleighThickness() {
-        return rayleighThickness;
-    }
-
-    double[] getInterpolateRayleighThickness() {
-        double[] taur = getRayleighThickness();
+    double[] getInterpolateRayleighThickness(double... taur) {
         if (Objects.nonNull(taur)) {
             double[] val = new double[taur.length];
             for (int i = 0; i < taur.length; i++) {
@@ -536,6 +530,7 @@ public class AuxiliaryValues {
         }
         throw new NullPointerException("The interpolate Rayleigh thickness is empty.");
     }
+
 
     static double[] getLineSpace(double start, double end, int interval) {
         if (interval < 0) {

@@ -31,13 +31,13 @@ import static junit.framework.Assert.assertNotNull;
 /**
  * @author muhammad.bc.
  */
-public class GaseousAbsorptionAuxIITest {
+public class GaseousAbsorptionAuxTest {
 
-    private GaseousAbsorptionAuxII absorptionAuxII;
+    private GaseousAbsorptionAux absorptionAuxII;
 
     @Before
     public void setUp() throws Exception {
-        absorptionAuxII = new GaseousAbsorptionAuxII();
+        absorptionAuxII = new GaseousAbsorptionAux();
     }
 
     @Test

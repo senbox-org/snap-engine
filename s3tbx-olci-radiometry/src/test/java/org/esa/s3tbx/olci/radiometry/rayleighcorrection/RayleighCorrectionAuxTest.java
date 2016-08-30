@@ -18,14 +18,14 @@
 
 package org.esa.s3tbx.olci.radiometry.rayleighcorrection;
 
+import java.io.FileReader;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.FileReader;
-import java.nio.file.Path;
-import java.util.ArrayList;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -86,5 +86,22 @@ public class RayleighCorrectionAuxTest {
         assertEquals(1.0046205520629883, doubles[0][0][0], 1e-8);
         assertEquals(1.0046125650405884, doubles[0][1][0], 1e-8);
         assertEquals( 1.0045990943908691, doubles[0][2][0], 1e-8);
+    }
+
+    @Test
+    public void testAuxWithInterpolation() throws Exception {
+        JSONParser jsonObject = new JSONParser();
+        JSONObject parse = (JSONObject) jsonObject.parse(new FileReader(pathJSON.toString()));
+
+        double[] thetas = rayleighCorrectionAux.parseJSON1DimArray(parse, "theta");
+        ArrayList<double[][][]> ray_coeff_matrix = rayleighCorrectionAux.parseJSON3DimArray(parse, "ray_coeff_matrix");
+
+        double[][][] doubles = ray_coeff_matrix.get(0);
+
+        double doubles1 = SpikeInterpolation.interpolate2D(doubles[0], thetas, thetas, 3, 75);
+
+        SpikeInterpolation.useApacheMath(thetas, thetas, doubles[0], 3, 75);
+
+        SpikeInterpolation.useLibJAI(doubles[0], 3, 75);
     }
 }
