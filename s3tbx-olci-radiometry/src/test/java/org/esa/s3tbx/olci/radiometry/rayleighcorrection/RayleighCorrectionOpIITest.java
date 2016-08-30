@@ -18,13 +18,9 @@
 
 package org.esa.s3tbx.olci.radiometry.rayleighcorrection;
 
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Test;
 
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -39,30 +35,5 @@ public class RayleighCorrectionOpIITest {
         assertEquals(-1, rayleighCorrectionOpII.getSourceBandIndex("band"));
         assertEquals(9, rayleighCorrectionOpII.getSourceBandIndex("09band"));
         assertEquals(5, rayleighCorrectionOpII.getSourceBandIndex("Bla05band"));
-    }
-
-
-    @Test
-    public void testCrossSectionSigma() throws Exception {
-        Product product = new Product("dummy", "dummy");
-        Band b1 = createBand("radiance_1", 1);
-        Band b2 = createBand("radiance_2", 2);
-        Band b3 = createBand("radiance_3", 3);
-        Band b4 = createBand("radiance_4", 4);
-
-        product.addBand(b1);
-        product.addBand(b2);
-        product.addBand(b3);
-        product.addBand(b4);
-
-        double[] allWavelengths = rayleighCorrectionOpII.getCrossSectionSigma(product, 3, "radiance_%d");
-        assertArrayEquals(new double[]{1.0041580107718594E-9, 3.915403961025194E-12, 1.5231224042681756E-13}, allWavelengths, 1e-8);
-
-    }
-
-    private Band createBand(String bandName, float waveLength) {
-        Band b1 = new Band(bandName, ProductData.TYPE_INT8, 1, 1);
-        b1.setSpectralWavelength(waveLength);
-        return b1;
     }
 }

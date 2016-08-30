@@ -75,8 +75,10 @@ public class RayleighCorrAlgorithm {
         return rho_ng_ref;
     }
 
-    //todo mba/* write test
     public double getCorrOzone(double rho_ng, double absorpO, double ozone, double cts, double ctv) {
+        if (cts == 0 || ctv == 0) {
+            throw new ArithmeticException("The sun angel and the view angle must not be zero.");
+        }
         double model_ozone = 0;
         double trans_ozoned12 = Math.exp(-(absorpO * ozone / 1000.0 - model_ozone) / cts);
         double trans_ozoneu12 = Math.exp(-(absorpO * ozone / 1000.0 - model_ozone) / ctv);
@@ -155,7 +157,6 @@ public class RayleighCorrAlgorithm {
         return rho_Rm;
     }
 
-    //todo mba/* write test
     public double getRhoBrr(double rayleighOpticalThicknes, double aziDiff1, double massAir1, double cosOZARad1,
                             double cosSZARad1, List<double[]> interpolateValues1, double[] tau_ray,
                             double saRay1, double[] fourierSeries1, double corrOzoneRefl) {
@@ -190,7 +191,7 @@ public class RayleighCorrAlgorithm {
         double[] crossSectionSigma = getCrossSectionSigma(sourceProduct, NUM_BANDS, BAND_NAME_PATTERN);
 
         double sourceRayRefl = getRayleigh(rayleighAux, crossSectionSigma, absorptionOfBand, rayleighSample.getSourceReflectance(), rayleighSample.getSourceIndex(), indexOfArray);
-        double lowerRayRefl = getRayleigh(rayleighAux, crossSectionSigma, absorptionOfBand, rayleighSample.getLowerReflectance(),  rayleighSample.getLowerWaterIndex(), indexOfArray);
+        double lowerRayRefl = getRayleigh(rayleighAux, crossSectionSigma, absorptionOfBand, rayleighSample.getLowerReflectance(), rayleighSample.getLowerWaterIndex(), indexOfArray);
         double upperRayRefl = getRayleigh(rayleighAux, crossSectionSigma, absorptionOfBand, rayleighSample.getUpperReflectance(), rayleighSample.getUpperWaterIndex(), indexOfArray);
 
         rayleighSample.setSourceReflectance((float) sourceRayRefl);
@@ -231,7 +232,6 @@ public class RayleighCorrAlgorithm {
         return (float) getRayleighOpticalThickness(sigma, seaLevels[indexOfArray], altitudes[indexOfArray], latitudes[indexOfArray]);
     }
 
-    //todo mba/* write test
     public double getRayleighOpticalThickness(double sigma, double seaLevelPressure, double altitude, double latitude) {
         double P = seaLevelPressure * Math.pow((1.0 - 0.0065 * altitude / 288.15), 5.255) * 1000;
         double latRad = Math.toRadians(latitude);
