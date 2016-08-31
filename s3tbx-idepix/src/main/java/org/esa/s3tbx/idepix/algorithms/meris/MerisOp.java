@@ -46,15 +46,28 @@ public class MerisOp extends BasisOp {
 
     // overall parameters
 
-    @Parameter(defaultValue = "false",
-            description = "Write TOA radiances to the target product.",
-            label = " Write TOA radiances to the target product")
     private boolean outputRadiance = false;
-
-    @Parameter(defaultValue = "false",
-            description = "Write TOA reflectances to the target product.",
-            label = " Write TOA Reflectances to the target product")
     private boolean outputRad2Refl = false;
+
+    @Parameter(description = "The list of radiance bands to write to target product.",
+            label = "Select TOA radiances to write to the target product",
+            valueSet = {
+                    "radiance_1", "radiance_2", "radiance_3", "radiance_4", "radiance_5",
+                    "radiance_6", "radiance_7", "radiance_8", "radiance_9", "radiance_10",
+                    "radiance_11", "radiance_12", "radiance_13", "radiance_14", "radiance_15"
+            },
+            defaultValue = "")
+    String[] radianceBandsToCopy;
+
+    @Parameter(description = "The list of reflectance bands to write to target product.",
+            label = "Select TOA reflectances to write to the target product",
+            valueSet = {
+                    "reflectance_1", "reflectance_2", "reflectance_3", "reflectance_4", "reflectance_5",
+                    "reflectance_6", "reflectance_7", "reflectance_8", "reflectance_9", "reflectance_10",
+                    "reflectance_11", "reflectance_12", "reflectance_13", "reflectance_14", "reflectance_15"
+            },
+            defaultValue = "")
+    String[] reflBandsToCopy;
 
     @Parameter(defaultValue = "false",
             label = " Write NN value to the target product.",
@@ -125,6 +138,9 @@ public class MerisOp extends BasisOp {
         if (!inputProductIsValid) {
             throw new OperatorException(IdepixConstants.INPUT_INCONSISTENCY_ERROR_MESSAGE);
         }
+
+        outputRadiance = radianceBandsToCopy != null && radianceBandsToCopy.length > 0;
+        outputRad2Refl = reflBandsToCopy != null && reflBandsToCopy.length > 0;
 
         preProcess();
         computeWaterCloudProduct();
@@ -241,10 +257,10 @@ public class MerisOp extends BasisOp {
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
         MerisUtils.setupMerisBitmasks(targetProduct);
         if (outputRadiance) {
-            IdepixProducts.addRadianceBands(sourceProduct, targetProduct);
+            IdepixProducts.addRadianceBands(sourceProduct, targetProduct, radianceBandsToCopy);
         }
         if (outputRad2Refl) {
-            MerisUtils.addRadiance2ReflectanceBands(rad2reflProduct, targetProduct);
+            MerisUtils.addRadiance2ReflectanceBands(rad2reflProduct, targetProduct, reflBandsToCopy);
         }
     }
 

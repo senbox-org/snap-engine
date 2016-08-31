@@ -4,7 +4,6 @@ import org.esa.s3tbx.idepix.core.AlgorithmSelector;
 import org.esa.s3tbx.idepix.core.IdepixConstants;
 import org.esa.s3tbx.idepix.core.util.IdepixUtils;
 import org.esa.s3tbx.idepix.operators.BasisOp;
-import org.esa.s3tbx.idepix.operators.CloudBufferOp;
 import org.esa.s3tbx.idepix.operators.IdepixProducts;
 import org.esa.s3tbx.processor.rad2refl.Sensor;
 import org.esa.snap.core.datamodel.Band;
@@ -18,6 +17,7 @@ import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.ProductUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -54,15 +54,40 @@ public class OlciOp extends BasisOp {
 
     // overall parameters
 
-    @Parameter(defaultValue = "false",
-            description = "Write TOA radiances to the target product.",
-            label = " Write TOA radiances to the target product")
-    private boolean outputRadiance = false;
+//    @Parameter(defaultValue = "false",
+//            description = "Write TOA radiances to the target product.",
+//            label = " Write TOA radiances to the target product")
+    private boolean outputRadiance;
 
-    @Parameter(defaultValue = "false",
-            description = "Write TOA reflectances to the target product.",
-            label = " Write TOA Reflectances to the target product")
-    private boolean outputRad2Refl = false;
+//    @Parameter(defaultValue = "false",
+//            description = "Write TOA reflectances to the target product.",
+//            label = " Write TOA Reflectances to the target product")
+    private boolean outputRad2Refl;
+
+    @Parameter(description = "The list of radiance bands to write to target product.",
+            label = "Select TOA radiances to write to the target product",
+            valueSet = {
+                    "Oa01_radiance", "Oa02_radiance", "Oa03_radiance", "Oa04_radiance", "Oa05_radiance",
+                    "Oa06_radiance", "Oa07_radiance", "Oa08_radiance", "Oa09_radiance", "Oa10_radiance",
+                    "Oa11_radiance", "Oa12_radiance", "Oa13_radiance", "Oa14_radiance", "Oa15_radiance",
+                    "Oa16_radiance", "Oa17_radiance", "Oa18_radiance", "Oa19_radiance", "Oa20_radiance",
+                    "Oa21_radiance"
+            },
+            defaultValue = "")
+    String[] radianceBandsToCopy;
+
+    @Parameter(description = "The list of reflectance bands to write to target product.",
+            label = "Select TOA reflectances to write to the target product",
+            valueSet = {
+                    "Oa01_reflectance", "Oa02_reflectance", "Oa03_reflectance", "Oa04_reflectance", "Oa05_reflectance",
+                    "Oa06_reflectance", "Oa07_reflectance", "Oa08_reflectance", "Oa09_reflectance", "Oa10_reflectance",
+                    "Oa11_reflectance", "Oa12_reflectance", "Oa13_reflectance", "Oa14_reflectance", "Oa15_reflectance",
+                    "Oa16_reflectance", "Oa17_reflectance", "Oa18_reflectance", "Oa19_reflectance", "Oa20_reflectance",
+                    "Oa21_reflectance"
+            },
+//            defaultValue = "Oa08_reflectance,Oa10_reflectance")
+            defaultValue = "")
+    String[] reflBandsToCopy;
 
     @Parameter(defaultValue = "false",
             label = " Write NN value to the target product.",
@@ -126,6 +151,9 @@ public class OlciOp extends BasisOp {
         if (!inputProductIsValid) {
             throw new OperatorException(IdepixConstants.INPUT_INCONSISTENCY_ERROR_MESSAGE);
         }
+
+        outputRadiance = radianceBandsToCopy != null && radianceBandsToCopy.length > 0;
+        outputRad2Refl = reflBandsToCopy != null && reflBandsToCopy.length > 0;
 
         preProcess();
 
@@ -214,10 +242,10 @@ public class OlciOp extends BasisOp {
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
         OlciUtils.setupOlciBitmasks(targetProduct);
         if (outputRadiance) {
-            IdepixProducts.addRadianceBands(sourceProduct, targetProduct);
+            IdepixProducts.addRadianceBands(sourceProduct, targetProduct, radianceBandsToCopy);
         }
         if (outputRad2Refl) {
-            OlciUtils.addRadiance2ReflectanceBands(rad2reflProduct, targetProduct);
+            OlciUtils.addRadiance2ReflectanceBands(rad2reflProduct, targetProduct, reflBandsToCopy);
         }
     }
 
