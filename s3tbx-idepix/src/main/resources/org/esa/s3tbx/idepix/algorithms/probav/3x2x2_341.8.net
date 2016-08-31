@@ -1,0 +1,68 @@
+problem: /Users/schiller/Themen_nach2008/lc-cci/August2014/SPOTVGT/PixBoxExport_SPOTVGT_20140818/NN1/spot1
+saved at Fri Sep 12 11:32:18 2014
+
+trainings sample has total sum of error^2=341.823143
+average of residues:
+ training 341.823143/16993/4=0.020116  test 23.513866/1164/1=0.020201
+ ratio avg.train/avg.test=0.995773
+
+the net has 4 inputs:
+input  1 is sqrt_B0 in [0.261725,1.185960]
+input  2 is sqrt_B2 in [0.168819,1.185538]
+input  3 is sqrt_B3 in [0.128452,1.298461]
+input  4 is sqrt_MIR in [0.077460,0.950263]
+
+the net has 1 outputs:
+output  1 is target in [1.000000,5.000000]
+
+ranges repeated for easier input
+#
+4
+0.261725 1.185960
+0.168819 1.185538
+0.128452 1.298461
+0.077460 0.950263
+1
+1.000000 5.000000
+$
+#planes=5 4 3 2 2 1
+bias 1 3
+0.732960
+1.969057
+17.551950
+bias 2 2
+-10.721518
+-1.276765
+bias 3 2
+-3.279273
+-6.086934
+bias 4 1
+0.094678
+wgt 0 4 3
+5.739092
+8.053920
+5.134133
+-14.383874
+6.696263
+-6.256749
+6.073951
+-15.207341
+-33.025929
+-15.030189
+23.944912
+-10.313782
+wgt 1 3 2
+33.595589
+12.887039
+-33.406858
+-6.034751
+9.277693
+-0.005501
+wgt 2 2 2
+-12.283099
+12.767216
+4.260474
+1.904937
+wgt 3 2 1
+-9.182840
+5.932328

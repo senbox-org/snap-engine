@@ -35,7 +35,7 @@ public class CloudBufferOp extends Operator {
     private int cloudBufferWidth;
 
     @Parameter(defaultValue = "false", label = " Use the LandCover advanced cloud buffer algorithm")
-    private boolean gaLcCloudBuffer;
+    private boolean useLcCloudBuffer;
 
 
     @SourceProduct(alias = "classifiedProduct")
@@ -90,7 +90,7 @@ public class CloudBufferOp extends Operator {
                 }
                 boolean isCloud = sourceFlagTile.getSampleBit(x, y, IdepixConstants.F_CLOUD);
                 if (isCloud) {
-                    if (gaLcCloudBuffer) {
+                    if (useLcCloudBuffer) {
                         CloudBuffer.computeCloudBufferLC(targetTile, IdepixConstants.F_CLOUD, IdepixConstants.F_CLOUD_BUFFER);
                     } else {
                         CloudBuffer.computeSimpleCloudBuffer(x, y,

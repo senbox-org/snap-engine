@@ -27,6 +27,7 @@ public class IdepixConstants {
     public static final int F_HIGH = 15;
     public static final int F_VEG_RISK = 16;
     public static final int F_SEAICE = 17;
+    public static final int F_HAZE = 18;
 
     public static final String SPOT_VGT_PRODUCT_TYPE_PREFIX = "VGT";
     public static final String PROBAV_PRODUCT_TYPE_PREFIX = "PROBA-V";

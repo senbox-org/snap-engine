@@ -26,13 +26,13 @@ import java.util.Map;
  *
  * Initial implementation:
  * - pure neural net approach which uses MERIS heritage bands only
- * - no auxdata available yet (as 'L2 auxdata' for MERIS)
+ * - no auxdata available yet (such as 'L2 auxdata' for MERIS)
  *
- * Currently resulting known issues:
+ * Currently resulting limitations:
  *    - no cloud shadow flag
  *    - glint flag over water just taken from 'sun_glint_risk' in L1 'quality_flags' band
  *
- * Advanced algorithm making use of more bands to be defined.
+ * Advanced algorithm to be defined which makes use of more bands.
  *
  * @author olafd
  */
@@ -52,16 +52,7 @@ public class OlciOp extends BasisOp {
     @TargetProduct(description = "The target product.")
     private Product targetProduct;
 
-    // overall parameters
-
-//    @Parameter(defaultValue = "false",
-//            description = "Write TOA radiances to the target product.",
-//            label = " Write TOA radiances to the target product")
     private boolean outputRadiance;
-
-//    @Parameter(defaultValue = "false",
-//            description = "Write TOA reflectances to the target product.",
-//            label = " Write TOA Reflectances to the target product")
     private boolean outputRad2Refl;
 
     @Parameter(description = "The list of radiance bands to write to target product.",
