@@ -7,10 +7,7 @@ import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.util.math.MathUtils;
 
 /**
- * todo: add comment
- * To change this template use File | Settings | File Templates.
- * Date: 17.08.2016
- * Time: 18:18
+ * IDEPIX pixel identification algorithm for Proba-V
  *
  * @author olafd
  */
@@ -21,9 +18,7 @@ public class ProbaVAlgorithm extends AbstractPixelProperties {
 
 
     private static final float BRIGHTWHITE_THRESH = 0.65f;
-    private static final float NDSI_THRESH = 0.50f;
     private static final float PRESSURE_THRESH = 0.9f;
-    private static final float CLOUD_THRESH = 1.65f;
     private static final float UNCERTAINTY_VALUE = 0.5f;
     private static final float BRIGHT_THRESH = 0.3f;
     private static final float WHITE_THRESH = 0.5f;
@@ -243,10 +238,6 @@ public class ProbaVAlgorithm extends AbstractPixelProperties {
 
     public float getBrightWhiteThreshold() {
         return BRIGHTWHITE_THRESH;
-    }
-
-    public float getNdsiThreshold() {
-        return NDSI_THRESH;
     }
 
     public float getNdviThreshold() {

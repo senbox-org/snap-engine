@@ -1,6 +1,5 @@
 package org.esa.s3tbx.idepix.algorithms.probav;
 
-import org.esa.s3tbx.idepix.algorithms.vgt.VgtConstants;
 import org.esa.s3tbx.idepix.core.IdepixConstants;
 import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.Mask;
@@ -26,37 +25,42 @@ public class ProbaVUtils {
         int h = cloudProduct.getSceneRasterHeight();
         Mask mask;
 
-        mask = Mask.BandMathsType.create("vgt_invalid",
+        mask = Mask.BandMathsType.create("probav_invalid",
                                          ProbaVConstants.F_INVALID_DESCR_TEXT, w, h,
                                          "pixel_classif_flags.F_INVALID",
                                          Color.red.darker(), 0.5f);
         cloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("vgt_cloud",
+        mask = Mask.BandMathsType.create("probav_cloud",
                                          ProbaVConstants.F_CLOUD_DESCR_TEXT, w, h,
                                          "pixel_classif_flags.F_CLOUD",
                                          Color.magenta, 0.5f);
         cloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("vgt_cloud_ambiguous",
+        mask = Mask.BandMathsType.create("probav_cloud_ambiguous",
                                          ProbaVConstants.F_CLOUD_AMBIGUOUS_DESCR_TEXT, w, h,
                                          "pixel_classif_flags.F_CLOUD_AMBIGUOUS",
                                          Color.yellow, 0.5f);
         cloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("vgt_cloud_sure",
+        mask = Mask.BandMathsType.create("probav_cloud_sure",
                                          ProbaVConstants.F_CLOUD_SURE_DESCR_TEXT, w, h,
                                          "pixel_classif_flags.F_CLOUD_SURE",
                                          Color.red, 0.5f);
         cloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("vgt_cloud_buffer",
+        mask = Mask.BandMathsType.create("probav_cloud_buffer",
                                          ProbaVConstants.F_CLOUD_BUFFER_DESCR_TEXT, w, h,
                                          "pixel_classif_flags.F_CLOUD_BUFFER",
                                          Color.orange, 0.5f);
         cloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("vgt_snow_ice",
+        mask = Mask.BandMathsType.create("probav_cloud_shadow",
+                                         ProbaVConstants.F_CLOUD_SHADOW_DESCR_TEXT, w, h,
+                                         "pixel_classif_flags.F_CLOUD_SHADOW",
+                                         Color.pink, 0.5f);
+        cloudProduct.getMaskGroup().add(index++, mask);
+        mask = Mask.BandMathsType.create("probav_snow_ice",
                                          ProbaVConstants.F_SNOW_ICE_DESCR_TEXT, w, h,
                                          "pixel_classif_flags.F_SNOW_ICE",
                                          Color.cyan, 0.5f);
         cloudProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("vgt_land",
+        mask = Mask.BandMathsType.create("probav_land",
                                          ProbaVConstants.F_LAND_DESCR_TEXT, w, h,
                                          "pixel_classif_flags.F_LAND",
                                          Color.green.brighter(), 0.5f);
@@ -78,6 +82,8 @@ public class ProbaVUtils {
                            BitSetter.setFlag(0, IdepixConstants.F_CLOUD_SURE), ProbaVConstants.F_CLOUD_SURE_DESCR_TEXT);
         flagCoding.addFlag("F_CLOUD_BUFFER",
                            BitSetter.setFlag(0, IdepixConstants.F_CLOUD_BUFFER), ProbaVConstants.F_CLOUD_BUFFER_DESCR_TEXT);
+        flagCoding.addFlag("F_CLOUD_SHADOW",
+                           BitSetter.setFlag(0, IdepixConstants.F_CLOUD_SHADOW), ProbaVConstants.F_CLOUD_SHADOW_DESCR_TEXT);
         flagCoding.addFlag("F_SNOW_ICE",
                            BitSetter.setFlag(0, IdepixConstants.F_CLEAR_SNOW), ProbaVConstants.F_SNOW_ICE_DESCR_TEXT);
         flagCoding.addFlag("F_LAND",

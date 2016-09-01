@@ -119,10 +119,11 @@ public class OlciMergeLandWaterOp extends Operator {
             }
 
             // potential post processing after merge, e.g. cloud buffer:
-            for (int y = rectangle.y; y < rectangle.y + rectangle.height; y++) {
-                checkForCancellation();
-                for (int x = rectangle.x; x < rectangle.x + rectangle.width; x++) {
-                    if (computeCloudBuffer) {
+            if (computeCloudBuffer) {
+                for (int y = rectangle.y; y < rectangle.y + rectangle.height; y++) {
+                    checkForCancellation();
+                    for (int x = rectangle.x; x < rectangle.x + rectangle.width; x++) {
+
                         final boolean isCloud = targetTile.getSampleBit(x, y, OlciConstants.F_CLOUD);
                         if (isCloud) {
                             CloudBuffer.computeSimpleCloudBuffer(x, y,
@@ -133,11 +134,12 @@ public class OlciMergeLandWaterOp extends Operator {
                         }
                     }
                 }
-            }
-            for (int y = rectangle.y; y < rectangle.y + rectangle.height; y++) {
-                checkForCancellation();
-                for (int x = rectangle.x; x < rectangle.x + rectangle.width; x++) {
-                    IdepixUtils.consolidateCloudAndBuffer(targetTile, x, y);
+
+                for (int y = rectangle.y; y < rectangle.y + rectangle.height; y++) {
+                    checkForCancellation();
+                    for (int x = rectangle.x; x < rectangle.x + rectangle.width; x++) {
+                        IdepixUtils.consolidateCloudAndBuffer(targetTile, x, y);
+                    }
                 }
             }
         } else if (hasNNOutput && targetBand == mergedNNBand) {

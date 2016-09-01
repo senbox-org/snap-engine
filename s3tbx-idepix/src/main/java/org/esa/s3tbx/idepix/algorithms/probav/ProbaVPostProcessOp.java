@@ -1,15 +1,17 @@
 package org.esa.s3tbx.idepix.algorithms.probav;
 
 import com.bc.ceres.core.ProgressMonitor;
+import org.esa.s3tbx.idepix.algorithms.CloudBuffer;
 import org.esa.s3tbx.idepix.core.IdepixConstants;
 import org.esa.s3tbx.idepix.core.util.IdepixUtils;
-import org.esa.snap.collocation.CollocateOp;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.Tile;
+import org.esa.snap.core.gpf.annotations.OperatorMetadata;
+import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.RectangleExtender;
@@ -17,18 +19,28 @@ import org.esa.snap.core.util.RectangleExtender;
 import java.awt.*;
 
 /**
- * todo: add comment
- * To change this template use File | Settings | File Templates.
- * Date: 17.08.2016
- * Time: 18:19
+ * Operator used to consolidate Idepix classification flag for Proba-V, currently:
+ * - basic flag consolidation following GK
+ * - cloud shadow
+ * - cloud buffer
  *
  * @author olafd
  */
+@OperatorMetadata(alias = "Idepix.Probav.Postprocess",
+        version = "1.0",
+        internal = true,
+        authors = "Olaf Danne",
+        copyright = "(c) 2016 by Brockmann Consult",
+        description = "Refines the Proba-V pixel classification over both land and water.")
 public class ProbaVPostProcessOp extends Operator {
-    //    @Parameter(defaultValue = "true",
-//            label = " Compute cloud shadow",
-//            description = " Compute cloud shadow with latest 'fronts' algorithm")
-    private boolean computeCloudShadow = true;   // always done currently
+
+    @Parameter(defaultValue = "true", label = " Compute a cloud buffer")
+    private boolean computeCloudBuffer;
+
+    @Parameter(defaultValue = "2", interval = "[0,100]",
+            label = " Width of cloud buffer (# of pixels)",
+            description = " The width of the 'safety buffer' around a pixel identified as cloudy.")
+    private int cloudBufferWidth;
 
     @SourceProduct(alias = "l1b")
     private Product l1bProduct;
@@ -49,13 +61,12 @@ public class ProbaVPostProcessOp extends Operator {
         origCloudFlagBand = probavCloudProduct.getBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS);
         origSmFlagBand = l1bProduct.getBand("SM_FLAGS");
 
-        int extendedWidth = 64;
-        int extendedHeight = 64; // todo: what do we need?
-
-        rectCalculator = new RectangleExtender(new Rectangle(l1bProduct.getSceneRasterWidth(),
-                                                             l1bProduct.getSceneRasterHeight()),
-                                               extendedWidth, extendedHeight
-        );
+        if (computeCloudBuffer) {
+            rectCalculator = new RectangleExtender(new Rectangle(l1bProduct.getSceneRasterWidth(),
+                                                                 l1bProduct.getSceneRasterHeight()),
+                                                   cloudBufferWidth, cloudBufferWidth
+            );
+        }
 
         ProductUtils.copyBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS, probavCloudProduct, postProcessedCloudProduct, false);
         setTargetProduct(postProcessedCloudProduct);
@@ -76,22 +87,49 @@ public class ProbaVPostProcessOp extends Operator {
     @Override
     public void computeTile(Band targetBand, final Tile targetTile, ProgressMonitor pm) throws OperatorException {
         Rectangle targetRectangle = targetTile.getRectangle();
-        final Rectangle srcRectangle = rectCalculator.extend(targetRectangle);
 
-        final Tile cloudFlagTile = getSourceTile(origCloudFlagBand, srcRectangle);
-        final Tile smFlagTile = getSourceTile(origSmFlagBand, srcRectangle);
+        Rectangle extendedRectangle = null;
+        if (computeCloudBuffer) {
+            extendedRectangle = rectCalculator.extend(targetRectangle);
+        }
 
-        for (int y = srcRectangle.y; y < srcRectangle.y + srcRectangle.height; y++) {
+        final Tile cloudFlagTile = getSourceTile(origCloudFlagBand, targetRectangle);
+        final Tile smFlagTile = getSourceTile(origSmFlagBand, targetRectangle);
+
+        for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
             checkForCancellation();
-            for (int x = srcRectangle.x; x < srcRectangle.x + srcRectangle.width; x++) {
+            for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
 
-                if (targetRectangle.contains(x, y)) {
-                    boolean isInvalid = targetTile.getSampleBit(x, y, IdepixConstants.F_INVALID);
-                    if (!isInvalid) {
-                        combineFlags(x, y, cloudFlagTile, targetTile);
-                        consolidateFlagging(x, y, smFlagTile, targetTile);
-                        setCloudShadow(x, y, smFlagTile, targetTile);
+                boolean isInvalid = targetTile.getSampleBit(x, y, IdepixConstants.F_INVALID);
+                if (!isInvalid) {
+                    combineFlags(x, y, cloudFlagTile, targetTile);
+                    consolidateFlagging(x, y, smFlagTile, targetTile);
+                    setCloudShadow(x, y, smFlagTile, targetTile);
+                }
+            }
+        }
+
+        // cloud buffer:
+        if (computeCloudBuffer) {
+            for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
+                checkForCancellation();
+                for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
+
+                    final boolean isCloud = targetTile.getSampleBit(x, y, IdepixConstants.F_CLOUD);
+                    if (isCloud) {
+                        CloudBuffer.computeSimpleCloudBuffer(x, y,
+                                                             targetTile,
+                                                             extendedRectangle,
+                                                             cloudBufferWidth,
+                                                             IdepixConstants.F_CLOUD_BUFFER);
                     }
+                }
+            }
+
+            for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
+                checkForCancellation();
+                for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
+                    IdepixUtils.consolidateCloudAndBuffer(targetTile, x, y);
                 }
             }
         }

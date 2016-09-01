@@ -1,7 +1,6 @@
 package org.esa.s3tbx.idepix.algorithms.probav;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.apache.commons.lang.ArrayUtils;
 import org.esa.s3tbx.idepix.core.IdepixConstants;
 import org.esa.s3tbx.idepix.core.pixel.AbstractPixelProperties;
 import org.esa.s3tbx.idepix.core.util.IdepixUtils;
@@ -15,37 +14,35 @@ import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.Tile;
+import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.watermask.operator.WatermaskClassifier;
 
-import javax.media.jai.Histogram;
-import javax.media.jai.JAI;
-import javax.media.jai.RenderedOp;
 import java.awt.*;
-import java.awt.image.RenderedImage;
-import java.awt.image.renderable.ParameterBlock;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Map;
 
 /**
- * todo: add comment
- * To change this template use File | Settings | File Templates.
- * Date: 17.08.2016
- * Time: 18:19
+ * Proba-V pixel classification operator.
  *
  * @author olafd
  */
+@OperatorMetadata(alias = "Idepix.Probav.Classification",
+        version = "1.0",
+        internal = true,
+        authors = "Olaf Danne",
+        copyright = "(c) 2016 by Brockmann Consult",
+        description = "Idepix land pixel classification operator for Proba-V.")
 public class ProbaVClassificationOp extends Operator {
 
-    @Parameter(defaultValue = "true",
+    @Parameter(defaultValue = "false",
             label = " Write TOA Reflectances to the target product",
             description = " Write TOA Reflectances to the target product")
-    private boolean copyToaReflectances = true;
+    private boolean copyToaReflectances = false;
 
     @Parameter(defaultValue = "false",
             label = " Write Feature Values to the target product",
@@ -66,17 +63,17 @@ public class ProbaVClassificationOp extends Operator {
     @Parameter(defaultValue = "1.1",
             label = " NN cloud ambiguous lower boundary",
             description = " NN cloud ambiguous lower boundary")
-    private double gaSchillerNNCloudAmbiguousLowerBoundaryValue;
+    private double schillerNNCloudAmbiguousLowerBoundaryValue;
 
     @Parameter(defaultValue = "2.7",
             label = " NN cloud ambiguous/sure separation value",
             description = " NN cloud ambiguous cloud ambiguous/sure separation value")
-    private double gaSchillerNNCloudAmbiguousSureSeparationValue;
+    private double schillerNNCloudAmbiguousSureSeparationValue;
 
     @Parameter(defaultValue = "4.6",
             label = " NN cloud sure/snow separation value",
             description = " NN cloud ambiguous cloud sure/snow separation value")
-    private double gaSchillerNNCloudSureSnowSeparationValue;
+    private double schillerNNCloudSureSnowSeparationValue;
 
     @Parameter(defaultValue = "false",
             label = " Use land-water flag from L1b product instead",
@@ -98,9 +95,9 @@ public class ProbaVClassificationOp extends Operator {
     private Band landWaterBand;
 
     protected static final int SM_F_CLEAR = 0;
-    protected static final int SM_F_UNDEFINED = 1;
+//    protected static final int SM_F_UNDEFINED = 1;
     protected static final int SM_F_CLOUD = 2;
-    protected static final int SM_F_SNOWICE = 3;
+//    protected static final int SM_F_SNOWICE = 3;
     protected static final int SM_F_CLOUDSHADOW = 4;
     protected static final int SM_F_LAND = 5;
     protected static final int SM_F_SWIR_GOOD = 6;
@@ -111,8 +108,6 @@ public class ProbaVClassificationOp extends Operator {
     static final byte WATERMASK_FRACTION_THRESH = 23;   // for 3x3 subsampling, this means 2 subpixels water
 
     ElevationModel getasseElevationModel;
-
-    private int[] listOfPixelTimes;
 
     Band cloudFlagBand;
     Band temperatureBand;
@@ -149,11 +144,10 @@ public class ProbaVClassificationOp extends Operator {
 
         // extract the pixel sampling times
         // todo: clarify with GK/JM how to further use this information
-        if (isProbaVDailySynthesisProduct(sourceProduct.getName())) {
-            final Band timeBand = sourceProduct.getBand("TIME");
-            final RenderedImage timeImage = timeBand.getSourceImage().getImage(0);
-            listOfPixelTimes = getListOfPixelTimes(timeImage);
-        }
+//        if (isProbaVDailySynthesisProduct(sourceProduct.getName())) {
+//            final Band timeBand = sourceProduct.getBand("TIME");
+//            final RenderedImage timeImage = timeBand.getSourceImage().getImage(0);
+//        }
     }
 
     @Override
@@ -170,7 +164,6 @@ public class ProbaVClassificationOp extends Operator {
             probavReflectanceTiles[i] = getSourceTile(probavReflectanceBands[i], rectangle);
         }
 
-        GeoPos geoPos = null;
         final Band cloudFlagTargetBand = targetProduct.getBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS);
         final Tile cloudFlagTargetTile = targetTiles.get(cloudFlagTargetBand);
 
@@ -203,19 +196,19 @@ public class ProbaVClassificationOp extends Operator {
                             cloudFlagTargetTile.setSample(x, y, IdepixConstants.F_CLOUD_SURE, false);
                             cloudFlagTargetTile.setSample(x, y, IdepixConstants.F_CLOUD, false);
                             cloudFlagTargetTile.setSample(x, y, IdepixConstants.F_CLEAR_SNOW, false);
-                            if (nnOutput[0] > gaSchillerNNCloudAmbiguousLowerBoundaryValue &&
-                                    nnOutput[0] <= gaSchillerNNCloudAmbiguousSureSeparationValue) {
+                            if (nnOutput[0] > schillerNNCloudAmbiguousLowerBoundaryValue &&
+                                    nnOutput[0] <= schillerNNCloudAmbiguousSureSeparationValue) {
                                 // this would be as 'CLOUD_AMBIGUOUS'...
                                 cloudFlagTargetTile.setSample(x, y, IdepixConstants.F_CLOUD_AMBIGUOUS, true);
                                 cloudFlagTargetTile.setSample(x, y, IdepixConstants.F_CLOUD, true);
                             }
-                            if (nnOutput[0] > gaSchillerNNCloudAmbiguousSureSeparationValue &&
-                                    nnOutput[0] <= gaSchillerNNCloudSureSnowSeparationValue) {
+                            if (nnOutput[0] > schillerNNCloudAmbiguousSureSeparationValue &&
+                                    nnOutput[0] <= schillerNNCloudSureSnowSeparationValue) {
                                 // this would be as 'CLOUD_SURE'...
                                 cloudFlagTargetTile.setSample(x, y, IdepixConstants.F_CLOUD_SURE, true);
                                 cloudFlagTargetTile.setSample(x, y, IdepixConstants.F_CLOUD, true);
                             }
-                            if (nnOutput[0] > gaSchillerNNCloudSureSnowSeparationValue) {
+                            if (nnOutput[0] > schillerNNCloudSureSnowSeparationValue) {
                                 // this would be as 'SNOW/ICE'...
                                 cloudFlagTargetTile.setSample(x, y, IdepixConstants.F_CLEAR_SNOW, true);
                             }
@@ -230,7 +223,7 @@ public class ProbaVClassificationOp extends Operator {
                 }
             }
         } catch (Exception e) {
-            throw new OperatorException("Failed to provide GA cloud screening:\n" + e.getMessage(), e);
+            throw new OperatorException("Failed to provide Proba-V cloud screening:\n" + e.getMessage(), e);
         }
     }
 
@@ -257,46 +250,6 @@ public class ProbaVClassificationOp extends Operator {
         if (applySchillerNN) {
             targetProduct.addBand("probav_nn_value", ProductData.TYPE_FLOAT32);
         }
-    }
-
-    // package local for testing
-    static int[] getListOfPixelTimes(RenderedImage timeImage) {
-
-        // Set up the parameters for the Histogram object.
-        // bin the histogram into the minutes of one day.
-        // we consider daily products only todo: clarify
-        int[] bins = {1440};
-        double[] low = {0.0};
-        double[] high = {1440.0};
-
-        // Create the parameter block.
-        ParameterBlock pb = new ParameterBlock();
-        pb.addSource(timeImage);           // Specify the source image
-        pb.add(null);                      // No ROI
-        pb.add(1);                         // Sampling
-        pb.add(1);                         // periods
-        pb.add(bins);                      // bins
-        pb.add(low);                       // low
-        pb.add(high);                      // high
-
-        // Perform the histogram operation.
-        final RenderedOp histoImage = JAI.create("histogram", pb, null);
-
-        // Retrieve the histogram data.
-        Histogram hist = (Histogram) histoImage.getProperty("histogram");
-        final int[][] histBins = hist.getBins();
-        java.util.List<Integer> histBinList = new ArrayList();
-        for (int i = 1; i < histBins[0].length; i++) {   // skip the 0 (no data value)
-            if (histBins[0][i] > 0) {
-                histBinList.add(i);
-            }
-        }
-        return ArrayUtils.toPrimitive(histBinList.toArray(new Integer[histBinList.size()]));
-    }
-
-    private static boolean isProbaVDailySynthesisProduct(String productName) {
-        return productName.toUpperCase().startsWith("PROBAV_S1_") &&
-                productName.toUpperCase().endsWith(".HDF5");
     }
 
     private void copyProbavAnnotations() {
@@ -454,18 +407,6 @@ public class ProbaVClassificationOp extends Operator {
         targetTile.setSample(x, y, IdepixConstants.F_SEAICE, probaVAlgorithm.isSeaIce());
     }
 
-
-    void setIsWater(byte watermask, AbstractPixelProperties pixelProperties) {
-        boolean isWater;
-        if (watermask == WatermaskClassifier.INVALID_VALUE) {
-            // fallback
-            isWater = pixelProperties.isL1Water();
-        } else {
-            isWater = watermask == WatermaskClassifier.WATER_VALUE;
-        }
-        pixelProperties.setIsWater(isWater);
-    }
-
     void setIsWaterByFraction(byte watermaskFraction, AbstractPixelProperties pixelProperties) {
         boolean isWater;
         if (watermaskFraction == WatermaskClassifier.INVALID_VALUE) {
@@ -491,7 +432,7 @@ public class ProbaVClassificationOp extends Operator {
         return altitude;
     }
 
-    private void checkProbavReflectanceQuality(ProbaVAlgorithm gaAlgorithm,
+    private void checkProbavReflectanceQuality(ProbaVAlgorithm probaVAlgorithm,
                                                float[] probavReflectance,
                                                Tile smFlagTile,
                                                int x, int y) {
@@ -500,11 +441,11 @@ public class ProbaVClassificationOp extends Operator {
         final boolean isNirGood = smFlagTile.getSampleBit(x, y, SM_F_NIR_GOOD);
         final boolean isSwirGood = smFlagTile.getSampleBit(x, y, SM_F_SWIR_GOOD);
         final boolean isProcessingLand = smFlagTile.getSampleBit(x, y, SM_F_LAND);
-        gaAlgorithm.setIsBlueGood(isBlueGood);
-        gaAlgorithm.setIsRedGood(isRedGood);
-        gaAlgorithm.setIsNirGood(isNirGood);
-        gaAlgorithm.setIsSwirGood(isSwirGood);
-        gaAlgorithm.setProcessingLand(isProcessingLand);
+        probaVAlgorithm.setIsBlueGood(isBlueGood);
+        probaVAlgorithm.setIsRedGood(isRedGood);
+        probaVAlgorithm.setIsNirGood(isNirGood);
+        probaVAlgorithm.setIsSwirGood(isSwirGood);
+        probaVAlgorithm.setProcessingLand(isProcessingLand);
 
         if (!isBlueGood || !isRedGood || !isNirGood || !isSwirGood || !isProcessingLand) {
             for (int i = 0; i < probavReflectance.length; i++) {
