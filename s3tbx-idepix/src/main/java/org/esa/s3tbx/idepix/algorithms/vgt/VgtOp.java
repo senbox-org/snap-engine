@@ -4,7 +4,6 @@ import org.esa.s3tbx.idepix.core.AlgorithmSelector;
 import org.esa.s3tbx.idepix.core.IdepixConstants;
 import org.esa.s3tbx.idepix.core.util.IdepixUtils;
 import org.esa.s3tbx.idepix.operators.BasisOp;
-import org.esa.s3tbx.idepix.operators.CloudBufferOp;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.GPF;
@@ -101,9 +100,7 @@ public class VgtOp extends BasisOp {
     @TargetProduct(description = "The target product.")
     private Product targetProduct;
 
-    private Map<String, Object> cloudClassificationParameters;
     private Product cloudProduct;
-    private Product waterMaskProduct;
     private Product postProcessingProduct;
 
     @Override
@@ -126,21 +123,18 @@ public class VgtOp extends BasisOp {
         waterMaskParameters.put("resolution", VgtConstants.LAND_WATER_MASK_RESOLUTION);
         waterMaskParameters.put("subSamplingFactorX", VgtConstants.OVERSAMPLING_FACTOR_X);
         waterMaskParameters.put("subSamplingFactorY", VgtConstants.OVERSAMPLING_FACTOR_Y);
-        waterMaskProduct = GPF.createProduct("LandWaterMask", waterMaskParameters, sourceProduct);
+        Product waterMaskProduct = GPF.createProduct("LandWaterMask", waterMaskParameters, sourceProduct);
 
         // Cloud Classification
         Map<String, Product> classificationInputProducts = new HashMap<>(4);
-        classificationInputProducts.put("gal1b", sourceProduct);
+        classificationInputProducts.put("l1b", sourceProduct);
         classificationInputProducts.put("waterMask", waterMaskProduct);
 
-        cloudClassificationParameters = createVgtCloudClassificationParameters();
+        Map<String, Object> cloudClassificationParameters = createVgtCloudClassificationParameters();
 
         cloudProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(VgtClassificationOp.class),
                                          cloudClassificationParameters, classificationInputProducts);
 
-//        targetProduct = gaCloudProduct;
-        // introduce post-processing as for Proba-V (request GK/JM 20160416)
-        // Post Cloud Classification: coastline refinement, cloud shadow, cloud buffer
         computeVgtPostProcessProduct();
 
         targetProduct = IdepixUtils.cloneProduct(cloudProduct, true);
@@ -150,17 +144,17 @@ public class VgtOp extends BasisOp {
     }
 
     private Map<String, Object> createVgtCloudClassificationParameters() {
-        Map<String, Object> gaCloudClassificationParameters = new HashMap<>(1);
-        gaCloudClassificationParameters.put("copyToaReflectances", copyToaReflectances);
-        gaCloudClassificationParameters.put("copyAnnotations", copyAnnotations);
-        gaCloudClassificationParameters.put("copyFeatureValues", copyFeatureValues);
-        gaCloudClassificationParameters.put("outputSchillerNNValue", outputSchillerNNValue);
-        gaCloudClassificationParameters.put("useL1bLandWaterFlag", useL1bLandWaterFlag);
-        gaCloudClassificationParameters.put("nnCloudAmbiguousLowerBoundaryValue", nnCloudAmbiguousLowerBoundaryValue);
-        gaCloudClassificationParameters.put("nnCloudAmbiguousSureSeparationValue", nnCloudAmbiguousSureSeparationValue);
-        gaCloudClassificationParameters.put("nnCloudSureSnowSeparationValue", nnCloudSureSnowSeparationValue);
+        Map<String, Object> cloudClassificationParameters = new HashMap<>(1);
+        cloudClassificationParameters.put("copyToaReflectances", copyToaReflectances);
+        cloudClassificationParameters.put("copyAnnotations", copyAnnotations);
+        cloudClassificationParameters.put("copyFeatureValues", copyFeatureValues);
+        cloudClassificationParameters.put("outputSchillerNNValue", outputSchillerNNValue);
+        cloudClassificationParameters.put("useL1bLandWaterFlag", useL1bLandWaterFlag);
+        cloudClassificationParameters.put("nnCloudAmbiguousLowerBoundaryValue", nnCloudAmbiguousLowerBoundaryValue);
+        cloudClassificationParameters.put("nnCloudAmbiguousSureSeparationValue", nnCloudAmbiguousSureSeparationValue);
+        cloudClassificationParameters.put("nnCloudSureSnowSeparationValue", nnCloudSureSnowSeparationValue);
 
-        return gaCloudClassificationParameters;
+        return cloudClassificationParameters;
     }
 
     private void computeVgtPostProcessProduct() {
@@ -169,19 +163,10 @@ public class VgtOp extends BasisOp {
         input.put("vgtCloud", cloudProduct);
 
         Map<String, Object> params = new HashMap<>();
-        final Product classifiedProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(VgtPostProcessOp.class),
+        params.put("computeCloudBuffer", computeCloudBuffer);
+        params.put("cloudBufferWidth", cloudBufferWidth);
+        postProcessingProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(VgtPostProcessOp.class),
                                                             params, input);
-
-        if (computeCloudBuffer) {
-            input = new HashMap<>();
-            input.put("classifiedProduct", classifiedProduct);
-            params = new HashMap<>();
-            params.put("cloudBufferWidth", cloudBufferWidth);
-            postProcessingProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(CloudBufferOp.class),
-                                                      params, input);
-        } else {
-            postProcessingProduct = classifiedProduct;
-        }
     }
 
     /**

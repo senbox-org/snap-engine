@@ -97,13 +97,9 @@ public class OlciUtils {
         return flagCoding;
     }
 
-    public static void addRadiance2ReflectanceBands(Product rad2reflProduct, Product targetProduct) {
-        addRadiance2ReflectanceBands(rad2reflProduct, targetProduct, 1, Rad2ReflConstants.OLCI_REFL_BAND_NAMES.length);
-    }
-
-    public static void addRadiance2ReflectanceBands(Product rad2reflProduct, Product targetProduct, int minBand, int maxBand) {
-        for (int i = minBand; i <= maxBand; i++) {
-            for (String bandname : rad2reflProduct.getBandNames()) {
+    public static void addRadiance2ReflectanceBands(Product rad2reflProduct, Product targetProduct, String[] reflBandsToCopy) {
+        for (int i = 1; i <= Rad2ReflConstants.OLCI_REFL_BAND_NAMES.length; i++) {
+            for (String bandname : reflBandsToCopy) {
                 // e.g. Oa01_reflectance
                 if (!targetProduct.containsBand(bandname) && bandname.equals("Oa" + String.format("%02d", i) + "_reflectance")) {
                     System.out.println("adding band: " + bandname);

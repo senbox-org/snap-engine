@@ -170,12 +170,12 @@ public class FlhMciOp extends PixelOperator {
         super.prepareInputs();
         validateParameters();
 
-        float lambda1 = getWavelength(lowerBaselineBandName);
-        float lambda2 = getWavelength(signalBandName);
-        float lambda3 = getWavelength(upperBaselineBandName);
+        float lowerLambda = getWavelength(lowerBaselineBandName);
+        float signalLambda = getWavelength(signalBandName);
+        float upperLambda = getWavelength(upperBaselineBandName);
 
         algorithm = new BaselineAlgorithm();
-        algorithm.setWavelengths(lambda1, lambda3, lambda2);
+        algorithm.setWavelengths(lowerLambda, upperLambda, signalLambda);
         algorithm.setCloudCorrectionFactor(cloudCorrectionFactor);
     }
 

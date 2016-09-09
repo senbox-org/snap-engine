@@ -94,13 +94,10 @@ public class MerisUtils {
         return flagCoding;
     }
 
-    public static void addRadiance2ReflectanceBands(Product rad2reflProduct, Product targetProduct) {
-        addRadiance2ReflectanceBands(rad2reflProduct, targetProduct, 1, EnvisatConstants.MERIS_L1B_NUM_SPECTRAL_BANDS);
-    }
-
-    public static void addRadiance2ReflectanceBands(Product rad2reflProduct, Product targetProduct, int minBand, int maxBand) {
-        for (int i = minBand; i <= maxBand; i++) {
-            for (String bandname : rad2reflProduct.getBandNames()) {
+    public static void addRadiance2ReflectanceBands(Product rad2reflProduct, Product targetProduct, String[] reflBandsToCopy) {
+        for (int i = 1; i <= Rad2ReflConstants.OLCI_REFL_BAND_NAMES.length; i++) {
+            for (String bandname : reflBandsToCopy) {
+                // e.g. Oa01_reflectance
                 if (!targetProduct.containsBand(bandname) &&
                         bandname.startsWith(Rad2ReflConstants.MERIS_AUTOGROUPING_REFL_STRING) &&
                         bandname.endsWith("_" + String.valueOf(i))) {
@@ -111,5 +108,6 @@ public class MerisUtils {
             }
         }
     }
+
 
 }

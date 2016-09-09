@@ -1,10 +1,8 @@
 package org.esa.s3tbx.idepix.operators;
 
-import org.esa.s3tbx.idepix.algorithms.landsat8.Landsat8ClassificationOp;
 import org.esa.s3tbx.processor.rad2refl.Rad2ReflConstants;
 import org.esa.s3tbx.processor.rad2refl.Rad2ReflOp;
 import org.esa.s3tbx.processor.rad2refl.Sensor;
-import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.OperatorSpi;
@@ -30,9 +28,9 @@ public class IdepixProducts {
         return GPF.createProduct("Meris.CloudTopPressureOp", GPF.NO_PARAMS, sourceProduct);
     }
 
-    public static void addRadianceBands(Product l1bProduct, Product targetProduct) {
-        for (String bandname : l1bProduct.getBandNames()) {
-            if (!targetProduct.containsBand(bandname) && bandname.startsWith(Rad2ReflConstants.MERIS_AUTOGROUPING_RAD_STRING)) {
+    public static void addRadianceBands(Product l1bProduct, Product targetProduct, String[] bandsToCopy) {
+        for (String bandname : bandsToCopy) {
+            if (!targetProduct.containsBand(bandname) && bandname.contains("radiance")) {
                 System.out.println("adding band: " + bandname);
                 ProductUtils.copyBand(bandname, l1bProduct, targetProduct, true);
             }

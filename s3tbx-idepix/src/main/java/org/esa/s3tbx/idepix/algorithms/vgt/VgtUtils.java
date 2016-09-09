@@ -47,6 +47,11 @@ public class VgtUtils {
                                          "pixel_classif_flags.F_CLOUD_BUFFER",
                                          Color.orange, 0.5f);
         cloudProduct.getMaskGroup().add(index++, mask);
+        mask = Mask.BandMathsType.create("vgt_cloud_shadow",
+                                         VgtConstants.F_CLOUD_SHADOW_DESCR_TEXT, w, h,
+                                         "pixel_classif_flags.F_CLOUD_SHADOW",
+                                         Color.pink, 0.5f);
+        cloudProduct.getMaskGroup().add(index++, mask);
         mask = Mask.BandMathsType.create("vgt_snow_ice",
                                          VgtConstants.F_SNOW_ICE_DESCR_TEXT, w, h,
                                          "pixel_classif_flags.F_SNOW_ICE",
@@ -69,6 +74,7 @@ public class VgtUtils {
         flagCoding.addFlag("F_CLOUD_AMBIGUOUS", BitSetter.setFlag(0, IdepixConstants.F_CLOUD_AMBIGUOUS), VgtConstants.F_CLOUD_AMBIGUOUS_DESCR_TEXT);
         flagCoding.addFlag("F_CLOUD_SURE", BitSetter.setFlag(0, IdepixConstants.F_CLOUD_SURE), VgtConstants.F_CLOUD_SURE_DESCR_TEXT);
         flagCoding.addFlag("F_CLOUD_BUFFER", BitSetter.setFlag(0, IdepixConstants.F_CLOUD_BUFFER), VgtConstants.F_CLOUD_BUFFER_DESCR_TEXT);
+        flagCoding.addFlag("F_CLOUD_SHADOW", BitSetter.setFlag(0, IdepixConstants.F_CLOUD_SHADOW), VgtConstants.F_CLOUD_SHADOW_DESCR_TEXT);
         flagCoding.addFlag("F_SNOW_ICE", BitSetter.setFlag(0, IdepixConstants.F_CLEAR_SNOW), VgtConstants.F_SNOW_ICE_DESCR_TEXT);
         flagCoding.addFlag("F_LAND", BitSetter.setFlag(0, IdepixConstants.F_LAND), VgtConstants.F_LAND_DESCR_TEXT);
         return flagCoding;

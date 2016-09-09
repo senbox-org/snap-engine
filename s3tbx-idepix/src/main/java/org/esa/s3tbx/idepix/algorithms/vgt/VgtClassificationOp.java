@@ -95,14 +95,14 @@ public class VgtClassificationOp extends Operator {
 
     public static final int SM_F_CLOUD_1 = 0;
     public static final int SM_F_CLOUD_2 = 1;
-    public static final int SM_F_ICE_SNOW = 2;
+//    public static final int SM_F_ICE_SNOW = 2;
     public static final int SM_F_LAND = 3;
     public static final int SM_F_MIR_GOOD = 4;
     public static final int SM_F_B3_GOOD = 5;
     public static final int SM_F_B2_GOOD = 6;
     public static final int SM_F_B0_GOOD = 7;
 
-    @SourceProduct(alias = "gal1b", description = "The source product.")
+    @SourceProduct(alias = "l1b", description = "The source product.")
     Product sourceProduct;
 
     @TargetProduct(description = "The target product.")
@@ -142,7 +142,6 @@ public class VgtClassificationOp extends Operator {
             vgtReflectanceTiles[i] = getSourceTile(vgtReflectanceBands[i], rectangle);
         }
 
-        GeoPos geoPos = null;
         final Band cloudFlagTargetBand = targetProduct.getBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS);
         final Tile cloudFlagTargetTile = targetTiles.get(cloudFlagTargetBand);
 
@@ -195,7 +194,7 @@ public class VgtClassificationOp extends Operator {
                             cloudFlagTargetTile.setSample(x, y, VgtConstants.F_SNOW_ICE, true);
                         }
                     }
-                    if (outputSchillerNNValue) {
+                    if (outputSchillerNNValue && nnTargetTile != null) {
                         nnTargetTile.setSample(x, y, nnOutput[0]);
                     }
 

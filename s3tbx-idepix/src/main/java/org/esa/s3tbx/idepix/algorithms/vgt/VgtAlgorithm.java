@@ -5,7 +5,6 @@ import org.esa.s3tbx.idepix.core.pixel.AbstractPixelProperties;
 import org.esa.s3tbx.idepix.core.util.IdepixUtils;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.util.math.MathUtils;
-import org.esa.snap.watermask.operator.WatermaskClassifier;
 
 /**
  * IDEPIX pixel identification algorithm for VGT

@@ -35,7 +35,7 @@ public class CloudBufferOp extends Operator {
     private int cloudBufferWidth;
 
     @Parameter(defaultValue = "false", label = " Use the LandCover advanced cloud buffer algorithm")
-    private boolean gaLcCloudBuffer;
+    private boolean useLcCloudBuffer;
 
 
     @SourceProduct(alias = "classifiedProduct")
@@ -57,12 +57,7 @@ public class CloudBufferOp extends Operator {
                                                cloudBufferWidth, cloudBufferWidth);
 
         origClassifFlagBand = classifiedProduct.getBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS);
-        if (origClassifFlagBand != null) {
-            ProductUtils.copyBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS, classifiedProduct, cloudBufferProduct, false);
-        } else {
-            origClassifFlagBand = classifiedProduct.getBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS);
-            ProductUtils.copyBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS, classifiedProduct, cloudBufferProduct, false);
-        }
+        ProductUtils.copyBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS, classifiedProduct, cloudBufferProduct, false);
         setTargetProduct(cloudBufferProduct);
     }
 
@@ -86,36 +81,16 @@ public class CloudBufferOp extends Operator {
 
         final Tile sourceFlagTile = getSourceTile(origClassifFlagBand, srcRectangle);
 
-//        for (int y = srcRectangle.y; y < srcRectangle.y + srcRectangle.height; y++) {
-//            checkForCancellation();
-//            for (int x = srcRectangle.x; x < srcRectangle.x + srcRectangle.width; x++) {
-//
-//                if (targetRectangle.contains(x, y)) {
-//                    IdepixUtils.combineFlags(x, y, sourceFlagTile, targetTile);
-//                }
-//                boolean isCloud = sourceFlagTile.getSampleBit(x, y, IdepixConstants.F_CLOUD);
-//                if (isCloud) {
-//                    if (gaLcCloudBuffer) {
-//                        CloudBuffer.computeCloudBufferLC(targetTile, IdepixConstants.F_CLOUD, IdepixConstants.F_CLOUD_BUFFER);
-//                    } else {
-//                        CloudBuffer.computeSimpleCloudBuffer(x, y,
-//                                                             targetTile,
-//                                                             srcRectangle,
-//                                                             cloudBufferWidth,
-//                                                             IdepixConstants.F_CLOUD_BUFFER);
-//                    }
-//                }
-//            }
-//        }
-
-        for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
+        for (int y = srcRectangle.y; y < srcRectangle.y + srcRectangle.height; y++) {
             checkForCancellation();
-            for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
+            for (int x = srcRectangle.x; x < srcRectangle.x + srcRectangle.width; x++) {
 
-                IdepixUtils.combineFlags(x, y, sourceFlagTile, targetTile);
+                if (targetRectangle.contains(x, y)) {
+                    IdepixUtils.combineFlags(x, y, sourceFlagTile, targetTile);
+                }
                 boolean isCloud = sourceFlagTile.getSampleBit(x, y, IdepixConstants.F_CLOUD);
                 if (isCloud) {
-                    if (gaLcCloudBuffer) {
+                    if (useLcCloudBuffer) {
                         CloudBuffer.computeCloudBufferLC(targetTile, IdepixConstants.F_CLOUD, IdepixConstants.F_CLOUD_BUFFER);
                     } else {
                         CloudBuffer.computeSimpleCloudBuffer(x, y,
@@ -127,7 +102,6 @@ public class CloudBufferOp extends Operator {
                 }
             }
         }
-
 
         for (int y = targetRectangle.y; y < targetRectangle.y + targetRectangle.height; y++) {
             checkForCancellation();

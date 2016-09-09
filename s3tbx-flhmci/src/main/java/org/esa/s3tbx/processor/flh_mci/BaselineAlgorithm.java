@@ -37,35 +37,35 @@ public final class BaselineAlgorithm {
     }
 
     /**
-     * Sets the center wavelengths of the low- and high baseline bands and of the signal band to be used during
+     * Sets the center wavelengths of the lower- and upper baseline bands and of the signal band to be used during
      * calculation.
      *
-     * @param low    lower band wavelength in nm
-     * @param high   higher band wavelength in nm
-     * @param signal signal band wavelength in nm
+     * @param lowerLambda  lower band wavelength in nm
+     * @param upperLambda  upper band wavelength in nm
+     * @param signalLambda signal band wavelength in nm
      */
-    public final void setWavelengths(float low, float high, float signal) throws OperatorException {
+    public final void setWavelengths(float lowerLambda, float upperLambda, float signalLambda) throws OperatorException {
         double num;
         double denom;
 
         // check for correct wavelengths
         // -----------------------------
-        if (low < 0.f || high < 0.f || signal < 0.f) {
+        if (lowerLambda < 0.f || upperLambda < 0.f || signalLambda < 0.f) {
             throw new OperatorException("Negative wavelengths");
         }
 
         // set numerator and check for validity
         // ------------------------------------
-        num = signal - low;
+        num = signalLambda - lowerLambda;
         if (num == 0.0) {
-            throw new OperatorException("Numerator is 0, low and signal wavelength are identical!");
+            throw new OperatorException("Numerator is 0, lower and signal wavelength are identical!");
         }
 
         // set denominator and check for validity
         // --------------------------------------
-        denom = high - low;
+        denom = upperLambda - lowerLambda;
         if (denom == 0.0) {
-            throw new OperatorException("Denominator is 0, low and high wavelength are identical");
+            throw new OperatorException("Denominator is 0, lower and upper wavelength are identical");
         }
         // inverse wavelength delta needed for baseline slope calculation
         inverseDelta = 1.0 / denom;
@@ -89,7 +89,6 @@ public final class BaselineAlgorithm {
      * @param lower lower baseline wavelength radiance
      * @param upper upper baseline wavelength radiance
      * @param peak  the signal wavelength radiance
-     *
      * @return the line height
      */
     public final double computeLineHeight(double lower, double upper, double peak) {
@@ -101,7 +100,6 @@ public final class BaselineAlgorithm {
      *
      * @param lower lower baseline wavelength radiance
      * @param upper upper baseline wavelength radiance
-     *
      * @return the slope
      */
     public final double computeSlope(double lower, double upper) {
