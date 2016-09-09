@@ -26,9 +26,9 @@ import org.esa.snap.core.gpf.ui.SingleTargetProductDialog;
 import org.esa.snap.core.gpf.ui.TargetProductSelectorModel;
 import org.esa.snap.core.util.ArrayUtils;
 import org.esa.snap.dataio.envisat.EnvisatConstants;
+import org.esa.snap.rcp.util.Dialogs;
 import org.esa.snap.ui.AppContext;
 
-import javax.swing.JOptionPane;
 import java.util.HashMap;
 
 class RadiometryDialog extends SingleTargetProductDialog {
@@ -88,7 +88,7 @@ class RadiometryDialog extends SingleTargetProductDialog {
             if (!isEnvisatSource) {
                 final String msg = "If " + EnvisatConstants.ENVISAT_FORMAT_NAME + " is selected as output format, " +
                         "the source product must be in the same format.";
-                JOptionPane.showMessageDialog(this.getContent(), msg, "Invalid Settings", JOptionPane.ERROR_MESSAGE);
+                Dialogs.showError("Invalid Settings", msg);
                 return false;
             }
         }
