@@ -58,6 +58,11 @@ class EarthExplorerManifest implements Manifest {
     }
 
     @Override
+    public String getProductType() {
+        return xPathHelper.getString("//File_Type", doc).trim();
+    }
+
+    @Override
     public final String getDescription() {
         return xPathHelper.getString("//File_Description", doc);
     }

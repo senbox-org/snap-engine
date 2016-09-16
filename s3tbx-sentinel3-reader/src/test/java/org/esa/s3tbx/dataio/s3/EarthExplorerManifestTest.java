@@ -17,7 +17,7 @@ package org.esa.s3tbx.dataio.s3;
 
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.ProductData;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -32,17 +32,19 @@ import static org.junit.Assert.*;
 
 public class EarthExplorerManifestTest {
 
-    private Manifest manifest;
+    private static Manifest manifest;
 
-    @Before
-    public void before() throws ParserConfigurationException, IOException, SAXException {
-        InputStream stream = getClass().getResourceAsStream("Earth_Explorer_manifest.xml");
-        try {
+    @BeforeClass
+    public static void before() throws ParserConfigurationException, IOException, SAXException {
+        try (InputStream stream = EarthExplorerManifestTest.class.getResourceAsStream("Earth_Explorer_manifest.xml")) {
             Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(stream);
             manifest = EarthExplorerManifest.createManifest(doc);
-        } finally {
-            stream.close();
         }
+    }
+
+    @Test
+    public void testGetProductType() throws Exception {
+        assertEquals("OL_1_ERR", manifest.getProductType());
     }
 
     @Test

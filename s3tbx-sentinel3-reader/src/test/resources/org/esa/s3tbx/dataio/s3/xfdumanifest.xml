@@ -784,6 +784,35 @@ This document is a manifest file of a SAFE archive. -->
             </metadataWrap>
         </metadataObject>
 
+        <metadataObject ID="generalProductInformation" classification="DESCRIPTION" category="DMD">
+            <metadataWrap mimeType="text/xml" vocabularyName="Sentinel-SAFE" textInfo="General Product Information">
+                <xmlData>
+                    <generalProductInformation>
+                        <productName>S3A_SL_1_RBT____20160820T201637_20160820T201937_20160820T222707_0179_007_370_4500_MAR_O_NR_001.SEN3</productName>
+                        <productType>SL_1_RBT___</productType>
+                        <timeliness>NR</timeliness>
+                        <baselineCollection>001</baselineCollection>
+                        <creationTime>20160820T222707</creationTime>
+                        <productSize>411941891</productSize>
+                        <dumpInformation>
+                            <granuleNumber>12</granuleNumber>
+                            <granulePosition>NONE</granulePosition>
+                            <dumpStart>2016-08-20T19:20:31.830177Z</dumpStart>
+                            <receivingGroundStation>CGS</receivingGroundStation>
+                            <receivingStartTime>2016-08-20T21:03:32.368698Z</receivingStartTime>
+                            <receivingStopTime>2016-08-20T21:03:46.594136Z</receivingStopTime>
+                        </dumpInformation>
+                        <dispositionMode>Demonstration</dispositionMode>
+                        <productUnit>
+                            <type>FRAME</type>
+                            <duration>179</duration>
+                            <alongtrackCoordinate>4500</alongtrackCoordinate>
+                        </productUnit>
+                    </generalProductInformation>
+                </xmlData>
+            </metadataWrap>
+        </metadataObject>
+
 
         <!-- MEASUREMENT METADATA =============== -->
 

@@ -1,7 +1,7 @@
 package org.esa.s3tbx.dataio.s3;
 
 import org.esa.snap.core.datamodel.ProductData;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -20,14 +20,19 @@ import static org.junit.Assert.*;
 public class XfduManifestTest {
 
 
-    private Manifest manifestTest;
+    private static Manifest manifestTest;
 
-    @Before
-    public void setUp() throws ParserConfigurationException, IOException, SAXException {
-        try (InputStream stream = getClass().getResourceAsStream("xfdumanifest.xml")) {
+    @BeforeClass
+    public static void setUp() throws ParserConfigurationException, IOException, SAXException {
+        try (InputStream stream = XfduManifestTest.class.getResourceAsStream("xfdumanifest.xml")) {
             Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(stream);
             manifestTest = XfduManifest.createManifest(doc);
         }
+    }
+
+    @Test
+    public void testGetProductType() throws Exception {
+        assertEquals("SL_1_RBT___", manifestTest.getProductType());
     }
 
     @Test

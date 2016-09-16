@@ -117,12 +117,12 @@ public abstract class AbstractProductFactory implements ProductFactory {
         readProducts(fileNames);
 
         final String productName = getProductName();
-        final String productType = productName.substring(0, 12);
+        final String productType = manifest.getProductType();
         final Product masterProduct = findMasterProduct();
         final int w = getSceneRasterWidth(masterProduct);
         final int h = masterProduct.getSceneRasterHeight();
         final Product targetProduct = new Product(productName, productType, w, h, productReader);
-        changeTargetProductName(targetProduct);
+        targetProduct.setDescription(manifest.getDescription());
         targetProduct.setFileLocation(getInputFile());
         targetProduct.setNumResolutionsMax(masterProduct.getNumResolutionsMax());
 
@@ -158,9 +158,6 @@ public abstract class AbstractProductFactory implements ProductFactory {
         setAutoGrouping(sourceProducts, targetProduct);
 
         return targetProduct;
-    }
-
-    protected void changeTargetProductName(Product targetProduct) {
     }
 
     protected void setSceneTransforms(Product product) {
@@ -398,7 +395,7 @@ public abstract class AbstractProductFactory implements ProductFactory {
         return productReader.getInputFileParentDirectory();
     }
 
-    protected final String getProductName() {
+    protected String getProductName() {
         return FileUtils.getFilenameWithoutExtension(getInputFileParentDirectory());
     }
 

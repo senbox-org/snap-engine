@@ -21,6 +21,8 @@ import java.util.List;
 
 public interface Manifest {
 
+    String getProductType();
+
     String getDescription();
 
     ProductData.UTC getStartTime();
