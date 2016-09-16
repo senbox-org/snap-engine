@@ -24,6 +24,7 @@ public class XfduManifest implements Manifest {
     protected static final String MANIFEST_FILE_NAME = "xfdumanifest.xml";
     private final Document doc;
     private final XPathHelper xPathHelper;
+    private MetadataElement manifestElement;
 
     public static Manifest createManifest(Document manifestDocument) {
         return new XfduManifest(manifestDocument);
@@ -84,9 +85,11 @@ public class XfduManifest implements Manifest {
 
     @Override
     public MetadataElement getMetadata() {
-        final MetadataElement manifestElement = new MetadataElement("Manifest");
-        final Node node = xPathHelper.getNode("//metadataSection", doc);
-        manifestElement.addElement(convertNodeToMetadataElement(node, new MetadataElement(node.getNodeName())));
+        if (manifestElement == null) {
+            manifestElement = new MetadataElement("Manifest");
+            Node node = xPathHelper.getNode("//metadataSection", doc);
+            manifestElement.addElement(convertNodeToMetadataElement(node, new MetadataElement(node.getNodeName())));
+        }
         return manifestElement;
     }
 
