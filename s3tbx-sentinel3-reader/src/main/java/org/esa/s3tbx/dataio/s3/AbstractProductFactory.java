@@ -53,7 +53,7 @@ import java.util.logging.Logger;
 
 public abstract class AbstractProductFactory implements ProductFactory {
 
-    private final List<Product> openProductList = new ArrayList<Product>();
+    private final List<Product> openProductList = new ArrayList<>();
     private final Sentinel3ProductReader productReader;
     private final Logger logger;
     private final static Color[] uncertainty_colors = new Color[]{
@@ -260,9 +260,7 @@ public abstract class AbstractProductFactory implements ProductFactory {
 
     @Override
     public final void dispose() throws IOException {
-        for (final Product product : openProductList) {
-            product.dispose();
-        }
+        openProductList.forEach(Product::dispose);
         openProductList.clear();
     }
 
@@ -294,17 +292,17 @@ public abstract class AbstractProductFactory implements ProductFactory {
     }
 
     protected void addDataNodes(Product masterProduct, Product targetProduct) throws IOException {
-        final boolean loadProfileTiepoints = Config.instance("s3tbx").load().preferences().getBoolean(LOAD_PROFILE_TIE_POINTS, false);
+        final boolean loadProfileTiePoints = Config.instance("s3tbx").load().preferences().getBoolean(LOAD_PROFILE_TIE_POINTS, false);
         final int w = targetProduct.getSceneRasterWidth();
         final int h = targetProduct.getSceneRasterHeight();
         for (final Product sourceProduct : openProductList) {
-            final Map<String, String> mapping = new HashMap<String, String>();
+            final Map<String, String> mapping = new HashMap<>();
             for (final Band sourceBand : sourceProduct.getBands()) {
                 if (!sourceBand.getName().contains("orphan")) {
                     RasterDataNode targetNode = null;
                     if (sourceBand.getRasterWidth() == w && sourceBand.getRasterHeight() == h) {
                         targetNode = addBand(sourceBand, targetProduct);
-                    } else if (loadProfileTiepoints || !isProfileNode(sourceBand.getName())) {
+                    } else if (loadProfileTiePoints || !isProfileNode(sourceBand.getName())) {
                         targetNode = addSpecialNode(masterProduct, sourceBand, targetProduct);
                     }
                     if (targetNode != null) {
@@ -425,15 +423,12 @@ public abstract class AbstractProductFactory implements ProductFactory {
     protected abstract List<String> getFileNames(Manifest manifest);
 
     private Manifest createManifest(File file) throws IOException {
-        final InputStream inputStream = new FileInputStream(file);
-        try {
+        try (InputStream inputStream = new FileInputStream(file)) {
             final Document xmlDocument = createXmlDocument(inputStream);
             if (file.getName().equals("L1c_Manifest.xml")) {
                 return EarthExplorerManifest.createManifest(xmlDocument);
             }
             return XfduManifest.createManifest(xmlDocument);
-        } finally {
-            inputStream.close();
         }
     }
 
