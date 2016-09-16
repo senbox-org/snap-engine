@@ -94,7 +94,7 @@ public class Sentinel3ProductReader extends AbstractProductReader {
 
     protected void setInput(Object input) {
         if(input instanceof File && ((File)input).isDirectory()) {
-            super.setInput(new File(((File)input), "xfdumanifest.xml"));
+            super.setInput(new File(((File)input), XfduManifest.MANIFEST_FILE_NAME));
         } else {
             super.setInput(input);
         }

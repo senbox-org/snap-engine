@@ -21,6 +21,7 @@ import java.util.List;
  */
 public class XfduManifest implements Manifest {
 
+    protected static final String MANIFEST_FILE_NAME = "xfdumanifest.xml";
     private final Document doc;
     private final XPathHelper xPathHelper;
 

@@ -37,6 +37,8 @@ import java.util.List;
  */
 class EarthExplorerManifest implements Manifest {
 
+    protected static final String L1C_MANIFEST_FILE_NAME = "L1c_Manifest.xml";
+
     private final Document doc;
     private final XPathHelper xPathHelper;
 

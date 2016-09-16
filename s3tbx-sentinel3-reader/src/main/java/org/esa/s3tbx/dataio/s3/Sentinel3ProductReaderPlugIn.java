@@ -112,8 +112,8 @@ public class Sentinel3ProductReaderPlugIn implements ProductReaderPlugIn {
         final File parentFile = inputFile.getParentFile();
         return parentFile != null &&
                 (isValidDirectoryName(parentFile.getName()) && isValidInputFileName(inputFile.getName())) ||
-                (isValidDirectoryName(inputFile.getName()) && new File(inputFile, "xfdumanifest.xml").exists()) ||
-                (isValidDirectoryName(inputFile.getName()) && new File(inputFile, "L1c_Manifest.xml").exists())
+               (isValidDirectoryName(inputFile.getName()) && new File(inputFile, XfduManifest.MANIFEST_FILE_NAME).exists()) ||
+               (isValidDirectoryName(inputFile.getName()) && new File(inputFile, EarthExplorerManifest.L1C_MANIFEST_FILE_NAME).exists())
         ;
     }
 
