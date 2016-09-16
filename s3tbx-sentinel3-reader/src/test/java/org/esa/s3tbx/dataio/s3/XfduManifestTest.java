@@ -1,6 +1,5 @@
 package org.esa.s3tbx.dataio.s3;
 
-import junit.framework.TestCase;
 import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,22 +12,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Tonio Fincke
  */
-public class XfduManifestTest extends TestCase {
+public class XfduManifestTest {
 
 
     private Manifest manifestTest;
 
     @Before
     public void setUp() throws ParserConfigurationException, IOException, SAXException {
-        InputStream stream = getClass().getResourceAsStream("xfdumanifest.xml");
-        try {
+        try (InputStream stream = getClass().getResourceAsStream("xfdumanifest.xml")) {
             Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(stream);
             manifestTest = XfduManifest.createManifest(doc);
-        } finally {
-            stream.close();
         }
     }
 
