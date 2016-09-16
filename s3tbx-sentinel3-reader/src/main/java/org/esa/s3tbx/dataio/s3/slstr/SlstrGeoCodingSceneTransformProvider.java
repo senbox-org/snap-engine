@@ -12,9 +12,11 @@ import org.opengis.referencing.operation.TransformException;
 import java.awt.geom.Point2D;
 
 /**
+ * Not in use.
+ *
  * @author Tonio Fincke
  */
-public class SlstrGeoCodingSceneTransformProvider implements SceneTransformProvider {
+class SlstrGeoCodingSceneTransformProvider implements SceneTransformProvider {
 
     private final GeoCoding sceneGeoCoding;
     private final GeoCoding modelGeoCoding;

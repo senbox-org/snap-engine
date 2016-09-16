@@ -1,7 +1,11 @@
 package org.esa.s3tbx.dataio.s3.slstr;
 
 import org.esa.snap.core.dataio.ProductSubsetDef;
-import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.core.datamodel.Scene;
+import org.esa.snap.core.datamodel.TiePointGeoCoding;
+import org.esa.snap.core.datamodel.TiePointGrid;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
 
 import java.awt.geom.AffineTransform;
@@ -10,7 +14,7 @@ import java.awt.geom.NoninvertibleTransformException;
 /**
  * @author Tonio Fincke
  */
-public class SlstrTiePointGeoCoding extends TiePointGeoCoding {
+class SlstrTiePointGeoCoding extends TiePointGeoCoding {
 
     private final AffineTransform2D transform;
     private final AffineTransform inverse;
