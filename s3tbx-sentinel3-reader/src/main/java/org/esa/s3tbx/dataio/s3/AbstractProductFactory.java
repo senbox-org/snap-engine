@@ -75,40 +75,6 @@ public abstract class AbstractProductFactory implements ProductFactory {
         separatingDimensions = new ArrayList<>();
     }
 
-    protected final Logger getLogger() {
-        return logger;
-    }
-
-    protected static Band copyBand(Band sourceBand, Product targetProduct, boolean copySourceImage) {
-        return ProductUtils.copyBand(sourceBand.getName(), sourceBand.getProduct(), targetProduct, copySourceImage);
-    }
-
-    protected static TiePointGrid copyBandAsTiePointGrid(Band sourceBand, Product targetProduct, int subSamplingX,
-                                                         int subSamplingY,
-                                                         float offsetX, float offsetY) {
-        final MultiLevelImage sourceImage = sourceBand.getGeophysicalImage();
-        final int w = sourceImage.getWidth();
-        final int h = sourceImage.getHeight();
-        final float[] tiePoints = sourceImage.getData().getSamples(0, 0, w, h, 0, new float[w * h]);
-
-        final String unit = sourceBand.getUnit();
-        final TiePointGrid tiePointGrid = new TiePointGrid(sourceBand.getName(), w, h,
-                                                           offsetX,
-                                                           offsetY,
-                                                           subSamplingX,
-                                                           subSamplingY,
-                                                           tiePoints,
-                                                           unit != null && unit.toLowerCase().contains("degree"));
-        final String description = sourceBand.getDescription();
-        tiePointGrid.setDescription(description);
-        tiePointGrid.setGeophysicalNoDataValue(sourceBand.getGeophysicalNoDataValue());
-        tiePointGrid.setUnit(unit);
-        targetProduct.addTiePointGrid(tiePointGrid);
-        sourceImage.dispose();
-
-        return tiePointGrid;
-    }
-
     @Override
     public final Product createProduct() throws IOException {
         manifest = createManifest(getInputFile());
@@ -158,6 +124,46 @@ public abstract class AbstractProductFactory implements ProductFactory {
         setAutoGrouping(sourceProducts, targetProduct);
 
         return targetProduct;
+    }
+
+    @Override
+    public final void dispose() throws IOException {
+        openProductList.forEach(Product::dispose);
+        openProductList.clear();
+    }
+
+    protected final Logger getLogger() {
+        return logger;
+    }
+
+    protected static Band copyBand(Band sourceBand, Product targetProduct, boolean copySourceImage) {
+        return ProductUtils.copyBand(sourceBand.getName(), sourceBand.getProduct(), targetProduct, copySourceImage);
+    }
+
+    protected static TiePointGrid copyBandAsTiePointGrid(Band sourceBand, Product targetProduct, int subSamplingX,
+                                                         int subSamplingY,
+                                                         float offsetX, float offsetY) {
+        final MultiLevelImage sourceImage = sourceBand.getGeophysicalImage();
+        final int w = sourceImage.getWidth();
+        final int h = sourceImage.getHeight();
+        final float[] tiePoints = sourceImage.getData().getSamples(0, 0, w, h, 0, new float[w * h]);
+
+        final String unit = sourceBand.getUnit();
+        final TiePointGrid tiePointGrid = new TiePointGrid(sourceBand.getName(), w, h,
+                                                           offsetX,
+                                                           offsetY,
+                                                           subSamplingX,
+                                                           subSamplingY,
+                                                           tiePoints,
+                                                           unit != null && unit.toLowerCase().contains("degree"));
+        final String description = sourceBand.getDescription();
+        tiePointGrid.setDescription(description);
+        tiePointGrid.setGeophysicalNoDataValue(sourceBand.getGeophysicalNoDataValue());
+        tiePointGrid.setUnit(unit);
+        targetProduct.addTiePointGrid(tiePointGrid);
+        sourceImage.dispose();
+
+        return tiePointGrid;
     }
 
     protected void setSceneTransforms(Product product) {
@@ -243,24 +249,6 @@ public abstract class AbstractProductFactory implements ProductFactory {
         }
     }
 
-    private void setTimes(Product targetProduct) {
-        final Product sourceProduct = findMasterProduct();
-        targetProduct.setStartTime(sourceProduct.getStartTime());
-        targetProduct.setEndTime(sourceProduct.getEndTime());
-        if (targetProduct.getStartTime() == null) {
-            targetProduct.setStartTime(manifest.getStartTime());
-        }
-        if (targetProduct.getEndTime() == null) {
-            targetProduct.setEndTime(manifest.getStopTime());
-        }
-    }
-
-    @Override
-    public final void dispose() throws IOException {
-        openProductList.forEach(Product::dispose);
-        openProductList.clear();
-    }
-
     protected Band addBand(Band sourceBand, Product targetProduct) {
         return copyBand(sourceBand, targetProduct, true);
     }
@@ -343,25 +331,6 @@ public abstract class AbstractProductFactory implements ProductFactory {
         return maskGroup;
     }
 
-    private void readProducts(List<String> fileNames) throws IOException {
-        for (final String fileName : fileNames) {
-            Product product = null;
-            try {
-                product = readProduct(fileName);
-            } catch (IOException ioe) {
-                logger.log(Level.WARNING, ioe.getMessage());
-            }
-            if (product != null) {
-                openProductList.add(product);
-            } else {
-                logger.log(Level.WARNING, MessageFormat.format("Could not find ''{0}''.", fileName));
-            }
-        }
-        if (openProductList.isEmpty()) {
-            throw new IOException("Could not find or read any valid products.");
-        }
-    }
-
     protected Product readProduct(String fileName) throws IOException {
         final File file = new File(getInputFileParentDirectory(), fileName);
         if (!file.exists()) {
@@ -408,6 +377,39 @@ public abstract class AbstractProductFactory implements ProductFactory {
         }
     }
 
+    protected abstract List<String> getFileNames(Manifest manifest);
+
+    private void setTimes(Product targetProduct) {
+        final Product sourceProduct = findMasterProduct();
+        targetProduct.setStartTime(sourceProduct.getStartTime());
+        targetProduct.setEndTime(sourceProduct.getEndTime());
+        if (targetProduct.getStartTime() == null) {
+            targetProduct.setStartTime(manifest.getStartTime());
+        }
+        if (targetProduct.getEndTime() == null) {
+            targetProduct.setEndTime(manifest.getStopTime());
+        }
+    }
+
+    private void readProducts(List<String> fileNames) throws IOException {
+        for (final String fileName : fileNames) {
+            Product product = null;
+            try {
+                product = readProduct(fileName);
+            } catch (IOException ioe) {
+                logger.log(Level.WARNING, ioe.getMessage());
+            }
+            if (product != null) {
+                openProductList.add(product);
+            } else {
+                logger.log(Level.WARNING, MessageFormat.format("Could not find ''{0}''.", fileName));
+            }
+        }
+        if (openProductList.isEmpty()) {
+            throw new IOException("Could not find or read any valid products.");
+        }
+    }
+
     private boolean isProfileNode(String targetNodeName) {
         for (String suffixForSeparatingDimension : separatingDimensions) {
             if (targetNodeName.contains("_" + suffixForSeparatingDimension + "_")) {
@@ -416,8 +418,6 @@ public abstract class AbstractProductFactory implements ProductFactory {
         }
         return false;
     }
-
-    protected abstract List<String> getFileNames(Manifest manifest);
 
     private Manifest createManifest(File file) throws IOException {
         try (InputStream inputStream = new FileInputStream(file)) {
