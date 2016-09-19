@@ -1,5 +1,5 @@
-Table of Wavelength Versus Ozone Absorption Coefficients From <https://www.arm.gov/publications/tech_reports/doe-sc-arm-tr-129.pdf>
-Multiply the appropriate coefficient by the columnar amount of ozone in atm-cm to find the ozone optical depth, tozone. Note that one atm-cm is equal to DU/1000; recall that DU stands for Dobson Unit.
+#Table of Wavelength Versus Ozone Absorption Coefficients From <https://www.arm.gov/publications/tech_reports/doe-sc-arm-tr-129.pdf>
+#Multiply the appropriate coefficient by the columnar amount of ozone in atm-cm to find the ozone optical depth, tozone. Note that one atm-cm is equal to DU/1000; recall that DU stands for Dobson Unit.
 3.800000000000000000e+02 0.000000000000000000e+00
 3.810000000000000000e+02 0.000000000000000000e+00
 3.820000000000000000e+02 0.000000000000000000e+00

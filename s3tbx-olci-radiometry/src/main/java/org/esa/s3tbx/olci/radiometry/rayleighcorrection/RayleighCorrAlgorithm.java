@@ -1,10 +1,10 @@
 package org.esa.s3tbx.olci.radiometry.rayleighcorrection;
 
-import java.util.List;
-import java.util.Map;
-import org.esa.s3tbx.olci.radiometry.smilecorr.RayleighSample;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.util.math.RsMathUtils;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author muhammad.bc.
@@ -83,8 +83,7 @@ public class RayleighCorrAlgorithm {
         double trans_ozoned12 = Math.exp(-(absorpO * ozone / 1000.0 - model_ozone) / cts);
         double trans_ozoneu12 = Math.exp(-(absorpO * ozone / 1000.0 - model_ozone) / ctv);
         double trans_ozone12 = trans_ozoned12 * trans_ozoneu12;
-        double rho = rho_ng / trans_ozone12;
-        return rho;
+        return rho_ng / trans_ozone12;
     }
 
     public double[] getRhoBrr(RayleighAux rayleighAux, double[] rayleighOpticalThickness, double[] corrOzoneRefl) {
@@ -157,16 +156,15 @@ public class RayleighCorrAlgorithm {
         return rho_Rm;
     }
 
-    public double getRhoBrr(double rayleighOpticalThicknes, double aziDiff1, double massAir1, double cosOZARad1,
+    public double getRhoBrr(double rayleighOpticalThickness, double aziDiff1, double massAir1, double cosOZARad1,
                             double cosSZARad1, List<double[]> interpolateValues1, double[] tau_ray,
                             double saRay1, double[] fourierSeries1, double corrOzoneRefl) {
 
-        double taurVal = rayleighOpticalThicknes;
-        double rho_BRR;
+        double taurVal = rayleighOpticalThickness;
         if (Double.isNaN(taurVal)) {
             return taurVal;
         }
-        double[] rho_Rm = getFourierSeries(rayleighOpticalThicknes, massAir1, cosOZARad1, cosSZARad1, interpolateValues1, fourierSeries1);
+        double[] rho_Rm = getFourierSeries(rayleighOpticalThickness, massAir1, cosOZARad1, cosSZARad1, interpolateValues1, fourierSeries1);
 
         double rho_R = rho_Rm[0] + 2.0 * rho_Rm[1] * Math.cos(aziDiff1) + 2.0 * rho_Rm[2] * Math.cos(2.0 * aziDiff1);
         // polynomial coefficients tpoly0, tpoly1 and tpoly2 from MERIS LUT
@@ -182,8 +180,7 @@ public class RayleighCorrAlgorithm {
         double rho_toaR = (corrOzoneRefl - rho_R) / (tR_thetaS * tR_thetaV); //toa reflectance corrected for Rayleigh scattering
         double sphericalFactor = 1.0 / (1.0 + saRay1 * rho_toaR); //#factor used in the next equation to account for the spherical albedo
         //#top of aerosol reflectance, which is equal to bottom of Rayleigh reflectance
-        rho_BRR = (rho_toaR * sphericalFactor);
-        return rho_BRR;
+        return (rho_toaR * sphericalFactor);
     }
 
     public RayleighSample getRayleighReflectance(RayleighSample rayleighSample, RayleighAux rayleighAux, Product sourceProduct, int indexOfArray, double[] absorptionOfBand) {
@@ -220,9 +217,8 @@ public class RayleighCorrAlgorithm {
         float rayleighThickness = getRayleighThickness(rayleighAux, indexOfArray, sigma);
         double sARay[] = rayleighAux.getInterpolateRayleighThickness(rayleighThickness);
         double corrOzone = getCorrOzone(ref, absorp, ozone, cosSZARad, cosOZARad);
-        double rhoBrr = getRhoBrr(rayleighThickness, aziDiffs, airMasses, cosOZARad, cosSZARad, interpolateValues, tau_ray, sARay[0], fourierSeries, corrOzone);
 
-        return rhoBrr;
+        return getRhoBrr(rayleighThickness, aziDiffs, airMasses, cosOZARad, cosSZARad, interpolateValues, tau_ray, sARay[0], fourierSeries, corrOzone);
     }
 
     public float getRayleighThickness(RayleighAux rayleighAux, int indexOfArray, double sigma) {

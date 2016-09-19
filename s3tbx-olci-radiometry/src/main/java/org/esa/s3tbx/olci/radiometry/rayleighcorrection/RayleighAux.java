@@ -18,15 +18,6 @@
 
 package org.esa.s3tbx.olci.radiometry.rayleighcorrection;
 
-import java.io.FileReader;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import org.apache.commons.math3.analysis.interpolation.BicubicSplineInterpolator;
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
@@ -40,6 +31,16 @@ import org.esa.snap.core.gpf.Tile;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author muhammad.bc.
@@ -161,9 +162,6 @@ public class RayleighAux {
         Map<Integer, List<double[]>> interpolate = new HashMap<>();
         double[] sunZenithAngles = getSunZenithAngles();
         double[] viewZenithAngles = getViewZenithAngles();
-
-        //todo mba ask Mp if to use this approach.
-        assert sunZenithAngles != null;
 
         if (Objects.nonNull(sunZenithAngles) && Objects.nonNull(viewZenithAngles)) {
             for (int index = 0; index < sunZenithAngles.length; index++) {

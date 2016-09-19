@@ -16,7 +16,7 @@
  *
  */
 
-package org.esa.s3tbx.olci.radiometry.smilecorr;
+package org.esa.s3tbx.olci.radiometry.rayleighcorrection;
 
 /**
  * @author muhammad.bc.

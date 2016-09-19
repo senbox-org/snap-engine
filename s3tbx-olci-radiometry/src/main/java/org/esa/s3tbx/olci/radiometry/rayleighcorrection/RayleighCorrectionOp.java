@@ -116,7 +116,7 @@ public class RayleighCorrectionOp extends Operator {
     public void initialize() throws OperatorException {
         sensor = getSensorPattern();
         algorithm = new RayleighCorrAlgorithm();
-        absorpOzone = new GaseousAbsorptionAux().absorptionOzone(sensor.toString());
+        absorpOzone = GaseousAbsorptionAux.getInstance().absorptionOzone(sensor.toString());
         crossSectionSigma = getCrossSectionSigma(sourceProduct, sensor.getNumBands(), sensor.getGetPattern());
 
         Product targetProduct = new Product(sourceProduct.getName(), sourceProduct.getProductType(),
@@ -185,8 +185,7 @@ public class RayleighCorrectionOp extends Operator {
     }
 
     private double[] getRhoBrr(RayleighAux rayleighAux, double[] rayleighOpticalThickness, double[] corrOzoneRefl) {
-        double[] rhoBrr = algorithm.getRhoBrr(rayleighAux, rayleighOpticalThickness, corrOzoneRefl);
-        return rhoBrr;
+        return algorithm.getRhoBrr(rayleighAux, rayleighOpticalThickness, corrOzoneRefl);
     }
 
 
@@ -196,8 +195,7 @@ public class RayleighCorrectionOp extends Operator {
         double[] cosOZARads = rayleighAux.getCosOZARads();
         double[] cosSZARads = rayleighAux.getCosSZARads();
 
-        double[] corrOzone = algorithm.getCorrOzone(reflectance, absorpO, totalOzones, cosOZARads, cosSZARads);
-        return corrOzone;
+        return algorithm.getCorrOzone(reflectance, absorpO, totalOzones, cosOZARads, cosSZARads);
     }
 
     double[] getCrossSectionSigma(Product sourceProduct, int numBands, String getBandNamePattern) {

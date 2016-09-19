@@ -19,14 +19,11 @@
 package org.esa.s3tbx.olci.radiometry.smilecorr;
 
 import com.bc.ceres.core.ProgressMonitor;
-import java.awt.Color;
-import java.awt.Rectangle;
-import javax.media.jai.RenderedOp;
-import javax.media.jai.operator.ConstantDescriptor;
 import org.esa.s3tbx.olci.radiometry.gaseousabsorption.GaseousAbsorptionAux;
 import org.esa.s3tbx.olci.radiometry.rayleighcorrection.RayleighAux;
 import org.esa.s3tbx.olci.radiometry.rayleighcorrection.RayleighCorrAlgorithm;
 import org.esa.s3tbx.olci.radiometry.rayleighcorrection.RayleighCorrectionOp;
+import org.esa.s3tbx.olci.radiometry.rayleighcorrection.RayleighSample;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
@@ -41,14 +38,12 @@ import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.math.RsMathUtils;
 
+import javax.media.jai.RenderedOp;
+import javax.media.jai.operator.ConstantDescriptor;
+import java.awt.Color;
+import java.awt.Rectangle;
 
-import static org.esa.s3tbx.olci.radiometry.rayleighcorrection.RayleighCorrectionOp.ALTITUDE;
-import static org.esa.s3tbx.olci.radiometry.rayleighcorrection.RayleighCorrectionOp.OAA;
-import static org.esa.s3tbx.olci.radiometry.rayleighcorrection.RayleighCorrectionOp.SAA;
-import static org.esa.s3tbx.olci.radiometry.rayleighcorrection.RayleighCorrectionOp.SEA_LEVEL_PRESSURE;
-import static org.esa.s3tbx.olci.radiometry.rayleighcorrection.RayleighCorrectionOp.TOTAL_OZONE;
-import static org.esa.s3tbx.olci.radiometry.rayleighcorrection.RayleighCorrectionOp.TP_LATITUDE;
-import static org.esa.s3tbx.olci.radiometry.rayleighcorrection.RayleighCorrectionOp.TP_LONGITUDE;
+import static org.esa.s3tbx.olci.radiometry.rayleighcorrection.RayleighCorrectionOp.*;
 
 
 /**
@@ -100,7 +95,7 @@ public class SmileCorretionOp extends Operator {
         if (isRalyeighOperator) {
             RayleighAux.initDefaultAuxiliary();
             rayleighCorrAlgorithm = new RayleighCorrAlgorithm();
-            absorpOzone = new GaseousAbsorptionAux().absorptionOzone(OLCI_SENSOR);
+            absorpOzone = GaseousAbsorptionAux.getInstance().absorptionOzone(OLCI_SENSOR);
         }
 
         // Configure the target
@@ -407,7 +402,7 @@ public class SmileCorretionOp extends Operator {
             int indexInArray = (y - minY) * (maxY - minY + 1) + x - minX;
 
             if (lowerWaterIndx != -1 && upperWaterIndx != -1) {
-                RayleighSample rayleighSampleToCompute = new RayleighSample(sourceRefl, lowerRefl,upperRefl, targetBandIndx,lowerWaterIndx, upperWaterIndx);
+                RayleighSample rayleighSampleToCompute = new RayleighSample(sourceRefl, lowerRefl, upperRefl, targetBandIndx, lowerWaterIndx, upperWaterIndx);
                 RayleighSample computedRayleighSample = rayleighCorrAlgorithm.getRayleighReflectance(rayleighSampleToCompute, rayleighAux, getSourceProduct(), indexInArray, absorpOzone);
                 sourceRefl = computedRayleighSample.getSourceReflectance();
                 lowerRefl = computedRayleighSample.getLowerWaterIndex();

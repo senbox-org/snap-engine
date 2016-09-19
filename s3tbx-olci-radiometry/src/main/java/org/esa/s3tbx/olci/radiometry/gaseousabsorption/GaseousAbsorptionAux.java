@@ -36,22 +36,24 @@ import java.util.List;
 public class GaseousAbsorptionAux {
 
     private List<double[]> ozoneHighs;
+    private List<double[]> coeffHighres;
 
-
-    private List<double[]> coeffhighres = new ArrayList();
-
-    public GaseousAbsorptionAux() {
+    private GaseousAbsorptionAux() {
         try {
             Path installAuxdata = installAuxdata();
             Path resolve = installAuxdata.resolve("ozone-highres.txt");
             FileReader fileReader = new FileReader(resolve.toString());
-            CsvReader reader = new CsvReader(fileReader, new char[]{' ', '\t'});
+            CsvReader reader = new CsvReader(fileReader, new char[]{' ', '\t'}, false, "#");
             ozoneHighs = reader.readDoubleRecords();
-            coeffhighres = getCoeffhighres(ozoneHighs);
+            coeffHighres = getCoeffhighres(ozoneHighs);
             fileReader.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static GaseousAbsorptionAux getInstance() {
+        return Holder.instance;
     }
 
     public List<double[]> getOzoneHighs() {
@@ -110,7 +112,7 @@ public class GaseousAbsorptionAux {
             for (int i = 0; i < lamC.length; i++) {
                 double lower = lamC[i] - lamW[i] / 2;
                 double upper = lamC[i] + lamW[i] / 2;
-                o3absorpInstrument.add(convolve(lower, upper, this.coeffhighres));
+                o3absorpInstrument.add(convolve(lower, upper, this.coeffHighres));
             }
         }
         if (instrument.equals("OLCI")) {
@@ -122,9 +124,17 @@ public class GaseousAbsorptionAux {
             for (int i = 0; i < lamC.length; i++) {
                 double lower = lamC[i] - lamW[i] / 2;
                 double upper = lamC[i] + lamW[i] / 2;
-                o3absorpInstrument.add(convolve(lower, upper, this.coeffhighres));
+                o3absorpInstrument.add(convolve(lower, upper, this.coeffHighres));
             }
         }
         return Doubles.toArray(o3absorpInstrument);
+    }
+
+    private static class Holder {
+
+        private static final GaseousAbsorptionAux instance = new GaseousAbsorptionAux();
+
+        private Holder() {
+        }
     }
 }
