@@ -32,7 +32,7 @@ public class XfduManifestTest {
 
     @Test
     public void testGetProductType() throws Exception {
-        assertEquals("SL_1_RBT___", manifestTest.getProductType());
+        assertEquals("SL_1_RBT", manifestTest.getProductType());
     }
 
     @Test
