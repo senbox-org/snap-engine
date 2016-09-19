@@ -36,6 +36,12 @@ public class XfduManifest implements Manifest {
     }
 
     @Override
+    public String getProductName() {
+        final Node gpi = xPathHelper.getNode("/XFDU/metadataSection/metadataObject[@ID='generalProductInformation']", doc);
+        return  xPathHelper.getString("//metadataWrap/xmlData/generalProductInformation/productName", gpi);
+    }
+
+    @Override
     public String getProductType() {
         final Node gpi = xPathHelper.getNode("/XFDU/metadataSection/metadataObject[@ID='generalProductInformation']", doc);
         String typeString = xPathHelper.getString("//metadataWrap/xmlData/generalProductInformation/productType", gpi);

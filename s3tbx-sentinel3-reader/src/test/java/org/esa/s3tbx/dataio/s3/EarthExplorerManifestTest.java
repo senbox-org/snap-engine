@@ -43,6 +43,11 @@ public class EarthExplorerManifestTest {
     }
 
     @Test
+    public void testGetProductName() throws Exception {
+        assertEquals("S3_OL_1_ERR_20130621T100921_20130621T101413_00291_000001_001_EST_TEST_00", manifest.getProductName());
+    }
+
+    @Test
     public void testGetProductType() throws Exception {
         assertEquals("OL_1_ERR", manifest.getProductType());
     }

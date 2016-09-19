@@ -31,6 +31,11 @@ public class XfduManifestTest {
     }
 
     @Test
+    public void testGetProductname() throws Exception {
+        assertEquals("S3A_SL_1_RBT____20160820T201637_20160820T201937_20160820T222707_0179_007_370_4500_MAR_O_NR_001.SEN3", manifestTest.getProductName());
+    }
+
+    @Test
     public void testGetProductType() throws Exception {
         assertEquals("SL_1_RBT", manifestTest.getProductType());
     }

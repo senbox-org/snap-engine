@@ -30,7 +30,6 @@ import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.datamodel.SampleCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.util.ProductUtils;
-import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.runtime.Config;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -365,7 +364,7 @@ public abstract class AbstractProductFactory implements ProductFactory {
     }
 
     protected String getProductName() {
-        return FileUtils.getFilenameWithoutExtension(getInputFileParentDirectory());
+        return manifest.getProductName();
     }
 
 

@@ -21,6 +21,8 @@ import java.util.List;
 
 public interface Manifest {
 
+    String getProductName();
+
     String getProductType();
 
     String getDescription();
@@ -34,4 +36,5 @@ public interface Manifest {
     List<String> getFileNames(String[] excluded);
 
     MetadataElement getMetadata();
+
 }
