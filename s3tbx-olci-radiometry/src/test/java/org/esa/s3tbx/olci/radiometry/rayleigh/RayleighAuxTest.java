@@ -16,16 +16,12 @@
  *
  */
 
-package org.esa.s3tbx.olci.radiometry.rayleighcorrection;
+package org.esa.s3tbx.olci.radiometry.rayleigh;
 
 import org.junit.Ignore;
 import org.junit.Test;
 
-
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * @author muhammad.bc.

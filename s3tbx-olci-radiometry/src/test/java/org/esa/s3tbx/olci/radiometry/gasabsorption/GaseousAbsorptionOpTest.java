@@ -16,9 +16,8 @@
  *
  */
 
-package org.esa.s3tbx.olci.radiometry.operator;
+package org.esa.s3tbx.olci.radiometry.gasabsorption;
 
-import org.esa.s3tbx.olci.radiometry.gaseousabsorption.GaseousAbsorptionOp;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.GPF;

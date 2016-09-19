@@ -1,4 +1,4 @@
-package org.esa.s3tbx.olci.radiometry.rayleighcorrection;
+package org.esa.s3tbx.olci.radiometry.rayleigh;
 
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.util.math.RsMathUtils;

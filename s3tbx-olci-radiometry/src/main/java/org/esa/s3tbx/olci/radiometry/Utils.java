@@ -16,15 +16,16 @@
  *
  */
 
-package org.esa.s3tbx.olci.radiometry.smilecorr;
+package org.esa.s3tbx.olci.radiometry;
+
+import org.esa.snap.core.gpf.OperatorException;
 
 import java.util.stream.IntStream;
-import org.esa.snap.core.gpf.OperatorException;
 
 /**
  * @author muhammad.bc.
  */
-public class SmileUtils {
+public class Utils {
 
     public static float[] multiple2ArrayFloat(float[] array1, float[] array2) {
         if (array1.length != array2.length) {

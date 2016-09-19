@@ -19,11 +19,11 @@
 package org.esa.s3tbx.olci.radiometry.smilecorr;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.s3tbx.olci.radiometry.gaseousabsorption.GaseousAbsorptionAux;
-import org.esa.s3tbx.olci.radiometry.rayleighcorrection.RayleighAux;
-import org.esa.s3tbx.olci.radiometry.rayleighcorrection.RayleighCorrAlgorithm;
-import org.esa.s3tbx.olci.radiometry.rayleighcorrection.RayleighCorrectionOp;
-import org.esa.s3tbx.olci.radiometry.rayleighcorrection.RayleighSample;
+import org.esa.s3tbx.olci.radiometry.gasabsorption.GaseousAbsorptionAux;
+import org.esa.s3tbx.olci.radiometry.rayleigh.RayleighAux;
+import org.esa.s3tbx.olci.radiometry.rayleigh.RayleighCorrAlgorithm;
+import org.esa.s3tbx.olci.radiometry.rayleigh.RayleighCorrectionOp;
+import org.esa.s3tbx.olci.radiometry.rayleigh.RayleighSample;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
@@ -43,13 +43,13 @@ import javax.media.jai.operator.ConstantDescriptor;
 import java.awt.Color;
 import java.awt.Rectangle;
 
-import static org.esa.s3tbx.olci.radiometry.rayleighcorrection.RayleighCorrectionOp.*;
+import static org.esa.s3tbx.olci.radiometry.rayleigh.RayleighCorrectionOp.*;
 
 
 /**
  * @author muhammad.bc
  */
-@OperatorMetadata(alias = "Olci.SmileCorrection",
+@OperatorMetadata(alias = "SmileCorrection.Olci",
         description = "Performs radiometric corrections on OLCI L1b data products.",
         authors = " Marco Peters ,Muhammad Bala (Brockmann Consult)",
         copyright = "(c) 2015 by Brockmann Consult",

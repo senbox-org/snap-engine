@@ -16,12 +16,12 @@
  *
  */
 
-package org.esa.s3tbx.olci.radiometry.rayleighcorrection;
+package org.esa.s3tbx.olci.radiometry.rayleigh;
 
 import org.apache.commons.math3.analysis.interpolation.BicubicSplineInterpolator;
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
-import org.esa.s3tbx.olci.radiometry.smilecorr.SmileUtils;
+import org.esa.s3tbx.olci.radiometry.Utils;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.dataop.dem.ElevationModel;
 import org.esa.snap.core.dataop.dem.ElevationModelDescriptor;
@@ -292,7 +292,7 @@ public class RayleighAux {
 
     void setSunAzimuthAnglesRad(double[] sunAzimuthAngles) {
         if (Objects.nonNull(sunAzimuthAngles)) {
-            sunAzimuthAnglesRad = SmileUtils.convertDegreesToRadians(sunAzimuthAngles);
+            sunAzimuthAnglesRad = Utils.convertDegreesToRadians(sunAzimuthAngles);
         }
     }
 
@@ -305,7 +305,7 @@ public class RayleighAux {
 
     void setViewAzimuthAnglesRad(double[] viewAzimuthAngles) {
         if (Objects.nonNull(viewAzimuthAngles)) {
-            viewAzimuthAnglesRad = SmileUtils.convertDegreesToRadians(viewAzimuthAngles);
+            viewAzimuthAnglesRad = Utils.convertDegreesToRadians(viewAzimuthAngles);
         }
     }
 
@@ -318,7 +318,7 @@ public class RayleighAux {
 
     void setSunZenithAnglesRad(double[] sunZenithAngles) {
         if (Objects.nonNull(sunZenithAngles)) {
-            sunZenithAnglesRad = SmileUtils.convertDegreesToRadians(sunZenithAngles);
+            sunZenithAnglesRad = Utils.convertDegreesToRadians(sunZenithAngles);
         }
         setCosSZARads(sunZenithAnglesRad);
         setSinSZARads(sunZenithAnglesRad);
@@ -333,7 +333,7 @@ public class RayleighAux {
 
     void setViewZenithAnglesRad(double[] viewZenithAngles) {
         if (Objects.nonNull(viewZenithAngles)) {
-            viewZenithAnglesRad = SmileUtils.convertDegreesToRadians(viewZenithAngles);
+            viewZenithAnglesRad = Utils.convertDegreesToRadians(viewZenithAngles);
         }
         setCosOZARads(viewZenithAnglesRad);
         setSinOZARads(viewZenithAnglesRad);
@@ -347,7 +347,7 @@ public class RayleighAux {
     }
 
     public void setAirMass() {
-        airMass = SmileUtils.getAirMass(this.getCosOZARads(), this.getCosSZARads());
+        airMass = Utils.getAirMass(this.getCosOZARads(), this.getCosSZARads());
     }
 
     double[] getAirMass() {
@@ -358,7 +358,7 @@ public class RayleighAux {
     }
 
     public void setAziDifferent() {
-        aziDiff = SmileUtils.getAziDiff(this.getSunAzimuthAnglesRad(), this.getViewAzimuthAnglesRad());
+        aziDiff = Utils.getAziDiff(this.getSunAzimuthAnglesRad(), this.getViewAzimuthAnglesRad());
     }
 
     double[] getAziDifferent() {

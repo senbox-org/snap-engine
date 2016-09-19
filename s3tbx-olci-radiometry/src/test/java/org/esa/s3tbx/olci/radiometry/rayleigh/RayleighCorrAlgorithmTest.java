@@ -1,4 +1,4 @@
-package org.esa.s3tbx.olci.radiometry.rayleighcorrection;
+package org.esa.s3tbx.olci.radiometry.rayleigh;
 
 /**
  * @author muhammad.bc.

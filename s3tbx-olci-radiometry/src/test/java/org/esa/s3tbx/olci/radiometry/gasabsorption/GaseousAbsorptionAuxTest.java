@@ -16,7 +16,7 @@
  *
  */
 
-package org.esa.s3tbx.olci.radiometry.gaseousabsorption;
+package org.esa.s3tbx.olci.radiometry.gasabsorption;
 
 import org.junit.Assert;
 import org.junit.Before;

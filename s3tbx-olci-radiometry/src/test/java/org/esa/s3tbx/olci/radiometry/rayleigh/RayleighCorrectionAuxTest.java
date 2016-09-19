@@ -16,20 +16,18 @@
  *
  */
 
-package org.esa.s3tbx.olci.radiometry.rayleighcorrection;
+package org.esa.s3tbx.olci.radiometry.rayleigh;
 
-import java.io.FileReader;
-import java.nio.file.Path;
-import java.util.ArrayList;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.FileReader;
+import java.nio.file.Path;
+import java.util.ArrayList;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 /**
  * @author muhammad.bc.

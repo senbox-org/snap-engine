@@ -16,22 +16,23 @@
  *
  */
 
-package org.esa.s3tbx.olci.radiometry.rayleighcorrection;
+package org.esa.s3tbx.olci.radiometry.rayleigh;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author muhammad.bc.
  */
-public class RayleighConstants {
-    static double AVOGADRO_NUMBER = 6.0221367E+23;
-    static double MEAN_MOLECULAR_ZERO = 28.9595;
-    static double Molecular_cm3 = 2.5469E19;
+public class RayleighCorrectionOpIITest {
+    RayleighCorrectionOp rayleighCorrectionOpII = new RayleighCorrectionOp();
 
-    // constants describing the state of the atmosphere and which we don't know; better values may be used if known
-    static double CO2 = 3.0e-4; // CO2 concentration at pixel; typical values are 300 to 360 ppm
-    static double C_CO2 = CO2 * 100;  // CO2 concentration in ppm
-    static double MEAN_MOLECULAR_WEIGHT_C02 = 15.0556 * CO2 + MEAN_MOLECULAR_ZERO;
-
-    static double PA = 0.9587256;
-    static double PB = 1.0 - PA; // Rayleigh Phase function, molecular asymmetry factor 2
-
+    @Test
+    public void testGetBandIndex() throws Exception {
+        assertEquals(8, rayleighCorrectionOpII.getSourceBandIndex("band_08"));
+        assertEquals(-1, rayleighCorrectionOpII.getSourceBandIndex("band"));
+        assertEquals(9, rayleighCorrectionOpII.getSourceBandIndex("09band"));
+        assertEquals(5, rayleighCorrectionOpII.getSourceBandIndex("Bla05band"));
+    }
 }

@@ -16,7 +16,7 @@
  *
  */
 
-package org.esa.s3tbx.olci.radiometry.gaseousabsorption;
+package org.esa.s3tbx.olci.radiometry.gasabsorption;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.google.common.primitives.Doubles;

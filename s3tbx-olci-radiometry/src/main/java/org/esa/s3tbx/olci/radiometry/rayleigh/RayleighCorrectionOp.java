@@ -16,10 +16,10 @@
  *
  */
 
-package org.esa.s3tbx.olci.radiometry.rayleighcorrection;
+package org.esa.s3tbx.olci.radiometry.rayleigh;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.s3tbx.olci.radiometry.gaseousabsorption.GaseousAbsorptionAux;
+import org.esa.s3tbx.olci.radiometry.gasabsorption.GaseousAbsorptionAux;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
@@ -35,7 +35,6 @@ import org.esa.snap.core.util.ProductUtils;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -45,8 +44,8 @@ import java.util.stream.Stream;
 /**
  * @author muhammad.bc.
  */
-@OperatorMetadata(alias = "Olci.RayleighCorrectionII",
-        description = "Performs radiometric corrections on OLCI L1b data products.",
+@OperatorMetadata(alias = "RayleighCorrection",
+        description = "Performs radiometric corrections on OLCI and MERIS L1b data products.",
         authors = " Marco Peters, Muhammad Bala (Brockmann Consult)",
         copyright = "(c) 2015 by Brockmann Consult",
         category = "Optical/Pre-Processing",
@@ -135,9 +134,7 @@ public class RayleighCorrectionOp extends Operator {
     public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
         checkForCancellation();
         RayleighAux rayleighAux = createAuxiliary(sensor, targetRectangle);
-        Iterator<Band> iteratorBand = targetTiles.keySet().iterator();
-        while (iteratorBand.hasNext()) {
-            Band targetBand = iteratorBand.next();
+        for (Band targetBand : targetTiles.keySet()) {
             Tile targetTile = targetTiles.get(targetBand);
             String targetBandName = targetBand.getName();
             int sourceBandIndex = getSourceBandIndex(targetBand.getName());
@@ -273,8 +270,8 @@ public class RayleighCorrectionOp extends Operator {
             rayleighAux.setSourceSampleRad(getSourceTile(sourceBand, rectangle));
             int length = (int) (rectangle.getWidth() * rectangle.getHeight());
 
-            double[] solarFlux = fillDefaultArray(length, (double) sourceBand.getSolarFlux());
-            double[] lambdaSource = fillDefaultArray(length, (double) sourceBand.getSpectralWavelength());
+            double[] solarFlux = fillDefaultArray(length, sourceBand.getSolarFlux());
+            double[] lambdaSource = fillDefaultArray(length, sourceBand.getSpectralWavelength());
 
             rayleighAux.setSolarFluxs(solarFlux);
             rayleighAux.setLambdaSource(lambdaSource);
@@ -349,7 +346,8 @@ public class RayleighCorrectionOp extends Operator {
         if (isSensor) {
             return Sensor.MERIS;
         }
-        throw new OperatorException("The operator can't be applied on the sensor");
+        throw new OperatorException("The operator can't be applied on this sensor.\n" +
+                                    "Only OLCI and MERIS are supported");
     }
 
     private enum Sensor {

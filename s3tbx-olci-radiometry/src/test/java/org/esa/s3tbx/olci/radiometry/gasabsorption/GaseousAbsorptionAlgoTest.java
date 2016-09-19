@@ -1,14 +1,12 @@
-package org.esa.s3tbx.olci.radiometry.operator;
+package org.esa.s3tbx.olci.radiometry.gasabsorption;
 
 
-import org.esa.s3tbx.olci.radiometry.gaseousabsorption.GaseousAbsorptionAlgo;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-
 import static junit.framework.Assert.assertEquals;
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 

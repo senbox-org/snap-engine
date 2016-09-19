@@ -18,7 +18,6 @@
 
 package org.esa.s3tbx.olci.radiometry.operator;
 
-import java.util.HashMap;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.GPF;
@@ -26,21 +25,26 @@ import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
+import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.ProductUtils;
+
+import java.util.HashMap;
 
 /**
  * @author muhammad.bc.
  */
-@OperatorMetadata(alias = "OLCI.Radiomerty",
+@OperatorMetadata(alias = "Radiometry.Olci",
         description = "Performs radiometric corrections on OLCI L1b data products.",
         authors = " Marco Peters ,Muhammad Bala (Brockmann Consult)",
         copyright = "(c) 2015 by Brockmann Consult",
         category = "Optical/Pre-Processing",
         version = "1.2")
 
-public class Radiometry extends Operator {
+public class RadiometryOp extends Operator {
     @SourceProduct
     public Product sourceProduct;
+
+    @TargetProduct
     private Product targetProduct;
 
 

@@ -16,20 +16,21 @@
  *
  */
 
-package org.esa.s3tbx.olci.radiometry.rayleighcorrection;
+package org.esa.s3tbx.olci.radiometry.rayleigh;
 
 import com.google.common.primitives.Doubles;
+import org.apache.commons.math3.analysis.interpolation.BicubicSplineInterpolatingFunction;
+import org.apache.commons.math3.analysis.interpolation.BicubicSplineInterpolator;
+
+import javax.media.jai.Interpolation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
-import javax.media.jai.Interpolation;
-import org.apache.commons.math3.analysis.interpolation.BicubicSplineInterpolatingFunction;
-import org.apache.commons.math3.analysis.interpolation.BicubicSplineInterpolator;
 
 /**
  * @author muhammad.bc.
  */
-public class SpikeInterpolation {
+class SpikeInterpolation {
     public static double interpolate2D(double[][] doubles2D, double[] xCoordinate, double[] yCoordinate,
                                        double x, double y) {
 

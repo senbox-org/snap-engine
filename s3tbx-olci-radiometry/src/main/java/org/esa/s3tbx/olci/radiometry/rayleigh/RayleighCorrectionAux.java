@@ -16,7 +16,7 @@
  *
  */
 
-package org.esa.s3tbx.olci.radiometry.rayleighcorrection;
+package org.esa.s3tbx.olci.radiometry.rayleigh;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.google.common.primitives.Doubles;
@@ -38,8 +38,8 @@ import java.util.stream.Collectors;
 public class RayleighCorrectionAux {
 
     Path installAuxdata() throws IOException {
-        Path auxdataDirectory = SystemUtils.getAuxDataPath().resolve("olci/smile-correction");
-        final Path sourceDirPath = ResourceInstaller.findModuleCodeBasePath(RayleighCorrectionAux.class).resolve("auxdata/smile");
+        Path auxdataDirectory = SystemUtils.getAuxDataPath().resolve("olci/rayleigh");
+        final Path sourceDirPath = ResourceInstaller.findModuleCodeBasePath(RayleighCorrectionAux.class).resolve("auxdata/rayleigh");
         final ResourceInstaller resourceInstaller = new ResourceInstaller(sourceDirPath, auxdataDirectory);
         resourceInstaller.install(".*", ProgressMonitor.NULL);
         return auxdataDirectory;

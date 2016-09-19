@@ -16,7 +16,7 @@
  *
  */
 
-package org.esa.s3tbx.olci.radiometry.gaseousabsorption;
+package org.esa.s3tbx.olci.radiometry.gasabsorption;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.Band;
@@ -30,7 +30,7 @@ import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.util.ProductUtils;
 
-import java.awt.*;
+import java.awt.Rectangle;
 
 
 /**
