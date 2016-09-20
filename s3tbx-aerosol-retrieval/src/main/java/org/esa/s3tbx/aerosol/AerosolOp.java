@@ -40,17 +40,6 @@ import java.util.logging.Logger;
 /**
  * Generates currently 2 bands: aot and aot_err on lower spatial resolution
  * rasterSize of target is 1/scale of source
- * <p>
- * <p>
- * TODO: implement IDEPIX flags (done for clear land)
- * TODO: implement treatment of wvCol from VGT
- * TODO: should add flag band with QA infos about aot retrieval
- * TODO: getSourceTiles, readAllValues and readAve/DarkestPixel shouldn't depend on order of band names defined in init
- * !!! Potential error source !!!!
- * TODO: (MINOR) ozone should always be atm.cm not DU
- * TODO: snow pixels should be treated separatly
- * TODO: add new surf specs for spectral Approach over desert and snow
- * TODO: AERONET output
  *
  * @author akheckel
  */
@@ -66,37 +55,38 @@ public class AerosolOp extends Operator {
     private Product sourceProduct;
     @TargetProduct
     private Product targetProduct;
-    /*
-        //@Parameter(defaultValue="false")
-        private boolean saveSdrBands = false;
-        //@Parameter(defaultValue="false")
-        private boolean saveModelBands = false;
-        //@Parameter(defaultValue="surface_reflectance_spec.asc")
-     */
-    private String SurfaceSpecName = "surface_reflectance_spec.asc";
+
     @Parameter(defaultValue = "2")
     private int vegSpecId;
+
     @Parameter(defaultValue = "1")
     private int soilSpecId;
+
+    @Parameter(defaultValue = "0.2")
+    private float ndviThreshold;
+
+    @Parameter(defaultValue = "9")
+    private int scale;
+
+    private static final float WV_COL = 2.5f;
+
+    private String SurfaceSpecName = "surface_reflectance_spec.asc";
 
     private String productName;
     private String productType;
 
     private InstrumentConsts instrC;
     private String instrument;
-
     private String[] specBandNames;
     private String[] geomBandNames;
     private String[] auxBandNames;
     private String surfPresName;
     private String ozoneName;
+
     private String validName;
+
     private String ndviName;
 
-    private float wvCol = 2.5f;
-
-    @Parameter(defaultValue = "9")
-    private int scale;
     private int srcRasterWidth;
     private int srcRasterHeight;
     private int tarRasterWidth;
@@ -114,8 +104,6 @@ public class AerosolOp extends Operator {
     private Band aotErrorBand;
     private Band latBand;
 
-    @Parameter(defaultValue = "0.2")
-    private float ndviThreshold;
 
     private boolean addFitBands = false;
     private Map<String, Double> sourceNoDataValues;
@@ -236,24 +224,11 @@ public class AerosolOp extends Operator {
     }
 
     private InputPixelData createInPixelData(double[] tileValues) {
-        PixelGeometry geomNadir;
-        PixelGeometry geomFward;
+        final PixelGeometry geomNadir = new PixelGeometry(tileValues[0], tileValues[1], tileValues[2], tileValues[3]);
+
         double[][] toaRefl = new double[2][nSpecWvl];
-        int skip = 0;
-        if (instrument.equals("AATSR")) {
-            geomNadir = new PixelGeometry(90.0 - tileValues[0], tileValues[1], 90.0 - tileValues[2], tileValues[3]);
-            skip += 4;
-            geomFward = new PixelGeometry(90.0 - tileValues[skip], tileValues[skip + 1], 90.0 - tileValues[skip + 2], tileValues[skip + 3]);
-            skip += 4;
-        } else if (instrument.equals("PROBAV")) {
-            geomNadir = new PixelGeometry(tileValues[0], tileValues[1], tileValues[4], tileValues[5]);
-            geomFward = geomNadir;
-            skip += 6;  // we have the angles SZA, SAA, VZA_SWIR, VAA_SWIR, VZA_VNIR, VAA_VNIR !!!
-        } else {
-            geomNadir = new PixelGeometry(tileValues[0], tileValues[1], tileValues[2], tileValues[3]);
-            geomFward = geomNadir;
-            skip += 4;
-        }
+        int skip = 4;
+
         for (int i = 0; i < nSpecWvl; i++) {
             toaRefl[0][i] = tileValues[skip + i];
             toaRefl[1][i] = tileValues[skip + i];
@@ -261,15 +236,15 @@ public class AerosolOp extends Operator {
         skip += nSpecWvl;
         if (instrument.equals("AATSR")) {
             for (int i = 0; i < nSpecWvl; i++) {
-                toaRefl[0][i] = RsMathUtils.radianceToReflectance((float) toaRefl[0][i], geomFward.sza, (float) Math.PI) * 0.01f;
+                toaRefl[0][i] = RsMathUtils.radianceToReflectance((float) toaRefl[0][i], geomNadir.sza, (float) Math.PI) * 0.01f;
                 toaRefl[1][i] = tileValues[skip + i];
-                toaRefl[1][i] = RsMathUtils.radianceToReflectance((float) toaRefl[1][i], geomFward.sza, (float) Math.PI) * 0.01f;
+                toaRefl[1][i] = RsMathUtils.radianceToReflectance((float) toaRefl[1][i], geomNadir.sza, (float) Math.PI) * 0.01f;
             }
             skip += nSpecWvl;
         }
         double surfP = Math.min(tileValues[skip], 1013.25);
         double o3DU = ensureO3DobsonUnits(tileValues[skip + 1]);
-        return new InputPixelData(geomNadir, geomFward, surfP, o3DU, this.wvCol, specWvl[0], toaRefl[0], toaRefl[1]);
+        return new InputPixelData(geomNadir, geomNadir, surfP, o3DU, WV_COL, specWvl[0], toaRefl[0], toaRefl[1]);
     }
 
     private void createTargetProduct() {
@@ -322,7 +297,7 @@ public class AerosolOp extends Operator {
     }
 
     private Map<String, Tile> getSourceTiles(String[] bandNames, Rectangle srcRec, BorderExtender borderExt) {
-        Map<String, Tile> tileMap = new HashMap<String, Tile>(bandNames.length);
+        Map<String, Tile> tileMap = new HashMap<>(bandNames.length);
         for (String name : bandNames) {
             RasterDataNode b = (name.equals(validName)) ? validBand : sourceProduct.getRasterDataNode(name);
             tileMap.put(name, getSourceTile(b, srcRec, borderExt));
@@ -331,7 +306,7 @@ public class AerosolOp extends Operator {
     }
 
     private Map<String, Double> getSourceNoDataValues(String[] bandNames) {
-        Map<String, Double> noDataMap = new HashMap<String, Double>(bandNames.length);
+        Map<String, Double> noDataMap = new HashMap<>(bandNames.length);
         for (String name : bandNames) {
             RasterDataNode b = (name.equals(validName)) ? validBand : sourceProduct.getRasterDataNode(name);
             noDataMap.put(name, b.getGeophysicalNoDataValue());
@@ -355,7 +330,7 @@ public class AerosolOp extends Operator {
             for (int x = xOffset; x < xOffset + pixelWindow.width; x++) {
                 valid = valid && sourceTiles.get(validName).getSampleBoolean(x, y);
                 if (valid) {
-                    valid = valid && readAllValues(x, y, sourceTiles, tileValues);
+                    valid = readAllValues(x, y, sourceTiles, tileValues);
                     if (valid) {
                         addToSumArray(tileValues, sumVal);
                         nAve++;
@@ -378,7 +353,7 @@ public class AerosolOp extends Operator {
         if (!valid) return null;
 
         int NPixel = 10;
-        ArrayList<InputPixelData> inPixelList = new ArrayList<InputPixelData>(pixelWindow.height * pixelWindow.width);
+        ArrayList<InputPixelData> inPixelList = new ArrayList<>(pixelWindow.height * pixelWindow.width);
         InputPixelData[] inPixField = null;
         float ndvi;
         float[] ndviArr = new float[pixelWindow.height * pixelWindow.width];
@@ -407,7 +382,7 @@ public class AerosolOp extends Operator {
                     ndvi = sourceTiles.get(ndviName).getSampleFloat(x, y);
                     if (valid && (ndvi >= ndviArr[ndviArr.length - 10 - NPixel])
                             && (ndvi <= ndviArr[ndviArr.length - 1 - NPixel])) {
-                        valid = valid && readAllValues(x, y, sourceTiles, tileValues);
+                        valid = readAllValues(x, y, sourceTiles, tileValues);
                         InputPixelData ipd = createInPixelData(tileValues);
                         if (valid && momo.isInsideLut(ipd)) {
                             inPixelList.add(ipd);

@@ -45,6 +45,7 @@ public class CreateElevationBandOp extends Operator {
 
     @SourceProduct
     private Product sourceProduct;
+
     @TargetProduct
     private Product targetProduct;
 

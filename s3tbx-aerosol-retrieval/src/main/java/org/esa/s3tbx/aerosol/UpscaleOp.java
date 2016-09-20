@@ -130,7 +130,9 @@ public class UpscaleOp extends Operator {
                     if (!targetFCG.contains(flgCoding.getName())) {
                         ProductUtils.copyFlagCoding(flgCoding, targetProduct);
                     }
-                    targetBand.setSampleCoding(targetFCG.get(flgCoding.getName()));
+                    if (targetBand != null) {
+                        targetBand.setSampleCoding(targetFCG.get(flgCoding.getName()));
+                    }
                 }
             }
         }

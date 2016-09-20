@@ -87,8 +87,8 @@ public class MomoLut {
     /**
      * todo add Javadoc
      *
-     * @param inPix
-     * @param tau
+     * @param inPix -
+     * @param tau -
      */
     public synchronized void getSdrAndDiffuseFrac(InputPixelData inPix, double tau) {
         Guardian.assertEquals("InputPixelData.nSpecWvl", inPix.nSpecWvl, nWvl);
@@ -98,7 +98,6 @@ public class MomoLut {
         for (int iView = 0; iView < 2; iView++) {
             geom = (iView == 0) ? inPix.geom : inPix.geomFward;
             final double[] toaR = (iView == 0) ? inPix.toaReflec : inPix.toaReflecFward;
-            //final double rad2rfl = Math.PI / Math.cos(Math.toRadians(geom.sza));
             final float geomAMF = (float) ((1 / Math.cos(Math.toRadians(geom.sza))
                     + 1 / Math.cos(Math.toRadians(geom.vza))));
             final double[] gasT = getGasTransmission(geomAMF, (float) inPix.wvCol, (float) (inPix.o3du / 1000));
@@ -108,7 +107,7 @@ public class MomoLut {
                 double rhoPath = lutValues[iWvl][0] * Math.PI / Math.cos(Math.toRadians(geom.sza));
                 double tupTdown = lutValues[iWvl][1] / Math.cos(Math.toRadians(geom.sza));
                 double spherAlb = lutValues[iWvl][2];
-                //double tgO3 = Math.exp(inPix.o3du * o3corr[i] * geomAMF/2); //my o3 correction scheme uses AMF=SC/VC not AMF=SC
+                //double tgO3 = Math.exp(inPix.o3du * o3corr[i] * geomAMF/2); // my o3 correction scheme uses AMF=SC/VC not AMF=SC
                 double toaCorr = toaR[iWvl] / gasT[iWvl];
                 double a = (toaCorr - rhoPath) / tupTdown;
                 inPix.surfReflec[iView][iWvl] = a / (1 + spherAlb * a);
@@ -120,8 +119,9 @@ public class MomoLut {
     /**
      * todo add Javadoc
      *
-     * @param ipd
-     * @return
+     * @param ipd -
+     *
+     * @return -
      */
     public boolean isInsideLut(InputPixelData ipd) {
         return (ipd.geom.vza >= lutLimits.get(DimSelector.VZA).min)
@@ -137,8 +137,9 @@ public class MomoLut {
     /**
      * todo add Javadoc
      *
-     * @param ipd
-     * @return
+     * @param ipd -
+     *
+     * @return -
      */
     public synchronized double getMaxAOT(InputPixelData ipd) {
         final float geomAMF = (float) ((1 / Math.cos(Math.toRadians(ipd.geom.sza))
@@ -163,7 +164,7 @@ public class MomoLut {
     // private methods
 
     private Map<DimSelector, LutLimits> getLutLimits() {
-        Map<DimSelector, LutLimits> limits = new HashMap<DimSelector, LutLimits>(5);
+        Map<DimSelector, LutLimits> limits = new HashMap<>(5);
         limits.put(DimSelector.VZA, new LutLimits(vza[0], vza[vza.length - 1]));
         limits.put(DimSelector.SZA, new LutLimits(sza[0], sza[sza.length - 1]));
         limits.put(DimSelector.AZI, new LutLimits(azi[0], azi[azi.length - 1]));

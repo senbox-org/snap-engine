@@ -34,7 +34,6 @@ import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.image.ImageManager;
-import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.dataio.envisat.EnvisatConstants;
 
@@ -114,16 +113,18 @@ public class AerosolRetrievalMasterOp extends Operator {
         RenderingHints rhAot = new RenderingHints(GPF.KEY_TILE_SIZE, aotTS);
 
         final String productType = sourceProduct.getProductType();
-        boolean isMerisProduct = EnvisatConstants.MERIS_L1_TYPE_PATTERN.matcher(productType).matches() ||
+        final boolean isMerisProduct = EnvisatConstants.MERIS_L1_TYPE_PATTERN.matcher(productType).matches() ||
                 IdepixConstants.MERIS_CCL1P_TYPE_PATTERN.matcher(productType).matches();
         final boolean isVgtProduct = productType.startsWith("VGT PRODUCT FORMAT V1.");
 
-        Guardian.assertTrue("not a valid source product", (isMerisProduct ^ isVgtProduct));
+        if (!isMerisProduct && !isVgtProduct) {
+            throw new OperatorException("Product " + sourceProduct.getName() + " is neither MERIS nor VGT L1 product.");
+        }
 
-        Product reflProduct = null;
+        Product reflProduct;
         if (isMerisProduct) {
             instrument = "MERIS";
-            Map<String, Object> params = new HashMap<String, Object>(4);
+            Map<String, Object> params = new HashMap<>(4);
             params.put("gaUseL1bLandWaterFlag", gaUseL1bLandWaterFlag);
             params.put("gaRefineClassificationNearCoastlines", gaRefineClassificationNearCoastlines);
             params.put("doEqualization", doEqualization);
@@ -131,7 +132,7 @@ public class AerosolRetrievalMasterOp extends Operator {
             params.put("gaComputeCloudBuffer", gaComputeCloudBuffer);
             params.put("gaCopyCTP", gaCopyCTP);
             reflProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(MerisPreparationOp.class), params, sourceProduct);
-        } else if (isVgtProduct) {
+        } else {
             instrument = "VGT";
             VgtPreparationOp vgtPrepOp = new VgtPreparationOp();
             vgtPrepOp.setParameterDefaultValues();
@@ -156,7 +157,7 @@ public class AerosolRetrievalMasterOp extends Operator {
         }
 
 
-        Map<String, Object> aotParams = new HashMap<String, Object>(4);
+        Map<String, Object> aotParams = new HashMap<>(4);
         aotParams.put("soilSpecId", soilSpecId);
         aotParams.put("vegSpecId", vegSpecId);
         aotParams.put("scale", scale);
@@ -166,17 +167,17 @@ public class AerosolRetrievalMasterOp extends Operator {
 
         Product fillAotProduct = aotDownsclProduct;
         if (!noFilling) {
-            Map<String, Product> fillSourceProds = new HashMap<String, Product>(2);
+            Map<String, Product> fillSourceProds = new HashMap<>(2);
             fillSourceProds.put("aotProduct", aotDownsclProduct);
             fillAotProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(GapFillingOp.class), GPF.NO_PARAMS, fillSourceProds);
         }
 
         targetProduct = fillAotProduct;
         if (!noUpscaling) {
-            Map<String, Product> upsclProducts = new HashMap<String, Product>(2);
+            Map<String, Product> upsclProducts = new HashMap<>(2);
             upsclProducts.put("lowresProduct", fillAotProduct);
             upsclProducts.put("hiresProduct", reflProduct);
-            Map<String, Object> sclParams = new HashMap<String, Object>(1);
+            Map<String, Object> sclParams = new HashMap<>(1);
             sclParams.put("scale", scale);
             Product aotHiresProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(UpscaleOp.class), sclParams, upsclProducts, rhTarget);
 
@@ -215,7 +216,6 @@ public class AerosolRetrievalMasterOp extends Operator {
 
             boolean copyBand = (copyToaReflBands && !tarP.containsBand(sourceBandName) && sourceBand.getSpectralWavelength() > 0);
             copyBand = copyBand || (instrument.equals("VGT") && InstrumentConsts.getInstance().isVgtAuxBand(sourceBand));
-            copyBand = copyBand || (instrument.equals("PROBAV") && InstrumentConsts.getInstance().isProbavAuxBand(sourceBand));
             copyBand = copyBand || (sourceBandName.equals("elevation"));
             copyBand = copyBand || (gaCopyCTP && sourceBandName.equals("cloud_top_press"));
 

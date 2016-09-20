@@ -109,7 +109,7 @@ public class MerisPreparationOp extends Operator {
             targetProduct = AerosolRetrievalMasterOp.EMPTY_PRODUCT;
             return;
         } else {
-            Map<String, Object> subsetParam = new HashMap<String, Object>(3);
+            Map<String, Object> subsetParam = new HashMap<>(3);
             subsetParam.put("region", szaRegion);
             Dimension targetTS = ImageManager.getPreferredTileSize(sourceProduct);
             RenderingHints rhTarget = new RenderingHints(GPF.KEY_TILE_SIZE, targetTS);
@@ -118,7 +118,7 @@ public class MerisPreparationOp extends Operator {
         }
 
         // convert radiance bands to reflectance
-        Map<String, Object> relfParam = new HashMap<String, Object>(3);
+        Map<String, Object> relfParam = new HashMap<>(3);
         relfParam.put("doRadToRefl", true);
         relfParam.put("doEqualization", doEqualization);
         relfParam.put("sensor", Sensor.MERIS);
