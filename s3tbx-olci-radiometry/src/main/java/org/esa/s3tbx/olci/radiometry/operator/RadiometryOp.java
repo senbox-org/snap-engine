@@ -33,10 +33,10 @@ import java.util.HashMap;
 /**
  * @author muhammad.bc.
  */
-@OperatorMetadata(alias = "Radiometry.Olci",
+@OperatorMetadata(alias = "Olci.CorrectRadiometry",
         description = "Performs radiometric corrections on OLCI L1b data products.",
-        authors = " Marco Peters ,Muhammad Bala (Brockmann Consult)",
-        copyright = "(c) 2015 by Brockmann Consult",
+        authors = " Marco Peters, Muhammad Bala (Brockmann Consult)",
+        copyright = "(c) 2016 by Brockmann Consult",
         category = "Optical/Pre-Processing",
         version = "1.2")
 
@@ -68,6 +68,6 @@ public class RadiometryOp extends Operator {
 
     private Product getSmileProduct(Product sourceProduct) {
         HashMap<String, Object> parameters = new HashMap<>();
-        return GPF.createProduct("Olci.SmileCorrection", parameters, sourceProduct);
+        return GPF.createProduct("SmileCorrection.Olci", parameters, sourceProduct);
     }
 }
