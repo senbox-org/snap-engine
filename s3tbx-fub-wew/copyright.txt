@@ -1,0 +1,19 @@
+Warranties and copyright information
+------------------------------------
+
+The FUB/WeW WATER processor package described in this document is provided
+'as is', with no warranty of merchantability or fitness to any particular
+purpose. Although every effort has been made to ensure accuracy of computations
+and conformity to the algorithms as published in the references below, the
+authors assume no responsibility whatsoever for any direct, indirect or
+consequential damage resulting from the use of this software. The FUB/WeW WATER
+processor is distributed free of charge and cannot be sold or re-sold. It
+can be copied and distributed further, provided all documentation is attached
+and provided the original source of the software is explicitly and
+prominently described.
+
+Questions, concerns and problems should be referred to the authors of the
+software package at the address indicated at the start of this file.
+
+The copyright on this file and the associated software remains with the
+Institute for Space Sciences (WeW), Freie Universitaet Berlin.

@@ -1,0 +1,10 @@
+<filesystem>
+
+    <folder name="OperatorUIs">
+        <file name="org.esa.s3tbx.fub.wew">
+            <attr name="operatorName" stringvalue="FUB.Water"/>
+            <attr name="disableFromGraphBuilder" stringvalue="true"/>
+        </file>
+    </folder>
+
+</filesystem>

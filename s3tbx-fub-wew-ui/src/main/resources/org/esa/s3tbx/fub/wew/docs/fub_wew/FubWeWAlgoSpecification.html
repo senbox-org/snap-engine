@@ -1,0 +1,153 @@
+<!--
+  ~ Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+  ~
+  ~ This program is free software; you can redistribute it and/or modify it
+  ~ under the terms of the GNU General Public License as published by the Free
+  ~ Software Foundation; either version 3 of the License, or (at your option)
+  ~ any later version.
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+  ~ more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License along
+  ~ with this program; if not, see http://www.gnu.org/licenses/
+  -->
+
+<html xmlns="http://www.w3.org/1999/html">
+<head>
+    <title>SNAP Data Processors - FUB/WeW Water Processor</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+<table class="header">
+    <tr class="header">
+        <td class="header">&nbsp;
+            FUB/Wew Water Processor - Algorithm Specification
+        </td>
+        <td class="header" align="right"><a href="nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/general/overview/SnapOverview.html"><img src="../images/snap_header.jpg" border=0></a>
+        </td>
+    </tr>
+</table>
+
+<h3>Algorithm Specification</h3>
+
+<p>
+    The FUB/WeW Water Processor makes use of MERIS Level-1b TOA radiances in the
+    bands 1-7, 9-10 and 12-14 to retrieve the following case II water properties and
+    atmospheric properties above case II waters :
+</p>
+
+<ul>
+    <li>chlorophyll-a concentration (log scale, mg/m^3)</li>
+    <li>yellow substance absorption @ 443 nm (log scale, 1/m)</li>
+    <li>total suspended matter concentration (log scale, g/m^3)</li>
+    <li>yellow substance absorption @ 443 nm (log scale, 1/m)</li>
+    <li>aerosol optical depth @ 440 nm</li>
+    <li>aerosol optical depth @ 550 nm</li>
+    <li>aerosol optical depth @ 670 nm</li>
+    <li>aerosol optical depth @ 870 nm</li>
+    <li>water-leaving RS reflectance @ 412 nm (1/sr)</li>
+    <li>water-leaving RS reflectance @ 442 nm (1/sr)</li>
+    <li>water-leaving RS reflectance @ 490 nm (1/sr)</li>
+    <li>water-leaving RS reflectance @ 510 nm (1/sr)</li>
+    <li>water-leaving RS reflectance @ 560 nm (1/sr)</li>
+    <li>water-leaving RS reflectance @ 620 nm (1/sr)</li>
+    <li>water-leaving RS reflectance @ 665 nm (1/sr)</li>
+    <li>water-leaving RS reflectance @ 708 nm (1/sr)</li>
+</ul>
+
+<p>
+The retrieval is based on four separate artificial neural networks which
+were trained on the basis of the results of extensive radiative transfer
+simulations with the MOMO code by taking varying atmospheric and oceanic
+conditions into account. All networks were validated against in-situ
+measurements.
+</p>
+
+<p>
+During the Plugin processing the MERIS Level-1b data are masked prior to
+the retrieval by applying the following combination mask :
+</p>
+
+<ul>
+    <li>GLINT_RISK</li>
+    <li>BRIGHT</li>
+    <li>INVALID</li>
+    <li>SUSPECT (only when not masking out almost all pixels)</li>
+</ul>
+
+<p>
+The masked pixel's values are set to 5.
+</p>
+
+<p>
+Non-masked pixels are then normalized for an atmosphere's ozone contents of
+344 Dobson units by calculating transmission correction factors.
+</p>
+
+<p>
+Notice that the AOT wavelengths 440, 670 and 870 nm correspond to the
+AERONET data wavelengths for a convenient direct comparison with in situ data.
+</p>
+
+<p>
+Each pixel is checked against the input and output values margin of the
+trained networks. Additional flags are set in case of a neural network
+failure for input and output separately.
+</p>
+
+<p>
+The radiative transfer simulation code and the retrieval algorithm are
+described in detail in the papers cited in the references section below.
+We would like to stress the fact that the operator is applicable over
+case II only, thus it is likely to fail over the open ocean by producing
+negative remote sensing (RS) water-leaving reflectances.
+</p>
+
+
+<h3>References</h3>
+<p>
+Fischer J., and Grassl H., "Radiative transfer in an atmosphere-ocean system:
+an azimuthally dependent matrixoperator approach",
+Applied Optics, 23, 1032-1039, 1984.
+</p>
+
+<p>
+Fell F., and Fischer J., "Numerical simulation of the light field in the
+atmosphere-ocean system using the matrixoperator method", Journal of
+Quantitative Spectroscopy & Radiative Transfer, 69, 351-388, 2001.
+</p>
+
+<p>
+Schroeder Th., Schaale M., Fell F. and Fischer J., "Atmospheric correction
+algorithm for MERIS data: A neural network approach", In: Proceedings of the
+Ocean Optics XVI Conference, Santa Fe, New Mexico, USA, published on CD ROM, 2002.
+</p>
+
+<p>
+Schroeder Th., Fischer J., Schaale M. and Fell F., "Artificial neural network
+based atmospheric correction algorithm: Application to MERIS data", In: P
+roceedings of the International Society for Optical Engineering (SPIE),
+Vol. 4892, Hangzhou, China, 2002.
+</p>
+
+<p>
+Schroeder Th., and Fischer J., "Atmospheric correction of MERIS imagery above
+case-2 waters", In: Proceedings of the 2003 MERIS User Workshop, ESA ESRIN,
+Frascati, Italy, 2003.
+</p>
+
+<p>
+Schroeder, Th., "Fernerkundung von Wasserinhaltsstoffen in Kuestengeweassern
+mit MERIS unter Anwendung expliziter und impliziter Atmosphaerenkorrektur-
+verfahren", Ph.D. Dissertation, Freie Universitatet Berlin,
+Berlin (Germany), 2005, http:/www.diss.fu-berlin.de/2005/78
+</p>
+
+<br>
+<hr>
+</body>
+</html>

@@ -1,0 +1,19 @@
+#BEAM Color Palette Definition File
+#Tue Jan 06 07:52:01 UTC 2004
+color0=0,0,255
+color1=0,0,255
+color2=0,255,255
+color3=0,255,0
+color4=255,255,0
+color5=255,0,0
+color6=255,0,0
+color7=0,0,0
+numPoints=8
+sample0=0.0009
+sample1=0.001
+sample2=0.0025
+sample3=0.004
+sample4=0.0055
+sample5=0.007
+sample6=0.009
+sample7=0.010

@@ -1,0 +1,154 @@
+<!--
+  ~ Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
+  ~
+  ~ This program is free software; you can redistribute it and/or modify it
+  ~ under the terms of the GNU General Public License as published by the Free
+  ~ Software Foundation; either version 3 of the License, or (at your option)
+  ~ any later version.
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+  ~ more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License along
+  ~ with this program; if not, see http://www.gnu.org/licenses/
+  -->
+
+<html xmlns="http://www.w3.org/1999/html">
+<head>
+    <title>SNAP Data Processors - FUB/WeW Water Processor</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+<table class="header">
+    <tr class="header">
+        <td class="header">&nbsp;
+            FUB/Wew Water Processor - Processor Description
+        </td>
+        <td class="header" align="right"><a href="nbdocs://org.esa.snap.snap.help/org/esa/snap/snap/help/docs/general/overview/SnapOverview.html"><img src="../images/snap_header.jpg" border=0></a>
+        </td>
+    </tr>
+</table>
+
+<h3>Processor Description</h3>
+
+
+<p>
+    The FUB/WeW Water Processor can be invoked from the VISAT tool menu by selecting
+    the <b>MERIS FUB/WeW WATER Processor</b> command. On the command line the FUB/WeW Water Processor is
+    available by means of the Graph Processing Tool <code>gpt</code> which is located in the BEAM <code>bin</code>
+    directory. Typing <code>gpt FUB.Water -h</code> displays further information.
+</p>
+
+<p>
+    Selecting the <b>MERIS FUB/WeW WATER Processor</b> command from the VISAT tool menu pops up the
+    following dialog:
+</p>
+
+<h4>I/O Parameters Tab</h4>
+
+<p align="center"><img src="images/FUBWeW_IOParameters.png"></p>
+
+<h5>Source Product Group</h5>
+
+<p class="i1">
+    <b>Source product:</b>
+    Here the user specifies the source product. The combo box presents
+    a list of all products open in VISAT. The user may select one of these
+    or, by clicking on the button next to the combo box, choose a product
+    from the file system.
+</p>
+
+<h5>Target Product Group</h5>
+
+<p class="i1">
+    <b>Name:</b>
+    Used to specify the name of the target product.
+</p>
+
+<p class="i1">
+    <b>Save as:</b>
+    Used to specify whether the target product should be saved to the file system. The
+    combo box presents a list of available file formats.
+    The text field or the button next to it allow to specify a target directory.
+</p>
+
+<p class="i1">
+    <b>Open in VISAT:</b>
+    Used to specify whether the target product should be opened in VISAT. When the
+    the target product is not saved, it is opened in VISAT automatically.
+</p>
+
+<h5>Button Group</h5>
+
+<p class="i1">
+    <b>Run</b>
+    Creates the target product. The FUB/WeW water processing is actually deferred until its band data are accessed, either by
+    writing the product to a file or by viewing its band data. When the <b>Save as</b> option is checked, the
+    processing is triggered automatically.
+</p>
+
+<p class="i1">
+    <b>Close</b>
+    Closes the dialog.
+</p>
+
+<h5>Menu Group</h5>
+
+<p class="i1">
+    <b>File</b>
+    The entries found in this menu allow to save the current processing parameters to disk and to open a saved parameter
+    set from disk.
+</p>
+
+<p class="i1">
+    <b>Help</b>
+    Access to this help pages and to an About dialog.
+</p>
+
+<h4>Processing Parameters Tab</h4>
+
+<p align="center"><img src="images/FUBWeW_ProcessingParameters.png"></p>
+
+<p class="i1">
+    <b>Compute chlorophyll-a concentration band: </b><br>
+    Whether chlorophyll-a concentration band shall be computed.
+</p>
+
+<p class="i1">
+    <b>Compute yellow substances band: </b><br>
+    Whether yellow substances band shall be computed.
+</p>
+
+<p class="i1">
+    <b>Compute total suspended matter band: </b><br>
+    Whether total suspended matter band shall be computed.
+</p>
+
+<p class="i1">
+    <b>Compute water leaving reflectances and AOT bands: </b><br>
+    Whether atmospheric correction bands shall be computed
+</p>
+
+<p class="i1">
+    <b>Check whether l1_flags.SUSPECT is valid: </b><br>
+    This is an expert parameter. Performs a check whether the l1_flags.SUSPECT shall be considered in an expression.
+    This parameter is only considered when the expression contains the term 'and not l1_flags.SUSPECT'".
+    This test is useful because some MERIS Level 1b scenes mark almost all pixels as suspect. If more than 50%
+    of the pixel of an line in the scene center are marked as suspect than the suspect flag is removed from
+    the expression.
+</p>
+
+<p class="i1">
+    <b>Use valid pixel expression: </b><br>
+    Band maths expression which defines valid pixels. If the expression is empty, all pixels will be
+    considered as valid. The default value for the expression is <br>
+    "<i>not l1_flags.GLINT_RISK and not l1_flags.BRIGHT and not l1_flags.INVALID and not l1_flags.SUSPECT</i>"
+</p>
+
+<br>
+<hr>
+</body>
+</html>
