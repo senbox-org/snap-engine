@@ -37,6 +37,8 @@
         <module>s3tbx-chris-reader</module>
         <module>s3tbx-flhmci</module>
         <module>s3tbx-flhmci-ui</module>
+        <module>s3tbx-fub-wew</module>
+        <module>s3tbx-fub-wew-ui</module>
         <module>s3tbx-fu-operator</module>
         <module>s3tbx-idepix</module>
         <module>s3tbx-idepix-ui</module>
@@ -81,8 +83,8 @@
         <netbeans.version>RELEASE802</netbeans.version>
         <javahelp.version>2.0.05</javahelp.version>
         <netcdf.version>4.3.22</netcdf.version>
-        <seadas.reader.version>1.5.8</seadas.reader.version>
-        <seadas.reader.ui.version>1.5.6</seadas.reader.ui.version>
+        <seadas.reader.version>1.5.9-SNAPSHOT</seadas.reader.version>
+        <seadas.reader.ui.version>1.5.7-SNAPSHOT</seadas.reader.ui.version>
         <brandingToken>s3tbx</brandingToken>
         <user.language>en</user.language>
     </properties>
