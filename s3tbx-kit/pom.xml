@@ -66,6 +66,11 @@
         </dependency>
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
+            <artifactId>s3tbx-aerosol-retrieval</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.s3tbx</groupId>
             <artifactId>s3tbx-alos-reader</artifactId>
             <version>${project.version}</version>
         </dependency>

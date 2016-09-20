@@ -1,0 +1,8 @@
+org.esa.s3tbx.aerosol.AerosolOp$Spi
+org.esa.s3tbx.aerosol.AerosolRetrievalMasterOp$Spi
+org.esa.s3tbx.aerosol.CreateElevationBandOp$Spi
+org.esa.s3tbx.aerosol.GapFillingOp$Spi
+org.esa.s3tbx.aerosol.MerisPreparationOp$Spi
+org.esa.s3tbx.aerosol.VgtPreparationOp$Spi
+org.esa.s3tbx.aerosol.UpscaleOp$Spi
+

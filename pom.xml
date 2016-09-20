@@ -29,6 +29,7 @@
     <modules>
         <module>s3tbx-aatsr-sst</module>
         <module>s3tbx-aatsr-sst-ui</module>
+        <module>s3tbx-aerosol-retrieval</module>
         <module>s3tbx-alos-reader</module>
         <module>s3tbx-arc</module>
         <module>s3tbx-arc-ui</module>

@@ -35,6 +35,7 @@ import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.gpf.common.BandMathsOp;
+import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.dataio.envisat.EnvisatConstants;
 
@@ -114,10 +115,10 @@ public class CloudTopPressureOp extends MerisBasisOp {
     }
 
     private void loadNeuralNet() throws IOException, JnnException {
-        final File neuralNetLandFile = new File(getClass().getResource("ctp_NN_1.nna").getPath());
-        final File neuralNetWaterFile = new File(getClass().getResource("ctp_NN_2.nna").getPath());
-        final JnnNet neuralNetLand = readNeuralNet(neuralNetLandFile);
-        final JnnNet neuralNetWater = readNeuralNet(neuralNetWaterFile);
+        final InputStream neuralNetLandIS = getClass().getResourceAsStream("ctp_NN_1.nna");
+        final InputStream neuralNetWaterIS = getClass().getResourceAsStream("ctp_NN_2.nna");
+        final JnnNet neuralNetLand = readNeuralNetFromStream(neuralNetLandIS);
+        final JnnNet neuralNetWater = readNeuralNetFromStream(neuralNetWaterIS);
         landNet = new ThreadLocal<JnnNet>() {
             @Override
             protected JnnNet initialValue() {
@@ -288,13 +289,22 @@ public class CloudTopPressureOp extends MerisBasisOp {
         }
     }
 
-    private JnnNet readNeuralNet(File nnFile) throws IOException, JnnException {
-        final InputStreamReader reader1 = new FileReader(nnFile);
+    private JnnNet readNeuralNetFromFile(File nnFile) throws IOException, JnnException {
+        final InputStreamReader reader = new FileReader(nnFile);
+        return getJnnNet(reader);
+    }
+
+    private JnnNet readNeuralNetFromStream(InputStream neuralNetStream) throws IOException, JnnException {
+        final InputStreamReader reader = new InputStreamReader(neuralNetStream);
+        return getJnnNet(reader);
+    }
+
+    private JnnNet getJnnNet(InputStreamReader reader) throws IOException, JnnException {
         try {
             Jnn.setOptimizing(true);
-            return Jnn.readNna(reader1);
+            return Jnn.readNna(reader);
         } finally {
-            reader1.close();
+            reader.close();
         }
     }
 
