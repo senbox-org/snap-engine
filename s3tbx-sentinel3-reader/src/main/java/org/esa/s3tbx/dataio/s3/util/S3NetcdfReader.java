@@ -549,8 +549,7 @@ public class S3NetcdfReader extends AbstractProductReader {
                 break;
             }
             case ProductData.TYPE_INT32: {
-                Object array = convertLongToIntArray(attributeValues.copyTo1DJavaArray());
-                productData = ProductData.createInstance((int[]) array);
+                productData = ProductData.createInstance((int[]) attributeValues.copyTo1DJavaArray());
                 break;
             }
             case ProductData.TYPE_UINT32: {
