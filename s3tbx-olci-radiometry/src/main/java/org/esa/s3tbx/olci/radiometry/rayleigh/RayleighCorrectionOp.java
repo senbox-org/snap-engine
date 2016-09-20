@@ -117,7 +117,7 @@ public class RayleighCorrectionOp extends Operator {
         absorpOzone = GaseousAbsorptionAux.getInstance().absorptionOzone(sensor.toString());
         crossSectionSigma = getCrossSectionSigma(sourceProduct, sensor.getNumBands(), sensor.getNamePattern());
 
-        Product targetProduct = new Product(sourceProduct.getName(), sourceProduct.getProductType(),
+        Product targetProduct = new Product(sourceProduct.getName() + "_rayleigh", sourceProduct.getProductType(),
                                             sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
 
         RayleighAux.initDefaultAuxiliary();
