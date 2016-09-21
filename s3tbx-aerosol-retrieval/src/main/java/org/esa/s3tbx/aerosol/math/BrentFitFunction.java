@@ -52,8 +52,8 @@ public class BrentFitFunction implements Function {
     @Override
     public synchronized double f(double tau) {
         double fmin = 0;
-        for (int i=0; i<inPixField.length; i++){
-            fmin += fPix(tau, inPixField[i]);
+        for (InputPixelData anInPixField : inPixField) {
+            fmin += fPix(tau, anInPixField);
         }
         return fmin;
     }
@@ -104,10 +104,10 @@ public class BrentFitFunction implements Function {
 //     to guide the optimization
     private static double isSdrNegativ(double[][] sdr) {
         double fmin = 0;
-        for (int iView = 0; iView < sdr.length; iView++) {
+        for (double[] aSdr : sdr) {
             for (int iWvl = 0; iWvl < sdr[0].length; iWvl++) {
                 if (sdr[0][iWvl] < LLIMIT) {
-                    fmin += (sdr[iView][iWvl] - LLIMIT) * (sdr[iView][iWvl] - LLIMIT) * PENALTY;
+                    fmin += (aSdr[iWvl] - LLIMIT) * (aSdr[iWvl] - LLIMIT) * PENALTY;
                 }
             }
         }

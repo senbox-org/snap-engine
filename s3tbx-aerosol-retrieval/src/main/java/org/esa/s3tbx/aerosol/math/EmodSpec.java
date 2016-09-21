@@ -5,8 +5,6 @@
 
 package org.esa.s3tbx.aerosol.math;
 
-import org.esa.s3tbx.aerosol.math.MvFunction;
-
 /**
  * This class provides the spectrum model function to be minimised by Powell.
  * (see ATBD (4), (6))

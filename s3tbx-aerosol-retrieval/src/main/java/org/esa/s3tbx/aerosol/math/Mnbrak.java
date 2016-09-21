@@ -4,7 +4,6 @@ package org.esa.s3tbx.aerosol.math;
  * This class provides a method for initially bracketing a minimum.
  *
  * @author Andreas Heckel, Olaf Danne
- * @version $Revision: 6368 $ $Date: 2009-10-02 15:51:14 +0200 (Fr, 02 Okt 2009) $
  */
 public class Mnbrak {
 
