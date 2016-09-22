@@ -52,6 +52,7 @@ import java.util.logging.Logger;
 
 public abstract class AbstractProductFactory implements ProductFactory {
 
+    private static Map<TiePointGrid, MultiLevelImage> tpgImageMap;
     private final List<Product> openProductList = new ArrayList<>();
     private final Sentinel3ProductReader productReader;
     private final Logger logger;
@@ -72,6 +73,7 @@ public abstract class AbstractProductFactory implements ProductFactory {
         this.productReader = productReader;
         this.logger = Logger.getLogger(getClass().getSimpleName());
         separatingDimensions = new ArrayList<>();
+        tpgImageMap = new HashMap<>();
     }
 
     @Override
@@ -139,22 +141,25 @@ public abstract class AbstractProductFactory implements ProductFactory {
         return ProductUtils.copyBand(sourceBand.getName(), sourceBand.getProduct(), targetProduct, copySourceImage);
     }
 
-    protected static TiePointGrid copyBandAsTiePointGrid(Band sourceBand, Product targetProduct, int subSamplingX,
-                                                         int subSamplingY,
-                                                         float offsetX, float offsetY) {
+    @Override
+    public MultiLevelImage getImageForTpg(TiePointGrid tpg) {
+        return tpgImageMap.get(tpg);
+    }
+
+    protected TiePointGrid copyBandAsTiePointGrid(Band sourceBand, Product targetProduct, int subSamplingX,
+                                                  int subSamplingY,
+                                                  float offsetX, float offsetY) {
         final MultiLevelImage sourceImage = sourceBand.getGeophysicalImage();
         final int w = sourceImage.getWidth();
         final int h = sourceImage.getHeight();
-        final float[] tiePoints = sourceImage.getData().getSamples(0, 0, w, h, 0, new float[w * h]);
-
+//        final float[] tiePoints = sourceImage.getData().getSamples(0, 0, w, h, 0, new float[w * h]);
         final String unit = sourceBand.getUnit();
         final TiePointGrid tiePointGrid = new TiePointGrid(sourceBand.getName(), w, h,
-                                                           offsetX,
-                                                           offsetY,
-                                                           subSamplingX,
-                                                           subSamplingY,
-                                                           tiePoints,
+                                                           offsetX, offsetY,
+                                                           subSamplingX, subSamplingY,
+                                                           null,
                                                            unit != null && unit.toLowerCase().contains("degree"));
+        tpgImageMap.put(tiePointGrid, sourceImage);
         final String description = sourceBand.getDescription();
         tiePointGrid.setDescription(description);
         tiePointGrid.setGeophysicalNoDataValue(sourceBand.getGeophysicalNoDataValue());

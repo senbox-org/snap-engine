@@ -15,6 +15,7 @@ package org.esa.s3tbx.dataio.s3;/*
  */
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.glevel.MultiLevelImage;
 import org.esa.s3tbx.dataio.s3.olci.OlciLevel1ProductFactory;
 import org.esa.s3tbx.dataio.s3.olci.OlciLevel2LProductFactory;
 import org.esa.s3tbx.dataio.s3.olci.OlciLevel2WProductFactory;
@@ -34,7 +35,9 @@ import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.TiePointGrid;
 
+import java.awt.image.Raster;
 import java.io.File;
 import java.io.IOException;
 
@@ -106,6 +109,15 @@ public class Sentinel3ProductReader extends AbstractProductReader {
                                                 int destOffsetY, int destWidth, int destHeight, ProductData destBuffer,
                                                 ProgressMonitor pm) throws IOException {
         throw new IllegalStateException("Data are provided by images.");
+    }
+
+
+    @Override
+    public void readTiePointGridRasterData(TiePointGrid tpg, int destOffsetX, int destOffsetY, int destWidth, int destHeight, ProductData destBuffer,
+                                           ProgressMonitor pm) throws IOException {
+        MultiLevelImage imageForTpg = factory.getImageForTpg(tpg);
+        Raster imageData = imageForTpg.getImage(0).getData();
+        imageData.getSamples(destOffsetX, destOffsetY, destWidth, destHeight, 0, (float[]) destBuffer.getElems());
     }
 
     @Override

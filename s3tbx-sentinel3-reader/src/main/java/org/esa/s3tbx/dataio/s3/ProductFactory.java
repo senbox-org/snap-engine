@@ -14,7 +14,9 @@ package org.esa.s3tbx.dataio.s3;/*
  * with this program; if not, see http://www.gnu.org/licenses/
  */
 
+import com.bc.ceres.glevel.MultiLevelImage;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.TiePointGrid;
 
 import java.io.IOException;
 
@@ -23,4 +25,6 @@ public interface ProductFactory {
     Product createProduct() throws IOException;
 
     void dispose() throws IOException;
+
+    MultiLevelImage getImageForTpg(TiePointGrid tpg);
 }
