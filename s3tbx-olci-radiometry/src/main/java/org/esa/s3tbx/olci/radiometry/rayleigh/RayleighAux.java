@@ -18,6 +18,7 @@
 
 package org.esa.s3tbx.olci.radiometry.rayleigh;
 
+import com.google.common.primitives.Doubles;
 import org.apache.commons.math3.analysis.interpolation.BicubicSplineInterpolator;
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
@@ -209,16 +210,29 @@ public class RayleighAux {
 
                 List<double[]> valueList = new ArrayList<>();
                 for (int i = 0; i < rayCooefMatrixA.length; i++) {
-                    double thetaMin = thetas[0];
-                    double thetaMax = thetas[thetas.length - 1];
-                    if (yVal > thetaMin && yVal < thetaMax) {
-                        double[] values = new double[4];
+                    double thetaMin = Doubles.min(thetas);
+                    double thetaMax = Doubles.max(thetas);
+                    double[] values = new double[4];
+                    if (yVal > thetaMin && yVal < thetaMax && xVal > thetaMin && xVal < thetaMax) {
                         values[0] = SpikeInterpolation.interpolate2D(rayCooefMatrixA[i], thetas, thetas, xVal, yVal);
                         values[1] = SpikeInterpolation.interpolate2D(rayCooefMatrixB[i], thetas, thetas, xVal, yVal);
                         values[2] = SpikeInterpolation.interpolate2D(rayCooefMatrixC[i], thetas, thetas, xVal, yVal);
                         values[3] = SpikeInterpolation.interpolate2D(rayCooefMatrixD[i], thetas, thetas, xVal, yVal);
                         valueList.add(values);
                     } else {
+                        if (yVal < thetaMin && xVal < thetaMax) {
+                            valueList.add(getGridValueAt(0, 0));
+                        } else {
+                            int len = thetas.length - 1;
+                            if (yVal > thetaMax && xVal > thetaMin) {
+                                valueList.add(getGridValueAt(0, len));
+                            } else if (xVal < thetaMin && yVal < thetaMax) {
+                                valueList.add(getGridValueAt(0, 0));
+                            } else if (yVal > thetaMax && xVal<thetaMin) {
+                                valueList.add(getGridValueAt(len, len));
+                            }
+                        }
+
                         valueList.add(new double[]{0, 0, 0, 0});
                     }
                 }
@@ -226,6 +240,15 @@ public class RayleighAux {
             }
         }
         interpolateMap = interpolate;
+    }
+
+    private double[] getGridValueAt(int x, int y) {
+        double[] values = new double[4];
+        values[0] = rayCooefMatrixA[x][y][0];
+        values[1] = rayCooefMatrixA[x][y][0];
+        values[2] = rayCooefMatrixA[x][y][0];
+        values[3] = rayCooefMatrixA[x][y][0];
+        return values;
     }
 
     public void setFourier() {
@@ -267,7 +290,7 @@ public class RayleighAux {
         }
     }
 
-    public Map<Integer, double[]> getFourier() {
+    public Map<Integer, double[]> getFourierCoeff() {
         if (Objects.nonNull(fourierPoly)) {
             return fourierPoly;
         }

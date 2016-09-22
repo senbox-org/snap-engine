@@ -35,6 +35,7 @@ import org.esa.snap.core.util.ProductUtils;
 import java.awt.Rectangle;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -110,6 +111,7 @@ public class RayleighCorrectionOp extends Operator {
     private double[] absorpOzone;
     private double[] crossSectionSigma;
 
+
     @Override
     public void initialize() throws OperatorException {
         sensor = getSensorPattern();
@@ -129,31 +131,34 @@ public class RayleighCorrectionOp extends Operator {
         setTargetProduct(targetProduct);
     }
 
+
     @Override
     public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
         checkForCancellation();
         RayleighAux rayleighAux = createAuxiliary(sensor, targetRectangle);
-        for (Band targetBand : targetTiles.keySet()) {
-            Tile targetTile = targetTiles.get(targetBand);
+        targetTiles.entrySet().stream().forEach(targetTileStream -> {
+            Tile targetTile = targetTileStream.getValue();
+            Band targetBand = targetTileStream.getKey();
             String targetBandName = targetBand.getName();
+            double[] rayleighOpticalThickness = null;
             int sourceBandIndex = getSourceBandIndex(targetBand.getName());
 
             if (targetBandName.equals(AIRMASS) && addAirMass) {
                 double[] massAirs = rayleighAux.getAirMass();
                 targetTile.setSamples(massAirs);
-                continue;
+                return;
             }
             if (sourceBandIndex == -1) {
-                continue;
+                return;
             }
             initAuxBand(rayleighAux, targetRectangle, sourceBandIndex);
-
             if (targetBandName.matches(RTOA_PATTERN) && computeRtoa) {
                 targetTile.setSamples(getReflectance(rayleighAux));
             } else if (targetBandName.matches(TAUR_PATTERN) && computeTaur) {
-                double[] rayleighOpticalThickness = getRayleighThickness(rayleighAux, crossSectionSigma, sourceBandIndex);
+                rayleighOpticalThickness = getRayleighThickness(rayleighAux, sourceBandIndex);
                 targetTile.setSamples(rayleighOpticalThickness);
             } else if (computeRBrr || computeRtoa_ng) {
+
                 double[] reflectance = getReflectance(rayleighAux);
                 if (Math.ceil(rayleighAux.getWaveLenght()) == WV_709_FOR_GASEOUS_ABSORPTION_CALCULATION) {
                     reflectance = waterVaporCorrection709(reflectance, targetRectangle, sensor);
@@ -161,15 +166,16 @@ public class RayleighCorrectionOp extends Operator {
                 double[] corrOzoneRefl = getCorrectOzone(rayleighAux, reflectance, sourceBandIndex);
                 if (targetBandName.matches(RTOA_NG_PATTERN) && computeRtoa_ng) {
                     targetTile.setSamples(corrOzoneRefl);
-                    continue;
                 }
                 if (targetBandName.matches(R_BRR_PATTERN) && computeRBrr) {
-                    double[] rayleighOpticalThickness = getRayleighThickness(rayleighAux, crossSectionSigma, sourceBandIndex);
+                    if (Objects.isNull(rayleighOpticalThickness)) {
+                        rayleighOpticalThickness = getRayleighThickness(rayleighAux, sourceBandIndex);
+                    }
                     double[] rhoBrr = getRhoBrr(rayleighAux, rayleighOpticalThickness, corrOzoneRefl);
                     targetTile.setSamples(rhoBrr);
                 }
             }
-        }
+        });
     }
 
     private double[] waterVaporCorrection709(double[] reflectances, Rectangle targetRectangle, Sensor sensor) {
@@ -201,7 +207,19 @@ public class RayleighCorrectionOp extends Operator {
     }
 
 
-    private double[] getRayleighThickness(RayleighAux rayleighAux, double[] crossSectionSigma, int sourceBandIndex) {
+    public double[] computeLatitude(double[] latitudes) {
+        double[] computeLAtitute = Arrays.stream(latitudes).map(p -> {
+            double latPower = Math.pow((1.0 - 0.0065 * p / 288.15), 5.255) * 1000;
+            double latRad = Math.toRadians(p);
+            double cos2LatRad = Math.cos(2 * latRad);
+            double g0 = 980.616 * (1 - 0.0026373 * cos2LatRad + 0.0000059 * Math.pow(cos2LatRad, 2));
+            return 0.73737 * p + 5517.56;
+        }).toArray();
+
+        return computeLAtitute;
+    }
+
+    private double[] getRayleighThickness(RayleighAux rayleighAux, int sourceBandIndex) {
         double[] seaLevels = rayleighAux.getSeaLevels();
         double[] altitudes = rayleighAux.getAltitudes();
         double[] latitudes = rayleighAux.getLatitudes();
@@ -315,7 +333,6 @@ public class RayleighCorrectionOp extends Operator {
             rayleighAux.setLatitudes(getSourceTile(sourceProduct.getTiePointGrid(TP_LATITUDE), rectangle));
             rayleighAux.setLongitude(getSourceTile(sourceProduct.getTiePointGrid(TP_LONGITUDE), rectangle));
             rayleighAux.setAltitudes(getSourceTile(sourceProduct.getBand(ALTITUDE), rectangle));
-//            auxiliaryValues.setAltitudes();
         }
 
         if (addAirMass || computeRBrr) {
@@ -325,7 +342,6 @@ public class RayleighCorrectionOp extends Operator {
         if (computeRBrr) {
             rayleighAux.setAziDifferent();
             rayleighAux.setFourier();
-//            auxiliaryValues.setInterpolation();
             rayleighAux.setSpikeInterpolation();
         }
         return rayleighAux;
@@ -344,7 +360,7 @@ public class RayleighCorrectionOp extends Operator {
             return Sensor.MERIS;
         }
         throw new OperatorException("The operator can't be applied on this sensor.\n" +
-                                    "Only OLCI and MERIS are supported");
+                                            "Only OLCI and MERIS are supported");
     }
 
     private enum Sensor {
@@ -375,7 +391,6 @@ public class RayleighCorrectionOp extends Operator {
     }
 
     public static class Spi extends OperatorSpi {
-
         public Spi() {
             super(RayleighCorrectionOp.class);
         }

@@ -32,10 +32,10 @@ import org.esa.snap.dataio.envisat.EnvisatConstants;
 
 import javax.media.jai.PlanarImage;
 import javax.media.jai.operator.ConstantDescriptor;
-import java.awt.*;
+import java.awt.Color;
 import java.awt.image.Raster;
 import java.io.IOException;
-import java.util.stream.Stream;
+import java.util.Arrays;
 
 @OperatorMetadata(alias = "FUB.Water", authors = "Thomas Schroeder, Michael Schaale",
         copyright = "Institute for Space Sciences (WeW), Freie Universitaet Berlin",
@@ -70,13 +70,13 @@ public class WaterProcessorOp extends PixelOperator {
     private boolean computeAtmCorr;
 
     @Parameter(description = "Expert parameter. Performs a check whether the '" + WaterProcessorOpConstant.SUSPECT_FLAG_NAME + "' shall be considered in an expression." +
-            "This parameter is only considered when the expression contains the term '" + WaterProcessorOpConstant.SUSPECT_EXPRESSION_TERM + "'",
+                             "This parameter is only considered when the expression contains the term '" + WaterProcessorOpConstant.SUSPECT_EXPRESSION_TERM + "'",
             defaultValue = "true", label = "Check whether '" + WaterProcessorOpConstant.SUSPECT_FLAG_NAME + "' is valid")
     private boolean checkWhetherSuspectIsValid;
 
     // TODO (mp/20160704) -  For OLCI: !quality_flags.invalid && (!quality_flags.land || quality_flags.fresh_inland_water)
     @Parameter(description = "Band maths expression which defines valid pixels. If the expression is empty," +
-            "all pixels will be considered.",
+                             "all pixels will be considered.",
             defaultValue = "not l1_flags.GLINT_RISK and not l1_flags.BRIGHT and not l1_flags.INVALID " + WaterProcessorOpConstant.SUSPECT_EXPRESSION_TERM,
             label = "Use valid pixel expression")
     private String expression;
@@ -97,14 +97,8 @@ public class WaterProcessorOp extends PixelOperator {
     @Override
     protected void prepareInputs() throws OperatorException {
         super.prepareInputs();
-        sensor = getSensorPattern();
-        String[] sourceRasterNames = new String[0];
-
-        if (sensor == Sensor.MERIS) {
-            sourceRasterNames = WaterProcessorOpConstant.SOURCE_RASTER_NAMES_MERIS;
-        } else if (sensor == Sensor.OLCI) {
-            sourceRasterNames = WaterProcessorOpConstant.SOURCE_RASTER_NAMES_OLCI;
-        }
+        sensor = getSensor();
+        String[] sourceRasterNames = sensor.getBandNames();
 
         for (int i = 0; i < inputBands.length; i++) {
             String radianceBandName = sourceRasterNames[i];
@@ -128,12 +122,7 @@ public class WaterProcessorOp extends PixelOperator {
 
     @Override
     protected void configureSourceSamples(SourceSampleConfigurer sampleConfigurer) throws OperatorException {
-        String[] sourceRasterNames = new String[0];
-        if (sensor == Sensor.MERIS) {
-            sourceRasterNames = WaterProcessorOpConstant.SOURCE_RASTER_NAMES_MERIS;
-        } else if (sensor == Sensor.OLCI) {
-            sourceRasterNames = WaterProcessorOpConstant.SOURCE_RASTER_NAMES_OLCI;
-        }
+        String[] sourceRasterNames = sensor.getBandNames();
         for (int i = 0; i < sourceRasterNames.length; i++) {
             sampleConfigurer.defineSample(i, sourceRasterNames[i]);
         }
@@ -599,15 +588,13 @@ public class WaterProcessorOp extends PixelOperator {
         return null;
     }
 
-    private Sensor getSensorPattern() {
+    private Sensor getSensor() {
         String[] bandNames = getSourceProduct().getBandNames();
-        boolean isSensor = Stream.of(bandNames).anyMatch(p -> p.matches("Oa\\d+_radiance"));
-        if (isSensor) {
+        if (Arrays.asList(bandNames).containsAll(Arrays.asList(Sensor.OLCI.getBandNames()))) {
             return Sensor.OLCI;
         }
-        isSensor = Stream.of(bandNames).anyMatch(p -> p.matches("radiance_\\d+"));
 
-        if (isSensor) {
+        if (Arrays.asList(bandNames).containsAll(Arrays.asList(Sensor.MERIS.getBandNames()))) {
             return Sensor.MERIS;
         }
         throw new OperatorException("The operator can't be applied on the sensor");
@@ -670,9 +657,10 @@ public class WaterProcessorOp extends PixelOperator {
                 Color.orange, Color.orange, Color.blue, Color.blue
         };
         for (int i = 0; i < WaterProcessorOpConstant.RESULT_ERROR_NAMES.length; i++) {
-            maskGroup.add(Mask.BandMathsType.create(WaterProcessorOpConstant.RESULT_ERROR_NAMES[i].toLowerCase(), WaterProcessorOpConstant.RESULT_ERROR_TEXTS[i],
-                    sceneWidth, sceneHeight, flagNamePrefix + WaterProcessorOpConstant.RESULT_ERROR_NAMES[i],
-                    colors[i], WaterProcessorOpConstant.RESULT_ERROR_TRANSPARENCIES[i]));
+            maskGroup.add(Mask.BandMathsType.create(WaterProcessorOpConstant.RESULT_ERROR_NAMES[i].toLowerCase(),
+                                                    WaterProcessorOpConstant.RESULT_ERROR_TEXTS[i],
+                                                    sceneWidth, sceneHeight, flagNamePrefix + WaterProcessorOpConstant.RESULT_ERROR_NAMES[i],
+                                                    colors[i], WaterProcessorOpConstant.RESULT_ERROR_TRANSPARENCIES[i]));
 
         }
     }
@@ -749,8 +737,8 @@ public class WaterProcessorOp extends PixelOperator {
 
     private PlanarImage createEmptyMask(Product product) {
         return ConstantDescriptor.create((float) product.getSceneRasterWidth(),
-                (float) product.getSceneRasterHeight(),
-                new Byte[]{-1}, null);
+                                         (float) product.getSceneRasterHeight(),
+                                         new Byte[]{-1}, null);
     }
 
     public static class Spi extends OperatorSpi {
@@ -761,22 +749,27 @@ public class WaterProcessorOp extends PixelOperator {
     }
 
     private enum Sensor {
-        MERIS("l1_flags", "l1_flags.SUSPECT"),
-        OLCI("quality_flags", "quality_flags.dubious");
+        MERIS(WaterProcessorOpConstant.SOURCE_RASTER_NAMES_MERIS, "l1_flags", "l1_flags.SUSPECT"),
+        OLCI(WaterProcessorOpConstant.SOURCE_RASTER_NAMES_OLCI, "quality_flags", "quality_flags.dubious");
 
+        private final String[] bandNames;
         private final String suspectFlag;
+        private final String flagName;
+
+        public String[] getBandNames() {
+            return bandNames;
+        }
 
         public String getFlagName() {
             return flagName;
         }
 
-        private final String flagName;
-
         public String getSuspectFlag() {
             return suspectFlag;
         }
 
-        Sensor(String flagName, String suspectFalg) {
+        Sensor(String[] bandNames, String flagName, String suspectFalg) {
+            this.bandNames = bandNames;
             this.flagName = flagName;
             this.suspectFlag = suspectFalg;
         }

@@ -94,7 +94,7 @@ public class RayleighCorrAlgorithm {
         final double[] sARay = rayleighAux.getInterpolateRayleighThickness(rayleighOpticalThickness);
         final double[] tau_ray = rayleighAux.getTaur();
 
-        final Map<Integer, double[]> fourier = rayleighAux.getFourier();
+        final Map<Integer, double[]> fourierCoeff = rayleighAux.getFourierCoeff();
         final Map<Integer, List<double[]>> interpolation = rayleighAux.getInterpolation();
         final int length = cosOZARads.length;
 
@@ -115,7 +115,7 @@ public class RayleighCorrAlgorithm {
             double cosSZARad = cosSZARads[index];
 
             List<double[]> interpolateValues = interpolation.get(index);
-            double[] fourierSeries = fourier.get(index);
+            double[] fourierSeries = fourierCoeff.get(index);
 
             double[] rho_Rm = getFourierSeries(taurVal, massAir, cosOZARad, cosSZARad, interpolateValues, fourierSeries);
 
@@ -199,7 +199,7 @@ public class RayleighCorrAlgorithm {
 
     private double getRayleigh(RayleighAux rayleighAux, double[] crossSectionSigma, double[] absorptionOfBand, double ref, int index, int indexOfArray) {
 
-        final Map<Integer, double[]> fourier = rayleighAux.getFourier();
+        final Map<Integer, double[]> fourier = rayleighAux.getFourierCoeff();
         final Map<Integer, List<double[]>> interpolation = rayleighAux.getInterpolation();
 
         double sigma = crossSectionSigma[index];
@@ -229,10 +229,12 @@ public class RayleighCorrAlgorithm {
     }
 
     public double getRayleighOpticalThickness(double sigma, double seaLevelPressure, double altitude, double latitude) {
+
         double P = seaLevelPressure * Math.pow((1.0 - 0.0065 * altitude / 288.15), 5.255) * 1000;
         double latRad = Math.toRadians(latitude);
         double cos2LatRad = Math.cos(2 * latRad);
         double g0 = 980.616 * (1 - 0.0026373 * cos2LatRad + 0.0000059 * Math.pow(cos2LatRad, 2));
+
         double effectiveMassWeightAltitude = 0.73737 * altitude + 5517.56;
 
         double g = g0 - (0.0003085462 + 0.000000227 * cos2LatRad) * effectiveMassWeightAltitude +
