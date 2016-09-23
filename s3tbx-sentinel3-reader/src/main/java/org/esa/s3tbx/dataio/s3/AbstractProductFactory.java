@@ -30,7 +30,6 @@ import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.datamodel.SampleCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.util.ProductUtils;
-import org.esa.snap.runtime.Config;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -67,7 +66,6 @@ public abstract class AbstractProductFactory implements ProductFactory {
     private final List<String> separatingDimensions;
 
     private volatile Manifest manifest;
-    public final static String LOAD_PROFILE_TIE_POINTS = "s3tbx.reader.loadProfileTiePoints";
 
     public AbstractProductFactory(Sentinel3ProductReader productReader) {
         this.productReader = productReader;
@@ -283,7 +281,6 @@ public abstract class AbstractProductFactory implements ProductFactory {
     }
 
     protected void addDataNodes(Product masterProduct, Product targetProduct) throws IOException {
-        final boolean loadProfileTiePoints = Config.instance("s3tbx").load().preferences().getBoolean(LOAD_PROFILE_TIE_POINTS, false);
         final int w = targetProduct.getSceneRasterWidth();
         final int h = targetProduct.getSceneRasterHeight();
         for (final Product sourceProduct : openProductList) {
@@ -293,7 +290,7 @@ public abstract class AbstractProductFactory implements ProductFactory {
                     RasterDataNode targetNode = null;
                     if (sourceBand.getRasterWidth() == w && sourceBand.getRasterHeight() == h) {
                         targetNode = addBand(sourceBand, targetProduct);
-                    } else if (loadProfileTiePoints || !isProfileNode(sourceBand.getName())) {
+                    } else {
                         targetNode = addSpecialNode(masterProduct, sourceBand, targetProduct);
                     }
                     if (targetNode != null) {
