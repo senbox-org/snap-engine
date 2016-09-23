@@ -156,9 +156,11 @@ public abstract class AbstractProductFactory implements ProductFactory {
         final String unit = sourceBand.getUnit();
         final TiePointGrid tiePointGrid = new TiePointGrid(sourceBand.getName(), w, h,
                                                            offsetX, offsetY,
-                                                           subSamplingX, subSamplingY,
-                                                           null,
-                                                           unit != null && unit.toLowerCase().contains("degree"));
+                                                           subSamplingX, subSamplingY);
+
+        if (unit != null && unit.toLowerCase().contains("degree")) {
+            tiePointGrid.setDiscontinuity(TiePointGrid.DISCONT_AUTO);
+        }
         tpgImageMap.put(tiePointGrid, sourceImage);
         final String description = sourceBand.getDescription();
         tiePointGrid.setDescription(description);
