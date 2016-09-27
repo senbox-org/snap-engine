@@ -47,7 +47,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 
 /**
- * The <code>FuOp</code> performs a MERIS, MODIS, OLCI and SeaWiFS based ocean colour classification
+ * The {@code FuOp} performs a MERIS, MODIS, OLCI and SeaWiFS based ocean colour classification
  * with the discrete Forel-Ule scale.
  *
  * @author Muhammad Bala
@@ -279,7 +279,6 @@ public class FuOp extends PixelOperator {
         }
     }
 
-
     /**
      * Configures all target samples computed by this operator.
      * Target samples are defined by using the provided {@link TargetSampleConfigurer}.
@@ -329,7 +328,7 @@ public class FuOp extends PixelOperator {
     }
 
     static ImageInfo createImageInfo(IndexCoding indexCoding) {
-        ColorPaletteDef.Point[] points = new ColorPaletteDef.Point[(int) FuAlgo.MAX_FU_VALUE + 1];
+        ColorPaletteDef.Point[] points = new ColorPaletteDef.Point[FuAlgo.MAX_FU_VALUE + 1];
         for (int i = 0; i < points.length; i++) {
             String name = i != 0 ? String.format("FU_%2d", i) : "undefined";
             indexCoding.addIndex(name, i, "");

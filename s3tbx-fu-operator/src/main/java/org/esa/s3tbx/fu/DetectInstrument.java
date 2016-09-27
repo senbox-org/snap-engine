@@ -26,13 +26,15 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 class DetectInstrument {
+
+    private static final String GLOBAL_ATTRIBUTES = "Global_Attributes";
     private static final String SEAWIFS_TITLE = "SeaWiFS Level-2 Data";
     private static final String MODIS_TITLE_VALUE = "HMODISA Level-2 Data";
     private static final String MODIS_ATTRIBUTE_TITLE = "title";
-    private static final String GLOBAL_ATTRIBUTES = "Global_Attributes";
-    private static final String OLCI_PRODUCT_TYPE = "S3A_OL_2";
     private static final String MERIS_TITLE_VALUE = "Title";
-    private static String OA_RADIANCE_BAND_NAME_PATTERN = "Oa%02d_radiance";
+    private static final String OLCI_PRODUCT_TYPE_START = "OL_2";
+    private static final String OLCI_L2_BANDNAME_PATTERN = "Oa\\d+_reflectance";
+    public static final String MERIS_L2_TYPE_PATTER = "MER_..._2P";
 
     static Instrument getInstrument(Product product) {
         if (meris(product)) {
@@ -61,8 +63,8 @@ class DetectInstrument {
 
     private static boolean olci(Product product) {
         boolean isOLCI = false;
-        List<Band> collect = Stream.of(product.getBands()).filter(p -> p.getName().matches("Oa\\d+_radiance")).collect(Collectors.toList());
-        boolean checkByType = product.getProductType().contains(OLCI_PRODUCT_TYPE);
+        List<Band> collect = Stream.of(product.getBands()).filter(p -> p.getName().matches(OLCI_L2_BANDNAME_PATTERN)).collect(Collectors.toList());
+        boolean checkByType = product.getProductType().contains(OLCI_PRODUCT_TYPE_START);
         if (collect.size() > 0 || checkByType) {
             isOLCI = true;
         }
@@ -83,7 +85,7 @@ class DetectInstrument {
     }
 
     private static boolean meris(Product product) {
-        Pattern compile = Pattern.compile("MER_..._2P");
+        Pattern compile = Pattern.compile(MERIS_L2_TYPE_PATTER);
         return compile.matcher(product.getProductType()).matches();
 
     }
