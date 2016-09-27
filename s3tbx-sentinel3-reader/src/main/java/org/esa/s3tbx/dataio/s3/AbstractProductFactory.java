@@ -51,7 +51,7 @@ import java.util.logging.Logger;
 
 public abstract class AbstractProductFactory implements ProductFactory {
 
-    private static Map<TiePointGrid, MultiLevelImage> tpgImageMap;
+    private Map<TiePointGrid, MultiLevelImage> tpgImageMap;
     private final List<Product> openProductList = new ArrayList<>();
     private final Sentinel3ProductReader productReader;
     private final Logger logger;
