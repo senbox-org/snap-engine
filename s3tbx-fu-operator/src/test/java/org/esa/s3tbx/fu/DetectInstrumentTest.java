@@ -5,7 +5,7 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
  * @author muhammad.bc .
@@ -32,13 +32,13 @@ public class DetectInstrumentTest {
     @Test
     public void testAutoDetectForOLCIProduct() {
         Product product = new Product("dummy", "dummy", 2, 2);
-        product.addBand("Oa01_radiance", ProductData.TYPE_INT8);
-        product.addBand("Oa02_radiance", ProductData.TYPE_INT8);
-        product.addBand("Oa03_radiance", ProductData.TYPE_INT8);
-        product.addBand("Oa04_radiance", ProductData.TYPE_INT8);
-        product.addBand("Oa05_radiance", ProductData.TYPE_INT8);
-        product.addBand("Oa06_radiance", ProductData.TYPE_INT8);
-        product.addBand("Oa07_radiance", ProductData.TYPE_INT8);
+        product.addBand("Oa01_reflectance", ProductData.TYPE_INT8);
+        product.addBand("Oa02_reflectance", ProductData.TYPE_INT8);
+        product.addBand("Oa03_reflectance", ProductData.TYPE_INT8);
+        product.addBand("Oa04_reflectance", ProductData.TYPE_INT8);
+        product.addBand("Oa05_reflectance", ProductData.TYPE_INT8);
+        product.addBand("Oa06_reflectance", ProductData.TYPE_INT8);
+        product.addBand("Oa07_reflectance", ProductData.TYPE_INT8);
         assertEquals(Instrument.OLCI, DetectInstrument.getInstrument(product));
     }
 
