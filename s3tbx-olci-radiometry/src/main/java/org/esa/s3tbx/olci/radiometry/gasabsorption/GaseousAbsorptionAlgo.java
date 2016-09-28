@@ -19,7 +19,7 @@
 package org.esa.s3tbx.olci.radiometry.gasabsorption;
 
 import com.bc.ceres.core.Assert;
-import org.esa.s3tbx.olci.radiometry.Utils;
+import org.esa.s3tbx.olci.radiometry.smilecorr.SmileCorrectionUtils;
 
 import java.util.ArrayList;
 
@@ -51,8 +51,8 @@ public class GaseousAbsorptionAlgo {
     public float[] getMassAir(float[] sza, float[] oza) {
         Assert.notNull(sza, "The sun zenith angel most not be null.");
         Assert.notNull(oza);
-        float[] szaRad = Utils.convertDegreesToRadians(sza);
-        float[] ozaRad = Utils.convertDegreesToRadians(oza);
+        float[] szaRad = SmileCorrectionUtils.convertDegreesToRadians(sza);
+        float[] ozaRad = SmileCorrectionUtils.convertDegreesToRadians(oza);
 
         float[] massAirs = new float[sza.length];
         for (int i = 0; i < sza.length; i++) {
@@ -91,9 +91,9 @@ public class GaseousAbsorptionAlgo {
         if (size == 1) {
             transmissionGas = arrayListExponential.get(0);
         } else if (size == 2) {
-            transmissionGas = Utils.multiple2ArrayFloat(arrayListExponential.get(0), arrayListExponential.get(1));
+            transmissionGas = SmileCorrectionUtils.multiple2ArrayFloat(arrayListExponential.get(0), arrayListExponential.get(1));
         } else if (size == 3) {
-            transmissionGas = Utils.multiple3ArrayFloat(arrayListExponential.get(0), arrayListExponential.get(1), arrayListExponential.get(2));
+            transmissionGas = SmileCorrectionUtils.multiple3ArrayFloat(arrayListExponential.get(0), arrayListExponential.get(1), arrayListExponential.get(2));
         }
         return transmissionGas;
     }

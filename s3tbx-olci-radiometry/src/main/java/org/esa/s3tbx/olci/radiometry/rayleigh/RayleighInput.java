@@ -21,21 +21,38 @@ package org.esa.s3tbx.olci.radiometry.rayleigh;
 /**
  * @author muhammad.bc.
  */
-public class RayleighSample {
+public class RayleighInput {
+    private float[] sourceRefls;
+    private float[] lowerRefls;
+    private float[] upperRefls;
+
     float sourceReflectance;
     float lowerReflectance;
     float upperReflectance;
+
     int sourceIndex;
     int lowerWaterIndex;
     int upperWaterIndex;
 
-    public RayleighSample(float sourceReflectance, float lowerReflectance, float upperReflectance, int sourceIndex, int lowerWaterIndex, int upperWaterIndex) {
+    public RayleighInput(float sourceReflectance, float lowerReflectance, float upperReflectance, int sourceIndex, int lowerWaterIndex, int upperWaterIndex) {
         this.sourceReflectance = sourceReflectance;
         this.lowerReflectance = lowerReflectance;
         this.upperReflectance = upperReflectance;
+
         this.sourceIndex = sourceIndex;
         this.lowerWaterIndex = lowerWaterIndex;
         this.upperWaterIndex = upperWaterIndex;
+    }
+
+    public RayleighInput(float[] sourceRefl, float[] lowerRefl, float[] upperRefl, int sourceIndx, int lowerWaterIndx, int upperWaterIndx) {
+
+        this.sourceRefls = sourceRefl;
+        this.lowerRefls = lowerRefl;
+        this.upperRefls = upperRefl;
+        this.sourceIndex = sourceIndx;
+        this.lowerWaterIndex = lowerWaterIndx;
+        this.upperWaterIndex = upperWaterIndx;
+
     }
 
 
@@ -43,24 +60,14 @@ public class RayleighSample {
         return sourceReflectance;
     }
 
-    public void setSourceReflectance(float sourceReflectance) {
-        this.sourceReflectance = sourceReflectance;
-    }
 
     public float getLowerReflectance() {
         return lowerReflectance;
     }
 
-    public void setLowerReflectance(float lowerReflectance) {
-        this.lowerReflectance = lowerReflectance;
-    }
 
     public float getUpperReflectance() {
         return upperReflectance;
-    }
-
-    public void setUpperReflectance(float upperReflectance) {
-        this.upperReflectance = upperReflectance;
     }
 
     public int getSourceIndex() {
@@ -73,5 +80,17 @@ public class RayleighSample {
 
     public int getUpperWaterIndex() {
         return upperWaterIndex;
+    }
+
+    public float[] getSourceReflectences() {
+        return sourceRefls;
+    }
+
+    public float[] getLowerReflectences() {
+        return lowerRefls;
+    }
+
+    public float[] getUpperReflectences() {
+        return upperRefls;
     }
 }

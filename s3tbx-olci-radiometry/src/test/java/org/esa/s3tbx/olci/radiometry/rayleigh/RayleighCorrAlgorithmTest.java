@@ -1,5 +1,28 @@
 package org.esa.s3tbx.olci.radiometry.rayleigh;
 
+import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
+import org.esa.s3tbx.olci.radiometry.smilecorr.SmileCorrectionUtils;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.gpf.Tile;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.mockito.Mockito;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.stream.DoubleStream;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.when;
+
 /**
  * @author muhammad.bc.
  */
@@ -7,14 +30,14 @@ public class RayleighCorrAlgorithmTest {
 
     private RayleighCorrAlgorithm algo;
 
-   /* @Before
+    @Before
     public void setUp() throws Exception {
         algo = new RayleighCorrAlgorithm();
     }
 
     @Test
     public void testConvertToRadian() throws Exception {
-        double[] convertDegreesToRadians = SmileUtils.convertDegreesToRadians(new double[]{50, 30, -1});
+        double[] convertDegreesToRadians = SmileCorrectionUtils.convertDegreesToRadians(new double[]{50, 30, -1});
         assertEquals(0.872664626, convertDegreesToRadians[0], 1e-8);
         assertEquals(0.5235987756, convertDegreesToRadians[1], 1e-8);
         assertEquals(-0.017453292519943295, convertDegreesToRadians[2], 1e-8);
@@ -175,17 +198,6 @@ public class RayleighCorrAlgorithmTest {
         assertEquals(3, fourierSeriesExpected.length);
         assertEquals(0.6321, fourierSeriesExpected[0], 1e-4);
 
-
-        double corrOzoneRefl = 1.5;
-        double aziDiff = 1.0;
-        int saRay1 = 1;
-        double[] tau_ray = {1.0, 1.0, 1.0};
-        double rhoBrrExpected = algo.getRhoBrr(rayleighOpticalThickness, aziDiff, massAir, cosOZARad, cosSZARad, interpolateValues, tau_ray, saRay1, fourierSeriesCof, corrOzoneRefl);
-
-        assertEquals(0.3720, rhoBrrExpected, 1e-4);
-
-        rhoBrrExpected = algo.getRhoBrr(Double.NaN, aziDiff, massAir, cosOZARad, cosSZARad, interpolateValues, tau_ray, saRay1, fourierSeriesCof, corrOzoneRefl);
-        assertEquals(Double.NaN, rhoBrrExpected, 1e-4);
     }
 
     private ArrayList<double[]> getInterpolationValues() {
@@ -204,10 +216,10 @@ public class RayleighCorrAlgorithmTest {
         double[] absorptionOfBand = {1.0, 1.2};
         double[] crossSectionSigma = {1.0, 1.2};
 
-        *//*RayleighOutput rrExpected = algo.getRayleighReflectance(rayleighInput, rayleighAux, indexOfArray, absorptionOfBand, crossSectionSigma);
+       /* RayleighOutput rrExpected = algo.getRayleighReflectance(rayleighInput, rayleighAux, indexOfArray, absorptionOfBand, crossSectionSigma);
         assertNotEquals(getRayleighSample().getSourceReflectance(), rrExpected.getSourceRayRefl());
         assertNotEquals(getRayleighSample().getLowerReflectance(), rrExpected.getLowerRayRefl());
-        assertNotEquals(getRayleighSample().getUpperReflectance(), rrExpected.getUpperRayRefl());*//*
+        assertNotEquals(getRayleighSample().getUpperReflectance(), rrExpected.getUpperRayRefl());*/
     }
 
 
@@ -255,5 +267,5 @@ public class RayleighCorrAlgorithmTest {
         int upperWaterIndex = 1;
 
         return new RayleighInput(sourceReflectance, lowerReflectance, upperReflectance, sourceIndex, lowerWaterIndex, upperWaterIndex);
-    }*/
+    }
 }

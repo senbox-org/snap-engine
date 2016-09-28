@@ -27,7 +27,9 @@ import java.io.FileReader;
 import java.nio.file.Path;
 import java.util.ArrayList;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author muhammad.bc.
@@ -35,11 +37,11 @@ import static org.junit.Assert.*;
 public class RayleighCorrectionAuxTest {
 
     private Path pathJSON;
-    private RayleighCorrectionAux rayleighCorrectionAux;
+    private RayleighAux rayleighCorrectionAux;
 
     @Before
     public void setUp() throws Exception {
-        rayleighCorrectionAux = new RayleighCorrectionAux();
+        rayleighCorrectionAux = new RayleighAux();
         Path installAuxdataPath = rayleighCorrectionAux.installAuxdata();
         pathJSON = installAuxdataPath.resolve("coeffMatrix.txt");
     }

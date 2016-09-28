@@ -25,23 +25,24 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static junit.framework.Assert.*;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
 
 /**
  * @author muhammad.bc.
  */
 public class GaseousAbsorptionAuxTest {
 
-    private GaseousAbsorptionAux absorptionAux;
+    private GaseousAbsorptionAux absorptionAuxII;
 
     @Before
     public void setUp() throws Exception {
-        absorptionAux = GaseousAbsorptionAux.getInstance();
+        absorptionAuxII = new GaseousAbsorptionAux();
     }
 
     @Test
     public void testGetOzoneHighAux() throws Exception {
-        List<double[]> ozoneHighs = absorptionAux.getOzoneHighs();
+        List<double[]> ozoneHighs = absorptionAuxII.getOzoneHighs();
         assertNotNull(ozoneHighs);
         assertEquals(592, ozoneHighs.size());
     }
@@ -52,14 +53,14 @@ public class GaseousAbsorptionAuxTest {
         ArrayList<double[]> coeffhighres = new ArrayList<>();
         coeffhighres.add(new double[]{1, 2, 3, 4, 5, 6, 7, 8});
         coeffhighres.add(new double[]{1, 2, 3, 4, 5, 6, 7, 8});
-        assertEquals(3.5, absorptionAux.convolve(3, 4, coeffhighres));
-        assertEquals(4.0, absorptionAux.convolve(3, 5, coeffhighres));
-        assertEquals(3.0, absorptionAux.convolve(1, 5, coeffhighres));
+        assertEquals(3.5, absorptionAuxII.convolve(3, 4, coeffhighres));
+        assertEquals(4.0, absorptionAuxII.convolve(3, 5, coeffhighres));
+        assertEquals(3.0, absorptionAuxII.convolve(1, 5, coeffhighres));
     }
 
     @Test
     public void testGetAbsorptionOLCI() throws Exception {
-        double[] olciAbsorption = absorptionAux.absorptionOzone("OLCI");
+        double[] olciAbsorption = absorptionAuxII.absorptionOzone("OLCI");
         double[] expectedArrays = new double[]{
                 6.666666666666667E-6,
                 3.1E-4,

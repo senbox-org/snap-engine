@@ -25,7 +25,6 @@ import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
-import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.ProductUtils;
 
 import java.util.HashMap;
@@ -33,25 +32,23 @@ import java.util.HashMap;
 /**
  * @author muhammad.bc.
  */
-@OperatorMetadata(alias = "Olci.CorrectRadiometry",
+@OperatorMetadata(alias = "OLCI.Radiomerty",
         description = "Performs radiometric corrections on OLCI L1b data products.",
-        authors = " Marco Peters, Muhammad Bala (Brockmann Consult)",
-        copyright = "(c) 2016 by Brockmann Consult",
+        authors = " Marco Peters ,Muhammad Bala (Brockmann Consult)",
+        copyright = "(c) 2015 by Brockmann Consult",
         category = "Optical/Pre-Processing",
         version = "1.2")
 
-public class RadiometryOp extends Operator {
+public class Radiometry extends Operator {
     @SourceProduct
     public Product sourceProduct;
-
-    @TargetProduct
     private Product targetProduct;
 
 
     @Override
     public void initialize() throws OperatorException {
         targetProduct = new Product(sourceProduct.getName(), sourceProduct.getProductType(),
-                sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
+                                    sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
         for (Band band : sourceProduct.getBands()) {
             final Band targetBand = targetProduct.addBand(band.getName(), band.getDataType());
             ProductUtils.copyRasterDataNodeProperties(band, targetBand);

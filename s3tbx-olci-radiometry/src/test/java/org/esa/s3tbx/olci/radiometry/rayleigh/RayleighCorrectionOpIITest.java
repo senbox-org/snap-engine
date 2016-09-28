@@ -20,7 +20,8 @@ package org.esa.s3tbx.olci.radiometry.rayleigh;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author muhammad.bc.

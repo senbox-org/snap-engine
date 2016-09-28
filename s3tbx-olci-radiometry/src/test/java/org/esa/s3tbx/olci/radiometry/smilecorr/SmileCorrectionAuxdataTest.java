@@ -25,7 +25,9 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author muhammad.bc.
@@ -35,7 +37,6 @@ public class SmileCorrectionAuxdataTest {
 
     @Test
     public void testAuxDataIsInstall() throws Exception {
-       ;
         Path auxDataPath =  SmileCorrectionAuxdata.installAuxdata();
         List<Path> collect = Files.list(auxDataPath).collect(Collectors.toList());
 

@@ -3,7 +3,7 @@ package org.esa.s3tbx.olci.radiometry.smilecorr;
 import org.esa.s3tbx.olci.radiometry.gasabsorption.GasToCompute;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
 
 /**
  * @author muhammad.bc.

@@ -66,9 +66,8 @@ public class SpikeInterpolationTest {
         try {
             Assert.assertEquals(-2, SpikeInterpolation.getUpperValue(useAr, -10), 1e-2);
             Assert.assertEquals(-2, SpikeInterpolation.getUpperValue(useAr, 100), 1e-2);
-            fail();
+            fail("Can fine the closest max value of 100.0");
         } catch (IllegalArgumentException e) {
-            e.printStackTrace();
         }
     }
 

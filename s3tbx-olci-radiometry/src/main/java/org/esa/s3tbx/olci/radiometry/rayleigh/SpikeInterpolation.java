@@ -47,13 +47,6 @@ public class SpikeInterpolation {
         int iy1 = arrayIndex(yCoordinate, y1);
         int iy2 = arrayIndex(yCoordinate, y2);
 
-        if (iy1 == -1 || iy2 == -1 || ix1 == -1 || ix2 == -1) {
-            // todo: mba ask Carsten what to do about the extrapolation 8/26/2016
-            // check if is ascending coordinate
-            // check if the same length
-//            findNormDistance() (y-y2)/(yCoordinate[iy2+1]-yCoordinate[iy2])
-            System.out.println("");
-        }
         double f11 = doubles2D[ix1][iy1];
         double f12 = doubles2D[ix1][iy2];
         double f21 = doubles2D[ix2][iy1];
@@ -73,14 +66,12 @@ public class SpikeInterpolation {
     public static double[] useLibJAI(double[][] samples, float xfrac, float yfrac) {
         Interpolation interpolation = Interpolation.getInstance(Interpolation.INTERP_BILINEAR);
         double interpolateBI = interpolation.interpolate(samples, xfrac, yfrac);
-        System.out.println("interpolate with bilinear JAI lib = " + interpolateBI);
         return new double[]{interpolateBI};
     }
 
     public static double useApacheMath(double[] xval, double[] yval, double[][] fval, double x, double y) {
         BicubicSplineInterpolator interpolator = new BicubicSplineInterpolator();
         BicubicSplineInterpolatingFunction interpolate = interpolator.interpolate(xval, yval, fval);
-        System.out.println("interpolate with bicubic Apache Lib = " + interpolate.value(x, y));
         return interpolate.value(x, y);
 
     }

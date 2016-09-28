@@ -16,16 +16,17 @@
  *
  */
 
-package org.esa.s3tbx.olci.radiometry;
+package org.esa.s3tbx.olci.radiometry.smilecorr;
 
 import org.esa.snap.core.gpf.OperatorException;
+import org.esa.snap.core.gpf.Tile;
 
 import java.util.stream.IntStream;
 
 /**
  * @author muhammad.bc.
  */
-public class Utils {
+public class SmileCorrectionUtils {
 
     public static float[] multiple2ArrayFloat(float[] array1, float[] array2) {
         if (array1.length != array2.length) {
@@ -67,5 +68,33 @@ public class Utils {
             aziDiff[value] = Math.acos(cosDelta);
         });
         return aziDiff;
+    }
+
+    public static double[] getSampleDoubles(Tile sourceTile) {
+        int maxX = sourceTile.getWidth();
+        int maxY = sourceTile.getHeight();
+
+        double[] val = new double[maxX * maxY];
+        int index = 0;
+        for (int y = sourceTile.getMinY(); y <= sourceTile.getMaxY(); y++) {
+            for (int x = sourceTile.getMinX(); x <= sourceTile.getMaxX(); x++) {
+                val[index++] = sourceTile.getSampleDouble(x, y);
+            }
+        }
+        return val;
+    }
+
+    public static float[] getSampleFloats(Tile sourceTile) {
+        int maxX = sourceTile.getWidth();
+        int maxY = sourceTile.getHeight();
+
+        float[] val = new float[maxX * maxY];
+        int index = 0;
+        for (int y = sourceTile.getMinY(); y <= sourceTile.getMaxY(); y++) {
+            for (int x = sourceTile.getMinX(); x <= sourceTile.getMaxX(); x++) {
+                val[index++] = sourceTile.getSampleFloat(x, y);
+            }
+        }
+        return val;
     }
 }

@@ -13,13 +13,13 @@
             </file>
 
             <file name="org-esa-s3tbx-olci-radiometry-gasabsorption-GaseousAbsorptionOpAction.instance">
-            <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
-            <attr name="delegate" methodvalue="org.esa.snap.core.gpf.ui.DefaultOperatorAction.create"/>
-            <attr name="displayName" stringvalue="Gaseous Absorption"/>
-            <attr name="dialogTitle" stringvalue="Gaseous Absorption"/>
-            <attr name="operatorName" stringvalue="GaseousAbsorption"/>
-            <attr name="helpId" stringvalue="GaseousAbsorption"/>
-            <attr name="targetProductNameSuffix" stringvalue="_gaseous"/>
+                <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
+                <attr name="delegate" methodvalue="org.esa.snap.core.gpf.ui.DefaultOperatorAction.create"/>
+                <attr name="displayName" stringvalue="Gaseous Absorption"/>
+                <attr name="dialogTitle" stringvalue="Gaseous Absorption"/>
+                <attr name="operatorName" stringvalue="GaseousAbsorption"/>
+                <attr name="helpId" stringvalue="GaseousAbsorption"/>
+                <attr name="targetProductNameSuffix" stringvalue="_gaseous"/>
             </file>
 
             <file name="org-esa-s3tbx-olci-radiometry-rayleigh-RayleighCorrectionOpAction.instance">

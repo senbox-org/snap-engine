@@ -21,7 +21,7 @@ package org.esa.s3tbx.olci.radiometry.rayleigh;
 /**
  * @author muhammad.bc.
  */
-class RayleighConstants {
+public class RayleighConstants {
     static double AVOGADRO_NUMBER = 6.0221367E+23;
     static double MEAN_MOLECULAR_ZERO = 28.9595;
     static double Molecular_cm3 = 2.5469E19;

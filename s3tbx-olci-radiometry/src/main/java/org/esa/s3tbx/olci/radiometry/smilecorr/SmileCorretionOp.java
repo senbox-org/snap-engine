@@ -23,7 +23,8 @@ import org.esa.s3tbx.olci.radiometry.gasabsorption.GaseousAbsorptionAux;
 import org.esa.s3tbx.olci.radiometry.rayleigh.RayleighAux;
 import org.esa.s3tbx.olci.radiometry.rayleigh.RayleighCorrAlgorithm;
 import org.esa.s3tbx.olci.radiometry.rayleigh.RayleighCorrectionOp;
-import org.esa.s3tbx.olci.radiometry.rayleigh.RayleighSample;
+import org.esa.s3tbx.olci.radiometry.rayleigh.RayleighInput;
+import org.esa.s3tbx.olci.radiometry.rayleigh.RayleighOutput;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
@@ -43,7 +44,13 @@ import javax.media.jai.operator.ConstantDescriptor;
 import java.awt.Color;
 import java.awt.Rectangle;
 
-import static org.esa.s3tbx.olci.radiometry.rayleigh.RayleighCorrectionOp.*;
+import static org.esa.s3tbx.olci.radiometry.rayleigh.RayleighCorrectionOp.ALTITUDE;
+import static org.esa.s3tbx.olci.radiometry.rayleigh.RayleighCorrectionOp.OAA;
+import static org.esa.s3tbx.olci.radiometry.rayleigh.RayleighCorrectionOp.SAA;
+import static org.esa.s3tbx.olci.radiometry.rayleigh.RayleighCorrectionOp.SEA_LEVEL_PRESSURE;
+import static org.esa.s3tbx.olci.radiometry.rayleigh.RayleighCorrectionOp.TOTAL_OZONE;
+import static org.esa.s3tbx.olci.radiometry.rayleigh.RayleighCorrectionOp.TP_LATITUDE;
+import static org.esa.s3tbx.olci.radiometry.rayleigh.RayleighCorrectionOp.TP_LONGITUDE;
 
 
 /**
@@ -72,6 +79,7 @@ public class SmileCorretionOp extends Operator {
     public static final String FRAME_OFFSET_BAND = "frame_offset";
     public static final String BEFORE_BAND = "before";
     public static final String OLCI_SENSOR = "OLCI";
+    public static final int DO_NOT_CORRECT_BAND = -1;
     private static SmileCorrectionAuxdata smileAuxdata = new SmileCorrectionAuxdata();
     private Mask waterMask;
 
@@ -100,7 +108,7 @@ public class SmileCorretionOp extends Operator {
 
         // Configure the target
         Product targetProduct = new Product(sourceProduct.getName(), sourceProduct.getProductType(),
-                sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
+                                            sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
 
         boolean[] landRefCorrectionSwitches = smileAuxdata.getLandRefCorrectionSwitches();
         boolean[] waterRefCorrectionSwitches = smileAuxdata.getWaterRefCorrectionSwitches();
@@ -127,10 +135,10 @@ public class SmileCorretionOp extends Operator {
 
 
         waterMask = Mask.BandMathsType.create("__water_mask", null,
-                getSourceProduct().getSceneRasterWidth(),
-                getSourceProduct().getSceneRasterHeight(),
-                WATER_EXPRESSION,
-                Color.GREEN, 0.0);
+                                              getSourceProduct().getSceneRasterWidth(),
+                                              getSourceProduct().getSceneRasterHeight(),
+                                              WATER_EXPRESSION,
+                                              Color.GREEN, 0.0);
         waterMask.setOwner(getSourceProduct());
     }
 
@@ -282,6 +290,7 @@ public class SmileCorretionOp extends Operator {
     }
 
     private void correctRad(Tile targetTile, String targetBandName, String substring, float[] refCentralWaveLengths, ProgressMonitor pm) {
+        checkForCancellation();
         Rectangle rectangle = targetTile.getRectangle();
         int targetBandIndex = Integer.parseInt(substring) - 1;
         Tile szaTile = getSourceTile(sourceProduct.getTiePointGrid(SZA), rectangle);
@@ -322,103 +331,85 @@ public class SmileCorretionOp extends Operator {
         }
 
         SmileTiles waterTiles = null;
+
         if (correctWater) {
             waterTiles = new SmileTiles(lambdaWaterLowerBand, radianceWaterLowerBand, solarIrradianceWaterLowerBand, lambdaWaterUpperBand,
-                    radianceWaterUpperBand, solarIrradianceWaterUpperBand, rectangle);
-
-            if (isRalyeighOperator) {
-                rayleighAux = prepareRayleighAux(rectangle);
-            }
+                                        radianceWaterUpperBand, solarIrradianceWaterUpperBand, rectangle);
         }
         SmileTiles landTiles = null;
         if (correctLand) {
             landTiles = new SmileTiles(lambdaLandLowerBand, radianceLandLowerBand, solarIrradianceLandLowerBand, lambdaLandUpperBand,
-                    radianceLandUpperBand, solarIrradianceLandUpperBand, rectangle);
+                                       radianceLandUpperBand, solarIrradianceLandUpperBand, rectangle);
         }
 
-        Tile lambdaSourceTile = getSourceTile(lambdaSourceBand, rectangle);
 
+        Tile lambdaSourceTile = getSourceTile(lambdaSourceBand, rectangle);
         final Tile waterMaskTile = getSourceTile(waterMask, rectangle);
         float refCentralWaveLength = refCentralWaveLengths[targetBandIndex];
 
-        for (int y = targetTile.getMinY(); y <= targetTile.getMaxY(); y++) {
-            if (pm.isCanceled()) {
-                return;
-            }
-            for (int x = targetTile.getMinX(); x <= targetTile.getMaxX(); x++) {
-                if (!sourceRadianceTile.isSampleValid(x, y)) {
-                    continue;
-                }
-                float sourceRadiance = sourceRadianceTile.getSampleFloat(x, y);
-                if (waterMaskTile.getSampleBoolean(x, y)) {
-                    if (correctWater) {
-                        float correctedRadiance = correctForSmileEffect(sourceRadiance, solarIrradianceTile, lambdaSourceTile,
-                                refCentralWaveLength, waterTiles,
-                                szaTile, rayleighAux, targetBandIndex, x, y);
-                        targetTile.setSample(x, y, correctedRadiance);
-                    } else {
-                        targetTile.setSample(x, y, sourceRadiance);
-                    }
-                } else {
-                    if (correctLand) {
-                        float correctedRadiance = correctForSmileEffect(sourceRadiance, solarIrradianceTile, lambdaSourceTile,
-                                refCentralWaveLength, landTiles,
-                                szaTile, rayleighAux, targetBandIndex, x, y);
-                        targetTile.setSample(x, y, correctedRadiance);
-                    } else {
-                        targetTile.setSample(x, y, sourceRadiance);
-                    }
-                }
-
-
-            }
+        float[] sourceRadiance = sourceRadianceTile.getSamplesFloat();
+        if (correctWater) {
+            float[] correctForSmileEffect = correctForSmileEffect(sourceRadianceTile, solarIrradianceTile,
+                                                                  lambdaSourceTile, refCentralWaveLength, waterTiles,
+                                                                  szaTile, targetBandIndex);
+            targetTile.setSamples(correctForSmileEffect);
+            return;
         }
+        if (correctLand) {
+            float[] correctedRadiance = correctForSmileEffect(sourceRadianceTile, solarIrradianceTile, lambdaSourceTile,
+                                                              refCentralWaveLength, landTiles,
+                                                              szaTile, targetBandIndex);
+            targetTile.setSamples(correctedRadiance);
+            return;
+        }
+        targetTile.setSamples(sourceRadiance);
     }
 
-    private float correctForSmileEffect(float radiance, Tile solarIrradianceTile, Tile effectWavelengthTargetTile,
-                                        float refCentralWaveLength, SmileTiles smileTiles,
-                                        Tile szaTile, RayleighAux rayleighAux, int targetBandIndx, int x, int y) {
-        float sza = szaTile.getSampleFloat(x, y);
-        float sourceTargetLambda = effectWavelengthTargetTile.getSampleFloat(x, y);
 
-        float solarIrradiance = solarIrradianceTile.getSampleFloat(x, y);
+    private float[] correctForSmileEffect(Tile sourceRadTile, Tile solarIrradianceTile, Tile effectWavelengthTargetTile,
+                                          float refCentralWaveLength, SmileTiles smileTiles,
+                                          Tile szaTile, int targetBandIndx) {
 
-        float sourceRefl = convertRadToRefl(radiance, solarIrradiance, sza);
+        float[] sza = SmileCorrectionUtils.getSampleFloats(szaTile);
+        float[] sourceTargetLambda = SmileCorrectionUtils.getSampleFloats(effectWavelengthTargetTile);
+        float[] solarIrradiance = SmileCorrectionUtils.getSampleFloats(solarIrradianceTile);
+        float[] radiance = SmileCorrectionUtils.getSampleFloats(sourceRadTile);
+        float[] lowerBandRad = SmileCorrectionUtils.getSampleFloats(smileTiles.getLowerRadianceTile());
+        float[] lowerBandSolarIrrad = SmileCorrectionUtils.getSampleFloats(smileTiles.getLowerSolarIrradianceTile());
+        float[] upperBandRad = SmileCorrectionUtils.getSampleFloats(smileTiles.getUpperRadianceTile());
+        float[] upperBandSolarIrrad = SmileCorrectionUtils.getSampleFloats(smileTiles.getUpperSolarIrradianceTile());
 
-        float lowerRefl = convertRadToRefl(smileTiles.getLowerRadianceTile().getSampleFloat(x, y),
-                smileTiles.getLowerSolarIrradianceTile().getSampleFloat(x, y),
-                sza);
-        float upperRefl = convertRadToRefl(smileTiles.getUpperRadianceTile().getSampleFloat(x, y),
-                smileTiles.getUpperSolarIrradianceTile().getSampleFloat(x, y), sza);
-
+        float[] sourceRefl = convertRadToRefl(radiance, solarIrradiance, sza);
+        float[] lowerRefl = convertRadToRefl(lowerBandRad, lowerBandSolarIrrad, sza);
+        float[] upperRefl = convertRadToRefl(upperBandRad, upperBandSolarIrrad, sza);
 
         if (isRalyeighOperator) {
             int lowerWaterIndx = smileAuxdata.getWaterLowerBands()[targetBandIndx] - 1;
             int upperWaterIndx = smileAuxdata.getWaterUpperBands()[targetBandIndx] - 1;
-
-            int minY = solarIrradianceTile.getMinY();
-            int minX = solarIrradianceTile.getMinX();
-            int maxY = solarIrradianceTile.getMaxY();
-            int indexInArray = (y - minY) * (maxY - minY + 1) + x - minX;
-
-            if (lowerWaterIndx != -1 && upperWaterIndx != -1) {
-                RayleighSample rayleighSampleToCompute = new RayleighSample(sourceRefl, lowerRefl, upperRefl, targetBandIndx, lowerWaterIndx, upperWaterIndx);
-                RayleighSample computedRayleighSample = rayleighCorrAlgorithm.getRayleighReflectance(rayleighSampleToCompute, rayleighAux, getSourceProduct(), indexInArray, absorpOzone);
-                sourceRefl = computedRayleighSample.getSourceReflectance();
-                lowerRefl = computedRayleighSample.getLowerWaterIndex();
-                upperRefl = computedRayleighSample.getUpperWaterIndex();
+            if (lowerWaterIndx != DO_NOT_CORRECT_BAND && upperWaterIndx != DO_NOT_CORRECT_BAND) {
+                RayleighInput rayleighInputToCompute = new RayleighInput(sourceRefl, lowerRefl, upperRefl, targetBandIndx, lowerWaterIndx, upperWaterIndx);
+                RayleighAux rayleighAux = prepareRayleighAux(sourceRadTile.getRectangle());
+                RayleighOutput computedRayleighOutput = rayleighCorrAlgorithm.getRayleighReflectance(rayleighInputToCompute, rayleighAux, absorpOzone, getSourceProduct());
+                sourceRefl = computedRayleighOutput.getSourceRayRefls();
+                lowerRefl = computedRayleighOutput.getLowerRayRefls();
+                upperRefl = computedRayleighOutput.getUpperRayRefls();
             }
         }
 
-        float lowerLambda = smileTiles.getLowerLambdaTile().getSampleFloat(x, y);
-        float upperLambda = smileTiles.getUpperLambdaTile().getSampleFloat(x, y);
+        float[] lowerLambda = smileTiles.getLowerLambdaTile().getSamplesFloat();
+        float[] upperLambda = smileTiles.getUpperLambdaTile().getSamplesFloat();
 
-        float correctedReflectance = SmileCorrectionAlgorithm.correctWithReflectance(sourceRefl, lowerRefl,
-                upperRefl, sourceTargetLambda, lowerLambda, upperLambda, refCentralWaveLength);
+        float[] convertRefTo = new float[sourceRefl.length];
+        for (int i = 0; i < sourceRefl.length; i++) {
+            float correctedReflectance = SmileCorrectionAlgorithm.correctWithReflectance(sourceRefl[i], lowerRefl[i],
+                                                                                         upperRefl[i], sourceTargetLambda[i], lowerLambda[i], upperLambda[i], refCentralWaveLength);
 
-        float shiftedSolarIrradiance = shiftSolarIrradiance(solarIrradiance, sourceTargetLambda, refCentralWaveLength);
-        return convertReflToRad(correctedReflectance, sza, shiftedSolarIrradiance);
+            float shiftedSolarIrradiance = shiftSolarIrradiance(solarIrradiance[i], sourceTargetLambda[i], refCentralWaveLength);
+            convertRefTo[i] = convertReflToRad(correctedReflectance, sza[i], shiftedSolarIrradiance);
+        }
+        return convertRefTo;
     }
+
 
     private RayleighAux prepareRayleighAux(Rectangle rectangle) {
         RayleighAux rayleighAux = new RayleighAux();
@@ -431,11 +422,6 @@ public class SmileCorretionOp extends Operator {
         rayleighAux.setLatitudes(getSourceTile(sourceProduct.getTiePointGrid(TP_LATITUDE), rectangle));
         rayleighAux.setLongitude(getSourceTile(sourceProduct.getTiePointGrid(TP_LONGITUDE), rectangle));
         rayleighAux.setAltitudes(getSourceTile(sourceProduct.getBand(ALTITUDE), rectangle));
-        rayleighAux.setAirMass();
-        rayleighAux.setAziDifferent();
-        rayleighAux.setFourier();
-//            auxiliaryValues.setInterpolation();
-        rayleighAux.setSpikeInterpolation();
         return rayleighAux;
     }
 
@@ -452,8 +438,12 @@ public class SmileCorretionOp extends Operator {
     }
 
 
-    private float convertRadToRefl(float radiance, float solarIrradiance, float sza) {
-        return RsMathUtils.radianceToReflectance(radiance, sza, solarIrradiance);
+    private float[] convertRadToRefl(float[] radiance, float[] solarIrradiance, float[] sza) {
+        float[] convertRadToRef = new float[radiance.length];
+        for (int i = 0; i < radiance.length; i++) {
+            convertRadToRef[i] = RsMathUtils.radianceToReflectance(radiance[i], sza[i], solarIrradiance[i]);
+        }
+        return convertRadToRef;
     }
 
     private float convertReflToRad(float refl, float sza, float solarIrradiance) {
@@ -512,6 +502,4 @@ public class SmileCorretionOp extends Operator {
         }
 
     }
-
-
 }

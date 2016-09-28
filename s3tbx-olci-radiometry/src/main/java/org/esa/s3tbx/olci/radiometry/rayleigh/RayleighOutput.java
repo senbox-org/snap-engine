@@ -16,23 +16,32 @@
  *
  */
 
-package org.esa.s3tbx.olci.radiometry.smilecorr;
-
-import org.junit.Test;
-
-
-import static org.junit.Assert.assertEquals;
+package org.esa.s3tbx.olci.radiometry.rayleigh;
 
 /**
  * @author muhammad.bc.
  */
+public class RayleighOutput {
+    private final float[] sourceRayRefls;
+    private final float[] lowerRayRefls;
+    private final float[] upperRayRefls;
 
-public class spike {
-    @Test
-    public void testCheck() throws Exception {
-        double CO2 = 3.E-4;
-        assertEquals(3.0e-4, CO2, 1e-4);
-        System.out.println(Math.ceil(708.75));
-        assertEquals(709, Math.ceil(708.75), 1e-1);
+    public RayleighOutput(float[] sourceRayRefl, float[] lowerRayRefl, float[] upperRayRefl) {
+
+        this.sourceRayRefls = sourceRayRefl;
+        this.lowerRayRefls = lowerRayRefl;
+        this.upperRayRefls = upperRayRefl;
+    }
+
+    public float[] getSourceRayRefls() {
+        return sourceRayRefls;
+    }
+
+    public float[] getLowerRayRefls() {
+        return lowerRayRefls;
+    }
+
+    public float[] getUpperRayRefls() {
+        return upperRayRefls;
     }
 }
