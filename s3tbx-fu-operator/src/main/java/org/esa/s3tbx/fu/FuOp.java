@@ -194,9 +194,8 @@ public class FuOp extends PixelOperator {
         fuAlgo = new FuAlgoFactory(instrument).create();
         reflecBandNames = findWaveBand(sourceProduct, this.instrument.getWavelengths(), MAX_DELTA_WAVELENGTH);
         final int bandNum = reflecBandNames.length;
-        if (bandNum < 0 || (bandNum != instrument.getWavelengths().length)) {
-            throw new OperatorException("FU value classification can not be applied to this product with the instrument " +
-                                                instrument.name() + ".");
+        if (bandNum != instrument.getWavelengths().length) {
+            throw new OperatorException("Could not find all necessary wavelengths for processing the instrument " + instrument.name() + ".");
         }
 
         targetBandDefs = BandDefinition.create(includeIntermediateResults, instrument);
