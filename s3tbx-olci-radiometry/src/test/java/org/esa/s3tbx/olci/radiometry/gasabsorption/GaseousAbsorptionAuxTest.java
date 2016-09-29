@@ -20,18 +20,18 @@ package org.esa.s3tbx.olci.radiometry.gasabsorption;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static junit.framework.Assert.*;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
 
 /**
  * @author muhammad.bc.
  */
-@Ignore
+
 public class GaseousAbsorptionAuxTest {
 
     private GaseousAbsorptionAux absorptionAuxII;
