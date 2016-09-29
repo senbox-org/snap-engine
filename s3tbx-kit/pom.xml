@@ -211,6 +211,11 @@
         </dependency>
         <dependency>
             <groupId>org.esa.s3tbx</groupId>
+            <artifactId>s3tbx-owt-classification</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.s3tbx</groupId>
             <artifactId>s3tbx-olci-radiometry</artifactId>
             <version>${project.version}</version>
         </dependency>

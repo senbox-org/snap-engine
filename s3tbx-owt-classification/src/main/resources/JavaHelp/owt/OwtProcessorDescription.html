@@ -1,0 +1,103 @@
+<!--
+  ~ Copyright (C) 2013 Brockmann Consult GmbH (info@brockmann-consult.de)
+  ~
+  ~ This program is free software; you can redistribute it and/or modify it
+  ~ under the terms of the GNU General Public License as published by the Free
+  ~ Software Foundation; either version 3 of the License, or (at your option)
+  ~ any later version.
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+  ~ more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License along
+  ~ with this program; if not, see http://www.gnu.org/licenses/
+  -->
+
+<html>
+<head>
+    <title>OWT Classification Processor</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+<table class="header">
+    <tr class="header">
+        <td class="header">&nbsp;
+            <b>OWT Classification</b> - Processor Description
+        </td>
+        <td class="header" align="right"><a href="../general/BeamOverview.html"><img src="../images/BeamHeader.jpg" border=0></a></td>
+    </tr>
+</table>
+
+<h3>User Interface</h3>
+<p>
+    The OWT Classification processor can be invoked from the VISAT tool menu by selecting
+    the <b>MERIS OWT Classification</b> command from the <b>Processing / Thematic Water Processing</b> menu. On the command line the OWT Classification processor is
+    available by means of the Graph Processing Tool <code>gpt</code> which is located in the BEAM <code>bin</code>
+    directory. Typing <code>gpt OWTClassification -h</code> displays further information.
+</p>
+
+
+<h4>I/O Parameters Panel</h4>
+<p align="center"><img src="images/OwtIOParameter.png" alt="I/O Parameters of OWT Processor"></p>
+
+<h5>Source Product Group</h5>
+
+<p class="i1">
+    <b>Source product:</b>
+    Here the user specifies the source product.
+    The combo box presents a list of all products opened in the VISAT.
+    The user may select one of these or, by clicking on the button next to the combo box, choose a product
+    from the file system.
+</p>
+
+<h5>Target Product Group</h5>
+
+<p class="i1">
+    <b>Name:</b>
+    Used to specify the name of the target product.
+</p>
+
+<p class="i1">
+    <b>Save as:</b>
+    Used to specify whether the target product should be saved to the file system. The
+    combo box presents a list of available file formats.
+    The text field or the button next to it allow to specify a target directory.
+</p>
+
+<p class="i1">
+    <b>Open in VISAT:</b>
+    Used to specify whether the target product should be opened in VISAT.
+    When the target product is not saved, it is opened in VISAT automatically.
+</p>
+
+<h4>Processing Parameters Panel</h4>
+<p align="center"><img src="images/OwtProcParameter.png" alt="Processing Parameters of OWT Processor"></p>
+
+<p class="i1">
+    <b>OWT Type:</b> Select one of the available types from the predefined list.
+    For a description of the types see the <a href="OwtAlgorithmSpecification.html">Algorithm Specification</a>
+</p>
+
+<p class="i1">
+    <b>Reflectances prefix:</b>
+    Specifies the prefix of the reflectance bands which are used for processing.
+</p>
+
+<p class="i1">
+    <b>Input reflectance is:</b>
+    Specifies if the input reflectance is either radiance reflectances or irradiance reflectances (ESA compatible).
+</p>
+
+<p class="i1">
+    <b>Write input reflectances:</b>
+    Whether or not the input reflectances shall be copied into target product.
+</p>
+
+
+<hr>
+</body>
+</html>
+
+
