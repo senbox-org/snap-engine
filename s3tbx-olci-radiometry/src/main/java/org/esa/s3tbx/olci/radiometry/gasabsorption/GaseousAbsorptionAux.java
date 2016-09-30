@@ -45,7 +45,7 @@ public class GaseousAbsorptionAux {
             Path installAuxdata = installAuxdata();
             Path resolve = installAuxdata.resolve("ozone-highres.txt");
             FileReader fileReader = new FileReader(resolve.toString());
-            CsvReader reader = new CsvReader(fileReader, new char[]{' ', '\t'});
+            CsvReader reader = new CsvReader(fileReader, new char[]{' ', '\t'}, true, "#");
             ozoneHighs = reader.readDoubleRecords();
             coeffhighres = getCoeffhighres(ozoneHighs);
             fileReader.close();
@@ -78,8 +78,8 @@ public class GaseousAbsorptionAux {
     }
 
     Path installAuxdata() throws IOException {
-        Path auxdataDirectory = SystemUtils.getAuxDataPath().resolve("olci/smile-correction");
-        final Path sourceDirPath = ResourceInstaller.findModuleCodeBasePath(GaseousAbsorptionAux.class).resolve("auxdata/smile");
+        Path auxdataDirectory = SystemUtils.getAuxDataPath().resolve("olci/gaseous");
+        final Path sourceDirPath = ResourceInstaller.findModuleCodeBasePath(GaseousAbsorptionAux.class).resolve("auxdata/gaseous");
         final ResourceInstaller resourceInstaller = new ResourceInstaller(sourceDirPath, auxdataDirectory);
         resourceInstaller.install(".*", ProgressMonitor.NULL);
         return auxdataDirectory;

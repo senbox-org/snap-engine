@@ -16,7 +16,7 @@
  *
  */
 
-package org.esa.s3tbx.olci.radiometry.rayleighcorrection;
+package org.esa.s3tbx.olci.radiometry.rayleigh;
 
 import org.esa.s3tbx.olci.radiometry.rayleigh.SpikeInterpolation;
 import org.junit.Assert;

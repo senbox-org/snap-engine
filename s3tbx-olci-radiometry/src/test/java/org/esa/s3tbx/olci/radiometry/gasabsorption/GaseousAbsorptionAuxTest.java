@@ -22,11 +22,15 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author muhammad.bc.
@@ -87,5 +91,16 @@ public class GaseousAbsorptionAuxTest {
         };
         assertEquals(21, olciAbsorption.length);
         Assert.assertArrayEquals(expectedArrays, olciAbsorption, 1e-8);
+    }
+
+    @Test
+    public void testGaseousAuxInstall() throws Exception {
+        Path auxDataPath = GaseousAbsorptionAux.getInstance().installAuxdata();
+        assertNotNull(auxDataPath);
+        assertTrue(auxDataPath.isAbsolute());
+        List<Path> collect = Files.list(auxDataPath).collect(Collectors.toList());
+        assertTrue(collect.stream().anyMatch(path -> path.getFileName().toString().equals("OLCIGaseousAbsorption.txt")));
+        assertTrue(collect.stream().anyMatch(path -> path.getFileName().toString().equals("ozone-highres.txt")));
+
     }
 }

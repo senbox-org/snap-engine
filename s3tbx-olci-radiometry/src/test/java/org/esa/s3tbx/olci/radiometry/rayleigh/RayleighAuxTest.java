@@ -21,9 +21,12 @@ package org.esa.s3tbx.olci.radiometry.rayleigh;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.nio.file.Path;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
@@ -103,5 +106,12 @@ public class RayleighAuxTest {
     public void testSquareArray() throws Exception {
         double[] squarePower = rayleighAux.getSquarePower(new double[]{2, 3, 4, 5});
         assertArrayEquals(new double[]{4, 9, 16, 25}, squarePower, 1e-3);
+    }
+
+    @Test
+    public void testInstallRayleighAux() throws Exception {
+        Path path = RayleighAux.installAuxdata();
+        assertNotNull(path);
+        assertTrue(path.toFile().exists());
     }
 }
