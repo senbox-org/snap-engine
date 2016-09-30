@@ -4,12 +4,14 @@
 
 <toc version="2.0" categoryclosedimage="folder" categoryopenimage="folder" topicimage="doc">
 
-    <tocitem text="Data Processors">
-        <tocitem text="Thematic Water Processing">
-            <tocitem text="OWT Classification Processors" target="owtClassification">
-                <tocitem text="Overview" target="owtClassification"/>
-                <tocitem text="Algorithm Specification" target="owtAlgorithmSpec"/>
-                <tocitem text="Processor Description" target="owtProcessorDesc"/>
+    <tocitem text="Sentinel Toolbox Application">
+        <tocitem text="Optical">
+            <tocitem text="Thematic Water Processing">
+                <tocitem text="OWT Classification Processors" target="owtClassification">
+                    <tocitem text="Overview" target="owtClassification"/>
+                    <tocitem text="Algorithm Specification" target="owtAlgorithmSpec"/>
+                    <tocitem text="Processor Description" target="owtProcessorDesc"/>
+                </tocitem>
             </tocitem>
         </tocitem>
     </tocitem>
