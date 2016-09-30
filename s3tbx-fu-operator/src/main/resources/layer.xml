@@ -26,7 +26,7 @@
     </folder>
 
     <folder name="Services">
-        <folder name="JavaHelp">
+        <folder name="javahelp">
             <file name="org-esa-s3tbx-FuOp-helpset.xml" url="helpset.xml">
                 <attr name="position" intvalue="4600"/>
             </file>

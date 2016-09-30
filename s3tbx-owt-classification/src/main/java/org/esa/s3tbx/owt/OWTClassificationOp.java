@@ -41,11 +41,11 @@ import org.esa.snap.core.util.ProductUtils;
 // todo   -                    Currently the OWT is calculated everywhere, including land and clouds.
 // todo   -                    should be done when the operator is migrated to SNAP
 @OperatorMetadata(alias = "OWTClassification",
-        category = "Optical/Pre-Processing",
+        category = "Optical/Thematic Water Processing",
         description = "Performs an optical water type classification based on atmospherically corrected reflectances.",
         authors = "Timothy Moore (University of New Hampshire); Marco Peters, Thomas Storm (Brockmann Consult)",
         copyright = "(c) 2016 by Timothy Moore (University of New Hampshire) and Brockmann Consult",
-        version = "1.7.1",
+        version = "2.0",
         internal = true)
 public class OWTClassificationOp extends PixelOperator {
 

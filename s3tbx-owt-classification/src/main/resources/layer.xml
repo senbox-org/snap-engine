@@ -47,8 +47,8 @@
     </folder>
 
     <folder name="Services">
-        <folder name="JavaHelp">
-            <file name="org-esa-s3tbx-owt-helpset.xml" url="helpset.xml">
+        <folder name="javahelp">
+            <file name="org-esa-s3tbx-OWTClassificationOp-helpset.xml" url="helpset.xml">
                 <attr name="position" intvalue="4600"/>
             </file>
         </folder>
