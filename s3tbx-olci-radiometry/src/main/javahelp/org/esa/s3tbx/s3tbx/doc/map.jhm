@@ -21,18 +21,8 @@
 
 <map version="2.0">
 
-    <mapID target="merisRadiometryCorrection" url="radiometry/MerisRadiometryProcessor.html"/>
-    <mapID target="merisRadiometryCorrectionProcessorDescription"
-           url="radiometry/MerisRadiometryProcessorDescription.html"/>
-    <mapID target="merisRadiometryCommandLine"
-           url="radiometry/MerisRadiometryCommandLine.html"/>
-    <mapID target="merisEqualizationAlgorithmSpecification"
-           url="radiometry/MerisEqualizationAlgorithmSpecification.html"/>
-    <mapID target="merisRecalibrationAlgorithmSpecification"
-           url="radiometry/RadioRecalibrationAlgorithmSpecification.html"/>
-    <mapID target="merisSmileCorrectionAlgorithmSpecification"
-           url="radiometry/SmileCorrectionAlgorithmSpecification.html"/>
-    <mapID target="merisRadToReflAlgorithmSpecification"
-           url="radiometry/RadToReflAlgorithmSpecification.html"/>
+    <mapID target="SmileCorrection.Olci" url="radiometry/SmileCorrection.html"/>
+    <mapID target="GaseousAbsorption" url="radiometry/SmileCorrection.html"/>
+    <mapID target="RayleighCorrection" url="radiometry/SmileCorrection.html"/>
 
 </map>

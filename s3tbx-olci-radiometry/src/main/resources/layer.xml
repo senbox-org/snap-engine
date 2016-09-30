@@ -61,8 +61,8 @@
     </folder>
 
     <folder name="Services">
-        <folder name="JavaHelp">
-            <file name="org-esa-s3tbx-FuOp-helpset.xml" url="helpset.xml">
+        <folder name="javahelp">
+            <file name="org-esa-s3tbx-olci-radiometry-smilecorr-SmileCorretionOp-helpset.xml" url="helpset.xml">
                 <attr name="position" intvalue="4600"/>
             </file>
         </folder>
