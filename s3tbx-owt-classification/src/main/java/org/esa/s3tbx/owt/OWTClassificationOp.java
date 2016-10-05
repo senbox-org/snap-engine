@@ -45,8 +45,7 @@ import org.esa.snap.core.util.ProductUtils;
         description = "Performs an optical water type classification based on atmospherically corrected reflectances.",
         authors = "Timothy Moore (University of New Hampshire); Marco Peters, Thomas Storm (Brockmann Consult)",
         copyright = "(c) 2016 by Timothy Moore (University of New Hampshire) and Brockmann Consult",
-        version = "2.0",
-        internal = true)
+        version = "2.0")
 public class OWTClassificationOp extends PixelOperator {
 
     private static final int DOMINANT_CLASS_NO_DATA_VALUE = -1;
