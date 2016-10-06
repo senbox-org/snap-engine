@@ -32,7 +32,7 @@ public class MerisLevel1ProductFactory extends MerisProductFactory {
 
     @Override
     protected void setAutoGrouping(Product[] sourceProducts, Product targetProduct) {
-        targetProduct.setAutoGrouping("M*_radiance:atmospheric_temperature_profile:lambda0:FWHM:solar_flux");
+        targetProduct.setAutoGrouping("M*_radiance:M*_radiance_err:atmospheric_temperature_profile:lambda0:FWHM:solar_flux");
     }
 
     @Override

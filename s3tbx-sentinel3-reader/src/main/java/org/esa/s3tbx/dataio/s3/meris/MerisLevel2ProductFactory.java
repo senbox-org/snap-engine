@@ -22,9 +22,9 @@ public class MerisLevel2ProductFactory extends MerisProductFactory {
     protected Band addBand(Band sourceBand, Product targetProduct) {
         final String sourceBandName = sourceBand.getName();
         if (sourceBandName.startsWith("IWV")) {
-            if(sourceBand.getProduct().getName().startsWith("l")) {
+            if (sourceBand.getProduct().getName().startsWith("l")) {
                 sourceBand.setName("L_" + sourceBandName);
-            } else if(sourceBand.getProduct().getName().startsWith("w")) { // masterProduct.getName().startsWith("w")
+            } else if (sourceBand.getProduct().getName().startsWith("w")) { // masterProduct.getName().startsWith("w")
                 sourceBand.setName("W_" + sourceBandName);
             }
         }
@@ -46,11 +46,10 @@ public class MerisLevel2ProductFactory extends MerisProductFactory {
         // the unit string follows the CF conventions.
         // See: http://www.unidata.ucar.edu/software/udunits/udunits-2.0.4/udunits2lib.html#Syntax
         if (targetNode.getName().startsWith("ADG443_NN") ||
-                targetNode.getName().startsWith("CHL_NN") ||
-                targetNode.getName().startsWith("CHL_OC4ME") ||
-                targetNode.getName().startsWith("KD490_M07") ||
-                targetNode.getName().startsWith("TSM_NN"))
-        {
+            targetNode.getName().startsWith("CHL_NN") ||
+            targetNode.getName().startsWith("CHL_OC4ME") ||
+            targetNode.getName().startsWith("KD490_M07") ||
+            targetNode.getName().startsWith("TSM_NN")) {
             if (targetNode instanceof Band) {
                 final Band targetBand = (Band) targetNode;
                 String unit = targetBand.getUnit();
@@ -73,8 +72,8 @@ public class MerisLevel2ProductFactory extends MerisProductFactory {
 
     @Override
     protected void setAutoGrouping(Product[] sourceProducts, Product targetProduct) {
-        targetProduct.setAutoGrouping("M*_rho_toa:M*_rho_top:M*_rho_w:" +
-                                              "atmospheric_temperature_profile:lambda0:FWHM:solar_flux");
+        targetProduct.setAutoGrouping("M*_rho_toa:M*_rho_toa_err:M*_rho_top:M*_rho_top_err:M*_rho_w:M*_rho_w_err:" +
+                                      "atmospheric_temperature_profile:lambda0:FWHM:solar_flux");
     }
 
 }
