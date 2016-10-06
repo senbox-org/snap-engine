@@ -39,12 +39,15 @@ public abstract class OlciProductFactory extends AbstractProductFactory {
 
     public final static String OLCI_USE_PIXELGEOCODING = "s3tbx.reader.olci.pixelGeoCoding";
 
+    static {
+        registerRGBProfiles();
+    }
+
     public OlciProductFactory(Sentinel3ProductReader productReader) {
         super(productReader);
         nameToWavelengthMap = new HashMap<>();
         nameToBandwidthMap = new HashMap<>();
         nameToIndexMap = new HashMap<>();
-        registerRGBProfiles();
     }
 
     @Override
