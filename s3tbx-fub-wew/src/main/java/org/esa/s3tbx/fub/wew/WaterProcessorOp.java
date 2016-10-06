@@ -13,7 +13,9 @@ import org.esa.snap.core.datamodel.MetadataAttribute;
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.ProductNode;
 import org.esa.snap.core.datamodel.ProductNodeGroup;
+import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
@@ -36,6 +38,9 @@ import java.awt.Color;
 import java.awt.image.Raster;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @OperatorMetadata(alias = "FUB.Water", authors = "Thomas Schroeder, Michael Schaale",
         copyright = "Institute for Space Sciences (WeW), Freie Universitaet Berlin",
@@ -98,7 +103,7 @@ public class WaterProcessorOp extends PixelOperator {
     protected void prepareInputs() throws OperatorException {
         super.prepareInputs();
         sensor = getSensor();
-        String[] sourceRasterNames = sensor.getBandNames();
+        String[] sourceRasterNames = sensor.getRasterNames();
 
         for (int i = 0; i < inputBands.length; i++) {
             String radianceBandName = sourceRasterNames[i];
@@ -122,7 +127,7 @@ public class WaterProcessorOp extends PixelOperator {
 
     @Override
     protected void configureSourceSamples(SourceSampleConfigurer sampleConfigurer) throws OperatorException {
-        String[] sourceRasterNames = sensor.getBandNames();
+        String[] sourceRasterNames = sensor.getRasterNames();
         for (int i = 0; i < sourceRasterNames.length; i++) {
             sampleConfigurer.defineSample(i, sourceRasterNames[i]);
         }
@@ -589,12 +594,14 @@ public class WaterProcessorOp extends PixelOperator {
     }
 
     private Sensor getSensor() {
-        String[] bandNames = getSourceProduct().getBandNames();
-        if (Arrays.asList(bandNames).containsAll(Arrays.asList(Sensor.OLCI.getBandNames()))) {
+        Stream<RasterDataNode> nodeStream = getSourceProduct().getRasterDataNodes().stream();
+        List<String> rasterNames = nodeStream.map(ProductNode::getName).collect(Collectors.toList());
+
+        if (rasterNames.containsAll(Arrays.asList(Sensor.OLCI.getRasterNames()))) {
             return Sensor.OLCI;
         }
 
-        if (Arrays.asList(bandNames).containsAll(Arrays.asList(Sensor.MERIS.getBandNames()))) {
+        if (rasterNames.containsAll(Arrays.asList(Sensor.MERIS.getRasterNames()))) {
             return Sensor.MERIS;
         }
         throw new OperatorException("The operator can't be applied on the sensor");
@@ -756,7 +763,7 @@ public class WaterProcessorOp extends PixelOperator {
         private final String suspectFlag;
         private final String flagName;
 
-        public String[] getBandNames() {
+        public String[] getRasterNames() {
             return bandNames;
         }
 
