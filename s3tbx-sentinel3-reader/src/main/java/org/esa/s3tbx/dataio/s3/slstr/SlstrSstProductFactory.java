@@ -87,15 +87,15 @@ public class SlstrSstProductFactory extends SlstrProductFactory {
 
     @Override
     protected void processProductSpecificMetadata(MetadataElement metadataElement) {
-        final MetadataElement slstrInformationElement = metadataElement.getElement("slstrProductInformation");
+        MetadataElement slstrInformationElement = metadataElement.getElement("slstrProductInformation");
         for (int i = 0; i < slstrInformationElement.getNumElements(); i++) {
-            final MetadataElement slstrElement = slstrInformationElement.getElementAt(i);
-            final String slstrElementName = slstrElement.getName();
+            MetadataElement slstrElement = slstrInformationElement.getElementAt(i);
+            String slstrElementName = slstrElement.getName();
             if (slstrElementName.endsWith("ImageSize")) {
-                final Double startOffset =
-                        Double.parseDouble(slstrElement.getAttribute("startOffset").getData().getElemString());
-                final Double trackOffset =
-                        Double.parseDouble(slstrElement.getAttribute("trackOffset").getData().getElemString());
+                MetadataAttribute startOffsetElem = slstrElement.getAttribute("startOffset");
+                MetadataAttribute trackOffsetElem = slstrElement.getAttribute("trackOffset");
+                Double startOffset = startOffsetElem != null ? Double.parseDouble(startOffsetElem.getData().getElemString()) : 0.0;
+                Double trackOffset = trackOffsetElem != null ? Double.parseDouble(trackOffsetElem.getData().getElemString()) : 0.0;
                 if (slstrElementName.equals("nadirImageSize")) {
                     nadirStartOffset = startOffset;
                     nadirTrackOffset = trackOffset;
