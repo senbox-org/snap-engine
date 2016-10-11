@@ -24,6 +24,7 @@ import org.esa.snap.core.datamodel.BasicPixelGeoCoding;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.GeoCodingFactory;
 import org.esa.snap.core.datamodel.Mask;
+import org.esa.snap.core.datamodel.MetadataAttribute;
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductNodeGroup;
@@ -110,8 +111,10 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
                     } else {
                         index = firstLetter + "o";
                     }
-                    double startOffset = Double.parseDouble(slstrElement.getAttribute("startOffset").getData().getElemString());
-                    double trackOffset = Double.parseDouble(slstrElement.getAttribute("trackOffset").getData().getElemString());
+                    MetadataAttribute startOffsetAttribute = slstrElement.getAttribute("startOffset");
+                    MetadataAttribute trackOffsetAttribute = slstrElement.getAttribute("trackOffset");
+                    double startOffset = startOffsetAttribute != null ? Double.parseDouble(startOffsetAttribute.getData().getElemString()) : 0.0;
+                    double trackOffset = trackOffsetAttribute != null ? Double.parseDouble(trackOffsetAttribute.getData().getElemString()) : 0.0;
                     gridIndexToStartOffset.put(index, startOffset);
                     gridIndexToTrackOffset.put(index, trackOffset);
                     if (firstLetter.equals("t")) {
