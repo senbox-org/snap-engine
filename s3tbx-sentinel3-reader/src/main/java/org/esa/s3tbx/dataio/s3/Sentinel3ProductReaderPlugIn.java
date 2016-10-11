@@ -191,5 +191,33 @@ public class Sentinel3ProductReaderPlugIn implements ProductReaderPlugIn {
                                                        "Oa02_reflectance"
                                                }
         ));
+        manager.addProfile(new RGBImageProfile("SLSTR L1 - Nadir",
+                                               new String[]{
+                                                       "S3_radiance_an",
+                                                       "S2_radiance_an",
+                                                       "S1_radiance_an",
+                                               }
+        ));
+        manager.addProfile(new RGBImageProfile("SLSTR L1 - Nadir, False colour",
+                                               new String[]{
+                                                       "S5_radiance_an",
+                                                       "S3_radiance_an",
+                                                       "S2_radiance_an",
+                                               }
+        ));
+        manager.addProfile(new RGBImageProfile("SLSTR L1 - Oblique",
+                                                new String[]{
+                                                        "S3_radiance_ao",
+                                                        "S2_radiance_ao",
+                                                        "S1_radiance_ao",
+                                                }
+        ));
+        manager.addProfile(new RGBImageProfile("SLSTR L1 - Oblique, False colour",
+                                                new String[]{
+                                                        "S5_radiance_ao",
+                                                        "S3_radiance_ao",
+                                                        "S2_radiance_ao",
+                                                }
+        ));
     }
 }
