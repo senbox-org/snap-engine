@@ -14,6 +14,9 @@ package org.esa.s3tbx.dataio.s3.slstr;/*
  * with this program; if not, see http://www.gnu.org/licenses/
  */
 
+import com.bc.ceres.glevel.support.DefaultMultiLevelImage;
+import com.bc.ceres.glevel.support.DefaultMultiLevelModel;
+import com.bc.ceres.glevel.support.DefaultMultiLevelSource;
 import org.esa.s3tbx.dataio.s3.Manifest;
 import org.esa.s3tbx.dataio.s3.Sentinel3ProductReader;
 import org.esa.snap.core.datamodel.Band;
@@ -128,14 +131,12 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
                 for (int j = 0; j < slstrElement.getNumElements(); j++) {
                     final MetadataElement bandElement = slstrElement.getElementAt(j);
                     final String bandName = bandElement.getAttribute("name").getData().getElemString();
-                    float wavelength =
-                            Float.parseFloat(bandElement.getAttribute("centralWavelength").getData().getElemString());
+                    float wavelength = Float.parseFloat(bandElement.getAttribute("centralWavelength").getData().getElemString());
                     //consider case that wavelength is given in micro meters
                     if (wavelength < 100) {
                         wavelength *= 1000;
                     }
-                    float bandWidth =
-                            Float.parseFloat(bandElement.getAttribute("bandWidth").getData().getElemString());
+                    float bandWidth = Float.parseFloat(bandElement.getAttribute("bandWidth").getData().getElemString());
                     if (bandWidth <= 1.0) {
                         bandWidth *= 1000;
                     }
@@ -155,6 +156,28 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
             ((Band) targetNode).setSpectralWavelength(nameToWavelengthMap.get(sourceBandNameStart));
             ((Band) targetNode).setSpectralBandIndex(nameToIndexMap.get(sourceBandNameStart));
             ((Band) targetNode).setSpectralBandwidth(nameToBandwidthMap.get(sourceBandNameStart));
+        }
+        configureDescription(sourceBand, targetNode);
+    }
+
+    protected void configureDescription(Band sourceBand, RasterDataNode targetNode) {
+        final String sourceBandName = sourceBand.getName();
+        final String sourceBandNameEnd = sourceBandName.substring(sourceBandName.length() - 2);
+        if (sourceBandNameEnd.startsWith("i")) {
+            String description = sourceBand.getDescription();
+            if (description == null) {
+                targetNode.setDescription("(1 km)");
+            } else {
+                targetNode.setDescription(description + " (1 km)");
+            }
+        } else if (sourceBandNameEnd.startsWith("a") || sourceBandName.startsWith("b") ||
+                sourceBandName.startsWith("c")) {
+            String description = sourceBand.getDescription();
+            if (description == null) {
+                targetNode.setDescription("(500 m)");
+            } else {
+                targetNode.setDescription(description + " (500 m)");
+            }
         }
     }
 
@@ -194,13 +217,29 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
                 return copyTiePointGrid(sourceBand, targetProduct, sourceStartOffset, sourceTrackOffset, sourceResolutions);
             } else {
                 final Band targetBand = new Band(sourceBandName, sourceBand.getDataType(),
-                                                 targetProduct.getSceneRasterWidth(), targetProduct.getSceneRasterHeight());
+                                                 sourceBand.getRasterWidth(), sourceBand.getRasterHeight());
                 targetProduct.addBand(targetBand);
                 ProductUtils.copyRasterDataNodeProperties(sourceBand, targetBand);
-                final float[] offsets = getOffsets(sourceStartOffset, sourceTrackOffset, sourceResolutions);
-                final RenderedImage sourceImage = createSourceImage(masterProduct, sourceBand, offsets, targetBand,
-                                                                    sourceResolutions);
-                targetBand.setSourceImage(sourceImage);
+                final RenderedImage sourceRenderedImage = sourceBand.getSourceImage().getImage(0);
+                //todo remove commented lines when resampling works with scenetransforms
+                //if pixel band geo-codings are used, scenetransforms are set
+//                if (Config.instance("s3tbx").load().preferences().getBoolean(SLSTR_L1B_USE_PIXELGEOCODINGS, false)) {
+//                    targetBand.setSourceImage(sourceRenderedImage);
+//                } else {
+                    final AffineTransform imageToModelTransform = new AffineTransform();
+                    final float[] offsets = getOffsets(sourceStartOffset, sourceTrackOffset, sourceResolutions);
+                    imageToModelTransform.translate(offsets[0], offsets[1]);
+                    final short[] referenceResolutions = getReferenceResolutions();
+                    final int subSamplingX = sourceResolutions[0] / referenceResolutions[0];
+                    final int subSamplingY = sourceResolutions[1] / referenceResolutions[1];
+                    imageToModelTransform.scale(subSamplingX, subSamplingY);
+                    final DefaultMultiLevelModel targetModel =
+                            new DefaultMultiLevelModel(imageToModelTransform,
+                                                       sourceRenderedImage.getWidth(), sourceRenderedImage.getHeight());
+                    final DefaultMultiLevelSource targetMultiLevelSource =
+                            new DefaultMultiLevelSource(sourceRenderedImage, targetModel);
+                    targetBand.setSourceImage(new DefaultMultiLevelImage(targetMultiLevelSource));
+//                }
                 return targetBand;
             }
         }

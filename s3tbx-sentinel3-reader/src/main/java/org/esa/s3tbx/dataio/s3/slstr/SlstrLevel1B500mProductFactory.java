@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * @author Tonio Fincke
  */
-public class SlstrLevel1B500mProductFactory extends SlstrLevel1ProductFactory {
+public class SlstrLevel1B500mProductFactory extends SlstrLevel1FixedResolutionProductFactory {
 
     public SlstrLevel1B500mProductFactory(Sentinel3ProductReader productReader) {
         super(productReader);
@@ -30,17 +30,4 @@ public class SlstrLevel1B500mProductFactory extends SlstrLevel1ProductFactory {
         return masterProduct;
     }
 
-    @Override
-    protected String getProductName() {
-        return super.getProductName() + "_500m";
-    }
-
-
-    @Override
-    protected void setSceneTransforms(Product product) {
-    }
-
-    @Override
-    protected void setBandGeoCodings(Product product) {
-    }
 }

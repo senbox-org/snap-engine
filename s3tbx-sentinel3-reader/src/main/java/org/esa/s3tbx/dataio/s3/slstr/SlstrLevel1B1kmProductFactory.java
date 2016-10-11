@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * @author Tonio Fincke
  */
-public class SlstrLevel1B1kmProductFactory extends SlstrLevel1ProductFactory {
+public class SlstrLevel1B1kmProductFactory extends SlstrLevel1FixedResolutionProductFactory {
 
     public SlstrLevel1B1kmProductFactory(Sentinel3ProductReader productReader) {
         super(productReader);
@@ -28,11 +28,6 @@ public class SlstrLevel1B1kmProductFactory extends SlstrLevel1ProductFactory {
             return Arrays.asList(fileNames);
         }
         return Collections.emptyList();
-    }
-
-    @Override
-    protected String getProductName() {
-        return super.getProductName() + "_1km";
     }
 
     @Override
@@ -55,11 +50,4 @@ public class SlstrLevel1B1kmProductFactory extends SlstrLevel1ProductFactory {
         return masterProduct;
     }
 
-    @Override
-    protected void setSceneTransforms(Product product) {
-    }
-
-    @Override
-    protected void setBandGeoCodings(Product product) {
-    }
 }
