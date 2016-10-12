@@ -15,6 +15,11 @@ public class SlstrLevel1B500mProductFactory extends SlstrLevel1FixedResolutionPr
     }
 
     @Override
+    protected String getProductName() {
+        return super.getProductName() + "_500m";
+    }
+
+    @Override
     protected Product findMasterProduct() {
         final List<Product> productList = getOpenProductList();
         Product masterProduct = new Product("dummy", "type", 1, 1);

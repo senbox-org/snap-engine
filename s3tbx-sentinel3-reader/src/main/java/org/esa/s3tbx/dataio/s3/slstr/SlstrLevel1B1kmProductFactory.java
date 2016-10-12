@@ -19,6 +19,11 @@ public class SlstrLevel1B1kmProductFactory extends SlstrLevel1FixedResolutionPro
     }
 
     @Override
+    protected String getProductName() {
+        return super.getProductName() + "_1km";
+    }
+
+    @Override
     protected List<String> getFileNames(Manifest manifest) {
         final File directory = getInputFileParentDirectory();
         final String[] fileNames = directory.list((dir, name) -> name.endsWith("in.nc") || name.endsWith("io.nc") || name.endsWith("tx.nc") ||
