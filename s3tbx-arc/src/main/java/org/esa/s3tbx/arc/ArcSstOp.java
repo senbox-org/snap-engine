@@ -16,9 +16,7 @@
 package org.esa.s3tbx.arc;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
@@ -32,6 +30,7 @@ import org.esa.snap.core.gpf.pointop.TargetSampleConfigurer;
 import org.esa.snap.core.gpf.pointop.WritableSample;
 import org.esa.snap.core.util.ResourceInstaller;
 import org.esa.snap.core.util.SystemUtils;
+import org.esa.snap.dataio.envisat.EnvisatConstants;
 
 import javax.media.jai.OpImage;
 import java.awt.image.Raster;
@@ -40,6 +39,10 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * An operator for computing sea surface temperature from (A)ATSR products.
@@ -54,11 +57,17 @@ import java.nio.file.Path;
                   description = "Computes sea surface temperature (SST) from (A)ATSR products.")
 public class ArcSstOp extends PixelOperator {
 
+    private Sensor sensor;
+
     @SuppressWarnings("unused")
     private enum Files {
         ASDI_AATSR("AATSR ASDI coeffs", "ASDI_AATSR.coef"),
         ASDI_ATSR1("ATSR1 ASDI coeffs", "ASDI_ATSR1.coef"),
         ASDI_ATSR2("ATSR2 ASDI coeffs", "ASDI_ATSR2.coef"),
+        ARC_N2_SLSTR("SLSTR ARC N2 coeffs","ARC_N2_SLSTR_2011.coef"),
+        ARC_N3_SLSTR("SLSTR ARC N3 coeffs","ARC_N3_SLSTR_2011.coef"),
+        ARC_D2_SLSTR("SLSTR ARC D2 coeffs","ARC_D2_SLSTR_2011.coef"),
+        ARC_D3_SLSTR("SLSTR ARC D3 coeffs","ARC_D3_SLSTR_2011.coef"),
         ARC_N2_AATSR("AATSR ARC N2 coeffs","ARC_N2_AATSR_2007.coef"),
         ARC_N3_AATSR("AATSR ARC N3 coeffs","ARC_N3_AATSR_2007.coef"),
         ARC_D2_AATSR("AATSR ARC D2 coeffs","ARC_D2_AATSR_2007.coef"),
@@ -92,12 +101,7 @@ public class ArcSstOp extends PixelOperator {
 
     @SourceProduct(alias = "source",
                    description = "The path of the (A)ATSR source product",
-                   label = "(A)ATSR source product",
-                   bands = {
-                           ArcConstants.NADIR_370_BAND,
-                           ArcConstants.NADIR_1100_BAND,
-                           ArcConstants.NADIR_1200_BAND
-                   })
+                   label = "(A)ATSR source product")
     private Product sourceProduct;
 
     @Parameter(defaultValue = "30.0f", label = "Total Column Water Vapour",
@@ -129,8 +133,8 @@ public class ArcSstOp extends PixelOperator {
     @Parameter(defaultValue = "ARC_D2_AATSR", label = "Dual-view coefficient file",
             description = ArcConstants.DUAL_VIEW_COEFF_FILE_DESCRIPTION,
             valueSet = {
-                    "ARC_D2_ATSR1", "ARC_D2_ATSR2", "ARC_D2_AATSR",
-                    "ARC_D3_ATSR1", "ARC_D3_ATSR2", "ARC_D3_AATSR"
+                    "ARC_D2_ATSR1", "ARC_D2_ATSR2", "ARC_D2_AATSR", "ARC_D2_SLSTR",
+                    "ARC_D3_ATSR1", "ARC_D3_ATSR2", "ARC_D3_AATSR", "ARC_D3_SLSTR"
             })
     private Files dualCoefficientsFile;
 
@@ -145,8 +149,8 @@ public class ArcSstOp extends PixelOperator {
     @Parameter(defaultValue = "ARC_N2_AATSR", label = "Nadir-view coefficient file",
                description = ArcConstants.NADIR_VIEW_COEFF_FILE_DESCRIPTION,
                valueSet = {
-                       "ARC_N2_ATSR1", "ARC_N2_ATSR2", "ARC_N2_AATSR",
-                       "ARC_N3_ATSR1", "ARC_N3_ATSR2", "ARC_N3_AATSR"
+                       "ARC_N2_ATSR1", "ARC_N2_ATSR2", "ARC_N2_AATSR", "ARC_N2_SLSTR",
+                       "ARC_N3_ATSR1", "ARC_N3_ATSR2", "ARC_N3_AATSR", "ARC_N3_SLSTR"
                })
     private Files nadirCoefficientsFile;
 
@@ -171,51 +175,60 @@ public class ArcSstOp extends PixelOperator {
     @Override
     protected void computePixel(int x, int y, Sample[] sourceSamples, WritableSample[] targetSamples) {
         checkCancellation();
-        final double secnad = 1.0 / Math.cos(Math.toRadians(90-sourceSamples[8].getFloat()));
-        final double secfwd = 1.0 / Math.cos(Math.toRadians(90-sourceSamples[9].getFloat()));
+        double secnad, secfwd;
+        if (sensor.anglesAreElevation()) {
+            secnad = 1.0 / Math.cos(Math.toRadians(90 - sourceSamples[6].getFloat()));
+            secfwd = 1.0 / Math.cos(Math.toRadians(90 - sourceSamples[7].getFloat()));
+        } else {
+            secnad = 1.0 / Math.cos(Math.toRadians(sourceSamples[6].getFloat()));
+            secfwd = 1.0 / Math.cos(Math.toRadians(sourceSamples[7].getFloat()));
+        }
 
         final float ir37N = sourceSamples[0].getFloat();
         final float ir11N = sourceSamples[1].getFloat();
         final float ir12N = sourceSamples[2].getFloat();
-        final float ir37F = sourceSamples[4].getFloat();
-        final float ir11F = sourceSamples[5].getFloat();
-        final float ir12F = sourceSamples[6].getFloat();
-        final float seaN = sourceSamples[3].getFloat();
-        final float seaF = sourceSamples[7].getFloat();
+        final float ir37F = sourceSamples[3].getFloat();
+        final float ir11F = sourceSamples[4].getFloat();
+        final float ir12F = sourceSamples[5].getFloat();
 
         if (nadir) {
-            if (nadirMaskIndex >= 0 && sourceSamples[nadirMaskIndex].getBoolean()) {
-                final double coeff[] = coeff1.get_Coeffs().getValues(nwpTCWV, secfwd, secnad);
+            if (nadirMaskIndex >= 0 && !sourceSamples[nadirMaskIndex].getBoolean()) {
+                targetSamples[0].set(invalidSstValue);
+            } else if (ir11N < 260.0 || ir12N < 260.0) {
+                targetSamples[0].set(invalidSstValue);
+            } else {
+                final double coeff[] = coeff1.get_Coeffs().getValues(nwpTCWV, 1.75, secnad);
                 final double nadirSst = coeff[0]*ir37N + coeff[1]*ir11N + coeff[2]*ir12N +
-                                       coeff[3]*ir37F + coeff[4]*ir11F + coeff[5]*ir12F +
-                                       coeff[6];
+                                        coeff[6];
 
                 targetSamples[0].set(nadirSst);
-            } else {
-                targetSamples[0].set(invalidSstValue);
             }
         }
         if (dual) {
-            if (dualMaskIndex >= 0 && sourceSamples[dualMaskIndex].getBoolean()) {
+            if (dualMaskIndex >= 0 && !sourceSamples[dualMaskIndex].getBoolean()) {
+                targetSamples[1].set(invalidSstValue);
+            } else if (ir11N < 260.0 || ir12N < 260.0 || ir11F < 260.0 || ir12F < 260.0) {
+                targetSamples[1].set(invalidSstValue);
+            } else {
                 final double coeff[] = coeff2.get_Coeffs().getValues(nwpTCWV, secfwd, secnad);
                 final double dualSst = coeff[0]*ir37N + coeff[1]*ir11N + coeff[2]*ir12N +
                                        coeff[3]*ir37F + coeff[4]*ir11F + coeff[5]*ir12F +
                                        coeff[6];
 
                 targetSamples[1].set(dualSst);
-            } else {
-                targetSamples[1].set(invalidSstValue);
             }
         }
         if (asdi) {
-            if (asdiMaskIndex >= 0 && sourceSamples[asdiMaskIndex].getBoolean()) {
+            if (asdiMaskIndex >= 0 && !sourceSamples[asdiMaskIndex].getBoolean()) {
+                targetSamples[2].set(invalidSstValue);
+            } else if (ir11N < 100.0 || ir12N < 100.0 || ir11F < 100.0 || ir12F < 100.0) {
+                targetSamples[2].set(invalidSstValue);
+            } else {
                 final double coeff[] = coeff3.get_Coeffs().getValues(nwpTCWV, secfwd, secnad);
                 final double asdi = coeff[0] * ir37N + coeff[1] * ir11N + coeff[2] * ir12N +
-                        coeff[3] * ir37F + coeff[4] * ir11F + coeff[5] * ir12F +
-                        coeff[6];
+                                    coeff[3] * ir37F + coeff[4] * ir11F + coeff[5] * ir12F +
+                                    coeff[6];
                 targetSamples[2].set(asdi);
-            } else {
-                targetSamples[2].set(invalidSstValue);
             }
         }
     }
@@ -230,16 +243,10 @@ public class ArcSstOp extends PixelOperator {
 
     @Override
     protected void configureSourceSamples(SourceSampleConfigurer sc) throws OperatorException {
-        sc.defineSample(0, ArcConstants.NADIR_370_BAND);
-        sc.defineSample(1, ArcConstants.NADIR_1100_BAND);
-        sc.defineSample(2, ArcConstants.NADIR_1200_BAND);
-        sc.defineSample(3, ArcConstants.SUN_ELEV_NADIR);
-        sc.defineSample(4, ArcConstants.FORWARD_370_BAND);
-        sc.defineSample(5, ArcConstants.FORWARD_1100_BAND);
-        sc.defineSample(6, ArcConstants.FORWARD_1200_BAND);
-        sc.defineSample(7, ArcConstants.SUN_ELEV_FORWARD);
-        sc.defineSample(8, ArcConstants.VIEW_ELEV_NADIR);
-        sc.defineSample(9, ArcConstants.VIEW_ELEV_FORWARD);
+        String[] sourceRasterNames = sensor.getRasterNames();
+        for (int i = 0; i < sourceRasterNames.length; i++) {
+            sc.defineSample(i, sourceRasterNames[i]);
+        }
 
         nadirMaskIndex = -1;
         if (nadirMaskExpression != null && !nadirMaskExpression.trim().isEmpty()) {
@@ -298,6 +305,7 @@ public class ArcSstOp extends PixelOperator {
     @Override
     protected void prepareInputs() throws OperatorException {
         super.prepareInputs();
+        sensor = getSensor();
 
         final File auxdataDir = installAuxiliaryData();
         initNadirCoefficients(auxdataDir);
@@ -344,6 +352,40 @@ public class ArcSstOp extends PixelOperator {
 
         public Spi() {
             super(ArcSstOp.class);
+        }
+    }
+
+    private Sensor getSensor() {
+        Stream<RasterDataNode> nodeStream = getSourceProduct().getRasterDataNodes().stream();
+        List<String> rasterNames = nodeStream.map(ProductNode::getName).collect(Collectors.toList());
+
+        if (rasterNames.containsAll(Arrays.asList(Sensor.AATSR.getRasterNames()))) {
+            return Sensor.AATSR;
+        }
+
+        if (rasterNames.containsAll(Arrays.asList(Sensor.SLSTR.getRasterNames()))) {
+            return Sensor.SLSTR;
+        }
+        throw new OperatorException("The operator can't be applied on the sensor");
+    }
+
+
+    private enum Sensor {
+        AATSR(ArcConstants.SOURCE_RASTER_NAMES_AATSR, true),
+        SLSTR(ArcConstants.SOURCE_RASTER_NAMES_SLSTR, false);
+
+        private final String[] bandNames;
+        private final boolean angles_are_elevation;
+
+        public String[] getRasterNames() {
+            return bandNames;
+        }
+
+        public boolean anglesAreElevation() { return angles_are_elevation;}
+
+        Sensor(String[] bandNames, boolean angles_are_elevation) {
+            this.bandNames = bandNames;
+            this.angles_are_elevation = angles_are_elevation;
         }
     }
 }
