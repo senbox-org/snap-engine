@@ -30,6 +30,7 @@ import org.esa.snap.core.gpf.pointop.TargetSampleConfigurer;
 import org.esa.snap.core.gpf.pointop.WritableSample;
 import org.esa.snap.core.util.ResourceInstaller;
 import org.esa.snap.core.util.SystemUtils;
+import org.esa.snap.core.util.converters.BooleanExpressionConverter;
 import org.esa.snap.dataio.envisat.EnvisatConstants;
 
 import javax.media.jai.OpImage;
@@ -122,24 +123,26 @@ public class ArcSstOp extends PixelOperator {
     private Files asdiCoefficientsFile;
 
     @Parameter(defaultValue = ArcConstants.DEFAULT_ASDI_BITMASK, label = "ASDI mask",
-               description = "ROI-mask used for the ASDI")
+               description = "ROI-mask used for the ASDI",
+               converter = BooleanExpressionConverter.class)
     private String asdiMaskExpression;
 
     @Parameter(defaultValue = "true",
-            label = ArcConstants.PROCESS_DUAL_VIEW_SST_LABELTEXT,
-            description = ArcConstants.PROCESS_DUAL_VIEW_SST_DESCRIPTION)
+               label = ArcConstants.PROCESS_DUAL_VIEW_SST_LABELTEXT,
+               description = ArcConstants.PROCESS_DUAL_VIEW_SST_DESCRIPTION)
     private boolean dual;
 
     @Parameter(defaultValue = "ARC_D2_AATSR", label = "Dual-view coefficient file",
-            description = ArcConstants.DUAL_VIEW_COEFF_FILE_DESCRIPTION,
-            valueSet = {
-                    "ARC_D2_ATSR1", "ARC_D2_ATSR2", "ARC_D2_AATSR", "ARC_D2_SLSTR",
-                    "ARC_D3_ATSR1", "ARC_D3_ATSR2", "ARC_D3_AATSR", "ARC_D3_SLSTR"
-            })
+               description = ArcConstants.DUAL_VIEW_COEFF_FILE_DESCRIPTION,
+               valueSet = {
+                       "ARC_D2_ATSR1", "ARC_D2_ATSR2", "ARC_D2_AATSR", "ARC_D2_SLSTR",
+                       "ARC_D3_ATSR1", "ARC_D3_ATSR2", "ARC_D3_AATSR", "ARC_D3_SLSTR"
+               })
     private Files dualCoefficientsFile;
 
     @Parameter(defaultValue = ArcConstants.DEFAULT_DUAL_VIEW_BITMASK, label = "Dual-view mask",
-            description = "ROI-mask used for the dual-view SST")  // todo - use ExpressionEditor
+               description = "ROI-mask used for the dual-view SST",
+               converter = BooleanExpressionConverter.class)
     private String dualMaskExpression;
 
     @Parameter(defaultValue = "true", label = ArcConstants.PROCESS_NADIR_VIEW_SST_LABELTEXT,
@@ -155,7 +158,8 @@ public class ArcSstOp extends PixelOperator {
     private Files nadirCoefficientsFile;
 
     @Parameter(defaultValue = ArcConstants.DEFAULT_NADIR_VIEW_BITMASK, label = "Nadir-view mask",
-               description = "ROI-mask used for the nadir-view SST")  // todo - use ExpressionEditor
+               description = "ROI-mask used for the nadir-view SST",
+               converter = BooleanExpressionConverter.class)
     private String nadirMaskExpression;
 
     @Parameter(defaultValue = "-999.0f", label = "Invalid SST value",
