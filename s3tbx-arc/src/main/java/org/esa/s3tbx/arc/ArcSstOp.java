@@ -31,6 +31,7 @@ import org.esa.snap.core.gpf.pointop.WritableSample;
 import org.esa.snap.core.util.ResourceInstaller;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.converters.BooleanExpressionConverter;
+import org.esa.snap.core.util.converters.GeneralExpressionConverter;
 import org.esa.snap.dataio.envisat.EnvisatConstants;
 
 import javax.media.jai.OpImage;
@@ -67,10 +68,10 @@ public class ArcSstOp extends PixelOperator {
                    label = "(A)ATSR source product")
     private Product sourceProduct;
 
-    @Parameter(defaultValue = "30.0f", label = "Total Column Water Vapour",
+    @Parameter(defaultValue = "30.0", label = "Total Column Water Vapour",
                description = "TCWV value to use in SST retrieval",
-               interval="[0,65]")
-    private float nwpTCWV;
+               converter = GeneralExpressionConverter.class)
+    private String tcwvExpression;
 
     @Parameter(defaultValue = "true",
                label = ArcConstants.PROCESS_ASDI_LABELTEXT,
@@ -142,7 +143,7 @@ public class ArcSstOp extends PixelOperator {
     protected void computePixel(int x, int y, Sample[] sourceSamples, WritableSample[] targetSamples) {
         checkCancellation();
         double secnad, secfwd;
-        if (sensor.anglesAreElevation()) {
+        if (sensor.isAtsr()) {
             secnad = 1.0 / Math.cos(Math.toRadians(90 - sourceSamples[6].getFloat()));
             secfwd = 1.0 / Math.cos(Math.toRadians(90 - sourceSamples[7].getFloat()));
         } else {
@@ -156,6 +157,7 @@ public class ArcSstOp extends PixelOperator {
         final float ir37F = sourceSamples[3].getFloat();
         final float ir11F = sourceSamples[4].getFloat();
         final float ir12F = sourceSamples[5].getFloat();
+        final float ntcwv = sourceSamples[8].getFloat();
 
         if (nadir) {
             if (nadirMaskIndex >= 0 && !sourceSamples[nadirMaskIndex].getBoolean()) {
@@ -163,7 +165,7 @@ public class ArcSstOp extends PixelOperator {
             } else if (ir11N < 260.0 || ir12N < 260.0) {
                 targetSamples[0].set(invalidSstValue);
             } else {
-                final double coeff[] = coeff1.get_Coeffs().getValues(nwpTCWV, 1.75, secnad);
+                final double coeff[] = coeff1.get_Coeffs().getValues(ntcwv, 1.75, secnad);
                 final double nadirSst = coeff[0]*ir37N + coeff[1]*ir11N + coeff[2]*ir12N +
                                         coeff[6];
 
@@ -176,7 +178,7 @@ public class ArcSstOp extends PixelOperator {
             } else if (ir11N < 260.0 || ir12N < 260.0 || ir11F < 260.0 || ir12F < 260.0) {
                 targetSamples[1].set(invalidSstValue);
             } else {
-                final double coeff[] = coeff2.get_Coeffs().getValues(nwpTCWV, secfwd, secnad);
+                final double coeff[] = coeff2.get_Coeffs().getValues(ntcwv, secfwd, secnad);
                 final double dualSst = coeff[0]*ir37N + coeff[1]*ir11N + coeff[2]*ir12N +
                                        coeff[3]*ir37F + coeff[4]*ir11F + coeff[5]*ir12F +
                                        coeff[6];
@@ -190,7 +192,7 @@ public class ArcSstOp extends PixelOperator {
             } else if (ir11N < 100.0 || ir12N < 100.0 || ir11F < 100.0 || ir12F < 100.0) {
                 targetSamples[2].set(invalidSstValue);
             } else {
-                final double coeff[] = coeff3.get_Coeffs().getValues(nwpTCWV, secfwd, secnad);
+                final double coeff[] = coeff3.get_Coeffs().getValues(ntcwv, secfwd, secnad);
                 final double asdi = coeff[0] * ir37N + coeff[1] * ir11N + coeff[2] * ir12N +
                                     coeff[3] * ir37F + coeff[4] * ir11F + coeff[5] * ir12F +
                                     coeff[6];
@@ -212,6 +214,9 @@ public class ArcSstOp extends PixelOperator {
         String[] sourceRasterNames = sensor.getRasterNames();
         for (int i = 0; i < sourceRasterNames.length; i++) {
             sc.defineSample(i, sourceRasterNames[i]);
+        }
+        if (sensor.isAtsr()) {
+            sc.defineComputedSample(sourceRasterNames.length, ProductData.TYPE_FLOAT32, tcwvExpression);
         }
 
         nadirMaskIndex = -1;
@@ -341,17 +346,17 @@ public class ArcSstOp extends PixelOperator {
         SLSTR(ArcConstants.SOURCE_RASTER_NAMES_SLSTR, false);
 
         private final String[] bandNames;
-        private final boolean angles_are_elevation;
+        private final boolean atsr;
 
         public String[] getRasterNames() {
             return bandNames;
         }
 
-        public boolean anglesAreElevation() { return angles_are_elevation;}
+        public boolean isAtsr() { return atsr;}
 
-        Sensor(String[] bandNames, boolean angles_are_elevation) {
+        Sensor(String[] bandNames, boolean atsr) {
             this.bandNames = bandNames;
-            this.angles_are_elevation = angles_are_elevation;
+            this.atsr = atsr;
         }
     }
 }

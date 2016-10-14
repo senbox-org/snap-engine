@@ -41,7 +41,8 @@ class ArcConstants {
             "S8_BT_io",
             "S9_BT_io",
             "sat_zenith_tn",
-            "sat_zenith_to"
+            "sat_zenith_to",
+            "total_column_water_vapour_tx"
     };
 
     public static final String LOGGER_NAME = "snap.processor.arc";
