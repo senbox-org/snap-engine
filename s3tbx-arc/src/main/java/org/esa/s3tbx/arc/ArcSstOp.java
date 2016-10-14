@@ -61,44 +61,6 @@ public class ArcSstOp extends PixelOperator {
     private Sensor sensor;
 
     @SuppressWarnings("unused")
-    private enum Files {
-        ASDI_AATSR("AATSR ASDI coeffs", "ASDI_AATSR.coef"),
-        ASDI_ATSR1("ATSR1 ASDI coeffs", "ASDI_ATSR1.coef"),
-        ASDI_ATSR2("ATSR2 ASDI coeffs", "ASDI_ATSR2.coef"),
-        ARC_N2_SLSTR("SLSTR ARC N2 coeffs","ARC_N2_SLSTR_2011.coef"),
-        ARC_N3_SLSTR("SLSTR ARC N3 coeffs","ARC_N3_SLSTR_2011.coef"),
-        ARC_D2_SLSTR("SLSTR ARC D2 coeffs","ARC_D2_SLSTR_2011.coef"),
-        ARC_D3_SLSTR("SLSTR ARC D3 coeffs","ARC_D3_SLSTR_2011.coef"),
-        ARC_N2_AATSR("AATSR ARC N2 coeffs","ARC_N2_AATSR_2007.coef"),
-        ARC_N3_AATSR("AATSR ARC N3 coeffs","ARC_N3_AATSR_2007.coef"),
-        ARC_D2_AATSR("AATSR ARC D2 coeffs","ARC_D2_AATSR_2007.coef"),
-        ARC_D3_AATSR("AATSR ARC D3 coeffs","ARC_D3_AATSR_2007.coef"),
-        ARC_N2_ATSR1("ATSR1 ARC N2 coeffs","ARC_N2_ATSR1_1995.coef"),
-        ARC_N3_ATSR1("ATSR1 ARC N3 coeffs","ARC_N3_ATSR1_1995.coef"),
-        ARC_D2_ATSR1("ATSR1 ARC D2 coeffs","ARC_D2_ATSR1_1995.coef"),
-        ARC_D3_ATSR1("ATSR1 ARC D3 coeffs","ARC_D3_ATSR1_1995.coef"),
-        ARC_N2_ATSR2("ATSR2 ARC N2 coeffs","ARC_N2_ATSR2_1999.coef"),
-        ARC_N3_ATSR2("ATSR2 ARC N3 coeffs","ARC_N3_ATSR2_1999.coef"),
-        ARC_D2_ATSR2("ATSR2 ARC D2 coeffs","ARC_D2_ATSR2_1999.coef"),
-        ARC_D3_ATSR2("ATSR2 ARC D3 coeffs","ARC_D3_ATSR2_1999.coef");
-
-        private final String label;
-        private final String filename;
-
-        Files(String label, String filename) {
-            this.label = label;
-            this.filename = filename;
-        }
-
-        @Override
-        public String toString() {
-            return label;
-        }
-
-        private URL getURL(File dir) throws MalformedURLException {
-            return new File(dir, filename).toURI().toURL();
-        }
-    }
 
     @SourceProduct(alias = "source",
                    description = "The path of the (A)ATSR source product",
@@ -120,7 +82,7 @@ public class ArcSstOp extends PixelOperator {
                valueSet = {
                        "ASDI_ATSR1", "ASDI_ATSR2", "ASDI_AATSR",
                })
-    private Files asdiCoefficientsFile;
+    private ArcFiles asdiCoefficientsFile;
 
     @Parameter(defaultValue = ArcConstants.DEFAULT_ASDI_BITMASK, label = "ASDI mask",
                description = "ROI-mask used for the ASDI",
@@ -138,7 +100,7 @@ public class ArcSstOp extends PixelOperator {
                        "ARC_D2_ATSR1", "ARC_D2_ATSR2", "ARC_D2_AATSR", "ARC_D2_SLSTR",
                        "ARC_D3_ATSR1", "ARC_D3_ATSR2", "ARC_D3_AATSR", "ARC_D3_SLSTR"
                })
-    private Files dualCoefficientsFile;
+    private ArcFiles dualCoefficientsFile;
 
     @Parameter(defaultValue = ArcConstants.DEFAULT_DUAL_VIEW_BITMASK, label = "Dual-view mask",
                description = "ROI-mask used for the dual-view SST",
@@ -155,7 +117,7 @@ public class ArcSstOp extends PixelOperator {
                        "ARC_N2_ATSR1", "ARC_N2_ATSR2", "ARC_N2_AATSR", "ARC_N2_SLSTR",
                        "ARC_N3_ATSR1", "ARC_N3_ATSR2", "ARC_N3_AATSR", "ARC_N3_SLSTR"
                })
-    private Files nadirCoefficientsFile;
+    private ArcFiles nadirCoefficientsFile;
 
     @Parameter(defaultValue = ArcConstants.DEFAULT_NADIR_VIEW_BITMASK, label = "Nadir-view mask",
                description = "ROI-mask used for the nadir-view SST",
@@ -319,9 +281,9 @@ public class ArcSstOp extends PixelOperator {
     private void initNadirCoefficients(File auxdataDir) throws OperatorException {
         final ArcCoefficientLoader loader = new ArcCoefficientLoader();
         try {
-            if (nadir) coeff1 = loader.load(nadirCoefficientsFile.getURL(auxdataDir));
-            if (dual) coeff2 = loader.load(dualCoefficientsFile.getURL(auxdataDir));
-            if (asdi) coeff3 = loader.load(asdiCoefficientsFile.getURL(auxdataDir));
+            if (nadir) coeff1 = loader.load(new File(auxdataDir, nadirCoefficientsFile.getFilename()).toURI().toURL());
+            if (dual) coeff2 = loader.load(new File(auxdataDir, dualCoefficientsFile.getFilename()).toURI().toURL());
+            if (asdi) coeff3 = loader.load(new File(auxdataDir, asdiCoefficientsFile.getFilename()).toURI().toURL());
         } catch (IOException e) {
             throw new OperatorException(e);
         }

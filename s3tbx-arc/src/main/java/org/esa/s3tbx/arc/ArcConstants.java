@@ -60,4 +60,5 @@ class ArcConstants {
     public static final String PROCESS_ASDI_DESCRIPTION = "Enables/disables generation of ATSR Saharan Dust Index";
     public static final String DEFAULT_ASDI_BITMASK = "";
     public static final String ASDI_COEFF_FILE_DESCRIPTION = "Coefficient file for ASDI";
+
 }

@@ -32,6 +32,7 @@ import org.openide.awt.ActionReference;
 import org.openide.awt.ActionRegistration;
 import org.openide.util.HelpCtx;
 import org.openide.util.NbBundle;
+import org.esa.s3tbx.arc.ArcFiles;
 
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
@@ -79,6 +80,9 @@ public class ArcAction extends AbstractSnapAction {
                             propertySet.setValue("nadirMaskExpression", preset.getMask());
                             propertySet.setValue("dualMaskExpression", preset.getMask());
                             propertySet.setValue("asdi", preset.getAsdi());
+                            propertySet.setValue("asdiCoefficientsFile",preset.getAsdiCoef());
+                            propertySet.setValue("nadirCoefficientsFile",preset.getNadirCoef());
+                            propertySet.setValue("dualCoefficientsFile",preset.getDualCoef());
                         } catch (IllegalArgumentException ex) {
                             // Unrecognised product type
                         }
@@ -109,21 +113,30 @@ public class ArcAction extends AbstractSnapAction {
     }
 
     private enum Presets {
-        AT1_TOA_1P("!cloud_flags_nadir.LAND", true),
-        AT2_TOA_1P("!cloud_flags_nadir.LAND", true),
-        ATS_TOA_1P("!cloud_flags_nadir.LAND", true),
-        SL_1_RBT("confidence_in_ocean", false);
+        AT1_TOA_1P("!cloud_flags_nadir.LAND", true, ArcFiles.ASDI_ATSR1, ArcFiles.ARC_N2_ATSR1, ArcFiles.ARC_D2_ATSR1),
+        AT2_TOA_1P("!cloud_flags_nadir.LAND", true, ArcFiles.ASDI_ATSR2, ArcFiles.ARC_N2_ATSR2, ArcFiles.ARC_D2_ATSR2),
+        ATS_TOA_1P("!cloud_flags_nadir.LAND", true, ArcFiles.ASDI_AATSR, ArcFiles.ARC_N2_AATSR, ArcFiles.ARC_D2_AATSR),
+        SL_1_RBT("confidence_in_ocean", false, ArcFiles.ASDI_AATSR, ArcFiles.ARC_N2_SLSTR, ArcFiles.ARC_D2_SLSTR);
 
         private final String mask;
         private final boolean asdi;
+        private final ArcFiles asdiCoef;
+        private final ArcFiles nadirCoef;
+        private final ArcFiles dualCoef;
 
-        private Presets(String mask, boolean asdi) {
+        private Presets(String mask, boolean asdi, ArcFiles asdiCoef, ArcFiles nadirCoef, ArcFiles dualCoef) {
             this.mask = mask;
             this.asdi = asdi;
+            this.asdiCoef = asdiCoef;
+            this.nadirCoef = nadirCoef;
+            this.dualCoef = dualCoef;
         }
 
         String getMask() { return this.mask; }
         boolean getAsdi() { return this.asdi; }
+        ArcFiles getAsdiCoef() { return this.asdiCoef; }
+        ArcFiles getNadirCoef() { return this.nadirCoef; }
+        ArcFiles getDualCoef() { return this.dualCoef; }
     }
 
 }
