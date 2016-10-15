@@ -71,13 +71,8 @@
 <h3>SNAP implementation</h3>
 
 <p>
-    In the SNAP implementation the dependence on TCWV is not fully implemented. The
-    coefficients include the dependence, but current ATSR L1b files do not include the
-    required data. As a result the user must select a constant value to use for
-    processing the scene.<br>
-    In future versions of the SNAP ARC processor it will be possible to specify TCWV
-    as a per-pixel field, use the TCWV supplied with SLSTR data, or make use of globally
-    defined coefficients (globally defined coefficients will be less accurate).
+    TCWV data is provided in SLSTR inputs; however, it is not included with ATSR L1b files.
+    As a result the user must supply the TCWV data when processing ATSR scenes.
 </p>
 
 <hr>
