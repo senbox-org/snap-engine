@@ -28,7 +28,10 @@ public class SlstrLevel1B500mProductFactory extends SlstrLevel1FixedResolutionPr
                 product.getSceneRasterHeight() > masterProduct.getSceneRasterHeight() &&
                 !product.getName().contains("flags") &&
                 !product.getName().endsWith("in") &&
-                !product.getName().endsWith("io")) {
+                !product.getName().endsWith("io") &&
+                !product.getName().endsWith("tn") &&
+                !product.getName().endsWith("tx") &&
+                !product.getName().endsWith("to")) {
                 masterProduct = product;
             }
         }

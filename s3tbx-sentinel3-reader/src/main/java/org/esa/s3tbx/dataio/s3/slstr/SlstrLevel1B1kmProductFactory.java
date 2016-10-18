@@ -37,12 +37,9 @@ public class SlstrLevel1B1kmProductFactory extends SlstrLevel1FixedResolutionPro
             if (product.getSceneRasterWidth() > masterProduct.getSceneRasterWidth() &&
                 product.getSceneRasterHeight() > masterProduct.getSceneRasterHeight() &&
                 !product.getName().contains("flags") &&
-                !product.getName().endsWith("an") &&
-                !product.getName().endsWith("ao") &&
-                !product.getName().endsWith("bn") &&
-                !product.getName().endsWith("bo") &&
-                !product.getName().endsWith("cn") &&
-                !product.getName().endsWith("co")) {
+                !product.getName().endsWith("tn") &&
+                !product.getName().endsWith("tx") &&
+                !product.getName().endsWith("to")) {
                 masterProduct = product;
             }
         }
