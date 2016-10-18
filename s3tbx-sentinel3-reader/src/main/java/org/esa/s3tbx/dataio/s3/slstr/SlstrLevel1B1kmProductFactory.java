@@ -4,9 +4,6 @@ import org.esa.s3tbx.dataio.s3.Manifest;
 import org.esa.s3tbx.dataio.s3.Sentinel3ProductReader;
 import org.esa.snap.core.datamodel.Product;
 
-import java.io.File;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -25,14 +22,11 @@ public class SlstrLevel1B1kmProductFactory extends SlstrLevel1FixedResolutionPro
 
     @Override
     protected List<String> getFileNames(Manifest manifest) {
-        final File directory = getInputFileParentDirectory();
-        final String[] fileNames = directory.list((dir, name) -> name.endsWith("in.nc") || name.endsWith("io.nc") || name.endsWith("tx.nc") ||
-                                                                 name.endsWith("tn.nc") || name.endsWith("to.nc"));
-
-        if (fileNames != null) {
-            return Arrays.asList(fileNames);
-        }
-        return Collections.emptyList();
+        List <String> fileNames = super.getFileNames(manifest);
+        fileNames.removeIf(name -> name.endsWith("an.nc") || name.endsWith("ao.nc") ||
+                                   name.endsWith("bn.nc") || name.endsWith("bo.nc") ||
+                                   name.endsWith("cn.nc") || name.endsWith("co.nc"));
+        return fileNames;
     }
 
     @Override
