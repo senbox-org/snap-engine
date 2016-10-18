@@ -23,13 +23,11 @@ public class ArcConstantsTest {
 
     @Test
     public void testBandNameConstants() {
-        assertEquals("btemp_nadir_0370", ArcConstants.NADIR_370_BAND);
-        assertEquals("btemp_nadir_1100", ArcConstants.NADIR_1100_BAND);
-        assertEquals("btemp_nadir_1200", ArcConstants.NADIR_1200_BAND);
-        assertEquals("btemp_fward_0370", ArcConstants.FORWARD_370_BAND);
-        assertEquals("btemp_fward_1100", ArcConstants.FORWARD_1100_BAND);
-        assertEquals("btemp_fward_1200", ArcConstants.FORWARD_1200_BAND);
-        assertEquals("sun_elev_nadir", ArcConstants.SUN_ELEV_NADIR);
-        assertEquals("sun_elev_fward", ArcConstants.SUN_ELEV_FORWARD);
+        assertEquals("btemp_nadir_0370", ArcConstants.SOURCE_RASTER_NAMES_AATSR[0]);
+        assertEquals("btemp_nadir_1100", ArcConstants.SOURCE_RASTER_NAMES_AATSR[1]);
+        assertEquals("btemp_nadir_1200", ArcConstants.SOURCE_RASTER_NAMES_AATSR[2]);
+        assertEquals("btemp_fward_0370", ArcConstants.SOURCE_RASTER_NAMES_AATSR[3]);
+        assertEquals("btemp_fward_1100", ArcConstants.SOURCE_RASTER_NAMES_AATSR[4]);
+        assertEquals("btemp_fward_1200", ArcConstants.SOURCE_RASTER_NAMES_AATSR[5]);
     }
 }
