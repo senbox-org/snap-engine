@@ -1,4 +1,4 @@
-package org.esa.s3tbx.idepix.algorithms.modis;
+package org.esa.s3tbx.idepix.algorithms.seawifs;
 
 import org.esa.s3tbx.idepix.core.util.IdepixUtils;
 import org.esa.snap.core.datamodel.FlagCoding;
@@ -10,12 +10,14 @@ import java.awt.*;
 import java.util.Random;
 
 /**
- * Utility class for Idepix MODIS
+ * todo: add comment
+ * To change this template use File | Settings | File Templates.
+ * Date: 18.10.2016
+ * Time: 14:43
  *
  * @author olafd
  */
-public class ModisUtils {
-
+public class SeaWifsUtils {
 
     /**
      * Provides MODIS pixel classification flag coding
@@ -24,34 +26,34 @@ public class ModisUtils {
      *
      * @return - the flag coding
      */
-    public static FlagCoding createOccciFlagCoding(String flagId) {
+    public static FlagCoding createSeawifsFlagCoding(String flagId) {
 
         FlagCoding flagCoding = new FlagCoding(flagId);
 
-        flagCoding.addFlag("F_INVALID", BitSetter.setFlag(0, ModisConstants.F_INVALID),
-                           ModisConstants.F_INVALID_DESCR_TEXT);
-        flagCoding.addFlag("F_CLOUD", BitSetter.setFlag(0, ModisConstants.F_CLOUD),
-                           ModisConstants.F_CLOUD_DESRC_TEXT);
-        flagCoding.addFlag("F_CLOUD_AMBIGUOUS", BitSetter.setFlag(0, ModisConstants.F_CLOUD_AMBIGUOUS),
-                           ModisConstants.F_CLOUD_AMBIGUOUS_DESRC_TEXT);
-        flagCoding.addFlag("F_CLOUD_SURE", BitSetter.setFlag(0, ModisConstants.F_CLOUD_SURE),
-                           ModisConstants.F_CLOUD_SURE_DESCR_TEXT);
-        flagCoding.addFlag("F_CLOUD_BUFFER", BitSetter.setFlag(0, ModisConstants.F_CLOUD_BUFFER),
-                           ModisConstants.F_CLOUD_BUFFER_DESCR_TEXT);
-        flagCoding.addFlag("F_CLOUD_SHADOW", BitSetter.setFlag(0, ModisConstants.F_CLOUD_SHADOW),
-                           ModisConstants.F_CLOUD_SHADOW_DESCR_TEXT);
-        flagCoding.addFlag("F_SNOW_ICE", BitSetter.setFlag(0, ModisConstants.F_SNOW_ICE),
-                           ModisConstants.F_SNOW_ICE_DESCR_TEXT);
-        flagCoding.addFlag("F_MIXED_PIXEL", BitSetter.setFlag(0, ModisConstants.F_MIXED_PIXEL),
-                           ModisConstants.F_MIXED_PIXEL_DESCR_TEXT);
-        flagCoding.addFlag("F_GLINT_RISK", BitSetter.setFlag(0, ModisConstants.F_GLINT_RISK),
-                           ModisConstants.F_GLINT_RISK_DESCR_TEXT);
-        flagCoding.addFlag("F_COASTLINE", BitSetter.setFlag(0, ModisConstants.F_COASTLINE),
-                           ModisConstants.F_COASTLINE_DESCR_TEXT);
-        flagCoding.addFlag("F_LAND", BitSetter.setFlag(0, ModisConstants.F_LAND),
-                           ModisConstants.F_LAND_DESCR_TEXT);
-        flagCoding.addFlag("F_BRIGHT", BitSetter.setFlag(0, ModisConstants.F_BRIGHT),
-                           ModisConstants.F_BRIGHT_DESCR_TEXT);
+        flagCoding.addFlag("F_INVALID", BitSetter.setFlag(0, SeaWifsConstants.F_INVALID),
+                           SeaWifsConstants.F_INVALID_DESCR_TEXT);
+        flagCoding.addFlag("F_CLOUD", BitSetter.setFlag(0, SeaWifsConstants.F_CLOUD),
+                           SeaWifsConstants.F_CLOUD_DESRC_TEXT);
+        flagCoding.addFlag("F_CLOUD_AMBIGUOUS", BitSetter.setFlag(0, SeaWifsConstants.F_CLOUD_AMBIGUOUS),
+                           SeaWifsConstants.F_CLOUD_AMBIGUOUS_DESRC_TEXT);
+        flagCoding.addFlag("F_CLOUD_SURE", BitSetter.setFlag(0, SeaWifsConstants.F_CLOUD_SURE),
+                           SeaWifsConstants.F_CLOUD_SURE_DESCR_TEXT);
+        flagCoding.addFlag("F_CLOUD_BUFFER", BitSetter.setFlag(0, SeaWifsConstants.F_CLOUD_BUFFER),
+                           SeaWifsConstants.F_CLOUD_BUFFER_DESCR_TEXT);
+        flagCoding.addFlag("F_CLOUD_SHADOW", BitSetter.setFlag(0, SeaWifsConstants.F_CLOUD_SHADOW),
+                           SeaWifsConstants.F_CLOUD_SHADOW_DESCR_TEXT);
+        flagCoding.addFlag("F_SNOW_ICE", BitSetter.setFlag(0, SeaWifsConstants.F_SNOW_ICE),
+                           SeaWifsConstants.F_SNOW_ICE_DESCR_TEXT);
+        flagCoding.addFlag("F_MIXED_PIXEL", BitSetter.setFlag(0, SeaWifsConstants.F_MIXED_PIXEL),
+                           SeaWifsConstants.F_MIXED_PIXEL_DESCR_TEXT);
+        flagCoding.addFlag("F_GLINT_RISK", BitSetter.setFlag(0, SeaWifsConstants.F_GLINT_RISK),
+                           SeaWifsConstants.F_GLINT_RISK_DESCR_TEXT);
+        flagCoding.addFlag("F_COASTLINE", BitSetter.setFlag(0, SeaWifsConstants.F_COASTLINE),
+                           SeaWifsConstants.F_COASTLINE_DESCR_TEXT);
+        flagCoding.addFlag("F_LAND", BitSetter.setFlag(0, SeaWifsConstants.F_LAND),
+                           SeaWifsConstants.F_LAND_DESCR_TEXT);
+        flagCoding.addFlag("F_BRIGHT", BitSetter.setFlag(0, SeaWifsConstants.F_BRIGHT),
+                           SeaWifsConstants.F_BRIGHT_DESCR_TEXT);
 
         return flagCoding;
     }

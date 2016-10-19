@@ -1,5 +1,6 @@
 package org.esa.s3tbx.idepix.algorithms.avhrr;
 
+import org.esa.s3tbx.idepix.core.util.IdepixUtils;
 import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
@@ -59,7 +60,7 @@ public class AvhrrAcUtils {
 
         mask = Mask.BandMathsType.create("F_INVALID", "Invalid pixel", w, h,
                                          "pixel_classif_flags.F_INVALID",
-                                         getRandomColour(r), 0.5f);
+                                         IdepixUtils.getRandomColour(r), 0.5f);
         avhrracProduct.getMaskGroup().add(index++, mask);
 
         mask = Mask.BandMathsType.create("F_CLOUD", "Cloudy pixel (sure or ambiguous)", w, h,
@@ -79,63 +80,63 @@ public class AvhrrAcUtils {
 
         mask = Mask.BandMathsType.create("F_CLOUD_BUFFER", "Cloud buffer pixel", w, h,
                                          "pixel_classif_flags.F_CLOUD_BUFFER",
-                                         getRandomColour(r), 0.5f);
+                                         IdepixUtils.getRandomColour(r), 0.5f);
         avhrracProduct.getMaskGroup().add(index++, mask);
 
         mask = Mask.BandMathsType.create("F_CLOUD_SHADOW", "Cloud shadow pixel", w, h,
                                          "pixel_classif_flags.F_CLOUD_SHADOW",
-                                         getRandomColour(r), 0.5f);
+                                         IdepixUtils.getRandomColour(r), 0.5f);
         avhrracProduct.getMaskGroup().add(index++, mask);
 
         mask = Mask.BandMathsType.create("F_SNOW_ICE", "Snow/ice pixel", w, h,
                                          "pixel_classif_flags.F_SNOW_ICE",
-                                         getRandomColour(r), 0.5f);
+                                         IdepixUtils.getRandomColour(r), 0.5f);
         avhrracProduct.getMaskGroup().add(index++, mask);
 
         mask = Mask.BandMathsType.create("F_GLINT_RISK", "Glint risk pixel", w, h,
                                          "pixel_classif_flags.F_GLINT_RISK",
-                                         getRandomColour(r), 0.5f);
+                                         IdepixUtils.getRandomColour(r), 0.5f);
         avhrracProduct.getMaskGroup().add(index++, mask);
 
         mask = Mask.BandMathsType.create("F_COASTLINE", "Coastline pixel", w, h,
                                          "pixel_classif_flags.F_COASTLINE",
-                                         getRandomColour(r), 0.5f);
+                                         IdepixUtils.getRandomColour(r), 0.5f);
         avhrracProduct.getMaskGroup().add(index++, mask);
 
         mask = Mask.BandMathsType.create("F_LAND", "Land pixel", w, h,
                                          "pixel_classif_flags.F_LAND",
-                                         getRandomColour(r), 0.5f);
+                                         IdepixUtils.getRandomColour(r), 0.5f);
         avhrracProduct.getMaskGroup().add(index++, mask);
 
         // tests:
         mask = Mask.BandMathsType.create("F_REFL1_ABOVE_THRESH", "TOA reflectance Channel 1 above threshold", w, h,
                                          "pixel_classif_flags.F_REFL1_ABOVE_THRESH",
-                                         getRandomColour(r), 0.5f);
+                                         IdepixUtils.getRandomColour(r), 0.5f);
         avhrracProduct.getMaskGroup().add(index++, mask);
 
         mask = Mask.BandMathsType.create("F_REFL2_ABOVE_THRESH", "TOA reflectance Channel 2 above threshold", w, h,
                                          "pixel_classif_flags.F_REFL2_ABOVE_THRESH",
-                                         getRandomColour(r), 0.5f);
+                                         IdepixUtils.getRandomColour(r), 0.5f);
         avhrracProduct.getMaskGroup().add(index++, mask);
 
         mask = Mask.BandMathsType.create("F_RATIO_REFL21_ABOVE_THRESH", "Ratio of TOA reflectance Channel 2/1 above threshold", w, h,
                                          "pixel_classif_flags.F_RATIO_REFL21_ABOVE_THRESH",
-                                         getRandomColour(r), 0.5f);
+                                         IdepixUtils.getRandomColour(r), 0.5f);
         avhrracProduct.getMaskGroup().add(index++, mask);
 
         mask = Mask.BandMathsType.create("F_RATIO_REFL31_ABOVE_THRESH", "Ratio of TOA reflectance Channel 3/1 above threshold", w, h,
                                          "pixel_classif_flags.F_RATIO_REFL31_ABOVE_THRESH",
-                                         getRandomColour(r), 0.5f);
+                                         IdepixUtils.getRandomColour(r), 0.5f);
         avhrracProduct.getMaskGroup().add(index++, mask);
 
         mask = Mask.BandMathsType.create("F_BT4_ABOVE_THRESH", "Brightness temperature Channel 4 above threshold", w, h,
                                          "pixel_classif_flags.F_BT4_ABOVE_THRESH",
-                                         getRandomColour(r), 0.5f);
+                                         IdepixUtils.getRandomColour(r), 0.5f);
         avhrracProduct.getMaskGroup().add(index++, mask);
 
         mask = Mask.BandMathsType.create("F_BT5_ABOVE_THRESH", "Brightness temperature Channel 5 above threshold", w, h,
                                          "pixel_classif_flags.F_BT5_ABOVE_THRESH",
-                                         getRandomColour(r), 0.5f);
+                                         IdepixUtils.getRandomColour(r), 0.5f);
         avhrracProduct.getMaskGroup().add(index++, mask);
 
         return index;
@@ -220,10 +221,4 @@ public class AvhrrAcUtils {
         return c2 * nuFinal / (Math.log(1.0 + c1 * nuFinal * nuFinal * nuFinal / rad));
     }
 
-    private static Color getRandomColour(Random random) {
-        int rColor = random.nextInt(256);
-        int gColor = random.nextInt(256);
-        int bColor = random.nextInt(256);
-        return new Color(rColor, gColor, bColor);
-    }
 }

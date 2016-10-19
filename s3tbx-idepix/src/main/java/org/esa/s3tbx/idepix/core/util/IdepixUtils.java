@@ -1,6 +1,7 @@
 package org.esa.s3tbx.idepix.core.util;
 
 
+import org.esa.s3tbx.idepix.algorithms.viirs.ViirsConstants;
 import org.esa.s3tbx.idepix.core.AlgorithmSelector;
 import org.esa.s3tbx.idepix.core.IdepixConstants;
 import org.esa.snap.core.datamodel.*;
@@ -11,7 +12,9 @@ import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.dataio.envisat.EnvisatConstants;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.Calendar;
+import java.util.Random;
 
 /**
  * @author Olaf Danne
@@ -55,7 +58,7 @@ public class IdepixUtils {
      * @return targetProduct
      */
     public static Product createCompatibleTargetProduct(Product sourceProduct, String name, String type,
-                                           boolean copyAllTiePoints) {
+                                                        boolean copyAllTiePoints) {
         final int sceneWidth = sourceProduct.getSceneRasterWidth();
         final int sceneHeight = sourceProduct.getSceneRasterHeight();
 
@@ -69,12 +72,13 @@ public class IdepixUtils {
 
     /**
      * Copies the tie point data.
-     *  @param sourceProduct
+     *
+     * @param sourceProduct
      * @param targetProduct
      * @param copyAllTiePoints
      */
     public static void copyTiePoints(Product sourceProduct,
-                               Product targetProduct, boolean copyAllTiePoints) {
+                                     Product targetProduct, boolean copyAllTiePoints) {
         if (copyAllTiePoints) {
             // copy all tie point grids to output product
             ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
@@ -93,7 +97,7 @@ public class IdepixUtils {
      * todo: move to a more general place?!
      *
      * @param referenceBand - the reference band
-     * @param product - the product where the geocoding shall be copied
+     * @param product       - the product where the geocoding shall be copied
      */
     public static void copyGeocodingFromBandToProduct(Band referenceBand, Product product) {
         final Scene srcScene = SceneFactory.createScene(referenceBand);
@@ -159,6 +163,7 @@ public class IdepixUtils {
                 !isValidProbavProduct(inputProduct) &&
                 !isValidModisProduct(inputProduct) &&
                 !isValidSeawifsProduct(inputProduct) &&
+                !isValidViirsProduct(inputProduct, ViirsConstants.VIIRS_SPECTRAL_BAND_NAMES) &&
                 !isValidMerisProduct(inputProduct) &&
                 !isValidOlciProduct(inputProduct) &&
                 !isValidVgtProduct(inputProduct)) {
@@ -232,6 +237,24 @@ public class IdepixUtils {
                 product.getName().matches("S[0-9]{13}.(?i)(L1C)"));
     }
 
+    public static boolean isValidViirsProduct(Product product, String[] expectedBandNames) {
+        // first check expected bands
+        if (expectedBandNames != null) {
+            for (String expectedBandName : expectedBandNames) {
+                if (!product.containsBand(expectedBandName)) {
+                    return false;
+                }
+            }
+        }
+
+//        e.g. V2012024230521.L1C
+        return (product.getName().matches("V[0-9]{13}.(?i)(L1C)") ||
+                product.getName().matches("V[0-9]{13}.(?i)(L1C.nc)") ||
+                product.getName().matches("V[0-9]{13}.(?i)(L2)") ||
+                product.getName().matches("V[0-9]{13}.(?i)(L2.nc)"));
+    }
+
+
     public static boolean isValidProbavProduct(Product product) {
         return product.getProductType().startsWith(IdepixConstants.PROBAV_PRODUCT_TYPE_PREFIX);
     }
@@ -251,11 +274,13 @@ public class IdepixUtils {
             return (isValidProbavProduct(sourceProduct));
         } else if (AlgorithmSelector.SEAWIFS == algorithm) {
             return (isValidSeawifsProduct(sourceProduct));
+        } else if (AlgorithmSelector.VIIRS == algorithm) {
+            return (isValidViirsProduct(sourceProduct, ViirsConstants.VIIRS_SPECTRAL_BAND_NAMES));
         } else if (AlgorithmSelector.MERIS == algorithm) {
             return (isValidMerisProduct(sourceProduct));
         } else if (AlgorithmSelector.OLCI == algorithm) {
             return (isValidOlciProduct(sourceProduct));
-        }else if (AlgorithmSelector.VGT == algorithm) {
+        } else if (AlgorithmSelector.VGT == algorithm) {
             return (isValidVgtProduct(sourceProduct));
         } else {
             throw new OperatorException("Algorithm " + algorithm.toString() + " not supported.");
@@ -387,6 +412,13 @@ public class IdepixUtils {
         if (targetTile.getSampleBit(x, y, IdepixConstants.F_CLOUD)) {
             targetTile.setSample(x, y, IdepixConstants.F_CLOUD_BUFFER, false);
         }
+    }
+
+    public static Color getRandomColour(Random random) {
+        int rColor = random.nextInt(256);
+        int gColor = random.nextInt(256);
+        int bColor = random.nextInt(256);
+        return new Color(rColor, gColor, bColor);
     }
 
     /**

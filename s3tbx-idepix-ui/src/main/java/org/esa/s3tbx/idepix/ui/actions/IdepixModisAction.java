@@ -33,7 +33,8 @@ import java.awt.event.ActionEvent;
  */
 @ActionID(category = "Processing", id = "org.esa.s3tbx.idepix.ui.actions.IdepixModisAction")
 @ActionRegistration(displayName = "#CTL_IdepixModisAction_Text")
-@ActionReference(path = "Menu/Optical/Preprocessing/IdePix Pixel Classification", position = 0)
+//@ActionReference(path = "Menu/Optical/Preprocessing/IdePix Pixel Classification", position = 0)
+@ActionReference(path = "Menu/Optical/Preprocessing/Masking/IdePix (Clouds, Land, Water, ...)", position = 0)
 @NbBundle.Messages({"CTL_IdepixModisAction_Text=MODIS"})
 public class IdepixModisAction extends AbstractSnapAction {
 
@@ -50,14 +51,8 @@ public class IdepixModisAction extends AbstractSnapAction {
         final DefaultSingleTargetProductDialog dialog =
                 new DefaultSingleTargetProductDialog(opMetadata.alias(),
                                                      getAppContext(),
-                                                     "Idepix - Pixel Identification and Classification (MODIS mode)",
+                                                     "Idepix (MODIS mode)",
                                                      HELP_ID);
-
-//        final IdepixDefaultDialog dialog = new IdepixDefaultDialog(opMetadata.alias(),
-//                                                                   getAppContext(),
-//                                                                   "Idepix - Pixel Identification and Classification (MODIS mode)",
-//                                                                   HELP_ID,
-//                                                                   "_idepix");
 
         dialog.setTargetProductNameSuffix("_IDEPIX");
         dialog.getJDialog().pack();

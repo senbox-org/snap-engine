@@ -33,7 +33,8 @@ import java.awt.event.ActionEvent;
  */
 @ActionID(category = "Processing", id = "org.esa.s3tbx.idepix.ui.actions.IdepixMerisAction")
 @ActionRegistration(displayName = "#CTL_IdepixMerisAction_Text")
-@ActionReference(path = "Menu/Optical/Preprocessing/IdePix Pixel Classification", position = 0)
+//@ActionReference(path = "Menu/Optical/Preprocessing/IdePix Pixel Classification", position = 0)
+@ActionReference(path = "Menu/Optical/Preprocessing/Masking/IdePix (Clouds, Land, Water, ...)", position = 0)
 @NbBundle.Messages({"CTL_IdepixMerisAction_Text=MERIS"})
 public class IdepixMerisAction extends AbstractSnapAction {
 
@@ -50,7 +51,7 @@ public class IdepixMerisAction extends AbstractSnapAction {
         final DefaultSingleTargetProductDialog dialog =
                 new DefaultSingleTargetProductDialog(opMetadata.alias(),
                                                      getAppContext(),
-                                                     "Idepix - Pixel Identification and Classification (MERIS mode)",
+                                                     "Idepix (MERIS mode)",
                                                      HELP_ID);
 
         dialog.setTargetProductNameSuffix("_IDEPIX");

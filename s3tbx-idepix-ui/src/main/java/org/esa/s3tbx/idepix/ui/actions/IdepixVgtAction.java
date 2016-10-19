@@ -33,7 +33,8 @@ import java.awt.event.ActionEvent;
  */
 @ActionID(category = "Processing", id = "org.esa.s3tbx.idepix.ui.actions.IdepixVgtAction")
 @ActionRegistration(displayName = "#CTL_IdepixVgtAction_Text")
-@ActionReference(path = "Menu/Optical/Preprocessing/IdePix Pixel Classification", position = 200)
+//@ActionReference(path = "Menu/Optical/Preprocessing/IdePix Pixel Classification", position = 200)
+@ActionReference(path = "Menu/Optical/Preprocessing/Masking/IdePix (Clouds, Land, Water, ...)", position = 200)
 @NbBundle.Messages({"CTL_IdepixVgtAction_Text=SPOT-VGT"})
 public class IdepixVgtAction extends AbstractSnapAction {
 
@@ -48,7 +49,7 @@ public class IdepixVgtAction extends AbstractSnapAction {
         final OperatorMetadata opMetadata = VgtOp.class.getAnnotation(OperatorMetadata.class);
         final IdepixDefaultDialog dialog = new IdepixDefaultDialog(opMetadata.alias(),
                                                                    getAppContext(),
-                                                                   "Idepix - Pixel Identification and Classification (VGT mode)",
+                                                                   "Idepix (SPOT VGT mode)",
                                                                    HELP_ID,
                                                                    "_idepix");
         dialog.getJDialog().pack();

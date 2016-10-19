@@ -48,7 +48,7 @@ package org.esa.s3tbx.idepix.ui.actions;
 //        final OperatorMetadata opMetadata = AvhrrOp.class.getAnnotation(OperatorMetadata.class);
 //        final IdepixDefaultDialog dialog = new IdepixDefaultDialog(opMetadata.alias(),
 //                                                                   getAppContext(),
-//                                                                   "Idepix - Pixel Identification and Classification (AVHRR mode)",
+//                                                                   "Idepix (AVHRR mode)",
 //                                                                   HELP_ID,
 //                                                                   "_idepix");
 //        dialog.getJDialog().pack();

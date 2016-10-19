@@ -33,8 +33,9 @@ import java.awt.event.ActionEvent;
  */
 @ActionID(category = "Processing", id = "org.esa.s3tbx.idepix.ui.actions.IdepixLandsat8Action")
 @ActionRegistration(displayName = "#CTL_IdepixLandsat8Action_Text")
-@ActionReference(path = "Menu/Optical/Preprocessing/IdePix Pixel Classification", position = 200)
-@NbBundle.Messages({"CTL_IdepixLandsat8Action_Text=Landsat8"})
+//@ActionReference(path = "Menu/Optical/Preprocessing/IdePix Pixel Classification", position = 200)
+@ActionReference(path = "Menu/Optical/Preprocessing/Masking/IdePix (Clouds, Land, Water, ...)", position = 200)
+@NbBundle.Messages({"CTL_IdepixLandsat8Action_Text=Landsat-8 OLI"})
 public class IdepixLandsat8Action extends AbstractSnapAction {
 
     private static final String HELP_ID = "idepixTool";
@@ -55,7 +56,7 @@ public class IdepixLandsat8Action extends AbstractSnapAction {
 
         final IdepixLandsat8Dialog dialog = new IdepixLandsat8Dialog(opMetadata.alias(),
                                                                      getAppContext(),
-                                                                     "Idepix - Pixel Identification and Classification (Landsat-8 mode)",
+                                                                     "Idepix (Landsat-8 OLI mode)",
                                                                      HELP_ID);
         dialog.setTargetProductNameSuffix("_IDEPIX");
         dialog.getJDialog().pack();

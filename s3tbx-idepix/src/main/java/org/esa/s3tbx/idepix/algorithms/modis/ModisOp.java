@@ -73,7 +73,6 @@ public class ModisOp extends BasisOp {
     public void initialize() throws OperatorException {
         applyOrLogicInCloudTest = cloudFlaggingStrength.equals("CLOUD_CONSERVATIVE");
 
-        // todo - take from OccciOp in BEAM Idepix
         final boolean inputProductIsValid = IdepixUtils.validateInputProduct(sourceProduct, AlgorithmSelector.MODIS);
         if (!inputProductIsValid) {
             throw new OperatorException(IdepixConstants.INPUT_INCONSISTENCY_ERROR_MESSAGE);
@@ -146,7 +145,6 @@ public class ModisOp extends BasisOp {
     private static void copySourceBands(Product rad2reflProduct, Product targetProduct, String bandNameSubstring) {
         for (String bandname : rad2reflProduct.getBandNames()) {
             if (bandname.contains(bandNameSubstring) && !targetProduct.containsBand(bandname)) {
-                System.out.println("copy band: " + bandname);
                 ProductUtils.copyBand(bandname, rad2reflProduct, targetProduct, true);
             }
         }

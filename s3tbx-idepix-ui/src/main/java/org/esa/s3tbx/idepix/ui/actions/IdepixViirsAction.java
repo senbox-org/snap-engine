@@ -14,7 +14,8 @@
  */
 package org.esa.s3tbx.idepix.ui.actions;
 
-import org.esa.s3tbx.idepix.algorithms.olci.OlciOp;
+import org.esa.s3tbx.idepix.algorithms.viirs.ViirsOp;
+import org.esa.s3tbx.idepix.algorithms.viirs.ViirsOp;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.ui.DefaultSingleTargetProductDialog;
 import org.esa.snap.rcp.actions.AbstractSnapAction;
@@ -27,31 +28,31 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 
 /**
- * Idepix action for OLCI algorithm.
+ * Idepix action for VIIRS algorithm.
  *
  * @author Olaf Danne
  */
-@ActionID(category = "Processing", id = "org.esa.s3tbx.idepix.ui.actions.IdepixOlciAction")
-@ActionRegistration(displayName = "#CTL_IdepixOlciAction_Text")
+@ActionID(category = "Processing", id = "org.esa.s3tbx.idepix.ui.actions.IdepixViirsAction")
+@ActionRegistration(displayName = "#CTL_IdepixViirsAction_Text")
 //@ActionReference(path = "Menu/Optical/Preprocessing/IdePix Pixel Classification", position = 0)
 @ActionReference(path = "Menu/Optical/Preprocessing/Masking/IdePix (Clouds, Land, Water, ...)", position = 0)
-@NbBundle.Messages({"CTL_IdepixOlciAction_Text=Sentinel-3 OLCI"})
-public class IdepixOlciAction extends AbstractSnapAction {
+@NbBundle.Messages({"CTL_IdepixViirsAction_Text=VIIRS"})
+public class IdepixViirsAction extends AbstractSnapAction {
 
     private static final String HELP_ID = "idepixTool";
 
-    public IdepixOlciAction() {
-        putValue(Action.SHORT_DESCRIPTION, "Performs pixel classification on a OLCI data product.");
+    public IdepixViirsAction() {
+        putValue(Action.SHORT_DESCRIPTION, "Performs pixel classification on a VIIRS data product.");
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        final OperatorMetadata opMetadata = OlciOp.class.getAnnotation(OperatorMetadata.class);
+        final OperatorMetadata opMetadata = ViirsOp.class.getAnnotation(OperatorMetadata.class);
 
         final DefaultSingleTargetProductDialog dialog =
                 new DefaultSingleTargetProductDialog(opMetadata.alias(),
                                                      getAppContext(),
-                                                     "Idepix (Sentinel-3 OLCI mode)",
+                                                     "Idepix (VIIRS mode)",
                                                      HELP_ID);
 
         dialog.setTargetProductNameSuffix("_IDEPIX");
