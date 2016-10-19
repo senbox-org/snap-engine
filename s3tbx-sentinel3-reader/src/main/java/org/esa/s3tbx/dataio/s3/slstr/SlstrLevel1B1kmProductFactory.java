@@ -34,8 +34,9 @@ public class SlstrLevel1B1kmProductFactory extends SlstrLevel1FixedResolutionPro
         final List<Product> productList = getOpenProductList();
         Product masterProduct = new Product("dummy", "type", 1, 1);
         for (Product product : productList) {
-            if (product.getSceneRasterWidth() > masterProduct.getSceneRasterWidth() &&
-                product.getSceneRasterHeight() > masterProduct.getSceneRasterHeight() &&
+            int masterSize = masterProduct.getSceneRasterWidth() * masterProduct.getSceneRasterHeight();
+            int productSize = product.getSceneRasterWidth() * product.getSceneRasterHeight();
+            if (productSize > masterSize &&
                 !product.getName().contains("flags") &&
                 !product.getName().endsWith("tn") &&
                 !product.getName().endsWith("tx") &&
@@ -44,6 +45,17 @@ public class SlstrLevel1B1kmProductFactory extends SlstrLevel1FixedResolutionPro
             }
         }
         return masterProduct;
+    }
+
+    @Override
+    protected void setAutoGrouping(Product[] sourceProducts, Product targetProduct) {
+        String bandGrouping = getAutoGroupingString(sourceProducts);
+        targetProduct.setAutoGrouping("F*BT_in:F*exception_in:" +
+                                      "F*BT_io:F*exception_io:" +
+                                      "S*BT_in:S*exception_in:" +
+                                      "S*BT_io:S*exception_io:" +
+                                      "specific_humidity:temperature_profile:" +
+                                      bandGrouping);
     }
 
 }

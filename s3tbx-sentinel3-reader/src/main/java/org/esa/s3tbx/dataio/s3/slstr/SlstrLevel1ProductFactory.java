@@ -54,7 +54,8 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
     public final static String SLSTR_L1B_USE_PIXELGEOCODINGS = "s3tbx.reader.slstrl1b.pixelGeoCodings";
 
     //todo read all these as metadata - tf 20160401
-    private final static String[] EXCLUDED_IDS = new String[] {"ADFData", "SLSTR_F1_QUALITY_IN_Data",
+    private final static String[] EXCLUDED_IDS = new String[]{
+            "ADFData", "SLSTR_F1_QUALITY_IN_Data",
             "SLSTR_F1_QUALITY_IO_Data", "SLSTR_F2_QUALITY_IN_Data", "SLSTR_F2_QUALITY_IO_Data",
             "SLSTR_S1_QUALITY_AN_Data", "SLSTR_S1_QUALITY_AO_Data", "SLSTR_S2_QUALITY_AN_Data",
             "SLSTR_S2_QUALITY_AO_Data", "SLSTR_S3_QUALITY_AN_Data", "SLSTR_S3_QUALITY_AO_Data",
@@ -174,7 +175,7 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
                 targetNode.setDescription(description + " (1 km)");
             }
         } else if (sourceBandNameEnd.startsWith("a") || sourceBandName.startsWith("b") ||
-                sourceBandName.startsWith("c")) {
+                   sourceBandName.startsWith("c")) {
             String description = sourceBand.getDescription();
             if (description == null) {
                 targetNode.setDescription("(500 m)");
@@ -196,8 +197,8 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
         for (int i = 1; i < productList.size(); i++) {
             Product product = productList.get(i);
             if (product.getSceneRasterWidth() > masterProduct.getSceneRasterWidth() &&
-                    product.getSceneRasterHeight() > masterProduct.getSceneRasterHeight() &&
-                    !product.getName().contains("flags")) {
+                product.getSceneRasterHeight() > masterProduct.getSceneRasterHeight() &&
+                !product.getName().contains("flags")) {
                 masterProduct = product;
             }
         }
@@ -229,19 +230,19 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
 //                if (Config.instance("s3tbx").load().preferences().getBoolean(SLSTR_L1B_USE_PIXELGEOCODINGS, false)) {
 //                    targetBand.setSourceImage(sourceRenderedImage);
 //                } else {
-                    final AffineTransform imageToModelTransform = new AffineTransform();
-                    final float[] offsets = getOffsets(sourceStartOffset, sourceTrackOffset, sourceResolutions);
-                    imageToModelTransform.translate(offsets[0], offsets[1]);
-                    final short[] referenceResolutions = getReferenceResolutions();
-                    final int subSamplingX = sourceResolutions[0] / referenceResolutions[0];
-                    final int subSamplingY = sourceResolutions[1] / referenceResolutions[1];
-                    imageToModelTransform.scale(subSamplingX, subSamplingY);
-                    final DefaultMultiLevelModel targetModel =
-                            new DefaultMultiLevelModel(imageToModelTransform,
-                                                       sourceRenderedImage.getWidth(), sourceRenderedImage.getHeight());
-                    final DefaultMultiLevelSource targetMultiLevelSource =
-                            new DefaultMultiLevelSource(sourceRenderedImage, targetModel);
-                    targetBand.setSourceImage(new DefaultMultiLevelImage(targetMultiLevelSource));
+                final AffineTransform imageToModelTransform = new AffineTransform();
+                final float[] offsets = getOffsets(sourceStartOffset, sourceTrackOffset, sourceResolutions);
+                imageToModelTransform.translate(offsets[0], offsets[1]);
+                final short[] referenceResolutions = getReferenceResolutions();
+                final int subSamplingX = sourceResolutions[0] / referenceResolutions[0];
+                final int subSamplingY = sourceResolutions[1] / referenceResolutions[1];
+                imageToModelTransform.scale(subSamplingX, subSamplingY);
+                final DefaultMultiLevelModel targetModel =
+                        new DefaultMultiLevelModel(imageToModelTransform,
+                                                   sourceRenderedImage.getWidth(), sourceRenderedImage.getHeight());
+                final DefaultMultiLevelSource targetMultiLevelSource =
+                        new DefaultMultiLevelSource(sourceRenderedImage, targetModel);
+                targetBand.setSourceImage(new DefaultMultiLevelImage(targetMultiLevelSource));
 //                }
                 return targetBand;
             }
@@ -250,22 +251,39 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
     }
 
     @Override
-    protected void setAutoGrouping(Product[] sourceProducts, Product targetProduct) {
-        String bandGrouping = getAutoGroupingString(sourceProducts);
-        String[] unwantedGroups = new String[]{"F1_BT", "F2_BT", "S1_radiance", "S2_radiance", "S3_radiance",
-                "S4_radiance", "S5_radiance", "S6_radiance", "S7_BT", "S8_BT", "S9_BT"};
+    protected String getAutoGroupingString(Product[] sourceProducts) {
+        String autoGrouping = super.getAutoGroupingString(sourceProducts);
+        String[] unwantedGroups = new String[]{
+                "F1_BT", "F2_BT", "S1_radiance", "S2_radiance", "S3_radiance",
+                "S4_radiance", "S5_radiance", "S6_radiance", "S7_BT", "S8_BT", "S9_BT"
+        };
         for (String unwantedGroup : unwantedGroups) {
-            if (bandGrouping.startsWith(unwantedGroup)) {
-                bandGrouping = bandGrouping.replace(unwantedGroup + ":", "");
-            } else if (bandGrouping.contains(unwantedGroup)) {
-                bandGrouping = bandGrouping.replace(":" + unwantedGroup, "");
+            if (autoGrouping.startsWith(unwantedGroup)) {
+                autoGrouping = autoGrouping.replace(unwantedGroup + ":", "");
+            } else if (autoGrouping.contains(unwantedGroup)) {
+                autoGrouping = autoGrouping.replace(":" + unwantedGroup, "");
             }
         }
-        targetProduct.setAutoGrouping("F*BT_in*:F*BT_io*:radiance_an:" +
-                                              "radiance_ao:radiance_bn:" +
-                                              "radiance_bo:radiance_cn:" +
-                                              "radiance_co:S*BT_in*:" +
-                                              "S*BT_io*:" + bandGrouping);
+        return autoGrouping;
+    }
+
+    @Override
+    protected void setAutoGrouping(Product[] sourceProducts, Product targetProduct) {
+        String bandGrouping = getAutoGroupingString(sourceProducts);
+        targetProduct.setAutoGrouping("F*BT_in:F*exception_in:" +
+                                      "F*BT_io:F*exception_io:" +
+                                      "S*BT_in:S*exception_in:" +
+                                      "S*BT_io:S*exception_io:" +
+                                      "radiance_an:S*exception_an:" +
+                                      "radiance_ao:S*exception_ao:" +
+                                      "radiance_bn:S*exception_bn:" +
+                                      "radiance_bo:S*exception_bo:" +
+                                      "radiance_cn:S*exception_cn:" +
+                                      "radiance_co:S*exception_co:" +
+                                      "x_*:y_*:" +
+                                      "elevation:latitude:longitude:" +
+                                      "specific_humidity:temperature_profile:" +
+                                      bandGrouping);
     }
 
     @Override
