@@ -2,7 +2,7 @@ package org.esa.s3tbx.idepix.algorithms.probav;
 
 import org.esa.s3tbx.idepix.core.AlgorithmSelector;
 import org.esa.s3tbx.idepix.core.IdepixConstants;
-import org.esa.s3tbx.idepix.core.util.IdepixUtils;
+import org.esa.s3tbx.idepix.core.util.IdepixIO;
 import org.esa.s3tbx.idepix.operators.BasisOp;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
@@ -89,7 +89,7 @@ public class ProbaVOp extends BasisOp {
 
     @Override
     public void initialize() throws OperatorException {
-        final boolean inputProductIsValid = IdepixUtils.validateInputProduct(sourceProduct, AlgorithmSelector.PROBAV);
+        final boolean inputProductIsValid = IdepixIO.validateInputProduct(sourceProduct, AlgorithmSelector.PROBAV);
         if (!inputProductIsValid) {
             throw new OperatorException(IdepixConstants.INPUT_INCONSISTENCY_ERROR_MESSAGE);
         }
@@ -99,9 +99,9 @@ public class ProbaVOp extends BasisOp {
 
     private void processProbav() {
         HashMap<String, Object> waterMaskParameters = new HashMap<>();
-        waterMaskParameters.put("resolution", ProbaVConstants.LAND_WATER_MASK_RESOLUTION);
-        waterMaskParameters.put("subSamplingFactorX", ProbaVConstants.OVERSAMPLING_FACTOR_X);
-        waterMaskParameters.put("subSamplingFactorY", ProbaVConstants.OVERSAMPLING_FACTOR_Y);
+        waterMaskParameters.put("resolution", IdepixConstants.LAND_WATER_MASK_RESOLUTION);
+        waterMaskParameters.put("subSamplingFactorX", IdepixConstants.OVERSAMPLING_FACTOR_X);
+        waterMaskParameters.put("subSamplingFactorY", IdepixConstants.OVERSAMPLING_FACTOR_Y);
         Product waterMaskProduct = GPF.createProduct("LandWaterMask", waterMaskParameters, sourceProduct);
 
         // Cloud Classification
@@ -116,10 +116,10 @@ public class ProbaVOp extends BasisOp {
 
         computePostProcessProduct();
 
-        Product targetProduct = IdepixUtils.cloneProduct(cloudProduct, true);
+        Product targetProduct = IdepixIO.cloneProduct(cloudProduct, true);
 
-        Band cloudFlagBand = targetProduct.getBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS);
-        cloudFlagBand.setSourceImage(postProcessingProduct.getBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS).getSourceImage());
+        Band cloudFlagBand = targetProduct.getBand(IdepixIO.IDEPIX_CLASSIF_FLAGS);
+        cloudFlagBand.setSourceImage(postProcessingProduct.getBand(IdepixIO.IDEPIX_CLASSIF_FLAGS).getSourceImage());
     }
 
     private void computePostProcessProduct() {

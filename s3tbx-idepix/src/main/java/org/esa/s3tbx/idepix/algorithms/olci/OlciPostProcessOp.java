@@ -2,16 +2,19 @@ package org.esa.s3tbx.idepix.algorithms.olci;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.s3tbx.idepix.algorithms.CloudShadowFronts;
-import org.esa.s3tbx.idepix.core.util.IdepixUtils;
+import org.esa.s3tbx.idepix.core.IdepixConstants;
+import org.esa.s3tbx.idepix.core.util.IdepixIO;
 import org.esa.snap.core.datamodel.*;
-import org.esa.snap.core.gpf.*;
+import org.esa.snap.core.gpf.Operator;
+import org.esa.snap.core.gpf.OperatorException;
+import org.esa.snap.core.gpf.OperatorSpi;
+import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.RectangleExtender;
 
 import java.awt.*;
-import java.util.HashMap;
 
 /**
  * Operator used to consolidate Idepix classification flag for OLCI:
@@ -47,16 +50,16 @@ public class OlciPostProcessOp extends Operator {
 
     @Override
     public void initialize() throws OperatorException {
-        Product postProcessedCloudProduct = IdepixUtils.createCompatibleTargetProduct(olciCloudProduct,
-                                                                                      "postProcessedCloud",
-                                                                                      "postProcessedCloud",
-                                                                                      true);
+        Product postProcessedCloudProduct = IdepixIO.createCompatibleTargetProduct(olciCloudProduct,
+                                                                                   "postProcessedCloud",
+                                                                                   "postProcessedCloud",
+                                                                                   true);
 
         waterFractionBand = waterMaskProduct.getBand("land_water_fraction");
 
         geoCoding = l1bProduct.getSceneGeoCoding();
 
-        origCloudFlagBand = olciCloudProduct.getBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS);
+        origCloudFlagBand = olciCloudProduct.getBand(IdepixIO.IDEPIX_CLASSIF_FLAGS);
 
         int extendedWidth;
         int extendedHeight;
@@ -74,7 +77,7 @@ public class OlciPostProcessOp extends Operator {
         );
 
 
-        ProductUtils.copyBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS, olciCloudProduct, postProcessedCloudProduct, false);
+        ProductUtils.copyBand(IdepixIO.IDEPIX_CLASSIF_FLAGS, olciCloudProduct, postProcessedCloudProduct, false);
         setTargetProduct(postProcessedCloudProduct);
     }
 
@@ -92,21 +95,21 @@ public class OlciPostProcessOp extends Operator {
             for (int x = srcRectangle.x; x < srcRectangle.x + srcRectangle.width; x++) {
 
                 if (targetRectangle.contains(x, y)) {
-                    boolean isCloud = sourceFlagTile.getSampleBit(x, y, OlciConstants.F_CLOUD);
+                    boolean isCloud = sourceFlagTile.getSampleBit(x, y, IdepixConstants.F_CLOUD);
                     combineFlags(x, y, sourceFlagTile, targetTile);
 
                     if (refineClassificationNearCoastlines) {
                         if (isNearCoastline(x, y, waterFractionTile, srcRectangle)) {
-                            targetTile.setSample(x, y, OlciConstants.F_COASTLINE, true);
+                            targetTile.setSample(x, y, IdepixConstants.F_COASTLINE, true);
                             refineSnowIceFlaggingForCoastlines(x, y, sourceFlagTile, targetTile);
                             if (isCloud) {
                                 refineCloudFlaggingForCoastlines(x, y, sourceFlagTile, waterFractionTile, targetTile, srcRectangle);
                             }
                         }
                     }
-                    boolean isCloudAfterRefinement = targetTile.getSampleBit(x, y, OlciConstants.F_CLOUD);
+                    boolean isCloudAfterRefinement = targetTile.getSampleBit(x, y, IdepixConstants.F_CLOUD);
                     if (isCloudAfterRefinement) {
-                        targetTile.setSample(x, y, OlciConstants.F_SNOW_ICE, false);
+                        targetTile.setSample(x, y, IdepixConstants.F_SNOW_ICE, false);
                     }
                 }
             }
@@ -174,13 +177,13 @@ public class OlciPostProcessOp extends Operator {
         final int TOP_BORDER = Math.max(y - windowWidth, srcRectangle.y);
         final int BOTTOM_BORDER = Math.min(y + windowWidth, srcRectangle.y + srcRectangle.height - 1);
         boolean removeCloudFlag = true;
-        if (CloudShadowFronts.isPixelSurrounded(x, y, sourceFlagTile, OlciConstants.F_CLOUD)) {
+        if (CloudShadowFronts.isPixelSurrounded(x, y, sourceFlagTile, IdepixConstants.F_CLOUD)) {
             removeCloudFlag = false;
         } else {
             Rectangle targetTileRectangle = targetTile.getRectangle();
             for (int i = LEFT_BORDER; i <= RIGHT_BORDER; i++) {
                 for (int j = TOP_BORDER; j <= BOTTOM_BORDER; j++) {
-                    boolean is_cloud = sourceFlagTile.getSampleBit(i, j, OlciConstants.F_CLOUD);
+                    boolean is_cloud = sourceFlagTile.getSampleBit(i, j, IdepixConstants.F_CLOUD);
                     if (is_cloud && targetTileRectangle.contains(i, j) && !isNearCoastline(i, j, waterFractionTile, srcRectangle)) {
                         removeCloudFlag = false;
                         break;
@@ -190,16 +193,16 @@ public class OlciPostProcessOp extends Operator {
         }
 
         if (removeCloudFlag) {
-            targetTile.setSample(x, y, OlciConstants.F_CLOUD, false);
-            targetTile.setSample(x, y, OlciConstants.F_CLOUD_SURE, false);
-            targetTile.setSample(x, y, OlciConstants.F_CLOUD_AMBIGUOUS, false);
+            targetTile.setSample(x, y, IdepixConstants.F_CLOUD, false);
+            targetTile.setSample(x, y, IdepixConstants.F_CLOUD_SURE, false);
+            targetTile.setSample(x, y, IdepixConstants.F_CLOUD_AMBIGUOUS, false);
         }
     }
 
     private void refineSnowIceFlaggingForCoastlines(int x, int y, Tile sourceFlagTile, Tile targetTile) {
-        final boolean isSnowIce = sourceFlagTile.getSampleBit(x, y, OlciConstants.F_SNOW_ICE);
+        final boolean isSnowIce = sourceFlagTile.getSampleBit(x, y, IdepixConstants.F_SNOW_ICE);
         if (isSnowIce) {
-            targetTile.setSample(x, y, OlciConstants.F_SNOW_ICE, false);
+            targetTile.setSample(x, y, IdepixConstants.F_SNOW_ICE, false);
         }
     }
 

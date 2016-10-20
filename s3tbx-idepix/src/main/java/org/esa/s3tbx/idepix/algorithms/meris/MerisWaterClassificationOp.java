@@ -4,6 +4,7 @@ import com.bc.ceres.core.ProgressMonitor;
 import org.esa.s3tbx.idepix.core.IdepixConstants;
 import org.esa.s3tbx.idepix.core.seaice.SeaIceClassification;
 import org.esa.s3tbx.idepix.core.seaice.SeaIceClassifier;
+import org.esa.s3tbx.idepix.core.util.IdepixIO;
 import org.esa.s3tbx.idepix.core.util.IdepixUtils;
 import org.esa.s3tbx.idepix.core.util.SchillerNeuralNetWrapper;
 import org.esa.s3tbx.meris.l2auxdata.L2AuxData;
@@ -95,8 +96,8 @@ public class MerisWaterClassificationOp extends Operator {
             description = " NN cloud ambiguous cloud sure/snow separation value ")
     double schillerNNCloudSureSnowSeparationValue;
 
-    public static final String SCHILLER_MERIS_WATER_NET_NAME = "11x8x5x3_876.8_water.net";
-    public static final String SCHILLER_MERIS_ALL_NET_NAME = "11x8x5x3_1409.7_all.net";
+    public static final String MERIS_WATER_NET_NAME = "11x8x5x3_876.8_water.net";
+    public static final String MERIS_ALL_NET_NAME = "11x8x5x3_1409.7_all.net";
 
     ThreadLocal<SchillerNeuralNetWrapper> merisWaterNeuralNet;
     ThreadLocal<SchillerNeuralNetWrapper> merisAllNeuralNet;
@@ -127,8 +128,8 @@ public class MerisWaterClassificationOp extends Operator {
     }
 
     private void readSchillerNets() {
-        try (InputStream isWater = getClass().getResourceAsStream(SCHILLER_MERIS_WATER_NET_NAME);
-             InputStream isAll = getClass().getResourceAsStream(SCHILLER_MERIS_ALL_NET_NAME)) {
+        try (InputStream isWater = getClass().getResourceAsStream(MERIS_WATER_NET_NAME);
+             InputStream isAll = getClass().getResourceAsStream(MERIS_ALL_NET_NAME)) {
             merisWaterNeuralNet = SchillerNeuralNetWrapper.create(isWater);
             merisAllNeuralNet = SchillerNeuralNetWrapper.create(isAll);
         } catch (IOException e) {
@@ -147,15 +148,15 @@ public class MerisWaterClassificationOp extends Operator {
     }
 
     private void createTargetProduct() {
-        targetProduct = IdepixUtils.createCompatibleTargetProduct(l1bProduct, "MER", "MER_L2", true);
+        targetProduct = IdepixIO.createCompatibleTargetProduct(l1bProduct, "MER", "MER_L2", true);
 
-        cloudFlagBand = targetProduct.addBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS, ProductData.TYPE_INT16);
-        FlagCoding flagCoding = MerisUtils.createMerisFlagCoding(IdepixUtils.IDEPIX_CLASSIF_FLAGS);
+        cloudFlagBand = targetProduct.addBand(IdepixIO.IDEPIX_CLASSIF_FLAGS, ProductData.TYPE_INT16);
+        FlagCoding flagCoding = MerisUtils.createMerisFlagCoding(IdepixIO.IDEPIX_CLASSIF_FLAGS);
         cloudFlagBand.setSampleCoding(flagCoding);
         targetProduct.getFlagCodingGroup().add(flagCoding);
 
         if (outputSchillerNNValue) {
-            nnOutputBand = targetProduct.addBand(MerisConstants.SCHILLER_NN_OUTPUT_BAND_NAME,
+            nnOutputBand = targetProduct.addBand(IdepixConstants.NN_OUTPUT_BAND_NAME,
                                                  ProductData.TYPE_FLOAT32);
         }
     }
@@ -258,11 +259,7 @@ public class MerisWaterClassificationOp extends Operator {
                                int waterFraction) {
 
         final boolean isCoastline = isCoastlinePixel(x, y, waterFraction);
-        targetTile.setSample(x, y, MerisConstants.F_COASTLINE, isCoastline);
-
-        if (x == 220 && y == 290) {
-            System.out.println("x = " + x);
-        }
+        targetTile.setSample(x, y, IdepixConstants.F_COASTLINE, isCoastline);
 
         boolean is_snow_ice;
         boolean is_glint_risk = !isCoastline && 
@@ -282,23 +279,23 @@ public class MerisWaterClassificationOp extends Operator {
 
         double[] nnOutput = getMerisNNOutput(x, y, rhoToaTiles);
         if (!targetTile.getSampleBit(x, y, IdepixConstants.F_INVALID)) {
-            targetTile.setSample(x, y, MerisConstants.F_CLOUD_AMBIGUOUS, false);
-            targetTile.setSample(x, y, MerisConstants.F_CLOUD_SURE, false);
-            targetTile.setSample(x, y, MerisConstants.F_CLOUD, false);
-            targetTile.setSample(x, y, MerisConstants.F_SNOW_ICE, false);
+            targetTile.setSample(x, y, IdepixConstants.F_CLOUD_AMBIGUOUS, false);
+            targetTile.setSample(x, y, IdepixConstants.F_CLOUD_SURE, false);
+            targetTile.setSample(x, y, IdepixConstants.F_CLOUD, false);
+            targetTile.setSample(x, y, IdepixConstants.F_SNOW_ICE, false);
             isCloudAmbiguous = nnOutput[0] > schillerNNCloudAmbiguousLowerBoundaryValue &&
                     nnOutput[0] <= schillerNNCloudAmbiguousSureSeparationValue;
             if (isCloudAmbiguous) {
                 // this would be as 'CLOUD_AMBIGUOUS'...
-                targetTile.setSample(x, y, MerisConstants.F_CLOUD_AMBIGUOUS, true);
-                targetTile.setSample(x, y, MerisConstants.F_CLOUD, true);
+                targetTile.setSample(x, y, IdepixConstants.F_CLOUD_AMBIGUOUS, true);
+                targetTile.setSample(x, y, IdepixConstants.F_CLOUD, true);
             }
             // check for snow_ice separation below if needed, first set all to cloud
             isCloudSure = nnOutput[0] > schillerNNCloudAmbiguousSureSeparationValue;
             if (isCloudSure) {
                 // this would be as 'CLOUD_SURE'...
-                targetTile.setSample(x, y, MerisConstants.F_CLOUD_SURE, true);
-                targetTile.setSample(x, y, MerisConstants.F_CLOUD, true);
+                targetTile.setSample(x, y, IdepixConstants.F_CLOUD_SURE, true);
+                targetTile.setSample(x, y, IdepixConstants.F_CLOUD, true);
             }
 
             is_snow_ice = false;
@@ -307,12 +304,12 @@ public class MerisWaterClassificationOp extends Operator {
             }
             if (is_snow_ice) {
                 // this would be as 'SNOW/ICE'...
-                targetTile.setSample(x, y, MerisConstants.F_SNOW_ICE, true);
-                targetTile.setSample(x, y, MerisConstants.F_CLOUD_SURE, false);
-                targetTile.setSample(x, y, MerisConstants.F_CLOUD, false);
+                targetTile.setSample(x, y, IdepixConstants.F_SNOW_ICE, true);
+                targetTile.setSample(x, y, IdepixConstants.F_CLOUD_SURE, false);
+                targetTile.setSample(x, y, IdepixConstants.F_CLOUD, false);
             }
         }
-        targetTile.setSample(x, y, MerisConstants.F_GLINTRISK, is_glint_risk && !isCloudSure);
+        targetTile.setSample(x, y, IdepixConstants.F_GLINT_RISK, is_glint_risk && !isCloudSure);
     }
 
     private double[] getMerisNNOutput(int x, int y, Tile[] rhoToaTiles) {

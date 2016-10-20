@@ -8,7 +8,6 @@ import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
-import org.esa.snap.core.gpf.annotations.TargetProduct;
 
 import javax.media.jai.RenderedOp;
 import javax.media.jai.operator.MultiplyDescriptor;
@@ -33,9 +32,6 @@ public class ClostOp extends Operator {
 
     @SourceProduct(alias = "l8source", description = "The source product.")
     Product sourceProduct;
-
-    @TargetProduct(description = "The target product.")
-    Product targetProduct;
 
     @Override
     public void initialize() throws OperatorException {

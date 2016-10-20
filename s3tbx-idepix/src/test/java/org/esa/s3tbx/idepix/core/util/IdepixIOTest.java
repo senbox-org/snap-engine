@@ -1,7 +1,6 @@
 package org.esa.s3tbx.idepix.core.util;
 
 import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Test;
@@ -9,11 +8,11 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * Tests for class {@link org.esa.s3tbx.idepix.core.util.IdepixUtils}.
+ * Tests for class {@link IdepixIO}.
  *
  * @author Olaf Danne
  */
-public class IdepixUtilsTest {
+public class IdepixIOTest {
 
     @Test
     public void testCorrectSaturatedReflectances() {
@@ -73,10 +72,10 @@ public class IdepixUtilsTest {
     @Test
     public void testAreAllReflectancesValid() {
         float[] reflOrig = new float[]{12.3f, 12.3f, 12.3f, 12.3f};
-        assertTrue(IdepixUtils.areAllReflectancesValid(reflOrig));
+        assertTrue(IdepixIO.areAllReflectancesValid(reflOrig));
 
         reflOrig = new float[]{Float.NaN, 12.3f, Float.NaN, 12.3f};
-        assertFalse(IdepixUtils.areAllReflectancesValid(reflOrig));
+        assertFalse(IdepixIO.areAllReflectancesValid(reflOrig));
     }
 
     @Test
@@ -113,14 +112,14 @@ public class IdepixUtilsTest {
     @Test
     public void testSetNewBandProperties() {
         Band band1 = new Band("test", ProductData.TYPE_FLOAT32, 10, 10);
-        IdepixUtils.setNewBandProperties(band1, "bla", "km", -999.0, false);
+        IdepixIO.setNewBandProperties(band1, "bla", "km", -999.0, false);
         assertEquals("bla", band1.getDescription());
         assertEquals("km", band1.getUnit());
         assertEquals(-999.0, band1.getNoDataValue(), 1.0e-8);
         assertEquals(false, band1.isNoDataValueUsed());
 
         Band band2 = new Band("test2", ProductData.TYPE_INT32, 10, 10);
-        IdepixUtils.setNewBandProperties(band2, "blubb", "ton", -1, true);
+        IdepixIO.setNewBandProperties(band2, "blubb", "ton", -1, true);
         assertEquals("blubb", band2.getDescription());
         assertEquals("ton", band2.getUnit());
         assertEquals(-1.0, band2.getNoDataValue(), 1.0e-8);
@@ -155,11 +154,11 @@ public class IdepixUtilsTest {
         product.addBand("cirrus", ProductData.TYPE_FLOAT32);
         product.addBand("thermal_infrared_(tirs)_2", ProductData.TYPE_FLOAT32);
 
-        assertFalse(IdepixUtils.isValidLandsat8Product(product));
+        assertFalse(IdepixIO.isValidLandsat8Product(product));
 
         product.addBand("thermal_infrared_(tirs)_1", ProductData.TYPE_FLOAT32);
 
-        assertTrue(IdepixUtils.isValidLandsat8Product(product));
+        assertTrue(IdepixIO.isValidLandsat8Product(product));
     }
 
 }

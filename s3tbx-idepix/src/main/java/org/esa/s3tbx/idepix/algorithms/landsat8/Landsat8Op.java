@@ -4,7 +4,7 @@ import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.glayer.tools.Tools;
 import org.esa.s3tbx.idepix.core.AlgorithmSelector;
 import org.esa.s3tbx.idepix.core.IdepixConstants;
-import org.esa.s3tbx.idepix.core.util.IdepixUtils;
+import org.esa.s3tbx.idepix.core.util.IdepixIO;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.Operator;
@@ -178,7 +178,7 @@ public class Landsat8Op extends Operator {
         System.out.println("Running IDEPIX Landsat 8 - source product: " + sourceProduct.getName());
 
 
-        final boolean inputProductIsValid = IdepixUtils.validateInputProduct(sourceProduct, AlgorithmSelector.LANDSAT8);
+        final boolean inputProductIsValid = IdepixIO.validateInputProduct(sourceProduct, AlgorithmSelector.LANDSAT8);
         if (!inputProductIsValid) {
             throw new OperatorException(IdepixConstants.INPUT_INCONSISTENCY_ERROR_MESSAGE);
         }
@@ -214,10 +214,10 @@ public class Landsat8Op extends Operator {
         computeCloudProduct();
         postProcess();
 
-        targetProduct = IdepixUtils.cloneProduct(classificationProduct, standardBandWidth, standardBandHeight, false);
+        targetProduct = IdepixIO.cloneProduct(classificationProduct, standardBandWidth, standardBandHeight, false);
 
-        Band cloudFlagBand = targetProduct.getBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS);
-        cloudFlagBand.setSourceImage(postProcessingProduct.getBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS).getSourceImage());
+        Band cloudFlagBand = targetProduct.getBand(IdepixIO.IDEPIX_CLASSIF_FLAGS);
+        cloudFlagBand.setSourceImage(postProcessingProduct.getBand(IdepixIO.IDEPIX_CLASSIF_FLAGS).getSourceImage());
 
         copyOutputBands();
     }
@@ -257,7 +257,7 @@ public class Landsat8Op extends Operator {
         // The land/water mask operator needs as input a product with just correct size and geocoding...
         final Product resizedProduct = new Product("dummy", "dummy", standardBandWidth, standardBandHeight);
         final Band blueBand = sourceProduct.getBand(Landsat8Constants.LANDSAT8_BLUE_BAND_NAME);
-        IdepixUtils.copyGeocodingFromBandToProduct(blueBand, resizedProduct);
+        IdepixIO.copyGeocodingFromBandToProduct(blueBand, resizedProduct);
         waterMaskProduct = GPF.createProduct("LandWaterMask", waterMaskParameters, resizedProduct);
     }
 
@@ -331,7 +331,7 @@ public class Landsat8Op extends Operator {
 
     private void copyOutputBands() {
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
-        Landsat8Utils.setupLandsat8Bitmasks(targetProduct);
+        Landsat8Utils.setupLandsat8ClassifBitmask(targetProduct);
         if (outputSourceBands) {
             ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
             for (Band sourceBand : sourceProduct.getBands()) {

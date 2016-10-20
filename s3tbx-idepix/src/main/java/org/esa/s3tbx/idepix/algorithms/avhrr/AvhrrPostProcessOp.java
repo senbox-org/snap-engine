@@ -3,7 +3,8 @@ package org.esa.s3tbx.idepix.algorithms.avhrr;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.s3tbx.idepix.algorithms.CloudBuffer;
 import org.esa.s3tbx.idepix.algorithms.CloudShadowFronts;
-import org.esa.s3tbx.idepix.core.util.IdepixUtils;
+import org.esa.s3tbx.idepix.core.IdepixConstants;
+import org.esa.s3tbx.idepix.core.util.IdepixIO;
 import org.esa.s3tbx.idepix.core.util.OperatorUtils;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.Operator;
@@ -84,7 +85,7 @@ public class AvhrrPostProcessOp extends Operator {
 
             geoCoding = l1bProduct.getSceneGeoCoding();
 
-            origCloudFlagBand = avhrrCloudProduct.getBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS);
+            origCloudFlagBand = avhrrCloudProduct.getBand(IdepixIO.IDEPIX_CLASSIF_FLAGS);
             rt3Band = avhrrCloudProduct.getBand("rt_3");
             bt4Band = avhrrCloudProduct.getBand("bt_4");
             refl1Band = avhrrCloudProduct.getBand("refl_1");
@@ -100,7 +101,7 @@ public class AvhrrPostProcessOp extends Operator {
             );
 
 
-            ProductUtils.copyBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS, avhrrCloudProduct, postProcessedCloudProduct, false);
+            ProductUtils.copyBand(IdepixIO.IDEPIX_CLASSIF_FLAGS, avhrrCloudProduct, postProcessedCloudProduct, false);
             setTargetProduct(postProcessedCloudProduct);
         }
     }
@@ -123,8 +124,8 @@ public class AvhrrPostProcessOp extends Operator {
             for (int x = srcRectangle.x; x < srcRectangle.x + srcRectangle.width; x++) {
 
                 if (targetRectangle.contains(x, y)) {
-                    boolean isCloud = sourceFlagTile.getSampleBit(x, y, AvhrrConstants.F_CLOUD);
-                    boolean isSnowIce = sourceFlagTile.getSampleBit(x, y, AvhrrConstants.F_SNOW_ICE);
+                    boolean isCloud = sourceFlagTile.getSampleBit(x, y, IdepixConstants.F_CLOUD);
+                    boolean isSnowIce = sourceFlagTile.getSampleBit(x, y, IdepixConstants.F_SNOW_ICE);
                     combineFlags(x, y, sourceFlagTile, targetTile);
 
                     // snow/ice filter refinement for AVHRR (GK 20150922):
@@ -135,22 +136,22 @@ public class AvhrrPostProcessOp extends Operator {
 
                     if (refineClassificationNearCoastlines) {
                         if (isNearCoastline(x, y, waterFractionTile, srcRectangle)) {
-                            targetTile.setSample(x, y, AvhrrConstants.F_COASTLINE, true);
+                            targetTile.setSample(x, y, IdepixConstants.F_COASTLINE, true);
                             refineSnowIceFlaggingForCoastlines(x, y, sourceFlagTile, targetTile);
                             if (isCloud) {
                                 refineCloudFlaggingForCoastlines(x, y, sourceFlagTile, waterFractionTile, targetTile, srcRectangle);
                             }
                         }
                     }
-                    boolean isCloudAfterRefinement = targetTile.getSampleBit(x, y, AvhrrConstants.F_CLOUD);
+                    boolean isCloudAfterRefinement = targetTile.getSampleBit(x, y, IdepixConstants.F_CLOUD);
                     if (isCloudAfterRefinement) {
-                        targetTile.setSample(x, y, AvhrrConstants.F_SNOW_ICE, false);
+                        targetTile.setSample(x, y, IdepixConstants.F_SNOW_ICE, false);
                         if ((computeCloudBuffer)) {
                             CloudBuffer.computeSimpleCloudBuffer(x, y,
                                                                  targetTile, targetTile,
                                                                  cloudBufferWidth,
-                                                                 AvhrrConstants.F_CLOUD,
-                                                                 AvhrrConstants.F_CLOUD_BUFFER);
+                                                                 IdepixConstants.F_CLOUD,
+                                                                 IdepixConstants.F_CLOUD_BUFFER);
                         }
                     }
 
@@ -264,13 +265,13 @@ public class AvhrrPostProcessOp extends Operator {
         final int TOP_BORDER = Math.max(y - windowWidth, srcRectangle.y);
         final int BOTTOM_BORDER = Math.min(y + windowWidth, srcRectangle.y + srcRectangle.height - 1);
         boolean removeCloudFlag = true;
-        if (CloudShadowFronts.isPixelSurrounded(x, y, sourceFlagTile, AvhrrConstants.F_CLOUD)) {
+        if (CloudShadowFronts.isPixelSurrounded(x, y, sourceFlagTile, IdepixConstants.F_CLOUD)) {
             removeCloudFlag = false;
         } else {
             Rectangle targetTileRectangle = targetTile.getRectangle();
             for (int i = LEFT_BORDER; i <= RIGHT_BORDER; i++) {
                 for (int j = TOP_BORDER; j <= BOTTOM_BORDER; j++) {
-                    boolean is_cloud = sourceFlagTile.getSampleBit(i, j, AvhrrConstants.F_CLOUD);
+                    boolean is_cloud = sourceFlagTile.getSampleBit(i, j, IdepixConstants.F_CLOUD);
                     if (is_cloud && targetTileRectangle.contains(i, j) && !isNearCoastline(i, j, waterFractionTile, srcRectangle)) {
                         removeCloudFlag = false;
                         break;
@@ -280,16 +281,16 @@ public class AvhrrPostProcessOp extends Operator {
         }
 
         if (removeCloudFlag) {
-            targetTile.setSample(x, y, AvhrrConstants.F_CLOUD, false);
-            targetTile.setSample(x, y, AvhrrConstants.F_CLOUD_SURE, false);
-            targetTile.setSample(x, y, AvhrrConstants.F_CLOUD_AMBIGUOUS, false);
+            targetTile.setSample(x, y, IdepixConstants.F_CLOUD, false);
+            targetTile.setSample(x, y, IdepixConstants.F_CLOUD_SURE, false);
+            targetTile.setSample(x, y, IdepixConstants.F_CLOUD_AMBIGUOUS, false);
         }
     }
 
     private void refineSnowIceFlaggingForCoastlines(int x, int y, Tile sourceFlagTile, Tile targetTile) {
-        final boolean isSnowIce = sourceFlagTile.getSampleBit(x, y, AvhrrConstants.F_SNOW_ICE);
+        final boolean isSnowIce = sourceFlagTile.getSampleBit(x, y, IdepixConstants.F_SNOW_ICE);
         if (isSnowIce) {
-            targetTile.setSample(x, y, AvhrrConstants.F_SNOW_ICE, false);
+            targetTile.setSample(x, y, IdepixConstants.F_SNOW_ICE, false);
         }
     }
 
@@ -309,10 +310,10 @@ public class AvhrrPostProcessOp extends Operator {
 
         if (firstCrit || !secondCrit) {
             // reset snow_ice to cloud todo: check with a test product from GK if this makes sense at all
-            targetTile.setSample(x, y, AvhrrConstants.F_CLOUD, true);
-            targetTile.setSample(x, y, AvhrrConstants.F_CLOUD_SURE, true);
-            targetTile.setSample(x, y, AvhrrConstants.F_CLOUD_AMBIGUOUS, false);
-            targetTile.setSample(x, y, AvhrrConstants.F_SNOW_ICE, false);
+            targetTile.setSample(x, y, IdepixConstants.F_CLOUD, true);
+            targetTile.setSample(x, y, IdepixConstants.F_CLOUD_SURE, true);
+            targetTile.setSample(x, y, IdepixConstants.F_CLOUD_AMBIGUOUS, false);
+            targetTile.setSample(x, y, IdepixConstants.F_SNOW_ICE, false);
         }
     }
 

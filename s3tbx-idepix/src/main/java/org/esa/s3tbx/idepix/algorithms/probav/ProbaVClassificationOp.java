@@ -3,7 +3,7 @@ package org.esa.s3tbx.idepix.algorithms.probav;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.s3tbx.idepix.core.IdepixConstants;
 import org.esa.s3tbx.idepix.core.pixel.AbstractPixelProperties;
-import org.esa.s3tbx.idepix.core.util.IdepixUtils;
+import org.esa.s3tbx.idepix.core.util.IdepixIO;
 import org.esa.s3tbx.idepix.core.util.SchillerNeuralNetWrapper;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.dataop.dem.ElevationModel;
@@ -123,7 +123,7 @@ public class ProbaVClassificationOp extends Operator {
     Band radioWaterBand;
 
 
-    public static final String SCHILLER_VGT_NET_NAME = "3x2x2_341.8.net";
+    public static final String VGT_NET_NAME = "3x2x2_341.8.net";
     ThreadLocal<SchillerNeuralNetWrapper> vgtNeuralNet;
 
 
@@ -164,7 +164,7 @@ public class ProbaVClassificationOp extends Operator {
             probavReflectanceTiles[i] = getSourceTile(probavReflectanceBands[i], rectangle);
         }
 
-        final Band cloudFlagTargetBand = targetProduct.getBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS);
+        final Band cloudFlagTargetBand = targetProduct.getBand(IdepixIO.IDEPIX_CLASSIF_FLAGS);
         final Tile cloudFlagTargetTile = targetTiles.get(cloudFlagTargetBand);
 
         final Band nnTargetBand = targetProduct.getBand("probav_nn_value");
@@ -195,7 +195,7 @@ public class ProbaVClassificationOp extends Operator {
                             cloudFlagTargetTile.setSample(x, y, IdepixConstants.F_CLOUD_AMBIGUOUS, false);
                             cloudFlagTargetTile.setSample(x, y, IdepixConstants.F_CLOUD_SURE, false);
                             cloudFlagTargetTile.setSample(x, y, IdepixConstants.F_CLOUD, false);
-                            cloudFlagTargetTile.setSample(x, y, IdepixConstants.F_CLEAR_SNOW, false);
+                            cloudFlagTargetTile.setSample(x, y, IdepixConstants.F_SNOW_ICE, false);
                             if (nnOutput[0] > schillerNNCloudAmbiguousLowerBoundaryValue &&
                                     nnOutput[0] <= schillerNNCloudAmbiguousSureSeparationValue) {
                                 // this would be as 'CLOUD_AMBIGUOUS'...
@@ -210,7 +210,7 @@ public class ProbaVClassificationOp extends Operator {
                             }
                             if (nnOutput[0] > schillerNNCloudSureSnowSeparationValue) {
                                 // this would be as 'SNOW/ICE'...
-                                cloudFlagTargetTile.setSample(x, y, IdepixConstants.F_CLEAR_SNOW, true);
+                                cloudFlagTargetTile.setSample(x, y, IdepixConstants.F_SNOW_ICE, true);
                             }
                         }
                         nnTargetTile.setSample(x, y, nnOutput[0]);
@@ -305,7 +305,7 @@ public class ProbaVClassificationOp extends Operator {
     }
 
     private void readSchillerNeuralNets() {
-        try (InputStream vgtLandIS = getClass().getResourceAsStream(SCHILLER_VGT_NET_NAME)) {
+        try (InputStream vgtLandIS = getClass().getResourceAsStream(VGT_NET_NAME)) {
             vgtNeuralNet = SchillerNeuralNetWrapper.create(vgtLandIS);
         } catch (IOException e) {
             throw new OperatorException("Cannot read Neural Nets: " + e.getMessage());
@@ -318,8 +318,8 @@ public class ProbaVClassificationOp extends Operator {
 
         targetProduct = new Product(sourceProduct.getName(), sourceProduct.getProductType(), sceneWidth, sceneHeight);
 
-        cloudFlagBand = targetProduct.addBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS, ProductData.TYPE_INT32);
-        FlagCoding flagCoding = ProbaVUtils.createProbavFlagCoding(IdepixUtils.IDEPIX_CLASSIF_FLAGS);
+        cloudFlagBand = targetProduct.addBand(IdepixIO.IDEPIX_CLASSIF_FLAGS, ProductData.TYPE_INT32);
+        FlagCoding flagCoding = ProbaVUtils.createProbavFlagCoding(IdepixIO.IDEPIX_CLASSIF_FLAGS);
         cloudFlagBand.setSampleCoding(flagCoding);
         targetProduct.getFlagCodingGroup().add(flagCoding);
 
@@ -332,33 +332,33 @@ public class ProbaVClassificationOp extends Operator {
 
         if (copyFeatureValues) {
             brightBand = targetProduct.addBand("bright_value", ProductData.TYPE_FLOAT32);
-            IdepixUtils.setNewBandProperties(brightBand, "Brightness", "dl", IdepixConstants.NO_DATA_VALUE, true);
+            IdepixIO.setNewBandProperties(brightBand, "Brightness", "dl", IdepixConstants.NO_DATA_VALUE, true);
             whiteBand = targetProduct.addBand("white_value", ProductData.TYPE_FLOAT32);
-            IdepixUtils.setNewBandProperties(whiteBand, "Whiteness", "dl", IdepixConstants.NO_DATA_VALUE, true);
+            IdepixIO.setNewBandProperties(whiteBand, "Whiteness", "dl", IdepixConstants.NO_DATA_VALUE, true);
             brightWhiteBand = targetProduct.addBand("bright_white_value", ProductData.TYPE_FLOAT32);
-            IdepixUtils.setNewBandProperties(brightWhiteBand, "Brightwhiteness", "dl", IdepixConstants.NO_DATA_VALUE,
-                                             true);
+            IdepixIO.setNewBandProperties(brightWhiteBand, "Brightwhiteness", "dl", IdepixConstants.NO_DATA_VALUE,
+                                          true);
             temperatureBand = targetProduct.addBand("temperature_value", ProductData.TYPE_FLOAT32);
-            IdepixUtils.setNewBandProperties(temperatureBand, "Temperature", "K", IdepixConstants.NO_DATA_VALUE, true);
+            IdepixIO.setNewBandProperties(temperatureBand, "Temperature", "K", IdepixConstants.NO_DATA_VALUE, true);
             spectralFlatnessBand = targetProduct.addBand("spectral_flatness_value", ProductData.TYPE_FLOAT32);
-            IdepixUtils.setNewBandProperties(spectralFlatnessBand, "Spectral Flatness", "dl",
-                                             IdepixConstants.NO_DATA_VALUE, true);
+            IdepixIO.setNewBandProperties(spectralFlatnessBand, "Spectral Flatness", "dl",
+                                          IdepixConstants.NO_DATA_VALUE, true);
             ndviBand = targetProduct.addBand("ndvi_value", ProductData.TYPE_FLOAT32);
-            IdepixUtils.setNewBandProperties(ndviBand, "NDVI", "dl", IdepixConstants.NO_DATA_VALUE, true);
+            IdepixIO.setNewBandProperties(ndviBand, "NDVI", "dl", IdepixConstants.NO_DATA_VALUE, true);
             ndsiBand = targetProduct.addBand("ndsi_value", ProductData.TYPE_FLOAT32);
-            IdepixUtils.setNewBandProperties(ndsiBand, "NDSI", "dl", IdepixConstants.NO_DATA_VALUE, true);
+            IdepixIO.setNewBandProperties(ndsiBand, "NDSI", "dl", IdepixConstants.NO_DATA_VALUE, true);
             glintRiskBand = targetProduct.addBand("glint_risk_value", ProductData.TYPE_FLOAT32);
-            IdepixUtils.setNewBandProperties(glintRiskBand, "GLINT_RISK", "dl", IdepixConstants.NO_DATA_VALUE, true);
+            IdepixIO.setNewBandProperties(glintRiskBand, "GLINT_RISK", "dl", IdepixConstants.NO_DATA_VALUE, true);
             radioLandBand = targetProduct.addBand("radiometric_land_value", ProductData.TYPE_FLOAT32);
-            IdepixUtils.setNewBandProperties(radioLandBand, "Radiometric Land Value", "", IdepixConstants.NO_DATA_VALUE,
-                                             true);
+            IdepixIO.setNewBandProperties(radioLandBand, "Radiometric Land Value", "", IdepixConstants.NO_DATA_VALUE,
+                                          true);
             radioWaterBand = targetProduct.addBand("radiometric_water_value", ProductData.TYPE_FLOAT32);
-            IdepixUtils.setNewBandProperties(radioWaterBand, "Radiometric Water Value", "",
-                                             IdepixConstants.NO_DATA_VALUE, true);
+            IdepixIO.setNewBandProperties(radioWaterBand, "Radiometric Water Value", "",
+                                          IdepixConstants.NO_DATA_VALUE, true);
         }
 
         // new bit masks:
-        ProbaVUtils.setupProbavBitmasks(targetProduct);
+        ProbaVUtils.setupProbavClassifBitmask(targetProduct);
 
     }
 
@@ -396,15 +396,11 @@ public class ProbaVClassificationOp extends Operator {
         targetTile.setSample(x, y, IdepixConstants.F_CLOUD_SHADOW, false); // not computed here
         targetTile.setSample(x, y, IdepixConstants.F_CLEAR_LAND, probaVAlgorithm.isClearLand());
         targetTile.setSample(x, y, IdepixConstants.F_CLEAR_WATER, probaVAlgorithm.isClearWater());
-        targetTile.setSample(x, y, IdepixConstants.F_CLEAR_SNOW, probaVAlgorithm.isClearSnow());
+        targetTile.setSample(x, y, IdepixConstants.F_SNOW_ICE, probaVAlgorithm.isClearSnow());
         targetTile.setSample(x, y, IdepixConstants.F_LAND, probaVAlgorithm.isLand());
         targetTile.setSample(x, y, IdepixConstants.F_WATER, probaVAlgorithm.isWater());
         targetTile.setSample(x, y, IdepixConstants.F_BRIGHT, probaVAlgorithm.isBright());
         targetTile.setSample(x, y, IdepixConstants.F_WHITE, probaVAlgorithm.isWhite());
-        targetTile.setSample(x, y, IdepixConstants.F_BRIGHTWHITE, probaVAlgorithm.isBrightWhite());
-        targetTile.setSample(x, y, IdepixConstants.F_HIGH, probaVAlgorithm.isHigh());
-        targetTile.setSample(x, y, IdepixConstants.F_VEG_RISK, probaVAlgorithm.isVegRisk());
-        targetTile.setSample(x, y, IdepixConstants.F_SEAICE, probaVAlgorithm.isSeaIce());
     }
 
     void setIsWaterByFraction(byte watermaskFraction, AbstractPixelProperties pixelProperties) {

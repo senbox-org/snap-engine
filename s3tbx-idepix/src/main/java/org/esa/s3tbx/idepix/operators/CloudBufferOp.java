@@ -3,6 +3,7 @@ package org.esa.s3tbx.idepix.operators;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.s3tbx.idepix.algorithms.CloudBuffer;
 import org.esa.s3tbx.idepix.core.IdepixConstants;
+import org.esa.s3tbx.idepix.core.util.IdepixIO;
 import org.esa.s3tbx.idepix.core.util.IdepixUtils;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
@@ -56,8 +57,8 @@ public class CloudBufferOp extends Operator {
                                                              classifiedProduct.getSceneRasterHeight()),
                                                cloudBufferWidth, cloudBufferWidth);
 
-        origClassifFlagBand = classifiedProduct.getBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS);
-        ProductUtils.copyBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS, classifiedProduct, cloudBufferProduct, false);
+        origClassifFlagBand = classifiedProduct.getBand(IdepixIO.IDEPIX_CLASSIF_FLAGS);
+        ProductUtils.copyBand(IdepixIO.IDEPIX_CLASSIF_FLAGS, classifiedProduct, cloudBufferProduct, false);
         setTargetProduct(cloudBufferProduct);
     }
 

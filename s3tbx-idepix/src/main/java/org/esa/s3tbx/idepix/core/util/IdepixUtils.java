@@ -1,15 +1,12 @@
 package org.esa.s3tbx.idepix.core.util;
 
-
-import org.esa.s3tbx.idepix.algorithms.viirs.ViirsConstants;
-import org.esa.s3tbx.idepix.core.AlgorithmSelector;
 import org.esa.s3tbx.idepix.core.IdepixConstants;
-import org.esa.snap.core.datamodel.*;
-import org.esa.snap.core.gpf.OperatorException;
+import org.esa.snap.core.datamodel.FlagCoding;
+import org.esa.snap.core.datamodel.Mask;
+import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.Tile;
-import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.core.util.BitSetter;
 import org.esa.snap.core.util.math.MathUtils;
-import org.esa.snap.dataio.envisat.EnvisatConstants;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,275 +14,16 @@ import java.util.Calendar;
 import java.util.Random;
 
 /**
- * @author Olaf Danne
- * @version $Revision: $ $Date:  $
+ * todo: add comment
+ * To change this template use File | Settings | File Templates.
+ * Date: 20.10.2016
+ * Time: 13:44
+ *
+ * @author olafd
  */
 public class IdepixUtils {
 
-    public static final String F_INVALID_DESCR_TEXT = "Invalid pixels";
-    public static final String F_CLOUD_DESCR_TEXT = "Pixels which are either cloud_sure or cloud_ambiguous";
-    public static final String F_CLOUD_AMBIGUOUS_DESCR_TEXT = "Semi transparent clouds, or clouds where the detection level is uncertain";
-    public static final String F_CLOUD_SURE_DESCR_TEXT = "Fully opaque clouds with full confidence of their detection";
-    public static final String F_CLOUD_BUFFER_DESCR_TEXT = "A buffer of n pixels around a cloud. n is a user supplied parameter. Applied to pixels masked as 'cloud'";
-    public static final String F_CLOUD_SHADOW_DESCR_TEXT = "Pixels is affect by a cloud shadow";
-    public static final String F_COASTLINE_DESCR_TEXT = "Pixels at a coastline";
-    public static final String F_CLEAR_SNOW_DESCR_TEXT = "Clear snow/ice pixels";
-    public static final String F_CLEAR_LAND_DESCR_TEXT = "Clear land pixels";
-    public static final String F_CLEAR_WATER_DESCR_TEXT = "Clear water pixels";
-    public static final String F_LAND_DESCR_TEXT = "Land pixels";
-    public static final String F_WATER_DESCR_TEXT = "Water pixels";
-    public static final String F_BRIGHT_DESCR_TEXT = "Bright pixels";
-    public static final String F_WHITE_DESCR_TEXT = "White pixels";
-    public static final String F_BRIGHTWHITE_DESCR_TEXT = "'Brightwhite' pixels";
-    public static final String F_HIGH_DESCR_TEXT = "High pixels";
-    public static final String F_VEG_RISK_DESCR_TEXT = "Pixels with vegetation risk";
-    public static final String F_SEAICE_DESCR_TEXT = "Sea ice pixels";
-
     private static java.util.logging.Logger logger = java.util.logging.Logger.getLogger("idepix");
-
-    public static final String IDEPIX_CLASSIF_FLAGS = "pixel_classif_flags";
-
-    private IdepixUtils() {
-    }
-
-    /**
-     * creates a new product with the same size
-     *
-     * @param sourceProduct
-     * @param name
-     * @param type
-     * @param copyAllTiePoints
-     * @return targetProduct
-     */
-    public static Product createCompatibleTargetProduct(Product sourceProduct, String name, String type,
-                                                        boolean copyAllTiePoints) {
-        final int sceneWidth = sourceProduct.getSceneRasterWidth();
-        final int sceneHeight = sourceProduct.getSceneRasterHeight();
-
-        Product targetProduct = new Product(name, type, sceneWidth, sceneHeight);
-        copyTiePoints(sourceProduct, targetProduct, copyAllTiePoints);
-        ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
-        targetProduct.setStartTime(sourceProduct.getStartTime());
-        targetProduct.setEndTime(sourceProduct.getEndTime());
-        return targetProduct;
-    }
-
-    /**
-     * Copies the tie point data.
-     *
-     * @param sourceProduct
-     * @param targetProduct
-     * @param copyAllTiePoints
-     */
-    public static void copyTiePoints(Product sourceProduct,
-                                     Product targetProduct, boolean copyAllTiePoints) {
-        if (copyAllTiePoints) {
-            // copy all tie point grids to output product
-            ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
-        } else {
-            for (int i = 0; i < sourceProduct.getNumTiePointGrids(); i++) {
-                TiePointGrid srcTPG = sourceProduct.getTiePointGridAt(i);
-                if (srcTPG.getName().equals("latitude") || srcTPG.getName().equals("longitude")) {
-                    targetProduct.addTiePointGrid(srcTPG.cloneTiePointGrid());
-                }
-            }
-        }
-    }
-
-    /**
-     * copies a geocoding from a given reference band as scene geocoding to a given product
-     * todo: move to a more general place?!
-     *
-     * @param referenceBand - the reference band
-     * @param product       - the product where the geocoding shall be copied
-     */
-    public static void copyGeocodingFromBandToProduct(Band referenceBand, Product product) {
-        final Scene srcScene = SceneFactory.createScene(referenceBand);
-        final Scene destScene = SceneFactory.createScene(product);
-        if (srcScene != null && destScene != null) {
-            srcScene.transferGeoCodingTo(destScene, null);
-        }
-    }
-
-    public static Product cloneProduct(Product sourceProduct, boolean copySourceBands) {
-        return cloneProduct(sourceProduct, sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight(), copySourceBands);
-    }
-
-    public static Product cloneProduct(Product sourceProduct, int width, int height, boolean copySourceBands) {
-        Product clonedProduct = new Product(sourceProduct.getName(),
-                                            sourceProduct.getProductType(),
-                                            width,
-                                            height);
-
-        ProductUtils.copyMetadata(sourceProduct, clonedProduct);
-        ProductUtils.copyGeoCoding(sourceProduct, clonedProduct);
-        ProductUtils.copyFlagCodings(sourceProduct, clonedProduct);
-        ProductUtils.copyFlagBands(sourceProduct, clonedProduct, true);
-        ProductUtils.copyMasks(sourceProduct, clonedProduct);
-        clonedProduct.setStartTime(sourceProduct.getStartTime());
-        clonedProduct.setEndTime(sourceProduct.getEndTime());
-
-        if (copySourceBands) {
-            // copy all bands from source product
-            for (Band b : sourceProduct.getBands()) {
-                if (!clonedProduct.containsBand(b.getName())) {
-                    ProductUtils.copyBand(b.getName(), sourceProduct, clonedProduct, true);
-                    if (isIdepixSpectralBand(b)) {
-                        ProductUtils.copyRasterDataNodeProperties(b, clonedProduct.getBand(b.getName()));
-                    }
-                }
-            }
-
-            for (int i = 0; i < sourceProduct.getNumTiePointGrids(); i++) {
-                TiePointGrid srcTPG = sourceProduct.getTiePointGridAt(i);
-                if (!clonedProduct.containsTiePointGrid(srcTPG.getName())) {
-                    clonedProduct.addTiePointGrid(srcTPG.cloneTiePointGrid());
-                }
-            }
-        }
-
-        return clonedProduct;
-    }
-
-    public static boolean isIdepixSpectralBand(Band b) {
-        return b.getName().startsWith("radiance") || b.getName().startsWith("refl") ||
-                b.getName().startsWith("brr") || b.getName().startsWith("rho_toa");
-    }
-
-
-    public static boolean validateInputProduct(Product inputProduct, AlgorithmSelector algorithm) {
-        return isInputValid(inputProduct) && isInputConsistent(inputProduct, algorithm);
-    }
-
-    public static boolean isInputValid(Product inputProduct) {
-        if (!isValidAvhrrProduct(inputProduct) &&
-                !isValidLandsat8Product(inputProduct) &&
-                !isValidProbavProduct(inputProduct) &&
-                !isValidModisProduct(inputProduct) &&
-                !isValidSeawifsProduct(inputProduct) &&
-                !isValidViirsProduct(inputProduct, ViirsConstants.VIIRS_SPECTRAL_BAND_NAMES) &&
-                !isValidMerisProduct(inputProduct) &&
-                !isValidOlciProduct(inputProduct) &&
-                !isValidVgtProduct(inputProduct)) {
-            logErrorMessage("Input sensor must be either MERIS, AATSR, AVHRR, colocated MERIS/AATSR, MODIS/SeaWiFS, PROBA-V or VGT!");
-        }
-        return true;
-    }
-
-    public static boolean isValidMerisProduct(Product product) {
-        final boolean merisL1TypePatternMatches = EnvisatConstants.MERIS_L1_TYPE_PATTERN.matcher(product.getProductType()).matches();
-        // accept also ICOL L1N products...
-        final boolean merisIcolTypePatternMatches = isValidMerisIcolL1NProduct(product);
-        final boolean merisCCL1PTypePatternMatches = isValidMerisCCL1PProduct(product);
-        return merisL1TypePatternMatches || merisIcolTypePatternMatches || merisCCL1PTypePatternMatches;
-    }
-
-    public static boolean isValidOlciProduct(Product product) {
-        return product.getProductType().startsWith("S3A_OL_");  // todo: clarify
-    }
-
-    private static boolean isValidMerisIcolL1NProduct(Product product) {
-        final String icolProductType = product.getProductType();
-        if (icolProductType.endsWith("_1N")) {
-            int index = icolProductType.indexOf("_1");
-            final String merisProductType = icolProductType.substring(0, index) + "_1P";
-            return (EnvisatConstants.MERIS_L1_TYPE_PATTERN.matcher(merisProductType).matches());
-        } else {
-            return false;
-        }
-    }
-
-    private static boolean isValidMerisCCL1PProduct(Product product) {
-        return IdepixConstants.MERIS_CCL1P_TYPE_PATTERN.matcher(product.getProductType()).matches();
-    }
-
-    public static boolean isValidAvhrrProduct(Product product) {
-        return product.getProductType().equalsIgnoreCase(IdepixConstants.AVHRR_L1b_PRODUCT_TYPE) ||
-                product.getProductType().equalsIgnoreCase(IdepixConstants.AVHRR_L1b_USGS_PRODUCT_TYPE);
-    }
-
-    public static boolean isValidLandsat8Product(Product product) {
-        return product.containsBand("coastal_aerosol") &&
-                product.containsBand("blue") &&
-                product.containsBand("green") &&
-                product.containsBand("red") &&
-                product.containsBand("near_infrared") &&
-                product.containsBand("swir_1") &&
-                product.containsBand("swir_2") &&
-                product.containsBand("panchromatic") &&
-                product.containsBand("cirrus") &&
-                product.containsBand("thermal_infrared_(tirs)_1") &&
-                product.containsBand("thermal_infrared_(tirs)_2");
-
-    }
-
-    public static boolean isValidModisProduct(Product product) {
-        //        return (product.getName().matches("MOD021KM.A[0-9]{7}.[0-9]{4}.[0-9]{3}.[0-9]{13}.(?i)(hdf)") ||
-        //                product.getName().matches("MOD021KM.A[0-9]{7}.[0-9]{4}.[0-9]{3}.[0-9]{13}") ||
-        //                product.getName().matches("A[0-9]{13}.(?i)(L1B_LAC)"));
-        return (product.getName().contains("MOD021KM") || product.getName().contains("MYD021KM") ||
-                //                product.getName().contains("L1B_LAC"));
-                product.getName().contains("L1B_"));  // seems that we have various extensions :-(
-    }
-
-    public static boolean isValidSeawifsProduct(Product product) {
-//        S2006131120520.L1B_LAC
-//        S2005141121515.L1B_MLAC
-        return (product.getName().matches("S[0-9]{13}.(?i)(L1B_LAC)") ||
-                product.getName().matches("S[0-9]{13}.(?i)(L1B_MLAC)") ||
-                product.getName().matches("S[0-9]{13}.(?i)(L1B_HRPT)") ||
-                product.getName().matches("S[0-9]{13}.(?i)(L1C)"));
-    }
-
-    public static boolean isValidViirsProduct(Product product, String[] expectedBandNames) {
-        // first check expected bands
-        if (expectedBandNames != null) {
-            for (String expectedBandName : expectedBandNames) {
-                if (!product.containsBand(expectedBandName)) {
-                    return false;
-                }
-            }
-        }
-
-//        e.g. V2012024230521.L1C
-        return (product.getName().matches("V[0-9]{13}.(?i)(L1C)") ||
-                product.getName().matches("V[0-9]{13}.(?i)(L1C.nc)") ||
-                product.getName().matches("V[0-9]{13}.(?i)(L2)") ||
-                product.getName().matches("V[0-9]{13}.(?i)(L2.nc)"));
-    }
-
-
-    public static boolean isValidProbavProduct(Product product) {
-        return product.getProductType().startsWith(IdepixConstants.PROBAV_PRODUCT_TYPE_PREFIX);
-    }
-
-    public static boolean isValidVgtProduct(Product product) {
-        return product.getProductType().startsWith(IdepixConstants.SPOT_VGT_PRODUCT_TYPE_PREFIX);
-    }
-
-    private static boolean isInputConsistent(Product sourceProduct, AlgorithmSelector algorithm) {
-        if (AlgorithmSelector.AVHRR == algorithm) {
-            return (isValidAvhrrProduct(sourceProduct));
-        } else if (AlgorithmSelector.LANDSAT8 == algorithm) {
-            return (isValidLandsat8Product(sourceProduct));
-        } else if (AlgorithmSelector.MODIS == algorithm) {
-            return (isValidModisProduct(sourceProduct));
-        } else if (AlgorithmSelector.PROBAV == algorithm) {
-            return (isValidProbavProduct(sourceProduct));
-        } else if (AlgorithmSelector.SEAWIFS == algorithm) {
-            return (isValidSeawifsProduct(sourceProduct));
-        } else if (AlgorithmSelector.VIIRS == algorithm) {
-            return (isValidViirsProduct(sourceProduct, ViirsConstants.VIIRS_SPECTRAL_BAND_NAMES));
-        } else if (AlgorithmSelector.MERIS == algorithm) {
-            return (isValidMerisProduct(sourceProduct));
-        } else if (AlgorithmSelector.OLCI == algorithm) {
-            return (isValidOlciProduct(sourceProduct));
-        } else if (AlgorithmSelector.VGT == algorithm) {
-            return (isValidVgtProduct(sourceProduct));
-        } else {
-            throw new OperatorException("Algorithm " + algorithm.toString() + " not supported.");
-        }
-    }
 
     public static void logErrorMessage(String msg) {
         if (System.getProperty("gpfMode") != null && "GUI".equals(System.getProperty("gpfMode"))) {
@@ -295,13 +33,10 @@ public class IdepixUtils {
             info(msg);
         }
     }
-
-
     public static void info(final String msg) {
         logger.info(msg);
         System.out.println(msg);
     }
-
 
     public static float spectralSlope(float ch1, float ch2, float wl1, float wl2) {
         return (ch2 - ch1) / (wl2 - wl1);
@@ -334,33 +69,6 @@ public class IdepixUtils {
             }
         }
         return correctedReflectance;
-    }
-
-
-    public static boolean areAllReflectancesValid(float[] reflectance) {
-        for (float aReflectance : reflectance) {
-            if (Float.isNaN(aReflectance) || aReflectance <= 0.0f) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public static boolean areAllReflectancesValid(double[] reflectance) {
-        for (double aReflectance : reflectance) {
-            if (Double.isNaN(aReflectance) || aReflectance <= 0.0f) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public static void setNewBandProperties(Band band, String description, String unit, double noDataValue,
-                                            boolean useNoDataValue) {
-        band.setDescription(description);
-        band.setUnit(unit);
-        band.setNoDataValue(noDataValue);
-        band.setNoDataValueUsed(useNoDataValue);
     }
 
     public static double convertGeophysicalToMathematicalAngle(double inAngle) {
@@ -414,13 +122,6 @@ public class IdepixUtils {
         }
     }
 
-    public static Color getRandomColour(Random random) {
-        int rColor = random.nextInt(256);
-        int gColor = random.nextInt(256);
-        int bColor = random.nextInt(256);
-        return new Color(rColor, gColor, bColor);
-    }
-
     /**
      * Computes the azimuth difference from the given
      *
@@ -431,5 +132,4 @@ public class IdepixUtils {
     public static double computeAzimuthDifference(final double vaa, final double saa) {
         return MathUtils.RTOD * Math.acos(Math.cos(MathUtils.DTOR * (vaa - saa)));
     }
-
 }

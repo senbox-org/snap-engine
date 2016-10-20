@@ -9,8 +9,6 @@ package org.esa.s3tbx.idepix.algorithms.avhrr;
  * @author olafd
  */
 public class AvhrrConstants {
-    public static final String CLASSIF_BAND_NAME = "pixel_classif_flags";
-    public static final String LAND_WATER_FRACTION_BAND_NAME = "land_water_fraction";
 
     public static final String AVHRR_AC_ALBEDO_1_BAND_NAME = "albedo_1";
     public static final String AVHRR_AC_ALBEDO_2_BAND_NAME = "albedo_2";
@@ -43,19 +41,6 @@ public class AvhrrConstants {
     static final int SRC_USGS_RADIANCE_4 = 6;
     static final int SRC_USGS_RADIANCE_5 = 7;
     static final int SRC_USGS_WATERFRACTION = 8;
-
-    public static final int F_INVALID = 0;
-    public static final int F_CLOUD = 1;
-    public static final int F_CLOUD_AMBIGUOUS = 2;
-    public static final int F_CLOUD_SURE = 3;
-    public static final int F_CLOUD_BUFFER = 4;
-    public static final int F_CLOUD_SHADOW = 5;
-    public static final int F_SNOW_ICE = 6;
-    public static final int F_MIXED_PIXEL = 7;
-    public static final int F_GLINT_RISK = 8;
-    public static final int F_COASTLINE = 9;
-    public static final int F_LAND = 10;
-
 
     public static final double SOLAR_3b = 4.448;
     // first value of the following constants is for NOAA11, second value for NOAA14

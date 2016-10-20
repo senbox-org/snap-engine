@@ -2,6 +2,7 @@ package org.esa.s3tbx.idepix.algorithms.vgt;
 
 import org.esa.s3tbx.idepix.core.IdepixConstants;
 import org.esa.s3tbx.idepix.core.pixel.AbstractPixelProperties;
+import org.esa.s3tbx.idepix.core.util.IdepixIO;
 import org.esa.s3tbx.idepix.core.util.IdepixUtils;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.util.math.MathUtils;
@@ -38,7 +39,7 @@ public class VgtAlgorithm extends AbstractPixelProperties {
     private boolean isCoastline;
 
     public boolean isInvalid() {
-        return !IdepixUtils.areAllReflectancesValid(refl);
+        return !IdepixIO.areAllReflectancesValid(refl);
     }
 
     public boolean isClearSnow() {

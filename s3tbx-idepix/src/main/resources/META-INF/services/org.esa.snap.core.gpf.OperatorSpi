@@ -34,3 +34,4 @@ org.esa.s3tbx.idepix.algorithms.vgt.VgtOp$Spi
 org.esa.s3tbx.idepix.algorithms.vgt.VgtClassificationOp$Spi
 org.esa.s3tbx.idepix.algorithms.vgt.VgtPostProcessOp$Spi
 org.esa.s3tbx.idepix.operators.CloudBufferOp$Spi
+org.esa.s3tbx.idepix.operators.IdepixPostProcessingOp$Spi

@@ -1,7 +1,8 @@
 package org.esa.s3tbx.idepix.algorithms.landsat8;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.s3tbx.idepix.core.util.IdepixUtils;
+import org.esa.s3tbx.idepix.core.IdepixConstants;
+import org.esa.s3tbx.idepix.core.util.IdepixIO;
 import org.esa.s3tbx.idepix.core.util.SchillerNeuralNetWrapper;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.Operator;
@@ -302,7 +303,7 @@ public class Landsat8ClassificationOp extends Operator {
         targetProduct = new Product(sourceProduct.getName(), sourceProduct.getProductType(), sceneWidth, sceneHeight);
 
         // shall be the only target band!!
-        cloudFlagBandName = IdepixUtils.IDEPIX_CLASSIF_FLAGS;
+        cloudFlagBandName = IdepixIO.IDEPIX_CLASSIF_FLAGS;
         Band cloudFlagBand = targetProduct.addBand(cloudFlagBandName, ProductData.TYPE_INT32);
         FlagCoding flagCoding = Landsat8Utils.createLandsat8FlagCoding(cloudFlagBandName);
         cloudFlagBand.setSampleCoding(flagCoding);
@@ -312,7 +313,7 @@ public class Landsat8ClassificationOp extends Operator {
         // but keep the NN result band! (od/02.03.2016)
         targetProduct.addBand(NN_RESULT_BAND_NAME, ProductData.TYPE_FLOAT32);
 
-        IdepixUtils.copyGeocodingFromBandToProduct(blueBand, targetProduct);
+        IdepixIO.copyGeocodingFromBandToProduct(blueBand, targetProduct);
         targetProduct.setStartTime(sourceProduct.getStartTime());
         targetProduct.setEndTime(sourceProduct.getEndTime());
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
@@ -344,7 +345,16 @@ public class Landsat8ClassificationOp extends Operator {
 
     private void setCloudFlag(Tile targetTile, int x, int y, Landsat8Algorithm l8Algorithm) {
         // for given instrument, compute boolean pixel properties and write to cloud flag band
-        targetTile.setSample(x, y, Landsat8Constants.F_INVALID, l8Algorithm.isInvalid());
+        targetTile.setSample(x, y, IdepixConstants.F_INVALID, l8Algorithm.isInvalid());
+        targetTile.setSample(x, y, IdepixConstants.F_CLOUD_SURE, l8Algorithm.isCloud());
+        targetTile.setSample(x, y, IdepixConstants.F_CLOUD_AMBIGUOUS, l8Algorithm.isCloudAmbiguous());
+        targetTile.setSample(x, y, IdepixConstants.F_SNOW_ICE, l8Algorithm.isSnowIce());
+        targetTile.setSample(x, y, IdepixConstants.F_BRIGHT, l8Algorithm.isBright());
+        targetTile.setSample(x, y, IdepixConstants.F_WHITE, l8Algorithm.isWhite());
+        targetTile.setSample(x, y, IdepixConstants.F_CLOUD_SHADOW, false); // not computed here
+        targetTile.setSample(x, y, IdepixConstants.F_GLINT_RISK, false);   // TODO
+        targetTile.setSample(x, y, IdepixConstants.F_COASTLINE, false);   // TODO
+        targetTile.setSample(x, y, IdepixConstants.F_LAND, l8Algorithm.isLand());         // TODO
         targetTile.setSample(x, y, Landsat8Constants.F_CLOUD_SHIMEZ, applyShimezCloudTest && l8Algorithm.isCloudShimez());
         targetTile.setSample(x, y, Landsat8Constants.F_CLOUD_SHIMEZ_BUFFER, false); // not computed here
         targetTile.setSample(x, y, Landsat8Constants.F_CLOUD_HOT, applyHotCloudTest && l8Algorithm.isCloudHot());
@@ -353,15 +363,6 @@ public class Landsat8ClassificationOp extends Operator {
         targetTile.setSample(x, y, Landsat8Constants.F_CLOUD_OTSU_BUFFER, false); // not computed here
         targetTile.setSample(x, y, Landsat8Constants.F_CLOUD_CLOST, applyClostCloudTest && l8Algorithm.isCloudClost());
         targetTile.setSample(x, y, Landsat8Constants.F_CLOUD_CLOST_BUFFER, false); // not computed here
-        targetTile.setSample(x, y, Landsat8Constants.F_CLOUD_SURE, l8Algorithm.isCloud());
-        targetTile.setSample(x, y, Landsat8Constants.F_CLOUD_AMBIGUOUS, l8Algorithm.isCloudAmbiguous());
-        targetTile.setSample(x, y, Landsat8Constants.F_SNOW_ICE, l8Algorithm.isSnowIce());
-        targetTile.setSample(x, y, Landsat8Constants.F_BRIGHT, l8Algorithm.isBright());
-        targetTile.setSample(x, y, Landsat8Constants.F_WHITE, l8Algorithm.isWhite());
-        targetTile.setSample(x, y, Landsat8Constants.F_CLOUD_SHADOW, false); // not computed here
-        targetTile.setSample(x, y, Landsat8Constants.F_GLINTRISK, false);   // TODO
-        targetTile.setSample(x, y, Landsat8Constants.F_COASTLINE, false);   // TODO
-        targetTile.setSample(x, y, Landsat8Constants.F_LAND, l8Algorithm.isLand());         // TODO
     }
 
 

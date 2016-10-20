@@ -28,13 +28,4 @@ public class IdepixProducts {
         return GPF.createProduct("Meris.CloudTopPressureOp", GPF.NO_PARAMS, sourceProduct);
     }
 
-    public static void addRadianceBands(Product l1bProduct, Product targetProduct, String[] bandsToCopy) {
-        for (String bandname : bandsToCopy) {
-            if (!targetProduct.containsBand(bandname) && bandname.contains("radiance")) {
-                System.out.println("adding band: " + bandname);
-                ProductUtils.copyBand(bandname, l1bProduct, targetProduct, true);
-            }
-        }
-    }
-
 }

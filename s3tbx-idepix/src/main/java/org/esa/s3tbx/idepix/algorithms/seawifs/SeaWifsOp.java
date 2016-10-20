@@ -1,10 +1,8 @@
 package org.esa.s3tbx.idepix.algorithms.seawifs;
 
-import org.esa.s3tbx.idepix.algorithms.modis.ModisClassificationOp;
-import org.esa.s3tbx.idepix.algorithms.modis.ModisPostProcessingOp;
 import org.esa.s3tbx.idepix.core.AlgorithmSelector;
 import org.esa.s3tbx.idepix.core.IdepixConstants;
-import org.esa.s3tbx.idepix.core.util.IdepixUtils;
+import org.esa.s3tbx.idepix.core.util.IdepixIO;
 import org.esa.s3tbx.idepix.operators.BasisOp;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.GPF;
@@ -76,7 +74,7 @@ public class SeaWifsOp extends BasisOp {
     @Override
     public void initialize() throws OperatorException {
 
-        final boolean inputProductIsValid = IdepixUtils.validateInputProduct(sourceProduct, AlgorithmSelector.SEAWIFS);
+        final boolean inputProductIsValid = IdepixIO.validateInputProduct(sourceProduct, AlgorithmSelector.SEAWIFS);
         if (!inputProductIsValid) {
             throw new OperatorException(IdepixConstants.INPUT_INCONSISTENCY_ERROR_MESSAGE);
         }
@@ -135,21 +133,13 @@ public class SeaWifsOp extends BasisOp {
 
     private void addBandsToTargetProduct(Product targetProduct) {
         if (outputRadiance) {
-            copySourceBands(sourceProduct, targetProduct, "Lt_");
+            IdepixIO.copySourceBands(sourceProduct, targetProduct, "Lt_");
         }
         if (outputReflectance) {
-            copySourceBands(classifProduct, targetProduct, "_refl");
+            IdepixIO.copySourceBands(classifProduct, targetProduct, "_refl");
         }
         if (outputDebug) {
-            copySourceBands(classifProduct, targetProduct, "_value");
-        }
-    }
-
-    private static void copySourceBands(Product rad2reflProduct, Product targetProduct, String bandNameSubstring) {
-        for (String bandname : rad2reflProduct.getBandNames()) {
-            if (bandname.contains(bandNameSubstring) && !targetProduct.containsBand(bandname)) {
-                ProductUtils.copyBand(bandname, rad2reflProduct, targetProduct, true);
-            }
+            IdepixIO.copySourceBands(classifProduct, targetProduct, "_value");
         }
     }
 

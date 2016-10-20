@@ -3,6 +3,7 @@ package org.esa.s3tbx.idepix.algorithms.probav;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.s3tbx.idepix.algorithms.CloudBuffer;
 import org.esa.s3tbx.idepix.core.IdepixConstants;
+import org.esa.s3tbx.idepix.core.util.IdepixIO;
 import org.esa.s3tbx.idepix.core.util.IdepixUtils;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
@@ -58,7 +59,7 @@ public class ProbaVPostProcessOp extends Operator {
         Product postProcessedCloudProduct = createTargetProduct(probavCloudProduct,
                                                                 "postProcessedCloud", "postProcessedCloud");
 
-        origCloudFlagBand = probavCloudProduct.getBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS);
+        origCloudFlagBand = probavCloudProduct.getBand(IdepixIO.IDEPIX_CLASSIF_FLAGS);
         origSmFlagBand = l1bProduct.getBand("SM_FLAGS");
 
         if (computeCloudBuffer) {
@@ -68,7 +69,7 @@ public class ProbaVPostProcessOp extends Operator {
             );
         }
 
-        ProductUtils.copyBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS, probavCloudProduct, postProcessedCloudProduct, false);
+        ProductUtils.copyBand(IdepixIO.IDEPIX_CLASSIF_FLAGS, probavCloudProduct, postProcessedCloudProduct, false);
         setTargetProduct(postProcessedCloudProduct);
     }
 
@@ -157,7 +158,7 @@ public class ProbaVPostProcessOp extends Operator {
         final boolean idepixClearLand = targetTile.getSampleBit(x, y, IdepixConstants.F_CLEAR_LAND);
         final boolean idepixWater = targetTile.getSampleBit(x, y, IdepixConstants.F_WATER);
         final boolean idepixClearWater = targetTile.getSampleBit(x, y, IdepixConstants.F_CLEAR_WATER);
-        final boolean idepixClearSnow = targetTile.getSampleBit(x, y, IdepixConstants.F_CLEAR_SNOW);
+        final boolean idepixClearSnow = targetTile.getSampleBit(x, y, IdepixConstants.F_SNOW_ICE);
         final boolean idepixCloud = targetTile.getSampleBit(x, y, IdepixConstants.F_CLOUD);
 
         final boolean safeClearLand = smClear && idepixLand && idepixClearLand && !idepixClearSnow;
@@ -176,7 +177,7 @@ public class ProbaVPostProcessOp extends Operator {
         targetTile.setSample(x, y, IdepixConstants.F_CLEAR_LAND, safeClearLandFinal);
         targetTile.setSample(x, y, IdepixConstants.F_CLEAR_WATER, safeClearWaterFinal);
         targetTile.setSample(x, y, IdepixConstants.F_CLOUD, safeCloudFinal);
-        targetTile.setSample(x, y, IdepixConstants.F_CLEAR_SNOW, safeSnowIce);
+        targetTile.setSample(x, y, IdepixConstants.F_SNOW_ICE, safeSnowIce);
     }
 
     public static class Spi extends OperatorSpi {

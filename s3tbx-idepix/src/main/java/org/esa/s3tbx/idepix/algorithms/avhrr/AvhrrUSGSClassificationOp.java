@@ -1,5 +1,6 @@
 package org.esa.s3tbx.idepix.algorithms.avhrr;
 
+import org.esa.s3tbx.idepix.core.IdepixConstants;
 import org.esa.s3tbx.idepix.core.util.SchillerNeuralNetWrapper;
 import org.esa.s3tbx.idepix.core.util.SunPosition;
 import org.esa.snap.core.datamodel.*;
@@ -171,7 +172,7 @@ public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
     }
 
     void readSchillerNets() {
-        try (InputStream is = getClass().getResourceAsStream(SCHILLER_AVHRRAC_NET_NAME)) {
+        try (InputStream is = getClass().getResourceAsStream(AVHRRAC_NET_NAME)) {
             avhrracNeuralNet = SchillerNeuralNetWrapper.create(is);
         } catch (IOException e) {
             throw new OperatorException("Cannot read Schiller neural nets: " + e.getMessage());
@@ -286,7 +287,7 @@ public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
 
         } else {
             targetSamplesIndex = 0;
-            targetSamples[targetSamplesIndex++].set(AvhrrConstants.F_INVALID, true);
+            targetSamples[targetSamplesIndex++].set(IdepixConstants.F_INVALID, true);
             targetSamples[targetSamplesIndex++].set(Float.NaN);
             targetSamples[targetSamplesIndex++].set(Float.NaN);
             targetSamples[targetSamplesIndex++].set(Float.NaN);
@@ -328,16 +329,16 @@ public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
 
     @Override
     void setClassifFlag(WritableSample[] targetSamples, AvhrrAlgorithm algorithm) {
-        targetSamples[0].set(AvhrrConstants.F_INVALID, algorithm.isInvalid());
-        targetSamples[0].set(AvhrrConstants.F_CLOUD, algorithm.isCloud());
-        targetSamples[0].set(AvhrrConstants.F_CLOUD_AMBIGUOUS, algorithm.isCloudAmbiguous());
-        targetSamples[0].set(AvhrrConstants.F_CLOUD_SURE, algorithm.isCloudSure());
-        targetSamples[0].set(AvhrrConstants.F_CLOUD_BUFFER, algorithm.isCloudBuffer());
-        targetSamples[0].set(AvhrrConstants.F_CLOUD_SHADOW, algorithm.isCloudShadow());
-        targetSamples[0].set(AvhrrConstants.F_SNOW_ICE, algorithm.isSnowIce());
-        targetSamples[0].set(AvhrrConstants.F_GLINT_RISK, algorithm.isGlintRisk());
-        targetSamples[0].set(AvhrrConstants.F_COASTLINE, algorithm.isCoastline());
-        targetSamples[0].set(AvhrrConstants.F_LAND, algorithm.isLand());
+        targetSamples[0].set(IdepixConstants.F_INVALID, algorithm.isInvalid());
+        targetSamples[0].set(IdepixConstants.F_CLOUD, algorithm.isCloud());
+        targetSamples[0].set(IdepixConstants.F_CLOUD_AMBIGUOUS, algorithm.isCloudAmbiguous());
+        targetSamples[0].set(IdepixConstants.F_CLOUD_SURE, algorithm.isCloudSure());
+        targetSamples[0].set(IdepixConstants.F_CLOUD_BUFFER, algorithm.isCloudBuffer());
+        targetSamples[0].set(IdepixConstants.F_CLOUD_SHADOW, algorithm.isCloudShadow());
+        targetSamples[0].set(IdepixConstants.F_SNOW_ICE, algorithm.isSnowIce());
+        targetSamples[0].set(IdepixConstants.F_GLINT_RISK, algorithm.isGlintRisk());
+        targetSamples[0].set(IdepixConstants.F_COASTLINE, algorithm.isCoastline());
+        targetSamples[0].set(IdepixConstants.F_LAND, algorithm.isLand());
     }
 
     @Override
@@ -369,7 +370,7 @@ public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
         }
 
         // BEAM: todo reactivate this once we have our SRTM mask in SNAP
-        sampleConfigurer.defineSample(index, AvhrrConstants.LAND_WATER_FRACTION_BAND_NAME, waterMaskProduct);
+        sampleConfigurer.defineSample(index, IdepixConstants.LAND_WATER_FRACTION_BAND_NAME, waterMaskProduct);
 
         // meanwhile use the 'Land-Sea-Mask' operator by Array (Jun Lu, Luis Veci):
 //        sampleConfigurer.defineSample(index, AvhrrConstants.AVHRR_AC_ALBEDO_1_BAND_NAME, waterMaskProduct);
@@ -379,7 +380,7 @@ public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
     protected void configureTargetSamples(TargetSampleConfigurer sampleConfigurer) throws OperatorException {
         int index = 0;
         // the only standard band:
-        sampleConfigurer.defineSample(index++, AvhrrConstants.CLASSIF_BAND_NAME);
+        sampleConfigurer.defineSample(index++, IdepixConstants.CLASSIF_BAND_NAME);
         sampleConfigurer.defineSample(index++, "vza");
         sampleConfigurer.defineSample(index++, "sza");
         sampleConfigurer.defineSample(index++, "vaa");
@@ -405,11 +406,11 @@ public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
     protected void configureTargetProduct(ProductConfigurer productConfigurer) {
         productConfigurer.copyTimeCoding();
         productConfigurer.copyTiePointGrids();
-        Band classifFlagBand = productConfigurer.addBand(AvhrrConstants.CLASSIF_BAND_NAME, ProductData.TYPE_INT16);
+        Band classifFlagBand = productConfigurer.addBand(IdepixConstants.CLASSIF_BAND_NAME, ProductData.TYPE_INT16);
 
         classifFlagBand.setDescription("Pixel classification flag");
         classifFlagBand.setUnit("dl");
-        FlagCoding flagCoding = AvhrrAcUtils.createAvhrrAcFlagCoding(AvhrrConstants.CLASSIF_BAND_NAME);
+        FlagCoding flagCoding = AvhrrAcUtils.createAvhrrAcFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
         classifFlagBand.setSampleCoding(flagCoding);
         getTargetProduct().getFlagCodingGroup().add(flagCoding);
 

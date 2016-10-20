@@ -1,9 +1,9 @@
-package org.esa.s3tbx.idepix.algorithms.viirs;
+package org.esa.s3tbx.idepix.operators;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.s3tbx.idepix.algorithms.modis.ModisUtils;
+import org.esa.s3tbx.idepix.algorithms.seawifs.SeaWifsConstants;
+import org.esa.s3tbx.idepix.algorithms.seawifs.SeaWifsUtils;
 import org.esa.s3tbx.idepix.core.IdepixConstants;
-import org.esa.s3tbx.idepix.operators.BasisOp;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.Product;
@@ -21,23 +21,23 @@ import org.esa.snap.core.util.RectangleExtender;
 import java.awt.*;
 
 /**
- * VIIRS post processing operator, operating on tiles:
+ * Default post processing operator, operating on tiles:
  * - cloud buffer
  * - ...
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "Idepix.Viirs.Postprocess",
+@OperatorMetadata(alias = "Idepix.Postprocess",
         version = "2.2",
         copyright = "(c) 2016 by Brockmann Consult",
-        description = "Refines the VIIRS pixel classification.",
+        description = "Refines the Idepix pixel classification.",
         internal = true)
-public class ViirsPostProcessingOp extends BasisOp {
+public class IdepixPostProcessingOp extends BasisOp{
 
-    @SourceProduct(alias = "refl", description = "VIIRS L1C reflectance product")
+    @SourceProduct(alias = "refl", description = "SeaWiFS reflectance product")
     private Product reflProduct;
 
-    @SourceProduct(alias = "classif", description = "VIIRS pixel classification product")
+    @SourceProduct(alias = "classif", description = "SeaWiFS pixel classification product")
     private Product classifProduct;
 
     @SourceProduct(alias = "waterMask")
@@ -247,7 +247,7 @@ public class ViirsPostProcessingOp extends BasisOp {
         ProductUtils.copyFlagCodings(classifProduct, targetProduct);
         ProductUtils.copyGeoCoding(reflProduct, targetProduct);
 
-        ModisUtils.setupModisClassifBitmask(targetProduct);
+        SeaWifsUtils.setupSeawifsClassifBitmask(targetProduct);
     }
 
     private void combineFlags(int x, int y, Tile sourceFlagTile, Tile targetTile) {
@@ -272,7 +272,6 @@ public class ViirsPostProcessingOp extends BasisOp {
         }
     }
 
-
     /**
      * The Service Provider Interface (SPI) for the operator.
      * It provides operator meta-data and is a factory for new operator instances.
@@ -280,7 +279,7 @@ public class ViirsPostProcessingOp extends BasisOp {
     public static class Spi extends OperatorSpi {
 
         public Spi() {
-            super(ViirsPostProcessingOp.class);
+            super(IdepixPostProcessingOp.class);
         }
     }
 

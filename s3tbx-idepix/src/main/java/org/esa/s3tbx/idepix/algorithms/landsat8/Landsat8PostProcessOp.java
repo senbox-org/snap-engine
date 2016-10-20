@@ -3,7 +3,8 @@ package org.esa.s3tbx.idepix.algorithms.landsat8;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.s3tbx.idepix.algorithms.CloudBuffer;
 import org.esa.s3tbx.idepix.algorithms.CloudShadowFronts;
-import org.esa.s3tbx.idepix.core.util.IdepixUtils;
+import org.esa.s3tbx.idepix.core.IdepixConstants;
+import org.esa.s3tbx.idepix.core.util.IdepixIO;
 import org.esa.s3tbx.idepix.core.util.OperatorUtils;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.Operator;
@@ -79,7 +80,7 @@ public class Landsat8PostProcessOp extends Operator {
 
             geoCoding = landsatCloudProduct.getSceneGeoCoding();
 
-            final String cloudClassifBandName = IdepixUtils.IDEPIX_CLASSIF_FLAGS;
+            final String cloudClassifBandName = IdepixIO.IDEPIX_CLASSIF_FLAGS;
             origCloudFlagBand = landsatCloudProduct.getBand(cloudClassifBandName);
             int extendedWidth = 64;
             int extendedHeight = 64; // todo: what do we need?
@@ -139,7 +140,7 @@ public class Landsat8PostProcessOp extends Operator {
         boolean isCloud = sourceFlagTile.getSampleBit(x, y, cloudFlagBit);
         if (refineClassificationNearCoastlines && waterFractionTile != null) {
             if (isNearCoastline(x, y, waterFractionTile, srcRectangle)) {
-                targetTile.setSample(x, y, Landsat8Constants.F_COASTLINE, true);
+                targetTile.setSample(x, y, IdepixConstants.F_COASTLINE, true);
                 refineSnowIceFlaggingForCoastlines(x, y, sourceFlagTile, targetTile);
                 if (isCloud) {
                     refineCloudFlaggingForCoastlines(x, y, cloudFlagBit,
@@ -149,7 +150,7 @@ public class Landsat8PostProcessOp extends Operator {
         }
         boolean isCloudAfterRefinement = targetTile.getSampleBit(x, y, cloudFlagBit);
         if (isCloudAfterRefinement) {
-            targetTile.setSample(x, y, Landsat8Constants.F_SNOW_ICE, false);
+            targetTile.setSample(x, y, IdepixConstants.F_SNOW_ICE, false);
             if ((computeCloudBuffer)) {
                 CloudBuffer.computeSimpleCloudBuffer(x, y,
                                                      targetTile, targetTile,
@@ -240,15 +241,15 @@ public class Landsat8PostProcessOp extends Operator {
 
         if (removeCloudFlag) {
             targetTile.setSample(x, y, Landsat8Constants.F_CLOUD_SHIMEZ, false);
-            targetTile.setSample(x, y, Landsat8Constants.F_CLOUD_SURE, false);
-            targetTile.setSample(x, y, Landsat8Constants.F_CLOUD_AMBIGUOUS, false);
+            targetTile.setSample(x, y, IdepixConstants.F_CLOUD_SURE, false);
+            targetTile.setSample(x, y, IdepixConstants.F_CLOUD_AMBIGUOUS, false);
         }
     }
 
     private void refineSnowIceFlaggingForCoastlines(int x, int y, Tile sourceFlagTile, Tile targetTile) {
-        final boolean isSnowIce = sourceFlagTile.getSampleBit(x, y, Landsat8Constants.F_SNOW_ICE);
+        final boolean isSnowIce = sourceFlagTile.getSampleBit(x, y, IdepixConstants.F_SNOW_ICE);
         if (isSnowIce) {
-            targetTile.setSample(x, y, Landsat8Constants.F_SNOW_ICE, false);
+            targetTile.setSample(x, y, IdepixConstants.F_SNOW_ICE, false);
         }
     }
 

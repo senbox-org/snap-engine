@@ -1,5 +1,6 @@
 package org.esa.s3tbx.idepix.algorithms.seawifs;
 
+import org.esa.s3tbx.idepix.core.IdepixConstants;
 import org.esa.s3tbx.idepix.core.util.SchillerNeuralNetWrapper;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.OperatorException;
@@ -62,7 +63,7 @@ public class SeaWifsClassificationOp extends PixelOperator {
     @SourceProduct(alias = "waterMask")
     private Product waterMaskProduct;
 
-    public static final String SCHILLER_SEAWIFS_NET_NAME = "6x3_166.0.net";
+    public static final String SEAWIFS_NET_NAME = "6x3_166.0.net";
 
     private static final int earthSunDistance = 1;
 
@@ -101,38 +102,38 @@ public class SeaWifsClassificationOp extends PixelOperator {
                                           getSourceProduct());
         }
         int index = SeaWifsConstants.SEAWIFS_SRC_RAD_OFFSET + SeaWifsConstants.SEAWIFS_L1B_NUM_SPECTRAL_BANDS + 1;
-        sampleConfigurer.defineSample(index, SeaWifsConstants.LAND_WATER_FRACTION_BAND_NAME, waterMaskProduct);
+        sampleConfigurer.defineSample(index, IdepixConstants.LAND_WATER_FRACTION_BAND_NAME, waterMaskProduct);
     }
 
     @Override
     protected void configureTargetSamples(TargetSampleConfigurer sampleConfigurer) throws OperatorException {
         // the only standard band:
-        sampleConfigurer.defineSample(0, SeaWifsConstants.CLASSIF_BAND_NAME);
-        sampleConfigurer.defineSample(1, SeaWifsConstants.SCHILLER_NN_OUTPUT_BAND_NAME);
+        sampleConfigurer.defineSample(0, IdepixConstants.CLASSIF_BAND_NAME);
+        sampleConfigurer.defineSample(1, IdepixConstants.NN_OUTPUT_BAND_NAME);
     }
 
     @Override
     protected void configureTargetProduct(ProductConfigurer productConfigurer) {
         productConfigurer.copyTimeCoding();
         productConfigurer.copyTiePointGrids();
-        Band classifFlagBand = productConfigurer.addBand(SeaWifsConstants.CLASSIF_BAND_NAME, ProductData.TYPE_INT16);
+        Band classifFlagBand = productConfigurer.addBand(IdepixConstants.CLASSIF_BAND_NAME, ProductData.TYPE_INT16);
 
         classifFlagBand.setDescription("Pixel classification flag");
         classifFlagBand.setUnit("dl");
-        FlagCoding flagCoding = SeaWifsUtils.createSeawifsFlagCoding(SeaWifsConstants.CLASSIF_BAND_NAME);
+        FlagCoding flagCoding = SeaWifsUtils.createSeawifsFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
         classifFlagBand.setSampleCoding(flagCoding);
         getTargetProduct().getFlagCodingGroup().add(flagCoding);
 
         getTargetProduct().setSceneGeoCoding(reflProduct.getSceneGeoCoding());
-        SeaWifsUtils.setupClassifBitmask(getTargetProduct());
+        SeaWifsUtils.setupSeawifsClassifBitmask(getTargetProduct());
 
-        Band nnValueBand = productConfigurer.addBand(SeaWifsConstants.SCHILLER_NN_OUTPUT_BAND_NAME, ProductData.TYPE_FLOAT32);
-        nnValueBand.setDescription("Schiller NN output value");
+        Band nnValueBand = productConfigurer.addBand(IdepixConstants.NN_OUTPUT_BAND_NAME, ProductData.TYPE_FLOAT32);
+        nnValueBand.setDescription("NN output value");
         nnValueBand.setUnit("dl");
     }
 
     private void readSchillerNets() {
-        try (InputStream isSW = getClass().getResourceAsStream(SCHILLER_SEAWIFS_NET_NAME)) {
+        try (InputStream isSW = getClass().getResourceAsStream(SEAWIFS_NET_NAME)) {
             seawifsNeuralNet = SchillerNeuralNetWrapper.create(isSW);
         } catch (IOException e) {
             throw new OperatorException("Cannot read Schiller neural nets: " + e.getMessage());
@@ -140,18 +141,18 @@ public class SeaWifsClassificationOp extends PixelOperator {
     }
 
     private void setClassifFlag(WritableSample[] targetSamples, SeaWifsAlgorithm algorithm) {
-        targetSamples[0].set(SeaWifsConstants.F_INVALID, algorithm.isInvalid());
-        targetSamples[0].set(SeaWifsConstants.F_CLOUD, algorithm.isCloud());
-        targetSamples[0].set(SeaWifsConstants.F_CLOUD_AMBIGUOUS, algorithm.isCloudAmbiguous());
-        targetSamples[0].set(SeaWifsConstants.F_CLOUD_SURE, algorithm.isCloudSure());
-        targetSamples[0].set(SeaWifsConstants.F_CLOUD_BUFFER, algorithm.isCloudBuffer());
-        targetSamples[0].set(SeaWifsConstants.F_CLOUD_SHADOW, algorithm.isCloudShadow());
-        targetSamples[0].set(SeaWifsConstants.F_SNOW_ICE, algorithm.isSnowIce());
-        targetSamples[0].set(SeaWifsConstants.F_MIXED_PIXEL, algorithm.isMixedPixel());
-        targetSamples[0].set(SeaWifsConstants.F_GLINT_RISK, algorithm.isGlintRisk());
-        targetSamples[0].set(SeaWifsConstants.F_COASTLINE, algorithm.isCoastline());
-        targetSamples[0].set(SeaWifsConstants.F_LAND, algorithm.isLand());
-        targetSamples[0].set(SeaWifsConstants.F_BRIGHT, algorithm.isBright());
+        targetSamples[0].set(IdepixConstants.F_INVALID, algorithm.isInvalid());
+        targetSamples[0].set(IdepixConstants.F_CLOUD, algorithm.isCloud());
+        targetSamples[0].set(IdepixConstants.F_CLOUD_AMBIGUOUS, algorithm.isCloudAmbiguous());
+        targetSamples[0].set(IdepixConstants.F_CLOUD_SURE, algorithm.isCloudSure());
+        targetSamples[0].set(IdepixConstants.F_CLOUD_BUFFER, algorithm.isCloudBuffer());
+        targetSamples[0].set(IdepixConstants.F_CLOUD_SHADOW, algorithm.isCloudShadow());
+        targetSamples[0].set(IdepixConstants.F_SNOW_ICE, algorithm.isSnowIce());
+        targetSamples[0].set(IdepixConstants.F_MIXED_PIXEL, algorithm.isMixedPixel());
+        targetSamples[0].set(IdepixConstants.F_GLINT_RISK, algorithm.isGlintRisk());
+        targetSamples[0].set(IdepixConstants.F_COASTLINE, algorithm.isCoastline());
+        targetSamples[0].set(IdepixConstants.F_LAND, algorithm.isLand());
+        targetSamples[0].set(IdepixConstants.F_BRIGHT, algorithm.isBright());
     }
 
     private SeaWifsAlgorithm createSeawifsAlgorithm(int x, int y, Sample[] sourceSamples, WritableSample[] targetSamples) {

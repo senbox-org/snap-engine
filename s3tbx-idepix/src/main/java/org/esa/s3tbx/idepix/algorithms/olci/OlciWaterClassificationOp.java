@@ -4,7 +4,7 @@ import com.bc.ceres.core.ProgressMonitor;
 import org.esa.s3tbx.idepix.core.IdepixConstants;
 import org.esa.s3tbx.idepix.core.seaice.SeaIceClassification;
 import org.esa.s3tbx.idepix.core.seaice.SeaIceClassifier;
-import org.esa.s3tbx.idepix.core.util.IdepixUtils;
+import org.esa.s3tbx.idepix.core.util.IdepixIO;
 import org.esa.s3tbx.idepix.core.util.SchillerNeuralNetWrapper;
 import org.esa.s3tbx.processor.rad2refl.Rad2ReflConstants;
 import org.esa.snap.core.datamodel.*;
@@ -18,7 +18,6 @@ import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.RectangleExtender;
 import org.esa.snap.core.util.math.MathUtils;
-import org.esa.snap.dataio.envisat.EnvisatConstants;
 
 import java.awt.*;
 import java.io.IOException;
@@ -89,8 +88,8 @@ public class OlciWaterClassificationOp extends Operator {
             description = " NN cloud ambiguous cloud sure/snow separation value ")
     double schillerNNCloudSureSnowSeparationValue;
 
-    public static final String SCHILLER_OLCI_WATER_NET_NAME = "11x8x5x3_876.8_water.net";
-    public static final String SCHILLER_OLCI_ALL_NET_NAME = "11x8x5x3_1409.7_all.net";
+    public static final String OLCI_WATER_NET_NAME = "11x8x5x3_876.8_water.net";
+    public static final String OLCI_ALL_NET_NAME = "11x8x5x3_1409.7_all.net";
 
     ThreadLocal<SchillerNeuralNetWrapper> olciWaterNeuralNet;
     ThreadLocal<SchillerNeuralNetWrapper> olciAllNeuralNet;
@@ -113,8 +112,8 @@ public class OlciWaterClassificationOp extends Operator {
     }
 
     private void readSchillerNets() {
-        try (InputStream isWater = getClass().getResourceAsStream(SCHILLER_OLCI_WATER_NET_NAME);
-             InputStream isAll = getClass().getResourceAsStream(SCHILLER_OLCI_ALL_NET_NAME)) {
+        try (InputStream isWater = getClass().getResourceAsStream(OLCI_WATER_NET_NAME);
+             InputStream isAll = getClass().getResourceAsStream(OLCI_ALL_NET_NAME)) {
             olciWaterNeuralNet = SchillerNeuralNetWrapper.create(isWater);
             olciAllNeuralNet = SchillerNeuralNetWrapper.create(isAll);
         } catch (IOException e) {
@@ -133,15 +132,15 @@ public class OlciWaterClassificationOp extends Operator {
     }
 
     private void createTargetProduct() {
-        targetProduct = IdepixUtils.createCompatibleTargetProduct(l1bProduct, "MER", "MER_L2", true);
+        targetProduct = IdepixIO.createCompatibleTargetProduct(l1bProduct, "MER", "MER_L2", true);
 
-        cloudFlagBand = targetProduct.addBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS, ProductData.TYPE_INT16);
-        FlagCoding flagCoding = OlciUtils.createOlciFlagCoding(IdepixUtils.IDEPIX_CLASSIF_FLAGS);
+        cloudFlagBand = targetProduct.addBand(IdepixIO.IDEPIX_CLASSIF_FLAGS, ProductData.TYPE_INT16);
+        FlagCoding flagCoding = OlciUtils.createOlciFlagCoding(IdepixIO.IDEPIX_CLASSIF_FLAGS);
         cloudFlagBand.setSampleCoding(flagCoding);
         targetProduct.getFlagCodingGroup().add(flagCoding);
 
         if (outputSchillerNNValue) {
-            nnOutputBand = targetProduct.addBand(OlciConstants.SCHILLER_NN_OUTPUT_BAND_NAME,
+            nnOutputBand = targetProduct.addBand(IdepixConstants.NN_OUTPUT_BAND_NAME,
                                                  ProductData.TYPE_FLOAT32);
         }
     }
@@ -222,7 +221,7 @@ public class OlciWaterClassificationOp extends Operator {
     private void classifyCloud(int x, int y, Tile[] rhoToaTiles, Tile targetTile, int waterFraction) {
 
         final boolean isCoastline = isCoastlinePixel(x, y, waterFraction);
-        targetTile.setSample(x, y, OlciConstants.F_COASTLINE, isCoastline);
+        targetTile.setSample(x, y, IdepixConstants.F_COASTLINE, isCoastline);
 
         boolean is_snow_ice;
         boolean checkForSeaIce = false;
@@ -232,28 +231,28 @@ public class OlciWaterClassificationOp extends Operator {
             checkForSeaIce = ignoreSeaIceClimatology || isPixelClassifiedAsSeaice(geoPos);
         }
 
-        boolean isCloudSure = false;
+        boolean isCloudSure;
         boolean isCloudAmbiguous;
 
         double[] nnOutput = getOlciNNOutput(x, y, rhoToaTiles);
         if (!targetTile.getSampleBit(x, y, IdepixConstants.F_INVALID)) {
-            targetTile.setSample(x, y, OlciConstants.F_CLOUD_AMBIGUOUS, false);
-            targetTile.setSample(x, y, OlciConstants.F_CLOUD_SURE, false);
-            targetTile.setSample(x, y, OlciConstants.F_CLOUD, false);
-            targetTile.setSample(x, y, OlciConstants.F_SNOW_ICE, false);
+            targetTile.setSample(x, y, IdepixConstants.F_CLOUD_AMBIGUOUS, false);
+            targetTile.setSample(x, y, IdepixConstants.F_CLOUD_SURE, false);
+            targetTile.setSample(x, y, IdepixConstants.F_CLOUD, false);
+            targetTile.setSample(x, y, IdepixConstants.F_SNOW_ICE, false);
             isCloudAmbiguous = nnOutput[0] > schillerNNCloudAmbiguousLowerBoundaryValue &&
                     nnOutput[0] <= schillerNNCloudAmbiguousSureSeparationValue;
             if (isCloudAmbiguous) {
                 // this would be as 'CLOUD_AMBIGUOUS'...
-                targetTile.setSample(x, y, OlciConstants.F_CLOUD_AMBIGUOUS, true);
-                targetTile.setSample(x, y, OlciConstants.F_CLOUD, true);
+                targetTile.setSample(x, y, IdepixConstants.F_CLOUD_AMBIGUOUS, true);
+                targetTile.setSample(x, y, IdepixConstants.F_CLOUD, true);
             }
             // check for snow_ice separation below if needed, first set all to cloud
             isCloudSure = nnOutput[0] > schillerNNCloudAmbiguousSureSeparationValue;
             if (isCloudSure) {
                 // this would be as 'CLOUD_SURE'...
-                targetTile.setSample(x, y, OlciConstants.F_CLOUD_SURE, true);
-                targetTile.setSample(x, y, OlciConstants.F_CLOUD, true);
+                targetTile.setSample(x, y, IdepixConstants.F_CLOUD_SURE, true);
+                targetTile.setSample(x, y, IdepixConstants.F_CLOUD, true);
             }
 
             is_snow_ice = false;
@@ -262,12 +261,12 @@ public class OlciWaterClassificationOp extends Operator {
             }
             if (is_snow_ice) {
                 // this would be as 'SNOW/ICE'...
-                targetTile.setSample(x, y, OlciConstants.F_SNOW_ICE, true);
-                targetTile.setSample(x, y, OlciConstants.F_CLOUD_SURE, false);
-                targetTile.setSample(x, y, OlciConstants.F_CLOUD, false);
+                targetTile.setSample(x, y, IdepixConstants.F_SNOW_ICE, true);
+                targetTile.setSample(x, y, IdepixConstants.F_CLOUD_SURE, false);
+                targetTile.setSample(x, y, IdepixConstants.F_CLOUD, false);
             }
         }
-        targetTile.setSample(x, y, OlciConstants.F_GLINTRISK, false);  // todo: use L1b glint flag
+        targetTile.setSample(x, y, IdepixConstants.F_GLINT_RISK, false);  // todo: use L1b glint flag
     }
 
     private double[] getOlciNNOutput(int x, int y, Tile[] rhoToaTiles) {

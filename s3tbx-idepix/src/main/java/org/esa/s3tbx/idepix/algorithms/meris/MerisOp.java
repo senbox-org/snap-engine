@@ -2,7 +2,7 @@ package org.esa.s3tbx.idepix.algorithms.meris;
 
 import org.esa.s3tbx.idepix.core.AlgorithmSelector;
 import org.esa.s3tbx.idepix.core.IdepixConstants;
-import org.esa.s3tbx.idepix.core.util.IdepixUtils;
+import org.esa.s3tbx.idepix.core.util.IdepixIO;
 import org.esa.s3tbx.idepix.operators.BasisOp;
 import org.esa.s3tbx.idepix.operators.CloudBufferOp;
 import org.esa.s3tbx.idepix.operators.IdepixProducts;
@@ -134,7 +134,7 @@ public class MerisOp extends BasisOp {
     public void initialize() throws OperatorException {
         System.out.println("Running IDEPIX MERIS - source product: " + sourceProduct.getName());
 
-        final boolean inputProductIsValid = IdepixUtils.validateInputProduct(sourceProduct, AlgorithmSelector.MERIS);
+        final boolean inputProductIsValid = IdepixIO.validateInputProduct(sourceProduct, AlgorithmSelector.MERIS);
         if (!inputProductIsValid) {
             throw new OperatorException(IdepixConstants.INPUT_INCONSISTENCY_ERROR_MESSAGE);
         }
@@ -150,11 +150,11 @@ public class MerisOp extends BasisOp {
 
         targetProduct = postProcessingProduct;
 
-        targetProduct = IdepixUtils.cloneProduct(mergedClassificationProduct, true);
+        targetProduct = IdepixIO.cloneProduct(mergedClassificationProduct, true);
         targetProduct.setAutoGrouping("radiance:reflectance");
 
-        Band cloudFlagBand = targetProduct.getBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS);
-        cloudFlagBand.setSourceImage(postProcessingProduct.getBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS).getSourceImage());
+        Band cloudFlagBand = targetProduct.getBand(IdepixIO.IDEPIX_CLASSIF_FLAGS);
+        cloudFlagBand.setSourceImage(postProcessingProduct.getBand(IdepixIO.IDEPIX_CLASSIF_FLAGS).getSourceImage());
 
         copyOutputBands();
         ProductUtils.copyFlagBands(sourceProduct, targetProduct, true);   // we need the L1b flag!
@@ -167,9 +167,9 @@ public class MerisOp extends BasisOp {
         ctpProduct = IdepixProducts.computeCloudTopPressureProduct(sourceProduct);
 
         HashMap<String, Object> waterMaskParameters = new HashMap<>();
-        waterMaskParameters.put("resolution", MerisConstants.LAND_WATER_MASK_RESOLUTION);
-        waterMaskParameters.put("subSamplingFactorX", MerisConstants.OVERSAMPLING_FACTOR_X);
-        waterMaskParameters.put("subSamplingFactorY", MerisConstants.OVERSAMPLING_FACTOR_Y);
+        waterMaskParameters.put("resolution", IdepixConstants.LAND_WATER_MASK_RESOLUTION);
+        waterMaskParameters.put("subSamplingFactorX", IdepixConstants.OVERSAMPLING_FACTOR_X);
+        waterMaskParameters.put("subSamplingFactorY", IdepixConstants.OVERSAMPLING_FACTOR_Y);
         waterMaskProduct = GPF.createProduct("LandWaterMask", waterMaskParameters, sourceProduct);
     }
 
@@ -255,12 +255,12 @@ public class MerisOp extends BasisOp {
 
     private void copyOutputBands() {
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
-        MerisUtils.setupMerisBitmasks(targetProduct);
+        MerisUtils.setupMerisClassifBitmask(targetProduct);
         if (outputRadiance) {
-            IdepixProducts.addRadianceBands(sourceProduct, targetProduct, radianceBandsToCopy);
+            IdepixIO.addRadianceBands(sourceProduct, targetProduct, radianceBandsToCopy);
         }
         if (outputRad2Refl) {
-            MerisUtils.addRadiance2ReflectanceBands(rad2reflProduct, targetProduct, reflBandsToCopy);
+            IdepixIO.addMerisRadiance2ReflectanceBands(rad2reflProduct, targetProduct, reflBandsToCopy);
         }
     }
 

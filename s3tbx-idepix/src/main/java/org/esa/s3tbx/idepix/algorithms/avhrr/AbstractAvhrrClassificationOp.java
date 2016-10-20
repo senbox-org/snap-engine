@@ -1,10 +1,6 @@
 package org.esa.s3tbx.idepix.algorithms.avhrr;
 
-import com.bc.ceres.glevel.MultiLevelImage;
-import org.esa.s3tbx.idepix.core.util.IdepixUtils;
-import org.esa.s3tbx.idepix.core.util.SchillerNeuralNetWrapper;
-import org.esa.s3tbx.idepix.core.util.SunPosition;
-import org.esa.s3tbx.idepix.core.util.SunPositionCalculator;
+import org.esa.s3tbx.idepix.core.util.*;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
@@ -17,8 +13,6 @@ import org.esa.snap.core.gpf.pointop.Sample;
 import org.esa.snap.core.gpf.pointop.WritableSample;
 import org.esa.snap.core.util.math.MathUtils;
 
-import javax.media.jai.RenderedOp;
-import javax.media.jai.operator.TransposeDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Calendar;
@@ -112,7 +106,7 @@ public abstract class AbstractAvhrrClassificationOp extends PixelOperator {
     static final int ALBEDO_TO_RADIANCE = 0;
     static final int RADIANCE_TO_ALBEDO = 1;
 
-    static final String SCHILLER_AVHRRAC_NET_NAME = "6x3_114.1.net";
+    static final String AVHRRAC_NET_NAME = "6x3_114.1.net";
 
     ThreadLocal<SchillerNeuralNetWrapper> avhrracNeuralNet;
 
@@ -134,7 +128,7 @@ public abstract class AbstractAvhrrClassificationOp extends PixelOperator {
     }
 
     void readSchillerNets() {
-        try (InputStream is = getClass().getResourceAsStream(SCHILLER_AVHRRAC_NET_NAME)) {
+        try (InputStream is = getClass().getResourceAsStream(AVHRRAC_NET_NAME)) {
             avhrracNeuralNet = SchillerNeuralNetWrapper.create(is);
         } catch (IOException e) {
             throw new OperatorException("Cannot read Schiller neural nets: " + e.getMessage());

@@ -1,6 +1,7 @@
 package org.esa.s3tbx.idepix.algorithms.modis;
 
 import com.bc.ceres.core.ProgressMonitor;
+import org.esa.s3tbx.idepix.core.IdepixConstants;
 import org.esa.s3tbx.idepix.operators.BasisOp;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
@@ -72,7 +73,7 @@ public class ModisPostProcessingOp extends BasisOp {
 
     @Override
     public void computeTile(Band targetBand, final Tile targetTile, ProgressMonitor pm) throws OperatorException {
-        final Band classifFlagSourceBand = classifProduct.getBand(ModisConstants.CLASSIF_BAND_NAME);
+        final Band classifFlagSourceBand = classifProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
         final Rectangle targetRectangle = targetTile.getRectangle();
         final Rectangle extendedRectangle = rectCalculator.extend(targetRectangle);
         final Tile classifFlagSourceTile = getSourceTile(classifFlagSourceBand, extendedRectangle);
@@ -83,14 +84,14 @@ public class ModisPostProcessingOp extends BasisOp {
             for (int x = extendedRectangle.x; x < extendedRectangle.x + extendedRectangle.width; x++) {
 
                 if (targetRectangle.contains(x, y)) {
-                    boolean isCloud = classifFlagSourceTile.getSampleBit(x, y, ModisConstants.F_CLOUD);
+                    boolean isCloud = classifFlagSourceTile.getSampleBit(x, y, IdepixConstants.F_CLOUD);
                     combineFlags(x, y, classifFlagSourceTile, targetTile);
 
                     if (!(classifProduct.getSceneGeoCoding() instanceof TiePointGeoCoding) &&
                             !(classifProduct.getSceneGeoCoding() instanceof CrsGeoCoding)) {
                         // in this case, coastline could not be determined per pixel earlier
                         if (isCoastline(x, y, classifFlagSourceTile, targetRectangle)) {
-                            targetTile.setSample(x, y, ModisConstants.F_COASTLINE, true);
+                            targetTile.setSample(x, y, IdepixConstants.F_COASTLINE, true);
                         }
                     }
 
@@ -122,14 +123,14 @@ public class ModisPostProcessingOp extends BasisOp {
         final int TOP_BORDER = Math.max(y - windowWidth, rectangle.y);
         final int BOTTOM_BORDER = Math.min(y + windowWidth, rectangle.y + rectangle.height - 1);
 
-        final boolean isLandCenter = sourceFlagTile.getSampleBit(x, y, ModisConstants.F_LAND);
+        final boolean isLandCenter = sourceFlagTile.getSampleBit(x, y, IdepixConstants.F_LAND);
         if (isLandCenter) {
             int landCount = 0;
             int count = 0;
             for (int i = LEFT_BORDER; i <= RIGHT_BORDER; i++) {
                 for (int j = TOP_BORDER; j <= BOTTOM_BORDER; j++) {
                     final boolean isCenter = (i == x && j == y);
-                    final boolean isLand = sourceFlagTile.getSampleBit(i, j, ModisConstants.F_LAND);
+                    final boolean isLand = sourceFlagTile.getSampleBit(i, j, IdepixConstants.F_LAND);
                     if (!isCenter) {
                         count++;
                     }
@@ -168,7 +169,7 @@ public class ModisPostProcessingOp extends BasisOp {
             for (int i = LEFT_BORDER; i <= RIGHT_BORDER; i++) {
                 for (int j = TOP_BORDER; j <= BOTTOM_BORDER; j++) {
                     if (rectangle.contains(i, j)) {
-                        boolean isAlreadyCoastline = sourceFlagTile.getSampleBit(i, j, ModisConstants.F_COASTLINE);
+                        boolean isAlreadyCoastline = sourceFlagTile.getSampleBit(i, j, IdepixConstants.F_COASTLINE);
                         if (isAlreadyCoastline) {
                             return true;
                         }
@@ -188,13 +189,13 @@ public class ModisPostProcessingOp extends BasisOp {
         final int TOP_BORDER = Math.max(y - windowWidth, rectangle.y);
         final int BOTTOM_BORDER = Math.min(y + windowWidth, rectangle.y + rectangle.height - 1);
         boolean removeCloudFlag = true;
-        if (isPixelSurrounded(x, y, sourceFlagTile, rectangle, ModisConstants.F_CLOUD)) {
+        if (isPixelSurrounded(x, y, sourceFlagTile, rectangle, IdepixConstants.F_CLOUD)) {
             removeCloudFlag = false;
         } else {
             Rectangle targetTileRectangle = targetTile.getRectangle();
             for (int i = LEFT_BORDER; i <= RIGHT_BORDER; i++) {
                 for (int j = TOP_BORDER; j <= BOTTOM_BORDER; j++) {
-                    boolean is_cloud = sourceFlagTile.getSampleBit(i, j, ModisConstants.F_CLOUD);
+                    boolean is_cloud = sourceFlagTile.getSampleBit(i, j, IdepixConstants.F_CLOUD);
                     if (is_cloud && targetTileRectangle.contains(i, j) && !isNearCoastline(i, j, sourceFlagTile, waterFractionTile, rectangle)) {
                         removeCloudFlag = false;
                         break;
@@ -204,20 +205,20 @@ public class ModisPostProcessingOp extends BasisOp {
         }
 
         if (removeCloudFlag) {
-            targetTile.setSample(x, y, ModisConstants.F_CLOUD, false);
-            targetTile.setSample(x, y, ModisConstants.F_CLOUD_SURE, false);
-            targetTile.setSample(x, y, ModisConstants.F_CLOUD_AMBIGUOUS, false);
-            boolean is_land = sourceFlagTile.getSampleBit(x, y, ModisConstants.F_LAND);
-            targetTile.setSample(x, y, ModisConstants.F_MIXED_PIXEL, !is_land);
+            targetTile.setSample(x, y, IdepixConstants.F_CLOUD, false);
+            targetTile.setSample(x, y, IdepixConstants.F_CLOUD_SURE, false);
+            targetTile.setSample(x, y, IdepixConstants.F_CLOUD_AMBIGUOUS, false);
+            boolean is_land = sourceFlagTile.getSampleBit(x, y, IdepixConstants.F_LAND);
+            targetTile.setSample(x, y, IdepixConstants.F_MIXED_PIXEL, !is_land);
         }
         // return whether this is still a cloud
         return !removeCloudFlag;
     }
 
     private void refineSnowIceFlaggingForCoastlines(int x, int y, Tile sourceFlagTile, Tile targetTile) {
-        final boolean isSnowIce = sourceFlagTile.getSampleBit(x, y, ModisConstants.F_SNOW_ICE);
+        final boolean isSnowIce = sourceFlagTile.getSampleBit(x, y, IdepixConstants.F_SNOW_ICE);
         if (isSnowIce) {
-            targetTile.setSample(x, y, ModisConstants.F_SNOW_ICE, false);
+            targetTile.setSample(x, y, IdepixConstants.F_SNOW_ICE, false);
         }
     }
 
@@ -240,14 +241,14 @@ public class ModisPostProcessingOp extends BasisOp {
 
     private void createTargetProduct() throws OperatorException {
         targetProduct = createCompatibleProduct(classifProduct, classifProduct.getName(), classifProduct.getProductType());
-        ProductUtils.copyBand(ModisConstants.CLASSIF_BAND_NAME, classifProduct, targetProduct, false);
+        ProductUtils.copyBand(IdepixConstants.CLASSIF_BAND_NAME, classifProduct, targetProduct, false);
 
         ProductUtils.copyFlagBands(reflProduct, targetProduct, true);
         ProductUtils.copyFlagCodings(reflProduct, targetProduct);
         ProductUtils.copyFlagCodings(classifProduct, targetProduct);
         ProductUtils.copyGeoCoding(reflProduct, targetProduct);
 
-        ModisUtils.setupClassifBitmask(targetProduct);
+        ModisUtils.setupModisClassifBitmask(targetProduct);
     }
 
     private void combineFlags(int x, int y, Tile sourceFlagTile, Tile targetTile) {
@@ -264,10 +265,9 @@ public class ModisPostProcessingOp extends BasisOp {
         final int BOTTOM_BORDER = Math.min(y + cloudBufferWidth, rectangle.y + rectangle.height - 1);
         for (int i = LEFT_BORDER; i <= RIGHT_BORDER; i++) {
             for (int j = TOP_BORDER; j <= BOTTOM_BORDER; j++) {
-                boolean is_already_cloud = sourceFlagTile.getSampleBit(i, j, ModisConstants.F_CLOUD);
-//                boolean is_land = sourceFlagTile.getSampleBit(i, j, ModisConstants.F_LAND);
+                boolean is_already_cloud = sourceFlagTile.getSampleBit(i, j, IdepixConstants.F_CLOUD);
                 if (!is_already_cloud && rectangle.contains(i, j)) {
-                    targetTile.setSample(i, j, ModisConstants.F_CLOUD_BUFFER, true);
+                    targetTile.setSample(i, j, IdepixConstants.F_CLOUD_BUFFER, true);
                 }
             }
         }

@@ -1,5 +1,6 @@
 package org.esa.s3tbx.idepix.algorithms.modis;
 
+import org.esa.s3tbx.idepix.core.IdepixConstants;
 import org.esa.s3tbx.idepix.core.util.SchillerNeuralNetWrapper;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.OperatorException;
@@ -8,7 +9,6 @@ import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.pointop.*;
-import org.esa.snap.core.util.ProductUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -67,9 +67,9 @@ public class ModisClassificationOp extends PixelOperator {
     @SourceProduct(alias = "waterMask")
     private Product waterMaskProduct;
 
-    public static final String SCHILLER_MODIS_WATER_NET_NAME = "9x7x5x3_130.3_water.net";
-    public static final String SCHILLER_MODIS_LAND_NET_NAME = "8x6x4x2_290.4_land.net";
-    public static final String SCHILLER_MODIS_ALL_NET_NAME = "9x7x5x3_319.7_all.net";
+    public static final String MODIS_WATER_NET_NAME = "9x7x5x3_130.3_water.net";
+    public static final String MODIS_LAND_NET_NAME = "8x6x4x2_290.4_land.net";
+    public static final String MODIS_ALL_NET_NAME = "9x7x5x3_319.7_all.net";
 
     ThreadLocal<SchillerNeuralNetWrapper> modisWaterNeuralNet;
     ThreadLocal<SchillerNeuralNetWrapper> modisLandNeuralNet;
@@ -117,41 +117,41 @@ public class ModisClassificationOp extends PixelOperator {
         }
 
         int index = ModisConstants.MODIS_SRC_RAD_OFFSET + ModisConstants.MODIS_L1B_NUM_SPECTRAL_BANDS + 1;
-        sampleConfigurer.defineSample(index, ModisConstants.LAND_WATER_FRACTION_BAND_NAME, waterMaskProduct);
+        sampleConfigurer.defineSample(index, IdepixConstants.LAND_WATER_FRACTION_BAND_NAME, waterMaskProduct);
     }
 
     @Override
     protected void configureTargetSamples(TargetSampleConfigurer sampleConfigurer) throws OperatorException {
         // the only standard band:
-        sampleConfigurer.defineSample(0, ModisConstants.CLASSIF_BAND_NAME);
-        sampleConfigurer.defineSample(1, ModisConstants.SCHILLER_NN_OUTPUT_BAND_NAME);
+        sampleConfigurer.defineSample(0, IdepixConstants.CLASSIF_BAND_NAME);
+        sampleConfigurer.defineSample(1, IdepixConstants.NN_OUTPUT_BAND_NAME);
     }
 
     @Override
     protected void configureTargetProduct(ProductConfigurer productConfigurer) {
         productConfigurer.copyTimeCoding();
         productConfigurer.copyTiePointGrids();
-        Band classifFlagBand = productConfigurer.addBand(ModisConstants.CLASSIF_BAND_NAME, ProductData.TYPE_INT16);
+        Band classifFlagBand = productConfigurer.addBand(IdepixConstants.CLASSIF_BAND_NAME, ProductData.TYPE_INT16);
 
         classifFlagBand.setDescription("Pixel classification flag");
         classifFlagBand.setUnit("dl");
-        FlagCoding flagCoding = ModisUtils.createOccciFlagCoding(ModisConstants.CLASSIF_BAND_NAME);
+        FlagCoding flagCoding = ModisUtils.createModisFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
         classifFlagBand.setSampleCoding(flagCoding);
         getTargetProduct().getFlagCodingGroup().add(flagCoding);
 
         getTargetProduct().setSceneGeoCoding(reflProduct.getSceneGeoCoding());
-        ModisUtils.setupClassifBitmask(getTargetProduct());
+        ModisUtils.setupModisClassifBitmask(getTargetProduct());
 
-        Band nnValueBand = productConfigurer.addBand(ModisConstants.SCHILLER_NN_OUTPUT_BAND_NAME, ProductData.TYPE_FLOAT32);
+        Band nnValueBand = productConfigurer.addBand(IdepixConstants.NN_OUTPUT_BAND_NAME, ProductData.TYPE_FLOAT32);
         nnValueBand.setDescription("Schiller NN output value");
         nnValueBand.setUnit("dl");
     }
 
     private void readSchillerNets() {
         try (
-                InputStream isMW = getClass().getResourceAsStream(SCHILLER_MODIS_WATER_NET_NAME);
-                InputStream isML = getClass().getResourceAsStream(SCHILLER_MODIS_LAND_NET_NAME);
-                InputStream isMA = getClass().getResourceAsStream(SCHILLER_MODIS_ALL_NET_NAME)
+                InputStream isMW = getClass().getResourceAsStream(MODIS_WATER_NET_NAME);
+                InputStream isML = getClass().getResourceAsStream(MODIS_LAND_NET_NAME);
+                InputStream isMA = getClass().getResourceAsStream(MODIS_ALL_NET_NAME)
         ) {
             modisWaterNeuralNet = SchillerNeuralNetWrapper.create(isMW);
             modisLandNeuralNet = SchillerNeuralNetWrapper.create(isML);
@@ -162,18 +162,18 @@ public class ModisClassificationOp extends PixelOperator {
     }
 
     private void setClassifFlag(WritableSample[] targetSamples, ModisAlgorithm algorithm) {
-        targetSamples[0].set(ModisConstants.F_INVALID, algorithm.isInvalid());
-        targetSamples[0].set(ModisConstants.F_CLOUD, algorithm.isCloud());
-        targetSamples[0].set(ModisConstants.F_CLOUD_AMBIGUOUS, algorithm.isCloudAmbiguous());
-        targetSamples[0].set(ModisConstants.F_CLOUD_SURE, algorithm.isCloudSure());
-        targetSamples[0].set(ModisConstants.F_CLOUD_BUFFER, algorithm.isCloudBuffer());
-        targetSamples[0].set(ModisConstants.F_CLOUD_SHADOW, algorithm.isCloudShadow());
-        targetSamples[0].set(ModisConstants.F_SNOW_ICE, algorithm.isSnowIce());
-        targetSamples[0].set(ModisConstants.F_MIXED_PIXEL, algorithm.isMixedPixel());
-        targetSamples[0].set(ModisConstants.F_GLINT_RISK, algorithm.isGlintRisk());
-        targetSamples[0].set(ModisConstants.F_COASTLINE, algorithm.isCoastline());
-        targetSamples[0].set(ModisConstants.F_LAND, algorithm.isLand());
-        targetSamples[0].set(ModisConstants.F_BRIGHT, algorithm.isBright());
+        targetSamples[0].set(IdepixConstants.F_INVALID, algorithm.isInvalid());
+        targetSamples[0].set(IdepixConstants.F_CLOUD, algorithm.isCloud());
+        targetSamples[0].set(IdepixConstants.F_CLOUD_AMBIGUOUS, algorithm.isCloudAmbiguous());
+        targetSamples[0].set(IdepixConstants.F_CLOUD_SURE, algorithm.isCloudSure());
+        targetSamples[0].set(IdepixConstants.F_CLOUD_BUFFER, algorithm.isCloudBuffer());
+        targetSamples[0].set(IdepixConstants.F_CLOUD_SHADOW, algorithm.isCloudShadow());
+        targetSamples[0].set(IdepixConstants.F_SNOW_ICE, algorithm.isSnowIce());
+        targetSamples[0].set(IdepixConstants.F_MIXED_PIXEL, algorithm.isMixedPixel());
+        targetSamples[0].set(IdepixConstants.F_GLINT_RISK, algorithm.isGlintRisk());
+        targetSamples[0].set(IdepixConstants.F_COASTLINE, algorithm.isCoastline());
+        targetSamples[0].set(IdepixConstants.F_LAND, algorithm.isLand());
+        targetSamples[0].set(IdepixConstants.F_BRIGHT, algorithm.isBright());
     }
 
     private ModisAlgorithm createModisAlgorithm(int x, int y, Sample[] sourceSamples, WritableSample[] targetSamples) {

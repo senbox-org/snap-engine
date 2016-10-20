@@ -1,5 +1,6 @@
 package org.esa.s3tbx.idepix.algorithms.viirs;
 
+import org.esa.s3tbx.idepix.core.IdepixConstants;
 import org.esa.s3tbx.idepix.core.util.SchillerNeuralNetWrapper;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.gpf.OperatorException;
@@ -48,7 +49,7 @@ public class ViirsClassificationOp extends PixelOperator {
     @SourceProduct(alias = "waterMask")
     private Product waterMaskProduct;
 
-    public static final String SCHILLER_VIIRS_NET_NAME = "6x5x4x3x2_204.8.net";
+    public static final String VIIRS_NET_NAME = "6x5x4x3x2_204.8.net";
     ThreadLocal<SchillerNeuralNetWrapper> viirsNeuralNet;
 
 
@@ -81,36 +82,36 @@ public class ViirsClassificationOp extends PixelOperator {
         }
 
         sampleConfigurer.defineSample(ViirsConstants.VIIRS_L1B_NUM_SPECTRAL_BANDS+1,
-                                      ViirsConstants.LAND_WATER_FRACTION_BAND_NAME, waterMaskProduct);
+                                      IdepixConstants.LAND_WATER_FRACTION_BAND_NAME, waterMaskProduct);
     }
 
     @Override
     protected void configureTargetSamples(TargetSampleConfigurer sampleConfigurer) throws OperatorException {
         // the only standard band:
-        sampleConfigurer.defineSample(0, ViirsConstants.CLASSIF_BAND_NAME);
+        sampleConfigurer.defineSample(0, IdepixConstants.CLASSIF_BAND_NAME);
 
         // debug bands:
         if (outputDebug) {
             sampleConfigurer.defineSample(1, ViirsConstants.BRIGHTNESS_BAND_NAME);
             sampleConfigurer.defineSample(2, ViirsConstants.NDSI_BAND_NAME);
         }
-        sampleConfigurer.defineSample(3, ViirsConstants.SCHILLER_NN_OUTPUT_BAND_NAME);
+        sampleConfigurer.defineSample(3, IdepixConstants.NN_OUTPUT_BAND_NAME);
     }
 
     @Override
     protected void configureTargetProduct(ProductConfigurer productConfigurer) {
         productConfigurer.copyTimeCoding();
         productConfigurer.copyTiePointGrids();
-        Band classifFlagBand = productConfigurer.addBand(ViirsConstants.CLASSIF_BAND_NAME, ProductData.TYPE_INT16);
+        Band classifFlagBand = productConfigurer.addBand(IdepixConstants.CLASSIF_BAND_NAME, ProductData.TYPE_INT16);
 
         classifFlagBand.setDescription("Pixel classification flag");
         classifFlagBand.setUnit("dl");
-        FlagCoding flagCoding = ViirsUtils.createViirsFlagCoding(ViirsConstants.CLASSIF_BAND_NAME);
+        FlagCoding flagCoding = ViirsUtils.createViirsFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
         classifFlagBand.setSampleCoding(flagCoding);
         getTargetProduct().getFlagCodingGroup().add(flagCoding);
 
         productConfigurer.copyGeoCoding();
-        ViirsUtils.setupOccciClassifBitmask(getTargetProduct());
+        ViirsUtils.setupViirsClassifBitmask(getTargetProduct());
 
         // debug bands:
         if (outputDebug) {
@@ -123,13 +124,13 @@ public class ViirsClassificationOp extends PixelOperator {
             ndsiValueBand.setUnit("dl");
 
         }
-        Band nnValueBand = productConfigurer.addBand(ViirsConstants.SCHILLER_NN_OUTPUT_BAND_NAME, ProductData.TYPE_FLOAT32);
+        Band nnValueBand = productConfigurer.addBand(IdepixConstants.NN_OUTPUT_BAND_NAME, ProductData.TYPE_FLOAT32);
         nnValueBand.setDescription("Schiller NN output value");
         nnValueBand.setUnit("dl");
     }
 
     private void readSchillerNet() {
-        try (InputStream isV = getClass().getResourceAsStream(SCHILLER_VIIRS_NET_NAME)) {
+        try (InputStream isV = getClass().getResourceAsStream(VIIRS_NET_NAME)) {
             viirsNeuralNet = SchillerNeuralNetWrapper.create(isV);
         } catch (IOException e) {
             throw new OperatorException("Cannot read Neural Nets: " + e.getMessage());
@@ -137,17 +138,17 @@ public class ViirsClassificationOp extends PixelOperator {
     }
 
     private void setClassifFlag(WritableSample[] targetSamples, ViirsAlgorithm algorithm) {
-        targetSamples[0].set(ViirsConstants.F_INVALID, algorithm.isInvalid());
-        targetSamples[0].set(ViirsConstants.F_CLOUD, algorithm.isCloud());
-        targetSamples[0].set(ViirsConstants.F_CLOUD_AMBIGUOUS, algorithm.isCloudAmbiguous());
-        targetSamples[0].set(ViirsConstants.F_CLOUD_SURE, algorithm.isCloudSure());
-        targetSamples[0].set(ViirsConstants.F_CLOUD_BUFFER, algorithm.isCloudBuffer());
-        targetSamples[0].set(ViirsConstants.F_CLOUD_SHADOW, algorithm.isCloudShadow());
-        targetSamples[0].set(ViirsConstants.F_SNOW_ICE, algorithm.isSnowIce());
-        targetSamples[0].set(ViirsConstants.F_MIXED_PIXEL, algorithm.isMixedPixel());
-        targetSamples[0].set(ViirsConstants.F_GLINT_RISK, algorithm.isGlintRisk());
-        targetSamples[0].set(ViirsConstants.F_LAND, algorithm.isLand());
-        targetSamples[0].set(ViirsConstants.F_BRIGHT, algorithm.isBright());
+        targetSamples[0].set(IdepixConstants.F_INVALID, algorithm.isInvalid());
+        targetSamples[0].set(IdepixConstants.F_CLOUD, algorithm.isCloud());
+        targetSamples[0].set(IdepixConstants.F_CLOUD_AMBIGUOUS, algorithm.isCloudAmbiguous());
+        targetSamples[0].set(IdepixConstants.F_CLOUD_SURE, algorithm.isCloudSure());
+        targetSamples[0].set(IdepixConstants.F_CLOUD_BUFFER, algorithm.isCloudBuffer());
+        targetSamples[0].set(IdepixConstants.F_CLOUD_SHADOW, algorithm.isCloudShadow());
+        targetSamples[0].set(IdepixConstants.F_SNOW_ICE, algorithm.isSnowIce());
+        targetSamples[0].set(IdepixConstants.F_MIXED_PIXEL, algorithm.isMixedPixel());
+        targetSamples[0].set(IdepixConstants.F_GLINT_RISK, algorithm.isGlintRisk());
+        targetSamples[0].set(IdepixConstants.F_LAND, algorithm.isLand());
+        targetSamples[0].set(IdepixConstants.F_BRIGHT, algorithm.isBright());
 
         if (outputDebug) {
             targetSamples[1].set(algorithm.brightValue());

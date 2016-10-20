@@ -2,9 +2,13 @@ package org.esa.s3tbx.idepix.algorithms.meris;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.s3tbx.idepix.algorithms.CloudShadowFronts;
-import org.esa.s3tbx.idepix.core.util.IdepixUtils;
+import org.esa.s3tbx.idepix.core.IdepixConstants;
+import org.esa.s3tbx.idepix.core.util.IdepixIO;
 import org.esa.snap.core.datamodel.*;
-import org.esa.snap.core.gpf.*;
+import org.esa.snap.core.gpf.Operator;
+import org.esa.snap.core.gpf.OperatorException;
+import org.esa.snap.core.gpf.OperatorSpi;
+import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
@@ -13,7 +17,6 @@ import org.esa.snap.core.util.RectangleExtender;
 import org.esa.snap.dataio.envisat.EnvisatConstants;
 
 import java.awt.*;
-import java.util.HashMap;
 
 /**
  * Operator used to consolidate Idepix classification flag for MERIS:
@@ -62,16 +65,16 @@ public class MerisPostProcessOp extends Operator {
 
     @Override
     public void initialize() throws OperatorException {
-        Product postProcessedCloudProduct = IdepixUtils.createCompatibleTargetProduct(merisCloudProduct,
-                                                                                      "postProcessedCloud",
-                                                                                      "postProcessedCloud",
-                                                                                      true);
+        Product postProcessedCloudProduct = IdepixIO.createCompatibleTargetProduct(merisCloudProduct,
+                                                                                   "postProcessedCloud",
+                                                                                   "postProcessedCloud",
+                                                                                   true);
 
         waterFractionBand = waterMaskProduct.getBand("land_water_fraction");
 
         geoCoding = l1bProduct.getSceneGeoCoding();
 
-        origCloudFlagBand = merisCloudProduct.getBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS);
+        origCloudFlagBand = merisCloudProduct.getBand(IdepixIO.IDEPIX_CLASSIF_FLAGS);
         szaTPG = l1bProduct.getTiePointGrid(EnvisatConstants.MERIS_SUN_ZENITH_DS_NAME);
         saaTPG = l1bProduct.getTiePointGrid(EnvisatConstants.MERIS_SUN_AZIMUTH_DS_NAME);
         altTPG = l1bProduct.getTiePointGrid(EnvisatConstants.MERIS_DEM_ALTITUDE_DS_NAME);
@@ -93,7 +96,7 @@ public class MerisPostProcessOp extends Operator {
         );
 
 
-        ProductUtils.copyBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS, merisCloudProduct, postProcessedCloudProduct, false);
+        ProductUtils.copyBand(IdepixIO.IDEPIX_CLASSIF_FLAGS, merisCloudProduct, postProcessedCloudProduct, false);
         setTargetProduct(postProcessedCloudProduct);
     }
 
@@ -115,21 +118,21 @@ public class MerisPostProcessOp extends Operator {
             for (int x = srcRectangle.x; x < srcRectangle.x + srcRectangle.width; x++) {
 
                 if (targetRectangle.contains(x, y)) {
-                    boolean isCloud = sourceFlagTile.getSampleBit(x, y, MerisConstants.F_CLOUD);
+                    boolean isCloud = sourceFlagTile.getSampleBit(x, y, IdepixConstants.F_CLOUD);
                     combineFlags(x, y, sourceFlagTile, targetTile);
 
                     if (refineClassificationNearCoastlines) {
                         if (isNearCoastline(x, y, waterFractionTile, srcRectangle)) {
-                            targetTile.setSample(x, y, MerisConstants.F_COASTLINE, true);
+                            targetTile.setSample(x, y, IdepixConstants.F_COASTLINE, true);
                             refineSnowIceFlaggingForCoastlines(x, y, sourceFlagTile, targetTile);
                             if (isCloud) {
                                 refineCloudFlaggingForCoastlines(x, y, sourceFlagTile, waterFractionTile, targetTile, srcRectangle);
                             }
                         }
                     }
-                    boolean isCloudAfterRefinement = targetTile.getSampleBit(x, y, MerisConstants.F_CLOUD);
+                    boolean isCloudAfterRefinement = targetTile.getSampleBit(x, y, IdepixConstants.F_CLOUD);
                     if (isCloudAfterRefinement) {
-                        targetTile.setSample(x, y, MerisConstants.F_SNOW_ICE, false);
+                        targetTile.setSample(x, y, IdepixConstants.F_SNOW_ICE, false);
                     }
                 }
             }
@@ -146,9 +149,9 @@ public class MerisPostProcessOp extends Operator {
                 protected boolean isCloudForShadow(int x, int y) {
                     final boolean is_cloud_current;
                     if (!targetTile.getRectangle().contains(x, y)) {
-                        is_cloud_current = sourceFlagTile.getSampleBit(x, y, MerisConstants.F_CLOUD);
+                        is_cloud_current = sourceFlagTile.getSampleBit(x, y, IdepixConstants.F_CLOUD);
                     } else {
-                        is_cloud_current = targetTile.getSampleBit(x, y, MerisConstants.F_CLOUD);
+                        is_cloud_current = targetTile.getSampleBit(x, y, IdepixConstants.F_CLOUD);
                     }
                     if (is_cloud_current) {
                         final boolean isNearCoastline = isNearCoastline(x, y, waterFractionTile, srcRectangle);
@@ -161,17 +164,17 @@ public class MerisPostProcessOp extends Operator {
 
                 @Override
                 protected boolean isCloudFree(int x, int y) {
-                    return !sourceFlagTile.getSampleBit(x, y, MerisConstants.F_CLOUD);
+                    return !sourceFlagTile.getSampleBit(x, y, IdepixConstants.F_CLOUD);
                 }
 
                 @Override
                 protected boolean isSurroundedByCloud(int x, int y) {
-                    return isPixelSurrounded(x, y, sourceFlagTile, MerisConstants.F_CLOUD);
+                    return isPixelSurrounded(x, y, sourceFlagTile, IdepixConstants.F_CLOUD);
                 }
 
                 @Override
                 protected void setCloudShadow(int x, int y) {
-                    targetTile.setSample(x, y, MerisConstants.F_CLOUD_SHADOW, true);
+                    targetTile.setSample(x, y, IdepixConstants.F_CLOUD_SHADOW, true);
                 }
             };
             cloudShadowFronts.computeCloudShadow();
@@ -239,13 +242,13 @@ public class MerisPostProcessOp extends Operator {
         final int TOP_BORDER = Math.max(y - windowWidth, srcRectangle.y);
         final int BOTTOM_BORDER = Math.min(y + windowWidth, srcRectangle.y + srcRectangle.height - 1);
         boolean removeCloudFlag = true;
-        if (CloudShadowFronts.isPixelSurrounded(x, y, sourceFlagTile, MerisConstants.F_CLOUD)) {
+        if (CloudShadowFronts.isPixelSurrounded(x, y, sourceFlagTile, IdepixConstants.F_CLOUD)) {
             removeCloudFlag = false;
         } else {
             Rectangle targetTileRectangle = targetTile.getRectangle();
             for (int i = LEFT_BORDER; i <= RIGHT_BORDER; i++) {
                 for (int j = TOP_BORDER; j <= BOTTOM_BORDER; j++) {
-                    boolean is_cloud = sourceFlagTile.getSampleBit(i, j, MerisConstants.F_CLOUD);
+                    boolean is_cloud = sourceFlagTile.getSampleBit(i, j, IdepixConstants.F_CLOUD);
                     if (is_cloud && targetTileRectangle.contains(i, j) && !isNearCoastline(i, j, waterFractionTile, srcRectangle)) {
                         removeCloudFlag = false;
                         break;
@@ -255,16 +258,16 @@ public class MerisPostProcessOp extends Operator {
         }
 
         if (removeCloudFlag) {
-            targetTile.setSample(x, y, MerisConstants.F_CLOUD, false);
-            targetTile.setSample(x, y, MerisConstants.F_CLOUD_SURE, false);
-            targetTile.setSample(x, y, MerisConstants.F_CLOUD_AMBIGUOUS, false);
+            targetTile.setSample(x, y, IdepixConstants.F_CLOUD, false);
+            targetTile.setSample(x, y, IdepixConstants.F_CLOUD_SURE, false);
+            targetTile.setSample(x, y, IdepixConstants.F_CLOUD_AMBIGUOUS, false);
         }
     }
 
     private void refineSnowIceFlaggingForCoastlines(int x, int y, Tile sourceFlagTile, Tile targetTile) {
-        final boolean isSnowIce = sourceFlagTile.getSampleBit(x, y, MerisConstants.F_SNOW_ICE);
+        final boolean isSnowIce = sourceFlagTile.getSampleBit(x, y, IdepixConstants.F_SNOW_ICE);
         if (isSnowIce) {
-            targetTile.setSample(x, y, MerisConstants.F_SNOW_ICE, false);
+            targetTile.setSample(x, y, IdepixConstants.F_SNOW_ICE, false);
         }
     }
 

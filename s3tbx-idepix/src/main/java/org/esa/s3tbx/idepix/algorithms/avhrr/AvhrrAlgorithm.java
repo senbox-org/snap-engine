@@ -1,6 +1,6 @@
 package org.esa.s3tbx.idepix.algorithms.avhrr;
 
-import org.esa.s3tbx.idepix.core.util.IdepixUtils;
+import org.esa.s3tbx.idepix.core.util.IdepixIO;
 
 /**
  * IDEPIX instrument-specific pixel identification algorithm for GlobAlbedo: abstract superclass
@@ -38,7 +38,7 @@ public class AvhrrAlgorithm implements AvhrrPixelProperties {
 
     @Override
     public boolean isInvalid() {
-        return !IdepixUtils.areAllReflectancesValid(radiance);
+        return !IdepixIO.areAllReflectancesValid(radiance);
     }
 
     @Override

@@ -3,6 +3,7 @@ package org.esa.s3tbx.idepix.algorithms.olci;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.s3tbx.idepix.algorithms.CloudBuffer;
 import org.esa.s3tbx.idepix.core.IdepixConstants;
+import org.esa.s3tbx.idepix.core.util.IdepixIO;
 import org.esa.s3tbx.idepix.core.util.IdepixUtils;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.FlagCoding;
@@ -60,23 +61,23 @@ public class OlciMergeLandWaterOp extends Operator {
 
     @Override
     public void initialize() throws OperatorException {
-        Product mergedClassifProduct = IdepixUtils.createCompatibleTargetProduct(landClassifProduct,
-                                                                                 "mergedClassif", "mergedClassif", true);
+        Product mergedClassifProduct = IdepixIO.createCompatibleTargetProduct(landClassifProduct,
+                                                                              "mergedClassif", "mergedClassif", true);
 
-        landClassifBand = landClassifProduct.getBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS);
-        waterClassifBand = waterClassifProduct.getBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS);
+        landClassifBand = landClassifProduct.getBand(IdepixIO.IDEPIX_CLASSIF_FLAGS);
+        waterClassifBand = waterClassifProduct.getBand(IdepixIO.IDEPIX_CLASSIF_FLAGS);
 
-        mergedClassifBand = mergedClassifProduct.addBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS, ProductData.TYPE_INT16);
-        FlagCoding flagCoding = OlciUtils.createOlciFlagCoding(IdepixUtils.IDEPIX_CLASSIF_FLAGS);
+        mergedClassifBand = mergedClassifProduct.addBand(IdepixIO.IDEPIX_CLASSIF_FLAGS, ProductData.TYPE_INT16);
+        FlagCoding flagCoding = OlciUtils.createOlciFlagCoding(IdepixIO.IDEPIX_CLASSIF_FLAGS);
         mergedClassifBand.setSampleCoding(flagCoding);
         mergedClassifProduct.getFlagCodingGroup().add(flagCoding);
 
-        hasNNOutput = landClassifProduct.containsBand(OlciConstants.SCHILLER_NN_OUTPUT_BAND_NAME) &&
-                waterClassifProduct.containsBand(OlciConstants.SCHILLER_NN_OUTPUT_BAND_NAME);
+        hasNNOutput = landClassifProduct.containsBand(IdepixConstants.NN_OUTPUT_BAND_NAME) &&
+                waterClassifProduct.containsBand(IdepixConstants.NN_OUTPUT_BAND_NAME);
         if (hasNNOutput) {
-            landNNBand = landClassifProduct.getBand(OlciConstants.SCHILLER_NN_OUTPUT_BAND_NAME);
-            waterNNBand = waterClassifProduct.getBand(OlciConstants.SCHILLER_NN_OUTPUT_BAND_NAME);
-            mergedNNBand = mergedClassifProduct.addBand(OlciConstants.SCHILLER_NN_OUTPUT_BAND_NAME, ProductData.TYPE_FLOAT32);
+            landNNBand = landClassifProduct.getBand(IdepixConstants.NN_OUTPUT_BAND_NAME);
+            waterNNBand = waterClassifProduct.getBand(IdepixConstants.NN_OUTPUT_BAND_NAME);
+            mergedNNBand = mergedClassifProduct.addBand(IdepixConstants.NN_OUTPUT_BAND_NAME, ProductData.TYPE_FLOAT32);
         }
 
         setTargetProduct(mergedClassifProduct);
@@ -111,7 +112,7 @@ public class OlciMergeLandWaterOp extends Operator {
             for (int y = rectangle.y; y < rectangle.y + rectangle.height; y++) {
                 checkForCancellation();
                 for (int x = rectangle.x; x < rectangle.x + rectangle.width; x++) {
-                    final boolean isLand = landClassifTile.getSampleBit(x, y, OlciConstants.F_LAND);
+                    final boolean isLand = landClassifTile.getSampleBit(x, y, IdepixConstants.F_LAND);
                     final Tile classifTile = isLand ? landClassifTile : waterClassifTile;
                     final int sample = classifTile.getSampleInt(x, y);
                     targetTile.setSample(x, y, sample);
@@ -124,7 +125,7 @@ public class OlciMergeLandWaterOp extends Operator {
                     checkForCancellation();
                     for (int x = rectangle.x; x < rectangle.x + rectangle.width; x++) {
 
-                        final boolean isCloud = targetTile.getSampleBit(x, y, OlciConstants.F_CLOUD);
+                        final boolean isCloud = targetTile.getSampleBit(x, y, IdepixConstants.F_CLOUD);
                         if (isCloud) {
                             CloudBuffer.computeSimpleCloudBuffer(x, y,
                                                                  targetTile,
@@ -146,7 +147,7 @@ public class OlciMergeLandWaterOp extends Operator {
             for (int y = rectangle.y; y < rectangle.y + rectangle.height; y++) {
                 checkForCancellation();
                 for (int x = rectangle.x; x < rectangle.x + rectangle.width; x++) {
-                    boolean isLand = landClassifTile.getSampleBit(x, y, OlciConstants.F_LAND);
+                    boolean isLand = landClassifTile.getSampleBit(x, y, IdepixConstants.F_LAND);
                     final float sample = isLand ? landNNTile.getSampleFloat(x, y) : waterNNTile.getSampleFloat(x, y);
                     targetTile.setSample(x, y, sample);
                 }

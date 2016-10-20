@@ -1,6 +1,6 @@
 package org.esa.s3tbx.idepix.algorithms.landsat8;
 
-import org.esa.s3tbx.idepix.core.util.IdepixUtils;
+import org.esa.s3tbx.idepix.core.IdepixConstants;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,27 +12,16 @@ import java.util.Map;
  */
 public class Landsat8Constants {
 
-    public static final int F_INVALID = 0;
-    public static final int F_CLOUD_SHIMEZ = 1;
-    public static final int F_CLOUD_SHIMEZ_BUFFER = 2;
-    public static final int F_CLOUD_HOT = 3;
-    public static final int F_CLOUD_HOT_BUFFER = 4;
-    public static final int F_CLOUD_OTSU = 5;
-    public static final int F_CLOUD_OTSU_BUFFER = 6;
-    public static final int F_CLOUD_CLOST = 7;
-    public static final int F_CLOUD_CLOST_BUFFER = 8;
-    public static final int F_CLOUD_AMBIGUOUS = 9;
-    public static final int F_CLOUD_SURE = 10;
-    public static final int F_CLOUD_SHADOW = 11;
-    public static final int F_BRIGHT = 12;
-    public static final int F_WHITE = 13;
-    public static final int F_SNOW_ICE = 14;
-    public static final int F_GLINTRISK = 15;
-    public static final int F_COASTLINE = 16;
-    public static final int F_LAND = 17;
+    // additional flags after the 16 default ones
+    public static final int F_CLOUD_SHIMEZ = IdepixConstants.NUM_DEFAULT_FLAGS + 1;
+    public static final int F_CLOUD_SHIMEZ_BUFFER = IdepixConstants.NUM_DEFAULT_FLAGS + 2;
+    public static final int F_CLOUD_HOT = IdepixConstants.NUM_DEFAULT_FLAGS + 3;
+    public static final int F_CLOUD_HOT_BUFFER = IdepixConstants.NUM_DEFAULT_FLAGS + 4;
+    public static final int F_CLOUD_OTSU = IdepixConstants.NUM_DEFAULT_FLAGS + 5;
+    public static final int F_CLOUD_OTSU_BUFFER = IdepixConstants.NUM_DEFAULT_FLAGS + 6;
+    public static final int F_CLOUD_CLOST = IdepixConstants.NUM_DEFAULT_FLAGS + 7;
+    public static final int F_CLOUD_CLOST_BUFFER =IdepixConstants.NUM_DEFAULT_FLAGS + 8;
 
-    public static final String F_INVALID_DESCR_TEXT = "Invalid pixel";
-    public static final String F_CLOUD_DESCR_TEXT = "Cloudy pixel";
     public static final String F_CLOUD_BUFFER_SHIMEZ_DESCR_TEXT =
             "A buffer of n pixels around a cloud. Applied to pixels classified as 'cloud' with SHIMEZ test";
     public static final String F_CLOUD_BUFFER_HOT_DESCR_TEXT =
@@ -41,13 +30,6 @@ public class Landsat8Constants {
             "A buffer of n pixels around a cloud. Applied to pixels classified as 'cloud' with OTSU test";
     public static final String F_CLOUD_BUFFER_CLOST_DESCR_TEXT =
             "A buffer of n pixels around a cloud. Applied to pixels classified as 'cloud' with CLOST test";
-    public static final String F_CLOUD_AMBIGUOUS_DESCR_TEXT = IdepixUtils.F_CLOUD_AMBIGUOUS_DESCR_TEXT;
-    public static final String F_CLOUD_SURE_DESCR_TEXT = IdepixUtils.F_CLOUD_SURE_DESCR_TEXT;
-    public static final String F_SNOW_ICE_DESCR_TEXT = "Snow/Ice pixel";
-    public static final String F_BRIGHT_DESCR_TEXT = "Bright pixel (EXPERIMENTAL!)";
-    public static final String F_WHITE_DESCR_TEXT = "White pixel (EXPERIMENTAL!)";
-    public static final String F_COASTLINE_DESCR_TEXT = "Pixel at a coastline";
-    public static final String F_LAND_DESCR_TEXT = "Land pixel";
 
     public static final String Landsat8_FLAGS_NAME = "flags";
 
