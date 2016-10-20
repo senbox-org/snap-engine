@@ -37,7 +37,8 @@ import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.dataio.envisat.EnvisatConstants;
 
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.RenderingHints;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,6 +49,7 @@ import java.util.Map;
         description = "Aerosol retrieval from optical sensors (MERIS, VGT) following USwansea algorithm as used in GlobAlbedo project.",
         authors = "Andreas Heckel, Olaf Danne, Marco Zuehlke",
         version = "1.0",
+        internal = true,
         copyright = "(C) 2010, 2016 by University Swansea (a.heckel@swansea.ac.uk) and Brockmann Consult")
 public class AerosolRetrievalMasterOp extends Operator {
 
