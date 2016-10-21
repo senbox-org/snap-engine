@@ -12,43 +12,43 @@ public class IdepixConstants {
     public static final String CLASSIF_BAND_NAME = "pixel_classif_flags";
     public static final String LAND_WATER_FRACTION_BAND_NAME = "land_water_fraction";
 
-    public static final int F_INVALID = 0;
-    public static final int F_CLOUD = 1;
-    public static final int F_CLOUD_AMBIGUOUS = 2;
-    public static final int F_CLOUD_SURE = 3;
-    public static final int F_CLOUD_BUFFER = 4;
-    public static final int F_CLOUD_SHADOW = 5;
-    public static final int F_SNOW_ICE = 6;
-    public static final int F_CLEAR_LAND = 7;
-    public static final int F_CLEAR_WATER = 8;
-    public static final int F_LAND = 9;
-    public static final int F_WATER = 10;
-    public static final int F_COASTLINE = 11;
-    public static final int F_MIXED_PIXEL = 12;
-    public static final int F_BRIGHT = 13;
-    public static final int F_WHITE = 14;
-    public static final int F_GLINT_RISK = 15;
+    public static final int IDEPIX_INVALID = 0;
+    public static final int IDEPIX_CLOUD = 1;
+    public static final int IDEPIX_CLOUD_AMBIGUOUS = 2;
+    public static final int IDEPIX_CLOUD_SURE = 3;
+    public static final int IDEPIX_CLOUD_BUFFER = 4;
+    public static final int IDEPIX_CLOUD_SHADOW = 5;
+    public static final int IDEPIX_SNOW_ICE = 6;
+    public static final int IDEPIX_CLEAR_LAND = 7;
+    public static final int IDEPIX_CLEAR_WATER = 8;
+    public static final int IDEPIX_LAND = 9;
+    public static final int IDEPIX_WATER = 10;
+    public static final int IDEPIX_COASTLINE = 11;
+    public static final int IDEPIX_MIXED_PIXEL = 12;
+    public static final int IDEPIX_BRIGHT = 13;
+    public static final int IDEPIX_WHITE = 14;
+    public static final int IDEPIX_GLINT_RISK = 15;
 
     public static final int NUM_DEFAULT_FLAGS = 16;
 
-    public static final String F_INVALID_DESCR_TEXT = "Invalid pixels";
-    public static final String F_CLOUD_DESCR_TEXT = "Pixels which are either cloud_sure or cloud_ambiguous";
-    public static final String F_CLOUD_AMBIGUOUS_DESCR_TEXT =
+    public static final String IDEPIX_INVALID_DESCR_TEXT = "Invalid pixels";
+    public static final String IDEPIX_CLOUD_DESCR_TEXT = "Pixels which are either cloud_sure or cloud_ambiguous";
+    public static final String IDEPIX_CLOUD_AMBIGUOUS_DESCR_TEXT =
             "Semi transparent clouds, or clouds where the detection level is uncertain";
-    public static final String F_CLOUD_SURE_DESCR_TEXT = "Fully opaque clouds with full confidence of their detection";
-    public static final String F_CLOUD_BUFFER_DESCR_TEXT =
+    public static final String IDEPIX_CLOUD_SURE_DESCR_TEXT = "Fully opaque clouds with full confidence of their detection";
+    public static final String IDEPIX_CLOUD_BUFFER_DESCR_TEXT =
             "A buffer of n pixels around a cloud. n is a user supplied parameter. Applied to pixels masked as 'cloud'";
-    public static final String F_CLOUD_SHADOW_DESCR_TEXT = "Pixels is affect by a cloud shadow";
-    public static final String F_SNOW_ICE_DESCR_TEXT = "Clear snow/ice pixels";
-    public static final String F_CLEAR_LAND_DESCR_TEXT = "Clear land pixels";
-    public static final String F_CLEAR_WATER_DESCR_TEXT = "Clear water pixels";
-    public static final String F_LAND_DESCR_TEXT = "Land pixels";
-    public static final String F_WATER_DESCR_TEXT = "Water pixels";
-    public static final String F_COASTLINE_DESCR_TEXT = "Pixels at a coastline";
-    public static final String F_MIXED_PIXEL_DESCR_TEXT = "Mixed pixel";
-    public static final String F_BRIGHT_DESCR_TEXT = "Bright pixels";
-    public static final String F_WHITE_DESCR_TEXT = "White pixels";
-    public static final String F_GLINT_RISK_DESCR_TEXT = "Glint risk pixel";
+    public static final String IDEPIX_CLOUD_SHADOW_DESCR_TEXT = "Pixels is affect by a cloud shadow";
+    public static final String IDEPIX_SNOW_ICE_DESCR_TEXT = "Clear snow/ice pixels";
+    public static final String IDEPIX_CLEAR_LAND_DESCR_TEXT = "Clear land pixels";
+    public static final String IDEPIX_CLEAR_WATER_DESCR_TEXT = "Clear water pixels";
+    public static final String IDEPIX_LAND_DESCR_TEXT = "Land pixels";
+    public static final String IDEPIX_WATER_DESCR_TEXT = "Water pixels";
+    public static final String IDEPIX_COASTLINE_DESCR_TEXT = "Pixels at a coastline";
+    public static final String IDEPIX_MIXED_PIXEL_DESCR_TEXT = "Mixed pixel";
+    public static final String IDEPIX_BRIGHT_DESCR_TEXT = "Bright pixels";
+    public static final String IDEPIX_WHITE_DESCR_TEXT = "White pixels";
+    public static final String IDEPIX_GLINT_RISK_DESCR_TEXT = "Glint risk pixel";
 
     public static final int LAND_WATER_MASK_RESOLUTION = 50;
     public static final int OVERSAMPLING_FACTOR_X = 3;
@@ -117,7 +117,8 @@ public class IdepixConstants {
 
     public static final String INPUT_INCONSISTENCY_ERROR_MESSAGE =
             "Selected cloud screening algorithm cannot be used with given input product. \n\n" +
-                    "Valid are: MERIS, VGT, AATSR, AVHRR, MODIS, Landsat8, SeaWIFS, colocated MERIS/AATSR L1b products.";
+                    "Supported sensors are: MERIS, SPOT VGT, MODIS, Landsat-8, SeaWiFS, Sentinel-2 MSI, " +
+                    "Sentinel-3 OLCI, PROBA-V, VIIRS.";
 
     /**
      * A pattern which matches MERIS CC L1P product types

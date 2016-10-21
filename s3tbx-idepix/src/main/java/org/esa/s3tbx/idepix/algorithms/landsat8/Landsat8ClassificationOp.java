@@ -345,24 +345,24 @@ public class Landsat8ClassificationOp extends Operator {
 
     private void setCloudFlag(Tile targetTile, int x, int y, Landsat8Algorithm l8Algorithm) {
         // for given instrument, compute boolean pixel properties and write to cloud flag band
-        targetTile.setSample(x, y, IdepixConstants.F_INVALID, l8Algorithm.isInvalid());
-        targetTile.setSample(x, y, IdepixConstants.F_CLOUD_SURE, l8Algorithm.isCloud());
-        targetTile.setSample(x, y, IdepixConstants.F_CLOUD_AMBIGUOUS, l8Algorithm.isCloudAmbiguous());
-        targetTile.setSample(x, y, IdepixConstants.F_SNOW_ICE, l8Algorithm.isSnowIce());
-        targetTile.setSample(x, y, IdepixConstants.F_BRIGHT, l8Algorithm.isBright());
-        targetTile.setSample(x, y, IdepixConstants.F_WHITE, l8Algorithm.isWhite());
-        targetTile.setSample(x, y, IdepixConstants.F_CLOUD_SHADOW, false); // not computed here
-        targetTile.setSample(x, y, IdepixConstants.F_GLINT_RISK, false);   // TODO
-        targetTile.setSample(x, y, IdepixConstants.F_COASTLINE, false);   // TODO
-        targetTile.setSample(x, y, IdepixConstants.F_LAND, l8Algorithm.isLand());         // TODO
-        targetTile.setSample(x, y, Landsat8Constants.F_CLOUD_SHIMEZ, applyShimezCloudTest && l8Algorithm.isCloudShimez());
-        targetTile.setSample(x, y, Landsat8Constants.F_CLOUD_SHIMEZ_BUFFER, false); // not computed here
-        targetTile.setSample(x, y, Landsat8Constants.F_CLOUD_HOT, applyHotCloudTest && l8Algorithm.isCloudHot());
-        targetTile.setSample(x, y, Landsat8Constants.F_CLOUD_HOT_BUFFER, false); // not computed here
-        targetTile.setSample(x, y, Landsat8Constants.F_CLOUD_OTSU, applyOtsuCloudTest && l8Algorithm.isCloudOtsu());
-        targetTile.setSample(x, y, Landsat8Constants.F_CLOUD_OTSU_BUFFER, false); // not computed here
-        targetTile.setSample(x, y, Landsat8Constants.F_CLOUD_CLOST, applyClostCloudTest && l8Algorithm.isCloudClost());
-        targetTile.setSample(x, y, Landsat8Constants.F_CLOUD_CLOST_BUFFER, false); // not computed here
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_INVALID, l8Algorithm.isInvalid());
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, l8Algorithm.isCloud());
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, l8Algorithm.isCloudAmbiguous());
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, l8Algorithm.isSnowIce());
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_BRIGHT, l8Algorithm.isBright());
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_WHITE, l8Algorithm.isWhite());
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SHADOW, false); // not computed here
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_GLINT_RISK, false);   // TODO
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_COASTLINE, false);   // TODO
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_LAND, l8Algorithm.isLand());         // TODO
+        targetTile.setSample(x, y, Landsat8Constants.IDEPIX_CLOUD_SHIMEZ, applyShimezCloudTest && l8Algorithm.isCloudShimez());
+        targetTile.setSample(x, y, Landsat8Constants.IDEPIX_CLOUD_SHIMEZ_BUFFER, false); // not computed here
+        targetTile.setSample(x, y, Landsat8Constants.IDEPIX_CLOUD_HOT, applyHotCloudTest && l8Algorithm.isCloudHot());
+        targetTile.setSample(x, y, Landsat8Constants.IDEPIX_CLOUD_HOT_BUFFER, false); // not computed here
+        targetTile.setSample(x, y, Landsat8Constants.IDEPIX_CLOUD_OTSU, applyOtsuCloudTest && l8Algorithm.isCloudOtsu());
+        targetTile.setSample(x, y, Landsat8Constants.IDEPIX_CLOUD_OTSU_BUFFER, false); // not computed here
+        targetTile.setSample(x, y, Landsat8Constants.IDEPIX_CLOUD_CLOST, applyClostCloudTest && l8Algorithm.isCloudClost());
+        targetTile.setSample(x, y, Landsat8Constants.IDEPIX_CLOUD_CLOST_BUFFER, false); // not computed here
     }
 
 

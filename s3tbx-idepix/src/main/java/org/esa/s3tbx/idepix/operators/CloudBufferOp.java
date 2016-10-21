@@ -89,16 +89,16 @@ public class CloudBufferOp extends Operator {
                 if (targetRectangle.contains(x, y)) {
                     IdepixUtils.combineFlags(x, y, sourceFlagTile, targetTile);
                 }
-                boolean isCloud = sourceFlagTile.getSampleBit(x, y, IdepixConstants.F_CLOUD);
+                boolean isCloud = sourceFlagTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
                 if (isCloud) {
                     if (useLcCloudBuffer) {
-                        CloudBuffer.computeCloudBufferLC(targetTile, IdepixConstants.F_CLOUD, IdepixConstants.F_CLOUD_BUFFER);
+                        CloudBuffer.computeCloudBufferLC(targetTile, IdepixConstants.IDEPIX_CLOUD, IdepixConstants.IDEPIX_CLOUD_BUFFER);
                     } else {
                         CloudBuffer.computeSimpleCloudBuffer(x, y,
                                                              targetTile,
                                                              srcRectangle,
                                                              cloudBufferWidth,
-                                                             IdepixConstants.F_CLOUD_BUFFER);
+                                                             IdepixConstants.IDEPIX_CLOUD_BUFFER);
                     }
                 }
             }

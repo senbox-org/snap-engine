@@ -185,7 +185,7 @@ public class OlciWaterClassificationOp extends Operator {
                             }
                         }
                     } else {
-                        targetTile.setSample(x, y, IdepixConstants.F_INVALID, true);
+                        targetTile.setSample(x, y, IdepixConstants.IDEPIX_INVALID, true);
                     }
                 }
             }
@@ -221,7 +221,7 @@ public class OlciWaterClassificationOp extends Operator {
     private void classifyCloud(int x, int y, Tile[] rhoToaTiles, Tile targetTile, int waterFraction) {
 
         final boolean isCoastline = isCoastlinePixel(x, y, waterFraction);
-        targetTile.setSample(x, y, IdepixConstants.F_COASTLINE, isCoastline);
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_COASTLINE, isCoastline);
 
         boolean is_snow_ice;
         boolean checkForSeaIce = false;
@@ -235,24 +235,24 @@ public class OlciWaterClassificationOp extends Operator {
         boolean isCloudAmbiguous;
 
         double[] nnOutput = getOlciNNOutput(x, y, rhoToaTiles);
-        if (!targetTile.getSampleBit(x, y, IdepixConstants.F_INVALID)) {
-            targetTile.setSample(x, y, IdepixConstants.F_CLOUD_AMBIGUOUS, false);
-            targetTile.setSample(x, y, IdepixConstants.F_CLOUD_SURE, false);
-            targetTile.setSample(x, y, IdepixConstants.F_CLOUD, false);
-            targetTile.setSample(x, y, IdepixConstants.F_SNOW_ICE, false);
+        if (!targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_INVALID)) {
+            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
+            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
+            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, false);
+            targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
             isCloudAmbiguous = nnOutput[0] > schillerNNCloudAmbiguousLowerBoundaryValue &&
                     nnOutput[0] <= schillerNNCloudAmbiguousSureSeparationValue;
             if (isCloudAmbiguous) {
                 // this would be as 'CLOUD_AMBIGUOUS'...
-                targetTile.setSample(x, y, IdepixConstants.F_CLOUD_AMBIGUOUS, true);
-                targetTile.setSample(x, y, IdepixConstants.F_CLOUD, true);
+                targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, true);
+                targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, true);
             }
             // check for snow_ice separation below if needed, first set all to cloud
             isCloudSure = nnOutput[0] > schillerNNCloudAmbiguousSureSeparationValue;
             if (isCloudSure) {
                 // this would be as 'CLOUD_SURE'...
-                targetTile.setSample(x, y, IdepixConstants.F_CLOUD_SURE, true);
-                targetTile.setSample(x, y, IdepixConstants.F_CLOUD, true);
+                targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, true);
+                targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, true);
             }
 
             is_snow_ice = false;
@@ -261,12 +261,12 @@ public class OlciWaterClassificationOp extends Operator {
             }
             if (is_snow_ice) {
                 // this would be as 'SNOW/ICE'...
-                targetTile.setSample(x, y, IdepixConstants.F_SNOW_ICE, true);
-                targetTile.setSample(x, y, IdepixConstants.F_CLOUD_SURE, false);
-                targetTile.setSample(x, y, IdepixConstants.F_CLOUD, false);
+                targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, true);
+                targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
+                targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, false);
             }
         }
-        targetTile.setSample(x, y, IdepixConstants.F_GLINT_RISK, false);  // todo: use L1b glint flag
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_GLINT_RISK, false);  // todo: use L1b glint flag
     }
 
     private double[] getOlciNNOutput(int x, int y, Tile[] rhoToaTiles) {

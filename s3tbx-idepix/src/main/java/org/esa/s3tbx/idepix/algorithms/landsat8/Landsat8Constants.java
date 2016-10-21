@@ -13,22 +13,22 @@ import java.util.Map;
 public class Landsat8Constants {
 
     // additional flags after the 16 default ones
-    public static final int F_CLOUD_SHIMEZ = IdepixConstants.NUM_DEFAULT_FLAGS + 1;
-    public static final int F_CLOUD_SHIMEZ_BUFFER = IdepixConstants.NUM_DEFAULT_FLAGS + 2;
-    public static final int F_CLOUD_HOT = IdepixConstants.NUM_DEFAULT_FLAGS + 3;
-    public static final int F_CLOUD_HOT_BUFFER = IdepixConstants.NUM_DEFAULT_FLAGS + 4;
-    public static final int F_CLOUD_OTSU = IdepixConstants.NUM_DEFAULT_FLAGS + 5;
-    public static final int F_CLOUD_OTSU_BUFFER = IdepixConstants.NUM_DEFAULT_FLAGS + 6;
-    public static final int F_CLOUD_CLOST = IdepixConstants.NUM_DEFAULT_FLAGS + 7;
-    public static final int F_CLOUD_CLOST_BUFFER =IdepixConstants.NUM_DEFAULT_FLAGS + 8;
+    public static final int IDEPIX_CLOUD_SHIMEZ = IdepixConstants.NUM_DEFAULT_FLAGS + 1;
+    public static final int IDEPIX_CLOUD_SHIMEZ_BUFFER = IdepixConstants.NUM_DEFAULT_FLAGS + 2;
+    public static final int IDEPIX_CLOUD_HOT = IdepixConstants.NUM_DEFAULT_FLAGS + 3;
+    public static final int IDEPIX_CLOUD_HOT_BUFFER = IdepixConstants.NUM_DEFAULT_FLAGS + 4;
+    public static final int IDEPIX_CLOUD_OTSU = IdepixConstants.NUM_DEFAULT_FLAGS + 5;
+    public static final int IDEPIX_CLOUD_OTSU_BUFFER = IdepixConstants.NUM_DEFAULT_FLAGS + 6;
+    public static final int IDEPIX_CLOUD_CLOST = IdepixConstants.NUM_DEFAULT_FLAGS + 7;
+    public static final int IDEPIX_CLOUD_CLOST_BUFFER =IdepixConstants.NUM_DEFAULT_FLAGS + 8;
 
-    public static final String F_CLOUD_BUFFER_SHIMEZ_DESCR_TEXT =
+    public static final String IDEPIX_CLOUD_BUFFER_SHIMEZ_DESCR_TEXT =
             "A buffer of n pixels around a cloud. Applied to pixels classified as 'cloud' with SHIMEZ test";
-    public static final String F_CLOUD_BUFFER_HOT_DESCR_TEXT =
+    public static final String IDEPIX_CLOUD_BUFFER_HOT_DESCR_TEXT =
             "A buffer of n pixels around a cloud. Applied to pixels classified as 'cloud' with HOT test";
-    public static final String F_CLOUD_BUFFER_OTSU_DESCR_TEXT =
+    public static final String IDEPIX_CLOUD_BUFFER_OTSU_DESCR_TEXT =
             "A buffer of n pixels around a cloud. Applied to pixels classified as 'cloud' with OTSU test";
-    public static final String F_CLOUD_BUFFER_CLOST_DESCR_TEXT =
+    public static final String IDEPIX_CLOUD_BUFFER_CLOST_DESCR_TEXT =
             "A buffer of n pixels around a cloud. Applied to pixels classified as 'cloud' with CLOST test";
 
     public static final String Landsat8_FLAGS_NAME = "flags";

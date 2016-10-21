@@ -191,26 +191,26 @@ public class ProbaVClassificationOp extends Operator {
                     // apply improvement from NN approach...
                     final double[] nnOutput = probaVAlgorithm.getNnOutput();
                     if (applySchillerNN) {
-                        if (!cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.F_INVALID)) {
-                            cloudFlagTargetTile.setSample(x, y, IdepixConstants.F_CLOUD_AMBIGUOUS, false);
-                            cloudFlagTargetTile.setSample(x, y, IdepixConstants.F_CLOUD_SURE, false);
-                            cloudFlagTargetTile.setSample(x, y, IdepixConstants.F_CLOUD, false);
-                            cloudFlagTargetTile.setSample(x, y, IdepixConstants.F_SNOW_ICE, false);
+                        if (!cloudFlagTargetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_INVALID)) {
+                            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
+                            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
+                            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, false);
+                            cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
                             if (nnOutput[0] > schillerNNCloudAmbiguousLowerBoundaryValue &&
                                     nnOutput[0] <= schillerNNCloudAmbiguousSureSeparationValue) {
                                 // this would be as 'CLOUD_AMBIGUOUS'...
-                                cloudFlagTargetTile.setSample(x, y, IdepixConstants.F_CLOUD_AMBIGUOUS, true);
-                                cloudFlagTargetTile.setSample(x, y, IdepixConstants.F_CLOUD, true);
+                                cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, true);
+                                cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, true);
                             }
                             if (nnOutput[0] > schillerNNCloudAmbiguousSureSeparationValue &&
                                     nnOutput[0] <= schillerNNCloudSureSnowSeparationValue) {
                                 // this would be as 'CLOUD_SURE'...
-                                cloudFlagTargetTile.setSample(x, y, IdepixConstants.F_CLOUD_SURE, true);
-                                cloudFlagTargetTile.setSample(x, y, IdepixConstants.F_CLOUD, true);
+                                cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, true);
+                                cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, true);
                             }
                             if (nnOutput[0] > schillerNNCloudSureSnowSeparationValue) {
                                 // this would be as 'SNOW/ICE'...
-                                cloudFlagTargetTile.setSample(x, y, IdepixConstants.F_SNOW_ICE, true);
+                                cloudFlagTargetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, true);
                             }
                         }
                         nnTargetTile.setSample(x, y, nnOutput[0]);
@@ -390,17 +390,17 @@ public class ProbaVClassificationOp extends Operator {
 
     void setCloudFlag(Tile targetTile, int y, int x, ProbaVAlgorithm probaVAlgorithm) {
         // for given instrument, compute boolean pixel properties and write to cloud flag band
-        targetTile.setSample(x, y, IdepixConstants.F_INVALID, probaVAlgorithm.isInvalid());
-        targetTile.setSample(x, y, IdepixConstants.F_CLOUD, probaVAlgorithm.isCloud());
-        targetTile.setSample(x, y, IdepixConstants.F_CLOUD_SURE, probaVAlgorithm.isCloud());
-        targetTile.setSample(x, y, IdepixConstants.F_CLOUD_SHADOW, false); // not computed here
-        targetTile.setSample(x, y, IdepixConstants.F_CLEAR_LAND, probaVAlgorithm.isClearLand());
-        targetTile.setSample(x, y, IdepixConstants.F_CLEAR_WATER, probaVAlgorithm.isClearWater());
-        targetTile.setSample(x, y, IdepixConstants.F_SNOW_ICE, probaVAlgorithm.isClearSnow());
-        targetTile.setSample(x, y, IdepixConstants.F_LAND, probaVAlgorithm.isLand());
-        targetTile.setSample(x, y, IdepixConstants.F_WATER, probaVAlgorithm.isWater());
-        targetTile.setSample(x, y, IdepixConstants.F_BRIGHT, probaVAlgorithm.isBright());
-        targetTile.setSample(x, y, IdepixConstants.F_WHITE, probaVAlgorithm.isWhite());
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_INVALID, probaVAlgorithm.isInvalid());
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, probaVAlgorithm.isCloud());
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, probaVAlgorithm.isCloud());
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SHADOW, false); // not computed here
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLEAR_LAND, probaVAlgorithm.isClearLand());
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLEAR_WATER, probaVAlgorithm.isClearWater());
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, probaVAlgorithm.isClearSnow());
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_LAND, probaVAlgorithm.isLand());
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_WATER, probaVAlgorithm.isWater());
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_BRIGHT, probaVAlgorithm.isBright());
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_WHITE, probaVAlgorithm.isWhite());
     }
 
     void setIsWaterByFraction(byte watermaskFraction, AbstractPixelProperties pixelProperties) {

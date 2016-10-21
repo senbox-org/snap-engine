@@ -154,7 +154,8 @@ public class IdepixIO {
     }
 
     public static boolean isValidOlciProduct(Product product) {
-        return product.getProductType().startsWith("S3A_OL_");  // todo: clarify
+//        return product.getProductType().startsWith("S3A_OL_");  // todo: clarify
+        return product.getProductType().contains("OL_1");  // new products have product type 'OL_1_ERR'
     }
 
     private static boolean isValidMerisIcolL1NProduct(Product product) {

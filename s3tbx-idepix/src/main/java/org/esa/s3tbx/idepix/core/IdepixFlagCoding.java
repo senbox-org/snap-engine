@@ -29,38 +29,38 @@ public class IdepixFlagCoding {
 
         FlagCoding flagCoding = new FlagCoding(flagId);
 
-        flagCoding.addFlag("F_INVALID", BitSetter.setFlag(0, IdepixConstants.F_INVALID),
-                           IdepixConstants.F_INVALID_DESCR_TEXT);
-        flagCoding.addFlag("F_CLOUD", BitSetter.setFlag(0, IdepixConstants.F_CLOUD),
-                           IdepixConstants.F_CLOUD_DESCR_TEXT);
-        flagCoding.addFlag("F_CLOUD_AMBIGUOUS", BitSetter.setFlag(0, IdepixConstants.F_CLOUD_AMBIGUOUS),
-                           IdepixConstants.F_CLOUD_AMBIGUOUS_DESCR_TEXT);
-        flagCoding.addFlag("F_CLOUD_SURE", BitSetter.setFlag(0, IdepixConstants.F_CLOUD_SURE),
-                           IdepixConstants.F_CLOUD_SURE_DESCR_TEXT);
-        flagCoding.addFlag("F_CLOUD_BUFFER", BitSetter.setFlag(0, IdepixConstants.F_CLOUD_BUFFER),
-                           IdepixConstants.F_CLOUD_BUFFER_DESCR_TEXT);
-        flagCoding.addFlag("F_CLOUD_SHADOW", BitSetter.setFlag(0, IdepixConstants.F_CLOUD_SHADOW),
-                           IdepixConstants.F_CLOUD_SHADOW_DESCR_TEXT);
-        flagCoding.addFlag("F_SNOW_ICE", BitSetter.setFlag(0, IdepixConstants.F_SNOW_ICE),
-                           IdepixConstants.F_SNOW_ICE_DESCR_TEXT);
-        flagCoding.addFlag("F_CLEAR_LAND", BitSetter.setFlag(0, IdepixConstants.F_CLEAR_LAND),
-                           IdepixConstants.F_CLEAR_LAND_DESCR_TEXT);
-        flagCoding.addFlag("F_CLEAR_WATER", BitSetter.setFlag(0, IdepixConstants.F_CLEAR_WATER),
-                           IdepixConstants.F_CLEAR_WATER_DESCR_TEXT);
-        flagCoding.addFlag("F_LAND", BitSetter.setFlag(0, IdepixConstants.F_LAND),
-                           IdepixConstants.F_LAND_DESCR_TEXT);
-        flagCoding.addFlag("F_WATER", BitSetter.setFlag(0, IdepixConstants.F_WATER),
-                           IdepixConstants.F_WATER_DESCR_TEXT);
-        flagCoding.addFlag("F_COASTLINE", BitSetter.setFlag(0, IdepixConstants.F_COASTLINE),
-                           IdepixConstants.F_COASTLINE_DESCR_TEXT);
-        flagCoding.addFlag("F_MIXED_PIXEL", BitSetter.setFlag(0, IdepixConstants.F_MIXED_PIXEL),
-                           IdepixConstants.F_MIXED_PIXEL_DESCR_TEXT);
-        flagCoding.addFlag("F_BRIGHT", BitSetter.setFlag(0, IdepixConstants.F_BRIGHT),
-                           IdepixConstants.F_BRIGHT_DESCR_TEXT);
-        flagCoding.addFlag("F_WHITE", BitSetter.setFlag(0, IdepixConstants.F_WHITE),
-                           IdepixConstants.F_WHITE_DESCR_TEXT);
-        flagCoding.addFlag("F_GLINT_RISK", BitSetter.setFlag(0, IdepixConstants.F_GLINT_RISK),
-                           IdepixConstants.F_GLINT_RISK_DESCR_TEXT);
+        flagCoding.addFlag("IDEPIX_INVALID", BitSetter.setFlag(0, IdepixConstants.IDEPIX_INVALID),
+                           IdepixConstants.IDEPIX_INVALID_DESCR_TEXT);
+        flagCoding.addFlag("IDEPIX_CLOUD", BitSetter.setFlag(0, IdepixConstants.IDEPIX_CLOUD),
+                           IdepixConstants.IDEPIX_CLOUD_DESCR_TEXT);
+        flagCoding.addFlag("IDEPIX_CLOUD_AMBIGUOUS", BitSetter.setFlag(0, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS),
+                           IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS_DESCR_TEXT);
+        flagCoding.addFlag("IDEPIX_CLOUD_SURE", BitSetter.setFlag(0, IdepixConstants.IDEPIX_CLOUD_SURE),
+                           IdepixConstants.IDEPIX_CLOUD_SURE_DESCR_TEXT);
+        flagCoding.addFlag("IDEPIX_CLOUD_BUFFER", BitSetter.setFlag(0, IdepixConstants.IDEPIX_CLOUD_BUFFER),
+                           IdepixConstants.IDEPIX_CLOUD_BUFFER_DESCR_TEXT);
+        flagCoding.addFlag("IDEPIX_CLOUD_SHADOW", BitSetter.setFlag(0, IdepixConstants.IDEPIX_CLOUD_SHADOW),
+                           IdepixConstants.IDEPIX_CLOUD_SHADOW_DESCR_TEXT);
+        flagCoding.addFlag("IDEPIX_SNOW_ICE", BitSetter.setFlag(0, IdepixConstants.IDEPIX_SNOW_ICE),
+                           IdepixConstants.IDEPIX_SNOW_ICE_DESCR_TEXT);
+        flagCoding.addFlag("IDEPIX_CLEAR_LAND", BitSetter.setFlag(0, IdepixConstants.IDEPIX_CLEAR_LAND),
+                           IdepixConstants.IDEPIX_CLEAR_LAND_DESCR_TEXT);
+        flagCoding.addFlag("IDEPIX_CLEAR_WATER", BitSetter.setFlag(0, IdepixConstants.IDEPIX_CLEAR_WATER),
+                           IdepixConstants.IDEPIX_CLEAR_WATER_DESCR_TEXT);
+        flagCoding.addFlag("IDEPIX_LAND", BitSetter.setFlag(0, IdepixConstants.IDEPIX_LAND),
+                           IdepixConstants.IDEPIX_LAND_DESCR_TEXT);
+        flagCoding.addFlag("IDEPIX_WATER", BitSetter.setFlag(0, IdepixConstants.IDEPIX_WATER),
+                           IdepixConstants.IDEPIX_WATER_DESCR_TEXT);
+        flagCoding.addFlag("IDEPIX_COASTLINE", BitSetter.setFlag(0, IdepixConstants.IDEPIX_COASTLINE),
+                           IdepixConstants.IDEPIX_COASTLINE_DESCR_TEXT);
+        flagCoding.addFlag("IDEPIX_MIXED_PIXEL", BitSetter.setFlag(0, IdepixConstants.IDEPIX_MIXED_PIXEL),
+                           IdepixConstants.IDEPIX_MIXED_PIXEL_DESCR_TEXT);
+        flagCoding.addFlag("IDEPIX_BRIGHT", BitSetter.setFlag(0, IdepixConstants.IDEPIX_BRIGHT),
+                           IdepixConstants.IDEPIX_BRIGHT_DESCR_TEXT);
+        flagCoding.addFlag("IDEPIX_WHITE", BitSetter.setFlag(0, IdepixConstants.IDEPIX_WHITE),
+                           IdepixConstants.IDEPIX_WHITE_DESCR_TEXT);
+        flagCoding.addFlag("IDEPIX_GLINT_RISK", BitSetter.setFlag(0, IdepixConstants.IDEPIX_GLINT_RISK),
+                           IdepixConstants.IDEPIX_GLINT_RISK_DESCR_TEXT);
 
         return flagCoding;
     }
@@ -81,83 +81,83 @@ public class IdepixFlagCoding {
         Mask mask;
         Random r = new Random();
 
-        mask = Mask.BandMathsType.create("F_INVALID", IdepixConstants.F_INVALID_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.F_INVALID",
+        mask = Mask.BandMathsType.create("IDEPIX_INVALID", IdepixConstants.IDEPIX_INVALID_DESCR_TEXT, w, h,
+                                         "pixel_classif_flags.IDEPIX_INVALID",
                                          getRandomColour(r), 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
 
-        mask = Mask.BandMathsType.create("F_CLOUD", IdepixConstants.F_CLOUD_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.F_CLOUD",
+        mask = Mask.BandMathsType.create("IDEPIX_CLOUD", IdepixConstants.IDEPIX_CLOUD_DESCR_TEXT, w, h,
+                                         "pixel_classif_flags.IDEPIX_CLOUD",
                                          Color.yellow, 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
 
-        mask = Mask.BandMathsType.create("F_CLOUD_AMBIGUOUS", IdepixConstants.F_CLOUD_AMBIGUOUS_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.F_CLOUD_AMBIGUOUS",
+        mask = Mask.BandMathsType.create("IDEPIX_CLOUD_AMBIGUOUS", IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS_DESCR_TEXT, w, h,
+                                         "pixel_classif_flags.IDEPIX_CLOUD_AMBIGUOUS",
                                          Color.blue, 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
 
-        mask = Mask.BandMathsType.create("F_CLOUD_SURE", IdepixConstants.F_CLOUD_SURE_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.F_CLOUD_SURE",
+        mask = Mask.BandMathsType.create("IDEPIX_CLOUD_SURE", IdepixConstants.IDEPIX_CLOUD_SURE_DESCR_TEXT, w, h,
+                                         "pixel_classif_flags.IDEPIX_CLOUD_SURE",
                                          Color.red, 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
 
-        mask = Mask.BandMathsType.create("F_CLOUD_BUFFER", IdepixConstants.F_CLOUD_BUFFER_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.F_CLOUD_BUFFER",
+        mask = Mask.BandMathsType.create("IDEPIX_CLOUD_BUFFER", IdepixConstants.IDEPIX_CLOUD_BUFFER_DESCR_TEXT, w, h,
+                                         "pixel_classif_flags.IDEPIX_CLOUD_BUFFER",
                                          getRandomColour(r), 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
 
-        mask = Mask.BandMathsType.create("F_CLOUD_SHADOW", IdepixConstants.F_CLOUD_SHADOW_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.F_CLOUD_SHADOW",
+        mask = Mask.BandMathsType.create("IDEPIX_CLOUD_SHADOW", IdepixConstants.IDEPIX_CLOUD_SHADOW_DESCR_TEXT, w, h,
+                                         "pixel_classif_flags.IDEPIX_CLOUD_SHADOW",
                                          getRandomColour(r), 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
 
-        mask = Mask.BandMathsType.create("F_SNOW_ICE", IdepixConstants.F_SNOW_ICE_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.F_SNOW_ICE",
+        mask = Mask.BandMathsType.create("IDEPIX_SNOW_ICE", IdepixConstants.IDEPIX_SNOW_ICE_DESCR_TEXT, w, h,
+                                         "pixel_classif_flags.IDEPIX_SNOW_ICE",
                                          getRandomColour(r), 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
 
-        mask = Mask.BandMathsType.create("F_CLEAR_LAND", IdepixConstants.F_CLEAR_LAND_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.F_CLEAR_LAND",
+        mask = Mask.BandMathsType.create("IDEPIX_CLEAR_LAND", IdepixConstants.IDEPIX_CLEAR_LAND_DESCR_TEXT, w, h,
+                                         "pixel_classif_flags.IDEPIX_CLEAR_LAND",
                                          getRandomColour(r), 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
 
-        mask = Mask.BandMathsType.create("F_CLEAR_WATER", IdepixConstants.F_CLEAR_WATER_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.F_CLEAR_WATER",
+        mask = Mask.BandMathsType.create("IDEPIX_CLEAR_WATER", IdepixConstants.IDEPIX_CLEAR_WATER_DESCR_TEXT, w, h,
+                                         "pixel_classif_flags.IDEPIX_CLEAR_WATER",
                                          getRandomColour(r), 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
 
-        mask = Mask.BandMathsType.create("F_LAND", IdepixConstants.F_LAND_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.F_LAND",
+        mask = Mask.BandMathsType.create("IDEPIX_LAND", IdepixConstants.IDEPIX_LAND_DESCR_TEXT, w, h,
+                                         "pixel_classif_flags.IDEPIX_LAND",
                                          getRandomColour(r), 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
 
-        mask = Mask.BandMathsType.create("F_WATER", IdepixConstants.F_WATER_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.F_WATER",
+        mask = Mask.BandMathsType.create("IDEPIX_WATER", IdepixConstants.IDEPIX_WATER_DESCR_TEXT, w, h,
+                                         "pixel_classif_flags.IDEPIX_WATER",
                                          getRandomColour(r), 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
 
-        mask = Mask.BandMathsType.create("F_COASTLINE", IdepixConstants.F_COASTLINE_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.F_COASTLINE",
+        mask = Mask.BandMathsType.create("IDEPIX_COASTLINE", IdepixConstants.IDEPIX_COASTLINE_DESCR_TEXT, w, h,
+                                         "pixel_classif_flags.IDEPIX_COASTLINE",
                                          getRandomColour(r), 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
 
-        mask = Mask.BandMathsType.create("F_MIXED_PIXEL", IdepixConstants.F_MIXED_PIXEL_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.F_MIXED_PIXEL",
+        mask = Mask.BandMathsType.create("IDEPIX_MIXED_PIXEL", IdepixConstants.IDEPIX_MIXED_PIXEL_DESCR_TEXT, w, h,
+                                         "pixel_classif_flags.IDEPIX_MIXED_PIXEL",
                                          getRandomColour(r), 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
 
-        mask = Mask.BandMathsType.create("F_BRIGHT", IdepixConstants.F_BRIGHT_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.F_BRIGHT",
+        mask = Mask.BandMathsType.create("IDEPIX_BRIGHT", IdepixConstants.IDEPIX_BRIGHT_DESCR_TEXT, w, h,
+                                         "pixel_classif_flags.IDEPIX_BRIGHT",
                                          getRandomColour(r), 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
 
-        mask = Mask.BandMathsType.create("F_WHITE", IdepixConstants.F_WHITE_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.F_WHITE",
+        mask = Mask.BandMathsType.create("IDEPIX_WHITE", IdepixConstants.IDEPIX_WHITE_DESCR_TEXT, w, h,
+                                         "pixel_classif_flags.IDEPIX_WHITE",
                                          getRandomColour(r), 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
 
-        mask = Mask.BandMathsType.create("F_GLINT_RISK", IdepixConstants.F_GLINT_RISK_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.F_GLINT_RISK",
+        mask = Mask.BandMathsType.create("IDEPIX_GLINT_RISK", IdepixConstants.IDEPIX_GLINT_RISK_DESCR_TEXT, w, h,
+                                         "pixel_classif_flags.IDEPIX_GLINT_RISK",
                                          getRandomColour(r), 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
 

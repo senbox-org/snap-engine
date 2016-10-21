@@ -86,7 +86,7 @@ public class MerisMergeLandWaterOp extends Operator {
             for (int y = rectangle.y; y < rectangle.y + rectangle.height; y++) {
                 checkForCancellation();
                 for (int x = rectangle.x; x < rectangle.x + rectangle.width; x++) {
-                    boolean isLand = landClassifTile.getSampleBit(x, y, IdepixConstants.F_LAND);
+                    boolean isLand = landClassifTile.getSampleBit(x, y, IdepixConstants.IDEPIX_LAND);
                     final int sample = isLand ? landClassifTile.getSampleInt(x, y) : waterClassifTile.getSampleInt(x, y);
                     targetTile.setSample(x, y, sample);
                 }
@@ -95,7 +95,7 @@ public class MerisMergeLandWaterOp extends Operator {
             for (int y = rectangle.y; y < rectangle.y + rectangle.height; y++) {
                 checkForCancellation();
                 for (int x = rectangle.x; x < rectangle.x + rectangle.width; x++) {
-                    boolean isLand = landClassifTile.getSampleBit(x, y, IdepixConstants.F_LAND);
+                    boolean isLand = landClassifTile.getSampleBit(x, y, IdepixConstants.IDEPIX_LAND);
                     final float sample = isLand ? landNNTile.getSampleFloat(x, y) : waterNNTile.getSampleFloat(x, y);
                     targetTile.setSample(x, y, sample);
                 }

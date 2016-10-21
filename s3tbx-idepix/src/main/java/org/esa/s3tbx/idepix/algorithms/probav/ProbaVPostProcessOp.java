@@ -101,7 +101,7 @@ public class ProbaVPostProcessOp extends Operator {
             checkForCancellation();
             for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
 
-                boolean isInvalid = targetTile.getSampleBit(x, y, IdepixConstants.F_INVALID);
+                boolean isInvalid = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_INVALID);
                 if (!isInvalid) {
                     combineFlags(x, y, cloudFlagTile, targetTile);
                     consolidateFlagging(x, y, smFlagTile, targetTile);
@@ -116,13 +116,13 @@ public class ProbaVPostProcessOp extends Operator {
                 checkForCancellation();
                 for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
 
-                    final boolean isCloud = targetTile.getSampleBit(x, y, IdepixConstants.F_CLOUD);
+                    final boolean isCloud = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
                     if (isCloud) {
                         CloudBuffer.computeSimpleCloudBuffer(x, y,
                                                              targetTile,
                                                              extendedRectangle,
                                                              cloudBufferWidth,
-                                                             IdepixConstants.F_CLOUD_BUFFER);
+                                                             IdepixConstants.IDEPIX_CLOUD_BUFFER);
                     }
                 }
             }
@@ -139,11 +139,11 @@ public class ProbaVPostProcessOp extends Operator {
     private void setCloudShadow(int x, int y, Tile smFlagTile, Tile targetTile) {
         // as requested by JM, 20160302:
         final boolean smCloudShadow = smFlagTile.getSampleBit(x, y, ProbaVClassificationOp.SM_F_CLOUDSHADOW);
-        final boolean safeCloudFinal = targetTile.getSampleBit(x, y, IdepixConstants.F_CLOUD);
-        final boolean isLand = targetTile.getSampleBit(x, y, IdepixConstants.F_LAND);
+        final boolean safeCloudFinal = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
+        final boolean isLand = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_LAND);
 
         final boolean isCloudShadow = smCloudShadow && !safeCloudFinal && isLand;
-        targetTile.setSample(x, y, IdepixConstants.F_CLOUD_SHADOW, isCloudShadow);
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SHADOW, isCloudShadow);
     }
 
     private void combineFlags(int x, int y, Tile sourceFlagTile, Tile targetTile) {
@@ -154,12 +154,12 @@ public class ProbaVPostProcessOp extends Operator {
 
     private void consolidateFlagging(int x, int y, Tile smFlagTile, Tile targetTile) {
         final boolean smClear = smFlagTile.getSampleBit(x, y, ProbaVClassificationOp.SM_F_CLEAR);
-        final boolean idepixLand = targetTile.getSampleBit(x, y, IdepixConstants.F_LAND);
-        final boolean idepixClearLand = targetTile.getSampleBit(x, y, IdepixConstants.F_CLEAR_LAND);
-        final boolean idepixWater = targetTile.getSampleBit(x, y, IdepixConstants.F_WATER);
-        final boolean idepixClearWater = targetTile.getSampleBit(x, y, IdepixConstants.F_CLEAR_WATER);
-        final boolean idepixClearSnow = targetTile.getSampleBit(x, y, IdepixConstants.F_SNOW_ICE);
-        final boolean idepixCloud = targetTile.getSampleBit(x, y, IdepixConstants.F_CLOUD);
+        final boolean idepixLand = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_LAND);
+        final boolean idepixClearLand = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLEAR_LAND);
+        final boolean idepixWater = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_WATER);
+        final boolean idepixClearWater = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLEAR_WATER);
+        final boolean idepixClearSnow = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_SNOW_ICE);
+        final boolean idepixCloud = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
 
         final boolean safeClearLand = smClear && idepixLand && idepixClearLand && !idepixClearSnow;
         final boolean safeClearWater = smClear && idepixWater && idepixClearWater && !idepixClearSnow;
@@ -174,10 +174,10 @@ public class ProbaVPostProcessOp extends Operator {
 
 
         // GK 20151201;
-        targetTile.setSample(x, y, IdepixConstants.F_CLEAR_LAND, safeClearLandFinal);
-        targetTile.setSample(x, y, IdepixConstants.F_CLEAR_WATER, safeClearWaterFinal);
-        targetTile.setSample(x, y, IdepixConstants.F_CLOUD, safeCloudFinal);
-        targetTile.setSample(x, y, IdepixConstants.F_SNOW_ICE, safeSnowIce);
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLEAR_LAND, safeClearLandFinal);
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLEAR_WATER, safeClearWaterFinal);
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, safeCloudFinal);
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, safeSnowIce);
     }
 
     public static class Spi extends OperatorSpi {

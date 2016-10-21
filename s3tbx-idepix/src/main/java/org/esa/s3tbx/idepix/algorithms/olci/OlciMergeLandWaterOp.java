@@ -112,7 +112,7 @@ public class OlciMergeLandWaterOp extends Operator {
             for (int y = rectangle.y; y < rectangle.y + rectangle.height; y++) {
                 checkForCancellation();
                 for (int x = rectangle.x; x < rectangle.x + rectangle.width; x++) {
-                    final boolean isLand = landClassifTile.getSampleBit(x, y, IdepixConstants.F_LAND);
+                    final boolean isLand = landClassifTile.getSampleBit(x, y, IdepixConstants.IDEPIX_LAND);
                     final Tile classifTile = isLand ? landClassifTile : waterClassifTile;
                     final int sample = classifTile.getSampleInt(x, y);
                     targetTile.setSample(x, y, sample);
@@ -125,13 +125,13 @@ public class OlciMergeLandWaterOp extends Operator {
                     checkForCancellation();
                     for (int x = rectangle.x; x < rectangle.x + rectangle.width; x++) {
 
-                        final boolean isCloud = targetTile.getSampleBit(x, y, IdepixConstants.F_CLOUD);
+                        final boolean isCloud = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
                         if (isCloud) {
                             CloudBuffer.computeSimpleCloudBuffer(x, y,
                                                                  targetTile,
                                                                  extendedRectangle,
                                                                  cloudBufferWidth,
-                                                                 IdepixConstants.F_CLOUD_BUFFER);
+                                                                 IdepixConstants.IDEPIX_CLOUD_BUFFER);
                         }
                     }
                 }
@@ -147,7 +147,7 @@ public class OlciMergeLandWaterOp extends Operator {
             for (int y = rectangle.y; y < rectangle.y + rectangle.height; y++) {
                 checkForCancellation();
                 for (int x = rectangle.x; x < rectangle.x + rectangle.width; x++) {
-                    boolean isLand = landClassifTile.getSampleBit(x, y, IdepixConstants.F_LAND);
+                    boolean isLand = landClassifTile.getSampleBit(x, y, IdepixConstants.IDEPIX_LAND);
                     final float sample = isLand ? landNNTile.getSampleFloat(x, y) : waterNNTile.getSampleFloat(x, y);
                     targetTile.setSample(x, y, sample);
                 }

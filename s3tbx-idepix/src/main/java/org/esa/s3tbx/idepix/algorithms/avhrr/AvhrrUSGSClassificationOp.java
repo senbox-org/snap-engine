@@ -287,7 +287,7 @@ public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
 
         } else {
             targetSamplesIndex = 0;
-            targetSamples[targetSamplesIndex++].set(IdepixConstants.F_INVALID, true);
+            targetSamples[targetSamplesIndex++].set(IdepixConstants.IDEPIX_INVALID, true);
             targetSamples[targetSamplesIndex++].set(Float.NaN);
             targetSamples[targetSamplesIndex++].set(Float.NaN);
             targetSamples[targetSamplesIndex++].set(Float.NaN);
@@ -329,16 +329,16 @@ public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
 
     @Override
     void setClassifFlag(WritableSample[] targetSamples, AvhrrAlgorithm algorithm) {
-        targetSamples[0].set(IdepixConstants.F_INVALID, algorithm.isInvalid());
-        targetSamples[0].set(IdepixConstants.F_CLOUD, algorithm.isCloud());
-        targetSamples[0].set(IdepixConstants.F_CLOUD_AMBIGUOUS, algorithm.isCloudAmbiguous());
-        targetSamples[0].set(IdepixConstants.F_CLOUD_SURE, algorithm.isCloudSure());
-        targetSamples[0].set(IdepixConstants.F_CLOUD_BUFFER, algorithm.isCloudBuffer());
-        targetSamples[0].set(IdepixConstants.F_CLOUD_SHADOW, algorithm.isCloudShadow());
-        targetSamples[0].set(IdepixConstants.F_SNOW_ICE, algorithm.isSnowIce());
-        targetSamples[0].set(IdepixConstants.F_GLINT_RISK, algorithm.isGlintRisk());
-        targetSamples[0].set(IdepixConstants.F_COASTLINE, algorithm.isCoastline());
-        targetSamples[0].set(IdepixConstants.F_LAND, algorithm.isLand());
+        targetSamples[0].set(IdepixConstants.IDEPIX_INVALID, algorithm.isInvalid());
+        targetSamples[0].set(IdepixConstants.IDEPIX_CLOUD, algorithm.isCloud());
+        targetSamples[0].set(IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, algorithm.isCloudAmbiguous());
+        targetSamples[0].set(IdepixConstants.IDEPIX_CLOUD_SURE, algorithm.isCloudSure());
+        targetSamples[0].set(IdepixConstants.IDEPIX_CLOUD_BUFFER, algorithm.isCloudBuffer());
+        targetSamples[0].set(IdepixConstants.IDEPIX_CLOUD_SHADOW, algorithm.isCloudShadow());
+        targetSamples[0].set(IdepixConstants.IDEPIX_SNOW_ICE, algorithm.isSnowIce());
+        targetSamples[0].set(IdepixConstants.IDEPIX_GLINT_RISK, algorithm.isGlintRisk());
+        targetSamples[0].set(IdepixConstants.IDEPIX_COASTLINE, algorithm.isCoastline());
+        targetSamples[0].set(IdepixConstants.IDEPIX_LAND, algorithm.isLand());
     }
 
     @Override

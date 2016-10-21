@@ -29,22 +29,22 @@ public class Landsat8Utils {
         FlagCoding flagCoding = IdepixFlagCoding.createDefaultFlagCoding(flagId);
 
         // additional flags for Landsat-8
-        flagCoding.addFlag("F_CLOUD_SHIMEZ", BitSetter.setFlag(0, Landsat8Constants.F_CLOUD_SHIMEZ),
-                           IdepixConstants.F_CLOUD_DESCR_TEXT + "[SHIMEZ]");
-        flagCoding.addFlag("F_CLOUD_SHIMEZ_BUFFER", BitSetter.setFlag(0, Landsat8Constants.F_CLOUD_SHIMEZ_BUFFER),
-                           Landsat8Constants.F_CLOUD_BUFFER_SHIMEZ_DESCR_TEXT);
-        flagCoding.addFlag("F_CLOUD_HOT", BitSetter.setFlag(0, Landsat8Constants.F_CLOUD_HOT),
-                           IdepixConstants.F_CLOUD_DESCR_TEXT + "[HOT]");
-        flagCoding.addFlag("F_CLOUD_HOT_BUFFER", BitSetter.setFlag(0, Landsat8Constants.F_CLOUD_HOT_BUFFER),
-                           Landsat8Constants.F_CLOUD_BUFFER_HOT_DESCR_TEXT);
-        flagCoding.addFlag("F_CLOUD_OTSU", BitSetter.setFlag(0, Landsat8Constants.F_CLOUD_OTSU),
-                           IdepixConstants.F_CLOUD_DESCR_TEXT + "[OTSU]");
-        flagCoding.addFlag("F_CLOUD_OTSU_BUFFER", BitSetter.setFlag(0, Landsat8Constants.F_CLOUD_OTSU_BUFFER),
-                           Landsat8Constants.F_CLOUD_BUFFER_OTSU_DESCR_TEXT);
-        flagCoding.addFlag("F_CLOUD_CLOST", BitSetter.setFlag(0, Landsat8Constants.F_CLOUD_CLOST),
-                           IdepixConstants.F_CLOUD_DESCR_TEXT + "[CLOST]");
-        flagCoding.addFlag("F_CLOUD_CLOST_BUFFER", BitSetter.setFlag(0, Landsat8Constants.F_CLOUD_CLOST_BUFFER),
-                           Landsat8Constants.F_CLOUD_BUFFER_CLOST_DESCR_TEXT);
+        flagCoding.addFlag("IDEPIX_CLOUD_SHIMEZ", BitSetter.setFlag(0, Landsat8Constants.IDEPIX_CLOUD_SHIMEZ),
+                           IdepixConstants.IDEPIX_CLOUD_DESCR_TEXT + "[SHIMEZ]");
+        flagCoding.addFlag("IDEPIX_CLOUD_SHIMEZ_BUFFER", BitSetter.setFlag(0, Landsat8Constants.IDEPIX_CLOUD_SHIMEZ_BUFFER),
+                           Landsat8Constants.IDEPIX_CLOUD_BUFFER_SHIMEZ_DESCR_TEXT);
+        flagCoding.addFlag("IDEPIX_CLOUD_HOT", BitSetter.setFlag(0, Landsat8Constants.IDEPIX_CLOUD_HOT),
+                           IdepixConstants.IDEPIX_CLOUD_DESCR_TEXT + "[HOT]");
+        flagCoding.addFlag("IDEPIX_CLOUD_HOT_BUFFER", BitSetter.setFlag(0, Landsat8Constants.IDEPIX_CLOUD_HOT_BUFFER),
+                           Landsat8Constants.IDEPIX_CLOUD_BUFFER_HOT_DESCR_TEXT);
+        flagCoding.addFlag("IDEPIX_CLOUD_OTSU", BitSetter.setFlag(0, Landsat8Constants.IDEPIX_CLOUD_OTSU),
+                           IdepixConstants.IDEPIX_CLOUD_DESCR_TEXT + "[OTSU]");
+        flagCoding.addFlag("IDEPIX_CLOUD_OTSU_BUFFER", BitSetter.setFlag(0, Landsat8Constants.IDEPIX_CLOUD_OTSU_BUFFER),
+                           Landsat8Constants.IDEPIX_CLOUD_BUFFER_OTSU_DESCR_TEXT);
+        flagCoding.addFlag("IDEPIX_CLOUD_CLOST", BitSetter.setFlag(0, Landsat8Constants.IDEPIX_CLOUD_CLOST),
+                           IdepixConstants.IDEPIX_CLOUD_DESCR_TEXT + "[CLOST]");
+        flagCoding.addFlag("IDEPIX_CLOUD_CLOST_BUFFER", BitSetter.setFlag(0, Landsat8Constants.IDEPIX_CLOUD_CLOST_BUFFER),
+                           Landsat8Constants.IDEPIX_CLOUD_BUFFER_CLOST_DESCR_TEXT);
 
         return flagCoding;
     }
@@ -63,50 +63,50 @@ public class Landsat8Utils {
         Mask mask;
 
         // SHIMEZ
-        mask = Mask.BandMathsType.create("F_CLOUD_SHIMEZ",
-                                         IdepixConstants.F_CLOUD_DESCR_TEXT + "[SHIMEZ]", w, h,
-                                         "pixel_classif_flags.F_CLOUD_SHIMEZ",
+        mask = Mask.BandMathsType.create("IDEPIX_CLOUD_SHIMEZ",
+                                         IdepixConstants.IDEPIX_CLOUD_DESCR_TEXT + "[SHIMEZ]", w, h,
+                                         "pixel_classif_flags.IDEPIX_CLOUD_SHIMEZ",
                                          Color.magenta, 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("F_CLOUD_SHIMEZ_BUFFER",
-                                         Landsat8Constants.F_CLOUD_BUFFER_SHIMEZ_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.F_CLOUD_SHIMEZ_BUFFER",
+        mask = Mask.BandMathsType.create("IDEPIX_CLOUD_SHIMEZ_BUFFER",
+                                         Landsat8Constants.IDEPIX_CLOUD_BUFFER_SHIMEZ_DESCR_TEXT, w, h,
+                                         "pixel_classif_flags.IDEPIX_CLOUD_SHIMEZ_BUFFER",
                                          Color.orange, 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
 
         // HOT
-        mask = Mask.BandMathsType.create("F_CLOUD_HOT",
-                                         IdepixConstants.F_CLOUD_DESCR_TEXT + "[HOT]", w, h,
-                                         "pixel_classif_flags.F_CLOUD_HOT",
+        mask = Mask.BandMathsType.create("IDEPIX_CLOUD_HOT",
+                                         IdepixConstants.IDEPIX_CLOUD_DESCR_TEXT + "[HOT]", w, h,
+                                         "pixel_classif_flags.IDEPIX_CLOUD_HOT",
                                          Color.magenta, 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("F_CLOUD_HOT_BUFFER",
-                                         Landsat8Constants.F_CLOUD_BUFFER_HOT_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.F_CLOUD_HOT_BUFFER",
+        mask = Mask.BandMathsType.create("IDEPIX_CLOUD_HOT_BUFFER",
+                                         Landsat8Constants.IDEPIX_CLOUD_BUFFER_HOT_DESCR_TEXT, w, h,
+                                         "pixel_classif_flags.IDEPIX_CLOUD_HOT_BUFFER",
                                          Color.orange, 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
 
         // OTSU
-        mask = Mask.BandMathsType.create("F_CLOUD_OTSU",
-                                         IdepixConstants.F_CLOUD_DESCR_TEXT + "[OTSU]", w, h,
-                                         "pixel_classif_flags.F_CLOUD_OTSU",
+        mask = Mask.BandMathsType.create("IDEPIX_CLOUD_OTSU",
+                                         IdepixConstants.IDEPIX_CLOUD_DESCR_TEXT + "[OTSU]", w, h,
+                                         "pixel_classif_flags.IDEPIX_CLOUD_OTSU",
                                          Color.magenta, 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("F_CLOUD_OTSU_BUFFER",
-                                         Landsat8Constants.F_CLOUD_BUFFER_OTSU_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.F_CLOUD_OTSU_BUFFER",
+        mask = Mask.BandMathsType.create("IDEPIX_CLOUD_OTSU_BUFFER",
+                                         Landsat8Constants.IDEPIX_CLOUD_BUFFER_OTSU_DESCR_TEXT, w, h,
+                                         "pixel_classif_flags.IDEPIX_CLOUD_OTSU_BUFFER",
                                          Color.orange, 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
 
         // CLOST
-        mask = Mask.BandMathsType.create("F_CLOUD_CLOST",
-                                         IdepixConstants.F_CLOUD_DESCR_TEXT + "[CLOST]", w, h,
-                                         "pixel_classif_flags.F_CLOUD_CLOST",
+        mask = Mask.BandMathsType.create("IDEPIX_CLOUD_CLOST",
+                                         IdepixConstants.IDEPIX_CLOUD_DESCR_TEXT + "[CLOST]", w, h,
+                                         "pixel_classif_flags.IDEPIX_CLOUD_CLOST",
                                          Color.magenta, 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
-        mask = Mask.BandMathsType.create("F_CLOUD_CLOST_BUFFER",
-                                         Landsat8Constants.F_CLOUD_BUFFER_CLOST_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.F_CLOUD_CLOST_BUFFER",
+        mask = Mask.BandMathsType.create("IDEPIX_CLOUD_CLOST_BUFFER",
+                                         Landsat8Constants.IDEPIX_CLOUD_BUFFER_CLOST_DESCR_TEXT, w, h,
+                                         "pixel_classif_flags.IDEPIX_CLOUD_CLOST_BUFFER",
                                          Color.orange, 0.5f);
         classifProduct.getMaskGroup().add(index, mask);
     }

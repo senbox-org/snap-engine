@@ -138,17 +138,17 @@ public class ViirsClassificationOp extends PixelOperator {
     }
 
     private void setClassifFlag(WritableSample[] targetSamples, ViirsAlgorithm algorithm) {
-        targetSamples[0].set(IdepixConstants.F_INVALID, algorithm.isInvalid());
-        targetSamples[0].set(IdepixConstants.F_CLOUD, algorithm.isCloud());
-        targetSamples[0].set(IdepixConstants.F_CLOUD_AMBIGUOUS, algorithm.isCloudAmbiguous());
-        targetSamples[0].set(IdepixConstants.F_CLOUD_SURE, algorithm.isCloudSure());
-        targetSamples[0].set(IdepixConstants.F_CLOUD_BUFFER, algorithm.isCloudBuffer());
-        targetSamples[0].set(IdepixConstants.F_CLOUD_SHADOW, algorithm.isCloudShadow());
-        targetSamples[0].set(IdepixConstants.F_SNOW_ICE, algorithm.isSnowIce());
-        targetSamples[0].set(IdepixConstants.F_MIXED_PIXEL, algorithm.isMixedPixel());
-        targetSamples[0].set(IdepixConstants.F_GLINT_RISK, algorithm.isGlintRisk());
-        targetSamples[0].set(IdepixConstants.F_LAND, algorithm.isLand());
-        targetSamples[0].set(IdepixConstants.F_BRIGHT, algorithm.isBright());
+        targetSamples[0].set(IdepixConstants.IDEPIX_INVALID, algorithm.isInvalid());
+        targetSamples[0].set(IdepixConstants.IDEPIX_CLOUD, algorithm.isCloud());
+        targetSamples[0].set(IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, algorithm.isCloudAmbiguous());
+        targetSamples[0].set(IdepixConstants.IDEPIX_CLOUD_SURE, algorithm.isCloudSure());
+        targetSamples[0].set(IdepixConstants.IDEPIX_CLOUD_BUFFER, algorithm.isCloudBuffer());
+        targetSamples[0].set(IdepixConstants.IDEPIX_CLOUD_SHADOW, algorithm.isCloudShadow());
+        targetSamples[0].set(IdepixConstants.IDEPIX_SNOW_ICE, algorithm.isSnowIce());
+        targetSamples[0].set(IdepixConstants.IDEPIX_MIXED_PIXEL, algorithm.isMixedPixel());
+        targetSamples[0].set(IdepixConstants.IDEPIX_GLINT_RISK, algorithm.isGlintRisk());
+        targetSamples[0].set(IdepixConstants.IDEPIX_LAND, algorithm.isLand());
+        targetSamples[0].set(IdepixConstants.IDEPIX_BRIGHT, algorithm.isBright());
 
         if (outputDebug) {
             targetSamples[1].set(algorithm.brightValue());

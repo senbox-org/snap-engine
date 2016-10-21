@@ -1,17 +1,11 @@
 package org.esa.s3tbx.idepix.core.util;
 
 import org.esa.s3tbx.idepix.core.IdepixConstants;
-import org.esa.snap.core.datamodel.FlagCoding;
-import org.esa.snap.core.datamodel.Mask;
-import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.Tile;
-import org.esa.snap.core.util.BitSetter;
 import org.esa.snap.core.util.math.MathUtils;
 
 import javax.swing.*;
-import java.awt.*;
 import java.util.Calendar;
-import java.util.Random;
 
 /**
  * todo: add comment
@@ -117,8 +111,8 @@ public class IdepixUtils {
     }
 
     public static void consolidateCloudAndBuffer(Tile targetTile, int x, int y) {
-        if (targetTile.getSampleBit(x, y, IdepixConstants.F_CLOUD)) {
-            targetTile.setSample(x, y, IdepixConstants.F_CLOUD_BUFFER, false);
+        if (targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD)) {
+            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_BUFFER, false);
         }
     }
 

@@ -115,17 +115,17 @@ public class Landsat8PostProcessOp extends Operator {
                     combineFlags(x, y, sourceFlagTile, targetTile);
 
                     postProcess(x, y, targetTile, srcRectangle, sourceFlagTile, waterFractionTile,
-                                Landsat8Constants.F_CLOUD_SHIMEZ,
-                                Landsat8Constants.F_CLOUD_SHIMEZ_BUFFER);
+                                Landsat8Constants.IDEPIX_CLOUD_SHIMEZ,
+                                Landsat8Constants.IDEPIX_CLOUD_SHIMEZ_BUFFER);
                     postProcess(x, y, targetTile, srcRectangle, sourceFlagTile, waterFractionTile,
-                                Landsat8Constants.F_CLOUD_HOT,
-                                Landsat8Constants.F_CLOUD_HOT_BUFFER);
+                                Landsat8Constants.IDEPIX_CLOUD_HOT,
+                                Landsat8Constants.IDEPIX_CLOUD_HOT_BUFFER);
                     postProcess(x, y, targetTile, srcRectangle, sourceFlagTile, waterFractionTile,
-                                Landsat8Constants.F_CLOUD_OTSU,
-                                Landsat8Constants.F_CLOUD_OTSU_BUFFER);
+                                Landsat8Constants.IDEPIX_CLOUD_OTSU,
+                                Landsat8Constants.IDEPIX_CLOUD_OTSU_BUFFER);
                     postProcess(x, y, targetTile, srcRectangle, sourceFlagTile, waterFractionTile,
-                                Landsat8Constants.F_CLOUD_CLOST,
-                                Landsat8Constants.F_CLOUD_CLOST_BUFFER);
+                                Landsat8Constants.IDEPIX_CLOUD_CLOST,
+                                Landsat8Constants.IDEPIX_CLOUD_CLOST_BUFFER);
                 }
             }
         }
@@ -140,7 +140,7 @@ public class Landsat8PostProcessOp extends Operator {
         boolean isCloud = sourceFlagTile.getSampleBit(x, y, cloudFlagBit);
         if (refineClassificationNearCoastlines && waterFractionTile != null) {
             if (isNearCoastline(x, y, waterFractionTile, srcRectangle)) {
-                targetTile.setSample(x, y, IdepixConstants.F_COASTLINE, true);
+                targetTile.setSample(x, y, IdepixConstants.IDEPIX_COASTLINE, true);
                 refineSnowIceFlaggingForCoastlines(x, y, sourceFlagTile, targetTile);
                 if (isCloud) {
                     refineCloudFlaggingForCoastlines(x, y, cloudFlagBit,
@@ -150,7 +150,7 @@ public class Landsat8PostProcessOp extends Operator {
         }
         boolean isCloudAfterRefinement = targetTile.getSampleBit(x, y, cloudFlagBit);
         if (isCloudAfterRefinement) {
-            targetTile.setSample(x, y, IdepixConstants.F_SNOW_ICE, false);
+            targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
             if ((computeCloudBuffer)) {
                 CloudBuffer.computeSimpleCloudBuffer(x, y,
                                                      targetTile, targetTile,
@@ -240,16 +240,16 @@ public class Landsat8PostProcessOp extends Operator {
         }
 
         if (removeCloudFlag) {
-            targetTile.setSample(x, y, Landsat8Constants.F_CLOUD_SHIMEZ, false);
-            targetTile.setSample(x, y, IdepixConstants.F_CLOUD_SURE, false);
-            targetTile.setSample(x, y, IdepixConstants.F_CLOUD_AMBIGUOUS, false);
+            targetTile.setSample(x, y, Landsat8Constants.IDEPIX_CLOUD_SHIMEZ, false);
+            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
+            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
         }
     }
 
     private void refineSnowIceFlaggingForCoastlines(int x, int y, Tile sourceFlagTile, Tile targetTile) {
-        final boolean isSnowIce = sourceFlagTile.getSampleBit(x, y, IdepixConstants.F_SNOW_ICE);
+        final boolean isSnowIce = sourceFlagTile.getSampleBit(x, y, IdepixConstants.IDEPIX_SNOW_ICE);
         if (isSnowIce) {
-            targetTile.setSample(x, y, IdepixConstants.F_SNOW_ICE, false);
+            targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
         }
     }
 
