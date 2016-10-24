@@ -164,6 +164,7 @@ public class SmileCorrectionAuxdata {
                                   final String detectorSunSpectralFluxesFilename,
                                   final int numRows,
                                   final int numCols) throws IOException {
+
         detectorWavelengths = loadFlatAuxDataFile(detectorWavelengthsFilename, numRows, numCols);
         detectorSunSpectralFluxes = loadFlatAuxDataFile(detectorSunSpectralFluxesFilename, numRows, numCols);
     }

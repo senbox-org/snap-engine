@@ -18,9 +18,13 @@
 
 package org.esa.s3tbx.olci.radiometry.smilecorr;
 
+import com.google.common.primitives.Doubles;
+import com.google.common.primitives.Floats;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.Tile;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
 /**
@@ -96,5 +100,18 @@ public class SmileCorrectionUtils {
             }
         }
         return val;
+    }
+
+    public static float[] convertDoublesToFloats(double[] ref) {
+        return Floats.toArray(Doubles.asList(ref));
+    }
+
+    public static int getSourceBandIndex(String name) {
+        Matcher matcher = Pattern.compile("(\\d+)").matcher(name);
+        if (!matcher.find()) {
+            return -1;
+        }
+        String group = matcher.group(0);
+        return Integer.parseInt(group);
     }
 }

@@ -42,7 +42,7 @@ public class RayleighCorrectionAuxTest {
     @Before
     public void setUp() throws Exception {
         rayleighCorrectionAux = new RayleighAux();
-        Path installAuxdataPath = rayleighCorrectionAux.installAuxdata();
+        Path installAuxdataPath = RayleighAux.installAuxdata();
         pathJSON = installAuxdataPath.resolve("coeffMatrix.txt");
     }
 
@@ -52,7 +52,7 @@ public class RayleighCorrectionAuxTest {
         JSONParser jsonObject = new JSONParser();
         JSONObject parse = (JSONObject) jsonObject.parse(new FileReader(pathJSON.toString()));
 
-        double[] thetas = rayleighCorrectionAux.parseJSON1DimArray(parse, "theta");
+        double[] thetas = RayleighAux.parseJSON1DimArray(parse, "theta");
         double[] expectedThetas = {
                 2.840904951095581,
                 17.638418197631836,
@@ -78,7 +78,7 @@ public class RayleighCorrectionAuxTest {
     public void testGetJSONRay_Matrix() throws Exception {
         JSONParser jsonObject = new JSONParser();
         JSONObject parse = (JSONObject) jsonObject.parse(new FileReader(pathJSON.toString()));
-        ArrayList<double[][][]> ray_coeff_matrix = rayleighCorrectionAux.parseJSON3DimArray(parse, "ray_coeff_matrix");
+        ArrayList<double[][][]> ray_coeff_matrix = RayleighAux.parseJSON3DimArray(parse, "ray_coeff_matrix");
         assertNotNull(ray_coeff_matrix);
         assertEquals(4, ray_coeff_matrix.size());
 
@@ -93,8 +93,8 @@ public class RayleighCorrectionAuxTest {
         JSONParser jsonObject = new JSONParser();
         JSONObject parse = (JSONObject) jsonObject.parse(new FileReader(pathJSON.toString()));
 
-        double[] thetas = rayleighCorrectionAux.parseJSON1DimArray(parse, "theta");
-        ArrayList<double[][][]> ray_coeff_matrix = rayleighCorrectionAux.parseJSON3DimArray(parse, "ray_coeff_matrix");
+        double[] thetas = RayleighAux.parseJSON1DimArray(parse, "theta");
+        ArrayList<double[][][]> ray_coeff_matrix = RayleighAux.parseJSON3DimArray(parse, "ray_coeff_matrix");
 
         double[][][] doubles = ray_coeff_matrix.get(0);
 
