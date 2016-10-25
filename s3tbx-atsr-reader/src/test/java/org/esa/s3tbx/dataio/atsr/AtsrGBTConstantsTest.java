@@ -15,20 +15,13 @@
  */
 package org.esa.s3tbx.dataio.atsr;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.Test;
 
-public class AtsrGBTConstantsTest extends TestCase {
+import static org.junit.Assert.assertEquals;
 
-    public AtsrGBTConstantsTest(String name) {
-        super(name);
-    }
+public class AtsrGBTConstantsTest {
 
-    public static Test suite() {
-        return new TestSuite(AtsrGBTConstantsTest.class);
-    }
-
+    @Test
     public void testBandNames() {
         assertEquals("btemp_nadir_1200", AtsrGBTConstants.NADIR_1200_BT_NAME);
         assertEquals("btemp_nadir_1100", AtsrGBTConstants.NADIR_1100_BT_NAME);
@@ -50,6 +43,7 @@ public class AtsrGBTConstantsTest extends TestCase {
         assertEquals("y_offs_fward", AtsrGBTConstants.FORWARD_Y_OFFS_NAME);
     }
 
+    @Test
     public void testDescriptions() {
         // @todo 3 nf/tb - remove and avoid tests checking values not used in the system's logic
         assertEquals("Nadir-view 12.0um brightness temperature image", AtsrGBTConstants.NADIR_1200_BT_DESCRIPTION);
@@ -77,6 +71,7 @@ public class AtsrGBTConstantsTest extends TestCase {
 
     }
 
+    @Test
     public void testUnits() {
         assertEquals("K", AtsrGBTConstants.BRIGHTNESS_TEMPERATURE_UNIT);
         assertEquals("%", AtsrGBTConstants.REFLECTANCE_UNIT);

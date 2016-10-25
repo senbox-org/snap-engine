@@ -15,32 +15,28 @@
  */
 package org.esa.s3tbx.dataio.atsr;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 import org.esa.snap.core.dataio.ProductReader;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.imageio.stream.ImageInputStream;
 import java.io.File;
 
-public class AtsrProductReaderPlugInTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+public class AtsrProductReaderPlugInTest {
 
     private AtsrProductReaderPlugIn _plugIn = null;
 
-    public AtsrProductReaderPlugInTest(String name) {
-        super(name);
-    }
-
-    public static Test suite() {
-        return new TestSuite(AtsrProductReaderPlugInTest.class);
-    }
-
-    @Override
-    protected void setUp() {
+    @Before
+    public void setUp() {
         _plugIn = new AtsrProductReaderPlugIn();
         assertNotNull(_plugIn);
     }
 
+    @Test
     public void testFormatNames() {
         String[] actualNames = null;
         String[] expectedNames = new String[]{AtsrConstants.ATSR_FORMAT_NAME};
@@ -53,10 +49,12 @@ public class AtsrProductReaderPlugInTest extends TestCase {
         }
     }
 
+    @Test
     public void testGetDescrition() {
         assertEquals(AtsrConstants.DESCRIPTION, _plugIn.getDescription(null));
     }
 
+    @Test
     public void testGetInputTypes() {
         Class[] expected = new Class[]{String.class, File.class, ImageInputStream.class};
         Class[] actual = null;
@@ -69,6 +67,7 @@ public class AtsrProductReaderPlugInTest extends TestCase {
         }
     }
 
+    @Test
     public void testCreateInstance() {
         ProductReader reader = null;
 

@@ -16,24 +16,23 @@
 package org.esa.s3tbx.dataio.atsr;
 
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-public class AtsrConstantsTest extends TestCase {
+import static org.junit.Assert.assertEquals;
 
-    public AtsrConstantsTest(String name) {
-        super(name);
-    }
+public class AtsrConstantsTest {
 
     public static Test suite() {
         return new TestSuite(AtsrConstantsTest.class);
     }
 
+    @org.junit.Test
     public void testBasicConstants() {
         assertEquals("ATSR", AtsrConstants.ATSR_FORMAT_NAME);
         assertEquals("ATSR1/ATSR2 products", AtsrConstants.DESCRIPTION);
     }
 
+    @org.junit.Test
     public void testHeaderByteSizeConstants() {
         assertEquals(4096, AtsrConstants.SADIST_2_HEAER_SIZE);
         assertEquals(2, AtsrConstants.BYTE_ORDER_SIZE);
@@ -64,6 +63,7 @@ public class AtsrConstantsTest extends TestCase {
         assertEquals(4, AtsrConstants.PIXEL_ERROR_SIZE);
     }
 
+    @org.junit.Test
     public void testHeaderConstants() {
         char[] expByteOrder = new char[]{'A', 'B'};
         String[] expProductTypes = new String[]{"GBT", "GSST"};
@@ -82,6 +82,7 @@ public class AtsrConstantsTest extends TestCase {
         }
     }
 
+    @org.junit.Test
     public void testHeaderFieldNameConstants() {
         assertEquals("PRODUCT_FILE_NAME", AtsrConstants.PRODUCT_FILE_NAME_FIELD_NAME);
         assertEquals("INSTRUMENT_NAME", AtsrConstants.INSTRUMENT_NAME_FIELD_NAME);
@@ -164,6 +165,7 @@ public class AtsrConstantsTest extends TestCase {
         assertEquals("longitude", AtsrConstants.LONGITUDE_NAME);
     }
 
+    @org.junit.Test
     public void testHeaderFieldDescriptionsandUnits() {
         // @todo 3 nf/tb - remove and avoid tests checking values not used in the system's logic
         assertEquals("Days since January 1st, 1950", AtsrConstants.ASCENDING_NODE_TIME_DESCRIPTION);
@@ -297,11 +299,13 @@ public class AtsrConstantsTest extends TestCase {
         assertEquals("Latitudes of image pixels", AtsrConstants.LATITUDE_DESCRIPTION);
     }
 
+    @org.junit.Test
     public void testMetadataConstants() {
         assertEquals("MPH", AtsrConstants.MPH_NAME);
         assertEquals("SPH", AtsrConstants.SPH_NAME);
     }
 
+    @org.junit.Test
     public void testProductSizeConstants() {
         assertEquals(512, AtsrConstants.ATSR_SCENE_RASTER_WIDTH);
         assertEquals(512, AtsrConstants.ATSR_SCENE_RASTER_HEIGHT);
@@ -314,6 +318,7 @@ public class AtsrConstantsTest extends TestCase {
         assertEquals(16, AtsrConstants.LAT_LON_SUBS_Y);
     }
 
+    @org.junit.Test
     public void testPixelSizes() {
         assertEquals(2, AtsrConstants.BT_PIXEL_SIZE);
         assertEquals(2, AtsrConstants.REF_PIXEL_SIZE);
@@ -324,10 +329,12 @@ public class AtsrConstantsTest extends TestCase {
         assertEquals(2, AtsrConstants.FLAGS_PIXEL_SIZE);
     }
 
+    @org.junit.Test
     public void testConversionConstants() {
         assertEquals(0.001f, AtsrConstants.LAT_LON_CONVERSION, 1e-6);
     }
 
+    @org.junit.Test
     public void testFlagCodings() {
 
         // @todo 3 nf/tb - remove and avoid tests checking values not used in the system's logic

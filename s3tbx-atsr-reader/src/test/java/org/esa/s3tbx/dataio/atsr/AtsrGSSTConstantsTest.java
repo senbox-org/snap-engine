@@ -15,20 +15,13 @@
  */
 package org.esa.s3tbx.dataio.atsr;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.Test;
 
-public class AtsrGSSTConstantsTest extends TestCase {
+import static org.junit.Assert.assertEquals;
 
-    public AtsrGSSTConstantsTest(String name) {
-        super(name);
-    }
+public class AtsrGSSTConstantsTest {
 
-    public static Test suite() {
-        return new TestSuite(AtsrGSSTConstantsTest.class);
-    }
-
+    @Test
     public void testBandNames() {
         assertEquals("nadir_view_sst", AtsrGSSTConstants.NADIR_SST_NAME);
         assertEquals("dual_view_sst", AtsrGSSTConstants.DUAL_SST_NAME);
@@ -38,12 +31,14 @@ public class AtsrGSSTConstantsTest extends TestCase {
         assertEquals("y_offs_fward", AtsrGSSTConstants.FORWARD_Y_OFFS_NAME);
     }
 
+    @Test
     public void testUnits() {
         assertEquals("K", AtsrGSSTConstants.SST_UNIT);
         assertEquals("km", AtsrGSSTConstants.COORDINATE_OFFSET_UNIT);
     }
 
     // @todo 3 nf/tb - remove and avoid tests checking values not used in the system's logic
+    @Test
     public void testDescriptions() {
         assertEquals("Nadir-only sea-surface temperature", AtsrGSSTConstants.NADIR_SST_DESCRIPTION);
         assertEquals("Dual-view sea-surface temperature", AtsrGSSTConstants.DUAL_SST_DESCRIPTION);
@@ -59,6 +54,7 @@ public class AtsrGSSTConstantsTest extends TestCase {
 
 
     // @todo 3 nf/tb - remove and avoid tests checking values not used in the system's logic
+    @Test
     public void testFlagsConstants() {
 
         assertEquals("confid_flags", AtsrGSSTConstants.CONFIDENCE_FLAGS_NAME);
