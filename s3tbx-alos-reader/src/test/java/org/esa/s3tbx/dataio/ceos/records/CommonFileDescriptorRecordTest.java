@@ -15,20 +15,23 @@
  */
 package org.esa.s3tbx.dataio.ceos.records;
 
-import junit.framework.TestCase;
 import org.esa.s3tbx.dataio.ceos.CeosFileReader;
 import org.esa.s3tbx.dataio.ceos.CeosTestHelper;
 import org.esa.s3tbx.dataio.ceos.IllegalCeosFormatException;
+import org.junit.Test;
 
 import javax.imageio.stream.ImageOutputStream;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-public class CommonFileDescriptorRecordTest extends TestCase {
+import static org.junit.Assert.assertEquals;
 
+public class CommonFileDescriptorRecordTest {
+
+    @Test
     public void testInitCommonFileDescriptorRecord() throws IOException,
-                                                            IllegalCeosFormatException {
+            IllegalCeosFormatException {
         final ByteArrayOutputStream os = new ByteArrayOutputStream(24);
         final ImageOutputStream ios = new MemoryCacheImageOutputStream(os);
         final String prefix = "fdkjglsdkfhierr.m b9b0970w34";

@@ -15,16 +15,19 @@
  */
 package org.esa.s3tbx.dataio.ceos.records;
 
-import junit.framework.TestCase;
 import org.esa.s3tbx.dataio.ceos.CeosFileReader;
 import org.esa.s3tbx.dataio.ceos.CeosTestHelper;
 import org.esa.s3tbx.dataio.ceos.IllegalCeosFormatException;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-public abstract class Ancillary2RecordTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+
+public abstract class Ancillary2RecordTest {
 
     private static final int RECORD_LENGTH = 4680;
 
@@ -32,8 +35,8 @@ public abstract class Ancillary2RecordTest extends TestCase {
     protected String _prefix;
     private CeosFileReader _reader;
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         final ByteArrayOutputStream os = new ByteArrayOutputStream(24);
         _ios = new MemoryCacheImageOutputStream(os);
         _prefix = "fdkjglsdkfhierr.m b9b0970w34";
@@ -41,8 +44,9 @@ public abstract class Ancillary2RecordTest extends TestCase {
         _reader = new CeosFileReader(_ios);
     }
 
+    @Test
     public void testInitRecord_SimpleConstructor() throws IOException,
-                                                          IllegalCeosFormatException {
+            IllegalCeosFormatException {
         writeRecordData(_ios);
         _ios.writeBytes("nq3tf9ß8nvnvpdi er 0 324p3f"); // suffix
         _reader.seek(_prefix.length());
@@ -52,6 +56,7 @@ public abstract class Ancillary2RecordTest extends TestCase {
         assertRecord(record);
     }
 
+    @Test
     public void testInitRecord() throws IOException, IllegalCeosFormatException {
         writeRecordData(_ios);
         _ios.writeBytes("nq3tf9ß8nvnvpdi er 0 324p3f"); // suffix
@@ -64,11 +69,11 @@ public abstract class Ancillary2RecordTest extends TestCase {
 
 
     protected abstract Ancillary2Record createAncillary2Record(final CeosFileReader reader) throws IOException,
-                                                                                                   IllegalCeosFormatException;
+            IllegalCeosFormatException;
 
     protected abstract Ancillary2Record createAncillary2Record(final CeosFileReader reader, final int startPos) throws
-                                                                                                                IOException,
-                                                                                                                IllegalCeosFormatException;
+            IOException,
+            IllegalCeosFormatException;
 
     protected abstract void writeSpecificRecordData(MemoryCacheImageOutputStream ios) throws IOException;
 

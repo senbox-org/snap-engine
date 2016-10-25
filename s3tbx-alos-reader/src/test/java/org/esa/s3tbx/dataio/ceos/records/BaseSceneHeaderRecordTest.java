@@ -16,10 +16,11 @@
 
 package org.esa.s3tbx.dataio.ceos.records;
 
-import junit.framework.TestCase;
 import org.esa.s3tbx.dataio.ceos.CeosFileReader;
 import org.esa.s3tbx.dataio.ceos.CeosTestHelper;
 import org.esa.s3tbx.dataio.ceos.IllegalCeosFormatException;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.imageio.stream.ImageOutputStream;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
@@ -27,7 +28,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Calendar;
 
-public abstract class BaseSceneHeaderRecordTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+
+public abstract class BaseSceneHeaderRecordTest {
 
     private final int _level1A = 0;
     private final int _level1B1 = 1;
@@ -36,16 +39,17 @@ public abstract class BaseSceneHeaderRecordTest extends TestCase {
     private String _prefix;
     private ImageOutputStream _ios;
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         final ByteArrayOutputStream os = new ByteArrayOutputStream(24);
         _ios = new MemoryCacheImageOutputStream(os);
         _prefix = "fdkjglsdkfhierr.m b9b0970w34";
         _ios.writeBytes(_prefix);
     }
 
+    @Test
     public void testInit_Level1A_SimpleConstructor() throws IOException,
-                                                            IllegalCeosFormatException {
+            IllegalCeosFormatException {
         writeRecordData(_ios, _level1A);
         _ios.writeBytes("nq3tf9ß8nvnvpdi er 0 324p3f"); // as suffix
         final CeosFileReader reader = new CeosFileReader(_ios);
@@ -57,10 +61,11 @@ public abstract class BaseSceneHeaderRecordTest extends TestCase {
     }
 
     protected abstract BaseSceneHeaderRecord createSceneHeaderRecord(final CeosFileReader reader) throws IOException,
-                                                                                                         IllegalCeosFormatException;
+            IllegalCeosFormatException;
 
+    @Test
     public void testInit_Level1B1() throws IOException,
-                                           IllegalCeosFormatException {
+            IllegalCeosFormatException {
         writeRecordData(_ios, _level1B1);
         _ios.writeBytes("nq3tf9ß8nvnvpdi er 0 324p3f"); // as suffix
         final CeosFileReader reader = new CeosFileReader(_ios);
@@ -72,10 +77,11 @@ public abstract class BaseSceneHeaderRecordTest extends TestCase {
 
     protected abstract BaseSceneHeaderRecord createSceneHeaderRecord(final CeosFileReader reader,
                                                                      final int startPos) throws IOException,
-                                                                                                IllegalCeosFormatException;
+            IllegalCeosFormatException;
 
+    @Test
     public void testInit_Level1B2() throws IOException,
-                                           IllegalCeosFormatException {
+            IllegalCeosFormatException {
         writeRecordData(_ios, _level1B2);
         _ios.writeBytes("nq3tf9ß8nvnvpdi er 0 324p3f"); // as suffix
         final CeosFileReader reader = new CeosFileReader(_ios);

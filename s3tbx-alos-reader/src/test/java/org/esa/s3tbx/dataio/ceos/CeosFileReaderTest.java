@@ -17,22 +17,28 @@
 package org.esa.s3tbx.dataio.ceos;
 
 
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-public class CeosFileReaderTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+
+public class CeosFileReaderTest {
 
     private MemoryCacheImageOutputStream _ios;
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         final ByteArrayOutputStream os = new ByteArrayOutputStream(24);
         _ios = new MemoryCacheImageOutputStream(os);
     }
 
+    @Test
     public void testSeek() throws IOException,
                                   IllegalCeosFormatException {
         final byte[] bytes = new byte[]{
@@ -55,6 +61,7 @@ public class CeosFileReaderTest extends TestCase {
         assertEquals(14, ceosReader.readB1());
     }
 
+    @Test
     public void testSkipBytes() throws IOException,
                                        IllegalCeosFormatException {
         final byte[] bytes = new byte[]{
@@ -74,6 +81,7 @@ public class CeosFileReaderTest extends TestCase {
         assertEquals(11, ceosReader.readB1());
     }
 
+    @Test
     public void testReadB1() throws IOException, IllegalCeosFormatException {
         _ios.writeByte(122);
         _ios.seek(0);
@@ -83,6 +91,7 @@ public class CeosFileReaderTest extends TestCase {
         assertEquals(122, ceosReader.readB1());
     }
 
+    @Test
     public void testReadB1GreatValue() throws IOException,
                                               IllegalCeosFormatException {
         _ios.writeByte(245);
@@ -93,6 +102,7 @@ public class CeosFileReaderTest extends TestCase {
         assertEquals(245, ceosReader.readB1());
     }
 
+    @Test
     public void testReadB1ThrowsException() throws IOException {
         final String prefix = "ddz716d51n+dn4drh1td6r4nh64n1687";
         _ios.writeBytes(prefix);
@@ -109,6 +119,7 @@ public class CeosFileReaderTest extends TestCase {
         }
     }
 
+    @Test
     public void testReadB2() throws IOException, IllegalCeosFormatException {
         final String prefix = "ß3534aß0uawemqw34mfavsdpvhaweföldv:";
         final String suffix = "lfjldfkjvg45";
@@ -123,6 +134,7 @@ public class CeosFileReaderTest extends TestCase {
         assertEquals(expected, ceosReader.readB2());
     }
 
+    @Test
     public void testReadB4() throws IOException, IllegalCeosFormatException {
         final String prefix = "ß3534aß0uawemqw34mfavsdpvhaweföldv:";
         final String suffix = "lfjldfkjvg45";
@@ -136,6 +148,7 @@ public class CeosFileReaderTest extends TestCase {
         assertEquals(7100, ceosReader.readB4());
     }
 
+    @Test
     public void testReadB4Array() throws IOException, IllegalCeosFormatException {
         final String prefix = "gf654hdf4f46514s:";
         final String suffix = "lfjldfkjvg45";
@@ -155,6 +168,7 @@ public class CeosFileReaderTest extends TestCase {
         assertEquals(expected2, intsToRead[1]);
     }
 
+    @Test
     public void testReadB4ArrayThrowsException() throws IOException {
         final String prefix = "ddz716d51n+dn4drh1td6r4nh64n1687";
         _ios.writeBytes(prefix);
@@ -172,6 +186,7 @@ public class CeosFileReaderTest extends TestCase {
         }
     }
 
+    @Test
     public void testReadB8() throws IOException,
                                     IllegalCeosFormatException {
         final byte[] bytes = new byte[]{0x00, 0x01, 0x00, 0x11, 0x00, 0x00, 0x1B, (byte) 0xBC};
@@ -183,6 +198,7 @@ public class CeosFileReaderTest extends TestCase {
         assertEquals(281547991161788L, ceosReader.readB8());
     }
 
+    @Test
     public void testReadB8Array() throws IOException,
                                          IllegalCeosFormatException {
         final long expected1 = 281547991161788L;
@@ -199,6 +215,7 @@ public class CeosFileReaderTest extends TestCase {
         assertEquals(expected2, values[1]);
     }
 
+    @Test
     public void testReadB1Array() throws IOException,
                                          IllegalCeosFormatException {
         final byte expected1 = 0x01;
@@ -233,6 +250,7 @@ public class CeosFileReaderTest extends TestCase {
         assertEquals(expected8, values[7]);
     }
 
+    @Test
     public void testReadI4() throws IllegalCeosFormatException, IOException {
         _ios.writeBytes("19730060");
         _ios.seek(0);
@@ -243,6 +261,7 @@ public class CeosFileReaderTest extends TestCase {
         assertEquals(60, ceosReader.readI4());
     }
 
+    @Test
     public void testReadIn() throws IllegalCeosFormatException, IOException {
         _ios.writeBytes("  7358");
         _ios.seek(0);
@@ -252,6 +271,7 @@ public class CeosFileReaderTest extends TestCase {
         assertEquals(7358, ceosReader.readIn(6));
     }
 
+    @Test
     public void testReadFnWithNegative() throws IllegalCeosFormatException, IOException {
         _ios.writeBytes("     -89.0060123");
         _ios.seek(0);
@@ -261,6 +281,7 @@ public class CeosFileReaderTest extends TestCase {
         assertEquals(-89.0060123, ceosReader.readFn(16), 1E-10);
     }
 
+    @Test
     public void testReadFnWithPositive() throws IllegalCeosFormatException, IOException {
         _ios.writeBytes("      19.0060123");
         _ios.seek(0);
@@ -270,6 +291,7 @@ public class CeosFileReaderTest extends TestCase {
         assertEquals(19.0060123, ceosReader.readFn(16), 1E-10);
     }
 
+    @Test
     public void testReadFnWithLeadingZero() throws IllegalCeosFormatException, IOException {
         _ios.writeBytes("       9.0060123");
         _ios.seek(0);
@@ -279,6 +301,7 @@ public class CeosFileReaderTest extends TestCase {
         assertEquals(9.0060123, ceosReader.readFn(16), 1E-10);
     }
 
+    @Test
     public void testReadFnWithTrailingZero() throws IllegalCeosFormatException, IOException {
         _ios.writeBytes("       9.0060000");
         _ios.seek(0);
@@ -288,6 +311,7 @@ public class CeosFileReaderTest extends TestCase {
         assertEquals(9.006, ceosReader.readFn(16), 1E-6);
     }
 
+    @Test
     public void testReadFnWithEmpty() throws IllegalCeosFormatException,
                                              IOException {
         final String prefix = "iufkdjker";
@@ -309,6 +333,7 @@ public class CeosFileReaderTest extends TestCase {
 
     }
 
+    @Test
     public void testReadEn() throws IllegalCeosFormatException, IOException {
         _ios.writeBytes(" 1.782000000000000E+04");
         _ios.seek(0);
@@ -318,6 +343,7 @@ public class CeosFileReaderTest extends TestCase {
         assertEquals(17820, ceosReader.readEn(22), 1E-6);
     }
 
+    @Test
     public void testReadGn() throws IllegalCeosFormatException, IOException {
         _ios.writeBytes("-1.06962770630708111E+01");
         _ios.seek(0);
@@ -327,6 +353,7 @@ public class CeosFileReaderTest extends TestCase {
         assertEquals(-1.06962770630708111E+01, ceosReader.readGn(24), 1E-25);
     }
 
+    @Test
     public void testReadGnArray() throws IllegalCeosFormatException,
                                          IOException {
         _ios.writeBytes("-1.06962770630708111E+01");
@@ -345,6 +372,7 @@ public class CeosFileReaderTest extends TestCase {
         assertEquals(6.75271499535523411E-13, values[3], 1e-25);
     }
 
+    @Test
     public void testReadAn() throws IllegalCeosFormatException, IOException {
         final String expected = "Kinkerlitzchen";
         _ios.writeBytes(expected);
@@ -355,6 +383,7 @@ public class CeosFileReaderTest extends TestCase {
         assertEquals(expected, ceosReader.readAn(expected.length()));
     }
 
+    @Test
     public void testReadB1ArrayThrowsException() throws IOException {
         final String prefix = "ddz716d51n+dn4drh1td6r4nh64n1687";
         _ios.writeBytes(prefix);
@@ -372,6 +401,7 @@ public class CeosFileReaderTest extends TestCase {
         }
     }
 
+    @Test
     public void testReadAnThrowsExceptionBecauseStreamIsToShort() throws IOException {
         final String prefix = "dflkjoieng nvivbaewr vpivbydv";
         final String charsToRead = "To lon"; // write 6 bytes to stream
@@ -389,6 +419,7 @@ public class CeosFileReaderTest extends TestCase {
         }
     }
 
+    @Test
     public void testReadFnWithExceptionBecauseStreamIsToShort() throws IOException {
         final String prefix = "following only 15 characters but it should read 16: ";
         final String only15Characters = "123456789.12345";
@@ -406,6 +437,7 @@ public class CeosFileReaderTest extends TestCase {
         }
     }
 
+    @Test
     public void testReadFnWithExceptionBecauseDoubleIsNotParsable() throws IOException {
         final String prefix = "following a not parsable double value : ";
         final String notParsable16Double = "1234g6789.123456";
@@ -424,6 +456,7 @@ public class CeosFileReaderTest extends TestCase {
         }
     }
 
+    @Test
     public void testReadInArray() throws IOException, IllegalCeosFormatException {
         final String prefix = "vspdfoperilfdkposnsern";
         _ios.writeBytes(prefix);
@@ -450,6 +483,7 @@ public class CeosFileReaderTest extends TestCase {
         assertEquals(prefix.length() + 6 * 3, _ios.getStreamPosition());
     }
 
+    @Test
     public void testReadInArrayWithBlanks() throws IOException, IllegalCeosFormatException {
         final String prefix = "vspdfoperilfdkposnsern";
         _ios.writeBytes(prefix);
@@ -474,6 +508,7 @@ public class CeosFileReaderTest extends TestCase {
         assertEquals(prefix.length() + 9 * 1, _ios.getStreamPosition());
     }
 
+    @Test
     public void testReadInArrayWithErrors() throws IOException {
         final String prefix = "vspdfoperilfdkposnsern";
         _ios.writeBytes(prefix);

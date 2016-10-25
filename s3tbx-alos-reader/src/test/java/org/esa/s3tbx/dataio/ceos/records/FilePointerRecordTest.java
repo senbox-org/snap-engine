@@ -15,24 +15,28 @@
  */
 package org.esa.s3tbx.dataio.ceos.records;
 
-import junit.framework.TestCase;
 import org.esa.s3tbx.dataio.ceos.CeosFileReader;
 import org.esa.s3tbx.dataio.ceos.IllegalCeosFormatException;
 import org.esa.snap.core.datamodel.MetadataElement;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.imageio.stream.ImageOutputStream;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-public class FilePointerRecordTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+public class FilePointerRecordTest {
 
     private ImageOutputStream _ios;
     private String _prefix;
     private CeosFileReader _reader;
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         final ByteArrayOutputStream os = new ByteArrayOutputStream(24);
         _ios = new MemoryCacheImageOutputStream(os);
         _prefix = "fdkjglsdkfhierr.m b9b0970w34";
@@ -42,6 +46,7 @@ public class FilePointerRecordTest extends TestCase {
         _reader = new CeosFileReader(_ios);
     }
 
+    @Test
     public void testInit_SimpleConstructor() throws IOException, IllegalCeosFormatException {
         _ios.seek(_prefix.length());
         final FilePointerRecord record = new FilePointerRecord(_reader);
@@ -51,6 +56,7 @@ public class FilePointerRecordTest extends TestCase {
         assertEquals(_prefix.length() + 360, _ios.getStreamPosition());
     }
 
+    @Test
     public void testInit() throws IOException, IllegalCeosFormatException {
         final FilePointerRecord record = new FilePointerRecord(_reader, _prefix.length());
 
@@ -59,8 +65,9 @@ public class FilePointerRecordTest extends TestCase {
         assertEquals(_prefix.length() + 360, _ios.getStreamPosition());
     }
 
+    @Test
     public void testAssignMetadataTo() throws IOException,
-                                              IllegalCeosFormatException {
+            IllegalCeosFormatException {
         final FilePointerRecord record = new FilePointerRecord(_reader, _prefix.length());
         final MetadataElement elem = new MetadataElement("elem");
 
@@ -138,8 +145,8 @@ public class FilePointerRecordTest extends TestCase {
 
         // Blank = 208 blanks
         ios.writeBytes("                                                  " +
-                       "                                                  " +
-                       "                                                  " +
-                       "                                                          "); // A208
+                               "                                                  " +
+                               "                                                  " +
+                               "                                                          "); // A208
     }
 }

@@ -15,10 +15,11 @@
  */
 package org.esa.s3tbx.dataio.ceos.records;
 
-import junit.framework.TestCase;
 import org.esa.s3tbx.dataio.ceos.CeosFileReader;
 import org.esa.s3tbx.dataio.ceos.CeosTestHelper;
 import org.esa.s3tbx.dataio.ceos.IllegalCeosFormatException;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.imageio.stream.ImageOutputStream;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
@@ -27,7 +28,11 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-public abstract class Ancillary1RecordTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+
+public abstract class Ancillary1RecordTest {
 
     private static final int RECORD_LENGTH = 4680;
 
@@ -35,8 +40,8 @@ public abstract class Ancillary1RecordTest extends TestCase {
     private String _prefix;
     private CeosFileReader _reader;
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         final ByteArrayOutputStream os = new ByteArrayOutputStream(24);
         _ios = new MemoryCacheImageOutputStream(os);
         _prefix = "fdkjglsdkfhierr.m b9b0970w34";
@@ -44,8 +49,9 @@ public abstract class Ancillary1RecordTest extends TestCase {
         _reader = new CeosFileReader(_ios);
     }
 
+    @Test
     public void testInitRecord_SimpleConstructor() throws IOException,
-                                                          IllegalCeosFormatException {
+            IllegalCeosFormatException {
         writeRecordData(_ios);
         _ios.writeBytes("nq3tf9ß8nvnvpdi er 0 324p3f"); // as suffix
         _reader.seek(_prefix.length());
@@ -55,8 +61,9 @@ public abstract class Ancillary1RecordTest extends TestCase {
         assertRecord(record);
     }
 
+    @Test
     public void testInitRecord() throws IOException,
-                                        IllegalCeosFormatException {
+            IllegalCeosFormatException {
         writeRecordData(_ios);
         _ios.writeBytes("nq3tf9ß8nvnvpdi er 0 324p3f"); // as suffix
 
@@ -65,10 +72,11 @@ public abstract class Ancillary1RecordTest extends TestCase {
         assertRecord(record);
     }
 
+    @Test
     public void testInitRecord_exceptions() throws IOException,
-                                                   IllegalCeosFormatException,
-                                                   NoSuchMethodException,
-                                                   IllegalAccessException {
+            IllegalCeosFormatException,
+            NoSuchMethodException,
+            IllegalAccessException {
         writeRecordDataForExceptions(_ios);
         _ios.writeBytes("nq3tf9ß8nvnvpdi er 0 324p3f"); // as suffix
 
@@ -78,7 +86,7 @@ public abstract class Ancillary1RecordTest extends TestCase {
     }
 
     private void assertRecord(final Ancillary1Record record) throws IOException,
-                                                                    IllegalCeosFormatException {
+            IllegalCeosFormatException {
         BaseRecordTest.assertRecord(record);
         assertEquals(_prefix.length(), record.getStartPos());
         assertEquals(_prefix.length() + RECORD_LENGTH, _ios.getStreamPosition());
@@ -245,51 +253,51 @@ public abstract class Ancillary1RecordTest extends TestCase {
 
         // write latitude coeffs
         ios.writeBytes(" 3.51762825378903869E+01" +
-                       "-3.72525633118785182E-06" +
-                       "-2.22154479999701052E-05" +
-                       " 6.75514377303297257E-13" +
-                       "-3.08409114105194292E-12" +
-                       "-6.47199691979237372E-14" +
-                       " 2.33148210051737742E-18" +
-                       "-8.25004293603135684E-19" +
-                       " 3.89695931047396857E-19" +
-                       " 7.62881323267747713E-20");
+                               "-3.72525633118785182E-06" +
+                               "-2.22154479999701052E-05" +
+                               " 6.75514377303297257E-13" +
+                               "-3.08409114105194292E-12" +
+                               "-6.47199691979237372E-14" +
+                               " 2.33148210051737742E-18" +
+                               "-8.25004293603135684E-19" +
+                               " 3.89695931047396857E-19" +
+                               " 7.62881323267747713E-20");
 
         // write longitude coeffs
         ios.writeBytes(" 1.38257153591810379E+02" +
-                       " 2.70569048022997204E-05" +
-                       "-4.53710988950547022E-06" +
-                       "-7.30238602559696922E-12" +
-                       "-1.03702398000958172E-12" +
-                       " 1.03698394927313316E-12" +
-                       " 1.91908097005926553E-18" +
-                       " 3.69386366596817251E-18" +
-                       "-1.23128778809667902E-18" +
-                       "-6.39669024583341597E-19");
+                               " 2.70569048022997204E-05" +
+                               "-4.53710988950547022E-06" +
+                               "-7.30238602559696922E-12" +
+                               "-1.03702398000958172E-12" +
+                               " 1.03698394927313316E-12" +
+                               " 1.91908097005926553E-18" +
+                               " 3.69386366596817251E-18" +
+                               "-1.23128778809667902E-18" +
+                               "-6.39669024583341597E-19");
 
         // write X coeffs
         ios.writeBytes("-4.17920143679666659E+06" +
-                       "-1.45568010437627992E+05" +
-                       " 3.86479338596612215E+04" +
-                       "-1.23862070427656249E+03" +
-                       " 7.24502994104848858E+03" +
-                       " 2.32251035691070371E+02" +
-                       " 1.57097184834409962E+01" +
-                       "-1.06636783607930674E+00" +
-                       "-8.96152721026457897E+01" +
-                       "-5.65286440987201266E-01");
+                               "-1.45568010437627992E+05" +
+                               " 3.86479338596612215E+04" +
+                               "-1.23862070427656249E+03" +
+                               " 7.24502994104848858E+03" +
+                               " 2.32251035691070371E+02" +
+                               " 1.57097184834409962E+01" +
+                               "-1.06636783607930674E+00" +
+                               "-8.96152721026457897E+01" +
+                               "-5.65286440987201266E-01");
 
         // write Y coeffs
         ios.writeBytes(" 2.15921675754298194E+05" +
-                       " 1.04608585586919016E+04" +
-                       " 5.76886918796067948E+03" +
-                       " 5.65591484966379028E+01" +
-                       "-1.84864330812192475E+03" +
-                       " 7.36076275871487837E+01" +
-                       " 9.12008243626968529E+00" +
-                       "-2.15733856129907675E+00" +
-                       " 5.52849921945469802E+00" +
-                       "-4.26207159240670652E-01");
+                               " 1.04608585586919016E+04" +
+                               " 5.76886918796067948E+03" +
+                               " 5.65591484966379028E+01" +
+                               "-1.84864330812192475E+03" +
+                               " 7.36076275871487837E+01" +
+                               " 9.12008243626968529E+00" +
+                               "-2.15733856129907675E+00" +
+                               " 5.52849921945469802E+00" +
+                               "-4.26207159240670652E-01");
 
         // write 6 coefficients for F4 function
         writeIncrementingDoubles(10.23456, 6, ios);
@@ -300,7 +308,7 @@ public abstract class Ancillary1RecordTest extends TestCase {
     }
 
     protected final void writeIncrementingDoubles(final double v, final int count, final ImageOutputStream ios) throws
-                                                                                                                IOException {
+            IOException {
         for (int i = 0; i < count; i++) {
             ios.writeDouble(v + i);
         }
@@ -320,8 +328,8 @@ public abstract class Ancillary1RecordTest extends TestCase {
     }
 
     private void assertExceptions(final Ancillary1Record record) throws IOException,
-                                                                        NoSuchMethodException,
-                                                                        IllegalAccessException {
+            NoSuchMethodException,
+            IllegalAccessException {
         BaseRecordTest.assertRecord(record);
         assertEquals(_prefix.length(), record.getStartPos());
         assertEquals(_prefix.length() + RECORD_LENGTH, _ios.getStreamPosition());
@@ -369,7 +377,7 @@ public abstract class Ancillary1RecordTest extends TestCase {
     }
 
     private void assertException(final Ancillary1Record record, final String methodName) throws NoSuchMethodException,
-                                                                                                IllegalAccessException {
+            IllegalAccessException {
         final Method method = record.getClass().getMethod(methodName);
         final String exceptionMessage = "IllegalCeosFormatException expected for method '";
         try {
@@ -383,16 +391,16 @@ public abstract class Ancillary1RecordTest extends TestCase {
     }
 
     protected abstract Ancillary1Record createAncillary1Record(final CeosFileReader reader) throws IOException,
-                                                                                                   IllegalCeosFormatException;
+            IllegalCeosFormatException;
 
     protected abstract Ancillary1Record createAncillary1Record(final CeosFileReader reader, final int startPos) throws
-                                                                                                                IOException,
-                                                                                                                IllegalCeosFormatException;
+            IOException,
+            IllegalCeosFormatException;
 
     protected abstract void writeCoefficients(final ImageOutputStream ios) throws IOException;
 
     protected abstract void assertCoefficients(final Ancillary1Record record) throws IOException,
-                                                                                     IllegalCeosFormatException;
+            IllegalCeosFormatException;
 
 
 }

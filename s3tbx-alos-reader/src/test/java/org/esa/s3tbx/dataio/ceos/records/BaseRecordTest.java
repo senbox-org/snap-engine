@@ -15,27 +15,33 @@
  */
 package org.esa.s3tbx.dataio.ceos.records;
 
-import junit.framework.TestCase;
 import org.esa.s3tbx.dataio.ceos.CeosFileReader;
 import org.esa.s3tbx.dataio.ceos.IllegalCeosFormatException;
 import org.esa.snap.core.datamodel.MetadataAttribute;
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.ProductData;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.imageio.stream.ImageOutputStream;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-public class BaseRecordTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 
-    public static final int RECORD_LENGTH = 4680;
+@SuppressWarnings("OctalInteger")
+public class BaseRecordTest {
+
+    static final int RECORD_LENGTH = 4680;
     private ImageOutputStream _ios;
     private String _prefix;
     private CeosFileReader _reader;
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         final ByteArrayOutputStream os = new ByteArrayOutputStream(24);
         _ios = new MemoryCacheImageOutputStream(os);
         _prefix = "BaseRecordTest_prefix";
@@ -45,8 +51,9 @@ public class BaseRecordTest extends TestCase {
         _reader = new CeosFileReader(_ios);
     }
 
+    @Test
     public void testInitBaseRecord() throws IOException,
-                                            IllegalCeosFormatException {
+            IllegalCeosFormatException {
         final BaseRecord record = new BaseRecord(_reader, _prefix.length());
 
         assertRecord(record);
@@ -55,8 +62,9 @@ public class BaseRecordTest extends TestCase {
         assertEquals(_prefix.length() + 12, _ios.getStreamPosition());
     }
 
+    @Test
     public void testAssignMetadataTo() throws IOException,
-                                              IllegalCeosFormatException {
+            IllegalCeosFormatException {
         final BaseRecord record = new BaseRecord(_reader, _prefix.length());
         final MetadataElement elem = new MetadataElement("elem");
 
@@ -67,7 +75,7 @@ public class BaseRecordTest extends TestCase {
         assertEquals(6, elem.getNumAttributes());
     }
 
-    public static void assertMetadata(final MetadataElement elem) {
+    static void assertMetadata(final MetadataElement elem) {
         assertIntAttribute(elem, "Record number", 1);
         assertIntAttribute(elem, "First record subtype", 077);
         assertIntAttribute(elem, "Record type code", 0300);
@@ -76,7 +84,7 @@ public class BaseRecordTest extends TestCase {
         assertIntAttribute(elem, "Record length", RECORD_LENGTH);
     }
 
-    public static void assertIntAttribute(MetadataElement elem, String attributeName, int expectedValue) {
+    static void assertIntAttribute(MetadataElement elem, String attributeName, int expectedValue) {
         final MetadataAttribute attribute = elem.getAttribute(attributeName);
         assertNotNull(attribute);
         assertEquals(ProductData.TYPE_INT32, attribute.getDataType());
@@ -84,7 +92,7 @@ public class BaseRecordTest extends TestCase {
         assertEquals(expectedValue, attribute.getData().getElemInt());
     }
 
-    public static void assertStringAttribute(MetadataElement elem, String attibuteName, String expectedValue) {
+    static void assertStringAttribute(MetadataElement elem, String attibuteName, String expectedValue) {
         final MetadataAttribute attribute = elem.getAttribute(attibuteName);
         assertNotNull(attribute);
         assertEquals(ProductData.TYPESTRING_ASCII, attribute.getData().getTypeString());
@@ -110,6 +118,7 @@ public class BaseRecordTest extends TestCase {
         ios.writeInt(RECORD_LENGTH); // recordLength = variable
     }
 
+    @Test
     public void testCreateMetadataElement() {
         MetadataElement elem;
         String suffix;

@@ -15,24 +15,27 @@
  */
 package org.esa.s3tbx.dataio.ceos.records;
 
-import junit.framework.TestCase;
 import org.esa.s3tbx.dataio.ceos.CeosFileReader;
 import org.esa.s3tbx.dataio.ceos.CeosTestHelper;
 import org.esa.s3tbx.dataio.ceos.IllegalCeosFormatException;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.imageio.stream.ImageOutputStream;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-public abstract class BaseImageFileDescriptorRecordTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+
+public abstract class BaseImageFileDescriptorRecordTest {
 
     private MemoryCacheImageOutputStream _ios;
     private String _prefix;
     private CeosFileReader _reader;
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         final ByteArrayOutputStream os = new ByteArrayOutputStream(24);
         _ios = new MemoryCacheImageOutputStream(os);
         _prefix = "AbstractImageFileDescriptorRecordTest_prefix";
@@ -42,8 +45,9 @@ public abstract class BaseImageFileDescriptorRecordTest extends TestCase {
         _reader = new CeosFileReader(_ios);
     }
 
+    @Test
     public void testInit_SimpleConstructor() throws IOException,
-                                                    IllegalCeosFormatException {
+            IllegalCeosFormatException {
         _reader.seek(_prefix.length());
 
         final BaseImageFileDescriptorRecord record = createImageFileDescriptorRecord(_reader);
@@ -53,8 +57,9 @@ public abstract class BaseImageFileDescriptorRecordTest extends TestCase {
         assertRecord(record);
     }
 
+    @Test
     public void testInit() throws IOException,
-                                  IllegalCeosFormatException {
+            IllegalCeosFormatException {
         final BaseImageFileDescriptorRecord record = createImageFileDescriptor(_reader, _prefix.length());
 
         assertEquals(_prefix.length(), record.getStartPos());
@@ -145,12 +150,12 @@ public abstract class BaseImageFileDescriptorRecordTest extends TestCase {
 
 
     protected abstract BaseImageFileDescriptorRecord createImageFileDescriptorRecord(final CeosFileReader reader) throws
-                                                                                                                  IOException,
-                                                                                                                  IllegalCeosFormatException;
+            IOException,
+            IllegalCeosFormatException;
 
     protected abstract BaseImageFileDescriptorRecord createImageFileDescriptor(final CeosFileReader reader,
                                                                                final int startPos) throws IOException,
-                                                                                                          IllegalCeosFormatException;
+            IllegalCeosFormatException;
 
     protected abstract void writeBytes341To392(ImageOutputStream ios) throws IOException;
 

@@ -15,23 +15,26 @@
  */
 package org.esa.s3tbx.dataio.ceos.records;
 
-import junit.framework.TestCase;
 import org.esa.s3tbx.dataio.ceos.CeosFileReader;
 import org.esa.s3tbx.dataio.ceos.CeosTestHelper;
 import org.esa.s3tbx.dataio.ceos.IllegalCeosFormatException;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-public class Ancillary3RecordTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+
+public class Ancillary3RecordTest {
 
     private MemoryCacheImageOutputStream _ios;
     private String _prefix;
     private CeosFileReader _reader;
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         final ByteArrayOutputStream os = new ByteArrayOutputStream(24);
         _ios = new MemoryCacheImageOutputStream(os);
         _prefix = "Ancillery3RecordTest_prefix";
@@ -41,8 +44,9 @@ public class Ancillary3RecordTest extends TestCase {
         _reader = new CeosFileReader(_ios);
     }
 
+    @Test
     public void testInit_SimpleConstructor() throws IOException,
-                                                    IllegalCeosFormatException {
+            IllegalCeosFormatException {
         _reader.seek(_prefix.length());
 
         final Ancillary3Record record = new Ancillary3Record(_reader);
@@ -50,8 +54,9 @@ public class Ancillary3RecordTest extends TestCase {
         assertRecord(record);
     }
 
+    @Test
     public void testInit() throws IOException,
-                                  IllegalCeosFormatException {
+            IllegalCeosFormatException {
         final Ancillary3Record record = new Ancillary3Record(_reader, _prefix.length());
 
         assertRecord(record);

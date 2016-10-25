@@ -16,23 +16,27 @@
 
 package org.esa.s3tbx.dataio.ceos.records;
 
-import junit.framework.TestCase;
 import org.esa.s3tbx.dataio.ceos.CeosFileReader;
 import org.esa.s3tbx.dataio.ceos.IllegalCeosFormatException;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.imageio.stream.ImageOutputStream;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-public abstract class BaseLeaderFileDescriptorRecordTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+public abstract class BaseLeaderFileDescriptorRecordTest {
 
     private ImageOutputStream _ios;
     private String _prefix;
     private CeosFileReader _reader;
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         final ByteArrayOutputStream os = new ByteArrayOutputStream(24);
         _ios = new MemoryCacheImageOutputStream(os);
         _prefix = "fdkjglsdkfhierr.m b9b0970w34";
@@ -42,8 +46,9 @@ public abstract class BaseLeaderFileDescriptorRecordTest extends TestCase {
         _reader = new CeosFileReader(_ios);
     }
 
+    @Test
     public void testInit_SimpleConstructor() throws IOException,
-                                                    IllegalCeosFormatException {
+            IllegalCeosFormatException {
         _reader.seek(_prefix.length());
 
         final CeosFileReader reader = _reader;
@@ -53,8 +58,9 @@ public abstract class BaseLeaderFileDescriptorRecordTest extends TestCase {
     }
 
 
+    @Test
     public void testInit() throws IOException,
-                                  IllegalCeosFormatException {
+            IllegalCeosFormatException {
 
         final CeosFileReader reader = _reader;
         final int startPos = _prefix.length();
@@ -182,10 +188,10 @@ public abstract class BaseLeaderFileDescriptorRecordTest extends TestCase {
 
     protected abstract BaseLeaderFileDescriptorRecord createLeaderFDR(final CeosFileReader reader,
                                                                       final int startPos) throws IOException,
-                                                                                                 IllegalCeosFormatException;
+            IllegalCeosFormatException;
 
     protected abstract BaseLeaderFileDescriptorRecord createLeaderFDR(final CeosFileReader reader) throws IOException,
-                                                                                                          IllegalCeosFormatException;
+            IllegalCeosFormatException;
 
     protected abstract void writeFields17To21(ImageOutputStream ios) throws IOException;
 

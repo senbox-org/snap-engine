@@ -16,12 +16,15 @@
 
 package org.esa.s3tbx.dataio.ceos;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.io.File;
 
-public class CeosHelperTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+public class CeosHelperTest {
 
+    @Test
     public void testGetFileFromInput() {
         String inputString = "testFile";
 
