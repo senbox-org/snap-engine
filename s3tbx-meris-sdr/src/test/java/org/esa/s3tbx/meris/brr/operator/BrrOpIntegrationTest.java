@@ -4,14 +4,34 @@ package org.esa.s3tbx.meris.brr.operator;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.GPF;
+import org.junit.Assume;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.HashMap;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class BrrOpIntegrationTest {
+
+    @BeforeClass
+    public static void setUpClass() throws Exception {
+        boolean internetAvailable;
+        try {
+            URLConnection urlConnection = new URL("http://www.google.com").openConnection();
+            urlConnection.setConnectTimeout(5);
+            urlConnection.getContent();
+            internetAvailable = true;
+        } catch (IOException e) {
+            internetAvailable = false;
+        }
+
+        Assume.assumeTrue("Internet connection not available, skipping BrrOpIntegrationTest", internetAvailable);
+    }
 
     @Test
     public void testProcessMerisL1B() throws IOException {
