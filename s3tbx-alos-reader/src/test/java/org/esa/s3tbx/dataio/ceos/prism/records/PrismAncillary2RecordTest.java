@@ -24,6 +24,8 @@ import org.esa.s3tbx.dataio.ceos.records.Ancillary2RecordTest;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 import java.io.IOException;
 
+import static org.junit.Assert.assertEquals;
+
 public class PrismAncillary2RecordTest extends Ancillary2RecordTest {
 
     @Override
