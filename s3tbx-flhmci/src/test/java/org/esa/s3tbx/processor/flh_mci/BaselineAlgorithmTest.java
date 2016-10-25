@@ -15,24 +15,17 @@
  */
 package org.esa.s3tbx.processor.flh_mci;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 import org.esa.snap.core.gpf.OperatorException;
+import org.junit.Before;
 
-public class BaselineAlgorithmTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+public class BaselineAlgorithmTest {
 
     private BaselineAlgorithm algo;
 
-    public BaselineAlgorithmTest(String testName) {
-        super(testName);
-    }
-
-    public static Test suite() {
-        return new TestSuite(BaselineAlgorithmTest.class);
-    }
-
-    @Override
+    @Before
     public void setUp() {
         algo = new BaselineAlgorithm();
     }
@@ -40,6 +33,7 @@ public class BaselineAlgorithmTest extends TestCase {
     /**
      * Tests the functionality of setWavelengths()
      */
+    @org.junit.Test
     public void testSetWavelengths() {
         float correctLow = 650.f;
         float correctSignal = 700.f;
@@ -56,37 +50,38 @@ public class BaselineAlgorithmTest extends TestCase {
         try {
             algo.setWavelengths(correctLow, correctHigh, correctLow);
             fail("exception expected!");
-        } catch (OperatorException e) {
+        } catch (OperatorException ignored) {
         }
 
         // when setting high and low the same - exception
         try {
             algo.setWavelengths(correctLow, correctLow, correctSignal);
             fail("exception expected!");
-        } catch (OperatorException e) {
+        } catch (OperatorException ignored) {
         }
 
         // when using negative wavelengths - exception
         try {
             algo.setWavelengths(-correctLow, correctHigh, correctSignal);
             fail("exception expected!");
-        } catch (OperatorException e) {
+        } catch (OperatorException ignored) {
         }
         try {
             algo.setWavelengths(correctLow, -correctHigh, correctSignal);
             fail("exception expected!");
-        } catch (OperatorException e) {
+        } catch (OperatorException ignored) {
         }
         try {
             algo.setWavelengths(correctLow, correctHigh, -correctSignal);
             fail("exception expected!");
-        } catch (OperatorException e) {
+        } catch (OperatorException ignored) {
         }
     }
 
     /**
      * Tests the cloud correction factor default value constant for correct value
      */
+    @org.junit.Test
     public void testDefaultCloudCorrectionFactor() {
         assertEquals(1.005f, BaselineAlgorithm.DEFAULT_CLOUD_CORRECT, 1e-6);
     }
