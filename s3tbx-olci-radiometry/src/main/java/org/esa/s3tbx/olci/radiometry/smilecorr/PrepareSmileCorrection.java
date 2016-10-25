@@ -16,24 +16,25 @@
  *
  */
 
-package org.esa.s3tbx.olci.radiometry.rayleigh;
-
-import org.junit.Test;
-
-
-import static org.junit.Assert.assertEquals;
+package org.esa.s3tbx.olci.radiometry.smilecorr;
 
 /**
  * @author muhammad.bc.
  */
-public class RayleighCorrectionOpIITest {
-    RayleighCorrectionOp rayleighCorrectionOpII = new RayleighCorrectionOp();
+public interface PrepareSmileCorrection {
+    float[] lambdaLowerBand();
 
-    @Test
-    public void testGetBandIndex() throws Exception {
-        assertEquals(8, rayleighCorrectionOpII.getSourceBandIndex("band_08"));
-        assertEquals(-1, rayleighCorrectionOpII.getSourceBandIndex("band"));
-        assertEquals(9, rayleighCorrectionOpII.getSourceBandIndex("09band"));
-        assertEquals(5, rayleighCorrectionOpII.getSourceBandIndex("Bla05band"));
-    }
+    float[] lambdaUpperBand();
+
+    float[] lambdaSourceBand();
+
+    float[] solarIrradianceLowerBand();
+
+    float[] solarIrradianceSourceBand();
+
+    float[] solarIrradianceUpperBand();
+
+    float[] radianceLowerBand();
+
+    float[] radianceUpperBand();
 }

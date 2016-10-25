@@ -16,8 +16,16 @@ import java.util.stream.IntStream;
 public class RayleighCorrAlgorithm {
 
 
-    public static final int NUM_BANDS = 21;
-    public static final String BAND_NAME_PATTERN = "Oa%02d_radiance";
+    public int numBands = 21;
+    public String bandNamePattern = "Oa%02d_radiance";
+
+    public RayleighCorrAlgorithm() {
+    }
+
+    public RayleighCorrAlgorithm(String bandPattern, int numBand) {
+        this.numBands = numBand;
+        this.bandNamePattern = bandPattern;
+    }
 
     //todo mba/* write test
     public double[] waterVaporCorrection709(double[] reflectances, double[] bWVRefTile, double[] bWVTile) {
@@ -108,6 +116,11 @@ public class RayleighCorrAlgorithm {
 
         for (int index = 0; index < length; index++) {
 
+            double corrOzone = corrOzoneRefl[index];
+            if (corrOzone <= 0) {
+                rho_BRR[index] = 0.0;
+                continue;
+            }
             double taurVal = rayleighOpticalThickness[index];
             if (Double.isNaN(taurVal)) {
                 rho_BRR[index] = taurVal;
@@ -137,7 +150,8 @@ public class RayleighCorrAlgorithm {
 
             double saRay = sARay[index];
 
-            double rho_toaR = (corrOzoneRefl[index] - rho_R) / (tR_thetaS * tR_thetaV); //toa corrOzoneRefl corrected for Rayleigh scattering
+
+            double rho_toaR = (corrOzone - rho_R) / (tR_thetaS * tR_thetaV); //toa corrOzoneRefl corrected for Rayleigh scattering
             double sphericalFactor = 1.0 / (1.0 + saRay * rho_toaR); //#factor used in the next equation to account for the spherical albedo
             //#top of aerosol reflectance, which is equal to bottom of Rayleigh reflectance
             rho_BRR[index] = (rho_toaR * sphericalFactor);
@@ -255,9 +269,9 @@ public class RayleighCorrAlgorithm {
         }
 
         private Map<Integer, double[]> getThicknessAllBands() {
-            double[] crossSectionSigma = getCrossSectionSigma(product, NUM_BANDS, BAND_NAME_PATTERN);
+            double[] crossSectionSigma = getCrossSectionSigma(product, numBands, bandNamePattern);
             Map<Integer, double[]> thicknessPerBand = new HashMap<>();
-            for (int bandIndex = 1; bandIndex <= NUM_BANDS; bandIndex++) {
+            for (int bandIndex = 1; bandIndex <= numBands; bandIndex++) {
                 double[] rayleighThickness = getRayleighThickness(rayleighAux, crossSectionSigma, bandIndex);
                 thicknessPerBand.put(bandIndex, rayleighThickness);
             }

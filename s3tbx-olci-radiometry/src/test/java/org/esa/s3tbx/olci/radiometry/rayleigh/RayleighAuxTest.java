@@ -82,20 +82,20 @@ public class RayleighAuxTest {
 
     @Test
     public void testCreateLineSpaceOfArrayElements() throws Exception {
-        double[] lineSpace = rayleighAux.getLineSpace(0, 10, 5);
+        double[] lineSpace = RayleighAux.getLineSpace(0, 10, 5);
         assertNotNull(lineSpace);
         assertEquals(5, lineSpace.length);
         assertArrayEquals(new double[]{0.0, 2.5, 5.0, 7.5, 10.0}, lineSpace, 1e-8);
-        lineSpace = rayleighAux.getLineSpace(0, 1, 5);
+        lineSpace = RayleighAux.getLineSpace(0, 1, 5);
         assertEquals(5, lineSpace.length);
         assertArrayEquals(new double[]{0.0, 0.25, 0.5, 0.75, 1.0}, lineSpace, 1e-8);
 
-        lineSpace = rayleighAux.getLineSpace(0, 0, 5);
+        lineSpace = RayleighAux.getLineSpace(0, 0, 5);
         assertEquals(5, lineSpace.length);
         assertArrayEquals(new double[]{0.0, 0.0, 0.0, 0.0, 0.0}, lineSpace, 1e-8);
 
         try {
-            lineSpace = rayleighAux.getLineSpace(0, 10, -5);
+            lineSpace = RayleighAux.getLineSpace(0, 10, -5);
             fail("Array cant have negative index");
         } catch (NegativeArraySizeException ex) {
 
