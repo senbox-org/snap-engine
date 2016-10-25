@@ -116,6 +116,11 @@ public class RayleighCorrAlgorithm {
 
         for (int index = 0; index < length; index++) {
 
+            double corrOzone = corrOzoneRefl[index];
+            if (corrOzone <= 0) {
+                rho_BRR[index] = 0.0;
+                continue;
+            }
             double taurVal = rayleighOpticalThickness[index];
             if (Double.isNaN(taurVal)) {
                 rho_BRR[index] = taurVal;
@@ -145,7 +150,8 @@ public class RayleighCorrAlgorithm {
 
             double saRay = sARay[index];
 
-            double rho_toaR = (corrOzoneRefl[index] - rho_R) / (tR_thetaS * tR_thetaV); //toa corrOzoneRefl corrected for Rayleigh scattering
+
+            double rho_toaR = (corrOzone - rho_R) / (tR_thetaS * tR_thetaV); //toa corrOzoneRefl corrected for Rayleigh scattering
             double sphericalFactor = 1.0 / (1.0 + saRay * rho_toaR); //#factor used in the next equation to account for the spherical albedo
             //#top of aerosol reflectance, which is equal to bottom of Rayleigh reflectance
             rho_BRR[index] = (rho_toaR * sphericalFactor);

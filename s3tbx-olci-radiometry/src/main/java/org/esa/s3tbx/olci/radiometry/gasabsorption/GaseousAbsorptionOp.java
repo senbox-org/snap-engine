@@ -19,6 +19,8 @@
 package org.esa.s3tbx.olci.radiometry.gasabsorption;
 
 import com.bc.ceres.core.ProgressMonitor;
+import org.esa.s3tbx.olci.radiometry.Sensor;
+import org.esa.s3tbx.olci.radiometry.smilecorr.SmileCorrectionUtils;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
@@ -36,7 +38,7 @@ import java.awt.Rectangle;
 /**
  * @author muhammad.bc.
  */
-@OperatorMetadata(alias =  "GaseousAbsorption",
+@OperatorMetadata(alias = "GaseousAbsorption",
         authors = "Marco Peters, Muhamamd Bala (Brockmann Consult)",
         copyright = "(c) 2016 by Brockmann Consult",
         description = "Correct the influence of atmospheric gas absorption for those OLCI channels.")
@@ -51,8 +53,12 @@ public class GaseousAbsorptionOp extends Operator {
 
     @Override
     public void initialize() throws OperatorException {
+        Sensor sensorType = SmileCorrectionUtils.getSensorType(sourceProduct);
+        if (!Sensor.OLCI.equals(sensorType)) {
+            throw new OperatorException("The sensor type is not supported with this operator.");
+        }
         targetProduct = new Product(sourceProduct.getName(), sourceProduct.getProductType(),
-                sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
+                                    sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
 
         for (int i = 1; i <= 21; i++) {
 //            Band targetBand = targetProduct.addBand(String.format("gaseous_absorp_%02d", i), ProductData.TYPE_FLOAT32);
@@ -76,6 +82,7 @@ public class GaseousAbsorptionOp extends Operator {
 
     @Override
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
+        checkForCancellation();
         final Rectangle rectangle = targetTile.getRectangle();
         String targetBandName = targetBand.getName();
         final float[] computedGases = computeGas(targetBandName, rectangle, sourceProduct);
