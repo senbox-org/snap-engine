@@ -15,24 +15,19 @@
  */
 package org.esa.s3tbx.aatsr.sst;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.Before;
+import org.junit.Test;
 
-public class SstCoefficientSetTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+
+public class SstCoefficientSetTest {
 
     private SstCoefficientSet _set;
 
-    public SstCoefficientSetTest(String testName) {
-        super(testName);
-    }
-
-    public static Test suite() {
-        return new TestSuite(SstCoefficientSetTest.class);
-    }
-
-    @Override
-    protected void setUp() {
+    @Before
+    public void setUp() {
         _set = new SstCoefficientSet();
         assertNotNull(_set);
     }
@@ -40,18 +35,19 @@ public class SstCoefficientSetTest extends TestCase {
     /**
      * Tests for the correct functionality of the description setter and getter
      */
+    @Test
     public void testSetGetDescription() {
         String desc1 = "A coefficient description";
         String desc2 = "Another coefficient description";
 
-        // initially the description shall be an emty string
+        // initially the description shall be an empty string
         assertEquals("", _set.getDescription());
 
         // it shall not be possible to add null as description
         try {
             _set.setDescription(null);
             fail("exception expected");
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException ignored) {
         }
 
         // when setting a description we expect to get it back
@@ -65,6 +61,7 @@ public class SstCoefficientSetTest extends TestCase {
     /**
      * Tests the correct functionality of the coefficient accessor function
      */
+    @Test
     public void testAddGetCoefficients() {
         SstCoefficients coeffs1 = new SstCoefficients(1, 2);
         SstCoefficients coeffs2 = new SstCoefficients(3, 5);
@@ -77,7 +74,7 @@ public class SstCoefficientSetTest extends TestCase {
         try {
             _set.addCoefficients(null);
             fail("exception expected");
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException ignored) {
         }
 
         // when we added one - the number must increase and we must be able to
@@ -100,13 +97,13 @@ public class SstCoefficientSetTest extends TestCase {
         try {
             _set.getCoefficientsAt(-3);
             fail("exception expected");
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
 
         try {
             _set.getCoefficientsAt(12);
             fail("exception expected");
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
     }
 }

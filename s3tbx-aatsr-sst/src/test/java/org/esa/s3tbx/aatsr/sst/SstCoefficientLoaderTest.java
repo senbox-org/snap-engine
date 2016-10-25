@@ -15,10 +15,9 @@
  */
 package org.esa.s3tbx.aatsr.sst;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 import org.esa.snap.core.gpf.OperatorException;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,22 +25,19 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-public class SstCoefficientLoaderTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
+
+public class SstCoefficientLoaderTest {
 
     private static final String expNadirDesc = "test coefficients nadir";
     private static final String expDualDesc = "test coefficients dual";
     private SstCoefficientLoader loader;
 
-    public SstCoefficientLoaderTest(String testName) {
-        super(testName);
-    }
-
-    public static Test suite() {
-        return new TestSuite(SstCoefficientLoaderTest.class);
-    }
-
-    @Override
-    protected void setUp() {
+    @Before
+    public void setUp() {
         loader = new SstCoefficientLoader();
         assertNotNull(loader);
     }
@@ -49,6 +45,7 @@ public class SstCoefficientLoaderTest extends TestCase {
     /**
      * Tests the load method for expected behaviour when fed with different erroneous arguments
      */
+    @Test
     public void testLoadWithInvalidArguments() throws IOException {
 
         // shall not accept null arguments
@@ -73,6 +70,7 @@ public class SstCoefficientLoaderTest extends TestCase {
     /**
      * Tests if a correctly formatted file is read in
      */
+    @Test
     public void testLoadCorrectFile() throws IOException, URISyntaxException {
         URL nadirCoeff = createNadirCoeffUrl();
         URL dualCoeff = createDualCoeffUrl();
@@ -90,6 +88,7 @@ public class SstCoefficientLoaderTest extends TestCase {
     /**
      * Tests that the content for the nadir coeffcient file is read correctly
      */
+    @Test
     public void testNadirStuffCorrectRead() throws IOException, URISyntaxException {
         URL nadirCoeff = createNadirCoeffUrl();
 
@@ -181,6 +180,7 @@ public class SstCoefficientLoaderTest extends TestCase {
     /**
      * Tests that the content for the dual coeffcient file is read correctly
      */
+    @Test
     public void testDualStuffCorrectRead() throws IOException, URISyntaxException {
         URL dualCoeff = createDualCoeffUrl();
 
@@ -266,6 +266,7 @@ public class SstCoefficientLoaderTest extends TestCase {
     /**
      * Tests that when the coefficient file contains no description none is read
      */
+    @Test
     public void testNoDescriptionCorrectRead() throws IOException, URISyntaxException {
         URL noDescFile = createNoDescriptionCoeffUrl();
 
@@ -283,38 +284,40 @@ public class SstCoefficientLoaderTest extends TestCase {
     /**
      * Tests that an incorrect set up coefficient file is checked and the errors are found
      */
+    @Test
     public void testIncorrectNumberOfMaps() throws IOException, URISyntaxException {
         URL illegalFile = createOneMapTooMuchUrl();
 
         try {
             loader.load(illegalFile);
             fail("OperatorException expected");
-        } catch (OperatorException e) {
+        } catch (OperatorException ignored) {
         }
 
         illegalFile = createMapOverlapUrl();
         try {
             loader.load(illegalFile);
             fail("OperatorException expected");
-        } catch (OperatorException e) {
+        } catch (OperatorException ignored) {
         }
 
         illegalFile = create_A_and_D_Url();
         try {
             loader.load(illegalFile);
             fail("OperatorException expected");
-        } catch (OperatorException e) {
+        } catch (OperatorException ignored) {
         }
     }
 
     /**
      * Tests that load description reacts as expected when fed with illegal arguments
      */
+    @Test
     public void testLoadDescriptionInterface() throws IOException {
         try {
             loader.getDescription(null);
             fail("IllegalArgumentException expected");
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException ignored) {
         }
 
         URL nonExistent = createNonExistentUrl();
@@ -326,6 +329,7 @@ public class SstCoefficientLoaderTest extends TestCase {
     /**
      * Tests that we really load the description strings expected
      */
+    @Test
     public void testLoadDescription() throws IOException, URISyntaxException {
         String description;
         URL url;

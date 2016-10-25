@@ -15,23 +15,17 @@
  */
 package org.esa.s3tbx.aatsr.sst;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 
-public class SstCoefficientsTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
-    public SstCoefficientsTest(String testName) {
-        super(testName);
-    }
-
-    public static Test suite() {
-        return new TestSuite(SstCoefficientsTest.class);
-    }
+public class SstCoefficientsTest {
 
     /**
      * Check the correct functionality of the default constructor
      */
+    @org.junit.Test
     public void testDefaultConstructor() {
         SstCoefficients coeffs = new SstCoefficients();
 
@@ -49,6 +43,7 @@ public class SstCoefficientsTest extends TestCase {
     /**
      * Check the correct functionality of the parametrized constructor
      */
+    @org.junit.Test
     public void testParameterConstructor() {
         int start = 12;
         int end = 34;
@@ -64,15 +59,16 @@ public class SstCoefficientsTest extends TestCase {
         end = 8;
 
         try {
-            range = new SstCoefficients(start, end);
+            new SstCoefficients(start, end);
             fail("exception expected");
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException ignored) {
         }
     }
 
     /**
      * Checks that we get back what we set and that error checking works
      */
+    @org.junit.Test
     public void testSetGetRange() {
         SstCoefficients range = new SstCoefficients();
 
@@ -96,13 +92,14 @@ public class SstCoefficientsTest extends TestCase {
         try {
             range.setRange(start, end);
             fail("exception expected");
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException ignored) {
         }
     }
 
     /**
      * Tests the correct functionality of setter and getter for the a coefficients set
      */
+    @org.junit.Test
     public void testSetGetACoefficients() {
         SstCoefficients coeffs = new SstCoefficients();
 
@@ -113,7 +110,7 @@ public class SstCoefficientsTest extends TestCase {
         try {
             coeffs.set_A_Coeffs(null);
             fail("exception expected");
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException ignored) {
         }
 
         // when we set something we expect to get the same thing back
@@ -130,6 +127,7 @@ public class SstCoefficientsTest extends TestCase {
     /**
      * Tests the correct functionality of setter and getter for the b coefficients set
      */
+    @org.junit.Test
     public void testSetGetBCoefficients() {
         SstCoefficients coeffs = new SstCoefficients();
 
@@ -140,7 +138,7 @@ public class SstCoefficientsTest extends TestCase {
         try {
             coeffs.set_B_Coeffs(null);
             fail("exception expected");
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException ignored) {
         }
 
         // when we set something we expect to get the same thing back
@@ -157,6 +155,7 @@ public class SstCoefficientsTest extends TestCase {
     /**
      * Tests the correct functionality of setter and getter for the c coefficients set
      */
+    @org.junit.Test
     public void testSetGetCCoefficients() {
         SstCoefficients coeffs = new SstCoefficients();
 
@@ -167,7 +166,7 @@ public class SstCoefficientsTest extends TestCase {
         try {
             coeffs.set_C_Coeffs(null);
             fail("exception expected");
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException ignored) {
         }
 
         // when we set something we expect to get the same thing back
@@ -184,6 +183,7 @@ public class SstCoefficientsTest extends TestCase {
     /**
      * Tests the correct functionality of setter and getter for the d coefficients set
      */
+    @org.junit.Test
     public void testSetGetDCoefficients() {
         SstCoefficients coeffs = new SstCoefficients();
 
@@ -194,7 +194,7 @@ public class SstCoefficientsTest extends TestCase {
         try {
             coeffs.set_D_Coeffs(null);
             fail("exception expected");
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException ignored) {
         }
 
         // when we set something we expect to get the same thing back
