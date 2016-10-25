@@ -15,14 +15,17 @@
  */
 package org.esa.s3tbx.dataio.modis;
 
-import junit.framework.TestCase;
 import org.esa.snap.core.dataio.ProductIOPlugInManager;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
+import org.junit.Test;
 
 import java.util.Iterator;
 
-public class ReaderLoadedAsServiceTest extends TestCase {
+import static org.junit.Assert.assertEquals;
 
+public class ReaderLoadedAsServiceTest {
+
+    @Test
     public void testReaderIsLoaded() {
 
         ProductIOPlugInManager plugInManager = ProductIOPlugInManager.getInstance();

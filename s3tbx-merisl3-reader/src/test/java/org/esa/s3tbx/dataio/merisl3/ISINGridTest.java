@@ -16,14 +16,18 @@
 
 package org.esa.s3tbx.dataio.merisl3;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-import java.awt.Point;
+import java.awt.*;
 
-public class ISINGridTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+public class ISINGridTest {
 
     private ISINGrid grid = new ISINGrid(ISINGrid.DEFAULT_ROW_COUNT);
 
+    @Test
     public void testDefaults() {
         assertEquals(2160, ISINGrid.DEFAULT_ROW_COUNT);
         assertEquals(2160, grid.getRowCount());
@@ -32,6 +36,7 @@ public class ISINGridTest extends TestCase {
         assertEquals(Math.PI * ISINGrid.RE / grid.getRowCount(), grid.getBinSize(), 1e-10);
     }
 
+    @Test
     public void test_getRowLength() {
         assertEquals(3, grid.getRowLength(0));
         assertEquals(9, grid.getRowLength(1));
@@ -47,6 +52,7 @@ public class ISINGridTest extends TestCase {
         assertEquals(22, grid.getRowLength(2160 - 1 - 3));
     }
 
+    @Test
     public void test_getRowOffset() {
         assertEquals(0, grid.getBinOffset(0));
         assertEquals(3, grid.getBinOffset(1));
@@ -63,6 +69,7 @@ public class ISINGridTest extends TestCase {
         assertEquals(5940422 - (3 + 9 + 16 + 22), grid.getBinOffset(2160 - 1 - 3));
     }
 
+    @Test
     public void test_getRowIndex() {
         assertEquals(0, grid.getRowIndex(0));
         assertEquals(1, grid.getRowIndex(3));
@@ -89,6 +96,7 @@ public class ISINGridTest extends TestCase {
         assertEquals(-1, grid.getRowIndex(5940422 + 1000));
     }
 
+    @Test
     public void test_getGridPoint() {
         final Point point = new Point();
 
@@ -113,6 +121,7 @@ public class ISINGridTest extends TestCase {
         assertEquals(new Point(-1, -1), grid.getGridPoint(5940422 + 1000, point));
     }
 
+    @Test
     public void test_getBinIndex() {
         assertEquals((0) + 2, grid.getBinIndex(new Point(2, 0)));
         assertEquals((3) + 7, grid.getBinIndex(new Point(7, 1)));
@@ -137,6 +146,7 @@ public class ISINGridTest extends TestCase {
     }
 
 
+    @Test
     public void test_getColIndex() {
 
         // test valid rowIndex and lon
@@ -180,20 +190,22 @@ public class ISINGridTest extends TestCase {
         try {
             grid.getColIndex(-1, 45.3);
             fail();
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (ArrayIndexOutOfBoundsException ignored) {
         }
 
         try {
             grid.getColIndex(grid.getRowCount(), 45.3);
             fail();
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (ArrayIndexOutOfBoundsException ignored) {
         }
     }
 
+    @Test
     public void test_getBinIndexWithLon() {
 
     }
 
+    @Test
     public void testDetectRowCount() throws Exception {
         final String name9277 = "L3_ENV_MER_A443_m__20030301_GLOB_SI_ACR_9277x9277_-90+90+-180+180_0000.nc";
         assertEquals(2160, ISINGrid.detectRowCount(name9277));

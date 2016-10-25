@@ -16,10 +16,14 @@
 
 package org.esa.s3tbx.dataio.merisl3;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class MerisL3FileFilterTest extends TestCase {
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
+public class MerisL3FileFilterTest {
+
+    @Test
     public void testFilter() {
         assertTrue(MerisL3FileFilter.isMerisBinnedL3Name("L3_ENV_MER_ABSD_m__20050201_GLOB_SI_ACR_9277x9277_-90+90+-180+180_0000.nc"));
         assertFalse(MerisL3FileFilter.isMerisBinnedL3Name("L2_ENV_MER_ABSD_m__20050201_GLOB_SI_ACR_9277x9277_-90+90+-180+180_0000.nc"));

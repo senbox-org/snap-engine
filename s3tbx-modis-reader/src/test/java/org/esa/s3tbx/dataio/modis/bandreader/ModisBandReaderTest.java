@@ -1,10 +1,13 @@
 package org.esa.s3tbx.dataio.modis.bandreader;
 
-import junit.framework.TestCase;
 import org.esa.s3tbx.dataio.modis.ModisConstants;
+import org.junit.Test;
 
-public class ModisBandReaderTest extends TestCase {
+import static org.junit.Assert.assertEquals;
 
+public class ModisBandReaderTest {
+
+    @Test
     public void testDecodeScalingMethod() {
         assertEquals(ModisBandReader.SCALE_UNKNOWN, ModisBandReader.decodeScalingMethod(null));
         assertEquals(ModisBandReader.SCALE_UNKNOWN, ModisBandReader.decodeScalingMethod(""));

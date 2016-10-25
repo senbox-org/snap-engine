@@ -1,12 +1,16 @@
 package org.esa.s3tbx.dataio.modis.attribute;
 
-import junit.framework.TestCase;
 import org.esa.s3tbx.dataio.modis.ModisGlobalAttributes;
 import org.esa.s3tbx.dataio.modis.netcdf.NetCDFVariables;
+import org.junit.Test;
 import ucar.nc2.Dimension;
 
-public class DaacAttributesTest extends TestCase {
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
+public class DaacAttributesTest {
+
+    @Test
     @SuppressWarnings("ConstantConditions")
     public void testInheritance() {
         final DaacAttributes daacAttributes = new DaacAttributes(new NetCDFVariables());
@@ -14,12 +18,14 @@ public class DaacAttributesTest extends TestCase {
         assertTrue(daacAttributes instanceof ModisGlobalAttributes);
     }
 
+    @Test
     public void testIsImappFormat() {
         final DaacAttributes daacAttributes = new DaacAttributes(new NetCDFVariables());
 
         assertFalse(daacAttributes.isImappFormat());
     }
 
+    @Test
     public void testIsWidthDimension() {
         Dimension dimension = new Dimension("Max_EV_frames", 34);
         assertTrue(DaacAttributes.isWidthDimension(dimension));
@@ -34,6 +40,7 @@ public class DaacAttributesTest extends TestCase {
         assertFalse(DaacAttributes.isWidthDimension(dimension));
     }
 
+    @Test
     public void testIsHeightDimension() {
         Dimension dimension = new Dimension("10*nscans", 838);
         assertTrue(DaacAttributes.isHeightDimension(dimension));

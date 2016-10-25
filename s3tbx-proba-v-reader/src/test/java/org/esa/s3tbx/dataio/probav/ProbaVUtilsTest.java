@@ -1,18 +1,22 @@
 package org.esa.s3tbx.dataio.probav;
 
-import junit.framework.TestCase;
 import ncsa.hdf.object.Attribute;
 import ncsa.hdf.object.h5.H5Datatype;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 /**
- *
  * @author olafd
  */
-public class ProbaVUtilsTest extends TestCase {
-    public void testGetAttributeValue()  {
+public class ProbaVUtilsTest {
+    @Test
+    public void testGetAttributeValue() {
         final H5Datatype intDatatype = new H5Datatype(H5Datatype.CLASS_INTEGER, H5Datatype.NATIVE, H5Datatype.NATIVE, -1);
         final Attribute intAttr = new Attribute("intAttr", intDatatype, new long[]{1L});
         intAttr.setValue(new int[]{2});
@@ -32,6 +36,7 @@ public class ProbaVUtilsTest extends TestCase {
         assertEquals("bla blubb lalala", stringAttrValue);
     }
 
+    @Test
     public void testGetStringAttributes() {
         List<Attribute> attrList = new ArrayList<>();
         final H5Datatype stringDatatype = new H5Datatype(H5Datatype.CLASS_STRING, H5Datatype.NATIVE, H5Datatype.NATIVE, -1);
@@ -53,6 +58,7 @@ public class ProbaVUtilsTest extends TestCase {
 
     }
 
+    @Test
     public void testGetDoubleAttributes() {
         List<Attribute> attrList = new ArrayList<>();
         final H5Datatype datatype = new H5Datatype(H5Datatype.CLASS_FLOAT, H5Datatype.NATIVE, H5Datatype.NATIVE, -1);
@@ -70,12 +76,12 @@ public class ProbaVUtilsTest extends TestCase {
         scaleAttr.setValue(new float[]{250.0f});
         attrList.add(scaleAttr);
         final double scaleFromAttributes = ProbaVUtils.getDoubleAttributeValue(attrList, "SCALE");
-        assertEquals(250.0, scaleFromAttributes);
+        assertEquals(250.0, scaleFromAttributes, 1e-8);
 
         final Attribute topLeftLatAttr = new Attribute("TOP_LEFT_LONGITUDE", datatype, new long[]{1L});
         topLeftLatAttr.setValue(new float[]{87.3f});
         attrList.add(topLeftLatAttr);
         final double topLeftLatFromAttributes = ProbaVUtils.getDoubleAttributeValue(attrList, "TOP_LEFT_LONGITUDE");
-        assertEquals(87.3, topLeftLatFromAttributes);
+        assertEquals(87.3, topLeftLatFromAttributes, 1e-8);
     }
 }

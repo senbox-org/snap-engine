@@ -1,11 +1,22 @@
 package org.esa.s3tbx.dataio.modis.hdf;
 
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
-public class HdfDataFieldTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
+public class HdfDataFieldTest {
 
     private HdfDataField dataField;
 
+    @Before
+    public void setUp() throws Exception {
+        dataField = new HdfDataField();
+    }
+
+    @Test
     public void testConstruction() {
         assertEquals("", dataField.getName());
         assertEquals(0, dataField.getHeight());
@@ -14,6 +25,7 @@ public class HdfDataFieldTest extends TestCase {
         assertNull(dataField.getDimensionNames());
     }
 
+    @Test
     public void testSetGetName() {
         final String name_1 = "Harry";
         final String name_2 = "Sally";
@@ -25,6 +37,7 @@ public class HdfDataFieldTest extends TestCase {
         assertEquals(name_2, dataField.getName());
     }
 
+    @Test
     public void testSetGetWidth() {
         final int width_1 = 34;
         final int width_2 = 109;
@@ -36,6 +49,7 @@ public class HdfDataFieldTest extends TestCase {
         assertEquals(width_2, dataField.getWidth());
     }
 
+    @Test
     public void testSetGetHeight() {
         final int height_1 = 889;
         final int height_2 = 57;
@@ -47,6 +61,7 @@ public class HdfDataFieldTest extends TestCase {
         assertEquals(height_2, dataField.getHeight());
     }
 
+    @Test
     public void testSetGetLayers() {
         final int layers_1 = 3;
         final int layers_2 = 9;
@@ -58,6 +73,7 @@ public class HdfDataFieldTest extends TestCase {
         assertEquals(layers_2, dataField.getLayers());
     }
 
+    @Test
     public void testSetGetDimensionNames() {
         final String[] dimensionNames = new String[]{"dim_1", "dim_2"};
 
@@ -66,10 +82,5 @@ public class HdfDataFieldTest extends TestCase {
         assertNotNull(result);
         assertEquals(2, result.length);
         assertEquals("dim_2", result[1]);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        dataField = new HdfDataField();
     }
 }

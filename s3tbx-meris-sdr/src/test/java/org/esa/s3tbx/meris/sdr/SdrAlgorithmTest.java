@@ -9,8 +9,8 @@ package org.esa.s3tbx.meris.sdr;
 import com.bc.jnn.Jnn;
 import com.bc.jnn.JnnException;
 import com.bc.jnn.JnnNet;
-import junit.framework.TestCase;
 import org.esa.snap.core.util.io.CsvReader;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,11 +18,15 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.List;
 
-public class SdrAlgorithmTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+public class SdrAlgorithmTest {
     private static final String NEURAL_NET_RESOURCE_PATH = "run05_100.nna";
     private static final String TEST_PIXEL_RESOURCE_PATH = "run05_100_test_pixel.dat";
     private static final double EPS = 1e-5;
 
+    @Test
     public void testValidConstructorCall() {
         try {
             new SdrAlgorithm(new JnnNet());
@@ -31,14 +35,16 @@ public class SdrAlgorithmTest extends TestCase {
         }
     }
 
+    @Test
     public void testInvalidConstructorCall() {
         try {
             new SdrAlgorithm(null);
             fail();
-        } catch (IllegalArgumentException expected) {
+        } catch (IllegalArgumentException ignored) {
         }
     }
 
+    @Test
     public void testSdaComputation() throws IOException, JnnException {
         final JnnNet neuralNet = readNeuralNet();
         final SdrAlgorithm algorithm = new SdrAlgorithm(neuralNet);
@@ -53,12 +59,12 @@ public class SdrAlgorithmTest extends TestCase {
         assertEquals(2.42241E-02, sdr, EPS);
     }
 
+    @Test
     public void testNeuralNetFunction() throws IOException, JnnException {
         final JnnNet neuralNet = readNeuralNet();
         final SdrAlgorithm algorithm = new SdrAlgorithm(neuralNet);
         final double[][] testVectors = readTestPixels();
-        for (int i = 0; i < testVectors.length; i++) {
-            double[] testVector = testVectors[i];
+        for (double[] testVector : testVectors) {
             double[] input = new double[testVector.length - 1];
             double[] actualOutput = new double[1];
             double[] expectedOutput = new double[1];
@@ -71,11 +77,8 @@ public class SdrAlgorithmTest extends TestCase {
 
     private JnnNet readNeuralNet() throws IOException, JnnException {
         final InputStream stream = SdrAlgorithmTest.class.getResourceAsStream(NEURAL_NET_RESOURCE_PATH);
-        final Reader reader = new InputStreamReader(stream);
-        try {
+        try (Reader reader = new InputStreamReader(stream)) {
             return Jnn.readNna(reader);
-        } finally {
-            reader.close();
         }
     }
 
@@ -83,11 +86,8 @@ public class SdrAlgorithmTest extends TestCase {
         final InputStream stream = SdrAlgorithmTest.class.getResourceAsStream(TEST_PIXEL_RESOURCE_PATH);
         final Reader reader = new InputStreamReader(stream);
         final List<String[]> recordList;
-        final CsvReader csvReader = new CsvReader(reader, new char[]{' ', '\t'}, true, "#");
-        try {
+        try (CsvReader csvReader = new CsvReader(reader, new char[]{' ', '\t'}, true, "#")) {
             recordList = csvReader.readStringRecords();
-        } finally {
-            csvReader.close();
         }
         final String[] header = recordList.get(0);
         recordList.remove(0);

@@ -6,13 +6,17 @@
  */
 package org.esa.s3tbx.meris.aerosol;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.io.File;
 import java.text.DateFormat;
 
-public class ClimFileFactoryTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
+public class ClimFileFactoryTest {
+
+    @Test
     public void testCreateTemporalFile() {
         final DateFormat dateFormat = UTCTest.getDateTimeFormat();
         final ClimFileFactory ff = new ClimFileFactory();

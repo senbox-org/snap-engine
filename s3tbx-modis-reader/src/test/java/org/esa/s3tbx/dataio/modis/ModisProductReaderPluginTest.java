@@ -1,18 +1,28 @@
 package org.esa.s3tbx.dataio.modis;
 
-import junit.framework.TestCase;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.util.io.SnapFileFilter;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Locale;
 
-public class ModisProductReaderPluginTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+public class ModisProductReaderPluginTest {
 
     private ModisProductReaderPlugIn plugIn;
     private File testFile;
 
+    @Test
     public void testInputTypes() {
         final Class[] inputTypes = plugIn.getInputTypes();
         assertNotNull(inputTypes);
@@ -21,12 +31,14 @@ public class ModisProductReaderPluginTest extends TestCase {
         assertEquals(File.class, inputTypes[1]);
     }
 
+    @Test
     public void testCreateReaderInstance() {
         final ProductReader readerInstance = plugIn.createReaderInstance();
         assertNotNull(readerInstance);
         assertTrue(readerInstance instanceof ModisProductReader);
     }
 
+    @Test
     public void testGetDefaultFileExtension() {
         final String[] defaultFileExtensions = plugIn.getDefaultFileExtensions();
         assertNotNull(defaultFileExtensions);
@@ -34,6 +46,7 @@ public class ModisProductReaderPluginTest extends TestCase {
         assertEquals(".hdf", defaultFileExtensions[0]);
     }
 
+    @Test
     public void testGetDescription() {
         String description = plugIn.getDescription(Locale.getDefault());
         assertNotNull(description);
@@ -44,6 +57,7 @@ public class ModisProductReaderPluginTest extends TestCase {
         assertEquals("MODIS HDF4 Data Products", description);
     }
 
+    @Test
     public void testGetFormatNames() {
         final String[] formatNames = plugIn.getFormatNames();
         assertNotNull(formatNames);
@@ -51,11 +65,12 @@ public class ModisProductReaderPluginTest extends TestCase {
         assertEquals("MODIS", formatNames[0]);
     }
 
+    @Test
     public void testGetInputFile_nullInput() {
-        final File file = ModisProductReaderPlugIn.getInputFile(null);
-        assertNull(file);
+        assertNull(ModisProductReaderPlugIn.getInputFile(null));
     }
 
+    @Test
     public void testGetInputFile_stringInput() {
         String testFileName = "test.file";
         final File file = ModisProductReaderPlugIn.getInputFile(testFileName);
@@ -63,6 +78,7 @@ public class ModisProductReaderPluginTest extends TestCase {
         assertEquals(testFileName, file.getName());
     }
 
+    @Test
     public void testGetInputFile_fileInput() {
         final File inputFile = new File("I_am_a.file");
         final File file = ModisProductReaderPlugIn.getInputFile(inputFile);
@@ -70,12 +86,14 @@ public class ModisProductReaderPluginTest extends TestCase {
         assertEquals(inputFile.getName(), file.getName());
     }
 
+    @Test
     public void testHasHdfFileExtension() {
         assertFalse(ModisProductReaderPlugIn.hasHdfFileExtension(null));
         assertFalse(ModisProductReaderPlugIn.hasHdfFileExtension(new File("tonio_und.tom")));
         assertTrue(ModisProductReaderPlugIn.hasHdfFileExtension(new File("I_am_but.hdf")));
     }
 
+    @Test
     public void testGetProductFileFilter() {
         final SnapFileFilter productFileFilter = plugIn.getProductFileFilter();
         assertNotNull(productFileFilter);
@@ -85,14 +103,17 @@ public class ModisProductReaderPluginTest extends TestCase {
         assertEquals("MODIS HDF4 Data Products (*.hdf)", productFileFilter.getDescription());
     }
 
+    @Test
     public void testIsValidInputFile_nullFile() {
         assertFalse(ModisProductReaderPlugIn.isValidInputFile(null));
     }
 
+    @Test
     public void testIsValidInputFile_notExistingFile() {
         assertFalse(ModisProductReaderPlugIn.isValidInputFile(new File("I/don/not/exist.hdf")));
     }
 
+    @Test
     public void testIsValidInputFile_nonHdfFile() throws IOException {
         testFile = new File("I_do_exist.txt");
         if (!testFile.createNewFile()) {
@@ -102,6 +123,7 @@ public class ModisProductReaderPluginTest extends TestCase {
         assertFalse(ModisProductReaderPlugIn.isValidInputFile(testFile));
     }
 
+    @Test
     public void testIsValidInputFile_hdfFile() throws IOException {
         testFile = new File("I_do_exist.hdf");
         if (!testFile.createNewFile()) {
@@ -111,13 +133,13 @@ public class ModisProductReaderPluginTest extends TestCase {
         assertTrue(ModisProductReaderPlugIn.isValidInputFile(testFile));
     }
 
-    @Override
-    protected void setUp() {
+    @Before
+    public void setUp() {
         plugIn = new ModisProductReaderPlugIn();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         if (testFile != null) {
             if (!testFile.delete()) {
                 fail("unable to delete test file");

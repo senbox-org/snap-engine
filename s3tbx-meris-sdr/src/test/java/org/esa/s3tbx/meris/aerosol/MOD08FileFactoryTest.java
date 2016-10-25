@@ -6,13 +6,17 @@
  */
 package org.esa.s3tbx.meris.aerosol;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.io.File;
 import java.text.DateFormat;
 
-public class MOD08FileFactoryTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
+public class MOD08FileFactoryTest {
+
+    @Test
     public void testCreateTemporalFile() {
         final DateFormat dateFormat = UTCTest.getDateTimeFormat();
         final MOD08FileFactory ff = new MOD08FileFactory();

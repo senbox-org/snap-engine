@@ -16,23 +16,19 @@
 
 package org.esa.s3tbx.dataio.modis;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
-public class ModisUtilsTest_CreateDateFromString extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
-    @Override
-    protected void setUp() throws Exception {
-    }
+public class ModisUtilsTest_CreateDateFromString {
 
-    @Override
-    protected void tearDown() throws Exception {
-    }
-
+    @Test
     public void testOk_MoreThanMillisecondsSnipped() throws ParseException {
         final Calendar cal = GregorianCalendar.getInstance();
         final String date = "2004-07-10";
@@ -53,6 +49,7 @@ public class ModisUtilsTest_CreateDateFromString extends TestCase {
         assertEquals(123, cal.get(Calendar.MILLISECOND));
     }
 
+    @Test
     public void testOk_exact() throws ParseException {
         final Calendar cal = GregorianCalendar.getInstance();
         final String date = "2005-08-22";
@@ -71,6 +68,7 @@ public class ModisUtilsTest_CreateDateFromString extends TestCase {
         assertEquals(887, cal.get(Calendar.MILLISECOND));
     }
 
+    @Test
     public void testOk_WithoutMilliseconds() throws ParseException {
         final Calendar cal = GregorianCalendar.getInstance();
         final String date = "2007-03-25";
@@ -89,6 +87,7 @@ public class ModisUtilsTest_CreateDateFromString extends TestCase {
         assertEquals(0, cal.get(Calendar.MILLISECOND));
     }
 
+    @Test
     public void testOk_WithMillisecondsFragment() throws ParseException {
         final Calendar cal = GregorianCalendar.getInstance();
         final String date = "2001-09-13";
@@ -107,6 +106,7 @@ public class ModisUtilsTest_CreateDateFromString extends TestCase {
         assertEquals(400, cal.get(Calendar.MILLISECOND));
     }
 
+    @Test
     public void testOk_WithoutSeconds() throws ParseException {
         final Calendar cal = GregorianCalendar.getInstance();
         final String date = "2008-04-21";

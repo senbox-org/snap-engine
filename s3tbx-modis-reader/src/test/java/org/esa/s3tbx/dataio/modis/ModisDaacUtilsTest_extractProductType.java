@@ -16,24 +16,29 @@
 
 package org.esa.s3tbx.dataio.modis;
 
-import junit.framework.TestCase;
 import org.esa.s3tbx.dataio.modis.productdb.ModisProductDb;
 import org.esa.snap.core.dataio.ProductIOException;
+import org.junit.Test;
 
-public class ModisDaacUtilsTest_extractProductType extends TestCase {
+import static org.junit.Assert.assertEquals;
 
+public class ModisDaacUtilsTest_extractProductType {
+
+    @Test
     public void testOk_MOD13A2_InTheMiddle() throws ProductIOException {
         final String typeString = ModisDaacUtils.extractProductType("MOD_SS.MOD13A2.somthing other");
 
         assertEquals("MOD13A2", typeString);
     }
 
+    @Test
     public void testOk_MYD13A2_AtStart() throws ProductIOException {
         final String typeString = ModisDaacUtils.extractProductType("MYD13A2.somthing other");
 
         assertEquals("MYD13A2", typeString);
     }
 
+    @Test
     public void testAllProductTypes_InTheMiddle() throws ProductIOException {
         final String[] supportetProductTypes = ModisProductDb.getInstance().getSupportetProductTypes();
         for (int i = 0; i < supportetProductTypes.length; i++) {
@@ -43,6 +48,7 @@ public class ModisDaacUtilsTest_extractProductType extends TestCase {
         }
     }
 
+    @Test
     public void testAllProductTypes_AtStart() throws ProductIOException {
         final String[] supportetProductTypes = ModisProductDb.getInstance().getSupportetProductTypes();
         for (int i = 0; i < supportetProductTypes.length; i++) {
@@ -54,6 +60,7 @@ public class ModisDaacUtilsTest_extractProductType extends TestCase {
         }
     }
 
+    @Test
     public void testShittyEsaNotFollowingTheConventionsNameHandling() throws ProductIOException {
         final String[] supportetProductTypes = ModisProductDb.getInstance().getSupportetProductTypes();
         for (int i = 0; i < supportetProductTypes.length; i++) {
@@ -68,12 +75,13 @@ public class ModisDaacUtilsTest_extractProductType extends TestCase {
         }
     }
 
+    @Test
     public void testExtractProdcutTypeReturnsEmptyStringOnUnknown() throws ProductIOException {
         assertEquals("", ModisDaacUtils.extractProductType("This.is.an.invalid.type"));
         assertEquals("", ModisDaacUtils.extractProductType("This_is_an_invalid_type"));
     }
 
     private boolean isImapp(String toTest) {
-        return toTest.indexOf("IMAPP") != -1;
+        return toTest.contains("IMAPP");
     }
 }

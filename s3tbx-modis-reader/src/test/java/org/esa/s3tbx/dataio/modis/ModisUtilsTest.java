@@ -16,10 +16,15 @@
 
 package org.esa.s3tbx.dataio.modis;
 
-import junit.framework.TestCase;
 import org.esa.snap.core.util.math.Range;
+import org.junit.Test;
 
-public class ModisUtilsTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
+
+public class ModisUtilsTest {
 
     private static final String TestCoreString =
             "GROUP                  = INVENTORYMETADATA\n" +
@@ -54,6 +59,7 @@ public class ModisUtilsTest extends TestCase {
                     '\n' +
                     "END";
 
+    @Test
     public void testExtractValueForKey() {
         assertEquals("Night", ModisUtils.extractValueForKey(TestCoreString, "DAYNIGHTFLAG"));
         assertEquals("2005-10-26T10:07:21.000Z", ModisUtils.extractValueForKey(TestCoreString, "PRODUCTIONDATETIME"));
@@ -61,24 +67,27 @@ public class ModisUtilsTest extends TestCase {
         assertNull(ModisUtils.extractValueForKey(TestCoreString, "huppepup"));
     }
 
+    @Test
     public void testExtractIntegerValueFromObject() {
         assertEquals("18490", ModisUtils.extractValueForKey(TestCoreString, "ORBITNUMBER"));
     }
 
+    @Test
     public void testExtractValueForKeyHandlesStupidInput() {
         try {
             ModisUtils.extractValueForKey(null, "DAYNIGHTFLAG");
             fail("IllegalArgumentException expected");
-        } catch (IllegalArgumentException expected) {
+        } catch (IllegalArgumentException ignored) {
         }
 
         try {
             ModisUtils.extractValueForKey(TestCoreString, null);
             fail("IllegalArgumentException expected");
-        } catch (IllegalArgumentException expected) {
+        } catch (IllegalArgumentException ignored) {
         }
     }
 
+    @Test
     public void testGetIncrementOffset() {
         final String test1 = "3,8";
         final String test2 = "3,8,13,...";
@@ -94,6 +103,7 @@ public class ModisUtilsTest extends TestCase {
         assertEquals(5, incrementOffset.increment);
     }
 
+    @Test
     public void testGetRangeFromString() {
         final String test_1 = "0, 32767";
         final String test_2 = "6,2";
@@ -109,12 +119,14 @@ public class ModisUtilsTest extends TestCase {
         assertEquals(6, (int) result.getMax());
     }
 
+    @Test
     public void testExtractBandName() {
         assertEquals("band_name", ModisUtils.extractBandName("band_name"));
         assertEquals("EV_250_Aggr500_RefSB", ModisUtils.extractBandName("MODIS_SWATH_Type_L1B/Data Fields/EV_250_Aggr500_RefSB"));
         assertEquals("EV_500_RefSB_Uncert_Indexes", ModisUtils.extractBandName("MODIS_SWATH_Type_L1B/Data Fields/EV_500_RefSB_Uncert_Indexes"));
     }
 
+    @Test
     public void testDecodeBandName() {
         assertEquals(".bla", ModisUtils.decodeBandName("schnipp,schnupp,bla,blubb", 2));
         assertEquals(".schnipp", ModisUtils.decodeBandName("schnipp,schnupp,bla,blubb", 0));

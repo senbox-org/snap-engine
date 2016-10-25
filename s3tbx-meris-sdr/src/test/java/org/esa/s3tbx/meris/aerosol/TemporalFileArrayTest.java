@@ -6,12 +6,15 @@
  */
 package org.esa.s3tbx.meris.aerosol;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.util.Calendar;
 
-public class TemporalFileArrayTest extends TestCase {
+import static org.junit.Assert.assertEquals;
 
+public class TemporalFileArrayTest {
+
+    @Test
     public void testTemporalFilesSorted() {
         final Calendar calendar = UTCTest.getCalendar();
         final TemporalFileArray fileArray = TemporalFileArray.create(getMOD08FileNames(), new MOD08FileFactory());

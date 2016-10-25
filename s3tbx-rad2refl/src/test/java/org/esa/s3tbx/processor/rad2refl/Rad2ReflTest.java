@@ -15,12 +15,17 @@
  */
 package org.esa.s3tbx.processor.rad2refl;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.io.IOException;
 
-public class Rad2ReflTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
+public class Rad2ReflTest {
+
+    @Test
     public void testGetSolarFluxesMeris() {
         try {
             Rad2ReflAuxdata auxdataRR = Rad2ReflAuxdata.loadMERISAuxdata("MER_RR");
@@ -48,15 +53,16 @@ public class Rad2ReflTest extends TestCase {
 
     }
 
+    @Test
     public void testGetSolarFluxSlstr() {
         SlstrRadReflConverter converter = new SlstrRadReflConverter("RAD_TO_REFL");
 
-        assertEquals(1837.39f, converter.getSolarFlux(0));
-        assertEquals(1525.94f, converter.getSolarFlux(1));
-        assertEquals(956.17f, converter.getSolarFlux(2));
-        assertEquals(365.9f, converter.getSolarFlux(3));
-        assertEquals(248.33f, converter.getSolarFlux(4));
-        assertEquals(78.33f, converter.getSolarFlux(5));
+        assertEquals(1837.39f, converter.getSolarFlux(0), 1e-8);
+        assertEquals(1525.94f, converter.getSolarFlux(1), 1e-8);
+        assertEquals(956.17f, converter.getSolarFlux(2), 1e-8);
+        assertEquals(365.9f, converter.getSolarFlux(3), 1e-8);
+        assertEquals(248.33f, converter.getSolarFlux(4), 1e-8);
+        assertEquals(78.33f, converter.getSolarFlux(5), 1e-8);
     }
 
 }

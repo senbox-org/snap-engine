@@ -16,7 +16,7 @@
 
 package org.esa.s3tbx.dataio.spot;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import javax.media.jai.BorderExtender;
 import javax.media.jai.Interpolation;
@@ -24,24 +24,21 @@ import javax.media.jai.JAI;
 import javax.media.jai.RenderedOp;
 import javax.media.jai.operator.CropDescriptor;
 import javax.media.jai.operator.ScaleDescriptor;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 
+import static org.junit.Assert.assertEquals;
 
-public class GridTest extends TestCase {
+
+public class GridTest {
     private static final int MAX_USHORT = (2 << 15) - 1;
     private static final int SAMPLING = 100;
 
+    @Test
     public void testJaiImageScaling() throws Exception {
         int destW = 1024;
         int destH = 512;

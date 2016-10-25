@@ -15,11 +15,11 @@
  */
 package org.esa.s3tbx.dataio.modis;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.Test;
 
-public class ModisConstantsTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+
+public class ModisConstantsTest {
 
     private static float[] expWavelength = {
             645.f, 858.5f, 469.f, 555.f, 1240.f, 1640.f, 2130.f, 412.5f, 443.f, 488.f,
@@ -66,17 +66,10 @@ public class ModisConstantsTest extends TestCase {
             300.f
     };
 
-    public ModisConstantsTest(String name) {
-        super(name);
-    }
-
-    public static Test suite() {
-        return new TestSuite(ModisConstantsTest.class);
-    }
-
     /**
      * Tests constants concerning general modis file constants
      */
+    @Test
     public void testFilePropertyConstants() {
         assertEquals(".hdf", ModisConstants.DEFAULT_FILE_EXTENSION);
         assertEquals("MODIS HDF4 Data Products", ModisConstants.READER_DESCRIPTION);
@@ -86,6 +79,7 @@ public class ModisConstantsTest extends TestCase {
     /**
      * Tests the motadata constant keys
      */
+    @Test
     public void testMetadataKeyConstants() {
         assertEquals("Number of Day mode scans", ModisConstants.NUM_OF_DAY_SCANS_KEY);
         assertEquals("Number of Night mode scans", ModisConstants.NUM_OF_NIGHT_SCANS_KEY);
@@ -128,6 +122,7 @@ public class ModisConstantsTest extends TestCase {
     /**
      * Tests the wavelength and bandwidth constants for correctness
      */
+    @Test
     public void testWavelengthsAndBandwidths() {
         assertEquals(expBandwidth.length, ModisConstants.BAND_WIDTHS.length);
         assertEquals(expWavelength.length, ModisConstants.BAND_CENTER_WAVELENGTHS.length);
@@ -139,12 +134,14 @@ public class ModisConstantsTest extends TestCase {
         }
     }
 
+    @Test
     public void testImappConstants() {
         assertEquals("DAYNIGHTFLAG", ModisConstants.DAY_NIGHT_FLAG_KEY);
         assertEquals("Day", ModisConstants.DAY_NIGHT_FLAG_DAY_VALUE);
         assertEquals("long_name", ModisConstants.BAND_NAME_KEY);
     }
 
+    @Test
     public void testScalingConstants() {
         assertEquals("exp", ModisConstants.EXPONENTIAL_SCALE_NAME);
         assertEquals("lin", ModisConstants.LINEAR_SCALE_NAME);

@@ -16,16 +16,19 @@
  */
 package org.esa.s3tbx.meris.brr.operator;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by marcoz.
  *
  * @author marcoz
- * @version $Revision: $ $Date: $
  */
-public class BrrOpTest extends TestCase {
+public class BrrOpTest {
     
+    @Test
     public void testRhoSpectralIndex() {
 
         assertTrue(BrrOp.isValidRhoSpectralIndex(0));

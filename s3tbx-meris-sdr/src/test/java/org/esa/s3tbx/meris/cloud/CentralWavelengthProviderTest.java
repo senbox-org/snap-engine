@@ -1,29 +1,30 @@
 package org.esa.s3tbx.meris.cloud;
 
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 /**
- * Created by IntelliJ IDEA.
  * User: marcoz
- * Date: 07.09.2005
- * Time: 11:13:08
- * To change this template use File | Settings | File Templates.
  */
-public class CentralWavelengthProviderTest extends TestCase {
+public class CentralWavelengthProviderTest {
 
     private static float DIFF = 0.000001f;
     private CentralWavelengthProvider provider;
 
-    @Override
+    @Before
     public void setUp() {
         provider = new CentralWavelengthProvider();
     }
 
+    @Test
     public void testInit() {
         final float[] cwRR = provider.getCentralWavelength("MER_RR");
         assertEquals("925 members", 925, cwRR.length);
@@ -32,6 +33,7 @@ public class CentralWavelengthProviderTest extends TestCase {
         assertEquals("value 924", 0f, cwRR[924], DIFF);
     }
 
+    @Test
     public void testIllegalProductType() {
         try {
             provider.getCentralWavelength("MER_TT");
@@ -40,6 +42,7 @@ public class CentralWavelengthProviderTest extends TestCase {
         }
     }
 
+    @Test
     public void testReadCW() throws IOException {
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         for (int i = 0; i < 925; i++) {
@@ -58,6 +61,7 @@ public class CentralWavelengthProviderTest extends TestCase {
         assertEquals("value 924", 924f, cwRR[924], DIFF);
     }
 
+    @Test
     public void testFr() throws IOException {
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         float value = 1.5f;
@@ -77,6 +81,7 @@ public class CentralWavelengthProviderTest extends TestCase {
         }
     }
 
+    @Test
     public void testFrDiscontinuiti() throws IOException {
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         for (int camera = 0; camera < 5; camera++) {

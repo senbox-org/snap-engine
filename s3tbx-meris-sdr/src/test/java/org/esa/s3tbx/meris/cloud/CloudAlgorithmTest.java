@@ -16,23 +16,23 @@
  */
 package org.esa.s3tbx.meris.cloud;
 
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.net.URL;
 
+import static org.junit.Assert.assertEquals;
+
 /**
- * Created by marcoz.
- *
  * @author marcoz
- * @version $Revision: 1.1 $ $Date: 2007/03/27 12:52:23 $
  */
-public class CloudAlgorithmTest extends TestCase {
+public class CloudAlgorithmTest {
 
     private CloudAlgorithm testAlgorithm;
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         URL codeSourceUrl = this.getClass().getProtectionDomain().getCodeSource().getLocation();
         File auxdataDir = new File(codeSourceUrl.toURI());
         File cloudAuxdataDir = new File(auxdataDir, "auxdata/cloudprob");
@@ -44,6 +44,7 @@ public class CloudAlgorithmTest extends TestCase {
     /*
       * Test method for 'org.esa.beam.processor.cloud.CloudAlgorithm.computeCloud(double[])'
       */
+    @Test
     public void testComputeCloud() {
         final double[] in = new double[]{0.0778002, 0.0695650, 0.0591455, 0.0545394,
                 0.0460968, 0.0415193, 0.0420742, 0.0421471,
@@ -57,6 +58,7 @@ public class CloudAlgorithmTest extends TestCase {
     /*
       * Test method for 'org.esa.beam.processor.cloud.CloudAlgorithm.nn2Probability(double)'
       */
+    @Test
     public void testNn2Probability() {
         double probability = testAlgorithm.nn2Probability(0.004993);
         assertEquals("probability", 0.01313, probability, 0.00001);
