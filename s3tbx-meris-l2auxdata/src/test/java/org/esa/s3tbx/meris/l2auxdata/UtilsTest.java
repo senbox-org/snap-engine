@@ -8,13 +8,18 @@ package org.esa.s3tbx.meris.l2auxdata;
 
 import com.google.common.jimfs.Jimfs;
 import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class UtilsTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
+public class UtilsTest {
+
+    @Test
     public void testDownloadAndInstall() throws Exception {
         FileSystem fs = Jimfs.newFileSystem();
         Path target = fs.getPath("target");
@@ -31,6 +36,7 @@ public class UtilsTest extends TestCase {
         fs.close();
     }
 
+    @Test
     public void testSeasonalFactorComputation() {
         double meanEarthSunDist = 149.60e+06 * 1000;
         final double sunEarthDistanceSquare = meanEarthSunDist * meanEarthSunDist;

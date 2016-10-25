@@ -6,11 +6,16 @@
  */
 package org.esa.s3tbx.meris.l2auxdata;
 
-import junit.framework.TestCase;
 import org.esa.snap.core.datamodel.ProductData;
+import org.junit.Test;
 
-public class AuxDatabaseTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 
+public class AuxDatabaseTest {
+
+    @Test
     public void testDatabaseInfos() {
         AuxFileInfo fi;
 
@@ -83,6 +88,7 @@ public class AuxDatabaseTest extends TestCase {
         assertEquals(1, fi.getDatasetCount());
     }
 
+    @Test
     public void testDatasetInfos() {
         AuxFileInfo fi;
 
@@ -286,6 +292,7 @@ public class AuxDatabaseTest extends TestCase {
         assertEquals("winds GADS", fi.getDatasetInfo(0).getName());
     }
 
+    @Test
     public void testSomeVariableInfosForT() {
         AuxFileInfo fi;
         AuxVariableInfo vi;
@@ -382,6 +389,7 @@ public class AuxDatabaseTest extends TestCase {
         assertEquals("dl", vi.getUnit());
     }
 
+    @Test
     public void testSomeVariableInfosForW() {
         AuxFileInfo fi;
         AuxVariableInfo vi;

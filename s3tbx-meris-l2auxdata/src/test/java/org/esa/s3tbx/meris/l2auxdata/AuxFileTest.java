@@ -6,30 +6,23 @@
  */
 package org.esa.s3tbx.meris.l2auxdata;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.Test;
 
-public class AuxFileTest extends TestCase {
+import static org.junit.Assert.assertNull;
+
+public class AuxFileTest {
 
     public static final String CASE1_TEST_FILE = "case1/case1.60.04.prd";
     public static final String CASE2_TEST_FILE = "case2/case2.42.00.prd";
 
-    public AuxFileTest(String s) {
-        super(s);
-    }
-
-    public static Test suite() {
-        return new TestSuite(AuxFileTest.class);
-    }
-
     // todo: all tests currently disabled. Reactivate when auxiliary data setup is clarified.
+    @Test
     public void testNothing() {
         assertNull(null);
     }
 
 //    public void testConstructor() {
-//        final AuxFileInfo fileInfo = AuxDatabase.getInstance().getFileInfo('Z');
+        final AuxFileInfo fileInfo = AuxDatabase.getInstance().getFileInfo('Z');
 //        final AuxFile auxFile = new AuxFile(fileInfo, new File("./unknown.prd"));
 //        assertEquals(new File("./unknown.prd"), auxFile.getFile());
 //        assertEquals(false, auxFile.isOpen());
