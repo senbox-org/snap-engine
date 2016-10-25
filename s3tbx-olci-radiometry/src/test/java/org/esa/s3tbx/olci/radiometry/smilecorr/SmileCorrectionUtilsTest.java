@@ -18,6 +18,9 @@
 
 package org.esa.s3tbx.olci.radiometry.smilecorr;
 
+import org.esa.s3tbx.olci.radiometry.Sensor;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -35,4 +38,21 @@ public class SmileCorrectionUtilsTest {
         assertEquals(15, SmileCorrectionUtils.getSourceBandIndex("Bla15band"));
     }
 
+    @Test
+    public void testSensorTypeOlci() throws Exception {
+        Product sourceProduct = new Product("bla", "what", 300, 300);
+        sourceProduct.addBand("Oa1_radiance", ProductData.TYPE_UINT8);
+        sourceProduct.addBand("Oa2_radiance", ProductData.TYPE_UINT8);
+        sourceProduct.addBand("Oa3_radiance", ProductData.TYPE_UINT8);
+        Sensor sensorType = SmileCorrectionUtils.getSensorType(sourceProduct);
+        assertEquals(Sensor.OLCI, sensorType);
+    }
+
+    @Test
+    public void testSensorTypeMeris() throws Exception {
+        Product sourceProduct = new Product("bla", "what", 300, 300);
+        sourceProduct.addBand("radiance_1", ProductData.TYPE_UINT8);
+        Sensor sensorType = SmileCorrectionUtils.getSensorType(sourceProduct);
+        assertEquals(Sensor.MERIS, sensorType);
+    }
 }

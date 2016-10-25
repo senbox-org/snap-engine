@@ -44,7 +44,10 @@ import javax.media.jai.operator.ConstantDescriptor;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.io.IOException;
-import java.util.stream.Stream;
+
+import static org.esa.s3tbx.olci.radiometry.smilecorr.SmileCorrectionUtils.getSampleFloats;
+import static org.esa.s3tbx.olci.radiometry.smilecorr.SmileCorrectionUtils.getSensorType;
+import static org.esa.s3tbx.olci.radiometry.smilecorr.SmileCorrectionUtils.getSourceBandIndex;
 
 
 /**
@@ -89,7 +92,7 @@ public class SmileCorrectionOp extends Operator {
 
     @Override
     public void initialize() throws OperatorException {
-        sensor = getSensorPattern(getSourceProduct());
+        sensor = getSensorType(getSourceProduct());
         smileAuxdata = new SmileCorrectionAuxdata(sensor);
         if (Sensor.MERIS.equals(sensor)) {
             try {
@@ -118,7 +121,7 @@ public class SmileCorrectionOp extends Operator {
     public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
         checkForCancellation();
         String targetBandName = targetBand.getName();
-        int targetBandIndex = SmileCorrectionUtils.getSourceBandIndex(targetBandName);
+        int targetBandIndex = getSourceBandIndex(targetBandName);
 
         if (Sensor.MERIS == sensor) {
             correctRadMeris(targetTile, targetBandName, targetBandIndex, smileAuxdata, pm);
@@ -181,20 +184,6 @@ public class SmileCorrectionOp extends Operator {
         }
     }
 
-    private Sensor getSensorPattern(Product sourceProduct) {
-        String[] bandNames = sourceProduct.getBandNames();
-        boolean isSensor = Stream.of(bandNames).anyMatch(p -> p.matches("Oa\\d+_radiance"));
-        if (isSensor) {
-            return Sensor.OLCI;
-        }
-        isSensor = Stream.of(bandNames).anyMatch(p -> p.matches("radiance_\\d+"));
-
-        if (isSensor) {
-            return Sensor.MERIS;
-        }
-        throw new OperatorException("The operator can't be applied on this sensor.\n" +
-                                            "Only OLCI and MERIS are supported");
-    }
 
     private void copyTargetBandsImage(Product targetProduct, String bandNamePattern, int numBand) {
         for (int i = 1; i <= numBand; i++) {
@@ -438,8 +427,8 @@ public class SmileCorrectionOp extends Operator {
         float[] lowerLambda = smileTiles.lambdaLowerBand();
         float[] upperLambda = smileTiles.lambdaUpperBand();
 
-        float[] sza = SmileCorrectionUtils.getSampleFloats(szaTile);
-        float[] radiance = SmileCorrectionUtils.getSampleFloats(sourceRadTile);
+        float[] sza = getSampleFloats(szaTile);
+        float[] radiance = getSampleFloats(sourceRadTile);
         float[] sourceRefl = convertRadToRefl(radiance, solarIrradiance, sza);
         float[] lowerRefl = convertRadToRefl(lowerBandRad, lowerBandSolarIrrad, sza);
         float[] upperRefl = convertRadToRefl(upperBandRad, upperBandSolarIrrad, sza);
@@ -479,12 +468,14 @@ public class SmileCorrectionOp extends Operator {
         rayleighAux.setViewAzimuthAngles(getSourceTile(sourceProduct.getTiePointGrid(sensor.getOAA()), rectangle));
         rayleighAux.setSeaLevels(getSourceTile(sourceProduct.getTiePointGrid(sensor.getSeaLevelPressure()), rectangle));
         rayleighAux.setTotalOzones(getSourceTile(sourceProduct.getTiePointGrid(sensor.getTotalOzone()), rectangle));
-        rayleighAux.setLatitudes(getSourceTile(sourceProduct.getTiePointGrid(sensor.getLatitude()), rectangle));
-        rayleighAux.setLongitude(getSourceTile(sourceProduct.getTiePointGrid(sensor.getLongitude()), rectangle));
         if (Sensor.MERIS.equals(sensor)) {
             rayleighAux.setAltitudes(getSourceTile(sourceProduct.getTiePointGrid(sensor.getAltitude()), rectangle));
+            rayleighAux.setLatitudes(getSourceTile(sourceProduct.getTiePointGrid(sensor.getLatitude()), rectangle));
+            rayleighAux.setLongitude(getSourceTile(sourceProduct.getTiePointGrid(sensor.getLongitude()), rectangle));
         } else {
             rayleighAux.setAltitudes(getSourceTile(sourceProduct.getBand(sensor.getAltitude()), rectangle));
+            rayleighAux.setLatitudes(getSourceTile(sourceProduct.getBand(sensor.getLatitude()), rectangle));
+            rayleighAux.setLongitude(getSourceTile(sourceProduct.getBand(sensor.getLongitude()), rectangle));
         }
         return rayleighAux;
     }
@@ -649,42 +640,42 @@ public class SmileCorrectionOp extends Operator {
 
         @Override
         public float[] lambdaLowerBand() {
-            return SmileCorrectionUtils.getSampleFloats(lowerLambdaTile);
+            return getSampleFloats(lowerLambdaTile);
         }
 
         @Override
         public float[] lambdaUpperBand() {
-            return SmileCorrectionUtils.getSampleFloats(upperLambdaTile);
+            return getSampleFloats(upperLambdaTile);
         }
 
         @Override
         public float[] lambdaSourceBand() {
-            return SmileCorrectionUtils.getSampleFloats(sourceLambdaTile);
+            return getSampleFloats(sourceLambdaTile);
         }
 
         @Override
         public float[] solarIrradianceLowerBand() {
-            return SmileCorrectionUtils.getSampleFloats(lowerSolarIrradianceTile);
+            return getSampleFloats(lowerSolarIrradianceTile);
         }
 
         @Override
         public float[] solarIrradianceSourceBand() {
-            return SmileCorrectionUtils.getSampleFloats(sourceSolarIrradianceTile);
+            return getSampleFloats(sourceSolarIrradianceTile);
         }
 
         @Override
         public float[] solarIrradianceUpperBand() {
-            return SmileCorrectionUtils.getSampleFloats(upperSolarIrradianceTile);
+            return getSampleFloats(upperSolarIrradianceTile);
         }
 
         @Override
         public float[] radianceLowerBand() {
-            return SmileCorrectionUtils.getSampleFloats(lowerRadianceTile);
+            return getSampleFloats(lowerRadianceTile);
         }
 
         @Override
         public float[] radianceUpperBand() {
-            return SmileCorrectionUtils.getSampleFloats(upperRadianceTile);
+            return getSampleFloats(upperRadianceTile);
         }
     }
 

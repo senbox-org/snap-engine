@@ -21,7 +21,6 @@ package org.esa.s3tbx.olci.radiometry.rayleigh;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.s3tbx.olci.radiometry.Sensor;
 import org.esa.s3tbx.olci.radiometry.gasabsorption.GaseousAbsorptionAux;
-import org.esa.s3tbx.olci.radiometry.smilecorr.SmileCorrectionUtils;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
@@ -39,7 +38,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Stream;
+import java.util.Set;
+
+import static org.esa.s3tbx.olci.radiometry.smilecorr.SmileCorrectionUtils.getSampleDoubles;
+import static org.esa.s3tbx.olci.radiometry.smilecorr.SmileCorrectionUtils.getSensorType;
+import static org.esa.s3tbx.olci.radiometry.smilecorr.SmileCorrectionUtils.getSourceBandIndex;
 
 /**
  * @author muhammad.bc.
@@ -115,7 +118,7 @@ public class RayleighCorrectionOp extends Operator {
 
     @Override
     public void initialize() throws OperatorException {
-        sensor = getSensorPattern();
+        sensor = getSensorType(sourceProduct);
         algorithm = new RayleighCorrAlgorithm();
         absorpOzone = GaseousAbsorptionAux.getInstance().absorptionOzone(sensor.toString());
         crossSectionSigma = getCrossSectionSigma(sourceProduct, sensor.getNumBands(), sensor.getNamePattern());
@@ -145,12 +148,14 @@ public class RayleighCorrectionOp extends Operator {
         checkForCancellation();
         RayleighAux rayleighAux = createAuxiliary(sensor, targetRectangle);
 
-        targetTiles.entrySet().stream().forEach(targetTileStream -> {
+        Set<Map.Entry<Band, Tile>> entries = targetTiles.entrySet();
+        entries.stream().forEach(targetTileStream -> {
+
             Tile targetTile = targetTileStream.getValue();
             Band targetBand = targetTileStream.getKey();
             String targetBandName = targetBand.getName();
             double[] rayleighOpticalThickness = null;
-            int sourceBandIndex = SmileCorrectionUtils.getSourceBandIndex(targetBand.getName());
+            int sourceBandIndex = getSourceBandIndex(targetBand.getName());
             if (targetBandName.equals(AIRMASS) && addAirMass) {
                 double[] massAirs = rayleighAux.getAirMass();
                 targetTile.setSamples(massAirs);
@@ -189,8 +194,8 @@ public class RayleighCorrectionOp extends Operator {
     private double[] waterVaporCorrection709(double[] reflectances, Rectangle targetRectangle, Sensor sensor) {
         String bandNamePattern = sensor.getNamePattern();
         int[] upperLowerBounds = sensor.getBounds();
-        double[] bWVRefTile = SmileCorrectionUtils.getSampleDoubles(getSourceTile(sourceProduct.getBand(String.format(bandNamePattern, upperLowerBounds[1])), targetRectangle));
-        double[] bWVTile = SmileCorrectionUtils.getSampleDoubles(getSourceTile(sourceProduct.getBand(String.format(bandNamePattern, upperLowerBounds[0])), targetRectangle));
+        double[] bWVRefTile = getSampleDoubles(getSourceTile(sourceProduct.getBand(String.format(bandNamePattern, upperLowerBounds[1])), targetRectangle));
+        double[] bWVTile = getSampleDoubles(getSourceTile(sourceProduct.getBand(String.format(bandNamePattern, upperLowerBounds[0])), targetRectangle));
         return algorithm.waterVaporCorrection709(reflectances, bWVRefTile, bWVTile);
     }
 
@@ -303,20 +308,6 @@ public class RayleighCorrectionOp extends Operator {
         return rayleighAux;
     }
 
-    private Sensor getSensorPattern() {
-        String[] bandNames = getSourceProduct().getBandNames();
-        boolean isSensor = Stream.of(bandNames).anyMatch(p -> p.matches("Oa\\d+_radiance"));
-        if (isSensor) {
-            return Sensor.OLCI;
-        }
-        isSensor = Stream.of(bandNames).anyMatch(p -> p.matches("radiance_\\d+"));
-
-        if (isSensor) {
-            return Sensor.MERIS;
-        }
-        throw new OperatorException("The operator can't be applied on this sensor.\n" +
-                                            "Only OLCI and MERIS are supported");
-    }
 
     public static class Spi extends OperatorSpi {
         public Spi() {

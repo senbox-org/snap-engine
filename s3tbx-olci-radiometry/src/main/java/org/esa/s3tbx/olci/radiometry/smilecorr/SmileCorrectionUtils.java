@@ -20,12 +20,15 @@ package org.esa.s3tbx.olci.radiometry.smilecorr;
 
 import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Floats;
+import org.esa.s3tbx.olci.radiometry.Sensor;
+import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.Tile;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * @author muhammad.bc.
@@ -113,5 +116,20 @@ public class SmileCorrectionUtils {
         }
         String group = matcher.group(0);
         return Integer.parseInt(group);
+    }
+
+    public static Sensor getSensorType(Product sourceProduct) {
+        String[] bandNames = sourceProduct.getBandNames();
+        boolean isSensor = Stream.of(bandNames).anyMatch(p -> p.matches("Oa\\d+_radiance"));
+        if (isSensor) {
+            return Sensor.OLCI;
+        }
+        isSensor = Stream.of(bandNames).anyMatch(p -> p.matches("radiance_\\d+"));
+
+        if (isSensor) {
+            return Sensor.MERIS;
+        }
+        throw new OperatorException("The operator can't be applied on this sensor.\n" +
+                                            "Only OLCI and MERIS are supported");
     }
 }
