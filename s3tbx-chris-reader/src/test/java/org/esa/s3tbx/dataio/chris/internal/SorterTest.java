@@ -16,40 +16,43 @@
 
 package org.esa.s3tbx.dataio.chris.internal;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * Test methods for class {@link Sorter}.
  *
  * @author Ralf Quast
- * @version $Revision$ $Date$
  */
-public class SorterTest extends TestCase {
+public class SorterTest {
 
+    @Test
     public void testNthElement() {
 
         try {
             Sorter.nthElement(null, 0);
             fail();
-        } catch (NullPointerException expected) {
+        } catch (NullPointerException ignored) {
         }
 
         try {
             Sorter.nthElement(new double[0], 0);
             fail();
-        } catch (IllegalArgumentException expected) {
+        } catch (IllegalArgumentException ignored) {
         }
 
         try {
             Sorter.nthElement(new double[]{1.0, 2.0}, -1);
             fail();
-        } catch (Exception expected) {
+        } catch (Exception ignored) {
         }
 
         try {
             Sorter.nthElement(new double[]{1.0, 2.0}, 2);
             fail();
-        } catch (Exception expected) {
+        } catch (Exception ignored) {
         }
 
         assertEquals(1.0, Sorter.nthElement(new double[]{1.0}, 0), 1.0);

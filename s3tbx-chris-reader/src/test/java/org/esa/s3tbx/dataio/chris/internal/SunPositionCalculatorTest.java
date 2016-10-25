@@ -16,27 +16,28 @@
 
 package org.esa.s3tbx.dataio.chris.internal;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
+import static org.junit.Assert.assertEquals;
+
 /**
  * Tests for class {@link SunPositionCalculator}.
  *
  * @author Ralf Quast
- * @version $Revision$ $Date$
  */
-public class SunPositionCalculatorTest extends TestCase {
+public class SunPositionCalculatorTest {
 
     /**
      * Test calculation of angular position of the Sun.
      * <p/>
      * Expected values are from the <a href="http://www.srrb.noaa.gov/highlights/sunrise/azel.html">NOAA
      * Solar Position Calculator</a>.
-     *
      */
+    @Test
     public void testCalculate() {
         final Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
 

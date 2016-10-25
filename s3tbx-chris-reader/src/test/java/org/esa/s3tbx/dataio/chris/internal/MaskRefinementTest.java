@@ -16,19 +16,22 @@
 
 package org.esa.s3tbx.dataio.chris.internal;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * Tests for class {@link MaskRefinement}.
  *
  * @author Ralf Quast
- * @version $Revision$ $Date$
  */
-public class MaskRefinementTest extends TestCase {
+public class MaskRefinementTest {
 
-    final static int ROW_COUNT = 2;
-    final static int COL_COUNT = 10;
+    private final static int ROW_COUNT = 2;
+    private final static int COL_COUNT = 10;
 
+    @Test
     public void testMaskRefinement() {
         final int[] data = new int[ROW_COUNT * COL_COUNT];
         final short[] mask = new short[ROW_COUNT * COL_COUNT];
@@ -97,6 +100,7 @@ public class MaskRefinementTest extends TestCase {
         assertEquals(0, mask[19]);
     }
 
+    @Test
     public void testAdjacentDifference() {
         final int[] values = new int[]{2, 3, 5, 7, 11, 13, 17, 19};
         final double[] diffs = new double[2];
@@ -127,17 +131,18 @@ public class MaskRefinementTest extends TestCase {
     }
 
 
+    @Test
     public void testMedian() {
         try {
             MaskRefinement.median(null);
             fail();
-        } catch (NullPointerException expected) {
+        } catch (NullPointerException ignored) {
         }
 
         try {
             MaskRefinement.median(new double[0]);
             fail();
-        } catch (IllegalArgumentException expected) {
+        } catch (IllegalArgumentException ignored) {
         }
 
         assertEquals(1.0, MaskRefinement.median(new double[]{1.0}), 0.0);

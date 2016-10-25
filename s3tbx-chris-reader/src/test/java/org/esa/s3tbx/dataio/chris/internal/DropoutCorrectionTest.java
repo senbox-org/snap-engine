@@ -16,36 +16,40 @@
 
 package org.esa.s3tbx.dataio.chris.internal;
 
-import junit.framework.TestCase;
 import org.esa.s3tbx.dataio.chris.Flags;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
-import java.awt.Rectangle;
+import java.awt.*;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Tests for class {@link DropoutCorrection}.
  *
  * @author Ralf Quast
- * @version $Revision$ $Date$
  */
-public class DropoutCorrectionTest extends TestCase {
+public class DropoutCorrectionTest {
 
     private int[][] data;
     private short[][] mask;
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         data = new int[][]{{1, 1, 1, 1, 1, 1, 1, 1, 1},
                 {1, 1, 1, 1, 1, 1, 1, 1, 1},
                 {1, 1, 1, 1, 1, 1, 1, 1, 1}};
         mask = new short[3][9];
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         data = null;
         mask = null;
     }
 
+    @Test
     public void testDropoutCorrection() {
         final DropoutCorrection dropoutCorrection = new DropoutCorrection();
 
