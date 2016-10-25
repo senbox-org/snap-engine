@@ -30,40 +30,40 @@ import static org.junit.Assert.assertEquals;
 
 public abstract class BaseImageFileDescriptorRecordTest {
 
-    private MemoryCacheImageOutputStream _ios;
-    private String _prefix;
-    private CeosFileReader _reader;
+    private MemoryCacheImageOutputStream ios;
+    private String prefix;
+    private CeosFileReader reader;
 
     @Before
     public void setUp() throws Exception {
         final ByteArrayOutputStream os = new ByteArrayOutputStream(24);
-        _ios = new MemoryCacheImageOutputStream(os);
-        _prefix = "AbstractImageFileDescriptorRecordTest_prefix";
-        _ios.writeBytes(_prefix);
-        writeRecordData(_ios);
-        _ios.writeBytes("AbstractImageFileDescriptorRecordTest_suffix"); // as suffix
-        _reader = new CeosFileReader(_ios);
+        ios = new MemoryCacheImageOutputStream(os);
+        prefix = "AbstractImageFileDescriptorRecordTest_prefix";
+        ios.writeBytes(prefix);
+        writeRecordData(ios);
+        ios.writeBytes("AbstractImageFileDescriptorRecordTest_suffix"); // as suffix
+        reader = new CeosFileReader(ios);
     }
 
     @Test
     public void testInit_SimpleConstructor() throws IOException,
             IllegalCeosFormatException {
-        _reader.seek(_prefix.length());
+        reader.seek(prefix.length());
 
-        final BaseImageFileDescriptorRecord record = createImageFileDescriptorRecord(_reader);
+        final BaseImageFileDescriptorRecord record = createImageFileDescriptorRecord(reader);
 
-        assertEquals(_prefix.length(), record.getStartPos());
-        assertEquals(_prefix.length() + BaseRecordTest.RECORD_LENGTH, _ios.getStreamPosition());
+        assertEquals(prefix.length(), record.getStartPos());
+        assertEquals(prefix.length() + BaseRecordTest.RECORD_LENGTH, ios.getStreamPosition());
         assertRecord(record);
     }
 
     @Test
     public void testInit() throws IOException,
             IllegalCeosFormatException {
-        final BaseImageFileDescriptorRecord record = createImageFileDescriptor(_reader, _prefix.length());
+        final BaseImageFileDescriptorRecord record = createImageFileDescriptor(reader, prefix.length());
 
-        assertEquals(_prefix.length(), record.getStartPos());
-        assertEquals(_prefix.length() + BaseRecordTest.RECORD_LENGTH, _ios.getStreamPosition());
+        assertEquals(prefix.length(), record.getStartPos());
+        assertEquals(prefix.length() + BaseRecordTest.RECORD_LENGTH, ios.getStreamPosition());
         assertRecord(record);
     }
 

@@ -24,19 +24,22 @@ import org.esa.s3tbx.dataio.ceos.records.Ancillary1RecordTest;
 import javax.imageio.stream.ImageOutputStream;
 import java.io.IOException;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 public class PrismAncillary1RecordTest extends Ancillary1RecordTest {
 
 
     @Override
     protected Ancillary1Record createAncillary1Record(final CeosFileReader reader) throws IOException,
-                                                                                          IllegalCeosFormatException {
+            IllegalCeosFormatException {
         return new PrismAncillary1Record(reader);
     }
 
     @Override
     protected Ancillary1Record createAncillary1Record(final CeosFileReader reader, final int startPos) throws
-                                                                                                       IOException,
-                                                                                                       IllegalCeosFormatException {
+            IOException,
+            IllegalCeosFormatException {
         return new PrismAncillary1Record(reader, startPos);
     }
 
@@ -95,7 +98,7 @@ public class PrismAncillary1RecordTest extends Ancillary1RecordTest {
 
     @Override
     protected void assertCoefficients(final Ancillary1Record record) throws IOException,
-                                                                            IllegalCeosFormatException {
+            IllegalCeosFormatException {
         final double[][] coeffsForCCD1 = record.getTransformationCoefficientsFor(1);
         final double[] latCoeffs_ccd1 = coeffsForCCD1[0];
         final double[] lonCoeffs_ccd1 = coeffsForCCD1[1];

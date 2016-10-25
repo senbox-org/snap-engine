@@ -25,6 +25,8 @@ import javax.imageio.stream.ImageOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
+import static org.junit.Assert.assertEquals;
+
 public class Avnir2LeaderFDRTest extends BaseLeaderFileDescriptorRecordTest {
 
     @Override

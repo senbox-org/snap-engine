@@ -25,6 +25,8 @@ import org.esa.s3tbx.dataio.ceos.records.BaseSceneHeaderRecordTest;
 import javax.imageio.stream.ImageOutputStream;
 import java.io.IOException;
 
+import static org.junit.Assert.assertEquals;
+
 public class Avnir2SceneHeaderRecordTest extends BaseSceneHeaderRecordTest {
 
     @Override
