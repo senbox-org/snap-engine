@@ -24,18 +24,21 @@ import org.esa.s3tbx.dataio.ceos.records.Ancillary1RecordTest;
 import javax.imageio.stream.ImageOutputStream;
 import java.io.IOException;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 public class Avnir2Ancillary1RecordTest extends Ancillary1RecordTest {
 
     @Override
     protected Ancillary1Record createAncillary1Record(final CeosFileReader reader) throws IOException,
-                                                                                          IllegalCeosFormatException {
+            IllegalCeosFormatException {
         return new Avnir2Ancillary1Record(reader);
     }
 
     @Override
     protected Ancillary1Record createAncillary1Record(final CeosFileReader reader, final int startPos) throws
-                                                                                                       IOException,
-                                                                                                       IllegalCeosFormatException {
+            IOException,
+            IllegalCeosFormatException {
         return new Avnir2Ancillary1Record(reader, startPos);
     }
 
@@ -70,7 +73,7 @@ public class Avnir2Ancillary1RecordTest extends Ancillary1RecordTest {
 
     @Override
     protected void assertCoefficients(final Ancillary1Record record) throws IOException,
-                                                                            IllegalCeosFormatException {
+            IllegalCeosFormatException {
         final double[][] coeffsForBand1 = record.getTransformationCoefficientsFor(1);
         final double[] latCoeffsBand1 = coeffsForBand1[0];
         final double[] lonCoeffsBand1 = coeffsForBand1[1];
