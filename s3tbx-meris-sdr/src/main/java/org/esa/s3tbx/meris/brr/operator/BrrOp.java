@@ -26,7 +26,7 @@ import org.esa.snap.core.util.BitSetter;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.dataio.envisat.EnvisatConstants;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.util.Map;
 
 
@@ -116,7 +116,7 @@ public class BrrOp extends BrrBasisOp {
         try {
             auxData = L2AuxDataProvider.getInstance().getAuxdata(inputProduct);
         } catch (Exception e) {
-            throw new OperatorException("Cannot initialize L2 Auxdata:" + e.getMessage());
+            throw new OperatorException("Cannot initialize L2 Auxdata:" + e.getMessage(), e);
         }
     }
 
