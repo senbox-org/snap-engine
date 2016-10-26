@@ -63,19 +63,20 @@ public class SmileCorrectionOp extends Operator {
 
 
     public static final String WATER_EXPRESSION = "not quality_flags_land";
-    public static final String SZA = "SZA";
-    public static final String OZA = "OZA";
-    public static final String FWHM_BAND_PATTERN = "FWHM_band_%d";
-    public static final String ALTITUDE_BAND = "altitude";
-    public static final String LATITUDE_BAND = "latitude";
-    public static final String LONGITUDE_BAND = "longitude";
-    public static final String DETECTOR_INDEX_BAND = "detector_index";
-    public static final String OLCI_SENSOR = "OLCI";
-    public static final int DO_NOT_CORRECT_BAND = -1;
+    private static final String FWHM_BAND_PATTERN = "FWHM_band_%d";
+    private static final String ALTITUDE_BAND = "altitude";
+    private static final String LATITUDE_BAND = "latitude";
+    private static final String LONGITUDE_BAND = "longitude";
+    private static final String DETECTOR_INDEX_BAND = "detector_index";
+    private static final String OLCI_SENSOR = "OLCI";
+    private static final int DO_NOT_CORRECT_BAND = -1;
     private static final String LAMBDA0_BAND_NAME_PATTERN = "lambda0_band_%d";
     private static final String SOLAR_FLUX_BAND_NAME_PATTERN = "solar_flux_band_%d";
     private static final String OA_RADIANCE_BAND_NAME_PATTERN = "Oa%02d_radiance";
     private static final String OA_RADIANCE_ERR_BAND_NAME_PATTERN = "Oa%02d_radiance_err";
+    public static final String OLCI_RADIANCE_PATTERN = "Oa\\d{2}_radiance";
+    public static final String LAMBDA_BAND_PATTERN = "lambda0_band_\\d+";
+    public static final String SOLAR_FLUX_BAND_PATTERN = "solar_flux_band_\\d+";
 
     private Mask waterMask;
 
@@ -126,15 +127,15 @@ public class SmileCorrectionOp extends Operator {
         if (Sensor.MERIS == sensor) {
             correctRadMeris(targetTile, targetBandName, targetBandIndex, smileAuxdata, pm);
         } else if (Sensor.OLCI == sensor) {
-            if (targetBandName.matches("Oa\\d{2}_radiance")) {
+            if (targetBandName.matches(OLCI_RADIANCE_PATTERN)) {
                 correctRad(targetTile, targetBandName, targetBandIndex, sensor, pm);
             }
 
-            if (targetBandName.matches("lambda0_band_\\d+")) {
+            if (targetBandName.matches(LAMBDA_BAND_PATTERN)) {
                 correctLambda(targetTile, targetBandName, targetBandIndex, pm);
             }
 
-            if (targetBandName.matches("solar_flux_band_\\d+")) {
+            if (targetBandName.matches(SOLAR_FLUX_BAND_PATTERN)) {
                 correctSolarFlux(targetTile, targetBandName, pm);
             }
         }
@@ -164,8 +165,10 @@ public class SmileCorrectionOp extends Operator {
         } else if (Sensor.MERIS == sensor) {
             createTargetBands(targetProduct, sensor.getNamePattern(), landRefCorrectionSwitches, waterRefCorrectionSwitches, refCentralWaveLengths);
             copyTargetBandImage(targetProduct, DETECTOR_INDEX_BAND);
+            ProductUtils.copyMasks(sourceProduct, targetProduct);
         }
         ProductUtils.copyProductNodes(sourceProduct, targetProduct);
+        ProductUtils.copyFlagBands(sourceProduct, targetProduct, true);
         return targetProduct;
     }
 
@@ -440,9 +443,10 @@ public class SmileCorrectionOp extends Operator {
                 RayleighInput rayleighInputToCompute = new RayleighInput(sourceRefl, lowerRefl, upperRefl, targetBandIndx, lowerWaterIndx, upperWaterIndx);
                 RayleighAux rayleighAux = prepareRayleighAux(sourceRadTile.getRectangle());
                 RayleighOutput computedRayleighOutput = rayleighCorrAlgorithm.getRayleighReflectance(rayleighInputToCompute, rayleighAux, absorpOzone, getSourceProduct());
-                sourceRefl = computedRayleighOutput.getSourceRayRefls();
-                lowerRefl = computedRayleighOutput.getLowerRayRefls();
-                upperRefl = computedRayleighOutput.getUpperRayRefls();
+
+                sourceRefl = SmileCorrectionUtils.add2ArrayFloat(sourceRefl, computedRayleighOutput.getSourceRayRefls());
+                lowerRefl = SmileCorrectionUtils.add2ArrayFloat(lowerRefl, computedRayleighOutput.getLowerRayRefls());
+                upperRefl = SmileCorrectionUtils.add2ArrayFloat(upperRefl, computedRayleighOutput.getUpperRayRefls());
             }
         }
 

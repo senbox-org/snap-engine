@@ -44,8 +44,18 @@ public class SmileCorrectionUtils {
         return cal;
     }
 
+
     public static float[] multiple3ArrayFloat(float[] array1, float[] array2, float[] array3) {
         return multiple2ArrayFloat(multiple2ArrayFloat(array1, array2), array3);
+    }
+
+    public static float[] add2ArrayFloat(float[] array1, float[] array2) {
+        if (array1.length != array2.length) {
+            throw new OperatorException("The arrays most have the same length.");
+        }
+        final float[] cal = new float[array1.length];
+        IntStream.range(0, cal.length).forEach(value -> cal[value] = array1[value] + array2[value]);
+        return cal;
     }
 
     public static double[] convertDegreesToRadians(double[] angle) {

@@ -131,9 +131,7 @@ public class RayleighCorrectionOp extends Operator {
         ProductUtils.copyProductNodes(sourceProduct, targetProduct);
         List<String> flagList = Arrays.asList(sourceProduct.getAllFlagNames());
 
-        if (flagList.contains(ALTITUDE)) {
-            ProductUtils.copyTiePointGrid(ALTITUDE, sourceProduct, targetProduct);
-        } else if (flagList.contains(ALTITUDE_DEM)) {
+        if (flagList.contains(ALTITUDE_DEM)) {
             ProductUtils.copyTiePointGrid(ALTITUDE_DEM, sourceProduct, targetProduct);
         }
 
@@ -164,7 +162,7 @@ public class RayleighCorrectionOp extends Operator {
             if (sourceBandIndex == -1) {
                 return;
             }
-            initAuxBand(rayleighAux, targetRectangle, sourceBandIndex);
+            addAuxForBand(rayleighAux, targetRectangle, sourceBandIndex);
             if (targetBandName.matches(RTOA_PATTERN) && computeRtoa) {
                 targetTile.setSamples(getReflectance(rayleighAux));
             } else if (targetBandName.matches(TAUR_PATTERN) && computeTaur) {
@@ -247,7 +245,7 @@ public class RayleighCorrectionOp extends Operator {
         }
     }
 
-    private int initAuxBand(RayleighAux rayleighAux, Rectangle rectangle, int sourceBandRefIndex) {
+    private int addAuxForBand(RayleighAux rayleighAux, Rectangle rectangle, int sourceBandRefIndex) {
         String format = String.format(sensor.getNamePattern(), sourceBandRefIndex);
         Band band = getSourceProduct().getBand(format);
         String sourceBandName = band.getName();
