@@ -9,13 +9,13 @@ org.esa.s3tbx.idepix.algorithms.landsat8.Landsat8PostProcessOp$Spi
 org.esa.s3tbx.idepix.algorithms.landsat8.Landsat8ClassificationOp$Spi
 org.esa.s3tbx.idepix.algorithms.modis.ModisOp$Spi
 org.esa.s3tbx.idepix.algorithms.modis.ModisClassificationOp$Spi
-org.esa.s3tbx.idepix.algorithms.modis.ModisPostProcessingOp$Spi
+org.esa.s3tbx.idepix.algorithms.modis.ModisPostProcessOp$Spi
 org.esa.s3tbx.idepix.algorithms.viirs.ViirsOp$Spi
 org.esa.s3tbx.idepix.algorithms.viirs.ViirsClassificationOp$Spi
-org.esa.s3tbx.idepix.algorithms.viirs.ViirsPostProcessingOp$Spi
+org.esa.s3tbx.idepix.algorithms.viirs.ViirsPostProcessOp$Spi
 org.esa.s3tbx.idepix.algorithms.seawifs.SeaWifsOp$Spi
 org.esa.s3tbx.idepix.algorithms.seawifs.SeaWifsClassificationOp$Spi
-org.esa.s3tbx.idepix.algorithms.seawifs.SeaWifsPostProcessingOp$Spi
+org.esa.s3tbx.idepix.algorithms.seawifs.SeaWifsPostProcessOp$Spi
 org.esa.s3tbx.idepix.algorithms.probav.ProbaVOp$Spi
 org.esa.s3tbx.idepix.algorithms.probav.ProbaVClassificationOp$Spi
 org.esa.s3tbx.idepix.algorithms.probav.ProbaVPostProcessOp$Spi

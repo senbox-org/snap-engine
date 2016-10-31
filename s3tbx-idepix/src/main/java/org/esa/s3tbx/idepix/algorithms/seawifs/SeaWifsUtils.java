@@ -26,7 +26,12 @@ public class SeaWifsUtils {
      * @return - the flag coding
      */
     public static FlagCoding createSeawifsFlagCoding(String flagId) {
-        return IdepixFlagCoding.createDefaultFlagCoding(flagId);
+        FlagCoding flagCoding = IdepixFlagCoding.createDefaultFlagCoding(flagId);
+
+        flagCoding.addFlag("IDEPIX_MIXED_PIXEL", BitSetter.setFlag(0, SeaWifsConstants.IDEPIX_MIXED_PIXEL),
+                           SeaWifsConstants.IDEPIX_MIXED_PIXEL_DESCR_TEXT);
+
+        return flagCoding;
     }
 
     /**
@@ -35,8 +40,17 @@ public class SeaWifsUtils {
      * @param classifProduct - the pixel classification product
      */
     public static void setupSeawifsClassifBitmask(Product classifProduct) {
+        int index = IdepixFlagCoding.setupDefaultClassifBitmask(classifProduct);
 
-        IdepixFlagCoding.setupDefaultClassifBitmask(classifProduct);
+        int w = classifProduct.getSceneRasterWidth();
+        int h = classifProduct.getSceneRasterHeight();
+        Mask mask;
+        Random r = new Random();
+
+        mask = Mask.BandMathsType.create("IDEPIX_GLINT_RISK", SeaWifsConstants.IDEPIX_MIXED_PIXEL_DESCR_TEXT, w, h,
+                                         "pixel_classif_flags.IDEPIX_GLINT_RISK",
+                                         IdepixFlagCoding.getRandomColour(r), 0.5f);
+        classifProduct.getMaskGroup().add(index, mask);
     }
 
 }

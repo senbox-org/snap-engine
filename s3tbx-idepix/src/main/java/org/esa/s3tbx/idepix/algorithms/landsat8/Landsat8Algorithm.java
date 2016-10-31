@@ -77,6 +77,8 @@ public class Landsat8Algorithm implements Landsat8PixelProperties {
         final boolean isCloudOtsu = applyOtsuCloudTest && isCloudOtsu();
 //        return !isInvalid() && isBright() && isWhite() && (isCloudShimez || isCloudHot);
         boolean nnCloud = nnResult[0] == NN_CATEGORY_CLOUD;
+
+        // current logic: cloudSure if Shimez, Clost, Otsu or NN over water
         return !isInvalid() && (isCloudShimez || isCloudClost || isCloudOtsu || (nnCloud && !isLand()));
     }
 

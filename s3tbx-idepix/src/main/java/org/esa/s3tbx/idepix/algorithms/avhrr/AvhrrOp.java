@@ -127,8 +127,8 @@ public class AvhrrOp extends BasisOp {
         targetProduct.setName(sourceProduct.getName() + ".idepix");
 
         Band cloudFlagBand;
-        cloudFlagBand = targetProduct.getBand(IdepixIO.IDEPIX_CLASSIF_FLAGS);
-        cloudFlagBand.setSourceImage(postProcessingProduct.getBand(IdepixIO.IDEPIX_CLASSIF_FLAGS).getSourceImage());
+        cloudFlagBand = targetProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
+        cloudFlagBand.setSourceImage(postProcessingProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME).getSourceImage());
 
     }
 

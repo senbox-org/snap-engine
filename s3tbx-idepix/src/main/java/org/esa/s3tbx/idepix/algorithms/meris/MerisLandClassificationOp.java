@@ -107,9 +107,9 @@ public class MerisLandClassificationOp extends Operator {
         targetProduct = new Product(sourceProduct.getName(), sourceProduct.getProductType(), sceneWidth, sceneHeight);
 
         // shall be the only target band!!
-        cloudFlagBand = targetProduct.addBand(IdepixIO.IDEPIX_CLASSIF_FLAGS, ProductData.TYPE_INT16);
+        cloudFlagBand = targetProduct.addBand(IdepixConstants.CLASSIF_BAND_NAME, ProductData.TYPE_INT16);
 //        cloudFlagBand = targetProduct.addBand(IdepixUtils.IDEPIX_CLASSIF_FLAGS, ProductData.TYPE_INT8);
-        FlagCoding flagCoding = MerisUtils.createMerisFlagCoding(IdepixIO.IDEPIX_CLASSIF_FLAGS);
+        FlagCoding flagCoding = MerisUtils.createMerisFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
         cloudFlagBand.setSampleCoding(flagCoding);
         targetProduct.getFlagCodingGroup().add(flagCoding);
 
@@ -140,7 +140,7 @@ public class MerisLandClassificationOp extends Operator {
             merisReflectanceTiles[i] = getSourceTile(merisReflBands[i], rectangle);
         }
 
-        final Band cloudFlagTargetBand = targetProduct.getBand(IdepixIO.IDEPIX_CLASSIF_FLAGS);
+        final Band cloudFlagTargetBand = targetProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
         final Tile cloudFlagTargetTile = targetTiles.get(cloudFlagTargetBand);
 
         Band nnTargetBand;
@@ -246,7 +246,7 @@ public class MerisLandClassificationOp extends Operator {
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, false);
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_BUFFER, false);
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SHADOW, false);
-        targetTile.setSample(x, y, IdepixConstants.IDEPIX_GLINT_RISK, false);
+        targetTile.setSample(x, y, MerisConstants.IDEPIX_GLINT_RISK, false);
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_COASTLINE, false);
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_LAND, true);   // already checked
     }

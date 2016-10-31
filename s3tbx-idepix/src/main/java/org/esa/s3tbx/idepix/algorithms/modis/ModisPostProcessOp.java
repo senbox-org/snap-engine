@@ -1,7 +1,6 @@
-package org.esa.s3tbx.idepix.algorithms.viirs;
+package org.esa.s3tbx.idepix.algorithms.modis;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.s3tbx.idepix.algorithms.modis.ModisUtils;
 import org.esa.s3tbx.idepix.core.IdepixConstants;
 import org.esa.s3tbx.idepix.operators.BasisOp;
 import org.esa.snap.core.datamodel.Band;
@@ -20,24 +19,26 @@ import org.esa.snap.core.util.RectangleExtender;
 
 import java.awt.*;
 
+//import org.esa.beam.idepix.algorithms.coastcolour.CoastColourClassificationOp;
+
 /**
- * VIIRS post processing operator, operating on tiles:
+ * OC-CCI post processing operator, operating on tiles:
  * - cloud buffer
  * - ...
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "Idepix.Viirs.Postprocess",
-        version = "2.2",
-        copyright = "(c) 2016 by Brockmann Consult",
-        description = "Refines the VIIRS pixel classification.",
-        internal = true)
-public class ViirsPostProcessingOp extends BasisOp {
+@OperatorMetadata(alias = "Idepix.Modis.Postprocess",
+                  version = "2.2",
+                  copyright = "(c) 2016 by Brockmann Consult",
+                  description = "Refines the MODIS pixel classification.",
+                  internal = true)
+public class ModisPostProcessOp extends BasisOp {
 
-    @SourceProduct(alias = "refl", description = "VIIRS L1C reflectance product")
+    @SourceProduct(alias = "refl", description = "MODIS L1b reflectance product")
     private Product reflProduct;
 
-    @SourceProduct(alias = "classif", description = "VIIRS pixel classification product")
+    @SourceProduct(alias = "classif", description = "MODIS pixel classification product")
     private Product classifProduct;
 
     @SourceProduct(alias = "waterMask")
@@ -208,7 +209,7 @@ public class ViirsPostProcessingOp extends BasisOp {
             targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
             targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
             boolean is_land = sourceFlagTile.getSampleBit(x, y, IdepixConstants.IDEPIX_LAND);
-            targetTile.setSample(x, y, IdepixConstants.IDEPIX_MIXED_PIXEL, !is_land);
+            targetTile.setSample(x, y, ModisConstants.IDEPIX_MIXED_PIXEL, !is_land);
         }
         // return whether this is still a cloud
         return !removeCloudFlag;
@@ -280,7 +281,7 @@ public class ViirsPostProcessingOp extends BasisOp {
     public static class Spi extends OperatorSpi {
 
         public Spi() {
-            super(ViirsPostProcessingOp.class);
+            super(ModisPostProcessOp.class);
         }
     }
 

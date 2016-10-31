@@ -148,8 +148,7 @@ public class SeaWifsClassificationOp extends PixelOperator {
         targetSamples[0].set(IdepixConstants.IDEPIX_CLOUD_BUFFER, algorithm.isCloudBuffer());
         targetSamples[0].set(IdepixConstants.IDEPIX_CLOUD_SHADOW, algorithm.isCloudShadow());
         targetSamples[0].set(IdepixConstants.IDEPIX_SNOW_ICE, algorithm.isSnowIce());
-        targetSamples[0].set(IdepixConstants.IDEPIX_MIXED_PIXEL, algorithm.isMixedPixel());
-        targetSamples[0].set(IdepixConstants.IDEPIX_GLINT_RISK, algorithm.isGlintRisk());
+        targetSamples[0].set(SeaWifsConstants.IDEPIX_MIXED_PIXEL, algorithm.isMixedPixel());
         targetSamples[0].set(IdepixConstants.IDEPIX_COASTLINE, algorithm.isCoastline());
         targetSamples[0].set(IdepixConstants.IDEPIX_LAND, algorithm.isLand());
         targetSamples[0].set(IdepixConstants.IDEPIX_BRIGHT, algorithm.isBright());

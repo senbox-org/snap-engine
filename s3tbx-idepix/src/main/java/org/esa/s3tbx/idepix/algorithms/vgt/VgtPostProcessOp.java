@@ -60,7 +60,7 @@ public class VgtPostProcessOp extends Operator {
         Product postProcessedCloudProduct = createTargetProduct(vgtCloudProduct,
                                                                 "postProcessedCloud", "postProcessedCloud");
 
-        origCloudFlagBand = finalVgtCloudProduct.getBand(IdepixIO.IDEPIX_CLASSIF_FLAGS);
+        origCloudFlagBand = finalVgtCloudProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
         origSmFlagBand = l1bProduct.getBand("SM");
 
         if (computeCloudBuffer) {
@@ -70,7 +70,7 @@ public class VgtPostProcessOp extends Operator {
             );
         }
 
-        ProductUtils.copyBand(IdepixIO.IDEPIX_CLASSIF_FLAGS, finalVgtCloudProduct, postProcessedCloudProduct, false);
+        ProductUtils.copyBand(IdepixConstants.CLASSIF_BAND_NAME, finalVgtCloudProduct, postProcessedCloudProduct, false);
         setTargetProduct(postProcessedCloudProduct);
     }
 
@@ -164,9 +164,9 @@ public class VgtPostProcessOp extends Operator {
         final boolean smClear = !smCloud1 && !smCloud2; // see mask definition in SPOT VGT reader
 
         final boolean idepixLand = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_LAND);
-        final boolean idepixClearLand = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLEAR_LAND);
-        final boolean idepixWater = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_WATER);
-        final boolean idepixClearWater = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLEAR_WATER);
+        final boolean idepixClearLand = targetTile.getSampleBit(x, y, VgtConstants.IDEPIX_CLEAR_LAND);
+        final boolean idepixWater = targetTile.getSampleBit(x, y, VgtConstants.IDEPIX_WATER);
+        final boolean idepixClearWater = targetTile.getSampleBit(x, y, VgtConstants.IDEPIX_CLEAR_WATER);
         final boolean idepixClearSnow = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_SNOW_ICE);
         final boolean idepixCloud = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
 
@@ -182,8 +182,8 @@ public class VgtPostProcessOp extends Operator {
         final boolean safeCloudFinal = safeCloud && (!safeClearLandFinal && !safeClearWaterFinal);
 
         // GK 20151201;
-        targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLEAR_LAND, safeClearLandFinal);
-        targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLEAR_WATER, safeClearWaterFinal);
+        targetTile.setSample(x, y, VgtConstants.IDEPIX_CLEAR_LAND, safeClearLandFinal);
+        targetTile.setSample(x, y, VgtConstants.IDEPIX_CLEAR_WATER, safeClearWaterFinal);
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, safeCloudFinal);
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, safeSnowIce);
     }

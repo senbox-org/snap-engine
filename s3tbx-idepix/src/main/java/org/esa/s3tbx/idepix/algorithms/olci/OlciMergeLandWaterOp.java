@@ -64,11 +64,11 @@ public class OlciMergeLandWaterOp extends Operator {
         Product mergedClassifProduct = IdepixIO.createCompatibleTargetProduct(landClassifProduct,
                                                                               "mergedClassif", "mergedClassif", true);
 
-        landClassifBand = landClassifProduct.getBand(IdepixIO.IDEPIX_CLASSIF_FLAGS);
-        waterClassifBand = waterClassifProduct.getBand(IdepixIO.IDEPIX_CLASSIF_FLAGS);
+        landClassifBand = landClassifProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
+        waterClassifBand = waterClassifProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
 
-        mergedClassifBand = mergedClassifProduct.addBand(IdepixIO.IDEPIX_CLASSIF_FLAGS, ProductData.TYPE_INT16);
-        FlagCoding flagCoding = OlciUtils.createOlciFlagCoding(IdepixIO.IDEPIX_CLASSIF_FLAGS);
+        mergedClassifBand = mergedClassifProduct.addBand(IdepixConstants.CLASSIF_BAND_NAME, ProductData.TYPE_INT16);
+        FlagCoding flagCoding = OlciUtils.createOlciFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
         mergedClassifBand.setSampleCoding(flagCoding);
         mergedClassifProduct.getFlagCodingGroup().add(flagCoding);
 

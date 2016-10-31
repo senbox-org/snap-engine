@@ -136,6 +136,11 @@ public class Landsat8Op extends Operator {
             label = " Write source bands to the target product")
     private boolean outputSourceBands;
 
+    @Parameter(defaultValue = "false",
+            label = " Write NN value to the target product.",
+            description = " If applied, write NN value to the target product ")
+    private boolean outputNNValue;
+
 
     private static final int LAND_WATER_MASK_RESOLUTION = 50;
     private static final int OVERSAMPLING_FACTOR_X = 3;
@@ -216,8 +221,8 @@ public class Landsat8Op extends Operator {
 
         targetProduct = IdepixIO.cloneProduct(classificationProduct, standardBandWidth, standardBandHeight, false);
 
-        Band cloudFlagBand = targetProduct.getBand(IdepixIO.IDEPIX_CLASSIF_FLAGS);
-        cloudFlagBand.setSourceImage(postProcessingProduct.getBand(IdepixIO.IDEPIX_CLASSIF_FLAGS).getSourceImage());
+        Band cloudFlagBand = targetProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
+        cloudFlagBand.setSourceImage(postProcessingProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME).getSourceImage());
 
         copyOutputBands();
     }
@@ -345,6 +350,10 @@ public class Landsat8Op extends Operator {
             for (Band otsuBands : otsuProduct.getBands()) {
                 ProductUtils.copyBand(otsuBands.getName(), otsuProduct, targetProduct, true);
             }
+        }
+
+        if (outputNNValue) {
+            IdepixIO.copySourceBands(classificationProduct, targetProduct, IdepixConstants.NN_OUTPUT_BAND_NAME);
         }
     }
 

@@ -143,7 +143,7 @@ public class VgtClassificationOp extends Operator {
             vgtReflectanceTiles[i] = getSourceTile(vgtReflectanceBands[i], rectangle);
         }
 
-        final Band cloudFlagTargetBand = targetProduct.getBand(IdepixIO.IDEPIX_CLASSIF_FLAGS);
+        final Band cloudFlagTargetBand = targetProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
         final Tile cloudFlagTargetTile = targetTiles.get(cloudFlagTargetBand);
 
         Band nnTargetBand;
@@ -216,8 +216,8 @@ public class VgtClassificationOp extends Operator {
 
         targetProduct = new Product(sourceProduct.getName(), sourceProduct.getProductType(), sceneWidth, sceneHeight);
 
-        cloudFlagBand = targetProduct.addBand(IdepixIO.IDEPIX_CLASSIF_FLAGS, ProductData.TYPE_INT32);
-        FlagCoding flagCoding = VgtUtils.createVgtFlagCoding(IdepixIO.IDEPIX_CLASSIF_FLAGS);
+        cloudFlagBand = targetProduct.addBand(IdepixConstants.CLASSIF_BAND_NAME, ProductData.TYPE_INT32);
+        FlagCoding flagCoding = VgtUtils.createVgtFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
         cloudFlagBand.setSampleCoding(flagCoding);
         targetProduct.getFlagCodingGroup().add(flagCoding);
 
@@ -279,12 +279,12 @@ public class VgtClassificationOp extends Operator {
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, vgtAlgorithm.isCloud());
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, vgtAlgorithm.isCloud());
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SHADOW, false); // not computed here
-        targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLEAR_LAND, vgtAlgorithm.isClearLand());
-        targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLEAR_WATER, vgtAlgorithm.isClearWater());
+        targetTile.setSample(x, y, VgtConstants.IDEPIX_CLEAR_LAND, vgtAlgorithm.isClearLand());
+        targetTile.setSample(x, y, VgtConstants.IDEPIX_CLEAR_WATER, vgtAlgorithm.isClearWater());
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_COASTLINE, vgtAlgorithm.isCoastline());
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, vgtAlgorithm.isClearSnow());
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_LAND, vgtAlgorithm.isLand());
-        targetTile.setSample(x, y, IdepixConstants.IDEPIX_WATER, vgtAlgorithm.isWater());
+        targetTile.setSample(x, y, VgtConstants.IDEPIX_WATER, vgtAlgorithm.isWater());
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_BRIGHT, vgtAlgorithm.isBright());
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_WHITE, vgtAlgorithm.isWhite());
     }

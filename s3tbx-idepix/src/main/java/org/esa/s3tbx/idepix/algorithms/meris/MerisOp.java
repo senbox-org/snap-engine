@@ -153,8 +153,8 @@ public class MerisOp extends BasisOp {
         targetProduct = IdepixIO.cloneProduct(mergedClassificationProduct, true);
         targetProduct.setAutoGrouping("radiance:reflectance");
 
-        Band cloudFlagBand = targetProduct.getBand(IdepixIO.IDEPIX_CLASSIF_FLAGS);
-        cloudFlagBand.setSourceImage(postProcessingProduct.getBand(IdepixIO.IDEPIX_CLASSIF_FLAGS).getSourceImage());
+        Band cloudFlagBand = targetProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
+        cloudFlagBand.setSourceImage(postProcessingProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME).getSourceImage());
 
         copyOutputBands();
         ProductUtils.copyFlagBands(sourceProduct, targetProduct, true);   // we need the L1b flag!

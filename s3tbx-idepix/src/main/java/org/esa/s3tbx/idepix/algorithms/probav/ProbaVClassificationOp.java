@@ -164,7 +164,7 @@ public class ProbaVClassificationOp extends Operator {
             probavReflectanceTiles[i] = getSourceTile(probavReflectanceBands[i], rectangle);
         }
 
-        final Band cloudFlagTargetBand = targetProduct.getBand(IdepixIO.IDEPIX_CLASSIF_FLAGS);
+        final Band cloudFlagTargetBand = targetProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
         final Tile cloudFlagTargetTile = targetTiles.get(cloudFlagTargetBand);
 
         final Band nnTargetBand = targetProduct.getBand("probav_nn_value");
@@ -318,8 +318,8 @@ public class ProbaVClassificationOp extends Operator {
 
         targetProduct = new Product(sourceProduct.getName(), sourceProduct.getProductType(), sceneWidth, sceneHeight);
 
-        cloudFlagBand = targetProduct.addBand(IdepixIO.IDEPIX_CLASSIF_FLAGS, ProductData.TYPE_INT32);
-        FlagCoding flagCoding = ProbaVUtils.createProbavFlagCoding(IdepixIO.IDEPIX_CLASSIF_FLAGS);
+        cloudFlagBand = targetProduct.addBand(IdepixConstants.CLASSIF_BAND_NAME, ProductData.TYPE_INT32);
+        FlagCoding flagCoding = ProbaVUtils.createProbavFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
         cloudFlagBand.setSampleCoding(flagCoding);
         targetProduct.getFlagCodingGroup().add(flagCoding);
 
@@ -394,11 +394,11 @@ public class ProbaVClassificationOp extends Operator {
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, probaVAlgorithm.isCloud());
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, probaVAlgorithm.isCloud());
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SHADOW, false); // not computed here
-        targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLEAR_LAND, probaVAlgorithm.isClearLand());
-        targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLEAR_WATER, probaVAlgorithm.isClearWater());
+        targetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_LAND, probaVAlgorithm.isClearLand());
+        targetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_WATER, probaVAlgorithm.isClearWater());
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, probaVAlgorithm.isClearSnow());
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_LAND, probaVAlgorithm.isLand());
-        targetTile.setSample(x, y, IdepixConstants.IDEPIX_WATER, probaVAlgorithm.isWater());
+        targetTile.setSample(x, y, ProbaVConstants.IDEPIX_WATER, probaVAlgorithm.isWater());
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_BRIGHT, probaVAlgorithm.isBright());
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_WHITE, probaVAlgorithm.isWhite());
     }

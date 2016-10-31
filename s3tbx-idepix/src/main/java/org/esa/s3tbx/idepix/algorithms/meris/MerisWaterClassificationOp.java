@@ -150,8 +150,8 @@ public class MerisWaterClassificationOp extends Operator {
     private void createTargetProduct() {
         targetProduct = IdepixIO.createCompatibleTargetProduct(l1bProduct, "MER", "MER_L2", true);
 
-        cloudFlagBand = targetProduct.addBand(IdepixIO.IDEPIX_CLASSIF_FLAGS, ProductData.TYPE_INT16);
-        FlagCoding flagCoding = MerisUtils.createMerisFlagCoding(IdepixIO.IDEPIX_CLASSIF_FLAGS);
+        cloudFlagBand = targetProduct.addBand(IdepixConstants.CLASSIF_BAND_NAME, ProductData.TYPE_INT16);
+        FlagCoding flagCoding = MerisUtils.createMerisFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
         cloudFlagBand.setSampleCoding(flagCoding);
         targetProduct.getFlagCodingGroup().add(flagCoding);
 
@@ -309,7 +309,7 @@ public class MerisWaterClassificationOp extends Operator {
                 targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, false);
             }
         }
-        targetTile.setSample(x, y, IdepixConstants.IDEPIX_GLINT_RISK, is_glint_risk && !isCloudSure);
+        targetTile.setSample(x, y, MerisConstants.IDEPIX_GLINT_RISK, is_glint_risk && !isCloudSure);
     }
 
     private double[] getMerisNNOutput(int x, int y, Tile[] rhoToaTiles) {
