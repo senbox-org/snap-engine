@@ -46,8 +46,8 @@ public class ModisUtils {
         Mask mask;
         Random r = new Random();
 
-        mask = Mask.BandMathsType.create("IDEPIX_GLINT_RISK", ModisConstants.IDEPIX_MIXED_PIXEL_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.IDEPIX_GLINT_RISK",
+        mask = Mask.BandMathsType.create("IDEPIX_MIXED_PIXEL", ModisConstants.IDEPIX_MIXED_PIXEL_DESCR_TEXT, w, h,
+                                         "pixel_classif_flags.IDEPIX_MIXED_PIXEL",
                                          IdepixFlagCoding.getRandomColour(r), 0.5f);
         classifProduct.getMaskGroup().add(index, mask);
     }

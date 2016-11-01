@@ -31,10 +31,11 @@ import java.awt.event.ActionEvent;
  *
  * @author Olaf Danne
  */
-@ActionID(category = "Processing", id = "org.esa.s3tbx.idepix.ui.actions.IdepixAvhrrAction")
-@ActionRegistration(displayName = "#CTL_IdepixAvhrrAction_Text")
-@ActionReference(path = "Menu/Optical/Preprocessing/IdePix Pixel Classification", position = 200)
-@NbBundle.Messages({"CTL_IdepixAvhrrAction_Text=Avhrr"})
+// todo: activate when ready to publish
+//@ActionID(category = "Processing", id = "org.esa.s3tbx.idepix.ui.actions.IdepixAvhrrAction")
+//@ActionRegistration(displayName = "#CTL_IdepixAvhrrAction_Text")
+//@ActionReference(path = "Menu/Optical/Preprocessing/IdePix Pixel Classification", position = 200)
+//@NbBundle.Messages({"CTL_IdepixAvhrrAction_Text=Avhrr"})
 public class IdepixAvhrrAction extends AbstractSnapAction {
 
     private static final String HELP_ID = "idepixTool";
