@@ -16,8 +16,6 @@ import org.esa.snap.dataio.envisat.EnvisatConstants;
  */
 public class IdepixIO {
 
-    public static final String IDEPIX_CLASSIF_FLAGS = "pixel_classif_flags";
-
     private IdepixIO() {
     }
 

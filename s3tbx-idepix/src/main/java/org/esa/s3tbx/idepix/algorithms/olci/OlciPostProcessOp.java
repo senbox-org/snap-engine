@@ -59,7 +59,7 @@ public class OlciPostProcessOp extends Operator {
 
         geoCoding = l1bProduct.getSceneGeoCoding();
 
-        origCloudFlagBand = olciCloudProduct.getBand(IdepixIO.IDEPIX_CLASSIF_FLAGS);
+        origCloudFlagBand = olciCloudProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
 
         int extendedWidth;
         int extendedHeight;
@@ -77,7 +77,7 @@ public class OlciPostProcessOp extends Operator {
         );
 
 
-        ProductUtils.copyBand(IdepixIO.IDEPIX_CLASSIF_FLAGS, olciCloudProduct, postProcessedCloudProduct, false);
+        ProductUtils.copyBand(IdepixConstants.CLASSIF_BAND_NAME, olciCloudProduct, postProcessedCloudProduct, false);
         setTargetProduct(postProcessedCloudProduct);
     }
 

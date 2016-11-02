@@ -74,7 +74,7 @@ public class MerisPostProcessOp extends Operator {
 
         geoCoding = l1bProduct.getSceneGeoCoding();
 
-        origCloudFlagBand = merisCloudProduct.getBand(IdepixIO.IDEPIX_CLASSIF_FLAGS);
+        origCloudFlagBand = merisCloudProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
         szaTPG = l1bProduct.getTiePointGrid(EnvisatConstants.MERIS_SUN_ZENITH_DS_NAME);
         saaTPG = l1bProduct.getTiePointGrid(EnvisatConstants.MERIS_SUN_AZIMUTH_DS_NAME);
         altTPG = l1bProduct.getTiePointGrid(EnvisatConstants.MERIS_DEM_ALTITUDE_DS_NAME);
@@ -96,7 +96,7 @@ public class MerisPostProcessOp extends Operator {
         );
 
 
-        ProductUtils.copyBand(IdepixIO.IDEPIX_CLASSIF_FLAGS, merisCloudProduct, postProcessedCloudProduct, false);
+        ProductUtils.copyBand(IdepixConstants.CLASSIF_BAND_NAME, merisCloudProduct, postProcessedCloudProduct, false);
         setTargetProduct(postProcessedCloudProduct);
     }
 

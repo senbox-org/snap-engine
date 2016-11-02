@@ -207,7 +207,7 @@ public class IdepixPostProcessingOp extends BasisOp{
             targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
             targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
             boolean is_land = sourceFlagTile.getSampleBit(x, y, IdepixConstants.IDEPIX_LAND);
-            targetTile.setSample(x, y, IdepixConstants.IDEPIX_MIXED_PIXEL, !is_land);
+//            targetTile.setSample(x, y, IdepixConstants.IDEPIX_MIXED_PIXEL, !is_land);
         }
         // return whether this is still a cloud
         return !removeCloudFlag;

@@ -1,5 +1,7 @@
 package org.esa.s3tbx.idepix.algorithms.viirs;
 
+import org.esa.s3tbx.idepix.core.IdepixConstants;
+
 /**
  * Constants for Idepix VIIRS algorithm
  *
@@ -32,6 +34,10 @@ public class ViirsConstants {
             VIIRS_REFLECTANCE_10_BAND_NAME,
     };
     public final static int VIIRS_L1B_NUM_SPECTRAL_BANDS = VIIRS_SPECTRAL_BAND_NAMES.length;
+
+    public static final int IDEPIX_MIXED_PIXEL = IdepixConstants.NUM_DEFAULT_FLAGS + 1;
+
+    public static final String IDEPIX_MIXED_PIXEL_DESCR_TEXT = "Mixed pixel";
 
     // debug bands:
     public static final String BRIGHTNESS_BAND_NAME = "brightness_value";

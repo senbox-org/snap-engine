@@ -100,7 +100,7 @@ public class SeaWifsOp extends BasisOp {
 
         postProcessInput.put("classif", classifProduct);
 
-        Product postProcessProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(SeaWifsPostProcessingOp.class),
+        Product postProcessProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(SeaWifsPostProcessOp.class),
                                                        postProcessParameters, postProcessInput);
 
         ProductUtils.copyMetadata(sourceProduct, postProcessProduct);

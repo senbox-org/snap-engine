@@ -1,5 +1,7 @@
 package org.esa.s3tbx.idepix.algorithms.modis;
 
+import org.esa.s3tbx.idepix.core.IdepixConstants;
+
 /**
  * Idepix MODIS consztants
  *
@@ -96,4 +98,7 @@ class ModisConstants {
 
     public static final int MODIS_L1B_NUM_EMISSIVE_BANDS = MODIS_L1B_EMISSIVE_BAND_NAMES.length;
 
+    public static final int IDEPIX_MIXED_PIXEL = IdepixConstants.NUM_DEFAULT_FLAGS + 1;
+
+    public static final String IDEPIX_MIXED_PIXEL_DESCR_TEXT = "Mixed pixel";
 }

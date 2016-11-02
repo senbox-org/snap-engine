@@ -1,5 +1,7 @@
 package org.esa.s3tbx.idepix.algorithms.seawifs;
 
+import org.esa.s3tbx.idepix.core.IdepixConstants;
+
 /**
  * Constants for Idepix SeaWiFS algorithm
  *
@@ -35,4 +37,7 @@ public class SeaWifsConstants {
 
     static final int SEAWIFS_L1B_NUM_SPECTRAL_BANDS = SEAWIFS_L1B_SPECTRAL_BAND_NAMES.length;
 
+    public static final int IDEPIX_MIXED_PIXEL = IdepixConstants.NUM_DEFAULT_FLAGS + 1;
+
+    public static final String IDEPIX_MIXED_PIXEL_DESCR_TEXT = "Mixed pixel";
 }

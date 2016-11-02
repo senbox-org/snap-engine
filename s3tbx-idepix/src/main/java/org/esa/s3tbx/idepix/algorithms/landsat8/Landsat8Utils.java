@@ -10,6 +10,7 @@ import org.esa.snap.core.util.BitSetter;
 
 import javax.media.jai.Histogram;
 import java.awt.*;
+import java.util.Random;
 
 /**
  * Utility class for Idepix Landsat 8
@@ -61,6 +62,7 @@ public class Landsat8Utils {
         int w = classifProduct.getSceneRasterWidth();
         int h = classifProduct.getSceneRasterHeight();
         Mask mask;
+        Random r = new Random();
 
         // SHIMEZ
         mask = Mask.BandMathsType.create("IDEPIX_CLOUD_SHIMEZ",
@@ -78,36 +80,36 @@ public class Landsat8Utils {
         mask = Mask.BandMathsType.create("IDEPIX_CLOUD_HOT",
                                          IdepixConstants.IDEPIX_CLOUD_DESCR_TEXT + "[HOT]", w, h,
                                          "pixel_classif_flags.IDEPIX_CLOUD_HOT",
-                                         Color.magenta, 0.5f);
+                                         IdepixFlagCoding.getRandomColour(r), 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
         mask = Mask.BandMathsType.create("IDEPIX_CLOUD_HOT_BUFFER",
                                          Landsat8Constants.IDEPIX_CLOUD_BUFFER_HOT_DESCR_TEXT, w, h,
                                          "pixel_classif_flags.IDEPIX_CLOUD_HOT_BUFFER",
-                                         Color.orange, 0.5f);
+                                         IdepixFlagCoding.getRandomColour(r), 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
 
         // OTSU
         mask = Mask.BandMathsType.create("IDEPIX_CLOUD_OTSU",
                                          IdepixConstants.IDEPIX_CLOUD_DESCR_TEXT + "[OTSU]", w, h,
                                          "pixel_classif_flags.IDEPIX_CLOUD_OTSU",
-                                         Color.magenta, 0.5f);
+                                         IdepixFlagCoding.getRandomColour(r), 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
         mask = Mask.BandMathsType.create("IDEPIX_CLOUD_OTSU_BUFFER",
                                          Landsat8Constants.IDEPIX_CLOUD_BUFFER_OTSU_DESCR_TEXT, w, h,
                                          "pixel_classif_flags.IDEPIX_CLOUD_OTSU_BUFFER",
-                                         Color.orange, 0.5f);
+                                         IdepixFlagCoding.getRandomColour(r), 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
 
         // CLOST
         mask = Mask.BandMathsType.create("IDEPIX_CLOUD_CLOST",
                                          IdepixConstants.IDEPIX_CLOUD_DESCR_TEXT + "[CLOST]", w, h,
                                          "pixel_classif_flags.IDEPIX_CLOUD_CLOST",
-                                         Color.magenta, 0.5f);
+                                         IdepixFlagCoding.getRandomColour(r), 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
         mask = Mask.BandMathsType.create("IDEPIX_CLOUD_CLOST_BUFFER",
                                          Landsat8Constants.IDEPIX_CLOUD_BUFFER_CLOST_DESCR_TEXT, w, h,
                                          "pixel_classif_flags.IDEPIX_CLOUD_CLOST_BUFFER",
-                                         Color.orange, 0.5f);
+                                         IdepixFlagCoding.getRandomColour(r), 0.5f);
         classifProduct.getMaskGroup().add(index, mask);
     }
 

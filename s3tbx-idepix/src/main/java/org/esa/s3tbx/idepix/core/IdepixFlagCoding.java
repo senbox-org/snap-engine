@@ -43,24 +43,14 @@ public class IdepixFlagCoding {
                            IdepixConstants.IDEPIX_CLOUD_SHADOW_DESCR_TEXT);
         flagCoding.addFlag("IDEPIX_SNOW_ICE", BitSetter.setFlag(0, IdepixConstants.IDEPIX_SNOW_ICE),
                            IdepixConstants.IDEPIX_SNOW_ICE_DESCR_TEXT);
-        flagCoding.addFlag("IDEPIX_CLEAR_LAND", BitSetter.setFlag(0, IdepixConstants.IDEPIX_CLEAR_LAND),
-                           IdepixConstants.IDEPIX_CLEAR_LAND_DESCR_TEXT);
-        flagCoding.addFlag("IDEPIX_CLEAR_WATER", BitSetter.setFlag(0, IdepixConstants.IDEPIX_CLEAR_WATER),
-                           IdepixConstants.IDEPIX_CLEAR_WATER_DESCR_TEXT);
-        flagCoding.addFlag("IDEPIX_LAND", BitSetter.setFlag(0, IdepixConstants.IDEPIX_LAND),
-                           IdepixConstants.IDEPIX_LAND_DESCR_TEXT);
-        flagCoding.addFlag("IDEPIX_WATER", BitSetter.setFlag(0, IdepixConstants.IDEPIX_WATER),
-                           IdepixConstants.IDEPIX_WATER_DESCR_TEXT);
-        flagCoding.addFlag("IDEPIX_COASTLINE", BitSetter.setFlag(0, IdepixConstants.IDEPIX_COASTLINE),
-                           IdepixConstants.IDEPIX_COASTLINE_DESCR_TEXT);
-        flagCoding.addFlag("IDEPIX_MIXED_PIXEL", BitSetter.setFlag(0, IdepixConstants.IDEPIX_MIXED_PIXEL),
-                           IdepixConstants.IDEPIX_MIXED_PIXEL_DESCR_TEXT);
         flagCoding.addFlag("IDEPIX_BRIGHT", BitSetter.setFlag(0, IdepixConstants.IDEPIX_BRIGHT),
                            IdepixConstants.IDEPIX_BRIGHT_DESCR_TEXT);
         flagCoding.addFlag("IDEPIX_WHITE", BitSetter.setFlag(0, IdepixConstants.IDEPIX_WHITE),
                            IdepixConstants.IDEPIX_WHITE_DESCR_TEXT);
-        flagCoding.addFlag("IDEPIX_GLINT_RISK", BitSetter.setFlag(0, IdepixConstants.IDEPIX_GLINT_RISK),
-                           IdepixConstants.IDEPIX_GLINT_RISK_DESCR_TEXT);
+        flagCoding.addFlag("IDEPIX_COASTLINE", BitSetter.setFlag(0, IdepixConstants.IDEPIX_COASTLINE),
+                           IdepixConstants.IDEPIX_COASTLINE_DESCR_TEXT);
+        flagCoding.addFlag("IDEPIX_LAND", BitSetter.setFlag(0, IdepixConstants.IDEPIX_LAND),
+                           IdepixConstants.IDEPIX_LAND_DESCR_TEXT);
 
         return flagCoding;
     }
@@ -116,36 +106,6 @@ public class IdepixFlagCoding {
                                          getRandomColour(r), 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
 
-        mask = Mask.BandMathsType.create("IDEPIX_CLEAR_LAND", IdepixConstants.IDEPIX_CLEAR_LAND_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.IDEPIX_CLEAR_LAND",
-                                         getRandomColour(r), 0.5f);
-        classifProduct.getMaskGroup().add(index++, mask);
-
-        mask = Mask.BandMathsType.create("IDEPIX_CLEAR_WATER", IdepixConstants.IDEPIX_CLEAR_WATER_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.IDEPIX_CLEAR_WATER",
-                                         getRandomColour(r), 0.5f);
-        classifProduct.getMaskGroup().add(index++, mask);
-
-        mask = Mask.BandMathsType.create("IDEPIX_LAND", IdepixConstants.IDEPIX_LAND_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.IDEPIX_LAND",
-                                         getRandomColour(r), 0.5f);
-        classifProduct.getMaskGroup().add(index++, mask);
-
-        mask = Mask.BandMathsType.create("IDEPIX_WATER", IdepixConstants.IDEPIX_WATER_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.IDEPIX_WATER",
-                                         getRandomColour(r), 0.5f);
-        classifProduct.getMaskGroup().add(index++, mask);
-
-        mask = Mask.BandMathsType.create("IDEPIX_COASTLINE", IdepixConstants.IDEPIX_COASTLINE_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.IDEPIX_COASTLINE",
-                                         getRandomColour(r), 0.5f);
-        classifProduct.getMaskGroup().add(index++, mask);
-
-        mask = Mask.BandMathsType.create("IDEPIX_MIXED_PIXEL", IdepixConstants.IDEPIX_MIXED_PIXEL_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.IDEPIX_MIXED_PIXEL",
-                                         getRandomColour(r), 0.5f);
-        classifProduct.getMaskGroup().add(index++, mask);
-
         mask = Mask.BandMathsType.create("IDEPIX_BRIGHT", IdepixConstants.IDEPIX_BRIGHT_DESCR_TEXT, w, h,
                                          "pixel_classif_flags.IDEPIX_BRIGHT",
                                          getRandomColour(r), 0.5f);
@@ -156,8 +116,13 @@ public class IdepixFlagCoding {
                                          getRandomColour(r), 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
 
-        mask = Mask.BandMathsType.create("IDEPIX_GLINT_RISK", IdepixConstants.IDEPIX_GLINT_RISK_DESCR_TEXT, w, h,
-                                         "pixel_classif_flags.IDEPIX_GLINT_RISK",
+        mask = Mask.BandMathsType.create("IDEPIX_COASTLINE", IdepixConstants.IDEPIX_COASTLINE_DESCR_TEXT, w, h,
+                                         "pixel_classif_flags.IDEPIX_COASTLINE",
+                                         getRandomColour(r), 0.5f);
+        classifProduct.getMaskGroup().add(index++, mask);
+
+        mask = Mask.BandMathsType.create("IDEPIX_LAND", IdepixConstants.IDEPIX_LAND_DESCR_TEXT, w, h,
+                                         "pixel_classif_flags.IDEPIX_LAND",
                                          getRandomColour(r), 0.5f);
         classifProduct.getMaskGroup().add(index++, mask);
 

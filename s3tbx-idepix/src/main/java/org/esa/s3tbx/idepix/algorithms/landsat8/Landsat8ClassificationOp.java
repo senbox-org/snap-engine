@@ -35,7 +35,7 @@ public class Landsat8ClassificationOp extends Operator {
 
     // the water mask ends at 59 Degree south, stop earlier to avoid artefacts
     private static final float WATER_MASK_SOUTH_BOUND = -58.0f;
-    private static final String NN_RESULT_BAND_NAME = "nnResult";
+//    private static final String NN_RESULT_BAND_NAME = "nnResult";
     // currently not used:
 //    private static final String DARK_GLINT_TEST_ONE_BAND_NAME = "darkGlintTest1";
 //    private static final String DARK_Glint_TEST_TWO_BAND_NAME = "darkGlintTest2";
@@ -254,7 +254,7 @@ public class Landsat8ClassificationOp extends Operator {
         }
 
         final Tile cloudFlagTargetTile = targetTiles.get(targetProduct.getBand(cloudFlagBandName));
-        final Tile nnResultTargetTile = targetTiles.get(targetProduct.getBand(NN_RESULT_BAND_NAME));
+        final Tile nnResultTargetTile = targetTiles.get(targetProduct.getBand(IdepixConstants.NN_OUTPUT_BAND_NAME));
 //        final Tile darkGlintTest1TargetTile = targetTiles.get(targetProduct.getBand(DARK_GLINT_TEST_ONE_BAND_NAME));
 //        final Tile darkGlintTest2TargetTile = targetTiles.get(targetProduct.getBand(DARK_Glint_TEST_TWO_BAND_NAME));
 
@@ -262,6 +262,11 @@ public class Landsat8ClassificationOp extends Operator {
             for (int y = rectangle.y; y < rectangle.y + rectangle.height; y++) {
                 checkForCancellation();
                 for (int x = rectangle.x; x < rectangle.x + rectangle.width; x++) {
+
+                    if ((x == 3461 || x == 3462) && y == 477) {
+                        System.out.println("x,y = " + x + "," + y);
+                    }
+
                     // set up pixel properties for given instruments...
                     Landsat8Algorithm landsat8Algorithm = createLandsat8Algorithm(
                             l8ReflectanceTiles,
@@ -303,7 +308,7 @@ public class Landsat8ClassificationOp extends Operator {
         targetProduct = new Product(sourceProduct.getName(), sourceProduct.getProductType(), sceneWidth, sceneHeight);
 
         // shall be the only target band!!
-        cloudFlagBandName = IdepixIO.IDEPIX_CLASSIF_FLAGS;
+        cloudFlagBandName = IdepixConstants.CLASSIF_BAND_NAME;
         Band cloudFlagBand = targetProduct.addBand(cloudFlagBandName, ProductData.TYPE_INT32);
         FlagCoding flagCoding = Landsat8Utils.createLandsat8FlagCoding(cloudFlagBandName);
         cloudFlagBand.setSampleCoding(flagCoding);
@@ -311,7 +316,7 @@ public class Landsat8ClassificationOp extends Operator {
 
         // todo - temporarily added the bands for testing. Shall be removed later. (mp/08.09.2015)
         // but keep the NN result band! (od/02.03.2016)
-        targetProduct.addBand(NN_RESULT_BAND_NAME, ProductData.TYPE_FLOAT32);
+        targetProduct.addBand(IdepixConstants.NN_OUTPUT_BAND_NAME, ProductData.TYPE_FLOAT32);
 
         IdepixIO.copyGeocodingFromBandToProduct(blueBand, targetProduct);
         targetProduct.setStartTime(sourceProduct.getStartTime());
@@ -346,15 +351,15 @@ public class Landsat8ClassificationOp extends Operator {
     private void setCloudFlag(Tile targetTile, int x, int y, Landsat8Algorithm l8Algorithm) {
         // for given instrument, compute boolean pixel properties and write to cloud flag band
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_INVALID, l8Algorithm.isInvalid());
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, l8Algorithm.isCloud());
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, l8Algorithm.isCloud());
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, l8Algorithm.isCloudAmbiguous());
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, l8Algorithm.isSnowIce());
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_BRIGHT, l8Algorithm.isBright());
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_WHITE, l8Algorithm.isWhite());
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SHADOW, false); // not computed here
-        targetTile.setSample(x, y, IdepixConstants.IDEPIX_GLINT_RISK, false);   // TODO
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_COASTLINE, false);   // TODO
-        targetTile.setSample(x, y, IdepixConstants.IDEPIX_LAND, l8Algorithm.isLand());         // TODO
+        targetTile.setSample(x, y, IdepixConstants.IDEPIX_LAND, l8Algorithm.isLand());
         targetTile.setSample(x, y, Landsat8Constants.IDEPIX_CLOUD_SHIMEZ, applyShimezCloudTest && l8Algorithm.isCloudShimez());
         targetTile.setSample(x, y, Landsat8Constants.IDEPIX_CLOUD_SHIMEZ_BUFFER, false); // not computed here
         targetTile.setSample(x, y, Landsat8Constants.IDEPIX_CLOUD_HOT, applyHotCloudTest && l8Algorithm.isCloudHot());
@@ -432,12 +437,24 @@ public class Landsat8ClassificationOp extends Operator {
     }
 
     private double[] calcNeuralNetResult(float[] l8Reflectance) {
+        // NNs and input bands being used:
+//        ALL("ALL", "20x4x2_1012.9.net", [default]: coastal_aerosol, blue, green, red, nir, swir1, swir2, cirrus
+//        LAND("LAND", "16x6x2_735.5.net", : coastal_aerosol, blue, green, red, nir, swir1, swir2, cirrus
+//        WATER("WATER", "12x4_444.6.net", : coastal_aerosol, blue, green, red, nir, swir1, swir2, cirrus, tirs1, tirs2
+//        LAND_USE_THERMAL("LAND_USE_THERMAL", "18x6_509.5.net",: coastal_aerosol, blue, green, red, nir, swir1, swir2, cirrus, tirs1, tirs2
+//        WATER_NOTIDAL("WATER_NOTIDAL", "11x4x2_434.7.net",  : coastal_aerosol, blue, green, red, nir, swir1, swir2, cirrus
+//        WATER_USE_THERMAL("WATER_USE_THERMAL", "12x4x2_305.0.net", : coastal_aerosol, blue, green, red, nir, swir1, swir2, cirrus, tirs1, tirs2
+//        WATER_NOTIDAL_USE_THERMAL("WATER_NOTIDAL_USE_THERMAL", "12x4x2_307.5.net", : coastal_aerosol, blue, green, red, nir, swir1, swir2, cirrus, tirs1, tirs2
+
         SchillerNeuralNetWrapper neuralNetWrapper = landsat8CloudNet.get();
         double[] cloudNetInput = neuralNetWrapper.getInputVector();
         for (int i = 0; i < 7; i++) {
             cloudNetInput[i] = Math.sqrt(l8Reflectance[i]);
         }
-        cloudNetInput[7] = Math.max(Math.sqrt((double) l8Reflectance[7]), neuralNetWrapper.getNeuralNet().getInmin()[7]);
+        // cirrus band can have negative values
+        // --> not allowing values lower as the net minimum
+        // note that panchromatic band (l8Reflectance[8]) is not used as NN input and skipped!
+        cloudNetInput[7] = Math.max(Math.sqrt((double) l8Reflectance[8]), neuralNetWrapper.getNeuralNet().getInmin()[7]);
         if (nnSelector.getLabel().endsWith("_USE_THERMAL")) {
             cloudNetInput[8] = Math.sqrt(l8Reflectance[9]);
             cloudNetInput[9] = Math.sqrt(l8Reflectance[10]);

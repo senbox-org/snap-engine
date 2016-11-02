@@ -59,7 +59,7 @@ public class ProbaVPostProcessOp extends Operator {
         Product postProcessedCloudProduct = createTargetProduct(probavCloudProduct,
                                                                 "postProcessedCloud", "postProcessedCloud");
 
-        origCloudFlagBand = probavCloudProduct.getBand(IdepixIO.IDEPIX_CLASSIF_FLAGS);
+        origCloudFlagBand = probavCloudProduct.getBand(IdepixConstants.CLASSIF_BAND_NAME);
         origSmFlagBand = l1bProduct.getBand("SM_FLAGS");
 
         if (computeCloudBuffer) {
@@ -69,7 +69,7 @@ public class ProbaVPostProcessOp extends Operator {
             );
         }
 
-        ProductUtils.copyBand(IdepixIO.IDEPIX_CLASSIF_FLAGS, probavCloudProduct, postProcessedCloudProduct, false);
+        ProductUtils.copyBand(IdepixConstants.CLASSIF_BAND_NAME, probavCloudProduct, postProcessedCloudProduct, false);
         setTargetProduct(postProcessedCloudProduct);
     }
 
@@ -155,9 +155,9 @@ public class ProbaVPostProcessOp extends Operator {
     private void consolidateFlagging(int x, int y, Tile smFlagTile, Tile targetTile) {
         final boolean smClear = smFlagTile.getSampleBit(x, y, ProbaVClassificationOp.SM_F_CLEAR);
         final boolean idepixLand = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_LAND);
-        final boolean idepixClearLand = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLEAR_LAND);
-        final boolean idepixWater = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_WATER);
-        final boolean idepixClearWater = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLEAR_WATER);
+        final boolean idepixClearLand = targetTile.getSampleBit(x, y, ProbaVConstants.IDEPIX_CLEAR_LAND);
+        final boolean idepixWater = targetTile.getSampleBit(x, y, ProbaVConstants.IDEPIX_WATER);
+        final boolean idepixClearWater = targetTile.getSampleBit(x, y, ProbaVConstants.IDEPIX_CLEAR_WATER);
         final boolean idepixClearSnow = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_SNOW_ICE);
         final boolean idepixCloud = targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD);
 
@@ -174,8 +174,8 @@ public class ProbaVPostProcessOp extends Operator {
 
 
         // GK 20151201;
-        targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLEAR_LAND, safeClearLandFinal);
-        targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLEAR_WATER, safeClearWaterFinal);
+        targetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_LAND, safeClearLandFinal);
+        targetTile.setSample(x, y, ProbaVConstants.IDEPIX_CLEAR_WATER, safeClearWaterFinal);
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, safeCloudFinal);
         targetTile.setSample(x, y, IdepixConstants.IDEPIX_SNOW_ICE, safeSnowIce);
     }

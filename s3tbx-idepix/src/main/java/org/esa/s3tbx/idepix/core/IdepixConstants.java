@@ -19,17 +19,12 @@ public class IdepixConstants {
     public static final int IDEPIX_CLOUD_BUFFER = 4;
     public static final int IDEPIX_CLOUD_SHADOW = 5;
     public static final int IDEPIX_SNOW_ICE = 6;
-    public static final int IDEPIX_CLEAR_LAND = 7;
-    public static final int IDEPIX_CLEAR_WATER = 8;
-    public static final int IDEPIX_LAND = 9;
-    public static final int IDEPIX_WATER = 10;
-    public static final int IDEPIX_COASTLINE = 11;
-    public static final int IDEPIX_MIXED_PIXEL = 12;
-    public static final int IDEPIX_BRIGHT = 13;
-    public static final int IDEPIX_WHITE = 14;
-    public static final int IDEPIX_GLINT_RISK = 15;
+    public static final int IDEPIX_BRIGHT = 7;
+    public static final int IDEPIX_WHITE = 8;
+    public static final int IDEPIX_COASTLINE = 9;
+    public static final int IDEPIX_LAND = 10;
 
-    public static final int NUM_DEFAULT_FLAGS = 16;
+    public static final int NUM_DEFAULT_FLAGS = 11;
 
     public static final String IDEPIX_INVALID_DESCR_TEXT = "Invalid pixels";
     public static final String IDEPIX_CLOUD_DESCR_TEXT = "Pixels which are either cloud_sure or cloud_ambiguous";
@@ -40,15 +35,10 @@ public class IdepixConstants {
             "A buffer of n pixels around a cloud. n is a user supplied parameter. Applied to pixels masked as 'cloud'";
     public static final String IDEPIX_CLOUD_SHADOW_DESCR_TEXT = "Pixels is affect by a cloud shadow";
     public static final String IDEPIX_SNOW_ICE_DESCR_TEXT = "Clear snow/ice pixels";
-    public static final String IDEPIX_CLEAR_LAND_DESCR_TEXT = "Clear land pixels";
-    public static final String IDEPIX_CLEAR_WATER_DESCR_TEXT = "Clear water pixels";
-    public static final String IDEPIX_LAND_DESCR_TEXT = "Land pixels";
-    public static final String IDEPIX_WATER_DESCR_TEXT = "Water pixels";
-    public static final String IDEPIX_COASTLINE_DESCR_TEXT = "Pixels at a coastline";
-    public static final String IDEPIX_MIXED_PIXEL_DESCR_TEXT = "Mixed pixel";
     public static final String IDEPIX_BRIGHT_DESCR_TEXT = "Bright pixels";
     public static final String IDEPIX_WHITE_DESCR_TEXT = "White pixels";
-    public static final String IDEPIX_GLINT_RISK_DESCR_TEXT = "Glint risk pixel";
+    public static final String IDEPIX_COASTLINE_DESCR_TEXT = "Pixels at a coastline";
+    public static final String IDEPIX_LAND_DESCR_TEXT = "Land pixels";
 
     public static final int LAND_WATER_MASK_RESOLUTION = 50;
     public static final int OVERSAMPLING_FACTOR_X = 3;

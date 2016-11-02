@@ -1,4 +1,4 @@
-package org.esa.s3tbx.idepix.algorithms.modis;
+package org.esa.s3tbx.idepix.algorithms.seawifs;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.s3tbx.idepix.core.IdepixConstants;
@@ -19,26 +19,24 @@ import org.esa.snap.core.util.RectangleExtender;
 
 import java.awt.*;
 
-//import org.esa.beam.idepix.algorithms.coastcolour.CoastColourClassificationOp;
-
 /**
- * OC-CCI post processing operator, operating on tiles:
+ * SeaWiFS post processing operator, operating on tiles:
  * - cloud buffer
  * - ...
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "Idepix.Modis.Postprocess",
-                  version = "2.2",
-                  copyright = "(c) 2016 by Brockmann Consult",
-                  description = "Refines the MODIS pixel classification.",
-                  internal = true)
-public class ModisPostProcessingOp extends BasisOp {
+@OperatorMetadata(alias = "Idepix.Seawifs.Postprocess",
+        version = "2.2",
+        copyright = "(c) 2016 by Brockmann Consult",
+        description = "Refines the SeaWiFS pixel classification.",
+        internal = true)
+public class SeaWifsPostProcessOp extends BasisOp {
 
-    @SourceProduct(alias = "refl", description = "MODIS L1b reflectance product")
+    @SourceProduct(alias = "refl", description = "SeaWiFS reflectance product")
     private Product reflProduct;
 
-    @SourceProduct(alias = "classif", description = "MODIS pixel classification product")
+    @SourceProduct(alias = "classif", description = "SeaWiFS pixel classification product")
     private Product classifProduct;
 
     @SourceProduct(alias = "waterMask")
@@ -209,7 +207,7 @@ public class ModisPostProcessingOp extends BasisOp {
             targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
             targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
             boolean is_land = sourceFlagTile.getSampleBit(x, y, IdepixConstants.IDEPIX_LAND);
-            targetTile.setSample(x, y, IdepixConstants.IDEPIX_MIXED_PIXEL, !is_land);
+            targetTile.setSample(x, y, SeaWifsConstants.IDEPIX_MIXED_PIXEL, !is_land);
         }
         // return whether this is still a cloud
         return !removeCloudFlag;
@@ -248,7 +246,7 @@ public class ModisPostProcessingOp extends BasisOp {
         ProductUtils.copyFlagCodings(classifProduct, targetProduct);
         ProductUtils.copyGeoCoding(reflProduct, targetProduct);
 
-        ModisUtils.setupModisClassifBitmask(targetProduct);
+        SeaWifsUtils.setupSeawifsClassifBitmask(targetProduct);
     }
 
     private void combineFlags(int x, int y, Tile sourceFlagTile, Tile targetTile) {
@@ -273,7 +271,6 @@ public class ModisPostProcessingOp extends BasisOp {
         }
     }
 
-
     /**
      * The Service Provider Interface (SPI) for the operator.
      * It provides operator meta-data and is a factory for new operator instances.
@@ -281,7 +278,7 @@ public class ModisPostProcessingOp extends BasisOp {
     public static class Spi extends OperatorSpi {
 
         public Spi() {
-            super(ModisPostProcessingOp.class);
+            super(SeaWifsPostProcessOp.class);
         }
     }
 

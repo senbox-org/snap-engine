@@ -99,7 +99,7 @@ public class ModisOp extends BasisOp {
 
         postProcessInput.put("classif", classifProduct);
 
-        Product postProcessProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(ModisPostProcessingOp.class),
+        Product postProcessProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(ModisPostProcessOp.class),
                                                        postProcessParameters, postProcessInput);
 
         ProductUtils.copyMetadata(sourceProduct,postProcessProduct);

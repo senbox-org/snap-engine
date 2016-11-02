@@ -336,7 +336,6 @@ public class AvhrrUSGSClassificationOp extends AbstractAvhrrClassificationOp {
         targetSamples[0].set(IdepixConstants.IDEPIX_CLOUD_BUFFER, algorithm.isCloudBuffer());
         targetSamples[0].set(IdepixConstants.IDEPIX_CLOUD_SHADOW, algorithm.isCloudShadow());
         targetSamples[0].set(IdepixConstants.IDEPIX_SNOW_ICE, algorithm.isSnowIce());
-        targetSamples[0].set(IdepixConstants.IDEPIX_GLINT_RISK, algorithm.isGlintRisk());
         targetSamples[0].set(IdepixConstants.IDEPIX_COASTLINE, algorithm.isCoastline());
         targetSamples[0].set(IdepixConstants.IDEPIX_LAND, algorithm.isLand());
     }

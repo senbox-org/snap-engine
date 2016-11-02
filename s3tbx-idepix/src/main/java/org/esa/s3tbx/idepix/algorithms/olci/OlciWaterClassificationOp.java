@@ -134,8 +134,8 @@ public class OlciWaterClassificationOp extends Operator {
     private void createTargetProduct() {
         targetProduct = IdepixIO.createCompatibleTargetProduct(l1bProduct, "MER", "MER_L2", true);
 
-        cloudFlagBand = targetProduct.addBand(IdepixIO.IDEPIX_CLASSIF_FLAGS, ProductData.TYPE_INT16);
-        FlagCoding flagCoding = OlciUtils.createOlciFlagCoding(IdepixIO.IDEPIX_CLASSIF_FLAGS);
+        cloudFlagBand = targetProduct.addBand(IdepixConstants.CLASSIF_BAND_NAME, ProductData.TYPE_INT16);
+        FlagCoding flagCoding = OlciUtils.createOlciFlagCoding(IdepixConstants.CLASSIF_BAND_NAME);
         cloudFlagBand.setSampleCoding(flagCoding);
         targetProduct.getFlagCodingGroup().add(flagCoding);
 
@@ -266,7 +266,6 @@ public class OlciWaterClassificationOp extends Operator {
                 targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, false);
             }
         }
-        targetTile.setSample(x, y, IdepixConstants.IDEPIX_GLINT_RISK, false);  // todo: use L1b glint flag
     }
 
     private double[] getOlciNNOutput(int x, int y, Tile[] rhoToaTiles) {

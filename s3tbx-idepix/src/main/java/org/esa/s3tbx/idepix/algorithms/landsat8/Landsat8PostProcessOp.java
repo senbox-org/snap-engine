@@ -80,7 +80,7 @@ public class Landsat8PostProcessOp extends Operator {
 
             geoCoding = landsatCloudProduct.getSceneGeoCoding();
 
-            final String cloudClassifBandName = IdepixIO.IDEPIX_CLASSIF_FLAGS;
+            final String cloudClassifBandName = IdepixConstants.CLASSIF_BAND_NAME;
             origCloudFlagBand = landsatCloudProduct.getBand(cloudClassifBandName);
             int extendedWidth = 64;
             int extendedHeight = 64; // todo: what do we need?
@@ -111,6 +111,10 @@ public class Landsat8PostProcessOp extends Operator {
             checkForCancellation();
             for (int x = srcRectangle.x; x < srcRectangle.x + srcRectangle.width; x++) {
 
+                if ((x == 3461 || x == 3462) && y == 477) {
+                    System.out.println("x,y = " + x + "," + y);
+                }
+
                 if (targetRectangle.contains(x, y)) {
                     combineFlags(x, y, sourceFlagTile, targetTile);
 
@@ -126,6 +130,12 @@ public class Landsat8PostProcessOp extends Operator {
                     postProcess(x, y, targetTile, srcRectangle, sourceFlagTile, waterFractionTile,
                                 Landsat8Constants.IDEPIX_CLOUD_CLOST,
                                 Landsat8Constants.IDEPIX_CLOUD_CLOST_BUFFER);
+
+                    postProcess(x, y, targetTile, srcRectangle, sourceFlagTile, waterFractionTile,
+                                IdepixConstants.IDEPIX_CLOUD_SURE,
+                                IdepixConstants.IDEPIX_CLOUD_BUFFER);
+                    targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD,
+                                         targetTile.getSampleBit(x, y, IdepixConstants.IDEPIX_CLOUD_SURE));
                 }
             }
         }
@@ -241,6 +251,10 @@ public class Landsat8PostProcessOp extends Operator {
 
         if (removeCloudFlag) {
             targetTile.setSample(x, y, Landsat8Constants.IDEPIX_CLOUD_SHIMEZ, false);
+            targetTile.setSample(x, y, Landsat8Constants.IDEPIX_CLOUD_CLOST, false);
+            targetTile.setSample(x, y, Landsat8Constants.IDEPIX_CLOUD_HOT, false);
+            targetTile.setSample(x, y, Landsat8Constants.IDEPIX_CLOUD_OTSU, false);
+            targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD, false);
             targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_SURE, false);
             targetTile.setSample(x, y, IdepixConstants.IDEPIX_CLOUD_AMBIGUOUS, false);
         }
