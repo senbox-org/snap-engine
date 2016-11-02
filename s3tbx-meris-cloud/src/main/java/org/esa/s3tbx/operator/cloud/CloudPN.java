@@ -25,6 +25,7 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.jexp.ParseException;
 import org.esa.snap.core.jexp.Term;
 import org.esa.snap.core.util.SystemUtils;
@@ -36,13 +37,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Logger;
 
 /**
  * A processing node to compute a cloud_probability mask using a neural network.
- *
  */
 class CloudPN extends ProcessingNode {
 
@@ -384,7 +386,9 @@ class CloudPN extends ProcessingNode {
     @Override
     public void startProcessing() throws ParseException {
         final Product l1bProduct = getSourceProduct();
-
+        if (!isOperatorSupport()) {
+            throw new OperatorException("Oparetor did not support this product \n" + l1bProduct.getName());
+        }
         szaGrid = l1bProduct.getTiePointGrid(EnvisatConstants.MERIS_SUN_ZENITH_DS_NAME);
         saaGrid = l1bProduct.getTiePointGrid(EnvisatConstants.MERIS_SUN_AZIMUTH_DS_NAME);
         vzaGrid = l1bProduct.getTiePointGrid(EnvisatConstants.MERIS_VIEW_ZENITH_DS_NAME);
@@ -399,5 +403,21 @@ class CloudPN extends ProcessingNode {
         validLandTerm = l1bProduct.parseExpression(validLandExpression);
         validOceanTerm = l1bProduct.parseExpression(validOceanExpression);
         landTerm = l1bProduct.parseExpression("l1_flags.LAND_OCEAN");
+    }
+
+    private boolean isOperatorSupport() {
+        List<String> tiePointNameList = Arrays.asList(getSourceProduct().getTiePointGridNames());
+        String[] tiePointNeeded = {
+                EnvisatConstants.MERIS_SUN_ZENITH_DS_NAME,
+                EnvisatConstants.MERIS_SUN_AZIMUTH_DS_NAME,
+                EnvisatConstants.MERIS_VIEW_ZENITH_DS_NAME,
+                EnvisatConstants.MERIS_VIEW_AZIMUTH_DS_NAME
+        };
+        for (String tie : tiePointNeeded) {
+            if (!tiePointNameList.contains(tie)) {
+                return false;
+            }
+        }
+        return true;
     }
 }
