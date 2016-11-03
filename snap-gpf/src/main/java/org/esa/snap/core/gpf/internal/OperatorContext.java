@@ -59,12 +59,14 @@ import org.esa.snap.core.gpf.descriptor.PropertySetDescriptorFactory;
 import org.esa.snap.core.gpf.graph.GraphOp;
 import org.esa.snap.core.gpf.monitor.TileComputationEvent;
 import org.esa.snap.core.gpf.monitor.TileComputationObserver;
+import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.util.ModuleMetadata;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.jai.JAIUtils;
 import org.esa.snap.runtime.Config;
 
 import javax.media.jai.BorderExtender;
+import javax.media.jai.ImageLayout;
 import javax.media.jai.JAI;
 import javax.media.jai.OpImage;
 import javax.media.jai.PlanarImage;
@@ -718,12 +720,23 @@ public class OperatorContext {
 
                 OperatorImage opImage = getOwnedOperatorImage(targetBand);
                 if (opImage == null) {
-
                     final OperatorImage image;
+                    int tileWidth = (int) targetProduct.getPreferredTileSize().getWidth();
+                    int tileHeight = (int) targetProduct.getPreferredTileSize().getHeight();
+                    if (targetBand.getRasterWidth() != targetProduct.getSceneRasterWidth() ||
+                            targetBand.getRasterHeight() != targetProduct.getSceneRasterHeight()) {
+                        tileWidth *= ((double) targetBand.getRasterWidth() / targetProduct.getSceneRasterWidth());
+                        tileHeight *= ((double) targetBand.getRasterHeight() / targetProduct.getSceneRasterHeight());
+                    }
+                    final int dataBufferType = ImageManager.getDataBufferType(targetBand.getDataType());
+                    final ImageLayout imageLayout =
+                            ImageManager.createSingleBandedImageLayout(dataBufferType, targetBand.getRasterWidth(),
+                                                                       targetBand.getRasterHeight(),
+                                                                       tileWidth, tileHeight);
                     if (operatorMustComputeTileStack()) {
-                        image = new OperatorImageTileStack(targetBand, this, locks);
+                        image = new OperatorImageTileStack(targetBand, this, locks, imageLayout);
                     } else {
-                        image = new OperatorImage(targetBand, this);
+                        image = new OperatorImage(targetBand, this, imageLayout);
                     }
                     targetImageMap.put(targetBand, image);
 

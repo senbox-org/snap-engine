@@ -280,6 +280,10 @@ public class WriteOp extends Operator {
         if (band.getRasterWidth() == targetProduct.getSceneRasterWidth() &&
                 band.getRasterHeight() == targetProduct.getSceneRasterHeight()) {
             tileSize = targetProduct.getPreferredTileSize();
+        } else {
+            final int tileWidth = band.getSourceImage().getTileWidth();
+            final int tileHeight = band.getSourceImage().getTileHeight();
+            tileSize = new Dimension(tileWidth, tileHeight);
         }
         if (tileSize == null) {
             tileSize = JAIUtils.computePreferredTileSize(band.getRasterWidth(),

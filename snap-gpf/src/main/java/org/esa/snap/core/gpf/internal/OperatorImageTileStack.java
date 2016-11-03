@@ -19,15 +19,13 @@ import com.bc.ceres.core.Assert;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.gpf.Tile;
-import org.esa.snap.core.image.ImageManager;
-import org.esa.snap.core.util.ImageUtils;
 
+import javax.media.jai.ImageLayout;
 import javax.media.jai.PlanarImage;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.Raster;
-import java.awt.image.SampleModel;
 import java.awt.image.WritableRaster;
 import java.util.HashMap;
 import java.util.Map;
@@ -49,6 +47,10 @@ public class OperatorImageTileStack extends OperatorImage {
         this.locks = locks;
     }
 
+    public OperatorImageTileStack(Band targetBand, OperatorContext operatorContext, Object[][] locks, ImageLayout imageLayout) {
+        super(targetBand, operatorContext, imageLayout);
+        this.locks = locks;
+    }
 
     // CHECK: Check whether this is an option to avoid removing single tiles from a previously computed tile stack
     /*
@@ -74,18 +76,26 @@ public class OperatorImageTileStack extends OperatorImage {
                 return tileFromCache;
             } else {
                 /* Create a new WritableRaster to represent this tile. */
-                Point location = new Point(tileXToX(tileX), tileYToY(tileY));
-                WritableRaster dest = createWritableRaster(sampleModel, location);
+                final WritableRaster dest = createWritableRaster(tileX, tileY);
 
                 /* Clip output rectangle to image bounds. */
-                Rectangle rect = new Rectangle(location.x, location.y,
-                                               sampleModel.getWidth(),
-                                               sampleModel.getHeight());
-                Rectangle destRect = rect.intersection(getBounds());
+                final Rectangle destRect = getClippedTileRectangle(dest);
                 computeRect((PlanarImage[]) null, dest, destRect);
                 return dest;
             }
         }
+    }
+
+    private Rectangle getClippedTileRectangle(WritableRaster dest) {
+        Rectangle rect = new Rectangle(dest.getMinX(), dest.getMinY(),
+                                       sampleModel.getWidth(),
+                                       sampleModel.getHeight());
+        return rect.intersection(getBounds());
+    }
+
+    private WritableRaster createWritableRaster(int tileX, int tileY) {
+        Point location = new Point(tileXToX(tileX), tileYToY(tileY));
+        return createWritableRaster(sampleModel, location);
     }
 
     @Override
@@ -100,11 +110,16 @@ public class OperatorImageTileStack extends OperatorImage {
         Map<Band, Tile> targetTiles = new HashMap<Band, Tile>(targetBands.length * 2);
         Map<Band, WritableRaster> writableRasters = new HashMap<Band, WritableRaster>(targetBands.length);
 
+        final int tileX = XToTileX(destRect.x);
+        final int tileY = YToTileY(destRect.y);
+
         for (Band band : targetBands) {
             if (band == getTargetBand() || operatorContext.isComputingImageOf(band)) {
                 WritableRaster tileRaster = getWritableRaster(band, tile);
                 writableRasters.put(band, tileRaster);
-                Tile targetTile = createTargetTile(band, tileRaster, destRect);
+                final Rectangle tileRect =
+                        ((OperatorImageTileStack) operatorContext.getTargetImage(band)).getClippedTileRectangle(tileRaster);
+                Tile targetTile = createTargetTile(band, tileRaster, tileRect);
                 targetTiles.put(band, targetTile);
             } else if (requiresAllBands()) {
                 Tile targetTile = operatorContext.getSourceTile(band, destRect);
@@ -115,10 +130,7 @@ public class OperatorImageTileStack extends OperatorImage {
         operatorContext.startWatch();
         operatorContext.getOperator().computeTileStack(targetTiles, destRect, ProgressMonitor.NULL);
         operatorContext.stopWatch();
-//        long nettoNanos = operatorContext.getNettoTime();
 
-        final int tileX = XToTileX(destRect.x);
-        final int tileY = YToTileY(destRect.y);
         for (Entry<Band, WritableRaster> entry : writableRasters.entrySet()) {
             Band band = entry.getKey();
             WritableRaster writableRaster = entry.getValue();
@@ -126,12 +138,13 @@ public class OperatorImageTileStack extends OperatorImage {
             OperatorImageTileStack operatorImage = (OperatorImageTileStack) operatorContext.getTargetImage(band);
             //put raster into cache after computing them.
             operatorImage.addTileToCache(tileX, tileY, writableRaster);
+            final Rectangle tileRect = operatorImage.getClippedTileRectangle(writableRaster);
 
             // CHECK: Check whether this is an option to avoid removing single tiles from a previously computed tile stack
             /*
             getOperatorContext().addTileToLocalCache(band, tileX, tileY, writableRaster);
             */
-            operatorContext.fireTileComputed(operatorImage, destRect, startNanos);
+            operatorContext.fireTileComputed(operatorImage, tileRect, startNanos);
         }
     }
 
@@ -140,39 +153,27 @@ public class OperatorImageTileStack extends OperatorImage {
         if (band == getTargetBand()) {
             tileRaster = targetTileRaster;
         } else {
+            final int tileX = XToTileX(targetTileRaster.getBounds().x);
+            final int tileY = YToTileY(targetTileRaster.getBounds().y);
             OperatorContext operatorContext = getOperatorContext();
             // casting to access "getWritableRaster" method
             OperatorImageTileStack operatorImage = (OperatorImageTileStack) operatorContext.getTargetImage(band);
             Assert.state(operatorImage != this);
-            tileRaster = operatorImage.getWritableRaster(targetTileRaster.getBounds());
+            tileRaster = operatorImage.getWritableRaster(tileX, tileY);
         }
         return tileRaster;
     }
 
-    private WritableRaster getWritableRaster(Rectangle tileRectangle) {
-        Assert.argument(tileRectangle.x % getTileWidth() == 0, "rectangle");
-        Assert.argument(tileRectangle.y % getTileHeight() == 0, "rectangle");
-        Assert.argument(tileRectangle.width == getTileWidth(), "rectangle");
-        Assert.argument(tileRectangle.height == getTileHeight(), "rectangle");
-        final int tileX = XToTileX(tileRectangle.x);
-        final int tileY = YToTileY(tileRectangle.y);
+    private WritableRaster getWritableRaster(int tileX, int tileY) {
         final Raster tileFromCache = getTileFromCache(tileX, tileY);
         final WritableRaster writableRaster;
         if (tileFromCache instanceof WritableRaster) {
             // we already have a WritableRaster in the cache
             writableRaster = (WritableRaster) tileFromCache;
         } else {
-            writableRaster = createWritableRaster(tileRectangle);
+            writableRaster = createWritableRaster(tileX, tileY);
         }
         return writableRaster;
-    }
-
-    private WritableRaster createWritableRaster(Rectangle rectangle) {
-        final int dataBufferType = ImageManager.getDataBufferType(getTargetBand().getDataType());
-        SampleModel sampleModel = ImageUtils.createSingleBandedSampleModel(dataBufferType, rectangle.width,
-                                                                           rectangle.height);
-        final Point location = new Point(rectangle.x, rectangle.y);
-        return createWritableRaster(sampleModel, location);
     }
 
     /**

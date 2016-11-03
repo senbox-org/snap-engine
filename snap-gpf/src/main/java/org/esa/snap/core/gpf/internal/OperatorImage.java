@@ -37,7 +37,7 @@ public class OperatorImage extends SourcelessOpImage {
         this(targetBand, operatorContext, ImageManager.createSingleBandedImageLayout(targetBand));
     }
 
-    private OperatorImage(Band targetBand, OperatorContext operatorContext, ImageLayout imageLayout) {
+    public OperatorImage(Band targetBand, OperatorContext operatorContext, ImageLayout imageLayout) {
         super(imageLayout,
               operatorContext.getRenderingHints(),
               imageLayout.getSampleModel(null),
