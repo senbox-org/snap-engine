@@ -24,8 +24,6 @@ import org.esa.snap.core.datamodel.MetadataAttribute;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.RasterDataNode;
-import org.esa.snap.core.datamodel.TiePointGrid;
-import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.jexp.ParseException;
 import org.esa.snap.core.jexp.Term;
 import org.esa.snap.core.util.SystemUtils;
@@ -63,17 +61,20 @@ class CloudPN extends ProcessingNode {
 
     private static final String PRESS_SCALE_HEIGHT_KEY = "press_scale_height";
 
+
     private static final int FLAG_CLOUDY = 1;
     private static final int FLAG_CLOUDFREE = 2;
     private static final int FLAG_UNCERTAIN = 4;
+    public static final String ATM_PRESS = "atm_press";
     private final String auxdataDir;
 
-    private TiePointGrid szaGrid;
-    private TiePointGrid saaGrid;
-    private TiePointGrid vzaGrid;
-    private TiePointGrid vaaGrid;
-    private TiePointGrid pressGrid;
+    private RasterDataNode szaGrid;
+    private RasterDataNode saaGrid;
+    private RasterDataNode vzaGrid;
+    private RasterDataNode vaaGrid;
+    private RasterDataNode pressGrid;
     private RasterDataNode altitude;
+
 
     private float[] centralWavelength;
     private CentralWavelengthProvider centralWavelengthProvider;
@@ -386,18 +387,16 @@ class CloudPN extends ProcessingNode {
     @Override
     public void startProcessing() throws ParseException {
         final Product l1bProduct = getSourceProduct();
-        if (!isOperatorSupport()) {
-            throw new OperatorException("Oparetor did not support this product \n" + l1bProduct.getName());
-        }
-        szaGrid = l1bProduct.getTiePointGrid(EnvisatConstants.MERIS_SUN_ZENITH_DS_NAME);
-        saaGrid = l1bProduct.getTiePointGrid(EnvisatConstants.MERIS_SUN_AZIMUTH_DS_NAME);
-        vzaGrid = l1bProduct.getTiePointGrid(EnvisatConstants.MERIS_VIEW_ZENITH_DS_NAME);
-        vaaGrid = l1bProduct.getTiePointGrid(EnvisatConstants.MERIS_VIEW_AZIMUTH_DS_NAME);
-        pressGrid = l1bProduct.getTiePointGrid("atm_press");
 
-        altitude = l1bProduct.getBand(EnvisatConstants.MERIS_AMORGOS_L1B_ALTIUDE_BAND_NAME);
+        szaGrid = getRasterData(EnvisatConstants.MERIS_SUN_ZENITH_DS_NAME);
+        saaGrid = getRasterData(EnvisatConstants.MERIS_SUN_AZIMUTH_DS_NAME);
+        vzaGrid = getRasterData(EnvisatConstants.MERIS_VIEW_ZENITH_DS_NAME);
+        vaaGrid = getRasterData(EnvisatConstants.MERIS_VIEW_AZIMUTH_DS_NAME);
+        altitude = getRasterData(EnvisatConstants.MERIS_DEM_ALTITUDE_DS_NAME);
+        pressGrid = getRasterData(ATM_PRESS);
+
         if (altitude == null) {
-            altitude = l1bProduct.getTiePointGrid(EnvisatConstants.MERIS_DEM_ALTITUDE_DS_NAME);
+            altitude = l1bProduct.getBand(EnvisatConstants.MERIS_AMORGOS_L1B_ALTIUDE_BAND_NAME);
         }
 
         validLandTerm = l1bProduct.parseExpression(validLandExpression);
@@ -405,19 +404,21 @@ class CloudPN extends ProcessingNode {
         landTerm = l1bProduct.parseExpression("l1_flags.LAND_OCEAN");
     }
 
-    private boolean isOperatorSupport() {
-        List<String> tiePointNameList = Arrays.asList(getSourceProduct().getTiePointGridNames());
-        String[] tiePointNeeded = {
-                EnvisatConstants.MERIS_SUN_ZENITH_DS_NAME,
-                EnvisatConstants.MERIS_SUN_AZIMUTH_DS_NAME,
-                EnvisatConstants.MERIS_VIEW_ZENITH_DS_NAME,
-                EnvisatConstants.MERIS_VIEW_AZIMUTH_DS_NAME
-        };
-        for (String tie : tiePointNeeded) {
-            if (!tiePointNameList.contains(tie)) {
-                return false;
-            }
+
+    private RasterDataNode getRasterData(String tieOrBandName) {
+        Product sourceProduct = getSourceProduct();
+        if (isTiePoint(tieOrBandName)) {
+            return sourceProduct.getTiePointGrid(tieOrBandName);
+        } else {
+            return sourceProduct.getBand(tieOrBandName);
         }
-        return true;
+    }
+
+    private boolean isTiePoint(String name) {
+        List<String> tiePointNameList = Arrays.asList(getSourceProduct().getTiePointGridNames());
+        if (tiePointNameList.contains(name)) {
+            return true;
+        }
+        return false;
     }
 }
