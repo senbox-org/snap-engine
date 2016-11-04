@@ -35,6 +35,7 @@ import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.util.Debug;
 import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.core.util.StringUtils;
 
 import javax.media.jai.Histogram;
 import java.awt.Dimension;
@@ -75,12 +76,12 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
         try {
             final MetadataElement srcRoot = sourceProduct.getMetadataRoot();
             final MetadataElement srcAbsRoot = srcRoot.getElement("Abstracted_Metadata");
-            if(srcAbsRoot == null)
+            if (srcAbsRoot == null)
                 return;
 
             final MetadataElement trgRoot = targetProduct.getMetadataRoot();
             MetadataElement trgAbsRoot = trgRoot.getElement("Abstracted_Metadata");
-            if(trgAbsRoot == null) {
+            if (trgAbsRoot == null) {
                 trgAbsRoot = new MetadataElement("Abstracted_Metadata");
                 trgRoot.addElement(trgAbsRoot);
                 ProductUtils.copyMetadata(srcAbsRoot, trgAbsRoot);
@@ -89,66 +90,66 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
             boolean nearRangeOnLeft = isNearRangeOnLeft(targetProduct);
 
             final MetadataAttribute firstLineTime = trgAbsRoot.getAttribute("first_line_time");
-            if(firstLineTime != null) {
+            if (firstLineTime != null) {
                 final ProductData.UTC startTime = targetProduct.getStartTime();
-                if(startTime != null)
+                if (startTime != null)
                     firstLineTime.getData().setElems(startTime.getArray());
             }
             final MetadataAttribute lastLineTime = trgAbsRoot.getAttribute("last_line_time");
-            if(lastLineTime != null) {
+            if (lastLineTime != null) {
                 final ProductData.UTC endTime = targetProduct.getEndTime();
-                if(endTime != null)
+                if (endTime != null)
                     lastLineTime.getData().setElems(endTime.getArray());
             }
             final MetadataAttribute totalSize = trgAbsRoot.getAttribute("total_size");
-            if(totalSize != null)
+            if (totalSize != null)
                 totalSize.getData().setElemUInt(targetProduct.getRawStorageSize());
 
             if (nearRangeOnLeft) {
                 setLatLongMetadata(targetProduct, trgAbsRoot, "first_near_lat", "first_near_long", 0.5f, 0.5f);
                 setLatLongMetadata(targetProduct, trgAbsRoot, "first_far_lat", "first_far_long",
-                        targetProduct.getSceneRasterWidth() - 1 + 0.5f, 0.5f);
+                                   targetProduct.getSceneRasterWidth() - 1 + 0.5f, 0.5f);
 
                 setLatLongMetadata(targetProduct, trgAbsRoot, "last_near_lat", "last_near_long",
-                        0.5f, targetProduct.getSceneRasterHeight() - 1 + 0.5f);
+                                   0.5f, targetProduct.getSceneRasterHeight() - 1 + 0.5f);
                 setLatLongMetadata(targetProduct, trgAbsRoot, "last_far_lat", "last_far_long",
-                        targetProduct.getSceneRasterWidth() - 1 + 0.5f, targetProduct.getSceneRasterHeight() - 1 + 0.5f);
+                                   targetProduct.getSceneRasterWidth() - 1 + 0.5f, targetProduct.getSceneRasterHeight() - 1 + 0.5f);
             } else {
                 setLatLongMetadata(targetProduct, trgAbsRoot, "first_near_lat", "first_near_long",
-                        targetProduct.getSceneRasterWidth() - 1 + 0.5f, 0.5f);
+                                   targetProduct.getSceneRasterWidth() - 1 + 0.5f, 0.5f);
                 setLatLongMetadata(targetProduct, trgAbsRoot, "first_far_lat", "first_far_long", 0.5f, 0.5f);
 
                 setLatLongMetadata(targetProduct, trgAbsRoot, "last_near_lat", "last_near_long",
-                        targetProduct.getSceneRasterWidth() - 1 + 0.5f, targetProduct.getSceneRasterHeight() - 1 + 0.5f);
+                                   targetProduct.getSceneRasterWidth() - 1 + 0.5f, targetProduct.getSceneRasterHeight() - 1 + 0.5f);
                 setLatLongMetadata(targetProduct, trgAbsRoot, "last_far_lat", "last_far_long",
-                        0.5f, targetProduct.getSceneRasterHeight() - 1 + 0.5f);
+                                   0.5f, targetProduct.getSceneRasterHeight() - 1 + 0.5f);
             }
 
             final MetadataAttribute height = trgAbsRoot.getAttribute("num_output_lines");
-            if(height != null)
+            if (height != null)
                 height.getData().setElemUInt(targetProduct.getSceneRasterHeight());
 
             final MetadataAttribute width = trgAbsRoot.getAttribute("num_samples_per_line");
-            if(width != null)
+            if (width != null)
                 width.getData().setElemUInt(targetProduct.getSceneRasterWidth());
 
             final MetadataAttribute offsetX = trgAbsRoot.getAttribute("subset_offset_x");
-            if(offsetX != null && subsetDef.getRegion() != null)
+            if (offsetX != null && subsetDef.getRegion() != null)
                 offsetX.getData().setElemUInt(subsetDef.getRegion().x);
 
             final MetadataAttribute offsetY = trgAbsRoot.getAttribute("subset_offset_y");
-            if(offsetY != null && subsetDef.getRegion() != null)
+            if (offsetY != null && subsetDef.getRegion() != null)
                 offsetY.getData().setElemUInt(subsetDef.getRegion().y);
 
             final MetadataAttribute slantRange = trgAbsRoot.getAttribute("slant_range_to_first_pixel");
-            if(slantRange != null) {
+            if (slantRange != null) {
                 final TiePointGrid srTPG = targetProduct.getTiePointGrid("slant_range_time");
-                if(srTPG != null) {
+                if (srTPG != null) {
                     final double slantRangeTime;
                     if (nearRangeOnLeft) {
-                        slantRangeTime = srTPG.getPixelDouble(0,0) / 1000000000.0; // ns to s
+                        slantRangeTime = srTPG.getPixelDouble(0, 0) / 1000000000.0; // ns to s
                     } else {
-                        slantRangeTime = srTPG.getPixelDouble(targetProduct.getSceneRasterWidth()-1,0) / 1000000000.0; // ns to s
+                        slantRangeTime = srTPG.getPixelDouble(targetProduct.getSceneRasterWidth() - 1, 0) / 1000000000.0; // ns to s
                     }
                     final double halfLightSpeed = 299792458.0 / 2.0;
                     final double slantRangeDist = slantRangeTime * halfLightSpeed;
@@ -157,16 +158,16 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
             }
 
             setSubsetSRGRCoefficients(sourceProduct, targetProduct, subsetDef, trgAbsRoot, nearRangeOnLeft);
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new IOException(e);
         }
     }
 
     private static boolean isNearRangeOnLeft(final Product product) {
         final TiePointGrid incidenceAngle = product.getTiePointGrid("incident_angle");
-        if(incidenceAngle != null) {
+        if (incidenceAngle != null) {
             final double incidenceAngleToFirstPixel = incidenceAngle.getPixelDouble(0, 0);
-            final double incidenceAngleToLastPixel = incidenceAngle.getPixelDouble(product.getSceneRasterWidth()-1, 0);
+            final double incidenceAngleToLastPixel = incidenceAngle.getPixelDouble(product.getSceneRasterWidth() - 1, 0);
             return (incidenceAngleToFirstPixel < incidenceAngleToLastPixel);
         } else {
             return true;
@@ -178,19 +179,19 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
             final MetadataElement absRoot, final boolean nearRangeOnLeft) {
 
         final MetadataElement SRGRCoefficientsElem = absRoot.getElement("SRGR_Coefficients");
-        if(SRGRCoefficientsElem != null) {
+        if (SRGRCoefficientsElem != null) {
             final double rangeSpacing = absRoot.getAttributeDouble("RANGE_SPACING", 0);
             final double colIndex = subsetDef.getRegion() == null ? 0 : subsetDef.getRegion().getX();
 
-            for(MetadataElement srgrList : SRGRCoefficientsElem.getElements()) {
+            for (MetadataElement srgrList : SRGRCoefficientsElem.getElements()) {
                 final double grO = srgrList.getAttributeDouble("ground_range_origin", 0);
                 double ground_range_origin_subset;
                 if (nearRangeOnLeft) {
-                    ground_range_origin_subset = grO + colIndex*rangeSpacing;
+                    ground_range_origin_subset = grO + colIndex * rangeSpacing;
                 } else {
                     final double colIndexFromRight = sourceProduct.getSceneRasterWidth() - colIndex -
-                                                     targetProduct.getSceneRasterWidth();
-                    ground_range_origin_subset = grO + colIndexFromRight*rangeSpacing;
+                            targetProduct.getSceneRasterWidth();
+                    ground_range_origin_subset = grO + colIndexFromRight * rangeSpacing;
                 }
                 srgrList.setAttributeDouble("ground_range_origin", ground_range_origin_subset);
             }
@@ -201,14 +202,14 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
                                            final String tagLat, final String tagLon, final float x, final float y) {
         final PixelPos pixelPos = new PixelPos(x, y);
         final GeoPos geoPos = new GeoPos();
-        if(product.getSceneGeoCoding() == null) return;
+        if (product.getSceneGeoCoding() == null) return;
         product.getSceneGeoCoding().getGeoPos(pixelPos, geoPos);
 
         final MetadataAttribute lat = absRoot.getAttribute(tagLat);
-        if(lat != null)
+        if (lat != null)
             lat.getData().setElemDouble(geoPos.getLat());
         final MetadataAttribute lon = absRoot.getAttribute(tagLon);
-        if(lon != null)
+        if (lon != null)
             lon.getData().setElemDouble(geoPos.getLon());
     }
 
@@ -485,8 +486,8 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
         setSceneRasterStartAndStopTime(product);
         addSubsetInfoMetadata(product);
         if (sourceProduct.getQuicklookBandName() != null
-            && product.getQuicklookBandName() == null
-            && product.containsBand(sourceProduct.getQuicklookBandName())) {
+                && product.getQuicklookBandName() == null
+                && product.containsBand(sourceProduct.getQuicklookBandName())) {
             product.setQuicklookBandName(sourceProduct.getQuicklookBandName());
         }
         product.setAutoGrouping(sourceProduct.getAutoGrouping());
@@ -551,6 +552,12 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
         for (int i = 0; i < getSourceProduct().getNumBands(); i++) {
             Band sourceBand = getSourceProduct().getBandAt(i);
             String bandName = sourceBand.getName();
+
+            if (!checkTheSameName(bandName)) {
+                System.out.println("bandName = " + bandName);
+                return;
+            }
+
             if (isNodeAccepted(bandName)) {
                 Band destBand;
                 boolean treatVirtualBandsAsRealBands = false;
@@ -619,6 +626,24 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
         for (final Map.Entry<Band, RasterDataNode> entry : bandMap.entrySet()) {
             copyImageInfo(entry.getValue(), entry.getKey());
         }
+    }
+
+    private boolean checkTheSameName(String bandName) {
+        Product sourceProduct = getSourceProduct();
+        boolean metaData = StringUtils.contains(sourceProduct.getMetadataRoot().getElementNames(), bandName);
+        int count = 0;
+        if (metaData) {
+            String[] nodeNames = getSubsetDef().getNodeNames();
+            for (String nodeName : nodeNames) {
+                if (nodeName.equalsIgnoreCase(bandName)) {
+                    count++;
+                }
+            }
+        }
+        if (count == 1) {
+            return true;
+        }
+        return true;
     }
 
     protected void addTiePointGridsToProduct(final Product product) {
@@ -703,8 +728,8 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
 
     private void copyAcceptedIndexCodings(final Product product) {
 
-        for(Band srcBand : product.getBands()) {
-            if(srcBand.isIndexBand() && isNodeAccepted(srcBand.getName())) {
+        for (Band srcBand : product.getBands()) {
+            if (srcBand.isIndexBand() && isNodeAccepted(srcBand.getName())) {
 
                 IndexCoding sourceIndexCoding = srcBand.getIndexCoding();
                 IndexCoding destIndexCoding = new IndexCoding(sourceIndexCoding.getName());

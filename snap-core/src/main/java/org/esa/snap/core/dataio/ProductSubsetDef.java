@@ -74,6 +74,7 @@ public class ProductSubsetDef {
 
     /**
      * Constructs a new and empty subset info.
+     *
      * @param subsetName The name of the subset to be created.
      */
     public ProductSubsetDef(String subsetName) {
@@ -137,9 +138,9 @@ public class ProductSubsetDef {
      */
     public void addNodeName(String name) {
         Guardian.assertNotNullOrEmpty("name", name);
-        if (containsNodeName(name)) {
-            return;
-        }
+//        if (containsNodeName(name)) {
+//            return;
+//        }
         if (nodeNameList == null) {
             nodeNameList = new ArrayList();
         }
@@ -165,7 +166,6 @@ public class ProductSubsetDef {
      * <code>false</code>.
      *
      * @param name the band's name
-     *
      * @return <code>true</code> for success, <code>false</code> otherwise
      */
     public boolean removeNodeName(String name) {
@@ -184,7 +184,6 @@ public class ProductSubsetDef {
      * Checks whether or not a node name is already contained in this subset.
      *
      * @param name the node name
-     *
      * @return true if so
      */
     public boolean containsNodeName(String name) {
@@ -196,7 +195,6 @@ public class ProductSubsetDef {
      * the product subset.
      *
      * @param name the node name
-     *
      * @return true if so
      */
     public boolean isNodeAccepted(String name) {
@@ -281,7 +279,6 @@ public class ProductSubsetDef {
      *
      * @param maxWidth  the maximum raster width
      * @param maxHeight the maximum raster height
-     *
      * @return the required raster size, never <code>null</code>
      */
     public Dimension getSceneRasterSize(int maxWidth, int maxHeight) {
@@ -316,10 +313,10 @@ public class ProductSubsetDef {
      */
     public boolean isEntireProductSelected() {
         return region == null
-               && subSamplingX == 1
-               && subSamplingY == 1
-               && nodeNameList == null
-               && !ignoreMetadata;
+                && subSamplingX == 1
+                && subSamplingY == 1
+                && nodeNameList == null
+                && !ignoreMetadata;
     }
 
     /**
@@ -327,7 +324,6 @@ public class ProductSubsetDef {
      * returned.
      *
      * @param name the node name
-     *
      * @return the node index or <code>-1</code>
      */
     private int getNodeNameIndex(String name) {
