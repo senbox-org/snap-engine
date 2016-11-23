@@ -16,13 +16,14 @@
 
 package org.esa.s3tbx.dataio.landsat.geotiff;
 
-import static org.junit.Assert.*;
 import org.esa.snap.core.dataio.ProductReader;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.InputStream;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Thomas Storm
@@ -127,10 +128,10 @@ public class LandsatGeotiffReaderPluginTest {
         assertTrue(LandsatGeotiffReaderPlugin.isLandsat7LegacyFilename("L71196030_03020031023_MTL.TXT"));
 
         assertTrue(LandsatGeotiffReaderPlugin.isLandsat7LegacyFilename("LE71960302003296ASN01.tar.gz"));
+        assertTrue(LandsatGeotiffReaderPlugin.isLandsat7LegacyFilename("LE72160332013191LGN00.tgz"));
 
         assertFalse(LandsatGeotiffReaderPlugin.isLandsat7LegacyFilename("L71950302003257MTI01.tar.gz"));  // Sensor type missing
         assertFalse(LandsatGeotiffReaderPlugin.isLandsat7LegacyFilename("LE52160332013191LGN00.tar.gz")); // '7' expected after 'LT'
-        assertFalse(LandsatGeotiffReaderPlugin.isLandsat7LegacyFilename("LE72160332013191LGN00.tgz")); // 'tar.gz' or 'txt' expected as extension
         assertFalse(LandsatGeotiffReaderPlugin.isLandsat7LegacyFilename("LE72160332013191LGN00.dat")); // 'tar.gz' or 'txt' expected as extension
     }
 
@@ -153,7 +154,7 @@ public class LandsatGeotiffReaderPluginTest {
 
     @Test
     public void testGetDefaultFileExtensions() throws Exception {
-        assertArrayEquals(new String[]{".txt", ".TXT", ".gz"}, plugin.getDefaultFileExtensions());
+        assertArrayEquals(new String[]{".txt", ".TXT", ".gz", ".tgz"}, plugin.getDefaultFileExtensions());
     }
 
     @Test
