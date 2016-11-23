@@ -3,5 +3,5 @@ OpenIDE-Module-Java-Dependencies: Java > 1.8
 OpenIDE-Module-Display-Category: Sentinel-3 Toolbox
 OpenIDE-Module-Specification-Version: ${s3tbx.nbmSpecVersion}
 AutoUpdate-Show-In-Client: false
-AutoUpdate-Essential-Module: true
-OpenIDE-Module-Layer: org/esa/s3tbx/aatsr/regrid/layer.xml
+AutoUpdate-Essential-Module: false
+OpenIDE-Module-Layer: org/esa/s3tbx/slstr/regrid/layer.xml
