@@ -56,7 +56,6 @@
         <module>s3tbx-meris-ops</module>
         <module>s3tbx-merisl3-reader</module>
         <module>s3tbx-modis-reader</module>
-        <module>s3tbx-proba-v-reader</module>
         <module>s3tbx-rad2refl</module>
         <module>s3tbx-rad2refl-ui</module>
         <module>s3tbx-olci-radiometry</module>

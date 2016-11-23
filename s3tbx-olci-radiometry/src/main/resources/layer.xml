@@ -2,6 +2,7 @@
 
     <folder name="Actions">
         <folder name="Operators">
+<!--
             <file name="org-esa-s3tbx-olci-radiometry-smilecorr-SmileCorrectionOpAction.instance">
                 <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
                 <attr name="delegate" methodvalue="org.esa.snap.core.gpf.ui.DefaultOperatorAction.create"/>
@@ -11,7 +12,9 @@
                 <attr name="helpId" stringvalue="SmileCorrection.Olci"/>
                 <attr name="targetProductNameSuffix" stringvalue="_smile"/>
             </file>
+-->
 
+<!--
             <file name="org-esa-s3tbx-olci-radiometry-gasabsorption-GaseousAbsorptionOpAction.instance">
                 <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
                 <attr name="delegate" methodvalue="org.esa.snap.core.gpf.ui.DefaultOperatorAction.create"/>
@@ -21,6 +24,7 @@
                 <attr name="helpId" stringvalue="GaseousAbsorption"/>
                 <attr name="targetProductNameSuffix" stringvalue="_gaseous"/>
             </file>
+-->
 
             <file name="org-esa-s3tbx-olci-radiometry-rayleigh-RayleighCorrectionOpAction.instance">
                 <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
@@ -38,17 +42,21 @@
     <folder name="Menu">
         <folder name="Optical">
             <folder name="Preprocessing">
+<!--
                 <file name="org-esa-s3tbx-olci-radiometry-smilecorr-SmileCorrectionOpAction.shadow">
                     <attr name="originalFile"
                           stringvalue="Actions/Operators/org-esa-s3tbx-olci-radiometry-smilecorr-SmileCorrectionOpAction.instance"/>
                     <attr name="position" intvalue="10000"/>
                 </file>
+-->
 
+<!--
                 <file name="org-esa-s3tbx-olci-radiometry-gasabsorption-GaseousAbsorptionOpAction.shadow">
                     <attr name="originalFile"
                           stringvalue="Actions/Operators/org-esa-s3tbx-olci-radiometry-gasabsorption-GaseousAbsorptionOpAction.instance"/>
                     <attr name="position" intvalue="11000"/>
                 </file>
+-->
 
                 <file name="org-esa-s3tbx-olci-radiometry-rayleigh-RayleighCorrectionOpAction.shadow">
                     <attr name="originalFile"

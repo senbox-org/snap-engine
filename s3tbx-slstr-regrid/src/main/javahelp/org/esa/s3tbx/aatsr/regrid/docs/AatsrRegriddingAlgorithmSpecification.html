@@ -1,0 +1,52 @@
+<!--
+  ~ Copyright (C) 2016 Telespazio Vega (info@brockmann-consult.de)
+  ~
+  ~ This program is free software; you can redistribute it and/or modify it
+  ~ under the terms of the GNU General Public License as published by the Free
+  ~ Software Foundation; either version 3 of the License, or (at your option)
+  ~ any later version.
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+  ~ more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License along
+  ~ with this program; if not, see http://www.gnu.org/licenses/
+  -->
+
+<html>
+<head>
+    <title>AATSR Regridding Processor</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<table class="header">
+    <tr class="header">
+        <td class="header">Algorithm Specification</td>
+        <td class="header" align="right"><img src="images/snap_header.jpg" border=0></td>
+    </tr>
+</table>
+<h3>Algorithm Specification</h3>
+<p>This tool parses an (A)ATSR(-1/2_ ATS_TOA_1P product, then for each pixel in the Nadir and Forward views:<br>
+<ol>
+    <li>Computes the original geolocation of the measurement (UBT) using methodology taken from a Technical Note by
+        Andrew Birks of Rutherford Appelton Laboratory -
+        <a href="https://earth.esa.int/pub/ESA_DOC/ENVISAT/AATSR/Instrument_Pixel_Coordinates_and_Measurement_Time.pdf">
+            "Instrument Pixel Coordinates and Measurement Times from AATSR Products"</a> -
+        and methodology extracted from <a href="https://earth.esa.int/instruments/aatsr/faq/AATSR_FAQ_issue1.pdf">
+            the AATSR Frequently Asked Questions (FAQ) document "Appendix A Interpolations of pixel geolocation in AATSR
+            full resolution products"</a> . </li>
+    <li>Computes the acquisition time of the pixels using the Andrew Birks TN.
+        This methodology allows retrieval of the acquisition time on a pixel basis as opposed to the usual per scan basis.
+        Note that there appears to be a systematic bias of +0.15 seconds in the acquisition time retrieval.
+        This is hinted at in the Andrew Birks TN.</li>
+</ol>
+
+<br>
+<hr>
+</body>
+
+</html>

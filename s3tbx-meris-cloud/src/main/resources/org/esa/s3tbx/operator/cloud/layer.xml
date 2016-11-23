@@ -19,10 +19,12 @@
     <folder name="Menu">
         <folder name="Optical">
             <folder name="Preprocessing">
-                <file name="org-esa-s3tbx-operator-cloud-MerisCloudOpAction.shadow">
-                    <attr name="originalFile" stringvalue="Actions/Operators/org-esa-s3tbx-operator-cloud-MerisCloudOpAction.instance"/>
-                    <attr name="position" intvalue="200"/>
-                </file>
+                <folder name="Masking">
+                    <file name="org-esa-s3tbx-operator-cloud-MerisCloudOpAction.shadow">
+                        <attr name="originalFile" stringvalue="Actions/Operators/org-esa-s3tbx-operator-cloud-MerisCloudOpAction.instance"/>
+                        <attr name="position" intvalue="200"/>
+                    </file>
+                </folder>
             </folder>
         </folder>
     </folder>

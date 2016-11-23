@@ -10,10 +10,12 @@
     <tocitem text="Sentinel Toolbox Application">
         <tocitem text="Optical">
             <tocitem text="Pre-Processing">
-                <tocitem text="Cloud Probability Processor" target="cloudScientificTool">
-                    <tocitem text="Overview" target="cloudScientificTool"/>
-                    <tocitem text="Algorithm Specification" target="cloudAlgorithmSpec"/>
-                    <tocitem text="Processor Description" target="cloudProcessorDesc"/>
+                <tocitem text="Masking">
+                    <tocitem text="Cloud Probability Processor" target="cloudScientificTool">
+                        <tocitem text="Overview" target="cloudScientificTool"/>
+                        <tocitem text="Algorithm Specification" target="cloudAlgorithmSpec"/>
+                        <tocitem text="Processor Description" target="cloudProcessorDesc"/>
+                    </tocitem>
                 </tocitem>
             </tocitem>
         </tocitem>

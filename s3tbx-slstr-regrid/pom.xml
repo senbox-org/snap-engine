@@ -3,19 +3,20 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
-        <artifactId>s3tbx</artifactId>
         <groupId>org.esa.s3tbx</groupId>
+        <artifactId>s3tbx</artifactId>
         <version>5.0.0-SNAPSHOT</version>
     </parent>
 
-
+    <packaging>nbm</packaging>
     <artifactId>s3tbx-slstr-regrid</artifactId>
     <name>SLSTR/AATSR Regridding Tool</name>
-    <packaging>nbm</packaging>
+
     <description>
-        Tool used to reconstruct the original nadir and forward view images
-        of Sentinel-3 SLSTR an Envisat AATSR L1B products.
+        This tool can be used to reconstruct the original nadir and forward view images
+        of Sentinel-3 SLSTR and Envisat AATSR L1B products.
     </description>
 
     <dependencies>
@@ -29,7 +30,15 @@
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
+            <artifactId>snap-rcp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
             <artifactId>ceres-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>ceres-jai</artifactId>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -50,10 +59,8 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <useDefaultManifestFile>true</useDefaultManifestFile>
-                </configuration>
             </plugin>
         </plugins>
     </build>
+
 </project>
