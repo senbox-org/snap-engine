@@ -1,0 +1,106 @@
+<!--
+  ~ Copyright (C) 2016 Telespazio Vega (info@brockmann-consult.de)
+  ~
+  ~ This program is free software; you can redistribute it and/or modify it
+  ~ under the terms of the GNU General Public License as published by the Free
+  ~ Software Foundation; either version 3 of the License, or (at your option)
+  ~ any later version.
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+  ~ more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License along
+  ~ with this program; if not, see http://www.gnu.org/licenses/
+  -->
+
+<html>
+<head>
+    <title>AATSR Regridding Processor</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+<table class="header">
+    <tr class="header">
+        <td class="header">User Interface</td>
+        <td class="header" align="right"><img src="images/snap_header.jpg" border=0></td>
+    </tr>
+</table>
+
+<h3>User Interface</h3>
+<p>
+    The AATSR Regridding processor can be invoked from the SNAP tool menu by selecting
+    the <b>Ungrid AATSR</b> command from the <b>Raster</b> menu. On the
+    command line the AATSR Regridding processor is
+    available by means of the Graph Processing Tool <code>gpt</code> which is located in the SNAP <code>bin</code>
+    directory. Typing <code>gpt AATSR.Ungrid -h</code> displays further information.
+</p>
+
+
+<h4>I/O Parameters Panel</h4>
+<p align="center"><img src="images/UngridAatsrIO.png" alt="I/O Parameters of the AATSR Ungridding Processor"></p>
+
+<h5>Source Product Group</h5>
+
+<p class="i1">
+    <b>Source product:</b>
+    Here the user specifies the source product.
+    The combo box presents a list of all products opened in SNAP.
+    The user may select one of these or, by clicking on the button next to the combo box, choose a product
+    from the file system.
+</p>
+
+<h5>Target Product Group</h5>
+
+<p class="i1">
+    <b>Name:</b>
+    Used to specify the name of the target product.
+</p>
+
+<p class="i1">
+    <b>Save as:</b>
+    Used to specify whether the target product should be saved to the file system. The
+    combo box presents a list of available file formats.
+    The text field or the button next to it allow to specify a target directory.
+</p>
+
+<p class="i1">
+    <b>Open in SNAP:</b>
+    Used to specify whether the target product should be opened in SNAP.
+    When the target product is not saved, it is opened in SNAP automatically.
+</p>
+
+<h4>Processing Parameters Panel</h4>
+<p align="center"><img src="images/UngridAatsrProcParams.png" alt="Processing Parameters of OWT Processor"></p>
+
+<p class="i1">
+    <b>L1B Characterisation File:</b>
+    Choose a AATSR L1B Characterisation file from your file system.
+    If provided, it will be used to determine the first forward and nadir pixel.
+    If not, the default values of 1305 for the first forward and 213 for the first nadir pixel will be used.
+    This parameter is optional.</a>
+</p>
+
+<p class="i1">
+    <b>Pixel Corner Reference:</b>
+    Choose the pixel coordinate reference point for use in the output file.
+    Check for Corner (default), un-check for Centre.
+</p>
+
+<p class="i1">
+    <b>Topographic corrections to tie points:</b>
+    If checked, topographic corrections to tie-points will be applied.
+</p>
+
+<p class="i1">
+    <b>Topography homogenity:</b>
+    When topographic correction to tie points is selected, this determines the distance in image coordinates
+    that a pixel can have to have the topographic correction applied.
+</p>
+
+<hr>
+</body>
+
+</html>
