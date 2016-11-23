@@ -39,6 +39,7 @@ import java.awt.Rectangle;
  * @author muhammad.bc.
  */
 @OperatorMetadata(alias = "GaseousAbsorption",
+        internal = true,
         authors = "Marco Peters, Muhamamd Bala (Brockmann Consult)",
         copyright = "(c) 2016 by Brockmann Consult",
         description = "Correct the influence of atmospheric gas absorption for those OLCI channels.")

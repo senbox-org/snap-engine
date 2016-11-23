@@ -23,6 +23,7 @@
     <tocitem text="Sentinel Toolbox Application">
         <tocitem text="Optical">
             <tocitem text="Pre-Processing">
+<!--
                 <tocitem text="MERIS L1b Radiometry Correction" target="merisRadiometryCorrection">
                     <tocitem text="Overview" target="merisRadiometryCorrection"/>
                     <tocitem text="Processor Description" target="merisRadiometryCorrectionProcessorDescription"/>
@@ -35,6 +36,7 @@
                     <tocitem text="Radiance-to-Reflectance Algorithm Specification"
                              target="merisRadToReflAlgorithmSpecification"/>
                 </tocitem>
+-->
             </tocitem>
         </tocitem>
     </tocitem>
