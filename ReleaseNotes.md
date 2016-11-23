@@ -1,6 +1,62 @@
 Sentinel-3 Toolbox Release Notes
 ================================
 
+Changes in S3TBX 5.0
+--------------------
+
+###New Features and Important Changes
+* **AATSR Regridding Tool**
+AATSR data is acquired with a conical scanning geometry. To display the acquisitions as a raster image the raw data is 
+transformed into a gridded L1 TOA product at a resolution of 1 km. This "gridding" modifies the exact pixel position and resolution. 
+This Tool allows the “re-gridding” of the AATSR data back into their original instrument geometries. 
+* **Rayleigh Correction Processor for OLCI and MERIS**
+This new operator allows the correction of the rayleigh scattering for OLCI and MERIS.
+* **OWT Processor**
+This processor, developed by Timothy Moore (University of New Hampshire), calculates optical water types. The classification is 
+based on atmospherically corrected reflectances.
+* **FUB Processor**
+This processor retrieves case II water and atmospheric properties for MERIS. It has been developed by Thomas Schroeder and 
+Michael Schaale from Freie Universitaet Berlin.
+* **PROBA-V Toolbox**
+This new toolbox is intended for the exploitation of PROAB-V data. Therefore the PROBA-V reader has been moved from the 
+Sentinel-3 Toolbox into the PROBA-V Toolbox. If you still need the reader you have to install the toolbox. 
+* **IDEPIX extended for more sensors**
+The pixel identification tool IDEPIX has been extended to support more sensors. Among the supported sensors are now: 
+MERIS, OLCI, VIIRS, PROAB-V, SeaWiFS and SPOT-VGT
+
+### Solved issues
+####Bug
+    [SIIITBX-88] - IdePix OperatorMetadata category missing
+    [SIIITBX-106] - Meteological tie-points for wind are missing
+    [SIIITBX-109] - Subsetting a S3 SLSTR WST product is not working
+    [SIIITBX-123] - Elements start- and trackoffset can be absent
+    [SIIITBX-125] - SLSTR 1Km product sometimes has size of tie-point grids
+    [SIIITBX-130] - Move Proba-V reader into Proba-V Toolbox
+
+####New Feature
+    [SIIITBX-64] - Concatenation of the SLSTR PDUs
+    [SIIITBX-117] - Support for Proba-V L2A data
+    [SIIITBX-120] - Include FUB/WeW Processor
+    [SIIITBX-122] - Migrate OWT processor to SNAP
+    [SIIITBX-129] - Support http proxy for automated MERIS auxiliary data download
+    [SIIITBX-131] - Introduce Rayleigh Correction processor for OLCI and MERIS
+    [SIIITBX-132] - Introduce AATSR Regridding Tool
+
+#####Other
+    [SIIITBX-111] - Transfer additional file formats (.tgz) solution for LandsatGeoTiffReader from BEAM to SNAP
+    [SIIITBX-115] - trackOffset and startOffset should be read as double
+    [SIIITBX-116] - NetCDF files are not released after closing the product in SNAP
+    [SIIITBX-119] - Enable lazy loading of tie-point-grids
+    [SIIITBX-126] - Reading Proba-V in 100m should be improved
+    [SIIITBX-23] - RQT 18: Write Images
+    [SIIITBX-30] - RQT 25: Creation of DEM
+    [SIIITBX-33] - RQT 28: IdePix Tool for OLCI
+    [SIIITBX-36] - RQT 31: ARC Tool for SLSTR
+    [SIIITBX-37] - RQT 32: SLSTR SST Tool
+    [SIIITBX-46] - RQT 41: Read S-3 Data as fast as Envisat Data
+    [SIIITBX-51] - RQT 46: Process S-3 Data as fast as Envisat Data
+
+
 Changes in S3TBX 4.0
 --------------------
 
