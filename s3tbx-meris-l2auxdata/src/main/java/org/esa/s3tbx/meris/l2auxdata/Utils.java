@@ -8,8 +8,11 @@ package org.esa.s3tbx.meris.l2auxdata;
 
 import org.esa.snap.core.datamodel.Product;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
@@ -48,7 +51,12 @@ public class Utils {
         final URL fileUrl;
         try {
             fileUrl = remoteZipFileUrl;
-            final URLConnection urlConnection = fileUrl.openConnection();
+            final URLConnection urlConnection;
+            if (System.getProperty("http.proxyHost") == null || System.getProperty("http.proxyPort") == null) {
+                urlConnection = fileUrl.openConnection();
+            } else {
+                urlConnection = fileUrl.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(System.getProperty("http.proxyHost"), Integer.parseInt(System.getProperty("http.proxyPort")))));
+            }
             InputStream inputStream = urlConnection.getInputStream();
             ZipInputStream zis = new ZipInputStream(inputStream);
             ZipEntry entry;
@@ -63,7 +71,7 @@ public class Utils {
                 }
             }
         } catch (IOException e) {
-            throw new L2AuxDataException("Not able to download auxillary data.", e);
+            throw new L2AuxDataException("Not able to download auxiliary data from " + remoteZipFileUrl, e);
         }
     }
 }
