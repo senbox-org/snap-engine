@@ -43,7 +43,7 @@ import java.util.Map;
  */
 @SuppressWarnings({"UnusedDeclaration", "FieldCanBeLocal"})
 @OperatorMetadata(alias = "CloudProb",
-        category = "Optical/Pre-Processing",
+        category = "Optical/Pre-Processing/Masking",
         version = "1.7",
         authors = "Rene Preusker (Algorithm), Tom Block (BEAM Implementation), Thomas Storm (GPF conversion)",
         copyright = "Copyright (C) 2004-2014 by ESA, FUB and Brockmann Consult",
