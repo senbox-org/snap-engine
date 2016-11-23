@@ -33,7 +33,7 @@ MERIS, OLCI, VIIRS, PROAB-V, SeaWiFS and SPOT-VGT
     [SIIITBX-125] - SLSTR 1Km product sometimes has size of tie-point grids
     [SIIITBX-130] - Move Proba-V reader into Proba-V Toolbox
 
-####New Feature
+####New Features
     [SIIITBX-64] - Concatenation of the SLSTR PDUs
     [SIIITBX-117] - Support for Proba-V L2A data
     [SIIITBX-120] - Include FUB/WeW Processor
@@ -43,11 +43,6 @@ MERIS, OLCI, VIIRS, PROAB-V, SeaWiFS and SPOT-VGT
     [SIIITBX-132] - Introduce AATSR Regridding Tool
 
 #####Other
-    [SIIITBX-111] - Transfer additional file formats (.tgz) solution for LandsatGeoTiffReader from BEAM to SNAP
-    [SIIITBX-115] - trackOffset and startOffset should be read as double
-    [SIIITBX-116] - NetCDF files are not released after closing the product in SNAP
-    [SIIITBX-119] - Enable lazy loading of tie-point-grids
-    [SIIITBX-126] - Reading Proba-V in 100m should be improved
     [SIIITBX-23] - RQT 18: Write Images
     [SIIITBX-30] - RQT 25: Creation of DEM
     [SIIITBX-33] - RQT 28: IdePix Tool for OLCI
@@ -55,6 +50,11 @@ MERIS, OLCI, VIIRS, PROAB-V, SeaWiFS and SPOT-VGT
     [SIIITBX-37] - RQT 32: SLSTR SST Tool
     [SIIITBX-46] - RQT 41: Read S-3 Data as fast as Envisat Data
     [SIIITBX-51] - RQT 46: Process S-3 Data as fast as Envisat Data
+    [SIIITBX-111] - Transfer additional file formats (.tgz) solution for LandsatGeoTiffReader from BEAM to SNAP
+    [SIIITBX-115] - trackOffset and startOffset should be read as double
+    [SIIITBX-116] - NetCDF files are not released after closing the product in SNAP
+    [SIIITBX-119] - Enable lazy loading of tie-point-grids
+    [SIIITBX-126] - Reading Proba-V in 100m should be improved
 
 
 Changes in S3TBX 4.0
