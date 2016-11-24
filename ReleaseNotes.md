@@ -24,6 +24,9 @@ Sentinel-3 Toolbox into the PROBA-V Toolbox. If you still need the reader you ha
 The pixel identification tool IDEPIX has been extended to support more sensors. Among the supported sensors are now: 
 MERIS, OLCI, VIIRS, PROAB-V, SeaWiFS and SPOT-VGT
 
+A comprehensive list of all issues resolved in this version of the Sentinel-3 Toolbox can be found in our 
+[issue tracking system](https://senbox.atlassian.net/secure/ReleaseNote.jspa?projectId=10200&version=11501)
+
 ### Solved issues
 ####Bug
     [SIIITBX-88] - IdePix OperatorMetadata category missing
@@ -41,15 +44,9 @@ MERIS, OLCI, VIIRS, PROAB-V, SeaWiFS and SPOT-VGT
     [SIIITBX-129] - Support http proxy for automated MERIS auxiliary data download
     [SIIITBX-131] - Introduce Rayleigh Correction processor for OLCI and MERIS
     [SIIITBX-132] - Introduce AATSR Regridding Tool
+    [SIIITBX-134] - Extend IdePix by more sensors
 
 #####Other
-    [SIIITBX-23] - RQT 18: Write Images
-    [SIIITBX-30] - RQT 25: Creation of DEM
-    [SIIITBX-33] - RQT 28: IdePix Tool for OLCI
-    [SIIITBX-36] - RQT 31: ARC Tool for SLSTR
-    [SIIITBX-37] - RQT 32: SLSTR SST Tool
-    [SIIITBX-46] - RQT 41: Read S-3 Data as fast as Envisat Data
-    [SIIITBX-51] - RQT 46: Process S-3 Data as fast as Envisat Data
     [SIIITBX-111] - Transfer additional file formats (.tgz) solution for LandsatGeoTiffReader from BEAM to SNAP
     [SIIITBX-115] - trackOffset and startOffset should be read as double
     [SIIITBX-116] - NetCDF files are not released after closing the product in SNAP
