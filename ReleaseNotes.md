@@ -27,31 +27,6 @@ MERIS, OLCI, VIIRS, PROAB-V, SeaWiFS and SPOT-VGT
 A comprehensive list of all issues resolved in this version of the Sentinel-3 Toolbox can be found in our 
 [issue tracking system](https://senbox.atlassian.net/secure/ReleaseNote.jspa?projectId=10200&version=11501)
 
-### Solved issues
-####Bug
-    [SIIITBX-88] - IdePix OperatorMetadata category missing
-    [SIIITBX-106] - Meteological tie-points for wind are missing
-    [SIIITBX-109] - Subsetting a S3 SLSTR WST product is not working
-    [SIIITBX-123] - Elements start- and trackoffset can be absent
-    [SIIITBX-125] - SLSTR 1Km product sometimes has size of tie-point grids
-    [SIIITBX-130] - Move Proba-V reader into Proba-V Toolbox
-
-####New Features
-    [SIIITBX-64] - Concatenation of the SLSTR PDUs
-    [SIIITBX-117] - Support for Proba-V L2A data
-    [SIIITBX-120] - Include FUB/WeW Processor
-    [SIIITBX-122] - Migrate OWT processor to SNAP
-    [SIIITBX-129] - Support http proxy for automated MERIS auxiliary data download
-    [SIIITBX-131] - Introduce Rayleigh Correction processor for OLCI and MERIS
-    [SIIITBX-132] - Introduce AATSR Regridding Tool
-    [SIIITBX-134] - Extend IdePix by more sensors
-
-#####Other
-    [SIIITBX-111] - Transfer additional file formats (.tgz) solution for LandsatGeoTiffReader from BEAM to SNAP
-    [SIIITBX-115] - trackOffset and startOffset should be read as double
-    [SIIITBX-116] - NetCDF files are not released after closing the product in SNAP
-    [SIIITBX-119] - Enable lazy loading of tie-point-grids
-    [SIIITBX-126] - Reading Proba-V in 100m should be improved
 
 
 Changes in S3TBX 4.0
