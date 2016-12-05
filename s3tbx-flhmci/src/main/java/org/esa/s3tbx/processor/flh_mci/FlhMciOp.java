@@ -42,10 +42,11 @@ import org.esa.snap.core.util.converters.BooleanExpressionConverter;
  *
  * @author Tom Block
  * @author Ralf Quast
+ * @author Marco Peters
  */
-@OperatorMetadata(alias = "FlhMci", authors = "Tom Block, Ralf Quast", copyright = "Brockmann Consult GmbH",
+@OperatorMetadata(alias = "FlhMci", authors = "Tom Block, Ralf Quast, Marco Peters", copyright = "Brockmann Consult GmbH",
                   category = "Optical/Thematic Water Processing",
-                  version = "2.0",
+                  version = "3.0",
                   description = "Computes fluorescence line height (FLH) or maximum chlorophyll index (MCI).")
 public class FlhMciOp extends PixelOperator {
 
@@ -128,14 +129,12 @@ public class FlhMciOp extends PixelOperator {
     protected void configureTargetProduct(ProductConfigurer productConfigurer) {
         super.configureTargetProduct(productConfigurer);
 
-        final String validPixelExpression = createValidMaskExpression();
-
         final Band lineHeightBand = productConfigurer.addBand(lineHeightBandName, ProductData.TYPE_FLOAT32);
 
         final Band signalBand = sourceProduct.getBand(signalBandName);
         lineHeightBand.setUnit(signalBand.getUnit());
         lineHeightBand.setDescription("Line height band");
-        lineHeightBand.setValidPixelExpression(validPixelExpression);
+        lineHeightBand.setValidPixelExpression(maskExpression);
         lineHeightBand.setNoDataValueUsed(true);
         lineHeightBand.setNoDataValue(invalidFlhMciValue);
 
@@ -147,22 +146,10 @@ public class FlhMciOp extends PixelOperator {
             slopeBand.setDescription("Baseline slope band");
             slopeBand.setNoDataValueUsed(true);
             slopeBand.setNoDataValue(invalidFlhMciValue);
-            slopeBand.setValidPixelExpression(validPixelExpression);
+            slopeBand.setValidPixelExpression(maskExpression);
         }
 
         ProductUtils.copyFlagBands(sourceProduct, productConfigurer.getTargetProduct(), true);
-    }
-
-    private String createValidMaskExpression() {
-        String expression;
-        if (sourceProduct.getBand("l1_flags") != null && sourceProduct.getFlagCodingGroup().get("l1_flags") != null) {
-            expression = "!l1_flags.INVALID && !l1_flags.LAND_OCEAN";
-        } else if (sourceProduct.getBand("l2_flags") != null && sourceProduct.getFlagCodingGroup().get("l2_flags") != null) {
-            expression = "l2_flags.WATER && !l2_flags.CLOUD";
-        } else {
-            expression = null;
-        }
-        return expression;
     }
 
     @Override
