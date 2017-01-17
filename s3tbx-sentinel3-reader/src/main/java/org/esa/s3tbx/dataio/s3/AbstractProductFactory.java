@@ -334,7 +334,7 @@ public abstract class AbstractProductFactory implements ProductFactory {
         return maskGroup;
     }
 
-    protected Product readProduct(String fileName) throws IOException {
+    protected Product readProduct(String fileName, Manifest manifest) throws IOException {
         final File file = new File(getInputFileParentDirectory(), fileName);
         if (!file.exists()) {
             return null;
@@ -398,7 +398,7 @@ public abstract class AbstractProductFactory implements ProductFactory {
         for (final String fileName : fileNames) {
             Product product = null;
             try {
-                product = readProduct(fileName);
+                product = readProduct(fileName, manifest);
             } catch (IOException ioe) {
                 logger.log(Level.WARNING, ioe.getMessage());
             }

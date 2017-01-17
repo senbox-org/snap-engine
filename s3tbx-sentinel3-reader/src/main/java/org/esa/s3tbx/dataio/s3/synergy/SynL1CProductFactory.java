@@ -164,7 +164,7 @@ public class SynL1CProductFactory extends AbstractProductFactory {
     }
 
     @Override
-    protected Product readProduct(String fileName) throws IOException {
+    protected Product readProduct(String fileName, Manifest manifest) throws IOException {
         final File file = new File(getInputFileParentDirectory(), fileName);
         if (!file.exists()) {
             return null;

@@ -20,6 +20,7 @@ import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.BasicPixelGeoCoding;
 import org.esa.snap.core.datamodel.GeoCodingFactory;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.RasterDataNode;
 
 import java.io.IOException;
 
@@ -66,7 +67,7 @@ public class SlstrWstProductFactory extends SlstrSstProductFactory {
     @Override
     protected void setUncertaintyBands(Product product) {
         super.setUncertaintyBands(product);
-        String[] bandNames = new String[]{"sst_theoretical_error"};
+        String[] bandNames = new String[]{"sst_theoretical_uncertainty"};
         String[] roles = new String[]{"uncertainty"};
 //        String[] bandNames = new String[]{"sses_bias", "sst_dtime", "sses_standard_deviation", "dt_analysis",
 //            "sst_theoretical_error"};
@@ -84,5 +85,10 @@ public class SlstrWstProductFactory extends SlstrSstProductFactory {
             }
         }
     }
+
+    @Override
+    protected void configureTargetNode(Band sourceBand, RasterDataNode targetNode) {
+    }
+
 
 }

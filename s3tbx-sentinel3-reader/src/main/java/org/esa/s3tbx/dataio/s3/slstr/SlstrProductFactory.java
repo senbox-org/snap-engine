@@ -16,6 +16,7 @@ package org.esa.s3tbx.dataio.s3.slstr;/*
 
 import com.bc.ceres.glevel.MultiLevelImage;
 import org.esa.s3tbx.dataio.s3.AbstractProductFactory;
+import org.esa.s3tbx.dataio.s3.Manifest;
 import org.esa.s3tbx.dataio.s3.Sentinel3ProductReader;
 import org.esa.s3tbx.dataio.s3.util.S3NetcdfReader;
 import org.esa.snap.core.datamodel.Band;
@@ -181,12 +182,12 @@ public abstract class SlstrProductFactory extends AbstractProductFactory {
     }
 
     @Override
-    protected Product readProduct(String fileName) throws IOException {
+    protected Product readProduct(String fileName, Manifest manifest) throws IOException {
         final File file = new File(getInputFileParentDirectory(), fileName);
         if (!file.exists()) {
             return null;
         }
-        final S3NetcdfReader slstrNetcdfReader = SlstrNetcdfReaderFactory.createSlstrNetcdfReader(file);
+        final S3NetcdfReader slstrNetcdfReader = SlstrNetcdfReaderFactory.createSlstrNetcdfReader(file, manifest);
         addSeparatingDimensions(slstrNetcdfReader.getSuffixesForSeparatingDimensions());
         return slstrNetcdfReader.readProductNodes(file, null);
     }
