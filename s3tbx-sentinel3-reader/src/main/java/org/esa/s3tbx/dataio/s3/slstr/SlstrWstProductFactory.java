@@ -67,20 +67,16 @@ public class SlstrWstProductFactory extends SlstrSstProductFactory {
     @Override
     protected void setUncertaintyBands(Product product) {
         super.setUncertaintyBands(product);
-        String[] bandNames = new String[]{"sst_theoretical_uncertainty"};
-        String[] roles = new String[]{"uncertainty"};
-//        String[] bandNames = new String[]{"sses_bias", "sst_dtime", "sses_standard_deviation", "dt_analysis",
-//            "sst_theoretical_error"};
-//        String[] roles = new String[]{"bias", "time deviation from reference time", "standard deviation",
-//                "deviation from analysis field", "uncertainty"};
+        // sst_theoretical_error is the old name
+        String[] possibleUncBandNames = new String[]{"sst_theoretical_uncertainty", "sst_theoretical_error"};
         if(product.containsBand("sea_surface_temperature")) {
             final Band seaSurfaceTemperatureBand = product.getBand("sea_surface_temperature");
-            for (int i = 0; i < bandNames.length; i++) {
-                String bandName = bandNames[i];
-                if(product.containsBand(bandName)) {
+            for (String bandName : possibleUncBandNames) {
+                if (product.containsBand(bandName)) {
                     final Band band = product.getBand(bandName);
-                    seaSurfaceTemperatureBand.addAncillaryVariable(band, roles[i]);
+                    seaSurfaceTemperatureBand.addAncillaryVariable(band, "uncertainty");
                     addUncertaintyImageInfo(band);
+                    break;
                 }
             }
         }
