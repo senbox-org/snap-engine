@@ -3,20 +3,13 @@
     <folder name="Actions">
         <folder name="Readers">
             <file name="org-esa-s3tbx-dataio-s3-ImportSentinel3Product.instance">
-                <attr name="instanceCreate"
-                      methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
-                <attr name="delegate"
-                      methodvalue="org.esa.snap.rcp.actions.file.ImportProductAction.create"/>
-                <attr name="displayName"
-                      stringvalue="Sentinel-3"/>
-                <attr name="formatName"
-                      stringvalue="Sen3"/>
-                <attr name="useAllFileFilter"
-                      boolvalue="true"/>
-                <attr name="helpId"
-                      stringvalue="importSentinel3Product"/>
-                <attr name="ShortDescription"
-                      stringvalue="Import a Sentinel-3 data product."/>
+                <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
+                <attr name="delegate" methodvalue="org.esa.snap.rcp.actions.file.ImportProductAction.create"/>
+                <attr name="displayName" stringvalue="Sentinel-3"/>
+                <attr name="formatName" stringvalue="Sen3"/>
+                <attr name="useAllFileFilter" boolvalue="true"/>
+                <attr name="helpId" stringvalue="importSentinel3Product"/>
+                <attr name="ShortDescription" stringvalue="Import a Sentinel-3 data product."/>
             </file>
             <file name="org-esa-s3tbx-dataio-s3-slstr-ImportSlstrL1B500mProduct.instance">
                 <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
@@ -54,6 +47,15 @@
                 <attr name="helpId" stringvalue="importMerisL2InS3FormatProduct"/>
                 <attr name="ShortDescription" stringvalue="Imports a MERIS Level 2 product provided in Sentinel-3 format."/>
             </file>
+            <file name="org-esa-s3tbx-dataio-s3-aatsr-ImportAatsrL1InS3FormatProduct.instance">
+                <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
+                <attr name="delegate" methodvalue="org.esa.snap.rcp.actions.file.ImportProductAction.create"/>
+                <attr name="displayName" stringvalue="(A)ATSR Level 1b (S3 Format)"/>
+                <attr name="formatName" stringvalue="ATS_L1_S3"/>
+                <attr name="useAllFileFilter" boolvalue="true"/>
+                <attr name="helpId" stringvalue="importAatsrL1InS3FormatProduct"/>
+                <attr name="ShortDescription" stringvalue="Imports an (A)ATSR Level 1 product provided in Sentinel-3 format."/>
+            </file>
         </folder>
     </folder>
 
@@ -82,6 +84,9 @@
                     <file name="org-esa-s3tbx-dataio-s3-meris-ImportMerisL2InS3FormatProduct.shadow">
                         <attr name="originalFile"
                               stringvalue="Actions/Readers/org-esa-s3tbx-dataio-s3-meris-ImportMerisL2InS3FormatProduct.instance"/>
+                    </file>
+                    <file name="org-esa-s3tbx-dataio-s3-aatsr-ImportAatsrL1InS3FormatProduct.shadow">
+                        <attr name="originalFile" stringvalue="Actions/Readers/org-esa-s3tbx-dataio-s3-aatsr-ImportAatsrL1InS3FormatProduct.instance"/>
                     </file>
                 </folder>
             </folder>

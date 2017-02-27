@@ -1,13 +1,12 @@
-package org.esa.s3tbx.dataio.s3.slstr;
+package org.esa.s3tbx.dataio.s3.util;
 
-import org.esa.s3tbx.dataio.s3.util.S3NetcdfReader;
 import org.esa.snap.core.datamodel.Product;
 import ucar.nc2.Variable;
 
 /**
  * @author Tonio Fincke
  */
-class MetTxReader extends S3NetcdfReader {
+public class MetTxReader extends S3NetcdfReader {
 
     @Override
     protected String[] getSeparatingDimensions() {
@@ -37,5 +36,4 @@ class MetTxReader extends S3NetcdfReader {
         final int start = bandName.substring(0, end).lastIndexOf("_");
         return Integer.parseInt(bandName.substring(start + 1, end)) - 1;
     }
-
 }

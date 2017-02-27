@@ -3,3 +3,4 @@ org.esa.s3tbx.dataio.s3.slstr.SlstrLevel1B1kmProductReaderPlugIn
 org.esa.s3tbx.dataio.s3.slstr.SlstrLevel1B500mProductReaderPlugIn
 org.esa.s3tbx.dataio.s3.meris.MerisLevel1ProductPlugIn
 org.esa.s3tbx.dataio.s3.meris.MerisLevel2ProductPlugIn
+org.esa.s3tbx.dataio.s3.aatsr.AatsrLevel1ProductReaderPlugIn

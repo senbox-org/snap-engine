@@ -423,15 +423,16 @@ public abstract class AbstractProductFactory implements ProductFactory {
     }
 
     private Manifest createManifest(File file) throws IOException {
+        final Document xmlDocument;
         try (InputStream inputStream = new FileInputStream(file)) {
-            final Document xmlDocument = createXmlDocument(inputStream);
-            // TODO (mp/16.09.2016) - probably not needed anymore
-            // according to the documentation SYN L1C should also have a xfdumanifest file
-            if (file.getName().equals(EarthExplorerManifest.L1C_MANIFEST_FILE_NAME)) {
-                return EarthExplorerManifest.createManifest(xmlDocument);
-            }
-            return XfduManifest.createManifest(xmlDocument);
+            xmlDocument = createXmlDocument(inputStream);
         }
+        // TODO (mp/16.09.2016) - probably not needed anymore
+        // according to the documentation SYN L1C should also have a xfdumanifest file
+        if (file.getName().equals(EarthExplorerManifest.L1C_MANIFEST_FILE_NAME)) {
+            return EarthExplorerManifest.createManifest(xmlDocument);
+        }
+        return XfduManifest.createManifest(xmlDocument);
     }
 
     private Document createXmlDocument(InputStream inputStream) throws IOException {

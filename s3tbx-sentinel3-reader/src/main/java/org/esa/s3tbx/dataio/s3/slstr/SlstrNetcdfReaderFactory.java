@@ -1,6 +1,7 @@
 package org.esa.s3tbx.dataio.s3.slstr;
 
 import org.esa.s3tbx.dataio.s3.Manifest;
+import org.esa.s3tbx.dataio.s3.util.MetTxReader;
 import org.esa.s3tbx.dataio.s3.util.S3NetcdfReader;
 
 import java.io.File;

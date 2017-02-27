@@ -510,8 +510,14 @@ public class S3NetcdfReader extends AbstractProductReader {
                 MetadataAttribute variableAttribute = null;
                 if (data instanceof float[]) {
                     variableAttribute = new MetadataAttribute("value", ProductData.createInstance((float[]) data), true);
+                } else if (data instanceof double[]) {
+                    variableAttribute = new MetadataAttribute("value", ProductData.createInstance((double[]) data), true);
+                } else if (data instanceof byte[]) {
+                    variableAttribute = new MetadataAttribute("value", ProductData.createInstance((byte[]) data), true);
                 } else if (data instanceof short[]) {
                     variableAttribute = new MetadataAttribute("value", ProductData.createInstance((short[]) data), true);
+                } else if (data instanceof int[]) {
+                    variableAttribute = new MetadataAttribute("value", ProductData.createInstance((int[]) data), true);
                 } else if (data instanceof long[]) {
                     variableAttribute = new MetadataAttribute("value", ProductData.createInstance((long[]) data), true);
                 }

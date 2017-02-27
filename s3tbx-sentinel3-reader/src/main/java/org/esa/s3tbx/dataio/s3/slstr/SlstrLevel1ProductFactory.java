@@ -43,6 +43,23 @@ import java.util.Map;
 
 public class SlstrLevel1ProductFactory extends SlstrProductFactory {
 
+    public final static String SLSTR_L1B_USE_PIXELGEOCODINGS = "s3tbx.reader.slstrl1b.pixelGeoCodings";
+
+    //todo read all these as metadata - tf 20160401
+    private final static String[] EXCLUDED_IDS = new String[]{
+                "ADFData", "SLSTR_F1_QUALITY_IN_Data",
+                "SLSTR_F1_QUALITY_IO_Data", "SLSTR_F2_QUALITY_IN_Data", "SLSTR_F2_QUALITY_IO_Data",
+                "SLSTR_S1_QUALITY_AN_Data", "SLSTR_S1_QUALITY_AO_Data", "SLSTR_S2_QUALITY_AN_Data",
+                "SLSTR_S2_QUALITY_AO_Data", "SLSTR_S3_QUALITY_AN_Data", "SLSTR_S3_QUALITY_AO_Data",
+                "SLSTR_S4_QUALITY_AN_Data", "SLSTR_S4_QUALITY_AO_Data", "SLSTR_S4_QUALITY_BN_Data",
+                "SLSTR_S4_QUALITY_BO_Data", "SLSTR_S4_QUALITY_CN_Data", "SLSTR_S4_QUALITY_CO_Data",
+                "SLSTR_S5_QUALITY_AN_Data", "SLSTR_S5_QUALITY_AO_Data", "SLSTR_S5_QUALITY_BN_Data",
+                "SLSTR_S5_QUALITY_BO_Data", "SLSTR_S5_QUALITY_CN_Data", "SLSTR_S5_QUALITY_CO_Data",
+                "SLSTR_S6_QUALITY_AN_Data", "SLSTR_S6_QUALITY_AO_Data", "SLSTR_S6_QUALITY_BN_Data",
+                "SLSTR_S6_QUALITY_BO_Data", "SLSTR_S6_QUALITY_CN_Data", "SLSTR_S6_QUALITY_CO_Data",
+                "SLSTR_S7_QUALITY_IN_Data", "SLSTR_S7_QUALITY_IO_Data", "SLSTR_S8_QUALITY_IN_Data",
+                "SLSTR_S8_QUALITY_IO_Data", "SLSTR_S9_QUALITY_IN_Data", "SLSTR_S9_QUALITY_IO_Data"
+    };
     private final Map<String, String> gridTypeToGridIndex;
     private final Map<String, Double> gridIndexToTrackOffset;
     private final Map<String, Double> gridIndexToStartOffset;
@@ -50,24 +67,6 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
     private Map<String, Float> nameToBandwidthMap;
     private Map<String, Integer> nameToIndexMap;
     private Map<String, GeoCoding> geoCodingMap;
-
-    public final static String SLSTR_L1B_USE_PIXELGEOCODINGS = "s3tbx.reader.slstrl1b.pixelGeoCodings";
-
-    //todo read all these as metadata - tf 20160401
-    private final static String[] EXCLUDED_IDS = new String[]{
-            "ADFData", "SLSTR_F1_QUALITY_IN_Data",
-            "SLSTR_F1_QUALITY_IO_Data", "SLSTR_F2_QUALITY_IN_Data", "SLSTR_F2_QUALITY_IO_Data",
-            "SLSTR_S1_QUALITY_AN_Data", "SLSTR_S1_QUALITY_AO_Data", "SLSTR_S2_QUALITY_AN_Data",
-            "SLSTR_S2_QUALITY_AO_Data", "SLSTR_S3_QUALITY_AN_Data", "SLSTR_S3_QUALITY_AO_Data",
-            "SLSTR_S4_QUALITY_AN_Data", "SLSTR_S4_QUALITY_AO_Data", "SLSTR_S4_QUALITY_BN_Data",
-            "SLSTR_S4_QUALITY_BO_Data", "SLSTR_S4_QUALITY_CN_Data", "SLSTR_S4_QUALITY_CO_Data",
-            "SLSTR_S5_QUALITY_AN_Data", "SLSTR_S5_QUALITY_AO_Data", "SLSTR_S5_QUALITY_BN_Data",
-            "SLSTR_S5_QUALITY_BO_Data", "SLSTR_S5_QUALITY_CN_Data", "SLSTR_S5_QUALITY_CO_Data",
-            "SLSTR_S6_QUALITY_AN_Data", "SLSTR_S6_QUALITY_AO_Data", "SLSTR_S6_QUALITY_BN_Data",
-            "SLSTR_S6_QUALITY_BO_Data", "SLSTR_S6_QUALITY_CN_Data", "SLSTR_S6_QUALITY_CO_Data",
-            "SLSTR_S7_QUALITY_IN_Data", "SLSTR_S7_QUALITY_IO_Data", "SLSTR_S8_QUALITY_IN_Data",
-            "SLSTR_S8_QUALITY_IO_Data", "SLSTR_S9_QUALITY_IN_Data", "SLSTR_S9_QUALITY_IO_Data"
-    };
 
 
     public SlstrLevel1ProductFactory(Sentinel3ProductReader productReader) {
@@ -94,26 +93,29 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
         return gridIndexToTrackOffset.get(gridIndex);
     }
 
+    protected String getProductSpecificMetadataElementName() {
+        return "slstrProductInformation";
+    }
+
     @Override
     protected void processProductSpecificMetadata(MetadataElement metadataElement) {
-        final MetadataElement slstrInformationElement = metadataElement.getElement("slstrProductInformation");
+        final MetadataElement productInformationElement = metadataElement.getElement(getProductSpecificMetadataElementName());
         final Product masterProduct = findMasterProduct();
         final int numberOfMasterColumns = masterProduct.getSceneRasterWidth();
         final int numberOfMasterRows = masterProduct.getSceneRasterHeight();
-        for (int i = 0; i < slstrInformationElement.getNumElements(); i++) {
-            final MetadataElement slstrElement = slstrInformationElement.getElementAt(i);
-            final String slstrElementName = slstrElement.getName();
-            if (slstrElementName.endsWith("ImageSize")) {
-                if (slstrElement.containsAttribute("grid")) {
-                    String firstLetter = gridTypeToGridIndex.get(slstrElement.getAttribute("grid").getData().getElemString());
+        for (MetadataElement infoElement : productInformationElement.getElements()) {
+            final String infoElementName = infoElement.getName();
+            if (infoElementName.endsWith("ImageSize")) {
+                if (infoElement.containsAttribute("grid")) {
+                    String firstLetter = gridTypeToGridIndex.get(infoElement.getAttribute("grid").getData().getElemString());
                     String index;
-                    if (slstrElementName.equals("nadirImageSize")) {
+                    if (infoElementName.equals("nadirImageSize")) {
                         index = firstLetter + "n";
                     } else {
                         index = firstLetter + "o";
                     }
-                    MetadataAttribute startOffsetAttribute = slstrElement.getAttribute("startOffset");
-                    MetadataAttribute trackOffsetAttribute = slstrElement.getAttribute("trackOffset");
+                    MetadataAttribute startOffsetAttribute = infoElement.getAttribute("startOffset");
+                    MetadataAttribute trackOffsetAttribute = infoElement.getAttribute("trackOffset");
                     double startOffset = startOffsetAttribute != null ? Double.parseDouble(startOffsetAttribute.getData().getElemString()) : 0.0;
                     double trackOffset = trackOffsetAttribute != null ? Double.parseDouble(trackOffsetAttribute.getData().getElemString()) : 0.0;
                     gridIndexToStartOffset.put(index, startOffset);
@@ -122,8 +124,8 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
                         gridIndexToStartOffset.put("tx", startOffset);
                         gridIndexToTrackOffset.put("tx", trackOffset);
                     }
-                    int numberOfRows = Integer.parseInt(slstrElement.getAttribute("rows").getData().getElemString());
-                    int numberOfColumns = Integer.parseInt(slstrElement.getAttribute("columns").getData().getElemString());
+                    int numberOfRows = Integer.parseInt(infoElement.getAttribute("rows").getData().getElemString());
+                    int numberOfColumns = Integer.parseInt(infoElement.getAttribute("columns").getData().getElemString());
                     if (numberOfColumns == numberOfMasterColumns && numberOfRows == numberOfMasterRows) {
                         setReferenceStartOffset(startOffset);
                         setReferenceTrackOffset(trackOffset);
@@ -131,9 +133,9 @@ public class SlstrLevel1ProductFactory extends SlstrProductFactory {
                     }
                 }
             }
-            if (slstrElementName.equals("bandDescriptions")) {
-                for (int j = 0; j < slstrElement.getNumElements(); j++) {
-                    final MetadataElement bandElement = slstrElement.getElementAt(j);
+            if (infoElementName.equals("bandDescriptions")) {
+                for (int j = 0; j < infoElement.getNumElements(); j++) {
+                    final MetadataElement bandElement = infoElement.getElementAt(j);
                     final String bandName = bandElement.getAttribute("name").getData().getElemString();
                     float wavelength = Float.parseFloat(bandElement.getAttribute("centralWavelength").getData().getElemString());
                     //consider case that wavelength is given in micro meters
