@@ -34,11 +34,11 @@ import java.awt.event.ActionEvent;
 @ActionID(category = "Processing", id = "org.esa.s3tbx.wew.water.ui.WaterProcessorOpAction")
 @ActionRegistration(displayName = "#CTL_WaterProcessorOpAction_Text")
 @ActionReference(path = "Menu/Optical/Thematic Water Processing", position = 1100)
-@NbBundle.Messages({"CTL_WaterProcessorOpAction_Text=FUB/WeW Water Processor"})
+@NbBundle.Messages({"CTL_WaterProcessorOpAction_Text=MERIS FUB/WeW Water Processor"})
 public class WaterProcessorOpAction extends AbstractSnapAction {
     private String operatorName = "FUB.Water";
     private String targetProductNameSuffix = "_wew";
-    private static final String Help_ID = "water";
+    private static final String Help_ID = "fubWeWTool";
     private ModelessDialog dialog;
 
 
