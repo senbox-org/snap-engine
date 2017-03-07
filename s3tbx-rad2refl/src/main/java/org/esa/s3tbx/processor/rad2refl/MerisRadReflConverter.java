@@ -1,6 +1,5 @@
 package org.esa.s3tbx.processor.rad2refl;
 
-import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.util.math.RsMathUtils;
 
 import java.util.Arrays;
@@ -14,16 +13,8 @@ public class MerisRadReflConverter implements RadReflConverter {
 
     private String conversionMode;
 
-//    private Rad2ReflAuxdata rad2ReflAuxdata;
-
-    public MerisRadReflConverter(Product sourceProduct, String conversionMode) {
+    public MerisRadReflConverter(String conversionMode) {
         this.conversionMode = conversionMode;
-
-//        try {
-//            rad2ReflAuxdata = Rad2ReflAuxdata.loadAuxdata(sourceProduct.getProductType());
-//        } catch (IOException e) {
-//            throw new OperatorException("Cannot load Radiance-to-Reflectance auxdata for MERIS: " + e.getMessage());
-//        }
     }
 
     @Override
