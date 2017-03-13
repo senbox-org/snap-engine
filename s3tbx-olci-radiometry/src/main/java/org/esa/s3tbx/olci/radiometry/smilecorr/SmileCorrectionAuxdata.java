@@ -17,7 +17,10 @@ package org.esa.s3tbx.olci.radiometry.smilecorr;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.s3tbx.olci.radiometry.Sensor;
+import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.OperatorException;
+import org.esa.snap.core.gpf.OperatorSpi;
+import org.esa.snap.core.gpf.OperatorSpiRegistry;
 import org.esa.snap.core.util.ResourceInstaller;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.io.CsvReader;
@@ -244,7 +247,10 @@ public class SmileCorrectionAuxdata {
     }
 
     static Path installAuxdata() throws IOException {
-        Path auxdataDirectory = SystemUtils.getAuxDataPath().resolve("olci/smile");
+        OperatorSpiRegistry operatorSpiRegistry = GPF.getDefaultInstance().getOperatorSpiRegistry();
+        OperatorSpi spi = operatorSpiRegistry.getOperatorSpi("SmileCorrection.Olci");
+        String version = spi.getOperatorDescriptor().getVersion();
+        Path auxdataDirectory = SystemUtils.getAuxDataPath().resolve("olci/smile/"+version);
         final Path sourceDirPath = ResourceInstaller.findModuleCodeBasePath(SmileCorrectionAuxdata.class).resolve("auxdata/smile");
         final ResourceInstaller resourceInstaller = new ResourceInstaller(sourceDirPath, auxdataDirectory);
         resourceInstaller.install(".*", ProgressMonitor.NULL);
