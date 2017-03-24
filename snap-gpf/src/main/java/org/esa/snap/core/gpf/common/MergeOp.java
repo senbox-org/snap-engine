@@ -107,6 +107,12 @@ public class MergeOp extends Operator {
         if (!(excludes == null || excludes.length == 0)) {
             throw new OperatorException("Defining excludes is not supported yet.");
         }
+        // make sure all sourceImages of the master product are created
+        Band[] bands = masterProduct.getBands();
+        for (Band band : bands) {
+            // trigger creation
+            band.getSourceImage();
+        }
         Set<Product> allSrcProducts = new HashSet<Product>();
         for (NodeDescriptor nodeDescriptor : includes) {
             Product srcProduct = getSourceProduct(nodeDescriptor.productId);
