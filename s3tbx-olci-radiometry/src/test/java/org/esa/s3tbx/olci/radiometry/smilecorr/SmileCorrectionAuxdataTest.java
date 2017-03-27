@@ -56,10 +56,10 @@ public class SmileCorrectionAuxdataTest {
         assertEquals(9, auxDataInFlatTable[0].length);
 
         assertEquals(1, auxDataInFlatTable[0][0], 1e-8);
-        assertEquals(1441.8, auxDataInFlatTable[0][8], 1e-8);
+        assertEquals(1513.6257, auxDataInFlatTable[0][8], 1e-8);
 
         assertEquals(6.0, auxDataInFlatTable[5][0], 1e-8);
-        assertEquals(1804.4, auxDataInFlatTable[5][8], 1e-8);
+        assertEquals(1796.8542, auxDataInFlatTable[5][8], 1e-8);
     }
 
     @Test
@@ -81,7 +81,30 @@ public class SmileCorrectionAuxdataTest {
         float[] expectedCentralWvl = {400f, 412.5f, 442.5f, 490f, 510f, 560f, 620f, 665f, 673.75f, 681.25f, 708.75f, 753.75f, 761.25f, 764.37f, 767.5f, 778.75f, 865f, 885f, 900f, 940f, 1020f, 0f};
         assertArrayEquals(expectedCentralWvl, smileCorrectionAuxdata.getRefCentralWaveLengths(), 1e-6f);
 
-        float[] expectedSolarIrradiance = {1441.8f, 1685.2f, 1864.1f, 1923.7f, 1943.5f, 1804.4f, 1653.4f, 1532.3f, 1497.9f, 1472.4f, 1408.4f, 1265.9f, 1252.1f, 1248.5f, 1222.1f, 1184.5f, 958.2f, 929.5f, 895.7f, 824.7f, 694.0f, 0.0f};
+        float[] expectedSolarIrradiance = {
+                1513.6257f,
+                1708.0474f,
+                1889.9923f,
+                1936.2612f,
+                1919.6490f,
+                1796.8542f,
+                1649.1400f,
+                1530.1553f,
+                1494.7185f,
+                1468.8616f, 
+                1403.1105f,
+                1266.3196f,
+                1247.4586f,
+                1238.9945f,
+                1229.7690f,
+                1173.4987f,
+                959.71075f,
+                930.86300f,
+                895.76700f,
+                826.40735f,
+                699.70306f,
+                0f
+        };
         assertArrayEquals(expectedSolarIrradiance, smileCorrectionAuxdata.getSolarIrradiances(), 1e-6f);
 
     }
@@ -108,7 +131,23 @@ public class SmileCorrectionAuxdataTest {
 
         float[] expectedCentralWvl = {412.5f, 442.5f, 490f, 510f, 560f, 620f, 665f, 681.25f, 708.75f, 753.75f, 761.875f, 778.75f, 865f, 885f, 900f, 0f};
         assertArrayEquals(expectedCentralWvl, smileCorrectionAuxdata.getRefCentralWaveLengths(), 1e-6f);
-        float[] expectedSolarIrradiance = {1713.69f, 1877.57f, 1929.26f, 1926.89f, 1800.46f, 1649.70f, 1530.93f, 1470.23f, 1405.47f, 1266.20f, 1249.80f, 1175.74f, 958.763f, 929.786f, 895.460f, 0f};
+        float[] expectedSolarIrradiance = {
+                1714.767334f,
+                1878.892944f,
+                1928.337158f,
+                1928.936279f,
+                1803.076294f,
+                1650.773804f,
+                1531.626465f,
+                1472.168091f,
+                1407.942627f,
+                1266.042847f,
+                1254.581177f,
+                1177.259522f,
+                958.3851929f,
+                929.8380127f,
+                895.4595947f,
+                0f};
         assertArrayEquals(expectedSolarIrradiance, smileCorrectionAuxdata.getSolarIrradiances(), 1e-6f);
 
     }
