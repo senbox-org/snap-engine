@@ -33,13 +33,13 @@ import org.esa.snap.core.image.ResolutionLevel;
 import org.esa.snap.core.image.VirtualBandOpImage;
 import org.esa.snap.core.util.ProductUtils;
 
-import java.awt.*;
+import java.awt.Rectangle;
 import java.awt.image.Raster;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.esa.snap.dataio.envisat.EnvisatConstants.MERIS_DETECTOR_INDEX_DS_NAME;
+import static org.esa.snap.dataio.envisat.EnvisatConstants.*;
 
 /**
  * An operator to provide conversion from radiances to reflectances or backwards.
@@ -56,7 +56,7 @@ import static org.esa.snap.dataio.envisat.EnvisatConstants.MERIS_DETECTOR_INDEX_
         description = "Provides conversion from radiances to reflectances or backwards.")
 public class Rad2ReflOp extends Operator {
 
-//    @Parameter(defaultValue = "OLCI", description = "The sensor", valueSet = {"MERIS", "OLCI", "SLSTR_500m"})
+    //    @Parameter(defaultValue = "OLCI", description = "The sensor", valueSet = {"MERIS", "OLCI", "SLSTR_500m"})
     // hide SLSTR for the moment, needs to be tested in more detail (20160818)
     @Parameter(defaultValue = "OLCI", description = "The sensor", valueSet = {"MERIS", "OLCI"})
     private Sensor sensor;
@@ -224,27 +224,12 @@ public class Rad2ReflOp extends Operator {
                                     sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
 
         for (int i = 0; i < sensor.getNumSpectralBands(); i++) {
-            Band sourceBand;
-            Band targetBand;
             if (isRadToReflMode()) {
-                sourceBand = sourceProduct.getBand(sensor.getRadBandNames()[i]);
-                targetBand = ProductUtils.copyBand(sensor.getRadBandNames()[i], sourceProduct, sensor.getReflBandNames()[i], targetProduct, false);
-                if (targetBand != null) {
-                    targetBand.setUnit(Rad2ReflConstants.REFL_UNIT);
-                }
+                Band sourceBand = sourceProduct.getBand(sensor.getRadBandNames()[i]);
+                createSpectralBand(sourceBand, sensor.getReflBandNames()[i], Rad2ReflConstants.REFL_UNIT,"Reflectance converted from radiance");
             } else {
-                sourceBand = sourceProduct.getBand(sensor.getReflBandNames()[i]);
-                targetBand = ProductUtils.copyBand(sensor.getReflBandNames()[i], sourceProduct, sensor.getRadBandNames()[i], targetProduct, false);
-                if (targetBand != null) {
-                    targetBand.setUnit(Rad2ReflConstants.RAD_UNIT);
-                }
-            }
-            if (targetBand != null) {
-                targetBand.setNoDataValue(Float.NaN);
-                targetBand.setNoDataValueUsed(true);
-                targetBand.setSpectralBandIndex(sourceBand.getSpectralBandIndex());
-                targetBand.setSpectralWavelength(sourceBand.getSpectralWavelength());
-                targetBand.setSpectralBandwidth(sourceBand.getSpectralBandwidth());
+                Band sourceBand = sourceProduct.getBand(sensor.getReflBandNames()[i]);
+                createSpectralBand(sourceBand, sensor.getRadBandNames()[i], Rad2ReflConstants.RAD_UNIT, "Radiance converted from reflectance");
             }
         }
 
@@ -280,6 +265,23 @@ public class Rad2ReflOp extends Operator {
         targetProduct.setAutoGrouping(sourceProduct.getAutoGrouping() + ":" + autogroupingExt);
 
         return targetProduct;
+    }
+
+    private Band createSpectralBand(Band sourceBand, String targetBandName, String unit, String description) {
+        Band targetBand = new Band(targetBandName, ProductData.TYPE_FLOAT32,
+                                   sourceBand.getRasterWidth(), sourceBand.getRasterHeight());
+        targetProduct.addBand(targetBand);
+        ProductUtils.copyRasterDataNodeProperties(sourceBand, targetBand);
+        targetBand.setUnit(description);
+        targetBand.setUnit(unit);
+        targetBand.setScalingFactor(1);
+        targetBand.setNoDataValue(Float.NaN);
+        targetBand.setNoDataValueUsed(true);
+        targetBand.setSpectralBandIndex(sourceBand.getSpectralBandIndex());
+        targetBand.setSpectralWavelength(sourceBand.getSpectralWavelength());
+        targetBand.setSpectralBandwidth(sourceBand.getSpectralBandwidth());
+
+        return targetBand;
     }
 
     private boolean isRadToReflMode() {
