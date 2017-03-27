@@ -6,7 +6,7 @@
     <parent>
         <artifactId>s3tbx</artifactId>
         <groupId>org.esa.s3tbx</groupId>
-        <version>5.0.2</version>
+        <version>5.0.3-SNAPSHOT</version>
     </parent>
 
     <name>Sentinel-3 SLSTR PDU Stitching</name>

@@ -21,7 +21,7 @@
 
     <groupId>org.esa.s3tbx</groupId>
     <artifactId>s3tbx</artifactId>
-    <version>5.0.2</version>
+    <version>5.0.3-SNAPSHOT</version>
     <name>Sentinel-3 Toolbox</name>
     <description>Tools for the Sentinel-3 Satellite</description>
     <url>https://github.com/senbox-org/s3tbx</url>
@@ -74,7 +74,7 @@
 
     <properties>
         <snap.version>5.0.3</snap.version>
-        <s3tbx.version>5.0.2</s3tbx.version>
+        <s3tbx.version>5.0.3-SNAPSHOT</s3tbx.version>
         <netbeans.version>RELEASE82</netbeans.version>
         <javahelp.version>2.0.05</javahelp.version>
         <netcdf.version>4.3.22</netcdf.version>
