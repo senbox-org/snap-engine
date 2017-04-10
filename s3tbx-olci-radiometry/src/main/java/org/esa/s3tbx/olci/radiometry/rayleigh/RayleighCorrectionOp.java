@@ -39,16 +39,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import static org.esa.s3tbx.olci.radiometry.smilecorr.SmileCorrectionUtils.getSampleDoubles;
-import static org.esa.s3tbx.olci.radiometry.smilecorr.SmileCorrectionUtils.getSensorType;
-import static org.esa.s3tbx.olci.radiometry.smilecorr.SmileCorrectionUtils.getSourceBandIndex;
+import static org.esa.s3tbx.olci.radiometry.smilecorr.SmileCorrectionUtils.*;
 
 /**
  * @author muhammad.bc.
  */
 @OperatorMetadata(alias = "RayleighCorrection",
         description = "Performs radiometric corrections on OLCI and MERIS L1b data products.",
-        authors = " Marco Peters, Muhammad Bala (Brockmann Consult)",
+        authors = "Marco Peters, Muhammad Bala (Brockmann Consult)",
         copyright = "(c) 2016 by Brockmann Consult",
         category = "Optical/Pre-Processing",
         version = "1.2")
@@ -128,10 +126,6 @@ public class RayleighCorrectionOp extends Operator {
         RayleighAux.initDefaultAuxiliary();
         addTargetBands(targetProduct);
         ProductUtils.copyProductNodes(sourceProduct, targetProduct);
-
-        if (Sensor.MERIS.equals(sensor)) {
-            ProductUtils.copyTiePointGrid(ALTITUDE_DEM, sourceProduct, targetProduct);
-        }
 
         ProductUtils.copyFlagBands(sourceProduct, targetProduct, true);
         targetProduct.setAutoGrouping(AUTO_GROUPING);
