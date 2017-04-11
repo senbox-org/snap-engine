@@ -251,8 +251,8 @@ public class S3NetcdfReader extends AbstractProductReader {
             band.setScalingFactor(getScalingFactor(variable));
             band.setScalingOffset(getAddOffset(variable));
             band.setSynthetic(synthetic);
-            addFillValue(band, variable);
             addSampleCodings(product, band, variable, false);
+            addFillValue(band, variable);
         }
     }
 
@@ -261,7 +261,8 @@ public class S3NetcdfReader extends AbstractProductReader {
         if (fillValueAttribute != null) {
             //todo double is not always correct
             band.setNoDataValue(fillValueAttribute.getNumericValue().doubleValue());
-            band.setNoDataValueUsed(true);
+            // enable only if it is not a flag band
+            band.setNoDataValueUsed(!band.isFlagBand());
         }
     }
 
