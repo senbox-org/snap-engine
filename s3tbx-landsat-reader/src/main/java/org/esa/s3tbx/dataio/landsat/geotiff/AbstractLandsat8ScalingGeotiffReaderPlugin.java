@@ -10,8 +10,10 @@ import java.io.IOException;
 import java.util.Locale;
 
 public abstract class AbstractLandsat8ScalingGeotiffReaderPlugin implements ProductReaderPlugIn {
+
     private static final Class[] READER_INPUT_TYPES = new Class[]{String.class, File.class};
     private static final String[] DEFAULT_FILE_EXTENSIONS = new String[]{".txt", ".TXT", ".gz"};
+    public static final String PRE_COLLECTION_FILENAME_PATTERN = "LT8\\d{13}.{3}\\d{2}_MTL.(txt|TXT)";
 
     @Override
     public DecodeQualification getDecodeQualification(Object input) {
@@ -36,7 +38,7 @@ public abstract class AbstractLandsat8ScalingGeotiffReaderPlugin implements Prod
 
     private static boolean isLandsat8Filename(String filename) {
         // TIRS must not be considered, only in OLI and COMBINED products we have different resolutions
-        return LandsatGeotiffReaderPlugin.isLandsat8Filename(filename) && !filename.matches("LT8\\d{13}.{3}\\d{2}_MTL.(txt|TXT)");
+        return LandsatTypeInfo.isLandsat8(filename) && !filename.matches(PRE_COLLECTION_FILENAME_PATTERN);
     }
 
     @Override

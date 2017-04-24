@@ -41,21 +41,11 @@ public class LandsatGeotiffReaderPlugin implements ProductReaderPlugIn {
     private static final String[] FORMAT_NAMES = new String[]{"LandsatGeoTIFF"};
     private static final String[] DEFAULT_FILE_EXTENSIONS = new String[]{".txt", ".TXT", ".gz", ".tgz"};
     private static final String READER_DESCRIPTION = "Landsat Data Products (GeoTIFF)";
-    private static final String L4_FILENAME_REGEX = "LT4\\d{13}\\w{3}\\d{2}";
-    private static final String L5_FILENAME_REGEX = "LT5\\d{13}.{3}\\d{2}";
-    private static final String L7_FILENAME_REGEX = "LE7\\d{13}.{3}\\d{2}";
-    private static final String L8_FILENAME_REGEX = "L[O,T,C]8\\d{13}.{3}\\d{2}";
 
     @Override
     public DecodeQualification getDecodeQualification(Object input) {
         String filename = new File(input.toString()).getName();
-        if (!isLandsatMSSFilename(filename) &&
-                !isLandsat4Filename(filename) &&
-                !isLandsat5Filename(filename) &&
-                !isLandsat7Filename(filename) &&
-                !isLandsat8Filename(filename) &&
-                !isLandsat5LegacyFilename(filename) &&
-                !isLandsat7LegacyFilename(filename)) {
+        if (!LandsatTypeInfo.isLandsat(filename)) {
             return DecodeQualification.UNABLE;
         }
 
@@ -151,7 +141,7 @@ public class LandsatGeotiffReaderPlugin implements ProductReaderPlugIn {
         if (inputFile == null) {
             throw new IOException("Unknown input type.");
         }
-        if (inputFile != null && inputFile.isFile() && !isCompressedFile(inputFile)) {
+        if (inputFile.isFile() && !isCompressedFile(inputFile)) {
             final File absoluteFile = inputFile.getAbsoluteFile();
             inputFile = absoluteFile.getParentFile();
             if (inputFile == null) {
@@ -175,73 +165,6 @@ public class LandsatGeotiffReaderPlugin implements ProductReaderPlugIn {
         return null;
     }
 
-    static boolean isLandsatMSSFilename(String filename) {
-        return filename.matches("LM[1-5]\\d{13}\\w{3}\\d{2}_MTL.(txt|TXT)");
-    }
-
-    static boolean isLandsat4Filename(String filename) {
-        if (filename.matches(L4_FILENAME_REGEX + "_MTL" + getTxtExtension())) {
-            return true;
-        } else if (filename.matches(L4_FILENAME_REGEX + getCompressionExtension())) {
-            return true;
-        }
-        return false;
-    }
-
-    static boolean isLandsat5Filename(String filename) {
-        if (filename.matches(L5_FILENAME_REGEX + "_MTL" + getTxtExtension())) {
-            return true;
-        } else if (filename.matches(L5_FILENAME_REGEX + getCompressionExtension())) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    static boolean isLandsat7Filename(String filename) {
-        if (filename.matches(L7_FILENAME_REGEX + "_MTL" + getTxtExtension())) {
-            return true;
-        } else if (filename.matches(L7_FILENAME_REGEX + getCompressionExtension())) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    static boolean isLandsat8Filename(String filename) {
-        if (filename.matches(L8_FILENAME_REGEX + "_MTL" + getTxtExtension())) {
-            return true;
-        } else if (filename.matches(L8_FILENAME_REGEX + getCompressionExtension())) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    static boolean isLandsat5LegacyFilename(String filename) {
-        if (filename.matches("LT5\\d{13}.{3}\\d{2}_MTL.(txt|TXT)")) {
-            return true;
-        } else if (filename.matches("L5\\d{6}_\\d{11}_MTL.(txt|TXT)")) {
-            return true;
-        } else if (filename.matches("LT5\\d{13}.{3}\\d{2}\\.(tar\\.gz|tgz|zip|ZIP)")) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    static boolean isLandsat7LegacyFilename(String filename) {
-        if (filename.matches("LE7\\d{13}.{3}\\d{2}_MTL.(txt|TXT)")) {
-            return true;
-        } else if (filename.matches("L7\\d{7}_\\d{11}_MTL.(txt|TXT)")) {
-            return true;
-        } else if (filename.matches("LE7\\d{13}.{3}\\d{2}\\.(tar\\.gz|tgz|zip|ZIP)")) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     static boolean isCompressedFile(File file) {
         String extension = FileUtils.getExtension(file);
         if (StringUtils.isNullOrEmpty(extension)) {
@@ -251,7 +174,6 @@ public class LandsatGeotiffReaderPlugin implements ProductReaderPlugIn {
         extension = extension.toLowerCase();
 
         return extension.contains("zip")
-                || extension.contains("ZIP")
                 || extension.contains("tar")
                 || extension.contains("tgz")
                 || extension.contains("gz")
@@ -259,13 +181,5 @@ public class LandsatGeotiffReaderPlugin implements ProductReaderPlugIn {
                 || extension.contains("bz")
                 || extension.contains("tbz2")
                 || extension.contains("bz2");
-    }
-
-    private static String getCompressionExtension() {
-        return "\\.(tar\\.gz|tgz|tar\\.bz|tbz|tar\\.bz2|tbz2|zip|ZIP)";
-    }
-
-    private static String getTxtExtension() {
-        return "\\.(txt|TXT)";
     }
 }
