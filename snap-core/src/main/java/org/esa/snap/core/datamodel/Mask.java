@@ -414,11 +414,10 @@ public class Mask extends Band {
             super(TYPE_NAME);
         }
 
-
-
         @Override
         public boolean canTransferMask(Mask mask, Product product) {
-            return getVectorData(mask) != null;
+//            return getVectorData(mask) != null;
+            return false;
         }
 
         @Override
