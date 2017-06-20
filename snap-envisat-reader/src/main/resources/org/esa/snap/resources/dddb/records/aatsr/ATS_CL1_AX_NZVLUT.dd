@@ -1,0 +1,6 @@
+ATS_CL1_AX_NZVLUT|Zone vertices for Visible Channel Cloud Test
+#
+x_coordinate_vertex_j           |Float | |4 |1|*|X co-ordinate of vertex J |1|
+y_coordinate_vertex_j           |Float | |4 |1|*|Y co-ordinate of vertex J |2|
+j                               |SShort| |2 |1|*|J : vertex identifier     |3|
+

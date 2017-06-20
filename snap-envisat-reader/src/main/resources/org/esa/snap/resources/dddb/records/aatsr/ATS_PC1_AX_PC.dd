@@ -48,7 +48,7 @@ tmz_rog_scp_err          |UShort|-        |2|1|*|TMZ_ROGUE_SCP_ERR|
 tmz_bb_outlimt_err       |UShort|-        |2|1|*|TMZ_BB_OUT_OF_LIMIT_ERR|
 bb_outrang_err           |SShort|-        |2|1|*|BB_PIX_COUNT_OUT_OF_RANGE_ERR|
 bb_outrang_allchn        |SShort|-        |2|1|*|BB_PIX_COUNT_OUT_OF_RANGE_ALL_CHANS|
-tmz_rog_bb_err           |SShort|-        |2|1|*|TMZ_ROGUE_BB_ERR|
+tmz_rog_bb_err           |UShort|-        |2|1|*|TMZ_ROGUE_BB_ERR|
 mon_threshold            |SShort|-        |2|1|*|monitor threshold|
 calibration_window_diff1 |SShort|-        |2|1|*|Calibration window diff1|
 calibration_window_diff2 |SShort|-        |2|1|*|Calibration window diff2|

@@ -1,0 +1,7 @@
+ATS_CL1_AX_NZDLUT|Zone definitions for Visible Channel Cloud Test
+#
+i_zone              |SShort | |2|1 |*|Zone identifier                  |1|
+vertex_identifier   |SShort | |2|5 |*|Vertex identifier v[k], k = 0, 4 |2|
+short_id            |UChar  | |1|8 |*|Short ID                         |3|
+full_id             |UChar  | |1|48|*|Full ID                          |4|
+

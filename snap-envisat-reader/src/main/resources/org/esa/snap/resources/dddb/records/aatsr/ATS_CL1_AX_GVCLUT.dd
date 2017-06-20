@@ -1,0 +1,5 @@
+ATS_CL1_AX_GVCLUT|General parameters for visible Channel Cloud Tests
+#
+n_vert           |SShort | |2 |1|*|Number of vertices     |1|
+n_zones          |SShort | |2 |1|*|Number of defined zones|2|
+Spare            |UChar  | |1 |16|*|Spare                  |3|

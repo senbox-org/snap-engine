@@ -1,0 +1,6 @@
+ATS_CL1_AX_SSTLUT|Snow-covered surface test LUT
+#
+ndsi_threshold   |SShort |0.0001 |2 |1|*|NDSI_THRESHOLD     |1|
+r87_threshold    |SShort |%/100  |2 |1|*|R87_THRESHOLD      |2|
+t11_threshold    |SShort |K/100  |2 |1|*|T11_THRESHOLD      |3|
+Spare            |UChar  |       |1 |14|*|Spare             |4|

@@ -1,0 +1,4 @@
+ATS_CL1_AX_GCLLUT|12 Micron Gross Cloud Test Land Surface LUT
+#
+land_thresh_nad           |SShort |K/100 |2|1|*|12 micron land threshold nadir  |1|
+land_thresh_for           |SShort |K/100 |2|1|*|12 micron land threshold forward|2|

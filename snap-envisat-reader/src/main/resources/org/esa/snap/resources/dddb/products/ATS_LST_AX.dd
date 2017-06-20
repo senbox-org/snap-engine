@@ -8,4 +8,4 @@ Surface Vegetation Class   |@/records/aatsr/ATS_LST_AX_SVC.dd     |VEG_CLASS_IND
 Vegetation Fraction        |@/records/aatsr/ATS_LST_AX_VF.dd	  |VEG_FRACTION                  |Vegetation Fraction
 Climatology Data           |@/records/aatsr/ATS_LST_AX_CD.dd	  |CLIMATOLOGY                   |Climatology Data
 Topographic Variance Flags |@/records/aatsr/ATS_LST_AX_TVF.dd	  |TOPOGRAPHIC_VAR               |Topographic Variance Flags
-LST Retrieval Coefficients |@/records/aatsr/ATS_LST_AX_LRC.dd	  |LST_RETRIEVAL_COEFF           |Land Surface Temperature Retrieval Coefficients
+LST Retrieval Coefficients |@/records/aatsr/ATS_LST_AX_LRC.dd	  |LST_RETRIEVAL_COEFF.          |Land Surface Temperature Retrieval Coefficients
