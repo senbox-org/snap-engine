@@ -78,6 +78,9 @@ public class SystemUtils {
     public static final String AUXDATA_DIR_NAME = "auxdata";
 
     private static final String EPSG_DATABASE_DIR_NAME = "epsg-database";
+    // need to keep it as static field, otherwise it might be removed from logmanager, and therefor the configuration too
+    // seems this is a bug and fixed in Java9 (http://bugs.java.com/view_bug.do?bug_id=8030192)
+    private static final Logger LOGGER_GEOTOOLS = Logger.getLogger("org.geotools");
 
     /**
      * Gets the current user's name, or the string <code>"unknown"</code> if the the user's name cannot be determined.
@@ -391,8 +394,7 @@ public class SystemUtils {
     }
 
     public static void initGeoTools() {
-        Logger logger = Logger.getLogger("org.geotools");
-        logger.setUseParentHandlers(false);
+        LOGGER_GEOTOOLS.setUseParentHandlers(false);
 
         // Must store EPSG database in BEAM home, otherwise it will be deleted from default temp location (Unix!, Windows?)
         File epsgDir = new File(SystemUtils.getApplicationDataDir(true), EPSG_DATABASE_DIR_NAME);
