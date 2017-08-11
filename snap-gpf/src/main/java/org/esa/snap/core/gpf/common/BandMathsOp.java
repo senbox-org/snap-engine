@@ -259,6 +259,13 @@ public class BandMathsOp extends Operator {
         if (sourceProducts == null || sourceProducts.length == 0) {
             throw new OperatorException("No source products given.");
         }
+        
+        if(sourceProducts.length > 1) {
+            for (int i = 0; i < sourceProducts.length; ++i) {
+                sourceProducts[i].setRefNo(i + 1);
+            }
+        }
+
         int width = sourceProducts[0].getSceneRasterWidth();
         int height = sourceProducts[0].getSceneRasterHeight();
         targetProduct = new Product(sourceProducts[0].getName() + "_BandMath", "BandMath", width, height);
@@ -453,8 +460,7 @@ public class BandMathsOp extends Operator {
     }
 
     private Namespace createNamespace() {
-        WritableNamespace namespace = BandArithmetic.createDefaultNamespace(sourceProducts, 0,
-                                                                            new SourceProductNamespacePrefixProvider());
+        WritableNamespace namespace = BandArithmetic.createDefaultNamespace(sourceProducts, 0);
         if (variables != null) {
             for (Variable variable : variables) {
                 if (ProductData.isFloatingPointType(ProductData.getType(variable.type))) {
