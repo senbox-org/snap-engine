@@ -23,6 +23,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.simplify.DouglasPeuckerSimplifier;
+import org.esa.snap.core.dataio.MultiSizeProductSubsetDef;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductSubsetBuilder;
 import org.esa.snap.core.dataio.ProductSubsetDef;
@@ -45,16 +46,28 @@ import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.jexp.ParseException;
 import org.esa.snap.core.jexp.Term;
+import org.esa.snap.core.transform.MathTransform2D;
 import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.converters.JtsGeometryConverter;
 import org.esa.snap.core.util.converters.RectangleConverter;
+import org.geotools.geometry.jts.JTS;
+import org.opengis.referencing.operation.TransformException;
 
+import java.awt.Dimension;
 import java.awt.Rectangle;
+import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
+import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 
 import static java.lang.Math.*;
@@ -89,15 +102,20 @@ public class SubsetOp extends Operator {
 
     @Parameter(converter = RectangleConverter.class,
             description = "The subset region in pixel coordinates.\n" +
-                          "Use the following format: <x>,<y>,<width>,<height>\n" +
-                          "If not given, the entire scene is used. The 'geoRegion' parameter has precedence over this parameter.")
+                    "Use the following format: <x>,<y>,<width>,<height>\n" +
+                    "If not given, the entire scene is used. The 'geoRegion' parameter has precedence over this parameter.")
     private Rectangle region = null;
+
+    @Parameter(description = "Name of the raster data node to which the region refers. Required when a region is given " +
+            "and the product has raster data nodes of multiple sizes. If neither is the case, this parameter is not " +
+            "used.")
+    private String referenceNodeName;
 
     @Parameter(converter = JtsGeometryConverter.class,
             description = "The subset region in geographical coordinates using WKT-format,\n" +
-                          "e.g. POLYGON((<lon1> <lat1>, <lon2> <lat2>, ..., <lon1> <lat1>))\n" +
-                          "(make sure to quote the option due to spaces in <geometry>).\n" +
-                          "If not given, the entire scene is used.")
+                    "e.g. POLYGON((<lon1> <lat1>, <lon2> <lat2>, ..., <lon1> <lat1>))\n" +
+                    "(make sure to quote the option due to spaces in <geometry>).\n" +
+                    "If not given, the entire scene is used.")
     private Geometry geoRegion;
     @Parameter(defaultValue = "1",
             description = "The pixel sub-sampling step in X (horizontal image direction)")
@@ -110,7 +128,7 @@ public class SubsetOp extends Operator {
     private boolean fullSwath = false;
 
     @Parameter(description = "The comma-separated list of names of tie-point grids to be copied. \n" +
-                             "If not given, all bands are copied.")
+            "If not given, all bands are copied.")
     private String[] tiePointGridNames;
 
     @Parameter(defaultValue = "false",
@@ -171,9 +189,25 @@ public class SubsetOp extends Operator {
 
     @Override
     public void initialize() throws OperatorException {
-        ensureSingleRasterSize(sourceProduct);
+        //todo change this meaningfully
+//        ensureSingleRasterSize(sourceProduct);
 
         subsetReader = new ProductSubsetBuilder();
+        ProductSubsetDef subsetDef;
+        if (!sourceProduct.isMultiSize()) {
+            subsetDef = getSingleSizeProductSubsetDef();
+        } else {
+            subsetDef = getMultiSizeProductSubsetDef();
+        }
+        try {
+            targetProduct = subsetReader.readProductNodes(sourceProduct, subsetDef);
+            targetProduct.setName("Subset_" + targetProduct.getName());
+        } catch (Throwable t) {
+            throw new OperatorException(t);
+        }
+    }
+
+    private ProductSubsetDef getSingleSizeProductSubsetDef() {
         final ProductSubsetDef subsetDef = new ProductSubsetDef();
         if (tiePointGridNames != null) {
             subsetDef.addNodeNames(tiePointGridNames);
@@ -202,13 +236,13 @@ public class SubsetOp extends Operator {
                 String msg = "No intersection with source product boundary " + sourceProduct.getName();
                 targetProduct.setDescription(msg);
                 getLogger().log(Level.WARNING, msg);
-                return;
+                return null;
             }
         }
         if (fullSwath && region != null) {
             region = new Rectangle(0, region.y, sourceProduct.getSceneRasterWidth(), region.height);
         }
-        
+
         if (region != null && !region.isEmpty()) {
             if (region.width == 0 || region.x + region.width > sourceProduct.getSceneRasterWidth()) {
                 region.width = sourceProduct.getSceneRasterWidth() - region.x;
@@ -222,12 +256,105 @@ public class SubsetOp extends Operator {
         subsetDef.setSubSampling(subSamplingX, subSamplingY);
         subsetDef.setIgnoreMetadata(!copyMetadata);
 
-        try {
-            targetProduct = subsetReader.readProductNodes(sourceProduct, subsetDef);
-            targetProduct.setName("Subset_" + targetProduct.getName());
-        } catch (Throwable t) {
-            throw new OperatorException(t);
+        return subsetDef;
+    }
+
+    private ProductSubsetDef getMultiSizeProductSubsetDef() {
+        if (subSamplingX != 1 || subSamplingY != 1) {
+            throw new OperatorException("Subsampling is not yet supported for multisize products");
         }
+        final MultiSizeProductSubsetDef subsetDef = new MultiSizeProductSubsetDef();
+        final ArrayList<String> nodeNameList = new ArrayList<>();
+        if (tiePointGridNames != null) {
+            nodeNameList.addAll(Arrays.asList(tiePointGridNames));
+        } else {
+            nodeNameList.addAll(Arrays.asList(sourceProduct.getTiePointGridNames()));
+        }
+
+        if (bandNames != null && bandNames.length > 0) {
+            nodeNameList.addAll(Arrays.asList(bandNames));
+        } else {
+            nodeNameList.addAll(Arrays.asList(sourceProduct.getBandNames()));
+        }
+        final ArrayList<String> referencedNodeNames = new ArrayList<>();
+        for (String nodeName : nodeNameList) {
+            collectReferencedRasters(nodeName, referencedNodeNames);
+        }
+        nodeNameList.addAll(referencedNodeNames);
+        if (geoRegion == null && region == null) {
+            subsetDef.addNodeNames(nodeNameList.toArray(new String[nodeNameList.size()]));
+            subsetDef.setSubSampling(1, 1);
+        }
+        else {
+            final Map<Dimension, Rectangle> rasterSizeToSubsetSize = new HashMap<>();
+            for (String nodeName : nodeNameList) {
+                final RasterDataNode rasterDataNode = sourceProduct.getRasterDataNode(nodeName);
+                final Dimension rasterSize = rasterDataNode.getRasterSize();
+                if (rasterSizeToSubsetSize.containsKey(rasterSize)) {
+                    subsetDef.addNode(nodeName, rasterSizeToSubsetSize.get(rasterSize), 1, 1);
+                } else {
+                    Rectangle pixelRegion = null;
+                    if (geoRegion != null) {
+                        pixelRegion = computePixelRegion(rasterDataNode, geoRegion, 0);
+                        if (pixelRegion.isEmpty()) {
+                            //todo handle case when there is no intersection at all
+                            String msg = "No intersection with raster data node boundary " + rasterDataNode.getName();
+                            rasterDataNode.setDescription(msg);
+                            getLogger().log(Level.WARNING, msg);
+                            break;
+                        }
+                    } else if (region != null) {
+                        //todo handle case that a region was passed in pixel coordinates
+                        if (StringUtils.isNullOrEmpty(referenceNodeName)) {
+                            throw new OperatorException("Reference node name must be given when subset is selected via" +
+                                                                "pixel region in a multisize product");
+                        }
+                        if (!sourceProduct.containsRasterDataNode(referenceNodeName)) {
+                            throw new OperatorException("Unknown reference node");
+                        }
+                        final RasterDataNode referenceNode = sourceProduct.getRasterDataNode(referenceNodeName);
+                        final Dimension referenceSize = referenceNode.getRasterSize();
+                        if (rasterSize.equals(referenceSize)) {
+                            pixelRegion = region;
+                        } else {
+                            final AffineTransform referencei2m = referenceNode.getImageToModelTransform();
+                            final MathTransform2D referencem2s = referenceNode.getModelToSceneTransform();
+                            final MathTransform2D rasters2m = rasterDataNode.getSceneToModelTransform();
+                            try {
+                                final AffineTransform rasterm2i = rasterDataNode.getImageToModelTransform().createInverse();
+                                final Rectangle regionInModelCoords = referencei2m.createTransformedShape(region).getBounds();
+                                final Polygon polygonInModelCoords = JTS.toPolygon(regionInModelCoords);
+                                final Geometry regionInSceneCoords = referencem2s.transform(polygonInModelCoords);
+                                final Geometry transformedPolygonInModelCoords = rasters2m.transform(regionInSceneCoords);
+                                final Rectangle2D transformedRegionInModelCoords =
+                                        JTS.toRectangle2D(transformedPolygonInModelCoords.getEnvelopeInternal());
+                                final Shape transformedRegionInImageCoords =
+                                        rasterm2i.createTransformedShape(transformedRegionInModelCoords);
+                                pixelRegion = transformedRegionInImageCoords.getBounds();
+                            } catch (NoninvertibleTransformException | TransformException e) {
+                                throw new OperatorException("Cannot invert transformation: " + e.getMessage());
+                            }
+                        }
+                    }
+                    if (fullSwath && pixelRegion != null) {
+                        pixelRegion = new Rectangle(0, pixelRegion.y, rasterDataNode.getRasterWidth(), pixelRegion.height);
+                    }
+                    if (pixelRegion != null && !pixelRegion.isEmpty()) {
+                        if (pixelRegion.width == 0 || pixelRegion.x + pixelRegion.width > rasterDataNode.getRasterWidth()) {
+                            pixelRegion.width = rasterDataNode.getRasterWidth() - pixelRegion.x;
+                        }
+                        if (pixelRegion.height == 0 || pixelRegion.y + pixelRegion.height > rasterDataNode.getRasterHeight()) {
+                            pixelRegion.height = rasterDataNode.getRasterHeight() - pixelRegion.y;
+                        }
+                    }
+                    subsetDef.addNode(nodeName, pixelRegion, 1, 1);
+                    rasterSizeToSubsetSize.put(rasterSize, pixelRegion);
+                }
+            }
+        }
+        subsetDef.setIgnoreMetadata(!copyMetadata);
+
+        return subsetDef;
     }
 
     private void collectReferencedRasters(String nodeName, ArrayList<String> referencedNodeNames) {
@@ -267,6 +394,7 @@ public class SubsetOp extends Operator {
         ProductData destBuffer = targetTile.getRawSamples();
         Rectangle rectangle = targetTile.getRectangle();
         try {
+            //todo adapt this
             subsetReader.readBandRasterData(band,
                                             rectangle.x,
                                             rectangle.y,
@@ -277,6 +405,34 @@ public class SubsetOp extends Operator {
         } catch (IOException e) {
             throw new OperatorException(e);
         }
+    }
+
+    public static Rectangle computePixelRegion(RasterDataNode node, Geometry geoRegion, int numBorderPixels) {
+        final Geometry productGeometry = computeNodeGeometry(node);
+        final Geometry regionIntersection = geoRegion.intersection(productGeometry);
+        if (regionIntersection.isEmpty()) {
+            return new Rectangle();
+        }
+        final PixelRegionFinder pixelRegionFinder = new PixelRegionFinder(node.getGeoCoding());
+        regionIntersection.apply(pixelRegionFinder);
+        final Rectangle pixelRegion = pixelRegionFinder.getPixelRegion();
+        pixelRegion.grow(numBorderPixels, numBorderPixels);
+        return pixelRegion.intersection(new Rectangle(node.getRasterWidth(), node.getRasterHeight()));
+    }
+
+    static Geometry computeNodeGeometry(RasterDataNode node) {
+        final Rectangle rect = new Rectangle(0, 0, node.getRasterWidth(), node.getRasterHeight());
+        final int step = Math.min(rect.width, rect.height) / 8;
+        final GeoPos[] geoBoundary = ProductUtils.createGeoBoundary(node, rect, step);
+        final ArrayList<GeneralPath> paths = ProductUtils.assemblePathList(geoBoundary);
+        final Polygon[] polygons = new Polygon[paths.size()];
+        final GeometryFactory factory = new GeometryFactory();
+        for (int i = 0; i < paths.size(); i++) {
+            polygons[i] = convertAwtPathToJtsPolygon(paths.get(i), factory);
+        }
+        final DouglasPeuckerSimplifier peuckerSimplifier = new DouglasPeuckerSimplifier(
+                polygons.length == 1 ? polygons[0] : factory.createMultiPolygon(polygons));
+        return peuckerSimplifier.getResultGeometry();
     }
 
     // todo - nf/mz 20131105 - move this method to a more prominent location (e.g. FeatureUtils)

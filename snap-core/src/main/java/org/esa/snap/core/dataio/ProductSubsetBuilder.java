@@ -34,6 +34,7 @@ import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.util.Debug;
+import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.ProductUtils;
 
 import javax.media.jai.Histogram;
@@ -235,7 +236,8 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
             sceneRasterHeight = s.height;
         }
         final Product targetProduct = createProduct();
-        updateMetadata(sourceProduct, targetProduct, getSubsetDef());
+        //todo put this back in
+//        updateMetadata(sourceProduct, targetProduct, getSubsetDef());
 
         return targetProduct;
     }
@@ -449,18 +451,13 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
     private Product createProduct() {
         Product sourceProduct = getSourceProduct();
         Debug.assertNotNull(sourceProduct);
-        Debug.assertTrue(getSceneRasterWidth() > 0);
-        Debug.assertTrue(getSceneRasterHeight() > 0);
         final String newProductName;
         if (this.newProductName == null || this.newProductName.length() == 0) {
             newProductName = sourceProduct.getName();
         } else {
             newProductName = this.newProductName;
         }
-        final Product product = new Product(newProductName, sourceProduct.getProductType(),
-                                            getSceneRasterWidth(),
-                                            getSceneRasterHeight(),
-                                            this);
+        final Product product = new Product(newProductName, sourceProduct.getProductType(), this);
         product.setPointingFactory(sourceProduct.getPointingFactory());
         if (newProductDesc == null || newProductDesc.length() == 0) {
             product.setDescription(sourceProduct.getDescription());
@@ -482,8 +479,9 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
         ProductUtils.copyVectorData(sourceProduct, product);
         ProductUtils.copyOverlayMasks(sourceProduct, product);
         ProductUtils.copyPreferredTileSize(sourceProduct, product);
-        setSceneRasterStartAndStopTime(product);
-        addSubsetInfoMetadata(product);
+        //todo set this
+//        setSceneRasterStartAndStopTime(product);
+//        addSubsetInfoMetadata(product);
         if (sourceProduct.getQuicklookBandName() != null
             && product.getQuicklookBandName() == null
             && product.containsBand(sourceProduct.getQuicklookBandName())) {
@@ -557,20 +555,29 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
                 if (getSubsetDef() != null && getSubsetDef().getTreatVirtualBandsAsRealBands()) {
                     treatVirtualBandsAsRealBands = true;
                 }
+                int width = sourceBand.getRasterWidth();
+                int height = sourceBand.getRasterHeight();
+                if (getSubsetDef() != null) {
+                    final Rectangle region = ((MultiSizeProductSubsetDef) getSubsetDef()).getRegion(bandName);
+                    if (region != null) {
+                        width = region.width;
+                        height = region.height;
+                    }
+                }
 
                 //@todo 1 se/se - extract copy of a band or virtual band to create deep clone of band and virtual band
                 if (!treatVirtualBandsAsRealBands && sourceBand instanceof VirtualBand) {
                     VirtualBand virtualSource = (VirtualBand) sourceBand;
                     destBand = new VirtualBand(bandName,
                                                sourceBand.getDataType(),
-                                               getSceneRasterWidth(),
-                                               getSceneRasterHeight(),
+                                               width,
+                                               height,
                                                virtualSource.getExpression());
                 } else {
                     destBand = new Band(bandName,
                                         sourceBand.getDataType(),
-                                        getSceneRasterWidth(),
-                                        getSceneRasterHeight());
+                                        width,
+                                        height);
                 }
                 if (sourceBand.getUnit() != null) {
                     destBand.setUnit(sourceBand.getUnit());
@@ -590,6 +597,7 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
                 }
                 destBand.setNoDataValueUsed(sourceBand.isNoDataValueUsed());
                 destBand.setValidPixelExpression(sourceBand.getValidPixelExpression());
+                ProductUtils.copyGeoCoding(sourceBand, destBand);
                 FlagCoding sourceFlagCoding = sourceBand.getFlagCoding();
                 IndexCoding sourceIndexCoding = sourceBand.getIndexCoding();
                 if (sourceFlagCoding != null) {
@@ -619,6 +627,56 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
         for (final Map.Entry<Band, RasterDataNode> entry : bandMap.entrySet()) {
             copyImageInfo(entry.getValue(), entry.getKey());
         }
+    }
+
+    @Override
+    public void readBandRasterData(Band destBand,
+                                   int destOffsetX,
+                                   int destOffsetY,
+                                   int destWidth,
+                                   int destHeight,
+                                   ProductData destBuffer, ProgressMonitor pm) throws IOException {
+
+        Guardian.assertNotNull("destBand", destBand);
+        Guardian.assertNotNull("destBuffer", destBuffer);
+
+        if (destBuffer.getNumElems() < destWidth * destHeight) {
+            throw new IllegalArgumentException("destination buffer too small");
+        }
+        if (destBuffer.getNumElems() > destWidth * destHeight) {
+            throw new IllegalArgumentException("destination buffer too big");
+        }
+
+        int sourceOffsetX = 0;
+        int sourceOffsetY = 0;
+        int sourceStepX = 1;
+        int sourceStepY = 1;
+        if (getSubsetDef() != null) {
+            sourceStepX = getSubsetDef().getSubSamplingX();
+            sourceStepY = getSubsetDef().getSubSamplingY();
+            final Rectangle region = ((MultiSizeProductSubsetDef) getSubsetDef()).getRegion(destBand.getName());
+            if (region != null) {
+                sourceOffsetX = region.x;
+                sourceOffsetY = region.y;
+            }
+        }
+        sourceOffsetX += sourceStepX * destOffsetX;
+        sourceOffsetY += sourceStepY * destOffsetY;
+        int sourceWidth = sourceStepX * (destWidth - 1) + 1;
+        int sourceHeight = sourceStepY * (destHeight - 1) + 1;
+
+        readBandRasterDataImpl(sourceOffsetX,
+                               sourceOffsetY,
+                               sourceWidth,
+                               sourceHeight,
+                               sourceStepX,
+                               sourceStepY,
+                               destBand,
+                               destOffsetX,
+                               destOffsetY,
+                               destWidth,
+                               destHeight,
+                               destBuffer, pm);
     }
 
     protected void addTiePointGridsToProduct(final Product product) {
@@ -687,15 +745,10 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
         if (subsetDef == null) {
             return true;
         }
-        final Rectangle sourceRegion = new Rectangle(0, 0, sourceProduct.getSceneRasterWidth(), getSceneRasterHeight());
-        return subsetDef.getRegion() == null
-                || subsetDef.getRegion().equals(sourceRegion)
-                && subsetDef.getSubSamplingX() == 1
-                && subsetDef.getSubSamplingY() == 1;
+        return subsetDef.isEntireProductSelected();
     }
 
     protected void addGeoCodingToProduct(final Product product) {
-
         if (!getSourceProduct().transferGeoCodingTo(product, getSubsetDef())) {
             Debug.trace("GeoCoding could not be transferred.");
         }
