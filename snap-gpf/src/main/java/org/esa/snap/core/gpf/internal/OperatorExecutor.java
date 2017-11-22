@@ -22,7 +22,6 @@ import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorCancelException;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.util.SystemUtils;
-import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.runtime.Config;
 
 import javax.media.jai.JAI;
@@ -31,12 +30,11 @@ import javax.media.jai.TileComputationListener;
 import javax.media.jai.TileRequest;
 import javax.media.jai.TileScheduler;
 import javax.media.jai.util.ImagingListener;
-import java.awt.Dimension;
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.image.Raster;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Semaphore;
 
 /**
@@ -53,17 +51,9 @@ public class OperatorExecutor {
     public static OperatorExecutor create(Operator op) {
         OperatorContext operatorContext = getOperatorContext(op);
         Product targetProduct = op.getTargetProduct();
-        // todo - [multisize_products] fix: don't rely on tiling is same for all bands (nf)
-        Dimension tileSize = targetProduct.getPreferredTileSize();
-
-        int rasterHeight = targetProduct.getSceneRasterHeight();
-        int rasterWidth = targetProduct.getSceneRasterWidth();
-        Rectangle boundary = new Rectangle(rasterWidth, rasterHeight);
-        int tileCountX = MathUtils.ceilInt(boundary.width / (double) tileSize.width);
-        int tileCountY = MathUtils.ceilInt(boundary.height / (double) tileSize.height);
         Band[] targetBands = targetProduct.getBands();
-        PlanarImage[] images = createImages(targetBands, operatorContext);
-        return new OperatorExecutor(images, tileCountX, tileCountY);
+        final PlanarImageSet[] planarImageSets = createImageSets(targetBands, operatorContext);
+        return new OperatorExecutor(planarImageSets);
     }
 
     public enum ExecutionOrder {
@@ -82,9 +72,7 @@ public class OperatorExecutor {
         PULL_ROW_BAND_COLUMN,
     }
 
-    private final int tileCountX;
-    private final int tileCountY;
-    private final PlanarImage[] images;
+    private PlanarImageSet[] planarImageSets;
     private final TileScheduler tileScheduler;
     private final int parallelism;
     private volatile OperatorException error = null;
@@ -95,11 +83,15 @@ public class OperatorExecutor {
     }
 
     public OperatorExecutor(PlanarImage[] images, int tileCountX, int tileCountY, int parallelism) {
-        this.images = images;
-        this.tileCountX = tileCountX;
-        this.tileCountY = tileCountY;
+        planarImageSets = createImageSets(images);
         this.parallelism = parallelism;
         this.tileScheduler = JAI.getDefaultInstance().getTileScheduler();
+    }
+
+    private OperatorExecutor(PlanarImageSet[] planarImageSets) {
+        this.planarImageSets = planarImageSets;
+        this.tileScheduler = JAI.getDefaultInstance().getTileScheduler();
+        this.parallelism = tileScheduler.getParallelism();
     }
 
     public void setScheduleRowsSeparate(boolean scheduleRowsSeparate) {
@@ -114,6 +106,14 @@ public class OperatorExecutor {
         execute(executionOrder, "Executing operator...", pm);
     }
 
+    private int getNumTiles() {
+        int numTiles = 0;
+        for (PlanarImageSet planarImageSet : planarImageSets) {
+            numTiles += planarImageSet.getImages().length * planarImageSet.tileCountX * planarImageSet.tileCountY;
+        }
+        return numTiles;
+    }
+
     public void execute(ExecutionOrder executionOrder, String executionMessage, ProgressMonitor pm) {
         final Semaphore semaphore = new Semaphore(parallelism, true);
         final TileComputationListener tcl = new OperatorTileComputationListener(semaphore, pm);
@@ -121,7 +121,7 @@ public class OperatorExecutor {
 
         ImagingListener imagingListener = JAI.getDefaultInstance().getImagingListener();
         JAI.getDefaultInstance().setImagingListener(new GPFImagingListener());
-        pm.beginTask(executionMessage, tileCountX * tileCountY * images.length);
+        pm.beginTask(executionMessage, getNumTiles());
 
         ExecutionOrder effectiveExecutionOrder = getEffectiveExecutionOrder(executionOrder);
 
@@ -162,43 +162,33 @@ public class OperatorExecutor {
     }
 
     private void scheduleBandRowColumn(Semaphore semaphore, TileComputationListener[] listeners, ProgressMonitor pm) {
-        for (final PlanarImage image : images) {
-            for (int tileY = 0; tileY < tileCountY; tileY++) {
-                for (int tileX = 0; tileX < tileCountX; tileX++) {
-                    scheduleTile(image, tileX, tileY, semaphore, listeners, pm);
-                }
-                if (scheduleRowsSeparate) {
-                    // wait until all threads / tiles are finished
-                    acquirePermits(semaphore, parallelism);
-                    semaphore.release(parallelism);
+        for (final PlanarImageSet planarImageSet : planarImageSets) {
+            for (final PlanarImage image : planarImageSet.images) {
+                final int tileCountY = planarImageSet.tileCountY;
+                for (int tileY = 0; tileY < tileCountY; tileY++) {
+                    final int tileCountX = planarImageSet.tileCountX;
+                    for (int tileX = 0; tileX < tileCountX; tileX++) {
+                        scheduleTile(image, tileX, tileY, tileCountX, tileCountY, semaphore, listeners, pm);
+                    }
+                    if (scheduleRowsSeparate) {
+                        // wait until all threads / tiles are finished
+                        acquirePermits(semaphore, parallelism);
+                        semaphore.release(parallelism);
+                    }
                 }
             }
         }
     }
 
     private void scheduleRowBandColumn(Semaphore semaphore, TileComputationListener[] listeners, ProgressMonitor pm) {
-        for (int tileY = 0; tileY < tileCountY; tileY++) {
-            for (final PlanarImage image : images) {
-                for (int tileX = 0; tileX < tileCountX; tileX++) {
-                    scheduleTile(image, tileX, tileY, semaphore, listeners, pm);
-                }
-            }
-            if (scheduleRowsSeparate) {
-                // wait until all threads / tiles are finished
-                acquirePermits(semaphore, parallelism);
-                semaphore.release(parallelism);
-            }
-        }
-    }
-
-    private void scheduleRowColumnBand(Semaphore semaphore, ProgressMonitor pm) {
-        //better handle stack operators, should equal well work for normal operators
-        if (images.length >= 1) {
-            final TileComputationListener tcl = new OperatorTileComputationListenerStack(semaphore, images, pm);
-            final TileComputationListener[] listeners = new TileComputationListener[]{tcl};
+        for (final PlanarImageSet planarImageSet : planarImageSets) {
+            final int tileCountY = planarImageSet.tileCountY;
             for (int tileY = 0; tileY < tileCountY; tileY++) {
-                for (int tileX = 0; tileX < tileCountX; tileX++) {
-                    scheduleTile(images[0], tileX, tileY, semaphore, listeners, pm);
+                for (final PlanarImage image : planarImageSet.images) {
+                    final int tileCountX = planarImageSet.tileCountX;
+                    for (int tileX = 0; tileX < tileCountX; tileX++) {
+                        scheduleTile(image, tileX, tileY, tileCountX, tileCountY, semaphore, listeners, pm);
+                    }
                 }
                 if (scheduleRowsSeparate) {
                     // wait until all threads / tiles are finished
@@ -209,8 +199,34 @@ public class OperatorExecutor {
         }
     }
 
-    private void scheduleTile(final PlanarImage image, int tileX, int tileY, Semaphore semaphore,
-                              TileComputationListener[] listeners, ProgressMonitor pm) {
+    private void scheduleRowColumnBand(Semaphore semaphore, ProgressMonitor pm) {
+        //better handle stack operators, should equal well work for normal operators
+        for (final PlanarImageSet planarImageSet : planarImageSets) {
+            final PlanarImage[] images = planarImageSet.getImages();
+            if (planarImageSet.getImages().length >= 1) {
+                final int tileCountY = planarImageSet.tileCountY;
+                final int tileCountX = planarImageSet.tileCountX;
+                final TileComputationListener tcl = new OperatorTileComputationListenerStack(semaphore, images,
+                                                                                             tileCountX, tileCountY,
+                                                                                             pm);
+                final TileComputationListener[] listeners = new TileComputationListener[]{tcl};
+                for (int tileY = 0; tileY < tileCountY; tileY++) {
+                    for (int tileX = 0; tileX < tileCountX; tileX++) {
+                        scheduleTile(planarImageSet.getImages()[0], tileX, tileY, tileCountX, tileCountY,
+                                     semaphore, listeners, pm);
+                    }
+                    if (scheduleRowsSeparate) {
+                        // wait until all threads / tiles are finished
+                        acquirePermits(semaphore, parallelism);
+                        semaphore.release(parallelism);
+                    }
+                }
+            }
+        }
+    }
+
+    private void scheduleTile(final PlanarImage image, int tileX, int tileY, int tileCountX, int tileCountY,
+                              Semaphore semaphore, TileComputationListener[] listeners, ProgressMonitor pm) {
 
         SystemUtils.LOG.finest(String.format("Scheduling tile x=%d/%d y=%d/%d for %s",
                                              tileX + 1, tileCountX, tileY + 1, tileCountY, image));
@@ -251,15 +267,45 @@ public class OperatorExecutor {
         }
     }
 
-    private static PlanarImage[] createImages(Band[] targetBands, OperatorContext operatorContext) {
-        final ArrayList<PlanarImage> images = new ArrayList<>(targetBands.length);
+    private static PlanarImageSet[] createImageSets(PlanarImage[] images) {
+        final ArrayList<PlanarImageSet> planarImageSets = new ArrayList<>();
+        for (final PlanarImage image : images) {
+            if (image != null) {
+                boolean found = false;
+                for (PlanarImageSet planarImageSet : planarImageSets) {
+                    if (planarImageSet.isCompatible(image)) {
+                        planarImageSet.add(image);
+                        found = true;
+                    }
+                }
+                if (!found) {
+                    final PlanarImageSet planarImageSet = new PlanarImageSet(image);
+                    planarImageSets.add(planarImageSet);
+                }
+            }
+        }
+        return planarImageSets.toArray(new PlanarImageSet[planarImageSets.size()]);
+    }
+
+    private static PlanarImageSet[] createImageSets(Band[] targetBands, OperatorContext operatorContext) {
+        final ArrayList<PlanarImageSet> planarImageSets = new ArrayList<>();
         for (final Band band : targetBands) {
             OperatorImage operatorImage = operatorContext.getTargetImage(band);
             if (operatorImage != null) {
-                images.add(operatorImage);
+                boolean found = false;
+                for (PlanarImageSet planarImageSet : planarImageSets) {
+                    if (planarImageSet.isCompatible(operatorImage)) {
+                        planarImageSet.add(operatorImage);
+                        found = true;
+                    }
+                }
+                if (!found) {
+                    final PlanarImageSet planarImageSet = new PlanarImageSet(operatorImage);
+                    planarImageSets.add(planarImageSet);
+                }
             }
         }
-        return images.toArray(new PlanarImage[images.size()]);
+        return planarImageSets.toArray(new PlanarImageSet[planarImageSets.size()]);
     }
 
     private static void checkForCancellation(ProgressMonitor pm) {
@@ -271,18 +317,20 @@ public class OperatorExecutor {
     // unused (mz) left for debugging purpose
     // does not schedule tile but instead calls getTile blocking
     private void executeRowBandColumn(ProgressMonitor pm) {
-        for (int tileY = 0; tileY < tileCountY; tileY++) {
-            for (final PlanarImage image : images) {
-                for (int tileX = 0; tileX < tileCountX; tileX++) {
-                    checkForCancellation(pm);
-                    /////////////////////////////////////////////////////////////////////
-                    //
-                    // Note: GPF pull-processing is triggered here!!!
-                    //
-                    image.getTile(tileX, tileY);
-                    //
-                    /////////////////////////////////////////////////////////////////////
-                    pm.worked(1);
+        for (PlanarImageSet planarImageSet : planarImageSets) {
+            for (int tileY = 0; tileY < planarImageSet.tileCountY; tileY++) {
+                for (final PlanarImage image : planarImageSet.images) {
+                    for (int tileX = 0; tileX < planarImageSet.tileCountX; tileX++) {
+                        checkForCancellation(pm);
+                        /////////////////////////////////////////////////////////////////////
+                        //
+                        // Note: GPF pull-processing is triggered here!!!
+                        //
+                        image.getTile(tileX, tileY);
+                        //
+                        /////////////////////////////////////////////////////////////////////
+                        pm.worked(1);
+                    }
                 }
             }
         }
@@ -293,8 +341,13 @@ public class OperatorExecutor {
         private final Semaphore semaphore;
         private final PlanarImage[] images;
         private final ProgressMonitor pm;
+        private final int tileCountX;
+        private final int tileCountY;
 
-        OperatorTileComputationListenerStack(Semaphore semaphore, PlanarImage[] images, ProgressMonitor pm) {
+        OperatorTileComputationListenerStack(Semaphore semaphore, PlanarImage[] images, int tileCountX, int tileCountY,
+                                             ProgressMonitor pm) {
+            this.tileCountX = tileCountX;
+            this.tileCountY = tileCountY;
             this.semaphore = semaphore;
             this.images = images;
             this.pm = pm;
@@ -377,6 +430,34 @@ public class OperatorExecutor {
             }
             return false;
         }
+    }
+
+    private static class PlanarImageSet {
+
+        private final List<PlanarImage> images;
+        private final int tileCountX;
+        private final int tileCountY;
+
+        PlanarImageSet(PlanarImage image) {
+            this.images = new ArrayList<>();
+            images.add(image);
+            this.tileCountX = image.getNumXTiles();
+            this.tileCountY = image.getNumYTiles();
+        }
+
+        boolean isCompatible(PlanarImage image) {
+            return image.getWidth() == images.get(0).getWidth() && image.getHeight() == images.get(0).getHeight() &&
+                    image.getNumXTiles() == tileCountX && image.getNumYTiles() == tileCountY;
+        }
+
+        void add(PlanarImage image) {
+            images.add(image);
+        }
+
+        PlanarImage[] getImages() {
+            return images.toArray(new PlanarImage[images.size()]);
+        }
+
     }
 
 }
