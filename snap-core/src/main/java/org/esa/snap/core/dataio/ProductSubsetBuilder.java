@@ -491,6 +491,7 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
                 return;
             }
         }
+        addGeoCodingToProduct(product);
     }
 
     private void setSceneRasterStartAndStopTime(Product product) {
