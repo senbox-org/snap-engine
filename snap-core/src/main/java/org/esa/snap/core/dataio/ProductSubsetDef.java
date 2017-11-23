@@ -15,6 +15,7 @@
  */
 package org.esa.snap.core.dataio;
 
+import org.esa.snap.core.util.ArrayUtils;
 import org.esa.snap.core.util.Guardian;
 
 import java.awt.Dimension;
@@ -42,6 +43,9 @@ public class ProductSubsetDef {
      * The spatial subset.
      */
     private Rectangle region = null;
+
+
+    private List<Rectangle> regions = null;
 
     /**
      * Subsampling in X direction.
@@ -174,8 +178,12 @@ public class ProductSubsetDef {
             return false;
         }
         nodeNameList.remove(index);
+        if (regions != null) {
+            regions.remove(index);
+        }
         if (nodeNameList.size() == 0) {
             nodeNameList = null;
+            regions = null;
         }
         return true;
     }
@@ -211,6 +219,24 @@ public class ProductSubsetDef {
      */
     public Rectangle getRegion() {
         return region != null ? new Rectangle(region) : null;
+    }
+
+    public Rectangle getRegion(String bandName) {
+        if (regions == null) {
+            return region;
+        }
+        final int index = ArrayUtils.getElementIndex(bandName, getNodeNames());
+        return regions.get(index);
+    }
+
+    public void addNode(String nodeName, Rectangle region) {
+        if (!containsNodeName(nodeName)) {
+            addNodeName(nodeName);
+            if (regions == null) {
+                regions = new ArrayList<>();
+            }
+            regions.add(region);
+        }
     }
 
     /**

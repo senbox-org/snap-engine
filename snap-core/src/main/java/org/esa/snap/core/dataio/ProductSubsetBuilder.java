@@ -17,22 +17,7 @@ package org.esa.snap.core.dataio;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.FlagCoding;
-import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.core.datamodel.GeoPos;
-import org.esa.snap.core.datamodel.ImageInfo;
-import org.esa.snap.core.datamodel.IndexCoding;
-import org.esa.snap.core.datamodel.MetadataAttribute;
-import org.esa.snap.core.datamodel.MetadataElement;
-import org.esa.snap.core.datamodel.PixelPos;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.datamodel.RasterDataNode;
-import org.esa.snap.core.datamodel.Stx;
-import org.esa.snap.core.datamodel.TiePointGeoCoding;
-import org.esa.snap.core.datamodel.TiePointGrid;
-import org.esa.snap.core.datamodel.VirtualBand;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.util.Debug;
 import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.ProductUtils;
@@ -457,7 +442,9 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
         } else {
             newProductName = this.newProductName;
         }
-        final Product product = new Product(newProductName, sourceProduct.getProductType(), this);
+        final Product product = new Product(newProductName, sourceProduct.getProductType(),
+                sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight(),
+                this);
         product.setPointingFactory(sourceProduct.getPointingFactory());
         if (newProductDesc == null || newProductDesc.length() == 0) {
             product.setDescription(sourceProduct.getDescription());
@@ -471,7 +458,8 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
         addBandsToProduct(product);
         ProductUtils.copyMasks(sourceProduct, product);
         addFlagCodingsToProduct(product);
-        addGeoCodingToProduct(product);
+        product.setSceneGeoCoding(product.getBandAt(0).getGeoCoding());
+//        addGeoCodingToProduct(product);
 
         // only copy index codings associated with accepted nodes
         copyAcceptedIndexCodings(product);
@@ -558,7 +546,7 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
                 int width = sourceBand.getRasterWidth();
                 int height = sourceBand.getRasterHeight();
                 if (getSubsetDef() != null) {
-                    final Rectangle region = ((MultiSizeProductSubsetDef) getSubsetDef()).getRegion(bandName);
+                    final Rectangle region = getSubsetDef().getRegion(bandName);
                     if (region != null) {
                         width = region.width;
                         height = region.height;
@@ -597,7 +585,6 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
                 }
                 destBand.setNoDataValueUsed(sourceBand.isNoDataValueUsed());
                 destBand.setValidPixelExpression(sourceBand.getValidPixelExpression());
-                ProductUtils.copyGeoCoding(sourceBand, destBand);
                 FlagCoding sourceFlagCoding = sourceBand.getFlagCoding();
                 IndexCoding sourceIndexCoding = sourceBand.getIndexCoding();
                 if (sourceFlagCoding != null) {
@@ -622,6 +609,18 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
                 }
                 product.addBand(destBand);
                 bandMap.put(destBand, sourceBand);
+                Scene sourceScene = SceneFactory.createScene(sourceBand);
+                Scene destScene = SceneFactory.createScene(destBand);
+                if (sourceScene != null && destScene != null) {
+                    ProductSubsetDef subsetDef = new ProductSubsetDef();
+                    if (getSubsetDef() != null) {
+                        subsetDef.setRegion(getSubsetDef().getRegion(sourceBand.getName()));
+                        int subSamplingX = getSubsetDef().getSubSamplingX();
+                        int subSamplingY = getSubsetDef().getSubSamplingY();
+                        subsetDef.setSubSampling(subSamplingX, subSamplingY);
+                    }
+                    sourceScene.transferGeoCodingTo(destScene, subsetDef);
+                }
             }
         }
         for (final Map.Entry<Band, RasterDataNode> entry : bandMap.entrySet()) {
@@ -654,7 +653,7 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
         if (getSubsetDef() != null) {
             sourceStepX = getSubsetDef().getSubSamplingX();
             sourceStepY = getSubsetDef().getSubSamplingY();
-            final Rectangle region = ((MultiSizeProductSubsetDef) getSubsetDef()).getRegion(destBand.getName());
+            final Rectangle region = getSubsetDef().getRegion(destBand.getName());
             if (region != null) {
                 sourceOffsetX = region.x;
                 sourceOffsetY = region.y;

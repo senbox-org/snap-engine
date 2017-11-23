@@ -23,7 +23,6 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.simplify.DouglasPeuckerSimplifier;
-import org.esa.snap.core.dataio.MultiSizeProductSubsetDef;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductSubsetBuilder;
 import org.esa.snap.core.dataio.ProductSubsetDef;
@@ -260,10 +259,7 @@ public class SubsetOp extends Operator {
     }
 
     private ProductSubsetDef getMultiSizeProductSubsetDef() {
-        if (subSamplingX != 1 || subSamplingY != 1) {
-            throw new OperatorException("Subsampling is not yet supported for multisize products");
-        }
-        final MultiSizeProductSubsetDef subsetDef = new MultiSizeProductSubsetDef();
+        ProductSubsetDef subsetDef = new ProductSubsetDef();
         final ArrayList<String> nodeNameList = new ArrayList<>();
         if (tiePointGridNames != null) {
             nodeNameList.addAll(Arrays.asList(tiePointGridNames));
@@ -283,15 +279,13 @@ public class SubsetOp extends Operator {
         nodeNameList.addAll(referencedNodeNames);
         if (geoRegion == null && region == null) {
             subsetDef.addNodeNames(nodeNameList.toArray(new String[nodeNameList.size()]));
-            subsetDef.setSubSampling(1, 1);
-        }
-        else {
+        } else {
             final Map<Dimension, Rectangle> rasterSizeToSubsetSize = new HashMap<>();
             for (String nodeName : nodeNameList) {
                 final RasterDataNode rasterDataNode = sourceProduct.getRasterDataNode(nodeName);
                 final Dimension rasterSize = rasterDataNode.getRasterSize();
                 if (rasterSizeToSubsetSize.containsKey(rasterSize)) {
-                    subsetDef.addNode(nodeName, rasterSizeToSubsetSize.get(rasterSize), 1, 1);
+                    subsetDef.addNode(nodeName, rasterSizeToSubsetSize.get(rasterSize));
                 } else {
                     Rectangle pixelRegion = null;
                     if (geoRegion != null) {
@@ -304,10 +298,9 @@ public class SubsetOp extends Operator {
                             break;
                         }
                     } else if (region != null) {
-                        //todo handle case that a region was passed in pixel coordinates
                         if (StringUtils.isNullOrEmpty(referenceNodeName)) {
                             throw new OperatorException("Reference node name must be given when subset is selected via" +
-                                                                "pixel region in a multisize product");
+                                    "pixel region in a multisize product");
                         }
                         if (!sourceProduct.containsRasterDataNode(referenceNodeName)) {
                             throw new OperatorException("Unknown reference node");
@@ -347,11 +340,12 @@ public class SubsetOp extends Operator {
                             pixelRegion.height = rasterDataNode.getRasterHeight() - pixelRegion.y;
                         }
                     }
-                    subsetDef.addNode(nodeName, pixelRegion, 1, 1);
+                    subsetDef.addNode(nodeName, pixelRegion);
                     rasterSizeToSubsetSize.put(rasterSize, pixelRegion);
                 }
             }
         }
+        subsetDef.setSubSampling(subSamplingX, subSamplingY);
         subsetDef.setIgnoreMetadata(!copyMetadata);
 
         return subsetDef;
@@ -396,11 +390,11 @@ public class SubsetOp extends Operator {
         try {
             //todo adapt this
             subsetReader.readBandRasterData(band,
-                                            rectangle.x,
-                                            rectangle.y,
-                                            rectangle.width,
-                                            rectangle.height,
-                                            destBuffer, pm);
+                    rectangle.x,
+                    rectangle.y,
+                    rectangle.width,
+                    rectangle.height,
+                    destBuffer, pm);
             targetTile.setRawSamples(destBuffer);
         } catch (IOException e) {
             throw new OperatorException(e);
@@ -451,7 +445,7 @@ public class SubsetOp extends Operator {
         final Rectangle pixelRegion = pixelRegionFinder.getPixelRegion();
         pixelRegion.grow(numBorderPixels, numBorderPixels);
         return pixelRegion.intersection(new Rectangle(product.getSceneRasterWidth(),
-                                                      product.getSceneRasterHeight()));
+                product.getSceneRasterHeight()));
     }
 
     static Geometry computeProductGeometry(Product product) {
