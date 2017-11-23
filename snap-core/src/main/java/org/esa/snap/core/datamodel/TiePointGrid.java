@@ -31,6 +31,7 @@ import org.esa.snap.core.util.math.IndexValidator;
 import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.core.util.math.Range;
 
+import java.awt.Rectangle;
 import java.awt.image.RenderedImage;
 import java.io.IOException;
 
@@ -974,10 +975,11 @@ public class TiePointGrid extends RasterDataNode {
             subsetStepX = subsetDef.getSubSamplingX();
             subsetStepY = subsetDef.getSubSamplingY();
             if (subsetDef.getRegion() != null) {
-                subsetOffsetX = subsetDef.getRegion().x;
-                subsetOffsetY = subsetDef.getRegion().y;
-                subsetWidth = subsetDef.getRegion().width;
-                subsetHeight = subsetDef.getRegion().height;
+                Rectangle subsetDefRegion = subsetDef.getRegion(sourceTiePointGrid.getName());
+                subsetOffsetX = subsetDefRegion.x;
+                subsetOffsetY = subsetDefRegion.y;
+                subsetWidth = subsetDefRegion.width;
+                subsetHeight = subsetDefRegion.height;
             }
         }
 
