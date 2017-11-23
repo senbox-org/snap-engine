@@ -316,6 +316,13 @@ public class ProductSubsetDef {
         if (region != null) {
             width = region.width;
             height = region.height;
+        } else if (regions != null) {
+            width = 0;
+            height = 0;
+            for (Rectangle rectangle : regions) {
+                width = Math.max(width, rectangle.width);
+                height = Math.max(width, rectangle.height);
+            }
         }
         return new Dimension((width - 1) / subSamplingX + 1,
                              (height - 1) / subSamplingY + 1);
