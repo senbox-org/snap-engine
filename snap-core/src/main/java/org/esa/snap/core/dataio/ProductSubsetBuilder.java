@@ -443,8 +443,7 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
             newProductName = this.newProductName;
         }
         final Product product = new Product(newProductName, sourceProduct.getProductType(),
-                sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight(),
-                this);
+                sceneRasterWidth, sceneRasterHeight, this);
         product.setPointingFactory(sourceProduct.getPointingFactory());
         if (newProductDesc == null || newProductDesc.length() == 0) {
             product.setDescription(sourceProduct.getDescription());
