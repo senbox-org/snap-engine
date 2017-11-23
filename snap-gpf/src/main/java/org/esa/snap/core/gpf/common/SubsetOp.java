@@ -188,15 +188,15 @@ public class SubsetOp extends Operator {
 
     @Override
     public void initialize() throws OperatorException {
-        //todo change this meaningfully
-//        ensureSingleRasterSize(sourceProduct);
-
         subsetReader = new ProductSubsetBuilder();
         ProductSubsetDef subsetDef;
         if (!sourceProduct.isMultiSize()) {
             subsetDef = getSingleSizeProductSubsetDef();
         } else {
             subsetDef = getMultiSizeProductSubsetDef();
+        }
+        if (subsetDef == null) {
+            return;
         }
         try {
             targetProduct = subsetReader.readProductNodes(sourceProduct, subsetDef);
@@ -280,6 +280,7 @@ public class SubsetOp extends Operator {
         if (geoRegion == null && region == null) {
             subsetDef.addNodeNames(nodeNameList.toArray(new String[nodeNameList.size()]));
         } else {
+            boolean validRegionFound = false;
             final Map<Dimension, Rectangle> rasterSizeToSubsetSize = new HashMap<>();
             for (String nodeName : nodeNameList) {
                 final RasterDataNode rasterDataNode = sourceProduct.getRasterDataNode(nodeName);
@@ -291,7 +292,6 @@ public class SubsetOp extends Operator {
                     if (geoRegion != null) {
                         pixelRegion = computePixelRegion(rasterDataNode, geoRegion, 0);
                         if (pixelRegion.isEmpty()) {
-                            //todo handle case when there is no intersection at all
                             String msg = "No intersection with raster data node boundary " + rasterDataNode.getName();
                             rasterDataNode.setDescription(msg);
                             getLogger().log(Level.WARNING, msg);
@@ -340,9 +340,13 @@ public class SubsetOp extends Operator {
                             pixelRegion.height = rasterDataNode.getRasterHeight() - pixelRegion.y;
                         }
                     }
+                    validRegionFound = validRegionFound || (pixelRegion != null && !pixelRegion.isEmpty());
                     subsetDef.addNode(nodeName, pixelRegion);
                     rasterSizeToSubsetSize.put(rasterSize, pixelRegion);
                 }
+            }
+            if (!validRegionFound) {
+                return null;
             }
         }
         subsetDef.setSubSampling(subSamplingX, subSamplingY);
