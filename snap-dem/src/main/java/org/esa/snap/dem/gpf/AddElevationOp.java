@@ -78,6 +78,9 @@ public final class AddElevationOp extends Operator {
     @Parameter(description = "The elevation band name.", defaultValue = "elevation", label = "Elevation Band Name")
     private String elevationBandName = "elevation";
 
+    @Parameter(description = "Fill nodata values by geod values", defaultValue = "false", label = "Fill Nodata with Geod")
+    private Boolean fillWithGeoid = false;
+
     private boolean isElevationModelAvailable = false;
     private ElevationModel dem = null;
     private double demNoDataValue = 0; // no data value for DEM
@@ -176,7 +179,7 @@ public final class AddElevationOp extends Operator {
 
             final boolean valid = DEMFactory.getLocalDEM(
                     dem, demNoDataValue, demResamplingMethod, tileGeoRef, x0, y0, w, h,
-                    sourceProduct, true, localDEM);
+                    sourceProduct, !fillWithGeoid, localDEM);
 
             final TileIndex tgtIndex = new TileIndex(targetTile);
             final int maxX = x0 + w;
