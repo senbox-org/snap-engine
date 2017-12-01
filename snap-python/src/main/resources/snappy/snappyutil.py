@@ -192,7 +192,7 @@ def _configure_snappy(snap_home=None,
         with open(snappy_ini_file, 'w') as file:
             file.writelines(['[DEFAULT]\n',
                              'snap_home = %s\n' % snap_home,
-                             'java_max_mem: %s\n' % jvm_max_mem,
+                             '# java_max_mem: 4G\n',
                              '# snap_start_engine: False\n',
                              '# java_class_path: ./target/classes\n',
                              '# java_library_path: ./lib\n',
