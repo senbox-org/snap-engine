@@ -16,13 +16,15 @@ import static java.lang.Float.NaN;
 class AggregatorAverageOutlierAware extends AbstractAggregator {
 
     private final String vectorName;
+    private final double deviationFactor;
 
-    AggregatorAverageOutlierAware(VariableContext varCtx, String varName, double stdDevFactor) {
+    AggregatorAverageOutlierAware(VariableContext varCtx, String varName, double deviationFactor) {
         super(Descriptor.NAME, new String[0],
                 createFeatureNames(varName, "mean", "sigma", "counts"),
                 createFeatureNames(varName, "mean", "sigma", "counts"));
 
         vectorName = "values." + varName;
+        this.deviationFactor = deviationFactor;
     }
 
     @Override
@@ -57,21 +59,32 @@ class AggregatorAverageOutlierAware extends AbstractAggregator {
     @Override
     public void completeTemporal(BinContext ctx, int numTemporalObs, WritableVector temporalVector) {
         final GrowableVector measurementsVec = ctx.get(vectorName);
-        if (measurementsVec.size() == 0) {
+        int count = measurementsVec.size();
+        if (count == 0) {
             temporalVector.set(0, NaN);
             temporalVector.set(1, NaN);
             temporalVector.set(2, 0);
-        } else if(measurementsVec.size() == 1) {
-            final float value = measurementsVec.get(0);
-            temporalVector.set(0, value);
-            temporalVector.set(1, 0.f);
-            temporalVector.set(2, 1);
         }
 
-        double sum = 0.0;
-        for (int i = 0; i < measurementsVec.size(); i++) {
-            sum += measurementsVec.get(i);
+        double[] statistics = calculateStatistics(measurementsVec);
+
+        if (count > 2) {    // we cannot detect outliers with two or less elements tb 2018-03-12
+            final double maxDelta = statistics[1] * deviationFactor;
+            final GrowableVector consolidatedMeasurements = new GrowableVector(count);
+            for (int i = 0; i < count; i++) {
+                final float measurement = measurementsVec.get(i);
+                if (Math.abs(measurement - statistics[0]) < maxDelta) {
+                    consolidatedMeasurements.add(measurement);
+                }
+            }
+
+            statistics = calculateStatistics(consolidatedMeasurements);
+            count = consolidatedMeasurements.size();
         }
+
+        temporalVector.set(0, (float) statistics[0]);
+        temporalVector.set(1, (float) statistics[1]);
+        temporalVector.set(2, count);
     }
 
     @Override
@@ -109,5 +122,25 @@ class AggregatorAverageOutlierAware extends AbstractAggregator {
         public AggregatorConfig createConfig() {
             throw new RuntimeException("not implemented");
         }
+    }
+
+    private double[] calculateStatistics(GrowableVector measurementsVec) {
+        final int count = measurementsVec.size();
+
+        double sum = 0.0;
+        for (int i = 0; i < count; i++) {
+            sum += measurementsVec.get(i);
+        }
+        final double mean = sum / count;
+
+        sum = 0.0;
+        for (int i = 0; i < count; i++) {
+            final double delta = measurementsVec.get(i) - mean;
+            sum += delta * delta;
+        }
+
+        final double stdDev = Math.sqrt(sum / count);
+
+        return new double[]{mean, stdDev};
     }
 }
