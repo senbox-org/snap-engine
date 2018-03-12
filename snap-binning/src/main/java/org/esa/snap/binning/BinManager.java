@@ -17,6 +17,7 @@
 package org.esa.snap.binning;
 
 import org.esa.snap.binning.support.BinTracer;
+import org.esa.snap.binning.support.GrowableVector;
 import org.esa.snap.binning.support.VariableContextImpl;
 import org.esa.snap.binning.support.VectorImpl;
 
@@ -36,6 +37,7 @@ public class BinManager {
     private final VariableContext variableContext;
     private final CellProcessor cellProcessor;
     private final Aggregator[] aggregators;
+    private final Aggregator[] growableDataAggregators;
     private final int spatialFeatureCount;
     private final int temporalFeatureCount;
     private final int outputFeatureCount;
@@ -59,8 +61,21 @@ public class BinManager {
 
     public BinManager(VariableContext variableContext, CellProcessorConfig cellProcessorConfig, Aggregator... aggregators) {
         this.variableContext = variableContext;
-        this.aggregators = aggregators;
-        this.spatialFeatureOffsets = new int[aggregators.length];
+
+        final List<Aggregator> standardAggregators = new ArrayList<>();
+        final List<Aggregator> growableAggregators = new ArrayList<>();
+        for (final Aggregator aggregator : aggregators) {
+            if (aggregator.requiresGrowableSpatialData()) {
+                growableAggregators.add(aggregator);
+            } else {
+                standardAggregators.add(aggregator);
+            }
+        }
+
+        this.aggregators = standardAggregators.toArray(new Aggregator[standardAggregators.size()]);
+        this.growableDataAggregators = growableAggregators.toArray(new Aggregator[growableAggregators.size()]);
+
+        this.spatialFeatureOffsets = new int[standardAggregators.size()];
         this.temporalFeatureOffsets = new int[aggregators.length];
         this.outputFeatureOffsets = new int[aggregators.length];
         int spatialFeatureCount = 0;
@@ -68,8 +83,8 @@ public class BinManager {
         int outputFeatureCount = 0;
         List<String> spatialFeatureNameList = new ArrayList<>();
         List<String> temporalFeatureNameList = new ArrayList<>();
-        for (int i = 0; i < aggregators.length; i++) {
-            Aggregator aggregator = aggregators[i];
+        for (int i = 0; i < this.aggregators.length; i++) {
+            Aggregator aggregator = this.aggregators[i];
             spatialFeatureOffsets[i] = spatialFeatureCount;
             temporalFeatureOffsets[i] = temporalFeatureCount;
             outputFeatureOffsets[i] = outputFeatureCount;
@@ -79,6 +94,7 @@ public class BinManager {
             Collections.addAll(spatialFeatureNameList, aggregator.getSpatialFeatureNames());
             Collections.addAll(temporalFeatureNameList, aggregator.getTemporalFeatureNames());
         }
+
         this.spatialFeatureCount = spatialFeatureCount;
         this.temporalFeatureCount = temporalFeatureCount;
         this.outputFeatureCount = outputFeatureCount;
@@ -87,7 +103,7 @@ public class BinManager {
         this.outputFeatureNames = new String[outputFeatureCount];
         final NameUnifier nameUnifier = new NameUnifier();
         int k = 0;
-        for (Aggregator aggregator : aggregators) {
+        for (Aggregator aggregator : this.aggregators) {
             for (int i = 0; i < aggregator.getOutputFeatureNames().length; i++) {
                 outputFeatureNames[k] = nameUnifier.unifyName(aggregator.getOutputFeatureNames()[i]);
                 k++;
@@ -198,7 +214,12 @@ public class BinManager {
     }
 
     public SpatialBin createSpatialBin(long binIndex) {
-        final SpatialBin spatialBin = new SpatialBin(binIndex, spatialFeatureCount);
+        final SpatialBin spatialBin;
+        if (growableDataAggregators.length == 0) {
+            spatialBin = new SpatialBin(binIndex, spatialFeatureCount);
+        } else {
+            spatialBin = new SpatialBin(binIndex, spatialFeatureCount, growableDataAggregators.length);
+        }
         initSpatialBin(spatialBin);
         traceSpatial("createSpatial", null, spatialBin);
         return spatialBin;
@@ -210,6 +231,11 @@ public class BinManager {
             final Aggregator aggregator = aggregators[i];
             spatialVector.setOffsetAndSize(spatialFeatureOffsets[i], aggregator.getSpatialFeatureNames().length);
             aggregator.aggregateSpatial(spatialBin, observation, spatialVector);
+        }
+        final GrowableVector[] vectors = spatialBin.getVectors();
+        for (int i = 0; i < growableDataAggregators.length; i++) {
+            final Aggregator aggregator = growableDataAggregators[i];
+            aggregator.aggregateSpatial(spatialBin, observation, vectors[i]);
         }
         spatialBin.numObs++;
         traceSpatial("aggregateSpatial", observation, spatialBin);
@@ -292,12 +318,19 @@ public class BinManager {
         traceOutput(temporalBin, outputVector);
     }
 
-    protected void initSpatialBin(SpatialBin bin) {
+    private void initSpatialBin(SpatialBin bin) {
         final VectorImpl vector = new VectorImpl(bin.featureValues);
         for (int i = 0; i < aggregators.length; i++) {
             final Aggregator aggregator = aggregators[i];
             vector.setOffsetAndSize(spatialFeatureOffsets[i], aggregator.getSpatialFeatureNames().length);
             aggregator.initSpatial(bin, vector);
+        }
+
+        final GrowableVector[] vectors = bin.getVectors();
+        for (int i = 0; i < growableDataAggregators.length; i++) {
+            final Aggregator aggregator = growableDataAggregators[i];
+
+            aggregator.initSpatial(bin, vectors[i]);
         }
     }
 
@@ -325,6 +358,7 @@ public class BinManager {
     public void setBinTracer(BinTracer binTracer) {
         this.binTracer = binTracer;
     }
+
     public BinTracer getBinTracer() {
         return binTracer;
     }

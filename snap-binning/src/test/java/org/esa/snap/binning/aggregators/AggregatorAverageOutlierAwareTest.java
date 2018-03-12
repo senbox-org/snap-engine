@@ -2,14 +2,17 @@ package org.esa.snap.binning.aggregators;
 
 import org.esa.snap.binning.BinContext;
 import org.esa.snap.binning.MyVariableContext;
+import org.esa.snap.binning.support.GrowableVector;
 import org.esa.snap.binning.support.VectorImpl;
 import org.junit.Before;
 import org.junit.Test;
 
 import static java.lang.Float.NaN;
 import static org.esa.snap.binning.aggregators.AggregatorTestUtils.createCtx;
+import static org.esa.snap.binning.aggregators.AggregatorTestUtils.obsNT;
 import static org.esa.snap.binning.aggregators.AggregatorTestUtils.vec;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class AggregatorAverageOutlierAwareTest {
 
@@ -18,6 +21,13 @@ public class AggregatorAverageOutlierAwareTest {
     @Before
     public void setUp() {
         ctx = createCtx();
+    }
+
+    @Test
+    public void testRequiresGrowableSpatialData() {
+        final AggregatorAverageOutlierAware agg = new AggregatorAverageOutlierAware(new MyVariableContext("var"), "var", 1.3);
+
+        assertTrue(agg.requiresGrowableSpatialData());
     }
 
     @Test
@@ -37,7 +47,50 @@ public class AggregatorAverageOutlierAwareTest {
         assertEquals("var_mean", agg.getOutputFeatureNames()[0]);
         assertEquals("var_sigma", agg.getOutputFeatureNames()[1]);
         assertEquals("var_counts", agg.getOutputFeatureNames()[2]);
+    }
 
+    @Test
+    public void testAggregateSpatial_noMeasurements() {
+        final AggregatorAverageOutlierAware agg = new AggregatorAverageOutlierAware(new MyVariableContext("var"), "var", 1.3);
+
+        agg.initSpatial(ctx, new GrowableVector(12));
+
+        agg.completeSpatial(ctx, 0, new GrowableVector(12));
+    }
+
+    @Test
+    public void testAggregateSpatial_oneMeasurement() {
+        final AggregatorAverageOutlierAware agg = new AggregatorAverageOutlierAware(new MyVariableContext("var"), "var", 1.3);
+
+        final GrowableVector vector = new GrowableVector(12);
+
+        agg.initSpatial(ctx, vector);
+
+        agg.aggregateSpatial(ctx, obsNT(0.21f), vector);
+        assertEquals(1, vector.size());
+        assertEquals(0.21, vector.get(0), 1e-8);
+
+        agg.completeSpatial(ctx, 0, vector);
+    }
+
+    @Test
+    public void testAggregateSpatial_threeMeasurements() {
+        final AggregatorAverageOutlierAware agg = new AggregatorAverageOutlierAware(new MyVariableContext("var"), "var", 1.2);
+
+        final GrowableVector vector = new GrowableVector(12);
+
+        agg.initSpatial(ctx, vector);
+
+        agg.aggregateSpatial(ctx, obsNT(0.31f), vector);
+        agg.aggregateSpatial(ctx, obsNT(0.32f), vector);
+        agg.aggregateSpatial(ctx, obsNT(0.33f), vector);
+
+        assertEquals(3, vector.size());
+        assertEquals(0.31f, vector.get(0), 1e-8);
+        assertEquals(0.32f, vector.get(1), 1e-8);
+        assertEquals(0.33f, vector.get(2), 1e-8);
+
+        agg.completeSpatial(ctx, 0, vector);
     }
 
     @Test

@@ -18,7 +18,9 @@ package org.esa.snap.binning;
 
 import org.esa.snap.binning.aggregators.AggregatorAverage;
 import org.esa.snap.binning.aggregators.AggregatorAverageML;
+import org.esa.snap.binning.aggregators.AggregatorAverageOutlierAware;
 import org.esa.snap.binning.aggregators.AggregatorMinMax;
+import org.esa.snap.binning.support.GrowableVector;
 import org.esa.snap.binning.support.ObservationImpl;
 import org.junit.Test;
 
@@ -29,12 +31,14 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 public class SpatialBinTest {
 
     @Test
-    public void testIllegalConstructorCalls() {
+    public void testIllegalConstructorCall() {
         try {
             new SpatialBin(0, -1);
             fail("IllegalArgumentException expected");
@@ -48,15 +52,27 @@ public class SpatialBinTest {
         assertEquals(42, bin.getIndex());
         bin = new SpatialBin(43, 3);
         assertEquals(43, bin.getIndex());
+
+        final GrowableVector[] vectors = bin.getVectors();
+        assertEquals(0, vectors.length);
+    }
+
+    @Test
+    public void testConstructWithGrowableData() {
+        final SpatialBin bin = new SpatialBin(43, 0, 1);
+        assertEquals(43, bin.getIndex());
+
+        final GrowableVector[] vectors = bin.getVectors();
+        assertEquals(1, vectors.length);
     }
 
     @Test
     public void testBinAggregationAndIO() throws IOException {
         MyVariableContext variableContext = new MyVariableContext("A", "B", "C");
         BinManager bman = new BinManager(variableContext,
-                                         new AggregatorMinMax(variableContext, "A", "A"),
-                                         new AggregatorAverage(variableContext, "B", "B", 0.0, false, false),
-                                         new AggregatorAverageML(variableContext, "C", "C", 0.5, false));
+                new AggregatorMinMax(variableContext, "A", "A"),
+                new AggregatorAverage(variableContext, "B", "B", 0.0, false, false),
+                new AggregatorAverageML(variableContext, "C", "C", 0.5, false));
 
         SpatialBin bin = bman.createSpatialBin(0);
 
@@ -120,11 +136,26 @@ public class SpatialBinTest {
     }
 
     @Test
+    public void testAggregationWithGrowingData() {
+        final MyVariableContext variableContext = new MyVariableContext("A", "B", "C");
+        final BinManager bman = new BinManager(variableContext,
+                new AggregatorMinMax(variableContext, "A", "A"),
+                new AggregatorAverage(variableContext, "B", "B", 0.0, false, false),
+                new AggregatorAverageOutlierAware(variableContext, "C", 1.2));
+
+        SpatialBin bin = bman.createSpatialBin(0);
+
+        bman.aggregateSpatialBin(new ObservationImpl(0.0, 0.0, 0.0, 0.2f, 4.0f, 4.0f), bin);
+
+    }
+
+    @Test
     public void testBinContext() {
-        BinContext ctx = new SpatialBin(0, 0);
-        assertEquals(null, ctx.get("a"));
+        final BinContext ctx = new SpatialBin(0, 0);
+        assertNull(ctx.get("a"));
+
         ctx.put("a", 42);
-        assertEquals(42, (int)ctx.get("a"));
+        assertEquals(42, (int) ctx.get("a"));
     }
 
     @Test
@@ -144,7 +175,7 @@ public class SpatialBinTest {
     public void testBinCreationWithIndex() throws Exception {
         final SpatialBin bin = SpatialBin.read(10L, new DataInputStream(new InputStream() {
             @Override
-            public int read() throws IOException {
+            public int read() {
                 return 0;
             }
         }));

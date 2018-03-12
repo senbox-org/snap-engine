@@ -13,33 +13,41 @@ import org.esa.snap.binning.support.GrowableVector;
 
 import static java.lang.Float.NaN;
 
-class AggregatorAverageOutlierAware extends AbstractAggregator {
+public class AggregatorAverageOutlierAware extends AbstractAggregator {
 
     private final String vectorName;
+    private final int varIndex;
     private final double deviationFactor;
 
-    AggregatorAverageOutlierAware(VariableContext varCtx, String varName, double deviationFactor) {
+    public AggregatorAverageOutlierAware(VariableContext varCtx, String varName, double deviationFactor) {
         super(Descriptor.NAME, new String[0],
                 createFeatureNames(varName, "mean", "sigma", "counts"),
                 createFeatureNames(varName, "mean", "sigma", "counts"));
 
         vectorName = "values." + varName;
         this.deviationFactor = deviationFactor;
+        this.varIndex = varCtx.getVariableIndex(varName);
+    }
+
+    @Override
+    public boolean requiresGrowableSpatialData() {
+        return true;
     }
 
     @Override
     public void initSpatial(BinContext ctx, WritableVector vector) {
-        throw new RuntimeException("not implemented");
+        // nothing to do here tb 2018-03-12
     }
 
     @Override
     public void aggregateSpatial(BinContext ctx, Observation observationVector, WritableVector spatialVector) {
-        throw new RuntimeException("not implemented");
+        final float value = observationVector.get(varIndex);
+        ((GrowableVector)spatialVector).add(value);
     }
 
     @Override
     public void completeSpatial(BinContext ctx, int numSpatialObs, WritableVector spatialVector) {
-        throw new RuntimeException("not implemented");
+        // nothing to do here tb 2018-03-12
     }
 
     @Override

@@ -16,6 +16,8 @@
 
 package org.esa.snap.binning;
 
+import org.esa.snap.binning.support.GrowableVector;
+
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
@@ -29,12 +31,27 @@ import java.util.Arrays;
  */
 public class SpatialBin extends Bin {
 
-    public SpatialBin() {
+    private final GrowableVector[] vectors;
+
+    private SpatialBin() {
         super();
+        vectors = new GrowableVector[0];
     }
 
     public SpatialBin(long index, int numFeatures) {
+        this(index, numFeatures, 0);
+    }
+
+    public SpatialBin(long index, int numFeatures, int numGrowableFeatures) {
         super(index, numFeatures);
+        if (numGrowableFeatures > 0) {
+            vectors = new GrowableVector[numGrowableFeatures];
+            for (int i = 0; i < numGrowableFeatures; i++) {
+                vectors[i] = new GrowableVector(256);   // @todo 2 tb/tb check if this is a meaningful default value 2018-03-12
+            }
+        } else {
+            vectors = new GrowableVector[0];
+        }
     }
 
     public void write(DataOutput dataOutput) throws IOException {
@@ -67,9 +84,13 @@ public class SpatialBin extends Bin {
         return bin;
     }
 
+    public GrowableVector[] getVectors() {
+        return vectors;
+    }
+
     @Override
     public String toString() {
         return String.format("%s{index=%d, numObs=%d, featureValues=%s}",
-                             getClass().getSimpleName(), index, numObs, Arrays.toString(featureValues));
+                getClass().getSimpleName(), index, numObs, Arrays.toString(featureValues));
     }
 }
