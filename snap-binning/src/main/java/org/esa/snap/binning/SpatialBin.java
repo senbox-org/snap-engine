@@ -31,7 +31,7 @@ import java.util.Arrays;
  */
 public class SpatialBin extends Bin {
 
-    private final GrowableVector[] vectors;
+    GrowableVector[] vectors;
 
     private SpatialBin() {
         super();
@@ -61,6 +61,16 @@ public class SpatialBin extends Bin {
         for (float value : featureValues) {
             dataOutput.writeFloat(value);
         }
+
+        final int numVectors = vectors.length;
+        dataOutput.writeInt(numVectors);
+        for (final GrowableVector vector : vectors) {
+            final int vectorSize = vector.size();
+            dataOutput.writeInt(vectorSize);
+            for (int k = 0; k < vectorSize; k++) {
+                dataOutput.writeFloat(vector.get(k));
+            }
+        }
     }
 
     public void readFields(DataInput dataInput) throws IOException {
@@ -70,6 +80,16 @@ public class SpatialBin extends Bin {
         featureValues = new float[numFeatures];
         for (int i = 0; i < numFeatures; i++) {
             featureValues[i] = dataInput.readFloat();
+        }
+        final int numVectors = dataInput.readInt();
+        vectors = new GrowableVector[numVectors];
+        for (int i = 0; i < numVectors; i++) {
+            final int vectorLength = dataInput.readInt();
+            final GrowableVector vector = new GrowableVector(vectorLength);
+            vectors[i] = vector;
+            for (int k = 0; k < vectorLength; k++) {
+                vector.add(dataInput.readFloat());
+            }
         }
     }
 

@@ -61,7 +61,9 @@ public class AggregatorAverageOutlierAware extends AbstractAggregator {
     @Override
     public void aggregateTemporal(BinContext ctx, Vector spatialVector, int numSpatialObs, WritableVector temporalVector) {
         final GrowableVector measurementsVec = ctx.get(vectorName);
-        measurementsVec.add(spatialVector.get(0));
+        for (int i = 0; i < spatialVector.size(); i++) {
+            measurementsVec.add(spatialVector.get(i));
+        }
     }
 
     @Override
@@ -85,9 +87,10 @@ public class AggregatorAverageOutlierAware extends AbstractAggregator {
                     consolidatedMeasurements.add(measurement);
                 }
             }
-
-            statistics = calculateStatistics(consolidatedMeasurements);
-            count = consolidatedMeasurements.size();
+            if (count > consolidatedMeasurements.size()) {
+                statistics = calculateStatistics(consolidatedMeasurements);
+                count = consolidatedMeasurements.size();
+            }
         }
 
         temporalVector.set(0, (float) statistics[0]);

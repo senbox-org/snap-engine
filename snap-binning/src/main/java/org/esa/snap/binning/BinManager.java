@@ -21,11 +21,7 @@ import org.esa.snap.binning.support.GrowableVector;
 import org.esa.snap.binning.support.VariableContextImpl;
 import org.esa.snap.binning.support.VectorImpl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * The bin manager class comprises a number of {@link Aggregator}s
@@ -91,6 +87,17 @@ public class BinManager {
             spatialFeatureCount += aggregator.getSpatialFeatureNames().length;
             temporalFeatureCount += aggregator.getTemporalFeatureNames().length;
             outputFeatureCount += aggregator.getOutputFeatureNames().length;
+            Collections.addAll(spatialFeatureNameList, aggregator.getSpatialFeatureNames());
+            Collections.addAll(temporalFeatureNameList, aggregator.getTemporalFeatureNames());
+        }
+
+        final int featureOffsetz = this.aggregators.length;
+        for (int i = 0; i < this.growableDataAggregators.length; i++) {
+            Aggregator aggregator = this.growableDataAggregators[i];
+            temporalFeatureOffsets[i + featureOffsetz] = temporalFeatureCount;
+            outputFeatureOffsets[i + featureOffsetz] = outputFeatureCount;
+            outputFeatureCount += aggregator.getOutputFeatureNames().length;
+            temporalFeatureCount += aggregator.getTemporalFeatureNames().length;
             Collections.addAll(spatialFeatureNameList, aggregator.getSpatialFeatureNames());
             Collections.addAll(temporalFeatureNameList, aggregator.getTemporalFeatureNames());
         }
@@ -203,8 +210,15 @@ public class BinManager {
 
     public final Vector getTemporalVector(TemporalBin bin, int aggIndex) {
         final VectorImpl vector = new VectorImpl(bin.featureValues);
-        final Aggregator aggregator = aggregators[aggIndex];
-        vector.setOffsetAndSize(temporalFeatureOffsets[aggIndex], aggregator.getTemporalFeatureNames().length);
+        final int numStandardAggregators = aggregators.length;
+        if (aggIndex < numStandardAggregators) {
+            final Aggregator aggregator = aggregators[aggIndex];
+            vector.setOffsetAndSize(temporalFeatureOffsets[aggIndex], aggregator.getTemporalFeatureNames().length);
+        } else {
+            final int growableAggregatorIndex = aggIndex - numStandardAggregators;
+            final Aggregator aggregator = growableDataAggregators[growableAggregatorIndex];
+            vector.setOffsetAndSize(temporalFeatureOffsets[aggIndex], aggregator.getTemporalFeatureNames().length);
+        }
         return vector;
     }
 
@@ -248,6 +262,11 @@ public class BinManager {
             spatialVector.setOffsetAndSize(spatialFeatureOffsets[i], aggregator.getSpatialFeatureNames().length);
             aggregator.completeSpatial(spatialBin, spatialBin.numObs, spatialVector);
         }
+        final GrowableVector[] vectors = spatialBin.getVectors();
+        for (int i = 0; i < growableDataAggregators.length; i++) {
+            final Aggregator aggregator = growableDataAggregators[i];
+            aggregator.completeSpatial(spatialBin, spatialBin.numObs, vectors[i]);
+        }
         traceSpatial("completeSpatial", null, spatialBin);
     }
 
@@ -268,7 +287,22 @@ public class BinManager {
     }
 
     public void aggregateTemporalBin(SpatialBin inputBin, TemporalBin outputBin) {
-        aggregateBin(inputBin, outputBin);
+        final VectorImpl spatialVector = new VectorImpl(inputBin.featureValues);
+        final VectorImpl temporalVector = new VectorImpl(outputBin.featureValues);
+        for (int i = 0; i < aggregators.length; i++) {
+            final Aggregator aggregator = aggregators[i];
+            spatialVector.setOffsetAndSize(spatialFeatureOffsets[i], aggregator.getSpatialFeatureNames().length);
+            temporalVector.setOffsetAndSize(temporalFeatureOffsets[i], aggregator.getTemporalFeatureNames().length);
+            aggregator.aggregateTemporal(outputBin, spatialVector, inputBin.numObs, temporalVector);
+        }
+
+        final GrowableVector[] vectors = inputBin.vectors;
+        for (int i = 0; i < growableDataAggregators.length; i++) {
+            final Aggregator aggregator = growableDataAggregators[i];
+            aggregator.aggregateTemporal(outputBin, vectors[i], 1, temporalVector);
+        }
+
+        outputBin.numObs += inputBin.numObs;
         outputBin.numPasses++;
         traceTemporal("aggregateTemporal", inputBin, outputBin);
     }
@@ -288,6 +322,7 @@ public class BinManager {
             temporalVector.setOffsetAndSize(temporalFeatureOffsets[i], aggregator.getTemporalFeatureNames().length);
             aggregator.aggregateTemporal(outputBin, spatialVector, inputBin.numObs, temporalVector);
         }
+
         outputBin.numObs += inputBin.numObs;
     }
 
@@ -296,6 +331,13 @@ public class BinManager {
         for (int i = 0; i < aggregators.length; i++) {
             final Aggregator aggregator = aggregators[i];
             temporalVector.setOffsetAndSize(temporalFeatureOffsets[i], aggregator.getTemporalFeatureNames().length);
+            aggregator.completeTemporal(temporalBin, temporalBin.numObs, temporalVector);
+        }
+
+        final int featureOffset = aggregators.length;
+        for (int i = 0; i < growableDataAggregators.length; i++) {
+            final Aggregator aggregator = growableDataAggregators[i];
+            temporalVector.setOffsetAndSize(temporalFeatureOffsets[i + featureOffset], aggregator.getTemporalFeatureNames().length);
             aggregator.completeTemporal(temporalBin, temporalBin.numObs, temporalVector);
         }
         traceTemporal("completeTemporal", null, temporalBin);
@@ -341,6 +383,13 @@ public class BinManager {
             vector.setOffsetAndSize(temporalFeatureOffsets[i], aggregator.getTemporalFeatureNames().length);
             aggregator.initTemporal(bin, vector);
         }
+
+        final int featureOffset = aggregators.length;
+        for (int i = 0; i < growableDataAggregators.length; i++) {
+            final Aggregator aggregator = growableDataAggregators[i];
+            vector.setOffsetAndSize(temporalFeatureOffsets[i + featureOffset], aggregator.getTemporalFeatureNames().length);
+            aggregator.initTemporal(bin, vector);
+        }
     }
 
     public boolean hasPostProcessor() {
@@ -365,7 +414,7 @@ public class BinManager {
 
     static class NameUnifier {
 
-        private final Map<String, Integer> addedNames = new HashMap<String, Integer>();
+        private final Map<String, Integer> addedNames = new HashMap<>();
 
         String unifyName(String name) {
             if (!addedNames.containsKey(name)) {
