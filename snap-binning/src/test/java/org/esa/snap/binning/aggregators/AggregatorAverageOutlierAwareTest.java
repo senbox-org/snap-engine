@@ -1,5 +1,7 @@
 package org.esa.snap.binning.aggregators;
 
+import org.esa.snap.binning.Aggregator;
+import org.esa.snap.binning.AggregatorConfig;
 import org.esa.snap.binning.BinContext;
 import org.esa.snap.binning.MyVariableContext;
 import org.esa.snap.binning.support.GrowableVector;
@@ -12,6 +14,8 @@ import static org.esa.snap.binning.aggregators.AggregatorTestUtils.createCtx;
 import static org.esa.snap.binning.aggregators.AggregatorTestUtils.obsNT;
 import static org.esa.snap.binning.aggregators.AggregatorTestUtils.vec;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public class AggregatorAverageOutlierAwareTest {
@@ -185,5 +189,79 @@ public class AggregatorAverageOutlierAwareTest {
         assertEquals(0.6850000023841858, out.get(0), 1e-8);
         assertEquals(0.029580410569906235, out.get(1), 1e-8);
         assertEquals(4, out.get(2), 1e-8);
+    }
+
+    @Test
+    public void testDescriptor_createAggregator_standard() {
+        final AggregatorAverageOutlierAware.Descriptor descriptor = new AggregatorAverageOutlierAware.Descriptor();
+
+        final Aggregator aggregator = descriptor.createAggregator(new MyVariableContext(), new AggregatorAverageOutlierAware.Config("variable", null, 1.2));
+        assertNotNull(aggregator);
+
+        assertEquals("variable_mean", aggregator.getTemporalFeatureNames()[0]);
+        assertEquals("variable_mean", aggregator.getOutputFeatureNames()[0]);
+    }
+
+    @Test
+    public void testDescriptor_createAggregator_withOutputName() {
+        final AggregatorAverageOutlierAware.Descriptor descriptor = new AggregatorAverageOutlierAware.Descriptor();
+
+        final Aggregator aggregator = descriptor.createAggregator(new MyVariableContext(), new AggregatorAverageOutlierAware.Config("variable", "target", 1.2));
+        assertNotNull(aggregator);
+
+        assertEquals("variable_mean", aggregator.getTemporalFeatureNames()[0]);
+        assertEquals("target_mean", aggregator.getOutputFeatureNames()[0]);
+    }
+
+    @Test
+    public void testDescriptor_createConfig() {
+        final AggregatorAverageOutlierAware.Descriptor descriptor = new AggregatorAverageOutlierAware.Descriptor();
+
+        final AggregatorConfig aggregatorConfig = descriptor.createConfig();
+        assertNotNull(aggregatorConfig);
+
+        final AggregatorAverageOutlierAware.Config config = (AggregatorAverageOutlierAware.Config) aggregatorConfig;
+        assertEquals(1.0, config.deviationFactor, 1e-8);
+        assertNull(config.varName);
+        assertNull(config.targetName);
+        assertEquals("AVG_OUTLIER", config.getName());
+    }
+
+    @Test
+    public void testDescriptor_getSourceVarNames() {
+        final AggregatorAverageOutlierAware.Descriptor descriptor = new AggregatorAverageOutlierAware.Descriptor();
+
+        final String[] sourceVarNames = descriptor.getSourceVarNames(new AggregatorAverageOutlierAware.Config("source", "target", 1.2));
+        assertEquals(1, sourceVarNames.length);
+        assertEquals("source", sourceVarNames[0]);
+    }
+
+    @Test
+    public void testDescriptor_getTargetVarNames_standard() {
+        final AggregatorAverageOutlierAware.Descriptor descriptor = new AggregatorAverageOutlierAware.Descriptor();
+
+        final String[] sourceVarNames = descriptor.getTargetVarNames(new AggregatorAverageOutlierAware.Config("source", null, 1.2));
+        assertEquals(3, sourceVarNames.length);
+        assertEquals("source_mean", sourceVarNames[0]);
+        assertEquals("source_sigma", sourceVarNames[1]);
+        assertEquals("source_counts", sourceVarNames[2]);
+    }
+
+    @Test
+    public void testDescriptor_getTargetVarNames_withTargetName() {
+        final AggregatorAverageOutlierAware.Descriptor descriptor = new AggregatorAverageOutlierAware.Descriptor();
+
+        final String[] sourceVarNames = descriptor.getTargetVarNames(new AggregatorAverageOutlierAware.Config("source", "target", 1.2));
+        assertEquals(3, sourceVarNames.length);
+        assertEquals("target_mean", sourceVarNames[0]);
+        assertEquals("target_sigma", sourceVarNames[1]);
+        assertEquals("target_counts", sourceVarNames[2]);
+    }
+
+    @Test
+    public void testDescriptor_getName() {
+        final AggregatorAverageOutlierAware.Descriptor descriptor = new AggregatorAverageOutlierAware.Descriptor();
+
+        assertEquals("AVG_OUTLIER", descriptor.getName());
     }
 }

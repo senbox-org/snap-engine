@@ -21,7 +21,11 @@ import org.esa.snap.binning.support.GrowableVector;
 import org.esa.snap.binning.support.VariableContextImpl;
 import org.esa.snap.binning.support.VectorImpl;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The bin manager class comprises a number of {@link Aggregator}s
@@ -91,13 +95,13 @@ public class BinManager {
             Collections.addAll(temporalFeatureNameList, aggregator.getTemporalFeatureNames());
         }
 
-        final int featureOffsetz = this.aggregators.length;
+        final int featureOffsets = this.aggregators.length;
         for (int i = 0; i < this.growableDataAggregators.length; i++) {
             Aggregator aggregator = this.growableDataAggregators[i];
-            temporalFeatureOffsets[i + featureOffsetz] = temporalFeatureCount;
-            outputFeatureOffsets[i + featureOffsetz] = outputFeatureCount;
-            outputFeatureCount += aggregator.getOutputFeatureNames().length;
+            temporalFeatureOffsets[i + featureOffsets] = temporalFeatureCount;
+            outputFeatureOffsets[i + featureOffsets] = outputFeatureCount;
             temporalFeatureCount += aggregator.getTemporalFeatureNames().length;
+            outputFeatureCount += aggregator.getOutputFeatureNames().length;
             Collections.addAll(spatialFeatureNameList, aggregator.getSpatialFeatureNames());
             Collections.addAll(temporalFeatureNameList, aggregator.getTemporalFeatureNames());
         }
@@ -116,6 +120,13 @@ public class BinManager {
                 k++;
             }
         }
+        for (Aggregator aggregator : this.growableDataAggregators) {
+            for (int i = 0; i < aggregator.getOutputFeatureNames().length; i++) {
+                outputFeatureNames[k] = nameUnifier.unifyName(aggregator.getOutputFeatureNames()[i]);
+                k++;
+            }
+        }
+
         if (cellProcessorConfig != null) {
             this.cellProcessor = createPostProcessor(cellProcessorConfig, outputFeatureNames);
             this.postFeatureNames = cellProcessor.getOutputFeatureNames();
@@ -224,6 +235,7 @@ public class BinManager {
 
     // method is used in Calvalus - undocumented API :-) don't remove
     public WritableVector createOutputVector() {
+        // @todo 1 tb/tb check if update needed for new aggregation and implement if required 2018-03-14
         return new VectorImpl(new float[outputFeatureCount]);
     }
 
@@ -309,6 +321,7 @@ public class BinManager {
 
     // method is used in Calvalus - undocumented API :-) don't remove
     public void aggregateTemporalBin(TemporalBin inputBin, TemporalBin outputBin) {
+        // @todo 1 tb/tb check if update needed for new aggregation and implement if required 2018-03-14
         aggregateBin(inputBin, outputBin);
         outputBin.numPasses += inputBin.numPasses;
     }
@@ -354,6 +367,13 @@ public class BinManager {
             final Aggregator aggregator = aggregators[i];
             temporalVector.setOffsetAndSize(temporalFeatureOffsets[i], aggregator.getTemporalFeatureNames().length);
             outputVectorImpl.setOffsetAndSize(outputFeatureOffsets[i], aggregator.getOutputFeatureNames().length);
+            aggregator.computeOutput(temporalVector, outputVector);
+        }
+        final int offset = aggregators.length;
+        for (int i = 0; i < growableDataAggregators.length; i++) {
+            final Aggregator aggregator = growableDataAggregators[i];
+            temporalVector.setOffsetAndSize(temporalFeatureOffsets[i + offset], aggregator.getTemporalFeatureNames().length);
+            outputVectorImpl.setOffsetAndSize(outputFeatureOffsets[i + offset], aggregator.getOutputFeatureNames().length);
             aggregator.computeOutput(temporalVector, outputVector);
         }
         outputVectorImpl.setOffsetAndSize(0, outputFeatureCount);

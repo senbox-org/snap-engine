@@ -21,6 +21,7 @@ import org.esa.snap.binning.aggregators.AggregatorAverageML;
 import org.esa.snap.binning.aggregators.AggregatorAverageOutlierAware;
 import org.esa.snap.binning.aggregators.AggregatorMinMax;
 import org.esa.snap.binning.support.ObservationImpl;
+import org.esa.snap.binning.support.VectorImpl;
 import org.junit.Test;
 
 import java.io.*;
@@ -169,6 +170,19 @@ public class TemporalBinTest {
         assertEquals(5.5f, agg3Copy.get(0), 1e-8);
         assertEquals(0.5f, agg3Copy.get(1), 1e-8);
         assertEquals(2.f, agg3Copy.get(2), 1e-8);   // two outliers removed, hence only 2 measurements tb 2018-03-13
+
+        final String[] outputFeatureNames = bman.getOutputFeatureNames();
+        assertEquals(7, outputFeatureNames.length);
+
+        final VectorImpl outputVector = new VectorImpl(new float[7]);
+        bman.computeOutput(tbin, outputVector);
+
+        assertEquals(0.2f, outputVector.get(0), 1e-8);
+        assertEquals(0.2f, outputVector.get(1), 1e-8);
+        assertEquals(0.f, outputVector.get(3), 1e-8);
+        assertEquals(5.5f, outputVector.get(4), 1e-8);
+        assertEquals(0.5f, outputVector.get(5), 1e-8);
+        assertEquals(2.0f, outputVector.get(6), 1e-8);
     }
 
     @Test

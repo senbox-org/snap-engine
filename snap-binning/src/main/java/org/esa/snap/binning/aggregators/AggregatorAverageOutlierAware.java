@@ -10,6 +10,8 @@ import org.esa.snap.binning.VariableContext;
 import org.esa.snap.binning.Vector;
 import org.esa.snap.binning.WritableVector;
 import org.esa.snap.binning.support.GrowableVector;
+import org.esa.snap.core.gpf.annotations.Parameter;
+import org.esa.snap.core.util.StringUtils;
 
 import static java.lang.Float.NaN;
 
@@ -20,9 +22,13 @@ public class AggregatorAverageOutlierAware extends AbstractAggregator {
     private final double deviationFactor;
 
     public AggregatorAverageOutlierAware(VariableContext varCtx, String varName, double deviationFactor) {
+        this(varCtx, varName, varName, deviationFactor);
+    }
+
+    private AggregatorAverageOutlierAware(VariableContext varCtx, String varName, String targetName, double deviationFactor) {
         super(Descriptor.NAME, new String[0],
                 createFeatureNames(varName, "mean", "sigma", "counts"),
-                createFeatureNames(varName, "mean", "sigma", "counts"));
+                createFeatureNames(targetName, "mean", "sigma", "counts"));
 
         vectorName = "values." + varName;
         this.deviationFactor = deviationFactor;
@@ -42,7 +48,7 @@ public class AggregatorAverageOutlierAware extends AbstractAggregator {
     @Override
     public void aggregateSpatial(BinContext ctx, Observation observationVector, WritableVector spatialVector) {
         final float value = observationVector.get(varIndex);
-        ((GrowableVector)spatialVector).add(value);
+        ((GrowableVector) spatialVector).add(value);
     }
 
     @Override
@@ -105,33 +111,69 @@ public class AggregatorAverageOutlierAware extends AbstractAggregator {
         outputVector.set(2, temporalVector.get(2));
     }
 
+    public static class Config extends AggregatorConfig {
+        @Parameter(label = "Source band name", notEmpty = true, notNull = true, description = "The source band used for aggregation.")
+        String varName;
+
+        @Parameter(label = "Target band name prefix (optional)", description = "The name prefix for the resulting bands. If empty, the source band name is used.")
+        String targetName;
+
+        @Parameter(label = "Deviation Factor", defaultValue = "1.0",
+                description = "Factor multiplied with the standard deviation that defines the distance to the mean that serves as threshold for outlier detection.")
+        Double deviationFactor;
+
+        public Config() {
+            this(null, null, 1.0);
+        }
+
+        public Config(String varName, String targetName, double deviationFactor) {
+            super(AggregatorAverageOutlierAware.Descriptor.NAME);
+            this.varName = varName;
+            this.targetName = targetName;
+            this.deviationFactor = deviationFactor;
+        }
+    }
+
     public static class Descriptor implements AggregatorDescriptor {
 
         public static final String NAME = "AVG_OUTLIER";
 
         @Override
         public Aggregator createAggregator(VariableContext varCtx, AggregatorConfig aggregatorConfig) {
-            throw new RuntimeException("not implemented");
+            final Config config = (Config) aggregatorConfig;
+
+            if (StringUtils.isNullOrEmpty(config.targetName)) {
+                return new AggregatorAverageOutlierAware(varCtx, config.varName, config.deviationFactor);
+            } else {
+                return new AggregatorAverageOutlierAware(varCtx, config.varName, config.targetName, config.deviationFactor);
+            }
         }
 
         @Override
         public String[] getSourceVarNames(AggregatorConfig aggregatorConfig) {
-            throw new RuntimeException("not implemented");
+            final Config config = (Config) aggregatorConfig;
+
+            return new String[]{config.varName};
         }
 
         @Override
         public String[] getTargetVarNames(AggregatorConfig aggregatorConfig) {
-            throw new RuntimeException("not implemented");
+            final Config config = (Config) aggregatorConfig;
+            if (StringUtils.isNullOrEmpty(config.targetName)) {
+                return createFeatureNames(config.varName, "mean", "sigma", "counts");
+            } else {
+                return createFeatureNames(config.targetName, "mean", "sigma", "counts");
+            }
         }
 
         @Override
         public String getName() {
-            throw new RuntimeException("not implemented");
+            return NAME;
         }
 
         @Override
         public AggregatorConfig createConfig() {
-            throw new RuntimeException("not implemented");
+            return new Config();
         }
     }
 
