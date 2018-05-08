@@ -18,10 +18,12 @@ package org.esa.snap.statistics;
 
 import com.bc.ceres.binding.ConversionException;
 import com.bc.ceres.binding.Converter;
+import java.util.Collection;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.HistogramStxOp;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.QualitativeStxOp;
 import org.esa.snap.core.datamodel.SummaryStxOp;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
@@ -87,6 +89,7 @@ import java.util.logging.Level;
 public class StatisticsOp extends Operator {
 
     public static final String DATETIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
+    public static final String MAJORITY_CLASS = "majority_class";
     public static final String MAXIMUM = "maximum";
     public static final String MINIMUM = "minimum";
     public static final String MEDIAN = "median";
@@ -102,27 +105,27 @@ public class StatisticsOp extends Operator {
     private static final double FILL_VALUE = -999.0;
 
     @SourceProducts(description = "The source products to be considered for statistics computation. If not given, " +
-                                  "the parameter 'sourceProductPaths' must be provided.")
+            "the parameter 'sourceProductPaths' must be provided.")
     Product[] sourceProducts;
 
     @Parameter(description = "A comma-separated list of file paths specifying the source products.\n" +
-                             "Each path may contain the wildcards '**' (matches recursively any directory),\n" +
-                             "'*' (matches any character sequence in path names) and\n" +
-                             "'?' (matches any single character).\n" +
-                             "If, for example, all NetCDF files under /eodata/ shall be considered, use '/eodata/**/*.nc'.")
+            "Each path may contain the wildcards '**' (matches recursively any directory),\n" +
+            "'*' (matches any character sequence in path names) and\n" +
+            "'?' (matches any single character).\n" +
+            "If, for example, all NetCDF files under /eodata/ shall be considered, use '/eodata/**/*.nc'.")
     String[] sourceProductPaths;
 
     @Parameter(description = "An ESRI shapefile, providing the considered geographical region(s) given as polygons. " +
-                             "If null, all pixels are considered.")
+            "If null, all pixels are considered.")
     File shapefile;
 
     @Parameter(description = "The start date. If not given, taken from the 'oldest' source product. Products that " +
-                             "have a start date before the start date given by this parameter are not considered.",
+            "have a start date before the start date given by this parameter are not considered.",
             format = DATETIME_PATTERN, converter = UtcConverter.class)
     ProductData.UTC startDate;
 
     @Parameter(description = "The end date. If not given, taken from the 'youngest' source product. Products that " +
-                             "have an end date after the end date given by this parameter are not considered.",
+            "have an end date after the end date given by this parameter are not considered.",
             format = DATETIME_PATTERN, converter = UtcConverter.class)
     ProductData.UTC endDate;
 
@@ -131,13 +134,13 @@ public class StatisticsOp extends Operator {
     BandConfiguration[] bandConfigurations;
 
     @Parameter(description = "The target file for shapefile output. Shapefile output will only be written if this " +
-                             "parameter is set. The band mapping file will have the suffix _band_mapping.txt.",
+            "parameter is set. The band mapping file will have the suffix _band_mapping.txt.",
             notNull = false)
     File outputShapefile;
 
     @Parameter(description = "The target file for ASCII output." +
-                             "The metadata file will have the suffix _metadata.txt.\n" +
-                             "ASCII output will only be written if this parameter is set.", notNull = false)
+            "The metadata file will have the suffix _metadata.txt.\n" +
+            "ASCII output will only be written if this parameter is set.", notNull = false)
     File outputAsciiFile;
 
     @Parameter(description = "The percentile levels that shall be created. Must be in the interval [0..100]",
@@ -145,13 +148,13 @@ public class StatisticsOp extends Operator {
     int[] percentiles;
 
     @Parameter(description = "The degree of accuracy used for statistics computation. Higher numbers " +
-                             "indicate higher accuracy but may lead to a considerably longer computation time.",
+            "indicate higher accuracy but may lead to a considerably longer computation time.",
             defaultValue = "3")
     int accuracy;
 
-    final Set<StatisticsOutputter> statisticsOutputters = new HashSet<StatisticsOutputter>();
+    final Set<StatisticsOutputter> statisticsOutputters = new HashSet<>();
 
-    final SortedSet<String> regionNames = new TreeSet<String>();
+    final SortedSet<String> regionNames = new TreeSet<>();
 
     private PrintStream metadataOutputStream;
     private PrintStream csvOutputStream;
@@ -181,9 +184,8 @@ public class StatisticsOp extends Operator {
             throw new OperatorException("No input products found that matches the criteria.");
         }
 
-        final Map<BandConfiguration, StatisticComputer.StxOpMapping> results = statisticComputer.getResults();
+        final Map<BandConfiguration, StatisticComputer.StxOpMapping> stxOps = statisticComputer.getResults();
         final String[] algorithmNames = getAlgorithmNames(percentiles);
-
 
         final List<String> bandNamesList = new ArrayList<String>();
         for (BandConfiguration bandConfiguration : bandConfigurations) {
@@ -197,7 +199,7 @@ public class StatisticsOp extends Operator {
 
 
         regionNames.clear();
-        for (StatisticComputer.StxOpMapping stxOpMapping : results.values()) {
+        for (StatisticComputer.StxOpMapping stxOpMapping : stxOps.values()) {
             regionNames.addAll(stxOpMapping.summaryMap.keySet());
         }
 
@@ -207,11 +209,11 @@ public class StatisticsOp extends Operator {
         }
 
         final StatisticsOutputContext statisticsOutputContext = StatisticsOutputContext.create(productNames,
-                                                                                               bandNames,
-                                                                                               algorithmNames,
-                                                                                               startDate,
-                                                                                               endDate,
-                                                                                               regionNames.toArray(new String[regionNames.size()]));
+                bandNames,
+                algorithmNames,
+                startDate,
+                endDate,
+                regionNames.toArray(new String[regionNames.size()]));
 
         setupOutputter();
 
@@ -219,7 +221,7 @@ public class StatisticsOp extends Operator {
             statisticsOutputter.initialiseOutput(statisticsOutputContext);
         }
 
-        for (Map.Entry<BandConfiguration, StatisticComputer.StxOpMapping> bandConfigurationStxOpMappingEntry : results.entrySet()) {
+        for (Map.Entry<BandConfiguration, StatisticComputer.StxOpMapping> bandConfigurationStxOpMappingEntry : stxOps.entrySet()) {
             final BandConfiguration bandConfiguration = bandConfigurationStxOpMappingEntry.getKey();
             final String bandName;
             if (bandConfiguration.sourceBandName != null) {
@@ -256,7 +258,6 @@ public class StatisticsOp extends Operator {
                         stxMap.put(getPercentileName(percentile), computePercentile(percentile, histogram));
                     }
                 }
-
                 stxMap.put(MAX_ERROR, Util.getBinWidth(histogram));
                 for (StatisticsOutputter statisticsOutputter : statisticsOutputters) {
                     statisticsOutputter.addToOutput(bandName, regionName, stxMap);
@@ -345,7 +346,7 @@ public class StatisticsOp extends Operator {
                 BandNameCreator bandNameCreator = new BandNameCreator(bandMappingOutputStream);
                 statisticsOutputters.add(
                         FeatureStatisticsWriter.createFeatureStatisticsWriter(shapefile.toURI().toURL(), outputShapefile.getAbsolutePath(),
-                                                                              bandNameCreator));
+                                bandNameCreator));
             } catch (MalformedURLException e) {
                 throw new OperatorException(
                         "Unable to create shapefile outputter: shapefile '" + shapefile.getName() + "' is invalid.", e);
@@ -366,11 +367,11 @@ public class StatisticsOp extends Operator {
             band.setNoDataValueUsed(true);
         } else {
             band = product.addBand(configuration.expression.replace(" ", "_"), configuration.expression,
-                                   ProductData.TYPE_FLOAT64);
+                    ProductData.TYPE_FLOAT64);
         }
         if (band == null) {
             throw new OperatorException(MessageFormat.format("Band ''{0}'' does not exist in product ''{1}''.",
-                                                             configuration.sourceBandName, product.getName()));
+                    configuration.sourceBandName, product.getName()));
         }
         return band;
     }
@@ -386,7 +387,7 @@ public class StatisticsOp extends Operator {
             throw new OperatorException("Parameter 'accuracy' must be less than or equal to " + Util.MAX_ACCURACY);
         }
         if ((sourceProducts == null || sourceProducts.length == 0) &&
-            (sourceProductPaths == null || sourceProductPaths.length == 0)) {
+                (sourceProductPaths == null || sourceProductPaths.length == 0)) {
             throw new OperatorException(
                     "Either source products must be given or parameter 'sourceProductPaths' must be specified");
         }

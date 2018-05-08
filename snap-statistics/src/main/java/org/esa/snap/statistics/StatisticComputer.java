@@ -8,6 +8,7 @@ import org.esa.snap.core.datamodel.HistogramStxOp;
 import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.QualitativeStxOp;
 import org.esa.snap.core.datamodel.StxFactory;
 import org.esa.snap.core.datamodel.SummaryStxOp;
 import org.esa.snap.core.datamodel.VectorDataNode;
@@ -113,12 +114,17 @@ public class StatisticComputer {
     }
 
     private void computeStatistic(String regionName, StxOpMapping stxOpsMapping, Band band, Shape roiShape, MultiLevelImage roiImage) {
-        final SummaryStxOp summaryStxOp = stxOpsMapping.getSummaryOp(regionName);
-        StxFactory.accumulate(band, 0, roiImage, roiShape, summaryStxOp, SubProgressMonitor.create(pm, 50));
-        final double minimum = summaryStxOp.getMinimum();
-        final double maximum = summaryStxOp.getMaximum();
-        final HistogramStxOp histogramStxOp = stxOpsMapping.getHistogramOp(regionName, minimum, maximum, band);
-        StxFactory.accumulate(band, 0, roiImage, roiShape, histogramStxOp, SubProgressMonitor.create(pm, 50));
+        if (band.isIndexBand()) {
+            final QualitativeStxOp qualitativeStxOp = stxOpsMapping.getQualitativeStxOp(regionName, band);
+            StxFactory.accumulate(band, 0, roiImage, roiShape, qualitativeStxOp, SubProgressMonitor.create(pm, 50));
+        } else {
+            final SummaryStxOp summaryStxOp = stxOpsMapping.getSummaryOp(regionName);
+            StxFactory.accumulate(band, 0, roiImage, roiShape, summaryStxOp, SubProgressMonitor.create(pm, 50));
+            final double minimum = summaryStxOp.getMinimum();
+            final double maximum = summaryStxOp.getMaximum();
+            final HistogramStxOp histogramStxOp = stxOpsMapping.getHistogramOp(regionName, minimum, maximum, band);
+            StxFactory.accumulate(band, 0, roiImage, roiShape, histogramStxOp, SubProgressMonitor.create(pm, 50));
+        }
     }
 
     private StxOpMapping getStxOpsMapping(BandConfiguration bandConfiguration) {
@@ -171,11 +177,22 @@ public class StatisticComputer {
         final Map<String, SummaryStxOp> summaryMap;
         final Map<String, HistogramStxOp> histogramMap;
         private final int initialBinCount;
+        final Map<String, QualitativeStxOp> qualitativeMap;
 
         StxOpMapping(int initialBinCount) {
-            this.summaryMap = new HashMap<String, SummaryStxOp>();
-            this.histogramMap = new HashMap<String, HistogramStxOp>();
+            this.summaryMap = new HashMap<>();
+            this.histogramMap = new HashMap<>();
             this.initialBinCount = initialBinCount;
+            this.qualitativeMap = new HashMap<>();
+        }
+
+        private QualitativeStxOp getQualitativeStxOp(String vdnName, Band band) {
+            QualitativeStxOp qualitativeStxOp = qualitativeMap.get(vdnName);
+            if (qualitativeStxOp == null) {
+                qualitativeStxOp = new QualitativeStxOp(band.getIndexCoding());
+                qualitativeMap.put(vdnName, qualitativeStxOp);
+            }
+            return qualitativeStxOp;
         }
 
         private SummaryStxOp getSummaryOp(String vdnName) {
