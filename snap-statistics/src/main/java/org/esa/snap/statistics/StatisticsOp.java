@@ -185,7 +185,7 @@ public class StatisticsOp extends Operator {
         }
 
         final Map<BandConfiguration, StatisticComputer.StxOpMapping> stxOps = statisticComputer.getResults();
-        final String[] algorithmNames = getAlgorithmNames(percentiles);
+        final String[] algorithmNames = getAlgorithmNames(stxOps, percentiles);
 
         final List<String> bandNamesList = new ArrayList<String>();
         for (BandConfiguration bandConfiguration : bandConfigurations) {
@@ -303,8 +303,46 @@ public class StatisticsOp extends Operator {
         return fileSet.toArray(new File[fileSet.size()]);
     }
 
-    public static String[] getAlgorithmNames(int[] percentiles) {
+    private static String[] getAlgorithmNames(Map<BandConfiguration, StatisticComputer.StxOpMapping> stxOps,
+                                              int[] percentiles) {
         final List<String> algorithms = new ArrayList<String>();
+        for (StatisticComputer.StxOpMapping stxOpMapping : stxOps.values()) {
+            Collection<SummaryStxOp> summaryStxOps = stxOpMapping.summaryMap.values();
+            for (SummaryStxOp summaryStxOp : summaryStxOps) {
+                if (!Double.isNaN(summaryStxOp.getMean())) {
+                    algorithms.add(MINIMUM);
+                    algorithms.add(MAXIMUM);
+                    algorithms.add(MEDIAN);
+                    algorithms.add(AVERAGE);
+                    algorithms.add(SIGMA);
+                    for (int percentile : percentiles) {
+                        algorithms.add(getPercentileName(percentile));
+                    }
+                    algorithms.add(MAX_ERROR);
+                    algorithms.add(TOTAL);
+                    break;
+                }
+            }
+            Collection<QualitativeStxOp> qualitativeStxOps = stxOpMapping.qualitativeMap.values();
+            if (!qualitativeStxOps.isEmpty() && !algorithms.contains(StatisticsOp.MAJORITY_CLASS)) {
+                algorithms.add(StatisticsOp.MAJORITY_CLASS);
+            }
+            for (QualitativeStxOp qualitativeStxOp : qualitativeStxOps) {
+                if (!qualitativeStxOp.getMajorityClass().equals(QualitativeStxOp.NO_MAJORITY_CLASS)) {
+                    String[] classNames = qualitativeStxOp.getClassNames();
+                    for (String className : classNames) {
+                        if (!algorithms.contains(className)) {
+                            algorithms.add(className);
+                        }
+                    }
+                }
+            }
+        }
+        return algorithms.toArray(new String[algorithms.size()]);
+    }
+
+    public static String[] getAlgorithmNames(int[] percentiles) {
+        final List<String> algorithms = new ArrayList<>();
         algorithms.add(MINIMUM);
         algorithms.add(MAXIMUM);
         algorithms.add(MEDIAN);
