@@ -90,6 +90,7 @@ public class StatisticsOp extends Operator {
 
     public static final String DATETIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
     public static final String MAJORITY_CLASS = "majority_class";
+    public static final String SECOND_MAJORITY_CLASS = "second_majority_class";
     public static final String MAXIMUM = "maximum";
     public static final String MINIMUM = "minimum";
     public static final String MEDIAN = "median";
@@ -240,6 +241,8 @@ public class StatisticsOp extends Operator {
                         stxMap.put(classNames[i], qualitativeStxOp.getNumberOfMembers(i));
                     }
                     stxMap.put(MAJORITY_CLASS, qualitativeStxOp.getMajorityClass());
+                    stxMap.put(SECOND_MAJORITY_CLASS, qualitativeStxOp.getSecondMajorityClass());
+                    stxMap.put(TOTAL, qualitativeStxOp.getTotalNumClassMembers());
                 }
                 for (StatisticsOutputter statisticsOutputter : statisticsOutputters) {
                     statisticsOutputter.addToOutput(bandName, regionName, stxMap);
@@ -333,13 +336,19 @@ public class StatisticsOp extends Operator {
                         algorithms.add(getPercentileName(percentile));
                     }
                     algorithms.add(MAX_ERROR);
-                    algorithms.add(TOTAL);
+                    if (!algorithms.contains(TOTAL)) {
+                        algorithms.add(TOTAL);
+                    }
                     break;
                 }
             }
             Collection<QualitativeStxOp> qualitativeStxOps = stxOpMapping.qualitativeMap.values();
             if (!qualitativeStxOps.isEmpty() && !algorithms.contains(StatisticsOp.MAJORITY_CLASS)) {
                 algorithms.add(StatisticsOp.MAJORITY_CLASS);
+                algorithms.add(StatisticsOp.SECOND_MAJORITY_CLASS);
+                if (!algorithms.contains(TOTAL)) {
+                    algorithms.add(StatisticsOp.TOTAL);
+                }
             }
             for (QualitativeStxOp qualitativeStxOp : qualitativeStxOps) {
                 if (!qualitativeStxOp.getMajorityClass().equals(QualitativeStxOp.NO_MAJORITY_CLASS)) {
@@ -356,7 +365,7 @@ public class StatisticsOp extends Operator {
     }
 
     public static String[] getAlgorithmNames(int[] percentiles) {
-        final List<String> algorithms = new ArrayList<String>();
+        final List<String> algorithms = new ArrayList<>();
         algorithms.add(MINIMUM);
         algorithms.add(MAXIMUM);
         algorithms.add(MEDIAN);

@@ -6,11 +6,13 @@ import org.esa.snap.core.util.math.DoubleList;
 
 public class QualitativeStxOp extends StxOp {
 
-    public final static String NO_MAJORITY_CLASS = "qualitativeStxOpEmpty";
+    public final static String NO_MAJORITY_CLASS = "";
 
     private final IndexCoding indexCoding;
     private final int[] numClassMembers;
+    private int totalNumClassMembers;
     private String majorityClass;
+    private String secondMajorityClass;
     private String[] indexNames;
 
     public QualitativeStxOp(IndexCoding indexCoding) {
@@ -19,7 +21,9 @@ public class QualitativeStxOp extends StxOp {
         indexNames = indexCoding.getIndexNames();
         numClassMembers = new int[indexCoding.getNumAttributes()];
         Arrays.fill(numClassMembers, 0);
+        totalNumClassMembers = 0;
         this.majorityClass = NO_MAJORITY_CLASS;
+        this.secondMajorityClass = NO_MAJORITY_CLASS;
     }
 
     public int getNumberOfMembers(int index) {
@@ -28,6 +32,14 @@ public class QualitativeStxOp extends StxOp {
 
     public String getMajorityClass() {
         return majorityClass;
+    }
+
+    public String getSecondMajorityClass() {
+        return secondMajorityClass;
+    }
+
+    public int getTotalNumClassMembers() {
+        return totalNumClassMembers;
     }
 
     public String[] getClassNames() {
@@ -79,6 +91,7 @@ public class QualitativeStxOp extends StxOp {
                     for (int i = 0; i < indexCoding.getNumAttributes(); i++) {
                         if (value == indexValues[i]) {
                             numClassMembers[i]++;
+                            totalNumClassMembers++;
                             break;
                         }
                     }
@@ -90,15 +103,25 @@ public class QualitativeStxOp extends StxOp {
             maskLineOffset += maskLineStride;
         }
         int maxIndex = -1;
-        int maxNumClassMembers = -1;
+        int secondMaxIndex = -1;
+        int maxNumClassMembers = 0;
+        int secondMaxNumClassMembers = 0;
         for (int i = 0; i < numClassMembers.length; i++) {
             if (numClassMembers[i] > maxNumClassMembers) {
+                secondMaxIndex = maxIndex;
+                secondMaxNumClassMembers = maxNumClassMembers;
                 maxIndex = i;
                 maxNumClassMembers = numClassMembers[i];
+            } else if (numClassMembers[i] > secondMaxNumClassMembers) {
+                secondMaxIndex = i;
+                secondMaxNumClassMembers = numClassMembers[i];
             }
         }
         if (maxIndex >= 0) {
             majorityClass = indexNames[maxIndex];
+            if (secondMaxIndex >= 0) {
+                secondMajorityClass = indexNames[secondMaxIndex];
+            }
         }
     }
 
