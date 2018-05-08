@@ -4,6 +4,7 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 
 import java.util.ArrayList;
+import org.esa.snap.statistics.StatisticsOp;
 
 /**
  * The context used to initialise instances of {@link StatisticsOutputter}.
@@ -40,6 +41,10 @@ public class StatisticsOutputContext {
      */
     public final String[] regionIds;
 
+
+    public final boolean isNotNumber(String algorithm) {
+        return algorithm.equals(StatisticsOp.MAJORITY_CLASS);
+    }
 
     // todo doku ... add context object to factory ... initialize Context object
 

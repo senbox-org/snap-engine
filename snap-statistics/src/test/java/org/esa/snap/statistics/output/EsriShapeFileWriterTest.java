@@ -37,7 +37,7 @@ import static org.junit.Assert.*;
  */
 public class EsriShapeFileWriterTest {
 
-    static File testdataDir;
+    private static File testdataDir;
 
     @After
     public void tearDown() throws Exception {
@@ -76,7 +76,7 @@ public class EsriShapeFileWriterTest {
 
         featureStatisticsWriter.initialiseOutput(StatisticsOutputContext.create(new String[]{"algal_2"}, algorithmNames));
 
-        HashMap<String, Number> statistics = new HashMap<String, Number>();
+        HashMap<String, Object> statistics = new HashMap<>();
         statistics.put("p90", 0.1);
         featureStatisticsWriter.addToOutput("algal_2", "4_pixels.1", statistics);
 
@@ -87,7 +87,7 @@ public class EsriShapeFileWriterTest {
         return featureStatisticsWriter.getFeatures();
     }
 
-    static File getTestFile(String fileName) {
+    private static File getTestFile(String fileName) {
         testdataDir.mkdirs();
         return new File(testdataDir, fileName);
     }

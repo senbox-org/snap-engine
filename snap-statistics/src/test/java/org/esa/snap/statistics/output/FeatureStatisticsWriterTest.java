@@ -38,7 +38,7 @@ public class FeatureStatisticsWriterTest {
 
         featureStatisticsWriter.initialiseOutput(StatisticsOutputContext.create(new String[]{"algal_2"}, algorithmNames));
 
-        HashMap<String, Number> statistics = new HashMap<String, Number>();
+        HashMap<String, Object> statistics = new HashMap<>();
         statistics.put("p90", 0.1);
         featureStatisticsWriter.addToOutput("algal_2", "4_pixels.1", statistics);
 
@@ -70,7 +70,7 @@ public class FeatureStatisticsWriterTest {
                 "algal_2"
         }, algorithmNames));
 
-        HashMap<String, Number> statistics = new HashMap<String, Number>();
+        HashMap<String, Object> statistics = new HashMap<>();
 
         statistics.put("p90", 1.90);
         featureStatisticsWriter.addToOutput("algal_2", "polygons.1", statistics);
@@ -132,7 +132,7 @@ public class FeatureStatisticsWriterTest {
                 "algal_2"
         }, algorithmNames));
 
-        HashMap<String, Number> statistics = new HashMap<String, Number>();
+        HashMap<String, Object> statistics = new HashMap<>();
 
         statistics.put("p90", 1.90);
         featureStatisticsWriter.addToOutput("algal_2", "polygons.1", statistics);

@@ -40,7 +40,7 @@ public interface StatisticsOutputter {
      * @param regionId   The id of the region the statistics have been computed for.
      * @param statistics The actual statistics as map. Keys are the algorithm names, values are the actual statistical values.
      */
-    void addToOutput(String bandName, String regionId, Map<String, Number> statistics);
+    void addToOutput(String bandName, String regionId, Map<String, Object> statistics);
 
     /**
      * Performs finalising steps.

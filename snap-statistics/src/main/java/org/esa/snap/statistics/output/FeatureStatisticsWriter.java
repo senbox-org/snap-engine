@@ -123,7 +123,11 @@ public class FeatureStatisticsWriter implements StatisticsOutputter {
             for (String bandName : statisticsOutputContext.bandNames) {
                 final String attributeName = bandNameCreator.createUniqueAttributeName(algorithmName, bandName);
                 if (originalFeatureType.getDescriptor(attributeName) == null) {
-                    typeBuilder.add(attributeName, Double.class);
+                    if (statisticsOutputContext.isNotNumber(algorithmName)) {
+                        typeBuilder.add(attributeName, String.class);
+                    } else {
+                        typeBuilder.add(attributeName, Double.class);
+                    }
                 }
             }
         }
@@ -140,7 +144,7 @@ public class FeatureStatisticsWriter implements StatisticsOutputter {
      * @param statistics The actual statistics as map. Keys are the algorithm names, values are the actual statistical values.
      */
     @Override
-    public void addToOutput(String bandName, String regionId, Map<String, Number> statistics) {
+    public void addToOutput(String bandName, String regionId, Map<String, Object> statistics) {
         final SimpleFeatureBuilder simpleFeatureBuilder = new SimpleFeatureBuilder(updatedFeatureType);
         final List<SimpleFeature> markedToRemove = new ArrayList<SimpleFeature>();
         final Map<String, SimpleFeature> markedToAdd = new HashMap<String, SimpleFeature>();
@@ -171,14 +175,14 @@ public class FeatureStatisticsWriter implements StatisticsOutputter {
             SimpleFeature feature = featureIterator.next();
             for (String algorithmName : statistics.keySet()) {
                 final String name = bandNameCreator.createUniqueAttributeName(algorithmName, bandName);
-                final Number value = getValue(statistics, algorithmName, feature, regionId);
+                final Object value = getValue(statistics, algorithmName, feature, regionId);
                 feature = createUpdatedFeature(simpleFeatureBuilder, feature, name, value);
             }
             features.add(feature);
         }
     }
 
-    private Number getValue(Map<String, Number> statistics, String algorithmName, SimpleFeature originalFeature, String regionId) {
+    private Object getValue(Map<String, Object> statistics, String algorithmName, SimpleFeature originalFeature, String regionId) {
         if (Util.getFeatureName(originalFeature).equals(regionId)) {
             return statistics.get(algorithmName);
         } else {
@@ -217,7 +221,7 @@ public class FeatureStatisticsWriter implements StatisticsOutputter {
         return updatedFeatureType;
     }
 
-    private static SimpleFeature createUpdatedFeature(SimpleFeatureBuilder builder, SimpleFeature baseFeature, String name, Number value) {
+    private static SimpleFeature createUpdatedFeature(SimpleFeatureBuilder builder, SimpleFeature baseFeature, String name, Object value) {
         builder.init(baseFeature);
         builder.set(name, value);
         return builder.buildFeature(baseFeature.getID());

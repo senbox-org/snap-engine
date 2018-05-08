@@ -346,28 +346,28 @@ public class StatisticsOpTest {
         }
 
         @Override
-        public void addToOutput(String bandName, String regionId, Map<String, Number> statistics) {
-            final TreeMap<String, Number> map = new TreeMap<>();
+        public void addToOutput(String bandName, String regionId, Map<String, Object> statistics) {
+            final TreeMap<String, Object> map = new TreeMap<>();
             map.putAll(statistics);
             region = regionId;
             this.bandName = bandName;
             int percentileIndex = 0;
-            for (Map.Entry<String, Number> entry : map.entrySet()) {
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
                 final String key = entry.getKey();
                 if (key.equalsIgnoreCase("total")) {
-                    pixels = entry.getValue().intValue();
+                    pixels = ((Number) entry.getValue()).intValue();
                 } else if (key.equalsIgnoreCase("minimum")) {
-                    minimum = entry.getValue().doubleValue();
+                    minimum = ((Number) entry.getValue()).doubleValue();
                 } else if (key.equalsIgnoreCase("maximum")) {
-                    maximum = entry.getValue().doubleValue();
+                    maximum = ((Number) entry.getValue()).doubleValue();
                 } else if (key.equalsIgnoreCase("average")) {
-                    average = entry.getValue().doubleValue();
+                    average = ((Number) entry.getValue()).doubleValue();
                 } else if (key.equalsIgnoreCase("median")) {
-                    median = entry.getValue().doubleValue();
+                    median = ((Number) entry.getValue()).doubleValue();
                 } else if (key.equalsIgnoreCase("sigma")) {
-                    sigma = entry.getValue().doubleValue();
+                    sigma = ((Number) entry.getValue()).doubleValue();
                 } else if (key.startsWith("p") && key.endsWith("threshold")) {
-                    percentiles[percentileIndex++] = entry.getValue().doubleValue();
+                    percentiles[percentileIndex++] = ((Number) entry.getValue()).doubleValue();
                 }
             }
         }

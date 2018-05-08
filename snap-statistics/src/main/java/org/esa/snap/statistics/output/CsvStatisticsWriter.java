@@ -65,7 +65,7 @@ public class CsvStatisticsWriter implements StatisticsOutputter {
      * @param statistics The actual statistics as map. Keys are the algorithm names, values are the actual statistical values.
      */
     @Override
-    public void addToOutput(String bandName, String regionId, Map<String, Number> statistics) {
+    public void addToOutput(String bandName, String regionId, Map<String, Object> statistics) {
         if (!statisticsContainer.containsBand(bandName)) {
             statisticsContainer.put(bandName, new BandStatistics());
         }
@@ -74,7 +74,7 @@ public class CsvStatisticsWriter implements StatisticsOutputter {
             dataForBandName.put(regionId, new RegionStatistics());
         }
         final RegionStatistics dataForRegionName = dataForBandName.getDataForRegionName(regionId);
-        for (Map.Entry<String, Number> entry : statistics.entrySet()) {
+        for (Map.Entry<String, Object> entry : statistics.entrySet()) {
             dataForRegionName.put(entry.getKey(), entry.getValue());
         }
     }
@@ -102,8 +102,12 @@ public class CsvStatisticsWriter implements StatisticsOutputter {
                     csvOutput.append("\t");
                     final RegionStatistics dataForRegionName = bandStatistics.getDataForRegionName(regionName);
                     if (dataForRegionName.containsAlgorithm(algorithmName)) {
-                        final Number numberValue = dataForRegionName.getDataForAlgorithmName(algorithmName);
-                        csvOutput.append(getValueAsString(numberValue));
+                        Object value = dataForRegionName.getDataForAlgorithmName(algorithmName);
+                        if (value instanceof Number) {
+                            csvOutput.append(getValueAsString((Number) value));
+                        } else {
+                            csvOutput.append(value.toString());
+                        }
                     }
                 }
                 csvOutput.append("\n");
@@ -176,9 +180,9 @@ public class CsvStatisticsWriter implements StatisticsOutputter {
 
     static class RegionStatistics {
 
-        Map<String, Number> regionStatistics = new HashMap<>();
+        Map<String, Object> regionStatistics = new HashMap<>();
 
-        Number getDataForAlgorithmName(String algorithmName) {
+        Object getDataForAlgorithmName(String algorithmName) {
             return regionStatistics.get(algorithmName);
         }
 
@@ -186,7 +190,7 @@ public class CsvStatisticsWriter implements StatisticsOutputter {
             return regionStatistics.containsKey(algorithmName);
         }
 
-        void put(String algorithmName, Number value) {
+        void put(String algorithmName, Object value) {
             regionStatistics.put(algorithmName, value);
         }
     }

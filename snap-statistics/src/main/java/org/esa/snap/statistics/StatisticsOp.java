@@ -230,13 +230,27 @@ public class StatisticsOp extends Operator {
                 bandName = bandConfiguration.expression.replace(" ", "_");
             }
             final StatisticComputer.StxOpMapping stxOpMapping = bandConfigurationStxOpMappingEntry.getValue();
+            final Map<String, QualitativeStxOp> qualitativeMap = stxOpMapping.qualitativeMap;
+            for (String regionName : qualitativeMap.keySet()) {
+                final HashMap<String, Object> stxMap = new HashMap<>();
+                final QualitativeStxOp qualitativeStxOp = qualitativeMap.get(regionName);
+                if (!qualitativeStxOp.getMajorityClass().equals(QualitativeStxOp.NO_MAJORITY_CLASS)) {
+                    String[] classNames = qualitativeStxOp.getClassNames();
+                    for (int i = 0; i < classNames.length; i++) {
+                        stxMap.put(classNames[i], qualitativeStxOp.getNumberOfMembers(i));
+                    }
+                    stxMap.put(MAJORITY_CLASS, qualitativeStxOp.getMajorityClass());
+                }
+                for (StatisticsOutputter statisticsOutputter : statisticsOutputters) {
+                    statisticsOutputter.addToOutput(bandName, regionName, stxMap);
+                }
+            }
             final Map<String, SummaryStxOp> summaryMap = stxOpMapping.summaryMap;
             final Map<String, HistogramStxOp> histogramMap = stxOpMapping.histogramMap;
             for (String regionName : summaryMap.keySet()) {
-
+                final HashMap<String, Object> stxMap = new HashMap<>();
                 final SummaryStxOp summaryStxOp = summaryMap.get(regionName);
                 final Histogram histogram = histogramMap.get(regionName).getHistogram();
-                final HashMap<String, Number> stxMap = new HashMap<String, Number>();
                 if (histogram.getTotals()[0] == 0) {
                     stxMap.put(MINIMUM, FILL_VALUE);
                     stxMap.put(MAXIMUM, FILL_VALUE);
@@ -342,7 +356,7 @@ public class StatisticsOp extends Operator {
     }
 
     public static String[] getAlgorithmNames(int[] percentiles) {
-        final List<String> algorithms = new ArrayList<>();
+        final List<String> algorithms = new ArrayList<String>();
         algorithms.add(MINIMUM);
         algorithms.add(MAXIMUM);
         algorithms.add(MEDIAN);
