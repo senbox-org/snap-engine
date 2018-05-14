@@ -153,6 +153,11 @@ public class StatisticsOp extends Operator {
             defaultValue = "3")
     int accuracy;
 
+    @Parameter(description = "If true, from bands with integer values statistical measures will be retrieved" +
+            "(counts per integer value, names of two most frequent integer values). If the band is an index band," +
+            "class names will be extracted from it.", defaultValue = "false")
+    boolean retrieveCategoricalStatistics;
+
     final Set<StatisticsOutputter> statisticsOutputters = new HashSet<>();
 
     final SortedSet<String> regionNames = new TreeSet<>();
@@ -166,7 +171,7 @@ public class StatisticsOp extends Operator {
         setDummyTargetProduct();
         validateInput();
 
-        final StatisticComputer statisticComputer = new StatisticComputer(shapefile, bandConfigurations, Util.computeBinCount(accuracy), getLogger());
+        final StatisticComputer statisticComputer = new StatisticComputer(shapefile, bandConfigurations, Util.computeBinCount(accuracy), retrieveCategoricalStatistics, getLogger());
 
         final ProductValidator productValidator = new ProductValidator(Arrays.asList(bandConfigurations), startDate, endDate, getLogger());
         final ProductLoop productLoop = new ProductLoop(new ProductLoader(), productValidator, statisticComputer, getLogger());
@@ -238,7 +243,7 @@ public class StatisticsOp extends Operator {
                 if (!qualitativeStxOp.getMajorityClass().equals(QualitativeStxOp.NO_MAJORITY_CLASS)) {
                     String[] classNames = qualitativeStxOp.getClassNames();
                     for (int i = 0; i < classNames.length; i++) {
-                        stxMap.put(classNames[i], qualitativeStxOp.getNumberOfMembers(i));
+                        stxMap.put(classNames[i], qualitativeStxOp.getNumberOfMembers(classNames[i]));
                     }
                     stxMap.put(MAJORITY_CLASS, qualitativeStxOp.getMajorityClass());
                     stxMap.put(SECOND_MAJORITY_CLASS, qualitativeStxOp.getSecondMajorityClass());

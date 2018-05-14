@@ -1,6 +1,7 @@
 package org.esa.snap.core.datamodel;
 
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import javax.media.jai.UnpackedImageData;
 import org.esa.snap.core.util.math.DoubleList;
 
@@ -8,34 +9,55 @@ public class QualitativeStxOp extends StxOp {
 
     public final static String NO_MAJORITY_CLASS = "";
 
-    private final IndexCoding indexCoding;
-    private final int[] numClassMembers;
+    private final Map<String, Integer> membersPerClass;
     private int totalNumClassMembers;
     private String majorityClass;
     private String secondMajorityClass;
-    private String[] indexNames;
+    private ClassCounter classCounter;
 
-    public QualitativeStxOp(IndexCoding indexCoding) {
+    public QualitativeStxOp() {
         super("Qualitative");
-        this.indexCoding = indexCoding;
-        indexNames = indexCoding.getIndexNames();
-        numClassMembers = new int[indexCoding.getNumAttributes()];
-        Arrays.fill(numClassMembers, 0);
+        membersPerClass = new HashMap<>();
         totalNumClassMembers = 0;
         this.majorityClass = NO_MAJORITY_CLASS;
         this.secondMajorityClass = NO_MAJORITY_CLASS;
     }
 
-    public int getNumberOfMembers(int index) {
-        return numClassMembers[index];
+    public int getNumberOfMembers(String className) {
+        if (membersPerClass.containsKey(className)) {
+            return membersPerClass.get(className);
+        }
+        return 0;
     }
 
     public String getMajorityClass() {
+        if (majorityClass.equals(NO_MAJORITY_CLASS)) {
+            determineMajorityClass();
+        }
         return majorityClass;
     }
 
     public String getSecondMajorityClass() {
+        if (majorityClass.equals(NO_MAJORITY_CLASS)) {
+            determineMajorityClass();
+        }
         return secondMajorityClass;
+    }
+
+    private void determineMajorityClass() {
+        int maxNumClassMembers = 0;
+        int secondMaxNumClassMembers = 0;
+        for (Map.Entry<String, Integer> entry : membersPerClass.entrySet()) {
+            if (entry.getValue() > maxNumClassMembers) {
+                secondMajorityClass = majorityClass;
+                secondMaxNumClassMembers = maxNumClassMembers;
+                majorityClass = entry.getKey();
+                maxNumClassMembers = entry.getValue();
+            } else if (entry.getValue() > secondMaxNumClassMembers) {
+                secondMajorityClass = entry.getKey();
+                secondMaxNumClassMembers = entry.getValue();
+            }
+        }
     }
 
     public int getTotalNumClassMembers() {
@@ -43,7 +65,16 @@ public class QualitativeStxOp extends StxOp {
     }
 
     public String[] getClassNames() {
-        return indexNames;
+        return membersPerClass.keySet().toArray(new String[0]);
+    }
+
+    public void determineClassCounterType(Band band) {
+        // maybe add here a third counter for flag codings
+        if (band.isIndexBand()) {
+            classCounter = new IndexCodingClassCounter(band.getIndexCoding());
+        } else {
+            classCounter = new DefaultClassCounter();
+        }
     }
 
     @Override
@@ -78,23 +109,14 @@ public class QualitativeStxOp extends StxOp {
 
         // }} Block End
 
-        int[] indexValues = new int[indexCoding.getNumAttributes()];
-        for (int i = 0; i < indexCoding.getNumAttributes(); i++) {
-            indexValues[i] = indexCoding.getIndexValue(indexNames[i]);
-        }
         for (int y = 0; y < height; y++) {
             int dataPixelOffset = dataLineOffset;
             int maskPixelOffset = maskLineOffset;
             for (int x = 0; x < width; x++) {
                 if (mask == null || mask[maskPixelOffset] != 0) {
                     int value = (int) values.getDouble(dataPixelOffset);
-                    for (int i = 0; i < indexCoding.getNumAttributes(); i++) {
-                        if (value == indexValues[i]) {
-                            numClassMembers[i]++;
-                            totalNumClassMembers++;
-                            break;
-                        }
-                    }
+                    classCounter.count(value);
+                    totalNumClassMembers++;
                 }
                 dataPixelOffset += dataPixelStride;
                 maskPixelOffset += maskPixelStride;
@@ -102,26 +124,61 @@ public class QualitativeStxOp extends StxOp {
             dataLineOffset += dataLineStride;
             maskLineOffset += maskLineStride;
         }
-        int maxIndex = -1;
-        int secondMaxIndex = -1;
-        int maxNumClassMembers = 0;
-        int secondMaxNumClassMembers = 0;
-        for (int i = 0; i < numClassMembers.length; i++) {
-            if (numClassMembers[i] > maxNumClassMembers) {
-                secondMaxIndex = maxIndex;
-                secondMaxNumClassMembers = maxNumClassMembers;
-                maxIndex = i;
-                maxNumClassMembers = numClassMembers[i];
-            } else if (numClassMembers[i] > secondMaxNumClassMembers) {
-                secondMaxIndex = i;
-                secondMaxNumClassMembers = numClassMembers[i];
+    }
+
+    private void putIntValue(int value) {
+        String key = Integer.toString(value);
+        if (!membersPerClass.containsKey(key)) {
+            membersPerClass.put(key, 1);
+        } else {
+            membersPerClass.put(key, membersPerClass.get(key) + 1);
+        }
+    }
+
+    private interface ClassCounter {
+
+        void count(int value);
+
+    }
+
+    private class IndexCodingClassCounter implements ClassCounter {
+
+        private final String[] indexNames;
+        private final int[] indexValues;
+        private final int numAttributes;
+
+        IndexCodingClassCounter(IndexCoding indexCoding) {
+            indexNames = indexCoding.getIndexNames();
+            numAttributes = indexCoding.getNumAttributes();
+            indexValues = new int[numAttributes];
+            for (int i = 0; i < numAttributes; i++) {
+                indexValues[i] = indexCoding.getIndexValue(indexNames[i]);
             }
         }
-        if (maxIndex >= 0) {
-            majorityClass = indexNames[maxIndex];
-            if (secondMaxIndex >= 0) {
-                secondMajorityClass = indexNames[secondMaxIndex];
+
+        @Override
+        public void count(int value) {
+            for (int i = 0; i < numAttributes; i++) {
+                if (value == indexValues[i]) {
+                    String indexName = indexNames[i];
+                    if (!membersPerClass.containsKey(indexName)) {
+                        membersPerClass.put(indexName, 1);
+                    } else {
+                        membersPerClass.put(indexName, membersPerClass.get(indexName) + 1);
+                    }
+                    return;
+                }
             }
+            putIntValue(value);
+        }
+
+    }
+
+    private class DefaultClassCounter implements ClassCounter {
+
+        @Override
+        public void count(int value) {
+            putIntValue(value);
         }
     }
 

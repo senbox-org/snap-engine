@@ -45,9 +45,11 @@ public class StatisticComputer {
     private final Map<BandConfiguration, StxOpMapping> stxOpMappings;
     private final int initialBinCount;
     private final Logger logger;
+    private final boolean retrieveCategoricalStatistics;
 
-    public StatisticComputer(File shapefile, BandConfiguration[] bandConfigurations, int initialBinCount, Logger logger) {
+    public StatisticComputer(File shapefile, BandConfiguration[] bandConfigurations, int initialBinCount, boolean retrieveCategoricalStatistics, Logger logger) {
         this.initialBinCount = initialBinCount;
+        this.retrieveCategoricalStatistics = retrieveCategoricalStatistics;
         this.logger = logger != null ? logger : SystemUtils.LOG;
         if (shapefile != null) {
             try {
@@ -114,7 +116,7 @@ public class StatisticComputer {
     }
 
     private void computeStatistic(String regionName, StxOpMapping stxOpsMapping, Band band, Shape roiShape, MultiLevelImage roiImage) {
-        if (band.isIndexBand()) {
+        if (retrieveCategoricalStatistics && isIntegerBand(band)) {
             final QualitativeStxOp qualitativeStxOp = stxOpsMapping.getQualitativeStxOp(regionName, band);
             StxFactory.accumulate(band, 0, roiImage, roiShape, qualitativeStxOp, SubProgressMonitor.create(pm, 50));
         } else {
@@ -143,7 +145,7 @@ public class StatisticComputer {
         while (featureIterator.hasNext()) {
             final SimpleFeature simpleFeature = featureIterator.next();
             final DefaultFeatureCollection fc = new DefaultFeatureCollection(simpleFeature.getID(),
-                                                                             simpleFeature.getFeatureType());
+                    simpleFeature.getFeatureType());
             fc.add(simpleFeature);
             String name = Util.getFeatureName(simpleFeature);
             result.add(new VectorDataNode(name, fc));
@@ -159,11 +161,11 @@ public class StatisticComputer {
             band.setNoDataValueUsed(true);
         } else {
             band = product.addBand(configuration.expression.replace(" ", "_"), configuration.expression,
-                                   ProductData.TYPE_FLOAT64);
+                    ProductData.TYPE_FLOAT64);
         }
         if (band == null) {
             throw new OperatorException(MessageFormat.format("Band ''{0}'' does not exist in product ''{1}''.",
-                                                             configuration.sourceBandName, product.getName()));
+                    configuration.sourceBandName, product.getName()));
         }
         return band;
     }
@@ -189,9 +191,10 @@ public class StatisticComputer {
         private QualitativeStxOp getQualitativeStxOp(String vdnName, Band band) {
             QualitativeStxOp qualitativeStxOp = qualitativeMap.get(vdnName);
             if (qualitativeStxOp == null) {
-                qualitativeStxOp = new QualitativeStxOp(band.getIndexCoding());
+                qualitativeStxOp = new QualitativeStxOp();
                 qualitativeMap.put(vdnName, qualitativeStxOp);
             }
+            qualitativeStxOp.determineClassCounterType(band);
             return qualitativeStxOp;
         }
 
@@ -206,8 +209,7 @@ public class StatisticComputer {
 
         private HistogramStxOp getHistogramOp(String vdnName, double minimum, double maximum, Band band) {
             HistogramStxOp histogramStxOp = histogramMap.get(vdnName);
-            boolean intHistogram;
-            intHistogram = band.getGeophysicalImage().getSampleModel().getDataType() < DataBuffer.TYPE_FLOAT;
+            boolean intHistogram = isIntegerBand(band);
             if (histogramStxOp == null) {
                 histogramStxOp = new HistogramStxOp(initialBinCount, minimum, maximum, intHistogram, false);
                 histogramMap.put(vdnName, histogramStxOp);
@@ -223,4 +225,10 @@ public class StatisticComputer {
             return histogramStxOp;
         }
     }
+
+    private static boolean isIntegerBand(Band band) {
+        return band.getGeophysicalImage().getSampleModel().getDataType() < DataBuffer.TYPE_FLOAT;
+    }
+
+
 }
