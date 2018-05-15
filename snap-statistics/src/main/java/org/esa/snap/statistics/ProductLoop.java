@@ -78,7 +78,14 @@ public class ProductLoop {
             path = product.getName();
         }
         logger.info("    current product: " + path);
-
+        if (product.getStartTime() != null && (oldestDate == null ||
+                product.getStartTime().getAsDate().before(oldestDate.getAsDate()))) {
+            oldestDate = product.getStartTime();
+        }
+        if (product.getEndTime() != null && (newestDate == null ||
+                product.getEndTime().getAsDate().after(newestDate.getAsDate()))) {
+            newestDate = product.getEndTime();
+        }
         statisticComputer.computeStatistic(product);
         productNames.add(path);
 
