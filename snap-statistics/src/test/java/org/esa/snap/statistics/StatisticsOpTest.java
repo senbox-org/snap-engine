@@ -26,6 +26,7 @@ import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.statistics.output.StatisticsOutputContext;
 import org.esa.snap.statistics.output.StatisticsOutputter;
+import org.esa.snap.statistics.tools.TimeInterval;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -301,6 +302,105 @@ public class StatisticsOpTest {
         assertFalse(StatisticsOp.isProductAlreadyOpened(products, new File("other.path")));
     }
 
+    @Test
+    public void testGetTimeIntervals_no_time_info() {
+        TimeInterval[] timeIntervals = StatisticsOp.getTimeIntervals(null, null, null);
+        assertEquals(0, timeIntervals.length);
+    }
+
+    @Test
+    public void testGetTimeIntervals_no_time_interval_definition() {
+        ProductData.UTC startDate = new ProductData.UTC(10, 10, 10);
+        ProductData.UTC endDate = new ProductData.UTC(20, 10, 10);
+        TimeInterval[] timeIntervals = StatisticsOp.getTimeIntervals(null, startDate, endDate);
+        assertEquals(1, timeIntervals.length);
+        assertEquals(0, timeIntervals[0].getId());
+        assertEquals(startDate, timeIntervals[0].getIntervalStart());
+        assertEquals(endDate, timeIntervals[0].getIntervalEnd());
+    }
+
+    @Test
+    public void testGetTimeIntervals_day_increase() {
+        ProductData.UTC startDate = new ProductData.UTC(10, 10, 10);
+        ProductData.UTC endDate = new ProductData.UTC(20, 10, 10);
+        TimeIntervalDefinition timeIntervalDefinition = new TimeIntervalDefinition();
+        timeIntervalDefinition.amount = 3;
+        timeIntervalDefinition.unit = "days";
+        TimeInterval[] timeIntervals = StatisticsOp.getTimeIntervals(timeIntervalDefinition, startDate, endDate);
+        assertEquals(4, timeIntervals.length);
+        assertEquals(0, timeIntervals[0].getId());
+        assertEquals(startDate.getAsDate(), timeIntervals[0].getIntervalStart().getAsDate());
+        assertEquals(new ProductData.UTC(13, 10, 10).getAsDate(), timeIntervals[0].getIntervalEnd().getAsDate());
+        assertEquals(1, timeIntervals[1].getId());
+        assertEquals(new ProductData.UTC(13, 10, 10).getAsDate(), timeIntervals[1].getIntervalStart().getAsDate());
+        assertEquals(new ProductData.UTC(16, 10, 10).getAsDate(), timeIntervals[1].getIntervalEnd().getAsDate());
+        assertEquals(2, timeIntervals[2].getId());
+        assertEquals(new ProductData.UTC(16, 10, 10).getAsDate(), timeIntervals[2].getIntervalStart().getAsDate());
+        assertEquals(new ProductData.UTC(19, 10, 10).getAsDate(), timeIntervals[2].getIntervalEnd().getAsDate());
+        assertEquals(3, timeIntervals[3].getId());
+        assertEquals(new ProductData.UTC(19, 10, 10).getAsDate(), timeIntervals[3].getIntervalStart().getAsDate());
+        assertEquals(new ProductData.UTC(20, 10, 10).getAsDate(), timeIntervals[3].getIntervalEnd().getAsDate());
+    }
+
+    @Test
+    public void testGetTimeIntervals_week_increase() {
+        ProductData.UTC startDate = new ProductData.UTC(1000, 10, 10);
+        ProductData.UTC endDate = new ProductData.UTC(1050, 10, 10);
+        TimeIntervalDefinition timeIntervalDefinition = new TimeIntervalDefinition();
+        timeIntervalDefinition.amount = 3;
+        timeIntervalDefinition.unit = "weeks";
+        TimeInterval[] timeIntervals = StatisticsOp.getTimeIntervals(timeIntervalDefinition, startDate, endDate);
+        assertEquals(3, timeIntervals.length);
+        assertEquals(0, timeIntervals[0].getId());
+        assertEquals(startDate.getAsDate(), timeIntervals[0].getIntervalStart().getAsDate());
+        assertEquals(new ProductData.UTC(1021, 10, 10).getAsDate(), timeIntervals[0].getIntervalEnd().getAsDate());
+        assertEquals(1, timeIntervals[1].getId());
+        assertEquals(new ProductData.UTC(1021, 10, 10).getAsDate(), timeIntervals[1].getIntervalStart().getAsDate());
+        assertEquals(new ProductData.UTC(1042, 10, 10).getAsDate(), timeIntervals[1].getIntervalEnd().getAsDate());
+        assertEquals(2, timeIntervals[2].getId());
+        assertEquals(new ProductData.UTC(1042, 10, 10).getAsDate(), timeIntervals[2].getIntervalStart().getAsDate());
+        assertEquals(new ProductData.UTC(1050, 10, 10).getAsDate(), timeIntervals[2].getIntervalEnd().getAsDate());
+    }
+
+    @Test
+    public void testGetTimeIntervals_month_increase() {
+        ProductData.UTC startDate = new ProductData.UTC(1000, 10, 10);
+        ProductData.UTC endDate = new ProductData.UTC(1150, 10, 10);
+        TimeIntervalDefinition timeIntervalDefinition = new TimeIntervalDefinition();
+        timeIntervalDefinition.amount = 2;
+        timeIntervalDefinition.unit = "months";
+        TimeInterval[] timeIntervals = StatisticsOp.getTimeIntervals(timeIntervalDefinition, startDate, endDate);
+        assertEquals(3, timeIntervals.length);
+        assertEquals(0, timeIntervals[0].getId());
+        assertEquals(startDate.getAsDate(), timeIntervals[0].getIntervalStart().getAsDate());
+        assertEquals(new ProductData.UTC(1061, 10, 10).getAsDate(), timeIntervals[0].getIntervalEnd().getAsDate());
+        assertEquals(1, timeIntervals[1].getId());
+        assertEquals(new ProductData.UTC(1061, 10, 10).getAsDate(), timeIntervals[1].getIntervalStart().getAsDate());
+        assertEquals(new ProductData.UTC(1122, 10, 10).getAsDate(), timeIntervals[1].getIntervalEnd().getAsDate());
+        assertEquals(2, timeIntervals[2].getId());
+        assertEquals(new ProductData.UTC(1122, 10, 10).getAsDate(), timeIntervals[2].getIntervalStart().getAsDate());
+        assertEquals(new ProductData.UTC(1150, 10, 10).getAsDate(), timeIntervals[2].getIntervalEnd().getAsDate());
+    }
+
+    @Test
+    public void testGetTimeIntervals_year_increase() {
+        ProductData.UTC startDate = new ProductData.UTC(1000, 10, 10);
+        ProductData.UTC endDate = new ProductData.UTC(2750, 10, 10);
+        TimeIntervalDefinition timeIntervalDefinition = new TimeIntervalDefinition();
+        timeIntervalDefinition.amount = 2;
+        timeIntervalDefinition.unit = "years";
+        TimeInterval[] timeIntervals = StatisticsOp.getTimeIntervals(timeIntervalDefinition, startDate, endDate);
+        assertEquals(3, timeIntervals.length);
+        assertEquals(0, timeIntervals[0].getId());
+        assertEquals(startDate.getAsDate(), timeIntervals[0].getIntervalStart().getAsDate());
+        assertEquals(new ProductData.UTC(1731, 10, 10).getAsDate(), timeIntervals[0].getIntervalEnd().getAsDate());
+        assertEquals(1, timeIntervals[1].getId());
+        assertEquals(new ProductData.UTC(1731, 10, 10).getAsDate(), timeIntervals[1].getIntervalStart().getAsDate());
+        assertEquals(new ProductData.UTC(2461, 10, 10).getAsDate(), timeIntervals[1].getIntervalEnd().getAsDate());
+        assertEquals(2, timeIntervals[2].getId());
+        assertEquals(new ProductData.UTC(2461, 10, 10).getAsDate(), timeIntervals[2].getIntervalStart().getAsDate());
+        assertEquals(new ProductData.UTC(2750, 10, 10).getAsDate(), timeIntervals[2].getIntervalEnd().getAsDate());
+    }
 
     private StatisticsOp createStatisticsOp() {
         StatisticsOp statisticsOp = new StatisticsOp();

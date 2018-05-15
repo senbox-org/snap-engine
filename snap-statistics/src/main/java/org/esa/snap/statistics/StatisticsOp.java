@@ -18,6 +18,7 @@ package org.esa.snap.statistics;
 
 import com.bc.ceres.binding.ConversionException;
 import com.bc.ceres.binding.Converter;
+import java.util.Calendar;
 import java.util.Collection;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.HistogramStxOp;
@@ -61,6 +62,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.logging.Level;
+import org.esa.snap.statistics.tools.TimeInterval;
 
 /**
  * An operator that is used to compute statistics for any number of source products, restricted to regions given by an
@@ -318,6 +320,49 @@ public class StatisticsOp extends Operator {
             }
         }
         return fileSet.toArray(new File[fileSet.size()]);
+    }
+
+    /* package local for testing*/
+    static TimeInterval[] getTimeIntervals(TimeIntervalDefinition interval, ProductData.UTC startDate, ProductData.UTC endDate) {
+        if (startDate == null || endDate == null) {
+            return new TimeInterval[0];
+        } else if (interval == null) {
+            return new TimeInterval[]{new TimeInterval(0, startDate, endDate)};
+        } else {
+            ArrayList<TimeInterval> timeIntervalList = new ArrayList<>();
+            int timeField = getTimeField(interval);
+            ProductData.UTC currentStartDate = new ProductData.UTC(startDate.getMJD());
+            ProductData.UTC currentEndDate = getIncreasedDate(startDate, timeField, interval.amount);
+            int counter = 0;
+            while (currentEndDate.getAsDate().before(endDate.getAsDate())) {
+                timeIntervalList.add(new TimeInterval(counter++, currentStartDate, currentEndDate));
+                currentStartDate = new ProductData.UTC(currentEndDate.getMJD());
+                currentEndDate = getIncreasedDate(currentEndDate, timeField, interval.amount);
+            }
+            timeIntervalList.add(new TimeInterval(counter, currentStartDate, endDate));
+            return timeIntervalList.toArray(new TimeInterval[0]);
+        }
+    }
+
+    private static ProductData.UTC getIncreasedDate(ProductData.UTC date, int timeField, int amount) {
+        Calendar calendar = date.getAsCalendar();
+        calendar.add(timeField, amount);
+        return ProductData.UTC.create(calendar.getTime(), 0);
+    }
+
+    private static int getTimeField(TimeIntervalDefinition interval) {
+        switch (interval.unit) {
+            case "days":
+                return Calendar.DAY_OF_MONTH;
+            case "weeks":
+                return Calendar.WEEK_OF_YEAR;
+            case "months":
+                return Calendar.MONTH;
+            case "years":
+                return Calendar.YEAR;
+            default:
+                throw new OperatorException("Invalid interval unit: " + interval.unit);
+        }
     }
 
     private static String[] getAlgorithmNames(Map<BandConfiguration, StatisticComputer.StxOpMapping> stxOps,
