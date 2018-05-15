@@ -1,7 +1,7 @@
 package org.esa.snap.core.datamodel;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 import javax.media.jai.UnpackedImageData;
 import org.esa.snap.core.util.math.DoubleList;
 
@@ -17,7 +17,7 @@ public class QualitativeStxOp extends StxOp {
 
     public QualitativeStxOp() {
         super("Qualitative");
-        membersPerClass = new HashMap<>();
+        membersPerClass = new TreeMap<>();
         totalNumClassMembers = 0;
         this.majorityClass = NO_MAJORITY_CLASS;
         this.secondMajorityClass = NO_MAJORITY_CLASS;
