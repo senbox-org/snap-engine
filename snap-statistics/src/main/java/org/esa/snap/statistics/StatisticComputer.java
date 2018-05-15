@@ -45,11 +45,9 @@ public class StatisticComputer {
     private final Map<BandConfiguration, StxOpMapping> stxOpMappings;
     private final int initialBinCount;
     private final Logger logger;
-    private final boolean retrieveCategoricalStatistics;
 
-    public StatisticComputer(File shapefile, BandConfiguration[] bandConfigurations, int initialBinCount, boolean retrieveCategoricalStatistics, Logger logger) {
+    public StatisticComputer(File shapefile, BandConfiguration[] bandConfigurations, int initialBinCount, Logger logger) {
         this.initialBinCount = initialBinCount;
-        this.retrieveCategoricalStatistics = retrieveCategoricalStatistics;
         this.logger = logger != null ? logger : SystemUtils.LOG;
         if (shapefile != null) {
             try {
@@ -107,15 +105,16 @@ public class StatisticComputer {
                     Mask currentMask = product.getMaskGroup().get(vdnName);
                     final Shape roiShape = currentMask.getValidShape();
                     final MultiLevelImage roiImage = currentMask.getSourceImage();
-                    computeStatistic(vdnName, stxOpsMapping, band, roiShape, roiImage);
+                    computeStatistic(vdnName, stxOpsMapping, band, bandConfiguration.retrieveCategoricalStatistics, roiShape, roiImage);
                 }
             } else {
-                computeStatistic("world", stxOpsMapping, band, null, null);
+                computeStatistic("world", stxOpsMapping, band, bandConfiguration.retrieveCategoricalStatistics, null, null);
             }
         }
     }
 
-    private void computeStatistic(String regionName, StxOpMapping stxOpsMapping, Band band, Shape roiShape, MultiLevelImage roiImage) {
+    private void computeStatistic(String regionName, StxOpMapping stxOpsMapping, Band band,
+                                  boolean retrieveCategoricalStatistics, Shape roiShape, MultiLevelImage roiImage) {
         if (retrieveCategoricalStatistics && isIntegerBand(band)) {
             final QualitativeStxOp qualitativeStxOp = stxOpsMapping.getQualitativeStxOp(regionName, band);
             StxFactory.accumulate(band, 0, roiImage, roiShape, qualitativeStxOp, SubProgressMonitor.create(pm, 50));
