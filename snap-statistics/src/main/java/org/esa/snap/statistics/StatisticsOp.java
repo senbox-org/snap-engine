@@ -324,22 +324,24 @@ public class StatisticsOp extends Operator {
                                               int[] percentiles) {
         final List<String> algorithms = new ArrayList<String>();
         for (StatisticComputer.StxOpMapping stxOpMapping : stxOps.values()) {
-            Collection<SummaryStxOp> summaryStxOps = stxOpMapping.summaryMap.values();
-            for (SummaryStxOp summaryStxOp : summaryStxOps) {
-                if (!Double.isNaN(summaryStxOp.getMean())) {
-                    algorithms.add(MINIMUM);
-                    algorithms.add(MAXIMUM);
-                    algorithms.add(MEDIAN);
-                    algorithms.add(AVERAGE);
-                    algorithms.add(SIGMA);
-                    for (int percentile : percentiles) {
-                        algorithms.add(getPercentileName(percentile));
+            if (!algorithms.contains(MINIMUM)) {
+                Collection<SummaryStxOp> summaryStxOps = stxOpMapping.summaryMap.values();
+                for (SummaryStxOp summaryStxOp : summaryStxOps) {
+                    if (!Double.isNaN(summaryStxOp.getMean())) {
+                        algorithms.add(MINIMUM);
+                        algorithms.add(MAXIMUM);
+                        algorithms.add(MEDIAN);
+                        algorithms.add(AVERAGE);
+                        algorithms.add(SIGMA);
+                        for (int percentile : percentiles) {
+                            algorithms.add(getPercentileName(percentile));
+                        }
+                        algorithms.add(MAX_ERROR);
+                        if (!algorithms.contains(TOTAL)) {
+                            algorithms.add(TOTAL);
+                        }
+                        break;
                     }
-                    algorithms.add(MAX_ERROR);
-                    if (!algorithms.contains(TOTAL)) {
-                        algorithms.add(TOTAL);
-                    }
-                    break;
                 }
             }
             Collection<QualitativeStxOp> qualitativeStxOps = stxOpMapping.qualitativeMap.values();
