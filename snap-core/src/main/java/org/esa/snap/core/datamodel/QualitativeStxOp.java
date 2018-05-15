@@ -81,7 +81,7 @@ public class QualitativeStxOp extends StxOp {
     public void accumulateData(UnpackedImageData dataPixels,
                                UnpackedImageData maskPixels) {
 
-        // Do not change this code block without doing the same changes in HistogramStxOp.java
+        // Do not change this code block without doing the same changes in HistogramStxOp.java and SummaryStxOp.java
         // {{ Block Start
 
         final DoubleList values = asDoubleList(dataPixels);
