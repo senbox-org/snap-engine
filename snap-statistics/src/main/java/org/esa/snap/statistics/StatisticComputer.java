@@ -16,6 +16,7 @@ import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.util.FeatureUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.statistics.output.Util;
+import org.esa.snap.statistics.tools.TimeInterval;
 import org.geotools.feature.DefaultFeatureCollection;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
@@ -42,12 +43,21 @@ public class StatisticComputer {
     private final FeatureUtils.FeatureCrsProvider crsProvider;
     private final ProgressMonitor pm;
     private final BandConfiguration[] bandConfigurations;
-    private final Map<BandConfiguration, StxOpMapping> stxOpMappings;
+    private final Map<BandConfiguration, StxOpMapping>[] stxOpMappingsList;
     private final int initialBinCount;
     private final Logger logger;
+    private final TimeInterval[] timeIntervals;
 
-    public StatisticComputer(File shapefile, BandConfiguration[] bandConfigurations, int initialBinCount, Logger logger) {
+    public StatisticComputer(File shapefile, BandConfiguration[] bandConfigurations, int initialBinCount,
+                             Logger logger) {
+        this(shapefile, bandConfigurations, initialBinCount,
+                new TimeInterval[]{new TimeInterval(0, new ProductData.UTC(0), new ProductData.UTC(1000000))}, logger);
+    }
+
+    public StatisticComputer(File shapefile, BandConfiguration[] bandConfigurations, int initialBinCount,
+                             TimeInterval[] timeIntervals, Logger logger) {
         this.initialBinCount = initialBinCount;
+        this.timeIntervals = timeIntervals;
         this.logger = logger != null ? logger : SystemUtils.LOG;
         if (shapefile != null) {
             try {
@@ -74,10 +84,31 @@ public class StatisticComputer {
         };
         pm = ProgressMonitor.NULL;
         this.bandConfigurations = bandConfigurations;
-        stxOpMappings = new HashMap<BandConfiguration, StxOpMapping>();
+        stxOpMappingsList = new Map[timeIntervals.length];
+        for (int i = 0; i < timeIntervals.length; i++) {
+            stxOpMappingsList[i] = new HashMap<>();
+        }
+    }
+
+    private int getIntervalIndex(Product product) {
+        if (product.getEndTime() == null) {
+            // if the product has no time information but has passed product validation,
+            // no start and end date have been set and there is only a single artificial time interval
+            return 0;
+        }
+        for (int i = 0; i < timeIntervals.length - 1; i++) {
+            // if a product's start and end time do not fall into the same interval,
+            // it will be assigned to the earlier one
+            if (product.getStartTime().getAsDate().after(timeIntervals[i].getIntervalStart().getAsDate()) &&
+                    product.getEndTime().getAsDate().before(timeIntervals[i + 1].getIntervalEnd().getAsDate())) {
+                return i;
+            }
+        }
+        return timeIntervals.length - 1;
     }
 
     public void computeStatistic(final Product product) {
+        int intervalIndex = getIntervalIndex(product);
         VectorDataNode[] vectorDataNodes = null;
         if (features != null) {
             final FeatureCollection<SimpleFeatureType, SimpleFeature> productFeatures
@@ -98,7 +129,7 @@ public class StatisticComputer {
                 }
                 band.setValidPixelExpression(newExpression);
             }
-            final StxOpMapping stxOpsMapping = getStxOpsMapping(bandConfiguration);
+            final StxOpMapping stxOpsMapping = getStxOpsMapping(intervalIndex, bandConfiguration);
             if (features != null) {
                 for (VectorDataNode vectorDataNode : vectorDataNodes) {
                     final String vdnName = vectorDataNode.getName();
@@ -128,15 +159,14 @@ public class StatisticComputer {
         }
     }
 
-    private StxOpMapping getStxOpsMapping(BandConfiguration bandConfiguration) {
-        StxOpMapping stxOpMapping = stxOpMappings.get(bandConfiguration);
+    private StxOpMapping getStxOpsMapping(int intervalIndex, BandConfiguration bandConfiguration) {
+        StxOpMapping stxOpMapping = stxOpMappingsList[intervalIndex].get(bandConfiguration);
         if (stxOpMapping == null) {
             stxOpMapping = new StxOpMapping(initialBinCount);
-            stxOpMappings.put(bandConfiguration, stxOpMapping);
+            stxOpMappingsList[intervalIndex].put(bandConfiguration, stxOpMapping);
         }
         return stxOpMapping;
     }
-
 
     private VectorDataNode[] createVectorDataNodes(FeatureCollection<SimpleFeatureType, SimpleFeature> productFeatures) {
         final FeatureIterator<SimpleFeature> featureIterator = productFeatures.features();
@@ -170,7 +200,11 @@ public class StatisticComputer {
     }
 
     public Map<BandConfiguration, StxOpMapping> getResults() {
-        return stxOpMappings;
+        return getResults(0);
+    }
+
+    public Map<BandConfiguration, StxOpMapping> getResults(int intervalIndex) {
+        return stxOpMappingsList[intervalIndex];
     }
 
     static class StxOpMapping {
