@@ -305,7 +305,10 @@ public class StatisticsOpTest {
     @Test
     public void testGetTimeIntervals_no_time_info() {
         TimeInterval[] timeIntervals = StatisticsOp.getTimeIntervals(null, null, null);
-        assertEquals(0, timeIntervals.length);
+        assertEquals(1, timeIntervals.length);
+        assertEquals(0, timeIntervals[0].getId());
+        assertEquals(new ProductData.UTC(0).getAsDate(), timeIntervals[0].getIntervalStart().getAsDate());
+        assertEquals(new ProductData.UTC(1000000).getAsDate(), timeIntervals[0].getIntervalEnd().getAsDate());
     }
 
     @Test
@@ -470,6 +473,11 @@ public class StatisticsOpTest {
                     percentiles[percentileIndex++] = ((Number) entry.getValue()).doubleValue();
                 }
             }
+        }
+
+        @Override
+        public void addToOutput(String bandName, TimeInterval interval, String regionId, Map<String, Object> statistics) {
+            //do nothing
         }
 
         @Override
