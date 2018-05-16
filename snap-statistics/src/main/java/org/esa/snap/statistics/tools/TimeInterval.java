@@ -22,7 +22,15 @@ public class TimeInterval {
         return intervalStart;
     }
 
+    public void setIntervalStart(ProductData.UTC intervalStart) {
+        this.intervalStart = intervalStart;
+    }
+
     public ProductData.UTC getIntervalEnd() {
         return intervalEnd;
+    }
+
+    public void setIntervalEnd(ProductData.UTC intervalEnd) {
+        this.intervalEnd = intervalEnd;
     }
 }
