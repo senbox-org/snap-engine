@@ -3,6 +3,7 @@ package org.esa.snap.statistics.output;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Map;
+import org.esa.snap.statistics.tools.TimeInterval;
 
 /**
  * Writes some metadata about the statistics to the given instance of {@link PrintStream}.
@@ -76,6 +77,11 @@ public class MetadataWriter implements StatisticsOutputter {
      */
     @Override
     public void addToOutput(String bandName, String regionId, Map<String, Object> statistics) {
+    }
+
+    @Override
+    public void addToOutput(String bandName, TimeInterval interval, String regionId, Map<String, Object> statistics) {
+
     }
 
     /**

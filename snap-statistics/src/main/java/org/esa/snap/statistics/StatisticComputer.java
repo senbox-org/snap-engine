@@ -203,7 +203,11 @@ public class StatisticComputer {
         return getResults(0);
     }
 
-    public Map<BandConfiguration, StxOpMapping> getResults(int intervalIndex) {
+    Map<BandConfiguration, StxOpMapping>[] getResultList() {
+        return stxOpMappingsList;
+    }
+
+    Map<BandConfiguration, StxOpMapping> getResults(int intervalIndex) {
         return stxOpMappingsList[intervalIndex];
     }
 

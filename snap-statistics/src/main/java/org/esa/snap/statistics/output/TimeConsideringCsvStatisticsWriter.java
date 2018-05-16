@@ -1,19 +1,3 @@
-/*
- * Copyright (C) 2011 Brockmann Consult GmbH (info@brockmann-consult.de)
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the Free
- * Software Foundation; either version 3 of the License, or (at your option)
- * any later version.
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, see http://www.gnu.org/licenses/
- */
-
 package org.esa.snap.statistics.output;
 
 import java.io.IOException;
@@ -25,24 +9,18 @@ import java.util.Map;
 import java.util.Set;
 import org.esa.snap.statistics.tools.TimeInterval;
 
-/**
- * Writes the statistics to an instance of {@link PrintStream}.
- * The format written is a tab-separated CSV ASCII file, containing the actual statistics.
- *
- * @author Thomas Storm
- */
-public class CsvStatisticsWriter implements StatisticsOutputter {
+public class TimeConsideringCsvStatisticsWriter implements StatisticsOutputter {
 
     private final PrintStream csvOutput;
     private String[] algorithmNames;
-    final Statistics statisticsContainer;
+    private final Statistics statisticsContainer;
 
     /**
      * Creates a new instance.
      *
      * @param csvOutput The target print stream where the statistics are written to.
      */
-    public CsvStatisticsWriter(PrintStream csvOutput) {
+    public TimeConsideringCsvStatisticsWriter(PrintStream csvOutput) {
         this.csvOutput = csvOutput;
         statisticsContainer = new Statistics();
     }
@@ -67,10 +45,19 @@ public class CsvStatisticsWriter implements StatisticsOutputter {
      */
     @Override
     public void addToOutput(String bandName, String regionId, Map<String, Object> statistics) {
-        if (!statisticsContainer.containsBand(bandName)) {
-            statisticsContainer.put(bandName, new BandStatistics());
+        // do nothing
+    }
+
+    @Override
+    public void addToOutput(String bandName, TimeInterval interval, String regionId, Map<String, Object> statistics) {
+        if (!statisticsContainer.containsInterval(interval)) {
+            statisticsContainer.put(interval, new TimeIntervalStatistics());
         }
-        final BandStatistics dataForBandName = statisticsContainer.getDataForBandName(bandName);
+        final TimeIntervalStatistics dataForTimeInterval = statisticsContainer.getDataForTimeInterval(interval);
+        if (!dataForTimeInterval.containsBand(bandName)) {
+            dataForTimeInterval.put(bandName, new BandStatistics());
+        }
+        final BandStatistics dataForBandName = dataForTimeInterval.getDataForBandName(bandName);
         if (!dataForBandName.containsRegion(regionId)) {
             dataForBandName.put(regionId, new RegionStatistics());
         }
@@ -80,49 +67,55 @@ public class CsvStatisticsWriter implements StatisticsOutputter {
         }
     }
 
-    @Override
-    public void addToOutput(String bandName, TimeInterval interval, String regionId, Map<String, Object> statistics) {
-        addToOutput(bandName, regionId, statistics);
-    }
-
     /**
      * {@inheritDoc}
      *
      * @throws IOException Never.
      */
     @Override
-    public void finaliseOutput() throws IOException {
+    public void finaliseOutput() {
         if (algorithmNames == null) {
             throw new IllegalStateException(getClass().getSimpleName() + " not initialised.");
         }
 
         writeHeader();
 
-        for (String bandName : statisticsContainer.getBandNames()) {
-            final BandStatistics bandStatistics = statisticsContainer.getDataForBandName(bandName);
-            for (String regionName : bandStatistics.getRegionNames()) {
-                csvOutput.append(regionName)
-                        .append("\t")
-                        .append(bandName);
-                for (String algorithmName : algorithmNames) {
-                    csvOutput.append("\t");
-                    final RegionStatistics dataForRegionName = bandStatistics.getDataForRegionName(regionName);
-                    if (dataForRegionName.containsAlgorithm(algorithmName)) {
-                        Object value = dataForRegionName.getDataForAlgorithmName(algorithmName);
-                        if (value instanceof Number) {
-                            csvOutput.append(getValueAsString((Number) value));
-                        } else {
-                            csvOutput.append(value.toString());
+        for (TimeInterval timeInterval : statisticsContainer.getTimeIntervals()) {
+            TimeIntervalStatistics dataForTimeInterval = statisticsContainer.getDataForTimeInterval(timeInterval);
+            for (String bandName : dataForTimeInterval.getBandNames()) {
+                final BandStatistics bandStatistics = dataForTimeInterval.getDataForBandName(bandName);
+                for (String regionName : bandStatistics.getRegionNames()) {
+                    csvOutput.append(regionName)
+                            .append("\t")
+                            .append(timeInterval.getIntervalStart().format())
+                            .append("\t")
+                            .append(timeInterval.getIntervalEnd().format())
+                            .append("\t")
+                            .append(bandName);
+                    for (String algorithmName : algorithmNames) {
+                        csvOutput.append("\t");
+                        final RegionStatistics dataForRegionName = bandStatistics.getDataForRegionName(regionName);
+                        if (dataForRegionName.containsAlgorithm(algorithmName)) {
+                            Object value = dataForRegionName.getDataForAlgorithmName(algorithmName);
+                            if (value instanceof Number) {
+                                csvOutput.append(getValueAsString((Number) value));
+                            } else {
+                                csvOutput.append(value.toString());
+                            }
                         }
                     }
+                    csvOutput.append("\n");
                 }
-                csvOutput.append("\n");
             }
         }
     }
 
     private void writeHeader() {
         csvOutput.append("# Region")
+                .append("\t")
+                .append("Interval Start")
+                .append("\t")
+                .append("Interval End")
                 .append("\t")
                 .append("Band");
 
@@ -133,7 +126,7 @@ public class CsvStatisticsWriter implements StatisticsOutputter {
         csvOutput.append("\n");
     }
 
-    static String getValueAsString(Number numberValue) {
+    private static String getValueAsString(Number numberValue) {
         if (numberValue instanceof Float || numberValue instanceof Double) {
             return String.format(Locale.ENGLISH, "%.4f", numberValue.doubleValue());
         }
@@ -141,6 +134,28 @@ public class CsvStatisticsWriter implements StatisticsOutputter {
     }
 
     static class Statistics {
+
+        Map<TimeInterval, TimeIntervalStatistics> statistics = new HashMap<>();
+
+        TimeIntervalStatistics getDataForTimeInterval(TimeInterval interval) {
+            return statistics.get(interval);
+        }
+
+        boolean containsInterval(TimeInterval interval) {
+            return statistics.containsKey(interval);
+        }
+
+        TimeInterval[] getTimeIntervals() {
+            final Set<TimeInterval> timeIntervals = statistics.keySet();
+            return timeIntervals.toArray(new TimeInterval[0]);
+        }
+
+        void put(TimeInterval timeInterval, TimeIntervalStatistics timeIntervalStatistics) {
+            statistics.put(timeInterval, timeIntervalStatistics);
+        }
+    }
+
+    static class TimeIntervalStatistics {
 
         Map<String, BandStatistics> statistics = new HashMap<>();
 
@@ -154,12 +169,13 @@ public class CsvStatisticsWriter implements StatisticsOutputter {
 
         String[] getBandNames() {
             final Set<String> bandNames = statistics.keySet();
-            return bandNames.toArray(new String[bandNames.size()]);
+            return bandNames.toArray(new String[0]);
         }
 
         void put(String bandName, BandStatistics bandStatistics) {
             statistics.put(bandName, bandStatistics);
         }
+
     }
 
     static class BandStatistics {
@@ -176,7 +192,7 @@ public class CsvStatisticsWriter implements StatisticsOutputter {
 
         String[] getRegionNames() {
             final Set<String> regionNames = bandStatistics.keySet();
-            return regionNames.toArray(new String[regionNames.size()]);
+            return regionNames.toArray(new String[0]);
         }
 
         void put(String regionName, RegionStatistics regionStatistics) {

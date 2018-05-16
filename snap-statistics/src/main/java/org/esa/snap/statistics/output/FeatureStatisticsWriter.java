@@ -18,6 +18,7 @@ package org.esa.snap.statistics.output;
 
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.util.FeatureUtils;
+import org.esa.snap.statistics.tools.TimeInterval;
 import org.geotools.data.FeatureSource;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
@@ -145,6 +146,45 @@ public class FeatureStatisticsWriter implements StatisticsOutputter {
      */
     @Override
     public void addToOutput(String bandName, String regionId, Map<String, Object> statistics) {
+        final SimpleFeatureBuilder simpleFeatureBuilder = new SimpleFeatureBuilder(updatedFeatureType);
+        final List<SimpleFeature> markedToRemove = new ArrayList<SimpleFeature>();
+        final Map<String, SimpleFeature> markedToAdd = new HashMap<String, SimpleFeature>();
+        for (SimpleFeature feature : features) {
+            for (String algorithmName : statistics.keySet()) {
+                final String name = bandNameCreator.createUniqueAttributeName(algorithmName, bandName);
+                if (Util.getFeatureName(feature).equals(regionId)) {
+                    SimpleFeature featureToUpdate;
+                    if (markedToAdd.containsKey(regionId)) {
+                        featureToUpdate = markedToAdd.get(regionId);
+                    } else {
+                        featureToUpdate = feature;
+                    }
+                    final SimpleFeature updatedFeature = createUpdatedFeature(simpleFeatureBuilder, featureToUpdate, name, statistics.get(algorithmName));
+                    markedToRemove.add(feature);
+                    markedToAdd.put(regionId, updatedFeature);
+                }
+            }
+        }
+        features.removeAll(markedToRemove);
+        features.addAll(markedToAdd.values());
+        if (!(markedToAdd.isEmpty() && markedToRemove.isEmpty())) {
+            return;
+        }
+
+        final FeatureIterator<SimpleFeature> featureIterator = originalFeatures.features();
+        while (featureIterator.hasNext()) {
+            SimpleFeature feature = featureIterator.next();
+            for (String algorithmName : statistics.keySet()) {
+                final String name = bandNameCreator.createUniqueAttributeName(algorithmName, bandName);
+                final Object value = getValue(statistics, algorithmName, feature, regionId);
+                feature = createUpdatedFeature(simpleFeatureBuilder, feature, name, value);
+            }
+            features.add(feature);
+        }
+    }
+
+    @Override
+    public void addToOutput(String bandName, TimeInterval interval, String regionId, Map<String, Object> statistics) {
         final SimpleFeatureBuilder simpleFeatureBuilder = new SimpleFeatureBuilder(updatedFeatureType);
         final List<SimpleFeature> markedToRemove = new ArrayList<SimpleFeature>();
         final Map<String, SimpleFeature> markedToAdd = new HashMap<String, SimpleFeature>();

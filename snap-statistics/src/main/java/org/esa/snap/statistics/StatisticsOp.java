@@ -41,6 +41,7 @@ import org.esa.snap.statistics.output.FeatureStatisticsWriter;
 import org.esa.snap.statistics.output.MetadataWriter;
 import org.esa.snap.statistics.output.StatisticsOutputContext;
 import org.esa.snap.statistics.output.StatisticsOutputter;
+import org.esa.snap.statistics.output.TimeConsideringCsvStatisticsWriter;
 import org.esa.snap.statistics.output.Util;
 
 import javax.media.jai.Histogram;
@@ -155,6 +156,11 @@ public class StatisticsOp extends Operator {
             defaultValue = "3")
     int accuracy;
 
+    @Parameter(description = "If set, the StatisticsOp will divide the time between start and end time into time intervals" +
+            "defined by this parameter. All measures will be aggregated from products within these intervals. " +
+            "This parameter will only have an effect if the parameters start date and end date are set.")
+    TimeIntervalDefinition interval;
+
     final Set<StatisticsOutputter> statisticsOutputters = new HashSet<>();
 
     final SortedSet<String> regionNames = new TreeSet<>();
@@ -168,7 +174,10 @@ public class StatisticsOp extends Operator {
         setDummyTargetProduct();
         validateInput();
 
-        final StatisticComputer statisticComputer = new StatisticComputer(shapefile, bandConfigurations, Util.computeBinCount(accuracy), getLogger());
+        TimeInterval[] timeIntervals = getTimeIntervals(interval, startDate, endDate);
+
+        final StatisticComputer statisticComputer = new StatisticComputer(shapefile, bandConfigurations,
+                Util.computeBinCount(accuracy), timeIntervals, getLogger());
 
         final ProductValidator productValidator = new ProductValidator(Arrays.asList(bandConfigurations), startDate, endDate, getLogger());
         final ProductLoop productLoop = new ProductLoop(new ProductLoader(), productValidator, statisticComputer, getLogger());
@@ -176,10 +185,12 @@ public class StatisticsOp extends Operator {
 
         if (startDate == null) {
             startDate = productLoop.getOldestDate();
+            timeIntervals[0].setIntervalStart(startDate);
         }
 
         if (endDate == null) {
             endDate = productLoop.getNewestDate();
+            timeIntervals[0].setIntervalEnd(endDate);
         }
 
         final String[] productNames = productLoop.getProductNames();
@@ -187,8 +198,8 @@ public class StatisticsOp extends Operator {
             throw new OperatorException("No input products found that matches the criteria.");
         }
 
-        final Map<BandConfiguration, StatisticComputer.StxOpMapping> stxOps = statisticComputer.getResults();
-        final String[] algorithmNames = getAlgorithmNames(stxOps, percentiles);
+        final Map<BandConfiguration, StatisticComputer.StxOpMapping>[] stxOpsList = statisticComputer.getResultList();
+        final String[] algorithmNames = getAlgorithmNames(stxOpsList, percentiles);
 
         final List<String> bandNamesList = new ArrayList<String>();
         for (BandConfiguration bandConfiguration : bandConfigurations) {
@@ -202,8 +213,10 @@ public class StatisticsOp extends Operator {
 
 
         regionNames.clear();
-        for (StatisticComputer.StxOpMapping stxOpMapping : stxOps.values()) {
-            regionNames.addAll(stxOpMapping.summaryMap.keySet());
+        for (Map<BandConfiguration, StatisticComputer.StxOpMapping> stxOps : stxOpsList) {
+            for (StatisticComputer.StxOpMapping stxOpMapping : stxOps.values()) {
+                regionNames.addAll(stxOpMapping.summaryMap.keySet());
+            }
         }
 
         if (regionNames.size() == 0) {
@@ -218,87 +231,89 @@ public class StatisticsOp extends Operator {
                 endDate,
                 regionNames.toArray(new String[regionNames.size()]));
 
-        setupOutputter();
+        setupOutputter(timeIntervals);
 
         for (StatisticsOutputter statisticsOutputter : statisticsOutputters) {
             statisticsOutputter.initialiseOutput(statisticsOutputContext);
         }
-
-        for (Map.Entry<BandConfiguration, StatisticComputer.StxOpMapping> bandConfigurationStxOpMappingEntry : stxOps.entrySet()) {
-            final BandConfiguration bandConfiguration = bandConfigurationStxOpMappingEntry.getKey();
-            final String bandName;
-            if (bandConfiguration.sourceBandName != null) {
-                bandName = bandConfiguration.sourceBandName;
-            } else {
-                bandName = bandConfiguration.expression.replace(" ", "_");
-            }
-            final StatisticComputer.StxOpMapping stxOpMapping = bandConfigurationStxOpMappingEntry.getValue();
-            final Map<String, QualitativeStxOp> qualitativeMap = stxOpMapping.qualitativeMap;
-            for (String regionName : qualitativeMap.keySet()) {
-                final HashMap<String, Object> stxMap = new HashMap<>();
-                final QualitativeStxOp qualitativeStxOp = qualitativeMap.get(regionName);
-                if (!qualitativeStxOp.getMajorityClass().equals(QualitativeStxOp.NO_MAJORITY_CLASS)) {
-                    String[] classNames = qualitativeStxOp.getClassNames();
-                    for (int i = 0; i < classNames.length; i++) {
-                        stxMap.put(classNames[i], qualitativeStxOp.getNumberOfMembers(classNames[i]));
-                    }
-                    stxMap.put(MAJORITY_CLASS, qualitativeStxOp.getMajorityClass());
-                    stxMap.put(SECOND_MAJORITY_CLASS, qualitativeStxOp.getSecondMajorityClass());
-                    stxMap.put(TOTAL, qualitativeStxOp.getTotalNumClassMembers());
-                }
-                for (StatisticsOutputter statisticsOutputter : statisticsOutputters) {
-                    statisticsOutputter.addToOutput(bandName, regionName, stxMap);
-                }
-            }
-            final Map<String, SummaryStxOp> summaryMap = stxOpMapping.summaryMap;
-            final Map<String, HistogramStxOp> histogramMap = stxOpMapping.histogramMap;
-            for (String regionName : summaryMap.keySet()) {
-                final HashMap<String, Object> stxMap = new HashMap<>();
-                final SummaryStxOp summaryStxOp = summaryMap.get(regionName);
-                final Histogram histogram = histogramMap.get(regionName).getHistogram();
-                if (histogram.getTotals()[0] == 0) {
-                    stxMap.put(MINIMUM, FILL_VALUE);
-                    stxMap.put(MAXIMUM, FILL_VALUE);
-                    stxMap.put(AVERAGE, FILL_VALUE);
-                    stxMap.put(SIGMA, FILL_VALUE);
-                    stxMap.put(TOTAL, 0);
-                    stxMap.put(MEDIAN, FILL_VALUE);
-                    for (int percentile : percentiles) {
-                        stxMap.put(getPercentileName(percentile), FILL_VALUE);
-                    }
+        for (int i = 0; i < timeIntervals.length; i++) {
+            final Map<BandConfiguration, StatisticComputer.StxOpMapping> stxOps = statisticComputer.getResults(i);
+            for (Map.Entry<BandConfiguration, StatisticComputer.StxOpMapping> bandConfigurationStxOpMappingEntry : stxOps.entrySet()) {
+                final BandConfiguration bandConfiguration = bandConfigurationStxOpMappingEntry.getKey();
+                final String bandName;
+                if (bandConfiguration.sourceBandName != null) {
+                    bandName = bandConfiguration.sourceBandName;
                 } else {
-                    stxMap.put(MINIMUM, summaryStxOp.getMinimum());
-                    stxMap.put(MAXIMUM, summaryStxOp.getMaximum());
-                    stxMap.put(AVERAGE, summaryStxOp.getMean());
-                    stxMap.put(SIGMA, summaryStxOp.getStandardDeviation());
-                    stxMap.put(TOTAL, histogram.getTotals()[0]);
-                    stxMap.put(MEDIAN, histogram.getPTileThreshold(0.5)[0]);
-                    for (int percentile : percentiles) {
-                        stxMap.put(getPercentileName(percentile), computePercentile(percentile, histogram));
+                    bandName = bandConfiguration.expression.replace(" ", "_");
+                }
+                final StatisticComputer.StxOpMapping stxOpMapping = bandConfigurationStxOpMappingEntry.getValue();
+                final Map<String, QualitativeStxOp> qualitativeMap = stxOpMapping.qualitativeMap;
+                for (String regionName : qualitativeMap.keySet()) {
+                    final HashMap<String, Object> stxMap = new HashMap<>();
+                    final QualitativeStxOp qualitativeStxOp = qualitativeMap.get(regionName);
+                    if (!qualitativeStxOp.getMajorityClass().equals(QualitativeStxOp.NO_MAJORITY_CLASS)) {
+                        String[] classNames = qualitativeStxOp.getClassNames();
+                        for (String className : classNames) {
+                            stxMap.put(className, qualitativeStxOp.getNumberOfMembers(className));
+                        }
+                        stxMap.put(MAJORITY_CLASS, qualitativeStxOp.getMajorityClass());
+                        stxMap.put(SECOND_MAJORITY_CLASS, qualitativeStxOp.getSecondMajorityClass());
+                        stxMap.put(TOTAL, qualitativeStxOp.getTotalNumClassMembers());
+                    }
+                    for (StatisticsOutputter statisticsOutputter : statisticsOutputters) {
+                        statisticsOutputter.addToOutput(bandName, regionName, stxMap);
                     }
                 }
-                stxMap.put(MAX_ERROR, Util.getBinWidth(histogram));
-                for (StatisticsOutputter statisticsOutputter : statisticsOutputters) {
-                    statisticsOutputter.addToOutput(bandName, regionName, stxMap);
+                final Map<String, SummaryStxOp> summaryMap = stxOpMapping.summaryMap;
+                final Map<String, HistogramStxOp> histogramMap = stxOpMapping.histogramMap;
+                for (String regionName : summaryMap.keySet()) {
+                    final HashMap<String, Object> stxMap = new HashMap<>();
+                    final SummaryStxOp summaryStxOp = summaryMap.get(regionName);
+                    final Histogram histogram = histogramMap.get(regionName).getHistogram();
+                    if (histogram.getTotals()[0] == 0) {
+                        stxMap.put(MINIMUM, FILL_VALUE);
+                        stxMap.put(MAXIMUM, FILL_VALUE);
+                        stxMap.put(AVERAGE, FILL_VALUE);
+                        stxMap.put(SIGMA, FILL_VALUE);
+                        stxMap.put(TOTAL, 0);
+                        stxMap.put(MEDIAN, FILL_VALUE);
+                        for (int percentile : percentiles) {
+                            stxMap.put(getPercentileName(percentile), FILL_VALUE);
+                        }
+                    } else {
+                        stxMap.put(MINIMUM, summaryStxOp.getMinimum());
+                        stxMap.put(MAXIMUM, summaryStxOp.getMaximum());
+                        stxMap.put(AVERAGE, summaryStxOp.getMean());
+                        stxMap.put(SIGMA, summaryStxOp.getStandardDeviation());
+                        stxMap.put(TOTAL, histogram.getTotals()[0]);
+                        stxMap.put(MEDIAN, histogram.getPTileThreshold(0.5)[0]);
+                        for (int percentile : percentiles) {
+                            stxMap.put(getPercentileName(percentile), computePercentile(percentile, histogram));
+                        }
+                    }
+                    stxMap.put(MAX_ERROR, Util.getBinWidth(histogram));
+                    for (StatisticsOutputter statisticsOutputter : statisticsOutputters) {
+                        statisticsOutputter.addToOutput(bandName, timeIntervals[i], regionName, stxMap);
+                    }
                 }
             }
-        }
 
-        try {
-            for (StatisticsOutputter statisticsOutputter : statisticsOutputters) {
-                statisticsOutputter.finaliseOutput();
-            }
-        } catch (IOException e) {
-            throw new OperatorException("Unable to write output.", e);
-        } finally {
-            if (metadataOutputStream != null) {
-                metadataOutputStream.close();
-            }
-            if (csvOutputStream != null) {
-                csvOutputStream.close();
-            }
-            if (bandMappingOutputStream != null) {
-                bandMappingOutputStream.close();
+            try {
+                for (StatisticsOutputter statisticsOutputter : statisticsOutputters) {
+                    statisticsOutputter.finaliseOutput();
+                }
+            } catch (IOException e) {
+                throw new OperatorException("Unable to write output.", e);
+            } finally {
+                if (metadataOutputStream != null) {
+                    metadataOutputStream.close();
+                }
+                if (csvOutputStream != null) {
+                    csvOutputStream.close();
+                }
+                if (bandMappingOutputStream != null) {
+                    bandMappingOutputStream.close();
+                }
             }
         }
 
@@ -325,7 +340,7 @@ public class StatisticsOp extends Operator {
     /* package local for testing*/
     static TimeInterval[] getTimeIntervals(TimeIntervalDefinition interval, ProductData.UTC startDate, ProductData.UTC endDate) {
         if (startDate == null || endDate == null) {
-            return new TimeInterval[0];
+            return new TimeInterval[]{new TimeInterval(0, new ProductData.UTC(0), new ProductData.UTC(1000000))};
         } else if (interval == null) {
             return new TimeInterval[]{new TimeInterval(0, startDate, endDate)};
         } else {
@@ -365,44 +380,46 @@ public class StatisticsOp extends Operator {
         }
     }
 
-    private static String[] getAlgorithmNames(Map<BandConfiguration, StatisticComputer.StxOpMapping> stxOps,
+    private static String[] getAlgorithmNames(Map<BandConfiguration, StatisticComputer.StxOpMapping>[] stxOpsList,
                                               int[] percentiles) {
         final List<String> algorithms = new ArrayList<String>();
-        for (StatisticComputer.StxOpMapping stxOpMapping : stxOps.values()) {
-            if (!algorithms.contains(MINIMUM)) {
-                Collection<SummaryStxOp> summaryStxOps = stxOpMapping.summaryMap.values();
-                for (SummaryStxOp summaryStxOp : summaryStxOps) {
-                    if (!Double.isNaN(summaryStxOp.getMean())) {
-                        algorithms.add(MINIMUM);
-                        algorithms.add(MAXIMUM);
-                        algorithms.add(MEDIAN);
-                        algorithms.add(AVERAGE);
-                        algorithms.add(SIGMA);
-                        for (int percentile : percentiles) {
-                            algorithms.add(getPercentileName(percentile));
+        for (Map<BandConfiguration, StatisticComputer.StxOpMapping> stxOps : stxOpsList) {
+            for (StatisticComputer.StxOpMapping stxOpMapping : stxOps.values()) {
+                if (!algorithms.contains(MINIMUM)) {
+                    Collection<SummaryStxOp> summaryStxOps = stxOpMapping.summaryMap.values();
+                    for (SummaryStxOp summaryStxOp : summaryStxOps) {
+                        if (!Double.isNaN(summaryStxOp.getMean())) {
+                            algorithms.add(MINIMUM);
+                            algorithms.add(MAXIMUM);
+                            algorithms.add(MEDIAN);
+                            algorithms.add(AVERAGE);
+                            algorithms.add(SIGMA);
+                            for (int percentile : percentiles) {
+                                algorithms.add(getPercentileName(percentile));
+                            }
+                            algorithms.add(MAX_ERROR);
+                            if (!algorithms.contains(TOTAL)) {
+                                algorithms.add(TOTAL);
+                            }
+                            break;
                         }
-                        algorithms.add(MAX_ERROR);
-                        if (!algorithms.contains(TOTAL)) {
-                            algorithms.add(TOTAL);
-                        }
-                        break;
                     }
                 }
-            }
-            Collection<QualitativeStxOp> qualitativeStxOps = stxOpMapping.qualitativeMap.values();
-            if (!qualitativeStxOps.isEmpty() && !algorithms.contains(StatisticsOp.MAJORITY_CLASS)) {
-                algorithms.add(StatisticsOp.MAJORITY_CLASS);
-                algorithms.add(StatisticsOp.SECOND_MAJORITY_CLASS);
-                if (!algorithms.contains(TOTAL)) {
-                    algorithms.add(StatisticsOp.TOTAL);
+                Collection<QualitativeStxOp> qualitativeStxOps = stxOpMapping.qualitativeMap.values();
+                if (!qualitativeStxOps.isEmpty() && !algorithms.contains(StatisticsOp.MAJORITY_CLASS)) {
+                    algorithms.add(StatisticsOp.MAJORITY_CLASS);
+                    algorithms.add(StatisticsOp.SECOND_MAJORITY_CLASS);
+                    if (!algorithms.contains(TOTAL)) {
+                        algorithms.add(StatisticsOp.TOTAL);
+                    }
                 }
-            }
-            for (QualitativeStxOp qualitativeStxOp : qualitativeStxOps) {
-                if (!qualitativeStxOp.getMajorityClass().equals(QualitativeStxOp.NO_MAJORITY_CLASS)) {
-                    String[] classNames = qualitativeStxOp.getClassNames();
-                    for (String className : classNames) {
-                        if (!algorithms.contains(className)) {
-                            algorithms.add(className);
+                for (QualitativeStxOp qualitativeStxOp : qualitativeStxOps) {
+                    if (!qualitativeStxOp.getMajorityClass().equals(QualitativeStxOp.NO_MAJORITY_CLASS)) {
+                        String[] classNames = qualitativeStxOp.getClassNames();
+                        for (String className : classNames) {
+                            if (!algorithms.contains(className)) {
+                                algorithms.add(className);
+                            }
                         }
                     }
                 }
@@ -430,7 +447,7 @@ public class StatisticsOp extends Operator {
         return PERCENTILE_PREFIX + percentile + PERCENTILE_SUFFIX;
     }
 
-    void setupOutputter() {
+    private void setupOutputter(TimeInterval[] timeIntervals) {
         if (outputAsciiFile != null) {
             try {
                 final StringBuilder metadataFileName = new StringBuilder(
@@ -439,7 +456,11 @@ public class StatisticsOp extends Operator {
                 final File metadataFile = new File(outputAsciiFile.getParent(), metadataFileName.toString());
                 metadataOutputStream = new PrintStream(new FileOutputStream(metadataFile));
                 csvOutputStream = new PrintStream(new FileOutputStream(outputAsciiFile));
-                statisticsOutputters.add(new CsvStatisticsWriter(csvOutputStream));
+                if (timeIntervals.length > 1) {
+                    statisticsOutputters.add(new TimeConsideringCsvStatisticsWriter(csvOutputStream));
+                } else {
+                    statisticsOutputters.add(new CsvStatisticsWriter(csvOutputStream));
+                }
                 statisticsOutputters.add(new MetadataWriter(metadataOutputStream));
             } catch (FileNotFoundException e) {
                 throw new OperatorException(e);
@@ -510,6 +531,9 @@ public class StatisticsOp extends Operator {
                 throw new OperatorException("Configuration must contain either a source band name or an expression.");
             }
         }
+        if (interval != null && interval.amount < 1) {
+            throw new OperatorException("interval amount must be larger than 0.");
+        }
         if (outputAsciiFile != null && outputAsciiFile.isDirectory()) {
             throw new OperatorException("Parameter 'outputAsciiFile' must not point to a directory.");
         }
@@ -521,7 +545,6 @@ public class StatisticsOp extends Operator {
                 throw new OperatorException("Parameter 'shapefile' must be provided if an output shapefile shall be created.");
             }
         }
-
         if (shapefile != null && shapefile.isDirectory()) {
             throw new OperatorException("Parameter 'shapefile' must point to a file.");
         }
