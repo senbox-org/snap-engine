@@ -115,11 +115,14 @@ public class BandNameCreator {
         }
         if (attributeName.length() > 10) {
             final int index = getIndex(algorithmName);
-            attributeName = shorten(algorithmName) + "_" + index;
+            attributeName = shorten(algorithmName) + "_" + index + "_" + timeInterval.getId();
             if (attributeName.length() > 10) {
                 final String indexPart = Integer.toString(index);
                 final int idxLength = indexPart.length();
-                attributeName = attributeName.substring(0, 10 - idxLength - 1) + "_" + indexPart;
+                final String intervalIdPart = Integer.toString(timeInterval.getId());
+                final int intervalIdLength = intervalIdPart.length();
+                attributeName = attributeName.substring(0, 10 - idxLength - intervalIdLength - 2) + "_" +
+                        indexPart + "_" + intervalIdPart;
             }
             indexMap.put(algorithmName, index + 1);
         }
