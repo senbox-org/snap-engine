@@ -45,7 +45,7 @@ import static org.junit.Assert.*;
  */
 public class StatisticsOpTest {
 
-    static final File TESTDATA_DIR = new File("target/statistics-test-io");
+    private static final File TESTDATA_DIR = new File("target/statistics-test-io");
 
     @Before
     public void setUp() throws Exception {
@@ -76,7 +76,7 @@ public class StatisticsOpTest {
         statisticsOp.sourceProducts = new Product[]{TestUtil.getTestProduct()};
         statisticsOp.shapefile = new File(getClass().getResource("4_pixels.shp").getFile());
         final MyOutputter outputter = new MyOutputter();
-        statisticsOp.statisticsOutputters.add(outputter);
+        statisticsOp.allStatisticsOutputters.add(outputter);
 
         statisticsOp.initialize();
 
@@ -104,7 +104,7 @@ public class StatisticsOpTest {
         statisticsOp.accuracy = 6;
 
         final MyOutputter outputter = new MyOutputter();
-        statisticsOp.statisticsOutputters.add(outputter);
+        statisticsOp.allStatisticsOutputters.add(outputter);
 
         statisticsOp.initialize();
 
@@ -133,7 +133,7 @@ public class StatisticsOpTest {
         statisticsOp.percentiles = null;
 
         final MyOutputter outputter = new MyOutputter();
-        statisticsOp.statisticsOutputters.add(outputter);
+        statisticsOp.allStatisticsOutputters.add(outputter);
 
         statisticsOp.initialize();
         
@@ -163,7 +163,7 @@ public class StatisticsOpTest {
         statisticsOp.shapefile = new File(getClass().getResource("4_pixels.shp").getFile());
 
         final MyOutputter outputter = new MyOutputter();
-        statisticsOp.statisticsOutputters.add(outputter);
+        statisticsOp.allStatisticsOutputters.add(outputter);
 
         statisticsOp.initialize();
 
@@ -191,7 +191,7 @@ public class StatisticsOpTest {
         statisticsOp.shapefile = new File(getClass().getResource("4_pixels.shp").getFile());
 
         final MyOutputter outputter = new MyOutputter();
-        statisticsOp.statisticsOutputters.add(outputter);
+        statisticsOp.allStatisticsOutputters.add(outputter);
 
         statisticsOp.initialize();
 
@@ -254,7 +254,7 @@ public class StatisticsOpTest {
         statisticsOp.percentiles = new int[]{20, 51, 90};
 
         final MyOutputter outputter = new MyOutputter();
-        statisticsOp.statisticsOutputters.add(outputter);
+        statisticsOp.allStatisticsOutputters.add(outputter);
 
         statisticsOp.initialize();
 

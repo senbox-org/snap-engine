@@ -107,6 +107,9 @@ public class StatisticsOp extends Operator {
     public static final int[] DEFAULT_PERCENTILES_INTS = new int[]{90, 95};
 
     private static final double FILL_VALUE = -999.0;
+    private static final int ALL_MEASURES = 0;
+    private static final int QUALITATIVE_MEASURES = 1;
+    private static final int QUANTITATIVE_MEASURES = 2;
 
     @SourceProducts(description = "The source products to be considered for statistics computation. If not given, " +
             "the parameter 'sourceProductPaths' must be provided.")
@@ -161,13 +164,21 @@ public class StatisticsOp extends Operator {
             "This parameter will only have an effect if the parameters start date and end date are set.")
     TimeIntervalDefinition interval;
 
-    final Set<StatisticsOutputter> statisticsOutputters = new HashSet<>();
+    @Parameter(description = "If true, categorical measures and quantitative measures will be written separately.",
+            defaultValue = "false")
+    boolean writeDataTypesSeparately;
 
-    final SortedSet<String> regionNames = new TreeSet<>();
+    final Set<StatisticsOutputter> allStatisticsOutputters = new HashSet<>();
+    private final Set<StatisticsOutputter> qualitativeStatisticsOutputters = new HashSet<>();
+    private final Set<StatisticsOutputter> quantitativeStatisticsOutputters = new HashSet<>();
+    private final Set[] statisticsOutputters =
+            new Set[]{allStatisticsOutputters, qualitativeStatisticsOutputters, quantitativeStatisticsOutputters};
 
-    private PrintStream metadataOutputStream;
-    private PrintStream csvOutputStream;
-    private PrintStream bandMappingOutputStream;
+    private final SortedSet<String> regionNames = new TreeSet<>();
+
+    private PrintStream[] metadataOutputStreams = new PrintStream[3];
+    private PrintStream[] csvOutputStreams = new PrintStream[3];
+    private PrintStream[] bandMappingOutputStreams = new PrintStream[3];
 
     @Override
     public void initialize() throws OperatorException {
@@ -199,18 +210,6 @@ public class StatisticsOp extends Operator {
         }
 
         final Map<BandConfiguration, StatisticComputer.StxOpMapping>[] stxOpsList = statisticComputer.getResultList();
-        final String[] algorithmNames = getAlgorithmNames(stxOpsList, percentiles);
-
-        final List<String> bandNamesList = new ArrayList<String>();
-        for (BandConfiguration bandConfiguration : bandConfigurations) {
-            if (bandConfiguration.sourceBandName != null) {
-                bandNamesList.add(bandConfiguration.sourceBandName);
-            } else {
-                bandNamesList.add(bandConfiguration.expression.replace(" ", "_"));
-            }
-        }
-        final String[] bandNames = bandNamesList.toArray(new String[bandNamesList.size()]);
-
 
         regionNames.clear();
         for (Map<BandConfiguration, StatisticComputer.StxOpMapping> stxOps : stxOpsList) {
@@ -224,17 +223,9 @@ public class StatisticsOp extends Operator {
             return;
         }
 
-        final StatisticsOutputContext statisticsOutputContext = StatisticsOutputContext.create(productNames,
-                bandNames,
-                algorithmNames,
-                timeIntervals,
-                regionNames.toArray(new String[regionNames.size()]));
+        String[] regionIDS = regionNames.toArray(new String[0]);
+        defineOutputters(timeIntervals, percentiles, productNames, regionIDS, stxOpsList);
 
-        setupOutputter(timeIntervals);
-
-        for (StatisticsOutputter statisticsOutputter : statisticsOutputters) {
-            statisticsOutputter.initialiseOutput(statisticsOutputContext);
-        }
         for (int i = 0; i < timeIntervals.length; i++) {
             final Map<BandConfiguration, StatisticComputer.StxOpMapping> stxOps = statisticComputer.getResults(i);
             for (Map.Entry<BandConfiguration, StatisticComputer.StxOpMapping> bandConfigurationStxOpMappingEntry : stxOps.entrySet()) {
@@ -259,7 +250,7 @@ public class StatisticsOp extends Operator {
                         stxMap.put(SECOND_MAJORITY_CLASS, qualitativeStxOp.getSecondMajorityClass());
                         stxMap.put(TOTAL, qualitativeStxOp.getTotalNumClassMembers());
                     }
-                    for (StatisticsOutputter statisticsOutputter : statisticsOutputters) {
+                    for (StatisticsOutputter statisticsOutputter : qualitativeStatisticsOutputters) {
                         statisticsOutputter.addToOutput(bandName, timeIntervals[i], regionName, stxMap);
                     }
                 }
@@ -291,27 +282,29 @@ public class StatisticsOp extends Operator {
                         }
                     }
                     stxMap.put(MAX_ERROR, Util.getBinWidth(histogram));
-                    for (StatisticsOutputter statisticsOutputter : statisticsOutputters) {
+                    for (StatisticsOutputter statisticsOutputter : quantitativeStatisticsOutputters) {
                         statisticsOutputter.addToOutput(bandName, timeIntervals[i], regionName, stxMap);
                     }
                 }
             }
 
             try {
-                for (StatisticsOutputter statisticsOutputter : statisticsOutputters) {
+                for (StatisticsOutputter statisticsOutputter : allStatisticsOutputters) {
                     statisticsOutputter.finaliseOutput();
                 }
             } catch (IOException e) {
                 throw new OperatorException("Unable to write output.", e);
             } finally {
-                if (metadataOutputStream != null) {
-                    metadataOutputStream.close();
-                }
-                if (csvOutputStream != null) {
-                    csvOutputStream.close();
-                }
-                if (bandMappingOutputStream != null) {
-                    bandMappingOutputStream.close();
+                for (int j = 0; j < 3; j++) {
+                    if (metadataOutputStreams[j] != null) {
+                        metadataOutputStreams[j].close();
+                    }
+                    if (csvOutputStreams[j] != null) {
+                        csvOutputStreams[j].close();
+                    }
+                    if (bandMappingOutputStreams[j] != null) {
+                        bandMappingOutputStreams[j].close();
+                    }
                 }
             }
         }
@@ -380,11 +373,11 @@ public class StatisticsOp extends Operator {
     }
 
     private static String[] getAlgorithmNames(Map<BandConfiguration, StatisticComputer.StxOpMapping>[] stxOpsList,
-                                              int[] percentiles) {
+                                              int[] percentiles, int qualifier) {
         final List<String> algorithms = new ArrayList<String>();
         for (Map<BandConfiguration, StatisticComputer.StxOpMapping> stxOps : stxOpsList) {
             for (StatisticComputer.StxOpMapping stxOpMapping : stxOps.values()) {
-                if (!algorithms.contains(MINIMUM)) {
+                if (qualifier != QUALITATIVE_MEASURES && !algorithms.contains(MINIMUM)) {
                     Collection<SummaryStxOp> summaryStxOps = stxOpMapping.summaryMap.values();
                     for (SummaryStxOp summaryStxOp : summaryStxOps) {
                         if (!Double.isNaN(summaryStxOp.getMean())) {
@@ -404,20 +397,22 @@ public class StatisticsOp extends Operator {
                         }
                     }
                 }
-                Collection<QualitativeStxOp> qualitativeStxOps = stxOpMapping.qualitativeMap.values();
-                if (!qualitativeStxOps.isEmpty() && !algorithms.contains(StatisticsOp.MAJORITY_CLASS)) {
-                    algorithms.add(StatisticsOp.MAJORITY_CLASS);
-                    algorithms.add(StatisticsOp.SECOND_MAJORITY_CLASS);
-                    if (!algorithms.contains(TOTAL)) {
-                        algorithms.add(StatisticsOp.TOTAL);
+                if (qualifier != QUANTITATIVE_MEASURES) {
+                    Collection<QualitativeStxOp> qualitativeStxOps = stxOpMapping.qualitativeMap.values();
+                    if (!qualitativeStxOps.isEmpty() && !algorithms.contains(StatisticsOp.MAJORITY_CLASS)) {
+                        algorithms.add(StatisticsOp.MAJORITY_CLASS);
+                        algorithms.add(StatisticsOp.SECOND_MAJORITY_CLASS);
+                        if (!algorithms.contains(TOTAL)) {
+                            algorithms.add(StatisticsOp.TOTAL);
+                        }
                     }
-                }
-                for (QualitativeStxOp qualitativeStxOp : qualitativeStxOps) {
-                    if (!qualitativeStxOp.getMajorityClass().equals(QualitativeStxOp.NO_MAJORITY_CLASS)) {
-                        String[] classNames = qualitativeStxOp.getClassNames();
-                        for (String className : classNames) {
-                            if (!algorithms.contains(className)) {
-                                algorithms.add(className);
+                    for (QualitativeStxOp qualitativeStxOp : qualitativeStxOps) {
+                        if (!qualitativeStxOp.getMajorityClass().equals(QualitativeStxOp.NO_MAJORITY_CLASS)) {
+                            String[] classNames = qualitativeStxOp.getClassNames();
+                            for (String className : classNames) {
+                                if (!algorithms.contains(className)) {
+                                    algorithms.add(className);
+                                }
                             }
                         }
                     }
@@ -446,33 +441,121 @@ public class StatisticsOp extends Operator {
         return PERCENTILE_PREFIX + percentile + PERCENTILE_SUFFIX;
     }
 
-    private void setupOutputter(TimeInterval[] timeIntervals) {
-        if (outputAsciiFile != null) {
-            try {
-                final StringBuilder metadataFileName = new StringBuilder(
-                        FileUtils.getFilenameWithoutExtension(outputAsciiFile));
-                metadataFileName.append("_metadata.txt");
-                final File metadataFile = new File(outputAsciiFile.getParent(), metadataFileName.toString());
-                metadataOutputStream = new PrintStream(new FileOutputStream(metadataFile));
-                csvOutputStream = new PrintStream(new FileOutputStream(outputAsciiFile));
-                if (timeIntervals.length > 1) {
-                    statisticsOutputters.add(new TimeConsideringCsvStatisticsWriter(csvOutputStream));
+    private void defineOutputters(TimeInterval[] timeIntervals, int[] percentiles, String[] productNames,
+                                  String[] regionIDs,
+                                  Map<BandConfiguration, StatisticComputer.StxOpMapping>[] stxOpsList) {
+        if (writeDataTypesSeparately && hasQualitativeAndQuantitativeData()) {
+            defineOutputterType(timeIntervals, percentiles, productNames, regionIDs, stxOpsList, QUANTITATIVE_MEASURES);
+            defineOutputterType(timeIntervals, percentiles, productNames, regionIDs, stxOpsList, QUALITATIVE_MEASURES);
+            allStatisticsOutputters.addAll(quantitativeStatisticsOutputters);
+            allStatisticsOutputters.addAll(qualitativeStatisticsOutputters);
+        } else {
+            defineOutputterType(timeIntervals, percentiles, productNames, regionIDs, stxOpsList, ALL_MEASURES);
+            quantitativeStatisticsOutputters.addAll(allStatisticsOutputters);
+            quantitativeStatisticsOutputters.addAll(allStatisticsOutputters);
+        }
+    }
+
+    private void defineOutputterType(TimeInterval[] timeIntervals, int[] percentiles, String[] productNames,
+                                     String[] regionIDs,
+                                     Map<BandConfiguration, StatisticComputer.StxOpMapping>[] stxOpsList, int qualifier) {
+        String[] bandNames = getBandNames(qualifier);
+        String[] algorithmNames = getAlgorithmNames(stxOpsList, percentiles, qualifier);
+        StatisticsOutputContext statisticsOutputContext =
+                StatisticsOutputContext.create(productNames, bandNames, algorithmNames, timeIntervals, regionIDs);
+        setupOutputters(timeIntervals, qualifier);
+        for (StatisticsOutputter statisticsOutputter : allStatisticsOutputters) {
+            statisticsOutputter.initialiseOutput(statisticsOutputContext);
+        }
+    }
+
+    private String[] getBandNames(int quantifier) {
+        if (quantifier == QUALITATIVE_MEASURES) {
+            return getBandNames(true, true);
+        } else if(quantifier == QUANTITATIVE_MEASURES) {
+            return getBandNames(true, false);
+        } else {
+            return getBandNames(false, true);
+        }
+    }
+
+    private String[] getBandNames(boolean considerMeasureType, boolean retrieveCategorical) {
+        final List<String> bandNamesList = new ArrayList<>();
+        for (BandConfiguration bandConfiguration : bandConfigurations) {
+            if (!considerMeasureType || bandConfiguration.retrieveCategoricalStatistics == retrieveCategorical) {
+                if (bandConfiguration.sourceBandName != null) {
+                    bandNamesList.add(bandConfiguration.sourceBandName);
                 } else {
-                    statisticsOutputters.add(new CsvStatisticsWriter(csvOutputStream));
+                    bandNamesList.add(bandConfiguration.expression.replace(" ", "_"));
                 }
-                statisticsOutputters.add(new MetadataWriter(metadataOutputStream));
+            }
+        }
+        return bandNamesList.toArray(new String[0]);
+    }
+
+    private boolean hasQualitativeAndQuantitativeData() {
+        boolean hasQuantitativeData = false;
+        boolean hasQualitativeData = false;
+        for (BandConfiguration bandConfiguration : bandConfigurations) {
+            if (bandConfiguration.retrieveCategoricalStatistics) {
+                hasQualitativeData = true;
+                if (hasQuantitativeData) {
+                    return true;
+                }
+            } else {
+                hasQuantitativeData = true;
+                if (hasQualitativeData) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private File getOutputFile(File origFile, int qualifier) {
+        if (origFile == null) {
+            return null;
+        }
+        if (qualifier == QUALITATIVE_MEASURES) {
+            return new File(origFile.getParent(),
+                    FileUtils.getFilenameWithoutExtension(origFile) + "_categorical" +
+                            FileUtils.getExtension(origFile));
+        } else if (qualifier == QUANTITATIVE_MEASURES) {
+            return new File(origFile.getParent(),
+                    FileUtils.getFilenameWithoutExtension(origFile) + "_quantitative" +
+                            FileUtils.getExtension(origFile));
+        }
+        return origFile;
+    }
+
+    private void setupOutputters(TimeInterval[] timeIntervals, int qualifier) {
+        Set<StatisticsOutputter> outputters = statisticsOutputters[qualifier];
+        File asciiFile = getOutputFile(outputAsciiFile, qualifier);
+        if (asciiFile != null) {
+            try {
+                final File metadataFile = new File(asciiFile.getParent(),
+                        FileUtils.getFilenameWithoutExtension(asciiFile) + "_metadata.txt");
+                metadataOutputStreams[qualifier] = new PrintStream(new FileOutputStream(metadataFile));
+                csvOutputStreams[qualifier] = new PrintStream(new FileOutputStream(asciiFile));
+                if (timeIntervals.length > 1) {
+                    outputters.add(new TimeConsideringCsvStatisticsWriter(csvOutputStreams[qualifier]));
+                } else {
+                    outputters.add(new CsvStatisticsWriter(csvOutputStreams[qualifier]));
+                }
+                outputters.add(new MetadataWriter(metadataOutputStreams[qualifier]));
             } catch (FileNotFoundException e) {
                 throw new OperatorException(e);
             }
         }
-        if (outputShapefile != null) {
+        File shapeFileOut = getOutputFile(outputShapefile, qualifier);
+        if (shapeFileOut != null) {
             try {
-                final String baseName = FileUtils.getFilenameWithoutExtension(outputShapefile);
-                final File bandMappingFile = new File(outputShapefile.getParent(), baseName + "_band_mapping.txt");
+                final String baseName = FileUtils.getFilenameWithoutExtension(shapeFileOut);
+                final File bandMappingFile = new File(shapeFileOut.getParent(), baseName + "_band_mapping.txt");
                 final FileOutputStream bandMappingFOS = new FileOutputStream(bandMappingFile);
-                bandMappingOutputStream = new PrintStream(bandMappingFOS);
-                BandNameCreator bandNameCreator = new BandNameCreator(bandMappingOutputStream);
-                statisticsOutputters.add(
+                bandMappingOutputStreams[qualifier] = new PrintStream(bandMappingFOS);
+                BandNameCreator bandNameCreator = new BandNameCreator(bandMappingOutputStreams[qualifier]);
+                outputters.add(
                         FeatureStatisticsWriter.createFeatureStatisticsWriter(shapefile.toURI().toURL(), outputShapefile.getAbsolutePath(),
                                 bandNameCreator));
             } catch (MalformedURLException e) {
