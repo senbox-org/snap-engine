@@ -287,24 +287,23 @@ public class StatisticsOp extends Operator {
                     }
                 }
             }
-
-            try {
-                for (StatisticsOutputter statisticsOutputter : allStatisticsOutputters) {
-                    statisticsOutputter.finaliseOutput();
+        }
+        try {
+            for (StatisticsOutputter statisticsOutputter : allStatisticsOutputters) {
+                statisticsOutputter.finaliseOutput();
+            }
+        } catch (IOException e) {
+            throw new OperatorException("Unable to write output.", e);
+        } finally {
+            for (int j = 0; j < 3; j++) {
+                if (metadataOutputStreams[j] != null) {
+                    metadataOutputStreams[j].close();
                 }
-            } catch (IOException e) {
-                throw new OperatorException("Unable to write output.", e);
-            } finally {
-                for (int j = 0; j < 3; j++) {
-                    if (metadataOutputStreams[j] != null) {
-                        metadataOutputStreams[j].close();
-                    }
-                    if (csvOutputStreams[j] != null) {
-                        csvOutputStreams[j].close();
-                    }
-                    if (bandMappingOutputStreams[j] != null) {
-                        bandMappingOutputStreams[j].close();
-                    }
+                if (csvOutputStreams[j] != null) {
+                    csvOutputStreams[j].close();
+                }
+                if (bandMappingOutputStreams[j] != null) {
+                    bandMappingOutputStreams[j].close();
                 }
             }
         }
@@ -473,7 +472,7 @@ public class StatisticsOp extends Operator {
     private String[] getBandNames(int quantifier) {
         if (quantifier == QUALITATIVE_MEASURES) {
             return getBandNames(true, true);
-        } else if(quantifier == QUANTITATIVE_MEASURES) {
+        } else if (quantifier == QUANTITATIVE_MEASURES) {
             return getBandNames(true, false);
         } else {
             return getBandNames(false, true);
