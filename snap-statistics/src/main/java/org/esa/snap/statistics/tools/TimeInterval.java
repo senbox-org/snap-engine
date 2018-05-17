@@ -2,7 +2,7 @@ package org.esa.snap.statistics.tools;
 
 import org.esa.snap.core.datamodel.ProductData;
 
-public class TimeInterval {
+public class TimeInterval implements Comparable {
 
     int id;
     ProductData.UTC intervalStart;
@@ -32,5 +32,13 @@ public class TimeInterval {
 
     public void setIntervalEnd(ProductData.UTC intervalEnd) {
         this.intervalEnd = intervalEnd;
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        if (!(o instanceof TimeInterval)) {
+            return -1;
+        }
+        return getId() - ((TimeInterval)o).getId();
     }
 }
