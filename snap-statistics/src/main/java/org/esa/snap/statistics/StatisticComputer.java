@@ -99,6 +99,7 @@ public class StatisticComputer {
         for (int i = 0; i < timeIntervals.length - 1; i++) {
             // if a product's start and end time do not fall into the same interval,
             // it will be assigned to the earlier one
+            // todo fix / write test
             if (product.getStartTime().getAsDate().after(timeIntervals[i].getIntervalStart().getAsDate()) &&
                     product.getEndTime().getAsDate().before(timeIntervals[i + 1].getIntervalEnd().getAsDate())) {
                 return i;
