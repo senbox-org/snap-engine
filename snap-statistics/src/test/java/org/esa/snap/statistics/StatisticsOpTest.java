@@ -477,7 +477,7 @@ public class StatisticsOpTest {
 
         @Override
         public void addToOutput(String bandName, TimeInterval interval, String regionId, Map<String, Object> statistics) {
-            //do nothing
+            addToOutput(bandName, regionId, statistics);
         }
 
         @Override
