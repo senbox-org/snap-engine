@@ -107,9 +107,9 @@ public class StatisticsOp extends Operator {
     public static final int[] DEFAULT_PERCENTILES_INTS = new int[]{90, 95};
 
     private static final double FILL_VALUE = -999.0;
-    private static final int ALL_MEASURES = 0;
-    private static final int QUALITATIVE_MEASURES = 1;
-    private static final int QUANTITATIVE_MEASURES = 2;
+    static final int ALL_MEASURES = 0;
+    static final int QUALITATIVE_MEASURES = 1;
+    static final int QUANTITATIVE_MEASURES = 2;
 
     @SourceProducts(description = "The source products to be considered for statistics computation. If not given, " +
             "the parameter 'sourceProductPaths' must be provided.")
@@ -419,7 +419,7 @@ public class StatisticsOp extends Operator {
                 }
             }
         }
-        return algorithms.toArray(new String[algorithms.size()]);
+        return algorithms.toArray(new String[0]);
     }
 
     public static String[] getAlgorithmNames(int[] percentiles) {
@@ -445,13 +445,13 @@ public class StatisticsOp extends Operator {
                                   String[] regionIDs,
                                   Map<BandConfiguration, StatisticComputer.StxOpMapping>[] stxOpsList) {
         if (writeDataTypesSeparately && hasQualitativeAndQuantitativeData()) {
-            defineOutputterType(timeIntervals, percentiles, productNames, regionIDs, stxOpsList, QUANTITATIVE_MEASURES);
             defineOutputterType(timeIntervals, percentiles, productNames, regionIDs, stxOpsList, QUALITATIVE_MEASURES);
-            allStatisticsOutputters.addAll(quantitativeStatisticsOutputters);
+            defineOutputterType(timeIntervals, percentiles, productNames, regionIDs, stxOpsList, QUANTITATIVE_MEASURES);
             allStatisticsOutputters.addAll(qualitativeStatisticsOutputters);
+            allStatisticsOutputters.addAll(quantitativeStatisticsOutputters);
         } else {
             defineOutputterType(timeIntervals, percentiles, productNames, regionIDs, stxOpsList, ALL_MEASURES);
-            quantitativeStatisticsOutputters.addAll(allStatisticsOutputters);
+            qualitativeStatisticsOutputters.addAll(allStatisticsOutputters);
             quantitativeStatisticsOutputters.addAll(allStatisticsOutputters);
         }
     }
@@ -512,7 +512,9 @@ public class StatisticsOp extends Operator {
         return false;
     }
 
-    private File getOutputFile(File origFile, int qualifier) {
+    /* package local for testing */
+    @SuppressWarnings("WeakerAccess")
+    static File getOutputFile(File origFile, int qualifier) {
         if (origFile == null) {
             return null;
         }

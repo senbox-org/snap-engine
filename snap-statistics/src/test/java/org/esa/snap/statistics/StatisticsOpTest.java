@@ -405,6 +405,26 @@ public class StatisticsOpTest {
         assertEquals(new ProductData.UTC(2750, 10, 10).getAsDate(), timeIntervals[2].getIntervalEnd().getAsDate());
     }
 
+    @Test
+    public void testGetOutputFile() {
+        assertNull(StatisticsOp.getOutputFile(null, StatisticsOp.ALL_MEASURES));
+        assertNull(StatisticsOp.getOutputFile(null, StatisticsOp.QUALITATIVE_MEASURES));
+        assertNull(StatisticsOp.getOutputFile(null, StatisticsOp.QUANTITATIVE_MEASURES));
+
+        File origFile = new File("origFile.txt");
+        File expectedQualitativeFile = new File("origFile_categorical.txt");
+        File expectedQuantitativeFile = new File("origFile_quantitative.txt");
+
+        File allMeasures_outputFile = StatisticsOp.getOutputFile(origFile, StatisticsOp.ALL_MEASURES);
+        assertEquals(origFile.getAbsolutePath(), allMeasures_outputFile.getAbsolutePath());
+
+        File qualitativeMeasures_outputFile = StatisticsOp.getOutputFile(origFile, StatisticsOp.QUALITATIVE_MEASURES);
+        assertEquals(expectedQualitativeFile.getAbsolutePath(), qualitativeMeasures_outputFile.getAbsolutePath());
+
+        File quantitativeMeasures_outputFile = StatisticsOp.getOutputFile(origFile, StatisticsOp.QUANTITATIVE_MEASURES);
+        assertEquals(expectedQuantitativeFile.getAbsolutePath(), quantitativeMeasures_outputFile.getAbsolutePath());
+    }
+
     private StatisticsOp createStatisticsOp() {
         StatisticsOp statisticsOp = new StatisticsOp();
         statisticsOp.setParameterDefaultValues();
