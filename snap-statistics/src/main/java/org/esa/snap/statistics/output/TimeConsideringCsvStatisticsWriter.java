@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import org.esa.snap.statistics.tools.TimeInterval;
 
 public class TimeConsideringCsvStatisticsWriter implements StatisticsOutputter {
@@ -135,7 +136,7 @@ public class TimeConsideringCsvStatisticsWriter implements StatisticsOutputter {
 
     static class Statistics {
 
-        Map<TimeInterval, TimeIntervalStatistics> statistics = new HashMap<>();
+        Map<TimeInterval, TimeIntervalStatistics> statistics = new TreeMap<>();
 
         TimeIntervalStatistics getDataForTimeInterval(TimeInterval interval) {
             return statistics.get(interval);
@@ -157,7 +158,7 @@ public class TimeConsideringCsvStatisticsWriter implements StatisticsOutputter {
 
     static class TimeIntervalStatistics {
 
-        Map<String, BandStatistics> statistics = new HashMap<>();
+        Map<String, BandStatistics> statistics = new TreeMap<>();
 
         BandStatistics getDataForBandName(String bandName) {
             return statistics.get(bandName);
@@ -180,7 +181,7 @@ public class TimeConsideringCsvStatisticsWriter implements StatisticsOutputter {
 
     static class BandStatistics {
 
-        Map<String, RegionStatistics> bandStatistics = new HashMap<>();
+        Map<String, RegionStatistics> bandStatistics = new TreeMap<>();
 
         RegionStatistics getDataForRegionName(String regionName) {
             return bandStatistics.get(regionName);
