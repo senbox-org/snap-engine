@@ -464,7 +464,8 @@ public class StatisticsOp extends Operator {
         StatisticsOutputContext statisticsOutputContext =
                 StatisticsOutputContext.create(productNames, bandNames, algorithmNames, timeIntervals, regionIDs);
         setupOutputters(timeIntervals, qualifier);
-        for (StatisticsOutputter statisticsOutputter : allStatisticsOutputters) {
+        Set<StatisticsOutputter> outputters = statisticsOutputters[qualifier];
+        for (StatisticsOutputter statisticsOutputter : outputters) {
             statisticsOutputter.initialiseOutput(statisticsOutputContext);
         }
     }
@@ -558,7 +559,7 @@ public class StatisticsOp extends Operator {
                 bandMappingOutputStreams[qualifier] = new PrintStream(bandMappingFOS);
                 BandNameCreator bandNameCreator = new BandNameCreator(bandMappingOutputStreams[qualifier]);
                 outputters.add(
-                        FeatureStatisticsWriter.createFeatureStatisticsWriter(shapefile.toURI().toURL(), outputShapefile.getAbsolutePath(),
+                        FeatureStatisticsWriter.createFeatureStatisticsWriter(shapefile.toURI().toURL(), shapeFileOut.getAbsolutePath(),
                                 bandNameCreator));
             } catch (MalformedURLException e) {
                 throw new OperatorException(
