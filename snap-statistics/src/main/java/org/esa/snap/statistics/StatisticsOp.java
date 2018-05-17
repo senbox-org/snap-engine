@@ -227,8 +227,7 @@ public class StatisticsOp extends Operator {
         final StatisticsOutputContext statisticsOutputContext = StatisticsOutputContext.create(productNames,
                 bandNames,
                 algorithmNames,
-                startDate,
-                endDate,
+                timeIntervals,
                 regionNames.toArray(new String[regionNames.size()]));
 
         setupOutputter(timeIntervals);
@@ -261,7 +260,7 @@ public class StatisticsOp extends Operator {
                         stxMap.put(TOTAL, qualitativeStxOp.getTotalNumClassMembers());
                     }
                     for (StatisticsOutputter statisticsOutputter : statisticsOutputters) {
-                        statisticsOutputter.addToOutput(bandName, regionName, stxMap);
+                        statisticsOutputter.addToOutput(bandName, timeIntervals[i], regionName, stxMap);
                     }
                 }
                 final Map<String, SummaryStxOp> summaryMap = stxOpMapping.summaryMap;

@@ -71,7 +71,6 @@ public class FeatureStatisticsWriter implements StatisticsOutputter {
      * @param originalShapefile An URL pointing to the original shapefile that shall is to be enriched with statistics.
      * @param targetShapefile   A file path where the target shapefile shall be written to.
      * @param bandNameCreator   An instance of {@link BandNameCreator}.
-     *
      * @return An instance of <code>FeatureStatisticsWriter</code>.
      */
     public static FeatureStatisticsWriter createFeatureStatisticsWriter(URL originalShapefile, String targetShapefile, BandNameCreator bandNameCreator) {
@@ -93,7 +92,6 @@ public class FeatureStatisticsWriter implements StatisticsOutputter {
      * @param originalFeatures The features to be enriched with statistics.
      * @param targetShapefile  A file path where the target shapefile shall be written to.
      * @param bandNameCreator  An instance of {@link org.esa.snap.statistics.output.BandNameCreator}.
-     *
      * @return An instance of <code>FeatureStatisticsWriter</code>.
      */
     public static FeatureStatisticsWriter createFeatureStatisticsWriter(FeatureCollection<SimpleFeatureType, SimpleFeature> originalFeatures, String targetShapefile,
@@ -107,7 +105,7 @@ public class FeatureStatisticsWriter implements StatisticsOutputter {
         this.targetShapefile = targetShapefile;
         this.originalFeatures = originalFeatures;
         this.bandNameCreator = bandNameCreator;
-        features = new ArrayList<SimpleFeature>();
+        features = new ArrayList<>();
     }
 
     /**
@@ -122,12 +120,25 @@ public class FeatureStatisticsWriter implements StatisticsOutputter {
         typeBuilder.init(originalFeatureType);
         for (final String algorithmName : statisticsOutputContext.algorithmNames) {
             for (String bandName : statisticsOutputContext.bandNames) {
-                final String attributeName = bandNameCreator.createUniqueAttributeName(algorithmName, bandName);
-                if (originalFeatureType.getDescriptor(attributeName) == null) {
-                    if (statisticsOutputContext.isNotNumber(algorithmName)) {
-                        typeBuilder.add(attributeName, String.class);
-                    } else {
-                        typeBuilder.add(attributeName, Double.class);
+                if (statisticsOutputContext.timeIntervals == null || statisticsOutputContext.timeIntervals.length == 1) {
+                    final String attributeName = bandNameCreator.createUniqueAttributeName(algorithmName, bandName);
+                    if (originalFeatureType.getDescriptor(attributeName) == null) {
+                        if (statisticsOutputContext.isNotNumber(algorithmName)) {
+                            typeBuilder.add(attributeName, String.class);
+                        } else {
+                            typeBuilder.add(attributeName, Double.class);
+                        }
+                    }
+                } else {
+                    for (TimeInterval timeInterval : statisticsOutputContext.timeIntervals) {
+                        final String attributeName = bandNameCreator.createUniqueAttributeName(algorithmName, bandName, timeInterval);
+                        if (originalFeatureType.getDescriptor(attributeName) == null) {
+                            if (statisticsOutputContext.isNotNumber(algorithmName)) {
+                                typeBuilder.add(attributeName, String.class);
+                            } else {
+                                typeBuilder.add(attributeName, Double.class);
+                            }
+                        }
                     }
                 }
             }
@@ -190,7 +201,7 @@ public class FeatureStatisticsWriter implements StatisticsOutputter {
         final Map<String, SimpleFeature> markedToAdd = new HashMap<String, SimpleFeature>();
         for (SimpleFeature feature : features) {
             for (String algorithmName : statistics.keySet()) {
-                final String name = bandNameCreator.createUniqueAttributeName(algorithmName, bandName);
+                final String name = bandNameCreator.getUniqueAttributeName(algorithmName, bandName, interval);
                 if (Util.getFeatureName(feature).equals(regionId)) {
                     SimpleFeature featureToUpdate;
                     if (markedToAdd.containsKey(regionId)) {
@@ -214,7 +225,7 @@ public class FeatureStatisticsWriter implements StatisticsOutputter {
         while (featureIterator.hasNext()) {
             SimpleFeature feature = featureIterator.next();
             for (String algorithmName : statistics.keySet()) {
-                final String name = bandNameCreator.createUniqueAttributeName(algorithmName, bandName);
+                final String name = bandNameCreator.getUniqueAttributeName(algorithmName, bandName, interval);
                 final Object value = getValue(statistics, algorithmName, feature, regionId);
                 feature = createUpdatedFeature(simpleFeatureBuilder, feature, name, value);
             }
@@ -234,7 +245,6 @@ public class FeatureStatisticsWriter implements StatisticsOutputter {
      * {@inheritDoc}
      * <p>
      * This implementation writes the enriched features to the specified target shapefile.
-     *
      *
      * @throws IOException If writing fails.
      */
