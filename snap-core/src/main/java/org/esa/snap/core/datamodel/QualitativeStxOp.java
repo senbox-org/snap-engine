@@ -69,9 +69,10 @@ public class QualitativeStxOp extends StxOp {
     }
 
     public void determineClassCounterType(Band band) {
-        // maybe add here a third counter for flag codings
         if (band.isIndexBand()) {
             classCounter = new IndexCodingClassCounter(band.getIndexCoding());
+        } else if (band.isFlagBand()) {
+            classCounter = new FlagCodingClassCounter(band.getFlagCoding());
         } else {
             classCounter = new DefaultClassCounter();
         }
@@ -170,6 +171,39 @@ public class QualitativeStxOp extends StxOp {
                 }
             }
             putIntValue(value);
+        }
+
+    }
+
+    private class FlagCodingClassCounter implements ClassCounter {
+        private final FlagCoding flagCoding;
+        private final String[] flagNames;
+        private final int numAttributes;
+
+        private final int[] flagValues;
+
+        FlagCodingClassCounter(FlagCoding flagCoding) {
+            this.flagCoding = flagCoding;
+            flagNames = flagCoding.getFlagNames();
+            numAttributes = flagCoding.getNumAttributes();
+            flagValues = new int[numAttributes];
+            for (int i = 0; i < numAttributes; i++) {
+                flagValues[i] = flagCoding.getFlagMask(flagNames[i]);
+            }
+        }
+
+        @Override
+        public void count(int value) {
+            for (int i = 0; i < numAttributes; i++) {
+                if ((value & flagValues[i]) != 0) {
+                    String flagName = flagNames[i];
+                    if (!membersPerClass.containsKey(flagName)) {
+                        membersPerClass.put(flagName, 1);
+                    } else {
+                        membersPerClass.put(flagName, membersPerClass.get(flagName) + 1);
+                    }
+                }
+            }
         }
 
     }
