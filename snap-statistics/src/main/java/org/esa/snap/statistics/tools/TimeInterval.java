@@ -4,9 +4,9 @@ import org.esa.snap.core.datamodel.ProductData;
 
 public class TimeInterval implements Comparable {
 
-    int id;
-    ProductData.UTC intervalStart;
-    ProductData.UTC intervalEnd;
+    private int id;
+    private ProductData.UTC intervalStart;
+    private ProductData.UTC intervalEnd;
 
     public TimeInterval(int id, ProductData.UTC intervalStart, ProductData.UTC intervalEnd) {
         this.id = id;
