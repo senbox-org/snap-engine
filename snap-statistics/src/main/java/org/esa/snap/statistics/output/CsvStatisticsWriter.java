@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import org.esa.snap.statistics.tools.TimeInterval;
 
@@ -85,9 +86,9 @@ public class CsvStatisticsWriter implements StatisticsOutputter {
             }
             if (measures.hasBands()) {
                 if (measure.bandName != null) {
-                    csvOutput.append(measure.bandName).append("\t");
+                    csvOutput.append(measure.bandName);
                 } else {
-                    csvOutput.append("\t").append("\t");
+                    csvOutput.append("\t");
                 }
             }
             for (String algorithmName : measureNames) {
@@ -138,7 +139,7 @@ public class CsvStatisticsWriter implements StatisticsOutputter {
         return numberValue.toString();
     }
 
-    private static class Measure {
+    private class Measure {
 
         private final String bandName;
         private final TimeInterval interval;
@@ -149,7 +150,8 @@ public class CsvStatisticsWriter implements StatisticsOutputter {
             this.bandName = bandName;
             this.interval = interval;
             this.regionId = regionId;
-            this.statistics = statistics;
+            this.statistics = new TreeMap<>();
+            this.statistics.putAll(statistics);
         }
 
     }
@@ -219,9 +221,13 @@ public class CsvStatisticsWriter implements StatisticsOutputter {
 
         private void sort(List<Measure> measureList, List<Measure> sortedMeasures, int recursionDepth, Manager[] managers) {
             if (recursionDepth < managers.length) {
-                for (int i = 0; i < managers[recursionDepth].size(); i++) {
-                    List<Measure> subList = managers[recursionDepth].getSubListforIndex(measureList, i);
-                    sort(subList, sortedMeasures, recursionDepth + 1, managers);
+                if (managers[recursionDepth].size() == 0) {
+                    sort(measureList, sortedMeasures, recursionDepth + 1, managers);
+                } else {
+                    for (int i = 0; i < managers[recursionDepth].size(); i++) {
+                        List<Measure> subList = managers[recursionDepth].getSubListforIndex(measureList, i);
+                        sort(subList, sortedMeasures, recursionDepth + 1, managers);
+                    }
                 }
             } else {
                 sortedMeasures.addAll(measureList);

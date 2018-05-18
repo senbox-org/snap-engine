@@ -43,7 +43,7 @@ public class CsvStatisticsWriterTest {
     }
 
     @Test
-    public void testFinaliseOutput() throws Exception {
+    public void testFinaliseOutput() {
         csvStatisticsWriter.initialiseOutput(StatisticsOutputContext.create(null, new String[]{
                 "p90",
                 "p95",
@@ -96,7 +96,7 @@ public class CsvStatisticsWriterTest {
         }
 
         @Override
-        public void write(int b) throws IOException {
+        public void write(int b) {
             byte b1 = (byte) b;
             builder.append(new String(new byte[]{b1}));
         }
