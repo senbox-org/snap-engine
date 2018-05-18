@@ -90,6 +90,7 @@ public class BandNameCreator {
                             "'.");
         }
         addMapping(desiredAttributeName, attributeName);
+        print(desiredAttributeName, attributeName, null);
         return attributeName;
     }
 
@@ -103,6 +104,7 @@ public class BandNameCreator {
      * @return A unique name for the combination of the three.
      */
     public String createUniqueAttributeName(String algorithmName, String sourceBandName, TimeInterval timeInterval) {
+        final String rawAttributeName = algorithmName + "_" + sourceBandName;
         final String desiredAttributeName = algorithmName + "_" + sourceBandName + "_" + timeInterval.getId();
         if (mappedNames.containsKey(desiredAttributeName)) {
             return mappedNames.get(desiredAttributeName);
@@ -133,6 +135,7 @@ public class BandNameCreator {
                             "'.");
         }
         addMapping(desiredAttributeName, attributeName);
+        print(desiredAttributeName, attributeName, timeInterval);
         return attributeName;
     }
 
@@ -166,12 +169,23 @@ public class BandNameCreator {
     }
 
     private void addMapping(String desiredAttributeName, String attributeName) {
+        mappedNames.put(desiredAttributeName, attributeName);
+    }
+
+    private void print(String desiredAttributeName, String attributeName, TimeInterval timeInterval) {
         printStream
                 .append(attributeName)
                 .append("=")
-                .append(desiredAttributeName)
+                .append(desiredAttributeName);
+        if (timeInterval != null) {
+            printStream
+                    .append(" between ")
+                    .append(timeInterval.getIntervalStart().format())
+                    .append(" and ")
+                    .append(timeInterval.getIntervalEnd().format());
+        }
+        printStream
                 .append("\n");
-        mappedNames.put(desiredAttributeName, attributeName);
     }
 
     private static class NullOutputStream extends OutputStream {
