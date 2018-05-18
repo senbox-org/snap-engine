@@ -56,6 +56,21 @@ public class MetadataWriter implements StatisticsOutputter {
                     .append(statisticsOutputContext.endDate.format())
                     .append("\n");
         }
+        if (statisticsOutputContext.timeIntervals != null) {
+            printStream
+                    .append("#\n")
+                    .append("# Time Intervals:")
+                    .append("\n");;
+            for (TimeInterval timeInterval : statisticsOutputContext.timeIntervals) {
+                printStream
+                        .append("#              From ")
+                        .append(timeInterval.getIntervalStart().format())
+                        .append(" to ")
+                        .append(timeInterval.getIntervalEnd().format())
+                        .append("\n");
+            }
+
+        }
         printStream.append("#\n");
         printStream.append("# Regions:\n");
         for (String regionId : statisticsOutputContext.regionIds) {
