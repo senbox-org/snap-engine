@@ -36,39 +36,10 @@ public class CsvStatisticsWriterTest {
     private PrintStream csvStream;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         csvOutput = new StringBuilder();
         csvStream = new PrintStream(new StringOutputStream(csvOutput));
         csvStatisticsWriter = new CsvStatisticsWriter(csvStream);
-    }
-
-    @Test
-    public void testAddToOutput() throws Exception {
-        addOutput();
-
-        assertEquals(((Number) csvStatisticsWriter.statisticsContainer.getDataForBandName("normalised_cow_density_index_(ncdi)")
-                             .getDataForRegionName("werdohl")
-                             .getDataForAlgorithmName("p95")).doubleValue(), 3.0, 1E-6);
-        assertEquals(((Number) csvStatisticsWriter.statisticsContainer.getDataForBandName("normalised_cow_density_index_(ncdi)")
-                             .getDataForRegionName("werdohl")
-                             .getDataForAlgorithmName("p90")).doubleValue(), 2.0, 1E-6);
-
-        assertEquals(((Number) csvStatisticsWriter.statisticsContainer.getDataForBandName("normalised_pig_density_index_(npdi)")
-                             .getDataForRegionName("bielefeld")
-                             .getDataForAlgorithmName("p90")).doubleValue(), 1.0, 1E-6);
-        assertEquals(((Number) csvStatisticsWriter.statisticsContainer.getDataForBandName("normalised_pig_density_index_(npdi)")
-                             .getDataForRegionName("bielefeld")
-                             .getDataForAlgorithmName("p95")).doubleValue(), 2.0, 1E-6);
-        assertEquals(((Number) csvStatisticsWriter.statisticsContainer.getDataForBandName("normalised_pig_density_index_(npdi)")
-                             .getDataForRegionName("bielefeld")
-                             .getDataForAlgorithmName("max")).doubleValue(), 3.0, 1E-6);
-        assertEquals(((Number) csvStatisticsWriter.statisticsContainer.getDataForBandName("normalised_pig_density_index_(npdi)")
-                             .getDataForRegionName("bielefeld")
-                             .getDataForAlgorithmName("min")).doubleValue(), 0.5, 1E-6);
-
-        assertEquals(((Number)csvStatisticsWriter.statisticsContainer.getDataForBandName("normalised_cow_density_index_(ncdi)")
-                             .getDataForRegionName("bielefeld")
-                             .getDataForAlgorithmName("p90")).doubleValue(), 1.0, 1E-6);
     }
 
     @Test
@@ -90,7 +61,7 @@ public class CsvStatisticsWriterTest {
     }
 
     @Test
-    public void testGetValueAsString() throws Exception {
+    public void testGetValueAsString() {
         assertEquals("0.0016", CsvStatisticsWriter.getValueAsString(1.6E-3));
         assertEquals("10.0000", CsvStatisticsWriter.getValueAsString(10.0));
         assertEquals("10", CsvStatisticsWriter.getValueAsString(10));

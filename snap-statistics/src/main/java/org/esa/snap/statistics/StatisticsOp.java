@@ -41,7 +41,6 @@ import org.esa.snap.statistics.output.FeatureStatisticsWriter;
 import org.esa.snap.statistics.output.MetadataWriter;
 import org.esa.snap.statistics.output.StatisticsOutputContext;
 import org.esa.snap.statistics.output.StatisticsOutputter;
-import org.esa.snap.statistics.output.TimeConsideringCsvStatisticsWriter;
 import org.esa.snap.statistics.output.Util;
 
 import javax.media.jai.Histogram;
@@ -462,7 +461,7 @@ public class StatisticsOp extends Operator {
         String[] algorithmNames = getAlgorithmNames(stxOpsList, percentiles, qualifier);
         StatisticsOutputContext statisticsOutputContext =
                 StatisticsOutputContext.create(productNames, bandNames, algorithmNames, timeIntervals, regionIDs);
-        setupOutputters(timeIntervals, qualifier);
+        setupOutputters(qualifier);
         Set<StatisticsOutputter> outputters = statisticsOutputters[qualifier];
         for (StatisticsOutputter statisticsOutputter : outputters) {
             statisticsOutputter.initialiseOutput(statisticsOutputContext);
@@ -530,7 +529,7 @@ public class StatisticsOp extends Operator {
         return origFile;
     }
 
-    private void setupOutputters(TimeInterval[] timeIntervals, int qualifier) {
+    private void setupOutputters(int qualifier) {
         Set<StatisticsOutputter> outputters = statisticsOutputters[qualifier];
         File asciiFile = getOutputFile(outputAsciiFile, qualifier);
         if (asciiFile != null) {
@@ -539,11 +538,7 @@ public class StatisticsOp extends Operator {
                         FileUtils.getFilenameWithoutExtension(asciiFile) + "_metadata.txt");
                 metadataOutputStreams[qualifier] = new PrintStream(new FileOutputStream(metadataFile));
                 csvOutputStreams[qualifier] = new PrintStream(new FileOutputStream(asciiFile));
-                if (timeIntervals.length > 1) {
-                    outputters.add(new TimeConsideringCsvStatisticsWriter(csvOutputStreams[qualifier]));
-                } else {
-                    outputters.add(new CsvStatisticsWriter(csvOutputStreams[qualifier]));
-                }
+                outputters.add(new CsvStatisticsWriter(csvOutputStreams[qualifier]));
                 outputters.add(new MetadataWriter(metadataOutputStreams[qualifier]));
             } catch (FileNotFoundException e) {
                 throw new OperatorException(e);

@@ -1,41 +1,20 @@
-/*
- * Copyright (C) 2011 Brockmann Consult GmbH (info@brockmann-consult.de)
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the Free
- * Software Foundation; either version 3 of the License, or (at your option)
- * any later version.
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, see http://www.gnu.org/licenses/
- */
-
 package org.esa.snap.statistics.output;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
+import java.util.TreeSet;
 import org.esa.snap.statistics.tools.TimeInterval;
 
-/**
- * Writes the statistics to an instance of {@link PrintStream}.
- * The format written is a tab-separated CSV ASCII file, containing the actual statistics.
- *
- * @author Thomas Storm
- */
 public class CsvStatisticsWriter implements StatisticsOutputter {
 
     private final PrintStream csvOutput;
-    private String[] algorithmNames;
-    final Statistics statisticsContainer;
+    private String[] measureNames;
+    private Measures measures;
 
     /**
      * Creates a new instance.
@@ -44,7 +23,7 @@ public class CsvStatisticsWriter implements StatisticsOutputter {
      */
     public CsvStatisticsWriter(PrintStream csvOutput) {
         this.csvOutput = csvOutput;
-        statisticsContainer = new Statistics();
+        this.measures = new Measures();
     }
 
     /**
@@ -54,8 +33,8 @@ public class CsvStatisticsWriter implements StatisticsOutputter {
      */
     @Override
     public void initialiseOutput(StatisticsOutputContext statisticsOutputContext) {
-        this.algorithmNames = statisticsOutputContext.algorithmNames;
-        Arrays.sort(algorithmNames);
+        this.measureNames = statisticsOutputContext.algorithmNames;
+        Arrays.sort(measureNames);
     }
 
     /**
@@ -67,22 +46,12 @@ public class CsvStatisticsWriter implements StatisticsOutputter {
      */
     @Override
     public void addToOutput(String bandName, String regionId, Map<String, Object> statistics) {
-        if (!statisticsContainer.containsBand(bandName)) {
-            statisticsContainer.put(bandName, new BandStatistics());
-        }
-        final BandStatistics dataForBandName = statisticsContainer.getDataForBandName(bandName);
-        if (!dataForBandName.containsRegion(regionId)) {
-            dataForBandName.put(regionId, new RegionStatistics());
-        }
-        final RegionStatistics dataForRegionName = dataForBandName.getDataForRegionName(regionId);
-        for (Map.Entry<String, Object> entry : statistics.entrySet()) {
-            dataForRegionName.put(entry.getKey(), entry.getValue());
-        }
+        measures.addMeasure(new Measure(bandName, null, regionId, statistics));
     }
 
     @Override
     public void addToOutput(String bandName, TimeInterval interval, String regionId, Map<String, Object> statistics) {
-        addToOutput(bandName, regionId, statistics);
+        measures.addMeasure(new Measure(bandName, interval, regionId, statistics));
     }
 
     /**
@@ -91,44 +60,73 @@ public class CsvStatisticsWriter implements StatisticsOutputter {
      * @throws IOException Never.
      */
     @Override
-    public void finaliseOutput() throws IOException {
-        if (algorithmNames == null) {
+    public void finaliseOutput() {
+        if (measureNames == null) {
             throw new IllegalStateException(getClass().getSimpleName() + " not initialised.");
         }
-
         writeHeader();
-
-        for (String bandName : statisticsContainer.getBandNames()) {
-            final BandStatistics bandStatistics = statisticsContainer.getDataForBandName(bandName);
-            for (String regionName : bandStatistics.getRegionNames()) {
-                csvOutput.append(regionName)
-                        .append("\t")
-                        .append(bandName);
-                for (String algorithmName : algorithmNames) {
-                    csvOutput.append("\t");
-                    final RegionStatistics dataForRegionName = bandStatistics.getDataForRegionName(regionName);
-                    if (dataForRegionName.containsAlgorithm(algorithmName)) {
-                        Object value = dataForRegionName.getDataForAlgorithmName(algorithmName);
-                        if (value instanceof Number) {
-                            csvOutput.append(getValueAsString((Number) value));
-                        } else {
-                            csvOutput.append(value.toString());
-                        }
+        measures.sort();
+        for (int i = 0; i < measures.getSize(); i++) {
+            Measure measure = measures.getMeasure(i);
+            if (measures.hasRegions()) {
+                if (measure.regionId != null) {
+                    csvOutput.append(measure.regionId).append("\t");
+                } else {
+                    csvOutput.append("\t").append("\t");
+                }
+            }
+            if (measures.hasTimeIntervals()) {
+                if (measure.interval != null) {
+                    csvOutput.append(measure.interval.getIntervalStart().format()).append("\t")
+                            .append(measure.interval.getIntervalEnd().format()).append("\t");
+                } else {
+                    csvOutput.append("\t").append("\t").append("\t").append("\t");
+                }
+            }
+            if (measures.hasBands()) {
+                if (measure.bandName != null) {
+                    csvOutput.append(measure.bandName).append("\t");
+                } else {
+                    csvOutput.append("\t").append("\t");
+                }
+            }
+            for (String algorithmName : measureNames) {
+                csvOutput.append("\t");
+                if (measure.statistics.containsKey(algorithmName)) {
+                    Object value = measure.statistics.get(algorithmName);
+                    if (value instanceof Number) {
+                        csvOutput.append(getValueAsString((Number) value));
+                    } else {
+                        csvOutput.append(value.toString());
                     }
                 }
-                csvOutput.append("\n");
             }
+            csvOutput.append("\n");
         }
+
     }
 
     private void writeHeader() {
-        csvOutput.append("# Region")
-                .append("\t")
-                .append("Band");
+        if (measures.hasRegions()) {
+            csvOutput.append("# Region")
+                    .append("\t");
+        }
+        if (measures.hasTimeIntervals()) {
+            csvOutput.append("Interval_Start")
+                    .append("\t")
+                    .append("Interval_End")
+                    .append("\t");
+        }
+        if (measures.hasBands()) {
+            csvOutput.append("Band").append("\t");
+        }
 
-        for (String algorithmName : algorithmNames) {
-            csvOutput.append("\t")
-                    .append(algorithmName);
+        for (int i = 0; i < measureNames.length; i++) {
+            String algorithmName = measureNames[i];
+            csvOutput.append(algorithmName);
+            if (i < measureNames.length - 1) {
+                csvOutput.append("\t");
+            }
         }
         csvOutput.append("\n");
     }
@@ -140,64 +138,232 @@ public class CsvStatisticsWriter implements StatisticsOutputter {
         return numberValue.toString();
     }
 
-    static class Statistics {
+    private static class Measure {
 
-        Map<String, BandStatistics> statistics = new HashMap<>();
+        private final String bandName;
+        private final TimeInterval interval;
+        private final String regionId;
+        private final Map<String, Object> statistics;
 
-        BandStatistics getDataForBandName(String bandName) {
-            return statistics.get(bandName);
+        Measure(String bandName, TimeInterval interval, String regionId, Map<String, Object> statistics) {
+            this.bandName = bandName;
+            this.interval = interval;
+            this.regionId = regionId;
+            this.statistics = statistics;
         }
 
-        boolean containsBand(String bandName) {
-            return statistics.containsKey(bandName);
+    }
+
+    private class Measures {
+
+        final static int POLYGON_INTERVAL_BAND = 0;
+        final static int POLYGON_BAND_INTERVAL = 1;
+        final static int INTERVAL_POLYGON_BAND = 2;
+        final static int INTERVAL_BAND_POLYGON = 3;
+        final static int BAND_POLYGON_INTERVAL = 4;
+        final static int BAND_INTERVAL_POLYGON = 5;
+
+        private int order;
+        private List<Measure> measures;
+        private final BandNamesManager bandNamesManager;
+        private final RegionIDsManager regionIDsManager;
+        private final TimeIntervalsManager timeIntervalsManager;
+
+        Measures() {
+            this(0);
         }
 
-        String[] getBandNames() {
-            final Set<String> bandNames = statistics.keySet();
-            return bandNames.toArray(new String[bandNames.size()]);
+        Measures(int order) {
+            this.order = order;
+            measures = new ArrayList<>();
+            bandNamesManager = new BandNamesManager();
+            regionIDsManager = new RegionIDsManager();
+            timeIntervalsManager = new TimeIntervalsManager();
         }
 
-        void put(String bandName, BandStatistics bandStatistics) {
-            statistics.put(bandName, bandStatistics);
+        boolean hasRegions() {
+            return regionIDsManager.size() > 0;
+        }
+
+        boolean hasBands() {
+            return bandNamesManager.size() > 0;
+        }
+
+        boolean hasTimeIntervals() {
+            return timeIntervalsManager.size() > 0;
+        }
+
+        void addMeasure(Measure measure) {
+            measures.add(measure);
+            if (measure.bandName != null) {
+                bandNamesManager.add(measure.bandName);
+            }
+            if (measure.interval != null) {
+                timeIntervalsManager.add(measure.interval);
+            }
+            if (measure.regionId != null) {
+                regionIDsManager.add(measure.regionId);
+            }
+        }
+
+        Measure getMeasure(int index) {
+            return measures.get(index);
+        }
+
+        void sort() {
+            List<Measure> sortedMeasures = new ArrayList<>();
+            Manager[] managers = getManagers();
+            sort(measures, sortedMeasures, 0, managers);
+            measures = sortedMeasures;
+        }
+
+        private void sort(List<Measure> measureList, List<Measure> sortedMeasures, int recursionDepth, Manager[] managers) {
+            if (recursionDepth < managers.length) {
+                for (int i = 0; i < managers[recursionDepth].size(); i++) {
+                    List<Measure> subList = managers[recursionDepth].getSubListforIndex(measureList, i);
+                    sort(subList, sortedMeasures, recursionDepth + 1, managers);
+                }
+            } else {
+                sortedMeasures.addAll(measureList);
+            }
+        }
+
+        void setOrder(int order) {
+            this.order = order;
+        }
+
+        int getSize() {
+            return measures.size();
+        }
+
+        private Manager[] getManagers() {
+            switch (order) {
+                case POLYGON_INTERVAL_BAND:
+                    return new Manager[]{regionIDsManager, timeIntervalsManager, bandNamesManager};
+                case POLYGON_BAND_INTERVAL:
+                    return new Manager[]{regionIDsManager, bandNamesManager, timeIntervalsManager};
+                case INTERVAL_POLYGON_BAND:
+                    return new Manager[]{timeIntervalsManager, regionIDsManager, bandNamesManager};
+                case INTERVAL_BAND_POLYGON:
+                    return new Manager[]{timeIntervalsManager, bandNamesManager, regionIDsManager};
+                case BAND_POLYGON_INTERVAL:
+                    return new Manager[]{bandNamesManager, regionIDsManager, timeIntervalsManager};
+                default:
+                    return new Manager[]{bandNamesManager, timeIntervalsManager, regionIDsManager};
+            }
+        }
+
+    }
+
+    private interface Manager {
+
+        List<Measure> getSubListforIndex(List<Measure> measures, int index);
+
+        void add(Object o);
+
+        int size();
+
+    }
+
+    private class BandNamesManager implements Manager {
+
+        private final TreeSet<String> bandNames;
+
+        BandNamesManager() {
+            bandNames = new TreeSet<>();
+        }
+
+        @Override
+        public void add(Object o) {
+            if (!(o instanceof String)) {
+                throw new IllegalArgumentException("String expected");
+            }
+            bandNames.add((String) o);
+        }
+
+        @Override
+        public List<Measure> getSubListforIndex(List<Measure> measures, int index) {
+            String bandName = bandNames.toArray(new String[0])[index];
+            ArrayList<Measure> subMeasures = new ArrayList<>();
+            for (Measure measure : measures) {
+                if (measure.bandName.equals(bandName)) {
+                    subMeasures.add(measure);
+                }
+            }
+            return subMeasures;
+        }
+
+        @Override
+        public int size() {
+            return bandNames.size();
         }
     }
 
-    static class BandStatistics {
+    private class RegionIDsManager implements Manager {
 
-        Map<String, RegionStatistics> bandStatistics = new HashMap<>();
+        private final TreeSet<String> regionIDs;
 
-        RegionStatistics getDataForRegionName(String regionName) {
-            return bandStatistics.get(regionName);
+        RegionIDsManager() {
+            regionIDs = new TreeSet<>();
         }
 
-        boolean containsRegion(String regionName) {
-            return bandStatistics.containsKey(regionName);
+        @Override
+        public void add(Object o) {
+            if (!(o instanceof String)) {
+                throw new IllegalArgumentException("String expected");
+            }
+            regionIDs.add((String) o);
         }
 
-        String[] getRegionNames() {
-            final Set<String> regionNames = bandStatistics.keySet();
-            return regionNames.toArray(new String[regionNames.size()]);
+        @Override
+        public List<Measure> getSubListforIndex(List<Measure> measures, int index) {
+            String regionId = regionIDs.toArray(new String[0])[index];
+            ArrayList<Measure> subMeasures = new ArrayList<>();
+            for (Measure measure : measures) {
+                if (measure.regionId.equals(regionId)) {
+                    subMeasures.add(measure);
+                }
+            }
+            return subMeasures;
         }
 
-        void put(String regionName, RegionStatistics regionStatistics) {
-            bandStatistics.put(regionName, regionStatistics);
+        @Override
+        public int size() {
+            return regionIDs.size();
         }
     }
 
-    static class RegionStatistics {
+    private class TimeIntervalsManager implements Manager {
 
-        Map<String, Object> regionStatistics = new HashMap<>();
+        private final TreeSet<TimeInterval> timeIntervals;
 
-        Object getDataForAlgorithmName(String algorithmName) {
-            return regionStatistics.get(algorithmName);
+        TimeIntervalsManager() {
+            timeIntervals = new TreeSet<>();
         }
 
-        boolean containsAlgorithm(String algorithmName) {
-            return regionStatistics.containsKey(algorithmName);
+        @Override
+        public void add(Object o) {
+            if (!(o instanceof TimeInterval)) {
+                throw new IllegalArgumentException("TimeInterval expected");
+            }
+            timeIntervals.add((TimeInterval) o);
         }
 
-        void put(String algorithmName, Object value) {
-            regionStatistics.put(algorithmName, value);
+        @Override
+        public List<Measure> getSubListforIndex(List<Measure> measures, int index) {
+            TimeInterval timeInterval = timeIntervals.toArray(new TimeInterval[0])[index];
+            ArrayList<Measure> subMeasures = new ArrayList<>();
+            for (Measure measure : measures) {
+                if (measure.interval.equals(timeInterval)) {
+                    subMeasures.add(measure);
+                }
+            }
+            return subMeasures;
+        }
+
+        @Override
+        public int size() {
+            return timeIntervals.size();
         }
     }
 
