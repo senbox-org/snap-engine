@@ -3,6 +3,7 @@ package org.esa.snap.statistics;
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
 import com.bc.ceres.glevel.MultiLevelImage;
+import java.util.Date;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.HistogramStxOp;
 import org.esa.snap.core.datamodel.Mask;
@@ -90,18 +91,27 @@ public class StatisticComputer {
         }
     }
 
-    private int getIntervalIndex(Product product) {
+    int getIntervalIndex(Product product) {
         if (product.getEndTime() == null) {
             // if the product has no time information but has passed product validation,
             // no start and end date have been set and there is only a single artificial time interval
             return 0;
         }
+        Date productStart = product.getStartTime().getAsDate();
+        Date productEnd = product.getEndTime().getAsDate();
+        if (productStart.before(timeIntervals[0].getIntervalStart().getAsDate()) ||
+                productEnd.after(timeIntervals[timeIntervals.length - 1].getIntervalEnd().getAsDate())) {
+            return -1;
+        }
         for (int i = 0; i < timeIntervals.length - 1; i++) {
             // if a product's start and end time do not fall into the same interval,
             // it will be assigned to the earlier one
-            // todo fix / write test
-            if (product.getStartTime().getAsDate().after(timeIntervals[i].getIntervalStart().getAsDate()) &&
-                    product.getEndTime().getAsDate().before(timeIntervals[i + 1].getIntervalEnd().getAsDate())) {
+            if (productStart.after(timeIntervals[i].getIntervalStart().getAsDate()) &&
+                    productEnd.before(timeIntervals[i].getIntervalEnd().getAsDate())) {
+                return i;
+            } else if (productStart.after(timeIntervals[i].getIntervalStart().getAsDate()) &&
+                    productStart.before(timeIntervals[i + 1].getIntervalStart().getAsDate()) &&
+                    productEnd.before(timeIntervals[i + 1].getIntervalEnd().getAsDate())) {
                 return i;
             }
         }
