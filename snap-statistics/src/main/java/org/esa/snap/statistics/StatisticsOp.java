@@ -218,6 +218,7 @@ public class StatisticsOp extends Operator {
         for (Map<BandConfiguration, StatisticComputer.StxOpMapping> stxOps : stxOpsList) {
             for (StatisticComputer.StxOpMapping stxOpMapping : stxOps.values()) {
                 regionNames.addAll(stxOpMapping.summaryMap.keySet());
+                regionNames.addAll(stxOpMapping.qualitativeMap.keySet());
             }
         }
 
