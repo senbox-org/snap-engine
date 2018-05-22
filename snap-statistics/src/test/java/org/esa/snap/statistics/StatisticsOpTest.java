@@ -18,6 +18,8 @@ package org.esa.snap.statistics;
 
 import com.bc.ceres.binding.ConversionException;
 import com.bc.ceres.binding.Converter;
+import com.bc.ceres.core.ProgressMonitor;
+import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
@@ -79,6 +81,7 @@ public class StatisticsOpTest {
         statisticsOp.allStatisticsOutputters.add(outputter);
 
         statisticsOp.initialize();
+        statisticsOp.doExecute(ProgressMonitor.NULL);
 
         assertEquals("4_pixels.1", outputter.region);
         assertEquals("algal_2", outputter.bandName);
@@ -107,6 +110,7 @@ public class StatisticsOpTest {
         statisticsOp.allStatisticsOutputters.add(outputter);
 
         statisticsOp.initialize();
+        statisticsOp.doExecute(ProgressMonitor.NULL);
 
         assertEquals("4_pixels.1", outputter.region);
         assertEquals("algal_2", outputter.bandName);
@@ -136,7 +140,7 @@ public class StatisticsOpTest {
         statisticsOp.allStatisticsOutputters.add(outputter);
 
         statisticsOp.initialize();
-        
+        statisticsOp.doExecute(ProgressMonitor.NULL);
 
         assertEquals("4_pixels.1", outputter.region);
         assertEquals("algal_2", outputter.bandName);
@@ -166,6 +170,7 @@ public class StatisticsOpTest {
         statisticsOp.allStatisticsOutputters.add(outputter);
 
         statisticsOp.initialize();
+        statisticsOp.doExecute(ProgressMonitor.NULL);
 
         assertEquals("4_pixels.1", outputter.region);
         assertEquals("algal_2_*_PI", outputter.bandName);
@@ -194,6 +199,7 @@ public class StatisticsOpTest {
         statisticsOp.allStatisticsOutputters.add(outputter);
 
         statisticsOp.initialize();
+        statisticsOp.doExecute(ProgressMonitor.NULL);
 
         assertEquals("4_pixels.1", outputter.region);
         assertEquals("algal_2", outputter.bandName);
@@ -235,7 +241,8 @@ public class StatisticsOpTest {
         parameters.put("bandConfigurations", new BandConfiguration[]{
                 bandConfiguration_1,
         });
-        GPF.createProduct("StatisticsOp", parameters, TestUtil.getTestProduct());
+        Product statisticsProduct = GPF.createProduct("StatisticsOp", parameters, TestUtil.getTestProduct());
+        ProductIO.writeProduct(statisticsProduct, TESTDATA_DIR, "BEAM-DIMAP", true);
 
         assertFalse(getTestFile("statisticsOutput.put").exists());
         assertTrue(getTestFile("statisticsOutput.out").exists());
@@ -257,6 +264,7 @@ public class StatisticsOpTest {
         statisticsOp.allStatisticsOutputters.add(outputter);
 
         statisticsOp.initialize();
+        statisticsOp.doExecute(ProgressMonitor.NULL);
 
         assertEquals("4_pixels.1", outputter.region);
         assertEquals("algal_2", outputter.bandName);

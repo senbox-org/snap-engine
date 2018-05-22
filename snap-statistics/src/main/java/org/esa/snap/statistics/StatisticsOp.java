@@ -18,6 +18,7 @@ package org.esa.snap.statistics;
 
 import com.bc.ceres.binding.ConversionException;
 import com.bc.ceres.binding.Converter;
+import com.bc.ceres.core.ProgressMonitor;
 import java.util.Calendar;
 import java.util.Collection;
 import org.esa.snap.core.datamodel.Band;
@@ -183,14 +184,17 @@ public class StatisticsOp extends Operator {
     public void initialize() throws OperatorException {
         setDummyTargetProduct();
         validateInput();
+    }
 
+    @Override
+    public void doExecute(ProgressMonitor pm) throws OperatorException {
         TimeInterval[] timeIntervals = getTimeIntervals(interval, startDate, endDate);
 
         final StatisticComputer statisticComputer = new StatisticComputer(shapefile, bandConfigurations,
                 Util.computeBinCount(accuracy), timeIntervals, getLogger());
 
         final ProductValidator productValidator = new ProductValidator(Arrays.asList(bandConfigurations), startDate, endDate, getLogger());
-        final ProductLoop productLoop = new ProductLoop(new ProductLoader(), productValidator, statisticComputer, getLogger());
+        final ProductLoop productLoop = new ProductLoop(new ProductLoader(), productValidator, statisticComputer, pm, getLogger());
         productLoop.loop(sourceProducts, getProductsToLoad());
 
         if (startDate == null) {
@@ -224,6 +228,7 @@ public class StatisticsOp extends Operator {
 
         String[] regionIDS = regionNames.toArray(new String[0]);
         defineOutputters(timeIntervals, percentiles, productNames, regionIDS, stxOpsList);
+
 
         for (int i = 0; i < timeIntervals.length; i++) {
             final Map<BandConfiguration, StatisticComputer.StxOpMapping> stxOps = statisticComputer.getResults(i);
