@@ -14,15 +14,15 @@ public class StatisticalMappingAnalyser {
 
     public StatisticalMappingAnalyser(Set<String> fullNames) {
         final int[] defaultPercentiles = StatisticsOp.DEFAULT_PERCENTILES_INTS;
-        final String[] algorithmNames = StatisticsOp.getAlgorithmNames(defaultPercentiles);
-        sortAlongLength_BiggestFirst(algorithmNames);
+        final String[] measureNames = StatisticsOp.getAlgorithmNames(defaultPercentiles);
+        sortAlongLength_BiggestFirst(measureNames);
         geophysicalParameter = new TreeSet<String>();
         statisticalMeasure = new TreeSet<String>();
         for (String fullName : fullNames) {
-            for (String algorithmName : algorithmNames) {
-                if (fullName.startsWith(algorithmName)) {
-                    statisticalMeasure.add(algorithmName);
-                    final String paramName = fullName.substring(algorithmName.length());
+            for (String measureName : measureNames) {
+                if (fullName.startsWith(measureName)) {
+                    statisticalMeasure.add(measureName);
+                    final String paramName = fullName.substring(measureName.length());
                     geophysicalParameter.add(trimWithUnderscores(paramName));
                     break;
                 }
@@ -54,12 +54,7 @@ public class StatisticalMappingAnalyser {
         return set.toArray(new String[set.size()]);
     }
 
-    public static void sortAlongLength_BiggestFirst(String[] algorithmNames) {
-        Arrays.sort(algorithmNames, new Comparator<String>() {
-            @Override
-            public int compare(String o1, String o2) {
-                return o2.length() - o1.length();
-            }
-        });
+    public static void sortAlongLength_BiggestFirst(String[] measureNames) {
+        Arrays.sort(measureNames, (o1, o2) -> o2.length() - o1.length());
     }
 }

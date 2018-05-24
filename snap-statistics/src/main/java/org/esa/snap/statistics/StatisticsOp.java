@@ -376,26 +376,26 @@ public class StatisticsOp extends Operator {
         }
     }
 
-    private static String[] getAlgorithmNames(Map<BandConfiguration, StatisticComputer.StxOpMapping>[] stxOpsList,
-                                              int[] percentiles, int qualifier) {
-        final List<String> algorithms = new ArrayList<String>();
+    private static String[] getMeasureNames(Map<BandConfiguration, StatisticComputer.StxOpMapping>[] stxOpsList,
+                                            int[] percentiles, int qualifier) {
+        final List<String> measures = new ArrayList<String>();
         for (Map<BandConfiguration, StatisticComputer.StxOpMapping> stxOps : stxOpsList) {
             for (StatisticComputer.StxOpMapping stxOpMapping : stxOps.values()) {
-                if (qualifier != QUALITATIVE_MEASURES && !algorithms.contains(MINIMUM)) {
+                if (qualifier != QUALITATIVE_MEASURES && !measures.contains(MINIMUM)) {
                     Collection<SummaryStxOp> summaryStxOps = stxOpMapping.summaryMap.values();
                     for (SummaryStxOp summaryStxOp : summaryStxOps) {
                         if (!Double.isNaN(summaryStxOp.getMean())) {
-                            algorithms.add(MINIMUM);
-                            algorithms.add(MAXIMUM);
-                            algorithms.add(MEDIAN);
-                            algorithms.add(AVERAGE);
-                            algorithms.add(SIGMA);
+                            measures.add(MINIMUM);
+                            measures.add(MAXIMUM);
+                            measures.add(MEDIAN);
+                            measures.add(AVERAGE);
+                            measures.add(SIGMA);
                             for (int percentile : percentiles) {
-                                algorithms.add(getPercentileName(percentile));
+                                measures.add(getPercentileName(percentile));
                             }
-                            algorithms.add(MAX_ERROR);
-                            if (!algorithms.contains(TOTAL)) {
-                                algorithms.add(TOTAL);
+                            measures.add(MAX_ERROR);
+                            if (!measures.contains(TOTAL)) {
+                                measures.add(TOTAL);
                             }
                             break;
                         }
@@ -403,19 +403,19 @@ public class StatisticsOp extends Operator {
                 }
                 if (qualifier != QUANTITATIVE_MEASURES) {
                     Collection<QualitativeStxOp> qualitativeStxOps = stxOpMapping.qualitativeMap.values();
-                    if (!qualitativeStxOps.isEmpty() && !algorithms.contains(StatisticsOp.MAJORITY_CLASS)) {
-                        algorithms.add(StatisticsOp.MAJORITY_CLASS);
-                        algorithms.add(StatisticsOp.SECOND_MAJORITY_CLASS);
-                        if (!algorithms.contains(TOTAL)) {
-                            algorithms.add(StatisticsOp.TOTAL);
+                    if (!qualitativeStxOps.isEmpty() && !measures.contains(StatisticsOp.MAJORITY_CLASS)) {
+                        measures.add(StatisticsOp.MAJORITY_CLASS);
+                        measures.add(StatisticsOp.SECOND_MAJORITY_CLASS);
+                        if (!measures.contains(TOTAL)) {
+                            measures.add(StatisticsOp.TOTAL);
                         }
                     }
                     for (QualitativeStxOp qualitativeStxOp : qualitativeStxOps) {
                         if (!qualitativeStxOp.getMajorityClass().equals(QualitativeStxOp.NO_MAJORITY_CLASS)) {
                             String[] classNames = qualitativeStxOp.getClassNames();
                             for (String className : classNames) {
-                                if (!algorithms.contains(className)) {
-                                    algorithms.add(className);
+                                if (!measures.contains(className)) {
+                                    measures.add(className);
                                 }
                             }
                         }
@@ -423,7 +423,7 @@ public class StatisticsOp extends Operator {
                 }
             }
         }
-        return algorithms.toArray(new String[0]);
+        return measures.toArray(new String[0]);
     }
 
     public static String[] getAlgorithmNames(int[] percentiles) {
@@ -464,9 +464,9 @@ public class StatisticsOp extends Operator {
                                      String[] regionIDs,
                                      Map<BandConfiguration, StatisticComputer.StxOpMapping>[] stxOpsList, int qualifier) {
         String[] bandNames = getBandNames(qualifier);
-        String[] algorithmNames = getAlgorithmNames(stxOpsList, percentiles, qualifier);
+        String[] measureNames = getMeasureNames(stxOpsList, percentiles, qualifier);
         StatisticsOutputContext statisticsOutputContext =
-                StatisticsOutputContext.create(productNames, bandNames, algorithmNames, timeIntervals, regionIDs);
+                StatisticsOutputContext.create(productNames, bandNames, measureNames, timeIntervals, regionIDs);
         setupOutputters(qualifier);
         Set<StatisticsOutputter> outputters = statisticsOutputters[qualifier];
         for (StatisticsOutputter statisticsOutputter : outputters) {

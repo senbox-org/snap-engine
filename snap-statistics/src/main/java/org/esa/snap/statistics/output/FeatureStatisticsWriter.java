@@ -115,15 +115,15 @@ public class FeatureStatisticsWriter implements StatisticsOutputter {
      */
     @Override
     public void initialiseOutput(StatisticsOutputContext statisticsOutputContext) {
-        Arrays.sort(statisticsOutputContext.algorithmNames);
+        Arrays.sort(statisticsOutputContext.measureNames);
         final SimpleFeatureTypeBuilder typeBuilder = new SimpleFeatureTypeBuilder();
         typeBuilder.init(originalFeatureType);
-        for (final String algorithmName : statisticsOutputContext.algorithmNames) {
+        for (final String measureName : statisticsOutputContext.measureNames) {
             for (String bandName : statisticsOutputContext.bandNames) {
                 if (statisticsOutputContext.timeIntervals == null || statisticsOutputContext.timeIntervals.length == 1) {
-                    final String attributeName = bandNameCreator.createUniqueAttributeName(algorithmName, bandName);
+                    final String attributeName = bandNameCreator.createUniqueAttributeName(measureName, bandName);
                     if (originalFeatureType.getDescriptor(attributeName) == null) {
-                        if (statisticsOutputContext.isNotNumber(algorithmName)) {
+                        if (statisticsOutputContext.isNotNumber(measureName)) {
                             typeBuilder.add(attributeName, String.class);
                         } else {
                             typeBuilder.add(attributeName, Double.class);
@@ -131,9 +131,9 @@ public class FeatureStatisticsWriter implements StatisticsOutputter {
                     }
                 } else {
                     for (TimeInterval timeInterval : statisticsOutputContext.timeIntervals) {
-                        final String attributeName = bandNameCreator.createUniqueAttributeName(algorithmName, bandName, timeInterval);
+                        final String attributeName = bandNameCreator.createUniqueAttributeName(measureName, bandName, timeInterval);
                         if (originalFeatureType.getDescriptor(attributeName) == null) {
-                            if (statisticsOutputContext.isNotNumber(algorithmName)) {
+                            if (statisticsOutputContext.isNotNumber(measureName)) {
                                 typeBuilder.add(attributeName, String.class);
                             } else {
                                 typeBuilder.add(attributeName, Double.class);
@@ -153,7 +153,7 @@ public class FeatureStatisticsWriter implements StatisticsOutputter {
      *
      * @param bandName   The name of the band the statistics have been computed for.
      * @param regionId   The id of the region the statistics have been computed for.
-     * @param statistics The actual statistics as map. Keys are the algorithm names, values are the actual statistical values.
+     * @param statistics The actual statistics as map. Keys are the measure names, values are the actual statistical values.
      */
     @Override
     public void addToOutput(String bandName, String regionId, Map<String, Object> statistics) {
@@ -161,8 +161,8 @@ public class FeatureStatisticsWriter implements StatisticsOutputter {
         final List<SimpleFeature> markedToRemove = new ArrayList<SimpleFeature>();
         final Map<String, SimpleFeature> markedToAdd = new HashMap<String, SimpleFeature>();
         for (SimpleFeature feature : features) {
-            for (String algorithmName : statistics.keySet()) {
-                final String name = bandNameCreator.createUniqueAttributeName(algorithmName, bandName);
+            for (String measureName : statistics.keySet()) {
+                final String name = bandNameCreator.createUniqueAttributeName(measureName, bandName);
                 if (Util.getFeatureName(feature).equals(regionId)) {
                     SimpleFeature featureToUpdate;
                     if (markedToAdd.containsKey(regionId)) {
@@ -170,7 +170,7 @@ public class FeatureStatisticsWriter implements StatisticsOutputter {
                     } else {
                         featureToUpdate = feature;
                     }
-                    final SimpleFeature updatedFeature = createUpdatedFeature(simpleFeatureBuilder, featureToUpdate, name, statistics.get(algorithmName));
+                    final SimpleFeature updatedFeature = createUpdatedFeature(simpleFeatureBuilder, featureToUpdate, name, statistics.get(measureName));
                     markedToRemove.add(feature);
                     markedToAdd.put(regionId, updatedFeature);
                 }
@@ -185,9 +185,9 @@ public class FeatureStatisticsWriter implements StatisticsOutputter {
         final FeatureIterator<SimpleFeature> featureIterator = originalFeatures.features();
         while (featureIterator.hasNext()) {
             SimpleFeature feature = featureIterator.next();
-            for (String algorithmName : statistics.keySet()) {
-                final String name = bandNameCreator.createUniqueAttributeName(algorithmName, bandName);
-                final Object value = getValue(statistics, algorithmName, feature, regionId);
+            for (String measureName : statistics.keySet()) {
+                final String name = bandNameCreator.createUniqueAttributeName(measureName, bandName);
+                final Object value = getValue(statistics, measureName, feature, regionId);
                 feature = createUpdatedFeature(simpleFeatureBuilder, feature, name, value);
             }
             features.add(feature);
@@ -200,8 +200,8 @@ public class FeatureStatisticsWriter implements StatisticsOutputter {
         final List<SimpleFeature> markedToRemove = new ArrayList<SimpleFeature>();
         final Map<String, SimpleFeature> markedToAdd = new HashMap<String, SimpleFeature>();
         for (SimpleFeature feature : features) {
-            for (String algorithmName : statistics.keySet()) {
-                final String name = bandNameCreator.getUniqueAttributeName(algorithmName, bandName, interval);
+            for (String measureName : statistics.keySet()) {
+                final String name = bandNameCreator.getUniqueMeasureName(measureName, bandName, interval);
                 if (Util.getFeatureName(feature).equals(regionId)) {
                     SimpleFeature featureToUpdate;
                     if (markedToAdd.containsKey(regionId)) {
@@ -209,7 +209,7 @@ public class FeatureStatisticsWriter implements StatisticsOutputter {
                     } else {
                         featureToUpdate = feature;
                     }
-                    final SimpleFeature updatedFeature = createUpdatedFeature(simpleFeatureBuilder, featureToUpdate, name, statistics.get(algorithmName));
+                    final SimpleFeature updatedFeature = createUpdatedFeature(simpleFeatureBuilder, featureToUpdate, name, statistics.get(measureName));
                     markedToRemove.add(feature);
                     markedToAdd.put(regionId, updatedFeature);
                 }
@@ -224,18 +224,18 @@ public class FeatureStatisticsWriter implements StatisticsOutputter {
         final FeatureIterator<SimpleFeature> featureIterator = originalFeatures.features();
         while (featureIterator.hasNext()) {
             SimpleFeature feature = featureIterator.next();
-            for (String algorithmName : statistics.keySet()) {
-                final String name = bandNameCreator.getUniqueAttributeName(algorithmName, bandName, interval);
-                final Object value = getValue(statistics, algorithmName, feature, regionId);
+            for (String measureName : statistics.keySet()) {
+                final String name = bandNameCreator.getUniqueMeasureName(measureName, bandName, interval);
+                final Object value = getValue(statistics, measureName, feature, regionId);
                 feature = createUpdatedFeature(simpleFeatureBuilder, feature, name, value);
             }
             features.add(feature);
         }
     }
 
-    private Object getValue(Map<String, Object> statistics, String algorithmName, SimpleFeature originalFeature, String regionId) {
+    private Object getValue(Map<String, Object> statistics, String measureName, SimpleFeature originalFeature, String regionId) {
         if (Util.getFeatureName(originalFeature).equals(regionId)) {
-            return statistics.get(algorithmName);
+            return statistics.get(measureName);
         } else {
             return FILL_VALUE;
         }

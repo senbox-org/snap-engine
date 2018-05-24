@@ -154,7 +154,7 @@ public class StatisticsOpTest {
         assertEquals(0.80447364, outputter.percentiles[0], 1E-6);
         assertEquals(0.80447364, outputter.percentiles[1], 1E-6);
         assertArrayEquals(new String[]{"minimum","maximum", "median", "average", "sigma", "p90_threshold", "p95_threshold", "max_error", "total"},
-                          outputter.algorithmNames);
+                          outputter.measureNames);
     }
 
     @Test
@@ -458,7 +458,7 @@ public class StatisticsOpTest {
         double[] percentiles;
         String region;
         String bandName;
-        private String[] algorithmNames;
+        private String[] measureNames;
 
         public MyOutputter() {
             percentiles = new double[2];
@@ -467,8 +467,8 @@ public class StatisticsOpTest {
         @Override
         public void initialiseOutput(StatisticsOutputContext statisticsOutputContext) {
             int numPercentiles = 0;
-            algorithmNames = statisticsOutputContext.algorithmNames;
-            for (String algorithmName : algorithmNames) {
+            measureNames = statisticsOutputContext.measureNames;
+            for (String algorithmName : measureNames) {
                 if (algorithmName.matches("p\\d\\d_threshold")) {
                     numPercentiles++;
                 }

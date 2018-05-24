@@ -88,7 +88,7 @@ public class MetadataWriter implements StatisticsOutputter {
      *
      * @param bandName   The name of the band the statistics have been computed for.
      * @param regionId   The id of the region the statistics have been computed for.
-     * @param statistics The actual statistics as map. Keys are the algorithm names, values are the actual statistical values.
+     * @param statistics The actual statistics as map. Keys are the measure names, values are the actual statistical values.
      */
     @Override
     public void addToOutput(String bandName, String regionId, Map<String, Object> statistics) {

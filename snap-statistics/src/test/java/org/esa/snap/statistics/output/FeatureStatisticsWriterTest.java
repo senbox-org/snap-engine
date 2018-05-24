@@ -34,9 +34,9 @@ public class FeatureStatisticsWriterTest {
     public void testSingleShape() throws Exception {
         final URL originalShapefile = getClass().getResource("../4_pixels.shp");
         final FeatureStatisticsWriter featureStatisticsWriter = FeatureStatisticsWriter.createFeatureStatisticsWriter(originalShapefile, null, new BandNameCreator());
-        final String[] algorithmNames = {"p90", "p95"};
+        final String[] measureNames = {"p90", "p95"};
 
-        featureStatisticsWriter.initialiseOutput(StatisticsOutputContext.create(new String[]{"algal_2"}, algorithmNames));
+        featureStatisticsWriter.initialiseOutput(StatisticsOutputContext.create(new String[]{"algal_2"}, measureNames));
 
         HashMap<String, Object> statistics = new HashMap<>();
         statistics.put("p90", 0.1);
@@ -63,12 +63,12 @@ public class FeatureStatisticsWriterTest {
     public void testThreeShapes() throws Exception {
         final URL originalShapefile = getClass().getResource("../polygons.shp");
         final FeatureStatisticsWriter featureStatisticsWriter = FeatureStatisticsWriter.createFeatureStatisticsWriter(originalShapefile, null, new BandNameCreator());
-        final String[] algorithmNames = {"p90", "p95"};
+        final String[] measureNames = {"p90", "p95"};
 
         featureStatisticsWriter.initialiseOutput(StatisticsOutputContext.create(new String[]{
                 "algal_2",
                 "algal_2"
-        }, algorithmNames));
+        }, measureNames));
 
         HashMap<String, Object> statistics = new HashMap<>();
 
@@ -126,11 +126,9 @@ public class FeatureStatisticsWriterTest {
     public void testThatAllShapesAreExported() throws Exception {
         final URL originalShapefile = getClass().getResource("../polygons.shp");
         final FeatureStatisticsWriter featureStatisticsWriter = FeatureStatisticsWriter.createFeatureStatisticsWriter(originalShapefile, null, new BandNameCreator());
-        final String[] algorithmNames = {"p90"};
+        final String[] measureNames = {"p90"};
 
-        featureStatisticsWriter.initialiseOutput(StatisticsOutputContext.create(new String[]{
-                "algal_2"
-        }, algorithmNames));
+        featureStatisticsWriter.initialiseOutput(StatisticsOutputContext.create(new String[]{"algal_2"}, measureNames));
 
         HashMap<String, Object> statistics = new HashMap<>();
 
