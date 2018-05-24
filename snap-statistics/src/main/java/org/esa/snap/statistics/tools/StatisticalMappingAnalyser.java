@@ -1,9 +1,10 @@
 package org.esa.snap.statistics.tools;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.esa.snap.statistics.StatisticsOp;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -14,7 +15,7 @@ public class StatisticalMappingAnalyser {
 
     public StatisticalMappingAnalyser(Set<String> fullNames) {
         final int[] defaultPercentiles = StatisticsOp.DEFAULT_PERCENTILES_INTS;
-        final String[] measureNames = StatisticsOp.getAlgorithmNames(defaultPercentiles);
+        final String[] measureNames = getMeasureNames(defaultPercentiles);
         sortAlongLength_BiggestFirst(measureNames);
         geophysicalParameter = new TreeSet<String>();
         statisticalMeasure = new TreeSet<String>();
@@ -28,6 +29,21 @@ public class StatisticalMappingAnalyser {
                 }
             }
         }
+    }
+
+    private static String[] getMeasureNames(int[] percentiles) {
+        final List<String> algorithms = new ArrayList<>();
+        algorithms.add(StatisticsOp.MINIMUM);
+        algorithms.add(StatisticsOp.MAXIMUM);
+        algorithms.add(StatisticsOp.MEDIAN);
+        algorithms.add(StatisticsOp.AVERAGE);
+        algorithms.add(StatisticsOp.SIGMA);
+        for (int percentile : percentiles) {
+            algorithms.add(StatisticsOp.PERCENTILE_PREFIX + percentile + StatisticsOp.PERCENTILE_SUFFIX);
+        }
+        algorithms.add(StatisticsOp.MAX_ERROR);
+        algorithms.add(StatisticsOp.TOTAL);
+        return algorithms.toArray(new String[0]);
     }
 
     public String[] getStatisticalMeasureNames() {

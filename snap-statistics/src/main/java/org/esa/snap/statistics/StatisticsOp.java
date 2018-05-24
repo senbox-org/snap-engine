@@ -426,6 +426,10 @@ public class StatisticsOp extends Operator {
         return measures.toArray(new String[0]);
     }
 
+    @Deprecated
+    /*
+     * will receive no replacement (@since 6.0.3)
+     */
     public static String[] getAlgorithmNames(int[] percentiles) {
         final List<String> algorithms = new ArrayList<>();
         algorithms.add(MINIMUM);
