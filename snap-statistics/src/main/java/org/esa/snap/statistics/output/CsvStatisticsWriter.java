@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -34,7 +35,7 @@ public class CsvStatisticsWriter implements StatisticsOutputter {
      */
     @Override
     public void initialiseOutput(StatisticsOutputContext statisticsOutputContext) {
-        this.measureNames = statisticsOutputContext.algorithmNames;
+        this.measureNames = statisticsOutputContext.measureNames;
         Arrays.sort(measureNames);
     }
 
@@ -43,7 +44,7 @@ public class CsvStatisticsWriter implements StatisticsOutputter {
      *
      * @param bandName   The name of the band the statistics have been computed for.
      * @param regionId   The id of the region the statistics have been computed for.
-     * @param statistics The actual statistics as map. Keys are the algorithm names, values are the actual statistical values.
+     * @param statistics The actual statistics as map. Keys are the measure names, values are the actual statistical values.
      */
     @Override
     public void addToOutput(String bandName, String regionId, Map<String, Object> statistics) {
@@ -91,10 +92,10 @@ public class CsvStatisticsWriter implements StatisticsOutputter {
                     csvOutput.append("\t");
                 }
             }
-            for (String algorithmName : measureNames) {
+            for (String measureName : measureNames) {
                 csvOutput.append("\t");
-                if (measure.statistics.containsKey(algorithmName)) {
-                    Object value = measure.statistics.get(algorithmName);
+                if (measure.statistics.containsKey(measureName)) {
+                    Object value = measure.statistics.get(measureName);
                     if (value instanceof Number) {
                         csvOutput.append(getValueAsString((Number) value));
                     } else {
@@ -123,8 +124,8 @@ public class CsvStatisticsWriter implements StatisticsOutputter {
         }
 
         for (int i = 0; i < measureNames.length; i++) {
-            String algorithmName = measureNames[i];
-            csvOutput.append(algorithmName);
+            String measureName = measureNames[i];
+            csvOutput.append(measureName);
             if (i < measureNames.length - 1) {
                 csvOutput.append("\t");
             }
@@ -141,6 +142,10 @@ public class CsvStatisticsWriter implements StatisticsOutputter {
 
     private class Measure {
 
+        final static int BAND_NAME = 0;
+        final static int INTERVAL = 1;
+        final static int REGION_ID = 2;
+
         private final String bandName;
         private final TimeInterval interval;
         private final String regionId;
@@ -152,6 +157,18 @@ public class CsvStatisticsWriter implements StatisticsOutputter {
             this.regionId = regionId;
             this.statistics = new TreeMap<>();
             this.statistics.putAll(statistics);
+        }
+
+        Comparable get(int index) {
+            switch (index) {
+                case BAND_NAME:
+                    return bandName;
+                case INTERVAL:
+                    return interval;
+                case REGION_ID:
+                    return regionId;
+            }
+            return bandName;
         }
 
     }
@@ -167,9 +184,9 @@ public class CsvStatisticsWriter implements StatisticsOutputter {
 
         private int order;
         private List<Measure> measures;
-        private final BandNamesManager bandNamesManager;
-        private final RegionIDsManager regionIDsManager;
-        private final TimeIntervalsManager timeIntervalsManager;
+        private final MeasureManager bandNamesManager;
+        private final MeasureManager regionIDsManager;
+        private final MeasureManager timeIntervalsManager;
 
         Measures() {
             this(0);
@@ -178,9 +195,9 @@ public class CsvStatisticsWriter implements StatisticsOutputter {
         Measures(int order) {
             this.order = order;
             measures = new ArrayList<>();
-            bandNamesManager = new BandNamesManager();
-            regionIDsManager = new RegionIDsManager();
-            timeIntervalsManager = new TimeIntervalsManager();
+            bandNamesManager = new MeasureManager<String>(Measure.BAND_NAME);
+            regionIDsManager = new MeasureManager<String>(Measure.REGION_ID);
+            timeIntervalsManager = new MeasureManager<String>(Measure.INTERVAL);
         }
 
         boolean hasRegions() {
@@ -214,18 +231,19 @@ public class CsvStatisticsWriter implements StatisticsOutputter {
 
         void sort() {
             List<Measure> sortedMeasures = new ArrayList<>();
-            Manager[] managers = getManagers();
+            MeasureManager[] managers = getManagers();
             sort(measures, sortedMeasures, 0, managers);
             measures = sortedMeasures;
         }
 
-        private void sort(List<Measure> measureList, List<Measure> sortedMeasures, int recursionDepth, Manager[] managers) {
+        private void sort(List<Measure> measureList, List<Measure> sortedMeasures, int recursionDepth, MeasureManager[] managers) {
             if (recursionDepth < managers.length) {
                 if (managers[recursionDepth].size() == 0) {
                     sort(measureList, sortedMeasures, recursionDepth + 1, managers);
                 } else {
                     for (int i = 0; i < managers[recursionDepth].size(); i++) {
-                        List<Measure> subList = managers[recursionDepth].getSubListforIndex(measureList, i);
+                        @SuppressWarnings("unchecked")
+                        List<Measure> subList = managers[recursionDepth].getSubListForIndex(measureList, i);
                         sort(subList, sortedMeasures, recursionDepth + 1, managers);
                     }
                 }
@@ -242,135 +260,55 @@ public class CsvStatisticsWriter implements StatisticsOutputter {
             return measures.size();
         }
 
-        private Manager[] getManagers() {
+        private MeasureManager[] getManagers() {
             switch (order) {
                 case POLYGON_INTERVAL_BAND:
-                    return new Manager[]{regionIDsManager, timeIntervalsManager, bandNamesManager};
+                    return new MeasureManager[]{regionIDsManager, timeIntervalsManager, bandNamesManager};
                 case POLYGON_BAND_INTERVAL:
-                    return new Manager[]{regionIDsManager, bandNamesManager, timeIntervalsManager};
+                    return new MeasureManager[]{regionIDsManager, bandNamesManager, timeIntervalsManager};
                 case INTERVAL_POLYGON_BAND:
-                    return new Manager[]{timeIntervalsManager, regionIDsManager, bandNamesManager};
+                    return new MeasureManager[]{timeIntervalsManager, regionIDsManager, bandNamesManager};
                 case INTERVAL_BAND_POLYGON:
-                    return new Manager[]{timeIntervalsManager, bandNamesManager, regionIDsManager};
+                    return new MeasureManager[]{timeIntervalsManager, bandNamesManager, regionIDsManager};
                 case BAND_POLYGON_INTERVAL:
-                    return new Manager[]{bandNamesManager, regionIDsManager, timeIntervalsManager};
+                    return new MeasureManager[]{bandNamesManager, regionIDsManager, timeIntervalsManager};
                 default:
-                    return new Manager[]{bandNamesManager, timeIntervalsManager, regionIDsManager};
+                    return new MeasureManager[]{bandNamesManager, timeIntervalsManager, regionIDsManager};
             }
         }
 
     }
 
-    private interface Manager {
+    private class MeasureManager<T extends Comparable<? super T>> {
 
-        List<Measure> getSubListforIndex(List<Measure> measures, int index);
+        private final List<T> elements;
+        private final int measureIndex;
 
-        void add(Object o);
-
-        int size();
-
-    }
-
-    private class BandNamesManager implements Manager {
-
-        private final TreeSet<String> bandNames;
-
-        BandNamesManager() {
-            bandNames = new TreeSet<>();
+        MeasureManager(int measureIndex) {
+            elements = new ArrayList<>();
+            this.measureIndex = measureIndex;
         }
 
-        @Override
-        public void add(Object o) {
-            if (!(o instanceof String)) {
-                throw new IllegalArgumentException("String expected");
-            }
-            bandNames.add((String) o);
+        public void add(T o) {
+            elements.add(o);
+            Collections.sort(elements);
         }
 
-        @Override
-        public List<Measure> getSubListforIndex(List<Measure> measures, int index) {
-            String bandName = bandNames.toArray(new String[0])[index];
+        List<Measure> getSubListForIndex(List<Measure> measures, int index) {
+            T bandName = elements.get(index);
             ArrayList<Measure> subMeasures = new ArrayList<>();
             for (Measure measure : measures) {
-                if (measure.bandName.equals(bandName)) {
+                if (measure.get(measureIndex).equals(bandName)) {
                     subMeasures.add(measure);
                 }
             }
             return subMeasures;
         }
 
-        @Override
         public int size() {
-            return bandNames.size();
-        }
-    }
-
-    private class RegionIDsManager implements Manager {
-
-        private final TreeSet<String> regionIDs;
-
-        RegionIDsManager() {
-            regionIDs = new TreeSet<>();
+            return elements.size();
         }
 
-        @Override
-        public void add(Object o) {
-            if (!(o instanceof String)) {
-                throw new IllegalArgumentException("String expected");
-            }
-            regionIDs.add((String) o);
-        }
-
-        @Override
-        public List<Measure> getSubListforIndex(List<Measure> measures, int index) {
-            String regionId = regionIDs.toArray(new String[0])[index];
-            ArrayList<Measure> subMeasures = new ArrayList<>();
-            for (Measure measure : measures) {
-                if (measure.regionId.equals(regionId)) {
-                    subMeasures.add(measure);
-                }
-            }
-            return subMeasures;
-        }
-
-        @Override
-        public int size() {
-            return regionIDs.size();
-        }
-    }
-
-    private class TimeIntervalsManager implements Manager {
-
-        private final TreeSet<TimeInterval> timeIntervals;
-
-        TimeIntervalsManager() {
-            timeIntervals = new TreeSet<>();
-        }
-
-        @Override
-        public void add(Object o) {
-            if (!(o instanceof TimeInterval)) {
-                throw new IllegalArgumentException("TimeInterval expected");
-            }
-            timeIntervals.add((TimeInterval) o);
-        }
-
-        @Override
-        public List<Measure> getSubListforIndex(List<Measure> measures, int index) {
-            TimeInterval timeInterval = timeIntervals.toArray(new TimeInterval[0])[index];
-            ArrayList<Measure> subMeasures = new ArrayList<>();
-            for (Measure measure : measures) {
-                if (measure.interval.equals(timeInterval)) {
-                    subMeasures.add(measure);
-                }
-            }
-            return subMeasures;
-        }
-
-        @Override
-        public int size() {
-            return timeIntervals.size();
-        }
     }
 
 }
