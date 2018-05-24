@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import org.esa.snap.statistics.tools.TimeInterval;
 
 public class CsvStatisticsWriter implements StatisticsOutputter {
@@ -184,9 +183,9 @@ public class CsvStatisticsWriter implements StatisticsOutputter {
 
         private int order;
         private List<Measure> measures;
-        private final MeasureManager bandNamesManager;
-        private final MeasureManager regionIDsManager;
-        private final MeasureManager timeIntervalsManager;
+        private final MeasureManager<String> bandNamesManager;
+        private final MeasureManager<String> regionIDsManager;
+        private final MeasureManager<TimeInterval> timeIntervalsManager;
 
         Measures() {
             this(0);
@@ -195,9 +194,9 @@ public class CsvStatisticsWriter implements StatisticsOutputter {
         Measures(int order) {
             this.order = order;
             measures = new ArrayList<>();
-            bandNamesManager = new MeasureManager<String>(Measure.BAND_NAME);
-            regionIDsManager = new MeasureManager<String>(Measure.REGION_ID);
-            timeIntervalsManager = new MeasureManager<String>(Measure.INTERVAL);
+            bandNamesManager = new MeasureManager<>(Measure.BAND_NAME);
+            regionIDsManager = new MeasureManager<>(Measure.REGION_ID);
+            timeIntervalsManager = new MeasureManager<>(Measure.INTERVAL);
         }
 
         boolean hasRegions() {
