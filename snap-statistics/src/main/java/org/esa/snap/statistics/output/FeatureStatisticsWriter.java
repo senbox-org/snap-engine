@@ -201,7 +201,7 @@ public class FeatureStatisticsWriter implements StatisticsOutputter {
         final Map<String, SimpleFeature> markedToAdd = new HashMap<String, SimpleFeature>();
         for (SimpleFeature feature : features) {
             for (String measureName : statistics.keySet()) {
-                final String name = bandNameCreator.getUniqueMeasureName(measureName, bandName, interval);
+                final String name = bandNameCreator.getUniqueAttributeName(measureName, bandName, interval);
                 if (Util.getFeatureName(feature).equals(regionId)) {
                     SimpleFeature featureToUpdate;
                     if (markedToAdd.containsKey(regionId)) {
@@ -225,7 +225,7 @@ public class FeatureStatisticsWriter implements StatisticsOutputter {
         while (featureIterator.hasNext()) {
             SimpleFeature feature = featureIterator.next();
             for (String measureName : statistics.keySet()) {
-                final String name = bandNameCreator.getUniqueMeasureName(measureName, bandName, interval);
+                final String name = bandNameCreator.getUniqueAttributeName(measureName, bandName, interval);
                 final Object value = getValue(statistics, measureName, feature, regionId);
                 feature = createUpdatedFeature(simpleFeatureBuilder, feature, name, value);
             }

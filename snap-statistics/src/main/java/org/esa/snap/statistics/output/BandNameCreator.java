@@ -138,15 +138,15 @@ public class BandNameCreator {
         return attributeName;
     }
 
-    String getUniqueMeasureName(String measureName, String sourceBandName, TimeInterval timeInterval) {
+    String getUniqueAttributeName(String measureName, String sourceBandName, TimeInterval timeInterval) {
         final String desiredAttributeName = measureName + "_" + sourceBandName + "_" + timeInterval.getId();
         if (mappedNames.containsKey(desiredAttributeName)) {
             return mappedNames.get(desiredAttributeName);
         }
-        return getUniqueMeasureName(measureName, sourceBandName);
+        return getUniqueAttributeName(measureName, sourceBandName);
     }
 
-    private String getUniqueMeasureName(String measureName, String sourceBandName) {
+    private String getUniqueAttributeName(String measureName, String sourceBandName) {
         final String desiredAttributeName = measureName + "_" + sourceBandName;
         if (mappedNames.containsKey(desiredAttributeName)) {
             return mappedNames.get(desiredAttributeName);
