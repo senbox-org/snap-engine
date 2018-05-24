@@ -295,10 +295,10 @@ public class CsvStatisticsWriter implements StatisticsOutputter {
         }
 
         List<Measure> getSubListForIndex(List<Measure> measures, int index) {
-            T bandName = elements.get(index);
+            T comparable = elements.get(index);
             ArrayList<Measure> subMeasures = new ArrayList<>();
             for (Measure measure : measures) {
-                if (measure.get(measureIndex).equals(bandName)) {
+                if (measure.get(measureIndex).equals(comparable)) {
                     subMeasures.add(measure);
                 }
             }
