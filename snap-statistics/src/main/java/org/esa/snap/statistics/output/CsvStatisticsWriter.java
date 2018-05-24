@@ -271,6 +271,7 @@ public class CsvStatisticsWriter implements StatisticsOutputter {
                     return new MeasureManager[]{timeIntervalsManager, bandNamesManager, regionIDsManager};
                 case BAND_POLYGON_INTERVAL:
                     return new MeasureManager[]{bandNamesManager, regionIDsManager, timeIntervalsManager};
+                case BAND_INTERVAL_POLYGON:
                 default:
                     return new MeasureManager[]{bandNamesManager, timeIntervalsManager, regionIDsManager};
             }
