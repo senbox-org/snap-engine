@@ -242,7 +242,8 @@ public class StatisticsOpTest {
                 bandConfiguration_1,
         });
         Product statisticsProduct = GPF.createProduct("StatisticsOp", parameters, TestUtil.getTestProduct());
-        ProductIO.writeProduct(statisticsProduct, TESTDATA_DIR, "BEAM-DIMAP", true);
+        GPF.writeProduct(statisticsProduct, new File(TESTDATA_DIR, "test.dim"), "BEAM-DIMAP",
+                true, true, ProgressMonitor.NULL);
 
         assertFalse(getTestFile("statisticsOutput.put").exists());
         assertTrue(getTestFile("statisticsOutput.out").exists());
