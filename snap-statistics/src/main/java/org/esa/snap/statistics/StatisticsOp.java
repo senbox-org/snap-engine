@@ -66,17 +66,19 @@ import java.util.logging.Level;
 import org.esa.snap.statistics.tools.TimeInterval;
 
 /**
- * An operator that is used to compute statistics for any number of source products, restricted to regions given by an
- * ESRI shapefile.
+ * An operator that is used to compute statistics for any number of source products, restricted to time intervals and
+ * regions given by an ESRI shapefile. If no time intervals are defined, statistics are aggregated over the whole period.
+ * If no region is given, all pixels of a product are considered.
+ *
  * <p>
- * It writes two different sorts of output:
+ * The operator writes two different sorts of output:
  * <ul>
- * <li>an ASCII file in tab-separated CSV format, in which the statistics are mapped to the source regions</li>
+ * <li>an ASCII file in tab-separated CSV format, in which the statistics are mapped to the source regions, time intervals and bands</li>
  * <li>a shapefile that corresponds to the input shapefile, enriched with the statistics for the regions defined by the shapefile</li>
  * </ul>
  * <p>
  * Unlike most other operators, that can compute single {@link Tile tiles},
- * the statistics operator processes all of its source products in its {@link #initialize()} method.
+ * the statistics operator processes all of its source products in its {@link #doExecute(ProgressMonitor)} method.
  *
  * @author Sabine Embacher
  * @author Tonio Fincke
