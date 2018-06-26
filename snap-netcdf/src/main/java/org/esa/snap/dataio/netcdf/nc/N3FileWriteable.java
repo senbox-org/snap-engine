@@ -16,100 +16,46 @@
 
 package org.esa.snap.dataio.netcdf.nc;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import ucar.ma2.DataType;
 import ucar.nc2.Dimension;
-import ucar.nc2.NetcdfFileWriteable;
+import ucar.nc2.NetcdfFileWriter;
 import ucar.nc2.Variable;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * A wrapper around the netCDF 3 {@link ucar.nc2.NetcdfFileWriteable}.
  *
  * @author MarcoZ
  */
-public class N3FileWriteable implements NFileWriteable {
+public class N3FileWriteable extends NFileWriteable {
 
-    private final NetcdfFileWriteable netcdfFileWriteable;
 
-    public static NFileWriteable create(String filename) throws IOException {
-        NetcdfFileWriteable writeable = NetcdfFileWriteable.createNew(filename, false);
-        writeable.setLargeFile(true);
-        return new N3FileWriteable(writeable);
-    }
 
-    public N3FileWriteable(NetcdfFileWriteable netcdfFileWriteable) {
-        this.netcdfFileWriteable = netcdfFileWriteable;
+     N3FileWriteable(String filename) throws IOException {
+        netcdfFileWriter = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf3,filename) ;
     }
 
     @Override
-    public void addDimension(String name, int length) {
-        netcdfFileWriteable.addDimension(name, length);
+    public NVariable addScalarVariable(String name, DataType dataType)  {
+        Variable variable = netcdfFileWriter.addVariable(null, name, dataType, new ArrayList<Dimension>());
+        NVariable nVariable = new N3Variable(variable, null);
+        variables.put(name, nVariable);
+        return nVariable;
     }
 
     @Override
-    public String getDimensions() {
-        return Dimension.makeDimensionList(netcdfFileWriteable.getRootGroup().getDimensions());
-    }
-
-    @Override
-    public void addGlobalAttribute(String name, String value) {
-        netcdfFileWriteable.addGlobalAttribute(name, value);
-    }
-
-    @Override
-    public void addGlobalAttribute(String name, Number value) {
-        netcdfFileWriteable.addGlobalAttribute(name, value);
-    }
-
-    @Override
-    public NVariable addScalarVariable(String name, DataType dataType) throws IOException {
-        Variable variable = netcdfFileWriteable.addVariable(name, dataType, "");
-        return new N3Variable(variable, netcdfFileWriteable);
-
-    }
-
-    @Override
-    public NVariable addVariable(String name, DataType dataType, java.awt.Dimension tileSize, String dims) throws IOException {
-        Variable variable = netcdfFileWriteable.addVariable(name, dataType, dims);
-        return new N3Variable(variable, netcdfFileWriteable);
+    public NVariable addVariable(String name, DataType dataType, boolean unsigned, java.awt.Dimension tileSize, String dimensions, int compressionLevel)
+    {
+        Variable variable = netcdfFileWriter.addVariable(null, name, dataType, dimensions);
+        NVariable nVariable = new N3Variable(variable, null);
+        variables.put(name, nVariable);
+        return nVariable;
     }
 
 
     @Override
-    public NVariable addVariable(String name, DataType dataType, boolean unsigned, java.awt.Dimension tileSize, String dims, int compressionLevel) throws IOException {
-        return addVariable(name, dataType, tileSize, dims);
-    }
-
-    @Override
-    public NVariable addVariable(String name, DataType dataType, boolean unsigned, java.awt.Dimension tileSize, String dims) throws IOException {
-        return addVariable(name, dataType, tileSize, dims);
-    }
-
-    @Override
-    public NVariable findVariable(String variableName) {
-        Variable variable = netcdfFileWriteable.getRootGroup().findVariable(variableName);
-        return variable != null ? new N3Variable(variable, netcdfFileWriteable) : null;
-    }
-
-    @Override
-    public boolean isNameValid(String name) {
-        return true;
-    }
-
-    @Override
-    public String makeNameValid(String name) {
-        return name;
-    }
-
-
-    @Override
-    public void create() throws IOException {
-        netcdfFileWriteable.create();
-    }
-
-    @Override
-    public void close() throws IOException {
-        netcdfFileWriteable.close();
-    }
+    public NetcdfFileWriter getWriter() { throw new NotImplementedException(); }
 }

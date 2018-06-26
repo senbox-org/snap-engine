@@ -19,6 +19,7 @@ package org.esa.snap.dataio.netcdf.nc;
 
 import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Test;
+import ucar.nc2.NetcdfFileWriter;
 
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -342,7 +343,7 @@ public class ChunkedWriterTest {
         }
 
         @Override
-        public void writeChunk(Rectangle rect, ProductData data) {
+        public void writeChunk(NetcdfFileWriter writer,Rectangle rect, ProductData data) {
             writtenChunks[getChunkX(rect.x)][getChunkY(rect.y)] = data;
         }
     }

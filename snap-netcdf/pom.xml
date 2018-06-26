@@ -31,6 +31,16 @@
         ODESA.
     </description>
 
+    <repositories>
+        <repository>
+            <id>unidata-all</id>
+            <name>Unidata All</name>
+            <url>https://artifacts.unidata.ucar.edu/repository/unidata-all/</url>
+        </repository>
+    </repositories>
+
+
+
     <dependencies>
         <dependency>
             <groupId>org.esa.snap</groupId>
@@ -52,14 +62,56 @@
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-core</artifactId>
         </dependency>
+
+        <!-->
+        Following dependencies are needed for netcdf4
+        <-->
+
+
+
+
+
         <dependency>
             <groupId>edu.ucar</groupId>
-            <artifactId>netcdf</artifactId>
+            <artifactId>netcdf4</artifactId>
+            <version>4.5.5</version>
         </dependency>
+
+        <dependency>
+            <groupId>edu.ucar</groupId>
+            <artifactId>netcdfAll</artifactId>
+            <version>4.6.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-gpf</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+
+        <dependency>
+            <groupId>edu.ucar</groupId>
+            <artifactId>cdm</artifactId>
+            <version>4.4.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <!--
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jdk14</artifactId>
+            <version>1.7.5</version>
+            <scope>runtime</scope>
+        </dependency>
+        <-->
+
+
+        <!-->
         <dependency>
             <groupId>edu.ucar</groupId>
             <artifactId>nujan</artifactId>
         </dependency>
+        <-->
         <!--
         We have to include the following UGLY dependencies so that they are put into the NBM module's ext folder.
         Otherwise we always get onm thne command-line:

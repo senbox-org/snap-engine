@@ -16,125 +16,46 @@
 
 package org.esa.snap.dataio.netcdf.nc;
 
-import edu.ucar.ral.nujan.netcdf.NhDimension;
-import edu.ucar.ral.nujan.netcdf.NhException;
-import edu.ucar.ral.nujan.netcdf.NhFileWriter;
-import edu.ucar.ral.nujan.netcdf.NhGroup;
-import edu.ucar.ral.nujan.netcdf.NhVariable;
-import org.esa.snap.dataio.netcdf.util.VariableNameHelper;
+
+
 import ucar.ma2.DataType;
+import ucar.nc2.*;
 
-import java.awt.Dimension;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Arrays;
 
-/**
- * A wrapper around the netCDF 4 {@link edu.ucar.ral.nujan.netcdf.NhFileWriter}.
- *
- * @author MarcoZ
- */
-public class N4FileWriteable implements NFileWriteable {
+
+///**
+/// * A wrapper around the netCDF 4 {@link edu.ucar.ral.nujan.netcdf.NhFileWriter}.
+// *
+// * @author MarcoZ
+// */
+public class N4FileWriteable extends NFileWriteable {
 
     private static final int DEFAULT_COMPRESSION = 6;
-    private final NhFileWriter nhFileWriter;
-    private Map<String, NVariable> variables;
 
-    public static NFileWriteable create(String filename) throws IOException {
-        try {
-            return new N4FileWriteable(new NhFileWriter(filename, NhFileWriter.OPT_OVERWRITE));
-        } catch (NhException e) {
-            throw new IOException(e);
-        }
-    }
 
-    private N4FileWriteable(NhFileWriter nhFileWriter) {
-        this.nhFileWriter = nhFileWriter;
-        this.variables = new HashMap<>();
+    N4FileWriteable(String filename) throws IOException {
+        netcdfFileWriter = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, filename);
     }
 
     @Override
-    public void addDimension(String name, int length) throws IOException {
-        try {
-            nhFileWriter.getRootGroup().addDimension(name, length);
-        } catch (NhException e) {
-            throw new IOException(e);
-        }
-    }
-
-    @Override
-    public String getDimensions() {
-        NhGroup rootGroup = nhFileWriter.getRootGroup();
-        NhDimension[] dimensions = rootGroup.getDimensions();
-        StringBuilder out = new StringBuilder();
-        for (NhDimension dim : dimensions) {
-            out.append(dim.getName()).append(" ");
-        }
-        return out.toString();
-    }
-
-    @Override
-    public void addGlobalAttribute(String name, String value) throws IOException {
-        try {
-            nhFileWriter.getRootGroup().addAttribute(name, NhVariable.TP_STRING_VAR,
-                                                     N4Variable.cropStringToMaxAttributeLength(name, value));
-        } catch (NhException e) {
-            throw new IOException(e);
-        }
-    }
-
-    @Override
-    public void addGlobalAttribute(String name, Number value) throws IOException {
-        try {
-            nhFileWriter.getRootGroup().addAttribute(name,
-                                                     value instanceof Byte ? NhVariable.TP_SBYTE :
-                                                     value instanceof Short ? NhVariable.TP_SHORT :
-                                                     value instanceof Integer ? NhVariable.TP_INT :
-                                                     value instanceof Long ? NhVariable.TP_LONG :
-                                                     value instanceof Float ? NhVariable.TP_FLOAT :
-                                                     value instanceof Double ? NhVariable.TP_DOUBLE :
-                                                             NhVariable.TP_CHAR,
-                                                     value);
-        } catch (NhException e) {
-            throw new IOException(e);
-        }
-    }
-
-    @Override
-    public NVariable addScalarVariable(String name, DataType dataType) throws IOException {
-        NhGroup rootGroup = nhFileWriter.getRootGroup();
-        boolean unsigned = false; // TODO
-        int nhType = N4DataType.convert(dataType, unsigned);
-        try {
-            NhVariable variable = rootGroup.addVariable(name, nhType, new NhDimension[0], null, null, 0);
-            NVariable nVariable = new N4Variable(variable, null);
-            variables.put(name, nVariable);
-            return nVariable;
-        } catch (NhException e) {
-            throw new IOException(e);
-        }
-    }
-
-    @Override
-    public NVariable addVariable(String name, DataType dataType, Dimension tileSize, String dims) throws IOException {
-        return addVariable(name, dataType, false, tileSize, dims);
+    public NVariable addScalarVariable(String name, DataType dataType) {
+        Variable variable = netcdfFileWriter.addVariable(null, name, dataType, new ArrayList<Dimension>());
+        NVariable nVariable = new N4Variable(variable, null);
+        variables.put(name, nVariable);
+        return nVariable;
     }
 
 
     @Override
-    public NVariable addVariable(String name, DataType dataType, boolean unsigned, Dimension tileSize, String dims) throws IOException {
-        return addVariable(name, dataType, unsigned, tileSize, dims, DEFAULT_COMPRESSION);
-    }
-
-    @Override
-    public NVariable addVariable(String name, DataType dataType, boolean unsigned, Dimension tileSize, String dimensions, int compressionLevel) throws
-            IOException {
-        NhGroup rootGroup = nhFileWriter.getRootGroup();
-        int nhType = N4DataType.convert(dataType, unsigned);
+    public NVariable addVariable(String name, DataType dataType, boolean unsigned, java.awt.Dimension tileSize, String dimensions, int compressionLevel) {
+        Group rootGroup = netcdfFileWriter.getNetcdfFile().getRootGroup();
         String[] dims = dimensions.split(" ");
-        NhDimension[] nhDims = new NhDimension[dims.length];
+        ucar.nc2.Dimension[] nhDims = new ucar.nc2.Dimension[dims.length];
         for (int i = 0; i < dims.length; i++) {
-            nhDims[i] = rootGroup.findLocalDimension(dims[i]);
+            nhDims[i] = rootGroup.findDimensionLocal(dims[i]);
         }
         int[] chunkLens = new int[dims.length];
         if (tileSize != null) {
@@ -148,60 +69,21 @@ public class N4FileWriteable implements NFileWriteable {
                 chunkLens[0] = tileSize.height * scalingFactor;
                 chunkLens[1] = tileSize.width * scalingFactor;
             }
-
             // ensure that chunklens <= scene width/height
             chunkLens[1] = Math.min(chunkLens[1], imageWidth);
             chunkLens[0] = Math.min(chunkLens[0], imageHeight);
-            tileSize = new Dimension(chunkLens[1], chunkLens[0]);
+            tileSize = new java.awt.Dimension(chunkLens[1], chunkLens[0]);
         } else {
             for (int i = 0; i < dims.length; i++) {
                 chunkLens[i] = nhDims[i].getLength();
             }
         }
-
-        Object fillValue = null; // TODO
-        try {
-            NhVariable variable = rootGroup.addVariable(name, nhType, nhDims, chunkLens, fillValue,
-                    compressionLevel);
-            NVariable nVariable = new N4Variable(variable, tileSize);
-            variables.put(name, nVariable);
-            return nVariable;
-        } catch (NhException e) {
-            throw new IOException(e);
-        }
+        //Object fillValue = null; // TODO
+        Variable variable = netcdfFileWriter.addVariable(null, name, dataType, dimensions);
+        Attribute chunksizes = new Attribute("_ChunkSizes", Arrays.asList(chunkLens));
+        variable.addAttribute(chunksizes);
+        NVariable nVariable = new N4Variable(variable, tileSize);
+        variables.put(name, nVariable);
+        return nVariable;
     }
-
-    @Override
-    public NVariable findVariable(String variableName) {
-        return variables.get(variableName);
-    }
-
-    @Override
-    public boolean isNameValid(String name) {
-        return VariableNameHelper.isVariableNameValid(name);
-    }
-
-    @Override
-    public String makeNameValid(String name) {
-        return VariableNameHelper.convertToValidName(name);
-    }
-
-    @Override
-    public void create() throws IOException {
-        try {
-            nhFileWriter.endDefine();
-        } catch (NhException e) {
-            throw new IOException(e);
-        }
-    }
-
-    @Override
-    public void close() throws IOException {
-        try {
-            nhFileWriter.close();
-        } catch (NhException e) {
-            throw new IOException(e);
-        }
-    }
-
 }

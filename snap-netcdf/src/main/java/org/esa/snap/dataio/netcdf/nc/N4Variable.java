@@ -16,55 +16,70 @@
 
 package org.esa.snap.dataio.netcdf.nc;
 
-import edu.ucar.ral.nujan.netcdf.NhDimension;
-import edu.ucar.ral.nujan.netcdf.NhException;
-import edu.ucar.ral.nujan.netcdf.NhVariable;
+
+
+
 import org.esa.snap.core.datamodel.ProductData;
+import sun.reflect.generics.tree.ClassTypeSignature;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 
-import java.awt.Dimension;
+///
+import ucar.nc2.*;
+import ucar.nc2.Dimension;
+//import ucar.nc2.dataset.NetcdfDataset;
+//import ucar.nc2.write.Nc4Chunking;
+//import ucar.nc2.write.Nc4ChunkingStrategyImpl;
+
+//import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- * A wrapper around the netCDF 4 {@link edu.ucar.ral.nujan.netcdf.NhVariable}.
- *
- * @author MarcoZ
- */
+//**
+// * A wrapper around the netCDF 4 {@link edu.ucar.ral.nujan.netcdf.NhVariable}.
+// *
+// * @author MarcoZ
+// */
+
+
+
+
 public class N4Variable implements NVariable {
 
     // MAX_ATTRIBUTE_LENGTH taken from
     // https://github.com/bcdev/nujan/blob/master/src/main/java/edu/ucar/ral/nujan/hdf/MsgAttribute.java#L185
     public static final int MAX_ATTRIBUTE_LENGTH = 65535 - 1000;
 
-    private final NhVariable variable;
-    private final Dimension tileSize;
+
+    private final Variable variable;
+    private final java.awt.Dimension tileSize;
     private ChunkWriter writer;
 
-    public N4Variable(NhVariable variable, Dimension tileSize) {
+    public N4Variable(Variable variable, java.awt.Dimension tileSize) {
         this.variable = variable;
         this.tileSize = tileSize;
     }
 
     @Override
     public String getName() {
-        return variable.getName();
+        return variable.getFullName();
     }
 
     @Override
     public DataType getDataType() {
-        int type = variable.getType();
-        return N4DataType.convert(type);
+        return variable.getDataType();
+
     }
 
     @Override
     public void addAttribute(String name, String value) throws IOException {
-        addAttributeImpl(name, cropStringToMaxAttributeLength(name, value), NhVariable.TP_STRING_VAR);
+        addAttributeImpl(name, cropStringToMaxAttributeLength(name, value),value.getClass().getName() ) ;
     }
 
     @Override
@@ -74,40 +89,61 @@ public class N4Variable implements NVariable {
 
     @Override
     public void addAttribute(String name, Number value, boolean isUnsigned) throws IOException {
-        DataType dataType = DataType.getType(value.getClass());
-        int nhType = N4DataType.convert(dataType, isUnsigned);
-        addAttributeImpl(name, value, nhType);
+        addAttributeImpl(name, value, name.getClass().getName());
     }
 
     @Override
     public void addAttribute(String name, Array value) throws IOException {
-        DataType dataType = DataType.getType(value.getElementType());
-        int nhType = N4DataType.convert(dataType, value.isUnsigned());
-
-        addAttributeImpl(name, value.getStorage(), nhType);
+        addAttributeImpl(name, value.getStorage(), value.getClass().getName());
     }
 
-    private void addAttributeImpl(String name, Object value, int type) throws IOException {
+    private void addAttributeImpl(String name, Object value, String type ) throws IOException {
         name = name.replace('.', '_');
         try {
-            if (!variable.attributeExists(name)) {
-                //attributes can only bet set once
-                variable.addAttribute(name, type, value);
+            if (variable.findAttribute(name) == null) {
+                if (value.getClass() == Integer.class) {
+                    int temp = (Integer) value;
+                    Attribute attribute = new Attribute(name, temp);
+                    variable.addAttribute(attribute);
+                } else if (value.getClass() == String.class) {
+                    String temp = (String) value;
+                    Attribute attribute = new Attribute(name, temp);
+                    variable.addAttribute(attribute);
+                }   else if (value.getClass() ==  Array.class) {
+                    Attribute attribute = new Attribute(name, (Array) value);
+                    variable.addAttribute(attribute);
+                }
+                    else if (value.getClass() ==  Number.class) {
+                        Attribute attribute = new Attribute(name,(Number) value);
+                        variable.addAttribute(attribute);
+                }
             }
-        } catch (NhException e) {
+        }
+        catch(Exception e){
+            throw new IOException(e);
+            }
+        }
+
+
+    @Override
+    public Attribute findAttribute(String name) {
+        return variable.findAttribute(name);
+    }
+
+
+
+    @Override
+
+    public void writeFully(NetcdfFileWriter netwriter, Array values) throws IOException {
+        int[] idxes = new int[values.getShape().length];
+        try {
+            netwriter.write(variable,idxes,values);
+        } catch (Exception e) {
             throw new IOException(e);
         }
     }
 
-    @Override
-    public void writeFully(Array values) throws IOException {
-        int[] idxes = new int[values.getShape().length];
-        try {
-            variable.writeData(idxes, values);
-        } catch (NhException e) {
-            throw new IOException(e);
-        }
-    }
+
 
     @Override
     public void write(int x, int y, int width, int height, boolean isYFlipped, ProductData data) throws IOException {
@@ -127,38 +163,37 @@ public class N4Variable implements NVariable {
     }
 
     private ChunkWriter createWriter(boolean isYFlipped) {
-        NhDimension[] nhDimensions = variable.getDimensions();
-        int sceneWidth = nhDimensions[1].getLength();
-        int sceneHeight = nhDimensions[0].getLength();
+        List<ucar.nc2.Dimension> dimensions = variable.getDimensions();
+        int sceneWidth = dimensions.get(1).getLength();
+        int sceneHeight = dimensions.get(0).getLength();
         int chunkWidth = tileSize.width;
         int chunkHeight = tileSize.height;
         return new NetCDF4ChunkWriter(sceneWidth, sceneHeight, chunkWidth, chunkHeight, isYFlipped);
     }
 
     private class NetCDF4ChunkWriter extends ChunkWriter {
-
         private final Set<Rectangle> writtenChunkRects;
-
         public NetCDF4ChunkWriter(int sceneWidth, int sceneHeight, int chunkWidth, int chunkHeight, boolean YFlipped) {
             super(sceneWidth, sceneHeight, chunkWidth, chunkHeight, YFlipped);
             writtenChunkRects = new HashSet<Rectangle>((sceneWidth / chunkWidth) * (sceneHeight / chunkHeight));
         }
-
         @Override
-        public void writeChunk(Rectangle rect, ProductData data) throws IOException {
+        public void writeChunk(NetcdfFileWriter netwriter, Rectangle rect, ProductData data) throws IOException {
             if (!writtenChunkRects.contains(rect)) {
                 // netcdf4 chunks can only be written once
                 final int[] origin = new int[]{rect.y, rect.x};
                 final int[] shape = new int[]{rect.height, rect.width};
-                DataType dataType = N4DataType.convert(variable.getType());
+                DataType dataType = variable.getDataType();
                 final Array values = Array.factory(dataType, shape, data.getElems());
                 try {
-                    variable.writeData(origin, values);
-                } catch (NhException e) {
+                    netwriter.write(variable,origin,values);
+                } catch (Exception e) {
                     throw new IOException(e);
                 }
                 writtenChunkRects.add(rect);
             }
         }
+
+
     }
 }

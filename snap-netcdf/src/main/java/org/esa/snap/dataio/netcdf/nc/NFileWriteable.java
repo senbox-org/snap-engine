@@ -16,41 +16,115 @@
 
 package org.esa.snap.dataio.netcdf.nc;
 
+
+import org.esa.snap.dataio.netcdf.util.VariableNameHelper;
 import ucar.ma2.DataType;
 
-import java.awt.Dimension;
+import ucar.nc2.*;
+
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.util.*;
 
-/**
- * An abstraction of the netcdf3/4 writing API.
- *
- * @author MarcoZ
- */
-public interface NFileWriteable {
+///**
+/// * A wrapper around the netCDF 4 {@link edu.ucar.ral.nujan.netcdf.NhFileWriter}.
+// *
+// * @author MarcoZ
+// */
+public abstract class NFileWriteable  {
 
-    void addDimension(String name, int length) throws IOException;
+    private static final int DEFAULT_COMPRESSION = 6;
 
-    String getDimensions();
 
-    void addGlobalAttribute(String name, String value) throws IOException;
+    public NetcdfFileWriter getWriter() {
+        return netcdfFileWriter;
+    }
 
-    void addGlobalAttribute(String name, Number value) throws IOException;
+    protected  NetcdfFileWriter netcdfFileWriter;
+    protected Map<String, NVariable> variables = new HashMap<>();
 
-    NVariable addScalarVariable(String name, DataType dataType) throws IOException;
 
-    NVariable addVariable(String name, DataType dataType, Dimension tileSize, String dims) throws IOException;
 
-    NVariable addVariable(String name, DataType dataType, boolean unsigned, Dimension tileSize, String dims) throws IOException;
 
-    NVariable addVariable(String name, DataType dataType, boolean unsigned, Dimension tileSize, String dims, int compressionLevel) throws IOException;
+    public void addDimension(String name, int length) throws IOException {
+        try {
+            //nhFileWriter.getRootGroup().addDimension(name, length);
+            netcdfFileWriter.addDimension(null,name,length);
+        } catch (Exception e) {
+            throw new IOException(e);
+        }
+    }
 
-    NVariable findVariable(String variableName);
+    public String getDimensions() {
+        Group rootGroup = netcdfFileWriter.getNetcdfFile().getRootGroup();
+        List<ucar.nc2.Dimension> dimensions = rootGroup.getDimensions();
+        StringBuilder out = new StringBuilder();
+        for (ucar.nc2.Dimension dim : dimensions) {
+            out.append(dim.getFullName()).append(" ");
+        }
+        return out.toString();
+    }
 
-    boolean isNameValid(String name);
+    public void addGlobalAttribute(String name, String value) throws IOException {
+        try {
+            Attribute attribute = new Attribute(name, value);
+            netcdfFileWriter.addGroupAttribute(null,attribute);
+        } catch (Exception e) {
+            throw new IOException(e);
+        }
+    }
 
-    String makeNameValid(String name);
+    public void addGlobalAttribute(String name, Number value) throws IOException {
+        try {
+            Attribute attribute = new Attribute(name, value);
+            netcdfFileWriter.addGroupAttribute(null,attribute);
+        } catch (Exception e) {
+            throw new IOException(e);
+        }
+    }
 
-    void create() throws IOException;
 
-    void close() throws IOException;
+
+    public NVariable addVariable(String name, DataType dataType, java.awt.Dimension tileSize, String dims) throws IOException {
+        return addVariable(name, dataType, false, tileSize, dims);
+    }
+
+
+    abstract public NVariable addScalarVariable(String name, DataType dataType)  ;
+
+    public NVariable addVariable(String name, DataType dataType, boolean unsigned, java.awt.Dimension tileSize, String dims)  {
+        return addVariable(name, dataType, unsigned, tileSize, dims, DEFAULT_COMPRESSION);
+    }
+
+    abstract public NVariable addVariable(String name, DataType dataType, boolean unsigned, java.awt.Dimension tileSize, String dimensions, int compressionLevel) ;
+
+    public NVariable findVariable(String variableName) {
+        return variables.get(variableName);
+    }
+
+    public boolean isNameValid(String name) {
+        return VariableNameHelper.isVariableNameValid(name);
+    }
+
+    public String makeNameValid(String name) {
+        return VariableNameHelper.convertToValidName(name);
+    }
+
+
+    public void create() throws IOException {
+        try {
+            netcdfFileWriter.create();
+        } catch (Exception e) {
+            throw new IOException(e);
+        }
+    }
+
+    public void close() throws IOException {
+        try {
+            netcdfFileWriter.close();
+        } catch (Exception e) {
+            throw new IOException(e);
+        }
+    }
+
 }

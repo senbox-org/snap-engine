@@ -22,6 +22,7 @@ import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFileWriteable;
+import ucar.nc2.NetcdfFileWriter;
 import ucar.nc2.Variable;
 
 import java.io.IOException;
@@ -85,12 +86,17 @@ public class N3Variable implements NVariable {
     }
 
     @Override
-    public void writeFully(Array values) throws IOException {
+    public void writeFully(NetcdfFileWriter writer, Array values) throws IOException {
         try {
             netcdfFileWriteable.write(variable.getFullName(), values);
         } catch (InvalidRangeException e) {
             throw new IOException(e);
         }
+    }
+
+    @Override
+    public Attribute findAttribute(String name) {
+        return variable.findAttribute(name);
     }
 
     @Override
@@ -104,7 +110,6 @@ public class N3Variable implements NVariable {
         writeOrigin[xIndex] = x;
         final int[] sourceShape = new int[]{height, width};
         final Array sourceArray = Array.factory(dataType, sourceShape, data.getElems());
-
         final int[] sourceOrigin = new int[2];
         sourceOrigin[xIndex] = 0;
         final int[] writeShape = new int[]{1, width};

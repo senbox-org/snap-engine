@@ -21,8 +21,7 @@ import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.MetadataAttribute;
 import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.dataio.netcdf.nc.N3FileWriteable;
-import org.esa.snap.dataio.netcdf.nc.N3Variable;
+import org.esa.snap.dataio.netcdf.nc.*;
 import org.esa.snap.dataio.netcdf.util.DataTypeUtils;
 import ucar.ma2.DataType;
 import ucar.nc2.Attribute;
@@ -48,16 +47,15 @@ public class CfFlagCodingPartTest extends TestCase {
         for (int i = 0; i < 8; i++) {
             addFlag(flagCoding, i);
         }
-
-        NetcdfFileWriteable writeable = NetcdfFileWriteable.createNew("not stored");
-        writeable.addDimension("y", flagBand.getRasterHeight());
-        writeable.addDimension("x", flagBand.getRasterWidth());
+        NFileWriteable n3writable = NWritableFactory.create("not stored", "netcdf3");
+        n3writable.addDimension("y", flagBand.getRasterHeight());
+        n3writable.addDimension("x", flagBand.getRasterWidth());
         final DataType ncDataType = DataTypeUtils.getNetcdfDataType(flagBand.getDataType());
-        Variable variable = writeable.addVariable(flagBand.getName(), ncDataType, writeable.getRootGroup().getDimensions());
-        CfBandPart.writeCfBandAttributes(flagBand, new N3Variable(variable, writeable));
-        CfFlagCodingPart.writeFlagCoding(flagBand, new N3FileWriteable(writeable));
+        NVariable variable = n3writable.addVariable(flagBand.getName(), ncDataType, null,"y x");
+        CfBandPart.writeCfBandAttributes(flagBand, variable);
+        CfFlagCodingPart.writeFlagCoding(flagBand, n3writable);
 
-        Variable someFlagsVariable = writeable.findVariable("flag_band");
+        NVariable someFlagsVariable = n3writable.findVariable("flag_band");
         assertNotNull(someFlagsVariable);
         Attribute flagMasksAttrib = someFlagsVariable.findAttribute("flag_masks");
         assertNotNull(flagMasksAttrib);

@@ -17,6 +17,7 @@
 package org.esa.snap.dataio.netcdf.nc;
 
 import org.esa.snap.core.datamodel.ProductData;
+import ucar.nc2.NetcdfFileWriter;
 
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -39,7 +40,7 @@ public abstract class ChunkWriter {
     private final int numChunksX;
     private final int numChunksY;
     private final Map<Point, Chunk> activeChunks;
-
+    NetcdfFileWriter writer;
     public ChunkWriter(int sceneWidth, int sceneHeight, int chunkWidth, int chunkHeight, boolean yFlipped) {
         this.sceneWidth = sceneWidth;
         this.sceneHeight = sceneHeight;
@@ -49,6 +50,8 @@ public abstract class ChunkWriter {
         this.numChunksX = (int) Math.ceil(sceneWidth / (double) chunkWidth);
         this.numChunksY = (int) Math.ceil(sceneHeight / (double) chunkHeight);
         this.activeChunks = new HashMap<Point, Chunk>();
+
+
     }
 
     public void write(int x, int y, int width, int height, ProductData data) throws IOException {
@@ -69,8 +72,9 @@ public abstract class ChunkWriter {
         Rectangle dataRect = new Rectangle(x, y, width, height);
         for (Point chunkIndex : chunkIndices) {
             Rectangle chunkRect = getChunkRect(chunkIndex);
+
             if (chunkRect.equals(dataRect)) {
-                writeChunk(chunkRect, data);
+                writeChunk(writer, chunkRect, data);
             } else {
                 Chunk chunk = activeChunks.get(chunkIndex);
                 if (chunk == null) {
@@ -79,7 +83,7 @@ public abstract class ChunkWriter {
                 }
                 chunk.copyDataFrom(dataRect, data);
                 if (chunk.complete()) {
-                    writeChunk(chunkRect, chunk.getData());
+                    writeChunk(writer, chunkRect, chunk.getData());
                     activeChunks.remove(chunkIndex);
                 }
             }
@@ -126,5 +130,5 @@ public abstract class ChunkWriter {
         return numChunksY;
     }
 
-    public abstract void writeChunk(Rectangle rect, ProductData data) throws IOException;
+    public abstract void writeChunk(NetcdfFileWriter netwriter, Rectangle rect, ProductData data) throws IOException;
 }
