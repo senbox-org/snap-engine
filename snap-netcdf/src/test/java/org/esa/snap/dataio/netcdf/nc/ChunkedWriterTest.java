@@ -343,7 +343,7 @@ public class ChunkedWriterTest {
         }
 
         @Override
-        public void writeChunk(NetcdfFileWriter writer,Rectangle rect, ProductData data) {
+        public void writeChunk(Rectangle rect, ProductData data) {
             writtenChunks[getChunkX(rect.x)][getChunkY(rect.y)] = data;
         }
     }

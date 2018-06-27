@@ -41,7 +41,7 @@ public class N3FileWriteable extends NFileWriteable {
     @Override
     public NVariable addScalarVariable(String name, DataType dataType)  {
         Variable variable = netcdfFileWriter.addVariable(null, name, dataType, new ArrayList<Dimension>());
-        NVariable nVariable = new N3Variable(variable, null);
+        NVariable nVariable = new N3Variable(variable, netcdfFileWriter);
         variables.put(name, nVariable);
         return nVariable;
     }
@@ -50,12 +50,9 @@ public class N3FileWriteable extends NFileWriteable {
     public NVariable addVariable(String name, DataType dataType, boolean unsigned, java.awt.Dimension tileSize, String dimensions, int compressionLevel)
     {
         Variable variable = netcdfFileWriter.addVariable(null, name, dataType, dimensions);
-        NVariable nVariable = new N3Variable(variable, null);
+        NVariable nVariable = new N3Variable(variable, netcdfFileWriter);
         variables.put(name, nVariable);
         return nVariable;
     }
 
-
-    @Override
-    public NetcdfFileWriter getWriter() { throw new NotImplementedException(); }
 }

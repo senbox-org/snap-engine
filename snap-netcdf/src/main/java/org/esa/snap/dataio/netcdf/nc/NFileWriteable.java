@@ -17,6 +17,7 @@
 package org.esa.snap.dataio.netcdf.nc;
 
 
+import org.esa.snap.dataio.netcdf.util.NetcdfFileOpener;
 import org.esa.snap.dataio.netcdf.util.VariableNameHelper;
 import ucar.ma2.DataType;
 
@@ -34,6 +35,8 @@ import java.util.*;
 public abstract class NFileWriteable  {
 
     private static final int DEFAULT_COMPRESSION = 6;
+    private String dimensions = "";
+    protected Map<String,Dimension> dimensionsMap =  new HashMap<>();
 
 
     public NetcdfFileWriter getWriter() {
@@ -49,20 +52,27 @@ public abstract class NFileWriteable  {
     public void addDimension(String name, int length) throws IOException {
         try {
             //nhFileWriter.getRootGroup().addDimension(name, length);
-            netcdfFileWriter.addDimension(null,name,length);
+            dimensionsMap.put(name,netcdfFileWriter.addDimension(null,name,length));
+
+            if (dimensions.length() == 0) {
+                dimensions=name;
+            } else {
+                dimensions=dimensions+" "+name;
+            }
         } catch (Exception e) {
             throw new IOException(e);
         }
     }
 
     public String getDimensions() {
-        Group rootGroup = netcdfFileWriter.getNetcdfFile().getRootGroup();
-        List<ucar.nc2.Dimension> dimensions = rootGroup.getDimensions();
-        StringBuilder out = new StringBuilder();
-        for (ucar.nc2.Dimension dim : dimensions) {
-            out.append(dim.getFullName()).append(" ");
-        }
-        return out.toString();
+//        Group rootGroup = netcdfFileWriter.getNetcdfFile().getRootGroup();
+//        List<ucar.nc2.Dimension> dimensions = rootGroup.getDimensions();
+//        StringBuilder out = new StringBuilder();
+//        for (ucar.nc2.Dimension dim : dimensions) {
+//            out.append(dim.getFullName()).append(" ");
+//        }
+//        return out.toString();
+        return dimensions;
     }
 
     public void addGlobalAttribute(String name, String value) throws IOException {

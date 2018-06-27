@@ -33,8 +33,6 @@ import java.util.Arrays;
 // */
 public class N4FileWriteable extends NFileWriteable {
 
-    private static final int DEFAULT_COMPRESSION = 6;
-
 
     N4FileWriteable(String filename) throws IOException {
         netcdfFileWriter = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, filename);
@@ -43,7 +41,7 @@ public class N4FileWriteable extends NFileWriteable {
     @Override
     public NVariable addScalarVariable(String name, DataType dataType) {
         Variable variable = netcdfFileWriter.addVariable(null, name, dataType, new ArrayList<Dimension>());
-        NVariable nVariable = new N4Variable(variable, null);
+        NVariable nVariable = new N4Variable(variable, null,netcdfFileWriter);
         variables.put(name, nVariable);
         return nVariable;
     }
@@ -51,13 +49,14 @@ public class N4FileWriteable extends NFileWriteable {
 
     @Override
     public NVariable addVariable(String name, DataType dataType, boolean unsigned, java.awt.Dimension tileSize, String dimensions, int compressionLevel) {
-        Group rootGroup = netcdfFileWriter.getNetcdfFile().getRootGroup();
+        //Group rootGroup = netcdfFileWriter.getNetcdfFile().getRootGroup();
         String[] dims = dimensions.split(" ");
         ucar.nc2.Dimension[] nhDims = new ucar.nc2.Dimension[dims.length];
         for (int i = 0; i < dims.length; i++) {
-            nhDims[i] = rootGroup.findDimensionLocal(dims[i]);
+            nhDims[i] = dimensionsMap.get(dims[i]);
+            //nhDims[i] = rootGroup.findDimensionLocal(dims[i]);
         }
-        int[] chunkLens = new int[dims.length];
+        Integer[] chunkLens = new Integer[dims.length];
         if (tileSize != null) {
             chunkLens[0] = tileSize.height;
             chunkLens[1] = tileSize.width;
@@ -82,7 +81,7 @@ public class N4FileWriteable extends NFileWriteable {
         Variable variable = netcdfFileWriter.addVariable(null, name, dataType, dimensions);
         Attribute chunksizes = new Attribute("_ChunkSizes", Arrays.asList(chunkLens));
         variable.addAttribute(chunksizes);
-        NVariable nVariable = new N4Variable(variable, tileSize);
+        NVariable nVariable = new N4Variable(variable, tileSize,netcdfFileWriter);
         variables.put(name, nVariable);
         return nVariable;
     }

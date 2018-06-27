@@ -35,9 +35,9 @@ import java.io.IOException;
 public class N3Variable implements NVariable {
 
     private final Variable variable;
-    private final NetcdfFileWriteable netcdfFileWriteable;
+    private final NetcdfFileWriter netcdfFileWriteable;
 
-    public N3Variable(Variable variable, NetcdfFileWriteable netcdfFileWriteable) {
+    public N3Variable(Variable variable, NetcdfFileWriter netcdfFileWriteable) {
         this.variable = variable;
         this.netcdfFileWriteable = netcdfFileWriteable;
     }
@@ -88,7 +88,7 @@ public class N3Variable implements NVariable {
     @Override
     public void writeFully(NetcdfFileWriter writer, Array values) throws IOException {
         try {
-            netcdfFileWriteable.write(variable.getFullName(), values);
+            netcdfFileWriteable.write(variable, values);
         } catch (InvalidRangeException e) {
             throw new IOException(e);
         }
@@ -101,7 +101,6 @@ public class N3Variable implements NVariable {
 
     @Override
     public void write(int x, int y, int width, int height, boolean isYFlipped, ProductData data) throws IOException {
-        String variableName = variable.getFullName();
         final int yIndex = 0;
         final int xIndex = 1;
         final DataType dataType = variable.getDataType();
@@ -118,7 +117,7 @@ public class N3Variable implements NVariable {
             sourceOrigin[yIndex] = line - y;
             try {
                 Array dataArrayLine = sourceArray.sectionNoReduce(sourceOrigin, writeShape, null);
-                netcdfFileWriteable.write(variableName, writeOrigin, dataArrayLine);
+                netcdfFileWriteable.write(variable, writeOrigin, dataArrayLine);
             } catch (InvalidRangeException e) {
                 e.printStackTrace();
                 throw new IOException("Unable to encode netCDF data.", e);

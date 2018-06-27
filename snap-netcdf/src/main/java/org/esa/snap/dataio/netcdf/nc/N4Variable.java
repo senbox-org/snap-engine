@@ -26,7 +26,6 @@ import ucar.ma2.DataType;
 
 ///
 import ucar.nc2.*;
-import ucar.nc2.Dimension;
 //import ucar.nc2.dataset.NetcdfDataset;
 //import ucar.nc2.write.Nc4Chunking;
 //import ucar.nc2.write.Nc4ChunkingStrategyImpl;
@@ -60,10 +59,12 @@ public class N4Variable implements NVariable {
     private final Variable variable;
     private final java.awt.Dimension tileSize;
     private ChunkWriter writer;
+    private final NetcdfFileWriter netcdfFileWriter;
 
-    public N4Variable(Variable variable, java.awt.Dimension tileSize) {
+    public N4Variable(Variable variable, java.awt.Dimension tileSize, NetcdfFileWriter netcdfFileWriter) {
         this.variable = variable;
         this.tileSize = tileSize;
+        this.netcdfFileWriter = netcdfFileWriter;
     }
 
     @Override
@@ -178,13 +179,15 @@ public class N4Variable implements NVariable {
             writtenChunkRects = new HashSet<Rectangle>((sceneWidth / chunkWidth) * (sceneHeight / chunkHeight));
         }
         @Override
-        public void writeChunk(NetcdfFileWriter netwriter, Rectangle rect, ProductData data) throws IOException {
+        public void writeChunk( Rectangle rect, ProductData data) throws IOException {
             if (!writtenChunkRects.contains(rect)) {
                 // netcdf4 chunks can only be written once
                 final int[] origin = new int[]{rect.y, rect.x};
                 final int[] shape = new int[]{rect.height, rect.width};
                 DataType dataType = variable.getDataType();
                 final Array values = Array.factory(dataType, shape, data.getElems());
+                NetcdfFileWriter netwriter = netcdfFileWriter;
+
                 try {
                     netwriter.write(variable,origin,values);
                 } catch (Exception e) {

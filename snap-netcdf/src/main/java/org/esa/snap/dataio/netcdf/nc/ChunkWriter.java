@@ -74,7 +74,7 @@ public abstract class ChunkWriter {
             Rectangle chunkRect = getChunkRect(chunkIndex);
 
             if (chunkRect.equals(dataRect)) {
-                writeChunk(writer, chunkRect, data);
+                writeChunk( chunkRect, data);
             } else {
                 Chunk chunk = activeChunks.get(chunkIndex);
                 if (chunk == null) {
@@ -83,7 +83,7 @@ public abstract class ChunkWriter {
                 }
                 chunk.copyDataFrom(dataRect, data);
                 if (chunk.complete()) {
-                    writeChunk(writer, chunkRect, chunk.getData());
+                    writeChunk(chunkRect, chunk.getData());
                     activeChunks.remove(chunkIndex);
                 }
             }
@@ -130,5 +130,5 @@ public abstract class ChunkWriter {
         return numChunksY;
     }
 
-    public abstract void writeChunk(NetcdfFileWriter netwriter, Rectangle rect, ProductData data) throws IOException;
+    public abstract void writeChunk(Rectangle rect, ProductData data) throws IOException;
 }
