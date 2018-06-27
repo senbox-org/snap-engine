@@ -19,24 +19,22 @@ package org.esa.snap.dataio.netcdf.nc;
 
 
 
+import com.google.common.primitives.Bytes;
+import com.google.common.primitives.Ints;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.dataio.netcdf.util.DataTypeUtils;
 import sun.reflect.generics.tree.ClassTypeSignature;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 
-///
 import ucar.nc2.*;
-//import ucar.nc2.dataset.NetcdfDataset;
-//import ucar.nc2.write.Nc4Chunking;
-//import ucar.nc2.write.Nc4ChunkingStrategyImpl;
 
-//import java.awt.Dimension;
+
+
 import java.awt.Rectangle;
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -45,8 +43,6 @@ import java.util.logging.Logger;
 // *
 // * @author MarcoZ
 // */
-
-
 
 
 public class N4Variable implements NVariable {
@@ -103,27 +99,48 @@ public class N4Variable implements NVariable {
         try {
             if (variable.findAttribute(name) == null) {
                 if (value.getClass() == Integer.class) {
-                    int temp = (Integer) value;
-                    Attribute attribute = new Attribute(name, temp);
+                    Attribute attribute = new Attribute(name, (Integer) value);
                     variable.addAttribute(attribute);
                 } else if (value.getClass() == String.class) {
-                    String temp = (String) value;
-                    Attribute attribute = new Attribute(name, temp);
+                    Attribute attribute = new Attribute(name, (String) value);
                     variable.addAttribute(attribute);
-                }   else if (value.getClass() ==  Array.class) {
+                } else if (value.getClass() == Array.class) {
                     Attribute attribute = new Attribute(name, (Array) value);
                     variable.addAttribute(attribute);
+                } else if (value.getClass() == Number.class) {
+                    Attribute attribute = new Attribute(name, (Number) value, false);
+                    variable.addAttribute(attribute);
+                } else if (value.getClass() == Float.class) {
+                    Attribute attribute = new Attribute(name, (Float) value);
+                    variable.addAttribute(attribute);
+                } else if (value.getClass() == List.class) {
+                    Attribute attribute = new Attribute(name, (List) value);
+                    variable.addAttribute(attribute);
+                } else if (value.getClass() == DataType.class) {
+                    Attribute attribute = new Attribute(name, (DataType) value, false);
+                    variable.addAttribute(attribute);
+                } else if (value.getClass() == Double.class) {
+                    Attribute attribute = new Attribute(name, DataTypeUtils.convertTo((Double) value, DataType.DOUBLE), false);
+                    variable.addAttribute(attribute);
                 }
-                    else if (value.getClass() ==  Number.class) {
-                        Attribute attribute = new Attribute(name,(Number) value);
+                else {
+                    if (value.getClass().getName() == "[I") {
+                        List<Integer> temp = Ints.asList((int[]) value);
+                        Attribute attribute = new Attribute(name, temp);
                         variable.addAttribute(attribute);
+                    }
+                    else  if (value.getClass().getName() == "[B") {
+                        List<Byte> temp = Bytes.asList((byte[]) value);
+                        Attribute attribute = new Attribute(name, temp);
+                        variable.addAttribute(attribute);
+                    }
                 }
             }
         }
         catch(Exception e){
             throw new IOException(e);
-            }
         }
+    }
 
 
     @Override
@@ -187,7 +204,6 @@ public class N4Variable implements NVariable {
                 DataType dataType = variable.getDataType();
                 final Array values = Array.factory(dataType, shape, data.getElems());
                 NetcdfFileWriter netwriter = netcdfFileWriter;
-
                 try {
                     netwriter.write(variable,origin,values);
                 } catch (Exception e) {

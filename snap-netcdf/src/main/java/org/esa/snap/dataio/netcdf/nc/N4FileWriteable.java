@@ -49,12 +49,10 @@ public class N4FileWriteable extends NFileWriteable {
 
     @Override
     public NVariable addVariable(String name, DataType dataType, boolean unsigned, java.awt.Dimension tileSize, String dimensions, int compressionLevel) {
-        //Group rootGroup = netcdfFileWriter.getNetcdfFile().getRootGroup();
         String[] dims = dimensions.split(" ");
         ucar.nc2.Dimension[] nhDims = new ucar.nc2.Dimension[dims.length];
         for (int i = 0; i < dims.length; i++) {
             nhDims[i] = dimensionsMap.get(dims[i]);
-            //nhDims[i] = rootGroup.findDimensionLocal(dims[i]);
         }
         Integer[] chunkLens = new Integer[dims.length];
         if (tileSize != null) {
