@@ -45,7 +45,7 @@ public interface NVariable {
 
     void addAttribute(String name, Array value) throws IOException;
 
-    void writeFully(NetcdfFileWriter writer, Array values) throws IOException;
+    void writeFully(Array values) throws IOException;
 
     void write(int x, int y, int width, int height, boolean isYFlipped, ProductData data) throws IOException;
 

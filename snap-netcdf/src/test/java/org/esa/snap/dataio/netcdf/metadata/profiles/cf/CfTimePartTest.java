@@ -24,8 +24,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import ucar.nc2.NetcdfFile;
+import ucar.nc2.NetcdfFileWriter;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * @author Thomas Storm
@@ -98,6 +100,11 @@ public class CfTimePartTest {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+        }
+
+        @Override
+        public NetcdfFileWriter getNetcdfFileWriter() {
+            return null;
         }
 
         @Override

@@ -86,7 +86,7 @@ public class N3Variable implements NVariable {
     }
 
     @Override
-    public void writeFully(NetcdfFileWriter writer, Array values) throws IOException {
+    public void writeFully(Array values) throws IOException {
         try {
             netcdfFileWriteable.write(variable, values);
         } catch (InvalidRangeException e) {
