@@ -23,6 +23,7 @@ import org.esa.snap.core.datamodel.MetadataAttribute;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.dataio.netcdf.nc.*;
 import org.esa.snap.dataio.netcdf.util.DataTypeUtils;
+import org.esa.snap.dataio.netcdf.util.UnsignedChecker;
 import ucar.ma2.DataType;
 import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFileWriteable;
@@ -59,6 +60,10 @@ public class CfFlagCodingPartTest extends TestCase {
         assertNotNull(someFlagsVariable);
         Attribute flagMasksAttrib = someFlagsVariable.findAttribute("flag_masks");
         assertNotNull(flagMasksAttrib);
+
+        if (someFlagsVariable.findAttribute("_Unsigned").getStringValue().equals("true"))
+        {someFlagsVariable.setDataType(someFlagsVariable.getDataType().withSignedness(DataType.Signedness.UNSIGNED));}
+
         assertEquals(someFlagsVariable.getDataType(), flagMasksAttrib.getDataType());
         assertEquals(8, flagMasksAttrib.getLength());
         assertTrue(flagMasksAttrib.isUnsigned());

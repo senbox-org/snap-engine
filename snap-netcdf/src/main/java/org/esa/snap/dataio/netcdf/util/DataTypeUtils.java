@@ -32,7 +32,7 @@ public class DataTypeUtils {
     }
 
     public static int getRasterDataType(Variable variable) {
-        return getRasterDataType(variable.getDataType(), variable.isUnsigned());
+        return getRasterDataType(variable.getDataType(), variable.getDataType().isUnsigned());
     }
 
     public static int getRasterDataType(final DataType dataType, boolean unsigned) {
@@ -47,6 +47,12 @@ public class DataTypeUtils {
             return unsigned ? ProductData.TYPE_UINT16 : ProductData.TYPE_INT16;
         } else if (DataType.INT.equals(dataType)) {
             return unsigned ? ProductData.TYPE_UINT32 : ProductData.TYPE_INT32;
+        }   else if (DataType.UBYTE.equals(dataType)) {
+            return  ProductData.TYPE_UINT8;
+        } else if (DataType.USHORT.equals(dataType)) {
+            return ProductData.TYPE_UINT16 ;
+        } else if (DataType.UINT.equals(dataType)) {
+            return  ProductData.TYPE_UINT32 ;
         } else if (DataType.LONG.equals(dataType)) {
             return ProductData.TYPE_INT64;
         } else if (DataType.FLOAT.equals(dataType)) {
@@ -76,14 +82,17 @@ public class DataTypeUtils {
     public static DataType getNetcdfDataType(int dataType) {
         switch (dataType) {
             case ProductData.TYPE_INT8:
-            case ProductData.TYPE_UINT8:
                 return DataType.BYTE;
+            case ProductData.TYPE_UINT8:
+                return DataType.UBYTE;
             case ProductData.TYPE_INT16:
-            case ProductData.TYPE_UINT16:
                 return DataType.SHORT;
+            case ProductData.TYPE_UINT16:
+                return DataType.USHORT;
             case ProductData.TYPE_INT32:
-            case ProductData.TYPE_UINT32:
                 return DataType.INT;
+            case ProductData.TYPE_UINT32:
+                return DataType.UINT;
             case ProductData.TYPE_INT64:
                 return DataType.LONG;
             case ProductData.TYPE_FLOAT32:
@@ -99,6 +108,45 @@ public class DataTypeUtils {
         }
     }
 
+
+    /**
+     * Return the NetCDF equivalent to the given dataType.
+     *
+     * @param dataType must be one of {@code ProductData.TYPE_*}
+     *
+     * @return the NetCDF equivalent to the given dataType or {@code null} if not {@code dataType} is
+     *         not one of {@code ProductData.TYPE_*}
+     *
+     * @see ProductData
+     */
+    public static DataType getNetcdf4DataType(int dataType) {
+        switch (dataType) {
+            case ProductData.TYPE_INT8:
+                return DataType.BYTE;
+            case ProductData.TYPE_UINT8:
+                return DataType.UBYTE;
+            case ProductData.TYPE_INT16:
+                return DataType.SHORT;
+            case ProductData.TYPE_UINT16:
+                return DataType.USHORT;
+            case ProductData.TYPE_INT32:
+                return DataType.INT;
+            case ProductData.TYPE_UINT32:
+                return DataType.UINT;
+            case ProductData.TYPE_INT64:
+                return DataType.LONG;
+            case ProductData.TYPE_FLOAT32:
+                return DataType.FLOAT;
+            case ProductData.TYPE_FLOAT64:
+                return DataType.DOUBLE;
+            case ProductData.TYPE_ASCII:
+                return DataType.STRING;
+            case ProductData.TYPE_UTC:
+                return DataType.STRING;
+            default:
+                return null;
+        }
+    }
     /**
      * Converts the given double value to the Java type corresponding to the the given {@link DataType data type}.
      *
@@ -114,12 +162,16 @@ public class DataTypeUtils {
     public static Number convertTo(double value, DataType dataType) {
         switch (dataType) {
             case BYTE:
+            case UBYTE:
                 return (byte) value;
             case SHORT:
+            case USHORT:
                 return (short) value;
             case INT:
+            case UINT:
                 return (int) value;
             case LONG:
+            case ULONG:
                 return (long) value;
             case FLOAT:
                 return (float) value;

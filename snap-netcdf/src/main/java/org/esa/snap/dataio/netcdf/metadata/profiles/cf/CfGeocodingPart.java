@@ -41,7 +41,6 @@ import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.ma2.Index;
 import ucar.nc2.Attribute;
-import ucar.nc2.NetcdfFileWriter;
 import ucar.nc2.Variable;
 
 import java.awt.Dimension;
@@ -154,8 +153,8 @@ public class CfGeocodingPart extends ProfilePartIO {
                 geoCoding.getGeoPos(pixelPos, geoPos);
                 lon[x] = geoPos.getLon();
             }
-            latVariable.writeFully( Array.factory(lat));
-            lonVariable.writeFully( Array.factory(lon));
+            latVariable.writeFully( Array.factory(DataType.DOUBLE,new int[]{h}, lat));
+            lonVariable.writeFully( Array.factory(DataType.DOUBLE,new int[]{w},lon));
         } else {
             final double[] lat = new double[w];
             final double[] lon = new double[w];

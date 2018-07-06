@@ -51,9 +51,7 @@ public abstract class NFileWriteable  {
 
     public void addDimension(String name, int length) throws IOException {
         try {
-            //nhFileWriter.getRootGroup().addDimension(name, length);
             dimensionsMap.put(name,netcdfFileWriter.addDimension(null,name,length));
-
             if (dimensions.length() == 0) {
                 dimensions=name;
             } else {
@@ -65,13 +63,6 @@ public abstract class NFileWriteable  {
     }
 
     public String getDimensions() {
-//        Group rootGroup = netcdfFileWriter.getNetcdfFile().getRootGroup();
-//        List<ucar.nc2.Dimension> dimensions = rootGroup.getDimensions();
-//        StringBuilder out = new StringBuilder();
-//        for (ucar.nc2.Dimension dim : dimensions) {
-//            out.append(dim.getFullName()).append(" ");
-//        }
-//        return out.toString();
         return dimensions;
     }
 
@@ -119,6 +110,10 @@ public abstract class NFileWriteable  {
     public String makeNameValid(String name) {
         return VariableNameHelper.convertToValidName(name);
     }
+
+
+    abstract public DataType getNetcdfDataType(int dataType);
+
 
 
     public void create() throws IOException {

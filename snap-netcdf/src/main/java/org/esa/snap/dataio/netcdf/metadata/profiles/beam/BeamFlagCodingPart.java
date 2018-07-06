@@ -64,6 +64,8 @@ public class BeamFlagCodingPart extends ProfilePartIO {
         if (flagCoding != null) {
             final String[] flagNames = flagCoding.getFlagNames();
             final StringBuilder descriptions = new StringBuilder();
+
+
             for (String flagName : flagNames) {
                 final MetadataAttribute flag = flagCoding.getFlag(flagName);
                 if (flag != null) {

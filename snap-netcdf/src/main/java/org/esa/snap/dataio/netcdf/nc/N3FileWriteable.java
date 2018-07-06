@@ -16,6 +16,7 @@
 
 package org.esa.snap.dataio.netcdf.nc;
 
+import org.esa.snap.dataio.netcdf.util.DataTypeUtils;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import ucar.ma2.DataType;
 import ucar.nc2.Dimension;
@@ -54,5 +55,13 @@ public class N3FileWriteable extends NFileWriteable {
         variables.put(name, nVariable);
         return nVariable;
     }
+
+    @Override
+    public DataType getNetcdfDataType(int dataType){
+        return DataTypeUtils.getNetcdfDataType(dataType);
+    };
+
+
+
 
 }

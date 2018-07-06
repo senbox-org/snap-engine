@@ -20,7 +20,6 @@ import org.esa.snap.core.datamodel.ProductData;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.nc2.Attribute;
-import ucar.nc2.NetcdfFileWriter;
 
 import java.io.IOException;
 
@@ -35,15 +34,15 @@ public interface NVariable {
 
     DataType getDataType();
 
-    void addAttribute(String name, String value) throws IOException;
+    void setDataType(DataType dataType);
 
+    Attribute addAttribute(String name, String value) throws IOException;
 
+    Attribute addAttribute(String name, Number value) throws IOException;
 
-    void addAttribute(String name, Number value) throws IOException;
+    Attribute addAttribute(String name, Number value, boolean unsigned) throws IOException;
 
-    void addAttribute(String name, Number value, boolean unsigned) throws IOException;
-
-    void addAttribute(String name, Array value) throws IOException;
+    Attribute addAttribute(String name, Array value) throws IOException;
 
     void writeFully(Array values) throws IOException;
 

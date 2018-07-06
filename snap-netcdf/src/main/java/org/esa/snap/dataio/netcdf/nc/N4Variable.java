@@ -17,11 +17,9 @@
 package org.esa.snap.dataio.netcdf.nc;
 
 
-import com.google.common.primitives.Bytes;
-import com.google.common.primitives.Ints;
+import com.google.common.primitives.*;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.dataio.netcdf.util.DataTypeUtils;
-import sun.reflect.generics.tree.ClassTypeSignature;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 
@@ -30,7 +28,6 @@ import ucar.nc2.*;
 
 import java.awt.Rectangle;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -71,74 +68,121 @@ public class N4Variable implements NVariable {
     }
 
     @Override
-    public void addAttribute(String name, String value) throws IOException {
+    public void setDataType(DataType dataType) {
+        variable.setDataType(dataType);
+    }
+
+
+    @Override
+    public Attribute addAttribute(String name, String value) throws IOException {
         if (value != null) {
-            addAttributeImpl(name, cropStringToMaxAttributeLength(name, value), value.getClass().getName());
+            return addAttributeImpl(name, cropStringToMaxAttributeLength(name, value), value.getClass().getName(),false);
         } else {
-            addAttributeImpl(name, value, "String");
+            return addAttributeImpl(name, value, "String",false);
         }
     }
 
     @Override
-    public void addAttribute(String name, Number value) throws IOException {
-        addAttribute(name, value, false);
+    public Attribute addAttribute(String name, Number value) throws IOException {
+        return addAttribute(name, value, false);
     }
 
     @Override
-    public void addAttribute(String name, Number value, boolean isUnsigned) throws IOException {
-        addAttributeImpl(name, value, name.getClass().getName());
+    public Attribute addAttribute(String name, Number value, boolean isUnsigned) throws IOException {
+        return addAttributeImpl(name, value, name.getClass().getName(),isUnsigned);
     }
 
     @Override
-    public void addAttribute(String name, Array value) throws IOException {
-        addAttributeImpl(name, value.getStorage(), value.getClass().getName());
+    public Attribute addAttribute(String name, Array value) throws IOException {
+        return addAttributeImpl(name, value.getStorage(), value.getClass().getName(), false);
     }
 
 
-    private void addAttributeImpl(String name, Object value, String type) throws IOException {
+    private Attribute addAttributeImpl(String name, Object value, String type,boolean isUnsigned) throws IOException {
         name = name.replace('.', '_');
         try {
             if (value != null) {
-                if (variable.findAttribute(name) == null) {
+                Attribute existingAttribute  = variable.findAttribute(name);
+                if (existingAttribute  == null) {
                     if (value.getClass() == Integer.class) {
-                        Attribute attribute = new Attribute(name, (Integer) value);
-                        variable.addAttribute(attribute);
+                        Attribute attribute = new Attribute(name, (Integer) value,isUnsigned);
+                        return variable.addAttribute(attribute);
                     } else if (value.getClass() == String.class) {
                         Attribute attribute = new Attribute(name, (String) value);
-                        variable.addAttribute(attribute);
+                        return variable.addAttribute(attribute);
                     } else if (value.getClass() == Array.class) {
                         Attribute attribute = new Attribute(name, (Array) value);
-                        variable.addAttribute(attribute);
+                        return variable.addAttribute(attribute);
                     } else if (value.getClass() == Number.class) {
-                        Attribute attribute = new Attribute(name, (Number) value, false);
-                        variable.addAttribute(attribute);
+                        Attribute attribute = new Attribute(name, (Number) value, isUnsigned);
+                        return variable.addAttribute(attribute);
                     } else if (value.getClass() == Float.class) {
                         Attribute attribute = new Attribute(name, (Float) value);
-                        variable.addAttribute(attribute);
+                        return variable.addAttribute(attribute);
                     } else if (value.getClass() == List.class) {
                         Attribute attribute = new Attribute(name, (List) value);
-                        variable.addAttribute(attribute);
+                        return variable.addAttribute(attribute);
                     } else if (value.getClass() == DataType.class) {
-                        Attribute attribute = new Attribute(name, (DataType) value, false);
-                        variable.addAttribute(attribute);
+                        Attribute attribute = new Attribute(name, (DataType) value);
+                        return variable.addAttribute(attribute);
                     } else if (value.getClass() == Double.class) {
                         Attribute attribute = new Attribute(name, DataTypeUtils.convertTo((Double) value, DataType.DOUBLE), false);
-                        variable.addAttribute(attribute);
+                        return variable.addAttribute(attribute);
+                    } else if (value.getClass() == Byte.class) {
+                        Attribute attribute = new Attribute(name, (Byte) value);
+                        return variable.addAttribute(attribute);
+                    } else if (value.getClass() == Short.class) {
+                        Attribute attribute = new Attribute(name, (Short) value);
+                        return variable.addAttribute(attribute);
                     } else {
                         if (value.getClass().getName() == "[I") {
                             List<Integer> temp = Ints.asList((int[]) value);
                             Attribute attribute = new Attribute(name, temp);
-                            variable.addAttribute(attribute);
+                            return variable.addAttribute(attribute);
                         } else if (value.getClass().getName() == "[B") {
                             List<Byte> temp = Bytes.asList((byte[]) value);
                             Attribute attribute = new Attribute(name, temp);
-                            variable.addAttribute(attribute);
+                            return variable.addAttribute(attribute);
+                        }
+                        else if (value.getClass().getName() == "[S") {
+                            List<Short> temp = Shorts.asList((short[]) value);
+                            Attribute attribute = new Attribute(name, temp);
+                            return variable.addAttribute(attribute);
+                        }
+                        else if (value.getClass().getName() == "[F") {
+                            List<Float> temp = Floats.asList((float[]) value);
+                            Attribute attribute = new Attribute(name, temp);
+                            return variable.addAttribute(attribute);
+                        }
+                        else if (value.getClass().getName() == "[D") {
+                            List<Double> temp = Doubles.asList((double[]) value);
+                            Attribute attribute = new Attribute(name, temp);
+                            return variable.addAttribute(attribute);
+                        }
+                        else if (value.getClass().getName() == "[J") {
+                            List<Long> temp = Longs.asList((long[]) value);
+                            Attribute attribute = new Attribute(name, temp);
+                            return variable.addAttribute(attribute);
+                        }
+                        else if (value.getClass().getName() == "[Z") {
+                            List<Boolean> temp = Booleans.asList((boolean[]) value);
+                            Attribute attribute = new Attribute(name, temp);
+                            return variable.addAttribute(attribute);
+                        }
+                        else if (value.getClass().getName() == "[C") {
+                            List<Character> temp = Chars.asList((char[]) value);
+                            Attribute attribute = new Attribute(name, temp);
+                            return variable.addAttribute(attribute);
+                        }
+                        else {throw new IllegalArgumentException("wrong type "+value.getClass().toString()+" of the attribute "+name);
                         }
                     }
+                } else {
+                    return existingAttribute;
                 }
             } else {
                 Attribute attribute = new Attribute(name, "");
-                variable.addAttribute(attribute);
+                return variable.addAttribute(attribute);
             }
         } catch (Exception e) {
             throw new IOException(e);
@@ -216,4 +260,5 @@ public class N4Variable implements NVariable {
 
 
     }
+
 }

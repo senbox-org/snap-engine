@@ -18,6 +18,7 @@ package org.esa.snap.dataio.netcdf.nc;
 
 
 
+import org.esa.snap.dataio.netcdf.util.DataTypeUtils;
 import ucar.ma2.DataType;
 import ucar.nc2.*;
 
@@ -83,4 +84,12 @@ public class N4FileWriteable extends NFileWriteable {
         variables.put(name, nVariable);
         return nVariable;
     }
+    @Override
+    public DataType getNetcdfDataType(int dataType){
+        return DataTypeUtils.getNetcdf4DataType(dataType);
+    };
+
+
+
+
 }

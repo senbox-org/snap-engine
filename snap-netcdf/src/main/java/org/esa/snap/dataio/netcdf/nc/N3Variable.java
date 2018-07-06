@@ -21,7 +21,6 @@ import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
-import ucar.nc2.NetcdfFileWriteable;
 import ucar.nc2.NetcdfFileWriter;
 import ucar.nc2.Variable;
 
@@ -53,35 +52,40 @@ public class N3Variable implements NVariable {
     }
 
     @Override
-    public void addAttribute(String name, String value) {
-        variable.addAttribute(new Attribute(name, value));
+    public void setDataType(DataType dataType) {
+        variable.setDataType(dataType);
     }
 
     @Override
-    public void addAttribute(String name, Number value) {
-        addAttribute(name, value, false);
+    public Attribute addAttribute(String name, String value) {
+        return variable.addAttribute(new Attribute(name, value));
     }
 
     @Override
-    public void addAttribute(String name, Number value, boolean isUnsigned) {
+    public Attribute addAttribute(String name, Number value) {
+        return addAttribute(name, value, false);
+    }
+
+    @Override
+    public Attribute addAttribute(String name, Number value, boolean isUnsigned) {
         if(value instanceof Long) {
-            variable.addAttribute(new Attribute(name, value.intValue()));
+            return variable.addAttribute(new Attribute(name, value.intValue()));
         }else {
-            variable.addAttribute(new Attribute(name, value));
+            return variable.addAttribute(new Attribute(name, value));
         }
     }
 
     @Override
-    public void addAttribute(String name, Array value) {
-        if (DataType.getType(value.getElementType()) == DataType.LONG) {
+    public Attribute addAttribute(String name, Array value) {
+        if (DataType.getType(value.getElementType(),false) == DataType.LONG) {
             long[] longElems = (long[]) value.get1DJavaArray(Long.class);
             int[] intElems = new int[longElems.length];
             for (int i = 0; i < longElems.length; i++) {
                 intElems[i] = (int) longElems[i];
             }
-            variable.addAttribute(new Attribute(name, Array.factory(intElems)));
+            return variable.addAttribute(new Attribute(name, Array.factory(DataType.INT,new int[]{longElems.length},intElems)));
         } else {
-            variable.addAttribute(new Attribute(name, value));
+            return variable.addAttribute(new Attribute(name, value));
         }
     }
 
@@ -108,7 +112,7 @@ public class N3Variable implements NVariable {
         final int[] writeOrigin = new int[2];
         writeOrigin[xIndex] = x;
         final int[] sourceShape = new int[]{height, width};
-        final Array sourceArray = Array.factory(dataType, sourceShape, data.getElems());
+        final Array sourceArray = Array.factory(dataType, sourceShape,  data.getElems());
         final int[] sourceOrigin = new int[2];
         sourceOrigin[xIndex] = 0;
         final int[] writeShape = new int[]{1, width};

@@ -34,10 +34,7 @@ import org.esa.snap.dataio.netcdf.metadata.ProfilePartIO;
 import org.esa.snap.dataio.netcdf.metadata.profiles.cf.CfBandPart;
 import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
 import org.esa.snap.dataio.netcdf.nc.NVariable;
-import org.esa.snap.dataio.netcdf.util.Constants;
-import org.esa.snap.dataio.netcdf.util.DataTypeUtils;
-import org.esa.snap.dataio.netcdf.util.NetcdfMultiLevelImage;
-import org.esa.snap.dataio.netcdf.util.ReaderUtils;
+import org.esa.snap.dataio.netcdf.util.*;
 import org.geotools.referencing.CRS;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -74,8 +71,8 @@ public class BeamBandPart extends ProfilePartIO {
     public void decode(ProfileReadContext ctx, Product p) throws IOException {
         NetcdfFile netcdfFile = ctx.getNetcdfFile();
         final List<Variable> variables = netcdfFile.getVariables();
-
         for (Variable variable : variables) {
+            UnsignedChecker.SetUnsignedType(variable);
             final List<Dimension> dimensions = variable.getDimensions();
             if (dimensions.size() != 2) {
                 continue;
@@ -86,6 +83,8 @@ public class BeamBandPart extends ProfilePartIO {
             final int width = dimensions.get(xDimIndex).getLength();
             final int height = dimensions.get(yDimIndex).getLength();
             Band band;
+
+
             if (height == p.getSceneRasterHeight()
                     && width == p.getSceneRasterWidth()) {
                 band = p.addBand(variable.getFullName(), rasterDataType);

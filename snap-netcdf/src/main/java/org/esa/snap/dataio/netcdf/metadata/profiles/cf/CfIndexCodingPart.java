@@ -24,7 +24,9 @@ import org.esa.snap.dataio.netcdf.metadata.ProfilePartIO;
 import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
 import org.esa.snap.dataio.netcdf.nc.NVariable;
 import org.esa.snap.dataio.netcdf.util.ReaderUtils;
+import org.esa.snap.dataio.netcdf.util.UnsignedChecker;
 import ucar.ma2.Array;
+import ucar.ma2.DataType;
 import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
@@ -75,7 +77,7 @@ public class CfIndexCodingPart extends ProfilePartIO {
             indexValues[i] = indexCoding.getIndexValue(name);
         }
         variable.addAttribute(FLAG_MEANINGS, meanings.toString().trim());
-        variable.addAttribute(FLAG_VALUES, Array.factory(indexValues));
+        variable.addAttribute(FLAG_VALUES, Array.factory(DataType.INT,new int[]{indexNames.length}, indexValues));
     }
 
     public static IndexCoding readIndexCoding(Variable variable, String indexCodingName) {
