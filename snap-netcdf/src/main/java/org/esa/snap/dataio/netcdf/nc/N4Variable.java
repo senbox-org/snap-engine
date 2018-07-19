@@ -18,7 +18,7 @@ package org.esa.snap.dataio.netcdf.nc;
 
 
 import com.google.common.primitives.*;
-import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel. ProductData;
 import org.esa.snap.dataio.netcdf.util.DataTypeUtils;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;

@@ -21,13 +21,12 @@ import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.MetadataAttribute;
 import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.dataio.netcdf.nc.*;
+import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
+import org.esa.snap.dataio.netcdf.nc.NVariable;
+import org.esa.snap.dataio.netcdf.nc.NWritableFactory;
 import org.esa.snap.dataio.netcdf.util.DataTypeUtils;
-import org.esa.snap.dataio.netcdf.util.UnsignedChecker;
 import ucar.ma2.DataType;
 import ucar.nc2.Attribute;
-import ucar.nc2.NetcdfFileWriteable;
-import ucar.nc2.Variable;
 
 /**
  * @author Marco Peters

@@ -17,7 +17,6 @@
 package org.esa.snap.dataio.netcdf.nc;
 
 import org.esa.snap.dataio.netcdf.util.DataTypeUtils;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import ucar.ma2.DataType;
 import ucar.nc2.Dimension;
 import ucar.nc2.NetcdfFileWriter;
@@ -27,7 +26,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 /**
- * A wrapper around the netCDF 3 {@link ucar.nc2.NetcdfFileWriteable}.
+ * A wrapper around the netCDF 3 {@link ucar.nc2.NetcdfFileWriter}.
  *
  * @author MarcoZ
  */

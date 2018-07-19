@@ -26,6 +26,8 @@
     <artifactId>snap-netcdf</artifactId>
     <packaging>nbm</packaging>
 
+
+
     <name>SNAP NetCDF Product Reader/Writer</name>
     <description>A product reader and writer for NetCDF files. It supports metadata profiles for CF, BEAM, HDF-EOS,
         ODESA.
@@ -38,7 +40,6 @@
             <url>https://artifacts.unidata.ucar.edu/repository/unidata-all/</url>
         </repository>
     </repositories>
-
 
 
     <dependencies>
@@ -68,7 +69,6 @@
         <dependency>
             <groupId>edu.ucar</groupId>
             <artifactId>netcdfAll</artifactId>
-            <version>5.0.0-beta2</version>
         </dependency>
 
         <dependency>
@@ -77,13 +77,14 @@
             <scope>test</scope>
         </dependency>
 
+        <!-->
         <dependency>
             <groupId>edu.ucar</groupId>
             <artifactId>cdm</artifactId>
             <version>4.4.0</version>
             <scope>compile</scope>
         </dependency>
- 
+         <-->
         <!--
         We have to include the following UGLY dependencies so that they are put into the NBM module's ext folder.
         Otherwise we always get onm thne command-line:
@@ -122,8 +123,9 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
         </dependency>
-
     </dependencies>
+
+
 
     <build>
         <plugins>
@@ -159,12 +161,25 @@
                         <publicPackage>org.slf4j.impl</publicPackage>
                         <publicPackage>org.esa.snap.dataio.netcdf.*</publicPackage>
                     </publicPackages>
+                    <nbmResources>
+                        <nbmResource>
+                            <directory>src/main/resources/lib/</directory>
+                            <targetPath>modules/lib/</targetPath>
+                            <includes>
+                                <include>**/*.dll</include>
+                                <include>**/*.so</include>
+                                <include>**/*.exe</include>
+                            </includes>
+                        </nbmResource>
+                    </nbmResources>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-            </plugin>
+
+
+
+
+
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -174,5 +189,8 @@
             </plugin>
         </plugins>
     </build>
+
+
+
 </project>
 
