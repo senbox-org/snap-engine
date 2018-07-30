@@ -44,7 +44,7 @@ public class N4FileWriteable extends NFileWriteable {
     N4FileWriteable(String filename) throws IOException {
 
         //Nc4ChunkingDefault chunker  =  new Nc4ChunkingDefault(5, true);
-
+        //chunker.setMinChunksize(8*3000*3000*100);
         netcdfFileWriter = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, filename);
     }
 
@@ -96,7 +96,7 @@ public class N4FileWriteable extends NFileWriteable {
                 chunkLens[i]=1;
             }
         }
-        Variable variable = netcdfFileWriter.addVariable(null, name, dataType, dimensions);
+        Variable variable = netcdfFileWriter.addVariable(null, name, dataType.withSignedness( (unsigned ? DataType.Signedness.UNSIGNED : DataType.Signedness.SIGNED)), dimensions);
         Attribute chunksizes = new Attribute("_ChunkSizes", Arrays.asList(chunkLens));
         variable.addAttribute(chunksizes);
         NVariable nVariable = new N4Variable(variable, tileSize,netcdfFileWriter);

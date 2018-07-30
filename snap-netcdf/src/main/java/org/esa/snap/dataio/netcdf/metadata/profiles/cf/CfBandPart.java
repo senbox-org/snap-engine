@@ -209,7 +209,7 @@ public class CfBandPart extends ProfilePartIO {
             }
             DataType netcdfDataType = DataTypeUtils.getNetcdfDataType(dataType);
             java.awt.Dimension tileSize = ImageManager.getPreferredTileSize(rasterDataNode.getProduct());
-            final NVariable variable = ncFile.addVariable(variableName, netcdfDataType, tileSize, dimensions);
+            final NVariable variable = ncFile.addVariable(variableName, netcdfDataType,netcdfDataType.isUnsigned(), tileSize, dimensions);
             writeCfBandAttributes(rasterDataNode, variable);
         }
     }

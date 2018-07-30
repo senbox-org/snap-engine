@@ -208,11 +208,11 @@ public class BeamBandPart extends ProfilePartIO {
                     dimMap.put(key, dimString);
                 }
                 final java.awt.Dimension tileSize = JAIUtils.computePreferredTileSize(bandSceneRasterWidth, bandSceneRasterHeight, 1);
-                variable = ncFile.addVariable(variableName, ncDataType, tileSize, dimString);
+                variable = ncFile.addVariable(variableName, ncDataType,ncDataType.isUnsigned(), tileSize, dimString);
                 encodeGeoCoding(ncFile, band, p, variable);
             } else {
                 final java.awt.Dimension tileSize = ImageManager.getPreferredTileSize(p);
-                variable = ncFile.addVariable(variableName, ncDataType, tileSize, productDimensions);
+                variable = ncFile.addVariable(variableName, ncDataType,ncDataType.isUnsigned(), tileSize, productDimensions);
             }
             CfBandPart.writeCfBandAttributes(band, variable);
             writeBeamBandAttributes(band, variable);

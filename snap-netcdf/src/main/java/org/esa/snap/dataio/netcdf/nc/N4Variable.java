@@ -122,10 +122,10 @@ public class N4Variable implements NVariable {
                     } else if (value.getClass() == List.class) {
                         Attribute attribute = new Attribute(name, (List) value);
                         return variable.addAttribute(attribute);
-                    } else if (value.getClass() == DataType.class) {
+                    }/* else if (value.getClass() == DataType.class) {
                         Attribute attribute = new Attribute(name, (DataType) value);
                         return variable.addAttribute(attribute);
-                    } else if (value.getClass() == Double.class) {
+                    }*/ else if (value.getClass() == Double.class) {
                         Attribute attribute = new Attribute(name, DataTypeUtils.convertTo((Double) value, DataType.DOUBLE), false);
                         return variable.addAttribute(attribute);
                     } else if (value.getClass() == Byte.class) {
