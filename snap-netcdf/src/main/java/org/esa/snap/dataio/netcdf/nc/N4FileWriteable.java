@@ -17,14 +17,20 @@
 package org.esa.snap.dataio.netcdf.nc;
 
 
-
 import org.esa.snap.dataio.netcdf.util.DataTypeUtils;
 import ucar.ma2.DataType;
-import ucar.nc2.*;
+import ucar.nc2.Attribute;
+import ucar.nc2.Dimension;
+import ucar.nc2.NetcdfFileWriter;
+import ucar.nc2.Variable;
+import ucar.nc2.write.Nc4ChunkingDefault;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+
+
+
 
 
 ///**
@@ -36,6 +42,9 @@ public class N4FileWriteable extends NFileWriteable {
 
 
     N4FileWriteable(String filename) throws IOException {
+
+        //Nc4ChunkingDefault chunker  =  new Nc4ChunkingDefault(5, true);
+
         netcdfFileWriter = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, filename);
     }
 
@@ -72,11 +81,21 @@ public class N4FileWriteable extends NFileWriteable {
             chunkLens[0] = Math.min(chunkLens[0], imageHeight);
             tileSize = new java.awt.Dimension(chunkLens[1], chunkLens[0]);
         } else {
-            for (int i = 0; i < dims.length; i++) {
-                chunkLens[i] = nhDims[i].getLength();
+            if (!dims[0].equals("")) {
+                for (int i = 0; i < dims.length; i++) {
+                    chunkLens[i] = nhDims[i].getLength();
+                }
+            }
+            else{
+                chunkLens[0]=1;
             }
         }
         //Object fillValue = null; // TODO
+        for (int i=0; i<chunkLens.length; i++) {
+            if (chunkLens[i]==null) {
+                chunkLens[i]=1;
+            }
+        }
         Variable variable = netcdfFileWriter.addVariable(null, name, dataType, dimensions);
         Attribute chunksizes = new Attribute("_ChunkSizes", Arrays.asList(chunkLens));
         variable.addAttribute(chunksizes);

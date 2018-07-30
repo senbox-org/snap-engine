@@ -66,10 +66,12 @@
             <artifactId>snap-core</artifactId>
         </dependency>
 
+
         <dependency>
             <groupId>edu.ucar</groupId>
             <artifactId>netcdfAll</artifactId>
         </dependency>
+
 
         <dependency>
             <groupId>org.esa.snap</groupId>
