@@ -46,6 +46,7 @@ public class BeamIndexCodingPart extends ProfilePartIO {
         for (Band band : bands) {
             String variableName = ReaderUtils.getVariableName(band);
             final Variable variable = ctx.getNetcdfFile().getRootGroup().findVariable(variableName);
+            UnsignedChecker.SetUnsignedType(variable);
             final IndexCoding indexCoding = readIndexCoding(variable, band.getName() + "_index_coding");
             if (indexCoding != null) {
                 p.getIndexCodingGroup().add(indexCoding);

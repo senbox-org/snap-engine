@@ -15,14 +15,18 @@
  */
 package org.esa.snap.dataio.netcdf.metadata.profiles.cf;
 
+import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.IndexCoding;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.dataio.netcdf.ProfileReadContext;
 import org.esa.snap.dataio.netcdf.ProfileWriteContext;
 import org.esa.snap.dataio.netcdf.metadata.ProfilePartIO;
 import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
 import org.esa.snap.dataio.netcdf.nc.NVariable;
+import org.esa.snap.dataio.netcdf.util.DataTypeUtils;
 import org.esa.snap.dataio.netcdf.util.ReaderUtils;
 import org.esa.snap.dataio.netcdf.util.UnsignedChecker;
 import ucar.ma2.Array;
@@ -46,6 +50,7 @@ public class CfIndexCodingPart extends ProfilePartIO {
         for (Band band : bands) {
             String varName = EscapeStrings.backslashEscape(band.getName(), NetcdfFile.reservedSectionSpec);
             Variable variable = ctx.getNetcdfFile().findVariable(varName);
+            UnsignedChecker.SetUnsignedType(variable);
             final IndexCoding indexCoding = readIndexCoding(variable, band.getName());
             if (indexCoding != null) {
                 p.getIndexCodingGroup().add(indexCoding);
@@ -70,6 +75,7 @@ public class CfIndexCodingPart extends ProfilePartIO {
     public static void writeIndexCoding(IndexCoding indexCoding, NVariable variable) throws IOException {
         final String[] indexNames = indexCoding.getIndexNames();
         final int[] indexValues = new int[indexNames.length];
+        //ProductData indexValues = ProductData.createInstance(DataTypeUtils.getRasterDataType(  variable.getDataType()), indexNames.length);
         final StringBuilder meanings = new StringBuilder();
         for (int i = 0; i < indexValues.length; i++) {
             String name = indexNames[i];
@@ -77,7 +83,7 @@ public class CfIndexCodingPart extends ProfilePartIO {
             indexValues[i] = indexCoding.getIndexValue(name);
         }
         variable.addAttribute(FLAG_MEANINGS, meanings.toString().trim());
-        variable.addAttribute(FLAG_VALUES, Array.factory(DataType.INT,new int[]{indexNames.length}, indexValues));
+        Attribute attribute = variable.addAttribute(FLAG_VALUES, Array.factory(DataType.INT,new int[]{indexNames.length}, indexValues));
     }
 
     public static IndexCoding readIndexCoding(Variable variable, String indexCodingName) {

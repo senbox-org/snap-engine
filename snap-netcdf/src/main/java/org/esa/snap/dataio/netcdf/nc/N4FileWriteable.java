@@ -43,8 +43,9 @@ public class N4FileWriteable extends NFileWriteable {
 
     N4FileWriteable(String filename) throws IOException {
 
+        // As for now Chunksize  can not be set with the chunker. Therefore, the following is commented.
         //Nc4ChunkingDefault chunker  =  new Nc4ChunkingDefault(5, true);
-        //chunker.setMinChunksize(8*3000*3000*100);
+        //chunker.setMinChunksize(8*3000*3000*1000);
         netcdfFileWriter = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, filename);
     }
 
