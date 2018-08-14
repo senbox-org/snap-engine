@@ -74,16 +74,27 @@ public class CfIndexCodingPart extends ProfilePartIO {
 
     public static void writeIndexCoding(IndexCoding indexCoding, NVariable variable) throws IOException {
         final String[] indexNames = indexCoding.getIndexNames();
-        final int[] indexValues = new int[indexNames.length];
-        //ProductData indexValues = ProductData.createInstance(DataTypeUtils.getRasterDataType(  variable.getDataType()), indexNames.length);
+        //final int[] indexValues = new int[indexNames.length];
+        ProductData indexValues = ProductData.createInstance(DataTypeUtils.getRasterDataType(variable.getDataType(),variable.getDataType().isUnsigned()), indexNames.length);
         final StringBuilder meanings = new StringBuilder();
-        for (int i = 0; i < indexValues.length; i++) {
+        for (int i = 0; i < indexValues.getNumElems(); i++) {
+            if (meanings.length() > 0) {
+                meanings.append(" ");
+            }
             String name = indexNames[i];
-            meanings.append(name).append(" ");
-            indexValues[i] = indexCoding.getIndexValue(name);
+            meanings.append(name);
+            indexValues.setElemIntAt(i, indexCoding.getIndexValue(name));
         }
         variable.addAttribute(FLAG_MEANINGS, meanings.toString().trim());
-        Attribute attribute = variable.addAttribute(FLAG_VALUES, Array.factory(DataType.INT,new int[]{indexNames.length}, indexValues));
+
+        final Array maskValues = Array.factory(variable.getDataType() ,new int[]{indexNames.length},indexValues.getElems());
+        Attribute attribute = variable.addAttribute(FLAG_VALUES, maskValues);
+        try {
+            if (indexValues.isUnsigned()) {
+                attribute.setDataType(attribute.getDataType().withSignedness(DataType.Signedness.UNSIGNED));
+            }
+        }
+        catch (NullPointerException ignore) {}
     }
 
     public static IndexCoding readIndexCoding(Variable variable, String indexCodingName) {

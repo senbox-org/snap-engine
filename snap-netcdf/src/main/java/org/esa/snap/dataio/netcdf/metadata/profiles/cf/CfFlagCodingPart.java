@@ -56,7 +56,7 @@ public class CfFlagCodingPart extends ProfilePartIO {
         final FlagCoding flagCoding = band.getFlagCoding();
         if (flagCoding != null) {
             final String[] flagNames = flagCoding.getFlagNames();
-            ProductData flagValueData = ProductData.createInstance(band.getDataType(), flagNames.length);
+            ProductData flagValueData = ProductData.createInstance( band.getDataType(), flagNames.length);
             final StringBuilder meanings = new StringBuilder();
             for (int i = 0; i < flagValueData.getNumElems(); i++) {
                 if (meanings.length() > 0) {

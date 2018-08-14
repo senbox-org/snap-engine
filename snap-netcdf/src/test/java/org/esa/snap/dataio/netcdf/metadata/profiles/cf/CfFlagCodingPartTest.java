@@ -65,7 +65,7 @@ public class CfFlagCodingPartTest extends TestCase {
 
         assertEquals(someFlagsVariable.getDataType(), flagMasksAttrib.getDataType());
         assertEquals(8, flagMasksAttrib.getLength());
-        assertTrue(flagMasksAttrib.isUnsigned());
+        assertTrue(flagMasksAttrib.getDataType().isUnsigned());
         for (int i = 0; i < 8; i++) {
             assertEquals(1 << i, flagMasksAttrib.getValues().getInt(i));
         }

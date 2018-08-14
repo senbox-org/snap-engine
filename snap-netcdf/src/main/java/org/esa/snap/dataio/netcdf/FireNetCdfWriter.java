@@ -25,6 +25,8 @@ import org.esa.snap.dataio.netcdf.AbstractNetCdfWriterPlugIn;
 import org.esa.snap.dataio.netcdf.NetCdfWriteProfile;
 import org.esa.snap.dataio.netcdf.ProfileWriteContext;
 import org.esa.snap.dataio.netcdf.ProfileWriteContextImpl;
+import org.esa.snap.dataio.netcdf.metadata.profiles.beam.BeamIndexCodingPart;
+import org.esa.snap.dataio.netcdf.metadata.profiles.cf.CfIndexCodingPart;
 import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
 import org.esa.snap.dataio.netcdf.nc.NVariable;
 import org.esa.snap.dataio.netcdf.util.Constants;
@@ -86,7 +88,7 @@ public class FireNetCdfWriter extends AbstractProductWriter {
         profile.addProfilePartWriter(plugIn.createFlagCodingPartWriter());
         //profile.addProfilePartWriter(plugIn.createGeoCodingPartWriter());
         profile.addProfilePartWriter(plugIn.createImageInfoPartWriter());
-        profile.addProfilePartWriter(plugIn.createIndexCodingPartWriter());
+        profile.addProfilePartWriter(new CfIndexCodingPart());
         profile.addProfilePartWriter(plugIn.createMaskPartWriter());
         profile.addProfilePartWriter(plugIn.createStxPartWriter());
         profile.addProfilePartWriter(plugIn.createTimePartWriter());
@@ -97,6 +99,7 @@ public class FireNetCdfWriter extends AbstractProductWriter {
     public void writeBandRasterData(Band sourceBand, int sourceOffsetX, int sourceOffsetY, int sourceWidth,
                                     int sourceHeight, ProductData sourceBuffer, ProgressMonitor pm) throws IOException {
         final String variableName = ReaderUtils.getVariableName(sourceBand);
+        //System.out.println(String.format("writing band... %s %d %d %d %d", variableName,sourceOffsetX,sourceOffsetY,sourceWidth,sourceHeight));
         if (shallWriteVariable(variableName)) {
             ProductData scaledBuffer;
             if (convertLogScaledBands && sourceBand.isLog10Scaled()) {
@@ -113,14 +116,14 @@ public class FireNetCdfWriter extends AbstractProductWriter {
                 Variable variable = writeable.getWriter().findVariable(variableName);
 
                 /// case of shifting the whole raster by half
-                if (! sourceBand.getProduct().getFileLocation().getName().contains("LCCS"))
-                {
+                //if (! sourceBand.getProduct().getFileLocation().getName().contains("LCCS"))
+                //{
                     int totalWidthHalf =  sourceBand.getRasterWidth()/2;
                     int totalWidth = sourceBand.getRasterWidth();
 
                     if (sourceOffsetX>totalWidthHalf)
-                    { final int[] shape =  new int[]{sourceHeight ,sourceWidth,1};
-                        final int[] origin =  new int[]{sourceOffsetY ,sourceOffsetX-totalWidthHalf,0};
+                    { final int[] shape =  new int[]{1,sourceHeight ,sourceWidth};
+                        final int[] origin =  new int[]{0,sourceOffsetY ,sourceOffsetX-totalWidthHalf};
                         Array array = Array.factory(variable.getDataType(),shape, elems);
                         try { writeable.getWriter().write(variable,origin,array) ;
                         }
@@ -128,8 +131,8 @@ public class FireNetCdfWriter extends AbstractProductWriter {
                     }
                     else if (sourceOffsetX<totalWidthHalf && (sourceOffsetX+sourceWidth+totalWidthHalf)<(totalWidth)) {
                         sourceOffsetX=sourceOffsetX+totalWidthHalf;
-                        final int[] shape =  new int[]{sourceHeight ,sourceWidth,1};
-                        final int[] origin =  new int[]{sourceOffsetY ,sourceOffsetX,0};
+                        final int[] shape =  new int[]{1,sourceHeight ,sourceWidth};
+                        final int[] origin =  new int[]{0,sourceOffsetY ,sourceOffsetX};
                         Array array = Array.factory(variable.getDataType(),shape, elems);
                         try { writeable.getWriter().write(variable,origin,array) ;
                         }
@@ -137,14 +140,14 @@ public class FireNetCdfWriter extends AbstractProductWriter {
 
                     }
                     else {
-                        final int[] shape = new int[]{sourceHeight, sourceWidth, 1};
-                        int[] originX1 = new int[]{sourceOffsetY, sourceOffsetX + totalWidthHalf, 0};
-                        int[] originX2 = new int[]{sourceOffsetY, 0, 0};
-                        int[] shape1 = new int[]{sourceHeight, totalWidthHalf - sourceOffsetX, 1};
-                        int[] shape2 = new int[]{sourceHeight, sourceWidth - totalWidthHalf + sourceOffsetX, 1};
+                        final int[] shape = new int[]{1,sourceHeight, sourceWidth};
+                        int[] originX1 = new int[]{0,sourceOffsetY, sourceOffsetX + totalWidthHalf};
+                        int[] originX2 = new int[]{0,sourceOffsetY, 0};
+                        int[] shape1 = new int[]{1,sourceHeight, totalWidthHalf - sourceOffsetX};
+                        int[] shape2 = new int[]{1,sourceHeight, sourceWidth - totalWidthHalf + sourceOffsetX};
                         Array array = Array.factory(variable.getDataType(), shape, elems);
                         int[] originCut1 = new int[]{0, 0, 0};
-                        int[] originCut2 = new int[]{0, totalWidth - sourceOffsetX - totalWidthHalf, 0};
+                        int[] originCut2 = new int[]{0,0, totalWidth - sourceOffsetX - totalWidthHalf};
                         try {
                             Array piece1 = array.sectionNoReduce(originCut1, shape1, new int[]{1, 1, 1});
                             Array piece2 = array.sectionNoReduce(originCut2, shape2, new int[]{1, 1, 1});
@@ -153,17 +156,17 @@ public class FireNetCdfWriter extends AbstractProductWriter {
                         } catch (InvalidRangeException e) {
                         }
                     }
-                }
+                //}
                 ///
-                else {
-                    final int[] shape =  new int[]{sourceHeight ,sourceWidth,1};
-                    final int[] origin =  new int[]{sourceOffsetY ,sourceOffsetX,0};
-                    Array array = Array.factory(variable.getDataType(),shape, elems);
-                    try { writeable.getWriter().write(variable,origin,array) ;
-                    }
-                    catch (InvalidRangeException e) {}
+                //else {
+                //    final int[] shape =  new int[]{1,sourceHeight ,sourceWidth};  //changed
+                //    final int[] origin =  new int[]{0,sourceOffsetY ,sourceOffsetX}; //changed
+                //    Array array = Array.factory(variable.getDataType(),shape, elems);
+                //    try { writeable.getWriter().write(variable,origin,array) ;
+                //    }
+                //    catch (InvalidRangeException e) {}
                     ///
-                }
+                //}
             }
         }
         else if(variableName.contains("burned_area_in_vegetation_class")) {
@@ -182,14 +185,13 @@ public class FireNetCdfWriter extends AbstractProductWriter {
             synchronized (writeable) {
                 Object elems = scaledBuffer.getElems();
                 Variable variable = writeable.getWriter().findVariable("burned_area_in_vegetation_class");
-                ///
-                //if (! sourceBand.getProduct().getFileLocation().getName().contains("LCCS")) {
+
                     int totalWidthHalf = sourceBand.getRasterWidth() / 2;
                     int totalWidth = sourceBand.getRasterWidth();
 
                     if (sourceOffsetX > totalWidthHalf) {
-                        final int[] shape = new int[]{sourceHeight, sourceWidth, 1, 1};
-                        final int[] origin = new int[]{sourceOffsetY, sourceOffsetX - totalWidthHalf, 0, vegetationClass - 1};
+                        final int[] shape = new int[]{1,1,sourceHeight, sourceWidth};
+                        final int[] origin = new int[]{0, vegetationClass - 1, sourceOffsetY, sourceOffsetX - totalWidthHalf  };
                         Array array = Array.factory(variable.getDataType(), shape, elems);
                         try {
                             writeable.getWriter().write(variable, origin, array);
@@ -197,8 +199,8 @@ public class FireNetCdfWriter extends AbstractProductWriter {
                         }
                     } else if (sourceOffsetX < totalWidthHalf && (sourceOffsetX + sourceWidth + totalWidthHalf) < (totalWidth)) {
                         sourceOffsetX = sourceOffsetX + totalWidthHalf;
-                        final int[] shape = new int[]{sourceHeight, sourceWidth, 1, 1};
-                        final int[] origin = new int[]{sourceOffsetY, sourceOffsetX, 0, vegetationClass - 1};
+                        final int[] shape = new int[]{1,1,sourceHeight, sourceWidth};
+                        final int[] origin = new int[]{0, vegetationClass - 1,sourceOffsetY, sourceOffsetX };
                         Array array = Array.factory(variable.getDataType(), shape, elems);
                         try {
                             writeable.getWriter().write(variable, origin, array);
@@ -206,14 +208,14 @@ public class FireNetCdfWriter extends AbstractProductWriter {
                         }
 
                     } else {
-                        final int[] shape = new int[]{sourceHeight, sourceWidth, 1, 1};
-                        int[] originX1 = new int[]{sourceOffsetY, sourceOffsetX + totalWidthHalf, 0, vegetationClass - 1};
-                        int[] originX2 = new int[]{sourceOffsetY, 0, 0, vegetationClass - 1};
-                        int[] shape1 = new int[]{sourceHeight, totalWidthHalf - sourceOffsetX, 1, 1};
-                        int[] shape2 = new int[]{sourceHeight, sourceWidth - totalWidthHalf + sourceOffsetX, 1, 1};
+                        final int[] shape = new int[]{1,1,sourceHeight, sourceWidth};
+                        int[] originX1 = new int[]{0,  vegetationClass - 1,sourceOffsetY, sourceOffsetX + totalWidthHalf};
+                        int[] originX2 = new int[]{0,  vegetationClass - 1,sourceOffsetY, 0};
+                        int[] shape1 = new int[]{1,1,sourceHeight, totalWidthHalf - sourceOffsetX};
+                        int[] shape2 = new int[]{1,1,sourceHeight, sourceWidth - totalWidthHalf + sourceOffsetX};
                         Array array = Array.factory(variable.getDataType(), shape, elems);
                         int[] originCut1 = new int[]{0, 0, 0, 0};
-                        int[] originCut2 = new int[]{0, totalWidth - sourceOffsetX - totalWidthHalf, 0, 0};
+                        int[] originCut2 = new int[]{0,0,0, totalWidth - sourceOffsetX - totalWidthHalf};
                         try {
                             Array piece1 = array.sectionNoReduce(originCut1, shape1, new int[]{1, 1, 1, 1});
                             Array piece2 = array.sectionNoReduce(originCut2, shape2, new int[]{1, 1, 1, 1});

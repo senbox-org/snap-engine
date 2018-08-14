@@ -189,7 +189,7 @@ public class CfBandPart extends ProfilePartIO {
         }
         if (rasterDataNode.isNoDataValueUsed()) {
             Number fillValue = DataTypeUtils.convertTo(noDataValue, variable.getDataType());
-            variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, fillValue);
+            variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, fillValue,variable.getDataType().isUnsigned());
         }
         variable.addAttribute("coordinates", "lat lon");
     }
