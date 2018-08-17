@@ -18,26 +18,19 @@ package org.esa.snap.dataio.netcdf;
 
 import org.esa.snap.dataio.netcdf.util.RasterDigest;
 import ucar.nc2.NetcdfFile;
-import ucar.nc2.NetcdfFileWriter;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 class ProfileReadContextImpl implements ProfileReadContext {
 
     private final Map<String, Object> propertyMap;
-    private NetcdfFileWriter netcdfFileWriter;
+    private NetcdfFile netcdfFile;
     private RasterDigest rasterDigest;
 
     public ProfileReadContextImpl(NetcdfFile netcdfFile) {
-        try {
-            this.netcdfFileWriter =  NetcdfFileWriter.openExisting(netcdfFile.getLocation());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.netcdfFile = netcdfFile;
         this.propertyMap = new HashMap<>();
-
     }
 
     @Override
@@ -62,6 +55,6 @@ class ProfileReadContextImpl implements ProfileReadContext {
 
     @Override
     public NetcdfFile getNetcdfFile() {
-        return netcdfFileWriter.getNetcdfFile();
+        return netcdfFile;
     }
 }
