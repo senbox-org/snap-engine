@@ -39,6 +39,7 @@ public abstract class ChunkWriter {
     private final int numChunksX;
     private final int numChunksY;
     private final Map<Point, Chunk> activeChunks;
+
     public ChunkWriter(int sceneWidth, int sceneHeight, int chunkWidth, int chunkHeight, boolean yFlipped) {
         this.sceneWidth = sceneWidth;
         this.sceneHeight = sceneHeight;

@@ -15,7 +15,11 @@
  */
 package org.esa.snap.dataio.netcdf.metadata.profiles.beam;
 
-import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.datamodel.CrsGeoCoding;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.TiePointGeoCoding;
+import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.dataio.netcdf.ProfileReadContext;
 import org.esa.snap.dataio.netcdf.ProfileWriteContext;
@@ -32,7 +36,7 @@ import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
-import java.awt.*;
+import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.io.IOException;
 

@@ -24,9 +24,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import ucar.nc2.NetcdfFile;
-import ucar.nc2.NetcdfFileWriter;
-
-import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;

@@ -18,7 +18,6 @@ package org.esa.snap.dataio.netcdf;
 
 import org.esa.snap.dataio.netcdf.util.RasterDigest;
 import ucar.nc2.NetcdfFile;
-import ucar.nc2.NetcdfFileWriter;
 
 /**
  * A context for reading metadata from netCDF into the BEAM product model.

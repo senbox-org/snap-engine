@@ -43,7 +43,6 @@ class NetCdfWriteProfile {
     }
 
     public void writeProduct(final ProfileWriteContext ctx, final Product product) throws IOException {
-
         profileInitPart.writeProductBody(ctx, product);
         for (ProfilePartWriter profilePart : profileParts) {
             profilePart.preEncode(ctx, product);

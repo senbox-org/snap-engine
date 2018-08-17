@@ -20,7 +20,8 @@ package org.esa.snap.dataio.netcdf.nc;
 import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Test;
 
-import java.awt.*;
+import java.awt.Point;
+import java.awt.Rectangle;
 
 import static org.junit.Assert.*;
 
