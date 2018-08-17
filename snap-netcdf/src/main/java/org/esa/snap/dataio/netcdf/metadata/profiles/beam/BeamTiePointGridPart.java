@@ -25,7 +25,6 @@ import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
 import org.esa.snap.dataio.netcdf.nc.NVariable;
 import org.esa.snap.dataio.netcdf.util.Constants;
 import org.esa.snap.dataio.netcdf.util.ReaderUtils;
-import org.esa.snap.dataio.netcdf.util.UnsignedChecker;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.nc2.Attribute;
@@ -124,7 +123,7 @@ public class BeamTiePointGridPart extends ProfilePartIO {
             final int[] shape = new int[]{y, x};
             final Array values = Array.factory(DataType.FLOAT, shape, tiePointGrid.getDataElems());
             String variableName = ReaderUtils.getVariableName(tiePointGrid);
-            ctx.getNetcdfFileWriteable().findVariable(variableName).writeFully( values);
+            ctx.getNetcdfFileWriteable().findVariable(variableName).writeFully(values);
         }
     }
 }

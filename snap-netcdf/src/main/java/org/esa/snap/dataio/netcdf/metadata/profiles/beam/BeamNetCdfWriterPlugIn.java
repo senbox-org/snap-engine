@@ -97,7 +97,9 @@ public class BeamNetCdfWriterPlugIn extends AbstractNetCdfWriterPlugIn {
     }
 
     @Override
-    public ProfilePartWriter createIndexCodingPartWriter() { return new BeamIndexCodingPart(); }
+    public ProfilePartWriter createIndexCodingPartWriter() {
+        return new BeamIndexCodingPart();
+    }
 
     @Override
     public ProfilePartWriter createMaskPartWriter() {

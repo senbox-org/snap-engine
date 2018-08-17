@@ -28,7 +28,6 @@ class ProfileReadContextImpl implements ProfileReadContext {
 
     private final Map<String, Object> propertyMap;
     private NetcdfFileWriter netcdfFileWriter;
-
     private RasterDigest rasterDigest;
 
     public ProfileReadContextImpl(NetcdfFile netcdfFile) {
@@ -40,7 +39,6 @@ class ProfileReadContextImpl implements ProfileReadContext {
         this.propertyMap = new HashMap<>();
 
     }
-
 
     @Override
     public void setRasterDigest(RasterDigest rasterDigest) {
@@ -66,7 +64,4 @@ class ProfileReadContextImpl implements ProfileReadContext {
     public NetcdfFile getNetcdfFile() {
         return netcdfFileWriter.getNetcdfFile();
     }
-
-    public NetcdfFileWriter getNetcdfFileWriter() {return netcdfFileWriter;}
-
 }

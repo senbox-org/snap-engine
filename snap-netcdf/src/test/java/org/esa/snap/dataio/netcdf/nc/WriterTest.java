@@ -22,8 +22,8 @@ public class WriterTest
         Product product;
         Product winProduct;
         //File inputFile = new File ("/home/roman/second/FIRE-CCI/ESACCI-LC-L4-LCCS-Map-300m-P1Y-1994-WESTERN_EUROPE_AND_MEDITERRANEAN-v2.0.7.nc");
-        //File inputFile = new File ("/home/roman/data/spark_test_dataset/robust_testcase.nc");
-        File inputFile = new File ("/home/roman/second/test_case.nc");
+        File inputFile = new File ("/home/roman/data/spark_test_dataset/robust_testcase.nc");
+        //File inputFile = new File ("/home/roman/second/test_case.nc");
         //test fail1
         //File inputFile = new File ("/home/roman/second/netcdfTester/applications/generic_reader/NetCDF/NetCDF-CF/MER_FR__1_test.N1_C2IOP.nc");
         //test fail2

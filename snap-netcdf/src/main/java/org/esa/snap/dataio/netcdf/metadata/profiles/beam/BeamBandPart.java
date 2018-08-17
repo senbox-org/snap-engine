@@ -34,7 +34,11 @@ import org.esa.snap.dataio.netcdf.metadata.ProfilePartIO;
 import org.esa.snap.dataio.netcdf.metadata.profiles.cf.CfBandPart;
 import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
 import org.esa.snap.dataio.netcdf.nc.NVariable;
-import org.esa.snap.dataio.netcdf.util.*;
+import org.esa.snap.dataio.netcdf.util.Constants;
+import org.esa.snap.dataio.netcdf.util.DataTypeUtils;
+import org.esa.snap.dataio.netcdf.util.NetcdfMultiLevelImage;
+import org.esa.snap.dataio.netcdf.util.ReaderUtils;
+import org.esa.snap.dataio.netcdf.util.UnsignedChecker;
 import org.geotools.referencing.CRS;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -72,7 +76,7 @@ public class BeamBandPart extends ProfilePartIO {
         NetcdfFile netcdfFile = ctx.getNetcdfFile();
         final List<Variable> variables = netcdfFile.getVariables();
         for (Variable variable : variables) {
-            UnsignedChecker.SetUnsignedType(variable);
+            UnsignedChecker.setUnsignedType(variable);
             final List<Dimension> dimensions = variable.getDimensions();
             if (dimensions.size() != 2) {
                 continue;
@@ -83,8 +87,6 @@ public class BeamBandPart extends ProfilePartIO {
             final int width = dimensions.get(xDimIndex).getLength();
             final int height = dimensions.get(yDimIndex).getLength();
             Band band;
-
-
             if (height == p.getSceneRasterHeight()
                     && width == p.getSceneRasterWidth()) {
                 band = p.addBand(variable.getFullName(), rasterDataType);
@@ -107,7 +109,6 @@ public class BeamBandPart extends ProfilePartIO {
         // the following method was introduced at 16.06.2011.
         // The fix is mainly needed for the CoastColour project and only considers MERIS data.
         maybeApplySpectralIndexAndSolarFluxFromMetadata(p);
-
         Attribute autoGroupingAttribute = netcdfFile.findGlobalAttribute(AUTO_GROUPING);
         if (autoGroupingAttribute != null) {
             String autoGrouping = autoGroupingAttribute.getStringValue();

@@ -26,6 +26,8 @@ import org.junit.Test;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.NetcdfFileWriter;
 
+import java.io.IOException;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -100,11 +102,6 @@ public class CfTimePartTest {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-        }
-
-        @Override
-        public NetcdfFileWriter getNetcdfFileWriter() {
-            return null;
         }
 
         @Override

@@ -70,7 +70,7 @@ public class N3Variable implements NVariable {
     public Attribute addAttribute(String name, Number value, boolean isUnsigned) {
         if(value instanceof Long) {
             return variable.addAttribute(new Attribute(name, value.intValue()));
-        }else {
+        } else {
             return variable.addAttribute(new Attribute(name, value));
         }
     }

@@ -17,15 +17,15 @@
 package org.esa.snap.dataio.netcdf.nc;
 
 
-import org.esa.snap.dataio.netcdf.util.NetcdfFileOpener;
 import org.esa.snap.dataio.netcdf.util.VariableNameHelper;
 import ucar.ma2.DataType;
-
-import ucar.nc2.*;
+import ucar.nc2.Attribute;
+import ucar.nc2.Dimension;
+import ucar.nc2.NetcdfFileWriter;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 ///**
 /// * A wrapper around the netCDF 4 {@link edu.ucar.ral.nujan.netcdf.NhFileWriter}.
@@ -38,15 +38,12 @@ public abstract class NFileWriteable  {
     private String dimensions = "";
     protected Map<String,Dimension> dimensionsMap =  new HashMap<>();
 
-
     public NetcdfFileWriter getWriter() {
         return netcdfFileWriter;
     }
 
     protected  NetcdfFileWriter netcdfFileWriter;
     protected Map<String, NVariable> variables = new HashMap<>();
-
-
 
 
     public void addDimension(String name, int length) throws IOException {
@@ -84,12 +81,9 @@ public abstract class NFileWriteable  {
         }
     }
 
-
-
     public NVariable addVariable(String name, DataType dataType, java.awt.Dimension tileSize, String dims) throws IOException {
         return addVariable(name, dataType, false, tileSize, dims);
     }
-
 
     abstract public NVariable addScalarVariable(String name, DataType dataType)  ;
 
@@ -111,10 +105,7 @@ public abstract class NFileWriteable  {
         return VariableNameHelper.convertToValidName(name);
     }
 
-
     abstract public DataType getNetcdfDataType(int dataType);
-
-
 
     public void create() throws IOException {
         try {

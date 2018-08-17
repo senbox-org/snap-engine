@@ -25,7 +25,6 @@ import org.esa.snap.dataio.netcdf.ProfileWriteContext;
 import org.esa.snap.dataio.netcdf.metadata.ProfilePartIO;
 import org.esa.snap.dataio.netcdf.nc.NVariable;
 import org.esa.snap.dataio.netcdf.util.ReaderUtils;
-import org.esa.snap.dataio.netcdf.util.UnsignedChecker;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.nc2.Attribute;
@@ -47,6 +46,7 @@ public class BeamStxPart extends ProfilePartIO {
         for (Band band : p.getBands()) {
             String variableName = ReaderUtils.getVariableName(band);
             final Variable variable = ctx.getNetcdfFile().getRootGroup().findVariable(variableName);
+
             final Attribute statistics = variable.findAttributeIgnoreCase(STATISTICS);
             final Attribute sampleFrequencies = variable.findAttributeIgnoreCase(SAMPLE_FREQUENCIES);
 

@@ -16,7 +16,6 @@
 
 package org.esa.snap.dataio.netcdf.nc;
 
-
 import org.esa.snap.dataio.netcdf.util.DataTypeUtils;
 import org.esa.snap.dataio.netcdf.util.DimKey;
 import ucar.ma2.DataType;
@@ -31,10 +30,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-
-
-
-
 ///**
 /// * A wrapper around the netCDF 4 {@link edu.ucar.ral.nujan.netcdf.NhFileWriter}.
 // *
@@ -44,8 +39,7 @@ public class N4FileWriteable extends NFileWriteable {
 
 
     N4FileWriteable(String filename) throws IOException {
-        Nc4Chunking chunker = new Nc4ChunkingDefault(5,true);
-        netcdfFileWriter = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, filename,chunker);
+        netcdfFileWriter = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, filename);
     }
 
     @Override
@@ -56,13 +50,11 @@ public class N4FileWriteable extends NFileWriteable {
         return nVariable;
     }
 
-
     @Override
     public NVariable addVariable(String name, DataType dataType, boolean unsigned, java.awt.Dimension tileSize, String dimensions, int compressionLevel) {
         String[] dims = dimensions.split(" ");
         ucar.nc2.Dimension[] nhDims = new ucar.nc2.Dimension[dims.length];
         Integer[] chunkLens = new Integer[dims.length];
-
         for (int i = 0; i < dims.length; i++) {
             nhDims[i] = dimensionsMap.get(dims[i]);
         }
@@ -109,12 +101,9 @@ public class N4FileWriteable extends NFileWriteable {
         variables.put(name, nVariable);
         return nVariable;
     }
+
     @Override
     public DataType getNetcdfDataType(int dataType){
         return DataTypeUtils.getNetcdf4DataType(dataType);
     };
-
-
-
-
 }

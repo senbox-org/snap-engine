@@ -19,9 +19,6 @@ package org.esa.snap.dataio.netcdf;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.dataio.netcdf.metadata.ProfileInitPartWriter;
 import org.esa.snap.dataio.netcdf.metadata.ProfilePartWriter;
-import org.esa.snap.dataio.netcdf.util.UnsignedChecker;
-import ucar.nc2.NetcdfFile;
-import ucar.nc2.Variable;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -52,9 +49,6 @@ class NetCdfWriteProfile {
             profilePart.preEncode(ctx, product);
         }
         ctx.getNetcdfFileWriteable().create();
-
-
-
         for (ProfilePartWriter profilePart : profileParts) {
             profilePart.encode(ctx, product);
         }

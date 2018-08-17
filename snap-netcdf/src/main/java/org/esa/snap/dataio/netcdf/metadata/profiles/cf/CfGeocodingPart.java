@@ -224,7 +224,6 @@ public class CfGeocodingPart extends ProfilePartIO {
         }
 
         if (lonLat != null) {
-
             final Variable lonVariable = lonLat[0];
             final Variable latVariable = lonLat[1];
             final DimKey rasterDim = ctx.getRasterDigest().getRasterDim();
@@ -261,9 +260,7 @@ public class CfGeocodingPart extends ProfilePartIO {
             // add a global attribute which will be analyzed when setting up the image(s)
             final List<Variable> variables = ctx.getNetcdfFile().getVariables();
             for (Variable next : variables) {
-                //next.getAttributes().add(new Attribute("LONGITUDE_SHIFTED_180", 1));
-                //Attribute temp = new Attribute("LONGITUDE_SHIFTED_180",1);
-                Attribute temp =next.addAttribute(new Attribute("LONGITUDE_SHIFTED_180",1));
+                next.addAttribute(new Attribute("LONGITUDE_SHIFTED_180",1));
             }
             for (int i = 0; i < lonData.getSize(); i++) {
                 final Index ii = lonData.getIndex().set(i);
@@ -304,7 +301,6 @@ public class CfGeocodingPart extends ProfilePartIO {
             return null;
         }
         ctx.setProperty(Constants.Y_FLIPPED_PROPERTY_NAME, yFlipped);
-
         return new CrsGeoCoding(DefaultGeographicCRS.WGS84,
                                 sceneRasterWidth, sceneRasterHeight,
                                 easting, northing,

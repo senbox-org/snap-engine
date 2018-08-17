@@ -31,7 +31,12 @@ import org.esa.snap.dataio.netcdf.ProfileWriteContext;
 import org.esa.snap.dataio.netcdf.metadata.ProfilePartIO;
 import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
 import org.esa.snap.dataio.netcdf.nc.NVariable;
-import org.esa.snap.dataio.netcdf.util.*;
+import org.esa.snap.dataio.netcdf.util.Constants;
+import org.esa.snap.dataio.netcdf.util.DataTypeUtils;
+import org.esa.snap.dataio.netcdf.util.DimKey;
+import org.esa.snap.dataio.netcdf.util.NetcdfMultiLevelImage;
+import org.esa.snap.dataio.netcdf.util.ReaderUtils;
+import org.esa.snap.dataio.netcdf.util.UnsignedChecker;
 import ucar.ma2.DataType;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
@@ -48,7 +53,7 @@ public class CfBandPart extends ProfilePartIO {
     @Override
     public void decode(final ProfileReadContext ctx, final Product p) throws IOException {
         for (final Variable variable : ctx.getRasterDigest().getRasterVariables()) {
-            UnsignedChecker.SetUnsignedType(variable);
+            UnsignedChecker.setUnsignedType(variable);
             final List<Dimension> dimensions = variable.getDimensions();
             final int rank = dimensions.size();
             final String bandBasename = variable.getShortName();
@@ -164,11 +169,6 @@ public class CfBandPart extends ProfilePartIO {
             unit = CfCompliantUnitMapper.tryFindUnitString(unit);
             variable.addAttribute("units", unit);
         }
-        //final boolean unsigned = isUnsigned(rasterDataNode);
-        //if (unsigned) {
-            //variable.addAttribute("_Unsigned", String.valueOf(true));
-        //    variable.setDataType(variable.getDataType().withSignedness(DataType.Signedness.UNSIGNED));
-        //}
 
         double noDataValue;
         if (!rasterDataNode.isLog10Scaled()) {

@@ -19,10 +19,8 @@ package org.esa.snap.dataio.netcdf.nc;
 
 import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Test;
-import ucar.nc2.NetcdfFileWriter;
 
-import java.awt.Point;
-import java.awt.Rectangle;
+import java.awt.*;
 
 import static org.junit.Assert.*;
 

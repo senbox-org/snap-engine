@@ -59,9 +59,9 @@ public class CfFlagCodingPartTest extends TestCase {
         assertNotNull(someFlagsVariable);
         Attribute flagMasksAttrib = someFlagsVariable.findAttribute("flag_masks");
         assertNotNull(flagMasksAttrib);
-
-        if (someFlagsVariable.findAttribute("_Unsigned").getStringValue().equals("true"))
-        {someFlagsVariable.setDataType(someFlagsVariable.getDataType().withSignedness(DataType.Signedness.UNSIGNED));}
+        if (someFlagsVariable.findAttribute("_Unsigned").getStringValue().equals("true")) {
+            someFlagsVariable.setDataType(someFlagsVariable.getDataType().withSignedness(DataType.Signedness.UNSIGNED));
+        }
 
         assertEquals(someFlagsVariable.getDataType(), flagMasksAttrib.getDataType());
         assertEquals(8, flagMasksAttrib.getLength());

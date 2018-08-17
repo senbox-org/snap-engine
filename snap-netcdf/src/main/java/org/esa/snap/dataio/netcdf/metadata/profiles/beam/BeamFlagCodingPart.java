@@ -64,8 +64,6 @@ public class BeamFlagCodingPart extends ProfilePartIO {
         if (flagCoding != null) {
             final String[] flagNames = flagCoding.getFlagNames();
             final StringBuilder descriptions = new StringBuilder();
-
-
             for (String flagName : flagNames) {
                 final MetadataAttribute flag = flagCoding.getFlag(flagName);
                 if (flag != null) {
@@ -84,7 +82,6 @@ public class BeamFlagCodingPart extends ProfilePartIO {
 
     public static FlagCoding readFlagCoding(ProfileReadContext ctx, String variableName) {
         final FlagCoding flagCoding = CfFlagCodingPart.readFlagCoding(ctx, variableName);
-
         if (flagCoding != null) {
             final Variable variable = ctx.getNetcdfFile().getRootGroup().findVariable(variableName);
             final Attribute descriptionsAtt = variable.findAttributeIgnoreCase(FLAG_DESCRIPTIONS);
@@ -96,13 +93,11 @@ public class BeamFlagCodingPart extends ProfilePartIO {
                     }
                 }
             }
-
             final Attribute nameAtt = variable.findAttributeIgnoreCase(FLAG_CODING_NAME);
             if (nameAtt != null) {
                 flagCoding.setName(nameAtt.getStringValue());
             }
         }
-
         return flagCoding;
     }
 

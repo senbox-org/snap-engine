@@ -34,8 +34,6 @@ public interface ProfileReadContext extends PropertyStore {
      */
     public NetcdfFile getNetcdfFile();
 
-    public NetcdfFileWriter getNetcdfFileWriter();
-
     /**
      * Sets the {@link RasterDigest}.
      *

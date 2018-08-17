@@ -24,13 +24,11 @@ import org.esa.snap.dataio.netcdf.ProfileWriteContext;
 import org.esa.snap.dataio.netcdf.metadata.ProfilePartIO;
 import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
 import org.esa.snap.dataio.netcdf.nc.NVariable;
-import org.esa.snap.dataio.netcdf.util.DataTypeUtils;
 import org.esa.snap.dataio.netcdf.util.ReaderUtils;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.nc2.Attribute;
 import ucar.nc2.Variable;
-import visad.data.DataNode;
 
 import java.io.IOException;
 
@@ -56,7 +54,7 @@ public class CfFlagCodingPart extends ProfilePartIO {
         final FlagCoding flagCoding = band.getFlagCoding();
         if (flagCoding != null) {
             final String[] flagNames = flagCoding.getFlagNames();
-            ProductData flagValueData = ProductData.createInstance( band.getDataType(), flagNames.length);
+            ProductData flagValueData = ProductData.createInstance(band.getDataType(), flagNames.length);
             final StringBuilder meanings = new StringBuilder();
             for (int i = 0; i < flagValueData.getNumElems(); i++) {
                 if (meanings.length() > 0) {
@@ -81,8 +79,6 @@ public class CfFlagCodingPart extends ProfilePartIO {
                 }
             }
             catch (NullPointerException ignore) {}
-
-
         }
     }
 
@@ -103,7 +99,6 @@ public class CfFlagCodingPart extends ProfilePartIO {
             final Array flagMasksArray = flagMasks.getValues();
             // must set the unsigned property explicitly,
             // even though it is set when writing the flag_masks attribute
-            //flagMasksArray.setUnsigned(variable.isUnsigned());
             maskValues = new int[flagMasks.getLength()];
             for (int i = 0; i < maskValues.length; i++) {
                 maskValues[i] = flagMasksArray.getInt(i);

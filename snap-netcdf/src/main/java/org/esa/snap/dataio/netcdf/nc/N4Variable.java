@@ -17,18 +17,28 @@
 package org.esa.snap.dataio.netcdf.nc;
 
 
-import com.google.common.primitives.*;
-import org.esa.snap.core.datamodel. ProductData;
-import org.esa.snap.dataio.netcdf.util.DataTypeUtils;
+import com.google.common.primitives.Bytes;
+import com.google.common.primitives.Ints;
+import com.google.common.primitives.Floats;
+import com.google.common.primitives.Chars;
+import com.google.common.primitives.Doubles;
+import com.google.common.primitives.Booleans;
+import com.google.common.primitives.Shorts;
+import com.google.common.primitives.Longs;
+
+import org.esa.snap.core.datamodel.ProductData;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 
-import ucar.nc2.*;
-
+import ucar.nc2.Variable;
+import ucar.nc2.NetcdfFileWriter;
+import ucar.nc2.Attribute;
 
 import java.awt.Rectangle;
 import java.io.IOException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -38,13 +48,11 @@ import java.util.logging.Logger;
 // * @author MarcoZ
 // */
 
-
 public class N4Variable implements NVariable {
 
     // MAX_ATTRIBUTE_LENGTH taken from
     // https://github.com/bcdev/nujan/blob/master/src/main/java/edu/ucar/ral/nujan/hdf/MsgAttribute.java#L185
     public static final int MAX_ATTRIBUTE_LENGTH = 65535 - 1000;
-
 
     private final Variable variable;
     private final java.awt.Dimension tileSize;
@@ -71,7 +79,6 @@ public class N4Variable implements NVariable {
     public void setDataType(DataType dataType) {
         variable.setDataType(dataType);
     }
-
 
     @Override
     public Attribute addAttribute(String name, String value) throws IOException {
@@ -122,11 +129,8 @@ public class N4Variable implements NVariable {
                     } else if (value.getClass() == List.class) {
                         Attribute attribute = new Attribute(name, (List) value);
                         return variable.addAttribute(attribute);
-                    }/* else if (value.getClass() == DataType.class) {
-                        Attribute attribute = new Attribute(name, (DataType) value);
-                        return variable.addAttribute(attribute);
-                    }*/ else if (value.getClass() == Double.class) {
-                        Attribute attribute = new Attribute(name, DataTypeUtils.convertTo((Double) value, DataType.DOUBLE), false);
+                    } else if (value.getClass() == Double.class) {
+                        Attribute attribute = new Attribute(name, (Double) value, false);
                         return variable.addAttribute(attribute);
                     } else if (value.getClass() == Byte.class) {
                         Attribute attribute = new Attribute(name, (Byte) value);
@@ -134,49 +138,41 @@ public class N4Variable implements NVariable {
                     } else if (value.getClass() == Short.class) {
                         Attribute attribute = new Attribute(name, (Short) value);
                         return variable.addAttribute(attribute);
-                    } else {
-                        if (value.getClass().getName() == "[I") {
+                    } else if (value.getClass().getName() == "[I") {
                             List<Integer> temp = Ints.asList((int[]) value);
                             Attribute attribute = new Attribute(name, temp);
                             return variable.addAttribute(attribute);
-                        } else if (value.getClass().getName() == "[B") {
+                    } else if (value.getClass().getName() == "[B") {
                             List<Byte> temp = Bytes.asList((byte[]) value);
                             Attribute attribute = new Attribute(name, temp);
                             return variable.addAttribute(attribute);
-                        }
-                        else if (value.getClass().getName() == "[S") {
+                    } else if (value.getClass().getName() == "[S") {
                             List<Short> temp = Shorts.asList((short[]) value);
                             Attribute attribute = new Attribute(name, temp);
                             return variable.addAttribute(attribute);
-                        }
-                        else if (value.getClass().getName() == "[F") {
+                    } else if (value.getClass().getName() == "[F") {
                             List<Float> temp = Floats.asList((float[]) value);
                             Attribute attribute = new Attribute(name, temp);
                             return variable.addAttribute(attribute);
-                        }
-                        else if (value.getClass().getName() == "[D") {
+                    } else if (value.getClass().getName() == "[D") {
                             List<Double> temp = Doubles.asList((double[]) value);
                             Attribute attribute = new Attribute(name, temp);
                             return variable.addAttribute(attribute);
-                        }
-                        else if (value.getClass().getName() == "[J") {
+                    } else if (value.getClass().getName() == "[J") {
                             List<Long> temp = Longs.asList((long[]) value);
                             Attribute attribute = new Attribute(name, temp);
                             return variable.addAttribute(attribute);
-                        }
-                        else if (value.getClass().getName() == "[Z") {
+                    } else if (value.getClass().getName() == "[Z") {
                             List<Boolean> temp = Booleans.asList((boolean[]) value);
                             Attribute attribute = new Attribute(name, temp);
                             return variable.addAttribute(attribute);
-                        }
-                        else if (value.getClass().getName() == "[C") {
+                    } else if (value.getClass().getName() == "[C") {
                             List<Character> temp = Chars.asList((char[]) value);
                             Attribute attribute = new Attribute(name, temp);
                             return variable.addAttribute(attribute);
-                        }
-                        else {throw new IllegalArgumentException("wrong type "+value.getClass().toString()+" of the attribute "+name);
-                        }
                     }
+                    else {throw new IllegalArgumentException("wrong type "+value.getClass().toString()+" of the attribute "+name);
+                        }
                 } else {
                     return existingAttribute;
                 }
@@ -194,7 +190,6 @@ public class N4Variable implements NVariable {
         return variable.findAttribute(name);
     }
 
-
     @Override
     public void writeFully(Array values) throws IOException {
         int[] idxes = new int[values.getShape().length];
@@ -204,7 +199,6 @@ public class N4Variable implements NVariable {
             throw new IOException(e);
         }
     }
-
 
     @Override
     public void write(int x, int y, int width, int height, boolean isYFlipped, ProductData data) throws IOException {
@@ -234,7 +228,6 @@ public class N4Variable implements NVariable {
 
     private class NetCDF4ChunkWriter extends ChunkWriter {
         private final Set<Rectangle> writtenChunkRects;
-
         public NetCDF4ChunkWriter(int sceneWidth, int sceneHeight, int chunkWidth, int chunkHeight, boolean YFlipped) {
             super(sceneWidth, sceneHeight, chunkWidth, chunkHeight, YFlipped);
             writtenChunkRects = new HashSet<Rectangle>((sceneWidth / chunkWidth) * (sceneHeight / chunkHeight));
@@ -257,8 +250,6 @@ public class N4Variable implements NVariable {
                 writtenChunkRects.add(rect);
             }
         }
-
-
     }
 
 }
