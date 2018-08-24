@@ -158,4 +158,5 @@ public class DefaultNetCdfWriter extends AbstractProductWriter {
         return String.valueOf(getOutput());
     }
 
+    protected NFileWriteable getWriteable() { return writeable; }
 }
