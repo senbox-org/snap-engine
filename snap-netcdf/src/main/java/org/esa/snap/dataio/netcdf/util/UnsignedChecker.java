@@ -12,5 +12,9 @@ public class UnsignedChecker {
             variable.setDataType(variable.getDataType().withSignedness(DataType.Signedness.UNSIGNED));
             variable.removeAttribute("_Unsigned");
         }
+        if (variable.getDataType().isUnsigned()) {
+            variable.setDataType(variable.getDataType().withSignedness(DataType.Signedness.UNSIGNED));
+            variable.removeAttribute("_Unsigned");
+        }
     }
 }

@@ -322,19 +322,23 @@ public class CfBandPart extends ProfilePartIO {
             final String sampleName = CfFlagCodingPart.replaceNonWordCharacters(meanings[i]);
             switch (sampleValues.getDataType()) {
                 case BYTE:
+                case UBYTE:
                     sampleCoding.addSample(sampleName,
                                            DataType.unsignedByteToShort(
                                                    sampleValues.getNumericValue(i).byteValue()), null);
                     break;
                 case SHORT:
+                case USHORT:
                     sampleCoding.addSample(sampleName,
                                            DataType.unsignedShortToInt(
                                                    sampleValues.getNumericValue(i).shortValue()), null);
                     break;
                 case INT:
+                case UINT:
                     sampleCoding.addSample(sampleName, sampleValues.getNumericValue(i).intValue(), null);
                     break;
                 case LONG:
+                case ULONG:
                     final long sampleValue = sampleValues.getNumericValue(i).longValue();
                     if (msb) {
                         final long sampleValueMsb = sampleValue >>> 32;
