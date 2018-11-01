@@ -112,7 +112,13 @@ public class CfBandPart extends ProfilePartIO {
             upperBand.setSourceImage(new NetcdfMultiLevelImage(upperBand, variable, origin, ctx));
             addSampleCodingOrMasksIfApplicable(p, upperBand, variable, variable.getFullName() + "_msb", true);
         } else {
-            final Band band = p.addBand(bandBasename, rasterDataType);
+            final Band band;
+            if (variable.getGroup().isRoot()) {
+                band = p.addBand(bandBasename, rasterDataType);
+            }
+            else {
+                band = p.addBand(bandBasename+"_"+variable.getGroup().getName(), rasterDataType);
+            }
             readCfBandAttributes(variable, band);
             band.setSourceImage(new NetcdfMultiLevelImage(band, variable, origin, ctx));
             addSampleCodingOrMasksIfApplicable(p, band, variable, variable.getFullName(), false);
