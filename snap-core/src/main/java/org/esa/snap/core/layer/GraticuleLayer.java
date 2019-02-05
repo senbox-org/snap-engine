@@ -38,9 +38,12 @@ import org.esa.snap.core.datamodel.PixelPos;
 
 /**
  * @author Marco Zuehlke
+ * @author Daniel Knowles
  * @version $Revision$ $Date$
  * @since BEAM 4.2
  */
+//JAN2018 - Daniel Knowles - updated with SeaDAS gridline revisions
+
 public class GraticuleLayer extends Layer {
 
     private static final GraticuleLayerType LAYER_TYPE = LayerTypeRegistry.getLayerType(GraticuleLayerType.class);

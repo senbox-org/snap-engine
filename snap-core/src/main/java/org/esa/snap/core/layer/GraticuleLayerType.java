@@ -29,6 +29,11 @@ import org.esa.snap.core.datamodel.RasterDataNode;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 
+/**
+ * @author Brockmann Consult
+ * @author Daniel Knowles
+ */
+//JAN2018 - Daniel Knowles - updated with SeaDAS gridline revisions
 
 
 @LayerTypeMetadata(name = "GraticuleLayerType", aliasNames = {"org.esa.snap.core.layer.GraticuleLayerType"})

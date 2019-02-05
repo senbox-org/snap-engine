@@ -27,7 +27,13 @@ import java.util.List;
 
 /**
  * A geometric representation of a geographical grid measured in longitudes and latitudes.
+ *
+ * @author Brockmann Consult
+ * @author Daniel Knowles
  */
+//JAN2018 - Daniel Knowles - updated with SeaDAS gridline revisions
+
+
 public class Graticule {
 
     private final GeneralPath[] _linePaths;
