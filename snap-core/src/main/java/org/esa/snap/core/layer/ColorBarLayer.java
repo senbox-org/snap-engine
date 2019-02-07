@@ -24,20 +24,14 @@ import org.esa.snap.core.datamodel.*;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.beans.PropertyChangeEvent;
-import java.util.ArrayList;
 
 
 /**
- * @author Marco Zuehlke
  * @author Daniel Knowles
- * @version $Revision$ $Date$
- * @since BEAM 4.2
  */
-//JAN2018 - Daniel Knowles - updated with SeaDAS gridline revisions
 
 public class ColorBarLayer extends Layer {
 
@@ -46,9 +40,8 @@ public class ColorBarLayer extends Layer {
     private RasterDataNode raster;
 
     private ProductNodeHandler productNodeHandler;
-    private ColorBar colorbar;
     private ImageLegend imageLegend;
-    RenderedImage renderedImage = null;
+    BufferedImage bufferedImage = null;
 
     private double NULL_DOUBLE = -1.0;
     private double ptsToPixelsMultiplier = NULL_DOUBLE;
@@ -90,17 +83,8 @@ public class ColorBarLayer extends Layer {
 
         getUserValues();
 
-        if (colorbar == null) {
-            colorbar = ColorBar.create(raster,
-                    getNumGridLines(),
-                    getGridSpacingLat(),
-                    getGridSpacingLon(), isLabelsSuffix(), isLabelsDecimal());
-        }
-
-
         if (imageLegend == null) {
             imageLegend = new ImageLegend(raster.getImageInfo(), raster);
-
 
             imageLegend.setHeaderText((String) raster.getName());
             imageLegend.setOrientation(ImageLegend.HORIZONTAL);
@@ -110,52 +94,32 @@ public class ColorBarLayer extends Layer {
             imageLegend.setAntialiasing((Boolean) true);
             imageLegend.setColorBarLength((Integer) 1200);
             imageLegend.setColorBarThickness((Integer) 60);
-            imageLegend.setTitleFontSize((Integer) 24);
-            imageLegend.setTitleUnitsFontSize((Integer) 12);
-            imageLegend.setLabelsFontSize((Integer) 12);
+            imageLegend.setTitleFontSize((Integer) 35);
+            imageLegend.setTitleUnitsFontSize((Integer) 35);
+            imageLegend.setLabelsFontSize((Integer) 35);
             imageLegend.setShowTitle((Boolean) true);
             imageLegend.setDistributionType((String) ImageLegend.DISTRIB_EVEN_STR);
             imageLegend.setScalingFactor((Double) 1.0);
             imageLegend.setLayerScaling((Double) getLabelsRotationLon());
             imageLegend.setNumberOfTicks((Integer) 5);
 
-            // todo Create it earlier and get it here
+
+            int imageHeight = raster.getRasterHeight();
+            int imageWidth = raster.getRasterWidth();
+            bufferedImage = imageLegend.createImage(new Dimension(imageWidth, imageHeight), true);
+
+        }
+
+
+        if (imageLegend != null && bufferedImage != null) {
+
+
             int imageHeight = raster.getRasterHeight();
             int imageWidth = raster.getRasterWidth();
 
-            renderedImage = imageLegend.createImage(new Dimension(imageWidth, imageHeight), true);
+            bufferedImage = imageLegend.createImage(new Dimension(imageWidth, imageHeight), true);
 
 
-        }
-
-        if (imageLegend != null && renderedImage != null) {
-            final Graphics2D g2d = rendering.getGraphics();
-            // added this to improve text
-            g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-            g2d.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
-            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-
-            final Viewport vp = rendering.getViewport();
-            final AffineTransform transformSave = g2d.getTransform();
-            try {
-                final AffineTransform transform = new AffineTransform();
-                transform.concatenate(transformSave);
-                transform.concatenate(vp.getModelToViewTransform());
-                transform.concatenate(raster.getSourceImage().getModel().getImageToModelTransform(0));
-                g2d.setTransform(transform);
-
-                drawImage(g2d, raster, renderedImage);
-
-            } finally {
-                g2d.setTransform(transformSave);
-            }
-
-
-        }
-
-
-        if (colorbar != null) {
 
             final Graphics2D g2d = rendering.getGraphics();
             // added this to improve text
@@ -170,104 +134,14 @@ public class ColorBarLayer extends Layer {
                 final AffineTransform transform = new AffineTransform();
                 transform.concatenate(transformSave);
                 transform.concatenate(vp.getModelToViewTransform());
-                transform.concatenate(raster.getSourceImage().getModel().getImageToModelTransform(0));
+  //              transform.concatenate(raster.getSourceImage().getModel().getImageToModelTransform(0));
+//
+//                transform.concatenate(createTransform(raster, bufferedImage));
+//                g2d.drawRenderedImage(bufferedImage, transform);
+
+
                 g2d.setTransform(transform);
-
-
-                final GeneralPath[] linePaths = colorbar.getLinePaths();
-                if (linePaths != null && isGridlinesShow()) {
-                    drawLinePaths(g2d, linePaths);
-                }
-
-                if (isBorderShow()) {
-                    drawBorder(g2d, raster);
-                }
-
-
-                if (isLabelsNorth()) {
-                    final ColorBar.TextGlyph[] textGlyphsNorth = colorbar.getTextGlyphsNorth();
-                    if (textGlyphsNorth != null) {
-                        if (isTickmarksShow()) {
-                            drawTickMarks(g2d, colorbar.getTickPointsNorth(), ColorBar.TextLocation.NORTH, false);
-                        }
-
-                        drawTextLabels(g2d, textGlyphsNorth, ColorBar.TextLocation.NORTH, false, raster);
-                    }
-                }
-
-                if (isLabelsSouth()) {
-                    final ColorBar.TextGlyph[] textGlyphsSouth = colorbar.getTextGlyphsSouth();
-                    if (textGlyphsSouth != null) {
-
-                        if (isTickmarksShow()) {
-                            drawTickMarks(g2d, colorbar.getTickPointsSouth(), ColorBar.TextLocation.SOUTH, false);
-                        }
-                        drawTextLabels(g2d, textGlyphsSouth, ColorBar.TextLocation.SOUTH, false, raster);
-                    }
-                }
-
-                if (isLabelsWest()) {
-                    final ColorBar.TextGlyph[] textGlyphsWest = colorbar.getTextGlyphsWest();
-                    if (textGlyphsWest != null) {
-                        if (isTickmarksShow()) {
-                            drawTickMarks(g2d, colorbar.getTickPointsWest(), ColorBar.TextLocation.WEST, false);
-                        }
-                        drawTextLabels(g2d, textGlyphsWest, ColorBar.TextLocation.WEST, false, raster);
-                    }
-                }
-
-
-                if (isLabelsEast()) {
-                    final ColorBar.TextGlyph[] textGlyphsEast = colorbar.getTextGlyphsEast();
-                    if (textGlyphsEast != null) {
-                        if (isTickmarksShow()) {
-                            drawTickMarks(g2d, colorbar.getTickPointsEast(), ColorBar.TextLocation.EAST, false);
-                        }
-                        drawTextLabels(g2d, textGlyphsEast, ColorBar.TextLocation.EAST, false, raster);
-                    }
-                }
-
-
-                if (isCornerLabelsWest()) {
-                    if (isTickmarksShow()) {
-                        drawCornerTickMarks(g2d, raster, ColorBar.TextLocation.WEST);
-                    }
-
-                    if (!isLabelsInside()) {
-                        drawLeftSideLatCornerLabels(g2d);
-                    }
-                }
-
-                if (isCornerLabelsEast()) {
-                    if (isTickmarksShow()) {
-                        drawCornerTickMarks(g2d, raster, ColorBar.TextLocation.EAST);
-                    }
-
-                    if (!isLabelsInside()) {
-                        drawRightSideLatCornerLabels(g2d);
-                    }
-                }
-
-                if (isCornerLabelsNorth()) {
-                    if (isTickmarksShow()) {
-                        drawCornerTickMarks(g2d, raster, ColorBar.TextLocation.NORTH);
-                    }
-
-                    if (!isLabelsInside()) {
-                        drawNorthSideLonCornerLabels(g2d);
-                    }
-                }
-
-                if (isCornerLabelsSouth()) {
-                    if (isTickmarksShow()) {
-                        drawCornerTickMarks(g2d, raster, ColorBar.TextLocation.SOUTH);
-                    }
-
-                    if (!isLabelsInside()) {
-                        drawSouthSideLonCornerLabels(g2d);
-                    }
-                }
-
+                drawImage(g2d, raster, bufferedImage);
 
             } finally {
                 g2d.setTransform(transformSave);
@@ -276,25 +150,23 @@ public class ColorBarLayer extends Layer {
     }
 
 
-    private void drawImage(Graphics2D g2d, RasterDataNode raster, RenderedImage renderedImage) {
+    private void drawImage(Graphics2D g2d, RasterDataNode raster, BufferedImage bufferedImage) {
 
-        AffineTransform transform = createTransform(renderedImage);
-        g2d.drawRenderedImage(renderedImage, transform);
+        AffineTransform transform = createTransform(bufferedImage);
+        g2d.drawRenderedImage(bufferedImage, transform);
 
     }
 
-    private AffineTransform createTransform(RenderedImage image) {
+    private AffineTransform createTransform(BufferedImage image) {
 
-//        VisatApp visatApp = VisatApp.getApp();
-//        ProductSceneView sceneView = visatApp.getSelectedProductSceneView();
-//        RasterDataNode raster = sceneView.getSceneImage().getRasters()[0];
         AffineTransform transform = raster.getSourceImage().getModel().getImageToModelTransform(0);
         transform.concatenate(createTransform(raster, image));
         return transform;
-        //return createTransform(raster, image);
+     //   return createTransform(raster, image);
     }
 
     private AffineTransform createTransform(RasterDataNode raster, RenderedImage colorBarImage) {
+
 
         int colorBarImageWidth = colorBarImage.getWidth();
         int colorBarImageHeight = colorBarImage.getHeight();
@@ -302,26 +174,6 @@ public class ColorBarLayer extends Layer {
         int rasterWidth = raster.getRasterWidth();
         int rasterHeight = raster.getRasterHeight();
 
-        // todo Danny commented these out as orientation was being determined by image dimensions not by actual orientation
-        //if color bar is horizontal
-        // double scaleX = (colorBarImageHeight < colorBarImageWidth) ? (double) rasterWidth / colorBarImageWidth : 0.6;
-
-        //if color bar is vertical
-        // double scaleY = (colorBarImageHeight > colorBarImageWidth) ? (double) rasterHeight / colorBarImageHeight : 0.6;
-
-//        if (scaleX > 1) {
-//            scaleY = scaleY + 1;
-//        }   else if (scaleY > 1) { //this statement must have the "else" clause, otherwise the scaleX will be problematic.
-//            scaleX = scaleX + 1;
-//        }
-//        int y_axis_translation = (colorBarImageHeight < colorBarImageWidth) ? rasterHeight : (rasterHeight - colorBarImageHeight)/2;
-//        int x_axis_translation = (colorBarImageHeight < colorBarImageWidth) ? (rasterWidth - colorBarImageWidth)/2 : rasterWidth ;
-
-        //todo Danny added the following 2 lines and commented out the preceding block
-
-
-//        double y_axis_translation = (getOrientation() == ImageLegend.HORIZONTAL) ? rasterHeight + (rasterHeight * getLayerOffset()/100) : (rasterHeight - colorBarImageHeight)/2;
-//        double x_axis_translation = (getOrientation() == ImageLegend.HORIZONTAL) ? (rasterWidth - colorBarImageWidth)/2 : rasterWidth + (rasterWidth * getLayerOffset()/100) ;
 
         double offset = (getOrientation() == ImageLegend.HORIZONTAL) ? (colorBarImageHeight * getLayerOffset() / 100) : (colorBarImageWidth * getLayerOffset() / 100);
         double shift = (getOrientation() == ImageLegend.HORIZONTAL) ? (colorBarImageWidth * getLayerShift() / 100) : -(colorBarImageHeight * getLayerShift() / 100);
@@ -336,36 +188,36 @@ public class ColorBarLayer extends Layer {
         }
 
 
+
+
         if (getOrientation() == ImageLegend.HORIZONTAL) {
-            if (ColorBarParamInfo.LOCATION_INSIDE_STR.equals(getInsideOutsideLocation())) {
+            if (isColorBarLocationInside()) {
+                switch (getColorBarLocationPlacement()) {
 
-
-                switch (getHorizontalLocation()) {
-
-                    case ColorBarParamInfo.LOCATION_BOTTOM_LEFT:
+                    case ColorBarLayerType.LOCATION_LOWER_LEFT:
                         defaultOffset = -colorBarImageHeight;
                         defaultShift = 0;
                         offset = -offset;
                         break;
-                    case ColorBarParamInfo.LOCATION_BOTTOM_CENTER:
+                    case ColorBarLayerType.LOCATION_LOWER_CENTER:
                         defaultOffset = -colorBarImageHeight;
                         defaultShift = (rasterWidth - colorBarImageWidth) / 2;
                         offset = -offset;
                         break;
-                    case ColorBarParamInfo.LOCATION_BOTTOM_RIGHT:
+                    case ColorBarLayerType.LOCATION_LOWER_RIGHT:
                         defaultOffset = -colorBarImageHeight;
                         defaultShift = rasterWidth - colorBarImageWidth;
                         offset = -offset;
                         break;
-                    case ColorBarParamInfo.LOCATION_TOP_LEFT:
+                    case ColorBarLayerType.LOCATION_UPPER_LEFT:
                         defaultOffset = -rasterHeight;
                         defaultShift = 0;
                         break;
-                    case ColorBarParamInfo.LOCATION_TOP_CENTER:
+                    case ColorBarLayerType.LOCATION_UPPER_CENTER:
                         defaultOffset = -rasterHeight;
                         defaultShift = (rasterWidth - colorBarImageWidth) / 2;
                         break;
-                    case ColorBarParamInfo.LOCATION_TOP_RIGHT:
+                    case ColorBarLayerType.LOCATION_UPPER_RIGHT:
                         defaultOffset = -rasterHeight;
                         defaultShift = rasterWidth - colorBarImageWidth;
                         break;
@@ -374,31 +226,31 @@ public class ColorBarLayer extends Layer {
                         defaultShift = (rasterWidth - colorBarImageWidth) / 2;
                 }
             } else {
-                switch (getHorizontalLocation()) {
+                switch (getColorBarLocationPlacement()) {
 
-                    case ColorBarParamInfo.LOCATION_BOTTOM_LEFT:
+                    case ColorBarLayerType.LOCATION_LOWER_LEFT:
                         defaultOffset = 0;
                         defaultShift = 0;
                         break;
-                    case ColorBarParamInfo.LOCATION_BOTTOM_CENTER:
+                    case ColorBarLayerType.LOCATION_LOWER_CENTER:
                         defaultOffset = 0;
                         defaultShift = (rasterWidth - colorBarImageWidth) / 2;
                         break;
-                    case ColorBarParamInfo.LOCATION_BOTTOM_RIGHT:
+                    case ColorBarLayerType.LOCATION_LOWER_RIGHT:
                         defaultOffset = 0;
                         defaultShift = rasterWidth - colorBarImageWidth;
                         break;
-                    case ColorBarParamInfo.LOCATION_TOP_LEFT:
+                    case ColorBarLayerType.LOCATION_UPPER_LEFT:
                         defaultOffset = -rasterHeight - colorBarImageHeight;
                         defaultShift = 0;
                         offset = -offset;
                         break;
-                    case ColorBarParamInfo.LOCATION_TOP_CENTER:
+                    case ColorBarLayerType.LOCATION_UPPER_CENTER:
                         defaultOffset = -rasterHeight - colorBarImageHeight;
                         defaultShift = (rasterWidth - colorBarImageWidth) / 2;
                         offset = -offset;
                         break;
-                    case ColorBarParamInfo.LOCATION_TOP_RIGHT:
+                    case ColorBarLayerType.LOCATION_UPPER_RIGHT:
                         defaultOffset = -rasterHeight - colorBarImageHeight;
                         defaultShift = rasterWidth - colorBarImageWidth;
                         offset = -offset;
@@ -410,31 +262,31 @@ public class ColorBarLayer extends Layer {
             }
 
         } else {
-            if (ColorBarParamInfo.LOCATION_INSIDE_STR.equals(getInsideOutsideLocation())) {
+            if (isColorBarLocationInside()) {
                 offset = -offset;
 
-                switch (getVerticalLocation()) {
-                    case ColorBarParamInfo.LOCATION_LEFT_UPPER:
+                switch (getColorBarLocationPlacement()) {
+                    case ColorBarLayerType.LOCATION_UPPER_LEFT:
                         defaultOffset = -rasterWidth;
                         defaultShift = 0;
                         break;
-                    case ColorBarParamInfo.LOCATION_LEFT_CENTER:
+                    case ColorBarLayerType.LOCATION_LEFT_CENTER:
                         defaultOffset = -rasterWidth;
                         defaultShift = (rasterHeight - colorBarImageHeight) / 2;
                         break;
-                    case ColorBarParamInfo.LOCATION_LEFT_LOWER:
+                    case ColorBarLayerType.LOCATION_LOWER_LEFT:
                         defaultOffset = -rasterWidth;
                         defaultShift = rasterHeight - colorBarImageHeight;
                         break;
-                    case ColorBarParamInfo.LOCATION_RIGHT_UPPER:
+                    case ColorBarLayerType.LOCATION_UPPER_RIGHT:
                         defaultOffset = -colorBarImageWidth;
                         defaultShift = 0;
                         break;
-                    case ColorBarParamInfo.LOCATION_RIGHT_CENTER:
+                    case ColorBarLayerType.LOCATION_RIGHT_CENTER:
                         defaultOffset = -colorBarImageWidth;
                         defaultShift = (rasterHeight - colorBarImageHeight) / 2;
                         break;
-                    case ColorBarParamInfo.LOCATION_RIGHT_LOWER:
+                    case ColorBarLayerType.LOCATION_LOWER_RIGHT:
                         defaultOffset = -colorBarImageWidth;
                         defaultShift = rasterHeight - colorBarImageHeight;
                         break;
@@ -443,28 +295,28 @@ public class ColorBarLayer extends Layer {
                         defaultShift = (rasterHeight - colorBarImageHeight) / 2;
                 }
             } else {
-                switch (getVerticalLocation()) {
-                    case ColorBarParamInfo.LOCATION_LEFT_UPPER:
+                switch (getColorBarLocationPlacement()) {
+                    case ColorBarLayerType.LOCATION_UPPER_LEFT:
                         defaultOffset = -rasterWidth - colorBarImageWidth;
                         defaultShift = 0;
                         break;
-                    case ColorBarParamInfo.LOCATION_LEFT_CENTER:
+                    case ColorBarLayerType.LOCATION_LEFT_CENTER:
                         defaultOffset = -rasterWidth - colorBarImageWidth;
                         defaultShift = (rasterHeight - colorBarImageHeight) / 2;
                         break;
-                    case ColorBarParamInfo.LOCATION_LEFT_LOWER:
+                    case ColorBarLayerType.LOCATION_LOWER_LEFT:
                         defaultOffset = -rasterWidth - colorBarImageWidth;
                         defaultShift = rasterHeight - colorBarImageHeight;
                         break;
-                    case ColorBarParamInfo.LOCATION_RIGHT_UPPER:
+                    case ColorBarLayerType.LOCATION_UPPER_RIGHT:
                         defaultOffset = 0;
                         defaultShift = 0;
                         break;
-                    case ColorBarParamInfo.LOCATION_RIGHT_CENTER:
+                    case ColorBarLayerType.LOCATION_RIGHT_CENTER:
                         defaultOffset = 0;
                         defaultShift = (rasterHeight - colorBarImageHeight) / 2;
                         break;
-                    case ColorBarParamInfo.LOCATION_RIGHT_LOWER:
+                    case ColorBarLayerType.LOCATION_LOWER_RIGHT:
                         defaultOffset = 0;
                         defaultShift = rasterHeight - colorBarImageHeight;
                         break;
@@ -475,18 +327,12 @@ public class ColorBarLayer extends Layer {
             }
         }
 
-
         double y_axis_translation = (getOrientation() == ImageLegend.HORIZONTAL) ? rasterHeight + offset + defaultOffset : shift + defaultShift;
         double x_axis_translation = (getOrientation() == ImageLegend.HORIZONTAL) ? shift + defaultShift : rasterWidth + offset + defaultOffset;
         //double[] flatmatrix = {scaleX, 0.0, 0.0, scaleY, x_axis_translation, y_axis_translation};
 
-        // todo Danny tmp edits
-        y_axis_translation = 0.0;
-        x_axis_translation = 0.0;
 
-        double[] flatmatrix = {1, 0.0, 0.0, -1, x_axis_translation, y_axis_translation};
-
-        // todo end Danny tmp edits
+        double[] flatmatrix = {1, 0.0, 0.0, 1, x_axis_translation, y_axis_translation};
 
 
         AffineTransform i2mTransform = new AffineTransform(flatmatrix);
@@ -520,655 +366,14 @@ public class ColorBarLayer extends Layer {
         return ImageLegend.HORIZONTAL;
     }
 
-    private void drawLeftSideLatCornerLabels(Graphics2D g2d) {
-
-        final ArrayList<ColorBar.TextGlyph> textGlyphArrayList = new ArrayList<>();
-
-        ColorBar.TextGlyph textGlyph = colorbar.getTextGlyphsLatCorners()[ColorBar.TOP_LEFT_CORNER_INDEX];
-        if (textGlyph != null) {
-            textGlyphArrayList.add(textGlyph);
-        }
-
-        textGlyph = colorbar.getTextGlyphsLatCorners()[ColorBar.BOTTOM_LEFT_CORNER_INDEX];
-        if (textGlyph != null) {
-            textGlyphArrayList.add(textGlyph);
-        }
-
-        final ColorBar.TextGlyph[] textGlyphs = textGlyphArrayList.toArray(new ColorBar.TextGlyph[textGlyphArrayList.size()]);
-        if (textGlyphs != null) {
-            drawTextLabels(g2d, textGlyphs, ColorBar.TextLocation.WEST, true, raster);
-        }
-    }
-
-    private void drawRightSideLatCornerLabels(Graphics2D g2d) {
-
-        final ArrayList<ColorBar.TextGlyph> textGlyphArrayList = new ArrayList<>();
-
-        ColorBar.TextGlyph textGlyph = colorbar.getTextGlyphsLatCorners()[ColorBar.TOP_RIGHT_CORNER_INDEX];
-        if (textGlyph != null) {
-            textGlyphArrayList.add(textGlyph);
-        }
-
-        textGlyph = colorbar.getTextGlyphsLatCorners()[ColorBar.BOTTOM_RIGHT_CORNER_INDEX];
-        if (textGlyph != null) {
-            textGlyphArrayList.add(textGlyph);
-        }
-
-        final ColorBar.TextGlyph[] textGlyphs = textGlyphArrayList.toArray(new ColorBar.TextGlyph[textGlyphArrayList.size()]);
-        if (textGlyphs != null) {
-            drawTextLabels(g2d, textGlyphs, ColorBar.TextLocation.EAST, true, raster);
-        }
-    }
-
-    private void drawNorthSideLonCornerLabels(Graphics2D g2d) {
-
-        final ArrayList<ColorBar.TextGlyph> textGlyphArrayList = new ArrayList<>();
-
-        ColorBar.TextGlyph textGlyph = colorbar.getTextGlyphsLonCorners()[ColorBar.TOP_LEFT_CORNER_INDEX];
-        if (textGlyph != null) {
-            textGlyphArrayList.add(textGlyph);
-        }
-
-        textGlyph = colorbar.getTextGlyphsLonCorners()[ColorBar.TOP_RIGHT_CORNER_INDEX];
-        if (textGlyph != null) {
-            textGlyphArrayList.add(textGlyph);
-        }
-
-        final ColorBar.TextGlyph[] textGlyphs = textGlyphArrayList.toArray(new ColorBar.TextGlyph[textGlyphArrayList.size()]);
-        if (textGlyphs != null) {
-            drawTextLabels(g2d, textGlyphs, ColorBar.TextLocation.NORTH, true, raster);
-        }
-    }
-
-    private void drawSouthSideLonCornerLabels(Graphics2D g2d) {
-
-        final ArrayList<ColorBar.TextGlyph> textGlyphArrayList = new ArrayList<>();
-
-        ColorBar.TextGlyph textGlyph = colorbar.getTextGlyphsLonCorners()[ColorBar.BOTTOM_LEFT_CORNER_INDEX];
-        if (textGlyph != null) {
-            textGlyphArrayList.add(textGlyph);
-        }
-
-        textGlyph = colorbar.getTextGlyphsLonCorners()[ColorBar.BOTTOM_RIGHT_CORNER_INDEX];
-        if (textGlyph != null) {
-            textGlyphArrayList.add(textGlyph);
-        }
-
-        final ColorBar.TextGlyph[] textGlyphs = textGlyphArrayList.toArray(new ColorBar.TextGlyph[textGlyphArrayList.size()]);
-        if (textGlyphs != null) {
-            drawTextLabels(g2d, textGlyphs, ColorBar.TextLocation.SOUTH, true, raster);
-        }
-    }
-
 
     private void getUserValues() {
 
 
     }
 
-    private void drawLinePaths(Graphics2D g2d, final GeneralPath[] linePaths) {
 
-        Color origPaint = (Color) g2d.getPaint();
-        Stroke origStroke = g2d.getStroke();
 
-        Composite oldComposite = null;
-        if (getGridlinesTransparency() > 0.0) {
-
-            oldComposite = g2d.getComposite();
-            g2d.setComposite(getAlphaComposite(getGridlinesTransparency()));
-        }
-        g2d.setPaint(getGridlinesColor());
-
-
-        Stroke drawingStroke;
-        //   if (isDashedLine() || getDashLengthPixels() != 0.0) {
-        if (getDashLengthPixels() > 0.0) {
-            drawingStroke = new BasicStroke((float) getGridlinesWidthPixels(), BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{(float) getDashLengthPixels()}, 0);
-        } else {
-            drawingStroke = new BasicStroke((float) getGridlinesWidthPixels());
-        }
-
-        g2d.setStroke(drawingStroke);
-        for (GeneralPath linePath : linePaths) {
-            g2d.draw(linePath);
-        }
-
-        if (oldComposite != null) {
-            g2d.setComposite(oldComposite);
-        }
-        g2d.setStroke(origStroke);
-        g2d.setPaint(origPaint);
-    }
-
-    private void drawCornerTickMarks(Graphics2D g2d, RasterDataNode raster, ColorBar.TextLocation textLocation) {
-
-        PixelPos pixelPos1 = null;
-        PixelPos pixelPos2 = null;
-
-        switch (textLocation) {
-            case NORTH:
-                pixelPos1 = new PixelPos(0, 0);
-                pixelPos2 = new PixelPos(raster.getRasterWidth(), 0);
-                break;
-            case SOUTH:
-                pixelPos1 = new PixelPos(0, raster.getRasterHeight());
-                pixelPos2 = new PixelPos(raster.getRasterWidth(), raster.getRasterHeight());
-                break;
-            case WEST:
-                pixelPos1 = new PixelPos(0, 0);
-                pixelPos2 = new PixelPos(0, raster.getRasterHeight());
-                break;
-            case EAST:
-                pixelPos1 = new PixelPos(raster.getRasterWidth(), 0);
-                pixelPos2 = new PixelPos(raster.getRasterWidth(), raster.getRasterHeight());
-                break;
-        }
-
-        if (pixelPos1 != null && pixelPos2 != null) {
-            PixelPos pixelPos[];
-            pixelPos = new PixelPos[2];
-            pixelPos[0] = pixelPos1;
-            pixelPos[1] = pixelPos2;
-
-            boolean drawCornerTicks = false;  // not sure we need this so I'm turning it off
-            if (drawCornerTicks) {
-                if (!isTickmarksInside()) {
-                    drawTickMarks(g2d, pixelPos, textLocation, true);
-                }
-            }
-        }
-    }
-
-
-    private void drawBorder(Graphics2D g2d, RasterDataNode raster) {
-
-        Color origColor = (Color) g2d.getPaint();
-        Stroke origStroke = g2d.getStroke();
-
-        double sidewaysShift = getBorderWidthPixels() / 2;
-        double lengthWiseAddOn = getBorderWidthPixels();
-
-
-        GeneralPath northBorderPath = new GeneralPath();
-        GeneralPath southBorderPath = new GeneralPath();
-        {
-            double xStart = 0 - lengthWiseAddOn;
-            double xEnd = raster.getRasterWidth() + lengthWiseAddOn;
-
-            double y = 0 - sidewaysShift;
-            northBorderPath.moveTo(xStart, y);
-            northBorderPath.lineTo(xEnd, y);
-            northBorderPath.closePath();
-
-            y = raster.getRasterHeight() + sidewaysShift;
-            southBorderPath.moveTo(xStart, y);
-            southBorderPath.lineTo(xEnd, y);
-            southBorderPath.closePath();
-        }
-
-        GeneralPath westBorderPath = new GeneralPath();
-        GeneralPath eastBorderPath = new GeneralPath();
-        {
-            double yStart = 0 - lengthWiseAddOn;
-            double yEnd = raster.getRasterHeight() + lengthWiseAddOn;
-
-            double x = 0 - sidewaysShift;
-            westBorderPath.moveTo(x, yStart);
-            westBorderPath.lineTo(x, yEnd);
-            westBorderPath.closePath();
-
-            x = raster.getRasterWidth() + sidewaysShift;
-            eastBorderPath.moveTo(x, yStart);
-            eastBorderPath.lineTo(x, yEnd);
-            eastBorderPath.closePath();
-        }
-
-        Stroke drawingStroke = new BasicStroke((float) getBorderWidthPixels());
-        g2d.setStroke(drawingStroke);
-        g2d.setPaint(getBorderColor());
-
-        g2d.draw(southBorderPath);
-        g2d.draw(northBorderPath);
-        g2d.draw(westBorderPath);
-        g2d.draw(eastBorderPath);
-
-        g2d.setPaint(origColor);
-        g2d.setStroke(origStroke);
-    }
-
-
-    private boolean isTextConflict(PixelPos pixelPos, Graphics2D g2d, ColorBar.TextLocation textLocation,
-                                   boolean isCorner,
-                                   RasterDataNode raster) {
-        Font origFont = g2d.getFont();
-        Font font = new Font(getLabelsFont(), getFontType(), getFontSizePixels());
-        g2d.setFont(font);
-
-        Rectangle2D singleLetter = g2d.getFontMetrics().getStringBounds("W", g2d);
-
-        double WRONG_AXIS_BUFFER_PERCENT = 0.02;
-
-        boolean conflict = false;
-        double overlapMultiplierBuffer = 1.0;
-        double xAllowedMin = 0 + overlapMultiplierBuffer * singleLetter.getHeight();
-        double xAllowedMax = raster.getRasterWidth() - overlapMultiplierBuffer * singleLetter.getHeight();
-        double yAllowedMin = 0 + overlapMultiplierBuffer * singleLetter.getHeight();
-        double yAllowedMax = raster.getRasterHeight() - overlapMultiplierBuffer * singleLetter.getHeight();
-        double buffer = 0;
-
-        switch (textLocation) {
-            case NORTH:
-                if (isCornerLabelsNorth() && !isCorner) {
-                    if (pixelPos.getX() < xAllowedMin || pixelPos.getX() > xAllowedMax) {
-                        conflict = true;
-                    }
-                }
-
-                buffer = WRONG_AXIS_BUFFER_PERCENT * raster.getRasterHeight();
-                if (pixelPos.getY() > buffer) {
-                    conflict = true;
-                }
-                break;
-            case SOUTH:
-                if (isCornerLabelsSouth() && !isCorner) {
-                    if (pixelPos.getX() < xAllowedMin || pixelPos.getX() > xAllowedMax) {
-                        conflict = true;
-                    }
-                }
-
-                buffer = WRONG_AXIS_BUFFER_PERCENT * raster.getRasterHeight();
-                if (pixelPos.getY() < (raster.getRasterHeight() - buffer)) {
-                    conflict = true;
-                }
-                break;
-            case WEST:
-                if (isCornerLabelsWest() && !isCorner) {
-                    if (pixelPos.getY() < yAllowedMin || pixelPos.getY() > yAllowedMax) {
-                        conflict = true;
-                    }
-                }
-
-                buffer = WRONG_AXIS_BUFFER_PERCENT * raster.getRasterWidth();
-                if (pixelPos.getX() > buffer) {
-                    conflict = true;
-                }
-                break;
-            case EAST:
-                if (isCornerLabelsEast() && !isCorner) {
-                    if (pixelPos.getY() < yAllowedMin || pixelPos.getY() > yAllowedMax) {
-                        conflict = true;
-                    }
-                }
-
-                buffer = WRONG_AXIS_BUFFER_PERCENT * raster.getRasterWidth();
-                if (pixelPos.getX() < (raster.getRasterWidth() - buffer)) {
-                    conflict = true;
-                }
-                break;
-
-        }
-
-        g2d.setFont(origFont);
-
-        return conflict;
-    }
-
-
-    private void drawTextLabels(Graphics2D g2d,
-                                final ColorBar.TextGlyph[] textGlyphs,
-                                ColorBar.TextLocation textLocation,
-                                boolean isCorner,
-                                RasterDataNode raster) {
-
-        double halfPixelCorrection = 0.0;
-        if (!isCorner) {
-            halfPixelCorrection = 0.5;
-        }
-
-
-        Color origColor = (Color) g2d.getPaint();
-        if (isCorner) {
-            g2d.setPaint(getLabelsColor());
-        } else {
-            g2d.setPaint(getLabelsColor());
-        }
-
-
-        Font origFont = g2d.getFont();
-        Font font = new Font(getLabelsFont(), getFontType(), getFontSizePixels());
-        g2d.setFont(font);
-
-
-        Rectangle2D singleLetter = g2d.getFontMetrics().getStringBounds("W", g2d);
-        double letterWidth = singleLetter.getWidth();
-        float spacerBetweenTextAndBorder = (float) (letterWidth / 2.0);
-
-
-        for (ColorBar.TextGlyph glyph : textGlyphs) {
-
-
-            PixelPos pixelPos = new PixelPos(glyph.getX(), glyph.getY());
-
-
-            if (!isTextConflict(pixelPos, g2d, textLocation, isCorner, raster)) {
-
-                if (isLabelsInside() && getInsideLabelsBgTransparency() < 1.0) {
-                    drawRectangle(g2d, glyph);
-                }
-
-                g2d.translate(glyph.getX(), glyph.getY());
-                g2d.rotate(glyph.getAngle());
-
-                Rectangle2D labelBounds = g2d.getFontMetrics().getStringBounds(glyph.getText(), g2d);
-                float width = (float) labelBounds.getWidth();
-                float height = (float) labelBounds.getHeight();
-
-
-                float halfLabelWidth = width / 2;
-
-
-                AffineTransform orig = g2d.getTransform();
-
-
-                if (!isLabelsInside()) {
-                    if (textLocation == ColorBar.TextLocation.NORTH) {
-                        double theta = (getLabelsRotationLon() / 180) * Math.PI;
-
-                        float xOffset = 0;
-                        float yOffset = 0;
-                        double verticalShift = halfPixelCorrection + getBorderWidthPixels() + spacerBetweenTextAndBorder;
-
-                        if (isTickmarksShow() && !isTickmarksInside() && !isCorner) {
-                            verticalShift += getTickmarksLength();
-                        }
-
-                        if (getLabelsRotationLon() > 85) {
-                            xOffset = -halfLabelWidth;
-                        }
-
-                        if (getLabelsRotationLon() < 5) {
-                            yOffset = height / 3;
-                        }
-
-                        float xMod = (float) (verticalShift * Math.cos(theta));
-                        float yMod = -1 * (float) (verticalShift * Math.sin(theta));
-
-                        g2d.rotate(-1 * Math.PI + theta);
-                        g2d.drawString(glyph.getText(), xMod + xOffset, +yMod + yOffset);
-                    }
-
-                    if (textLocation == ColorBar.TextLocation.SOUTH) {
-                        double theta = (getLabelsRotationLon() / 180) * Math.PI;
-
-                        float xOffset = -width;
-                        float yOffset = 2 * height / 3;
-                        double verticalShift = -halfPixelCorrection - getBorderWidthPixels() - spacerBetweenTextAndBorder;
-
-                        if (isTickmarksShow() && !isTickmarksInside() && !isCorner) {
-                            verticalShift -= getTickmarksLength();
-                        }
-
-                        if (getLabelsRotationLon() > 85) {
-                            xOffset = xOffset + halfLabelWidth;
-                        }
-
-                        if (getLabelsRotationLon() < 5) {
-                            yOffset = yOffset - height / 3;
-                        }
-
-                        float xMod = (float) (verticalShift * Math.cos(theta));
-                        float yMod = -1 * (float) (verticalShift * Math.sin(theta));
-
-                        g2d.rotate(theta);
-                        g2d.drawString(glyph.getText(), xMod + xOffset, +yMod + yOffset);
-                    }
-
-                    if (textLocation == ColorBar.TextLocation.EAST) {
-
-                        double theta = (getLabelsRotationLat() / 180) * Math.PI;
-
-                        float xOffset = 0;
-                        float yOffset = 2 * height / 3;
-                        double verticalShift = halfPixelCorrection + getBorderWidthPixels() + spacerBetweenTextAndBorder;
-
-                        if (isTickmarksShow() && !isTickmarksInside() && !isCorner) {
-                            verticalShift += getTickmarksLength();
-                        }
-
-                        if (getLabelsRotationLat() > 85) {
-                            xOffset = -halfLabelWidth;
-                        }
-
-                        if (getLabelsRotationLat() < 5) {
-                            yOffset = height / 3;
-                        }
-
-                        float xMod = (float) (verticalShift * Math.cos(theta));
-                        float yMod = (float) (verticalShift * Math.sin(theta));
-
-
-                        g2d.rotate(-1 * Math.PI - theta);
-                        g2d.drawString(glyph.getText(), xMod + xOffset, +yMod + yOffset);
-                    }
-
-
-                    if (textLocation == ColorBar.TextLocation.WEST) {
-
-                        double theta = (getLabelsRotationLat() / 180) * Math.PI;
-
-                        float xOffset = -width;
-                        float yOffset = 0;
-                        double verticalShift = -halfPixelCorrection - getBorderWidthPixels() - spacerBetweenTextAndBorder;
-
-                        if (isTickmarksShow() && !isTickmarksInside() && !isCorner) {
-                            verticalShift -= getTickmarksLength();
-                        }
-
-                        if (getLabelsRotationLat() > 85) {
-                            xOffset = xOffset + halfLabelWidth;
-                        }
-
-                        if (getLabelsRotationLat() < 5) {
-                            yOffset = yOffset + height / 3;
-                        }
-
-                        float xMod = (float) (verticalShift * Math.cos(theta));
-                        float yMod = (float) (verticalShift * Math.sin(theta));
-
-
-                        g2d.rotate(-theta);
-                        g2d.drawString(glyph.getText(), xMod + xOffset, +yMod + yOffset);
-                    }
-                } else {
-
-                    if (textLocation == ColorBar.TextLocation.WEST ||
-                            textLocation == ColorBar.TextLocation.SOUTH) {
-
-                        float xOffset = spacerBetweenTextAndBorder;
-                        float yOffset = height / 3;
-
-                        if (isTickmarksShow() && isTickmarksInside()) {
-                            xOffset += getTickmarksLength();
-                        }
-
-                        g2d.drawString(glyph.getText(), xOffset, yOffset);
-                    } else {
-                        float xOffset = -width - spacerBetweenTextAndBorder;
-                        float yOffset = height / 3;
-
-                        if (isTickmarksShow() && isTickmarksInside()) {
-                            xOffset -= getTickmarksLength();
-                        }
-
-                        g2d.rotate(-Math.PI);
-                        g2d.drawString(glyph.getText(), xOffset, yOffset);
-                    }
-                }
-
-                g2d.setTransform(orig);
-
-                g2d.rotate(-glyph.getAngle());
-                g2d.translate(-glyph.getX(), -glyph.getY());
-
-            }
-        }
-
-
-        g2d.setPaint(origColor);
-        g2d.setFont(origFont);
-
-    }
-
-
-    private void drawRectangle(Graphics2D g2d, final ColorBar.TextGlyph glyph) {
-
-        Composite oldComposite = null;
-        if (getInsideLabelsBgTransparency() > 0.0) {
-            oldComposite = g2d.getComposite();
-            g2d.setComposite(getAlphaComposite(getInsideLabelsBgTransparency()));
-        }
-
-        Color origPaint = (Color) g2d.getPaint();
-        Stroke origStroke = g2d.getStroke();
-
-        g2d.setPaint(getInsideLabelsBgColor());
-        g2d.setStroke(new BasicStroke(0));
-
-
-        g2d.translate(glyph.getX(), glyph.getY());
-        g2d.rotate(glyph.getAngle());
-
-        Rectangle2D singleLetter = g2d.getFontMetrics().getStringBounds("W", g2d);
-        double xOffset = singleLetter.getWidth() / 2.0;
-        double yOffset = singleLetter.getHeight() / 3.0;
-
-        if (isTickmarksShow() && isTickmarksInside()) {
-            xOffset += getTickmarksLength();
-        }
-
-        Rectangle2D labelBounds = g2d.getFontMetrics().getStringBounds(glyph.getText(), g2d);
-        labelBounds.setRect(labelBounds.getX() + xOffset - 1,
-                labelBounds.getY() + yOffset - 1,
-                labelBounds.getWidth(),
-                labelBounds.getHeight());
-
-        g2d.fill(labelBounds);
-
-        g2d.rotate(-glyph.getAngle());
-        g2d.translate(-glyph.getX(), -glyph.getY());
-
-
-        g2d.setPaint(origPaint);
-        g2d.setStroke(origStroke);
-        if (oldComposite != null) {
-            g2d.setComposite(oldComposite);
-        }
-    }
-
-
-    private void drawTickMarks(Graphics2D g2d, final PixelPos[] pixelPoses, ColorBar.TextLocation textLocation, boolean isCorner) {
-
-        Composite oldComposite = g2d.getComposite();
-        Stroke origStroke = g2d.getStroke();
-
-        Stroke drawingStroke = new BasicStroke((float) getGridlinesWidthPixels());
-        g2d.setStroke(drawingStroke);
-
-        Color origPaint = (Color) g2d.getPaint();
-        g2d.setPaint(getTickmarksColor());
-
-
-        double halfPixelCorrection = 0.0;
-        if (!isCorner) {
-            halfPixelCorrection = 0.5;
-        }
-
-        double xStart = 0, xEnd = 0, yStart = 0, yEnd = 0;
-
-        boolean validCase = false;
-
-        for (PixelPos pixelPos : pixelPoses) {
-
-            if (!isTextConflict(pixelPos, g2d, textLocation, isCorner, raster)) {
-                switch (textLocation) {
-                    case NORTH:
-                        xStart = pixelPos.getX();
-                        xEnd = pixelPos.getX();
-
-                        if (isTickmarksInside()) {
-                            yStart = pixelPos.getY() - halfPixelCorrection;
-                            yEnd = yStart + getTickmarksLength();
-                        } else {
-                            yStart = pixelPos.getY() - halfPixelCorrection - getBorderWidthPixels();
-                            yEnd = yStart - getTickmarksLength();
-                        }
-                        validCase = true;
-                        break;
-
-                    case SOUTH:
-                        xStart = pixelPos.getX();
-                        xEnd = pixelPos.getX();
-
-                        if (isTickmarksInside()) {
-                            yStart = pixelPos.getY() + halfPixelCorrection;
-                            yEnd = yStart - getTickmarksLength();
-                        } else {
-                            yStart = pixelPos.getY() + halfPixelCorrection + getBorderWidthPixels();
-                            yEnd = yStart + getTickmarksLength();
-                        }
-
-                        validCase = true;
-                        break;
-
-                    case WEST:
-                        yStart = pixelPos.getY();
-                        yEnd = pixelPos.getY();
-
-                        if (isTickmarksInside()) {
-                            xStart = pixelPos.getX() - halfPixelCorrection;
-                            xEnd = xStart + getTickmarksLength();
-                        } else {
-                            xStart = pixelPos.getX() - halfPixelCorrection - getBorderWidthPixels();
-                            xEnd = xStart - getTickmarksLength();
-                        }
-
-                        validCase = true;
-                        break;
-
-                    case EAST:
-                        yStart = pixelPos.getY();
-                        yEnd = pixelPos.getY();
-
-                        if (isTickmarksInside()) {
-                            xStart = pixelPos.getX() + halfPixelCorrection;
-                            xEnd = xStart - getTickmarksLength();
-                        } else {
-                            xStart = pixelPos.getX() + halfPixelCorrection + getBorderWidthPixels();
-                            xEnd = xStart + getTickmarksLength();
-                        }
-
-                        validCase = true;
-                        break;
-                }
-
-                if (validCase) {
-                    GeneralPath path = new GeneralPath();
-                    path.moveTo(xStart, yStart);
-                    path.lineTo(xEnd, yEnd);
-
-                    path.closePath();
-                    g2d.draw(path);
-                }
-            }
-
-        }
-
-        g2d.setPaint(origPaint);
-        g2d.setStroke(origStroke);
-        if (oldComposite != null) {
-            g2d.setComposite(oldComposite);
-        }
-    }
 
 
     private AlphaComposite getAlphaComposite(double itemTransparancy) {
@@ -1181,7 +386,7 @@ public class ColorBarLayer extends Layer {
         final Product product = getProduct();
         if (product != null) {
             product.removeProductNodeListener(productNodeHandler);
-            colorbar = null;
+            imageLegend = null;
             raster = null;
         }
     }
@@ -1196,7 +401,6 @@ public class ColorBarLayer extends Layer {
                         propertyName.equals(ColorBarLayerType.PROPERTY_LABELS_SUFFIX_NSWE_NAME) ||
                         propertyName.equals(ColorBarLayerType.PROPERTY_LABELS_DECIMAL_VALUE_NAME)
                 ) {
-            colorbar = null;
             imageLegend = null;
         }
         imageLegend = null;
@@ -1339,6 +543,20 @@ public class ColorBarLayer extends Layer {
         }
     }
 
+
+    private boolean isColorBarLocationInside() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_COLORBAR_LOCATION_INSIDE_NAME,
+                ColorBarLayerType.PROPERTY_COLORBAR_LOCATION_INSIDE_DEFAULT);
+    }
+
+
+    private String getColorBarLocationPlacement() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_COLORBAR_LOCATION_PLACEMENT_NAME,
+                ColorBarLayerType.PROPERTY_COLORBAR_LOCATION_PLACEMENT_DEFAULT);
+    }
+
+
+
     private boolean isLabelsInside() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABELS_INSIDE_NAME,
                 ColorBarLayerType.PROPERTY_LABELS_INSIDE_DEFAULT);
@@ -1457,7 +675,7 @@ public class ColorBarLayer extends Layer {
             if (event.getSourceNode() == getProduct() && Product.PROPERTY_NAME_SCENE_GEO_CODING.equals(
                     event.getPropertyName())) {
                 // Force recreation
-                colorbar = null;
+                imageLegend = null;
                 fireLayerDataChanged(getModelBounds());
             }
         }

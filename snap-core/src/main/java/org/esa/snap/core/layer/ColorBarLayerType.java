@@ -41,8 +41,8 @@ public class ColorBarLayerType extends LayerType {
     // Property Settings: ColorBar Location Section
 
     public static final String PROPERTY_COLORBAR_LOCATION_SECTION_NAME = "colorbar.location.section";
-    public static final String PROPERTY_COLORBAR_LOCATIO_SECTION_LABEL = "Size & Location";
-    public static final String PROPERTY_COLORBAR_LOCATIO_SECTION_TOOLTIP = "Set location and relative size of color bar image";
+    public static final String PROPERTY_COLORBAR_LOCATION_SECTION_LABEL = "Size & Location";
+    public static final String PROPERTY_COLORBAR_LOCATION_SECTION_TOOLTIP = "Set location and relative size of color bar image";
     public static final String PROPERTY_COLORBAR_LOCATION_SECTION_ALIAS = "colorbarLocationSection";
 
     public static final String PROPERTY_COLORBAR_LOCATION_INSIDE_NAME = "colorbar.location.inside";
@@ -71,8 +71,8 @@ public class ColorBarLayerType extends LayerType {
                 LOCATION_LOWER_LEFT,
                 LOCATION_LOWER_CENTER,
                 LOCATION_LOWER_RIGHT,
-                LOCATION_LEFT_CENTER,
-                LOCATION_RIGHT_CENTER
+//                LOCATION_LEFT_CENTER,
+//                LOCATION_RIGHT_CENTER
         };
     }
 
