@@ -23,7 +23,6 @@ import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerContext;
 import com.bc.ceres.glayer.LayerType;
 import com.bc.ceres.glayer.annotations.LayerTypeMetadata;
-import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.RasterDataNode;
 
 import java.awt.*;
@@ -38,6 +37,54 @@ import java.awt.geom.AffineTransform;
 
 @LayerTypeMetadata(name = "ColorBarLayerType", aliasNames = {"org.esa.snap.core.layer.ColorBarLayerType"})
 public class ColorBarLayerType extends LayerType {
+
+    // Property Settings: ColorBar Location Section
+
+    public static final String PROPERTY_COLORBAR_LOCATION_SECTION_NAME = "colorbar.location.section";
+    public static final String PROPERTY_COLORBAR_LOCATIO_SECTION_LABEL = "Size & Location";
+    public static final String PROPERTY_COLORBAR_LOCATIO_SECTION_TOOLTIP = "Set location and relative size of color bar image";
+    public static final String PROPERTY_COLORBAR_LOCATION_SECTION_ALIAS = "colorbarLocationSection";
+
+    public static final String PROPERTY_COLORBAR_LOCATION_INSIDE_NAME = "colorbar.location.inside";
+    public static final String PROPERTY_COLORBAR_LOCATION_INSIDE_LABEL = "Inside";
+    public static final String PROPERTY_COLORBAR_LOCATION_INSIDE_TOOLTIP = "Place color bar inside/outside image bounds";
+    private static final String PROPERTY_COLORBAR_LOCATION_INSIDE_ALIAS = "colorbarLocationInside";
+    public static final boolean PROPERTY_COLORBAR_LOCATION_INSIDE_DEFAULT = true;
+    public static final Class PROPERTY_COLORBAR_LOCATION_INSIDE_TYPE = Boolean.class;
+
+
+    public static final String LOCATION_UPPER_LEFT = "Upper Left";
+    public static final String LOCATION_UPPER_CENTER = "Upper Center";
+    public static final String LOCATION_UPPER_RIGHT = "Upper Right";
+    public static final String LOCATION_LOWER_LEFT = "Lower Left";
+    public static final String LOCATION_LOWER_CENTER = "Lower Center";
+    public static final String LOCATION_LOWER_RIGHT = "Lower Right";
+    public static final String LOCATION_LEFT_CENTER = "Left Side Center";
+    public static final String LOCATION_RIGHT_CENTER = "Right Side Center";
+
+
+    public static String[] getColorBarLocationArray() {
+        return  new String[]{
+                LOCATION_UPPER_LEFT,
+                LOCATION_UPPER_CENTER,
+                LOCATION_UPPER_RIGHT,
+                LOCATION_LOWER_LEFT,
+                LOCATION_LOWER_CENTER,
+                LOCATION_LOWER_RIGHT,
+                LOCATION_LEFT_CENTER,
+                LOCATION_RIGHT_CENTER
+        };
+    }
+
+
+
+
+    public static final String PROPERTY_COLORBAR_LOCATION_PLACEMENT_NAME = "colorbar.location.placement";
+    public static final String PROPERTY_COLORBAR_LOCATION_PLACEMENT_LABEL = "Placement";
+    public static final String PROPERTY_COLORBAR_LOCATION_PLACEMENT_TOOLTIP = "Where to place color bar on image";
+    private static final String PROPERTY_COLORBAR_LOCATION_PLACEMENT_ALIAS = "colorbarLocationPlacement";
+    public static final String PROPERTY_COLORBAR_LOCATION_PLACEMENT_DEFAULT = LOCATION_LOWER_RIGHT;
+    public static final Class PROPERTY_COLORBAR_LOCATION_PLACEMENT_TYPE = String.class;
 
 
 
@@ -384,6 +431,25 @@ public class ColorBarLayerType extends LayerType {
     @Override
     public PropertySet createLayerConfig(LayerContext ctx) {
         final PropertyContainer vc = new PropertyContainer();
+
+        // ColorBar Location Section
+
+        final Property locationSectionModel = Property.create(PROPERTY_COLORBAR_LOCATION_SECTION_NAME, Boolean.class, true, true);
+        locationSectionModel.getDescriptor().setAlias(PROPERTY_COLORBAR_LOCATION_SECTION_ALIAS);
+        vc.addProperty(locationSectionModel);
+
+        final Property locationInsideModel = Property.create(PROPERTY_COLORBAR_LOCATION_INSIDE_NAME, Boolean.class, true, true);
+        locationInsideModel.getDescriptor().setAlias(PROPERTY_COLORBAR_LOCATION_INSIDE_ALIAS);
+        vc.addProperty(locationInsideModel);
+
+        final Property locationEdgeModel = Property.create(PROPERTY_COLORBAR_LOCATION_PLACEMENT_NAME, String.class, true, true);
+        locationEdgeModel.getDescriptor().setAlias(PROPERTY_COLORBAR_LOCATION_PLACEMENT_ALIAS);
+        vc.addProperty(locationEdgeModel);
+
+
+
+
+
 
         final Property rasterModel = Property.create(PROPERTY_NAME_RASTER, RasterDataNode.class);
         rasterModel.getDescriptor().setNotNull(true);

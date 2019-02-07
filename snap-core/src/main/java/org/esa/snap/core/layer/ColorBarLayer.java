@@ -20,20 +20,15 @@ import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerTypeRegistry;
 import com.bc.ceres.grender.Rendering;
 import com.bc.ceres.grender.Viewport;
-import org.esa.snap.core.datamodel.ColorBar;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductNodeEvent;
-import org.esa.snap.core.datamodel.ProductNodeListenerAdapter;
-import org.esa.snap.core.datamodel.RasterDataNode;
+import org.esa.snap.core.datamodel.*;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.RenderedImage;
 import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;
-
-import org.esa.snap.core.datamodel.PixelPos;
 
 
 /**
@@ -52,6 +47,8 @@ public class ColorBarLayer extends Layer {
 
     private ProductNodeHandler productNodeHandler;
     private ColorBar colorbar;
+    private ImageLegend imageLegend;
+    RenderedImage renderedImage = null;
 
     private double NULL_DOUBLE = -1.0;
     private double ptsToPixelsMultiplier = NULL_DOUBLE;
@@ -99,6 +96,65 @@ public class ColorBarLayer extends Layer {
                     getGridSpacingLat(),
                     getGridSpacingLon(), isLabelsSuffix(), isLabelsDecimal());
         }
+
+
+        if (imageLegend == null) {
+            imageLegend = new ImageLegend(raster.getImageInfo(), raster);
+
+
+            imageLegend.setHeaderText((String) raster.getName());
+            imageLegend.setOrientation(ImageLegend.HORIZONTAL);
+            imageLegend.setBackgroundColor((Color) Color.WHITE);
+            imageLegend.setForegroundColor((Color) Color.BLACK);
+            imageLegend.setBackgroundTransparency(((Number) 0.5).floatValue());
+            imageLegend.setAntialiasing((Boolean) true);
+            imageLegend.setColorBarLength((Integer) 1200);
+            imageLegend.setColorBarThickness((Integer) 60);
+            imageLegend.setTitleFontSize((Integer) 24);
+            imageLegend.setTitleUnitsFontSize((Integer) 12);
+            imageLegend.setLabelsFontSize((Integer) 12);
+            imageLegend.setShowTitle((Boolean) true);
+            imageLegend.setDistributionType((String) ImageLegend.DISTRIB_EVEN_STR);
+            imageLegend.setScalingFactor((Double) 1.0);
+            imageLegend.setLayerScaling((Double) getLabelsRotationLon());
+            imageLegend.setNumberOfTicks((Integer) 5);
+
+            // todo Create it earlier and get it here
+            int imageHeight = raster.getRasterHeight();
+            int imageWidth = raster.getRasterWidth();
+
+            renderedImage = imageLegend.createImage(new Dimension(imageWidth, imageHeight), true);
+
+
+        }
+
+        if (imageLegend != null && renderedImage != null) {
+            final Graphics2D g2d = rendering.getGraphics();
+            // added this to improve text
+            g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+            g2d.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
+            final Viewport vp = rendering.getViewport();
+            final AffineTransform transformSave = g2d.getTransform();
+            try {
+                final AffineTransform transform = new AffineTransform();
+                transform.concatenate(transformSave);
+                transform.concatenate(vp.getModelToViewTransform());
+                transform.concatenate(raster.getSourceImage().getModel().getImageToModelTransform(0));
+                g2d.setTransform(transform);
+
+                drawImage(g2d, raster, renderedImage);
+
+            } finally {
+                g2d.setTransform(transformSave);
+            }
+
+
+        }
+
+
         if (colorbar != null) {
 
             final Graphics2D g2d = rendering.getGraphics();
@@ -219,6 +275,250 @@ public class ColorBarLayer extends Layer {
         }
     }
 
+
+    private void drawImage(Graphics2D g2d, RasterDataNode raster, RenderedImage renderedImage) {
+
+        AffineTransform transform = createTransform(renderedImage);
+        g2d.drawRenderedImage(renderedImage, transform);
+
+    }
+
+    private AffineTransform createTransform(RenderedImage image) {
+
+//        VisatApp visatApp = VisatApp.getApp();
+//        ProductSceneView sceneView = visatApp.getSelectedProductSceneView();
+//        RasterDataNode raster = sceneView.getSceneImage().getRasters()[0];
+        AffineTransform transform = raster.getSourceImage().getModel().getImageToModelTransform(0);
+        transform.concatenate(createTransform(raster, image));
+        return transform;
+        //return createTransform(raster, image);
+    }
+
+    private AffineTransform createTransform(RasterDataNode raster, RenderedImage colorBarImage) {
+
+        int colorBarImageWidth = colorBarImage.getWidth();
+        int colorBarImageHeight = colorBarImage.getHeight();
+
+        int rasterWidth = raster.getRasterWidth();
+        int rasterHeight = raster.getRasterHeight();
+
+        // todo Danny commented these out as orientation was being determined by image dimensions not by actual orientation
+        //if color bar is horizontal
+        // double scaleX = (colorBarImageHeight < colorBarImageWidth) ? (double) rasterWidth / colorBarImageWidth : 0.6;
+
+        //if color bar is vertical
+        // double scaleY = (colorBarImageHeight > colorBarImageWidth) ? (double) rasterHeight / colorBarImageHeight : 0.6;
+
+//        if (scaleX > 1) {
+//            scaleY = scaleY + 1;
+//        }   else if (scaleY > 1) { //this statement must have the "else" clause, otherwise the scaleX will be problematic.
+//            scaleX = scaleX + 1;
+//        }
+//        int y_axis_translation = (colorBarImageHeight < colorBarImageWidth) ? rasterHeight : (rasterHeight - colorBarImageHeight)/2;
+//        int x_axis_translation = (colorBarImageHeight < colorBarImageWidth) ? (rasterWidth - colorBarImageWidth)/2 : rasterWidth ;
+
+        //todo Danny added the following 2 lines and commented out the preceding block
+
+
+//        double y_axis_translation = (getOrientation() == ImageLegend.HORIZONTAL) ? rasterHeight + (rasterHeight * getLayerOffset()/100) : (rasterHeight - colorBarImageHeight)/2;
+//        double x_axis_translation = (getOrientation() == ImageLegend.HORIZONTAL) ? (rasterWidth - colorBarImageWidth)/2 : rasterWidth + (rasterWidth * getLayerOffset()/100) ;
+
+        double offset = (getOrientation() == ImageLegend.HORIZONTAL) ? (colorBarImageHeight * getLayerOffset() / 100) : (colorBarImageWidth * getLayerOffset() / 100);
+        double shift = (getOrientation() == ImageLegend.HORIZONTAL) ? (colorBarImageWidth * getLayerShift() / 100) : -(colorBarImageHeight * getLayerShift() / 100);
+
+        double defaultOffset = 0;
+        double defaultShift;
+
+        if (getOrientation() == ImageLegend.HORIZONTAL) {
+            defaultShift = (rasterWidth - colorBarImageWidth) / 2;
+        } else {
+            defaultShift = (rasterHeight - colorBarImageHeight) / 2;
+        }
+
+
+        if (getOrientation() == ImageLegend.HORIZONTAL) {
+            if (ColorBarParamInfo.LOCATION_INSIDE_STR.equals(getInsideOutsideLocation())) {
+
+
+                switch (getHorizontalLocation()) {
+
+                    case ColorBarParamInfo.LOCATION_BOTTOM_LEFT:
+                        defaultOffset = -colorBarImageHeight;
+                        defaultShift = 0;
+                        offset = -offset;
+                        break;
+                    case ColorBarParamInfo.LOCATION_BOTTOM_CENTER:
+                        defaultOffset = -colorBarImageHeight;
+                        defaultShift = (rasterWidth - colorBarImageWidth) / 2;
+                        offset = -offset;
+                        break;
+                    case ColorBarParamInfo.LOCATION_BOTTOM_RIGHT:
+                        defaultOffset = -colorBarImageHeight;
+                        defaultShift = rasterWidth - colorBarImageWidth;
+                        offset = -offset;
+                        break;
+                    case ColorBarParamInfo.LOCATION_TOP_LEFT:
+                        defaultOffset = -rasterHeight;
+                        defaultShift = 0;
+                        break;
+                    case ColorBarParamInfo.LOCATION_TOP_CENTER:
+                        defaultOffset = -rasterHeight;
+                        defaultShift = (rasterWidth - colorBarImageWidth) / 2;
+                        break;
+                    case ColorBarParamInfo.LOCATION_TOP_RIGHT:
+                        defaultOffset = -rasterHeight;
+                        defaultShift = rasterWidth - colorBarImageWidth;
+                        break;
+                    default:
+                        defaultOffset = -colorBarImageHeight;
+                        defaultShift = (rasterWidth - colorBarImageWidth) / 2;
+                }
+            } else {
+                switch (getHorizontalLocation()) {
+
+                    case ColorBarParamInfo.LOCATION_BOTTOM_LEFT:
+                        defaultOffset = 0;
+                        defaultShift = 0;
+                        break;
+                    case ColorBarParamInfo.LOCATION_BOTTOM_CENTER:
+                        defaultOffset = 0;
+                        defaultShift = (rasterWidth - colorBarImageWidth) / 2;
+                        break;
+                    case ColorBarParamInfo.LOCATION_BOTTOM_RIGHT:
+                        defaultOffset = 0;
+                        defaultShift = rasterWidth - colorBarImageWidth;
+                        break;
+                    case ColorBarParamInfo.LOCATION_TOP_LEFT:
+                        defaultOffset = -rasterHeight - colorBarImageHeight;
+                        defaultShift = 0;
+                        offset = -offset;
+                        break;
+                    case ColorBarParamInfo.LOCATION_TOP_CENTER:
+                        defaultOffset = -rasterHeight - colorBarImageHeight;
+                        defaultShift = (rasterWidth - colorBarImageWidth) / 2;
+                        offset = -offset;
+                        break;
+                    case ColorBarParamInfo.LOCATION_TOP_RIGHT:
+                        defaultOffset = -rasterHeight - colorBarImageHeight;
+                        defaultShift = rasterWidth - colorBarImageWidth;
+                        offset = -offset;
+                        break;
+                    default:
+                        defaultOffset = 0;
+                        defaultShift = (rasterWidth - colorBarImageWidth) / 2;
+                }
+            }
+
+        } else {
+            if (ColorBarParamInfo.LOCATION_INSIDE_STR.equals(getInsideOutsideLocation())) {
+                offset = -offset;
+
+                switch (getVerticalLocation()) {
+                    case ColorBarParamInfo.LOCATION_LEFT_UPPER:
+                        defaultOffset = -rasterWidth;
+                        defaultShift = 0;
+                        break;
+                    case ColorBarParamInfo.LOCATION_LEFT_CENTER:
+                        defaultOffset = -rasterWidth;
+                        defaultShift = (rasterHeight - colorBarImageHeight) / 2;
+                        break;
+                    case ColorBarParamInfo.LOCATION_LEFT_LOWER:
+                        defaultOffset = -rasterWidth;
+                        defaultShift = rasterHeight - colorBarImageHeight;
+                        break;
+                    case ColorBarParamInfo.LOCATION_RIGHT_UPPER:
+                        defaultOffset = -colorBarImageWidth;
+                        defaultShift = 0;
+                        break;
+                    case ColorBarParamInfo.LOCATION_RIGHT_CENTER:
+                        defaultOffset = -colorBarImageWidth;
+                        defaultShift = (rasterHeight - colorBarImageHeight) / 2;
+                        break;
+                    case ColorBarParamInfo.LOCATION_RIGHT_LOWER:
+                        defaultOffset = -colorBarImageWidth;
+                        defaultShift = rasterHeight - colorBarImageHeight;
+                        break;
+                    default:
+                        defaultOffset = -colorBarImageWidth;
+                        defaultShift = (rasterHeight - colorBarImageHeight) / 2;
+                }
+            } else {
+                switch (getVerticalLocation()) {
+                    case ColorBarParamInfo.LOCATION_LEFT_UPPER:
+                        defaultOffset = -rasterWidth - colorBarImageWidth;
+                        defaultShift = 0;
+                        break;
+                    case ColorBarParamInfo.LOCATION_LEFT_CENTER:
+                        defaultOffset = -rasterWidth - colorBarImageWidth;
+                        defaultShift = (rasterHeight - colorBarImageHeight) / 2;
+                        break;
+                    case ColorBarParamInfo.LOCATION_LEFT_LOWER:
+                        defaultOffset = -rasterWidth - colorBarImageWidth;
+                        defaultShift = rasterHeight - colorBarImageHeight;
+                        break;
+                    case ColorBarParamInfo.LOCATION_RIGHT_UPPER:
+                        defaultOffset = 0;
+                        defaultShift = 0;
+                        break;
+                    case ColorBarParamInfo.LOCATION_RIGHT_CENTER:
+                        defaultOffset = 0;
+                        defaultShift = (rasterHeight - colorBarImageHeight) / 2;
+                        break;
+                    case ColorBarParamInfo.LOCATION_RIGHT_LOWER:
+                        defaultOffset = 0;
+                        defaultShift = rasterHeight - colorBarImageHeight;
+                        break;
+                    default:
+                        defaultOffset = 0;
+                        defaultShift = (rasterHeight - colorBarImageHeight) / 2;
+                }
+            }
+        }
+
+
+        double y_axis_translation = (getOrientation() == ImageLegend.HORIZONTAL) ? rasterHeight + offset + defaultOffset : shift + defaultShift;
+        double x_axis_translation = (getOrientation() == ImageLegend.HORIZONTAL) ? shift + defaultShift : rasterWidth + offset + defaultOffset;
+        //double[] flatmatrix = {scaleX, 0.0, 0.0, scaleY, x_axis_translation, y_axis_translation};
+
+        // todo Danny tmp edits
+        y_axis_translation = 0.0;
+        x_axis_translation = 0.0;
+
+        double[] flatmatrix = {1, 0.0, 0.0, -1, x_axis_translation, y_axis_translation};
+
+        // todo end Danny tmp edits
+
+
+        AffineTransform i2mTransform = new AffineTransform(flatmatrix);
+        return i2mTransform;
+    }
+
+
+    public double getLayerOffset() {
+        return 0.0;
+    }
+
+    public double getLayerShift() {
+        return 0.0;
+    }
+
+    private String getInsideOutsideLocation() {
+        return ColorBarParamInfo.LOCATION_INSIDE_STR;
+    }
+
+
+    private String getHorizontalLocation() {
+        return ColorBarParamInfo.LOCATION_BOTTOM_RIGHT;
+    }
+
+    private String getVerticalLocation() {
+        return ColorBarParamInfo.LOCATION_RIGHT_LOWER;
+    }
+
+
+    private int getOrientation() {
+        return ImageLegend.HORIZONTAL;
+    }
 
     private void drawLeftSideLatCornerLabels(Graphics2D g2d) {
 
@@ -435,7 +735,6 @@ public class ColorBarLayer extends Layer {
         g2d.setPaint(origColor);
         g2d.setStroke(origStroke);
     }
-
 
 
     private boolean isTextConflict(PixelPos pixelPos, Graphics2D g2d, ColorBar.TextLocation textLocation,
@@ -898,7 +1197,10 @@ public class ColorBarLayer extends Layer {
                         propertyName.equals(ColorBarLayerType.PROPERTY_LABELS_DECIMAL_VALUE_NAME)
                 ) {
             colorbar = null;
+            imageLegend = null;
         }
+        imageLegend = null;
+
         if (getConfiguration().getProperty(propertyName) != null) {
             getConfiguration().setValue(propertyName, event.getNewValue());
         }
@@ -944,7 +1246,6 @@ public class ColorBarLayer extends Layer {
     }
 
 
-
     private Color getInsideLabelsBgColor() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_INSIDE_LABELS_BG_COLOR_NAME,
                 ColorBarLayerType.PROPERTY_INSIDE_LABELS_BG_COLOR_DEFAULT);
@@ -988,7 +1289,6 @@ public class ColorBarLayer extends Layer {
     }
 
 
-
     private double getPtsToPixelsMultiplier() {
 
         if (ptsToPixelsMultiplier == NULL_DOUBLE) {
@@ -1026,6 +1326,7 @@ public class ColorBarLayer extends Layer {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABELS_BOLD_NAME,
                 ColorBarLayerType.PROPERTY_LABELS_BOLD_DEFAULT);
     }
+
     private int getFontType() {
         if (isLabelsItalic() && isLabelsBold()) {
             return Font.ITALIC | Font.BOLD;
@@ -1044,7 +1345,7 @@ public class ColorBarLayer extends Layer {
     }
 
     private double getLabelsRotationLon() {
-        return  getConfigurationProperty(ColorBarLayerType.PROPERTY_LABELS_ROTATION_LON_NAME,
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABELS_ROTATION_LON_NAME,
                 ColorBarLayerType.PROPERTY_LABELS_ROTATION_LON_DEFAULT);
     }
 
