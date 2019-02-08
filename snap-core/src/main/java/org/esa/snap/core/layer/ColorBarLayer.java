@@ -47,6 +47,7 @@ public class ColorBarLayer extends Layer {
     private double ptsToPixelsMultiplier = NULL_DOUBLE;
 
 
+
     private int minorStep = 4;
 
 
@@ -63,6 +64,12 @@ public class ColorBarLayer extends Layer {
         raster.getProduct().addProductNodeListener(productNodeHandler);
 
         setTransparency(0.0);
+
+// todo Danny this doesn't work but would like to init the param in the Editor with the value
+//        configuration.setValue(ColorBarLayerType.PROPERTY_COLORBAR_TITLE_TITLE_ALIAS, raster.getName());
+//        configuration.setValue(ColorBarLayerType.PROPERTY_COLORBAR_TITLE_UNITS_ALIAS, raster.getUnit());
+
+
     }
 
     private static PropertySet initConfiguration(PropertySet configurationTemplate, RasterDataNode raster) {
@@ -86,7 +93,12 @@ public class ColorBarLayer extends Layer {
         if (imageLegend == null) {
             imageLegend = new ImageLegend(raster.getImageInfo(), raster);
 
-            imageLegend.setHeaderText((String) raster.getName());
+            String title = (getTitle() != null && getTitle().trim().length() > 0) ? getTitle() : raster.getName();
+            String units = (getUnits() != null && getUnits().trim().length() > 0) ? getUnits() : raster.getUnit();
+
+            imageLegend.setShowTitle((Boolean) isShowTitle());
+            imageLegend.setHeaderText((String) title);
+            imageLegend.setHeaderUnitsText((String) units);
             imageLegend.setOrientation(ImageLegend.HORIZONTAL);
             imageLegend.setBackgroundColor((Color) Color.WHITE);
             imageLegend.setForegroundColor((Color) Color.BLACK);
@@ -97,12 +109,14 @@ public class ColorBarLayer extends Layer {
             imageLegend.setTitleFontSize((Integer) 35);
             imageLegend.setTitleUnitsFontSize((Integer) 35);
             imageLegend.setLabelsFontSize((Integer) 35);
-            imageLegend.setShowTitle((Boolean) true);
             imageLegend.setDistributionType((String) ImageLegend.DISTRIB_EVEN_STR);
             imageLegend.setScalingFactor((Double) 1.0);
-            imageLegend.setLayerScaling((Double) getLabelsRotationLon());
+            imageLegend.setLayerScaling((Double) getSizeScaling());
             imageLegend.setNumberOfTicks((Integer) 5);
 
+
+
+            imageLegend.setBackgroundTransparencyEnabled(true);
 
             int imageHeight = raster.getRasterHeight();
             int imageWidth = raster.getRasterWidth();
@@ -117,7 +131,11 @@ public class ColorBarLayer extends Layer {
             int imageHeight = raster.getRasterHeight();
             int imageWidth = raster.getRasterWidth();
 
-            bufferedImage = imageLegend.createImage(new Dimension(imageWidth, imageHeight), true);
+            if (applySizeScaling()) {
+                bufferedImage = imageLegend.createImage(new Dimension(imageWidth, imageHeight), true);
+            } else {
+                bufferedImage = imageLegend.createImage();
+            }
 
 
 
@@ -150,6 +168,10 @@ public class ColorBarLayer extends Layer {
     }
 
 
+
+
+
+
     private void drawImage(Graphics2D g2d, RasterDataNode raster, BufferedImage bufferedImage) {
 
         AffineTransform transform = createTransform(bufferedImage);
@@ -175,8 +197,8 @@ public class ColorBarLayer extends Layer {
         int rasterHeight = raster.getRasterHeight();
 
 
-        double offset = (getOrientation() == ImageLegend.HORIZONTAL) ? (colorBarImageHeight * getLayerOffset() / 100) : (colorBarImageWidth * getLayerOffset() / 100);
-        double shift = (getOrientation() == ImageLegend.HORIZONTAL) ? (colorBarImageWidth * getLayerShift() / 100) : -(colorBarImageHeight * getLayerShift() / 100);
+        double offset = (getOrientation() == ImageLegend.HORIZONTAL) ? (colorBarImageHeight * getLocationOffset() / 100) : (colorBarImageWidth * getLocationOffset() / 100);
+        double shift = (getOrientation() == ImageLegend.HORIZONTAL) ? (colorBarImageWidth * getLocationShift() / 100) : -(colorBarImageHeight * getLocationShift() / 100);
 
         double defaultOffset = 0;
         double defaultShift;
@@ -221,10 +243,20 @@ public class ColorBarLayer extends Layer {
                         defaultOffset = -rasterHeight;
                         defaultShift = rasterWidth - colorBarImageWidth;
                         break;
+                    case ColorBarLayerType.LOCATION_LEFT_CENTER:
+                        defaultOffset = -(rasterHeight + colorBarImageHeight) / 2;;
+                        defaultShift = 0;
+                        break;
+                    case ColorBarLayerType.LOCATION_RIGHT_CENTER:
+                        defaultOffset = -(rasterHeight + colorBarImageHeight) / 2;;
+                        defaultShift = rasterWidth - colorBarImageWidth;
+                        break;
                     default:
                         defaultOffset = -colorBarImageHeight;
                         defaultShift = (rasterWidth - colorBarImageWidth) / 2;
                 }
+
+
             } else {
                 switch (getColorBarLocationPlacement()) {
 
@@ -340,13 +372,7 @@ public class ColorBarLayer extends Layer {
     }
 
 
-    public double getLayerOffset() {
-        return 0.0;
-    }
 
-    public double getLayerShift() {
-        return 0.0;
-    }
 
     private String getInsideOutsideLocation() {
         return ColorBarParamInfo.LOCATION_INSIDE_STR;
@@ -554,6 +580,51 @@ public class ColorBarLayer extends Layer {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_COLORBAR_LOCATION_PLACEMENT_NAME,
                 ColorBarLayerType.PROPERTY_COLORBAR_LOCATION_PLACEMENT_DEFAULT);
     }
+
+
+    private Double getLocationOffset() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_COLORBAR_LOCATION_OFFSET_NAME,
+                ColorBarLayerType.PROPERTY_COLORBAR_LOCATION_OFFSET_DEFAULT);
+    }
+
+    private Double getLocationShift() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_COLORBAR_LOCATION_SHIFT_NAME,
+                ColorBarLayerType.PROPERTY_COLORBAR_LOCATION_SHIFT_DEFAULT);
+    }
+
+
+    private boolean isShowTitle() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_COLORBAR_TITLE_SHOW_TITLE_NAME,
+                ColorBarLayerType.PROPERTY_COLORBAR_TITLE_SHOW_TITLE_DEFAULT);
+    }
+
+    private String getTitle() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_COLORBAR_TITLE_TITLE_NAME,
+                ColorBarLayerType.PROPERTY_COLORBAR_TITLE_TITLE_DEFAULT);
+    }
+
+    private String getUnits() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_COLORBAR_TITLE_UNITS_NAME,
+                ColorBarLayerType.PROPERTY_COLORBAR_TITLE_UNITS_DEFAULT);
+    }
+
+
+
+    private boolean applySizeScaling() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_COLORBAR_SCALING_APPLY_SIZE_SCALING_NAME,
+                ColorBarLayerType.PROPERTY_COLORBAR_SCALING_APPLY_SIZE_SCALING_DEFAULT);
+    }
+
+
+    private Double getSizeScaling() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_COLORBAR_SCALING_SIZE_SCALING_NAME,
+                ColorBarLayerType.PROPERTY_COLORBAR_SCALING_SIZE_SCALING_DEFAULT);
+    }
+
+
+
+
+
 
 
 

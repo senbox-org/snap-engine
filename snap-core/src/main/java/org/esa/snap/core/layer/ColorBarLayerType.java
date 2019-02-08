@@ -1,18 +1,4 @@
-/*
- * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the Free
- * Software Foundation; either version 3 of the License, or (at your option)
- * any later version.
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, see http://www.gnu.org/licenses/
- */
+
 
 package org.esa.snap.core.layer;
 
@@ -29,10 +15,8 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 
 /**
- * @author Brockmann Consult
  * @author Daniel Knowles
  */
-//JAN2018 - Daniel Knowles - updated with SeaDAS gridline revisions
 
 
 @LayerTypeMetadata(name = "ColorBarLayerType", aliasNames = {"org.esa.snap.core.layer.ColorBarLayerType"})
@@ -41,7 +25,7 @@ public class ColorBarLayerType extends LayerType {
     // Property Settings: ColorBar Location Section
 
     public static final String PROPERTY_COLORBAR_LOCATION_SECTION_NAME = "colorbar.location.section";
-    public static final String PROPERTY_COLORBAR_LOCATION_SECTION_LABEL = "Size & Location";
+    public static final String PROPERTY_COLORBAR_LOCATION_SECTION_LABEL = "Location";
     public static final String PROPERTY_COLORBAR_LOCATION_SECTION_TOOLTIP = "Set location and relative size of color bar image";
     public static final String PROPERTY_COLORBAR_LOCATION_SECTION_ALIAS = "colorbarLocationSection";
 
@@ -61,8 +45,6 @@ public class ColorBarLayerType extends LayerType {
     public static final String LOCATION_LOWER_RIGHT = "Lower Right";
     public static final String LOCATION_LEFT_CENTER = "Left Side Center";
     public static final String LOCATION_RIGHT_CENTER = "Right Side Center";
-
-
     public static String[] getColorBarLocationArray() {
         return  new String[]{
                 LOCATION_UPPER_LEFT,
@@ -71,13 +53,10 @@ public class ColorBarLayerType extends LayerType {
                 LOCATION_LOWER_LEFT,
                 LOCATION_LOWER_CENTER,
                 LOCATION_LOWER_RIGHT,
-//                LOCATION_LEFT_CENTER,
-//                LOCATION_RIGHT_CENTER
+                LOCATION_LEFT_CENTER,
+                LOCATION_RIGHT_CENTER
         };
     }
-
-
-
 
     public static final String PROPERTY_COLORBAR_LOCATION_PLACEMENT_NAME = "colorbar.location.placement";
     public static final String PROPERTY_COLORBAR_LOCATION_PLACEMENT_LABEL = "Placement";
@@ -86,6 +65,83 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_COLORBAR_LOCATION_PLACEMENT_DEFAULT = LOCATION_LOWER_RIGHT;
     public static final Class PROPERTY_COLORBAR_LOCATION_PLACEMENT_TYPE = String.class;
 
+    public static final String PROPERTY_COLORBAR_LOCATION_OFFSET_NAME = "colorbar.location.offset";
+    public static final String PROPERTY_COLORBAR_LOCATION_OFFSET_LABEL = "Offset";
+    public static final String PROPERTY_COLORBAR_LOCATION_OFFSET_TOOLTIP = "Move color bar away from axis (by percentage of color bar height)";
+    private static final String PROPERTY_COLORBAR_LOCATION_OFFSET_ALIAS = "colorbarLocationOffset";
+    public static final Double PROPERTY_COLORBAR_LOCATION_OFFSET_DEFAULT = 0.0;
+    public static final Class PROPERTY_COLORBAR_LOCATION_OFFSET_TYPE = Double.class;
+
+    public static final String PROPERTY_COLORBAR_LOCATION_SHIFT_NAME = "colorbar.location.shift";
+    public static final String PROPERTY_COLORBAR_LOCATION_SHIFT_LABEL = "Shift";
+    public static final String PROPERTY_COLORBAR_LOCATION_SHIFT_TOOLTIP = "Move color bar along the axis (by percentage of color bar width)";
+    private static final String PROPERTY_COLORBAR_LOCATION_SHIFT_ALIAS = "colorbarLocationShift";
+    public static final Double PROPERTY_COLORBAR_LOCATION_SHIFT_DEFAULT = 0.0;
+    public static final Class PROPERTY_COLORBAR_LOCATION_SHIFT_TYPE = Double.class;
+
+
+
+    // Property Settings: ColorBar Scaling Section
+
+    public static final String PROPERTY_COLORBAR_SCALING_SECTION_NAME = "colorbar.scaling.section";
+    public static final String PROPERTY_COLORBAR_SCALING_SECTION_LABEL = "Scaling";
+    public static final String PROPERTY_COLORBAR_SCALING_SECTION_TOOLTIP = "Set scaling and relative size of color bar image";
+    public static final String PROPERTY_COLORBAR_SCALING_SECTION_ALIAS = "colorbarLocationSection";
+
+    public static final String PROPERTY_COLORBAR_SCALING_APPLY_SIZE_SCALING_NAME = "colorbar.scaling.apply.size.scaling";
+    public static final String PROPERTY_COLORBAR_SCALING_APPLY_SIZE_SCALING_LABEL = "Scale size to image size";
+    public static final String PROPERTY_COLORBAR_SCALING_APPLY_SIZE_SCALING_TOOLTIP = "Scale the color bar size relative to the scene image size";
+    private static final String PROPERTY_COLORBAR_SCALING_APPLY_SIZE_SCALING_ALIAS = "colorbarScalingApplySizeScaling";
+    public static final boolean PROPERTY_COLORBAR_SCALING_APPLY_SIZE_SCALING_DEFAULT = true;
+    public static final Class PROPERTY_COLORBAR_SCALING_APPLY_SIZE_SCALING_TYPE = Boolean.class;
+
+    public static final String PROPERTY_COLORBAR_SCALING_SIZE_SCALING_NAME = "colorbar.scaling.size.scaling";
+    public static final String PROPERTY_COLORBAR_SCALING_SIZE_SCALING_LABEL = "Scaling Percent";
+    public static final String PROPERTY_COLORBAR_SCALING_SIZE_SCALING_TOOLTIP = "Percent to scale color bar relative to the scene image size";
+    private static final String PROPERTY_COLORBAR_SCALING_SIZE_SCALING_ALIAS = "colorbarScalingSizeScaling";
+    public static final double PROPERTY_COLORBAR_SCALING_SIZE_SCALING_DEFAULT = 50.0;
+    public static final Class PROPERTY_COLORBAR_SCALING_SIZE_SCALING_TYPE = Double.class;
+
+    
+
+    // Property Settings: ColorBar Title Section
+
+    public static final String PROPERTY_COLORBAR_TITLE_SECTION_NAME = "colorbar.title.section";
+    public static final String PROPERTY_COLORBAR_TITLE_SECTION_LABEL = "Title";
+    public static final String PROPERTY_COLORBAR_TITLE_SECTION_TOOLTIP = "Set title of color bar";
+    public static final String PROPERTY_COLORBAR_TITLE_SECTION_ALIAS = "colorbarTitleSection";
+
+    public static final String PROPERTY_COLORBAR_TITLE_SHOW_TITLE_NAME = "colorbar.title.show";
+    public static final String PROPERTY_COLORBAR_TITLE_SHOW_TITLE_LABEL = "Show Title";
+    public static final String PROPERTY_COLORBAR_TITLE_SHOW_TITLE_TOOLTIP = "Add title to the color bar";
+    private static final String PROPERTY_COLORBAR_TITLE_SHOW_TITLE_ALIAS = "colorbarTitleShow";
+    public static final boolean PROPERTY_COLORBAR_TITLE_SHOW_TITLE_DEFAULT = true;
+    public static final Class PROPERTY_COLORBAR_TITLE_SHOW_TITLE_TYPE = Boolean.class;
+
+    public static final String PROPERTY_COLORBAR_TITLE_TITLE_NAME = "colorbar.title.title";
+    public static final String PROPERTY_COLORBAR_TITLE_TITLE_LABEL = "Title";
+    public static final String PROPERTY_COLORBAR_TITLE_TITLE_TOOLTIP = "Add title to the color bar";
+    public static final String PROPERTY_COLORBAR_TITLE_TITLE_ALIAS = "colorbarTitleTitle";
+    public static final String PROPERTY_COLORBAR_TITLE_TITLE_DEFAULT = "";
+    public static final Class PROPERTY_COLORBAR_TITLE_TITLE_TYPE = String.class;
+
+    public static final String PROPERTY_COLORBAR_TITLE_UNITS_NAME = "colorbar.title.units";
+    public static final String PROPERTY_COLORBAR_TITLE_UNITS_LABEL = "Units";
+    public static final String PROPERTY_COLORBAR_TITLE_UNITS_TOOLTIP = "Add units to the title of the color bar";
+    public static final String PROPERTY_COLORBAR_TITLE_UNITS_ALIAS = "colorbarTitleUnits";
+    public static final String PROPERTY_COLORBAR_TITLE_UNITS_DEFAULT = "";
+    public static final Class PROPERTY_COLORBAR_TITLE_UNITS_TYPE = String.class;
+
+
+
+
+
+
+
+
+
+
+    
 
 
     // Property Settings: Grid Spacing Section
@@ -438,13 +494,64 @@ public class ColorBarLayerType extends LayerType {
         locationSectionModel.getDescriptor().setAlias(PROPERTY_COLORBAR_LOCATION_SECTION_ALIAS);
         vc.addProperty(locationSectionModel);
 
-        final Property locationInsideModel = Property.create(PROPERTY_COLORBAR_LOCATION_INSIDE_NAME, Boolean.class, true, true);
+        final Property locationInsideModel = Property.create(PROPERTY_COLORBAR_LOCATION_INSIDE_NAME, PROPERTY_COLORBAR_LOCATION_INSIDE_TYPE, true, true);
         locationInsideModel.getDescriptor().setAlias(PROPERTY_COLORBAR_LOCATION_INSIDE_ALIAS);
         vc.addProperty(locationInsideModel);
 
-        final Property locationEdgeModel = Property.create(PROPERTY_COLORBAR_LOCATION_PLACEMENT_NAME, String.class, true, true);
+        final Property locationEdgeModel = Property.create(PROPERTY_COLORBAR_LOCATION_PLACEMENT_NAME, PROPERTY_COLORBAR_LOCATION_PLACEMENT_TYPE, true, true);
         locationEdgeModel.getDescriptor().setAlias(PROPERTY_COLORBAR_LOCATION_PLACEMENT_ALIAS);
         vc.addProperty(locationEdgeModel);
+
+
+        final Property locationOffsetModel = Property.create(PROPERTY_COLORBAR_LOCATION_OFFSET_NAME, PROPERTY_COLORBAR_LOCATION_OFFSET_TYPE, true, true);
+        locationOffsetModel.getDescriptor().setAlias(PROPERTY_COLORBAR_LOCATION_OFFSET_ALIAS);
+        vc.addProperty(locationOffsetModel);
+
+        final Property locationShiftModel = Property.create(PROPERTY_COLORBAR_LOCATION_SHIFT_NAME, PROPERTY_COLORBAR_LOCATION_SHIFT_TYPE, true, true);
+        locationShiftModel.getDescriptor().setAlias(PROPERTY_COLORBAR_LOCATION_SHIFT_ALIAS);
+        vc.addProperty(locationShiftModel);
+
+
+
+
+
+
+
+        final Property scalingSectionModel = Property.create(PROPERTY_COLORBAR_SCALING_SECTION_NAME, Boolean.class, true, true);
+        scalingSectionModel.getDescriptor().setAlias(PROPERTY_COLORBAR_SCALING_SECTION_ALIAS);
+        vc.addProperty(scalingSectionModel);
+
+        final Property locationApplySizeScalingModel = Property.create(PROPERTY_COLORBAR_SCALING_APPLY_SIZE_SCALING_NAME, PROPERTY_COLORBAR_SCALING_APPLY_SIZE_SCALING_TYPE, true, true);
+        locationApplySizeScalingModel.getDescriptor().setAlias(PROPERTY_COLORBAR_SCALING_APPLY_SIZE_SCALING_ALIAS);
+        vc.addProperty(locationApplySizeScalingModel);
+
+        final Property locationSizeScalingModel = Property.create(PROPERTY_COLORBAR_SCALING_SIZE_SCALING_NAME, ColorBarLayerType.PROPERTY_COLORBAR_SCALING_SIZE_SCALING_TYPE, true, true);
+        locationSizeScalingModel.getDescriptor().setAlias(PROPERTY_COLORBAR_SCALING_SIZE_SCALING_ALIAS);
+        vc.addProperty(locationSizeScalingModel);
+
+
+        final Property titleSectionModel = Property.create(PROPERTY_COLORBAR_TITLE_SECTION_NAME, Boolean.class, true, true);
+        titleSectionModel.getDescriptor().setAlias(PROPERTY_COLORBAR_TITLE_SECTION_ALIAS);
+        vc.addProperty(titleSectionModel);
+
+        final Property titleShowModel = Property.create(PROPERTY_COLORBAR_TITLE_SHOW_TITLE_NAME,
+                PROPERTY_COLORBAR_TITLE_SHOW_TITLE_TYPE, true, true);
+        titleShowModel.getDescriptor().setAlias(PROPERTY_COLORBAR_TITLE_SHOW_TITLE_ALIAS);
+        vc.addProperty(titleShowModel);
+
+        final Property titleValueModel = Property.create(PROPERTY_COLORBAR_TITLE_TITLE_NAME,
+                PROPERTY_COLORBAR_TITLE_TITLE_TYPE, true, true);
+        titleValueModel.getDescriptor().setAlias(PROPERTY_COLORBAR_TITLE_TITLE_ALIAS);
+        vc.addProperty(titleValueModel);
+
+        final Property titleUnitsModel = Property.create(PROPERTY_COLORBAR_TITLE_UNITS_NAME,
+                PROPERTY_COLORBAR_TITLE_UNITS_TYPE, true, true);
+        titleUnitsModel.getDescriptor().setAlias(PROPERTY_COLORBAR_TITLE_UNITS_ALIAS);
+        vc.addProperty(titleUnitsModel);
+
+
+
+
 
 
 

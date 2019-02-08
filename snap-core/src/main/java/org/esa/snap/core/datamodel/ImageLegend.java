@@ -354,13 +354,27 @@ public class ImageLegend {
             // todo DANNY
         }
 
+        int tmpLabelsFontSize = getLabelsFontSize();
+        int tmpTitleFontSize = getTitleFontSize();
+        int tmpTitleUnitsFontSize = getTitleUnitsFontSize();
+        int tmpColorBarLength = getColorBarLength();
+        int tmpColorBarThickness = getColorBarThickness();
+
         setLabelsFontSize((int) Math.round(scalingFactor * getLabelsFontSize()));
         setTitleFontSize((int) Math.round(scalingFactor * getTitleFontSize()));
         setTitleUnitsFontSize((int) Math.round(scalingFactor * getTitleUnitsFontSize()));
         setColorBarLength((int) Math.round(scalingFactor * getColorBarLength()));
         setColorBarThickness((int) Math.round(scalingFactor * getColorBarThickness()));
 
-        return createImage();
+        BufferedImage bufferedImage = createImage();
+
+        setLabelsFontSize(tmpLabelsFontSize);
+        setTitleFontSize(tmpTitleFontSize);
+        setTitleUnitsFontSize(tmpTitleUnitsFontSize);
+        setColorBarLength(tmpColorBarLength);
+        setColorBarThickness(tmpColorBarThickness);
+
+        return bufferedImage;
     }
 
 
