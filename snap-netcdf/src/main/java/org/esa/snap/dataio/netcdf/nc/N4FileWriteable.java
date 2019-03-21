@@ -16,6 +16,7 @@
 
 package org.esa.snap.dataio.netcdf.nc;
 
+import org.esa.snap.dataio.netcdf.NetCDF4Chunking;
 import org.esa.snap.dataio.netcdf.util.DataTypeUtils;
 import org.esa.snap.dataio.netcdf.util.DimKey;
 import ucar.ma2.DataType;
@@ -23,8 +24,6 @@ import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
 import ucar.nc2.NetcdfFileWriter;
 import ucar.nc2.Variable;
-import ucar.nc2.write.Nc4Chunking;
-import ucar.nc2.write.Nc4ChunkingDefault;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -39,7 +38,7 @@ public class N4FileWriteable extends NFileWriteable {
 
 
     N4FileWriteable(String filename) throws IOException {
-        netcdfFileWriter = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, filename);
+        netcdfFileWriter = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, filename, new NetCDF4Chunking());
     }
 
     @Override
@@ -85,8 +84,8 @@ public class N4FileWriteable extends NFileWriteable {
             }
         }
         else{
-                chunkLens[0]=1;
-            }
+            chunkLens[0]=1;
+        }
         //Object fillValue = null; // TODO
         for (int i=0; i<chunkLens.length; i++) {
             if (chunkLens[i]==null) {
