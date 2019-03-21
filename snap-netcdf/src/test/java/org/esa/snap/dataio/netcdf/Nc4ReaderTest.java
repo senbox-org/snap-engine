@@ -17,6 +17,7 @@
 package org.esa.snap.dataio.netcdf;
 
 import org.esa.snap.core.dataio.ProductReader;
+import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.MetadataAttribute;
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.Product;
@@ -32,6 +33,8 @@ import java.net.URLDecoder;
 import java.util.Calendar;
 
 import static org.junit.Assert.*;
+
+import com.bc.ceres.glevel.MultiLevelImage;
 
 /**
  * @author Ralf Quast
@@ -91,6 +94,36 @@ public class Nc4ReaderTest {
         MetadataAttribute unconstrainedLonValues = unconstrainedLonElement.getElement("Values").getAttribute("data");
         long unconstrainedLonValueCount = unconstrainedLonValues.getNumDataElems();
         assertEquals(5, unconstrainedLonValueCount);
+    }
+
+    @Test
+    public void testNCMLSupport() throws Exception {
+
+        // The test.ncml NCML file simply renames the CHL1_value variable to CHL1_renamed
+        final URL url = Nc4ReaderTest.class.getResource("test.ncml");
+        final String path = URLDecoder.decode(url.getPath(), "UTF-8");
+        final File file = new File(path);
+        final ProductReader reader = new CfNetCdfReaderPlugIn().createReaderInstance();
+
+        final Product defaultProduct = reader.readProductNodes(file.getPath(), null);
+        MetadataElement defaultLonElement = defaultProduct.getMetadataRoot().getElement("Variable_Attributes").getElement("lon");
+        MetadataAttribute defaultLonValues = defaultLonElement.getElement("Values").getAttribute("data");
+        long defaultLonValueCount = defaultLonValues.getNumDataElems();
+        assertEquals(5, defaultLonValueCount);
+
+        Band band = defaultProduct.getBand("CHL1_value");
+        // The original CHL1_value variable available on test.nc 
+        // isn't available on test.ncml since it has been renamed
+        assertNull(band);
+
+        band = defaultProduct.getBand("CHL1_renamed");
+        // The renamed variable should be available
+        assertNotNull(band);
+
+        final MultiLevelImage image = band.getSourceImage();
+        assertEquals(5, image.getHeight());
+        assertEquals(5, image.getWidth());
+        image.dispose();
     }
 
     private void testStartTime(final Product product) {
