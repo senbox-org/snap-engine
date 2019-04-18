@@ -133,6 +133,15 @@ public class GraphProcessor {
         }
     }
 
+    private void executeNodeSources(NodeSource[] sources, GraphContext graphContext, ProgressMonitor pm) {
+        for (NodeSource source : sources) {
+            Node node = source.getSourceNode();
+            executeNodeSources(node.getSources(), graphContext, pm);
+            NodeContext nodeContext = graphContext.getNodeContext(node);
+            nodeContext.getOperator().execute(pm);
+        }
+    }
+
     /**
      * Executes the graph given by {@link GraphContext}.
      *
@@ -147,6 +156,12 @@ public class GraphProcessor {
         //Header header = graphContext.getGraph().getHeader();
         // TODO use header to specify execution order (mz, 2009-11-16)
         NodeContext[] outputNodeContexts = graphContext.getOutputNodeContexts();
+        for (NodeContext outputNodeContext : outputNodeContexts) {
+            NodeSource[] sources = outputNodeContext.getNode().getSources();
+            //todo consider improving handling of progressmonitor here
+            executeNodeSources(sources, graphContext, pm);
+            outputNodeContext.getOperator().execute(pm);
+        }
         Map<Dimension, List<NodeContext>> tileDimMap = buildTileDimensionMap(outputNodeContexts);
 
         List<Dimension> dimList = new ArrayList<>(tileDimMap.keySet());
