@@ -316,6 +316,7 @@ public class GPF {
                                    RenderingHints renderingHints) {
         Operator operator = createOperator(operatorName, parameters, sourceProducts, renderingHints);
         Product targetProduct = operator.getTargetProduct();
+        //todo set useful progressmonitor
         operator.execute(ProgressMonitor.NULL);
         return targetProduct;
     }
