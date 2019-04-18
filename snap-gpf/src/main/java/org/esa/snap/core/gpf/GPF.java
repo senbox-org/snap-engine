@@ -315,7 +315,9 @@ public class GPF {
                                    Map<String, Product> sourceProducts,
                                    RenderingHints renderingHints) {
         Operator operator = createOperator(operatorName, parameters, sourceProducts, renderingHints);
-        return operator.getTargetProduct();
+        Product targetProduct = operator.getTargetProduct();
+        operator.execute(ProgressMonitor.NULL);
+        return targetProduct;
     }
 
     /**
