@@ -693,10 +693,17 @@ public class OperatorContext {
     }
 
     private void initTargetImages() {
+        final Band[] targetBands = targetProduct.getBands();
+        targetImageMap = new HashMap<>(targetBands.length * 2);
+        updateTargetImages();
+    }
+
+    private void updateTargetImages() {
+        //todo check whether useful images are already set
+        final Band[] targetBands = targetProduct.getBands();
         if (targetProduct.getPreferredTileSize() == null) {
             targetProduct.setPreferredTileSize(getPreferredTileSize());
         }
-        final Band[] targetBands = targetProduct.getBands();
         Object[][] locks = null;
         if (operatorMustComputeTileStack()) {
             Dimension tileSize = targetProduct.getPreferredTileSize();
@@ -1241,6 +1248,7 @@ public class OperatorContext {
     public synchronized void executeOperator(ProgressMonitor pm) {
         if (!executed) {
             getOperator().doExecute(pm);
+            updateTargetImages();
             executed = true;
         }
     }
