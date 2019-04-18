@@ -307,6 +307,7 @@ public class CommandLineTool implements GraphProcessingObserver {
 
         OperatorDescriptor operatorDescriptor = operatorSpi.getOperatorDescriptor();
         final OperatorExecutor executor = OperatorExecutor.create(operator);
+        //todo set useful progressmonitor
         executor.execute(ProgressMonitor.NULL);
         if (!operatorDescriptor.isAutoWriteDisabled()) {
             String filePath = commandLineArgs.getTargetFilePath();
