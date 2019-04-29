@@ -230,7 +230,7 @@ public class BandMathsOp extends Operator {
             description = "List of variables which can be used within the expressions.")
     private Variable[] variables;
 
-    private Map<Band, BandDescriptor> descriptorMap;
+    private Map<String, BandDescriptor> descriptorMap;
 
 
     public BandMathsOp() {
@@ -275,7 +275,7 @@ public class BandMathsOp extends Operator {
             if (refRasters.length > 0) {
                 ProductUtils.copyImageGeometry(refRasters[0], targetBand, true);
             }
-            descriptorMap.put(targetBand, bandDescriptor);
+            descriptorMap.put(targetBand.getName(), bandDescriptor);
         }
 
         ProductUtils.copyMetadata(sourceProducts[0], targetProduct);
@@ -328,7 +328,7 @@ public class BandMathsOp extends Operator {
         Rectangle rect = targetTile.getRectangle();
         // Each tile needs its own Term for storing the symbol data.
         // We don't need the type checking here it is already done before.
-        final Term term = createTerm(descriptorMap.get(band).expression, false);
+        final Term term = createTerm(descriptorMap.get(band.getName()).expression, false);
         RasterDataSymbol[] refRasterDataSymbols = BandArithmetic.getRefRasterDataSymbols(term);
 
         for (RasterDataSymbol symbol : refRasterDataSymbols) {
