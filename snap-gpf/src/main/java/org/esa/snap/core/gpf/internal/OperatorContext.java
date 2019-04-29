@@ -46,7 +46,6 @@ import org.esa.snap.core.gpf.OperatorCancelException;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.OperatorSpiRegistry;
-import org.esa.snap.core.gpf.internal.ProxyProduct;
 import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.annotations.ParameterDescriptorFactory;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
@@ -122,7 +121,7 @@ public class OperatorContext {
     private final boolean computeTileStackMethodImplemented;
 
     private String id;
-    private Product targetProduct;
+    private OperatorProduct targetProduct;
     private OperatorSpi operatorSpi;
     private Map<Band, OperatorImage> targetImageMap;
     private OperatorConfiguration configuration;
@@ -273,12 +272,16 @@ public class OperatorContext {
         if (targetProduct == null) {
             initializeOperator();
         }
-        return new ProxyProduct(getOperator());
+        return targetProduct;
     }
 
     public void setTargetProduct(Product targetProduct) {
         Assert.notNull(targetProduct, "targetProduct");
-        this.targetProduct = targetProduct;
+        if (!(targetProduct instanceof OperatorProduct)) {
+            this.targetProduct = new OperatorProduct(getOperator(), targetProduct);
+        } else {
+            this.targetProduct = (OperatorProduct) targetProduct;
+        }
     }
 
     public Object getTargetProperty(String name) {
@@ -491,6 +494,7 @@ public class OperatorContext {
             initGraphMetadata();
 
             targetProduct.setModified(false);
+            targetProduct.setInitialized(true);
         } finally {
             initialising = false;
         }
@@ -843,8 +847,15 @@ public class OperatorContext {
                                                         declaredField.getName(), Product.class);
                     throw new OperatorException(msg);
                 }
-                final Product targetProduct = (Product) getOperatorFieldValue(declaredField);
-                if (targetProduct != null) {
+                Product operatorTargetProduct = (Product) getOperatorFieldValue(declaredField);
+                if (operatorTargetProduct != null) {
+                    OperatorProduct targetProduct;
+                    if (!(operatorTargetProduct instanceof OperatorProduct)) {
+                        targetProduct = new OperatorProduct(getOperator(), operatorTargetProduct);
+                    } else {
+                        targetProduct = (OperatorProduct) operatorTargetProduct;
+                    }
+                    setOperatorFieldValue(declaredField, targetProduct);
                     this.targetProduct = targetProduct;
                 } else {
                     if (this.targetProduct != null) {
