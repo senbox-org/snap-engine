@@ -80,7 +80,7 @@ public class DimapProductReader extends AbstractProductReader {
     private File inputFile;
     private Map<Band, ImageInputStream> bandInputStreams;
 
-    private Map<Band, File> bandDataFiles;
+    private Map<String, File> bandDataFiles;
     private Set<ReaderExtender> readerExtenders;
 
     /**
@@ -310,7 +310,7 @@ public class DimapProductReader extends AbstractProductReader {
         final int sourceMaxX = sourceOffsetX + sourceWidth - 1;
         final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
 
-        final File dataFile = bandDataFiles.get(destBand);
+        final File dataFile = bandDataFiles.get(destBand.getName());
         final ImageInputStream inputStream = getOrCreateImageInputStream(destBand, dataFile);
         if (inputStream == null) {
             return;
