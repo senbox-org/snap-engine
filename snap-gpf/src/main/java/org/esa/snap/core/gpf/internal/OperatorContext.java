@@ -46,6 +46,7 @@ import org.esa.snap.core.gpf.OperatorCancelException;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.OperatorSpiRegistry;
+import org.esa.snap.core.gpf.internal.ProxyProduct;
 import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.annotations.ParameterDescriptorFactory;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
@@ -272,7 +273,7 @@ public class OperatorContext {
         if (targetProduct == null) {
             initializeOperator();
         }
-        return targetProduct;
+        return new ProxyProduct(getOperator());
     }
 
     public void setTargetProduct(Product targetProduct) {
