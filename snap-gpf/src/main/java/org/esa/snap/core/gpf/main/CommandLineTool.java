@@ -24,6 +24,7 @@ import com.bc.ceres.binding.dom.DefaultDomConverter;
 import com.bc.ceres.binding.dom.DefaultDomElement;
 import com.bc.ceres.binding.dom.DomElement;
 import com.bc.ceres.binding.dom.XppDomElement;
+import com.bc.ceres.core.PrintWriterConciseProgressMonitor;
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.metadata.MetadataResourceEngine;
 import com.bc.ceres.resource.Resource;
@@ -307,8 +308,7 @@ public class CommandLineTool implements GraphProcessingObserver {
 
         OperatorDescriptor operatorDescriptor = operatorSpi.getOperatorDescriptor();
         final OperatorExecutor executor = OperatorExecutor.create(operator);
-        //todo set useful progressmonitor
-        executor.execute(ProgressMonitor.NULL);
+        executor.execute(new PrintWriterConciseProgressMonitor(System.out));
         if (!operatorDescriptor.isAutoWriteDisabled()) {
             String filePath = commandLineArgs.getTargetFilePath();
             String formatName = commandLineArgs.getTargetFormatName();
