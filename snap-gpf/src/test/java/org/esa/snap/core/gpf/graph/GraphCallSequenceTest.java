@@ -29,7 +29,6 @@ import org.esa.snap.core.gpf.OperatorSpiRegistry;
 import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
-import org.esa.snap.core.gpf.internal.OperatorProduct;
 
 import javax.media.jai.JAI;
 import java.awt.Rectangle;
@@ -510,10 +509,10 @@ public class GraphCallSequenceTest extends TestCase {
         }
     }
 
-    public static class RecordingProduct extends OperatorProduct {
+    public static class RecordingProduct extends Product {
 
         public RecordingProduct(RecordingOp op) {
-            super(op, new Product(op.getSpi().getOperatorAlias(), op.getClass().getSimpleName(), 1, 1));
+            super(op.getSpi().getOperatorAlias(), op.getClass().getSimpleName(), 1, 1);
             addBand("band_0", ProductData.TYPE_FLOAT32);
             recordCall(getName(), "Product.construct");
         }
