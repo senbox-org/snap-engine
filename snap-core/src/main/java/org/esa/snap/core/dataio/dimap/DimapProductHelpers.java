@@ -129,13 +129,13 @@ public class DimapProductHelpers {
      *
      * @throws IllegalArgumentException if one of the parameters is null.
      */
-    public static Map<String, File> getBandDataFiles(final Document dom, final Product product,
+    public static Map<Band, File> getBandDataFiles(final Document dom, final Product product,
                                                    final File inputDir) throws IllegalArgumentException {
         Guardian.assertNotNull("dom", dom);
         Guardian.assertNotNull("product", product);
         Guardian.assertNotNull("inputDir", inputDir);
 
-        final Map<String, File> dataFilesMap = new HashMap<>();
+        final Map<Band, File> dataFilesMap = new HashMap<>();
         if (!dom.hasRootElement()) {
             return dataFilesMap;
         }
@@ -160,7 +160,7 @@ public class DimapProductHelpers {
                     final String localHeaderFilePath = SystemUtils.convertToLocalPath(bandHeaderFilePath);
                     final String bandDataFilePath = FileUtils.exchangeExtension(localHeaderFilePath,
                                                                                 DimapProductConstants.IMAGE_FILE_EXTENSION);
-                    dataFilesMap.put(band.getName(), new File(inputDir, bandDataFilePath));
+                    dataFilesMap.put(band, new File(inputDir, bandDataFilePath));
                 }
             }
         }
