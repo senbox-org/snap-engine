@@ -486,7 +486,7 @@ public class OperatorContext {
             operator.initialize();
             initTargetProduct();
             initTargetProperties(operator.getClass());
-            initTargetImages();
+            setTargetImages();
             initGraphMetadata();
 
             targetProduct.setModified(false);
@@ -692,7 +692,7 @@ public class OperatorContext {
         }
     }
 
-    private void initTargetImages() {
+    private void setTargetImages() {
         final Band[] targetBands = targetProduct.getBands();
         targetImageMap = new HashMap<>(targetBands.length * 2);
         if (targetProduct.getPreferredTileSize() == null) {
@@ -707,6 +707,9 @@ public class OperatorContext {
         }
         targetImageMap = new HashMap<>(targetBands.length * 2);
         for (final Band targetBand : targetBands) {
+            if (targetImageMap.containsKey(targetBand)) {
+                continue;
+            }
             // Only register non-virtual bands
             // Actually it should not be necessary to distinguish between regular and not regular bands.
             // What does 'regular' actually mean?
@@ -1242,6 +1245,7 @@ public class OperatorContext {
     public synchronized void executeOperator(ProgressMonitor pm) {
         if (!executed) {
             getOperator().doExecute(pm);
+            setTargetImages();
             executed = true;
         }
     }
