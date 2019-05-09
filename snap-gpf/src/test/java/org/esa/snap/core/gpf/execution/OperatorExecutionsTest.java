@@ -7,16 +7,21 @@ import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.Operator;
+import org.esa.snap.core.gpf.graph.GraphException;
 import org.esa.snap.core.gpf.main.GPT;
-import org.esa.snap.core.util.io.FileUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -67,6 +72,38 @@ public class OperatorExecutionsTest {
                     "    </node>\n" +
                     "\n" +
                     "</graph>";
+    private final static String OPERATOR_WITH_FOLLOW_UP_DO_EXECUTE_GRAPH =
+            "<graph id=\"graph\">\n" +
+                    "    <version>1.0</version>\n" +
+                    "\n" +
+                    "    <node id=\"test_operator\">\n" +
+                    "        <operator>{operator_name}</operator>\n" +
+                    "    </node>\n" +
+                    "\n" +
+                    "    <node id=\"follow_up_do_execute\">\n" +
+                    "        <operator>FollowUpDoExecute</operator>\n" +
+                    "        <sources>\n" +
+                    "\t    <sourceProduct refid=\"test_operator\"/>\n" +
+                    "\t</sources>\n" +
+                    "    </node>\n" +
+                    "\n" +
+                    "</graph>";
+    private final static String OPERATOR_WITH_FOLLOW_UP_DO_EXECUTE_AND_COMPUTE_TILE_GRAPH =
+            "<graph id=\"graph\">\n" +
+                    "    <version>1.0</version>\n" +
+                    "\n" +
+                    "    <node id=\"test_operator\">\n" +
+                    "        <operator>{operator_name}</operator>\n" +
+                    "    </node>\n" +
+                    "\n" +
+                    "    <node id=\"follow_up_do_execute_and_compute_tile\">\n" +
+                    "        <operator>FollowUpDoExecuteAndComputeTile</operator>\n" +
+                    "        <sources>\n" +
+                    "\t    <sourceProduct refid=\"test_operator\"/>\n" +
+                    "\t</sources>\n" +
+                    "    </node>\n" +
+                    "\n" +
+                    "</graph>";
     private final static String OPERATOR_WITH_BAND_MATHS_GRAPH_2 =
             "<graph id=\"graph\">\n" +
                     "    <version>1.0</version>\n" +
@@ -99,6 +136,16 @@ public class OperatorExecutionsTest {
                     "\n" +
                     "</graph>";
     private static File outputDirectory;
+    private static Operators.InitComputeTileOperatorSpi initComputeTileOperatorSpi;
+    private static Operators.InitDoExecuteComputeTileOperatorSpi initDoExecuteComputeTileOperatorSpi;
+    private static Operators.InitJAIImageOperatorSpi initJAIImageOperatorSpi;
+    private static Operators.InitJAIImageDoExecuteOperatorSpi initJAIImageDoExecuteOperatorSpi;
+    private static Operators.InitDoExecuteSetsJAIImageOperatorSpi initDoExecuteSetsJAIImageOperatorSpi;
+    private static Operators.InitAndDoExecuteSetNoTargetProductOperatorSpi initAndDoExecuteSetNoTargetProductOperatorSpi;
+    private static Operators.InitSetsNoTargetProductOperatorSpi initSetsNoTargetProductOperatorSpi;
+    private static Operators.FollowUpDoExecuteOperatorSpi followUpDoExecuteOperatorSpi;
+    private static Operators.FollowUpDoExecuteAndComputeTileOperatorSpi followUpDoExecuteAndComputeTileOperatorSpi;
+    private static Operators.InitDoExecuteAddsBandComputeTileOperatorSpi initDoExecuteAddsBandComputeTileOperatorSpi;
 
     @BeforeClass
     public static void setUp() {
@@ -108,40 +155,50 @@ public class OperatorExecutionsTest {
                 fail("Unable to create test output directory");
             }
         }
-        GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(new Operators.InitComputeTileOperatorSpi());
+        initComputeTileOperatorSpi = new Operators.InitComputeTileOperatorSpi();
+        GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(initComputeTileOperatorSpi);
+        initDoExecuteComputeTileOperatorSpi = new Operators.InitDoExecuteComputeTileOperatorSpi();
+        GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(initDoExecuteComputeTileOperatorSpi);
+        initDoExecuteAddsBandComputeTileOperatorSpi = new Operators.InitDoExecuteAddsBandComputeTileOperatorSpi();
+        GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(initDoExecuteAddsBandComputeTileOperatorSpi);
+        initJAIImageOperatorSpi = new Operators.InitJAIImageOperatorSpi();
+        GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(initJAIImageOperatorSpi);
+        initJAIImageDoExecuteOperatorSpi = new Operators.InitJAIImageDoExecuteOperatorSpi();
+        GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(initJAIImageDoExecuteOperatorSpi);
+        initDoExecuteSetsJAIImageOperatorSpi = new Operators.InitDoExecuteSetsJAIImageOperatorSpi();
+        GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(initDoExecuteSetsJAIImageOperatorSpi);
+        initAndDoExecuteSetNoTargetProductOperatorSpi = new Operators.InitAndDoExecuteSetNoTargetProductOperatorSpi();
         GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(
-                new Operators.InitDoExecuteComputeTileOperatorSpi());
-        GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(new Operators.InitJAIImageOperatorSpi());
-        GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(
-                new Operators.InitJAIImageDoExecuteOperatorSpi());
-        GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(
-                new Operators.InitDoExecuteSetsJAIImageOperatorSpi());
-        GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(
-                new Operators.InitDoExecuteSetsTargetProductAndJAIImageOperatorSpi());
-        GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(
-                new Operators.InitAndDoExecuteSetNoTargetProductOperatorSpi());
-        GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(
-                new Operators.InitSetsNoTargetProductOperatorSpi());
+                initAndDoExecuteSetNoTargetProductOperatorSpi);
+        initSetsNoTargetProductOperatorSpi = new Operators.InitSetsNoTargetProductOperatorSpi();
+        GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(initSetsNoTargetProductOperatorSpi);
+        followUpDoExecuteOperatorSpi = new Operators.FollowUpDoExecuteOperatorSpi();
+        GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(followUpDoExecuteOperatorSpi);
+        followUpDoExecuteAndComputeTileOperatorSpi = new Operators.FollowUpDoExecuteAndComputeTileOperatorSpi();
+        GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(followUpDoExecuteAndComputeTileOperatorSpi);
     }
 
     @AfterClass
     public static void tearDown() {
-        GPF.getDefaultInstance().getOperatorSpiRegistry().removeOperatorSpi(new Operators.InitComputeTileOperatorSpi());
+        GPF.getDefaultInstance().getOperatorSpiRegistry().removeOperatorSpi(initComputeTileOperatorSpi);
+        GPF.getDefaultInstance().getOperatorSpiRegistry().removeOperatorSpi(initDoExecuteComputeTileOperatorSpi);
+        GPF.getDefaultInstance().getOperatorSpiRegistry().removeOperatorSpi(initDoExecuteAddsBandComputeTileOperatorSpi);
+        GPF.getDefaultInstance().getOperatorSpiRegistry().removeOperatorSpi(initJAIImageOperatorSpi);
+        GPF.getDefaultInstance().getOperatorSpiRegistry().removeOperatorSpi(initJAIImageDoExecuteOperatorSpi);
+        GPF.getDefaultInstance().getOperatorSpiRegistry().removeOperatorSpi(initDoExecuteSetsJAIImageOperatorSpi);
         GPF.getDefaultInstance().getOperatorSpiRegistry().removeOperatorSpi(
-                new Operators.InitDoExecuteComputeTileOperatorSpi());
-        GPF.getDefaultInstance().getOperatorSpiRegistry().removeOperatorSpi(new Operators.InitJAIImageOperatorSpi());
-        GPF.getDefaultInstance().getOperatorSpiRegistry().removeOperatorSpi(
-                new Operators.InitJAIImageDoExecuteOperatorSpi());
-        GPF.getDefaultInstance().getOperatorSpiRegistry().removeOperatorSpi(
-                new Operators.InitDoExecuteSetsJAIImageOperatorSpi());
-        GPF.getDefaultInstance().getOperatorSpiRegistry().removeOperatorSpi(
-                new Operators.InitDoExecuteSetsTargetProductAndJAIImageOperatorSpi());
-        GPF.getDefaultInstance().getOperatorSpiRegistry().removeOperatorSpi(
-                new Operators.InitAndDoExecuteSetNoTargetProductOperatorSpi());
-        GPF.getDefaultInstance().getOperatorSpiRegistry().removeOperatorSpi(
-                new Operators.InitSetsNoTargetProductOperatorSpi());
+                initAndDoExecuteSetNoTargetProductOperatorSpi);
+        GPF.getDefaultInstance().getOperatorSpiRegistry().removeOperatorSpi(initSetsNoTargetProductOperatorSpi);
+        GPF.getDefaultInstance().getOperatorSpiRegistry().removeOperatorSpi(followUpDoExecuteOperatorSpi);
+        GPF.getDefaultInstance().getOperatorSpiRegistry().removeOperatorSpi(followUpDoExecuteAndComputeTileOperatorSpi);
         if (outputDirectory.isDirectory()) {
-            if (!FileUtils.deleteTree(outputDirectory)) {
+            Path directoryPath = Paths.get(outputDirectory.toURI());
+            try {
+                Files.walk(directoryPath)
+                        .sorted(Comparator.reverseOrder())
+                        .map(Path::toFile)
+                        .forEach(File::delete);
+            } catch (IOException e) {
                 fail("Unable to delete test directory");
             }
         }
@@ -161,7 +218,7 @@ public class OperatorExecutionsTest {
 
     @Test
     public void testInitComputeTileOperatorWorksWithRunAsSingleOperatorInGpt() throws Exception {
-        Product product = runSingleOperatorInGpt("InitComputeTile", new String[0]);
+        Product product = runSingleOperatorInGptAndReadProduct("InitComputeTile", new String[0]);
         assertExpectedBandsExist(product, new String[]{"band1"});
     }
 
@@ -173,13 +230,23 @@ public class OperatorExecutionsTest {
 
     @Test
     public void testInitComputeTileOperatorWorksWithRunAsSingleOperatorInGraph() throws Exception {
-        Product product = runAsSingleOperatorInGraph("InitComputeTile", EMPTY_PARAMETERS_PART);
+        Product product = runAsSingleOperatorInGraphAndReadProduct("InitComputeTile", EMPTY_PARAMETERS_PART);
         assertExpectedBandsExist(product, new String[]{"band1"});
     }
 
     @Test
-    public void testInitComputeTileOperatorWorksWithRunAsConnectedOperatorInGraph() throws Exception {
-        assertRunningAsConnectedOperatorInGraphWorks_oneBand("InitComputeTile");
+    public void testInitComputeTileOperatorWorksWithRunAsConnectedOperatorInGraph_BandMaths() throws Exception {
+        assertRunningAsConnectedOperatorInGraphWorksWithBandMaths_oneBand("InitComputeTile");
+    }
+
+    @Test
+    public void testInitComputeTileOperatorWorksWithRunAsConnectedOperatorInGraph_FollowUpDoExecute() throws Exception {
+        assertRunningAsConnectedOperatorInGraphWorksWithFollowUpDoExecute_oneBand("InitComputeTile");
+    }
+
+    @Test
+    public void testInitComputeTileOperatorWorksWithRunAsConnectedOperatorInGraph_FollowUpDoExecuteAndComputeTile() throws Exception {
+        assertRunningAsConnectedOperatorInGraphWorksWithFollowUpDoExecuteAndComputeTile_oneBand("InitComputeTile");
     }
 
     @Test
@@ -196,7 +263,7 @@ public class OperatorExecutionsTest {
 
     @Test
     public void testInitDoExecuteComputeTileOperatorWorksWithRunAsSingleOperatorInGpt() throws Exception {
-        Product product = runSingleOperatorInGpt("InitDoExecuteComputeTile", new String[0]);
+        Product product = runSingleOperatorInGptAndReadProduct("InitDoExecuteComputeTile", new String[0]);
         assertExpectedBandsExist(product, new String[]{"band1"});
     }
 
@@ -208,13 +275,81 @@ public class OperatorExecutionsTest {
 
     @Test
     public void testInitDoExecuteComputeTileOperatorWorksWithRunAsSingleOperatorInGraph() throws Exception {
-        Product product = runAsSingleOperatorInGraph("InitDoExecuteComputeTile", EMPTY_PARAMETERS_PART);
+        Product product = runAsSingleOperatorInGraphAndReadProduct("InitDoExecuteComputeTile", EMPTY_PARAMETERS_PART);
         assertExpectedBandsExist(product, new String[]{"band1"});
     }
 
     @Test
-    public void testInitDoExecuteComputeTileOperatorWorksWithRunAsConnectedOperatorInGraph() throws Exception {
-        assertRunningAsConnectedOperatorInGraphWorks_oneBand("InitDoExecuteComputeTile");
+    public void testInitDoExecuteComputeTileOperatorWorksWithRunAsConnectedOperatorInGraph_BandMaths() throws Exception {
+        assertRunningAsConnectedOperatorInGraphWorksWithBandMaths_oneBand("InitDoExecuteComputeTile");
+    }
+
+    @Test
+    public void testInitDoExecuteComputeTileOperatorWorksWithRunAsConnectedOperatorInGraph_FollowUpDoExecute() throws Exception {
+        assertRunningAsConnectedOperatorInGraphWorksWithFollowUpDoExecute_oneBand("InitDoExecuteComputeTile");
+    }
+
+    @Test
+    public void testInitDoExecuteComputeTileOperatorWorksWithRunAsConnectedOperatorInGraph_FollowUpDoExecuteAndComputeTile() throws Exception {
+        assertRunningAsConnectedOperatorInGraphWorksWithFollowUpDoExecuteAndComputeTile_oneBand("InitDoExecuteComputeTile");
+    }
+
+    @Test
+    public void testInitDoExecuteAddsBandComputeTileOperatorWorksWithWriteAndRead() throws IOException {
+        Product product = writeAndReadProduct(new Operators.InitDoExecuteAddsBandComputeTileOperator(), "InitDoExecuteAddsBandComputeTile");
+        assertExpectedBandsExist(product, new String[]{"band1"});
+    }
+
+    @Test
+    public void testInitDoExecuteAddsBandComputeTileOperatorWorksWithOnlyInitialize() {
+        Product product = onlyInitializeProduct(new Operators.InitDoExecuteAddsBandComputeTileOperator());
+        try {
+            assertExpectedBandsExist(product, new String[]{"band1"});
+        } catch (AssertionError ae) {
+            //after initialisation, we expect band1 not to be present yet
+            assertExpectedBandsExist(product, new String[]{});
+            return;
+        }
+        fail("AssertionError expected");
+    }
+
+    @Test
+    public void testInitDoExecuteAddsBandComputeTileOperatorWorksWithRunAsSingleOperatorInGpt() throws Exception {
+        Product product = runSingleOperatorInGptAndReadProduct("InitDoExecuteAddsBandComputeTile", new String[0]);
+        assertExpectedBandsExist(product, new String[]{"band1"});
+    }
+
+    @Test
+    public void testInitDoExecuteAddsBandComputeTileOperatorWorksWithCreateProductFromGPF() {
+        Product product = createProductFromGPF("InitDoExecuteAddsBandComputeTile", new String[0]);
+        assertExpectedBandsExist(product, new String[]{"band1"});
+    }
+
+    @Test
+    public void testInitDoExecuteAddsBandComputeTileOperatorWorksWithRunAsSingleOperatorInGraph() throws Exception {
+        Product product = runAsSingleOperatorInGraphAndReadProduct("InitDoExecuteAddsBandComputeTile", EMPTY_PARAMETERS_PART);
+        assertExpectedBandsExist(product, new String[]{"band1"});
+    }
+
+    @Test
+    public void testInitDoExecuteAddsBandComputeTileOperatorWorksWithRunAsConnectedOperatorInGraph_BandMaths() throws Exception {
+        try {
+            assertRunningAsConnectedOperatorInGraphWorksWithBandMaths_oneBand("InitDoExecuteAddsBandComputeTile");
+        } catch (GraphException ge) {
+            //after initialisation, we expect band1 not to be present yet (and therefore there will be a graph exception)
+            return;
+        }
+        fail("AssertionError expected");
+    }
+
+    @Test
+    public void testInitDoExecuteAddsBandComputeTileOperatorWorksWithRunAsConnectedOperatorInGraph_FollowUpDoExecute() throws Exception {
+        assertRunningAsConnectedOperatorInGraphWorksWithFollowUpDoExecute_oneBand("InitDoExecuteAddsBandComputeTile");
+    }
+
+    @Test
+    public void testInitDoExecuteAddsBandComputeTileOperatorWorksWithRunAsConnectedOperatorInGraph_FollowUpDoExecuteAndComputeTile() throws Exception {
+        assertRunningAsConnectedOperatorInGraphWorksWithFollowUpDoExecuteAndComputeTile_oneBand("InitDoExecuteAddsBandComputeTile");
     }
 
     @Test
@@ -231,7 +366,7 @@ public class OperatorExecutionsTest {
 
     @Test
     public void testInitJAIImageOperatorWorksWithRunAsSingleOperatorInGpt() throws Exception {
-        Product product = runSingleOperatorInGpt("InitJAIImage", new String[0]);
+        Product product = runSingleOperatorInGptAndReadProduct("InitJAIImage", new String[0]);
         assertExpectedBandsExist(product, new String[]{"band1"});
     }
 
@@ -243,13 +378,23 @@ public class OperatorExecutionsTest {
 
     @Test
     public void testInitJAIImageOperatorWorksWithRunAsSingleOperatorInGraph() throws Exception {
-        Product product = runAsSingleOperatorInGraph("InitJAIImage", EMPTY_PARAMETERS_PART);
+        Product product = runAsSingleOperatorInGraphAndReadProduct("InitJAIImage", EMPTY_PARAMETERS_PART);
         assertExpectedBandsExist(product, new String[]{"band1"});
     }
 
     @Test
-    public void testInitJAIImageOperatorWorksWithRunAsConnectedOperatorInGraph() throws Exception {
-        assertRunningAsConnectedOperatorInGraphWorks_oneBand("InitJAIImage");
+    public void testInitJAIImageOperatorWorksWithRunAsConnectedOperatorInGraph_BandMaths() throws Exception {
+        assertRunningAsConnectedOperatorInGraphWorksWithBandMaths_oneBand("InitJAIImage");
+    }
+
+    @Test
+    public void testInitJAIImageOperatorWorksWithRunAsConnectedOperatorInGraph_FollowUpDoExecute() throws Exception {
+        assertRunningAsConnectedOperatorInGraphWorksWithFollowUpDoExecute_oneBand("InitJAIImage");
+    }
+
+    @Test
+    public void testInitJAIImageOperatorWorksWithRunAsConnectedOperatorInGraph_FollowUpDoExecuteAndComputeTile() throws Exception {
+        assertRunningAsConnectedOperatorInGraphWorksWithFollowUpDoExecuteAndComputeTile_oneBand("InitJAIImage");
     }
 
     @Test
@@ -273,7 +418,7 @@ public class OperatorExecutionsTest {
 
     @Test
     public void testInitJAIImageDoExecuteOperatorWorksWithRunAsSingleOperatorInGpt() throws Exception {
-        Product product = runSingleOperatorInGpt("InitJAIImageDoExecute", new String[0]);
+        Product product = runSingleOperatorInGptAndReadProduct("InitJAIImageDoExecute", new String[0]);
         assertExpectedBandsExist(product, new String[]{"band1", "band2"});
     }
 
@@ -285,13 +430,31 @@ public class OperatorExecutionsTest {
 
     @Test
     public void testInitJAIImageDoExecuteOperatorWorksWithRunAsSingleOperatorInGraph() throws Exception {
-        Product product = runAsSingleOperatorInGraph("InitJAIImageDoExecute", EMPTY_PARAMETERS_PART);
+        Product product = runAsSingleOperatorInGraphAndReadProduct("InitJAIImageDoExecute", EMPTY_PARAMETERS_PART);
         assertExpectedBandsExist(product, new String[]{"band1", "band2"});
     }
 
     @Test
-    public void testInitJAIImageDoExecuteOperatorWorksWithRunAsConnectedOperatorInGraph() throws Exception {
-        assertRunningAsConnectedOperatorInGraphWorks_twoBands("InitJAIImageDoExecute");
+    public void testInitJAIImageDoExecuteOperatorWorksWithRunAsConnectedOperatorInGraph_BandMaths() throws Exception {
+        Product product = onlyInitializeProduct(new Operators.InitJAIImageDoExecuteOperator());
+        try {
+            assertRunningAsConnectedOperatorInGraphWorksWithBandMaths_twoBands("InitJAIImageDoExecute");
+        } catch (GraphException ge) {
+            // this will fail when both bands are asked for, as BandMaths requires the bands to be present in the initialize method
+            assertRunningAsConnectedOperatorInGraphWorksWithBandMaths_oneBand("InitJAIImageDoExecute");
+            return;
+        }
+        fail("AssertionError expected");
+    }
+
+    @Test
+    public void testInitJAIImageDoExecuteOperatorWorksWithRunAsConnectedOperatorInGraph_FollowUpDoExecute() throws Exception {
+        assertRunningAsConnectedOperatorInGraphWorksWithFollowUpDoExecute_twoBands("InitJAIImageDoExecute");
+    }
+
+    @Test
+    public void testInitJAIImageDoExecuteOperatorWorksWithRunAsConnectedOperatorInGraph_FollowUpDoExecuteAndComputeTile() throws Exception {
+        assertRunningAsConnectedOperatorInGraphWorksWithFollowUpDoExecuteAndComputeTile_twoBands("InitJAIImageDoExecute");
     }
 
     @Test
@@ -312,7 +475,7 @@ public class OperatorExecutionsTest {
 
     @Test
     public void testInitDoExecuteSetsJAIImageOperatorWorksWithRunAsSingleOperatorInGpt() throws Exception {
-        Product product = runSingleOperatorInGpt("InitDoExecuteSetsJAIImage", new String[0]);
+        Product product = runSingleOperatorInGptAndReadProduct("InitDoExecuteSetsJAIImage", new String[0]);
         assertExpectedBandsExist(product, new String[]{"band1"});
     }
 
@@ -324,49 +487,23 @@ public class OperatorExecutionsTest {
 
     @Test
     public void testInitDoExecuteSetsJAIImageOperatorWorksWithRunAsSingleOperatorInGraph() throws Exception {
-        Product product = runAsSingleOperatorInGraph("InitDoExecuteSetsJAIImage", EMPTY_PARAMETERS_PART);
+        Product product = runAsSingleOperatorInGraphAndReadProduct("InitDoExecuteSetsJAIImage", EMPTY_PARAMETERS_PART);
         assertExpectedBandsExist(product, new String[]{"band1"});
     }
 
     @Test
-    public void testInitDoExecuteSetsJAIImageOperatorWorksWithRunAsConnectedOperatorInGraph() throws Exception {
-        assertRunningAsConnectedOperatorInGraphWorks_oneBand("InitDoExecuteSetsJAIImage");
+    public void testInitDoExecuteSetsJAIImageOperatorWorksWithRunAsConnectedOperatorInGraph_BandMaths() throws Exception {
+        assertRunningAsConnectedOperatorInGraphWorksWithBandMaths_oneBand("InitDoExecuteSetsJAIImage");
     }
 
     @Test
-    public void testInitDoExecuteSetsTargetProductAndJAIImageOperatorWorksWithWriteAndRead() throws IOException {
-        Product product = writeAndReadProduct(new Operators.InitDoExecuteSetsTargetProductAndJAIImageOperator(),
-                "InitDoExecuteSetsTargetProductAndJAIImage");
-        assertExpectedBandsExist(product, new String[]{"band1"});
+    public void testInitDoExecuteSetsJAIImageOperatorWorksWithRunAsConnectedOperatorInGraph_FollowUpDoExecute() throws Exception {
+        assertRunningAsConnectedOperatorInGraphWorksWithFollowUpDoExecute_oneBand("InitDoExecuteSetsJAIImage");
     }
 
     @Test
-    public void testInitDoExecuteSetsTargetProductAndJAIImageOperatorWorksWithOnlyInitialize() {
-        Product product = onlyInitializeProduct(new Operators.InitDoExecuteSetsTargetProductAndJAIImageOperator());
-        assertExpectedBandsExist(product, new String[]{"band1"});
-    }
-
-    @Test
-    public void testInitDoExecuteSetsTargetProductAndJAIImageOperatorWorksWithRunAsSingleOperatorInGpt() throws Exception {
-        Product product = runSingleOperatorInGpt("InitDoExecuteSetsTargetProductAndJAIImage", new String[0]);
-        assertExpectedBandsExist(product, new String[]{"band1"});
-    }
-
-    @Test
-    public void testInitDoExecuteSetsTargetProductAndJAIImageOperatorWorksWithCreateProductFromGPF() {
-        Product product = createProductFromGPF("InitDoExecuteSetsTargetProductAndJAIImage", new String[0]);
-        assertExpectedBandsExist(product, new String[]{"band1"});
-    }
-
-    @Test
-    public void testInitDoExecuteSetsTargetProductAndJAIImageOperatorWorksWithRunAsSingleOperatorInGraph() throws Exception {
-        Product product = runAsSingleOperatorInGraph("InitDoExecuteSetsTargetProductAndJAIImage", EMPTY_PARAMETERS_PART);
-        assertExpectedBandsExist(product, new String[]{"band1"});
-    }
-
-    @Test
-    public void testInitDoExecuteSetsTargetProductAndJAIImageOperatorWorksWithRunAsConnectedOperatorInGraph() throws Exception {
-        assertRunningAsConnectedOperatorInGraphWorks_oneBand("InitDoExecuteSetsTargetProductAndJAIImage");
+    public void testInitDoExecuteSetsJAIImageOperatorWorksWithRunAsConnectedOperatorInGraph_FollowUpDoExecuteAndComputeTile() throws Exception {
+        assertRunningAsConnectedOperatorInGraphWorksWithFollowUpDoExecuteAndComputeTile_oneBand("InitJAIImageDoExecute");
     }
 
     @Test
@@ -376,11 +513,12 @@ public class OperatorExecutionsTest {
         Operators.InitAndDoExecuteSetNoTargetProductOperator operator =
                 new Operators.InitAndDoExecuteSetNoTargetProductOperator();
         operator.setParameter("outputFilePath", outputFile.getAbsolutePath());
-        writeAndReadProduct(operator, "InitAndDoExecuteSetNoTargetProduct");
+        writeProduct(operator, "InitAndDoExecuteSetNoTargetProduct");
         assertExpectedFileExists(outputFile);
     }
 
     @Test
+    @Ignore("This test does not work and is not supposed to.")
     public void testInitAndDoExecuteSetNoTargetProductOperatorWorksWithOnlyInitialize() {
         String outputFileName = "OperatorExecutionsTest/InitAndDoExecuteSetNoTargetProduct_oi.txt";
         File outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
@@ -414,7 +552,7 @@ public class OperatorExecutionsTest {
         String outputFileName = "OperatorExecutionsTest/InitAndDoExecuteSetNoTargetProduct_rasoig.txt";
         File outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
         String parameter = PARAMETER_PART.replace("{parameter_name}", "outputFilePath").
-                replace("parameter_value", outputFile.getAbsolutePath());
+                replace("{parameter_value}", outputFile.getAbsolutePath());
         String parametersPart = PARAMETERS_PART.replace("{parameter}", parameter);
         runAsSingleOperatorInGraph("InitAndDoExecuteSetNoTargetProduct", parametersPart);
         assertExpectedFileExists(outputFile);
@@ -426,7 +564,7 @@ public class OperatorExecutionsTest {
         File outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
         Operator operator = new Operators.InitSetsNoTargetProductOperator();
         operator.setParameter("outputFilePath", outputFile.getAbsolutePath());
-        writeAndReadProduct(operator, "InitSetsNoTargetProduct");
+        writeProduct(operator, "InitSetsNoTargetProduct");
         assertExpectedFileExists(outputFile);
     }
 
@@ -476,11 +614,23 @@ public class OperatorExecutionsTest {
         return ProductIO.readProduct(outputFile);
     }
 
+    private void writeProduct(Operator operator, String operatorName) throws IOException {
+        String outputFileName = "OperatorExecutionsTest/" + operatorName + "_aw.dim";
+        File outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
+        GPF.writeProduct(operator.getTargetProduct(), outputFile, "BEAM-DIMAP", false,
+                ProgressMonitor.NULL);
+    }
+
     private Product onlyInitializeProduct(Operator operator) {
         return operator.getTargetProduct();
     }
 
-    private Product runSingleOperatorInGpt(String operatorName, String[] parameters) throws Exception {
+    private Product runSingleOperatorInGptAndReadProduct(String operatorName, String[] parameters) throws Exception {
+        String outputFilePath = runSingleOperatorInGpt(operatorName, parameters);
+        return ProductIO.readProduct(outputFilePath);
+    }
+
+    private String runSingleOperatorInGpt(String operatorName, String[] parameters) throws Exception {
         String outputFileName = "OperatorExecutionsTest/" + operatorName + "_rasoigpt.dim";
         File outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
         String outputFilePath = outputFile.getAbsolutePath();
@@ -492,7 +642,7 @@ public class OperatorExecutionsTest {
         arguments.add("-t");
         arguments.add(outputFilePath);
         GPT.run(arguments.toArray(new String[0]));
-        return ProductIO.readProduct(outputFilePath);
+        return outputFilePath;
     }
 
     private Product createProductFromGPF(String operatorName, String[] parameters) {
@@ -503,7 +653,12 @@ public class OperatorExecutionsTest {
         return GPF.createProduct(operatorName, parametersMap);
     }
 
-    private Product runAsSingleOperatorInGraph(String operatorName, String parameterPart) throws Exception {
+    private Product runAsSingleOperatorInGraphAndReadProduct(String operatorName, String parameterPart) throws Exception {
+        String outputFilePath = runAsSingleOperatorInGraph(operatorName, parameterPart);
+        return ProductIO.readProduct(outputFilePath);
+    }
+
+    private String runAsSingleOperatorInGraph(String operatorName, String parameterPart) throws Exception {
         String graph = SINGLE_OPERATOR_GRAPH.replace("{operator_name}", operatorName);
         graph = graph.replace("{parameter_part}", parameterPart);
         String graphFileName = "OperatorExecutionsTest/" + operatorName + "_rasoig.xml";
@@ -515,18 +670,18 @@ public class OperatorExecutionsTest {
         File outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
         String outputFilePath = outputFile.getAbsolutePath();
         GPT.run(new String[]{graphFile.getAbsolutePath(), "-t", outputFilePath});
-        return ProductIO.readProduct(outputFilePath);
+        return outputFilePath;
     }
 
-    private void assertRunningAsConnectedOperatorInGraphWorks_oneBand(String operatorName) throws Exception {
+    private void assertRunningAsConnectedOperatorInGraphWorksWithBandMaths_oneBand(String operatorName) throws Exception {
         String graph = OPERATOR_WITH_BAND_MATHS_GRAPH.replace("{operator_name}", operatorName);
-        String graphFileName = "OperatorExecutionsTest/" + operatorName + "_racoig.dim";
+        String graphFileName = "OperatorExecutionsTest/" + operatorName + "_racoig_bm.dim";
         File graphFile = GlobalTestConfig.getSnapTestDataOutputFile(graphFileName);
         PrintWriter printWriter = new PrintWriter(graphFile);
         printWriter.print(graph);
         printWriter.close();
 
-        String outputFileName = "OperatorExecutionsTest/" + operatorName + "_racoigp.dim";
+        String outputFileName = "OperatorExecutionsTest/" + operatorName + "_racoig_bm.dim";
         File outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
         String outputFilePath = outputFile.getAbsolutePath();
         GPT.run(new String[]{graphFile.getAbsolutePath(), "-t", outputFilePath});
@@ -536,15 +691,93 @@ public class OperatorExecutionsTest {
         assertEquals(5, band.getSampleInt(0, 0));
     }
 
-    private void assertRunningAsConnectedOperatorInGraphWorks_twoBands(String operatorName) throws Exception {
-        String graph = OPERATOR_WITH_BAND_MATHS_GRAPH_2.replace("{operator_name}", operatorName);
-        String graphFileName = "OperatorExecutionsTest/" + operatorName + "_racoig.dim";
+    private void assertRunningAsConnectedOperatorInGraphWorksWithFollowUpDoExecute_oneBand(String operatorName) throws Exception {
+        String graph = OPERATOR_WITH_FOLLOW_UP_DO_EXECUTE_GRAPH.replace("{operator_name}", operatorName);
+        String graphFileName = "OperatorExecutionsTest/" + operatorName + "_racoig_fudo.dim";
         File graphFile = GlobalTestConfig.getSnapTestDataOutputFile(graphFileName);
         PrintWriter printWriter = new PrintWriter(graphFile);
         printWriter.print(graph);
         printWriter.close();
 
-        String outputFileName = "OperatorExecutionsTest/" + operatorName + "_racoigp.dim";
+        String outputFileName = "OperatorExecutionsTest/" + operatorName + "_racoig_fudo.dim";
+        File outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
+        String outputFilePath = outputFile.getAbsolutePath();
+        GPT.run(new String[]{graphFile.getAbsolutePath(), "-t", outputFilePath});
+        Product product = ProductIO.readProduct(outputFilePath);
+        Band band = product.getBand("computed_band1");
+        assertNotNull(band);
+        assertEquals(5, band.getSampleInt(0, 0));
+    }
+
+    private void assertRunningAsConnectedOperatorInGraphWorksWithFollowUpDoExecute_twoBands(String operatorName) throws Exception {
+        String graph = OPERATOR_WITH_FOLLOW_UP_DO_EXECUTE_GRAPH.replace("{operator_name}", operatorName);
+        String graphFileName = "OperatorExecutionsTest/" + operatorName + "_racoig_fudo.dim";
+        File graphFile = GlobalTestConfig.getSnapTestDataOutputFile(graphFileName);
+        PrintWriter printWriter = new PrintWriter(graphFile);
+        printWriter.print(graph);
+        printWriter.close();
+
+        String outputFileName = "OperatorExecutionsTest/" + operatorName + "_racoig_fudo.dim";
+        File outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
+        String outputFilePath = outputFile.getAbsolutePath();
+        GPT.run(new String[]{graphFile.getAbsolutePath(), "-t", outputFilePath});
+        Product product = ProductIO.readProduct(outputFilePath);
+        Band band = product.getBand("computed_band1");
+        assertNotNull(band);
+        assertEquals(5, band.getSampleInt(0, 0));
+        Band band2 = product.getBand("computed_band2");
+        assertNotNull(band2);
+        assertEquals(5, band2.getSampleInt(0, 0));
+    }
+
+    private void assertRunningAsConnectedOperatorInGraphWorksWithFollowUpDoExecuteAndComputeTile_oneBand(String operatorName) throws Exception {
+        String graph = OPERATOR_WITH_FOLLOW_UP_DO_EXECUTE_AND_COMPUTE_TILE_GRAPH.replace("{operator_name}", operatorName);
+        String graphFileName = "OperatorExecutionsTest/" + operatorName + "_racoig_fudoact.dim";
+        File graphFile = GlobalTestConfig.getSnapTestDataOutputFile(graphFileName);
+        PrintWriter printWriter = new PrintWriter(graphFile);
+        printWriter.print(graph);
+        printWriter.close();
+
+        String outputFileName = "OperatorExecutionsTest/" + operatorName + "_racoig_fudoact.dim";
+        File outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
+        String outputFilePath = outputFile.getAbsolutePath();
+        GPT.run(new String[]{graphFile.getAbsolutePath(), "-t", outputFilePath});
+        Product product = ProductIO.readProduct(outputFilePath);
+        Band band = product.getBand("computed_band1");
+        assertNotNull(band);
+        assertEquals(5, band.getSampleInt(0, 0));
+    }
+
+    private void assertRunningAsConnectedOperatorInGraphWorksWithFollowUpDoExecuteAndComputeTile_twoBands(String operatorName) throws Exception {
+        String graph = OPERATOR_WITH_FOLLOW_UP_DO_EXECUTE_AND_COMPUTE_TILE_GRAPH.replace("{operator_name}", operatorName);
+        String graphFileName = "OperatorExecutionsTest/" + operatorName + "_racoig_fudoact.dim";
+        File graphFile = GlobalTestConfig.getSnapTestDataOutputFile(graphFileName);
+        PrintWriter printWriter = new PrintWriter(graphFile);
+        printWriter.print(graph);
+        printWriter.close();
+
+        String outputFileName = "OperatorExecutionsTest/" + operatorName + "_racoig_fudoact.dim";
+        File outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
+        String outputFilePath = outputFile.getAbsolutePath();
+        GPT.run(new String[]{graphFile.getAbsolutePath(), "-t", outputFilePath});
+        Product product = ProductIO.readProduct(outputFilePath);
+        Band band = product.getBand("computed_band1");
+        assertNotNull(band);
+        assertEquals(5, band.getSampleInt(0, 0));
+        Band band2 = product.getBand("computed_band2");
+        assertNotNull(band2);
+        assertEquals(5, band2.getSampleInt(0, 0));
+    }
+
+    private void assertRunningAsConnectedOperatorInGraphWorksWithBandMaths_twoBands(String operatorName) throws Exception {
+        String graph = OPERATOR_WITH_BAND_MATHS_GRAPH_2.replace("{operator_name}", operatorName);
+        String graphFileName = "OperatorExecutionsTest/" + operatorName + "_racoig.xml";
+        File graphFile = GlobalTestConfig.getSnapTestDataOutputFile(graphFileName);
+        PrintWriter printWriter = new PrintWriter(graphFile);
+        printWriter.print(graph);
+        printWriter.close();
+
+        String outputFileName = "OperatorExecutionsTest/" + operatorName + "_racoig.dim";
         File outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
         String outputFilePath = outputFile.getAbsolutePath();
         GPT.run(new String[]{graphFile.getAbsolutePath(), "-t", outputFilePath});

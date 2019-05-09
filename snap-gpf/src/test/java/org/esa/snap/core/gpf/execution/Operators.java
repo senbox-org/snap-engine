@@ -10,6 +10,7 @@ import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
+import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.StringUtils;
 
@@ -79,6 +80,38 @@ public class Operators {
 
         InitDoExecuteComputeTileOperatorSpi() {
             super(InitDoExecuteComputeTileOperator.class);
+        }
+    }
+
+    @OperatorMetadata(alias = "InitDoExecuteAddsBandComputeTile")
+    public static class InitDoExecuteAddsBandComputeTileOperator extends Operator {
+
+        @TargetProduct
+        Product targetProduct;
+
+        private int summand;
+
+        @Override
+        public void initialize() throws OperatorException {
+            Product product = new Product("InitDoExecuteAddsBandComputeTile", "InitDoExecuteAddsBandComputeTile", 1, 1);
+            setTargetProduct(product);
+        }
+
+        @Override
+        public void doExecute(ProgressMonitor pm) throws OperatorException {
+            getTargetProduct().addBand("band1", ProductData.TYPE_INT8);
+        }
+
+        @Override
+        public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
+            targetTile.setSample(0, 0, 3);
+        }
+    }
+
+    static class InitDoExecuteAddsBandComputeTileOperatorSpi extends OperatorSpi {
+
+        InitDoExecuteAddsBandComputeTileOperatorSpi() {
+            super(InitDoExecuteAddsBandComputeTileOperator.class);
         }
     }
 
@@ -172,40 +205,6 @@ public class Operators {
         }
     }
 
-    @OperatorMetadata(alias = "InitDoExecuteSetsTargetProductAndJAIImage")
-    public static class InitDoExecuteSetsTargetProductAndJAIImageOperator extends Operator {
-
-        @TargetProduct
-        Product targetProduct;
-
-        @Override
-        public void initialize() throws OperatorException {
-            // do nothing
-            Product dummyProduct = new Product("dummy", "dummy", 1, 1);
-            setTargetProduct(dummyProduct);
-        }
-
-        @Override
-        public void doExecute(ProgressMonitor pm) throws OperatorException {
-            Product product = new Product("initDoExecuteSetsTargetProductAndJAIImage",
-                    "initDoExecuteSetsTargetProductAndJAIImage", 1, 1);
-            Band band1 = product.addBand("band1", ProductData.TYPE_INT8);
-            Number[] bandValues = new Byte[]{3};
-            RenderedOp constantImage = ConstantDescriptor.create(1f, 1f, bandValues, null);
-            band1.setSourceImage(constantImage);
-            setTargetProduct(product);
-        }
-
-    }
-
-    static class InitDoExecuteSetsTargetProductAndJAIImageOperatorSpi extends OperatorSpi {
-
-        InitDoExecuteSetsTargetProductAndJAIImageOperatorSpi() {
-            super(InitDoExecuteSetsTargetProductAndJAIImageOperator.class);
-        }
-    }
-
-
     @OperatorMetadata(alias = "InitAndDoExecuteSetNoTargetProduct")
     public static class InitAndDoExecuteSetNoTargetProductOperator extends Operator {
 
@@ -272,6 +271,83 @@ public class Operators {
 
         InitSetsNoTargetProductOperatorSpi() {
             super(InitSetsNoTargetProductOperator.class);
+        }
+    }
+
+    @OperatorMetadata(alias = "FollowUpDoExecute")
+    public static class FollowUpDoExecuteOperator extends Operator {
+
+        @SourceProduct
+        Product sourceProduct;
+
+        @TargetProduct
+        Product targetProduct;
+
+        @Override
+        public void initialize() throws OperatorException {
+            Product product = new Product("FollowUpDoExecute", "FollowUpDoExecute",
+                    sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
+            setTargetProduct(product);
+        }
+
+        @Override
+        public void doExecute(ProgressMonitor pm) throws OperatorException {
+            Band[] bands = sourceProduct.getBands();
+            for (Band sourceBand : bands) {
+                Band targetBand = targetProduct.addBand("computed_" + sourceBand.getName(), sourceBand.getDataType());
+                int[] sourceBandValues = new int[1];
+                sourceBand.getSourceImage().getData().getPixels(0, 0, 1, 1, sourceBandValues);
+                Number[] bandValues = new Byte[1];
+                bandValues[0] = (byte)(sourceBandValues[0] + 2);
+                RenderedOp constantImage = ConstantDescriptor.create(1f, 1f, bandValues, null);
+                targetBand.setSourceImage(constantImage);
+            }
+        }
+
+    }
+
+    static class FollowUpDoExecuteOperatorSpi extends OperatorSpi {
+
+        FollowUpDoExecuteOperatorSpi() {
+            super(FollowUpDoExecuteOperator.class);
+        }
+    }
+
+    @OperatorMetadata(alias = "FollowUpDoExecuteAndComputeTile")
+    public static class FollowUpDoExecuteAndComputeTileOperator extends Operator {
+
+        @SourceProduct
+        Product sourceProduct;
+
+        @TargetProduct
+        Product targetProduct;
+
+        @Override
+        public void initialize() throws OperatorException {
+            Product product = new Product("FollowUpDoExecuteAndComputeTile", "FollowUpDoExecuteAndComputeTile",
+                    sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
+            setTargetProduct(product);
+        }
+
+        @Override
+        public void doExecute(ProgressMonitor pm) throws OperatorException {
+            Band[] bands = sourceProduct.getBands();
+            for (Band sourceBand : bands) {
+                targetProduct.addBand("computed_" + sourceBand.getName(), sourceBand.getDataType());
+            }
+        }
+
+        @Override
+        public void computeTile(Band targetBand, Tile targetTile, ProgressMonitor pm) throws OperatorException {
+            targetTile.setSample(0, 0, 5);
+        }
+
+    }
+
+    static class FollowUpDoExecuteAndComputeTileOperatorSpi extends OperatorSpi {
+
+        FollowUpDoExecuteAndComputeTileOperatorSpi() {
+            super(FollowUpDoExecuteAndComputeTileOperator.class);
         }
     }
 
