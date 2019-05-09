@@ -273,6 +273,9 @@ public class WriteOp extends Operator {
                 writableBands.add(band);
             }
         }
+        if (writableBands.size() == 0) {
+            return;
+        }
         tileSizes = new Dimension[writableBands.size()];
         tileCountsX = new int[writableBands.size()];
         tilesWritten = new boolean[writableBands.size()][][];
