@@ -37,7 +37,6 @@ import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.Tile;
-import org.esa.snap.core.gpf.internal.OperatorProduct;
 import org.esa.snap.core.image.ResolutionLevel;
 import org.esa.snap.core.image.VirtualBandOpImage;
 import org.esa.snap.core.jexp.Term;
@@ -142,8 +141,8 @@ public abstract class PointOperator extends Operator {
     protected Product createTargetProduct() throws OperatorException {
         Product sourceProduct = getSourceProduct();
         Assert.state(sourceProduct != null, "source product not set");
-        return new OperatorProduct(this, new Product(getId(), getClass().getName(),
-                sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight()));
+        return new Product(getId(), getClass().getName(),
+                sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
     }
 
     /**
