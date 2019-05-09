@@ -77,18 +77,19 @@ public class AreaOperatorTest extends TestCase {
         int kernelSize;
 
         private Band sourceBand;
+        private Band targetBand;
 
         @Override
         public void initialize() throws OperatorException {
             sourceBand = sourceProduct.getBand(bandName);
             targetProduct = new Product(sourceProduct.getName(), sourceProduct.getProductType(),
                                         sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
-            targetProduct.addBand(bandName, sourceBand.getDataType());
+            targetBand = targetProduct.addBand(bandName, sourceBand.getDataType());
         }
 
         @Override
         public void computeTile(Band band, Tile tile, ProgressMonitor pm) throws OperatorException {
-            if (band.getName().equals(bandName)) {
+            if (band == targetBand) {
                 int border = kernelSize / 2;
                 Rectangle sourceRegion = tile.getRectangle();
                 sourceRegion.grow(border, border);
