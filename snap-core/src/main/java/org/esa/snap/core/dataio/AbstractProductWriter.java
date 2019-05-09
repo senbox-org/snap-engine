@@ -47,6 +47,7 @@ public abstract class AbstractProductWriter implements ProductWriter {
     private Object _output;
 
     private ArrayList<ProductWriterListener> productWriterListeners;
+    private boolean writerPreparationTriggered;
 
     /**
      * Constructs a <code>ProductWriter</code>. Since no output destination is set, the <code>setOutput</code>
@@ -60,6 +61,7 @@ public abstract class AbstractProductWriter implements ProductWriter {
         Guardian.assertNotNull("writerPlugIn", writerPlugIn);
         _writerPlugIn = writerPlugIn;
         productWriterListeners = new ArrayList<>();
+        writerPreparationTriggered = false;
     }
 
     /**
@@ -193,6 +195,10 @@ public abstract class AbstractProductWriter implements ProductWriter {
 
     @Override
     public void prepareWriting() {
+        if (writerPreparationTriggered) {
+            return;
+        }
+        writerPreparationTriggered = true;
         for (ProductWriterListener productWriterListener : productWriterListeners) {
             productWriterListener.aboutToWriteProduct();
         }
