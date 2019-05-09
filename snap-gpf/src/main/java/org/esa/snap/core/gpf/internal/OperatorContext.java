@@ -121,7 +121,7 @@ public class OperatorContext {
     private final boolean computeTileStackMethodImplemented;
 
     private String id;
-    private OperatorProduct targetProduct;
+    private Product targetProduct;
     private OperatorSpi operatorSpi;
     private Map<Band, OperatorImage> targetImageMap;
     private OperatorConfiguration configuration;
@@ -277,11 +277,7 @@ public class OperatorContext {
 
     public void setTargetProduct(Product targetProduct) {
         Assert.notNull(targetProduct, "targetProduct");
-        if (!(targetProduct instanceof OperatorProduct)) {
-            this.targetProduct = new OperatorProduct(getOperator(), targetProduct);
-        } else {
-            this.targetProduct = (OperatorProduct) targetProduct;
-        }
+        this.targetProduct = targetProduct;
     }
 
     public Object getTargetProperty(String name) {
@@ -494,7 +490,6 @@ public class OperatorContext {
             initGraphMetadata();
 
             targetProduct.setModified(false);
-            targetProduct.setInitialized(true);
         } finally {
             initialising = false;
         }
@@ -847,15 +842,8 @@ public class OperatorContext {
                                                         declaredField.getName(), Product.class);
                     throw new OperatorException(msg);
                 }
-                Product operatorTargetProduct = (Product) getOperatorFieldValue(declaredField);
-                if (operatorTargetProduct != null) {
-                    OperatorProduct targetProduct;
-                    if (!(operatorTargetProduct instanceof OperatorProduct)) {
-                        targetProduct = new OperatorProduct(getOperator(), operatorTargetProduct);
-                    } else {
-                        targetProduct = (OperatorProduct) operatorTargetProduct;
-                    }
-                    setOperatorFieldValue(declaredField, targetProduct);
+                final Product targetProduct = (Product) getOperatorFieldValue(declaredField);
+                if (targetProduct != null) {
                     this.targetProduct = targetProduct;
                 } else {
                     if (this.targetProduct != null) {
