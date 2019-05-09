@@ -443,7 +443,9 @@ public class WriteOp extends Operator {
             productWriter.close();
         } catch (IOException ignore) {
         }
-        writableBands.clear();
+        if (writableBands != null) {
+            writableBands.clear();
+        }
         writeCache.clear();
         super.dispose();
     }
