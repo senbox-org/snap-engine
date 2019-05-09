@@ -21,6 +21,7 @@ import org.esa.snap.core.datamodel.ProductNode;
 import org.esa.snap.core.util.Guardian;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * The <code>AbstractProductWriter</code> class can be used as a base class for new product writer implementations.
@@ -45,6 +46,8 @@ public abstract class AbstractProductWriter implements ProductWriter {
      */
     private Object _output;
 
+    private ArrayList<ProductWriterListener> productWriterListeners;
+
     /**
      * Constructs a <code>ProductWriter</code>. Since no output destination is set, the <code>setOutput</code>
      * method must be called before data can be written.
@@ -56,6 +59,7 @@ public abstract class AbstractProductWriter implements ProductWriter {
     public AbstractProductWriter(ProductWriterPlugIn writerPlugIn) {
         Guardian.assertNotNull("writerPlugIn", writerPlugIn);
         _writerPlugIn = writerPlugIn;
+        productWriterListeners = new ArrayList<>();
     }
 
     /**
@@ -186,4 +190,21 @@ public abstract class AbstractProductWriter implements ProductWriter {
     * @param formatName The name of the file format.
     */
     public void setFormatName(final String formatName) {}
+
+    @Override
+    public void prepareWriting() {
+        for (ProductWriterListener productWriterListener : productWriterListeners) {
+            productWriterListener.aboutToWriteProduct();
+        }
+    }
+
+    @Override
+    public void addProductWriterListener(ProductWriterListener productWriterListener) {
+        productWriterListeners.add(productWriterListener);
+    }
+
+    @Override
+    public void removeProductWriterListener(ProductWriterListener productWriterListener) {
+        productWriterListeners.remove(productWriterListener);
+    }
 }
