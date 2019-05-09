@@ -158,7 +158,6 @@ public class GraphProcessor {
         NodeContext[] outputNodeContexts = graphContext.getOutputNodeContexts();
         for (NodeContext outputNodeContext : outputNodeContexts) {
             NodeSource[] sources = outputNodeContext.getNode().getSources();
-            //todo consider improving handling of progressmonitor here
             executeNodeSources(sources, graphContext, pm);
             outputNodeContext.getOperator().execute(pm);
         }
