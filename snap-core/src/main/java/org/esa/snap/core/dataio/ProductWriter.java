@@ -161,8 +161,9 @@ public interface ProductWriter {
     /**
      * To be called right before the product is written out.
      *
+     * @param pm A progress monitor to monitor the writing preparation
      */
-    void prepareWriting();
+    void prepareWriting(ProgressMonitor pm);
 
     /**
      * Adds a <code>ProductWriterListener</code> that will be notified in the case of events.

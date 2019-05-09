@@ -265,7 +265,7 @@ public class WriteOp extends Operator {
 
     @Override
     public void doExecute(ProgressMonitor pm) {
-        productWriter.prepareWriting();
+        productWriter.prepareWriting(pm);
         final Band[] bands = targetProduct.getBands();
         writableBands = new ArrayList<>(bands.length);
         for (final Band band : bands) {

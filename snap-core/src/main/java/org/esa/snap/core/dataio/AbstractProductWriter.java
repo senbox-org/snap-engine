@@ -15,6 +15,7 @@
  */
 package org.esa.snap.core.dataio;
 
+import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductNode;
@@ -194,13 +195,13 @@ public abstract class AbstractProductWriter implements ProductWriter {
     public void setFormatName(final String formatName) {}
 
     @Override
-    public void prepareWriting() {
+    public void prepareWriting(ProgressMonitor pm) {
         if (writerPreparationTriggered) {
             return;
         }
         writerPreparationTriggered = true;
         for (ProductWriterListener productWriterListener : productWriterListeners) {
-            productWriterListener.aboutToWriteProduct();
+            productWriterListener.aboutToWriteProduct(pm);
         }
     }
 
