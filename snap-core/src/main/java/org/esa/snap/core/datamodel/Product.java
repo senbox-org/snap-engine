@@ -913,7 +913,7 @@ public class Product extends ProductNode {
      * @return The scene size in pixels.
      * @throws IllegalStateException if the scene size wasn't specified yet and cannot be derived
      */
-    public Dimension getSceneRasterSize() {
+    public final Dimension getSceneRasterSize() {
         if (sceneRasterSize != null) {
             return sceneRasterSize;
         }
@@ -1795,7 +1795,7 @@ public class Product extends ProductNode {
      *
      * @param productManager this product's manager, can be {@code null}
      */
-    public void setProductManager(final ProductManager productManager) {
+    void setProductManager(final ProductManager productManager) {
         this.productManager = productManager;
     }
 
