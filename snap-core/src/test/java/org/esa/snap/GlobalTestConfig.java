@@ -24,28 +24,28 @@ import java.io.File;
 
 public class GlobalTestConfig {
 
-    public static final String SNAP_TEST_DATA_INPUT_DIR_PROPERTY_NAME = "org.esa.snap.testdata.in";
-    public static final String SNAP_TEST_DATA_OUTPUT_DIR_PROPERTY_NAME = "org.esa.snap.testdata.out";
-    public static final String SNAP_TEST_DATA_INPUT_DIR_DEFAULT_PATH = "testdata" + File.separatorChar + "in";
-    public static final String SNAP_TEST_DATA_OUTPUT_DIR_DEFAULT_PATH = "testdata" + File.separatorChar + "out";
+    public static final String BEAM_TEST_DATA_INPUT_DIR_PROPERTY_NAME = "org.esa.snap.testdata.in";
+    public static final String BEAM_TEST_DATA_OUTPUT_DIR_PROPERTY_NAME = "org.esa.snap.testdata.out";
+    public static final String BEAM_TEST_DATA_INPUT_DIR_DEFAULT_PATH = "testdata" + File.separatorChar + "in";
+    public static final String BEAM_TEST_DATA_OUTPUT_DIR_DEFAULT_PATH = "testdata" + File.separatorChar + "out";
 
-    public static File getSnapTestDataInputDirectory() {
-        return getDirectory(SNAP_TEST_DATA_INPUT_DIR_PROPERTY_NAME,
-                SNAP_TEST_DATA_INPUT_DIR_DEFAULT_PATH);
+    public static File getBeamTestDataInputDirectory() {
+        return getDirectory(BEAM_TEST_DATA_INPUT_DIR_PROPERTY_NAME,
+                            BEAM_TEST_DATA_INPUT_DIR_DEFAULT_PATH);
     }
 
-    public static File getSnapTestDataInputFile(String relPath) {
-        return new File(getSnapTestDataInputDirectory(),
+    public static File getBeamTestDataInputFile(String relPath) {
+        return new File(getBeamTestDataInputDirectory(),
                         SystemUtils.convertToLocalPath(relPath));
     }
 
-    public static File getSnapTestDataOutputDirectory() {
-        return getDirectory(SNAP_TEST_DATA_OUTPUT_DIR_PROPERTY_NAME,
-                SNAP_TEST_DATA_OUTPUT_DIR_DEFAULT_PATH);
+    public static File getBeamTestDataOutputDirectory() {
+        return getDirectory(BEAM_TEST_DATA_OUTPUT_DIR_PROPERTY_NAME,
+                            BEAM_TEST_DATA_OUTPUT_DIR_DEFAULT_PATH);
     }
 
-    public static File getSnapTestDataOutputFile(String relPath) {
-        return new File(getSnapTestDataOutputDirectory(),
+    public static File getBeamTestDataOutputFile(String relPath) {
+        return new File(getBeamTestDataOutputDirectory(),
                         SystemUtils.convertToLocalPath(relPath));
     }
 
@@ -69,12 +69,12 @@ public class GlobalTestConfig {
         };
     }
 
-    private static File getDirectory(String propertyName, String snapRelDefaultPath) {
+    private static File getDirectory(String propertyName, String beamRelDefaultPath) {
         String filePath = System.getProperty(propertyName);
         if (filePath != null) {
             return new File(filePath);
         }
         return new File(SystemUtils.getApplicationHomeDir(),
-                        SystemUtils.convertToLocalPath(snapRelDefaultPath));
+                        SystemUtils.convertToLocalPath(beamRelDefaultPath));
     }
 }

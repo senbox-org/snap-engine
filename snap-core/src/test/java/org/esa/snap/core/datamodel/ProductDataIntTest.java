@@ -32,7 +32,7 @@ public class ProductDataIntTest extends TestCase {
 
     @Override
     protected void setUp() throws IOException {
-        File outputDir = GlobalTestConfig.getSnapTestDataOutputFile("ProductData");
+        File outputDir = GlobalTestConfig.getBeamTestDataOutputFile("ProductData");
         Assume.assumeTrue(outputDir.mkdirs() || outputDir.exists());
         File streamFile = new File(outputDir, "int.img");
         Assume.assumeTrue(streamFile.createNewFile() || streamFile.exists());
@@ -49,7 +49,7 @@ public class ProductDataIntTest extends TestCase {
             _outputStream.close();
         } catch (IOException ignored) {
         }
-        FileUtils.deleteTree(GlobalTestConfig.getSnapTestDataOutputDirectory());
+        FileUtils.deleteTree(GlobalTestConfig.getBeamTestDataOutputDirectory());
     }
 
     public void testSingleValueConstructor() {

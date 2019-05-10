@@ -33,7 +33,7 @@ public class ProductDataAsciiTest extends TestCase {
 
     @Override
     protected void setUp() throws IOException {
-        File outputFile = GlobalTestConfig.getSnapTestDataOutputFile("ProductData");
+        File outputFile = GlobalTestConfig.getBeamTestDataOutputFile("ProductData");
         outputFile.mkdirs();
         File streamFile = new File(outputFile, "ascii.img");
         streamFile.createNewFile();
@@ -50,7 +50,7 @@ public class ProductDataAsciiTest extends TestCase {
             _outputStream.close();
         } catch (IOException e) {
         }
-        FileUtils.deleteTree(GlobalTestConfig.getSnapTestDataOutputDirectory());
+        FileUtils.deleteTree(GlobalTestConfig.getBeamTestDataOutputDirectory());
     }
 
     public void testDataTypeInconsistency() {

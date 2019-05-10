@@ -25,11 +25,11 @@ import java.util.Arrays;
 public class GlobalTestTools {
 
     public static void deleteTestDataOutputDirectory() {
-        FileUtils.deleteTree(GlobalTestConfig.getSnapTestDataOutputDirectory());
+        FileUtils.deleteTree(GlobalTestConfig.getBeamTestDataOutputDirectory());
     }
 
     public static void deleteTestDataInputDirectory() {
-        FileUtils.deleteTree(GlobalTestConfig.getSnapTestDataInputDirectory());
+        FileUtils.deleteTree(GlobalTestConfig.getBeamTestDataInputDirectory());
     }
 
     public static void deleteTestDirectory() {
