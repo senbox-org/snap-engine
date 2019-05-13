@@ -341,8 +341,6 @@ public class GPF {
      * @param operator The operator on which the execute method shall be called
      */
     public void executeOperator(Operator operator) {
-        // ensure initialize has been called before
-        operator.getTargetProduct();
         operatorExecutor.execute(operator);
     }
 
