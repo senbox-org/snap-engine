@@ -67,7 +67,9 @@ public class Operators {
 
         @Override
         public void doExecute(ProgressMonitor pm) throws OperatorException {
+            pm.beginTask("Executing initDoExecuteComputeTile", 1);
             summand += 2;
+            pm.done();
         }
 
         @Override
@@ -99,7 +101,9 @@ public class Operators {
 
         @Override
         public void doExecute(ProgressMonitor pm) throws OperatorException {
+            pm.beginTask("Executing InitDoExecuteAddsBandComputeTile", 1);
             getTargetProduct().addBand("band1", ProductData.TYPE_INT8);
+            pm.done();
         }
 
         @Override
@@ -158,11 +162,13 @@ public class Operators {
 
         @Override
         public void doExecute(ProgressMonitor pm) throws OperatorException {
+            pm.beginTask("Executing initJAIImageDoExecute", 1);
             Product targetProduct = getTargetProduct();
             Number[] bandValues = new Byte[]{3};
             RenderedOp constantImage = ConstantDescriptor.create(1f, 1f, bandValues, null);
             Band band = targetProduct.addBand("band2", ProductData.TYPE_INT8);
             band.setSourceImage(constantImage);
+            pm.done();
         }
 
     }
@@ -189,11 +195,13 @@ public class Operators {
 
         @Override
         public void doExecute(ProgressMonitor pm) throws OperatorException {
+            pm.beginTask("Executing initDoExecuteSetsJAIImage", 1);
             Product targetProduct = getTargetProduct();
             Band band1 = targetProduct.getBand("band1");
             Number[] bandValues = new Byte[]{3};
             RenderedOp constantImage = ConstantDescriptor.create(1f, 1f, bandValues, null);
             band1.setSourceImage(constantImage);
+            pm.done();
         }
 
     }
@@ -223,6 +231,7 @@ public class Operators {
 
         @Override
         public void doExecute(ProgressMonitor pm) throws OperatorException {
+            pm.beginTask("Executing InitAndDoExecuteSetNoTargetProduct", 1);
             try {
                 PrintWriter printWriter = new PrintWriter(new File(outputFilePath));
                 printWriter.print("something");
@@ -230,6 +239,7 @@ public class Operators {
             } catch (FileNotFoundException e) {
                 throw new OperatorException(e.getMessage());
             }
+            pm.done();
         }
 
     }
@@ -292,6 +302,7 @@ public class Operators {
 
         @Override
         public void doExecute(ProgressMonitor pm) throws OperatorException {
+            pm.beginTask("Executing FollowUpDoExecute", 1);
             Band[] bands = sourceProduct.getBands();
             for (Band sourceBand : bands) {
                 Band targetBand = targetProduct.addBand("computed_" + sourceBand.getName(), sourceBand.getDataType());
@@ -302,6 +313,7 @@ public class Operators {
                 RenderedOp constantImage = ConstantDescriptor.create(1f, 1f, bandValues, null);
                 targetBand.setSourceImage(constantImage);
             }
+            pm.done();
         }
 
     }
@@ -331,10 +343,12 @@ public class Operators {
 
         @Override
         public void doExecute(ProgressMonitor pm) throws OperatorException {
+            pm.beginTask("Executing FollowUpDoExecuteAndComputeTile", 1);
             Band[] bands = sourceProduct.getBands();
             for (Band sourceBand : bands) {
                 targetProduct.addBand("computed_" + sourceBand.getName(), sourceBand.getDataType());
             }
+            pm.done();
         }
 
         @Override
