@@ -17,6 +17,7 @@
 package org.esa.snap.core.gpf;
 
 import com.bc.ceres.core.Assert;
+import com.bc.ceres.core.PrintWriterConciseProgressMonitor;
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.ServiceRegistryManager;
 import org.esa.snap.core.datamodel.Product;
@@ -111,6 +112,7 @@ public class GPF {
     private DownsamplerSpiRegistry downsamplerSpiRegistry;
 
     private ProductManager productManager;
+    private ProgressMonitoredOperatorExecutor operatorExecutor;
 
     /**
      * Constructor.
@@ -120,6 +122,7 @@ public class GPF {
         spiRegistry = new OperatorSpiRegistryImpl(registryManager.getServiceRegistry(OperatorSpi.class));
         upsamplerSpiRegistry = new UpsamplerSpiRegistryImpl(registryManager.getServiceRegistry(UpsamplerSpi.class));
         downsamplerSpiRegistry = new DownsamplerSpiRegistryImpl(registryManager.getServiceRegistry(DownsamplerSpi.class));
+        operatorExecutor = operator -> operator.execute(new PrintWriterConciseProgressMonitor(System.out));
     }
 
     /**
@@ -328,9 +331,19 @@ public class GPF {
                                    RenderingHints renderingHints) {
         Operator operator = createOperator(operatorName, parameters, sourceProducts, renderingHints);
         Product targetProduct = operator.getTargetProduct();
-        //todo set useful progressmonitor
-        operator.execute(ProgressMonitor.NULL);
+        executeOperator(operator);
         return targetProduct;
+    }
+
+    /**
+     * Calls the execute method of an operator and sets an appropriate progress monitor.
+     *
+     * @param operator The operator on which the execute method shall be called
+     */
+    public void executeOperator(Operator operator) {
+        // ensure initialize has been called before
+        operator.getTargetProduct();
+        operatorExecutor.execute(operator);
     }
 
     /**
@@ -468,6 +481,10 @@ public class GPF {
     public synchronized void setProductManager(ProductManager productManager) {
         Assert.notNull(productManager, "productManager");
         this.productManager = productManager;
+    }
+
+    public void setGPFOperatorExecutor(ProgressMonitoredOperatorExecutor operatorExecutor) {
+        this.operatorExecutor = operatorExecutor;
     }
 
     static class RenderingKey<T> extends RenderingHints.Key {
