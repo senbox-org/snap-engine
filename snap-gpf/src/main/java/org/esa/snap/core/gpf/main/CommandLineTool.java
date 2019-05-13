@@ -25,7 +25,6 @@ import com.bc.ceres.binding.dom.DefaultDomElement;
 import com.bc.ceres.binding.dom.DomElement;
 import com.bc.ceres.binding.dom.XppDomElement;
 import com.bc.ceres.core.PrintWriterConciseProgressMonitor;
-import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.metadata.MetadataResourceEngine;
 import com.bc.ceres.resource.Resource;
 import com.thoughtworks.xstream.io.copy.HierarchicalStreamCopier;
