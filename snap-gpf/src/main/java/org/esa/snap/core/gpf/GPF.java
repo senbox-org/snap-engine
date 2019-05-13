@@ -481,7 +481,7 @@ public class GPF {
         this.productManager = productManager;
     }
 
-    public void setGPFOperatorExecutor(ProgressMonitoredOperatorExecutor operatorExecutor) {
+    public void setProgressMonitoredOperatorExecutor(ProgressMonitoredOperatorExecutor operatorExecutor) {
         this.operatorExecutor = operatorExecutor;
     }
 
