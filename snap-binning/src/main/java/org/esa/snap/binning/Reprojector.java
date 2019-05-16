@@ -20,6 +20,7 @@ import com.bc.ceres.core.Assert;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import org.esa.snap.binning.support.CrsGrid;
 import org.geotools.geometry.jts.JTS;
 
 import java.awt.Rectangle;
@@ -78,13 +79,14 @@ public class Reprojector {
         int gridWidth = determineGridWidth(planetaryGrid);
         Rectangle outputRegion = new Rectangle(gridWidth, gridHeight);
         if (roiGeometry != null) {
-            if (planetaryGrid instanceof MosaickingGrid) {
+            if (planetaryGrid instanceof CrsGrid) {
                 final Coordinate[] coordinates = getBoundsCoordinates(roiGeometry);
                 int gxmin = gridWidth;
                 int gxmax = 0;
                 int gymin = gridHeight;
                 int gymax = 0;
                 for (Coordinate coordinate : coordinates) {
+                    // TODO: distinguish getBinIndexFloor and getBinIndexCeiling for max and min
                     long bin = planetaryGrid.getBinIndex(coordinate.y, coordinate.x);
                     int row = planetaryGrid.getRowIndex(bin);
                     int col = (int)(bin - planetaryGrid.getFirstBinIndex(row));
@@ -114,6 +116,10 @@ public class Reprojector {
                 }
                 final int x = (int) Math.floor((180.0 + gxmin) / pixelSize);
                 final int y = (int) Math.floor((90.0 - gymax) / pixelSize);
+                // not changed in order not to break consistency with time series of systematic productions
+                // may change output dimensions by one pixel
+                //gxmin = x * pixelSize - 180.0;
+                //gymax = 90.0 - y * pixelSize;
                 final int width = (int) Math.ceil((gxmax - gxmin) / pixelSize);
                 final int height = (int) Math.ceil((gymax - gymin) / pixelSize);
                 final Rectangle unclippedOutputRegion = new Rectangle(x, y, width, height);
@@ -143,7 +149,7 @@ public class Reprojector {
             shape.lineTo((float) roiGeometry.getCoordinates()[i].x, (float) roiGeometry.getCoordinates()[i].y);
         }
 
-        roiGeometry = JTS.shapeToGeometry(shape.getBounds2D(), new GeometryFactory());
+        roiGeometry = JTS.toGeometry(shape.getBounds2D(), new GeometryFactory());
         return roiGeometry.getCoordinates();
     }
 
@@ -175,7 +181,7 @@ public class Reprojector {
         final int y1 = rasterRegion.y;
         final int y2 = y1 + rasterRegion.height - 1;
 
-        final List<TemporalBin> binRow = new ArrayList<TemporalBin>();
+        final List<TemporalBin> binRow = new ArrayList<>();
         int yUltimate = -1;
         while (temporalBins.hasNext()) {
             TemporalBin temporalBin = temporalBins.next();
@@ -270,7 +276,7 @@ public class Reprojector {
     }
 
     private long[] binIndicesForMosaicingLine(int y, int x1, int x2) {
-        final int gridWidth = planetaryGrid.getNumCols(0);
+        final long gridWidth = planetaryGrid.getNumCols(0);
         long[] binIndices = new long[x2 - x1 + 1];
         for (int x = x1, i = 0; x <= x2; x++, i++) {
             binIndices[i] = x + y * gridWidth;
