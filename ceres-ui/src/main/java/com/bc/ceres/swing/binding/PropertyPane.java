@@ -28,6 +28,7 @@ import javax.swing.JScrollPane;
 
 import static com.bc.ceres.swing.TableLayout.*;
 
+
 /**
  * A utility class used to create a {@link JPanel} containing default Swing components and their corresponding bindings for the
  * {@link com.bc.ceres.binding.PropertyContainer} given by the {@link com.bc.ceres.swing.binding.BindingContext}.
@@ -35,10 +36,27 @@ import static com.bc.ceres.swing.TableLayout.*;
  * is set, it will be used as label, otherwise a label is derived from the {@code name} property.
  * <p>Properties, whose attribute "enabled" is set to {@code false}, will be shown in disabled state.
  * Properties, whose attribute "visible" is set to {@code false}, will not be shown at all.
+ *
+ * @author Brockmann Consult
+ * @author Daniel Knowles
+ * @version $Revision$ $Date$
+ * @
  */
+// JAN2018 - Daniel Knowles - Added method to return property pane as a JScrollPane
+
+
+// JAN2018 - Daniel Knowles - Moved some of the logic for adding components to a public method which can also be called by
+//                            the preferences GUIs.
+//                          - Added tooltips: NOTE: actual tooltips values will be added in the future.
+//                            NOTE: this does not contain section breaks which may be added in the future for a future
+//                                  revision of map gridlines and other tools.
+
+
+
 public class PropertyPane {
 
     private final BindingContext bindingContext;
+
 
     public PropertyPane(PropertySet propertySet) {
         this(new BindingContext(propertySet));
@@ -53,6 +71,7 @@ public class PropertyPane {
     }
 
     public JPanel createPanel() {
+
         PropertySet propertyContainer = bindingContext.getPropertySet();
         Property[] properties = propertyContainer.getProperties();
 
@@ -70,22 +89,10 @@ public class PropertyPane {
             if (isInvisible(descriptor)) {
                 continue;
             }
-            PropertyEditor propertyEditor = registry.findPropertyEditor(descriptor);
-            JComponent[] components = propertyEditor.createComponents(descriptor, bindingContext);
-            if (components.length == 2) {
-                layout.setCellWeightX(rowIndex, 0, 0.0);
-                panel.add(components[1], cell(rowIndex, 0));
-                layout.setCellWeightX(rowIndex, 1, 1.0);
-                if(components[0] instanceof JScrollPane) {
-                    layout.setRowWeightY(rowIndex, 1.0);
-                    layout.setRowFill(rowIndex, TableLayout.Fill.BOTH);
-                }
-                panel.add(components[0], cell(rowIndex, 1));
-            } else {
-                layout.setCellColspan(rowIndex, 0, 2);
-                layout.setCellWeightX(rowIndex, 0, 1.0);
-                panel.add(components[0], cell(rowIndex, 0));
-            }
+
+            addComponent(rowIndex, layout, panel, bindingContext, registry, descriptor);
+
+
             if (displayUnitColumn) {
                 final JLabel label = new JLabel("");
                 if (descriptor.getUnit() != null) {
@@ -102,6 +109,31 @@ public class PropertyPane {
         panel.add(new JPanel());
         return panel;
     }
+
+
+
+
+
+
+
+    /*
+     * Returns a JScrollPane version of the property pane
+     * Note: This method was added to fix an issue where a layer editor view with too many properties wouldn't fit onto
+     *       some monitor screens.
+     * @author Daniel Knowles
+     * @since Jan 2019
+     */
+
+    public JScrollPane createJScrollPanel() {
+
+        JPanel panel = createPanel();
+        panel.setMinimumSize(panel.getPreferredSize());
+        final JScrollPane scrollPane = new JScrollPane(panel);
+
+        return scrollPane;
+    }
+
+
 
     private boolean isInvisible(PropertyDescriptor descriptor) {
         return Boolean.FALSE.equals(descriptor.getAttribute("visible")) || descriptor.isDeprecated();
@@ -122,4 +154,45 @@ public class PropertyPane {
         }
         return showUnitColumn;
     }
+
+
+
+
+    /*
+     * Adds a property component to the panel.
+     *
+     * @author Brockmann Consult
+     * @author Daniel Knowles
+     * @since Jan 2019
+     */
+    // JAN2019 - Daniel Knowles - Split out this method from the original inline flow and made this method public to
+    //                            enable the preferences GUIs to also call this.  Note: this call from the preferences
+    //                            GUIs is not currently being made by the master but may be made in future by the future
+    //                            revisions of the map gridline GUIs
+    //                          - Added tooltips
+
+    static public JComponent[] addComponent(int rowIndex, TableLayout layout, JPanel panel, BindingContext bindingContext,
+                                            PropertyEditorRegistry registry, PropertyDescriptor descriptor) {
+
+        PropertyEditor propertyEditor = registry.findPropertyEditor(descriptor);
+        JComponent[] components = propertyEditor.createComponents(descriptor, bindingContext);
+        if (components.length == 2) {
+            layout.setCellWeightX(rowIndex, 0, 0.0);
+            panel.add(components[1], cell(rowIndex, 0));
+            layout.setCellWeightX(rowIndex, 1, 1.0);
+            if(components[0] instanceof JScrollPane) {
+                layout.setRowWeightY(rowIndex, 1.0);
+                layout.setRowFill(rowIndex, TableLayout.Fill.BOTH);
+            }
+            panel.add(components[0], cell(rowIndex, 1));
+        } else {
+            layout.setCellColspan(rowIndex, 0, 2);
+            layout.setCellWeightX(rowIndex, 0, 1.0);
+            panel.add(components[0], cell(rowIndex, 0));
+        }
+
+        return components;
+    }
+
+
 }
