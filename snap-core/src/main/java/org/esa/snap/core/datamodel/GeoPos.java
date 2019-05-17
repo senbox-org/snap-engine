@@ -136,6 +136,7 @@ public class GeoPos {
      * Indicates whether some other object is "equal to" this one.
      *
      * @param obj the reference object with which to compare.
+     *
      * @return <code>true</code> if this object is the same as the obj argument; <code>false</code> otherwise.
      */
     @Override
@@ -209,20 +210,6 @@ public class GeoPos {
     }
 
 
-    /**
-     * Returns a string representation of the latitude value.
-     *
-     * @param compassFormat true: "[degrees] [N|S]"
-     *                      false: "+/- [degrees]"
-     * @param decimalFormat true: "degrees in decimal"
-     *                      false: "degrees in DDD°[MM'[SS"]]"
-     * @return a formatted string representing latitude
-     * @author Daniel Knowles
-     * @since Sept 2018
-     */
-    public String getLatString(boolean compassFormat, boolean decimalFormat) {
-        return getLatString(lat, compassFormat, decimalFormat);
-    }
 
     /**
      * Returns a string representation of the latitude value.
@@ -235,26 +222,14 @@ public class GeoPos {
     }
 
 
-    /**
-     * Returns a string representation of the longitude value.
-     *
-     * @param compassFormat true: "[degrees] [N|S]"
-     *                      false: "+/- [degrees]"
-     * @param decimalFormat true: "degrees in decimal"
-     *                      false: "degrees in DDD°[MM'[SS"]]"
-     * @return a formatted string representing longitude
-     * @author Daniel Knowles
-     * @since Sept 2018
-     */
-    public String getLonString(boolean compassFormat, boolean decimalFormat) {
-        return getLonString(lon, compassFormat, decimalFormat);
-    }
+
 
 
     /**
      * Returns a string representation of the given latitude value.
      *
      * @param lat the geographical latitude in decimal degree
+     *
      * @return a string of the form DDD°[MM'[SS"]] [N|S].
      */
     // SEP2018 - Daniel Knowles - Modified to call getLatString(lon, true, false)
@@ -283,16 +258,22 @@ public class GeoPos {
         }
     }
 
+
+
     /**
      * Returns a string representation of the given longitude value.
      *
      * @param lon the geographical longitude in decimal degree
+     *
      * @return a string of the form DDD°[MM'[SS"]] [W|E].
      */
     // SEP2018 - Daniel Knowles - Modified to call getLonString(lon, true, false)
     public static String getLonString(double lon) {
         return getLonString(lon, true, false);
     }
+
+
+
 
 
     /**
@@ -395,5 +376,41 @@ public class GeoPos {
     private static boolean isLonValid(double lon) {
         return !Double.isNaN(lon) && !Double.isInfinite(lon);
     }
+
+
+    /**
+     * Returns a string representation of the latitude value.
+     *
+     * @param compassFormat true: "[degrees] [N|S]"
+     *                      false: "+/- [degrees]"
+     * @param decimalFormat true: "degrees in decimal"
+     *                      false: "degrees in DDD°[MM'[SS"]]"
+     * @return a formatted string representing latitude
+     * @author Daniel Knowles
+     * @since Sept 2018
+     */
+    public String getLatString(boolean compassFormat, boolean decimalFormat) {
+        return getLatString(lat, compassFormat, decimalFormat);
+    }
+
+
+
+    /**
+     * Returns a string representation of the longitude value.
+     *
+     * @param compassFormat true: "[degrees] [N|S]"
+     *                      false: "+/- [degrees]"
+     * @param decimalFormat true: "degrees in decimal"
+     *                      false: "degrees in DDD°[MM'[SS"]]"
+     * @return a formatted string representing longitude
+     * @author Daniel Knowles
+     * @since Sept 2018
+     */
+    public String getLonString(boolean compassFormat, boolean decimalFormat) {
+        return getLonString(lon, compassFormat, decimalFormat);
+    }
+
+
+
 
 }
