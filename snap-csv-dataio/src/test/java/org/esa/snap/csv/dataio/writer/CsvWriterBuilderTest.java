@@ -28,7 +28,7 @@ public class CsvWriterBuilderTest {
                 .targetFormat(OutputFormat.ODESA)
                 .targetFile("target.csv")
                 .build();
-        assertEquals(FeatureCsvWriter.class, featureWriter.getClass());
+
     }
 
     @Test
