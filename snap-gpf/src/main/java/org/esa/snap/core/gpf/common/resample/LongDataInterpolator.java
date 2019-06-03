@@ -55,15 +55,11 @@ public abstract class LongDataInterpolator implements Interpolator {
             double subPixelOffsetY = offsetY - (int) offsetY;
             double subPixelOffsetX = offsetX - (int) offsetX;
             for (int dstY = 0; dstY < destRect.getHeight(); dstY++) {
-//                int srcY = (int) (subPixelOffsetY + scaleY * dstY);
-                double srcYF = subPixelOffsetY + (scaleY * (dstY + 0.5)) - 0.5;
-                int srcY = (int) srcYF;
+                int srcY = (int) Math.round(subPixelOffsetY + (scaleY * (dstY + 0.5)) - 0.5);
                 int srcIndexY = getSrcOffset() + srcY * getSrcScalineStride();
                 boolean yValid = srcY < srcRect.getHeight();
                 for (int dstX = 0; dstX < destRect.getWidth(); dstX++) {
-//                    int srcX = (int) (subPixelOffsetX + scaleX * dstX);
-                    double srcXF = subPixelOffsetX + (scaleX * (dstX + 0.5)) - 0.5;
-                    int srcX = (int) srcXF;
+                    int srcX = (int) Math.round(subPixelOffsetX + (scaleX * (dstX + 0.5)) - 0.5);
                     if (yValid && srcX < srcRect.getWidth()) {
                         setDstData(dstIndexY + dstX, getSrcData(srcIndexY + srcX));
                     } else {
