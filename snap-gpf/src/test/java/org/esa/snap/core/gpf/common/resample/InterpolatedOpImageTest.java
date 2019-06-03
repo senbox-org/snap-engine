@@ -280,43 +280,41 @@ public class InterpolatedOpImageTest {
     }
 
     @Test
-    @Ignore
     public void testInterpolate_Double_CubicConvolution() throws NoninvertibleTransformException {
         testCubicConvolution(ProductData.TYPE_FLOAT64);
     }
 
     @Test
-    @Ignore
     public void testInterpolate_Float_CubicConvolution() throws NoninvertibleTransformException {
         testCubicConvolution(ProductData.TYPE_FLOAT32);
     }
 
     @Test
-    @Ignore
+//    @Ignore
     public void testInterpolate_Byte_CubicConvolution() throws NoninvertibleTransformException {
         testCubicConvolution(ProductData.TYPE_INT8);
     }
 
     @Test
-    @Ignore
+//    @Ignore
     public void testInterpolate_Short_CubicConvolution() throws NoninvertibleTransformException {
         testCubicConvolution(ProductData.TYPE_INT16);
     }
 
     @Test
-    @Ignore
+//    @Ignore
     public void testInterpolate_UShort_CubicConvolution() throws NoninvertibleTransformException {
         testCubicConvolution(ProductData.TYPE_UINT16);
     }
 
     @Test
-    @Ignore
+//    @Ignore
     public void testInterpolate_Int_CubicConvolution() throws NoninvertibleTransformException {
         testCubicConvolution(ProductData.TYPE_INT32);
     }
 
     private void testCubicConvolution(int dataType) throws NoninvertibleTransformException {
-        final Band sourceBand = createSourceBand(dataType);
+        final Band sourceBand = createSourceBand(dataType, 4);
         final int dataBufferType = sourceBand.getSourceImage().getSampleModel().getDataType();
         final ImageLayout imageLayout = ImageManager.createSingleBandedImageLayout(referenceBand, dataBufferType);
         final InterpolatedOpImage image = new InterpolatedOpImage(sourceBand, sourceBand.getSourceImage(), imageLayout,
@@ -330,19 +328,31 @@ public class InterpolatedOpImageTest {
         assertEquals(referenceBand.getRasterHeight(), image.getHeight());
         assertEquals(dataBufferType, image.getSampleModel().getDataType());
         final Raster targetData = image.getData();
-        assertEquals(3.0, targetData.getSampleDouble(0, 0, 0), 1e-8);
-        assertEquals(4.0, targetData.getSampleDouble(1, 0, 0), 1e-8);
-        assertEquals(4.0, targetData.getSampleDouble(2, 0, 0), 1e-8);
-        assertEquals(5.0, targetData.getSampleDouble(0, 1, 0), 1e-8);
-        assertEquals(6.0, targetData.getSampleDouble(1, 1, 0), 1e-8);
-        assertEquals(6.0, targetData.getSampleDouble(2, 1, 0), 1e-8);
-        assertEquals(5.0, targetData.getSampleDouble(0, 2, 0), 1e-8);
-        assertEquals(6.0, targetData.getSampleDouble(1, 2, 0), 1e-8);
-        assertEquals(6.0, targetData.getSampleDouble(2, 2, 0), 1e-8);
+        if ((dataType == ProductData.TYPE_FLOAT32) || (dataType == ProductData.TYPE_FLOAT64)) {
+            assertEquals(3.4305556, targetData.getSampleDouble(0, 0, 0), 1e-6);
+            assertEquals(4.578704, targetData.getSampleDouble(1, 0, 0), 1e-6);
+            assertEquals(5.0324073, targetData.getSampleDouble(2, 0, 0), 1e-6);
+            assertEquals(4.0046296, targetData.getSampleDouble(0, 1, 0), 1e-6);
+            assertEquals(5.1527777, targetData.getSampleDouble(1, 1, 0), 1e-6);
+            assertEquals(5.6064816, targetData.getSampleDouble(2, 1, 0), 1e-6);
+            assertEquals(5.939815, targetData.getSampleDouble(0, 2, 0), 1e-6);
+            assertEquals(7.087963, targetData.getSampleDouble(1, 2, 0), 1e-6);
+            assertEquals(7.875, targetData.getSampleDouble(2, 2, 0), 1e-6);
+        } else {
+            assertEquals(3.0, targetData.getSampleDouble(0, 0, 0), 1e-8);
+            assertEquals(5.0, targetData.getSampleDouble(1, 0, 0), 1e-8);
+            assertEquals(5.0, targetData.getSampleDouble(2, 0, 0), 1e-8);
+            assertEquals(4.0, targetData.getSampleDouble(0, 1, 0), 1e-8);
+            assertEquals(5.0, targetData.getSampleDouble(1, 1, 0), 1e-8);
+            assertEquals(6.0, targetData.getSampleDouble(2, 1, 0), 1e-8);
+            assertEquals(6.0, targetData.getSampleDouble(0, 2, 0), 1e-8);
+            assertEquals(7.0, targetData.getSampleDouble(1, 2, 0), 1e-8);
+            assertEquals(8.0, targetData.getSampleDouble(2, 2, 0), 1e-8);
+        }
     }
 
     private void testBilinear(int dataType) throws NoninvertibleTransformException {
-        final Band sourceBand = createSourceBand(dataType);
+        final Band sourceBand = createSourceBand(dataType, 4);
         final int dataBufferType = sourceBand.getSourceImage().getSampleModel().getDataType();
         final ImageLayout imageLayout = ImageManager.createSingleBandedImageLayout(referenceBand, dataBufferType);
         final InterpolatedOpImage image = new InterpolatedOpImage(sourceBand, sourceBand.getSourceImage(), imageLayout,
@@ -357,30 +367,30 @@ public class InterpolatedOpImageTest {
         assertEquals(dataBufferType, image.getSampleModel().getDataType());
         final Raster targetData = image.getData();
         if (!(dataType == ProductData.TYPE_FLOAT32) && !(dataType == ProductData.TYPE_FLOAT64)) {
-            assertEquals(3.0, targetData.getSampleDouble(0, 0, 0), 1e-6);
+            assertEquals(4.0, targetData.getSampleDouble(0, 0, 0), 1e-6);
             assertEquals(4.0, targetData.getSampleDouble(1, 0, 0), 1e-6);
-            assertEquals(4.0, targetData.getSampleDouble(2, 0, 0), 1e-6);
-            assertEquals(4.0, targetData.getSampleDouble(0, 1, 0), 1e-6);
-            assertEquals(5.0, targetData.getSampleDouble(1, 1, 0), 1e-6);
-            assertEquals(5.0, targetData.getSampleDouble(2, 1, 0), 1e-6);
-            assertEquals(5.0, targetData.getSampleDouble(0, 2, 0), 1e-6);
-            assertEquals(5.0, targetData.getSampleDouble(1, 2, 0), 1e-6);
-            assertEquals(6.0, targetData.getSampleDouble(2, 2, 0), 1e-6);
+            assertEquals(5.0, targetData.getSampleDouble(2, 0, 0), 1e-6);
+            assertEquals(5.0, targetData.getSampleDouble(0, 1, 0), 1e-6);
+            assertEquals(6.0, targetData.getSampleDouble(1, 1, 0), 1e-6);
+            assertEquals(6.0, targetData.getSampleDouble(2, 1, 0), 1e-6);
+            assertEquals(6.0, targetData.getSampleDouble(0, 2, 0), 1e-6);
+            assertEquals(7.0, targetData.getSampleDouble(1, 2, 0), 1e-6);
+            assertEquals(8.0, targetData.getSampleDouble(2, 2, 0), 1e-6);
         } else {
             assertEquals(3.5, targetData.getSampleDouble(0, 0, 0), 1e-6);
             assertEquals(4.16666666, targetData.getSampleDouble(1, 0, 0), 1e-6);
-            assertEquals(4.33333333, targetData.getSampleDouble(2, 0, 0), 1e-6);
-            assertEquals(4.83333333, targetData.getSampleDouble(0, 1, 0), 1e-6);
+            assertEquals(4.8333335, targetData.getSampleDouble(2, 0, 0), 1e-6);
+            assertEquals(4.8333335, targetData.getSampleDouble(0, 1, 0), 1e-6);
             assertEquals(5.5, targetData.getSampleDouble(1, 1, 0), 1e-6);
-            assertEquals(5.66666666, targetData.getSampleDouble(2, 1, 0), 1e-6);
-            assertEquals(5.16666666, targetData.getSampleDouble(0, 2, 0), 1e-6);
-            assertEquals(5.83333333, targetData.getSampleDouble(1, 2, 0), 1e-6);
-            assertEquals(6.0, targetData.getSampleDouble(2, 2, 0));
+            assertEquals(6.1666665, targetData.getSampleDouble(2, 1, 0), 1e-6);
+            assertEquals(6.1666665, targetData.getSampleDouble(0, 2, 0), 1e-6);
+            assertEquals(6.8333335, targetData.getSampleDouble(1, 2, 0), 1e-6);
+            assertEquals(7.5, targetData.getSampleDouble(2, 2, 0), 1e-6);
         }
     }
 
     private void testNearestNeighbour(int dataType) throws NoninvertibleTransformException {
-        final Band sourceBand = createSourceBand(dataType);
+        final Band sourceBand = createSourceBand(dataType, 4);
         final int dataBufferType = sourceBand.getSourceImage().getSampleModel().getDataType();
         final ImageLayout imageLayout = ImageManager.createSingleBandedImageLayout(referenceBand, dataBufferType);
 
@@ -407,12 +417,20 @@ public class InterpolatedOpImageTest {
     }
 
     private Band createSourceBand(int dataType) {
-        return createSourceBand(dataType, "(X + 0.5) + ((Y + 0.5) * 2)");
+        return createSourceBand(dataType, "(X + 0.5) + ((Y + 0.5) * 2)", 2);
+    }
+
+    private Band createSourceBand(int dataType, int widthAndHeight) {
+        return createSourceBand(dataType, "(X + 0.5) + ((Y + 0.5) * 2)", widthAndHeight);
     }
 
     private Band createSourceBand(int dataType, String expression) {
-        int sourceWidth = 2;
-        int sourceHeight = 2;
+        return createSourceBand(dataType, expression, 2);
+    }
+
+    private Band createSourceBand(int dataType, String expression, int widthAndHeight) {
+        int sourceWidth = widthAndHeight;
+        int sourceHeight = widthAndHeight;
         int sourceScaleX = 3;
         int sourceScaleY = 3;
         int sourceTranslateX = 1;
