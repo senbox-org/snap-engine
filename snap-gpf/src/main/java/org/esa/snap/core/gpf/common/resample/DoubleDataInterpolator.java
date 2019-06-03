@@ -50,7 +50,6 @@ public abstract class DoubleDataInterpolator implements Interpolator {
 
     }
 
-
     static class NearestNeighbour extends DoubleDataInterpolator {
 
         @Override
@@ -60,11 +59,11 @@ public abstract class DoubleDataInterpolator implements Interpolator {
             double subPixelOffsetY = offsetY - (int) offsetY;
             double subPixelOffsetX = offsetX - (int) offsetX;
             for (int dstY = 0; dstY < destRect.getHeight(); dstY++) {
-                int srcY = (int) (subPixelOffsetY + scaleY * dstY);
+                int srcY = (int) Math.round(subPixelOffsetY + scaleY * dstY);
                 int srcIndexY = getSrcOffset() + srcY * getSrcScalineStride();
                 boolean yValid = srcY < srcRect.getHeight();
                 for (int dstX = 0; dstX < destRect.getWidth(); dstX++) {
-                    int srcX = (int) (subPixelOffsetX + scaleX * dstX);
+                    int srcX = (int) Math.round(subPixelOffsetX + scaleX * dstX);
                     if (yValid && srcX < srcRect.getWidth()) {
                         setDstData(dstIndexY + dstX, getSrcData(srcIndexY + srcX));
                     } else {
