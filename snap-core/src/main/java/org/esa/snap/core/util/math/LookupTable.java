@@ -250,7 +250,7 @@ public class LookupTable {
         for (int i = dimensions.length; i-- > 0;) {
             final int m = 1 << i;
             final double f = fracIndexes[i].f;
-            if (f < 1e-8) {
+            if (fractionHasNoEffect(f)) {
                 continue;
             }
             for (int j = 0; j < m; ++j) {
@@ -297,7 +297,7 @@ public class LookupTable {
         for (int i = fracIndexes.length; i-- > 0;) {
             final int m = 1 << i;
             final double f = fracIndexes[i].f;
-            if (f < 1e-8) {
+            if (fractionHasNoEffect(f)) {
                 continue;
             }
             for (int j = 0; j < m; ++j) {
@@ -348,7 +348,7 @@ public class LookupTable {
         for (int i = fracIndexes.length; i-- > 0;) {
             final int m = 1 << i;
             final double f = fracIndexes[i].f;
-            if (f < 1e-8) {
+            if (fractionHasNoEffect(f)) {
                 continue;
             }
             for (int j = 0; j < m; ++j) {
@@ -483,6 +483,10 @@ public class LookupTable {
             throw new IllegalArgumentException(MessageFormat.format(
                     "array.length = {0} does not correspond to the expected length {1}", array.getLength(), length));
         }
+    }
+
+    private static boolean fractionHasNoEffect(double f) {
+        return f < 1e-8;
     }
 }
 
