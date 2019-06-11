@@ -250,7 +250,9 @@ public class LookupTable {
         for (int i = dimensions.length; i-- > 0;) {
             final int m = 1 << i;
             final double f = fracIndexes[i].f;
-
+            if (f < 1e-8) {
+                continue;
+            }
             for (int j = 0; j < m; ++j) {
                 v[j] += f * (v[m + j] - v[j]);
             }
@@ -295,7 +297,9 @@ public class LookupTable {
         for (int i = fracIndexes.length; i-- > 0;) {
             final int m = 1 << i;
             final double f = fracIndexes[i].f;
-
+            if (f < 1e-8) {
+                continue;
+            }
             for (int j = 0; j < m; ++j) {
                 for (int k = 0; k < resultLength; k++) {
                     v[j][k] += f * (v[m + j][k] - v[j][k]);
@@ -344,7 +348,9 @@ public class LookupTable {
         for (int i = fracIndexes.length; i-- > 0;) {
             final int m = 1 << i;
             final double f = fracIndexes[i].f;
-
+            if (f < 1e-8) {
+                continue;
+            }
             for (int j = 0; j < m; ++j) {
                 for (int k = 0; k < resultDim1; k++) {
                     for (int l = 0; l < resultDim2; l++) {
