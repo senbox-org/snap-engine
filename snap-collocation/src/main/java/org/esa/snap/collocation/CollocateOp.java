@@ -361,15 +361,7 @@ public class CollocateOp extends Operator {
             Product slaveProduct = slaveProducts[i];
             // Add slave bands
             for (Band sourceBand : slaveProduct.getBands()) {
-                String targetBandName = sourceBand.getName();
-                if (renameSlaveComponents || targetProduct.containsBand(targetBandName) || targetProduct.containsTiePointGrid(targetBandName)) {
-                    targetBandName = slaveComponentPattern.replace(SOURCE_NAME_REFERENCE, targetBandName);
-                    if (slaveProducts.length > 1) {
-                        targetBandName = targetBandName.replace(SLAVE_NUMBER_ID_REFERENCE, String.valueOf(i));
-                    } else {
-                        targetBandName = targetBandName.replace(SLAVE_NUMBER_ID_REFERENCE, "");
-                    }
-                }
+                String targetBandName = getTargetBandName(sourceBand, i);
                 Band targetBand = targetProduct.addBand(targetBandName, sourceBand.getDataType());
                 ProductUtils.copyRasterDataNodeProperties(sourceBand, targetBand);
                 handleSampleCodings(sourceBand, targetBand, renameSlaveComponents, slaveComponentPattern);
@@ -380,15 +372,7 @@ public class CollocateOp extends Operator {
 
             // Add slave tie-point grids as bands
             for (TiePointGrid sourceGrid : slaveProduct.getTiePointGrids()) {
-                String targetBandName = sourceGrid.getName();
-                if (renameSlaveComponents || targetProduct.containsBand(targetBandName) || targetProduct.containsTiePointGrid(targetBandName)) {
-                    targetBandName = slaveComponentPattern.replace(SOURCE_NAME_REFERENCE, targetBandName);
-                    if (slaveProducts.length > 1) {
-                        targetBandName = targetBandName.replace(SLAVE_NUMBER_ID_REFERENCE, String.valueOf(i));
-                    } else {
-                        targetBandName = targetBandName.replace(SLAVE_NUMBER_ID_REFERENCE, "");
-                    }
-                }
+                String targetBandName = getTargetBandName(sourceGrid, i);
                 originalSlaveNames.put(sourceGrid.getName(), targetBandName);
                 Band targetBand = targetProduct.addBand(targetBandName, sourceGrid.getDataType());
                 ProductUtils.copyRasterDataNodeProperties(sourceGrid, targetBand);
@@ -430,6 +414,31 @@ public class CollocateOp extends Operator {
         }
 
         setAutoGrouping();
+    }
+
+    private String getTargetBandName(RasterDataNode rasterDataNode, int productIndex) {
+        String rasterDataNodeName = rasterDataNode.getName();
+        if (renameSlaveComponents) {
+            return rename(rasterDataNodeName, productIndex);
+        } else if (targetProduct.containsRasterDataNode(rasterDataNodeName)) {
+            if (StringUtils.isNullOrEmpty(slaveComponentPattern)) {
+                throw new OperatorException(format(
+                        "Target product already contains a raster data node with name ''{0}''. " +
+                                "Parameter 'slaveComponentPattern' must be set.",
+                        rasterDataNodeName));
+            }
+            return rename(rasterDataNodeName, productIndex);
+        }
+        return rasterDataNodeName;
+    }
+
+    private String rename(String rasterDataNodeName, int productIndex) {
+        rasterDataNodeName = slaveComponentPattern.replace(SOURCE_NAME_REFERENCE, rasterDataNodeName);
+        if (slaveProducts.length > 1) {
+            return rasterDataNodeName.replace(SLAVE_NUMBER_ID_REFERENCE, String.valueOf(productIndex));
+        } else {
+            return rasterDataNodeName.replace(SLAVE_NUMBER_ID_REFERENCE, "");
+        }
     }
 
 
