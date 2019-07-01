@@ -2099,7 +2099,7 @@ public abstract class RasterDataNode extends DataNode implements Scaling, SceneT
         }
     }
 
-    private boolean isPixelWithinImageBounds(int x, int y) {
+    public boolean isPixelWithinImageBounds(int x, int y) {
         return x >= 0 && y >= 0 && x < getRasterWidth() && y < getRasterHeight();
     }
 
@@ -2541,7 +2541,7 @@ public abstract class RasterDataNode extends DataNode implements Scaling, SceneT
                     change = true;
                 }
             }
-            variable.setAncillaryRelations(relations);
+            variable.setAncillaryRelations(StringUtils.addArrays(variable.getAncillaryRelations(), relations));
         }
         if (change) {
             fireProductNodeChanged(PROPERTY_NAME_ANCILLARY_VARIABLES, ancillaryVariables, ancillaryVariables);

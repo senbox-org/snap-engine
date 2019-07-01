@@ -24,7 +24,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * @author Marco Peters
@@ -34,9 +35,9 @@ public class GloballyShiftedDataTest {
     // This test relates to https://senbox.atlassian.net/browse/SNAP-950 and https://senbox.atlassian.net/browse/SNAP-951
 
     private static File tempFile;
-    private static final int WIDTH = 8100;
-    private static final int HEIGHT = 4050;
-    private static final int STEP_HEIGHT = 50;
+    private static final int WIDTH = 810;
+    private static final int HEIGHT = 405;
+    private static final int STEP_HEIGHT = 5;
     private static final int HALF_WIDTH = WIDTH / 2;
     private Product product;
 
@@ -45,7 +46,7 @@ public class GloballyShiftedDataTest {
         // Fails on Linux: "Unable to load library 'netcdf': libnetcdf.so: cannot open shared object file: No such file or directory"
         // why is it failing writing Netcdf files in test mode but not when SNAP is installed?
         // Probably because we use the Nujan lib for writing usually.
-        Assume.assumeTrue(isWindows());
+        Assume.assumeTrue("Runs only on windows", isWindows());
         
         tempFile = File.createTempFile(GloballyShiftedDataTest.class.getSimpleName(), ".nc");
 //        tempFile = new File(String.format("%s\\%s.nc", System.getProperty("user.home"), GloballyShiftedDataTest.class.getSimpleName()));
@@ -172,10 +173,11 @@ public class GloballyShiftedDataTest {
             }
 
             // for visual inspection
+            // Look at it in SNAP or some other GIS software OS image preview doesn't show the data well.
+            // needs to be tiff 32-bit int is not supported by png
 //            String userHome = System.getProperty("user.home");
-//            String path = String.format("%s\\%s_Level%d.png", userHome, GloballyShiftedDataTest.class.getSimpleName(), level);
+//            String path = String.format("%s\\%s_Level%d.tif", userHome, GloballyShiftedDataTest.class.getSimpleName(), level);
 //            File imageFile = new File(path);
-              // needs to be tiff 32-bit int is not supported by png
 //            ImageIO.write(levelImage, "TIFF", imageFile);
         }
 
