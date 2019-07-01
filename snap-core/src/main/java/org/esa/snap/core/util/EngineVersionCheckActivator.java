@@ -15,6 +15,7 @@ public class EngineVersionCheckActivator implements Activator {
 
     @Override
     public void start() {
+        SystemUtils.LOG.log(Level.INFO, "Attention! Please check regularly for updates.");
         if (VERSION_CHECKER.mustCheck()) {
             hasChecked = true;
             if (VERSION_CHECKER.checkForNewRelease()) {
