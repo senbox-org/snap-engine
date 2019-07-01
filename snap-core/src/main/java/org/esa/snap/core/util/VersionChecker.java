@@ -136,6 +136,7 @@ public class VersionChecker {
                 remoteVersion.set(readVersionFromStream(
                         remoteVersionStream == null ? new URL(VersionChecker.REMOTE_VERSION_FILE_URL).openStream() : remoteVersionStream));
             } catch (IOException e) {
+                e.printStackTrace();
                 return null;
             }
         }
