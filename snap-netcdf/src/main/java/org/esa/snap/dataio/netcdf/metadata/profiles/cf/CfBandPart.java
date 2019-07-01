@@ -81,7 +81,7 @@ public class CfBandPart extends ProfilePartIO {
 
     public static void writeCfBandAttributes(RasterDataNode rasterDataNode, NVariable variable) throws IOException {
         final String description = rasterDataNode.getDescription();
-        if (description != null) {f
+        if (description != null) {
             variable.addAttribute("long_name", description);
         }
         String unit = rasterDataNode.getUnit();
