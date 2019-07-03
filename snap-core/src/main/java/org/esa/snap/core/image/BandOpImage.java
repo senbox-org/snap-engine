@@ -48,30 +48,58 @@ public class BandOpImage extends RasterDataNodeOpImage {
 
     @Override
     protected void computeProductData(ProductData productData, Rectangle destRect) throws IOException {
-        final ProductReader productReader = getBand().getProductReader();
+        Band band = getBand();
+        final ProductReader productReader = band.getProductReader();
         if (productReader == null) {
-            throw new IllegalStateException("no product reader for band '" + getBand().getDisplayName() + "'");
+            throw new IllegalStateException("no product reader for band '" + band.getDisplayName() + "'");
         }
         if (getLevel() == 0) {
-            productReader.readBandRasterData(getBand(), destRect.x, destRect.y,
+            productReader.readBandRasterData(band, destRect.x, destRect.y,
                                              destRect.width, destRect.height,
                                              productData,
                                              ProgressMonitor.NULL);
         } else {
             final int sourceWidth = getSourceWidth(destRect.width);
-            final ProductData lineData = ProductData.createInstance(getBand().getDataType(), sourceWidth);
-            final int[] sourceCoords = getSourceCoords(sourceWidth, destRect.width);
+            final int sourceHeight = getSourceHeight(destRect.height);
+
+            final ProductData regionData = ProductData.createInstance(band.getDataType(), sourceWidth * sourceHeight);
             final int srcX = getSourceX(destRect.x);
-            final Band band = getBand();
+            final int srcY = getSourceY(destRect.y);
+            productReader.readBandRasterData(band, srcX, srcY,
+                                             sourceWidth, sourceHeight,
+                                             regionData, ProgressMonitor.NULL);
             for (int y = 0; y < destRect.height; y++) {
-                productReader.readBandRasterData(band,
-                                                 srcX,
-                                                 getSourceY(destRect.y + y),
-                                                 lineData.getNumElems(), 1,
-                                                 lineData,
-                                                 ProgressMonitor.NULL);
-                copyLine(y, destRect.width, lineData, productData, sourceCoords);
+                int sourceY = getSourceY(y);
+                int sourceOffsetY = sourceY * sourceWidth;
+                int destOffsetY = y * destRect.width;
+                for (int x = 0; x < destRect.width; x++) {
+                    int sourceX = getSourceX(x);
+                    switch (regionData.getType()) {
+                        case ProductData.TYPE_INT8:
+                        case ProductData.TYPE_INT16:
+                        case ProductData.TYPE_INT32:
+                            productData.setElemIntAt(destOffsetY + x, regionData.getElemIntAt(sourceOffsetY + sourceX));
+                            break;
+                        case ProductData.TYPE_UINT8:
+                        case ProductData.TYPE_UINT16:
+                        case ProductData.TYPE_UINT32:
+                            productData.setElemUIntAt(destOffsetY + x, regionData.getElemUIntAt(sourceOffsetY + sourceX));
+                            break;
+                        case ProductData.TYPE_FLOAT32:
+                            productData.setElemFloatAt(destOffsetY + x, regionData.getElemFloatAt(sourceOffsetY + sourceX));
+                            break;
+                        case ProductData.TYPE_FLOAT64:
+                            productData.setElemDoubleAt(destOffsetY + x, regionData.getElemDoubleAt(sourceOffsetY + sourceX));
+                            break;
+                        case ProductData.TYPE_ASCII:
+                        case ProductData.TYPE_UTC:
+                        default:
+                            throw new IllegalArgumentException("wrong product data type: " + regionData.getType());
+                    }
+
+                }
             }
+            regionData.dispose();
         }
     }
 }
