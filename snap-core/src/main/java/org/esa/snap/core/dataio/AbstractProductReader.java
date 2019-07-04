@@ -289,6 +289,60 @@ public abstract class AbstractProductReader implements ProductReader {
      * @see #readBandRasterData
      * @see #getSubsetDef
      */
+    public void readBandRasterDataSubsampled(int sourceOffsetX,
+                                                   int sourceOffsetY,
+                                                   int sourceWidth,
+                                                   int sourceHeight,
+                                                   int sourceStepX,
+                                                   int sourceStepY,
+                                                   Band destBand,
+                                                   int destOffsetX,
+                                                   int destOffsetY,
+                                                   int destWidth,
+                                                   int destHeight,
+                                                   ProductData destBuffer,
+                                                   ProgressMonitor pm) throws IOException {
+        readBandRasterDataImpl(sourceOffsetX,
+                               sourceOffsetY,
+                               sourceWidth,
+                               sourceHeight,
+                               sourceStepX,
+                               sourceStepY,
+                               destBand,
+                               destOffsetX,
+                               destOffsetY,
+                               destWidth,
+                               destHeight,
+                               destBuffer, pm);
+
+    }
+
+
+    /**
+     * The template method which is called by the method after an optional spatial subset has been applied to the input
+     * parameters.
+     * <p>The destination band, buffer and region parameters are exactly the ones passed to the original  call. Since
+     * the {@code destOffsetX} and {@code destOffsetY} parameters are already taken into account in the
+     * {@code sourceOffsetX} and {@code sourceOffsetY} parameters, an implementor of this method is free to
+     * ignore them.
+     *
+     * @param sourceOffsetX the absolute X-offset in source raster co-ordinates
+     * @param sourceOffsetY the absolute Y-offset in source raster co-ordinates
+     * @param sourceWidth   the width of region providing samples to be read given in source raster co-ordinates
+     * @param sourceHeight  the height of region providing samples to be read given in source raster co-ordinates
+     * @param sourceStepX   the sub-sampling in X direction within the region providing samples to be read
+     * @param sourceStepY   the sub-sampling in Y direction within the region providing samples to be read
+     * @param destBand      the destination band which identifies the data source from which to read the sample values
+     * @param destOffsetX   the X-offset in the band's raster co-ordinates
+     * @param destOffsetY   the Y-offset in the band's raster co-ordinates
+     * @param destWidth     the width of region to be read given in the band's raster co-ordinates
+     * @param destHeight    the height of region to be read given in the band's raster co-ordinates
+     * @param destBuffer    the destination buffer which receives the sample values to be read
+     * @param pm            a monitor to inform the user about progress
+     * @throws IOException if an I/O error occurs
+     * @see #readBandRasterData
+     * @see #getSubsetDef
+     */
     protected abstract void readBandRasterDataImpl(int sourceOffsetX,
                                                    int sourceOffsetY,
                                                    int sourceWidth,

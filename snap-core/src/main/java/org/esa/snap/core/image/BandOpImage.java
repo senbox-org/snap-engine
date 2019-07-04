@@ -17,6 +17,7 @@
 package org.esa.snap.core.image;
 
 import com.bc.ceres.core.ProgressMonitor;
+import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.ProductData;
@@ -62,44 +63,29 @@ public class BandOpImage extends RasterDataNodeOpImage {
             final int sourceWidth = getSourceWidth(destRect.width);
             final int sourceHeight = getSourceHeight(destRect.height);
 
-            final ProductData regionData = ProductData.createInstance(band.getDataType(), sourceWidth * sourceHeight);
             final int srcX = getSourceX(destRect.x);
             final int srcY = getSourceY(destRect.y);
-            productReader.readBandRasterData(band, srcX, srcY,
-                                             sourceWidth, sourceHeight,
-                                             regionData, ProgressMonitor.NULL);
-            for (int y = 0; y < destRect.height; y++) {
-                int sourceY = getSourceY(y);
-                int sourceOffsetY = sourceY * sourceWidth;
-                int destOffsetY = y * destRect.width;
-                for (int x = 0; x < destRect.width; x++) {
-                    int sourceX = getSourceX(x);
-                    switch (regionData.getType()) {
-                        case ProductData.TYPE_INT8:
-                        case ProductData.TYPE_INT16:
-                        case ProductData.TYPE_INT32:
-                            productData.setElemIntAt(destOffsetY + x, regionData.getElemIntAt(sourceOffsetY + sourceX));
-                            break;
-                        case ProductData.TYPE_UINT8:
-                        case ProductData.TYPE_UINT16:
-                        case ProductData.TYPE_UINT32:
-                            productData.setElemUIntAt(destOffsetY + x, regionData.getElemUIntAt(sourceOffsetY + sourceX));
-                            break;
-                        case ProductData.TYPE_FLOAT32:
-                            productData.setElemFloatAt(destOffsetY + x, regionData.getElemFloatAt(sourceOffsetY + sourceX));
-                            break;
-                        case ProductData.TYPE_FLOAT64:
-                            productData.setElemDoubleAt(destOffsetY + x, regionData.getElemDoubleAt(sourceOffsetY + sourceX));
-                            break;
-                        case ProductData.TYPE_ASCII:
-                        case ProductData.TYPE_UTC:
-                        default:
-                            throw new IllegalArgumentException("wrong product data type: " + regionData.getType());
-                    }
-
-                }
+            if (productReader instanceof AbstractProductReader) {
+                AbstractProductReader reader = (AbstractProductReader) productReader;
+                int scale = (int) getLevelImageSupport().getScale();
+                reader.readBandRasterDataSubsampled(srcX, srcY, sourceWidth, sourceHeight, scale, scale, band, destRect.x, destRect.y,
+                                                    destRect.width, destRect.height,
+                                                    productData, ProgressMonitor.NULL);
+                return;
             }
-            regionData.dispose();
+
+            // here it is probably better to read the whole tile row at once and then read from this the necessary data
+            final ProductData lineData = ProductData.createInstance(getBand().getDataType(), sourceWidth);
+            final int[] sourceCoords = getSourceCoords(sourceWidth, destRect.width);
+            for (int y = 0; y < destRect.height; y++) {
+                productReader.readBandRasterData(band,
+                                                 srcX,
+                                                 getSourceY(destRect.y + y),
+                                                 lineData.getNumElems(), 1,
+                                                 lineData,
+                                                 ProgressMonitor.NULL);
+                copyLine(y, destRect.width, lineData, productData, sourceCoords);
+            }
         }
     }
 }
