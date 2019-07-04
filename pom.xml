@@ -315,7 +315,7 @@
             <dependency>
                 <groupId>it.geosolutions.imageio-ext</groupId>
                 <artifactId>imageio-ext-tiff</artifactId>
-                <version>1.2.1-SNAP</version>
+                <version>1.2.1-SENTBX</version>
                 <exclusions>
                     <exclusion>
                         <groupId>javax.media</groupId>
