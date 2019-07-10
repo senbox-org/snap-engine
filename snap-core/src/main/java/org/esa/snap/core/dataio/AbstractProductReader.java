@@ -265,38 +265,6 @@ public abstract class AbstractProductReader implements ProductReader {
     }
 
     /**
-     * This method is actually not part of the public SNAP API and might change without further notification.
-     */
-    public void readBandRasterDataSubsampled(int sourceOffsetX,
-                                                   int sourceOffsetY,
-                                                   int sourceWidth,
-                                                   int sourceHeight,
-                                                   int sourceStepX,
-                                                   int sourceStepY,
-                                                   Band destBand,
-                                                   int destOffsetX,
-                                                   int destOffsetY,
-                                                   int destWidth,
-                                                   int destHeight,
-                                                   ProductData destBuffer,
-                                                   ProgressMonitor pm) throws IOException {
-        readBandRasterDataImpl(sourceOffsetX,
-                               sourceOffsetY,
-                               sourceWidth,
-                               sourceHeight,
-                               sourceStepX,
-                               sourceStepY,
-                               destBand,
-                               destOffsetX,
-                               destOffsetY,
-                               destWidth,
-                               destHeight,
-                               destBuffer, pm);
-
-    }
-
-
-    /**
      * The template method which is called by the method after an optional spatial subset has been applied to the input
      * parameters.
      * <p>The destination band, buffer and region parameters are exactly the ones passed to the original  call. Since
