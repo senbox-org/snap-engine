@@ -18,13 +18,14 @@ package org.esa.snap.core.image;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.glevel.MultiLevelImage;
+import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.util.math.MathUtils;
 
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.io.IOException;
-import java.util.HashMap;
 
 
 /**
@@ -56,49 +57,56 @@ public class BandOpImage extends RasterDataNodeOpImage {
         }
         if (getLevel() == 0) {
             band.getProductReader().readBandRasterData(band, destRect.x, destRect.y,
-                                             destRect.width, destRect.height,
-                                             destData, ProgressMonitor.NULL);
+                                                       destRect.width, destRect.height,
+                                                       destData, ProgressMonitor.NULL);
         } else {
-            readHigherLevelData(band, destData, destRect, getLevelImageSupport());
+            readHigherLevelData(band, destData, destRect, (int) getLevelImageSupport().getScale());
         }
     }
 
-    static void readHigherLevelData(Band band, ProductData destData, Rectangle destRect, LevelImageSupport lvlSupport) throws IOException {
-        final int sourceWidth = lvlSupport.getSourceWidth(destRect.width);
-        final int sourceHeight = lvlSupport.getSourceHeight(destRect.height);
-        final int srcX = lvlSupport.getSourceX(destRect.x);
-        final int srcY = lvlSupport.getSourceY(destRect.y);
+    private void readHigherLevelData(Band band, ProductData destTileData, Rectangle destTileRect, int scale) throws IOException {
+        int l0DestTileWidth = destTileRect.width * scale;
+        int l0DestTileHeight = destTileRect.height * scale;
+        int l0DestTileX = destTileRect.x * scale;
+        int l0DestTileY = destTileRect.y * scale;
+        Rectangle l0destTileRect = new Rectangle(l0DestTileX, l0DestTileY, l0DestTileWidth, l0DestTileHeight);
 
-        Point[] tileIndices = band.getSourceImage().getTileIndices(new Rectangle(srcX, srcY, sourceWidth, sourceHeight));
-        HashMap<Rectangle, ProductData> tileMap = new HashMap<>();
-        for (Point tileIndex : tileIndices) {
-            Rectangle tileRect = band.getSourceImage().getTileRect(tileIndex.x, tileIndex.y);
-            if (tileRect.isEmpty()) {
-                continue;
+        ProductReader productReader = band.getProductReader();
+
+        MultiLevelImage l0Image = band.getSourceImage();
+        Point[] tileIndices = l0Image.getTileIndices(l0destTileRect);
+        for (Point l0TileIndex : tileIndices) {
+            Rectangle l0TileRect = l0Image.getTileRect(l0TileIndex.x, l0TileIndex.y);
+
+            ProductData l0TileBuffer = ProductData.createInstance(destTileData.getType(), l0TileRect.width * l0TileRect.height);
+            productReader.readBandRasterData(band, l0TileRect.x, l0TileRect.y, l0TileRect.width, l0TileRect.height, l0TileBuffer, ProgressMonitor.NULL);
+
+            double invScale = 1.0 / scale;
+            final Rectangle destLevelTileRect = new Rectangle(
+                    MathUtils.floorInt(l0TileRect.x * invScale),
+                    MathUtils.floorInt(l0TileRect.y * invScale),
+                    MathUtils.floorInt(l0TileRect.width * invScale),
+                    MathUtils.floorInt(l0TileRect.height * invScale)
+            );
+            for (int destTileY = 0; destTileY < destLevelTileRect.height; destTileY++) {
+                if (destTileY <= destTileRect.height) {
+                    int subTileYOffset = destLevelTileRect.y - destTileRect.y;
+                    int subTileXOffset = destLevelTileRect.x - destTileRect.x;
+                    int destDataYOffset = (destTileY + subTileYOffset) * destTileRect.width + subTileXOffset;
+                    int l0TileBufferYOffset = destTileY * scale * l0TileRect.width;
+                    for (int destTileX = 0; destTileX < destLevelTileRect.width; destTileX++) {
+                        if (destTileX <= destTileRect.width) {
+                            int l0tileBufferIndex = l0TileBufferYOffset + destTileX * scale;
+                            double value = l0TileBuffer.getElemDoubleAt(l0tileBufferIndex);
+
+                            int destDataIndex = destDataYOffset + destTileX;
+                            destTileData.setElemDoubleAt(destDataIndex, value);
+                        }
+                    }
+                }
             }
-            final ProductData tileData = ProductData.createInstance(band.getDataType(), tileRect.width * tileRect.height);
-            band.readRasterData(tileRect.x, tileRect.y, tileRect.width, tileRect.height, tileData, ProgressMonitor.NULL);
-            tileMap.put(tileRect, tileData);
+            l0TileBuffer.dispose();
         }
-
-        for (int y = 0; y < destRect.height; y++) {
-            final int currentSrcYOffset = lvlSupport.getSourceY(destRect.y + y);
-            int currentDestYOffset = y * destRect.width;
-            for (int x = 0; x < destRect.width; x++) {
-                double value = getSourceValue(band, tileMap, lvlSupport.getSourceX(destRect.x + x), currentSrcYOffset);
-                destData.setElemDoubleAt(currentDestYOffset + x, value);
-            }
-
-        }
-    }
-
-    private static double getSourceValue(Band band, HashMap<Rectangle, ProductData> tileMap, int sourceX, int sourceY) {
-        MultiLevelImage img = band.getSourceImage();
-        Rectangle tileRect = img.getTileRect(img.XToTileX(sourceX), img.YToTileY(sourceY));
-        ProductData productData = tileMap.get(tileRect);
-        int currentX = sourceX - tileRect.x;
-        int currentY = sourceY - tileRect.y;
-        return productData.getElemDoubleAt(currentY * tileRect.width + currentX);
     }
 
 }
