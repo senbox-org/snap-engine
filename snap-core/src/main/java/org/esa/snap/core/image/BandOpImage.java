@@ -85,8 +85,8 @@ public class BandOpImage extends RasterDataNodeOpImage {
             final Rectangle destLevelTileRect = new Rectangle(
                     MathUtils.floorInt(l0TileRect.x * invScale),
                     MathUtils.floorInt(l0TileRect.y * invScale),
-                    MathUtils.floorInt(l0TileRect.width * invScale),
-                    MathUtils.floorInt(l0TileRect.height * invScale)
+                    MathUtils.ceilInt(l0TileRect.width * invScale),
+                    MathUtils.ceilInt(l0TileRect.height * invScale)
             );
             for (int destTileY = 0; destTileY < destLevelTileRect.height; destTileY++) {
                 if (destTileY <= destTileRect.height) {
