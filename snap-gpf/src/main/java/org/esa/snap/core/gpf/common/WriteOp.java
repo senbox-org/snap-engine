@@ -383,10 +383,29 @@ public class WriteOp extends Operator {
     }
 
     private void writeTileRow(Band band, Tile[] cacheLine) throws IOException {
-        for (Tile tile : cacheLine) {
-            final Rectangle r = tile.getRectangle();
-            synchronized (productWriter) {
-                productWriter.writeBandRasterData(band, r.x, r.y, r.width,r.height, tile.getRawSamples(), ProgressMonitor.NULL);
+        Tile firstTile = cacheLine[0];
+        int sceneWidth = band.getRasterWidth();
+        Rectangle lineBounds = new Rectangle(0, firstTile.getMinY(), sceneWidth, firstTile.getHeight());
+        ProductData[] rawSampleOFLine = new ProductData[cacheLine.length];
+        int[] tileWidth = new int[cacheLine.length];
+        for (int tileX = 0; tileX < cacheLine.length; tileX++) {
+            Tile tile = cacheLine[tileX];
+            rawSampleOFLine[tileX] = tile.getRawSamples();
+            tileWidth[tileX] = tile.getRectangle().width;
+        }
+        ProductData sampleLine = ProductData.createInstance(rawSampleOFLine[0].getType(), sceneWidth);
+        synchronized (productWriter) {
+            for (int y = lineBounds.y; y < lineBounds.y + lineBounds.height; y++) {
+                int targetPos = 0;
+                for (int tileX = 0; tileX < cacheLine.length; tileX++) {
+                    Object rawSamples = rawSampleOFLine[tileX].getElems();
+                    int width = tileWidth[tileX];
+                    int srcPos = (y - lineBounds.y) * width;
+                    System.arraycopy(rawSamples, srcPos, sampleLine.getElems(), targetPos, width);
+                    targetPos += width;
+                }
+
+                productWriter.writeBandRasterData(band, 0, y, sceneWidth, 1, sampleLine, ProgressMonitor.NULL);
             }
         }
     }
