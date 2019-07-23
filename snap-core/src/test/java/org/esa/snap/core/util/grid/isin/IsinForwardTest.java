@@ -20,8 +20,8 @@ public class IsinForwardTest {
         try {
             // -----------I--------------------
             forward.init(0.0, 0.0, 0.0, 0.0, 108.0, 1.0);
-            fail("RuntimeException expected");
-        } catch (RuntimeException expected) {
+            fail("IllegalArgumentException expected");
+        } catch (IllegalArgumentException expected) {
         }
     }
 
@@ -30,15 +30,15 @@ public class IsinForwardTest {
         try {
             // --------------------I--------------------
             forward.init(208.4, -6.32, 0.0, 0.0, 108.0, 1.0);
-            fail("RuntimeException expected");
-        } catch (RuntimeException expected) {
+            fail("IllegalArgumentException expected");
+        } catch (IllegalArgumentException expected) {
         }
 
         try {
             // ------------------I--------------------
             forward.init(208.4, 6.9, 0.0, 0.0, 108.0, 1.0);
-            fail("RuntimeException expected");
-        } catch (RuntimeException expected) {
+            fail("IllegalArgumentException expected");
+        } catch (IllegalArgumentException expected) {
         }
     }
 
@@ -47,8 +47,8 @@ public class IsinForwardTest {
         try {
             // ------------------------------I--------
             forward.init(12, 0.0, 0.0, 0.0, 108.3, 1.0);
-            fail("RuntimeException expected");
-        } catch (RuntimeException expected) {
+            fail("IllegalArgumentException expected");
+        } catch (IllegalArgumentException expected) {
         }
     }
 
@@ -57,8 +57,8 @@ public class IsinForwardTest {
         try {
             // -------------------------------I--------
             forward.init(12, 0.0, 0.0, 0.0, 107.0004, 1.0);
-            fail("RuntimeException expected");
-        } catch (RuntimeException expected) {
+            fail("IllegalArgumentException expected");
+        } catch (IllegalArgumentException expected) {
         }
     }
 
@@ -67,15 +67,15 @@ public class IsinForwardTest {
         try {
             // -----------------------------I--------
             forward.init(12, 0.0, 0.0, 0.0, 0, 1.0);
-            fail("RuntimeException expected");
-        } catch (RuntimeException expected) {
+            fail("IllegalArgumentException expected");
+        } catch (IllegalArgumentException expected) {
         }
 
         try {
             // ---------------------------------I--------
             forward.init(12, 0.0, 0.0, 0.0, 361 * 3600, 1.0);
-            fail("RuntimeException expected");
-        } catch (RuntimeException expected) {
+            fail("IllegalArgumentException expected");
+        } catch (IllegalArgumentException expected) {
         }
     }
 
@@ -84,22 +84,22 @@ public class IsinForwardTest {
         try {
             // -----------------------------------I----
             forward.init(12, 0.0, 0.0, 0.0, 22, -0.03);    // below -eps
-            fail("RuntimeException expected");
-        } catch (RuntimeException expected) {
+            fail("IllegalArgumentException expected");
+        } catch (IllegalArgumentException expected) {
         }
 
         try {
             // ----------------------------------I----
             forward.init(12, 0.0, 0.0, 0.0, 22, 2.1);  // above 2 + eps
-            fail("RuntimeException expected");
-        } catch (RuntimeException expected) {
+            fail("IllegalArgumentException expected");
+        } catch (IllegalArgumentException expected) {
         }
 
         try {
             // ----------------------------------I----
             forward.init(12, 0.0, 0.0, 0.0, 22, 0.6);  // too far away from integer value
-            fail("RuntimeException expected");
-        } catch (RuntimeException expected) {
+            fail("IllegalArgumentException expected");
+        } catch (IllegalArgumentException expected) {
         }
     }
 

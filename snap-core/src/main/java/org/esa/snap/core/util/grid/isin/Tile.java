@@ -204,7 +204,7 @@ class Tile {
             isinDef.ncol_inv[irow] = 1.0 / ((double) ncol);
             ncol_cen = ncol;    // @todo 3 tb/tb implement more clever than assigning in loop 2018-03-21
         }
-        isinDef.col_dist_inv = ncol_cen / (2.0 * Math.PI * sphere);
+        isinDef.col_dist_inv = ncol_cen / (Const.TWOPI * sphere);
 
         return isinDef;
     }
