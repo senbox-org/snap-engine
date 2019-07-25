@@ -19,6 +19,7 @@ class Tile {
     private double ul_x;
     private double ul_y;
     private IsinForward forward;
+    private IsinInverse inverse;
 
     void setNl(long nl) {
         this.nl = nl;
@@ -169,6 +170,7 @@ class Tile {
         ul_y = params.ul_yul - (0.5 * siz_y);
 
         forward = PGS_GCT_Init.forward(projParam);
+        inverse = PGS_GCT_Init.reverse(projParam);
     }
 
     IsinPoint forwardTileImage(double lon, double lat) {
@@ -179,6 +181,10 @@ class Tile {
 
     IsinPoint forwardGlobalMap(double lon, double lat) {
         return forward.transform(new IsinPoint(lon, lat));
+    }
+
+    IsinPoint inverseGlobalMap(double x, double y) {
+        return inverse.transform(new IsinPoint(x, y));
     }
 
     static IsinDef getIsinDef(long nrow_half, double sphere) {
