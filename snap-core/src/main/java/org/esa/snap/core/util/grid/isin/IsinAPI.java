@@ -20,7 +20,7 @@ public class IsinAPI {
         GRID_250_M
     }
 
-    private static final double TO_RAD = Math.PI / 180.0;
+    static final double TO_RAD = Math.PI / 180.0;
 
     /**
      * Constructs the API and initializes internal parameter according to the raster dimensions passed in.

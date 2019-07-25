@@ -109,12 +109,10 @@ class IsinForward {
         final int equatorRow = (int) (nrow_half - 1);
         final long ncol_cen = row[equatorRow].ncol;
 
-        /* Calculate the distance at the equator between
-         * the centers of two columns (and the inverse) */
-
+        // Calculate the distance at the equator between
+        // the centers of two columns (and the inverse)
         col_dist = (TWOPI * sphere) / ncol_cen;
         col_dist_inv = ncol_cen / (TWOPI * sphere);
-
     }
 
     IsinPoint transform(IsinPoint point) {

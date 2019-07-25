@@ -15,6 +15,8 @@ class IsinInverse {
     long nrow_half;
     double lon_cen_mer;
     double ref_lon;
+    double col_dist;
+    double col_dist_inv;
     int ijustify;
     Isin_row[] row;
 
@@ -105,5 +107,55 @@ class IsinInverse {
 
             row[irow] = currentRow;
         }
+
+        // Get the number of columns at the equator
+        final long ncol_cen = row[(int) (nrow_half - 1)].ncol;
+
+        // Calculate the distance at the equator between
+        // the centers of two columns (and the inverse)
+
+        col_dist = (TWOPI * sphere) / ncol_cen;
+        col_dist_inv = ncol_cen / (TWOPI * sphere);
+    }
+
+    IsinPoint transform(IsinPoint point) {
+        final double x = point.getX();
+        final double y = point.getY();
+
+        // Latitude
+        double lat = (y - false_north) * sphere_inv;
+        if (lat < -HALFPI || lat > HALFPI) {
+            lat = Double.NaN;
+        }
+
+        // Integer row number
+        long irow = (int) ((HALFPI - lat) * ang_size_inv);
+        if (irow >= nrow_half) {
+            irow = (this.nrow - 1) - irow;
+        }
+        if (irow < 0) {
+            irow = 0;
+        }
+
+        // Column number (relative to center)
+        double col = (x - false_east) * col_dist_inv;
+
+        // Fractional longitude (between 0 and 1)
+        final int nrow = (int) irow;
+        double flon = (col + row[nrow].icol_cen) * row[nrow].ncol_inv;
+        if (flon < 0.0 || flon > 1.0) {
+            return new IsinPoint(Double.NaN, Double.NaN);
+        }
+
+        // Actual longitude
+        double lon = ref_lon + (flon * TWOPI);
+        if (lon >= Math.PI) {
+            lon -= TWOPI;
+        }
+        if (lon < -Math.PI) {
+            lon += TWOPI;
+        }
+
+        return new IsinPoint(lon, lat);
     }
 }
