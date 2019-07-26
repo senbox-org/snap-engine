@@ -61,6 +61,22 @@ public class IsinAPI {
     }
 
     /**
+     * Map the location (x/y,tileH,tileV) onthe tiled global integerized sinusoidal raster to the geo location.
+     * The point returned contains the longitude (x) and latitude (y) coordinates in decimal degrees.
+     * (zero based) tile indices.
+     *
+     * @param x tile x coordinate
+     * @param y tile y coordinate
+     * @param  tileH horizontal tile index
+     * @param  tileV vertical tile index
+     * @return the mapped location
+     */
+    public IsinPoint tileImageCoordinatesToGeo(double x, double y, int tileH, int tileV) {
+        final IsinPoint isinPoint = tile.inverseTileImage(x, y, tileH, tileV);
+        return new IsinPoint(isinPoint.getX() * TO_DEG, isinPoint.getY() * TO_DEG);
+    }
+
+    /**
      * Map the location (lon/lat) to the tiled global integerized sinusoidal raster.
      * The point returned contains the map x and y coordinates within the tile and the horizontal and vertical
      * (zero based) tile indices.

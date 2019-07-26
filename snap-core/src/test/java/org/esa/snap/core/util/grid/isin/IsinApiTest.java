@@ -273,6 +273,41 @@ public class IsinApiTest {
     }
 
     @Test
+    public void testTileImageCoordinatesToGeo_1km() {
+        final IsinAPI isinAPI = new IsinAPI(GRID_1_KM);
+
+        // front pole
+        IsinPoint isinPoint = isinAPI.tileImageCoordinatesToGeo(-0.5, -0.5, 18, 9);
+        assertEquals(0.0, isinPoint.getX(), 1e-6);
+        assertEquals(0.0, isinPoint.getY(), 1e-6);
+
+        // Hamburg
+        isinPoint = isinAPI.tileImageCoordinatesToGeo(711.9384858866397, 773.369679449138, 18, 3);
+        assertEquals(9.993682, isinPoint.getX(), 1e-6);
+        assertEquals(53.551086, isinPoint.getY(), 1e-6);
+
+        // Cape of Good Hope
+        isinPoint = isinAPI.tileImageCoordinatesToGeo(567.00937995395, 522.3643604597146, 16, 12);
+        assertEquals(-18.49755, isinPoint.getX(), 1e-6);
+        assertEquals(-34.357203, isinPoint.getY(), 1e-6);
+
+        // Green Patch
+        isinPoint = isinAPI.tileImageCoordinatesToGeo(461.6277099444924, 186.34696065743992, 14, 14);
+        assertEquals(-58.130897, isinPoint.getX(), 1e-6);
+        assertEquals(-51.557058, isinPoint.getY(), 1e-6);
+
+        // Tatoosh island light house
+        isinPoint = isinAPI.tileImageCoordinatesToGeo(858.5295819438379, 192.51063950844946, 9, 4);
+        assertEquals(-124.736636, isinPoint.getX(), 1e-6);
+        assertEquals(48.391578, isinPoint.getY(), 1e-6);
+
+        // close to north pole
+        isinPoint = isinAPI.tileImageCoordinatesToGeo(133.2586612534251, 64.69239903637313, 18, 0);
+        assertEquals(116.8765, isinPoint.getX(), 1e-6);
+        assertEquals(89.45673, isinPoint.getY(), 1e-6);
+    }
+
+    @Test
     public void testToTileImageCoordinates_500m() {
         final IsinAPI isinAPI = new IsinAPI(GRID_500_M);
 
@@ -320,6 +355,41 @@ public class IsinApiTest {
     }
 
     @Test
+    public void testTileImageCoordinatesToGeo_500m() {
+        final IsinAPI isinAPI = new IsinAPI(GRID_500_M);
+
+        // front pole
+        IsinPoint isinPoint = isinAPI.tileImageCoordinatesToGeo(-0.5, -0.5, 18, 9);
+        assertEquals(0.0, isinPoint.getX(), 1e-6);
+        assertEquals(0.0, isinPoint.getY(), 1e-6);
+
+        // Hamburg
+        isinPoint = isinAPI.tileImageCoordinatesToGeo(1424.4324922288506, 1547.239358898276, 18, 3);
+        assertEquals(9.993682, isinPoint.getX(), 1e-6);
+        assertEquals(53.551086, isinPoint.getY(), 1e-6);
+
+        // Cape of Good Hope
+        isinPoint = isinAPI.tileImageCoordinatesToGeo(1134.070141991193, 1045.2287209194292, 16, 12);
+        assertEquals(-18.49755, isinPoint.getX(), 1e-6);
+        assertEquals(-34.357203, isinPoint.getY(), 1e-6);
+
+        // Green Patch
+        isinPoint = isinAPI.tileImageCoordinatesToGeo(924.7398440307516, 373.1939213148871, 14, 14);
+        assertEquals(-58.130897, isinPoint.getX(), 1e-6);
+        assertEquals(-51.557058, isinPoint.getY(), 1e-6);
+
+        // Tatoosh island light house
+        isinPoint = isinAPI.tileImageCoordinatesToGeo(1719.0986358544942, 385.5212790168989, 9, 4);
+        assertEquals(-124.736636, isinPoint.getX(), 1e-6);
+        assertEquals(48.391578, isinPoint.getY(), 1e-6);
+
+        // close to north pole
+        isinPoint = isinAPI.tileImageCoordinatesToGeo(265.71869472895924, 129.88479807274632, 18, 0);
+        assertEquals(116.8765, isinPoint.getX(), 1e-6);
+        assertEquals(89.45673, isinPoint.getY(), 1e-6);
+    }
+
+    @Test
     public void testToTileImageCoordinates_250m() {
         final IsinAPI isinAPI = new IsinAPI(GRID_250_M);
 
@@ -364,6 +434,41 @@ public class IsinApiTest {
         assertEquals(260.2695961454967, isinPoint.getY(), 1e-6);
         assertEquals(0, isinPoint.getTile_line());
         assertEquals(18, isinPoint.getTile_col());
+    }
+
+    @Test
+    public void testTileImageCoordinatesToGeo_250m() {
+        final IsinAPI isinAPI = new IsinAPI(GRID_250_M);
+
+        // front pole
+        IsinPoint isinPoint = isinAPI.tileImageCoordinatesToGeo(-0.5, -0.5, 18, 9);
+        assertEquals(0.0, isinPoint.getX(), 1e-6);
+        assertEquals(0.0, isinPoint.getY(), 1e-6);
+
+        // Hamburg
+        isinPoint = isinAPI.tileImageCoordinatesToGeo(2849.4205049132433, 3094.9787177965554, 18, 3);
+        assertEquals(9.993682, isinPoint.getX(), 1e-6);
+        assertEquals(53.551086, isinPoint.getY(), 1e-6);
+
+        // Cape of Good Hope
+        isinPoint = isinAPI.tileImageCoordinatesToGeo(2269.743048149161, 2090.9574418388584, 16, 12);
+        assertEquals(-18.49755, isinPoint.getX(), 1e-6);
+        assertEquals(-34.357203, isinPoint.getY(), 1e-6);
+
+        // Green Patch
+        isinPoint = isinAPI.tileImageCoordinatesToGeo(1850.964112203248, 746.8878426297742, 14, 14);
+        assertEquals(-58.130897, isinPoint.getX(), 1e-6);
+        assertEquals(-51.557058, isinPoint.getY(), 1e-6);
+
+        // Tatoosh island light house
+        isinPoint = isinAPI.tileImageCoordinatesToGeo(3440.390253020232, 771.5425580338015, 9, 4);
+        assertEquals(-124.736636, isinPoint.getX(), 1e-6);
+        assertEquals(48.391578, isinPoint.getY(), 1e-6);
+
+        // close to north pole
+        isinPoint = isinAPI.tileImageCoordinatesToGeo(530.463418624422, 260.2695961454967, 18, 0);
+        assertEquals(116.8765, isinPoint.getX(), 1e-6);
+        assertEquals(89.45673, isinPoint.getY(), 1e-6);
     }
 
     @Test
