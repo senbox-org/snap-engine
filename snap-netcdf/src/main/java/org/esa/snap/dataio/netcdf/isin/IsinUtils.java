@@ -1,5 +1,7 @@
 package org.esa.snap.dataio.netcdf.isin;
 
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.grid.isin.IsinAPI;
 import org.esa.snap.core.util.grid.isin.IsinPoint;
@@ -59,6 +61,31 @@ class IsinUtils {
         final ProductData latData = ProductData.createInstance(latitudes);
 
         return new GeoLocations(lonData, latData);
+    }
+
+    static Product createMpcVegetationPrototype(int tileH, int tileV, IsinAPI.Raster raster) {
+        final IsinAPI isinAPI = new IsinAPI(raster);
+        final IsinPoint tileDimensions = isinAPI.getTileDimensions();
+        final int rasterWidth = (int) tileDimensions.getX();
+        final int rasterHeight = (int) tileDimensions.getY();
+
+        final Product product = new Product("MPC_VEG_OL_L3", "Level3", rasterWidth, rasterHeight);
+
+        final GeoLocations geoLocations = getGeoLocations(tileH, tileV, raster);
+        final Band lonBand = new Band("lon", ProductData.TYPE_FLOAT32, rasterWidth, rasterHeight);
+        lonBand.setRasterData(geoLocations.getLongitudes());
+        lonBand.setNoDataValue(Double.NaN);
+        product.addBand(lonBand);
+
+        final Band latBand = new Band("lat", ProductData.TYPE_FLOAT32, rasterWidth, rasterHeight);
+        latBand.setRasterData(geoLocations.getLatitudes());
+        latBand.setNoDataValue(Double.NaN);
+        product.addBand(latBand);
+
+        final Band ogvi_mean = new Band("OGVI_mean", ProductData.TYPE_FLOAT32, rasterWidth, rasterHeight);
+        product.addBand(ogvi_mean);
+
+        return product;
     }
 
     static class GeoLocations {

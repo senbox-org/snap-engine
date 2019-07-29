@@ -1,6 +1,8 @@
 package org.esa.snap.dataio.netcdf.isin;
 
 import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.MetadataElement;
+import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Test;
 
@@ -8,6 +10,7 @@ import java.util.Date;
 
 import static org.esa.snap.core.util.grid.isin.IsinAPI.Raster.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class IsinUtilsTest {
 
@@ -137,5 +140,90 @@ public class IsinUtilsTest {
 
         assertEquals(-79.99722290039062, longitudes.getElemFloatAt(23039999), 1e-8);
         assertEquals(-59.998958587646484, latitudes.getElemFloatAt(23039999), 1e-8);
+    }
+
+    @Test
+    public void testCreateMpcVegetationPrototype_1km() {
+        final Product product = IsinUtils.createMpcVegetationPrototype(12, 14, GRID_1_KM);
+
+        assertEquals(1200, product.getSceneRasterWidth());
+        assertEquals(1200, product.getSceneRasterHeight());
+        assertEquals("MPC_VEG_OL_L3", product.getDisplayName());
+        assertEquals("Level3", product.getProductType());
+
+        // @todo 1 tb/tb add tests 2019-07-29
+        final MetadataElement metadataRoot = product.getMetadataRoot();
+
+        final Band lonBand = product.getBand("lon");
+        assertEquals(ProductData.TYPE_FLOAT32, lonBand.getDataType());
+        assertEquals(-96.00452423095703, lonBand.getPixelFloat(128, 256), 1e-8);
+        assertEquals(-96.0158462524414, lonBand.getPixelFloat(129, 257), 1e-8);
+        assertTrue(Double.isNaN(lonBand.getNoDataValue()));
+
+        final Band latBand = product.getBand("lat");
+        assertEquals(ProductData.TYPE_FLOAT32, latBand.getDataType());
+        assertEquals(-52.15416717529297, latBand.getPixelFloat(130, 258), 1e-8);
+        assertEquals(-52.162498474121094, latBand.getPixelFloat(131, 259), 1e-8);
+        assertTrue(Double.isNaN(latBand.getNoDataValue()));
+
+        final Band ogvi_mean = product.getBand("OGVI_mean");
+        assertEquals(ProductData.TYPE_FLOAT32, ogvi_mean.getDataType());
+
+    }
+
+    @Test
+    public void testCreateMpcVegetationPrototype_500m() {
+        final Product product = IsinUtils.createMpcVegetationPrototype(11, 13, GRID_500_M);
+
+        assertEquals(2400, product.getSceneRasterWidth());
+        assertEquals(2400, product.getSceneRasterHeight());
+        assertEquals("MPC_VEG_OL_L3", product.getDisplayName());
+        assertEquals("Level3", product.getProductType());
+
+        // @todo 1 tb/tb add tests 2019-07-29
+        final MetadataElement metadataRoot = product.getMetadataRoot();
+
+        final Band lonBand = product.getBand("lon");
+        assertEquals(ProductData.TYPE_FLOAT32, lonBand.getDataType());
+        assertEquals(-85.16436767578125, lonBand.getPixelFloat(1622, 492), 1e-8);
+        assertEquals(-85.1640625, lonBand.getPixelFloat(1623, 493), 1e-8);
+        assertTrue(Double.isNaN(lonBand.getNoDataValue()));
+
+        final Band latBand = product.getBand("lat");
+        assertEquals(ProductData.TYPE_FLOAT32, latBand.getDataType());
+        assertEquals(-42.06041717529297, latBand.getPixelFloat(1624, 494), 1e-8);
+        assertEquals(-42.06458282470703, latBand.getPixelFloat(1625, 495), 1e-8);
+        assertTrue(Double.isNaN(latBand.getNoDataValue()));
+
+        final Band ogvi_mean = product.getBand("OGVI_mean");
+        assertEquals(ProductData.TYPE_FLOAT32, ogvi_mean.getDataType());
+    }
+
+    @Test
+    public void testCreateMpcVegetationPrototype_250m() {
+        final Product product = IsinUtils.createMpcVegetationPrototype(10, 12, GRID_250_M);
+
+        assertEquals(4800, product.getSceneRasterWidth());
+        assertEquals(4800, product.getSceneRasterHeight());
+        assertEquals("MPC_VEG_OL_L3", product.getDisplayName());
+        assertEquals("Level3", product.getProductType());
+
+        // @todo 1 tb/tb add tests 2019-07-29
+        final MetadataElement metadataRoot = product.getMetadataRoot();
+
+        final Band lonBand = product.getBand("lon");
+        assertEquals(ProductData.TYPE_FLOAT32, lonBand.getDataType());
+        assertEquals(-95.54296112060547, lonBand.getPixelFloat(896, 2466), 1e-8);
+        assertEquals(-95.54371643066406, lonBand.getPixelFloat(897, 2467), 1e-8);
+        assertTrue(Double.isNaN(lonBand.getNoDataValue()));
+
+        final Band latBand = product.getBand("lat");
+        assertEquals(ProductData.TYPE_FLOAT32, latBand.getDataType());
+        assertEquals(-35.14270782470703, latBand.getPixelFloat(898, 2468), 1e-8);
+        assertEquals(-35.14479064941406, latBand.getPixelFloat(899, 2469), 1e-8);
+        assertTrue(Double.isNaN(latBand.getNoDataValue()));
+
+        final Band ogvi_mean = product.getBand("OGVI_mean");
+        assertEquals(ProductData.TYPE_FLOAT32, ogvi_mean.getDataType());
     }
 }
