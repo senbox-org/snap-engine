@@ -153,22 +153,54 @@ public class IsinUtilsTest {
 
         // @todo 1 tb/tb add tests 2019-07-29
         final MetadataElement metadataRoot = product.getMetadataRoot();
+        assertEquals("OLCI Level 3 vegetation data", metadataRoot.getAttribute("title").getData().getElemString());
+        assertEquals("Brockmann Consult GmbH", metadataRoot.getAttribute("institution").getData().getElemString());
+        assertEquals("OLCI Level 2 Land data (OLCI L2 L)", metadataRoot.getAttribute("source").getData().getElemString());
+        assertEquals("This dataset was produced at Brockmann Consult GmbH for the Sentinel-3 Mission Performance Centre under ESA contract no. TODO", metadataRoot.getAttribute("comment").getData().getElemString());
 
         final Band lonBand = product.getBand("lon");
         assertEquals(ProductData.TYPE_FLOAT32, lonBand.getDataType());
         assertEquals(-96.00452423095703, lonBand.getPixelFloat(128, 256), 1e-8);
         assertEquals(-96.0158462524414, lonBand.getPixelFloat(129, 257), 1e-8);
         assertTrue(Double.isNaN(lonBand.getNoDataValue()));
+        assertEquals("degrees_east", lonBand.getUnit());
 
         final Band latBand = product.getBand("lat");
         assertEquals(ProductData.TYPE_FLOAT32, latBand.getDataType());
         assertEquals(-52.15416717529297, latBand.getPixelFloat(130, 258), 1e-8);
         assertEquals(-52.162498474121094, latBand.getPixelFloat(131, 259), 1e-8);
         assertTrue(Double.isNaN(latBand.getNoDataValue()));
+        assertEquals("degrees_north", latBand.getUnit());
 
         final Band ogvi_mean = product.getBand("OGVI_mean");
         assertEquals(ProductData.TYPE_FLOAT32, ogvi_mean.getDataType());
+        assertTrue(Double.isNaN(ogvi_mean.getNoDataValue()));
+        assertTrue(Double.isNaN(ogvi_mean.getPixelFloat(132, 260)));
 
+        final Band ogvi_sigma = product.getBand("OGVI_sigma");
+        assertEquals(ProductData.TYPE_FLOAT32, ogvi_sigma.getDataType());
+        assertTrue(Double.isNaN(ogvi_sigma.getNoDataValue()));
+        assertTrue(Double.isNaN(ogvi_sigma.getPixelFloat(133, 261)));
+
+        final Band ogvi_count = product.getBand("OGVI_count");
+        assertEquals(ProductData.TYPE_INT32, ogvi_count.getDataType());
+        assertEquals(Integer.MIN_VALUE, (int)(ogvi_count.getNoDataValue()));
+        assertEquals(Integer.MIN_VALUE, ogvi_count.getPixelInt(134, 262));
+
+        final Band otci_mean = product.getBand("OTCI_mean");
+        assertEquals(ProductData.TYPE_FLOAT32, otci_mean.getDataType());
+        assertTrue(Double.isNaN(otci_mean.getNoDataValue()));
+        assertTrue(Double.isNaN(otci_mean.getPixelFloat(135, 263)));
+
+        final Band otci_sigma = product.getBand("OTCI_sigma");
+        assertEquals(ProductData.TYPE_FLOAT32, otci_sigma.getDataType());
+        assertTrue(Double.isNaN(otci_sigma.getNoDataValue()));
+        assertTrue(Double.isNaN(otci_sigma.getPixelFloat(136, 264)));
+
+        final Band otci_count = product.getBand("OTCI_count");
+        assertEquals(ProductData.TYPE_INT32, otci_count.getDataType());
+        assertEquals(Integer.MIN_VALUE, (int)(otci_count.getNoDataValue()));
+        assertEquals(Integer.MIN_VALUE, otci_count.getPixelInt(134, 262));
     }
 
     @Test
@@ -188,15 +220,44 @@ public class IsinUtilsTest {
         assertEquals(-85.16436767578125, lonBand.getPixelFloat(1622, 492), 1e-8);
         assertEquals(-85.1640625, lonBand.getPixelFloat(1623, 493), 1e-8);
         assertTrue(Double.isNaN(lonBand.getNoDataValue()));
+        assertEquals("degrees_east", lonBand.getUnit());
 
         final Band latBand = product.getBand("lat");
         assertEquals(ProductData.TYPE_FLOAT32, latBand.getDataType());
         assertEquals(-42.06041717529297, latBand.getPixelFloat(1624, 494), 1e-8);
         assertEquals(-42.06458282470703, latBand.getPixelFloat(1625, 495), 1e-8);
         assertTrue(Double.isNaN(latBand.getNoDataValue()));
+        assertEquals("degrees_north", latBand.getUnit());
 
         final Band ogvi_mean = product.getBand("OGVI_mean");
         assertEquals(ProductData.TYPE_FLOAT32, ogvi_mean.getDataType());
+        assertTrue(Double.isNaN(ogvi_mean.getNoDataValue()));
+        assertTrue(Double.isNaN(ogvi_mean.getPixelFloat(1626, 496)));
+
+        final Band ogvi_sigma = product.getBand("OGVI_sigma");
+        assertEquals(ProductData.TYPE_FLOAT32, ogvi_sigma.getDataType());
+        assertTrue(Double.isNaN(ogvi_sigma.getNoDataValue()));
+        assertTrue(Double.isNaN(ogvi_sigma.getPixelFloat(1627, 497)));
+
+        final Band ogvi_count = product.getBand("OGVI_count");
+        assertEquals(ProductData.TYPE_INT32, ogvi_count.getDataType());
+        assertEquals(Integer.MIN_VALUE, (int)(ogvi_count.getNoDataValue()));
+        assertEquals(Integer.MIN_VALUE, ogvi_count.getPixelInt(1628, 498));
+
+        final Band otci_mean = product.getBand("OTCI_mean");
+        assertEquals(ProductData.TYPE_FLOAT32, otci_mean.getDataType());
+        assertTrue(Double.isNaN(otci_mean.getNoDataValue()));
+        assertTrue(Double.isNaN(otci_mean.getPixelFloat(1629, 499)));
+
+        final Band otci_sigma = product.getBand("OTCI_sigma");
+        assertEquals(ProductData.TYPE_FLOAT32, otci_sigma.getDataType());
+        assertTrue(Double.isNaN(otci_sigma.getNoDataValue()));
+        assertTrue(Double.isNaN(otci_sigma.getPixelFloat(1630, 500)));
+
+        final Band otci_count = product.getBand("OTCI_count");
+        assertEquals(ProductData.TYPE_INT32, otci_count.getDataType());
+        assertEquals(Integer.MIN_VALUE, (int)(otci_count.getNoDataValue()));
+        assertEquals(Integer.MIN_VALUE, otci_count.getPixelInt(1631, 501));
     }
 
     @Test
@@ -216,14 +277,43 @@ public class IsinUtilsTest {
         assertEquals(-95.54296112060547, lonBand.getPixelFloat(896, 2466), 1e-8);
         assertEquals(-95.54371643066406, lonBand.getPixelFloat(897, 2467), 1e-8);
         assertTrue(Double.isNaN(lonBand.getNoDataValue()));
+        assertEquals("degrees_east", lonBand.getUnit());
 
         final Band latBand = product.getBand("lat");
         assertEquals(ProductData.TYPE_FLOAT32, latBand.getDataType());
         assertEquals(-35.14270782470703, latBand.getPixelFloat(898, 2468), 1e-8);
         assertEquals(-35.14479064941406, latBand.getPixelFloat(899, 2469), 1e-8);
         assertTrue(Double.isNaN(latBand.getNoDataValue()));
+        assertEquals("degrees_north", latBand.getUnit());
 
         final Band ogvi_mean = product.getBand("OGVI_mean");
         assertEquals(ProductData.TYPE_FLOAT32, ogvi_mean.getDataType());
+        assertTrue(Double.isNaN(ogvi_mean.getNoDataValue()));
+        assertTrue(Double.isNaN(ogvi_mean.getPixelFloat(900, 2470)));
+
+        final Band ogvi_sigma = product.getBand("OGVI_sigma");
+        assertEquals(ProductData.TYPE_FLOAT32, ogvi_sigma.getDataType());
+        assertTrue(Double.isNaN(ogvi_sigma.getNoDataValue()));
+        assertTrue(Double.isNaN(ogvi_sigma.getPixelFloat(901, 2471)));
+
+        final Band ogvi_count = product.getBand("OGVI_count");
+        assertEquals(ProductData.TYPE_INT32, ogvi_count.getDataType());
+        assertEquals(Integer.MIN_VALUE, (int)(ogvi_count.getNoDataValue()));
+        assertEquals(Integer.MIN_VALUE, ogvi_count.getPixelInt(902, 2472));
+
+        final Band otci_mean = product.getBand("OTCI_mean");
+        assertEquals(ProductData.TYPE_FLOAT32, otci_mean.getDataType());
+        assertTrue(Double.isNaN(otci_mean.getNoDataValue()));
+        assertTrue(Double.isNaN(otci_mean.getPixelFloat(903, 2473)));
+
+        final Band otci_sigma = product.getBand("OTCI_sigma");
+        assertEquals(ProductData.TYPE_FLOAT32, otci_sigma.getDataType());
+        assertTrue(Double.isNaN(otci_sigma.getNoDataValue()));
+        assertTrue(Double.isNaN(otci_sigma.getPixelFloat(904, 2474)));
+
+        final Band otci_count = product.getBand("OTCI_count");
+        assertEquals(ProductData.TYPE_INT32, otci_count.getDataType());
+        assertEquals(Integer.MIN_VALUE, (int)(otci_count.getNoDataValue()));
+        assertEquals(Integer.MIN_VALUE, otci_count.getPixelInt(905, 2475));
     }
 }

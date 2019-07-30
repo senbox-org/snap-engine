@@ -1,8 +1,6 @@
 package org.esa.snap.dataio.netcdf.isin;
 
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.util.grid.isin.IsinAPI;
 import org.esa.snap.core.util.grid.isin.IsinPoint;
 
@@ -75,17 +73,61 @@ class IsinUtils {
         final Band lonBand = new Band("lon", ProductData.TYPE_FLOAT32, rasterWidth, rasterHeight);
         lonBand.setRasterData(geoLocations.getLongitudes());
         lonBand.setNoDataValue(Double.NaN);
+        lonBand.setUnit("degrees_east");
         product.addBand(lonBand);
 
         final Band latBand = new Band("lat", ProductData.TYPE_FLOAT32, rasterWidth, rasterHeight);
         latBand.setRasterData(geoLocations.getLatitudes());
         latBand.setNoDataValue(Double.NaN);
+        latBand.setUnit("degrees_north");
         product.addBand(latBand);
 
+        addVariables(rasterWidth, rasterHeight, product);
+
+        final MetadataElement metadataRoot = product.getMetadataRoot();
+        metadataRoot.addAttribute(new MetadataAttribute("title", ProductData.createInstance("OLCI Level 3 vegetation data"), true));
+        metadataRoot.addAttribute(new MetadataAttribute("institution", ProductData.createInstance("Brockmann Consult GmbH"), true));
+        metadataRoot.addAttribute(new MetadataAttribute("source", ProductData.createInstance("OLCI Level 2 Land data (OLCI L2 L)"), true));
+        // @todo 1 tb/tb add references section, ask Carsten about content
+        metadataRoot.addAttribute(new MetadataAttribute("comment", ProductData.createInstance("This dataset was produced at Brockmann Consult GmbH for the Sentinel-3 Mission Performance Centre under ESA contract no. TODO"), true));
+
+        // @todo 1 tb/tb add standard names
+        // standard name: normalized_difference_vegetation_index
+        // long name: add mean value, std dev and counts
+        return product;
+    }
+
+    private static void addVariables(int rasterWidth, int rasterHeight, Product product) {
+        final int rasterSize = rasterHeight * rasterWidth;
         final Band ogvi_mean = new Band("OGVI_mean", ProductData.TYPE_FLOAT32, rasterWidth, rasterHeight);
+        ogvi_mean.setNoDataValue(Double.NaN);
+        ogvi_mean.setRasterData(createFloat(rasterSize));
         product.addBand(ogvi_mean);
 
-        return product;
+        final Band ogvi_sigma = new Band("OGVI_sigma", ProductData.TYPE_FLOAT32, rasterWidth, rasterHeight);
+        ogvi_sigma.setNoDataValue(Double.NaN);
+        ogvi_sigma.setRasterData(createFloat(rasterSize));
+        product.addBand(ogvi_sigma);
+
+        final Band ogvi_count = new Band("OGVI_count", ProductData.TYPE_INT32, rasterWidth, rasterHeight);
+        ogvi_count.setNoDataValue(Integer.MIN_VALUE);
+        ogvi_count.setRasterData(createInt(rasterSize));
+        product.addBand(ogvi_count);
+
+        final Band otci_mean = new Band("OTCI_mean", ProductData.TYPE_FLOAT32, rasterWidth, rasterHeight);
+        otci_mean.setNoDataValue(Double.NaN);
+        otci_mean.setRasterData(createFloat(rasterSize));
+        product.addBand(otci_mean);
+
+        final Band otci_sigma = new Band("OTCI_sigma", ProductData.TYPE_FLOAT32, rasterWidth, rasterHeight);
+        otci_sigma.setNoDataValue(Double.NaN);
+        otci_sigma.setRasterData(createFloat(rasterSize));
+        product.addBand(otci_sigma);
+
+        final Band otci_count = new Band("OTCI_count", ProductData.TYPE_INT32, rasterWidth, rasterHeight);
+        otci_count.setNoDataValue(Integer.MIN_VALUE);
+        otci_count.setRasterData(createInt(rasterSize));
+        product.addBand(otci_count);
     }
 
     static class GeoLocations {
@@ -104,5 +146,23 @@ class IsinUtils {
         ProductData getLatitudes() {
             return latitudes;
         }
+    }
+
+    private static ProductData createFloat(int size) {
+        final float[] data = new float[size];
+        for (int i = 0; i < size; i++) {
+            data[i] = Float.NaN;
+        }
+
+        return ProductData.createInstance(data);
+    }
+
+    private static ProductData createInt(int size) {
+        final int[] data = new int[size];
+        for (int i = 0; i < size; i++) {
+            data[i] = Integer.MIN_VALUE;
+        }
+
+        return ProductData.createInstance(data);
     }
 }
