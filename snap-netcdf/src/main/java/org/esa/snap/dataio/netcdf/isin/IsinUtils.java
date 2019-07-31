@@ -101,31 +101,37 @@ class IsinUtils {
         final int rasterSize = rasterHeight * rasterWidth;
         final Band ogvi_mean = new Band("OGVI_mean", ProductData.TYPE_FLOAT32, rasterWidth, rasterHeight);
         ogvi_mean.setNoDataValue(Double.NaN);
+        ogvi_mean.setNoDataValueUsed(true);
         ogvi_mean.setRasterData(createFloat(rasterSize));
         product.addBand(ogvi_mean);
 
         final Band ogvi_sigma = new Band("OGVI_sigma", ProductData.TYPE_FLOAT32, rasterWidth, rasterHeight);
         ogvi_sigma.setNoDataValue(Double.NaN);
+        ogvi_sigma.setNoDataValueUsed(true);
         ogvi_sigma.setRasterData(createFloat(rasterSize));
         product.addBand(ogvi_sigma);
 
         final Band ogvi_count = new Band("OGVI_count", ProductData.TYPE_INT32, rasterWidth, rasterHeight);
         ogvi_count.setNoDataValue(Integer.MIN_VALUE);
+        ogvi_count.setNoDataValueUsed(true);
         ogvi_count.setRasterData(createInt(rasterSize));
         product.addBand(ogvi_count);
 
         final Band otci_mean = new Band("OTCI_mean", ProductData.TYPE_FLOAT32, rasterWidth, rasterHeight);
         otci_mean.setNoDataValue(Double.NaN);
+        otci_mean.setNoDataValueUsed(true);
         otci_mean.setRasterData(createFloat(rasterSize));
         product.addBand(otci_mean);
 
         final Band otci_sigma = new Band("OTCI_sigma", ProductData.TYPE_FLOAT32, rasterWidth, rasterHeight);
         otci_sigma.setNoDataValue(Double.NaN);
+        otci_sigma.setNoDataValueUsed(true);
         otci_sigma.setRasterData(createFloat(rasterSize));
         product.addBand(otci_sigma);
 
         final Band otci_count = new Band("OTCI_count", ProductData.TYPE_INT32, rasterWidth, rasterHeight);
         otci_count.setNoDataValue(Integer.MIN_VALUE);
+        otci_count.setNoDataValueUsed(true);
         otci_count.setRasterData(createInt(rasterSize));
         product.addBand(otci_count);
     }

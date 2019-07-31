@@ -175,31 +175,37 @@ public class IsinUtilsTest {
         final Band ogvi_mean = product.getBand("OGVI_mean");
         assertEquals(ProductData.TYPE_FLOAT32, ogvi_mean.getDataType());
         assertTrue(Double.isNaN(ogvi_mean.getNoDataValue()));
+        assertTrue(ogvi_mean.isNoDataValueUsed());
         assertTrue(Double.isNaN(ogvi_mean.getPixelFloat(132, 260)));
 
         final Band ogvi_sigma = product.getBand("OGVI_sigma");
         assertEquals(ProductData.TYPE_FLOAT32, ogvi_sigma.getDataType());
         assertTrue(Double.isNaN(ogvi_sigma.getNoDataValue()));
+        assertTrue(ogvi_sigma.isNoDataValueUsed());
         assertTrue(Double.isNaN(ogvi_sigma.getPixelFloat(133, 261)));
 
         final Band ogvi_count = product.getBand("OGVI_count");
         assertEquals(ProductData.TYPE_INT32, ogvi_count.getDataType());
         assertEquals(Integer.MIN_VALUE, (int)(ogvi_count.getNoDataValue()));
+        assertTrue(ogvi_count.isNoDataValueUsed());
         assertEquals(Integer.MIN_VALUE, ogvi_count.getPixelInt(134, 262));
 
         final Band otci_mean = product.getBand("OTCI_mean");
         assertEquals(ProductData.TYPE_FLOAT32, otci_mean.getDataType());
         assertTrue(Double.isNaN(otci_mean.getNoDataValue()));
+        assertTrue(otci_mean.isNoDataValueUsed());
         assertTrue(Double.isNaN(otci_mean.getPixelFloat(135, 263)));
 
         final Band otci_sigma = product.getBand("OTCI_sigma");
         assertEquals(ProductData.TYPE_FLOAT32, otci_sigma.getDataType());
         assertTrue(Double.isNaN(otci_sigma.getNoDataValue()));
+        assertTrue(otci_sigma.isNoDataValueUsed());
         assertTrue(Double.isNaN(otci_sigma.getPixelFloat(136, 264)));
 
         final Band otci_count = product.getBand("OTCI_count");
         assertEquals(ProductData.TYPE_INT32, otci_count.getDataType());
         assertEquals(Integer.MIN_VALUE, (int)(otci_count.getNoDataValue()));
+        assertTrue(otci_count.isNoDataValueUsed());
         assertEquals(Integer.MIN_VALUE, otci_count.getPixelInt(134, 262));
     }
 
@@ -232,31 +238,37 @@ public class IsinUtilsTest {
         final Band ogvi_mean = product.getBand("OGVI_mean");
         assertEquals(ProductData.TYPE_FLOAT32, ogvi_mean.getDataType());
         assertTrue(Double.isNaN(ogvi_mean.getNoDataValue()));
+        assertTrue(ogvi_mean.isNoDataValueUsed());
         assertTrue(Double.isNaN(ogvi_mean.getPixelFloat(1626, 496)));
 
         final Band ogvi_sigma = product.getBand("OGVI_sigma");
         assertEquals(ProductData.TYPE_FLOAT32, ogvi_sigma.getDataType());
         assertTrue(Double.isNaN(ogvi_sigma.getNoDataValue()));
+        assertTrue(ogvi_sigma.isNoDataValueUsed());
         assertTrue(Double.isNaN(ogvi_sigma.getPixelFloat(1627, 497)));
 
         final Band ogvi_count = product.getBand("OGVI_count");
         assertEquals(ProductData.TYPE_INT32, ogvi_count.getDataType());
         assertEquals(Integer.MIN_VALUE, (int)(ogvi_count.getNoDataValue()));
+        assertTrue(ogvi_count.isNoDataValueUsed());
         assertEquals(Integer.MIN_VALUE, ogvi_count.getPixelInt(1628, 498));
 
         final Band otci_mean = product.getBand("OTCI_mean");
         assertEquals(ProductData.TYPE_FLOAT32, otci_mean.getDataType());
         assertTrue(Double.isNaN(otci_mean.getNoDataValue()));
+        assertTrue(otci_mean.isNoDataValueUsed());
         assertTrue(Double.isNaN(otci_mean.getPixelFloat(1629, 499)));
 
         final Band otci_sigma = product.getBand("OTCI_sigma");
         assertEquals(ProductData.TYPE_FLOAT32, otci_sigma.getDataType());
         assertTrue(Double.isNaN(otci_sigma.getNoDataValue()));
+        assertTrue(otci_sigma.isNoDataValueUsed());
         assertTrue(Double.isNaN(otci_sigma.getPixelFloat(1630, 500)));
 
         final Band otci_count = product.getBand("OTCI_count");
         assertEquals(ProductData.TYPE_INT32, otci_count.getDataType());
         assertEquals(Integer.MIN_VALUE, (int)(otci_count.getNoDataValue()));
+        assertTrue(otci_count.isNoDataValueUsed());
         assertEquals(Integer.MIN_VALUE, otci_count.getPixelInt(1631, 501));
     }
 
