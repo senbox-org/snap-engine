@@ -30,6 +30,11 @@
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-gpf</artifactId>
         </dependency>
+        <dependency>
+            <groupId>ro.cs.tao</groupId>
+            <artifactId>tao-datasources-scihub</artifactId>
+            <version>1.0</version>
+        </dependency>
 
         <dependency>
             <groupId>org.apache.derby</groupId>
@@ -83,6 +88,7 @@
                 <artifactId>nbm-maven-plugin</artifactId>
                 <configuration>
                     <publicPackages>
+                        <publicPackage>org.esa.snap.product.library.v2.*</publicPackage>
                         <publicPackage>org.esa.snap.productlibrary.*</publicPackage>
                         <publicPackage>javax.*</publicPackage>
                         <publicPackage>org.w3c.*</publicPackage>
