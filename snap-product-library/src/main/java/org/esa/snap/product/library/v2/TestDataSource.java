@@ -43,7 +43,7 @@ public class TestDataSource {
                 handler.setLevel(Level.INFO);
             }
             DataSource dataSource = getDatasourceRegistry().getService(SciHubDataSource.class);
-            dataSource.setCredentials("kraftek", "cei7samurai");
+            dataSource.setCredentials("jcoravu", "jcoravu@yahoo.com");
             String[] sensors = dataSource.getSupportedSensors();
 
             DataQuery query = dataSource.createQuery(sensors[1]);

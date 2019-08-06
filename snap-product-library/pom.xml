@@ -31,6 +31,10 @@
             <artifactId>snap-gpf</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>ceres-jai</artifactId>
+        </dependency>
+        <dependency>
             <groupId>ro.cs.tao</groupId>
             <artifactId>tao-datasources-scihub</artifactId>
             <version>1.0</version>
@@ -93,6 +97,8 @@
                         <publicPackage>javax.*</publicPackage>
                         <publicPackage>org.w3c.*</publicPackage>
                         <publicPackage>org.xml.*</publicPackage>
+                        <publicPackage>org.apache.*</publicPackage>
+                        <publicPackage>com.google.*</publicPackage>
                     </publicPackages>
                 </configuration>
             </plugin>
