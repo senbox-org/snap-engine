@@ -25,7 +25,8 @@ import java.awt.image.RenderedImage;
 import java.util.Comparator;
 
 /**
- * @deprecated because of typo in name, use {@link VerboseTileCache} instead
+ * @deprecated in SNAP 8.0.0 because of typo in name, use {@link VerboseTileCache} instead
+ *
  */
 @Deprecated
 public class VerbousTileCache implements TileCache {
