@@ -24,26 +24,21 @@ import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.util.Comparator;
 
-/**
- * @deprecated because of typo in name, use {@link VerboseTileCache} instead
- */
-@Deprecated
-public class VerbousTileCache implements TileCache {
+public class VerboseTileCache implements TileCache {
     private final TileCache tileCache;
     private CacheDiagnostics cacheDiagnostics;
-    String indent = "";
 
-    static boolean verbous;
+    static boolean verbose = true;
 
-    public static boolean isVerbous() {
-        return verbous;
+    public static boolean isVerbose() {
+        return verbose;
     }
 
-    public static void setVerbous(boolean verbous) {
-        VerbousTileCache.verbous = verbous;
+    public static void setVerbose(boolean verbose) {
+        VerboseTileCache.verbose = verbose;
     }
 
-    public VerbousTileCache(TileCache tileCache) {
+    public VerboseTileCache(TileCache tileCache) {
         this.tileCache = tileCache;
         if (tileCache instanceof CacheDiagnostics) {
             cacheDiagnostics = (CacheDiagnostics) tileCache;
@@ -111,12 +106,21 @@ public class VerbousTileCache implements TileCache {
         trace("memoryControl (end)", null, null, "n.a.");
     }
 
+    /**
+     * @deprecated does nothing; no replacement
+     */
+    @Deprecated
     public void setTileCapacity(int i) {
-        tileCache.setTileCapacity(i);
+//        tileCache.setTileCapacity(i);
     }
 
+    /**
+     * @deprecated does nothing; returns always 0
+     */
+    @Deprecated
     public int getTileCapacity() {
-        return tileCache.getTileCapacity();
+        return 0;
+//        return tileCache.getTileCapacity();
     }
 
     public void setMemoryCapacity(long l) {
@@ -144,7 +148,7 @@ public class VerbousTileCache implements TileCache {
     }
 
     private void trace(String method, RenderedImage image, Raster tile, String tilePos) {
-        if (verbous) {
+        if (verbose) {
             println("JAI TileCache Diagnostics: ======================================");
             println("  cache   = " + tileCache);
             println("  method  = " + method);
@@ -168,7 +172,6 @@ public class VerbousTileCache implements TileCache {
     }
 
     private void println(String x) {
-        // Uncomment for testing
-        //System.out.println(x);
+        System.out.println(x);
     }
 }
