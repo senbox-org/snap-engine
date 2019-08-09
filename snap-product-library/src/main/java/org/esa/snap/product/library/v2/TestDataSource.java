@@ -30,10 +30,30 @@ public class TestDataSource {
 
     public static void main(String args[]) {
         System.out.println("TestDataSource for product library.");
-        SciHubParameterProvider sciHubParameterProvider = new SciHubParameterProvider();
-        System.out.println("SupportedSensors: " + sciHubParameterProvider.getSupportedSensors());
+//        SciHubParameterProvider sciHubParameterProvider = new SciHubParameterProvider();
+//        System.out.println("SupportedSensors: " + sciHubParameterProvider.getSupportedSensors());
 
-        SciHub_Sentinel2_Test();
+        //SciHub_Sentinel2_Test();
+
+        String username = "jcoravu";
+        String password = "jcoravu@yahoo.com";
+        String sensor = "Sentinel1";
+        Date startDate = Date.from(LocalDateTime.of(2019, 2, 1, 0, 0, 0, 0)
+                .atZone(ZoneId.systemDefault())
+                .toInstant());
+        Date endDate = Date.from(LocalDateTime.of(2019, 3, 1, 0, 0, 0, 0)
+                .atZone(ZoneId.systemDefault())
+                .toInstant());
+        Polygon2D areaOfInterest = Polygon2D.fromWKT("POLYGON((22.8042573604346 43.8379609098684," +
+                "24.83885442747927 43.8379609098684," +
+                "24.83885442747927 44.795645304033826," +
+                "22.8042573604346 44.795645304033826," +
+                "22.8042573604346 43.8379609098684))");
+
+
+        double cloudCover = 100.0d;
+        List<EOProduct> results = SciHubDownloader.downloadProductList(username, password, sensor, startDate, endDate, areaOfInterest, cloudCover);
+        System.out.println("results="+results);
     }
 
     private static void SciHub_Sentinel2_Test() {
@@ -48,6 +68,7 @@ public class TestDataSource {
 
             DataQuery query = dataSource.createQuery(sensors[1]);
             query.addParameter(CommonParameterNames.PLATFORM, "Sentinel-2");
+
             QueryParameter<Date> begin = query.createParameter(CommonParameterNames.START_DATE, Date.class);
             begin.setMinValue(Date.from(LocalDateTime.of(2019, 2, 1, 0, 0, 0, 0)
                     .atZone(ZoneId.systemDefault())
@@ -56,6 +77,21 @@ public class TestDataSource {
                     .atZone(ZoneId.systemDefault())
                     .toInstant()));
             query.addParameter(begin);
+
+//            Date d = Date.from(LocalDateTime.of(2019, 2, 1, 0, 0, 0, 0)
+//                    .atZone(ZoneId.systemDefault())
+//                    .toInstant());
+//            QueryParameter<Date> begin = query.createParameter(CommonParameterNames.START_DATE, Date.class, d);
+//
+//            query.addParameter(begin);
+//
+//            Date endDate = Date.from(LocalDateTime.of(2019, 3, 1, 0, 0, 0, 0)
+//                    .atZone(ZoneId.systemDefault())
+//                    .toInstant());
+//            QueryParameter<Date> end = query.createParameter(CommonParameterNames.END_DATE, Date.class, endDate);
+//
+//            query.addParameter(end);
+
             Polygon2D aoi = Polygon2D.fromWKT("POLYGON((22.8042573604346 43.8379609098684," +
                     "24.83885442747927 43.8379609098684," +
                     "24.83885442747927 44.795645304033826," +
@@ -68,6 +104,9 @@ public class TestDataSource {
             query.setPageSize(50);
             query.setMaxResults(83);
             List<EOProduct> results = query.execute();
+
+            System.out.println("Total results: " + results.size());
+
             results.forEach(r -> {
                 System.out.println("ID=" + r.getId());
                 System.out.println("NAME=" + r.getName());
@@ -78,9 +117,9 @@ public class TestDataSource {
                         .forEach(a -> System.out.println("\tName='" + a.getName() +
                                 "', value='" + a.getValue() + "'"));
             });
-            DownloadStrategy strategy = (DownloadStrategy) dataSource.getProductFetchStrategy(sensors[0]);
-            strategy.setFetchMode(FetchMode.OVERWRITE);
-            strategy.fetch(results.get(0));
+//            DownloadStrategy strategy = (DownloadStrategy) dataSource.getProductFetchStrategy(sensors[0]);
+//            strategy.setFetchMode(FetchMode.OVERWRITE);
+//            strategy.fetch(results.get(0));
         } catch (Exception e) {
             e.printStackTrace();
         }
