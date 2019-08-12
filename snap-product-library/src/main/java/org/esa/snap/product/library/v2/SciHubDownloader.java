@@ -10,6 +10,8 @@ import ro.cs.tao.eodata.Polygon2D;
 import ro.cs.tao.spi.ServiceRegistry;
 import ro.cs.tao.spi.ServiceRegistryManager;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -20,11 +22,15 @@ import java.util.Map;
  */
 public class SciHubDownloader {
 
-    public static List<EOProduct> downloadProductList(String username, String password, String sensor, Map<String, Object> parametersValues) {
+    private static final byte MAXIMUM_RESULTS_PER_PAGE = 100;
+
+    private final DataQuery query;
+
+    public SciHubDownloader(String username, String password, String sensor, Map<String, Object> parametersValues) {
         DataSource dataSource = getDatasourceRegistry().getService(SciHubDataSource.class);
         dataSource.setCredentials(username, password);
 
-        DataQuery query = dataSource.createQuery(sensor);
+        this.query = dataSource.createQuery(sensor);
 
         Iterator<Map.Entry<String, Object>> it = parametersValues.entrySet().iterator();
         while (it.hasNext()) {
@@ -44,38 +50,38 @@ public class SciHubDownloader {
             QueryParameter<Date> begin = query.createParameter(CommonParameterNames.START_DATE, Date.class);
             begin.setMinValue(startDate);
             begin.setMaxValue(endDate);
-            query.addParameter(begin);
+            this.query.addParameter(begin);
         }
-
-        long count = query.getCount();
-        System.out.println("count="+count);
-
-        query.setPageSize(100);
-        query.setMaxResults(100);
-        List<EOProduct> results = query.execute();
-        System.out.println("results.size="+results.size());
-        return results;
     }
 
-    public static List<EOProduct> downloadProductList(String username, String password, String sensor, Date startDate, Date endDate, Polygon2D areaOfInterest, double cloudCover) {
-        DataSource dataSource = getDatasourceRegistry().getService(SciHubDataSource.class);
-        dataSource.setCredentials(username, password);
+    public List<EOProduct> downloadProducts(IProductsDownloaderListener downloaderListener) {
+        long productCount = this.query.getCount();
 
-        DataQuery query = dataSource.createQuery(sensor);
-        //query.addParameter(CommonParameterNames.PLATFORM, "Sentinel-2");
+        downloaderListener.notifyProductCount(productCount);
 
-        QueryParameter<Date> begin = query.createParameter(CommonParameterNames.START_DATE, Date.class);
-        begin.setMinValue(startDate);
-        begin.setMaxValue(endDate);
-        query.addParameter(begin);
+        List<EOProduct> totalResults;
+        if (productCount > 0) {
+            int pageSize = 1;
 
-        query.addParameter(CommonParameterNames.FOOTPRINT, areaOfInterest);
+            long totalPageNumber = productCount / pageSize;
+            if (productCount % pageSize != 0) {
+                totalPageNumber++;
+            }
 
-//        query.addParameter(CommonParameterNames.CLOUD_COVER, cloudCover);
-        query.setPageSize(2);
-        query.setMaxResults(100);
-        List<EOProduct> results = query.execute();
-        return results;
+            totalResults = new ArrayList<EOProduct>();
+            for (int pageNumber=1; pageNumber<=totalPageNumber; pageNumber++) {
+                this.query.setPageSize(pageSize);
+                this.query.setPageNumber(pageNumber);
+                List<EOProduct> pageResults = this.query.execute();
+                totalResults.addAll(pageResults);
+
+                downloaderListener.notifyPageProducts(pageNumber, pageResults);
+            }
+        } else {
+            totalResults = Collections.emptyList();
+        }
+        System.out.println("totalResults.size="+totalResults.size());
+        return totalResults;
     }
 
     private static ServiceRegistry<DataSource> getDatasourceRegistry() {

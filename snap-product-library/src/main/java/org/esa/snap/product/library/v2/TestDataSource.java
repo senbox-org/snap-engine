@@ -34,26 +34,6 @@ public class TestDataSource {
 //        System.out.println("SupportedSensors: " + sciHubParameterProvider.getSupportedSensors());
 
         //SciHub_Sentinel2_Test();
-
-        String username = "jcoravu";
-        String password = "jcoravu@yahoo.com";
-        String sensor = "Sentinel1";
-        Date startDate = Date.from(LocalDateTime.of(2019, 2, 1, 0, 0, 0, 0)
-                .atZone(ZoneId.systemDefault())
-                .toInstant());
-        Date endDate = Date.from(LocalDateTime.of(2019, 3, 1, 0, 0, 0, 0)
-                .atZone(ZoneId.systemDefault())
-                .toInstant());
-        Polygon2D areaOfInterest = Polygon2D.fromWKT("POLYGON((22.8042573604346 43.8379609098684," +
-                "24.83885442747927 43.8379609098684," +
-                "24.83885442747927 44.795645304033826," +
-                "22.8042573604346 44.795645304033826," +
-                "22.8042573604346 43.8379609098684))");
-
-
-        double cloudCover = 100.0d;
-        List<EOProduct> results = SciHubDownloader.downloadProductList(username, password, sensor, startDate, endDate, areaOfInterest, cloudCover);
-        System.out.println("results="+results);
     }
 
     private static void SciHub_Sentinel2_Test() {
