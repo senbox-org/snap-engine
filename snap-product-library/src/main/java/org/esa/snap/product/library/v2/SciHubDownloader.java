@@ -2,6 +2,7 @@ package org.esa.snap.product.library.v2;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
+import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import ro.cs.tao.datasource.DataQuery;
@@ -33,13 +34,11 @@ import java.util.Map;
  */
 public class SciHubDownloader {
 
-    private final DataQuery query;
-
-    public SciHubDownloader(String username, String password, String sensor, Map<String, Object> parametersValues) {
+    private static DataQuery buildDataQuery(String username, String password, String sensor, Map<String, Object> parametersValues) {
         DataSource dataSource = getDatasourceRegistry().getService(SciHubDataSource.class);
         dataSource.setCredentials(username, password);
 
-        this.query = dataSource.createQuery(sensor);
+        DataQuery query = dataSource.createQuery(sensor);
 
         Iterator<Map.Entry<String, Object>> it = parametersValues.entrySet().iterator();
         while (it.hasNext()) {
@@ -59,32 +58,48 @@ public class SciHubDownloader {
             QueryParameter<Date> begin = query.createParameter(CommonParameterNames.START_DATE, Date.class);
             begin.setMinValue(startDate);
             begin.setMaxValue(endDate);
-            this.query.addParameter(begin);
+            query.addParameter(begin);
         }
+        return query;
     }
 
-    public List<ProductLibraryItem> downloadProductList(IProductsDownloaderListener downloaderListener) {
-        this.query.setPageNumber(0);
-        this.query.setPageSize(0);
-        long productCount = this.query.getCount();
+    public static List<ProductLibraryItem> downloadProductList(Credentials credentials, String sensor, Map<String, Object> parametersValues,
+                                                               IProductsDownloaderListener downloaderListener, IThread thread, int pageSize) {
+
+        DataQuery query = buildDataQuery(credentials.getUserPrincipal().getName(), credentials.getPassword(), sensor, parametersValues);
+        query.setPageNumber(0);
+        query.setPageSize(0);
+        long productCount = query.getCount();
+
+        if (thread != null && !thread.isRunning()) {
+            return null; // stop running
+        }
 
         downloaderListener.notifyProductCount(productCount);
 
         List<ProductLibraryItem> totalResults;
         if (productCount > 0) {
-            int pageSize = 1;
-
             long totalPageNumber = productCount / pageSize;
             if (productCount % pageSize != 0) {
                 totalPageNumber++;
             }
 
-            this.query.setPageSize(pageSize);
+            query.setPageSize(pageSize);
 
             totalResults = new ArrayList<ProductLibraryItem>();
             for (int pageNumber=1; pageNumber<=totalPageNumber; pageNumber++) {
-                this.query.setPageNumber(pageNumber);
-                List<EOProduct> pageResults = this.query.execute();
+                query.setPageNumber(pageNumber);
+
+                if (thread != null && !thread.isRunning()) {
+                    return null; // stop running
+                }
+
+                List<EOProduct> pageResults = query.execute();
+
+                if (thread != null && !thread.isRunning()) {
+                    return null; // stop running
+                }
+
                 List<ProductLibraryItem> downloadedPageProducts = new ArrayList<>(pageResults.size());
                 for (int i=0; i<pageResults.size(); i++) {
                     EOProduct product = pageResults.get(i);
@@ -107,9 +122,14 @@ public class SciHubDownloader {
         return totalResults;
     }
 
-    public BufferedImage downloadQuickLookImage(String url) throws IOException {
-        try (CloseableHttpResponse response = NetUtils.openConnection(HttpMethod.GET, url, this.query.getSource().getCredentials())) {
+    public static BufferedImage downloadQuickLookImage(String url, Credentials credentials, IThread thread) throws IOException {
+        try (CloseableHttpResponse response = NetUtils.openConnection(HttpMethod.GET, url, credentials)) {
             if (response != null) {
+
+                if (thread != null && !thread.isRunning()) {
+                    return null; // stop running
+                }
+
                 StatusLine statusLine = response.getStatusLine();
                 switch (statusLine.getStatusCode()) {
                     case 200:
@@ -119,10 +139,19 @@ public class SciHubDownloader {
                             return null;
                         }
                         try {
+                            if (thread != null && !thread.isRunning()) {
+                                return null; // stop running
+                            }
+
                             ImageInputStream imageInputStream = ImageIO.createImageInputStream(inputStream);
                             if (imageInputStream == null) {
                                 return null;
                             }
+
+                            if (thread != null && !thread.isRunning()) {
+                                return null; // stop running
+                            }
+
                             BufferedImage bufferedImage = ImageIO.read(imageInputStream);
                             if (bufferedImage == null) {
                                 imageInputStream.close();
