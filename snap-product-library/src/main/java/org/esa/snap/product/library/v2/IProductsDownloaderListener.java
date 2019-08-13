@@ -1,7 +1,5 @@
 package org.esa.snap.product.library.v2;
 
-import ro.cs.tao.eodata.EOProduct;
-
 import java.util.List;
 
 /**
@@ -11,5 +9,5 @@ public interface IProductsDownloaderListener {
 
     void notifyProductCount(long productCount);
 
-    void notifyPageProducts(int pageNumber, List<EOProduct> pageResults);
+    void notifyPageProducts(int pageNumber, List<ProductLibraryItem> pageResults);
 }

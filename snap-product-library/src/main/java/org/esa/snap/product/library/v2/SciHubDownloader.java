@@ -1,15 +1,26 @@
 package org.esa.snap.product.library.v2;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.StatusLine;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import ro.cs.tao.datasource.DataQuery;
 import ro.cs.tao.datasource.DataSource;
 import ro.cs.tao.datasource.param.CommonParameterNames;
 import ro.cs.tao.datasource.param.QueryParameter;
 import ro.cs.tao.datasource.remote.scihub.SciHubDataSource;
+import ro.cs.tao.datasource.util.HttpMethod;
+import ro.cs.tao.datasource.util.NetUtils;
 import ro.cs.tao.eodata.EOProduct;
 import ro.cs.tao.eodata.Polygon2D;
 import ro.cs.tao.spi.ServiceRegistry;
 import ro.cs.tao.spi.ServiceRegistryManager;
 
+import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageInputStream;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -21,8 +32,6 @@ import java.util.Map;
  * Created by jcoravu on 7/8/2019.
  */
 public class SciHubDownloader {
-
-    private static final byte MAXIMUM_RESULTS_PER_PAGE = 100;
 
     private final DataQuery query;
 
@@ -54,12 +63,14 @@ public class SciHubDownloader {
         }
     }
 
-    public List<EOProduct> downloadProducts(IProductsDownloaderListener downloaderListener) {
+    public List<ProductLibraryItem> downloadProductList(IProductsDownloaderListener downloaderListener) {
+        this.query.setPageNumber(0);
+        this.query.setPageSize(0);
         long productCount = this.query.getCount();
 
         downloaderListener.notifyProductCount(productCount);
 
-        List<EOProduct> totalResults;
+        List<ProductLibraryItem> totalResults;
         if (productCount > 0) {
             int pageSize = 1;
 
@@ -68,20 +79,67 @@ public class SciHubDownloader {
                 totalPageNumber++;
             }
 
-            totalResults = new ArrayList<EOProduct>();
+            this.query.setPageSize(pageSize);
+
+            totalResults = new ArrayList<ProductLibraryItem>();
             for (int pageNumber=1; pageNumber<=totalPageNumber; pageNumber++) {
-                this.query.setPageSize(pageSize);
                 this.query.setPageNumber(pageNumber);
                 List<EOProduct> pageResults = this.query.execute();
-                totalResults.addAll(pageResults);
+                List<ProductLibraryItem> downloadedPageProducts = new ArrayList<>(pageResults.size());
+                for (int i=0; i<pageResults.size(); i++) {
+                    EOProduct product = pageResults.get(i);
+                    ProductLibraryItem productLibraryItem = new ProductLibraryItem();
+                    productLibraryItem.setName(product.getName());
+                    productLibraryItem.setType(product.getProductType());
+                    productLibraryItem.setQuickLookLocation(product.getQuicklookLocation());
+                    productLibraryItem.setApproximateSize(product.getApproximateSize());
+                    productLibraryItem.setAcquisitionDate(product.getAcquisitionDate());
 
-                downloaderListener.notifyPageProducts(pageNumber, pageResults);
+                    downloadedPageProducts.add(productLibraryItem);
+                    totalResults.add(productLibraryItem);
+                }
+
+                downloaderListener.notifyPageProducts(pageNumber, downloadedPageProducts);
             }
         } else {
             totalResults = Collections.emptyList();
         }
-        System.out.println("totalResults.size="+totalResults.size());
         return totalResults;
+    }
+
+    public BufferedImage downloadQuickLookImage(String url) throws IOException {
+        try (CloseableHttpResponse response = NetUtils.openConnection(HttpMethod.GET, url, this.query.getSource().getCredentials())) {
+            if (response != null) {
+                StatusLine statusLine = response.getStatusLine();
+                switch (statusLine.getStatusCode()) {
+                    case 200:
+                        HttpEntity entity = response.getEntity();
+                        InputStream inputStream = entity.getContent();
+                        if (inputStream == null) {
+                            return null;
+                        }
+                        try {
+                            ImageInputStream imageInputStream = ImageIO.createImageInputStream(inputStream);
+                            if (imageInputStream == null) {
+                                return null;
+                            }
+                            BufferedImage bufferedImage = ImageIO.read(imageInputStream);
+                            if (bufferedImage == null) {
+                                imageInputStream.close();
+                            }
+                            return bufferedImage;
+                        } finally {
+                            inputStream.close();
+                        }
+                    case 401:
+                        throw new IOException("401: Unauthorized or the supplied credentials are invalid");
+                    default:
+                        throw new IOException(String.valueOf(statusLine.getStatusCode()) + ": " + statusLine.getReasonPhrase());
+                }
+            } else {
+                throw new IOException(String.format("Null response (maybe url %s is not reachable", url));
+            }
+        }
     }
 
     private static ServiceRegistry<DataSource> getDatasourceRegistry() {
