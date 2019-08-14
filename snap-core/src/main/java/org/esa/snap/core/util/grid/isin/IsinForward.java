@@ -1,12 +1,14 @@
 package org.esa.snap.core.util.grid.isin;
 
 
-import static org.esa.snap.core.util.grid.isin.Const.*;
+import static org.esa.snap.core.util.grid.isin.Const.EPS_SPHERE;
+import static org.esa.snap.core.util.grid.isin.Const.HALFPI;
+import static org.esa.snap.core.util.grid.isin.Const.TWOPI;
 
 class IsinForward {
 
     private static final long NROW_MAX = 360 * 3600;  // Maximum number of rows (zones)
-    private static final double TWOPI_INV = 1.0 / (2.0 * Math.PI);
+    private static final double TWOPI_INV = 1.0 / TWOPI;
 
     double false_east;
     double false_north;
