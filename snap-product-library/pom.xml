@@ -110,7 +110,6 @@
                     <publicPackages>
                         <publicPackage>org.esa.snap.product.library.v2.*</publicPackage>
                         <publicPackage>org.esa.snap.productlibrary.*</publicPackage>
-                        <publicPackage>ro.cs.tao.*</publicPackage>
                         <publicPackage>org.opengis.*</publicPackage>
                         <publicPackage>javax.*</publicPackage>
                         <publicPackage>org.w3c.*</publicPackage>

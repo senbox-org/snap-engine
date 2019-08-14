@@ -3,13 +3,16 @@ package org.esa.snap.product.library.v2;
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.auth.Credentials;
-import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.esa.snap.product.library.v2.parameters.QueryFilter;
 import ro.cs.tao.datasource.DataQuery;
 import ro.cs.tao.datasource.DataSource;
 import ro.cs.tao.datasource.param.CommonParameterNames;
+import ro.cs.tao.datasource.param.DataSourceParameter;
+import ro.cs.tao.datasource.param.ParameterName;
 import ro.cs.tao.datasource.param.QueryParameter;
 import ro.cs.tao.datasource.remote.scihub.SciHubDataSource;
+import ro.cs.tao.datasource.remote.scihub.parameters.SciHubParameterProvider;
 import ro.cs.tao.datasource.util.HttpMethod;
 import ro.cs.tao.datasource.util.NetUtils;
 import ro.cs.tao.eodata.EOProduct;
@@ -19,6 +22,7 @@ import ro.cs.tao.spi.ServiceRegistryManager;
 
 import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageInputStream;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,6 +38,32 @@ import java.util.Map;
  */
 public class SciHubDownloader {
 
+    public static String[] getSupportedSensors() {
+        SciHubParameterProvider sciHubParameterProvider = new SciHubParameterProvider();
+        return sciHubParameterProvider.getSupportedSensors();
+    }
+
+    public static List<QueryFilter> getSensorParameters(String sensor) {
+        SciHubParameterProvider sciHubParameterProvider = new SciHubParameterProvider();
+        Map<String, Map<ParameterName, DataSourceParameter>> supportedParameters = sciHubParameterProvider.getSupportedParameters();
+        Map<ParameterName, DataSourceParameter> sensorParameters = supportedParameters.get(sensor);
+        Iterator<Map.Entry<ParameterName, DataSourceParameter>> it = sensorParameters.entrySet().iterator();
+        List<QueryFilter> parameters = new ArrayList<QueryFilter>(sensorParameters.size());
+        while (it.hasNext()) {
+            Map.Entry<ParameterName, DataSourceParameter> entry = it.next();
+            DataSourceParameter param = entry.getValue();
+            Class<?> type;
+            if (param.getName().equals(CommonParameterNames.FOOTPRINT)) {
+                type = Rectangle.Double.class;
+            } else {
+                type = param.getType();
+            }
+            QueryFilter queryParameter = new QueryFilter(param.getName(), type, param.getLabel(), param.getDefaultValue(), param.isRequired(), param.getValueSet());
+            parameters.add(queryParameter);
+        }
+        return parameters;
+    }
+
     private static DataQuery buildDataQuery(String username, String password, String sensor, Map<String, Object> parametersValues) {
         DataSource dataSource = getDatasourceRegistry().getService(SciHubDataSource.class);
         dataSource.setCredentials(username, password);
@@ -45,8 +75,13 @@ public class SciHubDownloader {
             Map.Entry<String, Object> entry = it.next();
             String parameterName = entry.getKey();
             if (parameterName.equals(CommonParameterNames.FOOTPRINT)) {
-                String value = (String)entry.getValue();
-                Polygon2D polygon2D = Polygon2D.fromWKT(value);
+                Rectangle.Double selectionArea = (Rectangle.Double)entry.getValue();
+                Polygon2D polygon2D = new Polygon2D();
+                polygon2D.append(selectionArea.x, selectionArea.y);
+                polygon2D.append(selectionArea.x + selectionArea.width, selectionArea.y);
+                polygon2D.append(selectionArea.x + selectionArea.width, selectionArea.y + selectionArea.height);
+                polygon2D.append(selectionArea.x, selectionArea.y + selectionArea.height);
+                polygon2D.append(selectionArea.x, selectionArea.y);
                 query.addParameter(parameterName, polygon2D);
             } else if (!parameterName.equals(CommonParameterNames.START_DATE) && !parameterName.equals(CommonParameterNames.END_DATE)) {
                 query.addParameter(parameterName, entry.getValue());
