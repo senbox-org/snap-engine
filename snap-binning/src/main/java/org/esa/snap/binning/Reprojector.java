@@ -217,7 +217,7 @@ public class Reprojector {
 
         long[] binIndicesForBinningLine;
         if (planetaryGrid instanceof MosaickingGrid) {
-            binIndicesForBinningLine = binIndicesForMosaicingLine(y, x1, x2);
+            binIndicesForBinningLine = binIndicesForMosaickingLine(y, x1, x2);
         } else {
             binIndicesForBinningLine = binIndicesForBinningLine(y, x1, x2);
         }
@@ -275,7 +275,7 @@ public class Reprojector {
         return binIndices;
     }
 
-    private long[] binIndicesForMosaicingLine(int y, int x1, int x2) {
+    private long[] binIndicesForMosaickingLine(int y, int x1, int x2) {
         final long gridWidth = planetaryGrid.getNumCols(0);
         long[] binIndices = new long[x2 - x1 + 1];
         for (int x = x1, i = 0; x <= x2; x++, i++) {
