@@ -18,7 +18,7 @@ class IsinInverse {
     double col_dist;
     double col_dist_inv;
     int ijustify;
-    Isin_row[] row;
+    IsinRow[] row;
 
     void init(double radius, double centerLon, double falseEasting, double falseNorth, double dzone, double djustify) {
         if (radius <= EPS_SPHERE) {
@@ -74,9 +74,9 @@ class IsinInverse {
         }
         this.ijustify = ijustify;
 
-        this.row = new Isin_row[(int) nrow_half];
+        this.row = new IsinRow[(int) nrow_half];
         for (int irow = 0; irow < nrow_half; irow++) {
-            final Isin_row currentRow = new Isin_row();
+            final IsinRow currentRow = new IsinRow();
 
             // Calculate latitude at center of row
             final double clat = HALFPI * (1.0 - ((double) irow + 0.5) / nrow_half);
