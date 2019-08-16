@@ -23,7 +23,7 @@ import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.OperatorSpiRegistry;
 import org.esa.snap.core.gpf.TestOps;
-import org.esa.snap.core.util.jai.VerbousTileCache;
+import org.esa.snap.core.util.jai.VerboseTileCache;
 
 import javax.media.jai.JAI;
 import javax.media.jai.TileCache;
@@ -34,11 +34,14 @@ public class GraphProcessorTest extends TestCase {
     private OperatorSpi spi3;
     private TileCache jaiTileCache;
     private TileCache testTileCache;
+    private boolean defVerbosity;
 
     @Override
     protected void setUp() throws Exception {
         jaiTileCache = JAI.getDefaultInstance().getTileCache();
-        testTileCache = new VerbousTileCache(jaiTileCache);
+        defVerbosity = VerboseTileCache.isVerbose();
+        VerboseTileCache.setVerbose(false);
+        testTileCache = new VerboseTileCache(jaiTileCache);
         JAI.getDefaultInstance().setTileCache(testTileCache);
         testTileCache.flush();
 
@@ -55,6 +58,7 @@ public class GraphProcessorTest extends TestCase {
     @Override
     protected void tearDown() throws Exception {
         testTileCache.flush();
+        VerboseTileCache.setVerbose(defVerbosity);
         JAI.getDefaultInstance().setTileCache(jaiTileCache);
         final OperatorSpiRegistry spiRegistry = GPF.getDefaultInstance().getOperatorSpiRegistry();
         spiRegistry.removeOperatorSpi(spi1);
@@ -96,7 +100,6 @@ public class GraphProcessorTest extends TestCase {
     //
     public void testThreeOpsExecutionOrder() throws Exception {
 
-        VerbousTileCache.setVerbous(false);
 
         Graph graph = new Graph("graph");
 
@@ -125,7 +128,6 @@ public class GraphProcessorTest extends TestCase {
         assertEquals("Op1;Op2;Op3;", TestOps.getCalls());
         TestOps.clearCalls();
 
-        VerbousTileCache.setVerbous(false);
     }
 
 }
