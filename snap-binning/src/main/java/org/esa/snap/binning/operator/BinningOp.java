@@ -246,7 +246,9 @@ public class BinningOp extends Operator {
     private transient BinWriter binWriter;
     private transient Area regionArea;
     private transient MetadataAggregator metadataAggregator;
-    private transient String planetaryGridClass;
+
+    @Parameter(defaultValue = "org.esa.snap.binning.support.SEAGrid")
+    private String planetaryGridClass;
     private transient CompositingType compositingType;
 
     private final Map<Product, List<Band>> addedVariableBands;
@@ -405,6 +407,8 @@ public class BinningOp extends Operator {
         formatterConfig.setOutputFormat(outputFormat);
         formatterConfig.setOutputType(outputType);
         formatterConfig.setProductCustomizerConfig(productCustomizerConfig);
+
+        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
         validateInput();
 
