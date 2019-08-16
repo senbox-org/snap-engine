@@ -702,7 +702,7 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
 
             if (isNodeAccepted(gridName) || (gridName.equals(latGridName) || gridName.equals(lonGridName))) {
                 final TiePointGrid tiePointGrid = TiePointGrid.createSubset(sourceTiePointGrid, getSubsetDef());
-                if (isFullScene(getSubsetDef(), sourceTiePointGrid) && sourceTiePointGrid.isStxSet()) {
+                if (isFullScene(getSubsetDef(), tiePointGrid) && sourceTiePointGrid.isStxSet()) {
                     copyStx(sourceTiePointGrid, tiePointGrid);
                 }
                 product.addTiePointGrid(tiePointGrid);
