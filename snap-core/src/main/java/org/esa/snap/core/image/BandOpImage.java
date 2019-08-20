@@ -21,6 +21,7 @@ import com.bc.ceres.glevel.MultiLevelImage;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.ProductData;
 
+import javax.media.jai.PlanarImage;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.io.IOException;
@@ -63,41 +64,43 @@ public class BandOpImage extends RasterDataNodeOpImage {
         }
     }
 
-    static void readHigherLevelData(Band band, ProductData destData, Rectangle destRect, LevelImageSupport lvlSupport) throws IOException {
+    private static void readHigherLevelData(Band band, ProductData destData, Rectangle destRect, LevelImageSupport lvlSupport) throws IOException {
         final int sourceWidth = lvlSupport.getSourceWidth(destRect.width);
         final int sourceHeight = lvlSupport.getSourceHeight(destRect.height);
         final int srcX = lvlSupport.getSourceX(destRect.x);
         final int srcY = lvlSupport.getSourceY(destRect.y);
 
-        Point[] tileIndices = band.getSourceImage().getTileIndices(new Rectangle(srcX, srcY, sourceWidth, sourceHeight));
+        final MultiLevelImage img = band.getSourceImage();
+        final int tileGridXOffset = img.getTileGridXOffset();
+        final int tileWidth = img.getTileWidth();
+
+        Point[] tileIndices = img.getTileIndices(new Rectangle(srcX, srcY, sourceWidth, sourceHeight));
         HashMap<Rectangle, ProductData> tileMap = new HashMap<>();
         for (Point tileIndex : tileIndices) {
-            Rectangle tileRect = band.getSourceImage().getTileRect(tileIndex.x, tileIndex.y);
+            Rectangle tileRect = img.getTileRect(tileIndex.x, tileIndex.y);
             if (tileRect.isEmpty()) {
                 continue;
-                        }
+            }
             final ProductData tileData = ProductData.createInstance(band.getDataType(), tileRect.width * tileRect.height);
             band.readRasterData(tileRect.x, tileRect.y, tileRect.width, tileRect.height, tileData, ProgressMonitor.NULL);
             tileMap.put(tileRect, tileData);
-                    }
+        }
+
+        final int srcWidth = lvlSupport.getSourceWidth()-1;
 
         for (int y = 0; y < destRect.height; y++) {
             final int currentSrcYOffset = lvlSupport.getSourceY(destRect.y + y);
             int currentDestYOffset = y * destRect.width;
+            int tileY = img.YToTileY(currentSrcYOffset);
             for (int x = 0; x < destRect.width; x++) {
-                double value = getSourceValue(band, tileMap, lvlSupport.getSourceX(destRect.x + x), currentSrcYOffset);
+                int sourceX =  lvlSupport.getSourceCoord(destRect.x + x, 0, srcWidth);
+                Rectangle tileRect = img.getTileRect(PlanarImage.XToTileX(sourceX, tileGridXOffset, tileWidth), tileY);
+                int currentX = sourceX - tileRect.x;
+                int currentY = currentSrcYOffset - tileRect.y;
+                double value = tileMap.get(tileRect).getElemDoubleAt(currentY * tileRect.width + currentX);
+
                 destData.setElemDoubleAt(currentDestYOffset + x, value);
-                }
             }
         }
-
-    private static double getSourceValue(Band band, HashMap<Rectangle, ProductData> tileMap, int sourceX, int sourceY) {
-        MultiLevelImage img = band.getSourceImage();
-        Rectangle tileRect = img.getTileRect(img.XToTileX(sourceX), img.YToTileY(sourceY));
-        ProductData productData = tileMap.get(tileRect);
-        int currentX = sourceX - tileRect.x;
-        int currentY = sourceY - tileRect.y;
-        return productData.getElemDoubleAt(currentY * tileRect.width + currentX);
     }
-
 }
