@@ -21,7 +21,9 @@ import com.bc.ceres.glevel.MultiLevelImage;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.ProductData;
 
-import java.awt.*;
+import javax.media.jai.PlanarImage;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.io.IOException;
 import java.util.HashMap;
 
@@ -92,7 +94,7 @@ public class BandOpImage extends RasterDataNodeOpImage {
             int tileY = img.YToTileY(currentSrcYOffset);
             for (int x = 0; x < destRect.width; x++) {
                 int sourceX =  lvlSupport.getSourceCoord(destRect.x + x, 0, srcWidth);
-                Rectangle tileRect = img.getTileRect(img.XToTileX(sourceX, tileGridXOffset, tileWidth), tileY);
+                Rectangle tileRect = img.getTileRect(PlanarImage.XToTileX(sourceX, tileGridXOffset, tileWidth), tileY);
                 int currentX = sourceX - tileRect.x;
                 int currentY = currentSrcYOffset - tileRect.y;
                 double value = tileMap.get(tileRect).getElemDoubleAt(currentY * tileRect.width + currentX);
