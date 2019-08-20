@@ -1,11 +1,17 @@
 package org.esa.snap.product.library.v2;
 
+import ro.cs.tao.eodata.EOProduct;
+
+import java.awt.geom.Path2D;
 import java.util.Date;
 
 /**
  * Created by jcoravu on 12/8/2019.
  */
 public class ProductLibraryItem {
+
+    private final EOProduct product;
+    private final String sensor;
 
     private String name;
     private String type;
@@ -15,9 +21,19 @@ public class ProductLibraryItem {
     private Date processingDate;
     private String quickLookLocation;
     private Date acquisitionDate;
+    private Path2D.Double path;
 
-    public ProductLibraryItem() {
+    public ProductLibraryItem(EOProduct product, String sensor) {
+        this.product = product;
+        this.sensor = sensor;
+    }
 
+    String getSensor() {
+        return sensor;
+    }
+
+    EOProduct getProduct() {
+        return product;
     }
 
     public String getName() {
@@ -82,5 +98,13 @@ public class ProductLibraryItem {
 
     public void setAcquisitionDate(Date acquisitionDate) {
         this.acquisitionDate = acquisitionDate;
+    }
+
+    public void setPath(Path2D.Double path) {
+        this.path = path;
+    }
+
+    public Path2D.Double getPath() {
+        return path;
     }
 }

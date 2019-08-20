@@ -7,7 +7,7 @@ import java.util.List;
  */
 public interface IProductsDownloaderListener {
 
-    void notifyProductCount(long productCount);
+    void notifyProductCount(long totalProductCount);
 
-    void notifyPageProducts(int pageNumber, List<ProductLibraryItem> pageResults);
+    void notifyPageProducts(int pageNumber, List<ProductLibraryItem> pageResults, long totalProductCount, int retrievedProductCount);
 }

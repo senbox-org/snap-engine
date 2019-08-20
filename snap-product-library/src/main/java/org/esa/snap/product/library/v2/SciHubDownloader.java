@@ -4,28 +4,42 @@ import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.auth.Credentials;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.esa.snap.product.library.v2.parameters.Point2D;
 import org.esa.snap.product.library.v2.parameters.QueryFilter;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Polygon;
+import ro.cs.tao.ProgressListener;
 import ro.cs.tao.datasource.DataQuery;
 import ro.cs.tao.datasource.DataSource;
+import ro.cs.tao.datasource.ProductFetchStrategy;
 import ro.cs.tao.datasource.param.CommonParameterNames;
 import ro.cs.tao.datasource.param.DataSourceParameter;
 import ro.cs.tao.datasource.param.ParameterName;
 import ro.cs.tao.datasource.param.QueryParameter;
+import ro.cs.tao.datasource.remote.FetchMode;
 import ro.cs.tao.datasource.remote.scihub.SciHubDataSource;
+import ro.cs.tao.datasource.remote.scihub.download.Sentinel1DownloadStrategy;
+import ro.cs.tao.datasource.remote.scihub.download.Sentinel2ArchiveDownloadStrategy;
+import ro.cs.tao.datasource.remote.scihub.download.Sentinel2DownloadStrategy;
+import ro.cs.tao.datasource.remote.scihub.download.SentinelDownloadStrategy;
 import ro.cs.tao.datasource.remote.scihub.parameters.SciHubParameterProvider;
 import ro.cs.tao.datasource.util.HttpMethod;
 import ro.cs.tao.datasource.util.NetUtils;
 import ro.cs.tao.eodata.EOProduct;
 import ro.cs.tao.eodata.Polygon2D;
+import ro.cs.tao.serialization.GeometryAdapter;
 import ro.cs.tao.spi.ServiceRegistry;
 import ro.cs.tao.spi.ServiceRegistryManager;
 
 import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageInputStream;
 import java.awt.Rectangle;
+import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -37,6 +51,24 @@ import java.util.Map;
  * Created by jcoravu on 7/8/2019.
  */
 public class SciHubDownloader {
+
+    public static Path downloadProduct(ProductLibraryItem selectedProduct, String targetFolder, IProgressListener progressListener) throws IOException {
+        EOProduct product = selectedProduct.getProduct();
+        SentinelDownloadStrategy sentinelDownloadStrategy;
+        if (selectedProduct.getSensor().equals("Sentinel1")) {
+            sentinelDownloadStrategy = new Sentinel1DownloadStrategy(targetFolder);
+        } else if (selectedProduct.getSensor().equals("Sentinel2")) {
+            sentinelDownloadStrategy = new Sentinel2ArchiveDownloadStrategy(targetFolder);
+        } else {
+            throw new IllegalArgumentException("Unknown sensor '"+selectedProduct.getSensor()+"'.");
+        }
+        sentinelDownloadStrategy.setFetchMode(FetchMode.OVERWRITE);
+        sentinelDownloadStrategy.setProgressListener(new DownloadProductProgressListener(progressListener));
+        Path productPath = sentinelDownloadStrategy.fetch(product);
+
+        System.out.println("productPath="+productPath);
+        return productPath;
+    }
 
     public static String[] getSupportedSensors() {
         SciHubParameterProvider sciHubParameterProvider = new SciHubParameterProvider();
@@ -76,12 +108,19 @@ public class SciHubDownloader {
             String parameterName = entry.getKey();
             if (parameterName.equals(CommonParameterNames.FOOTPRINT)) {
                 Rectangle.Double selectionArea = (Rectangle.Double)entry.getValue();
-                Polygon2D polygon2D = new Polygon2D();
-                polygon2D.append(selectionArea.x, selectionArea.y);
-                polygon2D.append(selectionArea.x + selectionArea.width, selectionArea.y);
-                polygon2D.append(selectionArea.x + selectionArea.width, selectionArea.y + selectionArea.height);
-                polygon2D.append(selectionArea.x, selectionArea.y + selectionArea.height);
-                polygon2D.append(selectionArea.x, selectionArea.y);
+                Polygon2D polygon2D;
+//                if (selectionArea.width == 0 && selectionArea.height == 0) {
+//                    polygon2D = new Point2D();
+//                    polygon2D.append(selectionArea.x, selectionArea.y);
+//                } else
+                {
+                    polygon2D = new Polygon2D();
+                    polygon2D.append(selectionArea.x, selectionArea.y); // the top left corner
+                    polygon2D.append(selectionArea.x + selectionArea.width, selectionArea.y); // the top right corner
+                    polygon2D.append(selectionArea.x + selectionArea.width, selectionArea.y + selectionArea.height); // the bottom right corner
+                    polygon2D.append(selectionArea.x, selectionArea.y + selectionArea.height); // the bottom left corner
+                    polygon2D.append(selectionArea.x, selectionArea.y); // the top left corner
+                }
                 query.addParameter(parameterName, polygon2D);
             } else if (!parameterName.equals(CommonParameterNames.START_DATE) && !parameterName.equals(CommonParameterNames.END_DATE)) {
                 query.addParameter(parameterName, entry.getValue());
@@ -99,29 +138,31 @@ public class SciHubDownloader {
     }
 
     public static List<ProductLibraryItem> downloadProductList(Credentials credentials, String sensor, Map<String, Object> parametersValues,
-                                                               IProductsDownloaderListener downloaderListener, IThread thread, int pageSize) {
+                                                               IProductsDownloaderListener downloaderListener, IThread thread, int pageSize) throws Exception {
 
         DataQuery query = buildDataQuery(credentials.getUserPrincipal().getName(), credentials.getPassword(), sensor, parametersValues);
         query.setPageNumber(0);
         query.setPageSize(0);
-        long productCount = query.getCount();
+        long totalProductCount = query.getCount();
 
         if (thread != null && !thread.isRunning()) {
             return null; // stop running
         }
 
-        downloaderListener.notifyProductCount(productCount);
+        downloaderListener.notifyProductCount(totalProductCount);
 
         List<ProductLibraryItem> totalResults;
-        if (productCount > 0) {
-            long totalPageNumber = productCount / pageSize;
-            if (productCount % pageSize != 0) {
+        if (totalProductCount > 0) {
+            long totalPageNumber = totalProductCount / pageSize;
+            if (totalProductCount % pageSize != 0) {
                 totalPageNumber++;
             }
 
             query.setPageSize(pageSize);
 
             totalResults = new ArrayList<ProductLibraryItem>();
+            GeometryAdapter geometryAdapter = new GeometryAdapter();
+            int retrievedProductCount = 0;
             for (int pageNumber=1; pageNumber<=totalPageNumber; pageNumber++) {
                 query.setPageNumber(pageNumber);
 
@@ -138,18 +179,28 @@ public class SciHubDownloader {
                 List<ProductLibraryItem> downloadedPageProducts = new ArrayList<>(pageResults.size());
                 for (int i=0; i<pageResults.size(); i++) {
                     EOProduct product = pageResults.get(i);
-                    ProductLibraryItem productLibraryItem = new ProductLibraryItem();
+                    ProductLibraryItem productLibraryItem = new ProductLibraryItem(product, sensor);
                     productLibraryItem.setName(product.getName());
                     productLibraryItem.setType(product.getProductType());
                     productLibraryItem.setQuickLookLocation(product.getQuicklookLocation());
                     productLibraryItem.setApproximateSize(product.getApproximateSize());
                     productLibraryItem.setAcquisitionDate(product.getAcquisitionDate());
 
+                    Geometry geometry = geometryAdapter.marshal(product.getGeometry());
+                    Coordinate[] coordinates = geometry.getCoordinates();
+                    Path2D.Double path = new Path2D.Double();
+                    path.moveTo(coordinates[0].getX(), coordinates[0].getY());
+                    for (int k=0; k<coordinates.length; k++) {
+                        path.lineTo(coordinates[k].getX(), coordinates[k].getY());
+                    }
+                    productLibraryItem.setPath(path);
+
                     downloadedPageProducts.add(productLibraryItem);
                     totalResults.add(productLibraryItem);
                 }
+                retrievedProductCount += downloadedPageProducts.size();
 
-                downloaderListener.notifyPageProducts(pageNumber, downloadedPageProducts);
+                downloaderListener.notifyPageProducts(pageNumber, downloadedPageProducts, totalProductCount, retrievedProductCount);
             }
         } else {
             totalResults = Collections.emptyList();
