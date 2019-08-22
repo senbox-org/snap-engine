@@ -1,6 +1,9 @@
 package org.esa.snap.product.library.v2;
 
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
 import ro.cs.tao.eodata.EOProduct;
+import ro.cs.tao.serialization.GeometryAdapter;
 
 import java.awt.geom.Path2D;
 import java.util.Date;
@@ -11,25 +14,15 @@ import java.util.Date;
 public class ProductLibraryItem {
 
     private final EOProduct product;
-    private final String sensor;
+    private final String mission;
 
-    private String name;
-    private String type;
-    private int width;
-    private int height;
-    private long approximateSize;
-    private Date processingDate;
-    private String quickLookLocation;
-    private Date acquisitionDate;
-    private Path2D.Double path;
-
-    public ProductLibraryItem(EOProduct product, String sensor) {
+    public ProductLibraryItem(EOProduct product, String mission) {
         this.product = product;
-        this.sensor = sensor;
+        this.mission = mission;
     }
 
-    String getSensor() {
-        return sensor;
+    public String getMission() {
+        return mission;
     }
 
     EOProduct getProduct() {
@@ -37,74 +30,42 @@ public class ProductLibraryItem {
     }
 
     public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+        return this.product.getName();
     }
 
     public String getType() {
-        return type;
+        return this.product.getAttributeValue("producttype");
     }
 
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public void setWidth(int width) {
-        this.width = width;
-    }
-
-    public int getHeight() {
-        return height;
-    }
-
-    public void setHeight(int height) {
-        this.height = height;
+    public String getInstrument() {
+        return this.product.getAttributeValue("instrumentshortname");
     }
 
     public long getApproximateSize() {
-        return approximateSize;
-    }
-
-    public void setApproximateSize(long approximateSize) {
-        this.approximateSize = approximateSize;
-    }
-
-    public Date getProcessingDate() {
-        return processingDate;
-    }
-
-    public void setProcessingDate(Date processingDate) {
-        this.processingDate = processingDate;
+        return this.product.getApproximateSize();
     }
 
     public String getQuickLookLocation() {
-        return quickLookLocation;
+        return this.product.getQuicklookLocation();
     }
 
-    public void setQuickLookLocation(String quickLookLocation) {
-        this.quickLookLocation = quickLookLocation;
+    public String getLocation() {
+        return this.product.getLocation();
     }
 
     public Date getAcquisitionDate() {
-        return acquisitionDate;
+        return this.product.getAcquisitionDate();
     }
 
-    public void setAcquisitionDate(Date acquisitionDate) {
-        this.acquisitionDate = acquisitionDate;
-    }
-
-    public void setPath(Path2D.Double path) {
-        this.path = path;
-    }
-
-    public Path2D.Double getPath() {
+    public Path2D.Double computeAreaPath() throws Exception {
+        GeometryAdapter geometryAdapter = new GeometryAdapter();
+        Geometry geometry = geometryAdapter.marshal(product.getGeometry());
+        Coordinate[] coordinates = geometry.getCoordinates();
+        Path2D.Double path = new Path2D.Double();
+        path.moveTo(coordinates[0].getX(), coordinates[0].getY());
+        for (int k = 0; k < coordinates.length; k++) {
+            path.lineTo(coordinates[k].getX(), coordinates[k].getY());
+        }
         return path;
     }
 }

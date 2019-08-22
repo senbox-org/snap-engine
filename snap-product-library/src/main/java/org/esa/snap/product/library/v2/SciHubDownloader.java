@@ -55,30 +55,28 @@ public class SciHubDownloader {
     public static Path downloadProduct(ProductLibraryItem selectedProduct, String targetFolder, IProgressListener progressListener) throws IOException {
         EOProduct product = selectedProduct.getProduct();
         SentinelDownloadStrategy sentinelDownloadStrategy;
-        if (selectedProduct.getSensor().equals("Sentinel1")) {
+        if (selectedProduct.getMission().equals("Sentinel1")) {
             sentinelDownloadStrategy = new Sentinel1DownloadStrategy(targetFolder);
-        } else if (selectedProduct.getSensor().equals("Sentinel2")) {
+        } else if (selectedProduct.getMission().equals("Sentinel2")) {
             sentinelDownloadStrategy = new Sentinel2ArchiveDownloadStrategy(targetFolder);
         } else {
-            throw new IllegalArgumentException("Unknown sensor '"+selectedProduct.getSensor()+"'.");
+            throw new IllegalArgumentException("Unknown mission '"+selectedProduct.getMission()+"'.");
         }
         sentinelDownloadStrategy.setFetchMode(FetchMode.OVERWRITE);
         sentinelDownloadStrategy.setProgressListener(new DownloadProductProgressListener(progressListener));
         Path productPath = sentinelDownloadStrategy.fetch(product);
-
-        System.out.println("productPath="+productPath);
         return productPath;
     }
 
-    public static String[] getSupportedSensors() {
+    public static String[] getSupportedMissions() {
         SciHubParameterProvider sciHubParameterProvider = new SciHubParameterProvider();
         return sciHubParameterProvider.getSupportedSensors();
     }
 
-    public static List<QueryFilter> getSensorParameters(String sensor) {
+    public static List<QueryFilter> getMissionParameters(String mission) {
         SciHubParameterProvider sciHubParameterProvider = new SciHubParameterProvider();
         Map<String, Map<ParameterName, DataSourceParameter>> supportedParameters = sciHubParameterProvider.getSupportedParameters();
-        Map<ParameterName, DataSourceParameter> sensorParameters = supportedParameters.get(sensor);
+        Map<ParameterName, DataSourceParameter> sensorParameters = supportedParameters.get(mission);
         Iterator<Map.Entry<ParameterName, DataSourceParameter>> it = sensorParameters.entrySet().iterator();
         List<QueryFilter> parameters = new ArrayList<QueryFilter>(sensorParameters.size());
         while (it.hasNext()) {
@@ -96,11 +94,11 @@ public class SciHubDownloader {
         return parameters;
     }
 
-    private static DataQuery buildDataQuery(String username, String password, String sensor, Map<String, Object> parametersValues) {
+    private static DataQuery buildDataQuery(String username, String password, String mission, Map<String, Object> parametersValues) {
         DataSource dataSource = getDatasourceRegistry().getService(SciHubDataSource.class);
         dataSource.setCredentials(username, password);
 
-        DataQuery query = dataSource.createQuery(sensor);
+        DataQuery query = dataSource.createQuery(mission);
 
         Iterator<Map.Entry<String, Object>> it = parametersValues.entrySet().iterator();
         while (it.hasNext()) {
@@ -137,10 +135,10 @@ public class SciHubDownloader {
         return query;
     }
 
-    public static List<ProductLibraryItem> downloadProductList(Credentials credentials, String sensor, Map<String, Object> parametersValues,
+    public static List<ProductLibraryItem> downloadProductList(Credentials credentials, String mission, Map<String, Object> parametersValues,
                                                                IProductsDownloaderListener downloaderListener, IThread thread, int pageSize) throws Exception {
 
-        DataQuery query = buildDataQuery(credentials.getUserPrincipal().getName(), credentials.getPassword(), sensor, parametersValues);
+        DataQuery query = buildDataQuery(credentials.getUserPrincipal().getName(), credentials.getPassword(), mission, parametersValues);
         query.setPageNumber(0);
         query.setPageSize(0);
         long totalProductCount = query.getCount();
@@ -161,7 +159,6 @@ public class SciHubDownloader {
             query.setPageSize(pageSize);
 
             totalResults = new ArrayList<ProductLibraryItem>();
-            GeometryAdapter geometryAdapter = new GeometryAdapter();
             int retrievedProductCount = 0;
             for (int pageNumber=1; pageNumber<=totalPageNumber; pageNumber++) {
                 query.setPageNumber(pageNumber);
@@ -179,22 +176,7 @@ public class SciHubDownloader {
                 List<ProductLibraryItem> downloadedPageProducts = new ArrayList<>(pageResults.size());
                 for (int i=0; i<pageResults.size(); i++) {
                     EOProduct product = pageResults.get(i);
-                    ProductLibraryItem productLibraryItem = new ProductLibraryItem(product, sensor);
-                    productLibraryItem.setName(product.getName());
-                    productLibraryItem.setType(product.getProductType());
-                    productLibraryItem.setQuickLookLocation(product.getQuicklookLocation());
-                    productLibraryItem.setApproximateSize(product.getApproximateSize());
-                    productLibraryItem.setAcquisitionDate(product.getAcquisitionDate());
-
-                    Geometry geometry = geometryAdapter.marshal(product.getGeometry());
-                    Coordinate[] coordinates = geometry.getCoordinates();
-                    Path2D.Double path = new Path2D.Double();
-                    path.moveTo(coordinates[0].getX(), coordinates[0].getY());
-                    for (int k=0; k<coordinates.length; k++) {
-                        path.lineTo(coordinates[k].getX(), coordinates[k].getY());
-                    }
-                    productLibraryItem.setPath(path);
-
+                    ProductLibraryItem productLibraryItem = new ProductLibraryItem(product, mission);
                     downloadedPageProducts.add(productLibraryItem);
                     totalResults.add(productLibraryItem);
                 }
