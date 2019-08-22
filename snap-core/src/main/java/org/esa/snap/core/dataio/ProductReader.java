@@ -57,6 +57,16 @@ public interface ProductReader {
     ProductSubsetDef getSubsetDef();
 
     /**
+     * Returns the exposed parameters about a data product, without reading it
+     *
+     * @return ProductReaderExposedParams
+     */
+    default ProductReaderExposedParams getExposedParams() {
+        return new ProductReaderExposedParams(null, false);
+    }
+
+
+    /**
      * Reads a data product and returns a in-memory representation of it.
      * <p> The given subset info can be used to specify spatial and spectral portions of the original product. If the
      * subset is omitted, the complete product is read in.
