@@ -4,15 +4,9 @@ import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.auth.Credentials;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.esa.snap.product.library.v2.parameters.Point2D;
 import org.esa.snap.product.library.v2.parameters.QueryFilter;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.Polygon;
-import ro.cs.tao.ProgressListener;
 import ro.cs.tao.datasource.DataQuery;
 import ro.cs.tao.datasource.DataSource;
-import ro.cs.tao.datasource.ProductFetchStrategy;
 import ro.cs.tao.datasource.param.CommonParameterNames;
 import ro.cs.tao.datasource.param.DataSourceParameter;
 import ro.cs.tao.datasource.param.ParameterName;
@@ -21,21 +15,18 @@ import ro.cs.tao.datasource.remote.FetchMode;
 import ro.cs.tao.datasource.remote.scihub.SciHubDataSource;
 import ro.cs.tao.datasource.remote.scihub.download.Sentinel1DownloadStrategy;
 import ro.cs.tao.datasource.remote.scihub.download.Sentinel2ArchiveDownloadStrategy;
-import ro.cs.tao.datasource.remote.scihub.download.Sentinel2DownloadStrategy;
 import ro.cs.tao.datasource.remote.scihub.download.SentinelDownloadStrategy;
 import ro.cs.tao.datasource.remote.scihub.parameters.SciHubParameterProvider;
 import ro.cs.tao.datasource.util.HttpMethod;
 import ro.cs.tao.datasource.util.NetUtils;
 import ro.cs.tao.eodata.EOProduct;
 import ro.cs.tao.eodata.Polygon2D;
-import ro.cs.tao.serialization.GeometryAdapter;
 import ro.cs.tao.spi.ServiceRegistry;
 import ro.cs.tao.spi.ServiceRegistryManager;
 
 import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageInputStream;
 import java.awt.Rectangle;
-import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
@@ -136,16 +127,14 @@ public class SciHubDownloader {
     }
 
     public static List<ProductLibraryItem> downloadProductList(Credentials credentials, String mission, Map<String, Object> parametersValues,
-                                                               IProductsDownloaderListener downloaderListener, IThread thread, int pageSize) throws Exception {
+                                                               IProductsDownloaderListener downloaderListener, IThread thread, int pageSize) throws InterruptedException {
 
         DataQuery query = buildDataQuery(credentials.getUserPrincipal().getName(), credentials.getPassword(), mission, parametersValues);
         query.setPageNumber(0);
         query.setPageSize(0);
         long totalProductCount = query.getCount();
 
-        if (thread != null && !thread.isRunning()) {
-            return null; // stop running
-        }
+        IThread.checkCancelled(thread);
 
         downloaderListener.notifyProductCount(totalProductCount);
 
@@ -163,15 +152,11 @@ public class SciHubDownloader {
             for (int pageNumber=1; pageNumber<=totalPageNumber; pageNumber++) {
                 query.setPageNumber(pageNumber);
 
-                if (thread != null && !thread.isRunning()) {
-                    return null; // stop running
-                }
+                IThread.checkCancelled(thread);
 
                 List<EOProduct> pageResults = query.execute();
 
-                if (thread != null && !thread.isRunning()) {
-                    return null; // stop running
-                }
+                IThread.checkCancelled(thread);
 
                 List<ProductLibraryItem> downloadedPageProducts = new ArrayList<>(pageResults.size());
                 for (int i=0; i<pageResults.size(); i++) {
@@ -190,13 +175,11 @@ public class SciHubDownloader {
         return totalResults;
     }
 
-    public static BufferedImage downloadQuickLookImage(String url, Credentials credentials, IThread thread) throws IOException {
+    public static BufferedImage downloadQuickLookImage(String url, Credentials credentials, IThread thread) throws IOException, java.lang.InterruptedException {
         try (CloseableHttpResponse response = NetUtils.openConnection(HttpMethod.GET, url, credentials)) {
             if (response != null) {
 
-                if (thread != null && !thread.isRunning()) {
-                    return null; // stop running
-                }
+                IThread.checkCancelled(thread);
 
                 StatusLine statusLine = response.getStatusLine();
                 switch (statusLine.getStatusCode()) {
@@ -207,18 +190,14 @@ public class SciHubDownloader {
                             return null;
                         }
                         try {
-                            if (thread != null && !thread.isRunning()) {
-                                return null; // stop running
-                            }
+                            IThread.checkCancelled(thread);
 
                             ImageInputStream imageInputStream = ImageIO.createImageInputStream(inputStream);
                             if (imageInputStream == null) {
                                 return null;
                             }
 
-                            if (thread != null && !thread.isRunning()) {
-                                return null; // stop running
-                            }
+                            IThread.checkCancelled(thread);
 
                             BufferedImage bufferedImage = ImageIO.read(imageInputStream);
                             if (bufferedImage == null) {

@@ -6,4 +6,10 @@ package org.esa.snap.product.library.v2;
 public interface IThread {
 
     public boolean isRunning();
+
+    public static void checkCancelled(IThread thread) throws InterruptedException {
+        if (thread != null && !thread.isRunning()) {
+            throw new InterruptedException(); // stop running
+        }
+    }
 }
