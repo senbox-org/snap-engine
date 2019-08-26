@@ -10,7 +10,7 @@ public class QueryFilter {
     private final Class<?> type;
     private final Object defaultValue;
     private final boolean required;
-    private Object[] valueSet;
+    private final Object[] valueSet;
 
     public QueryFilter(String name, Class<?> type, String label, Object defaultValue, boolean required, Object... valueSet) {
         this.name = name;

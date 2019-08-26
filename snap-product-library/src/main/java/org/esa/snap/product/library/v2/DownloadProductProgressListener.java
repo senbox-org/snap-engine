@@ -1,15 +1,13 @@
 package org.esa.snap.product.library.v2;
 
-import ro.cs.tao.ProgressListener;
-
 /**
  * Created by jcoravu on 19/8/2019.
  */
-public class DownloadProductProgressListener implements ProgressListener {
+public class DownloadProductProgressListener implements ro.cs.tao.ProgressListener {
 
-    private final IProgressListener progressListener;
+    private final ProgressListener progressListener;
 
-    public DownloadProductProgressListener(IProgressListener progressListener) {
+    public DownloadProductProgressListener(ProgressListener progressListener) {
         this.progressListener = progressListener;
     }
 
