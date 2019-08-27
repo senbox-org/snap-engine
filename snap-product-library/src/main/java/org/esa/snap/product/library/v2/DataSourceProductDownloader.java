@@ -8,7 +8,7 @@ import java.nio.file.Path;
  */
 public interface DataSourceProductDownloader {
 
-    public Path download(ProductLibraryItem product, ProgressListener progressListener) throws IOException;
+    public Path download(ProductLibraryItem product, Path targetFolderPath, ProgressListener progressListener) throws IOException;
 
     public void cancel();
 }

@@ -99,7 +99,7 @@ public class SciHubDataSourceResultsDownloader implements DataSourceResultsDownl
 
         downloaderListener.notifyProductCount(totalProductCount);
 
-        int pageSize = 1;
+        int pageSize = 100;
         List<ProductLibraryItem> totalResults;
         if (totalProductCount > 0) {
             long totalPageNumber = totalProductCount / pageSize;

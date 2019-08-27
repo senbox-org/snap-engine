@@ -71,7 +71,7 @@ public class SciHubDataSourceProductsProvider implements DataSourceProductsProvi
     }
 
     @Override
-    public DataSourceProductDownloader buidProductDownloader(String mission, Path targetFolderPath) {
-        return new SciHubDataSourceProductDownloader(mission, targetFolderPath);
+    public DataSourceProductDownloader buidProductDownloader(String mission) {
+        return new SciHubDataSourceProductDownloader(mission);
     }
 }

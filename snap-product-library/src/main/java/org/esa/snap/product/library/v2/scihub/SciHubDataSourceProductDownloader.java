@@ -18,26 +18,33 @@ import java.nio.file.Path;
  */
 public class SciHubDataSourceProductDownloader implements DataSourceProductDownloader {
 
+    private final String mission;
     private final SentinelDownloadStrategy sentinelDownloadStrategy;
 
-    public SciHubDataSourceProductDownloader(String mission, Path targetFolderPath) {
+    public SciHubDataSourceProductDownloader(String mission) {
+        this.mission = mission;
         if (mission.equals("Sentinel1")) {
-            this.sentinelDownloadStrategy = new Sentinel1DownloadStrategy(targetFolderPath.toString());
+            this.sentinelDownloadStrategy = new Sentinel1DownloadStrategy(null);
         } else if (mission.equals("Sentinel2")) {
-            this.sentinelDownloadStrategy = new Sentinel2ArchiveDownloadStrategy(targetFolderPath.toString());
+            this.sentinelDownloadStrategy = new Sentinel2ArchiveDownloadStrategy(null);
         } else if (mission.equals("Sentinel3")) {
-            this.sentinelDownloadStrategy = new Sentinel3DownloadStrategy(targetFolderPath.toString());
+            this.sentinelDownloadStrategy = new Sentinel3DownloadStrategy(null);
         } else {
             throw new IllegalArgumentException("Unknown mission '"+mission+"'.");
         }
     }
 
     @Override
-    public Path download(ProductLibraryItem product, ProgressListener progressListener) throws IOException {
-        SciHubProductLibraryItem productLibraryItem = (SciHubProductLibraryItem)product;
-        this.sentinelDownloadStrategy.setFetchMode(FetchMode.OVERWRITE);
-        this.sentinelDownloadStrategy.setProgressListener(new DownloadProductProgressListener(progressListener));
-        return this.sentinelDownloadStrategy.fetch(productLibraryItem.getProduct());
+    public Path download(ProductLibraryItem product, Path targetFolderPath, ProgressListener progressListener) throws IOException {
+        if (product.getMission().equals(this.mission)) {
+            SciHubProductLibraryItem productLibraryItem = (SciHubProductLibraryItem)product;
+            this.sentinelDownloadStrategy.setDestination(targetFolderPath.toString());
+            this.sentinelDownloadStrategy.setFetchMode(FetchMode.OVERWRITE);
+            this.sentinelDownloadStrategy.setProgressListener(new DownloadProductProgressListener(progressListener));
+            return this.sentinelDownloadStrategy.fetch(productLibraryItem.getProduct());
+        } else {
+            throw new IllegalArgumentException("The product misssion '" + product.getMission()+"' and the downloader mission '" + this.mission+"' does not match.");
+        }
     }
 
     @Override

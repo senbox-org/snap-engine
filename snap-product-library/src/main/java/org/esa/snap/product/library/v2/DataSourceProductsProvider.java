@@ -18,5 +18,5 @@ public interface DataSourceProductsProvider {
 
     public DataSourceResultsDownloader buildResultsDownloader();
 
-    public DataSourceProductDownloader buidProductDownloader(String mission, Path targetFolderPath);
+    public DataSourceProductDownloader buidProductDownloader(String mission);
 }
