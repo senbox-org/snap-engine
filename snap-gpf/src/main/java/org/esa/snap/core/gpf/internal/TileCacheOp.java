@@ -33,7 +33,7 @@ import java.awt.image.RenderedImage;
         description = "Operator which provides a dedicated cache for its source product.")
 public class TileCacheOp extends Operator {
 
-    private static final int MEGABYTES = 1024 * 1024;
+    private static final long MEGABYTES = 1024 * 1024;
     @SourceProduct
     Product source;
 
