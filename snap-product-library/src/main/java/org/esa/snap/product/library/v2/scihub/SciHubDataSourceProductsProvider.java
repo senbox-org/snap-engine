@@ -51,7 +51,15 @@ public class SciHubDataSourceProductsProvider implements DataSourceProductsProvi
             } else {
                 type = param.getType();
             }
-            QueryFilter queryParameter = new QueryFilter(param.getName(), type, param.getLabel(), param.getDefaultValue(), param.isRequired(), param.getValueSet());
+            boolean required = param.isRequired();
+            if (!required) {
+                if (param.getName().equals(CommonParameterNames.PLATFORM) || param.getName().equals(CommonParameterNames.START_DATE)
+                    || param.getName().equals(CommonParameterNames.END_DATE) || param.getName().equals(CommonParameterNames.FOOTPRINT)) {
+
+                    required = true;
+                }
+            }
+            QueryFilter queryParameter = new QueryFilter(param.getName(), type, param.getLabel(), param.getDefaultValue(), required, param.getValueSet());
             parameters.add(queryParameter);
         }
         return parameters;
