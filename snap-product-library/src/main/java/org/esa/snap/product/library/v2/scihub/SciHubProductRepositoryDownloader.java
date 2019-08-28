@@ -1,9 +1,9 @@
 package org.esa.snap.product.library.v2.scihub;
 
 import org.esa.snap.product.library.v2.DownloadProductProgressListener;
-import org.esa.snap.product.library.v2.DataSourceProductDownloader;
+import org.esa.snap.product.library.v2.repository.ProductRepositoryDownloader;
 import org.esa.snap.product.library.v2.ProgressListener;
-import org.esa.snap.product.library.v2.ProductLibraryItem;
+import org.esa.snap.product.library.v2.RepositoryProduct;
 import ro.cs.tao.datasource.remote.FetchMode;
 import ro.cs.tao.datasource.remote.scihub.download.Sentinel1DownloadStrategy;
 import ro.cs.tao.datasource.remote.scihub.download.Sentinel2ArchiveDownloadStrategy;
@@ -16,12 +16,12 @@ import java.nio.file.Path;
 /**
  * Created by jcoravu on 23/8/2019.
  */
-public class SciHubDataSourceProductDownloader implements DataSourceProductDownloader {
+public class SciHubProductRepositoryDownloader implements ProductRepositoryDownloader {
 
     private final String mission;
     private final SentinelDownloadStrategy sentinelDownloadStrategy;
 
-    public SciHubDataSourceProductDownloader(String mission) {
+    public SciHubProductRepositoryDownloader(String mission) {
         this.mission = mission;
         if (mission.equals("Sentinel1")) {
             this.sentinelDownloadStrategy = new Sentinel1DownloadStrategy(null);
@@ -35,9 +35,9 @@ public class SciHubDataSourceProductDownloader implements DataSourceProductDownl
     }
 
     @Override
-    public Path download(ProductLibraryItem product, Path targetFolderPath, ProgressListener progressListener) throws IOException {
+    public Path download(RepositoryProduct product, Path targetFolderPath, ProgressListener progressListener) throws IOException {
         if (product.getMission().equals(this.mission)) {
-            SciHubProductLibraryItem productLibraryItem = (SciHubProductLibraryItem)product;
+            SciHubRepositoryProduct productLibraryItem = (SciHubRepositoryProduct)product;
             this.sentinelDownloadStrategy.setDestination(targetFolderPath.toString());
             this.sentinelDownloadStrategy.setFetchMode(FetchMode.OVERWRITE);
             this.sentinelDownloadStrategy.setProgressListener(new DownloadProductProgressListener(progressListener));

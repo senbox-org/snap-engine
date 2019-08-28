@@ -5,7 +5,7 @@ import java.util.Date;
 /**
  * Created by jcoravu on 12/8/2019.
  */
-public interface ProductLibraryItem {
+public interface RepositoryProduct {
 
     public String getName();
 

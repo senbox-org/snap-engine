@@ -1,6 +1,6 @@
 package org.esa.snap.product.library.v2.scihub;
 
-import org.esa.snap.product.library.v2.ProductLibraryItem;
+import org.esa.snap.product.library.v2.RepositoryProduct;
 import ro.cs.tao.eodata.EOProduct;
 
 import java.util.Date;
@@ -8,12 +8,12 @@ import java.util.Date;
 /**
  * Created by jcoravu on 26/8/2019.
  */
-public class SciHubProductLibraryItem implements ProductLibraryItem {
+public class SciHubRepositoryProduct implements RepositoryProduct {
 
     private final EOProduct product;
     private final String mission;
 
-    public SciHubProductLibraryItem(EOProduct product, String mission) {
+    public SciHubRepositoryProduct(EOProduct product, String mission) {
         this.product = product;
         this.mission = mission;
     }

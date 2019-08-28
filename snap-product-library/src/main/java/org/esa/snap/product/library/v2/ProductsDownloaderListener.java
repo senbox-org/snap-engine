@@ -9,5 +9,5 @@ public interface ProductsDownloaderListener {
 
     public void notifyProductCount(long totalProductCount);
 
-    public void notifyPageProducts(int pageNumber, List<ProductLibraryItem> pageResults, long totalProductCount, int retrievedProductCount);
+    public void notifyPageProducts(int pageNumber, List<RepositoryProduct> pageResults, long totalProductCount, int retrievedProductCount);
 }

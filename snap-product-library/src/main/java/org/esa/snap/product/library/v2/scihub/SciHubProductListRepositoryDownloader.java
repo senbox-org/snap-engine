@@ -4,10 +4,10 @@ import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.auth.Credentials;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.esa.snap.product.library.v2.DataSourceResultsDownloader;
+import org.esa.snap.product.library.v2.repository.ProductListRepositoryDownloader;
 import org.esa.snap.product.library.v2.ProductsDownloaderListener;
 import org.esa.snap.product.library.v2.ThreadStatus;
-import org.esa.snap.product.library.v2.ProductLibraryItem;
+import org.esa.snap.product.library.v2.RepositoryProduct;
 import ro.cs.tao.datasource.DataQuery;
 import ro.cs.tao.datasource.DataSource;
 import ro.cs.tao.datasource.param.CommonParameterNames;
@@ -36,9 +36,9 @@ import java.util.Map;
 /**
  * Created by jcoravu on 26/8/2019.
  */
-public class SciHubDataSourceResultsDownloader implements DataSourceResultsDownloader {
+public class SciHubProductListRepositoryDownloader implements ProductListRepositoryDownloader {
 
-    public SciHubDataSourceResultsDownloader() {
+    public SciHubProductListRepositoryDownloader() {
     }
 
     @Override
@@ -86,8 +86,8 @@ public class SciHubDataSourceResultsDownloader implements DataSourceResultsDownl
     }
 
     @Override
-    public List<ProductLibraryItem> downloadProductList(Credentials credentials, String mission, Map<String, Object> parameterValues,
-                                                        ProductsDownloaderListener downloaderListener, ThreadStatus thread)
+    public List<RepositoryProduct> downloadProductList(Credentials credentials, String mission, Map<String, Object> parameterValues,
+                                                       ProductsDownloaderListener downloaderListener, ThreadStatus thread)
                                                         throws InterruptedException {
 
         DataQuery query = buildDataQuery(credentials.getUserPrincipal().getName(), credentials.getPassword(), mission, parameterValues);
@@ -100,7 +100,7 @@ public class SciHubDataSourceResultsDownloader implements DataSourceResultsDownl
         downloaderListener.notifyProductCount(totalProductCount);
 
         int pageSize = 100;
-        List<ProductLibraryItem> totalResults;
+        List<RepositoryProduct> totalResults;
         if (totalProductCount > 0) {
             long totalPageNumber = totalProductCount / pageSize;
             if (totalProductCount % pageSize != 0) {
@@ -109,7 +109,7 @@ public class SciHubDataSourceResultsDownloader implements DataSourceResultsDownl
 
             query.setPageSize(pageSize);
 
-            totalResults = new ArrayList<ProductLibraryItem>();
+            totalResults = new ArrayList<RepositoryProduct>();
             int retrievedProductCount = 0;
             for (int pageNumber=1; pageNumber<=totalPageNumber; pageNumber++) {
                 query.setPageNumber(pageNumber);
@@ -120,10 +120,10 @@ public class SciHubDataSourceResultsDownloader implements DataSourceResultsDownl
 
                 ThreadStatus.checkCancelled(thread);
 
-                List<ProductLibraryItem> downloadedPageProducts = new ArrayList<>(pageResults.size());
+                List<RepositoryProduct> downloadedPageProducts = new ArrayList<>(pageResults.size());
                 for (int i=0; i<pageResults.size(); i++) {
                     EOProduct product = pageResults.get(i);
-                    SciHubProductLibraryItem productLibraryItem = new SciHubProductLibraryItem(product, mission);
+                    SciHubRepositoryProduct productLibraryItem = new SciHubRepositoryProduct(product, mission);
                     downloadedPageProducts.add(productLibraryItem);
                     totalResults.add(productLibraryItem);
                 }

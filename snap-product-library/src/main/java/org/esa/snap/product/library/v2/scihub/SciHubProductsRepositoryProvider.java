@@ -1,8 +1,8 @@
 package org.esa.snap.product.library.v2.scihub;
 
-import org.esa.snap.product.library.v2.DataSourceProductDownloader;
-import org.esa.snap.product.library.v2.DataSourceProductsProvider;
-import org.esa.snap.product.library.v2.DataSourceResultsDownloader;
+import org.esa.snap.product.library.v2.repository.ProductRepositoryDownloader;
+import org.esa.snap.product.library.v2.repository.ProductsRepositoryProvider;
+import org.esa.snap.product.library.v2.repository.ProductListRepositoryDownloader;
 import org.esa.snap.product.library.v2.parameters.QueryFilter;
 import ro.cs.tao.datasource.param.CommonParameterNames;
 import ro.cs.tao.datasource.param.DataSourceParameter;
@@ -10,7 +10,6 @@ import ro.cs.tao.datasource.param.ParameterName;
 import ro.cs.tao.datasource.remote.scihub.parameters.SciHubParameterProvider;
 
 import java.awt.Rectangle;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -19,13 +18,13 @@ import java.util.Map;
 /**
  * Created by jcoravu on 26/8/2019.
  */
-public class SciHubDataSourceProductsProvider implements DataSourceProductsProvider {
+public class SciHubProductsRepositoryProvider implements ProductsRepositoryProvider {
 
-    public SciHubDataSourceProductsProvider() {
+    public SciHubProductsRepositoryProvider() {
     }
 
     @Override
-    public String getName() {
+    public String getRepositoryName() {
         return "ESA SciHub";
     }
 
@@ -66,12 +65,12 @@ public class SciHubDataSourceProductsProvider implements DataSourceProductsProvi
     }
 
     @Override
-    public DataSourceResultsDownloader buildResultsDownloader() {
-        return new SciHubDataSourceResultsDownloader();
+    public ProductListRepositoryDownloader buildResultsDownloader() {
+        return new SciHubProductListRepositoryDownloader();
     }
 
     @Override
-    public DataSourceProductDownloader buidProductDownloader(String mission) {
-        return new SciHubDataSourceProductDownloader(mission);
+    public ProductRepositoryDownloader buidProductDownloader(String mission) {
+        return new SciHubProductRepositoryDownloader(mission);
     }
 }
