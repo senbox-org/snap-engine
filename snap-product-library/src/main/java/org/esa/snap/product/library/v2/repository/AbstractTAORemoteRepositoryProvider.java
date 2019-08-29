@@ -1,18 +1,20 @@
-package org.esa.snap.product.library.v2.scihub;
+package org.esa.snap.product.library.v2.repository;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.auth.Credentials;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.esa.snap.product.library.v2.repository.ProductListRepositoryDownloader;
 import org.esa.snap.product.library.v2.ProductsDownloaderListener;
-import org.esa.snap.product.library.v2.ThreadStatus;
 import org.esa.snap.product.library.v2.RepositoryProduct;
+import org.esa.snap.product.library.v2.ThreadStatus;
+import org.esa.snap.product.library.v2.parameters.QueryFilter;
+import org.esa.snap.product.library.v2.repository.scihub.SciHubRepositoryProduct;
 import ro.cs.tao.datasource.DataQuery;
 import ro.cs.tao.datasource.DataSource;
 import ro.cs.tao.datasource.param.CommonParameterNames;
+import ro.cs.tao.datasource.param.DataSourceParameter;
+import ro.cs.tao.datasource.param.ParameterName;
 import ro.cs.tao.datasource.param.QueryParameter;
-import ro.cs.tao.datasource.remote.scihub.SciHubDataSource;
 import ro.cs.tao.datasource.util.HttpMethod;
 import ro.cs.tao.datasource.util.NetUtils;
 import ro.cs.tao.eodata.EOProduct;
@@ -34,11 +36,56 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by jcoravu on 26/8/2019.
+ * Created by jcoravu on 28/8/2019.
  */
-public class SciHubProductListRepositoryDownloader implements ProductListRepositoryDownloader {
+public abstract class AbstractTAORemoteRepositoryProvider<T extends DataSource> implements ProductsRepositoryProvider {
 
-    public SciHubProductListRepositoryDownloader() {
+    protected AbstractTAORemoteRepositoryProvider() {
+    }
+
+    protected abstract RepositoryProduct buildRepositoryProduct(EOProduct product, String mission);
+
+    protected abstract Class<T> getDataSourceClass();
+
+    @Override
+    public String[] getAvailableMissions() {
+        DataSource dataSource = getDataSource();
+        return dataSource.getSupportedSensors();
+    }
+    @Override
+    public String getRepositoryId() {
+        DataSource dataSource = getDataSource();
+        return dataSource.getId();
+    }
+
+    @Override
+    public List<QueryFilter> getMissionParameters(String mission) {
+        DataSource dataSource = getDataSource();
+        Map<String, Map<ParameterName, DataSourceParameter>> supportedParameters = dataSource.getSupportedParameters();
+        Map<ParameterName, DataSourceParameter> sensorParameters = supportedParameters.get(mission);
+        Iterator<Map.Entry<ParameterName, DataSourceParameter>> it = sensorParameters.entrySet().iterator();
+        List<QueryFilter> parameters = new ArrayList<QueryFilter>(sensorParameters.size());
+        while (it.hasNext()) {
+            Map.Entry<ParameterName, DataSourceParameter> entry = it.next();
+            DataSourceParameter param = entry.getValue();
+            Class<?> type;
+            if (param.getName().equals(CommonParameterNames.FOOTPRINT)) {
+                type = Rectangle.Double.class;
+            } else {
+                type = param.getType();
+            }
+            boolean required = param.isRequired();
+            if (!required) {
+                if (param.getName().equals(CommonParameterNames.PLATFORM) || param.getName().equals(CommonParameterNames.START_DATE)
+                        || param.getName().equals(CommonParameterNames.END_DATE) || param.getName().equals(CommonParameterNames.FOOTPRINT)) {
+
+                    required = true;
+                }
+            }
+            QueryFilter queryParameter = new QueryFilter(param.getName(), type, param.getLabel(), param.getDefaultValue(), required, param.getValueSet());
+            parameters.add(queryParameter);
+        }
+        return parameters;
     }
 
     @Override
@@ -88,7 +135,7 @@ public class SciHubProductListRepositoryDownloader implements ProductListReposit
     @Override
     public List<RepositoryProduct> downloadProductList(Credentials credentials, String mission, Map<String, Object> parameterValues,
                                                        ProductsDownloaderListener downloaderListener, ThreadStatus thread)
-                                                        throws InterruptedException {
+                                                       throws InterruptedException {
 
         DataQuery query = buildDataQuery(credentials.getUserPrincipal().getName(), credentials.getPassword(), mission, parameterValues);
         query.setPageNumber(0);
@@ -110,8 +157,7 @@ public class SciHubProductListRepositoryDownloader implements ProductListReposit
             query.setPageSize(pageSize);
 
             totalResults = new ArrayList<RepositoryProduct>();
-            int retrievedProductCount = 0;
-            for (int pageNumber=1; pageNumber<=totalPageNumber; pageNumber++) {
+            for (int pageNumber=1; pageNumber<=totalPageNumber && totalResults.size() < totalProductCount; pageNumber++) {
                 query.setPageNumber(pageNumber);
 
                 ThreadStatus.checkCancelled(thread);
@@ -123,13 +169,14 @@ public class SciHubProductListRepositoryDownloader implements ProductListReposit
                 List<RepositoryProduct> downloadedPageProducts = new ArrayList<>(pageResults.size());
                 for (int i=0; i<pageResults.size(); i++) {
                     EOProduct product = pageResults.get(i);
-                    SciHubRepositoryProduct productLibraryItem = new SciHubRepositoryProduct(product, mission);
-                    downloadedPageProducts.add(productLibraryItem);
-                    totalResults.add(productLibraryItem);
+                    RepositoryProduct repositoryProduct = buildRepositoryProduct(product, mission);
+                    downloadedPageProducts.add(repositoryProduct);
+                    totalResults.add(repositoryProduct);
                 }
-                retrievedProductCount += downloadedPageProducts.size();
 
-                downloaderListener.notifyPageProducts(pageNumber, downloadedPageProducts, totalProductCount, retrievedProductCount);
+                ThreadStatus.checkCancelled(thread);
+
+                downloaderListener.notifyPageProducts(pageNumber, downloadedPageProducts, totalProductCount, totalResults.size());
             }
         } else {
             totalResults = Collections.emptyList();
@@ -137,8 +184,13 @@ public class SciHubProductListRepositoryDownloader implements ProductListReposit
         return totalResults;
     }
 
-    private static DataQuery buildDataQuery(String username, String password, String mission, Map<String, Object> parametersValues) {
-        DataSource dataSource = getDataSourceRegistry().getService(SciHubDataSource.class);
+    private DataSource getDataSource() {
+        ServiceRegistry<DataSource> serviceRegistry = ServiceRegistryManager.getInstance().getServiceRegistry(DataSource.class);
+        return serviceRegistry.getService(getDataSourceClass());
+    }
+
+    private DataQuery buildDataQuery(String username, String password, String mission, Map<String, Object> parametersValues) {
+        DataSource dataSource = getDataSource();
         dataSource.setCredentials(username, password);
 
         DataQuery query = dataSource.createQuery(mission);
@@ -148,20 +200,13 @@ public class SciHubProductListRepositoryDownloader implements ProductListReposit
             Map.Entry<String, Object> entry = it.next();
             String parameterName = entry.getKey();
             if (parameterName.equals(CommonParameterNames.FOOTPRINT)) {
-                Rectangle.Double selectionArea = (Rectangle.Double)entry.getValue();
-                Polygon2D polygon2D;
-//                if (selectionArea.width == 0 && selectionArea.height == 0) {
-//                    polygon2D = new Point2D();
-//                    polygon2D.append(selectionArea.x, selectionArea.y);
-//                } else
-                {
-                    polygon2D = new Polygon2D();
-                    polygon2D.append(selectionArea.x, selectionArea.y); // the top left corner
-                    polygon2D.append(selectionArea.x + selectionArea.width, selectionArea.y); // the top right corner
-                    polygon2D.append(selectionArea.x + selectionArea.width, selectionArea.y + selectionArea.height); // the bottom right corner
-                    polygon2D.append(selectionArea.x, selectionArea.y + selectionArea.height); // the bottom left corner
-                    polygon2D.append(selectionArea.x, selectionArea.y); // the top left corner
-                }
+                Rectangle.Double selectionArea = (Rectangle.Double) entry.getValue();
+                Polygon2D polygon2D = new Polygon2D();
+                polygon2D.append(selectionArea.x, selectionArea.y); // the top left corner
+                polygon2D.append(selectionArea.x + selectionArea.width, selectionArea.y); // the top right corner
+                polygon2D.append(selectionArea.x + selectionArea.width, selectionArea.y + selectionArea.height); // the bottom right corner
+                polygon2D.append(selectionArea.x, selectionArea.y + selectionArea.height); // the bottom left corner
+                polygon2D.append(selectionArea.x, selectionArea.y); // the top left corner
                 query.addParameter(parameterName, polygon2D);
             } else if (!parameterName.equals(CommonParameterNames.START_DATE) && !parameterName.equals(CommonParameterNames.END_DATE)) {
                 query.addParameter(parameterName, entry.getValue());
@@ -176,9 +221,5 @@ public class SciHubProductListRepositoryDownloader implements ProductListReposit
             query.addParameter(begin);
         }
         return query;
-    }
-
-    private static ServiceRegistry<DataSource> getDataSourceRegistry() {
-        return ServiceRegistryManager.getInstance().getServiceRegistry(DataSource.class);
     }
 }

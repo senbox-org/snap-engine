@@ -1,1 +1,2 @@
-org.esa.snap.product.library.v2.scihub.SciHubProductsRepositoryProvider
+org.esa.snap.product.library.v2.repository.scihub.SciHubProductsRepositoryProvider
+org.esa.snap.product.library.v2.repository.usgs.USGSProductsRepositoryProvider

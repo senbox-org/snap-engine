@@ -1,4 +1,4 @@
-package org.esa.snap.product.library.v2.scihub;
+package org.esa.snap.product.library.v2.repository.scihub;
 
 import org.esa.snap.product.library.v2.DownloadProductProgressListener;
 import org.esa.snap.product.library.v2.repository.ProductRepositoryDownloader;
