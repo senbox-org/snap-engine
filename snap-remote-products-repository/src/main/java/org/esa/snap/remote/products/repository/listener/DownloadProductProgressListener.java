@@ -1,4 +1,4 @@
-package org.esa.snap.product.library.v2;
+package org.esa.snap.remote.products.repository.listener;
 
 /**
  * Created by jcoravu on 19/8/2019.

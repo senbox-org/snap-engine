@@ -102,6 +102,7 @@
         <module>globcover-worldmap</module>
         <module>snap-sta</module>
         <module>snap-remote-execution</module>
+        <module>snap-remote-products-repository</module>
 
         <module>lib-hdf</module>
     </modules>

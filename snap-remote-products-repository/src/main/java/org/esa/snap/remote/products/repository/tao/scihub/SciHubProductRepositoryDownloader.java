@@ -1,9 +1,9 @@
-package org.esa.snap.product.library.v2.repository.scihub;
+package org.esa.snap.remote.products.repository.tao.scihub;
 
-import org.esa.snap.product.library.v2.DownloadProductProgressListener;
-import org.esa.snap.product.library.v2.repository.ProductRepositoryDownloader;
-import org.esa.snap.product.library.v2.ProgressListener;
-import org.esa.snap.product.library.v2.RepositoryProduct;
+import org.esa.snap.remote.products.repository.listener.DownloadProductProgressListener;
+import org.esa.snap.remote.products.repository.ProductRepositoryDownloader;
+import org.esa.snap.remote.products.repository.listener.ProgressListener;
+import org.esa.snap.remote.products.repository.RepositoryProduct;
 import ro.cs.tao.datasource.remote.FetchMode;
 import ro.cs.tao.datasource.remote.scihub.download.Sentinel1DownloadStrategy;
 import ro.cs.tao.datasource.remote.scihub.download.Sentinel2ArchiveDownloadStrategy;

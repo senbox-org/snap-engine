@@ -1,14 +1,14 @@
-package org.esa.snap.product.library.v2.repository;
+package org.esa.snap.remote.products.repository.tao;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.auth.Credentials;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.esa.snap.product.library.v2.ProductsDownloaderListener;
-import org.esa.snap.product.library.v2.RepositoryProduct;
-import org.esa.snap.product.library.v2.ThreadStatus;
-import org.esa.snap.product.library.v2.parameters.QueryFilter;
-import org.esa.snap.product.library.v2.repository.scihub.SciHubRepositoryProduct;
+import org.esa.snap.remote.products.repository.listener.ProductListDownloaderListener;
+import org.esa.snap.remote.products.repository.RemoteProductsRepositoryProvider;
+import org.esa.snap.remote.products.repository.QueryFilter;
+import org.esa.snap.remote.products.repository.RepositoryProduct;
+import org.esa.snap.remote.products.repository.ThreadStatus;
 import ro.cs.tao.datasource.DataQuery;
 import ro.cs.tao.datasource.DataSource;
 import ro.cs.tao.datasource.param.CommonParameterNames;
@@ -38,7 +38,7 @@ import java.util.Map;
 /**
  * Created by jcoravu on 28/8/2019.
  */
-public abstract class AbstractTAORemoteRepositoryProvider<T extends DataSource> implements ProductsRepositoryProvider {
+public abstract class AbstractTAORemoteRepositoryProvider<T extends DataSource> implements RemoteProductsRepositoryProvider {
 
     protected AbstractTAORemoteRepositoryProvider() {
     }
@@ -134,7 +134,7 @@ public abstract class AbstractTAORemoteRepositoryProvider<T extends DataSource> 
 
     @Override
     public List<RepositoryProduct> downloadProductList(Credentials credentials, String mission, Map<String, Object> parameterValues,
-                                                       ProductsDownloaderListener downloaderListener, ThreadStatus thread)
+                                                       ProductListDownloaderListener downloaderListener, ThreadStatus thread)
                                                        throws InterruptedException {
 
         DataQuery query = buildDataQuery(credentials.getUserPrincipal().getName(), credentials.getPassword(), mission, parameterValues);

@@ -1,10 +1,7 @@
-package org.esa.snap.product.library.v2.repository;
+package org.esa.snap.remote.products.repository;
 
 import org.apache.http.auth.Credentials;
-import org.esa.snap.product.library.v2.ProductsDownloaderListener;
-import org.esa.snap.product.library.v2.RepositoryProduct;
-import org.esa.snap.product.library.v2.ThreadStatus;
-import org.esa.snap.product.library.v2.parameters.QueryFilter;
+import org.esa.snap.remote.products.repository.listener.ProductListDownloaderListener;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -14,7 +11,7 @@ import java.util.Map;
 /**
  * Created by jcoravu on 26/8/2019.
  */
-public interface ProductsRepositoryProvider {
+public interface RemoteProductsRepositoryProvider {
 
     public String getRepositoryName();
 
@@ -25,7 +22,7 @@ public interface ProductsRepositoryProvider {
     public List<QueryFilter> getMissionParameters(String mission);
 
     public List<RepositoryProduct> downloadProductList(Credentials credentials, String mission, Map<String, Object> parameterValues,
-                                                       ProductsDownloaderListener downloaderListener, ThreadStatus thread)
+                                                       ProductListDownloaderListener downloaderListener, ThreadStatus thread)
             throws java.lang.InterruptedException;
 
     public BufferedImage downloadProductQuickLookImage(Credentials credentials, String url, ThreadStatus thread)

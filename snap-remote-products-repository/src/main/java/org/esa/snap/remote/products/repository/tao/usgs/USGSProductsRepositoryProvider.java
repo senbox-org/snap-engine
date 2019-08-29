@@ -1,9 +1,8 @@
-package org.esa.snap.product.library.v2.repository.usgs;
+package org.esa.snap.remote.products.repository.tao.usgs;
 
-import org.esa.snap.product.library.v2.RepositoryProduct;
-import org.esa.snap.product.library.v2.repository.AbstractTAORemoteRepositoryProvider;
-import org.esa.snap.product.library.v2.repository.ProductRepositoryDownloader;
-import org.esa.snap.product.library.v2.repository.scihub.SciHubRepositoryProduct;
+import org.esa.snap.remote.products.repository.RepositoryProduct;
+import org.esa.snap.remote.products.repository.tao.AbstractTAORemoteRepositoryProvider;
+import org.esa.snap.remote.products.repository.ProductRepositoryDownloader;
 import ro.cs.tao.datasource.usgs.USGSDataSource;
 import ro.cs.tao.eodata.EOProduct;
 

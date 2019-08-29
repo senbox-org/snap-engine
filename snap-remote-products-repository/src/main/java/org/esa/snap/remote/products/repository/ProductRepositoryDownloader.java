@@ -1,7 +1,6 @@
-package org.esa.snap.product.library.v2.repository;
+package org.esa.snap.remote.products.repository;
 
-import org.esa.snap.product.library.v2.RepositoryProduct;
-import org.esa.snap.product.library.v2.ProgressListener;
+import org.esa.snap.remote.products.repository.listener.ProgressListener;
 
 import java.io.IOException;
 import java.nio.file.Path;

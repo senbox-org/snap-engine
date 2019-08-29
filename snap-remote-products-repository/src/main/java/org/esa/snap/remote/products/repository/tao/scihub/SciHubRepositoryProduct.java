@@ -1,6 +1,6 @@
-package org.esa.snap.product.library.v2.repository.scihub;
+package org.esa.snap.remote.products.repository.tao.scihub;
 
-import org.esa.snap.product.library.v2.repository.AbstractTAORepositoryProduct;
+import org.esa.snap.remote.products.repository.tao.AbstractTAORepositoryProduct;
 import ro.cs.tao.eodata.EOProduct;
 
 /**

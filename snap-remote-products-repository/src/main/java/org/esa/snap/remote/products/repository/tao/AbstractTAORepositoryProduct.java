@@ -1,6 +1,6 @@
-package org.esa.snap.product.library.v2.repository;
+package org.esa.snap.remote.products.repository.tao;
 
-import org.esa.snap.product.library.v2.RepositoryProduct;
+import org.esa.snap.remote.products.repository.RepositoryProduct;
 import ro.cs.tao.eodata.EOProduct;
 
 import java.util.Date;

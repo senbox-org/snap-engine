@@ -1,4 +1,4 @@
-package org.esa.snap.product.library.v2.parameters;
+package org.esa.snap.remote.products.repository;
 
 /**
  * Created by jcoravu on 14/8/2019.
