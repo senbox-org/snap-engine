@@ -141,7 +141,7 @@ def _configure_snappy(snap_home=None,
             with zipfile.ZipFile(jpy_wheel_file) as zf:
                 zf.extractall(snappy_dir)
         else:
-            logging.error(["The module 'jpy' is required to run snappy, but no binary 'jpy' wheel matching the pattern",
+            logging.error("\n".join(["The module 'jpy' is required to run snappy, but no binary 'jpy' wheel matching the pattern",
                            "'" + jpy_wheel_file_pat + "' could be found.",
                            "You can try to build a 'jpy' wheel yourself, then copy it into",
                            "\"" + snappy_dir + "\", and then run the configuration again.",
@@ -152,7 +152,7 @@ def _configure_snappy(snap_home=None,
                            "Or get the source code from https://github.com/bcdev/jpy and follow the build instructions:",
                            "  $ git clone https://github.com/bcdev/jpy.git",
                            "  $ cd jpy"
-                           ].join("\n"))
+                           ])
 
             return _ERR_CODE_NO_MATCHING_JPY_WHEEL_FOUND
     else:
