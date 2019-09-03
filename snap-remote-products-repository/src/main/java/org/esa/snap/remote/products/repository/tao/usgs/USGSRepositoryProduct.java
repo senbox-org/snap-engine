@@ -21,4 +21,8 @@ public class USGSRepositoryProduct extends AbstractTAORepositoryProduct {
     public String getInstrument() {
         return this.product.getAttributeValue("instrumentshortname");
     }
+
+    EOProduct getProduct() {
+        return this.product;
+    }
 }

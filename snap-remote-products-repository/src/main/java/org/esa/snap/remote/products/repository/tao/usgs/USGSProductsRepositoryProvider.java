@@ -31,6 +31,6 @@ public class USGSProductsRepositoryProvider extends AbstractTAORemoteRepositoryP
 
     @Override
     public ProductRepositoryDownloader buidProductDownloader(String mission) {
-        return null;
+        return new USGSProductRepositoryDownloader(mission);
     }
 }
