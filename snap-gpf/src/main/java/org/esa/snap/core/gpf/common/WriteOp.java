@@ -248,7 +248,24 @@ public class WriteOp extends Operator {
         productWriter.setIncrementalMode(incremental);
         productWriter.setFormatName(formatName);
         targetProduct.setProductWriter(productWriter);
+    }
 
+    private Dimension determineTileSize(Band band) {
+        Dimension tileSize = null;
+        if (band.getRasterWidth() == targetProduct.getSceneRasterWidth() &&
+                band.getRasterHeight() == targetProduct.getSceneRasterHeight()) {
+            tileSize = targetProduct.getPreferredTileSize();
+        }
+        if (tileSize == null) {
+            tileSize = JAIUtils.computePreferredTileSize(band.getRasterWidth(),
+                                                         band.getRasterHeight(), 1);
+        }
+        return tileSize;
+    }
+
+    @Override
+    public void doExecute(ProgressMonitor pm) {
+        productWriter.prepareWriting(pm);
         final Band[] bands = targetProduct.getBands();
         writableBands = new ArrayList<>(bands.length);
         for (final Band band : bands) {
@@ -256,6 +273,9 @@ public class WriteOp extends Operator {
             if (productWriter.shouldWrite(band)) {
                 writableBands.add(band);
             }
+        }
+        if (writableBands.size() == 0) {
+            return;
         }
         tileSizes = new Dimension[writableBands.size()];
         tileCountsX = new int[writableBands.size()];
@@ -278,24 +298,6 @@ public class WriteOp extends Operator {
         if(writeEntireTileRows && writableBands.size() > 0) {
             targetProduct.setPreferredTileSize(tileSizes[0]);
         }
-
-    }
-
-    private Dimension determineTileSize(Band band) {
-        Dimension tileSize = null;
-        if (band.getRasterWidth() == targetProduct.getSceneRasterWidth() &&
-                band.getRasterHeight() == targetProduct.getSceneRasterHeight()) {
-            tileSize = targetProduct.getPreferredTileSize();
-        }
-        if (tileSize == null) {
-            tileSize = JAIUtils.computePreferredTileSize(band.getRasterWidth(),
-                                                         band.getRasterHeight(), 1);
-        }
-        return tileSize;
-    }
-
-    @Override
-    public void doExecute(ProgressMonitor pm) {
         try {
             // Create not existing directories before writing
             if(file != null && file.getParentFile() != null){
@@ -445,7 +447,9 @@ public class WriteOp extends Operator {
             productWriter.close();
         } catch (IOException ignore) {
         }
-        writableBands.clear();
+        if (writableBands != null) {
+            writableBands.clear();
+        }
         writeCache.clear();
         super.dispose();
     }

@@ -19,7 +19,7 @@ import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.ProductData;
 
 /**
- * This imnterface must be implemented by classes that want to trace the progress of a product read operation
+ * This interface must be implemented by classes that want to trace the progress of a product read operation
  */
 public interface ProductReaderListener {
 
