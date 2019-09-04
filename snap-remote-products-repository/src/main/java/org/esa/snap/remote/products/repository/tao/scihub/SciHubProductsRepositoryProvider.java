@@ -31,6 +31,6 @@ public class SciHubProductsRepositoryProvider extends AbstractTAORemoteRepositor
 
     @Override
     public ProductRepositoryDownloader buidProductDownloader(String mission) {
-        return new SciHubProductRepositoryDownloader(mission);
+        return new SciHubProductRepositoryDownloader(mission, getRepositoryId());
     }
 }

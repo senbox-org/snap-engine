@@ -1,5 +1,6 @@
 package org.esa.snap.remote.products.repository.tao;
 
+import org.esa.snap.remote.products.repository.Attribute;
 import org.esa.snap.remote.products.repository.RepositoryProduct;
 import ro.cs.tao.eodata.EOProduct;
 
@@ -12,10 +13,19 @@ public abstract class AbstractTAORepositoryProduct implements RepositoryProduct 
 
     protected final EOProduct product;
     private final String mission;
+    private final String downloadURL;
+
+    protected Attribute[] attributes;
 
     protected AbstractTAORepositoryProduct(EOProduct product, String mission) {
         this.product = product;
         this.mission = mission;
+        this.downloadURL = product.getLocation();
+    }
+
+    @Override
+    public Attribute[] getAttributes() {
+        return attributes;
     }
 
     @Override
@@ -28,20 +38,19 @@ public abstract class AbstractTAORepositoryProduct implements RepositoryProduct 
         return this.product.getName();
     }
 
-
     @Override
     public long getApproximateSize() {
         return this.product.getApproximateSize();
     }
 
     @Override
-    public String getQuickLookLocation() {
+    public String getDownloadQuickLookImageURL() {
         return this.product.getQuicklookLocation();
     }
 
     @Override
-    public String getLocation() {
-        return this.product.getLocation();
+    public String getDownloadURL() {
+        return this.downloadURL;
     }
 
     @Override

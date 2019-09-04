@@ -7,17 +7,15 @@ import java.util.Date;
  */
 public interface RepositoryProduct {
 
+    public Attribute[] getAttributes();
+
     public String getName();
-
-    public String getType();
-
-    public String getInstrument();
 
     public long getApproximateSize();
 
-    public String getQuickLookLocation();
+    public String getDownloadQuickLookImageURL();
 
-    public String getLocation();
+    public String getDownloadURL();
 
     public Date getAcquisitionDate();
 

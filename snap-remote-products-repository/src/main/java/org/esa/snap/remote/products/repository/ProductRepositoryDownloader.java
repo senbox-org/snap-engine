@@ -10,6 +10,8 @@ import java.nio.file.Path;
  */
 public interface ProductRepositoryDownloader {
 
+    public String getRepositoryId();
+
     public Path download(RepositoryProduct product, Path targetFolderPath, ProgressListener progressListener) throws IOException;
 
     public void cancel();

@@ -17,15 +17,22 @@ import java.util.Properties;
 public class USGSProductRepositoryDownloader implements ProductRepositoryDownloader {
 
     private final String mission;
+    private final String repositoryId;
     private final SimpleArchiveDownloadStrategy simpleArchiveDownloadStrategy;
 
-    public USGSProductRepositoryDownloader(String mission) {
+    public USGSProductRepositoryDownloader(String mission, String repositoryId) {
         this.mission = mission;
+        this.repositoryId = repositoryId;
         if (mission.equals("Landsat8")) {
             this.simpleArchiveDownloadStrategy = new SimpleArchiveDownloadStrategy(null, new Properties());
         } else {
             throw new IllegalArgumentException("Unknown mission '"+mission+"'.");
         }
+    }
+
+    @Override
+    public String getRepositoryId() {
+        return this.repositoryId;
     }
 
     @Override

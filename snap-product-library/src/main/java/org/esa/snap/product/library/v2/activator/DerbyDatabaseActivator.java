@@ -1,6 +1,7 @@
 package org.esa.snap.product.library.v2.activator;
 
 import org.esa.snap.core.util.SystemUtils;
+import org.esa.snap.product.library.v2.database.DatabaseTableNames;
 import org.esa.snap.runtime.Activator;
 
 import java.io.File;
@@ -55,13 +56,13 @@ public class DerbyDatabaseActivator implements Activator {
             try (Connection connection = getConnection(true)) {
                 int currentDatabaseVersion = 0;
                 // check if the 'version' table exists into the database
-                if (doesTableExists("version", connection)) {
+                if (doesTableExists(DatabaseTableNames.VERSIONS, connection)) {
                     // the 'version' table exists and load the current database version number
                     currentDatabaseVersion = loadCurrentDatabaseVersionNumber(connection);
                 }
 
                 String sourceFolderPath = "org/esa/snap/product/library/v2/database";
-                String databaseFileNamePrefix = "derby-database-script-v";
+                String databaseFileNamePrefix = "derby-database-script-";
                 LinkedHashMap<Integer, List<String>> allStatements = DatabaseUtils.loadDatabaseStatements(sourceFolderPath, databaseFileNamePrefix, currentDatabaseVersion);
                 if (allStatements.size() > 0) {
                     connection.setAutoCommit(false);
@@ -77,7 +78,9 @@ public class DerbyDatabaseActivator implements Activator {
                                     statement.execute(patchStatements.get(i));
                                 }
                                 StringBuilder sql = new StringBuilder();
-                                sql.append("INSERT INTO version (number) VALUES (")
+                                sql.append("INSERT INTO ")
+                                        .append(DatabaseTableNames.VERSIONS)
+                                        .append(" (number) VALUES (")
                                         .append(patchNumber)
                                         .append(")");
                                 statement.execute(sql.toString());
@@ -105,7 +108,7 @@ public class DerbyDatabaseActivator implements Activator {
     private static int loadCurrentDatabaseVersionNumber(Connection connection) throws SQLException {
         int currentDatabaseVersion = 0;
         try (Statement statement = connection.createStatement()) {
-            String sql = "SELECT number FROM version";
+            String sql = "SELECT number FROM " + DatabaseTableNames.VERSIONS;
             try (ResultSet result = statement.executeQuery(sql)) {
                 while (result.next()) {
                     int versionNumber = result.getInt("number");

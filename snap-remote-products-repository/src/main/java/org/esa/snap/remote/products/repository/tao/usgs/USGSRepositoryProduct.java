@@ -12,16 +12,6 @@ public class USGSRepositoryProduct extends AbstractTAORepositoryProduct {
         super(product, mission);
     }
 
-    @Override
-    public String getType() {
-        return this.product.getAttributeValue("producttype");
-    }
-
-    @Override
-    public String getInstrument() {
-        return this.product.getAttributeValue("instrumentshortname");
-    }
-
     EOProduct getProduct() {
         return this.product;
     }
