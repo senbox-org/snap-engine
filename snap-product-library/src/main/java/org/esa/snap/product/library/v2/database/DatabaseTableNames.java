@@ -5,9 +5,10 @@ package org.esa.snap.product.library.v2.database;
  */
 public interface DatabaseTableNames {
 
+    public String LOCAL_REPOSITORIES = "local_repositories";
     public String REMOTE_REPOSITORIES = "remote_repositories";
     public String REMOTE_REPOSITORY_MISSIONS = "remote_repository_missions";
     public String PRODUCTS = "products";
     public String VERSIONS = "versions";
-    public String PRODUCT_REPOSITORY_ATTRIBUTES = "product_repository_attributes";
+    public String PRODUCT_REMOTE_ATTRIBUTES = "product_remote_attributes";
 }

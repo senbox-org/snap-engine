@@ -29,7 +29,7 @@ public class DerbyDAL {
     private DerbyDAL() {
     }
 
-    public static void saveProduct(RepositoryProduct productToSave, Path productMetadataFilePath, String repositoryId) throws Exception {
+    public static void saveProduct(RepositoryProduct productToSave, Path productMetadataFilePath, String repositoryId, Path localRepositoryFolderPath) throws Exception {
         Product sourceProduct = ProductIO.readProduct(productMetadataFilePath.toFile());
         if (sourceProduct != null) {
             try {
@@ -38,8 +38,9 @@ public class DerbyDAL {
 
                     int remoteRepositoryId = saveRemoteRepository(repositoryId, connection);
                     int remoteRepositoryMissionId = saveRemoteRepositoryMission(remoteRepositoryId, productToSave.getMission(), connection);
+                    int localRepositoryId = saveLocalRepositoryFolderPath(localRepositoryFolderPath, connection);
 
-                    int productId = insertProduct(productToSave, sourceProduct, productMetadataFilePath, remoteRepositoryMissionId, connection);
+                    int productId = insertProduct(productToSave, sourceProduct, productMetadataFilePath, remoteRepositoryMissionId, localRepositoryId, connection);
 
                     System.out.println(" saved product id = "+productId);
 
@@ -135,8 +136,50 @@ public class DerbyDAL {
         return remoteRepositoryId;
     }
 
-    private static int insertProduct(RepositoryProduct productToSave, Product sourceProduct, Path productMetadataFilePath, int remoteRepositoryMissionId, Connection connection)
-            throws SQLException, IOException {
+    private static int saveLocalRepositoryFolderPath(Path localRepositoryFolderPath, Connection connection) throws SQLException {
+        String localRepositoryPath = localRepositoryFolderPath.toString();
+        int localRepositoryId = 0;
+        try (Statement statement = connection.createStatement()) {
+            StringBuilder sql = new StringBuilder();
+            sql.append("SELECT id FROM ")
+                    .append(DatabaseTableNames.LOCAL_REPOSITORIES)
+                    .append(" WHERE LOWER(path) = '")
+                    .append(localRepositoryPath.toLowerCase())
+                    .append("'");
+            try (ResultSet resultSet = statement.executeQuery(sql.toString())) {
+                if (resultSet.next()) {
+                    localRepositoryId = resultSet.getInt("id");
+                }
+            }
+        }
+        if (localRepositoryId == 0) {
+            StringBuilder sql = new StringBuilder();
+            sql.append("INSERT INTO ")
+                    .append(DatabaseTableNames.LOCAL_REPOSITORIES)
+                    .append(" (path) VALUES ('")
+                    .append(localRepositoryPath)
+                    .append("')");
+            try (PreparedStatement statement = connection.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS)) {
+                int affectedRows = statement.executeUpdate();
+                if (affectedRows == 0) {
+                    throw new SQLException("Failed to insert the local repository, no rows affected.");
+                } else {
+                    try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                        if (generatedKeys.next()) {
+                            localRepositoryId = generatedKeys.getInt(1);
+                        } else {
+                            throw new SQLException("Failed to get the generated local repository id.");
+                        }
+                    }
+                }
+            }
+        }
+        return localRepositoryId;
+    }
+
+    private static int insertProduct(RepositoryProduct productToSave, Product sourceProduct, Path productMetadataFilePath,
+                                     int remoteRepositoryMissionId, int localRepositoryId, Connection connection)
+                                     throws SQLException, IOException {
 
         FileTime fileTime = Files.getLastModifiedTime(productMetadataFilePath);
         Date lastModifiedDate = new Date(fileTime.toMillis());
@@ -146,13 +189,15 @@ public class DerbyDAL {
         StringBuilder sql = new StringBuilder();
         sql.append("INSERT INTO ")
                 .append(DatabaseTableNames.PRODUCTS)
-                .append(" (name, remote_repository_mission_id, type, path, metadata_filename, approximate_size, acquisition_date")
-                .append(", last_modified_date, first_near_latitudine, first_near_longitude, first_far_latitudine, first_far_longitude")
-                .append(", last_near_latitudine, last_near_longitude, last_far_latitudine, last_far_longitude")
-                .append(", geo_boundary) VALUES ('")
+                .append(" (name, remote_repository_mission_id, local_repository_id, type, path, metadata_filename, size_in_bytes, acquisition_date")
+                .append(", last_modified_date, first_near_latitude, first_near_longitude, first_far_latitude, first_far_longitude")
+                .append(", last_near_latitude, last_near_longitude, last_far_latitude, last_far_longitude")
+                .append(", geometric_boundary) VALUES ('")
                 .append(sourceProduct.getName())
                 .append("', ")
                 .append(remoteRepositoryMissionId)
+                .append(", ")
+                .append(localRepositoryId)
                 .append(", '")
                 .append(sourceProduct.getProductType())
                 .append("', '")
@@ -160,7 +205,7 @@ public class DerbyDAL {
                 .append("', '")
                 .append(metadataFileName)
                 .append("', ")
-                .append(productToSave.getApproximateSize())
+                .append(0)
                 .append(", ")
                 .append("TIMESTAMP('" + TIMESTAMP_FORMAT.format(productToSave.getAcquisitionDate()) + "')")
                 .append(", ")
@@ -182,7 +227,7 @@ public class DerbyDAL {
                 .append(", ")
                 .append(0)
                 .append(", '")
-                .append("geo_boundary")
+                .append("geometric_boundary_value")
                 .append("')");
         System.out.println("sql='"+sql.toString()+"'");
 
@@ -190,13 +235,13 @@ public class DerbyDAL {
         try (PreparedStatement statement = connection.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS)) {
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0) {
-                throw new SQLException("Failed to insert the remote repository, no rows affected.");
+                throw new SQLException("Failed to insert the product, no rows affected.");
             } else {
                 try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
                         productId = generatedKeys.getInt(1);
                     } else {
-                        throw new SQLException("Failed to get the generated remote repository id.");
+                        throw new SQLException("Failed to get the generated product id.");
                     }
                 }
             }
@@ -204,17 +249,17 @@ public class DerbyDAL {
         return productId;
     }
 
-    private static void insertRemoteProductAttributes(int productId, Attribute[] attributes, Connection connection) throws SQLException {
+    private static void insertRemoteProductAttributes(int productId, Attribute[] remoteAttributes, Connection connection) throws SQLException {
         StringBuilder sql = new StringBuilder();
         sql.append("INSERT INTO ")
-                .append(DatabaseTableNames.PRODUCT_REPOSITORY_ATTRIBUTES)
+                .append(DatabaseTableNames.PRODUCT_REMOTE_ATTRIBUTES)
                 .append(" (product_id, name, value) VALUES (")
                 .append(productId)
                 .append(", ?, ?)");
         try (PreparedStatement statement = connection.prepareStatement(sql.toString())) {
-            for (int i=0; i<attributes.length; i++) {
-                statement.setString(1, attributes[i].getName());
-                statement.setString(2, attributes[i].getValue());
+            for (int i=0; i<remoteAttributes.length; i++) {
+                statement.setString(1, remoteAttributes[i].getName());
+                statement.setString(2, remoteAttributes[i].getValue());
                 statement.executeUpdate();
             }
         }
