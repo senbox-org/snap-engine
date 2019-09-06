@@ -1,5 +1,6 @@
 package org.esa.snap.remote.products.repository;
 
+import java.awt.image.BufferedImage;
 import java.util.Date;
 
 /**
@@ -20,4 +21,8 @@ public interface RepositoryProduct {
     public Date getAcquisitionDate();
 
     public String getMission();
+
+    public void setQuickLookImage(BufferedImage quickLookImage);
+
+    public BufferedImage getQuickLookImage();
 }

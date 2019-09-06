@@ -4,6 +4,7 @@ import org.esa.snap.remote.products.repository.Attribute;
 import org.esa.snap.remote.products.repository.RepositoryProduct;
 import ro.cs.tao.eodata.EOProduct;
 
+import java.awt.image.BufferedImage;
 import java.util.Date;
 
 /**
@@ -16,6 +17,7 @@ public abstract class AbstractTAORepositoryProduct implements RepositoryProduct 
     private final String downloadURL;
 
     protected Attribute[] attributes;
+    private BufferedImage quickLookImage;
 
     protected AbstractTAORepositoryProduct(EOProduct product, String mission) {
         this.product = product;
@@ -56,5 +58,15 @@ public abstract class AbstractTAORepositoryProduct implements RepositoryProduct 
     @Override
     public Date getAcquisitionDate() {
         return this.product.getAcquisitionDate();
+    }
+
+    @Override
+    public BufferedImage getQuickLookImage() {
+        return quickLookImage;
+    }
+
+    @Override
+    public void setQuickLookImage(BufferedImage quickLookImage) {
+        this.quickLookImage = quickLookImage;
     }
 }

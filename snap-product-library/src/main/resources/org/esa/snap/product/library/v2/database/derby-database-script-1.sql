@@ -35,6 +35,7 @@ CREATE TABLE products(
 	size_in_bytes BIGINT NOT NULL,
 	acquisition_date TIMESTAMP NOT NULL,
 	last_modified_date TIMESTAMP NOT NULL,
+	quick_look_image BLOB,
 	first_near_latitude DOUBLE NOT NULL,
 	first_near_longitude DOUBLE NOT NULL,
 	first_far_latitude DOUBLE NOT NULL,
