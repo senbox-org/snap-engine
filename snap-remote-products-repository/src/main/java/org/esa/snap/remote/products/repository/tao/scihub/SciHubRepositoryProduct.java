@@ -12,9 +12,26 @@ public class SciHubRepositoryProduct extends AbstractTAORepositoryProduct {
     public SciHubRepositoryProduct(EOProduct product, String mission) {
         super(product, mission);
 
-        this.attributes = new Attribute[2];
-        this.attributes[0] = new Attribute("Product type", product.getAttributeValue("producttype"));
-        this.attributes[1] = new Attribute("Instrument", product.getAttributeValue("instrumentshortname"));
+        int productTypeAttributeIndex = -1;
+        int instrumentShortNameAttributeIndex = -1;
+        for (int i=0; i<this.attributes.size(); i++) {
+            Attribute attribute = this.attributes.get(i);
+            if (attribute.getName().equalsIgnoreCase("producttype")) {
+                productTypeAttributeIndex = i;
+            } else if (attribute.getName().equalsIgnoreCase("instrumentshortname")) {
+                instrumentShortNameAttributeIndex = i;
+            }
+        }
+        if (productTypeAttributeIndex >= 0) {
+            Attribute tempAttribute = this.attributes.get(0);
+            this.attributes.set(0, this.attributes.get(productTypeAttributeIndex));
+            this.attributes.set(productTypeAttributeIndex, tempAttribute);
+        }
+        if (instrumentShortNameAttributeIndex >= 0) {
+            Attribute tempAttribute = this.attributes.get(1);
+            this.attributes.set(1, this.attributes.get(instrumentShortNameAttributeIndex));
+            this.attributes.set(instrumentShortNameAttributeIndex, tempAttribute);
+        }
     }
 
     EOProduct getProduct() {

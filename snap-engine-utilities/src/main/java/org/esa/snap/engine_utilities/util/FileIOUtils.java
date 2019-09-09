@@ -16,6 +16,7 @@
 package org.esa.snap.engine_utilities.util;
 
 import org.apache.commons.io.IOUtils;
+import org.esa.snap.core.util.io.FileUtils;
 
 import java.io.File;
 import java.io.FileReader;
@@ -138,5 +139,30 @@ public class FileIOUtils {
                 }
             }
         });
+    }
+
+    public static long computeFileSize(Path path) throws IOException {
+        FileSizeVisitor fileSizeVisitor = new FileSizeVisitor();
+        Files.walkFileTree(path, fileSizeVisitor);
+        return fileSizeVisitor.getSizeInBytes();
+    }
+
+    private static class FileSizeVisitor extends SimpleFileVisitor<Path> {
+
+        private long sizeInBytes;
+
+        private FileSizeVisitor() {
+            this.sizeInBytes = 0;
+        }
+
+        @Override
+        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+            this.sizeInBytes += Files.size(file);
+            return FileVisitResult.CONTINUE;
+        }
+
+        private long getSizeInBytes() {
+            return sizeInBytes;
+        }
     }
 }

@@ -4,6 +4,9 @@ import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.auth.Credentials;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.esa.snap.remote.products.repository.DataFormatType;
+import org.esa.snap.remote.products.repository.PixelType;
+import org.esa.snap.remote.products.repository.SensorType;
 import org.esa.snap.remote.products.repository.listener.ProductListDownloaderListener;
 import org.esa.snap.remote.products.repository.RemoteProductsRepositoryProvider;
 import org.esa.snap.remote.products.repository.QueryFilter;
@@ -15,6 +18,7 @@ import ro.cs.tao.datasource.param.CommonParameterNames;
 import ro.cs.tao.datasource.param.DataSourceParameter;
 import ro.cs.tao.datasource.param.ParameterName;
 import ro.cs.tao.datasource.param.QueryParameter;
+import ro.cs.tao.datasource.remote.ProductHelper;
 import ro.cs.tao.datasource.util.HttpMethod;
 import ro.cs.tao.datasource.util.NetUtils;
 import ro.cs.tao.eodata.EOProduct;
@@ -43,9 +47,11 @@ public abstract class AbstractTAORemoteRepositoryProvider<T extends DataSource> 
     protected AbstractTAORemoteRepositoryProvider() {
     }
 
-    protected abstract RepositoryProduct buildRepositoryProduct(EOProduct product, String mission);
+    protected abstract AbstractTAORepositoryProduct buildRepositoryProduct(EOProduct product, String mission);
 
     protected abstract Class<T> getDataSourceClass();
+
+    protected abstract ProductHelper buildProductHelper(String productName);
 
     @Override
     public String[] getAvailableMissions() {
@@ -169,7 +175,9 @@ public abstract class AbstractTAORemoteRepositoryProvider<T extends DataSource> 
                 List<RepositoryProduct> downloadedPageProducts = new ArrayList<>(pageResults.size());
                 for (int i=0; i<pageResults.size(); i++) {
                     EOProduct product = pageResults.get(i);
-                    RepositoryProduct repositoryProduct = buildRepositoryProduct(product, mission);
+                    ProductHelper productHelper = buildProductHelper(product.getName());
+                    product.setEntryPoint(productHelper.getMetadataFileName());
+                    AbstractTAORepositoryProduct repositoryProduct = buildRepositoryProduct(product, mission);
                     downloadedPageProducts.add(repositoryProduct);
                     totalResults.add(repositoryProduct);
                 }

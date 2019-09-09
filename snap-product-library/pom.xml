@@ -45,6 +45,11 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.orbisgis</groupId>
+            <artifactId>h2gis</artifactId>
+            <version>1.4.0</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.derby</groupId>
             <artifactId>derby</artifactId>
             <version>10.11.1.1</version>
@@ -91,7 +96,7 @@
             <artifactId>jasypt</artifactId>
             <version>1.9.2</version>
         </dependency>
-		
+
 		<dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

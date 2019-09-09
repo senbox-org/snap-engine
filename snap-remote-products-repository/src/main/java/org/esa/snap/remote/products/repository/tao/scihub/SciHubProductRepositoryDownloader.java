@@ -51,11 +51,7 @@ public class SciHubProductRepositoryDownloader implements ProductRepositoryDownl
             this.sentinelDownloadStrategy.setDestination(targetFolderPath.toString());
             this.sentinelDownloadStrategy.setFetchMode(FetchMode.OVERWRITE);
             this.sentinelDownloadStrategy.setProgressListener(new DownloadProductProgressListener(progressListener));
-            Path productFolder = this.sentinelDownloadStrategy.fetch(productLibraryItem.getProduct());
-            ProductHelper helper = SentinelProductHelper.create(product.getName());
-            String metadataFileName = helper.getMetadataFileName();
-            productLibraryItem.getProduct().setEntryPoint(metadataFileName);
-            return productFolder.resolve(metadataFileName);
+            return this.sentinelDownloadStrategy.fetch(productLibraryItem.getProduct());
         } else {
             throw new IllegalArgumentException("The product misssion '" + product.getMission()+"' and the downloader mission '" + this.mission+"' does not match.");
         }
