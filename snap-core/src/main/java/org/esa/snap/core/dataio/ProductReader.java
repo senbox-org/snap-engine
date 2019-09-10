@@ -62,7 +62,11 @@ public interface ProductReader {
      * @return ProductReaderExposedParams
      */
     default ProductReaderExposedParams getExposedParams() {
-        return new ProductReaderExposedParams(null, false);
+        return null;
+    }
+
+    default MetadataInspector getMetadataInspector(){
+        return null;
     }
 
 

@@ -25,11 +25,20 @@ public class ProductReaderExposedParams {
     // the usual band names that most of products of a certain type have
     List<String> bandNames;
 
+    // the usual mask names that most of products of a certain type have
+    List<String> maskNames;
+
     // a flag that indicates if the products of a certain type can have masks
     boolean hasMasks;
 
     public ProductReaderExposedParams(List<String> bandNames, boolean hasMasks) {
         this.bandNames = bandNames;
+        this.hasMasks = hasMasks;
+    }
+
+    public ProductReaderExposedParams(List<String> bandNames, List<String> maskNames, boolean hasMasks) {
+        this.bandNames = bandNames;
+        this.maskNames = maskNames;
         this.hasMasks = hasMasks;
     }
 
@@ -39,6 +48,14 @@ public class ProductReaderExposedParams {
 
     public void setBandNames(final List<String> bandNames) {
         this.bandNames = bandNames;
+    }
+
+    public List<String> getMaskNames() {
+        return maskNames;
+    }
+
+    public void setMaskNames(final List<String> maskNames) {
+        this.maskNames = maskNames;
     }
 
     public boolean isHasMasks() {
