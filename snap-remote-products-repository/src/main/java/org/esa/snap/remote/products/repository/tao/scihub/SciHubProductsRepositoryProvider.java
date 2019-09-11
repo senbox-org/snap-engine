@@ -1,8 +1,8 @@
 package org.esa.snap.remote.products.repository.tao.scihub;
 
-import org.esa.snap.remote.products.repository.RepositoryProduct;
-import org.esa.snap.remote.products.repository.tao.AbstractTAORemoteRepositoryProvider;
+import org.esa.snap.remote.products.repository.Polygon2D;
 import org.esa.snap.remote.products.repository.ProductRepositoryDownloader;
+import org.esa.snap.remote.products.repository.tao.AbstractTAORemoteRepositoryProvider;
 import ro.cs.tao.datasource.remote.ProductHelper;
 import ro.cs.tao.datasource.remote.scihub.SciHubDataSource;
 import ro.cs.tao.eodata.EOProduct;
@@ -17,8 +17,8 @@ public class SciHubProductsRepositoryProvider extends AbstractTAORemoteRepositor
     }
 
     @Override
-    protected SciHubRepositoryProduct buildRepositoryProduct(EOProduct product, String mission) {
-        return new SciHubRepositoryProduct(product, mission);
+    protected SciHubRepositoryProduct buildRepositoryProduct(EOProduct product, String mission, Polygon2D polygon) {
+        return new SciHubRepositoryProduct(product, mission, polygon);
     }
 
     @Override

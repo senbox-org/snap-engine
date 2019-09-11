@@ -23,7 +23,7 @@ public interface RemoteProductsRepositoryProvider {
 
     public List<RepositoryProduct> downloadProductList(Credentials credentials, String mission, Map<String, Object> parameterValues,
                                                        ProductListDownloaderListener downloaderListener, ThreadStatus thread)
-            throws java.lang.InterruptedException;
+            throws Exception;
 
     public BufferedImage downloadProductQuickLookImage(Credentials credentials, String url, ThreadStatus thread)
             throws IOException, java.lang.InterruptedException;

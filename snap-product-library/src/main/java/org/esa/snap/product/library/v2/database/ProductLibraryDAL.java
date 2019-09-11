@@ -1,10 +1,18 @@
 package org.esa.snap.product.library.v2.database;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.io.WKTReader;
 import org.esa.snap.engine_utilities.util.FileIOUtils;
-import org.esa.snap.product.library.v2.activator.ProductLibraryActivator;
 import org.esa.snap.remote.products.repository.Attribute;
+import org.esa.snap.remote.products.repository.Polygon2D;
 import org.esa.snap.remote.products.repository.RepositoryProduct;
+import org.h2gis.utilities.SFSUtilities;
+import org.h2gis.utilities.SpatialResultSet;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,19 +38,21 @@ public class ProductLibraryDAL {
     }
 
     public static List<RepositoryProduct> loadProductList() throws SQLException, IOException {
-        try (Connection connection = ProductLibraryActivator.getConnection()) {
-            try (Statement statement = connection.createStatement()) {
-                System.out.println("read the product list");
-
+        List<RepositoryProduct> productList;
+        Map<Integer, LocalRepositoryProduct> map;
+        try (Connection connection = H2DatabaseAccessor.getConnection()) {
+            Connection wrappedConnection = SFSUtilities.wrapConnection(connection);
+            try (Statement statement = wrappedConnection.createStatement()) {
                 StringBuilder sql = new StringBuilder();
-                sql.append("SELECT p.id, p.name, p.type, p.local_path, p.entry_point, p.size_in_bytes, p.acquisition_date, p.last_modified_date")
+                sql.append("SELECT p.id, p.name, p.type, p.local_path, p.entry_point, p.size_in_bytes, p.geometry, p.acquisition_date, p.last_modified_date")
                         .append(" FROM ")
                         .append(DatabaseTableNames.PRODUCTS)
                         .append(" AS p ");
 
-                List<RepositoryProduct> productList = new ArrayList<>();
-                Map<Integer, LocalRepositoryProduct> map = new HashMap<>();
-                try (ResultSet resultSet = statement.executeQuery(sql.toString())) {
+                productList = new ArrayList<>();
+                map = new HashMap<>();
+
+                try (SpatialResultSet resultSet = statement.executeQuery(sql.toString()).unwrap(SpatialResultSet.class)) {
                     while (resultSet.next()) {
                         int id = resultSet.getInt("id");
                         String name = resultSet.getString("name");
@@ -50,7 +60,22 @@ public class ProductLibraryDAL {
                         String localPath = resultSet.getString("local_path");
                         Date acquisitionDate = resultSet.getDate("acquisition_date");
                         long sizeInBytes = resultSet.getLong("size_in_bytes");
-                        LocalRepositoryProduct localProduct = new LocalRepositoryProduct(name, type, acquisitionDate, localPath, sizeInBytes);
+                        Geometry geometry = resultSet.getGeometry("geometry");
+                        if (!(geometry instanceof Polygon)) {
+                            throw new IllegalStateException("The product geometry type '"+geometry.getClass().getName()+"' is not a '"+Polygon.class.getName()+"' type.");
+                        }
+                        Coordinate[] coordinates = ((Polygon)geometry).getExteriorRing().getCoordinates();
+                        Coordinate firstCoordinate = coordinates[0];
+                        Coordinate lastCoordinate = coordinates[coordinates.length-1];
+                        if (firstCoordinate.x != lastCoordinate.x || firstCoordinate.y != lastCoordinate.y) {
+                            throw new IllegalStateException("The first and last coordinates of the polygon do not match.");
+                        }
+                        Polygon2D polygon = new Polygon2D();
+                        for (Coordinate coordinate : coordinates) {
+                            polygon.append(coordinate.x, coordinate.y);
+                        }
+
+                        LocalRepositoryProduct localProduct = new LocalRepositoryProduct(name, type, acquisitionDate, localPath, sizeInBytes, polygon);
                         productList.add(localProduct);
                         map.put(id, localProduct);
                     }
@@ -82,10 +107,25 @@ public class ProductLibraryDAL {
                     List<Attribute> remoteAttributeList = remoteAttributesMap.get(productId);
                     localProduct.setAttributes(remoteAttributeList);
                 }
-
-                return productList;
             }
         }
+
+        Path databaseParentFolder = H2DatabaseAccessor.getDatabaseParentFolder();
+        Path quickLookImagesFolder = databaseParentFolder.resolve("quick-look-images");
+
+        Iterator<Map.Entry<Integer, LocalRepositoryProduct>> it = map.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<Integer, LocalRepositoryProduct> entry = it.next();
+            int productId = entry.getKey().intValue();
+            LocalRepositoryProduct localProduct = entry.getValue();
+            Path quickLookImageFile = quickLookImagesFolder.resolve(Integer.toString(productId) + ".png");
+            if (Files.exists(quickLookImageFile)) {
+                BufferedImage quickLookImage = ImageIO.read(quickLookImageFile.toFile());
+                localProduct.setQuickLookImage(quickLookImage);
+            }
+        }
+
+        return productList;
     }
 
     public static void saveProduct(RepositoryProduct productToSave, Path productFolderPath, String repositoryId, Path localRepositoryFolderPath)
@@ -93,17 +133,33 @@ public class ProductLibraryDAL {
 
         //TODO Jean check if the productFolderPath belongs to the localRepositoryFolderPath
 
-        try (Connection connection = ProductLibraryActivator.getConnection()) {
-            System.out.println("save the product");
+//        System.out.println("save the product");
 
-            int localRepositoryId = saveLocalRepositoryFolderPath(localRepositoryFolderPath, connection);
-
-            int productId = insertProduct(productToSave, productFolderPath, localRepositoryId, connection);
-
-            System.out.println(" saved product id = " + productId);
-
-            insertRemoteProductAttributes(productId, productToSave.getAttributes(), connection);
+        int productId;
+        try (Connection connection = H2DatabaseAccessor.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                int localRepositoryId = saveLocalRepositoryFolderPath(localRepositoryFolderPath, connection);
+                productId = insertProduct(productToSave, productFolderPath, localRepositoryId, connection);
+                insertRemoteProductAttributes(productId, productToSave.getAttributes(), connection);
+                // commit the statements
+                connection.commit();
+            } catch (Exception exception) {
+                // rollback the statements from the transaction
+                connection.rollback();
+                throw exception;
+            }
         }
+
+        BufferedImage quickLookImage = productToSave.getQuickLookImage();
+        if (quickLookImage != null) {
+            Path databaseParentFolder = H2DatabaseAccessor.getDatabaseParentFolder();
+            Path quickLookImagesFolder = databaseParentFolder.resolve("quick-look-images");
+            FileIOUtils.ensureExists(quickLookImagesFolder);
+            Path quickLookImageFile = quickLookImagesFolder.resolve(Integer.toString(productId) + ".png");
+            ImageIO.write(quickLookImage, "png", quickLookImageFile.toFile());
+        }
+//        System.out.println(" saved product id = " + productId);
     }
 
     private static int saveLocalRepositoryFolderPath(Path localRepositoryFolderPath, Connection connection) throws SQLException {
@@ -174,7 +230,7 @@ public class ProductLibraryDAL {
                 .append(", ")
                 .append("?")
                 .append(", '")
-                .append(productToSave.getGeometry())
+                .append(productToSave.getPolygon().toWKT())
                 .append("', ")
                 .append(productToSave.getDataFormatType().getValue())
                 .append(", ")
@@ -182,7 +238,7 @@ public class ProductLibraryDAL {
                 .append(", ")
                 .append(productToSave.getSensorType().getValue())
                 .append(")");
-        System.out.println("sql='"+sql.toString()+"'");
+//        System.out.println("sql='"+sql.toString()+"'");
 
         int productId;
         try (PreparedStatement statement = connection.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS)) {

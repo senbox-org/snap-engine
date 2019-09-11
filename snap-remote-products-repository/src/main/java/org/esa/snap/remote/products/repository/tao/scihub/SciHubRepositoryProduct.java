@@ -1,6 +1,7 @@
 package org.esa.snap.remote.products.repository.tao.scihub;
 
 import org.esa.snap.remote.products.repository.Attribute;
+import org.esa.snap.remote.products.repository.Polygon2D;
 import org.esa.snap.remote.products.repository.tao.AbstractTAORepositoryProduct;
 import ro.cs.tao.eodata.EOProduct;
 
@@ -9,8 +10,8 @@ import ro.cs.tao.eodata.EOProduct;
  */
 public class SciHubRepositoryProduct extends AbstractTAORepositoryProduct {
 
-    public SciHubRepositoryProduct(EOProduct product, String mission) {
-        super(product, mission);
+    public SciHubRepositoryProduct(EOProduct product, String mission, Polygon2D polygon) {
+        super(product, mission, polygon);
 
         int productTypeAttributeIndex = -1;
         int instrumentShortNameAttributeIndex = -1;

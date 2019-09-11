@@ -1,8 +1,10 @@
 package org.esa.snap.product.library.v2.database;
 
+import com.vividsolutions.jts.geom.Geometry;
 import org.esa.snap.remote.products.repository.Attribute;
 import org.esa.snap.remote.products.repository.DataFormatType;
 import org.esa.snap.remote.products.repository.PixelType;
+import org.esa.snap.remote.products.repository.Polygon2D;
 import org.esa.snap.remote.products.repository.RepositoryProduct;
 import org.esa.snap.remote.products.repository.SensorType;
 
@@ -20,16 +22,23 @@ public class LocalRepositoryProduct implements RepositoryProduct {
     private final String type;
     private final Date acquisitionDate;
     private final long sizeInBytes;
+    private final Polygon2D polygon;
 
     private List<Attribute> attributes;
     private BufferedImage quickLookImage;
 
-    public LocalRepositoryProduct(String name, String type, Date acquisitionDate, String path, long sizeInBytes) {
+    public LocalRepositoryProduct(String name, String type, Date acquisitionDate, String path, long sizeInBytes, Polygon2D polygon) {
         this.name = name;
         this.type = type;
         this.path = path;
         this.acquisitionDate = acquisitionDate;
         this.sizeInBytes = sizeInBytes;
+        this.polygon = polygon;
+    }
+
+    @Override
+    public Polygon2D getPolygon() {
+        return this.polygon;
     }
 
     @Override
@@ -84,11 +93,6 @@ public class LocalRepositoryProduct implements RepositoryProduct {
 
     @Override
     public SensorType getSensorType() {
-        return null;
-    }
-
-    @Override
-    public String getGeometry() {
         return null;
     }
 

@@ -1,5 +1,6 @@
 package org.esa.snap.remote.products.repository.tao.usgs;
 
+import org.esa.snap.remote.products.repository.Polygon2D;
 import org.esa.snap.remote.products.repository.tao.AbstractTAORepositoryProduct;
 import ro.cs.tao.eodata.EOProduct;
 
@@ -8,8 +9,8 @@ import ro.cs.tao.eodata.EOProduct;
  */
 public class USGSRepositoryProduct extends AbstractTAORepositoryProduct {
 
-    public USGSRepositoryProduct(EOProduct product, String mission) {
-        super(product, mission);
+    public USGSRepositoryProduct(EOProduct product, String mission, Polygon2D polygon) {
+        super(product, mission, polygon);
     }
 
     EOProduct getProduct() {

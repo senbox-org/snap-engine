@@ -9,6 +9,8 @@ import java.util.List;
  */
 public interface RepositoryProduct {
 
+    public Polygon2D getPolygon();
+
     public List<Attribute> getAttributes();
 
     public String getName();
@@ -32,8 +34,6 @@ public interface RepositoryProduct {
     public DataFormatType getDataFormatType();
 
     public SensorType getSensorType();
-
-    public String getGeometry();
 
     public String getEntryPoint();
 }

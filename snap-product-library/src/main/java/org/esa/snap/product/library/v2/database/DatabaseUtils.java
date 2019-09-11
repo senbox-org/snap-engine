@@ -1,4 +1,4 @@
-package org.esa.snap.product.library.v2.activator;
+package org.esa.snap.product.library.v2.database;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;

@@ -3,6 +3,7 @@ package org.esa.snap.remote.products.repository.tao;
 import org.esa.snap.remote.products.repository.Attribute;
 import org.esa.snap.remote.products.repository.DataFormatType;
 import org.esa.snap.remote.products.repository.PixelType;
+import org.esa.snap.remote.products.repository.Polygon2D;
 import org.esa.snap.remote.products.repository.RepositoryProduct;
 import org.esa.snap.remote.products.repository.SensorType;
 import ro.cs.tao.eodata.EOProduct;
@@ -22,13 +23,15 @@ public abstract class AbstractTAORepositoryProduct implements RepositoryProduct 
 
     private final String mission;
     private final String downloadURL;
+    private final Polygon2D polygon;
 
     private BufferedImage quickLookImage;
 
-    protected AbstractTAORepositoryProduct(EOProduct product, String mission) {
+    protected AbstractTAORepositoryProduct(EOProduct product, String mission, Polygon2D polygon) {
         this.product = product;
         this.mission = mission;
         this.downloadURL = product.getLocation();
+        this.polygon = polygon;
 
         List<ro.cs.tao.eodata.Attribute> remoteAttributes = product.getAttributes();
         this.attributes = new ArrayList<>(remoteAttributes.size());
@@ -36,6 +39,11 @@ public abstract class AbstractTAORepositoryProduct implements RepositoryProduct 
             ro.cs.tao.eodata.Attribute remoteAttribute = remoteAttributes.get(i);
             this.attributes.add(new Attribute(remoteAttribute.getName(), remoteAttribute.getValue()));
         }
+    }
+
+    @Override
+    public Polygon2D getPolygon() {
+        return polygon;
     }
 
     @Override
@@ -96,11 +104,6 @@ public abstract class AbstractTAORepositoryProduct implements RepositoryProduct 
     @Override
     public SensorType getSensorType() {
         return convertToSensorType(this.product.getSensorType());
-    }
-
-    @Override
-    public String getGeometry() {
-        return this.product.getGeometry();
     }
 
     @Override

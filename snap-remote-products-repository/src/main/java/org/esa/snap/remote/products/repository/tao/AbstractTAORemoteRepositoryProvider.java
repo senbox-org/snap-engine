@@ -4,14 +4,17 @@ import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.auth.Credentials;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.esa.snap.remote.products.repository.DataFormatType;
-import org.esa.snap.remote.products.repository.PixelType;
-import org.esa.snap.remote.products.repository.SensorType;
-import org.esa.snap.remote.products.repository.listener.ProductListDownloaderListener;
-import org.esa.snap.remote.products.repository.RemoteProductsRepositoryProvider;
+import org.esa.snap.remote.products.repository.Polygon2D;
 import org.esa.snap.remote.products.repository.QueryFilter;
+import org.esa.snap.remote.products.repository.RemoteProductsRepositoryProvider;
 import org.esa.snap.remote.products.repository.RepositoryProduct;
 import org.esa.snap.remote.products.repository.ThreadStatus;
+import org.esa.snap.remote.products.repository.listener.ProductListDownloaderListener;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKTReader;
 import ro.cs.tao.datasource.DataQuery;
 import ro.cs.tao.datasource.DataSource;
 import ro.cs.tao.datasource.param.CommonParameterNames;
@@ -22,13 +25,13 @@ import ro.cs.tao.datasource.remote.ProductHelper;
 import ro.cs.tao.datasource.util.HttpMethod;
 import ro.cs.tao.datasource.util.NetUtils;
 import ro.cs.tao.eodata.EOProduct;
-import ro.cs.tao.eodata.Polygon2D;
 import ro.cs.tao.spi.ServiceRegistry;
 import ro.cs.tao.spi.ServiceRegistryManager;
 
 import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageInputStream;
 import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,7 +50,7 @@ public abstract class AbstractTAORemoteRepositoryProvider<T extends DataSource> 
     protected AbstractTAORemoteRepositoryProvider() {
     }
 
-    protected abstract AbstractTAORepositoryProduct buildRepositoryProduct(EOProduct product, String mission);
+    protected abstract AbstractTAORepositoryProduct buildRepositoryProduct(EOProduct product, String mission, Polygon2D polygon);
 
     protected abstract Class<T> getDataSourceClass();
 
@@ -141,7 +144,7 @@ public abstract class AbstractTAORemoteRepositoryProvider<T extends DataSource> 
     @Override
     public List<RepositoryProduct> downloadProductList(Credentials credentials, String mission, Map<String, Object> parameterValues,
                                                        ProductListDownloaderListener downloaderListener, ThreadStatus thread)
-                                                       throws InterruptedException {
+                                                       throws Exception {
 
         DataQuery query = buildDataQuery(credentials.getUserPrincipal().getName(), credentials.getPassword(), mission, parameterValues);
         query.setPageNumber(0);
@@ -163,6 +166,7 @@ public abstract class AbstractTAORemoteRepositoryProvider<T extends DataSource> 
             query.setPageSize(pageSize);
 
             totalResults = new ArrayList<RepositoryProduct>();
+            WKTReader wktReader = new WKTReader();
             for (int pageNumber=1; pageNumber<=totalPageNumber && totalResults.size() < totalProductCount; pageNumber++) {
                 query.setPageNumber(pageNumber);
 
@@ -175,9 +179,23 @@ public abstract class AbstractTAORemoteRepositoryProvider<T extends DataSource> 
                 List<RepositoryProduct> downloadedPageProducts = new ArrayList<>(pageResults.size());
                 for (int i=0; i<pageResults.size(); i++) {
                     EOProduct product = pageResults.get(i);
+                    Geometry productGeometry = wktReader.read(product.getGeometry());
+                    if (!(productGeometry instanceof Polygon)) {
+                        throw new IllegalStateException("The product geometry type '"+productGeometry.getClass().getName()+"' is not a '"+Polygon.class.getName()+"' type.");
+                    }
+                    Coordinate[] coordinates = ((Polygon)productGeometry).getExteriorRing().getCoordinates();
+                    Coordinate firstCoordinate = coordinates[0];
+                    Coordinate lastCoordinate = coordinates[coordinates.length-1];
+                    if (firstCoordinate.getX() != lastCoordinate.getX() || firstCoordinate.getY() != lastCoordinate.getY()) {
+                        throw new IllegalStateException("The first and last coordinates of the polygon do not match.");
+                    }
+                    Polygon2D polygon = new Polygon2D();
+                    for (Coordinate coordinate : coordinates) {
+                        polygon.append(coordinate.getX(), coordinate.getY());
+                    }
                     ProductHelper productHelper = buildProductHelper(product.getName());
                     product.setEntryPoint(productHelper.getMetadataFileName());
-                    AbstractTAORepositoryProduct repositoryProduct = buildRepositoryProduct(product, mission);
+                    AbstractTAORepositoryProduct repositoryProduct = buildRepositoryProduct(product, mission, polygon);
                     downloadedPageProducts.add(repositoryProduct);
                     totalResults.add(repositoryProduct);
                 }
@@ -208,13 +226,14 @@ public abstract class AbstractTAORemoteRepositoryProvider<T extends DataSource> 
             Map.Entry<String, Object> entry = it.next();
             String parameterName = entry.getKey();
             if (parameterName.equals(CommonParameterNames.FOOTPRINT)) {
-                Rectangle.Double selectionArea = (Rectangle.Double) entry.getValue();
-                Polygon2D polygon2D = new Polygon2D();
-                polygon2D.append(selectionArea.x, selectionArea.y); // the top left corner
-                polygon2D.append(selectionArea.x + selectionArea.width, selectionArea.y); // the top right corner
-                polygon2D.append(selectionArea.x + selectionArea.width, selectionArea.y + selectionArea.height); // the bottom right corner
-                polygon2D.append(selectionArea.x, selectionArea.y + selectionArea.height); // the bottom left corner
-                polygon2D.append(selectionArea.x, selectionArea.y); // the top left corner
+                Rectangle2D selectionArea = (Rectangle2D) entry.getValue();
+
+                ro.cs.tao.eodata.Polygon2D polygon2D = new ro.cs.tao.eodata.Polygon2D();
+                polygon2D.append(selectionArea.getX(), selectionArea.getY()); // the top left corner
+                polygon2D.append(selectionArea.getX() + selectionArea.getWidth(), selectionArea.getY()); // the top right corner
+                polygon2D.append(selectionArea.getX() + selectionArea.getWidth(), selectionArea.getY() + selectionArea.getHeight()); // the bottom right corner
+                polygon2D.append(selectionArea.getX(), selectionArea.getY() + selectionArea.getHeight()); // the bottom left corner
+                polygon2D.append(selectionArea.getX(), selectionArea.getY()); // the top left corner
                 query.addParameter(parameterName, polygon2D);
             } else if (!parameterName.equals(CommonParameterNames.START_DATE) && !parameterName.equals(CommonParameterNames.END_DATE)) {
                 query.addParameter(parameterName, entry.getValue());
