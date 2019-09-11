@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.List;
+import org.esa.snap.core.util.io.FileUtils;
 
 /**
  * AbstractRemoteWalker for VFSWalker
@@ -42,6 +44,22 @@ public abstract class AbstractRemoteWalker implements VFSWalker {
         } finally {
             connection.disconnect();
         }
+
+        // the path may be a valid directory but not accesible, but its content be right!
+        // e.g. Sentinel S1 bucket at AWS (https://sentinel-s1-l1c.s3.amazonaws.com)
+        final String extension = FileUtils.getExtension(path.getPath());
+        if (extension == null || extension.length() == 0) {
+            try {
+                List<BasicFileAttributes> attribList = this.walk(path);
+                if (attribList.size() > 0) {
+                    return VFSFileAttributes.newDir(path.toString());
+                }
+            }
+            catch (Exception ignored) {
+                //leave default
+            }
+        }
+
         // the address does not represent a directory
         return readFileAttributes(address, path.toString(), fileSystemRoot);
     }

@@ -16,6 +16,7 @@
 package org.esa.snap.core.dataio.rgb;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.sun.media.jai.codec.SeekableStream;
 import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
@@ -38,6 +39,8 @@ import java.awt.image.ColorModel;
 import java.awt.image.SampleModel;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import javax.media.jai.operator.StreamDescriptor;
 
 /**
  * @author Norman Fomferra
@@ -69,7 +72,16 @@ public class ImageProductReader extends AbstractProductReader {
     @Override
     protected Product readProductNodesImpl() throws IOException {
         File file = ImageProductReaderPlugIn.getFile(getInput());
-        sourceImage = FileLoadDescriptor.create(file.getPath(), null, true, null);
+        File temp = new File(file.getAbsolutePath());
+        
+        // Does this image come from a virtual file?
+        if (!temp.exists()) {
+            SeekableStream inputStream = SeekableStream.wrapInputStream(Files.newInputStream(file.toPath()), true);
+            sourceImage = StreamDescriptor.create(inputStream, null, null);
+        }
+        else {
+            sourceImage = FileLoadDescriptor.create(file.getPath(), null, true, null);
+        }
         ColorModel colorModel = sourceImage.getColorModel();
         ColorSpace colorSpace = colorModel.getColorSpace();
 

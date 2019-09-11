@@ -235,7 +235,7 @@ public abstract class VirtualDir {
             if (path.endsWith(".gz")) {
                 return new GZIPInputStream(new BufferedInputStream(new FileInputStream(getFile(path))));
             }
-            return new BufferedInputStream(new FileInputStream(getFile(path)));
+            return new BufferedInputStream(Files.newInputStream(getFile(path).toPath()));
         }
 
         @Override
@@ -255,7 +255,7 @@ public abstract class VirtualDir {
 
         @Override
         public boolean exists(String path) {
-            File child = new File(dir, path);
+            File child = dir.toPath().resolve(path).toFile();
             return child.exists();
         }
 
