@@ -509,6 +509,9 @@ public class OperatorContext {
         initializeOperator();
     }
 
+    public boolean isExecuted() {
+        return executed;
+    }
 
     public PropertySet getParameterSet() {
         if (parameterSet == null) {
@@ -761,7 +764,7 @@ public class OperatorContext {
                         targetImageMap.put(targetBand, new OperatorImage(targetBand, this) {
                             @Override
                             protected void computeRect(PlanarImage[] ignored, WritableRaster tile, Rectangle destRect) {
-                                executeOperator(ProgressMonitor.NULL);
+                                GPF.getDefaultInstance().executeOperator(getOperator());
                                 Band targetBand = getTargetBand();
                                 tile.setRect(targetBand.getGeophysicalImage().getData(destRect));
                                 TileImpl targetTile = new TileImpl(targetBand, tile, destRect, false);

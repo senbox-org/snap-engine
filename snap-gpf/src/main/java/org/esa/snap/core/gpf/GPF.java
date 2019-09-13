@@ -341,7 +341,9 @@ public class GPF {
      * @param operator The operator on which the execute method shall be called
      */
     public void executeOperator(Operator operator) {
-        operatorExecutor.execute(operator);
+        if (!operator.context.isExecuted()) {
+            operatorExecutor.execute(operator);
+        }
     }
 
     /**

@@ -21,6 +21,8 @@ import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.Frame;
 import java.awt.Window;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.concurrent.CountDownLatch;
 
 
@@ -31,13 +33,19 @@ public abstract class ProgressMonitorSwingWorker<T, V> extends SwingWorker<T, V>
 
     private final CountDownLatch unBlock;
     private final DialogProgressMonitor dialogPM;
-    private boolean blocking;
-    private Window blockingWindow;
+    private final Window blockingWindow;
 
 
     protected ProgressMonitorSwingWorker(Component parentComponent, String title) {
         unBlock = new CountDownLatch(1);
         dialogPM = new DialogProgressMonitor(parentComponent, title, Dialog.ModalityType.MODELESS);
+        blockingWindow = createBlockingWindow();
+        blockingWindow.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowOpened(WindowEvent e) {
+                unBlock.countDown();
+            }
+        });
     }
 
     /**
@@ -55,10 +63,8 @@ public abstract class ProgressMonitorSwingWorker<T, V> extends SwingWorker<T, V>
             value = doInBackground(dialogPM);
         } finally {
             dialogPM.done();
-            if (blocking) {
-                unBlock.await();
-                unblock();
-            }
+            unBlock.await();
+            unblock();
         }
         return value;
     }
@@ -81,27 +87,18 @@ public abstract class ProgressMonitorSwingWorker<T, V> extends SwingWorker<T, V>
      * block the <i>Event Dispatch Thread</i>.
      */
     public final void executeWithBlocking() {
-        this.blocking = true;
         dialogPM.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
         execute();
         block();
-        this.blocking = false;
     }
 
 
     private void block() {
-        if (blockingWindow == null) {
-            blockingWindow = createBlockingWindow();
-            unBlock.countDown();
-            blockingWindow.setVisible(true);
-        }
+        blockingWindow.setVisible(true);
     }
 
     private void unblock() {
-        if (blockingWindow != null) {
-            blockingWindow.dispose();
-            blockingWindow = null;
-        }
+        blockingWindow.dispose();
     }
 
     private static Window createBlockingWindow() {

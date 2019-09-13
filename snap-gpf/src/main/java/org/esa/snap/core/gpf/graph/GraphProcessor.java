@@ -136,9 +136,13 @@ public class GraphProcessor {
     private void executeNodeSources(NodeSource[] sources, GraphContext graphContext, ProgressMonitor pm) {
         for (NodeSource source : sources) {
             Node node = source.getSourceNode();
-            executeNodeSources(node.getSources(), graphContext, pm);
-            NodeContext nodeContext = graphContext.getNodeContext(node);
-            nodeContext.getOperator().execute(pm);
+            if (node != null) {
+                executeNodeSources(node.getSources(), graphContext, pm);
+                NodeContext nodeContext = graphContext.getNodeContext(node);
+                if (nodeContext != null) {
+                    nodeContext.getOperator().execute(pm);
+                }
+            }
         }
     }
 
