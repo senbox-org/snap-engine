@@ -604,7 +604,7 @@ public class Product extends ProductNode {
             this.writer.removeProductWriterListener(productWriterListener);
         }
         this.writer = writer;
-        if (productWriterListener != null) {
+        if (writer != null && productWriterListener != null) {
             writer.addProductWriterListener(productWriterListener);
         }
     }
