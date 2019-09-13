@@ -509,6 +509,9 @@ public class OperatorContext {
         initializeOperator();
     }
 
+    public boolean isExecuted() {
+        return executed;
+    }
 
     public PropertySet getParameterSet() {
         if (parameterSet == null) {
