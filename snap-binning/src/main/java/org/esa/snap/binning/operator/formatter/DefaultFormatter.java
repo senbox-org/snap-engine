@@ -55,28 +55,8 @@ class DefaultFormatter implements Formatter {
         final String outputType = formatterConfig.getOutputType();
         final String outputFormat = FormatterFactory.getOutputFormat(formatterConfig, outputFile);
 
-        final Rectangle outputRegion;
-        if (planetaryGrid instanceof CrsGrid) {
-            if (roiGeometry == null) {
-                outputRegion = new Rectangle(planetaryGrid.getNumCols(0), planetaryGrid.getNumRows());
-            } else {
-                final CrsGrid crsGrid = (CrsGrid) planetaryGrid;
-                if (roiGeometry instanceof LinearRing) {
-                    final LinearRing linearRing = (LinearRing) roiGeometry;
-                    roiGeometry = new GeometryFactory().createPolygon(linearRing);
-                }
-                final Geometry imageGeometry = crsGrid.getImageGeometry(roiGeometry);
-                if (imageGeometry == null) {
-                    outputRegion = new Rectangle(planetaryGrid.getNumCols(0), planetaryGrid.getNumRows());
-                } else {
-                    outputRegion = crsGrid.getBounds(imageGeometry);
-                }
-            }
-        } else {
-            outputRegion = Reprojector.computeRasterSubRegion(planetaryGrid, roiGeometry);
-        }
-
-        ProductCustomizer productCustomizer = formatterConfig.getProductCustomizer();
+        final Rectangle outputRegion = getOutputRegion(planetaryGrid, roiGeometry);
+        final ProductCustomizer productCustomizer = formatterConfig.getProductCustomizer();
 
         final TemporalBinRenderer temporalBinRenderer;
         if (outputType.equalsIgnoreCase("Product")) {
@@ -107,5 +87,29 @@ class DefaultFormatter implements Formatter {
         }
 
         Reprojector.reproject(planetaryGrid, temporalBinSource, temporalBinRenderer);
+    }
+
+    static Rectangle getOutputRegion(PlanetaryGrid planetaryGrid, Geometry roiGeometry) {
+        final Rectangle outputRegion;
+        if (planetaryGrid instanceof CrsGrid) {
+            if (roiGeometry == null) {
+                outputRegion = new Rectangle(planetaryGrid.getNumCols(0), planetaryGrid.getNumRows());
+            } else {
+                final CrsGrid crsGrid = (CrsGrid) planetaryGrid;
+                if (roiGeometry instanceof LinearRing) {
+                    final LinearRing linearRing = (LinearRing) roiGeometry;
+                    roiGeometry = new GeometryFactory().createPolygon(linearRing);
+                }
+                final Geometry imageGeometry = crsGrid.getImageGeometry(roiGeometry);
+                if (imageGeometry == null) {
+                    outputRegion = new Rectangle(planetaryGrid.getNumCols(0), planetaryGrid.getNumRows());
+                } else {
+                    outputRegion = crsGrid.getBounds(imageGeometry);
+                }
+            }
+        } else {
+            outputRegion = Reprojector.computeRasterSubRegion(planetaryGrid, roiGeometry);
+        }
+        return outputRegion;
     }
 }
