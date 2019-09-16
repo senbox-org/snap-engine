@@ -17,7 +17,7 @@ import static java.lang.Float.NaN;
 
 public class AggregatorAverageOutlierAware extends AbstractAggregator {
 
-    private final String vectorName;
+    private String vectorName;
     private final int varIndex;
     private final double deviationFactor;
 
@@ -63,6 +63,8 @@ public class AggregatorAverageOutlierAware extends AbstractAggregator {
         vector.set(0, 0.0f);
         vector.set(1, 0.0f);
         vector.set(2, 0.0f);
+
+        vectorName = ctx.ensureUnique(vectorName);
         ctx.put(vectorName, new GrowableVector(256));   // @todo 3 tb/tb is this a good default? 2018-03-09
     }
 

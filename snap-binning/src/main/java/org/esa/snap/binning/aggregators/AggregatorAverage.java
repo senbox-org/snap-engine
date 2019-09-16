@@ -16,16 +16,7 @@
 
 package org.esa.snap.binning.aggregators;
 
-import org.esa.snap.binning.AbstractAggregator;
-import org.esa.snap.binning.Aggregator;
-import org.esa.snap.binning.AggregatorConfig;
-import org.esa.snap.binning.AggregatorDescriptor;
-import org.esa.snap.binning.BinContext;
-import org.esa.snap.binning.Observation;
-import org.esa.snap.binning.VariableContext;
-import org.esa.snap.binning.Vector;
-import org.esa.snap.binning.WeightFn;
-import org.esa.snap.binning.WritableVector;
+import org.esa.snap.binning.*;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.util.StringUtils;
 
@@ -39,8 +30,8 @@ public final class AggregatorAverage extends AbstractAggregator {
     private final int varIndex;
     private final WeightFn weightFn;
     private final boolean outputCounts;
-    private final String icName;
     private final boolean outputSums;
+    private String icName;
 
     public AggregatorAverage(VariableContext varCtx, String varName, double weightCoeff) {
         this(varCtx, varName, varName, weightCoeff, false, false);
@@ -49,11 +40,11 @@ public final class AggregatorAverage extends AbstractAggregator {
     public AggregatorAverage(VariableContext varCtx, String varName, String targetName, double weightCoeff, boolean outputCounts,
                              boolean outputSums) {
         super(Descriptor.NAME,
-              createFeatureNames(varName, "sum", "sum_sq", outputCounts ? "counts" : null),
-              createFeatureNames(varName, "sum", "sum_sq", "weights", outputCounts ? "counts" : null),
-              outputSums ?
-              createFeatureNames(targetName, "sum", "sum_sq", "weights", outputCounts ? "counts" : null) :
-              createFeatureNames(targetName, "mean", "sigma", outputCounts ? "counts" : null)
+                createFeatureNames(varName, "sum", "sum_sq", outputCounts ? "counts" : null),
+                createFeatureNames(varName, "sum", "sum_sq", "weights", outputCounts ? "counts" : null),
+                outputSums ?
+                        createFeatureNames(targetName, "sum", "sum_sq", "weights", outputCounts ? "counts" : null) :
+                        createFeatureNames(targetName, "mean", "sigma", outputCounts ? "counts" : null)
         );
         if (varCtx == null) {
             throw new NullPointerException("varCtx");
@@ -191,6 +182,7 @@ public final class AggregatorAverage extends AbstractAggregator {
     }
 
     private void initNumInvalids(BinContext ctx) {
+        icName = ctx.ensureUnique(icName);
         ctx.put(icName, new int[1]);
     }
 
@@ -205,12 +197,12 @@ public final class AggregatorAverage extends AbstractAggregator {
     @Override
     public String toString() {
         return "AggregatorAverage{" +
-               ", varIndex=" + varIndex +
-               ", weightFn=" + weightFn +
-               ", spatialFeatureNames=" + Arrays.toString(getSpatialFeatureNames()) +
-               ", temporalFeatureNames=" + Arrays.toString(getTemporalFeatureNames()) +
-               ", outputFeatureNames=" + Arrays.toString(getOutputFeatureNames()) +
-               '}';
+                ", varIndex=" + varIndex +
+                ", weightFn=" + weightFn +
+                ", spatialFeatureNames=" + Arrays.toString(getSpatialFeatureNames()) +
+                ", temporalFeatureNames=" + Arrays.toString(getTemporalFeatureNames()) +
+                ", outputFeatureNames=" + Arrays.toString(getOutputFeatureNames()) +
+                '}';
     }
 
     public static class Config extends AggregatorConfig {
@@ -219,15 +211,15 @@ public final class AggregatorAverage extends AbstractAggregator {
         String varName;
         @Parameter(label = "Target band name prefix (optional)", description = "The name prefix for the resulting bands. If empty, the source band name is used.")
         String targetName;
-        @Parameter(label = "Weight coefficient", defaultValue = "0.0",
-                   description = "The number of spatial observations to the power of this value \n" +
-                                 "will define the value for weighting the sums. Zero means observation count weighting is disabled.")
+        @Parameter(label = "Weight coefficient", defaultValue = "1.0",
+                description = "The number of spatial observations to the power of this value \n" +
+                        "will define the value for weighting the sums. Zero means observation count weighting is disabled.")
         Double weightCoeff;
         @Parameter(defaultValue = "false",
-                   description = "If true, the result will include the count of all valid values.")
+                description = "If true, the result will include the count of all valid values.")
         Boolean outputCounts;
         @Parameter(defaultValue = "false",
-                   description = "If true, the result will include the sum of all values.")
+                description = "If true, the result will include the sum of all values.")
         Boolean outputSums;
 
         public Config() {
@@ -285,8 +277,8 @@ public final class AggregatorAverage extends AbstractAggregator {
             boolean outputCounts = config.outputCounts != null ? config.outputCounts : false;
             boolean outputSums = config.outputSums != null ? config.outputSums : false;
             return outputSums ?
-                   createFeatureNames(targetName, "sum", "sum_sq", "weights", outputCounts ? "counts" : null) :
-                   createFeatureNames(targetName, "mean", "sigma", outputCounts ? "counts" : null);
+                    createFeatureNames(targetName, "sum", "sum_sq", "weights", outputCounts ? "counts" : null) :
+                    createFeatureNames(targetName, "mean", "sigma", outputCounts ? "counts" : null);
         }
     }
 }
