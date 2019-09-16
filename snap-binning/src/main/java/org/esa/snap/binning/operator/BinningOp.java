@@ -31,6 +31,9 @@ import org.esa.snap.binning.TemporalBin;
 import org.esa.snap.binning.TemporalBinSource;
 import org.esa.snap.binning.TemporalBinner;
 import org.esa.snap.binning.cellprocessor.CellProcessorChain;
+import org.esa.snap.binning.operator.formatter.Formatter;
+import org.esa.snap.binning.operator.formatter.FormatterConfig;
+import org.esa.snap.binning.operator.formatter.FormatterFactory;
 import org.esa.snap.binning.operator.metadata.GlobalMetadata;
 import org.esa.snap.binning.operator.metadata.MetadataAggregator;
 import org.esa.snap.binning.operator.metadata.MetadataAggregatorFactory;
@@ -812,7 +815,9 @@ public class BinningOp extends Operator {
         if (outputTargetProduct) {
             getLogger().info(String.format("Writing mapped product '%s'...", formatterConfig.getOutputFile()));
             final MetadataElement processingGraphMetadata = getProcessingGraphMetadata();
-            Formatter.format(binningContext.getPlanetaryGrid(),
+
+            final Formatter defaultFormatter = FormatterFactory.get("default");
+            defaultFormatter.format(binningContext.getPlanetaryGrid(),
                              getTemporalBinSource(temporalBins),
                              binningContext.getBinManager().getResultFeatureNames(),
                              formatterConfig,
@@ -827,7 +832,7 @@ public class BinningOp extends Operator {
 
             if (outputType.equalsIgnoreCase("Product")) {
                 final File writtenProductFile = new File(outputFile);
-                String format = Formatter.getOutputFormat(formatterConfig, writtenProductFile);
+                String format = FormatterFactory.getOutputFormat(formatterConfig, writtenProductFile);
                 writtenProduct = ProductIO.readProduct(writtenProductFile, format);
                 this.targetProduct = copyProduct(writtenProduct);
             } else {

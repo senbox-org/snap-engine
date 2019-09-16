@@ -15,7 +15,7 @@
  */
 
 
-package org.esa.snap.binning.operator;
+package org.esa.snap.binning.operator.formatter;
 
 import com.bc.ceres.binding.BindingException;
 import com.bc.ceres.binding.ConversionException;
@@ -23,11 +23,13 @@ import org.esa.snap.binning.ProductCustomizer;
 import org.esa.snap.binning.ProductCustomizerConfig;
 import org.esa.snap.binning.ProductCustomizerDescriptor;
 import org.esa.snap.binning.TypedDescriptorsRegistry;
+import org.esa.snap.binning.operator.BinningOp;
+import org.esa.snap.binning.operator.ProductCustomizerConfigDomConverter;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.ParameterBlockConverter;
 
 /**
- * The configuration for the {@link Formatter}.
+ * The configuration for the {@link DefaultFormatter}.
  *
  * @author Norman Fomferra
  */

@@ -14,9 +14,10 @@
  * with this program; if not, see http://www.gnu.org/licenses/
  */
 
-package org.esa.snap.binning.operator;
+package org.esa.snap.binning.operator.formatter;
 
 import com.bc.ceres.binding.BindingException;
+import org.esa.snap.binning.operator.formatter.FormatterConfig;
 import org.esa.snap.core.util.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,7 +46,6 @@ public class FormatterConfigTest {
     @Test
     public void testXmlGeneration() throws BindingException {
         final String xml = config.toXml();
-        //System.out.println("xml = \n" + xml);
         final FormatterConfig configCopy = FormatterConfig.fromXml(xml);
 
         assertEquals(config.getOutputFile(), configCopy.getOutputFile());
@@ -55,11 +55,8 @@ public class FormatterConfigTest {
     }
 
     private FormatterConfig loadConfig(String configPath) throws IOException, BindingException {
-        final InputStreamReader reader = new InputStreamReader(getClass().getResourceAsStream(configPath));
-        try {
+        try (InputStreamReader reader = new InputStreamReader(getClass().getResourceAsStream(configPath))) {
             return FormatterConfig.fromXml(FileUtils.readText(reader));
-        } finally {
-            reader.close();
         }
     }
 }
