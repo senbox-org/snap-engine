@@ -28,6 +28,9 @@ import org.esa.snap.binning.operator.ProductCustomizerConfigDomConverter;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.ParameterBlockConverter;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * The configuration for the {@link DefaultFormatter}.
  *
@@ -46,6 +49,9 @@ public class FormatterConfig {
     private BinningOp.BandConfiguration[] bandConfigurations;
     @Parameter(alias = "productCustomizer", domConverter = ProductCustomizerConfigDomConverter.class)
     private ProductCustomizerConfig productCustomizerConfig;
+//    @Parameter
+    // @todo 1 ask Marco how to integrate HashMaps into XML tb 2019-09-17
+//    private Map<String, String> parameterMap;
 
     private transient ProductCustomizer productCustomizer;
 
@@ -143,4 +149,12 @@ public class FormatterConfig {
         }
         return productCustomizer;
     }
+
+//    public Map<String, String> getParameterMap() {
+//        return parameterMap;
+//    }
+//
+//    public void setParameterMap(Map<String, String> parameterMap) {
+//        this.parameterMap = parameterMap;
+//    }
 }

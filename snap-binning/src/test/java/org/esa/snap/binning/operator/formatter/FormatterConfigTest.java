@@ -17,34 +17,40 @@
 package org.esa.snap.binning.operator.formatter;
 
 import com.bc.ceres.binding.BindingException;
-import org.esa.snap.binning.operator.formatter.FormatterConfig;
 import org.esa.snap.core.util.io.FileUtils;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
 public class FormatterConfigTest {
 
-    private FormatterConfig config;
-
-    @Before
-    public void initOutputterConfig() throws IOException, BindingException {
-        config = loadConfig("FormatterConfigTest.xml");
-    }
-
     @Test
-    public void testOutputterConfig() {
+    public void testLoadOutputterConfig() throws IOException, BindingException {
+        final FormatterConfig config = loadConfig("FormatterConfigTest.xml");
         assertEquals("RGB", config.getOutputType());
         assertEquals("PNG", config.getOutputFormat());
         assertEquals("level-3-rgb.png", config.getOutputFile());
+//
+//        final Map<String, String> parameter = config.getParameterMap();
+//        assertNotNull(parameter);
+//        assertEquals(0, parameter.size());
     }
+    // @todo 1 reactivate this tb 2019-09-17
+//    @Test
+//    public void testLoadOutputterConfig_withParameter() throws IOException, BindingException {
+//        final FormatterConfig config = loadConfig("FormatterConfigWithParams.xml");
+//        assertEquals("Product", config.getOutputType());
+//        assertEquals("NetCDF-4", config.getOutputFormat());
+//        assertEquals("level-3-rgb.nc", config.getOutputFile());
+//    }
 
     @Test
-    public void testXmlGeneration() throws BindingException {
+    public void testXmlGeneration() throws BindingException, IOException {
+        final FormatterConfig config = loadConfig("FormatterConfigTest.xml");
         final String xml = config.toXml();
         final FormatterConfig configCopy = FormatterConfig.fromXml(xml);
 

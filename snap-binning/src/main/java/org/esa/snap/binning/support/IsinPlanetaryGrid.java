@@ -84,7 +84,8 @@ public class IsinPlanetaryGrid implements PlanetaryGrid {
         throw new RuntimeException("not implemented");
     }
 
-    static long toBinIndex(IsinPoint point) {
+    // this method is used in Calvalus - please keep it public tb 2019-09-17
+    public static long toBinIndex(IsinPoint point) {
         final short x = (short) (point.getX() + 0.5);
         final short y = (short) (point.getY() + 0.5);
         final int tile_x = point.getTile_col();
