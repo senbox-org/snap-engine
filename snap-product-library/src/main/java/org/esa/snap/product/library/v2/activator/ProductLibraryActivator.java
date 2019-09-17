@@ -28,7 +28,7 @@ public class ProductLibraryActivator implements Activator {
             ServiceRegistry<RemoteProductsRepositoryProvider> serviceRegistry = serviceRegistryManager.getServiceRegistry(RemoteProductsRepositoryProvider.class);
             ServiceLoader.loadServices(serviceRegistry);
 
-            // load Derby driver
+            // load H2 driver
             Class.forName("org.h2.Driver");
 
             H2DatabaseAccessor.upgradeDatabase();

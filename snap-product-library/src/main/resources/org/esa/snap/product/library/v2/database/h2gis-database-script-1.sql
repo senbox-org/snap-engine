@@ -27,10 +27,35 @@ CREATE TABLE local_repositories(
 )
 ;
 
+CREATE TABLE remote_repositories(
+	id SMALLINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+	name VARCHAR(256) UNIQUE NOT NULL
+)
+;
+
+CREATE TABLE remote_missions(
+	id SMALLINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+	name VARCHAR(256) NOT NULL,
+	remote_repository_id SMALLINT NOT NULL,
+	UNIQUE (remote_repository_id, name),
+    FOREIGN KEY (remote_repository_id) REFERENCES remote_repositories(id)
+)
+;
+
+CREATE TABLE remote_attributes(
+	id SMALLINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+	name VARCHAR(256) NOT NULL,
+	remote_mission_id SMALLINT NOT NULL,
+	UNIQUE (remote_mission_id, name),
+    FOREIGN KEY (remote_mission_id) REFERENCES remote_missions(id)
+)
+;
+
 CREATE TABLE products(
 	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
 	name VARCHAR(256) NOT NULL,
 	type VARCHAR(256) NOT NULL,
+	remote_mission_id SMALLINT,
 	local_repository_id SMALLINT NOT NULL,
 	local_path VARCHAR(1024) NOT NULL,
 	entry_point VARCHAR(256),
@@ -41,6 +66,7 @@ CREATE TABLE products(
 	data_format_type_id SMALLINT,
 	pixel_type_id SMALLINT,
 	sensor_type_id SMALLINT,
+    FOREIGN KEY (remote_mission_id) REFERENCES remote_missions(id),
     FOREIGN KEY (local_repository_id) REFERENCES local_repositories(id),
     FOREIGN KEY (data_format_type_id) REFERENCES data_format_types(id),
     FOREIGN KEY (pixel_type_id) REFERENCES pixel_types(id),

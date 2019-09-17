@@ -9,6 +9,7 @@ import org.esa.snap.remote.products.repository.RepositoryProduct;
 import org.esa.snap.remote.products.repository.SensorType;
 
 import java.awt.image.BufferedImage;
+import java.nio.file.Path;
 import java.util.Date;
 import java.util.List;
 
@@ -18,16 +19,17 @@ import java.util.List;
 public class LocalRepositoryProduct implements RepositoryProduct {
 
     private final String name;
-    private final String path;
+    private final Path path;
     private final String type;
     private final Date acquisitionDate;
     private final long sizeInBytes;
     private final Polygon2D polygon;
 
+    private String mission;
     private List<Attribute> attributes;
     private BufferedImage quickLookImage;
 
-    public LocalRepositoryProduct(String name, String type, Date acquisitionDate, String path, long sizeInBytes, Polygon2D polygon) {
+    public LocalRepositoryProduct(String name, String type, Date acquisitionDate, Path path, long sizeInBytes, Polygon2D polygon) {
         this.name = name;
         this.type = type;
         this.path = path;
@@ -63,7 +65,7 @@ public class LocalRepositoryProduct implements RepositoryProduct {
 
     @Override
     public String getDownloadURL() {
-        return this.path;
+        return this.path.toString();
     }
 
     @Override
@@ -73,7 +75,7 @@ public class LocalRepositoryProduct implements RepositoryProduct {
 
     @Override
     public String getMission() {
-        return this.type;
+        return this.mission;
     }
 
     @Override
@@ -108,5 +110,9 @@ public class LocalRepositoryProduct implements RepositoryProduct {
 
     void setAttributes(List<Attribute> attributes) {
         this.attributes = attributes;
+    }
+
+    void setMission(String mission) {
+        this.mission = mission;
     }
 }

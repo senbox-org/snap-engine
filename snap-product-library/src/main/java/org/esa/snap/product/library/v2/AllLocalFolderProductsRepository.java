@@ -20,8 +20,8 @@ public class AllLocalFolderProductsRepository {
         List<QueryFilter> parameters = new ArrayList<QueryFilter>();
 
         //parameters.add(new QueryFilter("mission", String.class, "Mission", null, false, new String[0]));
-        parameters.add(new QueryFilter("start", Date.class, "Start date", null, false, null));
-        parameters.add(new QueryFilter("end", Date.class, "End date", null, false, null));
+        parameters.add(new QueryFilter("startDate", Date.class, "Start date", null, false, null));
+        parameters.add(new QueryFilter("endDate", Date.class, "End date", null, false, null));
         parameters.add(new QueryFilter("footprint", Rectangle.Double.class, "Area of interest", null, false, null));
 
         return parameters;

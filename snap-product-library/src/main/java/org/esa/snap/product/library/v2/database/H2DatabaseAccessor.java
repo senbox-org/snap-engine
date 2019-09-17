@@ -1,7 +1,12 @@
 package org.esa.snap.product.library.v2.database;
 
 import org.esa.snap.core.util.SystemUtils;
+import org.h2.Driver;
+import org.h2.util.OsgiDataSourceFactory;
+import org.h2gis.functions.factory.H2GISDBFactory;
+import org.h2gis.functions.factory.H2GISFunctions;
 
+import javax.sql.DataSource;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.Connection;
@@ -27,7 +32,6 @@ public class H2DatabaseAccessor {
     public static Connection getConnection() throws SQLException {
         Path databaseParentFolder = getDatabaseParentFolder();
         String databaseName = "products";
-
         Properties properties = new Properties();
         properties.put("user", "snap");
         properties.put("password", "");
@@ -55,6 +59,9 @@ public class H2DatabaseAccessor {
             if (allStatements.size() > 0) {
                 connection.setAutoCommit(false);
                 try {
+                    if (currentDatabaseVersion == 0) {
+                        H2GISFunctions.load(connection);
+                    }
                     try (Statement statement = connection.createStatement()) {
                         Iterator<Map.Entry<Integer, List<String>>> it = allStatements.entrySet().iterator();
                         while (it.hasNext()) {
