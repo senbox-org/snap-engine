@@ -18,25 +18,24 @@ package org.esa.snap.pixex;
 
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.measurement.Measurement;
 import org.esa.snap.measurement.writer.MeasurementWriter;
-import org.esa.snap.pixex.output.DefaultFormatStrategy;
-import org.esa.snap.pixex.output.PixExMeasurementFactory;
-import org.esa.snap.pixex.output.PixExProductRegistry;
-import org.esa.snap.pixex.output.PixExRasterNamesFactory;
-import org.esa.snap.pixex.output.TargetWriterFactoryAndMap;
+import org.esa.snap.pixex.output.*;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import javax.media.jai.RenderedOp;
 import javax.media.jai.operator.ConstantDescriptor;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.Raster;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 
-import static junit.framework.Assert.*;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.fail;
 
 public class PixExMeasurementReaderTest {
 
@@ -47,10 +46,8 @@ public class PixExMeasurementReaderTest {
     public void setup() throws Exception {
         final File tmpDir = new File(System.getProperty("java.io.tmpdir"));
         inputDir = new File(tmpDir, getClass().getSimpleName());
-        if (!inputDir.mkdir()) { // already exists, so delete contents
-            for (File file : inputDir.listFiles()) {
-                file.delete();
-            }
+        if (!inputDir.mkdir()) {
+            fail("unable to create test directory");
         }
         windowSize = 3;
         final int upperLeftX = 20;
@@ -68,10 +65,10 @@ public class PixExMeasurementReaderTest {
         final PixExRasterNamesFactory rasterNamesFactory = new PixExRasterNamesFactory(true, true, exportMasks, null);
         final PixExProductRegistry productRegistry = new PixExProductRegistry(filenamePrefix, inputDir);
         final PixExMeasurementFactory measurementFactory = new PixExMeasurementFactory(rasterNamesFactory, windowSize,
-                                                                                       productRegistry);
+                productRegistry);
         final TargetWriterFactoryAndMap targetFactory = new TargetWriterFactoryAndMap(filenamePrefix, inputDir);
         final DefaultFormatStrategy formatStrategy = new DefaultFormatStrategy(rasterNamesFactory, windowSize, expression,
-                                                                               exportExpressionResult);
+                exportExpressionResult);
         final MeasurementWriter writer = new MeasurementWriter(measurementFactory, targetFactory, formatStrategy);
 
         final String[] radianceNames = {"rad_1", "rad_2", "rad_3"};
@@ -88,6 +85,13 @@ public class PixExMeasurementReaderTest {
         writer.writeMeasurements(centerX, centerY, 3, "coord" + 3, p2, validData);
         writer.writeMeasurements(centerX, centerY, 4, "coord" + 4, p3, validData);
         writer.writeMeasurements(centerX, centerY, 5, "coord" + 5, p3, validData);
+    }
+
+    @After
+    public void tearDown() {
+        if (inputDir != null && inputDir.isDirectory()) {
+            FileUtils.deleteTree(inputDir);
+        }
     }
 
     @Test
