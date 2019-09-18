@@ -31,21 +31,14 @@ import java.util.concurrent.CountDownLatch;
  */
 public abstract class ProgressMonitorSwingWorker<T, V> extends SwingWorker<T, V> {
 
-    private final CountDownLatch unBlock;
+    private CountDownLatch unBlock;
     private final DialogProgressMonitor dialogPM;
-    private final Window blockingWindow;
+    private Window blockingWindow;
 
 
     protected ProgressMonitorSwingWorker(Component parentComponent, String title) {
-        unBlock = new CountDownLatch(1);
+        unBlock = new CountDownLatch(0);
         dialogPM = new DialogProgressMonitor(parentComponent, title, Dialog.ModalityType.MODELESS);
-        blockingWindow = createBlockingWindow();
-        blockingWindow.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowOpened(WindowEvent e) {
-                unBlock.countDown();
-            }
-        });
     }
 
     /**
@@ -87,18 +80,27 @@ public abstract class ProgressMonitorSwingWorker<T, V> extends SwingWorker<T, V>
      * block the <i>Event Dispatch Thread</i>.
      */
     public final void executeWithBlocking() {
+        unBlock = new CountDownLatch(1);
+        blockingWindow = createBlockingWindow();
+        blockingWindow.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowOpened(WindowEvent e) {
+                unBlock.countDown();
+            }
+        });
         dialogPM.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
         execute();
         block();
     }
-
 
     private void block() {
         blockingWindow.setVisible(true);
     }
 
     private void unblock() {
-        blockingWindow.dispose();
+        if (blockingWindow != null) {
+            blockingWindow.dispose();
+        }
     }
 
     private static Window createBlockingWindow() {
