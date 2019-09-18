@@ -1,13 +1,11 @@
 package org.esa.snap.core.util.grid.isin;
 
 import org.esa.snap.core.datamodel.*;
-import org.esa.snap.core.util.grid.isin.IsinAPI;
-import org.esa.snap.core.util.grid.isin.IsinPoint;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-class IsinUtils {
+public class IsinUtils {
 
     private static final SimpleDateFormat YYYYMMDD_FORMAT = new SimpleDateFormat("yyyyMMdd");
 
@@ -15,7 +13,7 @@ class IsinUtils {
     private static final String CENTRE = "MPC";
     private static final String STATUS = "O";
 
-    static String createFileName(String platform, Date startDate, Date endDate, Date processingDate, String tileIndex) {
+    public static String createFileName(String platform, Date startDate, Date endDate, Date processingDate, String tileIndex) {
         return platform +
                 "_OL_3_VEG_" +
                 YYYYMMDD_FORMAT.format(startDate) +
@@ -61,7 +59,7 @@ class IsinUtils {
         return new GeoLocations(lonData, latData);
     }
 
-    static Product createMpcVegetationPrototype(int tileH, int tileV, IsinAPI.Raster raster) {
+    public static Product createMpcVegetationPrototype(int tileH, int tileV, IsinAPI.Raster raster) {
         final IsinAPI isinAPI = new IsinAPI(raster);
         final IsinPoint tileDimensions = isinAPI.getTileDimensions();
         final int rasterWidth = (int) tileDimensions.getX();
@@ -136,24 +134,6 @@ class IsinUtils {
         product.addBand(otci_count);
     }
 
-    static class GeoLocations {
-        private final ProductData longitudes;
-        private final ProductData latitudes;
-
-        GeoLocations(ProductData longitudes, ProductData latitudes) {
-            this.longitudes = longitudes;
-            this.latitudes = latitudes;
-        }
-
-        ProductData getLongitudes() {
-            return longitudes;
-        }
-
-        ProductData getLatitudes() {
-            return latitudes;
-        }
-    }
-
     private static ProductData createFloat(int size) {
         final float[] data = new float[size];
         for (int i = 0; i < size; i++) {
@@ -170,5 +150,23 @@ class IsinUtils {
         }
 
         return ProductData.createInstance(data);
+    }
+
+    static class GeoLocations {
+        private final ProductData longitudes;
+        private final ProductData latitudes;
+
+        GeoLocations(ProductData longitudes, ProductData latitudes) {
+            this.longitudes = longitudes;
+            this.latitudes = latitudes;
+        }
+
+        ProductData getLongitudes() {
+            return longitudes;
+        }
+
+        ProductData getLatitudes() {
+            return latitudes;
+        }
     }
 }

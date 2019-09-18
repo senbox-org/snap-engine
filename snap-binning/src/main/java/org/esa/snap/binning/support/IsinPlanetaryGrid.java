@@ -18,14 +18,18 @@ public class IsinPlanetaryGrid implements PlanetaryGrid {
     private static final int NUM_ROWS_250M = NUM_TILES_VERTICAL * 4800;
 
     private final IsinAPI isinAPI;
+    private final IsinAPI.Raster raster;
 
     public IsinPlanetaryGrid(int numRows) {
         if (numRows == NUM_ROWS_1KM) {
             isinAPI = new IsinAPI(GRID_1_KM);
+            raster = GRID_1_KM;
         } else if (numRows == NUM_ROWS_500M) {
             isinAPI = new IsinAPI(GRID_500_M);
+            raster = GRID_500_M;
         } else if (numRows == NUM_ROWS_250M) {
             isinAPI = new IsinAPI(GRID_250_M);
+            raster = GRID_250_M;
         } else {
             throw new IllegalArgumentException("Invalid number of rows");
         }
@@ -82,6 +86,10 @@ public class IsinPlanetaryGrid implements PlanetaryGrid {
     @Override
     public double[] getCenterLatLon(long bin) {
         throw new RuntimeException("not implemented");
+    }
+
+    public IsinAPI.Raster getRaster() {
+        return raster;
     }
 
     // this method is used in Calvalus - please keep it public tb 2019-09-17
