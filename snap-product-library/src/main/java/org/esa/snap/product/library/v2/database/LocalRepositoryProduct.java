@@ -18,6 +18,7 @@ import java.util.List;
  */
 public class LocalRepositoryProduct implements RepositoryProduct {
 
+    private final int id;
     private final String name;
     private final Path path;
     private final String type;
@@ -29,7 +30,8 @@ public class LocalRepositoryProduct implements RepositoryProduct {
     private List<Attribute> attributes;
     private BufferedImage quickLookImage;
 
-    public LocalRepositoryProduct(String name, String type, Date acquisitionDate, Path path, long sizeInBytes, Polygon2D polygon) {
+    public LocalRepositoryProduct(int id, String name, String type, Date acquisitionDate, Path path, long sizeInBytes, Polygon2D polygon) {
+        this.id = id;
         this.name = name;
         this.type = type;
         this.path = path;
@@ -114,5 +116,9 @@ public class LocalRepositoryProduct implements RepositoryProduct {
 
     void setMission(String mission) {
         this.mission = mission;
+    }
+
+    int getId() {
+        return id;
     }
 }

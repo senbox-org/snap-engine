@@ -57,6 +57,11 @@ public abstract class AbstractTAORemoteRepositoryProvider<T extends DataSource> 
     protected abstract ProductHelper buildProductHelper(String productName);
 
     @Override
+    public boolean hasAuthentication() {
+        return true;
+    }
+
+    @Override
     public String[] getAvailableMissions() {
         DataSource dataSource = getDataSource();
         return dataSource.getSupportedSensors();
@@ -79,7 +84,7 @@ public abstract class AbstractTAORemoteRepositoryProvider<T extends DataSource> 
             DataSourceParameter param = entry.getValue();
             Class<?> type;
             if (param.getName().equals(CommonParameterNames.FOOTPRINT)) {
-                type = Rectangle.Double.class;
+                type = Rectangle2D.class;
             } else {
                 type = param.getType();
             }
@@ -208,6 +213,11 @@ public abstract class AbstractTAORemoteRepositoryProvider<T extends DataSource> 
             totalResults = Collections.emptyList();
         }
         return totalResults;
+    }
+
+    @Override
+    public Map<String, String> getDisplayedAttributes() {
+        return null;
     }
 
     private DataSource getDataSource() {

@@ -13,6 +13,8 @@ import java.util.Map;
  */
 public interface RemoteProductsRepositoryProvider {
 
+    public boolean hasAuthentication();
+
     public String getRepositoryName();
 
     public String getRepositoryId();
@@ -23,10 +25,12 @@ public interface RemoteProductsRepositoryProvider {
 
     public List<RepositoryProduct> downloadProductList(Credentials credentials, String mission, Map<String, Object> parameterValues,
                                                        ProductListDownloaderListener downloaderListener, ThreadStatus thread)
-            throws Exception;
+                                                       throws Exception;
 
     public BufferedImage downloadProductQuickLookImage(Credentials credentials, String url, ThreadStatus thread)
-            throws IOException, java.lang.InterruptedException;
+                                                       throws IOException, java.lang.InterruptedException;
 
     public ProductRepositoryDownloader buidProductDownloader(String mission);
+
+    public Map<String, String> getDisplayedAttributes();
 }

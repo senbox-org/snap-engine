@@ -3,15 +3,17 @@ package org.esa.snap.product.library.v2.database;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Polygon;
+import org.apache.commons.lang.StringUtils;
 import org.esa.snap.engine_utilities.util.FileIOUtils;
+import org.esa.snap.product.library.v2.AllLocalFolderProductsRepository;
 import org.esa.snap.remote.products.repository.Attribute;
 import org.esa.snap.remote.products.repository.Polygon2D;
 import org.esa.snap.remote.products.repository.RepositoryProduct;
+import org.esa.snap.remote.products.repository.SensorType;
 import org.h2gis.utilities.SFSUtilities;
 import org.h2gis.utilities.SpatialResultSet;
 
 import javax.imageio.ImageIO;
-import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -29,9 +31,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by jcoravu on 3/9/2019.
@@ -41,45 +44,90 @@ public class ProductLibraryDAL {
     private ProductLibraryDAL() {
     }
 
-    public static List<RemoteMission> loadMissions() throws SQLException, IOException {
-        List<RemoteMission> missions = new ArrayList<>();
-        try (Connection connection = H2DatabaseAccessor.getConnection()) {
-            try (Statement statement = connection.createStatement()) {
-                StringBuilder sql = new StringBuilder();
-                sql.append("SELECT rm.id, rm.name FROM ")
-                        .append(DatabaseTableNames.REMOTE_MISSIONS)
-                        .append(" AS rm ");
-                try (ResultSet resultSet = statement.executeQuery(sql.toString())) {
-                    while (resultSet.next()) {
-                        short id = resultSet.getShort("id");
-                        String name = resultSet.getString("name");
-                        missions.add(new RemoteMission(id, name));
-                    }
-                }
+    public static List<RemoteMission> loadMissions(Statement statement) throws SQLException, IOException {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT rm.id, rm.name FROM ")
+                .append(DatabaseTableNames.REMOTE_MISSIONS)
+                .append(" AS rm ");
+        try (ResultSet resultSet = statement.executeQuery(sql.toString())) {
+            List<RemoteMission> missions = new ArrayList<>();
+            while (resultSet.next()) {
+                short id = resultSet.getShort("id");
+                String name = resultSet.getString("name");
+                missions.add(new RemoteMission(id, name));
             }
+            return missions;
         }
-        return missions;
+    }
+
+    public static Map<Short, Set<String>> loadAttributesNames(Statement statement) throws SQLException, IOException {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT ra.remote_mission_id, ra.name FROM ")
+                .append(DatabaseTableNames.REMOTE_ATTRIBUTES)
+                .append(" AS ra ");
+        try (ResultSet resultSet = statement.executeQuery(sql.toString())) {
+            Map<Short, Set<String>> attributes = new HashMap<>();
+            while (resultSet.next()) {
+                short missionId = resultSet.getShort("remote_mission_id");
+                String attributeName = resultSet.getString("name");
+                Set<String> missionAttributes = attributes.get(missionId);
+                if (missionAttributes == null) {
+                    missionAttributes = new HashSet<>();
+                    attributes.put(missionId, missionAttributes);
+                }
+                missionAttributes.add(attributeName);
+            }
+            return attributes;
+        }
     }
 
     public static List<RepositoryProduct> loadProductList(RemoteMission mission, Map<String, Object> parameterValues) throws SQLException, IOException {
         List<RepositoryProduct> productList;
-        Map<Integer, LocalRepositoryProduct> productsMap;
         try (Connection connection = H2DatabaseAccessor.getConnection()) {
             Connection wrappedConnection = SFSUtilities.wrapConnection(connection);
 
+            Date startDate = null;
+            Date endDate = null;
+            List<Attribute> attributes = null;
+            Rectangle2D selectionArea = null;
+            SensorType sensorType = null;
+            for (Map.Entry<String, Object> entry : parameterValues.entrySet()) {
+                String parameterName = entry.getKey();
+                Object parameterValue = entry.getValue();
+                if (parameterName.equalsIgnoreCase(AllLocalFolderProductsRepository.FOOT_PRINT_PARAMETER)) {
+                    selectionArea = (Rectangle2D)parameterValue;
+                } else if (parameterName.equalsIgnoreCase(AllLocalFolderProductsRepository.START_DATE_PARAMETER)) {
+                    startDate = (Date)parameterValue;
+                    if (startDate == null) {
+                        throw new NullPointerException("The start date is null.");
+                    }
+                } else if (parameterName.equalsIgnoreCase(AllLocalFolderProductsRepository.END_DATE_PARAMETER)) {
+                    endDate = (Date)parameterValue;
+                    if (endDate == null) {
+                        throw new NullPointerException("The end date is null.");
+                    }
+                } else if (parameterName.equalsIgnoreCase(AllLocalFolderProductsRepository.SENSOR_TYPE_PARAMETER)) {
+                    sensorType = (SensorType)parameterValue;
+                } else if (parameterName.equalsIgnoreCase(AllLocalFolderProductsRepository.METADATA_ATTRIBUTES_PARAMETER)) {
+                    attributes = (List<Attribute>)parameterValue;
+                } else {
+                    throw new IllegalStateException("Unknown parameter '" + parameterName + "'.");
+                }
+            }
             StringBuilder sql = new StringBuilder();
             sql.append("SELECT p.id, p.name, p.type, p.local_path, p.entry_point, p.size_in_bytes, p.geometry, p.acquisition_date, p.last_modified_date")
                 .append(", lr.folder_path");
             if (mission == null) {
+                // no mission filter
                 sql.append(", rm.name AS mission_name");
             }
             sql.append(" FROM ")
                     .append(DatabaseTableNames.PRODUCTS)
                     .append(" AS p, ")
                     .append(DatabaseTableNames.LOCAL_REPOSITORIES)
-                    .append(" AS lr")
-            ;
+                    .append(" AS lr");
             if (mission == null) {
+                // no mission filter
                 sql.append(", ")
                         .append(DatabaseTableNames.REMOTE_MISSIONS)
                         .append(" AS rm ")
@@ -88,36 +136,16 @@ public class ProductLibraryDAL {
                 sql.append(" WHERE p.remote_mission_id = ")
                         .append(mission.getId());
             }
-
-            Date startDate = null;
-            Date endDate = null;
-            for (Map.Entry<String, Object> entry : parameterValues.entrySet()) {
-                String parameterName = entry.getKey();
-                Object parameterValue = entry.getValue();
-                if (parameterName.equalsIgnoreCase("footprint")) {
-                    Rectangle2D selectionArea = (Rectangle2D)parameterValue;
-                    Polygon2D polygon = new Polygon2D();
-                    polygon.append(selectionArea.getX(), selectionArea.getY()); // the top left corner
-                    polygon.append(selectionArea.getX() + selectionArea.getWidth(), selectionArea.getY()); // the top right corner
-                    polygon.append(selectionArea.getX() + selectionArea.getWidth(), selectionArea.getY() + selectionArea.getHeight()); // the bottom right corner
-                    polygon.append(selectionArea.getX(), selectionArea.getY() + selectionArea.getHeight()); // the bottom left corner
-                    polygon.append(selectionArea.getX(), selectionArea.getY()); // the top left corner
-                    sql.append(" AND ST_Intersects(p.geometry, '")
-                            .append(polygon.toWKT())
-                            .append("')");
-                } else if (parameterName.equalsIgnoreCase("startDate")) {
-                    startDate = (Date)parameterValue;
-                    if (startDate == null) {
-                        throw new NullPointerException("The start date is null.");
-                    }
-                } else if (parameterName.equalsIgnoreCase("endDate")) {
-                    endDate = (Date)parameterValue;
-                    if (endDate == null) {
-                        throw new NullPointerException("The end date is null.");
-                    }
-                } else {
-                    throw new IllegalStateException("Unknown parameter '" + parameterName + "'.");
-                }
+            if (selectionArea != null) {
+                Polygon2D polygon = new Polygon2D();
+                polygon.append(selectionArea.getX(), selectionArea.getY()); // the top left corner
+                polygon.append(selectionArea.getX() + selectionArea.getWidth(), selectionArea.getY()); // the top right corner
+                polygon.append(selectionArea.getX() + selectionArea.getWidth(), selectionArea.getY() + selectionArea.getHeight()); // the bottom right corner
+                polygon.append(selectionArea.getX(), selectionArea.getY() + selectionArea.getHeight()); // the bottom left corner
+                polygon.append(selectionArea.getX(), selectionArea.getY()); // the top left corner
+                sql.append(" AND ST_Intersects(p.geometry, '")
+                        .append(polygon.toWKT())
+                        .append("')");
             }
             if (startDate != null) {
                 sql.append(" AND p.acquisition_date >= ?");
@@ -125,8 +153,12 @@ public class ProductLibraryDAL {
             if (endDate != null) {
                 sql.append(" AND p.acquisition_date <= ?");
             }
+            if (sensorType != null) {
+                sql.append(" AND p.sensor_type_id = ")
+                    .append(sensorType.getValue());
+            }
             Calendar calendar = Calendar.getInstance();
-            try (PreparedStatement statement = wrappedConnection.prepareStatement(sql.toString())) {
+            try (PreparedStatement prepareStatement = wrappedConnection.prepareStatement(sql.toString())) {
                 if (startDate != null) {
                     calendar.setTimeInMillis(startDate.getTime());
                     calendar.set(Calendar.HOUR_OF_DAY, 0);
@@ -134,7 +166,7 @@ public class ProductLibraryDAL {
                     calendar.set(Calendar.SECOND, 0);
                     calendar.set(Calendar.MILLISECOND, 0);
                     java.sql.Timestamp startTimestamp = new java.sql.Timestamp(calendar.getTimeInMillis());
-                    statement.setTimestamp(1, startTimestamp);
+                    prepareStatement.setTimestamp(1, startTimestamp);
                 }
                 if (endDate != null) {
                     calendar.setTimeInMillis(endDate.getTime());
@@ -143,11 +175,10 @@ public class ProductLibraryDAL {
                     calendar.set(Calendar.SECOND, 59);
                     calendar.set(Calendar.MILLISECOND, 0);
                     java.sql.Timestamp endTimestamp = new java.sql.Timestamp(calendar.getTimeInMillis());
-                    statement.setTimestamp(2, endTimestamp);
+                    prepareStatement.setTimestamp(2, endTimestamp);
                 }
-                try (SpatialResultSet resultSet = statement.executeQuery().unwrap(SpatialResultSet.class)) {
+                try (SpatialResultSet resultSet = prepareStatement.executeQuery().unwrap(SpatialResultSet.class)) {
                     productList = new ArrayList<>();
-                    productsMap = new HashMap<>();
                     while (resultSet.next()) {
                         int id = resultSet.getInt("id");
                         String name = resultSet.getString("name");
@@ -160,23 +191,28 @@ public class ProductLibraryDAL {
                         long sizeInBytes = resultSet.getLong("size_in_bytes");
                         Geometry geometry = resultSet.getGeometry("geometry");
                         Polygon2D polygon = buildPolygon(geometry);
-                        LocalRepositoryProduct localProduct = new LocalRepositoryProduct(name, type, acquisitionDate, productLocalPath, sizeInBytes, polygon);
+                        LocalRepositoryProduct localProduct = new LocalRepositoryProduct(id, name, type, acquisitionDate, productLocalPath, sizeInBytes, polygon);
                         localProduct.setMission(missionName);
                         productList.add(localProduct);
-                        productsMap.put(id, localProduct);
                     }
                 }
-            }
 
-            if (productList.size() > 0) {
-                Map<Integer, List<Attribute>> remoteAttributesMap = loadProductRemoteAttributes(wrappedConnection);
-                Iterator<Map.Entry<Integer, LocalRepositoryProduct>> it = productsMap.entrySet().iterator();
-                while (it.hasNext()) {
-                    Map.Entry<Integer, LocalRepositoryProduct> entry = it.next();
-                    int productId = entry.getKey().intValue();
-                    LocalRepositoryProduct localProduct = entry.getValue();
-                    List<Attribute> remoteAttributeList = remoteAttributesMap.get(productId);
-                    localProduct.setAttributes(remoteAttributeList);
+                if (productList.size() > 0) {
+                    try (Statement statement = connection.createStatement()) {
+                        for (int i=productList.size()-1; i>=0; i--) {
+                            LocalRepositoryProduct localProduct = (LocalRepositoryProduct)productList.get(i);
+                            List<Attribute> remoteAttributes = loadProductRemoteAttributes(localProduct.getId(), statement);
+                            boolean foundAllAttributes = true;
+                            if (attributes != null && attributes.size() > 0) {
+                                foundAllAttributes = checkProductAttributesMatches(remoteAttributes, attributes);
+                            }
+                            if (foundAllAttributes) {
+                                localProduct.setAttributes(remoteAttributes);
+                            } else {
+                                productList.remove(i);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -185,12 +221,9 @@ public class ProductLibraryDAL {
             Path databaseParentFolder = H2DatabaseAccessor.getDatabaseParentFolder();
             Path quickLookImagesFolder = databaseParentFolder.resolve("quick-look-images");
 
-            Iterator<Map.Entry<Integer, LocalRepositoryProduct>> it = productsMap.entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry<Integer, LocalRepositoryProduct> entry = it.next();
-                int productId = entry.getKey().intValue();
-                LocalRepositoryProduct localProduct = entry.getValue();
-                Path quickLookImageFile = quickLookImagesFolder.resolve(Integer.toString(productId) + ".png");
+            for (int i=0; i<productList.size(); i++) {
+                LocalRepositoryProduct localProduct = (LocalRepositoryProduct)productList.get(i);
+                Path quickLookImageFile = quickLookImagesFolder.resolve(Integer.toString(localProduct.getId()) + ".png");
                 if (Files.exists(quickLookImageFile)) {
                     BufferedImage quickLookImage = ImageIO.read(quickLookImageFile.toFile());
                     localProduct.setQuickLookImage(quickLookImage);
@@ -201,26 +234,39 @@ public class ProductLibraryDAL {
         return productList;
     }
 
-    private static Map<Integer, List<Attribute>> loadProductRemoteAttributes(Connection connection) throws SQLException {
-        try (Statement statement = connection.createStatement()) {
-            StringBuilder sql = new StringBuilder();
-            sql.append("SELECT product_id, name, value FROM ")
-                    .append(DatabaseTableNames.PRODUCT_REMOTE_ATTRIBUTES);
-            Map<Integer, List<Attribute>> remoteAttributesMap = new HashMap<>();
-            try (ResultSet resultSet = statement.executeQuery(sql.toString())) {
-                while (resultSet.next()) {
-                    int productId = resultSet.getInt("product_id");
-                    String name = resultSet.getString("name");
-                    String value = resultSet.getString("value");
-                    List<Attribute> remoteAttributes = remoteAttributesMap.get(productId);
-                    if (remoteAttributes == null) {
-                        remoteAttributes = new ArrayList<>();
-                        remoteAttributesMap.put(productId, remoteAttributes);
-                    }
-                    remoteAttributes.add(new Attribute(name, value));
+    private static boolean checkProductAttributesMatches(List<Attribute> remoteAttributes, List<Attribute> attributes) {
+        boolean foundAllAttributes = true;
+        for (int k = 0; k < attributes.size() && foundAllAttributes; k++) {
+            Attribute filterAttribute = attributes.get(k);
+            boolean found = false;
+            for (int j = 0; j < remoteAttributes.size() && !found; j++) {
+                Attribute productAttribute = remoteAttributes.get(j);
+                if (productAttribute.getName().equalsIgnoreCase(filterAttribute.getName())
+                        && StringUtils.containsIgnoreCase(productAttribute.getValue(), filterAttribute.getValue())) {
+                    found = true;
                 }
             }
-            return remoteAttributesMap;
+            if (!found) {
+                foundAllAttributes = false;
+            }
+        }
+        return foundAllAttributes;
+    }
+
+    private static List<Attribute> loadProductRemoteAttributes(int productId, Statement statement) throws SQLException {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT name, value FROM ")
+                .append(DatabaseTableNames.PRODUCT_REMOTE_ATTRIBUTES)
+                .append(" WHERE product_id = ")
+                .append(productId);
+        try (ResultSet resultSet = statement.executeQuery(sql.toString())) {
+            List<Attribute> remoteAttributes = new ArrayList<>();
+            while (resultSet.next()) {
+                String name = resultSet.getString("name");
+                String value = resultSet.getString("value");
+                remoteAttributes.add(new Attribute(name, value));
+            }
+            return remoteAttributes;
         }
     }
 
