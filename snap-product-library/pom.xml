@@ -102,6 +102,11 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>ro.cs.tao</groupId>
+            <artifactId>tao-utils</artifactId>
+            <version>1.0</version>
+        </dependency>
     </dependencies>
 
     <build>
