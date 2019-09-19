@@ -85,6 +85,8 @@ public class PixExMeasurementReaderTest {
         writer.writeMeasurements(centerX, centerY, 3, "coord" + 3, p2, validData);
         writer.writeMeasurements(centerX, centerY, 4, "coord" + 4, p3, validData);
         writer.writeMeasurements(centerX, centerY, 5, "coord" + 5, p3, validData);
+
+        writer.close();
     }
 
     @After

@@ -16,18 +16,11 @@
 
 package org.esa.snap.pixex;
 
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.CrsGeoCoding;
-import org.esa.snap.core.datamodel.GeoPos;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.measurement.Measurement;
 import org.esa.snap.measurement.writer.MeasurementWriter;
-import org.esa.snap.pixex.output.DefaultFormatStrategy;
-import org.esa.snap.pixex.output.PixExMeasurementFactory;
-import org.esa.snap.pixex.output.PixExProductRegistry;
-import org.esa.snap.pixex.output.PixExRasterNamesFactory;
-import org.esa.snap.pixex.output.TargetWriterFactoryAndMap;
+import org.esa.snap.pixex.output.*;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.junit.After;
 import org.junit.Before;
@@ -37,7 +30,7 @@ import org.opengis.referencing.operation.TransformException;
 
 import javax.media.jai.RenderedOp;
 import javax.media.jai.operator.ConstantDescriptor;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.Raster;
 import java.io.BufferedReader;
@@ -57,26 +50,20 @@ public class MeasurementWriterTest {
     private MeasurementWriter writer;
 
     @Before
-    public void setup() throws IOException {
+    public void setup() {
         final File tmpDir = new File(System.getProperty("java.io.tmpdir"));
         outputDir = new File(tmpDir, getClass().getSimpleName());
         if (!outputDir.mkdir()) { // already exists, so delete contents
-            for (File file : outputDir.listFiles()) {
-                file.delete();
-            }
+            fail("unable to create test directory");
         }
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         if (writer != null) {
             writer.close();
         }
-        deleteOutputFiles();
-        outputDir.deleteOnExit();
-//        noinspection ResultOfMethodCallIgnored
-        outputDir.delete();
-
+        FileUtils.deleteTree(outputDir);
     }
 
     @Test
@@ -157,7 +144,7 @@ public class MeasurementWriterTest {
         final String filenamePrefix = "testWritingMeasurementsWithExpression";
 
         writer = createMeasurementWriter(windowSize, false, filenamePrefix, "Is Valid",
-                                         withExpression);
+                withExpression);
 
         final String[] varNames = {"abc", "def"};
         final Product testProduct = createTestProduct("N1", "T1", varNames, 360, 180);
@@ -165,13 +152,10 @@ public class MeasurementWriterTest {
         writeRegion(writer, testProduct, 2, windowSize);
 
         File t1CoordFile = new File(outputDir, "testWritingMeasurementsWithExpression_T1_measurements.txt");
-        BufferedReader reader = new BufferedReader(new FileReader(t1CoordFile));
-        try {
+        try (BufferedReader reader = new BufferedReader(new FileReader(t1CoordFile))) {
             skipLines(reader, 8);    //skip file header and table header lines
             assertMeasurementEquals(getMeasurement(1, 0), reader.readLine(), withExpression);
             assertMeasurementEquals(getMeasurement(2, 0), reader.readLine(), withExpression);
-        } finally {
-            reader.close();
         }
     }
 
@@ -183,7 +167,7 @@ public class MeasurementWriterTest {
         final boolean exportExpressionResult = true;
 
         writer = createMeasurementWriter(windowSize, filenamePrefix, expression,
-                                         exportExpressionResult);
+                exportExpressionResult);
 
         final String[] varNames = {"abc", "def"};
         final Product testProduct = createTestProduct("N1", "T1", varNames, 360, 180);
@@ -191,8 +175,7 @@ public class MeasurementWriterTest {
         writeRegion(writer, testProduct, 1, windowSize);
 
         File t1CoordFile = new File(outputDir, "testWritingProductMap_productIdMap.txt");
-        final BufferedReader reader = new BufferedReader(new FileReader(t1CoordFile));
-        try {
+        try (BufferedReader reader = new BufferedReader(new FileReader(t1CoordFile))) {
             skipLines(reader, 2);    //skip file header and table header lines
             String line = reader.readLine();
             assertNotNull("Nothing written to ProductMap.", line);
@@ -218,8 +201,6 @@ public class MeasurementWriterTest {
             assertNotNull("Nothing written to ProductMap.", line);
             assertFalse(line.isEmpty());
             assertProductMapEntryEquals(2, "T2", testProduct3.getFileLocation().getAbsolutePath(), line);
-        } finally {
-            reader.close();
         }
     }
 
@@ -250,8 +231,8 @@ public class MeasurementWriterTest {
         final int centerY = pixelY + pixelBorder;
         final byte validValue = (byte) (coordId % 2 == 0 ? -1 : 0);
         final RenderedOp renderedOp = ConstantDescriptor.create((float) p1.getSceneRasterWidth(),
-                                                                (float) p1.getSceneRasterHeight(),
-                                                                new Byte[]{validValue}, null);
+                (float) p1.getSceneRasterHeight(),
+                new Byte[]{validValue}, null);
         final Raster validData = renderedOp.getData(new Rectangle(pixelX, pixelY, windowSize, windowSize));
 
         writer.writeMeasurements(centerX, centerY, coordId, "coord" + coordId, p1, validData);
@@ -319,17 +300,17 @@ public class MeasurementWriterTest {
         for (int i = 0; i < bandNames.length; i++) {
             Band band = product.addBand(bandNames[i], ProductData.TYPE_FLOAT32);
             band.setSourceImage(ConstantDescriptor.create((float) bounds.width, (float) bounds.height,
-                                                          new Float[]{(float) i}, null));
+                    new Float[]{(float) i}, null));
         }
         return product;
     }
 
     private static Measurement getMeasurement(int coordId, int productId) throws ParseException {
         return new Measurement(coordId, "coord" + coordId, productId,
-                               20.5f, 42.5f,
-                               ProductData.UTC.parse("12-MAR-2008 17:12:56"),
-                               new GeoPos(47.5f, -159.5f),
-                               new Float[]{12.34f, 1234.56f}, coordId % 2 == 0);
+                20.5f, 42.5f,
+                ProductData.UTC.parse("12-MAR-2008 17:12:56"),
+                new GeoPos(47.5f, -159.5f),
+                new Float[]{12.34f, 1234.56f}, coordId % 2 == 0);
     }
 
     private MeasurementWriter createMeasurementWriter(int windowSize, String filenamePrefix, String expression,
@@ -342,19 +323,11 @@ public class MeasurementWriterTest {
         final PixExRasterNamesFactory rasterNamesFactory = new PixExRasterNamesFactory(true, true, exportMasks, null);
         final PixExProductRegistry productRegistry = new PixExProductRegistry(filenamePrefix, outputDir);
         final PixExMeasurementFactory measurementFactory = new PixExMeasurementFactory(rasterNamesFactory, windowSize,
-                                                                                       productRegistry);
+                productRegistry);
         final TargetWriterFactoryAndMap targetFactory = new TargetWriterFactoryAndMap(filenamePrefix, outputDir);
         final DefaultFormatStrategy formatStrategy = new DefaultFormatStrategy(rasterNamesFactory, windowSize,
-                                                                               expression,
-                                                                               exportExpressionResult);
+                expression,
+                exportExpressionResult);
         return new MeasurementWriter(measurementFactory, targetFactory, formatStrategy);
-    }
-
-    private void deleteOutputFiles() throws IOException {
-        for (File file : outputDir.listFiles()) {
-            file.deleteOnExit();
-//            noinspection ResultOfMethodCallIgnored
-            file.delete();
-        }
     }
 }
