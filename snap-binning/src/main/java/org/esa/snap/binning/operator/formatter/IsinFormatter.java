@@ -85,11 +85,10 @@ public class IsinFormatter implements Formatter {
                 }
 
                 int writeIndex = (int) (gridIndex.getX() + productWidth * gridIndex.getY());
-                // @todo 1 tb/tb set correct feature values in test-setup 2019-09-18
-//                final float[] featureValues = temporalBin.getFeatureValues();
-//                for (int feat = 0; feat < featureValues.length; feat++) {
-//                    targetVariables[feat].setElemFloatAt(writeIndex, featureValues[feat]);
-//                }
+                final float[] featureValues = temporalBin.getFeatureValues();
+                for (int feat = 0; feat < featureValues.length; feat++) {
+                    targetVariables[feat].setElemFloatAt(writeIndex, featureValues[feat]);
+                }
             }
         }
 

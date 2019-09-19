@@ -891,7 +891,7 @@ public class BinningOp extends Operator {
         }
     }
 
-    // package access for tessting only tb 2013-05-07
+    // package access for testing only tb 2013-05-07
     static ProductData.UTC parseStartDateUtc(String date) {
         try {
             if (date.matches("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}")) {
