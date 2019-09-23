@@ -65,18 +65,17 @@ public class IsinFormatter implements Formatter {
                 // make switch to new tile
                 // -----------------------
                 if (x_tile != gridIndex.getTile_col() || y_tile != gridIndex.getTile_line()) {
-                    x_tile = gridIndex.getTile_col();
-                    y_tile = gridIndex.getTile_line();
-
                     if (tileProduct != null) {
                         writeTileProduct(outputFormat, outputFile, productName, tileProduct);
                         tileProduct.dispose();
                     }
 
+                    x_tile = gridIndex.getTile_col();
+                    y_tile = gridIndex.getTile_line();
+
                     tileProduct = IsinUtils.createMpcVegetationPrototype(x_tile, y_tile, isinGrid.getRaster());
                     productWidth = tileProduct.getSceneRasterWidth();
                     productName = getProductName(startTime.getAsDate(), stopTime.getAsDate(), x_tile, y_tile);
-
 
                     for (int feat = 0; feat < featureNames.length; feat++) {
                         final RasterDataNode rasterDataNode = tileProduct.getRasterDataNode(featureNames[feat]);
@@ -96,13 +95,6 @@ public class IsinFormatter implements Formatter {
             writeTileProduct(outputFormat, outputFile, productName, tileProduct);
             tileProduct.dispose();
         }
-
-        // -- create file name from conventions
-        // -- create product template
-        // - OR
-        // -- fill in values (check from feature list)
-
-        //throw new RuntimeException("not implemented");
     }
 
     private void writeTileProduct(String outputType, File outputFile, String productName, Product tileProduct) throws IOException {

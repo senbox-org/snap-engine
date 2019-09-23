@@ -1,0 +1,2 @@
+org.esa.snap.binning.operator.formatter.DefaultFormatterPlugin
+org.esa.snap.binning.operator.formatter.IsinFormatterPlugin
