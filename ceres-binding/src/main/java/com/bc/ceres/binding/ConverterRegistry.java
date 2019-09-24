@@ -41,8 +41,10 @@ import java.awt.Font;
 import java.awt.geom.AffineTransform;
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -55,9 +57,11 @@ import java.util.regex.Pattern;
 public class ConverterRegistry {
 
     private Map<Class<?>, Converter<?>> converters;
+    private List<PathConverter> pathConverters;
 
     private ConverterRegistry() {
         converters = new HashMap<>(33);
+        pathConverters = new ArrayList<PathConverter>();
 
         // Primitive types
         setConverter(Boolean.TYPE, new BooleanConverter());
@@ -140,6 +144,32 @@ public class ConverterRegistry {
         return (Converter<T>) converter;
     }
     
+    /**
+     * Registers a {@code PathConverter} to allow the conversion of user-defined
+     * textual representations of {@code Path} to object instances.
+     * 
+     * @param converter The converter.
+     */
+    public void registerPathConverter(PathConverter converter) {
+        pathConverters.add(converter);
+    }
+
+    /**
+     * Returns the {@code PathConverter} that matches the given textual 
+     * representation of a {@code Path}.
+     * 
+     * @param text
+     * @return The Path converter, May be {@code null}.
+     */
+    public PathConverter getPathConverter(String text) {
+        for (PathConverter converter : pathConverters) {
+            if (converter.matches(text)) {
+                return converter;
+            }
+        }
+        return null;
+    }
+
     // Initialization on demand holder idiom
     private static class Holder {
         private static final ConverterRegistry instance = new ConverterRegistry();

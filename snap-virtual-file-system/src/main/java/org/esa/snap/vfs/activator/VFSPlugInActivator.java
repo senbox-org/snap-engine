@@ -1,7 +1,10 @@
 package org.esa.snap.vfs.activator;
 
+import com.bc.ceres.binding.ConverterRegistry;
+
 import org.esa.snap.runtime.Activator;
 import org.esa.snap.vfs.VFS;
+import org.esa.snap.vfs.converters.VFSPathConverter;
 import org.esa.snap.vfs.preferences.model.VFSRemoteFileRepositoriesController;
 import org.esa.snap.vfs.preferences.model.VFSRemoteFileRepository;
 
@@ -36,6 +39,7 @@ public class VFSPlugInActivator implements Activator {
             Path configFile = VFSRemoteFileRepositoriesController.getDefaultConfigFilePath();
             List<VFSRemoteFileRepository> vfsRepositories = VFSRemoteFileRepositoriesController.getVFSRemoteFileRepositories(configFile);
             VFS.getInstance().initRemoteInstalledProviders(vfsRepositories);
+            ConverterRegistry.getInstance().registerPathConverter(new VFSPathConverter());
         } catch (Exception exception) {
             logger.log(Level.SEVERE, "Unable to start the VFS Plugin. Reason: " + exception.getMessage(), exception);
         }

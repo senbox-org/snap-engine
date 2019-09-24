@@ -18,8 +18,13 @@ package com.bc.ceres.binding.converters;
 
 import com.bc.ceres.binding.ConversionException;
 import com.bc.ceres.binding.Converter;
+import com.bc.ceres.binding.ConverterRegistry;
+import com.bc.ceres.binding.PathConverter;
 
 import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.spi.FileSystemProvider;
 
 public class FileConverter implements Converter<File> {
 
@@ -33,6 +38,30 @@ public class FileConverter implements Converter<File> {
         if (text.isEmpty()) {
             return null;
         }
+
+        // Gets the FileSystem provider identified by scheme.
+        int semicolonIndex = text.indexOf(':');
+        if (semicolonIndex > -1) {
+            String uriScheme = text.substring(0, semicolonIndex);
+            
+            for (FileSystemProvider provider : FileSystemProvider.installedProviders()) {
+                if (uriScheme.equalsIgnoreCase(provider.getScheme())) {
+                    try {
+                        URI uri = new URI(text);
+                        return provider.getPath(uri).toFile();
+                    }
+                    catch (URISyntaxException e) {
+                    }
+                }
+            }
+        }
+
+        // Gets the PathConverter from the given textual representation.
+        PathConverter converter = ConverterRegistry.getInstance().getPathConverter(text);
+        if (converter != null)
+            return converter.parse(text).toFile();
+
+        // Returns File by default.
         return new File(text);
     }
 
