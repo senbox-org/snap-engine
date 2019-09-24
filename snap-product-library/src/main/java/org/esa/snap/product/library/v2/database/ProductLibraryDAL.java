@@ -3,9 +3,9 @@ package org.esa.snap.product.library.v2.database;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Polygon;
-import org.apache.commons.lang.StringUtils;
 import org.esa.snap.engine_utilities.util.FileIOUtils;
 import org.esa.snap.product.library.v2.AllLocalFolderProductsRepository;
+import org.esa.snap.product.library.v2.AttributeFilter;
 import org.esa.snap.remote.products.repository.Attribute;
 import org.esa.snap.remote.products.repository.Polygon2D;
 import org.esa.snap.remote.products.repository.RepositoryProduct;
@@ -88,7 +88,7 @@ public class ProductLibraryDAL {
 
             Date startDate = null;
             Date endDate = null;
-            List<Attribute> attributes = null;
+            List<AttributeFilter> attributes = null;
             Rectangle2D selectionArea = null;
             SensorType sensorType = null;
             for (Map.Entry<String, Object> entry : parameterValues.entrySet()) {
@@ -108,8 +108,8 @@ public class ProductLibraryDAL {
                     }
                 } else if (parameterName.equalsIgnoreCase(AllLocalFolderProductsRepository.SENSOR_TYPE_PARAMETER)) {
                     sensorType = (SensorType)parameterValue;
-                } else if (parameterName.equalsIgnoreCase(AllLocalFolderProductsRepository.METADATA_ATTRIBUTES_PARAMETER)) {
-                    attributes = (List<Attribute>)parameterValue;
+                } else if (parameterName.equalsIgnoreCase(AllLocalFolderProductsRepository.ATTRIBUTES_PARAMETER)) {
+                    attributes = (List<AttributeFilter>)parameterValue;
                 } else {
                     throw new IllegalStateException("Unknown parameter '" + parameterName + "'.");
                 }
@@ -234,15 +234,14 @@ public class ProductLibraryDAL {
         return productList;
     }
 
-    private static boolean checkProductAttributesMatches(List<Attribute> remoteAttributes, List<Attribute> attributes) {
+    private static boolean checkProductAttributesMatches(List<Attribute> remoteAttributes, List<AttributeFilter> attributes) {
         boolean foundAllAttributes = true;
         for (int k = 0; k < attributes.size() && foundAllAttributes; k++) {
-            Attribute filterAttribute = attributes.get(k);
+            AttributeFilter filterAttribute = attributes.get(k);
             boolean found = false;
             for (int j = 0; j < remoteAttributes.size() && !found; j++) {
                 Attribute productAttribute = remoteAttributes.get(j);
-                if (productAttribute.getName().equalsIgnoreCase(filterAttribute.getName())
-                        && StringUtils.containsIgnoreCase(productAttribute.getValue(), filterAttribute.getValue())) {
+                if (filterAttribute.matches(productAttribute)) {
                     found = true;
                 }
             }

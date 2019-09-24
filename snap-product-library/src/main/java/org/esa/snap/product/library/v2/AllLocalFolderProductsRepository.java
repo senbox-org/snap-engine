@@ -20,7 +20,7 @@ public class AllLocalFolderProductsRepository {
     public static final String END_DATE_PARAMETER = "endDate";
     public static final String FOOT_PRINT_PARAMETER = "footprint";
     public static final String SENSOR_TYPE_PARAMETER = "sensorType";
-    public static final String METADATA_ATTRIBUTES_PARAMETER = "metadataAttributes";
+    public static final String ATTRIBUTES_PARAMETER = "attributes";
 
     public AllLocalFolderProductsRepository() {
     }
@@ -39,7 +39,7 @@ public class AllLocalFolderProductsRepository {
         };
         SensorType[] sensorTypes = new SensorType[] {SensorType.ALTIMETRIC, SensorType.ATMOSPHERIC, SensorType.OPTICAL, SensorType.RADAR, SensorType.UNKNOWN};
         parameters.add(new QueryFilter(SENSOR_TYPE_PARAMETER, Object[].class, "Sensor", null, false, sensorTypeRenderer, sensorTypes));
-        parameters.add(new QueryFilter(METADATA_ATTRIBUTES_PARAMETER, Attribute.class, "Attributes", null, false, null, null));
+        parameters.add(new QueryFilter(ATTRIBUTES_PARAMETER, Attribute.class, "Attributes", null, false, null, null));
         parameters.add(new QueryFilter(FOOT_PRINT_PARAMETER, Rectangle2D.class, "Area of interest", null, false, null));
 
         return parameters;
