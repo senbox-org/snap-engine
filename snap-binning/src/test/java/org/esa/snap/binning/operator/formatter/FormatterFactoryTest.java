@@ -1,9 +1,5 @@
 package org.esa.snap.binning.operator.formatter;
 
-import org.esa.snap.binning.operator.formatter.DefaultFormatter;
-import org.esa.snap.binning.operator.formatter.Formatter;
-import org.esa.snap.binning.operator.formatter.FormatterFactory;
-import org.esa.snap.binning.operator.formatter.IsinFormatter;
 import org.junit.Test;
 
 import java.io.File;
@@ -25,12 +21,6 @@ public class FormatterFactoryTest {
     public void testCreateWithDefaultKey() {
         Formatter formatter = FormatterFactory.get("default");
         assertTrue(formatter instanceof DefaultFormatter);
-    }
-
-    @Test
-    public void testCreateWithIsinKey() {
-        Formatter formatter = FormatterFactory.get("isin");
-        assertTrue(formatter instanceof IsinFormatter);
     }
 
     @Test
