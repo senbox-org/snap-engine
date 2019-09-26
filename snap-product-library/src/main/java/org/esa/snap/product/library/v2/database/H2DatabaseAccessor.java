@@ -34,7 +34,7 @@ public class H2DatabaseAccessor {
         String databaseName = "products";
         Properties properties = new Properties();
         properties.put("user", "snap");
-        properties.put("password", "");
+        properties.put("password", "snap");
         String databaseURL = "jdbc:h2:" + databaseParentFolder.resolve(databaseName).toString();
         return DriverManager.getConnection(databaseURL, properties);
     }

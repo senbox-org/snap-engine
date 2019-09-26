@@ -60,24 +60,24 @@ public class ProductLibraryDAL {
         }
     }
 
-    public static Map<Short, Set<String>> loadAttributesNames(Statement statement) throws SQLException, IOException {
+    public static Map<Short, Set<String>> loadAttributesNamesPerMission(Statement statement) throws SQLException, IOException {
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT ra.remote_mission_id, ra.name FROM ")
                 .append(DatabaseTableNames.REMOTE_ATTRIBUTES)
                 .append(" AS ra ");
         try (ResultSet resultSet = statement.executeQuery(sql.toString())) {
-            Map<Short, Set<String>> attributes = new HashMap<>();
+            Map<Short, Set<String>> attributeNamesPerMission = new HashMap<>();
             while (resultSet.next()) {
                 short missionId = resultSet.getShort("remote_mission_id");
                 String attributeName = resultSet.getString("name");
-                Set<String> missionAttributes = attributes.get(missionId);
+                Set<String> missionAttributes = attributeNamesPerMission.get(missionId);
                 if (missionAttributes == null) {
                     missionAttributes = new HashSet<>();
-                    attributes.put(missionId, missionAttributes);
+                    attributeNamesPerMission.put(missionId, missionAttributes);
                 }
                 missionAttributes.add(attributeName);
             }
-            return attributes;
+            return attributeNamesPerMission;
         }
     }
 
@@ -115,7 +115,7 @@ public class ProductLibraryDAL {
                 }
             }
             StringBuilder sql = new StringBuilder();
-            sql.append("SELECT p.id, p.name, p.type, p.local_path, p.entry_point, p.size_in_bytes, p.geometry, p.acquisition_date, p.last_modified_date")
+            sql.append("SELECT p.id, p.name, p.local_repository_relative_path, p.entry_point, p.size_in_bytes, p.geometry, p.acquisition_date, p.last_modified_date")
                 .append(", lr.folder_path");
             if (mission == null) {
                 // no mission filter
@@ -136,6 +136,8 @@ public class ProductLibraryDAL {
                 sql.append(" WHERE p.remote_mission_id = ")
                         .append(mission.getId());
             }
+            sql.append(" AND lr.id = p.local_repository_id");
+
             if (selectionArea != null) {
                 Polygon2D polygon = new Polygon2D();
                 polygon.append(selectionArea.getX(), selectionArea.getY()); // the top left corner
@@ -182,9 +184,9 @@ public class ProductLibraryDAL {
                     while (resultSet.next()) {
                         int id = resultSet.getInt("id");
                         String name = resultSet.getString("name");
-                        String type = resultSet.getString("type");
+                        String type = null;
                         String localFolderPath = resultSet.getString("folder_path");
-                        String localPath = resultSet.getString("local_path");
+                        String localPath = resultSet.getString("local_repository_relative_path");
                         Path productLocalPath = Paths.get(localFolderPath, localPath);
                         String missionName = (mission == null) ? resultSet.getString("mission_name") : mission.getName();
                         Timestamp acquisitionDate = resultSet.getTimestamp("acquisition_date");
@@ -474,24 +476,22 @@ public class ProductLibraryDAL {
         return localRepositoryId;
     }
 
-    private static int insertProduct(RepositoryProduct productToSave, Path relativePath, int remoteMissionId, int localRepositoryId,
+    private static int insertProduct(RepositoryProduct productToSave, Path localRepositoryRelativePath, int remoteMissionId, int localRepositoryId,
                                      FileTime fileTime, long sizeInBytes, Connection connection)
                                      throws SQLException, IOException {
 
         StringBuilder sql = new StringBuilder();
         sql.append("INSERT INTO ")
                 .append(DatabaseTableNames.PRODUCTS)
-                .append(" (name, type, remote_mission_id, local_repository_id, local_path, entry_point, size_in_bytes, acquisition_date")
+                .append(" (name, remote_mission_id, local_repository_id, local_repository_relative_path, entry_point, size_in_bytes, acquisition_date")
                 .append(", last_modified_date, geometry, data_format_type_id, pixel_type_id, sensor_type_id) VALUES ('")
                 .append(productToSave.getName())
-                .append("', '")
-                .append("product_type") //TODO Jean set the product type
                 .append("', ")
                 .append(remoteMissionId)
                 .append(", ")
                 .append(localRepositoryId)
                 .append(", '")
-                .append(relativePath.toString())
+                .append(localRepositoryRelativePath.toString())
                 .append("', '")
                 .append(productToSave.getEntryPoint())
                 .append("', ")
