@@ -57,8 +57,9 @@ public abstract class AbstractTAORemoteRepositoryProvider<T extends DataSource> 
     protected abstract ProductHelper buildProductHelper(String productName);
 
     @Override
-    public boolean hasAuthentication() {
-        return true;
+    public boolean requiresAuthentication() {
+        DataSource dataSource = getDataSource();
+        return dataSource.requiresAuthentication();
     }
 
     @Override

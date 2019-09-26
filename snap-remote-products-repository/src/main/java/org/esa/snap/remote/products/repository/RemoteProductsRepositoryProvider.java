@@ -13,7 +13,7 @@ import java.util.Map;
  */
 public interface RemoteProductsRepositoryProvider {
 
-    public boolean hasAuthentication();
+    public boolean requiresAuthentication();
 
     public String getRepositoryName();
 

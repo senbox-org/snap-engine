@@ -1,17 +1,14 @@
 package org.esa.snap.remote.products.repository.tao.scihub;
 
-import org.esa.snap.remote.products.repository.listener.DownloadProductProgressListener;
 import org.esa.snap.remote.products.repository.ProductRepositoryDownloader;
-import org.esa.snap.remote.products.repository.listener.ProgressListener;
 import org.esa.snap.remote.products.repository.RepositoryProduct;
+import org.esa.snap.remote.products.repository.listener.DownloadProductProgressListener;
+import org.esa.snap.remote.products.repository.listener.ProgressListener;
 import ro.cs.tao.datasource.remote.FetchMode;
-import ro.cs.tao.datasource.remote.ProductHelper;
 import ro.cs.tao.datasource.remote.scihub.download.Sentinel1DownloadStrategy;
 import ro.cs.tao.datasource.remote.scihub.download.Sentinel2ArchiveDownloadStrategy;
 import ro.cs.tao.datasource.remote.scihub.download.Sentinel3DownloadStrategy;
 import ro.cs.tao.datasource.remote.scihub.download.SentinelDownloadStrategy;
-import ro.cs.tao.products.sentinels.Sentinel1ProductHelper;
-import ro.cs.tao.products.sentinels.SentinelProductHelper;
 
 import java.io.IOException;
 import java.nio.file.Path;
