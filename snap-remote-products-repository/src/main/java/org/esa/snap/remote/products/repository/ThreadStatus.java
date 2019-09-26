@@ -7,7 +7,7 @@ public interface ThreadStatus {
 
     public boolean isRunning();
 
-    public static void checkCancelled(ThreadStatus thread) throws InterruptedException {
+    public static void checkCancelled(ThreadStatus thread) throws java.lang.InterruptedException {
         if (thread != null && !thread.isRunning()) {
             throw new InterruptedException(); // stop running
         }

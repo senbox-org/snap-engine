@@ -54,10 +54,9 @@ CREATE TABLE remote_attributes(
 CREATE TABLE products(
 	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
 	name VARCHAR(256) NOT NULL,
-	type VARCHAR(256) NOT NULL,
 	remote_mission_id SMALLINT,
 	local_repository_id SMALLINT NOT NULL,
-	local_path VARCHAR(1024) NOT NULL,
+	local_repository_relative_path VARCHAR(1024) NOT NULL,
 	entry_point VARCHAR(256),
 	size_in_bytes BIGINT NOT NULL,
 	acquisition_date TIMESTAMP NOT NULL,
@@ -66,6 +65,7 @@ CREATE TABLE products(
 	data_format_type_id SMALLINT,
 	pixel_type_id SMALLINT,
 	sensor_type_id SMALLINT,
+	UNIQUE (local_repository_id, local_repository_relative_path),
     FOREIGN KEY (remote_mission_id) REFERENCES remote_missions(id),
     FOREIGN KEY (local_repository_id) REFERENCES local_repositories(id),
     FOREIGN KEY (data_format_type_id) REFERENCES data_format_types(id),
@@ -78,7 +78,7 @@ CREATE TABLE product_remote_attributes(
 	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
 	product_id INTEGER NOT NULL,
 	name VARCHAR(256) NOT NULL,
-	value VARCHAR(2048) NOT NULL,
+	value VARCHAR(4096) NOT NULL,
 	UNIQUE (product_id, name),
 	FOREIGN KEY (product_id) REFERENCES products(id)
 )
