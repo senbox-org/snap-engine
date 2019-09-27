@@ -1,6 +1,5 @@
 package org.esa.snap.product.library.v2.database;
 
-import com.vividsolutions.jts.geom.Geometry;
 import org.esa.snap.remote.products.repository.Attribute;
 import org.esa.snap.remote.products.repository.DataFormatType;
 import org.esa.snap.remote.products.repository.PixelType;
@@ -53,6 +52,10 @@ public class LocalRepositoryProduct implements RepositoryProduct {
     @Override
     public String getName() {
         return this.name;
+    }
+
+    public Path getPath() {
+        return path;
     }
 
     @Override
