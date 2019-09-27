@@ -255,7 +255,7 @@ public final class ProductTemporalBinRenderer implements TemporalBinRenderer {
         }
     }
 
-    static CrsGeoCoding createMapGeoCoding(Rectangle outputRegion, double pixelSize) {
+    public static CrsGeoCoding createMapGeoCoding(Rectangle outputRegion, double pixelSize) {
         CrsGeoCoding geoCoding;
         try {
             geoCoding = new CrsGeoCoding(DefaultGeographicCRS.WGS84,

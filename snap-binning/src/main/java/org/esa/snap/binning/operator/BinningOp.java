@@ -31,6 +31,9 @@ import org.esa.snap.binning.TemporalBin;
 import org.esa.snap.binning.TemporalBinSource;
 import org.esa.snap.binning.TemporalBinner;
 import org.esa.snap.binning.cellprocessor.CellProcessorChain;
+import org.esa.snap.binning.operator.formatter.Formatter;
+import org.esa.snap.binning.operator.formatter.FormatterConfig;
+import org.esa.snap.binning.operator.formatter.FormatterFactory;
 import org.esa.snap.binning.operator.metadata.GlobalMetadata;
 import org.esa.snap.binning.operator.metadata.MetadataAggregator;
 import org.esa.snap.binning.operator.metadata.MetadataAggregatorFactory;
@@ -812,7 +815,9 @@ public class BinningOp extends Operator {
         if (outputTargetProduct) {
             getLogger().info(String.format("Writing mapped product '%s'...", formatterConfig.getOutputFile()));
             final MetadataElement processingGraphMetadata = getProcessingGraphMetadata();
-            Formatter.format(binningContext.getPlanetaryGrid(),
+
+            final Formatter defaultFormatter = FormatterFactory.get("default");
+            defaultFormatter.format(binningContext.getPlanetaryGrid(),
                              getTemporalBinSource(temporalBins),
                              binningContext.getBinManager().getResultFeatureNames(),
                              formatterConfig,
@@ -827,7 +832,7 @@ public class BinningOp extends Operator {
 
             if (outputType.equalsIgnoreCase("Product")) {
                 final File writtenProductFile = new File(outputFile);
-                String format = Formatter.getOutputFormat(formatterConfig, writtenProductFile);
+                String format = FormatterFactory.getOutputFormat(formatterConfig, writtenProductFile);
                 writtenProduct = ProductIO.readProduct(writtenProductFile, format);
                 this.targetProduct = copyProduct(writtenProduct);
             } else {
@@ -886,7 +891,7 @@ public class BinningOp extends Operator {
         }
     }
 
-    // package access for tessting only tb 2013-05-07
+    // package access for testing only tb 2013-05-07
     static ProductData.UTC parseStartDateUtc(String date) {
         try {
             if (date.matches("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}")) {
@@ -899,7 +904,7 @@ public class BinningOp extends Operator {
         }
     }
 
-    private static class SimpleTemporalBinSource implements TemporalBinSource {
+    public static class SimpleTemporalBinSource implements TemporalBinSource {
 
         private final List<TemporalBin> temporalBins;
 
