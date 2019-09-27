@@ -27,7 +27,6 @@ import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.util.DummyProductBuilder;
 import org.esa.snap.dataio.netcdf.metadata.profiles.cf.CfNetCdfReaderPlugIn;
 import org.esa.snap.runtime.Config;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -37,7 +36,9 @@ import java.net.URLDecoder;
 import java.util.Calendar;
 import java.util.HashMap;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Ralf Quast
@@ -100,7 +101,6 @@ public class Nc4ReaderTest {
     }
 
     @Test
-    @Ignore
     public void testWithExistingLatLonBandsAndCrsGeoCoding() throws IOException {
         DummyProductBuilder pb = new DummyProductBuilder();
         pb.size(DummyProductBuilder.Size.SMALL);
