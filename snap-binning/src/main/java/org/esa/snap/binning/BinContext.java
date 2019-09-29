@@ -47,4 +47,12 @@ public interface BinContext {
      * @param value The value.
      */
     void put(String name, Object value);
+
+    /**
+     * Returns a name that is not yet used in the context by adding "_<number>" to the name. Numbers increment until a
+     * slot not used is found.
+     * @param name the desired name
+     * @return the unique name drived from the desired name
+     */
+    String ensureUnique(String name);
 }

@@ -57,17 +57,6 @@ public class TemporalBin extends Bin {
         }
     }
 
-    public void readFields(DataInput dataInput) throws IOException {
-        // Note, we don't serialise the index, because it is usually the MapReduce key
-        numObs = dataInput.readInt();
-        numPasses = dataInput.readInt();
-        final int numFeatures = dataInput.readInt();
-        featureValues = new float[numFeatures];
-        for (int i = 0; i < numFeatures; i++) {
-            featureValues[i] = dataInput.readFloat();
-        }
-    }
-
     public static TemporalBin read(DataInput dataInput) throws IOException {
         TemporalBin bin = new TemporalBin();
         bin.readFields(dataInput);
@@ -85,6 +74,17 @@ public class TemporalBin extends Bin {
     public String toString() {
         return String.format("%s{index=%d, numObs=%d, numPasses=%d, featureValues=%s}",
                              getClass().getSimpleName(), index, numObs, numPasses, Arrays.toString(featureValues));
+    }
+
+    private void readFields(DataInput dataInput) throws IOException {
+        // Note, we don't serialise the index, because it is usually the MapReduce key
+        numObs = dataInput.readInt();
+        numPasses = dataInput.readInt();
+        final int numFeatures = dataInput.readInt();
+        featureValues = new float[numFeatures];
+        for (int i = 0; i < numFeatures; i++) {
+            featureValues[i] = dataInput.readFloat();
+        }
     }
 
 }

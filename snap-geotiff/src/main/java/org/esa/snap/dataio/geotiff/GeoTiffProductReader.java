@@ -26,23 +26,7 @@ import it.geosolutions.imageioimpl.plugins.tiff.TIFFRenderedImage;
 import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.dataio.dimap.DimapProductHelpers;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.ColorPaletteDef;
-import org.esa.snap.core.datamodel.CrsGeoCoding;
-import org.esa.snap.core.datamodel.FilterBand;
-import org.esa.snap.core.datamodel.GcpDescriptor;
-import org.esa.snap.core.datamodel.GcpGeoCoding;
-import org.esa.snap.core.datamodel.GeoPos;
-import org.esa.snap.core.datamodel.ImageInfo;
-import org.esa.snap.core.datamodel.IndexCoding;
-import org.esa.snap.core.datamodel.PixelPos;
-import org.esa.snap.core.datamodel.Placemark;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.datamodel.ProductNodeGroup;
-import org.esa.snap.core.datamodel.TiePointGeoCoding;
-import org.esa.snap.core.datamodel.TiePointGrid;
-import org.esa.snap.core.datamodel.VirtualBand;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.dataop.maptransf.Datum;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.util.SystemUtils;
@@ -50,13 +34,9 @@ import org.esa.snap.core.util.geotiff.EPSGCodes;
 import org.esa.snap.core.util.geotiff.GeoTIFFCodes;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.core.util.jai.JAIUtils;
+import org.esa.snap.dataio.FileImageInputStreamSpi;
 import org.esa.snap.dataio.geotiff.internal.GeoKeyEntry;
-import org.geotools.coverage.grid.io.imageio.geotiff.GeoTiffConstants;
-import org.geotools.coverage.grid.io.imageio.geotiff.GeoTiffException;
-import org.geotools.coverage.grid.io.imageio.geotiff.GeoTiffIIOMetadataDecoder;
-import org.geotools.coverage.grid.io.imageio.geotiff.GeoTiffMetadata2CRSAdapter;
-import org.geotools.coverage.grid.io.imageio.geotiff.PixelScale;
-import org.geotools.coverage.grid.io.imageio.geotiff.TiePoint;
+import org.geotools.coverage.grid.io.imageio.geotiff.*;
 import org.geotools.factory.Hints;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.referencing.operation.matrix.GeneralMatrix;
@@ -70,30 +50,20 @@ import org.xml.sax.SAXException;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
+import javax.imageio.spi.IIORegistry;
+import javax.imageio.spi.ImageInputStreamSpi;
 import javax.imageio.stream.ImageInputStream;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.awt.image.DataBuffer;
-import java.awt.image.IndexColorModel;
-import java.awt.image.Raster;
-import java.awt.image.RenderedImage;
-import java.awt.image.SampleModel;
+import java.awt.image.*;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -102,7 +72,12 @@ public class GeoTiffProductReader extends AbstractProductReader {
 
     private static final int FIRST_IMAGE = 0;
 
+    // non standard ASCII tag (code 42112) to extract GDAL metadata,
+    // see https://gdal.org/drivers/raster/gtiff.html#metadata:
+    private static final int TIFFTAG_GDAL_METADATA = 42112;
+
     private ImageInputStream inputStream;
+    protected ImageInputStreamSpi imageInputStreamSpi;
     private Map<Band, Integer> bandMap;
 
     private TIFFImageReader imageReader;
@@ -110,6 +85,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
 
     public GeoTiffProductReader(ProductReaderPlugIn readerPlugIn) {
         super(readerPlugIn);
+        registerSpi();
     }
 
     @Override
@@ -150,7 +126,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
 
         if (isGlobalShifted180) {
             // SPECIAL CASE of a global geographic lat/lon with lon from 0..360 instead of -180..180
-            readBandRasterDataImplGlobalShifted180(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight,
+            readBandRasterDataImplGlobalShifted180(sourceOffsetX, sourceOffsetY, 
                                                    sourceStepX, sourceStepY, destBand, destOffsetX, destOffsetY,
                                                    destWidth, destHeight, destBuffer, pm);
         } else {
@@ -200,7 +176,6 @@ public class GeoTiffProductReader extends AbstractProductReader {
     }
 
     private void readBandRasterDataImplGlobalShifted180(int sourceOffsetX, int sourceOffsetY,
-                                                        int sourceWidth, int sourceHeight,
                                                         int sourceStepX, int sourceStepY,
                                                         Band destBand,
                                                         int destOffsetX, int destOffsetY,
@@ -259,10 +234,38 @@ public class GeoTiffProductReader extends AbstractProductReader {
         return subsampledImage.getData(new Rectangle(destOffsetX, destOffsetY, destWidth, destHeight));
     }
 
+    /**
+     * Registers a file image input strwM SPI for image input stream, if none is yet registered.
+     */
+    protected void registerSpi() {
+        final IIORegistry defaultInstance = IIORegistry.getDefaultInstance();
+        Iterator<ImageInputStreamSpi> serviceProviders = defaultInstance.getServiceProviders(ImageInputStreamSpi.class, true);
+        ImageInputStreamSpi toUnorder = null;
+        if (defaultInstance.getServiceProviderByClass(FileImageInputStreamSpi.class) == null) {
+            // register only if not already registered
+            while (serviceProviders.hasNext()) {
+                ImageInputStreamSpi current = serviceProviders.next();
+                if (current.getInputClass() == File.class) {
+                    toUnorder = current;
+                    break;
+                }
+            }
+            imageInputStreamSpi = new FileImageInputStreamSpi();
+            defaultInstance.registerServiceProvider(imageInputStreamSpi);
+            if (toUnorder != null) {
+                // Make the custom Spi to be the first one to be used.
+                defaultInstance.setOrdering(ImageInputStreamSpi.class, imageInputStreamSpi, toUnorder);
+            }
+        }
+    }
+
     @Override
     public synchronized void close() throws IOException {
         super.close();
         inputStream.close();
+        if (imageInputStreamSpi != null) {
+            IIORegistry.getDefaultInstance().deregisterServiceProvider(imageInputStreamSpi);
+        }
     }
 
     Product readGeoTIFFProduct(final ImageInputStream stream, final File inputFile) throws IOException {
@@ -366,9 +369,40 @@ public class GeoTiffProductReader extends AbstractProductReader {
         final int numBands = sampleModel.getNumBands();
         final int productDataType = ImageManager.getProductDataType(sampleModel.getDataType());
         bandMap = new HashMap<>(numBands);
+
+        // check if GDAL metadata exists. If so, extract all band info and add to bands.
+        // todo: so far this has been implemented and tested for PROBA-V S* GeoTiff products only (SIIITBX-85),
+        //  for these we get now bands RED, NIR, BLUE, SWIR (or NDVI) instead of band_1,..,band_4.
+        //  Explore if this can be generalized for further GeoTiff products.
+        final TIFFField gdalMetadataTiffField = tiffInfo.getField(TIFFTAG_GDAL_METADATA);
+        if (gdalMetadataTiffField != null) {
+            final String gdalMetadataXmlString = gdalMetadataTiffField.getAsString(0);
+            try {
+                final Band[] bandsFromGdalMetadata = Utils.setupBandsFromGdalMetadata(gdalMetadataXmlString,
+                                                                                      productDataType,
+                                                                      product.getSceneRasterWidth(),
+                                                                      product.getSceneRasterHeight());
+                if (bandsFromGdalMetadata.length == numBands) {
+                    for (int i = 0; i < bandsFromGdalMetadata.length; i++) {
+                        product.addBand(bandsFromGdalMetadata[i]);
+                    }
+                } else {
+                    for (int i = 0; i < numBands; i++) {
+                        final String bandName = String.format("band_%d", i + 1);
+                        product.addBand(bandName, productDataType);
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            for (int i = 0; i < numBands; i++) {
+                final String bandName = String.format("band_%d", i + 1);
+                product.addBand(bandName, productDataType);
+            }
+        }
         for (int i = 0; i < numBands; i++) {
-            final String bandName = String.format("band_%d", i + 1);
-            final Band band = product.addBand(bandName, productDataType);
+            final Band band = product.getBandAt(i);
             if (tiffInfo.containsField(
                     BaselineTIFFTagSet.TAG_COLOR_MAP) && baseImage.getColorModel() instanceof IndexColorModel) {
                 band.setImageInfo(createIndexedImageInfo(product, baseImage, band));

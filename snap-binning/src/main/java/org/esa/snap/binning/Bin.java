@@ -80,14 +80,31 @@ public abstract class Bin implements BinContext {
 
     @Override
     public <T> T get(String name) {
+        ensureContextMap();
         return contextMap != null ? (T) contextMap.get(name) : null;
     }
 
     @Override
     public void put(String name, Object value) {
+        ensureContextMap();
+        contextMap.put(name, value);
+    }
+
+    @Override
+    public String ensureUnique(String name) {
+        ensureContextMap();
+        int counter = 0;
+        String temp_name = name;
+        while (contextMap.containsKey(temp_name)) {
+            counter++;
+            temp_name = temp_name + "_" + counter;
+        }
+        return temp_name;
+    }
+
+    private void ensureContextMap() {
         if (contextMap == null) {
             contextMap = new HashMap<>();
         }
-        contextMap.put(name, value);
     }
 }

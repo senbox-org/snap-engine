@@ -486,8 +486,9 @@ public class OperatorContext {
             operator.initialize();
             initTargetProduct();
             initTargetProperties(operator.getClass());
-            initTargetImages();
+            setTargetImages();
             initGraphMetadata();
+            targetProduct.setProductWriterListener((ProgressMonitor pm) -> operator.execute(pm));
 
             targetProduct.setModified(false);
         } finally {
@@ -508,6 +509,9 @@ public class OperatorContext {
         initializeOperator();
     }
 
+    public boolean isExecuted() {
+        return executed;
+    }
 
     public PropertySet getParameterSet() {
         if (parameterSet == null) {
@@ -692,11 +696,12 @@ public class OperatorContext {
         }
     }
 
-    private void initTargetImages() {
+    private void setTargetImages() {
+        final Band[] targetBands = targetProduct.getBands();
+        targetImageMap = new HashMap<>(targetBands.length * 2);
         if (targetProduct.getPreferredTileSize() == null) {
             targetProduct.setPreferredTileSize(getPreferredTileSize());
         }
-        final Band[] targetBands = targetProduct.getBands();
         Object[][] locks = null;
         if (operatorMustComputeTileStack()) {
             Dimension tileSize = targetProduct.getPreferredTileSize();
@@ -706,6 +711,9 @@ public class OperatorContext {
         }
         targetImageMap = new HashMap<>(targetBands.length * 2);
         for (final Band targetBand : targetBands) {
+            if (targetImageMap.containsKey(targetBand)) {
+                continue;
+            }
             // Only register non-virtual bands
             // Actually it should not be necessary to distinguish between regular and not regular bands.
             // What does 'regular' actually mean?
@@ -756,7 +764,7 @@ public class OperatorContext {
                         targetImageMap.put(targetBand, new OperatorImage(targetBand, this) {
                             @Override
                             protected void computeRect(PlanarImage[] ignored, WritableRaster tile, Rectangle destRect) {
-                                executeOperator(ProgressMonitor.NULL);
+                                GPF.getDefaultInstance().executeOperator(getOperator());
                                 Band targetBand = getTargetBand();
                                 tile.setRect(targetBand.getGeophysicalImage().getData(destRect));
                                 TileImpl targetTile = new TileImpl(targetBand, tile, destRect, false);
@@ -1241,6 +1249,7 @@ public class OperatorContext {
     public synchronized void executeOperator(ProgressMonitor pm) {
         if (!executed) {
             getOperator().doExecute(pm);
+            setTargetImages();
             executed = true;
         }
     }

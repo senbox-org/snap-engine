@@ -19,6 +19,7 @@ class Tile {
     private double ul_x;
     private double ul_y;
     private IsinForward forward;
+    private IsinInverse inverse;
 
     void setNl(long nl) {
         this.nl = nl;
@@ -169,6 +170,7 @@ class Tile {
         ul_y = params.ul_yul - (0.5 * siz_y);
 
         forward = PGS_GCT_Init.forward(projParam);
+        inverse = PGS_GCT_Init.reverse(projParam);
     }
 
     IsinPoint forwardTileImage(double lon, double lat) {
@@ -177,8 +179,19 @@ class Tile {
         return invPix(invMapped);
     }
 
+    IsinPoint inverseTileImage(double x, double y, int tileH, int tileV) {
+        final IsinPoint mapTiledPoint = new IsinPoint(x, y, tileH, tileV);
+        final IsinPoint globalMapPoint = fwdPix(mapTiledPoint);
+        final IsinPoint globalTiledPoint = fwdMap(globalMapPoint);
+        return inverse.transform(globalTiledPoint);
+    }
+
     IsinPoint forwardGlobalMap(double lon, double lat) {
         return forward.transform(new IsinPoint(lon, lat));
+    }
+
+    IsinPoint inverseGlobalMap(double x, double y) {
+        return inverse.transform(new IsinPoint(x, y));
     }
 
     static IsinDef getIsinDef(long nrow_half, double sphere) {
@@ -204,7 +217,7 @@ class Tile {
             isinDef.ncol_inv[irow] = 1.0 / ((double) ncol);
             ncol_cen = ncol;    // @todo 3 tb/tb implement more clever than assigning in loop 2018-03-21
         }
-        isinDef.col_dist_inv = ncol_cen / (2.0 * Math.PI * sphere);
+        isinDef.col_dist_inv = ncol_cen / (Const.TWOPI * sphere);
 
         return isinDef;
     }
@@ -214,6 +227,15 @@ class Tile {
         final double samp_global = ((isinPoint.getX() - ul_x) * inv_siz_x) - ns_offset;
 
         return new IsinPoint(samp_global, line_global);
+    }
+
+    private IsinPoint fwdMap(IsinPoint isinPoint) {
+        final double samp_global = isinPoint.getX();
+        final double line_global = isinPoint.getY();
+        final double y = ul_y - ((line_global + nl_offset) * siz_y);
+        final double x = ul_x + ((samp_global + ns_offset) * siz_x);
+
+        return new IsinPoint(x, y);
     }
 
     private IsinPoint invPix(IsinPoint isinPoint) {
@@ -250,5 +272,22 @@ class Tile {
         final double samp = samp_global - (itile_samp * ns_tile);
 
         return new IsinPoint(samp, line, itile_samp, itile_line);
+    }
+
+    private IsinPoint fwdPix(IsinPoint isinPoint) {
+        final int tile_line = isinPoint.getTile_line();
+        final int tile_col = isinPoint.getTile_col();
+        final double samp = isinPoint.getX();
+        final double line = isinPoint.getY();
+
+        if (line < -0.5 || line > (nl_tile - 0.5) ||
+                samp < -0.5 || samp > (ns_tile - 0.5)) {
+            throw new IllegalArgumentException("tile coordinates out of range");
+        }
+
+        final double line_global = line + (nl_tile * (long) tile_line);
+        final double samp_global = samp + (ns_tile * (long) tile_col);
+
+        return new IsinPoint(samp_global, line_global);
     }
 }

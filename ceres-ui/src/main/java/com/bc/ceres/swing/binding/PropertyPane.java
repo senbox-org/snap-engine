@@ -44,10 +44,13 @@ import java.awt.*;
  * @
  */
 // JAN2018 - Daniel Knowles - Added method to return property pane as a JScrollPane
-//                          - Moved some of the logic for adding components to a public method which can also be called by
+
+
+// JAN2018 - Daniel Knowles - Moved some of the logic for adding components to a public method which can also be called by
 //                            the preferences GUIs.
-//                          - Added tooltips
-//                          - Added section break logic
+//                          - Added tooltips: NOTE: actual tooltips values will be added in the future.
+//                            NOTE: this does not contain section breaks which may be added in the future for a future
+//                                  revision of map gridlines and other tools.
 
 
 

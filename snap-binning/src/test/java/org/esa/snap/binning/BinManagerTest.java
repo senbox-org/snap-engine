@@ -21,6 +21,8 @@ import org.esa.snap.binning.aggregators.AggregatorAverageML;
 import org.esa.snap.binning.aggregators.AggregatorMinMax;
 import org.esa.snap.binning.aggregators.AggregatorOnMaxSet;
 import org.esa.snap.binning.cellprocessor.FeatureSelection;
+import org.esa.snap.binning.support.ObservationImpl;
+import org.esa.snap.binning.support.VectorImpl;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -48,7 +50,7 @@ public class BinManagerTest {
     }
 
     @Test
-    public void testNameUnifying() throws Exception {
+    public void testNameUnifying() {
         BinManager.NameUnifier nameUnifier = new BinManager.NameUnifier();
         assertEquals("expression_p90", nameUnifier.unifyName("expression_p90"));
         assertEquals("expression_p90_1", nameUnifier.unifyName("expression_p90"));
@@ -117,6 +119,68 @@ public class BinManagerTest {
 
         final int featureCount = binManager.getResultFeatureCount();
         assertEquals(1, featureCount);
+    }
+
+    @Test
+    public void testAggregationWithThreeAVGs(){
+        final VariableContext ctx = new MyVariableContext("tcwv", "tcwv_uncertainty");
+        final AggregatorAverage agg_tcwv = new AggregatorAverage(ctx, "tcwv", null, 1.0, true, false);
+        final AggregatorAverage agg_tcwv_unc = new AggregatorAverage(ctx, "tcwv_uncertainty", "tcwv_unc", 1.0, false, false);
+        final AggregatorAverage agg_tcwv_sums = new AggregatorAverage(ctx, "tcwv_uncertainty", "tcwv_unc_sum", 1.0, false, true);
+
+        final BinManager binManager = new BinManager(ctx,
+                agg_tcwv,
+                agg_tcwv_unc,
+                agg_tcwv_sums);
+
+        final int binIndex = 20;
+        final SpatialBin spatialBin = binManager.createSpatialBin(binIndex);
+        assertEquals(7, spatialBin.getFeatureValues().length);
+
+        // ------------------------------------------------------------------------------------------------------------tcwv tcwv_unc
+        ObservationImpl observation = new ObservationImpl(23.8, 19.09, 78687443, 35.4f, 1.76f);
+        binManager.aggregateSpatialBin(observation, spatialBin);
+
+        observation = new ObservationImpl(23.8, 19.09, 78687443, 35.4f, 1.76f);
+        binManager.aggregateSpatialBin(observation, spatialBin);
+
+        observation = new ObservationImpl(23.8, 19.09, 78687443, Float.NaN, Float.NaN);
+        binManager.aggregateSpatialBin(observation, spatialBin);
+
+        observation = new ObservationImpl(23.8, 19.09, 78687443, Float.NaN, Float.NaN);
+        binManager.aggregateSpatialBin(observation, spatialBin);
+
+        observation = new ObservationImpl(23.8, 19.09, 78687443, 35.4f, 1.76f);
+        binManager.aggregateSpatialBin(observation, spatialBin);
+
+        binManager.completeSpatialBin(spatialBin);
+        final float[] featureValues = spatialBin.getFeatureValues();
+        // agg tvwv
+        assertEquals(35.400001525878906, featureValues[0], 1e-8);    // sum_tcwv/count
+        assertEquals(1253.16015625, featureValues[1], 1e-8);    // sum_tcwv²/count
+        assertEquals(3, featureValues[2], 1e-8);    // tcwv counts
+        // agg tcwv_unc
+        assertEquals(1.7599998712539673, featureValues[3], 1e-8);    // tcwv_unc/counts
+        assertEquals(3.097599983215332, featureValues[4], 1e-8);    // tcwv_unc²/counts
+        // agg tcwv_unc - sum+sums_quares
+        assertEquals(1.7599998712539673, featureValues[5], 1e-8);    // tcwv_unc/counts
+        assertEquals(3.097599983215332, featureValues[6], 1e-8);    // tcwv_unc²/counts
+
+        final TemporalBin temporalBin = binManager.createTemporalBin(binIndex);
+        binManager.aggregateTemporalBin(spatialBin, temporalBin);
+
+        binManager.completeTemporalBin(temporalBin);
+
+        final VectorImpl vector = new VectorImpl(new float[8]);
+        binManager.computeOutput(temporalBin, vector);
+        assertEquals(35.400001525878906, vector.get(0), 1e-8);
+        assertEquals(0.012500000186264515, vector.get(1), 1e-8);
+        assertEquals(3.0, vector.get(2), 1e-8);
+        assertEquals(1.7599998712539673, vector.get(3), 1e-8);
+        assertEquals(7.213353528641164E-4, vector.get(4), 1e-8);
+        assertEquals(8.799999237060547, vector.get(5), 1e-8);
+        assertEquals(15.48799991607666, vector.get(6), 1e-8);
+        assertEquals(5.0, vector.get(7), 1e-8);
     }
 
     private VariableContext createVariableContext() {

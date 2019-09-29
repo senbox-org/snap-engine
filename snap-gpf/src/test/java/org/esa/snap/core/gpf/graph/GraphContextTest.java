@@ -6,7 +6,7 @@ import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.OperatorSpiRegistry;
 import org.esa.snap.core.gpf.TestOps;
-import org.esa.snap.core.util.jai.VerbousTileCache;
+import org.esa.snap.core.util.jai.VerboseTileCache;
 
 import javax.media.jai.JAI;
 import javax.media.jai.TileCache;
@@ -17,11 +17,14 @@ public class GraphContextTest extends TestCase {
     private OperatorSpi spi3;
     private TileCache jaiTileCache;
     private TileCache testTileCache;
+    private boolean defVerbosity;
 
     @Override
     protected void setUp() throws Exception {
         jaiTileCache = JAI.getDefaultInstance().getTileCache();
-        testTileCache = new VerbousTileCache(jaiTileCache);
+        defVerbosity = VerboseTileCache.isVerbose();
+        VerboseTileCache.setVerbose(false);
+        testTileCache = new VerboseTileCache(jaiTileCache);
         JAI.getDefaultInstance().setTileCache(testTileCache);
         testTileCache.flush();
 
@@ -38,6 +41,7 @@ public class GraphContextTest extends TestCase {
     @Override
     protected void tearDown() throws Exception {
         testTileCache.flush();
+        VerboseTileCache.setVerbose(defVerbosity);
         JAI.getDefaultInstance().setTileCache(jaiTileCache);
         final OperatorSpiRegistry spiRegistry = GPF.getDefaultInstance().getOperatorSpiRegistry();
         spiRegistry.removeOperatorSpi(spi1);
@@ -140,7 +144,7 @@ public class GraphContextTest extends TestCase {
         assertNotNull(op3.inputs);
         assertEquals(0, op3.inputs.length);
 
-        assertEquals(false, op3.ignoreSign);        // has NO default value
+        assertFalse(op3.ignoreSign);        // has NO default value
         assertEquals("NN", op3.interpolMethod);     // has default value
         assertEquals(1.5, op3.factor);              // has default value
 

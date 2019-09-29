@@ -15,12 +15,14 @@
  */
 package org.esa.snap.core.dataio;
 
+import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductNode;
 import org.esa.snap.core.util.Guardian;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * The <code>AbstractProductWriter</code> class can be used as a base class for new product writer implementations.
@@ -45,6 +47,9 @@ public abstract class AbstractProductWriter implements ProductWriter {
      */
     private Object _output;
 
+    private ArrayList<ProductWriterListener> productWriterListeners;
+    private boolean writerPreparationTriggered;
+
     /**
      * Constructs a <code>ProductWriter</code>. Since no output destination is set, the <code>setOutput</code>
      * method must be called before data can be written.
@@ -56,6 +61,8 @@ public abstract class AbstractProductWriter implements ProductWriter {
     public AbstractProductWriter(ProductWriterPlugIn writerPlugIn) {
         Guardian.assertNotNull("writerPlugIn", writerPlugIn);
         _writerPlugIn = writerPlugIn;
+        productWriterListeners = new ArrayList<>();
+        writerPreparationTriggered = false;
     }
 
     /**
@@ -186,4 +193,25 @@ public abstract class AbstractProductWriter implements ProductWriter {
     * @param formatName The name of the file format.
     */
     public void setFormatName(final String formatName) {}
+
+    @Override
+    public void prepareWriting(ProgressMonitor pm) {
+        if (writerPreparationTriggered) {
+            return;
+        }
+        writerPreparationTriggered = true;
+        for (ProductWriterListener productWriterListener : productWriterListeners) {
+            productWriterListener.aboutToWriteProduct(pm);
+        }
+    }
+
+    @Override
+    public void addProductWriterListener(ProductWriterListener productWriterListener) {
+        productWriterListeners.add(productWriterListener);
+    }
+
+    @Override
+    public void removeProductWriterListener(ProductWriterListener productWriterListener) {
+        productWriterListeners.remove(productWriterListener);
+    }
 }

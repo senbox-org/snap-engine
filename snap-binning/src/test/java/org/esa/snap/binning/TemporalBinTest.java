@@ -210,6 +210,20 @@ public class TemporalBinTest {
         assertEquals(10L, bin.getIndex());
     }
 
+    // ---- abstract Bin tests -----
+    @Test
+    public void testEnsureUnique() {
+        final TemporalBin bin = new TemporalBin(43, 0);
+
+        String unique = bin.ensureUnique("nasenmann");
+        assertEquals(unique, "nasenmann");
+
+        bin.put("nasenmann", 56d);
+
+        unique = bin.ensureUnique("nasenmann");
+        assertEquals(unique, "nasenmann_1");
+    }
+
     private TemporalBin serializeAndRestoreBin(TemporalBin tbin) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         tbin.write(new DataOutputStream(baos));
