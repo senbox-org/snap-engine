@@ -25,10 +25,10 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import java.awt.Color;
+import java.awt.Font;
 
-import static com.bc.ceres.swing.TableLayout.*;
-
-import java.awt.*;
+import static com.bc.ceres.swing.TableLayout.cell;
 
 /**
  * A utility class used to create a {@link JPanel} containing default Swing components and their corresponding bindings for the
@@ -131,9 +131,8 @@ public class PropertyPane {
 
         JPanel panel = createPanel();
         panel.setMinimumSize(panel.getPreferredSize());
-        final JScrollPane scrollPane = new JScrollPane(panel);
 
-        return scrollPane;
+        return new JScrollPane(panel);
     }
 
 
