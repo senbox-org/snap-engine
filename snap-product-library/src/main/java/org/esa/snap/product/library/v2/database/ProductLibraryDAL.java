@@ -288,6 +288,33 @@ public class ProductLibraryDAL {
         return polygon;
     }
 
+    public static void deleteProduct(LocalRepositoryProduct repositoryProduct) throws IOException, SQLException {
+        try (Connection connection = H2DatabaseAccessor.getConnection()) {
+            connection.setAutoCommit(false);
+            try (Statement statement = connection.createStatement()) {
+                StringBuilder sql = new StringBuilder();
+                sql.append("DELETE FROM ")
+                        .append(DatabaseTableNames.PRODUCT_REMOTE_ATTRIBUTES)
+                        .append(" WHERE product_id = ")
+                        .append(repositoryProduct.getId());
+                statement.executeUpdate(sql.toString());
+
+                sql = new StringBuilder();
+                sql.append("DELETE FROM ")
+                        .append(DatabaseTableNames.PRODUCTS)
+                        .append(" WHERE id = ")
+                        .append(repositoryProduct.getId());
+                statement.executeUpdate(sql.toString());
+                // commit the data
+                connection.commit();
+            } catch (Exception exception) {
+                // rollback the statements from the transaction
+                connection.rollback();
+                throw exception;
+            }
+        }
+    }
+
     public static SaveProductData saveProduct(RepositoryProduct productToSave, Path productFolderPath, String remoteRepositoryName, Path localRepositoryFolderPath)
                                    throws IOException, SQLException {
 
