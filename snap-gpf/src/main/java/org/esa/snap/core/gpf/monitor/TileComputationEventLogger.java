@@ -15,6 +15,7 @@
  */
 package org.esa.snap.core.gpf.monitor;
 
+import com.sun.media.jai.util.SunTileCache;
 import org.esa.snap.core.gpf.internal.OperatorImage;
 
 import java.util.HashSet;
@@ -25,7 +26,7 @@ import java.util.logging.Level;
  * A printer for tile computation events.
  * It prints out immediately when a tile computation has happened.
  * Re-computations are indicated.
- *
+ * <p>
  * May be used as a value for the 'snap.config' variable 'snap.gpf.tileComputationObserver'.
  *
  * @author marco Zuehlke
@@ -96,6 +97,13 @@ public class TileComputationEventLogger extends TileComputationObserver {
                 recordedEventSet.add(tileEvent);
                 newEvent = true;
             }
+        }
+        if (tileEvent.image.getTileCache() instanceof SunTileCache) {
+            SunTileCache tileCache = (SunTileCache) tileEvent.image.getTileCache();
+            message += String.format(" %d/%d MB #%d",
+                                     tileCache.getCacheMemoryUsed() / 1024 / 1024,
+                                     tileCache.getMemoryCapacity() / 1024 / 1024,
+                                     tileCache.getCacheTileCount());
         }
         if (newEvent) {
             getLogger().log(Level.INFO, "Tile computed: " + message);
