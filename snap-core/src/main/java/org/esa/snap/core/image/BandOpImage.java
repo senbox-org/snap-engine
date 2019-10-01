@@ -21,11 +21,9 @@ import com.bc.ceres.glevel.MultiLevelImage;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.ProductData;
 
-import javax.media.jai.PlanarImage;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.geom.AffineTransform;
+import java.awt.*;
 import java.io.IOException;
+import java.util.List;
 import java.util.*;
 
 
@@ -72,7 +70,6 @@ public class BandOpImage extends RasterDataNodeOpImage {
         final int srcY = lvlSupport.getSourceY(destRect.y);
 
         final MultiLevelImage img = band.getSourceImage();
-        final int tileGridXOffset = img.getTileGridXOffset();
         final int tileWidth = img.getTileWidth();
         final int tileHeight = img.getTileHeight();
 
@@ -80,7 +77,6 @@ public class BandOpImage extends RasterDataNodeOpImage {
         Map<Integer, List<PositionCouple>> ySrcTiled = compTiledL0AxisIdx(destRect.y, destRect.height, tileHeight, lvlSupport::getSourceY);
 
         Point[] tileIndices = img.getTileIndices(new Rectangle(srcX, srcY, sourceWidth, sourceHeight));
-        HashMap<Rectangle, ProductData> tileMap = new HashMap<>();
         for (Point tileIndex : tileIndices) {
             final int xTileIdx = tileIndex.x;
             final int yTileIdx = tileIndex.y;
@@ -107,26 +103,7 @@ public class BandOpImage extends RasterDataNodeOpImage {
                     destData.setElemDoubleAt(yDestOffset + xDest - destRect.x, v);
                 }
             }
-
-//            tileMap.put(tileRect, tileData);
         }
-
-//        final int srcWidth = lvlSupport.getSourceWidth() - 1;
-//
-//        for (int y = 0; y < destRect.height; y++) {
-//            final int currentSrcYOffset = lvlSupport.getSourceY(destRect.y + y);
-//            int currentDestYOffset = y * destRect.width;
-//            int tileY = img.YToTileY(currentSrcYOffset);
-//            for (int x = 0; x < destRect.width; x++) {
-//                int sourceX = lvlSupport.getSourceCoord(destRect.x + x, 0, srcWidth);
-//                Rectangle tileRect = img.getTileRect(PlanarImage.XToTileX(sourceX, tileGridXOffset, tileWidth), tileY);
-//                int currentX = sourceX - tileRect.x;
-//                int currentY = currentSrcYOffset - tileRect.y;
-//                double value = tileMap.get(tileRect).getElemDoubleAt(currentY * tileRect.width + currentX);
-//
-//                destData.setElemDoubleAt(currentDestYOffset + x, value);
-//            }
-//        }
     }
 
     static LinkedHashMap<Integer, List<PositionCouple>> compTiledL0AxisIdx(int destStart, int destAxislength, int tileAxisLengthL0, SourceConverter lvlSupport) {
@@ -138,7 +115,7 @@ public class BandOpImage extends RasterDataNodeOpImage {
             if (map.containsKey(tileIdx)) {
                 xSrc = map.get(tileIdx);
             } else {
-                xSrc = new ArrayList<PositionCouple>();
+                xSrc = new ArrayList<>();
                 map.put(tileIdx, xSrc);
             }
             xSrc.add(new PositionCouple(srcIdx, i));
@@ -146,7 +123,7 @@ public class BandOpImage extends RasterDataNodeOpImage {
         return map;
     }
 
-    static interface SourceConverter {
+    interface SourceConverter {
         int getSource(int idx);
     }
 

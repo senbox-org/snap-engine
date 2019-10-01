@@ -5,7 +5,6 @@ import org.junit.Test;
 import java.awt.*;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.Assert.*;
 
