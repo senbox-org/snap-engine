@@ -42,7 +42,7 @@ public class WriteVirtualBandWithWriteOpTest {
             writeOp.writeProduct(ProgressMonitor.NULL);
             writeOp.dispose();
 
-            Mockito.verify(mockedWriter, Mockito.times(10)).writeBandRasterData(Mockito.argThat(new IsBand("virtband")),
+            Mockito.verify(mockedWriter, Mockito.times(1)).writeBandRasterData(Mockito.argThat(new IsBand("virtband")),
                                                                                 Mockito.eq(0),
                                                                                 Mockito.anyInt(),
                                                                                 Mockito.eq(10),
