@@ -89,6 +89,7 @@ public class BandOpImage extends RasterDataNodeOpImage {
 
             final List<PositionCouple> yPositions = ySrcTiled.get(yTileIdx);
             final List<PositionCouple> xPositions = xSrcTiled.get(xTileIdx);
+            if(yPositions == null || xPositions == null) continue;
             for (PositionCouple yPos : yPositions) {
                 final int ySrc = yPos.srcPos;
                 final int yPosInTile = ySrc % tileHeight;
