@@ -325,6 +325,61 @@ public class ProductLibraryDAL {
         return polygon;
     }
 
+    public static void deleteLocalRepositoryFolder(LocalRepositoryFolder localRepositoryFolder) throws IOException, SQLException {
+        try (Connection connection = H2DatabaseAccessor.getConnection()) {
+            Set<Integer> productIds;
+            try (Statement statement = connection.createStatement()) {
+                StringBuilder sql = new StringBuilder();
+                sql.append("SELECT id FROM ")
+                        .append(DatabaseTableNames.PRODUCTS)
+                        .append(" WHERE local_repository_id = ")
+                        .append(localRepositoryFolder.getId());
+                try (ResultSet resultSet = statement.executeQuery(sql.toString())) {
+                    productIds = new HashSet<>();
+                    while (resultSet.next()) {
+                        productIds.add(resultSet.getInt("id"));
+                    }
+                }
+            }
+            if (productIds.size() > 0) {
+                connection.setAutoCommit(false);
+                try {
+                    StringBuilder sql = new StringBuilder();
+                    sql.append("DELETE FROM ")
+                            .append(DatabaseTableNames.PRODUCT_REMOTE_ATTRIBUTES)
+                            .append(" WHERE product_id = ?");
+                    try (PreparedStatement statement = connection.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS)) {
+                        for (Integer productId : productIds) {
+                            statement.setInt(1, productId.intValue());
+                            statement.executeUpdate();
+                        }
+                    }
+                    try (Statement statement = connection.createStatement()) {
+                        sql = new StringBuilder();
+                        sql.append("DELETE FROM ")
+                                .append(DatabaseTableNames.PRODUCTS)
+                                .append(" WHERE local_repository_id = ")
+                                .append(localRepositoryFolder.getId());
+                        statement.executeUpdate(sql.toString());
+
+                        sql = new StringBuilder();
+                        sql.append("DELETE FROM ")
+                                .append(DatabaseTableNames.LOCAL_REPOSITORIES)
+                                .append(" WHERE id = ")
+                                .append(localRepositoryFolder.getId());
+                        statement.executeUpdate(sql.toString());
+                    }
+                    // commit the data
+                    connection.commit();
+                } catch (Exception exception) {
+                    // rollback the statements from the transaction
+                    connection.rollback();
+                    throw exception;
+                }
+            }
+        }
+    }
+
     public static void deleteProduct(LocalRepositoryProduct repositoryProduct) throws IOException, SQLException {
         try (Connection connection = H2DatabaseAccessor.getConnection()) {
             connection.setAutoCommit(false);

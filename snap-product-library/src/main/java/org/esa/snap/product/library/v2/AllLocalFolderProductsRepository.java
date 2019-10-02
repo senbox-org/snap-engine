@@ -7,6 +7,7 @@ import org.esa.snap.remote.products.repository.SensorType;
 
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
