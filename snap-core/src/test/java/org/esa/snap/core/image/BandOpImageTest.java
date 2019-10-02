@@ -2,13 +2,15 @@ package org.esa.snap.core.image;
 
 import org.junit.Test;
 
-import java.awt.*;
+import java.awt.Rectangle;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-public class BandOpImageTest_Static_PackageLocal {
+public class BandOpImageTest {
 
     @Test
     public void testComputeTiledLevel0AxisIndexes() {
