@@ -60,6 +60,23 @@ public class ProductLibraryDAL {
         }
     }
 
+    public static List<LocalRepositoryFolder> loadLocalRepositoryFolders(Statement statement) throws SQLException, IOException {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT id, folder_path FROM ")
+                .append(DatabaseTableNames.LOCAL_REPOSITORIES);
+        try (ResultSet resultSet = statement.executeQuery(sql.toString())) {
+            List<LocalRepositoryFolder> results = new ArrayList<>();
+            while (resultSet.next()) {
+                short localRepositoryId = resultSet.getShort("id");
+                String folderPath = resultSet.getString("folder_path");
+                Path localRepositoryFolderPath = Paths.get(folderPath);
+                LocalRepositoryFolder localRepositoryFolder = new LocalRepositoryFolder(localRepositoryId, localRepositoryFolderPath);
+                results.add(localRepositoryFolder);
+            }
+            return results;
+        }
+    }
+
     public static Map<Short, Set<String>> loadAttributesNamesPerMission(Statement statement) throws SQLException, IOException {
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT ra.remote_mission_id, ra.name FROM ")
@@ -81,7 +98,9 @@ public class ProductLibraryDAL {
         }
     }
 
-    public static List<RepositoryProduct> loadProductList(RemoteMission mission, Map<String, Object> parameterValues) throws SQLException, IOException {
+    public static List<RepositoryProduct> loadProductList(LocalRepositoryFolder localRepositoryFolder, RemoteMission mission, Map<String, Object> parameterValues)
+                                                          throws SQLException, IOException {
+
         List<RepositoryProduct> productList;
         try (Connection connection = H2DatabaseAccessor.getConnection()) {
             Connection wrappedConnection = SFSUtilities.wrapConnection(connection);
@@ -115,17 +134,24 @@ public class ProductLibraryDAL {
                 }
             }
             StringBuilder sql = new StringBuilder();
-            sql.append("SELECT p.id, p.name, p.local_repository_relative_path, p.entry_point, p.size_in_bytes, p.geometry, p.acquisition_date, p.last_modified_date")
-                .append(", lr.folder_path");
+            sql.append("SELECT p.id, p.name, p.local_repository_relative_path, p.entry_point, p.size_in_bytes, p.geometry, p.acquisition_date, p.last_modified_date");
+            if (localRepositoryFolder == null) {
+                // no local repository filter
+                sql.append(", lr.folder_path");
+            }
             if (mission == null) {
                 // no mission filter
                 sql.append(", rm.name AS mission_name");
             }
             sql.append(" FROM ")
                     .append(DatabaseTableNames.PRODUCTS)
-                    .append(" AS p, ")
-                    .append(DatabaseTableNames.LOCAL_REPOSITORIES)
-                    .append(" AS lr");
+                    .append(" AS p");
+            if (localRepositoryFolder == null) {
+                // no local repository filter
+                sql.append(", ")
+                        .append(DatabaseTableNames.LOCAL_REPOSITORIES)
+                        .append(" AS lr");
+            }
             if (mission == null) {
                 // no mission filter
                 sql.append(", ")
@@ -136,7 +162,13 @@ public class ProductLibraryDAL {
                 sql.append(" WHERE p.remote_mission_id = ")
                         .append(mission.getId());
             }
-            sql.append(" AND lr.id = p.local_repository_id");
+            sql.append(" AND p.local_repository_id = ");
+            if (localRepositoryFolder == null) {
+                // no local repository filter
+                sql.append(" lr.id");
+            } else {
+                sql.append(localRepositoryFolder.getId());
+            }
 
             if (selectionArea != null) {
                 Polygon2D polygon = new Polygon2D();
@@ -185,9 +217,14 @@ public class ProductLibraryDAL {
                         int id = resultSet.getInt("id");
                         String name = resultSet.getString("name");
                         String type = null;
-                        String localFolderPath = resultSet.getString("folder_path");
                         String localPath = resultSet.getString("local_repository_relative_path");
-                        Path productLocalPath = Paths.get(localFolderPath, localPath);
+                        Path productLocalPath;
+                        if (localRepositoryFolder == null) {
+                            String localRepositoryFolderPath = resultSet.getString("folder_path");
+                            productLocalPath = Paths.get(localRepositoryFolderPath, localPath);
+                        } else {
+                            productLocalPath = localRepositoryFolder.getPath().resolve(localPath);
+                        }
                         String missionName = (mission == null) ? resultSet.getString("mission_name") : mission.getName();
                         Timestamp acquisitionDate = resultSet.getTimestamp("acquisition_date");
                         long sizeInBytes = resultSet.getLong("size_in_bytes");
