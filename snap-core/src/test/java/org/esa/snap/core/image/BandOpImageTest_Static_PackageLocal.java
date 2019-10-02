@@ -3,8 +3,8 @@ package org.esa.snap.core.image;
 import org.junit.Test;
 
 import java.awt.*;
-import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -12,7 +12,7 @@ public class BandOpImageTest_Static_PackageLocal {
 
     @Test
     public void testComputeTiledLevel0AxisIndexes() {
-        final LinkedHashMap<Integer, List<BandOpImage.PositionCouple>> xSrcTiled;
+        final Map<Integer, List<BandOpImage.PositionCouple>> xSrcTiled;
 
         //preparation
         final LevelImageSupport lvlSup = new LevelImageSupport(40, 40, new ResolutionLevel(2, 4.0));
@@ -20,7 +20,7 @@ public class BandOpImageTest_Static_PackageLocal {
         int tileWidth = 9;
 
         //execution
-        xSrcTiled = BandOpImage.compTiledL0AxisIdx(targetRect.x, targetRect.width, tileWidth, lvlSup::getSourceX);
+        xSrcTiled = BandOpImage.computeTiledL0AxisIdx(targetRect.x, targetRect.width, tileWidth, lvlSup::getSourceX);
 
         //verification
         assertEquals(3, xSrcTiled.size());

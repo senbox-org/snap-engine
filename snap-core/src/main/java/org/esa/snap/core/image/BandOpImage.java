@@ -73,13 +73,18 @@ public class BandOpImage extends RasterDataNodeOpImage {
         final int tileWidth = img.getTileWidth();
         final int tileHeight = img.getTileHeight();
 
-        Map<Integer, List<PositionCouple>> xSrcTiled = compTiledL0AxisIdx(destRect.x, destRect.width, tileWidth, lvlSupport::getSourceX);
-        Map<Integer, List<PositionCouple>> ySrcTiled = compTiledL0AxisIdx(destRect.y, destRect.height, tileHeight, lvlSupport::getSourceY);
+        Map<Integer, List<PositionCouple>> xSrcTiled = computeTiledL0AxisIdx(destRect.x, destRect.width, tileWidth, lvlSupport::getSourceX);
+        Map<Integer, List<PositionCouple>> ySrcTiled = computeTiledL0AxisIdx(destRect.y, destRect.height, tileHeight, lvlSupport::getSourceY);
 
         Point[] tileIndices = img.getTileIndices(new Rectangle(srcX, srcY, sourceWidth, sourceHeight));
         for (Point tileIndex : tileIndices) {
             final int xTileIdx = tileIndex.x;
             final int yTileIdx = tileIndex.y;
+            final List<PositionCouple> yPositions = ySrcTiled.get(yTileIdx);
+            final List<PositionCouple> xPositions = xSrcTiled.get(xTileIdx);
+            if (yPositions == null || xPositions == null) {
+                continue;
+            }
             Rectangle tileRect = img.getTileRect(xTileIdx, yTileIdx);
             if (tileRect.isEmpty()) {
                 continue;
@@ -87,9 +92,6 @@ public class BandOpImage extends RasterDataNodeOpImage {
             final ProductData tileData = ProductData.createInstance(band.getDataType(), tileRect.width * tileRect.height);
             band.readRasterData(tileRect.x, tileRect.y, tileRect.width, tileRect.height, tileData, ProgressMonitor.NULL);
 
-            final List<PositionCouple> yPositions = ySrcTiled.get(yTileIdx);
-            final List<PositionCouple> xPositions = xSrcTiled.get(xTileIdx);
-            if(yPositions == null || xPositions == null) continue;
             for (PositionCouple yPos : yPositions) {
                 final int ySrc = yPos.srcPos;
                 final int yPosInTile = ySrc % tileHeight;
@@ -107,8 +109,8 @@ public class BandOpImage extends RasterDataNodeOpImage {
         }
     }
 
-    static LinkedHashMap<Integer, List<PositionCouple>> compTiledL0AxisIdx(int destStart, int destAxislength, int tileAxisLengthL0, SourceConverter lvlSupport) {
-        final LinkedHashMap<Integer, List<PositionCouple>> map = new LinkedHashMap<>();
+    static Map<Integer, List<PositionCouple>> computeTiledL0AxisIdx(int destStart, int destAxislength, int tileAxisLengthL0, SourceConverter lvlSupport) {
+        final Map<Integer, List<PositionCouple>> map = new HashMap<>();
         for (int i = destStart; i < destStart + destAxislength; i++) {
             int srcIdx = lvlSupport.getSource(i);
             final int tileIdx = srcIdx / tileAxisLengthL0;
