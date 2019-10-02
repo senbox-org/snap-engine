@@ -122,6 +122,7 @@ public class EnviProductReader extends AbstractProductReader {
             product.setDescription(header.getDescription());
             product.getMetadataRoot().addElement(header.getAsMetadata());
 
+            product.setPreferredTileSize(product.getSceneRasterWidth(), 1);
             initGeoCoding(product, header);
             initBands(inputFile, product, header);
 
