@@ -4,7 +4,6 @@ import org.esa.snap.remote.products.repository.ProductRepositoryDownloader;
 import org.esa.snap.remote.products.repository.RepositoryProduct;
 import org.esa.snap.remote.products.repository.listener.DownloadProductProgressListener;
 import org.esa.snap.remote.products.repository.listener.ProgressListener;
-import org.esa.snap.remote.products.repository.tao.scihub.SciHubRepositoryProduct;
 import ro.cs.tao.datasource.remote.DownloadStrategy;
 import ro.cs.tao.datasource.remote.FetchMode;
 import ro.cs.tao.eodata.EOProduct;

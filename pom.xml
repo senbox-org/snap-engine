@@ -46,6 +46,7 @@
         <jide.version>3.6.1</jide.version>
         <maven.build.timestamp.format>yyyyMMdd</maven.build.timestamp.format>
         <buildDate>${maven.build.timestamp}</buildDate>
+        <tao.version>1.0</tao.version>
     </properties>
 
     <modules>
@@ -721,6 +722,28 @@
                 <version>${snap.version}</version>
             </dependency>
 
+            <!--TAO modules -->
+            <dependency>
+                <groupId>ro.cs.tao</groupId>
+                <artifactId>tao-data-model</artifactId>
+                <version>${tao.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ro.cs.tao</groupId>
+                <artifactId>tao-data-sources</artifactId>
+                <version>${tao.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ro.cs.tao</groupId>
+                <artifactId>tao-datasources-scihub</artifactId>
+                <version>${tao.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ro.cs.tao</groupId>
+                <artifactId>tao-datasources-usgs</artifactId>
+                <version>${tao.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -737,6 +760,16 @@
                 <enabled>true</enabled>
                 <checksumPolicy>warn</checksumPolicy>
             </snapshots>
+        </repository>
+        <repository>
+            <id>tao-core</id>
+            <name>TAO Core</name>
+            <url>https://raw.githubusercontent.com/tao-org/tao-core/repository</url>
+        </repository>
+        <repository>
+            <id>tao-plugins</id>
+            <name>TAO Plugins</name>
+            <url>https://raw.githubusercontent.com/tao-org/tao-plugins/repository</url>
         </repository>
     </repositories>
 

@@ -8,7 +8,6 @@ import ro.cs.tao.datasource.remote.scihub.SciHubDataSource;
 import ro.cs.tao.eodata.EOProduct;
 import ro.cs.tao.products.sentinels.SentinelProductHelper;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 

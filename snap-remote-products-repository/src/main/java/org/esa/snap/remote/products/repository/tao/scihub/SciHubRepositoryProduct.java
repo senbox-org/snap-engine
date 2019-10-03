@@ -1,6 +1,5 @@
 package org.esa.snap.remote.products.repository.tao.scihub;
 
-import org.esa.snap.remote.products.repository.Attribute;
 import org.esa.snap.remote.products.repository.Polygon2D;
 import org.esa.snap.remote.products.repository.tao.AbstractTAORepositoryProduct;
 import ro.cs.tao.eodata.EOProduct;
