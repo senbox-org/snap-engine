@@ -3,6 +3,8 @@ package org.esa.snap.product.library.v2.database;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Polygon;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.engine_utilities.util.FileIOUtils;
 import org.esa.snap.product.library.v2.AllLocalFolderProductsRepository;
 import org.esa.snap.product.library.v2.AttributeFilter;
@@ -44,7 +46,7 @@ public class ProductLibraryDAL {
     private ProductLibraryDAL() {
     }
 
-    public static List<RemoteMission> loadMissions(Statement statement) throws SQLException, IOException {
+    public static List<RemoteMission> loadMissions(Statement statement) throws SQLException {
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT rm.id, rm.name FROM ")
                 .append(DatabaseTableNames.REMOTE_MISSIONS)
@@ -60,7 +62,7 @@ public class ProductLibraryDAL {
         }
     }
 
-    public static List<LocalRepositoryFolder> loadLocalRepositoryFolders(Statement statement) throws SQLException, IOException {
+    public static List<LocalRepositoryFolder> loadLocalRepositoryFolders(Statement statement) throws SQLException {
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT id, folder_path FROM ")
                 .append(DatabaseTableNames.LOCAL_REPOSITORIES);
@@ -77,7 +79,7 @@ public class ProductLibraryDAL {
         }
     }
 
-    public static Map<Short, Set<String>> loadAttributesNamesPerMission(Statement statement) throws SQLException, IOException {
+    public static Map<Short, Set<String>> loadAttributesNamesPerMission(Statement statement) throws SQLException {
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT ra.remote_mission_id, ra.name FROM ")
                 .append(DatabaseTableNames.REMOTE_ATTRIBUTES)
@@ -96,6 +98,16 @@ public class ProductLibraryDAL {
             }
             return attributeNamesPerMission;
         }
+    }
+
+    private static Polygon2D buildPolygon(Rectangle2D selectionArea) {
+        Polygon2D polygon = new Polygon2D();
+        polygon.append(selectionArea.getX(), selectionArea.getY()); // the top left corner
+        polygon.append(selectionArea.getX() + selectionArea.getWidth(), selectionArea.getY()); // the top right corner
+        polygon.append(selectionArea.getX() + selectionArea.getWidth(), selectionArea.getY() + selectionArea.getHeight()); // the bottom right corner
+        polygon.append(selectionArea.getX(), selectionArea.getY() + selectionArea.getHeight()); // the bottom left corner
+        polygon.append(selectionArea.getX(), selectionArea.getY()); // the top left corner
+        return polygon;
     }
 
     public static List<RepositoryProduct> loadProductList(LocalRepositoryFolder localRepositoryFolder, RemoteMission mission, Map<String, Object> parameterValues)
@@ -134,14 +146,20 @@ public class ProductLibraryDAL {
                 }
             }
             StringBuilder sql = new StringBuilder();
-            sql.append("SELECT p.id, p.name, p.local_repository_relative_path, p.entry_point, p.size_in_bytes, p.geometry, p.acquisition_date, p.last_modified_date");
+            if (mission == null) {
+                sql.append("SELECT q.id, q.name, q.relative_path, q.entry_point, q.size_in_bytes, q.geometry, q.acquisition_date, q.last_modified_date");
+                if (localRepositoryFolder == null) {
+                    // no local repository filter
+                    sql.append(", q.folder_path");
+                }
+                sql.append(", rm.name AS mission_name")
+                        .append(" FROM (");
+            }
+            sql.append("SELECT p.id, p.name, p.relative_path, p.entry_point, p.size_in_bytes, p.geometry, p.acquisition_date")
+                    .append(", p.last_modified_date, p.remote_mission_id");
             if (localRepositoryFolder == null) {
                 // no local repository filter
                 sql.append(", lr.folder_path");
-            }
-            if (mission == null) {
-                // no mission filter
-                sql.append(", rm.name AS mission_name");
             }
             sql.append(" FROM ")
                     .append(DatabaseTableNames.PRODUCTS)
@@ -152,31 +170,21 @@ public class ProductLibraryDAL {
                         .append(DatabaseTableNames.LOCAL_REPOSITORIES)
                         .append(" AS lr");
             }
-            if (mission == null) {
-                // no mission filter
-                sql.append(", ")
-                        .append(DatabaseTableNames.REMOTE_MISSIONS)
-                        .append(" AS rm ")
-                        .append("WHERE p.remote_mission_id = rm.id");
-            } else {
-                sql.append(" WHERE p.remote_mission_id = ")
-                        .append(mission.getId());
+            sql.append(" WHERE ");
+            if (mission != null) {
+                sql.append("p.remote_mission_id = ")
+                        .append(mission.getId())
+                        .append(" AND ");
             }
-            sql.append(" AND p.local_repository_id = ");
+            sql.append("p.local_repository_id = ");
             if (localRepositoryFolder == null) {
                 // no local repository filter
-                sql.append(" lr.id");
+                sql.append("lr.id");
             } else {
                 sql.append(localRepositoryFolder.getId());
             }
-
             if (selectionArea != null) {
-                Polygon2D polygon = new Polygon2D();
-                polygon.append(selectionArea.getX(), selectionArea.getY()); // the top left corner
-                polygon.append(selectionArea.getX() + selectionArea.getWidth(), selectionArea.getY()); // the top right corner
-                polygon.append(selectionArea.getX() + selectionArea.getWidth(), selectionArea.getY() + selectionArea.getHeight()); // the bottom right corner
-                polygon.append(selectionArea.getX(), selectionArea.getY() + selectionArea.getHeight()); // the bottom left corner
-                polygon.append(selectionArea.getX(), selectionArea.getY()); // the top left corner
+                Polygon2D polygon = buildPolygon(selectionArea);
                 sql.append(" AND ST_Intersects(p.geometry, '")
                         .append(polygon.toWKT())
                         .append("')");
@@ -189,7 +197,13 @@ public class ProductLibraryDAL {
             }
             if (sensorType != null) {
                 sql.append(" AND p.sensor_type_id = ")
-                    .append(sensorType.getValue());
+                        .append(sensorType.getValue());
+            }
+            if (mission == null) {
+                sql.append(") AS q")
+                        .append(" LEFT OUTER JOIN ")
+                        .append(DatabaseTableNames.REMOTE_MISSIONS)
+                        .append(" AS rm ON (q.remote_mission_id = rm.id)");
             }
             Calendar calendar = Calendar.getInstance();
             try (PreparedStatement prepareStatement = wrappedConnection.prepareStatement(sql.toString())) {
@@ -217,7 +231,7 @@ public class ProductLibraryDAL {
                         int id = resultSet.getInt("id");
                         String name = resultSet.getString("name");
                         String type = null;
-                        String localPath = resultSet.getString("local_repository_relative_path");
+                        String localPath = resultSet.getString("relative_path");
                         Path productLocalPath;
                         if (localRepositoryFolder == null) {
                             String localRepositoryFolderPath = resultSet.getString("folder_path");
@@ -325,7 +339,7 @@ public class ProductLibraryDAL {
         return polygon;
     }
 
-    public static void deleteLocalRepositoryFolder(LocalRepositoryFolder localRepositoryFolder) throws IOException, SQLException {
+    public static void deleteLocalRepositoryFolder(LocalRepositoryFolder localRepositoryFolder) throws SQLException {
         try (Connection connection = H2DatabaseAccessor.getConnection()) {
             Set<Integer> productIds;
             try (Statement statement = connection.createStatement()) {
@@ -380,18 +394,13 @@ public class ProductLibraryDAL {
         }
     }
 
-    public static void deleteProduct(LocalRepositoryProduct repositoryProduct) throws IOException, SQLException {
+    public static void deleteProduct(LocalRepositoryProduct repositoryProduct) throws SQLException {
         try (Connection connection = H2DatabaseAccessor.getConnection()) {
             connection.setAutoCommit(false);
             try (Statement statement = connection.createStatement()) {
-                StringBuilder sql = new StringBuilder();
-                sql.append("DELETE FROM ")
-                        .append(DatabaseTableNames.PRODUCT_REMOTE_ATTRIBUTES)
-                        .append(" WHERE product_id = ")
-                        .append(repositoryProduct.getId());
-                statement.executeUpdate(sql.toString());
+                deleteProductRemoteAttributes(repositoryProduct.getId(), statement);
 
-                sql = new StringBuilder();
+                StringBuilder sql = new StringBuilder();
                 sql.append("DELETE FROM ")
                         .append(DatabaseTableNames.PRODUCTS)
                         .append(" WHERE id = ")
@@ -407,20 +416,74 @@ public class ProductLibraryDAL {
         }
     }
 
-    public static SaveProductData saveProduct(RepositoryProduct productToSave, Path productFolderPath, String remoteRepositoryName, Path localRepositoryFolderPath)
-                                   throws IOException, SQLException {
+    private static void deleteProductRemoteAttributes(int productId, Statement statement) throws SQLException {
+        StringBuilder sql = new StringBuilder();
+        sql.append("DELETE FROM ")
+                .append(DatabaseTableNames.PRODUCT_REMOTE_ATTRIBUTES)
+                .append(" WHERE product_id = ")
+                .append(productId);
+        statement.executeUpdate(sql.toString());
+    }
 
-        Path parent = productFolderPath;
+    private static Path extractProductRelativePathToLocalRepositoryFolder(Path productPath, Path localRepositoryFolderPath) {
+        Path parent = productPath;
         while (parent != null && parent.compareTo(localRepositoryFolderPath) != 0) {
-            parent = productFolderPath.getParent();
+            parent = productPath.getParent();
         }
         Path relativePath;
         if (parent == null) {
-            throw new IllegalArgumentException("The product folder path '"+ productFolderPath.toString()+"' must be specified into the local repository folder path '"+localRepositoryFolderPath.toString()+"'.");
+            throw new IllegalArgumentException("The product folder path '"+ productPath.toString()+"' must be specified into the local repository folder path '"+localRepositoryFolderPath.toString()+"'.");
         } else {
             int localRepositoryNameCount = localRepositoryFolderPath.getNameCount();
-            relativePath = productFolderPath.subpath(localRepositoryNameCount, productFolderPath.getNameCount());
+            relativePath = productPath.subpath(localRepositoryNameCount, productPath.getNameCount());
         }
+        return relativePath;
+    }
+
+    public static SaveProductData saveProduct(Product productToSave, BufferedImage quickLookImage, Polygon2D polygon2D, Path productPath, Path localRepositoryFolderPath)
+                                              throws IOException, SQLException {
+
+        Path relativePath = extractProductRelativePathToLocalRepositoryFolder(productPath, localRepositoryFolderPath);
+        int productId;
+        short localRepositoryId;
+        try (Connection connection = H2DatabaseAccessor.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                localRepositoryId = saveLocalRepositoryFolderPath(localRepositoryFolderPath, connection);
+                FileTime fileTime = Files.getLastModifiedTime(productPath);
+                long sizeInBytes = FileIOUtils.computeFileSize(productPath);
+
+                Integer existingProductId = loadProductId(localRepositoryId, relativePath, connection);
+                if (existingProductId == null) {
+                    productId = insertProduct(productToSave, polygon2D, relativePath, localRepositoryId, fileTime, sizeInBytes, connection);
+                } else {
+                    productId = existingProductId.intValue();
+                    deleteQuickLookImage(productId);
+                    try (Statement statement = connection.createStatement()) {
+                        deleteProductRemoteAttributes(productId, statement);
+                    }
+                    updateProduct(productId, productToSave, polygon2D, relativePath, localRepositoryId, fileTime, sizeInBytes, connection);
+                }
+                if (quickLookImage != null) {
+                    writeQuickLookImage(productId, quickLookImage);
+                }
+
+                // commit the statements
+                connection.commit();
+            } catch (Exception exception) {
+                // rollback the statements from the transaction
+                connection.rollback();
+                throw exception;
+            }
+        }
+        LocalRepositoryFolder localRepositoryFolder = new LocalRepositoryFolder(localRepositoryId, localRepositoryFolderPath);
+        return new SaveProductData(null, localRepositoryFolder);
+    }
+
+    public static SaveProductData saveProduct(RepositoryProduct productToSave, Path productPath, String remoteRepositoryName, Path localRepositoryFolderPath)
+                                              throws IOException, SQLException {
+
+        Path relativePath = extractProductRelativePathToLocalRepositoryFolder(productPath, localRepositoryFolderPath);
         int productId;
         short remoteMissionId;
         short localRepositoryId;
@@ -430,11 +493,26 @@ public class ProductLibraryDAL {
                 short remoteRepositoryId = saveRemoteRepositoryName(remoteRepositoryName, connection);
                 remoteMissionId = saveRemoteMissionName(remoteRepositoryId, productToSave.getMission(), productToSave.getAttributes(), connection);
                 localRepositoryId = saveLocalRepositoryFolderPath(localRepositoryFolderPath, connection);
-                FileTime fileTime = Files.getLastModifiedTime(productFolderPath);
-                long sizeInBytes = FileIOUtils.computeFileSize(productFolderPath);
+                FileTime fileTime = Files.getLastModifiedTime(productPath);
+                long sizeInBytes = FileIOUtils.computeFileSize(productPath);
 
-                productId = insertProduct(productToSave, relativePath, remoteMissionId, localRepositoryId, fileTime, sizeInBytes, connection);
+                Integer existingProductId = loadProductId(localRepositoryId, relativePath, connection);
+                if (existingProductId == null) {
+                    productId = insertProduct(productToSave, relativePath, remoteMissionId, localRepositoryId, fileTime, sizeInBytes, connection);
+                } else {
+                    productId = existingProductId.intValue();
+                    deleteQuickLookImage(productId);
+                    try (Statement statement = connection.createStatement()) {
+                        deleteProductRemoteAttributes(productId, statement);
+                    }
+                    updateProduct(productId, productToSave, relativePath, remoteMissionId, localRepositoryId, fileTime, sizeInBytes, connection);
+                }
+
                 insertRemoteProductAttributes(productId, productToSave.getAttributes(), connection);
+                if (productToSave.getQuickLookImage() != null) {
+                    writeQuickLookImage(productId, productToSave.getQuickLookImage());
+                }
+
                 // commit the statements
                 connection.commit();
             } catch (Exception exception) {
@@ -443,18 +521,43 @@ public class ProductLibraryDAL {
                 throw exception;
             }
         }
-
-        BufferedImage quickLookImage = productToSave.getQuickLookImage();
-        if (quickLookImage != null) {
-            Path databaseParentFolder = H2DatabaseAccessor.getDatabaseParentFolder();
-            Path quickLookImagesFolder = databaseParentFolder.resolve("quick-look-images");
-            FileIOUtils.ensureExists(quickLookImagesFolder);
-            Path quickLookImageFile = quickLookImagesFolder.resolve(Integer.toString(productId) + ".png");
-            ImageIO.write(quickLookImage, "png", quickLookImageFile.toFile());
-        }
         RemoteMission remoteMission = new RemoteMission(remoteMissionId, productToSave.getMission());
         LocalRepositoryFolder localRepositoryFolder = new LocalRepositoryFolder(localRepositoryId, localRepositoryFolderPath);
         return new SaveProductData(remoteMission, localRepositoryFolder);
+    }
+
+    private static void deleteQuickLookImage(int productId) throws IOException {
+        Path databaseParentFolder = H2DatabaseAccessor.getDatabaseParentFolder();
+        Path quickLookImagesFolder = databaseParentFolder.resolve("quick-look-images");
+        Path quickLookImageFile = quickLookImagesFolder.resolve(Integer.toString(productId) + ".png");
+        Files.deleteIfExists(quickLookImageFile);
+    }
+
+    private static void writeQuickLookImage(int productId, BufferedImage quickLookImage) throws IOException {
+        Path databaseParentFolder = H2DatabaseAccessor.getDatabaseParentFolder();
+        Path quickLookImagesFolder = databaseParentFolder.resolve("quick-look-images");
+        FileIOUtils.ensureExists(quickLookImagesFolder);
+        Path quickLookImageFile = quickLookImagesFolder.resolve(Integer.toString(productId) + ".png");
+        ImageIO.write(quickLookImage, "png", quickLookImageFile.toFile());
+    }
+
+    private static Integer loadProductId(short localRepositoryId, Path relativePath, Connection connection) throws SQLException {
+        try (Statement statement = connection.createStatement()) {
+            StringBuilder sql = new StringBuilder();
+            sql.append("SELECT id FROM ")
+                    .append(DatabaseTableNames.PRODUCTS)
+                    .append(" WHERE local_repository_id = ")
+                    .append(localRepositoryId)
+                    .append(" AND LOWER(relative_path) = '")
+                    .append(relativePath.toString().toLowerCase())
+                    .append("'");
+            try (ResultSet resultSet = statement.executeQuery(sql.toString())) {
+                if (resultSet.next()) {
+                    return resultSet.getInt("id");
+                }
+            }
+        }
+        return null;
     }
 
     private static short saveRemoteRepositoryName(String remoteRepositoryName, Connection connection) throws SQLException {
@@ -595,14 +698,168 @@ public class ProductLibraryDAL {
         return localRepositoryId;
     }
 
-    private static int insertProduct(RepositoryProduct productToSave, Path localRepositoryRelativePath, int remoteMissionId, int localRepositoryId,
+    private static void updateProduct(int productId, Product productToSave, Polygon2D polygon2D, Path relativePath, int localRepositoryId,
                                      FileTime fileTime, long sizeInBytes, Connection connection)
-                                     throws SQLException, IOException {
+                                     throws SQLException {
+
+        StringBuilder sql = new StringBuilder();
+        sql.append("UPDATE ")
+                .append(DatabaseTableNames.PRODUCTS)
+                .append(" SET name = '")
+                .append(productToSave.getName())
+                .append("', remote_mission_id = ")
+                .append("NULL") // remote mission
+                .append(", local_repository_id = ")
+                .append(localRepositoryId)
+                .append(", relative_path = '")
+                .append(relativePath.toString())
+                .append("', entry_point = '")
+                .append("NULL") // entry point
+                .append("', size_in_bytes = ")
+                .append(sizeInBytes)
+                .append(", acquisition_date = ")
+                .append("?") // acquisition date
+                .append(", last_modified_date = ")
+                .append("?") // last modified date
+                .append(", geometry = '")
+                .append(polygon2D.toWKT())
+                .append("', data_format_type_id = ")
+                .append("NULL") // format data type
+                .append(", pixel_type_id = ")
+                .append("NULL") // pixel type
+                .append(", sensor_type_id = ")
+                .append("NULL") // sensor type
+                .append(" WHERE id = ")
+                .append(productId);
+        ProductData.UTC startTime = productToSave.getStartTime();
+        Date acquisitionDate = (startTime == null) ? null : startTime.getAsDate();
+        executeUpdateProductStatement(sql.toString(), acquisitionDate, fileTime, connection);
+    }
+
+    private static void executeUpdateProductStatement(String sql, Date acquisitionDate, FileTime fileTime, Connection connection) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(sql.toString())) {
+            java.sql.Timestamp acquisitionDateTimestamp = null;
+            if (acquisitionDate != null) {
+                acquisitionDateTimestamp = new java.sql.Timestamp(acquisitionDate.getTime());
+            }
+            statement.setTimestamp(1, acquisitionDateTimestamp);
+            statement.setTimestamp(2, new java.sql.Timestamp(fileTime.toMillis()));
+
+            int affectedRows = statement.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLException("Failed to insert the product, no rows affected.");
+            }
+        }
+    }
+
+    private static int insertProduct(Product productToSave, Polygon2D polygon2D, Path relativePath, int localRepositoryId,
+                                     FileTime fileTime, long sizeInBytes, Connection connection)
+                                     throws SQLException {
 
         StringBuilder sql = new StringBuilder();
         sql.append("INSERT INTO ")
                 .append(DatabaseTableNames.PRODUCTS)
-                .append(" (name, remote_mission_id, local_repository_id, local_repository_relative_path, entry_point, size_in_bytes, acquisition_date")
+                .append(" (name, remote_mission_id, local_repository_id, relative_path, entry_point, size_in_bytes, acquisition_date")
+                .append(", last_modified_date, geometry, data_format_type_id, pixel_type_id, sensor_type_id) VALUES ('")
+                .append(productToSave.getName())
+                .append("', ")
+                .append("NULL") // remote mission
+                .append(", ")
+                .append(localRepositoryId)
+                .append(", '")
+                .append(relativePath.toString())
+                .append("', '")
+                .append("NULL") // entry point
+                .append("', ")
+                .append(sizeInBytes)
+                .append(", ")
+                .append("?") // acquisition date
+                .append(", ")
+                .append("?") // last modified date
+                .append(", '")
+                .append(polygon2D.toWKT())
+                .append("', ")
+                .append("NULL") // format data type
+                .append(", ")
+                .append("NULL") // pixel type
+                .append(", ")
+                .append("NULL") // sensor type
+                .append(")");
+        ProductData.UTC startTime = productToSave.getStartTime();
+        Date acquisitionDate = (startTime == null) ? null : startTime.getAsDate();
+        return executeProductStatement(sql.toString(), acquisitionDate, fileTime, connection);
+    }
+
+    private static int executeProductStatement(String sql, Date acquisitionDate, FileTime fileTime, Connection connection) throws SQLException {
+        int productId;
+        try (PreparedStatement statement = connection.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS)) {
+            java.sql.Timestamp acquisitionDateTimestamp = null;
+            if (acquisitionDate != null) {
+                acquisitionDateTimestamp = new java.sql.Timestamp(acquisitionDate.getTime());
+            }
+            statement.setTimestamp(1, acquisitionDateTimestamp);
+            statement.setTimestamp(2, new java.sql.Timestamp(fileTime.toMillis()));
+
+            int affectedRows = statement.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLException("Failed to insert the product, no rows affected.");
+            } else {
+                try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        productId = generatedKeys.getInt(1);
+                    } else {
+                        throw new SQLException("Failed to get the generated product id.");
+                    }
+                }
+            }
+        }
+        return productId;
+    }
+
+    private static void updateProduct(int productId, RepositoryProduct productToSave, Path relativePath, int remoteMissionId,
+                                      int localRepositoryId, FileTime fileTime, long sizeInBytes, Connection connection)
+                                      throws SQLException {
+
+        StringBuilder sql = new StringBuilder();
+        sql.append("UPDATE")
+                .append(DatabaseTableNames.PRODUCTS)
+                .append(" SET name = ")
+                .append(productToSave.getName())
+                .append("', remote_mission_id = ")
+                .append(remoteMissionId)
+                .append(", local_repository_id = ")
+                .append(localRepositoryId)
+                .append(", relative_path = '")
+                .append(relativePath.toString())
+                .append("', entry_point = '")
+                .append(productToSave.getEntryPoint())
+                .append("', size_in_bytes = ")
+                .append(sizeInBytes)
+                .append(", acquisition_date = ")
+                .append("?")
+                .append(", last_modified_date = ")
+                .append("?")
+                .append(", geometry = '")
+                .append(productToSave.getPolygon().toWKT())
+                .append("', data_format_type_id = ")
+                .append(productToSave.getDataFormatType().getValue())
+                .append(", pixel_type_id = ")
+                .append(productToSave.getPixelType().getValue())
+                .append(", sensor_type_id = ")
+                .append(productToSave.getSensorType().getValue())
+                .append(" WHERE id = ")
+                .append(productId);
+        executeUpdateProductStatement(sql.toString(), productToSave.getAcquisitionDate(), fileTime, connection);
+    }
+
+    private static int insertProduct(RepositoryProduct productToSave, Path relativePath, int remoteMissionId, int localRepositoryId,
+                                     FileTime fileTime, long sizeInBytes, Connection connection)
+                                     throws SQLException {
+
+        StringBuilder sql = new StringBuilder();
+        sql.append("INSERT INTO ")
+                .append(DatabaseTableNames.PRODUCTS)
+                .append(" (name, remote_mission_id, local_repository_id, relative_path, entry_point, size_in_bytes, acquisition_date")
                 .append(", last_modified_date, geometry, data_format_type_id, pixel_type_id, sensor_type_id) VALUES ('")
                 .append(productToSave.getName())
                 .append("', ")
@@ -610,7 +867,7 @@ public class ProductLibraryDAL {
                 .append(", ")
                 .append(localRepositoryId)
                 .append(", '")
-                .append(localRepositoryRelativePath.toString())
+                .append(relativePath.toString())
                 .append("', '")
                 .append(productToSave.getEntryPoint())
                 .append("', ")
@@ -628,26 +885,7 @@ public class ProductLibraryDAL {
                 .append(", ")
                 .append(productToSave.getSensorType().getValue())
                 .append(")");
-
-        int productId;
-        try (PreparedStatement statement = connection.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS)) {
-            statement.setTimestamp(1, new java.sql.Timestamp(productToSave.getAcquisitionDate().getTime()));
-            statement.setTimestamp(2, new java.sql.Timestamp(fileTime.toMillis()));
-
-            int affectedRows = statement.executeUpdate();
-            if (affectedRows == 0) {
-                throw new SQLException("Failed to insert the product, no rows affected.");
-            } else {
-                try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
-                    if (generatedKeys.next()) {
-                        productId = generatedKeys.getInt(1);
-                    } else {
-                        throw new SQLException("Failed to get the generated product id.");
-                    }
-                }
-            }
-        }
-        return productId;
+        return executeProductStatement(sql.toString(), productToSave.getAcquisitionDate(), fileTime, connection);
     }
 
     private static void insertRemoteProductAttributes(int productId, List<Attribute> remoteAttributes, Connection connection) throws SQLException {
