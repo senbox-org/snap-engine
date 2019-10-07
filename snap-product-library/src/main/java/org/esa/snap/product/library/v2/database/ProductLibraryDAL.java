@@ -355,57 +355,34 @@ public class ProductLibraryDAL {
                     }
                 }
             }
-            if (productIds.size() > 0) {
-                connection.setAutoCommit(false);
-                try {
-                    StringBuilder sql = new StringBuilder();
-                    sql.append("DELETE FROM ")
-                            .append(DatabaseTableNames.PRODUCT_REMOTE_ATTRIBUTES)
-                            .append(" WHERE product_id = ?");
-                    try (PreparedStatement statement = connection.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS)) {
-                        for (Integer productId : productIds) {
-                            statement.setInt(1, productId.intValue());
-                            statement.executeUpdate();
-                        }
-                    }
-                    try (Statement statement = connection.createStatement()) {
-                        sql = new StringBuilder();
-                        sql.append("DELETE FROM ")
-                                .append(DatabaseTableNames.PRODUCTS)
-                                .append(" WHERE local_repository_id = ")
-                                .append(localRepositoryFolder.getId());
-                        statement.executeUpdate(sql.toString());
 
-                        sql = new StringBuilder();
-                        sql.append("DELETE FROM ")
-                                .append(DatabaseTableNames.LOCAL_REPOSITORIES)
-                                .append(" WHERE id = ")
-                                .append(localRepositoryFolder.getId());
-                        statement.executeUpdate(sql.toString());
-                    }
-                    // commit the data
-                    connection.commit();
-                } catch (Exception exception) {
-                    // rollback the statements from the transaction
-                    connection.rollback();
-                    throw exception;
-                }
-            }
-        }
-    }
-
-    public static void deleteProduct(LocalRepositoryProduct repositoryProduct) throws SQLException {
-        try (Connection connection = H2DatabaseAccessor.getConnection()) {
             connection.setAutoCommit(false);
-            try (Statement statement = connection.createStatement()) {
-                deleteProductRemoteAttributes(repositoryProduct.getId(), statement);
-
+            try {
                 StringBuilder sql = new StringBuilder();
                 sql.append("DELETE FROM ")
-                        .append(DatabaseTableNames.PRODUCTS)
-                        .append(" WHERE id = ")
-                        .append(repositoryProduct.getId());
-                statement.executeUpdate(sql.toString());
+                        .append(DatabaseTableNames.PRODUCT_REMOTE_ATTRIBUTES)
+                        .append(" WHERE product_id = ?");
+                try (PreparedStatement statement = connection.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS)) {
+                    for (Integer productId : productIds) {
+                        statement.setInt(1, productId.intValue());
+                        statement.executeUpdate();
+                    }
+                }
+                try (Statement statement = connection.createStatement()) {
+                    sql = new StringBuilder();
+                    sql.append("DELETE FROM ")
+                            .append(DatabaseTableNames.PRODUCTS)
+                            .append(" WHERE local_repository_id = ")
+                            .append(localRepositoryFolder.getId());
+                    statement.executeUpdate(sql.toString());
+
+                    sql = new StringBuilder();
+                    sql.append("DELETE FROM ")
+                            .append(DatabaseTableNames.LOCAL_REPOSITORIES)
+                            .append(" WHERE id = ")
+                            .append(localRepositoryFolder.getId());
+                    statement.executeUpdate(sql.toString());
+                }
                 // commit the data
                 connection.commit();
             } catch (Exception exception) {
@@ -414,6 +391,33 @@ public class ProductLibraryDAL {
                 throw exception;
             }
         }
+    }
+
+    public static void deleteProduct(LocalRepositoryProduct repositoryProduct) throws SQLException {
+        try (Connection connection = H2DatabaseAccessor.getConnection()) {
+            connection.setAutoCommit(false);
+            try (Statement statement = connection.createStatement()) {
+                deleteProduct(repositoryProduct.getId(), statement);
+
+                // commit the data
+                connection.commit();
+            } catch (Exception exception) {
+                // rollback the statements from the transaction
+                connection.rollback();
+                throw exception;
+            }
+        }
+    }
+
+    private static void deleteProduct(int productId, Statement statement) throws SQLException {
+        deleteProductRemoteAttributes(productId, statement);
+
+        StringBuilder sql = new StringBuilder();
+        sql.append("DELETE FROM ")
+                .append(DatabaseTableNames.PRODUCTS)
+                .append(" WHERE id = ")
+                .append(productId);
+        statement.executeUpdate(sql.toString());
     }
 
     private static void deleteProductRemoteAttributes(int productId, Statement statement) throws SQLException {
@@ -438,6 +442,53 @@ public class ProductLibraryDAL {
             relativePath = productPath.subpath(localRepositoryNameCount, productPath.getNameCount());
         }
         return relativePath;
+    }
+
+    public static Set<Integer> deleteMissingLocalRepositoryProducts(short localRepositoryId, List<SaveProductData> savedProducts) throws SQLException {
+        try (Connection connection = H2DatabaseAccessor.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                Set<Integer> missingProductIds;
+                try (Statement statement = connection.createStatement()) {
+                    StringBuilder sql = new StringBuilder();
+                    sql.append("SELECT id FROM ")
+                            .append(DatabaseTableNames.PRODUCTS)
+                            .append(" WHERE local_repository_id = ")
+                            .append(localRepositoryId);
+                    try (ResultSet resultSet = statement.executeQuery(sql.toString())) {
+                        missingProductIds = new HashSet<>();
+                        while (resultSet.next()) {
+                            int productId = resultSet.getInt("id");
+                            boolean found = false;
+                            for (int i=0; i<savedProducts.size() && !found; i++) {
+                                SaveProductData saveProductData = savedProducts.get(i);
+                                if (saveProductData.getProductId() == productId) {
+                                    found = true;
+                                }
+                            }
+                            if (!found) {
+                                missingProductIds.add(productId);
+                            }
+                        }
+                    }
+
+                    if (missingProductIds.size() > 0) {
+                        for (Integer productId : missingProductIds) {
+                            deleteProduct(productId.intValue(), statement);
+                        }
+                    }
+                }
+
+                // commit the statements
+                connection.commit();
+
+                return missingProductIds;
+            } catch (Exception exception) {
+                // rollback the statements from the transaction
+                connection.rollback();
+                throw exception;
+            }
+        }
     }
 
     public static SaveProductData saveProduct(Product productToSave, BufferedImage quickLookImage, Polygon2D polygon2D, Path productPath, Path localRepositoryFolderPath)
@@ -477,7 +528,7 @@ public class ProductLibraryDAL {
             }
         }
         LocalRepositoryFolder localRepositoryFolder = new LocalRepositoryFolder(localRepositoryId, localRepositoryFolderPath);
-        return new SaveProductData(null, localRepositoryFolder);
+        return new SaveProductData(productId, null, localRepositoryFolder);
     }
 
     public static SaveProductData saveProduct(RepositoryProduct productToSave, Path productPath, String remoteRepositoryName, Path localRepositoryFolderPath)
@@ -523,7 +574,7 @@ public class ProductLibraryDAL {
         }
         RemoteMission remoteMission = new RemoteMission(remoteMissionId, productToSave.getMission());
         LocalRepositoryFolder localRepositoryFolder = new LocalRepositoryFolder(localRepositoryId, localRepositoryFolderPath);
-        return new SaveProductData(remoteMission, localRepositoryFolder);
+        return new SaveProductData(productId, remoteMission, localRepositoryFolder);
     }
 
     private static void deleteQuickLookImage(int productId) throws IOException {

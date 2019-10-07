@@ -5,12 +5,18 @@ package org.esa.snap.product.library.v2.database;
  */
 public class SaveProductData {
 
+    private final int productId;
     private final RemoteMission remoteMission;
     private final LocalRepositoryFolder localRepositoryFolder;
 
-    public SaveProductData(RemoteMission remoteMission, LocalRepositoryFolder localRepositoryFolder) {
+    public SaveProductData(int productId, RemoteMission remoteMission, LocalRepositoryFolder localRepositoryFolder) {
+        this.productId = productId;
         this.remoteMission = remoteMission;
         this.localRepositoryFolder = localRepositoryFolder;
+    }
+
+    public int getProductId() {
+        return productId;
     }
 
     public RemoteMission getRemoteMission() {
