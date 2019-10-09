@@ -46,6 +46,39 @@ public class ProductLibraryDAL {
     private ProductLibraryDAL() {
     }
 
+    public static Short loadLocalRepositoryId(Path localRepositoryFolderPath, Statement statement) throws SQLException {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT id FROM ")
+                .append(DatabaseTableNames.LOCAL_REPOSITORIES)
+                .append(" WHERE LOWER(folder_path) = '")
+                .append(localRepositoryFolderPath.toString().toLowerCase())
+                .append("'");
+        try (ResultSet resultSet = statement.executeQuery(sql.toString())) {
+            if (resultSet.next()) {
+                return resultSet.getShort("id");
+            }
+        }
+        return null;
+    }
+
+    public static List<LocalProductMetadata> loadProductRelativePaths(short localRepositoryId, Statement statement) throws SQLException {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT id, relative_path, last_modified_date FROM ")
+                .append(DatabaseTableNames.PRODUCTS)
+                .append(" WHERE local_repository_id = ")
+                .append(localRepositoryId);
+        try (ResultSet resultSet = statement.executeQuery(sql.toString())) {
+            List<LocalProductMetadata> repositoryProducts = new ArrayList<>();
+            while (resultSet.next()) {
+                int productId = resultSet.getInt("id");
+                String relativePath = resultSet.getString("relative_path");
+                Timestamp lastModifiedDate = resultSet.getTimestamp("last_modified_date");
+                repositoryProducts.add(new LocalProductMetadata(productId, relativePath, lastModifiedDate));
+            }
+            return repositoryProducts;
+        }
+    }
+
     public static List<RemoteMission> loadMissions(Statement statement) throws SQLException {
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT rm.id, rm.name FROM ")
@@ -230,7 +263,6 @@ public class ProductLibraryDAL {
                     while (resultSet.next()) {
                         int id = resultSet.getInt("id");
                         String name = resultSet.getString("name");
-                        String type = null;
                         String localPath = resultSet.getString("relative_path");
                         Path productLocalPath;
                         if (localRepositoryFolder == null) {
@@ -244,7 +276,7 @@ public class ProductLibraryDAL {
                         long sizeInBytes = resultSet.getLong("size_in_bytes");
                         Geometry geometry = resultSet.getGeometry("geometry");
                         Polygon2D polygon = buildPolygon(geometry);
-                        LocalRepositoryProduct localProduct = new LocalRepositoryProduct(id, name, type, acquisitionDate, productLocalPath, sizeInBytes, polygon);
+                        LocalRepositoryProduct localProduct = new LocalRepositoryProduct(id, name, acquisitionDate, productLocalPath, sizeInBytes, polygon);
                         localProduct.setMission(missionName);
                         productList.add(localProduct);
                     }
@@ -444,7 +476,7 @@ public class ProductLibraryDAL {
         return relativePath;
     }
 
-    public static Set<Integer> deleteMissingLocalRepositoryProducts(short localRepositoryId, List<SaveProductData> savedProducts) throws SQLException {
+    public static Set<Integer> deleteMissingLocalRepositoryProducts(short localRepositoryId, Set<Integer> savedProductIds) throws SQLException {
         try (Connection connection = H2DatabaseAccessor.getConnection()) {
             connection.setAutoCommit(false);
             try {
@@ -459,14 +491,7 @@ public class ProductLibraryDAL {
                         missingProductIds = new HashSet<>();
                         while (resultSet.next()) {
                             int productId = resultSet.getInt("id");
-                            boolean found = false;
-                            for (int i=0; i<savedProducts.size() && !found; i++) {
-                                SaveProductData saveProductData = savedProducts.get(i);
-                                if (saveProductData.getProductId() == productId) {
-                                    found = true;
-                                }
-                            }
-                            if (!found) {
+                            if (!savedProductIds.contains(productId)) {
                                 missingProductIds.add(productId);
                             }
                         }
@@ -531,7 +556,7 @@ public class ProductLibraryDAL {
         return new SaveProductData(productId, null, localRepositoryFolder);
     }
 
-    public static SaveProductData saveProduct(RepositoryProduct productToSave, Path productPath, String remoteRepositoryName, Path localRepositoryFolderPath)
+    public static SaveDownloadedProductData saveProduct(RepositoryProduct productToSave, Path productPath, String remoteRepositoryName, Path localRepositoryFolderPath)
                                               throws IOException, SQLException {
 
         Path relativePath = extractProductRelativePathToLocalRepositoryFolder(productPath, localRepositoryFolderPath);
@@ -572,9 +597,14 @@ public class ProductLibraryDAL {
                 throw exception;
             }
         }
+        Set<String> productAttributeNames = new HashSet<>();
+        for (int i=0; i<productToSave.getAttributes().size(); i++) {
+            Attribute attribute = productToSave.getAttributes().get(i);
+            productAttributeNames.add(attribute.getName());
+        }
         RemoteMission remoteMission = new RemoteMission(remoteMissionId, productToSave.getMission());
         LocalRepositoryFolder localRepositoryFolder = new LocalRepositoryFolder(localRepositoryId, localRepositoryFolderPath);
-        return new SaveProductData(productId, remoteMission, localRepositoryFolder);
+        return new SaveDownloadedProductData(productId, remoteMission, localRepositoryFolder, productAttributeNames);
     }
 
     private static void deleteQuickLookImage(int productId) throws IOException {
@@ -669,6 +699,7 @@ public class ProductLibraryDAL {
             }
         }
         if (remoteMissionId == 0) {
+            // insert the mission id
             StringBuilder sql = new StringBuilder();
             sql.append("INSERT INTO ")
                     .append(DatabaseTableNames.REMOTE_MISSIONS)

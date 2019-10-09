@@ -20,7 +20,6 @@ public class LocalRepositoryProduct implements RepositoryProduct {
     private final int id;
     private final String name;
     private final Path path;
-    private final String type;
     private final Date acquisitionDate;
     private final long sizeInBytes;
     private final Polygon2D polygon;
@@ -29,10 +28,9 @@ public class LocalRepositoryProduct implements RepositoryProduct {
     private List<Attribute> attributes;
     private BufferedImage quickLookImage;
 
-    public LocalRepositoryProduct(int id, String name, String type, Date acquisitionDate, Path path, long sizeInBytes, Polygon2D polygon) {
+    public LocalRepositoryProduct(int id, String name, Date acquisitionDate, Path path, long sizeInBytes, Polygon2D polygon) {
         this.id = id;
         this.name = name;
-        this.type = type;
         this.path = path;
         this.acquisitionDate = acquisitionDate;
         this.sizeInBytes = sizeInBytes;
@@ -52,10 +50,6 @@ public class LocalRepositoryProduct implements RepositoryProduct {
     @Override
     public String getName() {
         return this.name;
-    }
-
-    public Path getPath() {
-        return path;
     }
 
     @Override
@@ -123,5 +117,9 @@ public class LocalRepositoryProduct implements RepositoryProduct {
 
     int getId() {
         return id;
+    }
+
+    public Path getPath() {
+        return path;
     }
 }
