@@ -8,6 +8,7 @@
     </parent>
 
     <artifactId>snap-binning</artifactId>
+    <version>7.0.0</version>
     <packaging>nbm</packaging>
 
     <name>SNAP Level-3 Binning Processor (GPF)</name>
@@ -45,6 +46,7 @@
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-netcdf</artifactId>
+            <version>8.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

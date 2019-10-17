@@ -69,6 +69,7 @@ import java.util.logging.Logger;
 public class SpatialProductBinner {
 
     private static final String PROPERTY_KEY_SLICE_HEIGHT = "snap.binning.sliceHeight";
+    private static final String PROPERTY_KEY_SLICE_WIDTH = "snap.binning.sliceWidth";
     private static final String BINNING_MASK_NAME = "_binning_mask";
 
     /**
@@ -193,7 +194,7 @@ public class SpatialProductBinner {
 
     private static boolean areTilesDirectlyUsable(MultiLevelImage maskImage, MultiLevelImage[] varImages,
                                                   Dimension defaultSliceSize) {
-        boolean areTilesUsable = false;
+        boolean areTilesUsable = true;
         if (maskImage != null) {
             areTilesUsable = isTileSizeCompatible(maskImage, defaultSliceSize);
         }
@@ -227,7 +228,7 @@ public class SpatialProductBinner {
 
 
     private static Dimension computeDefaultSliceDimension(Product product) {
-        final int sliceWidth = product.getSceneRasterWidth();
+        int sliceWidth = product.getSceneRasterWidth();
         Dimension preferredTileSize = product.getPreferredTileSize();
         int sliceHeight;
         if (preferredTileSize != null) {
@@ -238,6 +239,9 @@ public class SpatialProductBinner {
 
         // TODO make this a parameter nf/mz 2013-11-05
         sliceHeight = Config.instance().preferences().getInt(PROPERTY_KEY_SLICE_HEIGHT, sliceHeight);
+        if (Config.instance().preferences().getInt(PROPERTY_KEY_SLICE_WIDTH, sliceWidth) != 0) {
+           sliceWidth = Config.instance().preferences().getInt(PROPERTY_KEY_SLICE_WIDTH, sliceWidth);
+        }
         Dimension dimension = new Dimension(sliceWidth, sliceHeight);
         String logMsg = String.format("Using slice dimension [width=%d, height=%d] in binning", dimension.width, dimension.height);
         SystemUtils.LOG.log(Level.INFO, logMsg);
