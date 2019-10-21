@@ -1,11 +1,7 @@
 package org.esa.snap.product.library.v2.database;
 
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.engine_utilities.util.FileIOUtils;
-
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -23,34 +19,6 @@ public class ScanLocalRepositoryFolderHelper extends AddLocalRepositoryFolderHel
     private static final Logger logger = Logger.getLogger(ScanLocalRepositoryFolderHelper.class.getName());
 
     public ScanLocalRepositoryFolderHelper() {
-    }
-
-    @Override
-    protected void missingProductGeoCoding(Path path, Product product) throws IOException {
-        super.missingProductGeoCoding(path, product);
-
-        if (logger.isLoggable(Level.FINE)) {
-            if (Files.isDirectory(path)) {
-                logger.log(Level.FINE, "Delete the folder '"+path.toString()+"' because the product does not contain the geo-coding.");
-            } else {
-                logger.log(Level.FINE, "Delete the file '"+path.toString()+"' because the product does not contain the geo-coding.");
-            }
-        }
-        FileIOUtils.deleteFolder(path);
-    }
-
-    @Override
-    protected void invalidProduct(Path path) throws IOException {
-        super.invalidProduct(path);
-
-        if (logger.isLoggable(Level.FINE)) {
-            if (Files.isDirectory(path)) {
-                logger.log(Level.FINE, "Delete the folder '"+path.toString()+"' because it does not represent a valid product.");
-            } else {
-                logger.log(Level.FINE, "Delete the file '"+path.toString()+"' because it does not represent a valid product.");
-            }
-        }
-        FileIOUtils.deleteFolder(path);
     }
 
     public List<SaveProductData> scanValidProductsFromFolder(LocalRepositoryFolder localRepositoryFolder) throws IOException, SQLException {

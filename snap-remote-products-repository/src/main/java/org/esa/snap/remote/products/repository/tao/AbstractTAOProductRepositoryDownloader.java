@@ -1,5 +1,7 @@
 package org.esa.snap.remote.products.repository.tao;
 
+import org.apache.http.auth.Credentials;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.esa.snap.remote.products.repository.ProductRepositoryDownloader;
 import org.esa.snap.remote.products.repository.RepositoryProduct;
 import org.esa.snap.remote.products.repository.listener.DownloadProductProgressListener;
@@ -34,8 +36,11 @@ public abstract class AbstractTAOProductRepositoryDownloader implements ProductR
     }
 
     @Override
-    public Path download(RepositoryProduct product, Path targetFolderPath, ProgressListener progressListener) throws InterruptedException, IOException {
+    public Path download(RepositoryProduct product, Credentials credentials, Path targetFolderPath, ProgressListener progressListener)
+                         throws InterruptedException, IOException {
+
         if (product.getMission().equals(this.mission)) {
+            this.downloadStrategy.setCredentials(new UsernamePasswordCredentials(credentials.getUserPrincipal().getName(), credentials.getPassword()));
             this.downloadStrategy.setDestination(targetFolderPath.toString());
             this.downloadStrategy.setFetchMode(FetchMode.OVERWRITE);
             this.downloadStrategy.setProgressListener(new DownloadProductProgressListener(progressListener));

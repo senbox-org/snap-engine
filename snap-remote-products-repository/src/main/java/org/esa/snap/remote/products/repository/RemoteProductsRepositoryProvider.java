@@ -13,6 +13,8 @@ import java.util.Map;
  */
 public interface RemoteProductsRepositoryProvider {
 
+    public int getMaximumRunningConnectionsPerAccount();
+
     public boolean requiresAuthentication();
 
     public String getRepositoryName();

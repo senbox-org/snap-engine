@@ -26,6 +26,11 @@ public class SciHubProductsRepositoryProvider extends AbstractTAORemoteRepositor
     }
 
     @Override
+    public int getMaximumRunningConnectionsPerAccount() {
+        return 2;
+    }
+
+    @Override
     protected SciHubRepositoryProduct buildRepositoryProduct(EOProduct product, String mission, Polygon2D polygon) {
         return new SciHubRepositoryProduct(product, mission, polygon);
     }

@@ -1,5 +1,6 @@
 package org.esa.snap.remote.products.repository;
 
+import org.apache.http.auth.Credentials;
 import org.esa.snap.remote.products.repository.listener.ProgressListener;
 
 import java.io.IOException;
@@ -12,7 +13,7 @@ public interface ProductRepositoryDownloader {
 
     public String getRepositoryId();
 
-    public Path download(RepositoryProduct product, Path targetFolderPath, ProgressListener progressListener) throws InterruptedException, IOException;
+    public Path download(RepositoryProduct product, Credentials credentials, Path targetFolderPath, ProgressListener progressListener) throws InterruptedException, IOException;
 
     public void cancel();
 }

@@ -461,10 +461,16 @@ public class ProductLibraryDAL {
         statement.executeUpdate(sql.toString());
     }
 
-    private static Path extractProductRelativePathToLocalRepositoryFolder(Path productPath, Path localRepositoryFolderPath) {
+    private static Path extractProductPathRelativeToLocalRepositoryFolder(Path productPath, Path localRepositoryFolderPath) {
+        if (productPath == null) {
+            throw new NullPointerException("The product folder path is null.");
+        }
+        if (localRepositoryFolderPath == null) {
+            throw new NullPointerException("The local repository folder path is null.");
+        }
         Path parent = productPath;
         while (parent != null && parent.compareTo(localRepositoryFolderPath) != 0) {
-            parent = productPath.getParent();
+            parent = parent.getParent();
         }
         Path relativePath;
         if (parent == null) {
@@ -519,26 +525,27 @@ public class ProductLibraryDAL {
     public static SaveProductData saveProduct(Product productToSave, BufferedImage quickLookImage, Polygon2D polygon2D, Path productPath, Path localRepositoryFolderPath)
                                               throws IOException, SQLException {
 
-        Path relativePath = extractProductRelativePathToLocalRepositoryFolder(productPath, localRepositoryFolderPath);
         int productId;
-        short localRepositoryId;
+        LocalRepositoryFolder localRepositoryFolder;
         try (Connection connection = H2DatabaseAccessor.getConnection()) {
             connection.setAutoCommit(false);
             try {
-                localRepositoryId = saveLocalRepositoryFolderPath(localRepositoryFolderPath, connection);
+                localRepositoryFolder = saveLocalRepositoryFolderPath(localRepositoryFolderPath, connection);
+                Path relativePath = extractProductPathRelativeToLocalRepositoryFolder(productPath, localRepositoryFolder.getPath());
+
                 FileTime fileTime = Files.getLastModifiedTime(productPath);
                 long sizeInBytes = FileIOUtils.computeFileSize(productPath);
 
-                Integer existingProductId = loadProductId(localRepositoryId, relativePath, connection);
+                Integer existingProductId = loadProductId(localRepositoryFolder.getId(), relativePath, connection);
                 if (existingProductId == null) {
-                    productId = insertProduct(productToSave, polygon2D, relativePath, localRepositoryId, fileTime, sizeInBytes, connection);
+                    productId = insertProduct(productToSave, polygon2D, relativePath, localRepositoryFolder.getId(), fileTime, sizeInBytes, connection);
                 } else {
                     productId = existingProductId.intValue();
                     deleteQuickLookImage(productId);
                     try (Statement statement = connection.createStatement()) {
                         deleteProductRemoteAttributes(productId, statement);
                     }
-                    updateProduct(productId, productToSave, polygon2D, relativePath, localRepositoryId, fileTime, sizeInBytes, connection);
+                    updateProduct(productId, productToSave, polygon2D, relativePath, localRepositoryFolder.getId(), fileTime, sizeInBytes, connection);
                 }
                 if (quickLookImage != null) {
                     writeQuickLookImage(productId, quickLookImage);
@@ -552,36 +559,79 @@ public class ProductLibraryDAL {
                 throw exception;
             }
         }
-        LocalRepositoryFolder localRepositoryFolder = new LocalRepositoryFolder(localRepositoryId, localRepositoryFolderPath);
         return new SaveProductData(productId, null, localRepositoryFolder);
+    }
+
+    private static LocalRepositoryFolder saveLocalRepositoryFolderPath(Path localRepositoryFolderPath, Connection connection) throws SQLException {
+        try (Statement statement = connection.createStatement()) {
+            List<LocalRepositoryFolder> localRepositoryFolders = loadLocalRepositoryFolders(statement);
+
+            for (int i = 0; i < localRepositoryFolders.size(); i++) {
+                LocalRepositoryFolder localRepositoryFolder = localRepositoryFolders.get(i);
+                Path parent = localRepositoryFolderPath;
+                while (parent != null && parent.compareTo(localRepositoryFolder.getPath()) != 0) {
+                    parent = parent.getParent();
+                }
+                if (parent != null) {
+                    return localRepositoryFolder;
+                }
+            }
+
+            StringBuilder sql = new StringBuilder();
+            sql.append("INSERT INTO ")
+                    .append(DatabaseTableNames.LOCAL_REPOSITORIES)
+                    .append(" (folder_path) VALUES ('")
+                    .append(localRepositoryFolderPath.toString())
+                    .append("')");
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS)) {
+                int affectedRows = preparedStatement.executeUpdate();
+                if (affectedRows == 0) {
+                    throw new SQLException("Failed to insert the local repository, no rows affected.");
+                } else {
+                    short localRepositoryId;
+                    try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                        if (generatedKeys.next()) {
+                            localRepositoryId = generatedKeys.getShort(1);
+                        } else {
+                            throw new SQLException("Failed to get the generated local repository id.");
+                        }
+                    }
+                    return new LocalRepositoryFolder(localRepositoryId, localRepositoryFolderPath);
+                }
+            }
+        }
     }
 
     public static SaveDownloadedProductData saveProduct(RepositoryProduct productToSave, Path productPath, String remoteRepositoryName, Path localRepositoryFolderPath)
                                               throws IOException, SQLException {
 
-        Path relativePath = extractProductRelativePathToLocalRepositoryFolder(productPath, localRepositoryFolderPath);
         int productId;
         short remoteMissionId;
-        short localRepositoryId;
+        LocalRepositoryFolder localRepositoryFolder;
         try (Connection connection = H2DatabaseAccessor.getConnection()) {
             connection.setAutoCommit(false);
             try {
+                localRepositoryFolder = saveLocalRepositoryFolderPath(localRepositoryFolderPath, connection);
+                Path relativePath = extractProductPathRelativeToLocalRepositoryFolder(productPath, localRepositoryFolder.getPath());
+
                 short remoteRepositoryId = saveRemoteRepositoryName(remoteRepositoryName, connection);
                 remoteMissionId = saveRemoteMissionName(remoteRepositoryId, productToSave.getMission(), productToSave.getAttributes(), connection);
-                localRepositoryId = saveLocalRepositoryFolderPath(localRepositoryFolderPath, connection);
+
                 FileTime fileTime = Files.getLastModifiedTime(productPath);
                 long sizeInBytes = FileIOUtils.computeFileSize(productPath);
 
-                Integer existingProductId = loadProductId(localRepositoryId, relativePath, connection);
+                Integer existingProductId = loadProductId(localRepositoryFolder.getId(), relativePath, connection);
                 if (existingProductId == null) {
-                    productId = insertProduct(productToSave, relativePath, remoteMissionId, localRepositoryId, fileTime, sizeInBytes, connection);
+                    // no existing product into the database
+                    productId = insertProduct(productToSave, relativePath, remoteMissionId, localRepositoryFolder.getId(), fileTime, sizeInBytes, connection);
                 } else {
+                    // the product already exists into the database
                     productId = existingProductId.intValue();
                     deleteQuickLookImage(productId);
                     try (Statement statement = connection.createStatement()) {
                         deleteProductRemoteAttributes(productId, statement);
                     }
-                    updateProduct(productId, productToSave, relativePath, remoteMissionId, localRepositoryId, fileTime, sizeInBytes, connection);
+                    updateProduct(productId, productToSave, relativePath, remoteMissionId, localRepositoryFolder.getId(), fileTime, sizeInBytes, connection);
                 }
 
                 insertRemoteProductAttributes(productId, productToSave.getAttributes(), connection);
@@ -603,7 +653,6 @@ public class ProductLibraryDAL {
             productAttributeNames.add(attribute.getName());
         }
         RemoteMission remoteMission = new RemoteMission(remoteMissionId, productToSave.getMission());
-        LocalRepositoryFolder localRepositoryFolder = new LocalRepositoryFolder(localRepositoryId, localRepositoryFolderPath);
         return new SaveDownloadedProductData(productId, remoteMission, localRepositoryFolder, productAttributeNames);
     }
 
@@ -739,47 +788,6 @@ public class ProductLibraryDAL {
         return remoteMissionId;
     }
 
-    private static short saveLocalRepositoryFolderPath(Path localRepositoryFolderPath, Connection connection) throws SQLException {
-        String localRepositoryPath = localRepositoryFolderPath.toString();
-        short localRepositoryId = 0;
-        try (Statement statement = connection.createStatement()) {
-            StringBuilder sql = new StringBuilder();
-            sql.append("SELECT id FROM ")
-                    .append(DatabaseTableNames.LOCAL_REPOSITORIES)
-                    .append(" WHERE LOWER(folder_path) = '")
-                    .append(localRepositoryPath.toLowerCase())
-                    .append("'");
-            try (ResultSet resultSet = statement.executeQuery(sql.toString())) {
-                if (resultSet.next()) {
-                    localRepositoryId = resultSet.getShort("id");
-                }
-            }
-        }
-        if (localRepositoryId == 0) {
-            StringBuilder sql = new StringBuilder();
-            sql.append("INSERT INTO ")
-                    .append(DatabaseTableNames.LOCAL_REPOSITORIES)
-                    .append(" (folder_path) VALUES ('")
-                    .append(localRepositoryPath)
-                    .append("')");
-            try (PreparedStatement statement = connection.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS)) {
-                int affectedRows = statement.executeUpdate();
-                if (affectedRows == 0) {
-                    throw new SQLException("Failed to insert the local repository, no rows affected.");
-                } else {
-                    try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
-                        if (generatedKeys.next()) {
-                            localRepositoryId = generatedKeys.getShort(1);
-                        } else {
-                            throw new SQLException("Failed to get the generated local repository id.");
-                        }
-                    }
-                }
-            }
-        }
-        return localRepositoryId;
-    }
-
     private static void updateProduct(int productId, Product productToSave, Polygon2D polygon2D, Path relativePath, int localRepositoryId,
                                      FileTime fileTime, long sizeInBytes, Connection connection)
                                      throws SQLException {
@@ -903,9 +911,9 @@ public class ProductLibraryDAL {
                                       throws SQLException {
 
         StringBuilder sql = new StringBuilder();
-        sql.append("UPDATE")
+        sql.append("UPDATE ")
                 .append(DatabaseTableNames.PRODUCTS)
-                .append(" SET name = ")
+                .append(" SET name = '")
                 .append(productToSave.getName())
                 .append("', remote_mission_id = ")
                 .append(remoteMissionId)

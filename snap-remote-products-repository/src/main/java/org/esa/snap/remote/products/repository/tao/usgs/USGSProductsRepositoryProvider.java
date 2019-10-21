@@ -17,6 +17,11 @@ public class USGSProductsRepositoryProvider extends AbstractTAORemoteRepositoryP
     }
 
     @Override
+    public int getMaximumRunningConnectionsPerAccount() {
+        return -1;
+    }
+
+    @Override
     protected USGSRepositoryProduct buildRepositoryProduct(EOProduct product, String mission, Polygon2D polygon) {
         return new USGSRepositoryProduct(product, mission, polygon);
     }
