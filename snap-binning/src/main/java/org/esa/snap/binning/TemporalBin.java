@@ -76,7 +76,8 @@ public class TemporalBin extends Bin {
                              getClass().getSimpleName(), index, numObs, numPasses, Arrays.toString(featureValues));
     }
 
-    private void readFields(DataInput dataInput) throws IOException {
+    // method is used in Calvalus - implicit API, keep it public - tb 2019-10-14
+    public void readFields(DataInput dataInput) throws IOException {
         // Note, we don't serialise the index, because it is usually the MapReduce key
         numObs = dataInput.readInt();
         numPasses = dataInput.readInt();
