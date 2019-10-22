@@ -183,10 +183,18 @@ public class SpatialProductBinner {
             }
         } else {
             int sceneHeight = referenceImage.getHeight();
-            int numSlices = MathUtils.ceilInt(sceneHeight / (double) defaultSliceSize.height);
+            int sceneWidth = referenceImage.getWidth();
+            int numSlices = MathUtils.ceilInt(sceneHeight * sceneWidth / (double) (defaultSliceSize.height * defaultSliceSize.width ));
             rectangles = new Rectangle[numSlices];
-            for (int i = 0; i < numSlices; i++) {
-                rectangles[i] = computeCurrentSliceRectangle(defaultSliceSize, i, sceneHeight);
+            if (defaultSliceSize.width == sceneWidth) {
+                for (int i = 0; i < numSlices; i++) {
+                    rectangles[i] = computeCurrentSliceRectangle(defaultSliceSize, i, sceneHeight);
+                }
+            }
+            else {
+                for (int i = 0; i < numSlices; i++) {
+                    rectangles[i] = computeCurrentSliceRectange(defaultSliceSize,i,sceneHeight,sceneWidth);
+                }
             }
         }
         return rectangles;
@@ -206,6 +214,33 @@ public class SpatialProductBinner {
 
     private static boolean isTileSizeCompatible(MultiLevelImage image, Dimension defaultSliceSize) {
         return image.getTileWidth() == defaultSliceSize.width && image.getTileHeight() == defaultSliceSize.height;
+    }
+
+    private static Rectangle computeCurrentSliceRectange(Dimension defaultSlice, int sliceIndex, int sceneHeight, int sceneWidth) {
+        // first iterate over height, then width
+        int numSliceY = MathUtils.ceilInt (sceneHeight / defaultSlice.height );
+        int numSliceX = MathUtils.ceilInt (sceneWidth / defaultSlice.width );
+
+        int sliceIndexY = MathUtils.floorInt (sliceIndex / numSliceY );
+        int sliceIndexX = sliceIndex - (sliceIndexY * numSliceY);
+
+        int sliceY = sliceIndexY * defaultSlice.height;
+        int sliceX = sliceIndexX * defaultSlice.width;
+
+        int currentSliceHeight = defaultSlice.height;
+        if (sliceY + defaultSlice.height > sceneHeight) {
+            currentSliceHeight = sceneHeight - sliceY;
+        }
+        int currentSliceWidth = defaultSlice.width;
+        if (sliceX + defaultSlice.width > sceneWidth) {
+            currentSliceWidth = sceneWidth - sliceX;
+        }
+
+        if (sliceX + defaultSlice.width > sceneWidth) {
+            currentSliceWidth = sceneWidth - sliceX;
+        }
+
+        return new Rectangle(sliceX,sliceY,currentSliceWidth,currentSliceHeight);
     }
 
     private static Rectangle computeCurrentSliceRectangle(Dimension defaultSlice, int sliceIndex, int sceneHeight) {

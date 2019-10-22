@@ -8,7 +8,6 @@
     </parent>
 
     <artifactId>snap-binning</artifactId>
-    <version>7.0.0</version>
     <packaging>nbm</packaging>
 
     <name>SNAP Level-3 Binning Processor (GPF)</name>
