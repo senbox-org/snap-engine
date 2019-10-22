@@ -219,7 +219,6 @@ public class SpatialProductBinner {
     private static Rectangle computeCurrentSliceRectange(Dimension defaultSlice, int sliceIndex, int sceneHeight, int sceneWidth) {
         // first iterate over height, then width
         int numSliceY = MathUtils.ceilInt (sceneHeight / defaultSlice.height );
-        int numSliceX = MathUtils.ceilInt (sceneWidth / defaultSlice.width );
 
         int sliceIndexY = MathUtils.floorInt (sliceIndex / numSliceY );
         int sliceIndexX = sliceIndex - (sliceIndexY * numSliceY);
@@ -232,10 +231,6 @@ public class SpatialProductBinner {
             currentSliceHeight = sceneHeight - sliceY;
         }
         int currentSliceWidth = defaultSlice.width;
-        if (sliceX + defaultSlice.width > sceneWidth) {
-            currentSliceWidth = sceneWidth - sliceX;
-        }
-
         if (sliceX + defaultSlice.width > sceneWidth) {
             currentSliceWidth = sceneWidth - sliceX;
         }
