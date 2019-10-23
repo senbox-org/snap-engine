@@ -16,11 +16,11 @@ public class SciHubProductRepositoryDownloader extends AbstractTAOProductReposit
         super(mission, repositoryId);
 
         if (mission.equals("Sentinel1")) {
-            this.downloadStrategy = new Sentinel1DownloadStrategy(null);
+            this.downloadStrategy = new Sentinel1Downloader();
         } else if (mission.equals("Sentinel2")) {
-            this.downloadStrategy = new Sentinel2ArchiveDownloadStrategy(null);
+            this.downloadStrategy = new Sentinel2Downloader();
         } else if (mission.equals("Sentinel3")) {
-            this.downloadStrategy = new Sentinel3DownloadStrategy(null);
+            this.downloadStrategy = new Sentinel3Downloader();
         } else {
             throw new IllegalArgumentException("Unknown mission '"+mission+"'.");
         }

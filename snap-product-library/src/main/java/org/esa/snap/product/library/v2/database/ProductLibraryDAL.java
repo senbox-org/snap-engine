@@ -133,16 +133,6 @@ public class ProductLibraryDAL {
         }
     }
 
-    private static Polygon2D buildPolygon(Rectangle2D selectionArea) {
-        Polygon2D polygon = new Polygon2D();
-        polygon.append(selectionArea.getX(), selectionArea.getY()); // the top left corner
-        polygon.append(selectionArea.getX() + selectionArea.getWidth(), selectionArea.getY()); // the top right corner
-        polygon.append(selectionArea.getX() + selectionArea.getWidth(), selectionArea.getY() + selectionArea.getHeight()); // the bottom right corner
-        polygon.append(selectionArea.getX(), selectionArea.getY() + selectionArea.getHeight()); // the bottom left corner
-        polygon.append(selectionArea.getX(), selectionArea.getY()); // the top left corner
-        return polygon;
-    }
-
     public static List<RepositoryProduct> loadProductList(LocalRepositoryFolder localRepositoryFolder, RemoteMission mission, Map<String, Object> parameterValues)
                                                           throws SQLException, IOException {
 
@@ -217,7 +207,7 @@ public class ProductLibraryDAL {
                 sql.append(localRepositoryFolder.getId());
             }
             if (selectionArea != null) {
-                Polygon2D polygon = buildPolygon(selectionArea);
+                Polygon2D polygon = Polygon2D.buildPolygon(selectionArea);
                 sql.append(" AND ST_Intersects(p.geometry, '")
                         .append(polygon.toWKT())
                         .append("')");

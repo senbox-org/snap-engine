@@ -3,11 +3,13 @@ package org.esa.snap.remote.products.repository.tao.scihub;
 import org.esa.snap.remote.products.repository.Polygon2D;
 import org.esa.snap.remote.products.repository.ProductRepositoryDownloader;
 import org.esa.snap.remote.products.repository.tao.AbstractTAORemoteRepositoryProvider;
+import ro.cs.tao.datasource.DataSource;
 import ro.cs.tao.datasource.remote.ProductHelper;
 import ro.cs.tao.datasource.remote.scihub.SciHubDataSource;
 import ro.cs.tao.eodata.EOProduct;
 import ro.cs.tao.products.sentinels.SentinelProductHelper;
 
+import java.net.URISyntaxException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -43,6 +45,11 @@ public class SciHubProductsRepositoryProvider extends AbstractTAORemoteRepositor
     @Override
     protected Class<SciHubDataSource> getDataSourceClass() {
         return SciHubDataSource.class;
+    }
+
+    @Override
+    protected DataSource buildNewDataSource() throws URISyntaxException {
+        return new SciHubDataSource();
     }
 
     @Override

@@ -33,6 +33,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -51,6 +52,8 @@ public abstract class AbstractTAORemoteRepositoryProvider<T extends DataSource> 
     protected abstract AbstractTAORepositoryProduct buildRepositoryProduct(EOProduct product, String mission, Polygon2D polygon);
 
     protected abstract Class<T> getDataSourceClass();
+
+    protected abstract DataSource buildNewDataSource() throws URISyntaxException;
 
     protected abstract ProductHelper buildProductHelper(String productName);
 
@@ -169,7 +172,7 @@ public abstract class AbstractTAORemoteRepositoryProvider<T extends DataSource> 
 
             query.setPageSize(pageSize);
 
-            totalResults = new ArrayList<RepositoryProduct>();
+            totalResults = new ArrayList<>();
             WKTReader wktReader = new WKTReader();
             for (int pageNumber=1; pageNumber<=totalPageNumber && totalResults.size() < totalProductCount; pageNumber++) {
                 query.setPageNumber(pageNumber);
@@ -224,8 +227,8 @@ public abstract class AbstractTAORemoteRepositoryProvider<T extends DataSource> 
         return serviceRegistry.getService(getDataSourceClass());
     }
 
-    private DataQuery buildDataQuery(String username, String password, String mission, Map<String, Object> parametersValues) {
-        DataSource dataSource = getDataSource();
+    private DataQuery buildDataQuery(String username, String password, String mission, Map<String, Object> parametersValues) throws URISyntaxException {
+        DataSource dataSource = buildNewDataSource();
         dataSource.setCredentials(username, password);
 
         DataQuery query = dataSource.createQuery(mission);

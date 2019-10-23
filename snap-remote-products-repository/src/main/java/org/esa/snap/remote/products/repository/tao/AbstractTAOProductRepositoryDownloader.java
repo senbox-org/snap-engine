@@ -12,6 +12,7 @@ import ro.cs.tao.eodata.EOProduct;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Base64;
 
 /**
  * Created by jcoravu on 26/9/2019.
@@ -57,5 +58,12 @@ public abstract class AbstractTAOProductRepositoryDownloader implements ProductR
     @Override
     public void cancel() {
         this.downloadStrategy.cancel();
+    }
+
+    public static String buildAuthenticationToken(Credentials credentials) {
+        if (credentials == null) {
+            throw new NullPointerException("The credentials cannot be null");
+        }
+        return "Basic " + new String(Base64.getEncoder().encode((credentials.getUserPrincipal().getName() + ":" + credentials.getPassword()).getBytes()));
     }
 }
