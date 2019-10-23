@@ -38,22 +38,23 @@ import static org.junit.Assume.assumeTrue;
  */
 public class TestCreateElevationOp {
 
-    public final static String sep = File.separator;
-    public final static String rootPathTestProducts = SystemUtils.getApplicationHomeDir()+sep+".."+sep+".."+sep+"testdata";
-    public final static String inputSAR = rootPathTestProducts + sep + "input" + sep + "SAR" + sep;
-    public final static File inputASAR_WSM = new File(inputSAR + "ASAR" + sep + "subset_1_of_ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.dim");
+    private static final String PROPERTY_NAME_S1_DATA_DIR = "s1tbx.tests.data.dir";
+    private final static String sep = File.separator;
+    private final static String input = System.getProperty(PROPERTY_NAME_S1_DATA_DIR,"/data/ssd/testData/s1tbx/");
+    private final static String inputSAR = input + sep + "SAR" + sep;
+    private final static File inputASAR_WSM = new File(inputSAR + "ASAR" + sep + "subset_1_of_ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.dim");
 
     private final static OperatorSpi spi = new AddElevationOp.Spi();
 
     private static double[] expectedValues = {
-            1526.274658203125,
-            1522.37060546875,
-            1533.1915283203125,
-            1552.01318359375,
-            1524.1387939453125,
-            1519.0521240234375,
-            1533.115966796875,
-            1555.3663330078125
+            1528.408203125,
+            1525.0687255859375,
+            1524.87841796875,
+            1541.1314697265625,
+            1527.7576904296875,
+            1521.7149658203125,
+            1521.7635498046875,
+            1542.481201171875
     };
 
     private File inputFile;

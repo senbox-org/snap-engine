@@ -34,10 +34,11 @@ import static org.junit.Assume.assumeTrue;
  */
 public class TestInputProductValidator {
 
-    public final static String sep = File.separator;
-    public final static String rootPathTestProducts = SystemUtils.getApplicationHomeDir()+sep+".."+sep+".."+sep+".."+sep+".."+sep+"testdata";
-    public final static String inputSAR = rootPathTestProducts + sep + "input" + sep + "SAR" + sep;
-    public final static File inputASAR_WSM = new File(inputSAR + "ASAR" + sep + "subset_1_of_ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.dim");
+    private static final String PROPERTY_NAME_S1_DATA_DIR = "s1tbx.tests.data.dir";
+    private final static String sep = File.separator;
+    private final static String input = System.getProperty(PROPERTY_NAME_S1_DATA_DIR,"/data/ssd/testData/s1tbx/");
+    private final static String inputSAR = input + sep + "SAR" + sep;
+    private final static File inputASAR_WSM = new File(inputSAR + "ASAR" + sep + "subset_1_of_ENVISAT-ASA_WSM_1PNPDE20080119_093446_000000852065_00165_30780_2977.dim");
 
     File inputFile;
     @Before
