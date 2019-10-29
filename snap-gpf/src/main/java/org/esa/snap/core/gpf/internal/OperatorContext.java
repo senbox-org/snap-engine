@@ -153,7 +153,10 @@ public class OperatorContext {
     public static void setTileCache(OpImage image, boolean force) {
         if (force && image.getTileCache() == null) {
             image.setTileCache(getTileCache());
-            SystemUtils.LOG.info(String.format("Tile cache assigned to %s", image));
+            boolean disableTileCache = Config.instance().preferences().getBoolean(GPF.DISABLE_TILE_CACHE_PROPERTY, false);
+            if (disableTileCache) {
+                SystemUtils.LOG.info(String.format("Tile cache assigned to %s", image));
+            }
         } else {
             setTileCache(image);
         }
@@ -180,7 +183,7 @@ public class OperatorContext {
             image.setTileCache(null);
         } else if (image.getTileCache() == null) {
             image.setTileCache(getTileCache());
-            SystemUtils.LOG.info(String.format("Tile cache assigned to %s", image));
+            SystemUtils.LOG.fine(String.format("Tile cache assigned to %s", image));
         }
     }
 
