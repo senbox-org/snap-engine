@@ -45,6 +45,8 @@ public class ImageInfo implements Cloneable {
     @Deprecated
     public static final String HISTOGRAM_MATCHING_NORMALIZE = "normalize";
 
+    private static final double FORCED_CHANGE_FACTOR = 0.0001;
+
     /**
      * Enumerates the possible histogram matching modes.
      */
@@ -331,6 +333,168 @@ public class ImageInfo implements Cloneable {
         }
     }
 
+    public void setColorPaletteDef(ColorPaletteDef colorPaletteDef,
+                                   double minSample,
+                                   double maxSample, boolean autoDistribute, boolean isSourceLogScaled, boolean isTargetLogScaled) {
+        transferPoints(colorPaletteDef, minSample, maxSample, autoDistribute, getColorPaletteDef(), isSourceLogScaled, isTargetLogScaled);
+    }
+
+
+    private static void transferPoints(ColorPaletteDef sourceCPD,
+                                       double minTargetValue,
+                                       double maxTargetValue,
+                                       boolean autoDistribute,
+                                       ColorPaletteDef targetCPD,
+                                       boolean isSourceLogScaled,
+                                       boolean isTargetLogScaled) {
+
+        if (autoDistribute || sourceCPD.isAutoDistribute()) {
+            alignNumPoints(sourceCPD, targetCPD);
+            double minSourceValue = sourceCPD.getMinDisplaySample();
+            double maxSourceValue = sourceCPD.getMaxDisplaySample();
+
+            // The target CPD log status needs to be set here to be effective
+            targetCPD.setLogScaled(isTargetLogScaled);
+
+            for (int i = 0; i < sourceCPD.getNumPoints(); i++) {
+
+                if (minTargetValue != maxTargetValue && minSourceValue != maxSourceValue) {
+
+                    double linearWeight;
+                    if (isSourceLogScaled) {
+                        double currentSourceLogValue = sourceCPD.getPointAt(i).getSample();
+                        linearWeight = getLinearWeightFromLogValue(currentSourceLogValue, minSourceValue, maxSourceValue);
+
+                    } else {
+                        double currentSourceValue = sourceCPD.getPointAt(i).getSample();
+                        linearWeight = (currentSourceValue - minSourceValue) / (maxSourceValue - minSourceValue);
+                    }
+
+                    double currentLinearTargetValue = getLinearValue(linearWeight, minTargetValue, maxTargetValue);
+
+                    if (isTargetLogScaled) {
+                        double currentLogTargetValue = getLogarithmicValue(currentLinearTargetValue, minTargetValue, maxTargetValue);
+                        targetCPD.getPointAt(i).setSample(currentLogTargetValue);
+                    } else {
+                        targetCPD.getPointAt(i).setSample(currentLinearTargetValue);
+                    }
+
+
+                } else {
+                    // cant do much here so just set all to min value and let user fix either palette or bad entry
+                    targetCPD.getPointAt(i).setSample(minTargetValue);
+                }
+
+                Color currentSourceColor = sourceCPD.getPointAt(i).getColor();
+                targetCPD.getPointAt(i).setColor(currentSourceColor);
+                targetCPD.getPointAt(i).setLabel(sourceCPD.getPointAt(i).getLabel());
+            }
+
+        } else {
+            targetCPD.setPoints(sourceCPD.getPoints().clone());
+            targetCPD.setLogScaled(isTargetLogScaled);
+        }
+
+    }
+
+
+    private static double getLogarithmicValue(double linearValue, double min, double max) {
+
+        // Prevent extrapolation which could occur due to machine roundoffs in the calculations
+        if (linearValue == min) {
+            return min;
+        }
+        if (linearValue == max) {
+            return max;
+        }
+
+        double b = Math.log(max / min) / (max - min);
+        double a = min / (Math.exp(b * min));
+        double logValue = a * Math.exp(b * linearValue);
+
+        // Prevent UNEXPECTED interpolation/extrapolation which could occur due to machine roundoffs in the calculations
+        if (linearValue > min && logValue < min) {
+            return min;
+        }
+        if (linearValue < max && logValue > max) {
+            return max;
+        }
+        if (linearValue < min && logValue >= min) {
+            return min - (max - min) * FORCED_CHANGE_FACTOR;
+        }
+        if (linearValue > max && logValue <= max) {
+            return max + (max - min) * FORCED_CHANGE_FACTOR;
+        }
+
+        return logValue;
+    }
+
+    private static double getLinearValue(double linearWeight, double min, double max) {
+
+        // Prevent extrapolation which could occur due to machine roundoffs in the calculations
+        if (linearWeight == 0) {
+            return min;
+        }
+        if (linearWeight == 1) {
+            return max;
+        }
+
+        double deltaNormalized = (max - min);
+        double linearValue = min + linearWeight * (deltaNormalized);
+
+        // Prevent UNEXPECTED interpolation/extrapolation which could occur due to machine roundoffs in the calculations
+        if (linearWeight > 0 && linearValue < min) {
+            return min;
+        }
+        if (linearWeight < 1 && linearValue > max) {
+            return max;
+        }
+        if (linearWeight < 0 && linearValue >= min) {
+            return min - (max - min) * FORCED_CHANGE_FACTOR;
+        }
+        if (linearWeight > 1 && linearValue <= max) {
+            return max + (max - min) * FORCED_CHANGE_FACTOR;
+        }
+
+        return linearValue;
+    }
+
+
+    private static double getLinearWeightFromLogValue(double logValue, double min, double max) {
+
+        // Prevent extrapolation which could occur due to machine roundoffs in the calculations
+        if (logValue == min) {
+            return 0;
+        }
+        if (logValue == max) {
+            return 1;
+        }
+
+        double b = Math.log(max / min) / (max - min);
+        double a = min / (Math.exp(b * min));
+
+//        double linearWeight = Math.log(logValue / a) / b;
+//        linearWeight = (linearWeight - min) / (max - min);
+        double linearWeight = ((Math.log(logValue / a) / b) - min) / (max - min);
+
+        // Prevent UNEXPECTED interpolation/extrapolation which could occur due to machine roundoffs in the calculations
+        if (logValue > min && linearWeight < 0) {
+            return 0;
+        }
+        if (logValue < max && linearWeight > 1) {
+            return 1;
+        }
+        if (logValue < min && linearWeight >= 0) {
+            return 0 - FORCED_CHANGE_FACTOR;
+        }
+        if (logValue > max && linearWeight <= 1) {
+            return 1 + FORCED_CHANGE_FACTOR;
+        }
+
+        return linearWeight;
+    }
+
+
     private static void alignNumPoints(ColorPaletteDef sourceCPD, ColorPaletteDef targetCPD) {
         int deltaNumPoints = targetCPD.getNumPoints() - sourceCPD.getNumPoints();
         if (deltaNumPoints < 0) {
@@ -349,14 +513,14 @@ public class ImageInfo implements Cloneable {
      *
      * @param mode the histogram matching string
      *
-     * @return the histogram matching. {@link ImageInfo.HistogramMatching#None} if {@code maode} is not "Equalize" or "Normalize".
+     * @return the histogram matching. {@link HistogramMatching#None} if {@code maode} is not "Equalize" or "Normalize".
      */
-    public static ImageInfo.HistogramMatching getHistogramMatching(String mode) {
-        ImageInfo.HistogramMatching histogramMatchingEnum = ImageInfo.HistogramMatching.None;
+    public static HistogramMatching getHistogramMatching(String mode) {
+        HistogramMatching histogramMatchingEnum = HistogramMatching.None;
         if ("Equalize".equalsIgnoreCase(mode)) {
-            histogramMatchingEnum = ImageInfo.HistogramMatching.Equalize;
+            histogramMatchingEnum = HistogramMatching.Equalize;
         } else if ("Normalize".equalsIgnoreCase(mode)) {
-            histogramMatchingEnum = ImageInfo.HistogramMatching.Normalize;
+            histogramMatchingEnum = HistogramMatching.Normalize;
         }
         return histogramMatchingEnum;
     }
