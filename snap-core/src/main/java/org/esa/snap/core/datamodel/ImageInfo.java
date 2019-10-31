@@ -29,8 +29,14 @@ import java.awt.image.IndexColorModel;
  * This class contains information about how a product's raster data node is displayed as an image.
  *
  * @author Norman Fomferra
+ * @author Daniel Knowles (NASA)
  * @version $Revision$ $Date$
  */
+// OCT 2019 - Knowles
+//          - Added methods and calls to these methods which transform weighted points between logarithmic scaling and
+//            linear scaling in both directions.
+
+
 public class ImageInfo implements Cloneable {
 
     public static final Color NO_COLOR = new Color(0, 0, 0, 0);
