@@ -144,8 +144,8 @@ public class CsvProductWriter extends AbstractProductWriter {
         final int[] dataTypes = new int[bands.length];
 
         final Raster[] dataRasters = new Raster[rasterDataNodes.length];
-        // todo: For big products this will not work because the hole scene is allocated. But no one wants to
-        //  export big scenes to ASCII. So this is minor and can be adressed when the need arises.
+        // todo: For big products this will not work because the whole scene is allocated. But no one wants to
+        //  export big scenes to ASCII. So this is minor and can be addressed when the need arises.
         Rectangle dataRect = new Rectangle(getSourceProduct().getSceneRasterWidth(), getSourceProduct().getSceneRasterHeight());
         for (int i = 0; i < rasterDataNodes.length; i++) {
             dataRasters[i] = rasterDataNodes[i].getGeophysicalImage().getData(dataRect);
