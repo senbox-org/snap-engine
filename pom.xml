@@ -46,7 +46,7 @@
         <jide.version>3.6.1</jide.version>
         <maven.build.timestamp.format>yyyyMMdd</maven.build.timestamp.format>
         <buildDate>${maven.build.timestamp}</buildDate>
-        <tao.version>1.0</tao.version>
+        <tao.version>1.0.1</tao.version>
     </properties>
 
     <modules>
@@ -722,25 +722,21 @@
                 <version>${snap.version}</version>
             </dependency>
 
-            <!--TAO modules -->
+            <!-- TAO modules -->
             <dependency>
                 <groupId>ro.cs.tao</groupId>
                 <artifactId>tao-data-model</artifactId>
                 <version>${tao.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.eclipse.persistence</groupId>
+                        <artifactId>org.eclipse.persistence.moxy</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>ro.cs.tao</groupId>
                 <artifactId>tao-data-sources</artifactId>
-                <version>${tao.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>ro.cs.tao</groupId>
-                <artifactId>tao-datasources-scihub</artifactId>
-                <version>${tao.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>ro.cs.tao</groupId>
-                <artifactId>tao-datasources-usgs</artifactId>
                 <version>${tao.version}</version>
             </dependency>
 
@@ -978,9 +974,9 @@
                 </plugin>
 
                 <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
+                    <groupId>org.apache.netbeans.utilities</groupId>
                     <artifactId>nbm-maven-plugin</artifactId>
-                    <version>4.1</version>
+                    <version>4.3</version>
                     <extensions>true</extensions>
                     <dependencies>
                         <dependency>
@@ -1088,7 +1084,7 @@
             </plugin>
 
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
+                <groupId>org.apache.netbeans.utilities</groupId>
                 <artifactId>nbm-maven-plugin</artifactId>
             </plugin>
 

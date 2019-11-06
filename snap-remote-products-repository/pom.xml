@@ -40,10 +40,12 @@
         <dependency>
             <groupId>ro.cs.tao</groupId>
             <artifactId>tao-datasources-scihub</artifactId>
+            <version>1.0.1</version>
         </dependency>
         <dependency>
             <groupId>ro.cs.tao</groupId>
             <artifactId>tao-datasources-usgs</artifactId>
+            <version>1.0.1</version>
         </dependency>
     </dependencies>
 
@@ -52,11 +54,13 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>nbm-maven-plugin</artifactId>
+                <version>4.1</version>
                 <configuration>
+                    <verifyRuntime>warn</verifyRuntime>
                     <publicPackages>
                         <publicPackage>org.esa.snap.remote.products.repository</publicPackage>
                         <publicPackage>org.esa.snap.remote.products.repository.listener.*</publicPackage>
-                        <publicPackage>org.apache.http.auth.*</publicPackage>
+                        <!--<publicPackage>org.apache.http.auth.*</publicPackage>-->
                     </publicPackages>
                 </configuration>
             </plugin>
