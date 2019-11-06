@@ -82,7 +82,7 @@
     </dependencies>
     <profiles>
         <profile>
-            <id>oracle-tools</id>
+            <id>jdk-tools</id>
             <activation>
                 <property>
                     <name>java.vendor</name>
@@ -91,7 +91,7 @@
             </activation>
             <dependencies>
                 <dependency>
-                    <groupId>com.oracle</groupId>
+                    <groupId>com.sun</groupId>
                     <artifactId>tools</artifactId>
                     <version>1.8.0</version>
                     <scope>system</scope>
