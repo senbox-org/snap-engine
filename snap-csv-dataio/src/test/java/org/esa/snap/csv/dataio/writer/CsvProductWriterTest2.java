@@ -19,10 +19,7 @@ package org.esa.snap.csv.dataio.writer;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductWriter;
-import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.LineNumberReader;
