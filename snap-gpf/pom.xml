@@ -85,8 +85,10 @@
             <id>jdk-tools</id>
             <activation>
                 <property>
-                    <name>java.vendor</name>
-                    <value>Oracle Corporation</value>
+                    <!-- Maybe this needs to be updated when detecting JDK distributions where
+                    the following does not apply. Currently, it works for the JDKs from Oracle, Adopt, Azul and Amazon-->
+                    <name>java.vm.specification.name</name>
+                    <value>Java Virtual Machine Specification</value>
                 </property>
             </activation>
             <dependencies>
