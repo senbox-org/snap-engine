@@ -184,7 +184,9 @@ public class CsvProductWriter extends AbstractProductWriter {
 
     @Override
     public void flush() throws IOException {
-        writer.flush();
+        if (writer != null) {
+            writer.flush();
+        }
     }
 
     @Override
