@@ -64,6 +64,7 @@
                 <artifactId>nbm-maven-plugin</artifactId>
                 <version>4.3</version>
                 <configuration>
+                    <verifyRuntime>warn</verifyRuntime>
                     <publicPackages>
                         <publicPackage>org.esa.snap.remote.products.repository</publicPackage>
                         <publicPackage>org.esa.snap.remote.products.repository.listener.*</publicPackage>
