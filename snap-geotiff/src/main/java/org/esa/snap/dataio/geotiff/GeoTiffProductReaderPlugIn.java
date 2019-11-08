@@ -52,7 +52,7 @@ public class GeoTiffProductReaderPlugIn implements ProductReaderPlugIn {
 			if(input instanceof String || input instanceof File) {
 				 final String ext = FileUtils.getExtension((File) imageIOInput);
                  if(ext != null && ext.equalsIgnoreCase(".tif") || ext.equalsIgnoreCase(".tiff") || ext.equalsIgnoreCase(".btf")) {
-                     return DecodeQualification.INTENDED;
+                     return DecodeQualification.SUITABLE;
                  } else if(ext != null && ext.equalsIgnoreCase(".zip")) {
                      return checkZip((File) imageIOInput);
                  } else {
@@ -91,7 +91,7 @@ public class GeoTiffProductReaderPlugIn implements ProductReaderPlugIn {
             }
         }
         if(foundTiff && entryCnt == 1) {
-            return DecodeQualification.INTENDED;    // only zipped tiff
+            return DecodeQualification.SUITABLE;    // only zipped tiff
         }
         return DecodeQualification.UNABLE;
     }
