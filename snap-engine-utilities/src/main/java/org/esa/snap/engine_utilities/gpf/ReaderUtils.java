@@ -108,6 +108,7 @@ public final class ReaderUtils {
      * @param input an input object of unknown type
      * @return a <code>File</code> or <code>null</code> it the input can not be resolved to a <code>File</code>.
      */
+    @Deprecated
     public static File getFileFromInput(final Object input) {
         if (input instanceof String) {
             return new File((String) input);
