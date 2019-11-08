@@ -119,11 +119,11 @@ public final class ReaderUtils {
     }
 
     /**
-     * Returns a <code>File</code> if the given input is a <code>String</code> or <code>File</code>,
+     * Returns a <code>Path</code> if the given input is a <code>String</code> or <code>File</code>,
      * otherwise it returns null;
      *
      * @param input an input object of unknown type
-     * @return a <code>File</code> or <code>null</code> it the input can not be resolved to a <code>File</code>.
+     * @return a <code>Path</code> or <code>null</code> it the input can not be resolved to a <code>Path</code>.
      */
     public static Path getPathFromInput(final Object input) {
         if (input instanceof String) {
