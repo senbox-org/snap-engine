@@ -31,6 +31,7 @@ import org.esa.snap.engine_utilities.datamodel.Unit;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.util.Arrays;
 
@@ -127,7 +128,7 @@ public final class ReaderUtils {
      */
     public static Path getPathFromInput(final Object input) {
         if (input instanceof String) {
-            return new File((String) input).toPath();
+            return Paths.get((String) input);
         } else if (input instanceof File) {
             return ((File)input).toPath();
         } else if (input instanceof Path) {
