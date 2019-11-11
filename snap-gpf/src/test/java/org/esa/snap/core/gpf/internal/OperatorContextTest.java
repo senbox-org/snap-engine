@@ -126,7 +126,6 @@ public class OperatorContextTest {
 
         MetadataElement node0Element = elementPG.getElement("node.0");
         assertNotNull(node0Element);
-        assertEquals(9, node0Element.getNumAttributes());
         assertNotNull(node0Element.getAttribute("id"));
         assertNotNull(node0Element.getAttribute("operator"));
         assertNotNull(node0Element.getAttribute("moduleName"));
@@ -136,6 +135,7 @@ public class OperatorContextTest {
         assertNotNull(node0Element.getAttribute("copyright"));
         assertNotNull(node0Element.getAttribute("authors"));
         assertNotNull(node0Element.getAttribute("purpose"));
+        assertEquals(9, node0Element.getNumAttributes());
         assertNotNull("Subset", node0Element.getAttributeString("operator"));
         assertEquals("(c) 2011 by Brockmann Consult", node0Element.getAttributeString("copyright"));
         assertEquals("SNAP Graph Processing Framework (GPF)", node0Element.getAttributeString("moduleName"));
