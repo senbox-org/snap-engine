@@ -30,7 +30,9 @@ import org.esa.snap.core.gpf.annotations.SourceProducts;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 
 @SuppressWarnings({"PackageVisibleField"})
 public class OperatorContextTest {
@@ -128,9 +130,17 @@ public class OperatorContextTest {
         assertNotNull(node0Element.getAttribute("id"));
         assertNotNull(node0Element.getAttribute("operator"));
         assertNotNull(node0Element.getAttribute("moduleName"));
-        assertEquals("SNAP Graph Processing Framework (GPF)", node0Element.getAttributeString("moduleName"));
         assertNotNull(node0Element.getAttribute("moduleVersion"));
         assertNotNull(node0Element.getAttribute("processingTime"));
+        assertNotNull(node0Element.getAttribute("version"));
+        assertNotNull(node0Element.getAttribute("copyright"));
+        assertNotNull(node0Element.getAttribute("authors"));
+        assertNotNull(node0Element.getAttribute("purpose"));
+        assertNotNull("Subset", node0Element.getAttributeString("operator"));
+        assertEquals("(c) 2011 by Brockmann Consult", node0Element.getAttributeString("copyright"));
+        assertEquals("SNAP Graph Processing Framework (GPF)", node0Element.getAttributeString("moduleName"));
+        assertEquals("Create a spatial and/or spectral subset of a data product.", node0Element.getAttributeString("purpose"));
+        assertEquals("Marco Zuehlke, Norman Fomferra, Marco Peters", node0Element.getAttributeString("authors"));
 
     }
 
