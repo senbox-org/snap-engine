@@ -29,6 +29,8 @@ import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.RasterDataNode;
+import org.esa.snap.core.datamodel.Scene;
+import org.esa.snap.core.datamodel.SceneFactory;
 import org.esa.snap.core.datamodel.Stx;
 import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
@@ -702,7 +704,7 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
 
             if (isNodeAccepted(gridName) || (gridName.equals(latGridName) || gridName.equals(lonGridName))) {
                 final TiePointGrid tiePointGrid = TiePointGrid.createSubset(sourceTiePointGrid, getSubsetDef());
-                if (isFullScene(getSubsetDef(), sourceTiePointGrid) && sourceTiePointGrid.isStxSet()) {
+                if (isFullScene(getSubsetDef(), tiePointGrid) && sourceTiePointGrid.isStxSet()) {
                     copyStx(sourceTiePointGrid, tiePointGrid);
                 }
                 product.addTiePointGrid(tiePointGrid);
@@ -764,6 +766,17 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
 
         if (!getSourceProduct().transferGeoCodingTo(product, getSubsetDef())) {
             Debug.trace("GeoCoding could not be transferred.");
+        }
+
+        //Adjust sceneGeocoding
+        if(getSubsetDef() != null && getSubsetDef().getRegionMap() != null) {
+            for(RasterDataNode rasterDataNode : product.getRasterDataNodes()) {
+                if(rasterDataNode.getRasterWidth() == product.getSceneRasterSize().getWidth() &&
+                        rasterDataNode.getRasterHeight() == product.getSceneRasterSize().getHeight()
+                        && rasterDataNode.getGeoCoding() != null) {
+                    ProductUtils.copyGeoCoding(rasterDataNode,product);
+                }
+            }
         }
     }
 

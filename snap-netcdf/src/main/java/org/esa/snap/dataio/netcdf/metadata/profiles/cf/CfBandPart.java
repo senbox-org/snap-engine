@@ -295,12 +295,15 @@ public class CfBandPart extends ProfilePartIO {
             if (stringValue.endsWith("b")) {
                 // Special management for bytes; Can occur in e.g. ASCAT files from EUMETSAT
                 return Byte.parseByte(stringValue.substring(0, stringValue.length() - 1));
-            } else {
+            } else if (!stringValue.isEmpty()) {
                 return Double.parseDouble(stringValue);
+            } else {
+                return 0;
             }
         } else {
             return attribute.getNumericValue();
         }
+
     }
 
     private static int getRasterDataType(Variable variable, DataTypeWorkarounds workarounds) {
@@ -426,7 +429,6 @@ public class CfBandPart extends ProfilePartIO {
                     } else {
                         sampleCoding.addSamples(sampleName, intValues, null);
                     }
-                    sampleCoding.addSamples(sampleName, intValues, null);
                     break;
                 case LONG:
                     long[] longValues = {sampleMasks.getNumericValue(i).longValue(),

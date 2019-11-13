@@ -29,17 +29,17 @@ public class AggregatorTestUtils {
         return new VectorImpl(values);
     }
 
-    public static Observation obs(double mjd, float... values) {
+    static Observation obs(double mjd, float... values) {
         return new ObservationImpl(0.0, 0.0, mjd, values);
     }
 
-    public static Observation obsNT(float... values) {
+    static Observation obsNT(float... values) {
         return new ObservationImpl(0.0, 0.0, 0.0, values);
     }
 
-    public static BinContext createCtx() {
+    static BinContext createCtx() {
         return new BinContext() {
-            private HashMap<String, Object> map = new HashMap<String, Object>();
+            private HashMap<String, Object> map = new HashMap<>();
 
             @Override
             public long getIndex() {
@@ -54,6 +54,11 @@ public class AggregatorTestUtils {
             @Override
             public void put(String name, Object value) {
                 map.put(name, value);
+            }
+
+            @Override
+            public String ensureUnique(String name) {
+                return name;
             }
         };
     }

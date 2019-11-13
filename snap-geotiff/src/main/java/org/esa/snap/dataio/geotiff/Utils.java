@@ -17,12 +17,19 @@ package org.esa.snap.dataio.geotiff;
 
 import com.sun.media.jai.codec.TIFFField;
 import it.geosolutions.imageio.plugins.tiff.GeoTIFFTagSet;
-import org.esa.snap.core.datamodel.FilterBand;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductNode;
-import org.esa.snap.core.datamodel.VirtualBand;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.util.geotiff.GeoTIFFMetadata;
+import org.w3c.dom.CharacterData;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -165,5 +172,98 @@ public class Utils {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Parses a GDAL metadata string and takes the information to set up the bands for a target product with a
+     * maximum of information. Acutally implemented and tested for the purpose of improved reading of
+     * Proba-V S* GeoTiff products (see SIIITBX-85).
+     *
+     * @param gdalMetadataXmlString - GDAL metadata XLM string
+     * @param productDataType - product data type
+     * @param width - product width
+     * @param height - product height
+     *
+     * @return array of bands
+     * @throws Exception -
+     */
+    static Band[] setupBandsFromGdalMetadata(String gdalMetadataXmlString,
+                                                    int productDataType,
+                                                    int width, int height) throws Exception {
+        final DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        final InputSource is = new InputSource();
+        is.setCharacterStream(new StringReader(gdalMetadataXmlString));
+
+        final Document doc = db.parse(is);
+        final NodeList nodes = doc.getElementsByTagName("GDALMetadata");
+        final Element element = (Element) nodes.item(0);
+
+        ArrayList bandnameList = new ArrayList();
+        ArrayList descrList = new ArrayList();
+        ArrayList unitsList = new ArrayList();
+        ArrayList nodataList = new ArrayList();
+        ArrayList offsetList = new ArrayList();
+        ArrayList scaleList = new ArrayList();
+        for (int i = 0; i < element.getElementsByTagName("Item").getLength(); i++) {
+            final Node node = element.getElementsByTagName("Item").item(i);
+            final Node child = node.getFirstChild();
+            final CharacterData cd = (CharacterData) child;
+            if (node.hasAttributes()) {
+                for (int j = 0; j < node.getAttributes().getLength(); j++) {
+                    final Node attr = node.getAttributes().item(j);
+                    if (attr.getNodeName().equals("name")) {
+                        switch (attr.getNodeValue()) {
+                            case "BAND":
+                                bandnameList.add(cd.getData());
+                                break;
+                            case "DESCRIPTION":
+                                descrList.add(cd.getData());
+                                break;
+                            case "UNITS":
+                                unitsList.add(cd.getData());
+                                break;
+                            case "NODATA":
+                                nodataList.add(cd.getData());
+                                break;
+                            case "OFFSET":
+                                offsetList.add(cd.getData());
+                                break;
+                            case "SCALE":
+                                scaleList.add(cd.getData());
+                                break;
+                        }
+                    }
+                }
+            }
+        }
+
+        Band[] bands = new Band[bandnameList.size()];
+        for (int i = 0; i < bandnameList.size(); i++) {
+            bands[i] = new Band((String) bandnameList.get(i), productDataType, width, height);
+            bands[i].setDescription((String) descrList.get(i));
+            bands[i].setUnit((String) unitsList.get(i));
+            final String nodataValString = (String) nodataList.get(i);
+            if (nodataValString != null) {
+                final double nodataVal = Double.parseDouble(nodataValString);
+                bands[i].setNoDataValue(nodataVal);
+                bands[i].setNoDataValueUsed(true);
+            }
+            if (offsetList.size() > 0) {
+                final String offsetValString = (String) offsetList.get(i);
+                if (offsetValString != null) {
+                    final double offsetVal = Double.parseDouble(offsetValString);
+                    bands[i].setScalingOffset(offsetVal);
+                }
+            }
+            if (scaleList.size() > 0) {
+                final String scaleValString = (String) scaleList.get(i);
+                if (scaleValString != null) {
+                    final double scaleVal = Double.parseDouble(scaleValString);
+                    bands[i].setScalingFactor(scaleVal);
+                }
+            }
+        }
+
+        return bands;
     }
 }

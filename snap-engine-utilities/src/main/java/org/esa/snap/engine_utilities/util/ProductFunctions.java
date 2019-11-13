@@ -36,7 +36,7 @@ public class ProductFunctions {
             "xfdumanifest", "metadata"};
     private final static String[] txtPrefix = {"LC8"};
     // valid but not products
-    private static final String[] excludedExtensions = {"pix", "tif", "nc"};
+    private static final String[] excludedExtensions = {};
 
     private static final String[] nonValidExtensions = {"xsd", "xsl", "xls", "pdf", "doc", "docx", "ps", "db", "rtf",
             "ief", "ord", "rrd", "lbl", "aux", "ovr", "brs",
@@ -65,14 +65,12 @@ public class ProductFunctions {
                     return true;
                 }
             }
-            return false;
         } else if (name.endsWith("txt")) {
             for (String str : txtPrefix) {
                 if (name.startsWith(str)) {
                     return true;
                 }
             }
-            return false;
         }
 
         // test with readers

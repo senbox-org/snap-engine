@@ -313,6 +313,26 @@ public class ProductSubsetDef {
         if(bandName != null && regionMap != null && regionMap.containsKey(bandName)) {
             width = regionMap.get(bandName).width;
             height = regionMap.get(bandName).height;
+        } else if (regionMap != null) {
+            int auxWidth = -1;
+            int auxHeight = -1;
+
+            for (Object nodeName : nodeNameList) {
+                String nodeNameString = nodeName.toString();
+                Rectangle rec = regionMap.get(nodeNameString);
+                if(rec == null) {
+                    continue;
+                }
+                if(auxHeight < rec.height ) {
+                    auxHeight = rec.height;
+                    auxWidth = rec.width;
+                }
+            }
+
+            if(auxHeight != -1 && auxWidth != -1) {
+                width = auxWidth;
+                height = auxHeight;
+            }
         }
         return new Dimension((width - 1) / subSamplingX + 1,
                              (height - 1) / subSamplingY + 1);

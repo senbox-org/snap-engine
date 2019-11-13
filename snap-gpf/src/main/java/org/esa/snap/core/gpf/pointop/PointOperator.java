@@ -141,10 +141,8 @@ public abstract class PointOperator extends Operator {
     protected Product createTargetProduct() throws OperatorException {
         Product sourceProduct = getSourceProduct();
         Assert.state(sourceProduct != null, "source product not set");
-        return new Product(getId(),
-                           getClass().getName(),
-                           sourceProduct.getSceneRasterWidth(),
-                           sourceProduct.getSceneRasterHeight());
+        return new Product(getId(), getClass().getName(),
+                sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
     }
 
     /**

@@ -720,6 +720,14 @@
                 <version>${snap.version}</version>
             </dependency>
 
+            <!-- JSoup -->
+
+            <dependency>
+                <groupId>org.jsoup</groupId>
+                <artifactId>jsoup</artifactId>
+                <version>1.11.3</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -851,7 +859,8 @@
                         <systemPropertyVariables>
                             <org.esa.snap.testdata.out>target/test-data</org.esa.snap.testdata.out>
                         </systemPropertyVariables>
-                        <argLine>-Xmx1024M -Dfile.encoding=UTF-8 @{argLine}</argLine>
+                        <!--<argLine>-Xmx1024M -Dfile.encoding=UTF-8 @{argLine}</argLine>-->
+                        <argLine>-Xmx1024M -Dfile.encoding=UTF-8</argLine>
                     </configuration>
                 </plugin>
 
@@ -1071,7 +1080,7 @@
                         <configuration>
                             <rules>
                                 <requireMavenVersion>
-                                    <version>[3.2.5,3.6.0]</version>
+                                    <version>[3.2.5,)</version>
                                 </requireMavenVersion>
                                 <requireJavaVersion>
                                     <version>1.8</version>

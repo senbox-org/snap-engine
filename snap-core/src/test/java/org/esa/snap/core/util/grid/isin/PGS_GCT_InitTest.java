@@ -15,7 +15,6 @@ public class PGS_GCT_InitTest {
 
         final IsinForward isinFwd = PGS_GCT_Init.forward(projParam);
         assertNotNull(isinFwd);
-
     }
 
     @Test
@@ -25,6 +24,7 @@ public class PGS_GCT_InitTest {
         projParam[8] = 43200.0;
         projParam[10] = 1.0;
 
-        PGS_GCT_Init.reverse(projParam);
+        final IsinInverse isinInv = PGS_GCT_Init.reverse(projParam);
+        assertNotNull(isinInv);
     }
 }

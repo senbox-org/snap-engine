@@ -11,40 +11,78 @@ import org.esa.snap.core.gpf.graph.Graph;
 import org.esa.snap.core.gpf.graph.GraphException;
 import org.esa.snap.core.gpf.graph.GraphIO;
 import org.esa.snap.core.gpf.graph.GraphProcessor;
+import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.measurement.Measurement;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
 import javax.media.jai.operator.ConstantDescriptor;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 
 import static org.junit.Assert.*;
 
 public class PixExOpTest {
 
+    private File testDir;
+
+    private static void computeData(Map<String, Object> parameterMap, Product[] sourceProducts) {
+        GPF.createProduct("PixEx", parameterMap, sourceProducts);
+    }
+
+    private static Product createTestProduct(String name, String type, String[] bandNames) throws FactoryException,
+            TransformException {
+        Rectangle bounds = new Rectangle(360, 180);
+        Product product = new Product(name, type, bounds.width, bounds.height);
+        AffineTransform i2mTransform = new AffineTransform();
+        final int northing = 90;
+        final int easting = -180;
+        i2mTransform.translate(easting, northing);
+        final double scaleX = 360.0 / bounds.width;
+        final double scaleY = 180.0 / bounds.height;
+        i2mTransform.scale(scaleX, -scaleY);
+        CrsGeoCoding geoCoding = new CrsGeoCoding(DefaultGeographicCRS.WGS84, bounds, i2mTransform);
+        product.setSceneGeoCoding(geoCoding);
+        for (int i = 0; i < bandNames.length; i++) {
+            Band band = product.addBand(bandNames[i], ProductData.TYPE_FLOAT32);
+            band.setSourceImage(ConstantDescriptor.create((float) bounds.width, (float) bounds.height,
+                    new Float[]{(float) i}, null));
+        }
+        return product;
+    }
+
+    @Before
+    public void setUp() {
+        final File tmpDir = new File(System.getProperty("java.io.tmpdir"));
+        testDir = new File(tmpDir, this.getClass().getSimpleName());
+        if (!testDir.mkdirs()) {
+            fail("unable to create test directory");
+        }
+    }
+
+    @After
+    public void tearDown() {
+        FileUtils.deleteTree(testDir);
+    }
+
     @Test
-    public void testUsingGraph() throws GraphException, IOException {
+    public void testUsingGraph() throws GraphException {
         String parentDir = new File(getClass().getResource("dummyProduct1.dim").getFile()).getParent();
         int windowSize = 11;
         Coordinate[] coordinates = new Coordinate[]{
                 new Coordinate("carlCoordinate", 60.1, 3.0, null),
                 new Coordinate("cassandraCoordinate", 59.1, 0.5, null)
         };
-        final File outputDir = getOutputDir("testUsingGraph", getClass());
         String graphOpXml =
                 "<graph id=\"someGraphId\">\n" +
                         "    <version>1.0</version>\n" +
@@ -70,7 +108,7 @@ public class PixExOpTest {
                         "          </coordinate>\n" +
                         "        </coordinates>\n" +
                         "        <windowSize>" + windowSize + "</windowSize>\n" +
-                        "        <outputDir>" + outputDir.getAbsolutePath() + "</outputDir>\n" +
+                        "        <outputDir>" + testDir.getAbsolutePath() + "</outputDir>\n" +
                         "        <outputFilePrefix>" + "testUsingGraph" + "</outputFilePrefix>\n" +
 
                         "      </parameters>\n" +
@@ -81,14 +119,13 @@ public class PixExOpTest {
         GraphProcessor processor = new GraphProcessor();
         processor.executeGraph(graph, ProgressMonitor.NULL);
 
-        final PixExMeasurementReader reader = new PixExMeasurementReader(outputDir);
+        final PixExMeasurementReader reader = new PixExMeasurementReader(testDir);
         List<Measurement> measurementList = convertToList(reader);
         assertEquals(windowSize * windowSize * 2 * 2, measurementList.size());
     }
 
     @Test
     public void testGetParsedInputPaths() throws Exception {
-        final File testDir = getOutputDir("testGetParsedInputPaths", getClass());
         final File subDir1 = new File(testDir, "subDir1");
         final File subDir2 = new File(testDir, "subDir2");
         final File subDir2_1 = new File(subDir2, "subDir2_1");
@@ -108,9 +145,9 @@ public class PixExOpTest {
         assertTrue("Missing dir '" + subDir1.getCanonicalPath() + "'.", dirList.contains(subDir1.getCanonicalFile()));
         assertTrue("Missing dir '" + subDir2.getCanonicalPath() + "'.", dirList.contains(subDir2.getCanonicalFile()));
         assertTrue("Missing dir '" + subDir2_1.getCanonicalPath() + "'.",
-                   dirList.contains(subDir2_1.getCanonicalFile()));
+                dirList.contains(subDir2_1.getCanonicalFile()));
         assertTrue("Missing dir '" + subDir2_2.getCanonicalPath() + "'.",
-                   dirList.contains(subDir2_2.getCanonicalFile()));
+                dirList.contains(subDir2_2.getCanonicalFile()));
 
         dirList = PixExOp.getSourceProductFileSet(new String[]{testDir.getPath(), subDir2_1.getPath()}, Logger.getAnonymousLogger());
         assertEquals(2, dirList.size());
@@ -128,8 +165,7 @@ public class PixExOpTest {
         int windowSize = 3;
 
         HashMap<String, Object> parameterMap = new HashMap<>();
-        final File outputDir = getOutputDir("testSingleProduct", getClass());
-        parameterMap.put("outputDir", outputDir);
+        parameterMap.put("outputDir", testDir);
         parameterMap.put("outputFilePrefix", "pixels");
         parameterMap.put("exportTiePoints", false);
         parameterMap.put("exportMasks", false);
@@ -142,9 +178,9 @@ public class PixExOpTest {
 
         computeData(parameterMap, sourceProducts);
 
-        assertTrue("Kmz file does not exists", new File(outputDir, "pixels_coordinates.kmz").exists());
+        assertTrue("Kmz file does not exists", new File(testDir, "pixels_coordinates.kmz").exists());
 
-        try (PixExMeasurementReader reader = new PixExMeasurementReader(outputDir)) {
+        try (PixExMeasurementReader reader = new PixExMeasurementReader(testDir)) {
             final List<Measurement> measurementList = convertToList(reader);
             assertEquals(windowSize * windowSize * sourceProducts.length * coordinates.length, measurementList.size());
             testForExistingMeasurement(measurementList, "coord1", 1, 10.5f, 9.5f, 189.5f, 79.5f);
@@ -159,8 +195,7 @@ public class PixExOpTest {
         int windowSize = 1;
 
         HashMap<String, Object> parameterMap = new HashMap<>();
-        final File outputDir = getOutputDir("testSingleProduct", getClass());
-        parameterMap.put("outputDir", outputDir);
+        parameterMap.put("outputDir", testDir);
         parameterMap.put("exportTiePoints", false);
         parameterMap.put("exportMasks", false);
         parameterMap.put("coordinates", coordinates);
@@ -183,15 +218,15 @@ public class PixExOpTest {
 
         computeData(parameterMap, sourceProducts);
 
-        try (PixExMeasurementReader reader = new PixExMeasurementReader(outputDir)) {
+        try (PixExMeasurementReader reader = new PixExMeasurementReader(testDir)) {
             final List<Measurement> measurementList = convertToList(reader);
             assertEquals(sourceProducts.length, measurementList.size());
             assertEquals(ProductData.UTC.parse("22/08/1999", "dd/MM/yyyy").getAsDate(),
-                         measurementList.get(0).getTime().getAsDate());
+                    measurementList.get(0).getTime().getAsDate());
             assertEquals(ProductData.UTC.parse("20/03/2001", "dd/MM/yyyy").getAsDate(),
-                         measurementList.get(1).getTime().getAsDate());
+                    measurementList.get(1).getTime().getAsDate());
             assertEquals(ProductData.UTC.parse("14/11/2010", "dd/MM/yyyy").getAsDate(),
-                         measurementList.get(2).getTime().getAsDate());
+                    measurementList.get(2).getTime().getAsDate());
         }
     }
 
@@ -206,8 +241,7 @@ public class PixExOpTest {
         int windowSize = 5;
 
         HashMap<String, Object> parameterMap = new HashMap<>();
-        File outputDir = getOutputDir("testTwoProductsSameType", getClass());
-        parameterMap.put("outputDir", outputDir);
+        parameterMap.put("outputDir", testDir);
         parameterMap.put("exportTiePoints", false);
         parameterMap.put("exportMasks", false);
         parameterMap.put("coordinates", coordinates);
@@ -221,7 +255,7 @@ public class PixExOpTest {
         };
 
         computeData(parameterMap, products);
-        try (PixExMeasurementReader reader = new PixExMeasurementReader(outputDir)) {
+        try (PixExMeasurementReader reader = new PixExMeasurementReader(testDir)) {
             final List<Measurement> measurementList = convertToList(reader);
             assertEquals(windowSize * windowSize * products.length * coordinates.length, measurementList.size());
             testForExistingMeasurement(measurementList, "coord1", 1, 10.5f, 9.5f, 189.5f, 79.5f);
@@ -239,8 +273,7 @@ public class PixExOpTest {
         int windowSize = 1;
 
         HashMap<String, Object> parameterMap = new HashMap<>();
-        File outputDir = getOutputDir("testTwentyProductsSameType", getClass());
-        parameterMap.put("outputDir", outputDir);
+        parameterMap.put("outputDir", testDir);
         parameterMap.put("exportTiePoints", false);
         parameterMap.put("exportMasks", false);
         parameterMap.put("coordinates", coordinates);
@@ -255,7 +288,7 @@ public class PixExOpTest {
 
         Product[] products = productList.toArray(new Product[productList.size()]);
         computeData(parameterMap, products);
-        try (PixExMeasurementReader reader = new PixExMeasurementReader(outputDir)) {
+        try (PixExMeasurementReader reader = new PixExMeasurementReader(testDir)) {
             final List<Measurement> measurementList = convertToList(reader);
             assertEquals(windowSize * windowSize * products.length * coordinates.length, measurementList.size());
             testForExistingMeasurement(measurementList, "coord1", 1, 9.5f, 10.5f, 190.5f, 80.5f);
@@ -274,8 +307,7 @@ public class PixExOpTest {
         };
         int windowSize = 5;
 
-        File outputDir = getOutputDir("testTwoProductsTwoDifferentTypes", getClass());
-        parameterMap.put("outputDir", outputDir);
+        parameterMap.put("outputDir", testDir);
         parameterMap.put("exportTiePoints", false);
         parameterMap.put("exportMasks", false);
         parameterMap.put("coordinates", coordinates);
@@ -290,7 +322,7 @@ public class PixExOpTest {
         };
 
         computeData(parameterMap, products);
-        final PixExMeasurementReader reader = new PixExMeasurementReader(outputDir);
+        final PixExMeasurementReader reader = new PixExMeasurementReader(testDir);
         final List<Measurement> measurementList = convertToList(reader);
         try {
             assertEquals(windowSize * windowSize * products.length * coordinates.length, measurementList.size());
@@ -328,8 +360,7 @@ public class PixExOpTest {
 
         PixExOp pixEx = new PixExOp();
         pixEx.setParameterDefaultValues();
-        File outputDir = getOutputDir("testTwoProductsWithTimeConstraints", getClass());
-        pixEx.setParameter("outputDir", outputDir);
+        pixEx.setParameter("outputDir", testDir);
         pixEx.setParameter("exportTiePoints", false);
         pixEx.setParameter("exportMasks", false);
         pixEx.setParameter("coordinates", coordinates);
@@ -346,7 +377,6 @@ public class PixExOpTest {
         }
     }
 
-
     @Test
     public void testTwentyProductsWithDifferentTypes() throws Exception {
 
@@ -357,8 +387,7 @@ public class PixExOpTest {
         int windowSize = 1;
 
         HashMap<String, Object> parameterMap = new HashMap<>();
-        File outputDir = getOutputDir("testTwentyProductsWithDifferentTypes", getClass());
-        parameterMap.put("outputDir", outputDir);
+        parameterMap.put("outputDir", testDir);
         parameterMap.put("exportTiePoints", false);
         parameterMap.put("exportMasks", false);
         parameterMap.put("coordinates", coordinates);
@@ -372,7 +401,7 @@ public class PixExOpTest {
         Product[] products = productList.toArray(new Product[productList.size()]);
 
         computeData(parameterMap, products);
-        try (PixExMeasurementReader measurementReader = new PixExMeasurementReader(outputDir)) {
+        try (PixExMeasurementReader measurementReader = new PixExMeasurementReader(testDir)) {
             final List<Measurement> measurementList = convertToList(measurementReader);
             assertEquals(windowSize * windowSize * products.length * coordinates.length, measurementList.size());
             testForExistingMeasurement(measurementList, "coord3", 1, 2.5f, 1.5f, 181.5f, 87.5f);
@@ -397,8 +426,8 @@ public class PixExOpTest {
 
         assertEquals(2, coordinates.size());
         assertEquals("0", coordinates.get(0).getName());
-        assertEquals(56.0123, (double) coordinates.get(0).getLat(), 0.0001);
-        assertEquals(6.2345, (double) coordinates.get(0).getLon(), 0.0001);
+        assertEquals(56.0123, coordinates.get(0).getLat(), 0.0001);
+        assertEquals(6.2345, coordinates.get(0).getLon(), 0.0001);
         final Coordinate.OriginalValue[] originalValues = coordinates.get(0).getOriginalValues();
         assertEquals(4, originalValues.length);
         assertEquals("test1.1", originalValues[1].value);
@@ -406,28 +435,13 @@ public class PixExOpTest {
         assertEquals(0.3F, Float.parseFloat(originalValues[3].value), 0.001);
 
         assertEquals("1", coordinates.get(1).getName());
-        assertEquals(56.0124, (double) coordinates.get(1).getLat(), 0.0001);
-        assertEquals(6.2346, (double) coordinates.get(1).getLon(), 0.0001);
+        assertEquals(56.0124, coordinates.get(1).getLat(), 0.0001);
+        assertEquals(6.2346, coordinates.get(1).getLon(), 0.0001);
         final Coordinate.OriginalValue[] originalValues1 = coordinates.get(1).getOriginalValues();
         assertEquals(4, originalValues.length);
         assertEquals("test1.2", originalValues1[1].value);
         assertEquals(0.21F, Float.parseFloat(originalValues1[2].value), 0.001);
         assertEquals(0.31F, Float.parseFloat(originalValues1[3].value), 0.001);
-    }
-
-    public static File getOutputDir(String methodName, Class testClass) {
-        final File tmpDir = new File(System.getProperty("java.io.tmpdir"));
-        File baseTestDir = new File(tmpDir, testClass.getSimpleName());
-        final File dir = new File(baseTestDir, methodName);
-        if (!dir.mkdirs()) { // already exists, so delete content
-            final File[] files = dir.listFiles();
-            if (files != null) {
-                for (File file : files) {
-                    file.delete();
-                }
-            }
-        }
-        return dir;
     }
 
     private void testForExistingMeasurement(List<Measurement> measurementList, String coordinateName, int id,
@@ -448,31 +462,6 @@ public class PixExOpTest {
             list.add(measurementIterator.next());
         }
         return list;
-    }
-
-    private static void computeData(Map<String, Object> parameterMap, Product[] sourceProducts) {
-        GPF.createProduct("PixEx", parameterMap, sourceProducts);
-    }
-
-    public static Product createTestProduct(String name, String type, String[] bandNames) throws FactoryException,
-            TransformException {
-        Rectangle bounds = new Rectangle(360, 180);
-        Product product = new Product(name, type, bounds.width, bounds.height);
-        AffineTransform i2mTransform = new AffineTransform();
-        final int northing = 90;
-        final int easting = -180;
-        i2mTransform.translate(easting, northing);
-        final double scaleX = 360 / bounds.width;
-        final double scaleY = 180 / bounds.height;
-        i2mTransform.scale(scaleX, -scaleY);
-        CrsGeoCoding geoCoding = new CrsGeoCoding(DefaultGeographicCRS.WGS84, bounds, i2mTransform);
-        product.setSceneGeoCoding(geoCoding);
-        for (int i = 0; i < bandNames.length; i++) {
-            Band band = product.addBand(bandNames[i], ProductData.TYPE_FLOAT32);
-            band.setSourceImage(ConstantDescriptor.create((float) bounds.width, (float) bounds.height,
-                                                          new Float[]{(float) i}, null));
-        }
-        return product;
     }
 
 }

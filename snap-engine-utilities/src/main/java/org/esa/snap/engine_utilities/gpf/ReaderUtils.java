@@ -31,6 +31,7 @@ import org.esa.snap.engine_utilities.datamodel.Unit;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.util.Arrays;
 
@@ -108,6 +109,7 @@ public final class ReaderUtils {
      * @param input an input object of unknown type
      * @return a <code>File</code> or <code>null</code> it the input can not be resolved to a <code>File</code>.
      */
+    @Deprecated
     public static File getFileFromInput(final Object input) {
         if (input instanceof String) {
             return new File((String) input);
@@ -118,15 +120,15 @@ public final class ReaderUtils {
     }
 
     /**
-     * Returns a <code>File</code> if the given input is a <code>String</code> or <code>File</code>,
+     * Returns a <code>Path</code> if the given input is a <code>String</code> or <code>File</code>,
      * otherwise it returns null;
      *
      * @param input an input object of unknown type
-     * @return a <code>File</code> or <code>null</code> it the input can not be resolved to a <code>File</code>.
+     * @return a <code>Path</code> or <code>null</code> it the input can not be resolved to a <code>Path</code>.
      */
     public static Path getPathFromInput(final Object input) {
         if (input instanceof String) {
-            return new File((String) input).toPath();
+            return Paths.get((String) input);
         } else if (input instanceof File) {
             return ((File)input).toPath();
         } else if (input instanceof Path) {

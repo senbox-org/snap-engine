@@ -1,0 +1,36 @@
+<parameter>
+    <outputType>Product</outputType>
+    <outputFormat>NetCDF-4</outputFormat>
+    <outputFile>level-3-rgb.nc</outputFile>
+    <outputBands>
+        <band>
+            <name>radiance_9</name>
+            <index>0</index>
+            <minValue>0.0</minValue>
+            <maxValue>100.0</maxValue>
+        </band>
+        <band>
+            <name>radiance_5</name>
+            <index>1</index>
+            <minValue>0.0</minValue>
+            <maxValue>100.0</maxValue>
+        </band>
+        <band>
+            <name>radiance_4</name>
+            <index>2</index>
+            <minValue>0.0</minValue>
+            <maxValue>100.0</maxValue>
+        </band>
+    </outputBands>
+    <parameterMap>
+        <entry>
+            <string>platform</string>
+            <string>S3A</string>
+        </entry>
+        <entry>
+            <string>wiedehopf</string>
+            <string>birdy</string>
+        </entry>
+    </parameterMap>
+
+</parameter>

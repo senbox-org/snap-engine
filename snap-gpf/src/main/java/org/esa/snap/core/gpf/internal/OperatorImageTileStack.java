@@ -18,6 +18,7 @@ package org.esa.snap.core.gpf.internal;
 import com.bc.ceres.core.Assert;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.util.ImageUtils;
@@ -92,7 +93,7 @@ public class OperatorImageTileStack extends OperatorImage {
     protected void computeRect(PlanarImage[] ignored, WritableRaster tile, Rectangle destRect) {
 
         final OperatorContext operatorContext = getOperatorContext();
-        operatorContext.executeOperator(ProgressMonitor.NULL);
+        GPF.getDefaultInstance().executeOperator(operatorContext.getOperator());
 
         long startNanos = System.nanoTime();
 
