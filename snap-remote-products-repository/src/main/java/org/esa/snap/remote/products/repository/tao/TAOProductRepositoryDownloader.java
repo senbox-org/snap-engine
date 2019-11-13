@@ -12,24 +12,22 @@ import ro.cs.tao.eodata.EOProduct;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Base64;
+import java.util.Properties;
 
 /**
  * Created by jcoravu on 26/9/2019.
  */
-public abstract class AbstractTAOProductRepositoryDownloader implements ProductRepositoryDownloader {
+class TAOProductRepositoryDownloader implements ProductRepositoryDownloader {
 
     private final String mission;
     private final String repositoryId;
+    private final DownloadStrategy downloadStrategy;
 
-    protected DownloadStrategy downloadStrategy;
-
-    protected AbstractTAOProductRepositoryDownloader(String mission, String repositoryId) {
+    TAOProductRepositoryDownloader(String mission, String repositoryId, DownloadStrategy downloadStrategy) {
         this.mission = mission;
         this.repositoryId = repositoryId;
+        this.downloadStrategy = downloadStrategy;
     }
-
-    protected abstract EOProduct getEOProduct(RepositoryProduct product);
 
     @Override
     public String getRepositoryId() {
@@ -37,33 +35,30 @@ public abstract class AbstractTAOProductRepositoryDownloader implements ProductR
     }
 
     @Override
-    public Path download(RepositoryProduct product, Credentials credentials, Path targetFolderPath, ProgressListener progressListener)
+    public Path download(RepositoryProduct repositoryProduct, Credentials credentials, Path targetFolderPath, ProgressListener progressListener)
                          throws InterruptedException, IOException {
 
-        if (product.getMission().equals(this.mission)) {
+        if (repositoryProduct.getMission().equals(this.mission)) {
+            Properties properties = new Properties();
+            properties.put("auto.uncompress", "true");
+            this.downloadStrategy.addProperties(properties);
             this.downloadStrategy.setCredentials(new UsernamePasswordCredentials(credentials.getUserPrincipal().getName(), credentials.getPassword()));
             this.downloadStrategy.setDestination(targetFolderPath.toString());
             this.downloadStrategy.setFetchMode(FetchMode.OVERWRITE);
             this.downloadStrategy.setProgressListener(new DownloadProductProgressListener(progressListener));
             try {
-                return this.downloadStrategy.fetch(getEOProduct(product));
+                EOProduct product = ((TAORepositoryProduct)repositoryProduct).getProduct();
+                return this.downloadStrategy.fetch(product);
             } catch (ro.cs.tao.datasource.InterruptedException exception) {
                 throw new java.lang.InterruptedException();
             }
         } else {
-            throw new IllegalArgumentException("The product mission '" + product.getMission()+"' and the downloader mission '" + this.mission+"' does not match.");
+            throw new IllegalArgumentException("The product mission '" + repositoryProduct.getMission()+"' and the downloader mission '" + this.mission+"' does not match.");
         }
     }
 
     @Override
     public void cancel() {
         this.downloadStrategy.cancel();
-    }
-
-    public static String buildAuthenticationToken(Credentials credentials) {
-        if (credentials == null) {
-            throw new NullPointerException("The credentials cannot be null");
-        }
-        return "Basic " + new String(Base64.getEncoder().encode((credentials.getUserPrincipal().getName() + ":" + credentials.getPassword()).getBytes()));
     }
 }

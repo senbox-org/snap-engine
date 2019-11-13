@@ -16,18 +16,17 @@ import java.util.List;
 /**
  * Created by jcoravu on 28/8/2019.
  */
-public abstract class AbstractTAORepositoryProduct implements RepositoryProduct {
+class TAORepositoryProduct implements RepositoryProduct {
 
-    protected final EOProduct product;
-    protected final List<Attribute> attributes;
-
+    private final EOProduct product;
+    private final List<Attribute> attributes;
     private final String mission;
     private final String downloadURL;
     private final Polygon2D polygon;
 
     private BufferedImage quickLookImage;
 
-    protected AbstractTAORepositoryProduct(EOProduct product, String mission, Polygon2D polygon) {
+    TAORepositoryProduct(EOProduct product, String mission, Polygon2D polygon) {
         this.product = product;
         this.mission = mission;
         this.downloadURL = product.getLocation();
@@ -72,7 +71,7 @@ public abstract class AbstractTAORepositoryProduct implements RepositoryProduct 
     }
 
     @Override
-    public String getDownloadURL() {
+    public String getURL() {
         return this.downloadURL;
     }
 
@@ -109,6 +108,10 @@ public abstract class AbstractTAORepositoryProduct implements RepositoryProduct 
     @Override
     public String getEntryPoint() {
         return this.product.getEntryPoint();
+    }
+
+    EOProduct getProduct() {
+        return this.product;
     }
 
     private static DataFormatType convertToDataFormatType(ro.cs.tao.eodata.enums.DataFormat dataFormat) {

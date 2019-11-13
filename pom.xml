@@ -46,7 +46,9 @@
         <jide.version>3.6.1</jide.version>
         <maven.build.timestamp.format>yyyyMMdd</maven.build.timestamp.format>
         <buildDate>${maven.build.timestamp}</buildDate>
-        <tao.version>1.0.1</tao.version>
+        <nbm.plugin.group.id>org.apache.netbeans.utilities</nbm.plugin.group.id>
+        <nbm.plugin.artifact.id>nbm-maven-plugin</nbm.plugin.artifact.id>
+        <nbm.plugin.version>4.3</nbm.plugin.version>
     </properties>
 
     <modules>
@@ -721,25 +723,6 @@
                 <artifactId>snap-smart-configurator</artifactId>
                 <version>${snap.version}</version>
             </dependency>
-
-            <!-- TAO modules -->
-            <dependency>
-                <groupId>ro.cs.tao</groupId>
-                <artifactId>tao-data-model</artifactId>
-                <version>${tao.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.eclipse.persistence</groupId>
-                        <artifactId>org.eclipse.persistence.moxy</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>ro.cs.tao</groupId>
-                <artifactId>tao-data-sources</artifactId>
-                <version>${tao.version}</version>
-            </dependency>
-
         </dependencies>
     </dependencyManagement>
 

@@ -5,6 +5,7 @@ import org.apache.http.StatusLine;
 import org.apache.http.auth.Credentials;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.esa.snap.remote.products.repository.Polygon2D;
+import org.esa.snap.remote.products.repository.ProductRepositoryDownloader;
 import org.esa.snap.remote.products.repository.QueryFilter;
 import org.esa.snap.remote.products.repository.RemoteProductsRepositoryProvider;
 import org.esa.snap.remote.products.repository.RepositoryProduct;
@@ -13,14 +14,17 @@ import org.esa.snap.remote.products.repository.listener.ProductListDownloaderLis
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 import ro.cs.tao.datasource.DataQuery;
 import ro.cs.tao.datasource.DataSource;
+import ro.cs.tao.datasource.DataSourceManager;
+import ro.cs.tao.datasource.ProductFetchStrategy;
 import ro.cs.tao.datasource.param.CommonParameterNames;
 import ro.cs.tao.datasource.param.DataSourceParameter;
 import ro.cs.tao.datasource.param.ParameterName;
 import ro.cs.tao.datasource.param.QueryParameter;
-import ro.cs.tao.datasource.remote.ProductHelper;
+import ro.cs.tao.datasource.remote.DownloadStrategy;
 import ro.cs.tao.datasource.util.HttpMethod;
 import ro.cs.tao.datasource.util.NetUtils;
 import ro.cs.tao.eodata.EOProduct;
@@ -44,40 +48,42 @@ import java.util.Map;
 /**
  * Created by jcoravu on 28/8/2019.
  */
-public abstract class AbstractTAORemoteRepositoryProvider<T extends DataSource> implements RemoteProductsRepositoryProvider {
+public class TAORemoteRepositoryProvider implements RemoteProductsRepositoryProvider {
 
-    protected AbstractTAORemoteRepositoryProvider() {
+    private final DataSource dataSource;
+
+    public TAORemoteRepositoryProvider(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
-    protected abstract AbstractTAORepositoryProduct buildRepositoryProduct(EOProduct product, String mission, Polygon2D polygon);
+    @Override
+    public String getRepositoryName() {
+        return getRepositoryId();
+    }
 
-    protected abstract Class<T> getDataSourceClass();
-
-    protected abstract DataSource buildNewDataSource() throws URISyntaxException;
-
-    protected abstract ProductHelper buildProductHelper(String productName);
+    @Override
+    public int getMaximumAllowedTransfersPerAccount() {
+        return this.dataSource.getMaximumAllowedTransfers();
+    }
 
     @Override
     public boolean requiresAuthentication() {
-        DataSource dataSource = getDataSource();
-        return dataSource.requiresAuthentication();
+        return this.dataSource.requiresAuthentication();
     }
 
     @Override
     public String[] getAvailableMissions() {
-        DataSource dataSource = getDataSource();
-        return dataSource.getSupportedSensors();
+        return this.dataSource.getSupportedSensors();
     }
+
     @Override
     public String getRepositoryId() {
-        DataSource dataSource = getDataSource();
-        return dataSource.getId();
+        return this.dataSource.defaultId();
     }
 
     @Override
     public List<QueryFilter> getMissionParameters(String mission) {
-        DataSource dataSource = getDataSource();
-        Map<String, Map<ParameterName, DataSourceParameter>> supportedParameters = dataSource.getSupportedParameters();
+        Map<String, Map<ParameterName, DataSourceParameter>> supportedParameters = this.dataSource.getSupportedParameters();
         Map<ParameterName, DataSourceParameter> sensorParameters = supportedParameters.get(mission);
         Iterator<Map.Entry<ParameterName, DataSourceParameter>> it = sensorParameters.entrySet().iterator();
         List<QueryFilter> parameters = new ArrayList<QueryFilter>(sensorParameters.size());
@@ -105,7 +111,7 @@ public abstract class AbstractTAORemoteRepositoryProvider<T extends DataSource> 
     }
 
     @Override
-    public BufferedImage downloadProductQuickLookImage(Credentials credentials, String url, ThreadStatus thread) throws IOException, java.lang.InterruptedException {
+    public BufferedImage downloadProductQuickLookImage(Credentials credentials, String url, ThreadStatus thread) throws IOException, InterruptedException {
         try (CloseableHttpResponse response = NetUtils.openConnection(HttpMethod.GET, url, credentials)) {
             if (response != null) {
 
@@ -151,7 +157,7 @@ public abstract class AbstractTAORemoteRepositoryProvider<T extends DataSource> 
     @Override
     public List<RepositoryProduct> downloadProductList(Credentials credentials, String mission, Map<String, Object> parameterValues,
                                                        ProductListDownloaderListener downloaderListener, ThreadStatus thread)
-                                                       throws Exception {
+            throws Exception {
 
         DataQuery query = buildDataQuery(credentials.getUserPrincipal().getName(), credentials.getPassword(), mission, parameterValues);
         query.setPageNumber(0);
@@ -160,11 +166,15 @@ public abstract class AbstractTAORemoteRepositoryProvider<T extends DataSource> 
 
         ThreadStatus.checkCancelled(thread);
 
-        downloaderListener.notifyProductCount(totalProductCount);
+        List<RepositoryProduct> productList;
+        if (totalProductCount == 0) {
+            downloaderListener.notifyProductCount(totalProductCount);
 
-        int pageSize = 100;
-        List<RepositoryProduct> totalResults;
-        if (totalProductCount > 0) {
+            productList = Collections.emptyList();
+        } else if (totalProductCount > 0) {
+            downloaderListener.notifyProductCount(totalProductCount);
+
+            int pageSize = 100;
             long totalPageNumber = totalProductCount / pageSize;
             if (totalProductCount % pageSize != 0) {
                 totalPageNumber++;
@@ -172,9 +182,9 @@ public abstract class AbstractTAORemoteRepositoryProvider<T extends DataSource> 
 
             query.setPageSize(pageSize);
 
-            totalResults = new ArrayList<>();
             WKTReader wktReader = new WKTReader();
-            for (int pageNumber=1; pageNumber<=totalPageNumber && totalResults.size() < totalProductCount; pageNumber++) {
+            productList = new ArrayList<>();
+            for (int pageNumber=1; pageNumber<=totalPageNumber && productList.size() < totalProductCount; pageNumber++) {
                 query.setPageNumber(pageNumber);
 
                 ThreadStatus.checkCancelled(thread);
@@ -183,38 +193,25 @@ public abstract class AbstractTAORemoteRepositoryProvider<T extends DataSource> 
 
                 ThreadStatus.checkCancelled(thread);
 
-                List<RepositoryProduct> downloadedPageProducts = new ArrayList<>(pageResults.size());
-                for (int i=0; i<pageResults.size(); i++) {
-                    EOProduct product = pageResults.get(i);
-                    Geometry productGeometry = wktReader.read(product.getGeometry());
-                    if (!(productGeometry instanceof Polygon)) {
-                        throw new IllegalStateException("The product geometry type '"+productGeometry.getClass().getName()+"' is not a '"+Polygon.class.getName()+"' type.");
-                    }
-                    Coordinate[] coordinates = ((Polygon)productGeometry).getExteriorRing().getCoordinates();
-                    Coordinate firstCoordinate = coordinates[0];
-                    Coordinate lastCoordinate = coordinates[coordinates.length-1];
-                    if (firstCoordinate.getX() != lastCoordinate.getX() || firstCoordinate.getY() != lastCoordinate.getY()) {
-                        throw new IllegalStateException("The first and last coordinates of the polygon do not match.");
-                    }
-                    Polygon2D polygon = new Polygon2D();
-                    for (Coordinate coordinate : coordinates) {
-                        polygon.append(coordinate.getX(), coordinate.getY());
-                    }
-                    ProductHelper productHelper = buildProductHelper(product.getName());
-                    product.setEntryPoint(productHelper.getMetadataFileName());
-                    AbstractTAORepositoryProduct repositoryProduct = buildRepositoryProduct(product, mission, polygon);
-                    downloadedPageProducts.add(repositoryProduct);
-                    totalResults.add(repositoryProduct);
-                }
+                List<RepositoryProduct> downloadedPageProducts = downloadProductList(mission, pageResults, wktReader);
+                productList.addAll(downloadedPageProducts);
 
                 ThreadStatus.checkCancelled(thread);
 
-                downloaderListener.notifyPageProducts(pageNumber, downloadedPageProducts, totalProductCount, totalResults.size());
+                downloaderListener.notifyPageProducts(pageNumber, downloadedPageProducts, totalProductCount, productList.size());
             }
         } else {
-            totalResults = Collections.emptyList();
+            List<EOProduct> pageResults = query.execute();
+
+            ThreadStatus.checkCancelled(thread);
+
+            WKTReader wktReader = new WKTReader();
+            List<RepositoryProduct> downloadedPageProducts = downloadProductList(mission, pageResults, wktReader);
+            productList = new ArrayList<>(downloadedPageProducts);
+
+            downloaderListener.notifyPageProducts(1, downloadedPageProducts, productList.size(), productList.size());
         }
-        return totalResults;
+        return productList;
     }
 
     @Override
@@ -222,16 +219,21 @@ public abstract class AbstractTAORemoteRepositoryProvider<T extends DataSource> 
         return null;
     }
 
-    private DataSource getDataSource() {
-        ServiceRegistry<DataSource> serviceRegistry = ServiceRegistryManager.getInstance().getServiceRegistry(DataSource.class);
-        return serviceRegistry.getService(getDataSourceClass());
+    @Override
+    public ProductRepositoryDownloader buildProductDownloader(String mission) {
+        ProductFetchStrategy productFetchStrategy = this.dataSource.getProductFetchStrategy(mission);
+        if (productFetchStrategy == null) {
+            throw new NullPointerException("The download strategy is null for mission '" + mission + "'.");
+        }
+        DownloadStrategy downloadStrategy = (DownloadStrategy)productFetchStrategy.clone();
+        return new TAOProductRepositoryDownloader(mission, getRepositoryId(), downloadStrategy);
     }
 
-    private DataQuery buildDataQuery(String username, String password, String mission, Map<String, Object> parametersValues) throws URISyntaxException {
-        DataSource dataSource = buildNewDataSource();
-        dataSource.setCredentials(username, password);
+    private DataQuery buildDataQuery(String username, String password, String mission, Map<String, Object> parametersValues) throws InstantiationException, IllegalAccessException {
+        DataSource newDataSource = this.dataSource.getClass().newInstance();
+        newDataSource.setCredentials(username, password);
 
-        DataQuery query = dataSource.createQuery(mission);
+        DataQuery query = newDataSource.createQuery(mission);
 
         Iterator<Map.Entry<String, Object>> it = parametersValues.entrySet().iterator();
         while (it.hasNext()) {
@@ -252,13 +254,42 @@ public abstract class AbstractTAORemoteRepositoryProvider<T extends DataSource> 
             }
         }
         Date startDate = (Date)parametersValues.get(CommonParameterNames.START_DATE);
-        Date endDate = (Date)parametersValues.get(CommonParameterNames.END_DATE);
-        if (startDate != null || endDate != null) {
+        if (startDate != null) {
             QueryParameter<Date> begin = query.createParameter(CommonParameterNames.START_DATE, Date.class);
-            begin.setMinValue(startDate);
-            begin.setMaxValue(endDate);
+            begin.setValue(startDate);
             query.addParameter(begin);
         }
+        Date endDate = (Date)parametersValues.get(CommonParameterNames.END_DATE);
+        if (endDate != null) {
+            QueryParameter<Date> end = query.createParameter(CommonParameterNames.END_DATE, Date.class);
+            end.setValue(endDate);
+            query.addParameter(end);
+        }
+
         return query;
+    }
+
+    private static List<RepositoryProduct> downloadProductList(String mission, List<EOProduct> pageResults, WKTReader wktReader) throws InterruptedException, ParseException {
+        List<RepositoryProduct> downloadedPageProducts = new ArrayList<>(pageResults.size());
+        for (int i=0; i<pageResults.size(); i++) {
+            EOProduct product = pageResults.get(i);
+            Geometry productGeometry = wktReader.read(product.getGeometry());
+            if (!(productGeometry instanceof Polygon)) {
+                throw new IllegalStateException("The product geometry type '"+productGeometry.getClass().getName()+"' is not a '"+Polygon.class.getName()+"' type.");
+            }
+            Coordinate[] coordinates = ((Polygon)productGeometry).getExteriorRing().getCoordinates();
+            Coordinate firstCoordinate = coordinates[0];
+            Coordinate lastCoordinate = coordinates[coordinates.length-1];
+            if (firstCoordinate.getX() != lastCoordinate.getX() || firstCoordinate.getY() != lastCoordinate.getY()) {
+                throw new IllegalStateException("The first and last coordinates of the polygon do not match.");
+            }
+            Polygon2D polygon = new Polygon2D();
+            for (Coordinate coordinate : coordinates) {
+                polygon.append(coordinate.getX(), coordinate.getY());
+            }
+            TAORepositoryProduct repositoryProduct = new TAORepositoryProduct(product, mission, polygon);
+            downloadedPageProducts.add(repositoryProduct);
+        }
+        return downloadedPageProducts;
     }
 }

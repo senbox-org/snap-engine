@@ -13,7 +13,7 @@ import java.util.Map;
  */
 public interface RemoteProductsRepositoryProvider {
 
-    public int getMaximumRunningConnectionsPerAccount();
+    public int getMaximumAllowedTransfersPerAccount();
 
     public boolean requiresAuthentication();
 
@@ -32,7 +32,7 @@ public interface RemoteProductsRepositoryProvider {
     public BufferedImage downloadProductQuickLookImage(Credentials credentials, String url, ThreadStatus thread)
                                                        throws IOException, java.lang.InterruptedException;
 
-    public ProductRepositoryDownloader buidProductDownloader(String mission);
+    public ProductRepositoryDownloader buildProductDownloader(String mission);
 
     public Map<String, String> getDisplayedAttributes();
 }

@@ -19,8 +19,7 @@ public interface RepositoryProduct {
 
     public String getDownloadQuickLookImageURL();
 
-    //TODO Jean rename method
-    public String getDownloadURL();
+    public String getURL();
 
     public Date getAcquisitionDate();
 

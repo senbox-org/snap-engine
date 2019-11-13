@@ -54,8 +54,9 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.netbeans.utilities</groupId>
-                <artifactId>nbm-maven-plugin</artifactId>
+                <groupId>${nbm.plugin.group.id}</groupId>
+                <artifactId>${nbm.plugin.artifact.id}</artifactId>
+                <version>${nbm.plugin.version}</version>
                 <configuration>
                     <publicPackages>
                         <publicPackage>org.esa.snap.collocation</publicPackage>

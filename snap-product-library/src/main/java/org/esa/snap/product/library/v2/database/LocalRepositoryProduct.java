@@ -63,7 +63,7 @@ public class LocalRepositoryProduct implements RepositoryProduct {
     }
 
     @Override
-    public String getDownloadURL() {
+    public String getURL() {
         return this.path.toString();
     }
 

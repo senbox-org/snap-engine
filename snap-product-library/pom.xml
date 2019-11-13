@@ -107,8 +107,9 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.netbeans.utilities</groupId>
-                <artifactId>nbm-maven-plugin</artifactId>
+                <groupId>${nbm.plugin.group.id}</groupId>
+                <artifactId>${nbm.plugin.artifact.id}</artifactId>
+                <version>${nbm.plugin.version}</version>
                 <configuration>
                     <publicPackages>
                         <publicPackage>org.esa.snap.product.library.v2.*</publicPackage>
@@ -118,6 +119,7 @@
                         <publicPackage>org.xml.*</publicPackage>
                         <publicPackage>org.apache.*</publicPackage>
                         <publicPackage>com.google.*</publicPackage>
+                        <publicPackage>javax.xml.*</publicPackage>
                     </publicPackages>
                 </configuration>
             </plugin>
