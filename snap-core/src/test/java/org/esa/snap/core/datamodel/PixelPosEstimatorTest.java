@@ -15,9 +15,12 @@ package org.esa.snap.core.datamodel;/*
  */
 
 import org.esa.snap.core.util.jai.SingleBandedSampleModel;
+import org.esa.snap.test.LongTestRunner;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.experimental.runners.Enclosed;
+import org.junit.runner.RunWith;
 
 import javax.media.jai.ImageLayout;
 import javax.media.jai.JAI;
@@ -36,6 +39,7 @@ import java.awt.image.WritableRaster;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+@RunWith(Enclosed.class)
 public class PixelPosEstimatorTest {
 
     @BeforeClass
@@ -43,152 +47,157 @@ public class PixelPosEstimatorTest {
         JAI.getDefaultInstance().getTileCache().setMemoryCapacity(134217728);
     }
 
-    @Test
-    @Ignore("too long to be executed by default")
-    public void testGetPixelPosForSimulatedSwath() {
-        final int nx = 512;
-        final int ny = 36000;
 
-        final PlanarImage[] images = generateSwathCoordinates(nx, ny, 0.009, 0.009, new Rotator(0.0, -5.0, 269.0));
-        final PlanarImage lonImage = images[0];
-        final PlanarImage latImage = images[1];
-        final PlanarImage maskImage = images[2];
-        final PixelPosEstimator estimator = new PixelPosEstimator(lonImage, latImage, maskImage, 0.5, false);
+    @RunWith(LongTestRunner.class)
+    public static class longPixelPosEstimatorTest {
+        @Test
+        public void testGetPixelPosForSimulatedSwath() {
+            final int nx = 512;
+            final int ny = 36000;
 
-        final GeoPos g = new GeoPos();
-        final PixelPos p = new PixelPos();
+            final PlanarImage[] images = generateSwathCoordinates(nx, ny, 0.009, 0.009, new Rotator(0.0, -5.0, 269.0));
+            final PlanarImage lonImage = images[0];
+            final PlanarImage latImage = images[1];
+            final PlanarImage maskImage = images[2];
+            final PixelPosEstimator estimator = new PixelPosEstimator(lonImage, latImage, maskImage, 0.5, false);
 
-        for (int y = 0; y < ny; y++) {
-            final Rectangle region = new Rectangle(0, y, nx, 1);
-            final Raster lonData = lonImage.getData(region);
-            final Raster latData = latImage.getData(region);
-            for (int x = 0; x < nx; x++) {
-                final float lon = lonData.getSampleFloat(x, y, 0);
-                final float lat = latData.getSampleFloat(x, y, 0);
-                g.setLocation(lat, lon);
-                estimator.getPixelPos(g, p);
+            final GeoPos g = new GeoPos();
+            final PixelPos p = new PixelPos();
 
-                assertTrue(p.isValid());
-                assertEquals(x + 0.5, p.getX(), 0.5);
-                assertEquals(y + 0.5, p.getY(), 0.5);
+            for (int y = 0; y < ny; y++) {
+                final Rectangle region = new Rectangle(0, y, nx, 1);
+                final Raster lonData = lonImage.getData(region);
+                final Raster latData = latImage.getData(region);
+                for (int x = 0; x < nx; x++) {
+                    final float lon = lonData.getSampleFloat(x, y, 0);
+                    final float lat = latData.getSampleFloat(x, y, 0);
+                    g.setLocation(lat, lon);
+                    estimator.getPixelPos(g, p);
+
+                    assertTrue(p.isValid());
+                    assertEquals(x + 0.5, p.getX(), 0.5);
+                    assertEquals(y + 0.5, p.getY(), 0.5);
+                }
             }
         }
     }
 
-    @Test
-    public void testSingleApproximation() {
-        final int nx = 512;
-        final int ny = 512;
-        final PlanarImage[] images = generateSwathCoordinates(nx, ny, 0.009, 0.009, new Rotator(0.0, 0.0, 265.0));
+    public static class basicPixelPosEstimatorTest {
+        @Test
+        public void testSingleApproximation() {
+            final int nx = 512;
+            final int ny = 512;
+            final PlanarImage[] images = generateSwathCoordinates(nx, ny, 0.009, 0.009, new Rotator(0.0, 0.0, 265.0));
 
-        final PlanarImage lonImage = images[0];
-        final PlanarImage latImage = images[1];
-        final PlanarImage maskImage = images[2];
-        final Raster lonData = lonImage.getData();
-        final Raster latData = latImage.getData();
+            final PlanarImage lonImage = images[0];
+            final PlanarImage latImage = images[1];
+            final PlanarImage maskImage = images[2];
+            final Raster lonData = lonImage.getData();
+            final Raster latData = latImage.getData();
 
-        final Rectangle rectangle = new Rectangle(0, 0, 512, 512);
-        final Stepping stepping = new DefaultSteppingFactory().createStepping(
-                rectangle, 1000);
+            final Rectangle rectangle = new Rectangle(0, 0, 512, 512);
+            final Stepping stepping = new DefaultSteppingFactory().createStepping(
+                    rectangle, 1000);
 
-        final double[][] data = GeoApproximation.extractWarpPoints(
-                new PixelPosEstimator.PlanarImageSampleSource(lonImage),
-                new PixelPosEstimator.PlanarImageSampleSource(latImage),
-                new PixelPosEstimator.PlanarImageSampleSource(maskImage),
-                stepping);
-        final GeoApproximation a = GeoApproximation.create(data, 0.5, rectangle);
-        final RationalFunctionModel fx = a.getFX();
-        final RationalFunctionModel fy = a.getFY();
+            final double[][] data = GeoApproximation.extractWarpPoints(
+                    new PixelPosEstimator.PlanarImageSampleSource(lonImage),
+                    new PixelPosEstimator.PlanarImageSampleSource(latImage),
+                    new PixelPosEstimator.PlanarImageSampleSource(maskImage),
+                    stepping);
+            final GeoApproximation a = GeoApproximation.create(data, 0.5, rectangle);
+            final RationalFunctionModel fx = a.getFX();
+            final RationalFunctionModel fy = a.getFY();
 
-        final double fxRmse = fx.getRmse();
-        final double fyRmse = fy.getRmse();
-        assertTrue(0.05 > fxRmse);
-        assertTrue(0.05 > fyRmse);
+            final double fxRmse = fx.getRmse();
+            final double fyRmse = fy.getRmse();
+            assertTrue(0.05 > fxRmse);
+            assertTrue(0.05 > fyRmse);
 
-        final Rotator rotator = a.getRotator();
-        final Point2D p = new Point2D.Double();
-        for (int y = 0; y < ny; y++) {
-            for (int x = 0; x < nx; x++) {
-                double lon = lonData.getSampleDouble(x, y, 0);
-                double lat = latData.getSampleDouble(x, y, 0);
+            final Rotator rotator = a.getRotator();
+            final Point2D p = new Point2D.Double();
+            for (int y = 0; y < ny; y++) {
+                for (int x = 0; x < nx; x++) {
+                    double lon = lonData.getSampleDouble(x, y, 0);
+                    double lat = latData.getSampleDouble(x, y, 0);
 
-                p.setLocation(lon, lat);
-                rotator.transform(p);
+                    p.setLocation(lon, lat);
+                    rotator.transform(p);
 
-                lon = p.getX();
-                lat = p.getY();
+                    lon = p.getX();
+                    lat = p.getY();
 
-                assertEquals(x + 0.5, fx.getValue(lat, lon), 0.5);
-                assertEquals(y + 0.5, fy.getValue(lat, lon), 0.5);
+                    assertEquals(x + 0.5, fx.getValue(lat, lon), 0.5);
+                    assertEquals(y + 0.5, fy.getValue(lat, lon), 0.5);
+                }
             }
         }
-    }
 
-    @Test
-    public void testStepping() {
-        final Rectangle rectangle = new Rectangle(0, 0, 512, 512);
-        final Stepping stepping = new DefaultSteppingFactory().createStepping(
-                rectangle, 1000);
+        @Test
+        public void testStepping() {
+            final Rectangle rectangle = new Rectangle(0, 0, 512, 512);
+            final Stepping stepping = new DefaultSteppingFactory().createStepping(
+                    rectangle, 1000);
 
-        assertEquals(0, stepping.getMinX());
-        assertEquals(0, stepping.getMinY());
-        assertEquals(511, stepping.getMaxX());
-        assertEquals(511, stepping.getMaxY());
-        assertEquals(32, stepping.getPointCountX());
-        assertEquals(32, stepping.getPointCountY());
-        assertEquals(17, stepping.getStepX());
-        assertEquals(17, stepping.getStepY());
-        assertEquals(510, stepping.getMinX() + stepping.getStepX() * (stepping.getPointCountX() - 2));
-        assertEquals(527, stepping.getMinX() + stepping.getStepX() * (stepping.getPointCountX() - 1));
-        assertEquals(510, stepping.getMinY() + stepping.getStepX() * (stepping.getPointCountY() - 2));
-        assertEquals(527, stepping.getMinY() + stepping.getStepY() * (stepping.getPointCountY() - 1));
-    }
+            assertEquals(0, stepping.getMinX());
+            assertEquals(0, stepping.getMinY());
+            assertEquals(511, stepping.getMaxX());
+            assertEquals(511, stepping.getMaxY());
+            assertEquals(32, stepping.getPointCountX());
+            assertEquals(32, stepping.getPointCountY());
+            assertEquals(17, stepping.getStepX());
+            assertEquals(17, stepping.getStepY());
+            assertEquals(510, stepping.getMinX() + stepping.getStepX() * (stepping.getPointCountX() - 2));
+            assertEquals(527, stepping.getMinX() + stepping.getStepX() * (stepping.getPointCountX() - 1));
+            assertEquals(510, stepping.getMinY() + stepping.getStepX() * (stepping.getPointCountY() - 2));
+            assertEquals(527, stepping.getMinY() + stepping.getStepY() * (stepping.getPointCountY() - 1));
+        }
 
-    @Test
-    public void testExtractWarpPoints() {
-        final int nx = 512;
-        final int ny = 512;
-        final PlanarImage[] images = generateSwathCoordinates(nx, ny, 0.009, 0.009, new Rotator(0.0, 0.0, 265.0));
+        @Test
+        public void testExtractWarpPoints() {
+            final int nx = 512;
+            final int ny = 512;
+            final PlanarImage[] images = generateSwathCoordinates(nx, ny, 0.009, 0.009, new Rotator(0.0, 0.0, 265.0));
 
-        final PlanarImage lonImage = images[0];
-        final PlanarImage latImage = images[1];
-        final PlanarImage maskImage = images[2];
-        final Raster lonData = lonImage.getData();
-        final Raster latData = latImage.getData();
+            final PlanarImage lonImage = images[0];
+            final PlanarImage latImage = images[1];
+            final PlanarImage maskImage = images[2];
+            final Raster lonData = lonImage.getData();
+            final Raster latData = latImage.getData();
 
-        assertEquals(0.0, lonData.getSampleDouble(nx / 2, ny / 2, 0), 0.0);
-        assertEquals(0.0, latData.getSampleDouble(nx / 2, ny / 2, 0), 0.0);
+            assertEquals(0.0, lonData.getSampleDouble(nx / 2, ny / 2, 0), 0.0);
+            assertEquals(0.0, latData.getSampleDouble(nx / 2, ny / 2, 0), 0.0);
 
-        final Rectangle rectangle = new Rectangle(0, 0, 512, 512);
-        final Stepping stepping = new DefaultSteppingFactory().createStepping(
-                rectangle, 1000);
+            final Rectangle rectangle = new Rectangle(0, 0, 512, 512);
+            final Stepping stepping = new DefaultSteppingFactory().createStepping(
+                    rectangle, 1000);
 
-        final double[][] data = GeoApproximation.extractWarpPoints(
-                new PixelPosEstimator.PlanarImageSampleSource(lonImage),
-                new PixelPosEstimator.PlanarImageSampleSource(latImage),
-                new PixelPosEstimator.PlanarImageSampleSource(maskImage),
-                stepping);
-        assertEquals(stepping.getPointCount(), data.length);
+            final double[][] data = GeoApproximation.extractWarpPoints(
+                    new PixelPosEstimator.PlanarImageSampleSource(lonImage),
+                    new PixelPosEstimator.PlanarImageSampleSource(latImage),
+                    new PixelPosEstimator.PlanarImageSampleSource(maskImage),
+                    stepping);
+            assertEquals(stepping.getPointCount(), data.length);
 
-        final double[] upperLeft = data[0];
-        assertEquals(0.5, upperLeft[2], 0.0);
-        assertEquals(0.5, upperLeft[3], 0.0);
+            final double[] upperLeft = data[0];
+            assertEquals(0.5, upperLeft[2], 0.0);
+            assertEquals(0.5, upperLeft[3], 0.0);
 
-        final double[] eastOfUpperRight = data[stepping.getPointCountX() - 2];
-        assertEquals(510.5, eastOfUpperRight[2], 0.0);
-        assertEquals(0.5, eastOfUpperRight[3], 0.0);
+            final double[] eastOfUpperRight = data[stepping.getPointCountX() - 2];
+            assertEquals(510.5, eastOfUpperRight[2], 0.0);
+            assertEquals(0.5, eastOfUpperRight[3], 0.0);
 
-        final double[] upperRight = data[stepping.getPointCountX() - 1];
-        assertEquals(511.5, upperRight[2], 0.0);
-        assertEquals(0.5, upperRight[3], 0.0);
+            final double[] upperRight = data[stepping.getPointCountX() - 1];
+            assertEquals(511.5, upperRight[2], 0.0);
+            assertEquals(0.5, upperRight[3], 0.0);
 
-        final double[] northOfLowerRight = data[data.length - 1 - stepping.getPointCountY()];
-        assertEquals(511.5, northOfLowerRight[2], 0.0);
-        assertEquals(510.5, northOfLowerRight[3], 0.0);
+            final double[] northOfLowerRight = data[data.length - 1 - stepping.getPointCountY()];
+            assertEquals(511.5, northOfLowerRight[2], 0.0);
+            assertEquals(510.5, northOfLowerRight[3], 0.0);
 
-        final double[] lowerRight = data[data.length - 1];
-        assertEquals(511.5, lowerRight[2], 0.0);
-        assertEquals(511.5, lowerRight[3], 0.0);
+            final double[] lowerRight = data[data.length - 1];
+            assertEquals(511.5, lowerRight[2], 0.0);
+            assertEquals(511.5, lowerRight[3], 0.0);
+        }
     }
 
     private static PlanarImage[] generateSwathCoordinates(int nx, int ny,
