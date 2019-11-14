@@ -36,6 +36,8 @@ public interface MetadataInspector {
 
         private boolean hasMasks;
 
+        private boolean hasGeoCoding;
+
         public Set<String> getBandList() {
             return bandList;
         }
@@ -58,6 +60,14 @@ public interface MetadataInspector {
 
         public void setHasMasks(boolean hasMasks) {
             this.hasMasks = hasMasks;
+        }
+
+        public boolean isHasGeoCoding() {
+            return hasGeoCoding;
+        }
+
+        public void setHasGeoCoding(boolean hasGeoCoding) {
+            this.hasGeoCoding = hasGeoCoding;
         }
 
         public String getProductWidth() {
