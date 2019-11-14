@@ -47,6 +47,13 @@
             <groupId>it.geosolutions.imageio-ext</groupId>
             <artifactId>imageio-ext-tiff</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>test-utils</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+
 
         <dependency>
             <groupId>rhino</groupId>
