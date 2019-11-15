@@ -20,6 +20,7 @@
 
     <properties>
         <tao.version>1.0.1</tao.version>
+        <geotools.version>20.0</geotools.version>
     </properties>
 
     <dependencies>
@@ -33,7 +34,11 @@
             <artifactId>httpclient</artifactId>
             <version>4.5.1</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-epsg-hsql</artifactId>
+            <version>${geotools.version}</version>
+        </dependency>
         <dependency>
             <groupId>ro.cs.tao</groupId>
             <artifactId>tao-data-model</artifactId>
