@@ -104,6 +104,7 @@
         <module>snap-remote-execution</module>
 
         <module>lib-hdf</module>
+        <module>test-utils</module>
     </modules>
 
     <organization>
@@ -194,6 +195,13 @@
                 <groupId>org.esa.snap</groupId>
                 <artifactId>snap-engine-utilities</artifactId>
                 <version>${snap.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.esa.snap</groupId>
+                <artifactId>test-utils</artifactId>
+                <version>${snap.version}</version>
+                <type>test-jar</type>
+                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.esa.snap</groupId>

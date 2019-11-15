@@ -24,7 +24,6 @@ public class AddElevationOpTest {
 
     @Test
     public void testAddingExternalDEM() throws IOException {
-        GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(new AddElevationOp.Spi());
         final Map<String, Object> parametersMap = new HashMap<>();
         final File externalDEMFile = new File(AddElevationOpTest.class.getResource(DEM_NAME).getFile());
         parametersMap.put("demName", "External DEM");
