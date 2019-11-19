@@ -40,7 +40,6 @@ import org.esa.snap.core.util.math.FXYSum;
 import org.geotools.referencing.CRS;
 import org.jdom.Document;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
@@ -52,10 +51,12 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Vector;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertNotSame;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public class DimapProductHelpersTest {
@@ -506,7 +507,7 @@ public class DimapProductHelpersTest {
         assertEquals(expTransform.getClass(), actualTransform.getClass());
 
         final double[] actualValues = actualTransform.getParameterValues();
-        assertEquals(true, Arrays.equals(expTransform.getParameterValues(), actualValues));
+        assertTrue(Arrays.equals(expTransform.getParameterValues(), actualValues));
 
         final MapTransformDescriptor actualDescriptor = actualTransform.getDescriptor();
         assertEquals(expDescriptor.getClass(), actualDescriptor.getClass());
@@ -596,7 +597,7 @@ public class DimapProductHelpersTest {
         assertEquals(LambertConformalConicDescriptor.LCCT.class, actualTransform.getClass());
 
         final double[] actualValues = actualTransform.getParameterValues();
-        assertEquals(true, Arrays.equals(_expValues, actualValues));
+        assertArrayEquals(_expValues, actualValues, 0.0);
 
         final MapTransformDescriptor actualDescriptor = actualTransform.getDescriptor();
         assertEquals(LambertConformalConicDescriptor.class, actualDescriptor.getClass());
@@ -608,75 +609,75 @@ public class DimapProductHelpersTest {
 
         // without ellipsoid name Element
         dom = createDom(withoutMandatoryLines(new int[]{11}));
-        assertEquals(null, DimapProductHelpers.createGeoCoding(dom, product));
+        assertNull(DimapProductHelpers.createGeoCoding(dom, product));
 
         // without ellipsoid major axis Element
         dom = createDom(withoutMandatoryLines(new int[]{13}));
-        assertEquals(null, DimapProductHelpers.createGeoCoding(dom, product));
+        assertNull(DimapProductHelpers.createGeoCoding(dom, product));
 
         // without ellipsoid minor axis Element
         dom = createDom(withoutMandatoryLines(new int[]{14}));
-        assertEquals(null, DimapProductHelpers.createGeoCoding(dom, product));
+        assertNull(DimapProductHelpers.createGeoCoding(dom, product));
 
         // without ellipsoid parameters Element
         dom = createDom(withoutMandatoryLines(ArrayUtils.createIntArray(12, 15)));
-        assertEquals(null, DimapProductHelpers.createGeoCoding(dom, product));
+        assertNull(DimapProductHelpers.createGeoCoding(dom, product));
 
         // without ellipsoid Element
         dom = createDom(withoutMandatoryLines(ArrayUtils.createIntArray(10, 16)));
-        assertEquals(null, DimapProductHelpers.createGeoCoding(dom, product));
+        assertNull(DimapProductHelpers.createGeoCoding(dom, product));
 
         // without horizontal datum name Element
         dom = createDom(withoutMandatoryLines(new int[]{9}));
-        assertEquals(null, DimapProductHelpers.createGeoCoding(dom, product));
+        assertNull(DimapProductHelpers.createGeoCoding(dom, product));
 
         // without horizontal datum Element
         dom = createDom(withoutMandatoryLines(ArrayUtils.createIntArray(8, 17)));
-        assertEquals(null, DimapProductHelpers.createGeoCoding(dom, product));
+        assertNull(DimapProductHelpers.createGeoCoding(dom, product));
 
         // without Geographic_CS Element
         dom = createDom(withoutMandatoryLines(ArrayUtils.createIntArray(6, 18)));
-        assertEquals(null, DimapProductHelpers.createGeoCoding(dom, product));
+        assertNull(DimapProductHelpers.createGeoCoding(dom, product));
 
         // without Horizontal_CS Element
         dom = createDom(withoutMandatoryLines(ArrayUtils.createIntArray(3, 71)));
-        assertEquals(null, DimapProductHelpers.createGeoCoding(dom, product));
+        assertNull(DimapProductHelpers.createGeoCoding(dom, product));
 
         // without Coordinate_Reference_System Element
         dom = createDom(withoutMandatoryLines(ArrayUtils.createIntArray(1, 72)));
-        assertEquals(null, DimapProductHelpers.createGeoCoding(dom, product));
+        assertNull(DimapProductHelpers.createGeoCoding(dom, product));
 
         // without Projection Element
         dom = createDom(withoutMandatoryLines(ArrayUtils.createIntArray(19, 54)));
-        assertEquals(null, DimapProductHelpers.createGeoCoding(dom, product));
+        assertNull(DimapProductHelpers.createGeoCoding(dom, product));
 
         // without NAME Element
         dom = createDom(withoutMandatoryLines(new int[]{20}));
-        assertEquals(null, DimapProductHelpers.createGeoCoding(dom, product));
+        assertNull(DimapProductHelpers.createGeoCoding(dom, product));
 
         // without Projection_CT_Method Element
         dom = createDom(withoutMandatoryLines(ArrayUtils.createIntArray(21, 53)));
-        assertEquals(null, DimapProductHelpers.createGeoCoding(dom, product));
+        assertNull(DimapProductHelpers.createGeoCoding(dom, product));
 
         // without PROJECTION_CT_NAME Element
         dom = createDom(withoutMandatoryLines(new int[]{22}));
-        assertEquals(null, DimapProductHelpers.createGeoCoding(dom, product));
+        assertNull(DimapProductHelpers.createGeoCoding(dom, product));
 
         // without Projection_Parameters Element
         dom = createDom(withoutMandatoryLines(ArrayUtils.createIntArray(23, 52)));
-        assertEquals(null, DimapProductHelpers.createGeoCoding(dom, product));
+        assertNull(DimapProductHelpers.createGeoCoding(dom, product));
 
         // without all Projection_Parameter Elements
         dom = createDom(withoutMandatoryLines(ArrayUtils.createIntArray(24, 51)));
-        assertEquals(null, DimapProductHelpers.createGeoCoding(dom, product));
+        assertNull(DimapProductHelpers.createGeoCoding(dom, product));
 
         // without PROJECTION_PARAMETER_VALUE Element
         dom = createDom(withoutMandatoryLines(new int[]{26}));
-        assertEquals(null, DimapProductHelpers.createGeoCoding(dom, product));
+        assertNull(DimapProductHelpers.createGeoCoding(dom, product));
 
         // without MAP_INFO Element
         dom = createDom(withoutMandatoryLines(ArrayUtils.createIntArray(55, 70)));
-        assertEquals(null, DimapProductHelpers.createGeoCoding(dom, product));
+        assertNull(DimapProductHelpers.createGeoCoding(dom, product));
     }
 
     @Test
@@ -692,7 +693,6 @@ public class DimapProductHelpersTest {
     }
 
     @Test
-    @Ignore
     public void testCreateGeoCodingForPixelGeoCoding() throws IOException {
         String origGCProperty = System.getProperty("snap.useAlternatePixelGeoCoding", "false");
         try {
@@ -789,7 +789,7 @@ public class DimapProductHelpersTest {
         final GeoCoding[] geoCodings = DimapProductHelpers.createGeoCoding(dom, product);
 
         assertFalse(product.isUsingSingleGeoCoding());
-        assertTrue(product.getSceneGeoCoding() == null);
+        assertNull(product.getSceneGeoCoding());
 
         final GeoCoding geoCoding1 = geoCodings[0];
         final GeoCoding geoCoding2 = geoCodings[1];
@@ -878,7 +878,7 @@ public class DimapProductHelpersTest {
                 vector.add(_xmlMapGeocodingStringStyleV1_4_0[i]);
             }
         }
-        final String[] strings = vector.toArray(new String[vector.size()]);
+        final String[] strings = vector.toArray(new String[0]);
         return StringUtils.arrayToString(strings, "");
     }
 

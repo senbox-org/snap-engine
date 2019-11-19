@@ -27,7 +27,7 @@ import static org.junit.Assert.fail;
 public class CommandLineToolTemplateTest {
 
     private CommandLineTool tool;
-    private TestCommandLineContext context;
+    private CommandLineTestContext context;
 
     private static File sourceFile;
     private static File targetFile;
@@ -45,7 +45,7 @@ public class CommandLineToolTemplateTest {
     @Before
     public void init() {
         TestProductIOPlugIn.INSTANCE.clear();
-        context = new TestCommandLineContext();
+        context = new CommandLineTestContext();
         tool = new CommandLineTool(context);
     }
 

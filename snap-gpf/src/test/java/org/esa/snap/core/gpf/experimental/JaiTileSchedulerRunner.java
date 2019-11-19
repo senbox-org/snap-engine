@@ -1,7 +1,5 @@
 package org.esa.snap.core.gpf.experimental;
 
-import org.junit.Ignore;
-
 import javax.media.jai.ImageLayout;
 import javax.media.jai.JAI;
 import javax.media.jai.PlanarImage;
@@ -15,8 +13,7 @@ import java.awt.RenderingHints;
 import java.awt.image.Raster;
 
 
-@Ignore
-public class JaiTileSchedulerTest {
+public class JaiTileSchedulerRunner {
 
     public static void main(String[] args) {
         scheduleTiles(0);

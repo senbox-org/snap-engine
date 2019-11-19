@@ -16,8 +16,6 @@
 
 package com.bc.ceres.swing.figure.support;
 
-import org.junit.Ignore;
-
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
@@ -29,8 +27,7 @@ import java.awt.Shape;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 
-@Ignore
-public class DefaultShapeFigureTest {
+public class DefaultShapeFigureRunner {
 
     public static void main(String[] args) {
        /*

@@ -1,9 +1,7 @@
 package com.acme.ext;
 
 import com.bc.ceres.core.ExtensionFactory;
-import org.junit.Ignore;
 
-@Ignore
 public class StringExtensionFactory implements ExtensionFactory {
 
     @Override

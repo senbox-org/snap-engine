@@ -29,13 +29,14 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.StringReader;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
-@Ignore("Method GraphOp#setOperatorParameters(...) needs to be implemented.")
+@Ignore("Method GraphOp not yet public and not fully implemented.")
 public class GraphOpTest {
 
     private final TestOps.Op1.Spi operatorSpi1 = new TestOps.Op1.Spi();
@@ -120,7 +121,7 @@ public class GraphOpTest {
     }
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(operatorSpi1);
         GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(operatorSpi2);
         graphOpSpiOneNode = createOp2GraphSpi();
@@ -132,7 +133,7 @@ public class GraphOpTest {
     }
 
     @After
-    protected void tearDown() throws Exception {
+    public void tearDown() throws Exception {
         GPF.getDefaultInstance().getOperatorSpiRegistry().removeOperatorSpi(operatorSpi1);
         GPF.getDefaultInstance().getOperatorSpiRegistry().removeOperatorSpi(operatorSpi2);
         GPF.getDefaultInstance().getOperatorSpiRegistry().removeOperatorSpi(graphOpSpiOneNode);
@@ -141,14 +142,14 @@ public class GraphOpTest {
     }
 
     @Test
-    public void testParameterValuesAreUsedFromHeader() throws Exception {
+    public void testParameterValuesAreUsedFromHeader() {
 
-        Map<String, Product> sourceProducts = new HashMap<String, Product>(1);
+        Map<String, Product> sourceProducts = new HashMap<>(1);
         Product testProduct = new Product("p", "t", 1, 1);
         testProduct.addBand("Op1A", ProductData.TYPE_INT8);
         sourceProducts.put("toa", testProduct);
 
-        Product targetProduct = GPF.createProduct("Op2Graph", new HashMap<String, Object>(), sourceProducts);
+        Product targetProduct = GPF.createProduct("Op2Graph", new HashMap<>(), sourceProducts);
         assertNotNull(targetProduct);
         assertEquals("Op2Name", targetProduct.getName());
         OperatorProductReader operatorProductReader = (OperatorProductReader) targetProduct.getProductReader();
@@ -158,11 +159,11 @@ public class GraphOpTest {
     }
 
     @Test
-    public void testOneNodeDirectCall() throws Exception {
-        Map<String, Object> parameters = new HashMap<String, Object>(1);
+    public void testOneNodeDirectCall() {
+        Map<String, Object> parameters = new HashMap<>(1);
         parameters.put("THR", 65.0);
 
-        Map<String, Product> sourceProducts = new HashMap<String, Product>(1);
+        Map<String, Product> sourceProducts = new HashMap<>(1);
         Product testProduct = new Product("p", "t", 1, 1);
         testProduct.addBand("Op1A", ProductData.TYPE_INT8);
         sourceProducts.put("toa", testProduct);
@@ -177,11 +178,11 @@ public class GraphOpTest {
     }
 
     @Test
-    public void testTwoNodesDirectCall() throws Exception {
-        Map<String, Object> parameters = new HashMap<String, Object>(1);
+    public void testTwoNodesDirectCall() {
+        Map<String, Object> parameters = new HashMap<>(1);
         parameters.put("THR", 66.0);
 
-        Product targetProduct = GPF.createProduct("SourcelessOp1Op2Graph", parameters, Collections.EMPTY_MAP);
+        Product targetProduct = GPF.createProduct("SourcelessOp1Op2Graph", parameters, new HashMap<>());
         assertNotNull(targetProduct);
         assertEquals("Op2Name", targetProduct.getName());
         OperatorProductReader operatorProductReader = (OperatorProductReader) targetProduct.getProductReader();
@@ -191,12 +192,12 @@ public class GraphOpTest {
     }
 
     @Test
-    public void testUsesOtherGraph() throws Exception {
+    public void testUsesOtherGraph() {
 
-        Map<String, Object> parameters = new HashMap<String, Object>(1);
+        Map<String, Object> parameters = new HashMap<>(1);
         parameters.put("THR", 67.0);
 
-        Product targetProduct = GPF.createProduct("UsesOtherGraph", parameters, Collections.EMPTY_MAP);
+        Product targetProduct = GPF.createProduct("UsesOtherGraph", parameters, new HashMap<>());
         assertNotNull(targetProduct);
         assertEquals("Op2Name", targetProduct.getName());
         OperatorProductReader operatorProductReader = (OperatorProductReader) targetProduct.getProductReader();

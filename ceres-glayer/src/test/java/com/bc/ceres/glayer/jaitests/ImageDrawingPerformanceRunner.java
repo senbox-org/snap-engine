@@ -16,8 +16,6 @@
 
 package com.bc.ceres.glayer.jaitests;
 
-import org.junit.Ignore;
-
 import javax.imageio.ImageIO;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -29,8 +27,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-@Ignore
-public class ImageDrawingPerformanceTest {
+public class ImageDrawingPerformanceRunner {
     private static final String[] BUFFERED_IMAGE_TYPE_NAMES = new String[]{
             "TYPE_3BYTE_BGR",
             "TYPE_4BYTE_ABGR",
@@ -70,12 +67,12 @@ public class ImageDrawingPerformanceTest {
             System.out.println("name\ttype\ttime(ms)\tFPS");
             final Graphics2D graphics2D = (Graphics2D) g;
             for (String typeName : BUFFERED_IMAGE_TYPE_NAMES) {
-                test(graphics2D, new BufferedImage(getWidth(), getHeight(), getType(typeName)), typeName);
+                draw(graphics2D, new BufferedImage(getWidth(), getHeight(), getType(typeName)), typeName);
             }
-            test(graphics2D, graphics2D.getDeviceConfiguration().createCompatibleImage(getWidth(), getHeight(), image.getTransparency()), "COMPATIBLE");
+            draw(graphics2D, graphics2D.getDeviceConfiguration().createCompatibleImage(getWidth(), getHeight(), image.getTransparency()), "COMPATIBLE");
         }
 
-        private void test(Graphics2D graphics2D, BufferedImage bufferedImage, String typeName) {
+        private void draw(Graphics2D graphics2D, BufferedImage bufferedImage, String typeName) {
             int type = bufferedImage.getType();
             final Graphics2D imageG = bufferedImage.createGraphics();
             imageG.drawImage(image, null, 0, 0);

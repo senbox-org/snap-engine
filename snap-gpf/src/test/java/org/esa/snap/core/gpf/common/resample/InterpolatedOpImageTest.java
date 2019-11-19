@@ -280,37 +280,37 @@ public class InterpolatedOpImageTest {
     }
 
     @Test
-    @Ignore
+    @Ignore("Needs to be fixed. SNAP-1241")
     public void testInterpolate_Double_CubicConvolution() throws NoninvertibleTransformException {
         testCubicConvolution(ProductData.TYPE_FLOAT64);
     }
 
     @Test
-    @Ignore
+    @Ignore("Needs to be fixed. SNAP-1241")
     public void testInterpolate_Float_CubicConvolution() throws NoninvertibleTransformException {
         testCubicConvolution(ProductData.TYPE_FLOAT32);
     }
 
     @Test
-    @Ignore
+    @Ignore("Needs to be fixed. SNAP-1241")
     public void testInterpolate_Byte_CubicConvolution() throws NoninvertibleTransformException {
         testCubicConvolution(ProductData.TYPE_INT8);
     }
 
     @Test
-    @Ignore
+    @Ignore("Needs to be fixed. SNAP-1241")
     public void testInterpolate_Short_CubicConvolution() throws NoninvertibleTransformException {
         testCubicConvolution(ProductData.TYPE_INT16);
     }
 
     @Test
-    @Ignore
+    @Ignore("Needs to be fixed. SNAP-1241")
     public void testInterpolate_UShort_CubicConvolution() throws NoninvertibleTransformException {
         testCubicConvolution(ProductData.TYPE_UINT16);
     }
 
     @Test
-    @Ignore
+    @Ignore("Needs to be fixed. SNAP-1241")
     public void testInterpolate_Int_CubicConvolution() throws NoninvertibleTransformException {
         testCubicConvolution(ProductData.TYPE_INT32);
     }

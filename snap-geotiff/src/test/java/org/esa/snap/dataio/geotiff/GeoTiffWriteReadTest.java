@@ -41,6 +41,7 @@ import org.esa.snap.core.dataop.maptransf.MapProjectionRegistry;
 import org.esa.snap.core.dataop.maptransf.MapTransform;
 import org.esa.snap.core.dataop.maptransf.MapTransformDescriptor;
 import org.esa.snap.core.image.ImageManager;
+import org.esa.snap.test.LongTestRunner;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.ReferencingFactoryFinder;
 import org.geotools.referencing.crs.DefaultProjectedCRS;
@@ -48,6 +49,7 @@ import org.geotools.referencing.cs.DefaultCartesianCS;
 import org.geotools.referencing.datum.DefaultGeodeticDatum;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.opengis.parameter.ParameterValueGroup;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -76,6 +78,7 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
 @SuppressWarnings({"InstanceVariableMayNotBeInitialized"})
+@RunWith(LongTestRunner.class)
 public class GeoTiffWriteReadTest {
     private static final String WGS_84 = "EPSG:4326";
     private static final String WGS_72 = "EPSG:4322";

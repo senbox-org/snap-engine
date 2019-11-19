@@ -31,13 +31,20 @@
             <artifactId>jide-oss</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.swinglabs.swingx</groupId>
+            <artifactId>swingx-all</artifactId>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.swinglabs.swingx</groupId>
-            <artifactId>swingx-all</artifactId>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>test-utils</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
         </dependency>
+
     </dependencies>
 
     <build>

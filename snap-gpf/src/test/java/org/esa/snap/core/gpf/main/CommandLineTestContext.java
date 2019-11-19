@@ -1,7 +1,5 @@
 package org.esa.snap.core.gpf.main;
 
-import org.junit.Ignore;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -20,8 +18,7 @@ import java.util.logging.Logger;
 /**
  * @author Norman Fomferra
  */
-@Ignore
-public class TestCommandLineContext extends DefaultCommandLineContext {
+public class CommandLineTestContext extends DefaultCommandLineContext {
 
     final StringBuffer printBuffer = new StringBuffer();
     final Map<String, String> textFiles = new HashMap<>();

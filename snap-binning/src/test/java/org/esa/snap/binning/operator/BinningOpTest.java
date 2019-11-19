@@ -38,9 +38,11 @@ import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.main.GPT;
 import org.esa.snap.core.util.converters.JtsGeometryConverter;
 import org.esa.snap.core.util.io.FileUtils;
+import org.esa.snap.test.LongTestRunner;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,8 +50,15 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.SortedMap;
 
-import static java.lang.Math.*;
-import static org.junit.Assert.*;
+import static java.lang.Math.sqrt;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Test that creates a local and a global L3 product from 5 source files.
@@ -58,6 +67,7 @@ import static org.junit.Assert.*;
  *
  * @author Norman Fomferra
  */
+@RunWith(LongTestRunner.class)
 public class BinningOpTest {
 
     static final File TESTDATA_DIR = new File("target/binning-test-io");

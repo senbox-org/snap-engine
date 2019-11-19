@@ -79,14 +79,152 @@ class BigGeoTiffProductWriter extends AbstractProductWriter {
     private File intermediateFile = null;
     private ProductWriter intermediateWriter = null;
     private List<String> bandNames = new ArrayList<>();
+    private boolean writingDataHasStarted = false;
 
     public BigGeoTiffProductWriter(ProductWriterPlugIn writerPlugIn) {
         super(writerPlugIn);
         createWriterParams();
-        withIntermediate = Config.instance().preferences().getBoolean(PARAM_PUSH_PROCESSING, false);
-        if (withIntermediate) {
-            intermediateWriter = new DimapProductWriterPlugIn().createWriterInstance();
+        final boolean writeIntermediateProduct = Config.instance().preferences().getBoolean(PARAM_PUSH_PROCESSING, false);
+        setWriteIntermediateProduct(writeIntermediateProduct);
+    }
+
+
+    @Override
+    public void flush() throws IOException {
+        if (outputStream != null) {
+            outputStream.flush();
         }
+    }
+
+    @Override
+    public void close() throws IOException {
+        if (withIntermediate) {
+            if (intermediateWriter != null) {
+                intermediateWriter.flush();
+                intermediateWriter.close();
+                _writeProductNodesImpl();
+                Product product = ProductIO.readProduct(intermediateFile, "BEAM-DIMAP");
+                product.setName(FileUtils.getFilenameWithoutExtension(outputFile));
+                _writeBandRasterData(product);
+                intermediateWriter.deleteOutput();
+                intermediateWriter = null;
+            }
+        }
+
+        if (outputStream != null && Config.instance().preferences().getBoolean(PARAM_ARCGIS_AUX, false)) {
+            File auxFile = new File(outputFile.getParent(), outputFile.getName() + ".aux.xml");
+            SystemUtils.LOG.info("writing band names to ArcGIS aux " + auxFile.getPath());
+            try (BufferedWriter auxWriter = new BufferedWriter(new FileWriter(auxFile))) {
+                auxWriter.write("<PAMDataset>\n  <Metadata>\n    <MDI key='Band_0'>dummy</MDI>\n");
+                int i = 0;
+                for (String bandName : bandNames) {
+                    auxWriter.write("    <MDI key='Band_" + (++i) + "'>");
+                    auxWriter.write(bandName);
+                    auxWriter.write("</MDI>\n");
+                }
+                auxWriter.write("  </Metadata>\n</PAMDataset>\n");
+            }
+        }
+
+        if (outputStream != null) {
+            outputStream.flush();
+            outputStream.close();
+            outputStream = null;
+        }
+
+        if (imageWriter != null) {
+            imageWriter.dispose();
+            imageWriter = null;
+        }
+    }
+
+    @Override
+    public boolean shouldWrite(ProductNode node) {
+        if (node instanceof VirtualBand) {
+            return false;
+        } else if (node instanceof FilterBand) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public void deleteOutput() throws IOException {
+        if (outputFile != null && outputFile.isFile()) {
+            if (!outputFile.delete()) {
+                throw new IOException("Unable to delete file: " + outputFile.getAbsolutePath());
+            }
+        }
+    }
+
+    @Override
+    public void writeBandRasterData(Band sourceBand, int sourceOffsetX, int sourceOffsetY, int sourceWidth, int sourceHeight, ProductData sourceBuffer, ProgressMonitor pm) throws IOException {
+        if (withIntermediate) {
+            intermediateWriter.writeBandRasterData(sourceBand, sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, sourceBuffer, pm);
+        } else {
+            if (isWritten) {
+                return;
+            }
+            final Product sourceProduct = sourceBand.getProduct();
+            _writeBandRasterData(sourceProduct);
+            isWritten = true;
+        }
+    }
+
+    @Override
+    protected void writeProductNodesImpl() throws IOException {
+        writingDataHasStarted = true;
+        updateTilingParameter();
+        for (Band band : getSourceProduct().getBands()) {
+            bandNames.add(band.getName());
+        }
+        if (withIntermediate) {
+            if (getOutput() instanceof String) {
+                intermediateFile = new File(System.getProperty("java.io.tmpdir"), getOutput() + ".tmp.dim");
+            } else {
+                intermediateFile = new File(System.getProperty("java.io.tmpdir"), ((File) getOutput()).getName() + ".tmp.dim");
+            }
+            SystemUtils.LOG.info("writing to intermediate file " + intermediateFile.getPath());
+            intermediateWriter.writeProductNodes(getSourceProduct(), intermediateFile);
+        } else {
+            _writeProductNodesImpl();
+        }
+    }
+
+    private void _writeBandRasterData(Product sourceProduct) throws IOException {
+        final int targetDataType = getTargetDataType(sourceProduct);
+        final ArrayList<Band> bandsToExport = getBandsToExport(sourceProduct);
+
+        RenderedImage writeImage;
+        if (bandsToExport.size() > 1) {
+            final ParameterBlock parameterBlock = new ParameterBlock();
+            for (int i = 0; i < bandsToExport.size(); i++) {
+                final Band subsetBand = bandsToExport.get(i);
+                final RenderedImage sourceImage = getImageWithTargetDataType(targetDataType, subsetBand);
+                parameterBlock.setSource(sourceImage, i);
+            }
+            writeImage = JAI.create("bandmerge", parameterBlock, null);
+        } else {
+            writeImage = getImageWithTargetDataType(targetDataType, bandsToExport.get(0));
+        }
+
+        GeoTIFFMetadata geoTIFFMetadata = ProductUtils.createGeoTIFFMetadata(sourceProduct);
+        if (geoTIFFMetadata == null) {
+            geoTIFFMetadata = new GeoTIFFMetadata();
+        }
+        final ImageTypeSpecifier imageTypeSpecifier = ImageTypeSpecifier.createFromRenderedImage(writeImage);
+        final TIFFImageMetadata iioMetadata = (TIFFImageMetadata) GeoTIFF.createIIOMetadata(imageWriter, imageTypeSpecifier, geoTIFFMetadata,
+                "it_geosolutions_imageioimpl_plugins_tiff_image_1.0",
+                "it.geosolutions.imageio.plugins.tiff.BaselineTIFFTagSet,it.geosolutions.imageio.plugins.tiff.BaselineTIFFTagSet");
+
+
+        addDimapMetaField(sourceProduct, iioMetadata);
+
+        final SampleModel sampleModel = writeImage.getSampleModel();
+        writeParam.setDestinationType(new ImageTypeSpecifier(new BogusAndCheatingColorModel(sampleModel), sampleModel));
+
+        final IIOImage iioImage = new IIOImage(writeImage, null, iioMetadata);
+        imageWriter.write(null, iioImage, writeParam);
     }
 
     private void createWriterParams() {
@@ -122,22 +260,16 @@ class BigGeoTiffProductWriter extends AbstractProductWriter {
         writeParam.setForceToBigTIFF(forceBigTiff);
     }
 
-    @Override
-    protected void writeProductNodesImpl() throws IOException {
-        updateTilingParameter();
-        for (Band band : getSourceProduct().getBands()) {
-            bandNames.add(band.getName());
+    private void setWriteIntermediateProduct(boolean intermediate) {
+        if (writingDataHasStarted) {
+            throw new IllegalStateException("It is not allowed to change the state 'write intermediate product' " +
+                    "after some data has already been written.");
         }
-        if (withIntermediate) {
-            if (getOutput() instanceof String) {
-                intermediateFile = new File(System.getProperty("java.io.tmpdir"), getOutput() + ".tmp.dim");
-            } else {
-                intermediateFile = new File(System.getProperty("java.io.tmpdir"), ((File) getOutput()).getName() + ".tmp.dim");
-            }
-            SystemUtils.LOG.info("writing to intermediate file " + intermediateFile.getPath());
-            intermediateWriter.writeProductNodes(getSourceProduct(), intermediateFile);
+        withIntermediate = intermediate;
+        if (intermediate) {
+            intermediateWriter = new DimapProductWriterPlugIn().createWriterInstance();
         } else {
-            _writeProductNodesImpl();
+            intermediateWriter = null;
         }
     }
 
@@ -186,55 +318,6 @@ class BigGeoTiffProductWriter extends AbstractProductWriter {
         throw new IllegalStateException("No appropriate image writer for format BigTIFF found.");
     }
 
-    @Override
-    public void writeBandRasterData(Band sourceBand, int sourceOffsetX, int sourceOffsetY, int sourceWidth, int sourceHeight, ProductData sourceBuffer, ProgressMonitor pm) throws IOException {
-        if (withIntermediate) {
-            intermediateWriter.writeBandRasterData(sourceBand, sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, sourceBuffer, pm);
-        } else {
-            if (isWritten) {
-                return;
-            }
-            final Product sourceProduct = sourceBand.getProduct();
-            _writeBandRasterData(sourceProduct);
-            isWritten = true;
-        }
-    }
-
-    private void _writeBandRasterData(Product sourceProduct) throws IOException {
-        final int targetDataType = getTargetDataType(sourceProduct);
-        final ArrayList<Band> bandsToExport = getBandsToExport(sourceProduct);
-
-        RenderedImage writeImage;
-        if (bandsToExport.size() > 1) {
-            final ParameterBlock parameterBlock = new ParameterBlock();
-            for (int i = 0; i < bandsToExport.size(); i++) {
-                final Band subsetBand = bandsToExport.get(i);
-                final RenderedImage sourceImage = getImageWithTargetDataType(targetDataType, subsetBand);
-                parameterBlock.setSource(sourceImage, i);
-            }
-            writeImage = JAI.create("bandmerge", parameterBlock, null);
-        } else {
-            writeImage = getImageWithTargetDataType(targetDataType, bandsToExport.get(0));
-        }
-
-        GeoTIFFMetadata geoTIFFMetadata = ProductUtils.createGeoTIFFMetadata(sourceProduct);
-        if (geoTIFFMetadata == null) {
-            geoTIFFMetadata = new GeoTIFFMetadata();
-        }
-        final ImageTypeSpecifier imageTypeSpecifier = ImageTypeSpecifier.createFromRenderedImage(writeImage);
-        final TIFFImageMetadata iioMetadata = (TIFFImageMetadata) GeoTIFF.createIIOMetadata(imageWriter, imageTypeSpecifier, geoTIFFMetadata,
-                "it_geosolutions_imageioimpl_plugins_tiff_image_1.0",
-                "it.geosolutions.imageio.plugins.tiff.BaselineTIFFTagSet,it.geosolutions.imageio.plugins.tiff.BaselineTIFFTagSet");
-
-
-        addDimapMetaField(sourceProduct, iioMetadata);
-
-        final SampleModel sampleModel = writeImage.getSampleModel();
-        writeParam.setDestinationType(new ImageTypeSpecifier(new BogusAndCheatingColorModel(sampleModel), sampleModel));
-
-        final IIOImage iioImage = new IIOImage(writeImage, null, iioMetadata);
-        imageWriter.write(null, iioImage, writeParam);
-    }
 
     private ArrayList<Band> getBandsToExport(Product sourceProduct) {
         final int nodeCount = sourceProduct.getNumBands();
@@ -278,74 +361,6 @@ class BigGeoTiffProductWriter extends AbstractProductWriter {
             sourceImage = FormatDescriptor.create(sourceImage, targetDataType, null);
         }
         return sourceImage;
-    }
-
-    @Override
-    public void flush() throws IOException {
-        if (outputStream != null) {
-            outputStream.flush();
-        }
-    }
-
-    @Override
-    public void close() throws IOException {
-        if (withIntermediate) {
-            if (intermediateWriter != null) {
-                intermediateWriter.flush();
-                intermediateWriter.close();
-                _writeProductNodesImpl();
-                Product product = ProductIO.readProduct(intermediateFile, "BEAM-DIMAP");
-                product.setName(FileUtils.getFilenameWithoutExtension(outputFile));
-                _writeBandRasterData(product);
-                intermediateWriter.deleteOutput();
-                intermediateWriter = null;
-            }
-        }
-
-        if (outputStream != null && Config.instance().preferences().getBoolean(PARAM_ARCGIS_AUX, false)) {
-            File auxFile = new File(outputFile.getParent(), outputFile.getName() + ".aux.xml");
-            SystemUtils.LOG.info("writing band names to ArcGIS aux " + auxFile.getPath());
-            try (BufferedWriter auxWriter = new BufferedWriter(new FileWriter(auxFile))) {
-                auxWriter.write("<PAMDataset>\n  <Metadata>\n    <MDI key='Band_0'>dummy</MDI>\n");
-                int i=0;
-                for (String bandName : bandNames) {
-                    auxWriter.write("    <MDI key='Band_" + (++i) + "'>");
-                    auxWriter.write(bandName);
-                    auxWriter.write("</MDI>\n");
-                }
-                auxWriter.write("  </Metadata>\n</PAMDataset>\n");
-            }
-        }
-
-        if (outputStream != null) {
-            outputStream.flush();
-            outputStream.close();
-            outputStream = null;
-        }
-
-        if (imageWriter != null) {
-            imageWriter.dispose();
-            imageWriter = null;
-        }
-    }
-
-    @Override
-    public boolean shouldWrite(ProductNode node) {
-        if (node instanceof VirtualBand) {
-            return false;
-        } else if (node instanceof FilterBand) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public void deleteOutput() throws IOException {
-        if (outputFile != null && outputFile.isFile()) {
-            if (!outputFile.delete()) {
-                throw new IOException("Unable to delete file: " + outputFile.getAbsolutePath());
-            }
-        }
     }
 
     private void updateProductName() {

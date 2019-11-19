@@ -19,18 +19,13 @@ package org.esa.snap.binning.operator;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 
@@ -45,85 +40,19 @@ import static org.junit.Assert.assertTrue;
  */
 public class MappedByteBufferTest {
 
-    interface FileIO {
-        void write(File file, int n, Producer producer) throws IOException;
-
-        int read(File file, Consumer consumer) throws IOException;
-    }
-
-    interface Producer {
-        long createKey();
-
-        float[] createSamples();
-    }
-
-    interface Consumer {
-        void process(long key, float[] samples);
-    }
-
-
     private static final int MiB = 1024 * 1024;
-    private static final int N = 25000;
 
     private File file;
 
     @Before
     public void setUp() throws Exception {
         file = genTestFile();
-        file.deleteOnExit();
     }
 
     @After
     public void tearDown() {
         deleteFile(file);
     }
-
-//    /*
-//     * This - failing and therefore ignored - test documents a case in which unmapping
-//     * does not work. A long is written into the buffer using an index; after that, cleanup fails
-//     * with an instance of java.lang.Error. See testMemoryMappedFileIOWithCleaning below
-//     * for a nearly identical, non-failing test which is able to delete the temporary file.
-//     */
-//    @Test
-//    @Ignore
-//    public void testMemoryMappedFileIOWithCleaning_Failing() throws Exception {
-//        final int fileSize = 1024 * 1024 * 100;
-//
-//        final RandomAccessFile raf = new RandomAccessFile(file, "rw");
-//        final FileChannel fc = raf.getChannel();
-//        MappedByteBuffer buffer = null;
-//        try {
-//            buffer = fc.map(FileChannel.MapMode.READ_WRITE, 0, fileSize);
-//            buffer.putDouble(1.2);
-//            buffer.putFloat(3.4f);
-//            buffer.putLong(fileSize - 8, 1L);
-//        } finally {
-//            MemoryMappedFileCleaner.cleanup(raf, buffer);
-//        }
-//
-//        deleteFile("MappedByteBufferTest.testMemoryMappedFileIOWithCleaning");
-//        assertFalse(file.exists());
-//    }
-
-//    @Test
-//    public void testMemoryMappedFileIOWithCleaning() throws Exception {
-//        final int fileSize = 1024 * 1024 * 100;
-//
-//        final RandomAccessFile raf = new RandomAccessFile(file, "rw");
-//        final FileChannel fc = raf.getChannel();
-//        MappedByteBuffer buffer = null;
-//        try {
-//            buffer = fc.map(FileChannel.MapMode.READ_WRITE, 0, fileSize);
-//            buffer.putDouble(1.2);
-//            buffer.putFloat(3.4f);
-//            buffer.putLong(1L);
-//        } finally {
-//            MemoryMappedFileCleaner.cleanup(raf, buffer);
-//        }
-//
-//        deleteFile("MappedByteBufferTest.testMemoryMappedFileIOWithCleaning");
-//        assertFalse(file.exists());
-//    }
 
     @Test
     public void testThatMemoryMappedFileIODoesNotConsumeHeapSpace() throws Exception {
@@ -226,197 +155,6 @@ public class MappedByteBufferTest {
         }
     }
 
-    @Test
-    public void testStreamedFileIOPerformance() throws Exception {
-        testFileIOPerformance(new StreamedFileIO());
-    }
-
-    @Test()
-    @Ignore("Perfomace test ignored")
-    public void testMemoryMappedFileIOPerformance() throws Exception {
-        testFileIOPerformance(new MemoryMappedFileIO());
-    }
-
-    private void testFileIOPerformance(FileIO fileIO) throws IOException {
-
-        System.out.println("Testing " + fileIO.getClass().getSimpleName() + " for " + N + " samples");
-
-        MyProducer producer = new MyProducer();
-        MyConsumer consumer = new MyConsumer();
-
-        long t1 = System.currentTimeMillis();
-        fileIO.write(file, N, producer);
-        long t2 = System.currentTimeMillis();
-        fileIO.read(file, consumer);
-        long t3 = System.currentTimeMillis();
-
-        assertEquals(N, producer.n);
-        assertEquals(N, consumer.n);
-
-        System.out.println("buf write time: " + (t2 - t1) + " ms");
-        System.out.println("buf read time:  " + (t3 - t2) + " ms");
-        System.out.println("buf total time: " + (t3 - t1) + " ms");
-        System.out.println("file size:      " + file.length() + " bytes");
-    }
-
-    class MemoryMappedFileIO implements FileIO {
-        @Override
-        public void write(File file, int n, Producer producer) throws IOException {
-            RandomAccessFile raf = new RandomAccessFile(file, "rw");
-            FileChannel channel = raf.getChannel();
-            ByteBuffer buffer = channel.map(FileChannel.MapMode.READ_WRITE, 0, 100L * MiB);
-            try {
-                for (int i = 0; i < n; i++) {
-                    long key = producer.createKey();
-                    float[] samples = producer.createSamples();
-                    writeKey(buffer, key);
-                    writeSamples(buffer, samples);
-                }
-            } finally {
-                writeKey(buffer, -1L);
-                raf.close();
-            }
-        }
-
-        @Override
-        public int read(File file, Consumer consumer) throws IOException {
-            RandomAccessFile raf = new RandomAccessFile(file, "r");
-            FileChannel channel = raf.getChannel();
-            long length = file.length();
-            ByteBuffer buffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, length);
-            int n = 0;
-            try {
-                while (true) {
-                    long key = readKey(buffer);
-                    if (key == -1L) {
-                        break;
-                    }
-                    float[] samples = readSamples(buffer);
-                    consumer.process(key, samples);
-                    n++;
-                }
-            } finally {
-                raf.close();
-            }
-            return n;
-        }
-
-        private long readKey(ByteBuffer is) {
-            return is.getLong();
-        }
-
-        private float[] readSamples(ByteBuffer is) {
-            int n = is.getInt();
-            float[] samples = new float[n];
-            for (int i = 0; i < samples.length; i++) {
-                samples[i] = is.getFloat();
-            }
-            return samples;
-        }
-
-        private void writeKey(ByteBuffer stream, long key) {
-            stream.putLong(key);
-        }
-
-        private void writeSamples(ByteBuffer stream, float[] samples) {
-            stream.putInt(samples.length);
-            for (float sample : samples) {
-                stream.putFloat(sample);
-            }
-        }
-
-
-    }
-
-    class StreamedFileIO implements FileIO {
-        @Override
-        public void write(File file, int n, Producer producer) throws IOException {
-            try (DataOutputStream stream = new DataOutputStream(new FileOutputStream(file))) {
-                for (int i = 0; i < n; i++) {
-                    long key = producer.createKey();
-                    float[] samples = producer.createSamples();
-                    writeKey(stream, key);
-                    writeSamples(stream, samples);
-                }
-            }
-        }
-
-        @Override
-        public int read(File file, Consumer consumer) throws IOException {
-            int n = 0;
-            try (DataInputStream stream = new DataInputStream(new FileInputStream(file))) {
-                while (true) {
-                    long key;
-                    try {
-                        key = readKey(stream);
-                    } catch (EOFException eof) {
-                        break;
-                    }
-                    float[] samples = readSamples(stream);
-                    consumer.process(key, samples);
-                    n++;
-                }
-            }
-            return n;
-        }
-
-        private long readKey(DataInputStream is) throws IOException {
-            return is.readLong();
-        }
-
-        private float[] readSamples(DataInputStream is) throws IOException {
-            int n = is.readInt();
-            float[] samples = new float[n];
-            for (int i = 0; i < samples.length; i++) {
-                samples[i] = is.readFloat();
-            }
-            return samples;
-        }
-
-        private void writeKey(DataOutputStream stream, long key) throws IOException {
-            stream.writeLong(key);
-        }
-
-        private void writeSamples(DataOutputStream stream, float[] samples) throws IOException {
-            stream.writeInt(samples.length);
-            for (float sample : samples) {
-                stream.writeFloat(sample);
-            }
-        }
-    }
-
-    /**
-     * Sample producer which creates randomly-sized sample arrays (length: 0 ... 10).
-     */
-    private static class MyProducer implements Producer {
-        long n;
-
-        @Override
-        public long createKey() {
-            return n++;
-        }
-
-        @Override
-        public float[] createSamples() {
-            final float[] samples = new float[(int) (Math.random() * 11)];
-            for (int i = 0; i < samples.length; i++) {
-                samples[i] = 0.1f * i;
-            }
-            return samples;
-        }
-    }
-
-    /**
-     * Sample consumer which simply counts received sample arrays.
-     */
-    private static class MyConsumer implements Consumer {
-        long n;
-
-        @Override
-        public void process(long key, float[] samples) {
-            n++;
-        }
-    }
 
     private static long getFreeMiB() {
         return Runtime.getRuntime().freeMemory() / MiB;

@@ -22,7 +22,11 @@ import javax.media.jai.ImageLayout;
 import javax.media.jai.JAI;
 import javax.media.jai.PlanarImage;
 import javax.media.jai.SourcelessOpImage;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
@@ -31,9 +35,6 @@ import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
 import java.util.ArrayList;
 
-import org.junit.Ignore;
-
-@Ignore
 public class TransparencyTest {
 
 

@@ -16,21 +16,31 @@
 
 package org.esa.snap.pixex;
 
-import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.CrsGeoCoding;
+import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.measurement.Measurement;
 import org.esa.snap.measurement.writer.MeasurementWriter;
-import org.esa.snap.pixex.output.*;
+import org.esa.snap.pixex.output.DefaultFormatStrategy;
+import org.esa.snap.pixex.output.PixExMeasurementFactory;
+import org.esa.snap.pixex.output.PixExProductRegistry;
+import org.esa.snap.pixex.output.PixExRasterNamesFactory;
+import org.esa.snap.pixex.output.TargetWriterFactoryAndMap;
+import org.esa.snap.test.LongTestRunner;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 
 import javax.media.jai.RenderedOp;
 import javax.media.jai.operator.ConstantDescriptor;
-import java.awt.*;
+import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.image.Raster;
 import java.io.BufferedReader;
@@ -41,9 +51,15 @@ import java.text.ParseException;
 import java.util.Locale;
 import java.util.Scanner;
 
-import static junit.framework.Assert.*;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
 
 @SuppressWarnings({"IOResourceOpenedButNotSafelyClosed"})
+@RunWith(LongTestRunner.class)
 public class MeasurementWriterTest {
 
     private File outputDir;

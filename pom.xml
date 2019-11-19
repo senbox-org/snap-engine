@@ -871,7 +871,7 @@
                         <argLine>-Xmx1024M -Dfile.encoding=UTF-8</argLine>
                     </configuration>
                 </plugin>
-
+                
                 <plugin>
                     <artifactId>maven-resources-plugin</artifactId>
                     <version>3.1.0</version>
