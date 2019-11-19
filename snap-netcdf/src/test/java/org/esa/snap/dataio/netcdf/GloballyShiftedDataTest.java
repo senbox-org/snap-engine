@@ -155,8 +155,8 @@ public class GloballyShiftedDataTest {
 
     }
 
-    @Ignore("Not fixed yet: SNAP-951")
     @Test
+    @Ignore("Not fixed yet: SNAP-951")
     public void testLevelImagesNotScrambled() {
         Band band = product.getBandAt(0);
 

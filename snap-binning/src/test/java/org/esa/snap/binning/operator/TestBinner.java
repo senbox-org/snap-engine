@@ -18,7 +18,14 @@ package org.esa.snap.binning.operator;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.vividsolutions.jts.io.WKTReader;
-import org.esa.snap.binning.*;
+import org.esa.snap.binning.BinningContext;
+import org.esa.snap.binning.PlanetaryGrid;
+import org.esa.snap.binning.SpatialBin;
+import org.esa.snap.binning.SpatialBinConsumer;
+import org.esa.snap.binning.SpatialBinner;
+import org.esa.snap.binning.TemporalBin;
+import org.esa.snap.binning.TemporalBinSource;
+import org.esa.snap.binning.TemporalBinner;
 import org.esa.snap.binning.operator.formatter.Formatter;
 import org.esa.snap.binning.operator.formatter.FormatterConfig;
 import org.esa.snap.binning.operator.formatter.FormatterFactory;
@@ -30,12 +37,17 @@ import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.Debug;
 import org.esa.snap.core.util.StopWatch;
 import org.esa.snap.core.util.io.FileUtils;
-import org.junit.Ignore;
 
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * <p>
@@ -58,7 +70,6 @@ import java.util.*;
  *
  * @author Norman Fomferra
  */
-@Ignore
 public class TestBinner {
 
     public static void main(String[] args) throws Exception {

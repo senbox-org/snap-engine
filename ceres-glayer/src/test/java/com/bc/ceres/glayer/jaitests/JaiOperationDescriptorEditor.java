@@ -16,33 +16,46 @@
 
 package com.bc.ceres.glayer.jaitests;
 
-import javax.media.jai.*;
+import javax.media.jai.EnumeratedParameter;
+import javax.media.jai.Interpolation;
+import javax.media.jai.JAI;
+import javax.media.jai.OperationDescriptor;
+import javax.media.jai.ParameterListDescriptor;
 import javax.media.jai.util.Range;
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
  * Provides a Swing component used to edit the parameters of a JAI operation.
  */
-public class OperationDescriptorEditor {
-    private final OperationDescriptor operationDescriptor;
+public class JaiOperationDescriptorEditor {
     private final ArrayList<ParameterDescriptor> parameterDescriptors;
-    private final String modeName;
 
-    public OperationDescriptorEditor(OperationDescriptor operationDescriptor) {
+    private JaiOperationDescriptorEditor(OperationDescriptor operationDescriptor) {
         this(operationDescriptor, "rendered");
     }
 
-    public OperationDescriptorEditor(OperationDescriptor operationDescriptor, String modeName) {
-        this.operationDescriptor = operationDescriptor;
-        this.modeName = modeName;
+    private JaiOperationDescriptorEditor(OperationDescriptor operationDescriptor, String modeName) {
         final ParameterListDescriptor descriptor = operationDescriptor.getParameterListDescriptor(modeName);
         final String[] names = descriptor.getParamNames();
         final Class[] classes = descriptor.getParamClasses();
         final Object[] defaultValues = descriptor.getParamDefaults();
-        parameterDescriptors = new ArrayList<ParameterDescriptor>(names.length);
+        parameterDescriptors = new ArrayList<>(names.length);
         for (int i = 0; i < names.length; i++) {
             final String name = names[i];
             final Class type = classes[i];
@@ -61,15 +74,7 @@ public class OperationDescriptorEditor {
         }
     }
 
-    public OperationDescriptor getOperationDescriptor() {
-        return operationDescriptor;
-    }
-
-    public String getModeName() {
-        return modeName;
-    }
-
-    public JPanel createPanel() {
+    private JPanel createPanel() {
         final GridBagLayout bagLayout = new GridBagLayout();
         final GridBagConstraints constraints = new GridBagConstraints();
         constraints.anchor = GridBagConstraints.BASELINE;
@@ -108,11 +113,11 @@ public class OperationDescriptorEditor {
 
     private JComponent getEditor(ParameterDescriptor parameterDescriptor) {
         if (parameterDescriptor.type.equals(Boolean.class)) {
-            return new JComboBox(new Object[]{Boolean.TRUE, Boolean.FALSE});
+            return new JComboBox<>(new Object[]{Boolean.TRUE, Boolean.FALSE});
         }
         if (EnumeratedParameter.class.isAssignableFrom(parameterDescriptor.type) &&
                 parameterDescriptor.enumeratedParameters != null) {
-            final JComboBox comboBox = new JComboBox(parameterDescriptor.enumeratedParameters);
+            final JComboBox<EnumeratedParameter> comboBox = new JComboBox<>(parameterDescriptor.enumeratedParameters);
             comboBox.setRenderer(new DefaultListCellRenderer() {
                 @Override
                 public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
@@ -124,7 +129,7 @@ public class OperationDescriptorEditor {
             return comboBox;
         }
         if (Interpolation.class.isAssignableFrom(parameterDescriptor.type)) {
-            final JComboBox comboBox = new JComboBox(INTERPOLATION_VALUES);
+            final JComboBox<Interpolation> comboBox = new JComboBox<>(INTERPOLATION_VALUES);
             comboBox.setRenderer(new DefaultListCellRenderer() {
                 @Override
                 public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
@@ -149,7 +154,7 @@ public class OperationDescriptorEditor {
         final JTabbedPane jTabbedPane = new JTabbedPane();
         for (String opName : args) {
             final OperationDescriptor descriptor = (OperationDescriptor) JAI.getDefaultInstance().getOperationRegistry().getDescriptor("rendered", opName);
-            final OperationDescriptorEditor descriptorEditor = new OperationDescriptorEditor(descriptor);
+            final JaiOperationDescriptorEditor descriptorEditor = new JaiOperationDescriptorEditor(descriptor);
             final JPanel panel = descriptorEditor.createPanel();
             jTabbedPane.add(opName, new JScrollPane(panel));
         }
@@ -160,14 +165,14 @@ public class OperationDescriptorEditor {
         frame.setVisible(true);
     }
 
-    final static HashMap<Interpolation, String> I2S = new HashMap<Interpolation, String>(8);
-    final static Interpolation[] INTERPOLATION_VALUES = new Interpolation[]{
+    private final static HashMap<Interpolation, String> I2S = new HashMap<>(8);
+    private final static Interpolation[] INTERPOLATION_VALUES = new Interpolation[]{
             Interpolation.getInstance(Interpolation.INTERP_NEAREST),
             Interpolation.getInstance(Interpolation.INTERP_BILINEAR),
             Interpolation.getInstance(Interpolation.INTERP_BICUBIC),
             Interpolation.getInstance(Interpolation.INTERP_BICUBIC_2),
     };
-    final static String[] INTERPOLATION_NAMES = new String[]{
+    private final static String[] INTERPOLATION_NAMES = new String[]{
             "INTERP_NEAREST",
             "INTERP_BILINEAR",
             "INTERP_BICUBIC",
@@ -181,7 +186,7 @@ public class OperationDescriptorEditor {
         }
     }
 
-    private final class ParameterDescriptor {
+    private static final class ParameterDescriptor {
         final String name;
         final Class type;
         final Object defaultValue;

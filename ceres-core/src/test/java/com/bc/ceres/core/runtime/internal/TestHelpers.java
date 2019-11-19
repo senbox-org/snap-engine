@@ -16,16 +16,18 @@
 
 package com.bc.ceres.core.runtime.internal;
 
-import com.bc.ceres.core.*;
-import com.bc.ceres.core.runtime.*;
-import org.junit.*;
+import com.bc.ceres.core.CoreException;
+import com.bc.ceres.core.runtime.Module;
+import com.bc.ceres.core.runtime.ModuleState;
 
-import java.io.*;
-import java.net.*;
+import java.io.IOException;
+import java.net.URL;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 
-@Ignore
 public class TestHelpers {
     /**
      * Loads a module. Sets the location to the resiource URL and the ID to -1

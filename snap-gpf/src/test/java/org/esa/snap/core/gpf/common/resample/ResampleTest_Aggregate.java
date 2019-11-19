@@ -22,7 +22,7 @@ import static org.junit.Assert.assertNotNull;
 /**
  * @author Tonio Fincke
  */
-@Ignore
+@Ignore("Needs to be fixed. SNAP-1242")
 public class ResampleTest_Aggregate {
 
     @Test

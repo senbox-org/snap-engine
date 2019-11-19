@@ -232,7 +232,7 @@ public class MappedByteBufferTest {
     }
 
     @Test()
-    @Ignore("Perfomace test ignored")
+    @Ignore("Perfomance test ignored")
     public void testMemoryMappedFileIOPerformance() throws Exception {
         testFileIOPerformance(new MemoryMappedFileIO());
     }

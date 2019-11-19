@@ -97,7 +97,7 @@ public class ProductSceneCrsTest {
     }
 
     @Test
-    @Ignore("org.opengis.parameter.InvalidParameterValueException: Argument \"info\" should not be null")
+    @Ignore("GeoTools issue: org.opengis.parameter.InvalidParameterValueException: Argument \"info\" should not be null")
     public void testNotSoObviousCase() throws Exception {
         MathTransform2D geoCodingTransform = new NonLinearGarbageTransform();
         DefaultDerivedCRS crs1 = new DefaultDerivedCRS("IMG1", WGS84, geoCodingTransform, DISPLAY);

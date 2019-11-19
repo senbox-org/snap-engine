@@ -17,30 +17,29 @@ package org.esa.snap.dem.dataio.ace;
 
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.dataop.resamp.Resampling;
-import org.junit.Ignore;
+import org.junit.Assume;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLConnection;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
-/**
- * Created by IntelliJ IDEA.
- * User: lveci
- * Date: Apr 25, 2008
- * To change this template use File | Settings | File Templates.
- */
 public class TestACEElevationModel {
 
-    private static double[] expectedValues = {
-            1100.0,
-            1149.0,
-            1080.0,
-            1037.0
+    private final static double[] EXPECTED_DEM_VALUES = {
+            1117.271972,
+            1164.292968,
+            1092.735961,
+            1047.098999
     };
 
-    @Ignore
+    @Test
     public void testElevationModel() throws Exception {
+        Assume.assumeTrue("Internet connection not available, skipping BrrOpIntegrationTest", isInternetAvailable());
 
         final ACEElevationModel dem = getElevationModel();
         int height = 2;
@@ -55,12 +54,12 @@ public class TestACEElevationModel {
                 try {
                     demValues[count++] = dem.getElevation(geoPos);
                 } catch (Exception e) {
-                    assertFalse("Get Elevation threw: " + e.getMessage(), true);
+                    fail("Get Elevation threw: " + e.getMessage());
                 }
             }
         }
 
-        assertArrayEquals(expectedValues, demValues, 1.0e-6);
+        assertArrayEquals(EXPECTED_DEM_VALUES, demValues, 1.0e-6);
     }
 
     @Test
@@ -86,5 +85,19 @@ public class TestACEElevationModel {
     private ACEElevationModel getElevationModel() throws IOException {
         return new ACEElevationModel(new ACEElevationModelDescriptor(), Resampling.BILINEAR_INTERPOLATION);
     }
+
+    private boolean isInternetAvailable() {
+        boolean internetAvailable;
+        try {
+            URLConnection urlConnection = new URL("http://www.google.com").openConnection();
+            urlConnection.setConnectTimeout(2000);
+            urlConnection.getContent();
+            internetAvailable = true;
+        } catch (IOException e) {
+            internetAvailable = false;
+        }
+        return internetAvailable;
+    }
+
 
 }

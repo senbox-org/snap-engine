@@ -11,7 +11,6 @@ import org.esa.snap.core.gpf.graph.GraphException;
 import org.esa.snap.core.gpf.main.GPT;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -25,7 +24,9 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 public class OperatorExecutionsTest {
 
@@ -518,7 +519,6 @@ public class OperatorExecutionsTest {
     }
 
     @Test
-    @Ignore("This test does not work and is not supposed to.")
     public void testInitAndDoExecuteSetNoTargetProductOperatorWorksWithOnlyInitialize() {
         String outputFileName = "OperatorExecutionsTest/InitAndDoExecuteSetNoTargetProduct_oi.txt";
         File outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
