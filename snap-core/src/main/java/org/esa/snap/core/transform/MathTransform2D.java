@@ -1,7 +1,7 @@
 package org.esa.snap.core.transform;
 
-import com.vividsolutions.jts.geom.Geometry;
 import org.geotools.geometry.jts.JTS;
+import org.locationtech.jts.geom.Geometry;
 import org.opengis.referencing.operation.NoninvertibleTransformException;
 import org.opengis.referencing.operation.TransformException;
 

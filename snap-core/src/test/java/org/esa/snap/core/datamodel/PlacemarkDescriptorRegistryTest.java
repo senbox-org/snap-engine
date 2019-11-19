@@ -1,7 +1,7 @@
 package org.esa.snap.core.datamodel;
 
 import com.bc.ceres.core.DefaultServiceRegistry;
-import com.vividsolutions.jts.geom.Polygon;
+import org.locationtech.jts.geom.Polygon;
 import org.esa.snap.core.dataio.DecodeQualification;
 import org.geotools.feature.AttributeTypeBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;

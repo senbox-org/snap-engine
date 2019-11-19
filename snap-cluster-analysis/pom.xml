@@ -49,6 +49,12 @@
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-core</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.ejml</groupId>
+                    <artifactId>ejml-ddense</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>

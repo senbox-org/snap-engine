@@ -6,10 +6,10 @@ import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.core.util.math.RsMathUtils;
 import org.geotools.referencing.CRS;
+import tec.uom.se.unit.Units;
 
 import javax.measure.quantity.Length;
-import javax.measure.unit.SI;
-import javax.measure.unit.Unit;
+import javax.measure.Unit;
 import java.awt.geom.Rectangle2D;
 
 /**
@@ -91,9 +91,9 @@ public class AreaCalculator {
     }
 
     private void initEarthRadius(GeoCoding gc, Unit<Length> axisUnit) {
-        if (axisUnit.equals(SI.METER)) {
+        if (axisUnit.equals(Units.METRE)) {
             earthRadius = CRS.getEllipsoid(gc.getMapCRS()).getSemiMajorAxis() * 1.0;
-        } else if (axisUnit.equals(SI.KILOMETER)) {
+        } else if (axisUnit.equals(Units.METRE.multiply(1000))) {
             earthRadius = CRS.getEllipsoid(gc.getMapCRS()).getSemiMajorAxis() * 1000.0;
         } else {
             earthRadius = RsMathUtils.MEAN_EARTH_RADIUS;

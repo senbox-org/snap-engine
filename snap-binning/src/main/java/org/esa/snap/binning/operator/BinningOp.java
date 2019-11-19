@@ -17,8 +17,8 @@
 package org.esa.snap.binning.operator;
 
 import com.bc.ceres.core.ProgressMonitor;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.esa.snap.binning.AggregatorConfig;
 import org.esa.snap.binning.BinningContext;
 import org.esa.snap.binning.CellProcessorConfig;

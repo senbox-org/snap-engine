@@ -17,7 +17,7 @@
 package org.esa.snap.binning.operator;
 
 import com.bc.ceres.core.ProgressMonitor;
-import com.vividsolutions.jts.io.WKTReader;
+import org.locationtech.jts.io.WKTReader;
 import org.esa.snap.binning.BinningContext;
 import org.esa.snap.binning.PlanetaryGrid;
 import org.esa.snap.binning.SpatialBin;

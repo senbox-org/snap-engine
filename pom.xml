@@ -42,10 +42,12 @@
         <hdf.version>2.7.1</hdf.version>
         <netcdf.version>4.3.22</netcdf.version>
         <slf4j.version>1.6.6</slf4j.version> <!-- used by netcdf, yes we hate that! -->
-        <geotools.version>17.1</geotools.version>
+        <geotools.version>20.0</geotools.version>
+        <org.locationtech.version>1.16.0</org.locationtech.version>
         <jide.version>3.6.1</jide.version>
         <maven.build.timestamp.format>yyyyMMdd</maven.build.timestamp.format>
         <buildDate>${maven.build.timestamp}</buildDate>
+        <tao.version>1.0.1</tao.version>
         <nbm.plugin.group.id>org.apache.netbeans.utilities</nbm.plugin.group.id>
         <nbm.plugin.artifact.id>nbm-maven-plugin</nbm.plugin.artifact.id>
         <nbm.plugin.version>4.3</nbm.plugin.version>
@@ -957,9 +959,9 @@
                 </plugin>
 
                 <plugin>
-                    <groupId>org.apache.netbeans.utilities</groupId>
-                    <artifactId>nbm-maven-plugin</artifactId>
-                    <version>4.3</version>
+                    <groupId>${nbm.plugin.group.id}</groupId>
+                    <artifactId>${nbm.plugin.artifact.id}</artifactId>
+                    <version>${nbm.plugin.version}</version>
                     <extensions>true</extensions>
                     <dependencies>
                         <dependency>
@@ -1067,8 +1069,9 @@
             </plugin>
 
             <plugin>
-                <groupId>org.apache.netbeans.utilities</groupId>
-                <artifactId>nbm-maven-plugin</artifactId>
+                <groupId>${nbm.plugin.group.id}</groupId>
+                <artifactId>${nbm.plugin.artifact.id}</artifactId>
+                <version>${nbm.plugin.version}</version>
             </plugin>
 
             <plugin>
