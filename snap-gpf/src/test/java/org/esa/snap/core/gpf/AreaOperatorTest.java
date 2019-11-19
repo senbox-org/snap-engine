@@ -17,21 +17,24 @@
 package org.esa.snap.core.gpf;
 
 import com.bc.ceres.core.ProgressMonitor;
-import junit.framework.TestCase;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
+import org.junit.Test;
 
 import javax.media.jai.BorderExtenderConstant;
 import java.awt.Rectangle;
 import java.awt.image.Raster;
 
+import static org.junit.Assert.assertEquals;
 
-public class AreaOperatorTest extends TestCase {
 
+public class AreaOperatorTest {
+
+    @Test
     public void testBasicOperatorStates() throws OperatorException {
         Product sourceProduct = new Product("foo", "grunt", 4, 4);
         Band band = sourceProduct.addBand("bar", ProductData.TYPE_FLOAT32);
@@ -60,7 +63,7 @@ public class AreaOperatorTest extends TestCase {
 
         for (int i = 0; i < expectedSamples.length; i++) {
             float expectedSample = expectedSamples[i];
-            assertEquals(expectedSample, data.getSampleFloat(i % 4, i / 4, 0));
+            assertEquals(expectedSample, data.getSampleFloat(i % 4, i / 4, 0), 1.0e-4);
         }
 
     }

@@ -49,8 +49,8 @@ import static org.junit.Assert.assertTrue;
 
 public class BindingContextValueBackedTest {
 
-    private BindingContext bindingContextVB;
-    private PropertyContainer propertyContainerVB;
+    BindingContext bindingContextVB;
+    PropertyContainer propertyContainerVB;
 
     private Exception error;
     private JComponent component;
@@ -141,28 +141,6 @@ public class BindingContextValueBackedTest {
         assertEquals(10, binding.getPropertyValue());
         assertNull(binding.getProblem());
     }
-
-    @Test()
-    public void testBindTextField() throws Exception {
-        JTextField textField = new JTextField();
-        Binding binding = bindingContextVB.bind("stringValue", textField);
-        Thread.sleep(1000); // previous value of 100 was not enough for building on my desktop rq-20140426
-        assertNotNull(binding);
-        assertSame(textField, getPrimaryComponent(binding));
-        assertNotNull(binding.getComponents());
-        assertEquals(1, binding.getComponents().length);
-
-        assertEquals("stringValue", textField.getName());
-
-        textField.setText("Bibo");
-        textField.postActionEvent();
-        assertEquals("Bibo", propertyContainerVB.getValue("stringValue"));
-
-        propertyContainerVB.setValue("stringValue", "Samson");
-        Thread.sleep(1000); // previous value of 100 was not enough for building on my desktop rq-20140426
-        assertEquals("Samson", textField.getText());
-    }
-
 
     @Test
     public void testBindFormattedTextFieldToString() {
@@ -410,7 +388,7 @@ public class BindingContextValueBackedTest {
     }
 
 
-    private static JComponent getPrimaryComponent(Binding binding) {
+    static JComponent getPrimaryComponent(Binding binding) {
         return binding.getComponents()[0];
     }
 

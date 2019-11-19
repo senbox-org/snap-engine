@@ -4,15 +4,20 @@ import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.GPF;
+import org.esa.snap.test.LongTestRunner;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.awt.image.Raster;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
+@RunWith(LongTestRunner.class)
 public class GLCMOp_IntegrationTest {
 
     private final static String SOURCE_PRODUCT_NAME =
@@ -29,26 +34,26 @@ public class GLCMOp_IntegrationTest {
         Product glcmProduct = GPF.createProduct("GLCM", parameters, sourceProduct);
 
         assertNotNull(glcmProduct);
-        assert(glcmProduct.getBandGroup().contains("conc_chl_Contrast"));
-        assert(glcmProduct.getBandGroup().contains("conc_chl_Dissimilarity"));
-        assert(glcmProduct.getBandGroup().contains("conc_chl_Homogeneity"));
-        assert(glcmProduct.getBandGroup().contains("conc_chl_ASM"));
-        assert(glcmProduct.getBandGroup().contains("conc_chl_Energy"));
-        assert(glcmProduct.getBandGroup().contains("conc_chl_MAX"));
-        assert(glcmProduct.getBandGroup().contains("conc_chl_Entropy"));
-        assert(glcmProduct.getBandGroup().contains("conc_chl_GLCMMean"));
-        assert(glcmProduct.getBandGroup().contains("conc_chl_GLCMVariance"));
-        assert(glcmProduct.getBandGroup().contains("conc_chl_GLCMCorrelation"));
-        assert(glcmProduct.getBandGroup().contains("conc_chl_masked_Contrast"));
-        assert(glcmProduct.getBandGroup().contains("conc_chl_masked_Dissimilarity"));
-        assert(glcmProduct.getBandGroup().contains("conc_chl_masked_Homogeneity"));
-        assert(glcmProduct.getBandGroup().contains("conc_chl_masked_ASM"));
-        assert(glcmProduct.getBandGroup().contains("conc_chl_masked_Energy"));
-        assert(glcmProduct.getBandGroup().contains("conc_chl_masked_MAX"));
-        assert(glcmProduct.getBandGroup().contains("conc_chl_masked_Entropy"));
-        assert(glcmProduct.getBandGroup().contains("conc_chl_masked_GLCMMean"));
-        assert(glcmProduct.getBandGroup().contains("conc_chl_masked_GLCMVariance"));
-        assert(glcmProduct.getBandGroup().contains("conc_chl_masked_GLCMCorrelation"));
+        assertTrue(glcmProduct.containsBand("conc_chl_Contrast"));
+        assertTrue(glcmProduct.containsBand("conc_chl_Dissimilarity"));
+        assertTrue(glcmProduct.containsBand("conc_chl_Homogeneity"));
+        assertTrue(glcmProduct.containsBand("conc_chl_ASM"));
+        assertTrue(glcmProduct.containsBand("conc_chl_Energy"));
+        assertTrue(glcmProduct.containsBand("conc_chl_MAX"));
+        assertTrue(glcmProduct.containsBand("conc_chl_Entropy"));
+        assertTrue(glcmProduct.containsBand("conc_chl_GLCMMean"));
+        assertTrue(glcmProduct.containsBand("conc_chl_GLCMVariance"));
+        assertTrue(glcmProduct.containsBand("conc_chl_GLCMCorrelation"));
+        assertTrue(glcmProduct.containsBand("conc_chl_masked_Contrast"));
+        assertTrue(glcmProduct.containsBand("conc_chl_masked_Dissimilarity"));
+        assertTrue(glcmProduct.containsBand("conc_chl_masked_Homogeneity"));
+        assertTrue(glcmProduct.containsBand("conc_chl_masked_ASM"));
+        assertTrue(glcmProduct.containsBand("conc_chl_masked_Energy"));
+        assertTrue(glcmProduct.containsBand("conc_chl_masked_MAX"));
+        assertTrue(glcmProduct.containsBand("conc_chl_masked_Entropy"));
+        assertTrue(glcmProduct.containsBand("conc_chl_masked_GLCMMean"));
+        assertTrue(glcmProduct.containsBand("conc_chl_masked_GLCMVariance"));
+        assertTrue(glcmProduct.containsBand("conc_chl_masked_GLCMCorrelation"));
 
         Band concChlContrastBand = glcmProduct.getBand("conc_chl_Contrast");
         Raster concChlContrastData = concChlContrastBand.getSourceImage().getData();

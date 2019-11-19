@@ -21,11 +21,11 @@ import org.esa.snap.core.dataop.dem.ElevationModelDescriptor;
 import org.esa.snap.core.dataop.dem.ElevationModelRegistry;
 import org.esa.snap.core.dataop.resamp.ResamplingFactory;
 import org.esa.snap.core.util.SystemUtils;
+import org.esa.snap.test.LongTestRunner;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
-/**
- * Created by lveci on 3/31/2017.
- */
+@RunWith(LongTestRunner.class)
 public class TestElevations {
 
     private static final GeoPos toronto = new GeoPos(43.6532, -79.3832);

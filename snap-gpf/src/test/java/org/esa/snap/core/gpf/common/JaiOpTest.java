@@ -16,7 +16,6 @@
 
 package org.esa.snap.core.gpf.common;
 
-import junit.framework.TestCase;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
@@ -24,6 +23,8 @@ import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.util.jai.SingleBandedSampleModel;
+import org.junit.Assert;
+import org.junit.Test;
 
 import javax.media.jai.Interpolation;
 import javax.media.jai.JAI;
@@ -43,18 +44,26 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.HashMap;
 
-public class JaiOpTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+
+public class JaiOpTest {
+    @Test
     public void testNoSourceGiven() {
         final JaiOp op = new JaiOp();
 
         try {
             op.getTargetProduct();
-            fail("OperatorException expected");
+            Assert.fail("OperatorException expected");
         } catch (OperatorException e) {
             // ok
         }
     }
 
+    @Test
     public void testNoJaiOpGiven() {
 
         final Product sourceProduct = createSourceProduct();
@@ -64,13 +73,14 @@ public class JaiOpTest extends TestCase {
 
         try {
             op.getTargetProduct();
-            fail("OperatorException expected");
+            Assert.fail("OperatorException expected");
         } catch (OperatorException e) {
             // ok
         }
     }
 
     // uses JAI "scale" to create a higher resolution version of a product
+    @Test
     public void testGeometricOperation() {
 
         final Product sourceProduct = createSourceProduct();
@@ -117,6 +127,7 @@ public class JaiOpTest extends TestCase {
     }
 
     // uses JAI "rescale" to apply a linear transformation to sample value
+    @Test
     public void testSampleOperation() {
 
         final Product sourceProduct = createSourceProduct();
@@ -186,6 +197,7 @@ public class JaiOpTest extends TestCase {
      * Not actually a unit-test, its just a code snippet allowing
      * to explore API specification and object state of a JAI RenderedOp.
      */
+    @Test
     public void testJaiOperationIntrospection() {
         final BufferedImage sourceImage = new BufferedImage(16, 16, BufferedImage.TYPE_4BYTE_ABGR);
 
@@ -244,6 +256,7 @@ public class JaiOpTest extends TestCase {
      * Not actually a unit-test, its just a code snippet allowing
      * to explore API specification and object state of a JAI RenderedOp.
      */
+    @Test
     public void testJaiOperationParameterChange() {
         final BufferedImage sourceImage = new BufferedImage(16, 16, BufferedImage.TYPE_4BYTE_ABGR);
 
@@ -285,6 +298,7 @@ public class JaiOpTest extends TestCase {
      * Not actually a unit-test, its just a code snippet allowing
      * to explore API specification and object state of a JAI RenderedOp.
      */
+    @Test
     public void testJaiOperationParameterChangeInDAG() {
         final BufferedImage sourceImage = new BufferedImage(16, 16, BufferedImage.TYPE_4BYTE_ABGR);
 

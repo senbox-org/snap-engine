@@ -18,14 +18,17 @@ package org.esa.snap.dataio.geotiff;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.test.LongTestRunner;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import javax.imageio.stream.FileCacheImageInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 
 /**
@@ -33,8 +36,8 @@ import static org.junit.Assert.*;
  *
  * @author Serge Stankovic
  */
-
-public class BigTiffReaderTest {
+@RunWith(LongTestRunner.class)
+public class TiffReaderTest {
 
     @Test
     public void testReadImageFile() throws IOException {
