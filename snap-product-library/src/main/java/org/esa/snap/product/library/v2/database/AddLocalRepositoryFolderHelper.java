@@ -13,11 +13,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
-import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
@@ -32,7 +29,10 @@ public class AddLocalRepositoryFolderHelper {
 
     private static final Logger logger = Logger.getLogger(AddLocalRepositoryFolderHelper.class.getName());
 
-    public AddLocalRepositoryFolderHelper() {
+    protected final AllLocalFolderProductsRepository allLocalFolderProductsRepository;
+
+    public AddLocalRepositoryFolderHelper(AllLocalFolderProductsRepository allLocalFolderProductsRepository) {
+        this.allLocalFolderProductsRepository = allLocalFolderProductsRepository;
     }
 
     protected void finishSavingProduct(SaveProductData saveProductData) {
@@ -54,17 +54,7 @@ public class AddLocalRepositoryFolderHelper {
         List<SaveProductData> savedProducts = null;
         if (Files.exists(localRepositoryFolderPath)) {
             // the local repository folder exists on the disk
-            List<LocalProductMetadata> existingLocalRepositoryProducts;
-            try (Connection connection = H2DatabaseAccessor.getConnection()) {
-                try (Statement statement = connection.createStatement()) {
-                    Short localRepositoryId = ProductLibraryDAL.loadLocalRepositoryId(localRepositoryFolderPath, statement);
-                    if (localRepositoryId == null) {
-                        existingLocalRepositoryProducts = Collections.emptyList();
-                    } else {
-                        existingLocalRepositoryProducts = ProductLibraryDAL.loadProductRelativePaths(localRepositoryId.shortValue(), statement);
-                    }
-                }
-            }
+            List<LocalProductMetadata> existingLocalRepositoryProducts = this.allLocalFolderProductsRepository.loadRepositoryProductsMetadata(localRepositoryFolderPath);
             savedProducts = saveProductsFromFolder(localRepositoryFolderPath, existingLocalRepositoryProducts);
         } else {
             if (logger.isLoggable(Level.FINE)) {
@@ -150,7 +140,7 @@ public class AddLocalRepositoryFolderHelper {
 //                            logger.log(Level.SEVERE, "Failed to create the quick look image for product '" + product.getName() + "'.", exception);
 //                        }
 
-                saveProductData = ProductLibraryDAL.saveProduct(product, quickLookImage, polygon2D, productPath, localRepositoryFolderPath);
+                saveProductData = this.allLocalFolderProductsRepository.saveProduct(product, quickLookImage, polygon2D, productPath, localRepositoryFolderPath);
             } finally {
                 product.dispose();
             }

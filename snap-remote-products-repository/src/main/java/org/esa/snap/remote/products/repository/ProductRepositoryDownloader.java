@@ -13,7 +13,7 @@ public interface ProductRepositoryDownloader {
 
     public String getRepositoryId();
 
-    public Path download(RepositoryProduct product, Credentials credentials, Path targetFolderPath, ProgressListener progressListener) throws InterruptedException, IOException;
+    public Path download(RepositoryProduct product, Credentials credentials, Path targetFolderPath, ProgressListener progressListener) throws Exception;
 
     public void cancel();
 }

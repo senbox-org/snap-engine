@@ -2,9 +2,11 @@ package org.esa.snap.remote.products.repository;
 
 import org.esa.snap.remote.products.repository.tao.TAORemoteRepositoryProvider;
 import ro.cs.tao.datasource.DataSource;
+import ro.cs.tao.datasource.DataSourceManager;
 import ro.cs.tao.spi.ServiceRegistry;
 import ro.cs.tao.spi.ServiceRegistryManager;
 
+import javax.xml.crypto.Data;
 import java.util.Set;
 
 /**
@@ -13,8 +15,7 @@ import java.util.Set;
 public class RemoteRepositoriesManager {
 
     public static RemoteProductsRepositoryProvider[] getRemoteProductsRepositoryProviders() {
-        ServiceRegistry<DataSource> registry = ServiceRegistryManager.getInstance().getServiceRegistry(DataSource.class);
-        Set<DataSource> services = registry.getServices();
+        Set<DataSource> services = DataSourceManager.getInstance().getRegisteredDataSources();
         RemoteProductsRepositoryProvider[] remoteRepositoryProductProviders = new RemoteProductsRepositoryProvider[services.size()];
         int index = 0;
         for (DataSource dataSource : services) {

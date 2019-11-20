@@ -1,4 +1,4 @@
-package org.esa.snap.product.library.v2;
+package org.esa.snap.product.library.v2.database;
 
 import org.esa.snap.remote.products.repository.Attribute;
 

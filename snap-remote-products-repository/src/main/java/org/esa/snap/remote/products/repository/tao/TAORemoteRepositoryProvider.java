@@ -3,14 +3,17 @@ package org.esa.snap.remote.products.repository.tao;
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.auth.Credentials;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.esa.snap.remote.products.repository.Polygon2D;
 import org.esa.snap.remote.products.repository.ProductRepositoryDownloader;
-import org.esa.snap.remote.products.repository.QueryFilter;
+import org.esa.snap.remote.products.repository.RepositoryQueryParameter;
 import org.esa.snap.remote.products.repository.RemoteProductsRepositoryProvider;
 import org.esa.snap.remote.products.repository.RepositoryProduct;
 import org.esa.snap.remote.products.repository.ThreadStatus;
+import org.esa.snap.remote.products.repository.listener.DownloadProductProgressListener;
 import org.esa.snap.remote.products.repository.listener.ProductListDownloaderListener;
+import org.esa.snap.remote.products.repository.listener.ProgressListener;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Polygon;
@@ -24,6 +27,7 @@ import ro.cs.tao.datasource.param.DataSourceParameter;
 import ro.cs.tao.datasource.param.ParameterName;
 import ro.cs.tao.datasource.param.QueryParameter;
 import ro.cs.tao.datasource.remote.DownloadStrategy;
+import ro.cs.tao.datasource.remote.FetchMode;
 import ro.cs.tao.eodata.EOProduct;
 import ro.cs.tao.utils.HttpMethod;
 import ro.cs.tao.utils.NetUtils;
@@ -34,12 +38,15 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * Created by jcoravu on 28/8/2019.
@@ -48,13 +55,17 @@ public class TAORemoteRepositoryProvider implements RemoteProductsRepositoryProv
 
     private final DataSource dataSource;
 
+    private final Map<RepositoryProduct, DownloadStrategy> downloadingProducts;
+
     public TAORemoteRepositoryProvider(DataSource dataSource) {
         this.dataSource = dataSource;
+
+        this.downloadingProducts = new HashMap<>();
     }
 
     @Override
     public String getRepositoryName() {
-        return getRepositoryId();
+        return this.dataSource.defaultId();
     }
 
     @Override
@@ -73,16 +84,11 @@ public class TAORemoteRepositoryProvider implements RemoteProductsRepositoryProv
     }
 
     @Override
-    public String getRepositoryId() {
-        return this.dataSource.defaultId();
-    }
-
-    @Override
-    public List<QueryFilter> getMissionParameters(String mission) {
+    public List<RepositoryQueryParameter> getMissionParameters(String mission) {
         Map<String, Map<ParameterName, DataSourceParameter>> supportedParameters = this.dataSource.getSupportedParameters();
         Map<ParameterName, DataSourceParameter> sensorParameters = supportedParameters.get(mission);
         Iterator<Map.Entry<ParameterName, DataSourceParameter>> it = sensorParameters.entrySet().iterator();
-        List<QueryFilter> parameters = new ArrayList<QueryFilter>(sensorParameters.size());
+        List<RepositoryQueryParameter> parameters = new ArrayList<RepositoryQueryParameter>(sensorParameters.size());
         while (it.hasNext()) {
             Map.Entry<ParameterName, DataSourceParameter> entry = it.next();
             DataSourceParameter param = entry.getValue();
@@ -100,7 +106,7 @@ public class TAORemoteRepositoryProvider implements RemoteProductsRepositoryProv
                     required = true;
                 }
             }
-            QueryFilter queryParameter = new QueryFilter(param.getName(), type, param.getLabel(), param.getDefaultValue(), required, param.getValueSet());
+            RepositoryQueryParameter queryParameter = new RepositoryQueryParameter(param.getName(), type, param.getLabel(), param.getDefaultValue(), required, param.getValueSet());
             parameters.add(queryParameter);
         }
         return parameters;
@@ -180,7 +186,7 @@ public class TAORemoteRepositoryProvider implements RemoteProductsRepositoryProv
 
             WKTReader wktReader = new WKTReader();
             productList = new ArrayList<>();
-            for (int pageNumber=1; pageNumber<=totalPageNumber && productList.size() < totalProductCount; pageNumber++) {
+            for (int pageNumber = 1; pageNumber <= totalPageNumber && productList.size() < totalProductCount; pageNumber++) {
                 query.setPageNumber(pageNumber);
 
                 ThreadStatus.checkCancelled(thread);
@@ -216,13 +222,59 @@ public class TAORemoteRepositoryProvider implements RemoteProductsRepositoryProv
     }
 
     @Override
-    public ProductRepositoryDownloader buildProductDownloader(String mission) {
-        ProductFetchStrategy productFetchStrategy = this.dataSource.getProductFetchStrategy(mission);
-        if (productFetchStrategy == null) {
-            throw new NullPointerException("The download strategy is null for mission '" + mission + "'.");
+    public void cancelDownloadProduct(RepositoryProduct repositoryProduct) {
+        DownloadStrategy downloadStrategy;
+        synchronized (this.downloadingProducts) {
+            downloadStrategy = this.downloadingProducts.remove(repositoryProduct);
         }
-        DownloadStrategy downloadStrategy = (DownloadStrategy)productFetchStrategy.clone();
-        return new TAOProductRepositoryDownloader(mission, getRepositoryId(), downloadStrategy);
+        if (downloadStrategy != null) {
+            downloadStrategy.cancel();
+        }
+    }
+
+    @Override
+    public Path downloadProduct(RepositoryProduct repositoryProduct, Credentials credentials, Path targetFolderPath, ProgressListener progressListener)
+            throws Exception {
+
+        DownloadStrategy downloadStrategy = null;
+        try {
+            synchronized (this.downloadingProducts) {
+                downloadStrategy = this.downloadingProducts.get(repositoryProduct);
+                if (downloadStrategy == null) {
+                    DataSource newDataSource = this.dataSource.getClass().newInstance();
+                    newDataSource.setCredentials(credentials.getUserPrincipal().getName(), credentials.getPassword());
+                    ProductFetchStrategy productFetchStrategy = newDataSource.getProductFetchStrategy(repositoryProduct.getMission());
+                    if (productFetchStrategy == null) {
+                        throw new NullPointerException("The download strategy is null for mission '" + repositoryProduct.getMission() + "'.");
+                    }
+                    downloadStrategy = (DownloadStrategy) productFetchStrategy.clone();
+                    this.downloadingProducts.put(repositoryProduct, downloadStrategy);
+                } else {
+                    throw new IllegalArgumentException("The product '" + repositoryProduct.getName()+"' is already downloading.");
+                }
+            }
+
+            Properties properties = new Properties();
+            properties.put("auto.uncompress", "true");
+            downloadStrategy.addProperties(properties);
+            downloadStrategy.setCredentials(new UsernamePasswordCredentials(credentials.getUserPrincipal().getName(), credentials.getPassword()));
+            downloadStrategy.setDestination(targetFolderPath.toString());
+            downloadStrategy.setFetchMode(FetchMode.OVERWRITE);
+            downloadStrategy.setProgressListener(new DownloadProductProgressListener(progressListener));
+
+            try {
+                EOProduct product = ((TAORepositoryProduct)repositoryProduct).getProduct();
+                return downloadStrategy.fetch(product);
+            } catch (ro.cs.tao.datasource.InterruptedException exception) {
+                throw new java.lang.InterruptedException();
+            }
+        } finally {
+            if (downloadStrategy != null) {
+                synchronized (this.downloadingProducts) {
+                    this.downloadingProducts.remove(repositoryProduct);
+                }
+            }
+        }
     }
 
     private DataQuery buildDataQuery(String username, String password, String mission, Map<String, Object> parametersValues) throws InstantiationException, IllegalAccessException {

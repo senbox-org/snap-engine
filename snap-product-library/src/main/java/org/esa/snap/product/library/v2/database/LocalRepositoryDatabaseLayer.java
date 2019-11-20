@@ -6,8 +6,6 @@ import org.locationtech.jts.geom.Polygon;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.engine_utilities.util.FileIOUtils;
-import org.esa.snap.product.library.v2.AllLocalFolderProductsRepository;
-import org.esa.snap.product.library.v2.AttributeFilter;
 import org.esa.snap.remote.products.repository.Attribute;
 import org.esa.snap.remote.products.repository.Polygon2D;
 import org.esa.snap.remote.products.repository.RepositoryProduct;
@@ -41,9 +39,9 @@ import java.util.Set;
 /**
  * Created by jcoravu on 3/9/2019.
  */
-public class ProductLibraryDAL {
+class LocalRepositoryDatabaseLayer {
 
-    private ProductLibraryDAL() {
+    private LocalRepositoryDatabaseLayer() {
     }
 
     public static Short loadLocalRepositoryId(Path localRepositoryFolderPath, Statement statement) throws SQLException {
@@ -161,7 +159,18 @@ public class ProductLibraryDAL {
                         throw new NullPointerException("The end date is null.");
                     }
                 } else if (parameterName.equalsIgnoreCase(AllLocalFolderProductsRepository.SENSOR_TYPE_PARAMETER)) {
-                    sensorType = (SensorType)parameterValue;
+                    String selectedSensorType = (String)parameterValue;
+                    if (selectedSensorType != null) {
+                        SensorType sensorTypes[] = SensorType.values();
+                        for (int i=0; i<sensorTypes.length && sensorType == null; i++) {
+                            if (selectedSensorType.equals(sensorTypes[i].getName())) {
+                                sensorType = sensorTypes[i];
+                            }
+                        }
+                        if (sensorType == null) {
+                            throw new IllegalStateException("Unknown sensor type '" + selectedSensorType+"'.");
+                        }
+                    }
                 } else if (parameterName.equalsIgnoreCase(AllLocalFolderProductsRepository.ATTRIBUTES_PARAMETER)) {
                     attributes = (List<AttributeFilter>)parameterValue;
                 } else {
