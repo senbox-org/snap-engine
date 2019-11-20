@@ -206,6 +206,10 @@ public class ProductIO {
         return readProductImpl(file, null);
     }
 
+    public static Product readProduct(File file, ProductSubsetDef subsetDef) throws IOException {
+        return readProductImpl(file, subsetDef);
+    }
+
     private static Product readProductImpl(File file, ProductSubsetDef subsetDef) throws IOException {
         Guardian.assertNotNull("file", file);
         if (!file.exists()) {
