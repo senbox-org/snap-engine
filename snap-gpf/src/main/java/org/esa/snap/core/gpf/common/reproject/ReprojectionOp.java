@@ -226,6 +226,7 @@ public class ReprojectionOp extends Operator {
                                                           "Please consider resampling it so that all rasters have the same size.");
             }
         }
+        validateSourceProduct();
         validateCrsParameters();
         validateResamplingParameter();
         validateReferencingParameters();
@@ -235,8 +236,9 @@ public class ReprojectionOp extends Operator {
         /*
         * 1. Compute the target CRS
         */
+        GeoCoding sceneGeoCoding = sourceProduct.getSceneGeoCoding();
         final GeoPos centerGeoPos =
-                getCenterGeoPos(sourceProduct.getSceneGeoCoding(), sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
+                getCenterGeoPos(sceneGeoCoding, sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
         CoordinateReferenceSystem targetCrs = createTargetCRS(centerGeoPos);
         /*
         * 2. Compute the target geometry
@@ -617,6 +619,13 @@ public class ReprojectionOp extends Operator {
         }
         // force longitude==x-axis and latitude==y-axis
         return CRS.decode(crsCode, true);
+    }
+
+    private void validateSourceProduct() {
+        GeoCoding sceneGeoCoding = sourceProduct.getSceneGeoCoding();
+        if(sceneGeoCoding == null) {
+            throw new OperatorException("The source product does not provide geo-information and cannot be reprojected");
+        }
     }
 
     protected void validateCrsParameters() {
