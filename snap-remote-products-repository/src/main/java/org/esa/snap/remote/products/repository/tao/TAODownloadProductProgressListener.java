@@ -1,13 +1,15 @@
-package org.esa.snap.remote.products.repository.listener;
+package org.esa.snap.remote.products.repository.tao;
+
+import org.esa.snap.remote.products.repository.listener.ProgressListener;
 
 /**
  * Created by jcoravu on 19/8/2019.
  */
-public class DownloadProductProgressListener implements ro.cs.tao.ProgressListener {
+public class TAODownloadProductProgressListener implements ro.cs.tao.ProgressListener {
 
     private final ProgressListener progressListener;
 
-    public DownloadProductProgressListener(ProgressListener progressListener) {
+    public TAODownloadProductProgressListener(ProgressListener progressListener) {
         this.progressListener = progressListener;
     }
 

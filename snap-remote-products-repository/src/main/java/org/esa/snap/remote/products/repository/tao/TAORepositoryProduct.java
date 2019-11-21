@@ -6,38 +6,38 @@ import org.esa.snap.remote.products.repository.PixelType;
 import org.esa.snap.remote.products.repository.Polygon2D;
 import org.esa.snap.remote.products.repository.RepositoryProduct;
 import org.esa.snap.remote.products.repository.SensorType;
-import ro.cs.tao.eodata.EOProduct;
 
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 /**
  * Created by jcoravu on 28/8/2019.
  */
-class TAORepositoryProduct implements RepositoryProduct {
+public class TAORepositoryProduct implements RepositoryProduct {
 
-    private final EOProduct product;
-    private final List<Attribute> attributes;
+    private final String name;
     private final String mission;
     private final String downloadURL;
     private final Polygon2D polygon;
+    private final Date acquisitionDate;
+    private final long approximateSize;
 
+    private List<Attribute> attributes;
+    private String entryPoint;
     private BufferedImage quickLookImage;
+    private SensorType sensorType;
+    private DataFormatType dataFormatType;
+    private PixelType pixelType;
+    private String downloadQuickLookImageURL;
 
-    TAORepositoryProduct(EOProduct product, String mission, Polygon2D polygon) {
-        this.product = product;
+    TAORepositoryProduct(String name, String downloadURL, String mission, Polygon2D polygon, Date acquisitionDate, long approximateSize) {
+        this.name = name;
         this.mission = mission;
-        this.downloadURL = product.getLocation();
+        this.downloadURL = downloadURL;
         this.polygon = polygon;
-
-        List<ro.cs.tao.eodata.Attribute> remoteAttributes = product.getAttributes();
-        this.attributes = new ArrayList<>(remoteAttributes.size());
-        for (int i=0; i<remoteAttributes.size(); i++) {
-            ro.cs.tao.eodata.Attribute remoteAttribute = remoteAttributes.get(i);
-            this.attributes.add(new Attribute(remoteAttribute.getName(), remoteAttribute.getValue()));
-        }
+        this.acquisitionDate = acquisitionDate;
+        this.approximateSize = approximateSize;
     }
 
     @Override
@@ -57,17 +57,17 @@ class TAORepositoryProduct implements RepositoryProduct {
 
     @Override
     public String getName() {
-        return this.product.getName();
+        return this.name;
     }
 
     @Override
     public long getApproximateSize() {
-        return this.product.getApproximateSize();
+        return this.approximateSize;
     }
 
     @Override
     public String getDownloadQuickLookImageURL() {
-        return this.product.getQuicklookLocation();
+        return this.downloadQuickLookImageURL;
     }
 
     @Override
@@ -77,12 +77,12 @@ class TAORepositoryProduct implements RepositoryProduct {
 
     @Override
     public Date getAcquisitionDate() {
-        return this.product.getAcquisitionDate();
+        return this.acquisitionDate;
     }
 
     @Override
     public BufferedImage getQuickLookImage() {
-        return quickLookImage;
+        return this.quickLookImage;
     }
 
     @Override
@@ -92,85 +92,45 @@ class TAORepositoryProduct implements RepositoryProduct {
 
     @Override
     public PixelType getPixelType() {
-        return convertToPixelType(this.product.getPixelType());
+        return this.pixelType;
     }
 
     @Override
     public DataFormatType getDataFormatType() {
-        return convertToDataFormatType(this.product.getFormatType());
+        return this.dataFormatType;
     }
 
     @Override
     public SensorType getSensorType() {
-        return convertToSensorType(this.product.getSensorType());
+        return this.sensorType;
     }
 
     @Override
     public String getEntryPoint() {
-        return this.product.getEntryPoint();
+        return this.entryPoint;
     }
 
-    EOProduct getProduct() {
-        return this.product;
+    void setEntryPoint(String entryPoint) {
+        this.entryPoint = entryPoint;
     }
 
-    private static DataFormatType convertToDataFormatType(ro.cs.tao.eodata.enums.DataFormat dataFormat) {
-        if (dataFormat == ro.cs.tao.eodata.enums.DataFormat.RASTER) {
-            return DataFormatType.RASTER;
-        }
-        if (dataFormat == ro.cs.tao.eodata.enums.DataFormat.VECTOR) {
-            return DataFormatType.VECTOR;
-        }
-        if (dataFormat == ro.cs.tao.eodata.enums.DataFormat.OTHER) {
-            return DataFormatType.OTHER;
-        }
-        throw new IllegalArgumentException("Unknown data format: "+ dataFormat);
+    void setDownloadQuickLookImageURL(String downloadQuickLookImageURL) {
+        this.downloadQuickLookImageURL = downloadQuickLookImageURL;
     }
 
-    private static SensorType convertToSensorType(ro.cs.tao.eodata.enums.SensorType sensorType) {
-        if (sensorType == ro.cs.tao.eodata.enums.SensorType.OPTICAL) {
-            return SensorType.OPTICAL;
-        }
-        if (sensorType == ro.cs.tao.eodata.enums.SensorType.RADAR) {
-            return SensorType.RADAR;
-        }
-        if (sensorType == ro.cs.tao.eodata.enums.SensorType.ALTIMETRIC) {
-            return SensorType.ALTIMETRIC;
-        }
-        if (sensorType == ro.cs.tao.eodata.enums.SensorType.ATMOSPHERIC) {
-            return SensorType.ATMOSPHERIC;
-        }
-        if (sensorType == ro.cs.tao.eodata.enums.SensorType.UNKNOWN) {
-            return SensorType.UNKNOWN;
-        }
-        throw new IllegalArgumentException("Unknown sensor type: "+ sensorType);
+    void setAttributes(List<Attribute> attributes) {
+        this.attributes = attributes;
     }
 
-    private static PixelType convertToPixelType(ro.cs.tao.eodata.enums.PixelType pixelType) {
-        if (pixelType == ro.cs.tao.eodata.enums.PixelType.UINT8) {
-            return PixelType.UINT8;
-        }
-        if (pixelType == ro.cs.tao.eodata.enums.PixelType.UINT8) {
-            return PixelType.UINT8;
-        }
-        if (pixelType == ro.cs.tao.eodata.enums.PixelType.INT8) {
-            return PixelType.INT8;
-        }
-        if (pixelType == ro.cs.tao.eodata.enums.PixelType.UINT16) {
-            return PixelType.UINT16;
-        }
-        if (pixelType == ro.cs.tao.eodata.enums.PixelType.UINT32) {
-            return PixelType.UINT32;
-        }
-        if (pixelType == ro.cs.tao.eodata.enums.PixelType.INT32) {
-            return PixelType.INT32;
-        }
-        if (pixelType == ro.cs.tao.eodata.enums.PixelType.FLOAT32) {
-            return PixelType.FLOAT32;
-        }
-        if (pixelType == ro.cs.tao.eodata.enums.PixelType.FLOAT64) {
-            return PixelType.FLOAT64;
-        }
-        throw new IllegalArgumentException("Unknown pixel type: "+ pixelType);
+    void setDataFormatType(DataFormatType dataFormatType) {
+        this.dataFormatType = dataFormatType;
+    }
+
+    void setPixelType(PixelType pixelType) {
+        this.pixelType = pixelType;
+    }
+
+    void setSensorType(SensorType sensorType) {
+        this.sensorType = sensorType;
     }
 }

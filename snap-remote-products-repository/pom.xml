@@ -84,6 +84,7 @@
                         <publicPackage>org.esa.snap.remote.products.repository</publicPackage>
                         <publicPackage>org.esa.snap.remote.products.repository.listener.*</publicPackage>
                         <publicPackage>org.apache.http.auth.*</publicPackage>
+                        <publicPackage>org.codehaus.stax2.*</publicPackage>
                         <publicPackage>javax.xml.bind.*</publicPackage>
                     </publicPackages>
                 </configuration>
