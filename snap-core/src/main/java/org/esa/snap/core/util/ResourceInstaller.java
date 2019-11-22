@@ -64,7 +64,11 @@ public class ResourceInstaller {
      * @param pm            progress monitor for indicating progress
      * @see FileSystem#getPathMatcher(String)
      */
+
     public void install(String patternString, ProgressMonitor pm) throws IOException {
+        install(patternString, pm, false); }
+
+    public void install(String patternString, ProgressMonitor pm, boolean overWrite) throws IOException {
         if (!patternString.startsWith("glob:") && !patternString.startsWith("regex:")) {
             patternString = "regex:" + patternString;
         }
@@ -73,13 +77,13 @@ public class ResourceInstaller {
         try {
             Collection<Path> resources = collectResources(patternString);
             pm.worked(20);
-            copyResources(resources, new SubProgressMonitor(pm, 80));
+            copyResources(resources, new SubProgressMonitor(pm, 80), overWrite);
         } finally {
             pm.done();
         }
     }
 
-    private void copyResources(Collection<Path> resources, ProgressMonitor pm) throws IOException {
+    private void copyResources(Collection<Path> resources, ProgressMonitor pm, boolean overWrite) throws IOException {
         synchronized (ResourceInstaller.class) {
             pm.beginTask("Copying resources...", resources.size());
             try {
@@ -87,7 +91,7 @@ public class ResourceInstaller {
                     Path relFilePath = sourceBasePath.relativize(resource);
                     String relPathString = relFilePath.toString();
                     Path targetFile = targetDirPath.resolve(relPathString);
-                    if (!Files.exists(targetFile) && !Files.isDirectory(resource)) {
+                    if (((Files.exists(targetFile) && overWrite) || !Files.exists(targetFile)) && !Files.isDirectory(resource)) {
                         Path parentPath = targetFile.getParent();
                         if (parentPath == null) {
                             throw new IOException("Could not retrieve the parent directory of '" + targetFile.toString() + "'.");
