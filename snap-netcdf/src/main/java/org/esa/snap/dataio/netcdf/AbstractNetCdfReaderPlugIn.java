@@ -56,8 +56,8 @@ public abstract class AbstractNetCdfReaderPlugIn implements ProductReaderPlugIn 
     public final DecodeQualification getDecodeQualification(Object input) {
         if (input instanceof String || input instanceof File) {
             final String ext = FileUtils.getExtension((File) input);
-            if (ext!=null){
-                if(!ext.equalsIgnoreCase(NETCDF_FILE_EXTENSION) && !ext.equalsIgnoreCase(ZIP_FILE_EXTENSION)) {
+            if (ext != null) {
+                if (!ext.equalsIgnoreCase(NETCDF_FILE_EXTENSION) && !ext.equalsIgnoreCase(ZIP_FILE_EXTENSION)) {
                     return DecodeQualification.UNABLE;
                 }
             }
