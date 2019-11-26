@@ -514,39 +514,39 @@ public final class DimapHeaderWriter extends XmlWriter {
             writeGeoCoding(product.getSceneGeoCoding(), indent, -1);
         } else {
             final Band[] bands = product.getBands();
-            for (int i = 0; i < bands.length; i++) {
-                final Band band = bands[i];
-                writeGeoCoding(band.getGeoCoding(), indent, i);
+            for (int bandIndex = 0; bandIndex < bands.length; bandIndex++) {
+                final Band band = bands[bandIndex];
+                writeGeoCoding(band.getGeoCoding(), indent, bandIndex);
             }
         }
     }
 
-    private void writeGeoCoding(final GeoCoding geoCoding, final int indent, final int index) {
+    private void writeGeoCoding(final GeoCoding geoCoding, final int indent, final int bandIndex) {
         if (geoCoding != null) {
             final DimapPersistable persistable = DimapPersistence.getPersistable(geoCoding);
             if (persistable != null) {
                 final String[] geopositionTags = createTags(indent, DimapProductConstants.TAG_GEOPOSITION);
                 println(geopositionTags[0]);
-                writeBandIndexIf(index >= 0, index, indent + 1);
+                writeBandIndexIf(bandIndex >= 0, bandIndex, indent + 1);
                 printElement(indent + 1, persistable.createXmlFromObject(geoCoding));
                 println(geopositionTags[1]);
             } else if (geoCoding instanceof TiePointGeoCoding) {
-                writeGeoCoding((TiePointGeoCoding) geoCoding, indent, index);
+                writeGeoCoding((TiePointGeoCoding) geoCoding, indent, bandIndex);
             } else if (geoCoding instanceof MapGeoCoding) {
                 writeGeoCoding((MapGeoCoding) geoCoding, indent);
             } else if (geoCoding instanceof BasicPixelGeoCoding) {
-                writeGeoCoding((BasicPixelGeoCoding) geoCoding, indent, index);
+                writeGeoCoding((BasicPixelGeoCoding) geoCoding, indent, bandIndex);
             } else if (geoCoding instanceof FXYGeoCoding) {
-                writeGeoCoding((FXYGeoCoding) geoCoding, indent, index);
+                writeGeoCoding((FXYGeoCoding) geoCoding, indent, bandIndex);
             } else if (geoCoding instanceof GcpGeoCoding) {
-                writeGeoCoding((GcpGeoCoding) geoCoding, indent, index);
+                writeGeoCoding((GcpGeoCoding) geoCoding, indent, bandIndex);
             } else if (geoCoding instanceof CrsGeoCoding) {
-                writeGeoCoding((CrsGeoCoding) geoCoding, indent, index);
+                writeGeoCoding((CrsGeoCoding) geoCoding, indent, bandIndex);
             }
         }
     }
 
-    private void writeGeoCoding(final CrsGeoCoding crsGeoCoding, int indent, int index) {
+    private void writeGeoCoding(final CrsGeoCoding crsGeoCoding, int indent, int bandIndex) {
         final CoordinateReferenceSystem crs = crsGeoCoding.getMapCRS();
         final double[] matrix = new double[6];
         final MathTransform transform = crsGeoCoding.getImageToMapTransform();
@@ -569,13 +569,13 @@ public final class DimapHeaderWriter extends XmlWriter {
         println(crsTags[1]);
         final String[] geopositionTags = createTags(indent, DimapProductConstants.TAG_GEOPOSITION);
         println(geopositionTags[0]);
-        writeBandIndexIf(index >= 0, index, indent + 1);
+        writeBandIndexIf(bandIndex >= 0, bandIndex, indent + 1);
         printLine(indent + 1, DimapProductConstants.TAG_IMAGE_TO_MODEL_TRANSFORM, StringUtils.arrayToCsv(matrix));
         println(geopositionTags[1]);
 
     }
 
-    private void writeGeoCoding(final GcpGeoCoding gcpPointGeoCoding, int indent, int index) {
+    private void writeGeoCoding(final GcpGeoCoding gcpPointGeoCoding, int indent, int bandIndex) {
         final String[] crsTags = createTags(indent, DimapProductConstants.TAG_COORDINATE_REFERENCE_SYSTEM);
         println(crsTags[0]);
         writeDatum(gcpPointGeoCoding.getDatum(), indent + 1);
@@ -589,14 +589,14 @@ public final class DimapHeaderWriter extends XmlWriter {
         if (!(originalGeoCoding == null || originalGeoCoding instanceof GcpGeoCoding)) {
             final String[] ogcTags = createTags(indent + 2, DimapProductConstants.TAG_ORIGINAL_GEOCODING);
             println(ogcTags[0]);
-            writeGeoCoding(originalGeoCoding, indent + 3, index);
+            writeGeoCoding(originalGeoCoding, indent + 3, bandIndex);
             println(ogcTags[1]);
         }
         println(gcpTags[1]);
         println(posTags[1]);
     }
 
-    private void writeGeoCoding(final TiePointGeoCoding tiePointGeoCoding, final int indent, final int index) {
+    private void writeGeoCoding(final TiePointGeoCoding tiePointGeoCoding, final int indent, final int bandIndex) {
         final String[] crsTags = createTags(indent, DimapProductConstants.TAG_COORDINATE_REFERENCE_SYSTEM);
         println(crsTags[0]);
         writeDatum(tiePointGeoCoding.getDatum(), indent + 1);
@@ -608,7 +608,7 @@ public final class DimapHeaderWriter extends XmlWriter {
         }
         final String[] geopositionTags = createTags(indent, DimapProductConstants.TAG_GEOPOSITION);
         println(geopositionTags[0]);
-        writeBandIndexIf(index >= 0, index, indent + 1);
+        writeBandIndexIf(bandIndex >= 0, bandIndex, indent + 1);
         final String[] pointsTags = createTags(indent + 1, DimapProductConstants.TAG_GEOPOSITION_POINTS);
         println(pointsTags[0]);
         printLine(indent + 2, DimapProductConstants.TAG_TIE_POINT_GRID_NAME_LAT, latGridName);
@@ -752,7 +752,7 @@ public final class DimapHeaderWriter extends XmlWriter {
         println(crsTags[1]);
     }
 
-    private void writeGeoCoding(final BasicPixelGeoCoding pixelGeoCoding, final int indent, final int index) {
+    private void writeGeoCoding(final BasicPixelGeoCoding pixelGeoCoding, final int indent, final int bandIndex) {
         final String latBandName = pixelGeoCoding.getLatBand().getName();
         final String lonBandName = pixelGeoCoding.getLonBand().getName();
         final String validMask = pixelGeoCoding.getValidMask();
@@ -771,15 +771,15 @@ public final class DimapHeaderWriter extends XmlWriter {
             final String[] pixelPosEstimatorTags = createTags(indent + 1,
                                                               DimapProductConstants.TAG_PIXEL_POSITION_ESTIMATOR);
             println(pixelPosEstimatorTags[0]);
-            writeGeoCoding(posEstimator, indent + 2, index);
+            writeGeoCoding(posEstimator, indent + 2, bandIndex);
             println(pixelPosEstimatorTags[1]);
         }
         println(geopositionTags[1]);
     }
 
-    private void writeGeoCoding(final FXYGeoCoding fxyGeoCoding, int indent, final int index) {
+    private void writeGeoCoding(final FXYGeoCoding fxyGeoCoding, int indent, final int bandIndex) {
 
-        if (index <= 0) {
+        if (bandIndex <= 0) {
             indent = writeFXYCoordRefSystem(fxyGeoCoding, indent);
         }
 
@@ -822,7 +822,7 @@ public final class DimapHeaderWriter extends XmlWriter {
         println(gpTags[0]);
 
         indent++;
-        writeBandIndexIf(index >= 0, index, indent);
+        writeBandIndexIf(bandIndex >= 0, bandIndex, indent);
         final String[] gpiTags = createTags(indent, DimapProductConstants.TAG_GEOPOSITION_INSERT);
         println(gpiTags[0]);
 
@@ -981,7 +981,7 @@ public final class DimapHeaderWriter extends XmlWriter {
             printLine(indent + 1, DimapProductConstants.TAG_PRODUCT_SCENE_RASTER_STOP_TIME,
                       sceneRasterStopTime.format());
         }
-        if(product.getQuicklookBandName() != null) {
+        if (product.getQuicklookBandName() != null) {
             printLine(indent + 1, DimapProductConstants.TAG_QUICKLOOK_BAND_NAME,
                       product.getQuicklookBandName());
         }
