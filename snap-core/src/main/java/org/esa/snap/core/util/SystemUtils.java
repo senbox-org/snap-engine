@@ -378,12 +378,31 @@ public class SystemUtils {
     /**
      * Initialize third party libraries of SNAP.
      *
-     * @param cls The most useful class loader.
+     * @param cls The most useful class.
      * @since BEAM 4.8
      */
     public static void init3rdPartyLibs(Class<?> cls) {
-        initJAI(cls);
+        init3rdPartyLibs(cls != null ? cls.getClassLoader() : Thread.currentThread().getContextClassLoader());
+    }
+
+    /**
+     * Initialize third party libraries of SNAP.
+     *
+     * @param cl The most useful class loader.
+     * @since SNAP 8.0
+     */
+    public static void init3rdPartyLibs(ClassLoader cl) {
+        initJAI(cl);
         initGeoTools();
+        initNetCdf();
+    }
+
+    private static void initNetCdf() {
+        // the class ucar.nc2.iosp.hdf4.H4header logs a lot of unwanted stuff at warn log level.
+        // setting log level to error
+        // see issue: https://senbox.atlassian.net/browse/SNAP-1247
+        System.setProperty("org.slf4j.simplelogger.log.ucar.nc2.iosp.hdf4.H4header", "error");
+
     }
 
     public static void initGeoTools() {
