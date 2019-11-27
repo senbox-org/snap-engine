@@ -21,9 +21,11 @@ import org.esa.snap.core.datamodel.Kernel;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.RasterDataNode;
+import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.core.util.StringUtils;
 import org.jdom.Element;
 
+import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,15 +37,16 @@ import java.util.List;
 class ConvolutionFilterBandPersistable extends RasterDataNodePersistable {
 
     @Override
-    public Object createObjectFromXml(Element element, Product product) {
+    public Object createObjectFromXml(Element element, Product product, Dimension regionRasterSize) {
         final Element filterInfo = element.getChild(DimapProductConstants.TAG_FILTER_BAND_INFO);
         final Element kernelInfo = filterInfo.getChild(DimapProductConstants.TAG_FILTER_KERNEL);
         final Kernel kernel = convertElementToKernel(kernelInfo);
         final String sourceName = filterInfo.getChildTextTrim(DimapProductConstants.TAG_FILTER_SOURCE);
         final String bandName = element.getChildTextTrim(DimapProductConstants.TAG_BAND_NAME);
         final RasterDataNode sourceNode = product.getRasterDataNode(sourceName);
+        Dimension filterBandSize = ImageUtils.computeSceneRasterSize(sourceNode.getRasterWidth(), sourceNode.getRasterHeight(), regionRasterSize);
         // todo - read iterationCount
-        final ConvolutionFilterBand cfb = new ConvolutionFilterBand(bandName, sourceNode, kernel, 1);
+        final ConvolutionFilterBand cfb = new ConvolutionFilterBand(bandName, sourceNode, filterBandSize, kernel, 1);
         cfb.setDescription(element.getChildTextTrim(DimapProductConstants.TAG_BAND_DESCRIPTION));
         cfb.setUnit(element.getChildTextTrim(DimapProductConstants.TAG_PHYSICAL_UNIT));
         cfb.setSolarFlux(Float.parseFloat(element.getChildTextTrim(DimapProductConstants.TAG_SOLAR_FLUX)));

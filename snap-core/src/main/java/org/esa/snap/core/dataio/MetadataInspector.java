@@ -36,6 +36,7 @@ public interface MetadataInspector {
 
         private boolean hasMasks;
 
+        //TODO Jean for Denisa: remove 'hasGeoCoding' and check if (geoCoding != null)
         private boolean hasGeoCoding;
 
         public Set<String> getBandList() {

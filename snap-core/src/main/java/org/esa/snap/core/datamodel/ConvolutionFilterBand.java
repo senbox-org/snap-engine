@@ -18,6 +18,7 @@ package org.esa.snap.core.datamodel;
 
 import javax.media.jai.KernelJAI;
 import javax.media.jai.operator.ConvolveDescriptor;
+import java.awt.Dimension;
 import java.awt.RenderingHints;
 import java.awt.image.RenderedImage;
 
@@ -43,6 +44,17 @@ public class ConvolutionFilterBand extends FilterBand {
         this.kernel = kernel;
         this.iterationCount = iterationCount;
     }
+
+    public ConvolutionFilterBand(String name, RasterDataNode source, Dimension filterBandSize, Kernel kernel, int iterationCount) {
+        super(name,
+                source.getGeophysicalDataType() == ProductData.TYPE_FLOAT64 ? ProductData.TYPE_FLOAT64 : ProductData.TYPE_FLOAT32,
+                filterBandSize.width,
+                filterBandSize.height,
+                source);
+        this.kernel = kernel;
+        this.iterationCount = iterationCount;
+    }
+
 
     public Kernel getKernel() {
         return kernel;

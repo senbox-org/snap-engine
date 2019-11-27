@@ -40,7 +40,7 @@ import static org.junit.Assert.assertTrue;
 
 public class TiffReadingPerformanceTest {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
 
         final URL resource = TiffReadingPerformanceTest.class.getResource("20180623_185222_ssc4d2_0024_visual.tif");
         final String filePath = resource.getFile();
@@ -49,7 +49,9 @@ public class TiffReadingPerformanceTest {
         Debug.setEnabled(true);
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        final Product product = reader.readGeoTIFFProduct(new FileImageInputStream(file), file);
+        FileImageInputStream imageInputStream = new FileImageInputStream(file);
+        GeoTiffImageReader geoTiffImageReader = new GeoTiffImageReader(imageInputStream);
+        final Product product = reader.readProduct(geoTiffImageReader, file.toPath());
         stopWatch.stopAndTrace("Opening product");
         assertNotNull(product);
 

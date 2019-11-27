@@ -22,7 +22,9 @@ import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.util.jai.SingleBandedSampleModel;
 
+import javax.media.jai.JAI;
 import javax.media.jai.PlanarImage;
+import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -53,6 +55,67 @@ import java.util.Vector;
  * @version $Revision$ $Date$
  */
 public class ImageUtils {
+
+    public static Dimension computeSceneRasterSize(int defaultSceneRasterWidth, int defaultSceneRasterHeight, Dimension regionRasterSize) {
+        if (regionRasterSize != null) {
+            if (regionRasterSize.width > defaultSceneRasterWidth) {
+                throw new IllegalArgumentException("The region width " + regionRasterSize.width + " cannot be greater than the raster width " + defaultSceneRasterWidth + ".");
+            }
+            if (regionRasterSize.height > defaultSceneRasterHeight) {
+                throw new IllegalArgumentException("The region height " + regionRasterSize.height + " cannot be greater than the raster height " + defaultSceneRasterHeight + ".");
+            }
+            return regionRasterSize;
+        }
+        return new Dimension(defaultSceneRasterWidth, defaultSceneRasterHeight);
+    }
+
+    public static int computeTileCount(int imageSize, int tileSize) {
+        int tileCount = imageSize / tileSize;
+        if (imageSize % tileSize != 0) {
+            tileCount++;
+        }
+        return tileCount;
+    }
+
+    public static int computeTileLeftX(int tileColumnIndex, int tileWidth) {
+        return tileColumnIndex * tileWidth;
+    }
+
+    public static int computeTileRightX(int tileColumnIndex, int tileWidth) {
+        return (tileColumnIndex+1) * tileWidth;
+    }
+
+    public static int computeTileTopY(int tileRowIndex, int tileHeight) {
+        return tileRowIndex * tileHeight;
+    }
+
+    public static int computeTileBottomY(int tileRowIndex, int tileHeight) {
+        return (tileRowIndex+1) * tileHeight;
+    }
+
+    public static int scaleValue(int source, int level) {
+        int size = source >> level;
+        int sizeTest = size << level;
+        if (sizeTest < source) {
+            size++;
+        }
+        return size;
+    }
+
+    public static Dimension computeTileDimensionAtResolutionLevel(Dimension tileSize, int level) {
+        return computeTileDimensionAtResolutionLevel(tileSize.width, tileSize.height, level);
+    }
+
+    public static Dimension computeTileDimensionAtResolutionLevel(int fullTileWidth, int fullTileHeight, int level) {
+        int width = scaleValue(fullTileWidth, level);
+        int height = scaleValue(fullTileHeight, level);
+        return getTileDimension(width, height);
+    }
+
+    private static Dimension getTileDimension(int width, int height) {
+        Dimension defaultSize = JAI.getDefaultTileSize();
+        return new Dimension((width < defaultSize.width) ? width : defaultSize.width, (height < defaultSize.height) ? height : defaultSize.height);
+    }
 
     /**
      * Converts the given rendered image into an image of the given {#link java.awt.image.BufferedImage} type.

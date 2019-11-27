@@ -18,6 +18,8 @@ package org.esa.snap.core.dataio.dimap.spi;
 import org.esa.snap.core.datamodel.Product;
 import org.jdom.Element;
 
+import java.awt.Dimension;
+
 /**
  * Interface to implemented by clients who know how to read objects from
  * and write object to BEAM-DIMAP XML.
@@ -28,6 +30,6 @@ import org.jdom.Element;
  * @version $Revision$ $Date$
  */
 public interface DimapPersistable {
-    Object createObjectFromXml(Element element, Product product);
+    Object createObjectFromXml(Element element, Product product, Dimension regionRasterSize);
     Element createXmlFromObject(Object object);
 }

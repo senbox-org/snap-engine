@@ -23,7 +23,9 @@ public class GeoCodingTest {
         final URL resource = getClass().getResource("nearGreenwichMeridian.tif");
         final String filePath = resource.getFile();
         final GeoTiffProductReader reader = new GeoTiffProductReader(new GeoTiffProductReaderPlugIn());
-        final Product product = reader.readGeoTIFFProduct(new FileCacheImageInputStream(resource.openStream(), null), new File(filePath));
+        FileCacheImageInputStream imageInputStream = new FileCacheImageInputStream(resource.openStream(), null);
+        GeoTiffImageReader geoTiffImageReader = new GeoTiffImageReader(imageInputStream);
+        final Product product = reader.readProduct(geoTiffImageReader, new File(filePath).toPath());
 
         final GeoCoding geoCoding = product.getSceneGeoCoding();
         final GeoPos ul = geoCoding.getGeoPos(new PixelPos(0, 0), null);

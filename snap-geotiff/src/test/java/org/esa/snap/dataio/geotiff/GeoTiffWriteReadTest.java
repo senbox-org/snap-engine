@@ -520,9 +520,14 @@ public class GeoTiffWriteReadTest {
         }
         writer.flush();
         ByteArraySeekableStream inputStream = new ByteArraySeekableStream(outputStream.toByteArray());
-        final Product product = reader.readGeoTIFFProduct(new MemoryCacheImageInputStream(inputStream), location);
-        product.setProductReader(reader);
-        return product;
+        MemoryCacheImageInputStream imageInputStream = new MemoryCacheImageInputStream(inputStream);
+        GeoTiffImageReader geoTiffImageReader = new GeoTiffImageReader(imageInputStream);
+        try {
+            final Product product = reader.readProduct(geoTiffImageReader, location.toPath());
+            product.setProductReader(reader);
+            return product;
+        } catch (Exception e) {
+            throw new IOException(e);
+        }
     }
-
 }

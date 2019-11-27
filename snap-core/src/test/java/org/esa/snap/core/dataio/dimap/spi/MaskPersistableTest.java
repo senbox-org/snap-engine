@@ -85,7 +85,7 @@ public class MaskPersistableTest {
         final InputStream resourceStream = getClass().getResourceAsStream("TestMask.xml");
         final Document document = new SAXBuilder().build(resourceStream);
         final Product product = new Product("P", "T", 10, 10);
-        final Mask maskFromXml = (Mask) persistable.createObjectFromXml(document.getRootElement(), product);
+        final Mask maskFromXml = (Mask) persistable.createObjectFromXml(document.getRootElement(), product, null);
 
         assertNotNull(maskFromXml);
         assertEquals(TestImageType.class, maskFromXml.getImageType().getClass());
@@ -103,7 +103,7 @@ public class MaskPersistableTest {
         final InputStream resourceStream = getClass().getResourceAsStream("TestMask_WithSize.xml");
         final Document document = new SAXBuilder().build(resourceStream);
         final Product product = new Product("P", "T", 10, 10);
-        final Mask maskFromXml = (Mask) persistable.createObjectFromXml(document.getRootElement(), product);
+        final Mask maskFromXml = (Mask) persistable.createObjectFromXml(document.getRootElement(), product, null);
 
         assertNotNull(maskFromXml);
         assertEquals(TestImageType.class, maskFromXml.getImageType().getClass());
