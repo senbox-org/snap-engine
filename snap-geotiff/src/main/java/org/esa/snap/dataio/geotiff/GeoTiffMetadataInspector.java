@@ -26,8 +26,8 @@ public class GeoTiffMetadataInspector implements MetadataInspector {
     public Metadata getMetadata(Path productPath) throws IOException {
         try (GeoTiffImageReader geoTiffImageReader = GeoTiffProductReader.buildGeoTiffImageReader(productPath)) {
             Metadata metadata = new Metadata();
-            metadata.setProductWidth(String.valueOf(geoTiffImageReader.getImageWidth()));
-            metadata.setProductHeight(String.valueOf(geoTiffImageReader.getImageHeight()));
+            metadata.setProductWidth(geoTiffImageReader.getImageWidth());
+            metadata.setProductHeight(geoTiffImageReader.getImageHeight());
 
             TIFFImageMetadata imageMetadata = geoTiffImageReader.getImageMetadata();
             TiffFileInfo tiffInfo = new TiffFileInfo(imageMetadata.getRootIFD());
@@ -54,17 +54,6 @@ public class GeoTiffMetadataInspector implements MetadataInspector {
                 metadata.setGeoCoding(geoCoding);
             }
 
-            if (metadata.getGeoCoding() != null) {
-                GeoPos geoPos1 = metadata.getGeoCoding().getGeoPos(new PixelPos(0, 0), null);
-                GeoPos geoPos2 = metadata.getGeoCoding().getGeoPos(new PixelPos(geoTiffImageReader.getImageWidth(), geoTiffImageReader.getImageHeight()), null);
-                metadata.setLatitudeNorth(String.valueOf(geoPos1.getLat()));
-                metadata.setLatitudeSouth(String.valueOf(geoPos2.getLat()));
-                metadata.setLongitudeEast(String.valueOf(geoPos2.getLon()));
-                metadata.setLongitudeWest(String.valueOf(geoPos1.getLon()));
-                metadata.setHasGeoCoding(true);
-            } else {
-                metadata.setHasGeoCoding(false);
-            }
             return metadata;
         } catch (IOException exception) {
             throw exception;
