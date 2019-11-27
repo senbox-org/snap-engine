@@ -1,7 +1,6 @@
 package org.esa.snap.core.dataio;
 
 import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.core.datamodel.GeoPos;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -24,19 +23,12 @@ public interface MetadataInspector {
         private Set<String> bandList = new HashSet<>();
         private Set<String> maskList = new HashSet<>();
 
-        private String productWidth;
-        private String productHeight;
-
-        private String latitudeNorth;
-        private String longitudeWest;
-        private String latitudeSouth;
-        private String longitudeEast;
+        private int productWidth;
+        private int productHeight;
 
         private GeoCoding geoCoding;
 
         private boolean hasMasks;
-
-        private boolean hasGeoCoding;
 
         public Set<String> getBandList() {
             return bandList;
@@ -63,59 +55,23 @@ public interface MetadataInspector {
         }
 
         public boolean isHasGeoCoding() {
-            return hasGeoCoding;
+            return geoCoding != null;
         }
 
-        public void setHasGeoCoding(boolean hasGeoCoding) {
-            this.hasGeoCoding = hasGeoCoding;
-        }
-
-        public String getProductWidth() {
+        public int getProductWidth() {
             return productWidth;
         }
 
-        public void setProductWidth(String productWidth) {
+        public void setProductWidth(int productWidth) {
             this.productWidth = productWidth;
         }
 
-        public String getProductHeight() {
+        public int getProductHeight() {
             return productHeight;
         }
 
-        public void setProductHeight(String productHeight) {
+        public void setProductHeight(int productHeight) {
             this.productHeight = productHeight;
-        }
-
-        public String getLatitudeNorth() {
-            return latitudeNorth;
-        }
-
-        public void setLatitudeNorth(String latitudeNorth) {
-            this.latitudeNorth = latitudeNorth;
-        }
-
-        public String getLongitudeWest() {
-            return longitudeWest;
-        }
-
-        public void setLongitudeWest(String longitudeWest) {
-            this.longitudeWest = longitudeWest;
-        }
-
-        public String getLatitudeSouth() {
-            return latitudeSouth;
-        }
-
-        public void setLatitudeSouth(String latitudeSouth) {
-            this.latitudeSouth = latitudeSouth;
-        }
-
-        public String getLongitudeEast() {
-            return longitudeEast;
-        }
-
-        public void setLongitudeEast(String longitudeEast) {
-            this.longitudeEast = longitudeEast;
         }
 
         public GeoCoding getGeoCoding() {
