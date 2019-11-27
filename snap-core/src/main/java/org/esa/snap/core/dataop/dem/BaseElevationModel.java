@@ -120,15 +120,17 @@ public abstract class BaseElevationModel implements ElevationModel, Resampling.R
     }
 
     public void updateCache(final ElevationTile tile) {
-        elevationTileCache.remove(tile);
-        elevationTileCache.add(0, tile);
-        while (elevationTileCache.size() > maxCacheSize) {
-            final int index = elevationTileCache.size() - 1;
-            final ElevationTile lastTile = elevationTileCache.get(index);
-            if (lastTile != null) {
-                lastTile.clearCache();
+        synchronized (elevationTileCache) {
+            elevationTileCache.remove(tile);
+            elevationTileCache.add(0, tile);
+            while (elevationTileCache.size() > maxCacheSize) {
+                final int index = elevationTileCache.size() - 1;
+                final ElevationTile lastTile = elevationTileCache.get(index);
+                if (lastTile != null) {
+                    lastTile.clearCache();
+                }
+                elevationTileCache.remove(index);
             }
-            elevationTileCache.remove(index);
         }
     }
 
@@ -177,12 +179,14 @@ public abstract class BaseElevationModel implements ElevationModel, Resampling.R
     }
 
     public void dispose() {
-        for (ElevationTile tile : elevationTileCache) {
-            if (tile != null) {
-                tile.dispose();
+        synchronized (elevationTileCache) {
+            for (ElevationTile tile : elevationTileCache) {
+                if (tile != null) {
+                    tile.dispose();
+                }
             }
+            elevationTileCache.clear();
         }
-        elevationTileCache.clear();
         for (ElevationFile[] elevationFile : elevationFiles) {
             for (ElevationFile anElevationFile : elevationFile) {
                 if (anElevationFile != null) {
