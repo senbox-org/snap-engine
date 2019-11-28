@@ -21,10 +21,14 @@ import com.bc.ceres.glevel.MultiLevelImage;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.ProductData;
 
-import java.awt.*;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.*;
+import java.util.Map;
+import java.util.Objects;
 
 
 /**
@@ -89,21 +93,23 @@ public class BandOpImage extends RasterDataNodeOpImage {
             if (tileRect.isEmpty()) {
                 continue;
             }
-            final ProductData tileData = ProductData.createInstance(band.getDataType(), tileRect.width * tileRect.height);
-            band.readRasterData(tileRect.x, tileRect.y, tileRect.width, tileRect.height, tileData, ProgressMonitor.NULL);
+//            final ProductData tileData = ProductData.createInstance(band.getDataType(), tileRect.width * tileRect.height);
+//            band.readRasterData(tileRect.x, tileRect.y, tileRect.width, tileRect.height, tileData, ProgressMonitor.NULL);
 
+            double[] sample = new double[1];
             for (PositionCouple yPos : yPositions) {
                 final int ySrc = yPos.srcPos;
-                final int yPosInTile = ySrc % tileHeight;
-                final int yOffsetInTile = yPosInTile * tileRect.width;
+//                final int yPosInTile = ySrc % tileHeight;
+//                final int yOffsetInTile = yPosInTile * tileRect.width;
                 final int yDest = yPos.destPos;
                 final int yDestOffset = (yDest - destRect.y) * destRect.width;
                 for (PositionCouple xPos : xPositions) {
                     final int xSrc = xPos.srcPos;
-                    final int xPosInTile = xSrc % tileWidth;
+//                    final int xPosInTile = xSrc % tileWidth;
                     final int xDest = xPos.destPos;
-                    final double v = tileData.getElemDoubleAt(yOffsetInTile + xPosInTile);
-                    destData.setElemDoubleAt(yDestOffset + xDest - destRect.x, v);
+//                    final double v = tileData.getElemDoubleAt(yOffsetInTile + xPosInTile);
+                    band.readPixels(xSrc, ySrc, 1, 1, sample);
+                    destData.setElemDoubleAt(yDestOffset + xDest - destRect.x, sample[0]);
                 }
             }
         }
