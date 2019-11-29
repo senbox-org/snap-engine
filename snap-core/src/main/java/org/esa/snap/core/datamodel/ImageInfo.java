@@ -339,6 +339,32 @@ public class ImageInfo implements Cloneable {
         }
     }
 
+    public void setColorPaletteDefInvert(ColorPaletteDef colorPaletteDef) {
+        transferPointsInvert(colorPaletteDef, getColorPaletteDef());
+    }
+
+    private static void transferPointsInvert(ColorPaletteDef sourceCPD, ColorPaletteDef targetCPD) {
+
+        alignNumPoints(sourceCPD, targetCPD);
+
+
+        Color[] targetColors = new Color[sourceCPD.getNumPoints()];
+        for (int i = 0; i < sourceCPD.getNumPoints(); i++) {
+            int targetPointIndex = sourceCPD.getNumPoints() - 1 - i;
+            targetColors[i] = sourceCPD.getPointAt(targetPointIndex).getColor();
+        }
+
+        for (int i = 0; i < sourceCPD.getNumPoints(); i++) {
+            targetCPD.getPointAt(i).setLabel(sourceCPD.getPointAt(i).getLabel());
+            targetCPD.getPointAt(i).setColor(targetColors[i]);
+        }
+
+        targetCPD.setLogScaled(sourceCPD.isLogScaled());
+        targetCPD.setDiscrete(sourceCPD.isDiscrete());
+        targetCPD.setAutoDistribute(sourceCPD.isAutoDistribute());
+    }
+
+
     public void setColorPaletteDef(ColorPaletteDef colorPaletteDef,
                                    double minSample,
                                    double maxSample, boolean autoDistribute, boolean isSourceLogScaled, boolean isTargetLogScaled) {
