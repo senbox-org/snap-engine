@@ -21,15 +21,14 @@ import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.TiePointGrid;
-import org.esa.snap.core.util.Debug;
-import org.esa.snap.core.util.Guardian;
-import org.esa.snap.core.util.SystemUtils;
-import org.esa.snap.core.util.TreeNode;
+import org.esa.snap.core.util.*;
 import org.esa.snap.runtime.Config;
 
-import java.awt.Dimension;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The {@code AbstractProductReader}  class can be used as a base class for new product reader implementations. The
@@ -42,6 +41,8 @@ import java.io.IOException;
  * @see #readBandRasterData
  */
 public abstract class AbstractProductReader implements ProductReader {
+
+    private static final Logger logger = Logger.getLogger(AbstractProductReader.class.getName());
 
     /**
      * @since BEAM 4.9
@@ -166,6 +167,11 @@ public abstract class AbstractProductReader implements ProductReader {
         final long startTime = System.currentTimeMillis();
         setInput(input);
         setSubsetDef(subsetDef);
+
+        if (logger.isLoggable(Level.FINE)) {
+            logger.log(Level.FINE, "Read the product from input '" + input + "' using the '" + getClass().getName()+"' reader class. The subset is '" + subsetDef + "'.");
+        }
+
         final Product product = readProductNodesImpl();
         configurePreferredTileSize(product);
         product.setModified(false);
@@ -423,15 +429,23 @@ public abstract class AbstractProductReader implements ProductReader {
                         "' with discontinuity at " + gridDiscontinutity +
                         " degree");
         }
-        return new TiePointGrid(gridName,
-                                gridWidth,
-                                gridHeight,
-                                offsetX,
-                                offsetY,
-                                subSamplingX,
-                                subSamplingY,
-                                tiePoints,
-                                gridDiscontinutity);
+//        return new TiePointGrid(gridName,
+//                                gridWidth,
+//                                gridHeight,
+//                                offsetX,
+//                                offsetY,
+//                                subSamplingX,
+//                                subSamplingY,
+//                                tiePoints,
+//                                gridDiscontinutity);
+        return buildTiePointGrid(gridName, gridWidth, gridHeight, offsetX, offsetY, subSamplingX, subSamplingY, tiePoints, gridDiscontinutity);
+    }
+
+    protected static TiePointGrid buildTiePointGrid(String gridName, int gridWidth, int gridHeight,
+                                              double offsetX, double offsetY, double subSamplingX,
+                                              double subSamplingY, float[] tiePoints, int gridDiscontinutity) {
+
+        return new TiePointGrid(gridName, gridWidth, gridHeight, offsetX, offsetY, subSamplingX, subSamplingY, tiePoints, gridDiscontinutity);
     }
 
     public static void configurePreferredTileSize(Product product) {

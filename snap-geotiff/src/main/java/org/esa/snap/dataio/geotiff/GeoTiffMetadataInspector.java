@@ -24,17 +24,18 @@ public class GeoTiffMetadataInspector implements MetadataInspector {
 
     @Override
     public Metadata getMetadata(Path productPath) throws IOException {
-        try (GeoTiffImageReader geoTiffImageReader = GeoTiffProductReader.buildGeoTiffImageReader(productPath)) {
+        try (GeoTiffImageReader geoTiffImageReader = GeoTiffImageReader.buildGeoTiffImageReader(productPath)) {
+            Dimension productSize = new Dimension(geoTiffImageReader.getImageWidth(), geoTiffImageReader.getImageHeight());
+
             Metadata metadata = new Metadata();
-            metadata.setProductWidth(geoTiffImageReader.getImageWidth());
-            metadata.setProductHeight(geoTiffImageReader.getImageHeight());
+            metadata.setProductWidth(productSize.width);
+            metadata.setProductHeight(productSize.height);
 
             TIFFImageMetadata imageMetadata = geoTiffImageReader.getImageMetadata();
             TiffFileInfo tiffInfo = new TiffFileInfo(imageMetadata.getRootIFD());
             TIFFField tagNumberField = tiffInfo.getField(Utils.PRIVATE_BEAM_TIFF_TAG_NUMBER);
 
             Product product = null;
-            Dimension productSize = new Dimension(1, 1);
             if (tagNumberField != null && tagNumberField.getType() == TIFFTag.TIFF_ASCII) {
                 String tagNumberText = tagNumberField.getAsString(0).trim();
                 if (tagNumberText.contains("<Dimap_Document")) { // with DIMAP header
@@ -42,8 +43,7 @@ public class GeoTiffMetadataInspector implements MetadataInspector {
                 }
             }
             if (product == null) {            // without DIMAP header
-                TIFFRenderedImage baseImage = geoTiffImageReader.getBaseImage();
-                product = GeoTiffProductReader.buildProductWithoutDimapHeader(productPath, "GeoTIFF", tiffInfo, baseImage, productSize);
+                product = GeoTiffProductReader.buildProductWithoutDimapHeader(productPath, "GeoTIFF", tiffInfo, geoTiffImageReader.getBaseImage(), productSize);
             }
             for (int i = 0; i < product.getNumBands(); i++) {
                 metadata.getBandList().add(product.getBandAt(i).getName());
@@ -55,6 +55,8 @@ public class GeoTiffMetadataInspector implements MetadataInspector {
             }
 
             return metadata;
+        } catch (RuntimeException exception) {
+            throw exception;
         } catch (IOException exception) {
             throw exception;
         } catch (Exception exception) {

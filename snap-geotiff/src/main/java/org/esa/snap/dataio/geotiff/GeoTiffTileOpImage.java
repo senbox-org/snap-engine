@@ -26,17 +26,17 @@ public class GeoTiffTileOpImage extends SingleBandedOpImage {
     private final int bandIndex;
     private final boolean isGlobalShifted180;
 
-    public GeoTiffTileOpImage(GeoTiffImageReader geoTiffImageReader, MultiLevelModel imageMultiLevelModel, int dataType, int bandIndex,
+    public GeoTiffTileOpImage(GeoTiffImageReader geoTiffImageReader, MultiLevelModel imageMultiLevelModel, int dataBufferType, int bandIndex,
                               Rectangle imageBounds, Dimension tileSize, Point tileOffset, int level, boolean isGlobalShifted180) {
 
-        this(geoTiffImageReader, dataType, bandIndex, imageBounds, tileSize, ImageUtils.computeTileDimensionAtResolutionLevel(tileSize, level),
+        this(geoTiffImageReader, dataBufferType, bandIndex, imageBounds, tileSize, ImageUtils.computeTileDimensionAtResolutionLevel(tileSize, level),
                 tileOffset, ResolutionLevel.create(imageMultiLevelModel, level), isGlobalShifted180);
     }
 
-    private GeoTiffTileOpImage(GeoTiffImageReader geoTiffImageReader, int dataType, int bandIndex, Rectangle imageBounds, Dimension tileSize,
+    private GeoTiffTileOpImage(GeoTiffImageReader geoTiffImageReader, int dataBufferType, int bandIndex, Rectangle imageBounds, Dimension tileSize,
                                Dimension subTileSize, Point tileOffset, ResolutionLevel resolutionLevel, boolean isGlobalShifted180) {
 
-        super(dataType, null, tileSize.width, tileSize.height, subTileSize, null, resolutionLevel);
+        super(dataBufferType, null, tileSize.width, tileSize.height, subTileSize, null, resolutionLevel);
 
         this.geoTiffImageReader = geoTiffImageReader;
         this.bandIndex = bandIndex;

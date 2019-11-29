@@ -47,4 +47,18 @@ public class ZipFileSystemBuilder {
         }
         return ZIP_FILE_SYSTEM_CONSTRUCTOR.newInstance(ZIP_FILE_SYSTEM_PROVIDER, zipPath, Collections.emptyMap());
     }
+
+    public static Path buildZipEntryPath(Path zipArchiveRoot, String zipEntryPath) {
+        String fileSystemSeparator = zipArchiveRoot.getFileSystem().getSeparator();
+        String childRelativePath = FileSystemUtils.replaceFileSeparator(zipEntryPath, fileSystemSeparator);
+
+        String rootAsString = zipArchiveRoot.toString();
+        if (childRelativePath.startsWith(rootAsString)) {
+            return zipArchiveRoot.getFileSystem().getPath(childRelativePath);
+        }
+        if (childRelativePath.startsWith(fileSystemSeparator)) {
+            childRelativePath = childRelativePath.substring(fileSystemSeparator.length());
+        }
+        return zipArchiveRoot.resolve(childRelativePath);
+    }
 }

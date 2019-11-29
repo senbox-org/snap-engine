@@ -27,6 +27,7 @@ import org.apache.commons.lang.StringUtils;
 import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.MetadataInspector;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
+import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.dataio.dimap.DimapProductHelpers;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.ColorPaletteDef;
@@ -48,15 +49,13 @@ import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.dataop.maptransf.Datum;
 import org.esa.snap.core.image.ImageManager;
+import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.geotiff.EPSGCodes;
 import org.esa.snap.core.util.geotiff.GeoTIFFCodes;
 import org.esa.snap.core.util.io.FileUtils;
-import org.esa.snap.core.util.jai.JAIUtils;
-import org.esa.snap.dataio.FileImageInputStreamSpi;
+import org.esa.snap.dataio.ImageRegistryUtils;
 import org.esa.snap.dataio.geotiff.internal.GeoKeyEntry;
-import org.esa.snap.engine_utilities.util.FileSystemUtils;
-import org.esa.snap.engine_utilities.util.ZipFileSystemBuilder;
 import org.geotools.coverage.grid.io.imageio.geotiff.GeoTiffConstants;
 import org.geotools.coverage.grid.io.imageio.geotiff.GeoTiffException;
 import org.geotools.coverage.grid.io.imageio.geotiff.GeoTiffIIOMetadataDecoder;
@@ -73,7 +72,6 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.xml.sax.SAXException;
 
-import javax.imageio.spi.IIORegistry;
 import javax.imageio.spi.ImageInputStreamSpi;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -84,30 +82,19 @@ import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.image.IndexColorModel;
 import java.awt.image.SampleModel;
-import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.nio.file.FileSystem;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class GeoTiffProductReader extends AbstractProductReader {
-
-    private static final Logger logger = Logger.getLogger(GeoTiffProductReader.class.getName());
-
-    private static final int BUFFER_SIZE = 1024 * 1024;
 
     // non standard ASCII tag (code 42112) to extract GDAL metadata,
     // see https://gdal.org/drivers/raster/gtiff.html#metadata:
@@ -115,12 +102,15 @@ public class GeoTiffProductReader extends AbstractProductReader {
 
     private ImageInputStreamSpi imageInputStreamSpi;
     private GeoTiffImageReader geoTiffImageReader;
-    private boolean isGlobalShifted180;
 
     public GeoTiffProductReader(ProductReaderPlugIn readerPlugIn) {
+        this(readerPlugIn, ImageRegistryUtils.registerImageInputStreamSpi());
+    }
+
+    protected GeoTiffProductReader(ProductReaderPlugIn readerPlugIn, ImageInputStreamSpi imageInputStreamSpi) {
         super(readerPlugIn);
 
-        this.imageInputStreamSpi = registerImageInputStreamSpi();
+        this.imageInputStreamSpi = imageInputStreamSpi;
     }
 
     @Override
@@ -129,60 +119,49 @@ public class GeoTiffProductReader extends AbstractProductReader {
     }
 
     @Override
-    protected synchronized Product readProductNodesImpl() throws IOException {
+    protected Product readProductNodesImpl() throws IOException {
         boolean success = false;
         try {
-            Object productInputFile = super.getInput();
-
-            if (logger.isLoggable(Level.FINE)) {
-                logger.log(Level.FINE, "Read the GeoTiff product from input '" + productInputFile + "'.");
-            }
+            Object productInput = super.getInput();
 
             Path productPath = null;
-            if (productInputFile instanceof String) {
-                productPath = new File((String)productInputFile).toPath();
-                this.geoTiffImageReader = buildGeoTiffImageReader(productPath);
-            } else if (productInputFile instanceof File) {
-                productPath = ((File) productInputFile).toPath();
-                this.geoTiffImageReader = buildGeoTiffImageReader(productPath);
-            } else if (productInputFile instanceof Path) {
-                productPath = (Path) productInputFile;
-                this.geoTiffImageReader = buildGeoTiffImageReader(productPath);
-            } else if (productInputFile instanceof InputStream) {
-                this.geoTiffImageReader = new GeoTiffImageReader((InputStream)productInputFile, null);
+            if (productInput instanceof String) {
+                productPath = new File((String)productInput).toPath();
+                this.geoTiffImageReader = GeoTiffImageReader.buildGeoTiffImageReader(productPath);
+            } else if (productInput instanceof File) {
+                productPath = ((File) productInput).toPath();
+                this.geoTiffImageReader = GeoTiffImageReader.buildGeoTiffImageReader(productPath);
+            } else if (productInput instanceof Path) {
+                productPath = (Path) productInput;
+                this.geoTiffImageReader = GeoTiffImageReader.buildGeoTiffImageReader(productPath);
+            } else if (productInput instanceof InputStream) {
+                this.geoTiffImageReader = new GeoTiffImageReader((InputStream)productInput, null);
             } else {
-                throw new IllegalArgumentException("Unknown input '"+productInputFile+"'.");
+                throw new IllegalArgumentException("Unknown input '"+productInput+"'.");
             }
 
             Product product = readProduct(this.geoTiffImageReader, productPath);
             success = true;
+
             return product;
-        } catch (IOException ex) {
-            throw ex;
-        } catch (Exception ex) {
-            throw new IOException(ex);
+        } catch (RuntimeException exception) {
+            throw exception;
+        } catch (IOException exception) {
+            throw exception;
+        } catch (Exception exception) {
+            throw new IOException(exception);
         } finally {
-            if (!success && this.geoTiffImageReader != null) {
-                this.geoTiffImageReader.close();
+            if (!success) {
+                closeResources();
             }
         }
     }
 
     @Override
-    public synchronized void close() throws IOException {
+    public void close() throws IOException {
         super.close();
 
-        try {
-            if (this.geoTiffImageReader != null) {
-                this.geoTiffImageReader.close();
-                this.geoTiffImageReader = null;
-            }
-        } finally {
-            if (this.imageInputStreamSpi != null) {
-                IIORegistry.getDefaultInstance().deregisterServiceProvider(this.imageInputStreamSpi);
-                this.imageInputStreamSpi = null;
-            }
-        }
+        closeResources();
     }
 
     @Override
@@ -194,9 +173,33 @@ public class GeoTiffProductReader extends AbstractProductReader {
         throw new UnsupportedOperationException("Method not implemented");
     }
 
-    Product readProduct(GeoTiffImageReader geoTiffImageReader, Path productPath) throws Exception {
-        Rectangle imageBounds = computeImageBounds(geoTiffImageReader.getImageWidth(), geoTiffImageReader.getImageHeight());
-        Dimension productSize = new Dimension(imageBounds.width, imageBounds.height);
+    private void closeResources() {
+        try {
+            if (this.geoTiffImageReader != null) {
+                this.geoTiffImageReader.close();
+                this.geoTiffImageReader = null;
+            }
+        } finally {
+            if (this.imageInputStreamSpi != null) {
+                ImageRegistryUtils.deregisterImageInputStreamSpi(this.imageInputStreamSpi);
+                this.imageInputStreamSpi = null;
+            }
+        }
+        System.gc();
+    }
+
+    public Product readProduct(GeoTiffImageReader geoTiffImageReader, Path productPath) throws Exception {
+        Rectangle productImageBounds = ImageUtils.computeImageBounds(geoTiffImageReader.getImageWidth(), geoTiffImageReader.getImageHeight(), getSubsetDef());
+        return readProduct(geoTiffImageReader, productPath, productImageBounds);
+    }
+
+    public Product readProduct(GeoTiffImageReader geoTiffImageReader, Path productPath, Rectangle productImageBounds) throws Exception {
+        if ((productImageBounds.x + productImageBounds.width) > geoTiffImageReader.getImageWidth()) {
+            throw new IllegalStateException("The coordinates are out of bounds: product.x="+productImageBounds.x+", product.width="+productImageBounds.width+", image.width=" + geoTiffImageReader.getImageWidth());
+        }
+        if ((productImageBounds.y + productImageBounds.height) > geoTiffImageReader.getImageHeight()) {
+            throw new IllegalStateException("The coordinates are out of bounds: product.y="+productImageBounds.y+", product.height="+productImageBounds.height+", image.height=" + geoTiffImageReader.getImageHeight());
+        }
 
         TIFFImageMetadata imageMetadata = geoTiffImageReader.getImageMetadata();
         TiffFileInfo tiffInfo = new TiffFileInfo(imageMetadata.getRootIFD());
@@ -205,66 +208,64 @@ public class GeoTiffProductReader extends AbstractProductReader {
         if (tagNumberField != null && tagNumberField.getType() == TIFFTag.TIFF_ASCII) {
             String tagNumberText = tagNumberField.getAsString(0).trim();
             if (tagNumberText.contains("<Dimap_Document")) { // with DIMAP header
+                Dimension productSize = new Dimension(productImageBounds.width, productImageBounds.height);
                 product = buildProductFromDimapHeader(tagNumberText, productSize);
             }
         }
         if (product == null) {            // without DIMAP header
             TIFFRenderedImage baseImage = geoTiffImageReader.getBaseImage();
-            String productType = getReaderPlugIn().getFormatNames()[0];
-            product = buildProductWithoutDimapHeader(productPath, productType, tiffInfo, baseImage, productSize);
+            Dimension productSize = new Dimension(productImageBounds.width, productImageBounds.height);
+            product = buildProductWithoutDimapHeader(productPath, GeoTiffProductReaderPlugIn.FORMAT_NAMES[0], tiffInfo, baseImage, productSize);
             boolean createIndexedImageInfo = (tiffInfo.containsField(BaselineTIFFTagSet.TAG_COLOR_MAP) && baseImage.getColorModel() instanceof IndexColorModel);
             if (createIndexedImageInfo) {
                 for (int i = 0; i < product.getNumBands(); i++) {
                     Band band = product.getBandAt(i);
-                    band.setImageInfo(createIndexedImageInfo(product, baseImage, band));
+                    band.setImageInfo(buildIndexedImageInfo(product, baseImage, band));
                 }
             }
         }
 
+        boolean isGlobalShifted180 = false;
         if (tiffInfo.isGeotiff()) {
-            applyGeoCoding(tiffInfo, imageMetadata, product);
+            isGlobalShifted180 = applyGeoCoding(tiffInfo, imageMetadata, product);
         }
 
-        Dimension preferredTileSize = computePreferredTiling(this.isGlobalShifted180, geoTiffImageReader, product.getSceneRasterSize());
+        Dimension preferredTileSize = computePreferredTiling(isGlobalShifted180, geoTiffImageReader, product.getSceneRasterSize());
         product.setPreferredTileSize(preferredTileSize);
+        product.setProductReader(this);
         if (productPath != null) {
             product.setFileLocation(productPath.toFile());
         }
-        product.setProductReader(this);
 
         GeoCoding bandGeoCoding = product.getSceneGeoCoding();
+        if (bandGeoCoding == null) {
+            bandGeoCoding = buildBandGeoCoding(productImageBounds.width, productImageBounds.height);
+        }
         int bandIndex = 0;
         for (int i = 0; i < product.getNumBands(); i++) {
             Band band = product.getBandAt(i);
-            int dataType = ImageManager.getDataBufferType(band.getDataType());
-            GeoTiffMultiLevelSource multiLevelSource = new GeoTiffMultiLevelSource(geoTiffImageReader, dataType, imageBounds, preferredTileSize, bandIndex, bandGeoCoding, this.isGlobalShifted180);
+            if (band.getRasterWidth() != productImageBounds.width) {
+                throw new IllegalStateException("The band width "+ band.getRasterWidth() + " is not equal with the product with " + productImageBounds.width + ".");
+            }
+            if (band.getRasterHeight() != productImageBounds.height) {
+                throw new IllegalStateException("The band height "+ band.getRasterHeight() + " is not equal with the product height " + productImageBounds.height + ".");
+            }
+            band.setGeoCoding(bandGeoCoding);
+            int dataBufferType = ImageManager.getDataBufferType(band.getDataType());
+            GeoTiffMultiLevelSource multiLevelSource = new GeoTiffMultiLevelSource(geoTiffImageReader, dataBufferType, productImageBounds, preferredTileSize, bandIndex, band.getGeoCoding(), isGlobalShifted180);
             band.setSourceImage(new DefaultMultiLevelImage(multiLevelSource));
             if (!(band instanceof VirtualBand || band instanceof FilterBand)) {
                 bandIndex++;
             }
         }
+
         TiffTagToMetadataConverter.addTiffTagsToMetadata(imageMetadata, tiffInfo, product.getMetadataRoot());
 
         return product;
     }
 
-    private Rectangle computeImageBounds(int imageWidth, int imageHeight) {
-        Rectangle imageBounds = null;
-        if (getSubsetDef() != null) {
-            imageBounds = getSubsetDef().getRegion();
-            if (imageBounds != null) {
-                if (imageBounds.width > imageWidth) {
-                    throw new IllegalArgumentException("The visible region width " + imageBounds.width + " cannot be greater than the image width " + imageWidth + ".");
-                }
-                if (imageBounds.height > imageHeight) {
-                    throw new IllegalArgumentException("The visible region height " + imageBounds.height + " cannot be greater than the image height " + imageHeight + ".");
-                }
-            }
-        }
-        if (imageBounds == null) {
-            imageBounds = new Rectangle(0, 0, imageWidth, imageHeight);
-        }
-        return imageBounds;
+    protected GeoCoding buildBandGeoCoding(int bandWidth, int bandHeight) {
+        return null;
     }
 
     public static Product buildProductWithoutDimapHeader(Path productPath, String productType, TiffFileInfo tiffInfo, TIFFRenderedImage baseImage, Dimension productSize)
@@ -289,14 +290,6 @@ public class GeoTiffProductReader extends AbstractProductReader {
         }
 
         return product;
-    }
-
-    private static void removeGeoCodingAndTiePointGrids(Product product) {
-        product.setSceneGeoCoding(null);
-        final TiePointGrid[] pointGrids = product.getTiePointGrids();
-        for (TiePointGrid pointGrid : pointGrids) {
-            product.removeTiePointGrid(pointGrid);
-        }
     }
 
     private static Band[] buildBands(TiffFileInfo tiffInfo, TIFFRenderedImage baseImage, int productWidth, int productHeight) throws Exception {
@@ -335,7 +328,12 @@ public class GeoTiffProductReader extends AbstractProductReader {
             inputStream = new ByteArrayInputStream(tagNumberText.getBytes());
             Document document = new DOMBuilder().build(builder.parse(inputStream));
             product = DimapProductHelpers.createProduct(document, productSize);
-            removeGeoCodingAndTiePointGrids(product);
+            // remove the geo coding
+            product.setSceneGeoCoding(null);
+            TiePointGrid[] pointGrids = product.getTiePointGrids();
+            for (TiePointGrid pointGrid : pointGrids) {
+                product.removeTiePointGrid(pointGrid);
+            }
         } catch (ParserConfigurationException | SAXException ignore) {
             // ignore if it can not be read
         } finally {
@@ -347,31 +345,13 @@ public class GeoTiffProductReader extends AbstractProductReader {
     }
 
     private static Dimension computePreferredTiling(boolean isGlobalShifted180, GeoTiffImageReader geoTiffImageReader, Dimension productSize) throws IOException {
-        Dimension dimension;
         if (isGlobalShifted180) {
-            dimension = new Dimension(productSize.width, productSize.height);
-        } else {
-            int imageWidth = geoTiffImageReader.getImageWidth();
-            int imageHeight = geoTiffImageReader.getImageHeight();
-            int tileWidth = geoTiffImageReader.getTileWidth();
-            int tileHeight = geoTiffImageReader.getTileHeight();
-            boolean isBadTiling = (tileWidth <= 1 || tileHeight <= 1 || imageWidth == tileWidth || imageHeight == tileHeight);
-            if (isBadTiling) {
-                dimension = JAIUtils.computePreferredTileSize(productSize.width, productSize.height, 1);
-            } else {
-                if (tileWidth > productSize.width) {
-                    tileWidth = productSize.width;
-                }
-                if (tileHeight > productSize.height) {
-                    tileHeight = productSize.height;
-                }
-                dimension = new Dimension(tileWidth, tileHeight);
-            }
+            return new Dimension(productSize.width, productSize.height);
         }
-        return dimension;
+        return geoTiffImageReader.computePreferredTiling(productSize.width, productSize.height);
     }
 
-    private static ImageInfo createIndexedImageInfo(Product product, TIFFRenderedImage baseImage, Band band) {
+    private static ImageInfo buildIndexedImageInfo(Product product, TIFFRenderedImage baseImage, Band band) {
         final IndexColorModel colorModel = (IndexColorModel) baseImage.getColorModel();
         final IndexCoding indexCoding = new IndexCoding("color_map");
         final int colorCount = colorModel.getMapSize();
@@ -387,19 +367,17 @@ public class GeoTiffProductReader extends AbstractProductReader {
         return new ImageInfo(new ColorPaletteDef(points, points.length));
     }
 
-    private void applyGeoCoding(TiffFileInfo info, TIFFImageMetadata metadata, Product product) {
+    private static boolean applyGeoCoding(TiffFileInfo info, TIFFImageMetadata metadata, Product product) {
+        boolean isGlobalShifted180 = false;
         if (info.containsField(GeoTIFFTagSet.TAG_MODEL_TIE_POINT)) {
-
             double[] tiePoints = info.getField(GeoTIFFTagSet.TAG_MODEL_TIE_POINT).getAsDoubles();
-
             boolean isGlobal = isGlobal(product.getSceneRasterWidth(), info);
-
             // check if we have a global geographic lat/lon with lon from 0..360 instead of -180..180
-            final double deltaX = Math.ceil(360.0d / product.getSceneRasterWidth());
+            double deltaX = Math.ceil(360.0d / product.getSceneRasterWidth());
             if (isGlobal && tiePoints.length == 6 && Math.abs(tiePoints[3]) < deltaX) {
                 // e.g. tiePoints[3] = -0.5, productWidth=722 --> we have a lon range of 361 which should start
                 // at or near -180 but not at zero
-                this.isGlobalShifted180 = true;
+                isGlobalShifted180 = true;
                 // subtract 180 from the longitudes
                 tiePoints[3] -= 180.0;
             }
@@ -418,6 +396,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
                 // ignore
             }
         }
+        return isGlobalShifted180;
     }
 
     private static boolean isGlobal(int productWidth, TiffFileInfo info) {
@@ -582,10 +561,8 @@ public class GeoTiffProductReader extends AbstractProductReader {
         }
 
         String[] names = Utils.findSuitableLatLonNames(product);
-        final TiePointGrid latGrid = new TiePointGrid(
-                names[0], width, height, xMin, yMin, xDiff, yDiff, lats);
-        final TiePointGrid lonGrid = new TiePointGrid(
-                names[1], width, height, xMin, yMin, xDiff, yDiff, lons);
+        final TiePointGrid latGrid = new TiePointGrid(names[0], width, height, xMin, yMin, xDiff, yDiff, lats);
+        final TiePointGrid lonGrid = new TiePointGrid(names[1], width, height, xMin, yMin, xDiff, yDiff, lons);
 
         product.addTiePointGrid(latGrid);
         product.addTiePointGrid(lonGrid);
@@ -678,9 +655,6 @@ public class GeoTiffProductReader extends AbstractProductReader {
             return; // not able to apply GCP geo coding; not enough tie points
         }
 
-        final int width = product.getSceneRasterWidth();
-        final int height = product.getSceneRasterHeight();
-
         final GcpDescriptor gcpDescriptor = GcpDescriptor.getInstance();
         final ProductNodeGroup<Placemark> gcpGroup = product.getGcpGroup();
         for (int i = 0; i < numTiePoints; i++) {
@@ -697,14 +671,15 @@ public class GeoTiffProductReader extends AbstractProductReader {
             final PixelPos pixelPos = new PixelPos(x, y);
             final GeoPos geoPos = new GeoPos(lat, lon);
 
-            final Placemark gcp = Placemark.createPointPlacemark(gcpDescriptor, "gcp_" + i, "GCP_" + i, "",
-                    pixelPos, geoPos, product.getSceneGeoCoding());
+            final Placemark gcp = Placemark.createPointPlacemark(gcpDescriptor, "gcp_" + i, "GCP_" + i, "", pixelPos, geoPos, product.getSceneGeoCoding());
             gcpGroup.add(gcp);
         }
 
         final Placemark[] gcps = gcpGroup.toArray(new Placemark[gcpGroup.getNodeCount()]);
         final SortedMap<Integer, GeoKeyEntry> geoKeyEntries = info.getGeoKeyEntries();
         final Datum datum = getDatum(geoKeyEntries);
+        final int width = product.getSceneRasterWidth();
+        final int height = product.getSceneRasterHeight();
         product.setSceneGeoCoding(new GcpGeoCoding(method, gcps, width, height, datum));
     }
 
@@ -724,66 +699,5 @@ public class GeoTiffProductReader extends AbstractProductReader {
             datum = Datum.WGS_84;
         }
         return datum;
-    }
-
-    public static GeoTiffImageReader buildGeoTiffImageReader(Path productPath) throws IOException, IllegalAccessException, InstantiationException, InvocationTargetException {
-        if (productPath.getFileName().toString().toLowerCase().endsWith(GeoTiffProductReaderPlugIn.ZIP_FILE_EXTENSION)) {
-            boolean success = false;
-            FileSystem fileSystem = null;
-            try {
-                fileSystem = ZipFileSystemBuilder.newZipFileSystem(productPath);
-                TreeSet<String> filePaths = FileSystemUtils.listAllFilePaths(fileSystem);
-                Iterator<String> itFileNames = filePaths.iterator();
-                while (itFileNames.hasNext() && !success) {
-                    String filePath = itFileNames.next();
-                    boolean extensionMatches = Arrays.stream(GeoTiffProductReaderPlugIn.TIFF_FILE_EXTENSION).anyMatch(filePath.toLowerCase()::endsWith);
-                    if (extensionMatches) {
-                        int startIndex = 0;
-                        if (filePath.startsWith(fileSystem.getSeparator())) {
-                            startIndex = fileSystem.getSeparator().length(); // the file path starts with '/' (the root folder in the zip archive)
-                        }
-                        if (filePath.indexOf(fileSystem.getSeparator(), startIndex) < 0) {
-                            Path tiffImagePath = fileSystem.getPath(filePath);
-                            InputStream inputStream = Files.newInputStream(tiffImagePath);
-                            BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream, BUFFER_SIZE);
-                            GeoTiffImageReader geoTiffImageReader = new GeoTiffImageReader(bufferedInputStream, fileSystem);
-                            success = true;
-                            return geoTiffImageReader;
-                        }
-                    }
-                }
-                throw new IllegalArgumentException("The zip archive '" + productPath.toString()+"' does not contain an image.");
-            } finally {
-                if (fileSystem != null && !success) {
-                    fileSystem.close();
-                }
-            }
-        } else {
-            return new GeoTiffImageReader(productPath.toFile());
-        }
-    }
-
-    private static FileImageInputStreamSpi registerImageInputStreamSpi() {
-        FileImageInputStreamSpi imageInputStreamSpi = null;
-        IIORegistry defaultInstance = IIORegistry.getDefaultInstance();
-        if (defaultInstance.getServiceProviderByClass(FileImageInputStreamSpi.class) == null) {
-            // register only if not already registered
-            ImageInputStreamSpi toUnorder = null;
-            Iterator<ImageInputStreamSpi> serviceProviders = defaultInstance.getServiceProviders(ImageInputStreamSpi.class, true);
-            while (serviceProviders.hasNext()) {
-                ImageInputStreamSpi current = serviceProviders.next();
-                if (current.getInputClass() == File.class) {
-                    toUnorder = current;
-                    break;
-                }
-            }
-            imageInputStreamSpi = new FileImageInputStreamSpi();
-            defaultInstance.registerServiceProvider(imageInputStreamSpi);
-            if (toUnorder != null) {
-                // Make the custom Spi to be the first one to be used.
-                defaultInstance.setOrdering(ImageInputStreamSpi.class, imageInputStreamSpi, toUnorder);
-            }
-        }
-        return imageInputStreamSpi;
     }
 }

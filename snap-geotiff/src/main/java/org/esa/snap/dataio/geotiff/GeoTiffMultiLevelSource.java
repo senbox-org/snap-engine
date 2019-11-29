@@ -34,14 +34,14 @@ public class GeoTiffMultiLevelSource extends AbstractMultiLevelSource {
     private static final Logger logger = Logger.getLogger(GeoTiffMultiLevelSource.class.getName());
 
     private final GeoTiffImageReader geoTiffImageReader;
-    private final int dataType;
+    private final int dataBufferType;
     private Dimension tileSize;
     private Rectangle imageBounds;
     private final int bandIndex;
     private final TileImageDisposer tileImageDisposer;
     private final boolean isGlobalShifted180;
 
-    public GeoTiffMultiLevelSource(GeoTiffImageReader geoTiffImageReader, int dataType, Rectangle imageBounds, Dimension tileSize,
+    public GeoTiffMultiLevelSource(GeoTiffImageReader geoTiffImageReader, int dataBufferType, Rectangle imageBounds, Dimension tileSize,
                                    int bandIndex, GeoCoding geoCoding, boolean isGlobalShifted180) {
 
         super(new DefaultMultiLevelModel(Product.findImageToModelTransform(geoCoding), imageBounds.width, imageBounds.height));
@@ -54,7 +54,7 @@ public class GeoTiffMultiLevelSource extends AbstractMultiLevelSource {
         }
 
         this.geoTiffImageReader = geoTiffImageReader;
-        this.dataType = dataType;
+        this.dataBufferType = dataBufferType;
         this.imageBounds = imageBounds;
         this.tileSize = tileSize;
         this.bandIndex = bandIndex;
@@ -94,7 +94,7 @@ public class GeoTiffMultiLevelSource extends AbstractMultiLevelSource {
                 Dimension currentTileSize = new Dimension(tileWidth, tileHeight);
 
                 Point tileOffset = new Point(tileOffsetX, tileOffsetY);
-                GeoTiffTileOpImage geoTiffTileOpImage = new GeoTiffTileOpImage(this.geoTiffImageReader, getModel(), this.dataType, this.bandIndex,
+                GeoTiffTileOpImage geoTiffTileOpImage = new GeoTiffTileOpImage(this.geoTiffImageReader, getModel(), this.dataBufferType, this.bandIndex,
                                                                                 this.imageBounds, currentTileSize, tileOffset, level, this.isGlobalShifted180);
                 this.tileImageDisposer.registerForDisposal(geoTiffTileOpImage);
 
