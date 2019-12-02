@@ -38,18 +38,6 @@ import java.util.Vector;
  * contained in the curve. This allows a better image interpretation because certain colors correspond to certain sample
  * values even if the curve points are used to create color gradient palettes.
  */
-
-/**
- *
- * @author Brockmann Consult
- * @author Daniel Knowles (NASA)
- * @author Bing Yang (NASA)
- */
-// OCT 2019 - Knowles / Yang
-//          - Added boolean field for isLogScaled.
-//          - Added use of _PROPERTY_KEY_IS_LOG_SCALED for reading/writing the cpd file.
-
-
 public class ColorPaletteDef implements Cloneable  {
 
     private final static String _PROPERTY_KEY_NUM_POINTS = "numPoints";
@@ -296,6 +284,9 @@ public class ColorPaletteDef implements Cloneable  {
             }
             point.setColor(color);
             point.setSample(sample);
+            // todo DANNY added this
+            point.setLabel(file.getName());
+            //    System.out.println(point.label);
             points[i] = point;
             lastSample = sample;
         }
