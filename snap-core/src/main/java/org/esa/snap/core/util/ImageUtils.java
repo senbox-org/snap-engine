@@ -57,6 +57,34 @@ import java.util.Vector;
  */
 public class ImageUtils {
 
+    private static int computeBandValue(int productValue, double productOriginPosition, double bandPixelStep) {
+        return (int)(productValue * productOriginPosition / bandPixelStep);
+    }
+
+    public static Rectangle computeBandBounds(Rectangle productBounds, Dimension defaultProductSize, Dimension defaultBandSize,
+                                              double productStepX, double productStepY, double bandPixelSizeX, double bandPixelSizeY) {
+
+        Rectangle bandBounds;
+        if (defaultProductSize.width == productBounds.width && defaultProductSize.height == productBounds.height) {
+            bandBounds = new Rectangle(0, 0, defaultBandSize.width, defaultBandSize.height);
+        } else if (defaultBandSize.width < defaultProductSize.width || defaultBandSize.height < defaultProductSize.height) {
+            bandBounds = new Rectangle();
+            bandBounds.x = computeBandValue(productBounds.x, productStepX, bandPixelSizeX);
+            bandBounds.y = computeBandValue(productBounds.y, productStepY, bandPixelSizeY);
+            bandBounds.width = computeBandValue(productBounds.width, productStepX, bandPixelSizeX);
+            bandBounds.height = computeBandValue(productBounds.height, productStepY, bandPixelSizeY);
+            if (bandBounds.width > productBounds.width) {
+                throw new IllegalStateException("The band width " + bandBounds.width + " is greater than the product width " + productBounds.width + ".");
+            }
+            if (bandBounds.height > productBounds.height) {
+                throw new IllegalStateException("The band height " + bandBounds.height + " is greater than the product height " + productBounds.height + ".");
+            }
+        } else {
+            bandBounds = productBounds;
+        }
+        return bandBounds;
+    }
+
     public static Rectangle computeImageBounds(int defaultImageWidth, int defaultImageHeight, ProductSubsetDef subsetDef) {
         Rectangle imageBounds = null;
         if (subsetDef != null) {
