@@ -65,6 +65,7 @@ import org.geotools.coverage.grid.io.imageio.geotiff.TiePoint;
 import org.geotools.factory.Hints;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.referencing.operation.matrix.GeneralMatrix;
+import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.geotools.referencing.operation.transform.ProjectiveTransform;
 import org.jdom.Document;
 import org.jdom.input.DOMBuilder;
@@ -237,10 +238,8 @@ public class GeoTiffProductReader extends AbstractProductReader {
             product.setFileLocation(productPath.toFile());
         }
 
-        GeoCoding bandGeoCoding = product.getSceneGeoCoding();
-        if (bandGeoCoding == null) {
-            bandGeoCoding = buildBandGeoCoding(productImageBounds.width, productImageBounds.height);
-        }
+        GeoCoding bandGeoCoding = buildBandGeoCoding(product.getSceneGeoCoding(), productImageBounds.width, productImageBounds.height);
+        AffineTransform2D imageToModelTransform = buildBandImageToModelTransform(productImageBounds.width, productImageBounds.height);
         int bandIndex = 0;
         for (int i = 0; i < product.getNumBands(); i++) {
             Band band = product.getBandAt(i);
@@ -251,6 +250,9 @@ public class GeoTiffProductReader extends AbstractProductReader {
                 throw new IllegalStateException("The band height "+ band.getRasterHeight() + " is not equal with the product height " + productImageBounds.height + ".");
             }
             band.setGeoCoding(bandGeoCoding);
+            if (imageToModelTransform != null) {
+                band.setImageToModelTransform(imageToModelTransform);
+            }
             int dataBufferType = ImageManager.getDataBufferType(band.getDataType());
             GeoTiffMultiLevelSource multiLevelSource = new GeoTiffMultiLevelSource(geoTiffImageReader, dataBufferType, productImageBounds, preferredTileSize, bandIndex, band.getGeoCoding(), isGlobalShifted180);
             band.setSourceImage(new DefaultMultiLevelImage(multiLevelSource));
@@ -264,8 +266,12 @@ public class GeoTiffProductReader extends AbstractProductReader {
         return product;
     }
 
-    protected GeoCoding buildBandGeoCoding(int bandWidth, int bandHeight) {
+    protected AffineTransform2D buildBandImageToModelTransform(int bandWidth, int bandHeight) {
         return null;
+    }
+
+    protected GeoCoding buildBandGeoCoding(GeoCoding productGeoCoding, int bandWidth, int bandHeight) throws Exception {
+        return productGeoCoding;
     }
 
     public static Product buildProductWithoutDimapHeader(Path productPath, String productType, TiffFileInfo tiffInfo, TIFFRenderedImage baseImage, Dimension productSize)

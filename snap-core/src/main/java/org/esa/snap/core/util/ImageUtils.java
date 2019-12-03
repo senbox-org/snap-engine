@@ -97,29 +97,8 @@ public class ImageUtils {
         return tileCount;
     }
 
-    public static int computeTileLeftX(int tileColumnIndex, int tileWidth) {
-        return tileColumnIndex * tileWidth;
-    }
-
-    public static int computeTileRightX(int tileColumnIndex, int tileWidth) {
-        return (tileColumnIndex+1) * tileWidth;
-    }
-
-    public static int computeTileTopY(int tileRowIndex, int tileHeight) {
-        return tileRowIndex * tileHeight;
-    }
-
-    public static int computeTileBottomY(int tileRowIndex, int tileHeight) {
-        return (tileRowIndex+1) * tileHeight;
-    }
-
-    public static int scaleValue(int source, int level) {
-        int size = source >> level;
-        int sizeTest = size << level;
-        if (sizeTest < source) {
-            size++;
-        }
-        return size;
+    public static int computeLevelSize(int sourceSize, int level) {
+        return (int) Math.ceil(sourceSize / Math.pow(2, level));
     }
 
     public static Dimension computeTileDimensionAtResolutionLevel(Dimension tileSize, int level) {
@@ -127,8 +106,8 @@ public class ImageUtils {
     }
 
     public static Dimension computeTileDimensionAtResolutionLevel(int fullTileWidth, int fullTileHeight, int level) {
-        int width = scaleValue(fullTileWidth, level);
-        int height = scaleValue(fullTileHeight, level);
+        int width = computeLevelSize(fullTileWidth, level);
+        int height = computeLevelSize(fullTileHeight, level);
         return getTileDimension(width, height);
     }
 

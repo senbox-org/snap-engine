@@ -41,7 +41,7 @@ public class GeoTiffTileOpImage extends SingleBandedOpImage {
         this.geoTiffImageReader = geoTiffImageReader;
         this.bandIndex = bandIndex;
         this.isGlobalShifted180 = isGlobalShifted180;
-        this.levelTileOffset = new Point(ImageUtils.scaleValue(tileOffset.x, resolutionLevel.getIndex()), ImageUtils.scaleValue(tileOffset.y, resolutionLevel.getIndex()));
+        this.levelTileOffset = new Point(ImageUtils.computeLevelSize(tileOffset.x, resolutionLevel.getIndex()), ImageUtils.computeLevelSize(tileOffset.y, resolutionLevel.getIndex()));
         this.imageOffset = new Point(imageBounds.x, imageBounds.y);
         this.levelImageSupport = new LevelImageSupport(imageBounds.width, imageBounds.height, resolutionLevel);
     }

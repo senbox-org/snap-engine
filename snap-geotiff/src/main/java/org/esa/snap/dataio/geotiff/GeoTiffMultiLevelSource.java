@@ -2,24 +2,16 @@ package org.esa.snap.dataio.geotiff;
 
 import com.bc.ceres.glevel.support.AbstractMultiLevelSource;
 import com.bc.ceres.glevel.support.DefaultMultiLevelModel;
-import com.bc.ceres.glevel.support.DefaultMultiLevelSource;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.image.TileImageDisposer;
 import org.esa.snap.core.util.ImageUtils;
 
-import javax.media.jai.BorderExtender;
-import javax.media.jai.ImageLayout;
-import javax.media.jai.Interpolation;
-import javax.media.jai.JAI;
-import javax.media.jai.RenderedOp;
+import javax.media.jai.*;
 import javax.media.jai.operator.BorderDescriptor;
 import javax.media.jai.operator.MosaicDescriptor;
 import javax.media.jai.operator.TranslateDescriptor;
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.awt.image.RenderedImage;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,8 +27,8 @@ public class GeoTiffMultiLevelSource extends AbstractMultiLevelSource {
 
     private final GeoTiffImageReader geoTiffImageReader;
     private final int dataBufferType;
-    private Dimension tileSize;
-    private Rectangle imageBounds;
+    private final Dimension tileSize;
+    private final Rectangle imageBounds;
     private final int bandIndex;
     private final TileImageDisposer tileImageDisposer;
     private final boolean isGlobalShifted180;
@@ -73,34 +65,38 @@ public class GeoTiffMultiLevelSource extends AbstractMultiLevelSource {
 
     @Override
     protected RenderedImage createImage(int level) {
-        int numXTiles = ImageUtils.computeTileCount(this.imageBounds.width, this.tileSize.width);
-        int numYTiles = ImageUtils.computeTileCount(this.imageBounds.height, this.tileSize.height);
+        int columnTileCount = ImageUtils.computeTileCount(this.imageBounds.width, this.tileSize.width);
+        int rowTileCount = ImageUtils.computeTileCount(this.imageBounds.height, this.tileSize.height);
 
-        int tileCount = numXTiles * numYTiles;
-        List<RenderedImage> tileImages = Collections.synchronizedList(new ArrayList<>(tileCount));
-        double factor = 1.0 / Math.pow(2, level);
-        for (int tileRowIndex = 0; tileRowIndex < numYTiles; tileRowIndex++) {
-            for (int tileColumnIndex = 0; tileColumnIndex < numXTiles; tileColumnIndex++) {
+        int imageLevelWidth = ImageUtils.computeLevelSize(this.imageBounds.width, level);
+        int imageLevelHeight = ImageUtils.computeLevelSize(this.imageBounds.height, level);
+
+        List<RenderedImage> tileImages = Collections.synchronizedList(new ArrayList<>(columnTileCount * rowTileCount));
+        double factor = 1.0d / Math.pow(2, level);
+        float xTranslateWidth = (float) (this.tileSize.width * factor);
+        float yTranslateHeight = (float) (this.tileSize.height * factor);
+        for (int tileRowIndex = 0; tileRowIndex < rowTileCount; tileRowIndex++) {
+            int tileOffsetY = tileRowIndex * this.tileSize.height;
+            int tileHeight = this.tileSize.height;
+            if (tileRowIndex == rowTileCount - 1) {
+                tileHeight = this.imageBounds.height - tileOffsetY; // the last row
+            }
+            for (int tileColumnIndex = 0; tileColumnIndex < columnTileCount; tileColumnIndex++) {
                 int tileOffsetX = tileColumnIndex * this.tileSize.width;
-                int tileOffsetY = tileRowIndex * this.tileSize.height;
                 int tileWidth = this.tileSize.width;
-                if (tileColumnIndex == numXTiles-1) {
-                    tileWidth = this.imageBounds.width - tileOffsetX;
+                if (tileColumnIndex == columnTileCount - 1) {
+                    tileWidth = this.imageBounds.width - tileOffsetX; // the last column
                 }
-                int tileHeight = this.tileSize.height;
-                if (tileRowIndex == numYTiles - 1) {
-                    tileHeight = this.imageBounds.height - tileOffsetY;
-                }
-                Dimension currentTileSize = new Dimension(tileWidth, tileHeight);
 
+                Dimension currentTileSize = new Dimension(tileWidth, tileHeight);
                 Point tileOffset = new Point(tileOffsetX, tileOffsetY);
                 GeoTiffTileOpImage geoTiffTileOpImage = new GeoTiffTileOpImage(this.geoTiffImageReader, getModel(), this.dataBufferType, this.bandIndex,
                                                                                 this.imageBounds, currentTileSize, tileOffset, level, this.isGlobalShifted180);
                 this.tileImageDisposer.registerForDisposal(geoTiffTileOpImage);
 
-                float xTrans = (float) (tileOffsetX * factor);
-                float yTrans = (float) (tileOffsetY * factor);
-                RenderedOp opImage = TranslateDescriptor.create(geoTiffTileOpImage, xTrans, yTrans, Interpolation.getInstance(Interpolation.INTERP_NEAREST), null);
+                float translateY = computeTranslateOffset(tileRowIndex, rowTileCount, yTranslateHeight, geoTiffTileOpImage.getHeight(), imageLevelHeight);
+                float translateX = computeTranslateOffset(tileColumnIndex, columnTileCount, xTranslateWidth, geoTiffTileOpImage.getWidth(), imageLevelWidth);
+                RenderedOp opImage = TranslateDescriptor.create(geoTiffTileOpImage, translateX, translateY, Interpolation.getInstance(Interpolation.INTERP_NEAREST), null);
                 tileImages.add(opImage);
             }
         }
@@ -109,33 +105,43 @@ public class GeoTiffMultiLevelSource extends AbstractMultiLevelSource {
             return null;
         }
 
-        Dimension defaultTileSize = JAI.getDefaultTileSize();
-
         ImageLayout imageLayout = new ImageLayout();
         imageLayout.setMinX(0);
         imageLayout.setMinY(0);
-        imageLayout.setTileWidth(defaultTileSize.width);
-        imageLayout.setTileHeight(defaultTileSize.height);
+        imageLayout.setTileWidth(this.tileSize.width);
+        imageLayout.setTileHeight(this.tileSize.height);
         imageLayout.setTileGridXOffset(0);
         imageLayout.setTileGridYOffset(0);
-
+        RenderingHints hints = new RenderingHints(JAI.KEY_IMAGE_LAYOUT, imageLayout);
         RenderedImage[] sources = tileImages.toArray(new RenderedImage[tileImages.size()]);
-        RenderedOp mosaicOp = MosaicDescriptor.create(sources, MosaicDescriptor.MOSAIC_TYPE_OVERLAY, null, null, null, null, new RenderingHints(JAI.KEY_IMAGE_LAYOUT, imageLayout));
 
-        int fittingRectWidth = ImageUtils.scaleValue(this.imageBounds.width, level);
-        int fittingRectHeight = ImageUtils.scaleValue(this.imageBounds.height, level);
+        RenderedOp mosaicOp = MosaicDescriptor.create(sources, MosaicDescriptor.MOSAIC_TYPE_OVERLAY, null, null, null, null, hints);
 
-        Rectangle fitRect = new Rectangle(0, 0, fittingRectWidth, fittingRectHeight);
-        Rectangle destBounds = DefaultMultiLevelSource.getLevelImageBounds(fitRect, Math.pow(2.0, level));
-
-        BorderExtender borderExtender = BorderExtender.createInstance(BorderExtender.BORDER_COPY);
-
-        if (mosaicOp.getWidth() < destBounds.width || mosaicOp.getHeight() < destBounds.height) {
-            int rightPad = destBounds.width - mosaicOp.getWidth();
-            int bottomPad = destBounds.height - mosaicOp.getHeight();
+        if (mosaicOp.getWidth() > imageLevelWidth) {
+            throw new IllegalStateException("The mosaic operator width " + mosaicOp.getWidth() + " > than the image width " + imageLevelWidth + ".");
+        }
+        if (mosaicOp.getHeight() > imageLevelHeight) {
+            throw new IllegalStateException("The mosaic operator height " + mosaicOp.getWidth() + " > than the image height " + imageLevelHeight + ".");
+        }
+        if (mosaicOp.getWidth() < imageLevelWidth || mosaicOp.getHeight() < imageLevelHeight) {
+            int rightPad = imageLevelWidth - mosaicOp.getWidth();
+            int bottomPad = imageLevelHeight - mosaicOp.getHeight();
+            BorderExtender borderExtender = BorderExtender.createInstance(BorderExtender.BORDER_COPY);
             mosaicOp = BorderDescriptor.create(mosaicOp, 0, rightPad, 0, bottomPad, borderExtender, null);
         }
 
         return mosaicOp;
+    }
+
+    private static float computeTranslateOffset(int tileIndex, int tileCount, float translateSize, int imageSize, int imageLevelTotalSize) {
+        float translateOffset = tileIndex * translateSize;
+        if (translateOffset + imageSize > imageLevelTotalSize) {
+            if (tileIndex == tileCount - 1) {
+                translateOffset = imageLevelTotalSize - imageSize; // the last row
+            } else {
+                throw new IllegalStateException("Invalid values: translateSize="+translateSize+", translateOffset="+translateOffset+", imageSize="+imageSize+", imageLevelTotalSize="+imageLevelTotalSize);
+            }
+        }
+        return translateOffset;
     }
 }
