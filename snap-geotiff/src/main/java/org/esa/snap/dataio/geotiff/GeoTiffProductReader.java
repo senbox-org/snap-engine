@@ -27,7 +27,6 @@ import org.apache.commons.lang.StringUtils;
 import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.MetadataInspector;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
-import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.dataio.dimap.DimapProductHelpers;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.ColorPaletteDef;
@@ -62,6 +61,7 @@ import org.geotools.coverage.grid.io.imageio.geotiff.GeoTiffIIOMetadataDecoder;
 import org.geotools.coverage.grid.io.imageio.geotiff.GeoTiffMetadata2CRSAdapter;
 import org.geotools.coverage.grid.io.imageio.geotiff.PixelScale;
 import org.geotools.coverage.grid.io.imageio.geotiff.TiePoint;
+import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.geotools.factory.Hints;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.referencing.operation.matrix.GeneralMatrix;
@@ -102,6 +102,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
 
     private ImageInputStreamSpi imageInputStreamSpi;
     private GeoTiffImageReader geoTiffImageReader;
+    private static Rectangle subsetRegion;
 
     public GeoTiffProductReader(ProductReaderPlugIn readerPlugIn) {
         this(readerPlugIn, ImageRegistryUtils.registerImageInputStreamSpi());
@@ -194,11 +195,17 @@ public class GeoTiffProductReader extends AbstractProductReader {
     }
 
     public Product readProduct(GeoTiffImageReader geoTiffImageReader, Path productPath, Rectangle productImageBounds) throws Exception {
+        if(subsetRegion != null){
+            subsetRegion = null;
+        }
         if ((productImageBounds.x + productImageBounds.width) > geoTiffImageReader.getImageWidth()) {
             throw new IllegalStateException("The coordinates are out of bounds: product.x="+productImageBounds.x+", product.width="+productImageBounds.width+", image.width=" + geoTiffImageReader.getImageWidth());
         }
         if ((productImageBounds.y + productImageBounds.height) > geoTiffImageReader.getImageHeight()) {
             throw new IllegalStateException("The coordinates are out of bounds: product.y="+productImageBounds.y+", product.height="+productImageBounds.height+", image.height=" + geoTiffImageReader.getImageHeight());
+        }
+        if(!productImageBounds.equals(new Rectangle(0,0,geoTiffImageReader.getImageWidth(),geoTiffImageReader.getImageHeight()))) {
+            subsetRegion = productImageBounds;
         }
 
         TIFFImageMetadata imageMetadata = geoTiffImageReader.getImageMetadata();
@@ -438,6 +445,14 @@ public class GeoTiffProductReader extends AbstractProductReader {
                 crs = DefaultGeographicCRS.WGS84;
             }
         }
+
+       if(subsetRegion != null){
+           double stepX = metadataDecoder.getModelPixelScales().getScaleX();
+           double stepY = metadataDecoder.getModelPixelScales().getScaleY();
+           double originX = ((AffineTransform2D) toModel).getTranslateX();
+           double originY = ((AffineTransform2D) toModel).getTranslateY();
+           return new CrsGeoCoding(crs, subsetRegion.width,subsetRegion.height,originX + subsetRegion.x, originY - subsetRegion.y,stepX,stepY);
+       }
         Rectangle imageBounds = new Rectangle(productSize.width, productSize.height);
         return new CrsGeoCoding(crs, imageBounds, (AffineTransform) toModel);
     }
@@ -563,7 +578,6 @@ public class GeoTiffProductReader extends AbstractProductReader {
         String[] names = Utils.findSuitableLatLonNames(product);
         final TiePointGrid latGrid = new TiePointGrid(names[0], width, height, xMin, yMin, xDiff, yDiff, lats);
         final TiePointGrid lonGrid = new TiePointGrid(names[1], width, height, xMin, yMin, xDiff, yDiff, lons);
-
         product.addTiePointGrid(latGrid);
         product.addTiePointGrid(lonGrid);
         final SortedMap<Integer, GeoKeyEntry> geoKeyEntries = info.getGeoKeyEntries();
