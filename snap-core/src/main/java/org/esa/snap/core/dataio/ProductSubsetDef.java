@@ -198,6 +198,20 @@ public class ProductSubsetDef {
         return getNodeNameIndex(name) >= 0;
     }
 
+    public boolean containsBandNameIgnoreCase(String name) {
+        if (isNodeAccepted("allBands")) {
+            return true;
+        }
+        return isNodeAccepted(name);
+    }
+
+    public boolean containsMaskNameIgnoreCase(String name) {
+        if (isNodeAccepted("allMasks")) {
+            return true;
+        }
+        return isNodeAccepted(name);
+    }
+
     /**
      * Checks whether or not a node (a band, a tie-point grid or metadata element) with the given name will be part of
      * the product subset.

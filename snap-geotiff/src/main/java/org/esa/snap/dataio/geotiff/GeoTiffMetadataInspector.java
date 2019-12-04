@@ -52,9 +52,7 @@ public class GeoTiffMetadataInspector implements MetadataInspector {
             }
 
             return metadata;
-        } catch (RuntimeException exception) {
-            throw exception;
-        } catch (IOException exception) {
+        } catch (RuntimeException | IOException exception) {
             throw exception;
         } catch (Exception exception) {
             throw new IOException(exception);

@@ -57,6 +57,18 @@ import java.util.Vector;
  */
 public class ImageUtils {
 
+    public static Rectangle computeBandBoundsBasedOnPercent(Rectangle productBounds, int defaultProductWidth, int defaultProductHeight, int defaultBandWidth, int defaultBandHeight) {
+        float productOffsetXPercent = productBounds.x / (float)defaultProductWidth;
+        float productOffsetYPercent = productBounds.y / (float)defaultProductHeight;
+        float productWidthPercent = productBounds.width / (float)defaultProductWidth;
+        float productHeightPercent = productBounds.height / (float)defaultProductHeight;
+        int bandOffsetX = (int)(productOffsetXPercent * defaultBandWidth);
+        int bandOffsetY = (int)(productOffsetYPercent * defaultBandHeight);
+        int bandWidth = (int)(productWidthPercent * defaultBandWidth);
+        int bandHeight = (int)(productHeightPercent * defaultBandHeight);
+        return new Rectangle(bandOffsetX, bandOffsetY, bandWidth, bandHeight);
+    }
+
     private static int computeBandValue(int productValue, double productOriginPosition, double bandPixelStep) {
         return (int)(productValue * productOriginPosition / bandPixelStep);
     }
@@ -85,7 +97,7 @@ public class ImageUtils {
         return bandBounds;
     }
 
-    public static Rectangle computeImageBounds(int defaultImageWidth, int defaultImageHeight, ProductSubsetDef subsetDef) {
+    public static Rectangle computeProductBounds(int defaultImageWidth, int defaultImageHeight, ProductSubsetDef subsetDef) {
         Rectangle imageBounds = null;
         if (subsetDef != null) {
             imageBounds = subsetDef.getRegion();
