@@ -20,6 +20,8 @@ import org.esa.snap.core.util.DefaultPropertyMap;
 import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.PropertyMap;
 import org.esa.snap.core.util.math.MathUtils;
+import org.esa.snap.core.util.math.LogLinearTransform;
+
 
 import java.awt.Color;
 import java.io.BufferedWriter;
@@ -37,7 +39,18 @@ import java.util.Vector;
  * <p> This special implementation of a gradation curve also provides separate color values for each of the tie points
  * contained in the curve. This allows a better image interpretation because certain colors correspond to certain sample
  * values even if the curve points are used to create color gradient palettes.
+ *
+ * @author Brockmann Consult
+ * @author Daniel Knowles (NASA)
+ * @author Bing Yang (NASA)
+ * @version $Revision$ $Date$
  */
+
+
+// DEC 2019 - Knowles / Yang
+//          - Added capability to export color palette in cpt and pal formats.
+
+
 public class ColorPaletteDef implements Cloneable  {
 
     private final static String _PROPERTY_KEY_NUM_POINTS = "numPoints";
@@ -318,6 +331,146 @@ public class ColorPaletteDef implements Cloneable  {
         propertyMap.store(file.toPath(), "BEAM Colour Palette Definition File"); /*I18N*/
     }
 
+    /**
+     * Stores a 256 point generic color palette
+     *
+     * @param colorPaletteDef thje color palette definition
+     * @param file            the file
+     * @throws IOException if an I/O error occurs
+     */
+    public static void storePal(ColorPaletteDef colorPaletteDef, File file) throws IOException {
+
+        ArrayList<String> fileContents = new ArrayList<String>();
+        String DELIMITER = " ";
+
+        double min = colorPaletteDef.getMinDisplaySample();
+        double max = colorPaletteDef.getMaxDisplaySample();
+        double sample;
+
+        for (int i = 0; i < 256; i++) {
+            double weight = i / 255.0;
+
+            if (colorPaletteDef.isLogScaled()) {
+                sample = LogLinearTransform.getLogarithmicValueUsingLinearWeight(weight, min, max);
+            } else {
+                sample = weight * (max - min) + min;
+            }
+            Color color = colorPaletteDef.computeColor(sample);
+            fileContents.add(getCptColorEntry(color, DELIMITER));
+
+        }
+
+        printStringArrayListToFile(file, "Generic 256 Point RGB Color Palette", fileContents);
+    }
+
+    /**
+     * Stores  color palette in cpt format
+     *
+     * @param colorPaletteDef thje color palette definition
+     * @param file            the file
+     * @throws IOException if an I/O error occurs
+     */
+    public static void storeCpt(ColorPaletteDef colorPaletteDef, File file) throws IOException {
+
+        ArrayList<String> cptFileContents = new ArrayList<String>();
+        String DELIMITER = " \t";
+        String DELIMITER_BIG = " \t\t";
+
+        final Point[] points = colorPaletteDef.getPoints();
+        final int numPoints = points.length;
+        boolean discrete = colorPaletteDef.isDiscrete();
+
+
+        int numEntries;
+
+        if (discrete) {
+            numEntries = numPoints;
+        } else {
+            numEntries = numPoints - 1;
+        }
+
+        for (int i = 0; i < numEntries; i++) {
+            String currLine = null;
+
+//            this code would be used if one wanted to include values
+            double currValue = colorPaletteDef.getPointAt(i).getSample();
+            String currValueString = Double.toString(currValue);
+
+            double nextValue;
+            String nextValueString = null;
+
+
+            Color currColor = colorPaletteDef.getPointAt(i).getColor();
+            String currColorString = getCptColorEntry(currColor, DELIMITER);
+
+//            String currValueString = Integer.toString(i) + ".0";
+//            String nextValueString = Integer.toString(i + 1) + ".0";
+
+            if (discrete) {
+                if (i == numPoints - 1) {
+                    if ((i - 1) >= 0) {
+                        double delta = colorPaletteDef.getPointAt(i).getSample() - colorPaletteDef.getPointAt(i - 1).getSample();
+                        nextValue = colorPaletteDef.getPointAt(i).getSample() + delta;
+                        nextValueString = Double.toString(nextValue);
+                    }
+                } else {
+                    nextValue = colorPaletteDef.getPointAt(i + 1).getSample();
+                    nextValueString = Double.toString(nextValue);
+                }
+
+                if (nextValueString != null) {
+                    currLine = "  " + currValueString + DELIMITER + currColorString + DELIMITER_BIG + nextValueString + DELIMITER + currColorString;
+                }
+            } else {
+                nextValue = colorPaletteDef.getPointAt(i + 1).getSample();
+                nextValueString = Double.toString(nextValue);
+                Color nextColor = colorPaletteDef.getPointAt(i + 1).getColor();
+                String nextColorString = getCptColorEntry(nextColor, DELIMITER);
+                currLine = "  " + currValueString + DELIMITER + currColorString + DELIMITER_BIG + nextValueString + DELIMITER + nextColorString;
+            }
+
+            if (currLine != null) {
+                cptFileContents.add(currLine);
+            }
+
+        }
+
+
+        printStringArrayListToFile(file, "CPT Format Color Palette", cptFileContents);
+    }
+
+    private static String getCptColorEntry(Color color, String DELIMITER) {
+
+        String colorRed = Integer.toString(color.getRed());
+        String colorGreen = Integer.toString(color.getGreen());
+        String colorBlue = Integer.toString(color.getBlue());
+        String colorString = colorRed + DELIMITER + colorGreen + DELIMITER + colorBlue;
+
+        return colorString;
+
+    }
+
+    private static void printStringArrayListToFile(File file, String header, ArrayList<String> contentsArrayList) {
+
+        BufferedWriter bos = null;
+        try {
+            bos = new BufferedWriter(new FileWriter(file));
+
+            bos.write("#" + header);
+            bos.newLine();
+
+            for (String currLine : contentsArrayList) {
+                bos.write(currLine);
+                bos.newLine();
+            }
+
+            bos.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+    }
+
     private void check2PointsMinimum() {
         if (getNumPoints() == 2) {
             throw new IllegalStateException("gradation curve must at least have 2 points");
@@ -344,6 +497,42 @@ public class ColorPaletteDef implements Cloneable  {
             colors[i] = points.get(i).getColor();
         }
         return colors;
+    }
+
+    private Color computeColor(final double sample) {
+        for (int i = 0; i < getNumPoints() - 1; i++) {
+            final Point p1 = getPointAt(i);
+            final Point p2 = getPointAt(i + 1);
+            final double sample1 = p1.getSample();
+            final double sample2 = p2.getSample();
+            final Color color1 = p1.getColor();
+            final Color color2 = p2.getColor();
+            if (sample >= sample1 && sample <= sample2) {
+                if (discrete) {
+                    return color1;
+                } else {
+                    return computeColor(sample, sample1, sample2, color1, color2);
+                }
+            }
+        }
+        return Color.BLACK;
+    }
+
+    private Color computeColor(double sample, double sample1, double sample2, Color color1, Color color2) {
+        final double f = (sample - sample1) / (sample2 - sample1);
+        final double r1 = color1.getRed();
+        final double r2 = color2.getRed();
+        final double g1 = color1.getGreen();
+        final double g2 = color2.getGreen();
+        final double b1 = color1.getBlue();
+        final double b2 = color2.getBlue();
+        final double a1 = color1.getAlpha();
+        final double a2 = color2.getAlpha();
+        final int red = (int) MathUtils.roundAndCrop(r1 + f * (r2 - r1), 0L, 255L);
+        final int green = (int) MathUtils.roundAndCrop(g1 + f * (g2 - g1), 0L, 255L);
+        final int blue = (int) MathUtils.roundAndCrop(b1 + f * (b2 - b1), 0L, 255L);
+        final int alpha = (int) MathUtils.roundAndCrop(a1 + f * (a2 - a1), 0L, 255L);
+        return new Color(red, green, blue, alpha);
     }
 
     @Override

@@ -17,6 +17,7 @@ package org.esa.snap.core.datamodel;
 
 import com.bc.ceres.core.Assert;
 import org.esa.snap.core.image.ImageManager;
+import org.esa.snap.core.util.math.LogLinearTransform;
 
 import java.awt.Color;
 import java.awt.Transparency;
@@ -33,7 +34,7 @@ import java.awt.image.IndexColorModel;
  * @version $Revision$ $Date$
  */
 // OCT 2019 - Knowles
-//          - Added methods and calls to these methods which transform weighted points between logarithmic scaling and
+//          - Added logic to transform weighted points between logarithmic scaling and
 //            linear scaling in both directions.
 
 
@@ -395,17 +396,17 @@ public class ImageInfo implements Cloneable {
                     double linearWeight;
                     if (isSourceLogScaled) {
                         double currentSourceLogValue = sourceCPD.getPointAt(i).getSample();
-                        linearWeight = getLinearWeightFromLogValue(currentSourceLogValue, minSourceValue, maxSourceValue);
+                        linearWeight = LogLinearTransform.getLinearWeightFromLogValue(currentSourceLogValue, minSourceValue, maxSourceValue);
 
                     } else {
                         double currentSourceValue = sourceCPD.getPointAt(i).getSample();
                         linearWeight = (currentSourceValue - minSourceValue) / (maxSourceValue - minSourceValue);
                     }
 
-                    double currentLinearTargetValue = getLinearValue(linearWeight, minTargetValue, maxTargetValue);
+                    double currentLinearTargetValue = LogLinearTransform.getLinearValue(linearWeight, minTargetValue, maxTargetValue);
 
                     if (isTargetLogScaled) {
-                        double currentLogTargetValue = getLogarithmicValue(currentLinearTargetValue, minTargetValue, maxTargetValue);
+                        double currentLogTargetValue = LogLinearTransform.getLogarithmicValue(currentLinearTargetValue, minTargetValue, maxTargetValue);
                         targetCPD.getPointAt(i).setSample(currentLogTargetValue);
                     } else {
                         targetCPD.getPointAt(i).setSample(currentLinearTargetValue);
@@ -430,101 +431,6 @@ public class ImageInfo implements Cloneable {
     }
 
 
-    private static double getLogarithmicValue(double linearValue, double min, double max) {
-
-        // Prevent extrapolation which could occur due to machine roundoffs in the calculations
-        if (linearValue == min) {
-            return min;
-        }
-        if (linearValue == max) {
-            return max;
-        }
-
-        double b = Math.log(max / min) / (max - min);
-        double a = min / (Math.exp(b * min));
-        double logValue = a * Math.exp(b * linearValue);
-
-        // Prevent UNEXPECTED interpolation/extrapolation which could occur due to machine roundoffs in the calculations
-        if (linearValue > min && logValue < min) {
-            return min;
-        }
-        if (linearValue < max && logValue > max) {
-            return max;
-        }
-        if (linearValue < min && logValue >= min) {
-            return min - (max - min) * FORCED_CHANGE_FACTOR;
-        }
-        if (linearValue > max && logValue <= max) {
-            return max + (max - min) * FORCED_CHANGE_FACTOR;
-        }
-
-        return logValue;
-    }
-
-    private static double getLinearValue(double linearWeight, double min, double max) {
-
-        // Prevent extrapolation which could occur due to machine roundoffs in the calculations
-        if (linearWeight == 0) {
-            return min;
-        }
-        if (linearWeight == 1) {
-            return max;
-        }
-
-        double deltaNormalized = (max - min);
-        double linearValue = min + linearWeight * (deltaNormalized);
-
-        // Prevent UNEXPECTED interpolation/extrapolation which could occur due to machine roundoffs in the calculations
-        if (linearWeight > 0 && linearValue < min) {
-            return min;
-        }
-        if (linearWeight < 1 && linearValue > max) {
-            return max;
-        }
-        if (linearWeight < 0 && linearValue >= min) {
-            return min - (max - min) * FORCED_CHANGE_FACTOR;
-        }
-        if (linearWeight > 1 && linearValue <= max) {
-            return max + (max - min) * FORCED_CHANGE_FACTOR;
-        }
-
-        return linearValue;
-    }
-
-
-    private static double getLinearWeightFromLogValue(double logValue, double min, double max) {
-
-        // Prevent extrapolation which could occur due to machine roundoffs in the calculations
-        if (logValue == min) {
-            return 0;
-        }
-        if (logValue == max) {
-            return 1;
-        }
-
-        double b = Math.log(max / min) / (max - min);
-        double a = min / (Math.exp(b * min));
-
-//        double linearWeight = Math.log(logValue / a) / b;
-//        linearWeight = (linearWeight - min) / (max - min);
-        double linearWeight = ((Math.log(logValue / a) / b) - min) / (max - min);
-
-        // Prevent UNEXPECTED interpolation/extrapolation which could occur due to machine roundoffs in the calculations
-        if (logValue > min && linearWeight < 0) {
-            return 0;
-        }
-        if (logValue < max && linearWeight > 1) {
-            return 1;
-        }
-        if (logValue < min && linearWeight >= 0) {
-            return 0 - FORCED_CHANGE_FACTOR;
-        }
-        if (logValue > max && linearWeight <= 1) {
-            return 1 + FORCED_CHANGE_FACTOR;
-        }
-
-        return linearWeight;
-    }
 
 
     private static void alignNumPoints(ColorPaletteDef sourceCPD, ColorPaletteDef targetCPD) {
