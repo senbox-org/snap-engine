@@ -103,7 +103,6 @@ public class GeoTiffProductReader extends AbstractProductReader {
 
     private ImageInputStreamSpi imageInputStreamSpi;
     private GeoTiffImageReader geoTiffImageReader;
-    private static Rectangle subsetRegion;
 
     public GeoTiffProductReader(ProductReaderPlugIn readerPlugIn) {
         this(readerPlugIn, ImageRegistryUtils.registerImageInputStreamSpi());
@@ -196,15 +195,13 @@ public class GeoTiffProductReader extends AbstractProductReader {
     }
 
     public Product readProduct(GeoTiffImageReader geoTiffImageReader, Path productPath, Rectangle productImageBounds) throws Exception {
-        if(subsetRegion != null){
-            subsetRegion = null;
-        }
         if ((productImageBounds.x + productImageBounds.width) > geoTiffImageReader.getImageWidth()) {
             throw new IllegalStateException("The coordinates are out of bounds: product.x="+productImageBounds.x+", product.width="+productImageBounds.width+", image.width=" + geoTiffImageReader.getImageWidth());
         }
         if ((productImageBounds.y + productImageBounds.height) > geoTiffImageReader.getImageHeight()) {
             throw new IllegalStateException("The coordinates are out of bounds: product.y="+productImageBounds.y+", product.height="+productImageBounds.height+", image.height=" + geoTiffImageReader.getImageHeight());
         }
+        Rectangle subsetRegion = null;
         if(!productImageBounds.equals(new Rectangle(0,0,geoTiffImageReader.getImageWidth(),geoTiffImageReader.getImageHeight()))) {
             subsetRegion = productImageBounds;
         }
@@ -235,7 +232,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
 
         boolean isGlobalShifted180 = false;
         if (tiffInfo.isGeotiff()) {
-            isGlobalShifted180 = applyGeoCoding(tiffInfo, imageMetadata, product);
+            isGlobalShifted180 = applyGeoCoding(tiffInfo, imageMetadata, product, subsetRegion);
         }
 
         Dimension preferredTileSize = computePreferredTiling(isGlobalShifted180, geoTiffImageReader, product.getSceneRasterSize());
@@ -380,7 +377,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
         return new ImageInfo(new ColorPaletteDef(points, points.length));
     }
 
-    private static boolean applyGeoCoding(TiffFileInfo info, TIFFImageMetadata metadata, Product product) {
+    private static boolean applyGeoCoding(TiffFileInfo info, TIFFImageMetadata metadata, Product product, Rectangle subsetRegion) {
         boolean isGlobalShifted180 = false;
         if (info.containsField(GeoTIFFTagSet.TAG_MODEL_TIE_POINT)) {
             double[] tiePoints = info.getField(GeoTIFFTagSet.TAG_MODEL_TIE_POINT).getAsDoubles();
@@ -404,7 +401,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
 
         if (product.getSceneGeoCoding() == null) {
             try {
-                product.setSceneGeoCoding(buildGeoCoding(metadata, product.getSceneRasterSize()));
+                product.setSceneGeoCoding(buildGeoCoding(metadata, product.getSceneRasterSize(),subsetRegion));
             } catch (Exception ignored) {
                 // ignore
             }
@@ -433,7 +430,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
                 !Double.isNaN(pixelScales[1]) && !Double.isInfinite(pixelScales[1]);
     }
 
-    public static GeoCoding buildGeoCoding(TIFFImageMetadata metadata, Dimension productSize) throws Exception {
+    public static GeoCoding buildGeoCoding(TIFFImageMetadata metadata, Dimension productSize, Rectangle subsetRegion) throws Exception {
         final GeoTiffIIOMetadataDecoder metadataDecoder = new GeoTiffIIOMetadataDecoder(metadata);
         Hints hints = new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, true);
         final GeoTiffMetadata2CRSAdapter geoTiff2CRSAdapter = new GeoTiffMetadata2CRSAdapter(hints);
