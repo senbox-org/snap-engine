@@ -47,7 +47,7 @@ public class GeoTiffMetadataInspector implements MetadataInspector {
             }
 
             if (tiffInfo.isGeotiff()) {
-                GeoCoding geoCoding = GeoTiffProductReader.buildGeoCoding(imageMetadata, product.getSceneRasterSize());
+                GeoCoding geoCoding = GeoTiffProductReader.buildGeoCoding(imageMetadata, product.getSceneRasterSize(), null);
                 metadata.setGeoCoding(geoCoding);
             }
 
