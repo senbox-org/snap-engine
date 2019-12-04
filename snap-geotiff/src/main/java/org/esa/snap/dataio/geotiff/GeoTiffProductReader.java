@@ -27,6 +27,7 @@ import org.apache.commons.lang.StringUtils;
 import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.MetadataInspector;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
+import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.dataio.dimap.DimapProductHelpers;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.ColorPaletteDef;
@@ -127,7 +128,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
 
             Path productPath = null;
             if (productInput instanceof String) {
-                productPath = new File((String)productInput).toPath();
+                productPath = new File((String) productInput).toPath();
                 this.geoTiffImageReader = GeoTiffImageReader.buildGeoTiffImageReader(productPath);
             } else if (productInput instanceof File) {
                 productPath = ((File) productInput).toPath();
@@ -136,18 +137,16 @@ public class GeoTiffProductReader extends AbstractProductReader {
                 productPath = (Path) productInput;
                 this.geoTiffImageReader = GeoTiffImageReader.buildGeoTiffImageReader(productPath);
             } else if (productInput instanceof InputStream) {
-                this.geoTiffImageReader = new GeoTiffImageReader((InputStream)productInput, null);
+                this.geoTiffImageReader = new GeoTiffImageReader((InputStream) productInput, null);
             } else {
-                throw new IllegalArgumentException("Unknown input '"+productInput+"'.");
+                throw new IllegalArgumentException("Unknown input '" + productInput + "'.");
             }
 
             Product product = readProduct(this.geoTiffImageReader, productPath);
             success = true;
 
             return product;
-        } catch (RuntimeException exception) {
-            throw exception;
-        } catch (IOException exception) {
+        } catch (RuntimeException | IOException exception) {
             throw exception;
         } catch (Exception exception) {
             throw new IOException(exception);
@@ -190,20 +189,20 @@ public class GeoTiffProductReader extends AbstractProductReader {
     }
 
     public Product readProduct(GeoTiffImageReader geoTiffImageReader, Path productPath) throws Exception {
-        Rectangle productImageBounds = ImageUtils.computeImageBounds(geoTiffImageReader.getImageWidth(), geoTiffImageReader.getImageHeight(), getSubsetDef());
-        return readProduct(geoTiffImageReader, productPath, productImageBounds);
+        Rectangle productBounds = ImageUtils.computeProductBounds(geoTiffImageReader.getImageWidth(), geoTiffImageReader.getImageHeight(), getSubsetDef());
+        return readProduct(geoTiffImageReader, productPath, productBounds);
     }
 
     public Product readProduct(GeoTiffImageReader geoTiffImageReader, Path productPath, Rectangle productBounds) throws Exception {
-        if ((productImageBounds.x + productImageBounds.width) > geoTiffImageReader.getImageWidth()) {
+        if ((productBounds.x + productBounds.width) > geoTiffImageReader.getImageWidth()) {
             throw new IllegalStateException("The coordinates are out of bounds: product.x="+productBounds.x+", product.width="+productBounds.width+", image.width=" + geoTiffImageReader.getImageWidth());
         }
-        if ((productImageBounds.y + productImageBounds.height) > geoTiffImageReader.getImageHeight()) {
+        if ((productBounds.y + productBounds.height) > geoTiffImageReader.getImageHeight()) {
             throw new IllegalStateException("The coordinates are out of bounds: product.y="+productBounds.y+", product.height="+productBounds.height+", image.height=" + geoTiffImageReader.getImageHeight());
         }
         Rectangle subsetRegion = null;
-        if(!productImageBounds.equals(new Rectangle(0,0,geoTiffImageReader.getImageWidth(),geoTiffImageReader.getImageHeight()))) {
-            subsetRegion = productImageBounds;
+        if (!productBounds.equals(new Rectangle(0, 0, geoTiffImageReader.getImageWidth(), geoTiffImageReader.getImageHeight()))) {
+            subsetRegion = productBounds;
         }
 
         TIFFImageMetadata imageMetadata = geoTiffImageReader.getImageMetadata();
@@ -249,30 +248,40 @@ public class GeoTiffProductReader extends AbstractProductReader {
             product.setFileLocation(productPath.toFile());
         }
 
-        GeoCoding bandGeoCoding = buildBandGeoCoding(product.getSceneGeoCoding(), productImageBounds.width, productImageBounds.height);
-        AffineTransform2D imageToModelTransform = buildBandImageToModelTransform(productImageBounds.width, productImageBounds.height);
+        GeoCoding bandGeoCoding = buildBandGeoCoding(product.getSceneGeoCoding(), productBounds.width, productBounds.height);
+        AffineTransform2D imageToModelTransform = buildBandImageToModelTransform(productBounds.width, productBounds.height);
+        int bandCount = product.getNumBands();
         int bandIndex = 0;
-        for (int i = 0; i < product.getNumBands(); i++) {
+        for (int i = 0; i < bandCount; i++) {
             Band band = product.getBandAt(i);
-            if (band.getRasterWidth() != productImageBounds.width) {
-                throw new IllegalStateException("The band width "+ band.getRasterWidth() + " is not equal with the product with " + productImageBounds.width + ".");
+            if (subsetDef == null || subsetDef.containsBandNameIgnoreCase(band.getName())) {
+                if (band.getRasterWidth() != productBounds.width) {
+                    throw new IllegalStateException("The band width "+ band.getRasterWidth() + " is not equal with the product with " + productBounds.width + ".");
+                }
+                if (band.getRasterHeight() != productBounds.height) {
+                    throw new IllegalStateException("The band height "+ band.getRasterHeight() + " is not equal with the product height " + productBounds.height + ".");
+                }
+                if (bandGeoCoding != null) {
+                    band.setGeoCoding(bandGeoCoding);
+                }
+                if (imageToModelTransform != null) {
+                    band.setImageToModelTransform(imageToModelTransform);
+                }
+                int dataBufferType = ImageManager.getDataBufferType(band.getDataType());
+                GeoTiffMultiLevelSource multiLevelSource = new GeoTiffMultiLevelSource(geoTiffImageReader, dataBufferType, productBounds, preferredTileSize, bandIndex, band.getGeoCoding(), isGlobalShifted180);
+                band.setSourceImage(new DefaultMultiLevelImage(multiLevelSource));
+            } else {
+                if (product.removeBand(band)) {
+                    bandCount--;
+                    i--;
+                } else {
+                    throw new IllegalStateException("Failed to remove the band '" + band.getName()+"' from the product.");
+                }
             }
-            if (band.getRasterHeight() != productImageBounds.height) {
-                throw new IllegalStateException("The band height "+ band.getRasterHeight() + " is not equal with the product height " + productImageBounds.height + ".");
-            }
-            band.setGeoCoding(bandGeoCoding);
-            if (imageToModelTransform != null) {
-                band.setImageToModelTransform(imageToModelTransform);
-            }
-            int dataBufferType = ImageManager.getDataBufferType(band.getDataType());
-            GeoTiffMultiLevelSource multiLevelSource = new GeoTiffMultiLevelSource(geoTiffImageReader, dataBufferType, productImageBounds, preferredTileSize, bandIndex, band.getGeoCoding(), isGlobalShifted180);
-            band.setSourceImage(new DefaultMultiLevelImage(multiLevelSource));
             if (!(band instanceof VirtualBand || band instanceof FilterBand)) {
                 bandIndex++;
             }
         }
-
-        TiffTagToMetadataConverter.addTiffTagsToMetadata(imageMetadata, tiffInfo, product.getMetadataRoot());
 
         return product;
     }
