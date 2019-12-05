@@ -15,7 +15,6 @@
  */
 package org.esa.snap.core.dataio;
 
-import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.util.Guardian;
 
 import java.awt.Dimension;
@@ -196,20 +195,6 @@ public class ProductSubsetDef {
      */
     public boolean containsNodeName(String name) {
         return getNodeNameIndex(name) >= 0;
-    }
-
-    public boolean containsBandNameIgnoreCase(String name) {
-        if (isNodeAccepted("allBands")) {
-            return true;
-        }
-        return isNodeAccepted(name);
-    }
-
-    public boolean containsMaskNameIgnoreCase(String name) {
-        if (isNodeAccepted("allMasks")) {
-            return true;
-        }
-        return isNodeAccepted(name);
     }
 
     /**

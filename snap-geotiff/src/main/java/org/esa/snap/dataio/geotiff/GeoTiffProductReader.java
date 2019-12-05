@@ -66,7 +66,6 @@ import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.geotools.factory.Hints;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.referencing.operation.matrix.GeneralMatrix;
-import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.geotools.referencing.operation.transform.ProjectiveTransform;
 import org.jdom.Document;
 import org.jdom.input.DOMBuilder;
@@ -254,7 +253,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
         int bandIndex = 0;
         for (int i = 0; i < bandCount; i++) {
             Band band = product.getBandAt(i);
-            if (subsetDef == null || subsetDef.containsBandNameIgnoreCase(band.getName())) {
+            if (subsetDef == null || subsetDef.isNodeAccepted(band.getName())) {
                 if (band.getRasterWidth() != productBounds.width) {
                     throw new IllegalStateException("The band width "+ band.getRasterWidth() + " is not equal with the product with " + productBounds.width + ".");
                 }
