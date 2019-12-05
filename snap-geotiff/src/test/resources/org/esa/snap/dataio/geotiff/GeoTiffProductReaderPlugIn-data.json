@@ -34,6 +34,11 @@
             "id": "ESACCI-LC-Map-300m-2000-V1_0",
             "relativePath": "applications/generic_reader/GeoTIFF/ESACCI-LC-Map-300m-2000-V1.0.tif",
             "description": "GeoTIFF data product"
+        },
+        {
+            "id": "t011949_corr",
+            "relativePath": "applications/generic_reader/GeoTIFF/t011949_corr.tif",
+            "description": "GeoTIFF data product"
         }
     ]
 }
