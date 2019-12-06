@@ -52,13 +52,6 @@
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.esa.snap</groupId>
-            <artifactId>snap-reader-tests</artifactId>
-            <type>test-jar</type>
-            <scope>test</scope>
-            <version>${snap.version}</version>
-        </dependency>
 
     </dependencies>
 
