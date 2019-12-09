@@ -208,7 +208,7 @@ public class Utils {
             final Node node = element.getElementsByTagName("Item").item(i);
             final Node child = node.getFirstChild();
             final CharacterData cd = (CharacterData) child;
-            if (node.hasAttributes()) {
+            if (node.hasAttributes() && cd != null) {
                 for (int j = 0; j < node.getAttributes().getLength(); j++) {
                     final Node attr = node.getAttributes().item(j);
                     if (attr.getNodeName().equals("name")) {
