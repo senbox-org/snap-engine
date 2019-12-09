@@ -241,7 +241,7 @@ public class MappedByteBufferRunner {
 
         @Override
         public float[] createSamples() {
-            final Random random = new Random(RandomUtils.seed())
+            final Random random = new Random(RandomUtils.seed());
             final float[] samples = new float[(int) (random.nextDouble() * 11)];
             for (int i = 0; i < samples.length; i++) {
                 samples[i] = 0.1f * i;
