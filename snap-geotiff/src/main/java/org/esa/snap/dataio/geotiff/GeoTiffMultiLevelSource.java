@@ -133,6 +133,14 @@ public class GeoTiffMultiLevelSource extends AbstractMultiLevelSource {
         return mosaicOp;
     }
 
+    public boolean isGlobalShifted180() {
+        return isGlobalShifted180;
+    }
+
+    public int getBandIndex() {
+        return bandIndex;
+    }
+
     private static float computeTranslateOffset(int tileIndex, int tileCount, float translateSize, int imageSize, int imageLevelTotalSize) {
         float translateOffset = tileIndex * translateSize;
         if (translateOffset + imageSize > imageLevelTotalSize) {

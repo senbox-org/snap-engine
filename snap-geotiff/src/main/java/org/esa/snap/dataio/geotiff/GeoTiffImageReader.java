@@ -136,6 +136,17 @@ public class GeoTiffImageReader implements Closeable {
         return dimension;
     }
 
+    public Dimension validateSize(int metadataImageWidth, int metadataImageHeight) throws IOException {
+        Dimension defaultBandSize = new Dimension(getImageWidth(), getImageHeight());
+        if (defaultBandSize.width != metadataImageWidth) {
+            throw new IllegalStateException("The width " + metadataImageWidth + " from the metadata file is not equal with the image width " + defaultBandSize.width + ".");
+        }
+        if (defaultBandSize.height != metadataImageHeight) {
+            throw new IllegalStateException("The height " + metadataImageHeight + " from the metadata file is not equal with the image height " + defaultBandSize.height + ".");
+        }
+        return defaultBandSize;
+    }
+
     private static TIFFImageReader buildImageReader(Object sourceImage) throws IOException {
         TIFFImageReader imageReader = null;
         ImageInputStream imageInputStream = ImageIO.createImageInputStream(sourceImage);

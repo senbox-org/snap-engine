@@ -81,18 +81,16 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
+import java.awt.image.DataBuffer;
 import java.awt.image.IndexColorModel;
+import java.awt.image.Raster;
 import java.awt.image.SampleModel;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.logging.Level;
 
 public class GeoTiffProductReader extends AbstractProductReader {
@@ -164,12 +162,48 @@ public class GeoTiffProductReader extends AbstractProductReader {
     }
 
     @Override
-    protected void readBandRasterDataImpl(int sourceOffsetX, int sourceOffsetY, int sourceWidthOLD, int sourceHeightOLD, int sourceStepX, int sourceStepY,
+    protected void readBandRasterDataImpl(int sourceOffsetX, int sourceOffsetY, int sourceWidth, int sourceHeight, int sourceStepX, int sourceStepY,
                                           Band destBand, int destOffsetX, int destOffsetY, int destWidth, int destHeight,
                                           ProductData destBuffer, ProgressMonitor pm)
                                           throws IOException {
 
-        throw new UnsupportedOperationException("Method not implemented");
+        DefaultMultiLevelImage defaultMultiLevelImage = (DefaultMultiLevelImage)destBand.getSourceImage();
+        GeoTiffMultiLevelSource geoTiffMultiLevelSource = (GeoTiffMultiLevelSource)defaultMultiLevelImage.getSource();
+        if (geoTiffMultiLevelSource.isGlobalShifted180()) {
+            //TODO Jean to be implemented
+            throw new UnsupportedOperationException("The method not implemented yet.");
+        } else {
+            Raster data;
+            synchronized (this.geoTiffImageReader) {
+                data = this.geoTiffImageReader.readRect(sourceOffsetX, sourceOffsetY, sourceStepX, sourceStepY, destOffsetX, destOffsetY, destWidth, destHeight);
+            }
+            DataBuffer dataBuffer = data.getDataBuffer();
+            SampleModel sampleModel = data.getSampleModel();
+            int dataBufferType = dataBuffer.getDataType();
+            int bandIndex = geoTiffMultiLevelSource.getBandIndex();
+            boolean isInteger = (dataBufferType == DataBuffer.TYPE_SHORT || dataBufferType == DataBuffer.TYPE_USHORT || dataBufferType == DataBuffer.TYPE_INT);
+            if (isInteger && destBuffer.getElems() instanceof int[]) {
+                sampleModel.getSamples(0, 0, data.getWidth(), data.getHeight(), bandIndex, (int[]) destBuffer.getElems(), dataBuffer);
+            } else if (dataBufferType == DataBuffer.TYPE_FLOAT && destBuffer.getElems() instanceof float[]) {
+                sampleModel.getSamples(0, 0, data.getWidth(), data.getHeight(), bandIndex, (float[]) destBuffer.getElems(), dataBuffer);
+            } else if (dataBufferType == DataBuffer.TYPE_BYTE && destBuffer.getElems() instanceof byte[]) {
+                int[] dArray = new int[destWidth * destHeight];
+                sampleModel.getSamples(0, 0, data.getWidth(), data.getHeight(), bandIndex, dArray, dataBuffer);
+                for (int i=0; i<dArray.length; i++) {
+                    destBuffer.setElemIntAt(i, dArray[i]);
+                }
+            } else {
+                double[] dArray = new double[destWidth * destHeight];
+                sampleModel.getSamples(0, 0, data.getWidth(), data.getHeight(), bandIndex, dArray, dataBuffer);
+                if (destBuffer.getElems() instanceof double[]) {
+                    System.arraycopy(dArray, 0, destBuffer.getElems(), 0, dArray.length);
+                } else {
+                    for (int i=0; i<dArray.length; i++) {
+                        destBuffer.setElemDoubleAt(i, dArray[i]);
+                    }
+                }
+            }
+        }
     }
 
     private void closeResources() {
