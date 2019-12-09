@@ -24,6 +24,8 @@ import net.sf.javaml.core.Instance;
 import net.sf.javaml.featureselection.scoring.GainRatio;
 import org.esa.snap.core.gpf.OperatorException;
 
+import org.esa.snap.core.util.RandomUtils;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -116,7 +118,7 @@ public class Evaluator {
                                    final CrossValidation cv) {
         final StringBuilder log = new StringBuilder(512);
 
-        final Map<Object, PerformanceMeasure> cvPerfMeasure = cv.crossValidation(dataset, 5, new Random());
+        final Map<Object, PerformanceMeasure> cvPerfMeasure = cv.crossValidation(dataset, 5, new Random(RandomUtils.seed()));
 
         log.append(title + '\n');
         log.append("Number of classes = " + cvPerfMeasure.size() + '\n');
@@ -162,7 +164,7 @@ public class Evaluator {
 
         log.append(datasetType + " feature importance score:\n");
         ClassifierAttributeEvaluation eval = new ClassifierAttributeEvaluation(
-                mlClassifier, NUM_PERTURBATIONS, new MTRandom());
+                mlClassifier, NUM_PERTURBATIONS, new MTRandom(RandomUtils.seed()));
         ClassifierAttributeEvaluation.FeatureScore[] fs = eval.performEvaluation(dataset, pm);
 
         final TreeMap<Double, Integer> sortedMap = new TreeMap<>();

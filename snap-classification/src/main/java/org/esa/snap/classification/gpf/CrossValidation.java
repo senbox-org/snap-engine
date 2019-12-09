@@ -13,6 +13,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import org.esa.snap.core.util.RandomUtils;
+
 /**
  * Implementation of the cross-validation evaluation technique.
  *
@@ -134,7 +136,7 @@ public class CrossValidation {
      * @return the results of the cross-validation.
      */
     public Map<Object, PerformanceMeasure> crossValidation(Dataset data, int folds) {
-        return crossValidation(data, folds, new Random(System.currentTimeMillis()));
+        return crossValidation(data, folds, new Random(RandomUtils.seed()));
 
     }
 

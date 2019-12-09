@@ -18,6 +18,8 @@ package org.esa.snap.classification.gpf.randomForest;
 import org.esa.snap.classification.gpf.BaseClassifier;
 import org.esa.snap.classification.gpf.ClassifierDescriptor;
 import org.esa.snap.classification.gpf.SupervisedClassifier;
+import org.esa.snap.core.util.RandomUtils;
+
 import be.abeel.util.MTRandom;
 import net.sf.javaml.classification.Classifier;
 import net.sf.javaml.classification.tree.RandomForest;
@@ -41,7 +43,7 @@ public class RandomForestClassifier extends BaseClassifier implements Supervised
     public Classifier createMLClassifier(final FeatureInfo[] featureInfos) {
         final int numSplitFeatures = getNumSplitFeatures(featureInfos.length);
         //SystemUtils.LOG.info("********* #trees = " + treeCount + " #split features = " + numSplitFeatures);
-        return new RandomForest(treeCount, false, numSplitFeatures, new MTRandom());
+        return new RandomForest(treeCount, false, numSplitFeatures, new MTRandom(RandomUtils.seed()));
     }
 
     public Classifier retrieveMLClassifier(final ClassifierDescriptor classifierDescriptor) {
