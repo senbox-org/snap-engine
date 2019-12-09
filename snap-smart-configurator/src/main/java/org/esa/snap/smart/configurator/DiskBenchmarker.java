@@ -17,6 +17,7 @@
 package org.esa.snap.smart.configurator;
 
 import org.esa.snap.core.util.SystemUtils;
+import org.esa.snap.core.util.RandomUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -143,7 +144,7 @@ public class DiskBenchmarker {
      */
     private static double computeWriteSpeed(String uniqueName, String dirName, int fileSize, int nbSamples) throws IOException {
         byte[] dataToWrite = new byte[fileSize * 1024 * 1024];
-        new Random().nextBytes(dataToWrite);
+        new Random(RandomUtils.seed()).nextBytes(dataToWrite);
 
         long startTime = System.currentTimeMillis();
 

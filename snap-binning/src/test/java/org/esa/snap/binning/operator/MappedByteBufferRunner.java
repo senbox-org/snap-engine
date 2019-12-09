@@ -28,6 +28,10 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
+import java.util.Random;
+
+import org.esa.snap.core.util.RandomUtils;
+
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -237,7 +241,8 @@ public class MappedByteBufferRunner {
 
         @Override
         public float[] createSamples() {
-            final float[] samples = new float[(int) (Math.random() * 11)];
+            final Random random = new Random(RandomUtils.seed())
+            final float[] samples = new float[(int) (random.nextDouble() * 11)];
             for (int i = 0; i < samples.length; i++) {
                 samples[i] = 0.1f * i;
             }

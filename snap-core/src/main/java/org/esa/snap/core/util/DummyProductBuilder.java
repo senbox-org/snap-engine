@@ -12,6 +12,8 @@ import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.datamodel.VirtualBand;
+import org.esa.snap.core.util.RandomUtils;
+
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
@@ -492,7 +494,7 @@ public class DummyProductBuilder {
     }
 
     private static float[] createRandomPoints(int n) {
-        Random random = new Random();
+        Random random = new Random(RandomUtils.seed());
         float[] pnts = new float[n];
         for (int i = 0; i < pnts.length; i++) {
             pnts[i] = (float) random.nextGaussian();
