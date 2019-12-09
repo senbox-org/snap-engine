@@ -9,3 +9,8 @@ target/
 beam.ids
 src/main/sql/*.jar
 beampy.ini
+.project
+.settings/
+sourcetrail*
+.classpath
+*.srctrl*
