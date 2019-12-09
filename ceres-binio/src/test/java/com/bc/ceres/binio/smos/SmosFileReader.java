@@ -29,6 +29,8 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
 
+import java.util.Random;
+
 /**
  * todo - API doc
  */
@@ -112,9 +114,10 @@ public class SmosFileReader {
     }
 
     private static void randomAccess(CompoundData data) throws IOException {
+        final Random random = new Random();
         final SequenceData gridPointList = data.getSequence("Grid_Point_List");
         for (int i = 0; i < gridPointList.getElementCount(); i++) {
-            int index = (int) (Math.random() * gridPointList.getElementCount());
+            int index = (int) (random.nextDouble() * gridPointList.getElementCount());
             final CompoundData gridPointData = gridPointList.getCompound(index);
             final long gridPointId = gridPointData.getUInt(0);
 //            final float longitude = gridPointData.getFloat(1);
