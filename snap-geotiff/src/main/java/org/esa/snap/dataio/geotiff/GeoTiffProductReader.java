@@ -139,7 +139,10 @@ public class GeoTiffProductReader extends AbstractProductReader {
                 throw new IllegalArgumentException("Unknown input '" + productInput + "'.");
             }
 
-            Product product = readProduct(this.geoTiffImageReader, productPath);
+            String defaultProductName = FileUtils.getFilenameWithoutExtension(productPath.getFileName().toString());
+            Product product = readProduct(this.geoTiffImageReader, defaultProductName);
+            product.setFileLocation(productPath.toFile());
+
             success = true;
 
             return product;
@@ -221,12 +224,12 @@ public class GeoTiffProductReader extends AbstractProductReader {
         System.gc();
     }
 
-    public Product readProduct(GeoTiffImageReader geoTiffImageReader, Path productPath) throws Exception {
+    public Product readProduct(GeoTiffImageReader geoTiffImageReader, String defaultProductName) throws Exception {
         Rectangle productBounds = ImageUtils.computeProductBounds(geoTiffImageReader.getImageWidth(), geoTiffImageReader.getImageHeight(), getSubsetDef());
-        return readProduct(geoTiffImageReader, productPath, productBounds);
+        return readProduct(geoTiffImageReader, defaultProductName, productBounds);
     }
 
-    public Product readProduct(GeoTiffImageReader geoTiffImageReader, Path productPath, Rectangle productBounds) throws Exception {
+    public Product readProduct(GeoTiffImageReader geoTiffImageReader, String defaultProductName, Rectangle productBounds) throws Exception {
         if ((productBounds.x + productBounds.width) > geoTiffImageReader.getImageWidth()) {
             throw new IllegalStateException("The coordinates are out of bounds: product.x="+productBounds.x+", product.width="+productBounds.width+", image.width=" + geoTiffImageReader.getImageWidth());
         }
@@ -240,19 +243,10 @@ public class GeoTiffProductReader extends AbstractProductReader {
 
         TIFFImageMetadata imageMetadata = geoTiffImageReader.getImageMetadata();
         TiffFileInfo tiffInfo = new TiffFileInfo(imageMetadata.getRootIFD());
-        TIFFField tagNumberField = tiffInfo.getField(Utils.PRIVATE_BEAM_TIFF_TAG_NUMBER);
-        Product product = null;
-        if (tagNumberField != null && tagNumberField.getType() == TIFFTag.TIFF_ASCII) {
-            String tagNumberText = tagNumberField.getAsString(0).trim();
-            if (tagNumberText.contains("<Dimap_Document")) { // with DIMAP header
-                Dimension productSize = new Dimension(productBounds.width, productBounds.height);
-                product = buildProductFromDimapHeader(tagNumberText, productSize);
-            }
-        }
+        Product product = buildProductFromDimapHeader(tiffInfo, productBounds.width, productBounds.height);
         if (product == null) {            // without DIMAP header
             TIFFRenderedImage baseImage = geoTiffImageReader.getBaseImage();
-            Dimension productSize = new Dimension(productBounds.width, productBounds.height);
-            product = buildProductWithoutDimapHeader(productPath, GeoTiffProductReaderPlugIn.FORMAT_NAMES[0], tiffInfo, baseImage, productSize);
+            product = buildProductWithoutDimapHeader(defaultProductName, tiffInfo, baseImage, productBounds.width, productBounds.height);
             boolean createIndexedImageInfo = (tiffInfo.containsField(BaselineTIFFTagSet.TAG_COLOR_MAP) && baseImage.getColorModel() instanceof IndexColorModel);
             if (createIndexedImageInfo) {
                 for (int i = 0; i < product.getNumBands(); i++) {
@@ -277,9 +271,6 @@ public class GeoTiffProductReader extends AbstractProductReader {
         Dimension preferredTileSize = computePreferredTiling(isGlobalShifted180, geoTiffImageReader, product.getSceneRasterSize());
         product.setPreferredTileSize(preferredTileSize);
         product.setProductReader(this);
-        if (productPath != null) {
-            product.setFileLocation(productPath.toFile());
-        }
 
         GeoCoding bandGeoCoding = buildBandGeoCoding(product.getSceneGeoCoding(), productBounds.width, productBounds.height);
         AffineTransform2D imageToModelTransform = buildBandImageToModelTransform(productBounds.width, productBounds.height);
@@ -327,7 +318,20 @@ public class GeoTiffProductReader extends AbstractProductReader {
         return productGeoCoding;
     }
 
-    public static Product buildProductWithoutDimapHeader(Path productPath, String productType, TiffFileInfo tiffInfo, TIFFRenderedImage baseImage, Dimension productSize)
+    private static Product buildProductFromDimapHeader(TiffFileInfo tiffInfo, int productWidth, int productHeight) throws IOException {
+        TIFFField tagNumberField = tiffInfo.getField(Utils.PRIVATE_BEAM_TIFF_TAG_NUMBER);
+        Product product = null;
+        if (tagNumberField != null && tagNumberField.getType() == TIFFTag.TIFF_ASCII) {
+            String tagNumberText = tagNumberField.getAsString(0).trim();
+            if (tagNumberText.contains("<Dimap_Document")) { // with DIMAP header
+                Dimension productSize = new Dimension(productWidth, productHeight);
+                product = buildProductFromDimapHeader(tagNumberText, productSize);
+            }
+        }
+        return product;
+    }
+
+    private static Product buildProductWithoutDimapHeader(String defaultProductName, TiffFileInfo tiffInfo, TIFFRenderedImage baseImage, int productWidth, int productHeight)
                                                          throws Exception {
 
         String productName = null;
@@ -335,13 +339,13 @@ public class GeoTiffProductReader extends AbstractProductReader {
             TIFFField tagImageDescriptionField = tiffInfo.getField(BaselineTIFFTagSet.TAG_IMAGE_DESCRIPTION);
             productName = tagImageDescriptionField.getAsString(0).trim();
         }
-        if (StringUtils.isBlank(productName) && productPath != null) {
-            productName = FileUtils.getFilenameWithoutExtension(productPath.getFileName().toString());
+        if (StringUtils.isBlank(productName) && defaultProductName != null) {
+            productName = defaultProductName;//FileUtils.getFilenameWithoutExtension(productPath.getFileName().toString());
         } else {
             productName = "geotiff";
         }
 
-        Product product = new Product(productName, productType, productSize.width, productSize.height);
+        Product product = new Product(productName, GeoTiffProductReaderPlugIn.FORMAT_NAMES[0], productWidth, productHeight);
 
         Band[] bands = buildBands(tiffInfo, baseImage, product.getSceneRasterWidth(), product.getSceneRasterHeight());
         for (int i = 0; i < bands.length; i++) {
@@ -378,7 +382,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
         return bands;
     }
 
-    public static Product buildProductFromDimapHeader(String tagNumberText, Dimension productSize) throws IOException {
+    private static Product buildProductFromDimapHeader(String tagNumberText, Dimension productSize) throws IOException {
         Product product = null;
         InputStream inputStream = null;
         try {
@@ -479,7 +483,30 @@ public class GeoTiffProductReader extends AbstractProductReader {
                 !Double.isNaN(pixelScales[1]) && !Double.isInfinite(pixelScales[1]);
     }
 
-    public static GeoCoding buildGeoCoding(TIFFImageMetadata metadata, Dimension productSize, Rectangle subsetRegion) throws Exception {
+    public static Product readMetadataProduct(Path productPath, boolean readGeoCoding) throws Exception {
+        try (GeoTiffImageReader geoTiffImageReader = GeoTiffImageReader.buildGeoTiffImageReader(productPath)) {
+            return GeoTiffProductReader.readMetadataProduct(geoTiffImageReader, readGeoCoding);
+        }
+    }
+
+    public static Product readMetadataProduct(GeoTiffImageReader geoTiffImageReader, boolean readGeoCoding) throws Exception {
+        int productWidth = geoTiffImageReader.getImageWidth();
+        int productHeight = geoTiffImageReader.getImageHeight();
+        TIFFImageMetadata imageMetadata = geoTiffImageReader.getImageMetadata();
+        TiffFileInfo tiffInfo = new TiffFileInfo(imageMetadata.getRootIFD());
+        Product product = GeoTiffProductReader.buildProductFromDimapHeader(tiffInfo, productWidth, productHeight);
+        if (product == null) {            // without DIMAP header
+            product = GeoTiffProductReader.buildProductWithoutDimapHeader(null, tiffInfo, geoTiffImageReader.getBaseImage(), productWidth, productHeight);
+        }
+        if (readGeoCoding && tiffInfo.isGeotiff()) {
+            GeoCoding geoCoding = GeoTiffProductReader.buildGeoCoding(imageMetadata, product.getSceneRasterSize(), null);
+            product.setSceneGeoCoding(geoCoding);
+        }
+
+        return product;
+    }
+
+    private static GeoCoding buildGeoCoding(TIFFImageMetadata metadata, Dimension productSize, Rectangle subsetRegion) throws Exception {
         final GeoTiffIIOMetadataDecoder metadataDecoder = new GeoTiffIIOMetadataDecoder(metadata);
         Hints hints = new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, true);
         final GeoTiffMetadata2CRSAdapter geoTiff2CRSAdapter = new GeoTiffMetadata2CRSAdapter(hints);

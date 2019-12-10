@@ -18,6 +18,7 @@ package org.esa.snap.dataio.geotiff;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.util.io.FileUtils;
 import org.junit.Test;
 
 import javax.imageio.stream.FileCacheImageInputStream;
@@ -44,7 +45,8 @@ public class BigTiffReaderTest {
         FileCacheImageInputStream imageInputStream = new FileCacheImageInputStream(resource.openStream(), null);
         GeoTiffImageReader geoTiffImageReader = new GeoTiffImageReader(imageInputStream);
 
-        final Product product = reader.readProduct(geoTiffImageReader, new File(filePath).toPath());
+        String defaultProductName = FileUtils.getFilenameWithoutExtension(new File(filePath).getName().toString());
+        final Product product = reader.readProduct(geoTiffImageReader, defaultProductName);
         assertNotNull(product);
 
         final Band band = product.getBandAt(0);

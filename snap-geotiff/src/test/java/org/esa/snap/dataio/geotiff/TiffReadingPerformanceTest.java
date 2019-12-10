@@ -21,6 +21,7 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.Debug;
 import org.esa.snap.core.util.StopWatch;
+import org.esa.snap.core.util.io.FileUtils;
 
 import javax.imageio.stream.FileImageInputStream;
 import java.io.File;
@@ -51,7 +52,8 @@ public class TiffReadingPerformanceTest {
         stopWatch.start();
         FileImageInputStream imageInputStream = new FileImageInputStream(file);
         GeoTiffImageReader geoTiffImageReader = new GeoTiffImageReader(imageInputStream);
-        final Product product = reader.readProduct(geoTiffImageReader, file.toPath());
+        String defaultProductName = FileUtils.getFilenameWithoutExtension(file.getName().toString());
+        final Product product = reader.readProduct(geoTiffImageReader, defaultProductName);
         stopWatch.stopAndTrace("Opening product");
         assertNotNull(product);
 

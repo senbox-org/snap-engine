@@ -41,6 +41,7 @@ import org.esa.snap.core.dataop.maptransf.MapProjectionRegistry;
 import org.esa.snap.core.dataop.maptransf.MapTransform;
 import org.esa.snap.core.dataop.maptransf.MapTransformDescriptor;
 import org.esa.snap.core.image.ImageManager;
+import org.esa.snap.core.util.io.FileUtils;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.ReferencingFactoryFinder;
 import org.geotools.referencing.crs.DefaultProjectedCRS;
@@ -523,7 +524,8 @@ public class GeoTiffWriteReadTest {
         MemoryCacheImageInputStream imageInputStream = new MemoryCacheImageInputStream(inputStream);
         GeoTiffImageReader geoTiffImageReader = new GeoTiffImageReader(imageInputStream);
         try {
-            final Product product = reader.readProduct(geoTiffImageReader, location.toPath());
+            String defaultProductName = FileUtils.getFilenameWithoutExtension(location.toPath().getFileName().toString());
+            final Product product = reader.readProduct(geoTiffImageReader, defaultProductName);
             product.setProductReader(reader);
             return product;
         } catch (Exception e) {

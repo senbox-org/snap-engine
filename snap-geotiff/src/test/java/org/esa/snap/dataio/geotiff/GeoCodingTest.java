@@ -4,6 +4,7 @@ import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.util.io.FileUtils;
 import org.junit.Test;
 
 import javax.imageio.stream.FileCacheImageInputStream;
@@ -25,7 +26,8 @@ public class GeoCodingTest {
         final GeoTiffProductReader reader = new GeoTiffProductReader(new GeoTiffProductReaderPlugIn());
         FileCacheImageInputStream imageInputStream = new FileCacheImageInputStream(resource.openStream(), null);
         GeoTiffImageReader geoTiffImageReader = new GeoTiffImageReader(imageInputStream);
-        final Product product = reader.readProduct(geoTiffImageReader, new File(filePath).toPath());
+        String defaultProductName = FileUtils.getFilenameWithoutExtension(new File(filePath).getName().toString());
+        final Product product = reader.readProduct(geoTiffImageReader, defaultProductName);
 
         final GeoCoding geoCoding = product.getSceneGeoCoding();
         final GeoPos ul = geoCoding.getGeoPos(new PixelPos(0, 0), null);
