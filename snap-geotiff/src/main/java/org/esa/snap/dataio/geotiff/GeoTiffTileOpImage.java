@@ -1,6 +1,7 @@
 package org.esa.snap.dataio.geotiff;
 
 import com.bc.ceres.glevel.MultiLevelModel;
+import org.esa.snap.core.image.AbstractSubsetTileOpImage;
 import org.esa.snap.core.image.LevelImageSupport;
 import org.esa.snap.core.image.ResolutionLevel;
 import org.esa.snap.core.image.SingleBandedOpImage;
@@ -17,33 +18,18 @@ import java.io.IOException;
 /**
  * Created by jcoravu on 22/11/2019.
  */
-public class GeoTiffTileOpImage extends SingleBandedOpImage {
+public class GeoTiffTileOpImage extends AbstractSubsetTileOpImage {
 
     private final GeoTiffImageReader geoTiffImageReader;
-    private final LevelImageSupport levelImageSupport;
-    private final Point imageOffset;
-    private final Point levelTileOffset;
-    private final int bandIndex;
     private final boolean isGlobalShifted180;
 
     public GeoTiffTileOpImage(GeoTiffImageReader geoTiffImageReader, MultiLevelModel imageMultiLevelModel, int dataBufferType, int bandIndex,
                               Rectangle imageBounds, Dimension tileSize, Point tileOffset, int level, boolean isGlobalShifted180) {
 
-        this(geoTiffImageReader, dataBufferType, bandIndex, imageBounds, tileSize, ImageUtils.computeTileDimensionAtResolutionLevel(tileSize, level),
-                tileOffset, ResolutionLevel.create(imageMultiLevelModel, level), isGlobalShifted180);
-    }
-
-    private GeoTiffTileOpImage(GeoTiffImageReader geoTiffImageReader, int dataBufferType, int bandIndex, Rectangle imageBounds, Dimension tileSize,
-                               Dimension subTileSize, Point tileOffset, ResolutionLevel resolutionLevel, boolean isGlobalShifted180) {
-
-        super(dataBufferType, null, tileSize.width, tileSize.height, subTileSize, null, resolutionLevel);
+        super(imageMultiLevelModel, dataBufferType, bandIndex, imageBounds, tileSize, tileOffset, level);
 
         this.geoTiffImageReader = geoTiffImageReader;
-        this.bandIndex = bandIndex;
         this.isGlobalShifted180 = isGlobalShifted180;
-        this.levelTileOffset = new Point(ImageUtils.computeLevelSize(tileOffset.x, resolutionLevel.getIndex()), ImageUtils.computeLevelSize(tileOffset.y, resolutionLevel.getIndex()));
-        this.imageOffset = new Point(imageBounds.x, imageBounds.y);
-        this.levelImageSupport = new LevelImageSupport(imageBounds.width, imageBounds.height, resolutionLevel);
     }
 
     @Override
@@ -108,42 +94,12 @@ public class GeoTiffTileOpImage extends SingleBandedOpImage {
         }
     }
 
-    private Rectangle computeIntersection(Rectangle destinationRectangle) {
-        int sourceImageWidth = getImageWidth();
-        int sourceImageHeight = getImageHeight();
-        Rectangle sourceImageBounds = new Rectangle(this.imageOffset.x, this.imageOffset.y, sourceImageWidth, sourceImageHeight);
-
-        int destinationSourceWidth = this.levelImageSupport.getSourceWidth(destinationRectangle.width);
-        int destinationSourceHeight = this.levelImageSupport.getSourceHeight(destinationRectangle.height);
-        int destinationSourceX = this.levelImageSupport.getSourceX(this.levelTileOffset.x + destinationRectangle.x);
-        int destinationSourceY = this.levelImageSupport.getSourceY(this.levelTileOffset.y + destinationRectangle.y);
-        if (destinationSourceX + destinationSourceWidth > sourceImageWidth) {
-            destinationSourceWidth = sourceImageWidth - destinationSourceX;
-        }
-        if (destinationSourceY + destinationSourceHeight > sourceImageHeight) {
-            destinationSourceHeight = sourceImageHeight - destinationSourceY;
-        }
-        destinationSourceX += this.imageOffset.x;
-        destinationSourceY += this.imageOffset.y;
-
-        Rectangle tileBoundsInSourceImage = new Rectangle(destinationSourceX, destinationSourceY, destinationSourceWidth, destinationSourceHeight);
-        return sourceImageBounds.intersection(tileBoundsInSourceImage);
-    }
-
     private int computeSourceX(double x) {
         return this.levelImageSupport.getSourceCoord(x, 0, this.levelImageSupport.getSourceWidth()-1);
     }
 
     private int computeSourceY(double y) {
         return this.levelImageSupport.getSourceCoord(y, 0, this.levelImageSupport.getSourceHeight()-1);
-    }
-
-    private int getImageWidth() {
-        return this.levelImageSupport.getSourceWidth();
-    }
-
-    private int getImageHeight() {
-        return this.levelImageSupport.getSourceHeight();
     }
 
     private Raster readRasterData(int destOffsetX, int destOffsetY, int destWidth, int destHeight) throws IOException {
