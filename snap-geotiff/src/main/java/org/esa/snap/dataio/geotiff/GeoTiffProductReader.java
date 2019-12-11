@@ -25,7 +25,6 @@ import it.geosolutions.imageioimpl.plugins.tiff.TIFFImageMetadata;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFRenderedImage;
 import org.apache.commons.lang.StringUtils;
 import org.esa.snap.core.dataio.AbstractProductReader;
-import org.esa.snap.core.dataio.MetadataInspector;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.dataio.dimap.DimapProductHelpers;
@@ -110,11 +109,6 @@ public class GeoTiffProductReader extends AbstractProductReader {
         super(readerPlugIn);
 
         this.imageInputStreamSpi = imageInputStreamSpi;
-    }
-
-    @Override
-    public MetadataInspector getMetadataInspector() {
-        return new GeoTiffMetadataInspector();
     }
 
     @Override

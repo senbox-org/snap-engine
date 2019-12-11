@@ -17,6 +17,7 @@ package org.esa.snap.dataio.geotiff;
 
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFImageReader;
 import org.esa.snap.core.dataio.DecodeQualification;
+import org.esa.snap.core.dataio.MetadataInspector;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.util.StringUtils;
@@ -48,6 +49,11 @@ public class GeoTiffProductReaderPlugIn implements ProductReaderPlugIn {
     private static final String[] ALL_FILE_EXTENSIONS = StringUtils.addToArray(TIFF_FILE_EXTENSION, ZIP_FILE_EXTENSION);
 
     public GeoTiffProductReaderPlugIn() {
+    }
+
+    @Override
+    public MetadataInspector getMetadataInspector() {
+        return new GeoTiffMetadataInspector();
     }
 
     @Override

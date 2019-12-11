@@ -56,19 +56,6 @@ public interface ProductReader {
      */
     ProductSubsetDef getSubsetDef();
 
-    /**
-     * Returns the exposed parameters about a data product, without reading it
-     *
-     * @return ProductReaderExposedParams
-     */
-    default ProductReaderExposedParams getExposedParams() {
-        return null;
-    }
-
-    default MetadataInspector getMetadataInspector(){
-        return null;
-    }
-
 
     /**
      * Reads a data product and returns a in-memory representation of it.

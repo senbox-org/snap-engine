@@ -62,4 +62,17 @@ public interface ProductReaderPlugIn extends ProductIOPlugIn {
      */
     ProductReader createReaderInstance();
 
+    /**
+     * Returns the exposed parameters about a data product, without reading it
+     *
+     * @return ProductReaderExposedParams
+     */
+    default ProductReaderExposedParams getExposedParams() {
+        return null;
+    }
+
+    default MetadataInspector getMetadataInspector(){
+        return null;
+    }
+
 }
