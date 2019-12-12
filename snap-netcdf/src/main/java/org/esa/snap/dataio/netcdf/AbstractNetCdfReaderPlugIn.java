@@ -42,8 +42,8 @@ import java.io.IOException;
 
 public abstract class AbstractNetCdfReaderPlugIn implements ProductReaderPlugIn {
 
-    private final String ZIP_FILE_EXTENSION = ".zip";
-    private final String NETCDF_FILE_EXTENSION = ".nc";
+    private static final String ZIP_FILE_EXTENSION = ".zip";
+    private static final String NETCDF_FILE_EXTENSION = ".nc";
     ///////////////////////////////////////////////
     // ProductReaderPlugIn related methods
 
@@ -55,7 +55,7 @@ public abstract class AbstractNetCdfReaderPlugIn implements ProductReaderPlugIn 
     @Override
     public final DecodeQualification getDecodeQualification(Object input) {
         if (input instanceof String || input instanceof File) {
-            final String ext = FileUtils.getExtension((File) input);
+            final String ext = FileUtils.getExtension(new File(input.toString()));
             if (ext != null) {
                 if (!ext.equalsIgnoreCase(NETCDF_FILE_EXTENSION) && !ext.equalsIgnoreCase(ZIP_FILE_EXTENSION)) {
                     return DecodeQualification.UNABLE;
@@ -78,8 +78,9 @@ public abstract class AbstractNetCdfReaderPlugIn implements ProductReaderPlugIn 
                     pathname = trimmed.substring(0, trimmed.length() - 4);
                     final File file = new File(pathname);
                     if (file.isFile() && file.length() == 0) {
-                        file.deleteOnExit();
-                        file.delete();
+                        if(!file.delete()) {
+                            file.deleteOnExit();
+                        }
                     }
                 }
             }
