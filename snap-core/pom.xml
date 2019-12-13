@@ -160,6 +160,7 @@
                         <publicPackage>javax.vecmath.*</publicPackage>
                         <publicPackage>org.jdom.*</publicPackage>
                         <publicPackage>org.geotools.*</publicPackage>
+                        <publicPackage>it.geosolutions.*</publicPackage>
                         <publicPackage>org.opengis.*</publicPackage>
                         <publicPackage>com.vividsolutions.jts.*</publicPackage>
                         <publicPackage>Jama</publicPackage>

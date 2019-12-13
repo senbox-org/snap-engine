@@ -137,8 +137,12 @@ public class ImageUtils {
         return tileCount;
     }
 
+    public static double computeLevelSizeAsDouble(int sourceSize, int level) {
+        return sourceSize / Math.pow(2, level);
+    }
+
     public static int computeLevelSize(int sourceSize, int level) {
-        return (int) Math.ceil(sourceSize / Math.pow(2, level));
+        return (int) Math.ceil(computeLevelSizeAsDouble(sourceSize, level));
     }
 
     public static Dimension computeTileDimensionAtResolutionLevel(Dimension tileSize, int level) {

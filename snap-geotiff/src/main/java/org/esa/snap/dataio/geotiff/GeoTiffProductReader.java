@@ -448,7 +448,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
 
         if (product.getSceneGeoCoding() == null) {
             try {
-                product.setSceneGeoCoding(buildGeoCoding(metadata, product.getSceneRasterSize(),subsetRegion));
+                product.setSceneGeoCoding(buildGeoCoding(metadata, product.getSceneRasterSize(), subsetRegion));
             } catch (Exception ignored) {
                 // ignore
             }
@@ -477,6 +477,25 @@ public class GeoTiffProductReader extends AbstractProductReader {
                 !Double.isNaN(pixelScales[1]) && !Double.isInfinite(pixelScales[1]);
     }
 
+    public static GeoCoding readGeoCoding(Path productPath) throws Exception {
+        try (GeoTiffImageReader geoTiffImageReader = GeoTiffImageReader.buildGeoTiffImageReader(productPath)) {
+            return readGeoCoding(geoTiffImageReader);
+        }
+    }
+
+    public static GeoCoding readGeoCoding(GeoTiffImageReader geoTiffImageReader) throws Exception {
+        TIFFImageMetadata imageMetadata = geoTiffImageReader.getImageMetadata();
+        TiffFileInfo tiffInfo = new TiffFileInfo(imageMetadata.getRootIFD());
+        if (tiffInfo.isGeotiff()) {
+            int productWidth = geoTiffImageReader.getImageWidth();
+            int productHeight = geoTiffImageReader.getImageHeight();
+            Product product = new Product("GeoTiff", GeoTiffProductReaderPlugIn.FORMAT_NAMES[0], productWidth, productHeight);
+            applyGeoCoding(tiffInfo, imageMetadata, product, null);
+            return product.getSceneGeoCoding();
+        }
+        return null;
+    }
+
     public static Product readMetadataProduct(Path productPath, boolean readGeoCoding) throws Exception {
         try (GeoTiffImageReader geoTiffImageReader = GeoTiffImageReader.buildGeoTiffImageReader(productPath)) {
             return GeoTiffProductReader.readMetadataProduct(geoTiffImageReader, readGeoCoding);
@@ -493,10 +512,8 @@ public class GeoTiffProductReader extends AbstractProductReader {
             product = GeoTiffProductReader.buildProductWithoutDimapHeader(null, tiffInfo, geoTiffImageReader.getBaseImage(), productWidth, productHeight);
         }
         if (readGeoCoding && tiffInfo.isGeotiff()) {
-            GeoCoding geoCoding = GeoTiffProductReader.buildGeoCoding(imageMetadata, product.getSceneRasterSize(), null);
-            product.setSceneGeoCoding(geoCoding);
+            applyGeoCoding(tiffInfo, imageMetadata, product, null);
         }
-
         return product;
     }
 
@@ -519,13 +536,13 @@ public class GeoTiffProductReader extends AbstractProductReader {
             }
         }
 
-       if(subsetRegion != null){
-           double stepX = metadataDecoder.getModelPixelScales().getScaleX();
-           double stepY = metadataDecoder.getModelPixelScales().getScaleY();
-           double originX = ((AffineTransform2D) toModel).getTranslateX();
-           double originY = ((AffineTransform2D) toModel).getTranslateY();
-           return new CrsGeoCoding(crs, subsetRegion.width,subsetRegion.height,originX + subsetRegion.x, originY - subsetRegion.y,stepX,stepY);
-       }
+        if (subsetRegion != null) {
+            double stepX = metadataDecoder.getModelPixelScales().getScaleX();
+            double stepY = metadataDecoder.getModelPixelScales().getScaleY();
+            double originX = ((AffineTransform2D) toModel).getTranslateX();
+            double originY = ((AffineTransform2D) toModel).getTranslateY();
+            return new CrsGeoCoding(crs, subsetRegion.width, subsetRegion.height, originX + subsetRegion.x, originY - subsetRegion.y, stepX, stepY);
+        }
         Rectangle imageBounds = new Rectangle(productSize.width, productSize.height);
         return new CrsGeoCoding(crs, imageBounds, (AffineTransform) toModel);
     }
@@ -765,9 +782,9 @@ public class GeoTiffProductReader extends AbstractProductReader {
         final Placemark[] gcps = gcpGroup.toArray(new Placemark[gcpGroup.getNodeCount()]);
         final SortedMap<Integer, GeoKeyEntry> geoKeyEntries = info.getGeoKeyEntries();
         final Datum datum = getDatum(geoKeyEntries);
-        final int width = product.getSceneRasterWidth();
-        final int height = product.getSceneRasterHeight();
-        product.setSceneGeoCoding(new GcpGeoCoding(method, gcps, width, height, datum));
+        final int productWidth = product.getSceneRasterWidth();
+        final int productHeight = product.getSceneRasterHeight();
+        product.setSceneGeoCoding(new GcpGeoCoding(method, gcps, productWidth, productHeight, datum));
     }
 
     private static Datum getDatum(Map<Integer, GeoKeyEntry> geoKeyEntries) {
