@@ -25,24 +25,17 @@ import java.nio.file.Path;
  */
 public class ColorPaletteSchemes {
 
-
-    //    public static final String CPD_DEFAULTS_FILENAME = "scheme_defaults.txt";
-//    public static final String CPD_COLORBLIND_DEFAULTS_FILENAME = "scheme_defaults_universal.txt";
-//    public static final String CPD_COLORBLIND_SELECTOR_FILENAME = "scheme_selector_universal.txt";
-//    public static final String CPD_SCHEMES_FILENAME = "scheme_selector.txt";
-//    public static final String USER_CPD_DEFAULTS_FILENAME = "scheme_defaults_user.txt";
-//    public static final String USER_CPD_SCHEMES_FILENAME = "scheme_selector_user.txt";
     public static final String DEFAULT_CPD_FILENAME = "gray_scale.cpd";
-
-
     public static final String NEW_CPD_SELECTOR_FILENAME = "color_palette_scheme_selector.txt";
     public static final String NEW_CPD_DEFAULTS_FILENAME = "color_palette_scheme_defaults.txt";
     public static final String NEW_CPD_SCHEMES_FILENAME = "color_palette_schemes.txt";
     public static final String COLORBAR_TITLE_OVERRIDE_MACRO = "USE_SCHEME_VALUE";
 
-
     public static final String PROPERTY_NAME_PALETTES_COLOR_BLIND_ENABLED = "palettes.colorBlind.enabled";
     public static final boolean DEFAULT_PALETTES_COLOR_BLIND_ENABLED = false;
+
+    public static final double DOUBLE_NULL = -Double.MAX_VALUE;
+
 
     public boolean isjComboBoxShouldFire() {
         return jComboBoxShouldFire;
@@ -231,16 +224,26 @@ public class ColorPaletteSchemes {
 
 
                         if (id != null && id.length() > 0 &&
-                                minStr != null && minStr.length() > 0 &&
-                                maxStr != null && maxStr.length() > 0 &&
+                                minStr != null &&
+                                maxStr != null &&
                                 logScaledStr != null && logScaledStr.length() > 0 &&
                                 cpdFileNameStandard != null && cpdFileNameStandard.length() > 0 &&
                                 cpdFileNameColorBlind != null && cpdFileNameStandard.length() > 0
                                 ) {
 
 
-                            min = Double.valueOf(minStr);
-                            max = Double.valueOf(maxStr);
+                            if(minStr.length()>0){
+                                min = Double.valueOf(minStr);
+                            } else {
+                                min = DOUBLE_NULL;
+                            }
+
+                            if(maxStr.length()>0){
+                                max = Double.valueOf(maxStr);
+                            } else {
+                                max = DOUBLE_NULL;
+                            }
+
                             logScaled = false;
                             if (logScaledStr != null && logScaledStr.toLowerCase().equals("true")) {
                                 logScaled = true;
@@ -480,12 +483,17 @@ public class ColorPaletteSchemes {
     private boolean testMinMax(double min, double max, boolean isLogScaled) {
         boolean checksOut = true;
 
-        if (min == max) {
-            checksOut = false;
+        if (min != DOUBLE_NULL && max != DOUBLE_NULL) {
+            if (min == max) {
+                checksOut = false;
+            }
         }
 
-        if (isLogScaled && min == 0) {
-            checksOut = false;
+
+        if (min != DOUBLE_NULL && max != DOUBLE_NULL) {
+            if (isLogScaled && min == 0) {
+                checksOut = false;
+            }
         }
 
         return checksOut;
