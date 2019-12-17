@@ -594,17 +594,17 @@
 
             <dependency>
                 <groupId>javax.media.jai</groupId>
-                <artifactId>jai-core-open-jdk</artifactId>
+                <artifactId>jai-core-openjdk</artifactId>
                 <version>1.1.4</version>
             </dependency>
             <dependency>
                 <groupId>javax.media.jai</groupId>
-                <artifactId>jai-codec-open-jdk</artifactId>
+                <artifactId>jai-codec-openjdk</artifactId>
                 <version>1.1.4</version>
             </dependency>
             <dependency>
                 <groupId>javax.media.jai</groupId>
-                <artifactId>mlibwrapper-jai-open-jdk</artifactId>
+                <artifactId>mlibwrapper-jai-openjdk</artifactId>
                 <version>1.1.4</version>
             </dependency>
             <dependency>

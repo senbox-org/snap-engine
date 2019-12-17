@@ -25,15 +25,15 @@
         </dependency>
         <dependency>
             <groupId>javax.media.jai</groupId>
-            <artifactId>jai-core-open-jdk</artifactId>
+            <artifactId>jai-core-openjdk</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.media.jai</groupId>
-            <artifactId>jai-codec-open-jdk</artifactId>
+            <artifactId>jai-codec-openjdk</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.media.jai</groupId>
-            <artifactId>mlibwrapper-jai-open-jdk</artifactId>
+            <artifactId>mlibwrapper-jai-openjdk</artifactId>
         </dependency>
         <dependency>
             <groupId>com.sun.media</groupId>
