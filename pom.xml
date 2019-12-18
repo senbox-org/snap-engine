@@ -220,7 +220,6 @@
                 <artifactId>snap-sta</artifactId>
                 <version>${snap.version}</version>
             </dependency>
-
             <!-- Miscellaneous 3rd party libraries ############################################# -->
 
             <dependency>
@@ -234,11 +233,7 @@
                 <artifactId>netcdfAll</artifactId>
                 <version>${netcdf.version}</version>
             </dependency>
-            <dependency>
-                <groupId>edu.ucar</groupId>
-                <artifactId>opendap</artifactId>
-                <version>${netcdf.version}</version>
-            </dependency>
+
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
@@ -248,11 +243,6 @@
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-simple</artifactId>
                 <version>${slf4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>edu.ucar</groupId>
-                <artifactId>nujan</artifactId>
-                <version>1.4.1.1</version>
             </dependency>
             <dependency>
                 <groupId>org.htmlparser</groupId>
@@ -317,7 +307,7 @@
             <dependency>
                 <groupId>it.geosolutions.imageio-ext</groupId>
                 <artifactId>imageio-ext-tiff</artifactId>
-                <version>1.2-SENTBX</version>
+                <version>1.2.4-SNAPSHOT</version>
                 <exclusions>
                     <exclusion>
                         <groupId>javax.media</groupId>
@@ -729,7 +719,7 @@
         <repository>
             <id>snap-repo-public</id>
             <name>Public Maven Repository for SNAP</name>
-            <url>http://nexus.senbox.net/nexus/content/repositories/public/</url>
+            <url>https://snap-build-server.tilaa.cloud/nexus/repository/snap-maven-public/</url>
             <releases>
                 <enabled>true</enabled>
                 <checksumPolicy>warn</checksumPolicy>
@@ -834,7 +824,7 @@
 
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.18.1</version>
+                    <version>3.0.0-M3</version>
                     <configuration>
                         <!--
                              If enabled some assertions in GeoTools fail.
@@ -853,7 +843,7 @@
                         <systemPropertyVariables>
                             <org.esa.snap.testdata.out>target/test-data</org.esa.snap.testdata.out>
                         </systemPropertyVariables>
-                        <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true -Xmx1024M -Dfile.encoding=UTF-8 @{argLine}</argLine>
+                        <argLine>-Xmx1024M -Dfile.encoding=UTF-8 @{argLine}</argLine>
                     </configuration>
                 </plugin>
 
@@ -925,10 +915,9 @@
                         </groups>
                     </configuration>
                 </plugin>
-
                 <plugin>
                     <artifactId>maven-surefire-report-plugin</artifactId>
-                    <version>2.22.2</version>
+                    <version>3.0.0-M3</version>
                 </plugin>
 
                 <plugin>
@@ -978,7 +967,7 @@
                     <version>1.10</version>
                     <executions>
                         <execution>
-                            <id>regex-property</id>
+                            <id>create-nbmSpecVersion</id>
                             <goals>
                                 <goal>regex-property</goal>
                             </goals>
@@ -1074,7 +1063,7 @@
                         <configuration>
                             <rules>
                                 <requireMavenVersion>
-                                    <version>[3.2.5,3.6.1]</version>
+                                    <version>[3.2.5,3.6.0]</version>
                                 </requireMavenVersion>
                                 <requireJavaVersion>
                                     <version>1.8</version>
