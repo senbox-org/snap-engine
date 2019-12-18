@@ -25,7 +25,8 @@ import java.nio.file.Path;
  */
 public class ColorPaletteSchemes {
 
-    public static final String DEFAULT_CPD_FILENAME = "gray_scale.cpd";
+//    public static final String DEFAULT_CPD_FILENAME = "gray_scale.cpd";
+    public static final String DEFAULT_CPD_FILENAME = "oceancolor_standard.cpd";
     public static final String NEW_CPD_SELECTOR_FILENAME = "color_palette_scheme_selector.txt";
     public static final String NEW_CPD_DEFAULTS_FILENAME = "color_palette_scheme_defaults.txt";
     public static final String NEW_CPD_SCHEMES_FILENAME = "color_palette_schemes.txt";
@@ -35,6 +36,7 @@ public class ColorPaletteSchemes {
     public static final boolean DEFAULT_PALETTES_COLOR_BLIND_ENABLED = false;
 
     public static final double DOUBLE_NULL = -Double.MAX_VALUE;
+    public static final String NULL_ENTRY = "null";
 
 
     public boolean isjComboBoxShouldFire() {
@@ -223,32 +225,32 @@ public class ColorPaletteSchemes {
                         cpdFileNameColorBlind = values[5].trim();
 
 
-                        if (id != null && id.length() > 0 &&
-                                minStr != null &&
-                                maxStr != null &&
-                                logScaledStr != null && logScaledStr.length() > 0 &&
-                                cpdFileNameStandard != null && cpdFileNameStandard.length() > 0 &&
-                                cpdFileNameColorBlind != null && cpdFileNameStandard.length() > 0
-                                ) {
+                        if (cpdFileNameStandard == null ||
+                                cpdFileNameStandard.length() == 0 ||
+                                NULL_ENTRY.toLowerCase().equals(cpdFileNameStandard.toLowerCase())) {
+                            cpdFileNameStandard = DEFAULT_CPD_FILENAME;
+                        }
 
 
-                            if(minStr.length()>0){
-                                min = Double.valueOf(minStr);
-                            } else {
-                                min = DOUBLE_NULL;
-                            }
+                        if(minStr.length() > 0 && !NULL_ENTRY.toLowerCase().equals(minStr.toLowerCase())){
+                            min = Double.valueOf(minStr);
+                        } else {
+                            min = DOUBLE_NULL;
+                        }
 
-                            if(maxStr.length()>0){
-                                max = Double.valueOf(maxStr);
-                            } else {
-                                max = DOUBLE_NULL;
-                            }
+                        if(maxStr.length() > 0 && !NULL_ENTRY.toLowerCase().equals(maxStr.toLowerCase())){
+                            max = Double.valueOf(maxStr);
+                        } else {
+                            max = DOUBLE_NULL;
+                        }
 
-                            logScaled = false;
-                            if (logScaledStr != null && logScaledStr.toLowerCase().equals("true")) {
-                                logScaled = true;
-                            }
+                        logScaled = false;
+                        if (logScaledStr != null && logScaledStr.length() > 0 && logScaledStr.toLowerCase().equals("true")) {
+                            logScaled = true;
+                        }
 
+
+                        if (id != null && id.length() > 0) {
                             fieldsInitialized = true;
                         }
                     }
