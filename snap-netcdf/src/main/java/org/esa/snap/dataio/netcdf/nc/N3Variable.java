@@ -68,7 +68,7 @@ public class N3Variable implements NVariable {
 
     @Override
     public Attribute addAttribute(String name, Number value, boolean isUnsigned) {
-        if(value instanceof Long) {
+        if (value instanceof Long) {
             return variable.addAttribute(new Attribute(name, value.intValue()));
         } else {
             return variable.addAttribute(new Attribute(name, value));
@@ -77,13 +77,13 @@ public class N3Variable implements NVariable {
 
     @Override
     public Attribute addAttribute(String name, Array value) {
-        if (DataType.getType(value.getElementType(),false) == DataType.LONG) {
-            long[] longElems = (long[]) value.get1DJavaArray(Long.class);
+        if (DataType.getType(value.getElementType(), false) == DataType.LONG) {
+            long[] longElems = (long[]) value.get1DJavaArray(DataType.LONG);
             int[] intElems = new int[longElems.length];
             for (int i = 0; i < longElems.length; i++) {
                 intElems[i] = (int) longElems[i];
             }
-            return variable.addAttribute(new Attribute(name, Array.factory(DataType.INT,new int[]{longElems.length},intElems)));
+            return variable.addAttribute(new Attribute(name, Array.factory(DataType.INT, new int[]{longElems.length}, intElems)));
         } else {
             return variable.addAttribute(new Attribute(name, value));
         }
@@ -112,7 +112,7 @@ public class N3Variable implements NVariable {
         final int[] writeOrigin = new int[2];
         writeOrigin[xIndex] = x;
         final int[] sourceShape = new int[]{height, width};
-        final Array sourceArray = Array.factory(dataType, sourceShape,  data.getElems());
+        final Array sourceArray = Array.factory(dataType, sourceShape, data.getElems());
         final int[] sourceOrigin = new int[2];
         sourceOrigin[xIndex] = 0;
         final int[] writeShape = new int[]{1, width};

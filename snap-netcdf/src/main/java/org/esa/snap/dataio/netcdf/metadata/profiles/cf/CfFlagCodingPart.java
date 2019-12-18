@@ -77,8 +77,9 @@ public class CfFlagCodingPart extends ProfilePartIO {
                 if (flagValueData.isUnsigned()) {
                     attribute.setDataType(attribute.getDataType().withSignedness(DataType.Signedness.UNSIGNED));
                 }
+            } catch (NullPointerException ignore) {
+                // how can this happen? isn't something else wrong in this case?
             }
-            catch (NullPointerException ignore) {}
         }
     }
 

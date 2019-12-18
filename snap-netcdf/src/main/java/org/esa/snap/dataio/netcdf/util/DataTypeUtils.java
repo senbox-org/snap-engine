@@ -47,12 +47,12 @@ public class DataTypeUtils {
             return unsigned ? ProductData.TYPE_UINT16 : ProductData.TYPE_INT16;
         } else if (DataType.INT.equals(dataType)) {
             return unsigned ? ProductData.TYPE_UINT32 : ProductData.TYPE_INT32;
-        }   else if (DataType.UBYTE.equals(dataType)) {
-            return  ProductData.TYPE_UINT8;
+        } else if (DataType.UBYTE.equals(dataType)) {
+            return ProductData.TYPE_UINT8;
         } else if (DataType.USHORT.equals(dataType)) {
-            return ProductData.TYPE_UINT16 ;
+            return ProductData.TYPE_UINT16;
         } else if (DataType.UINT.equals(dataType)) {
-            return  ProductData.TYPE_UINT32 ;
+            return ProductData.TYPE_UINT32;
         } else if (DataType.LONG.equals(dataType)) {
             return ProductData.TYPE_INT64;
         } else if (DataType.FLOAT.equals(dataType)) {
@@ -73,10 +73,8 @@ public class DataTypeUtils {
      * Return the NetCDF equivalent to the given dataType.
      *
      * @param dataType must be one of {@code ProductData.TYPE_*}
-     *
      * @return the NetCDF equivalent to the given dataType or {@code null} if not {@code dataType} is
-     *         not one of {@code ProductData.TYPE_*}
-     *
+     * not one of {@code ProductData.TYPE_*}
      * @see ProductData
      */
     public static DataType getNetcdfDataType(int dataType) {
@@ -113,10 +111,8 @@ public class DataTypeUtils {
      * Return the NetCDF equivalent to the given dataType.
      *
      * @param dataType must be one of {@code ProductData.TYPE_*}
-     *
      * @return the NetCDF equivalent to the given dataType or {@code null} if not {@code dataType} is
-     *         not one of {@code ProductData.TYPE_*}
-     *
+     * not one of {@code ProductData.TYPE_*}
      * @see ProductData
      */
     public static DataType getNetcdf4DataType(int dataType) {
@@ -147,14 +143,13 @@ public class DataTypeUtils {
                 return null;
         }
     }
+
     /**
      * Converts the given double value to the Java type corresponding to the the given {@link DataType data type}.
      *
      * @param value    The value to be converted.
      * @param dataType The NetCDF data type.
-     *
      * @return The converted value corresponding to the given {@link DataType data type}.
-     *
      * @throws IllegalArgumentException if {@link DataType dataType} is not one of {@link DataType#BYTE},
      *                                  {@link DataType#SHORT}, {@link DataType#INT}, {@link DataType#LONG},
      *                                  {@link DataType#FLOAT} or {@link DataType#DOUBLE}.
@@ -186,7 +181,6 @@ public class DataTypeUtils {
      * Creates a ProductData instance for the given netcdf attribute.
      *
      * @param attribute A netcdf attribute.
-     *
      * @return A new ProductData instance with the attribute's data type and value.
      */
     public static ProductData createProductData(Attribute attribute) {

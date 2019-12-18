@@ -32,30 +32,30 @@ import java.util.Map;
 // *
 // * @author MarcoZ
 // */
-public abstract class NFileWriteable  {
+public abstract class NFileWriteable {
 
     private static final int DEFAULT_COMPRESSION = 6;
     private String dimensions = "";
-    protected Map<String,Dimension> dimensionsMap =  new HashMap<>();
+    protected Map<String, Dimension> dimensionsMap = new HashMap<>();
 
     public NetcdfFileWriter getWriter() {
         return netcdfFileWriter;
     }
 
-    protected  NetcdfFileWriter netcdfFileWriter;
+    protected NetcdfFileWriter netcdfFileWriter;
     protected Map<String, NVariable> variables = new HashMap<>();
-
 
     public void addDimension(String name, int length) throws IOException {
         try {
-            dimensionsMap.put(name,netcdfFileWriter.addDimension(null,name,length));
-            if (dimensions.length() == 0) {
-                dimensions=name;
-            } else {
-                dimensions=dimensions+" "+name;
-            }
+            dimensionsMap.put(name, netcdfFileWriter.addDimension(null, name, length));
         } catch (Exception e) {
             throw new IOException(e);
+        }
+        boolean firstDimension = dimensions.length() == 0;
+        if (firstDimension) {
+            dimensions = name;
+        } else {
+            dimensions = dimensions + " " + name;
         }
     }
 
@@ -66,7 +66,7 @@ public abstract class NFileWriteable  {
     public void addGlobalAttribute(String name, String value) throws IOException {
         try {
             Attribute attribute = new Attribute(name, value);
-            netcdfFileWriter.addGroupAttribute(null,attribute);
+            netcdfFileWriter.addGroupAttribute(null, attribute);
         } catch (Exception e) {
             throw new IOException(e);
         }
@@ -75,7 +75,7 @@ public abstract class NFileWriteable  {
     public void addGlobalAttribute(String name, Number value) throws IOException {
         try {
             Attribute attribute = new Attribute(name, value);
-            netcdfFileWriter.addGroupAttribute(null,attribute);
+            netcdfFileWriter.addGroupAttribute(null, attribute);
         } catch (Exception e) {
             throw new IOException(e);
         }
@@ -85,13 +85,13 @@ public abstract class NFileWriteable  {
         return addVariable(name, dataType, false, tileSize, dims);
     }
 
-    abstract public NVariable addScalarVariable(String name, DataType dataType)  ;
+    abstract public NVariable addScalarVariable(String name, DataType dataType);
 
-    public NVariable addVariable(String name, DataType dataType, boolean unsigned, java.awt.Dimension tileSize, String dims)  {
+    public NVariable addVariable(String name, DataType dataType, boolean unsigned, java.awt.Dimension tileSize, String dims) {
         return addVariable(name, dataType, unsigned, tileSize, dims, DEFAULT_COMPRESSION);
     }
 
-    abstract public NVariable addVariable(String name, DataType dataType, boolean unsigned, java.awt.Dimension tileSize, String dimensions, int compressionLevel) ;
+    abstract public NVariable addVariable(String name, DataType dataType, boolean unsigned, java.awt.Dimension tileSize, String dimensions, int compressionLevel);
 
     public NVariable findVariable(String variableName) {
         return variables.get(variableName);
@@ -108,11 +108,7 @@ public abstract class NFileWriteable  {
     abstract public DataType getNetcdfDataType(int dataType);
 
     public void create() throws IOException {
-        try {
-            netcdfFileWriter.create();
-        } catch (Exception e) {
-            throw new IOException(e);
-        }
+        netcdfFileWriter.create();
     }
 
     public void close() throws IOException {

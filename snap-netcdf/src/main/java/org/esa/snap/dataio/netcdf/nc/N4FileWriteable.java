@@ -44,7 +44,7 @@ public class N4FileWriteable extends NFileWriteable {
     @Override
     public NVariable addScalarVariable(String name, DataType dataType) {
         Variable variable = netcdfFileWriter.addVariable(null, name, dataType, new ArrayList<Dimension>());
-        NVariable nVariable = new N4Variable(variable, null,netcdfFileWriter);
+        NVariable nVariable = new N4Variable(variable, null, netcdfFileWriter);
         variables.put(name, nVariable);
         return nVariable;
     }
@@ -82,27 +82,27 @@ public class N4FileWriteable extends NFileWriteable {
                     chunkLens[i] = nhDims[i].getLength();
                 }
             }
-        }
-        else{
-            chunkLens[0]=1;
+        } else {
+            chunkLens[0] = 1;
         }
         //Object fillValue = null; // TODO
-        for (int i=0; i<chunkLens.length; i++) {
-            if (chunkLens[i]==null) {
-                chunkLens[i]=1;
+        for (int i = 0; i < chunkLens.length; i++) {
+            if (chunkLens[i] == null) {
+                chunkLens[i] = 1;
             }
         }
-        Variable variable = netcdfFileWriter.addVariable(null, name, dataType.withSignedness( (unsigned ? DataType.Signedness.UNSIGNED : DataType.Signedness.SIGNED)), dimensions);
-        Attribute chunksizes;
-        chunksizes = new Attribute("_ChunkSizes", Arrays.asList(chunkLens));
+        Variable variable = netcdfFileWriter.addVariable(null, name, dataType.withSignedness((unsigned ? DataType.Signedness.UNSIGNED : DataType.Signedness.SIGNED)), dimensions);
+        Attribute chunksizes = new Attribute("_ChunkSizes", Arrays.asList(chunkLens));
         variable.addAttribute(chunksizes);
-        NVariable nVariable = new N4Variable(variable, tileSize,netcdfFileWriter);
+        NVariable nVariable = new N4Variable(variable, tileSize, netcdfFileWriter);
         variables.put(name, nVariable);
         return nVariable;
     }
 
     @Override
-    public DataType getNetcdfDataType(int dataType){
+    public DataType getNetcdfDataType(int dataType) {
         return DataTypeUtils.getNetcdf4DataType(dataType);
-    };
+    }
+
+    ;
 }

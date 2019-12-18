@@ -32,8 +32,6 @@ import java.util.ArrayList;
  */
 public class N3FileWriteable extends NFileWriteable {
 
-
-
      N3FileWriteable(String filename) throws IOException {
         netcdfFileWriter = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf3,filename) ;
     }
@@ -47,8 +45,7 @@ public class N3FileWriteable extends NFileWriteable {
     }
 
     @Override
-    public NVariable addVariable(String name, DataType dataType, boolean unsigned, java.awt.Dimension tileSize, String dimensions, int compressionLevel)
-    {
+    public NVariable addVariable(String name, DataType dataType, boolean unsigned, java.awt.Dimension tileSize, String dimensions, int compressionLevel) {
         Variable variable = netcdfFileWriter.addVariable(null, name, dataType, dimensions);
         NVariable nVariable = new N3Variable(variable, netcdfFileWriter);
         variables.put(name, nVariable);

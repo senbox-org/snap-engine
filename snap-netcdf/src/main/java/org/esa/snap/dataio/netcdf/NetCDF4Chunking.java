@@ -11,25 +11,25 @@ import ucar.nc2.write.Nc4Chunking;
 import java.util.List;
 
 public class NetCDF4Chunking implements Nc4Chunking {
-    private static final int MIN_VARIABLE_BYTES = (int) Math.pow(2,16); // 65K
-    private static final int DEFAULT_CHUNKSIZE_BYTES = (int) Math.pow(2,18); // 256K
-    private static final int MIN_CHUNKSIZE_BYTES = (int) Math.pow(2,13); // 8K
-    private static final int DEFLATLEVEL = 5;
-    private static final boolean ISSHUFFLE = true;
+
+    private static final int MIN_VARIABLE_BYTES = (int) Math.pow(2, 16); // 65K
+    private static final int DEFAULT_CHUNKSIZE_BYTES = (int) Math.pow(2, 18); // 256K
+    private static final int MIN_CHUNKSIZE_BYTES = (int) Math.pow(2, 13); // 8K
+    private static final int DEFLAT_LEVEL = 5;
+    private static final boolean IS_SHUFFLE = true;
 
     private int minVariableSize = MIN_VARIABLE_BYTES;
     private int defaultChunkSize = DEFAULT_CHUNKSIZE_BYTES;
     private int minChunksize = MIN_CHUNKSIZE_BYTES;
-    private int deflatLevele = DEFLATLEVEL;
-    private boolean isShuffle = ISSHUFFLE;
 
     @Override
     public boolean isChunked(Variable v) {
-        if (v.isUnlimited()) return true;
-        // if (getChunkAttribute(v) != null) return true;
+        if (v.isUnlimited()) {
+            return true;
+        }
 
         long size = v.getSize() * v.getElementSize();
-        return (size > minVariableSize);
+        return size > minVariableSize;
     }
 
 
@@ -37,8 +37,9 @@ public class NetCDF4Chunking implements Nc4Chunking {
     public long[] computeChunking(Variable v) {
 
         int[] resultFromAtt = computeChunkingFromAttribute(v);
-        if (resultFromAtt != null)
+        if (resultFromAtt != null) {
             return convertToLong(resultFromAtt);
+        }
 
         int maxElements = defaultChunkSize / v.getElementSize();
 
@@ -57,8 +58,9 @@ public class NetCDF4Chunking implements Nc4Chunking {
         Attribute att = getChunkAttribute(v); // use CHUNK_SIZES attribute if it exists
         if (att != null) {
             int[] result = new int[v.getRank()];
-            for (int i = 0; i < v.getRank(); i++)
+            for (int i = 0; i < v.getRank(); i++) {
                 result[i] = att.getNumericValue(i).intValue();
+            }
             return result;
         }
 
@@ -85,10 +87,13 @@ public class NetCDF4Chunking implements Nc4Chunking {
     }
 
     private long[] convertToLong(int[] shape) {
-        if (shape.length == 0) shape = new int[1];
+        if (shape.length == 0) {
+            shape = new int[1];
+        }
         long[] result = new long[shape.length];
-        for (int i=0; i<shape.length; i++)
+        for (int i = 0; i < shape.length; i++) {
             result[i] = shape[i] > 0 ? shape[i] : 1; // unlimited dim has 0
+        }
         return result;
     }
 
@@ -103,27 +108,33 @@ public class NetCDF4Chunking implements Nc4Chunking {
 
     private Attribute getChunkAttribute(Variable v) {
         Attribute att = v.findAttribute(CDM.CHUNK_SIZES);
-        if (att != null && att.getDataType().isIntegral() && att.getLength() == v.getRank())
+        if (att != null && att.getDataType().isIntegral() && att.getLength() == v.getRank()) {
             return att;
+        }
         return null;
     }
 
     private int[] incrUnlimitedShape(List<Dimension> dims, int[] shape, long maxElements) {
         int countUnlimitedDims = 0;
         for (Dimension d : dims) {
-            if (d.isUnlimited()) countUnlimitedDims++;
+            if (d.isUnlimited()) {
+                countUnlimitedDims++;
+            }
         }
         long shapeSize = new Section(shape).computeSize(); // shape with unlimited dimensions == 1
         int needFactor = (int) (maxElements / shapeSize);
 
         // distribute needFactor amongst the n unlimited dimensions
         int need;
-        if ( countUnlimitedDims <= 1) need = needFactor;
-        else if ( countUnlimitedDims == 2) need = (int) Math.sqrt(needFactor);
-        else if ( countUnlimitedDims == 3) need = (int) Math.cbrt(needFactor);
-        else {
+        if (countUnlimitedDims <= 1) {
+            need = needFactor;
+        } else if (countUnlimitedDims == 2) {
+            need = (int) Math.sqrt(needFactor);
+        } else if (countUnlimitedDims == 3) {
+            need = (int) Math.cbrt(needFactor);
+        } else {
             // nth root?? hmm roundoff !!
-            need = (int)  Math.pow(needFactor, 1.0 / countUnlimitedDims);
+            need = (int) Math.pow(needFactor, 1.0 / countUnlimitedDims);
         }
 
         int[] result = new int[shape.length];
@@ -137,11 +148,11 @@ public class NetCDF4Chunking implements Nc4Chunking {
 
     @Override
     public int getDeflateLevel(Variable v) {
-        return deflatLevele;
+        return DEFLAT_LEVEL;
     }
 
     @Override
     public boolean isShuffle(Variable v) {
-        return isShuffle;
+        return IS_SHUFFLE;
     }
 }

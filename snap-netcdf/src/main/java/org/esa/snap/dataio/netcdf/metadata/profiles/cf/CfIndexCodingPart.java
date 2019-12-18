@@ -72,7 +72,7 @@ public class CfIndexCodingPart extends ProfilePartIO {
 
     public static void writeIndexCoding(IndexCoding indexCoding, NVariable variable) throws IOException {
         final String[] indexNames = indexCoding.getIndexNames();
-        ProductData indexValues = ProductData.createInstance(DataTypeUtils.getRasterDataType(variable.getDataType(),variable.getDataType().isUnsigned()), indexNames.length);
+        ProductData indexValues = ProductData.createInstance(DataTypeUtils.getRasterDataType(variable.getDataType(), variable.getDataType().isUnsigned()), indexNames.length);
         final StringBuilder meanings = new StringBuilder();
         for (int i = 0; i < indexValues.getNumElems(); i++) {
             if (meanings.length() > 0) {
@@ -83,14 +83,15 @@ public class CfIndexCodingPart extends ProfilePartIO {
             indexValues.setElemIntAt(i, indexCoding.getIndexValue(name));
         }
         variable.addAttribute(FLAG_MEANINGS, meanings.toString().trim());
-        final Array maskValues = Array.factory(variable.getDataType() ,new int[]{indexNames.length},indexValues.getElems());
+        final Array maskValues = Array.factory(variable.getDataType(), new int[]{indexNames.length}, indexValues.getElems());
         Attribute attribute = variable.addAttribute(FLAG_VALUES, maskValues);
         try {
             if (indexValues.isUnsigned()) {
                 attribute.setDataType(attribute.getDataType().withSignedness(DataType.Signedness.UNSIGNED));
             }
+        } catch (NullPointerException ignore) {
+            // why can an NPE occur?
         }
-        catch (NullPointerException ignore) {}
     }
 
     public static IndexCoding readIndexCoding(Variable variable, String indexCodingName) {
