@@ -66,12 +66,23 @@ public class GeoTiffProductReaderPlugIn implements ProductReaderPlugIn {
                 }
                 return DecodeQualification.UNABLE;
             }
-            try (ImageInputStream stream = ImageIO.createImageInputStream(imageIOInput)) {
-                return getDecodeQualificationImpl(stream);
-            }
-        } catch (Exception ignore) {
+
+			if(input instanceof String || input instanceof File) {
+				 final String ext = FileUtils.getExtension((File) imageIOInput);
+                 if(ext != null && ext.equalsIgnoreCase(".tif") || ext.equalsIgnoreCase(".tiff") || ext.equalsIgnoreCase(".btf")) {
+                     return DecodeQualification.SUITABLE;
+                 } else if(ext != null && ext.equalsIgnoreCase(".zip")) {
+                     return checkZip((File) imageIOInput);
+                 } else {
+                     return DecodeQualification.UNABLE;
+                 }
+			}
+      final ImageInputStream stream = ImageIO.createImageInputStream(imageIOInput);
+      try {
+          return getDecodeQualificationImpl(stream);
+      } catch (Exception ignore) {
             // nothing to do, return value is already UNABLE
-        }
+      }
 
         return DecodeQualification.UNABLE;
     }
@@ -101,8 +112,8 @@ public class GeoTiffProductReaderPlugIn implements ProductReaderPlugIn {
                 }
             }
         }
-        if (foundTiff && entryCnt == 1) {
-            return DecodeQualification.INTENDED;    // only zipped tiff
+        if(foundTiff && entryCnt == 1) {
+            return DecodeQualification.SUITABLE;    // only zipped tiff
         }
         return DecodeQualification.UNABLE;
     }
