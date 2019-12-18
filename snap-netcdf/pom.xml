@@ -75,6 +75,12 @@
             <artifactId>snap-gpf</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>edu.ucar</groupId>
+            <artifactId>udunits</artifactId>
+            <version>${netcdf.version}</version>
+<!--            <version>4.5.5</version>-->
+        </dependency>
         <!--
         We have to include the following UGLY dependencies so that they are put into the NBM module's ext folder.
         Otherwise we always get onm thne command-line:
@@ -104,6 +110,11 @@
         </dependency>
 
         <!-- Test stuff -->
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-gpf</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

@@ -4,7 +4,7 @@
     <parent>
         <artifactId>snap-engine</artifactId>
         <groupId>org.esa.snap</groupId>
-        <version>7.0.0-SNAPSHOT</version>
+        <version>7.0.3</version>
     </parent>
 
     <artifactId>snap-engine-utilities</artifactId>
@@ -20,10 +20,6 @@
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
-            <artifactId>ceres-jai</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.esa.snap</groupId>
             <artifactId>snap-core</artifactId>
         </dependency>
         <dependency>
@@ -35,76 +31,15 @@
             <artifactId>snap-runtime</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.derby</groupId>
-            <artifactId>derby</artifactId>
-            <version>10.11.1.1</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-net</groupId>
-            <artifactId>commons-net</artifactId>
-            <version>3.3</version>
-        </dependency>
-        <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.4</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-compress</artifactId>
-            <version>1.8</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-            <version>1.9</version>
-        </dependency>
 
-        <dependency>
-            <groupId>org.apache.olingo</groupId>
-            <artifactId>olingo-odata2-api</artifactId>
-            <version>2.0.8</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.olingo</groupId>
-            <artifactId>olingo-odata2-core</artifactId>
-            <version>2.0.8</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>javax.ws.rs</groupId>
-                    <artifactId>javax.ws.rs-api</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.abdera</groupId>
-            <artifactId>abdera-core</artifactId>
-            <version>1.1.3</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.abdera</groupId>
-            <artifactId>abdera-client</artifactId>
-            <version>1.1.3</version>
-        </dependency>
-
-        <dependency>
-            <groupId>net.sf.sevenzipjbinding</groupId>
-            <artifactId>sevenzipjbinding</artifactId>
-            <version>4.65-1.04</version>
-        </dependency>
-        <dependency>
-            <groupId>net.sf.sevenzipjbinding</groupId>
-            <artifactId>native-libs</artifactId>
-            <version>4.65-1.04</version>
-        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jasypt</groupId>
-            <artifactId>jasypt</artifactId>
-            <version>1.9.2</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -117,10 +52,6 @@
                     <publicPackages>
                         <publicPackage>org.esa.snap.engine_utilities.*</publicPackage>
                         <publicPackage>org.apache.commons.*</publicPackage>
-                        <publicPackage>org.w3c.dom.*</publicPackage>
-                        <publicPackage>org.xml.*</publicPackage>
-                        <publicPackage>org.jaxen.*</publicPackage>
-                        <publicPackage>javax.*</publicPackage>
                     </publicPackages>
                 </configuration>
             </plugin>

@@ -17,22 +17,31 @@ package org.esa.snap.core.dataio;
 
 /**
  * The <code>ProductReaderPlugIn</code> interface is implemented by data product reader plug-ins.
- * <p>XMLDecoder plug-ins are used to provide meta-information about a particular data format and to create instances of
+ * <p>ProductReaderPlugIn plug-ins are used to provide meta-information about a particular data format and to create instances of
  * the actual reader objects.
  * <p> A plug-in can register itself in the <code>ProductIO</code> plug-in registry or it is automatically found during
  * a classpath scan.
+ * <p>
+ * Consider reading the developer guide when implementing a new product reader in the wiki:<br>
+ * <a href="https://senbox.atlassian.net/wiki/spaces/SNAP/pages/10584125/How+to+create+a+new+product+reader">How to create a new product reader</a>
  *
  * @author Norman Fomferra
- * @version $Revision$ $Date$
  * @see ProductWriterPlugIn
  */
 public interface ProductReaderPlugIn extends ProductIOPlugIn {
 
     /**
      * Gets the qualification of the product reader to decode a given input object.
+     * Things to consider when implementing this method:
+     * <ul>
+     * <li>make sure method always succeeds; ensure that no exception is thrown</li>
+     * <li>make sure that it is fast (terminates within milliseconds)</li>
+     * <li>make sure method is thread safe</li>
+     * <li>use the INTENDED qualification with care; generic readers shall return SUITABLE at most</li>
+     * </ul>
      *
      * @param input the input object
-     * @return  the decode qualification
+     * @return the decode qualification
      */
     DecodeQualification getDecodeQualification(Object input);
 

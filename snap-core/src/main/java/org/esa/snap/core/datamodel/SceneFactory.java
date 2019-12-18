@@ -71,18 +71,28 @@ public final class SceneFactory {
         int numTransferred = 0;
         for (String rasterName : rasterNames) {
             final RasterDataNode sourceRaster = sourceProduct.getRasterDataNode(rasterName);
-            if (sourceRaster != null) {
+            final RasterDataNode targetRaster = targetProduct.getRasterDataNode(rasterName);
+            if (sourceRaster != null && targetRaster != null) {
+                ProductSubsetDef auxiliarSubsetDef = null;
+                if(subsetDef == null || subsetDef.getRegionMap() == null) {
+                    auxiliarSubsetDef = subsetDef;
+                } else {
+                    auxiliarSubsetDef = new ProductSubsetDef();
+                    auxiliarSubsetDef.setRegion(subsetDef.getRegionMap().get(sourceRaster.getName()));
+                    auxiliarSubsetDef.setSubSampling(subsetDef.getSubSamplingX(),subsetDef.getSubSamplingY());
+                }
+
                 final Scene sourceRasterScene = SceneFactory.createScene(sourceRaster);
-                final RasterDataNode targetRaster = targetProduct.getRasterDataNode(rasterName);
-                if (targetRaster != null) {
+
+                //if (targetRaster != null) {
                     final Scene targetRasterScene = SceneFactory.createScene(targetRaster);
-                    if (transferGeoCoding(sourceRasterScene, targetRasterScene, subsetDef)) {
+                    if (transferGeoCoding(sourceRasterScene, targetRasterScene, auxiliarSubsetDef)) {
                         numTransferred++;
                     } else {
                         SystemUtils.LOG.warning(
                                 "failed to transfer geo-coding of band '" + sourceRaster.getName() + "'");
                     }
-                }
+                //}
             }
         }
 

@@ -25,6 +25,7 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.datamodel.VirtualBand;
+import org.esa.snap.core.gpf.OperatorException;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.junit.Test;
 import org.opengis.referencing.FactoryException;
@@ -43,6 +44,7 @@ public class CollocateOpTest {
 
         CollocateOp op = new CollocateOp();
         op.setParameterDefaultValues();
+        op.setSlaveComponentPattern("${ORIGINAL_NAME}_S");
 
         // test default settings
         assertEquals("COLLOCATED", op.getTargetProductType());
@@ -81,9 +83,9 @@ public class CollocateOpTest {
         assertEquals("!l1_flags_M.INVALID && radiance_1_M > 10", targetProduct.getBandAt(0).getValidMaskExpression());
         assertEquals("!l1_flags_M.INVALID && radiance_1_M > 10", targetProduct.getBandAt(1).getValidMaskExpression());
 
-        assertEquals("(!l1_flags_S.INVALID && radiance_1_S > 10) && collocation_flags.SLAVE_PRESENT",
+        assertEquals("!l1_flags_S.INVALID && radiance_1_S > 10",
                      targetProduct.getBandAt(16 + 1).getValidMaskExpression());
-        assertEquals("(!l1_flags_S.INVALID && radiance_1_S > 10) && collocation_flags.SLAVE_PRESENT",
+        assertEquals("!l1_flags_S.INVALID && radiance_1_S > 10",
                      targetProduct.getBandAt(16 + 2).getValidMaskExpression());
 
         assertEquals(4, targetProduct.getMaskGroup().getNodeCount());
@@ -134,6 +136,7 @@ public class CollocateOpTest {
 
         CollocateOp op = new CollocateOp();
         op.setParameterDefaultValues();
+        op.setSlaveComponentPattern("${ORIGINAL_NAME}_S");
 
         // test default settings
         assertEquals("COLLOCATED", op.getTargetProductType());
@@ -172,9 +175,9 @@ public class CollocateOpTest {
         assertEquals("!l1_flags_M.INVALID && radiance_1_M > 10", targetProduct.getBandAt(0).getValidMaskExpression());
         assertEquals("!l1_flags_M.INVALID && radiance_1_M > 10", targetProduct.getBandAt(1).getValidMaskExpression());
 
-        assertEquals("(!l2_flags_S.INVALID && reflec_1_S > 0.1) && collocation_flags.SLAVE_PRESENT",
+        assertEquals("!l2_flags_S.INVALID && reflec_1_S > 0.1",
                      targetProduct.getBandAt(16 + 1).getValidMaskExpression());
-        assertEquals("(!l2_flags_S.INVALID && reflec_1_S > 0.1) && collocation_flags.SLAVE_PRESENT",
+        assertEquals("!l2_flags_S.INVALID && reflec_1_S > 0.1",
                      targetProduct.getBandAt(16 + 2).getValidMaskExpression());
 
         assertEquals(3, targetProduct.getMaskGroup().getNodeCount());
@@ -219,6 +222,7 @@ public class CollocateOpTest {
 
         CollocateOp op = new CollocateOp();
         op.setParameterDefaultValues();
+        op.setSlaveComponentPattern("${ORIGINAL_NAME}_S");
 
         op.setMasterProduct(masterProduct);
         op.setSlaveProduct(slaveProduct);
@@ -230,6 +234,29 @@ public class CollocateOpTest {
         assertArrayEquals(new String[]{"*nadir*_M"}, autoGrouping.get(0));
         assertArrayEquals(new String[]{"*fward*_M"}, autoGrouping.get(1));
         assertArrayEquals(new String[]{"*radiance*_S"}, autoGrouping.get(2));
+    }
+
+    @Test
+    public void testCollocate_failsWhenSlaveRenamingPatternIsMissing() {
+        final Product masterProduct = createTestProduct1();
+        final Product slaveProduct = createTestProduct1();
+
+        CollocateOp op = new CollocateOp();
+        op.setParameterDefaultValues();
+        op.setRenameSlaveComponents(false);
+        op.setSlaveComponentPattern("");
+
+        op.setMasterProduct(masterProduct);
+        op.setSlaveProduct(slaveProduct);
+
+        try {
+            op.getTargetProduct();
+            fail("Exception expected");
+        } catch (OperatorException oe) {
+            assertEquals("Target product already contains a raster data node with name 'latitude'. " +
+                    "Parameter slaveComponentPattern must be set.",
+                    oe.getMessage());
+        }
     }
 
     private static float[] wl = new float[]{

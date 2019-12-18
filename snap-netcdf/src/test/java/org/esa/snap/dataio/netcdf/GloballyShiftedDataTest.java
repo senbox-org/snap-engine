@@ -78,7 +78,6 @@ public class GloballyShiftedDataTest {
             throw new IOException(e);
         }
 
-
         try {
             // rightValues are written to the left side of the image, but as the data is globally shifted
             // they will be on the right side when read in

@@ -74,14 +74,13 @@ public class BandNameCreator {
             attributeName = shorten(attributeName);
         }
         if (attributeName.length() > 10) {
-            final int index = getIndex(measureName);
+            final int index = getIndex(sourceBandName);
             attributeName = shorten(measureName) + "_" + index;
             if (attributeName.length() > 10) {
                 final String indexPart = Integer.toString(index);
                 final int idxLength = indexPart.length();
                 attributeName = attributeName.substring(0, 10 - idxLength - 1) + "_" + indexPart;
             }
-            indexMap.put(measureName, index + 1);
         }
         if (tooLong) {
             SystemUtils.LOG.warning(
@@ -115,7 +114,7 @@ public class BandNameCreator {
             attributeName = shorten(attributeName);
         }
         if (attributeName.length() > 10) {
-            final int index = getIndex(measureName);
+            final int index = getIndex(sourceBandName);
             attributeName = shorten(measureName) + "_" + index + "_" + timeInterval.getId();
             if (attributeName.length() > 10) {
                 final String indexPart = Integer.toString(index);
@@ -125,7 +124,6 @@ public class BandNameCreator {
                 attributeName = attributeName.substring(0, 10 - idxLength - intervalIdLength - 2) + "_" +
                         indexPart + "_" + intervalIdPart;
             }
-            indexMap.put(measureName, index + 1);
         }
         if (tooLong) {
             SystemUtils.LOG.warning(
@@ -155,16 +153,16 @@ public class BandNameCreator {
     }
 
     private static String shorten(String attributeName) {
-        attributeName = attributeName.replace("minimum", "min").replace("maximum", "max");
+        attributeName = attributeName.replace("minimum", "mn").replace("maximum", "mx").replace("_threshold", "");
         attributeName = attributeName.replace("a", "").replace("e", "").replace("i", "").replace("o", "").replace("u", "");
         return attributeName;
     }
 
-    private int getIndex(String attributeName) {
-        if (indexMap.containsKey(attributeName)) {
-            return indexMap.get(attributeName);
+    private synchronized int getIndex(String attributeName) {
+        if (!indexMap.containsKey(attributeName)) {
+            indexMap.put(attributeName, indexMap.size());
         }
-        return 0;
+        return indexMap.get(attributeName);
     }
 
     private void addMapping(String desiredAttributeName, String attributeName) {

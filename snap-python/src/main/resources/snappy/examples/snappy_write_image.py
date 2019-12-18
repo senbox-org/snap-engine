@@ -1,5 +1,6 @@
-import snappy
 import sys
+
+import snappy
 from snappy import (ProductIO, ProductUtils, ProgressMonitor)
 
 if len(sys.argv) != 2:
@@ -25,16 +26,33 @@ RenderedImage = jpy.get_type('java.awt.image.RenderedImage')
 System = jpy.get_type('java.lang.System')
 System.setProperty('com.sun.media.jai.disableMediaLib', 'true')
 
+
 def write_image(band, filename, format):
     im = ImageManager.getInstance().createColoredBandImage([band], band.getImageInfo(), 0)
     JAI.create("filestore", im, filename, format)
+
 
 def write_rgb_image(bands, filename, format):
     image_info = ProductUtils.createImageInfo(bands, True, ProgressMonitor.NULL)
     im = ImageManager.getInstance().createColoredBandImage(bands, image_info, 0)
     JAI.create("filestore", im, filename, format)
 
+
+def resize(product, targetWidth, targetHeight):
+    from snappy import GPF
+    from snappy import HashMap
+
+    parameters = HashMap()
+    parameters.put('targetWidth', targetWidth)
+    parameters.put('targetHeight', targetHeight)
+    return GPF.createProduct('Resample', parameters, product)
+
 product = ProductIO.readProduct(file)
+
+# This scales the product to the specified size
+# remove if you don't want scaling.
+product = resize(product, 1000, 1000)
+
 band = product.getBand('radiance_13')
 
 # The colour palette assigned to pixel values 0, 50, 100 in the band's geophysical units

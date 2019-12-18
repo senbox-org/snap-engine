@@ -46,6 +46,7 @@ public class TestUtils {
     private static final boolean FailOnLargeTestProducts = false;
     private static final boolean FailOnAllNoData = false;
     private static final int LARGE_DIMENSION = 100;
+    private static final ProductData.UTC NO_TIME = new ProductData.UTC();
 
     private static boolean testEnvironmentInitialized = false;
     public static final String SKIPTEST = "skipTest";
@@ -98,15 +99,18 @@ public class TestUtils {
             throw new Exception("product scene raster dimensions are " + product.getSceneRasterWidth() +" x "+ product.getSceneRasterHeight());
         }
         if (verifyTimes) {
-            if (product.getStartTime() == null)
+            if (product.getStartTime() == null || product.getStartTime().getMJD() == NO_TIME.getMJD()) {
                 throw new Exception("startTime is null");
-            if (product.getEndTime() == null)
+            }
+            if (product.getEndTime() == null || product.getEndTime().getMJD() == NO_TIME.getMJD()) {
                 throw new Exception("endTime is null");
+            }
         }
         if (verifyBandData && FailOnAllNoData) {
             for (Band b : product.getBands()) {
-                if (b.getUnit() == null || b.getUnit().isEmpty())
+                if (b.getUnit() == null || b.getUnit().isEmpty()) {
                     throw new Exception("band " + b.getName() + " has null unit");
+                }
 
                 // readPixels gets computeTiles to be executed
                 final int w = b.getRasterWidth() / 2;
@@ -122,8 +126,9 @@ public class TestUtils {
                     final float[] floatValues = new float[w];
                     b.readPixels(x0, y, w, 1, floatValues, ProgressMonitor.NULL);
                     for (float f : floatValues) {
-                        if (!(f == b.getNoDataValue() || f == 0 || f == Float.NaN))
+                        if (!(f == b.getNoDataValue() || f == 0 || Float.isNaN(f))) {
                             allNoData = false;
+                        }
                     }
                 }
                 if (allNoData) {
@@ -296,7 +301,8 @@ public class TestUtils {
                     msg += anExpected + ", ";
                 }
                 TestUtils.log.info(msg);
-                throw new IOException("Mismatch [" + i + "] " + actual[i] + " is not " + expected[i]);
+                throw new IOException("Mismatch [" + i + "] " + actual[i] + " is not " + expected[i] + " for " +
+                        targetProduct.getName() +" band:"+ bandName);
             }
         }
     }

@@ -20,19 +20,18 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Polygon;
-import com.vividsolutions.jts.simplify.DouglasPeuckerSimplifier;
-import org.esa.snap.binning.PlanetaryGrid;
+import org.esa.snap.binning.MosaickingGrid;
+import org.esa.snap.core.datamodel.CrsGeoCoding;
+import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.common.reproject.ReprojectionOp;
 import org.esa.snap.core.image.ImageManager;
-import org.esa.snap.core.util.ProductUtils;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.operation.TransformException;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.PathIterator;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,7 +40,7 @@ import java.util.List;
  *
  * @author Marco Zühlke
  */
-public class PlateCarreeGrid implements PlanetaryGrid {
+public class PlateCarreeGrid implements MosaickingGrid {
 
     private final int numRows;
     private final int numCols;
@@ -86,7 +85,7 @@ public class PlateCarreeGrid implements PlanetaryGrid {
 
     @Override
     public long getNumBins() {
-        return ((long) numRows) * (long) numCols;
+        return numRows * (long) numCols;
     }
 
     @Override
@@ -101,7 +100,7 @@ public class PlateCarreeGrid implements PlanetaryGrid {
 
     @Override
     public long getFirstBinIndex(int row) {
-        return ((long) row) * ((long) numCols);
+        return row * ((long) numCols);
     }
 
     @Override
@@ -118,7 +117,7 @@ public class PlateCarreeGrid implements PlanetaryGrid {
         };
     }
 
-    private double getCenterLon(int col) {
+    public double getCenterLon(int col) {
         return 360.0 * (col + 0.5) / numCols - 180.0;
     }
 
@@ -143,7 +142,8 @@ public class PlateCarreeGrid implements PlanetaryGrid {
         return (numRows - 1) - (int) ((90.0 + lat) * (numRows / 180.0));
     }
 
-    public Product reprojectToPlateCareeGrid(Product sourceProduct) {
+    @Override
+    public Product reprojectToGrid(Product sourceProduct) {
         final ReprojectionOp repro = new ReprojectionOp();
 
         repro.setParameter("resampling", "Nearest");
@@ -180,12 +180,12 @@ public class PlateCarreeGrid implements PlanetaryGrid {
 
     public Rectangle[] getDataSliceRectangles(Geometry productGeometry, Dimension tileSize) {
         Rectangle productBoundingBox = computeBounds(productGeometry);
-        Rectangle gridAlignedBoundingBox = alignToTileGrid(productBoundingBox, tileSize);
+        Rectangle gridAlignedBoundingBox = MosaickingGrid.alignToTileGrid(productBoundingBox, tileSize);
         final int xStart = gridAlignedBoundingBox.x / tileSize.width;
         final int yStart = gridAlignedBoundingBox.y / tileSize.height;
         final int width = gridAlignedBoundingBox.width / tileSize.width;
         final int height = gridAlignedBoundingBox.height / tileSize.height;
-        List<Rectangle> rectangles = new ArrayList<Rectangle>(width * height);
+        List<Rectangle> rectangles = new ArrayList<>(width * height);
 
         for (int y = yStart; y < yStart + height; y++) {
             for (int x = xStart; x < xStart + width; x++) {
@@ -198,7 +198,19 @@ public class PlateCarreeGrid implements PlanetaryGrid {
                 }
             }
         }
-        return rectangles.toArray(new Rectangle[rectangles.size()]);
+        return rectangles.toArray(new Rectangle[0]);
+    }
+
+    @Override
+    public GeoCoding getGeoCoding(Rectangle outputRegion) {
+        try {
+            return new CrsGeoCoding(DefaultGeographicCRS.WGS84, outputRegion.width, outputRegion.height,
+                                    -180.0D + this.pixelSize * outputRegion.x,
+                                    90.0D - this.pixelSize * outputRegion.y,
+                                    this.pixelSize, this.pixelSize, 0.0D, 0.0D);
+        } catch (TransformException | FactoryException e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
     private Rectangle computeBounds(Geometry roiGeometry) {
@@ -225,15 +237,6 @@ public class PlateCarreeGrid implements PlanetaryGrid {
         return region;
     }
 
-    private Rectangle alignToTileGrid(Rectangle rectangle, Dimension tileSize) {
-        int minX = rectangle.x / tileSize.width * tileSize.width;
-        int maxX = (rectangle.x + rectangle.width + tileSize.width - 1) / tileSize.width * tileSize.width;
-        int minY = (rectangle.y / tileSize.height) * tileSize.height;
-        int maxY = (rectangle.y + rectangle.height + tileSize.height - 1) / tileSize.height * tileSize.height;
-
-        return new Rectangle(minX, minY, maxX - minX, maxY - minY);
-    }
-
     private Geometry getTileGeometry(int tileX, int tileY, Dimension tileSize) {
         int tileWidth = tileSize.width;
         int tileHeight = tileSize.height;
@@ -250,47 +253,7 @@ public class PlateCarreeGrid implements PlanetaryGrid {
     }
 
     private double tileYToDegree(int tileY, int tileHeight) {
-        return  90.0 - (tileY * tileHeight * 180.0 / numRows);
-    }
-
-    // TODO Compare with implementation in SubsetOp
-    public Geometry computeProductGeometry(Product product) {
-        try {
-            final GeneralPath[] paths = ProductUtils.createGeoBoundaryPaths(product);
-            final Polygon[] polygons = new Polygon[paths.length];
-
-            for (int i = 0; i < paths.length; i++) {
-                polygons[i] = convertToJtsPolygon(paths[i].getPathIterator(null));
-            }
-            final DouglasPeuckerSimplifier peuckerSimplifier = new DouglasPeuckerSimplifier(
-                    polygons.length == 1 ? polygons[0] : geometryFactory.createMultiPolygon(polygons));
-            return peuckerSimplifier.getResultGeometry();
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    private Polygon convertToJtsPolygon(PathIterator pathIterator) {
-        ArrayList<double[]> coordList = new ArrayList<double[]>();
-        int lastOpenIndex = 0;
-        while (!pathIterator.isDone()) {
-            final double[] coords = new double[6];
-            final int segType = pathIterator.currentSegment(coords);
-            if (segType == PathIterator.SEG_CLOSE) {
-                // we should only detect a single SEG_CLOSE
-                coordList.add(coordList.get(lastOpenIndex));
-                lastOpenIndex = coordList.size();
-            } else {
-                coordList.add(coords);
-            }
-            pathIterator.next();
-        }
-        final Coordinate[] coordinates = new Coordinate[coordList.size()];
-        for (int i1 = 0; i1 < coordinates.length; i1++) {
-            final double[] coord = coordList.get(i1);
-            coordinates[i1] = new Coordinate(coord[0], coord[1]);
-        }
-        return geometryFactory.createPolygon(geometryFactory.createLinearRing(coordinates), null);
+        return 90.0 - (tileY * tileHeight * 180.0 / numRows);
     }
 
 }

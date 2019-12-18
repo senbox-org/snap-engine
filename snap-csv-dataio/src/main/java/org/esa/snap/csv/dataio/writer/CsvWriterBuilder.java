@@ -69,9 +69,6 @@ public class CsvWriterBuilder {
             case PRODUCT: {
                 return new ProductCsvWriter(targetFile);
             }
-            case PIXEL: {
-                return new PixelCsvWriter(writer, outputFormat);
-            }
             case FEATURE: {
                 return new FeatureCsvWriter(writer, outputFormat);
             }

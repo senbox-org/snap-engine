@@ -128,6 +128,13 @@ public class StatisticsOp extends Operator {
             "If null, all pixels are considered.")
     File shapefile;
 
+    @Parameter(description = "The name of the attribute in the ESRI shapefile that shall be used to identify features" +
+            "in the output. If none is given or if the shapefile does not have the attribute, the feature id will be" +
+            "used. This parameter is case-sensitive. It is only considered when the shapefile parameter is set.",
+            defaultValue = "name"
+    )
+    String featureId;
+
     @Parameter(description = "The start date. If not given, taken from the 'oldest' source product. Products that " +
             "have a start date before the start date given by this parameter are not considered.",
             format = DATETIME_PATTERN, converter = UtcConverter.class)
@@ -193,21 +200,11 @@ public class StatisticsOp extends Operator {
         TimeInterval[] timeIntervals = getTimeIntervals(interval, startDate, endDate);
 
         final StatisticComputer statisticComputer = new StatisticComputer(shapefile, bandConfigurations,
-                Util.computeBinCount(accuracy), timeIntervals, getLogger());
+                Util.computeBinCount(accuracy), timeIntervals, featureId, getLogger());
 
         final ProductValidator productValidator = new ProductValidator(Arrays.asList(bandConfigurations), startDate, endDate, getLogger());
         final ProductLoop productLoop = new ProductLoop(new ProductLoader(), productValidator, statisticComputer, pm, getLogger());
         productLoop.loop(sourceProducts, getProductsToLoad());
-
-        if (startDate == null) {
-            startDate = productLoop.getOldestDate();
-            timeIntervals[0].setIntervalStart(startDate);
-        }
-
-        if (endDate == null) {
-            endDate = productLoop.getNewestDate();
-            timeIntervals[0].setIntervalEnd(endDate);
-        }
 
         final String[] productNames = productLoop.getProductNames();
         if (productNames.length == 0) {
@@ -232,68 +229,11 @@ public class StatisticsOp extends Operator {
         String[] regionIDS = regionNames.toArray(new String[0]);
         defineOutputters(timeIntervals, percentiles, productNames, regionIDS, stxOpsList);
 
-
+        if (timeIntervals.length == 0) {
+            processStatisticsPerTimeInterval(statisticComputer.getResults(0), null);
+        }
         for (int i = 0; i < timeIntervals.length; i++) {
-            final Map<BandConfiguration, StatisticComputer.StxOpMapping> stxOps = statisticComputer.getResults(i);
-            for (Map.Entry<BandConfiguration, StatisticComputer.StxOpMapping> bandConfigurationStxOpMappingEntry : stxOps.entrySet()) {
-                final BandConfiguration bandConfiguration = bandConfigurationStxOpMappingEntry.getKey();
-                final String bandName;
-                if (bandConfiguration.sourceBandName != null) {
-                    bandName = bandConfiguration.sourceBandName;
-                } else {
-                    bandName = bandConfiguration.expression.replace(" ", "_");
-                }
-                final StatisticComputer.StxOpMapping stxOpMapping = bandConfigurationStxOpMappingEntry.getValue();
-                final Map<String, QualitativeStxOp> qualitativeMap = stxOpMapping.qualitativeMap;
-                for (String regionName : qualitativeMap.keySet()) {
-                    final HashMap<String, Object> stxMap = new HashMap<>();
-                    final QualitativeStxOp qualitativeStxOp = qualitativeMap.get(regionName);
-                    if (!qualitativeStxOp.getMajorityClass().equals(QualitativeStxOp.NO_MAJORITY_CLASS)) {
-                        String[] classNames = qualitativeStxOp.getClassNames();
-                        for (String className : classNames) {
-                            stxMap.put(className, qualitativeStxOp.getNumberOfMembers(className));
-                        }
-                        stxMap.put(MAJORITY_CLASS, qualitativeStxOp.getMajorityClass());
-                        stxMap.put(SECOND_MAJORITY_CLASS, qualitativeStxOp.getSecondMajorityClass());
-                        stxMap.put(TOTAL, qualitativeStxOp.getTotalNumClassMembers());
-                    }
-                    for (StatisticsOutputter statisticsOutputter : qualitativeStatisticsOutputters) {
-                        statisticsOutputter.addToOutput(bandName, timeIntervals[i], regionName, stxMap);
-                    }
-                }
-                final Map<String, SummaryStxOp> summaryMap = stxOpMapping.summaryMap;
-                final Map<String, HistogramStxOp> histogramMap = stxOpMapping.histogramMap;
-                for (String regionName : summaryMap.keySet()) {
-                    final HashMap<String, Object> stxMap = new HashMap<>();
-                    final SummaryStxOp summaryStxOp = summaryMap.get(regionName);
-                    final Histogram histogram = histogramMap.get(regionName).getHistogram();
-                    if (histogram.getTotals()[0] == 0) {
-                        stxMap.put(MINIMUM, FILL_VALUE);
-                        stxMap.put(MAXIMUM, FILL_VALUE);
-                        stxMap.put(AVERAGE, FILL_VALUE);
-                        stxMap.put(SIGMA, FILL_VALUE);
-                        stxMap.put(TOTAL, 0);
-                        stxMap.put(MEDIAN, FILL_VALUE);
-                        for (int percentile : percentiles) {
-                            stxMap.put(getPercentileName(percentile), FILL_VALUE);
-                        }
-                    } else {
-                        stxMap.put(MINIMUM, summaryStxOp.getMinimum());
-                        stxMap.put(MAXIMUM, summaryStxOp.getMaximum());
-                        stxMap.put(AVERAGE, summaryStxOp.getMean());
-                        stxMap.put(SIGMA, summaryStxOp.getStandardDeviation());
-                        stxMap.put(TOTAL, histogram.getTotals()[0]);
-                        stxMap.put(MEDIAN, histogram.getPTileThreshold(0.5)[0]);
-                        for (int percentile : percentiles) {
-                            stxMap.put(getPercentileName(percentile), computePercentile(percentile, histogram));
-                        }
-                    }
-                    stxMap.put(MAX_ERROR, Util.getBinWidth(histogram));
-                    for (StatisticsOutputter statisticsOutputter : quantitativeStatisticsOutputters) {
-                        statisticsOutputter.addToOutput(bandName, timeIntervals[i], regionName, stxMap);
-                    }
-                }
-            }
+            processStatisticsPerTimeInterval(statisticComputer.getResults(i), timeIntervals[i]);
         }
         try {
             for (StatisticsOutputter statisticsOutputter : allStatisticsOutputters) {
@@ -318,6 +258,77 @@ public class StatisticsOp extends Operator {
         getLogger().log(Level.INFO, "Successfully computed statistics.");
     }
 
+    private void processStatisticsPerTimeInterval(Map<BandConfiguration, StatisticComputer.StxOpMapping> stxOps,
+                                               TimeInterval timeInterval) {
+        for (Map.Entry<BandConfiguration, StatisticComputer.StxOpMapping> bandConfigurationStxOpMappingEntry : stxOps.entrySet()) {
+            final BandConfiguration bandConfiguration = bandConfigurationStxOpMappingEntry.getKey();
+            final String bandName;
+            if (bandConfiguration.sourceBandName != null) {
+                bandName = bandConfiguration.sourceBandName;
+            } else {
+                bandName = bandConfiguration.expression.replace(" ", "_");
+            }
+            final StatisticComputer.StxOpMapping stxOpMapping = bandConfigurationStxOpMappingEntry.getValue();
+            final Map<String, QualitativeStxOp> qualitativeMap = stxOpMapping.qualitativeMap;
+            for (String regionName : qualitativeMap.keySet()) {
+                final HashMap<String, Object> stxMap = new HashMap<>();
+                final QualitativeStxOp qualitativeStxOp = qualitativeMap.get(regionName);
+                if (!qualitativeStxOp.getMajorityClass().equals(QualitativeStxOp.NO_MAJORITY_CLASS)) {
+                    String[] classNames = qualitativeStxOp.getClassNames();
+                    for (String className : classNames) {
+                        stxMap.put(className, qualitativeStxOp.getNumberOfMembers(className));
+                    }
+                    stxMap.put(MAJORITY_CLASS, qualitativeStxOp.getMajorityClass());
+                    stxMap.put(SECOND_MAJORITY_CLASS, qualitativeStxOp.getSecondMajorityClass());
+                    stxMap.put(TOTAL, qualitativeStxOp.getTotalNumClassMembers());
+                }
+                for (StatisticsOutputter statisticsOutputter : qualitativeStatisticsOutputters) {
+                    if (timeInterval != null) {
+                        statisticsOutputter.addToOutput(bandName, timeInterval, regionName, stxMap);
+                    } else {
+                        statisticsOutputter.addToOutput(bandName, regionName, stxMap);
+                    }
+                }
+            }
+            final Map<String, SummaryStxOp> summaryMap = stxOpMapping.summaryMap;
+            final Map<String, HistogramStxOp> histogramMap = stxOpMapping.histogramMap;
+            for (String regionName : summaryMap.keySet()) {
+                final HashMap<String, Object> stxMap = new HashMap<>();
+                final SummaryStxOp summaryStxOp = summaryMap.get(regionName);
+                final Histogram histogram = histogramMap.get(regionName).getHistogram();
+                if (histogram.getTotals()[0] == 0) {
+                    stxMap.put(MINIMUM, FILL_VALUE);
+                    stxMap.put(MAXIMUM, FILL_VALUE);
+                    stxMap.put(AVERAGE, FILL_VALUE);
+                    stxMap.put(SIGMA, FILL_VALUE);
+                    stxMap.put(TOTAL, 0);
+                    stxMap.put(MEDIAN, FILL_VALUE);
+                    for (int percentile : percentiles) {
+                        stxMap.put(getPercentileName(percentile), FILL_VALUE);
+                    }
+                } else {
+                    stxMap.put(MINIMUM, summaryStxOp.getMinimum());
+                    stxMap.put(MAXIMUM, summaryStxOp.getMaximum());
+                    stxMap.put(AVERAGE, summaryStxOp.getMean());
+                    stxMap.put(SIGMA, summaryStxOp.getStandardDeviation());
+                    stxMap.put(TOTAL, histogram.getTotals()[0]);
+                    stxMap.put(MEDIAN, histogram.getPTileThreshold(0.5)[0]);
+                    for (int percentile : percentiles) {
+                        stxMap.put(getPercentileName(percentile), computePercentile(percentile, histogram));
+                    }
+                }
+                stxMap.put(MAX_ERROR, Util.getBinWidth(histogram));
+                for (StatisticsOutputter statisticsOutputter : quantitativeStatisticsOutputters) {
+                    if (timeInterval != null) {
+                        statisticsOutputter.addToOutput(bandName, timeInterval, regionName, stxMap);
+                    } else {
+                        statisticsOutputter.addToOutput(bandName, regionName, stxMap);
+                    }
+                }
+            }
+        }
+    }
+
     private File[] getProductsToLoad() {
         SortedSet<File> fileSet = new TreeSet<File>();
         if (sourceProductPaths != null) {
@@ -338,7 +349,7 @@ public class StatisticsOp extends Operator {
     /* package local for testing*/
     static TimeInterval[] getTimeIntervals(TimeIntervalDefinition interval, ProductData.UTC startDate, ProductData.UTC endDate) {
         if (startDate == null || endDate == null) {
-            return new TimeInterval[]{new TimeInterval(0, new ProductData.UTC(0), new ProductData.UTC(1000000))};
+            return new TimeInterval[0];
         } else if (interval == null) {
             return new TimeInterval[]{new TimeInterval(0, startDate, endDate)};
         } else {
@@ -472,7 +483,7 @@ public class StatisticsOp extends Operator {
         String[] bandNames = getBandNames(qualifier);
         String[] measureNames = getMeasureNames(stxOpsList, percentiles, qualifier);
         StatisticsOutputContext statisticsOutputContext =
-                StatisticsOutputContext.create(productNames, bandNames, measureNames, timeIntervals, regionIDs);
+                StatisticsOutputContext.create(productNames, bandNames, measureNames, timeIntervals, featureId, regionIDs);
         setupOutputters(qualifier);
         Set<StatisticsOutputter> outputters = statisticsOutputters[qualifier];
         for (StatisticsOutputter statisticsOutputter : outputters) {
