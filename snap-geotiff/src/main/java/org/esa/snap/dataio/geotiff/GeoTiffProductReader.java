@@ -326,7 +326,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
     }
 
     private static Product buildProductWithoutDimapHeader(String defaultProductName, TiffFileInfo tiffInfo, TIFFRenderedImage baseImage, int productWidth, int productHeight)
-                                                         throws Exception {
+                                                          throws ParserConfigurationException, SAXException, IOException {
 
         String productName = null;
         if (tiffInfo.containsField(BaselineTIFFTagSet.TAG_IMAGE_DESCRIPTION)) {
@@ -334,7 +334,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
             productName = tagImageDescriptionField.getAsString(0).trim();
         }
         if (StringUtils.isBlank(productName) && defaultProductName != null) {
-            productName = defaultProductName;//FileUtils.getFilenameWithoutExtension(productPath.getFileName().toString());
+            productName = defaultProductName;
         } else {
             productName = "geotiff";
         }
@@ -349,7 +349,9 @@ public class GeoTiffProductReader extends AbstractProductReader {
         return product;
     }
 
-    private static Band[] buildBands(TiffFileInfo tiffInfo, TIFFRenderedImage baseImage, int productWidth, int productHeight) throws Exception {
+    private static Band[] buildBands(TiffFileInfo tiffInfo, TIFFRenderedImage baseImage, int productWidth, int productHeight)
+                                     throws IOException, ParserConfigurationException, SAXException {
+
         SampleModel sampleModel = baseImage.getSampleModel();
         int numBands = sampleModel.getNumBands();
         int productDataType = ImageManager.getProductDataType(sampleModel.getDataType());

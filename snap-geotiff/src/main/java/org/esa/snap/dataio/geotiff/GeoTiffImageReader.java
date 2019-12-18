@@ -235,7 +235,7 @@ public class GeoTiffImageReader implements Closeable {
                     return geoTiffImageReader;
                 }
             } // end 'while (it.hasNext())'
-            throw new IllegalArgumentException("The zip archive '" + productPath.toString() + "' does not contain the file '" + zipEntryPath + "'.");
+            throw new FileNotFoundException("The zip archive '" + productPath.toString() + "' does not contain the file '" + zipEntryPath + "'.");
         } finally {
             if (fileSystem != null && !success) {
                 fileSystem.close();

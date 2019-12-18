@@ -9,16 +9,10 @@ public class MosaicMatrix {
     private final int columnCount;
     private final MatrixCell[][] internal;
 
-    private int currentRowIndex;
-    private int currentColumnIndex;
-
     public MosaicMatrix(int rowCount, int columnCount) {
         this.rowCount = rowCount;
         this.columnCount = columnCount;
         this.internal = new MatrixCell[rowCount][columnCount];
-
-        this.currentColumnIndex = 0;
-        this.currentRowIndex = 0;
     }
 
     public int getRowCount() {
@@ -30,15 +24,25 @@ public class MosaicMatrix {
     }
 
     public void addCell(MatrixCell matrixCell) {
-        if (this.currentRowIndex == this.rowCount && this.currentColumnIndex == this.columnCount) {
-            throw new IllegalArgumentException("Cannot add cell past to the matrix size");
+        if (matrixCell == null) {
+            throw new NullPointerException("The matrix cell is null.");
         }
-        addCellAt(this.currentRowIndex, this.currentColumnIndex, matrixCell);
-        if (this.currentColumnIndex == this.columnCount - 1) {
-            this.currentColumnIndex = 0;
-            this.currentRowIndex++;
+        int rowIndex = -1;
+        int columnIndex = -1;
+        boolean canContinue = true;
+        for (int row=0; row < this.rowCount && canContinue; row++) {
+            for (int column=0; column < this.columnCount && canContinue; column++) {
+                if (this.internal[row][column] == null) {
+                    rowIndex = row;
+                    columnIndex = column;
+                    canContinue = false;
+                }
+            }
         }
-        this.currentColumnIndex++;
+        if (rowIndex == -1 || columnIndex == -1) {
+            throw new IllegalArgumentException("Cannot add cell past to the matrix size.");
+        }
+        addCellAt(rowIndex, columnIndex, matrixCell);
     }
 
     public MatrixCell getCellAt(int rowIndex, int columnIndex) {
@@ -117,5 +121,4 @@ public class MosaicMatrix {
 
         public int getCellHeight();
     }
-
 }
