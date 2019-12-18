@@ -23,7 +23,6 @@
         <version>7.0.3</version>
     </parent>
 
-
     <artifactId>snap-netcdf</artifactId>
     <packaging>nbm</packaging>
 
@@ -31,14 +30,6 @@
     <description>A product reader and writer for NetCDF files. It supports metadata profiles for CF, BEAM, HDF-EOS,
         ODESA.
     </description>
-
-    <!--<repositories>-->
-        <!--<repository>-->
-            <!--<id>unidata-all</id>-->
-            <!--<name>Unidata All</name>-->
-            <!--<url>https://artifacts.unidata.ucar.edu/repository/unidata-all/</url>-->
-        <!--</repository>-->
-    <!--</repositories>-->
 
     <dependencies>
         <dependency>
@@ -49,12 +40,10 @@
             <groupId>org.esa.snap</groupId>
             <artifactId>ceres-binding</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>ceres-jai</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>ceres-glayer</artifactId>
@@ -63,17 +52,13 @@
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-core</artifactId>
         </dependency>
-
         <dependency>
             <groupId>edu.ucar</groupId>
-            <artifactId>netcdfAll</artifactId>
-            <version>5.0.0-beta6</version>
+            <artifactId>netcdf</artifactId>
         </dependency>
-
         <dependency>
-            <groupId>org.esa.snap</groupId>
-            <artifactId>snap-gpf</artifactId>
-            <scope>test</scope>
+            <groupId>edu.ucar</groupId>
+            <artifactId>nujan</artifactId>
         </dependency>
         <dependency>
             <groupId>edu.ucar</groupId>
@@ -97,6 +82,7 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
         </dependency>
+
         <!--
         This is needed because otherwise we get:
         [ERROR] Failed to execute goal org.codehaus.mojo:nbm-maven-plugin:3.14:manifest (default-manifest) on project snap-netcdf:
@@ -123,6 +109,7 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
         </dependency>
+
     </dependencies>
 
     <build>
@@ -171,8 +158,6 @@
                     </nbmResources>
                 </configuration>
             </plugin>
-
-
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
@@ -186,6 +171,5 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
 
