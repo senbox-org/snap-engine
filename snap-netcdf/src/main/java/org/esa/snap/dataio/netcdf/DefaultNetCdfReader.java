@@ -24,6 +24,7 @@ import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.dataio.netcdf.util.Constants;
 import org.esa.snap.dataio.netcdf.util.NetcdfFileOpener;
+import org.esa.snap.dataio.netcdf.util.TimeUtils;
 import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
 
@@ -70,24 +71,16 @@ class DefaultNetCdfReader extends AbstractProductReader {
 
     }
 
-    private void applyTimeCoverageAttributes(Product product) throws IOException {
+    private void applyTimeCoverageAttributes(Product product) {
         for (int i = 0; i < netcdfFile.getGlobalAttributes().size(); i++) {
             Attribute attribute = netcdfFile.getGlobalAttributes().get(i);
             if (attribute.getShortName().equals("time_coverage_start")) {
                 final String startTime = (String) attribute.getValue(0);
-                try {
-                    product.setStartTime(ProductData.UTC.parse(startTime));
-                } catch (ParseException e) {
-                    Logger.getGlobal().log(Level.WARNING, e.getMessage(), e);
-                }
+                product.setStartTime(TimeUtils.parseDateTime(startTime));
             }
             if (attribute.getShortName().equals("time_coverage_end")) {
                 final String endTime = (String) attribute.getValue(0);
-                try {
-                    product.setEndTime(ProductData.UTC.parse(endTime));
-                } catch (ParseException e) {
-                    Logger.getGlobal().log(Level.WARNING, e.getMessage(), e);
-                }
+                product.setEndTime(TimeUtils.parseDateTime(endTime));
             }
         }
     }
