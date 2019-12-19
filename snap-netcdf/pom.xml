@@ -54,17 +54,7 @@
         </dependency>
         <dependency>
             <groupId>edu.ucar</groupId>
-            <artifactId>netcdf</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>edu.ucar</groupId>
-            <artifactId>nujan</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>edu.ucar</groupId>
-            <artifactId>udunits</artifactId>
-            <version>${netcdf.version}</version>
-<!--            <version>4.5.5</version>-->
+            <artifactId>netcdfAll</artifactId>
         </dependency>
         <!--
         We have to include the following UGLY dependencies so that they are put into the NBM module's ext folder.
