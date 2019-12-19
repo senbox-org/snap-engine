@@ -37,60 +37,23 @@ public class GeoTiffTileOpImage extends AbstractSubsetTileOpImage {
         try {
             Rectangle tileBoundsIntersection = computeIntersection(destinationRectangle);
             if (!tileBoundsIntersection.isEmpty()) {
-                if (this.isGlobalShifted180) {
-                    readGlobalShifted180Rectangle(destinationRaster, destinationRectangle, tileBoundsIntersection);
-                } else {
-                    readNormalRectangle(destinationRaster, destinationRectangle, tileBoundsIntersection);
+                Raster rasterData = readRasterData(tileBoundsIntersection.x, tileBoundsIntersection.y, tileBoundsIntersection.width, tileBoundsIntersection.height);
+
+                int offsetY = this.levelTileOffset.y + destinationRectangle.y;
+                int offsetX = this.levelTileOffset.x + destinationRectangle.x;
+                for (int y = 0; y < destinationRectangle.height; y++) {
+                    int currentSrcYOffset = this.imageOffset.y + computeSourceY(offsetY + y);
+                    validateCoordinate(currentSrcYOffset, tileBoundsIntersection.y, tileBoundsIntersection.height);
+                    for (int x = 0; x < destinationRectangle.width; x++) {
+                        int currentSrcXOffset = this.imageOffset.x + computeSourceX(offsetX + x);
+                        validateCoordinate(currentSrcXOffset, tileBoundsIntersection.x, tileBoundsIntersection.width);
+                        double value = rasterData.getSampleDouble(currentSrcXOffset, currentSrcYOffset, this.bandIndex);
+                        destinationRaster.setSample(destinationRectangle.x + x, destinationRectangle.y + y, this.bandIndex, value);
+                    }
                 }
             }
         } catch (IOException ex) {
             throw new IllegalStateException("Failed to read the data for level " + getLevel()+" and rectangle " + destinationRectangle + ".", ex);
-        }
-    }
-
-    private void readNormalRectangle(WritableRaster destinationRaster, Rectangle destinationRectangle, Rectangle tileBoundsIntersection) throws IOException {
-        Raster rasterData = readRasterData(tileBoundsIntersection.x, tileBoundsIntersection.y, tileBoundsIntersection.width, tileBoundsIntersection.height);
-
-        int offsetY = this.levelTileOffset.y + destinationRectangle.y;
-        int offsetX = this.levelTileOffset.x + destinationRectangle.x;
-        for (int y = 0; y < destinationRectangle.height; y++) {
-            int currentSrcYOffset = this.imageOffset.y + computeSourceY(offsetY + y);
-            validateCoordinate(currentSrcYOffset, tileBoundsIntersection.y, tileBoundsIntersection.height);
-            for (int x = 0; x < destinationRectangle.width; x++) {
-                int currentSrcXOffset = this.imageOffset.x + computeSourceX(offsetX + x);
-                validateCoordinate(currentSrcXOffset, tileBoundsIntersection.x, tileBoundsIntersection.width);
-                double value = rasterData.getSampleDouble(currentSrcXOffset, currentSrcYOffset, this.bandIndex);
-                destinationRaster.setSample(destinationRectangle.x + x, destinationRectangle.y + y, this.bandIndex, value);
-            }
-        }
-    }
-
-    private void readGlobalShifted180Rectangle(WritableRaster destinationRaster, Rectangle destinationRectangle, Rectangle tileBoundsIntersection) throws IOException {
-        int leftRasterWidth = tileBoundsIntersection.width / 2;
-        int rightRasterWidth = tileBoundsIntersection.width - leftRasterWidth;
-        int rightRasterX = tileBoundsIntersection.x + tileBoundsIntersection.width - rightRasterWidth;
-        Raster leftRasterData = readRasterData(tileBoundsIntersection.x, tileBoundsIntersection.y, leftRasterWidth, tileBoundsIntersection.height);
-        Raster rightRasterData = readRasterData(rightRasterX, tileBoundsIntersection.y, rightRasterWidth, tileBoundsIntersection.height);
-
-        int offsetY = this.levelTileOffset.y + destinationRectangle.y;
-        int offsetX = this.levelTileOffset.x + destinationRectangle.x;
-        double halfDestinationWidth = destinationRectangle.width / 2.0d;
-        for (int y = 0; y < destinationRectangle.height; y++) {
-            int currentSrcYOffset = this.imageOffset.y + computeSourceY(offsetY + y);
-            validateCoordinate(currentSrcYOffset, tileBoundsIntersection.y, tileBoundsIntersection.height);
-            for (int x = 0; x < destinationRectangle.width; x++) {
-                double value;
-                if (x < ((int) halfDestinationWidth)) {
-                    int currentSrcXOffset = this.imageOffset.x + computeSourceX(offsetX + x + halfDestinationWidth);
-                    validateCoordinate(currentSrcXOffset, rightRasterX, rightRasterWidth);
-                    value = rightRasterData.getSampleDouble(currentSrcXOffset, currentSrcYOffset, this.bandIndex);
-                } else {
-                    int currentSrcXOffset = this.imageOffset.x + computeSourceX(offsetX + x - halfDestinationWidth);
-                    validateCoordinate(currentSrcXOffset, tileBoundsIntersection.x, leftRasterWidth);
-                    value = leftRasterData.getSampleDouble(currentSrcXOffset, currentSrcYOffset, this.bandIndex);
-                }
-                destinationRaster.setSample(destinationRectangle.x + x, destinationRectangle.y + y, this.bandIndex, value);
-            }
         }
     }
 
@@ -108,7 +71,7 @@ public class GeoTiffTileOpImage extends AbstractSubsetTileOpImage {
         int sourceOffsetX = sourceStepX * destOffsetX;
         int sourceOffsetY = sourceStepY * destOffsetY;
         synchronized (this.geoTiffImageReader) {
-            return this.geoTiffImageReader.readRect(sourceOffsetX, sourceOffsetY, sourceStepX, sourceStepY, destOffsetX, destOffsetY, destWidth, destHeight);
+            return this.geoTiffImageReader.readRect(this.isGlobalShifted180, sourceOffsetX, sourceOffsetY, sourceStepX, sourceStepY, destOffsetX, destOffsetY, destWidth, destHeight);
         }
     }
 

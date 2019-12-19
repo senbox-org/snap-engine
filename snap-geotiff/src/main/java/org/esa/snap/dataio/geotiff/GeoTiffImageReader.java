@@ -13,6 +13,11 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
+import javax.media.jai.InterpolationNearest;
+import javax.media.jai.RenderedOp;
+import javax.media.jai.operator.CropDescriptor;
+import javax.media.jai.operator.MosaicDescriptor;
+import javax.media.jai.operator.TranslateDescriptor;
 import java.awt.*;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
@@ -38,6 +43,8 @@ public class GeoTiffImageReader implements Closeable {
     private final TIFFImageReader imageReader;
     private final Closeable closeable;
 
+    private RenderedImage swappedSubsampledImage;
+
     public GeoTiffImageReader(ImageInputStream imageInputStream) throws IOException {
         this.imageReader = findImageReader(imageInputStream);
         this.closeable = null;
@@ -59,14 +66,14 @@ public class GeoTiffImageReader implements Closeable {
             ImageInputStream imageInputStream = (ImageInputStream) this.imageReader.getInput();
             try {
                 imageInputStream.close();
-            } catch (IOException e) {
+            } catch (IOException ignore) {
                 // ignore
             }
         } finally {
             if (this.closeable != null) {
                 try {
                     this.closeable.close();
-                } catch (IOException e) {
+                } catch (IOException ignore) {
                     // ignore
                 }
             }
@@ -77,7 +84,7 @@ public class GeoTiffImageReader implements Closeable {
         return (TIFFImageMetadata) this.imageReader.getImageMetadata(FIRST_IMAGE);
     }
 
-    public Raster readRect(int sourceOffsetX, int sourceOffsetY, int sourceStepX, int sourceStepY, int destOffsetX, int destOffsetY, int destWidth, int destHeight)
+    public Raster readRect(boolean isGlobalShifted180, int sourceOffsetX, int sourceOffsetY, int sourceStepX, int sourceStepY, int destOffsetX, int destOffsetY, int destWidth, int destHeight)
                            throws IOException {
 
         ImageReadParam readParam = this.imageReader.getDefaultReadParam();
@@ -85,7 +92,15 @@ public class GeoTiffImageReader implements Closeable {
         int subsamplingYOffset = sourceOffsetY % sourceStepY;
         readParam.setSourceSubsampling(sourceStepX, sourceStepY, subsamplingXOffset, subsamplingYOffset);
         RenderedImage subsampledImage = this.imageReader.readAsRenderedImage(FIRST_IMAGE, readParam);
-        return subsampledImage.getData(new Rectangle(destOffsetX, destOffsetY, destWidth, destHeight));
+        Rectangle rectangle = new Rectangle(destOffsetX, destOffsetY, destWidth, destHeight);
+        if (isGlobalShifted180) {
+            if (this.swappedSubsampledImage == null) {
+                this.swappedSubsampledImage = horizontalMosaic(getHalfImages(subsampledImage));
+            }
+            return this.swappedSubsampledImage.getData(rectangle);
+        } else {
+            return subsampledImage.getData(rectangle);
+        }
     }
 
     public int getImageWidth() throws IOException {
@@ -147,6 +162,18 @@ public class GeoTiffImageReader implements Closeable {
         return defaultBandSize;
     }
 
+    public Dimension validateArea(Rectangle area) throws IOException {
+        int imageWidth = getImageWidth();
+        if ((area.x + area.width) > imageWidth) {
+            throw new IllegalStateException("The coordinates are out of bounds: area.x="+area.x+", area.width="+area.width+", image.width=" + imageWidth);
+        }
+        int imageHeight = getImageHeight();
+        if ((area.y + area.height) > imageHeight) {
+            throw new IllegalStateException("The coordinates are out of bounds: area.y="+area.y+", area.height="+area.height+", image.height=" + imageHeight);
+        }
+        return new Dimension(imageWidth, imageHeight);
+    }
+
     private static TIFFImageReader buildImageReader(Object sourceImage) throws IOException {
         TIFFImageReader imageReader = null;
         ImageInputStream imageInputStream = ImageIO.createImageInputStream(sourceImage);
@@ -171,6 +198,30 @@ public class GeoTiffImageReader implements Closeable {
             }
         }
         throw new IllegalStateException("GeoTiff imageReader not found.");
+    }
+
+    private RenderedImage[] getHalfImages(RenderedImage fullImage) {
+        int xStart = 0;
+        int yStart = 0;
+        float width = (float) fullImage.getWidth() / 2;
+        float height = fullImage.getHeight();
+        final RenderedOp leftImage = CropDescriptor.create(fullImage, (float) xStart, (float) yStart, width, height, null);
+
+        xStart = fullImage.getWidth() / 2;
+        width = (float) (fullImage.getWidth() - xStart);
+        final RenderedOp rightImage = CropDescriptor.create(fullImage, (float) xStart, (float) yStart, width, height, null);
+
+        return new RenderedImage[]{leftImage, rightImage};
+    }
+
+    private static RenderedImage horizontalMosaic(RenderedImage[] halfImages) {
+        final RenderedImage leftImage = halfImages[0];
+        final RenderedImage rightImage = halfImages[1];
+        // Translate the left image to shift it fullWidth/2 pixels to the right, and vice versa
+        RenderedImage translatedLeftImage = TranslateDescriptor.create(leftImage, (float) leftImage.getWidth(), 0f, new InterpolationNearest(), null);
+        RenderedImage translatedRightImage = TranslateDescriptor.create(rightImage, -1.0f * rightImage.getWidth(), 0f, new InterpolationNearest(), null);
+        // Now mosaic the two images.
+        return MosaicDescriptor.create(new RenderedImage[]{translatedRightImage, translatedLeftImage}, MosaicDescriptor.MOSAIC_TYPE_OVERLAY, null, null, null, null, null);
     }
 
     public static GeoTiffImageReader buildGeoTiffImageReader(Path productPath) throws IOException, IllegalAccessException, InstantiationException, InvocationTargetException {

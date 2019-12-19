@@ -91,8 +91,11 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class GeoTiffProductReader extends AbstractProductReader {
+
+    private static final Logger logger = Logger.getLogger(GeoTiffProductReader.class.getName());
 
     // non standard ASCII tag (code 42112) to extract GDAL metadata,
     // see https://gdal.org/drivers/raster/gtiff.html#metadata:
@@ -166,38 +169,33 @@ public class GeoTiffProductReader extends AbstractProductReader {
 
         DefaultMultiLevelImage defaultMultiLevelImage = (DefaultMultiLevelImage)destBand.getSourceImage();
         GeoTiffMultiLevelSource geoTiffMultiLevelSource = (GeoTiffMultiLevelSource)defaultMultiLevelImage.getSource();
-        if (geoTiffMultiLevelSource.isGlobalShifted180()) {
-            //TODO Jean to be implemented
-            throw new UnsupportedOperationException("The method not implemented yet.");
-        } else {
-            Raster data;
-            synchronized (this.geoTiffImageReader) {
-                data = this.geoTiffImageReader.readRect(sourceOffsetX, sourceOffsetY, sourceStepX, sourceStepY, destOffsetX, destOffsetY, destWidth, destHeight);
+        Raster data;
+        synchronized (this.geoTiffImageReader) {
+            data = this.geoTiffImageReader.readRect(geoTiffMultiLevelSource.isGlobalShifted180(), sourceOffsetX, sourceOffsetY, sourceStepX, sourceStepY, destOffsetX, destOffsetY, destWidth, destHeight);
+        }
+        DataBuffer dataBuffer = data.getDataBuffer();
+        SampleModel sampleModel = data.getSampleModel();
+        int dataBufferType = dataBuffer.getDataType();
+        int bandIndex = geoTiffMultiLevelSource.getBandIndex();
+        boolean isInteger = (dataBufferType == DataBuffer.TYPE_SHORT || dataBufferType == DataBuffer.TYPE_USHORT || dataBufferType == DataBuffer.TYPE_INT);
+        if (isInteger && destBuffer.getElems() instanceof int[]) {
+            sampleModel.getSamples(0, 0, data.getWidth(), data.getHeight(), bandIndex, (int[]) destBuffer.getElems(), dataBuffer);
+        } else if (dataBufferType == DataBuffer.TYPE_FLOAT && destBuffer.getElems() instanceof float[]) {
+            sampleModel.getSamples(0, 0, data.getWidth(), data.getHeight(), bandIndex, (float[]) destBuffer.getElems(), dataBuffer);
+        } else if (dataBufferType == DataBuffer.TYPE_BYTE && destBuffer.getElems() instanceof byte[]) {
+            int[] dArray = new int[destWidth * destHeight];
+            sampleModel.getSamples(0, 0, data.getWidth(), data.getHeight(), bandIndex, dArray, dataBuffer);
+            for (int i = 0; i < dArray.length; i++) {
+                destBuffer.setElemIntAt(i, dArray[i]);
             }
-            DataBuffer dataBuffer = data.getDataBuffer();
-            SampleModel sampleModel = data.getSampleModel();
-            int dataBufferType = dataBuffer.getDataType();
-            int bandIndex = geoTiffMultiLevelSource.getBandIndex();
-            boolean isInteger = (dataBufferType == DataBuffer.TYPE_SHORT || dataBufferType == DataBuffer.TYPE_USHORT || dataBufferType == DataBuffer.TYPE_INT);
-            if (isInteger && destBuffer.getElems() instanceof int[]) {
-                sampleModel.getSamples(0, 0, data.getWidth(), data.getHeight(), bandIndex, (int[]) destBuffer.getElems(), dataBuffer);
-            } else if (dataBufferType == DataBuffer.TYPE_FLOAT && destBuffer.getElems() instanceof float[]) {
-                sampleModel.getSamples(0, 0, data.getWidth(), data.getHeight(), bandIndex, (float[]) destBuffer.getElems(), dataBuffer);
-            } else if (dataBufferType == DataBuffer.TYPE_BYTE && destBuffer.getElems() instanceof byte[]) {
-                int[] dArray = new int[destWidth * destHeight];
-                sampleModel.getSamples(0, 0, data.getWidth(), data.getHeight(), bandIndex, dArray, dataBuffer);
-                for (int i=0; i<dArray.length; i++) {
-                    destBuffer.setElemIntAt(i, dArray[i]);
-                }
+        } else {
+            double[] dArray = new double[destWidth * destHeight];
+            sampleModel.getSamples(0, 0, data.getWidth(), data.getHeight(), bandIndex, dArray, dataBuffer);
+            if (destBuffer.getElems() instanceof double[]) {
+                System.arraycopy(dArray, 0, destBuffer.getElems(), 0, dArray.length);
             } else {
-                double[] dArray = new double[destWidth * destHeight];
-                sampleModel.getSamples(0, 0, data.getWidth(), data.getHeight(), bandIndex, dArray, dataBuffer);
-                if (destBuffer.getElems() instanceof double[]) {
-                    System.arraycopy(dArray, 0, destBuffer.getElems(), 0, dArray.length);
-                } else {
-                    for (int i=0; i<dArray.length; i++) {
-                        destBuffer.setElemDoubleAt(i, dArray[i]);
-                    }
+                for (int i = 0; i < dArray.length; i++) {
+                    destBuffer.setElemDoubleAt(i, dArray[i]);
                 }
             }
         }
@@ -224,14 +222,9 @@ public class GeoTiffProductReader extends AbstractProductReader {
     }
 
     public Product readProduct(GeoTiffImageReader geoTiffImageReader, String defaultProductName, Rectangle productBounds) throws Exception {
-        if ((productBounds.x + productBounds.width) > geoTiffImageReader.getImageWidth()) {
-            throw new IllegalStateException("The coordinates are out of bounds: product.x="+productBounds.x+", product.width="+productBounds.width+", image.width=" + geoTiffImageReader.getImageWidth());
-        }
-        if ((productBounds.y + productBounds.height) > geoTiffImageReader.getImageHeight()) {
-            throw new IllegalStateException("The coordinates are out of bounds: product.y="+productBounds.y+", product.height="+productBounds.height+", image.height=" + geoTiffImageReader.getImageHeight());
-        }
+        Dimension defaultImageSize = geoTiffImageReader.validateArea(productBounds);
         Rectangle subsetRegion = null;
-        if (!productBounds.equals(new Rectangle(0, 0, geoTiffImageReader.getImageWidth(), geoTiffImageReader.getImageHeight()))) {
+        if (!productBounds.equals(new Rectangle(0, 0, defaultImageSize.width, defaultImageSize.height))) {
             subsetRegion = productBounds;
         }
 
@@ -249,6 +242,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
                 }
             }
         }
+
         ProductSubsetDef subsetDef = getSubsetDef();
         boolean isGlobalShifted180 = false;
         if (tiffInfo.isGeotiff()) {
@@ -256,8 +250,10 @@ public class GeoTiffProductReader extends AbstractProductReader {
         }
 
         if (subsetDef == null || !subsetDef.isIgnoreMetadata()) {
+            // add the metadata to the product
             TiffTagToMetadataConverter.addTiffTagsToMetadata(imageMetadata, tiffInfo, product.getMetadataRoot());
         } else {
+            // do not add the metadata to the product and remove the existing metadata
             product.getMetadataRoot().dispose();
             product.getMetadataRoot().setModified(false);
         }
@@ -437,17 +433,13 @@ public class GeoTiffProductReader extends AbstractProductReader {
                 // e.g. tiePoints[3] = -0.5, productWidth=722 --> we have a lon range of 361 which should start
                 // at or near -180 but not at zero
                 isGlobalShifted180 = true;
-                // subtract 180 from the longitudes
-                tiePoints[3] -= 180.0;
-            }
-
-            if (canCreateTiePointGeoCoding(tiePoints)) {
+                applyGlobalShiftedTiePointGeoCoding(product, info);
+            } else if (canCreateTiePointGeoCoding(tiePoints)) {
                 applyTiePointGeoCoding(info, tiePoints, product);
             } else if (canCreateGcpGeoCoding(tiePoints)) {
                 applyGcpGeoCoding(info, tiePoints, product);
             }
         }
-
         if (product.getSceneGeoCoding() == null) {
             try {
                 product.setSceneGeoCoding(buildGeoCoding(metadata, product.getSceneRasterSize(), subsetRegion));
@@ -458,19 +450,54 @@ public class GeoTiffProductReader extends AbstractProductReader {
         return isGlobalShifted180;
     }
 
-    private static boolean isGlobal(int productWidth, TiffFileInfo info) {
-        boolean isGlobal = false;
+    private static void applyGlobalShiftedTiePointGeoCoding(Product product, TiffFileInfo info) {
         final TIFFField pixelScaleField = info.getField(GeoTIFFTagSet.TAG_MODEL_PIXEL_SCALE);
-        if (pixelScaleField != null) {
+        final TIFFField tiePointField = info.getField(GeoTIFFTagSet.TAG_MODEL_TIE_POINT);
+
+        if (pixelScaleField != null && tiePointField != null) {
             double[] pixelScales = pixelScaleField.getAsDoubles();
+            double[] tiePoints = tiePointField.getAsDoubles();
 
             if (isPixelScaleValid(pixelScales)) {
-                final double widthInDegree = pixelScales[0] * productWidth;
-                isGlobal = Math.ceil(widthInDegree) >= 360;
+                // create new TiePointGeocoding based on given info:
+                int gridWidth = product.getSceneRasterWidth();
+                int gridHeight = product.getSceneRasterHeight();
+
+                float[] latPoints = new float[gridWidth * gridHeight];
+                tiePoints[4] = Math.min(tiePoints[4], 90.0);
+                for (int j = 0; j < gridHeight; j++) {
+                    for (int i = 0; i < gridWidth; i++) {
+                        latPoints[j * gridWidth + i] = (float) (tiePoints[4] - j * pixelScales[1]);
+                    }
+                }
+
+                float[] lonPoints = new float[gridWidth * gridHeight];
+                for (int j = 0; j < gridHeight; j++) {
+                    for (int i = 0; i < gridWidth; i++) {
+                        lonPoints[j * gridWidth + i] = (float) (i * pixelScales[0] - 180.0f);
+                    }
+                }
+
+                final TiePointGrid latGrid = new TiePointGrid("latGrid", gridWidth, gridHeight, 0.0, 0.0, 1.0, 1.0, latPoints);
+                final TiePointGrid lonGrid = new TiePointGrid("lonGrid", gridWidth, gridHeight, 0.0, 0.0, 1.0, 1.0, lonPoints);
+                product.getTiePointGridGroup().add(latGrid);
+                product.getTiePointGridGroup().add(lonGrid);
+                final TiePointGeoCoding geoCoding = new TiePointGeoCoding(latGrid, lonGrid);
+                product.setSceneGeoCoding(geoCoding);
             }
         }
+    }
 
-        return isGlobal;
+    private static boolean isGlobal(int productWidth, TiffFileInfo info) {
+        TIFFField pixelScaleField = info.getField(GeoTIFFTagSet.TAG_MODEL_PIXEL_SCALE);
+        if (pixelScaleField != null) {
+            double[] pixelScales = pixelScaleField.getAsDoubles();
+            if (isPixelScaleValid(pixelScales)) {
+                double widthInDegree = pixelScales[0] * productWidth;
+                return (Math.ceil(widthInDegree) >= 360);
+            }
+        }
+        return false;
     }
 
     private static boolean isPixelScaleValid(double[] pixelScales) {
@@ -621,7 +648,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
         try {
             return Integer.parseInt(metadata.getGeoKey(key));
         } catch (NumberFormatException ne) {
-            SystemUtils.LOG.log(Level.FINE, ne.getMessage(), ne);
+            logger.log(Level.FINE, ne.getMessage(), ne);
             return GeoTiffConstants.UNDEFINED;
         }
     }
