@@ -1,12 +1,10 @@
 package org.esa.snap.core.dataio;
 
 import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.core.datamodel.GeoPos;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Interface to be implemented by all simple metadata inspectors.
@@ -21,8 +19,8 @@ public interface MetadataInspector {
     Metadata getMetadata(Path productPath) throws IOException;
 
     class Metadata {
-        private Set<String> bandList = new HashSet<>();
-        private Set<String> maskList = new HashSet<>();
+        private TreeSet<String> bandList = new TreeSet<>();
+        private TreeSet<String> maskList = new TreeSet<>();
 
         private int productWidth;
         private int productHeight;
@@ -31,19 +29,19 @@ public interface MetadataInspector {
 
         private boolean hasMasks;
 
-        public Set<String> getBandList() {
+        public TreeSet<String> getBandList() {
             return bandList;
         }
 
-        public void setBandList(Set<String> bandList) {
+        public void setBandList(TreeSet<String> bandList) {
             this.bandList = bandList;
         }
 
-        public Set<String> getMaskList() {
+        public TreeSet<String> getMaskList() {
             return maskList;
         }
 
-        public void setMaskList(Set<String> maskList) {
+        public void setMaskList(TreeSet<String> maskList) {
             this.maskList = maskList;
         }
 
