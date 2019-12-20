@@ -25,7 +25,11 @@ public abstract class AbstractMosaicSubsetMultiLevelSource<TileDataType> extends
     private final TileImageDisposer tileImageDisposer;
 
     protected AbstractMosaicSubsetMultiLevelSource(Rectangle visibleImageBounds, Dimension tileSize, GeoCoding geoCoding) {
-        super(new DefaultMultiLevelModel(Product.findImageToModelTransform(geoCoding), visibleImageBounds.width, visibleImageBounds.height));
+        this(DefaultMultiLevelModel.getLevelCount(visibleImageBounds.width, visibleImageBounds.height), visibleImageBounds, tileSize, geoCoding);
+    }
+
+    protected AbstractMosaicSubsetMultiLevelSource(int levelCount, Rectangle visibleImageBounds, Dimension tileSize, GeoCoding geoCoding) {
+        super(new DefaultMultiLevelModel(levelCount, Product.findImageToModelTransform(geoCoding), visibleImageBounds.width, visibleImageBounds.height));
 
         if (visibleImageBounds.width < tileSize.width) {
             throw new IllegalArgumentException("The visible image width " + visibleImageBounds.width + " cannot be smaller than the tile width " + tileSize.width + ".");
@@ -52,10 +56,28 @@ public abstract class AbstractMosaicSubsetMultiLevelSource<TileDataType> extends
 
     protected final java.util.List<RenderedImage> buildTileImages(int level, Rectangle visibleBounds, float translateLevelOffsetX, float translateLevelOffsetY, TileDataType tileData) {
         int columnTileCount = ImageUtils.computeTileCount(visibleBounds.width, this.tileSize.width);
-        int rowTileCount = ImageUtils.computeTileCount(visibleBounds.height, this.tileSize.height);
+        float imageLevelWidth;
+        if (columnTileCount > 1) {
+            // for more than one tile column compute the image width for the specified level as a float number
+            imageLevelWidth = (float) ImageUtils.computeLevelSizeAsDouble(visibleBounds.width, level);
+        } else if (columnTileCount == 1) {
+            // for only one tile column compute the image width for the specified level as an integer number
+            imageLevelWidth = ImageUtils.computeLevelSize(visibleBounds.width, level);
+        } else {
+            throw new IllegalArgumentException("Invalid column tile count: " + columnTileCount);
+        }
 
-        float imageLevelWidth = (float) ImageUtils.computeLevelSizeAsDouble(visibleBounds.width, level);
-        float imageLevelHeight = (float) ImageUtils.computeLevelSizeAsDouble(visibleBounds.height, level);
+        int rowTileCount = ImageUtils.computeTileCount(visibleBounds.height, this.tileSize.height);
+        float imageLevelHeight;
+        if (rowTileCount > 1) {
+            // for more than one tile row compute the image height for the specified level as a float number
+            imageLevelHeight = (float) ImageUtils.computeLevelSizeAsDouble(visibleBounds.height, level);
+        } else if (rowTileCount == 1) {
+            // for only one tile row compute the image height for the specified level as an integer number
+            imageLevelHeight = ImageUtils.computeLevelSize(visibleBounds.height, level);
+        } else {
+            throw new IllegalArgumentException("Invalid row tile count: " + rowTileCount);
+        }
 
         java.util.List<RenderedImage> tileImages = new ArrayList<>(columnTileCount * rowTileCount);
         float xTranslateWidth = (float) ImageUtils.computeLevelSizeAsDouble(this.tileSize.width, level);
@@ -77,7 +99,13 @@ public abstract class AbstractMosaicSubsetMultiLevelSource<TileDataType> extends
                 this.tileImageDisposer.registerForDisposal(tileOpImage);
 
                 float translateX = computeTranslateOffset(tileColumnIndex, columnTileCount, xTranslateWidth, tileOpImage.getWidth(), imageLevelWidth);
+                if (translateX < 0.0f) {
+                    throw new IllegalStateException("The translate x is negative: "+ translateX);
+                }
                 float translateY = computeTranslateOffset(tileRowIndex, rowTileCount, yTranslateHeight, tileOpImage.getHeight(), imageLevelHeight);
+                if (translateY < 0.0f) {
+                    throw new IllegalStateException("The translate y is negative: "+ translateY);
+                }
                 RenderedOp opImage = TranslateDescriptor.create(tileOpImage, translateLevelOffsetX + translateX, translateLevelOffsetY + translateY, Interpolation.getInstance(Interpolation.INTERP_NEAREST), null);
                 tileImages.add(opImage);
                 if (isLastRow && isLastColumn) {
@@ -86,10 +114,10 @@ public abstract class AbstractMosaicSubsetMultiLevelSource<TileDataType> extends
                 }
             }
         }
-        if (totalTranslateLevelWidth != imageLevelWidth) {
+        if (imageLevelWidth != totalTranslateLevelWidth) {
             throw new IllegalStateException("Invalid width: imageLevelWidth="+imageLevelWidth+", totalTranslateWidth="+totalTranslateLevelWidth);
         }
-        if (totalTranslateLevelHeight != imageLevelHeight) {
+        if (imageLevelHeight != totalTranslateLevelHeight) {
             throw new IllegalStateException("Invalid height: imageLevelHeight="+imageLevelHeight+", totalTranslateHeight="+totalTranslateLevelHeight);
         }
 
@@ -103,11 +131,12 @@ public abstract class AbstractMosaicSubsetMultiLevelSource<TileDataType> extends
         int imageLevelWidth = ImageUtils.computeLevelSize(this.visibleImageBounds.width, level);
         int imageLevelHeight = ImageUtils.computeLevelSize(this.visibleImageBounds.height, level);
 
+        Dimension defaultTileSize = JAI.getDefaultTileSize();
         ImageLayout imageLayout = new ImageLayout();
         imageLayout.setMinX(0);
         imageLayout.setMinY(0);
-        imageLayout.setTileWidth(this.tileSize.width);
-        imageLayout.setTileHeight(this.tileSize.height);
+        imageLayout.setTileWidth(defaultTileSize.width); // set the default JAI tile width
+        imageLayout.setTileHeight(defaultTileSize.height); // set the default JAI tile height
         imageLayout.setTileGridXOffset(0);
         imageLayout.setTileGridYOffset(0);
         RenderingHints hints = new RenderingHints(JAI.KEY_IMAGE_LAYOUT, imageLayout);
@@ -135,6 +164,9 @@ public abstract class AbstractMosaicSubsetMultiLevelSource<TileDataType> extends
         float translateOffset = tileIndex * translateSize;
         if (translateOffset + imageSize > imageLevelTotalSize) {
             if (tileIndex == tileCount - 1) {
+                if (imageLevelTotalSize < imageSize) {
+                    throw new IllegalStateException("Invalid values: imageLevelTotalSize="+imageLevelTotalSize+", imageSize="+imageSize);
+                }
                 translateOffset = imageLevelTotalSize - imageSize; // the last row
             } else {
                 throw new IllegalStateException("Invalid values: translateSize="+translateSize+", translateOffset="+translateOffset+", imageSize="+imageSize+", imageLevelTotalSize="+imageLevelTotalSize);

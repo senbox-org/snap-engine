@@ -61,6 +61,13 @@ public class GeoTiffImageReader implements Closeable {
     }
 
     @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+
+        close();
+    }
+
+    @Override
     public void close() {
         try {
             ImageInputStream imageInputStream = (ImageInputStream) this.imageReader.getInput();
