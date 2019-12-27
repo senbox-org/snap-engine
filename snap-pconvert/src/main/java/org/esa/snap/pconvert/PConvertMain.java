@@ -129,9 +129,8 @@ public class PConvertMain {
         sb.append("     For product output, the default value includes all bands.\n");
         sb.append("\n");
         sb.append("  -B or --band-names <name> or <nameR>,<nameG>,<nameB> or <name1>,<name2>,<name3>,<name4>...\n");
-        sb.append("     For image output, the number of bands should be 1 (greyscale) or\n");
-        sb.append("     3 (RGB)");
-        sb.append(      "This option can not be used together with band indices option.");
+        sb.append("     For image output, the number of bands should be 1 (greyscale) or 3 (RGB)\n");
+        sb.append("     This option can not be used together with band indices option.");
         sb.append("\n");
         sb.append("  -p or --rgb-profile <file-path>\n");
         sb.append("     Valid for greyscale or RGB image output only.\n");
@@ -225,7 +224,7 @@ public class PConvertMain {
         _noDataColor = null;
 
         String bandIndicesStr = null;
-        String bandNamesStr   = null;
+        String bandNamesStr = null;
         String histoSkipPercentStr = null;
         List<File> fileList = new LinkedList<File>();
         String maxResStr = null;
@@ -347,7 +346,7 @@ public class PConvertMain {
             error("unknown output format '" + _formatExt + "'");
         }
 
-        if (bandIndicesStr != null && bandNamesStr != null ){
+        if (bandIndicesStr != null && bandNamesStr != null) {
             error("Band indexes and band names options can not be specified together.");
         }
         if (bandNamesStr != null) {
@@ -693,13 +692,13 @@ public class PConvertMain {
         return index;
     }
 
-    private void bandNamesToIndices(Product product, String[] bandNames){
+    private void bandNamesToIndices(Product product, String[] bandNames) {
         _bandIndices = new int[bandNames.length];
-        for (int i = 0 ; i < bandNames.length ; i++) {
-            if (product.getBand(bandNames[i])!=null) {
-                _bandIndices[i]=product.getBandIndex(bandNames[i]);
+        for (int i = 0; i < bandNames.length; i++) {
+            if (product.getBand(bandNames[i]) != null) {
+                _bandIndices[i] = product.getBandIndex(bandNames[i]);
             } else {
-                error("band "+bandNames[i]+" is not present in the product "+product.getName());
+                error("band " + bandNames[i] + " is not present in the product " + product.getName());
             }
         }
         //Check for wrong option combination, if band_indices obtained from band_names are in conflict with the other options.
