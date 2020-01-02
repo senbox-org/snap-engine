@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 
-
 /**
  * Created by knowles on 11/20/19.
  */
@@ -21,7 +20,7 @@ import java.util.ArrayList;
 /**
  * Created by danielknowles on 6/28/14.
  */
-public class ColorSchemes {
+public class ColorSchemeManager {
 
     //    public static final String DEFAULT_CPD_FILENAME = "gray_scale.cpd";
     public static final String DEFAULT_CPD_FILENAME = "oceancolor_standard.cpd";
@@ -42,8 +41,6 @@ public class ColorSchemes {
     public static final String LOG_FALSE = "FALSE";
     public static final String LOG_FROM_CPD = "From Cpd";
     public static final String LOG_FROM_SCHEME = "From Scheme";
-
-
 
 
     public static final String PROPERTY_DEFAULT_CPD_SECTION_KEY = "color.manipulation.default.cpd.section";
@@ -79,7 +76,6 @@ public class ColorSchemes {
     public static final String PROPERTY_OTHER_CPD_ALIAS = "colorManipulationOtherCpd";
     public static final String PROPERTY_OTHER_CPD_DEFAULT = "gradient_red_white_blue.cpd";
     public static final Class PROPERTY_OTHER_CPD_TYPE = String.class;
-
 
 
     public static final String PROPERTY_GENERAL_BEHAVIOR_SECTION_KEY = "color.manipulation.general.behavior.section";
@@ -125,13 +121,6 @@ public class ColorSchemes {
     public static final Class PROPERTY_GENERAL_LOG_TYPE = String.class;
 
 
-
-
-
-
-
-
-
     public static final String PROPERTY_USE_COLOR_BLIND_CPD_KEY = "color.manipulation.use.color.blind.cpd";
     public static final String PROPERTY_USE_COLOR_BLIND_CPD_LABEL = "Use Color Blind Palettes";
     public static final String PROPERTY_USE_COLOR_BLIND_CPD_TOOLTIP = "Use the color blind compliant palettes";
@@ -156,7 +145,6 @@ public class ColorSchemes {
     public static final Class PROPERTY_USE_SCHEME_PALETTE_STX_TYPE = Boolean.class;
 
 
-
     public static final String PROPERTY_SCHEME_CPD_KEY = "color.manipulation.scheme.cpd";
     public static final String PROPERTY_SCHEME_CPD_LABEL = "Palette";
     public static final String PROPERTY_SCHEME_CPD_TOOLTIP = "The cpd file to use when for the scheme";
@@ -171,7 +159,6 @@ public class ColorSchemes {
     public static final Class PROPERTY_SCHEME_CPD_TYPE = String.class;
 
 
-
     public static final String PROPERTY_SCHEME_RANGE_KEY = "color.manipulation.scheme.range";
     public static final String PROPERTY_SCHEME_RANGE_LABEL = "Range";
     public static final String PROPERTY_SCHEME_RANGE_TOOLTIP = "range options for the scheme";
@@ -181,7 +168,6 @@ public class ColorSchemes {
     public static final String PROPERTY_SCHEME_RANGE_OPTION3 = RANGE_FROM_CPD;
     public static final String PROPERTY_SCHEME_RANGE_DEFAULT = RANGE_FROM_SCHEME;
     public static final Class PROPERTY_SCHEME_RANGE_TYPE = String.class;
-
 
 
     public static final String PROPERTY_SCHEME_LOG_KEY = "color.manipulation.scheme.log";
@@ -196,11 +182,6 @@ public class ColorSchemes {
     public static final Class PROPERTY_SCHEME_LOG_TYPE = String.class;
 
 
-
-
-
-
-
     public static final String PROPERTY_RESTORE_SECTION_KEY = "color.manipulation.restoreDefaults.section";
     public static final String PROPERTY_RESTORE_SECTION_LABEL = "---";
     public static final String PROPERTY_RESTORE_SECTION_TOOLTIP = "---";
@@ -213,11 +194,10 @@ public class ColorSchemes {
     public static final boolean PROPERTY_RESTORE_TO_DEFAULTS_DEFAULT = false;
 
 
+//    public static final String NEW_CPD_SELECTOR_FILENAME = "color_palette_scheme_selector.txt";
 
-
-    public static final String NEW_CPD_SELECTOR_FILENAME = "color_palette_scheme_selector.txt";
-    public static final String NEW_CPD_DEFAULTS_FILENAME = "color_palette_scheme_defaults.txt";
-    public static final String NEW_CPD_SCHEMES_FILENAME = "color_palette_schemes.txt";
+    public static final String COLOR_SCHEME_LUT_FILENAME = "color_palette_scheme_defaults.txt";
+    public static final String COLOR_SCHEMES_FILENAME = "color_palette_schemes.txt";
     public static final String COLORBAR_TITLE_OVERRIDE_MACRO = "USE_SCHEME_VALUE";
 
     public static final String PROPERTY_NAME_PALETTES_COLOR_BLIND_ENABLED = "palettes.colorBlind.enabled";
@@ -235,64 +215,39 @@ public class ColorSchemes {
         this.jComboBoxShouldFire = jComboBoxShouldFire;
     }
 
-    public static enum Id {
-        SELECTOR,
-        DEFAULTS
-    }
-
 
     private final String STANDARD_SCHEME_COMBO_BOX_FIRST_ENTRY_NAME = "-- none --";
 
     private ArrayList<ColorPaletteInfo> colorSchemeInfos = new ArrayList<ColorPaletteInfo>();
-//    private ArrayList<ColorPaletteInfo> newColorPaletteDefaultInfos = new ArrayList<ColorPaletteInfo>();
-//    private ArrayList<ColorPaletteInfo> newColorPaletteSelectorInfos = new ArrayList<ColorPaletteInfo>();
+    private ArrayList<ColorPaletteInfo> colorSchemeLutInfos = new ArrayList<ColorPaletteInfo>();
 
-    private File newColorPaletteSchemesFile = null;
-    private File newColorPaletteDefaultsFile = null;
-    private File newColorPaletteSelectorFile = null;
-
+    private File colorSchemesFile = null;
+    private File colorSchemeLutFile = null;
 
     private JComboBox jComboBox = null;
     private boolean jComboBoxShouldFire = true;
 
-    private ArrayList<ColorPaletteInfo> colorPaletteInfos = new ArrayList<ColorPaletteInfo>();
-    private ColorPaletteInfo jComboBoxFirstEntryColorPaletteInfo = null;
+    private ColorPaletteInfo jComboBoxFirstEntryColorSchemeInfo = null;
 
     private File colorPaletteDir = null;
-    private File schemeDefaultsFile = null;
-    //   private File userSchemesFile = null;
     private String jComboBoxFirstEntryName = null;
-    PropertyMap configuration = null;
     boolean useColorBlind = false;
 
 
-    public ColorSchemes(File colorPaletteDir, Id id, boolean userInterfaceMode, PropertyMap configuration) {
+    public ColorSchemeManager(File colorPaletteDir) {
         this.colorPaletteDir = colorPaletteDir;
-        this.configuration = configuration;
         this.useColorBlind = getUseColorBlind();
 
+        colorSchemesFile = new File(this.colorPaletteDir, COLOR_SCHEMES_FILENAME);
+        colorSchemeLutFile = new File(this.colorPaletteDir, COLOR_SCHEME_LUT_FILENAME);
 
-        initColorPaletteSchemeInfos();
-
-        schemeDefaultsFile = new File(this.colorPaletteDir, NEW_CPD_DEFAULTS_FILENAME);
-
-
-        if (colorPaletteDir != null && colorPaletteDir.exists()) {
-
-//            if (userInterfaceMode) {
-//                initComboBox();
-//            } else {
-//                // this mode is used for setting the default color scheme for an image when first opened
-//                // it doesn't need comboBoxes, only the colorPaletteInfos is needed
-//                initColorPaletteInfos(colorPaletteDir, colorPaletteInfos, schemesFile, false);
-//            }
-
-            schemeDefaultsFile = new File(this.colorPaletteDir, NEW_CPD_DEFAULTS_FILENAME);
+        if (colorSchemesFile.exists() && colorSchemeLutFile.exists()) {
+            initColorSchemeInfos();
 
             setjComboBoxFirstEntryName(STANDARD_SCHEME_COMBO_BOX_FIRST_ENTRY_NAME);
 
             initComboBox();
-            initSchemeDefaults(colorPaletteInfos, schemeDefaultsFile);
+            initColorSchemeLut();
 
             reset();
         }
@@ -305,24 +260,22 @@ public class ColorSchemes {
 //        jComboBoxFirstEntryColorPaletteInfo = new ColorPaletteInfo(getjComboBoxFirstEntryName(), null, null, null, 0, 0, false, true, true, null, null, null, colorPaletteDir);
 //        colorPaletteInfos.add(jComboBoxFirstEntryColorPaletteInfo);
 
-//        initColorPaletteInfos(colorPaletteDir, colorPaletteInfos, schemesFile, true);
 
-
-        Object[] colorPaletteInfosArray = colorSchemeInfos.toArray();
+        Object[] colorSchemeInfosArray = colorSchemeInfos.toArray();
 
         final String[] toolTipsArray = new String[colorSchemeInfos.size()];
 
         int i = 0;
-        for (ColorPaletteInfo colorPaletteInfo : colorSchemeInfos) {
-            toolTipsArray[i] = colorPaletteInfo.getDescription();
+        for (ColorPaletteInfo colorSchemeInfo : colorSchemeInfos) {
+            toolTipsArray[i] = colorSchemeInfo.getDescription();
             i++;
         }
 
         final Boolean[] enabledArray = new Boolean[colorSchemeInfos.size()];
 
         i = 0;
-        for (ColorPaletteInfo colorPaletteInfo : colorSchemeInfos) {
-            enabledArray[i] = colorPaletteInfo.isEnabled();
+        for (ColorPaletteInfo colorSchemeInfo : colorSchemeInfos) {
+            enabledArray[i] = colorSchemeInfo.isEnabled();
             i++;
         }
 
@@ -330,31 +283,23 @@ public class ColorSchemes {
         myComboBoxRenderer.setTooltipList(toolTipsArray);
         myComboBoxRenderer.setEnabledList(enabledArray);
 
-        jComboBox = new JComboBox(colorPaletteInfosArray);
+        jComboBox = new JComboBox(colorSchemeInfosArray);
         jComboBox.setRenderer(myComboBoxRenderer);
         jComboBox.setEditable(false);
         jComboBox.setMaximumRowCount(20);
-        if (schemeDefaultsFile != null) {
-            jComboBox.setToolTipText("To modify see file: " + colorPaletteDir + "/" + schemeDefaultsFile.getName());
+        if (colorSchemeLutFile != null) {
+            jComboBox.setToolTipText("To modify see file: " + colorPaletteDir + "/" + colorSchemeLutFile.getName());
         }
-
 
     }
 
 
-    private boolean initColorPaletteSchemeInfos() {
-
+    private boolean initColorSchemeInfos() {
 
 //        jComboBoxFirstEntryColorPaletteInfo = new ColorPaletteInfo(getjComboBoxFirstEntryName(), null, null, null, 0, 0, false, true, true, null, null, null, colorPaletteDir);
 //        newColorPaletteSchemeInfos.add(jComboBoxFirstEntryColorPaletteInfo);
 
-        newColorPaletteSchemesFile = new File(this.colorPaletteDir, NEW_CPD_SCHEMES_FILENAME);
-        if (!newColorPaletteSchemesFile.exists()) {
-            return false;
-        }
-
-        ArrayList<String> lines = readFileIntoArrayList(newColorPaletteSchemesFile);
-
+        ArrayList<String> lines = readFileIntoArrayList(colorSchemesFile);
 
         int i = 0;
         for (String line : lines) {
@@ -421,13 +366,13 @@ public class ColorSchemes {
                         }
 
 
-                        if(minStr.length() > 0 && !NULL_ENTRY.toLowerCase().equals(minStr.toLowerCase())){
+                        if (minStr.length() > 0 && !NULL_ENTRY.toLowerCase().equals(minStr.toLowerCase())) {
                             min = Double.valueOf(minStr);
                         } else {
                             min = DOUBLE_NULL;
                         }
 
-                        if(maxStr.length() > 0 && !NULL_ENTRY.toLowerCase().equals(maxStr.toLowerCase())){
+                        if (maxStr.length() > 0 && !NULL_ENTRY.toLowerCase().equals(maxStr.toLowerCase())) {
                             max = Double.valueOf(maxStr);
                         } else {
                             max = DOUBLE_NULL;
@@ -515,10 +460,9 @@ public class ColorSchemes {
     }
 
 
-    private void initSchemeDefaults(ArrayList<ColorPaletteInfo> colorPaletteInfos, File file) {
+    private void initColorSchemeLut() {
 
-        ArrayList<String> lines = readFileIntoArrayList(file);
-
+        ArrayList<String> lines = readFileIntoArrayList(colorSchemeLutFile);
 
         int i = 0;
         for (String line : lines) {
@@ -647,11 +591,9 @@ public class ColorSchemes {
 
 
                         if (colorPaletteInfo != null) {
-                            colorPaletteInfos.add(colorPaletteInfo);
+                            colorSchemeLutInfos.add(colorPaletteInfo);
                         }
                     }
-
-
                 }
             }
         }
@@ -680,14 +622,14 @@ public class ColorSchemes {
 
     public void reset() {
         if (jComboBox != null) {
-            jComboBox.setSelectedItem(jComboBoxFirstEntryColorPaletteInfo);
+            jComboBox.setSelectedItem(jComboBoxFirstEntryColorSchemeInfo);
         }
     }
 
     public ColorPaletteInfo setSchemeName(String schemeName) {
 
         if (schemeName != null) {
-            for (ColorPaletteInfo colorPaletteInfo : colorPaletteInfos) {
+            for (ColorPaletteInfo colorPaletteInfo : colorSchemeLutInfos) {
                 if (schemeName.trim().equals(colorPaletteInfo.getName().trim())) {
                     jComboBox.setSelectedItem(colorPaletteInfo);
                     return colorPaletteInfo;
@@ -726,8 +668,8 @@ public class ColorSchemes {
         return jComboBox;
     }
 
-    public ArrayList<ColorPaletteInfo> getColorPaletteInfos() {
-        return colorPaletteInfos;
+    public ArrayList<ColorPaletteInfo> getColorSchemeLutInfos() {
+        return colorSchemeLutInfos;
     }
 
 
@@ -806,25 +748,16 @@ public class ColorSchemes {
     }
 
 
-    public static boolean getUseColorBlind(PropertyMap configuration) {
 
-        if (configuration != null) {
-            return configuration.getPropertyBool(PROPERTY_NAME_PALETTES_COLOR_BLIND_ENABLED, DEFAULT_PALETTES_COLOR_BLIND_ENABLED);
-        } else {
-            return DEFAULT_PALETTES_COLOR_BLIND_ENABLED;
-        }
-
-    }
 
     public boolean getUseColorBlind() {
+        return false;
 
-        if (configuration != null) {
-            return configuration.getPropertyBool(PROPERTY_NAME_PALETTES_COLOR_BLIND_ENABLED, DEFAULT_PALETTES_COLOR_BLIND_ENABLED);
-        } else {
-            return DEFAULT_PALETTES_COLOR_BLIND_ENABLED;
-        }
-
-
+//        if (configuration != null) {
+//            return configuration.getPropertyBool(PROPERTY_NAME_PALETTES_COLOR_BLIND_ENABLED, DEFAULT_PALETTES_COLOR_BLIND_ENABLED);
+//        } else {
+//            return DEFAULT_PALETTES_COLOR_BLIND_ENABLED;
+//        }
     }
 
 }
