@@ -22,9 +22,9 @@ public class GeoTiffTileOpImage extends AbstractSubsetTileOpImage {
     private final int bandIndex;
 
     public GeoTiffTileOpImage(GeoTiffImageReader geoTiffImageReader, MultiLevelModel imageMultiLevelModel, int dataBufferType, int bandIndex,
-                              Rectangle imageBounds, Dimension tileSize, Point tileOffset, int level, boolean isGlobalShifted180) {
+                              Rectangle imageReadBounds, Dimension tileSize, Point tileOffset, int level, boolean isGlobalShifted180) {
 
-        super(imageMultiLevelModel, dataBufferType, imageBounds, tileSize, tileOffset, level);
+        super(imageMultiLevelModel, dataBufferType, imageReadBounds, tileSize, tileOffset, level);
 
         this.geoTiffImageReader = geoTiffImageReader;
         this.isGlobalShifted180 = isGlobalShifted180;

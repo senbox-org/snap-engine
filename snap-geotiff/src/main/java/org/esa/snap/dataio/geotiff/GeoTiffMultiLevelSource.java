@@ -29,13 +29,13 @@ public class GeoTiffMultiLevelSource extends AbstractMosaicSubsetMultiLevelSourc
     }
 
     @Override
-    protected SourcelessOpImage buildTileOpImage(Rectangle visibleBounds, int level, Point tileOffset, Dimension tileSize, Void tileData) {
-        return new GeoTiffTileOpImage(this.geoTiffImageReader, getModel(), this.dataBufferType, this.bandIndex, visibleBounds, tileSize, tileOffset, level, this.isGlobalShifted180);
+    protected SourcelessOpImage buildTileOpImage(Rectangle imageCellReadBounds, int level, Point tileOffset, Dimension tileSize, Void tileData) {
+        return new GeoTiffTileOpImage(this.geoTiffImageReader, getModel(), this.dataBufferType, this.bandIndex, imageCellReadBounds, tileSize, tileOffset, level, this.isGlobalShifted180);
     }
 
     @Override
     protected RenderedImage createImage(int level) {
-        java.util.List<RenderedImage> tileImages = buildTileImages(level, this.visibleImageBounds, 0.0f, 0.0f, null);
+        java.util.List<RenderedImage> tileImages = buildTileImages(level, this.imageReadBounds, 0.0f, 0.0f, null);
         if (tileImages.size() > 0) {
             return buildMosaicOp(level, tileImages);
         }

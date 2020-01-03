@@ -141,15 +141,19 @@ public class ImageUtils {
         return sourceSize / Math.pow(2, level);
     }
 
+    public static Point computeLevelOffset(Point offset, int level) {
+        return new Point(ImageUtils.computeLevelSize(offset.x, level), ImageUtils.computeLevelSize(offset.y, level));
+    }
+
     public static int computeLevelSize(int sourceSize, int level) {
         return (int) Math.ceil(computeLevelSizeAsDouble(sourceSize, level));
     }
 
-    public static Dimension computeTileDimensionAtResolutionLevel(Dimension tileSize, int level) {
-        return computeTileDimensionAtResolutionLevel(tileSize.width, tileSize.height, level);
+    public static Dimension computeLevelTileDimension(Dimension tileSize, int level) {
+        return computeLevelTileDimension(tileSize.width, tileSize.height, level);
     }
 
-    public static Dimension computeTileDimensionAtResolutionLevel(int fullTileWidth, int fullTileHeight, int level) {
+    public static Dimension computeLevelTileDimension(int fullTileWidth, int fullTileHeight, int level) {
         int width = computeLevelSize(fullTileWidth, level);
         int height = computeLevelSize(fullTileHeight, level);
         return getTileDimension(width, height);
