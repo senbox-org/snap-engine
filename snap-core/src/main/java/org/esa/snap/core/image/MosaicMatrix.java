@@ -42,7 +42,7 @@ public class MosaicMatrix {
         if (rowIndex == -1 || columnIndex == -1) {
             throw new IllegalArgumentException("Cannot add cell past to the matrix size.");
         }
-        addCellAt(rowIndex, columnIndex, matrixCell);
+        setCellAt(rowIndex, columnIndex, matrixCell, false, false);
     }
 
     public MatrixCell getCellAt(int rowIndex, int columnIndex) {
@@ -88,30 +88,54 @@ public class MosaicMatrix {
         return true;
     }
 
-    public void addCellAt(int rowIndex, int columnIndex, MatrixCell matrixCell) {
+    public void setCellAt(int rowIndex, int columnIndex, MatrixCell matrixCell, boolean doNotValidateLastColumnWidth, boolean doNotValidateLastRowHeight) {
         if (rowIndex < 0 || rowIndex > this.rowCount - 1) {
-            throw new IllegalArgumentException("Invalid row index");
+            throw new IllegalArgumentException("Invalid row index " + rowIndex + ". The row count is " + this.rowCount + ".");
         }
         if (columnIndex < 0 || columnIndex > this.columnCount - 1) {
-            throw new IllegalArgumentException("Invalid column index");
+            throw new IllegalArgumentException("Invalid column index " + columnIndex + ". The column count is " + this.columnCount + ".");
         }
-        if (columnIndex > 0) {
-            MatrixCell leftCell = this.internal[rowIndex][columnIndex - 1];
-            if (matrixCell.getCellHeight() != leftCell.getCellHeight()) {
-                throw new IllegalArgumentException("Cell height is different from that of previously added cells.");
-            }
-        }
+
+        // validate cell width
         if (rowIndex > 0) {
-            MatrixCell upperCell = this.internal[rowIndex - 1][columnIndex];
-            if (matrixCell.getCellWidth() != upperCell.getCellWidth()) {
-                throw new IllegalArgumentException("Cell width is different from that of previously added cells.");
+            MatrixCell previousTopRowCell = this.internal[rowIndex - 1][columnIndex];
+            if (matrixCell.getCellWidth() != previousTopRowCell.getCellWidth()) {
+                // different cell width values
+                boolean canThrowException = true;
+                if (columnIndex  == this.columnCount - 1) {
+                    // the last column
+                    if (doNotValidateLastColumnWidth) {
+                        canThrowException = false;
+                    }
+                }
+                if (canThrowException) {
+                    throw new IllegalArgumentException("Cell width " + matrixCell.getCellWidth() + " is different from that of previously top added cell width " + previousTopRowCell.getCellWidth() + ".");
+                }
             }
         }
+        // validate cell height
+        if (columnIndex > 0) {
+            MatrixCell previousLeftColumnCell = this.internal[rowIndex][columnIndex - 1];
+            if (matrixCell.getCellHeight() != previousLeftColumnCell.getCellHeight()) {
+                // different cell height values
+                boolean canThrowException = true;
+                if (rowIndex  == this.rowCount - 1) {
+                    // the last row
+                    if (doNotValidateLastRowHeight) {
+                        canThrowException = false;
+                    }
+                }
+                if (canThrowException) {
+                    throw new IllegalArgumentException("Cell height " + matrixCell.getCellHeight() + " is different from that of previously left added cell height " + previousLeftColumnCell.getCellHeight() + ".");
+                }
+            }
+        }
+
         MatrixCell cell = this.internal[rowIndex][columnIndex];
         if (cell == null) {
             this.internal[rowIndex][columnIndex] = matrixCell;
         } else {
-            throw new IllegalArgumentException("The cell has already a value.");
+            throw new IllegalArgumentException("The cell from row index " + rowIndex + " and column index " + columnIndex + " has already a value.");
         }
     }
 
