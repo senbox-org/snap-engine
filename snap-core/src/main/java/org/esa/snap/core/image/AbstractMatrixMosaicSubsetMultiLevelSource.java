@@ -17,6 +17,9 @@ public abstract class AbstractMatrixMosaicSubsetMultiLevelSource extends Abstrac
     protected AbstractMatrixMosaicSubsetMultiLevelSource(MosaicMatrix mosaicMatrix, Rectangle imageMatrixReadBounds, Dimension tileSize, GeoCoding geoCoding) {
         super(imageMatrixReadBounds, tileSize, geoCoding);
 
+        if (!mosaicMatrix.isConsistent()) {
+            throw new IllegalArgumentException("The matrix has empty cells.");
+        }
         this.mosaicMatrix = mosaicMatrix;
     }
 

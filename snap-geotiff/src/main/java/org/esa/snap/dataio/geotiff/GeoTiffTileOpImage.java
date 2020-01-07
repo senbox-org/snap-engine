@@ -41,6 +41,11 @@ public class GeoTiffTileOpImage extends AbstractSubsetTileOpImage {
             } catch (IOException ex) {
                 throw new IllegalStateException("Failed to read the data for level " + getLevel() + " and rectangle " + levelDestinationRectangle + ".", ex);
             }
+            int rasterDataBufferType = normalRasterData.getSampleModel().getDataType();
+            int imageDataBufferType = getSampleModel().getDataType();
+            if (rasterDataBufferType != imageDataBufferType) {
+                throw new IllegalStateException("The raster data buffer type " + rasterDataBufferType + " is different than the image data buffer type " + imageDataBufferType + ".");
+            }
             writeDataOnLevelRaster(normalRasterData, normalBoundsIntersection, levelDestinationRaster, levelDestinationRectangle, this.bandIndex);
         }
     }
