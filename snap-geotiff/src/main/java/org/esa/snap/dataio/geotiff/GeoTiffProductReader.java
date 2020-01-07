@@ -633,8 +633,8 @@ public class GeoTiffProductReader extends AbstractProductReader {
         final SortedSet<Double> xSet = new TreeSet<>();
         final SortedSet<Double> ySet = new TreeSet<>();
         for (int i = 0; i < tiePoints.length; i += 6) {
-            ySet.add(tiePoints[i]);
-            xSet.add(tiePoints[i + 1]);
+            xSet.add(tiePoints[i]);
+            ySet.add(tiePoints[i + 1]);
         }
         final double xMin = xSet.first();
         final double xMax = xSet.last();
@@ -663,8 +663,8 @@ public class GeoTiffProductReader extends AbstractProductReader {
         final float[] lons = new float[width * height];
 
         for (int i = 0; i < tiePoints.length; i += 6) {
-            final int idxY = yIdx.get(tiePoints[i + 0]);
-            final int idxX = xIdx.get(tiePoints[i + 1]);
+            final int idxX = xIdx.get(tiePoints[i + 0]);
+            final int idxY = yIdx.get(tiePoints[i + 1]);
             final int arrayIdx = idxY * width + idxX;
             lons[arrayIdx] = (float) tiePoints[i + 3];
             lats[arrayIdx] = (float) tiePoints[i + 4];
