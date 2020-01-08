@@ -10,7 +10,7 @@ import java.util.ArrayList;
 /**
  * Created by jcoravu on 12/12/2019.
  */
-public abstract class AbstractMatrixMosaicSubsetMultiLevelSource extends AbstractMosaicSubsetMultiLevelSource<MosaicMatrix.MatrixCell> {
+public abstract class AbstractMatrixMosaicSubsetMultiLevelSource extends AbstractMosaicSubsetMultiLevelSource {
 
     private final MosaicMatrix mosaicMatrix;
 
@@ -22,6 +22,9 @@ public abstract class AbstractMatrixMosaicSubsetMultiLevelSource extends Abstrac
         }
         this.mosaicMatrix = mosaicMatrix;
     }
+
+    protected abstract java.util.List<RenderedImage> buildMatrixCellTileImages(int level, Rectangle imageCellReadBounds, float translateLevelOffsetX,
+                                                                               float translateLevelOffsetY, MosaicMatrix.MatrixCell matrixCell);
 
     @Override
     protected RenderedImage createImage(int level) {
@@ -41,7 +44,7 @@ public abstract class AbstractMatrixMosaicSubsetMultiLevelSource extends Abstrac
                     float cellTranslateLevelOffsetX = (float) ImageUtils.computeLevelSizeAsDouble(intersectionMatrixBounds.x - this.imageReadBounds.x, level);
                     float cellTranslateLevelOffsetY = (float) ImageUtils.computeLevelSizeAsDouble(intersectionMatrixBounds.y - this.imageReadBounds.y, level);
 
-                    java.util.List<RenderedImage> cellTileImages = buildTileImages(level, cellLocalIntersectionBounds, cellTranslateLevelOffsetX, cellTranslateLevelOffsetY, matrixCell);
+                    java.util.List<RenderedImage> cellTileImages = buildMatrixCellTileImages(level, cellLocalIntersectionBounds, cellTranslateLevelOffsetX, cellTranslateLevelOffsetY, matrixCell);
                     matrixTileImages.addAll(cellTileImages);
                 }
                 cellMatrixOffsetX += matrixCell.getCellWidth();
