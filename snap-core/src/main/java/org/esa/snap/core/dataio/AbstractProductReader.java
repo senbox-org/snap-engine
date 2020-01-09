@@ -394,6 +394,14 @@ public abstract class AbstractProductReader implements ProductReader {
      * @return the discontinuity mode, always one of {@link TiePointGrid#DISCONT_NONE}, {@link TiePointGrid#DISCONT_AT_180} and {@link TiePointGrid#DISCONT_AT_360}.
      */
     protected int getGridDiscontinutity(String name) {
+        return getGridDiscontinutityValue(name);
+//        if (isNameOfLongitudeGrid(name)) {
+//            return TiePointGrid.DISCONT_AT_180;
+//        }
+//        return TiePointGrid.DISCONT_NONE;
+    }
+
+    private static int getGridDiscontinutityValue(String name) {
         if (isNameOfLongitudeGrid(name)) {
             return TiePointGrid.DISCONT_AT_180;
         }
@@ -441,9 +449,15 @@ public abstract class AbstractProductReader implements ProductReader {
         return buildTiePointGrid(gridName, gridWidth, gridHeight, offsetX, offsetY, subSamplingX, subSamplingY, tiePoints, gridDiscontinutity);
     }
 
-    protected static TiePointGrid buildTiePointGrid(String gridName, int gridWidth, int gridHeight,
-                                              double offsetX, double offsetY, double subSamplingX,
-                                              double subSamplingY, float[] tiePoints, int gridDiscontinutity) {
+    protected static TiePointGrid buildTiePointGrid(String gridName, int gridWidth, int gridHeight, double offsetX, double offsetY,
+                                                    double subSamplingX, double subSamplingY, float[] tiePoints) {
+
+        int gridDiscontinutity = getGridDiscontinutityValue(gridName);
+        return buildTiePointGrid(gridName, gridWidth, gridHeight, offsetX, offsetY, subSamplingX, subSamplingY, tiePoints, gridDiscontinutity);
+    }
+
+    protected static TiePointGrid buildTiePointGrid(String gridName, int gridWidth, int gridHeight, double offsetX, double offsetY,
+                                                    double subSamplingX, double subSamplingY, float[] tiePoints, int gridDiscontinutity) {
 
         return new TiePointGrid(gridName, gridWidth, gridHeight, offsetX, offsetY, subSamplingX, subSamplingY, tiePoints, gridDiscontinutity);
     }
