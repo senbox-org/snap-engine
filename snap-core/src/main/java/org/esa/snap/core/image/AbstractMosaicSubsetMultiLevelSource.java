@@ -12,6 +12,7 @@ import javax.media.jai.operator.ConstantDescriptor;
 import javax.media.jai.operator.MosaicDescriptor;
 import javax.media.jai.operator.TranslateDescriptor;
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.image.RenderedImage;
 import java.util.List;
 import java.util.ArrayList;
@@ -30,8 +31,16 @@ public abstract class AbstractMosaicSubsetMultiLevelSource extends AbstractMulti
         this(DefaultMultiLevelModel.getLevelCount(imageReadBounds.width, imageReadBounds.height), imageReadBounds, tileSize, geoCoding);
     }
 
+    protected AbstractMosaicSubsetMultiLevelSource(Rectangle imageReadBounds, Dimension tileSize, AffineTransform imageToModelTransform) {
+        this(DefaultMultiLevelModel.getLevelCount(imageReadBounds.width, imageReadBounds.height), imageReadBounds, tileSize, imageToModelTransform);
+    }
+
     protected AbstractMosaicSubsetMultiLevelSource(int levelCount, Rectangle imageReadBounds, Dimension tileSize, GeoCoding geoCoding) {
-        super(new DefaultMultiLevelModel(levelCount, Product.findImageToModelTransform(geoCoding), imageReadBounds.width, imageReadBounds.height));
+        this(levelCount, imageReadBounds, tileSize, Product.findImageToModelTransform(geoCoding));
+    }
+
+    protected AbstractMosaicSubsetMultiLevelSource(int levelCount, Rectangle imageReadBounds, Dimension tileSize, AffineTransform imageToModelTransform) {
+        super(new DefaultMultiLevelModel(levelCount, imageToModelTransform, imageReadBounds.width, imageReadBounds.height));
 
         this.imageReadBounds = imageReadBounds;
         this.tileSize = tileSize;
@@ -57,22 +66,24 @@ public abstract class AbstractMosaicSubsetMultiLevelSource extends AbstractMulti
         int startTileRowIndex = imageCellReadBounds.y / decompresedTileSize.height;
         int endTileRowIndex = computeDecompressedEndTileIndex(startTileColumnIndex, imageCellReadBounds.y, imageCellReadBounds.height, decompresedTileSize.height);
 
-        float levelImageWidth = computeLevelImageSize(imageCellReadBounds.width, (endTileColumnIndex - startTileColumnIndex) + 1, level);
-        float levelImageHeight = computeLevelImageSize(imageCellReadBounds.height, (endTileRowIndex - startTileRowIndex) + 1, level);
+        float levelTotalImageWidth = (float) ImageUtils.computeLevelSizeAsDouble(imageCellReadBounds.width, level);
+        float levelTotalImageHeight = (float) ImageUtils.computeLevelSizeAsDouble(imageCellReadBounds.height, level);
 
         int defaultColumnTileCount = ImageUtils.computeTileCount(defaultImageWidth, decompresedTileSize.width);
         java.util.List<RenderedImage> tileImages = new ArrayList<>();
-        float levelTranslateY = translateLevelOffsetX;
+
+        float levelTranslateY = 0.0f;
         int currentImageTileTopY = imageCellReadBounds.y;
         for (int tileRowIndex = startTileRowIndex; tileRowIndex <= endTileRowIndex; tileRowIndex++) {
             int currentTileHeight = computeDecompressedImageTileSize(startTileRowIndex, endTileRowIndex, tileRowIndex, currentImageTileTopY, imageCellReadBounds.y, imageCellReadBounds.height, decompresedTileSize.height);
             int levelImageTileHeight = ImageUtils.computeLevelSize(currentTileHeight, level);
+
             int tileOffsetYFromDecompressedImage = currentImageTileTopY - (tileRowIndex * decompresedTileSize.height);
             if (tileOffsetYFromDecompressedImage < 0) {
                 throw new IllegalStateException("The tile offset Y from the decompressed image file is negative.");
             }
 
-            float levelTranslateX = translateLevelOffsetY;
+            float levelTranslateX = 0.0f;
             int currentImageTileLeftX = imageCellReadBounds.x;
             for (int tileColumnIndex = startTileColumnIndex; tileColumnIndex <= endTileColumnIndex; tileColumnIndex++) {
                 int currentTileWidth = computeDecompressedImageTileSize(startTileColumnIndex, endTileColumnIndex, tileColumnIndex, currentImageTileLeftX, imageCellReadBounds.x, imageCellReadBounds.width, decompresedTileSize.width);
@@ -94,19 +105,25 @@ public abstract class AbstractMosaicSubsetMultiLevelSource extends AbstractMulti
                 validateTileImageSize(tileOpImage, levelImageTileWidth, levelImageTileHeight);
                 this.tileImageDisposer.registerForDisposal(tileOpImage);
 
-                levelTranslateX = computeDecompressedTileTranslateOffset(tileColumnIndex, endTileColumnIndex, levelTranslateX, tileOpImage.getWidth(), levelImageWidth);
-                levelTranslateY = computeDecompressedTileTranslateOffset(tileRowIndex, endTileRowIndex, levelTranslateY, tileOpImage.getHeight(), levelImageHeight);
-
-                PlanarImage opImage = TranslateDescriptor.create(tileOpImage, levelTranslateX, levelTranslateY, Interpolation.getInstance(Interpolation.INTERP_NEAREST), null);
+                PlanarImage opImage = TranslateDescriptor.create(tileOpImage, translateLevelOffsetX + levelTranslateX, translateLevelOffsetY + levelTranslateY, Interpolation.getInstance(Interpolation.INTERP_NEAREST), null);
                 tileImages.add(opImage);
 
                 levelTranslateX += (float) ImageUtils.computeLevelSizeAsDouble(currentTileWidth, level);
                 currentImageTileLeftX += currentTileWidth;
             }
 
+            if (levelTotalImageWidth != levelTranslateX) {
+                throw new IllegalStateException("Invalid translate width: levelTotalImageWidth="+levelTotalImageWidth+", levelTranslateX="+levelTranslateX);
+            }
+
             levelTranslateY += (float) ImageUtils.computeLevelSizeAsDouble(currentTileHeight, level);
             currentImageTileTopY += currentTileHeight;
         }
+
+        if (levelTotalImageHeight != levelTranslateY) {
+            throw new IllegalStateException("Invalid translate width: levelTotalImageHeight="+levelTotalImageHeight+", levelTranslateY="+levelTranslateY);
+        }
+
         return tileImages;
     }
 
@@ -155,10 +172,10 @@ public abstract class AbstractMosaicSubsetMultiLevelSource extends AbstractMulti
             }
         }
         if (levelImageWidth != levelTotalTranslateWidth) {
-            throw new IllegalStateException("Invalid width: imageLevelWidth="+levelImageWidth+", totalTranslateWidth="+levelTotalTranslateWidth);
+            throw new IllegalStateException("Invalid translate width: imageLevelWidth="+levelImageWidth+", totalTranslateWidth="+levelTotalTranslateWidth);
         }
         if (levelImageHeight != levelTotalTranslateHeight) {
-            throw new IllegalStateException("Invalid height: imageLevelHeight="+levelImageHeight+", totalTranslateHeight="+levelTotalTranslateHeight);
+            throw new IllegalStateException("Invalid translate height: imageLevelHeight="+levelImageHeight+", totalTranslateHeight="+levelTotalTranslateHeight);
         }
 
         return tileImages;
@@ -256,24 +273,6 @@ public abstract class AbstractMosaicSubsetMultiLevelSource extends AbstractMulti
             throw new IllegalArgumentException("Invalid tile count: " + tileCount);
         }
         return levelImageSize;
-    }
-
-    private static float computeDecompressedTileTranslateOffset(int currentTileIndex, int endTileIndex, float levelTranslateOffset, int levelImageTileSize, float levelImageTotalSize) {
-        float translateOffset = levelTranslateOffset;
-        if (translateOffset + levelImageTileSize > levelImageTotalSize) {
-            if (currentTileIndex == endTileIndex) {
-                if (levelImageTotalSize < levelImageTileSize) {
-                    throw new IllegalStateException("Invalid values: imageLevelTotalSize="+levelImageTotalSize+", imageSize="+levelImageTileSize);
-                }
-                translateOffset = levelImageTotalSize - levelImageTileSize; // the last row or column
-            } else {
-                throw new IllegalStateException("Invalid values: levelTranslateOffset="+levelTranslateOffset+", levelImageTileSize="+levelImageTileSize+", imageLevelTotalSize="+levelImageTotalSize);
-            }
-        }
-        if (translateOffset < 0.0f) {
-            throw new IllegalStateException("The translate offset is negative: "+ translateOffset);
-        }
-        return translateOffset;
     }
 
     private static int computeDecompressedEndTileIndex(int startTileIndex, int imageReadOffset, int imageReadSize, int tileSize) {

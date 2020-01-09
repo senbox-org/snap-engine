@@ -1,9 +1,11 @@
 package org.esa.snap.core.image;
 
 import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.util.ImageUtils;
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.image.RenderedImage;
 import java.util.ArrayList;
 
@@ -15,7 +17,20 @@ public abstract class AbstractMatrixMosaicSubsetMultiLevelSource extends Abstrac
     private final MosaicMatrix mosaicMatrix;
 
     protected AbstractMatrixMosaicSubsetMultiLevelSource(MosaicMatrix mosaicMatrix, Rectangle imageMatrixReadBounds, Dimension tileSize, GeoCoding geoCoding) {
-        super(imageMatrixReadBounds, tileSize, geoCoding);
+        this(mosaicMatrix, imageMatrixReadBounds, tileSize, Product.findImageToModelTransform(geoCoding));
+    }
+
+    protected AbstractMatrixMosaicSubsetMultiLevelSource(MosaicMatrix mosaicMatrix, Rectangle imageMatrixReadBounds, Dimension tileSize, AffineTransform imageToModelTransform) {
+        super(imageMatrixReadBounds, tileSize, imageToModelTransform);
+
+        if (!mosaicMatrix.isConsistent()) {
+            throw new IllegalArgumentException("The matrix has empty cells.");
+        }
+        this.mosaicMatrix = mosaicMatrix;
+    }
+
+    protected AbstractMatrixMosaicSubsetMultiLevelSource(int levelCount, MosaicMatrix mosaicMatrix, Rectangle imageMatrixReadBounds, Dimension tileSize, AffineTransform imageToModelTransform) {
+        super(levelCount, imageMatrixReadBounds, tileSize, imageToModelTransform);
 
         if (!mosaicMatrix.isConsistent()) {
             throw new IllegalArgumentException("The matrix has empty cells.");
