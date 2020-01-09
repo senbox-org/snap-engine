@@ -22,6 +22,7 @@ product = ProductIO.readProduct(file)
 op = SubsetOp()
 op.setSourceProduct(product)
 op.setGeoRegion(geom)
+op.setCopyMetadata(True)
 
 sub_product = op.getTargetProduct()
 
