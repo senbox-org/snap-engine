@@ -549,10 +549,7 @@ public final class DimapHeaderWriter extends XmlWriter {
     private void writeGeoCoding(final CrsGeoCoding crsGeoCoding, int indent, int bandIndex) {
         final CoordinateReferenceSystem crs = crsGeoCoding.getMapCRS();
         final double[] matrix = new double[6];
-        final MathTransform transform = crsGeoCoding.getImageToMapTransform();
-        if (transform instanceof AffineTransform) {
-            ((AffineTransform) transform).getMatrix(matrix);
-        }
+        ((AffineTransform) crsGeoCoding.getImageToMapTransform()).getMatrix(matrix);
 
         final String[] crsTags = createTags(indent, DimapProductConstants.TAG_COORDINATE_REFERENCE_SYSTEM);
         println(crsTags[0]);
@@ -570,9 +567,9 @@ public final class DimapHeaderWriter extends XmlWriter {
         final String[] geopositionTags = createTags(indent, DimapProductConstants.TAG_GEOPOSITION);
         println(geopositionTags[0]);
         writeBandIndexIf(bandIndex >= 0, bandIndex, indent + 1);
+        // TODO: 10.01.2020 SE -- why tag "image to model transform" is used? The context is "image to map" and not "image to model"
         printLine(indent + 1, DimapProductConstants.TAG_IMAGE_TO_MODEL_TRANSFORM, StringUtils.arrayToCsv(matrix));
         println(geopositionTags[1]);
-
     }
 
     private void writeGeoCoding(final GcpGeoCoding gcpPointGeoCoding, int indent, int bandIndex) {
