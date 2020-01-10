@@ -17,6 +17,8 @@
 package org.esa.snap.core.datamodel;
 
 import com.bc.ceres.core.ProgressMonitor;
+import org.mockito.Matchers;
+import org.mockito.Mockito;
 
 import java.io.IOException;
 
@@ -83,8 +85,6 @@ public class VirtualBandTest extends AbstractRasterDataNodeTest {
                     fail("Event not expected");
                 }
             }
-
-
         };
         product.addBand(virtualBand);
         product.setModified(false);
@@ -95,6 +95,70 @@ public class VirtualBandTest extends AbstractRasterDataNodeTest {
         virtualBand.updateExpression(oldIdentifier, newIdentifier);
         assertEquals(renamedExpression, virtualBand.getExpression());
         assertTrue(virtualBand.isModified());
+    }
+
+    public void testThrowIllegalargumentExceptionIfTheExpressionArgumentIsNull() {
+        final String expression = null;
+        try {
+            new VirtualBand("name", ProductData.TYPE_INT32, 10, 11, expression);
+            fail("IllegalArgumentException expected");
+        } catch (IllegalArgumentException expected) {
+        } catch (Exception e) {
+            fail("IllegalArgumentException expected");
+        }
+    }
+
+    public void testThrowIllegalargumentExceptionIfTheExpressionArgumentIsAnEmptyString() {
+        final String expression = "";
+        try {
+            new VirtualBand("name", ProductData.TYPE_INT32, 10, 11, expression);
+            fail("IllegalArgumentException expected");
+        } catch (IllegalArgumentException expected) {
+        } catch (Exception e) {
+            fail("IllegalArgumentException expected");
+        }
+    }
+
+    public void testThrowIllegalargumentExceptionIfTheExpressionArgumentContainsOnlyWhitespaces() {
+        final String expression = " \n\r\t";
+        try {
+            new VirtualBand("name", ProductData.TYPE_INT32, 10, 11, expression);
+            fail("IllegalArgumentException expected");
+        } catch (IllegalArgumentException expected) {
+        } catch (Exception e) {
+            fail("IllegalArgumentException expected");
+        }
+    }
+
+    public void testReplaceExpression_Ignore_null_empty_and_equal_Expression() {
+        final Product product = new Product("prod", "type", 10, 11);
+        final VirtualBand vb = new VirtualBand("name", ProductData.TYPE_INT16, 10, 11, "2");
+        product.addBand(vb);
+
+        final ProductNodeListener listener = Mockito.mock(ProductNodeListener.class);
+        product.addProductNodeListener(listener);
+
+        // try to set null will be ignored
+        vb.setExpression(null);
+        assertEquals("2", vb.getExpression()); // still unchanged
+        Mockito.verifyZeroInteractions(listener);
+
+        // try to set empty expression will be ignored
+        vb.setExpression("   ");
+        assertEquals("2", vb.getExpression()); // still unchanged
+        Mockito.verifyZeroInteractions(listener);
+
+        // try to set equal expression will be ignored
+        vb.setExpression("2");
+        assertEquals("2", vb.getExpression()); // still unchanged
+        Mockito.verifyZeroInteractions(listener);
+
+        // try to set different expression is allowed
+        vb.setExpression("3");
+        assertEquals("3", vb.getExpression()); // still unchanged
+        Mockito.verify(listener, Mockito.times(2)).nodeChanged(Mockito.any());
+        Mockito.verify(listener, Mockito.times(1)).nodeDataChanged(Mockito.any());
+        Mockito.verifyNoMoreInteractions(listener);
     }
 
     @Override

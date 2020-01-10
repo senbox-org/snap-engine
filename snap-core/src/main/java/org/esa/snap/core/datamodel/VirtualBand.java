@@ -80,6 +80,9 @@ public class VirtualBand extends Band {
         super(name, dataType, width, height);
         setSpectralBandIndex(-1);
         setSynthetic(true);
+        if (expression == null || expression.trim().isEmpty()) {
+            throw new IllegalArgumentException("Expression must be not null and not empty");
+        }
         this.expression = expression;
     }
 
@@ -88,19 +91,23 @@ public class VirtualBand extends Band {
     }
 
     public void setExpression(final String expression) {
-        if (expression != null && !this.expression.equals(expression)) {
-            this.expression = expression;
-            if (isSourceImageSet()) {
-                setSourceImage(null);
-            }
-            resetValidMask();
-            setStx(null);
-            setImageInfo(null);
-            setModified(true);
-            fireProductNodeChanged(PROPERTY_NAME_EXPRESSION);
-            fireProductNodeChanged(PROPERTY_NAME_DATA);
-            fireProductNodeDataChanged();
+        if (expression == null || expression.trim().isEmpty()) {
+            return;
         }
+        if (this.expression.equals(expression)) {
+            return;
+        }
+        this.expression = expression;
+        if (isSourceImageSet()) {
+            setSourceImage(null);
+        }
+        resetValidMask();
+        setStx(null);
+        setImageInfo(null);
+        setModified(true);
+        fireProductNodeChanged(PROPERTY_NAME_EXPRESSION);
+        fireProductNodeChanged(PROPERTY_NAME_DATA);
+        fireProductNodeDataChanged();
     }
 
     /**
@@ -204,7 +211,6 @@ public class VirtualBand extends Band {
      * Gets an estimated raw storage size in bytes of this product node.
      *
      * @param subsetDef if not <code>null</code> the subset may limit the size returned
-     *
      * @return the size in bytes.
      */
     @Override
@@ -218,10 +224,10 @@ public class VirtualBand extends Band {
     @Override
     public String toString() {
         return getClass().getName() + "["
-               + getName() + ","
-               + ProductData.getTypeString(getDataType()) + ","
-               + getRasterWidth() + ","
-               + getRasterHeight() + "]";
+                + getName() + ","
+                + ProductData.getTypeString(getDataType()) + ","
+                + getRasterWidth() + ","
+                + getRasterHeight() + "]";
     }
 
     /**
@@ -249,7 +255,6 @@ public class VirtualBand extends Band {
      *
      * @param raster     The raster data node.
      * @param expression The band-arithmetic expression.
-     *
      * @return A multi-level image.
      */
     public static MultiLevelImage createSourceImage(RasterDataNode raster, String expression) {
