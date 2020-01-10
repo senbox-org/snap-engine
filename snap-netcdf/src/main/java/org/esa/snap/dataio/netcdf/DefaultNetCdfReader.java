@@ -30,9 +30,6 @@ import ucar.nc2.NetcdfFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.ParseException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 class DefaultNetCdfReader extends AbstractProductReader {
 
