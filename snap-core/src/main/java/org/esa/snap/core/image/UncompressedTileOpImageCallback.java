@@ -1,5 +1,6 @@
 package org.esa.snap.core.image;
 
+import javax.media.jai.PlanarImage;
 import javax.media.jai.SourcelessOpImage;
 import java.awt.*;
 
@@ -8,5 +9,5 @@ import java.awt.*;
  */
 public interface UncompressedTileOpImageCallback<TileDataType> {
 
-    public SourcelessOpImage buildTileOpImage(Rectangle imageCellReadBounds, int level, Point tileOffsetFromCellReadBounds, Dimension tileSize, TileDataType tileData);
+    public PlanarImage buildTileOpImage(Rectangle imageCellReadBounds, int level, Point tileOffsetFromCellReadBounds, Dimension tileSize, TileDataType tileData);
 }

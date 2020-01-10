@@ -67,7 +67,7 @@ public abstract class AbstractMatrixMosaicSubsetMultiLevelSource extends Abstrac
             cellMatrixOffsetY += this.mosaicMatrix.getCellAt(rowIndex, 0).getCellHeight();
         }
         if (matrixTileImages.size() > 0) {
-            return buildMosaicOp(level, matrixTileImages);
+            return buildMosaicOp(level, matrixTileImages, false);
         }
         return null;
     }

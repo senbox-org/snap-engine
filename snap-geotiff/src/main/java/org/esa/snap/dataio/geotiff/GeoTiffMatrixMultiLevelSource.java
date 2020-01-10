@@ -8,12 +8,11 @@ import org.esa.snap.core.image.UncompressedTileOpImageCallback;
 import javax.media.jai.SourcelessOpImage;
 import java.awt.*;
 import java.awt.image.RenderedImage;
-import java.util.*;
 
 /**
  * Created by jcoravu on 7/1/2020.
  */
-public class GeoTiffMatrixMultiLevelSource extends AbstractMatrixMosaicSubsetMultiLevelSource implements UncompressedTileOpImageCallback<MosaicMatrix.MatrixCell> {
+public class GeoTiffMatrixMultiLevelSource extends AbstractMatrixMosaicSubsetMultiLevelSource implements UncompressedTileOpImageCallback<GeoTiffMatrixCell> {
 
     private final int bandIndex;
 
@@ -24,9 +23,8 @@ public class GeoTiffMatrixMultiLevelSource extends AbstractMatrixMosaicSubsetMul
     }
 
     @Override
-    public SourcelessOpImage buildTileOpImage(Rectangle imageCellReadBounds, int level, Point tileOffset, Dimension tileSize, MosaicMatrix.MatrixCell matrixCell) {
-        GeoTiffMatrixCell volumeMatrixCell = (GeoTiffMatrixCell)matrixCell;
-        return new GeoTiffTileOpImage(volumeMatrixCell.getGeoTiffImageReader(), getModel(), volumeMatrixCell.getDataBufferType(),
+    public SourcelessOpImage buildTileOpImage(Rectangle imageCellReadBounds, int level, Point tileOffset, Dimension tileSize, GeoTiffMatrixCell geoTiffMatrixCell) {
+        return new GeoTiffTileOpImage(geoTiffMatrixCell.getGeoTiffImageReader(), getModel(), geoTiffMatrixCell.getDataBufferType(),
                                       this.bandIndex, imageCellReadBounds, tileSize, tileOffset, level, false);
     }
 
@@ -34,6 +32,7 @@ public class GeoTiffMatrixMultiLevelSource extends AbstractMatrixMosaicSubsetMul
     protected java.util.List<RenderedImage> buildMatrixCellTileImages(int level, Rectangle imageCellReadBounds, float cellTranslateLevelOffsetX, float cellTranslateLevelOffsetY,
                                                                       MosaicMatrix.MatrixCell matrixCell) {
 
-        return buildUncompressedTileImages(level, imageCellReadBounds, cellTranslateLevelOffsetX, cellTranslateLevelOffsetY, this, matrixCell);
+        GeoTiffMatrixCell geoTiffMatrixCell = (GeoTiffMatrixCell)matrixCell;
+        return buildUncompressedTileImages(level, imageCellReadBounds, this.tileSize, cellTranslateLevelOffsetX, cellTranslateLevelOffsetY, this, geoTiffMatrixCell);
     }
 }
