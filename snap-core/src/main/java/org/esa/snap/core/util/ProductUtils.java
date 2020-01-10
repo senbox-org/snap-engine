@@ -1198,6 +1198,7 @@ public class ProductUtils {
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
         ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
         ProductUtils.copyFlagCodings(sourceProduct, targetProduct);
+        ProductUtils.copyFlagBands(sourceProduct, targetProduct, true); 
         ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
         ProductUtils.copyMasks(sourceProduct, targetProduct);
         ProductUtils.copyVectorData(sourceProduct, targetProduct);
