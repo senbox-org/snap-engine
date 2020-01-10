@@ -190,7 +190,7 @@ public class NbCodeGenTool implements CeresModuleProject.Processor {
             parentToPath.put("Graphs", "Menu/Graphs");  // ???
             parentToPath.put("help", "Menu/Help");  // ???
             parentToPath.put("processing", "Menu/Processing");  // ???
-            parentToPath.put("processing.preProcessing", "Menu/Processing/Pre-Processing");  // ???
+            parentToPath.put("processing.preProcessing", "Menu/Processing/Preprocessing");  // ???
             parentToPath.put("processing.thematicLand", "Menu/Processing/Thematic Land Processing");  // ???
             parentToPath.put("processing.thematicWater", "Menu/Processing/Thematic Water Processing");  // ???
             parentToPath.put("processing.imageAnalysis", "Menu/Processing/Image Analysis");  // ???

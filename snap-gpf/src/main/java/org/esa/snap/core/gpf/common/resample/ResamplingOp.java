@@ -64,7 +64,7 @@ import java.util.logging.Logger;
  * @author Tonio Fincke
  */
 @OperatorMetadata(alias = "Resample",
-        category = "Raster/Geometric",
+        category = "Raster/Geometric Operations",
         version = "2.0",
         authors = "Tonio Fincke",
         copyright = "(c) 2016 by Brockmann Consult",
