@@ -104,6 +104,7 @@
         <module>snap-remote-execution</module>
 
         <module>lib-hdf</module>
+        <module>lib-openjpeg</module>
     </modules>
 
     <organization>
@@ -726,6 +727,18 @@
                 <groupId>org.jsoup</groupId>
                 <artifactId>jsoup</artifactId>
                 <version>1.11.3</version>
+            </dependency>
+
+
+            <dependency>
+                <groupId>net.java.dev.jna</groupId>
+                <artifactId>jna</artifactId>
+                <version>4.2.1</version>
+            </dependency>
+            <dependency>
+                <groupId>net.java.dev.jna</groupId>
+                <artifactId>jna-platform</artifactId>
+                <version>4.2.1</version>
             </dependency>
 
         </dependencies>
