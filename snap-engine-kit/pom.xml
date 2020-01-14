@@ -102,6 +102,11 @@
             <artifactId>lib-hdf</artifactId>
             <version>${hdf.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>lib-openjpeg</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- Engine Extension Modules -->
         <dependency>
