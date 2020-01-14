@@ -165,7 +165,7 @@ public class EngineConfig extends Config {
     }
 
     public Level logLevel() {
-        return parseLogLevelName(preferences().get(PROPERTY_LOG_LEVEL, "INFO"));
+        return parseLogLevelName(preferences().get(PROPERTY_LOG_LEVEL, "WARNING"));
     }
 
     public EngineConfig logLevel(Level level) {
@@ -266,7 +266,7 @@ public class EngineConfig extends Config {
             try {
                 return Level.parse(levelName);
             } catch (IllegalArgumentException e) {
-                return Level.INFO;
+                return Level.WARNING;
             }
         }
     }
@@ -291,6 +291,12 @@ public class EngineConfig extends Config {
         logger.setLevel(logLevel);
         replaceConsoleLoggerFormatter(Logger.getLogger(""));
         replaceConsoleLoggerFormatter(logger);
+
+        // test:
+        final Handler[] parentHandlers = logger.getParent().getHandlers();
+        for (Handler parentHandler : parentHandlers) {
+            parentHandler.setLevel(logLevel);
+        }
     }
 
     private void replaceConsoleLoggerFormatter(Logger logger) {
