@@ -71,7 +71,7 @@
         <module>snap-arcbingrid-reader</module>
         <module>snap-bigtiff</module>
         <module>snap-binning</module>
-<!--        <module>snap-classification</module>-->
+        <module>snap-classification</module>
         <module>snap-cluster-analysis</module>
         <module>snap-collocation</module>
         <module>snap-csv-dataio</module>
@@ -863,7 +863,7 @@
                         <argLine>-Xmx1024M -Dfile.encoding=UTF-8</argLine>
                     </configuration>
                 </plugin>
-                
+
                 <plugin>
                     <artifactId>maven-resources-plugin</artifactId>
                     <version>3.1.0</version>
@@ -965,6 +965,11 @@
                         </dependency>
                     </dependencies>
                     <configuration>
+                        <!-- necessary because of issue described here:
+                        http://mail-archives.apache.org/mod_mbox/netbeans-dev/201906.mbox/%3cCAArD4mAMKOXQtxCwcMdB2tVEXCNirEfKT4+c=0-rUm6YDg8EHg@mail.gmail.com%3e
+                        -->
+                        <verifyRuntime>false</verifyRuntime>
+
                         <moduleType>normal</moduleType>
                         <licenseName>GPL 3</licenseName>
                         <licenseFile>${project.basedir}/../LICENSE.txt</licenseFile>
