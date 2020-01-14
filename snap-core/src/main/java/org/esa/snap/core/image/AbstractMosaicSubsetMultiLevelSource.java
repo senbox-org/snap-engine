@@ -61,7 +61,7 @@ public abstract class AbstractMosaicSubsetMultiLevelSource extends AbstractMulti
         int endTileColumnIndex = computeDecompressedEndTileIndex(startTileColumnIndex, imageCellReadBounds.x, imageCellReadBounds.width, decompresedTileSize.width);
 
         int startTileRowIndex = imageCellReadBounds.y / decompresedTileSize.height;
-        int endTileRowIndex = computeDecompressedEndTileIndex(startTileColumnIndex, imageCellReadBounds.y, imageCellReadBounds.height, decompresedTileSize.height);
+        int endTileRowIndex = computeDecompressedEndTileIndex(startTileRowIndex, imageCellReadBounds.y, imageCellReadBounds.height, decompresedTileSize.height);
 
         float levelTotalImageWidth = (float) ImageUtils.computeLevelSizeAsDouble(imageCellReadBounds.width, level);
         float levelTotalImageHeight = (float) ImageUtils.computeLevelSizeAsDouble(imageCellReadBounds.height, level);

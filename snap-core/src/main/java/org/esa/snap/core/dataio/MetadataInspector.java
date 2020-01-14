@@ -27,8 +27,6 @@ public interface MetadataInspector {
 
         private GeoCoding geoCoding;
 
-        private boolean hasMasks;
-
         public TreeSet<String> getBandList() {
             return bandList;
         }
@@ -46,11 +44,7 @@ public interface MetadataInspector {
         }
 
         public boolean isHasMasks() {
-            return hasMasks;
-        }
-
-        public void setHasMasks(boolean hasMasks) {
-            this.hasMasks = hasMasks;
+            return !maskList.isEmpty();
         }
 
         public boolean isHasGeoCoding() {
