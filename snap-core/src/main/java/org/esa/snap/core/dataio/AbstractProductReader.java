@@ -27,6 +27,8 @@ import org.esa.snap.runtime.Config;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -530,5 +532,19 @@ public abstract class AbstractProductReader implements ProductReader {
         return name.equalsIgnoreCase("lon") ||
                name.equalsIgnoreCase("long") ||
                name.equalsIgnoreCase("longitude");
+    }
+
+    public static Path convertInputToPath(Object input) {
+        if (input == null) {
+            throw new NullPointerException();
+        } else if (input instanceof File) {
+            return ((File)input).toPath();
+        } else if (input instanceof Path) {
+            return (Path) input;
+        } else if (input instanceof String) {
+            return Paths.get((String) input);
+        } else {
+            throw new IllegalArgumentException("Unknown input '"+input+"'.");
+        }
     }
 }

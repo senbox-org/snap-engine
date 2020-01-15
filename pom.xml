@@ -80,6 +80,7 @@
         <module>snap-envisat-reader</module>
         <module>snap-getasse30-dem</module>
         <module>snap-geotiff</module>
+        <module>snap-jp2-reader</module>
         <module>snap-hdf5-writer</module>
         <module>snap-jython</module>
         <module>snap-land-cover</module>
