@@ -234,7 +234,7 @@ public class ColorSchemeManager {
     boolean useColorBlind = false;
 
 
-    private boolean initialized =  false;
+    private boolean initialized = false;
     static ColorSchemeManager manager = new ColorSchemeManager();
 
     public static ColorSchemeManager getDefault() {
@@ -257,7 +257,6 @@ public class ColorSchemeManager {
             if (colorSchemesFile.exists() && colorSchemeLutFile.exists()) {
                 initColorSchemeInfos();
 
-                setjComboBoxFirstEntryName(STANDARD_SCHEME_COMBO_BOX_FIRST_ENTRY_NAME);
 
                 initComboBox();
                 initColorSchemeLut();
@@ -278,9 +277,11 @@ public class ColorSchemeManager {
         colorSchemeLutFile = new File(this.colorPaletteDir, COLOR_SCHEME_LUT_FILENAME);
 
         if (colorSchemesFile.exists() && colorSchemeLutFile.exists()) {
-            initColorSchemeInfos();
 
             setjComboBoxFirstEntryName(STANDARD_SCHEME_COMBO_BOX_FIRST_ENTRY_NAME);
+
+            initColorSchemeInfos();
+
 
             initComboBox();
             initColorSchemeLut();
@@ -332,8 +333,9 @@ public class ColorSchemeManager {
 
     private boolean initColorSchemeInfos() {
 
-//        jComboBoxFirstEntryColorPaletteInfo = new ColorPaletteInfo(getjComboBoxFirstEntryName(), null, null, null, 0, 0, false, true, true, null, null, null, colorPaletteDir);
-//        newColorPaletteSchemeInfos.add(jComboBoxFirstEntryColorPaletteInfo);
+        setjComboBoxFirstEntryName(STANDARD_SCHEME_COMBO_BOX_FIRST_ENTRY_NAME);
+        jComboBoxFirstEntryColorSchemeInfo = new ColorPaletteInfo(getjComboBoxFirstEntryName(), null, null, null, 0, 0, false, true, true, null, null, null, colorPaletteDir);
+        colorSchemeInfos.add(jComboBoxFirstEntryColorSchemeInfo);
 
         ArrayList<String> lines = readFileIntoArrayList(colorSchemesFile);
 
@@ -655,12 +657,40 @@ public class ColorSchemeManager {
         return checksOut;
     }
 
+    public void setSelected(ColorPaletteInfo colorPaletteInfo) {
+        // loop through and find rootScheme
+        if (jComboBox != null) {
+            if (colorPaletteInfo != null) {
+                if (colorPaletteInfo.getRootName() != null) {
+                    for (ColorPaletteInfo storedColorPaletteInfo : colorSchemeInfos) {
+                        if (colorPaletteInfo.getRootName().equals(storedColorPaletteInfo.getName())) {
+                            jComboBox.setSelectedItem(storedColorPaletteInfo);
+                        }
+                    }
+                } else {
+                    jComboBox.setSelectedItem(colorPaletteInfo);
+                }
+            } else {
+                reset();
+            }
+        }
+
+    }
 
     public void reset() {
         if (jComboBox != null) {
             jComboBox.setSelectedItem(jComboBoxFirstEntryColorSchemeInfo);
         }
     }
+
+    public boolean isSchemeSet() {
+        if (jComboBox != null && jComboBoxFirstEntryColorSchemeInfo != jComboBox.getSelectedItem()) {
+            return true;
+        }
+
+        return false;
+    }
+
 
     public ColorPaletteInfo setSchemeName(String schemeName) {
 
@@ -784,8 +814,6 @@ public class ColorSchemeManager {
     }
 
 
-
-
     public boolean getUseColorBlind() {
         return false;
 
@@ -795,8 +823,6 @@ public class ColorSchemeManager {
 //            return DEFAULT_PALETTES_COLOR_BLIND_ENABLED;
 //        }
     }
-
-
 
 
 }
