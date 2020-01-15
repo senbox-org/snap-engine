@@ -165,7 +165,7 @@ public class EngineConfig extends Config {
     }
 
     public Level logLevel() {
-        return parseLogLevelName(preferences().get(PROPERTY_LOG_LEVEL, "WARNING"));
+        return parseLogLevelName(preferences().get(PROPERTY_LOG_LEVEL, "INFO"));
     }
 
     public EngineConfig logLevel(Level level) {
