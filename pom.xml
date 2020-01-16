@@ -871,7 +871,7 @@
                         <argLine>-Xmx1024M -Dfile.encoding=UTF-8</argLine>
                     </configuration>
                 </plugin>
-                
+
                 <plugin>
                     <artifactId>maven-resources-plugin</artifactId>
                     <version>3.1.0</version>
@@ -970,6 +970,11 @@
                             <groupId>javax.help</groupId>
                             <artifactId>javahelp</artifactId>
                             <version>${javahelp.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.apache.maven.shared</groupId>
+                            <artifactId>maven-dependency-analyzer</artifactId>
+                            <version>1.10</version>
                         </dependency>
                     </dependencies>
                     <configuration>
