@@ -71,7 +71,10 @@
         <module>snap-arcbingrid-reader</module>
         <module>snap-bigtiff</module>
         <module>snap-binning</module>
+<!--
+TODO Jean uncomment 'snap-classification' before transfer to the master branch
         <module>snap-classification</module>
+-->
         <module>snap-cluster-analysis</module>
         <module>snap-collocation</module>
         <module>snap-csv-dataio</module>
