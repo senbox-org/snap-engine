@@ -63,8 +63,8 @@ public abstract class AbstractMosaicSubsetMultiLevelSource extends AbstractMulti
         int startTileRowIndex = imageCellReadBounds.y / decompresedTileSize.height;
         int endTileRowIndex = computeDecompressedEndTileIndex(startTileRowIndex, imageCellReadBounds.y, imageCellReadBounds.height, decompresedTileSize.height);
 
-        float levelTotalImageWidth = (float) ImageUtils.computeLevelSizeAsDouble(imageCellReadBounds.width, level);
-        float levelTotalImageHeight = (float) ImageUtils.computeLevelSizeAsDouble(imageCellReadBounds.height, level);
+        int levelTotalImageWidth = ImageUtils.computeLevelSize(imageCellReadBounds.width, level);
+        int levelTotalImageHeight = ImageUtils.computeLevelSize(imageCellReadBounds.height, level);
 
         int defaultColumnTileCount = ImageUtils.computeTileCount(defaultImageWidth, decompresedTileSize.width);
         java.util.List<RenderedImage> tileImages = new ArrayList<>();
@@ -74,6 +74,17 @@ public abstract class AbstractMosaicSubsetMultiLevelSource extends AbstractMulti
         for (int tileRowIndex = startTileRowIndex; tileRowIndex <= endTileRowIndex; tileRowIndex++) {
             int currentTileHeight = computeDecompressedImageTileSize(startTileRowIndex, endTileRowIndex, tileRowIndex, currentImageTileTopY, imageCellReadBounds.y, imageCellReadBounds.height, decompresedTileSize.height);
             int levelImageTileHeight = ImageUtils.computeLevelSize(currentTileHeight, level);
+
+            if (levelTranslateY + levelImageTileHeight > levelTotalImageHeight) {
+                if (tileRowIndex == endTileRowIndex) {
+                    // subtract the difference only if the current row tile index is the last
+                    float difference = (levelTranslateY + levelImageTileHeight) - levelTotalImageHeight;
+                    levelTranslateY -= difference;
+                } else if (tileRowIndex < endTileRowIndex - 1) {
+                    // the current tile row index is not the penultimate row
+                    throw new IllegalStateException("Invalid translate height: levelTranslateY="+levelTranslateY+", levelImageTileHeight="+levelImageTileHeight+", levelTotalImageHeight="+levelTotalImageHeight+", level="+level);
+                }
+            }
 
             int tileOffsetYFromDecompressedImage = currentImageTileTopY - (tileRowIndex * decompresedTileSize.height);
             if (tileOffsetYFromDecompressedImage < 0) {
@@ -85,6 +96,17 @@ public abstract class AbstractMosaicSubsetMultiLevelSource extends AbstractMulti
             for (int tileColumnIndex = startTileColumnIndex; tileColumnIndex <= endTileColumnIndex; tileColumnIndex++) {
                 int currentTileWidth = computeDecompressedImageTileSize(startTileColumnIndex, endTileColumnIndex, tileColumnIndex, currentImageTileLeftX, imageCellReadBounds.x, imageCellReadBounds.width, decompresedTileSize.width);
                 int levelImageTileWidth = ImageUtils.computeLevelSize(currentTileWidth, level);
+
+                if (levelTranslateX + levelImageTileWidth > levelTotalImageWidth) {
+                    if (tileColumnIndex == endTileColumnIndex) {
+                        // subtract the difference only if the current column tile index is the last
+                        float difference = (levelTranslateX + levelImageTileWidth) - levelTotalImageWidth;
+                        levelTranslateX -= difference;
+                    } else if (tileColumnIndex < endTileColumnIndex - 1) {
+                        // the current tile column index is not the penultimate row
+                        throw new IllegalStateException("Invalid translate width: levelTranslateX="+levelTranslateX+", levelImageTileWidth="+levelImageTileWidth+", levelTotalImageWidth="+levelTotalImageWidth+", level="+level);
+                    }
+                }
 
                 int tileOffsetXFromDecompressedImage = currentImageTileLeftX - (tileColumnIndex * decompresedTileSize.width);
                 if (tileOffsetXFromDecompressedImage < 0) {
@@ -108,8 +130,7 @@ public abstract class AbstractMosaicSubsetMultiLevelSource extends AbstractMulti
                 levelTranslateX += (float) ImageUtils.computeLevelSizeAsDouble(currentTileWidth, level);
                 currentImageTileLeftX += currentTileWidth;
             }
-
-            if (levelTotalImageWidth != levelTranslateX) {
+            if (levelTranslateX > levelTotalImageWidth) {
                 throw new IllegalStateException("Invalid translate width: levelTotalImageWidth="+levelTotalImageWidth+", levelTranslateX="+levelTranslateX+", level="+level);
             }
 
@@ -117,10 +138,9 @@ public abstract class AbstractMosaicSubsetMultiLevelSource extends AbstractMulti
             currentImageTileTopY += currentTileHeight;
         }
 
-        if (levelTotalImageHeight != levelTranslateY) {
+        if (levelTranslateY > levelTotalImageHeight) {
             throw new IllegalStateException("Invalid translate width: levelTotalImageHeight="+levelTotalImageHeight+", levelTranslateY="+levelTranslateY+", level="+level);
         }
-
         return tileImages;
     }
 
@@ -166,7 +186,7 @@ public abstract class AbstractMosaicSubsetMultiLevelSource extends AbstractMulti
                         float difference = (levelTranslateX + levelImageTileWidth) - levelTotalImageWidth;
                         levelTranslateX -= difference;
                     } else if (tileColumnIndex < columnTileCount - 2) {
-                        // the current tile row index is not the penultimate row
+                        // the current column row index is not the penultimate row
                         throw new IllegalStateException("Invalid translate width: levelTranslateX="+levelTranslateX+", levelImageTileWidth="+levelImageTileWidth+", levelTotalImageWidth="+levelTotalImageWidth+", level="+level);
                     }
                 }
@@ -231,10 +251,10 @@ public abstract class AbstractMosaicSubsetMultiLevelSource extends AbstractMulti
         RenderedOp mosaicOp = MosaicDescriptor.create(sources, MosaicDescriptor.MOSAIC_TYPE_OVERLAY, null, sourceRois, getMosaicOpSourceThreshold(), getMosaicOpBackgroundValues(), hints);
 
         if (mosaicOp.getWidth() > imageLevelWidth) {
-            throw new IllegalStateException("The mosaic operator width " + mosaicOp.getWidth() + " > than the image width " + imageLevelWidth + ".");
+            throw new IllegalStateException("The mosaic operator width " + mosaicOp.getWidth() + " > than the image width " + imageLevelWidth + " on level " + level + ".");
         }
         if (mosaicOp.getHeight() > imageLevelHeight) {
-            throw new IllegalStateException("The mosaic operator height " + mosaicOp.getWidth() + " > than the image height " + imageLevelHeight + ".");
+            throw new IllegalStateException("The mosaic operator height " + mosaicOp.getWidth() + " > than the image height " + imageLevelHeight + " on level " + level + ".");
         }
         if (mosaicOp.getWidth() < imageLevelWidth || mosaicOp.getHeight() < imageLevelHeight) {
             int rightPad = imageLevelWidth - mosaicOp.getWidth();
