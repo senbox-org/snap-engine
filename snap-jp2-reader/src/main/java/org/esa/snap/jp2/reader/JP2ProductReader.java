@@ -26,7 +26,6 @@ import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.metadata.XmlMetadataParser;
 import org.esa.snap.core.metadata.XmlMetadataParserFactory;
-import org.esa.snap.jp2.reader.internal.CopyOfJP2MultiLevelSource;
 import org.esa.snap.jp2.reader.internal.JP2MultiLevelSource;
 import org.esa.snap.jp2.reader.internal.JP2ProductReaderConstants;
 import org.esa.snap.jp2.reader.metadata.CodeStreamInfo;
@@ -148,9 +147,7 @@ public class JP2ProductReader extends AbstractProductReader {
 
             double[] bandScales = null;
             double[] bandOffsets = null;
-            //addBands(imageInfo, csInfo, bandScales, bandOffsets);
-            //TODO Jean new method to create a subset
-            addBandsNew(imageInfo, csInfo, bandScales, bandOffsets);
+            addBands(imageInfo, csInfo, bandScales, bandOffsets);
 
             this.product.setPreferredTileSize(JAI.getDefaultTileSize());
             this.product.setFileLocation(jp2File.toFile());
@@ -232,51 +229,6 @@ public class JP2ProductReader extends AbstractProductReader {
 
     private void addBands(ImageInfo imageInfo, CodeStreamInfo csInfo, double[] bandScales, double[] bandOffsets) {
         List<CodeStreamInfo.TileComponentInfo> componentTilesInfo = csInfo.getComponentTilesInfo();
-        Rectangle subsetRegion = null;
-
-        JP2ImageFile jp2ImageFile = new JP2ImageFile(this.virtualJp2File);
-        Path localCacheFolder = this.virtualJp2File.getLocalCacheFolder();
-        int imageWidth = this.product.getSceneRasterWidth();
-        int imageHeight = this.product.getSceneRasterHeight();
-        int numBands = componentTilesInfo.size();
-        if (getSubsetDef() != null && getSubsetDef().getRegion() != null) {
-            subsetRegion = getSubsetDef().getRegion();
-        }
-        for (int bandIdx = 0; bandIdx < numBands; bandIdx++) {
-            //used to identify the bands selected by the user in Advanced Open dialog
-            //default is true, because the product can be opened without advanced option (in this case all the bands should be opened)
-            String bandName = "band_" + (bandIdx + 1);
-            if (getSubsetDef() == null || getSubsetDef().isNodeAccepted(bandName)) {
-                // changes from https://github.com/senbox-org/s2tbx/pull/48
-                /*int precision = imageInfo.getComponents().get(bandIdx).getPrecision();
-                Band virtualBand = new Band("band_" + String.valueOf(bandIdx + 1), OpenJpegUtils.PRECISION_TYPE_MAP.get(precision), imageWidth, imageHeight);*/
-                ImageInfo.ImageInfoComponent bandImageInfo = imageInfo.getComponents().get(bandIdx);
-                int snapDataType = getSnapDataTypeFromImageInfo(bandImageInfo);
-                int awtDataType = getAwtDataTypeFromImageInfo(bandImageInfo);
-                Band virtualBand = new Band("band_" + (bandIdx + 1),
-                        snapDataType,
-                        imageWidth,
-                        imageHeight);
-
-                JP2MultiLevelSource source = new JP2MultiLevelSource(localCacheFolder, jp2ImageFile, bandIdx, numBands, imageWidth, imageHeight,
-                        csInfo.getTileWidth(), csInfo.getTileHeight(),
-                        csInfo.getNumTilesX(), csInfo.getNumTilesY(),
-                        csInfo.getNumResolutions(), awtDataType,
-                        this.product.getSceneGeoCoding(), subsetRegion);
-
-                virtualBand.setSourceImage(new DefaultMultiLevelImage(source));
-
-                if (bandScales != null && bandOffsets != null) {
-                    virtualBand.setScalingFactor(bandScales[bandIdx]);
-                    virtualBand.setScalingOffset(bandOffsets[bandIdx]);
-                }
-                this.product.addBand(virtualBand);
-            }
-        }
-    }
-
-    private void addBandsNew(ImageInfo imageInfo, CodeStreamInfo csInfo, double[] bandScales, double[] bandOffsets) {
-        List<CodeStreamInfo.TileComponentInfo> componentTilesInfo = csInfo.getComponentTilesInfo();
 
         Rectangle imageReadBounds = new Rectangle(0, 0, this.product.getSceneRasterWidth(), this.product.getSceneRasterHeight());
         int numBands = componentTilesInfo.size();
@@ -301,7 +253,7 @@ public class JP2ProductReader extends AbstractProductReader {
 
                 Dimension decompresedTileSize = new Dimension(csInfo.getTileWidth(), csInfo.getTileHeight());
 
-                CopyOfJP2MultiLevelSource source = new CopyOfJP2MultiLevelSource(jp2ImageFile, localCacheFolder, defaultImageSize, imageReadBounds, numBands, bandIndex,
+                JP2MultiLevelSource source = new JP2MultiLevelSource(jp2ImageFile, localCacheFolder, defaultImageSize, imageReadBounds, numBands, bandIndex,
                                                                                  decompresedTileSize, csInfo.getNumResolutions(), awtDataType, this.product.getSceneGeoCoding());
                 virtualBand.setSourceImage(new DefaultMultiLevelImage(source));
 

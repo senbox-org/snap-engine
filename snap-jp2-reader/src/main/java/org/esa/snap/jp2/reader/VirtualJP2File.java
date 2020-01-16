@@ -69,7 +69,7 @@ public class VirtualJP2File extends AbstractFile implements JP2LocalFile {
             throw new IOException("Unable to get md5sum of path " + inputFile.toString());
         }
 
-        Path localCacheFolder = PathUtils.get(SystemUtils.getCacheDir(), "s2tbx", "jp2-reader", version, md5sum, PathUtils.getFileNameWithoutExtension(inputFile).toLowerCase() + "_cached");
+        Path localCacheFolder = PathUtils.get(SystemUtils.getCacheDir(), "snap", "jp2-reader", version, md5sum, PathUtils.getFileNameWithoutExtension(inputFile).toLowerCase() + "_cached");
         if (!Files.exists(localCacheFolder)) {
             Files.createDirectories(localCacheFolder);
         }
