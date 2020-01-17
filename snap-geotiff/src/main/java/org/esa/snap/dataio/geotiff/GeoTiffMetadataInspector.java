@@ -1,6 +1,6 @@
 package org.esa.snap.dataio.geotiff;
 
-import org.esa.snap.core.dataio.MetadataInspector;
+import org.esa.snap.core.metadata.MetadataInspector;
 import org.esa.snap.core.datamodel.Product;
 
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package org.esa.snap.core.dataio;
+package org.esa.snap.core.metadata;
 
 import org.esa.snap.core.datamodel.GeoCoding;
 
@@ -19,11 +19,24 @@ public interface MetadataInspector {
     Metadata getMetadata(Path productPath) throws IOException;
 
     class Metadata {
-        private TreeSet<String> bandList = new TreeSet<>();
-        private TreeSet<String> maskList = new TreeSet<>();
+
+        private final TreeSet<String> bandList;
+        private final TreeSet<String> maskList;
 
         private int productWidth;
         private int productHeight;
+
+        public Metadata() {
+            this(0, 0);
+        }
+
+        public Metadata(int productWidth, int productHeight) {
+            this.bandList = new TreeSet<>();
+            this.maskList = new TreeSet<>();
+
+            setProductWidth(productWidth);
+            setProductHeight(productHeight);
+        }
 
         private GeoCoding geoCoding;
 
@@ -31,16 +44,8 @@ public interface MetadataInspector {
             return bandList;
         }
 
-        public void setBandList(TreeSet<String> bandList) {
-            this.bandList = bandList;
-        }
-
         public TreeSet<String> getMaskList() {
             return maskList;
-        }
-
-        public void setMaskList(TreeSet<String> maskList) {
-            this.maskList = maskList;
         }
 
         public boolean isHasMasks() {

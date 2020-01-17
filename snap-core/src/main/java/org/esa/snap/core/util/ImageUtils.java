@@ -85,6 +85,9 @@ public class ImageUtils {
         if (defaultHeight <= 0) {
             throw new IllegalArgumentException("Invalid default height " + defaultHeight + ".");
         }
+        if (mapCRS == null) {
+            throw new NullPointerException("The coordinate reference system is null.");
+        }
 
         double offsetX = 0.0d;
         double offsetY = 0.0d;

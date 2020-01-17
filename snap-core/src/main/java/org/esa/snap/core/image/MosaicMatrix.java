@@ -60,8 +60,14 @@ public class MosaicMatrix {
             throw new UnsupportedOperationException("Current matrix has unassigned cells!");
         }
         int totalWidth = 0;
-        for (int i = 0; i < this.columnCount; i++) {
-            totalWidth += this.internal[0][i].getCellWidth();
+        for (int rowIndex = 0; rowIndex < this.rowCount; rowIndex++) {
+            int rowTotalWidth = 0;
+            for (int columnIndex = 0; columnIndex < this.columnCount; columnIndex++) {
+                rowTotalWidth += this.internal[rowIndex][columnIndex].getCellWidth();
+            }
+            if (totalWidth < rowTotalWidth) {
+                totalWidth = rowTotalWidth;
+            }
         }
         return totalWidth;
     }
@@ -71,16 +77,22 @@ public class MosaicMatrix {
             throw new UnsupportedOperationException("Current matrix has unassigned cells!");
         }
         int totalHeight = 0;
-        for (int i = 0; i < this.rowCount; i++) {
-            totalHeight += this.internal[i][0].getCellHeight();
+        for (int columnIndex = 0; columnIndex < this.columnCount; columnIndex++) {
+            int columnTotalHeight = 0;
+            for (int rowIndex = 0; rowIndex < this.rowCount; rowIndex++) {
+                columnTotalHeight += this.internal[rowIndex][columnIndex].getCellHeight();
+            }
+            if (totalHeight < columnTotalHeight) {
+                totalHeight = columnTotalHeight;
+            }
         }
         return totalHeight;
     }
 
     public boolean isConsistent() {
-        for (int i = 0; i < this.rowCount; i++) {
-            for (int j = 0; j < this.columnCount; j++) {
-                if (this.internal[i][j] == null) {
+        for (int rowIndex = 0; rowIndex < this.rowCount; rowIndex++) {
+            for (int columnIndex = 0; columnIndex < this.columnCount; columnIndex++) {
+                if (this.internal[rowIndex][columnIndex] == null) {
                     return false;
                 }
             }

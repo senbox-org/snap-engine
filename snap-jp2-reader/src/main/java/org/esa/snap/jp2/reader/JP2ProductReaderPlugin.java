@@ -18,6 +18,7 @@
 package org.esa.snap.jp2.reader;
 
 import org.esa.snap.core.dataio.*;
+import org.esa.snap.core.metadata.MetadataInspector;
 import org.esa.snap.core.util.io.SnapFileFilter;
 import org.esa.snap.jp2.reader.internal.JP2ProductReaderConstants;
 import org.esa.snap.jp2.reader.metadata.JP2MetadataInspector;

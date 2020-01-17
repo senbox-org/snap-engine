@@ -1,6 +1,6 @@
 package org.esa.snap.jp2.reader.metadata;
 
-import org.esa.snap.core.dataio.MetadataInspector;
+import org.esa.snap.core.metadata.MetadataInspector;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.metadata.XmlMetadataParser;

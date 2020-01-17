@@ -1,15 +1,15 @@
-package org.esa.snap.core.dataio;
+package org.esa.snap.core.metadata;
 
-import org.w3c.dom.NodeList;
 import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 import javax.xml.xpath.XPath;
@@ -17,9 +17,9 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
@@ -30,7 +30,8 @@ import java.util.logging.Logger;
  *
  * @author Denisa Stefanescu
  */
-public abstract class XmlMetadataInspector implements MetadataInspector{
+@Deprecated
+public abstract class XmlMetadataInspector implements MetadataInspector {
 
     private Document xmlDocument;
     private XPath xPath;
