@@ -79,6 +79,14 @@ public class ImageUtils {
                                                  int defaultWidth, int defaultHeight, CoordinateReferenceSystem mapCRS, Rectangle subsetBounds)
                                                  throws FactoryException, TransformException {
 
+        return buildCrsGeoCoding(coordinateUpperLeftX, coordinateUpperLeftY, resolutionX, resolutionY, defaultWidth, defaultHeight, mapCRS, subsetBounds, 0.0d, 0.0d);
+    }
+
+    public static CrsGeoCoding buildCrsGeoCoding(double coordinateUpperLeftX, double coordinateUpperLeftY, double resolutionX, double resolutionY,
+                                                 int defaultWidth, int defaultHeight, CoordinateReferenceSystem mapCRS, Rectangle subsetBounds,
+                                                 double referencePixelX, double referencePixelY)
+                                                 throws FactoryException, TransformException {
+
         if (defaultWidth <= 0) {
             throw new IllegalArgumentException("Invalid default width " + defaultWidth + ".");
         }
@@ -106,7 +114,8 @@ public class ImageUtils {
             imageWidth = subsetBounds.width;
             imageHeight = subsetBounds.height;
         }
-        return new CrsGeoCoding(mapCRS, imageWidth, imageHeight, coordinateUpperLeftX + offsetX, coordinateUpperLeftY - offsetY, resolutionX, resolutionY, 0.0d, 0.0d);
+        return new CrsGeoCoding(mapCRS, imageWidth, imageHeight, coordinateUpperLeftX + offsetX, coordinateUpperLeftY - offsetY,
+                                resolutionX, resolutionY, referencePixelX, referencePixelY);
     }
 
     public static Rectangle computeBandBoundsBasedOnPercent(Rectangle productBounds, int defaultProductWidth, int defaultProductHeight, int defaultBandWidth, int defaultBandHeight) {
