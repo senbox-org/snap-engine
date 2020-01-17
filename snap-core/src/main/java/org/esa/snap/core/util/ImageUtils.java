@@ -19,9 +19,13 @@ package org.esa.snap.core.util;
 // other org.esa.snap packages here above org.esa.snap.util
 
 import org.esa.snap.core.dataio.ProductSubsetDef;
+import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.util.jai.SingleBandedSampleModel;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.operation.TransformException;
 
 import javax.media.jai.JAI;
 import javax.media.jai.PlanarImage;
@@ -56,6 +60,51 @@ import java.util.Vector;
  * @version $Revision$ $Date$
  */
 public class ImageUtils {
+
+    public static CrsGeoCoding buildCrsGeoCoding(Point.Double coordinateUpperLeft, Point.Double resolution, Dimension defaultSize,
+                                                 CoordinateReferenceSystem mapCRS, Rectangle subsetBounds)
+                                                 throws FactoryException, TransformException {
+
+        return buildCrsGeoCoding(coordinateUpperLeft.x, coordinateUpperLeft.y, resolution.x, resolution.y, defaultSize.width, defaultSize.height, mapCRS, subsetBounds);
+    }
+
+    public static CrsGeoCoding buildCrsGeoCoding(double coordinateUpperLeftX, double coordinateUpperLeftY, double resolutionX, double resolutionY, Dimension defaultSize,
+                                                 CoordinateReferenceSystem mapCRS, Rectangle subsetBounds)
+                                                 throws FactoryException, TransformException {
+
+        return buildCrsGeoCoding(coordinateUpperLeftX, coordinateUpperLeftY, resolutionX, resolutionY, defaultSize.width, defaultSize.height, mapCRS, subsetBounds);
+    }
+
+    public static CrsGeoCoding buildCrsGeoCoding(double coordinateUpperLeftX, double coordinateUpperLeftY, double resolutionX, double resolutionY,
+                                                 int defaultWidth, int defaultHeight, CoordinateReferenceSystem mapCRS, Rectangle subsetBounds)
+                                                 throws FactoryException, TransformException {
+
+        if (defaultWidth <= 0) {
+            throw new IllegalArgumentException("Invalid default width " + defaultWidth + ".");
+        }
+        if (defaultHeight <= 0) {
+            throw new IllegalArgumentException("Invalid default height " + defaultHeight + ".");
+        }
+
+        double offsetX = 0.0d;
+        double offsetY = 0.0d;
+        int imageWidth = defaultWidth;
+        int imageHeight = defaultHeight;
+        if (subsetBounds != null) {
+            if ((subsetBounds.x < 0) || ((subsetBounds.x + subsetBounds.width) > imageWidth)) {
+                throw new IllegalArgumentException("Invalid subset bounds: bounds.x="+subsetBounds.x+", bounds.width="+subsetBounds.width+", default.width="+imageWidth);
+            }
+            if ((subsetBounds.y < 0) || ((subsetBounds.y + subsetBounds.height) > imageHeight)) {
+                throw new IllegalArgumentException("Invalid subset bounds: bounds.y="+subsetBounds.y+", bounds.height="+subsetBounds.height+", default.height="+imageHeight);
+            }
+
+            offsetX = subsetBounds.x * resolutionX;
+            offsetY = subsetBounds.y * resolutionY;
+            imageWidth = subsetBounds.width;
+            imageHeight = subsetBounds.height;
+        }
+        return new CrsGeoCoding(mapCRS, imageWidth, imageHeight, coordinateUpperLeftX + offsetX, coordinateUpperLeftY - offsetY, resolutionX, resolutionY, 0.0d, 0.0d);
+    }
 
     public static Rectangle computeBandBoundsBasedOnPercent(Rectangle productBounds, int defaultProductWidth, int defaultProductHeight, int defaultBandWidth, int defaultBandHeight) {
         float productOffsetXPercent = productBounds.x / (float)defaultProductWidth;
