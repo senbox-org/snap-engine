@@ -45,7 +45,10 @@ public class N3FileWriteable extends NFileWriteable {
     }
 
     @Override
-    public NVariable addVariable(String name, DataType dataType, boolean unsigned, java.awt.Dimension tileSize, String dimensions, int compressionLevel) {
+    public NVariable addVariable(String name, DataType dataType, boolean unsigned, java.awt.Dimension tileSize, String dimensions, int compressionLevel) throws IOException {
+        if (unsigned == true){
+            throw new IOException("Cannot write unsigned variable "+name+" to NetCDF3. Try NetCDF4 or remove variable from the product");
+        }
         Variable variable = netcdfFileWriter.addVariable(null, name, dataType, dimensions);
         NVariable nVariable = new N3Variable(variable, netcdfFileWriter);
         variables.put(name, nVariable);

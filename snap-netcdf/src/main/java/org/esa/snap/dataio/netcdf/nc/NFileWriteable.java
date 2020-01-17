@@ -87,11 +87,11 @@ public abstract class NFileWriteable {
 
     abstract public NVariable addScalarVariable(String name, DataType dataType);
 
-    public NVariable addVariable(String name, DataType dataType, boolean unsigned, java.awt.Dimension tileSize, String dims) {
+    public NVariable addVariable(String name, DataType dataType, boolean unsigned, java.awt.Dimension tileSize, String dims) throws IOException {
         return addVariable(name, dataType, unsigned, tileSize, dims, DEFAULT_COMPRESSION);
     }
 
-    abstract public NVariable addVariable(String name, DataType dataType, boolean unsigned, java.awt.Dimension tileSize, String dimensions, int compressionLevel);
+    abstract public NVariable addVariable(String name, DataType dataType, boolean unsigned, java.awt.Dimension tileSize, String dimensions, int compressionLevel) throws IOException;
 
     public NVariable findVariable(String variableName) {
         return variables.get(variableName);
