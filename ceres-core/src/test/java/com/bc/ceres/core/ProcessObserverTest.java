@@ -28,7 +28,7 @@ public class ProcessObserverTest {
 
     @Test
     public void testJavaProcessMissingArg() throws Exception {
-        final String commandLine = String.format(getJavaExecPath() + " -cp %s %s 2", classPath, TestExecutable.class.getName());
+        final String commandLine = String.format(getJavaExecPath() + " -cp %s %s 2", getClassPath(), TestExecutable.class.getName());
         final Process process = Runtime.getRuntime().exec(commandLine);
         final MyHandler handler = new MyHandler();
         new ProcessObserver(process).setHandler(handler).start();
@@ -41,7 +41,7 @@ public class ProcessObserverTest {
 
     @Ignore("This test fails to often on the server. No Idea why.")
     public void testJavaProcessCancel() throws Exception {
-        final String commandLine = String.format(getJavaExecPath() + " -cp %s %s 10 2", classPath, TestExecutable.class.getName());
+        final String commandLine = String.format(getJavaExecPath() + " -cp %s %s 10 2", getClassPath(), TestExecutable.class.getName());
         final Process process = Runtime.getRuntime().exec(commandLine);
         final MyHandler handler = new MyHandler();
         final ProcessObserver.ObservedProcess observedProcess = new ProcessObserver(process)
@@ -59,12 +59,21 @@ public class ProcessObserverTest {
     }
 
     protected String getJavaExecPath() {
-        //Add "" to JAVA path if it has blan spaces
+        //Add "" to JAVA path if it has blank spaces
         if(JAVA_EXEC_PATH.contains(" ")) {
             return "\"" + JAVA_EXEC_PATH + "\"";
         }
 
         return JAVA_EXEC_PATH;
+    }
+
+    protected String getClassPath() {
+        //Add "" to claspath if it has blank spaces
+        if(classPath.contains(" ")) {
+            return "\"" + classPath + "\"";
+        }
+
+        return classPath;
     }
 
     static class MyHandler implements ProcessObserver.Handler {
