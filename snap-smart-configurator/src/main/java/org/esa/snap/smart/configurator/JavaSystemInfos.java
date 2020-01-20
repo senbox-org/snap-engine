@@ -103,7 +103,7 @@ public class JavaSystemInfos implements SystemInfos {
     public long getRAM() {
         OperatingSystemMXBean mXBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
         long totalRAMInByte = mXBean.getTotalPhysicalMemorySize();
-        long totalRAMInMB = Math.round(totalRAMInByte/(1E6));
+        long totalRAMInMB = Math.round(totalRAMInByte/(1024 * 1024));
         SystemUtils.LOG.fine("Total RAM in MB: " + totalRAMInMB);
         return totalRAMInMB;
     }
@@ -113,7 +113,7 @@ public class JavaSystemInfos implements SystemInfos {
         OperatingSystemMXBean mXBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
 
         long freeRAMInByte = mXBean.getFreePhysicalMemorySize();
-        long freeRamInMegaBytes = Math.round(freeRAMInByte/(1024*1024));
+        long freeRamInMegaBytes = Math.round(freeRAMInByte/(1024 * 1024));
         SystemUtils.LOG.fine("Free RAM in MB: " + freeRamInMegaBytes);
         return freeRamInMegaBytes;
     }
