@@ -44,7 +44,7 @@ class LocalRepositoryDatabaseLayer {
     private LocalRepositoryDatabaseLayer() {
     }
 
-    public static Short loadLocalRepositoryId(Path localRepositoryFolderPath, Statement statement) throws SQLException {
+    static Short loadLocalRepositoryId(Path localRepositoryFolderPath, Statement statement) throws SQLException {
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT id FROM ")
                 .append(DatabaseTableNames.LOCAL_REPOSITORIES)
@@ -59,7 +59,7 @@ class LocalRepositoryDatabaseLayer {
         return null;
     }
 
-    public static List<LocalProductMetadata> loadProductRelativePaths(short localRepositoryId, Statement statement) throws SQLException {
+    static List<LocalProductMetadata> loadProductRelativePaths(short localRepositoryId, Statement statement) throws SQLException {
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT id, relative_path, last_modified_date FROM ")
                 .append(DatabaseTableNames.PRODUCTS)
@@ -77,7 +77,7 @@ class LocalRepositoryDatabaseLayer {
         }
     }
 
-    public static List<RemoteMission> loadMissions(Statement statement) throws SQLException {
+    static List<RemoteMission> loadMissions(Statement statement) throws SQLException {
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT rm.id, rm.name FROM ")
                 .append(DatabaseTableNames.REMOTE_MISSIONS)
@@ -93,7 +93,7 @@ class LocalRepositoryDatabaseLayer {
         }
     }
 
-    public static List<LocalRepositoryFolder> loadLocalRepositoryFolders(Statement statement) throws SQLException {
+    static List<LocalRepositoryFolder> loadLocalRepositoryFolders(Statement statement) throws SQLException {
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT id, folder_path FROM ")
                 .append(DatabaseTableNames.LOCAL_REPOSITORIES);
@@ -110,7 +110,7 @@ class LocalRepositoryDatabaseLayer {
         }
     }
 
-    public static Map<Short, Set<String>> loadAttributesNamesPerMission(Statement statement) throws SQLException {
+    static Map<Short, Set<String>> loadAttributesNamesPerMission(Statement statement) throws SQLException {
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT ra.remote_mission_id, ra.name FROM ")
                 .append(DatabaseTableNames.REMOTE_ATTRIBUTES)
@@ -131,11 +131,12 @@ class LocalRepositoryDatabaseLayer {
         }
     }
 
-    public static List<RepositoryProduct> loadProductList(LocalRepositoryFolder localRepositoryFolder, RemoteMission mission, Map<String, Object> parameterValues)
-                                                          throws SQLException, IOException {
+    static List<RepositoryProduct> loadProductList(LocalRepositoryFolder localRepositoryFolder, RemoteMission mission,
+                                                   Map<String, Object> parameterValues, H2DatabaseParameters databaseParameters)
+                                                   throws SQLException, IOException {
 
         List<RepositoryProduct> productList;
-        try (Connection connection = H2DatabaseAccessor.getConnection()) {
+        try (Connection connection = H2DatabaseAccessor.getConnection(databaseParameters)) {
             Connection wrappedConnection = SFSUtilities.wrapConnection(connection);
 
             Date startDate = null;
@@ -302,8 +303,7 @@ class LocalRepositoryDatabaseLayer {
         }
 
         if (productList.size() > 0) {
-            Path databaseParentFolder = H2DatabaseAccessor.getDatabaseParentFolder();
-            Path quickLookImagesFolder = databaseParentFolder.resolve("quick-look-images");
+            Path quickLookImagesFolder = databaseParameters.getParentFolderPath().resolve("quick-look-images");
 
             for (int i=0; i<productList.size(); i++) {
                 LocalRepositoryProduct localProduct = (LocalRepositoryProduct)productList.get(i);
@@ -370,8 +370,8 @@ class LocalRepositoryDatabaseLayer {
         return polygon;
     }
 
-    public static void deleteLocalRepositoryFolder(LocalRepositoryFolder localRepositoryFolder) throws SQLException {
-        try (Connection connection = H2DatabaseAccessor.getConnection()) {
+    static void deleteLocalRepositoryFolder(LocalRepositoryFolder localRepositoryFolder, H2DatabaseParameters databaseParameters) throws SQLException {
+        try (Connection connection = H2DatabaseAccessor.getConnection(databaseParameters)) {
             Set<Integer> productIds;
             try (Statement statement = connection.createStatement()) {
                 StringBuilder sql = new StringBuilder();
@@ -387,16 +387,17 @@ class LocalRepositoryDatabaseLayer {
                 }
             }
 
+            boolean success = false;
             connection.setAutoCommit(false);
             try {
                 StringBuilder sql = new StringBuilder();
                 sql.append("DELETE FROM ")
                         .append(DatabaseTableNames.PRODUCT_REMOTE_ATTRIBUTES)
                         .append(" WHERE product_id = ?");
-                try (PreparedStatement statement = connection.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS)) {
+                try (PreparedStatement preparedStatement = connection.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS)) {
                     for (Integer productId : productIds) {
-                        statement.setInt(1, productId.intValue());
-                        statement.executeUpdate();
+                        preparedStatement.setInt(1, productId.intValue());
+                        preparedStatement.executeUpdate();
                     }
                 }
                 try (Statement statement = connection.createStatement()) {
@@ -416,26 +417,33 @@ class LocalRepositoryDatabaseLayer {
                 }
                 // commit the data
                 connection.commit();
-            } catch (Exception exception) {
-                // rollback the statements from the transaction
-                connection.rollback();
-                throw exception;
+
+                success = true;
+            } finally {
+                if (!success) {
+                    // rollback the statements from the transaction
+                    connection.rollback();
+                }
             }
         }
     }
 
-    public static void deleteProduct(LocalRepositoryProduct repositoryProduct) throws SQLException {
-        try (Connection connection = H2DatabaseAccessor.getConnection()) {
+    static void deleteProduct(LocalRepositoryProduct repositoryProduct, H2DatabaseParameters databaseParameters) throws SQLException {
+        try (Connection connection = H2DatabaseAccessor.getConnection(databaseParameters)) {
+            boolean success = false;
             connection.setAutoCommit(false);
             try (Statement statement = connection.createStatement()) {
                 deleteProduct(repositoryProduct.getId(), statement);
 
                 // commit the data
                 connection.commit();
-            } catch (Exception exception) {
-                // rollback the statements from the transaction
-                connection.rollback();
-                throw exception;
+
+                success = true;
+            } finally {
+                if (!success) {
+                    // rollback the statements from the transaction
+                    connection.rollback();
+                }
             }
         }
     }
@@ -481,8 +489,9 @@ class LocalRepositoryDatabaseLayer {
         return relativePath;
     }
 
-    public static Set<Integer> deleteMissingLocalRepositoryProducts(short localRepositoryId, Set<Integer> savedProductIds) throws SQLException {
-        try (Connection connection = H2DatabaseAccessor.getConnection()) {
+    static Set<Integer> deleteMissingLocalRepositoryProducts(short localRepositoryId, Set<Integer> savedProductIds, H2DatabaseParameters databaseParameters) throws SQLException {
+        try (Connection connection = H2DatabaseAccessor.getConnection(databaseParameters)) {
+            boolean success = false;
             connection.setAutoCommit(false);
             try {
                 Set<Integer> missingProductIds;
@@ -512,21 +521,26 @@ class LocalRepositoryDatabaseLayer {
                 // commit the statements
                 connection.commit();
 
+                success = true;
+
                 return missingProductIds;
-            } catch (Exception exception) {
-                // rollback the statements from the transaction
-                connection.rollback();
-                throw exception;
+            } finally {
+                if (!success) {
+                    // rollback the statements from the transaction
+                    connection.rollback();
+                }
             }
         }
     }
 
-    public static SaveProductData saveProduct(Product productToSave, BufferedImage quickLookImage, Polygon2D polygon2D, Path productPath, Path localRepositoryFolderPath)
-                                              throws IOException, SQLException {
+    static SaveProductData saveProduct(Product productToSave, BufferedImage quickLookImage, Polygon2D polygon2D, Path productPath,
+                                       Path localRepositoryFolderPath, H2DatabaseParameters databaseParameters)
+                                       throws IOException, SQLException {
 
         int productId;
         LocalRepositoryFolder localRepositoryFolder;
-        try (Connection connection = H2DatabaseAccessor.getConnection()) {
+        try (Connection connection = H2DatabaseAccessor.getConnection(databaseParameters)) {
+            boolean success = false;
             connection.setAutoCommit(false);
             try {
                 localRepositoryFolder = saveLocalRepositoryFolderPath(localRepositoryFolderPath, connection);
@@ -540,22 +554,25 @@ class LocalRepositoryDatabaseLayer {
                     productId = insertProduct(productToSave, polygon2D, relativePath, localRepositoryFolder.getId(), fileTime, sizeInBytes, connection);
                 } else {
                     productId = existingProductId.intValue();
-                    deleteQuickLookImage(productId);
+                    deleteQuickLookImage(productId, databaseParameters.getParentFolderPath());
                     try (Statement statement = connection.createStatement()) {
                         deleteProductRemoteAttributes(productId, statement);
                     }
                     updateProduct(productId, productToSave, polygon2D, relativePath, localRepositoryFolder.getId(), fileTime, sizeInBytes, connection);
                 }
                 if (quickLookImage != null) {
-                    writeQuickLookImage(productId, quickLookImage);
+                    writeQuickLookImage(productId, quickLookImage, databaseParameters.getParentFolderPath());
                 }
 
                 // commit the statements
                 connection.commit();
-            } catch (Exception exception) {
-                // rollback the statements from the transaction
-                connection.rollback();
-                throw exception;
+
+                success = true;
+            } finally {
+                if (!success) {
+                    // rollback the statements from the transaction
+                    connection.rollback();
+                }
             }
         }
         return new SaveProductData(productId, null, localRepositoryFolder);
@@ -575,39 +592,41 @@ class LocalRepositoryDatabaseLayer {
                     return localRepositoryFolder;
                 }
             }
+        }
 
-            StringBuilder sql = new StringBuilder();
-            sql.append("INSERT INTO ")
-                    .append(DatabaseTableNames.LOCAL_REPOSITORIES)
-                    .append(" (folder_path) VALUES ('")
-                    .append(localRepositoryFolderPath.toString())
-                    .append("')");
-            try (PreparedStatement preparedStatement = connection.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS)) {
-                int affectedRows = preparedStatement.executeUpdate();
-                if (affectedRows == 0) {
-                    throw new SQLException("Failed to insert the local repository, no rows affected.");
-                } else {
-                    short localRepositoryId;
-                    try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
-                        if (generatedKeys.next()) {
-                            localRepositoryId = generatedKeys.getShort(1);
-                        } else {
-                            throw new SQLException("Failed to get the generated local repository id.");
-                        }
+        StringBuilder sql = new StringBuilder();
+        sql.append("INSERT INTO ")
+                .append(DatabaseTableNames.LOCAL_REPOSITORIES)
+                .append(" (folder_path) VALUES ('")
+                .append(localRepositoryFolderPath.toString())
+                .append("')");
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS)) {
+            int affectedRows = preparedStatement.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLException("Failed to insert the local repository, no rows affected.");
+            } else {
+                short localRepositoryId;
+                try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        localRepositoryId = generatedKeys.getShort(1);
+                    } else {
+                        throw new SQLException("Failed to get the generated local repository id.");
                     }
-                    return new LocalRepositoryFolder(localRepositoryId, localRepositoryFolderPath);
                 }
+                return new LocalRepositoryFolder(localRepositoryId, localRepositoryFolderPath);
             }
         }
     }
 
-    public static SaveDownloadedProductData saveProduct(RepositoryProduct productToSave, Path productPath, String remoteRepositoryName, Path localRepositoryFolderPath)
+    static SaveDownloadedProductData saveProduct(RepositoryProduct productToSave, Path productPath, String remoteRepositoryName,
+                                                 Path localRepositoryFolderPath, H2DatabaseParameters databaseParameters)
                                               throws IOException, SQLException {
 
         int productId;
         short remoteMissionId;
         LocalRepositoryFolder localRepositoryFolder;
-        try (Connection connection = H2DatabaseAccessor.getConnection()) {
+        try (Connection connection = H2DatabaseAccessor.getConnection(databaseParameters)) {
+            boolean success = false;
             connection.setAutoCommit(false);
             try {
                 localRepositoryFolder = saveLocalRepositoryFolderPath(localRepositoryFolderPath, connection);
@@ -626,7 +645,7 @@ class LocalRepositoryDatabaseLayer {
                 } else {
                     // the product already exists into the database
                     productId = existingProductId.intValue();
-                    deleteQuickLookImage(productId);
+                    deleteQuickLookImage(productId, databaseParameters.getParentFolderPath());
                     try (Statement statement = connection.createStatement()) {
                         deleteProductRemoteAttributes(productId, statement);
                     }
@@ -635,15 +654,18 @@ class LocalRepositoryDatabaseLayer {
 
                 insertRemoteProductAttributes(productId, productToSave.getAttributes(), connection);
                 if (productToSave.getQuickLookImage() != null) {
-                    writeQuickLookImage(productId, productToSave.getQuickLookImage());
+                    writeQuickLookImage(productId, productToSave.getQuickLookImage(), databaseParameters.getParentFolderPath());
                 }
 
                 // commit the statements
                 connection.commit();
-            } catch (Exception exception) {
-                // rollback the statements from the transaction
-                connection.rollback();
-                throw exception;
+
+                success = true;
+            } finally {
+                if (!success) {
+                    // rollback the statements from the transaction
+                    connection.rollback();
+                }
             }
         }
         Set<String> productAttributeNames = new HashSet<>();
@@ -655,15 +677,13 @@ class LocalRepositoryDatabaseLayer {
         return new SaveDownloadedProductData(productId, remoteMission, localRepositoryFolder, productAttributeNames);
     }
 
-    private static void deleteQuickLookImage(int productId) throws IOException {
-        Path databaseParentFolder = H2DatabaseAccessor.getDatabaseParentFolder();
+    private static void deleteQuickLookImage(int productId, Path databaseParentFolder) throws IOException {
         Path quickLookImagesFolder = databaseParentFolder.resolve("quick-look-images");
         Path quickLookImageFile = quickLookImagesFolder.resolve(Integer.toString(productId) + ".png");
         Files.deleteIfExists(quickLookImageFile);
     }
 
-    private static void writeQuickLookImage(int productId, BufferedImage quickLookImage) throws IOException {
-        Path databaseParentFolder = H2DatabaseAccessor.getDatabaseParentFolder();
+    private static void writeQuickLookImage(int productId, BufferedImage quickLookImage, Path databaseParentFolder) throws IOException {
         Path quickLookImagesFolder = databaseParentFolder.resolve("quick-look-images");
         FileIOUtils.ensureExists(quickLookImagesFolder);
         Path quickLookImageFile = quickLookImagesFolder.resolve(Integer.toString(productId) + ".png");
@@ -711,12 +731,12 @@ class LocalRepositoryDatabaseLayer {
                     .append(" (name) VALUES ('")
                     .append(remoteRepositoryName)
                     .append("')");
-            try (PreparedStatement statement = connection.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS)) {
-                int affectedRows = statement.executeUpdate();
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS)) {
+                int affectedRows = preparedStatement.executeUpdate();
                 if (affectedRows == 0) {
                     throw new SQLException("Failed to insert the remote repository, no rows affected.");
                 } else {
-                    try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                    try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
                         if (generatedKeys.next()) {
                             remoteRepositoryId = generatedKeys.getShort(1);
                         } else {
@@ -756,12 +776,12 @@ class LocalRepositoryDatabaseLayer {
                     .append(", '")
                     .append(remoteMissionName)
                     .append("')");
-            try (PreparedStatement statement = connection.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS)) {
-                int affectedRows = statement.executeUpdate();
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS)) {
+                int affectedRows = preparedStatement.executeUpdate();
                 if (affectedRows == 0) {
                     throw new SQLException("Failed to insert the remote mission, no rows affected.");
                 } else {
-                    try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                    try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
                         if (generatedKeys.next()) {
                             remoteMissionId = generatedKeys.getShort(1);
                         } else {
@@ -881,19 +901,19 @@ class LocalRepositoryDatabaseLayer {
 
     private static int executeProductStatement(String sql, Date acquisitionDate, FileTime fileTime, Connection connection) throws SQLException {
         int productId;
-        try (PreparedStatement statement = connection.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS)) {
             java.sql.Timestamp acquisitionDateTimestamp = null;
             if (acquisitionDate != null) {
                 acquisitionDateTimestamp = new java.sql.Timestamp(acquisitionDate.getTime());
             }
-            statement.setTimestamp(1, acquisitionDateTimestamp);
-            statement.setTimestamp(2, new java.sql.Timestamp(fileTime.toMillis()));
+            preparedStatement.setTimestamp(1, acquisitionDateTimestamp);
+            preparedStatement.setTimestamp(2, new java.sql.Timestamp(fileTime.toMillis()));
 
-            int affectedRows = statement.executeUpdate();
+            int affectedRows = preparedStatement.executeUpdate();
             if (affectedRows == 0) {
                 throw new SQLException("Failed to insert the product, no rows affected.");
             } else {
-                try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
                         productId = generatedKeys.getInt(1);
                     } else {
@@ -984,12 +1004,12 @@ class LocalRepositoryDatabaseLayer {
                 .append(" (product_id, name, value) VALUES (")
                 .append(productId)
                 .append(", ?, ?)");
-        try (PreparedStatement statement = connection.prepareStatement(sql.toString())) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql.toString())) {
             for (int i=0; i<remoteAttributes.size(); i++) {
                 Attribute attribute = remoteAttributes.get(i);
-                statement.setString(1, attribute.getName());
-                statement.setString(2, attribute.getValue());
-                statement.executeUpdate();
+                preparedStatement.setString(1, attribute.getName());
+                preparedStatement.setString(2, attribute.getValue());
+                preparedStatement.executeUpdate();
             }
         }
     }

@@ -14,12 +14,7 @@ import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by jcoravu on 5/9/2019.
@@ -32,7 +27,13 @@ public class AllLocalFolderProductsRepository {
     public static final String SENSOR_TYPE_PARAMETER = "sensorType";
     public static final String ATTRIBUTES_PARAMETER = "attributes";
 
-    public AllLocalFolderProductsRepository() {
+    private final H2DatabaseParameters databaseParameters;
+
+    public AllLocalFolderProductsRepository(H2DatabaseParameters databaseParameters) {
+        if (databaseParameters == null) {
+            throw new NullPointerException("The database parameters are null.");
+        }
+        this.databaseParameters = databaseParameters;
     }
 
     public List<RepositoryQueryParameter> getParameters() {
@@ -56,27 +57,27 @@ public class AllLocalFolderProductsRepository {
     public List<RepositoryProduct> loadProductList(LocalRepositoryFolder localRepositoryFolder, RemoteMission mission, Map<String, Object> parameterValues)
                                                    throws SQLException, IOException {
 
-        return LocalRepositoryDatabaseLayer.loadProductList(localRepositoryFolder, mission, parameterValues);
+        return LocalRepositoryDatabaseLayer.loadProductList(localRepositoryFolder, mission, parameterValues, this.databaseParameters);
     }
 
     public SaveDownloadedProductData saveProduct(RepositoryProduct productToSave, Path productPath, String remoteRepositoryName, Path localRepositoryFolderPath)
             throws IOException, SQLException {
 
-        return LocalRepositoryDatabaseLayer.saveProduct(productToSave, productPath, remoteRepositoryName, localRepositoryFolderPath);
+        return LocalRepositoryDatabaseLayer.saveProduct(productToSave, productPath, remoteRepositoryName, localRepositoryFolderPath, this.databaseParameters);
     }
 
     public SaveProductData saveProduct(Product productToSave, BufferedImage quickLookImage, Polygon2D polygon2D, Path productPath, Path localRepositoryFolderPath)
             throws IOException, SQLException {
 
-        return LocalRepositoryDatabaseLayer.saveProduct(productToSave, quickLookImage, polygon2D, productPath, localRepositoryFolderPath);
+        return LocalRepositoryDatabaseLayer.saveProduct(productToSave, quickLookImage, polygon2D, productPath, localRepositoryFolderPath, this.databaseParameters);
     }
 
     public Set<Integer> deleteMissingProducts(short localRepositoryId, Set<Integer> savedProductIds) throws SQLException {
-        return LocalRepositoryDatabaseLayer.deleteMissingLocalRepositoryProducts(localRepositoryId, savedProductIds);
+        return LocalRepositoryDatabaseLayer.deleteMissingLocalRepositoryProducts(localRepositoryId, savedProductIds, this.databaseParameters);
     }
 
     public List<LocalProductMetadata> loadRepositoryProductsMetadata(short localRepositoryId) throws SQLException {
-        try (Connection connection = H2DatabaseAccessor.getConnection()) {
+        try (Connection connection = H2DatabaseAccessor.getConnection(this.databaseParameters)) {
             try (Statement statement = connection.createStatement()) {
                 return LocalRepositoryDatabaseLayer.loadProductRelativePaths(localRepositoryId, statement);
             }
@@ -84,15 +85,15 @@ public class AllLocalFolderProductsRepository {
     }
 
     public void deleteRepositoryFolder(LocalRepositoryFolder localRepositoryFolder) throws SQLException {
-        LocalRepositoryDatabaseLayer.deleteLocalRepositoryFolder(localRepositoryFolder);
+        LocalRepositoryDatabaseLayer.deleteLocalRepositoryFolder(localRepositoryFolder, this.databaseParameters);
     }
 
     public void deleteProduct(LocalRepositoryProduct repositoryProduct) throws SQLException {
-        LocalRepositoryDatabaseLayer.deleteProduct(repositoryProduct);
+        LocalRepositoryDatabaseLayer.deleteProduct(repositoryProduct, this.databaseParameters);
     }
 
     public List<LocalRepositoryFolder> loadRepositoryFolders() throws SQLException {
-        try (Connection connection = H2DatabaseAccessor.getConnection()) {
+        try (Connection connection = H2DatabaseAccessor.getConnection(this.databaseParameters)) {
             try (Statement statement = connection.createStatement()) {
                 return LocalRepositoryDatabaseLayer.loadLocalRepositoryFolders(statement);
             }
@@ -100,7 +101,7 @@ public class AllLocalFolderProductsRepository {
     }
 
     public LocalRepositoryParameterValues loadParameterValues() throws SQLException {
-        try (Connection connection = H2DatabaseAccessor.getConnection()) {
+        try (Connection connection = H2DatabaseAccessor.getConnection(this.databaseParameters)) {
             try (Statement statement = connection.createStatement()) {
                 List<LocalRepositoryFolder> localRepositoryFolders = LocalRepositoryDatabaseLayer.loadLocalRepositoryFolders(statement);
                 Map<Short, Set<String>> attributeNamesPerMission = LocalRepositoryDatabaseLayer.loadAttributesNamesPerMission(statement);
@@ -111,7 +112,7 @@ public class AllLocalFolderProductsRepository {
     }
 
     public List<LocalProductMetadata> loadRepositoryProductsMetadata(Path localRepositoryFolderPath) throws SQLException {
-        try (Connection connection = H2DatabaseAccessor.getConnection()) {
+        try (Connection connection = H2DatabaseAccessor.getConnection(this.databaseParameters)) {
             try (Statement statement = connection.createStatement()) {
                 Short localRepositoryId = LocalRepositoryDatabaseLayer.loadLocalRepositoryId(localRepositoryFolderPath, statement);
                 List<LocalProductMetadata> existingLocalRepositoryProducts;

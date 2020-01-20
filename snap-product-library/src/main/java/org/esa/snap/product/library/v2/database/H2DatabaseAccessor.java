@@ -1,42 +1,27 @@
 package org.esa.snap.product.library.v2.database;
 
+import org.apache.commons.lang.StringUtils;
 import org.esa.snap.core.util.SystemUtils;
-import org.h2.Driver;
-import org.h2.util.OsgiDataSourceFactory;
-import org.h2gis.functions.factory.H2GISDBFactory;
 import org.h2gis.functions.factory.H2GISFunctions;
 
-import javax.sql.DataSource;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.sql.*;
+import java.util.*;
 
 /**
  * Created by jcoravu on 10/9/2019.
  */
 public class H2DatabaseAccessor {
 
+    public static final String DATABASE_DEFINITION_LANGUAGE_SOURCE_FOLDER_PATH = "org/esa/snap/product/library/v2/database";
+    public static final String DATABASE_SQL_FILE_NAME_PREFIX = "h2gis-database-script-";
+
     private H2DatabaseAccessor() {
     }
 
-    public static Connection getConnection() throws SQLException {
-        Path databaseParentFolder = getDatabaseParentFolder();
-        String databaseName = "products";
-        Properties properties = new Properties();
-        properties.put("user", "snap");
-        properties.put("password", "snap");
-        String databaseURL = "jdbc:h2:" + databaseParentFolder.resolve(databaseName).toString();
-        return DriverManager.getConnection(databaseURL, properties);
+    public static Connection getConnection(H2DatabaseParameters databaseParameters) throws SQLException {
+        return getConnection(databaseParameters.getUrl(), databaseParameters.getProperties());
     }
 
     public static Path getDatabaseParentFolder() {
@@ -44,8 +29,8 @@ public class H2DatabaseAccessor {
         return applicationDataFolder.resolve("product-library");
     }
 
-    public static void upgradeDatabase() throws SQLException, IOException {
-        try (Connection connection = H2DatabaseAccessor.getConnection()) {
+    public static void upgradeDatabase(String databaseUrl, Properties databaseProperties) throws SQLException, IOException {
+        try (Connection connection = getConnection(databaseUrl, databaseProperties)) {
             int currentDatabaseVersion = 0;
             // check if the 'version' table exists into the database
             if (doesTableExists(DatabaseTableNames.VERSIONS, connection)) {
@@ -53,10 +38,14 @@ public class H2DatabaseAccessor {
                 currentDatabaseVersion = loadCurrentDatabaseVersionNumber(connection);
             }
 
-            String sourceFolderPath = "org/esa/snap/product/library/v2/database";
-            String databaseFileNamePrefix = "h2gis-database-script-";
+            String sourceFolderPath = DATABASE_DEFINITION_LANGUAGE_SOURCE_FOLDER_PATH;
+            String databaseFileNamePrefix = DATABASE_SQL_FILE_NAME_PREFIX;
             LinkedHashMap<Integer, List<String>> allStatements = DatabaseUtils.loadDatabaseStatements(sourceFolderPath, databaseFileNamePrefix, currentDatabaseVersion);
             if (allStatements.size() > 0) {
+                if (!connection.getAutoCommit()) {
+                    throw new IllegalStateException("The connection has an opened transaction.");
+                }
+                boolean success = false;
                 connection.setAutoCommit(false);
                 try {
                     if (currentDatabaseVersion == 0) {
@@ -84,10 +73,13 @@ public class H2DatabaseAccessor {
                     }
                     // commit the statements
                     connection.commit();
-                } catch (Exception exception) {
-                    // rollback the statements from the transaction
-                    connection.rollback();
-                    throw exception;
+
+                    success = true;
+                } finally {
+                    if (!success) {
+                        // rollback the statements from the transaction
+                        connection.rollback();
+                    }
                 }
             }
         }
@@ -114,5 +106,15 @@ public class H2DatabaseAccessor {
         try (ResultSet result = databaseMetaData.getTables(null, null, tableName.toUpperCase(), null)) {
             return result.next();
         }
+    }
+
+    private static Connection getConnection(String databaseUrl, Properties databaseProperties) throws SQLException {
+        if (StringUtils.isBlank(databaseUrl)) {
+            throw new NullPointerException("The database url is null or empty.");
+        }
+        if (databaseProperties == null) {
+            throw new NullPointerException("The database properties are null.");
+        }
+        return DriverManager.getConnection(databaseUrl, databaseProperties);
     }
 }

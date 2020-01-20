@@ -46,7 +46,7 @@ public class ScanLocalRepositoryFolderHelper extends AddLocalRepositoryFolderHel
                 logger.log(Level.FINE, "The local repository folder '"+localRepositoryFolder.getPath().toString()+"' to scan does not exist.");
             }
 
-            LocalRepositoryDatabaseLayer.deleteLocalRepositoryFolder(localRepositoryFolder);
+            this.allLocalFolderProductsRepository.deleteRepositoryFolder(localRepositoryFolder);
 
             if (logger.isLoggable(Level.FINE)) {
                 logger.log(Level.FINE, "Deleted the local repository folder folder '" + localRepositoryFolder.getPath().toString()+"' from the database.");
