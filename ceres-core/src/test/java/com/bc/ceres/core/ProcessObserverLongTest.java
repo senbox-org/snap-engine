@@ -12,7 +12,7 @@ public class ProcessObserverLongTest extends ProcessObserverTest{
 
     @Test
     public void testJavaProcessOk() throws Exception {
-        final String commandLine = String.format(JAVA_EXEC_PATH + " -cp %s %s 2 10", classPath, TestExecutable.class.getName());
+        final String commandLine = String.format("\"" + JAVA_EXEC_PATH + "\"" + " -cp \"%s\" %s 2 10", classPath, TestExecutable.class.getName());
         final Process process = Runtime.getRuntime().exec(commandLine);
         final MyHandler handler = new MyHandler();
         new ProcessObserver(process).setHandler(handler).start();
