@@ -28,7 +28,7 @@ public class ProcessObserverTest {
 
     @Test
     public void testJavaProcessMissingArg() throws Exception {
-        final String commandLine = String.format(JAVA_EXEC_PATH + " -cp %s %s 2", classPath, TestExecutable.class.getName());
+        final String commandLine = String.format("\"" + JAVA_EXEC_PATH + "\"" + " -cp \"%s\" %s 2", classPath, TestExecutable.class.getName());
         final Process process = Runtime.getRuntime().exec(commandLine);
         final MyHandler handler = new MyHandler();
         new ProcessObserver(process).setHandler(handler).start();
@@ -41,7 +41,7 @@ public class ProcessObserverTest {
 
     @Ignore("This test fails to often on the server. No Idea why.")
     public void testJavaProcessCancel() throws Exception {
-        final String commandLine = String.format(JAVA_EXEC_PATH + " -cp %s %s 10 2", classPath, TestExecutable.class.getName());
+        final String commandLine = String.format("\"" + JAVA_EXEC_PATH + "\"" + " -cp \"%s\" %s 10 2", classPath, TestExecutable.class.getName());
         final Process process = Runtime.getRuntime().exec(commandLine);
         final MyHandler handler = new MyHandler();
         final ProcessObserver.ObservedProcess observedProcess = new ProcessObserver(process)
