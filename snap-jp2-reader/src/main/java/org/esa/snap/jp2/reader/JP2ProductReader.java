@@ -26,6 +26,7 @@ import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.metadata.XmlMetadataParser;
 import org.esa.snap.core.metadata.XmlMetadataParserFactory;
+import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.jp2.reader.internal.JP2MultiLevelSource;
 import org.esa.snap.jp2.reader.internal.JP2ProductReaderConstants;
 import org.esa.snap.jp2.reader.metadata.CodeStreamInfo;
@@ -124,25 +125,27 @@ public class JP2ProductReader extends AbstractProductReader {
 
             int imageWidth = imageInfo.getWidth();
             int imageHeight = imageInfo.getHeight();
-
+            Dimension defaultProductSize = new Dimension(imageWidth,imageHeight);
+            Rectangle subsetRegion = null;
             if (getSubsetDef() != null && getSubsetDef().getRegion() != null) {
                 imageWidth = getSubsetDef().getRegion().width;
                 imageHeight = getSubsetDef().getRegion().height;
+                subsetRegion = getSubsetDef().getRegion();
             }
 
             this.product = new Product(this.virtualJp2File.getFileName(), JP2ProductReaderConstants.TYPE, imageWidth, imageHeight);
 
             MetadataElement metadataRoot = this.product.getMetadataRoot();
-            if ((getSubsetDef() != null && !getSubsetDef().isIgnoreMetadata()) || getSubsetDef() == null) {
+            if (getSubsetDef() == null || !getSubsetDef().isIgnoreMetadata()) {
                 metadataRoot.addElement(imageInfo.toMetadataElement());
                 metadataRoot.addElement(csInfo.toMetadataElement());
             }
             if (metadata != null) {
                 metadata.setFileName(jp2File.toString());
-                if ((getSubsetDef() != null && !getSubsetDef().isIgnoreMetadata()) || getSubsetDef() == null) {
+                if (getSubsetDef() == null || !getSubsetDef().isIgnoreMetadata()) {
                     metadataRoot.addElement(metadata.getRootElement());
                 }
-                addGeoCoding(metadata);
+                addGeoCoding(metadata, subsetRegion, defaultProductSize);
             }
 
             double[] bandScales = null;
@@ -167,24 +170,20 @@ public class JP2ProductReader extends AbstractProductReader {
         // do nothing
     }
 
-    private void addGeoCoding(Jp2XmlMetadata metadata) {
+    private void addGeoCoding(Jp2XmlMetadata metadata, Rectangle subsetRegion, Dimension defaultProductSize) {
         int imageWidth = this.product.getSceneRasterWidth();
         int imageHeight = this.product.getSceneRasterHeight();
-        double offsetX = 0;
-        double offsetY = 0;
-        if (getSubsetDef() != null && getSubsetDef().getRegion() != null) {
-            offsetX = getSubsetDef().getRegion().x * metadata.getStepX();
-            offsetY = getSubsetDef().getRegion().y * metadata.getStepY();
-        }
         String crsGeoCoding = metadata.getCrsGeocoding();
         Point2D origin = metadata.getOrigin();
         GeoCoding geoCoding = null;
         if (crsGeoCoding != null && origin != null) {
             try {
                 CoordinateReferenceSystem mapCRS = CRS.decode(crsGeoCoding.replace("::", ":"));
-                geoCoding = new CrsGeoCoding(mapCRS, imageWidth, imageHeight, origin.getX() + offsetX, origin.getY() + offsetY, metadata.getStepX(), -metadata.getStepY());
+                geoCoding = ImageUtils.buildCrsGeoCoding(origin.getX(), origin.getY(),
+                                                         metadata.getStepX(), -metadata.getStepY(),
+                                                         defaultProductSize, mapCRS, subsetRegion);
             } catch (Exception gEx) {
-                // ignore
+                System.out.println(gEx);
             }
         }
         if (geoCoding == null) {
@@ -212,8 +211,12 @@ public class JP2ProductReader extends AbstractProductReader {
                     }
                 }
                 if(latPoints != null ) {
-                    TiePointGrid latGrid = createTiePointGrid("latitude", 2, 2, offsetX, offsetY, imageWidth, imageHeight, latPoints);
-                    TiePointGrid lonGrid = createTiePointGrid("longitude", 2, 2, offsetX, offsetY, imageWidth, imageHeight, lonPoints);
+                    TiePointGrid latGrid = createTiePointGrid("latitude", 2, 2, 0, 0, imageWidth, imageHeight, latPoints);
+                    TiePointGrid lonGrid = createTiePointGrid("longitude", 2, 2, 0, 0, imageWidth, imageHeight, lonPoints);
+                    if(getSubsetDef() != null && getSubsetDef().getRegion() != null) {
+                        lonGrid = TiePointGrid.createSubset(lonGrid,getSubsetDef());
+                        latGrid = TiePointGrid.createSubset(latGrid,getSubsetDef());
+                    }
                     geoCoding = new TiePointGeoCoding(latGrid, lonGrid);
                     this.product.addTiePointGrid(latGrid);
                     this.product.addTiePointGrid(lonGrid);
