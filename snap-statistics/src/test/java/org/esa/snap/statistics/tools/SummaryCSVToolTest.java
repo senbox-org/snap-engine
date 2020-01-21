@@ -7,6 +7,8 @@ import org.mockito.Mockito;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,7 +25,9 @@ public class SummaryCSVToolTest {
     public void setUp() throws Exception {
         shapeFileReader = mock(SummaryCSVTool.ShapeFileReader.class);
         logger = mock(Logger.class);
-        final File existingShapeFile = new File(SummaryCSVToolTest.class.getResource("20070504_out_cwbody_desh_gk3.shp").getFile());
+        final URL resource = SummaryCSVToolTest.class.getResource("20070504_out_cwbody_desh_gk3.shp");
+        final URI uri = new URI(resource.toString());
+        final File existingShapeFile = new File(uri.getPath());
         inputDir = Mockito.spy(existingShapeFile.getParentFile());
         summaryCSVTool = new SummaryCSVTool(logger, shapeFileReader, "NAME");
     }
