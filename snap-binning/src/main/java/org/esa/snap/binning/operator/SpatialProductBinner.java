@@ -69,6 +69,7 @@ import java.util.logging.Logger;
 public class SpatialProductBinner {
 
     private static final String PROPERTY_KEY_SLICE_HEIGHT = "snap.binning.sliceHeight";
+    private static final String PROPERTY_KEY_SLICE_WIDTH = "snap.binning.sliceWidth";
     private static final String BINNING_MASK_NAME = "_binning_mask";
 
     /**
@@ -182,10 +183,18 @@ public class SpatialProductBinner {
             }
         } else {
             int sceneHeight = referenceImage.getHeight();
-            int numSlices = MathUtils.ceilInt(sceneHeight / (double) defaultSliceSize.height);
+            int sceneWidth = referenceImage.getWidth();
+            int numSlices = MathUtils.ceilInt(sceneHeight * sceneWidth / (double) (defaultSliceSize.height * defaultSliceSize.width ));
             rectangles = new Rectangle[numSlices];
-            for (int i = 0; i < numSlices; i++) {
-                rectangles[i] = computeCurrentSliceRectangle(defaultSliceSize, i, sceneHeight);
+            if (defaultSliceSize.width == sceneWidth) {
+                for (int i = 0; i < numSlices; i++) {
+                    rectangles[i] = computeCurrentSliceRectangle(defaultSliceSize, i, sceneHeight);
+                }
+            }
+            else {
+                for (int i = 0; i < numSlices; i++) {
+                    rectangles[i] = computeCurrentSliceRectange(defaultSliceSize,i,sceneHeight,sceneWidth);
+                }
             }
         }
         return rectangles;
@@ -193,7 +202,7 @@ public class SpatialProductBinner {
 
     private static boolean areTilesDirectlyUsable(MultiLevelImage maskImage, MultiLevelImage[] varImages,
                                                   Dimension defaultSliceSize) {
-        boolean areTilesUsable = false;
+        boolean areTilesUsable = true;
         if (maskImage != null) {
             areTilesUsable = isTileSizeCompatible(maskImage, defaultSliceSize);
         }
@@ -205,6 +214,28 @@ public class SpatialProductBinner {
 
     private static boolean isTileSizeCompatible(MultiLevelImage image, Dimension defaultSliceSize) {
         return image.getTileWidth() == defaultSliceSize.width && image.getTileHeight() == defaultSliceSize.height;
+    }
+
+    private static Rectangle computeCurrentSliceRectange(Dimension defaultSlice, int sliceIndex, int sceneHeight, int sceneWidth) {
+        // first iterate over height, then width
+        int numSliceY = MathUtils.ceilInt (sceneHeight / defaultSlice.height );
+
+        int sliceIndexY = MathUtils.floorInt (sliceIndex / numSliceY );
+        int sliceIndexX = sliceIndex - (sliceIndexY * numSliceY);
+
+        int sliceY = sliceIndexY * defaultSlice.height;
+        int sliceX = sliceIndexX * defaultSlice.width;
+
+        int currentSliceHeight = defaultSlice.height;
+        if (sliceY + defaultSlice.height > sceneHeight) {
+            currentSliceHeight = sceneHeight - sliceY;
+        }
+        int currentSliceWidth = defaultSlice.width;
+        if (sliceX + defaultSlice.width > sceneWidth) {
+            currentSliceWidth = sceneWidth - sliceX;
+        }
+
+        return new Rectangle(sliceX,sliceY,currentSliceWidth,currentSliceHeight);
     }
 
     private static Rectangle computeCurrentSliceRectangle(Dimension defaultSlice, int sliceIndex, int sceneHeight) {
@@ -227,7 +258,7 @@ public class SpatialProductBinner {
 
 
     private static Dimension computeDefaultSliceDimension(Product product) {
-        final int sliceWidth = product.getSceneRasterWidth();
+        int sliceWidth = product.getSceneRasterWidth();
         Dimension preferredTileSize = product.getPreferredTileSize();
         int sliceHeight;
         if (preferredTileSize != null) {
@@ -238,6 +269,9 @@ public class SpatialProductBinner {
 
         // TODO make this a parameter nf/mz 2013-11-05
         sliceHeight = Config.instance().preferences().getInt(PROPERTY_KEY_SLICE_HEIGHT, sliceHeight);
+        if (Config.instance().preferences().getInt(PROPERTY_KEY_SLICE_WIDTH, sliceWidth) != 0) {
+           sliceWidth = Config.instance().preferences().getInt(PROPERTY_KEY_SLICE_WIDTH, sliceWidth);
+        }
         Dimension dimension = new Dimension(sliceWidth, sliceHeight);
         String logMsg = String.format("Using slice dimension [width=%d, height=%d] in binning", dimension.width, dimension.height);
         SystemUtils.LOG.log(Level.INFO, logMsg);
