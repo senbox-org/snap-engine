@@ -31,28 +31,28 @@ public class AllLocalFolderProductsRepositoryTest {
         assertNotNull(queryParameters);
         assertEquals(true, queryParameters.size() > 0);
 
-        RepositoryQueryParameter parameter = findQueryParameter(AllLocalFolderProductsRepository.FOOT_PRINT_PARAMETER, queryParameters);
+        RepositoryQueryParameter parameter = findQueryParameterByName(AllLocalFolderProductsRepository.FOOT_PRINT_PARAMETER, queryParameters);
         assertNotNull(parameter);
         assertEquals(Rectangle2D.class, parameter.getType());
 
-        parameter = findQueryParameter(AllLocalFolderProductsRepository.START_DATE_PARAMETER, queryParameters);
+        parameter = findQueryParameterByName(AllLocalFolderProductsRepository.START_DATE_PARAMETER, queryParameters);
         assertNotNull(parameter);
         assertEquals(Date.class, parameter.getType());
 
-        parameter = findQueryParameter(AllLocalFolderProductsRepository.END_DATE_PARAMETER, queryParameters);
+        parameter = findQueryParameterByName(AllLocalFolderProductsRepository.END_DATE_PARAMETER, queryParameters);
         assertNotNull(parameter);
         assertEquals(Date.class, parameter.getType());
 
-        parameter = findQueryParameter(AllLocalFolderProductsRepository.SENSOR_TYPE_PARAMETER, queryParameters);
+        parameter = findQueryParameterByName(AllLocalFolderProductsRepository.SENSOR_TYPE_PARAMETER, queryParameters);
         assertNotNull(parameter);
         assertEquals(String.class, parameter.getType());
 
-        parameter = findQueryParameter(AllLocalFolderProductsRepository.ATTRIBUTES_PARAMETER, queryParameters);
+        parameter = findQueryParameterByName(AllLocalFolderProductsRepository.ATTRIBUTES_PARAMETER, queryParameters);
         assertNotNull(parameter);
         assertEquals(Attribute.class, parameter.getType());
     }
 
-    private static RepositoryQueryParameter findQueryParameter(String name, List<RepositoryQueryParameter> queryParameters) {
+    private static RepositoryQueryParameter findQueryParameterByName(String name, List<RepositoryQueryParameter> queryParameters) {
         for (int i=0;i<queryParameters.size(); i++) {
             if (name.equals(queryParameters.get(i).getName())) {
                 return queryParameters.get(i);

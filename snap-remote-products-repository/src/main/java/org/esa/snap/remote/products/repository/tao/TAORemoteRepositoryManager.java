@@ -320,7 +320,9 @@ public class TAORemoteRepositoryManager {
                                      throws InstantiationException, IllegalAccessException {
 
         DataSource dataSource = findDataSource(dataSourceName);
-        dataSource.setCredentials(credentials.getUserPrincipal().getName(), credentials.getPassword());
+        if (credentials != null) {
+            dataSource.setCredentials(credentials.getUserPrincipal().getName(), credentials.getPassword());
+        }
 
         DataQuery query = dataSource.createQuery(mission);
 
