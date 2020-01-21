@@ -26,6 +26,9 @@ import java.awt.geom.AffineTransform;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.List;
 import java.util.*;
 import java.util.logging.Logger;
@@ -76,8 +79,10 @@ public class PixExOpTest {
     }
 
     @Test
-    public void testUsingGraph() throws GraphException {
-        String parentDir = new File(getClass().getResource("dummyProduct1.dim").getFile()).getParent();
+    public void testUsingGraph() throws GraphException, URISyntaxException {
+        final URL resource = getClass().getResource("dummyProduct1.dim");
+        final URI uri = new URI(resource.toString());
+        String parentDir = new File(uri.getPath()).getParent();
         int windowSize = 11;
         Coordinate[] coordinates = new Coordinate[]{
                 new Coordinate("carlCoordinate", 60.1, 3.0, null),
@@ -421,7 +426,9 @@ public class PixExOpTest {
 
     @Test
     public void testExtractMatchupCoordinates() throws Exception {
-        final File testFile = new File(getClass().getResource("test.csv").getFile());
+        final URL resource = getClass().getResource("test.csv");
+        final URI uri = new URI(resource.toString());
+        final File testFile = new File(uri.getPath());
         final List<Coordinate> coordinates = PixExOp.extractMatchupCoordinates(testFile);
 
         assertEquals(2, coordinates.size());
