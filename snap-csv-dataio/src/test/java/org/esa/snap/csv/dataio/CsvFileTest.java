@@ -24,6 +24,8 @@ import org.opengis.feature.type.FeatureType;
 import org.opengis.feature.type.PropertyDescriptor;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URL;
 import java.util.Collection;
 import java.util.Map;
 
@@ -39,7 +41,9 @@ public class CsvFileTest {
 
     @Test
     public void testParseProperties() throws Exception {
-        final String simpleFormatExample = getClass().getResource("reader/simple_format_example.txt").getFile();
+        URL url = getClass().getResource("reader/simple_format_example.txt");
+        URI uri = new URI(url.toString());
+        final String simpleFormatExample = uri.getPath();
         final CsvSourceParser parser = CsvFile.createCsvSourceParser(simpleFormatExample);
         parser.parseMetadata();
 
@@ -61,7 +65,9 @@ public class CsvFileTest {
 
     @Test
     public void testParseRecords() throws Exception {
-        final String simpleFormatExample = getClass().getResource("reader/simple_format_example.txt").getFile();
+        URL url = getClass().getResource("reader/simple_format_example.txt");
+        URI uri = new URI(url.toString());
+        final String simpleFormatExample = uri.getPath();
         final CsvSourceParser parser = CsvFile.createCsvSourceParser(simpleFormatExample);
         final CsvSource csvSource = parser.parseMetadata();
         parser.parseRecords(0, 3);
@@ -131,7 +137,9 @@ public class CsvFileTest {
 
     @Test
     public void testParseRecords_NoFeatureId() throws Exception {
-        final String simpleFormatExample = getClass().getResource("reader/simple_format_no_feature_id.txt").getFile();
+        URL url = getClass().getResource("reader/simple_format_no_feature_id.txt");
+        URI uri = new URI(url.toString());
+        final String simpleFormatExample = uri.getPath();
         final CsvSourceParser parser = CsvFile.createCsvSourceParser(simpleFormatExample);
         final CsvSource csvSource = parser.parseMetadata();
         parser.parseRecords(0, 3);
@@ -202,7 +210,9 @@ public class CsvFileTest {
 
     @Test
     public void testParseRecords_NotAllRecords() throws Exception {
-        final String simpleFormatExample = getClass().getResource("reader/simple_format_example.txt").getFile();
+        URL url = getClass().getResource("reader/simple_format_example.txt");
+        URI uri = new URI(url.toString());
+        final String simpleFormatExample = uri.getPath();
         final CsvSourceParser parser = CsvFile.createCsvSourceParser(simpleFormatExample);
         final CsvSource csvSource = parser.parseMetadata();
         parser.parseRecords(1, 2);
@@ -252,7 +262,9 @@ public class CsvFileTest {
 
     @Test
     public void testParseRecords_LessRecordsThanExpected() throws Exception {
-        final String simpleFormatExample = getClass().getResource("reader/simple_format_example.txt").getFile();
+        URL url = getClass().getResource("reader/simple_format_example.txt");
+        URI uri = new URI(url.toString());
+        final String simpleFormatExample = uri.getPath();
         final CsvSourceParser parser = CsvFile.createCsvSourceParser(simpleFormatExample);
         final CsvSource csvSource = parser.parseMetadata();
         parser.parseRecords(0, 10);
@@ -265,7 +277,9 @@ public class CsvFileTest {
 
     @Test
     public void testParseHeader() throws Exception {
-        final String simpleFormatExample = getClass().getResource("reader/simple_format_example.txt").getFile();
+        URL url = getClass().getResource("reader/simple_format_example.txt");
+        URI uri = new URI(url.toString());
+        final String simpleFormatExample = uri.getPath();
         final CsvSourceParser parser = CsvFile.createCsvSourceParser(simpleFormatExample);
         parser.parseMetadata();
 
@@ -297,7 +311,9 @@ public class CsvFileTest {
 
     @Test
     public void testParseHeader_NoFeatureId() throws Exception {
-        final String simpleFormatExample = getClass().getResource("reader/simple_format_no_feature_id.txt").getFile();
+        URL url = getClass().getResource("reader/simple_format_no_feature_id.txt");
+        URI uri = new URI(url.toString());
+        final String simpleFormatExample = uri.getPath();
         final CsvSourceParser parser = CsvFile.createCsvSourceParser(simpleFormatExample);
         parser.parseMetadata();
 

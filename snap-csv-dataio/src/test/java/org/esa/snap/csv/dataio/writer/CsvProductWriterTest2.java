@@ -25,6 +25,8 @@ import org.junit.Test;
 import java.io.LineNumberReader;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.net.URI;
+import java.net.URL;
 import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
@@ -39,7 +41,9 @@ public class CsvProductWriterTest2 {
     public void testWriteFeatures_WhenReadingFromProduct() throws Exception {
         StringWriter result = new StringWriter();
 
-        Product product = ProductIO.readProduct(getClass().getResource("CSV_export_test.dim").getPath());
+        URL url = getClass().getResource("CSV_export_test.dim");
+        URI uri = new URI(url.toString());
+        Product product = ProductIO.readProduct(uri.getPath());
         ProductWriter writer = new CsvProductWriterPlugIn(result, CsvProductWriter.WRITE_FEATURES |
                 CsvProductWriter.WRITE_PROPERTIES).createWriterInstance();
         writer.writeProductNodes(product, "");

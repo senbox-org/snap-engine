@@ -7,6 +7,9 @@ import org.esa.snap.test.LongTestRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.net.URI;
+import java.net.URL;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -16,8 +19,14 @@ public class CsvProduct2x2Test {
 
     @Test
     public void test2x2Product() throws Exception {
-        final String dimap = getClass().getResource("MER_FR__1PNUPA20030808_073810_000000982018_00450_07518_6007.dim").getPath();
-        final String csv = getClass().getResource("MER_FR__1PNUPA20030808_073810_000000982018_00450_07518_6007.csv").getPath();
+        URL urlDimap = getClass().getResource("MER_FR__1PNUPA20030808_073810_000000982018_00450_07518_6007.dim");
+        URI uriDimap = new URI(urlDimap.toString());
+        final String dimap = uriDimap.getPath();
+
+        URL urlCsv = getClass().getResource("MER_FR__1PNUPA20030808_073810_000000982018_00450_07518_6007.csv");
+        URI uriCsv = new URI(urlCsv.toString());
+        final String csv = uriCsv.getPath();
+
         Product dimPro = ProductIO.readProduct(dimap);
         Product csvPro = ProductIO.readProduct(csv);
 
