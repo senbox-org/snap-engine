@@ -44,18 +44,17 @@ public class GeoTiffProductReaderTest {
 
     @Test
     public void testReadProduct() throws Exception {
-        final URL resource = getClass().getResource("tiger-minisblack-strip-16.tif");
+        URL resource = getClass().getResource("tiger-minisblack-strip-16.tif");
         assertNotNull(resource);
 
         FileCacheImageInputStream imageInputStream = new FileCacheImageInputStream(resource.openStream(), null);
         try (GeoTiffImageReader geoTiffImageReader = new GeoTiffImageReader(imageInputStream)) {
-
-            final String filePath = resource.getFile();
+            String filePath = resource.getFile();
             String defaultProductName = FileUtils.getFilenameWithoutExtension(new File(filePath).getName().toString());
 
-            GeoTiffProductReaderPlugIn readerPlugIn = new GeoTiffProductReaderPlugIn();
-            final GeoTiffProductReader productReader = new GeoTiffProductReader(readerPlugIn);
-            final Product product = productReader.readProduct(geoTiffImageReader, defaultProductName);
+            GeoTiffProductReader productReader = buildProductReader();
+
+            Product product = productReader.readProduct(geoTiffImageReader, defaultProductName);
             assertNotNull(product);
             assertNull(product.getFileLocation());
             assertNotNull(product.getMetadataRoot());
@@ -68,13 +67,13 @@ public class GeoTiffProductReaderTest {
             assertEquals(76, product.getSceneRasterHeight());
             assertEquals(1, product.getNumBands());
 
-            final Band band = product.getBandAt(0);
+            Band band = product.getBandAt(0);
             assertNotNull(band);
             assertEquals("band_1", band.getName());
             assertEquals(73, band.getRasterWidth());
             assertEquals(76, band.getRasterHeight());
 
-            final int[] pixels = new int[band.getRasterWidth() * band.getRasterHeight()];
+            int[] pixels = new int[band.getRasterWidth() * band.getRasterHeight()];
             band.readPixels(0, 0, band.getRasterWidth(), band.getRasterHeight(), pixels, ProgressMonitor.NULL);
 
             assertEquals(52428, pixels[20]);
@@ -85,21 +84,19 @@ public class GeoTiffProductReaderTest {
 
     @Test
     public void testReadProductSubset() throws Exception {
-        final URL resource = getClass().getResource("tiger-minisblack-strip-16.tif");
+        URL resource = getClass().getResource("tiger-minisblack-strip-16.tif");
         assertNotNull(resource);
 
         File productFile = new File(resource.toURI());
 
-        GeoTiffProductReaderPlugIn readerPlugIn = new GeoTiffProductReaderPlugIn();
-        final GeoTiffProductReader productReader = new GeoTiffProductReader(readerPlugIn);
+        GeoTiffProductReader productReader = buildProductReader();
 
-        Rectangle subsetRegion = new Rectangle(23, 32, 41, 35);
         ProductSubsetDef subsetDef = new ProductSubsetDef();
         subsetDef.setNodeNames(new String[] { "band_1"} );
-        subsetDef.setRegion(subsetRegion);
+        subsetDef.setRegion(new Rectangle(23, 32, 41, 35));
         subsetDef.setSubSampling(1, 1);
 
-        final Product product = productReader.readProductNodes(productFile, subsetDef);
+        Product product = productReader.readProductNodes(productFile, subsetDef);
         assertNotNull(product);
         assertNotNull(product.getFileLocation());
         assertNull(product.getSceneGeoCoding());
@@ -111,7 +108,7 @@ public class GeoTiffProductReaderTest {
         assertEquals(35, product.getSceneRasterHeight());
         assertEquals(1, product.getNumBands());
 
-        final Band band = product.getBandAt(0);
+        Band band = product.getBandAt(0);
         assertNotNull(band);
         assertEquals("band_1", band.getName());
         assertEquals(41, band.getRasterWidth());
@@ -119,7 +116,7 @@ public class GeoTiffProductReaderTest {
 
         assertEquals(0, product.getMaskGroup().getNodeCount());
 
-        final int[] pixels = new int[band.getRasterWidth() * band.getRasterHeight()];
+        int[] pixels = new int[band.getRasterWidth() * band.getRasterHeight()];
         band.readPixels(0, 0, band.getRasterWidth(), band.getRasterHeight(), pixels, ProgressMonitor.NULL);
 
         assertEquals(33566, pixels[0]);
@@ -134,5 +131,10 @@ public class GeoTiffProductReaderTest {
         assertEquals(53921, pixels[765]);
         assertEquals(16508, pixels[999]);
         assertEquals(46053, pixels[434]);
+    }
+
+    private static GeoTiffProductReader buildProductReader() {
+        GeoTiffProductReaderPlugIn readerPlugIn = new GeoTiffProductReaderPlugIn();
+        return  new GeoTiffProductReader(readerPlugIn);
     }
 }

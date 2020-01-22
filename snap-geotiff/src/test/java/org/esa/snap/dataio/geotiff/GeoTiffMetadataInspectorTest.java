@@ -19,7 +19,7 @@ public class GeoTiffMetadataInspectorTest {
     }
 
     @Test
-    public void testGeoTiffMetadataInspector() throws URISyntaxException, IOException {
+    public void testMetadataInspector() throws URISyntaxException, IOException {
         URL resource = getClass().getResource("tiger-minisblack-strip-16.tif");
         assertNotNull(resource);
 

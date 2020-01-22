@@ -22,7 +22,7 @@ public class JP2MetadataInspectorTest {
     }
 
     @Test
-    public void testGeoTiffMetadataInspector() throws URISyntaxException, IOException {
+    public void testMetadataInspector() throws URISyntaxException, IOException {
         URL resource = getClass().getResource("sample.jp2");
         assertNotNull(resource);
 
