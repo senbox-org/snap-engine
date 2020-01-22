@@ -83,7 +83,7 @@ public class JP2TileOpImage extends SingleBandedOpImage {
             } else {
                 computeRectIndirect(levelDestinationRaster, levelDestinationRectangle);
             }
-        } catch (IOException ex) {
+        } catch (InterruptedException | IOException ex) {
             throw new IllegalStateException("Failed to read the data for level " + getLevel() + " and rectangle " + levelDestinationRectangle + ".", ex);
         }
     }
@@ -103,7 +103,7 @@ public class JP2TileOpImage extends SingleBandedOpImage {
         }
     }
 
-    private void computeRectIndirect(WritableRaster levelDestinationRaster, Rectangle levelDestinationRectangle) throws IOException {
+    private void computeRectIndirect(WritableRaster levelDestinationRaster, Rectangle levelDestinationRectangle) throws InterruptedException, IOException {
         int level = getLevel();
         Path tileDecompressedFile = decompressTile(level);
         if (tileDecompressedFile != null) {
@@ -149,7 +149,7 @@ public class JP2TileOpImage extends SingleBandedOpImage {
         return intersection;
     }
 
-    private Path decompressTile(int level) throws IOException {
+    private Path decompressTile(int level) throws InterruptedException, IOException {
         Path imageFile = getLocalImageFile();
         String imageFileName = PathUtils.getFileNameWithoutExtension(imageFile).toLowerCase() + "_tile_" + String.valueOf(this.decompressTileIndex) + "_" + String.valueOf(level) + ".tif";
         Path tileFile = PathUtils.get(this.cacheDir, imageFileName);

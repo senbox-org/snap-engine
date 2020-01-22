@@ -164,7 +164,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
     protected void readBandRasterDataImpl(int sourceOffsetX, int sourceOffsetY, int sourceWidth, int sourceHeight, int sourceStepX, int sourceStepY,
                                           Band destBand, int destOffsetX, int destOffsetY, int destWidth, int destHeight,
                                           ProductData destBuffer, ProgressMonitor pm)
-                                          throws IOException {
+            throws IOException {
 
         DefaultMultiLevelImage defaultMultiLevelImage = (DefaultMultiLevelImage)destBand.getSourceImage();
         GeoTiffMultiLevelSource geoTiffMultiLevelSource = (GeoTiffMultiLevelSource)defaultMultiLevelImage.getSource();
@@ -321,7 +321,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
     }
 
     private static Product buildProductWithoutDimapHeader(String defaultProductName, TiffFileInfo tiffInfo, TIFFRenderedImage baseImage, int productWidth, int productHeight)
-                                                          throws ParserConfigurationException, SAXException, IOException {
+            throws ParserConfigurationException, SAXException, IOException {
 
         String productName = null;
         if (tiffInfo.containsField(BaselineTIFFTagSet.TAG_IMAGE_DESCRIPTION)) {
@@ -345,7 +345,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
     }
 
     private static Band[] buildBands(TiffFileInfo tiffInfo, TIFFRenderedImage baseImage, int productWidth, int productHeight)
-                                     throws IOException, ParserConfigurationException, SAXException {
+            throws IOException, ParserConfigurationException, SAXException {
 
         SampleModel sampleModel = baseImage.getSampleModel();
         int numBands = sampleModel.getNumBands();
@@ -421,42 +421,48 @@ public class GeoTiffProductReader extends AbstractProductReader {
         return new ImageInfo(new ColorPaletteDef(points, points.length));
     }
 
-    private static boolean applyGeoCoding(TiffFileInfo info, TIFFImageMetadata metadata, int defaultImageWidth, int defaultImageHeight, Product product, Rectangle subsetRegion) {
+    private static boolean applyGeoCoding(TiffFileInfo info, TIFFImageMetadata metadata, int defaultImageWidth, int defaultImageHeight, Product product, Rectangle subsetRegion)
+                                          throws Exception {
+
         boolean isGlobalShifted180 = false;
         if (info.containsField(GeoTIFFTagSet.TAG_MODEL_TIE_POINT)) {
             double[] tiePoints = info.getField(GeoTIFFTagSet.TAG_MODEL_TIE_POINT).getAsDoubles();
-            boolean isGlobal = isGlobal(product.getSceneRasterWidth(), info);
+            int rasterWidth = defaultImageWidth; //product.getSceneRasterWidth();
+            boolean isGlobal = isGlobal(rasterWidth, info);
             // check if we have a global geographic lat/lon with lon from 0..360 instead of -180..180
-            double deltaX = Math.ceil(360.0d / product.getSceneRasterWidth());
+            double deltaX = Math.ceil(360.0d / rasterWidth);
             if (isGlobal && tiePoints.length == 6 && Math.abs(tiePoints[3]) < deltaX) {
                 // e.g. tiePoints[3] = -0.5, productWidth=722 --> we have a lon range of 361 which should start
                 // at or near -180 but not at zero
                 isGlobalShifted180 = true;
-                //TODO Jean compute geocoding for subset
-                TiePointGeoCoding tiePointGeoCoding = buildGlobalShiftedTiePointGeoCoding(info, product.getSceneRasterWidth(), product.getSceneRasterHeight());
+                TiePointGeoCoding tiePointGeoCoding = buildGlobalShiftedTiePointGeoCoding(info, defaultImageWidth, defaultImageHeight, subsetRegion);
                 if (tiePointGeoCoding != null) {
                     product.getTiePointGridGroup().add(tiePointGeoCoding.getLatGrid());
                     product.getTiePointGridGroup().add(tiePointGeoCoding.getLonGrid());
                     product.setSceneGeoCoding(tiePointGeoCoding);
                 }
             } else if (canCreateTiePointGeoCoding(tiePoints)) {
-                applyTiePointGeoCoding(info, tiePoints, product);
+                String[] names = Utils.findSuitableLatLonNames(product);
+                TiePointGeoCoding tiePointGeoCoding = buildTiePointGeoCoding(info, tiePoints, names, subsetRegion);
+                product.addTiePointGrid(tiePointGeoCoding.getLatGrid());
+                product.addTiePointGrid(tiePointGeoCoding.getLonGrid());
+                product.setSceneGeoCoding(tiePointGeoCoding);
             } else if (canCreateGcpGeoCoding(tiePoints)) {
                 applyGcpGeoCoding(info, tiePoints, product);
             }
         }
         if (product.getSceneGeoCoding() == null) {
-            try {
+//            try {
                 CrsGeoCoding crsGeoCoding = buildGeoCoding(metadata, defaultImageWidth, defaultImageHeight, subsetRegion);
                 product.setSceneGeoCoding(crsGeoCoding);
-            } catch (Exception ignored) {
-                // ignore
-            }
+//            } catch (Exception ignored) {
+//                // ignore
+//            }
         }
         return isGlobalShifted180;
     }
 
-    private static TiePointGeoCoding buildGlobalShiftedTiePointGeoCoding(TiffFileInfo info, int productWidth, int productHeight) {
+    private static TiePointGeoCoding buildGlobalShiftedTiePointGeoCoding(TiffFileInfo info, int productWidth, int productHeight, Rectangle subsetRegion) {
         final TIFFField pixelScaleField = info.getField(GeoTIFFTagSet.TAG_MODEL_PIXEL_SCALE);
         final TIFFField tiePointField = info.getField(GeoTIFFTagSet.TAG_MODEL_TIE_POINT);
 
@@ -486,6 +492,14 @@ public class GeoTiffProductReader extends AbstractProductReader {
 
                 TiePointGrid latGrid = new TiePointGrid("latGrid", productWidth, productHeight, 0.0, 0.0, 1.0, 1.0, latPoints);
                 TiePointGrid lonGrid = new TiePointGrid("lonGrid", productWidth, productHeight, 0.0, 0.0, 1.0, 1.0, lonPoints);
+                if (subsetRegion != null) {
+                    ProductSubsetDef productSubsetDef = new ProductSubsetDef();
+                    productSubsetDef.setRegion(subsetRegion);
+                    productSubsetDef.setSubSampling(1, 1);
+                    lonGrid = TiePointGrid.createSubset(lonGrid, productSubsetDef);
+                    latGrid = TiePointGrid.createSubset(latGrid, productSubsetDef);
+                }
+
                 return new TiePointGeoCoding(latGrid, lonGrid);
             }
         }
@@ -568,11 +582,20 @@ public class GeoTiffProductReader extends AbstractProductReader {
                 mapCRS = DefaultGeographicCRS.WGS84;
             }
         }
+        AffineTransform transform = (AffineTransform)toModel;
+        if (metadataDecoder.getModelPixelScales() == null) {
+            Rectangle imageBounds;
+            if (subsetRegion == null) {
+                imageBounds = new Rectangle(0, 0, defaultProductWidth, defaultProductHeight);
+            } else {
+                imageBounds = subsetRegion;
+            }
+            return new CrsGeoCoding(mapCRS, imageBounds, transform);
+        }
         double stepX = metadataDecoder.getModelPixelScales().getScaleX();
         double stepY = metadataDecoder.getModelPixelScales().getScaleY();
-        double originX = ((AffineTransform2D) toModel).getTranslateX();
-        double originY = ((AffineTransform2D) toModel).getTranslateY();
-
+        double originX = transform.getTranslateX();
+        double originY = transform.getTranslateY();
         return ImageUtils.buildCrsGeoCoding(originX, originY, stepX, stepY, defaultProductWidth, defaultProductHeight, mapCRS, subsetRegion);
     }
 
@@ -653,7 +676,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
         }
     }
 
-    private static void applyTiePointGeoCoding(TiffFileInfo info, double[] tiePoints, Product product) {
+    private static TiePointGeoCoding buildTiePointGeoCoding(TiffFileInfo info, double[] tiePoints, String[] names, Rectangle subsetRegion) {
         final SortedSet<Double> xSet = new TreeSet<>();
         final SortedSet<Double> ySet = new TreeSet<>();
         for (int i = 0; i < tiePoints.length; i += 6) {
@@ -694,14 +717,20 @@ public class GeoTiffProductReader extends AbstractProductReader {
             lats[arrayIdx] = (float) tiePoints[i + 4];
         }
 
-        String[] names = Utils.findSuitableLatLonNames(product);
-        final TiePointGrid latGrid = new TiePointGrid(names[0], width, height, xMin, yMin, xDiff, yDiff, lats);
-        final TiePointGrid lonGrid = new TiePointGrid(names[1], width, height, xMin, yMin, xDiff, yDiff, lons);
-        product.addTiePointGrid(latGrid);
-        product.addTiePointGrid(lonGrid);
-        final SortedMap<Integer, GeoKeyEntry> geoKeyEntries = info.getGeoKeyEntries();
-        final Datum datum = getDatum(geoKeyEntries);
-        product.setSceneGeoCoding(new TiePointGeoCoding(latGrid, lonGrid, datum));
+        SortedMap<Integer, GeoKeyEntry> geoKeyEntries = info.getGeoKeyEntries();
+        Datum datum = getDatum(geoKeyEntries);
+
+        TiePointGrid latGrid = new TiePointGrid(names[0], width, height, xMin, yMin, xDiff, yDiff, lats);
+        TiePointGrid lonGrid = new TiePointGrid(names[1], width, height, xMin, yMin, xDiff, yDiff, lons);
+        if (subsetRegion != null) {
+            ProductSubsetDef productSubsetDef = new ProductSubsetDef();
+            productSubsetDef.setRegion(subsetRegion);
+            productSubsetDef.setSubSampling(1, 1);
+            lonGrid = TiePointGrid.createSubset(lonGrid, productSubsetDef);
+            latGrid = TiePointGrid.createSubset(latGrid, productSubsetDef);
+        }
+
+        return new TiePointGeoCoding(latGrid, lonGrid, datum);
     }
 
     private static boolean canCreateGcpGeoCoding(final double[] tiePoints) {

@@ -20,6 +20,7 @@ package org.esa.snap.jp2.reader.internal;
 import org.esa.snap.lib.openjpeg.utils.CommandOutput;
 import org.esa.snap.lib.openjpeg.utils.OpenJpegUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -40,8 +41,7 @@ public class OpjExecutor {
         exePath = executable;
     }
 
-    public int execute(Map<String, String> arguments) {
-        int exitCode = 0;
+    public int execute(Map<String, String> arguments) throws InterruptedException, IOException {
         lastError = null;
         lastOutput = null;
         List<String> args = new ArrayList<>();
@@ -52,18 +52,12 @@ public class OpjExecutor {
         }
         ProcessBuilder builder = new ProcessBuilder(args);
         builder.redirectErrorStream(true);
-        try {
-            CommandOutput commandOutput = OpenJpegUtils.runProcess(builder);
-            lastOutput = commandOutput.getTextOutput();
-            lastError = commandOutput.getErrorOutput();
-            exitCode = commandOutput.getErrorCode();
-        } catch (Exception e) {
-            logger.severe(e.getMessage());
-        }
-        return exitCode;
+
+        CommandOutput commandOutput = OpenJpegUtils.runProcess(builder);
+        lastOutput = commandOutput.getTextOutput();
+        lastError = commandOutput.getErrorOutput();
+        return commandOutput.getErrorCode();
     }
 
     public String getLastError() { return lastError; }
-
-    public String getLastOutput() { return lastOutput; }
 }
