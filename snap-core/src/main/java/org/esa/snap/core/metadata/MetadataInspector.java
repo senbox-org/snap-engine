@@ -25,6 +25,7 @@ public interface MetadataInspector {
 
         private int productWidth;
         private int productHeight;
+        private GeoCoding geoCoding;
 
         public Metadata() {
             this(0, 0);
@@ -38,7 +39,13 @@ public interface MetadataInspector {
             setProductHeight(productHeight);
         }
 
-        private GeoCoding geoCoding;
+        public void addBandName(String bandName) {
+            this.bandList.add(bandName);
+        }
+
+        public void addMaskName(String maskName) {
+            this.maskList.add(maskName);
+        }
 
         public TreeSet<String> getBandList() {
             return bandList;
