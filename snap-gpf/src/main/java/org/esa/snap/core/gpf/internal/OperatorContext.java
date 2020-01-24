@@ -410,27 +410,35 @@ public class OperatorContext {
         return computeTileStackMethodImplemented;
     }
 
-    public Tile getSourceTile(RasterDataNode rasterDataNode, Rectangle region) {
+    public Tile getSourceTile(RasterDataNode rasterDataNode, Rectangle region) throws OperatorException {
         return getSourceTile(rasterDataNode, region, null);
     }
 
-    public Tile getSourceTile(RasterDataNode rasterDataNode, Rectangle region, BorderExtender borderExtender) {
+    public Tile getSourceTile(RasterDataNode rasterDataNode, Rectangle region, BorderExtender borderExtender)
+            throws OperatorException {
+        Tile tile;
         suspendWatch();
-        MultiLevelImage image = rasterDataNode.getSourceImage();
-        /////////////////////////////////////////////////////////////////////
-        //
-        // Note: GPF pull-processing is triggered here!
-        //
-        Raster awtRaster;
-        if (borderExtender != null) {
-            awtRaster = image.getExtendedData(region, borderExtender);
-        } else {
-            awtRaster = image.getData(region); // Note: copyData is NOT faster!
+        try {
+            MultiLevelImage image = rasterDataNode.getSourceImage();
+            /////////////////////////////////////////////////////////////////////
+            //
+            // Note: GPF pull-processing is triggered here!
+            //
+            Raster awtRaster;
+            if (borderExtender != null) {
+                awtRaster = image.getExtendedData(region, borderExtender);
+            } else {
+                awtRaster = image.getData(region); // Note: copyData is NOT faster!
+            }
+            tile = new TileImpl(rasterDataNode, awtRaster);
+        } catch (IllegalArgumentException | NullPointerException e) {
+            throw new OperatorException(e.getMessage());
+        } finally {
+            resumeWatch();
         }
         //
         /////////////////////////////////////////////////////////////////////
-        resumeWatch();
-        return new TileImpl(rasterDataNode, awtRaster);
+        return tile;
     }
 
     public OperatorImage getTargetImage(Band band) {
