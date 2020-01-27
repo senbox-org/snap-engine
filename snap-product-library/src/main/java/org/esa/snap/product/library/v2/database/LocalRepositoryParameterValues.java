@@ -1,5 +1,8 @@
 package org.esa.snap.product.library.v2.database;
 
+import org.esa.snap.product.library.v2.database.model.LocalRepositoryFolder;
+import org.esa.snap.product.library.v2.database.model.RemoteMission;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;

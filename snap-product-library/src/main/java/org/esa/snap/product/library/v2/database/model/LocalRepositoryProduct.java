@@ -1,4 +1,4 @@
-package org.esa.snap.product.library.v2.database;
+package org.esa.snap.product.library.v2.database.model;
 
 import org.esa.snap.remote.products.repository.Attribute;
 import org.esa.snap.remote.products.repository.DataFormatType;
@@ -107,15 +107,15 @@ public class LocalRepositoryProduct implements RepositoryProduct {
         this.quickLookImage = quickLookImage;
     }
 
-    void setAttributes(List<Attribute> attributes) {
+    public void setAttributes(List<Attribute> attributes) {
         this.attributes = attributes;
     }
 
-    void setMission(String mission) {
+    public void setMission(String mission) {
         this.mission = mission;
     }
 
-    int getId() {
+    public int getId() {
         return id;
     }
 

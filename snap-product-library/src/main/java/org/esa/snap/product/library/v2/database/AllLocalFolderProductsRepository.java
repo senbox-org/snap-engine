@@ -1,6 +1,9 @@
 package org.esa.snap.product.library.v2.database;
 
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.product.library.v2.database.model.LocalRepositoryFolder;
+import org.esa.snap.product.library.v2.database.model.LocalRepositoryProduct;
+import org.esa.snap.product.library.v2.database.model.RemoteMission;
 import org.esa.snap.remote.products.repository.Attribute;
 import org.esa.snap.remote.products.repository.Polygon2D;
 import org.esa.snap.remote.products.repository.RepositoryProduct;

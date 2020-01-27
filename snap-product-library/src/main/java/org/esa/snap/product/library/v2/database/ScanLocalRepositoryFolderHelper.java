@@ -1,5 +1,7 @@
 package org.esa.snap.product.library.v2.database;
 
+import org.esa.snap.product.library.v2.database.model.LocalRepositoryFolder;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.sql.SQLException;

@@ -1,5 +1,9 @@
 package org.esa.snap.product.library.v2.database;
 
+import org.esa.snap.product.library.v2.database.model.LocalRepositoryFolder;
+import org.esa.snap.product.library.v2.database.model.LocalRepositoryProduct;
+import org.esa.snap.product.library.v2.database.model.RemoteMission;
+import org.esa.snap.product.library.v2.database.model.RemoteRepository;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Polygon;
@@ -79,15 +83,21 @@ class LocalRepositoryDatabaseLayer {
 
     static List<RemoteMission> loadMissions(Statement statement) throws SQLException {
         StringBuilder sql = new StringBuilder();
-        sql.append("SELECT rm.id, rm.name FROM ")
+        sql.append("SELECT rm.id, rm.name, rr.id AS remote_repository_id, rr.name AS remote_repository_name FROM ")
                 .append(DatabaseTableNames.REMOTE_MISSIONS)
-                .append(" AS rm ");
+                .append(" AS rm, ")
+                .append(DatabaseTableNames.REMOTE_REPOSITORIES)
+                .append(" AS rr ")
+                .append(" WHERE rm.remote_repository_id = rr.id");
         try (ResultSet resultSet = statement.executeQuery(sql.toString())) {
             List<RemoteMission> missions = new ArrayList<>();
             while (resultSet.next()) {
                 short id = resultSet.getShort("id");
                 String name = resultSet.getString("name");
-                missions.add(new RemoteMission(id, name));
+                short remoteRepositoryId = resultSet.getShort("remote_repository_id");
+                String remoteRepositoryName = resultSet.getString("remote_repository_name");
+                RemoteRepository remoteRepository = new RemoteRepository(remoteRepositoryId, remoteRepositoryName);
+                missions.add(new RemoteMission(id, name, remoteRepository));
             }
             return missions;
         }
@@ -624,6 +634,7 @@ class LocalRepositoryDatabaseLayer {
 
         int productId;
         short remoteMissionId;
+        RemoteRepository remoteRepository;
         LocalRepositoryFolder localRepositoryFolder;
         try (Connection connection = H2DatabaseAccessor.getConnection(databaseParameters)) {
             boolean success = false;
@@ -633,6 +644,8 @@ class LocalRepositoryDatabaseLayer {
                 Path relativePath = extractProductPathRelativeToLocalRepositoryFolder(productPath, localRepositoryFolder.getPath());
 
                 short remoteRepositoryId = saveRemoteRepositoryName(remoteRepositoryName, connection);
+                remoteRepository = new RemoteRepository(remoteRepositoryId, remoteRepositoryName);
+
                 remoteMissionId = saveRemoteMissionName(remoteRepositoryId, productToSave.getMission(), productToSave.getAttributes(), connection);
 
                 FileTime fileTime = Files.getLastModifiedTime(productPath);
@@ -673,7 +686,7 @@ class LocalRepositoryDatabaseLayer {
             Attribute attribute = productToSave.getAttributes().get(i);
             productAttributeNames.add(attribute.getName());
         }
-        RemoteMission remoteMission = new RemoteMission(remoteMissionId, productToSave.getMission());
+        RemoteMission remoteMission = new RemoteMission(remoteMissionId, productToSave.getMission(), remoteRepository);
         return new SaveDownloadedProductData(productId, remoteMission, localRepositoryFolder, productAttributeNames);
     }
 

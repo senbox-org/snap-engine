@@ -43,6 +43,14 @@
                     <groupId>org.eclipse.persistence</groupId>
                     <artifactId>org.eclipse.persistence.moxy</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.codehaus.woodstox</groupId>
+                    <artifactId>stax2-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml.woodstox</groupId>
+                    <artifactId>woodstox-core</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>

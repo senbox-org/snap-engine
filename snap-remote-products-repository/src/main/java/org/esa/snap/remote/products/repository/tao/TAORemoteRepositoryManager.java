@@ -4,15 +4,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.auth.Credentials;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.esa.snap.remote.products.repository.Attribute;
-import org.esa.snap.remote.products.repository.DataFormatType;
-import org.esa.snap.remote.products.repository.PixelType;
-import org.esa.snap.remote.products.repository.Polygon2D;
-import org.esa.snap.remote.products.repository.RemoteProductsRepositoryProvider;
-import org.esa.snap.remote.products.repository.RepositoryProduct;
-import org.esa.snap.remote.products.repository.RepositoryQueryParameter;
-import org.esa.snap.remote.products.repository.SensorType;
-import org.esa.snap.remote.products.repository.ThreadStatus;
+import org.esa.snap.remote.products.repository.*;
 import org.esa.snap.remote.products.repository.listener.ProductListDownloaderListener;
 import org.esa.snap.remote.products.repository.listener.ProgressListener;
 import org.locationtech.jts.geom.Coordinate;
@@ -20,6 +12,7 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
+import ro.cs.tao.configuration.ConfigurationManager;
 import ro.cs.tao.datasource.DataQuery;
 import ro.cs.tao.datasource.DataSource;
 import ro.cs.tao.datasource.DataSourceComponent;
@@ -41,6 +34,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -65,6 +59,7 @@ public class TAORemoteRepositoryManager {
     private final Map<String, DataSourceComponent> downloadingProducts;
 
     private TAORemoteRepositoryManager() {
+        ConfigurationManager.setConfigurationProvider(new TAOConfigurationProvider());
         Set<DataSource> services = DataSourceManager.getInstance().getRegisteredDataSources();
         this.remoteRepositoryProductProviders = new RemoteProductsRepositoryProvider[services.size()];
         int index = 0;
@@ -193,7 +188,7 @@ public class TAORemoteRepositoryManager {
 
                 StatusLine statusLine = response.getStatusLine();
                 switch (statusLine.getStatusCode()) {
-                    case 200:
+                    case HttpURLConnection.HTTP_OK:
                         HttpEntity entity = response.getEntity();
                         InputStream inputStream = entity.getContent();
                         if (inputStream == null) {
@@ -217,10 +212,12 @@ public class TAORemoteRepositoryManager {
                         } finally {
                             inputStream.close();
                         }
-                    case 401:
-                        throw new IOException("401: Unauthorized or the supplied credentials are invalid");
+                    case HttpURLConnection.HTTP_UNAUTHORIZED:
+                        throw new HTTPServerException(HttpURLConnection.HTTP_UNAUTHORIZED, "Unauthorized or the supplied credentials are invalid.");
+                    case HttpURLConnection.HTTP_INTERNAL_ERROR:
+                        throw new HTTPServerException(HttpURLConnection.HTTP_INTERNAL_ERROR, "Internal Server Error");
                     default:
-                        throw new IOException(String.valueOf(statusLine.getStatusCode()) + ": " + statusLine.getReasonPhrase());
+                        throw new HTTPServerException(statusLine.getStatusCode(), String.valueOf(statusLine.getStatusCode()) + ": " + statusLine.getReasonPhrase());
                 }
             } else {
                 throw new IOException(String.format("Null response (maybe url %s is not reachable", url));

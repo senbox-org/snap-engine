@@ -1,4 +1,4 @@
-package org.esa.snap.product.library.v2.database;
+package org.esa.snap.product.library.v2.database.model;
 
 import java.nio.file.Path;
 
