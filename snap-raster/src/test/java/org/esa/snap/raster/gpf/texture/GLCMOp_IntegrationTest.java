@@ -10,6 +10,8 @@ import org.junit.runner.RunWith;
 
 import java.awt.image.Raster;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 
@@ -24,9 +26,10 @@ public class GLCMOp_IntegrationTest {
             "subset_0_of_S2B_MSIL1C_20170718T101029_N0205_R022_T34VCL_20170718T101346_idepix_c2rcc_normal.dim";
 
     @Test
-    public void testGLCMOp_Integration() throws IOException {
+    public void testGLCMOp_Integration() throws IOException, URISyntaxException {
         URL resource = getClass().getResource(SOURCE_PRODUCT_NAME);
-        Product sourceProduct = ProductIO.readProduct(resource.getFile());
+        final URI uri = new URI(resource.toString());
+        Product sourceProduct = ProductIO.readProduct(uri.getPath());
 
         HashMap<String, Object> parameters = new HashMap<>();
         parameters.put("sourceBands", "conc_chl,conc_chl_masked");

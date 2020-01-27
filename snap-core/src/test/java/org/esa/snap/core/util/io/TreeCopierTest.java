@@ -22,7 +22,7 @@ public class TreeCopierTest {
     public static void setUpClass() throws Exception {
         tempDirectory = Files.createTempDirectory(TreeCopierTest.class.getName());
         URI uri = TreeCopierTest.class.getResource("testZip.zip").toURI();
-        URI zipUri = URI.create("jar:file:" + uri.getPath() + "!/");
+        URI zipUri = URI.create("jar:file:" + uri.getPath().replaceAll(" ","%20") + "!/");
         FileSystems.newFileSystem(zipUri, Collections.emptyMap());
         testZip = Paths.get(zipUri);
     }

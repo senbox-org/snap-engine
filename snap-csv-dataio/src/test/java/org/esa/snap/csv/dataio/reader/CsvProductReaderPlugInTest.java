@@ -21,6 +21,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 import static org.junit.Assert.*;
 
@@ -40,11 +43,11 @@ public class CsvProductReaderPlugInTest {
 
     @Test
     public void testGetDecodeQualification() throws Exception {
-        File validFile = new File(getClass().getResource("simple_format_example.txt").getFile());
-        File validFileWithoutProperties = new File(getClass().getResource("simple_format_no_properties.txt").getFile());
-        File invalidProperties = new File(getClass().getResource("simple_format_invalid_properties.txt").getFile());
-        File invalidHeader = new File(getClass().getResource("simple_format_no_header.txt").getFile());
-        File invalidType = new File(getClass().getResource("simple_format_invalid_type.txt").getFile());
+        File validFile = new File(getResourceFilePath("simple_format_example.txt"));
+        File validFileWithoutProperties = new File(getResourceFilePath("simple_format_no_properties.txt"));
+        File invalidProperties = new File(getResourceFilePath("simple_format_invalid_properties.txt"));
+        File invalidHeader = new File(getResourceFilePath("simple_format_no_header.txt"));
+        File invalidType = new File(getResourceFilePath("simple_format_invalid_type.txt"));
 
         assertEquals(DecodeQualification.SUITABLE, csvProductReaderPlugIn.getDecodeQualification(validFile));
         assertEquals(DecodeQualification.SUITABLE, csvProductReaderPlugIn.getDecodeQualification(validFileWithoutProperties));
@@ -61,5 +64,11 @@ public class CsvProductReaderPlugInTest {
     @Test
     public void testGetDescription() throws Exception {
         assertEquals("CSV products", csvProductReaderPlugIn.getDescription(null));
+    }
+
+    private String getResourceFilePath (String name) throws URISyntaxException {
+        URL url = getClass().getResource(name);
+        URI uri = new URI(url.toString());
+        return uri.getPath();
     }
 }
