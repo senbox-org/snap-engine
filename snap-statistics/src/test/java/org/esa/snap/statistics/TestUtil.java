@@ -6,11 +6,16 @@ import org.esa.snap.core.util.Guardian;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 public class TestUtil {
 
-    public static Product getTestProduct() throws IOException {
-        return ProductIO.readProduct(TestUtil.class.getResource("testProduct1.dim").getFile());
+    public static Product getTestProduct() throws IOException, URISyntaxException {
+        URL resource = TestUtil.class.getResource("testProduct1.dim");
+        final URI uri = new URI(resource.toString());
+        return ProductIO.readProduct(uri.getPath());
     }
 
     public static void deleteTreeOnExit(File tree) {
