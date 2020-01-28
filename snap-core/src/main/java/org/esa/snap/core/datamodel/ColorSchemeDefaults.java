@@ -1,6 +1,9 @@
 package org.esa.snap.core.datamodel;
 
 import org.esa.snap.core.util.PropertyMap;
+import org.esa.snap.core.util.SystemUtils;
+
+import java.nio.file.Path;
 
 /**
  * Created by knowles on 11/20/19.
@@ -219,9 +222,13 @@ public class ColorSchemeDefaults {
     }
 
 
+    public static Path getColorPalettesDir() {
+        return SystemUtils.getAuxDataPath().resolve("color_palettes");
+    }
 
 
-
-
+    public static Path getColorSchemeDir() {
+        return SystemUtils.getAuxDataPath().resolve("color_schemes");
+    }
 
 }
