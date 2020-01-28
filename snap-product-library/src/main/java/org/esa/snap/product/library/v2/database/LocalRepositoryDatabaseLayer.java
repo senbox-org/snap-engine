@@ -264,6 +264,7 @@ class LocalRepositoryDatabaseLayer {
 
             Calendar calendar = Calendar.getInstance();
             try (PreparedStatement prepareStatement = wrappedConnection.prepareStatement(sql.toString())) {
+                int parameterIndex = 1;
                 if (startDate != null) {
                     calendar.setTimeInMillis(startDate.getTime());
                     calendar.set(Calendar.HOUR_OF_DAY, 0);
@@ -271,7 +272,7 @@ class LocalRepositoryDatabaseLayer {
                     calendar.set(Calendar.SECOND, 0);
                     calendar.set(Calendar.MILLISECOND, 0);
                     java.sql.Timestamp startTimestamp = new java.sql.Timestamp(calendar.getTimeInMillis());
-                    prepareStatement.setTimestamp(1, startTimestamp);
+                    prepareStatement.setTimestamp(parameterIndex++, startTimestamp);
                 }
                 if (endDate != null) {
                     calendar.setTimeInMillis(endDate.getTime());
@@ -280,7 +281,7 @@ class LocalRepositoryDatabaseLayer {
                     calendar.set(Calendar.SECOND, 59);
                     calendar.set(Calendar.MILLISECOND, 0);
                     java.sql.Timestamp endTimestamp = new java.sql.Timestamp(calendar.getTimeInMillis());
-                    prepareStatement.setTimestamp(2, endTimestamp);
+                    prepareStatement.setTimestamp(parameterIndex++, endTimestamp);
                 }
                 try (SpatialResultSet resultSet = prepareStatement.executeQuery().unwrap(SpatialResultSet.class)) {
                     productList = new ArrayList<>();
