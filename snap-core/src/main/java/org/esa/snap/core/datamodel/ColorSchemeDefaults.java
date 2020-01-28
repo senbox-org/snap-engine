@@ -11,8 +11,8 @@ public class ColorSchemeDefaults {
     //    public static final String DEFAULT_CPD_FILENAME = "gray_scale.cpd";
     public static final String DEFAULT_CPD_FILENAME = "oceancolor_standard.cpd";
 
-    public static final String COLOR_SCHEME_LUT_FILENAME = "color_palette_scheme_defaults.txt";
-    public static final String COLOR_SCHEMES_FILENAME = "color_palette_schemes.txt";
+    public static final String COLOR_SCHEME_LUT_FILENAME = "color_palette_scheme_defaults.xml";
+    public static final String COLOR_SCHEMES_FILENAME = "color_palette_schemes.xml";
 
     public static final double DOUBLE_NULL = -Double.MAX_VALUE;
     public static final String NULL_ENTRY = "null";
