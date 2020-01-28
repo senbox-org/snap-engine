@@ -48,6 +48,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -104,9 +107,10 @@ public class VectorDataNodeReaderTest {
         assertEquals(Point.class, attributeDescriptors.get(8).getType().getBinding());
     }
 
-    private String readStringFromFile(String name) throws IOException {
-        String file = getClass().getResource(name).getFile();
-        BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
+    private String readStringFromFile(String name) throws IOException, URISyntaxException {
+        URL url = getClass().getResource(name);
+        URI uri = new URI(url.toString());
+        BufferedReader bufferedReader = new BufferedReader(new FileReader(uri.getPath()));
         StringBuilder b = new StringBuilder();
         while (true) {
             String s = bufferedReader.readLine();

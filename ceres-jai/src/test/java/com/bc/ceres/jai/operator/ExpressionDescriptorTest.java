@@ -19,10 +19,10 @@ package com.bc.ceres.jai.operator;
 import com.bc.ceres.jai.ExpressionCompilerConfig;
 import com.bc.ceres.jai.opimage.ExpressionCRIF;
 import com.bc.ceres.jai.opimage.ExpressionOpImage_1;
-import junit.framework.TestCase;
-import org.jdom2.Document;
-import org.jdom2.JDOMException;
-import org.jdom2.input.SAXBuilder;
+import org.junit.Assert;
+import org.junit.Assume;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import javax.media.jai.ImageLayout;
 import javax.media.jai.JAI;
@@ -35,16 +35,13 @@ import java.awt.image.PixelInterleavedSampleModel;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
-import static java.lang.Math.*;
+import static java.lang.Math.sqrt;
 
-public class ExpressionDescriptorTest extends TestCase {
-
-    private static final String M2REPO;
+public class ExpressionDescriptorTest {
 
     private static final int W = 4;
     private static final int H = 5;
@@ -59,28 +56,31 @@ public class ExpressionDescriptorTest extends TestCase {
     private static final float N2 = 2.7f;
     private static final int N1 = 32;
 
-    static {
-        String localRepositoryPath = System.getProperty("m2repo");
 
-        if (localRepositoryPath == null) {
-            final String settingsFile = new File(System.getProperty("user.home"), ".m2/settings.xml").getPath();
+    private static final String JAI_CORE_NAME = "jai-core";
+    private static String jaiCoreLibPath;
+    private static final String JAI_CODEC_NAME = "jai-codec";
+    private static String jaiCodecLibPath;
 
-            try {
-                final Document document = new SAXBuilder().build(settingsFile);
-                localRepositoryPath = document.getRootElement().getChildText("localRepository");
-            } catch (JDOMException e) {
-                // ignore;
-            } catch (IOException e) {
-                // ignore;
+    @BeforeClass
+    public static void setUpClass() {
+        String classPath = System.getProperty("java.class.path");
+        String[] split = classPath.split(File.pathSeparator);
+        for (String s : split) {
+            if (s.contains(JAI_CORE_NAME)) {
+                jaiCoreLibPath = s;
             }
-            if (localRepositoryPath == null) {
-                localRepositoryPath = new File(System.getProperty("user.home"), ".m2/repository").getPath();
+            if (s.contains(JAI_CODEC_NAME)) {
+                jaiCodecLibPath = s;
             }
         }
 
-        M2REPO = localRepositoryPath;
+        String msg = String.format("Couldn't find %s and/or %s library on classpath", JAI_CORE_NAME, JAI_CODEC_NAME);
+        Assume.assumeTrue(msg, jaiCoreLibPath != null || jaiCodecLibPath != null);
     }
 
+
+    @Test
     public void testDescriptor() {
         ParameterBlockJAI params = createParameterBlock(DataBuffer.TYPE_DOUBLE,
                                                         "S1 * S2 / S3 % S4 + S5 - S6");
@@ -98,6 +98,7 @@ public class ExpressionDescriptorTest extends TestCase {
         testDestinationImage(op, (float) sqrt(S5));
     }
 
+    @Test
     public void testCRIF() {
         ParameterBlockJAI params = createParameterBlock(DataBuffer.TYPE_DOUBLE,
                                                         "S1 * S2 / S3 % S4 + S5 - S6");
@@ -109,6 +110,7 @@ public class ExpressionDescriptorTest extends TestCase {
     /**
      * Tests the ExpressionOpImage code that has been created using the testCreate() method.
      */
+    @Test
     public void testGeneratedExpressionOpImage() {
         HashMap<String, RenderedImage> sourceMap = createSourceMap();
         Vector<RenderedImage> sources = new Vector<RenderedImage>();
@@ -123,15 +125,10 @@ public class ExpressionDescriptorTest extends TestCase {
     }
 
     static ExpressionCompilerConfig createExpressionCompilerConfig() {
-        File m2repo = new File(M2REPO);
-        if (!m2repo.exists()) {
-            fail("Maven2 repository not found at " + m2repo + ".\nPlease adjust system property 'm2repo'.");
-        }
-
         File outputDir = new File("./target/test-classes");
         File[] classPath = {
-                new File(m2repo, "javax/media/jai/jai-core/1.1.3/jai-core-1.1.3.jar"),
-                new File(m2repo, "javax/media/jai/jai-codec/1.1.3/jai-codec-1.1.3.jar"),
+                new File(jaiCoreLibPath),
+                new File(jaiCodecLibPath),
                 new File("./target/classes"),
                 new File("./target/test-classes")
         };
@@ -177,25 +174,25 @@ public class ExpressionDescriptorTest extends TestCase {
     }
 
     private static void testDestinationImage(RenderedImage image, double expectedSample) {
-        assertNotNull(image);
-        assertEquals(W, image.getWidth());
-        assertEquals(H, image.getHeight());
+        Assert.assertNotNull(image);
+        Assert.assertEquals(W, image.getWidth());
+        Assert.assertEquals(H, image.getHeight());
         Raster data = image.getData();
-        assertEquals(expectedSample, data.getSampleDouble(0, 0, 0), 1e-10);
-        assertEquals(expectedSample, data.getSampleDouble(1, 1, 0), 1e-10);
-        assertEquals(expectedSample, data.getSampleDouble(2, 2, 0), 1e-10);
-        assertEquals(expectedSample, data.getSampleDouble(3, 3, 0), 1e-10);
+        Assert.assertEquals(expectedSample, data.getSampleDouble(0, 0, 0), 1e-10);
+        Assert.assertEquals(expectedSample, data.getSampleDouble(1, 1, 0), 1e-10);
+        Assert.assertEquals(expectedSample, data.getSampleDouble(2, 2, 0), 1e-10);
+        Assert.assertEquals(expectedSample, data.getSampleDouble(3, 3, 0), 1e-10);
     }
 
     private static void testDestinationImage(RenderedImage image, int expectedSample) {
-        assertNotNull(image);
-        assertEquals(W, image.getWidth());
-        assertEquals(H, image.getHeight());
+        Assert.assertNotNull(image);
+        Assert.assertEquals(W, image.getWidth());
+        Assert.assertEquals(H, image.getHeight());
         Raster data = image.getData();
-        assertEquals(expectedSample, data.getSample(0, 0, 0));
-        assertEquals(expectedSample, data.getSample(1, 1, 0));
-        assertEquals(expectedSample, data.getSample(2, 2, 0));
-        assertEquals(expectedSample, data.getSample(3, 3, 0));
+        Assert.assertEquals(expectedSample, data.getSample(0, 0, 0));
+        Assert.assertEquals(expectedSample, data.getSample(1, 1, 0));
+        Assert.assertEquals(expectedSample, data.getSample(2, 2, 0));
+        Assert.assertEquals(expectedSample, data.getSample(3, 3, 0));
     }
 
     static RenderedOp createSourceImage(Number[] v) {

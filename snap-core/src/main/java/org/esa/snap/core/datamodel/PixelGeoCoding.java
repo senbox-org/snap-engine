@@ -30,10 +30,25 @@ import org.esa.snap.core.util.math.IndexValidator;
 import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.runtime.Config;
 
-import javax.media.jai.*;
+import javax.media.jai.ImageLayout;
+import javax.media.jai.Interpolation;
+import javax.media.jai.JAI;
+import javax.media.jai.PointOpImage;
+import javax.media.jai.RasterAccessor;
+import javax.media.jai.RasterFactory;
+import javax.media.jai.RasterFormatTag;
+import javax.media.jai.RenderedOp;
 import javax.media.jai.operator.ScaleDescriptor;
-import java.awt.*;
-import java.awt.image.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
+import java.awt.image.ComponentSampleModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.Raster;
+import java.awt.image.RenderedImage;
+import java.awt.image.SampleModel;
+import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -90,9 +105,6 @@ public class PixelGeoCoding extends AbstractGeoCoding implements BasicPixelGeoCo
     private static final String SYSPROP_PIXEL_GEO_CODING_FRACTION_ACCURACY = "snap.pixelGeoCoding.fractionAccuracy";
 
     private static final int MAX_SEARCH_CYCLES = 10;
-
-    // TODO - (nf) make EPS for quad-tree search dependent on current scene
-    private static final double EPS = 0.04; // used by quad-tree search
     private static final boolean TRACE = false;
     private static final double D2R = Math.PI / 180.0;
     private final Band latBand;
@@ -104,6 +116,7 @@ public class PixelGeoCoding extends AbstractGeoCoding implements BasicPixelGeoCo
     private final boolean useTiling;
     private final boolean fractionAccuracy;
     private final boolean estimatorCreatedInternally;
+    private double EPS; // used by quad-tree search
     private Boolean crossingMeridianAt180;
     private GeoCoding pixelPosEstimator;
     private PixelGrid latGrid;
@@ -147,6 +160,7 @@ public class PixelGeoCoding extends AbstractGeoCoding implements BasicPixelGeoCo
         this.lonBand = lonBand;
         validMaskExpression = validMask;
         this.searchRadius = searchRadius;
+        this.EPS = 0.02;    // will be set later to a more appropriate value, depending on the data resolutions
 
         rasterWidth = latBand.getRasterWidth();
         rasterHeight = latBand.getRasterHeight();
@@ -431,6 +445,21 @@ public class PixelGeoCoding extends AbstractGeoCoding implements BasicPixelGeoCo
                 }
             }
         }
+    }
+
+    private void setEpsilon() {
+        final int x_center = rasterWidth / 2;
+        final int y_center = rasterHeight / 2;
+
+        final GeoPos geoPos_1 = new GeoPos();
+        final GeoPos geoPos_2 = new GeoPos();
+        getGeoPosInternal(x_center, y_center, geoPos_1);
+        getGeoPosInternal(x_center + 1, y_center + 1, geoPos_2);
+
+        final double deltaLat = Math.abs(geoPos_1.lat - geoPos_2.lat);
+        final double deltaLon = Math.abs(geoPos_1.lon - geoPos_2.lon);
+
+        EPS = Math.max(deltaLat, deltaLon) / Math.sqrt(2);
     }
 
     private String getUniqueMaskName(Product product, String startName) {
@@ -748,14 +777,24 @@ public class PixelGeoCoding extends AbstractGeoCoding implements BasicPixelGeoCo
 
         final Result result = new Result();
         boolean pixelFound = quadTreeSearch(0,
-                geoPos.lat, geoPos.lon,
-                0, 0,
-                rasterWidth,
-                rasterHeight,
-                result);
+                                            geoPos.lat, geoPos.lon,
+                                            0, 0,
+                                            rasterWidth,
+                                            rasterHeight,
+                                            result);
 
         if (pixelFound) {
-            pixelPos.setLocation(result.x + 0.5f, result.y + 0.5f);
+            final GeoPos resultGeoPos = new GeoPos();
+            getGeoPosInternal(result.x, result.y, resultGeoPos);
+            final double absLon = Math.abs(resultGeoPos.lon - geoPos.lon);
+            final double absLat = Math.abs(resultGeoPos.lat - geoPos.lat);
+            final double distance = Math.max(absLat, absLon);
+
+            if (distance < EPS) {
+                pixelPos.setLocation(result.x + 0.5f, result.y + 0.5f);
+            } else {
+                pixelPos.setInvalid();
+            }
         } else {
             pixelPos.setInvalid();
         }
@@ -765,6 +804,7 @@ public class PixelGeoCoding extends AbstractGeoCoding implements BasicPixelGeoCo
         if (!initialized) {
             try {
                 initData(latBand, lonBand, validMaskExpression, ProgressMonitor.NULL);
+                setEpsilon();
             } catch (IOException e) {
                 throw new IllegalStateException("Unable to initialise data for pixel geo-coding", e);
             }

@@ -75,7 +75,7 @@ import java.util.Map;
  * @since BEAM 4.7
  */
 @OperatorMetadata(alias = "Mosaic",
-                  category = "Raster/Geometric",
+                  category = "Raster/Geometric Operations",
                   version = "1.0",
                   authors = "Marco Peters, Ralf Quast, Marco Zühlke",
                   copyright = "(c) 2009 by Brockmann Consult",

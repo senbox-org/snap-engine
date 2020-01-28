@@ -64,7 +64,7 @@ import static java.text.MessageFormat.*;
  * @since BEAM 4.1
  */
 @OperatorMetadata(alias = "Collocate",
-        category = "Raster/Geometric",
+        category = "Raster/Geometric Operations",
         version = "1.2",
         authors = "Ralf Quast, Norman Fomferra",
         copyright = "(c) 2007-2011 by Brockmann Consult",

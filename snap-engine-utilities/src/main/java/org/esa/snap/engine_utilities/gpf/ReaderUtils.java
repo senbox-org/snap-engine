@@ -74,8 +74,11 @@ public final class ReaderUtils {
 
     public static Band createVirtualIntensityBand(final Product product, final Band bandI, final Band bandQ,
                                                   final String bandName, final String suffix) {
-        final String expression = bandI.getName() + " * " + bandI.getName() + " + " +
-                bandQ.getName() + " * " + bandQ.getName();
+        final String bandNameI = bandI.getName();
+        final double nodatavalueI = bandI.getNoDataValue();
+        final String bandNameQ = bandQ.getName();
+        final String expression = bandNameI +" == " + nodatavalueI +" ? " + nodatavalueI +" : " +
+                bandNameI + " * " + bandNameI + " + " + bandNameQ + " * " + bandNameQ;
 
         String name = bandName;
         if (!name.endsWith(suffix)) {
@@ -89,7 +92,7 @@ public final class ReaderUtils {
         virtBand.setUnit(Unit.INTENSITY);
         virtBand.setDescription("Intensity from complex data");
         virtBand.setNoDataValueUsed(true);
-        virtBand.setNoDataValue(bandI.getNoDataValue());
+        virtBand.setNoDataValue(nodatavalueI);
         virtBand.setOwner(product);
         product.addBand(virtBand);
 

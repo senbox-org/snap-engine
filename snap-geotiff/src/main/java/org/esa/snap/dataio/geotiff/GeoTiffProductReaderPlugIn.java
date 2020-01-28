@@ -66,12 +66,15 @@ public class GeoTiffProductReaderPlugIn implements ProductReaderPlugIn {
                 }
                 return DecodeQualification.UNABLE;
             }
-            try (ImageInputStream stream = ImageIO.createImageInputStream(imageIOInput)) {
+
+            final ImageInputStream stream = ImageIO.createImageInputStream(imageIOInput);
+            try {
                 return getDecodeQualificationImpl(stream);
+            } catch (Exception ignore) {
+                // nothing to do, return value is already UNABLE
             }
-        } catch (Exception ignore) {
-            // nothing to do, return value is already UNABLE
-        }
+
+        } catch (IOException ignore) {}
 
         return DecodeQualification.UNABLE;
     }
@@ -101,7 +104,7 @@ public class GeoTiffProductReaderPlugIn implements ProductReaderPlugIn {
                 }
             }
         }
-        if (foundTiff && entryCnt == 1) {
+        if(foundTiff && entryCnt == 1) {
             return DecodeQualification.SUITABLE;    // only zipped tiff
         }
         return DecodeQualification.UNABLE;

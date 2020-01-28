@@ -29,6 +29,7 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.Stx;
 import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.core.util.io.SnapFileFilter;
 import org.esa.snap.dataio.netcdf.metadata.ProfileInitPartReader;
 import org.esa.snap.dataio.netcdf.metadata.ProfilePartReader;
@@ -41,6 +42,8 @@ import java.io.IOException;
 
 public abstract class AbstractNetCdfReaderPlugIn implements ProductReaderPlugIn {
 
+    private static final String ZIP_FILE_EXTENSION = ".zip";
+    private static final String NETCDF_FILE_EXTENSION = ".nc";
     ///////////////////////////////////////////////
     // ProductReaderPlugIn related methods
 
@@ -51,6 +54,14 @@ public abstract class AbstractNetCdfReaderPlugIn implements ProductReaderPlugIn 
 
     @Override
     public final DecodeQualification getDecodeQualification(Object input) {
+        if (input instanceof String || input instanceof File) {
+            final String ext = FileUtils.getExtension(new File(input.toString()));
+            if (ext != null) {
+                if (!ext.equalsIgnoreCase(NETCDF_FILE_EXTENSION) && !ext.equalsIgnoreCase(ZIP_FILE_EXTENSION)) {
+                    return DecodeQualification.UNABLE;
+                }
+            }
+        }
         NetcdfFile netcdfFile = null;
         try {
             netcdfFile = NetcdfFileOpener.open(input.toString());
@@ -62,13 +73,14 @@ public abstract class AbstractNetCdfReaderPlugIn implements ProductReaderPlugIn 
             // ok -- just clean up and return UNABLE
             if (input != null) {
                 String pathname = input.toString();
-                if (pathname.toLowerCase().trim().endsWith(".zip")) {
+                if (pathname.toLowerCase().trim().endsWith(ZIP_FILE_EXTENSION)) {
                     final String trimmed = pathname.trim();
                     pathname = trimmed.substring(0, trimmed.length() - 4);
                     final File file = new File(pathname);
                     if (file.isFile() && file.length() == 0) {
-                        file.deleteOnExit();
-                        file.delete();
+                        if(!file.delete()) {
+                            file.deleteOnExit();
+                        }
                     }
                 }
             }
