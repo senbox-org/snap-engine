@@ -39,11 +39,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created by jcoravu on 3/9/2019.
  */
 class LocalRepositoryDatabaseLayer {
+
+    private static final Logger logger = Logger.getLogger(LocalRepositoryDatabaseLayer.class.getName());
 
     private LocalRepositoryDatabaseLayer() {
     }
@@ -81,25 +85,17 @@ class LocalRepositoryDatabaseLayer {
         }
     }
 
-    static List<RemoteMission> loadMissions(Statement statement) throws SQLException {
+    static List<String> loadUniqueRemoteMissionNames(Statement statement) throws SQLException {
         StringBuilder sql = new StringBuilder();
-        sql.append("SELECT rm.id, rm.name, rr.id AS remote_repository_id, rr.name AS remote_repository_name FROM ")
+        sql.append("SELECT name FROM ")
                 .append(DatabaseTableNames.REMOTE_MISSIONS)
-                .append(" AS rm, ")
-                .append(DatabaseTableNames.REMOTE_REPOSITORIES)
-                .append(" AS rr ")
-                .append(" WHERE rm.remote_repository_id = rr.id");
+                .append(" GROUP BY name");
         try (ResultSet resultSet = statement.executeQuery(sql.toString())) {
-            List<RemoteMission> missions = new ArrayList<>();
+            List<String> remoteMissionNames = new ArrayList<>();
             while (resultSet.next()) {
-                short id = resultSet.getShort("id");
-                String name = resultSet.getString("name");
-                short remoteRepositoryId = resultSet.getShort("remote_repository_id");
-                String remoteRepositoryName = resultSet.getString("remote_repository_name");
-                RemoteRepository remoteRepository = new RemoteRepository(remoteRepositoryId, remoteRepositoryName);
-                missions.add(new RemoteMission(id, name, remoteRepository));
+                remoteMissionNames.add(resultSet.getString("name"));
             }
-            return missions;
+            return remoteMissionNames;
         }
     }
 
@@ -141,7 +137,7 @@ class LocalRepositoryDatabaseLayer {
         }
     }
 
-    static List<RepositoryProduct> loadProductList(LocalRepositoryFolder localRepositoryFolder, RemoteMission mission,
+    static List<RepositoryProduct> loadProductList(LocalRepositoryFolder localRepositoryFolder, String remoteMissionName,
                                                    Map<String, Object> parameterValues, H2DatabaseParameters databaseParameters)
                                                    throws SQLException, IOException {
 
@@ -189,35 +185,36 @@ class LocalRepositoryDatabaseLayer {
                 }
             }
             StringBuilder sql = new StringBuilder();
-            if (mission == null) {
-                sql.append("SELECT q.id, q.name, q.relative_path, q.entry_point, q.size_in_bytes, q.geometry, q.acquisition_date, q.last_modified_date");
-                if (localRepositoryFolder == null) {
-                    // no local repository filter
-                    sql.append(", q.folder_path");
-                }
-                sql.append(", rm.name AS mission_name")
-                        .append(" FROM (");
-            }
-            sql.append("SELECT p.id, p.name, p.relative_path, p.entry_point, p.size_in_bytes, p.geometry, p.acquisition_date")
-                    .append(", p.last_modified_date, p.remote_mission_id");
+            sql.append("SELECT p.id, p.name, p.relative_path, p.entry_point, p.size_in_bytes, p.geometry, p.acquisition_date, p.last_modified_date, p.remote_mission_id");
             if (localRepositoryFolder == null) {
                 // no local repository filter
                 sql.append(", lr.folder_path");
             }
+            if (remoteMissionName != null) {
+                // the mission is specified
+                sql.append(", rm.name AS remote_mission_name");
+            }
             sql.append(" FROM ")
-                    .append(DatabaseTableNames.PRODUCTS)
-                    .append(" AS p");
+               .append(DatabaseTableNames.PRODUCTS)
+               .append(" AS p");
             if (localRepositoryFolder == null) {
                 // no local repository filter
                 sql.append(", ")
-                        .append(DatabaseTableNames.LOCAL_REPOSITORIES)
-                        .append(" AS lr");
+                   .append(DatabaseTableNames.LOCAL_REPOSITORIES)
+                   .append(" AS lr");
+            }
+            if (remoteMissionName != null) {
+                // the mission is specified
+                sql.append(", ")
+                   .append(DatabaseTableNames.REMOTE_MISSIONS)
+                   .append(" AS rm");
             }
             sql.append(" WHERE ");
-            if (mission != null) {
-                sql.append("p.remote_mission_id = ")
-                        .append(mission.getId())
-                        .append(" AND ");
+            if (remoteMissionName != null) {
+                // the mission is specified
+                sql.append("p.remote_mission_id = rm.id AND rm.name = '")
+                   .append(remoteMissionName)
+                   .append("' AND ");
             }
             sql.append("p.local_repository_id = ");
             if (localRepositoryFolder == null) {
@@ -242,12 +239,29 @@ class LocalRepositoryDatabaseLayer {
                 sql.append(" AND p.sensor_type_id = ")
                         .append(sensorType.getValue());
             }
-            if (mission == null) {
-                sql.append(") AS q")
+
+            if (remoteMissionName == null) {
+                // no mission filter
+                StringBuilder outerSql = new StringBuilder();
+                outerSql.append("SELECT q.id, q.name, q.relative_path, q.entry_point, q.size_in_bytes, q.geometry, q.acquisition_date, q.last_modified_date");
+                if (localRepositoryFolder == null) {
+                    // no local repository filter
+                    outerSql.append(", q.folder_path");
+                }
+                outerSql.append(", left_rm.name AS remote_mission_name")
+                        .append(" FROM (")
+                        .append(sql)
+                        .append(") AS q")
                         .append(" LEFT OUTER JOIN ")
                         .append(DatabaseTableNames.REMOTE_MISSIONS)
-                        .append(" AS rm ON (q.remote_mission_id = rm.id)");
+                        .append(" AS left_rm ON (q.remote_mission_id = left_rm.id)");
+                sql = outerSql;
             }
+
+            if (logger.isLoggable(Level.FINE)) {
+                logger.log(Level.FINE, "The sql query is : " + sql.toString());
+            }
+
             Calendar calendar = Calendar.getInstance();
             try (PreparedStatement prepareStatement = wrappedConnection.prepareStatement(sql.toString())) {
                 if (startDate != null) {
@@ -276,12 +290,13 @@ class LocalRepositoryDatabaseLayer {
                         String localPath = resultSet.getString("relative_path");
                         Path productLocalPath;
                         if (localRepositoryFolder == null) {
+                            // no local repository filter
                             String localRepositoryFolderPath = resultSet.getString("folder_path");
                             productLocalPath = Paths.get(localRepositoryFolderPath, localPath);
                         } else {
                             productLocalPath = localRepositoryFolder.getPath().resolve(localPath);
                         }
-                        String missionName = (mission == null) ? resultSet.getString("mission_name") : mission.getName();
+                        String missionName = resultSet.getString("remote_mission_name"); // the remote mission name my be null
                         Timestamp acquisitionDate = resultSet.getTimestamp("acquisition_date");
                         long sizeInBytes = resultSet.getLong("size_in_bytes");
                         Geometry geometry = resultSet.getGeometry("geometry");

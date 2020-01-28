@@ -106,7 +106,7 @@ public class TAORemoteRepositoryManager {
             dataSourceComponent = new DataSourceComponent();
             dataSourceComponent.setDataSourceName(dataSourceName);
             dataSourceComponent.setSensorName(repositoryProduct.getMission());
-            dataSourceComponent.setFetchMode(FetchMode.OVERWRITE);
+            dataSourceComponent.setFetchMode(FetchMode.RESUME);
             dataSourceComponent.setUserName(credentials.getUserPrincipal().getName());
             dataSourceComponent.setPassword(credentials.getPassword());
             dataSourceComponent.setProgressListener(new TAODownloadProductProgressListener(progressListener));

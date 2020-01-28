@@ -57,10 +57,10 @@ public class AllLocalFolderProductsRepository {
         return parameters;
     }
 
-    public List<RepositoryProduct> loadProductList(LocalRepositoryFolder localRepositoryFolder, RemoteMission mission, Map<String, Object> parameterValues)
+    public List<RepositoryProduct> loadProductList(LocalRepositoryFolder localRepositoryFolder, String remoteMissionName, Map<String, Object> parameterValues)
                                                    throws SQLException, IOException {
 
-        return LocalRepositoryDatabaseLayer.loadProductList(localRepositoryFolder, mission, parameterValues, this.databaseParameters);
+        return LocalRepositoryDatabaseLayer.loadProductList(localRepositoryFolder, remoteMissionName, parameterValues, this.databaseParameters);
     }
 
     public SaveDownloadedProductData saveProduct(RepositoryProduct productToSave, Path productPath, String remoteRepositoryName, Path localRepositoryFolderPath)
@@ -108,8 +108,8 @@ public class AllLocalFolderProductsRepository {
             try (Statement statement = connection.createStatement()) {
                 List<LocalRepositoryFolder> localRepositoryFolders = LocalRepositoryDatabaseLayer.loadLocalRepositoryFolders(statement);
                 Map<Short, Set<String>> attributeNamesPerMission = LocalRepositoryDatabaseLayer.loadAttributesNamesPerMission(statement);
-                List<RemoteMission> missions = LocalRepositoryDatabaseLayer.loadMissions(statement);
-                return new LocalRepositoryParameterValues(missions, attributeNamesPerMission, localRepositoryFolders);
+                List<String> remoteMissionNames = LocalRepositoryDatabaseLayer.loadUniqueRemoteMissionNames(statement);
+                return new LocalRepositoryParameterValues(remoteMissionNames, attributeNamesPerMission, localRepositoryFolders);
             }
         }
     }

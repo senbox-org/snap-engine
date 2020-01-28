@@ -12,18 +12,18 @@ import java.util.Set;
  */
 public class LocalRepositoryParameterValues {
 
-    private final List<RemoteMission> missions;
+    private final List<String> remoteMissionNames;
     private final Map<Short, Set<String>> attributeNamesPerMission;
     private final List<LocalRepositoryFolder> localRepositoryFolders;
 
-    public LocalRepositoryParameterValues(List<RemoteMission> missions, Map<Short, Set<String>> attributeNamesPerMission, List<LocalRepositoryFolder> localRepositoryFolders) {
-        this.missions = missions;
+    public LocalRepositoryParameterValues(List<String> remoteMissionNames, Map<Short, Set<String>> attributeNamesPerMission, List<LocalRepositoryFolder> localRepositoryFolders) {
+        this.remoteMissionNames = remoteMissionNames;
         this.attributeNamesPerMission = attributeNamesPerMission;
         this.localRepositoryFolders = localRepositoryFolders;
     }
 
-    public List<RemoteMission> getMissions() {
-        return missions;
+    public List<String> getRemoteMissionNames() {
+        return remoteMissionNames;
     }
 
     public Map<Short, Set<String>> getAttributes() {
