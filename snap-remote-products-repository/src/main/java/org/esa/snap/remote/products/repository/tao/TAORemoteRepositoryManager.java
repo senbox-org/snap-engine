@@ -102,7 +102,7 @@ public class TAORemoteRepositoryManager {
                     throw new IllegalArgumentException("The product '" + repositoryProduct.getName()+"' is already downloading.");
                 }
             }
-
+            final List<String> downloadMessages = new ArrayList<>();
             dataSourceComponent = new DataSourceComponent();
             dataSourceComponent.setDataSourceName(dataSourceName);
             dataSourceComponent.setSensorName(repositoryProduct.getMission());
@@ -123,16 +123,19 @@ public class TAORemoteRepositoryManager {
                 }
 
                 @Override
-                public void downloadFailed(EOProduct eoProduct, String s) {
+                public void downloadFailed(EOProduct eoProduct, String message) {
                     eoProduct.setProductStatus(ProductStatus.FAILED);
+                    downloadMessages.add(message);
                 }
 
                 @Override
-                public void downloadAborted(EOProduct eoProduct, String s) {
+                public void downloadAborted(EOProduct eoProduct, String message) {
+                    downloadMessages.add(message);
                 }
 
                 @Override
-                public void downloadIgnored(EOProduct eoProduct, String s) {
+                public void downloadIgnored(EOProduct eoProduct, String message) {
+                    downloadMessages.add(message);
                 }
             });
 
@@ -142,7 +145,7 @@ public class TAORemoteRepositoryManager {
             product.setLocation(repositoryProduct.getURL());
 
             List<EOProduct> products = new ArrayList<>(1);
-            products.add(product);
+            products.add(product); // add the product to be downloaded
 
             Properties additionalProperties = new Properties();
             additionalProperties.put("auto.uncompress", "true");
@@ -157,7 +160,7 @@ public class TAORemoteRepositoryManager {
                 URI uri = new URI(productPath);
                 return Paths.get(uri);
             } else {
-                throw new Exception("Failed to download the product '" + repositoryProduct.getName() + "'.");
+                throw new IllegalStateException(buildFailedDownloadExceptionMessage(repositoryProduct.getName(), dataSourceName, repositoryProduct.getMission(), downloadMessages));
             }
         } finally {
             if (dataSourceComponent != null) {
@@ -468,5 +471,26 @@ public class TAORemoteRepositoryManager {
             }
         }
         throw new IllegalStateException("Unknown data source '" + dataSourceName + "'.");
+    }
+
+    private static String buildFailedDownloadExceptionMessage(String productName, String dataSourceName, String mission, List<String> downloadMessages) {
+        StringBuilder exceptionMessage = new StringBuilder();
+        exceptionMessage.append("Downloading the product '")
+                .append(productName)
+                .append("' from the data source '")
+                .append(dataSourceName)
+                .append("' and the mission '")
+                .append(mission)
+                .append("' has failed.");
+        if (downloadMessages.size() > 0) {
+            exceptionMessage.append(" Possible causes:");
+            for (int i=0;i<downloadMessages.size(); i++) {
+                if (i > 0) {
+                    exceptionMessage.append("; ");
+                }
+                exceptionMessage.append(downloadMessages.get(i));
+            }
+        }
+        return exceptionMessage.toString();
     }
 }
