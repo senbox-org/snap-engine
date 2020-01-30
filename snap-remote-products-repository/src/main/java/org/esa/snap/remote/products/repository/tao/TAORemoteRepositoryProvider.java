@@ -52,7 +52,7 @@ class TAORemoteRepositoryProvider implements RemoteProductsRepositoryProvider {
 
     @Override
     public BufferedImage downloadProductQuickLookImage(Credentials credentials, String url, ThreadStatus thread) throws IOException, InterruptedException {
-        return TAORemoteRepositoryManager.downloadProductQuickLookImage(credentials, url, thread);
+        return TAORemoteRepositoryManager.downloadProductQuickLookImage(getRepositoryName(), credentials, url, thread);
     }
 
     @Override

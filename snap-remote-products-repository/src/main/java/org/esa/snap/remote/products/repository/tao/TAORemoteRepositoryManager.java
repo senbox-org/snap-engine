@@ -14,11 +14,7 @@ import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 import ro.cs.tao.configuration.ConfigurationManager;
-import ro.cs.tao.datasource.DataQuery;
-import ro.cs.tao.datasource.DataSource;
-import ro.cs.tao.datasource.DataSourceComponent;
-import ro.cs.tao.datasource.DataSourceManager;
-import ro.cs.tao.datasource.ProductStatusListener;
+import ro.cs.tao.datasource.*;
 import ro.cs.tao.datasource.param.CommonParameterNames;
 import ro.cs.tao.datasource.param.DataSourceParameter;
 import ro.cs.tao.datasource.param.ParameterName;
@@ -40,11 +36,16 @@ import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.lang.InterruptedException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created by jcoravu on 21/11/2019.
  */
 public class TAORemoteRepositoryManager {
+
+    private static final Logger logger = Logger.getLogger(TAORemoteRepositoryManager.class.getName());
 
     private static final TAORemoteRepositoryManager instance = new TAORemoteRepositoryManager();
 
@@ -196,7 +197,11 @@ public class TAORemoteRepositoryManager {
         return findDataSource(dataSourceName).getSupportedSensors();
     }
 
-    public static BufferedImage downloadProductQuickLookImage(Credentials credentials, String url, ThreadStatus thread) throws IOException, InterruptedException {
+    public static BufferedImage downloadProductQuickLookImage(String dataSourceName, Credentials credentials, String url, ThreadStatus thread) throws IOException, InterruptedException {
+        if (logger.isLoggable(Level.FINE)) {
+            logger.log(Level.FINE, "Download the quick look image: remote repository '" + dataSourceName+"', url '"+url+"'.");
+        }
+
         try (CloseableHttpResponse response = NetUtils.openConnection(HttpMethod.GET, url, credentials)) {
             if (response != null) {
 
@@ -273,6 +278,24 @@ public class TAORemoteRepositoryManager {
     public static List<RepositoryProduct> downloadProductList(String dataSourceName, String mission, Credentials credentials, Map<String, Object> parameterValues,
                                                               ProductListDownloaderListener downloaderListener, ThreadStatus thread)
                                                               throws Exception {
+
+        if (logger.isLoggable(Level.FINE)) {
+            StringBuilder logMessage = new StringBuilder();
+            logMessage.append("Start downloading the product list from the '")
+                    .append(dataSourceName)
+                    .append("' remote repository using the mission '")
+                    .append(mission)
+                    .append("'.\nThe query parameters are:");
+            Iterator<Map.Entry<String, Object>> iterator = parameterValues.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<String, Object> entry = iterator.next();
+                logMessage.append("\n   - ")
+                        .append(entry.getKey())
+                        .append(": ")
+                        .append(entry.getValue());
+            }
+            logger.log(Level.FINE, logMessage.toString());
+        }
 
         DataQuery query = buildDataQuery(dataSourceName, mission, credentials, parameterValues);
         query.setPageNumber(0);
@@ -378,25 +401,27 @@ public class TAORemoteRepositoryManager {
         for (int i=0; i<pageResults.size(); i++) {
             EOProduct product = pageResults.get(i);
             Geometry productGeometry = wktReader.read(product.getGeometry());
-//            if (!(productGeometry instanceof Polygon)) {
-//                throw new IllegalStateException("The product geometry type '"+productGeometry.getClass().getName()+"' is not a '"+Polygon.class.getName()+"' type.");
-//            }
-//            Coordinate[] coordinates = ((Polygon)productGeometry).getExteriorRing().getCoordinates();
-//            Coordinate firstCoordinate = coordinates[0];
-//            Coordinate lastCoordinate = coordinates[coordinates.length-1];
-//            if (firstCoordinate.getX() != lastCoordinate.getX() || firstCoordinate.getY() != lastCoordinate.getY()) {
-//                throw new IllegalStateException("The first and last coordinates of the polygon do not match.");
-//            }
-//            Polygon2D polygon = new Polygon2D();
-//            for (Coordinate coordinate : coordinates) {
-//                polygon.append(coordinate.getX(), coordinate.getY());
-//            }
-
-            Coordinate[] coordinates = productGeometry.getBoundary().getCoordinates();
+            Coordinate[] coordinates = null;
+            if (productGeometry instanceof MultiPolygon) {
+                MultiPolygon multiPolygon = (MultiPolygon)productGeometry;
+                if (multiPolygon.getNumGeometries() > 0) {
+                    if (multiPolygon.getGeometryN(0) instanceof Polygon) {
+                        coordinates = ((Polygon)multiPolygon.getGeometryN(0)).getExteriorRing().getCoordinates();
+                    } else {
+                        throw new IllegalStateException("The multipolygon first geometry is not a polygon.");
+                    }
+                } else {
+                    throw new IllegalStateException("The product multipolygon geometry is empty.");
+                }
+            } else if (productGeometry instanceof Polygon) {
+                coordinates = ((Polygon)productGeometry).getExteriorRing().getCoordinates();
+            } else {
+                throw new IllegalStateException("The product geometry type '"+productGeometry.getClass().getName()+"' is not a '"+Polygon.class.getName()+"' type.");
+            }
             Coordinate firstCoordinate = coordinates[0];
             Coordinate lastCoordinate = coordinates[coordinates.length-1];
             if (firstCoordinate.getX() != lastCoordinate.getX() || firstCoordinate.getY() != lastCoordinate.getY()) {
-                //throw new IllegalStateException("The first and last coordinates of the polygon do not match.");
+                throw new IllegalStateException("The first and last coordinates of the polygon do not match.");
             }
             Polygon2D polygon = new Polygon2D();
             for (Coordinate coordinate : coordinates) {
