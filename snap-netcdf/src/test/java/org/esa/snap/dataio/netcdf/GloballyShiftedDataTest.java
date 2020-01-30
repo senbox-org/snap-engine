@@ -11,7 +11,6 @@ import org.esa.snap.dataio.netcdf.nc.NWritableFactory;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Assume;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -46,14 +45,8 @@ public class GloballyShiftedDataTest {
 
     @BeforeClass
     public static void createTestDataFile() throws IOException {
-        // Fails on Linux: "Unable to load library 'netcdf': libnetcdf.so: cannot open shared object file: No such file or directory"
-        // why is it failing writing Netcdf files in test mode but not when SNAP is installed?
-        // Probably because we use the Nujan lib for writing usually.
-        Assume.assumeTrue("Runs only on windows", isWindows());
 
         tempFile = File.createTempFile(GloballyShiftedDataTest.class.getSimpleName(), ".nc");
-//        tempFile = new File(String.format("%s\\%s.nc", System.getProperty("user.home"), GloballyShiftedDataTest.class.getSimpleName()));
-//        NetcdfFileWriter ncFile = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, tempFile.getAbsolutePath());
         NFileWriteable ncFile = NWritableFactory.create(tempFile.getAbsolutePath(), "netcdf4");
         ncFile.addDimension("lat", HEIGHT);
         ncFile.addDimension("lon", WIDTH);
@@ -75,18 +68,9 @@ public class GloballyShiftedDataTest {
         }
 
         ncFile.create();
-//        try {
         lat.writeFully(Array.factory(DataType.DOUBLE, new int[]{HEIGHT}, latValues));
         lon.writeFully(Array.factory(DataType.DOUBLE, new int[]{WIDTH}, lonValues));
-//            ncFile.write(lat, Array.factory(DataType.DOUBLE, new int[]{HEIGHT}, latValues));
-//            ncFile.write(lon, Array.factory(DataType.DOUBLE, new int[]{WIDTH},lonValues));
-//            lat.ncFile.flush();
-//        } catch (InvalidRangeException e) {
-//            throw new IOException(e);
-//        }
 
-
-//        try {
         // rightValues are written to the left side of the image, but as the data is globally shifted
         // they will be on the right side when read in
         int[] rightDataValues = new int[HALF_WIDTH * STEP_HEIGHT];
@@ -101,12 +85,7 @@ public class GloballyShiftedDataTest {
         for (int i = 0; i < HEIGHT; i = i + STEP_HEIGHT) {
             data.write(0, i, HALF_WIDTH, STEP_HEIGHT, false, rightProduData);
             data.write(HALF_WIDTH, i, HALF_WIDTH, STEP_HEIGHT, false, leftProduData);
-//                ncFile.write(data, new int[]{i, 0}, rightValues);
-//                ncFile.write(data, new int[]{i, HALF_WIDTH}, leftValues);
         }
-//        } catch (InvalidRangeException e) {
-//            throw new IOException(e);
-//        }
 
         ncFile.close();
     }
