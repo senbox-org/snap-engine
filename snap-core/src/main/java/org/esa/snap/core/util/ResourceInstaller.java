@@ -36,8 +36,14 @@ import static java.nio.file.StandardCopyOption.*;
  * Installs resources from a given source to a given target.
  *
  * @author Marco Peters
+ * @author Daniel Knowles (NASA)
+ * @author Bing Yang (NASA)
  * @version $Revision$ $Date$
  */
+// NOV 2019 - Knowles / Yang
+//          - Added boolean option for whether to overwrite existing files
+
+
 public class ResourceInstaller {
 
     private final Path sourceBasePath;

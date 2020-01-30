@@ -4,10 +4,6 @@ import org.esa.snap.core.util.PropertyMap;
 
 
 /**
- * Created by knowles on 11/20/19.
- */
-
-/**
  * Contains many key parameters and defaults for the color manipulation tool and it's related color scheme manager
  *
  * @author Daniel Knowles

@@ -1,17 +1,17 @@
 package org.esa.snap.core.datamodel;
 
-/**
- * Created by knowles on 11/20/19.
- */
-
 
 import java.io.File;
 import java.io.IOException;
 
 /**
- * Created by danielknowles on 6/28/14.
+ * Contains all info for a color scheme
+ * @author Daniel Knowles (NASA)
+ * @date Nov 2019
+ *
  */
-public class ColorPaletteInfo {
+
+public class ColorSchemeInfo {
     private String name;
     private String rootName;
     private String description;
@@ -27,8 +27,8 @@ public class ColorPaletteInfo {
     private File colorPaletteDir;
 
 
-    public ColorPaletteInfo(String name, String rootName, String description, String cpdFilenameStandard, double minValue, double maxValue,
-                            boolean isLogScaled, boolean isOverRide, boolean enabled, String cpdFilenameColorBlind, String colorBarTitle, String colorBarLabels, File colorPaletteDir) {
+    public ColorSchemeInfo(String name, String rootName, String description, String cpdFilenameStandard, double minValue, double maxValue,
+                           boolean isLogScaled, boolean isOverRide, boolean enabled, String cpdFilenameColorBlind, String colorBarTitle, String colorBarLabels, File colorPaletteDir) {
         this.setName(name);
         if (rootName != null) {
             this.setRootName(rootName);

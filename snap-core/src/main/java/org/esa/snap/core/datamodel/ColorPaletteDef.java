@@ -46,7 +46,8 @@ import java.util.Vector;
  * @version $Revision$ $Date$
  */
 
-
+// OCT 2019 - Knowles / Yang
+//          - Add fields for logScaling
 // DEC 2019 - Knowles / Yang
 //          - Added capability to export color palette in cpt and pal formats.
 
@@ -297,9 +298,7 @@ public class ColorPaletteDef implements Cloneable  {
             }
             point.setColor(color);
             point.setSample(sample);
-            // todo DANNY added this
             point.setLabel(file.getName());
-            //    System.out.println(point.label);
             points[i] = point;
             lastSample = sample;
         }

@@ -36,6 +36,10 @@ import java.awt.image.IndexColorModel;
 // OCT 2019 - Knowles
 //          - Added logic to transform weighted points between logarithmic scaling and
 //            linear scaling in both directions.
+//  NOV 2019 - Knowles
+//           - Added logic to invert the direction of the color palette
+//  DEC 2019 - Knowles
+//           - Moved some of the log/liner transform methods into the class LogLinearTransform
 
 
 public class ImageInfo implements Cloneable {
