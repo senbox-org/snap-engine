@@ -9,6 +9,7 @@ import org.esa.snap.remote.products.repository.listener.ProductListDownloaderLis
 import org.esa.snap.remote.products.repository.listener.ProgressListener;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
@@ -38,15 +39,7 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by jcoravu on 21/11/2019.
@@ -65,6 +58,26 @@ public class TAORemoteRepositoryManager {
         int index = 0;
         for (DataSource dataSource : services) {
             this.remoteRepositoryProductProviders[index++] = new TAORemoteRepositoryProvider(dataSource.getId());
+        }
+
+        if (this.remoteRepositoryProductProviders.length > 1) {
+            // sort alphabetically by repository name
+            Comparator<RemoteProductsRepositoryProvider> comparator = new Comparator<RemoteProductsRepositoryProvider>() {
+                @Override
+                public int compare(RemoteProductsRepositoryProvider leftProvider, RemoteProductsRepositoryProvider rightProvider) {
+                    return leftProvider.getRepositoryName().compareToIgnoreCase(rightProvider.getRepositoryName());
+                }
+            };
+            for (int i=0; i<this.remoteRepositoryProductProviders.length-1; i++) {
+                for (int j=i+1; j<this.remoteRepositoryProductProviders.length; j++) {
+                    int result = comparator.compare(this.remoteRepositoryProductProviders[i], this.remoteRepositoryProductProviders[j]);
+                    if (result > 0) {
+                        RemoteProductsRepositoryProvider aux = this.remoteRepositoryProductProviders[i];
+                        this.remoteRepositoryProductProviders[i] = this.remoteRepositoryProductProviders[j];
+                        this.remoteRepositoryProductProviders[j] = aux;
+                    }
+                }
+            }
         }
 
         this.downloadingProducts = new HashMap<>();
@@ -365,14 +378,25 @@ public class TAORemoteRepositoryManager {
         for (int i=0; i<pageResults.size(); i++) {
             EOProduct product = pageResults.get(i);
             Geometry productGeometry = wktReader.read(product.getGeometry());
-            if (!(productGeometry instanceof Polygon)) {
-                throw new IllegalStateException("The product geometry type '"+productGeometry.getClass().getName()+"' is not a '"+Polygon.class.getName()+"' type.");
-            }
-            Coordinate[] coordinates = ((Polygon)productGeometry).getExteriorRing().getCoordinates();
+//            if (!(productGeometry instanceof Polygon)) {
+//                throw new IllegalStateException("The product geometry type '"+productGeometry.getClass().getName()+"' is not a '"+Polygon.class.getName()+"' type.");
+//            }
+//            Coordinate[] coordinates = ((Polygon)productGeometry).getExteriorRing().getCoordinates();
+//            Coordinate firstCoordinate = coordinates[0];
+//            Coordinate lastCoordinate = coordinates[coordinates.length-1];
+//            if (firstCoordinate.getX() != lastCoordinate.getX() || firstCoordinate.getY() != lastCoordinate.getY()) {
+//                throw new IllegalStateException("The first and last coordinates of the polygon do not match.");
+//            }
+//            Polygon2D polygon = new Polygon2D();
+//            for (Coordinate coordinate : coordinates) {
+//                polygon.append(coordinate.getX(), coordinate.getY());
+//            }
+
+            Coordinate[] coordinates = productGeometry.getBoundary().getCoordinates();
             Coordinate firstCoordinate = coordinates[0];
             Coordinate lastCoordinate = coordinates[coordinates.length-1];
             if (firstCoordinate.getX() != lastCoordinate.getX() || firstCoordinate.getY() != lastCoordinate.getY()) {
-                throw new IllegalStateException("The first and last coordinates of the polygon do not match.");
+                //throw new IllegalStateException("The first and last coordinates of the polygon do not match.");
             }
             Polygon2D polygon = new Polygon2D();
             for (Coordinate coordinate : coordinates) {
