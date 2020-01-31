@@ -15,6 +15,11 @@ class TAOConfigurationProvider implements ConfigurationProvider {
     }
 
     @Override
+    public Path getApplicationHome() {
+        return null;
+    }
+
+    @Override
     public String getValue(String s) {
         return null;
     }

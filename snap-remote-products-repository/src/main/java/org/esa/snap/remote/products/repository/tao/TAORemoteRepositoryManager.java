@@ -353,7 +353,7 @@ public class TAORemoteRepositoryManager {
     }
 
     private static DataQuery buildDataQuery(String dataSourceName, String mission, Credentials credentials, Map<String, Object> parametersValues)
-                                     throws InstantiationException, IllegalAccessException {
+                                            throws InstantiationException, IllegalAccessException {
 
         DataSource dataSource = findDataSource(dataSourceName);
         if (credentials != null) {
@@ -381,23 +381,31 @@ public class TAORemoteRepositoryManager {
             }
         }
 
+        Calendar calendar = Calendar.getInstance();
+
         Date startDate = (Date)parametersValues.get(CommonParameterNames.START_DATE);
-        Date endDate = (Date)parametersValues.get(CommonParameterNames.END_DATE);
         if (startDate != null) {
-            QueryParameter<Date> queryParameter = query.createParameter(CommonParameterNames.START_DATE, Date.class);
-            queryParameter.setMinValue(startDate);
-            if (endDate != null) {
-                queryParameter.setMaxValue(endDate);
-            }
-            query.addParameter(queryParameter);
+            calendar.setTimeInMillis(startDate.getTime());
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+
+            QueryParameter<Date> begin = query.createParameter(CommonParameterNames.START_DATE, Date.class);
+            begin.setValue(calendar.getTime());
+            query.addParameter(begin);
         }
+        Date endDate = (Date)parametersValues.get(CommonParameterNames.END_DATE);
         if (endDate != null) {
-            QueryParameter<Date> queryParameter = query.createParameter(CommonParameterNames.END_DATE, Date.class);
-            queryParameter.setMaxValue(endDate);
-            if (startDate != null) {
-                queryParameter.setMinValue(startDate);
-            }
-            query.addParameter(queryParameter);
+            calendar.setTimeInMillis(endDate.getTime());
+            calendar.set(Calendar.HOUR_OF_DAY, 23);
+            calendar.set(Calendar.MINUTE, 59);
+            calendar.set(Calendar.SECOND, 59);
+            calendar.set(Calendar.MILLISECOND, 0);
+
+            QueryParameter<Date> end = query.createParameter(CommonParameterNames.END_DATE, Date.class);
+            end.setValue(calendar.getTime());
+            query.addParameter(end);
         }
 
         return query;
