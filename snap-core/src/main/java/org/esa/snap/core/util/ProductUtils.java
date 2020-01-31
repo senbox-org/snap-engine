@@ -998,6 +998,35 @@ public class ProductUtils {
     }
 
     /**
+     * Copies all bands which contain a flag-coding or an index-coding from the source product to the target product.
+     *
+     * @param sourceProduct   the source product
+     * @param targetProduct   the target product
+     * @param copySourceImage whether the source image of the source band should be copied.
+     * @since SNAP 8.0
+     */
+    public static void copySampleCodingBands(Product sourceProduct, Product targetProduct, boolean copySourceImage) {
+        Guardian.assertNotNull("source", sourceProduct);
+        Guardian.assertNotNull("target", targetProduct);
+        if (sourceProduct.getFlagCodingGroup().getNodeCount() > 0 ||
+                sourceProduct.getIndexCodingGroup().getNodeCount() > 0) {
+            // loop over bands and check if they have a sample coding attached
+            for (int i = 0; i < sourceProduct.getNumBands(); i++) {
+                Band sourceBand = sourceProduct.getBandAt(i);
+                String bandName = sourceBand.getName();
+                if ((sourceBand.isFlagBand() || sourceBand.isIndexBand()) && targetProduct.getBand(bandName) == null) {
+                    copyBand(bandName, sourceProduct, targetProduct, copySourceImage);
+                }
+            }
+            // first the bands have to be copied and then the masks
+            // other wise the referenced bands, e.g. flag band, is not contained in the target product
+            // and the mask is not copied
+            copyMasks(sourceProduct, targetProduct);
+            copyOverlayMasks(sourceProduct, targetProduct);
+        }
+    }
+
+    /**
      * Copies the named tie-point grid from the source product to the target product.
      * <p>
      * The method does not copy any image geo-coding/geometry information.
