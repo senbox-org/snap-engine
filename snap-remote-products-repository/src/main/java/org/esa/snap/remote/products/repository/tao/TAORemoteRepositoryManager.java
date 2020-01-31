@@ -380,17 +380,24 @@ public class TAORemoteRepositoryManager {
                 query.addParameter(parameterName, entry.getValue());
             }
         }
+
         Date startDate = (Date)parametersValues.get(CommonParameterNames.START_DATE);
-        if (startDate != null) {
-            QueryParameter<Date> begin = query.createParameter(CommonParameterNames.START_DATE, Date.class);
-            begin.setValue(startDate);
-            query.addParameter(begin);
-        }
         Date endDate = (Date)parametersValues.get(CommonParameterNames.END_DATE);
+        if (startDate != null) {
+            QueryParameter<Date> queryParameter = query.createParameter(CommonParameterNames.START_DATE, Date.class);
+            queryParameter.setMinValue(startDate);
+            if (endDate != null) {
+                queryParameter.setMaxValue(endDate);
+            }
+            query.addParameter(queryParameter);
+        }
         if (endDate != null) {
-            QueryParameter<Date> end = query.createParameter(CommonParameterNames.END_DATE, Date.class);
-            end.setValue(endDate);
-            query.addParameter(end);
+            QueryParameter<Date> queryParameter = query.createParameter(CommonParameterNames.END_DATE, Date.class);
+            queryParameter.setMaxValue(endDate);
+            if (startDate != null) {
+                queryParameter.setMinValue(startDate);
+            }
+            query.addParameter(queryParameter);
         }
 
         return query;
@@ -401,7 +408,7 @@ public class TAORemoteRepositoryManager {
         for (int i=0; i<pageResults.size(); i++) {
             EOProduct product = pageResults.get(i);
             Geometry productGeometry = wktReader.read(product.getGeometry());
-            Coordinate[] coordinates = null;
+            Coordinate[] coordinates;
             if (productGeometry instanceof MultiPolygon) {
                 MultiPolygon multiPolygon = (MultiPolygon)productGeometry;
                 if (multiPolygon.getNumGeometries() > 0) {
