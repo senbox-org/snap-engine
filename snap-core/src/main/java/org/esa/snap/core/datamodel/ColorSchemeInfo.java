@@ -13,6 +13,7 @@ import java.io.IOException;
 
 public class ColorSchemeInfo {
     private String name;
+    private String displayName;
     private String rootName;
     private String description;
     private String cpdFilenameStandard;
@@ -26,8 +27,10 @@ public class ColorSchemeInfo {
     private boolean isOverRide;
     private File colorPaletteDir;
 
+    private boolean useDisplayName = true;
 
-    public ColorSchemeInfo(String name, String rootName, String description, String cpdFilenameStandard, double minValue, double maxValue,
+
+    public ColorSchemeInfo(String name, String displayName, String rootName, String description, String cpdFilenameStandard, double minValue, double maxValue,
                            boolean isLogScaled, boolean isOverRide, boolean enabled, String cpdFilenameColorBlind, String colorBarTitle, String colorBarLabels, File colorPaletteDir) {
         this.setName(name);
         if (rootName != null) {
@@ -35,6 +38,8 @@ public class ColorSchemeInfo {
         } else {
             this.setRootName(name);
         }
+
+        this.displayName = displayName;
         this.setDescription(description);
         this.setCpdFilenameStandard(cpdFilenameStandard);
         this.setMinValue(minValue);
@@ -46,6 +51,15 @@ public class ColorSchemeInfo {
         this.colorBarLabels = colorBarLabels;
         this.colorBarTitle = colorBarTitle;
         this.setColorPaletteDir(colorPaletteDir);
+    }
+
+
+    public void setUseDisplayName(boolean useDisplayName) {
+        this.useDisplayName = useDisplayName;
+    }
+
+    public boolean isUseDisplayName() {
+        return this.useDisplayName;
     }
 
 
@@ -101,12 +115,11 @@ public class ColorSchemeInfo {
     }
 
     public String toString() {
-//        if (description == null) {
-//            return getName();
-//        }   else {
-//            return getName() + " (" + getDescription() + ")";
-//        }
-        return getName();
+        if (isUseDisplayName() && displayName != null && displayName.length() > 0) {
+            return displayName;
+        } else {
+            return getName();
+        }
     }
 
     public String getName() {

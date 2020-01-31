@@ -143,6 +143,11 @@ public class ColorSchemeDefaults {
     public static final String PROPERTY_SCHEME_LOG_OPTION4 = OPTION_LOG_FALSE;
     public static final String PROPERTY_SCHEME_LOG_DEFAULT = OPTION_LOG_FROM_SCHEME;
 
+    public static final String PROPERTY_SCHEME_VERBOSE_KEY = PROPERTY_SCHEME_KEY_SUFFIX + ".verbose";
+    public static final String PROPERTY_SCHEME_VERBOSE_LABEL = "Verbose Schemes";
+    public static final String PROPERTY_SCHEME_VERBOSE_TOOLTIP = "Scheme selector will display the DISPLAY field instead of the scheme name";
+    public static final boolean PROPERTY_SCHEME_VERBOSE_DEFAULT = true;
+
     // ----------------------------
 
 
