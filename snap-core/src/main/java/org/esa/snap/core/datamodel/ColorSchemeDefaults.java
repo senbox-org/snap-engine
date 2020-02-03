@@ -153,6 +153,12 @@ public class ColorSchemeDefaults {
     public static final String PROPERTY_SCHEME_SHOW_DISABLED_TOOLTIP = "Scheme selector will display all schemes including schemes with missing cpd files";
     public static final boolean PROPERTY_SCHEME_SHOW_DISABLED_DEFAULT = false;
 
+    public static final String PROPERTY_SCHEME_SORT_KEY = PROPERTY_SCHEME_KEY_SUFFIX + ".sort";
+    public static final String PROPERTY_SCHEME_SORT_LABEL = "Sort Schemes";
+    public static final String PROPERTY_SCHEME_SORT_TOOLTIP = "Scheme selector will display all schemes sorted versus original xml order";
+    public static final boolean PROPERTY_SCHEME_SORT_DEFAULT = false;
+
+
     // ----------------------------
 
 
