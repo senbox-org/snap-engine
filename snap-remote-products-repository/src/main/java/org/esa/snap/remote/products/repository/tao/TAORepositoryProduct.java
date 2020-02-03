@@ -16,6 +16,7 @@ import java.util.List;
  */
 public class TAORepositoryProduct implements RepositoryProduct {
 
+    private final String id;
     private final String name;
     private final String mission;
     private final String downloadURL;
@@ -31,7 +32,8 @@ public class TAORepositoryProduct implements RepositoryProduct {
     private PixelType pixelType;
     private String downloadQuickLookImageURL;
 
-    TAORepositoryProduct(String name, String downloadURL, String mission, AbstractGeometry2D polygon, Date acquisitionDate, long approximateSize) {
+    TAORepositoryProduct(String id, String name, String downloadURL, String mission, AbstractGeometry2D polygon, Date acquisitionDate, long approximateSize) {
+        this.id = id;
         this.name = name;
         this.mission = mission;
         this.downloadURL = downloadURL;
@@ -116,6 +118,10 @@ public class TAORepositoryProduct implements RepositoryProduct {
 
     void setDownloadQuickLookImageURL(String downloadQuickLookImageURL) {
         this.downloadQuickLookImageURL = downloadQuickLookImageURL;
+    }
+
+    String getId() {
+        return id;
     }
 
     void setAttributes(List<Attribute> attributes) {

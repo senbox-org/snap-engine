@@ -96,24 +96,52 @@ public class TAORemoteRepositoryManager {
             downloadStrategy = this.downloadingProducts.remove(key);
         }
         if (downloadStrategy != null) {
+            if (logger.isLoggable(Level.FINE)) {
+                StringBuilder logMessage = new StringBuilder();
+                logMessage.append("Cancel downloading the product '")
+                        .append(repositoryProduct.getName())
+                        .append("' from the '")
+                        .append(dataSourceName)
+                        .append("' remote repository using the '")
+                        .append(repositoryProduct.getMission())
+                        .append("' mission.");
+                logger.log(Level.FINE, logMessage.toString());
+            }
+
             downloadStrategy.cancel();
         }
     }
 
-    public Path downloadProduct(String dataSourceName, RepositoryProduct repositoryProduct, Credentials credentials, Path targetFolderPath, ProgressListener progressListener) throws Exception {
+    public Path downloadProduct(String dataSourceName, TAORepositoryProduct repositoryProduct, Credentials credentials, Path targetFolderPath, ProgressListener progressListener)
+                                throws Exception {
+
         String key = buildKey(dataSourceName, repositoryProduct);
         DataSourceComponent dataSourceComponent = null;
         try {
+            if (logger.isLoggable(Level.FINE)) {
+                StringBuilder logMessage = new StringBuilder();
+                logMessage.append("Start downloading the product '")
+                        .append(repositoryProduct.getName())
+                        .append("' from the '")
+                        .append(dataSourceName)
+                        .append("' remote repository using the '")
+                        .append(repositoryProduct.getMission())
+                        .append("' mission.");
+                logger.log(Level.FINE, logMessage.toString());
+            }
+
             synchronized (this.downloadingProducts) {
                 dataSourceComponent = this.downloadingProducts.get(repositoryProduct);
                 if (dataSourceComponent == null) {
                     dataSourceComponent = new DataSourceComponent();
                     this.downloadingProducts.put(key, dataSourceComponent);
                 } else {
-                    throw new IllegalArgumentException("The product '" + repositoryProduct.getName()+"' is already downloading.");
+                    throw new IllegalArgumentException("The product '" + repositoryProduct.getName()+"' is already downloading from the '" + dataSourceName+"' remote repository using the '" + repositoryProduct.getMission()+"' mission.");
                 }
             }
+
             final List<String> downloadMessages = new ArrayList<>();
+
             dataSourceComponent = new DataSourceComponent();
             dataSourceComponent.setDataSourceName(dataSourceName);
             dataSourceComponent.setSensorName(repositoryProduct.getMission());
@@ -151,6 +179,7 @@ public class TAORemoteRepositoryManager {
             });
 
             EOProduct product = new EOProduct();
+            product.setId(repositoryProduct.getId());
             product.setProductType(repositoryProduct.getMission());
             product.setName(repositoryProduct.getName());
             product.setLocation(repositoryProduct.getURL());
@@ -166,7 +195,7 @@ public class TAORemoteRepositoryManager {
             if (product.getProductStatus() == ProductStatus.DOWNLOADED) {
                 String productPath = product.getLocation();
                 if (productPath == null) {
-                    throw new NullPointerException("The path of the downloaded product '" + repositoryProduct.getName()+"' is null.");
+                    throw new NullPointerException("The path of the downloaded product '" + repositoryProduct.getName() + "' is null when downloading it from the '" + dataSourceName+"' remote repository using the '"+repositoryProduct.getMission()+"' mission.");
                 }
                 URI uri = new URI(productPath);
                 return Paths.get(uri);
@@ -280,9 +309,9 @@ public class TAORemoteRepositoryManager {
             StringBuilder logMessage = new StringBuilder();
             logMessage.append("Start downloading the product list from the '")
                     .append(dataSourceName)
-                    .append("' remote repository using the mission '")
+                    .append("' remote repository using the '")
                     .append(mission)
-                    .append("'.\nThe query parameters are:");
+                    .append("' mission.\nThe query parameters are:");
             Iterator<Map.Entry<String, Object>> iterator = parameterValues.entrySet().iterator();
             while (iterator.hasNext()) {
                 Map.Entry<String, Object> entry = iterator.next();
@@ -423,7 +452,7 @@ public class TAORemoteRepositoryManager {
                 attributes.add(new Attribute(remoteAttribute.getName(), remoteAttribute.getValue()));
             }
 
-            TAORepositoryProduct repositoryProduct = new TAORepositoryProduct(product.getName(), product.getLocation(), mission, geometry, product.getAcquisitionDate(), product.getApproximateSize());
+            TAORepositoryProduct repositoryProduct = new TAORepositoryProduct(product.getId(), product.getName(), product.getLocation(), mission, geometry, product.getAcquisitionDate(), product.getApproximateSize());
             repositoryProduct.setAttributes(attributes);
             repositoryProduct.setEntryPoint(product.getEntryPoint());
             repositoryProduct.setDataFormatType(convertToDataFormatType(product.getFormatType()));
@@ -514,13 +543,13 @@ public class TAORemoteRepositoryManager {
         StringBuilder exceptionMessage = new StringBuilder();
         exceptionMessage.append("Downloading the product '")
                 .append(productName)
-                .append("' from the data source '")
+                .append("' from the '")
                 .append(dataSourceName)
-                .append("' and the mission '")
+                .append("' remote repository using the '")
                 .append(mission)
-                .append("' has failed.");
+                .append("' mission has failed.");
         if (downloadMessages.size() > 0) {
-            exceptionMessage.append(" Possible causes:");
+            exceptionMessage.append(" The possible causes may be: ");
             for (int i=0;i<downloadMessages.size(); i++) {
                 if (i > 0) {
                     exceptionMessage.append("; ");
