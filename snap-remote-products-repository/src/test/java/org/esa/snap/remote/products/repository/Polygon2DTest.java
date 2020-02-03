@@ -44,7 +44,7 @@ public class Polygon2DTest {
 
     @Test
     public void testBuildPath() {
-        Path2D.Double path = Polygon2D.buildPath(new Rectangle.Double(25.0d, 25.0d, 75.0d, 75.0d));
+        Path2D.Double path = GeometryUtils.buildPath(new Rectangle.Double(25.0d, 25.0d, 75.0d, 75.0d));
         assertNotNull(path);
         assertEquals(false, path.contains(0.d, 0.0d));
         assertEquals(false, path.contains(24.1d, 75.0d));
@@ -57,8 +57,9 @@ public class Polygon2DTest {
 
     @Test
     public void testBuildPolygon() {
-        Polygon2D polygon = Polygon2D.buildPolygon(new Rectangle.Double(25.0d, 25.0d, 75.0d, 75.0d));
+        Polygon2D polygon = GeometryUtils.buildPolygon(new Rectangle.Double(25.0d, 25.0d, 75.0d, 75.0d));
         assertNotNull(polygon);
+        assertEquals(1, polygon.getPathCount());
 
         String wkt = polygon.toWKT();
         assertNotNull(wkt);

@@ -4,16 +4,14 @@ import org.esa.snap.product.library.v2.database.model.LocalRepositoryFolder;
 import org.esa.snap.product.library.v2.database.model.LocalRepositoryProduct;
 import org.esa.snap.product.library.v2.database.model.RemoteMission;
 import org.esa.snap.product.library.v2.database.model.RemoteRepository;
+import org.esa.snap.remote.products.repository.*;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Polygon;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.engine_utilities.util.FileIOUtils;
-import org.esa.snap.remote.products.repository.Attribute;
-import org.esa.snap.remote.products.repository.Polygon2D;
-import org.esa.snap.remote.products.repository.RepositoryProduct;
-import org.esa.snap.remote.products.repository.SensorType;
 import org.h2gis.utilities.SFSUtilities;
 import org.h2gis.utilities.SpatialResultSet;
 
@@ -48,6 +46,8 @@ import java.util.logging.Logger;
 class LocalRepositoryDatabaseLayer {
 
     private static final Logger logger = Logger.getLogger(LocalRepositoryDatabaseLayer.class.getName());
+
+    private static final int MAXIMUM_REMOTE_ATTRIBUTE_VALUE = 102400;
 
     private LocalRepositoryDatabaseLayer() {
     }
@@ -224,7 +224,7 @@ class LocalRepositoryDatabaseLayer {
                 sql.append(localRepositoryFolder.getId());
             }
             if (selectionArea != null) {
-                Polygon2D polygon = Polygon2D.buildPolygon(selectionArea);
+                Polygon2D polygon = GeometryUtils.buildPolygon(selectionArea);
                 sql.append(" AND ST_Intersects(p.geometry, '")
                         .append(polygon.toWKT())
                         .append("')");
@@ -300,9 +300,10 @@ class LocalRepositoryDatabaseLayer {
                         String missionName = resultSet.getString("remote_mission_name"); // the remote mission name my be null
                         Timestamp acquisitionDate = resultSet.getTimestamp("acquisition_date");
                         long sizeInBytes = resultSet.getLong("size_in_bytes");
-                        Geometry geometry = resultSet.getGeometry("geometry");
-                        Polygon2D polygon = buildPolygon(geometry);
-                        LocalRepositoryProduct localProduct = new LocalRepositoryProduct(id, name, acquisitionDate, productLocalPath, sizeInBytes, polygon);
+                        Geometry productGeometry = resultSet.getGeometry("geometry");
+                        //AbstractGeometry2D geometry = GeometryUtils.convertProductGeometry(productGeometry);
+                        AbstractGeometry2D geometry = convertProductGeometry(productGeometry);
+                        LocalRepositoryProduct localProduct = new LocalRepositoryProduct(id, name, acquisitionDate, productLocalPath, sizeInBytes, geometry);
                         localProduct.setMission(missionName);
                         productList.add(localProduct);
                     }
@@ -344,6 +345,44 @@ class LocalRepositoryDatabaseLayer {
         return productList;
     }
 
+    private static Polygon2D buildPolygon(Polygon polygon) {
+        Coordinate[] coordinates = polygon.getExteriorRing().getCoordinates();
+        Coordinate firstCoordinate = coordinates[0];
+        Coordinate lastCoordinate = coordinates[coordinates.length-1];
+        if (firstCoordinate.getX() != lastCoordinate.getX() || firstCoordinate.getY() != lastCoordinate.getY()) {
+            throw new IllegalStateException("The first and last coordinates of the polygon do not match.");
+        }
+        Polygon2D polygon2D = new Polygon2D();
+        for (Coordinate coordinate : coordinates) {
+            polygon2D.append(coordinate.getX(), coordinate.getY());
+        }
+        return polygon2D;
+    }
+
+    //TODO Jean remove after fixing the bug: java.lang.LinkageError: loader constraint violation: loader (instance of org/netbeans/StandardModule$OneModuleClassLoader)
+    // previously initiated loading for a different type with name "org/locationtech/jts/geom/Geometry"
+    private static AbstractGeometry2D convertProductGeometry(Geometry productGeometry) {
+        AbstractGeometry2D geometry;
+        if (productGeometry instanceof MultiPolygon) {
+            MultiPolygon multiPolygon = (MultiPolygon)productGeometry;
+            MultiPolygon2D multiPolygon2D = new MultiPolygon2D();
+            for (int p=0; p<multiPolygon.getNumGeometries(); p++) {
+                if (multiPolygon.getGeometryN(p) instanceof Polygon) {
+                    Polygon2D polygon2D = buildPolygon((Polygon)multiPolygon.getGeometryN(p));
+                    multiPolygon2D.setPolygon(p, polygon2D);
+                } else {
+                    throw new IllegalStateException("The multipolygon first geometry is not a polygon.");
+                }
+            }
+            geometry = multiPolygon2D;
+        } else if (productGeometry instanceof Polygon) {
+            geometry = buildPolygon((Polygon)productGeometry);
+        } else {
+            throw new IllegalStateException("The product geometry type '"+productGeometry.getClass().getName()+"' is not a '"+Polygon.class.getName()+"' type.");
+        }
+        return geometry;
+    }
+
     private static boolean checkProductAttributesMatches(List<Attribute> remoteAttributes, List<AttributeFilter> attributes) {
         boolean foundAllAttributes = true;
         for (int k = 0; k < attributes.size() && foundAllAttributes; k++) {
@@ -379,7 +418,7 @@ class LocalRepositoryDatabaseLayer {
         }
     }
 
-    private static Polygon2D buildPolygon(Geometry geometry) {
+    private static Polygon2D buildPolygon11(Geometry geometry) {
         if (!(geometry instanceof Polygon)) {
             throw new IllegalStateException("The product geometry type '"+geometry.getClass().getName()+"' is not a '"+Polygon.class.getName()+"' type.");
         }
@@ -559,7 +598,7 @@ class LocalRepositoryDatabaseLayer {
         }
     }
 
-    static SaveProductData saveProduct(Product productToSave, BufferedImage quickLookImage, Polygon2D polygon2D, Path productPath,
+    static SaveProductData saveProduct(Product productToSave, BufferedImage quickLookImage, AbstractGeometry2D polygon2D, Path productPath,
                                        Path localRepositoryFolderPath, H2DatabaseParameters databaseParameters)
                                        throws IOException, SQLException {
 
@@ -836,9 +875,9 @@ class LocalRepositoryDatabaseLayer {
         return remoteMissionId;
     }
 
-    private static void updateProduct(int productId, Product productToSave, Polygon2D polygon2D, Path relativePath, int localRepositoryId,
-                                     FileTime fileTime, long sizeInBytes, Connection connection)
-                                     throws SQLException {
+    private static void updateProduct(int productId, Product productToSave, AbstractGeometry2D geometry, Path relativePath, int localRepositoryId,
+                                      FileTime fileTime, long sizeInBytes, Connection connection)
+                                      throws SQLException {
 
         StringBuilder sql = new StringBuilder();
         sql.append("UPDATE ")
@@ -860,7 +899,7 @@ class LocalRepositoryDatabaseLayer {
                 .append(", last_modified_date = ")
                 .append("?") // last modified date
                 .append(", geometry = '")
-                .append(polygon2D.toWKT())
+                .append(geometry.toWKT())
                 .append("', data_format_type_id = ")
                 .append("NULL") // format data type
                 .append(", pixel_type_id = ")
@@ -890,7 +929,7 @@ class LocalRepositoryDatabaseLayer {
         }
     }
 
-    private static int insertProduct(Product productToSave, Polygon2D polygon2D, Path relativePath, int localRepositoryId,
+    private static int insertProduct(Product productToSave, AbstractGeometry2D geometry, Path relativePath, int localRepositoryId,
                                      FileTime fileTime, long sizeInBytes, Connection connection)
                                      throws SQLException {
 
@@ -915,7 +954,7 @@ class LocalRepositoryDatabaseLayer {
                 .append(", ")
                 .append("?") // last modified date
                 .append(", '")
-                .append(polygon2D.toWKT())
+                .append(geometry.toWKT())
                 .append("', ")
                 .append("NULL") // format data type
                 .append(", ")
@@ -1036,9 +1075,11 @@ class LocalRepositoryDatabaseLayer {
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql.toString())) {
             for (int i=0; i<remoteAttributes.size(); i++) {
                 Attribute attribute = remoteAttributes.get(i);
-                preparedStatement.setString(1, attribute.getName());
-                preparedStatement.setString(2, attribute.getValue());
-                preparedStatement.executeUpdate();
+                if (attribute.getValue().length() <= MAXIMUM_REMOTE_ATTRIBUTE_VALUE) {
+                    preparedStatement.setString(1, attribute.getName());
+                    preparedStatement.setString(2, attribute.getValue());
+                    preparedStatement.executeUpdate();
+                }
             }
         }
     }

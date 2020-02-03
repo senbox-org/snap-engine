@@ -23,7 +23,7 @@ CREATE TABLE data_format_types(
 
 CREATE TABLE local_repositories(
 	id SMALLINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-	folder_path VARCHAR(1024) UNIQUE NOT NULL
+	folder_path VARCHAR(2048) UNIQUE NOT NULL
 )
 ;
 
@@ -53,11 +53,11 @@ CREATE TABLE remote_attributes(
 
 CREATE TABLE products(
 	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
-	name VARCHAR(256) NOT NULL,
+	name VARCHAR(512) NOT NULL,
 	remote_mission_id SMALLINT,
 	local_repository_id SMALLINT NOT NULL,
-	relative_path VARCHAR(1024) NOT NULL,
-	entry_point VARCHAR(256),
+	relative_path VARCHAR(2048) NOT NULL,
+	entry_point VARCHAR(512),
 	size_in_bytes BIGINT NOT NULL,
 	acquisition_date TIMESTAMP,
 	last_modified_date TIMESTAMP NOT NULL,
@@ -78,7 +78,7 @@ CREATE TABLE product_remote_attributes(
 	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
 	product_id INTEGER NOT NULL,
 	name VARCHAR(256) NOT NULL,
-	value VARCHAR(4096) NOT NULL,
+	value VARCHAR(102400) NOT NULL,
 	UNIQUE (product_id, name),
 	FOREIGN KEY (product_id) REFERENCES products(id)
 )

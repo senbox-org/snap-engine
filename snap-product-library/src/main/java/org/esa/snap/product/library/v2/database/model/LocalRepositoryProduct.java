@@ -3,7 +3,7 @@ package org.esa.snap.product.library.v2.database.model;
 import org.esa.snap.remote.products.repository.Attribute;
 import org.esa.snap.remote.products.repository.DataFormatType;
 import org.esa.snap.remote.products.repository.PixelType;
-import org.esa.snap.remote.products.repository.Polygon2D;
+import org.esa.snap.remote.products.repository.AbstractGeometry2D;
 import org.esa.snap.remote.products.repository.RepositoryProduct;
 import org.esa.snap.remote.products.repository.SensorType;
 
@@ -22,13 +22,13 @@ public class LocalRepositoryProduct implements RepositoryProduct {
     private final Path path;
     private final Date acquisitionDate;
     private final long sizeInBytes;
-    private final Polygon2D polygon;
+    private final AbstractGeometry2D polygon;
 
     private String mission;
     private List<Attribute> attributes;
     private BufferedImage quickLookImage;
 
-    public LocalRepositoryProduct(int id, String name, Date acquisitionDate, Path path, long sizeInBytes, Polygon2D polygon) {
+    public LocalRepositoryProduct(int id, String name, Date acquisitionDate, Path path, long sizeInBytes, AbstractGeometry2D polygon) {
         this.id = id;
         this.name = name;
         this.path = path;
@@ -38,7 +38,7 @@ public class LocalRepositoryProduct implements RepositoryProduct {
     }
 
     @Override
-    public Polygon2D getPolygon() {
+    public AbstractGeometry2D getPolygon() {
         return this.polygon;
     }
 

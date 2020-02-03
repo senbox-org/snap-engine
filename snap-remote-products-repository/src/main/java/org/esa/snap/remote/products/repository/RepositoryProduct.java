@@ -9,7 +9,7 @@ import java.util.List;
  */
 public interface RepositoryProduct {
 
-    public Polygon2D getPolygon();
+    public AbstractGeometry2D getPolygon();
 
     public List<Attribute> getAttributes();
 

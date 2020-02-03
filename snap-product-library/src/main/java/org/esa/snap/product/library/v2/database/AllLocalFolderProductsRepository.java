@@ -3,9 +3,8 @@ package org.esa.snap.product.library.v2.database;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.product.library.v2.database.model.LocalRepositoryFolder;
 import org.esa.snap.product.library.v2.database.model.LocalRepositoryProduct;
-import org.esa.snap.product.library.v2.database.model.RemoteMission;
 import org.esa.snap.remote.products.repository.Attribute;
-import org.esa.snap.remote.products.repository.Polygon2D;
+import org.esa.snap.remote.products.repository.AbstractGeometry2D;
 import org.esa.snap.remote.products.repository.RepositoryProduct;
 import org.esa.snap.remote.products.repository.RepositoryQueryParameter;
 import org.esa.snap.remote.products.repository.SensorType;
@@ -69,7 +68,7 @@ public class AllLocalFolderProductsRepository {
         return LocalRepositoryDatabaseLayer.saveProduct(productToSave, productPath, remoteRepositoryName, localRepositoryFolderPath, this.databaseParameters);
     }
 
-    public SaveProductData saveProduct(Product productToSave, BufferedImage quickLookImage, Polygon2D polygon2D, Path productPath, Path localRepositoryFolderPath)
+    public SaveProductData saveProduct(Product productToSave, BufferedImage quickLookImage, AbstractGeometry2D polygon2D, Path productPath, Path localRepositoryFolderPath)
             throws IOException, SQLException {
 
         return LocalRepositoryDatabaseLayer.saveProduct(productToSave, quickLookImage, polygon2D, productPath, localRepositoryFolderPath, this.databaseParameters);

@@ -7,10 +7,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.esa.snap.remote.products.repository.*;
 import org.esa.snap.remote.products.repository.listener.ProductListDownloaderListener;
 import org.esa.snap.remote.products.repository.listener.ProgressListener;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.MultiPolygon;
-import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 import ro.cs.tao.configuration.ConfigurationManager;
@@ -415,33 +412,9 @@ public class TAORemoteRepositoryManager {
         List<RepositoryProduct> downloadedPageProducts = new ArrayList<>(pageResults.size());
         for (int i=0; i<pageResults.size(); i++) {
             EOProduct product = pageResults.get(i);
+
             Geometry productGeometry = wktReader.read(product.getGeometry());
-            Coordinate[] coordinates;
-            if (productGeometry instanceof MultiPolygon) {
-                MultiPolygon multiPolygon = (MultiPolygon)productGeometry;
-                if (multiPolygon.getNumGeometries() > 0) {
-                    if (multiPolygon.getGeometryN(0) instanceof Polygon) {
-                        coordinates = ((Polygon)multiPolygon.getGeometryN(0)).getExteriorRing().getCoordinates();
-                    } else {
-                        throw new IllegalStateException("The multipolygon first geometry is not a polygon.");
-                    }
-                } else {
-                    throw new IllegalStateException("The product multipolygon geometry is empty.");
-                }
-            } else if (productGeometry instanceof Polygon) {
-                coordinates = ((Polygon)productGeometry).getExteriorRing().getCoordinates();
-            } else {
-                throw new IllegalStateException("The product geometry type '"+productGeometry.getClass().getName()+"' is not a '"+Polygon.class.getName()+"' type.");
-            }
-            Coordinate firstCoordinate = coordinates[0];
-            Coordinate lastCoordinate = coordinates[coordinates.length-1];
-            if (firstCoordinate.getX() != lastCoordinate.getX() || firstCoordinate.getY() != lastCoordinate.getY()) {
-                throw new IllegalStateException("The first and last coordinates of the polygon do not match.");
-            }
-            Polygon2D polygon = new Polygon2D();
-            for (Coordinate coordinate : coordinates) {
-                polygon.append(coordinate.getX(), coordinate.getY());
-            }
+            AbstractGeometry2D geometry = GeometryUtils.convertProductGeometry(productGeometry);
 
             List<ro.cs.tao.eodata.Attribute> remoteAttributes = product.getAttributes();
             List<Attribute> attributes = new ArrayList<>(remoteAttributes.size());
@@ -450,7 +423,7 @@ public class TAORemoteRepositoryManager {
                 attributes.add(new Attribute(remoteAttribute.getName(), remoteAttribute.getValue()));
             }
 
-            TAORepositoryProduct repositoryProduct = new TAORepositoryProduct(product.getName(), product.getLocation(), mission, polygon, product.getAcquisitionDate(), product.getApproximateSize());
+            TAORepositoryProduct repositoryProduct = new TAORepositoryProduct(product.getName(), product.getLocation(), mission, geometry, product.getAcquisitionDate(), product.getApproximateSize());
             repositoryProduct.setAttributes(attributes);
             repositoryProduct.setEntryPoint(product.getEntryPoint());
             repositoryProduct.setDataFormatType(convertToDataFormatType(product.getFormatType()));

@@ -3,7 +3,7 @@ package org.esa.snap.remote.products.repository.tao;
 import org.esa.snap.remote.products.repository.Attribute;
 import org.esa.snap.remote.products.repository.DataFormatType;
 import org.esa.snap.remote.products.repository.PixelType;
-import org.esa.snap.remote.products.repository.Polygon2D;
+import org.esa.snap.remote.products.repository.AbstractGeometry2D;
 import org.esa.snap.remote.products.repository.RepositoryProduct;
 import org.esa.snap.remote.products.repository.SensorType;
 
@@ -19,7 +19,7 @@ public class TAORepositoryProduct implements RepositoryProduct {
     private final String name;
     private final String mission;
     private final String downloadURL;
-    private final Polygon2D polygon;
+    private final AbstractGeometry2D polygon;
     private final Date acquisitionDate;
     private final long approximateSize;
 
@@ -31,7 +31,7 @@ public class TAORepositoryProduct implements RepositoryProduct {
     private PixelType pixelType;
     private String downloadQuickLookImageURL;
 
-    TAORepositoryProduct(String name, String downloadURL, String mission, Polygon2D polygon, Date acquisitionDate, long approximateSize) {
+    TAORepositoryProduct(String name, String downloadURL, String mission, AbstractGeometry2D polygon, Date acquisitionDate, long approximateSize) {
         this.name = name;
         this.mission = mission;
         this.downloadURL = downloadURL;
@@ -41,7 +41,7 @@ public class TAORepositoryProduct implements RepositoryProduct {
     }
 
     @Override
-    public Polygon2D getPolygon() {
+    public AbstractGeometry2D getPolygon() {
         return polygon;
     }
 
