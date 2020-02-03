@@ -148,6 +148,11 @@ public class ColorSchemeDefaults {
     public static final String PROPERTY_SCHEME_VERBOSE_TOOLTIP = "Scheme selector will display the DISPLAY field instead of the scheme name";
     public static final boolean PROPERTY_SCHEME_VERBOSE_DEFAULT = true;
 
+    public static final String PROPERTY_SCHEME_SHOW_DISABLED_KEY = PROPERTY_SCHEME_KEY_SUFFIX + ".show.disabled";
+    public static final String PROPERTY_SCHEME_SHOW_DISABLED_LABEL = "Show Disabled Schemes";
+    public static final String PROPERTY_SCHEME_SHOW_DISABLED_TOOLTIP = "Scheme selector will display all schemes including schemes with missing cpd files";
+    public static final boolean PROPERTY_SCHEME_SHOW_DISABLED_DEFAULT = false;
+
     // ----------------------------
 
 

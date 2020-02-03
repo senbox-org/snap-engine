@@ -26,11 +26,12 @@ public class ColorSchemeInfo {
     private boolean enabled;
     private boolean isOverRide;
     private File colorPaletteDir;
+    private int entryNumber;
 
     private boolean useDisplayName = true;
 
 
-    public ColorSchemeInfo(String name, String displayName, String rootName, String description, String cpdFilenameStandard, double minValue, double maxValue,
+    public ColorSchemeInfo(String name, int entryNumber, String displayName, String rootName, String description, String cpdFilenameStandard, double minValue, double maxValue,
                            boolean isLogScaled, boolean isOverRide, boolean enabled, String cpdFilenameColorBlind, String colorBarTitle, String colorBarLabels, File colorPaletteDir) {
         this.setName(name);
         if (rootName != null) {
@@ -39,6 +40,7 @@ public class ColorSchemeInfo {
             this.setRootName(name);
         }
 
+        this.entryNumber = entryNumber;
         this.displayName = displayName;
         this.setDescription(description);
         this.setCpdFilenameStandard(cpdFilenameStandard);
@@ -51,6 +53,11 @@ public class ColorSchemeInfo {
         this.colorBarLabels = colorBarLabels;
         this.colorBarTitle = colorBarTitle;
         this.setColorPaletteDir(colorPaletteDir);
+    }
+
+
+    public int getEntryNumber() {
+        return entryNumber;
     }
 
 
