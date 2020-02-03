@@ -102,16 +102,21 @@ public final class AddElevationOp extends Operator {
     public void initialize() throws OperatorException {
 
         try {
-            if (!demName.contains(externalDEMStr)) {
-                DEMFactory.checkIfDEMInstalled(demName);
-            }
-
             DEMFactory.validateDEM(demName, sourceProduct);
-            initElevationModel();
             createTargetProduct();
-
         } catch (Throwable e) {
             OperatorUtils.catchOperatorException(getId(), e);
+        }
+    }
+
+    @Override
+    public void doExecute(ProgressMonitor pm) throws OperatorException {
+        try {
+            initElevationModel();
+            elevationBand.setNoDataValue(demNoDataValue);
+            elevationBand.setNoDataValueUsed(true);
+        } catch (IOException e) {
+            throw new OperatorException(e);
         }
     }
 
@@ -143,8 +148,6 @@ public final class AddElevationOp extends Operator {
         }
 
         elevationBand = targetProduct.addBand(elevationBandName, ProductData.TYPE_FLOAT32);
-        elevationBand.setNoDataValue(demNoDataValue);
-        elevationBand.setNoDataValueUsed(true);
         elevationBand.setUnit(Unit.METERS);
         elevationBand.setDescription(demName);
     }
