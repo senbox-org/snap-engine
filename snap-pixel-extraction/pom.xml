@@ -60,6 +60,14 @@
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-csv-dataio</artifactId>
         </dependency>
+		<dependency>
+            <groupId>org.jfree</groupId>
+            <artifactId>jfreechart</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jfree</groupId>
+            <artifactId>jcommon</artifactId>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -83,6 +91,7 @@
                         <publicPackage>org.esa.snap.pixex.*</publicPackage>
                         <publicPackage>org.esa.snap.measurement</publicPackage>
                         <publicPackage>org.esa.snap.measurement.writer</publicPackage>
+						<publicPackage>org.jfree.*</publicPackage>
                     </publicPackages>
                 </configuration>
             </plugin>
