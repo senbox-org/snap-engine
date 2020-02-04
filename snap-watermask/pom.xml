@@ -75,9 +75,8 @@
 	<build>
         <plugins>
             <plugin>
-                <groupId>${nbm.plugin.group.id}</groupId>
-                <artifactId>${nbm.plugin.artifact.id}</artifactId>
-                <version>${nbm.plugin.version}</version>
+                <groupId>org.apache.netbeans.utilities</groupId>
+                <artifactId>nbm-maven-plugin</artifactId>
                 <configuration>
                     <publicPackages>
                         <publicPackage>org.esa.snap.watermask.operator.*</publicPackage>

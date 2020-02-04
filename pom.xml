@@ -48,9 +48,6 @@
         <maven.build.timestamp.format>yyyyMMdd</maven.build.timestamp.format>
         <buildDate>${maven.build.timestamp}</buildDate>
         <tao.version>1.0.1</tao.version>
-        <nbm.plugin.group.id>org.apache.netbeans.utilities</nbm.plugin.group.id>
-        <nbm.plugin.artifact.id>nbm-maven-plugin</nbm.plugin.artifact.id>
-        <nbm.plugin.version>4.3</nbm.plugin.version>
     </properties>
 
     <modules>
@@ -959,9 +956,9 @@
                 </plugin>
 
                 <plugin>
-                    <groupId>${nbm.plugin.group.id}</groupId>
-                    <artifactId>${nbm.plugin.artifact.id}</artifactId>
-                    <version>${nbm.plugin.version}</version>
+                    <groupId>org.apache.netbeans.utilities</groupId>
+                    <artifactId>nbm-maven-plugin</artifactId>
+                    <version>4.4</version>
                     <extensions>true</extensions>
                     <dependencies>
                         <dependency>
@@ -1069,9 +1066,9 @@
             </plugin>
 
             <plugin>
-                <groupId>${nbm.plugin.group.id}</groupId>
-                <artifactId>${nbm.plugin.artifact.id}</artifactId>
-                <version>${nbm.plugin.version}</version>
+                <groupId>org.apache.netbeans.utilities</groupId>
+                <artifactId>nbm-maven-plugin</artifactId>
+                <version>4.4</version>
             </plugin>
 
             <plugin>
