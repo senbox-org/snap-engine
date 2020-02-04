@@ -184,6 +184,9 @@ public class GeoTiffImageReader implements Closeable {
     private static TIFFImageReader buildImageReader(Object sourceImage) throws IOException {
         TIFFImageReader imageReader = null;
         ImageInputStream imageInputStream = ImageIO.createImageInputStream(sourceImage);
+        if (imageInputStream == null) {
+            throw new NullPointerException("The image input stream is null for source image '" + sourceImage + "'.");
+        }
         try {
             imageReader = findImageReader(imageInputStream);
         } finally {
