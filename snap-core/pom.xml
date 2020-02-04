@@ -38,10 +38,10 @@
             <groupId>org.esa.snap</groupId>
             <artifactId>ceres-binding</artifactId>
         </dependency>
-        <dependency>
+        <!--dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>ceres-binio</artifactId>
-        </dependency>
+        </dependency-->
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>ceres-glayer</artifactId>
@@ -58,10 +58,10 @@
             <groupId>org.jdom</groupId>
             <artifactId>jdom</artifactId>
         </dependency>
-        <dependency>
+        <!--dependency>
             <groupId>com.bc.jnn</groupId>
             <artifactId>jnn</artifactId>
-        </dependency>
+        </dependency-->
         <dependency>
             <groupId>Jama</groupId>
             <artifactId>Jama</artifactId>
@@ -90,18 +90,18 @@
             <groupId>org.geotools</groupId>
             <artifactId>gt-shapefile</artifactId>
         </dependency>
-        <dependency>
+        <!--dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-cql</artifactId>
-        </dependency>
+        </dependency-->
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-wms</artifactId>
         </dependency>
-        <dependency>
+        <!--dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-render</artifactId>
-        </dependency>
+        </dependency-->
         <dependency>
             <groupId>org.geotools.xsd</groupId>
             <artifactId>gt-xsd-gml3</artifactId>
@@ -127,10 +127,12 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+			<scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
+			<scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.vividsolutions</groupId>
@@ -168,6 +170,7 @@
                         <publicPackage>javax.vecmath.*</publicPackage>
                         <publicPackage>org.jdom.*</publicPackage>
                         <publicPackage>org.geotools.*</publicPackage>
+						<publicPackage>it.geosolutions.*</publicPackage>
                         <publicPackage>org.opengis.*</publicPackage>
                         <publicPackage>com.vividsolutions.jts.*</publicPackage>
                         <publicPackage>Jama</publicPackage>
@@ -178,7 +181,7 @@
                         <publicPackage>org.esa.snap.core.jexp</publicPackage>
                         <publicPackage>org.esa.snap.core.jexp.impl</publicPackage>
                         <publicPackage>com.bc.util</publicPackage>
-                        <publicPackage>com.bc.jnn</publicPackage>
+                        <!--publicPackage>com.bc.jnn</publicPackage-->
                         <publicPackage>org.esa.snap</publicPackage>
                         <publicPackage>org.esa.snap.runtime.*</publicPackage>
                         <publicPackage>org.esa.snap.dataio.*</publicPackage>
