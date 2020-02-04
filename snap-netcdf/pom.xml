@@ -150,6 +150,7 @@
                         <publicPackage>ucar.unidata.io.bzip2</publicPackage>
                         <publicPackage>ucar.unidata.util</publicPackage>
                         <publicPackage>ucar.nc2.ft.point.standard.*</publicPackage>
+                        <publicPackage>thredds.catalog</publicPackage>
                         <publicPackage>javax.annotation</publicPackage>
                         <publicPackage>org.slf4j</publicPackage>
                         <publicPackage>org.slf4j.impl</publicPackage>
