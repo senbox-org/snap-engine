@@ -91,7 +91,6 @@
                         <publicPackage>org.esa.snap.pixex.*</publicPackage>
                         <publicPackage>org.esa.snap.measurement</publicPackage>
                         <publicPackage>org.esa.snap.measurement.writer</publicPackage>
-						<publicPackage>org.jfree.*</publicPackage>
                     </publicPackages>
                 </configuration>
             </plugin>
