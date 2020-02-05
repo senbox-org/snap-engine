@@ -24,6 +24,7 @@ public class ColorSchemeInfo {
     private double maxValue;
     private boolean isLogScaled;
     private boolean enabled;
+    private boolean devider;
     private boolean isOverRide;
     private File colorPaletteDir;
     private int entryNumber;
@@ -31,7 +32,7 @@ public class ColorSchemeInfo {
     private boolean useDisplayName = true;
 
 
-    public ColorSchemeInfo(String name, int entryNumber, String displayName, String rootName, String description, String cpdFilenameStandard, double minValue, double maxValue,
+    public ColorSchemeInfo(String name, boolean devider, int entryNumber, String displayName, String rootName, String description, String cpdFilenameStandard, double minValue, double maxValue,
                            boolean isLogScaled, boolean isOverRide, boolean enabled, String cpdFilenameColorBlind, String colorBarTitle, String colorBarLabels, File colorPaletteDir) {
         this.setName(name);
         if (rootName != null) {
@@ -40,6 +41,7 @@ public class ColorSchemeInfo {
             this.setRootName(name);
         }
 
+        this.devider = devider;
         this.entryNumber = entryNumber;
         this.displayName = displayName;
         this.setDescription(description);
@@ -60,6 +62,9 @@ public class ColorSchemeInfo {
         return entryNumber;
     }
 
+    public boolean isDevider() {
+        return devider;
+    }
 
     public void setUseDisplayName(boolean useDisplayName) {
         this.useDisplayName = useDisplayName;
@@ -122,7 +127,11 @@ public class ColorSchemeInfo {
     }
 
     public String toString() {
-        if (isUseDisplayName() && displayName != null && displayName.length() > 0) {
+        return toString(isUseDisplayName());
+    }
+
+    public String toString(boolean verbose) {
+        if (verbose && displayName != null && displayName.length() > 0) {
             return displayName;
         } else {
             return getName();
