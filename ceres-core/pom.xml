@@ -53,28 +53,15 @@
             <groupId>commons-collections</groupId>
             <artifactId>commons-collections</artifactId>
         </dependency>
-        <!--
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-        </dependency>
-        -->
         <dependency>
             <groupId>org.apache.velocity</groupId>
             <artifactId>velocity</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jfree</groupId>
-            <artifactId>jfreechart</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jfree</groupId>
-            <artifactId>jcommon</artifactId>
         </dependency>
 
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+			<scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
@@ -101,15 +88,6 @@
                         <publicPackage>org.apache.commons.math3.*</publicPackage>
                         <publicPackage>org.apache.commons.cli.*</publicPackage>
                         <publicPackage>org.apache.commons.collections.*</publicPackage>
-                        <!--
-                        <publicPackage>org.apache.commons.codec.*</publicPackage>
-                        -->
-
-                        <publicPackage>org.jfree.chart.*</publicPackage>
-                        <publicPackage>org.jfree.data.*</publicPackage>
-                        <publicPackage>org.jfree.date.*</publicPackage>
-                        <publicPackage>org.jfree.ui</publicPackage>
-                        <publicPackage>org.jfree.util</publicPackage>
 
                         <publicPackage>org.apache.velocity.*</publicPackage>
 
