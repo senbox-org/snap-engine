@@ -129,6 +129,11 @@ public class ColorSchemeInfo {
         }
     }
 
+    public String getDisplayName() {
+        return displayName;
+    }
+
+
     public String getName() {
         return name;
     }
