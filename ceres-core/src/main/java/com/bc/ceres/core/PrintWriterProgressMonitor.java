@@ -143,7 +143,7 @@ public class PrintWriterProgressMonitor implements ProgressMonitor {
     }
 
     protected void printCanceledMessage(PrintWriter pw) {
-        pw.println(MessageFormat.format("{0}, cancelation requested", getMessage()));
+        pw.println(MessageFormat.format("{0}, cancellation requested", getMessage()));
     }
 
     protected String getMessage() {
