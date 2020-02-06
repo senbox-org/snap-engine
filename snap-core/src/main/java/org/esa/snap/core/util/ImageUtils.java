@@ -18,8 +18,10 @@ package org.esa.snap.core.util;
 // Important: make sure that we get no dependencies to
 // other org.esa.snap packages here above org.esa.snap.util
 
+import com.vividsolutions.jts.geom.Geometry;
 import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
+import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.util.jai.SingleBandedSampleModel;
@@ -130,32 +132,49 @@ public class ImageUtils {
         return new Rectangle(bandOffsetX, bandOffsetY, bandWidth, bandHeight);
     }
 
-    private static int computeBandValue(int productValue, double productOriginPosition, double bandPixelStep) {
-        return (int)(productValue * productOriginPosition / bandPixelStep);
-    }
-
-    public static Rectangle computeBandBounds(Rectangle productBounds, Dimension defaultProductSize, Dimension defaultBandSize,
-                                              double productStepX, double productStepY, double bandPixelSizeX, double bandPixelSizeY) {
-
-        Rectangle bandBounds;
-        if (defaultProductSize.width == productBounds.width && defaultProductSize.height == productBounds.height) {
-            bandBounds = new Rectangle(0, 0, defaultBandSize.width, defaultBandSize.height);
-        } else if (defaultBandSize.width < defaultProductSize.width || defaultBandSize.height < defaultProductSize.height) {
-            bandBounds = new Rectangle();
-            bandBounds.x = computeBandValue(productBounds.x, productStepX, bandPixelSizeX);
-            bandBounds.y = computeBandValue(productBounds.y, productStepY, bandPixelSizeY);
-            bandBounds.width = computeBandValue(productBounds.width, productStepX, bandPixelSizeX);
-            bandBounds.height = computeBandValue(productBounds.height, productStepY, bandPixelSizeY);
-            if (bandBounds.width > productBounds.width) {
-                throw new IllegalStateException("The band width " + bandBounds.width + " is greater than the product width " + productBounds.width + ".");
+    public static Rectangle computeBandBounds(ProductSubsetDef subsetDef, Dimension defaultProductSize, Dimension defaultBandSize,
+                                              GeoCoding productDefaultGeoCoding,  GeoCoding bandDefaultGeoCoding) {
+        Rectangle bandBounds = null;
+        if(subsetDef != null){
+            if(subsetDef.isGeoRegion()){
+                Geometry geoRegion = subsetDef.getGeoRegion();
+                bandBounds = ProductUtils.computePixelRegion(bandDefaultGeoCoding, defaultBandSize.width, defaultBandSize.height, geoRegion, 0);
+            }else{
+                Rectangle productSubsetBounds = subsetDef.getRegion();
+                Geometry geoRegion = ProductUtils.computeGeoRegion(productDefaultGeoCoding, defaultProductSize.width, defaultProductSize.height, productSubsetBounds);
+                bandBounds = ProductUtils.computePixelRegion(bandDefaultGeoCoding, defaultBandSize.width, defaultBandSize.height, geoRegion, 0);
             }
-            if (bandBounds.height > productBounds.height) {
-                throw new IllegalStateException("The band height " + bandBounds.height + " is greater than the product height " + productBounds.height + ".");
-            }
-        } else {
-            bandBounds = productBounds;
+        }
+        if (bandBounds == null) {
+            bandBounds = new Rectangle(defaultBandSize.width, defaultBandSize.height);
         }
         return bandBounds;
+    }
+
+    public static Rectangle computeProductBounds(GeoCoding productDefaultGeoCoding, int defaultImageWidth, int defaultImageHeight, ProductSubsetDef subsetDef) {
+        Rectangle imageBounds = null;
+        if(subsetDef != null){
+            if(subsetDef.isGeoRegion() && productDefaultGeoCoding == null){
+                throw new IllegalArgumentException("The geoRegion subset cannot be done because the product GeoCoding is missing!");
+            }else if(subsetDef.isGeoRegion()){
+                imageBounds = ProductUtils.computePixelRegion(productDefaultGeoCoding, defaultImageWidth, defaultImageHeight, subsetDef.getGeoRegion(), 0);
+                subsetDef.setRegion(imageBounds);
+            }else{
+                imageBounds = subsetDef.getRegion();
+            }
+            if (imageBounds != null) {
+                if (imageBounds.width > defaultImageWidth) {
+                    throw new IllegalArgumentException("The visible region width " + imageBounds.width + " cannot be greater than the image width " + defaultImageWidth + ".");
+                }
+                if (imageBounds.height > defaultImageHeight) {
+                    throw new IllegalArgumentException("The visible region height " + imageBounds.height + " cannot be greater than the image height " + defaultImageHeight + ".");
+                }
+            }
+        }
+       if (imageBounds == null) {
+           imageBounds = new Rectangle(defaultImageWidth, defaultImageHeight);
+       }
+       return imageBounds;
     }
 
     public static Rectangle computeProductBounds(int defaultImageWidth, int defaultImageHeight, ProductSubsetDef subsetDef) {

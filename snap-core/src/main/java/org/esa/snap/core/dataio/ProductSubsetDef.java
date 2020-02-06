@@ -15,6 +15,7 @@
  */
 package org.esa.snap.core.dataio;
 
+import com.vividsolutions.jts.geom.Geometry;
 import org.esa.snap.core.util.Guardian;
 
 import java.awt.Dimension;
@@ -22,6 +23,7 @@ import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 /**
  * The <code>ProductSubsetDef</code> class describes a subset or portion of a remote sensing data product.
@@ -43,6 +45,11 @@ public class ProductSubsetDef {
      * The spatial subset.
      */
     private Rectangle region = null;
+
+    /**
+     * The geoCoding subset
+     */
+    private Geometry geoRegion = null;
 
     /**
      * The spatial subset for each RasterDataNode
@@ -68,6 +75,11 @@ public class ProductSubsetDef {
      * ignores or not ignores Metadata at writing or reading a product
      */
     private boolean ignoreMetadata = false;
+
+    /**
+     * subset is done on geoRegion or region
+     */
+    private boolean isGeoRegion = false;
 
     private boolean treatVirtualBandsAsRealBands = false;
 
@@ -163,6 +175,20 @@ public class ProductSubsetDef {
         }
         for (int i = 0; i < names.length; i++) {
             addNodeName(names[i]);
+        }
+    }
+
+    /**
+     * Adds the given product node names to this subset.
+     *
+     * @param names the nodename's to be added
+     */
+    public void addNodeNames(Set<String> names) {
+        if (names == null) {
+            return;
+        }
+        for (String name : names) {
+            addNodeName(name);
         }
     }
 
@@ -382,5 +408,24 @@ public class ProductSubsetDef {
             }
         }
         return -1;
+    }
+
+    public Geometry getGeoRegion(){
+        return this.geoRegion;
+    }
+
+    public void setGeoRegion(Geometry geometryRegion){
+        if(geometryRegion == null){
+            this.geoRegion = null;
+        }else{
+            this.geoRegion = geometryRegion;
+        }
+    }
+
+    /**
+     * if <code>true</code>, subset is done based on geo region, otherwise subset is done based on region.
+     */
+    public boolean isGeoRegion() {
+        return geoRegion != null;
     }
 }

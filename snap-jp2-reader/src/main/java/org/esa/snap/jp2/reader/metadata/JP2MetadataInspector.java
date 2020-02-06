@@ -1,18 +1,20 @@
 package org.esa.snap.jp2.reader.metadata;
 
+import org.esa.snap.core.datamodel.TiePointGeoCoding;
+import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.metadata.MetadataInspector;
-import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.metadata.XmlMetadataParser;
 import org.esa.snap.core.metadata.XmlMetadataParserFactory;
+import org.esa.snap.jp2.reader.JP2ProductReader;
 import org.esa.snap.lib.openjpeg.utils.OpenJpegExecRetriever;
 import org.esa.snap.lib.openjpeg.utils.OpenJpegUtils;
-import org.geotools.referencing.CRS;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
+import java.awt.*;
 import java.awt.geom.Point2D;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import static org.esa.snap.lib.openjpeg.utils.OpenJpegUtils.validateOpenJpegExecutables;
@@ -54,9 +56,7 @@ public class JP2MetadataInspector implements MetadataInspector {
 
             metadata.setProductWidth(imageWidth);
             metadata.setProductHeight(imageHeight);
-            if(metadata.isHasGeoCoding()) {
-                metadata.setGeoCoding(addGeoCoding(metadataHeader, imageWidth, imageHeight));
-            }
+            metadata.setGeoCoding(addGeoCoding(metadataHeader, imageWidth, imageHeight));
         } catch (IOException|InterruptedException e) {
             throw new IOException("Error while reading file '" + productPath.toString() + "'.", e);
         }
@@ -65,16 +65,15 @@ public class JP2MetadataInspector implements MetadataInspector {
 
     private GeoCoding addGeoCoding(Jp2XmlMetadata metadata, int width, int height) {
 
-        String crsGeoCoding = metadata.getCrsGeocoding();
         Point2D origin = metadata.getOrigin();
-        GeoCoding geoCoding = null;
-        if (crsGeoCoding != null && origin != null) {
-            try {
-                CoordinateReferenceSystem mapCRS = CRS.decode(crsGeoCoding.replace("::", ":"));
-                geoCoding = new CrsGeoCoding(mapCRS, width, height, origin.getX(), origin.getY(), metadata.getStepX(), -metadata.getStepY());
-            } catch (Exception gEx) {
-                logger.warning(gEx.getMessage());
-            }
+        GeoCoding geoCoding = JP2ProductReader.computeCrsGeoCoding(origin, metadata, new Dimension(width, height), null);
+        if (geoCoding == null) {
+            Map<String, TiePointGrid> tiePointGrids = JP2ProductReader.computeTiePointGrids(origin, width, height, metadata);
+           if(tiePointGrids != null && !tiePointGrids.isEmpty()) {
+               TiePointGrid lonGrid = tiePointGrids.get("lon");
+               TiePointGrid latGrid = tiePointGrids.get("lat");
+               geoCoding = new TiePointGeoCoding(latGrid, lonGrid);
+           }
         }
         return geoCoding;
     }

@@ -17,8 +17,6 @@
 package org.esa.snap.core.gpf.common;
 
 import com.bc.ceres.core.ProgressMonitor;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.CoordinateFilter;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Polygon;
@@ -27,15 +25,11 @@ import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductSubsetBuilder;
 import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.core.datamodel.GeoPos;
-import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.dataop.barithm.BandArithmetic;
-import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
@@ -52,8 +46,6 @@ import org.esa.snap.core.util.converters.RectangleConverter;
 
 import java.awt.Rectangle;
 import java.awt.geom.GeneralPath;
-import java.awt.geom.Path2D;
-import java.awt.geom.PathIterator;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -324,7 +316,7 @@ public class SubsetOp extends Operator {
         if (regionIntersection.isEmpty()) {
             return new Rectangle();
         }
-        final PixelRegionFinder pixelRegionFinder = new PixelRegionFinder(product.getSceneGeoCoding());
+        final ProductUtils.PixelRegionFinder pixelRegionFinder = new ProductUtils.PixelRegionFinder(product.getSceneGeoCoding());
         regionIntersection.apply(pixelRegionFinder);
         final Rectangle pixelRegion = pixelRegionFinder.getPixelRegion();
         pixelRegion.grow(numBorderPixels, numBorderPixels);
@@ -338,7 +330,7 @@ public class SubsetOp extends Operator {
         if (regionIntersection.isEmpty()) {
             return new Rectangle();
         }
-        final PixelRegionFinder pixelRegionFinder = new PixelRegionFinder(rasterDataNode.getGeoCoding(),true);
+        final ProductUtils.PixelRegionFinder pixelRegionFinder = new ProductUtils.PixelRegionFinder(rasterDataNode.getGeoCoding(),true);
         regionIntersection.apply(pixelRegionFinder);
         final Rectangle pixelRegion = pixelRegionFinder.getPixelRegion();
         pixelRegion.grow(numBorderPixels, numBorderPixels);
@@ -353,7 +345,7 @@ public class SubsetOp extends Operator {
         final Polygon[] polygons = new Polygon[paths.length];
         final GeometryFactory factory = new GeometryFactory();
         for (int i = 0; i < paths.length; i++) {
-            polygons[i] = convertAwtPathToJtsPolygon(paths[i], factory);
+            polygons[i] = ProductUtils.convertAwtPathToJtsPolygon(paths[i], factory);
         }
 
         if(polygons.length == 1) {
@@ -373,7 +365,7 @@ public class SubsetOp extends Operator {
         final Polygon[] polygons = new Polygon[paths.length];
         final GeometryFactory factory = new GeometryFactory();
         for (int i = 0; i < paths.length; i++) {
-            polygons[i] = convertAwtPathToJtsPolygon(paths[i], factory);
+            polygons[i] = ProductUtils.convertAwtPathToJtsPolygon(paths[i], factory);
         }
 
         if(polygons.length == 1) {
@@ -391,7 +383,7 @@ public class SubsetOp extends Operator {
         final Polygon[] polygons = new Polygon[paths.length];
         final GeometryFactory factory = new GeometryFactory();
         for (int i = 0; i < paths.length; i++) {
-            polygons[i] = convertAwtPathToJtsPolygon(paths[i], factory);
+            polygons[i] = ProductUtils.convertAwtPathToJtsPolygon(paths[i], factory);
         }
         final DouglasPeuckerSimplifier peuckerSimplifier = new DouglasPeuckerSimplifier(
                 polygons.length == 1 ? polygons[0] : factory.createMultiPolygon(polygons));
@@ -403,38 +395,12 @@ public class SubsetOp extends Operator {
         final Polygon[] polygons = new Polygon[paths.length];
         final GeometryFactory factory = new GeometryFactory();
         for (int i = 0; i < paths.length; i++) {
-            polygons[i] = convertAwtPathToJtsPolygon(paths[i], factory);
+            polygons[i] = ProductUtils.convertAwtPathToJtsPolygon(paths[i], factory);
         }
         final DouglasPeuckerSimplifier peuckerSimplifier = new DouglasPeuckerSimplifier(
                 polygons.length == 1 ? polygons[0] : factory.createMultiPolygon(polygons));
         return peuckerSimplifier.getResultGeometry();
     }
-
-    private static Polygon convertAwtPathToJtsPolygon(Path2D path, GeometryFactory factory) {
-        final PathIterator pathIterator = path.getPathIterator(null);
-        ArrayList<double[]> coordList = new ArrayList<>();
-        int lastOpenIndex = 0;
-        while (!pathIterator.isDone()) {
-            final double[] coords = new double[6];
-            final int segType = pathIterator.currentSegment(coords);
-            if (segType == PathIterator.SEG_CLOSE) {
-                // we should only detect a single SEG_CLOSE
-                coordList.add(coordList.get(lastOpenIndex));
-                lastOpenIndex = coordList.size();
-            } else {
-                coordList.add(coords);
-            }
-            pathIterator.next();
-        }
-        final Coordinate[] coordinates = new Coordinate[coordList.size()];
-        for (int i1 = 0; i1 < coordinates.length; i1++) {
-            final double[] coord = coordList.get(i1);
-            coordinates[i1] = new Coordinate(coord[0], coord[1]);
-        }
-
-        return factory.createPolygon(factory.createLinearRing(coordinates), null);
-    }
-
 
     public static HashMap<String,Rectangle> computeRegionMap (Rectangle region, Product product, String[] rasterNames) {
         if(rasterNames == null || rasterNames.length == 0) {
@@ -537,52 +503,6 @@ public class SubsetOp extends Operator {
 
         public Spi() {
             super(SubsetOp.class);
-        }
-    }
-
-    private static class PixelRegionFinder implements CoordinateFilter {
-
-        private final GeoCoding geoCoding;
-        private int x1;
-        private int y1;
-        private int x2;
-        private int y2;
-        boolean round = false;
-
-        private PixelRegionFinder(GeoCoding geoCoding) {
-            this(geoCoding, false);
-        }
-
-        private PixelRegionFinder(GeoCoding geoCoding, boolean round) {
-            this.geoCoding = geoCoding;
-            x1 = Integer.MAX_VALUE;
-            x2 = Integer.MIN_VALUE;
-            y1 = Integer.MAX_VALUE;
-            y2 = Integer.MIN_VALUE;
-            this.round = round;
-        }
-
-        @Override
-        public void filter(Coordinate coordinate) {
-            final GeoPos geoPos = new GeoPos(coordinate.y, coordinate.x);
-            final PixelPos pixelPos = geoCoding.getPixelPos(geoPos, null);
-            if (pixelPos.isValid()) {
-                if(round) {
-                    x1 = min(x1, (int) round(pixelPos.x));
-                    x2 = max(x2, (int) round(pixelPos.x));
-                    y1 = min(y1, (int) round(pixelPos.y));
-                    y2 = max(y2, (int) round(pixelPos.y));
-                } else {
-                    x1 = min(x1, (int) floor(pixelPos.x));
-                    x2 = max(x2, (int) ceil(pixelPos.x));
-                    y1 = min(y1, (int) floor(pixelPos.y));
-                    y2 = max(y2, (int) ceil(pixelPos.y));
-                }
-            }
-        }
-
-        public Rectangle getPixelRegion() {
-            return new Rectangle(x1, y1, x2 - x1, y2 - y1);
         }
     }
 }

@@ -23,6 +23,7 @@ import com.bc.ceres.glevel.support.DefaultMultiLevelImage;
 import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.DecodeQualification;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
+import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.metadata.XmlMetadataParser;
 import org.esa.snap.core.metadata.XmlMetadataParserFactory;
@@ -44,7 +45,9 @@ import java.awt.geom.Point2D;
 import java.awt.image.DataBuffer;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -127,10 +130,23 @@ public class JP2ProductReader extends AbstractProductReader {
             int imageHeight = imageInfo.getHeight();
             Dimension defaultProductSize = new Dimension(imageWidth,imageHeight);
             Rectangle subsetRegion = null;
-            if (getSubsetDef() != null && getSubsetDef().getRegion() != null) {
-                imageWidth = getSubsetDef().getRegion().width;
-                imageHeight = getSubsetDef().getRegion().height;
-                subsetRegion = getSubsetDef().getRegion();
+            GeoCoding productDefaultGeoCoding = null;
+            if(getSubsetDef() != null) {
+                if (metadata != null) {
+                    Point2D origin = metadata.getOrigin();
+                    productDefaultGeoCoding = computeCrsGeoCoding(origin, metadata, defaultProductSize, null);
+                    if (productDefaultGeoCoding == null) {
+                        Map<String, TiePointGrid> tiePointGrids = computeTiePointGrids(origin, imageWidth, imageHeight, metadata);
+                        if(!tiePointGrids.isEmpty()) {
+                            TiePointGrid lonGrid = tiePointGrids.get("lon");
+                            TiePointGrid latGrid = tiePointGrids.get("lat");
+                            productDefaultGeoCoding = new TiePointGeoCoding(latGrid, lonGrid);
+                        }
+                    }
+                }
+                subsetRegion = ImageUtils.computeProductBounds(productDefaultGeoCoding, imageWidth, imageHeight, getSubsetDef());
+                imageWidth = subsetRegion.width;
+                imageHeight = subsetRegion.height;
             }
 
             this.product = new Product(this.virtualJp2File.getFileName(), JP2ProductReaderConstants.TYPE, imageWidth, imageHeight);
@@ -145,7 +161,7 @@ public class JP2ProductReader extends AbstractProductReader {
                 if (getSubsetDef() == null || !getSubsetDef().isIgnoreMetadata()) {
                     metadataRoot.addElement(metadata.getRootElement());
                 }
-                addGeoCoding(metadata, subsetRegion, defaultProductSize);
+                addGeoCoding(metadata, getSubsetDef(), defaultProductSize);
             }
 
             double[] bandScales = null;
@@ -170,65 +186,71 @@ public class JP2ProductReader extends AbstractProductReader {
         // do nothing
     }
 
-    private void addGeoCoding(Jp2XmlMetadata metadata, Rectangle subsetRegion, Dimension defaultProductSize) {
+    private void addGeoCoding(Jp2XmlMetadata metadata, ProductSubsetDef subsetDef, Dimension defaultProductSize) {
         int imageWidth = this.product.getSceneRasterWidth();
         int imageHeight = this.product.getSceneRasterHeight();
-        String crsGeoCoding = metadata.getCrsGeocoding();
-        Point2D origin = metadata.getOrigin();
-        GeoCoding geoCoding = null;
-        if (crsGeoCoding != null && origin != null) {
-            try {
-                CoordinateReferenceSystem mapCRS = CRS.decode(crsGeoCoding.replace("::", ":"));
-                geoCoding = ImageUtils.buildCrsGeoCoding(origin.getX(), origin.getY(),
-                                                         metadata.getStepX(), -metadata.getStepY(),
-                                                         defaultProductSize, mapCRS, subsetRegion);
-            } catch (Exception gEx) {
-                System.out.println(gEx);
-            }
+        Rectangle subsetRegion = null;
+        if(subsetDef != null){
+            subsetRegion = subsetDef.getRegion();
         }
+        Point2D origin = metadata.getOrigin();
+        GeoCoding geoCoding = computeCrsGeoCoding(origin, metadata, defaultProductSize, subsetRegion);
         if (geoCoding == null) {
-            try {
-                float[] latPoints = null;
-                float[] lonPoints = null;
-                if(origin != null){
-                    float oX = (float) origin.getX();
-                    float oY = (float) origin.getY();
-                    float h = (float) imageHeight * (float) metadata.getStepY();
-                    float w = (float) imageWidth * (float) metadata.getStepX();
-                    latPoints = new float[]{oY + h, oY + h, oY, oY};
-                    lonPoints = new float[]{oX, oX + w, oX, oX + w};
-                } else {
-                    List<Point2D> polygonPositions = metadata.getPolygonPositions();
-                    if (polygonPositions != null) {
-                        latPoints = new float[]{(float) polygonPositions.get(0).getX(),
-                                (float) polygonPositions.get(1).getX(),
-                                (float) polygonPositions.get(3).getX(),
-                                (float) polygonPositions.get(2).getX()};
-                        lonPoints = new float[]{(float) polygonPositions.get(0).getY(),
-                                (float) polygonPositions.get(1).getY(),
-                                (float) polygonPositions.get(3).getY(),
-                                (float) polygonPositions.get(2).getY()};
-                    }
+            Map<String, TiePointGrid> tiePointGrids = computeTiePointGrids(origin, imageWidth, imageHeight, metadata);
+            if(!tiePointGrids.isEmpty()) {
+                TiePointGrid lonGrid = tiePointGrids.get("lon");
+                TiePointGrid latGrid = tiePointGrids.get("lat");
+                if (subsetDef != null) {
+                    lonGrid = TiePointGrid.createSubset(lonGrid, subsetDef);
+                    latGrid = TiePointGrid.createSubset(latGrid, subsetDef);
                 }
-                if(latPoints != null ) {
-                    TiePointGrid latGrid = createTiePointGrid("latitude", 2, 2, 0, 0, imageWidth, imageHeight, latPoints);
-                    TiePointGrid lonGrid = createTiePointGrid("longitude", 2, 2, 0, 0, imageWidth, imageHeight, lonPoints);
-                    if(getSubsetDef() != null && getSubsetDef().getRegion() != null) {
-                        lonGrid = TiePointGrid.createSubset(lonGrid,getSubsetDef());
-                        latGrid = TiePointGrid.createSubset(latGrid,getSubsetDef());
-                    }
-                    geoCoding = new TiePointGeoCoding(latGrid, lonGrid);
-                    this.product.addTiePointGrid(latGrid);
-                    this.product.addTiePointGrid(lonGrid);
-                }
-            } catch (Exception ignored) {
-                // ignore
+                geoCoding = new TiePointGeoCoding(latGrid, lonGrid);
+                this.product.addTiePointGrid(latGrid);
+                this.product.addTiePointGrid(lonGrid);
             }
         }
         if (geoCoding != null) {
             this.product.setSceneGeoCoding(geoCoding);
         }
     }
+
+    public static Map<String, TiePointGrid> computeTiePointGrids(Point2D origin, int imageWidth, int imageHeight, Jp2XmlMetadata metadata) {
+        Map<String , TiePointGrid> tiePointGrids = new HashMap<>();
+        try {
+            float[] latPoints = null;
+            float[] lonPoints = null;
+            if (origin != null) {
+                float oX = (float) origin.getX();
+                float oY = (float) origin.getY();
+                float h = (float) imageHeight * (float) metadata.getStepY();
+                float w = (float) imageWidth * (float) metadata.getStepX();
+                latPoints = new float[]{oY + h, oY + h, oY, oY};
+                lonPoints = new float[]{oX, oX + w, oX, oX + w};
+            } else {
+                List<Point2D> polygonPositions = metadata.getPolygonPositions();
+                if (polygonPositions != null) {
+                    latPoints = new float[]{(float) polygonPositions.get(0).getX(),
+                            (float) polygonPositions.get(1).getX(),
+                            (float) polygonPositions.get(3).getX(),
+                            (float) polygonPositions.get(2).getX()};
+                    lonPoints = new float[]{(float) polygonPositions.get(0).getY(),
+                            (float) polygonPositions.get(1).getY(),
+                            (float) polygonPositions.get(3).getY(),
+                            (float) polygonPositions.get(2).getY()};
+                }
+            }
+            if (latPoints != null) {
+                TiePointGrid latGrid = buildTiePointGrid("latitude", 2, 2, 0, 0, imageWidth, imageHeight, latPoints);
+                TiePointGrid lonGrid = buildTiePointGrid("longitude", 2, 2, 0, 0, imageWidth, imageHeight, lonPoints);
+                tiePointGrids.put("lat", latGrid);
+                tiePointGrids.put("lon", lonGrid);
+            }
+        } catch (Exception ignored) {
+            // ignore
+        }
+        return tiePointGrids;
+    }
+
 
     private void addBands(ImageInfo imageInfo, CodeStreamInfo csInfo, double[] bandScales, double[] bandOffsets) {
         List<CodeStreamInfo.TileComponentInfo> componentTilesInfo = csInfo.getComponentTilesInfo();
@@ -289,5 +311,20 @@ public class JP2ProductReader extends AbstractProductReader {
             return DataBuffer.TYPE_USHORT;
         }
         return OpenJpegUtils.DATA_TYPE_MAP.get(precision);
+    }
+
+    public static CrsGeoCoding computeCrsGeoCoding(Point2D origin, Jp2XmlMetadata metadata, Dimension defaultProductSize, Rectangle subsetRegion){
+        String crsGeoCoding = metadata.getCrsGeocoding();
+        if (crsGeoCoding != null && origin != null) {
+            try {
+                CoordinateReferenceSystem mapCRS = CRS.decode(crsGeoCoding.replace("::", ":"));
+                return ImageUtils.buildCrsGeoCoding(origin.getX(), origin.getY(),
+                                                         metadata.getStepX(), -metadata.getStepY(),
+                                                         defaultProductSize, mapCRS, subsetRegion);
+            } catch (Exception gEx) {
+                logger.warning(gEx.getMessage());
+            }
+        }
+        return null;
     }
 }

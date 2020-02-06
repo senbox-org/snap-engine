@@ -4,6 +4,7 @@ import org.esa.snap.core.datamodel.GeoCoding;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Set;
 import java.util.TreeSet;
 
 /**
@@ -20,8 +21,8 @@ public interface MetadataInspector {
 
     class Metadata {
 
-        private final TreeSet<String> bandList;
-        private final TreeSet<String> maskList;
+        private final Set<String> bandList;
+        private final Set<String> maskList;
 
         private int productWidth;
         private int productHeight;
@@ -47,11 +48,11 @@ public interface MetadataInspector {
             this.maskList.add(maskName);
         }
 
-        public TreeSet<String> getBandList() {
+        public Set<String> getBandList() {
             return bandList;
         }
 
-        public TreeSet<String> getMaskList() {
+        public Set<String> getMaskList() {
             return maskList;
         }
 
