@@ -1,10 +1,18 @@
 package org.esa.snap.core.util;
 
-import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.util.math.Range;
 
-import java.awt.*;
-import java.awt.geom.*;
+import java.awt.Rectangle;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Area;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.PathIterator;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -228,7 +236,7 @@ public class GeoUtils {
 
     /**
      * Creates a rectangular boundary expressed in pixel positions for the given source rectangle. If the source
-     * {@code rect} is 100 x 50 pixels and {@code step} is 10 the returned array will countain exactly 2 * 10
+     * {@code rect} is 100 x 50 pixels and {@code step} is 10 the returned array will contain exactly 2 * 10
      * + 2 * (5 - 2) = 26 pixel positions.
      * <p>This method is used for an intermediate step when determining a raster boundary expressed in geographical
      * co-ordinates.
@@ -251,7 +259,7 @@ public class GeoUtils {
 
     /**
      * Creates a rectangular boundary expressed in pixel positions for the given source rectangle. If the source
-     * {@code rect} is 100 x 50 pixels and {@code step} is 10 the returned array will countain exactly 2 * 10
+     * {@code rect} is 100 x 50 pixels and {@code step} is 10 the returned array will contain exactly 2 * 10
      * + 2 * (5 - 2) = 26 pixel positions.
      * <p>This method is used for an intermediate step when determining a product boundary expressed in geographical
      * co-ordinates.
