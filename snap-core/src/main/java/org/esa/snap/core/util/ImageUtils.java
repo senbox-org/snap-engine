@@ -59,6 +59,7 @@ import java.util.Vector;
  * <p> All functions have been implemented with extreme caution in order to provide a maximum performance.
  *
  * @author Norman Fomferra
+ * modified 20200206 to compute product and band bounds based on subset information by Denisa Stefanescu
  * @version $Revision$ $Date$
  */
 public class ImageUtils {
@@ -151,6 +152,12 @@ public class ImageUtils {
         return bandBounds;
     }
 
+    /**
+     * Computes the product bounds based on the subsetDef.
+     * If the subset region is not specified the image bounds are the same with the initial product bounds.
+     * If the subset region is specified by geometry, the pixel region is computed and added in the subsetDef.
+     * Otherwise(subset region is specified in pixels) the image bounds are the pixel subset region.
+     */
     public static Rectangle computeProductBounds(GeoCoding productDefaultGeoCoding, int defaultImageWidth, int defaultImageHeight, ProductSubsetDef subsetDef) {
         Rectangle imageBounds = null;
         if(subsetDef != null){

@@ -27,11 +27,12 @@ import java.util.Set;
 
 /**
  * The <code>ProductSubsetDef</code> class describes a subset or portion of a remote sensing data product.
- * <p> Subsets can be spatial or spectral or both. A spatial subset is given through a rectangular region in pixels. The
- * spectral subset as a list of band (or channel) names.
+ * <p> Subsets can be spatial or spectral or both. A spatial subset is given through a rectangular region in pixels or by geometry.
+ * The pixel and geometry regions are mutually exclusive. The spectral subset as a list of band (or channel) names.
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
+ * modified 20200206 to support geometry subset by Denisa Stefanescu
  * @version $Revision$ $Date$
  */
 public class ProductSubsetDef {
@@ -75,11 +76,6 @@ public class ProductSubsetDef {
      * ignores or not ignores Metadata at writing or reading a product
      */
     private boolean ignoreMetadata = false;
-
-    /**
-     * subset is done on geoRegion or region
-     */
-    private boolean isGeoRegion = false;
 
     private boolean treatVirtualBandsAsRealBands = false;
 
@@ -415,11 +411,7 @@ public class ProductSubsetDef {
     }
 
     public void setGeoRegion(Geometry geometryRegion){
-        if(geometryRegion == null){
-            this.geoRegion = null;
-        }else{
-            this.geoRegion = geometryRegion;
-        }
+        this.geoRegion = geometryRegion;
     }
 
     /**
