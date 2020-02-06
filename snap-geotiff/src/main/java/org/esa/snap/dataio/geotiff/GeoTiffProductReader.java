@@ -16,6 +16,7 @@
 package org.esa.snap.dataio.geotiff;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.glevel.MultiLevelImage;
 import com.bc.ceres.glevel.support.DefaultMultiLevelImage;
 import it.geosolutions.imageio.plugins.tiff.BaselineTIFFTagSet;
 import it.geosolutions.imageio.plugins.tiff.GeoTIFFTagSet;
@@ -115,6 +116,9 @@ public class GeoTiffProductReader extends AbstractProductReader {
 
     @Override
     protected Product readProductNodesImpl() throws IOException {
+        if (this.geoTiffImageReader != null) {
+//            throw new IllegalStateException("There is already an image reader.");
+        }
         boolean success = false;
         try {
             Object productInput = super.getInput();
@@ -135,9 +139,14 @@ public class GeoTiffProductReader extends AbstractProductReader {
                 throw new IllegalArgumentException("Unknown input '" + productInput + "'.");
             }
 
-            String defaultProductName = FileUtils.getFilenameWithoutExtension(productPath.getFileName().toString());
+            String defaultProductName = null;
+            if (productPath != null) {
+                defaultProductName = FileUtils.getFilenameWithoutExtension(productPath.getFileName().toString());
+            }
             Product product = readProduct(this.geoTiffImageReader, defaultProductName);
-            product.setFileLocation(productPath.toFile());
+            if (productPath != null) {
+                product.setFileLocation(productPath.toFile());
+            }
 
             success = true;
 
@@ -164,7 +173,11 @@ public class GeoTiffProductReader extends AbstractProductReader {
     protected void readBandRasterDataImpl(int sourceOffsetX, int sourceOffsetY, int sourceWidth, int sourceHeight, int sourceStepX, int sourceStepY,
                                           Band destBand, int destOffsetX, int destOffsetY, int destWidth, int destHeight,
                                           ProductData destBuffer, ProgressMonitor pm)
-            throws IOException {
+                                          throws IOException {
+
+        if (this.geoTiffImageReader == null) {
+            throw new NullPointerException("The image reader is null.");
+        }
 
         DefaultMultiLevelImage defaultMultiLevelImage = (DefaultMultiLevelImage)destBand.getSourceImage();
         GeoTiffMultiLevelSource geoTiffMultiLevelSource = (GeoTiffMultiLevelSource)defaultMultiLevelImage.getSource();
@@ -229,10 +242,12 @@ public class GeoTiffProductReader extends AbstractProductReader {
 
         TIFFImageMetadata imageMetadata = geoTiffImageReader.getImageMetadata();
         TiffFileInfo tiffInfo = new TiffFileInfo(imageMetadata.getRootIFD());
+        SampleModel sampleModel;
         Product product = buildProductFromDimapHeader(tiffInfo, productBounds.width, productBounds.height);
         if (product == null) {            // without DIMAP header
             TIFFRenderedImage baseImage = geoTiffImageReader.getBaseImage();
             product = buildProductWithoutDimapHeader(defaultProductName, tiffInfo, baseImage, productBounds.width, productBounds.height);
+            sampleModel = baseImage.getSampleModel();
             boolean createIndexedImageInfo = (tiffInfo.containsField(BaselineTIFFTagSet.TAG_COLOR_MAP) && baseImage.getColorModel() instanceof IndexColorModel);
             if (createIndexedImageInfo) {
                 for (int i = 0; i < product.getNumBands(); i++) {
@@ -240,6 +255,8 @@ public class GeoTiffProductReader extends AbstractProductReader {
                     band.setImageInfo(buildIndexedImageInfo(product, baseImage, band));
                 }
             }
+        } else {
+            sampleModel = geoTiffImageReader.getBaseImage().getSampleModel();
         }
 
         ProductSubsetDef subsetDef = getSubsetDef();
@@ -264,35 +281,38 @@ public class GeoTiffProductReader extends AbstractProductReader {
         GeoCoding bandGeoCoding = buildBandGeoCoding(product.getSceneGeoCoding(), productBounds.width, productBounds.height);
         AffineTransform2D imageToModelTransform = buildBandImageToModelTransform(productBounds.width, productBounds.height);
         int bandCount = product.getNumBands();
-        int bandIndex = 0;
-        for (int i = 0; i < bandCount; i++) {
+        for (int i = 0, bandIndex = 0; i < bandCount; i++, bandIndex++) {
             Band band = product.getBandAt(i);
             if (subsetDef == null || subsetDef.isNodeAccepted(band.getName())) {
-                if (band.getRasterWidth() != productBounds.width) {
-                    throw new IllegalStateException("The band width "+ band.getRasterWidth() + " is not equal with the product with " + productBounds.width + ".");
+                // the product band is accepted
+                if (!(band instanceof VirtualBand || band instanceof FilterBand)) {
+                    if (band.getRasterWidth() != productBounds.width) {
+                        throw new IllegalStateException("The band width " + band.getRasterWidth() + " is not equal with the product with " + productBounds.width + ".");
+                    }
+                    if (band.getRasterHeight() != productBounds.height) {
+                        throw new IllegalStateException("The band height " + band.getRasterHeight() + " is not equal with the product height " + productBounds.height + ".");
+                    }
+                    if (bandGeoCoding != null) {
+                        band.setGeoCoding(bandGeoCoding);
+                    }
+                    if (imageToModelTransform != null) {
+                        band.setImageToModelTransform(imageToModelTransform);
+                    }
+                    if (bandIndex >= sampleModel.getNumBands()) {
+                        throw new IllegalStateException("The band index " + bandIndex + " must be < " + sampleModel.getNumBands() + ". The band name is '" + band.getName() + "'.");
+                    }
+                    int dataBufferType = ImageManager.getDataBufferType(band.getDataType()); // sampleModel.getDataType();
+                    GeoTiffMultiLevelSource multiLevelSource = new GeoTiffMultiLevelSource(geoTiffImageReader, dataBufferType, productBounds, preferredTileSize, bandIndex, band.getGeoCoding(), isGlobalShifted180);
+                    band.setSourceImage(new DefaultMultiLevelImage(multiLevelSource));
                 }
-                if (band.getRasterHeight() != productBounds.height) {
-                    throw new IllegalStateException("The band height "+ band.getRasterHeight() + " is not equal with the product height " + productBounds.height + ".");
-                }
-                if (bandGeoCoding != null) {
-                    band.setGeoCoding(bandGeoCoding);
-                }
-                if (imageToModelTransform != null) {
-                    band.setImageToModelTransform(imageToModelTransform);
-                }
-                int dataBufferType = ImageManager.getDataBufferType(band.getDataType());
-                GeoTiffMultiLevelSource multiLevelSource = new GeoTiffMultiLevelSource(geoTiffImageReader, dataBufferType, productBounds, preferredTileSize, bandIndex, band.getGeoCoding(), isGlobalShifted180);
-                band.setSourceImage(new DefaultMultiLevelImage(multiLevelSource));
             } else {
+                // the product band is not accepted
                 if (product.removeBand(band)) {
                     bandCount--;
                     i--;
                 } else {
                     throw new IllegalStateException("Failed to remove the band '" + band.getName()+"' from the product.");
                 }
-            }
-            if (!(band instanceof VirtualBand || band instanceof FilterBand)) {
-                bandIndex++;
             }
         }
 
@@ -321,7 +341,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
     }
 
     private static Product buildProductWithoutDimapHeader(String defaultProductName, TiffFileInfo tiffInfo, TIFFRenderedImage baseImage, int productWidth, int productHeight)
-            throws ParserConfigurationException, SAXException, IOException {
+                                                          throws ParserConfigurationException, SAXException, IOException {
 
         String productName = null;
         if (tiffInfo.containsField(BaselineTIFFTagSet.TAG_IMAGE_DESCRIPTION)) {
@@ -345,7 +365,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
     }
 
     private static Band[] buildBands(TiffFileInfo tiffInfo, TIFFRenderedImage baseImage, int productWidth, int productHeight)
-            throws IOException, ParserConfigurationException, SAXException {
+                                     throws IOException, ParserConfigurationException, SAXException {
 
         SampleModel sampleModel = baseImage.getSampleModel();
         int numBands = sampleModel.getNumBands();

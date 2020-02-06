@@ -317,19 +317,13 @@ public class GeoTiffImageReader implements Closeable {
                 String filePath = itFileNames.next();
                 boolean extensionMatches = Arrays.stream(GeoTiffProductReaderPlugIn.TIFF_FILE_EXTENSION).anyMatch(filePath.toLowerCase()::endsWith);
                 if (extensionMatches) {
-                    int startIndex = 0;
-                    if (filePath.startsWith(fileSystem.getSeparator())) {
-                        startIndex = fileSystem.getSeparator().length(); // the file path starts with '/' (the root folder in the zip archive)
-                    }
-                    if (filePath.indexOf(fileSystem.getSeparator(), startIndex) < 0) {
-                        Path tiffImagePath = fileSystem.getPath(filePath);
-                        GeoTiffImageReader geoTiffImageReader = buildGeoTiffImageReaderObject(tiffImagePath, fileSystem);
-                        success = true;
-                        return geoTiffImageReader;
-                    }
+                    Path tiffImagePath = fileSystem.getPath(filePath);
+                    GeoTiffImageReader geoTiffImageReader = buildGeoTiffImageReaderObject(tiffImagePath, fileSystem);
+                    success = true;
+                    return geoTiffImageReader;
                 }
             }
-            throw new IllegalArgumentException("The zip archive '" + productPath.toString() + "' does not contain an image.");
+            throw new IllegalArgumentException("The zip archive '" + productPath.toString() + "' does not contain an image. The item count is " + filePaths.size()+".");
         } finally {
             if (fileSystem != null && !success) {
                 fileSystem.close();

@@ -1,13 +1,10 @@
 package org.esa.snap.dataio.geotiff;
 
 import com.bc.ceres.glevel.MultiLevelModel;
-import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.image.AbstractSubsetTileOpImage;
 
 import javax.media.jai.PlanarImage;
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
@@ -40,11 +37,6 @@ public class GeoTiffTileOpImage extends AbstractSubsetTileOpImage {
                 normalRasterData = readRasterData(normalBoundsIntersection.x, normalBoundsIntersection.y, normalBoundsIntersection.width, normalBoundsIntersection.height);
             } catch (IOException ex) {
                 throw new IllegalStateException("Failed to read the data for level " + getLevel() + " and rectangle " + levelDestinationRectangle + ".", ex);
-            }
-            int rasterDataBufferType = normalRasterData.getSampleModel().getDataType();
-            int imageDataBufferType = getSampleModel().getDataType();
-            if (rasterDataBufferType != imageDataBufferType) {
-                throw new IllegalStateException("The raster data buffer type " + rasterDataBufferType + " is different than the image data buffer type " + imageDataBufferType + ".");
             }
             writeDataOnLevelRaster(normalRasterData, normalBoundsIntersection, levelDestinationRaster, levelDestinationRectangle, this.bandIndex);
         }
