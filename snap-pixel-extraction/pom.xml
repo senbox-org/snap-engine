@@ -60,6 +60,14 @@
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-csv-dataio</artifactId>
         </dependency>
+		<dependency>
+            <groupId>org.jfree</groupId>
+            <artifactId>jfreechart</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jfree</groupId>
+            <artifactId>jcommon</artifactId>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

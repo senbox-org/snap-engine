@@ -40,7 +40,7 @@ public class TileCacheOp extends Operator {
     @TargetProduct
     Product target;
 
-    @Parameter(defaultValue = "1000", unit = "MB", description = "The cache size in MB. Set it to 0 to use default tile cache.", label = "Cache size")
+    @Parameter(defaultValue = "1000", unit = "MB", description = "The cache size in MB", label = "Cache size")
     int cacheSize;
 
     private TileCache localCache;
@@ -48,11 +48,8 @@ public class TileCacheOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
         SystemUtils.LOG.warning("You are using TileCache operator. Be aware that it is an experimental implementation.");
-        if (cacheSize > 0) {
-            localCache = JAI.createTileCache(cacheSize * MEGABYTES);
-        } else {
-            localCache = JAI.getDefaultInstance().getTileCache();
-        }
+        
+        localCache = JAI.createTileCache(cacheSize * MEGABYTES);
         Product sourceProduct = getSourceProduct();
         Band[] bands = sourceProduct.getBands();
         for (Band band : bands) {
@@ -60,7 +57,6 @@ public class TileCacheOp extends Operator {
             if (image instanceof OpImage) {
                 OpImage opImage = (OpImage) image;
                 opImage.setTileCache(localCache);
-                SystemUtils.LOG.info(String.format("Local tile cache %d assigned to %s", cacheSize, image));
             }
         }
 
@@ -69,9 +65,7 @@ public class TileCacheOp extends Operator {
 
     @Override
     public void dispose() {
-        if (cacheSize > 0) {
-            localCache.flush();
-        }
+        localCache.flush();
         localCache = null;
         super.dispose();
     }

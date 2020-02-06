@@ -28,9 +28,9 @@ public class MaxStringAttributeLengthTest {
     @Before
     public void setUp() throws Exception {
         nc4TempFile = Files.createTempFile(getClass().getSimpleName(), "nc4");
-        nc4Writable = NWritableFactory.create(nc4TempFile.toString(),"netcdf4");
+        nc4Writable = N4FileWriteable.create(nc4TempFile.toString());
         nc3TempFile = Files.createTempFile(getClass().getSimpleName(), "nc3");
-        nc3Writable = NWritableFactory.create(nc3TempFile.toString(),"netcdf3");
+        nc3Writable = N3FileWriteable.create(nc3TempFile.toString());
     }
 
     @After
@@ -61,13 +61,13 @@ public class MaxStringAttributeLengthTest {
 
     @Test
     public void testMaxStringVariableAttributeLengthNC3() throws IOException {
-        Path tempFile = Files.createTempFile(getClass().getSimpleName(), null);
-        NFileWriteable ncFile = NWritableFactory.create(tempFile.toString(),"netcdf3");
+        final Path tempFile = Files.createTempFile(getClass().getSimpleName(), null);
+        NFileWriteable ncFile = N3FileWriteable.create(tempFile.toString());
         try {
             NVariable variable = ncFile.addScalarVariable("metadataVariable", DataType.BYTE);
             variable.addAttribute("longVariableAttributeValue", createLongString(TOO_LONG));
         } finally {
-            if (!Files.deleteIfExists(tempFile)) {
+            if (!tempFile.toFile().delete()) {
                 fail("unable to delete test file");
             }
         }
