@@ -36,10 +36,7 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.Raster;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Semaphore;
 import java.util.logging.Logger;
 
@@ -188,6 +185,17 @@ public class GraphProcessor {
         final TileComputationListener tcl = new GraphTileComputationListener(semaphore, parallelism);
         final TileComputationListener[] listeners = new TileComputationListener[]{tcl};
 
+        // loop over all nodes and check if one of them computes tile-stack. If so, we do stack-processing. tb 2020-02-07
+        boolean canComputeTileStack = false;
+        final Deque<NodeContext> nodeContexts = graphContext.getInitNodeContextDeque();
+        for (NodeContext nodeContext : nodeContexts) {
+            canComputeTileStack |= nodeContext.canComputeTileStack();
+        }
+
+        for (NodeContext outputNodeContext : outputNodeContexts) {
+            outputNodeContext.getOperator().getContext().setComputingStack(canComputeTileStack);
+        }
+
         try {
             pm.beginTask("Computing raster data...", numPmTicks);
             for (Dimension dimension : dimList) {
@@ -208,7 +216,7 @@ public class GraphProcessor {
                         fireTileStarted(graphContext, tileRectangle);
                         for (NodeContext nodeContext : nodeContextList) {
                             Product targetProduct = nodeContext.getTargetProduct();
-                            if (nodeContext.canComputeTileStack()) {
+                            if (canComputeTileStack) {
 
                                 // (1) Pull tile from first OperatorImage we find. This will trigger pulling
                                 // tiles of all other OperatorImage computed stack-wise.

@@ -119,6 +119,7 @@ public class OperatorContext {
     private final RenderingHints renderingHints;
     private final boolean computeTileMethodImplemented;
     private final boolean computeTileStackMethodImplemented;
+    private boolean isComputingStack;
 
     private String id;
     private Product targetProduct;
@@ -387,6 +388,14 @@ public class OperatorContext {
 
     public boolean isComputeTileStackMethodImplemented() {
         return computeTileStackMethodImplemented;
+    }
+
+    public boolean isComputingStack() {
+        return isComputingStack;
+    }
+
+    public void setComputingStack(boolean computingStack) {
+        isComputingStack = computingStack;
     }
 
     public Tile getSourceTile(RasterDataNode rasterDataNode, Rectangle region) {

@@ -245,6 +245,10 @@ public abstract class Operator {
         return context.isComputeTileStackMethodImplemented();
     }
 
+    public OperatorContext getContext() {
+        return context;
+    }
+
     /**
      * Deactivates the {@link #computeTile(Band, Tile, ProgressMonitor) computeTile}
      * method. This method can be called from within the {@link #initialize()} method if the current operator configuration prevents
