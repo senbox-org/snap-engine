@@ -40,6 +40,8 @@ import java.awt.image.IndexColorModel;
 //           - Added logic to invert the direction of the color palette
 //  DEC 2019 - Knowles
 //           - Moved some of the log/liner transform methods into the class LogLinearTransform
+// JAN 2020 - Knowles
+//          - Added ColorSchemeInfo colorSchemeInfo to be able to set the color scheme selector in the ColorManipulation GUI
 
 
 public class ImageInfo implements Cloneable {
@@ -73,6 +75,7 @@ public class ImageInfo implements Cloneable {
     private HistogramMatching histogramMatching;
     private String uncertaintyBandName;
     private boolean logScaled;
+    private ColorSchemeInfo colorSchemeInfo = null;
 
     /**
      * Enumerates the possible histogram matching modes.
@@ -465,6 +468,15 @@ public class ImageInfo implements Cloneable {
             histogramMatchingEnum = HistogramMatching.Normalize;
         }
         return histogramMatchingEnum;
+    }
+
+
+    public ColorSchemeInfo getColorSchemeInfo() {
+        return colorSchemeInfo;
+    }
+
+    public void setColorSchemeInfo(ColorSchemeInfo colorSchemeInfo) {
+        this.colorSchemeInfo = colorSchemeInfo;
     }
 
 }

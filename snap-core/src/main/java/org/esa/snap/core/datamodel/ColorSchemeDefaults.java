@@ -12,6 +12,8 @@ import org.esa.snap.core.util.PropertyMap;
 
 public class ColorSchemeDefaults {
 
+    public static final boolean COLOR_SCHEME_CODE_DEBUG = true;
+
     public static final String TOOLNAME_COLOR_MANIPULATION = "Color Manipulation";
 
     // Directory names
@@ -242,6 +244,11 @@ public class ColorSchemeDefaults {
         }
     }
 
+    public static void debug(String message) {
+        if (COLOR_SCHEME_CODE_DEBUG) {
+            System.out.println(message);
+        }
+    }
 
 
 }

@@ -25,6 +25,7 @@ public class ColorSchemeInfo {
     private boolean enabled;
     private boolean divider;
     private File colorPaletteDir;
+    private boolean duplicateEntry = false;
 
     private boolean useDisplayName = true;
 
@@ -187,5 +188,13 @@ public class ColorSchemeInfo {
 
     public void setColorPaletteDir(File colorPaletteDir) {
         this.colorPaletteDir = colorPaletteDir;
+    }
+
+    public boolean isDuplicateEntry() {
+        return duplicateEntry;
+    }
+
+    public void setDuplicateEntry(boolean duplicateEntry) {
+        this.duplicateEntry = duplicateEntry;
     }
 }
