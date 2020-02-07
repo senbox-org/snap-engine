@@ -2,15 +2,26 @@ package org.esa.snap.remote.products.repository.tao;
 
 import org.esa.snap.remote.products.repository.listener.ProgressListener;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * Created by jcoravu on 19/8/2019.
  */
-public class TAODownloadProductProgressListener implements ro.cs.tao.ProgressListener {
+class TAODownloadProductProgressListener implements ro.cs.tao.ProgressListener {
+
+    private static final Logger logger = Logger.getLogger(TAODownloadProductProgressListener.class.getName());
 
     private final ProgressListener progressListener;
+    private final String dataSourceName;
+    private final String missionName;
+    private final String productName;
 
-    public TAODownloadProductProgressListener(ProgressListener progressListener) {
+    TAODownloadProductProgressListener(ProgressListener progressListener, String dataSourceName, String missionName, String productName) {
         this.progressListener = progressListener;
+        this.dataSourceName = dataSourceName;
+        this.missionName = missionName;
+        this.productName = productName;
     }
 
     @Override
@@ -31,8 +42,13 @@ public class TAODownloadProductProgressListener implements ro.cs.tao.ProgressLis
 
     @Override
     public void notifyProgress(double progressValue) {
-        short value = (short)(progressValue * 100.0d);
-        this.progressListener.notifyProgress(value);
+        short progressPercent = (short)(progressValue * 100.0d);
+
+        if (logger.isLoggable(Level.FINE)) {
+            logger.log(Level.FINE, "Update the downloading progress percent " + progressPercent + "% of the product '" + this.productName+"' from the '"+this.dataSourceName+"' remote repository using the '" + this.missionName + "' mission.");
+        }
+
+        this.progressListener.notifyProgress(progressPercent);
     }
 
     @Override

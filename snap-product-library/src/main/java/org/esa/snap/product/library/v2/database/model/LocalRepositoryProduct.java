@@ -98,11 +98,6 @@ public class LocalRepositoryProduct implements RepositoryProduct {
     }
 
     @Override
-    public String getEntryPoint() {
-        return null;
-    }
-
-    @Override
     public void setQuickLookImage(BufferedImage quickLookImage) {
         this.quickLookImage = quickLookImage;
     }

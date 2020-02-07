@@ -34,6 +34,4 @@ public interface RepositoryProduct {
     public DataFormatType getDataFormatType();
 
     public SensorType getSensorType();
-
-    public String getEntryPoint();
 }

@@ -40,16 +40,16 @@ import java.util.logging.Logger;
 /**
  * Created by jcoravu on 21/11/2019.
  */
-public class TAORemoteRepositoryManager {
+public class TAORemoteRepositoriesManager {
 
-    private static final Logger logger = Logger.getLogger(TAORemoteRepositoryManager.class.getName());
+    private static final Logger logger = Logger.getLogger(TAORemoteRepositoriesManager.class.getName());
 
-    private static final TAORemoteRepositoryManager instance = new TAORemoteRepositoryManager();
+    private static final TAORemoteRepositoriesManager instance = new TAORemoteRepositoriesManager();
 
     private final RemoteProductsRepositoryProvider[] remoteRepositoryProductProviders;
     private final Map<String, DataSourceComponent> downloadingProducts;
 
-    private TAORemoteRepositoryManager() {
+    private TAORemoteRepositoriesManager() {
         ConfigurationManager.setConfigurationProvider(new TAOConfigurationProvider());
         Set<DataSource> services = DataSourceManager.getInstance().getRegisteredDataSources();
         this.remoteRepositoryProductProviders = new RemoteProductsRepositoryProvider[services.size()];
@@ -81,7 +81,7 @@ public class TAORemoteRepositoryManager {
         this.downloadingProducts = new HashMap<>();
     }
 
-    public static TAORemoteRepositoryManager getInstance() {
+    public static TAORemoteRepositoriesManager getInstance() {
         return instance;
     }
 
@@ -140,7 +140,8 @@ public class TAORemoteRepositoryManager {
                 }
             }
 
-            final List<String> downloadMessages = new ArrayList<>();
+            TAODownloadProductProgressListener taoProgressListener = new TAODownloadProductProgressListener(progressListener, dataSourceName, repositoryProduct.getMission(), repositoryProduct.getName());
+            TAODownloadProductStatusListener taoProductStatusListener = new TAODownloadProductStatusListener();
 
             dataSourceComponent = new DataSourceComponent();
             dataSourceComponent.setDataSourceName(dataSourceName);
@@ -148,35 +149,8 @@ public class TAORemoteRepositoryManager {
             dataSourceComponent.setFetchMode(FetchMode.RESUME);
             dataSourceComponent.setUserName(credentials.getUserPrincipal().getName());
             dataSourceComponent.setPassword(credentials.getPassword());
-            dataSourceComponent.setProgressListener(new TAODownloadProductProgressListener(progressListener));
-            dataSourceComponent.setProductStatusListener(new ProductStatusListener() {
-                @Override
-                public boolean downloadStarted(EOProduct eoProduct) {
-                    eoProduct.setProductStatus(ProductStatus.DOWNLOADING);
-                    return true;
-                }
-
-                @Override
-                public void downloadCompleted(EOProduct eoProduct) {
-                    eoProduct.setProductStatus(ProductStatus.DOWNLOADED);
-                }
-
-                @Override
-                public void downloadFailed(EOProduct eoProduct, String message) {
-                    eoProduct.setProductStatus(ProductStatus.FAILED);
-                    downloadMessages.add(message);
-                }
-
-                @Override
-                public void downloadAborted(EOProduct eoProduct, String message) {
-                    downloadMessages.add(message);
-                }
-
-                @Override
-                public void downloadIgnored(EOProduct eoProduct, String message) {
-                    downloadMessages.add(message);
-                }
-            });
+            dataSourceComponent.setProgressListener(taoProgressListener);
+            dataSourceComponent.setProductStatusListener(taoProductStatusListener);
 
             EOProduct product = new EOProduct();
             product.setId(repositoryProduct.getId());
@@ -200,7 +174,7 @@ public class TAORemoteRepositoryManager {
                 URI uri = new URI(productPath);
                 return Paths.get(uri);
             } else {
-                throw new IllegalStateException(buildFailedDownloadExceptionMessage(repositoryProduct.getName(), dataSourceName, repositoryProduct.getMission(), downloadMessages));
+                throw new IllegalStateException(buildFailedDownloadExceptionMessage(repositoryProduct.getName(), dataSourceName, repositoryProduct.getMission(), taoProductStatusListener.getDownloadMessages()));
             }
         } finally {
             if (dataSourceComponent != null) {
@@ -454,7 +428,6 @@ public class TAORemoteRepositoryManager {
 
             TAORepositoryProduct repositoryProduct = new TAORepositoryProduct(product.getId(), product.getName(), product.getLocation(), mission, geometry, product.getAcquisitionDate(), product.getApproximateSize());
             repositoryProduct.setAttributes(attributes);
-            repositoryProduct.setEntryPoint(product.getEntryPoint());
             repositoryProduct.setDataFormatType(convertToDataFormatType(product.getFormatType()));
             repositoryProduct.setPixelType(convertToPixelType(product.getPixelType()));
             repositoryProduct.setSensorType(convertToSensorType(product.getSensorType()));

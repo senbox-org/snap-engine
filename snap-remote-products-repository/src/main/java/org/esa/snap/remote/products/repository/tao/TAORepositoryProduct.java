@@ -25,7 +25,6 @@ public class TAORepositoryProduct implements RepositoryProduct {
     private final long approximateSize;
 
     private List<Attribute> attributes;
-    private String entryPoint;
     private BufferedImage quickLookImage;
     private SensorType sensorType;
     private DataFormatType dataFormatType;
@@ -105,15 +104,6 @@ public class TAORepositoryProduct implements RepositoryProduct {
     @Override
     public SensorType getSensorType() {
         return this.sensorType;
-    }
-
-    @Override
-    public String getEntryPoint() {
-        return this.entryPoint;
-    }
-
-    void setEntryPoint(String entryPoint) {
-        this.entryPoint = entryPoint;
     }
 
     void setDownloadQuickLookImageURL(String downloadQuickLookImageURL) {

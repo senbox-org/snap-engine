@@ -5,7 +5,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.esa.snap.remote.products.repository.listener.ProductListDownloaderListener;
-import org.esa.snap.remote.products.repository.tao.TAORemoteRepositoryManager;
+import org.esa.snap.remote.products.repository.tao.TAORemoteRepositoriesManager;
 import org.junit.Assume;
 import org.junit.Test;
 
@@ -28,7 +28,7 @@ public class TAORemoteRepositoryManagerTest {
 
     @Test
     public void testGetRemoteProductsRepositoryProviders() {
-        TAORemoteRepositoryManager repositoryManager = TAORemoteRepositoryManager.getInstance();
+        TAORemoteRepositoriesManager repositoryManager = TAORemoteRepositoriesManager.getInstance();
         RemoteProductsRepositoryProvider[] remoteRepositoryProductProviders = repositoryManager.getRemoteProductsRepositoryProviders();
         assertNotNull(remoteRepositoryProductProviders);
         assertEquals(true, remoteRepositoryProductProviders.length > 0);
@@ -39,7 +39,7 @@ public class TAORemoteRepositoryManagerTest {
             assertEquals(true, missions.length > 0);
 
             for (int k=0; k<missions.length; k++) {
-                List<RepositoryQueryParameter> queryParameters = TAORemoteRepositoryManager.getMissionParameters(remoteRepositoryProductProviders[i].getRepositoryName(), missions[k]);
+                List<RepositoryQueryParameter> queryParameters = TAORemoteRepositoriesManager.getMissionParameters(remoteRepositoryProductProviders[i].getRepositoryName(), missions[k]);
                 assertNotNull(queryParameters);
                 assertEquals(true, queryParameters.size() >= 3);
 
@@ -169,7 +169,7 @@ public class TAORemoteRepositoryManagerTest {
     }
 
     private static RemoteProductsRepositoryProvider findRepositoryProviderByName(String repositoryNameToFind) {
-        TAORemoteRepositoryManager repositoryManager = TAORemoteRepositoryManager.getInstance();
+        TAORemoteRepositoriesManager repositoryManager = TAORemoteRepositoriesManager.getInstance();
         RemoteProductsRepositoryProvider[] remoteRepositoryProductProviders = repositoryManager.getRemoteProductsRepositoryProviders();
 
         assertNotNull(remoteRepositoryProductProviders);
