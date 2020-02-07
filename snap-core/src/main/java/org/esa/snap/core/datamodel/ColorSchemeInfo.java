@@ -14,7 +14,6 @@ import java.io.IOException;
 public class ColorSchemeInfo {
     private String name;
     private String displayName;
-    private String rootName;
     private String description;
     private String cpdFilenameStandard;
     private String cpdFilenameColorBlind;
@@ -24,25 +23,17 @@ public class ColorSchemeInfo {
     private double maxValue;
     private boolean isLogScaled;
     private boolean enabled;
-    private boolean devider;
-    private boolean isOverRide;
+    private boolean divider;
     private File colorPaletteDir;
-    private int entryNumber;
 
     private boolean useDisplayName = true;
 
 
-    public ColorSchemeInfo(String name, boolean devider, int entryNumber, String displayName, String rootName, String description, String cpdFilenameStandard, double minValue, double maxValue,
-                           boolean isLogScaled, boolean isOverRide, boolean enabled, String cpdFilenameColorBlind, String colorBarTitle, String colorBarLabels, File colorPaletteDir) {
+    public ColorSchemeInfo(String name, boolean divider, String displayName, String description, String cpdFilenameStandard, double minValue, double maxValue,
+                           boolean isLogScaled, boolean enabled, String cpdFilenameColorBlind, String colorBarTitle, String colorBarLabels, File colorPaletteDir) {
         this.setName(name);
-        if (rootName != null) {
-            this.setRootName(rootName);
-        } else {
-            this.setRootName(name);
-        }
 
-        this.devider = devider;
-        this.entryNumber = entryNumber;
+        this.divider = divider;
         this.displayName = displayName;
         this.setDescription(description);
         this.setCpdFilenameStandard(cpdFilenameStandard);
@@ -50,7 +41,6 @@ public class ColorSchemeInfo {
         this.setMaxValue(maxValue);
         this.setLogScaled(isLogScaled);
         this.setEnabled(enabled);
-        this.setOverRide(isOverRide);
         this.cpdFilenameColorBlind = cpdFilenameColorBlind;
         this.colorBarLabels = colorBarLabels;
         this.colorBarTitle = colorBarTitle;
@@ -58,12 +48,8 @@ public class ColorSchemeInfo {
     }
 
 
-    public int getEntryNumber() {
-        return entryNumber;
-    }
-
-    public boolean isDevider() {
-        return devider;
+    public boolean isDivider() {
+        return divider;
     }
 
     public void setUseDisplayName(boolean useDisplayName) {
@@ -155,7 +141,7 @@ public class ColorSchemeInfo {
         return description;
     }
 
-    private void setDescription(String description) {
+    public void setDescription(String description) {
         this.description = description;
     }
 
@@ -168,21 +154,7 @@ public class ColorSchemeInfo {
         this.enabled = enabled;
     }
 
-    public boolean isOverRide() {
-        return isOverRide;
-    }
 
-    public void setOverRide(boolean overRide) {
-        isOverRide = overRide;
-    }
-
-    public String getRootName() {
-        return rootName;
-    }
-
-    public void setRootName(String rootName) {
-        this.rootName = rootName;
-    }
 
     public String getCpdFilenameColorBlind() {
         return cpdFilenameColorBlind;
