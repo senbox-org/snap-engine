@@ -16,7 +16,6 @@
 package org.esa.snap.dataio.geotiff;
 
 import com.bc.ceres.core.ProgressMonitor;
-import com.bc.ceres.glevel.MultiLevelImage;
 import com.bc.ceres.glevel.support.DefaultMultiLevelImage;
 import it.geosolutions.imageio.plugins.tiff.BaselineTIFFTagSet;
 import it.geosolutions.imageio.plugins.tiff.GeoTIFFTagSet;
@@ -55,21 +54,9 @@ import org.esa.snap.core.util.geotiff.GeoTIFFCodes;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.dataio.ImageRegistryUtils;
 import org.esa.snap.dataio.geotiff.internal.GeoKeyEntry;
-import org.geotools.coverage.grid.io.imageio.geotiff.GeoTiffConstants;
-import org.geotools.coverage.grid.io.imageio.geotiff.GeoTiffException;
-import org.geotools.coverage.grid.io.imageio.geotiff.GeoTiffIIOMetadataDecoder;
-import org.geotools.coverage.grid.io.imageio.geotiff.GeoTiffMetadata2CRSAdapter;
-import org.geotools.coverage.grid.io.imageio.geotiff.PixelScale;
-import org.geotools.coverage.grid.io.imageio.geotiff.TiePoint;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
-import org.geotools.factory.Hints;
-import org.geotools.referencing.crs.DefaultGeographicCRS;
-import org.geotools.referencing.operation.matrix.GeneralMatrix;
-import org.geotools.referencing.operation.transform.ProjectiveTransform;
 import org.jdom.Document;
 import org.jdom.input.DOMBuilder;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.operation.MathTransform;
 import org.xml.sax.SAXException;
 
 import javax.imageio.spi.ImageInputStreamSpi;
@@ -79,7 +66,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Rectangle;
-import java.awt.geom.AffineTransform;
 import java.awt.image.DataBuffer;
 import java.awt.image.IndexColorModel;
 import java.awt.image.Raster;
@@ -90,12 +76,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class GeoTiffProductReader extends AbstractProductReader {
-
-    private static final Logger logger = Logger.getLogger(GeoTiffProductReader.class.getName());
 
     // non standard ASCII tag (code 42112) to extract GDAL metadata,
     // see https://gdal.org/drivers/raster/gtiff.html#metadata:
@@ -229,7 +211,11 @@ public class GeoTiffProductReader extends AbstractProductReader {
     }
 
     public Product readProduct(GeoTiffImageReader geoTiffImageReader, String defaultProductName) throws Exception {
-        Rectangle productBounds = ImageUtils.computeProductBounds(geoTiffImageReader.getImageWidth(), geoTiffImageReader.getImageHeight(), getSubsetDef());
+        GeoCoding productDefaultGeoCoding = null;
+        if(getSubsetDef() != null) {
+            productDefaultGeoCoding = geoTiffImageReader.buildGeoCoding(geoTiffImageReader.getImageMetadata(), geoTiffImageReader.getImageWidth(), geoTiffImageReader.getImageHeight(), null);
+        }
+        Rectangle productBounds = ImageUtils.computeProductBounds(productDefaultGeoCoding, geoTiffImageReader.getImageWidth(), geoTiffImageReader.getImageHeight(), getSubsetDef());
         return readProduct(geoTiffImageReader, defaultProductName, productBounds);
     }
 
@@ -262,7 +248,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
         ProductSubsetDef subsetDef = getSubsetDef();
         boolean isGlobalShifted180 = false;
         if (tiffInfo.isGeotiff()) {
-            isGlobalShifted180 = applyGeoCoding(tiffInfo, imageMetadata, defaultImageSize.width, defaultImageSize.height, product, subsetRegion);
+            isGlobalShifted180 = applyGeoCoding(geoTiffImageReader, tiffInfo, imageMetadata, defaultImageSize.width, defaultImageSize.height, product, subsetRegion);
         }
 
         if (subsetDef == null || !subsetDef.isIgnoreMetadata()) {
@@ -441,7 +427,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
         return new ImageInfo(new ColorPaletteDef(points, points.length));
     }
 
-    private static boolean applyGeoCoding(TiffFileInfo info, TIFFImageMetadata metadata, int defaultImageWidth, int defaultImageHeight, Product product, Rectangle subsetRegion)
+    private static boolean applyGeoCoding(GeoTiffImageReader geoTiffImageReader, TiffFileInfo info, TIFFImageMetadata metadata, int defaultImageWidth, int defaultImageHeight, Product product, Rectangle subsetRegion)
                                           throws Exception {
 
         boolean isGlobalShifted180 = false;
@@ -473,7 +459,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
         }
         if (product.getSceneGeoCoding() == null) {
 //            try {
-                CrsGeoCoding crsGeoCoding = buildGeoCoding(metadata, defaultImageWidth, defaultImageHeight, subsetRegion);
+                CrsGeoCoding crsGeoCoding = geoTiffImageReader.buildGeoCoding(metadata, defaultImageWidth, defaultImageHeight, subsetRegion);
                 product.setSceneGeoCoding(crsGeoCoding);
 //            } catch (Exception ignored) {
 //                // ignore
@@ -557,7 +543,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
             int productWidth = geoTiffImageReader.getImageWidth();
             int productHeight = geoTiffImageReader.getImageHeight();
             Product product = new Product("GeoTiff", GeoTiffProductReaderPlugIn.FORMAT_NAMES[0], productWidth, productHeight);
-            applyGeoCoding(tiffInfo, imageMetadata, productWidth, productHeight, product, null);
+            applyGeoCoding(geoTiffImageReader, tiffInfo, imageMetadata, productWidth, productHeight, product, null);
             return product.getSceneGeoCoding();
         }
         return null;
@@ -579,121 +565,9 @@ public class GeoTiffProductReader extends AbstractProductReader {
             product = GeoTiffProductReader.buildProductWithoutDimapHeader(null, tiffInfo, geoTiffImageReader.getBaseImage(), productWidth, productHeight);
         }
         if (readGeoCoding && tiffInfo.isGeotiff()) {
-            applyGeoCoding(tiffInfo, imageMetadata, productWidth, productHeight, product, null);
+            applyGeoCoding(geoTiffImageReader, tiffInfo, imageMetadata, productWidth, productHeight, product, null);
         }
         return product;
-    }
-
-    private static CrsGeoCoding buildGeoCoding(TIFFImageMetadata metadata, int defaultProductWidth, int defaultProductHeight, Rectangle subsetRegion) throws Exception {
-        final GeoTiffIIOMetadataDecoder metadataDecoder = new GeoTiffIIOMetadataDecoder(metadata);
-        Hints hints = new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, true);
-        final GeoTiffMetadata2CRSAdapter geoTiff2CRSAdapter = new GeoTiffMetadata2CRSAdapter(hints);
-        // todo reactivate the following line if geotools has fixed the problem. (see BEAM-1510)
-        // final MathTransform toModel = GeoTiffMetadata2CRSAdapter.getRasterToModel(metadataDecoder, false);
-        final MathTransform toModel = getRasterToModel(metadataDecoder);
-        CoordinateReferenceSystem mapCRS;
-        try {
-            mapCRS = geoTiff2CRSAdapter.createCoordinateSystem(metadataDecoder);
-        } catch (UnsupportedOperationException e) {
-            if (toModel == null) {
-                throw e;
-            } else {
-                // ENVI falls back to WGS84, if no CRS is given in the GeoTIFF.
-                mapCRS = DefaultGeographicCRS.WGS84;
-            }
-        }
-        AffineTransform transform = (AffineTransform)toModel;
-        if (metadataDecoder.getModelPixelScales() == null) {
-            Rectangle imageBounds;
-            if (subsetRegion == null) {
-                imageBounds = new Rectangle(0, 0, defaultProductWidth, defaultProductHeight);
-            } else {
-                imageBounds = subsetRegion;
-            }
-            return new CrsGeoCoding(mapCRS, imageBounds, transform);
-        }
-        double stepX = metadataDecoder.getModelPixelScales().getScaleX();
-        double stepY = metadataDecoder.getModelPixelScales().getScaleY();
-        double originX = transform.getTranslateX();
-        double originY = transform.getTranslateY();
-        return ImageUtils.buildCrsGeoCoding(originX, originY, stepX, stepY, defaultProductWidth, defaultProductHeight, mapCRS, subsetRegion);
-    }
-
-    /*
-     * Copied from GeoTools GeoTiffMetadata2CRSAdapter because the given tie-point offset is
-     * not correctly interpreted in GeoTools. The tie-point should be placed at the pixel center
-     * if RasterPixelIsPoint is set as value for GTRasterTypeGeoKey.
-     * See links:
-     * http://www.remotesensing.org/geotiff/faq.html#PixelIsPoint
-     * http://lists.osgeo.org/pipermail/gdal-dev/2007-November/015040.html
-     * http://trac.osgeo.org/gdal/wiki/rfc33_gtiff_pixelispoint
-     */
-    private static MathTransform getRasterToModel(final GeoTiffIIOMetadataDecoder metadata) throws GeoTiffException {
-        //
-        // Load initials
-        //
-        final boolean hasTiePoints = metadata.hasTiePoints();
-        final boolean hasPixelScales = metadata.hasPixelScales();
-        final boolean hasModelTransformation = metadata.hasModelTrasformation();
-        int rasterType = getGeoKeyAsInt(GeoTiffConstants.GTRasterTypeGeoKey, metadata);
-        // geotiff spec says that PixelIsArea is the default
-        if (rasterType == GeoTiffConstants.UNDEFINED) {
-            rasterType = GeoTiffConstants.RasterPixelIsArea;
-        }
-        MathTransform xform;
-        if (hasTiePoints && hasPixelScales) {
-
-            //
-            // we use tie points and pixel scales to build the grid to world
-            //
-            // model space
-            final TiePoint[] tiePoints = metadata.getModelTiePoints();
-            final PixelScale pixScales = metadata.getModelPixelScales();
-
-
-            // here is the matrix we need to build
-            final GeneralMatrix gm = new GeneralMatrix(3);
-            final double scaleRaster2ModelLongitude = pixScales.getScaleX();
-            final double scaleRaster2ModelLatitude = -pixScales.getScaleY();
-            // "raster" space
-            final double tiePointColumn = tiePoints[0].getValueAt(0) + (rasterType == GeoTiffConstants.RasterPixelIsPoint ? 0.5 : 0);
-            final double tiePointRow = tiePoints[0].getValueAt(1) + (rasterType == GeoTiffConstants.RasterPixelIsPoint ? 0.5 : 0);
-
-            // compute an "offset and scale" matrix
-            gm.setElement(0, 0, scaleRaster2ModelLongitude);
-            gm.setElement(1, 1, scaleRaster2ModelLatitude);
-            gm.setElement(0, 1, 0);
-            gm.setElement(1, 0, 0);
-
-            gm.setElement(0, 2, tiePoints[0].getValueAt(3) - (scaleRaster2ModelLongitude * tiePointColumn));
-            gm.setElement(1, 2, tiePoints[0].getValueAt(4) - (scaleRaster2ModelLatitude * tiePointRow));
-
-            // make it a LinearTransform
-            xform = ProjectiveTransform.create(gm);
-
-        } else if (hasModelTransformation) {
-            if (rasterType == GeoTiffConstants.RasterPixelIsPoint) {
-                final AffineTransform tempTransform = new AffineTransform(metadata.getModelTransformation());
-                tempTransform.concatenate(AffineTransform.getTranslateInstance(0.5, 0.5));
-                xform = ProjectiveTransform.create(tempTransform);
-            } else {
-                assert rasterType == GeoTiffConstants.RasterPixelIsArea;
-                xform = ProjectiveTransform.create(metadata.getModelTransformation());
-            }
-        } else {
-            throw new GeoTiffException(metadata, "Unknown Raster to Model configuration.", null);
-        }
-
-        return xform;
-    }
-
-    private static int getGeoKeyAsInt(final int key, final GeoTiffIIOMetadataDecoder metadata) {
-        try {
-            return Integer.parseInt(metadata.getGeoKey(key));
-        } catch (NumberFormatException ne) {
-            logger.log(Level.FINE, ne.getMessage(), ne);
-            return GeoTiffConstants.UNDEFINED;
-        }
     }
 
     private static TiePointGeoCoding buildTiePointGeoCoding(TiffFileInfo info, double[] tiePoints, String[] names, Rectangle subsetRegion) {

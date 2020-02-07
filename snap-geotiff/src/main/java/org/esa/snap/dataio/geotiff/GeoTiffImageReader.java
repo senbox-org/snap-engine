@@ -3,11 +3,25 @@ package org.esa.snap.dataio.geotiff;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFImageMetadata;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFImageReader;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFRenderedImage;
+import org.esa.snap.core.datamodel.CrsGeoCoding;
+import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.core.util.jai.JAIUtils;
 import org.esa.snap.engine_utilities.util.FileSystemUtils;
 import org.esa.snap.engine_utilities.util.FindChildFileVisitor;
 import org.esa.snap.engine_utilities.util.NotRegularFileException;
 import org.esa.snap.engine_utilities.util.ZipFileSystemBuilder;
+import org.geotools.coverage.grid.io.imageio.geotiff.GeoTiffConstants;
+import org.geotools.coverage.grid.io.imageio.geotiff.GeoTiffException;
+import org.geotools.coverage.grid.io.imageio.geotiff.GeoTiffIIOMetadataDecoder;
+import org.geotools.coverage.grid.io.imageio.geotiff.GeoTiffMetadata2CRSAdapter;
+import org.geotools.coverage.grid.io.imageio.geotiff.PixelScale;
+import org.geotools.coverage.grid.io.imageio.geotiff.TiePoint;
+import org.geotools.factory.Hints;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.geotools.referencing.operation.matrix.GeneralMatrix;
+import org.geotools.referencing.operation.transform.ProjectiveTransform;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.operation.MathTransform;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
@@ -19,6 +33,7 @@ import javax.media.jai.operator.CropDescriptor;
 import javax.media.jai.operator.MosaicDescriptor;
 import javax.media.jai.operator.TranslateDescriptor;
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.awt.image.SampleModel;
@@ -30,12 +45,15 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 
 /**
  * Created by jcoravu on 22/11/2019.
  */
 public class GeoTiffImageReader implements Closeable {
+    private static final Logger logger = Logger.getLogger(GeoTiffImageReader.class.getName());
 
     private static final int BUFFER_SIZE = 1024 * 1024;
     private static final byte FIRST_IMAGE = 0;
@@ -349,6 +367,118 @@ public class GeoTiffImageReader implements Closeable {
             if (!success) {
                 inputStream.close();
             }
+        }
+    }
+
+    public static CrsGeoCoding buildGeoCoding(TIFFImageMetadata metadata, int defaultProductWidth, int defaultProductHeight, Rectangle subsetRegion) throws Exception {
+        final GeoTiffIIOMetadataDecoder metadataDecoder = new GeoTiffIIOMetadataDecoder(metadata);
+        Hints hints = new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, true);
+        final GeoTiffMetadata2CRSAdapter geoTiff2CRSAdapter = new GeoTiffMetadata2CRSAdapter(hints);
+        // todo reactivate the following line if geotools has fixed the problem. (see BEAM-1510)
+        // final MathTransform toModel = GeoTiffMetadata2CRSAdapter.getRasterToModel(metadataDecoder, false);
+        final MathTransform toModel = getRasterToModel(metadataDecoder);
+        CoordinateReferenceSystem mapCRS;
+        try {
+            mapCRS = geoTiff2CRSAdapter.createCoordinateSystem(metadataDecoder);
+        } catch (UnsupportedOperationException e) {
+            if (toModel == null) {
+                throw e;
+            } else {
+                // ENVI falls back to WGS84, if no CRS is given in the GeoTIFF.
+                mapCRS = DefaultGeographicCRS.WGS84;
+            }
+        }
+        AffineTransform transform = (AffineTransform)toModel;
+        if (metadataDecoder.getModelPixelScales() == null) {
+            Rectangle imageBounds;
+            if (subsetRegion == null) {
+                imageBounds = new Rectangle(0, 0, defaultProductWidth, defaultProductHeight);
+            } else {
+                imageBounds = subsetRegion;
+            }
+            return new CrsGeoCoding(mapCRS, imageBounds, transform);
+        }
+        double stepX = metadataDecoder.getModelPixelScales().getScaleX();
+        double stepY = metadataDecoder.getModelPixelScales().getScaleY();
+        double originX = transform.getTranslateX();
+        double originY = transform.getTranslateY();
+        return ImageUtils.buildCrsGeoCoding(originX, originY, stepX, stepY, defaultProductWidth, defaultProductHeight, mapCRS, subsetRegion);
+    }
+
+    /*
+     * Copied from GeoTools GeoTiffMetadata2CRSAdapter because the given tie-point offset is
+     * not correctly interpreted in GeoTools. The tie-point should be placed at the pixel center
+     * if RasterPixelIsPoint is set as value for GTRasterTypeGeoKey.
+     * See links:
+     * http://www.remotesensing.org/geotiff/faq.html#PixelIsPoint
+     * http://lists.osgeo.org/pipermail/gdal-dev/2007-November/015040.html
+     * http://trac.osgeo.org/gdal/wiki/rfc33_gtiff_pixelispoint
+     */
+    private static MathTransform getRasterToModel(final GeoTiffIIOMetadataDecoder metadata) throws GeoTiffException {
+        //
+        // Load initials
+        //
+        final boolean hasTiePoints = metadata.hasTiePoints();
+        final boolean hasPixelScales = metadata.hasPixelScales();
+        final boolean hasModelTransformation = metadata.hasModelTrasformation();
+        int rasterType = getGeoKeyAsInt(GeoTiffConstants.GTRasterTypeGeoKey, metadata);
+        // geotiff spec says that PixelIsArea is the default
+        if (rasterType == GeoTiffConstants.UNDEFINED) {
+            rasterType = GeoTiffConstants.RasterPixelIsArea;
+        }
+        MathTransform xform;
+        if (hasTiePoints && hasPixelScales) {
+
+            //
+            // we use tie points and pixel scales to build the grid to world
+            //
+            // model space
+            final TiePoint[] tiePoints = metadata.getModelTiePoints();
+            final PixelScale pixScales = metadata.getModelPixelScales();
+
+
+            // here is the matrix we need to build
+            final GeneralMatrix gm = new GeneralMatrix(3);
+            final double scaleRaster2ModelLongitude = pixScales.getScaleX();
+            final double scaleRaster2ModelLatitude = -pixScales.getScaleY();
+            // "raster" space
+            final double tiePointColumn = tiePoints[0].getValueAt(0) + (rasterType == GeoTiffConstants.RasterPixelIsPoint ? 0.5 : 0);
+            final double tiePointRow = tiePoints[0].getValueAt(1) + (rasterType == GeoTiffConstants.RasterPixelIsPoint ? 0.5 : 0);
+
+            // compute an "offset and scale" matrix
+            gm.setElement(0, 0, scaleRaster2ModelLongitude);
+            gm.setElement(1, 1, scaleRaster2ModelLatitude);
+            gm.setElement(0, 1, 0);
+            gm.setElement(1, 0, 0);
+
+            gm.setElement(0, 2, tiePoints[0].getValueAt(3) - (scaleRaster2ModelLongitude * tiePointColumn));
+            gm.setElement(1, 2, tiePoints[0].getValueAt(4) - (scaleRaster2ModelLatitude * tiePointRow));
+
+            // make it a LinearTransform
+            xform = ProjectiveTransform.create(gm);
+
+        } else if (hasModelTransformation) {
+            if (rasterType == GeoTiffConstants.RasterPixelIsPoint) {
+                final AffineTransform tempTransform = new AffineTransform(metadata.getModelTransformation());
+                tempTransform.concatenate(AffineTransform.getTranslateInstance(0.5, 0.5));
+                xform = ProjectiveTransform.create(tempTransform);
+            } else {
+                assert rasterType == GeoTiffConstants.RasterPixelIsArea;
+                xform = ProjectiveTransform.create(metadata.getModelTransformation());
+            }
+        } else {
+            throw new GeoTiffException(metadata, "Unknown Raster to Model configuration.", null);
+        }
+
+        return xform;
+    }
+
+    private static int getGeoKeyAsInt(final int key, final GeoTiffIIOMetadataDecoder metadata) {
+        try {
+            return Integer.parseInt(metadata.getGeoKey(key));
+        } catch (NumberFormatException ne) {
+            logger.log(Level.FINE, ne.getMessage(), ne);
+            return GeoTiffConstants.UNDEFINED;
         }
     }
 }

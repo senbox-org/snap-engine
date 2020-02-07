@@ -133,21 +133,28 @@ public class ImageUtils {
         return new Rectangle(bandOffsetX, bandOffsetY, bandWidth, bandHeight);
     }
 
-    public static Rectangle computeBandBounds(ProductSubsetDef subsetDef, Dimension defaultProductSize, Dimension defaultBandSize,
-                                              GeoCoding productDefaultGeoCoding,  GeoCoding bandDefaultGeoCoding) {
+    public static Rectangle computeBandBounds(GeoCoding productDefaultGeoCoding,  GeoCoding bandDefaultGeoCoding, Dimension defaultProductSize, Dimension defaultBandSize, ProductSubsetDef subsetDef) {
+        return computeBandBounds(productDefaultGeoCoding, bandDefaultGeoCoding, defaultProductSize.width, defaultProductSize.height, defaultBandSize.width, defaultBandSize.height, subsetDef);
+    }
+
+    public static Rectangle computeBandBounds(GeoCoding productDefaultGeoCoding,  GeoCoding bandDefaultGeoCoding, int defaultProductWidth, int defaultProductHeight, int defaultBandWidth, int defaultBandHeight, ProductSubsetDef subsetDef) {
         Rectangle bandBounds = null;
         if(subsetDef != null){
-            if(subsetDef.isGeoRegion()){
+            if(subsetDef.isGeoRegion() && bandDefaultGeoCoding == null){
+                throw new IllegalArgumentException("The geoRegion subset cannot be done because the product GeoCoding is missing!");
+            }else if(subsetDef.isGeoRegion()){
                 Geometry geoRegion = subsetDef.getGeoRegion();
-                bandBounds = ProductUtils.computePixelRegion(bandDefaultGeoCoding, defaultBandSize.width, defaultBandSize.height, geoRegion, 0);
-            }else{
+                bandBounds = ProductUtils.computePixelRegion(bandDefaultGeoCoding, defaultBandWidth, defaultBandHeight, geoRegion, 0);
+            }else if(productDefaultGeoCoding != null && bandDefaultGeoCoding != null){//pixel subset region
                 Rectangle productSubsetBounds = subsetDef.getRegion();
-                Geometry geoRegion = ProductUtils.computeGeoRegion(productDefaultGeoCoding, defaultProductSize.width, defaultProductSize.height, productSubsetBounds);
-                bandBounds = ProductUtils.computePixelRegion(bandDefaultGeoCoding, defaultBandSize.width, defaultBandSize.height, geoRegion, 0);
+                Geometry geoRegion = ProductUtils.computeGeoRegion(productDefaultGeoCoding, defaultProductWidth, defaultProductHeight, productSubsetBounds);
+                bandBounds = ProductUtils.computePixelRegion(bandDefaultGeoCoding, defaultBandWidth, defaultBandHeight, geoRegion, 0);
+            }else{
+                bandBounds = computeBandBoundsBasedOnPercent(subsetDef.getRegion(), defaultProductWidth, defaultProductHeight, defaultBandWidth, defaultBandHeight);
             }
         }
         if (bandBounds == null) {
-            bandBounds = new Rectangle(defaultBandSize.width, defaultBandSize.height);
+            bandBounds = new Rectangle(defaultBandWidth, defaultBandHeight);
         }
         return bandBounds;
     }
