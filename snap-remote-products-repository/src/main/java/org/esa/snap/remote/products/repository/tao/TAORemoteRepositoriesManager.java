@@ -112,7 +112,8 @@ public class TAORemoteRepositoriesManager {
         }
     }
 
-    public Path downloadProduct(String dataSourceName, TAORepositoryProduct repositoryProduct, Credentials credentials, Path targetFolderPath, ProgressListener progressListener)
+    public Path downloadProduct(String dataSourceName, TAORepositoryProduct repositoryProduct, Credentials credentials, Path targetFolderPath,
+                                ProgressListener progressListener, boolean uncompressedDownloadedProduct)
                                 throws Exception {
 
         String key = buildKey(dataSourceName, repositoryProduct);
@@ -162,7 +163,7 @@ public class TAORemoteRepositoriesManager {
             products.add(product); // add the product to be downloaded
 
             Properties additionalProperties = new Properties();
-            additionalProperties.put("auto.uncompress", "true");
+            additionalProperties.put("auto.uncompress", Boolean.toString(uncompressedDownloadedProduct));
 
             dataSourceComponent.doFetch(products, null, targetFolderPath.toString(), null, additionalProperties);
 

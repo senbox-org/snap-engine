@@ -37,7 +37,8 @@ public interface RemoteProductsRepositoryProvider {
 
     public void cancelDownloadProduct(RepositoryProduct repositoryProduct);
 
-    public Path downloadProduct(RepositoryProduct repositoryProduct, Credentials credentials, Path targetFolderPath, ProgressListener progressListener)
+    public Path downloadProduct(RepositoryProduct repositoryProduct, Credentials credentials, Path targetFolderPath,
+                                ProgressListener progressListener, boolean uncompressedDownloadedProduct)
                                 throws Exception;
 
     public static RemoteProductsRepositoryProvider[] getRemoteProductsRepositoryProviders() {

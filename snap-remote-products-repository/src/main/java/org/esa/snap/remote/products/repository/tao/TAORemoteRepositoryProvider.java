@@ -74,8 +74,12 @@ class TAORemoteRepositoryProvider implements RemoteProductsRepositoryProvider {
     }
 
     @Override
-    public Path downloadProduct(RepositoryProduct repositoryProduct, Credentials credentials, Path targetFolderPath, ProgressListener progressListener) throws Exception {
+    public Path downloadProduct(RepositoryProduct repositoryProduct, Credentials credentials, Path targetFolderPath,
+                                ProgressListener progressListener, boolean uncompressedDownloadedProduct)
+                                throws Exception {
+
         TAORepositoryProduct taoRepositoryProduct = (TAORepositoryProduct)repositoryProduct;
-        return TAORemoteRepositoriesManager.getInstance().downloadProduct(getRepositoryName(), taoRepositoryProduct, credentials, targetFolderPath, progressListener);
+        return TAORemoteRepositoriesManager.getInstance().downloadProduct(getRepositoryName(), taoRepositoryProduct, credentials, targetFolderPath,
+                                                                progressListener, uncompressedDownloadedProduct);
     }
 }
