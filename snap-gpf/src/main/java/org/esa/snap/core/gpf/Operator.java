@@ -229,6 +229,7 @@ public abstract class Operator {
      * @since SNAP 3.0
      */
     public boolean canComputeTile() {
+//        return context.isComputeTileMethodImplemented() || context.isComputingStack();
         return context.isComputeTileMethodImplemented();
     }
 
@@ -612,5 +613,4 @@ public abstract class Operator {
         Assert.argument(operatorSpi.getOperatorClass().isAssignableFrom(getClass()), "operatorSpi");
         context.setOperatorSpi(operatorSpi);
     }
-
 }

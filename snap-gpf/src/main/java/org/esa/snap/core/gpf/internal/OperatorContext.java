@@ -463,7 +463,7 @@ public class OperatorContext {
     }
 
     private boolean operatorMustComputeTileStack() {
-        return operator.canComputeTileStack() && !operator.canComputeTile();
+        return operator.canComputeTileStack() && (!operator.canComputeTile() || operator.getContext().isComputingStack());
     }
 
     private static boolean implementsMethod(Class<?> aClass, String methodName, Class[] methodParameterTypes) {
