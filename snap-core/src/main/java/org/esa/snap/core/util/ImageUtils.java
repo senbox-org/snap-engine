@@ -191,25 +191,6 @@ public class ImageUtils {
        return imageBounds;
     }
 
-    public static Rectangle computeProductBounds(int defaultImageWidth, int defaultImageHeight, ProductSubsetDef subsetDef) {
-        Rectangle imageBounds = null;
-        if (subsetDef != null) {
-            imageBounds = subsetDef.getRegion();
-            if (imageBounds != null) {
-                if (imageBounds.width > defaultImageWidth) {
-                    throw new IllegalArgumentException("The visible region width " + imageBounds.width + " cannot be greater than the image width " + defaultImageWidth + ".");
-                }
-                if (imageBounds.height > defaultImageHeight) {
-                    throw new IllegalArgumentException("The visible region height " + imageBounds.height + " cannot be greater than the image height " + defaultImageHeight + ".");
-                }
-            }
-        }
-        if (imageBounds == null) {
-            imageBounds = new Rectangle(0, 0, defaultImageWidth, defaultImageHeight);
-        }
-        return imageBounds;
-    }
-
     public static Dimension computeSceneRasterSize(int defaultSceneRasterWidth, int defaultSceneRasterHeight, Dimension regionRasterSize) {
         if (regionRasterSize != null) {
             if (regionRasterSize.width > defaultSceneRasterWidth) {
