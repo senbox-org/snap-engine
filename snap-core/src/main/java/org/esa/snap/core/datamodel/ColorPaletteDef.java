@@ -24,10 +24,7 @@ import org.esa.snap.core.util.math.LogLinearTransform;
 
 
 import java.awt.Color;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -52,7 +49,7 @@ import java.util.Vector;
 //          - Added capability to export color palette in cpt and pal formats.
 
 
-public class ColorPaletteDef implements Cloneable  {
+public class ColorPaletteDef implements Cloneable {
 
     private final static String _PROPERTY_KEY_NUM_POINTS = "numPoints";
     private final static String _PROPERTY_KEY_COLOR = "color";
@@ -72,16 +69,16 @@ public class ColorPaletteDef implements Cloneable  {
 
     public ColorPaletteDef(double minSample, double maxSample) {
         this(new Point[]{
-                    new Point(minSample, Color.BLACK),
-                    new Point(maxSample, Color.WHITE)
+                new Point(minSample, Color.BLACK),
+                new Point(maxSample, Color.WHITE)
         }, 256);
     }
 
     public ColorPaletteDef(double minSample, double centerSample, double maxSample) {
         this(new Point[]{
-                    new Point(minSample, Color.BLACK),
-                    new Point(centerSample, Color.GRAY),
-                    new Point(maxSample, Color.WHITE)
+                new Point(minSample, Color.BLACK),
+                new Point(centerSample, Color.GRAY),
+                new Point(maxSample, Color.WHITE)
         }, 256);
     }
 
@@ -178,7 +175,6 @@ public class ColorPaletteDef implements Cloneable  {
      *
      * @param index   the index
      * @param scaling the scaling
-     *
      * @return true, if a point has been inserted
      */
     public boolean createPointAfter(int index, Scaling scaling) {
@@ -205,14 +201,13 @@ public class ColorPaletteDef implements Cloneable  {
      *
      * @param c1 1st color
      * @param c2 2nd color
-     *
      * @return the center color
      */
     public static Color getCenterColor(Color c1, Color c2) {
         return new Color(0.5F * (c1.getRed() + c2.getRed()) / 255.0F,
-                         0.5F * (c1.getGreen() + c2.getGreen()) / 255.0F,
-                         0.5F * (c1.getBlue() + c2.getBlue()) / 255.0F,
-                         0.5F * (c1.getAlpha() + c2.getAlpha()) / 255.0F);
+                0.5F * (c1.getGreen() + c2.getGreen()) / 255.0F,
+                0.5F * (c1.getBlue() + c2.getBlue()) / 255.0F,
+                0.5F * (c1.getAlpha() + c2.getAlpha()) / 255.0F);
     }
 
 
@@ -274,9 +269,7 @@ public class ColorPaletteDef implements Cloneable  {
      * Loads a color palette definition from the given file
      *
      * @param file the file
-     *
      * @return the color palette definition, never null
-     *
      * @throws IOException if an I/O error occurs
      */
     public static ColorPaletteDef loadColorPaletteDef(File file) throws IOException {
@@ -285,7 +278,7 @@ public class ColorPaletteDef implements Cloneable  {
         final int numPoints = propertyMap.getPropertyInt(_PROPERTY_KEY_NUM_POINTS);
         if (numPoints < 2) {
             throw new IOException("The selected file contains less than\n" +
-                                  "two colour points.");
+                    "two colour points.");
         }
         final Point[] points = new Point[numPoints];
         double lastSample = 0;
@@ -308,12 +301,170 @@ public class ColorPaletteDef implements Cloneable  {
         return paletteDef;
     }
 
+
+
+
+    /**
+     * Loads a color palette definition from the given cpt format file
+     *
+     * @author Daniel Knowles
+     * @param file cpt format file
+     * @return the color palette definition, never null
+     * @throws IOException if an I/O error occurs
+     */
+    public static ColorPaletteDef loadCpt(File file) throws IOException {
+
+        if (file == null) {
+            throw new IOException("Null file in loadCpt");
+        }
+
+        if (!file.exists()) {
+            throw new IOException("File='" + file.getName() + "'does not exist");
+        }
+
+        String label = file.getName();
+        Point lastPoint = null;
+
+        ArrayList<Point> pointsArrayList = new ArrayList<Point>();
+
+        ArrayList<String> lines = readFileIntoArrayList(file);
+
+        for (String line : lines) {
+            line = line.trim();
+            if (!line.startsWith("#")) {
+                String[] values = line.split("\\s+");
+
+                if (values != null && values.length == 8) {
+                    Point firstPoint = string2Point(label, values[0], values[1], values[2], values[3]);
+                    if (firstPoint != null) {
+                        pointsArrayList.add(firstPoint);
+                    }
+                    lastPoint = string2Point(label, values[4], values[5], values[6], values[7]);
+                }
+            }
+        }
+
+        if (lastPoint != null) {
+            pointsArrayList.add(lastPoint);
+        }
+
+        if (pointsArrayList == null || pointsArrayList.size() < 2) {
+            throw new IOException("The selected file contains less than\n" +
+                    "two color points.");
+        }
+
+        final Point[] points = new Point[pointsArrayList.size()];
+
+        int i=0;
+        for (Point point : pointsArrayList) {
+            points[i] = point;
+            i++;
+        }
+
+        ColorPaletteDef paletteDef = new ColorPaletteDef(points, 256);
+
+        paletteDef.setAutoDistribute(false);
+        paletteDef.setLogScaled(false);
+        return paletteDef;
+    }
+
+
+
+
+
+
+    public static Color string2Color(String redString, String greenString, String blueString) {
+        Color color;
+        int red, green, blue;
+
+        if (redString != null && redString.length() > 0 &&
+                greenString != null && greenString.length() > 0 &&
+                blueString != null && blueString.length() > 0) {
+
+            redString = redString.trim();
+            greenString = greenString.trim();
+            blueString = blueString.trim();
+
+            try {
+                red = Integer.parseInt(redString);
+                green = Integer.parseInt(greenString);
+                blue = Integer.parseInt(blueString);
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        } else {
+            return null;
+        }
+
+        try {
+            color = new Color(red, green, blue);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+
+        return color;
+    }
+
+
+    private static Point string2Point(String label, String sampleStr, String redStr, String greenStr, String blueStr) {
+        boolean valid = true;
+
+        Point point = new Point();
+
+        double sample = 0.0;
+        if (sampleStr != null && sampleStr.length() > 0) {
+            sampleStr = sampleStr.trim();
+            try {
+                sample = Double.parseDouble(sampleStr);
+            } catch (NumberFormatException e) {
+                valid = false;
+            }
+        } else {
+            valid = false;
+        }
+
+        Color color = string2Color(redStr, greenStr, blueStr);
+
+        if (valid && color != null) {
+            point = new Point();
+            point.setColor(color);
+            point.setSample(sample);
+            point.setLabel(label);
+            return point;
+        } else {
+            return null;
+        }
+    }
+
+
+    public static ArrayList<String> readFileIntoArrayList(File file) throws IOException {
+        String lineData;
+        ArrayList<String> fileContents = new ArrayList<String>();
+        BufferedReader moFile = null;
+        try {
+            moFile = new BufferedReader(new FileReader(file));
+            while ((lineData = moFile.readLine()) != null) {
+
+                fileContents.add(lineData);
+            }
+        } catch (IOException e) {
+            throw new IOException("Error reading file='" + file.getName() + "' in loadCpt");
+        } finally {
+            try {
+                moFile.close();
+            } catch (Exception e) {
+                //Ignore
+            }
+        }
+        return fileContents;
+    }
+
+
     /**
      * Stores this color palette definition in the given file
      *
      * @param colorPaletteDef thje color palette definition
      * @param file            the file
-     *
      * @throws IOException if an I/O error occurs
      */
     public static void storeColorPaletteDef(ColorPaletteDef colorPaletteDef, File file) throws IOException {
@@ -365,7 +516,7 @@ public class ColorPaletteDef implements Cloneable  {
     /**
      * Stores  color palette in cpt format
      *
-     * @param colorPaletteDef thje color palette definition
+     * @param colorPaletteDef the color palette definition
      * @param file            the file
      * @throws IOException if an I/O error occurs
      */
@@ -437,6 +588,7 @@ public class ColorPaletteDef implements Cloneable  {
 
         printStringArrayListToFile(file, "CPT Format Color Palette", cptFileContents);
     }
+
 
     private static String getCptColorEntry(Color color, String DELIMITER) {
 
@@ -573,6 +725,7 @@ public class ColorPaletteDef implements Cloneable  {
         result = 31 * result + (isLogScaled ? 1 : 0);
         return result;
     }
+
     public boolean isLogScaled() {
         return isLogScaled;
     }
