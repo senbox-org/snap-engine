@@ -153,7 +153,10 @@ public class GraphContext {
         boolean canComputeTileStack = false;
         for (Node node : getGraph().getNodes()) {
             NodeContext nodeContext = getNodeContext(node);
-            canComputeTileStack |= nodeContext.canComputeTileStack();
+            if (!nodeContext.isOutput()) {
+                // prevent triggering stack computation by WriteOp, which implements both computeTile AND computeTileStack tb 2020-02-11
+                canComputeTileStack |= nodeContext.canComputeTileStack();
+            }
         }
 
         for (Node node : getGraph().getNodes()) {

@@ -18,7 +18,6 @@ package org.esa.snap.core.gpf.internal;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.descriptor.OperatorDescriptor;
@@ -80,15 +79,7 @@ public class OperatorImage extends SourcelessOpImage {
         operatorContext.startWatch();
         // computeTile() may have been deactivated
         if (targetTile != null && operatorContext.getOperator().canComputeTile()) {
-            if (operatorContext.isComputingStack()) {
-                final Product product = getTargetBand().getProduct();
-                final Band[] bands = product.getBands();
-                for (final Band band : bands) {
-                    operatorContext.getOperator().computeTile(band, targetTile, ProgressMonitor.NULL);
-                }
-            } else {
-                operatorContext.getOperator().computeTile(getTargetBand(), targetTile, ProgressMonitor.NULL);
-            }
+            operatorContext.getOperator().computeTile(getTargetBand(), targetTile, ProgressMonitor.NULL);
         }
         operatorContext.stopWatch();
 //        long nettoNanos = operatorContext.getNettoTime();

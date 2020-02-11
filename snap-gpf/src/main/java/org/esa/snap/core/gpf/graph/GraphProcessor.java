@@ -213,7 +213,6 @@ public class GraphProcessor {
                         for (NodeContext nodeContext : nodeContextList) {
                             Product targetProduct = nodeContext.getTargetProduct();
                             if (canComputeTileStack) {
-
                                 // (1) Pull tile from first OperatorImage we find. This will trigger pulling
                                 // tiles of all other OperatorImage computed stack-wise.
                                 //
@@ -223,24 +222,22 @@ public class GraphProcessor {
                                         forceTileComputation(image, tileX, tileY, semaphore, tileScheduler, listeners,
                                                              parallelism);
 
-                                        System.out.println("Scheduled: " + tileX + ", " +tileY + " band: " + band.getName());
                                         break;
                                     }
                                 }
 
                                 // (2) Pull tile from source images of other regular bands.
                                 //
-//                                for (Band band : targetProduct.getBands()) {
-//                                    PlanarImage image = nodeContext.getTargetImage(band);
-//                                    if (image == null) {
-//                                        if (OperatorContext.isRegularBand(band) && band.isSourceImageSet()) {
-//                                            forceTileComputation(band.getSourceImage(), tileX, tileY, semaphore,
-//                                                                 tileScheduler, listeners, parallelism);
-//                                        }
-//                                    }
-//                                }
+                                for (Band band : targetProduct.getBands()) {
+                                    PlanarImage image = nodeContext.getTargetImage(band);
+                                    if (image == null) {
+                                        if (OperatorContext.isRegularBand(band) && band.isSourceImageSet()) {
+                                            forceTileComputation(band.getSourceImage(), tileX, tileY, semaphore,
+                                                                 tileScheduler, listeners, parallelism);
+                                        }
+                                    }
+                                }
                             } else {
-
                                 // Simply pull tile from source images of regular bands.
                                 //
                                 for (Band band : targetProduct.getBands()) {
