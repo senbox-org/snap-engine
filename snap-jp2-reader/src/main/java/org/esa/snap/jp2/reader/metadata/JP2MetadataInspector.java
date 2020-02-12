@@ -1,9 +1,9 @@
 package org.esa.snap.jp2.reader.metadata;
 
+import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.metadata.MetadataInspector;
-import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.metadata.XmlMetadataParser;
 import org.esa.snap.core.metadata.XmlMetadataParserFactory;
 import org.esa.snap.jp2.reader.JP2ProductReader;
@@ -64,16 +64,18 @@ public class JP2MetadataInspector implements MetadataInspector {
     }
 
     private GeoCoding addGeoCoding(Jp2XmlMetadata metadata, int width, int height) {
-
-        Point2D origin = metadata.getOrigin();
-        GeoCoding geoCoding = JP2ProductReader.computeCrsGeoCoding(origin, metadata, new Dimension(width, height), null);
-        if (geoCoding == null) {
-            Map<String, TiePointGrid> tiePointGrids = JP2ProductReader.computeTiePointGrids(origin, width, height, metadata);
-           if(tiePointGrids != null && !tiePointGrids.isEmpty()) {
-               TiePointGrid lonGrid = tiePointGrids.get("lon");
-               TiePointGrid latGrid = tiePointGrids.get("lat");
-               geoCoding = new TiePointGeoCoding(latGrid, lonGrid);
-           }
+        GeoCoding geoCoding= null;
+        if(metadata != null) {
+            Point2D origin = metadata.getOrigin();
+            geoCoding = JP2ProductReader.computeCrsGeoCoding(origin, metadata, new Dimension(width, height), null);
+            if (geoCoding == null) {
+                Map<String, TiePointGrid> tiePointGrids = JP2ProductReader.computeTiePointGrids(origin, width, height, metadata);
+                if (tiePointGrids != null && !tiePointGrids.isEmpty()) {
+                    TiePointGrid lonGrid = tiePointGrids.get("lon");
+                    TiePointGrid latGrid = tiePointGrids.get("lat");
+                    geoCoding = new TiePointGeoCoding(latGrid, lonGrid);
+                }
+            }
         }
         return geoCoding;
     }

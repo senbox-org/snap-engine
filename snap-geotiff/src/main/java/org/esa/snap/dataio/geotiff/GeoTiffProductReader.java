@@ -63,9 +63,7 @@ import javax.imageio.spi.ImageInputStreamSpi;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.DataBuffer;
 import java.awt.image.IndexColorModel;
 import java.awt.image.Raster;
@@ -75,7 +73,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class GeoTiffProductReader extends AbstractProductReader {
 
@@ -213,7 +215,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
     public Product readProduct(GeoTiffImageReader geoTiffImageReader, String defaultProductName) throws Exception {
         GeoCoding productDefaultGeoCoding = null;
         if(getSubsetDef() != null) {
-            productDefaultGeoCoding = geoTiffImageReader.buildGeoCoding(geoTiffImageReader.getImageMetadata(), geoTiffImageReader.getImageWidth(), geoTiffImageReader.getImageHeight(), null);
+            productDefaultGeoCoding = GeoTiffProductReader.readGeoCoding(geoTiffImageReader, null);
         }
         Rectangle productBounds = ImageUtils.computeProductBounds(productDefaultGeoCoding, geoTiffImageReader.getImageWidth(), geoTiffImageReader.getImageHeight(), getSubsetDef());
         return readProduct(geoTiffImageReader, defaultProductName, productBounds);
@@ -530,20 +532,20 @@ public class GeoTiffProductReader extends AbstractProductReader {
                 !Double.isNaN(pixelScales[1]) && !Double.isInfinite(pixelScales[1]);
     }
 
-    public static GeoCoding readGeoCoding(Path productPath) throws Exception {
+    public static GeoCoding readGeoCoding(Path productPath, Rectangle subsetRegion) throws Exception {
         try (GeoTiffImageReader geoTiffImageReader = GeoTiffImageReader.buildGeoTiffImageReader(productPath)) {
-            return readGeoCoding(geoTiffImageReader);
+            return readGeoCoding(geoTiffImageReader, subsetRegion);
         }
     }
 
-    public static GeoCoding readGeoCoding(GeoTiffImageReader geoTiffImageReader) throws Exception {
+    public static GeoCoding readGeoCoding(GeoTiffImageReader geoTiffImageReader, Rectangle subsetRegion) throws Exception {
         TIFFImageMetadata imageMetadata = geoTiffImageReader.getImageMetadata();
         TiffFileInfo tiffInfo = new TiffFileInfo(imageMetadata.getRootIFD());
         if (tiffInfo.isGeotiff()) {
             int productWidth = geoTiffImageReader.getImageWidth();
             int productHeight = geoTiffImageReader.getImageHeight();
             Product product = new Product("GeoTiff", GeoTiffProductReaderPlugIn.FORMAT_NAMES[0], productWidth, productHeight);
-            applyGeoCoding(geoTiffImageReader, tiffInfo, imageMetadata, productWidth, productHeight, product, null);
+            applyGeoCoding(geoTiffImageReader, tiffInfo, imageMetadata, productWidth, productHeight, product, subsetRegion);
             return product.getSceneGeoCoding();
         }
         return null;

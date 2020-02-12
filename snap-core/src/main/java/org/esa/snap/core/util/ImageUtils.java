@@ -31,11 +31,7 @@ import org.opengis.referencing.operation.TransformException;
 
 import javax.media.jai.JAI;
 import javax.media.jai.PlanarImage;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.Transparency;
+import java.awt.*;
 import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
@@ -140,17 +136,21 @@ public class ImageUtils {
     public static Rectangle computeBandBounds(GeoCoding productDefaultGeoCoding,  GeoCoding bandDefaultGeoCoding, int defaultProductWidth, int defaultProductHeight, int defaultBandWidth, int defaultBandHeight, ProductSubsetDef subsetDef) {
         Rectangle bandBounds = null;
         if(subsetDef != null){
-            if(subsetDef.isGeoRegion() && bandDefaultGeoCoding == null){
-                throw new IllegalArgumentException("The geoRegion subset cannot be done because the product GeoCoding is missing!");
-            }else if(subsetDef.isGeoRegion()){
-                Geometry geoRegion = subsetDef.getGeoRegion();
-                bandBounds = ProductUtils.computePixelRegion(bandDefaultGeoCoding, defaultBandWidth, defaultBandHeight, geoRegion, 0);
-            }else if(productDefaultGeoCoding != null && bandDefaultGeoCoding != null){//pixel subset region
-                Rectangle productSubsetBounds = subsetDef.getRegion();
-                Geometry geoRegion = ProductUtils.computeGeoRegion(productDefaultGeoCoding, defaultProductWidth, defaultProductHeight, productSubsetBounds);
-                bandBounds = ProductUtils.computePixelRegion(bandDefaultGeoCoding, defaultBandWidth, defaultBandHeight, geoRegion, 0);
+            if(defaultProductWidth != defaultBandWidth || defaultProductHeight != defaultBandHeight) {
+                if (subsetDef.isGeoRegion() && bandDefaultGeoCoding == null) {
+                    throw new IllegalArgumentException("The geoRegion subset cannot be done because the product GeoCoding is missing!");
+                } else if (subsetDef.isGeoRegion()) {
+                    Geometry geoRegion = subsetDef.getGeoRegion();
+                    bandBounds = ProductUtils.computePixelRegion(bandDefaultGeoCoding, defaultBandWidth, defaultBandHeight, geoRegion, 0);
+                } else if (productDefaultGeoCoding != null && bandDefaultGeoCoding != null) {//pixel subset region
+                    Rectangle productSubsetBounds = subsetDef.getRegion();
+                    Geometry geoRegion = ProductUtils.computeGeoRegion(productDefaultGeoCoding, defaultProductWidth, defaultProductHeight, productSubsetBounds);
+                    bandBounds = ProductUtils.computePixelRegion(bandDefaultGeoCoding, defaultBandWidth, defaultBandHeight, geoRegion, 0);
+                } else {
+                    bandBounds = computeBandBoundsBasedOnPercent(subsetDef.getRegion(), defaultProductWidth, defaultProductHeight, defaultBandWidth, defaultBandHeight);
+                }
             }else{
-                bandBounds = computeBandBoundsBasedOnPercent(subsetDef.getRegion(), defaultProductWidth, defaultProductHeight, defaultBandWidth, defaultBandHeight);
+                bandBounds = subsetDef.getRegion();
             }
         }
         if (bandBounds == null) {
