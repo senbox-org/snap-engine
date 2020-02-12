@@ -26,17 +26,12 @@ import org.esa.snap.core.gpf.internal.ProductSetHandler;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.math.MathUtils;
 
-import javax.media.jai.JAI;
-import javax.media.jai.PlanarImage;
-import javax.media.jai.TileComputationListener;
-import javax.media.jai.TileRequest;
-import javax.media.jai.TileScheduler;
+import javax.media.jai.*;
 import javax.media.jai.util.ImagingListener;
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.Raster;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.logging.Logger;
 
@@ -88,7 +83,6 @@ public class GraphProcessor {
      * processing steps of the currently running processing graph.
      *
      * @param processingObserver the observer
-     *
      * @see GraphProcessingObserver
      */
     public void addObserver(GraphProcessingObserver processingObserver) {
@@ -109,7 +103,6 @@ public class GraphProcessor {
      *
      * @param graph the {@link Graph}
      * @param pm    a progress monitor. Can be used to signal progress.
-     *
      * @throws GraphException if any error occurs during execution
      * @see GraphProcessor#executeGraph(GraphContext, com.bc.ceres.core.ProgressMonitor)
      */
@@ -148,7 +141,6 @@ public class GraphProcessor {
      *
      * @param graphContext the {@link GraphContext} to execute
      * @param pm           a progress monitor. Can be used to signal progress.
-     *
      * @return the output products of the executed graph
      */
     public Product[] executeGraph(GraphContext graphContext, ProgressMonitor pm) {
@@ -189,7 +181,9 @@ public class GraphProcessor {
         boolean canComputeTileStack = false;
         final Deque<NodeContext> nodeContexts = graphContext.getInitNodeContextDeque();
         for (NodeContext nodeContext : nodeContexts) {
-            canComputeTileStack |= nodeContext.canComputeTileStack();
+            if (!nodeContext.isOutput()) {
+                canComputeTileStack |= nodeContext.canComputeTileStack();
+            }
         }
 
         try {
@@ -206,9 +200,9 @@ public class GraphProcessor {
                             return graphContext.getOutputProducts();
                         }
                         Rectangle tileRectangle = new Rectangle(tileX * tileSize.width,
-                                                                tileY * tileSize.height,
-                                                                tileSize.width,
-                                                                tileSize.height);
+                                tileY * tileSize.height,
+                                tileSize.width,
+                                tileSize.height);
                         fireTileStarted(graphContext, tileRectangle);
                         for (NodeContext nodeContext : nodeContextList) {
                             Product targetProduct = nodeContext.getTargetProduct();
@@ -220,7 +214,7 @@ public class GraphProcessor {
                                     PlanarImage image = nodeContext.getTargetImage(band);
                                     if (image != null) {
                                         forceTileComputation(image, tileX, tileY, semaphore, tileScheduler, listeners,
-                                                             parallelism);
+                                                parallelism);
 
                                         break;
                                     }
@@ -233,7 +227,7 @@ public class GraphProcessor {
                                     if (image == null) {
                                         if (OperatorContext.isRegularBand(band) && band.isSourceImageSet()) {
                                             forceTileComputation(band.getSourceImage(), tileX, tileY, semaphore,
-                                                                 tileScheduler, listeners, parallelism);
+                                                    tileScheduler, listeners, parallelism);
                                         }
                                     }
                                 }
@@ -244,10 +238,10 @@ public class GraphProcessor {
                                     PlanarImage image = nodeContext.getTargetImage(band);
                                     if (image != null) {
                                         forceTileComputation(image, tileX, tileY, semaphore, tileScheduler, listeners,
-                                                             parallelism);
+                                                parallelism);
                                     } else if (OperatorContext.isRegularBand(band) && band.isSourceImageSet()) {
                                         forceTileComputation(band.getSourceImage(), tileX, tileY, semaphore,
-                                                             tileScheduler, listeners, parallelism);
+                                                tileScheduler, listeners, parallelism);
                                     }
                                 }
                             }
