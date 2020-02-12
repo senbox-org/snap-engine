@@ -5,10 +5,10 @@ package org.esa.snap.remote.products.repository;
  */
 public interface ThreadStatus {
 
-    public boolean isRunning();
+    public boolean isFinished();
 
     public static void checkCancelled(ThreadStatus thread) throws java.lang.InterruptedException {
-        if (thread != null && !thread.isRunning()) {
+        if (thread != null && thread.isFinished()) {
             throw new InterruptedException(); // stop running
         }
     }

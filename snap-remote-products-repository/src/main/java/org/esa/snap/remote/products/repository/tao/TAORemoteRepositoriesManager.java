@@ -154,6 +154,7 @@ public class TAORemoteRepositoriesManager {
             dataSourceComponent.setProductStatusListener(taoProductStatusListener);
 
             EOProduct product = new EOProduct();
+            product.setApproximateSize(repositoryProduct.getApproximateSize());
             product.setId(repositoryProduct.getId());
             product.setProductType(repositoryProduct.getMission());
             product.setName(repositoryProduct.getName());
@@ -164,6 +165,7 @@ public class TAORemoteRepositoriesManager {
 
             Properties additionalProperties = new Properties();
             additionalProperties.put("auto.uncompress", Boolean.toString(uncompressedDownloadedProduct));
+            additionalProperties.put("progress.interval", "1000");
 
             dataSourceComponent.doFetch(products, null, targetFolderPath.toString(), null, additionalProperties);
 

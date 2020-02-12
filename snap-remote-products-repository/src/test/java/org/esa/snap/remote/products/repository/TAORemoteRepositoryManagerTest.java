@@ -198,8 +198,8 @@ public class TAORemoteRepositoryManagerTest {
     private static ThreadStatus buildEmptyThreadStatus() {
         return new ThreadStatus() {
             @Override
-            public boolean isRunning() {
-                return true;
+            public boolean isFinished() {
+                return false;
             }
         };
     }
