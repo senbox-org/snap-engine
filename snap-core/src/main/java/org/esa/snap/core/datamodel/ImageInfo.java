@@ -42,7 +42,8 @@ import java.awt.image.IndexColorModel;
 //           - Moved some of the log/liner transform methods into the class LogLinearTransform
 // JAN 2020 - Knowles
 //          - Added ColorSchemeInfo colorSchemeInfo to be able to set the color scheme selector in the ColorManipulation GUI
-
+// FEB 2020 - Knowles
+//          - Added ColorPaletteDef source->target transfer of the fields sourceFileMin and sourceFileMax
 
 public class ImageInfo implements Cloneable {
 
@@ -329,6 +330,9 @@ public class ImageInfo implements Cloneable {
                                        boolean autoDistribute,
                                        ColorPaletteDef targetCPD) {
 
+        targetCPD.setSourceFileMin(sourceCPD.getSourceFileMin());
+        targetCPD.setSourceFileMax(sourceCPD.getSourceFileMax());
+
         if (autoDistribute || sourceCPD.isAutoDistribute()) {
             alignNumPoints(sourceCPD, targetCPD);
             double minDisplaySample = sourceCPD.getMinDisplaySample();
@@ -352,6 +356,9 @@ public class ImageInfo implements Cloneable {
     }
 
     private static void transferPointsInvert(ColorPaletteDef sourceCPD, ColorPaletteDef targetCPD) {
+
+        targetCPD.setSourceFileMin(sourceCPD.getSourceFileMin());
+        targetCPD.setSourceFileMax(sourceCPD.getSourceFileMax());
 
         alignNumPoints(sourceCPD, targetCPD);
 
@@ -387,6 +394,9 @@ public class ImageInfo implements Cloneable {
                                        ColorPaletteDef targetCPD,
                                        boolean isSourceLogScaled,
                                        boolean isTargetLogScaled) {
+
+        targetCPD.setSourceFileMin(sourceCPD.getSourceFileMin());
+        targetCPD.setSourceFileMax(sourceCPD.getSourceFileMax());
 
         if (autoDistribute || sourceCPD.isAutoDistribute()) {
             alignNumPoints(sourceCPD, targetCPD);

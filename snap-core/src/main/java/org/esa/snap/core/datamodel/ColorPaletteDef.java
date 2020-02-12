@@ -47,6 +47,8 @@ import java.util.Vector;
 //          - Add fields for logScaling
 // DEC 2019 - Knowles / Yang
 //          - Added capability to export color palette in cpt and pal formats.
+// FEB 2020 - Knowles
+//          - Added fields sourceFileMin and sourceFileMax to better track the original source values
 
 
 public class ColorPaletteDef implements Cloneable {
@@ -65,6 +67,8 @@ public class ColorPaletteDef implements Cloneable {
     private boolean discrete;
     private boolean autoDistribute;
     private boolean isLogScaled;
+    private double sourceFileMin;
+    private double sourceFileMax;
 
 
     public ColorPaletteDef(double minSample, double maxSample) {
@@ -298,6 +302,8 @@ public class ColorPaletteDef implements Cloneable {
         ColorPaletteDef paletteDef = new ColorPaletteDef(points, 256);
         paletteDef.setAutoDistribute(propertyMap.getPropertyBool(_PROPERTY_KEY_AUTODISTRIBUTE, false));
         paletteDef.setLogScaled(propertyMap.getPropertyBool(_PROPERTY_KEY_IS_LOG_SCALED, false));
+        paletteDef.setSourceFileMin(paletteDef.getMinDisplaySample());
+        paletteDef.setSourceFileMax(paletteDef.getMaxDisplaySample());
         return paletteDef;
     }
 
@@ -365,6 +371,8 @@ public class ColorPaletteDef implements Cloneable {
 
         paletteDef.setAutoDistribute(false);
         paletteDef.setLogScaled(false);
+        paletteDef.setSourceFileMin(paletteDef.getMinDisplaySample());
+        paletteDef.setSourceFileMax(paletteDef.getMaxDisplaySample());
         return paletteDef;
     }
 
@@ -732,6 +740,22 @@ public class ColorPaletteDef implements Cloneable {
 
     public void setLogScaled(boolean logScaled) {
         isLogScaled = logScaled;
+    }
+
+    public double getSourceFileMin() {
+        return sourceFileMin;
+    }
+
+    public void setSourceFileMin(double sourceFileMin) {
+        this.sourceFileMin = sourceFileMin;
+    }
+
+    public double getSourceFileMax() {
+        return sourceFileMax;
+    }
+
+    public void setSourceFileMax(double sourceFileMax) {
+        this.sourceFileMax = sourceFileMax;
     }
 
     public static class Point implements Cloneable {
