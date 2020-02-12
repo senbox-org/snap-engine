@@ -17,9 +17,12 @@
 package org.esa.snap.core.gpf.common;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.vividsolutions.jts.geom.Geometry;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductReader;
+import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.VirtualBand;
@@ -30,7 +33,10 @@ import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
+import org.esa.snap.core.metadata.MetadataInspector;
 import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.core.util.converters.JtsGeometryConverter;
+import org.esa.snap.core.util.converters.RectangleConverter;
 
 import java.awt.Rectangle;
 import java.io.File;
@@ -69,6 +75,29 @@ public class ReadOp extends Operator {
     @Parameter(description = "An (optional) format name.", notNull = false, notEmpty = true)
     private String formatName;
 
+    @Parameter(description = "The list of source bands.", alias = "sourceBands", label = "Source Bands")
+    private String[] bandNames;
+
+    @Parameter(description = "The list of source masks.", alias = "sourceMasks", label = "Source Masks")
+    private String[] maskNames;
+
+    @Parameter(converter = RectangleConverter.class,
+            description = "The subset region in pixel coordinates.\n" +
+                    "Use the following format: <x>,<y>,<width>,<height>\n" +
+                    "If not given, the entire scene is used. The 'geoRegion' parameter has precedence over this parameter.")
+    private Rectangle region = null;
+
+    @Parameter(converter = JtsGeometryConverter.class,
+            description = "The subset region in geographical coordinates using WKT-format,\n" +
+                    "e.g. POLYGON((<lon1> <lat1>, <lon2> <lat2>, ..., <lon1> <lat1>))\n" +
+                    "(make sure to quote the option due to spaces in <geometry>).\n" +
+                    "If not given, the entire scene is used.")
+    private Geometry geoRegion = null;
+
+    @Parameter(defaultValue = "false",
+            description = "Whether to copy the metadata of the source product.")
+    private boolean copyMetadata = false;
+
     @TargetProduct
     private Product targetProduct;
 
@@ -80,7 +109,10 @@ public class ReadOp extends Operator {
         if (!file.exists()) {
             throw new OperatorException(String.format("Specified 'file' [%s] does not exist.", file));
         }
-
+        ProductSubsetDef subsetDef = null;
+        if(bandNames != null || maskNames != null || region != null || geoRegion != null || copyMetadata){
+            subsetDef = new ProductSubsetDef();
+        }
         try {
             Product openedProduct = getOpenedProduct();
             if (openedProduct != null) {
@@ -114,7 +146,32 @@ public class ReadOp extends Operator {
                         throw new OperatorException("No product reader found for file " + file);
                     }
                 }
-                targetProduct = productReader.readProductNodes(file, null);
+                if(subsetDef != null){
+                    MetadataInspector metadataInspector = productReader.getReaderPlugIn().getMetadataInspector();
+                    MetadataInspector.Metadata metadata = metadataInspector.getMetadata(file.toPath());
+                    if (bandNames != null && bandNames.length > 0) {
+                        subsetDef.addNodeNames(bandNames);
+                    }else{
+                        subsetDef.addNodeNames(metadata.getBandList());
+                    }
+
+                    if (maskNames != null && maskNames.length > 0) {
+                        subsetDef.addNodeNames(maskNames);
+                    }else{
+                        subsetDef.addNodeNames(metadata.getMaskList());
+                    }
+
+                    if(region == null && geoRegion != null){
+                        subsetDef.setGeoRegion(geoRegion);
+                    }else if(region != null){
+                        subsetDef.setRegion(region);
+                    }else{
+                        Rectangle productRegion = new Rectangle(0, 0, metadata.getProductWidth(), metadata.getProductHeight());
+                        subsetDef.setRegion(productRegion);
+                    }
+                    subsetDef.setIgnoreMetadata(copyMetadata);
+                }
+                targetProduct = productReader.readProductNodes(file, subsetDef);
                 targetProduct.setFileLocation(file);
             }
         } catch (IOException e) {
