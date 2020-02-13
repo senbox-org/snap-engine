@@ -5,8 +5,7 @@ import org.junit.Test;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayByte;
 
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class CacheEntryTest {
 
@@ -15,7 +14,7 @@ public class CacheEntryTest {
 
     @Before
     public void setUp() {
-        testArray = new ArrayByte(new int[]{1, 2},false);
+        testArray = new ArrayByte(new int[]{1, 2});
         cacheEntry = new CacheEntry(testArray);
     }
 

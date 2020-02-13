@@ -1,28 +1,25 @@
 package org.esa.snap.dataio.netcdf.metadata.profiles.cf;
 
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
+
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.dataio.netcdf.nc.N3Variable;
 import org.esa.snap.dataio.netcdf.util.Constants;
 import org.esa.snap.dataio.netcdf.util.DataTypeUtils;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import ucar.ma2.DataType;
 import ucar.nc2.Attribute;
-import ucar.nc2.NetcdfFileWriter;
+import ucar.nc2.NetcdfFileWriteable;
 import ucar.nc2.Variable;
 
 import java.io.IOException;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertThat;
-
 public class CfBandPartTest {
 
     private Band spectralBand;
-    private NetcdfFileWriter writeable;
+    private NetcdfFileWriteable writeable;
     private Variable variable;
 
     @Before
@@ -30,11 +27,11 @@ public class CfBandPartTest {
         spectralBand = new Band("spectralBand", ProductData.TYPE_UINT16, 10, 10);
         spectralBand.setSpectralWavelength(342.5f);
 
-        writeable = NetcdfFileWriter.createNew("not stored", false);
+        writeable = NetcdfFileWriteable.createNew("not stored");
         writeable.addDimension("y", spectralBand.getRasterHeight());
         writeable.addDimension("x", spectralBand.getRasterWidth());
         final DataType ncDataType = DataTypeUtils.getNetcdfDataType(spectralBand.getDataType());
-        variable = writeable.addVariable(spectralBand.getName(), ncDataType, "y x");
+        variable = writeable.addVariable(spectralBand.getName(), ncDataType, writeable.getRootGroup().getDimensions());
     }
 
     @Test
