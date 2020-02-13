@@ -117,6 +117,29 @@ public class ImageUtils {
                                 resolutionX, resolutionY, referencePixelX, referencePixelY);
     }
 
+    public static Rectangle computeBandAngleBoundsBasedOnPercent(Rectangle productBounds, int defaultProductWidth, int defaultProductHeight, int defaultBandWidth, int defaultBandHeight) {
+        float productOffsetXPercent = productBounds.x / (float)defaultProductWidth;
+        float productOffsetYPercent = productBounds.y / (float)defaultProductHeight;
+        float productWidthPercent = productBounds.width / (float)defaultProductWidth;
+        float productHeightPercent = productBounds.height / (float)defaultProductHeight;
+        int bandOffsetX = Math.round(productOffsetXPercent * defaultBandWidth);
+        int bandOffsetY = Math.round(productOffsetYPercent * defaultBandHeight);
+        int bandWidth = Math.round(productWidthPercent * defaultBandWidth);
+        int bandHeight = Math.round(productHeightPercent * defaultBandHeight);
+        if(Math.round(bandWidth/productWidthPercent) > defaultBandWidth){
+            bandWidth--;
+        }else if(Math.round(bandWidth/productWidthPercent) < defaultBandWidth){
+            bandWidth++;
+        }
+        if(Math.round(bandHeight/productHeightPercent) > defaultBandHeight){
+            bandHeight--;
+        }else if(Math.round(bandHeight/productHeightPercent) < defaultBandHeight){
+            bandHeight++;
+        }
+
+        return new Rectangle(bandOffsetX, bandOffsetY, bandWidth, bandHeight);
+    }
+
     public static Rectangle computeBandBoundsBasedOnPercent(Rectangle productBounds, int defaultProductWidth, int defaultProductHeight, int defaultBandWidth, int defaultBandHeight) {
         float productOffsetXPercent = productBounds.x / (float)defaultProductWidth;
         float productOffsetYPercent = productBounds.y / (float)defaultProductHeight;
