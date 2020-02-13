@@ -48,6 +48,7 @@ import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.dataop.maptransf.Datum;
 import org.esa.snap.core.image.ImageManager;
+import org.esa.snap.core.subset.AbstractSubsetRegion;
 import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.core.util.geotiff.EPSGCodes;
 import org.esa.snap.core.util.geotiff.GeoTIFFCodes;
@@ -101,7 +102,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
     @Override
     protected Product readProductNodesImpl() throws IOException {
         if (this.geoTiffImageReader != null) {
-//            throw new IllegalStateException("There is already an image reader.");
+            throw new IllegalStateException("There is already an image reader.");
         }
         boolean success = false;
         try {
@@ -213,20 +214,21 @@ public class GeoTiffProductReader extends AbstractProductReader {
     }
 
     public Product readProduct(GeoTiffImageReader geoTiffImageReader, String defaultProductName) throws Exception {
-        GeoCoding productDefaultGeoCoding = null;
-        if(getSubsetDef() != null) {
-            productDefaultGeoCoding = GeoTiffProductReader.readGeoCoding(geoTiffImageReader, null);
+        Rectangle productBounds;
+        int defaultImageWidth = geoTiffImageReader.getImageWidth();
+        int defaultImageHeight = geoTiffImageReader.getImageHeight();
+        if (getSubsetDef() == null || getSubsetDef().getSubsetRegion() == null) {
+            productBounds = new Rectangle(0, 0, defaultImageWidth, defaultImageHeight);
+        } else {
+            GeoCoding productDefaultGeoCoding = GeoTiffProductReader.readGeoCoding(geoTiffImageReader, null);
+            AbstractSubsetRegion subsetRegion = getSubsetDef().getSubsetRegion();
+            productBounds = subsetRegion.computePixelRegion(productDefaultGeoCoding, defaultImageWidth, defaultImageHeight);
         }
-        Rectangle productBounds = ImageUtils.computeProductBounds(productDefaultGeoCoding, geoTiffImageReader.getImageWidth(), geoTiffImageReader.getImageHeight(), getSubsetDef());
         return readProduct(geoTiffImageReader, defaultProductName, productBounds);
     }
 
     public Product readProduct(GeoTiffImageReader geoTiffImageReader, String defaultProductName, Rectangle productBounds) throws Exception {
         Dimension defaultImageSize = geoTiffImageReader.validateArea(productBounds);
-        Rectangle subsetRegion = null;
-        if (!productBounds.equals(new Rectangle(0, 0, defaultImageSize.width, defaultImageSize.height))) {
-            subsetRegion = productBounds;
-        }
 
         TIFFImageMetadata imageMetadata = geoTiffImageReader.getImageMetadata();
         TiffFileInfo tiffInfo = new TiffFileInfo(imageMetadata.getRootIFD());
@@ -250,7 +252,11 @@ public class GeoTiffProductReader extends AbstractProductReader {
         ProductSubsetDef subsetDef = getSubsetDef();
         boolean isGlobalShifted180 = false;
         if (tiffInfo.isGeotiff()) {
-            isGlobalShifted180 = applyGeoCoding(geoTiffImageReader, tiffInfo, imageMetadata, defaultImageSize.width, defaultImageSize.height, product, subsetRegion);
+            Rectangle subsetRegion = null;
+            if (productBounds.x != 0 || productBounds.y != 0 || productBounds.width != defaultImageSize.width || productBounds.height != defaultImageSize.height) {
+                subsetRegion = productBounds;
+            }
+            isGlobalShifted180 = applyGeoCoding(tiffInfo, imageMetadata, defaultImageSize.width, defaultImageSize.height, product, subsetRegion);
         }
 
         if (subsetDef == null || !subsetDef.isIgnoreMetadata()) {
@@ -429,7 +435,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
         return new ImageInfo(new ColorPaletteDef(points, points.length));
     }
 
-    private static boolean applyGeoCoding(GeoTiffImageReader geoTiffImageReader, TiffFileInfo info, TIFFImageMetadata metadata, int defaultImageWidth, int defaultImageHeight, Product product, Rectangle subsetRegion)
+    private static boolean applyGeoCoding(TiffFileInfo info, TIFFImageMetadata metadata, int defaultImageWidth, int defaultImageHeight, Product product, Rectangle subsetRegion)
                                           throws Exception {
 
         boolean isGlobalShifted180 = false;
@@ -460,12 +466,8 @@ public class GeoTiffProductReader extends AbstractProductReader {
             }
         }
         if (product.getSceneGeoCoding() == null) {
-//            try {
-                CrsGeoCoding crsGeoCoding = geoTiffImageReader.buildGeoCoding(metadata, defaultImageWidth, defaultImageHeight, subsetRegion);
-                product.setSceneGeoCoding(crsGeoCoding);
-//            } catch (Exception ignored) {
-//                // ignore
-//            }
+            CrsGeoCoding crsGeoCoding = GeoTiffImageReader.buildGeoCoding(metadata, defaultImageWidth, defaultImageHeight, subsetRegion);
+            product.setSceneGeoCoding(crsGeoCoding);
         }
         return isGlobalShifted180;
     }
@@ -545,7 +547,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
             int productWidth = geoTiffImageReader.getImageWidth();
             int productHeight = geoTiffImageReader.getImageHeight();
             Product product = new Product("GeoTiff", GeoTiffProductReaderPlugIn.FORMAT_NAMES[0], productWidth, productHeight);
-            applyGeoCoding(geoTiffImageReader, tiffInfo, imageMetadata, productWidth, productHeight, product, subsetRegion);
+            applyGeoCoding(tiffInfo, imageMetadata, productWidth, productHeight, product, subsetRegion);
             return product.getSceneGeoCoding();
         }
         return null;
@@ -567,7 +569,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
             product = GeoTiffProductReader.buildProductWithoutDimapHeader(null, tiffInfo, geoTiffImageReader.getBaseImage(), productWidth, productHeight);
         }
         if (readGeoCoding && tiffInfo.isGeotiff()) {
-            applyGeoCoding(geoTiffImageReader, tiffInfo, imageMetadata, productWidth, productHeight, product, null);
+            applyGeoCoding(tiffInfo, imageMetadata, productWidth, productHeight, product, null);
         }
         return product;
     }

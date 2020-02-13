@@ -34,6 +34,9 @@ import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.metadata.MetadataInspector;
+import org.esa.snap.core.subset.AbstractSubsetRegion;
+import org.esa.snap.core.subset.GeometrySubsetRegion;
+import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.converters.JtsGeometryConverter;
 import org.esa.snap.core.util.converters.RectangleConverter;
@@ -85,94 +88,84 @@ public class ReadOp extends Operator {
             description = "The subset region in pixel coordinates.\n" +
                     "Use the following format: <x>,<y>,<width>,<height>\n" +
                     "If not given, the entire scene is used. The 'geoRegion' parameter has precedence over this parameter.")
-    private Rectangle region = null;
+    private Rectangle region;
 
     @Parameter(converter = JtsGeometryConverter.class,
             description = "The subset region in geographical coordinates using WKT-format,\n" +
                     "e.g. POLYGON((<lon1> <lat1>, <lon2> <lat2>, ..., <lon1> <lat1>))\n" +
                     "(make sure to quote the option due to spaces in <geometry>).\n" +
                     "If not given, the entire scene is used.")
-    private Geometry geoRegion = null;
+    private Geometry geoRegion;
 
-    @Parameter(defaultValue = "false",
-            description = "Whether to copy the metadata of the source product.")
-    private boolean copyMetadata = false;
+    @Parameter(defaultValue = "false", description = "Whether to copy the metadata of the source product.")
+    private boolean copyMetadata;
 
     @TargetProduct
     private Product targetProduct;
 
+    public ReadOp() {
+        this.copyMetadata = false;
+    }
+
     @Override
     public void initialize() throws OperatorException {
-        if (file == null) {
+        if (this.file == null) {
             throw new OperatorException("The 'file' parameter is not set");
         }
-        if (!file.exists()) {
-            throw new OperatorException(String.format("Specified 'file' [%s] does not exist.", file));
-        }
-        ProductSubsetDef subsetDef = null;
-        if(bandNames != null || maskNames != null || region != null || geoRegion != null || copyMetadata){
-            subsetDef = new ProductSubsetDef();
+        if (!this.file.exists()) {
+            throw new OperatorException(String.format("Specified 'file' [%s] does not exist.", this.file));
         }
         try {
             Product openedProduct = getOpenedProduct();
             if (openedProduct != null) {
-                //targetProduct = openedProduct;    // won't work. Product must be copied and use copySourceImage
-
-                targetProduct = new Product(openedProduct.getName(), openedProduct.getProductType(),
-                                            openedProduct.getSceneRasterWidth(), openedProduct.getSceneRasterHeight());
+                this.targetProduct = new Product(openedProduct.getName(), openedProduct.getProductType(), openedProduct.getSceneRasterWidth(), openedProduct.getSceneRasterHeight());
                 for (Band srcband : openedProduct.getBands()) {
-                    if (targetProduct.getBand(srcband.getName()) != null) {
+                    if (this.targetProduct.getBand(srcband.getName()) != null) {
                         continue;
                     }
                     if (srcband instanceof VirtualBand) {
                         ProductUtils.copyVirtualBand(targetProduct, (VirtualBand) srcband, srcband.getName());
                     } else {
-                        ProductUtils.copyBand(srcband.getName(), openedProduct, targetProduct, true);
+                        ProductUtils.copyBand(srcband.getName(), openedProduct, this.targetProduct, true);
                     }
                 }
-                ProductUtils.copyProductNodes(openedProduct, targetProduct);
-                targetProduct.setFileLocation(openedProduct.getFileLocation());
-
-            }else {
+                ProductUtils.copyProductNodes(openedProduct, this.targetProduct);
+                this.targetProduct.setFileLocation(openedProduct.getFileLocation());
+            } else {
                 ProductReader productReader;
-                if (formatName != null && !formatName.trim().isEmpty()) {
-                    productReader = ProductIO.getProductReader(formatName);
+                if (this.formatName != null && !this.formatName.trim().isEmpty()) {
+                    productReader = ProductIO.getProductReader(this.formatName);
                     if (productReader == null) {
-                        throw new OperatorException("No product reader found for format '" + this.formatName + "'");
+                        throw new OperatorException("No product reader found for format '" + this.formatName + "'.");
                     }
                 } else {
                     productReader = ProductIO.getProductReaderForInput(file);
                     if (productReader == null) {
-                        throw new OperatorException("No product reader found for file " + file);
+                        throw new OperatorException("No product reader found for file '" + this.file.getAbsolutePath() + "'.");
                     }
                 }
-                if(subsetDef != null){
-                    MetadataInspector metadataInspector = productReader.getReaderPlugIn().getMetadataInspector();
-                    MetadataInspector.Metadata metadata = metadataInspector.getMetadata(file.toPath());
-                    if (bandNames != null && bandNames.length > 0) {
-                        subsetDef.addNodeNames(bandNames);
-                    }else{
-                        subsetDef.addNodeNames(metadata.getBandList());
-                    }
 
-                    if (maskNames != null && maskNames.length > 0) {
-                        subsetDef.addNodeNames(maskNames);
-                    }else{
-                        subsetDef.addNodeNames(metadata.getMaskList());
+                ProductSubsetDef subsetDef = null;
+                if (this.bandNames != null || this.maskNames != null || this.region != null || this.geoRegion != null || this.copyMetadata) {
+                    subsetDef = new ProductSubsetDef();
+                    subsetDef.setIgnoreMetadata(this.copyMetadata);
+                    AbstractSubsetRegion subsetRegion = null;
+                    if (this.geoRegion != null) {
+                        subsetRegion = new GeometrySubsetRegion(this.geoRegion, 0, true);
+                    } else if (this.region != null) {
+                        subsetRegion = new PixelSubsetRegion(this.region);
                     }
-
-                    if(region == null && geoRegion != null){
-                        subsetDef.setGeoRegion(geoRegion);
-                    }else if(region != null){
-                        subsetDef.setRegion(region);
-                    }else{
-                        Rectangle productRegion = new Rectangle(0, 0, metadata.getProductWidth(), metadata.getProductHeight());
-                        subsetDef.setRegion(productRegion);
+                    subsetDef.setSubsetRegion(subsetRegion);
+                    if (this.bandNames != null && this.bandNames.length > 0) {
+                        subsetDef.addNodeNames(this.bandNames);
                     }
-                    subsetDef.setIgnoreMetadata(copyMetadata);
+                    if (this.maskNames != null && this.maskNames.length > 0) {
+                        subsetDef.addNodeNames(this.maskNames);
+                    }
                 }
-                targetProduct = productReader.readProductNodes(file, subsetDef);
-                targetProduct.setFileLocation(file);
+
+                this.targetProduct = productReader.readProductNodes(this.file, subsetDef);
+                this.targetProduct.setFileLocation(this.file);
             }
         } catch (IOException e) {
             throw new OperatorException(e);

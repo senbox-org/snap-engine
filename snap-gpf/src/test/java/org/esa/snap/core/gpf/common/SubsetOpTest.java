@@ -34,6 +34,7 @@ import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.dataop.maptransf.Datum;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.graph.GraphException;
+import org.esa.snap.core.subset.AbstractSubsetRegion;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.junit.Test;
 import org.opengis.referencing.FactoryException;
@@ -201,7 +202,7 @@ public class SubsetOpTest {
         AffineTransform at = AffineTransform.getTranslateInstance(-180, -90);
         CrsGeoCoding geoCoding = new CrsGeoCoding(DefaultGeographicCRS.WGS84, new Rectangle(360, 180), at);
         product.setSceneGeoCoding(geoCoding);
-        geometry = SubsetOp.computeProductGeometry(product);
+        geometry = AbstractSubsetRegion.computeProductGeometry(product.getSceneGeoCoding(), product.getSceneRasterWidth(), product.getSceneRasterHeight());
         assertTrue(geometry instanceof Polygon);
         assertEquals("POLYGON ((-179.5 -89.5, -179.5 89.5, 179.5 89.5, 179.5 -89.5, -179.5 -89.5))",
                      geometry.toString());
@@ -215,7 +216,7 @@ public class SubsetOpTest {
         op.setSourceProduct(product);
         op.setRegion(new Rectangle(180 - 50, 90 - 25, 100, 50));
         product = op.getTargetProduct();
-        geometry = SubsetOp.computeProductGeometry(product);
+        geometry = AbstractSubsetRegion.computeProductGeometry(product.getSceneGeoCoding(), product.getSceneRasterWidth(), product.getSceneRasterHeight());
         assertTrue(geometry instanceof Polygon);
         assertEquals("POLYGON ((-49.5 -24.5, -49.5 24.5, 49.5 24.5, 49.5 -24.5, -49.5 -24.5))", geometry.toString());
 

@@ -16,6 +16,8 @@
 package org.esa.snap.core.dataio;
 
 import com.vividsolutions.jts.geom.Geometry;
+import org.esa.snap.core.subset.AbstractSubsetRegion;
+import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.esa.snap.core.util.Guardian;
 
 import java.awt.Dimension;
@@ -38,6 +40,11 @@ import java.util.Set;
 public class ProductSubsetDef {
 
     /**
+     * The subset region
+     */
+    private AbstractSubsetRegion subsetRegion;
+
+    /**
      * The optional name of the subset
      */
     private String subsetName = null;
@@ -45,11 +52,15 @@ public class ProductSubsetDef {
     /**
      * The spatial subset.
      */
+    //TODO Jean remove the 'region' attribute
+    @Deprecated
     private Rectangle region = null;
 
     /**
      * The geoCoding subset
      */
+    //TODO Jean remove the 'geoRegion' attribute
+    @Deprecated
     private Geometry geoRegion = null;
 
     /**
@@ -253,6 +264,7 @@ public class ProductSubsetDef {
     public void setRegion(Rectangle region) {
         if (region == null) {
             this.region = null;
+            this.subsetRegion = null;
         } else {
             setRegion(region.x, region.y, region.width, region.height);
         }
@@ -274,7 +286,8 @@ public class ProductSubsetDef {
         if (x < 0 || y < 0 || w < 1 || h < 1) {
             throw new IllegalArgumentException("invalid region");
         }
-        region = new Rectangle(x, y, w, h);
+        this.region = new Rectangle(x, y, w, h);
+        this.subsetRegion = new PixelSubsetRegion(x, y, w, h);
     }
 
     /**
@@ -419,5 +432,13 @@ public class ProductSubsetDef {
      */
     public boolean isGeoRegion() {
         return geoRegion != null;
+    }
+
+    public AbstractSubsetRegion getSubsetRegion() {
+        return subsetRegion;
+    }
+
+    public void setSubsetRegion(AbstractSubsetRegion subsetRegion) {
+        this.subsetRegion = subsetRegion;
     }
 }
