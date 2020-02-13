@@ -14,56 +14,39 @@ import java.awt.*;
 public class GeometrySubsetRegion extends AbstractSubsetRegion {
 
     private final Geometry geometryRegion;
-    private final int borderPixels;
-    private final boolean roundPixelRegion;
 
     public GeometrySubsetRegion(Geometry geometryRegion, int borderPixels, boolean roundPixelRegion) {
+        super(borderPixels, roundPixelRegion);
+
         if (geometryRegion == null) {
             throw new NullPointerException("The geometry region is null.");
         }
-        if (borderPixels < 0) {
-            throw new IllegalArgumentException("The border pixels " + borderPixels + " is negative.");
-        }
         this.geometryRegion = geometryRegion;
-        this.borderPixels = borderPixels;
-        this.roundPixelRegion = roundPixelRegion;
     }
 
     @Override
-    public Rectangle computePixelRegion(GeoCoding productDefaultGeoCoding, int defaultProductWidth, int defaultProductHeight) {
+    public Rectangle computeProductPixelRegion(GeoCoding productDefaultGeoCoding, int defaultProductWidth, int defaultProductHeight) {
         if (productDefaultGeoCoding == null) {
             throw new NullPointerException("The pixel region cannot be computed because the product GeoCoding is missing.");
         }
         return computePixelRegionUsingGeometry(productDefaultGeoCoding, defaultProductWidth, defaultProductHeight, this.geometryRegion, this.borderPixels, this.roundPixelRegion);
     }
 
-    public Rectangle computeBandBounds(GeoCoding productDefaultGeoCoding, GeoCoding bandDefaultGeoCoding, int defaultProductWidth, int defaultProductHeight, int defaultBandWidth, int defaultBandHeight) {
-        ProductSubsetDef subsetDef = null;
-
-        Rectangle bandBounds = null;
+    @Override
+    public Rectangle computeBandPixelRegion(GeoCoding productDefaultGeoCoding, GeoCoding bandDefaultGeoCoding, int defaultProductWidth,
+                                            int defaultProductHeight, int defaultBandWidth, int defaultBandHeight) {
 
         if (defaultProductWidth != defaultBandWidth || defaultProductHeight != defaultBandHeight) {
             // the product is multisize
-
-
-
-
-            if (subsetDef.isGeoRegion() && bandDefaultGeoCoding == null) {
-                throw new IllegalArgumentException("The geoRegion subset cannot be done because the product GeoCoding is missing!");
-            } else if (subsetDef.isGeoRegion()) {
-                Geometry geoRegion = subsetDef.getGeoRegion();
-                bandBounds = ProductUtils.computePixelRegion(bandDefaultGeoCoding, defaultBandWidth, defaultBandHeight, geoRegion, 0);
-            } else if (productDefaultGeoCoding != null && bandDefaultGeoCoding != null) {//pixel subset region
-                Rectangle productSubsetBounds = subsetDef.getRegion();
-                Geometry geoRegion = ProductUtils.computeGeoRegion(productDefaultGeoCoding, defaultProductWidth, defaultProductHeight, productSubsetBounds);
-                bandBounds = ProductUtils.computePixelRegion(bandDefaultGeoCoding, defaultBandWidth, defaultBandHeight, geoRegion, 0);
-            } else {
-                bandBounds = ImageUtils.computeBandBoundsBasedOnPercent(subsetDef.getRegion(), defaultProductWidth, defaultProductHeight, defaultBandWidth, defaultBandHeight);
+            if (bandDefaultGeoCoding == null) {
+                throw new NullPointerException("The pixel region cannot be computed because the band GeoCoding is missing of the multi size product.");
             }
+            return computePixelRegionUsingGeometry(bandDefaultGeoCoding, defaultBandWidth, defaultBandHeight, this.geometryRegion, this.borderPixels, this.roundPixelRegion);
         } else {
-            bandBounds = subsetDef.getRegion();
+            if (productDefaultGeoCoding == null) {
+                throw new NullPointerException("The pixel region cannot be computed because the product GeoCoding is missing.");
+            }
+            return computePixelRegionUsingGeometry(productDefaultGeoCoding, defaultProductWidth, defaultProductHeight, this.geometryRegion, this.borderPixels, this.roundPixelRegion);
         }
-        return bandBounds;
     }
-
 }

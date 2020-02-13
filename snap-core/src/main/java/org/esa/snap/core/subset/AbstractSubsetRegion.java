@@ -14,12 +14,25 @@ import java.awt.geom.GeneralPath;
  */
 public abstract class AbstractSubsetRegion {
 
-    protected AbstractSubsetRegion() {
+    protected final int borderPixels;
+    protected final boolean roundPixelRegion;
+
+    protected AbstractSubsetRegion(int borderPixels, boolean roundPixelRegion) {
+        if (borderPixels < 0) {
+            throw new IllegalArgumentException("The border pixels " + borderPixels + " is negative.");
+        }
+        this.borderPixels = borderPixels;
+        this.roundPixelRegion = roundPixelRegion;
     }
 
-    public abstract Rectangle computePixelRegion(GeoCoding rasterGeoCoding, int rasterWidth, int rasterHeight);
+    public abstract Rectangle computeProductPixelRegion(GeoCoding productDefaultGeoCoding, int defaultProductWidth, int defaultProductHeight);
 
-    public static Rectangle computePixelRegionUsingGeometry(GeoCoding rasterGeoCoding, int rasterWidth, int rasterHeight, Geometry geometryRegion, int numBorderPixels, boolean roundPixelRegion) {
+    public abstract Rectangle computeBandPixelRegion(GeoCoding productDefaultGeoCoding, GeoCoding bandDefaultGeoCoding, int defaultProductWidth,
+                                                     int defaultProductHeight, int defaultBandWidth, int defaultBandHeight);
+
+    public static Rectangle computePixelRegionUsingGeometry(GeoCoding rasterGeoCoding, int rasterWidth, int rasterHeight,
+                                                            Geometry geometryRegion, int numBorderPixels, boolean roundPixelRegion) {
+
         final Geometry productGeometry = computeProductGeometry(rasterGeoCoding, rasterWidth, rasterHeight);
         final Geometry regionIntersection = geometryRegion.intersection(productGeometry);
         if (regionIntersection.isEmpty()) {

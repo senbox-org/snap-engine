@@ -214,15 +214,15 @@ public class GeoTiffProductReader extends AbstractProductReader {
     }
 
     public Product readProduct(GeoTiffImageReader geoTiffImageReader, String defaultProductName) throws Exception {
+        ProductSubsetDef subsetDef = getSubsetDef();
         Rectangle productBounds;
         int defaultImageWidth = geoTiffImageReader.getImageWidth();
         int defaultImageHeight = geoTiffImageReader.getImageHeight();
-        if (getSubsetDef() == null || getSubsetDef().getSubsetRegion() == null) {
+        if (subsetDef == null || subsetDef.getSubsetRegion() == null) {
             productBounds = new Rectangle(0, 0, defaultImageWidth, defaultImageHeight);
         } else {
             GeoCoding productDefaultGeoCoding = GeoTiffProductReader.readGeoCoding(geoTiffImageReader, null);
-            AbstractSubsetRegion subsetRegion = getSubsetDef().getSubsetRegion();
-            productBounds = subsetRegion.computePixelRegion(productDefaultGeoCoding, defaultImageWidth, defaultImageHeight);
+            productBounds = subsetDef.getSubsetRegion().computeProductPixelRegion(productDefaultGeoCoding, defaultImageWidth, defaultImageHeight);
         }
         return readProduct(geoTiffImageReader, defaultProductName, productBounds);
     }

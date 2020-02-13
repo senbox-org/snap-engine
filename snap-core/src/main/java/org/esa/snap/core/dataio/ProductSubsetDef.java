@@ -17,6 +17,7 @@ package org.esa.snap.core.dataio;
 
 import com.vividsolutions.jts.geom.Geometry;
 import org.esa.snap.core.subset.AbstractSubsetRegion;
+import org.esa.snap.core.subset.GeometrySubsetRegion;
 import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.esa.snap.core.util.Guardian;
 
@@ -248,6 +249,8 @@ public class ProductSubsetDef {
      *
      * @return the spatial subset as a rectangular region, or <code>null</code> if no spatial region was defined
      */
+    //TODO Jean remove
+    @Deprecated
     public Rectangle getRegion() {
         return region != null ? new Rectangle(region) : null;
     }
@@ -287,7 +290,7 @@ public class ProductSubsetDef {
             throw new IllegalArgumentException("invalid region");
         }
         this.region = new Rectangle(x, y, w, h);
-        this.subsetRegion = new PixelSubsetRegion(x, y, w, h);
+        this.subsetRegion = new PixelSubsetRegion(x, y, w, h, 0, false);
     }
 
     /**
@@ -419,12 +422,15 @@ public class ProductSubsetDef {
         return -1;
     }
 
+    //TODO Jean remove
+    @Deprecated
     public Geometry getGeoRegion(){
         return this.geoRegion;
     }
 
     public void setGeoRegion(Geometry geometryRegion){
         this.geoRegion = geometryRegion;
+        this.subsetRegion = new GeometrySubsetRegion(geoRegion, 0, true);
     }
 
     /**

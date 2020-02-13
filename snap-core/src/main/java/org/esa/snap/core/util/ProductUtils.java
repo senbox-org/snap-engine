@@ -2498,13 +2498,15 @@ public class ProductUtils {
         return range;
     }
 
+    //TODO Jean remove
+    @Deprecated
     public static Rectangle computePixelRegion(GeoCoding productGeoCoding, int productWidth, int productHeight, Geometry geoRegion, int numBorderPixels) {
         final Geometry productGeometry = computeProductGeometry(productGeoCoding, productWidth, productHeight);
         final Geometry regionIntersection = geoRegion.intersection(productGeometry);
         if (regionIntersection.isEmpty()) {
             return new Rectangle();
         }
-        final PixelRegionFinder pixelRegionFinder = new PixelRegionFinder(productGeoCoding);
+        final PixelRegionFinder pixelRegionFinder = new PixelRegionFinder(productGeoCoding, false);
         regionIntersection.apply(pixelRegionFinder);
         final Rectangle pixelRegion = pixelRegionFinder.getPixelRegion();
         pixelRegion.grow(numBorderPixels, numBorderPixels);

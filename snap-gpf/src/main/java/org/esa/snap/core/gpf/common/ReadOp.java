@@ -22,7 +22,6 @@ import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.Mask;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.VirtualBand;
@@ -33,7 +32,6 @@ import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
-import org.esa.snap.core.metadata.MetadataInspector;
 import org.esa.snap.core.subset.AbstractSubsetRegion;
 import org.esa.snap.core.subset.GeometrySubsetRegion;
 import org.esa.snap.core.subset.PixelSubsetRegion;
@@ -41,7 +39,7 @@ import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.converters.JtsGeometryConverter;
 import org.esa.snap.core.util.converters.RectangleConverter;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 
@@ -153,7 +151,7 @@ public class ReadOp extends Operator {
                     if (this.geoRegion != null) {
                         subsetRegion = new GeometrySubsetRegion(this.geoRegion, 0, true);
                     } else if (this.region != null) {
-                        subsetRegion = new PixelSubsetRegion(this.region);
+                        subsetRegion = new PixelSubsetRegion(this.region, 0, false);
                     }
                     subsetDef.setSubsetRegion(subsetRegion);
                     if (this.bandNames != null && this.bandNames.length > 0) {
@@ -184,12 +182,10 @@ public class ReadOp extends Operator {
 
     @Override
     public void computeTile(Band band, Tile targetTile, ProgressMonitor pm) throws OperatorException {
-
         ProductData dataBuffer = targetTile.getRawSamples();
         Rectangle rectangle = targetTile.getRectangle();
         try {
-            targetProduct.getProductReader().readBandRasterData(band, rectangle.x, rectangle.y, rectangle.width,
-                                                                rectangle.height, dataBuffer, pm);
+            targetProduct.getProductReader().readBandRasterData(band, rectangle.x, rectangle.y, rectangle.width, rectangle.height, dataBuffer, pm);
             targetTile.setRawSamples(dataBuffer);
         } catch (IOException e) {
             throw new OperatorException(e);
