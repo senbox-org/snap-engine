@@ -301,6 +301,7 @@ class LocalRepositoryDatabaseLayer {
                         Timestamp acquisitionDate = resultSet.getTimestamp("acquisition_date");
                         long sizeInBytes = resultSet.getLong("size_in_bytes");
                         Geometry productGeometry = resultSet.getGeometry("geometry");
+                        //TODO Jean use GeometryUtils.convertProductGeometry(productGeometry)
                         //AbstractGeometry2D geometry = GeometryUtils.convertProductGeometry(productGeometry);
                         AbstractGeometry2D geometry = convertProductGeometry(productGeometry);
                         LocalRepositoryProduct localProduct = new LocalRepositoryProduct(id, name, acquisitionDate, productLocalPath, sizeInBytes, geometry);

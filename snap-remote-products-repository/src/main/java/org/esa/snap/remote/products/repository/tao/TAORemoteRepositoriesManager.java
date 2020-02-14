@@ -96,6 +96,7 @@ public class TAORemoteRepositoriesManager {
             downloadStrategy = this.downloadingProducts.remove(key);
         }
         if (downloadStrategy != null) {
+            // the product is still downloading
             if (logger.isLoggable(Level.FINE)) {
                 StringBuilder logMessage = new StringBuilder();
                 logMessage.append("Cancel downloading the product '")
@@ -132,7 +133,7 @@ public class TAORemoteRepositoriesManager {
             }
 
             synchronized (this.downloadingProducts) {
-                dataSourceComponent = this.downloadingProducts.get(repositoryProduct);
+                dataSourceComponent = this.downloadingProducts.get(key);
                 if (dataSourceComponent == null) {
                     dataSourceComponent = new DataSourceComponent();
                     this.downloadingProducts.put(key, dataSourceComponent);
@@ -144,7 +145,6 @@ public class TAORemoteRepositoriesManager {
             TAODownloadProductProgressListener taoProgressListener = new TAODownloadProductProgressListener(progressListener, dataSourceName, repositoryProduct.getMission(), repositoryProduct.getName());
             TAODownloadProductStatusListener taoProductStatusListener = new TAODownloadProductStatusListener();
 
-            dataSourceComponent = new DataSourceComponent();
             dataSourceComponent.setDataSourceName(dataSourceName);
             dataSourceComponent.setSensorName(repositoryProduct.getMission());
             dataSourceComponent.setFetchMode(FetchMode.RESUME);
@@ -165,11 +165,12 @@ public class TAORemoteRepositoriesManager {
 
             Properties additionalProperties = new Properties();
             additionalProperties.put("auto.uncompress", Boolean.toString(uncompressedDownloadedProduct));
-            additionalProperties.put("progress.interval", "1000");
+            additionalProperties.put("progress.interval", "1500");
 
             dataSourceComponent.doFetch(products, null, targetFolderPath.toString(), null, additionalProperties);
 
             if (product.getProductStatus() == ProductStatus.DOWNLOADED) {
+                // the product has been downloaded
                 String productPath = product.getLocation();
                 if (productPath == null) {
                     throw new NullPointerException("The path of the downloaded product '" + repositoryProduct.getName() + "' is null when downloading it from the '" + dataSourceName+"' remote repository using the '"+repositoryProduct.getMission()+"' mission.");
@@ -177,7 +178,17 @@ public class TAORemoteRepositoriesManager {
                 URI uri = new URI(productPath);
                 return Paths.get(uri);
             } else {
-                throw new IllegalStateException(buildFailedDownloadExceptionMessage(repositoryProduct.getName(), dataSourceName, repositoryProduct.getMission(), taoProductStatusListener.getDownloadMessages()));
+                // the product has not been downloaded and check if downloading the product was cancelled before throwing an exception
+                boolean downloadingProductCancelled;
+                synchronized (this.downloadingProducts) {
+                    DataSourceComponent previousDataSource = this.downloadingProducts.remove(key);
+                    downloadingProductCancelled = (previousDataSource == null);
+                }
+                if (downloadingProductCancelled) {
+                    throw new java.lang.InterruptedException("Downloading the product '" + repositoryProduct.getName() + "' has been cancelled.");
+                } else {
+                    throw new IllegalStateException(buildFailedDownloadExceptionMessage(repositoryProduct.getName(), dataSourceName, repositoryProduct.getMission(), taoProductStatusListener.getDownloadMessages()));
+                }
             }
         } finally {
             if (dataSourceComponent != null) {
@@ -307,6 +318,7 @@ public class TAORemoteRepositoriesManager {
 
         ThreadStatus.checkCancelled(thread);
 
+        RemoteMission remoteMission = new RemoteMission(mission, dataSourceName);
         List<RepositoryProduct> productList;
         if (totalProductCount == 0) {
             downloaderListener.notifyProductCount(totalProductCount);
@@ -334,7 +346,7 @@ public class TAORemoteRepositoriesManager {
 
                 ThreadStatus.checkCancelled(thread);
 
-                List<RepositoryProduct> downloadedPageProducts = convertProducts(mission, pageResults, wktReader);
+                List<RepositoryProduct> downloadedPageProducts = convertProducts(remoteMission, pageResults, wktReader);
                 productList.addAll(downloadedPageProducts);
 
                 ThreadStatus.checkCancelled(thread);
@@ -347,7 +359,7 @@ public class TAORemoteRepositoriesManager {
             ThreadStatus.checkCancelled(thread);
 
             WKTReader wktReader = new WKTReader();
-            List<RepositoryProduct> downloadedPageProducts = convertProducts(mission, pageResults, wktReader);
+            List<RepositoryProduct> downloadedPageProducts = convertProducts(remoteMission, pageResults, wktReader);
             productList = new ArrayList<>(downloadedPageProducts);
 
             downloaderListener.notifyPageProducts(1, downloadedPageProducts, productList.size(), productList.size());
@@ -414,7 +426,7 @@ public class TAORemoteRepositoriesManager {
         return query;
     }
 
-    private static List<RepositoryProduct> convertProducts(String mission, List<EOProduct> pageResults, WKTReader wktReader) throws InterruptedException, ParseException {
+    private static List<RepositoryProduct> convertProducts(RemoteMission mission, List<EOProduct> pageResults, WKTReader wktReader) throws InterruptedException, ParseException {
         List<RepositoryProduct> downloadedPageProducts = new ArrayList<>(pageResults.size());
         for (int i=0; i<pageResults.size(); i++) {
             EOProduct product = pageResults.get(i);

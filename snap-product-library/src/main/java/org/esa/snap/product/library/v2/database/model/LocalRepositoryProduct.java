@@ -78,6 +78,11 @@ public class LocalRepositoryProduct implements RepositoryProduct {
     }
 
     @Override
+    public String getRepositoryName() {
+        return null;
+    }
+
+    @Override
     public BufferedImage getQuickLookImage() {
         return quickLookImage;
     }

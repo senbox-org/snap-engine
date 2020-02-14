@@ -25,6 +25,8 @@ public interface RepositoryProduct {
 
     public String getMission();
 
+    public String getRepositoryName();
+
     public void setQuickLookImage(BufferedImage quickLookImage);
 
     public BufferedImage getQuickLookImage();

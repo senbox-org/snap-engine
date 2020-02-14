@@ -1,11 +1,6 @@
 package org.esa.snap.remote.products.repository.tao;
 
-import org.esa.snap.remote.products.repository.Attribute;
-import org.esa.snap.remote.products.repository.DataFormatType;
-import org.esa.snap.remote.products.repository.PixelType;
-import org.esa.snap.remote.products.repository.AbstractGeometry2D;
-import org.esa.snap.remote.products.repository.RepositoryProduct;
-import org.esa.snap.remote.products.repository.SensorType;
+import org.esa.snap.remote.products.repository.*;
 
 import java.awt.image.BufferedImage;
 import java.util.Date;
@@ -18,7 +13,7 @@ public class TAORepositoryProduct implements RepositoryProduct {
 
     private final String id;
     private final String name;
-    private final String mission;
+    private final RemoteMission mission;
     private final String downloadURL;
     private final AbstractGeometry2D polygon;
     private final Date acquisitionDate;
@@ -31,7 +26,7 @@ public class TAORepositoryProduct implements RepositoryProduct {
     private PixelType pixelType;
     private String downloadQuickLookImageURL;
 
-    TAORepositoryProduct(String id, String name, String downloadURL, String mission, AbstractGeometry2D polygon, Date acquisitionDate, long approximateSize) {
+    TAORepositoryProduct(String id, String name, String downloadURL, RemoteMission mission, AbstractGeometry2D polygon, Date acquisitionDate, long approximateSize) {
         this.id = id;
         this.name = name;
         this.mission = mission;
@@ -53,7 +48,12 @@ public class TAORepositoryProduct implements RepositoryProduct {
 
     @Override
     public String getMission() {
-        return mission;
+        return this.mission.getName();
+    }
+
+    @Override
+    public String getRepositoryName() {
+        return this.mission.getRepositoryName();
     }
 
     @Override
