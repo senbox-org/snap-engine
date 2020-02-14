@@ -3,6 +3,7 @@ package org.esa.snap.core.subset;
 import com.vividsolutions.jts.geom.Geometry;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.util.ImageUtils;
+import org.esa.snap.core.util.ProductUtils;
 
 import java.awt.*;
 
@@ -36,6 +37,7 @@ public class PixelSubsetRegion extends AbstractSubsetRegion {
 
     @Override
     public Rectangle computeProductPixelRegion(GeoCoding productDefaultGeoCoding, int defaultProductWidth, int defaultProductHeight) {
+        validateDefaultSize(defaultProductWidth, defaultProductHeight, "The default product");
         return this.pixelRegion;
     }
 
@@ -43,15 +45,30 @@ public class PixelSubsetRegion extends AbstractSubsetRegion {
     public Rectangle computeBandPixelRegion(GeoCoding productDefaultGeoCoding, GeoCoding bandDefaultGeoCoding, int defaultProductWidth,
                                             int defaultProductHeight, int defaultBandWidth, int defaultBandHeight) {
 
+        validateDefaultSize(defaultProductWidth, defaultProductHeight, "The default product");
+        validateDefaultSize(defaultBandWidth, defaultBandHeight, "The default band");
+
         if (defaultProductWidth != defaultBandWidth || defaultProductHeight != defaultBandHeight) {
             // the product is multisize
             if (productDefaultGeoCoding != null && bandDefaultGeoCoding != null) {
-                Geometry productGeometryRegion = computeGeometryUsingPixelRegion(productDefaultGeoCoding, defaultProductWidth, defaultProductHeight, this.pixelRegion);
-                return computePixelRegionUsingGeometry(bandDefaultGeoCoding, defaultBandWidth, defaultBandHeight, productGeometryRegion, this.borderPixels, this.roundPixelRegion);
+                Geometry productGeometryRegion = ProductUtils.computeGeometryUsingPixelRegion(productDefaultGeoCoding, defaultProductWidth, defaultProductHeight, this.pixelRegion);
+                return ProductUtils.computePixelRegionUsingGeometry(bandDefaultGeoCoding, defaultBandWidth, defaultBandHeight, productGeometryRegion, this.borderPixels, this.roundPixelRegion);
             }
             return ImageUtils.computeBandBoundsBasedOnPercent(this.pixelRegion, defaultProductWidth, defaultProductHeight, defaultBandWidth, defaultBandHeight);
         } else {
             return this.pixelRegion;
+        }
+    }
+
+    @Override
+    protected void validateDefaultSize(int defaultProductWidth, int defaultProductHeight, String exceptionMessagePrefix) {
+        super.validateDefaultSize(defaultProductWidth, defaultProductHeight, exceptionMessagePrefix);
+
+        if (defaultProductWidth < this.pixelRegion.width) {
+            throw new IllegalArgumentException(exceptionMessagePrefix + " width '"+defaultProductWidth+"' must be greater or equal than the pixel region width " + this.pixelRegion.width + ".");
+        }
+        if (defaultProductHeight < this.pixelRegion.height) {
+            throw new IllegalArgumentException(exceptionMessagePrefix + " height '"+defaultProductHeight+"' must be greater or equal than the pixel region height " + this.pixelRegion.height + ".");
         }
     }
 }

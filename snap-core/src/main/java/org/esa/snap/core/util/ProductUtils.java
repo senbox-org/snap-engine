@@ -21,37 +21,10 @@ import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.grender.support.BufferedImageRendering;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.CoordinateFilter;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.simplify.DouglasPeuckerSimplifier;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.ColorPaletteDef;
-import org.esa.snap.core.datamodel.DensityPlot;
-import org.esa.snap.core.datamodel.FlagCoding;
-import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.core.datamodel.GeoPos;
-import org.esa.snap.core.datamodel.ImageInfo;
-import org.esa.snap.core.datamodel.IndexCoding;
-import org.esa.snap.core.datamodel.Mask;
-import org.esa.snap.core.datamodel.MetadataAttribute;
-import org.esa.snap.core.datamodel.MetadataElement;
-import org.esa.snap.core.datamodel.PixelPos;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.datamodel.ProductNode;
-import org.esa.snap.core.datamodel.ProductNodeGroup;
-import org.esa.snap.core.datamodel.ProductVisitorAdapter;
-import org.esa.snap.core.datamodel.RGBChannelDef;
-import org.esa.snap.core.datamodel.RasterDataNode;
-import org.esa.snap.core.datamodel.Scene;
-import org.esa.snap.core.datamodel.SceneFactory;
-import org.esa.snap.core.datamodel.TiePointGrid;
-import org.esa.snap.core.datamodel.TimeCoding;
-import org.esa.snap.core.datamodel.VectorDataNode;
-import org.esa.snap.core.datamodel.VirtualBand;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.layer.MaskLayerType;
 import org.esa.snap.core.util.geotiff.GeoCoding2GeoTIFFMetadata;
@@ -67,36 +40,16 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import javax.media.jai.PlanarImage;
-import java.awt.Color;
+import java.awt.*;
 import java.awt.Dimension;
-import java.awt.Rectangle;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Area;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.Path2D;
-import java.awt.geom.PathIterator;
-import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
-import java.awt.image.ComponentColorModel;
-import java.awt.image.DataBuffer;
-import java.awt.image.DataBufferByte;
-import java.awt.image.IndexColorModel;
-import java.awt.image.Raster;
-import java.awt.image.SampleModel;
-import java.awt.image.WritableRaster;
+import java.awt.geom.*;
+import java.awt.image.*;
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
-import static java.lang.Math.ceil;
-import static java.lang.Math.floor;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.Math.round;
+import static java.lang.Math.*;
 
 /**
  * This class provides many static factory methods to be used in conjunction with data products.
@@ -2498,54 +2451,6 @@ public class ProductUtils {
         return range;
     }
 
-    //TODO Jean remove
-    @Deprecated
-    public static Rectangle computePixelRegion(GeoCoding productGeoCoding, int productWidth, int productHeight, Geometry geoRegion, int numBorderPixels) {
-        final Geometry productGeometry = computeProductGeometry(productGeoCoding, productWidth, productHeight);
-        final Geometry regionIntersection = geoRegion.intersection(productGeometry);
-        if (regionIntersection.isEmpty()) {
-            return new Rectangle();
-        }
-        final PixelRegionFinder pixelRegionFinder = new PixelRegionFinder(productGeoCoding, false);
-        regionIntersection.apply(pixelRegionFinder);
-        final Rectangle pixelRegion = pixelRegionFinder.getPixelRegion();
-        pixelRegion.grow(numBorderPixels, numBorderPixels);
-        return pixelRegion.intersection(new Rectangle(productWidth,
-                                                      productHeight));
-    }
-
-    public static Geometry computeGeoRegion(GeoCoding productGeoCoding, int productWidth, int productHeight, Rectangle pixelRegion) {
-
-        final int step = Math.min(pixelRegion.width, pixelRegion.height) / 8;
-        GeneralPath[] paths = createGeoBoundaryPaths(productGeoCoding, productWidth, productHeight, pixelRegion, step, true);
-        final Polygon[] polygons = new Polygon[paths.length];
-        final GeometryFactory factory = new GeometryFactory();
-        for (int i = 0; i < paths.length; i++) {
-            polygons[i] = convertAwtPathToJtsPolygon(paths[i], factory);
-        }
-
-        if(polygons.length == 1) {
-            return polygons[0];
-        } else {
-            return factory.createMultiPolygon(polygons);
-        }
-        //final DouglasPeuckerSimplifier peuckerSimplifier = new DouglasPeuckerSimplifier(
-        //        polygons.length == 1 ? polygons[0] : factory.createMultiPolygon(polygons));
-        //return peuckerSimplifier.getResultGeometry();
-    }
-
-    static Geometry computeProductGeometry(GeoCoding productGeoCoding, int productWidth, int productHeight) {
-        final GeneralPath[] paths = createGeoBoundaryPaths(productGeoCoding, productWidth, productHeight);
-        final Polygon[] polygons = new Polygon[paths.length];
-        final GeometryFactory factory = new GeometryFactory();
-        for (int i = 0; i < paths.length; i++) {
-            polygons[i] = convertAwtPathToJtsPolygon(paths[i], factory);
-        }
-        final DouglasPeuckerSimplifier peuckerSimplifier = new DouglasPeuckerSimplifier(
-                polygons.length == 1 ? polygons[0] : factory.createMultiPolygon(polygons));
-        return peuckerSimplifier.getResultGeometry();
-    }
-
     public static Polygon convertAwtPathToJtsPolygon(Path2D path, GeometryFactory factory) {
         final PathIterator pathIterator = path.getPathIterator(null);
         ArrayList<double[]> coordList = new ArrayList<>();
@@ -2571,18 +2476,56 @@ public class ProductUtils {
         return factory.createPolygon(factory.createLinearRing(coordinates), null);
     }
 
+    public static Rectangle computePixelRegionUsingGeometry(GeoCoding rasterGeoCoding, int rasterWidth, int rasterHeight, Geometry geometryRegion,
+                                                            int numBorderPixels, boolean roundPixelRegion) {
+
+        final Geometry productGeometry = computeProductGeometry(rasterGeoCoding, rasterWidth, rasterHeight);
+        final Geometry regionIntersection = geometryRegion.intersection(productGeometry);
+        if (regionIntersection.isEmpty()) {
+            return new Rectangle();
+        }
+        final ProductUtils.PixelRegionFinder pixelRegionFinder = new ProductUtils.PixelRegionFinder(rasterGeoCoding, roundPixelRegion);
+        regionIntersection.apply(pixelRegionFinder);
+        final Rectangle pixelRegion = pixelRegionFinder.getPixelRegion();
+        pixelRegion.grow(numBorderPixels, numBorderPixels);
+        return pixelRegion.intersection(new Rectangle(rasterWidth, rasterHeight));
+    }
+
+    public static Geometry computeGeometryUsingPixelRegion(GeoCoding rasterGeoCoding, int rasterWidth, int rasterHeight, Rectangle pixelRegion) {
+        final int step = Math.min(pixelRegion.width, pixelRegion.height) / 8;
+        GeneralPath[] paths = ProductUtils.createGeoBoundaryPathsArray(rasterGeoCoding, rasterWidth, rasterHeight, pixelRegion, step, false);
+        final com.vividsolutions.jts.geom.Polygon[] polygons = new com.vividsolutions.jts.geom.Polygon[paths.length];
+        final GeometryFactory factory = new GeometryFactory();
+        for (int i = 0; i < paths.length; i++) {
+            polygons[i] = ProductUtils.convertAwtPathToJtsPolygon(paths[i], factory);
+        }
+        if (polygons.length == 1) {
+            return polygons[0];
+        } else {
+            return factory.createMultiPolygon(polygons);
+        }
+    }
+
+    public static Geometry computeProductGeometry(GeoCoding productGeoCoding, int productWidth, int productHeight) {
+        final GeneralPath[] paths = ProductUtils.createGeoBoundaryPaths(productGeoCoding, productWidth, productHeight);
+        final com.vividsolutions.jts.geom.Polygon[] polygons = new com.vividsolutions.jts.geom.Polygon[paths.length];
+        final GeometryFactory factory = new GeometryFactory();
+        for (int i = 0; i < paths.length; i++) {
+            polygons[i] = ProductUtils.convertAwtPathToJtsPolygon(paths[i], factory);
+        }
+        final DouglasPeuckerSimplifier peuckerSimplifier = new DouglasPeuckerSimplifier(polygons.length == 1 ? polygons[0] : factory.createMultiPolygon(polygons));
+        return peuckerSimplifier.getResultGeometry();
+    }
+
     public static class PixelRegionFinder implements CoordinateFilter {
 
         private final GeoCoding geoCoding;
+
         private int x1;
         private int y1;
         private int x2;
         private int y2;
-        boolean round = false;
-
-        public PixelRegionFinder(GeoCoding geoCoding) {
-            this(geoCoding, false);
-        }
+        private boolean round;
 
         public PixelRegionFinder(GeoCoding geoCoding, boolean round) {
             this.geoCoding = geoCoding;

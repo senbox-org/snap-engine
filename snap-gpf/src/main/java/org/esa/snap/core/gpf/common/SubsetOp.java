@@ -18,9 +18,6 @@ package org.esa.snap.core.gpf.common;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Polygon;
-import com.vividsolutions.jts.simplify.DouglasPeuckerSimplifier;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductSubsetBuilder;
 import org.esa.snap.core.dataio.ProductSubsetDef;
@@ -41,8 +38,7 @@ import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.converters.JtsGeometryConverter;
 import org.esa.snap.core.util.converters.RectangleConverter;
 
-import java.awt.Rectangle;
-import java.awt.geom.GeneralPath;
+import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -97,27 +93,27 @@ public class SubsetOp extends Operator {
     private Geometry geoRegion;
     @Parameter(defaultValue = "1",
             description = "The pixel sub-sampling step in X (horizontal image direction)")
-    private int subSamplingX = 1;
+    private int subSamplingX;
     @Parameter(defaultValue = "1",
             description = "The pixel sub-sampling step in Y (vertical image direction)")
-    private int subSamplingY = 1;
+    private int subSamplingY;
     @Parameter(defaultValue = "false",
             description = "Forces the operator to extend the subset region to the full swath.")
-    private boolean fullSwath = false;
+    private boolean fullSwath;
 
-    @Parameter(description = "The comma-separated list of names of tie-point grids to be copied. \n" +
-                             "If not given, all bands are copied.")
+    @Parameter(description = "The comma-separated list of names of tie-point grids to be copied. \nIf not given, all bands are copied.")
     private String[] tiePointGridNames;
 
-    @Parameter(defaultValue = "false",
-            description = "Whether to copy the metadata of the source product.")
-    private boolean copyMetadata = false;
+    @Parameter(defaultValue = "false", description = "Whether to copy the metadata of the source product.")
+    private boolean copyMetadata;
 
     private transient ProductReader subsetReader;
 
     public SubsetOp() {
-        subSamplingX = 1;
-        subSamplingY = 1;
+        this.subSamplingX = 1;
+        this.subSamplingY = 1;
+        this.fullSwath = false;
+        this.copyMetadata = false;
     }
 
     public String[] getTiePointGridNames() {
@@ -309,7 +305,7 @@ public class SubsetOp extends Operator {
      * Non-API (yet).
      */
     public static Rectangle computePixelRegion(Product product, Geometry geometryRegion, int numBorderPixels) {
-        return AbstractSubsetRegion.computePixelRegionUsingGeometry(product.getSceneGeoCoding(), product.getSceneRasterWidth(), product.getSceneRasterHeight(), geometryRegion, numBorderPixels, false);
+        return ProductUtils.computePixelRegionUsingGeometry(product.getSceneGeoCoding(), product.getSceneRasterWidth(), product.getSceneRasterHeight(), geometryRegion, numBorderPixels, false);
     }
 
     public static HashMap<String, Rectangle> computeRegionMap(Rectangle region, Product product, String[] rasterNames) {
@@ -328,20 +324,20 @@ public class SubsetOp extends Operator {
         GeoCoding productGeoCoding = product.getSceneGeoCoding();
         int productWidth = product.getSceneRasterWidth();
         int productHeight = product.getSceneRasterHeight();
-        Geometry geoRegion = AbstractSubsetRegion.computeGeometryUsingPixelRegion(productGeoCoding, productWidth, productHeight, region);
+        Geometry geoRegion = ProductUtils.computeGeometryUsingPixelRegion(productGeoCoding, productWidth, productHeight, region);
         Geometry finalGeometry = null;
         for (String rasterName : rasterNames) {
             RasterDataNode rasterDataNode = product.getRasterDataNode(rasterName);
             if (rasterDataNode == null) {
                 continue;
             }
-            Rectangle rect = AbstractSubsetRegion.computePixelRegionUsingGeometry(rasterDataNode.getGeoCoding(), rasterDataNode.getRasterWidth(), rasterDataNode.getRasterHeight(), geoRegion, 0, true);
+            Rectangle rect = ProductUtils.computePixelRegionUsingGeometry(rasterDataNode.getGeoCoding(), rasterDataNode.getRasterWidth(), rasterDataNode.getRasterHeight(), geoRegion, 0, true);
             regionMap.put(rasterDataNode.getName(), rect);
 
             GeoCoding rasterGeoCoding = rasterDataNode.getGeoCoding();
             int rasterWidth = rasterDataNode.getRasterWidth();
             int rasterHeight = rasterDataNode.getRasterHeight();
-            Geometry geom = AbstractSubsetRegion.computeGeometryUsingPixelRegion(rasterGeoCoding, rasterWidth, rasterHeight, rect);
+            Geometry geom = ProductUtils.computeGeometryUsingPixelRegion(rasterGeoCoding, rasterWidth, rasterHeight, rect);
             geometryMap.put(rasterDataNode.getName(), geom);
             if (finalGeometry == null) {
                 finalGeometry = geom;
@@ -355,7 +351,7 @@ public class SubsetOp extends Operator {
             if (rasterDataNode == null) {
                 continue;
             }
-            Rectangle rect = AbstractSubsetRegion.computePixelRegionUsingGeometry(rasterDataNode.getGeoCoding(), rasterDataNode.getRasterWidth(), rasterDataNode.getRasterHeight(), finalGeometry, 0, true);
+            Rectangle rect = ProductUtils.computePixelRegionUsingGeometry(rasterDataNode.getGeoCoding(), rasterDataNode.getRasterWidth(), rasterDataNode.getRasterHeight(), finalGeometry, 0, true);
             finalRegionMap.put(rasterDataNode.getName(), rect);
         }
 
@@ -377,7 +373,7 @@ public class SubsetOp extends Operator {
         GeoCoding referenceRasterGeoCoding = referenceNode.getGeoCoding();
         int referenceRasterWidth = referenceNode.getRasterWidth();
         int referenceRasterHeight = referenceNode.getRasterHeight();
-        Geometry geometryRegion = AbstractSubsetRegion.computeGeometryUsingPixelRegion(referenceRasterGeoCoding, referenceRasterWidth, referenceRasterHeight, region);
+        Geometry geometryRegion = ProductUtils.computeGeometryUsingPixelRegion(referenceRasterGeoCoding, referenceRasterWidth, referenceRasterHeight, region);
 
         for (String rasterName : rasterNames) {
             RasterDataNode rasterDataNode = product.getRasterDataNode(rasterName);
@@ -388,7 +384,7 @@ public class SubsetOp extends Operator {
                 regionMap.put(rasterDataNode.getName(), region);
                 continue;
             }
-            Rectangle rasterPixelRegion = AbstractSubsetRegion.computePixelRegionUsingGeometry(rasterDataNode.getGeoCoding(), rasterDataNode.getRasterWidth(), rasterDataNode.getRasterHeight(), geometryRegion, 0, true);
+            Rectangle rasterPixelRegion = ProductUtils.computePixelRegionUsingGeometry(rasterDataNode.getGeoCoding(), rasterDataNode.getRasterWidth(), rasterDataNode.getRasterHeight(), geometryRegion, 0, true);
             regionMap.put(rasterDataNode.getName(), rasterPixelRegion);
         }
 
@@ -412,7 +408,7 @@ public class SubsetOp extends Operator {
                 continue;
             }
 
-            Rectangle rect = AbstractSubsetRegion.computePixelRegionUsingGeometry(rasterDataNode.getGeoCoding(), rasterDataNode.getRasterWidth(), rasterDataNode.getRasterHeight(), geoRegion, 0, true);
+            Rectangle rect = ProductUtils.computePixelRegionUsingGeometry(rasterDataNode.getGeoCoding(), rasterDataNode.getRasterWidth(), rasterDataNode.getRasterHeight(), geoRegion, 0, true);
             regionMap.put(rasterDataNode.getName(), rect);
         }
 

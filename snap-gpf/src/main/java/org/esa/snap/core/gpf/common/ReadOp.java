@@ -86,23 +86,22 @@ public class ReadOp extends Operator {
             description = "The subset region in pixel coordinates.\n" +
                     "Use the following format: <x>,<y>,<width>,<height>\n" +
                     "If not given, the entire scene is used. The 'geoRegion' parameter has precedence over this parameter.")
-    private Rectangle region;
+    private Rectangle pixelRegion;
 
     @Parameter(converter = JtsGeometryConverter.class,
             description = "The subset region in geographical coordinates using WKT-format,\n" +
                     "e.g. POLYGON((<lon1> <lat1>, <lon2> <lat2>, ..., <lon1> <lat1>))\n" +
                     "(make sure to quote the option due to spaces in <geometry>).\n" +
                     "If not given, the entire scene is used.")
-    private Geometry geoRegion;
+    private Geometry geometryRegion;
 
     @Parameter(defaultValue = "false", description = "Whether to copy the metadata of the source product.")
-    private boolean copyMetadata;
+    private Boolean copyMetadata; // use the 'copyMetadata' attribute as Boolean object
 
     @TargetProduct
     private Product targetProduct;
 
     public ReadOp() {
-        this.copyMetadata = false;
     }
 
     @Override
@@ -113,9 +112,35 @@ public class ReadOp extends Operator {
         if (!this.file.exists()) {
             throw new OperatorException(String.format("Specified 'file' [%s] does not exist.", this.file));
         }
+        if (this.pixelRegion != null && this.geometryRegion != null) {
+            throw new OperatorException("Both types of region are specified: pixel and geometry. At most one must be specified.");
+        }
+        boolean hasBandNames = (this.bandNames != null && this.bandNames.length > 0);
+        boolean hasMaskNames = (this.maskNames != null && this.maskNames.length > 0);
+        ProductSubsetDef subsetDef = null;
+        if (hasBandNames || hasMaskNames || this.pixelRegion != null || this.geometryRegion != null || this.copyMetadata != null) {
+            subsetDef = new ProductSubsetDef();
+            if (this.copyMetadata != null) {
+                subsetDef.setIgnoreMetadata(!this.copyMetadata.booleanValue());
+            }
+            AbstractSubsetRegion subsetRegion = null;
+            if (this.geometryRegion != null) {
+                subsetRegion = new GeometrySubsetRegion(this.geometryRegion, 0, true);
+            } else if (this.pixelRegion != null) {
+                subsetRegion = new PixelSubsetRegion(this.pixelRegion, 0, false);
+            }
+            subsetDef.setSubsetRegion(subsetRegion);
+            if (hasBandNames) {
+                subsetDef.addNodeNames(this.bandNames);
+            }
+            if (hasMaskNames) {
+                subsetDef.addNodeNames(this.maskNames);
+            }
+        }
+
         try {
             Product openedProduct = getOpenedProduct();
-            if (openedProduct != null) {
+            if (openedProduct != null && subsetDef == null) {
                 this.targetProduct = new Product(openedProduct.getName(), openedProduct.getProductType(), openedProduct.getSceneRasterWidth(), openedProduct.getSceneRasterHeight());
                 for (Band srcband : openedProduct.getBands()) {
                     if (this.targetProduct.getBand(srcband.getName()) != null) {
@@ -137,31 +162,11 @@ public class ReadOp extends Operator {
                         throw new OperatorException("No product reader found for format '" + this.formatName + "'.");
                     }
                 } else {
-                    productReader = ProductIO.getProductReaderForInput(file);
+                    productReader = ProductIO.getProductReaderForInput(this.file);
                     if (productReader == null) {
                         throw new OperatorException("No product reader found for file '" + this.file.getAbsolutePath() + "'.");
                     }
                 }
-
-                ProductSubsetDef subsetDef = null;
-                if (this.bandNames != null || this.maskNames != null || this.region != null || this.geoRegion != null || this.copyMetadata) {
-                    subsetDef = new ProductSubsetDef();
-                    subsetDef.setIgnoreMetadata(this.copyMetadata);
-                    AbstractSubsetRegion subsetRegion = null;
-                    if (this.geoRegion != null) {
-                        subsetRegion = new GeometrySubsetRegion(this.geoRegion, 0, true);
-                    } else if (this.region != null) {
-                        subsetRegion = new PixelSubsetRegion(this.region, 0, false);
-                    }
-                    subsetDef.setSubsetRegion(subsetRegion);
-                    if (this.bandNames != null && this.bandNames.length > 0) {
-                        subsetDef.addNodeNames(this.bandNames);
-                    }
-                    if (this.maskNames != null && this.maskNames.length > 0) {
-                        subsetDef.addNodeNames(this.maskNames);
-                    }
-                }
-
                 this.targetProduct = productReader.readProductNodes(this.file, subsetDef);
                 this.targetProduct.setFileLocation(this.file);
             }
@@ -170,26 +175,26 @@ public class ReadOp extends Operator {
         }
     }
 
-    private Product getOpenedProduct() {
-        final Product[] openedProducts = getProductManager().getProducts();
-        for (Product openedProduct : openedProducts) {
-            if (file.equals(openedProduct.getFileLocation())) {
-                return openedProduct;
-            }
-        }
-        return null;
-    }
-
     @Override
     public void computeTile(Band band, Tile targetTile, ProgressMonitor pm) throws OperatorException {
         ProductData dataBuffer = targetTile.getRawSamples();
         Rectangle rectangle = targetTile.getRectangle();
         try {
-            targetProduct.getProductReader().readBandRasterData(band, rectangle.x, rectangle.y, rectangle.width, rectangle.height, dataBuffer, pm);
+            this.targetProduct.getProductReader().readBandRasterData(band, rectangle.x, rectangle.y, rectangle.width, rectangle.height, dataBuffer, pm);
             targetTile.setRawSamples(dataBuffer);
         } catch (IOException e) {
             throw new OperatorException(e);
         }
+    }
+
+    private Product getOpenedProduct() {
+        Product[] openedProducts = getProductManager().getProducts();
+        for (Product openedProduct : openedProducts) {
+            if (this.file.equals(openedProduct.getFileLocation())) {
+                return openedProduct;
+            }
+        }
+        return null;
     }
 
     public static class Spi extends OperatorSpi {
