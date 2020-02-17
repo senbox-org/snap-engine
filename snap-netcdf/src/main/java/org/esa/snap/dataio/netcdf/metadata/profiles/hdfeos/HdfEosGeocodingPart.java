@@ -35,7 +35,7 @@ import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.MathTransformFactory;
 import org.opengis.referencing.operation.TransformException;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.util.List;
@@ -99,7 +99,11 @@ public class HdfEosGeocodingPart extends ProfilePartIO {
                 try {
                     parameters = transformFactory.getDefaultParameters("OGC:Sinusoidal");
                 } catch (NoSuchIdentifierException ignore) {
-                    return;
+                    try {
+                        parameters = transformFactory.getDefaultParameters("Sinusoidal");
+                    } catch (NoSuchIdentifierException ignore2) {
+                        return;
+                    }
                 }
                 double semi_major;
                 double semi_minor;
