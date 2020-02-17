@@ -163,18 +163,17 @@ public abstract class AbstractProductReader implements ProductReader {
      * @throws IOException                if an I/O error occurs
      * @throws IllegalFileFormatException if the file format is unknown.
      */
-    public Product readProductNodes(Object input,
-                                    ProductSubsetDef subsetDef) throws IOException {
+    public Product readProductNodes(Object input, ProductSubsetDef subsetDef) throws IOException {
         // (nf, 26.09.2007) removed (input == null) check, null inputs (= no sources) shall be allowed
         if (input != null && !isInstanceOfValidInputType(input)) {
             throw new IllegalArgumentException("invalid input source: " + input);
         }
-        final long startTime = System.currentTimeMillis();
         setInput(input);
         setSubsetDef(subsetDef);
 
+        long startTime = System.currentTimeMillis();
         if (logger.isLoggable(Level.FINE)) {
-            logger.log(Level.FINE, "Read the product from input '" + input + "' using the '" + getClass().getName()+"' reader class. The subset is '" + subsetDef + "'.");
+            logger.log(Level.FINE, "Start reading the product from input '" + input + "' using the '" + getClass().getName()+"' reader class. The subset is '" + subsetDef + "'.");
         }
 
         final Product product = readProductNodesImpl();
@@ -183,9 +182,12 @@ public abstract class AbstractProductReader implements ProductReader {
         if (product.getProductReader() == null) {
             product.setProductReader(this);
         }
-        final long endTime = System.currentTimeMillis();
-        String msg = String.format("Read product nodes (took %d ms)", (endTime - startTime));
-        SystemUtils.LOG.fine(msg);
+
+        if (logger.isLoggable(Level.FINE)) {
+            long elapsedSeconds = (System.currentTimeMillis() - startTime) / 1000;
+            logger.log(Level.FINE, "Finish reading the product from input '" + input + "' using the '" + getClass().getName()+"' reader class. The time elapsed is " + elapsedSeconds + " seconds.");
+        }
+
         return product;
     }
 

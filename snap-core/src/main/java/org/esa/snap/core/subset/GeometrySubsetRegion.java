@@ -37,7 +37,8 @@ public class GeometrySubsetRegion extends AbstractSubsetRegion {
                                             int defaultProductHeight, int defaultBandWidth, int defaultBandHeight) {
 
         validateDefaultSize(defaultProductWidth, defaultProductHeight, "The default product");
-        validateDefaultSize(defaultBandWidth, defaultBandHeight, "The default band");
+        // test if the band width and band height > 0
+        super.validateDefaultSize(defaultBandWidth, defaultBandHeight, "The default band");
 
         if (defaultProductWidth != defaultBandWidth || defaultProductHeight != defaultBandHeight) {
             // the product is multisize
