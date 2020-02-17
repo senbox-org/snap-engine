@@ -18,9 +18,7 @@ package org.esa.snap.core.util;
 // Important: make sure that we get no dependencies to
 // other org.esa.snap packages here above org.esa.snap.util
 
-import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
-import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.util.jai.SingleBandedSampleModel;
@@ -100,59 +98,6 @@ public class ImageUtils {
         }
         return new CrsGeoCoding(mapCRS, imageWidth, imageHeight, coordinateUpperLeftX + offsetX, coordinateUpperLeftY - offsetY,
                                 resolutionX, resolutionY, referencePixelX, referencePixelY);
-    }
-
-    //TODO Jean remove
-    public static Rectangle computeBandAngleBoundsBasedOnPercent(Rectangle productBounds, int defaultProductWidth, int defaultProductHeight, int defaultBandWidth, int defaultBandHeight) {
-        float productOffsetXPercent = productBounds.x / (float)defaultProductWidth;
-        float productOffsetYPercent = productBounds.y / (float)defaultProductHeight;
-        float productWidthPercent = productBounds.width / (float)defaultProductWidth;
-        float productHeightPercent = productBounds.height / (float)defaultProductHeight;
-        int bandOffsetX = Math.round(productOffsetXPercent * defaultBandWidth);
-        int bandOffsetY = Math.round(productOffsetYPercent * defaultBandHeight);
-        int bandWidth = Math.round(productWidthPercent * defaultBandWidth);
-        int bandHeight = Math.round(productHeightPercent * defaultBandHeight);
-        if(Math.round(bandWidth/productWidthPercent) > defaultBandWidth){
-            bandWidth--;
-        }else if(Math.round(bandWidth/productWidthPercent) < defaultBandWidth){
-            bandWidth++;
-        }
-        if(Math.round(bandHeight/productHeightPercent) > defaultBandHeight){
-            bandHeight--;
-        }else if(Math.round(bandHeight/productHeightPercent) < defaultBandHeight){
-            bandHeight++;
-        }
-
-        return new Rectangle(bandOffsetX, bandOffsetY, bandWidth, bandHeight);
-    }
-
-    //TODO Jean remove
-    public static Rectangle computeBandBoundsBasedOnPercent(Rectangle productBounds, int defaultProductWidth, int defaultProductHeight, int defaultBandWidth, int defaultBandHeight) {
-        float productOffsetXPercent = productBounds.x / (float)defaultProductWidth;
-        float productOffsetYPercent = productBounds.y / (float)defaultProductHeight;
-        float productWidthPercent = productBounds.width / (float)defaultProductWidth;
-        float productHeightPercent = productBounds.height / (float)defaultProductHeight;
-        int bandOffsetX = (int)(productOffsetXPercent * defaultBandWidth);
-        int bandOffsetY = (int)(productOffsetYPercent * defaultBandHeight);
-        int bandWidth = (int)(productWidthPercent * defaultBandWidth);
-        int bandHeight = (int)(productHeightPercent * defaultBandHeight);
-        return new Rectangle(bandOffsetX, bandOffsetY, bandWidth, bandHeight);
-    }
-
-    /**
-     * Computes the product bounds based on the subsetDef.
-     * If the subset region is not specified the image bounds are the same with the initial product bounds.
-     * If the subset region is specified by geometry, the pixel region is computed and added in the subsetDef.
-     * Otherwise(subset region is specified in pixels) the image bounds are the pixel subset region.
-     */
-    public static Rectangle computeProductBounds(GeoCoding productDefaultGeoCoding, int defaultImageWidth, int defaultImageHeight, ProductSubsetDef subsetDef) {
-        Rectangle productBounds;
-        if (subsetDef == null || subsetDef.getSubsetRegion() == null) {
-            productBounds = new Rectangle(0, 0, defaultImageWidth, defaultImageHeight);
-        } else {
-            productBounds = subsetDef.getSubsetRegion().computeProductPixelRegion(productDefaultGeoCoding, defaultImageWidth, defaultImageHeight);
-        }
-        return productBounds;
     }
 
     public static Dimension computeSceneRasterSize(int defaultSceneRasterWidth, int defaultSceneRasterHeight, Dimension regionRasterSize) {

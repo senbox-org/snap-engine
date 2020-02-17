@@ -54,7 +54,7 @@ public class PixelSubsetRegion extends AbstractSubsetRegion {
                 Geometry productGeometryRegion = ProductUtils.computeGeometryUsingPixelRegion(productDefaultGeoCoding, defaultProductWidth, defaultProductHeight, this.pixelRegion);
                 return ProductUtils.computePixelRegionUsingGeometry(bandDefaultGeoCoding, defaultBandWidth, defaultBandHeight, productGeometryRegion, this.borderPixels, this.roundPixelRegion);
             }
-            return ImageUtils.computeBandBoundsBasedOnPercent(this.pixelRegion, defaultProductWidth, defaultProductHeight, defaultBandWidth, defaultBandHeight);
+            return computeBandBoundsBasedOnPercent(this.pixelRegion, defaultProductWidth, defaultProductHeight, defaultBandWidth, defaultBandHeight);
         } else {
             return this.pixelRegion;
         }
@@ -70,5 +70,17 @@ public class PixelSubsetRegion extends AbstractSubsetRegion {
         if (defaultProductHeight < this.pixelRegion.height) {
             throw new IllegalArgumentException(exceptionMessagePrefix + " height '"+defaultProductHeight+"' must be greater or equal than the pixel region height " + this.pixelRegion.height + ".");
         }
+    }
+
+    private static Rectangle computeBandBoundsBasedOnPercent(Rectangle productBounds, int defaultProductWidth, int defaultProductHeight, int defaultBandWidth, int defaultBandHeight) {
+        float productOffsetXPercent = productBounds.x / (float)defaultProductWidth;
+        float productOffsetYPercent = productBounds.y / (float)defaultProductHeight;
+        float productWidthPercent = productBounds.width / (float)defaultProductWidth;
+        float productHeightPercent = productBounds.height / (float)defaultProductHeight;
+        int bandOffsetX = (int)(productOffsetXPercent * defaultBandWidth);
+        int bandOffsetY = (int)(productOffsetYPercent * defaultBandHeight);
+        int bandWidth = (int)(productWidthPercent * defaultBandWidth);
+        int bandHeight = (int)(productHeightPercent * defaultBandHeight);
+        return new Rectangle(bandOffsetX, bandOffsetY, bandWidth, bandHeight);
     }
 }

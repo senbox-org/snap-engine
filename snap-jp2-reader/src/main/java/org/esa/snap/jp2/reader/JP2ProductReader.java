@@ -125,13 +125,12 @@ public class JP2ProductReader extends AbstractProductReader {
             ImageInfo imageInfo = opjDumpFile.getImageInfo();
             CodeStreamInfo csInfo = opjDumpFile.getCodeStreamInfo();
             Jp2XmlMetadata metadata = opjDumpFile.getMetadata();
-
+            ProductSubsetDef subsetDef = getSubsetDef();
             int imageWidth = imageInfo.getWidth();
             int imageHeight = imageInfo.getHeight();
             Dimension defaultProductSize = new Dimension(imageWidth,imageHeight);
-            Rectangle subsetRegion = null;
-            GeoCoding productDefaultGeoCoding = null;
-            if(getSubsetDef() != null) {
+            if (subsetDef != null) {
+                GeoCoding productDefaultGeoCoding = null;
                 if (metadata != null) {
                     Point2D origin = metadata.getOrigin();
                     productDefaultGeoCoding = computeCrsGeoCoding(origin, metadata, defaultProductSize, null);
@@ -144,7 +143,12 @@ public class JP2ProductReader extends AbstractProductReader {
                         }
                     }
                 }
-                subsetRegion = ImageUtils.computeProductBounds(productDefaultGeoCoding, imageWidth, imageHeight, getSubsetDef());
+                Rectangle subsetRegion;
+                if (subsetDef == null || subsetDef.getSubsetRegion() == null) {
+                    subsetRegion = new Rectangle(0, 0, imageWidth, imageHeight);
+                } else {
+                    subsetRegion = subsetDef.getSubsetRegion().computeProductPixelRegion(productDefaultGeoCoding, imageWidth, imageHeight);
+                }
                 imageWidth = subsetRegion.width;
                 imageHeight = subsetRegion.height;
             }
