@@ -44,6 +44,7 @@ import java.awt.image.IndexColorModel;
 //          - Added ColorSchemeInfo colorSchemeInfo to be able to set the color scheme selector in the ColorManipulation GUI
 // FEB 2020 - Knowles
 //          - Added ColorPaletteDef source->target transfer of the fields sourceFileMin and sourceFileMax
+//          - When tranferring points of the ColorPaletteDef, log scaling field in image info is also updated
 
 public class ImageInfo implements Cloneable {
 
@@ -383,6 +384,7 @@ public class ImageInfo implements Cloneable {
     public void setColorPaletteDef(ColorPaletteDef colorPaletteDef,
                                    double minSample,
                                    double maxSample, boolean autoDistribute, boolean isSourceLogScaled, boolean isTargetLogScaled) {
+        setLogScaled(isTargetLogScaled);
         transferPoints(colorPaletteDef, minSample, maxSample, autoDistribute, getColorPaletteDef(), isSourceLogScaled, isTargetLogScaled);
     }
 
