@@ -105,6 +105,10 @@ public class GeoTiffProductReader extends AbstractProductReader {
 
     private static final int FIRST_IMAGE = 0;
 
+    // non standard ASCII tag (code 42112) to extract GDAL metadata,
+    // see https://gdal.org/drivers/raster/gtiff.html#metadata:
+    private static final int TIFFTAG_GDAL_METADATA = 42112;
+
     private ImageInputStream inputStream;
     protected ImageInputStreamSpi imageInputStreamSpi;
     private Map<Band, Integer> bandMap;
@@ -398,9 +402,40 @@ public class GeoTiffProductReader extends AbstractProductReader {
         final int numBands = sampleModel.getNumBands();
         final int productDataType = ImageManager.getProductDataType(sampleModel.getDataType());
         bandMap = new HashMap<>(numBands);
+
+        // check if GDAL metadata exists. If so, extract all band info and add to bands.
+        // todo: so far this has been implemented and tested for PROBA-V S* GeoTiff products only (SIIITBX-85),
+        //  for these we get now bands RED, NIR, BLUE, SWIR (or NDVI) instead of band_1,..,band_4.
+        //  Explore if this can be generalized for further GeoTiff products.
+        final TIFFField gdalMetadataTiffField = tiffInfo.getField(TIFFTAG_GDAL_METADATA);
+        if (gdalMetadataTiffField != null) {
+            final String gdalMetadataXmlString = gdalMetadataTiffField.getAsString(0);
+            try {
+                final Band[] bandsFromGdalMetadata = Utils.setupBandsFromGdalMetadata(gdalMetadataXmlString,
+                                                                                      productDataType,
+                                                                                      product.getSceneRasterWidth(),
+                                                                                      product.getSceneRasterHeight());
+                if (bandsFromGdalMetadata.length == numBands) {
+                    for (int i = 0; i < bandsFromGdalMetadata.length; i++) {
+                        product.addBand(bandsFromGdalMetadata[i]);
+                    }
+                } else {
+                    for (int i = 0; i < numBands; i++) {
+                        final String bandName = String.format("band_%d", i + 1);
+                        product.addBand(bandName, productDataType);
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            for (int i = 0; i < numBands; i++) {
+                final String bandName = String.format("band_%d", i + 1);
+                product.addBand(bandName, productDataType);
+            }
+        }
         for (int i = 0; i < numBands; i++) {
-            final String bandName = String.format("band_%d", i + 1);
-            final Band band = product.addBand(bandName, productDataType);
+            final Band band = product.getBandAt(i);
             if (tiffInfo.containsField(
                     BaselineTIFFTagSet.TAG_COLOR_MAP) && baseImage.getColorModel() instanceof IndexColorModel) {
                 band.setImageInfo(createIndexedImageInfo(product, baseImage, band));
