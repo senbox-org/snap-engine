@@ -28,9 +28,9 @@ import org.xml.sax.InputSource;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -38,7 +38,7 @@ public class Utils {
 
     public static final int PRIVATE_BEAM_TIFF_TAG_NUMBER = 65000;
 
-    public static List<TIFFField> createGeoTIFFFields(GeoTIFFMetadata geoTIFFMetadata) {
+    static List<TIFFField> createGeoTIFFFields(GeoTIFFMetadata geoTIFFMetadata) {
         final List<TIFFField> list = new ArrayList<TIFFField>(6);
         // Geo Key Directory
         final int numGeoKeyEntries = geoTIFFMetadata.getNumGeoKeyEntries();
@@ -120,12 +120,12 @@ public class Utils {
         return list;
     }
 
-    public static boolean isValidModelTransformation(double[] modelTransformation) {
+    static boolean isValidModelTransformation(double[] modelTransformation) {
         final double[] defaultValues = new double[16];
         return isValidData(modelTransformation, defaultValues);
     }
 
-    public static boolean isValidModelPixelScale(double[] modelTransformation) {
+    static boolean isValidModelPixelScale(double[] modelTransformation) {
         final double[] defaultValues = {1, 1, 0};
         return isValidData(modelTransformation, defaultValues);
     }
@@ -237,26 +237,38 @@ public class Utils {
             }
         }
 
+        Iterator descrListIterator = descrList.iterator();
+        Iterator unitsListIterator = unitsList.iterator();
+        Iterator nodataListIterator = nodataList.iterator();
+        Iterator offsetListIterator = offsetList.iterator();
+        Iterator scaleListIterator = scaleList.iterator();
+
         Band[] bands = new Band[bandnameList.size()];
         for (int i = 0; i < bandnameList.size(); i++) {
             bands[i] = new Band((String) bandnameList.get(i), productDataType, width, height);
-            bands[i].setDescription((String) descrList.get(i));
-            bands[i].setUnit((String) unitsList.get(i));
-            final String nodataValString = (String) nodataList.get(i);
-            if (nodataValString != null) {
-                final double nodataVal = Double.parseDouble(nodataValString);
-                bands[i].setNoDataValue(nodataVal);
-                bands[i].setNoDataValueUsed(true);
+            if (descrListIterator.hasNext()) {
+                bands[i].setDescription((String) descrListIterator.next());
             }
-            if (offsetList.size() > 0) {
-                final String offsetValString = (String) offsetList.get(i);
+            if (unitsListIterator.hasNext()) {
+                bands[i].setUnit((String) unitsListIterator.next());
+            }
+            if (nodataListIterator.hasNext()) {
+                final String nodataValString = (String) nodataListIterator.next();
+                if (nodataValString != null) {
+                    final double nodataVal = Double.parseDouble(nodataValString);
+                    bands[i].setNoDataValue(nodataVal);
+                    bands[i].setNoDataValueUsed(true);
+                }
+            }
+            if (offsetListIterator.hasNext()) {
+                final String offsetValString = (String) offsetListIterator.next();
                 if (offsetValString != null) {
                     final double offsetVal = Double.parseDouble(offsetValString);
                     bands[i].setScalingOffset(offsetVal);
                 }
             }
-            if (scaleList.size() > 0) {
-                final String scaleValString = (String) scaleList.get(i);
+            if (scaleListIterator.hasNext()) {
+                final String scaleValString = (String) scaleListIterator.next();
                 if (scaleValString != null) {
                     final double scaleVal = Double.parseDouble(scaleValString);
                     bands[i].setScalingFactor(scaleVal);
