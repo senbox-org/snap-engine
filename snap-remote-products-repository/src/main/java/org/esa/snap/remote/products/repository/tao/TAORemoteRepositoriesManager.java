@@ -1,5 +1,6 @@
 package org.esa.snap.remote.products.repository.tao;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.auth.Credentials;
@@ -89,7 +90,7 @@ public class TAORemoteRepositoriesManager {
         return this.remoteRepositoryProductProviders;
     }
 
-    public void cancelDownloadProduct(String dataSourceName, RepositoryProduct repositoryProduct) {
+    public void cancelDownloadProduct(String dataSourceName, TAORepositoryProduct repositoryProduct) {
         String key = buildKey(dataSourceName, repositoryProduct);
         DataSourceComponent downloadStrategy;
         synchronized (this.downloadingProducts) {
@@ -118,6 +119,11 @@ public class TAORemoteRepositoriesManager {
                                 throws Exception {
 
         String key = buildKey(dataSourceName, repositoryProduct);
+
+        if (StringUtils.isBlank(repositoryProduct.getURL())) {
+            throw new NullPointerException("The remote repository product url is null or empty.");
+        }
+
         DataSourceComponent dataSourceComponent = null;
         try {
             if (logger.isLoggable(Level.FINE)) {
@@ -453,8 +459,20 @@ public class TAORemoteRepositoriesManager {
         return downloadedPageProducts;
     }
 
-    private static String buildKey(String dataSourceName, RepositoryProduct repositoryProduct) {
-        return dataSourceName + "|" + repositoryProduct.getMission() + "|" + repositoryProduct.getName();
+    private static String buildKey(String dataSourceName, TAORepositoryProduct repositoryProduct) {
+        if (StringUtils.isBlank(dataSourceName)) {
+            throw new NullPointerException("The data source name is null or empty.");
+        }
+        if (repositoryProduct == null) {
+            throw new NullPointerException("The remote repository product is null.");
+        }
+        if (StringUtils.isBlank(repositoryProduct.getMission())) {
+            throw new NullPointerException("The remote repository product mission is null or empty.");
+        }
+        if (StringUtils.isBlank(repositoryProduct.getId())) {
+            throw new NullPointerException("The remote repository product id is null or empty.");
+        }
+        return dataSourceName + "|" + repositoryProduct.getMission() + "|" + repositoryProduct.getId();
     }
 
     private static DataFormatType convertToDataFormatType(ro.cs.tao.eodata.enums.DataFormat dataFormat) {

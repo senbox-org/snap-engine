@@ -70,7 +70,8 @@ class TAORemoteRepositoryProvider implements RemoteProductsRepositoryProvider {
 
     @Override
     public void cancelDownloadProduct(RepositoryProduct repositoryProduct) {
-        TAORemoteRepositoriesManager.getInstance().cancelDownloadProduct(getRepositoryName(), repositoryProduct);
+        TAORepositoryProduct taoRepositoryProduct = (TAORepositoryProduct)repositoryProduct;
+        TAORemoteRepositoriesManager.getInstance().cancelDownloadProduct(getRepositoryName(), taoRepositoryProduct);
     }
 
     @Override
