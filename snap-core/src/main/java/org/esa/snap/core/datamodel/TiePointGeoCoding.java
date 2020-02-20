@@ -771,12 +771,20 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
         final Product destProduct = destScene.getProduct();
         TiePointGrid latGrid = destProduct.getTiePointGrid(latGridName);
         if (latGrid == null) {
-            latGrid = TiePointGrid.createSubset(getLatGrid(), subsetDef);
+            if (subsetDef != null) {
+                latGrid = TiePointGrid.createSubset(getLatGrid(), subsetDef);
+            } else {
+                latGrid = getLatGrid().cloneTiePointGrid();
+            }
             destProduct.addTiePointGrid(latGrid);
         }
         TiePointGrid lonGrid = destProduct.getTiePointGrid(lonGridName);
         if (lonGrid == null) {
-            lonGrid = TiePointGrid.createSubset(getLonGrid(), subsetDef);
+            if (subsetDef != null) {
+                lonGrid = TiePointGrid.createSubset(getLonGrid(), subsetDef);
+            } else {
+                lonGrid = getLonGrid().cloneTiePointGrid();
+            }
             destProduct.addTiePointGrid(lonGrid);
         }
         if (latGrid != null && lonGrid != null) {
