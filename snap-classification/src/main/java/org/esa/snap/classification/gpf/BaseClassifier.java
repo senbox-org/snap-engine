@@ -31,9 +31,10 @@ import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.SystemUtils;
+import org.esa.snap.core.util.ThreadExecutor;
+import org.esa.snap.core.util.ThreadRunnable;
 import org.esa.snap.engine_utilities.gpf.OperatorUtils;
 import org.esa.snap.engine_utilities.gpf.StackUtils;
-import org.esa.snap.engine_utilities.gpf.ThreadManager;
 import org.esa.snap.engine_utilities.gpf.TileIndex;
 import org.esa.snap.engine_utilities.util.VectorUtils;
 
@@ -1206,7 +1207,7 @@ public abstract class BaseClassifier implements SupervisedClassifier {
         status.beginTask("Extracting data... ", tileRectangles.length);
 
         final List<Instance> instanceList = new ArrayList<>();
-        final ThreadManager threadManager = new ThreadManager();
+        final ThreadExecutor executor = new ThreadExecutor();
 
         final int numClasses = classLabelMap.size();
         final int[] instancesCnt = new int[numClasses];
@@ -1247,10 +1248,10 @@ public abstract class BaseClassifier implements SupervisedClassifier {
 
                 //System.out.println(virtualBandName + ": " + expression);
 
-                final Thread worker = new Thread() {
+                final ThreadRunnable worker = new ThreadRunnable() {
 
                     @Override
-                    public void run() {
+                    public void process() {
                         try {
                             final int x0 = rectangle.x, y0 = rectangle.y;
                             final int w = rectangle.width, h = rectangle.height;
@@ -1311,11 +1312,11 @@ public abstract class BaseClassifier implements SupervisedClassifier {
                     }
                 };
 
-                threadManager.add(worker);
+                executor.execute(worker);
                 status.worked(1);
             }
 
-            threadManager.finish();
+            executor.complete();
 
             for (int i = 0; i < tileRectangles.length; i++) {
 
@@ -1349,10 +1350,10 @@ public abstract class BaseClassifier implements SupervisedClassifier {
         final List<Instance> instanceList = new ArrayList<>();
 
         try {
-            final ThreadManager threadManager = new ThreadManager();
+            final ThreadExecutor executor = new ThreadExecutor();
 
             for (final Rectangle rectangle : tileRectangles) {
-                final Thread worker = new Thread() {
+                final ThreadRunnable worker = new ThreadRunnable() {
 
                     final int xMin = rectangle.x;
                     final int xMax = rectangle.x + rectangle.width;
@@ -1363,7 +1364,7 @@ public abstract class BaseClassifier implements SupervisedClassifier {
                     final Tile[] featureTiles = new Tile[featureInfos.length];
 
                     @Override
-                    public void run() {
+                    public void process() {
                         int i = 0;
                         for (FeatureInfo featureInfo : featureInfos) {
                             featureTiles[i++] = operator.getSourceTile(featureInfo.featureBand, rectangle);
@@ -1374,12 +1375,12 @@ public abstract class BaseClassifier implements SupervisedClassifier {
                     }
                 };
 
-                threadManager.add(worker);
+                executor.execute(worker);
 
                 status.worked(1);
             }
 
-            threadManager.finish();
+            executor.complete();
 
             //SystemUtils.LOG.info("instanceList.size = " + instanceList.size());
             /*for (int i = 0; i < 3; i++) {

@@ -27,7 +27,8 @@ import net.sf.javaml.classification.Classifier;
 import net.sf.javaml.core.Dataset;
 import net.sf.javaml.core.Instance;
 import org.esa.snap.core.dataop.downloadable.StatusProgressMonitor;
-import org.esa.snap.engine_utilities.gpf.ThreadManager;
+import org.esa.snap.core.util.ThreadExecutor;
+import org.esa.snap.core.util.ThreadRunnable;
 
 import java.util.Iterator;
 import java.util.SortedSet;
@@ -86,7 +87,7 @@ public class SVMClassifier extends BaseClassifier implements SupervisedClassifie
 
         final svm_parameter param = libSVM.getParameters();
         final svm_problem problem = transformDataset(trainDataset);
-        final ThreadManager threadManager = new ThreadManager();
+        final ThreadExecutor executor = new ThreadExecutor();
         final NewValues newValues = new NewValues();
 
         pm.beginTask("Determining optimal parameters...", c.length * gamma.length);
@@ -103,10 +104,10 @@ public class SVMClassifier extends BaseClassifier implements SupervisedClassifie
                     final int ii = i;
                     final int jj = j;
 
-                    final Thread worker = new Thread() {
+                    final ThreadRunnable worker = new ThreadRunnable() {
 
                         @Override
-                        public void run() {
+                        public void process() {
                             final double accuracy = performCrossValidation(newParam, problem);
                             synchronized (this) {
                                 if (accuracy > newValues.accuracyMax) {
@@ -119,7 +120,7 @@ public class SVMClassifier extends BaseClassifier implements SupervisedClassifie
 
                     };
 
-                    threadManager.add(worker);
+                    executor.execute(worker);
                     pm.worked(1);
                 }
             }
@@ -127,7 +128,7 @@ public class SVMClassifier extends BaseClassifier implements SupervisedClassifie
             pm.done();
         }
 
-        threadManager.finish();
+        executor.complete();
 
         param.C = c[newValues.cIdx];
         param.gamma = gamma[newValues.gammaIdx];
