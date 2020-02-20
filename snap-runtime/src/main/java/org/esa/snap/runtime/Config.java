@@ -5,7 +5,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.BackingStoreException;
@@ -52,7 +57,7 @@ public class Config {
     private final static Map<String, Config> INSTANCES = new HashMap<>();
     private final String name;
     private final EnginePreferences preferences;
-    private boolean loaded;
+    private AtomicBoolean isLoaded = new AtomicBoolean(false);
 
     private Config(String name) {
         this(name, new EnginePreferences((EnginePreferences) EngineConfig.instance().preferences(), name));
@@ -87,7 +92,7 @@ public class Config {
         } catch (BackingStoreException e) {
             // ok
         }
-        loaded = false;
+        isLoaded.set(false);
     }
 
     public String name() {
@@ -122,7 +127,7 @@ public class Config {
      * @return true, if the configuration has already been loaded
      */
     public boolean loaded() {
-        return loaded;
+        return isLoaded.get();
     }
 
     /**
@@ -186,42 +191,38 @@ public class Config {
      */
     public Config load() {
 
-        if (loaded) {
-            return this;
-        }
+        if (isLoaded.compareAndSet(false, true)) {
 
-        loaded = true;
+            // Configuration level 1: Default configuration file from ${installDir}/etc
+            if (!ignoreDefaultConfig()) {
+                Properties defaultProperties = loadProperties(installDir().resolve("etc").resolve(name() + CONFIG_FILE_EXT), false);
+                if (defaultProperties != null) {
+                    // Properties from $installDir/etc are not put into preferences, they only serve as default values.
+                    Properties newProperties = new Properties(defaultProperties);
+                    newProperties.putAll(preferences.getProperties());
+                    preferences.setProperties(newProperties);
+                }
+            }
 
-        // Configuration level 1: Default configuration file from ${installDir}/etc
-        if (!ignoreDefaultConfig()) {
-            Properties defaultProperties = loadProperties(installDir().resolve("etc").resolve(name() + CONFIG_FILE_EXT), false);
-            if (defaultProperties != null) {
-                // Properties from $installDir/etc are not put into preferences, they only serve as default values.
-                Properties newProperties = new Properties(defaultProperties);
-                newProperties.putAll(preferences.getProperties());
-                preferences.setProperties(newProperties);
+            // Configuration level 2: User configuration file from ${userDir}/etc
+            if (!ignoreUserConfig()) {
+                Properties userProperties = loadProperties(userDir().resolve("etc").resolve(name() + CONFIG_FILE_EXT), false);
+                if (userProperties != null) {
+                    // Properties from $userDir/etc *are* put into preferences, they overwrite any existing values.
+                    preferences.getProperties().putAll(userProperties);
+                }
+            }
+
+            // Configuration level 3: Custom configuration file
+            String configPath = preferences.get(name() + CONFIG_KEY_SUFFIX, null);
+            if (configPath != null) {
+                Properties additionalProperties = loadProperties(Paths.get(configPath), true);
+                if (additionalProperties != null) {
+                    // Properties from $configPath *are also* put into preferences, they overwrite any existing values.
+                    preferences.getProperties().putAll(additionalProperties);
+                }
             }
         }
-
-        // Configuration level 2: User configuration file from ${userDir}/etc
-        if (!ignoreUserConfig()) {
-            Properties userProperties = loadProperties(userDir().resolve("etc").resolve(name() + CONFIG_FILE_EXT), false);
-            if (userProperties != null) {
-                // Properties from $userDir/etc *are* put into preferences, they overwrite any existing values.
-                preferences.getProperties().putAll(userProperties);
-            }
-        }
-
-        // Configuration level 3: Custom configuration file
-        String configPath = preferences.get(name() + CONFIG_KEY_SUFFIX, null);
-        if (configPath != null) {
-            Properties additionalProperties = loadProperties(Paths.get(configPath), true);
-            if (additionalProperties != null) {
-                // Properties from $configPath *are also* put into preferences, they overwrite any existing values.
-                preferences.getProperties().putAll(additionalProperties);
-            }
-        }
-
         return this;
     }
 
