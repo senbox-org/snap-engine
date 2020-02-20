@@ -9,6 +9,8 @@ import org.esa.snap.core.datamodel.PixelPos;
 
 public class TiePointSplineForward extends TiePointForward {
 
+    public static final String KEY = "FWD_TIE_POINT_SPLINE";
+
     private GeoRaster geoRaster;
     private ThreadLocal<InterpolationContext> contextTL;
 
@@ -42,7 +44,7 @@ public class TiePointSplineForward extends TiePointForward {
 
     @Override
     public String getKey() {
-        return ComponentFactory.FWD_TIE_POINT_SPLINE;
+        return KEY;
     }
 
     @Override
@@ -180,7 +182,7 @@ public class TiePointSplineForward extends TiePointForward {
         int ySpline;
     }
 
-    static class Plugin implements ForwardPlugin {
+    public static class Plugin implements ForwardPlugin {
         @Override
         public ForwardCoding create() {
             return new TiePointSplineForward();

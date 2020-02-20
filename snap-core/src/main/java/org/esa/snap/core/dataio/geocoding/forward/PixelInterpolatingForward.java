@@ -9,6 +9,8 @@ import org.esa.snap.core.util.math.MathUtils;
 
 public class PixelInterpolatingForward implements ForwardCoding {
 
+    public static final String KEY = "FWD_PIXEL_INTERPOLATING";
+
     private int sceneWidth;
     private int sceneHeight;
     private double[] longitudes;
@@ -84,7 +86,7 @@ public class PixelInterpolatingForward implements ForwardCoding {
 
     @Override
     public String getKey() {
-        return ComponentFactory.FWD_PIXEL_INTERPOLATING;
+        return KEY;
     }
 
     @Override
@@ -165,7 +167,7 @@ public class PixelInterpolatingForward implements ForwardCoding {
         }
     }
 
-    static class Plugin implements ForwardPlugin {
+    public static class Plugin implements ForwardPlugin {
         @Override
         public ForwardCoding create() {
             return new PixelInterpolatingForward();

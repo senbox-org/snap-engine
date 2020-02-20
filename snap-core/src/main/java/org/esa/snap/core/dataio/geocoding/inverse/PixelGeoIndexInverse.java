@@ -1,6 +1,5 @@
 package org.esa.snap.core.dataio.geocoding.inverse;
 
-import org.esa.snap.core.dataio.geocoding.ComponentFactory;
 import org.esa.snap.core.dataio.geocoding.GeoRaster;
 import org.esa.snap.core.dataio.geocoding.InverseCoding;
 import org.esa.snap.core.dataio.geocoding.util.InterpolationContext;
@@ -14,6 +13,9 @@ import org.esa.snap.core.util.math.SphericalDistance;
 import java.util.TreeMap;
 
 public class PixelGeoIndexInverse implements InverseCoding {
+
+    public static final String KEY = "INV_PIXEL_GEO_INDEX";
+    public static final String KEY_INTERPOLATING = "INV_PIXEL_GEO_INDEX_INTERPOLATING";
 
     private final boolean fractionalAccuracy;
     private final XYInterpolator interpolator;
@@ -29,7 +31,7 @@ public class PixelGeoIndexInverse implements InverseCoding {
         this(false);
     }
 
-    public PixelGeoIndexInverse(boolean fractionalAccuracy) {
+    PixelGeoIndexInverse(boolean fractionalAccuracy) {
         this.fractionalAccuracy = fractionalAccuracy;
         if (fractionalAccuracy) {
             interpolator = new InverseDistanceWeightingInterpolator();
@@ -116,9 +118,9 @@ public class PixelGeoIndexInverse implements InverseCoding {
     @Override
     public String getFactoryKey() {
         if (fractionalAccuracy) {
-            return ComponentFactory.INV_PIXEL_GEO_INDEX_INTERPOLATING;
+            return KEY_INTERPOLATING;
         } else {
-            return ComponentFactory.INV_PIXEL_GEO_INDEX;
+            return KEY;
         }
     }
 
@@ -207,10 +209,17 @@ public class PixelGeoIndexInverse implements InverseCoding {
         }
     }
 
-    static class Plugin implements InversePlugin {
+    public static class Plugin implements InversePlugin {
+
+        private final boolean fractionalAccuracy;
+
+        public Plugin(boolean fractionalAccuracy) {
+            this.fractionalAccuracy = fractionalAccuracy;
+        }
+
         @Override
         public InverseCoding create() {
-            return new PixelGeoIndexInverse();
+            return new PixelGeoIndexInverse(fractionalAccuracy);
         }
     }
 }

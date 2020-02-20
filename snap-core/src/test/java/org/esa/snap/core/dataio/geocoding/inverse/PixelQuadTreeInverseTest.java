@@ -445,7 +445,15 @@ public class PixelQuadTreeInverseTest {
 
     @Test
     public void testPlugin_create() {
-        final PixelQuadTreeInverse.Plugin plugin = new PixelQuadTreeInverse.Plugin();
+        final PixelQuadTreeInverse.Plugin plugin = new PixelQuadTreeInverse.Plugin(false);
+
+        final InverseCoding inverseCoding = plugin.create();
+        assertTrue(inverseCoding instanceof PixelQuadTreeInverse);
+    }
+
+    @Test
+    public void testPlugin_create_interpolating() {
+        final PixelQuadTreeInverse.Plugin plugin = new PixelQuadTreeInverse.Plugin(true);
 
         final InverseCoding inverseCoding = plugin.create();
         assertTrue(inverseCoding instanceof PixelQuadTreeInverse);

@@ -289,7 +289,15 @@ public class PixelGeoIndexInverseTest {
 
     @Test
     public void testPlugin_create() {
-        final PixelGeoIndexInverse.Plugin plugin = new PixelGeoIndexInverse.Plugin();
+        final PixelGeoIndexInverse.Plugin plugin = new PixelGeoIndexInverse.Plugin(false);
+
+        final InverseCoding inverseCoding = plugin.create();
+        assertTrue(inverseCoding instanceof PixelGeoIndexInverse);
+    }
+
+    @Test
+    public void testPlugin_create_interpolating() {
+        final PixelGeoIndexInverse.Plugin plugin = new PixelGeoIndexInverse.Plugin(true);
 
         final InverseCoding inverseCoding = plugin.create();
         assertTrue(inverseCoding instanceof PixelGeoIndexInverse);

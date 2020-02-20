@@ -16,6 +16,8 @@
 package org.esa.snap.dataio.netcdf.metadata.profiles.cf;
 
 import org.esa.snap.core.dataio.geocoding.*;
+import org.esa.snap.core.dataio.geocoding.forward.PixelForward;
+import org.esa.snap.core.dataio.geocoding.inverse.PixelQuadTreeInverse;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.GeoCoding;
@@ -390,8 +392,8 @@ public class CfGeocodingPart extends ProfilePartIO {
             final GeoRaster geoRaster = new GeoRaster(longitudes, latitudes, lonBand.getName(), latBand.getName(),
                                                       width, height, resolutionInKm);
 
-            final ForwardCoding forward = ComponentFactory.getForward(ComponentFactory.FWD_PIXEL);
-            final InverseCoding inverse = ComponentFactory.getInverse(ComponentFactory.INV_PIXEL_QUAD_TREE);
+            final ForwardCoding forward = ComponentFactory.getForward(PixelForward.KEY);
+            final InverseCoding inverse = ComponentFactory.getInverse(PixelQuadTreeInverse.KEY);
 
             final ComponentGeoCoding geoCoding = new ComponentGeoCoding(geoRaster, forward, inverse, GeoChecks.ANTIMERIDIAN);
             geoCoding.initialize();

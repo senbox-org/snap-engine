@@ -19,6 +19,11 @@ import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.IllegalFileFormatException;
 import org.esa.snap.core.dataio.geocoding.*;
+import org.esa.snap.core.dataio.geocoding.forward.PixelForward;
+import org.esa.snap.core.dataio.geocoding.forward.PixelInterpolatingForward;
+import org.esa.snap.core.dataio.geocoding.forward.TiePointBilinearForward;
+import org.esa.snap.core.dataio.geocoding.inverse.PixelQuadTreeInverse;
+import org.esa.snap.core.dataio.geocoding.inverse.TiePointInverse;
 import org.esa.snap.core.dataio.geocoding.util.RasterUtils;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.util.ArrayUtils;
@@ -428,12 +433,12 @@ public class EnvisatProductReader extends AbstractProductReader {
         final Preferences preferences = Config.instance("snap").preferences();
         final boolean useFractAccuracy = preferences.getBoolean(SYSPROP_SNAP_PIXEL_CODING_FRACTION_ACCURACY, false);
         if (useFractAccuracy) {
-            codingNames[0] = ComponentFactory.FWD_PIXEL_INTERPOLATING;
+            codingNames[0] = PixelInterpolatingForward.KEY;
         } else {
-            codingNames[0] = preferences.get(SYSPROP_ENVISAT_PIXEL_CODING_FORWARD, ComponentFactory.FWD_PIXEL);
+            codingNames[0] = preferences.get(SYSPROP_ENVISAT_PIXEL_CODING_FORWARD, PixelForward.KEY);
         }
 
-        codingNames[1] = preferences.get(SYSPROP_ENVISAT_PIXEL_CODING_INVERSE, ComponentFactory.INV_PIXEL_QUAD_TREE);
+        codingNames[1] = preferences.get(SYSPROP_ENVISAT_PIXEL_CODING_INVERSE, PixelQuadTreeInverse.KEY);
 
         return codingNames;
     }
@@ -442,8 +447,8 @@ public class EnvisatProductReader extends AbstractProductReader {
         final String[] codingNames = new String[2];
 
         final Preferences preferences = Config.instance("snap").preferences();
-        codingNames[0] = preferences.get(SYSPROP_ENVISAT_TIE_POINT_CODING_FORWARD, ComponentFactory.FWD_TIE_POINT_BILINEAR);
-        codingNames[1] = ComponentFactory.INV_TIE_POINT;
+        codingNames[0] = preferences.get(SYSPROP_ENVISAT_TIE_POINT_CODING_FORWARD, TiePointBilinearForward.KEY);
+        codingNames[1] = TiePointInverse.KEY;
 
         return codingNames;
     }

@@ -13,6 +13,9 @@ import org.esa.snap.core.util.math.RsMathUtils;
 
 public class PixelQuadTreeInverse implements InverseCoding {
 
+    public static final String KEY = "INV_PIXEL_QUAD_TREE";
+    public static final String KEY_INTERPOLATING = "INV_PIXEL_QUAD_TREE_INTERPOLATING";
+
     private static final double TO_DEG = 180.0 / Math.PI ;
 
     private final boolean fractionalAccuracy;
@@ -94,9 +97,9 @@ public class PixelQuadTreeInverse implements InverseCoding {
     @Override
     public String getFactoryKey() {
         if (fractionalAccuracy) {
-            return ComponentFactory.INV_PIXEL_QUAD_TREE_INTERPOLATING;
+            return KEY_INTERPOLATING;
         } else {
-            return ComponentFactory.INV_PIXEL_QUAD_TREE;
+            return KEY;
         }
     }
 
@@ -269,10 +272,17 @@ public class PixelQuadTreeInverse implements InverseCoding {
         return b1 || b2 || b3 || b4;
     }
 
-    static class Plugin implements InversePlugin {
+    public static class Plugin implements InversePlugin {
+
+        private final boolean fractionalAccuracy;
+
+        public Plugin(boolean fractionalAccuracy) {
+            this.fractionalAccuracy = fractionalAccuracy;
+        }
+
         @Override
         public InverseCoding create() {
-            return new PixelQuadTreeInverse();
+            return new PixelQuadTreeInverse(fractionalAccuracy);
         }
     }
 }

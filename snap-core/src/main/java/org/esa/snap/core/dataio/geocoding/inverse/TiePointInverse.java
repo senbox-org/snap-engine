@@ -16,6 +16,8 @@ import java.awt.*;
 
 public class TiePointInverse implements InverseCoding {
 
+    public static final String KEY = "INV_TIE_POINT";
+
     private static final int MAX_NUM_POINTS_PER_TILE = 1000;
     private static final double GEOLOCATION_MARGIN = 1e-5; // degree margin to compensate for float/double conversion (approx 1m at the equator)
 
@@ -97,7 +99,7 @@ public class TiePointInverse implements InverseCoding {
 
     @Override
     public String getFactoryKey() {
-        return ComponentFactory.INV_TIE_POINT;
+        return KEY;
     }
 
     @Override
@@ -517,7 +519,7 @@ public class TiePointInverse implements InverseCoding {
         double overlapEnd;
     }
 
-    static class Plugin implements InversePlugin {
+    public static class Plugin implements InversePlugin {
         @Override
         public InverseCoding create() {
             return new TiePointInverse();

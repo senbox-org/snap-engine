@@ -8,6 +8,8 @@ import org.esa.snap.core.datamodel.PixelPos;
 
 public class PixelForward implements ForwardCoding {
 
+    public static final String KEY = "FWD_PIXEL";
+
     private int sceneWidth;
     private int sceneHeight;
     private double[] longitudes;
@@ -53,7 +55,7 @@ public class PixelForward implements ForwardCoding {
 
     @Override
     public String getKey() {
-        return ComponentFactory.FWD_PIXEL;
+        return KEY;
     }
 
     @Override
@@ -62,7 +64,7 @@ public class PixelForward implements ForwardCoding {
         latitudes = null;
     }
 
-    static class Plugin implements ForwardPlugin {
+    public static class Plugin implements ForwardPlugin {
 
         @Override
         public ForwardCoding create() {

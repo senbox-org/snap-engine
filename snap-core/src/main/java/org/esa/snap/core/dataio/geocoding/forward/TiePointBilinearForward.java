@@ -10,6 +10,8 @@ import org.esa.snap.core.datamodel.TiePointGrid;
 
 public class TiePointBilinearForward extends TiePointForward {
 
+    public static final String KEY = "FWD_TIE_POINT_BILINEAR";
+
     private TiePointGrid lonGrid;
     private TiePointGrid latGrid;
     private int sceneWidth;
@@ -42,7 +44,7 @@ public class TiePointBilinearForward extends TiePointForward {
 
     @Override
     public String getKey() {
-        return ComponentFactory.FWD_TIE_POINT_BILINEAR;
+        return KEY;
     }
 
     @Override
@@ -66,7 +68,7 @@ public class TiePointBilinearForward extends TiePointForward {
         latGrid = null;
     }
 
-    static class Plugin implements ForwardPlugin{
+    public static class Plugin implements ForwardPlugin{
         @Override
         public ForwardCoding create() {
             return new TiePointBilinearForward();
