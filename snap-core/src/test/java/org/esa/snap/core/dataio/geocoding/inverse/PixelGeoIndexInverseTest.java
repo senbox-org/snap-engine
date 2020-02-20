@@ -1,6 +1,7 @@
 package org.esa.snap.core.dataio.geocoding.inverse;
 
 import org.esa.snap.core.dataio.geocoding.GeoRaster;
+import org.esa.snap.core.dataio.geocoding.InverseCoding;
 import org.esa.snap.core.dataio.geocoding.TestData;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
@@ -284,5 +285,13 @@ public class PixelGeoIndexInverseTest {
 
         rasterRegion.extend(200, 271);
         assertFalse(rasterRegion.isPoint());
+    }
+
+    @Test
+    public void testPlugin_create() {
+        final PixelGeoIndexInverse.Plugin plugin = new PixelGeoIndexInverse.Plugin();
+
+        final InverseCoding inverseCoding = plugin.create();
+        assertTrue(inverseCoding instanceof PixelGeoIndexInverse);
     }
 }

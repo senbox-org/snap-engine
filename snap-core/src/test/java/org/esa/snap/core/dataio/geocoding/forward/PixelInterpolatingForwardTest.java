@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class PixelInterpolatingForwardTest {
 
@@ -90,6 +91,29 @@ public class PixelInterpolatingForwardTest {
     }
 
     @Test
+    public void testGetGeoPos_AMSUB_border() {
+        final GeoRaster geoRaster = TestData.get_AMSUB();
+
+        pixelForward.initialize(geoRaster, true, new PixelPos[0]);
+
+        GeoPos geoPos = pixelForward.getGeoPos(new PixelPos(0.0, 0.0), null);
+        assertEquals(170.53682499999996, geoPos.lon, 1e-8);
+        assertEquals(-74.3491, geoPos.lat, 1e-8);
+
+        geoPos = pixelForward.getGeoPos(new PixelPos(0.0, 31.0), null);
+        assertEquals(164.019525, geoPos.lon, 1e-8);
+        assertEquals(-70.02935, geoPos.lat, 1e-8);
+
+        geoPos = pixelForward.getGeoPos(new PixelPos(31.0, 31.0), null);
+        assertEquals(175.30530108032227, geoPos.lon, 1e-8);
+        assertEquals(-68.0219246887207, geoPos.lat, 1e-8);
+
+        geoPos = pixelForward.getGeoPos(new PixelPos(31.0, 0.0), null);
+        assertEquals(-176.44617499999998, geoPos.lon, 1e-8);
+        assertEquals(-71.87672500000001, geoPos.lat, 1e-8);
+    }
+
+    @Test
     public void testGetGeoPos_SLSTR_OL_outside() {
         final GeoRaster geoRaster = TestData.get_SLSTR_OL();
 
@@ -130,5 +154,13 @@ public class PixelInterpolatingForwardTest {
         final GeoRaster geoRaster = TestData.get_SLSTR_OL();
         pixelForward.initialize(geoRaster, false, new PixelPos[0]);
         pixelForward.dispose();
+    }
+
+    @Test
+    public void testPlugin_create() {
+        final PixelInterpolatingForward.Plugin plugin = new PixelInterpolatingForward.Plugin();
+
+        final ForwardCoding forwardCoding = plugin.create();
+        assertTrue(forwardCoding instanceof PixelInterpolatingForward);
     }
 }

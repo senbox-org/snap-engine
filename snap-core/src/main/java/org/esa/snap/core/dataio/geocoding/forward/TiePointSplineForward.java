@@ -1,6 +1,7 @@
 package org.esa.snap.core.dataio.geocoding.forward;
 
 import org.esa.snap.core.dataio.geocoding.ComponentFactory;
+import org.esa.snap.core.dataio.geocoding.ForwardCoding;
 import org.esa.snap.core.dataio.geocoding.GeoRaster;
 import org.esa.snap.core.dataio.geocoding.util.SplineInterpolator;
 import org.esa.snap.core.datamodel.GeoPos;
@@ -40,7 +41,7 @@ public class TiePointSplineForward extends TiePointForward {
     }
 
     @Override
-    public String getFactoryKey() {
+    public String getKey() {
         return ComponentFactory.FWD_TIE_POINT_SPLINE;
     }
 
@@ -177,6 +178,13 @@ public class TiePointSplineForward extends TiePointForward {
         LonInterpolator lonInterpolator;
         int xSpline;
         int ySpline;
+    }
+
+    static class Plugin implements ForwardPlugin {
+        @Override
+        public ForwardCoding create() {
+            return new TiePointSplineForward();
+        }
     }
 }
 

@@ -1,6 +1,7 @@
 package org.esa.snap.core.dataio.geocoding.forward;
 
 import org.esa.snap.core.dataio.geocoding.ComponentFactory;
+import org.esa.snap.core.dataio.geocoding.ForwardCoding;
 import org.esa.snap.core.dataio.geocoding.GeoRaster;
 import org.esa.snap.core.dataio.geocoding.util.RasterUtils;
 import org.esa.snap.core.datamodel.GeoPos;
@@ -40,7 +41,7 @@ public class TiePointBilinearForward extends TiePointForward {
     }
 
     @Override
-    public String getFactoryKey() {
+    public String getKey() {
         return ComponentFactory.FWD_TIE_POINT_BILINEAR;
     }
 
@@ -63,5 +64,12 @@ public class TiePointBilinearForward extends TiePointForward {
     public void dispose() {
         lonGrid = null;
         latGrid = null;
+    }
+
+    static class Plugin implements ForwardPlugin{
+        @Override
+        public ForwardCoding create() {
+            return new TiePointBilinearForward();
+        }
     }
 }

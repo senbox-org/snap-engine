@@ -2,6 +2,7 @@ package org.esa.snap.core.dataio.geocoding.inverse;
 
 import org.esa.snap.core.dataio.geocoding.AMSR2;
 import org.esa.snap.core.dataio.geocoding.GeoRaster;
+import org.esa.snap.core.dataio.geocoding.InverseCoding;
 import org.esa.snap.core.dataio.geocoding.TestData;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
@@ -11,6 +12,7 @@ import org.junit.Test;
 import static java.lang.Double.NaN;
 import static org.esa.snap.core.dataio.geocoding.TestData.get_SLSTR_OL;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class PixelQuadTreeInverseTest {
 
@@ -439,5 +441,13 @@ public class PixelQuadTreeInverseTest {
         inverse.initialize(geoRaster, false, new PixelPos[0]);
 
         inverse.dispose();
+    }
+
+    @Test
+    public void testPlugin_create() {
+        final PixelQuadTreeInverse.Plugin plugin = new PixelQuadTreeInverse.Plugin();
+
+        final InverseCoding inverseCoding = plugin.create();
+        assertTrue(inverseCoding instanceof PixelQuadTreeInverse);
     }
 }

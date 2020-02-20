@@ -52,7 +52,7 @@ public class PixelForward implements ForwardCoding {
     }
 
     @Override
-    public String getFactoryKey() {
+    public String getKey() {
         return ComponentFactory.FWD_PIXEL;
     }
 
@@ -60,5 +60,13 @@ public class PixelForward implements ForwardCoding {
     public void dispose() {
         longitudes = null;
         latitudes = null;
+    }
+
+    static class Plugin implements ForwardPlugin {
+
+        @Override
+        public ForwardCoding create() {
+            return new PixelForward();
+        }
     }
 }

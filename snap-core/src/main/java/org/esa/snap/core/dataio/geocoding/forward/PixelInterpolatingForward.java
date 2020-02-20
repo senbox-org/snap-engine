@@ -25,25 +25,36 @@ public class PixelInterpolatingForward implements ForwardCoding {
             return geoPos;
         }
 
-        final double x = pixelPos.getX();
-        final double y = pixelPos.getY();
+        double x = pixelPos.getX();
+        double y = pixelPos.getY();
         if (x < 0 || x > sceneWidth || y < 0 || y > sceneHeight) {
             return geoPos;
         }
 
+
         int x0 = (int) Math.floor(x);
+        if (x0 == sceneWidth) {
+            x0 -= 1;
+            x -= 1;
+        }
         int y0 = (int) Math.floor(y);
-        double delta = pixelPos.x - x0;
+        if (y == sceneHeight) {
+            y0 -= 1;
+            y -= 1;
+        }
+
+        double delta = x - x0;
         if (x0 > 0 && delta < 0.5 || x0 == sceneWidth - 1) {
             x0 -= 1;
         }
-        delta = pixelPos.y - y0;
+
+        delta = y - y0;
         if (y0 > 0 && delta < 0.5 || y0 == sceneHeight - 1) {
             y0 -= 1;
         }
 
-        final double wx = pixelPos.x - (x0 + 0.5);
-        final double wy = pixelPos.y - (y0 + 0.5);
+        final double wx = x - (x0 + 0.5);
+        final double wy = y - (y0 + 0.5);
 
         InterpolationContext context = getInterpolationContext(longitudes, x0, y0);
         final double lon = lonInterpolator.interpolate(wx, wy, context);
@@ -72,7 +83,7 @@ public class PixelInterpolatingForward implements ForwardCoding {
     }
 
     @Override
-    public String getFactoryKey() {
+    public String getKey() {
         return ComponentFactory.FWD_PIXEL_INTERPOLATING;
     }
 
@@ -151,6 +162,13 @@ public class PixelInterpolatingForward implements ForwardCoding {
                 lon -= OFFSET;
             }
             return lon;
+        }
+    }
+
+    static class Plugin implements ForwardPlugin {
+        @Override
+        public ForwardCoding create() {
+            return new PixelInterpolatingForward();
         }
     }
 }

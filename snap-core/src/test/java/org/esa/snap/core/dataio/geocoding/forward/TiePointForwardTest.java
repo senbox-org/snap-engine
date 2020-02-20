@@ -130,7 +130,7 @@ public class TiePointForwardTest {
         }
 
         @Override
-        public String getFactoryKey() {
+        public String getKey() {
             return null;
         }
 

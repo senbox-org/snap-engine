@@ -1,5 +1,6 @@
 package org.esa.snap.core.dataio.geocoding.forward;
 
+import org.esa.snap.core.dataio.geocoding.ForwardCoding;
 import org.esa.snap.core.dataio.geocoding.GeoRaster;
 import org.esa.snap.core.dataio.geocoding.TestData;
 import org.esa.snap.core.datamodel.GeoPos;
@@ -8,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class TiePointSplineForwardTest {
 
@@ -116,5 +118,13 @@ public class TiePointSplineForwardTest {
         geoPos = coding.getGeoPos(new PixelPos(24.5, 1.5), null);
         assertEquals(-179.22068148148145, geoPos.lon, 1e-8);
         assertEquals(-72.24090370370371, geoPos.lat, 1e-8);
+    }
+
+    @Test
+    public void testPlugin_create() {
+        final TiePointSplineForward.Plugin plugin = new TiePointSplineForward.Plugin();
+
+        final ForwardCoding forwardCoding = plugin.create();
+        assertTrue(forwardCoding instanceof TiePointSplineForward);
     }
 }

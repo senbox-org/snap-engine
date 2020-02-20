@@ -397,6 +397,14 @@ public class TiePointInverseTest {
         assertTrue(Double.isNaN(pixelPos.y));
     }
 
+    @Test
+    public void testPlugin_create() {
+        final TiePointInverse.Plugin plugin = new TiePointInverse.Plugin();
+
+        final InverseCoding inverseCoding = plugin.create();
+        assertTrue(inverseCoding instanceof TiePointInverse);
+    }
+
     private void assertSameRasterParameter(TiePointGrid lonGrid, TiePointGrid normalizedLonGrid) {
         assertEquals(lonGrid.getGridWidth(), normalizedLonGrid.getGridWidth());
         assertEquals(lonGrid.getGridHeight(), normalizedLonGrid.getGridHeight());

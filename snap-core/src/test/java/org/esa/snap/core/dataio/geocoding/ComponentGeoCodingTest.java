@@ -1,7 +1,8 @@
 package org.esa.snap.core.dataio.geocoding;
 
-import org.esa.snap.core.datamodel.GeoPos;
-import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.core.dataio.ProductSubsetDef;
+import org.esa.snap.core.dataio.geocoding.util.RasterUtils;
+import org.esa.snap.core.datamodel.*;
 import org.geotools.referencing.crs.DefaultDerivedCRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.referencing.cs.DefaultEllipsoidalCS;
@@ -9,6 +10,7 @@ import org.geotools.referencing.datum.DefaultGeodeticDatum;
 import org.junit.Before;
 import org.junit.Test;
 import org.opengis.referencing.operation.MathTransform;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -267,7 +269,7 @@ public class ComponentGeoCodingTest {
 
     @Test
     public void testInitialize_checks_poles_anti_meridian() {
-        final GeoRaster geoRaster = new GeoRaster(AMSUB.AMSUB_POLE_LON, AMSUB.AMSUB_POLE_LAT, null, null, 25, 25,16.0);
+        final GeoRaster geoRaster = new GeoRaster(AMSUB.AMSUB_POLE_LON, AMSUB.AMSUB_POLE_LAT, null, null, 25, 25, 16.0);
 
         final ComponentGeoCoding geoCoding = new ComponentGeoCoding(geoRaster, forwardCoding, inverseCoding, GeoChecks.POLES);
 
@@ -289,7 +291,7 @@ public class ComponentGeoCodingTest {
         try {
             geoCoding.isCrossingMeridianAt180();
             fail("IllegalStateException expected");
-        } catch (IllegalStateException expected){
+        } catch (IllegalStateException expected) {
         }
     }
 
@@ -305,11 +307,106 @@ public class ComponentGeoCodingTest {
 
     @Test
     public void testIsCrossingMeridianAt180_is() {
-        final GeoRaster geoRaster = new GeoRaster(AMSUB.AMSUB_POLE_LON, AMSUB.AMSUB_POLE_LAT, null, null, 25, 25,16.0);
+        final GeoRaster geoRaster = new GeoRaster(AMSUB.AMSUB_POLE_LON, AMSUB.AMSUB_POLE_LAT, null, null, 25, 25, 16.0);
 
         final ComponentGeoCoding geoCoding = new ComponentGeoCoding(geoRaster, forwardCoding, inverseCoding, GeoChecks.ANTIMERIDIAN);
         geoCoding.initialize();
 
         assertTrue(geoCoding.isCrossingMeridianAt180());
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test
+    public void testTransferRequiredRaster_tiePoints() {
+        final GeoRaster geoRaster = TestData.get_MER_RR();
+
+        final ComponentGeoCoding geoCoding = new ComponentGeoCoding(geoRaster, forwardCoding, inverseCoding, GeoChecks.NONE);
+        geoCoding.initialize();
+
+        final Product sourceProduct = new Product("source", "TEST", 5, 5);
+        sourceProduct.addTiePointGrid(new TiePointGrid(geoRaster.getLonVariableName(), geoRaster.getRasterWidth(), geoRaster.getRasterHeight(),
+                geoRaster.getOffsetX(), geoRaster.getOffsetY(), geoRaster.getSubsamplingX(), geoRaster.getSubsamplingY(),
+                RasterUtils.toFloat(geoRaster.getLongitudes())));
+
+        sourceProduct.addTiePointGrid(new TiePointGrid(geoRaster.getLatVariableName(), geoRaster.getRasterWidth(), geoRaster.getRasterHeight(),
+                geoRaster.getOffsetX(), geoRaster.getOffsetY(), geoRaster.getSubsamplingX(), geoRaster.getSubsamplingY(),
+                RasterUtils.toFloat(geoRaster.getLatitudes())));
+
+        final Scene sourceScene = SceneFactory.createScene(sourceProduct);
+
+        final Product targetProduct = new Product("target", "TEST", 5, 5);
+        final Scene targetScene = SceneFactory.createScene(targetProduct);
+
+        geoCoding.transferRequiredRasters(sourceScene, targetScene, new ProductSubsetDef());
+
+        final TiePointGrid longitude = targetScene.getProduct().getTiePointGrid("longitude");
+        assertNotNull(longitude);
+        final TiePointGrid latitude = targetScene.getProduct().getTiePointGrid("latitude");
+        assertNotNull(latitude);
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test
+    public void testTransferRequiredRaster_geoLocationBands_subsampling() {
+        final GeoRaster geoRaster = TestData.get_OLCI();
+        final ComponentGeoCoding geoCoding = new ComponentGeoCoding(geoRaster, forwardCoding, inverseCoding, GeoChecks.NONE);
+        geoCoding.initialize();
+
+        final Product sourceProduct = new Product("source", "TEST", geoRaster.getRasterWidth(), geoRaster.getRasterHeight());
+        final Band lonBand = new Band(geoRaster.getLonVariableName(), ProductData.TYPE_FLOAT64, geoRaster.getRasterWidth(), geoRaster.getRasterHeight());
+        lonBand.setRasterData(ProductData.createInstance(geoRaster.getLongitudes()));
+        final Band latBand = new Band(geoRaster.getLatVariableName(), ProductData.TYPE_FLOAT64, geoRaster.getRasterWidth(), geoRaster.getRasterHeight());
+        lonBand.setRasterData(ProductData.createInstance(geoRaster.getLatitudes()));
+        sourceProduct.addBand(lonBand);
+        sourceProduct.addBand(latBand);
+
+        final Scene sourceScene = SceneFactory.createScene(sourceProduct);
+
+        final Product targetProduct = new Product("target", "TEST", 16, 18);
+        final Scene targetScene = SceneFactory.createScene(targetProduct);
+
+        final ProductSubsetDef subsetDef = new ProductSubsetDef();
+        subsetDef.setSubSampling(2, 2);
+
+        geoCoding.transferRequiredRasters(sourceScene, targetScene, subsetDef);
+
+        final Band longitude = targetScene.getProduct().getBand("longitude");
+        assertNotNull(longitude);
+
+        final Band latitude = targetScene.getProduct().getBand("latitude");
+        assertNotNull(latitude);
+    }
+
+    @Test
+    public void testCloneGeoRaster() {
+        final GeoRaster geoRaster = TestData.get_OLCI();
+        final ComponentGeoCoding geoCoding = new ComponentGeoCoding(geoRaster, forwardCoding, inverseCoding, GeoChecks.NONE);
+        geoCoding.initialize();
+
+        final GeoRaster cloned = geoCoding.cloneGeoRaster("himpelchen", "pimpelchen");
+        assertEquals(geoRaster.getRasterWidth(), cloned.getRasterWidth());
+        assertEquals(geoRaster.getRasterHeight(), cloned.getRasterHeight());
+        assertEquals("himpelchen", cloned.getLonVariableName());
+        assertEquals("pimpelchen", cloned.getLatVariableName());
+        assertArrayEquals(geoRaster.getLongitudes(), cloned.getLongitudes(), 1e-8);
+        assertArrayEquals(geoRaster.getLatitudes(), cloned.getLatitudes(), 1e-8);
+        assertEquals(geoRaster.getSceneWidth(), cloned.getSceneWidth());
+        assertEquals(geoRaster.getSceneHeight(), cloned.getSceneHeight());
+        assertEquals(geoRaster.getRasterResolutionInKm(), cloned.getRasterResolutionInKm(), 1e-8);
+        assertEquals(geoRaster.getOffsetX(), cloned.getOffsetX(), 1e-8);
+        assertEquals(geoRaster.getOffsetY(), cloned.getOffsetY(), 1e-8);
+        assertEquals(geoRaster.getSubsamplingX(), cloned.getSubsamplingX(), 1e-8);
+        assertEquals(geoRaster.getSubsamplingY(), cloned.getSubsamplingY(), 1e-8);
+    }
+
+    @Test
+    public void testGetDatum() {
+        final ComponentGeoCoding geoCoding = new ComponentGeoCoding(null, forwardCoding, inverseCoding);
+
+        try {
+            geoCoding.getDatum();
+            fail("NotImplementedException expected");
+        } catch (NotImplementedException expected) {
+        }
     }
 }

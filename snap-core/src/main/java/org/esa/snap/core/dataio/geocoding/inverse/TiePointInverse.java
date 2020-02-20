@@ -516,4 +516,11 @@ public class TiePointInverse implements InverseCoding {
         double overlapStart;
         double overlapEnd;
     }
+
+    static class Plugin implements InversePlugin {
+        @Override
+        public InverseCoding create() {
+            return new TiePointInverse();
+        }
+    }
 }

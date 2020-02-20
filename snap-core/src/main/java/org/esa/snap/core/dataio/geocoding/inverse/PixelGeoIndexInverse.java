@@ -206,4 +206,11 @@ public class PixelGeoIndexInverse implements InverseCoding {
             return min_x == max_x && min_y == max_y;
         }
     }
+
+    static class Plugin implements InversePlugin {
+        @Override
+        public InverseCoding create() {
+            return new PixelGeoIndexInverse();
+        }
+    }
 }

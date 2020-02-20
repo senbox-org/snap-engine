@@ -45,10 +45,10 @@ public class ComponentGeoCodingTest_transferGeoCoding {
         assertTrue(geoCoding instanceof ComponentGeoCoding);
         assertEquals(DefaultGeographicCRS.WGS84, geoCoding.getGeoCRS());
         assertTrue(geoCoding.getImageCRS() instanceof DefaultDerivedCRS);
-        assertEquals(geoCoding.getForwardCoding().getFactoryKey(), ComponentFactory.FWD_TIE_POINT_BILINEAR);
+        assertEquals(geoCoding.getForwardCoding().getKey(), ComponentFactory.FWD_TIE_POINT_BILINEAR);
         assertEquals(geoCoding.getInverseCoding().getFactoryKey(), ComponentFactory.INV_TIE_POINT);
         assertEquals(GeoChecks.ANTIMERIDIAN, geoCoding.getGeoChecks());
-        assertEquals(geoCoding.isCrossingMeridianAt180(), false);
+        assertFalse(geoCoding.isCrossingMeridianAt180());
         doForwardBackwardTest(geoCoding);
 
         assertTrue(productSubset.getSceneGeoCoding() instanceof ComponentGeoCoding);
@@ -57,10 +57,10 @@ public class ComponentGeoCodingTest_transferGeoCoding {
         assertTrue(subsetGC.getImageCRS() instanceof DefaultDerivedCRS);
         assertNotSame(geoCoding.getForwardCoding(), subsetGC.getForwardCoding());
         assertNotSame(geoCoding.getInverseCoding(), subsetGC.getInverseCoding());
-        assertEquals(geoCoding.getForwardCoding().getFactoryKey(), subsetGC.getForwardCoding().getFactoryKey());
+        assertEquals(geoCoding.getForwardCoding().getKey(), subsetGC.getForwardCoding().getKey());
         assertEquals(geoCoding.getInverseCoding().getFactoryKey(), subsetGC.getInverseCoding().getFactoryKey());
         assertEquals(GeoChecks.ANTIMERIDIAN, subsetGC.getGeoChecks());
-        assertEquals(subsetGC.isCrossingMeridianAt180(), false);
+        assertFalse(subsetGC.isCrossingMeridianAt180());
         doForwardBackwardTest(subsetGC);
     }
 
@@ -81,10 +81,10 @@ public class ComponentGeoCodingTest_transferGeoCoding {
         assertTrue(geoCoding instanceof ComponentGeoCoding);
         assertEquals(DefaultGeographicCRS.WGS84, geoCoding.getGeoCRS());
         assertTrue(geoCoding.getImageCRS() instanceof DefaultDerivedCRS);
-        assertEquals(geoCoding.getForwardCoding().getFactoryKey(), ComponentFactory.FWD_TIE_POINT_BILINEAR);
+        assertEquals(geoCoding.getForwardCoding().getKey(), ComponentFactory.FWD_TIE_POINT_BILINEAR);
         assertEquals(geoCoding.getInverseCoding().getFactoryKey(), ComponentFactory.INV_TIE_POINT);
         assertEquals(GeoChecks.ANTIMERIDIAN, geoCoding.getGeoChecks());
-        assertEquals(geoCoding.isCrossingMeridianAt180(), false);
+        assertFalse(geoCoding.isCrossingMeridianAt180());
         doForwardBackwardTest(geoCoding);
 
         assertTrue(productSubset.getSceneGeoCoding() instanceof ComponentGeoCoding);
@@ -93,10 +93,10 @@ public class ComponentGeoCodingTest_transferGeoCoding {
         assertTrue(subsetGC.getImageCRS() instanceof DefaultDerivedCRS);
         assertNotSame(geoCoding.getForwardCoding(), subsetGC.getForwardCoding());
         assertNotSame(geoCoding.getInverseCoding(), subsetGC.getInverseCoding());
-        assertEquals(geoCoding.getForwardCoding().getFactoryKey(), subsetGC.getForwardCoding().getFactoryKey());
+        assertEquals(geoCoding.getForwardCoding().getKey(), subsetGC.getForwardCoding().getKey());
         assertEquals(geoCoding.getInverseCoding().getFactoryKey(), subsetGC.getInverseCoding().getFactoryKey());
         assertEquals(GeoChecks.ANTIMERIDIAN, subsetGC.getGeoChecks());
-        assertEquals(subsetGC.isCrossingMeridianAt180(), false);
+        assertFalse(subsetGC.isCrossingMeridianAt180());
         doForwardBackwardTest(subsetGC);
     }
 
@@ -119,7 +119,7 @@ public class ComponentGeoCodingTest_transferGeoCoding {
         assertTrue(geoCoding instanceof ComponentGeoCoding);
         assertEquals(DefaultGeographicCRS.WGS84, geoCoding.getGeoCRS());
         assertTrue(geoCoding.getImageCRS() instanceof DefaultDerivedCRS);
-        assertEquals(geoCoding.getForwardCoding().getFactoryKey(), ComponentFactory.FWD_TIE_POINT_BILINEAR);
+        assertEquals(geoCoding.getForwardCoding().getKey(), ComponentFactory.FWD_TIE_POINT_BILINEAR);
         assertEquals(geoCoding.getInverseCoding().getFactoryKey(), ComponentFactory.INV_TIE_POINT);
         assertEquals(GeoChecks.ANTIMERIDIAN, geoCoding.getGeoChecks());
         assertEquals(geoCoding.isCrossingMeridianAt180(), false);
@@ -131,7 +131,7 @@ public class ComponentGeoCodingTest_transferGeoCoding {
         assertTrue(subsetGC.getImageCRS() instanceof DefaultDerivedCRS);
         assertNotSame(geoCoding.getForwardCoding(), subsetGC.getForwardCoding());
         assertNotSame(geoCoding.getInverseCoding(), subsetGC.getInverseCoding());
-        assertEquals(geoCoding.getForwardCoding().getFactoryKey(), subsetGC.getForwardCoding().getFactoryKey());
+        assertEquals(geoCoding.getForwardCoding().getKey(), subsetGC.getForwardCoding().getKey());
         assertEquals(geoCoding.getInverseCoding().getFactoryKey(), subsetGC.getInverseCoding().getFactoryKey());
         assertEquals(GeoChecks.ANTIMERIDIAN, subsetGC.getGeoChecks());
         assertEquals(subsetGC.isCrossingMeridianAt180(), false);
@@ -155,7 +155,7 @@ public class ComponentGeoCodingTest_transferGeoCoding {
         assertTrue(geoCoding instanceof ComponentGeoCoding);
         assertEquals(DefaultGeographicCRS.WGS84, geoCoding.getGeoCRS());
         assertTrue(geoCoding.getImageCRS() instanceof DefaultDerivedCRS);
-        assertEquals(geoCoding.getForwardCoding().getFactoryKey(), ComponentFactory.FWD_TIE_POINT_BILINEAR);
+        assertEquals(geoCoding.getForwardCoding().getKey(), ComponentFactory.FWD_TIE_POINT_BILINEAR);
         assertEquals(geoCoding.getInverseCoding().getFactoryKey(), ComponentFactory.INV_TIE_POINT);
         assertEquals(GeoChecks.ANTIMERIDIAN, geoCoding.getGeoChecks());
         assertEquals(geoCoding.isCrossingMeridianAt180(), true);
@@ -167,7 +167,7 @@ public class ComponentGeoCodingTest_transferGeoCoding {
         assertTrue(subsetGC.getImageCRS() instanceof DefaultDerivedCRS);
         assertNotSame(geoCoding.getForwardCoding(), subsetGC.getForwardCoding());
         assertNotSame(geoCoding.getInverseCoding(), subsetGC.getInverseCoding());
-        assertEquals(geoCoding.getForwardCoding().getFactoryKey(), subsetGC.getForwardCoding().getFactoryKey());
+        assertEquals(geoCoding.getForwardCoding().getKey(), subsetGC.getForwardCoding().getKey());
         assertEquals(geoCoding.getInverseCoding().getFactoryKey(), subsetGC.getInverseCoding().getFactoryKey());
         assertEquals(GeoChecks.ANTIMERIDIAN, subsetGC.getGeoChecks());
         assertEquals(subsetGC.isCrossingMeridianAt180(), true);
@@ -191,7 +191,7 @@ public class ComponentGeoCodingTest_transferGeoCoding {
         assertTrue(geoCoding instanceof ComponentGeoCoding);
         assertEquals(DefaultGeographicCRS.WGS84, geoCoding.getGeoCRS());
         assertTrue(geoCoding.getImageCRS() instanceof DefaultDerivedCRS);
-        assertEquals(geoCoding.getForwardCoding().getFactoryKey(), ComponentFactory.FWD_TIE_POINT_SPLINE);
+        assertEquals(geoCoding.getForwardCoding().getKey(), ComponentFactory.FWD_TIE_POINT_SPLINE);
         assertEquals(geoCoding.getInverseCoding().getFactoryKey(), ComponentFactory.INV_TIE_POINT);
         assertEquals(GeoChecks.ANTIMERIDIAN, geoCoding.getGeoChecks());
         assertEquals(geoCoding.isCrossingMeridianAt180(), false);
@@ -203,7 +203,7 @@ public class ComponentGeoCodingTest_transferGeoCoding {
         assertTrue(subsetGC.getImageCRS() instanceof DefaultDerivedCRS);
         assertNotSame(geoCoding.getForwardCoding(), subsetGC.getForwardCoding());
         assertNotSame(geoCoding.getInverseCoding(), subsetGC.getInverseCoding());
-        assertEquals(geoCoding.getForwardCoding().getFactoryKey(), subsetGC.getForwardCoding().getFactoryKey());
+        assertEquals(geoCoding.getForwardCoding().getKey(), subsetGC.getForwardCoding().getKey());
         assertEquals(geoCoding.getInverseCoding().getFactoryKey(), subsetGC.getInverseCoding().getFactoryKey());
         assertEquals(GeoChecks.ANTIMERIDIAN, subsetGC.getGeoChecks());
         assertEquals(geoCoding.isCrossingMeridianAt180(), false);
@@ -229,7 +229,7 @@ public class ComponentGeoCodingTest_transferGeoCoding {
         assertTrue(geoCoding instanceof ComponentGeoCoding);
         assertEquals(DefaultGeographicCRS.WGS84, geoCoding.getGeoCRS());
         assertTrue(geoCoding.getImageCRS() instanceof DefaultDerivedCRS);
-        assertEquals(geoCoding.getForwardCoding().getFactoryKey(), ComponentFactory.FWD_TIE_POINT_SPLINE);
+        assertEquals(geoCoding.getForwardCoding().getKey(), ComponentFactory.FWD_TIE_POINT_SPLINE);
         assertEquals(geoCoding.getInverseCoding().getFactoryKey(), ComponentFactory.INV_TIE_POINT);
         assertEquals(GeoChecks.ANTIMERIDIAN, geoCoding.getGeoChecks());
         assertEquals(geoCoding.isCrossingMeridianAt180(), false);
@@ -241,7 +241,7 @@ public class ComponentGeoCodingTest_transferGeoCoding {
         assertTrue(subsetGC.getImageCRS() instanceof DefaultDerivedCRS);
         assertNotSame(geoCoding.getForwardCoding(), subsetGC.getForwardCoding());
         assertNotSame(geoCoding.getInverseCoding(), subsetGC.getInverseCoding());
-        assertEquals(geoCoding.getForwardCoding().getFactoryKey(), subsetGC.getForwardCoding().getFactoryKey());
+        assertEquals(geoCoding.getForwardCoding().getKey(), subsetGC.getForwardCoding().getKey());
         assertEquals(geoCoding.getInverseCoding().getFactoryKey(), subsetGC.getInverseCoding().getFactoryKey());
         assertEquals(GeoChecks.ANTIMERIDIAN, subsetGC.getGeoChecks());
         assertEquals(geoCoding.isCrossingMeridianAt180(), false);
@@ -265,7 +265,7 @@ public class ComponentGeoCodingTest_transferGeoCoding {
         assertTrue(geoCoding instanceof ComponentGeoCoding);
         assertEquals(DefaultGeographicCRS.WGS84, geoCoding.getGeoCRS());
         assertTrue(geoCoding.getImageCRS() instanceof DefaultDerivedCRS);
-        assertEquals(geoCoding.getForwardCoding().getFactoryKey(), ComponentFactory.FWD_TIE_POINT_SPLINE);
+        assertEquals(geoCoding.getForwardCoding().getKey(), ComponentFactory.FWD_TIE_POINT_SPLINE);
         assertEquals(geoCoding.getInverseCoding().getFactoryKey(), ComponentFactory.INV_TIE_POINT);
         assertEquals(GeoChecks.ANTIMERIDIAN, geoCoding.getGeoChecks());
         assertEquals(geoCoding.isCrossingMeridianAt180(), true);
@@ -277,7 +277,7 @@ public class ComponentGeoCodingTest_transferGeoCoding {
         assertTrue(subsetGC.getImageCRS() instanceof DefaultDerivedCRS);
         assertNotSame(geoCoding.getForwardCoding(), subsetGC.getForwardCoding());
         assertNotSame(geoCoding.getInverseCoding(), subsetGC.getInverseCoding());
-        assertEquals(geoCoding.getForwardCoding().getFactoryKey(), subsetGC.getForwardCoding().getFactoryKey());
+        assertEquals(geoCoding.getForwardCoding().getKey(), subsetGC.getForwardCoding().getKey());
         assertEquals(geoCoding.getInverseCoding().getFactoryKey(), subsetGC.getInverseCoding().getFactoryKey());
         assertEquals(GeoChecks.ANTIMERIDIAN, subsetGC.getGeoChecks());
         assertEquals(subsetGC.isCrossingMeridianAt180(), true);
@@ -302,7 +302,7 @@ public class ComponentGeoCodingTest_transferGeoCoding {
         assertTrue(geoCoding instanceof ComponentGeoCoding);
         assertEquals(DefaultGeographicCRS.WGS84, geoCoding.getGeoCRS());
         assertTrue(geoCoding.getImageCRS() instanceof DefaultDerivedCRS);
-        assertEquals(geoCoding.getForwardCoding().getFactoryKey(), ComponentFactory.FWD_PIXEL_INTERPOLATING);
+        assertEquals(geoCoding.getForwardCoding().getKey(), ComponentFactory.FWD_PIXEL_INTERPOLATING);
         assertEquals(geoCoding.getInverseCoding().getFactoryKey(), ComponentFactory.INV_PIXEL_QUAD_TREE_INTERPOLATING);
         assertEquals(GeoChecks.ANTIMERIDIAN, geoCoding.getGeoChecks());
         assertEquals(geoCoding.isCrossingMeridianAt180(), false);
@@ -314,7 +314,7 @@ public class ComponentGeoCodingTest_transferGeoCoding {
         assertTrue(subsetGC.getImageCRS() instanceof DefaultDerivedCRS);
         assertNotSame(geoCoding.getForwardCoding(), subsetGC.getForwardCoding());
         assertNotSame(geoCoding.getInverseCoding(), subsetGC.getInverseCoding());
-        assertEquals(geoCoding.getForwardCoding().getFactoryKey(), subsetGC.getForwardCoding().getFactoryKey());
+        assertEquals(geoCoding.getForwardCoding().getKey(), subsetGC.getForwardCoding().getKey());
         assertEquals(geoCoding.getInverseCoding().getFactoryKey(), subsetGC.getInverseCoding().getFactoryKey());
         assertEquals(GeoChecks.ANTIMERIDIAN, subsetGC.getGeoChecks());
         assertEquals(subsetGC.isCrossingMeridianAt180(), false);
@@ -341,7 +341,7 @@ public class ComponentGeoCodingTest_transferGeoCoding {
         assertTrue(geoCoding instanceof ComponentGeoCoding);
         assertEquals(DefaultGeographicCRS.WGS84, geoCoding.getGeoCRS());
         assertTrue(geoCoding.getImageCRS() instanceof DefaultDerivedCRS);
-        assertEquals(geoCoding.getForwardCoding().getFactoryKey(), ComponentFactory.FWD_PIXEL_INTERPOLATING);
+        assertEquals(geoCoding.getForwardCoding().getKey(), ComponentFactory.FWD_PIXEL_INTERPOLATING);
         assertEquals(geoCoding.getInverseCoding().getFactoryKey(), ComponentFactory.INV_PIXEL_QUAD_TREE_INTERPOLATING);
         assertEquals(GeoChecks.ANTIMERIDIAN, geoCoding.getGeoChecks());
         assertEquals(geoCoding.isCrossingMeridianAt180(), false);
@@ -353,7 +353,7 @@ public class ComponentGeoCodingTest_transferGeoCoding {
         assertTrue(subsetGC.getImageCRS() instanceof DefaultDerivedCRS);
         assertNotSame(geoCoding.getForwardCoding(), subsetGC.getForwardCoding());
         assertNotSame(geoCoding.getInverseCoding(), subsetGC.getInverseCoding());
-        assertEquals(geoCoding.getForwardCoding().getFactoryKey(), subsetGC.getForwardCoding().getFactoryKey());
+        assertEquals(geoCoding.getForwardCoding().getKey(), subsetGC.getForwardCoding().getKey());
         assertEquals(geoCoding.getInverseCoding().getFactoryKey(), subsetGC.getInverseCoding().getFactoryKey());
         assertEquals(GeoChecks.ANTIMERIDIAN, subsetGC.getGeoChecks());
         assertEquals(subsetGC.isCrossingMeridianAt180(), false);

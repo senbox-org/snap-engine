@@ -136,83 +136,90 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
 
         final GeoRaster geoRaster;
         if (subsetDef == null) {
-            geoRaster = new GeoRaster(this.geoRaster.getLongitudes().clone(), this.geoRaster.getLatitudes().clone(),
-                                      lonVariableName, latVariableName,
-                                      this.geoRaster.getRasterWidth(), this.geoRaster.getRasterHeight(),
-                                      this.geoRaster.getSceneWidth(), this.geoRaster.getSceneHeight(),
-                                      this.geoRaster.getRasterResolutionInKm(),
-                                      this.geoRaster.getOffsetX(), this.geoRaster.getOffsetY(),
-                                      this.geoRaster.getSubsamplingX(), this.geoRaster.getSubsamplingY());
+            geoRaster = cloneGeoRaster(lonVariableName, latVariableName);
         } else {
-            final RasterDataNode lonRaster = destScene.getProduct().getRasterDataNode(lonVariableName);
-            final RasterDataNode latRaster = destScene.getProduct().getRasterDataNode(latVariableName);
-            final double[] longitudes;
-            final double[] latitudes;
-            final int gridWidth;
-            final int gridHeight;
-            final double offsetX;
-            final double offsetY;
-            final double subsamplingX;
-            final double subsamplingY;
-            if (lonRaster instanceof TiePointGrid) {
-                final TiePointGrid lonTPG = (TiePointGrid) lonRaster;
-                final TiePointGrid latTPG = (TiePointGrid) latRaster;
-
-                gridWidth = lonTPG.getGridWidth();
-                gridHeight = lonTPG.getGridHeight();
-
-                final float[] lons = (float[]) lonTPG.getGridData().getElems();
-                longitudes = IntStream.range(0, lons.length).mapToDouble(i -> lons[i]).toArray();
-
-                final float[] lats = (float[]) latTPG.getGridData().getElems();
-                latitudes = IntStream.range(0, lats.length).mapToDouble(i -> lats[i]).toArray();
-
-                offsetX = lonTPG.getOffsetX();
-                offsetY = lonTPG.getOffsetY();
-                subsamplingX = lonTPG.getSubSamplingX();
-                subsamplingY = lonTPG.getSubSamplingY();
-            } else {
-                gridWidth = lonRaster.getRasterWidth();
-                gridHeight = lonRaster.getRasterHeight();
-
-                longitudes = lonRaster.getSourceImage().getImage(0).getData().getPixels(0, 0, gridWidth, gridHeight, new double[gridWidth * gridHeight]);
-                latitudes = latRaster.getSourceImage().getImage(0).getData().getPixels(0, 0, gridWidth, gridHeight, new double[gridWidth * gridHeight]);
-
-                offsetX = 0.5;
-                offsetY = 0.5;
-                subsamplingX = 1.0;
-                subsamplingY = 1.0;
-            }
-
-            geoRaster = new GeoRaster(longitudes, latitudes, lonVariableName, latVariableName,
-                                      gridWidth, gridHeight, destScene.getRasterWidth(), destScene.getRasterHeight(),
-                                      this.geoRaster.getRasterResolutionInKm() * subsetDef.getSubSamplingX(),
-                                      offsetX, offsetY, subsamplingX, subsamplingY);
+            geoRaster = calculateGeoRaster(destScene, subsetDef, lonVariableName, latVariableName);
         }
 
-        final ForwardCoding forwardCoding = ComponentFactory.getForward(this.forwardCoding.getFactoryKey());
-        final InverseCoding inverseCoding = ComponentFactory.getInverse(this.inverseCoding.getFactoryKey());
+        ForwardCoding forwardCoding = null;
+        if (this.forwardCoding != null) {
+            forwardCoding = ComponentFactory.getForward(this.forwardCoding.getKey());
+        }
+        InverseCoding inverseCoding = null;
+        if (this.inverseCoding != null) {
+            inverseCoding = ComponentFactory.getInverse(this.inverseCoding.getFactoryKey());
+        }
 
         final CoordinateReferenceSystem geoCRS = getGeoCRS();
         final ComponentGeoCoding destGeoCoding = new ComponentGeoCoding(geoRaster, forwardCoding, inverseCoding, geoChecks, geoCRS);
         destGeoCoding.initialize();
         destScene.setGeoCoding(destGeoCoding);
         return true;
-
-        // @todo 1 tb/tb
-        // read target raster data as doubles
-        // extract width/height
-        // detect current forward and inverse
-        // create new ones and assemble new GeoCoding
-        // initialize new GeoCoding
-        //
-        //        throw new
-        //
-        //                NotImplementedException();
-        //
     }
 
-    public void transferRequiredRasters(Scene srcScene, Scene destScene, ProductSubsetDef subsetDef) {
+    private GeoRaster calculateGeoRaster(Scene destScene, ProductSubsetDef subsetDef, String lonVariableName, String latVariableName) {
+        GeoRaster geoRaster;
+        final Product destProduct = destScene.getProduct();
+        final RasterDataNode lonRaster = destProduct.getRasterDataNode(lonVariableName);
+        final RasterDataNode latRaster = destProduct.getRasterDataNode(latVariableName);
+        final double[] longitudes;
+        final double[] latitudes;
+        final int gridWidth;
+        final int gridHeight;
+        final double offsetX;
+        final double offsetY;
+        final double subsamplingX;
+        final double subsamplingY;
+        if (lonRaster instanceof TiePointGrid) {
+            final TiePointGrid lonTPG = (TiePointGrid) lonRaster;
+            final TiePointGrid latTPG = (TiePointGrid) latRaster;
+
+            gridWidth = lonTPG.getGridWidth();
+            gridHeight = lonTPG.getGridHeight();
+
+            final float[] lons = (float[]) lonTPG.getGridData().getElems();
+            longitudes = IntStream.range(0, lons.length).mapToDouble(i -> lons[i]).toArray();
+
+            final float[] lats = (float[]) latTPG.getGridData().getElems();
+            latitudes = IntStream.range(0, lats.length).mapToDouble(i -> lats[i]).toArray();
+
+            offsetX = lonTPG.getOffsetX();
+            offsetY = lonTPG.getOffsetY();
+            subsamplingX = lonTPG.getSubSamplingX();
+            subsamplingY = lonTPG.getSubSamplingY();
+        } else {
+            gridWidth = lonRaster.getRasterWidth();
+            gridHeight = lonRaster.getRasterHeight();
+
+            longitudes = lonRaster.getSourceImage().getImage(0).getData().getPixels(0, 0, gridWidth, gridHeight, new double[gridWidth * gridHeight]);
+            latitudes = latRaster.getSourceImage().getImage(0).getData().getPixels(0, 0, gridWidth, gridHeight, new double[gridWidth * gridHeight]);
+
+            offsetX = 0.5;
+            offsetY = 0.5;
+            subsamplingX = 1.0;
+            subsamplingY = 1.0;
+        }
+
+        geoRaster = new GeoRaster(longitudes, latitudes, lonVariableName, latVariableName,
+                gridWidth, gridHeight, destScene.getRasterWidth(), destScene.getRasterHeight(),
+                this.geoRaster.getRasterResolutionInKm() * subsetDef.getSubSamplingX(),
+                offsetX, offsetY, subsamplingX, subsamplingY);
+        return geoRaster;
+    }
+
+    // package access for testing only tb 2020-02-20
+    GeoRaster cloneGeoRaster(String lonVariableName, String latVariableName) {
+        return new GeoRaster(this.geoRaster.getLongitudes().clone(), this.geoRaster.getLatitudes().clone(),
+                lonVariableName, latVariableName,
+                this.geoRaster.getRasterWidth(), this.geoRaster.getRasterHeight(),
+                this.geoRaster.getSceneWidth(), this.geoRaster.getSceneHeight(),
+                this.geoRaster.getRasterResolutionInKm(),
+                this.geoRaster.getOffsetX(), this.geoRaster.getOffsetY(),
+                this.geoRaster.getSubsamplingX(), this.geoRaster.getSubsamplingY());
+    }
+
+    // package access for testing only tb 2020-02-20
+    void transferRequiredRasters(Scene srcScene, Scene destScene, ProductSubsetDef subsetDef) {
         final String lonVarName = geoRaster.getLonVariableName();
         final String latVarName = geoRaster.getLatVariableName();
 

@@ -115,19 +115,6 @@ public class PixelQuadTreeInverse implements InverseCoding {
 
     // package access for testing only tb 2019-12-16
     double getEpsilon(double resolutionInKm) {
-//        final int x_center = rasterWidth / 2;
-//        final int y_center = rasterHeight / 2;
-//
-//        final GeoPos geoPos_1 = new GeoPos();
-//        final GeoPos geoPos_2 = new GeoPos();
-//        getGeoPos(x_center, y_center, geoPos_1);
-//        getGeoPos(x_center + 1, y_center + 1, geoPos_2);
-//
-//        final double deltaLat = Math.abs(geoPos_1.lat - geoPos_2.lat);
-//        final double deltaLon = Math.abs(geoPos_1.lon - geoPos_2.lon);
-//
-//        return Math.max(deltaLat, deltaLon) / Math.sqrt(2);
-
         final double angle = 2.0 * Math.asin((resolutionInKm * 1000.0) / (2 * RsMathUtils.MEAN_EARTH_RADIUS));
         return TO_DEG * angle * 2.0;
     }
@@ -280,5 +267,12 @@ public class PixelQuadTreeInverse implements InverseCoding {
         final boolean b4 = quadTreeSearch(depth + 1, lat, lon, i2, j2, w2r, h2r, result);
 
         return b1 || b2 || b3 || b4;
+    }
+
+    static class Plugin implements InversePlugin {
+        @Override
+        public InverseCoding create() {
+            return new PixelQuadTreeInverse();
+        }
     }
 }

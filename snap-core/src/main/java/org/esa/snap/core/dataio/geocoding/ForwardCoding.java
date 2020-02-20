@@ -32,7 +32,7 @@ public interface ForwardCoding {
      *
      * @return the key String used while instantiating via {@link ComponentFactory}
      */
-    String getFactoryKey();
+    String getKey();
 
     void dispose();
 }
