@@ -767,7 +767,8 @@ public class ProductUtils {
      * Creates a rectangular boundary expressed in pixel positions for the given source rectangle. If the source
      * {@code rect} is 100 x 50 pixels and {@code step} is 10 the returned array will countain exactly 2 * 10
      * + 2 * (5 - 2) = 26 pixel positions.
-     * <p>
+     * <p>//                Rectangle subProductBounds;
+
      * This method is used for an intermediate step when determining a product boundary expressed in geographical
      * co-ordinates.
      * <p>
@@ -2491,7 +2492,13 @@ public class ProductUtils {
         return pixelRegion.intersection(new Rectangle(rasterWidth, rasterHeight));
     }
 
+    //TODO Jean do not use 'int rasterWidth, int rasterHeight' parameters because the
+    // 'pixelRegion' cannot be null since we compute the 'step' value and the 'rasterWidth' and 'rasterHeight' are used
+    // only if the 'pixelRegion == null'
     public static Geometry computeGeometryUsingPixelRegion(GeoCoding rasterGeoCoding, int rasterWidth, int rasterHeight, Rectangle pixelRegion) {
+        if (pixelRegion == null) {
+            throw new NullPointerException("The pixel region is null.");
+        }
         final int step = Math.min(pixelRegion.width, pixelRegion.height) / 8;
         GeneralPath[] paths = ProductUtils.createGeoBoundaryPathsArray(rasterGeoCoding, rasterWidth, rasterHeight, pixelRegion, step, false);
         final com.vividsolutions.jts.geom.Polygon[] polygons = new com.vividsolutions.jts.geom.Polygon[paths.length];
