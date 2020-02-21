@@ -18,6 +18,7 @@ package org.esa.snap.core.gpf.common;
 
 import com.bc.ceres.binding.Converter;
 import com.bc.ceres.binding.ConverterRegistry;
+import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.glevel.MultiLevelImage;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
@@ -142,22 +143,32 @@ public class MosaicOp extends Operator {
         } else {
             targetProduct = createTargetProduct();
         }
-        reprojectedProducts = createReprojectedProducts();
+    }
 
+    @Override
+    public void doExecute(ProgressMonitor pm) throws OperatorException {
+        pm.beginTask("Creating Mosaic", 6);
+        reprojectedProducts = createReprojectedProducts();
+        pm.worked(1);
         // for each variable and each product one 'alpha' image is created.
         // the alpha value for a pixel is either 0.0 or 1.0
         List<List<PlanarImage>> alphaImageList = createAlphaImages();
-
+        pm.worked(1);
         // for each variable and each product one 'source' image is created.
         List<List<RenderedImage>> sourceImageList = createSourceImages();
-
+        pm.worked(1);
         List<RenderedImage> mosaicImageList = createMosaicImages(sourceImageList, alphaImageList);
-
+        pm.worked(1);
         final List<RenderedImage> variableCountImageList = createVariableCountImages(alphaImageList);
+        pm.worked(1);
         setTargetBandImages(targetProduct, mosaicImageList, variableCountImageList);
-        reprojectedProducts = null;
+        pm.worked(1);
     }
 
+    @Override
+    public void dispose() {
+        reprojectedProducts = null;
+    }
 
     private void updateMetadata(Product product) {
         final MetadataElement graphElement = product.getMetadataRoot().getElement("Processing_Graph");
