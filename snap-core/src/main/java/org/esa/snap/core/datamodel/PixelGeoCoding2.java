@@ -553,8 +553,8 @@ class PixelGeoCoding2 extends AbstractGeoCoding implements BasicPixelGeoCoding {
 
         @Override
         public void getGeoPosDouble(int x0, int y0, double wx, double wy, GeoPos geoPos) {
-            geoPos.lon = interpolate(x0, y0, wx, wy, lonData, LAT);
-            geoPos.lat = interpolate(x0, y0, wx, wy, latData, LON);
+            geoPos.lon = interpolate(x0, y0, wx, wy, lonData, LON);
+            geoPos.lat = interpolate(x0, y0, wx, wy, latData, LAT);
         }
 
         private double interpolate(int x0, int y0, double wx, double wy, double[] data, int latLon) {
