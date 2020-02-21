@@ -229,7 +229,6 @@ public abstract class Operator {
      * @since SNAP 3.0
      */
     public boolean canComputeTile() {
-//        return context.isComputeTileMethodImplemented() || context.isComputingStack();
         return context.isComputeTileMethodImplemented();
     }
 
@@ -244,10 +243,6 @@ public abstract class Operator {
      */
     public boolean canComputeTileStack() {
         return context.isComputeTileStackMethodImplemented();
-    }
-
-    public OperatorContext getContext() {
-        return context;
     }
 
     /**

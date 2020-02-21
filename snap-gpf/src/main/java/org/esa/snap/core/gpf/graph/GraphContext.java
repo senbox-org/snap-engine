@@ -162,7 +162,7 @@ public class GraphContext {
         for (Node node : getGraph().getNodes()) {
             NodeContext nodeContext = getNodeContext(node);
             if (nodeContext.isOutput()) {
-                nodeContext.getOperator().getContext().setComputingStack(canComputeTileStack);
+                nodeContext.setComputingStack(canComputeTileStack);
                 initNodeContext(nodeContext, graphOp);
                 addOutputNodeContext(nodeContext);
             }

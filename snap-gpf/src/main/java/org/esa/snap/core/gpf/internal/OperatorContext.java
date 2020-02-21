@@ -223,7 +223,7 @@ public class OperatorContext {
     }
 
     public Product[] getSourceProducts() {
-        return sourceProductList.toArray(new Product[sourceProductList.size()]);
+        return sourceProductList.toArray(new Product[0]);
     }
 
     public void setSourceProducts(Product[] products) {
@@ -463,7 +463,7 @@ public class OperatorContext {
     }
 
     private boolean operatorMustComputeTileStack() {
-        return operator.canComputeTileStack() && (!operator.canComputeTile() || operator.getContext().isComputingStack());
+        return operator.canComputeTileStack() && (!operator.canComputeTile() || isComputingStack());
     }
 
     private static boolean implementsMethod(Class<?> aClass, String methodName, Class[] methodParameterTypes) {
@@ -497,7 +497,7 @@ public class OperatorContext {
             initTargetProperties(operator.getClass());
             setTargetImages();
             initGraphMetadata();
-            targetProduct.setProductWriterListener((ProgressMonitor pm) -> operator.execute(pm));
+            targetProduct.setProductWriterListener(operator::execute);
 
             targetProduct.setModified(false);
         } finally {
@@ -1020,7 +1020,7 @@ public class OperatorContext {
                 srcProductList.remove(product);
             }
         }
-        return srcProductList.toArray(new Product[srcProductList.size()]);
+        return srcProductList.toArray(new Product[0]);
     }
 
     private static Field[] getAnnotatedSourceProductFields(Operator operator1) {
