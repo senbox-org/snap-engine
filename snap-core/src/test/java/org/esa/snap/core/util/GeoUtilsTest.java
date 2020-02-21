@@ -521,8 +521,8 @@ public class GeoUtilsTest {
                 return geoPos;
             }
 
-            final int x = (int) Math.floor(pipoX) - pipoX == width ? 1 : 0;
-            final int y = (int) Math.floor(pipoY) - pipoY == height ? 1 : 0;
+            final int x = (int) Math.floor(pipoX) - (pipoX == width ? 1 : 0);
+            final int y = (int) Math.floor(pipoY) - (pipoY == height ? 1 : 0);
 
             final int index = y * width + x;
             geoPos.lon = longitudes[index];
