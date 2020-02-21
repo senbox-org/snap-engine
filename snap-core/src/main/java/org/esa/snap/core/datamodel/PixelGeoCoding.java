@@ -173,16 +173,16 @@ public class PixelGeoCoding extends AbstractGeoCoding implements BasicPixelGeoCo
 
             Interpolation nearestInterpolation = Interpolation.getInstance(Interpolation.INTERP_NEAREST);
             final RenderedOp tempLatOffsetImg = ScaleDescriptor.create(latImage, 1.0f, 1.0f,
-                    unscaledImageOffsetX, unscaledImageOffsetY,
-                    nearestInterpolation, null);
+                                                                       unscaledImageOffsetX, unscaledImageOffsetY,
+                                                                       nearestInterpolation, null);
             final RenderedOp tempLatImg = ScaleDescriptor.create(tempLatOffsetImg, scale, scale, 0f, 0f,
-                    nearestInterpolation, null);
+                                                                 nearestInterpolation, null);
 
             final RenderedOp tempLonOffsetImg = ScaleDescriptor.create(lonImage, 1.0f, 1.0f,
-                    unscaledImageOffsetX, unscaledImageOffsetY,
-                    nearestInterpolation, null);
+                                                                       unscaledImageOffsetX, unscaledImageOffsetY,
+                                                                       nearestInterpolation, null);
             final RenderedOp tempLonImg = ScaleDescriptor.create(tempLonOffsetImg, scale, scale, 0f, 0f,
-                    nearestInterpolation, null);
+                                                                 nearestInterpolation, null);
 
             final int minX = tempLatImg.getMinX();
             final int minY = tempLatImg.getMinY();
@@ -190,16 +190,16 @@ public class PixelGeoCoding extends AbstractGeoCoding implements BasicPixelGeoCo
             final boolean containsAngles = true;
 
             final float[] latTiePoints = tempLatImg.getAsBufferedImage().getRaster().getPixels(minX, minY, tpGridWidth,
-                    tpGridHeight,
-                    new float[numTiePoints]);
+                                                                                               tpGridHeight,
+                                                                                               new float[numTiePoints]);
             final float[] lonTiePoints = tempLonImg.getAsBufferedImage().getRaster().getPixels(minX, minY, tpGridWidth,
-                    tpGridHeight,
-                    new float[numTiePoints]);
+                                                                                               tpGridHeight,
+                                                                                               new float[numTiePoints]);
 
             final TiePointGrid tpLatGrid = new TiePointGrid("lat", tpGridWidth, tpGridHeight, tpOffsetX, tpOffsetY,
-                    subSampling, subSampling, latTiePoints, containsAngles);
+                                                            subSampling, subSampling, latTiePoints, containsAngles);
             final TiePointGrid tpLonGrid = new TiePointGrid("lon", tpGridWidth, tpGridHeight, tpOffsetX, tpOffsetY,
-                    subSampling, subSampling, lonTiePoints, containsAngles);
+                                                            subSampling, subSampling, lonTiePoints, containsAngles);
             pixelPosEstimator = new TiePointGeoCoding(tpLatGrid, tpLonGrid);
             estimatorCreatedInternally = true;
         } else {
@@ -406,7 +406,7 @@ public class PixelGeoCoding extends AbstractGeoCoding implements BasicPixelGeoCo
                 validMask = latBand.getProduct().getMaskImage(validMaskExpr, latBand);
             }
             latLonImage = new LatLonImage(this.latBand.getGeophysicalImage(), this.lonBand.getGeophysicalImage(),
-                    validMask, pixelPosEstimator);
+                                          validMask, pixelPosEstimator);
         } else {
             Mask validMask = null;
             try {
@@ -419,8 +419,8 @@ public class PixelGeoCoding extends AbstractGeoCoding implements BasicPixelGeoCo
                     validMask = Mask.BandMathsType.create(maskName, "", sceneSize.width, sceneSize.height, validMaskExpr, Color.RED, 0.0);
                     validMask.setOwner(latBand.getProduct());
                     fillInvalidGaps(new ValidMaskValidator(rasterWidth, 0, validMask),
-                            (float[]) latGrid.getDataElems(),
-                            (float[]) lonGrid.getDataElems(), SubProgressMonitor.create(pm, 1));
+                                    (float[]) latGrid.getDataElems(),
+                                    (float[]) lonGrid.getDataElems(), SubProgressMonitor.create(pm, 1));
                 }
             } finally {
                 pm.done();
@@ -762,11 +762,11 @@ public class PixelGeoCoding extends AbstractGeoCoding implements BasicPixelGeoCo
 
         final Result result = new Result();
         boolean pixelFound = quadTreeSearch(0,
-                geoPos.lat, geoPos.lon,
-                0, 0,
-                rasterWidth,
-                rasterHeight,
-                result);
+                                            geoPos.lat, geoPos.lon,
+                                            0, 0,
+                                            rasterWidth,
+                                            rasterHeight,
+                                            result);
 
         if (pixelFound) {
             final GeoPos resultGeoPos = new GeoPos();
@@ -813,18 +813,22 @@ public class PixelGeoCoding extends AbstractGeoCoding implements BasicPixelGeoCo
         }
         geoPos.setInvalid();
         if (pixelPos.isValid()) {
-            int x0 = (int) Math.floor(pixelPos.getX());
-            int y0 = (int) Math.floor(pixelPos.getY());
+            final double pipoX = pixelPos.getX();
+            final double pipoY = pixelPos.getY();
+
+            // TODO: 20.02.2020 SE fixed -- Marked GETGEOPOS abort condition
+            int x0 = (int) Math.floor(pipoX) - pipoX == rasterWidth ? 1 : 0;
+            int y0 = (int) Math.floor(pipoY) - pipoY == rasterHeight ? 1 : 0;
             if (x0 >= 0 && x0 < rasterWidth && y0 >= 0 && y0 < rasterHeight) {
                 if (fractionAccuracy) { // implies tiling mode
-                    if (x0 > 0 && pixelPos.x - x0 < 0.5f || x0 == rasterWidth - 1) {
+                    if (x0 > 0 && pipoX - x0 < 0.5f || x0 == rasterWidth - 1) {
                         x0 -= 1;
                     }
-                    if (y0 > 0 && pixelPos.y - y0 < 0.5f || y0 == rasterHeight - 1) {
+                    if (y0 > 0 && pipoY - y0 < 0.5f || y0 == rasterHeight - 1) {
                         y0 -= 1;
                     }
-                    final double wx = pixelPos.x - (x0 + 0.5f);
-                    final double wy = pixelPos.y - (y0 + 0.5f);
+                    final double wx = pipoX - (x0 + 0.5f);
+                    final double wy = pipoY - (y0 + 0.5f);
                     final Raster latLonData = latLonImage.getData(new Rectangle(x0, y0, 2, 2));
                     final double lat = interpolate(wx, wy, latLonData, 0);
                     final double lon = interpolate(wx, wy, latLonData, 1);
@@ -1064,13 +1068,13 @@ public class PixelGeoCoding extends AbstractGeoCoding implements BasicPixelGeoCo
             int dy = bestY - y0;
             if (Math.abs(dx) >= searchRadius || Math.abs(dy) >= searchRadius) {
                 Debug.trace("WARNING: search radius reached at " +
-                        "(x0 = " + x0 + ", y0 = " + y0 + "), " +
-                        "(dx = " + dx + ", dy = " + dy + "), " +
-                        "#best = " + bestCount);
+                                    "(x0 = " + x0 + ", y0 = " + y0 + "), " +
+                                    "(dx = " + dx + ", dy = " + dy + "), " +
+                                    "#best = " + bestCount);
             }
         } else {
             Debug.trace("WARNING: no better pixel found at " +
-                    "(x0 = " + x0 + ", y0 = " + y0 + ")");
+                                "(x0 = " + x0 + ", y0 = " + y0 + ")");
         }
     }
 
@@ -1111,8 +1115,8 @@ public class PixelGeoCoding extends AbstractGeoCoding implements BasicPixelGeoCo
             validMaskExpression = null;
         }
         destScene.setGeoCoding(new PixelGeoCoding(latBand, lonBand,
-                validMaskExpression,
-                getSearchRadius()));
+                                                  validMaskExpression,
+                                                  getSearchRadius()));
         return true;
     }
 
@@ -1224,9 +1228,9 @@ public class PixelGeoCoding extends AbstractGeoCoding implements BasicPixelGeoCo
         private static ImageLayout layout(RenderedImage latSrc, RenderedImage lonSrc) {
             int maxDataType = Math.max(latSrc.getSampleModel().getDataType(), lonSrc.getSampleModel().getDataType());
             final SampleModel sampleModel = RasterFactory.createBandedSampleModel(maxDataType,
-                    latSrc.getTileWidth(),
-                    latSrc.getTileHeight(),
-                    2);
+                                                                                  latSrc.getTileWidth(),
+                                                                                  latSrc.getTileHeight(),
+                                                                                  2);
             final ImageLayout imageLayout = new ImageLayout();
             imageLayout.setSampleModel(sampleModel);
             return imageLayout;
@@ -1257,13 +1261,13 @@ public class PixelGeoCoding extends AbstractGeoCoding implements BasicPixelGeoCo
         @Override
         protected void computeRect(Raster[] sources, WritableRaster dest, Rectangle destRect) {
             RasterAccessor latAcc = new RasterAccessor(sources[0], destRect, latRasterFormatTag,
-                    getSourceImage(0).getColorModel());
+                                                       getSourceImage(0).getColorModel());
             RasterAccessor lonAcc = new RasterAccessor(sources[1], destRect, lonRasterFormatTag,
-                    getSourceImage(1).getColorModel());
+                                                       getSourceImage(1).getColorModel());
             RasterAccessor validMaskAcc = null;
             if (maskRasterFormatTag != null) {
                 validMaskAcc = new RasterAccessor(sources[2], destRect, maskRasterFormatTag,
-                        getSourceImage(2).getColorModel());
+                                                  getSourceImage(2).getColorModel());
             }
             RasterAccessor destAcc = new RasterAccessor(dest, destRect, targetRasterFormatTag, getColorModel());
 

@@ -49,6 +49,8 @@ public class GeoPos {
      * Constructs a new geo-position with latitude and longitude set to zero.
      */
     public GeoPos() {
+        // TODO: 20.02.2020 SE fixed -- Marked GETGEOPOS setInvalid instead?
+        setInvalid();
     }
 
     /**
