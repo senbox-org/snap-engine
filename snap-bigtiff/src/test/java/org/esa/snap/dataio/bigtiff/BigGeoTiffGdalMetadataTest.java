@@ -14,13 +14,15 @@
  * with this program; if not, see http://www.gnu.org/licenses/
  */
 
-package org.esa.snap.dataio.geotiff;
+package org.esa.snap.dataio.bigtiff;
 
 import junit.framework.TestCase;
 import org.esa.snap.core.datamodel.Band;
 
-public class GeoTiffProbaVGdalMetadataTest extends TestCase {
+public class BigGeoTiffGdalMetadataTest extends TestCase {
 
+    // TODO: these tests are duplicated from standard GeoTiff reader. Try to make GDAL support more generic.
+    
     public void testGetBandsFromGdalMetadata_probav_toa() throws Exception {
         // TOA product
         // e.g. PROBAV_S1_TOA_X20Y10_20180308_333M_V101_RADIOMETRY.tif
@@ -46,7 +48,7 @@ public class GeoTiffProbaVGdalMetadataTest extends TestCase {
                         "<Item name=\"NODATA\" sample=\"3\">-1.00000</Item>\n" +
                 "</GDALMetadata>";
 
-        Band[] bands = Utils.setupBandsFromGdalMetadata(probavGdalMetadatatring, productType, 1, 1);
+        Band[] bands = BigGeoTiffUtils.setupBandsFromGdalMetadata(probavGdalMetadatatring, productType, 1, 1);
         assertNotNull(bands);
         assertEquals(4, bands.length);
 
@@ -96,7 +98,7 @@ public class GeoTiffProbaVGdalMetadataTest extends TestCase {
                         "<Item name=\"NODATA\" sample=\"3\">-1.00000</Item>\n" +
                 "</GDALMetadata>";
 
-        Band[] bands = Utils.setupBandsFromGdalMetadata(probavGdalMetadatatring, productType, 1, 1);
+        Band[] bands = BigGeoTiffUtils.setupBandsFromGdalMetadata(probavGdalMetadatatring, productType, 1, 1);
         assertNotNull(bands);
         assertEquals(4, bands.length);
 
@@ -136,7 +138,7 @@ public class GeoTiffProbaVGdalMetadataTest extends TestCase {
                         "<Item name=\"UNITTYPE\" sample=\"0\">255.00000</Item>\n" +
                 "</GDALMetadata>";
 
-        Band[] bands = Utils.setupBandsFromGdalMetadata(probavGdalMetadatatring, productType, 1, 1);
+        Band[] bands = BigGeoTiffUtils.setupBandsFromGdalMetadata(probavGdalMetadatatring, productType, 1, 1);
         assertNotNull(bands);
         assertEquals(1, bands.length);
 
@@ -148,5 +150,26 @@ public class GeoTiffProbaVGdalMetadataTest extends TestCase {
         assertEquals(-0.0800000000000000017, bands[0].getScalingOffset());
     }
 
+    public void testGetBandsFromGdalMetadata_bandname_only() throws Exception {
+        // we have a band name in metadata, but no other attributes like description, unit,...
+        // e.g. CCI-LC-MERIS-SR-L3-300m-v4.0--FR-2009-01-01-364d.STATUS.tif
+        final int productType = 11;
+        final String probavGdalMetadatatring =
+                "<GDALMetadata>\n" +
+                        "<Item name=\"Generate by\">gdal_mosaic</Item>\n" +
+                        "<Item name=\"Copyright\">UCL Geomatics, BELGIUM 1999-2012</Item>\n" +
+                        "<Item name=\"Authors\">Pierre Defourny et al.</Item>\n" +
+                        "<Item name=\"BAND\" sample=\"0\">STATUS</Item>\n" +
+                "</GDALMetadata>";
+
+        Band[] bands = BigGeoTiffUtils.setupBandsFromGdalMetadata(probavGdalMetadatatring, productType, 1, 1);
+        assertNotNull(bands);
+        assertEquals(1, bands.length);
+
+        assertEquals("STATUS", bands[0].getName());
+        assertNull(bands[0].getDescription());
+        assertNull(bands[0].getUnit());
+        assertFalse(bands[0].isNoDataValueUsed());
+    }
 
 }
