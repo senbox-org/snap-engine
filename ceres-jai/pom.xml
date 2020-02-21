@@ -33,6 +33,11 @@
         </dependency>
         <dependency>
             <groupId>javax.media.jai</groupId>
+            <artifactId>jai-codec-openjdk</artifactId>
+            <version>1.1.4</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.media.jai</groupId>
             <artifactId>mlibwrapper-jai</artifactId>
         </dependency>
         <dependency>
@@ -69,6 +74,8 @@
                         <publicPackage>javax.media.jai.*</publicPackage>
                         <publicPackage>javax.imageio.*</publicPackage>
                         <publicPackage>com.sun.media.*</publicPackage>
+                        <publicPackage>sun.awt.image.codec.*</publicPackage>
+                        <publicPackage>com.sun.image.codec.jpeg.*</publicPackage>
                         <publicPackage>com.sun.medialib.codec.*</publicPackage>
                         <publicPackage>com.sun.medialib.mlib.*</publicPackage>
                         <publicPackage>com.bc.ceres.compiler</publicPackage>
