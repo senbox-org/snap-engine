@@ -766,10 +766,8 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
      */
     @Override
     public boolean transferGeoCoding(final Scene srcScene, final Scene destScene, final ProductSubsetDef subsetDef) {
-        final String latGridName = getLatGrid().getName();
-        final String lonGridName = getLonGrid().getName();
-        TiePointGrid destLatGrid = getDestGrid(latGridName, destScene, subsetDef);
-        TiePointGrid destLonGrid = getDestGrid(lonGridName, destScene, subsetDef);
+        TiePointGrid destLatGrid = getDestGrid(getLatGrid(), destScene, subsetDef);
+        TiePointGrid destLonGrid = getDestGrid(getLonGrid(), destScene, subsetDef);
         if (destLatGrid != null && destLonGrid != null) {
             destScene.setGeoCoding(new TiePointGeoCoding(destLatGrid, destLonGrid));
             return true;
@@ -778,18 +776,18 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
         }
     }
 
-    protected TiePointGrid getDestGrid(String gridName, final Scene destScene, final ProductSubsetDef subsetDef) {
+    protected TiePointGrid getDestGrid(TiePointGrid grid, final Scene destScene, final ProductSubsetDef subsetDef) {
         final Product destProduct = destScene.getProduct();
-        TiePointGrid grid = destProduct.getTiePointGrid(gridName);
-        if (grid == null) {
+        TiePointGrid destGrid = destProduct.getTiePointGrid(grid.getName());
+        if (destGrid == null) {
             if (subsetDef != null) {
-                grid = TiePointGrid.createSubset(getLatGrid(), subsetDef);
+                destGrid = TiePointGrid.createSubset(grid, subsetDef);
             } else {
-                grid = getLatGrid().cloneTiePointGrid();
+                destGrid = grid.cloneTiePointGrid();
             }
-            destProduct.addTiePointGrid(grid);
+            destProduct.addTiePointGrid(destGrid);
         }
-        return grid;
+        return destGrid;
     }
 
     /////////////////////////////////////////////////////////////////////////
