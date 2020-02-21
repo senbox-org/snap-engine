@@ -245,8 +245,8 @@ class PixelGeoCoding2 extends AbstractGeoCoding implements BasicPixelGeoCoding {
         if (pixelPos.isValid()) {
             // TODO: 20.02.2020 SE fixed -- Marked GETGEOPOS abort condition
             if (pixelPosIsInsideRasterWH(pixelPos)) {
-                int x0 = (int) Math.floor(pixelPos.getX()) - pixelPos.x == rasterW ? 1 : 0;
-                int y0 = (int) Math.floor(pixelPos.getY()) - pixelPos.y == rasterH ? 1 : 0;
+                int x0 = (int) Math.floor(pixelPos.getX()) - (pixelPos.x == rasterW ? 1 : 0);
+                int y0 = (int) Math.floor(pixelPos.getY()) - (pixelPos.y == rasterH ? 1 : 0);
 
                 if (fractionAccuracy && !isInPixelCenter(pixelPos)) {
                     if (x0 > 0 && pixelPos.x - x0 < 0.5 || x0 == rasterW - 1) {
