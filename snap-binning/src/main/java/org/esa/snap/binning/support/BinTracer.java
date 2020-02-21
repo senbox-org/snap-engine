@@ -37,6 +37,7 @@ import java.io.PrintStream;
 public class BinTracer {
 
     private static final String SYSPROP_TRACE_LAT_LON = "snap.binning.traceLatLon";
+    private static final String LAT_LON_TRACE_STRING = Config.instance().preferences().get(SYSPROP_TRACE_LAT_LON, null);
 
     private final long binIndex;
     private final String[] obsNames;
@@ -55,7 +56,7 @@ public class BinTracer {
     }
 
     public static boolean isActive() {
-        return Config.instance().preferences().get(SYSPROP_TRACE_LAT_LON, null) != null;
+        return LAT_LON_TRACE_STRING != null;
     }
 
     public static BinTracer create(BinManager binManager, PlanetaryGrid planetaryGridInst, String productOutputFile) {
@@ -83,9 +84,8 @@ public class BinTracer {
     }
 
     private static long getBinIndexToTrace(PlanetaryGrid planetaryGrid) {
-        String latLonString = Config.instance().preferences().get(SYSPROP_TRACE_LAT_LON, null);
-        if (latLonString != null && latLonString.contains(",")) {
-            String[] latLon = latLonString.split(",");
+        if (LAT_LON_TRACE_STRING != null && LAT_LON_TRACE_STRING.contains(",")) {
+            String[] latLon = LAT_LON_TRACE_STRING.split(",");
             if (latLon.length == 2) {
                 double lat = Double.parseDouble(latLon[0]);
                 double lon = Double.parseDouble(latLon[1]);
