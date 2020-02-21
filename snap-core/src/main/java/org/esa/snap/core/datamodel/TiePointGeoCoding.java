@@ -768,31 +768,28 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
     public boolean transferGeoCoding(final Scene srcScene, final Scene destScene, final ProductSubsetDef subsetDef) {
         final String latGridName = getLatGrid().getName();
         final String lonGridName = getLonGrid().getName();
-        final Product destProduct = destScene.getProduct();
-        TiePointGrid latGrid = destProduct.getTiePointGrid(latGridName);
-        if (latGrid == null) {
-            if (subsetDef != null) {
-                latGrid = TiePointGrid.createSubset(getLatGrid(), subsetDef);
-            } else {
-                latGrid = getLatGrid().cloneTiePointGrid();
-            }
-            destProduct.addTiePointGrid(latGrid);
-        }
-        TiePointGrid lonGrid = destProduct.getTiePointGrid(lonGridName);
-        if (lonGrid == null) {
-            if (subsetDef != null) {
-                lonGrid = TiePointGrid.createSubset(getLonGrid(), subsetDef);
-            } else {
-                lonGrid = getLonGrid().cloneTiePointGrid();
-            }
-            destProduct.addTiePointGrid(lonGrid);
-        }
-        if (latGrid != null && lonGrid != null) {
-            destScene.setGeoCoding(new TiePointGeoCoding(latGrid, lonGrid));
+        TiePointGrid destLatGrid = getDestGrid(latGridName, destScene, subsetDef);
+        TiePointGrid destLonGrid = getDestGrid(lonGridName, destScene, subsetDef);
+        if (destLatGrid != null && destLonGrid != null) {
+            destScene.setGeoCoding(new TiePointGeoCoding(destLatGrid, destLonGrid));
             return true;
         } else {
             return false;
         }
+    }
+
+    protected TiePointGrid getDestGrid(String gridName, final Scene destScene, final ProductSubsetDef subsetDef) {
+        final Product destProduct = destScene.getProduct();
+        TiePointGrid grid = destProduct.getTiePointGrid(gridName);
+        if (grid == null) {
+            if (subsetDef != null) {
+                grid = TiePointGrid.createSubset(getLatGrid(), subsetDef);
+            } else {
+                grid = getLatGrid().cloneTiePointGrid();
+            }
+            destProduct.addTiePointGrid(grid);
+        }
+        return grid;
     }
 
     /////////////////////////////////////////////////////////////////////////
