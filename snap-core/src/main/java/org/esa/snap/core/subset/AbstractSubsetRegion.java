@@ -10,20 +10,18 @@ import java.awt.*;
 public abstract class AbstractSubsetRegion {
 
     protected final int borderPixels;
-    protected final boolean roundPixelRegion;
 
-    protected AbstractSubsetRegion(int borderPixels, boolean roundPixelRegion) {
+    protected AbstractSubsetRegion(int borderPixels) {
         if (borderPixels < 0) {
             throw new IllegalArgumentException("The border pixels " + borderPixels + " is negative.");
         }
         this.borderPixels = borderPixels;
-        this.roundPixelRegion = roundPixelRegion;
     }
 
-    public abstract Rectangle computeProductPixelRegion(GeoCoding productDefaultGeoCoding, int defaultProductWidth, int defaultProductHeight);
+    public abstract Rectangle computeProductPixelRegion(GeoCoding productDefaultGeoCoding, int defaultProductWidth, int defaultProductHeight, boolean roundPixelRegion);
 
     public abstract Rectangle computeBandPixelRegion(GeoCoding productDefaultGeoCoding, GeoCoding bandDefaultGeoCoding, int defaultProductWidth,
-                                                     int defaultProductHeight, int defaultBandWidth, int defaultBandHeight);
+                                                     int defaultProductHeight, int defaultBandWidth, int defaultBandHeight, boolean roundPixelRegion);
 
 
     protected void validateDefaultSize(int defaultProductWidth, int defaultProductHeight, String exceptionMessagePrefix) {

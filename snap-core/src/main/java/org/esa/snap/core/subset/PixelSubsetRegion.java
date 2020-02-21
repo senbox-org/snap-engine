@@ -2,7 +2,6 @@ package org.esa.snap.core.subset;
 
 import com.vividsolutions.jts.geom.Geometry;
 import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.core.util.ProductUtils;
 
 import java.awt.*;
@@ -14,8 +13,8 @@ public class PixelSubsetRegion extends AbstractSubsetRegion {
 
     private final Rectangle pixelRegion;
 
-    public PixelSubsetRegion(int x, int y, int width, int height, int borderPixels, boolean roundPixelRegion) {
-        super(borderPixels, roundPixelRegion);
+    public PixelSubsetRegion(int x, int y, int width, int height, int borderPixels) {
+        super(borderPixels);
 
         if (x < 0 || y < 0 || width < 1 || height < 1) {
             throw new IllegalArgumentException("The pixel region 'x="+x+", y="+y+", width="+width+", height="+height+"' is invalid.");
@@ -23,8 +22,8 @@ public class PixelSubsetRegion extends AbstractSubsetRegion {
         this.pixelRegion = new Rectangle(x, y, width, height);
     }
 
-    public PixelSubsetRegion(Rectangle pixelRegion, int borderPixels, boolean roundPixelRegion) {
-        super(borderPixels, roundPixelRegion);
+    public PixelSubsetRegion(Rectangle pixelRegion, int borderPixels) {
+        super(borderPixels);
 
         if (pixelRegion == null) {
             throw new NullPointerException("The pixel region is null.");
@@ -36,14 +35,14 @@ public class PixelSubsetRegion extends AbstractSubsetRegion {
     }
 
     @Override
-    public Rectangle computeProductPixelRegion(GeoCoding productDefaultGeoCoding, int defaultProductWidth, int defaultProductHeight) {
+    public Rectangle computeProductPixelRegion(GeoCoding productDefaultGeoCoding, int defaultProductWidth, int defaultProductHeight, boolean roundPixelRegion) {
         validateDefaultSize(defaultProductWidth, defaultProductHeight, "The default product");
         return this.pixelRegion;
     }
 
     @Override
     public Rectangle computeBandPixelRegion(GeoCoding productDefaultGeoCoding, GeoCoding bandDefaultGeoCoding, int defaultProductWidth,
-                                            int defaultProductHeight, int defaultBandWidth, int defaultBandHeight) {
+                                            int defaultProductHeight, int defaultBandWidth, int defaultBandHeight, boolean roundPixelRegion) {
 
         validateDefaultSize(defaultProductWidth, defaultProductHeight, "The default product");
         // test if the band width and band height > 0
@@ -53,7 +52,7 @@ public class PixelSubsetRegion extends AbstractSubsetRegion {
             // the product is multisize
             if (productDefaultGeoCoding != null && bandDefaultGeoCoding != null) {
                 Geometry productGeometryRegion = ProductUtils.computeGeometryUsingPixelRegion(productDefaultGeoCoding, defaultProductWidth, defaultProductHeight, this.pixelRegion);
-                return ProductUtils.computePixelRegionUsingGeometry(bandDefaultGeoCoding, defaultBandWidth, defaultBandHeight, productGeometryRegion, this.borderPixels, this.roundPixelRegion);
+                return ProductUtils.computePixelRegionUsingGeometry(bandDefaultGeoCoding, defaultBandWidth, defaultBandHeight, productGeometryRegion, this.borderPixels, roundPixelRegion);
             }
             return computeBandBoundsBasedOnPercent(this.pixelRegion, defaultProductWidth, defaultProductHeight, defaultBandWidth, defaultBandHeight);
         } else {

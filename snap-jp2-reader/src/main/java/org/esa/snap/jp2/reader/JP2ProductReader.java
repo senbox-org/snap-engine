@@ -147,7 +147,7 @@ public class JP2ProductReader extends AbstractProductReader {
                 if (subsetDef == null || subsetDef.getSubsetRegion() == null) {
                     subsetRegion = new Rectangle(0, 0, imageWidth, imageHeight);
                 } else {
-                    subsetRegion = subsetDef.getSubsetRegion().computeProductPixelRegion(productDefaultGeoCoding, imageWidth, imageHeight);
+                    subsetRegion = subsetDef.getSubsetRegion().computeProductPixelRegion(productDefaultGeoCoding, imageWidth, imageHeight, false);
                 }
                 imageWidth = subsetRegion.width;
                 imageHeight = subsetRegion.height;

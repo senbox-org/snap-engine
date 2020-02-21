@@ -101,9 +101,6 @@ public class ReadOp extends Operator {
     @TargetProduct
     private Product targetProduct;
 
-    public ReadOp() {
-    }
-
     @Override
     public void initialize() throws OperatorException {
         if (this.file == null) {
@@ -125,9 +122,9 @@ public class ReadOp extends Operator {
             }
             AbstractSubsetRegion subsetRegion = null;
             if (this.geometryRegion != null) {
-                subsetRegion = new GeometrySubsetRegion(this.geometryRegion, 0, true);
+                subsetRegion = new GeometrySubsetRegion(this.geometryRegion, 0);
             } else if (this.pixelRegion != null) {
-                subsetRegion = new PixelSubsetRegion(this.pixelRegion, 0, false);
+                subsetRegion = new PixelSubsetRegion(this.pixelRegion, 0);
             }
             subsetDef.setSubsetRegion(subsetRegion);
             if (hasBandNames) {

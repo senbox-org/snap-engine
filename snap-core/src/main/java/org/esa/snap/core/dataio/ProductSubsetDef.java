@@ -290,7 +290,7 @@ public class ProductSubsetDef {
             throw new IllegalArgumentException("invalid region");
         }
         this.region = new Rectangle(x, y, w, h);
-        this.subsetRegion = new PixelSubsetRegion(x, y, w, h, 0, false);
+        this.subsetRegion = new PixelSubsetRegion(x, y, w, h, 0);
     }
 
     /**
@@ -430,7 +430,7 @@ public class ProductSubsetDef {
 
     public void setGeoRegion(Geometry geometryRegion){
         this.geoRegion = geometryRegion;
-        this.subsetRegion = new GeometrySubsetRegion(geoRegion, 0, true);
+        this.subsetRegion = new GeometrySubsetRegion(geoRegion, 0);
     }
 
     /**

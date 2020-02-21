@@ -2484,7 +2484,7 @@ public class ProductUtils {
         if (regionIntersection.isEmpty()) {
             return new Rectangle();
         }
-        final ProductUtils.PixelRegionFinder pixelRegionFinder = new ProductUtils.PixelRegionFinder(rasterGeoCoding, roundPixelRegion);
+        final PixelRegionFinder pixelRegionFinder = new PixelRegionFinder(rasterGeoCoding, roundPixelRegion);
         regionIntersection.apply(pixelRegionFinder);
         final Rectangle pixelRegion = pixelRegionFinder.getPixelRegion();
         pixelRegion.grow(numBorderPixels, numBorderPixels);
@@ -2493,11 +2493,11 @@ public class ProductUtils {
 
     public static Geometry computeGeometryUsingPixelRegion(GeoCoding rasterGeoCoding, int rasterWidth, int rasterHeight, Rectangle pixelRegion) {
         final int step = Math.min(pixelRegion.width, pixelRegion.height) / 8;
-        GeneralPath[] paths = ProductUtils.createGeoBoundaryPathsArray(rasterGeoCoding, rasterWidth, rasterHeight, pixelRegion, step, false);
+        GeneralPath[] paths = createGeoBoundaryPaths(rasterGeoCoding, rasterWidth, rasterHeight, pixelRegion, step, false);
         final com.vividsolutions.jts.geom.Polygon[] polygons = new com.vividsolutions.jts.geom.Polygon[paths.length];
         final GeometryFactory factory = new GeometryFactory();
         for (int i = 0; i < paths.length; i++) {
-            polygons[i] = ProductUtils.convertAwtPathToJtsPolygon(paths[i], factory);
+            polygons[i] = convertAwtPathToJtsPolygon(paths[i], factory);
         }
         if (polygons.length == 1) {
             return polygons[0];
@@ -2507,11 +2507,11 @@ public class ProductUtils {
     }
 
     public static Geometry computeProductGeometry(GeoCoding productGeoCoding, int productWidth, int productHeight) {
-        final GeneralPath[] paths = ProductUtils.createGeoBoundaryPaths(productGeoCoding, productWidth, productHeight);
+        final GeneralPath[] paths = createGeoBoundaryPaths(productGeoCoding, productWidth, productHeight);
         final com.vividsolutions.jts.geom.Polygon[] polygons = new com.vividsolutions.jts.geom.Polygon[paths.length];
         final GeometryFactory factory = new GeometryFactory();
         for (int i = 0; i < paths.length; i++) {
-            polygons[i] = ProductUtils.convertAwtPathToJtsPolygon(paths[i], factory);
+            polygons[i] = convertAwtPathToJtsPolygon(paths[i], factory);
         }
         final DouglasPeuckerSimplifier peuckerSimplifier = new DouglasPeuckerSimplifier(polygons.length == 1 ? polygons[0] : factory.createMultiPolygon(polygons));
         return peuckerSimplifier.getResultGeometry();
@@ -2525,7 +2525,7 @@ public class ProductUtils {
         private int y1;
         private int x2;
         private int y2;
-        private boolean round;
+        private boolean round = false;
 
         public PixelRegionFinder(GeoCoding geoCoding, boolean round) {
             this.geoCoding = geoCoding;
