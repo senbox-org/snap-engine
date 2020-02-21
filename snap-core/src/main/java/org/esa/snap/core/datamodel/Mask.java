@@ -134,9 +134,9 @@ public class Mask extends Band {
 
     private boolean isMaskImageInvalid(MultiLevelImage image) {
         return image.getSampleModel().getDataType() != DataBuffer.TYPE_BYTE
-               || image.getNumBands() != 1
-               || image.getWidth() != getRasterWidth()
-               || image.getHeight() != getRasterHeight();
+                || image.getNumBands() != 1
+                || image.getWidth() != getRasterWidth()
+                || image.getHeight() != getRasterHeight();
     }
 
     @Override
@@ -323,21 +323,21 @@ public class Mask extends Band {
 
         private boolean isFlagCodingExpression(String rasterName, String attribute,
                                                Product sourceProduct, Product targetProduct) {
-                Band sourceRaster = sourceProduct.getBand(rasterName);
-                Band targetRaster = targetProduct.getBand(rasterName);
-                if (sourceRaster.isFlagBand() && targetRaster.isFlagBand()) {
+            Band sourceRaster = sourceProduct.getBand(rasterName);
+            Band targetRaster = targetProduct.getBand(rasterName);
+            if (sourceRaster != null && targetRaster != null && sourceRaster.isFlagBand() && targetRaster.isFlagBand()) {
                     String flagCodingName = sourceRaster.getFlagCoding().getName();
                     return isFlagCodingExpression(flagCodingName, attribute, sourceProduct) ||
                             isFlagCodingExpression(flagCodingName, attribute, targetProduct);
-                }
-                return false;
+            }
+            return false;
         }
 
         private boolean isIndexCodingExpression(String rasterName, String attribute,
-                                               Product sourceProduct, Product targetProduct) {
+                                                Product sourceProduct, Product targetProduct) {
             Band sourceRaster = sourceProduct.getBand(rasterName);
             Band targetRaster = targetProduct.getBand(rasterName);
-            if (sourceRaster.isIndexBand() && targetRaster.isIndexBand()) {
+            if (sourceRaster != null && targetRaster != null && sourceRaster.isIndexBand() && targetRaster.isIndexBand()) {
                 String indexCodingName = sourceRaster.getIndexCoding().getName();
                 return isIndexCodingExpression(indexCodingName, attribute, sourceProduct) ||
                         isIndexCodingExpression(indexCodingName, attribute, targetProduct);
