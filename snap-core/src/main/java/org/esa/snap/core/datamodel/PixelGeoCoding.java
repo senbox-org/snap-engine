@@ -817,8 +817,8 @@ public class PixelGeoCoding extends AbstractGeoCoding implements BasicPixelGeoCo
             final double pipoY = pixelPos.getY();
 
             // TODO: 20.02.2020 SE fixed -- Marked GETGEOPOS abort condition
-            int x0 = (int) Math.floor(pipoX) - pipoX == rasterWidth ? 1 : 0;
-            int y0 = (int) Math.floor(pipoY) - pipoY == rasterHeight ? 1 : 0;
+            int x0 = (int) Math.floor(pipoX) - (pipoX == rasterWidth ? 1 : 0);
+            int y0 = (int) Math.floor(pipoY) - (pipoY == rasterHeight ? 1 : 0);
             if (x0 >= 0 && x0 < rasterWidth && y0 >= 0 && y0 < rasterHeight) {
                 if (fractionAccuracy) { // implies tiling mode
                     if (x0 > 0 && pipoX - x0 < 0.5f || x0 == rasterWidth - 1) {
