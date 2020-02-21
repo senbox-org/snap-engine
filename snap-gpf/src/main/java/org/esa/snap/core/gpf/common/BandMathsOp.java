@@ -342,17 +342,19 @@ public class BandMathsOp extends Operator {
 
     @Override
     public void doExecute(ProgressMonitor pm) throws OperatorException {
-        copyTiePointGridData(sourceProducts[0], targetProduct);
+        copyTiePointGridData(sourceProducts[0], targetProduct, pm);
     }
 
-    private static void copyTiePointGridData(Product sourceProduct, Product targetProduct) {
+    private static void copyTiePointGridData(Product sourceProduct, Product targetProduct, ProgressMonitor pm) {
+        pm.beginTask("Reading Tie Point Data", targetProduct.getNumTiePointGrids());
         for (int i = 0; i < targetProduct.getNumTiePointGrids(); i++) {
             TiePointGrid targetTPG = targetProduct.getTiePointGridAt(i);
-            if (targetTPG.getData() != null && sourceProduct.containsTiePointGrid(targetTPG.getName())) {
+            if (targetTPG.getData() == null && sourceProduct.containsTiePointGrid(targetTPG.getName())) {
                 float[] srcTiePoints = sourceProduct.getTiePointGrid(targetTPG.getName()).getTiePoints();
                 final float[] destTiePoints = new float[srcTiePoints.length];
                 System.arraycopy(srcTiePoints, 0, destTiePoints, 0, srcTiePoints.length);
                 targetTPG.setData(ProductData.createInstance(destTiePoints));
+                pm.worked(1);
             }
         }
     }
