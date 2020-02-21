@@ -243,9 +243,10 @@ class PixelGeoCoding2 extends AbstractGeoCoding implements BasicPixelGeoCoding {
         }
         geoPos.setInvalid();
         if (pixelPos.isValid()) {
+            // TODO: 20.02.2020 SE fixed -- Marked GETGEOPOS abort condition
             if (pixelPosIsInsideRasterWH(pixelPos)) {
-                int x0 = (int) Math.floor(pixelPos.getX());
-                int y0 = (int) Math.floor(pixelPos.getY());
+                int x0 = (int) Math.floor(pixelPos.getX()) - pixelPos.x == rasterW ? 1 : 0;
+                int y0 = (int) Math.floor(pixelPos.getY()) - pixelPos.y == rasterH ? 1 : 0;
 
                 if (fractionAccuracy && !isInPixelCenter(pixelPos)) {
                     if (x0 > 0 && pixelPos.x - x0 < 0.5 || x0 == rasterW - 1) {
@@ -285,7 +286,8 @@ class PixelGeoCoding2 extends AbstractGeoCoding implements BasicPixelGeoCoding {
     private boolean pixelPosIsInsideRasterWH(PixelPos pixelPos) {
         final double x = pixelPos.x;
         final double y = pixelPos.y;
-        return x >= 0 && x < rasterW && y >= 0 && y < rasterH;
+        // TODO: 20.02.2020 SE fixed -- Marked GETGEOPOS abort condition
+        return x >= 0 && x <= rasterW && y >= 0 && y <= rasterH;
     }
 
     public int getRasterWidth() {
