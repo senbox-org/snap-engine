@@ -273,6 +273,11 @@ public class PixExOp extends Operator {
                 throw new OperatorException("Directory for sub-scenes does not exist and could not be created.");
             }
         }
+        setDummyTargetProduct();
+    }
+
+    @Override
+    public void doExecute(ProgressMonitor pm) throws OperatorException {
         if (exportKmz) {
             kmlDocument = new KmlDocument("placemarks", null);
             knownKmzPlacemarks = new ArrayList<>();
@@ -317,8 +322,6 @@ public class PixExOp extends Operator {
             if (!sourceProductFileSet.isEmpty()) {
                 measurementsFound |= extractMeasurements(sourceProductFileSet);
             }
-
-            setDummyTargetProduct();
 
             if (exportKmz && measurementsFound) {
                 KmzExporter kmzExporter = new KmzExporter();
