@@ -96,7 +96,20 @@ public class TAORemoteRepositoriesManager {
         synchronized (this.downloadingProducts) {
             downloadStrategy = this.downloadingProducts.remove(key);
         }
-        if (downloadStrategy != null) {
+        if (downloadStrategy == null) {
+            // the product is not downloading
+            if (logger.isLoggable(Level.FINE)) {
+                StringBuilder logMessage = new StringBuilder();
+                logMessage.append("The product '")
+                        .append(repositoryProduct.getName())
+                        .append("' from the '")
+                        .append(dataSourceName)
+                        .append("' remote repository using the '")
+                        .append(repositoryProduct.getMission())
+                        .append("' mission is not downloading.");
+                logger.log(Level.FINE, logMessage.toString());
+            }
+        } else {
             // the product is still downloading
             if (logger.isLoggable(Level.FINE)) {
                 StringBuilder logMessage = new StringBuilder();

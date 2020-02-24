@@ -5,8 +5,8 @@ package org.esa.snap.engine_utilities.util;
  */
 public class Pair<First, Second> {
 
-    private final First first;
-    private final Second second;
+    private First first;
+    private Second second;
 
     public Pair(First first, Second second) {
         this.first = first;
@@ -19,5 +19,13 @@ public class Pair<First, Second> {
 
     public Second getSecond() {
         return second;
+    }
+
+    public void setFirst(First first) {
+        this.first = first;
+    }
+
+    public void setSecond(Second second) {
+        this.second = second;
     }
 }
