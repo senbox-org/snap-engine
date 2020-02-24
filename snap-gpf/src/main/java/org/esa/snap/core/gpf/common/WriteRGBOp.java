@@ -63,7 +63,7 @@ public class WriteRGBOp extends Operator {
     @TargetProduct
     private Product targetProduct;
 
-    private transient RasterDataNode[] rgbChannelNodes;
+    private transient Band[] rgbChannelNodes;
     private transient Map<Band, Band> bandMap;
     private transient Map<Band, ProductData> dataMap;
 
@@ -79,7 +79,7 @@ public class WriteRGBOp extends Operator {
 
         bandMap = new HashMap<Band, Band>(3);
         dataMap = new HashMap<Band, ProductData>(3);
-        rgbChannelNodes = new RasterDataNode[3];
+        rgbChannelNodes = new Band[3];
 
         final int height = sourceProduct.getSceneRasterHeight();
         final int width = sourceProduct.getSceneRasterWidth();
@@ -94,12 +94,16 @@ public class WriteRGBOp extends Operator {
         Band targetBand = new Band(bandName, sourceBand.getDataType(), width, height);
         targetProduct.addBand(targetBand);
         bandMap.put(targetBand, sourceBand);
-
-        ProductData data = targetBand.createCompatibleRasterData();
-        dataMap.put(targetBand, data);
-
-        targetBand.setRasterData(data);
         rgbChannelNodes[rgbIndex] = targetBand;
+    }
+
+    @Override
+    public void doExecute(ProgressMonitor pm) throws OperatorException {
+        for (Band targetBand : rgbChannelNodes) {
+            ProductData data = targetBand.createCompatibleRasterData();
+            dataMap.put(targetBand, data);
+            targetBand.setRasterData(data);
+        }
     }
 
     @Override
