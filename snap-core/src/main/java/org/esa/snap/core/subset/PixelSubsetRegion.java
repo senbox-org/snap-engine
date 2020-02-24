@@ -72,6 +72,10 @@ public class PixelSubsetRegion extends AbstractSubsetRegion {
         }
     }
 
+    public Rectangle getPixelRegion() {
+        return pixelRegion;
+    }
+
     private static Rectangle computeBandBoundsBasedOnPercent(Rectangle productBounds, int defaultProductWidth, int defaultProductHeight, int defaultBandWidth, int defaultBandHeight) {
         float productOffsetXPercent = productBounds.x / (float)defaultProductWidth;
         float productOffsetYPercent = productBounds.y / (float)defaultProductHeight;

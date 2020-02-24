@@ -20,6 +20,7 @@ import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.VirtualBand;
+import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.esa.snap.core.util.io.FileUtils;
 import org.junit.Test;
 
@@ -95,7 +96,7 @@ public class GeoTiffProductReaderTest {
 
         ProductSubsetDef subsetDef = new ProductSubsetDef();
         subsetDef.setNodeNames(new String[] { "band_1"} );
-        subsetDef.setRegion(new Rectangle(23, 32, 41, 35));
+        subsetDef.setSubsetRegion(new PixelSubsetRegion(new Rectangle(23, 32, 41, 35), 0));
         subsetDef.setSubSampling(1, 1);
 
         Product product = productReader.readProductNodes(productFile, subsetDef);

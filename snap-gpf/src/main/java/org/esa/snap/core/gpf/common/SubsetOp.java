@@ -34,6 +34,7 @@ import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.jexp.ParseException;
 import org.esa.snap.core.jexp.Term;
 import org.esa.snap.core.subset.AbstractSubsetRegion;
+import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.converters.JtsGeometryConverter;
 import org.esa.snap.core.util.converters.RectangleConverter;
@@ -218,7 +219,7 @@ public class SubsetOp extends Operator {
                 if (region.height == 0 || region.y + region.height > sourceProduct.getSceneRasterHeight()) {
                     region.height = sourceProduct.getSceneRasterHeight() - region.y;
                 }
-                subsetDef.setRegion(region);
+                subsetDef.setSubsetRegion(new PixelSubsetRegion(region, 0));
             } else {
                 // the source product is multisize or the reference band is specified
                 subsetDef.setRegionMap(computeRegionMap(region, referenceBand, sourceProduct, subsetDef.getNodeNames()));

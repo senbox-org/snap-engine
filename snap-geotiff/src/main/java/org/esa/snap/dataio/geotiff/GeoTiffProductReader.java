@@ -48,6 +48,7 @@ import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.dataop.maptransf.Datum;
 import org.esa.snap.core.image.ImageManager;
+import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.esa.snap.core.util.geotiff.EPSGCodes;
 import org.esa.snap.core.util.geotiff.GeoTIFFCodes;
 import org.esa.snap.core.util.io.FileUtils;
@@ -502,7 +503,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
                 TiePointGrid lonGrid = new TiePointGrid("lonGrid", productWidth, productHeight, 0.0, 0.0, 1.0, 1.0, lonPoints);
                 if (subsetRegion != null) {
                     ProductSubsetDef productSubsetDef = new ProductSubsetDef();
-                    productSubsetDef.setRegion(subsetRegion);
+                    productSubsetDef.setSubsetRegion(new PixelSubsetRegion(subsetRegion, 0));
                     productSubsetDef.setSubSampling(1, 1);
                     lonGrid = TiePointGrid.createSubset(lonGrid, productSubsetDef);
                     latGrid = TiePointGrid.createSubset(latGrid, productSubsetDef);
@@ -620,7 +621,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
         TiePointGrid lonGrid = new TiePointGrid(names[1], width, height, xMin, yMin, xDiff, yDiff, lons);
         if (subsetRegion != null) {
             ProductSubsetDef productSubsetDef = new ProductSubsetDef();
-            productSubsetDef.setRegion(subsetRegion);
+            productSubsetDef.setSubsetRegion(new PixelSubsetRegion(subsetRegion, 0));
             productSubsetDef.setSubSampling(1, 1);
             lonGrid = TiePointGrid.createSubset(lonGrid, productSubsetDef);
             latGrid = TiePointGrid.createSubset(latGrid, productSubsetDef);

@@ -5,6 +5,7 @@ import com.bc.ceres.glevel.MultiLevelImage;
 import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.junit.Test;
 
 import java.awt.*;
@@ -76,7 +77,7 @@ public class JP2ProductReaderTest {
         Rectangle subsetRegion = new Rectangle(100, 100, 278, 189);
         ProductSubsetDef subsetDef = new ProductSubsetDef();
         subsetDef.setNodeNames(new String[] { "band_2", "band_3"} );
-        subsetDef.setRegion(subsetRegion);
+        subsetDef.setSubsetRegion(new PixelSubsetRegion(subsetRegion, 0));
         subsetDef.setSubSampling(1, 1);
 
         Product product = productReader.readProductNodes(productFile, subsetDef);
