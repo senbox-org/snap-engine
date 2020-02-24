@@ -116,7 +116,7 @@ public class PixelGeoIndexInverse implements InverseCoding {
     }
 
     @Override
-    public String getFactoryKey() {
+    public String getKey() {
         if (fractionalAccuracy) {
             return KEY_INTERPOLATING;
         } else {

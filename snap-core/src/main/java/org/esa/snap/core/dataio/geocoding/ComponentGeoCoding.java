@@ -147,7 +147,7 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
         }
         InverseCoding inverseCoding = null;
         if (this.inverseCoding != null) {
-            inverseCoding = ComponentFactory.getInverse(this.inverseCoding.getFactoryKey());
+            inverseCoding = ComponentFactory.getInverse(this.inverseCoding.getKey());
         }
 
         final CoordinateReferenceSystem geoCRS = getGeoCRS();
@@ -311,5 +311,9 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
     // package access for testing only tb 2019-11-18
     InverseCoding getInverseCoding() {
         return inverseCoding;
+    }
+
+    public GeoRaster getGeoRaster() {
+        return geoRaster;
     }
 }

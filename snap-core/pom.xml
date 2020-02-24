@@ -115,12 +115,17 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-			<scope>test</scope>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-all</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
-			<scope>test</scope>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.vividsolutions</groupId>
