@@ -23,6 +23,9 @@ public abstract class AbstractMatrixMosaicSubsetMultiLevelSource extends Abstrac
     protected AbstractMatrixMosaicSubsetMultiLevelSource(MosaicMatrix mosaicMatrix, Rectangle imageMatrixReadBounds, Dimension tileSize, AffineTransform imageToModelTransform) {
         super(imageMatrixReadBounds, tileSize, imageToModelTransform);
 
+        if (mosaicMatrix == null) {
+            throw new NullPointerException("The mosaic matrix is null.");
+        }
         if (!mosaicMatrix.isConsistent()) {
             throw new IllegalArgumentException("The matrix has empty cells.");
         }
@@ -32,6 +35,9 @@ public abstract class AbstractMatrixMosaicSubsetMultiLevelSource extends Abstrac
     protected AbstractMatrixMosaicSubsetMultiLevelSource(int levelCount, MosaicMatrix mosaicMatrix, Rectangle imageMatrixReadBounds, Dimension tileSize, AffineTransform imageToModelTransform) {
         super(levelCount, imageMatrixReadBounds, tileSize, imageToModelTransform);
 
+        if (mosaicMatrix == null) {
+            throw new NullPointerException("The mosaic matrix is null.");
+        }
         if (!mosaicMatrix.isConsistent()) {
             throw new IllegalArgumentException("The matrix has empty cells.");
         }

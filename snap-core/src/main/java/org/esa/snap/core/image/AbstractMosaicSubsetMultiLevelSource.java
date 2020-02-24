@@ -39,6 +39,20 @@ public abstract class AbstractMosaicSubsetMultiLevelSource extends AbstractMulti
     protected AbstractMosaicSubsetMultiLevelSource(int levelCount, Rectangle imageReadBounds, Dimension tileSize, AffineTransform imageToModelTransform) {
         super(new DefaultMultiLevelModel(levelCount, imageToModelTransform, imageReadBounds.width, imageReadBounds.height));
 
+        if (imageReadBounds == null) {
+            throw new NullPointerException("The read bounds region is null.");
+        }
+        if (imageReadBounds.x < 0 || imageReadBounds.y < 0 || imageReadBounds.width < 1 || imageReadBounds.height < 1) {
+            throw new IllegalArgumentException("The read bounds region '"+imageReadBounds+"' is invalid.");
+        }
+
+        if (tileSize == null) {
+            throw new NullPointerException("The tile size is null.");
+        }
+        if (tileSize.width < 1 || tileSize.height < 1) {
+            throw new IllegalArgumentException("The tile size '"+tileSize+"' is invalid.");
+        }
+
         this.imageReadBounds = imageReadBounds;
         this.tileSize = tileSize;
 
