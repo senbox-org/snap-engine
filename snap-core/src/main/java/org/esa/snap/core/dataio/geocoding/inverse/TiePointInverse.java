@@ -98,7 +98,7 @@ public class TiePointInverse implements InverseCoding {
     }
 
     @Override
-    public String getFactoryKey() {
+    public String getKey() {
         return KEY;
     }
 
