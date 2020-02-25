@@ -12,7 +12,7 @@ import org.esa.snap.core.util.PropertyMap;
 
 public class ColorSchemeDefaults {
 
-    public static final boolean COLOR_SCHEME_CODE_DEBUG = true;
+    public static final boolean COLOR_SCHEME_CODE_DEBUG = false;
 
     public static final String TOOLNAME_COLOR_MANIPULATION = "Color Manipulation";
 
@@ -160,6 +160,30 @@ public class ColorSchemeDefaults {
     public static final String PROPERTY_SCHEME_SORT_TOOLTIP = "Scheme selector will display all schemes sorted versus original xml order";
     public static final boolean PROPERTY_SCHEME_SORT_DEFAULT = false;
 
+
+    // Scheme option
+
+    private static final String PROPERTY_RANGE_BUTTON_KEY_SUFFIX = PROPERTY_ROOT_KEY + ".range.options";
+
+    public static final String PROPERTY_RANGE_BUTTON_SECTION_KEY = PROPERTY_RANGE_BUTTON_KEY_SUFFIX + ".section";
+    public static final String PROPERTY_RANGE_BUTTON_SECTION_LABEL = "Range Options";
+    public static final String PROPERTY_RANGE_BUTTON_SECTION_TOOLTIP = "Button options in the Color Manipulation GUI";
+
+
+    public static final String PROPERTY_RANGE_BUTTON_98_KEY = PROPERTY_RANGE_BUTTON_KEY_SUFFIX + ".98";
+    public static final String PROPERTY_RANGE_BUTTON_98_LABEL = "Show 98% range button";
+    public static final String PROPERTY_RANGE_BUTTON_98_TOOLTIP = "Show 98% range button in the sliders GUI";
+    public static final boolean PROPERTY_RANGE_BUTTON_98_DEFAULT = false;
+
+    public static final String PROPERTY_RANGE_BUTTON_95_KEY = PROPERTY_RANGE_BUTTON_KEY_SUFFIX + ".95";
+    public static final String PROPERTY_RANGE_BUTTON_95_LABEL = "Show 95% range button";
+    public static final String PROPERTY_RANGE_BUTTON_95_TOOLTIP = "Show 95% range button in the sliders GUI";
+    public static final boolean PROPERTY_RANGE_BUTTON_95_DEFAULT = true;
+
+    public static final String PROPERTY_RANGE_BUTTON_90_KEY = PROPERTY_RANGE_BUTTON_KEY_SUFFIX + ".90";
+    public static final String PROPERTY_RANGE_BUTTON_90_LABEL = "Show 90% range button";
+    public static final String PROPERTY_RANGE_BUTTON_90_TOOLTIP = "Show 90% range button in the sliders GUI";
+    public static final boolean PROPERTY_RANGE_BUTTON_90_DEFAULT = false;
 
     // ----------------------------
 
