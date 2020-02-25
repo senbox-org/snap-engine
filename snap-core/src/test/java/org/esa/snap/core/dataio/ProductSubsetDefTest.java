@@ -19,6 +19,7 @@ package org.esa.snap.core.dataio;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import org.esa.snap.core.subset.PixelSubsetRegion;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
@@ -135,14 +136,14 @@ public class ProductSubsetDefTest extends TestCase {
     public void testGetAndSetRegion() {
         assertNull("initially, getRegion() should return null", _subset.getRegion());
 
-        _subset.setRegion(new Rectangle(20, 30, 25, 35));
+        _subset.setSubsetRegion(new PixelSubsetRegion(new Rectangle(20, 30, 25, 35), 0));
         assertNotNull(_subset.getRegion());
         assertEquals(20, _subset.getRegion().x);
         assertEquals(30, _subset.getRegion().y);
         assertEquals(25, _subset.getRegion().width);
         assertEquals(35, _subset.getRegion().height);
 
-        _subset.setRegion(40, 45, 50, 55);
+        _subset.setSubsetRegion(new PixelSubsetRegion(40, 45, 50, 55, 0));
         assertNotNull(_subset.getRegion());
         assertEquals(40, _subset.getRegion().x);
         assertEquals(45, _subset.getRegion().y);
@@ -153,54 +154,54 @@ public class ProductSubsetDefTest extends TestCase {
         assertTrue(_subset.getRegion() != _subset.getRegion());
 
         // reset subset region
-        _subset.setRegion(null);
+        _subset.setSubsetRegion(null);
         assertEquals(null, _subset.getRegion());
 
         // IllegalArgumentException if x is negative
         try {
-            _subset.setRegion(-1, 2, 3, 4);
+            _subset.setSubsetRegion(new PixelSubsetRegion(-1, 2, 3, 4, 0));
             fail("IllegalArgumentException expected");
         } catch (IllegalArgumentException e) {
         }
 
         // IllegalArgumentException if y is negative
         try {
-            _subset.setRegion(1, -1, 3, 4);
+            _subset.setSubsetRegion(new PixelSubsetRegion(1, -1, 3, 4, 0));
             fail("IllegalArgumentException expected");
         } catch (IllegalArgumentException e) {
         }
 
         // IllegalArgumentException if width is zero
         try {
-            _subset.setRegion(1, 2, 0, 4);
+            _subset.setSubsetRegion(new PixelSubsetRegion(1, 2, 0, 4, 0));
             fail("IllegalArgumentException expected");
         } catch (IllegalArgumentException e) {
         }
 
         // IllegalArgumentException if height is zero
         try {
-            _subset.setRegion(1, 2, 3, 0);
+            _subset.setSubsetRegion(new PixelSubsetRegion(1, 2, 3, 0, 0));
             fail("IllegalArgumentException expected");
         } catch (IllegalArgumentException e) {
         }
 
         // IllegalArgumentException if width is negative
         try {
-            _subset.setRegion(1, 2, -1, 4);
+            _subset.setSubsetRegion(new PixelSubsetRegion(1, 2, -1, 4, 0));
             fail("IllegalArgumentException expected");
         } catch (IllegalArgumentException e) {
         }
 
         // IllegalArgumentException if height is negative
         try {
-            _subset.setRegion(1, 2, 3, -1);
+            _subset.setSubsetRegion(new PixelSubsetRegion(1, 2, 3, -1, 0));
             fail("IllegalArgumentException expected");
         } catch (IllegalArgumentException e) {
         }
 
         // IllegalArgumentException if bad values in Rectangle
         try {
-            _subset.setRegion(new Rectangle(12, 2, 3, -1));
+            _subset.setSubsetRegion(new PixelSubsetRegion(new Rectangle(12, 2, 3, -1), 0));
             fail("IllegalArgumentException expected");
         } catch (IllegalArgumentException e) {
         }
@@ -244,48 +245,48 @@ public class ProductSubsetDefTest extends TestCase {
     public void testGetRasterSize() {
 
         _subset.setSubSampling(1, 1);
-        _subset.setRegion(new Rectangle(0, 0, 1, 1));
+        _subset.setSubsetRegion(new PixelSubsetRegion(new Rectangle(0, 0, 1, 1), 0));
         assertEquals(new Dimension(1, 1), _subset.getSceneRasterSize(100, 100));
 
-        _subset.setRegion(new Rectangle(0, 0, 9, 9));
+        _subset.setSubsetRegion(new PixelSubsetRegion(new Rectangle(0, 0, 9, 9), 0));
         assertEquals(new Dimension(9, 9), _subset.getSceneRasterSize(100, 100));
 
-        _subset.setRegion(new Rectangle(0, 0, 10, 10));
+        _subset.setSubsetRegion(new PixelSubsetRegion(new Rectangle(0, 0, 10, 10), 0));
         assertEquals(new Dimension(10, 10), _subset.getSceneRasterSize(100, 100));
 
         _subset.setSubSampling(2, 2);
 
-        _subset.setRegion(new Rectangle(0, 0, 1, 1));
+        _subset.setSubsetRegion(new PixelSubsetRegion(new Rectangle(0, 0, 1, 1), 0));
         assertEquals(new Dimension(1, 1), _subset.getSceneRasterSize(100, 100));
 
-        _subset.setRegion(new Rectangle(0, 0, 90, 9));
+        _subset.setSubsetRegion(new PixelSubsetRegion(new Rectangle(0, 0, 90, 9), 0));
         assertEquals(new Dimension(45, 5), _subset.getSceneRasterSize(100, 100));
 
-        _subset.setRegion(new Rectangle(0, 0, 100, 10));
+        _subset.setSubsetRegion(new PixelSubsetRegion(new Rectangle(0, 0, 100, 10), 0));
         assertEquals(new Dimension(50, 5), _subset.getSceneRasterSize(100, 100));
 
-        _subset.setRegion(new Rectangle(0, 0, 110, 11));
+        _subset.setSubsetRegion(new PixelSubsetRegion(new Rectangle(0, 0, 110, 11), 0));
         assertEquals(new Dimension(55, 6), _subset.getSceneRasterSize(100, 100));
 
 
         _subset.setSubSampling(3, 3);
 
-        _subset.setRegion(new Rectangle(0, 0, 10, 1));
+        _subset.setSubsetRegion(new PixelSubsetRegion(new Rectangle(0, 0, 10, 1), 0));
         assertEquals(new Dimension(4, 1), _subset.getSceneRasterSize(100, 100));
 
-        _subset.setRegion(new Rectangle(0, 0, 90, 9));
+        _subset.setSubsetRegion(new PixelSubsetRegion(new Rectangle(0, 0, 90, 9), 0));
         assertEquals(new Dimension(30, 3), _subset.getSceneRasterSize(100, 100));
 
-        _subset.setRegion(new Rectangle(0, 0, 100, 10));
+        _subset.setSubsetRegion(new PixelSubsetRegion(new Rectangle(0, 0, 100, 10), 0));
         assertEquals(new Dimension(34, 4), _subset.getSceneRasterSize(100, 100));
 
-        _subset.setRegion(new Rectangle(0, 0, 110, 11));
+        _subset.setSubsetRegion(new PixelSubsetRegion(new Rectangle(0, 0, 110, 11), 0));
         assertEquals(new Dimension(37, 4), _subset.getSceneRasterSize(100, 100));
 
-        _subset.setRegion(new Rectangle(0, 0, 120, 12));
+        _subset.setSubsetRegion(new PixelSubsetRegion(new Rectangle(0, 0, 120, 12), 0));
         assertEquals(new Dimension(40, 4), _subset.getSceneRasterSize(100, 100));
 
-        _subset.setRegion(new Rectangle(0, 0, 130, 13));
+        _subset.setSubsetRegion(new PixelSubsetRegion(new Rectangle(0, 0, 130, 13), 0));
         assertEquals(new Dimension(44, 5), _subset.getSceneRasterSize(100, 100));
     }
 
