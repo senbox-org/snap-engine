@@ -135,7 +135,7 @@ public class Histogram extends Range {
      */
     public Range findRangeForPercent(double threshold) {
         if (threshold >0 && threshold <= 100) {
-            double limits = threshold / (100 * 2);
+            double limits = (100 - threshold) / (100 * 2);
             return findRange(limits, limits);
         }
 

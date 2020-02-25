@@ -185,6 +185,11 @@ public class ColorSchemeDefaults {
     public static final String PROPERTY_RANGE_BUTTON_90_TOOLTIP = "Show 90% range button in the sliders GUI";
     public static final boolean PROPERTY_RANGE_BUTTON_90_DEFAULT = false;
 
+    public static final String PROPERTY_RANGE_ZOOM_IN_KEY = PROPERTY_RANGE_BUTTON_KEY_SUFFIX + ".zoom.in";
+    public static final String PROPERTY_RANGE_ZOOM_IN_LABEL = "Slider view zoomed in";
+    public static final String PROPERTY_RANGE_ZOOM_IN_TOOLTIP = "Display slider view zoomed in by defaul";
+    public static final boolean PROPERTY_RANGE_ZOOM_IN_DEFAULT = false;
+
     // ----------------------------
 
 
