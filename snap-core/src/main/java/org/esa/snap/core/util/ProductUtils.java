@@ -22,6 +22,7 @@ import com.bc.ceres.core.SubProgressMonitor;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.grender.support.BufferedImageRendering;
 import com.vividsolutions.jts.geom.*;
+import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.simplify.DouglasPeuckerSimplifier;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.image.ImageManager;
@@ -40,6 +41,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import javax.media.jai.PlanarImage;
 import java.awt.*;
+import java.awt.Dimension;
 import java.awt.geom.*;
 import java.awt.image.*;
 import java.io.IOException;
@@ -2242,6 +2244,63 @@ public class ProductUtils {
         }
         final DouglasPeuckerSimplifier peuckerSimplifier = new DouglasPeuckerSimplifier(polygons.length == 1 ? polygons[0] : factory.createMultiPolygon(polygons));
         return peuckerSimplifier.getResultGeometry();
+    }
+
+    public static GeneralPath[] createGeoBoundaryPaths(GeoCoding productGeoCoding, int productWidth, int productHeight) {
+        final Rectangle rect = new Rectangle(0, 0, productWidth, productHeight);
+        final int step = Math.min(rect.width, rect.height) / 8;
+        return createGeoBoundaryPaths(productGeoCoding, productWidth, productHeight, rect, step > 0 ? step : 1);
+    }
+
+    public static GeneralPath[] createGeoBoundaryPaths(GeoCoding productGeoCoding, int productWidth, int productHeight, Rectangle region, int step) {
+        final boolean usePixelCenter = true;
+        return createGeoBoundaryPaths(productGeoCoding, productWidth, productHeight, region, step, usePixelCenter);
+    }
+
+    public static GeoPos[] createGeoBoundary(GeoCoding productGeocoding, int productWidth, int productHeight, Rectangle region, int step, boolean usePixelCenter) {
+        if (productGeocoding == null) {
+            throw new IllegalArgumentException(UtilConstants.MSG_NO_GEO_CODING);
+        }
+        if (region == null) {
+            region = new Rectangle(0, 0, productWidth, productHeight);
+        }
+        final PixelPos[] points = createRectBoundary(region, step, usePixelCenter);
+        final ArrayList<GeoPos> geoPoints = new ArrayList<>(points.length);
+        for (final PixelPos pixelPos : points) {
+            final GeoPos gcGeoPos = productGeocoding.getGeoPos(pixelPos, null);
+            if (true) { // including valid positions only leads to unit test failures 'very elsewhere' rq-20140414
+                geoPoints.add(gcGeoPos);
+            }
+        }
+        return geoPoints.toArray(new GeoPos[geoPoints.size()]);
+    }
+
+    public static GeoPos[] createGeoBoundaryArray(GeoCoding rasterGeoCoding, int rasterWidth, int rasterHeight, Rectangle region, int step, final boolean usePixelCenter) {
+        if (rasterGeoCoding == null) {
+            throw new IllegalArgumentException(UtilConstants.MSG_NO_GEO_CODING);
+        }
+        if (region == null) {
+            region = new Rectangle(0, 0, rasterWidth, rasterHeight);
+        }
+        final PixelPos[] points = createRectBoundary(region, step, usePixelCenter);
+        final ArrayList<GeoPos> geoPoints = new ArrayList<>(points.length);
+        for (final PixelPos pixelPos : points) {
+            final GeoPos gcGeoPos = rasterGeoCoding.getGeoPos(pixelPos, null);
+            if (true) { // including valid positions only leads to unit test failures 'very elsewhere' rq-20140414
+                geoPoints.add(gcGeoPos);
+            }
+        }
+        return geoPoints.toArray(new GeoPos[geoPoints.size()]);
+    }
+
+    public static GeneralPath[] createGeoBoundaryPaths(GeoCoding productGeoCoding, int productWidth, int productHeight, Rectangle region, int step, boolean usePixelCenter) {
+        if (productGeoCoding == null) {
+            throw new IllegalArgumentException(UtilConstants.MSG_NO_GEO_CODING);
+        }
+        final GeoPos[] geoPoints = createGeoBoundary(productGeoCoding, productWidth, productHeight, region, step, usePixelCenter);
+        normalizeGeoPolygon(geoPoints);
+        final ArrayList<GeneralPath> pathList = assemblePathList(geoPoints);
+        return pathList.toArray(new GeneralPath[pathList.size()]);
     }
 
     public static class PixelRegionFinder implements CoordinateFilter {
