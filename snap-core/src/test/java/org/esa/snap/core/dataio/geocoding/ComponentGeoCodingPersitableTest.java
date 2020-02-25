@@ -24,7 +24,8 @@ public class ComponentGeoCodingPersitableTest {
 
     @Test
     public void testToAndFromXML() {
-        final ComponentGeoCoding initialGeocoding = initializeWithBands(product, false, false, false);
+        final ComponentGeoCoding initialGeocoding = initializeWithBands(product, false, false, true);
+        assertThat(initialGeocoding.isCrossingMeridianAt180(), is(true));
 
         final Element xmlFromObject = persistable.createXmlFromObject(initialGeocoding);
 
@@ -65,6 +66,7 @@ public class ComponentGeoCodingPersitableTest {
         assertThat(newGeoCoding.getInverseCoding().getKey(), is(equalTo(initialGeocoding.getInverseCoding().getKey())));
         assertThat(newGeoCoding.getGeoChecks().name(), is(equalTo(initialGeocoding.getGeoChecks().name())));
         assertThat(newGeoCoding.getGeoCRS().toWKT(), is(equalTo(initialGeocoding.getGeoCRS().toWKT())));
+        assertThat(newGeoCoding.isCrossingMeridianAt180(), is(true));
 
         final GeoRaster initialGeoRaster = initialGeocoding.getGeoRaster();
         final GeoRaster newGeoRaster = newGeoCoding.getGeoRaster();

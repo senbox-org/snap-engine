@@ -1,6 +1,5 @@
 package org.esa.snap.core.dataio.geocoding.inverse;
 
-import org.esa.snap.core.dataio.geocoding.ComponentFactory;
 import org.esa.snap.core.dataio.geocoding.GeoRaster;
 import org.esa.snap.core.dataio.geocoding.InverseCoding;
 import org.esa.snap.core.dataio.geocoding.util.Approximation;
