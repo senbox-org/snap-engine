@@ -244,47 +244,51 @@ public class TemporalPercentileOp extends Operator {
     public void initialize() throws OperatorException {
         validateInput();
         interpolator = InterpolatorFactory.createInterpolator(gapFillingMethod);
-
         final Product targetProduct = createTargetProduct();
-
         checkMemNeeds(targetProduct);
-
-        final Area targetArea = Utils.createProductArea(targetProduct);
         setTargetProduct(targetProduct);
+        getLogger().log(Level.INFO, "Successfully initialized target product.");
+    }
 
-
-        final ProductValidator productValidator = new ProductValidator(sourceBandName, bandMathsExpression, validPixelExpression, startDate, endDate, targetArea, getLogger());
+    @Override
+    public void doExecute(ProgressMonitor pm) throws OperatorException {
+        pm.beginTask("", 5);
+        pm.setSubTaskName("Creating product area");
+        final Area targetArea = Utils.createProductArea(getTargetProduct());
+        pm.worked(1);
+        pm.setSubTaskName("Loading products");
+        final ProductValidator productValidator = new ProductValidator(sourceBandName, bandMathsExpression,
+                validPixelExpression, startDate, endDate, targetArea, getLogger());
         final ProductLoader productLoader = new ProductLoader(sourceProductPaths, productValidator, getLogger());
         final Product[] products = productLoader.loadProducts();
         gc();
+        pm.worked(1);
 
+        pm.setSubTaskName("Group products");
         dailyGroupedSourceProducts = Utils.groupProductsDaily(products);
-
         if (dailyGroupedSourceProducts.size() < 2) {
             throw new OperatorException("For temporal percentile calculation " +
-                                        "at least two days must contain valid input products.");
+                    "at least two days must contain valid input products.");
         }
         if (dailyGroupedSourceProducts.size() == 2 && splineOrQuadraticInterpolationIsSelected()) {
             throw new OperatorException("For temporal percentile calculation " +
-                                        "with percentileCalculationMethod='" + gapFillingMethod + "' " +
-                                        "at least three days must contain valid input products.");
+                    "with percentileCalculationMethod='" + gapFillingMethod + "' " +
+                    "at least three days must contain valid input products.");
         }
+        pm.worked(1);
 
+        addInputMetadataToProduct(getTargetProduct());
         initTimeSeriesStartAndEnd();
-        addInputMetadataToProduct(targetProduct);
         initTimeSeriesDataProduct();
-
-        getLogger().log(Level.INFO, "Successfully initialized target product.");
-
+        pm.setSubTaskName("Compute Mean Data and write to time series product");
         computeMeanDataForEachDayAndWriteDataToTimeSeriesProduct();
-
         reloadIntermediateTimeSeriesProduct();
-
         dailyGroupedSourceProducts.clear();
-
-        getLogger().log(Level.INFO, "Input products colocated with target product.");
-
+        pm.worked(1);
+        getLogger().log(Level.INFO, "Input products collocated with target product.");
+        pm.setSubTaskName("Init percentile computer");
         initPercentileComputer();
+        pm.worked(1);
     }
 
     private void checkMemNeeds(Product targetProduct) {
