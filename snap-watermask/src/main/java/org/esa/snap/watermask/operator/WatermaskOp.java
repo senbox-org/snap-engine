@@ -89,6 +89,10 @@ public class WatermaskOp extends Operator {
         validateParameter();
         validateSourceProduct();
         initTargetProduct();
+    }
+
+    @Override
+    public void doExecute(ProgressMonitor pm) throws OperatorException {
         try {
             classifier = new WatermaskClassifier(resolution, subSamplingFactorX, subSamplingFactorY);
         } catch (IOException e) {
