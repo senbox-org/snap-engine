@@ -1,6 +1,5 @@
 package org.esa.snap.core.dataio.geocoding.forward;
 
-import org.esa.snap.core.dataio.geocoding.ComponentFactory;
 import org.esa.snap.core.dataio.geocoding.ForwardCoding;
 import org.esa.snap.core.dataio.geocoding.GeoRaster;
 import org.esa.snap.core.dataio.geocoding.util.RasterUtils;
@@ -17,7 +16,7 @@ public class TiePointBilinearForward extends TiePointForward {
     private int sceneWidth;
     private int sceneHeight;
 
-    public TiePointBilinearForward() {
+    TiePointBilinearForward() {
         lonGrid = null;
         latGrid = null;
     }

@@ -161,7 +161,9 @@ public class ComponentGeoCodingPersitable implements DimapPersistable {
 
         final ForwardCoding forwardCoding = ComponentFactory.getForward(forwardKey);
         final InverseCoding inverseCoding = ComponentFactory.getInverse(inverseKey);
-        return new ComponentGeoCoding(geoRaster, forwardCoding, inverseCoding, GeoChecks.valueOf(geoChecksName), geoCRS);
+        final ComponentGeoCoding geoCoding = new ComponentGeoCoding(geoRaster, forwardCoding, inverseCoding, GeoChecks.valueOf(geoChecksName), geoCRS);
+        geoCoding.initialize();
+        return geoCoding;
     }
 
     @Override

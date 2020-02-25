@@ -303,13 +303,11 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
         return geoChecks;
     }
 
-    // package access for testing only tb 2019-11-18
-    ForwardCoding getForwardCoding() {
+    public ForwardCoding getForwardCoding() {
         return forwardCoding;
     }
 
-    // package access for testing only tb 2019-11-18
-    InverseCoding getInverseCoding() {
+    public InverseCoding getInverseCoding() {
         return inverseCoding;
     }
 

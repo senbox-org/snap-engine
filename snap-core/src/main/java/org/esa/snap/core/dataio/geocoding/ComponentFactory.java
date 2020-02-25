@@ -1,6 +1,5 @@
 package org.esa.snap.core.dataio.geocoding;
 
-
 import org.esa.snap.core.dataio.geocoding.forward.*;
 import org.esa.snap.core.dataio.geocoding.inverse.InversePlugin;
 import org.esa.snap.core.dataio.geocoding.inverse.PixelGeoIndexInverse;
@@ -10,15 +9,6 @@ import org.esa.snap.core.dataio.geocoding.inverse.TiePointInverse;
 import java.util.HashMap;
 
 public class ComponentFactory {
-
-
-
-
-
-
-
-
-
 
     private static final HashMap<String, ForwardPlugin> forwardPlugins = new HashMap<>();
     private static final HashMap<String, InversePlugin> inversePlugins = new HashMap<>();

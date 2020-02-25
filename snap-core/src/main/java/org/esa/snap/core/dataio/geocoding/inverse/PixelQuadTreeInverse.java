@@ -1,6 +1,5 @@
 package org.esa.snap.core.dataio.geocoding.inverse;
 
-import org.esa.snap.core.dataio.geocoding.ComponentFactory;
 import org.esa.snap.core.dataio.geocoding.GeoRaster;
 import org.esa.snap.core.dataio.geocoding.InverseCoding;
 import org.esa.snap.core.dataio.geocoding.util.InterpolationContext;
@@ -34,7 +33,7 @@ public class PixelQuadTreeInverse implements InverseCoding {
         this(false);
     }
 
-    public PixelQuadTreeInverse(boolean fractionalAccuracy) {
+    PixelQuadTreeInverse(boolean fractionalAccuracy) {
         this.fractionalAccuracy = fractionalAccuracy;
         if (fractionalAccuracy) {
             interpolator = new InverseDistanceWeightingInterpolator();
