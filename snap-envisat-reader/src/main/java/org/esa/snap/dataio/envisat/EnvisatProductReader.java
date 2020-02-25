@@ -744,10 +744,14 @@ public class EnvisatProductReader extends AbstractProductReader {
             case EnvisatConstants.MERIS_FRG_L1B_PRODUCT_TYPE_NAME:
             case EnvisatConstants.MERIS_FR_L2_PRODUCT_TYPE_NAME:
             case EnvisatConstants.MERIS_FRS_L2_PRODUCT_TYPE_NAME:
+            case EnvisatConstants.MERIS_FSG_L2_PRODUCT_TYPE_NAME:
                 return EnvisatConstants.MERIS_FR_PX_SIZE_IN_KM;
 
             case EnvisatConstants.MERIS_RR_L1B_PRODUCT_TYPE_NAME:
+            case EnvisatConstants.MERIS_RRG_L1B_PRODUCT_TYPE_NAME:
             case EnvisatConstants.MERIS_RR_L2_PRODUCT_TYPE_NAME:
+            case EnvisatConstants.MERIS_RRC_L2_PRODUCT_TYPE_NAME:
+            case EnvisatConstants.MERIS_RRV_L2_PRODUCT_TYPE_NAME:
                 return EnvisatConstants.MERIS_RR_PX_SIZE_IN_KM;
 
             case EnvisatConstants.AATSR_L1B_TOA_PRODUCT_TYPE_NAME:

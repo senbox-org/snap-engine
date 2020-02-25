@@ -54,6 +54,10 @@ public interface EnvisatConstants {
      */
     String MERIS_RR_L1B_PRODUCT_TYPE_NAME = "MER_RR__1P";
     /**
+     * Product type ID for MERIS reduced resolution geo-corrected L1b products.
+     */
+    String MERIS_RRG_L1B_PRODUCT_TYPE_NAME = "MER_RRG_1P";
+    /**
      * Product type ID for MERIS full resolution full swath L1b products.
      */
     String MERIS_FRS_L1B_PRODUCT_TYPE_NAME = "MER_FRS_1P";
@@ -74,9 +78,21 @@ public interface EnvisatConstants {
      */
     String MERIS_RR_L2_PRODUCT_TYPE_NAME = "MER_RR__2P";
     /**
+     * Product type ID for MERIS reduced resolution cloud and water L2 products.
+     */
+    String MERIS_RRC_L2_PRODUCT_TYPE_NAME = "MER_RRC_2P";
+    /**
+     * Product type ID for MERIS reduced resolution vegetation L2 products.
+     */
+    String MERIS_RRV_L2_PRODUCT_TYPE_NAME = "MER_RRV_2P";
+    /**
      * Product type ID for MERIS full resolution full swath L2 products.
      */
     String MERIS_FRS_L2_PRODUCT_TYPE_NAME = "MER_FRS_2P";
+    /**
+     * Product type ID for MERIS full resolution full swath  Geo/Ortho-correctedL2 products.
+     */
+    String MERIS_FSG_L2_PRODUCT_TYPE_NAME = "MER_FSG_2P";
     /**
      * Product type ID for AATSR L1b products.
      */
