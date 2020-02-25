@@ -18,7 +18,7 @@ import static org.junit.Assert.*;
 /**
  * Created by jcoravu on 5/11/2019.
  */
-public class JP2ProductReaderTest {
+public class JP2ProductReaderTest extends AbstractJP2Test {
 
     public JP2ProductReaderTest() {
     }

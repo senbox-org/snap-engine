@@ -16,7 +16,7 @@ import static org.junit.Assert.assertNotNull;
 /**
  * Created by jcoravu on 21/1/2020.
  */
-public class JP2MetadataInspectorTest {
+public class JP2MetadataInspectorTest extends AbstractJP2Test{
 
     public JP2MetadataInspectorTest() {
     }
