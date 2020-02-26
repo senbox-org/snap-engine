@@ -173,12 +173,12 @@ public class ColorSchemeDefaults {
     public static final String PROPERTY_RANGE_BUTTON_98_KEY = PROPERTY_RANGE_BUTTON_KEY_SUFFIX + ".98";
     public static final String PROPERTY_RANGE_BUTTON_98_LABEL = "Show 98% range button";
     public static final String PROPERTY_RANGE_BUTTON_98_TOOLTIP = "Show 98% range button in the sliders GUI";
-    public static final boolean PROPERTY_RANGE_BUTTON_98_DEFAULT = false;
+    public static final boolean PROPERTY_RANGE_BUTTON_98_DEFAULT = true;
 
     public static final String PROPERTY_RANGE_BUTTON_95_KEY = PROPERTY_RANGE_BUTTON_KEY_SUFFIX + ".95";
     public static final String PROPERTY_RANGE_BUTTON_95_LABEL = "Show 95% range button";
     public static final String PROPERTY_RANGE_BUTTON_95_TOOLTIP = "Show 95% range button in the sliders GUI";
-    public static final boolean PROPERTY_RANGE_BUTTON_95_DEFAULT = true;
+    public static final boolean PROPERTY_RANGE_BUTTON_95_DEFAULT = false;
 
     public static final String PROPERTY_RANGE_BUTTON_90_KEY = PROPERTY_RANGE_BUTTON_KEY_SUFFIX + ".90";
     public static final String PROPERTY_RANGE_BUTTON_90_LABEL = "Show 90% range button";
@@ -188,7 +188,7 @@ public class ColorSchemeDefaults {
     public static final String PROPERTY_RANGE_ZOOM_IN_KEY = PROPERTY_RANGE_BUTTON_KEY_SUFFIX + ".zoom.in";
     public static final String PROPERTY_RANGE_ZOOM_IN_LABEL = "Slider view zoomed in";
     public static final String PROPERTY_RANGE_ZOOM_IN_TOOLTIP = "Display slider view zoomed in by defaul";
-    public static final boolean PROPERTY_RANGE_ZOOM_IN_DEFAULT = false;
+    public static final boolean PROPERTY_RANGE_ZOOM_IN_DEFAULT = true;
 
     // ----------------------------
 
