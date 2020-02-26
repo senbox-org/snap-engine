@@ -2,12 +2,9 @@ package org.esa.snap.core.util.grid.isin;
 
 
 /*
- Things we need from this package:
+    This class implements an interface to the Integerized Sinusoidal (ISIN) Raster used by NASA data products.
 
- - DONE: convert lon/lat into tile_x, tile_y, x, y
- - DONE: return dimension of specific tile
- - return projection params for each tile
-
+    The API exposes methods for converting lon/lat to x/y and back as wells as support for ISIN tiles.
  */
 
 public class IsinAPI {
@@ -20,7 +17,8 @@ public class IsinAPI {
         GRID_250_M
     }
 
-    private static final double TO_RAD = Math.PI / 180.0;
+    static final double TO_RAD = Math.PI / 180.0;
+    private static final double TO_DEG = 180.0 / Math.PI ;
 
     /**
      * Constructs the API and initializes internal parameter according to the raster dimensions passed in.
@@ -35,8 +33,8 @@ public class IsinAPI {
     }
 
     /**
-     * Map the location (lon/lat) to the global integerized sinusoidal raster.
-     * The point returned contains the map x and y coordinates.
+     * Map the geo-location (lon/lat) to the global integerized sinusoidal raster.
+     * The point returned contains the global map x and y coordinates.
      *
      * @param lon longitude
      * @param lat latitude
@@ -44,6 +42,35 @@ public class IsinAPI {
      */
     public IsinPoint toGlobalMap(double lon, double lat) {
         return tile.forwardGlobalMap(lon * TO_RAD, lat * TO_RAD);
+    }
+
+    /**
+     * Map the location (x/y) on the global integerized sinusoidal raster to the geo-location.
+     * The point returned contains the longitude and latitude coordinates in decimal degrees as x and y values.
+     *
+     * @param x global map x coordinate
+     * @param y global map y coordinate
+     * @return the geo-location
+     */
+    public IsinPoint globalMapToGeo(double x, double y) {
+        final IsinPoint isinPoint = tile.inverseGlobalMap(x, y);
+        return new IsinPoint(isinPoint.getX() * TO_DEG, isinPoint.getY() * TO_DEG);
+    }
+
+    /**
+     * Map the location (x/y,tileH,tileV) on the tiled global integerized sinusoidal raster to the geo-location.
+     * The point returned contains the longitude and latitude coordinates in decimal degrees as x and y values.
+     * This method expects zero based tile indices as input parameters.
+     *
+     * @param x tile x coordinate
+     * @param y tile y coordinate
+     * @param  tileH horizontal tile index
+     * @param  tileV vertical tile index
+     * @return the mapped location
+     */
+    public IsinPoint tileImageCoordinatesToGeo(double x, double y, int tileH, int tileV) {
+        final IsinPoint isinPoint = tile.inverseTileImage(x, y, tileH, tileV);
+        return new IsinPoint(isinPoint.getX() * TO_DEG, isinPoint.getY() * TO_DEG);
     }
 
     /**
@@ -71,8 +98,7 @@ public class IsinAPI {
         return new IsinPoint(tile_width, tile_height);
     }
 
-    // @todo 1 tb/tb make static and test 2018-05-29
-    private ProjectionParam getProjectionParam(Raster raster) {
+    static ProjectionParam getProjectionParam(Raster raster) {
         ProjectionType projectionType;
         if (raster == Raster.GRID_1_KM) {
             projectionType = ProjectionType.ISIN_K;

@@ -912,7 +912,7 @@ public class BinningOp extends Operator {
         }
     }
 
-    private static class SimpleTemporalBinSource implements TemporalBinSource {
+    public static class SimpleTemporalBinSource implements TemporalBinSource {
 
         private final List<TemporalBin> temporalBins;
 

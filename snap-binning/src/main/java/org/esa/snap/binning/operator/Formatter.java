@@ -26,7 +26,9 @@ import org.esa.snap.binning.ProductCustomizer;
 import org.esa.snap.binning.Reprojector;
 import org.esa.snap.binning.TemporalBinRenderer;
 import org.esa.snap.binning.TemporalBinSource;
+import org.esa.snap.binning.operator.formatter.FormatterFactory;
 import org.esa.snap.binning.support.CrsGrid;
+import org.esa.snap.binning.support.IsinPlanetaryGrid;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.ProductData;
@@ -49,6 +51,35 @@ public class Formatter {
                               ProductData.UTC startTime,
                               ProductData.UTC stopTime,
                               MetadataElement... metadataElements) throws Exception {
+        org.esa.snap.binning.operator.formatter.Formatter formatter;
+        if (planetaryGrid instanceof IsinPlanetaryGrid) {
+            formatter = FormatterFactory.get("isin");
+        } else {
+            formatter = FormatterFactory.get("default");
+        }
+        formatter.format(planetaryGrid,
+                         temporalBinSource,
+                         featureNames,
+                         formatterConfig,
+                         roiGeometry,
+                         startTime,
+                         stopTime,
+                         metadataElements);
+    }
+
+    static String getOutputFormat(FormatterConfig formatterConfig, File outputFile) {
+        return FormatterFactory.getOutputFormat(formatterConfig, outputFile);
+    }
+
+
+    public static void old_format(PlanetaryGrid planetaryGrid,
+                              TemporalBinSource temporalBinSource,
+                              String[] featureNames,
+                              FormatterConfig formatterConfig,
+                              Geometry roiGeometry,
+                              ProductData.UTC startTime,
+                              ProductData.UTC stopTime,
+                              MetadataElement... metadataElements) throws Exception {
 
         if (featureNames.length == 0) {
             throw new IllegalArgumentException("Illegal binning context: featureNames.length == 0");
@@ -56,7 +87,7 @@ public class Formatter {
 
         final File outputFile = new File(formatterConfig.getOutputFile());
         final String outputType = formatterConfig.getOutputType();
-        final String outputFormat = getOutputFormat(formatterConfig, outputFile);
+        final String outputFormat = old_getOutputFormat(formatterConfig, outputFile);
 
         final Rectangle outputRegion;
         if (planetaryGrid instanceof CrsGrid) {
@@ -115,7 +146,7 @@ public class Formatter {
         Reprojector.reproject(planetaryGrid, temporalBinSource, temporalBinRenderer);
     }
 
-    static String getOutputFormat(FormatterConfig formatterConfig, File outputFile) {
+    static String old_getOutputFormat(FormatterConfig formatterConfig, File outputFile) {
         final String fileName = outputFile.getName();
         final int extPos = fileName.lastIndexOf(".");
         String outputFileNameExt = fileName.substring(extPos + 1);

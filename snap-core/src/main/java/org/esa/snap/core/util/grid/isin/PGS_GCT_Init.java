@@ -17,7 +17,7 @@ class PGS_GCT_Init {
         return isinForward;
     }
 
-    static void reverse(double[] projParam) {
+    static IsinInverse reverse(double[] projParam) {
         final double rMajor = projParam[0];
         final double radius = projParam[0];
         final double rMinor = projParam[1];
@@ -26,5 +26,9 @@ class PGS_GCT_Init {
         final double centerLong = projParam[4];
         final double dzone = projParam[8];
         final double djustify = projParam[10];
+
+        final IsinInverse isinInverse = new IsinInverse();
+        isinInverse.init(radius, centerLong, falseEasting, falseNorthing, dzone, djustify);
+        return isinInverse;
     }
 }
