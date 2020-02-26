@@ -17,6 +17,7 @@
 package org.esa.snap.core.datamodel;
 
 import org.esa.snap.core.dataio.ProductSubsetDef;
+import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.referencing.cs.DefaultEllipsoidalCS;
@@ -76,7 +77,7 @@ public class CrsGeoCodingTest {
     @Test
     public void testTransferGeoCodingWithSubset_Region() {
         final ProductSubsetDef subsetDef = new ProductSubsetDef("subset");
-        subsetDef.setRegion(2, 2, 4, 4);
+        subsetDef.setSubsetRegion(new PixelSubsetRegion(2, 2, 4, 4, 0));
         final boolean transfered = srcScene.transferGeoCodingTo(destScene, subsetDef);
         assertTrue(transfered);
 
@@ -115,7 +116,7 @@ public class CrsGeoCodingTest {
     @Test
     public void testTransferGeoCodingWithSubset_SubsamplingAndRegion() {
         final ProductSubsetDef subsetDef = new ProductSubsetDef("subset");
-        subsetDef.setRegion(2, 2, 8, 8);
+        subsetDef.setSubsetRegion(new PixelSubsetRegion(2, 2, 8, 8, 0));
         subsetDef.setSubSampling(2, 2);
         final boolean transfered = srcScene.transferGeoCodingTo(destScene, subsetDef);
         assertTrue(transfered);
@@ -146,14 +147,14 @@ public class CrsGeoCodingTest {
         srcScene = SceneFactory.createScene(srcNode);
 
         final ProductSubsetDef subsetDef = new ProductSubsetDef("subset");
-        subsetDef.setRegion(2, 2, 8, 8);
+        subsetDef.setSubsetRegion(new PixelSubsetRegion(2, 2, 8, 8, 0));
         subsetDef.setSubSampling(2, 2);
         boolean transfered = srcScene.transferGeoCodingTo(destScene, subsetDef);
         assertTrue(transfered);
 
         assertTrue(destScene.getGeoCoding().isCrossingMeridianAt180());
 
-        subsetDef.setRegion(2, 2, 2, 2);
+        subsetDef.setSubsetRegion(new PixelSubsetRegion(2, 2, 2, 2, 0));
         transfered = srcScene.transferGeoCodingTo(destScene, subsetDef);
         assertTrue(transfered);
 

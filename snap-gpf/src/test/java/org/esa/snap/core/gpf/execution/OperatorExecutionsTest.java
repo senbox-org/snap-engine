@@ -519,17 +519,6 @@ public class OperatorExecutionsTest {
     }
 
     @Test
-    public void testInitAndDoExecuteSetNoTargetProductOperatorWorksWithOnlyInitialize() {
-        String outputFileName = "OperatorExecutionsTest/InitAndDoExecuteSetNoTargetProduct_oi.txt";
-        File outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);
-        Operators.InitAndDoExecuteSetNoTargetProductOperator operator =
-                new Operators.InitAndDoExecuteSetNoTargetProductOperator();
-        operator.setParameter("outputFilePath", outputFile.getAbsolutePath());
-        onlyInitializeProduct(operator);
-        assertExpectedFileExists(outputFile);
-    }
-
-    @Test
     public void testInitAndDoExecuteSetNoTargetProductOperatorWorksWithRunAsSingleOperatorInGpt() throws Exception {
         String outputFileName = "OperatorExecutionsTest/InitAndDoExecuteSetNoTargetProduct_rasoigpt.txt";
         File outputFile = GlobalTestConfig.getSnapTestDataOutputFile(outputFileName);

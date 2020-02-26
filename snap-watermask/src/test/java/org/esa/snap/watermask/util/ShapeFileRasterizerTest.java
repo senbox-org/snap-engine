@@ -6,6 +6,7 @@ import org.junit.Test;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.io.File;
+import java.net.URI;
 import java.net.URL;
 import java.util.List;
 import java.util.zip.ZipFile;
@@ -20,7 +21,8 @@ public class ShapeFileRasterizerTest  {
         final File targetDir = new File("");
         final ShapeFileRasterizer rasterizer = new ShapeFileRasterizer(targetDir);
         final URL shapeUrl = getClass().getResource("e000n05f.shp");
-        final File shapeFile = new File(shapeUrl.getFile());
+        final URI uri = new URI(shapeUrl.toString());
+        final File shapeFile = new File(uri.getPath());
         final int resolution = WatermaskUtils.computeSideLength(150);
         final BufferedImage image = rasterizer.createImage(shapeFile, resolution);
 
@@ -38,9 +40,10 @@ public class ShapeFileRasterizerTest  {
         final File targetDir = new File("");
         final ShapeFileRasterizer rasterizer = new ShapeFileRasterizer(targetDir);
         final URL shapeUrl = getClass().getResource("e000n05f.zip");
+         final URI uri = new URI(shapeUrl.toString());
          final int tileSize = WatermaskUtils.computeSideLength(150);
          final List<File> tempFiles;
-         final ZipFile zipFile = new ZipFile(shapeUrl.getFile());
+         final ZipFile zipFile = new ZipFile(uri.getPath());
          try {
              tempFiles = rasterizer.createTempFiles(zipFile);
          } finally {

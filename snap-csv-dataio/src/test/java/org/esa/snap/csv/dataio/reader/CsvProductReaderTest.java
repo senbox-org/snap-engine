@@ -31,6 +31,9 @@ import org.junit.Test;
 
 import java.awt.image.Raster;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -150,8 +153,10 @@ public class CsvProductReaderTest {
         assertEquals(Float.NaN, radiance2Data.getSampleFloat(2, 1, 0), 1.0E-6);
     }
 
-    private Product readTestProduct(String name) throws IOException {
-        return reader.readProductNodes(getClass().getResource(name).getFile(), null);
+    private Product readTestProduct(String name) throws IOException, URISyntaxException {
+        URL url = getClass().getResource(name);
+        URI uri = new URI(url.toString());
+        return reader.readProductNodes(uri.getPath(), null);
     }
 
     @Test
@@ -238,7 +243,7 @@ public class CsvProductReaderTest {
     }
 
     @Test
-    public void testCreateTimeCoding_firstTimeColumn() throws IOException {
+    public void testCreateTimeCoding_firstTimeColumn() throws IOException, URISyntaxException {
         Product product = readTestProduct("simple_format_no_properties_but_time_column.txt");
 
         CsvProductReader.CSVTimeCoding timeCoding = (CsvProductReader.CSVTimeCoding) product.getSceneTimeCoding();
@@ -255,7 +260,7 @@ public class CsvProductReaderTest {
     }
 
     @Test
-    public void testCreateTimeCoding_firstCompleteTimeColumn() throws IOException {
+    public void testCreateTimeCoding_firstCompleteTimeColumn() throws IOException, URISyntaxException {
         Product product = readTestProduct("simple_format_no_properties_gaps_in_first_time_column.txt");
 
         CsvProductReader.CSVTimeCoding timeCoding = (CsvProductReader.CSVTimeCoding) product.getSceneTimeCoding();
@@ -273,7 +278,7 @@ public class CsvProductReaderTest {
     }
 
     @Test
-    public void testCreateTimeCoding_timeColumnProperty() throws IOException {
+    public void testCreateTimeCoding_timeColumnProperty() throws IOException, URISyntaxException {
         Product product = readTestProduct("simple_format_with_time_column_property.txt");
 
         CsvProductReader.CSVTimeCoding timeCoding = (CsvProductReader.CSVTimeCoding) product.getSceneTimeCoding();

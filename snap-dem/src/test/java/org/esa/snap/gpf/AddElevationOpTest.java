@@ -10,6 +10,9 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,14 +26,14 @@ public class AddElevationOpTest {
     private static final String DEM_NAME = "45N015E_5M.ACE2";
 
     @Test
-    public void testAddingExternalDEM() throws IOException {
+    public void testAddingExternalDEM() throws IOException, URISyntaxException {
         final Map<String, Object> parametersMap = new HashMap<>();
-        final File externalDEMFile = new File(AddElevationOpTest.class.getResource(DEM_NAME).getFile());
+        final File externalDEMFile = new File(getResourcePath(DEM_NAME));
         parametersMap.put("demName", "External DEM");
         parametersMap.put("externalDEMFile", externalDEMFile);
         parametersMap.put("externalDEMNoDataValue", -500.0);
         parametersMap.put("demResamplingMethod", ResamplingFactory.BILINEAR_INTERPOLATION_NAME);
-        final String pathToProduct = AddElevationOpTest.class.getResource(PRODUCT_NAME).getFile();
+        final String pathToProduct = getResourcePath(PRODUCT_NAME);
         final Product sourceProduct = ProductIO.readProduct(pathToProduct);
         final Product elevationProduct = GPF.createProduct("AddElevation", parametersMap, sourceProduct);
 
@@ -41,4 +44,9 @@ public class AddElevationOpTest {
         assertEquals(38.6651268, sampleFloat, 1e-8);
     }
 
+    private String getResourcePath(String name) throws URISyntaxException {
+        URL url = AddElevationOpTest.class.getResource(name);
+        URI uri = new URI(url.toString());
+        return uri.getPath();
+    }
 } 

@@ -15,6 +15,8 @@
  */
 package org.esa.snap.core.dataio;
 
+import org.esa.snap.core.metadata.MetadataInspector;
+
 /**
  * The <code>ProductReaderPlugIn</code> interface is implemented by data product reader plug-ins.
  * <p>ProductReaderPlugIn plug-ins are used to provide meta-information about a particular data format and to create instances of
@@ -61,5 +63,9 @@ public interface ProductReaderPlugIn extends ProductIOPlugIn {
      * @return a new reader instance, never <code>null</code>
      */
     ProductReader createReaderInstance();
+
+    default MetadataInspector getMetadataInspector(){
+        return null;
+    }
 
 }

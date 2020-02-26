@@ -53,7 +53,7 @@ public class ConvolutionFilterBandPersistableTest extends TestCase {
     public void testCreateObjectFromXml() {
         final Element xmlElement = createXmlElement();
 
-        final Object object = _convolutionFilterBandPersistable.createObjectFromXml(xmlElement, _product);
+        final Object object = _convolutionFilterBandPersistable.createObjectFromXml(xmlElement, _product, null);
         _product.addBand((Band)object);
 
         assertNotNull(object);
@@ -144,7 +144,7 @@ public class ConvolutionFilterBandPersistableTest extends TestCase {
     public void testReadAndWrite() {
         final Element xmlElement = createXmlElement();
 
-        final Object object = _convolutionFilterBandPersistable.createObjectFromXml(xmlElement, _product);
+        final Object object = _convolutionFilterBandPersistable.createObjectFromXml(xmlElement, _product, null);
         _product.addBand((Band) object);
 
         final Element xmlFromObject = _convolutionFilterBandPersistable.createXmlFromObject(object);

@@ -20,6 +20,7 @@ package org.esa.snap.core.datamodel;
 import junit.framework.TestCase;
 import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.dataop.maptransf.Datum;
+import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.esa.snap.core.util.math.FXYSum;
 
 public class SceneTest extends TestCase {
@@ -43,7 +44,7 @@ public class SceneTest extends TestCase {
         _destBand2 = _destProduct.addBand("Band2", ProductData.TYPE_INT32);
 
         _subsetDef = new ProductSubsetDef("subset");
-        _subsetDef.setRegion(50, 100, 50, 100);
+        _subsetDef.setSubsetRegion(new PixelSubsetRegion(50, 100, 50, 100, 0));
         _subsetDef.setSubSampling(2, 2);
     }
 
