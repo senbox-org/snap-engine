@@ -45,6 +45,7 @@ import java.awt.image.IndexColorModel;
 // FEB 2020 - Knowles
 //          - Added ColorPaletteDef source->target transfer of the fields sourceFileMin and sourceFileMax
 //          - When tranferring points of the ColorPaletteDef, log scaling field in image info is also updated
+//          - Added zoomToHistLimits
 
 public class ImageInfo implements Cloneable {
 
@@ -62,6 +63,7 @@ public class ImageInfo implements Cloneable {
 
     private static final double FORCED_CHANGE_FACTOR = 0.0001;
 
+
     /**
      * Enumerates the possible histogram matching modes.
      */
@@ -78,6 +80,7 @@ public class ImageInfo implements Cloneable {
     private String uncertaintyBandName;
     private boolean logScaled;
     private ColorSchemeInfo colorSchemeInfo = null;
+    private Boolean zoomToHistLimits = null;
 
     /**
      * Enumerates the possible histogram matching modes.
@@ -489,6 +492,15 @@ public class ImageInfo implements Cloneable {
 
     public void setColorSchemeInfo(ColorSchemeInfo colorSchemeInfo) {
         this.colorSchemeInfo = colorSchemeInfo;
+    }
+
+
+    public Boolean getZoomToHistLimits() {
+        return zoomToHistLimits;
+    }
+
+    public void setZoomToHistLimits(Boolean zoomToHistLimits) {
+        this.zoomToHistLimits = zoomToHistLimits;
     }
 
 }
