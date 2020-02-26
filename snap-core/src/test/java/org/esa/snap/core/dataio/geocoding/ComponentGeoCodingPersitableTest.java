@@ -7,7 +7,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersitable.*;
-import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingTestUtils.*;
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingTestUtils.createProduct;
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingTestUtils.initializeWithBands;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
@@ -15,6 +16,15 @@ public class ComponentGeoCodingPersitableTest {
 
     private DimapPersistable persistable;
     private Product product;
+
+    private static final String LS = System.lineSeparator();
+    private static String EXPECTED_GEO_CRS = "GEOGCS[\"WGS84(DD)\", " + LS +
+            "  DATUM[\"WGS84\", " + LS +
+            "    SPHEROID[\"WGS84\", 6378137.0, 298.257223563]], " + LS +
+            "  PRIMEM[\"Greenwich\", 0.0], " + LS +
+            "  UNIT[\"degree\", 0.017453292519943295], " + LS +
+            "  AXIS[\"Geodetic longitude\", EAST], " + LS +
+            "  AXIS[\"Geodetic latitude\", NORTH]]";
 
     @Before
     public void setUp() throws Exception {
@@ -45,7 +55,7 @@ public class ComponentGeoCodingPersitableTest {
         assertThat(xmlFromObject.getChildTextTrim(TAG_FORWARD_CODING_KEY), is("FWD_PIXEL"));
         assertThat(xmlFromObject.getChildTextTrim(TAG_INVERSE_CODING_KEY), is("INV_PIXEL_GEO_INDEX"));
         assertThat(xmlFromObject.getChildTextTrim(TAG_GEO_CHECKS), is("ANTIMERIDIAN"));
-        assertThat(xmlFromObject.getChildTextTrim(TAG_GEO_CRS), is("GEOGCS[\"WGS84(DD)\", \r\n  DATUM[\"WGS84\", \r\n    SPHEROID[\"WGS84\", 6378137.0, 298.257223563]], \r\n  PRIMEM[\"Greenwich\", 0.0], \r\n  UNIT[\"degree\", 0.017453292519943295], \r\n  AXIS[\"Geodetic longitude\", EAST], \r\n  AXIS[\"Geodetic latitude\", NORTH]]"));
+        assertThat(xmlFromObject.getChildTextTrim(TAG_GEO_CRS), is(EXPECTED_GEO_CRS));
         assertThat(xmlFromObject.getChildTextTrim(TAG_LON_VARIABLE_NAME), is("Lon"));
         assertThat(xmlFromObject.getChildTextTrim(TAG_LAT_VARIABLE_NAME), is("Lat"));
         assertThat(xmlFromObject.getChildTextTrim(TAG_RASTER_RESOLUTION_KM), is("300.0"));
