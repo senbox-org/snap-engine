@@ -36,10 +36,6 @@ public class CsvProductWriterPlugIn implements ProductWriterPlugIn {
     private Writer writer;
     private final int config;
 
-    public CsvProductWriterPlugIn() {
-        this(null, CsvProductWriter.WRITE_FEATURES | CsvProductWriter.WRITE_PROPERTIES);
-    }
-
     public CsvProductWriterPlugIn(Writer writer, int config) {
         this.writer = writer;
         this.config = config;

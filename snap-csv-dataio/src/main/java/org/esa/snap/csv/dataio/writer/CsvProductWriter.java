@@ -19,12 +19,12 @@ package org.esa.snap.csv.dataio.writer;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.dataio.AbstractProductWriter;
 import org.esa.snap.core.dataio.ProductWriterPlugIn;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.datamodel.RasterDataNode;
-import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
+import org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersitable;
+import org.esa.snap.core.dataio.geocoding.GeoRaster;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.csv.dataio.Constants;
+import org.jdom.Element;
 
 import java.awt.Rectangle;
 import java.awt.image.DataBuffer;
@@ -43,8 +43,8 @@ import java.util.Arrays;
  */
 public class CsvProductWriter extends AbstractProductWriter {
 
-    public static final int WRITE_PROPERTIES = 1;
-    public static final int WRITE_FEATURES = 2;
+    static final int WRITE_PROPERTIES = 1;
+    static final int WRITE_FEATURES = 2;
 
     protected final int config;
     protected Writer writer;
@@ -126,7 +126,18 @@ public class CsvProductWriter extends AbstractProductWriter {
         if ((config & WRITE_PROPERTIES) != WRITE_PROPERTIES) {
             return;
         }
-        writeLine("#" + Constants.PROPERTY_NAME_SCENE_RASTER_WIDTH + "=" + getSourceProduct().getSceneRasterWidth());
+
+        final Product product = getSourceProduct();
+        writeLine("#" + Constants.PROPERTY_NAME_SCENE_RASTER_WIDTH + "=" + product.getSceneRasterWidth());
+
+        final GeoCoding sceneGeoCoding = product.getSceneGeoCoding();
+        if (sceneGeoCoding instanceof ComponentGeoCoding) {
+            final ComponentGeoCoding geoCoding = (ComponentGeoCoding) sceneGeoCoding;
+            final ComponentGeoCodingPersitable persitable = new ComponentGeoCodingPersitable();
+            final Element xmlFromObject = persitable.createXmlFromObject(geoCoding);
+//            xmlFromObject.
+        }
+
     }
 
     @Override
@@ -136,6 +147,7 @@ public class CsvProductWriter extends AbstractProductWriter {
         if (productWritten) {
             return;
         }
+
         final RasterDataNode[] bands = getSourceProduct().getBands();
         final TiePointGrid[] tiePointGrids = getSourceProduct().getTiePointGrids();
         final RasterDataNode[] rasterDataNodes = Arrays.copyOf(bands, bands.length + tiePointGrids.length);
