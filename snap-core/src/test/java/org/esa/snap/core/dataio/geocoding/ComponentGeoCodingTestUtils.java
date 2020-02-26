@@ -17,7 +17,7 @@ public class ComponentGeoCodingTestUtils {
     final static int TP_WIDTH = 8;
     final static int TP_HEIGHT = 10;
 
-    static Product createProduct() {
+    public static Product createProduct() {
         final Product product = new Product("P", "T", SCENE_WIDTH, SCENE_HEIGHT);
         product.addTiePointGrid(new TiePointGrid("tpLon", TP_WIDTH, TP_HEIGHT, 0.5, 0.5, 5, 5));
         product.addTiePointGrid(new TiePointGrid("tpLat", TP_WIDTH, TP_HEIGHT, 0.5, 0.5, 5, 5));
@@ -27,7 +27,7 @@ public class ComponentGeoCodingTestUtils {
         return product;
     }
 
-    static ComponentGeoCoding initializeWithBands(Product srcProduct, boolean interpolating, boolean quadTree, boolean antimeridian) {
+    public static ComponentGeoCoding initializeWithBands(Product srcProduct, boolean interpolating, boolean quadTree, boolean antimeridian) {
         double[][] sceneDoubles = createSceneDoubles(antimeridian);
         double[] lons = sceneDoubles[0];
         double[] lats = sceneDoubles[1];
@@ -59,7 +59,7 @@ public class ComponentGeoCodingTestUtils {
         return geoCoding;
     }
 
-    static ComponentGeoCoding initializeWithTiePoints(Product srcProduct, boolean bilinear, boolean antimeridian) {
+    public static ComponentGeoCoding initializeWithTiePoints(Product srcProduct, boolean bilinear, boolean antimeridian) {
         float[][] tiePointFloats = createTiePointFloats(antimeridian);
         float[] lons = tiePointFloats[0];
         float[] lats = tiePointFloats[1];
@@ -81,7 +81,7 @@ public class ComponentGeoCodingTestUtils {
         return geoCoding;
     }
 
-    static double[][] createSceneDoubles(boolean withAntimeridian) {
+    public static double[][] createSceneDoubles(boolean withAntimeridian) {
 
         final double[] lon = new double[SCENE_WIDTH * SCENE_HEIGHT];
         final double[] lat = new double[SCENE_WIDTH * SCENE_HEIGHT];
@@ -112,7 +112,7 @@ public class ComponentGeoCodingTestUtils {
         return new double[][]{lon, lat};
     }
 
-    static float[][] createTiePointFloats(boolean withAntimeridian) {
+    public static float[][] createTiePointFloats(boolean withAntimeridian) {
 
         final float[] lon = new float[TP_WIDTH * TP_HEIGHT];
         final float[] lat = new float[TP_WIDTH * TP_HEIGHT];
@@ -143,7 +143,7 @@ public class ComponentGeoCodingTestUtils {
         return new float[][]{lon, lat};
     }
 
-    static double[] toD(float[] lons) {
+    public static double[] toD(float[] lons) {
         final double[] doubles = new double[lons.length];
         for (int i = 0; i < lons.length; i++) {
             doubles[i] = lons[i];

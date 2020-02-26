@@ -18,8 +18,6 @@ package org.esa.snap.core.util.geotiff;
 import com.sun.media.imageio.plugins.tiff.GeoTIFFTagSet;
 import com.sun.media.imageio.plugins.tiff.TIFFTag;
 import org.jdom.Element;
-import org.jdom.output.Format;
-import org.jdom.output.XMLOutputter;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -373,24 +371,6 @@ public class GeoTIFFMetadata {
         out.print("\"");
         out.println("};");
         out.println();
-    }
-
-    public String getAsXML() {
-        // following lines uses the old JDOM jar
-//        xmlOutputter.setIndent(true);
-//        xmlOutputter.setIndent("  ");
-//        xmlOutputter.setNewlines(true);
-//        xmlOutputter.setExpandEmptyElements(false);
-//        xmlOutputter.setOmitEncoding(true);
-//        xmlOutputter.setOmitDeclaration(true);
-//        xmlOutputter.setTextNormalize(true);
-        final Format prettyFormat = Format.getPrettyFormat();
-        prettyFormat.setExpandEmptyElements(false);
-        prettyFormat.setOmitEncoding(true);
-        prettyFormat.setOmitDeclaration(true);
-        prettyFormat.setTextMode(Format.TextMode.NORMALIZE);
-        final XMLOutputter xmlOutputter = new XMLOutputter(prettyFormat);
-        return xmlOutputter.outputString(createRootTree("class name list template"));
     }
 
     protected static TIFFTag getGeoKeyDirectoryTag() {

@@ -15,18 +15,26 @@
  */
 package org.esa.snap.dataio.netcdf.metadata.profiles.beam;
 
+import org.esa.snap.core.dataio.dimap.spi.DimapPersistable;
+import org.esa.snap.core.dataio.dimap.spi.DimapPersistence;
+import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
+import org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersitable;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.util.StringUtils;
+import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.dataio.netcdf.ProfileReadContext;
 import org.esa.snap.dataio.netcdf.ProfileWriteContext;
 import org.esa.snap.dataio.netcdf.metadata.profiles.cf.CfGeocodingPart;
 import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
 import org.esa.snap.dataio.netcdf.nc.NVariable;
 import org.geotools.referencing.CRS;
+import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
@@ -39,10 +47,12 @@ import ucar.nc2.Variable;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.io.IOException;
+import java.io.StringReader;
 
 public class BeamGeocodingPart extends CfGeocodingPart {
 
     public static final String TIEPOINT_COORDINATES = "tiepoint_coordinates";
+    public static final String SNAP_GEOCODING = "snap_geocoding";
 
     private static final int LON_INDEX = 0;
     private static final int LAT_INDEX = 1;
@@ -50,8 +60,38 @@ public class BeamGeocodingPart extends CfGeocodingPart {
     @Override
     public void decode(ProfileReadContext ctx, Product p) throws IOException {
         NetcdfFile netcdfFile = ctx.getNetcdfFile();
+        GeoCoding geoCoding = createGeoCoding(p, netcdfFile);
+        if (geoCoding != null) {
+            p.setSceneGeoCoding(geoCoding);
+        } else {
+            super.decode(ctx, p);
+        }
+    }
+
+    private GeoCoding createGeoCoding(Product p, NetcdfFile netcdfFile) {
+        final Attribute snapGeoCodingAtt = netcdfFile.findGlobalAttribute(SNAP_GEOCODING);
+        if (snapGeoCodingAtt != null) {
+            final String xml = snapGeoCodingAtt.getStringValue();
+            if (xml.contains(ComponentGeoCodingPersitable.TAG_COMPONENT_GEO_CODING)) {
+                try {
+                    final SAXBuilder saxBuilder = new SAXBuilder();
+                    String stripped = xml.replace("\n", "").replace("\r", "").replaceAll("> *<", "><");
+                    final org.jdom.Document build = saxBuilder.build(new StringReader(stripped));
+                    final Element rootElement = build.getRootElement();
+                    final Element parent = new Element("parent");
+                    parent.addContent(rootElement.detach());
+                    final ComponentGeoCodingPersitable pers = new ComponentGeoCodingPersitable();
+                    final Object objectFromXml = pers.createObjectFromXml(parent, p);
+                    if (objectFromXml instanceof GeoCoding) {
+                        return (GeoCoding) objectFromXml;
+                    }
+                } catch (JDOMException | IOException e) {
+                    SystemUtils.LOG.warning("Unable to instanciate ComponentGeoCoding from NetCDF.");
+                    SystemUtils.LOG.warning(e.getMessage());
+                }
+            }
+        }
         final Attribute tpCoordinatesAtt = netcdfFile.findGlobalAttribute(TIEPOINT_COORDINATES);
-        GeoCoding geoCoding = null;
         if (tpCoordinatesAtt != null) {
             final String[] tpGridNames = tpCoordinatesAtt.getStringValue().split(" ");
             if (tpGridNames.length == 2
@@ -59,23 +99,19 @@ public class BeamGeocodingPart extends CfGeocodingPart {
                 && p.containsTiePointGrid(tpGridNames[LAT_INDEX])) {
                 final TiePointGrid lon = p.getTiePointGrid(tpGridNames[LON_INDEX]);
                 final TiePointGrid lat = p.getTiePointGrid(tpGridNames[LAT_INDEX]);
-                geoCoding = new TiePointGeoCoding(lat, lon);
-            }
-        } else {
-            final Variable crsVar = netcdfFile.getRootGroup().findVariable("crs");
-            if (crsVar != null) {
-                final Attribute wktAtt = crsVar.findAttribute("wkt");
-                final Attribute i2mAtt = crsVar.findAttribute("i2m");
-                if (wktAtt != null && i2mAtt != null) {
-                    geoCoding = createGeoCodingFromWKT(p, wktAtt.getStringValue(), i2mAtt.getStringValue());
-                }
+                return new TiePointGeoCoding(lat, lon);
             }
         }
-        if (geoCoding != null) {
-            p.setSceneGeoCoding(geoCoding);
-        } else {
-            super.decode(ctx, p);
+
+        final Variable crsVar = netcdfFile.getRootGroup().findVariable("crs");
+        if (crsVar != null) {
+            final Attribute wktAtt = crsVar.findAttribute("wkt");
+            final Attribute i2mAtt = crsVar.findAttribute("i2m");
+            if (wktAtt != null && i2mAtt != null) {
+                return createGeoCodingFromWKT(p, wktAtt.getStringValue(), i2mAtt.getStringValue());
+            }
         }
+        return null;
     }
 
     private GeoCoding createGeoCodingFromWKT(Product p, String wktString, String i2mString) {
@@ -99,7 +135,12 @@ public class BeamGeocodingPart extends CfGeocodingPart {
     public void preEncode(ProfileWriteContext ctx, Product p) throws IOException {
         super.preEncode(ctx, p);
         final GeoCoding geoCoding = p.getSceneGeoCoding();
-        if (geoCoding instanceof TiePointGeoCoding) {
+        if (geoCoding instanceof ComponentGeoCoding) {
+            final DimapPersistable persistable = DimapPersistence.getPersistable(geoCoding);
+            final Element xmlFromObject = persistable.createXmlFromObject(geoCoding);
+            final String value = StringUtils.toXMLString(xmlFromObject);
+            ctx.getNetcdfFileWriteable().addGlobalAttribute(SNAP_GEOCODING, value);
+        } else if (geoCoding instanceof TiePointGeoCoding) {
             final TiePointGeoCoding tpGC = (TiePointGeoCoding) geoCoding;
             final String[] names = new String[2];
             names[LON_INDEX] = tpGC.getLonGrid().getName();

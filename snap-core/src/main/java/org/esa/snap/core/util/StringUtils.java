@@ -16,6 +16,10 @@
 package org.esa.snap.core.util;
 
 import org.esa.snap.core.jexp.impl.Tokenizer;
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.output.Format;
+import org.jdom.output.XMLOutputter;
 
 import java.awt.Color;
 import java.lang.reflect.Array;
@@ -855,4 +859,30 @@ public class StringUtils {
         return clonedNames;
     }
 
+    public static String toXMLString(Element element) {
+        return toXMLString(getFormat(), element);
+    }
+
+    public static String toXMLString(Format format, Element element) {
+        final XMLOutputter xmlOutputter = new XMLOutputter(format);
+        return xmlOutputter.outputString(element);
+    }
+
+    public static String toXMLString(Document element) {
+        return toXMLString(getFormat(), element);
+    }
+
+    public static String toXMLString(Format format, Document element) {
+        final XMLOutputter xmlOutputter = new XMLOutputter(format);
+        return xmlOutputter.outputString(element);
+    }
+
+    private static Format getFormat() {
+        final Format prettyFormat = Format.getPrettyFormat();
+        prettyFormat.setExpandEmptyElements(false);
+        prettyFormat.setOmitEncoding(true);
+        prettyFormat.setOmitDeclaration(true);
+        prettyFormat.setTextMode(Format.TextMode.NORMALIZE);
+        return prettyFormat;
+    }
 }
