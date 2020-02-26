@@ -148,7 +148,7 @@ public class ColorSchemeDefaults {
     public static final String PROPERTY_SCHEME_VERBOSE_KEY = PROPERTY_SCHEME_KEY_SUFFIX + ".verbose";
     public static final String PROPERTY_SCHEME_VERBOSE_LABEL = "Verbose Schemes";
     public static final String PROPERTY_SCHEME_VERBOSE_TOOLTIP = "Scheme selector will display the DISPLAY field instead of the scheme name";
-    public static final boolean PROPERTY_SCHEME_VERBOSE_DEFAULT = true;
+    public static final boolean PROPERTY_SCHEME_VERBOSE_DEFAULT = false;
 
     public static final String PROPERTY_SCHEME_SHOW_DISABLED_KEY = PROPERTY_SCHEME_KEY_SUFFIX + ".show.disabled";
     public static final String PROPERTY_SCHEME_SHOW_DISABLED_LABEL = "Show Disabled Schemes";
@@ -158,7 +158,7 @@ public class ColorSchemeDefaults {
     public static final String PROPERTY_SCHEME_SORT_KEY = PROPERTY_SCHEME_KEY_SUFFIX + ".sort";
     public static final String PROPERTY_SCHEME_SORT_LABEL = "Sort Schemes";
     public static final String PROPERTY_SCHEME_SORT_TOOLTIP = "Scheme selector will display all schemes sorted versus original xml order";
-    public static final boolean PROPERTY_SCHEME_SORT_DEFAULT = false;
+    public static final boolean PROPERTY_SCHEME_SORT_DEFAULT = true;
 
 
     // Scheme option
