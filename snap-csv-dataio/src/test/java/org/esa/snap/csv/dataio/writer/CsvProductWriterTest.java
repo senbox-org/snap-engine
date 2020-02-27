@@ -38,7 +38,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class CsvProductWriterTest {
 
-    private final String LS = System.lineSeparator();
+    private final String LS = "\n";
 
     private StringWriter stringWriter;
 
