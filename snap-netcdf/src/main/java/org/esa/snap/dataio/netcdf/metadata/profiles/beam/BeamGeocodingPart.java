@@ -15,10 +15,8 @@
  */
 package org.esa.snap.dataio.netcdf.metadata.profiles.beam;
 
-import org.esa.snap.core.dataio.dimap.spi.DimapPersistable;
-import org.esa.snap.core.dataio.dimap.spi.DimapPersistence;
 import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
-import org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersitable;
+import org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.Product;
@@ -49,10 +47,11 @@ import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.io.StringReader;
 
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.KEYWORD_SNAP_GEOCODING;
+
 public class BeamGeocodingPart extends CfGeocodingPart {
 
     public static final String TIEPOINT_COORDINATES = "tiepoint_coordinates";
-    public static final String SNAP_GEOCODING = "snap_geocoding";
 
     private static final int LON_INDEX = 0;
     private static final int LAT_INDEX = 1;
@@ -69,10 +68,10 @@ public class BeamGeocodingPart extends CfGeocodingPart {
     }
 
     private GeoCoding createGeoCoding(Product p, NetcdfFile netcdfFile) {
-        final Attribute snapGeoCodingAtt = netcdfFile.findGlobalAttribute(SNAP_GEOCODING);
+        final Attribute snapGeoCodingAtt = netcdfFile.findGlobalAttribute(KEYWORD_SNAP_GEOCODING);
         if (snapGeoCodingAtt != null) {
             final String xml = snapGeoCodingAtt.getStringValue();
-            if (xml.contains(ComponentGeoCodingPersitable.TAG_COMPONENT_GEO_CODING)) {
+            if (xml.contains(ComponentGeoCodingPersistable.TAG_COMPONENT_GEO_CODING)) {
                 try {
                     final SAXBuilder saxBuilder = new SAXBuilder();
                     String stripped = xml.replace("\n", "").replace("\r", "").replaceAll("> *<", "><");
@@ -80,7 +79,7 @@ public class BeamGeocodingPart extends CfGeocodingPart {
                     final Element rootElement = build.getRootElement();
                     final Element parent = new Element("parent");
                     parent.addContent(rootElement.detach());
-                    final ComponentGeoCodingPersitable pers = new ComponentGeoCodingPersitable();
+                    final ComponentGeoCodingPersistable pers = new ComponentGeoCodingPersistable();
                     final Object objectFromXml = pers.createObjectFromXml(parent, p);
                     if (objectFromXml instanceof GeoCoding) {
                         return (GeoCoding) objectFromXml;
@@ -136,10 +135,10 @@ public class BeamGeocodingPart extends CfGeocodingPart {
         super.preEncode(ctx, p);
         final GeoCoding geoCoding = p.getSceneGeoCoding();
         if (geoCoding instanceof ComponentGeoCoding) {
-            final DimapPersistable persistable = DimapPersistence.getPersistable(geoCoding);
+            final ComponentGeoCodingPersistable persistable = new ComponentGeoCodingPersistable();
             final Element xmlFromObject = persistable.createXmlFromObject(geoCoding);
             final String value = StringUtils.toXMLString(xmlFromObject);
-            ctx.getNetcdfFileWriteable().addGlobalAttribute(SNAP_GEOCODING, value);
+            ctx.getNetcdfFileWriteable().addGlobalAttribute(KEYWORD_SNAP_GEOCODING, value);
         } else if (geoCoding instanceof TiePointGeoCoding) {
             final TiePointGeoCoding tpGC = (TiePointGeoCoding) geoCoding;
             final String[] names = new String[2];

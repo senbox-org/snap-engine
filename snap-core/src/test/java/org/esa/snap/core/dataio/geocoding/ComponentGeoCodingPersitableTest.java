@@ -6,7 +6,7 @@ import org.jdom.Element;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersitable.*;
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.*;
 import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingTestUtils.createProduct;
 import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingTestUtils.initializeWithBands;
 import static org.hamcrest.CoreMatchers.*;
@@ -28,7 +28,7 @@ public class ComponentGeoCodingPersitableTest {
 
     @Before
     public void setUp() throws Exception {
-        persistable = new ComponentGeoCodingPersitableSpi().createPersistable();
+        persistable = new ComponentGeoCodingPersistableSpi().createPersistable();
         product = createProduct();
     }
 

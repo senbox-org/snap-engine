@@ -4,10 +4,12 @@ import org.esa.snap.core.dataio.dimap.spi.DimapPersistable;
 import org.esa.snap.core.dataio.dimap.spi.DimapPersistableSpi;
 import org.jdom.Element;
 
-public class ComponentGeoCodingPersitableSpi implements DimapPersistableSpi {
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_COMPONENT_GEO_CODING;
+
+public class ComponentGeoCodingPersistableSpi implements DimapPersistableSpi {
     @Override
     public boolean canDecode(Element element) {
-        return element != null && element.getChild(ComponentGeoCodingPersitable.TAG_COMPONENT_GEO_CODING) != null;
+        return element != null && element.getChild(TAG_COMPONENT_GEO_CODING) != null;
     }
 
     @Override
@@ -17,6 +19,6 @@ public class ComponentGeoCodingPersitableSpi implements DimapPersistableSpi {
 
     @Override
     public DimapPersistable createPersistable() {
-        return new ComponentGeoCodingPersitable();
+        return new ComponentGeoCodingPersistable();
     }
 }

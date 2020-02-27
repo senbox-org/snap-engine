@@ -1,5 +1,6 @@
 package org.esa.snap.dataio.netcdf.metadata.profiles.beam;
 
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.KEYWORD_SNAP_GEOCODING;
 import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingTestUtils.*;
 
 import org.esa.snap.core.datamodel.Product;
@@ -53,7 +54,7 @@ public class BeamGeocodingPartTest_ComponentGeocoding {
         final ArgumentCaptor<String> name = ArgumentCaptor.forClass(String.class);
         final ArgumentCaptor<String> xmlStr = ArgumentCaptor.forClass(String.class);
         verify(nFileWriteable).addGlobalAttribute(name.capture(), xmlStr.capture());
-        assertEquals(name.getValue(), BeamGeocodingPart.SNAP_GEOCODING);
+        assertEquals(name.getValue(), KEYWORD_SNAP_GEOCODING);
         final String expected = "<ComponentGeoCoding>" +
                                 "  <ForwardCodingKey>FWD_PIXEL</ForwardCodingKey>" +
                                 "  <InverseCodingKey>INV_PIXEL_GEO_INDEX</InverseCodingKey>" +

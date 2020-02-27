@@ -5,16 +5,17 @@ import org.jdom.Element;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_COMPONENT_GEO_CODING;
 import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
 
 public class ComponentGeoCodingPersitableSpiTest {
 
-    private ComponentGeoCodingPersitableSpi spi;
+    private ComponentGeoCodingPersistableSpi spi;
 
     @Before
     public void setUp() throws Exception {
-        spi = new ComponentGeoCodingPersitableSpi();
+        spi = new ComponentGeoCodingPersistableSpi();
     }
 
     @Test
@@ -40,7 +41,7 @@ public class ComponentGeoCodingPersitableSpiTest {
         assertThat(spi.canDecode(parent), is(false));
 
         // the right child element
-        parent.addContent(new Element(ComponentGeoCodingPersitable.TAG_COMPONENT_GEO_CODING));
+        parent.addContent(new Element(TAG_COMPONENT_GEO_CODING));
         assertThat(spi.canDecode(parent), is(true));
     }
 
@@ -48,6 +49,6 @@ public class ComponentGeoCodingPersitableSpiTest {
     public void createPersistable() {
         final DimapPersistable persistable = spi.createPersistable();
 
-        assertThat(persistable, is(instanceOf(ComponentGeoCodingPersitable.class)));
+        assertThat(persistable, is(instanceOf(ComponentGeoCodingPersistable.class)));
     }
 }
