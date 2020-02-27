@@ -59,6 +59,7 @@ import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.core.dataop.resamp.ResamplingFactory;
 import org.esa.snap.core.util.Debug;
 import org.esa.snap.core.util.Guardian;
+import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.XmlWriter;
@@ -79,6 +80,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.io.File;
@@ -110,10 +112,12 @@ public class DimapProductHelpers {
      *
      * @param dom the DOM in BEAM-DIMAP format
      *
+     * @param regionRasterSize the region size to be displayed
+     *
      * @return an in-memory data product represenation
      */
-    public static Product createProduct(Document dom) {
-        return new ProductBuilder(dom).createProduct();
+    public static Product createProduct(Document dom, Dimension regionRasterSize) {
+        return new ProductBuilder(dom).createProduct(regionRasterSize);
     }
 
     /**
@@ -306,7 +310,7 @@ public class DimapProductHelpers {
                     } else {
                         final DimapPersistable persistable = DimapPersistence.getPersistable(geoPosElem);
                         if (persistable != null) {
-                            geoCodings[bandIndex] = (GeoCoding) persistable.createObjectFromXml(geoPosElem, product);
+                            geoCodings[bandIndex] = (GeoCoding) persistable.createObjectFromXml(geoPosElem, product, null);
                         }
                     }
                 }
@@ -1122,18 +1126,18 @@ public class DimapProductHelpers {
             return _dom;
         }
 
-        private Product createProduct() {
-            ancillaryVariables = new HashMap<>();
+        private Product createProduct(Dimension regionRasterSize) {
+            this.ancillaryVariables = new HashMap<>();
 
-            product = new Product(getProductName(), getProductType(), getSceneRasterWidth(),
-                                                getSceneRasterHeight());
+            Dimension productSize = ImageUtils.computeSceneRasterSize(getSceneRasterWidth(), getSceneRasterHeight(), regionRasterSize);
+            this.product = new Product(getProductName(), getProductType(), productSize.width, productSize.height);
             setSceneRasterStartAndStopTime();
             setDescription();
             addQuicklook();
             addMasks();
             addFlagsCoding();
             addIndexCoding();
-            addBands();
+            addBands(regionRasterSize);
             addTiePointGrids();
             addDisplayInfosToBandsAndTiePointGrids();
             addOldBitmaskDefinitions();
@@ -1535,7 +1539,7 @@ public class DimapProductHelpers {
                 for (final Element child : children) {
                     final DimapPersistable persistable = DimapPersistence.getPersistable(child);
                     if (persistable != null) {
-                        final Object object = persistable.createObjectFromXml(child, product);
+                        final Object object = persistable.createObjectFromXml(child, product, null);
                         if (object instanceof Mask) {
                             product.getMaskGroup().add((Mask) object);
                         }
@@ -1577,10 +1581,10 @@ public class DimapProductHelpers {
             }
         }
 
-        private void addBands() {
+        private void addBands(Dimension regionRasterSize) {
             final Element child = getRootElement().getChild(DimapProductConstants.TAG_IMAGE_INTERPRETATION);
             if (child != null) {
-                addSpectralBands(child);
+                addSpectralBands(child, regionRasterSize);
             }
         }
 
@@ -1593,7 +1597,7 @@ public class DimapProductHelpers {
             }
         }
 
-        private void addSpectralBands(final Element parent) {
+        private void addSpectralBands(final Element parent, Dimension regionRasterSize) {
             final List children = parent.getChildren(DimapProductConstants.TAG_SPECTRAL_BAND_INFO);
             final List<Element> filterBandElementList = new ArrayList<Element>();
             for (Object child : children) {
@@ -1603,14 +1607,14 @@ public class DimapProductHelpers {
                     // they need an already existing RasterDataNode as source
                     filterBandElementList.add(element);
                 } else {
-                    final Band band = addBand(element, product);
+                    final Band band = addBand(element, product, regionRasterSize);
                     setGeneralBandProperties(band, element, product);
                     collectAncillaryVariables(element, band);
                 }
             }
             for (Object child : filterBandElementList) {
                 final Element element = (Element) child;
-                final Band band = addBand(element, product);
+                final Band band = addBand(element, product, regionRasterSize);
                 setGeneralBandProperties(band, element, product);
                 collectAncillaryVariables(element, band);
             }
@@ -1692,7 +1696,7 @@ public class DimapProductHelpers {
             }
         }
 
-        private static Band addBand(final Element element, Product product) {
+        private static Band addBand(final Element element, Product product, Dimension regionRasterSize) {
             Band band = null;
             final String bandName = element.getChildTextTrim(DimapProductConstants.TAG_BAND_NAME);
 
@@ -1708,6 +1712,7 @@ public class DimapProductHelpers {
                 rasterWidth = product.getSceneRasterWidth();
                 rasterHeight = product.getSceneRasterHeight();
             }
+            Dimension bandSize = ImageUtils.computeSceneRasterSize(rasterWidth, rasterHeight, regionRasterSize);
 
             final String description = element.getChildTextTrim(DimapProductConstants.TAG_BAND_DESCRIPTION);
             final int type = ProductData.getType(element.getChildTextTrim(DimapProductConstants.TAG_DATA_TYPE));
@@ -1715,14 +1720,15 @@ public class DimapProductHelpers {
                 return null;
             }
             if (isVirtualBand(element)) {
-                final VirtualBand virtualBand = new VirtualBand(bandName, type, rasterWidth, rasterHeight, getExpression(element));                product.addBand(virtualBand);
+                final VirtualBand virtualBand = new VirtualBand(bandName, type, bandSize.width, bandSize.height, getExpression(element));
+                product.addBand(virtualBand);
                 virtualBand.setNoDataValue(getInvalidValue(element));
                 virtualBand.setNoDataValueUsed(getUseInvalidValue(element));
                 band = virtualBand;
             } else if (isFilterBand(element)) {
                 final DimapPersistable persistable = DimapPersistence.getPersistable(element);
                 if (persistable != null) {
-                    band = (Band) persistable.createObjectFromXml(element, product);
+                    band = (Band) persistable.createObjectFromXml(element, product, regionRasterSize);
                     // currently it can be null if the operator of filtered band is of type
                     // GeneralFilterBand.STDDEV or GeneralFilterBand.RMS
                     if (band != null) {
@@ -1730,7 +1736,7 @@ public class DimapProductHelpers {
                     }
                 }
             } else {
-                band = new Band(bandName, type, rasterWidth, rasterHeight);
+                band = new Band(bandName, type, bandSize.width, bandSize.height);
                 product.addBand(band);
             }
             if (band != null) {

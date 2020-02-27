@@ -22,6 +22,7 @@ import org.esa.snap.core.dataop.maptransf.IdentityTransformDescriptor;
 import org.esa.snap.core.dataop.maptransf.MapInfo;
 import org.esa.snap.core.dataop.maptransf.MapProjection;
 import org.esa.snap.core.dataop.maptransf.MapTransform;
+import org.esa.snap.core.subset.PixelSubsetRegion;
 
 import java.awt.Point;
 import java.awt.geom.AffineTransform;
@@ -107,7 +108,7 @@ public class MapGeoCodingTest extends TestCase {
 
         final ProductSubsetDef subsetDef = new ProductSubsetDef("subset");
         subsetDef.setSubSampling(2, 3);
-        subsetDef.setRegion(10, 10, 50, 50);
+        subsetDef.setSubsetRegion(new PixelSubsetRegion(10, 10, 50, 50, 0));
         srcScene.transferGeoCodingTo(destScene, subsetDef);
 
         assertNotSame(mapGeoCoding, destNode.getGeoCoding());

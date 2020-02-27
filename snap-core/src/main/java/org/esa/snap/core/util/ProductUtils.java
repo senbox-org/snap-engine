@@ -21,7 +21,9 @@ import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.grender.support.BufferedImageRendering;
-import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.*;
+import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.simplify.DouglasPeuckerSimplifier;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.layer.MaskLayerType;
@@ -39,12 +41,15 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import javax.media.jai.PlanarImage;
 import java.awt.*;
+import java.awt.Dimension;
 import java.awt.geom.*;
 import java.awt.image.*;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.List;
+
+import static java.lang.Math.*;
 
 /**
  * This class provides many static factory methods to be used in conjunction with data products.
@@ -2169,4 +2174,175 @@ public class ProductUtils {
         return range;
     }
 
+    public static Polygon convertAwtPathToJtsPolygon(Path2D path, GeometryFactory factory) {
+        final PathIterator pathIterator = path.getPathIterator(null);
+        ArrayList<double[]> coordList = new ArrayList<>();
+        int lastOpenIndex = 0;
+        while (!pathIterator.isDone()) {
+            final double[] coords = new double[6];
+            final int segType = pathIterator.currentSegment(coords);
+            if (segType == PathIterator.SEG_CLOSE) {
+                // we should only detect a single SEG_CLOSE
+                coordList.add(coordList.get(lastOpenIndex));
+                lastOpenIndex = coordList.size();
+            } else {
+                coordList.add(coords);
+            }
+            pathIterator.next();
+        }
+        final Coordinate[] coordinates = new Coordinate[coordList.size()];
+        for (int i1 = 0; i1 < coordinates.length; i1++) {
+            final double[] coord = coordList.get(i1);
+            coordinates[i1] = new Coordinate(coord[0], coord[1]);
+        }
+
+        return factory.createPolygon(factory.createLinearRing(coordinates), null);
+    }
+
+    public static Rectangle computePixelRegionUsingGeometry(GeoCoding rasterGeoCoding, int rasterWidth, int rasterHeight, Geometry geometryRegion,
+                                                            int numBorderPixels, boolean roundPixelRegion) {
+
+        final Geometry productGeometry = computeProductGeometry(rasterGeoCoding, rasterWidth, rasterHeight);
+        final Geometry regionIntersection = geometryRegion.intersection(productGeometry);
+        if (regionIntersection.isEmpty()) {
+            return new Rectangle();
+        }
+        final PixelRegionFinder pixelRegionFinder = new PixelRegionFinder(rasterGeoCoding, roundPixelRegion);
+        regionIntersection.apply(pixelRegionFinder);
+        final Rectangle pixelRegion = pixelRegionFinder.getPixelRegion();
+        pixelRegion.grow(numBorderPixels, numBorderPixels);
+        return pixelRegion.intersection(new Rectangle(rasterWidth, rasterHeight));
+    }
+
+    //TODO Jean do not use 'int rasterWidth, int rasterHeight' parameters because the
+    // 'pixelRegion' cannot be null since we compute the 'step' value and the 'rasterWidth' and 'rasterHeight' are used
+    // only if the 'pixelRegion == null'
+    public static Geometry computeGeometryUsingPixelRegion(GeoCoding rasterGeoCoding, int rasterWidth, int rasterHeight, Rectangle pixelRegion) {
+        if (pixelRegion == null) {
+            throw new NullPointerException("The pixel region is null.");
+        }
+        final int step = Math.min(pixelRegion.width, pixelRegion.height) / 8;
+        GeneralPath[] paths = createGeoBoundaryPaths(rasterGeoCoding, rasterWidth, rasterHeight, pixelRegion, step, false);
+        final com.vividsolutions.jts.geom.Polygon[] polygons = new com.vividsolutions.jts.geom.Polygon[paths.length];
+        final GeometryFactory factory = new GeometryFactory();
+        for (int i = 0; i < paths.length; i++) {
+            polygons[i] = convertAwtPathToJtsPolygon(paths[i], factory);
+        }
+        if (polygons.length == 1) {
+            return polygons[0];
+        } else {
+            return factory.createMultiPolygon(polygons);
+        }
+    }
+
+    public static Geometry computeProductGeometry(GeoCoding productGeoCoding, int productWidth, int productHeight) {
+        final GeneralPath[] paths = createGeoBoundaryPaths(productGeoCoding, productWidth, productHeight);
+        final com.vividsolutions.jts.geom.Polygon[] polygons = new com.vividsolutions.jts.geom.Polygon[paths.length];
+        final GeometryFactory factory = new GeometryFactory();
+        for (int i = 0; i < paths.length; i++) {
+            polygons[i] = convertAwtPathToJtsPolygon(paths[i], factory);
+        }
+        final DouglasPeuckerSimplifier peuckerSimplifier = new DouglasPeuckerSimplifier(polygons.length == 1 ? polygons[0] : factory.createMultiPolygon(polygons));
+        return peuckerSimplifier.getResultGeometry();
+    }
+
+    public static GeneralPath[] createGeoBoundaryPaths(GeoCoding productGeoCoding, int productWidth, int productHeight) {
+        final Rectangle rect = new Rectangle(0, 0, productWidth, productHeight);
+        final int step = Math.min(rect.width, rect.height) / 8;
+        return createGeoBoundaryPaths(productGeoCoding, productWidth, productHeight, rect, step > 0 ? step : 1);
+    }
+
+    public static GeneralPath[] createGeoBoundaryPaths(GeoCoding productGeoCoding, int productWidth, int productHeight, Rectangle region, int step) {
+        final boolean usePixelCenter = true;
+        return createGeoBoundaryPaths(productGeoCoding, productWidth, productHeight, region, step, usePixelCenter);
+    }
+
+    public static GeoPos[] createGeoBoundary(GeoCoding productGeocoding, int productWidth, int productHeight, Rectangle region, int step, boolean usePixelCenter) {
+        if (productGeocoding == null) {
+            throw new IllegalArgumentException(UtilConstants.MSG_NO_GEO_CODING);
+        }
+        if (region == null) {
+            region = new Rectangle(0, 0, productWidth, productHeight);
+        }
+        final PixelPos[] points = createRectBoundary(region, step, usePixelCenter);
+        final ArrayList<GeoPos> geoPoints = new ArrayList<>(points.length);
+        for (final PixelPos pixelPos : points) {
+            final GeoPos gcGeoPos = productGeocoding.getGeoPos(pixelPos, null);
+            if (true) { // including valid positions only leads to unit test failures 'very elsewhere' rq-20140414
+                geoPoints.add(gcGeoPos);
+            }
+        }
+        return geoPoints.toArray(new GeoPos[geoPoints.size()]);
+    }
+
+    public static GeoPos[] createGeoBoundaryArray(GeoCoding rasterGeoCoding, int rasterWidth, int rasterHeight, Rectangle region, int step, final boolean usePixelCenter) {
+        if (rasterGeoCoding == null) {
+            throw new IllegalArgumentException(UtilConstants.MSG_NO_GEO_CODING);
+        }
+        if (region == null) {
+            region = new Rectangle(0, 0, rasterWidth, rasterHeight);
+        }
+        final PixelPos[] points = createRectBoundary(region, step, usePixelCenter);
+        final ArrayList<GeoPos> geoPoints = new ArrayList<>(points.length);
+        for (final PixelPos pixelPos : points) {
+            final GeoPos gcGeoPos = rasterGeoCoding.getGeoPos(pixelPos, null);
+            if (true) { // including valid positions only leads to unit test failures 'very elsewhere' rq-20140414
+                geoPoints.add(gcGeoPos);
+            }
+        }
+        return geoPoints.toArray(new GeoPos[geoPoints.size()]);
+    }
+
+    public static GeneralPath[] createGeoBoundaryPaths(GeoCoding productGeoCoding, int productWidth, int productHeight, Rectangle region, int step, boolean usePixelCenter) {
+        if (productGeoCoding == null) {
+            throw new IllegalArgumentException(UtilConstants.MSG_NO_GEO_CODING);
+        }
+        final GeoPos[] geoPoints = createGeoBoundary(productGeoCoding, productWidth, productHeight, region, step, usePixelCenter);
+        normalizeGeoPolygon(geoPoints);
+        final ArrayList<GeneralPath> pathList = assemblePathList(geoPoints);
+        return pathList.toArray(new GeneralPath[pathList.size()]);
+    }
+
+    public static class PixelRegionFinder implements CoordinateFilter {
+
+        private final GeoCoding geoCoding;
+
+        private int x1;
+        private int y1;
+        private int x2;
+        private int y2;
+        private boolean round = false;
+
+        public PixelRegionFinder(GeoCoding geoCoding, boolean round) {
+            this.geoCoding = geoCoding;
+            x1 = Integer.MAX_VALUE;
+            x2 = Integer.MIN_VALUE;
+            y1 = Integer.MAX_VALUE;
+            y2 = Integer.MIN_VALUE;
+            this.round = round;
+        }
+
+        @Override
+        public void filter(Coordinate coordinate) {
+            final GeoPos geoPos = new GeoPos(coordinate.y, coordinate.x);
+            final PixelPos pixelPos = geoCoding.getPixelPos(geoPos, null);
+            if (pixelPos.isValid()) {
+                if(round) {
+                    x1 = min(x1, (int) round(pixelPos.x));
+                    x2 = max(x2, (int) round(pixelPos.x));
+                    y1 = min(y1, (int) round(pixelPos.y));
+                    y2 = max(y2, (int) round(pixelPos.y));
+                } else {
+                    x1 = min(x1, (int) floor(pixelPos.x));
+                    x2 = max(x2, (int) ceil(pixelPos.x));
+                    y1 = min(y1, (int) floor(pixelPos.y));
+                    y2 = max(y2, (int) ceil(pixelPos.y));
+                }
+            }
+        }
+
+        public Rectangle getPixelRegion() {
+            return new Rectangle(x1, y1, x2 - x1, y2 - y1);
+        }
+    }
 }

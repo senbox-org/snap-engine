@@ -89,7 +89,7 @@ public class BandMathMaskPersistableTest {
         final InputStream resourceStream = getClass().getResourceAsStream("BandMathMask.xml");
         final Document document = new SAXBuilder().build(resourceStream);
         final Product product = new Product("P", "T", 10, 10);
-        final Mask maskFromXml = (Mask) persistable.createObjectFromXml(document.getRootElement(), product);
+        final Mask maskFromXml = (Mask) persistable.createObjectFromXml(document.getRootElement(), product, null);
 
         assertNotNull(maskFromXml);
         assertEquals(Mask.BandMathsType.class, maskFromXml.getImageType().getClass());

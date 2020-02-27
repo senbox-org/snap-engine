@@ -206,6 +206,26 @@ public class ProductIO {
         return readProductImpl(file, null);
     }
 
+    /**
+     * Reads the data product specified by the given file.
+     * <p>The product returned will be associated with the reader appropriate for the given
+     * file format (see also {@link Product#getProductReader() Product.productReader}).
+     * <p>The method does not automatically read band data, thus
+     * {@link Band#getRasterData() Band.rasterData} will always be null
+     * for all bands in the product returned by this method.
+     *
+     * @param file the data product file
+     * @param subsetDef the subset of a product
+     *
+     * @return a data model as an in-memory representation of the given product file or <code>null</code> if no
+     *         appropriate reader was found for the given product file
+     *
+     * @throws IOException if an I/O error occurs
+     */
+    public static Product readProduct(File file, ProductSubsetDef subsetDef) throws IOException {
+        return readProductImpl(file, subsetDef);
+    }
+
     private static Product readProductImpl(File file, ProductSubsetDef subsetDef) throws IOException {
         Guardian.assertNotNull("file", file);
         if (!file.exists()) {
