@@ -4,7 +4,7 @@ import org.esa.snap.core.util.PropertyMap;
 
 
 /**
- * Contains many key parameters and defaults for the color manipulation tool and it's related color scheme manager
+ * Contains many key parameters and defaults for the color manipulation tool
  *
  * @author Daniel Knowles
  * @date 2/1/2020
@@ -12,9 +12,10 @@ import org.esa.snap.core.util.PropertyMap;
 
 public class ColorSchemeDefaults {
 
-    public static final boolean COLOR_SCHEME_CODE_DEBUG = false;
+    public static final boolean COLOR_SCHEME_CODE_DEBUG = true;
 
-    public static final String TOOLNAME_COLOR_MANIPULATION = "Color Manipulation";
+//    public static final String TOOLNAME_COLOR_MANIPULATION = "Color Manager";
+    public static final String TOOLNAME_COLOR_MANIPULATION = "Colour Manipulation";
 
     // Directory names
     public static final String DIR_NAME_COLOR_SCHEMES = "color_schemes";
@@ -73,7 +74,7 @@ public class ColorSchemeDefaults {
     private static final String PROPERTY_GENERAL_KEY_SUFFIX = PROPERTY_ROOT_KEY + ".general";
 
     public static final String PROPERTY_GENERAL_SECTION_KEY = PROPERTY_GENERAL_KEY_SUFFIX + ".section";
-    public static final String PROPERTY_GENERAL_SECTION_LABEL = "General (Non-Scheme) Options";
+    public static final String PROPERTY_GENERAL_SECTION_LABEL = "Standard Options";
     public static final String PROPERTY_GENERAL_SECTION_TOOLTIP = "General behavior when not using a color scheme";
 
     public static final String PROPERTY_GENERAL_CPD_KEY = PROPERTY_GENERAL_KEY_SUFFIX + ".cpd";
@@ -145,50 +146,85 @@ public class ColorSchemeDefaults {
     public static final String PROPERTY_SCHEME_LOG_OPTION4 = OPTION_LOG_FALSE;
     public static final String PROPERTY_SCHEME_LOG_DEFAULT = OPTION_LOG_FROM_SCHEME;
 
-    public static final String PROPERTY_SCHEME_VERBOSE_KEY = PROPERTY_SCHEME_KEY_SUFFIX + ".verbose";
+
+
+    // Scheme Selector Options
+
+    private static final String PROPERTY_SCHEME_SELECTOR_KEY_SUFFIX = PROPERTY_ROOT_KEY + ".scheme.selector";
+
+    public static final String PROPERTY_SCHEME_SELECTOR_SECTION_KEY = PROPERTY_SCHEME_SELECTOR_KEY_SUFFIX + ".section";
+    public static final String PROPERTY_SCHEME_SELECTOR_SECTION_LABEL = "Scheme Selector Options";
+    public static final String PROPERTY_SCHEME_SELECTOR_SECTION_TOOLTIP = "Display format of schemes listed within the Scheme Selector";
+
+
+    public static final String PROPERTY_SCHEME_VERBOSE_KEY = PROPERTY_SCHEME_SELECTOR_KEY_SUFFIX + ".verbose";
     public static final String PROPERTY_SCHEME_VERBOSE_LABEL = "Verbose Schemes";
     public static final String PROPERTY_SCHEME_VERBOSE_TOOLTIP = "Scheme selector will display the DISPLAY field instead of the scheme name";
     public static final boolean PROPERTY_SCHEME_VERBOSE_DEFAULT = false;
 
-    public static final String PROPERTY_SCHEME_SHOW_DISABLED_KEY = PROPERTY_SCHEME_KEY_SUFFIX + ".show.disabled";
+    public static final String PROPERTY_SCHEME_SHOW_DISABLED_KEY = PROPERTY_SCHEME_SELECTOR_KEY_SUFFIX + ".show.disabled";
     public static final String PROPERTY_SCHEME_SHOW_DISABLED_LABEL = "Show Disabled Schemes";
     public static final String PROPERTY_SCHEME_SHOW_DISABLED_TOOLTIP = "Scheme selector will display all schemes including schemes with missing cpd files";
     public static final boolean PROPERTY_SCHEME_SHOW_DISABLED_DEFAULT = false;
 
-    public static final String PROPERTY_SCHEME_SORT_KEY = PROPERTY_SCHEME_KEY_SUFFIX + ".sort";
+    public static final String PROPERTY_SCHEME_SORT_KEY = PROPERTY_SCHEME_SELECTOR_KEY_SUFFIX + ".sort";
     public static final String PROPERTY_SCHEME_SORT_LABEL = "Sort Schemes";
     public static final String PROPERTY_SCHEME_SORT_TOOLTIP = "Scheme selector will display all schemes sorted versus original xml order";
     public static final boolean PROPERTY_SCHEME_SORT_DEFAULT = true;
 
 
-    // Scheme option
+    // Slider Options
 
-    private static final String PROPERTY_RANGE_BUTTON_KEY_SUFFIX = PROPERTY_ROOT_KEY + ".range.options";
+    private static final String PROPERTY_SLIDER_KEY_SUFFIX = PROPERTY_ROOT_KEY + ".slider.options";
 
-    public static final String PROPERTY_RANGE_BUTTON_SECTION_KEY = PROPERTY_RANGE_BUTTON_KEY_SUFFIX + ".section";
-    public static final String PROPERTY_RANGE_BUTTON_SECTION_LABEL = "Range Options";
-    public static final String PROPERTY_RANGE_BUTTON_SECTION_TOOLTIP = "Button options in the Color Manipulation GUI";
+    public static final String PROPERTY_SLIDERS_SECTION_KEY = PROPERTY_SLIDER_KEY_SUFFIX + ".section";
+    public static final String PROPERTY_SLIDERS_SECTION_LABEL = "Slider Options";
+    public static final String PROPERTY_SLIDERS_SECTION_TOOLTIP = "Button options in the Color Manipulation GUI";
 
+    public static final String PROPERTY_SLIDERS_BUTTON_100_KEY = PROPERTY_SLIDER_KEY_SUFFIX + ".100";
+    public static final String PROPERTY_SLIDERS_BUTTON_100_LABEL = "Show 100% range button";
+    public static final String PROPERTY_SLIDERS_BUTTON_100_TOOLTIP = "Show 100% range button in the sliders GUI";
+    public static final boolean PROPERTY_SLIDERS_BUTTON_100_DEFAULT = true;
 
-    public static final String PROPERTY_RANGE_BUTTON_98_KEY = PROPERTY_RANGE_BUTTON_KEY_SUFFIX + ".98";
-    public static final String PROPERTY_RANGE_BUTTON_98_LABEL = "Show 98% range button";
-    public static final String PROPERTY_RANGE_BUTTON_98_TOOLTIP = "Show 98% range button in the sliders GUI";
-    public static final boolean PROPERTY_RANGE_BUTTON_98_DEFAULT = true;
+    public static final String PROPERTY_SLIDERS_BUTTON_98_KEY = PROPERTY_SLIDER_KEY_SUFFIX + ".98";
+    public static final String PROPERTY_SLIDERS_BUTTON_98_LABEL = "Show 98% range button";
+    public static final String PROPERTY_SLIDERS_BUTTON_98_TOOLTIP = "Show 98% range button in the sliders GUI";
+    public static final boolean PROPERTY_SLIDERS_BUTTON_98_DEFAULT = false;
 
-    public static final String PROPERTY_RANGE_BUTTON_95_KEY = PROPERTY_RANGE_BUTTON_KEY_SUFFIX + ".95";
-    public static final String PROPERTY_RANGE_BUTTON_95_LABEL = "Show 95% range button";
-    public static final String PROPERTY_RANGE_BUTTON_95_TOOLTIP = "Show 95% range button in the sliders GUI";
-    public static final boolean PROPERTY_RANGE_BUTTON_95_DEFAULT = false;
+    public static final String PROPERTY_SLIDERS_BUTTON_95_KEY = PROPERTY_SLIDER_KEY_SUFFIX + ".95";
+    public static final String PROPERTY_SLIDERS_BUTTON_95_LABEL = "Show 95% range button";
+    public static final String PROPERTY_SLIDERS_BUTTON_95_TOOLTIP = "Show 95% range button in the sliders GUI";
+    public static final boolean PROPERTY_SLIDERS_BUTTON_95_DEFAULT = false;
 
-    public static final String PROPERTY_RANGE_BUTTON_90_KEY = PROPERTY_RANGE_BUTTON_KEY_SUFFIX + ".90";
-    public static final String PROPERTY_RANGE_BUTTON_90_LABEL = "Show 90% range button";
-    public static final String PROPERTY_RANGE_BUTTON_90_TOOLTIP = "Show 90% range button in the sliders GUI";
-    public static final boolean PROPERTY_RANGE_BUTTON_90_DEFAULT = false;
+    public static final String PROPERTY_SLIDERS_BUTTON_90_KEY = PROPERTY_SLIDER_KEY_SUFFIX + ".90";
+    public static final String PROPERTY_SLIDERS_BUTTON_90_LABEL = "Show 90% range button";
+    public static final String PROPERTY_SLIDERS_BUTTON_90_TOOLTIP = "Show 90% range button in the sliders GUI";
+    public static final boolean PROPERTY_SLIDERS_BUTTON_90_DEFAULT = false;
 
-    public static final String PROPERTY_RANGE_ZOOM_IN_KEY = PROPERTY_RANGE_BUTTON_KEY_SUFFIX + ".zoom.in";
-    public static final String PROPERTY_RANGE_ZOOM_IN_LABEL = "Slider view zoomed in";
-    public static final String PROPERTY_RANGE_ZOOM_IN_TOOLTIP = "Display slider view zoomed in by defaul";
-    public static final boolean PROPERTY_RANGE_ZOOM_IN_DEFAULT = true;
+    public static final String PROPERTY_SLIDERS_BUTTON_1_SIGMA_KEY = PROPERTY_SLIDER_KEY_SUFFIX + ".1.sigma";
+    public static final String PROPERTY_SLIDERS_BUTTON_1_SIGMA_LABEL = "Show 1 sigma (68.27%) range button";
+    public static final String PROPERTY_SLIDERS_BUTTON_1_SIGMA_TOOLTIP = "Show 68.27% range button in the sliders GUI";
+    public static final boolean PROPERTY_SLIDERS_BUTTON_1_SIGMA_DEFAULT = false;
+
+    public static final String PROPERTY_SLIDERS_BUTTON_2_SIGMA_KEY = PROPERTY_SLIDER_KEY_SUFFIX + ".2.sigma";
+    public static final String PROPERTY_SLIDERS_BUTTON_2_SIGMA_LABEL = "Show 2 sigma (95.45%) range button";
+    public static final String PROPERTY_SLIDERS_BUTTON_2_SIGMA_TOOLTIP = "Show 95.45% range button in the sliders GUI";
+    public static final boolean PROPERTY_SLIDERS_BUTTON_2_SIGMA_DEFAULT = true;
+
+    public static final String PROPERTY_SLIDERS_BUTTON_3_SIGMA_KEY = PROPERTY_SLIDER_KEY_SUFFIX + ".3.sigma";
+    public static final String PROPERTY_SLIDERS_BUTTON_3_SIGMA_LABEL = "Show 3 sigma (99.73%) range button";
+    public static final String PROPERTY_SLIDERS_BUTTON_3_SIGMA_TOOLTIP = "Show 99.73% range button in the sliders GUI";
+    public static final boolean PROPERTY_SLIDERS_BUTTON_3_SIGMA_DEFAULT = true;
+
+    public static final String PROPERTY_SLIDERS_ZOOM_VERTICAL_SHOW_KEY = PROPERTY_SLIDER_KEY_SUFFIX + ".zoom.vertical.show";
+    public static final String PROPERTY_SLIDERS_ZOOM_VERTICAL_SHOW_IN_LABEL = "Show zoom vertical buttons";
+    public static final String PROPERTY_SLIDERS_ZOOM_VERTICAL_SHOW_IN_TOOLTIP = "Show zoom vertical buttons";
+    public static final boolean PROPERTY_SLIDERS_ZOOM_VERTICAL_SHOW_IN_DEFAULT = true;
+
+    public static final String PROPERTY_SLIDERS_ZOOM_IN_KEY = PROPERTY_SLIDER_KEY_SUFFIX + ".zoom.in";
+    public static final String PROPERTY_SLIDERS_ZOOM_IN_LABEL = "Slider view zoomed in";
+    public static final String PROPERTY_SLIDERS_ZOOM_IN_TOOLTIP = "Display slider view zoomed in by default";
+    public static final boolean PROPERTY_SLIDERS_ZOOM_IN_DEFAULT = true;
 
     // ----------------------------
 
@@ -200,7 +236,7 @@ public class ColorSchemeDefaults {
     private static final String PROPERTY_CPD_KEY_SUFFIX = PROPERTY_ROOT_KEY + ".default.cpd";
 
     public static final String PROPERTY_CPD_SECTION_KEY = PROPERTY_CPD_KEY_SUFFIX + ".section";
-    public static final String PROPERTY_CPD_SECTION_LABEL = "Palettes";
+    public static final String PROPERTY_CPD_SECTION_LABEL = "Default Palettes";
     public static final String PROPERTY_CPD_SECTION_TOOLTIP = "Palettes to use";
 
     public static final String PROPERTY_CPD_GRAY_SCALE_KEY = PROPERTY_CPD_KEY_SUFFIX + ".gray.scale";
