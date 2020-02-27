@@ -33,6 +33,7 @@ public class Constants {
     public static final String DEFAULT_SEPARATOR = "\t";
     public static final String FORMAT_NAME = "CSV";
     public static final String DESCRIPTION = "CSV products";
+    public static final String COMMENT = "#";
 
     public static final String NAME_METADATA_ELEMENT_CSV_HEADER_PROPERTIES = "CSV Header Properties";
 

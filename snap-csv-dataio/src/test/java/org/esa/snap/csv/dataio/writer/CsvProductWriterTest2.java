@@ -36,7 +36,6 @@ import static org.junit.Assert.assertEquals;
  */
 public class CsvProductWriterTest2 {
 
-
     @Test
     public void testWriteFeatures_WhenReadingFromProduct() throws Exception {
         StringWriter result = new StringWriter();
@@ -64,5 +63,4 @@ public class CsvProductWriterTest2 {
                      lines[24]);
 
     }
-
 }
