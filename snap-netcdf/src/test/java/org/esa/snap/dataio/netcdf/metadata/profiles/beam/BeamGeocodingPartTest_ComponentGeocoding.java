@@ -1,6 +1,6 @@
 package org.esa.snap.dataio.netcdf.metadata.profiles.beam;
 
-import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.KEYWORD_SNAP_GEOCODING;
+import static org.esa.snap.core.dataio.Constants.GEOCODING;
 import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingTestUtils.*;
 
 import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
@@ -52,7 +52,7 @@ public class BeamGeocodingPartTest_ComponentGeocoding {
         when(attribute.getStringValue()).thenReturn(EXPECTED);
 
         final NetcdfFile netcdfFile = mock(NetcdfFile.class);
-        when(netcdfFile.findGlobalAttribute(KEYWORD_SNAP_GEOCODING)).thenReturn(attribute);
+        when(netcdfFile.findGlobalAttribute(GEOCODING)).thenReturn(attribute);
 
         ProfileReadContext ctxR = mock(ProfileReadContext.class);
         when(ctxR.getNetcdfFile()).thenReturn(netcdfFile);
@@ -117,7 +117,7 @@ public class BeamGeocodingPartTest_ComponentGeocoding {
         final ArgumentCaptor<String> name = ArgumentCaptor.forClass(String.class);
         final ArgumentCaptor<String> xmlStr = ArgumentCaptor.forClass(String.class);
         verify(nFileWriteable).addGlobalAttribute(name.capture(), xmlStr.capture());
-        assertEquals(name.getValue(), KEYWORD_SNAP_GEOCODING);
+        assertEquals(name.getValue(), GEOCODING);
         assertThat(strip(xmlStr.getValue()), is(equalTo(strip(EXPECTED))));
     }
 

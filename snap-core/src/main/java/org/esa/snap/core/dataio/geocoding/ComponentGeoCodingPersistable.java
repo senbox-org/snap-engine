@@ -13,7 +13,6 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import java.util.stream.IntStream;
 
 public class ComponentGeoCodingPersistable implements DimapPersistable {
-    public static final String KEYWORD_SNAP_GEOCODING = "snap_geocoding";
 
     public static final String TAG_COMPONENT_GEO_CODING = "ComponentGeoCoding";
     public static final String TAG_FORWARD_CODING_KEY = "ForwardCodingKey";

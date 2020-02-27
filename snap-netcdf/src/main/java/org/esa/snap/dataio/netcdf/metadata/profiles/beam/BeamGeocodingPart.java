@@ -47,7 +47,8 @@ import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.io.StringReader;
 
-import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.KEYWORD_SNAP_GEOCODING;
+import static org.esa.snap.core.dataio.Constants.GEOCODING;
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_COMPONENT_GEO_CODING;
 
 public class BeamGeocodingPart extends CfGeocodingPart {
 
@@ -68,10 +69,10 @@ public class BeamGeocodingPart extends CfGeocodingPart {
     }
 
     private GeoCoding createGeoCoding(Product p, NetcdfFile netcdfFile) {
-        final Attribute snapGeoCodingAtt = netcdfFile.findGlobalAttribute(KEYWORD_SNAP_GEOCODING);
-        if (snapGeoCodingAtt != null) {
-            final String xml = snapGeoCodingAtt.getStringValue();
-            if (xml.contains(ComponentGeoCodingPersistable.TAG_COMPONENT_GEO_CODING)) {
+        final Attribute geoCodingAtt = netcdfFile.findGlobalAttribute(GEOCODING);
+        if (geoCodingAtt != null) {
+            final String xml = geoCodingAtt.getStringValue();
+            if (xml.contains(TAG_COMPONENT_GEO_CODING)) {
                 try {
                     final SAXBuilder saxBuilder = new SAXBuilder();
                     String stripped = xml.replace("\n", "").replace("\r", "").replaceAll("> *<", "><");
@@ -138,7 +139,7 @@ public class BeamGeocodingPart extends CfGeocodingPart {
             final ComponentGeoCodingPersistable persistable = new ComponentGeoCodingPersistable();
             final Element xmlFromObject = persistable.createXmlFromObject(geoCoding);
             final String value = StringUtils.toXMLString(xmlFromObject);
-            ctx.getNetcdfFileWriteable().addGlobalAttribute(KEYWORD_SNAP_GEOCODING, value);
+            ctx.getNetcdfFileWriteable().addGlobalAttribute(GEOCODING, value);
         } else if (geoCoding instanceof TiePointGeoCoding) {
             final TiePointGeoCoding tpGC = (TiePointGeoCoding) geoCoding;
             final String[] names = new String[2];
