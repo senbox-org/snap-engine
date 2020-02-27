@@ -10,7 +10,7 @@ import org.esa.snap.core.util.PropertyMap;
  * @date 2/1/2020
  */
 
-public class ColorSchemeDefaults {
+public class ColorManipulationDefaults {
 
     public static final boolean COLOR_SCHEME_CODE_DEBUG = true;
 
