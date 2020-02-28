@@ -29,6 +29,8 @@ import org.jdom.output.XMLOutputter;
 import java.awt.*;
 import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 
@@ -61,6 +63,7 @@ public class CsvProductWriter extends AbstractProductWriter {
 
     @Override
     protected void writeProductNodesImpl() throws IOException {
+        ensureWriter();
         getSeparatorFromMetaData();
         writeProperties();
         writeHeader();
@@ -86,6 +89,12 @@ public class CsvProductWriter extends AbstractProductWriter {
             builder.append(getJavaType(dataType));
         }
         writeLine(builder.toString());
+    }
+
+    private void ensureWriter() throws IOException {
+        if (writer == null) {
+            writer = new FileWriter(new File(getOutput().toString()));
+        }
     }
 
     // package access for testing only tb 2020-02-28

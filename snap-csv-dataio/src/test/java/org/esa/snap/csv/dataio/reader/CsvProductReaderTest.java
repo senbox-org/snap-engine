@@ -164,6 +164,18 @@ public class CsvProductReaderTest {
         assertEquals(ProductData.TYPE_FLOAT32, ((CsvProductReader) reader).getProductDataType(Float.class));
         assertEquals(ProductData.TYPE_FLOAT64, ((CsvProductReader) reader).getProductDataType(Double.class));
         assertEquals(ProductData.TYPE_INT8, ((CsvProductReader) reader).getProductDataType(Byte.class));
+        assertEquals(ProductData.TYPE_INT16, ((CsvProductReader) reader).getProductDataType(Short.class));
+        assertEquals(ProductData.TYPE_INT32, ((CsvProductReader) reader).getProductDataType(Integer.class));
+        assertEquals(ProductData.TYPE_UTC, ((CsvProductReader) reader).getProductDataType(ProductData.UTC.class));
+    }
+
+    @Test
+    public void testGetDataType_illegal() {
+        try {
+            ((CsvProductReader) reader).getProductDataType(Object.class);
+            fail("IllegalArgumentException expected");
+        } catch (IllegalArgumentException expected) {
+        }
     }
 
     @Test

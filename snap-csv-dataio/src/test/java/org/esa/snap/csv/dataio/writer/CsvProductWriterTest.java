@@ -19,13 +19,9 @@ package org.esa.snap.csv.dataio.writer;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.dataio.ProductWriter;
 import org.esa.snap.core.dataio.geocoding.*;
-import org.esa.snap.core.dataio.geocoding.forward.PixelForward;
 import org.esa.snap.core.dataio.geocoding.forward.TiePointSplineForward;
-import org.esa.snap.core.dataio.geocoding.inverse.PixelGeoIndexInverse;
 import org.esa.snap.core.dataio.geocoding.inverse.TiePointInverse;
-import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.jdom.Element;
 import org.junit.Before;
@@ -36,6 +32,8 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 
+import static org.esa.snap.csv.dataio.CsvTestUtils.createProductWithPixelGeoCoding;
+import static org.esa.snap.csv.dataio.CsvTestUtils.createProductWithoutGeoCoding;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
@@ -126,7 +124,7 @@ public class CsvProductWriterTest {
         writer.writeBandRasterData(null, -1, -1, -1, -1, null, ProgressMonitor.NULL);
 
         assertEquals("#sceneRasterWidth=2" + LS +
-                "#geocoding=<ComponentGeoCoding><ForwardCodingKey>FWD_PIXEL</ForwardCodingKey><InverseCodingKey>INV_PIXEL_GEO_INDEX_INTERPOLATING</InverseCodingKey><GeoChecks>NONE</GeoChecks><GeoCRS>GEOGCS[\"WGS84(DD)\",   DATUM[\"WGS84\",     SPHEROID[\"WGS84\", 6378137.0, 298.257223563]],   PRIMEM[\"Greenwich\", 0.0],   UNIT[\"degree\", 0.017453292519943295],   AXIS[\"Geodetic longitude\", EAST],   AXIS[\"Geodetic latitude\", NORTH]]</GeoCRS><LonVariableName>longitude</LonVariableName><LatVariableName>latitude</LatVariableName><RasterResolutionKm>1.3</RasterResolutionKm></ComponentGeoCoding>" + LS +
+                "#geocoding=<ComponentGeoCoding><ForwardCodingKey>FWD_PIXEL</ForwardCodingKey><InverseCodingKey>INV_PIXEL_GEO_INDEX_INTERPOLATING</InverseCodingKey><GeoChecks>NONE</GeoChecks><GeoCRS>GEOGCS[\"WGS84(DD)\",   DATUM[\"WGS84\",     SPHEROID[\"WGS84\", 6378137.0, 298.257223563]],   PRIMEM[\"Greenwich\", 0.0],   UNIT[\"degree\", 0.017453292519943295],   AXIS[\"Geodetic longitude\", EAST],   AXIS[\"Geodetic latitude\", NORTH]]</GeoCRS><LonVariableName>longitude</LonVariableName><LatVariableName>latitude</LatVariableName><RasterResolutionKm>1.3</RasterResolutionKm><OffsetX>0.5</OffsetX><OffsetY>0.5</OffsetY><SubsamplingX>1.0</SubsamplingX><SubsamplingY>1.0</SubsamplingY></ComponentGeoCoding>" + LS +
                 "featureId\tradiance_1:float\tradiance_2:double\tradiance_3:int\tlongitude:float\tlatitude:float" + LS +
                 "0\t3.0\t13.0\t103\t-117.0\t23.0" + LS +
                 "1\t4.0\t14.0\t104\t-116.0\t24.0" + LS +
@@ -188,7 +186,7 @@ public class CsvProductWriterTest {
         writer.writeBandRasterData(null, -1, -1, -1, -1, null, ProgressMonitor.NULL);
 
         assertEquals("#sceneRasterWidth=4" + LS +
-                        "#geocoding=<ComponentGeoCoding><ForwardCodingKey>FWD_TIE_POINT_SPLINE</ForwardCodingKey><InverseCodingKey>INV_TIE_POINT</InverseCodingKey><GeoChecks>NONE</GeoChecks><GeoCRS>GEOGCS[\"WGS84(DD)\",   DATUM[\"WGS84\",     SPHEROID[\"WGS84\", 6378137.0, 298.257223563]],   PRIMEM[\"Greenwich\", 0.0],   UNIT[\"degree\", 0.017453292519943295],   AXIS[\"Geodetic longitude\", EAST],   AXIS[\"Geodetic latitude\", NORTH]]</GeoCRS><LonVariableName>longitude</LonVariableName><LatVariableName>latitude</LatVariableName><RasterResolutionKm>1.3</RasterResolutionKm></ComponentGeoCoding>" + LS +
+                        "#geocoding=<ComponentGeoCoding><ForwardCodingKey>FWD_TIE_POINT_SPLINE</ForwardCodingKey><InverseCodingKey>INV_TIE_POINT</InverseCodingKey><GeoChecks>NONE</GeoChecks><GeoCRS>GEOGCS[\"WGS84(DD)\",   DATUM[\"WGS84\",     SPHEROID[\"WGS84\", 6378137.0, 298.257223563]],   PRIMEM[\"Greenwich\", 0.0],   UNIT[\"degree\", 0.017453292519943295],   AXIS[\"Geodetic longitude\", EAST],   AXIS[\"Geodetic latitude\", NORTH]]</GeoCRS><LonVariableName>longitude</LonVariableName><LatVariableName>latitude</LatVariableName><RasterResolutionKm>1.3</RasterResolutionKm><OffsetX>0.5</OffsetX><OffsetY>0.5</OffsetY><SubsamplingX>2.0</SubsamplingX><SubsamplingY>2.0</SubsamplingY></ComponentGeoCoding>" + LS +
                         "featureId\tradiance_1:float\tradiance_2:double\tradiance_3:int\tlongitude:float\tlatitude:float" + LS +
                         "0\t6.0\t16.0\t106\t6.0\t7.0" + LS +
                         "1\t7.0\t17.0\t107\t6.5\t7.5" + LS +
@@ -253,62 +251,6 @@ public class CsvProductWriterTest {
 
         verify(writer, times(1)).close();
         verifyNoMoreInteractions(writer);
-    }
-
-    private void fillBandDataInt(Band band, int startValue) {
-        final int rasterWidth = band.getRasterWidth();
-        final int rasterHeight = band.getRasterHeight();
-
-        final ProductData data = band.createCompatibleProductData(rasterWidth * rasterHeight);
-        int value = startValue;
-        int dataIndex = 0;
-        for (int i = 0; i < rasterWidth; i++) {
-            for (int j = 0; j < rasterHeight; j++) {
-                data.setElemIntAt(dataIndex++, value++);
-            }
-        }
-        band.setData(data);
-    }
-
-    private void fillBandDataFloat(Band band, int startValue) {
-        final int rasterWidth = band.getRasterWidth();
-        final int rasterHeight = band.getRasterHeight();
-
-        final ProductData data = band.createCompatibleProductData(rasterWidth * rasterHeight);
-        int value = startValue;
-        int dataIndex = 0;
-        for (int i = 0; i < rasterWidth; i++) {
-            for (int j = 0; j < rasterHeight; j++) {
-                data.setElemFloatAt(dataIndex++, value++);
-            }
-        }
-        band.setData(data);
-    }
-
-    private Product createProductWithoutGeoCoding(int startValue, int width, int height) {
-        final Product product = new Product("testProduct", "testType", width, height);
-        fillBandDataFloat(product.addBand("radiance_1", ProductData.TYPE_FLOAT32), startValue);
-        fillBandDataFloat(product.addBand("radiance_2", ProductData.TYPE_FLOAT64), 10 + startValue);
-        fillBandDataInt(product.addBand("radiance_3", ProductData.TYPE_INT32), 100 + startValue);
-        return product;
-    }
-
-    private Product createProductWithPixelGeoCoding(int startValue, int width, int height) {
-        final Product product = createProductWithoutGeoCoding(startValue, width, height);
-
-        fillBandDataFloat(product.addBand("longitude", ProductData.TYPE_FLOAT32), -120 + startValue);
-        fillBandDataFloat(product.addBand("latitude", ProductData.TYPE_FLOAT32), 20 + startValue);
-
-        final GeoRaster geoRaster = new GeoRaster(null, null, "longitude", "latitude",
-                2, 3, 1.3);
-
-        final ForwardCoding forward = ComponentFactory.getForward(PixelForward.KEY);
-        final InverseCoding inverse = ComponentFactory.getInverse(PixelGeoIndexInverse.KEY_INTERPOLATING);
-
-        final ComponentGeoCoding geoCoding = new ComponentGeoCoding(geoRaster, forward, inverse);
-        product.setSceneGeoCoding(geoCoding);
-
-        return product;
     }
 
     private Product createProductWithTiePoints(int startValue, int width, int height) {

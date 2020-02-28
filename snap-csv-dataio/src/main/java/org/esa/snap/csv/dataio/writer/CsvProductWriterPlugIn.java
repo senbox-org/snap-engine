@@ -36,6 +36,11 @@ public class CsvProductWriterPlugIn implements ProductWriterPlugIn {
     private Writer writer;
     private final int config;
 
+    // required for service loader tb 2020-02-28
+    public CsvProductWriterPlugIn() {
+        this(null, CsvProductWriter.WRITE_FEATURES | CsvProductWriter.WRITE_PROPERTIES);
+    }
+
     public CsvProductWriterPlugIn(Writer writer, int config) {
         this.writer = writer;
         this.config = config;

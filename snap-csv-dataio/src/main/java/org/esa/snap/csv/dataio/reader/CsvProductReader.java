@@ -19,29 +19,30 @@ package org.esa.snap.csv.dataio.reader;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.core.datamodel.GeoCodingFactory;
-import org.esa.snap.core.datamodel.MetadataAttribute;
-import org.esa.snap.core.datamodel.MetadataElement;
-import org.esa.snap.core.datamodel.PixelTimeCoding;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
+import org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.csv.dataio.CsvFile;
 import org.esa.snap.csv.dataio.CsvSource;
 import org.esa.snap.csv.dataio.CsvSourceParser;
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
 import org.opengis.feature.type.AttributeDescriptor;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.StringReader;
 import java.text.MessageFormat;
 import java.util.logging.Level;
 import java.util.stream.DoubleStream;
 
+import static org.esa.snap.core.dataio.Constants.GEOCODING;
 import static org.esa.snap.csv.dataio.Constants.*;
 
 /**
@@ -86,7 +87,7 @@ public class CsvProductReader extends AbstractProductReader {
         if (sceneRasterWidthProperty != null) {
             sceneRasterWidth = Integer.parseInt(sceneRasterWidthProperty);
             sceneRasterHeight = recordCount % sceneRasterWidth == 0 ? recordCount / sceneRasterWidth :
-                                recordCount / sceneRasterWidth + 1;
+                    recordCount / sceneRasterWidth + 1;
         } else {
             if (isSquareNumber(recordCount)) {
                 sceneRasterWidth = (int) Math.sqrt(recordCount);
@@ -116,7 +117,7 @@ public class CsvProductReader extends AbstractProductReader {
         return product;
     }
 
-    private void initGeocoding() {
+    private void initGeocoding() throws IOException {
         final Band latBand = fetchBand(LAT_NAMES);
         if (latBand == null) {
             SystemUtils.LOG.info("Latitude information not available.");
@@ -129,10 +130,33 @@ public class CsvProductReader extends AbstractProductReader {
             SystemUtils.LOG.warning("Unable to initialize PixelGeoCoding.");
             return;
         }
+
+        final String geoCodingMeta = source.getProperties().get(GEOCODING);
+        if (geoCodingMeta == null) {
+            setDefaultGeoCoding(latBand, lonBand);
+            return;
+        }
+
+        final Element containerElement;
+        try {
+            final SAXBuilder saxBuilder = new SAXBuilder();
+            final Document document = saxBuilder.build(new StringReader(geoCodingMeta));
+            containerElement = new Element("container");
+            containerElement.addContent(document.getRootElement().detach());
+        } catch (JDOMException e) {
+            throw new IOException(e.getMessage());
+        }
+
+        final ComponentGeoCodingPersistable persistable = new ComponentGeoCodingPersistable();
+        final ComponentGeoCoding geoCoding = (ComponentGeoCoding) persistable.createObjectFromXml(containerElement, product, null);
+
+        product.setSceneGeoCoding(geoCoding);
+    }
+
+    private void setDefaultGeoCoding(Band latBand, Band lonBand) {
         final String validMask = latBand.getValidMaskExpression();
         final int searchRadius = 5;
         GeoCoding gc = GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, validMask, searchRadius);
-//        GeoCoding gc = new PixelGeoCoding(latBand, lonBand, validMask, searchRadius);
         product.setSceneGeoCoding(gc);
     }
 
@@ -238,8 +262,8 @@ public class CsvProductReader extends AbstractProductReader {
                                           int destOffsetY, int destWidth, int destHeight, ProductData destBuffer,
                                           ProgressMonitor pm) throws IOException {
         SystemUtils.LOG.log(Level.FINEST, MessageFormat.format(
-                    "reading band data (" + destBand.getName() + ") from {0} to {1}",
-                    destOffsetY * destWidth, sourceOffsetY * destWidth + destWidth * destHeight));
+                "reading band data (" + destBand.getName() + ") from {0} to {1}",
+                destOffsetY * destWidth, sourceOffsetY * destWidth + destWidth * destHeight));
         pm.beginTask("reading band data...", destWidth * destHeight);
 
         Object[] values;
@@ -299,7 +323,7 @@ public class CsvProductReader extends AbstractProductReader {
             }
             default: {
                 throw new IllegalArgumentException(
-                            "Unsupported type '" + ProductData.getTypeString(destBuffer.getType()) + "'.");
+                        "Unsupported type '" + ProductData.getTypeString(destBuffer.getType()) + "'.");
             }
         }
     }
@@ -331,10 +355,10 @@ public class CsvProductReader extends AbstractProductReader {
     private boolean isAccessibleBandType(Class<?> type) {
         final String className = type.getSimpleName().toLowerCase();
         return className.equals("float") ||
-               className.equals("double") ||
-               className.equals("byte") ||
-               className.equals("short") ||
-               className.equals("integer");
+                className.equals("double") ||
+                className.equals("byte") ||
+                className.equals("short") ||
+                className.equals("integer");
     }
 
     static class CSVTimeCoding extends PixelTimeCoding {

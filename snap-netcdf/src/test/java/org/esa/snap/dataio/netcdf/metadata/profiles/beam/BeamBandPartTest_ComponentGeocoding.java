@@ -35,6 +35,7 @@ public class BeamBandPartTest_ComponentGeocoding {
             "  <LonVariableName>Lon</LonVariableName>" +
             "  <LatVariableName>Lat</LatVariableName>" +
             "  <RasterResolutionKm>300.0</RasterResolutionKm>" +
+            "  <OffsetX>0.5</OffsetX><OffsetY>0.5</OffsetY><SubsamplingX>1.0</SubsamplingX><SubsamplingY>1.0</SubsamplingY>" +
             "</ComponentGeoCoding>";
 
     @Before
