@@ -298,8 +298,7 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
         isInitialized = true;
     }
 
-    // package access for testing only tb 2019-11-18
-    GeoChecks getGeoChecks() {
+    public GeoChecks getGeoChecks() {
         return geoChecks;
     }
 
