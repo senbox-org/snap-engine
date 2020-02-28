@@ -1,7 +1,7 @@
 package org.esa.snap.binning.operator.metadata;
 
-import com.vividsolutions.jts.io.ParseException;
-import com.vividsolutions.jts.io.WKTReader;
+import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKTReader;
 import org.esa.snap.binning.AggregatorConfig;
 import org.esa.snap.binning.aggregators.AggregatorAverage;
 import org.esa.snap.binning.aggregators.AggregatorOnMaxSet;

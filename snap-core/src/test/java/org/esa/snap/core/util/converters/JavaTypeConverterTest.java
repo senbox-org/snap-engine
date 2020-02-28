@@ -17,8 +17,8 @@
 package org.esa.snap.core.util.converters;
 
 import com.bc.ceres.binding.ConversionException;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Polygon;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Polygon;
 import org.junit.Test;
 
 import java.util.Date;

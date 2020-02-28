@@ -16,7 +16,7 @@
 
 package org.esa.snap.binning;
 
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 
 /**
  * The binning context.
