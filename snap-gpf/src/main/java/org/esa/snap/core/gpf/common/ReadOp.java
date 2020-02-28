@@ -118,7 +118,7 @@ public class ReadOp extends Operator {
         if (hasBandNames || hasMaskNames || this.pixelRegion != null || this.geometryRegion != null || this.copyMetadata != null) {
             subsetDef = new ProductSubsetDef();
             if (this.copyMetadata != null) {
-                subsetDef.setIgnoreMetadata(!this.copyMetadata.booleanValue());
+                subsetDef.setIgnoreMetadata(this.copyMetadata.booleanValue());
             }
             AbstractSubsetRegion subsetRegion = null;
             if (this.geometryRegion != null) {
