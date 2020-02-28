@@ -161,7 +161,7 @@ public class BeamBandPart extends ProfilePartIO {
                     final Element parent = new Element("parent");
                     parent.addContent(rootElement.detach());
                     final ComponentGeoCodingPersistable pers = new ComponentGeoCodingPersistable();
-                    final Object objectFromXml = pers.createObjectFromXml(parent, p);
+                    final Object objectFromXml = pers.createObjectFromXml(parent, p, null);
                     if (objectFromXml instanceof GeoCoding) {
                         band.setGeoCoding((GeoCoding) objectFromXml);
                     }

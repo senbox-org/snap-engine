@@ -10,6 +10,7 @@ import org.jdom.Element;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
+import java.awt.*;
 import java.util.stream.IntStream;
 
 public class ComponentGeoCodingPersistable implements DimapPersistable {
@@ -24,7 +25,7 @@ public class ComponentGeoCodingPersistable implements DimapPersistable {
     public static final String TAG_RASTER_RESOLUTION_KM = "RasterResolutionKm";
 
     @Override
-    public Object createObjectFromXml(Element element, Product product) {
+    public Object createObjectFromXml(Element element, Product product, Dimension regionRasterSize) {
         final String gcElemName = element.getName();
 
         final Element codingMain = element.getChild(TAG_COMPONENT_GEO_CODING);

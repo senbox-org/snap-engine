@@ -17,11 +17,7 @@ package org.esa.snap.dataio.netcdf.metadata.profiles.beam;
 
 import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
 import org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable;
-import org.esa.snap.core.datamodel.CrsGeoCoding;
-import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.TiePointGeoCoding;
-import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.dataio.netcdf.ProfileReadContext;
@@ -42,7 +38,7 @@ import ucar.nc2.Attribute;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.io.StringReader;
@@ -81,7 +77,7 @@ public class BeamGeocodingPart extends CfGeocodingPart {
                     final Element parent = new Element("parent");
                     parent.addContent(rootElement.detach());
                     final ComponentGeoCodingPersistable pers = new ComponentGeoCodingPersistable();
-                    final Object objectFromXml = pers.createObjectFromXml(parent, p);
+                    final Object objectFromXml = pers.createObjectFromXml(parent, p, null);
                     if (objectFromXml instanceof GeoCoding) {
                         return (GeoCoding) objectFromXml;
                     }
@@ -95,8 +91,8 @@ public class BeamGeocodingPart extends CfGeocodingPart {
         if (tpCoordinatesAtt != null) {
             final String[] tpGridNames = tpCoordinatesAtt.getStringValue().split(" ");
             if (tpGridNames.length == 2
-                && p.containsTiePointGrid(tpGridNames[LON_INDEX])
-                && p.containsTiePointGrid(tpGridNames[LAT_INDEX])) {
+                    && p.containsTiePointGrid(tpGridNames[LON_INDEX])
+                    && p.containsTiePointGrid(tpGridNames[LAT_INDEX])) {
                 final TiePointGrid lon = p.getTiePointGrid(tpGridNames[LON_INDEX]);
                 final TiePointGrid lat = p.getTiePointGrid(tpGridNames[LAT_INDEX]);
                 return new TiePointGeoCoding(lat, lon);
@@ -120,13 +116,12 @@ public class BeamGeocodingPart extends CfGeocodingPart {
             String[] parameters = StringUtils.csvToArray(i2mString);
             double[] matrix = new double[parameters.length];
             for (int i = 0; i < matrix.length; i++) {
-                matrix[i] = Double.valueOf(parameters[i]);
+                matrix[i] = Double.parseDouble(parameters[i]);
             }
             AffineTransform i2m = new AffineTransform(matrix);
             Rectangle imageBounds = new Rectangle(p.getSceneRasterWidth(), p.getSceneRasterHeight());
             return new CrsGeoCoding(crs, imageBounds, i2m);
-        } catch (FactoryException ignore) {
-        } catch (TransformException ignore) {
+        } catch (FactoryException | TransformException ignore) {
         }
         return null;
     }

@@ -6,14 +6,11 @@ import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.dataio.netcdf.ProfileReadContext;
-import org.esa.snap.dataio.netcdf.ProfileWriteContext;
-import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
 import org.esa.snap.dataio.netcdf.nc.NVariable;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import ucar.nc2.Attribute;
-import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
 import java.io.IOException;
@@ -21,7 +18,8 @@ import java.io.IOException;
 import static org.esa.snap.core.dataio.Constants.GEOCODING;
 import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingTestUtils.createProduct;
 import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingTestUtils.initializeWithBands;
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
@@ -30,14 +28,14 @@ public class BeamBandPartTest_ComponentGeocoding {
     private BeamBandPart part;
     private Product product;
     public static final String EXPECTED = "<ComponentGeoCoding>" +
-                                          "  <ForwardCodingKey>FWD_PIXEL</ForwardCodingKey>" +
-                                          "  <InverseCodingKey>INV_PIXEL_GEO_INDEX</InverseCodingKey>" +
-                                          "  <GeoChecks>ANTIMERIDIAN</GeoChecks>" +
-                                          "  <GeoCRS>GEOGCS[\"WGS84(DD)\", DATUM[\"WGS84\", SPHEROID[\"WGS84\", 6378137.0, 298.257223563]], PRIMEM[\"Greenwich\", 0.0], UNIT[\"degree\", 0.017453292519943295], AXIS[\"Geodetic longitude\", EAST], AXIS[\"Geodetic latitude\", NORTH]]</GeoCRS>" +
-                                          "  <LonVariableName>Lon</LonVariableName>" +
-                                          "  <LatVariableName>Lat</LatVariableName>" +
-                                          "  <RasterResolutionKm>300.0</RasterResolutionKm>" +
-                                          "</ComponentGeoCoding>";
+            "  <ForwardCodingKey>FWD_PIXEL</ForwardCodingKey>" +
+            "  <InverseCodingKey>INV_PIXEL_GEO_INDEX</InverseCodingKey>" +
+            "  <GeoChecks>ANTIMERIDIAN</GeoChecks>" +
+            "  <GeoCRS>GEOGCS[\"WGS84(DD)\", DATUM[\"WGS84\", SPHEROID[\"WGS84\", 6378137.0, 298.257223563]], PRIMEM[\"Greenwich\", 0.0], UNIT[\"degree\", 0.017453292519943295], AXIS[\"Geodetic longitude\", EAST], AXIS[\"Geodetic latitude\", NORTH]]</GeoCRS>" +
+            "  <LonVariableName>Lon</LonVariableName>" +
+            "  <LatVariableName>Lat</LatVariableName>" +
+            "  <RasterResolutionKm>300.0</RasterResolutionKm>" +
+            "</ComponentGeoCoding>";
 
     @Before
     public void setUp() throws Exception {

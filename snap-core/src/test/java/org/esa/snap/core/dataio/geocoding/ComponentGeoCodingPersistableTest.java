@@ -12,7 +12,7 @@ import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingTestUtils.ini
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
-public class ComponentGeoCodingPersitableTest {
+public class ComponentGeoCodingPersistableTest {
 
     private DimapPersistable persistable;
     private Product product;
@@ -67,7 +67,7 @@ public class ComponentGeoCodingPersitableTest {
         product.setSceneGeoCoding(null);
         assertThat(product.getSceneGeoCoding(), is(nullValue()));
 
-        final Object objectFromXml = persistable.createObjectFromXml(generalGeoCodingElem, product);
+        final Object objectFromXml = persistable.createObjectFromXml(generalGeoCodingElem, product, null);
 
         assertThat(objectFromXml, is(instanceOf(ComponentGeoCoding.class)));
         final ComponentGeoCoding newGeoCoding = (ComponentGeoCoding) objectFromXml;
