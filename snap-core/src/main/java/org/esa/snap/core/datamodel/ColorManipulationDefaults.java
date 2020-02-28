@@ -1,6 +1,9 @@
 package org.esa.snap.core.datamodel;
 
+import org.esa.snap.core.util.NamingConvention;
 import org.esa.snap.core.util.PropertyMap;
+
+import static org.esa.snap.core.util.NamingConvention.*;
 
 
 /**
@@ -14,8 +17,9 @@ public class ColorManipulationDefaults {
 
     public static final boolean COLOR_SCHEME_CODE_DEBUG = true;
 
-//    public static final String TOOLNAME_COLOR_MANIPULATION = "Color Manager";
-    public static final String TOOLNAME_COLOR_MANIPULATION = "Colour Manipulation";
+    public static final String TOOLNAME_COLOR_MANIPULATION = NamingConvention.COLOR_MIXED_CASE + " Manipulation";
+
+
 
     // Directory names
     public static final String DIR_NAME_COLOR_SCHEMES = "color_schemes";
@@ -75,11 +79,11 @@ public class ColorManipulationDefaults {
 
     public static final String PROPERTY_GENERAL_SECTION_KEY = PROPERTY_GENERAL_KEY_SUFFIX + ".section";
     public static final String PROPERTY_GENERAL_SECTION_LABEL = "Standard Options";
-    public static final String PROPERTY_GENERAL_SECTION_TOOLTIP = "General behavior when not using a color scheme";
+    public static final String PROPERTY_GENERAL_SECTION_TOOLTIP = "General behavior when not using a " + COLOR_LOWER_CASE + " scheme";
 
     public static final String PROPERTY_GENERAL_CPD_KEY = PROPERTY_GENERAL_KEY_SUFFIX + ".cpd";
     public static final String PROPERTY_GENERAL_CPD_LABEL = "Palette";
-    public static final String PROPERTY_GENERAL_CPD_TOOLTIP = "The cpd file to use when not using a color scheme";
+    public static final String PROPERTY_GENERAL_CPD_TOOLTIP = "The cpd file to use when not using a " + COLOR_LOWER_CASE + " scheme";
     public static final String PROPERTY_GENERAL_CPD_OPTION1 = OPTION_COLOR_GRAY_SCALE;
     public static final String PROPERTY_GENERAL_CPD_OPTION2 = OPTION_COLOR_STANDARD;
     public static final String PROPERTY_GENERAL_CPD_OPTION3 = OPTION_COLOR_UNIVERSAL;
@@ -88,14 +92,14 @@ public class ColorManipulationDefaults {
 
     public static final String PROPERTY_GENERAL_RANGE_KEY = PROPERTY_GENERAL_KEY_SUFFIX + ".range";
     public static final String PROPERTY_GENERAL_RANGE_LABEL = "Range";
-    public static final String PROPERTY_GENERAL_RANGE_TOOLTIP = "range options to use when not using a color scheme";
+    public static final String PROPERTY_GENERAL_RANGE_TOOLTIP = "range options to use when not using a " + COLOR_LOWER_CASE + "scheme";
     public static final String PROPERTY_GENERAL_RANGE_OPTION1 = OPTION_RANGE_FROM_DATA;
     public static final String PROPERTY_GENERAL_RANGE_OPTION2 = OPTION_RANGE_FROM_CPD;
     public static final String PROPERTY_GENERAL_RANGE_DEFAULT = OPTION_RANGE_FROM_DATA;
 
     public static final String PROPERTY_GENERAL_LOG_KEY = PROPERTY_GENERAL_KEY_SUFFIX + ".log";
     public static final String PROPERTY_GENERAL_LOG_LABEL = "Log Scaling";
-    public static final String PROPERTY_GENERAL_LOG_TOOLTIP = "log options to use when not using a color scheme";
+    public static final String PROPERTY_GENERAL_LOG_TOOLTIP = "log options to use when not using a " + COLOR_LOWER_CASE + " scheme";
     public static final String PROPERTY_GENERAL_LOG_OPTION1 = OPTION_LOG_TRUE;
     public static final String PROPERTY_GENERAL_LOG_OPTION2 = OPTION_LOG_FALSE;
     public static final String PROPERTY_GENERAL_LOG_OPTION3 = OPTION_LOG_FROM_CPD;
@@ -111,11 +115,11 @@ public class ColorManipulationDefaults {
 
     public static final String PROPERTY_SCHEME_SECTION_KEY = PROPERTY_SCHEME_KEY_SUFFIX + ".section";
     public static final String PROPERTY_SCHEME_SECTION_LABEL = "Scheme Options";
-    public static final String PROPERTY_SCHEME_SECTION_TOOLTIP = "Behavior when using a color scheme";
+    public static final String PROPERTY_SCHEME_SECTION_TOOLTIP = "Behavior when using a " + COLOR_LOWER_CASE + " scheme";
 
     public static final String PROPERTY_SCHEME_AUTO_APPLY_KEY = PROPERTY_SCHEME_KEY_SUFFIX + ".auto.apply";
-    public static final String PROPERTY_SCHEME_AUTO_APPLY_LABEL = "Automatically Apply Color Schemes";
-    public static final String PROPERTY_SCHEME_AUTO_APPLY_TOOLTIP = "Automatically apply color schemes when opening a band based on its name";
+    public static final String PROPERTY_SCHEME_AUTO_APPLY_LABEL = "Automatically Apply " + NamingConvention.COLOR_MIXED_CASE + " Schemes";
+    public static final String PROPERTY_SCHEME_AUTO_APPLY_TOOLTIP = "Automatically apply " + NamingConvention.COLOR_LOWER_CASE +" schemes when opening a band based on its name";
     public static final boolean PROPERTY_SCHEME_AUTO_APPLY_DEFAULT = true;
 
     public static final String PROPERTY_SCHEME_CPD_KEY = PROPERTY_SCHEME_KEY_SUFFIX + ".cpd";
@@ -179,7 +183,7 @@ public class ColorManipulationDefaults {
 
     public static final String PROPERTY_SLIDERS_SECTION_KEY = PROPERTY_SLIDER_KEY_SUFFIX + ".section";
     public static final String PROPERTY_SLIDERS_SECTION_LABEL = "Slider Options";
-    public static final String PROPERTY_SLIDERS_SECTION_TOOLTIP = "Button options in the Color Manipulation GUI";
+    public static final String PROPERTY_SLIDERS_SECTION_TOOLTIP = "Button options in the " + TOOLNAME_COLOR_MANIPULATION + " GUI";
 
     public static final String PROPERTY_SLIDERS_BUTTON_100_KEY = PROPERTY_SLIDER_KEY_SUFFIX + ".100";
     public static final String PROPERTY_SLIDERS_BUTTON_100_LABEL = "Show 100% range button";
@@ -246,12 +250,12 @@ public class ColorManipulationDefaults {
 
     public static final String PROPERTY_CPD_STANDARD_KEY = PROPERTY_CPD_KEY_SUFFIX + ".standard";
     public static final String PROPERTY_CPD_STANDARD_LABEL = OPTION_COLOR_STANDARD;
-    public static final String PROPERTY_CPD_STANDARD_TOOLTIP = "The cpd file to use when STANDARD COLOR is selected";
+    public static final String PROPERTY_CPD_STANDARD_TOOLTIP = "The cpd file to use when STANDARD " + COLOR_UPPER_CASE +" is selected";
     public static final String PROPERTY_CPD_STANDARD_DEFAULT = CPD_STANDARD_DEFAULT;
 
     public static final String PROPERTY_CPD_UNIVERSAL_KEY = PROPERTY_CPD_KEY_SUFFIX + ".universal";
     public static final String PROPERTY_CPD_UNIVERSAL_LABEL = OPTION_COLOR_UNIVERSAL;
-    public static final String PROPERTY_CPD_UNIVERSAL_TOOLTIP = "The color blind compliant cpd file to use when UNIVERSAL COLOR is selected";
+    public static final String PROPERTY_CPD_UNIVERSAL_TOOLTIP = "The color blind compliant cpd file to use when UNIVERSAL " + COLOR_UPPER_CASE + " is selected";
     public static final String PROPERTY_CPD_UNIVERSAL_DEFAULT = CPD_UNIVERSAL_DEFAULT;
 
     public static final String PROPERTY_CPD_ANOMALIES_KEY = PROPERTY_CPD_KEY_SUFFIX + ".anomalies";
@@ -277,8 +281,8 @@ public class ColorManipulationDefaults {
     public static final String PROPERTY_RESTORE_SECTION_TOOLTIP = "Restores preferences to the package defaults";
 
     public static final String PROPERTY_RESTORE_DEFAULTS_NAME = PROPERTY_RESTORE_KEY_SUFFIX + ".apply";
-    public static final String PROPERTY_RESTORE_DEFAULTS_LABEL = "RESTORE DEFAULTS (Color Preferences)";
-    public static final String PROPERTY_RESTORE_DEFAULTS_TOOLTIP = "Restore all color preferences to the default";
+    public static final String PROPERTY_RESTORE_DEFAULTS_LABEL = "RESTORE DEFAULTS (" + NamingConvention.COLOR_MIXED_CASE + " Preferences)";
+    public static final String PROPERTY_RESTORE_DEFAULTS_TOOLTIP = "Restore all " + NamingConvention.COLOR_LOWER_CASE + " preferences to the default";
     public static final boolean PROPERTY_RESTORE_DEFAULTS_DEFAULT = false;
 
     //-------------------------------
