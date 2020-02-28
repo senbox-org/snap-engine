@@ -23,6 +23,10 @@ public class ComponentGeoCodingPersistable implements DimapPersistable {
     public static final String TAG_LON_VARIABLE_NAME = "LonVariableName";
     public static final String TAG_LAT_VARIABLE_NAME = "LatVariableName";
     public static final String TAG_RASTER_RESOLUTION_KM = "RasterResolutionKm";
+    public static final String TAG_OFFSET_X = "OffsetX";
+    public static final String TAG_OFFSET_Y = "OffsetY";
+    public static final String TAG_SUBSAMPLING_X = "SubsamplingX";
+    public static final String TAG_SUBSAMPLING_Y = "SubsamplingY";
 
     @Override
     public Object createObjectFromXml(Element element, Product product, Dimension regionRasterSize) {
@@ -182,6 +186,10 @@ public class ComponentGeoCodingPersistable implements DimapPersistable {
         final String lonVarName = geoRaster.getLonVariableName();
         final String latVarName = geoRaster.getLatVariableName();
         final double resolutionKm = geoRaster.getRasterResolutionInKm();
+        final double offsetX = geoRaster.getOffsetX();
+        final double offsetY = geoRaster.getOffsetY();
+        final double subsamplingX = geoRaster.getSubsamplingX();
+        final double subsamplingY = geoRaster.getSubsamplingY();
 
         final Element codingMain = new Element(TAG_COMPONENT_GEO_CODING);
         final Element forwardKeyElem = new Element(TAG_FORWARD_CODING_KEY);
@@ -191,6 +199,10 @@ public class ComponentGeoCodingPersistable implements DimapPersistable {
         final Element lonVarNameElem = new Element(TAG_LON_VARIABLE_NAME);
         final Element latVarNameElem = new Element(TAG_LAT_VARIABLE_NAME);
         final Element resolutionKmElem = new Element(TAG_RASTER_RESOLUTION_KM);
+        final Element offsetXElem = new Element(TAG_OFFSET_X);
+        final Element offsetYElem = new Element(TAG_OFFSET_Y);
+        final Element subsamplingXElem = new Element(TAG_SUBSAMPLING_X);
+        final Element subsamplingYElem = new Element(TAG_SUBSAMPLING_Y);
 
         codingMain.addContent(forwardKeyElem);
         codingMain.addContent(inverseKeyElem);
@@ -199,6 +211,10 @@ public class ComponentGeoCodingPersistable implements DimapPersistable {
         codingMain.addContent(lonVarNameElem);
         codingMain.addContent(latVarNameElem);
         codingMain.addContent(resolutionKmElem);
+        codingMain.addContent(offsetXElem);
+        codingMain.addContent(offsetYElem);
+        codingMain.addContent(subsamplingXElem);
+        codingMain.addContent(subsamplingYElem);
 
         forwardKeyElem.setText(forwardKey);
         inverseKeyElem.setText(inverseKey);
@@ -207,6 +223,10 @@ public class ComponentGeoCodingPersistable implements DimapPersistable {
         lonVarNameElem.setText(lonVarName);
         latVarNameElem.setText(latVarName);
         resolutionKmElem.setText(String.valueOf(resolutionKm));
+        offsetXElem.setText(String.valueOf(offsetX));
+        offsetYElem.setText(String.valueOf(offsetY));
+        subsamplingXElem.setText(String.valueOf(subsamplingX));
+        subsamplingYElem.setText(String.valueOf(subsamplingY));
 
         return codingMain;
     }
