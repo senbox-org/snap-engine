@@ -227,6 +227,10 @@ public class GeoTiffProductReader extends AbstractProductReader {
     }
 
     public Product readProduct(GeoTiffImageReader geoTiffImageReader, String defaultProductName, Rectangle productBounds) throws Exception {
+        return readProduct(geoTiffImageReader, defaultProductName, productBounds, null);
+    }
+
+    public Product readProduct(GeoTiffImageReader geoTiffImageReader, String defaultProductName, Rectangle productBounds, Double noDataValue) throws Exception {
         Dimension defaultImageSize = geoTiffImageReader.validateArea(productBounds);
 
         TIFFImageMetadata imageMetadata = geoTiffImageReader.getImageMetadata();
@@ -295,7 +299,8 @@ public class GeoTiffProductReader extends AbstractProductReader {
                         throw new IllegalStateException("The band index " + bandIndex + " must be < " + sampleModel.getNumBands() + ". The band name is '" + band.getName() + "'.");
                     }
                     int dataBufferType = ImageManager.getDataBufferType(band.getDataType()); // sampleModel.getDataType();
-                    GeoTiffMultiLevelSource multiLevelSource = new GeoTiffMultiLevelSource(geoTiffImageReader, dataBufferType, productBounds, preferredTileSize, bandIndex, band.getGeoCoding(), isGlobalShifted180);
+                    GeoTiffMultiLevelSource multiLevelSource = new GeoTiffMultiLevelSource(geoTiffImageReader, dataBufferType, productBounds, preferredTileSize,
+                                                                                           bandIndex, band.getGeoCoding(), isGlobalShifted180, noDataValue);
                     band.setSourceImage(new DefaultMultiLevelImage(multiLevelSource));
                 }
             } else {
