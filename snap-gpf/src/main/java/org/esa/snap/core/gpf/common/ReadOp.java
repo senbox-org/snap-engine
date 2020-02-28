@@ -17,7 +17,6 @@
 package org.esa.snap.core.gpf.common;
 
 import com.bc.ceres.core.ProgressMonitor;
-import com.vividsolutions.jts.geom.Geometry;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductSubsetDef;
@@ -38,6 +37,7 @@ import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.converters.JtsGeometryConverter;
 import org.esa.snap.core.util.converters.RectangleConverter;
+import org.locationtech.jts.geom.Geometry;
 
 import java.awt.*;
 import java.io.File;

@@ -21,7 +21,7 @@ import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.grender.support.BufferedImageRendering;
-import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.*;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.ColorPaletteDef;
 import org.esa.snap.core.datamodel.DensityPlot;
@@ -57,6 +57,7 @@ import org.esa.snap.core.util.math.Range;
 import org.geotools.feature.DefaultFeatureCollection;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.locationtech.jts.simplify.DouglasPeuckerSimplifier;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -64,6 +65,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import javax.media.jai.PlanarImage;
 import java.awt.*;
 import java.awt.Dimension;
+import java.awt.Polygon;
 import java.awt.geom.*;
 import java.awt.image.*;
 import java.io.IOException;
@@ -2196,7 +2198,7 @@ public class ProductUtils {
         return range;
     }
 
-    public static Polygon convertAwtPathToJtsPolygon(Path2D path, GeometryFactory factory) {
+    public static org.locationtech.jts.geom.Polygon convertAwtPathToJtsPolygon(Path2D path, GeometryFactory factory) {
         final PathIterator pathIterator = path.getPathIterator(null);
         ArrayList<double[]> coordList = new ArrayList<>();
         int lastOpenIndex = 0;
@@ -2245,7 +2247,7 @@ public class ProductUtils {
         }
         final int step = Math.min(pixelRegion.width, pixelRegion.height) / 8;
         GeneralPath[] paths = createGeoBoundaryPaths(rasterGeoCoding, rasterWidth, rasterHeight, pixelRegion, step, false);
-        final com.vividsolutions.jts.geom.Polygon[] polygons = new com.vividsolutions.jts.geom.Polygon[paths.length];
+        final org.locationtech.jts.geom.Polygon[] polygons = new org.locationtech.jts.geom.Polygon[paths.length];
         final GeometryFactory factory = new GeometryFactory();
         for (int i = 0; i < paths.length; i++) {
             polygons[i] = convertAwtPathToJtsPolygon(paths[i], factory);
@@ -2259,7 +2261,7 @@ public class ProductUtils {
 
     public static Geometry computeProductGeometry(GeoCoding productGeoCoding, int productWidth, int productHeight) {
         final GeneralPath[] paths = createGeoBoundaryPaths(productGeoCoding, productWidth, productHeight);
-        final com.vividsolutions.jts.geom.Polygon[] polygons = new com.vividsolutions.jts.geom.Polygon[paths.length];
+        final org.locationtech.jts.geom.Polygon[] polygons = new org.locationtech.jts.geom.Polygon[paths.length];
         final GeometryFactory factory = new GeometryFactory();
         for (int i = 0; i < paths.length; i++) {
             polygons[i] = convertAwtPathToJtsPolygon(paths[i], factory);

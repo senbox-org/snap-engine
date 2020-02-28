@@ -33,7 +33,7 @@
         </dependency>
         <dependency>
             <groupId>javax.media.jai</groupId>
-            <artifactId>mlibwrapper-jai</artifactId>
+            <artifactId>mlibwrapper-jai-openjdk</artifactId>
         </dependency>
         <dependency>
             <groupId>com.sun.media</groupId>
