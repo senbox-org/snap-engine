@@ -1,6 +1,6 @@
 package org.esa.snap.core.transform;
 
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 import org.geotools.referencing.operation.transform.IdentityTransform;
 import org.opengis.referencing.operation.TransformException;
 

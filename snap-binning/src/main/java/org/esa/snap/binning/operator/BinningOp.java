@@ -17,9 +17,19 @@
 package org.esa.snap.binning.operator;
 
 import com.bc.ceres.core.ProgressMonitor;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import org.esa.snap.binning.*;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.esa.snap.binning.AggregatorConfig;
+import org.esa.snap.binning.BinningContext;
+import org.esa.snap.binning.CellProcessorConfig;
+import org.esa.snap.binning.CompositingType;
+import org.esa.snap.binning.DataPeriod;
+import org.esa.snap.binning.ProductCustomizerConfig;
+import org.esa.snap.binning.SpatialBin;
+import org.esa.snap.binning.SpatialBinner;
+import org.esa.snap.binning.TemporalBin;
+import org.esa.snap.binning.TemporalBinSource;
+import org.esa.snap.binning.TemporalBinner;
 import org.esa.snap.binning.cellprocessor.CellProcessorChain;
 import org.esa.snap.binning.operator.formatter.Formatter;
 import org.esa.snap.binning.operator.formatter.FormatterConfig;

@@ -16,6 +16,7 @@
 package org.esa.snap.engine_utilities.util;
 
 import org.apache.commons.io.IOUtils;
+import org.esa.snap.core.util.io.FileUtils;
 
 import java.io.File;
 import java.io.FileReader;
@@ -23,8 +24,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.PosixFileAttributeView;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 import static java.nio.file.FileVisitResult.CONTINUE;
 import static java.nio.file.StandardCopyOption.*;
@@ -138,5 +144,71 @@ public class FileIOUtils {
                 }
             }
         });
+    }
+
+    public static long computeFileSize(Path path) throws IOException {
+        FileSizeVisitor fileSizeVisitor = new FileSizeVisitor();
+        Files.walkFileTree(path, fileSizeVisitor);
+        return fileSizeVisitor.getSizeInBytes();
+    }
+
+    public static Path ensureExists(Path folder) throws IOException {
+        if (!Files.exists(folder)) {
+            if (isPosixFileSystem()) {
+                Set<PosixFilePermission> perms = PosixFilePermissions.fromString("rwxr-xr-x");
+                FileAttribute<Set<PosixFilePermission>> attrs = PosixFilePermissions.asFileAttribute(perms);
+                folder = Files.createDirectories(folder, attrs);
+            } else {
+                folder = Files.createDirectories(folder);
+            }
+
+        }
+        return folder;
+    }
+
+    public static Path ensurePermissions(Path file) throws IOException {
+        if (Files.exists(file)) {
+            if (isPosixFileSystem()) {
+                Set<PosixFilePermission> perms = PosixFilePermissions.fromString("rwxr-xr-x");
+                file = Files.setPosixFilePermissions(file, perms);
+            }
+        }
+        return file;
+    }
+
+    private static Boolean supportsPosix;
+
+    private static boolean isPosixFileSystem() {
+        if (supportsPosix == null) {
+            supportsPosix = Boolean.FALSE;
+            FileSystem fileSystem = FileSystems.getDefault();
+            Iterable<FileStore> fileStores = fileSystem.getFileStores();
+            for (FileStore fs : fileStores) {
+                supportsPosix = fs.supportsFileAttributeView(PosixFileAttributeView.class);
+                if (supportsPosix) {
+                    break;
+                }
+            }
+        }
+        return supportsPosix.booleanValue();
+    }
+
+    private static class FileSizeVisitor extends SimpleFileVisitor<Path> {
+
+        private long sizeInBytes;
+
+        private FileSizeVisitor() {
+            this.sizeInBytes = 0;
+        }
+
+        @Override
+        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+            this.sizeInBytes += Files.size(file);
+            return FileVisitResult.CONTINUE;
+        }
+
+        private long getSizeInBytes() {
+            return sizeInBytes;
+        }
     }
 }

@@ -1,7 +1,7 @@
 package org.esa.snap.core.gpf.descriptor;
 
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
 import org.junit.Test;
 
 import java.io.StringReader;
