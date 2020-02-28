@@ -20,7 +20,9 @@ import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.dataio.ProductWriter;
 import org.esa.snap.core.dataio.geocoding.*;
 import org.esa.snap.core.dataio.geocoding.forward.PixelForward;
+import org.esa.snap.core.dataio.geocoding.forward.TiePointSplineForward;
 import org.esa.snap.core.dataio.geocoding.inverse.PixelGeoIndexInverse;
+import org.esa.snap.core.dataio.geocoding.inverse.TiePointInverse;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
@@ -29,10 +31,14 @@ import org.jdom.Element;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.awt.image.DataBuffer;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.io.Writer;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Olaf Danne
@@ -152,24 +158,101 @@ public class CsvProductWriterTest {
         writer.writeBandRasterData(null, -1, -1, -1, -1, null, ProgressMonitor.NULL);
 
         assertEquals("#sceneRasterWidth=4" + LS +
-                "featureId\tradiance_1:float\tradiance_2:double\tradiance_3:int\ttp_1:float\ttp_2:float" + LS +
-                "0\t5.0\t15.0\t105\t5.0\t6.0" + LS +
-                "1\t6.0\t16.0\t106\t5.5\t6.5" + LS +
-                "2\t7.0\t17.0\t107\t6.0\t7.0" + LS +
-                "3\t8.0\t18.0\t108\t6.5\t7.5" + LS +
-                "4\t9.0\t19.0\t109\t6.0\t7.0" + LS +
-                "5\t10.0\t20.0\t110\t6.5\t7.5" + LS +
-                "6\t11.0\t21.0\t111\t7.0\t8.0" + LS +
-                "7\t12.0\t22.0\t112\t7.5\t8.5" + LS +
-                "8\t13.0\t23.0\t113\t7.0\t8.0" + LS +
-                "9\t14.0\t24.0\t114\t7.5\t8.5" + LS +
-                "10\t15.0\t25.0\t115\t8.0\t9.0" + LS +
-                "11\t16.0\t26.0\t116\t8.5\t9.5" + LS +
-                "12\t17.0\t27.0\t117\t8.0\t9.0" + LS +
-                "13\t18.0\t28.0\t118\t8.5\t9.5" + LS +
-                "14\t19.0\t29.0\t119\t9.0\t10.0" + LS +
-                "15\t20.0\t30.0\t120\t9.5\t10.5",
+                        "featureId\tradiance_1:float\tradiance_2:double\tradiance_3:int\ttp_1:float\ttp_2:float" + LS +
+                        "0\t5.0\t15.0\t105\t5.0\t6.0" + LS +
+                        "1\t6.0\t16.0\t106\t5.5\t6.5" + LS +
+                        "2\t7.0\t17.0\t107\t6.0\t7.0" + LS +
+                        "3\t8.0\t18.0\t108\t6.5\t7.5" + LS +
+                        "4\t9.0\t19.0\t109\t6.0\t7.0" + LS +
+                        "5\t10.0\t20.0\t110\t6.5\t7.5" + LS +
+                        "6\t11.0\t21.0\t111\t7.0\t8.0" + LS +
+                        "7\t12.0\t22.0\t112\t7.5\t8.5" + LS +
+                        "8\t13.0\t23.0\t113\t7.0\t8.0" + LS +
+                        "9\t14.0\t24.0\t114\t7.5\t8.5" + LS +
+                        "10\t15.0\t25.0\t115\t8.0\t9.0" + LS +
+                        "11\t16.0\t26.0\t116\t8.5\t9.5" + LS +
+                        "12\t17.0\t27.0\t117\t8.0\t9.0" + LS +
+                        "13\t18.0\t28.0\t118\t8.5\t9.5" + LS +
+                        "14\t19.0\t29.0\t119\t9.0\t10.0" + LS +
+                        "15\t20.0\t30.0\t120\t9.5\t10.5",
                 stringWriter.toString().trim());
+    }
+
+    @Test
+    public void testWrite_noGeoCoding_withTiePointsAndGeoCoding() throws IOException {
+        final ProductWriter writer = createProductWriter(CsvProductWriter.WRITE_FEATURES | CsvProductWriter.WRITE_PROPERTIES);
+
+        final Product product = createProductWithTiePointsAndGeoCoding(6, 4, 4);
+
+        writer.writeProductNodes(product, "");
+        writer.writeBandRasterData(null, -1, -1, -1, -1, null, ProgressMonitor.NULL);
+
+        assertEquals("#sceneRasterWidth=4" + LS +
+                        "#geocoding=<ComponentGeoCoding><ForwardCodingKey>FWD_TIE_POINT_SPLINE</ForwardCodingKey><InverseCodingKey>INV_TIE_POINT</InverseCodingKey><GeoChecks>NONE</GeoChecks><GeoCRS>GEOGCS[\"WGS84(DD)\",   DATUM[\"WGS84\",     SPHEROID[\"WGS84\", 6378137.0, 298.257223563]],   PRIMEM[\"Greenwich\", 0.0],   UNIT[\"degree\", 0.017453292519943295],   AXIS[\"Geodetic longitude\", EAST],   AXIS[\"Geodetic latitude\", NORTH]]</GeoCRS><LonVariableName>longitude</LonVariableName><LatVariableName>latitude</LatVariableName><RasterResolutionKm>1.3</RasterResolutionKm></ComponentGeoCoding>" + LS +
+                        "featureId\tradiance_1:float\tradiance_2:double\tradiance_3:int\tlongitude:float\tlatitude:float" + LS +
+                        "0\t6.0\t16.0\t106\t6.0\t7.0" + LS +
+                        "1\t7.0\t17.0\t107\t6.5\t7.5" + LS +
+                        "2\t8.0\t18.0\t108\t7.0\t8.0" + LS +
+                        "3\t9.0\t19.0\t109\t7.5\t8.5" + LS +
+                        "4\t10.0\t20.0\t110\t7.0\t8.0" + LS +
+                        "5\t11.0\t21.0\t111\t7.5\t8.5" + LS +
+                        "6\t12.0\t22.0\t112\t8.0\t9.0" + LS +
+                        "7\t13.0\t23.0\t113\t8.5\t9.5" + LS +
+                        "8\t14.0\t24.0\t114\t8.0\t9.0" + LS +
+                        "9\t15.0\t25.0\t115\t8.5\t9.5" + LS +
+                        "10\t16.0\t26.0\t116\t9.0\t10.0" + LS +
+                        "11\t17.0\t27.0\t117\t9.5\t10.5" + LS +
+                        "12\t18.0\t28.0\t118\t9.0\t10.0" + LS +
+                        "13\t19.0\t29.0\t119\t9.5\t10.5" + LS +
+                        "14\t20.0\t30.0\t120\t10.0\t11.0" + LS +
+                        "15\t21.0\t31.0\t121\t10.5\t11.5",
+                stringWriter.toString().trim());
+    }
+
+    @Test
+    public void testGetJavaType() {
+        assertEquals("float", CsvProductWriter.getJavaType(DataBuffer.TYPE_FLOAT));
+        assertEquals("double", CsvProductWriter.getJavaType(DataBuffer.TYPE_DOUBLE));
+        assertEquals("byte", CsvProductWriter.getJavaType(DataBuffer.TYPE_BYTE));
+        assertEquals("short", CsvProductWriter.getJavaType(DataBuffer.TYPE_SHORT));
+        assertEquals("ushort", CsvProductWriter.getJavaType(DataBuffer.TYPE_USHORT));
+        assertEquals("int", CsvProductWriter.getJavaType(DataBuffer.TYPE_INT));
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    @Test
+    public void testGetJavaType_unsupported() {
+        try {
+            CsvProductWriter.getJavaType(DataBuffer.TYPE_UNDEFINED);
+            fail("IllegalArgumentException expected");
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    @Test
+    public void testFlush() throws IOException {
+        final Writer writer = mock(Writer.class);
+
+        final CsvProductWriterPlugIn plugIn = new CsvProductWriterPlugIn(writer, 0);
+        final ProductWriter productWriter = plugIn.createWriterInstance();
+
+        productWriter.flush();
+
+        verify(writer, times(1)).flush();
+        verifyNoMoreInteractions(writer);
+    }
+
+    @Test
+    public void testClose() throws IOException {
+        final Writer writer = mock(Writer.class);
+
+        final CsvProductWriterPlugIn plugIn = new CsvProductWriterPlugIn(writer, 0);
+        final ProductWriter productWriter = plugIn.createWriterInstance();
+
+        productWriter.close();
+
+        verify(writer, times(1)).close();
+        verifyNoMoreInteractions(writer);
     }
 
     private void fillBandDataInt(Band band, int startValue) {
@@ -242,10 +325,32 @@ public class CsvProductWriterTest {
         return product;
     }
 
+    private Product createProductWithTiePointsAndGeoCoding(int startValue, int width, int height) {
+        final Product product = createProductWithoutGeoCoding(startValue, width, height);
+        final int tpWidth = width / 2;
+        final int tpHeight = height / 2;
+
+        final TiePointGrid lon = new TiePointGrid("longitude", tpWidth, tpHeight, 0.5, 0.5, 2.0, 2.0, createFloatData(startValue, tpWidth, tpHeight));
+        final TiePointGrid lat = new TiePointGrid("latitude", tpWidth, tpHeight, 0.5, 0.5, 2.0, 2.0, createFloatData(startValue + 1, tpWidth, tpHeight));
+
+        product.addTiePointGrid(lon);
+        product.addTiePointGrid(lat);
+
+        final GeoRaster geoRaster = new GeoRaster(null, null, "longitude", "latitude",
+                tpWidth, tpHeight, width, height, 1.3, 0.5, 0.5, 2.0, 2.0);
+        final ForwardCoding forward = ComponentFactory.getForward(TiePointSplineForward.KEY);
+        final InverseCoding inverse = ComponentFactory.getInverse(TiePointInverse.KEY);
+
+        final ComponentGeoCoding geoCoding = new ComponentGeoCoding(geoRaster, forward, inverse);
+        product.setSceneGeoCoding(geoCoding);
+
+        return product;
+    }
+
     private float[] createFloatData(int startValue, int width, int height) {
         final float[] floatData = new float[width * height];
 
-        for (int i = 0; i  < width * height; i++) {
+        for (int i = 0; i < width * height; i++) {
             floatData[i] = startValue + i;
         }
         return floatData;

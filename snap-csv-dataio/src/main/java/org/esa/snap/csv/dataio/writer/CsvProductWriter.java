@@ -29,11 +29,8 @@ import org.jdom.output.XMLOutputter;
 import java.awt.*;
 import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Arrays;
 
 import static org.esa.snap.core.dataio.Constants.GEOCODING;
 
@@ -47,7 +44,6 @@ public class CsvProductWriter extends AbstractProductWriter {
 
     static final int WRITE_PROPERTIES = 1;
     static final int WRITE_FEATURES = 2;
-
 
     private final int config;
 
@@ -65,9 +61,6 @@ public class CsvProductWriter extends AbstractProductWriter {
 
     @Override
     protected void writeProductNodesImpl() throws IOException {
-        if (writer == null) {
-            writer = new FileWriter(new File(getOutput().toString()));
-        }
         getSeparatorFromMetaData();
         writeProperties();
         writeHeader();
@@ -95,7 +88,8 @@ public class CsvProductWriter extends AbstractProductWriter {
         writeLine(builder.toString());
     }
 
-    private String getJavaType(int dataType) {
+    // package access for testing only tb 2020-02-28
+    static String getJavaType(int dataType) {
         switch (dataType) {
             case DataBuffer.TYPE_FLOAT: {
                 return "float";
@@ -213,7 +207,7 @@ public class CsvProductWriter extends AbstractProductWriter {
 
     @Override
     public void deleteOutput() {
-        // @todo 2 tb/tb implement this! 2020-02-27
+        // @todo 2 tb/** is this intentionally not implemented?? tb/tb implement this! 2020-02-27
     }
 
     private void getSeparatorFromMetaData() {
