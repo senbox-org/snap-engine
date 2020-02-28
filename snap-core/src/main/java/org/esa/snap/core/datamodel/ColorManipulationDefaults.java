@@ -176,6 +176,12 @@ public class ColorManipulationDefaults {
     public static final String PROPERTY_SCHEME_SORT_TOOLTIP = "Scheme selector will display all schemes sorted versus original xml order";
     public static final boolean PROPERTY_SCHEME_SORT_DEFAULT = true;
 
+    public static final String PROPERTY_SCHEME_SPLIT_DISPLAY_KEY = PROPERTY_SCHEME_SELECTOR_KEY_SUFFIX + ".split";
+    public static final String PROPERTY_SCHEME_SPLIT_DISPLAY_LABEL = "Split Display of Schemes";
+    public static final String PROPERTY_SCHEME_SPLIT_DISPLAY_TOOLTIP = "Scheme selector will display all schemes split into primary and additional categories";
+    public static final boolean PROPERTY_SCHEME_SPLIT_DISPLAY_DEFAULT = true;
+
+
 
     // Slider Options
 

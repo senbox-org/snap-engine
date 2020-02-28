@@ -24,16 +24,18 @@ public class ColorSchemeInfo {
     private boolean isLogScaled;
     private boolean enabled;
     private boolean divider;
+    private boolean primary;
     private File colorPaletteDir;
     private boolean duplicateEntry = false;
 
     private boolean useDisplayName = true;
 
 
-    public ColorSchemeInfo(String name, boolean divider, String displayName, String description, String cpdFilenameStandard, double minValue, double maxValue,
+    public ColorSchemeInfo(String name, boolean primary, boolean divider, String displayName, String description, String cpdFilenameStandard, double minValue, double maxValue,
                            boolean isLogScaled, boolean enabled, String cpdFilenameColorBlind, String colorBarTitle, String colorBarLabels, File colorPaletteDir) {
         this.setName(name);
 
+        this.primary = primary;
         this.divider = divider;
         this.displayName = displayName;
         this.setDescription(description);
@@ -196,5 +198,13 @@ public class ColorSchemeInfo {
 
     public void setDuplicateEntry(boolean duplicateEntry) {
         this.duplicateEntry = duplicateEntry;
+    }
+
+    public boolean isPrimary() {
+        return primary;
+    }
+
+    public void setPrimary(boolean primary) {
+        this.primary = primary;
     }
 }
