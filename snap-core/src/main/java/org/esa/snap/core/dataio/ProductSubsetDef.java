@@ -15,7 +15,8 @@
  */
 package org.esa.snap.core.dataio;
 
-import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.subset.AbstractSubsetRegion;
+import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.esa.snap.core.util.Guardian;
 
 import java.awt.Dimension;
@@ -23,27 +24,29 @@ import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 /**
  * The <code>ProductSubsetDef</code> class describes a subset or portion of a remote sensing data product.
- * <p> Subsets can be spatial or spectral or both. A spatial subset is given through a rectangular region in pixels. The
- * spectral subset as a list of band (or channel) names.
+ * <p> Subsets can be spatial or spectral or both. A spatial subset is given through a rectangular region in pixels or by geometry.
+ * The pixel and geometry regions are mutually exclusive. The spectral subset as a list of band (or channel) names.
  *
  * @author Norman Fomferra
  * @author Sabine Embacher
+ * modified 20200206 to support geometry subset by Denisa Stefanescu
  * @version $Revision$ $Date$
  */
 public class ProductSubsetDef {
 
     /**
+     * The subset region
+     */
+    private AbstractSubsetRegion subsetRegion;
+
+    /**
      * The optional name of the subset
      */
     private String subsetName = null;
-
-    /**
-     * The spatial subset.
-     */
-    private Rectangle region = null;
 
     /**
      * The spatial subset for each RasterDataNode
@@ -168,6 +171,20 @@ public class ProductSubsetDef {
     }
 
     /**
+     * Adds the given product node names to this subset.
+     *
+     * @param names the nodename's to be added
+     */
+    public void addNodeNames(Set<String> names) {
+        if (names == null) {
+            return;
+        }
+        for (String name : names) {
+            addNodeName(name);
+        }
+    }
+
+    /**
      * Removes a band from the spectral subset. If the band is not contained in this subset, the method returns
      * <code>false</code>.
      *
@@ -214,10 +231,19 @@ public class ProductSubsetDef {
      * Gets the spatial subset as a rectangular region. Creates a new rectangle each time it is called. This prevents
      * from modifying this subset by modifying the returned region.
      *
+     * TODO TO BE removed in future
+     * @deprecated
+     * Use {@link #getSubsetRegion()} instead.
+     *
      * @return the spatial subset as a rectangular region, or <code>null</code> if no spatial region was defined
      */
+    @Deprecated
     public Rectangle getRegion() {
-        return region != null ? new Rectangle(region) : null;
+        if (this.subsetRegion != null && this.subsetRegion instanceof PixelSubsetRegion) {
+            PixelSubsetRegion pixelSubsetRegion = (PixelSubsetRegion)this.subsetRegion;
+            return new Rectangle(pixelSubsetRegion.getPixelRegion());
+        }
+        return null;
     }
 
     public HashMap<String,Rectangle> getRegionMap() {
@@ -226,12 +252,17 @@ public class ProductSubsetDef {
     /**
      * Sets the spatial subset as a rectangular region.
      *
+     * TODO TO BE removed in future
+     * @deprecated
+     * Use {@link #setSubsetRegion(AbstractSubsetRegion)} instead.
+     *
      * @param region the spatial subset as a rectangular region, <code>null</code> if no spatial region shall be
      *               defined
      */
+    @Deprecated
     public void setRegion(Rectangle region) {
         if (region == null) {
-            this.region = null;
+            this.subsetRegion = null;
         } else {
             setRegion(region.x, region.y, region.width, region.height);
         }
@@ -244,16 +275,18 @@ public class ProductSubsetDef {
     /**
      * Sets the spatial subset as a rectangular region.
      *
+     * TODO TO BE removed in future
+     * @deprecated
+     * Use {@link #setSubsetRegion(AbstractSubsetRegion)} instead.
+     *
      * @param x the X-offset in pixels
      * @param y the Y-offset in pixels
      * @param w the width of the subset in pixels
      * @param h the height of the subset in pixels
      */
+    @Deprecated
     public void setRegion(int x, int y, int w, int h) {
-        if (x < 0 || y < 0 || w < 1 || h < 1) {
-            throw new IllegalArgumentException("invalid region");
-        }
-        region = new Rectangle(x, y, w, h);
+        this.subsetRegion = new PixelSubsetRegion(x, y, w, h, 0);
     }
 
     /**
@@ -306,10 +339,16 @@ public class ProductSubsetDef {
 
         int width = maxWidth;
         int height = maxHeight;
-        if (region != null) {
-            width = region.width;
-            height = region.height;
+//        if (region != null) {
+//            width = region.width;
+//            height = region.height;
+//        }
+        if (this.subsetRegion != null && this.subsetRegion instanceof PixelSubsetRegion) {
+            PixelSubsetRegion pixelSubsetRegion = (PixelSubsetRegion)this.subsetRegion;
+            width = pixelSubsetRegion.getPixelRegion().width;
+            height = pixelSubsetRegion.getPixelRegion().height;
         }
+
         if(bandName != null && regionMap != null && regionMap.containsKey(bandName)) {
             width = regionMap.get(bandName).width;
             height = regionMap.get(bandName).height;
@@ -358,11 +397,8 @@ public class ProductSubsetDef {
      * Checks whether or not this subset definition select the entire product.
      */
     public boolean isEntireProductSelected() {
-        return region == null
-               && subSamplingX == 1
-               && subSamplingY == 1
-               && nodeNameList == null
-               && !ignoreMetadata;
+        //return region == null && subSamplingX == 1 && subSamplingY == 1 && nodeNameList == null && !ignoreMetadata;
+        return (this.subsetRegion == null) && subSamplingX == 1 && subSamplingY == 1 && nodeNameList == null && !ignoreMetadata;
     }
 
     /**
@@ -383,5 +419,13 @@ public class ProductSubsetDef {
             }
         }
         return -1;
+    }
+
+    public AbstractSubsetRegion getSubsetRegion() {
+        return subsetRegion;
+    }
+
+    public void setSubsetRegion(AbstractSubsetRegion subsetRegion) {
+        this.subsetRegion = subsetRegion;
     }
 }

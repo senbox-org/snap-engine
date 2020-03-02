@@ -9,14 +9,24 @@ public class ThreadExecutor {
     private final ThreadPoolExecutor executor;
     private boolean debugSingleThreaded = false;
     private Runnable runnable;
+    private final int numConsecutiveThreads;
 
     public ThreadExecutor() {
-        this(Runtime.getRuntime().availableProcessors() * 2);
+        this.numConsecutiveThreads = Runtime.getRuntime().availableProcessors() * 2;
+        this.executor = createThreadPool(numConsecutiveThreads);
     }
 
     public ThreadExecutor(final int maxThreads) {
-        this.executor = new ThreadPoolExecutor(maxThreads, maxThreads, 300, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>());
+        this.numConsecutiveThreads = maxThreads;
+        this.executor = createThreadPool(numConsecutiveThreads);
+    }
+
+    private ThreadPoolExecutor createThreadPool(final int maxThreads) {
+        return new ThreadPoolExecutor(maxThreads, maxThreads, 300, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+    }
+
+    public int getNumConsecutiveThreads() {
+        return numConsecutiveThreads;
     }
 
     public void setDebugSingleThreaded(final boolean debugSingleThreaded) {

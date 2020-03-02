@@ -42,6 +42,7 @@ import org.esa.snap.core.dataop.maptransf.MapTransform;
 import org.esa.snap.core.dataop.maptransf.MapTransformDescriptor;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.test.LongTestRunner;
+import org.esa.snap.core.util.io.FileUtils;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.ReferencingFactoryFinder;
 import org.geotools.referencing.crs.DefaultProjectedCRS;
@@ -72,10 +73,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @SuppressWarnings({"InstanceVariableMayNotBeInitialized"})
 @RunWith(LongTestRunner.class)
@@ -261,7 +259,6 @@ public class GeoTiffWriteReadTest {
         assertEquals(outProduct.getBandAt(0).getDataType(), inProduct.getBandAt(0).getDataType());
         assertEquals(outProduct.getBandAt(0).getScalingFactor(), inProduct.getBandAt(0).getScalingFactor(), 1.0e-6);
         assertEquals(outProduct.getBandAt(0).getScalingOffset(), inProduct.getBandAt(0).getScalingOffset(), 1.0e-6);
-        assertEquals(location, inProduct.getFileLocation());
         assertNotNull(inProduct.getSceneGeoCoding());
         assertEquality(outProduct.getSceneGeoCoding(), inProduct.getSceneGeoCoding(), 2.0e-5f);
     }
@@ -278,7 +275,6 @@ public class GeoTiffWriteReadTest {
         assertEquals(outProduct.getBandAt(0).getDataType(), inProduct.getBandAt(0).getDataType());
         assertEquals(outProduct.getBandAt(0).getScalingFactor(), inProduct.getBandAt(0).getScalingFactor(), 1.0e-6);
         assertEquals(outProduct.getBandAt(0).getScalingOffset(), inProduct.getBandAt(0).getScalingOffset(), 1.0e-6);
-        assertEquals(location, inProduct.getFileLocation());
         assertNotNull(inProduct.getSceneGeoCoding());
         assertEquality(outProduct.getSceneGeoCoding(), inProduct.getSceneGeoCoding(), 2.0e-5f);
     }
@@ -286,8 +282,9 @@ public class GeoTiffWriteReadTest {
     @Test
     public void testWriteReadTiePointGeoCoding() throws IOException {
         setTiePointGeoCoding(outProduct);
-        final Band bandFloat32 = outProduct.addBand("float32", ProductData.TYPE_FLOAT32);
-        bandFloat32.setDataElems(createFloats(getProductSize(), 2.343f));
+
+        final Band band = outProduct.addBand("band_2", ProductData.TYPE_INT16);
+        band.setDataElems(createShortData(getProductSize(), 23));
 
         performTest(2.0e-5f);
     }
@@ -337,7 +334,6 @@ public class GeoTiffWriteReadTest {
         for (int i = 0; i < outProduct.getNumBands(); i++) {
             assertEquality(outProduct.getBandAt(i), inProduct.getBandAt(i));
         }
-        assertEquals(location, inProduct.getFileLocation());
         assertNotNull(inProduct.getSceneGeoCoding());
         assertEquality(outProduct.getSceneGeoCoding(), inProduct.getSceneGeoCoding(), accuracy);
     }
@@ -522,10 +518,23 @@ public class GeoTiffWriteReadTest {
             }
         }
         writer.flush();
-        ByteArraySeekableStream inputStream = new ByteArraySeekableStream(outputStream.toByteArray());
-        final Product product = reader.readGeoTIFFProduct(new MemoryCacheImageInputStream(inputStream), location);
-        product.setProductReader(reader);
-        return product;
-    }
 
+        ByteArraySeekableStream inputStream = new ByteArraySeekableStream(outputStream.toByteArray());
+        MemoryCacheImageInputStream imageInputStream = new MemoryCacheImageInputStream(inputStream);
+        GeoTiffImageReader geoTiffImageReader = new GeoTiffImageReader(imageInputStream);
+        try {
+            String defaultProductName = FileUtils.getFilenameWithoutExtension(location.toPath().getFileName().toString());
+            Product product = reader.readProduct(geoTiffImageReader, defaultProductName);
+            assertNotNull(product);
+            assertNull(product.getFileLocation());
+            assertNotNull(product.getName());
+            assertNotNull(product.getProductReader());
+            assertEquals(product.getProductReader(), reader);
+            assertTrue(product.getNumBands() > 0);
+
+            return product;
+        } catch (Exception e) {
+            throw new IOException(e);
+        }
+    }
 }

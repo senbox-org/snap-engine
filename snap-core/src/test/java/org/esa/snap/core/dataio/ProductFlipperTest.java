@@ -19,6 +19,7 @@ package org.esa.snap.core.dataio;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.esa.snap.core.util.ProductUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -187,7 +188,7 @@ public class ProductFlipperTest {
     @Test
     public void testTiePointFlipping_WithSubset() throws IOException {
         final ProductSubsetDef subsetDef = new ProductSubsetDef();
-        subsetDef.setRegion(2, 2, 10, 10);
+        subsetDef.setSubsetRegion(new PixelSubsetRegion(2, 2, 10, 10, 0));
         subsetDef.setSubSampling(2, 2);
         final Product sub = ProductSubsetBuilder.createProductSubset(product, subsetDef, "s", "s");
         final TiePointGrid sFlippedT1 = sub.getTiePointGrid("t1");

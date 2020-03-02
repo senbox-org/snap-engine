@@ -17,6 +17,7 @@
 package org.esa.snap.core.datamodel;
 
 import org.esa.snap.core.dataio.ProductSubsetDef;
+import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.SystemUtils;
@@ -78,7 +79,7 @@ public final class SceneFactory {
                     auxiliarSubsetDef = subsetDef;
                 } else {
                     auxiliarSubsetDef = new ProductSubsetDef();
-                    auxiliarSubsetDef.setRegion(subsetDef.getRegionMap().get(sourceRaster.getName()));
+                    auxiliarSubsetDef.setSubsetRegion(new PixelSubsetRegion(subsetDef.getRegionMap().get(sourceRaster.getName()), 0));
                     auxiliarSubsetDef.setSubSampling(subsetDef.getSubSamplingX(),subsetDef.getSubSamplingY());
                 }
 

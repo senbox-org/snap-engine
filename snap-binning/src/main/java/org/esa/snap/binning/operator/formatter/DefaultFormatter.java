@@ -17,9 +17,6 @@
 
 package org.esa.snap.binning.operator.formatter;
 
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LinearRing;
 import org.esa.snap.binning.*;
 import org.esa.snap.binning.operator.ImageTemporalBinRenderer;
 import org.esa.snap.binning.operator.ProductTemporalBinRenderer;
@@ -27,6 +24,9 @@ import org.esa.snap.binning.support.CrsGrid;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.ProductData;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LinearRing;
 
 import java.awt.*;
 import java.io.File;

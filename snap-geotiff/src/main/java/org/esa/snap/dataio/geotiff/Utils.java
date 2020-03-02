@@ -25,9 +25,12 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -187,9 +190,9 @@ public class Utils {
      * @return array of bands
      * @throws Exception -
      */
-    static Band[] setupBandsFromGdalMetadata(String gdalMetadataXmlString,
-                                                    int productDataType,
-                                                    int width, int height) throws Exception {
+    static Band[] setupBandsFromGdalMetadata(String gdalMetadataXmlString, int productDataType, int width, int height)
+                                             throws ParserConfigurationException, IOException, SAXException {
+
         final DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         final InputSource is = new InputSource();
         is.setCharacterStream(new StringReader(gdalMetadataXmlString));
@@ -208,7 +211,7 @@ public class Utils {
             final Node node = element.getElementsByTagName("Item").item(i);
             final Node child = node.getFirstChild();
             final CharacterData cd = (CharacterData) child;
-            if (node.hasAttributes()) {
+            if (node.hasAttributes() && cd != null) {
                 for (int j = 0; j < node.getAttributes().getLength(); j++) {
                     final Node attr = node.getAttributes().item(j);
                     if (attr.getNodeName().equals("name")) {

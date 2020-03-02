@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
-        <artifactId>snap-engine</artifactId>
         <groupId>org.esa.snap</groupId>
+        <artifactId>snap-engine</artifactId>
         <version>8.0.0-SNAPSHOT</version>
     </parent>
 
@@ -30,13 +35,25 @@
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-gpf</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>ceres-jai</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>snap-remote-products-repository</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.orbisgis</groupId>
+            <artifactId>h2gis</artifactId>
+            <version>1.5.0</version>
+        </dependency>
         <dependency>
             <groupId>org.apache.derby</groupId>
             <artifactId>derby</artifactId>
             <version>10.11.1.1</version>
         </dependency>
-
         <dependency>
             <groupId>org.apache.olingo</groupId>
             <artifactId>olingo-odata2-api</artifactId>
@@ -57,6 +74,17 @@
             <groupId>org.apache.abdera</groupId>
             <artifactId>abdera-core</artifactId>
             <version>1.1.3</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-codec</groupId>
+                    <artifactId>commons-codec</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.6</version>
         </dependency>
         <dependency>
             <groupId>org.apache.abdera</groupId>
@@ -68,7 +96,7 @@
             <artifactId>jasypt</artifactId>
             <version>1.9.2</version>
         </dependency>
-		
+
 		<dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -83,10 +111,14 @@
                 <artifactId>nbm-maven-plugin</artifactId>
                 <configuration>
                     <publicPackages>
+                        <publicPackage>org.esa.snap.product.library.v2.*</publicPackage>
                         <publicPackage>org.esa.snap.productlibrary.*</publicPackage>
-                        <publicPackage>javax.*</publicPackage>
+                        <publicPackage>org.opengis.*</publicPackage>
                         <publicPackage>org.w3c.*</publicPackage>
                         <publicPackage>org.xml.*</publicPackage>
+                        <publicPackage>org.apache.*</publicPackage>
+                        <publicPackage>com.google.*</publicPackage>
+                        <publicPackage>javax.xml.*</publicPackage>
                     </publicPackages>
                 </configuration>
             </plugin>

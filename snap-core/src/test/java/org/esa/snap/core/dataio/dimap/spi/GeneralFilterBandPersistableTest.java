@@ -126,7 +126,7 @@ public class GeneralFilterBandPersistableTest extends TestCase {
     public void testReadAndWrite() {
         final Element xmlElement = createXmlElement(GeneralFilterBandPersistable.VERSION_1_2);
 
-        final Object object = _generalFilterBandPersistable.createObjectFromXml(xmlElement, _product);
+        final Object object = _generalFilterBandPersistable.createObjectFromXml(xmlElement, _product, null);
         _product.addBand((Band) object);
 
         final Element xmlFromObject = _generalFilterBandPersistable.createXmlFromObject(object);
@@ -139,7 +139,7 @@ public class GeneralFilterBandPersistableTest extends TestCase {
     }
 
     private void assertCreateRightGeneralFilterBand(Element xmlElement) {
-        final Object object = _generalFilterBandPersistable.createObjectFromXml(xmlElement, _product);
+        final Object object = _generalFilterBandPersistable.createObjectFromXml(xmlElement, _product, null);
         _product.addBand((Band) object);
 
         assertNotNull(object);

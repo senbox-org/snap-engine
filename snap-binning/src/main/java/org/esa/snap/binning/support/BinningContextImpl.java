@@ -17,7 +17,7 @@
 package org.esa.snap.binning.support;
 
 import com.bc.ceres.core.Assert;
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 import org.esa.snap.binning.BinManager;
 import org.esa.snap.binning.BinningContext;
 import org.esa.snap.binning.CompositingType;
