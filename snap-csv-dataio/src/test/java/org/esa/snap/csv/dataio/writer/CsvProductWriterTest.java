@@ -23,7 +23,6 @@ import org.esa.snap.core.dataio.geocoding.forward.TiePointSplineForward;
 import org.esa.snap.core.dataio.geocoding.inverse.TiePointInverse;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.TiePointGrid;
-import org.jdom.Element;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -124,7 +123,7 @@ public class CsvProductWriterTest {
         writer.writeBandRasterData(null, -1, -1, -1, -1, null, ProgressMonitor.NULL);
 
         assertEquals("#sceneRasterWidth=2" + LS +
-                "#geocoding=<ComponentGeoCoding><ForwardCodingKey>FWD_PIXEL</ForwardCodingKey><InverseCodingKey>INV_PIXEL_GEO_INDEX_INTERPOLATING</InverseCodingKey><GeoChecks>NONE</GeoChecks><GeoCRS>GEOGCS[\"WGS84(DD)\",   DATUM[\"WGS84\",     SPHEROID[\"WGS84\", 6378137.0, 298.257223563]],   PRIMEM[\"Greenwich\", 0.0],   UNIT[\"degree\", 0.017453292519943295],   AXIS[\"Geodetic longitude\", EAST],   AXIS[\"Geodetic latitude\", NORTH]]</GeoCRS><LonVariableName>longitude</LonVariableName><LatVariableName>latitude</LatVariableName><RasterResolutionKm>1.3</RasterResolutionKm><OffsetX>0.5</OffsetX><OffsetY>0.5</OffsetY><SubsamplingX>1.0</SubsamplingX><SubsamplingY>1.0</SubsamplingY></ComponentGeoCoding>" + LS +
+                "#rasterResolutionInKm=1.3" + LS +
                 "featureId\tradiance_1:float\tradiance_2:double\tradiance_3:int\tlongitude:float\tlatitude:float" + LS +
                 "0\t3.0\t13.0\t103\t-117.0\t23.0" + LS +
                 "1\t4.0\t14.0\t104\t-116.0\t24.0" + LS +
@@ -132,18 +131,6 @@ public class CsvProductWriterTest {
                 "3\t6.0\t16.0\t106\t-114.0\t26.0" + LS +
                 "4\t7.0\t17.0\t107\t-113.0\t27.0" + LS +
                 "5\t8.0\t18.0\t108\t-112.0\t28.0", stringWriter.toString().trim());
-    }
-
-    @Test
-    public void testConvert() {
-        Element masterElement = new Element("master");
-        Element subElement = new Element("sub");
-        subElement.addContent("here we are\n with a line-break\r\n");
-
-        masterElement.addContent(subElement);
-
-        final String xmlString = CsvProductWriter.convert(masterElement);
-        assertEquals("<master><sub>here we are with a line-break</sub></master>", xmlString);
     }
 
     @Test
@@ -186,7 +173,7 @@ public class CsvProductWriterTest {
         writer.writeBandRasterData(null, -1, -1, -1, -1, null, ProgressMonitor.NULL);
 
         assertEquals("#sceneRasterWidth=4" + LS +
-                        "#geocoding=<ComponentGeoCoding><ForwardCodingKey>FWD_TIE_POINT_SPLINE</ForwardCodingKey><InverseCodingKey>INV_TIE_POINT</InverseCodingKey><GeoChecks>NONE</GeoChecks><GeoCRS>GEOGCS[\"WGS84(DD)\",   DATUM[\"WGS84\",     SPHEROID[\"WGS84\", 6378137.0, 298.257223563]],   PRIMEM[\"Greenwich\", 0.0],   UNIT[\"degree\", 0.017453292519943295],   AXIS[\"Geodetic longitude\", EAST],   AXIS[\"Geodetic latitude\", NORTH]]</GeoCRS><LonVariableName>longitude</LonVariableName><LatVariableName>latitude</LatVariableName><RasterResolutionKm>1.3</RasterResolutionKm><OffsetX>0.5</OffsetX><OffsetY>0.5</OffsetY><SubsamplingX>2.0</SubsamplingX><SubsamplingY>2.0</SubsamplingY></ComponentGeoCoding>" + LS +
+                        "#rasterResolutionInKm=1.3" + LS +
                         "featureId\tradiance_1:float\tradiance_2:double\tradiance_3:int\tlongitude:float\tlatitude:float" + LS +
                         "0\t6.0\t16.0\t106\t6.0\t7.0" + LS +
                         "1\t7.0\t17.0\t107\t6.5\t7.5" + LS +

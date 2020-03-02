@@ -41,5 +41,6 @@ public class Constants {
     public static final String PROPERTY_NAME_TIME_COLUMN = "timeColumn";
     public static final String PROPERTY_NAME_TIME_PATTERN = "timePattern";
     public static final String PROPERTY_NAME_SCENE_RASTER_WIDTH = "sceneRasterWidth";
+    public static final String PROPERTY_NAME_RASTER_RESOLUTION = "rasterResolutionInKm";
 
 }

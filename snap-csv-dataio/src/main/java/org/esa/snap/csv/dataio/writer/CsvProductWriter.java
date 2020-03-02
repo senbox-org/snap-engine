@@ -20,7 +20,6 @@ import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.dataio.AbstractProductWriter;
 import org.esa.snap.core.dataio.ProductWriterPlugIn;
 import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
-import org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.csv.dataio.Constants;
 import org.jdom.Element;
@@ -34,7 +33,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 
-import static org.esa.snap.core.dataio.Constants.GEOCODING;
+import static org.esa.snap.csv.dataio.Constants.PROPERTY_NAME_RASTER_RESOLUTION;
 
 /**
  * Allows writing a {@link Product} in CSV format.
@@ -140,9 +139,8 @@ public class CsvProductWriter extends AbstractProductWriter {
         final GeoCoding sceneGeoCoding = product.getSceneGeoCoding();
         if (sceneGeoCoding instanceof ComponentGeoCoding) {
             final ComponentGeoCoding geoCoding = (ComponentGeoCoding) sceneGeoCoding;
-            final ComponentGeoCodingPersistable persistable = new ComponentGeoCodingPersistable();
-            final Element xmlGeoCoding = persistable.createXmlFromObject(geoCoding);
-            writeLine(Constants.COMMENT + GEOCODING + "=" + convert(xmlGeoCoding));
+            final double rasterResolutionInKm = geoCoding.getGeoRaster().getRasterResolutionInKm();
+            writeLine(Constants.COMMENT + PROPERTY_NAME_RASTER_RESOLUTION + "=" + rasterResolutionInKm);
         }
     }
 
@@ -231,13 +229,5 @@ public class CsvProductWriter extends AbstractProductWriter {
     private String getFeatureIdColumnNameFromMetadata() {
         // todo - implement metadata search
         return "featureId";
-    }
-
-    // package access for testing only tb 2020-02-27
-    static String convert(Element element) {
-        final XMLOutputter xmlOutputter = new XMLOutputter();
-        final String xmlString = xmlOutputter.outputString(element);
-        // get rid of formatting stuff so that we have one line tb 2020-02-27
-        return xmlString.replace("\r", "").replace("\n", "").replace("&#xD;", "").replaceAll("> *<", "><");
     }
 }

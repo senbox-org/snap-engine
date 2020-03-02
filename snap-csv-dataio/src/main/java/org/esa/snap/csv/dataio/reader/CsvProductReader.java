@@ -19,8 +19,9 @@ package org.esa.snap.csv.dataio.reader;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
-import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
-import org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable;
+import org.esa.snap.core.dataio.geocoding.*;
+import org.esa.snap.core.dataio.geocoding.forward.PixelForward;
+import org.esa.snap.core.dataio.geocoding.inverse.PixelQuadTreeInverse;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.SystemUtils;
@@ -131,24 +132,30 @@ public class CsvProductReader extends AbstractProductReader {
             return;
         }
 
-        final String geoCodingMeta = source.getProperties().get(GEOCODING);
-        if (geoCodingMeta == null) {
+        final String rasterResolutionString = source.getProperties().get(PROPERTY_NAME_RASTER_RESOLUTION);
+        if (rasterResolutionString == null) {
             setDefaultGeoCoding(latBand, lonBand);
             return;
         }
 
-        final Element containerElement;
-        try {
-            final SAXBuilder saxBuilder = new SAXBuilder();
-            final Document document = saxBuilder.build(new StringReader(geoCodingMeta));
-            containerElement = new Element("container");
-            containerElement.addContent(document.getRootElement().detach());
-        } catch (JDOMException e) {
-            throw new IOException(e.getMessage());
-        }
+        lonBand.loadRasterData();
+        latBand.loadRasterData();
 
-        final ComponentGeoCodingPersistable persistable = new ComponentGeoCodingPersistable();
-        final ComponentGeoCoding geoCoding = (ComponentGeoCoding) persistable.createObjectFromXml(containerElement, product, null);
+        final int rasterWidth = lonBand.getRasterWidth();
+        final int rasterHeight = lonBand.getRasterHeight();
+        final int size = rasterWidth * rasterHeight;
+
+        final double[] longitudes = lonBand.getSourceImage().getImage(0).getData()
+                .getPixels(0, 0, rasterWidth, rasterHeight, new double[size]);
+        final double[] latitudes = latBand.getSourceImage().getImage(0).getData()
+                .getPixels(0, 0, rasterWidth, rasterHeight, new double[size]);
+        final GeoRaster geoRaster = new GeoRaster(longitudes, latitudes, lonBand.getName(), latBand.getName(),
+                rasterWidth, rasterHeight, Double.parseDouble(rasterResolutionString));
+
+        final ForwardCoding forwardCoding = ComponentFactory.getForward(PixelForward.KEY);
+        final InverseCoding inverseCoding = ComponentFactory.getInverse(PixelQuadTreeInverse.KEY);
+        final ComponentGeoCoding geoCoding = new ComponentGeoCoding(geoRaster, forwardCoding, inverseCoding);
+        geoCoding.initialize();
 
         product.setSceneGeoCoding(geoCoding);
     }
