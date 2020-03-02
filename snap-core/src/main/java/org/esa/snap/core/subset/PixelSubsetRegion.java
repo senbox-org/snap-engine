@@ -1,8 +1,8 @@
 package org.esa.snap.core.subset;
 
-import com.vividsolutions.jts.geom.Geometry;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.util.ProductUtils;
+import org.locationtech.jts.geom.Geometry;
 
 import java.awt.*;
 

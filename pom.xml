@@ -42,10 +42,12 @@
         <hdf.version>2.7.1</hdf.version>
         <netcdf.version>4.3.22</netcdf.version>
         <slf4j.version>1.6.6</slf4j.version> <!-- used by netcdf, yes we hate that! -->
-        <geotools.version>17.1</geotools.version>
+        <geotools.version>20.0</geotools.version>
+        <org.locationtech.version>1.16.0</org.locationtech.version>
         <jide.version>3.6.1</jide.version>
         <maven.build.timestamp.format>yyyyMMdd</maven.build.timestamp.format>
         <buildDate>${maven.build.timestamp}</buildDate>
+        <tao.version>1.0.1</tao.version>
     </properties>
 
     <modules>
@@ -103,6 +105,7 @@
         <module>globcover-worldmap</module>
         <module>snap-sta</module>
         <module>snap-remote-execution</module>
+        <module>snap-remote-products-repository</module>
 
         <module>lib-hdf</module>
         <module>lib-openjpeg</module>
@@ -735,6 +738,16 @@
                 <checksumPolicy>warn</checksumPolicy>
             </snapshots>
         </repository>
+        <repository>
+            <id>tao-core</id>
+            <name>TAO Core</name>
+            <url>https://raw.githubusercontent.com/tao-org/tao-core/repository</url>
+        </repository>
+        <repository>
+            <id>tao-plugins</id>
+            <name>TAO Plugins</name>
+            <url>https://raw.githubusercontent.com/tao-org/tao-plugins/repository</url>
+        </repository>
     </repositories>
 
     <distributionManagement>
@@ -1061,6 +1074,7 @@
             <plugin>
                 <groupId>org.apache.netbeans.utilities</groupId>
                 <artifactId>nbm-maven-plugin</artifactId>
+                <version>4.4</version>
             </plugin>
 
             <plugin>

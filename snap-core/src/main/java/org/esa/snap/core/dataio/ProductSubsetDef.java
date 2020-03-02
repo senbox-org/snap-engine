@@ -15,9 +15,7 @@
  */
 package org.esa.snap.core.dataio;
 
-import com.vividsolutions.jts.geom.Geometry;
 import org.esa.snap.core.subset.AbstractSubsetRegion;
-import org.esa.snap.core.subset.GeometrySubsetRegion;
 import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.esa.snap.core.util.Guardian;
 

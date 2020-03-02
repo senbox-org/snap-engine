@@ -1,8 +1,8 @@
 package org.esa.snap.pixex;
 
 import com.bc.ceres.core.ProgressMonitor;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
 import org.esa.snap.core.dataio.geometry.VectorDataNodeReader;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.Placemark;

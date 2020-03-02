@@ -17,7 +17,7 @@
 package org.esa.snap.binning.operator;
 
 import com.bc.ceres.binding.BindingException;
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 import org.esa.snap.binning.Aggregator;
 import org.esa.snap.binning.AggregatorConfig;
 import org.esa.snap.binning.AggregatorDescriptor;

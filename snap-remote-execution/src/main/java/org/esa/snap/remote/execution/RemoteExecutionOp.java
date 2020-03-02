@@ -31,7 +31,7 @@ import org.esa.snap.remote.execution.machines.executors.SlaveProductsInputData;
 import org.esa.snap.remote.execution.machines.executors.WindowsRemoteMachineExecutor;
 import org.esa.snap.remote.execution.machines.RemoteMachineProperties;
 import org.esa.snap.remote.execution.utils.CommandExecutorUtils;
-import org.esa.snap.remote.execution.utils.ThreadNamePoolExecutor;
+import org.esa.snap.engine_utilities.util.ThreadNamePoolExecutor;
 import org.esa.snap.remote.execution.utils.UnixMountLocalFolderResult;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
@@ -408,7 +408,7 @@ public class RemoteExecutionOp extends Operator {
         boolean remoteMachinesFinishOnTime = false;
         try {
             if (this.waitingSecondsTimeout > 0) {
-                threadPoolExecutor = new ThreadNamePoolExecutor("cep", processorCount);
+                threadPoolExecutor = new ThreadNamePoolExecutor("remote-execution", processorCount);
                 for (int i = 0; i < remoteMachinesRunnable.length; i++) {
                     threadPoolExecutor.execute(remoteMachinesRunnable[i]); // start the thread
                 }
@@ -425,7 +425,7 @@ public class RemoteExecutionOp extends Operator {
             } else {
                 if (remoteMachinesRunnable.length > 1) {
                     // start the remote machines from the second position in new threads
-                    threadPoolExecutor = new ThreadNamePoolExecutor("cep", processorCount);
+                    threadPoolExecutor = new ThreadNamePoolExecutor("remote-execution", processorCount);
                     for (int i = 1; i < remoteMachinesRunnable.length; i++) {
                         threadPoolExecutor.execute(remoteMachinesRunnable[i]); // start the thread
                     }
