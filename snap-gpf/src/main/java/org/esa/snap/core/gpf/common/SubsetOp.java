@@ -226,7 +226,7 @@ public class SubsetOp extends Operator {
                 }
                 subsetDef.setSubsetRegion(new PixelSubsetRegion(region, 0));
             } else {
-                // the source product is multisize or the reference band is specified
+                // the source product is multisize and the reference band is specified
                 subsetDef.setRegionMap(computeRegionMap(region, referenceBand, sourceProduct, subsetDef.getNodeNames()));
             }
         }
