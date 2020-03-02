@@ -18,14 +18,7 @@ package org.esa.snap.dataio.netcdf.metadata.profiles.cf;
 import org.esa.snap.core.dataio.geocoding.*;
 import org.esa.snap.core.dataio.geocoding.forward.PixelForward;
 import org.esa.snap.core.dataio.geocoding.inverse.PixelQuadTreeInverse;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.CrsGeoCoding;
-import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.core.datamodel.GeoPos;
-import org.esa.snap.core.datamodel.MapGeoCoding;
-import org.esa.snap.core.datamodel.PixelPos;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.math.SphericalDistance;
@@ -47,14 +40,9 @@ import ucar.ma2.Index;
 import ucar.nc2.Attribute;
 import ucar.nc2.Variable;
 
-import javax.measure.converter.UnitConverter;
-import javax.measure.quantity.Length;
-import javax.measure.unit.SI;
-import javax.measure.unit.Unit;
 import java.awt.*;
 import java.io.IOException;
 import java.util.List;
-import java.util.prefs.Preferences;
 
 public class CfGeocodingPart extends ProfilePartIO {
 
@@ -265,8 +253,8 @@ public class CfGeocodingPart extends ProfilePartIO {
             if (rasterDim.fitsTo(lonVariable, latVariable)) {
                 try {
                     return createConventionBasedMapGeoCoding(lonVariable, latVariable,
-                                                             product.getSceneRasterWidth(),
-                                                             product.getSceneRasterHeight(), ctx);
+                            product.getSceneRasterWidth(),
+                            product.getSceneRasterHeight(), ctx);
                 } catch (Exception e) {
                     SystemUtils.LOG.warning("Failed to create NetCDF geo-coding");
                 }
@@ -337,10 +325,10 @@ public class CfGeocodingPart extends ProfilePartIO {
         }
         ctx.setProperty(Constants.Y_FLIPPED_PROPERTY_NAME, yFlipped);
         return new CrsGeoCoding(DefaultGeographicCRS.WGS84,
-                                sceneRasterWidth, sceneRasterHeight,
-                                easting, northing,
-                                pixelSizeX, pixelSizeY,
-                                pixelX, pixelY);
+                sceneRasterWidth, sceneRasterHeight,
+                easting, northing,
+                pixelSizeX, pixelSizeY,
+                pixelX, pixelY);
     }
 
     static boolean isGlobalShifted180(Array lonData) {
@@ -390,7 +378,7 @@ public class CfGeocodingPart extends ProfilePartIO {
             final double resolutionInKm = computeResolutionInKm(lonBand, latBand);
 
             final GeoRaster geoRaster = new GeoRaster(longitudes, latitudes, lonBand.getName(), latBand.getName(),
-                                                      width, height, resolutionInKm);
+                    width, height, resolutionInKm);
 
             final ForwardCoding forward = ComponentFactory.getForward(PixelForward.KEY);
             final InverseCoding inverse = ComponentFactory.getInverse(PixelQuadTreeInverse.KEY);
@@ -409,10 +397,8 @@ public class CfGeocodingPart extends ProfilePartIO {
 
         final DefaultGeographicCRS wgs84 = DefaultGeographicCRS.WGS84;
         final Ellipsoid ellipsoid = wgs84.getDatum().getEllipsoid();
-        final Unit<Length> axisUnit = ellipsoid.getAxisUnit();
-        final UnitConverter converterToKm = axisUnit.getConverterTo(SI.KILOMETER);
         final double meanEarthRadiusM = (ellipsoid.getSemiMajorAxis() + ellipsoid.getSemiMinorAxis()) / 2;
-        final double meanEarthRadiusKm = converterToKm.convert(meanEarthRadiusM);
+        final double meanEarthRadiusKm = meanEarthRadiusM / 1000.0;
 
         final Rectangle R = new Rectangle(0, 0, 10, 10);
         R.width = Math.min(R.width, width);
