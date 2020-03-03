@@ -57,8 +57,7 @@ public class CsvProductReadWriteTest {
         final Product product = ProductIO.readProduct(uri.getPath());
 
         final StringWriter stringWriter = new StringWriter();
-        final CsvProductWriterPlugIn writerPlugIn = new CsvProductWriterPlugIn(stringWriter, CsvProductWriter.WRITE_FEATURES | CsvProductWriter.WRITE_PROPERTIES);
-        final ProductWriter productWriter = writerPlugIn.createWriterInstance();
+        final ProductWriter productWriter = new CsvProductWriter(new CsvProductWriterPlugIn(), CsvProductWriter.WRITE_FEATURES | CsvProductWriter.WRITE_PROPERTIES, stringWriter);
         productWriter.writeProductNodes(product, "");
         // parameters doesn't matter. They are ignored in this writer.
         productWriter.writeBandRasterData(null, -1, -1, -1, -1, null, ProgressMonitor.NULL);
@@ -84,18 +83,18 @@ public class CsvProductReadWriteTest {
         final Product product = createProductWithoutGeoCoding(11, 4, 5);
 
         File targetFile = null;
+        Product writtenProduct = null;
         try {
             targetFile = createFileInTempDir("no_geocoding.csv");
             final FileWriter fileWriter = new FileWriter(targetFile);
-            final CsvProductWriterPlugIn writerPlugIn = new CsvProductWriterPlugIn(fileWriter, CsvProductWriter.WRITE_FEATURES | CsvProductWriter.WRITE_PROPERTIES);
-            final ProductWriter productWriter = writerPlugIn.createWriterInstance();
+            final ProductWriter productWriter = new CsvProductWriter(new CsvProductWriterPlugIn(), CsvProductWriter.WRITE_FEATURES | CsvProductWriter.WRITE_PROPERTIES, fileWriter);
 
             productWriter.writeProductNodes(product, "");
             productWriter.writeBandRasterData(null, -1, -1, -1, -1, null, ProgressMonitor.NULL);
             productWriter.flush();
             productWriter.close();
 
-            final Product writtenProduct = productReader.readProductNodes(targetFile, null);
+            writtenProduct = productReader.readProductNodes(targetFile, null);
             assertEquals(4, writtenProduct.getSceneRasterWidth());
             assertEquals(5, writtenProduct.getSceneRasterHeight());
 
@@ -120,10 +119,15 @@ public class CsvProductReadWriteTest {
             assertNull(writtenProduct.getSceneGeoCoding());
 
         } finally {
+            if (writtenProduct != null) {
+                writtenProduct.dispose();
+            }
             productReader.close();
             if (targetFile != null) {
-                if (!targetFile.delete()) {
-                    fail("unable to delete test file");
+                if (targetFile.isFile()) {
+                    if (!targetFile.delete()) {
+                        fail("unable to delete test file");
+                    }
                 }
             }
         }
@@ -137,8 +141,7 @@ public class CsvProductReadWriteTest {
         try {
             targetFile = createFileInTempDir("pixel_geocoding.csv");
             final FileWriter fileWriter = new FileWriter(targetFile);
-            final CsvProductWriterPlugIn writerPlugIn = new CsvProductWriterPlugIn(fileWriter, CsvProductWriter.WRITE_FEATURES | CsvProductWriter.WRITE_PROPERTIES);
-            final ProductWriter productWriter = writerPlugIn.createWriterInstance();
+            final ProductWriter productWriter = new CsvProductWriter(new CsvProductWriterPlugIn(), CsvProductWriter.WRITE_FEATURES | CsvProductWriter.WRITE_PROPERTIES, fileWriter);
 
             productWriter.writeProductNodes(product, "");
             productWriter.writeBandRasterData(null, -1, -1, -1, -1, null, ProgressMonitor.NULL);
@@ -189,6 +192,11 @@ public class CsvProductReadWriteTest {
     private File createFileInTempDir(String fileName) throws IOException {
         final File tempDir = new File(System.getProperty("java.io.tmpdir"));
         final File file = new File(tempDir, fileName);
+        if (file.isFile()) {
+            if (!file.delete()) {
+                fail("unable to delete test-file");
+            }
+        }
         if (!file.createNewFile()) {
             fail("unable to create test-file");
         }

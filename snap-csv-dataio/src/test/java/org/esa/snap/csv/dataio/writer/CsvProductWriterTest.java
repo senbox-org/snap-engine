@@ -218,8 +218,8 @@ public class CsvProductWriterTest {
     public void testFlush() throws IOException {
         final Writer writer = mock(Writer.class);
 
-        final CsvProductWriterPlugIn plugIn = new CsvProductWriterPlugIn(writer, 0);
-        final ProductWriter productWriter = plugIn.createWriterInstance();
+        final ProductWriter productWriter = new CsvProductWriter(new CsvProductWriterPlugIn()
+                , CsvProductWriter.WRITE_FEATURES | CsvProductWriter.WRITE_PROPERTIES, writer);
 
         productWriter.flush();
 
@@ -231,8 +231,7 @@ public class CsvProductWriterTest {
     public void testClose() throws IOException {
         final Writer writer = mock(Writer.class);
 
-        final CsvProductWriterPlugIn plugIn = new CsvProductWriterPlugIn(writer, 0);
-        final ProductWriter productWriter = plugIn.createWriterInstance();
+        final ProductWriter productWriter = new CsvProductWriter(new CsvProductWriterPlugIn(), CsvProductWriter.WRITE_FEATURES | CsvProductWriter.WRITE_PROPERTIES, writer);
 
         productWriter.close();
 
@@ -286,7 +285,6 @@ public class CsvProductWriterTest {
     }
 
     private ProductWriter createProductWriter(int config) {
-        final CsvProductWriterPlugIn plugIn = new CsvProductWriterPlugIn(stringWriter, config);
-        return plugIn.createWriterInstance();
+        return new CsvProductWriter(new CsvProductWriterPlugIn(), config, stringWriter);
     }
 }

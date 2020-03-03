@@ -28,6 +28,7 @@ import org.esa.snap.csv.dataio.CsvFile;
 import org.esa.snap.csv.dataio.CsvSourceParser;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Locale;
 import java.util.logging.Level;
 
@@ -46,6 +47,7 @@ public class CsvProductReaderPlugIn implements ProductReaderPlugIn {
             return DecodeQualification.UNABLE;
         }
 
+        DecodeQualification decodeQualification = DecodeQualification.SUITABLE;
         CsvSourceParser csvFile = null;
         try {
             csvFile = CsvFile.createCsvSourceParser(input.toString());
@@ -54,14 +56,20 @@ public class CsvProductReaderPlugIn implements ProductReaderPlugIn {
         } catch (Exception e) {
             String msg = String.format("Not able to decode CSV file, reason is '%s'", e.getMessage());
             SystemUtils.LOG.log(Level.WARNING, msg);
-            return DecodeQualification.UNABLE;
+            decodeQualification = DecodeQualification.UNABLE;
         } finally {
             if (csvFile != null) {
-                csvFile.close();
+                try {
+                    csvFile.close();
+                } catch (IOException e) {
+                    String msg = String.format("Not able to close CSV file, reason is '%s'", e.getMessage());
+                    SystemUtils.LOG.log(Level.WARNING, msg);
+                    decodeQualification = DecodeQualification.UNABLE;
+                }
             }
         }
 
-        return DecodeQualification.SUITABLE;
+        return decodeQualification;
     }
 
     private boolean isFileExtensionValid(File file) {
