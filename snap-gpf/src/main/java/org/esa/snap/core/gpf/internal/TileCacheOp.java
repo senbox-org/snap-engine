@@ -26,7 +26,7 @@ import java.awt.image.RenderedImage;
  */
 @OperatorMetadata(alias = "TileCache",
         category = "Tools",
-        authors = "Marco Peters",
+        authors = "Marco Peters, Martin Böttcher",
         copyright = "Brockmann Consult GmbH",
         version = "0.1",
         internal = true,
@@ -48,6 +48,7 @@ public class TileCacheOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
         SystemUtils.LOG.warning("You are using TileCache operator. Be aware that it is an experimental implementation.");
+
         if (cacheSize > 0) {
             localCache = JAI.createTileCache(cacheSize * MEGABYTES);
         } else {

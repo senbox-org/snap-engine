@@ -56,6 +56,7 @@ public interface ProductReader {
      */
     ProductSubsetDef getSubsetDef();
 
+
     /**
      * Reads a data product and returns a in-memory representation of it.
      * <p> The given subset info can be used to specify spatial and spectral portions of the original product. If the

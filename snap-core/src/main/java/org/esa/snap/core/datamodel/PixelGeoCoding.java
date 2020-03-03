@@ -30,25 +30,10 @@ import org.esa.snap.core.util.math.IndexValidator;
 import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.runtime.Config;
 
-import javax.media.jai.ImageLayout;
-import javax.media.jai.Interpolation;
-import javax.media.jai.JAI;
-import javax.media.jai.PointOpImage;
-import javax.media.jai.RasterAccessor;
-import javax.media.jai.RasterFactory;
-import javax.media.jai.RasterFormatTag;
-import javax.media.jai.RenderedOp;
+import javax.media.jai.*;
 import javax.media.jai.operator.ScaleDescriptor;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.image.ComponentSampleModel;
-import java.awt.image.DataBuffer;
-import java.awt.image.Raster;
-import java.awt.image.RenderedImage;
-import java.awt.image.SampleModel;
-import java.awt.image.WritableRaster;
+import java.awt.*;
+import java.awt.image.*;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -777,11 +762,11 @@ public class PixelGeoCoding extends AbstractGeoCoding implements BasicPixelGeoCo
 
         final Result result = new Result();
         boolean pixelFound = quadTreeSearch(0,
-                                            geoPos.lat, geoPos.lon,
-                                            0, 0,
-                                            rasterWidth,
-                                            rasterHeight,
-                                            result);
+                geoPos.lat, geoPos.lon,
+                0, 0,
+                rasterWidth,
+                rasterHeight,
+                result);
 
         if (pixelFound) {
             final GeoPos resultGeoPos = new GeoPos();

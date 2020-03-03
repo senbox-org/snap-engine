@@ -39,6 +39,7 @@ import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProducts;
 import org.esa.snap.core.gpf.annotations.TargetProperty;
 import org.esa.snap.core.image.VirtualBandOpImage;
+import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.SystemUtils;
@@ -757,7 +758,7 @@ public class PixExOp extends Operator {
         final Rectangle productBounds = new Rectangle(0, 0, product.getSceneRasterWidth(),
                                                       product.getSceneRasterHeight());
         Rectangle finalRegion = productBounds.intersection(region);
-        subsetDef.setRegion(finalRegion);
+        subsetDef.setSubsetRegion(new PixelSubsetRegion(finalRegion, 0));
         final Product subset = ProductSubsetBuilder.createProductSubset(product, subsetDef, null, null);
         final String[] extension = ProductIO.getProductWriterExtensions(ProductIO.DEFAULT_FORMAT_NAME);
         final File productFile = new File(subScenesDir, product.getName() + extension[0]);

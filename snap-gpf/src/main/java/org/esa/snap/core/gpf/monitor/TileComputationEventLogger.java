@@ -99,9 +99,11 @@ public class TileComputationEventLogger extends TileComputationObserver {
             }
         }
         if (tileEvent.image.getTileCache() instanceof SunTileCache) {
-            message += " " + (((SunTileCache)tileEvent.image.getTileCache()).getCacheMemoryUsed() / 1024 / 1024)
-                     + "/" + (((SunTileCache)tileEvent.image.getTileCache()).getMemoryCapacity() / 1024 / 1024)
-                     + " " + ((SunTileCache)tileEvent.image.getTileCache()).getCacheTileCount();
+            SunTileCache tileCache = (SunTileCache) tileEvent.image.getTileCache();
+            message += String.format(" %d/%d MB #%d",
+                                     tileCache.getCacheMemoryUsed() / 1024 / 1024,
+                                     tileCache.getMemoryCapacity() / 1024 / 1024,
+                                     tileCache.getCacheTileCount());
         }
         if (newEvent) {
             getLogger().log(Level.INFO, "Tile computed: " + message);

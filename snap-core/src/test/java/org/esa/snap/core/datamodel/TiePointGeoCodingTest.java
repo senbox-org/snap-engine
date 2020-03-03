@@ -20,6 +20,10 @@ import org.esa.snap.core.dataio.ProductSubsetBuilder;
 import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.datamodel.TiePointGeoCodingLongTest.TestSet;
 import org.esa.snap.core.transform.AffineTransform2D;
+import org.esa.snap.core.subset.PixelSubsetRegion;
+import org.esa.snap.core.util.Debug;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -86,7 +90,7 @@ public class TiePointGeoCodingTest {
     public void testTransferGeoCoding_WithSpatialSubset() throws IOException {
         final Scene srcScene = SceneFactory.createScene(createProduct());
         final ProductSubsetDef subsetDef = new ProductSubsetDef();
-        subsetDef.setRegion(2, 2, PW - 4, PH - 4);
+        subsetDef.setSubsetRegion(new PixelSubsetRegion(2, 2, PW - 4, PH - 4, 0));
         subsetDef.setSubSampling(1,2);
         final Product destProduct = ProductSubsetBuilder.createProductSubset(new Product("test2", "test2", PW, PH),
                                                                              subsetDef, "test2", "");

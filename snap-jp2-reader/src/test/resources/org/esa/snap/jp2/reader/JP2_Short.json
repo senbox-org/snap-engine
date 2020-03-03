@@ -1,0 +1,95 @@
+{
+  "id": "JP2_Short",
+  "decodeQualification": "SUITABLE",
+  "expectedContent": {
+    "sceneWidth": 700,
+    "sceneHeight": 400,
+    "bands": [
+      {
+        "name": "band_1",
+        "noDataValue": "0.0",
+        "noDataValueUsed": "false",
+        "spectralWavelength": "0.0",
+        "spectralBandwidth": "0.0",
+        "expectedPixels": [
+          {
+            "x": 374,
+            "y": 247,
+            "value": 62.0
+          },
+          {
+            "x": 678,
+            "y": 335,
+            "value": 248.0
+          }
+        ]
+      }
+    ],
+    "metadata": [
+      {
+        "path": "Image Info/x0",
+        "value": "0"
+      },
+      {
+        "path": "Image Info/y0",
+        "value": "0"
+      },
+      {
+        "path": "Image Info/width",
+        "value": "700"
+      },
+      {
+        "path": "Image Info/height",
+        "value": "400"
+      },
+      {
+        "path": "Image Info/numComponents",
+        "value": "1"
+      },
+      {
+        "path": "Image Info/Component/dx",
+        "value": "1"
+      },
+      {
+        "path": "Image Info/Component/dy",
+        "value": "1"
+      },
+      {
+        "path": "Image Info/Component/precision",
+        "value": "8"
+      },
+      {
+        "path": "Image Info/Component/signed",
+        "value": "false"
+      },
+      {
+        "path": "Code Stream/tx0",
+        "value": "0"
+      },
+      {
+        "path": "Code Stream/ty0",
+        "value": "0"
+      },
+      {
+        "path": "Code Stream/tileWidth",
+        "value": "700"
+      },
+      {
+        "path": "Code Stream/tileHeight",
+        "value": "400"
+      },
+      {
+        "path": "Code Stream/numTilesX",
+        "value": "1"
+      },
+      {
+        "path": "Code Stream/numTilesY",
+        "value": "1"
+      },
+      {
+        "path": "Code Stream/Codestream Tile Component/numResolutions",
+        "value": "6"
+      }
+    ]
+  }
+}
