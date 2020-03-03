@@ -23,20 +23,9 @@ import ncsa.hdf.hdf5lib.exceptions.HDF5LibraryException;
 import org.esa.snap.core.dataio.AbstractProductWriter;
 import org.esa.snap.core.dataio.ProductIOException;
 import org.esa.snap.core.dataio.ProductWriterPlugIn;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.ColorPaletteDef;
-import org.esa.snap.core.datamodel.FlagCoding;
-import org.esa.snap.core.datamodel.MapGeoCoding;
-import org.esa.snap.core.datamodel.MetadataAttribute;
-import org.esa.snap.core.datamodel.MetadataElement;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.datamodel.ProductNode;
-import org.esa.snap.core.datamodel.ProductNodeGroup;
-import org.esa.snap.core.datamodel.Stx;
-import org.esa.snap.core.datamodel.TiePointGeoCoding;
-import org.esa.snap.core.datamodel.TiePointGrid;
-import org.esa.snap.core.datamodel.VirtualBand;
+import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
+import org.esa.snap.core.dataio.geocoding.GeoRaster;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.dataop.maptransf.MapInfo;
 import org.esa.snap.core.dataop.maptransf.MapProjection;
 import org.esa.snap.core.dataop.maptransf.MapTransform;
@@ -55,6 +44,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.*;
 
 /**
  * A product writer implementation for the HDF5 format.
@@ -151,16 +142,41 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
     }
 
     private void writeGeoCoding() throws IOException {
-        final Product product = getSourceProduct();
-        if (product.getSceneGeoCoding() instanceof TiePointGeoCoding) {
-            writeGeoCoding((TiePointGeoCoding) product.getSceneGeoCoding());
-        } else if (product.getSceneGeoCoding() instanceof MapGeoCoding) {
-            writeGeoCoding((MapGeoCoding) product.getSceneGeoCoding());
+        final GeoCoding sceneGeoCoding = getSourceProduct().getSceneGeoCoding();
+        if (sceneGeoCoding instanceof ComponentGeoCoding) {
+            writeGeoCoding((ComponentGeoCoding) sceneGeoCoding);
+        } else if (sceneGeoCoding instanceof TiePointGeoCoding) {
+            writeGeoCoding((TiePointGeoCoding) sceneGeoCoding);
+        } else if (sceneGeoCoding instanceof MapGeoCoding) {
+            writeGeoCoding((MapGeoCoding) sceneGeoCoding);
+        }
+    }
+
+    private void writeGeoCoding(ComponentGeoCoding gc) throws IOException {
+        final int groupID = createGeoCodingGroup();
+        try {
+            createScalarAttribute(groupID, "java_class_name", gc.getClass().getName());
+            createScalarAttribute(groupID, TAG_FORWARD_CODING_KEY, gc.getForwardCoding().getKey());
+            createScalarAttribute(groupID, TAG_INVERSE_CODING_KEY, gc.getInverseCoding().getKey());
+            createScalarAttribute(groupID, TAG_GEO_CHECKS, gc.getGeoChecks().name());
+            createScalarAttribute(groupID, TAG_GEO_CRS, gc.getGeoCRS().toWKT().replace("\n", "").replace("\r", ""));
+
+            final GeoRaster gr = gc.getGeoRaster();
+
+            createScalarAttribute(groupID, TAG_LON_VARIABLE_NAME, gr.getLonVariableName());
+            createScalarAttribute(groupID, TAG_LAT_VARIABLE_NAME, gr.getLatVariableName());
+            createScalarAttribute(groupID, TAG_RASTER_RESOLUTION_KM, gr.getRasterResolutionInKm());
+            createScalarAttribute(groupID, TAG_OFFSET_X, gr.getOffsetX());
+            createScalarAttribute(groupID, TAG_OFFSET_Y, gr.getOffsetY());
+            createScalarAttribute(groupID, TAG_SUBSAMPLING_X, gr.getSubsamplingX());
+            createScalarAttribute(groupID, TAG_SUBSAMPLING_Y, gr.getSubsamplingY());
+        } finally {
+            closeH5G(groupID);
         }
     }
 
     private void writeGeoCoding(final TiePointGeoCoding geoCoding) throws IOException {
-        final int groupID = createH5G(fileID, "geo_coding");
+        final int groupID = createGeoCodingGroup();
         try {
             createScalarAttribute(groupID, "java_class_name", TiePointGeoCoding.class.getName());
             createScalarAttribute(groupID, "lat_grid", geoCoding.getLatGrid().getName());
@@ -173,7 +189,7 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
     private void writeGeoCoding(final MapGeoCoding geoCoding) throws IOException {
         final MapInfo mapInfo = geoCoding.getMapInfo();
         final MapProjection mapProjection = mapInfo.getMapProjection();
-        final int groupID = createH5G(fileID, "geo_coding");
+        final int groupID = createGeoCodingGroup();
         try {
             createScalarAttribute(groupID, "java_class_name", MapGeoCoding.class.getName());
             createScalarAttribute(groupID, "easting", mapInfo.getEasting());
@@ -201,6 +217,10 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
         } finally {
             closeH5G(groupID);
         }
+    }
+
+    private int createGeoCodingGroup() throws IOException {
+        return createH5G(fileID, "geo_coding");
     }
 
     /**
@@ -621,7 +641,7 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
     }
 
     private void createScalarAttribute(int locationID, String name, int jh5DataType, int typeSize, Object value) throws
-                                                                                                                 IOException {
+            IOException {
         Debug.trace("Hdf5ProductWriter.createScalarAttribute("
                     + "locationID=" + locationID
                     + ", name=" + name
@@ -654,7 +674,7 @@ public class Hdf5ProductWriter extends AbstractProductWriter {
     }
 
     private void createArrayAttribute(int locationID, String name, int jh5DataType, int arraySize, Object value) throws
-                                                                                                                 IOException {
+            IOException {
         //Debug.trace("creating array attribute " + name + ", JH5 type " + jh5DataType + ", size " + arraySize);
         int attrTypeID = -1;
         int attrSpaceID = -1;
