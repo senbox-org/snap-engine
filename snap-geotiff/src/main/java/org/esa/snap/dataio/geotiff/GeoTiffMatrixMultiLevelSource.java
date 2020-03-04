@@ -15,11 +15,13 @@ import java.awt.image.RenderedImage;
 public class GeoTiffMatrixMultiLevelSource extends AbstractMatrixMosaicSubsetMultiLevelSource implements UncompressedTileOpImageCallback<GeoTiffMatrixCell> {
 
     private final int bandIndex;
+    private final Double noDataValue;
 
-    public GeoTiffMatrixMultiLevelSource(MosaicMatrix spotBandMatrix, Rectangle imageMatrixReadBounds, Dimension tileSize, int bandIndex, GeoCoding geoCoding) {
+    public GeoTiffMatrixMultiLevelSource(MosaicMatrix spotBandMatrix, Rectangle imageMatrixReadBounds, Dimension tileSize, int bandIndex, GeoCoding geoCoding, Double noDataValue) {
         super(spotBandMatrix, imageMatrixReadBounds, tileSize, geoCoding);
 
         this.bandIndex = bandIndex;
+        this.noDataValue = noDataValue;
     }
 
     @Override
@@ -34,5 +36,14 @@ public class GeoTiffMatrixMultiLevelSource extends AbstractMatrixMosaicSubsetMul
 
         GeoTiffMatrixCell geoTiffMatrixCell = (GeoTiffMatrixCell)matrixCell;
         return buildUncompressedTileImages(level, imageCellReadBounds, this.tileSize, cellTranslateLevelOffsetX, cellTranslateLevelOffsetY, this, geoTiffMatrixCell);
+    }
+
+
+    @Override
+    protected double[] getMosaicOpBackgroundValues() {
+        if (this.noDataValue == null) {
+            return super.getMosaicOpBackgroundValues();
+        }
+        return new double[] { this.noDataValue.doubleValue() };
     }
 }

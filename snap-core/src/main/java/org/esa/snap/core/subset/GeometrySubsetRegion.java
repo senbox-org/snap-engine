@@ -1,6 +1,7 @@
 package org.esa.snap.core.subset;
 
 import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.util.GeoUtils;
 import org.esa.snap.core.util.ProductUtils;
 import org.locationtech.jts.geom.Geometry;
 
@@ -29,7 +30,7 @@ public class GeometrySubsetRegion extends AbstractSubsetRegion {
         if (productDefaultGeoCoding == null) {
             throw new NullPointerException("The pixel region cannot be computed because the product GeoCoding is missing.");
         }
-        return ProductUtils.computePixelRegionUsingGeometry(productDefaultGeoCoding, defaultProductWidth, defaultProductHeight, this.geometryRegion, this.borderPixels, roundPixelRegion);
+        return GeoUtils.computePixelRegionUsingGeometry(productDefaultGeoCoding, defaultProductWidth, defaultProductHeight, this.geometryRegion, this.borderPixels, roundPixelRegion);
     }
 
     @Override
@@ -45,12 +46,12 @@ public class GeometrySubsetRegion extends AbstractSubsetRegion {
             if (bandDefaultGeoCoding == null) {
                 throw new NullPointerException("The pixel region cannot be computed because the band GeoCoding is missing of the multi size product.");
             }
-            return ProductUtils.computePixelRegionUsingGeometry(bandDefaultGeoCoding, defaultBandWidth, defaultBandHeight, this.geometryRegion, this.borderPixels, roundPixelRegion);
+            return GeoUtils.computePixelRegionUsingGeometry(bandDefaultGeoCoding, defaultBandWidth, defaultBandHeight, this.geometryRegion, this.borderPixels, roundPixelRegion);
         } else {
             if (productDefaultGeoCoding == null) {
                 throw new NullPointerException("The pixel region cannot be computed because the product GeoCoding is missing.");
             }
-            return ProductUtils.computePixelRegionUsingGeometry(productDefaultGeoCoding, defaultProductWidth, defaultProductHeight, this.geometryRegion, this.borderPixels, roundPixelRegion);
+            return GeoUtils.computePixelRegionUsingGeometry(productDefaultGeoCoding, defaultProductWidth, defaultProductHeight, this.geometryRegion, this.borderPixels, roundPixelRegion);
         }
     }
 }

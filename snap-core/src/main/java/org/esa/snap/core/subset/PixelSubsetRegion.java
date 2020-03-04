@@ -1,6 +1,7 @@
 package org.esa.snap.core.subset;
 
 import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.util.GeoUtils;
 import org.esa.snap.core.util.ProductUtils;
 import org.locationtech.jts.geom.Geometry;
 
@@ -51,8 +52,8 @@ public class PixelSubsetRegion extends AbstractSubsetRegion {
         if (defaultProductWidth != defaultBandWidth || defaultProductHeight != defaultBandHeight) {
             // the product is multisize
             if (productDefaultGeoCoding != null && bandDefaultGeoCoding != null) {
-                Geometry productGeometryRegion = ProductUtils.computeGeometryUsingPixelRegion(productDefaultGeoCoding, defaultProductWidth, defaultProductHeight, this.pixelRegion);
-                return ProductUtils.computePixelRegionUsingGeometry(bandDefaultGeoCoding, defaultBandWidth, defaultBandHeight, productGeometryRegion, this.borderPixels, roundPixelRegion);
+                Geometry productGeometryRegion = GeoUtils.computeGeometryUsingPixelRegion(productDefaultGeoCoding, this.pixelRegion);
+                return GeoUtils.computePixelRegionUsingGeometry(bandDefaultGeoCoding, defaultBandWidth, defaultBandHeight, productGeometryRegion, this.borderPixels, roundPixelRegion);
             }
             return computeBandBoundsBasedOnPercent(this.pixelRegion, defaultProductWidth, defaultProductHeight, defaultBandWidth, defaultBandHeight);
         } else {

@@ -213,6 +213,9 @@ public class GeoTiffProductReader extends AbstractProductReader {
     }
 
     public Product readProduct(GeoTiffImageReader geoTiffImageReader, String defaultProductName) throws Exception {
+        if (geoTiffImageReader == null) {
+            throw new NullPointerException("The image reader is null.");
+        }
         ProductSubsetDef subsetDef = getSubsetDef();
         Rectangle productBounds;
         int defaultImageWidth = geoTiffImageReader.getImageWidth();
@@ -231,6 +234,12 @@ public class GeoTiffProductReader extends AbstractProductReader {
     }
 
     public Product readProduct(GeoTiffImageReader geoTiffImageReader, String defaultProductName, Rectangle productBounds, Double noDataValue) throws Exception {
+        if (geoTiffImageReader == null) {
+            throw new NullPointerException("The image reader is null.");
+        }
+        if (productBounds.isEmpty()) {
+            throw new IllegalStateException("Empty product bounds.");
+        }
         Dimension defaultImageSize = geoTiffImageReader.validateArea(productBounds);
 
         TIFFImageMetadata imageMetadata = geoTiffImageReader.getImageMetadata();
@@ -399,7 +408,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
             DocumentBuilder builder = factory.newDocumentBuilder();
             inputStream = new ByteArrayInputStream(tagNumberText.getBytes());
             Document document = new DOMBuilder().build(builder.parse(inputStream));
-            product = DimapProductHelpers.createProduct(document, productSize);
+            product = DimapProductHelpers.createProduct(document, GeoTiffProductReaderPlugIn.FORMAT_NAMES[0], productSize);
             // remove the geo coding
             product.setSceneGeoCoding(null);
             TiePointGrid[] pointGrids = product.getTiePointGrids();
