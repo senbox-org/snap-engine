@@ -1,19 +1,19 @@
 package org.esa.snap.product.library.v2.database;
 
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.engine_utilities.util.FileIOUtils;
 import org.esa.snap.product.library.v2.database.model.LocalRepositoryFolder;
 import org.esa.snap.product.library.v2.database.model.LocalRepositoryProduct;
 import org.esa.snap.product.library.v2.database.model.RemoteMission;
 import org.esa.snap.product.library.v2.database.model.RemoteRepository;
 import org.esa.snap.remote.products.repository.*;
+import org.h2gis.utilities.SFSUtilities;
+import org.h2gis.utilities.SpatialResultSet;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Polygon;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.engine_utilities.util.FileIOUtils;
-import org.h2gis.utilities.SFSUtilities;
-import org.h2gis.utilities.SpatialResultSet;
 
 import javax.imageio.ImageIO;
 import java.awt.geom.Rectangle2D;
@@ -23,20 +23,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Calendar;
+import java.sql.*;
+import java.util.*;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -419,23 +408,6 @@ class LocalRepositoryDatabaseLayer {
         }
     }
 
-    private static Polygon2D buildPolygon11(Geometry geometry) {
-        if (!(geometry instanceof Polygon)) {
-            throw new IllegalStateException("The product geometry type '"+geometry.getClass().getName()+"' is not a '"+Polygon.class.getName()+"' type.");
-        }
-        Coordinate[] coordinates = ((Polygon)geometry).getExteriorRing().getCoordinates();
-        Coordinate firstCoordinate = coordinates[0];
-        Coordinate lastCoordinate = coordinates[coordinates.length-1];
-        if (firstCoordinate.x != lastCoordinate.x || firstCoordinate.y != lastCoordinate.y) {
-            throw new IllegalStateException("The first and last coordinates of the polygon do not match.");
-        }
-        Polygon2D polygon = new Polygon2D();
-        for (Coordinate coordinate : coordinates) {
-            polygon.append(coordinate.x, coordinate.y);
-        }
-        return polygon;
-    }
-
     static void deleteLocalRepositoryFolder(LocalRepositoryFolder localRepositoryFolder, H2DatabaseParameters databaseParameters) throws SQLException {
         try (Connection connection = H2DatabaseAccessor.getConnection(databaseParameters)) {
             Set<Integer> productIds;
@@ -684,6 +656,55 @@ class LocalRepositoryDatabaseLayer {
         }
     }
 
+    //TODO Jean new method
+    static void updateProductPath(LocalRepositoryProduct productToUpdate, Path productPath, Path localRepositoryFolderPath, H2DatabaseParameters databaseParameters)
+                                  throws SQLException, IOException {
+
+        LocalRepositoryFolder localRepositoryFolder;
+        try (Connection connection = H2DatabaseAccessor.getConnection(databaseParameters)) {
+            boolean success = false;
+            connection.setAutoCommit(false);
+            try {
+                localRepositoryFolder = saveLocalRepositoryFolderPath(localRepositoryFolderPath, connection);
+                Path relativePath = extractProductPathRelativeToLocalRepositoryFolder(productPath, localRepositoryFolder.getPath());
+
+                FileTime fileTime = Files.getLastModifiedTime(productPath);
+                long sizeInBytes = FileIOUtils.computeFileSize(productPath);
+
+                StringBuilder sql = new StringBuilder();
+                sql.append("UPDATE ")
+                    .append(DatabaseTableNames.PRODUCTS)
+                    .append(" SET local_repository_id = ")
+                    .append(localRepositoryFolder.getId())
+                    .append(", relative_path = '")
+                    .append(relativePath.toString())
+                    .append("', size_in_bytes = ")
+                    .append(sizeInBytes)
+                    .append(", last_modified_date = ")
+                    .append("?") // last modified date
+                    .append(" WHERE id = ")
+                    .append(productToUpdate.getId());
+                try (PreparedStatement statement = connection.prepareStatement(sql.toString())) {
+                    statement.setTimestamp(1, new java.sql.Timestamp(fileTime.toMillis()));
+                    int affectedRows = statement.executeUpdate();
+                    if (affectedRows == 0) {
+                        throw new SQLException("Failed to update the product, no rows affected.");
+                    }
+                }
+
+                // commit the statements
+                connection.commit();
+
+                success = true;
+            } finally {
+                if (!success) {
+                    // rollback the statements from the transaction
+                    connection.rollback();
+                }
+            }
+        }
+    }
+
     static SaveDownloadedProductData saveProduct(RepositoryProduct productToSave, Path productPath, String remoteRepositoryName,
                                                  Path localRepositoryFolderPath, H2DatabaseParameters databaseParameters)
                                               throws IOException, SQLException {
@@ -925,7 +946,7 @@ class LocalRepositoryDatabaseLayer {
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0) {
-                throw new SQLException("Failed to insert the product, no rows affected.");
+                throw new SQLException("Failed to update the product, no rows affected.");
             }
         }
     }
@@ -965,10 +986,10 @@ class LocalRepositoryDatabaseLayer {
                 .append(")");
         ProductData.UTC startTime = productToSave.getStartTime();
         Date acquisitionDate = (startTime == null) ? null : startTime.getAsDate();
-        return executeProductStatement(sql.toString(), acquisitionDate, fileTime, connection);
+        return executeInsertProductStatement(sql.toString(), acquisitionDate, fileTime, connection);
     }
 
-    private static int executeProductStatement(String sql, Date acquisitionDate, FileTime fileTime, Connection connection) throws SQLException {
+    private static int executeInsertProductStatement(String sql, Date acquisitionDate, FileTime fileTime, Connection connection) throws SQLException {
         int productId;
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS)) {
             java.sql.Timestamp acquisitionDateTimestamp = null;
@@ -1063,7 +1084,7 @@ class LocalRepositoryDatabaseLayer {
                 .append(", ")
                 .append(productToSave.getSensorType().getValue())
                 .append(")");
-        return executeProductStatement(sql.toString(), productToSave.getAcquisitionDate(), fileTime, connection);
+        return executeInsertProductStatement(sql.toString(), productToSave.getAcquisitionDate(), fileTime, connection);
     }
 
     private static void insertRemoteProductAttributes(int productId, List<Attribute> remoteAttributes, Connection connection) throws SQLException {

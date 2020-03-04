@@ -18,10 +18,7 @@ package org.esa.snap.engine_utilities.util;
 import org.apache.commons.io.IOUtils;
 import org.esa.snap.core.util.io.FileUtils;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttribute;
@@ -106,10 +103,52 @@ public class FileIOUtils {
         }
 
         @Override
+        public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+            FileVisitResult visitResult = super.postVisitDirectory(dir, exc);
+
+            if (this.isMove) {
+                Files.delete(dir);
+            }
+            return visitResult;
+        }
+
+        @Override
         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
             copyFile(file, target.resolve(source.relativize(file)));
             return FileVisitResult.CONTINUE;
         }
+    }
+
+    public static Path copyFolderNew(Path sourcePath, Path targetPath) throws IOException {
+        return copyOrMoveFolder(sourcePath, targetPath, false);
+    }
+
+    public static Path moveFolderNew(Path sourcePath, Path targetPath) throws IOException {
+        return copyOrMoveFolder(sourcePath, targetPath, true);
+    }
+
+    private static Path copyOrMoveFolder(Path sourcePath, Path targetPath, boolean move) throws IOException {
+        if (sourcePath == null) {
+            throw new NullPointerException("The source path is null.");
+        }
+        if (targetPath == null) {
+            throw new NullPointerException("The target path is null.");
+        }
+        if (!Files.exists(sourcePath)) {
+            throw new FileNotFoundException("The source path '" + sourcePath + "' does not exist.");
+        }
+        if (!Files.exists(targetPath)) {
+            throw new FileNotFoundException("The target path '" + targetPath + "' does not exist.");
+        }
+        if (!Files.isDirectory(targetPath)) {
+            throw new NotDirectoryException("The target path '" + targetPath + "' is not a directory.");
+        }
+        Path target = targetPath.resolve(sourcePath.getFileName());
+        // follow links when copying files
+        EnumSet<FileVisitOption> opts = EnumSet.of(FileVisitOption.FOLLOW_LINKS);
+        CopyDirVisitor visitor = new CopyDirVisitor(sourcePath, target, move);
+        Files.walkFileTree(sourcePath, opts, Integer.MAX_VALUE, visitor);
+        return target;
     }
 
     public static void copyFolder(final Path source, final Path target) throws IOException {
