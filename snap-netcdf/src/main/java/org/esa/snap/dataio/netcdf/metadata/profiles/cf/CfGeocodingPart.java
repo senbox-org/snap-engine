@@ -18,10 +18,10 @@ package org.esa.snap.dataio.netcdf.metadata.profiles.cf;
 import org.esa.snap.core.dataio.geocoding.*;
 import org.esa.snap.core.dataio.geocoding.forward.PixelForward;
 import org.esa.snap.core.dataio.geocoding.inverse.PixelQuadTreeInverse;
+import org.esa.snap.core.dataio.geocoding.util.RasterUtils;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.util.SystemUtils;
-import org.esa.snap.core.util.math.SphericalDistance;
 import org.esa.snap.dataio.netcdf.ProfileReadContext;
 import org.esa.snap.dataio.netcdf.ProfileWriteContext;
 import org.esa.snap.dataio.netcdf.metadata.ProfilePartIO;
@@ -33,7 +33,6 @@ import org.esa.snap.dataio.netcdf.util.DimKey;
 import org.esa.snap.dataio.netcdf.util.ReaderUtils;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
-import org.opengis.referencing.datum.Ellipsoid;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.ma2.Index;
@@ -375,7 +374,7 @@ public class CfGeocodingPart extends ProfilePartIO {
             double[] longitudes = lonBand.getSourceImage().getData().getSamples(0, 0, width, height, 0, new double[fullSize]);
             double[] latitudes = latBand.getSourceImage().getData().getSamples(0, 0, width, height, 0, new double[fullSize]);
 
-            final double resolutionInKm = computeResolutionInKm(lonBand, latBand);
+            final double resolutionInKm = RasterUtils.computeResolutionInKm(lonBand, latBand);
 
             final GeoRaster geoRaster = new GeoRaster(longitudes, latitudes, lonBand.getName(), latBand.getName(),
                     width, height, resolutionInKm);
@@ -389,56 +388,4 @@ public class CfGeocodingPart extends ProfilePartIO {
         }
         return null;
     }
-
-    private static double computeResolutionInKm(Band lonBand, Band latBand) {
-        final Product product = lonBand.getProduct();
-        final int width = product.getSceneRasterWidth();
-        final int height = product.getSceneRasterHeight();
-
-        final DefaultGeographicCRS wgs84 = DefaultGeographicCRS.WGS84;
-        final Ellipsoid ellipsoid = wgs84.getDatum().getEllipsoid();
-        final double meanEarthRadiusM = (ellipsoid.getSemiMajorAxis() + ellipsoid.getSemiMinorAxis()) / 2;
-        final double meanEarthRadiusKm = meanEarthRadiusM / 1000.0;
-
-        final Rectangle R = new Rectangle(0, 0, 10, 10);
-        R.width = Math.min(R.width, width);
-        R.height = Math.min(R.height, height);
-        if (width > R.width) {
-            R.x = (width - R.width) / 2;
-        }
-        if (height > R.height) {
-            R.y = (height - R.height) / 2;
-        }
-
-        final int resPixelsSize = R.width * R.height;
-        double[] resLons = lonBand.getSourceImage().getData().getSamples(R.x, R.y, R.width, R.height, 0, new double[resPixelsSize]);
-        double[] resLats = latBand.getSourceImage().getData().getSamples(R.x, R.y, R.width, R.height, 0, new double[resPixelsSize]);
-
-        int count = 0;
-        double distanceSum = 0;
-        for (int y = 0; y < R.height; y++) {
-            for (int x = 0; x < R.width; x++) {
-                final int idx = y * R.width + x;
-                final double resLon = resLons[idx];
-                final double resLat = resLats[idx];
-                final SphericalDistance spherDist = new SphericalDistance(resLon, resLat);
-                if (x < R.width - 1) {
-                    final int idxRight = idx + 1;
-                    final double distance = spherDist.distance(resLons[idxRight], resLats[idxRight]);
-                    distanceSum += distance;
-                    count++;
-                }
-                if (y < R.height - 1) {
-                    final int idxBottom = idx + R.width;
-                    final double distance = spherDist.distance(resLons[idxBottom], resLats[idxBottom]);
-                    distanceSum += distance;
-                    count++;
-                }
-            }
-        }
-
-        final double distanceMeanRadian = distanceSum / count;
-        return distanceMeanRadian * meanEarthRadiusKm;
-    }
-
 }
