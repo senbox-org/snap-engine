@@ -202,11 +202,6 @@ public class RasterUtils {
         final int width = product.getSceneRasterWidth();
         final int height = product.getSceneRasterHeight();
 
-        final DefaultGeographicCRS wgs84 = DefaultGeographicCRS.WGS84;
-        final Ellipsoid ellipsoid = wgs84.getDatum().getEllipsoid();
-        final double meanEarthRadiusM = (ellipsoid.getSemiMajorAxis() + ellipsoid.getSemiMinorAxis()) / 2;
-        final double meanEarthRadiusKm = meanEarthRadiusM / 1000.0;
-
         final Rectangle R = new Rectangle(0, 0, 10, 10);
         R.width = Math.min(R.width, width);
         R.height = Math.min(R.height, height);
@@ -221,23 +216,27 @@ public class RasterUtils {
         double[] resLons = lonBand.getSourceImage().getData().getSamples(R.x, R.y, R.width, R.height, 0, new double[resPixelsSize]);
         double[] resLats = latBand.getSourceImage().getData().getSamples(R.x, R.y, R.width, R.height, 0, new double[resPixelsSize]);
 
+        return computeResolutionInKm(resLons, resLats, R.width, R.height);
+    }
+
+    public static double computeResolutionInKm(double[] lonData, double[] latData, int width, int height) {
         int count = 0;
         double distanceSum = 0;
-        for (int y = 0; y < R.height; y++) {
-            for (int x = 0; x < R.width; x++) {
-                final int idx = y * R.width + x;
-                final double resLon = resLons[idx];
-                final double resLat = resLats[idx];
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                final int idx = y * width + x;
+                final double resLon = lonData[idx];
+                final double resLat = latData[idx];
                 final SphericalDistance spherDist = new SphericalDistance(resLon, resLat);
-                if (x < R.width - 1) {
+                if (x < width - 1) {
                     final int idxRight = idx + 1;
-                    final double distance = spherDist.distance(resLons[idxRight], resLats[idxRight]);
+                    final double distance = spherDist.distance(lonData[idxRight], latData[idxRight]);
                     distanceSum += distance;
                     count++;
                 }
-                if (y < R.height - 1) {
-                    final int idxBottom = idx + R.width;
-                    final double distance = spherDist.distance(resLons[idxBottom], resLats[idxBottom]);
+                if (y < height - 1) {
+                    final int idxBottom = idx + width;
+                    final double distance = spherDist.distance(lonData[idxBottom], latData[idxBottom]);
                     distanceSum += distance;
                     count++;
                 }
@@ -245,6 +244,12 @@ public class RasterUtils {
         }
 
         final double distanceMeanRadian = distanceSum / count;
+
+        final DefaultGeographicCRS wgs84 = DefaultGeographicCRS.WGS84;
+        final Ellipsoid ellipsoid = wgs84.getDatum().getEllipsoid();
+        final double meanEarthRadiusM = (ellipsoid.getSemiMajorAxis() + ellipsoid.getSemiMinorAxis()) / 2;
+        final double meanEarthRadiusKm = meanEarthRadiusM / 1000.0;
+
         return distanceMeanRadian * meanEarthRadiusKm;
     }
 }
