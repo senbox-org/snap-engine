@@ -23,7 +23,7 @@ public class JavaTypeConverter extends ClassConverter {
 
     public JavaTypeConverter() {
         super();
-        addPackageQualifier("com.vividsolutions.jts.geom.");
+        addPackageQualifier("org.locationtech.jts.geom.");
     }
 
     @Override

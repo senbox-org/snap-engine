@@ -112,12 +112,14 @@ public class DimapProductHelpers {
      *
      * @param dom the DOM in BEAM-DIMAP format
      *
+     * @param defaultProductType the product type
+     *
      * @param regionRasterSize the region size to be displayed
      *
      * @return an in-memory data product represenation
      */
-    public static Product createProduct(Document dom, Dimension regionRasterSize) {
-        return new ProductBuilder(dom).createProduct(regionRasterSize);
+    public static Product createProduct(Document dom, String defaultProductType, Dimension regionRasterSize) {
+        return new ProductBuilder(dom).createProduct(defaultProductType, regionRasterSize);
     }
 
     /**
@@ -155,16 +157,18 @@ public class DimapProductHelpers {
         for (Object bandDataFile1 : bandDataFiles) {
             final Element bandDataFile = (Element) bandDataFile1;
             final String actualIndex = bandDataFile.getChildTextTrim(DimapProductConstants.TAG_BAND_INDEX);
-            final String bandName = getBandName(rootElement, actualIndex);
-            final Band band = product.getBand(bandName);
-            if (band != null) {
-                final Element filePathElement = bandDataFile.getChild(DimapProductConstants.TAG_DATA_FILE_PATH);
-                final String bandHeaderFilePath = filePathElement.getAttributeValue(DimapProductConstants.ATTRIB_HREF);
-                if (bandHeaderFilePath != null && bandHeaderFilePath.length() > 0) {
-                    final String localHeaderFilePath = SystemUtils.convertToLocalPath(bandHeaderFilePath);
-                    final String bandDataFilePath = FileUtils.exchangeExtension(localHeaderFilePath,
-                                                                                DimapProductConstants.IMAGE_FILE_EXTENSION);
-                    dataFilesMap.put(band, new File(inputDir, bandDataFilePath));
+            if (actualIndex != null) {
+                final String bandName = getBandName(rootElement, actualIndex);
+                final Band band = product.getBand(bandName);
+                if (band != null) {
+                    final Element filePathElement = bandDataFile.getChild(DimapProductConstants.TAG_DATA_FILE_PATH);
+                    final String bandHeaderFilePath = filePathElement.getAttributeValue(DimapProductConstants.ATTRIB_HREF);
+                    if (bandHeaderFilePath != null && bandHeaderFilePath.length() > 0) {
+                        final String localHeaderFilePath = SystemUtils.convertToLocalPath(bandHeaderFilePath);
+                        final String bandDataFilePath = FileUtils.exchangeExtension(localHeaderFilePath,
+                                DimapProductConstants.IMAGE_FILE_EXTENSION);
+                        dataFilesMap.put(band, new File(inputDir, bandDataFilePath));
+                    }
                 }
             }
         }
@@ -1126,11 +1130,19 @@ public class DimapProductHelpers {
             return _dom;
         }
 
-        private Product createProduct(Dimension regionRasterSize) {
+        private Product createProduct(String defaultProductType, Dimension regionRasterSize) {
+            if (org.apache.commons.lang.StringUtils.isBlank(defaultProductType)) {
+                throw new NullPointerException("The default product type is null or empty.");
+            }
             this.ancillaryVariables = new HashMap<>();
 
             Dimension productSize = ImageUtils.computeSceneRasterSize(getSceneRasterWidth(), getSceneRasterHeight(), regionRasterSize);
-            this.product = new Product(getProductName(), getProductType(), productSize.width, productSize.height);
+            String productName = getProductName();
+            String productType = getProductType();
+            if (org.apache.commons.lang.StringUtils.isBlank(productType)) {
+                productType = defaultProductType;
+            }
+            this.product = new Product(productName, productType, productSize.width, productSize.height);
             setSceneRasterStartAndStopTime();
             setDescription();
             addQuicklook();
@@ -1715,7 +1727,11 @@ public class DimapProductHelpers {
             Dimension bandSize = ImageUtils.computeSceneRasterSize(rasterWidth, rasterHeight, regionRasterSize);
 
             final String description = element.getChildTextTrim(DimapProductConstants.TAG_BAND_DESCRIPTION);
-            final int type = ProductData.getType(element.getChildTextTrim(DimapProductConstants.TAG_DATA_TYPE));
+            String typeAsString = element.getChildTextTrim(DimapProductConstants.TAG_DATA_TYPE);
+            if (typeAsString == null) {
+                return null;
+            }
+            final int type = ProductData.getType(typeAsString);
             if (type == ProductData.TYPE_UNDEFINED) {
                 return null;
             }

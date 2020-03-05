@@ -17,9 +17,10 @@ public class GeoTiffMultiLevelSource extends AbstractMosaicSubsetMultiLevelSourc
     private final boolean isGlobalShifted180;
     private final int dataBufferType;
     private final int bandIndex;
+    private final Double noDataValue;
 
     public GeoTiffMultiLevelSource(GeoTiffImageReader geoTiffImageReader, int dataBufferType, Rectangle visibleImageBounds, Dimension tileSize,
-                                   int bandIndex, GeoCoding geoCoding, boolean isGlobalShifted180) {
+                                   int bandIndex, GeoCoding geoCoding, boolean isGlobalShifted180, Double noDataValue) {
 
         super(visibleImageBounds, tileSize, geoCoding);
 
@@ -27,6 +28,7 @@ public class GeoTiffMultiLevelSource extends AbstractMosaicSubsetMultiLevelSourc
         this.isGlobalShifted180 = isGlobalShifted180;
         this.dataBufferType = dataBufferType;
         this.bandIndex = bandIndex;
+        this.noDataValue = noDataValue;
     }
 
     @Override
@@ -41,6 +43,14 @@ public class GeoTiffMultiLevelSource extends AbstractMosaicSubsetMultiLevelSourc
             return buildMosaicOp(level, tileImages, false);
         }
         return null;
+    }
+
+    @Override
+    protected double[] getMosaicOpBackgroundValues() {
+        if (this.noDataValue == null) {
+            return super.getMosaicOpBackgroundValues();
+        }
+        return new double[] { this.noDataValue.doubleValue() };
     }
 
     public boolean isGlobalShifted180() {

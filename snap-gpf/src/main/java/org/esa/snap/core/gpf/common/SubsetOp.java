@@ -17,7 +17,13 @@
 package org.esa.snap.core.gpf.common;
 
 import com.bc.ceres.core.ProgressMonitor;
-import com.vividsolutions.jts.geom.Geometry;
+import org.esa.snap.core.util.GeoUtils;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.CoordinateFilter;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.simplify.DouglasPeuckerSimplifier;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductSubsetBuilder;
 import org.esa.snap.core.dataio.ProductSubsetDef;
@@ -221,7 +227,7 @@ public class SubsetOp extends Operator {
                 }
                 subsetDef.setSubsetRegion(new PixelSubsetRegion(region, 0));
             } else {
-                // the source product is multisize or the reference band is specified
+                // the source product is multisize and the reference band is specified
                 subsetDef.setRegionMap(computeRegionMap(region, referenceBand, sourceProduct, subsetDef.getNodeNames()));
             }
         }
@@ -306,7 +312,7 @@ public class SubsetOp extends Operator {
      * Non-API (yet).
      */
     public static Rectangle computePixelRegion(Product product, Geometry geometryRegion, int numBorderPixels) {
-        return ProductUtils.computePixelRegionUsingGeometry(product.getSceneGeoCoding(), product.getSceneRasterWidth(), product.getSceneRasterHeight(), geometryRegion, numBorderPixels, false);
+        return GeoUtils.computePixelRegionUsingGeometry(product.getSceneGeoCoding(), product.getSceneRasterWidth(), product.getSceneRasterHeight(), geometryRegion, numBorderPixels, false);
     }
 
     public static HashMap<String, Rectangle> computeRegionMap(Rectangle region, Product product, String[] rasterNames) {
@@ -325,20 +331,24 @@ public class SubsetOp extends Operator {
         GeoCoding productGeoCoding = product.getSceneGeoCoding();
         int productWidth = product.getSceneRasterWidth();
         int productHeight = product.getSceneRasterHeight();
-        Geometry geoRegion = ProductUtils.computeGeometryUsingPixelRegion(productGeoCoding, productWidth, productHeight, region);
+        Rectangle pixelRegion = region;
+        if (pixelRegion == null) {
+            pixelRegion = new Rectangle(productWidth, productHeight);
+        }
+        Geometry geoRegion = GeoUtils.computeGeometryUsingPixelRegion(productGeoCoding, pixelRegion);
         Geometry finalGeometry = null;
         for (String rasterName : rasterNames) {
             RasterDataNode rasterDataNode = product.getRasterDataNode(rasterName);
             if (rasterDataNode == null) {
                 continue;
             }
-            Rectangle rect = ProductUtils.computePixelRegionUsingGeometry(rasterDataNode.getGeoCoding(), rasterDataNode.getRasterWidth(), rasterDataNode.getRasterHeight(), geoRegion, 0, true);
+            Rectangle rect = GeoUtils.computePixelRegionUsingGeometry(rasterDataNode.getGeoCoding(), rasterDataNode.getRasterWidth(), rasterDataNode.getRasterHeight(), geoRegion, 0, true);
             regionMap.put(rasterDataNode.getName(), rect);
 
             GeoCoding rasterGeoCoding = rasterDataNode.getGeoCoding();
             int rasterWidth = rasterDataNode.getRasterWidth();
             int rasterHeight = rasterDataNode.getRasterHeight();
-            Geometry geom = ProductUtils.computeGeometryUsingPixelRegion(rasterGeoCoding, rasterWidth, rasterHeight, rect);
+            Geometry geom = GeoUtils.computeGeometryUsingPixelRegion(rasterGeoCoding, rect);
             geometryMap.put(rasterDataNode.getName(), geom);
             if (finalGeometry == null) {
                 finalGeometry = geom;
@@ -352,7 +362,7 @@ public class SubsetOp extends Operator {
             if (rasterDataNode == null) {
                 continue;
             }
-            Rectangle rect = ProductUtils.computePixelRegionUsingGeometry(rasterDataNode.getGeoCoding(), rasterDataNode.getRasterWidth(), rasterDataNode.getRasterHeight(), finalGeometry, 0, true);
+            Rectangle rect = GeoUtils.computePixelRegionUsingGeometry(rasterDataNode.getGeoCoding(), rasterDataNode.getRasterWidth(), rasterDataNode.getRasterHeight(), finalGeometry, 0, true);
             finalRegionMap.put(rasterDataNode.getName(), rect);
         }
 
@@ -374,7 +384,12 @@ public class SubsetOp extends Operator {
         GeoCoding referenceRasterGeoCoding = referenceNode.getGeoCoding();
         int referenceRasterWidth = referenceNode.getRasterWidth();
         int referenceRasterHeight = referenceNode.getRasterHeight();
-        Geometry geometryRegion = ProductUtils.computeGeometryUsingPixelRegion(referenceRasterGeoCoding, referenceRasterWidth, referenceRasterHeight, region);
+        Rectangle pixelRegion = region;
+        if (pixelRegion == null) {
+            pixelRegion = new Rectangle(referenceRasterWidth, referenceRasterHeight);
+        }
+
+        Geometry geometryRegion = GeoUtils.computeGeometryUsingPixelRegion(referenceRasterGeoCoding, pixelRegion);
 
         for (String rasterName : rasterNames) {
             RasterDataNode rasterDataNode = product.getRasterDataNode(rasterName);
@@ -385,7 +400,7 @@ public class SubsetOp extends Operator {
                 regionMap.put(rasterDataNode.getName(), region);
                 continue;
             }
-            Rectangle rasterPixelRegion = ProductUtils.computePixelRegionUsingGeometry(rasterDataNode.getGeoCoding(), rasterDataNode.getRasterWidth(), rasterDataNode.getRasterHeight(), geometryRegion, 0, true);
+            Rectangle rasterPixelRegion = GeoUtils.computePixelRegionUsingGeometry(rasterDataNode.getGeoCoding(), rasterDataNode.getRasterWidth(), rasterDataNode.getRasterHeight(), geometryRegion, 0, true);
             regionMap.put(rasterDataNode.getName(), rasterPixelRegion);
         }
 
@@ -409,7 +424,7 @@ public class SubsetOp extends Operator {
                 continue;
             }
 
-            Rectangle rect = ProductUtils.computePixelRegionUsingGeometry(rasterDataNode.getGeoCoding(), rasterDataNode.getRasterWidth(), rasterDataNode.getRasterHeight(), geoRegion, 0, true);
+            Rectangle rect = GeoUtils.computePixelRegionUsingGeometry(rasterDataNode.getGeoCoding(), rasterDataNode.getRasterWidth(), rasterDataNode.getRasterHeight(), geoRegion, 0, true);
             regionMap.put(rasterDataNode.getName(), rect);
         }
 

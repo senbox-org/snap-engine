@@ -135,7 +135,7 @@ public class DimapProductReader extends AbstractProductReader {
         initInput();
         Document dom = readDom();
 
-        this.product = existingProduct == null ? DimapProductHelpers.createProduct(dom, null) : existingProduct;
+        this.product = existingProduct == null ? DimapProductHelpers.createProduct(dom, DimapProductConstants.DIMAP_FORMAT_NAME, null) : existingProduct;
         this.product.setProductReader(this);
 
         if (existingProduct == null) {

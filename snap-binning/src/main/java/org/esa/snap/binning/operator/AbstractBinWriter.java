@@ -16,7 +16,7 @@
 
 package org.esa.snap.binning.operator;
 
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 import org.esa.snap.binning.TemporalBin;
 import org.esa.snap.binning.support.SEAGrid;
 import org.esa.snap.binning.support.SeadasGrid;
