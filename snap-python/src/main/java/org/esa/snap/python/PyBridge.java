@@ -69,13 +69,13 @@ import static org.esa.snap.core.util.SystemUtils.*;
  */
 public class PyBridge {
 
-    public static final String PYTHON_EXECUTABLE_PROPERTY = "snap.pythonExecutable";
-    public static final String PYTHON_MODULE_DIR_PROPERTY = "snap.pythonModuleDir";
-    public static final String FORCE_PYTHON_CONFIG_PROPERTY = "snap.forcePythonConfig";
-    public static final String PYTHON_EXTRA_PATHS_PROPERTY = "snap.pythonExtraPaths";
+    public static final String PYTHON_EXECUTABLE_PROPERTY = "seadas8.pythonExecutable";
+    public static final String PYTHON_MODULE_DIR_PROPERTY = "seadas8.pythonModuleDir";
+    public static final String FORCE_PYTHON_CONFIG_PROPERTY = "seadas8.forcePythonConfig";
+    public static final String PYTHON_EXTRA_PATHS_PROPERTY = "seadas8.pythonExtraPaths";
     public static final Path PYTHON_CONFIG_DIR;
 
-    private static final String SNAP_PYTHON_DIRNAME = "snap-python";
+    private static final String SNAP_PYTHON_DIRNAME = "seadas8-python";
     private static final String JPY_DEBUG_PROPERTY = "jpy.debug";
     private static final String JPY_CONFIG_PROPERTY = "jpy.config";
     private static final String SNAPPY_NAME = "snappy";

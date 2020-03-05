@@ -53,16 +53,16 @@ import java.util.stream.Collectors;
  */
 public class EngineConfig extends Config {
 
-    public static final String PROPERTY_INSTALL_DIR = "snap.home";
-    public static final String PROPERTY_USER_DIR = "snap.userdir";
-    public static final String PROPERTY_CONFIG_FILE = "snap" + CONFIG_KEY_SUFFIX;
-    public static final String PROPERTY_EXCLUDED_CLUSTER_NAMES = "snap.excludedClusters";
-    public static final String PROPERTY_EXCLUDED_MODULE_NAMES = "snap.excludedModules";
-    public static final String PROPERTY_IGNORE_USER_CONFIG = "snap.ignoreUserConfig";
-    public static final String PROPERTY_IGNORE_DEFAULT_CONFIG = "snap.ignoreDefaultConfig";
-    public static final String PROPERTY_DEBUG = "snap.debug";
-    public static final String PROPERTY_LOGGER_NAME = "snap.logger.name";
-    public static final String PROPERTY_LOG_LEVEL = "snap.log.level";
+    public static final String PROPERTY_INSTALL_DIR = "seadas8.home";
+    public static final String PROPERTY_USER_DIR = "seadas8.userdir";
+    public static final String PROPERTY_CONFIG_FILE = "seadas8" + CONFIG_KEY_SUFFIX;
+    public static final String PROPERTY_EXCLUDED_CLUSTER_NAMES = "seadas8.excludedClusters";
+    public static final String PROPERTY_EXCLUDED_MODULE_NAMES = "seadas8.excludedModules";
+    public static final String PROPERTY_IGNORE_USER_CONFIG = "seadas8.ignoreUserConfig";
+    public static final String PROPERTY_IGNORE_DEFAULT_CONFIG = "seadas8.ignoreDefaultConfig";
+    public static final String PROPERTY_DEBUG = "seadas8.debug";
+    public static final String PROPERTY_LOGGER_NAME = "seadas8.logger.name";
+    public static final String PROPERTY_LOG_LEVEL = "seadas8.log.level";
 
     static String[] DEFAULT_EXCLUDED_CLUSTER_NAMES = new String[]{
             "bin", "etc", "platform", "ide", "java"
@@ -87,7 +87,7 @@ public class EngineConfig extends Config {
     private Logger logger;
 
     private EngineConfig() {
-        super("snap", new EnginePreferences("snap"));
+        super("seadas8", new EnginePreferences("seadas8"));
         add(this);
         initLogger();
     }
@@ -136,7 +136,7 @@ public class EngineConfig extends Config {
         if (value != null) {
             return Paths.get(value);
         }
-        return Paths.get(System.getProperty("user.home"), ".snap");
+        return Paths.get(System.getProperty("user.home"), ".seadas8");
     }
 
     public EngineConfig configFile(Path value) {
@@ -242,7 +242,7 @@ public class EngineConfig extends Config {
 
     private Set<String> loadOtherClusterNames() {
         Set<String> clusterNames = Collections.emptySet();
-        Path clustersFile = installDir().resolve("etc").resolve("snap.clusters");
+        Path clustersFile = installDir().resolve("etc").resolve("seadas8.clusters");
         if (Files.isRegularFile(clustersFile)) {
             try {
                 clusterNames = Files.readAllLines(clustersFile).stream().filter(name -> !name.trim().isEmpty()).collect(Collectors.toSet());
@@ -253,7 +253,7 @@ public class EngineConfig extends Config {
         for (String clusterName : excludedClusterNames()) {
             clusterNames.remove(clusterName);
         }
-        clusterNames.remove("snap");
+        clusterNames.remove("seadas8");
         return clusterNames;
     }
 

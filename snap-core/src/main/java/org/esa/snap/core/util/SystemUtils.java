@@ -187,7 +187,7 @@ public class SystemUtils {
      * @since BEAM 4.10
      */
     public static String getApplicationContextId() {
-        return Config.instance().preferences().get("snap.context", "snap");
+        return Config.instance().preferences().get("seadas8.context", "seadas8");
     }
 
     /**
@@ -201,7 +201,7 @@ public class SystemUtils {
      * @since BEAM 4.10
      */
     public static String getApplicationName() {
-        return Config.instance().preferences().get(getApplicationContextId() + ".application.name", "SNAP");
+        return Config.instance().preferences().get(getApplicationContextId() + ".application.name", "SEADAS8");
     }
 
     /**
