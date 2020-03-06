@@ -56,6 +56,16 @@ public class TAORemoteRepositoriesManager {
         this.remoteRepositoryProductProviders = new RemoteProductsRepositoryProvider[services.size()];
         int index = 0;
         for (DataSource dataSource : services) {
+            Map<String, Map<String, Map<String, String>>> filteredParameters = null;
+            if ("Alaska Satellite Facility".equals(dataSource.getId())) {
+                filteredParameters = buildAlaskaSatelliteFacilityParameterFilter();
+            } else if ("Amazon Web Services".equals(dataSource.getId())) {
+            } else if ("Scientific Data Hub".equals(dataSource.getId())) {
+            } else if ("USGS".equals(dataSource.getId())) {
+            }
+            if (filteredParameters != null && filteredParameters.size() > 0) {
+                dataSource.setFilteredParameters(filteredParameters);
+            }
             this.remoteRepositoryProductProviders[index++] = new TAORemoteRepositoryProvider(dataSource.getId());
         }
 
@@ -577,5 +587,28 @@ public class TAORemoteRepositoriesManager {
             }
         }
         return exceptionMessage.toString();
+    }
+
+    /**
+     * The structure of the map is: Map<Sensor, Map<ParameterName, Map<ValueSetEntry, ValueSetFriendlyValue>>>
+     */
+    private static Map<String, Map<String, Map<String, String>>> buildAlaskaSatelliteFacilityParameterFilter() {
+//        Map<String, String> productTypeParameterValues = new HashMap<>();
+//        productTypeParameterValues.put("GRD_HS", "GRD_HS");
+//        productTypeParameterValues.put("GRD_HD", "GRD_HD");
+//        productTypeParameterValues.put("GRD_MS", "GRD_MS");
+//        productTypeParameterValues.put("GRD_MD", "GRD_MD");
+//        productTypeParameterValues.put("GRD_FS", "GRD_FS");
+//        productTypeParameterValues.put("GRD_FD", "GRD_FD");
+//        productTypeParameterValues.put("SLC", "SLC");
+//        productTypeParameterValues.put("OCN", "OCN");
+//
+//        Map<String, Map<String, String>> sentinel1Parameters = new HashMap<>();
+//        sentinel1Parameters.put("productType", productTypeParameterValues);
+//
+//        Map<String, Map<String, Map<String, String>>> filteredParameters = new HashMap<>();
+//        filteredParameters.put("Sentinel1", sentinel1Parameters);
+//        return filteredParameters;
+        return null;
     }
 }
