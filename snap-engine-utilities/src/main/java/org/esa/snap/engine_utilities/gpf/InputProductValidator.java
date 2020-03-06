@@ -185,12 +185,14 @@ public class InputProductValidator {
         final MetadataElement[] elems = annotation.getElements();
         for (MetadataElement elem : elems) {
             final MetadataElement product = elem.getElement("product");
-            final MetadataElement swathTiming = product.getElement("swathTiming");
-            final MetadataElement burstList = swathTiming.getElement("burstList");
-            final int count = Integer.parseInt(burstList.getAttributeString("count"));
-            if (count != 0) {
-                isDebursted = false;
-                break;
+            if(product != null) {
+                final MetadataElement swathTiming = product.getElement("swathTiming");
+                final MetadataElement burstList = swathTiming.getElement("burstList");
+                final int count = Integer.parseInt(burstList.getAttributeString("count"));
+                if (count != 0) {
+                    isDebursted = false;
+                    break;
+                }
             }
         }
         return isDebursted;
