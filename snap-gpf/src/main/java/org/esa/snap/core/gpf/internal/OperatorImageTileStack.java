@@ -20,6 +20,7 @@ import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.Tile;
+import org.esa.snap.core.gpf.common.WriteOp;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.util.ImageUtils;
 
@@ -101,8 +102,13 @@ public class OperatorImageTileStack extends OperatorImage {
         Map<Band, Tile> targetTiles = new HashMap<Band, Tile>(targetBands.length * 2);
         Map<Band, WritableRaster> writableRasters = new HashMap<Band, WritableRaster>(targetBands.length);
 
+
         for (Band band : targetBands) {
-            if (band == getTargetBand() || operatorContext.isComputingImageOf(band)) {
+            // @todo 1 tb/tb continue here. 2020-03-06
+            // this first conditional skips the creation of a WritableRaster for WriteOp nodes. For some reason not
+            // really understood, this overwrites the tile-data computed by operators further up the graph when running
+            // in tile-stack-computation modus.
+            if (!(operatorContext.getOperator() instanceof WriteOp) && (band == getTargetBand() || operatorContext.isComputingImageOf(band))) {
                 WritableRaster tileRaster = getWritableRaster(band, tile);
                 writableRasters.put(band, tileRaster);
                 Tile targetTile = createTargetTile(band, tileRaster, destRect);
