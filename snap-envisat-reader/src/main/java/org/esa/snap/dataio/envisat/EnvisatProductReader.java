@@ -233,12 +233,12 @@ public class EnvisatProductReader extends AbstractProductReader {
         product.setAutoGrouping(getProductFile().getAutoGroupingPattern());
 
         addBandsToProduct(product);
+        addTiePointGridsToProduct(product);
+        addGeoCodingToProduct(product);
+        initPointingFactory(product);
         if (!isMetadataIgnored()) {
             addHeaderAnnotationsToProduct(product);
             addDatasetAnnotationsToProduct(product);
-            addTiePointGridsToProduct(product);
-            addGeoCodingToProduct(product);
-            initPointingFactory(product);
         }
         addDefaultMasksToProduct(product);
         addDefaultMasksDefsToBands(product);
