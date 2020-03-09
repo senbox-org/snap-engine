@@ -302,6 +302,15 @@ public class OperatorContext {
         }
     }
 
+    /**
+     * Determines whether this operator is an output node. i.e. is a final leaf in the graph that writes result data to disk.
+     *
+     * @return if so
+     */
+    public boolean isOutputNode() {
+        return getOperatorSpi().getOperatorDescriptor().isAutoWriteDisabled();
+    }
+
     public OperatorSpi getOperatorSpi() {
         if (operatorSpi == null) {
             // create anonymous SPI

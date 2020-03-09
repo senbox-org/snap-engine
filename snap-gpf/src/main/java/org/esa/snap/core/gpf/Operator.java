@@ -18,22 +18,12 @@ package org.esa.snap.core.gpf;
 
 import com.bc.ceres.core.Assert;
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductManager;
-import org.esa.snap.core.datamodel.RasterDataNode;
-import org.esa.snap.core.datamodel.TiePointGrid;
-import org.esa.snap.core.gpf.annotations.OperatorMetadata;
-import org.esa.snap.core.gpf.annotations.Parameter;
-import org.esa.snap.core.gpf.annotations.SourceProduct;
-import org.esa.snap.core.gpf.annotations.SourceProducts;
-import org.esa.snap.core.gpf.annotations.TargetProduct;
-import org.esa.snap.core.gpf.annotations.TargetProperty;
+import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.gpf.annotations.*;
 import org.esa.snap.core.gpf.internal.OperatorContext;
 
 import javax.media.jai.BorderExtender;
-import java.awt.Dimension;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.text.MessageFormat;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -83,7 +73,6 @@ import java.util.logging.Logger;
  * @see SourceProduct
  * @see SourceProducts
  * @see Tile
- *
  * @since 4.1
  */
 public abstract class Operator {
@@ -126,7 +115,7 @@ public abstract class Operator {
      * only once durting the lifetime of an {@code Operator} instance.
      * If not already done, calling the {@link #getTargetProduct()} will always trigger
      * a call to the {@code initialize()} method.
-     *
+     * <p>
      * Any client code that must be performed before computation of tile data
      * should be placed here.
      *
@@ -524,16 +513,16 @@ public abstract class Operator {
         for (Product product : products) {
             if (product.isMultiSize()) {
                 String message = String.format("Source product '%s' contains rasters of different sizes and can not be processed.\n" +
-                                                       "Please consider resampling it so that all rasters have the same size.",
-                                               product.getName());
+                                "Please consider resampling it so that all rasters have the same size.",
+                        product.getName());
                 throw new OperatorException(message);
             }
             if (sceneRasterSize == null) {
                 sceneRasterSize = product.getSceneRasterSize();
             } else if (!product.getSceneRasterSize().equals(sceneRasterSize)) {
                 throw new OperatorException(String.format("All source products must have the same raster size of %d x %d pixels.",
-                                                          sceneRasterSize.width,
-                                                          sceneRasterSize.height));
+                        sceneRasterSize.width,
+                        sceneRasterSize.height));
             }
         }
         return sceneRasterSize;
@@ -554,8 +543,8 @@ public abstract class Operator {
                 rasterSize = rasterDataNode.getRasterSize();
             } else if (!rasterSize.equals(rasterDataNode.getRasterSize())) {
                 throw new OperatorException(String.format("All source rasters must have the same size of %d x %d pixels.",
-                                                          rasterSize.width,
-                                                          rasterSize.height));
+                        rasterSize.width,
+                        rasterSize.height));
             }
         }
         return rasterSize;

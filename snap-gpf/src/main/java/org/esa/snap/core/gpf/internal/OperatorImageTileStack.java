@@ -20,14 +20,11 @@ import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.Tile;
-import org.esa.snap.core.gpf.common.WriteOp;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.util.ImageUtils;
 
 import javax.media.jai.PlanarImage;
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.Raster;
 import java.awt.image.SampleModel;
 import java.awt.image.WritableRaster;
@@ -81,8 +78,8 @@ public class OperatorImageTileStack extends OperatorImage {
 
                 /* Clip output rectangle to image bounds. */
                 Rectangle rect = new Rectangle(location.x, location.y,
-                                               sampleModel.getWidth(),
-                                               sampleModel.getHeight());
+                        sampleModel.getWidth(),
+                        sampleModel.getHeight());
                 Rectangle destRect = rect.intersection(getBounds());
                 computeRect((PlanarImage[]) null, dest, destRect);
                 return dest;
@@ -104,11 +101,12 @@ public class OperatorImageTileStack extends OperatorImage {
 
 
         for (Band band : targetBands) {
-            // @todo 1 tb/tb continue here. 2020-03-06
-            // this first conditional skips the creation of a WritableRaster for WriteOp nodes. For some reason not
+            // tb 2020-03-09
+            // this first conditional skips the creation of a WritableRaster for output-nodes. For some reason not
             // really understood, this overwrites the tile-data computed by operators further up the graph when running
             // in tile-stack-computation modus.
-            if (!(operatorContext.getOperator() instanceof WriteOp) && (band == getTargetBand() || operatorContext.isComputingImageOf(band))) {
+            if (!(operatorContext.isOutputNode())
+                    && (band == getTargetBand() || operatorContext.isComputingImageOf(band))) {
                 WritableRaster tileRaster = getWritableRaster(band, tile);
                 writableRasters.put(band, tileRaster);
                 Tile targetTile = createTargetTile(band, tileRaster, destRect);
@@ -177,7 +175,7 @@ public class OperatorImageTileStack extends OperatorImage {
     private WritableRaster createWritableRaster(Rectangle rectangle) {
         final int dataBufferType = ImageManager.getDataBufferType(getTargetBand().getDataType());
         SampleModel sampleModel = ImageUtils.createSingleBandedSampleModel(dataBufferType, rectangle.width,
-                                                                           rectangle.height);
+                rectangle.height);
         final Point location = new Point(rectangle.x, rectangle.y);
         return createWritableRaster(sampleModel, location);
     }
