@@ -20,6 +20,7 @@ import org.esa.snap.core.datamodel.MetadataAttribute;
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.dataio.netcdf.ProfileReadContext;
 import org.esa.snap.dataio.netcdf.ProfileWriteContext;
 import org.esa.snap.dataio.netcdf.metadata.ProfilePartIO;
@@ -27,6 +28,7 @@ import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
 import org.esa.snap.dataio.netcdf.nc.NVariable;
 import org.esa.snap.dataio.netcdf.util.DataTypeUtils;
 import org.esa.snap.dataio.netcdf.util.MetadataUtils;
+import org.esa.snap.dataio.netcdf.util.VariableNameHelper;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.nc2.Attribute;
@@ -147,23 +149,29 @@ public class BeamMetadataPart extends ProfilePartIO {
         if (globalAttributes != null) {
             for (int i = 0; i < globalAttributes.getNumAttributes(); i++) {
                 final MetadataAttribute attribute = globalAttributes.getAttributeAt(i);
-                if (!SNAP_GLOBAL_ATTRIBUTES.contains(attribute.getName())) {
+                String attributeName = attribute.getName();
+                if (!VariableNameHelper.isVariableNameValid(attributeName)) {
+                    attributeName = VariableNameHelper.convertToValidName(attributeName);
+                    SystemUtils.LOG.warning("Found invalid attribute name '" + attribute.getName() +
+                                                    "' - replaced by '" + attributeName + "'.");
+                }
+                if (!SNAP_GLOBAL_ATTRIBUTES.contains(attributeName)) {
                     final ProductData productData = attribute.getData();
                     if (productData.isInt()) {
                         final Number value = productData.getElemInt();
-                        ctx.getNetcdfFileWriteable().addGlobalAttribute(attribute.getName(), value);
+                        ctx.getNetcdfFileWriteable().addGlobalAttribute(attributeName, value);
                     } else if (productData instanceof ProductData.Double) {
                         final Number value = productData.getElemDouble();
-                        ctx.getNetcdfFileWriteable().addGlobalAttribute(attribute.getName(), value);
+                        ctx.getNetcdfFileWriteable().addGlobalAttribute(attributeName, value);
                     } else if (productData instanceof ProductData.Float) {
                         final Number value = productData.getElemFloat();
-                        ctx.getNetcdfFileWriteable().addGlobalAttribute(attribute.getName(), value);
+                        ctx.getNetcdfFileWriteable().addGlobalAttribute(attributeName, value);
                     } else if (productData instanceof ProductData.ASCII || productData instanceof ProductData.UTC) {
                         final String value = productData.getElemString();
-                        ctx.getNetcdfFileWriteable().addGlobalAttribute(attribute.getName(), value);
+                        ctx.getNetcdfFileWriteable().addGlobalAttribute(attributeName, value);
                     } else {
                         final String value = Arrays.asList(productData.getElems()).stream().map(x -> String.valueOf(x)).collect(Collectors.joining(","));
-                        ctx.getNetcdfFileWriteable().addGlobalAttribute(attribute.getName(), value);
+                        ctx.getNetcdfFileWriteable().addGlobalAttribute(attributeName, value);
                     }
                 }
             }
