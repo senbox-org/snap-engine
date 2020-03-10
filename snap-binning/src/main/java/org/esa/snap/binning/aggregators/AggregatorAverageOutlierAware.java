@@ -91,7 +91,7 @@ public class AggregatorAverageOutlierAware extends AbstractAggregator {
             final GrowableVector consolidatedMeasurements = new GrowableVector(count);
             for (int i = 0; i < count; i++) {
                 final float measurement = measurementsVec.get(i);
-                if (Math.abs(measurement - statistics[0]) < maxDelta) {
+                if (Math.abs(measurement - statistics[0]) <= maxDelta) {
                     consolidatedMeasurements.add(measurement);
                 }
             }
