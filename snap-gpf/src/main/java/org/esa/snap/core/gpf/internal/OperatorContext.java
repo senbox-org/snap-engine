@@ -119,6 +119,7 @@ public class OperatorContext {
     private final RenderingHints renderingHints;
     private final boolean computeTileMethodImplemented;
     private final boolean computeTileStackMethodImplemented;
+    private boolean isComputingStack;
 
     private String id;
     private Product targetProduct;
@@ -222,7 +223,7 @@ public class OperatorContext {
     }
 
     public Product[] getSourceProducts() {
-        return sourceProductList.toArray(new Product[sourceProductList.size()]);
+        return sourceProductList.toArray(new Product[0]);
     }
 
     public void setSourceProducts(Product[] products) {
@@ -299,6 +300,15 @@ public class OperatorContext {
         if (isCancelled()) {
             throw new OperatorCancelException("Operation canceled.");
         }
+    }
+
+    /**
+     * Determines whether this operator is an output node. i.e. is a final leaf in the graph that writes result data to disk.
+     *
+     * @return if so
+     */
+    public boolean isOutputNode() {
+        return getOperatorSpi().getOperatorDescriptor().isAutoWriteDisabled();
     }
 
     public OperatorSpi getOperatorSpi() {
@@ -389,6 +399,14 @@ public class OperatorContext {
         return computeTileStackMethodImplemented;
     }
 
+    public boolean isComputingStack() {
+        return isComputingStack;
+    }
+
+    public void setComputingStack(boolean computingStack) {
+        isComputingStack = computingStack;
+    }
+
     public Tile getSourceTile(RasterDataNode rasterDataNode, Rectangle region) {
         return getSourceTile(rasterDataNode, region, null);
     }
@@ -454,7 +472,7 @@ public class OperatorContext {
     }
 
     private boolean operatorMustComputeTileStack() {
-        return operator.canComputeTileStack() && !operator.canComputeTile();
+        return operator.canComputeTileStack() && (!operator.canComputeTile() || isComputingStack());
     }
 
     private static boolean implementsMethod(Class<?> aClass, String methodName, Class[] methodParameterTypes) {
@@ -488,7 +506,7 @@ public class OperatorContext {
             initTargetProperties(operator.getClass());
             setTargetImages();
             initGraphMetadata();
-            targetProduct.setProductWriterListener((ProgressMonitor pm) -> operator.execute(pm));
+            targetProduct.setProductWriterListener(operator::execute);
 
             targetProduct.setModified(false);
         } finally {
@@ -1011,7 +1029,7 @@ public class OperatorContext {
                 srcProductList.remove(product);
             }
         }
-        return srcProductList.toArray(new Product[srcProductList.size()]);
+        return srcProductList.toArray(new Product[0]);
     }
 
     private static Field[] getAnnotatedSourceProductFields(Operator operator1) {
