@@ -13,7 +13,7 @@ import static org.esa.snap.core.util.NamingConvention.*;
 
 public class ColorManipulationDefaults {
 
-    public static final boolean COLOR_MANIPULATION_DEBUG = true;
+    public static final boolean COLOR_MANIPULATION_DEBUG = false;
 
     public static final String TOOLNAME_COLOR_MANIPULATION = NamingConvention.COLOR_MIXED_CASE + " Manipulation";
 
@@ -113,7 +113,7 @@ public class ColorManipulationDefaults {
     public static final String PROPERTY_SCHEME_AUTO_APPLY_LABEL = "Apply " + NamingConvention.COLOR_MIXED_CASE + " Schemes Automatically";
     public static final String PROPERTY_SCHEME_AUTO_APPLY_TOOLTIP = "<html>Apply " + NamingConvention.COLOR_LOWER_CASE +" schemes automatically<br>" +
             " when opening a band based on its name</html>";
-    public static final boolean PROPERTY_SCHEME_AUTO_APPLY_DEFAULT = true;
+    public static final boolean PROPERTY_SCHEME_AUTO_APPLY_DEFAULT = false;
 
     public static final String PROPERTY_SCHEME_PALETTE_KEY = PROPERTY_SCHEME_KEY_SUFFIX + ".palette";
     public static final String PROPERTY_SCHEME_PALETTE_LABEL = "Palette";
