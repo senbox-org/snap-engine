@@ -51,7 +51,8 @@ public class PixExMeasurementReaderTest {
     public void setup() throws Exception {
         final File tmpDir = new File(System.getProperty("java.io.tmpdir"));
         inputDir = new File(tmpDir, getClass().getSimpleName());
-        Assume.assumeTrue("Could not create temporary test directory; skipping tests", inputDir.mkdir());
+        String msg = String.format("Could not create temporary test directory (%s); skipping test", inputDir.toString());
+        Assume.assumeTrue(msg, inputDir.mkdir());
 
         windowSize = 3;
         final int upperLeftX = 20;
