@@ -1,6 +1,6 @@
 package org.esa.snap.product.library.v2.database;
 
-import org.apache.commons.lang.StringUtils;
+import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.h2gis.functions.factory.H2GISFunctions;
 
@@ -109,7 +109,7 @@ public class H2DatabaseAccessor {
     }
 
     private static Connection getConnection(String databaseUrl, Properties databaseProperties) throws SQLException {
-        if (StringUtils.isBlank(databaseUrl)) {
+        if (StringUtils.isNullOrEmpty(databaseUrl)) {
             throw new NullPointerException("The database url is null or empty.");
         }
         if (databaseProperties == null) {
