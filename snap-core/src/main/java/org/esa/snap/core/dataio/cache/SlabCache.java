@@ -35,23 +35,31 @@ class SlabCache {
                 for (int tileY = tileRegion.getTile_Y_min(); tileY <= tileRegion.getTile_Y_max(); tileY++) {
                     final TileRegion bounds = tileBoundsCalculator.getBounds(tileX, tileY);
 
-                    // @todo 1 tb/tb calculate slab region by intersecting with product boundaries. There might be tiles smaller
-                    //  than the expected size - on the right and lower product boundary
                     final int regionXMin = bounds.getTile_X_min();
                     final int regionYMin = bounds.getTile_Y_min();
                     final int regionWidth = bounds.getTile_X_max() - regionXMin + 1;
                     final int regionHeight = bounds.getTile_Y_max() - regionYMin + 1;
-                    final Slab slab = new Slab(new Rectangle(regionXMin, regionYMin, regionWidth, regionHeight));
+                    final Rectangle boundsRect = new Rectangle(regionXMin, regionYMin, regionWidth, regionHeight);
 
-                    synchronized (dataStorage) {
-                        // @todo 1 tb/tb create appropriate buffer and read 2020-03-11
-                        dataStorage.readRasterData(regionXMin, regionYMin, regionWidth, regionHeight, null);
-                        // @todo 1 tb/tb set data to slab 2020-03-11
+                    if (searchRegion.intersects(boundsRect)) {
+                        final Slab slab = new Slab(boundsRect);
+
+                        synchronized (dataStorage) {
+                            // @todo 1 tb/tb create appropriate buffer and read 2020-03-11
+                            dataStorage.readRasterData(regionXMin, regionYMin, regionWidth, regionHeight, null);
+                            // @todo 1 tb/tb set data to slab 2020-03-11
+                        }
+
+                        slab.setLastAccess(System.currentTimeMillis());
+                        cache.add(slab);
+                        resultList.add(slab);
+
+                        searchRegion.subtract(new Area(boundsRect));
+                        if (searchRegion.isEmpty()){
+                            // we have covered all search area - we can leave here tb 2020-03-12
+                            resultList.toArray(new Slab[0]);
+                        }
                     }
-
-                    slab.setLastAccess(System.currentTimeMillis());
-                    cache.add(slab);
-                    resultList.add(slab);
                 }
             }
         }
