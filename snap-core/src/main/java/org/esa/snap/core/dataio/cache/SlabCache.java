@@ -1,5 +1,7 @@
 package org.esa.snap.core.dataio.cache;
 
+import org.esa.snap.core.datamodel.ProductData;
+
 import java.awt.*;
 import java.awt.geom.Area;
 import java.util.ArrayList;
@@ -44,18 +46,18 @@ class SlabCache {
                     if (searchRegion.intersects(boundsRect)) {
                         final Slab slab = new Slab(boundsRect);
 
+                        final ProductData buffer = dataStorage.createBuffer(regionWidth * regionHeight);
                         synchronized (dataStorage) {
-                            // @todo 1 tb/tb create appropriate buffer and read 2020-03-11
-                            dataStorage.readRasterData(regionXMin, regionYMin, regionWidth, regionHeight, null);
-                            // @todo 1 tb/tb set data to slab 2020-03-11
+                            dataStorage.readRasterData(regionXMin, regionYMin, regionWidth, regionHeight, buffer);
                         }
-
+                        slab.setData(buffer);
                         slab.setLastAccess(System.currentTimeMillis());
+
                         cache.add(slab);
                         resultList.add(slab);
 
                         searchRegion.subtract(new Area(boundsRect));
-                        if (searchRegion.isEmpty()){
+                        if (searchRegion.isEmpty()) {
                             // we have covered all search area - we can leave here tb 2020-03-12
                             resultList.toArray(new Slab[0]);
                         }

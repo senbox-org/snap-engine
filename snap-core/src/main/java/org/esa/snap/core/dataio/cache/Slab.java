@@ -1,27 +1,56 @@
 package org.esa.snap.core.dataio.cache;
 
+import org.esa.snap.core.datamodel.ProductData;
+
 import java.awt.*;
 
-public class Slab {
+class Slab {
+
+    // the rectangle with 4 ints and the last access long
+    private static final long SELF_SIZE = 24;
 
     private final Rectangle region;
 
     private long lastAccess;
+    private ProductData productData;
 
-    public Slab(Rectangle region) {
+    Slab(Rectangle region) {
         this.region = region;
         this.lastAccess = -1L;
     }
 
-    public Rectangle getRegion() {
+    Rectangle getRegion() {
         return region;
     }
 
-    public long getLastAccess() {
+    long getLastAccess() {
         return lastAccess;
     }
 
-    public void setLastAccess(long lastAccess) {
+    void setLastAccess(long lastAccess) {
         this.lastAccess = lastAccess;
+    }
+
+    public ProductData getData() {
+        return productData;
+    }
+
+    public void setData(ProductData productData) {
+        this.productData = productData;
+    }
+
+    public long getSizeInBytes() {
+        long size = SELF_SIZE;
+        if (productData != null) {
+            size += productData.getNumElems() * productData.getElemSize();
+        }
+        return size;
+    }
+
+    public void dispose() {
+        if (productData != null) {
+            productData.dispose();
+            productData = null;
+        }
     }
 }

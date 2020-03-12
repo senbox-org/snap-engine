@@ -33,6 +33,7 @@ public class SlabCacheTest {
         assertTrue(slabs[0].getLastAccess() > -1);
 
         verify(storage, times(1)).readRasterData(eq(0), eq(0), eq(10), eq(10), anyObject());
+        verify(storage, times(1)).createBuffer(eq(100));
         verifyNoMoreInteractions(storage);
     }
 
@@ -57,6 +58,7 @@ public class SlabCacheTest {
         assertTrue(slabsSecond[0].getLastAccess() >= lastAccess);
 
         verify(storage, times(1)).readRasterData(eq(0), eq(0), eq(10), eq(10), anyObject());
+        verify(storage, times(1)).createBuffer(eq(100));
         verifyNoMoreInteractions(storage);
     }
 
@@ -83,6 +85,7 @@ public class SlabCacheTest {
 
         verify(storage, times(1)).readRasterData(eq(0), eq(0), eq(10), eq(9), anyObject());
         verify(storage, times(1)).readRasterData(eq(10), eq(0), eq(10), eq(9), anyObject());
+        verify(storage, times(2)).createBuffer(eq(90));
         verifyNoMoreInteractions(storage);
     }
 
@@ -109,6 +112,7 @@ public class SlabCacheTest {
 
         verify(storage, times(1)).readRasterData(eq(0), eq(0), eq(9), eq(8), anyObject());
         verify(storage, times(1)).readRasterData(eq(0), eq(8), eq(9), eq(8), anyObject());
+        verify(storage, times(2)).createBuffer(eq(72));
         verifyNoMoreInteractions(storage);
     }
 
@@ -151,6 +155,7 @@ public class SlabCacheTest {
         verify(storage, times(1)).readRasterData(eq(20), eq(40), eq(10), eq(20), anyObject());
         verify(storage, times(1)).readRasterData(eq(30), eq(20), eq(10), eq(20), anyObject());
         verify(storage, times(1)).readRasterData(eq(30), eq(40), eq(10), eq(20), anyObject());
+        verify(storage, times(4)).createBuffer(eq(200));
         verifyNoMoreInteractions(storage);
     }
 
@@ -210,6 +215,7 @@ public class SlabCacheTest {
         verify(storage, times(1)).readRasterData(eq(20), eq(40), eq(10), eq(20), anyObject());
         verify(storage, times(1)).readRasterData(eq(30), eq(20), eq(10), eq(20), anyObject());
         verify(storage, times(1)).readRasterData(eq(30), eq(40), eq(10), eq(20), anyObject());
+        verify(storage, times(4)).createBuffer(eq(200));
         verifyNoMoreInteractions(storage);
     }
 
@@ -234,6 +240,7 @@ public class SlabCacheTest {
 
         verify(storage, times(1)).readRasterData(eq(0), eq(40), eq(400), eq(20), anyObject());
         verify(storage, times(1)).readRasterData(eq(0), eq(60), eq(400), eq(20), anyObject());
+        verify(storage, times(2)).createBuffer(eq(8000));
         verifyNoMoreInteractions(storage);
     }
 
@@ -277,6 +284,7 @@ public class SlabCacheTest {
         verify(storage, times(1)).readRasterData(eq(0), eq(1160), eq(512), eq(40), anyObject());
         verify(storage, times(1)).readRasterData(eq(0), eq(1200), eq(512), eq(40), anyObject());
         verify(storage, times(1)).readRasterData(eq(0), eq(1240), eq(512), eq(40), anyObject());
+        verify(storage, times(3)).createBuffer(eq(20480));
         verifyNoMoreInteractions(storage);
     }
 }
