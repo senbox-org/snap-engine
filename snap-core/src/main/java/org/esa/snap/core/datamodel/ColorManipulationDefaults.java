@@ -20,6 +20,7 @@ public class ColorManipulationDefaults {
 
     // Directory names
     public static final String DIR_NAME_COLOR_SCHEMES = "color_schemes";
+    public static final String DIR_NAME_RGB_PROFILES = "rgb_profiles";
     public static final String DIR_NAME_COLOR_PALETTES = "color_palettes";
     public static final String DIR_NAME_AUX_DATA = "auxdata";
 
@@ -188,32 +189,32 @@ public class ColorManipulationDefaults {
     public static final String PROPERTY_SLIDERS_SECTION_LABEL = "Slider Options";
     public static final String PROPERTY_SLIDERS_SECTION_TOOLTIP = "Button options in the " + TOOLNAME_COLOR_MANIPULATION + " GUI";
 
-    public static final String PROPERTY_SLIDERS_BUTTON_100_KEY = PROPERTY_SLIDER_KEY_SUFFIX + ".100";
+    public static final String PROPERTY_SLIDERS_BUTTON_100_KEY = PROPERTY_SLIDER_KEY_SUFFIX + ".100.button";
     public static final String PROPERTY_SLIDERS_BUTTON_100_LABEL = "100% button";
     public static final String PROPERTY_SLIDERS_BUTTON_100_TOOLTIP = "Enable 100% range button in the sliders GUI";
     public static final boolean PROPERTY_SLIDERS_BUTTON_100_DEFAULT = true;
 
-    public static final String PROPERTY_SLIDERS_BUTTON_95_KEY = PROPERTY_SLIDER_KEY_SUFFIX + ".95";
+    public static final String PROPERTY_SLIDERS_BUTTON_95_KEY = PROPERTY_SLIDER_KEY_SUFFIX + ".95.button";
     public static final String PROPERTY_SLIDERS_BUTTON_95_LABEL = "95% button";
     public static final String PROPERTY_SLIDERS_BUTTON_95_TOOLTIP = "Enable 95% range button in the sliders GUI";
     public static final boolean PROPERTY_SLIDERS_BUTTON_95_DEFAULT = false;
 
-    public static final String PROPERTY_SLIDERS_BUTTON_1_SIGMA_KEY = PROPERTY_SLIDER_KEY_SUFFIX + ".1.sigma";
+    public static final String PROPERTY_SLIDERS_BUTTON_1_SIGMA_KEY = PROPERTY_SLIDER_KEY_SUFFIX + ".1.sigma.button";
     public static final String PROPERTY_SLIDERS_BUTTON_1_SIGMA_LABEL = "<html>1&sigma; (68.27%) button</html>";
     public static final String PROPERTY_SLIDERS_BUTTON_1_SIGMA_TOOLTIP = "Enable 68.27% range button in the sliders GUI";
     public static final boolean PROPERTY_SLIDERS_BUTTON_1_SIGMA_DEFAULT = false;
 
-    public static final String PROPERTY_SLIDERS_BUTTON_2_SIGMA_KEY = PROPERTY_SLIDER_KEY_SUFFIX + ".2.sigma";
+    public static final String PROPERTY_SLIDERS_BUTTON_2_SIGMA_KEY = PROPERTY_SLIDER_KEY_SUFFIX + ".2.sigma.button";
     public static final String PROPERTY_SLIDERS_BUTTON_2_SIGMA_LABEL = "<html>2&sigma; (95.45%) button</html>";
     public static final String PROPERTY_SLIDERS_BUTTON_2_SIGMA_TOOLTIP = "Enable 95.45% range button in the sliders GUI";
     public static final boolean PROPERTY_SLIDERS_BUTTON_2_SIGMA_DEFAULT = true;
 
-    public static final String PROPERTY_SLIDERS_BUTTON_3_SIGMA_KEY = PROPERTY_SLIDER_KEY_SUFFIX + ".3.sigma";
+    public static final String PROPERTY_SLIDERS_BUTTON_3_SIGMA_KEY = PROPERTY_SLIDER_KEY_SUFFIX + ".3.sigma.button";
     public static final String PROPERTY_SLIDERS_BUTTON_3_SIGMA_LABEL = "<html>3&sigma; (99.73%) button</html>";
     public static final String PROPERTY_SLIDERS_BUTTON_3_SIGMA_TOOLTIP = "Enable 99.73% range button in the sliders GUI";
     public static final boolean PROPERTY_SLIDERS_BUTTON_3_SIGMA_DEFAULT = true;
 
-    public static final String PROPERTY_SLIDERS_ZOOM_VERTICAL_SHOW_KEY = PROPERTY_SLIDER_KEY_SUFFIX + ".zoom.vertical.show";
+    public static final String PROPERTY_SLIDERS_ZOOM_VERTICAL_SHOW_KEY = PROPERTY_SLIDER_KEY_SUFFIX + ".zoom.vertical.buttons";
     public static final String PROPERTY_SLIDERS_ZOOM_VERTICAL_SHOW_IN_LABEL = "Vertical Zoom buttons";
     public static final String PROPERTY_SLIDERS_ZOOM_VERTICAL_SHOW_IN_TOOLTIP = "Enable zoom vertical buttons";
     public static final boolean PROPERTY_SLIDERS_ZOOM_VERTICAL_SHOW_IN_DEFAULT = true;
@@ -223,6 +224,16 @@ public class ColorManipulationDefaults {
     public static final String PROPERTY_SLIDERS_ZOOM_IN_TOOLTIP = "Display slider view zoomed in by default";
     public static final boolean PROPERTY_SLIDERS_ZOOM_IN_DEFAULT = true;
 
+
+    public static final String PROPERTY_SLIDERS_BUTTON_EXTRA_INFORMATION_KEY = PROPERTY_SLIDER_KEY_SUFFIX + ".extra.info.button";
+    public static final String PROPERTY_SLIDERS_BUTTON_EXTRA_INFORMATION_LABEL = "Extra Information button";
+    public static final String PROPERTY_SLIDERS_BUTTON_EXTRA_INFORMATION_TOOLTIP = "Enable Extra Information button in the sliders GUI";
+    public static final boolean PROPERTY_SLIDERS_BUTTON_EXTRA_INFORMATION_DEFAULT = true;
+
+    public static final String PROPERTY_SLIDERS_SHOW_INFORMATION_KEY = PROPERTY_SLIDER_KEY_SUFFIX + ".extra.info";
+    public static final String PROPERTY_SLIDERS_SHOW_INFORMATION_LABEL = "Show Extra Information (by default)";
+    public static final String PROPERTY_SLIDERS_SHOW_INFORMATION_TOOLTIP = "Display extra information in the histogram/slider view by default";
+    public static final boolean PROPERTY_SLIDERS_SHOW_INFORMATION_DEFAULT = true;
 
 
 
@@ -255,6 +266,24 @@ public class ColorManipulationDefaults {
     public static final String PROPERTY_PALETTE_DEFAULT_ANOMALIES_TOOLTIP = "The palette file to use when ANOMALIES is selected";
     public static final String PROPERTY_PALETTE_DEFAULT_ANOMALIES_DEFAULT = PALETTE_ANOMALIES_DEFAULT;
 
+
+    // RGB Options
+
+    private static final String PROPERTY_RGB_OPTIONS_KEY_SUFFIX = PROPERTY_ROOT_KEY + ".rgb.options";
+
+    public static final String PROPERTY_RGB_OPTIONS_SECTION_KEY = PROPERTY_RGB_OPTIONS_KEY_SUFFIX + ".section";
+    public static final String PROPERTY_RGB_OPTIONS_SECTION_LABEL = "RGB Options";
+    public static final String PROPERTY_RGB_OPTIONS_SECTION_TOOLTIP = "Options for the RGB Image";
+
+    public static final String PROPERTY_RGB_OPTIONS_MIN_KEY = PROPERTY_RGB_OPTIONS_KEY_SUFFIX + ".button.min";
+    public static final String PROPERTY_RGB_OPTIONS_MIN_LABEL = "Min";
+    public static final String PROPERTY_RGB_OPTIONS_MIN_TOOLTIP = "The min value to use in the RGB (A..B) range button";
+    public static final double PROPERTY_RGB_OPTIONS_MIN_DEFAULT = 0.0;
+
+    public static final String PROPERTY_RGB_OPTIONS_MAX_KEY = PROPERTY_RGB_OPTIONS_KEY_SUFFIX + "button.min";
+    public static final String PROPERTY_RGB_OPTIONS_MAX_LABEL = "Max";
+    public static final String PROPERTY_RGB_OPTIONS_MAX_TOOLTIP = "The max value to use in the RGB (A..B) range button";
+    public static final double PROPERTY_RGB_OPTIONS_MAX_DEFAULT = 1.0;
 
 
 
