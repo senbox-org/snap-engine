@@ -13,7 +13,7 @@ class TileIndexCalculator {
         this.tileHeight = tileHeight;
     }
 
-    public TileRegion getTileIndexRegion(Area searchRegion) {
+    TileRegion getTileIndexRegion(Area searchRegion) {
         final Rectangle searchRegionBounds = searchRegion.getBounds();
 
         final int tileX_min = searchRegionBounds.x / tileWidth;

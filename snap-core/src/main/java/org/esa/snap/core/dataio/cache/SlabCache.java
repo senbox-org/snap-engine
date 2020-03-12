@@ -7,23 +7,16 @@ import java.util.List;
 
 class SlabCache {
 
-    private final int rasterWidth;
-    private final int rasterHeight;
-    private final int tileWidth;
-    private final int tileHeight;
-
     private final DataStorage dataStorage;
     private final TileIndexCalculator tileCalculator;
+    private final TileBoundaryCalculator tileBoundsCalculator;
 
     private final List<Slab> cache;
 
     SlabCache(int rasterWidth, int rasterHeight, int tileWidth, int tileHeight, DataStorage dataStorage) {
-        this.rasterWidth = rasterWidth;
-        this.rasterHeight = rasterHeight;
-        this.tileWidth = tileWidth;
-        this.tileHeight = tileHeight;
         this.dataStorage = dataStorage;
         this.tileCalculator = new TileIndexCalculator(tileWidth, tileHeight);
+        this.tileBoundsCalculator = new TileBoundaryCalculator(rasterWidth, rasterHeight, tileWidth, tileHeight);
 
         cache = new ArrayList<>();
     }
@@ -40,15 +33,19 @@ class SlabCache {
 
             for (int tileX = tileRegion.getTile_X_min(); tileX <= tileRegion.getTile_X_max(); tileX++) {
                 for (int tileY = tileRegion.getTile_Y_min(); tileY <= tileRegion.getTile_Y_max(); tileY++) {
-                    final int x_load = tileX * tileWidth;
-                    final int y_load = tileY * tileHeight;
+                    final TileRegion bounds = tileBoundsCalculator.getBounds(tileX, tileY);
+
                     // @todo 1 tb/tb calculate slab region by intersecting with product boundaries. There might be tiles smaller
                     //  than the expected size - on the right and lower product boundary
-                    final Slab slab = new Slab(new Rectangle(x_load, y_load, tileWidth, tileHeight));
+                    final int regionXMin = bounds.getTile_X_min();
+                    final int regionYMin = bounds.getTile_Y_min();
+                    final int regionWidth = bounds.getTile_X_max() - regionXMin + 1;
+                    final int regionHeight = bounds.getTile_Y_max() - regionYMin + 1;
+                    final Slab slab = new Slab(new Rectangle(regionXMin, regionYMin, regionWidth, regionHeight));
 
                     synchronized (dataStorage) {
                         // @todo 1 tb/tb create appropriate buffer and read 2020-03-11
-                        dataStorage.readRasterData(x_load, y_load, tileWidth, tileHeight, null);
+                        dataStorage.readRasterData(regionXMin, regionYMin, regionWidth, regionHeight, null);
                         // @todo 1 tb/tb set data to slab 2020-03-11
                     }
 
