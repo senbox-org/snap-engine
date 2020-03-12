@@ -5,14 +5,28 @@ import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.auth.Credentials;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.esa.snap.remote.products.repository.*;
+import org.esa.snap.remote.products.repository.AbstractGeometry2D;
+import org.esa.snap.remote.products.repository.Attribute;
+import org.esa.snap.remote.products.repository.DataFormatType;
+import org.esa.snap.remote.products.repository.GeometryUtils;
+import org.esa.snap.remote.products.repository.HTTPServerException;
+import org.esa.snap.remote.products.repository.PixelType;
+import org.esa.snap.remote.products.repository.RemoteMission;
+import org.esa.snap.remote.products.repository.RemoteProductsRepositoryProvider;
+import org.esa.snap.remote.products.repository.RepositoryProduct;
+import org.esa.snap.remote.products.repository.RepositoryQueryParameter;
+import org.esa.snap.remote.products.repository.SensorType;
+import org.esa.snap.remote.products.repository.ThreadStatus;
 import org.esa.snap.remote.products.repository.listener.ProductListDownloaderListener;
 import org.esa.snap.remote.products.repository.listener.ProgressListener;
-import org.locationtech.jts.geom.*;
+import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 import ro.cs.tao.configuration.ConfigurationManager;
-import ro.cs.tao.datasource.*;
+import ro.cs.tao.datasource.DataQuery;
+import ro.cs.tao.datasource.DataSource;
+import ro.cs.tao.datasource.DataSourceComponent;
+import ro.cs.tao.datasource.DataSourceManager;
 import ro.cs.tao.datasource.param.CommonParameterNames;
 import ro.cs.tao.datasource.param.DataSourceParameter;
 import ro.cs.tao.datasource.param.ParameterName;
@@ -33,8 +47,17 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
-import java.lang.InterruptedException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -64,7 +87,7 @@ public class TAORemoteRepositoriesManager {
             } else if ("USGS".equals(dataSource.getId())) {
             }
             if (filteredParameters != null && filteredParameters.size() > 0) {
-                dataSource.setFilteredParameters(filteredParameters);
+//                dataSource.setFilteredParameters(filteredParameters);
             }
             this.remoteRepositoryProductProviders[index++] = new TAORemoteRepositoryProvider(dataSource.getId());
         }
