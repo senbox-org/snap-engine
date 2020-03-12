@@ -91,6 +91,7 @@
         <module>snap-pgx-reader</module>
         <module>snap-pixel-extraction</module>
         <module>snap-product-library</module>
+        <module>snap-product-library-v2</module>
         <module>snap-python</module>
         <module>snap-raster</module>
         <module>snap-rtp-codec</module>
