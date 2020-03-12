@@ -35,10 +35,7 @@ import java.awt.Rectangle;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 
 /**
@@ -64,8 +61,6 @@ import java.util.logging.Logger;
  */
 public class Band extends AbstractBand {
 
-    private static final Logger logger = Logger.getLogger(Band.class.getName());
-
     public static final String PROPERTY_NAME_SAMPLE_CODING = "sampleCoding";
     public static final String PROPERTY_NAME_SOLAR_FLUX = "solarFlux";
     public static final String PROPERTY_NAME_SPECTRAL_BAND_INDEX = "spectralBandIndex";
@@ -81,7 +76,7 @@ public class Band extends AbstractBand {
     private float spectralWavelength;
     private float spectralBandwidth;
     private float solarFlux;
-    private Path colorPaletteFilePath;
+
     /**
      * Constructs a new <code>Band</code>.
      *
@@ -97,14 +92,6 @@ public class Band extends AbstractBand {
         // so spectral band index must be -1
         setSpectralBandIndex(-1);
         setModified(false);
-    }
-
-    /**
-     * Set the file path used to load the default image info
-     * @param colorPaletteFilePath
-     */
-    public void setColorPaletteFilePath(Path colorPaletteFilePath) {
-        this.colorPaletteFilePath = colorPaletteFilePath;
     }
 
     /**
@@ -494,15 +481,6 @@ public class Band extends AbstractBand {
 
     @Override
     public ImageInfo createDefaultImageInfo(double[] histoSkipAreas, ProgressMonitor pm) {
-        if (this.colorPaletteFilePath != null) {
-            try {
-                ColorPaletteDef colorPaletteDef = ColorPaletteDef.loadColorPaletteDef(this.colorPaletteFilePath.toFile());
-                return new ImageInfo(colorPaletteDef);
-            } catch (IOException ex) {
-                logger.log(Level.SEVERE, String.format("Unable to load the custom color palette from file '%s'.", this.colorPaletteFilePath.toString()), ex);
-            }
-        }
-
         final IndexCoding indexCoding = getIndexCoding();
         if (indexCoding == null) {
             return super.createDefaultImageInfo(histoSkipAreas, pm);
