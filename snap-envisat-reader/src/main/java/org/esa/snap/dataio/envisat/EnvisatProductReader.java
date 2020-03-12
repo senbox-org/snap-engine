@@ -213,6 +213,8 @@ public class EnvisatProductReader extends AbstractProductReader {
             productName = getProductFile().getProductId();
         }
         productName = FileUtils.createValidFilename(productName);
+        productName = FileUtils.getFilenameWithoutExtension(productName); // .zip
+        productName = FileUtils.getFilenameWithoutExtension(productName); // .N1
 
         int sceneRasterHeight = getSceneRasterHeight();
         Product product = new Product(productName,
