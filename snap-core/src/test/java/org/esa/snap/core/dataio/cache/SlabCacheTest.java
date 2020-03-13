@@ -1,5 +1,6 @@
 package org.esa.snap.core.dataio.cache;
 
+import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -286,5 +287,112 @@ public class SlabCacheTest {
         verify(storage, times(1)).readRasterData(eq(0), eq(1240), eq(512), eq(40), anyObject());
         verify(storage, times(3)).createBuffer(eq(20480));
         verifyNoMoreInteractions(storage);
+    }
+
+    @Test
+    public void testCopyData_one_slab_region_inside_float() {
+        final Slab slab = new Slab(new Rectangle(0, 0, 10, 10));
+        slab.setData(create(100, 1.0f));
+        final Slab[] slabs = {slab};
+
+        final Rectangle destRect = new Rectangle(2, 3, 4, 3);
+        final ProductData destBuffer = create(12, 2.f);
+
+        SlabCache.copyData(destBuffer, destRect, slabs);
+
+        // just check corners
+        assertEquals(1.f, destBuffer.getElemFloatAt(0), 1e-8);
+        assertEquals(1.f, destBuffer.getElemFloatAt(3), 1e-8);
+        assertEquals(1.f, destBuffer.getElemFloatAt(8), 1e-8);
+        assertEquals(1.f, destBuffer.getElemFloatAt(11), 1e-8);
+    }
+
+    @Test
+    public void testCopyData_two_slabs_region_in_one_inside_float() {
+        // actually this should never happen, this test just verifies that there is no crash and data is copied as expected tb 2020-03-13
+
+        final Slab slab_0 = new Slab(new Rectangle(0, 0, 10, 10));
+        slab_0.setData(create(100, 2.0f));
+
+        final Slab slab_1 = new Slab(new Rectangle(10, 0, 10, 10));
+        slab_1.setData(create(100, 3.0f));
+
+        final Slab[] slabs = {slab_0, slab_1};
+
+        // is contained in second slab
+        final Rectangle destRect = new Rectangle(12, 3, 4, 3);
+        final ProductData destBuffer = create(12, 4.f);
+
+        SlabCache.copyData(destBuffer, destRect, slabs);
+
+        // just check corners
+        assertEquals(3.f, destBuffer.getElemFloatAt(0), 1e-8);
+        assertEquals(3.f, destBuffer.getElemFloatAt(3), 1e-8);
+        assertEquals(3.f, destBuffer.getElemFloatAt(8), 1e-8);
+        assertEquals(3.f, destBuffer.getElemFloatAt(11), 1e-8);
+    }
+
+    @Test
+    public void testCopyData_two_slabs_region_intersects_horizontally_byte() {
+        final Slab slab_0 = new Slab(new Rectangle(0, 10, 10, 10));
+        slab_0.setData(create(100, (byte)3));
+
+        final Slab slab_1 = new Slab(new Rectangle(0, 20, 10, 10));
+        slab_1.setData(create(100, (byte)4));
+
+        final Slab[] slabs = {slab_0, slab_1};
+
+        // overlaps both slabs
+        final Rectangle destRect = new Rectangle(3, 18, 4, 4);
+        final ProductData destBuffer = create(16, (byte)5);
+
+        SlabCache.copyData(destBuffer, destRect, slabs);
+
+        assertEquals(3, destBuffer.getElemIntAt(0));    // (0,0)
+        assertEquals(3, destBuffer.getElemIntAt(5));    // (1,1)
+        assertEquals(4, destBuffer.getElemIntAt(10));   // (2,2)
+        assertEquals(4, destBuffer.getElemIntAt(15));   // (3,3)
+    }
+
+    @Test
+    public void testCopyData_two_slabs_region_intersects_vertically_byte() {
+        final Slab slab_0 = new Slab(new Rectangle(0, 10, 10, 10));
+        slab_0.setData(create(100, (byte)4));
+
+        final Slab slab_1 = new Slab(new Rectangle(10, 10, 10, 10));
+        slab_1.setData(create(100, (byte)5));
+
+        final Slab[] slabs = {slab_0, slab_1};
+
+        // overlaps both slabs
+        final Rectangle destRect = new Rectangle(8, 12, 4, 5);
+        final ProductData destBuffer = create(20, (byte)6);
+
+        SlabCache.copyData(destBuffer, destRect, slabs);
+
+        assertEquals(4, destBuffer.getElemIntAt(0));    // (0,0)
+        assertEquals(4, destBuffer.getElemIntAt(5));    // (1,1)
+        assertEquals(5, destBuffer.getElemIntAt(10));   // (2,2)
+        assertEquals(5, destBuffer.getElemIntAt(15));   // (3,3)
+        assertEquals(4, destBuffer.getElemIntAt(16));   // (0,4)
+        assertEquals(5, destBuffer.getElemIntAt(19));   // (3,4)
+    }
+
+    private ProductData create(int size, float fillValue) {
+        final float[] data = new float[size];
+        for (int i = 0; i < data.length;i++) {
+            data[i] = fillValue;
+        }
+
+        return ProductData.createInstance(data);
+    }
+
+    private ProductData create(int size, byte fillValue) {
+        final byte[] data = new byte[size];
+        for (int i = 0; i < data.length;i++) {
+            data[i] = fillValue;
+        }
+
+        return ProductData.createInstance(data);
     }
 }

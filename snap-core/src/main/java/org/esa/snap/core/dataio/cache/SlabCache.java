@@ -23,6 +23,15 @@ class SlabCache {
         cache = new ArrayList<>();
     }
 
+    /**
+     * Retrieves all slabs that intersect with the loading region supplied.
+     *
+     * @param x      loading region x coordinate
+     * @param y      loading region y coordinate
+     * @param width  loading region width
+     * @param height loading region hight
+     * @return all slabs intersection with the coordinates
+     */
     Slab[] get(int x, int y, int width, int height) {
         final Area searchRegion = new Area(new Rectangle(x, y, width, height));
 
@@ -67,6 +76,31 @@ class SlabCache {
         }
 
         return resultList.toArray(new Slab[0]);
+    }
+
+    @SuppressWarnings("SuspiciousSystemArraycopy")
+    static void copyData(ProductData targetBuffer, Rectangle destRegion, Slab[] slabs) {
+        final Area destArea = new Area(destRegion);
+        for (final Slab slab: slabs) {
+            final Rectangle slabRegion = slab.getRegion();
+            final Area slabArea = new Area(slabRegion);
+            slabArea.intersect(destArea);
+
+            final Rectangle intersectBounds = slabArea.getBounds();
+            final int sourceX = intersectBounds.x - slabRegion.x;
+            final int sourceY = intersectBounds.y - slabRegion.y;
+            final int targetX = intersectBounds.x - destRegion.x;
+            final int targetY = intersectBounds.y - destRegion.y;
+
+            final Object srcData = slab.getData().getElems();
+            final Object destData = targetBuffer.getElems();
+
+            for (int y = 0; y < intersectBounds.height; y++) {
+                final int srcPos = sourceX + (sourceY + y) * slabRegion.width;
+                final int destPos = targetX + (targetY + y) * destRegion.width;
+                System.arraycopy(srcData, srcPos, destData, destPos, intersectBounds.width);
+            }
+        }
     }
 
     /**
