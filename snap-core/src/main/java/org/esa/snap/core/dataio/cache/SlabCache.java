@@ -5,7 +5,6 @@ import org.esa.snap.core.datamodel.ProductData;
 import java.awt.*;
 import java.awt.geom.Area;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 class SlabCache {
@@ -88,10 +87,18 @@ class SlabCache {
         return totalSize;
     }
 
+    void clear() {
+        for (final Slab slab : cache) {
+            slab.dispose();
+        }
+
+        cache.clear();
+    }
+
     @SuppressWarnings("SuspiciousSystemArraycopy")
     static void copyData(ProductData targetBuffer, Rectangle destRegion, Slab[] slabs) {
         final Area destArea = new Area(destRegion);
-        for (final Slab slab: slabs) {
+        for (final Slab slab : slabs) {
             final Rectangle slabRegion = slab.getRegion();
             final Area slabArea = new Area(slabRegion);
             slabArea.intersect(destArea);
@@ -123,11 +130,12 @@ class SlabCache {
      * @return a list of slabs from cache intersecting with the region
      */
     private ArrayList<Slab> getCachedData(Area searchRegion) {
-        final ArrayList<Slab> resultList = new ArrayList<>(4);
+        final ArrayList<Slab> resultList = new ArrayList<>(4);  // assuming we have quadratic tiles tb 2020-03-16
         for (Slab slab : cache) {
             final Rectangle slabRegion = slab.getRegion();
             if (searchRegion.intersects(slabRegion)) {
                 searchRegion.subtract(new Area(slabRegion));
+                slab.setLastAccess(System.currentTimeMillis());
                 resultList.add(slab);
 
                 if (searchRegion.isEmpty()) {

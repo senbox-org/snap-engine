@@ -463,14 +463,39 @@ public class SlabCacheTest {
         final SlabCache slabCache = new SlabCache(100, 300, 10, 10, storage);
         when(storage.createBuffer(anyInt())).thenReturn(create(200, (short)7));
 
-        final Slab slab = new Slab(new Rectangle(1, 121, 100, 2));
-        slab.setData(create(200, (short)-1));
         // trigger slab creation
         slabCache.get(1, 122, 1 ,1);
         slabCache.get(11, 122, 1 ,1);
         slabCache.get(21, 122, 1 ,1);
 
         assertEquals(1272L, slabCache.getSizeInBytes());
+    }
+
+    @Test
+    public void testClear_empty() {
+        final SlabCache slabCache = new SlabCache(110, 310, 20, 20, storage);
+        assertEquals(0L, slabCache.getSizeInBytes());
+
+        slabCache.clear();
+
+        assertEquals(0L, slabCache.getSizeInBytes());
+    }
+
+    @Test
+    public void testClear_withData() {
+        final SlabCache slabCache = new SlabCache(1000, 3000, 100, 100, storage);
+        when(storage.createBuffer(anyInt())).thenReturn(create(10000, (short)8));
+
+        // trigger slab creation
+        slabCache.get(0, 0, 5 ,5);
+        slabCache.get(100, 100, 5 ,5);
+        slabCache.get(200, 200, 5 ,5);
+
+        assertEquals(60072L, slabCache.getSizeInBytes());
+
+        slabCache.clear();
+
+        assertEquals(0L, slabCache.getSizeInBytes());
     }
 
     private ProductData create(int size, float fillValue) {
