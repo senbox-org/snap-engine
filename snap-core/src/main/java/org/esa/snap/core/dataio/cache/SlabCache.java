@@ -5,6 +5,7 @@ import org.esa.snap.core.datamodel.ProductData;
 import java.awt.*;
 import java.awt.geom.Area;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 class SlabCache {
@@ -76,6 +77,15 @@ class SlabCache {
         }
 
         return resultList.toArray(new Slab[0]);
+    }
+
+    long getSizeInBytes() {
+        long totalSize = 0;
+
+        for (final Slab slab : cache) {
+            totalSize += slab.getSizeInBytes();
+        }
+        return totalSize;
     }
 
     @SuppressWarnings("SuspiciousSystemArraycopy")

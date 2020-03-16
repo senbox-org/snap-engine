@@ -378,6 +378,101 @@ public class SlabCacheTest {
         assertEquals(5, destBuffer.getElemIntAt(19));   // (3,4)
     }
 
+    @Test
+    public void testCopyData_four_slabs_region_intersects_center_short() {
+        final Slab slab_0 = new Slab(new Rectangle(100, 120, 10, 10));
+        slab_0.setData(create(100, (short)5));
+
+        final Slab slab_1 = new Slab(new Rectangle(110, 120, 10, 10));
+        slab_1.setData(create(100, (short)6));
+
+        final Slab slab_2 = new Slab(new Rectangle(100, 130, 10, 10));
+        slab_2.setData(create(100, (short)7));
+
+        final Slab slab_3 = new Slab(new Rectangle(110, 130, 10, 10));
+        slab_3.setData(create(100, (short)8));
+
+        final Slab[] slabs = {slab_0, slab_1, slab_2, slab_3};
+
+        // overlaps all four slabs
+        final Rectangle destRect = new Rectangle(108, 129, 5, 5);
+        final ProductData destBuffer = create(25, (short) 9);
+
+        SlabCache.copyData(destBuffer, destRect, slabs);
+
+        assertEquals(5, destBuffer.getElemIntAt(0));    // (0,0)
+        assertEquals(5, destBuffer.getElemIntAt(1));    // (1,0)
+        assertEquals(6, destBuffer.getElemIntAt(2));    // (2,0)
+        assertEquals(7, destBuffer.getElemIntAt(6));    // (1,1)
+        assertEquals(8, destBuffer.getElemIntAt(7));    // (2,1)
+        assertEquals(7, destBuffer.getElemIntAt(20));   // (4,0)
+        assertEquals(8, destBuffer.getElemIntAt(24));   // (4,4)
+    }
+
+    @Test
+    public void testCopyData_scanline_caching_short() {
+        final Slab slab_0 = new Slab(new Rectangle(0, 120, 1145, 1));
+        slab_0.setData(create(1145, (short)6));
+
+        final Slab slab_1 = new Slab(new Rectangle(0, 121, 1145, 1));
+        slab_1.setData(create(1145, (short)7));
+
+        final Slab slab_2 = new Slab(new Rectangle(0, 122, 1145, 1));
+        slab_2.setData(create(1145, (short)8));
+
+        final Slab slab_3 = new Slab(new Rectangle(0, 123, 1145, 1));
+        slab_3.setData(create(1145, (short)9));
+
+        final Slab slab_4 = new Slab(new Rectangle(0, 124, 1145, 1));
+        slab_4.setData(create(1145, (short)9));
+
+        final Slab[] slabs = {slab_0, slab_1, slab_2, slab_3, slab_4};
+
+        final Rectangle destRect = new Rectangle(1102, 121, 10, 3);
+        final ProductData destBuffer = create(30, (short) 10);
+
+        SlabCache.copyData(destBuffer, destRect, slabs);
+
+        assertEquals(7, destBuffer.getElemIntAt(0));    // (0,0)
+        assertEquals(8, destBuffer.getElemIntAt(10));   // (1,1)
+        assertEquals(9, destBuffer.getElemIntAt(21));   // (2,2)
+    }
+
+    @Test
+    public void tetSizeInBytes_empty() {
+        final SlabCache slabCache = new SlabCache(200, 300, 10, 10, storage);
+
+        assertEquals(0L, slabCache.getSizeInBytes());
+    }
+
+    @Test
+    public void testGetSizeInBytes_oneSlab() {
+        final SlabCache slabCache = new SlabCache(200, 300, 10, 10, storage);
+        when(storage.createBuffer(anyInt())).thenReturn(create(200, (short)7));
+
+        final Slab slab = new Slab(new Rectangle(1, 121, 100, 2));
+        slab.setData(create(200, (short)-1));
+        // trigger slab creation
+        slabCache.get(1, 122, 1 ,1);
+
+        assertEquals(424L, slabCache.getSizeInBytes());
+    }
+
+    @Test
+    public void testGetSizeInBytes_threeSlabs() {
+        final SlabCache slabCache = new SlabCache(100, 300, 10, 10, storage);
+        when(storage.createBuffer(anyInt())).thenReturn(create(200, (short)7));
+
+        final Slab slab = new Slab(new Rectangle(1, 121, 100, 2));
+        slab.setData(create(200, (short)-1));
+        // trigger slab creation
+        slabCache.get(1, 122, 1 ,1);
+        slabCache.get(11, 122, 1 ,1);
+        slabCache.get(21, 122, 1 ,1);
+
+        assertEquals(1272L, slabCache.getSizeInBytes());
+    }
+
     private ProductData create(int size, float fillValue) {
         final float[] data = new float[size];
         for (int i = 0; i < data.length;i++) {
@@ -389,6 +484,15 @@ public class SlabCacheTest {
 
     private ProductData create(int size, byte fillValue) {
         final byte[] data = new byte[size];
+        for (int i = 0; i < data.length;i++) {
+            data[i] = fillValue;
+        }
+
+        return ProductData.createInstance(data);
+    }
+
+    private ProductData create(int size, short fillValue) {
+        final short[] data = new short[size];
         for (int i = 0; i < data.length;i++) {
             data[i] = fillValue;
         }
