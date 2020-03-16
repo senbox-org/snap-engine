@@ -12,4 +12,5 @@ public interface DatabaseTableNames {
     public String PRODUCTS = "products";
     public String VERSIONS = "versions";
     public String PRODUCT_REMOTE_ATTRIBUTES = "product_remote_attributes";
+    public String PRODUCT_LOCAL_ATTRIBUTES = "product_local_attributes";
 }

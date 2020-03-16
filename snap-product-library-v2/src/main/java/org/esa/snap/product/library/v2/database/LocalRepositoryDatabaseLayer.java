@@ -1,7 +1,10 @@
 package org.esa.snap.product.library.v2.database;
 
+import org.esa.snap.core.datamodel.MetadataAttribute;
+import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.engine_utilities.datamodel.AbstractMetadata;
 import org.esa.snap.engine_utilities.util.FileIOUtils;
 import org.esa.snap.product.library.v2.database.model.LocalRepositoryFolder;
 import org.esa.snap.product.library.v2.database.model.LocalRepositoryProduct;
@@ -37,6 +40,7 @@ class LocalRepositoryDatabaseLayer {
     private static final Logger logger = Logger.getLogger(LocalRepositoryDatabaseLayer.class.getName());
 
     private static final int MAXIMUM_REMOTE_ATTRIBUTE_VALUE = 102400;
+    private static final int MAXIMUM_LOCAL_ATTRIBUTE_VALUE = 1024;
 
     private LocalRepositoryDatabaseLayer() {
     }
@@ -105,11 +109,10 @@ class LocalRepositoryDatabaseLayer {
         }
     }
 
-    static Map<Short, Set<String>> loadAttributesNamesPerMission(Statement statement) throws SQLException {
+    static Map<Short, Set<String>> loadRemoteAttributesNamesPerMission(Statement statement) throws SQLException {
         StringBuilder sql = new StringBuilder();
-        sql.append("SELECT ra.remote_mission_id, ra.name FROM ")
-                .append(DatabaseTableNames.REMOTE_ATTRIBUTES)
-                .append(" AS ra ");
+        sql.append("SELECT remote_mission_id, name FROM ")
+                .append(DatabaseTableNames.REMOTE_ATTRIBUTES);
         try (ResultSet resultSet = statement.executeQuery(sql.toString())) {
             Map<Short, Set<String>> attributeNamesPerMission = new HashMap<>();
             while (resultSet.next()) {
@@ -126,6 +129,21 @@ class LocalRepositoryDatabaseLayer {
         }
     }
 
+    static Set<String> loadLocalAttributesNames(Statement statement) throws SQLException {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT name FROM ")
+           .append(DatabaseTableNames.PRODUCT_LOCAL_ATTRIBUTES)
+           .append(" GROUP BY name");
+        try (ResultSet resultSet = statement.executeQuery(sql.toString())) {
+            Set<String> localAttributeNames = new HashSet<>();
+            while (resultSet.next()) {
+                String attributeName = resultSet.getString("name");
+                localAttributeNames.add(attributeName);
+            }
+            return localAttributeNames;
+        }
+    }
+
     static List<RepositoryProduct> loadProductList(LocalRepositoryFolder localRepositoryFolder, String remoteMissionName,
                                                    Map<String, Object> parameterValues, H2DatabaseParameters databaseParameters)
                                                    throws SQLException, IOException {
@@ -136,7 +154,7 @@ class LocalRepositoryDatabaseLayer {
 
             Date startDate = null;
             Date endDate = null;
-            List<AttributeFilter> attributes = null;
+            List<AttributeFilter> attributesToFind = null;
             Rectangle2D selectionArea = null;
             SensorType sensorType = null;
             for (Map.Entry<String, Object> entry : parameterValues.entrySet()) {
@@ -168,7 +186,7 @@ class LocalRepositoryDatabaseLayer {
                         }
                     }
                 } else if (parameterName.equalsIgnoreCase(AllLocalFolderProductsRepository.ATTRIBUTES_PARAMETER)) {
-                    attributes = (List<AttributeFilter>)parameterValue;
+                    attributesToFind = (List<AttributeFilter>)parameterValue;
                 } else {
                     throw new IllegalStateException("Unknown parameter '" + parameterName + "'.");
                 }
@@ -303,13 +321,13 @@ class LocalRepositoryDatabaseLayer {
                     try (Statement statement = connection.createStatement()) {
                         for (int i=productList.size()-1; i>=0; i--) {
                             LocalRepositoryProduct localProduct = (LocalRepositoryProduct)productList.get(i);
-                            List<Attribute> remoteAttributes = loadProductRemoteAttributes(localProduct.getId(), statement);
+                            List<Attribute> productAttributes = loadProductAttributes(localProduct.getId(), statement);
                             boolean foundAllAttributes = true;
-                            if (attributes != null && attributes.size() > 0) {
-                                foundAllAttributes = checkProductAttributesMatches(remoteAttributes, attributes);
+                            if (attributesToFind != null && attributesToFind.size() > 0) {
+                                foundAllAttributes = checkProductAttributesMatches(productAttributes, attributesToFind);
                             }
                             if (foundAllAttributes) {
-                                localProduct.setAttributes(remoteAttributes);
+                                localProduct.setAttributes(productAttributes);
                             } else {
                                 productList.remove(i);
                             }
@@ -373,13 +391,13 @@ class LocalRepositoryDatabaseLayer {
         return geometry;
     }
 
-    private static boolean checkProductAttributesMatches(List<Attribute> remoteAttributes, List<AttributeFilter> attributes) {
+    private static boolean checkProductAttributesMatches(List<Attribute> existingProductAttributes, List<AttributeFilter> attributesToFind) {
         boolean foundAllAttributes = true;
-        for (int k = 0; k < attributes.size() && foundAllAttributes; k++) {
-            AttributeFilter filterAttribute = attributes.get(k);
+        for (int k = 0; k < attributesToFind.size() && foundAllAttributes; k++) {
+            AttributeFilter filterAttribute = attributesToFind.get(k);
             boolean found = false;
-            for (int j = 0; j < remoteAttributes.size() && !found; j++) {
-                Attribute productAttribute = remoteAttributes.get(j);
+            for (int j = 0; j < existingProductAttributes.size() && !found; j++) {
+                Attribute productAttribute = existingProductAttributes.get(j);
                 if (filterAttribute.matches(productAttribute)) {
                     found = true;
                 }
@@ -391,21 +409,36 @@ class LocalRepositoryDatabaseLayer {
         return foundAllAttributes;
     }
 
-    private static List<Attribute> loadProductRemoteAttributes(int productId, Statement statement) throws SQLException {
+    private static List<Attribute> loadProductAttributes(int productId, Statement statement) throws SQLException {
+        List<Attribute> productAttributes = new ArrayList<>();
+
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT name, value FROM ")
                 .append(DatabaseTableNames.PRODUCT_REMOTE_ATTRIBUTES)
                 .append(" WHERE product_id = ")
                 .append(productId);
         try (ResultSet resultSet = statement.executeQuery(sql.toString())) {
-            List<Attribute> remoteAttributes = new ArrayList<>();
             while (resultSet.next()) {
                 String name = resultSet.getString("name");
                 String value = resultSet.getString("value");
-                remoteAttributes.add(new Attribute(name, value));
+                productAttributes.add(new Attribute(name, value));
             }
-            return remoteAttributes;
         }
+
+        sql = new StringBuilder();
+        sql.append("SELECT name, value FROM ")
+                .append(DatabaseTableNames.PRODUCT_LOCAL_ATTRIBUTES)
+                .append(" WHERE product_id = ")
+                .append(productId);
+        try (ResultSet resultSet = statement.executeQuery(sql.toString())) {
+            while (resultSet.next()) {
+                String name = resultSet.getString("name");
+                String value = resultSet.getString("value");
+                productAttributes.add(new Attribute(name, value));
+            }
+        }
+
+        return productAttributes;
     }
 
     static void deleteLocalRepositoryFolder(LocalRepositoryFolder localRepositoryFolder, H2DatabaseParameters databaseParameters) throws SQLException {
@@ -488,22 +521,27 @@ class LocalRepositoryDatabaseLayer {
 
     private static void deleteProduct(int productId, Statement statement) throws SQLException {
         deleteProductRemoteAttributes(productId, statement);
-
-        StringBuilder sql = new StringBuilder();
-        sql.append("DELETE FROM ")
-                .append(DatabaseTableNames.PRODUCTS)
-                .append(" WHERE id = ")
-                .append(productId);
-        statement.executeUpdate(sql.toString());
+        deleteProductLocalAttributes(productId, statement);
+        deleteRecordsFromTable(DatabaseTableNames.PRODUCTS, "id", productId, statement);
     }
 
     private static void deleteProductRemoteAttributes(int productId, Statement statement) throws SQLException {
+        deleteRecordsFromTable(DatabaseTableNames.PRODUCT_REMOTE_ATTRIBUTES, "product_id", productId, statement);
+    }
+
+    private static void deleteProductLocalAttributes(int productId, Statement statement) throws SQLException {
+        deleteRecordsFromTable(DatabaseTableNames.PRODUCT_LOCAL_ATTRIBUTES, "product_id", productId, statement);
+    }
+
+    private static int deleteRecordsFromTable(String tableName, String columnName, int columnValue, Statement statement) throws SQLException {
         StringBuilder sql = new StringBuilder();
         sql.append("DELETE FROM ")
-                .append(DatabaseTableNames.PRODUCT_REMOTE_ATTRIBUTES)
-                .append(" WHERE product_id = ")
-                .append(productId);
-        statement.executeUpdate(sql.toString());
+                .append(tableName)
+                .append(" WHERE ")
+                .append(columnName)
+                .append(" = ")
+                .append(columnValue);
+        return statement.executeUpdate(sql.toString());
     }
 
     private static Path extractProductPathRelativeToLocalRepositoryFolder(Path productPath, Path localRepositoryFolderPath) {
@@ -575,6 +613,12 @@ class LocalRepositoryDatabaseLayer {
                                        Path localRepositoryFolderPath, H2DatabaseParameters databaseParameters)
                                        throws IOException, SQLException {
 
+        if (productToSave == null) {
+            throw new NullPointerException("The product is null.");
+        }
+
+        Map<String, String> localProductAttributes = extractLocalProductAttributes(productToSave);
+
         int productId;
         LocalRepositoryFolder localRepositoryFolder;
         try (Connection connection = H2DatabaseAccessor.getConnection(databaseParameters)) {
@@ -595,9 +639,15 @@ class LocalRepositoryDatabaseLayer {
                     deleteQuickLookImage(productId, databaseParameters.getParentFolderPath());
                     try (Statement statement = connection.createStatement()) {
                         deleteProductRemoteAttributes(productId, statement);
+                        deleteProductLocalAttributes(productId, statement);
                     }
                     updateProduct(productId, productToSave, polygon2D, relativePath, localRepositoryFolder.getId(), fileTime, sizeInBytes, connection);
                 }
+
+                if (localProductAttributes.size() > 0) {
+                    insertProductLocalAttributes(productId, localProductAttributes, connection);
+                }
+
                 if (quickLookImage != null) {
                     writeQuickLookImage(productId, quickLookImage, databaseParameters.getParentFolderPath());
                 }
@@ -656,7 +706,6 @@ class LocalRepositoryDatabaseLayer {
         }
     }
 
-    //TODO Jean new method
     static void updateProductPath(LocalRepositoryProduct productToUpdate, Path productPath, Path localRepositoryFolderPath, H2DatabaseParameters databaseParameters)
                                   throws SQLException, IOException {
 
@@ -705,9 +754,31 @@ class LocalRepositoryDatabaseLayer {
         }
     }
 
+    private static Map<String, String> extractLocalProductAttributes(Product product) {
+        MetadataElement emptyMetadata = AbstractMetadata.addAbstractedMetadataHeader(null);
+        MetadataElement productRootMetadata = AbstractMetadata.getAbstractedMetadata(product);
+        MetadataAttribute[] attributes = emptyMetadata.getAttributes();
+        Map<String, String> localProductAttributes = new HashMap<>();
+        for (int i=0; i<attributes.length; i++) {
+            String attributeName = attributes[i].getName();
+            String attributeValue = productRootMetadata.getAttributeString(attributeName);
+            localProductAttributes.put(attributeName, attributeValue);
+        }
+        return localProductAttributes;
+    }
+
     static SaveDownloadedProductData saveProduct(RepositoryProduct productToSave, Path productPath, String remoteRepositoryName,
-                                                 Path localRepositoryFolderPath, H2DatabaseParameters databaseParameters)
-                                              throws IOException, SQLException {
+                                                 Path localRepositoryFolderPath, Product product, H2DatabaseParameters databaseParameters)
+                                                 throws IOException, SQLException {
+
+        if (productToSave == null) {
+            throw new NullPointerException("The product is null.");
+        }
+
+        Map<String, String> localProductAttributes = null;
+        if (product != null) {
+            localProductAttributes = extractLocalProductAttributes(product);
+        }
 
         int productId;
         short remoteMissionId;
@@ -738,11 +809,19 @@ class LocalRepositoryDatabaseLayer {
                     deleteQuickLookImage(productId, databaseParameters.getParentFolderPath());
                     try (Statement statement = connection.createStatement()) {
                         deleteProductRemoteAttributes(productId, statement);
+                        deleteProductLocalAttributes(productId, statement);
                     }
                     updateProduct(productId, productToSave, relativePath, remoteMissionId, localRepositoryFolder.getId(), fileTime, sizeInBytes, connection);
                 }
 
-                insertRemoteProductAttributes(productId, productToSave.getAttributes(), connection);
+                if (productToSave.getAttributes().size() > 0) {
+                    insertProductRemoteAttributes(productId, productToSave.getAttributes(), connection);
+                }
+
+                if (localProductAttributes != null && localProductAttributes.size() > 0) {
+                    insertProductLocalAttributes(productId, localProductAttributes, connection);
+                }
+
                 if (productToSave.getQuickLookImage() != null) {
                     writeQuickLookImage(productId, productToSave.getQuickLookImage(), databaseParameters.getParentFolderPath());
                 }
@@ -1087,7 +1166,7 @@ class LocalRepositoryDatabaseLayer {
         return executeInsertProductStatement(sql.toString(), productToSave.getAcquisitionDate(), fileTime, connection);
     }
 
-    private static void insertRemoteProductAttributes(int productId, List<Attribute> remoteAttributes, Connection connection) throws SQLException {
+    private static void insertProductRemoteAttributes(int productId, List<Attribute> remoteAttributes, Connection connection) throws SQLException {
         StringBuilder sql = new StringBuilder();
         sql.append("INSERT INTO ")
                 .append(DatabaseTableNames.PRODUCT_REMOTE_ATTRIBUTES)
@@ -1100,6 +1179,24 @@ class LocalRepositoryDatabaseLayer {
                 if (attribute.getValue().length() <= MAXIMUM_REMOTE_ATTRIBUTE_VALUE) {
                     preparedStatement.setString(1, attribute.getName());
                     preparedStatement.setString(2, attribute.getValue());
+                    preparedStatement.executeUpdate();
+                }
+            }
+        }
+    }
+
+    private static void insertProductLocalAttributes(int productId, Map<String, String> localAttributes, Connection connection) throws SQLException {
+        StringBuilder sql = new StringBuilder();
+        sql.append("INSERT INTO ")
+                .append(DatabaseTableNames.PRODUCT_LOCAL_ATTRIBUTES)
+                .append(" (product_id, name, value) VALUES (")
+                .append(productId)
+                .append(", ?, ?)");
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql.toString())) {
+            for (Map.Entry<String, String> entry : localAttributes.entrySet()) {
+                if (entry.getValue().length() <= MAXIMUM_LOCAL_ATTRIBUTE_VALUE) {
+                    preparedStatement.setString(1, entry.getKey());
+                    preparedStatement.setString(2, entry.getValue());
                     preparedStatement.executeUpdate();
                 }
             }

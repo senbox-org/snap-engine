@@ -62,10 +62,10 @@ public class AllLocalFolderProductsRepository {
         return LocalRepositoryDatabaseLayer.loadProductList(localRepositoryFolder, remoteMissionName, parameterValues, this.databaseParameters);
     }
 
-    public SaveDownloadedProductData saveProduct(RepositoryProduct productToSave, Path productPath, String remoteRepositoryName, Path localRepositoryFolderPath)
-            throws IOException, SQLException {
+    public SaveDownloadedProductData saveProduct(RepositoryProduct productToSave, Path productPath, String remoteRepositoryName, Path localRepositoryFolderPath, Product product)
+                                        throws IOException, SQLException {
 
-        return LocalRepositoryDatabaseLayer.saveProduct(productToSave, productPath, remoteRepositoryName, localRepositoryFolderPath, this.databaseParameters);
+        return LocalRepositoryDatabaseLayer.saveProduct(productToSave, productPath, remoteRepositoryName, localRepositoryFolderPath, product, this.databaseParameters);
     }
 
     public SaveProductData saveProduct(Product productToSave, BufferedImage quickLookImage, AbstractGeometry2D polygon2D, Path productPath, Path localRepositoryFolderPath)
@@ -110,9 +110,10 @@ public class AllLocalFolderProductsRepository {
         try (Connection connection = H2DatabaseAccessor.getConnection(this.databaseParameters)) {
             try (Statement statement = connection.createStatement()) {
                 List<LocalRepositoryFolder> localRepositoryFolders = LocalRepositoryDatabaseLayer.loadLocalRepositoryFolders(statement);
-                Map<Short, Set<String>> attributeNamesPerMission = LocalRepositoryDatabaseLayer.loadAttributesNamesPerMission(statement);
+                Map<Short, Set<String>> remoteAttributeNamesPerMission = LocalRepositoryDatabaseLayer.loadRemoteAttributesNamesPerMission(statement);
+                Set<String> localAttributeNames = LocalRepositoryDatabaseLayer.loadLocalAttributesNames(statement);
                 List<String> remoteMissionNames = LocalRepositoryDatabaseLayer.loadUniqueRemoteMissionNames(statement);
-                return new LocalRepositoryParameterValues(remoteMissionNames, attributeNamesPerMission, localRepositoryFolders);
+                return new LocalRepositoryParameterValues(remoteMissionNames, remoteAttributeNamesPerMission, localAttributeNames, localRepositoryFolders);
             }
         }
     }
