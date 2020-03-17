@@ -118,6 +118,25 @@ public class SlabCacheTest {
     }
 
     @Test
+    public void testGet_twoSlabs_vertical_with_allocation_listener() {
+        final SlabCache slabCache = new SlabCache(80, 180, 9, 8, storage);
+
+        final AllocationListener listener = mock(AllocationListener.class);
+        slabCache.setAllocationListener(listener);
+
+        final Slab[] slabs = slabCache.get(2, 6, 4, 4);
+        assertEquals(2, slabs.length);
+
+        verify(listener, times(2)).allocated(24);
+        verifyNoMoreInteractions(listener);
+
+        verify(storage, times(1)).readRasterData(eq(0), eq(0), eq(9), eq(8), anyObject());
+        verify(storage, times(1)).readRasterData(eq(0), eq(8), eq(9), eq(8), anyObject());
+        verify(storage, times(2)).createBuffer(eq(72));
+        verifyNoMoreInteractions(storage);
+    }
+
+    @Test
     public void testGet_fourSlabs_intersectingCenterPoint() {
         final SlabCache slabCache = new SlabCache(50, 140, 10, 20, storage);
 
@@ -439,6 +458,41 @@ public class SlabCacheTest {
     }
 
     @Test
+    public void testRead() {
+        final SlabCache slabCache = new SlabCache(1145, 300, 1, 1145, storage);
+
+        final Slab slab_0 = new Slab(new Rectangle(0, 120, 1145, 1));
+        slab_0.setData(create(1145, (short)6));
+        slabCache.cache.add(slab_0);
+
+        final Slab slab_1 = new Slab(new Rectangle(0, 121, 1145, 1));
+        slab_1.setData(create(1145, (short)7));
+        slabCache.cache.add(slab_1);
+
+        final Slab slab_2 = new Slab(new Rectangle(0, 122, 1145, 1));
+        slab_2.setData(create(1145, (short)8));
+        slabCache.cache.add(slab_2);
+
+        final Slab slab_3 = new Slab(new Rectangle(0, 123, 1145, 1));
+        slab_3.setData(create(1145, (short)9));
+        slabCache.cache.add(slab_3);
+
+        final Slab slab_4 = new Slab(new Rectangle(0, 124, 1145, 1));
+        slab_4.setData(create(1145, (short)9));
+        slabCache.cache.add(slab_4);
+
+
+        final Rectangle destRect = new Rectangle(1102, 121, 10, 3);
+        final ProductData destBuffer = create(30, (short) 10);
+
+        slabCache.read(destRect, destBuffer);
+
+        assertEquals(7, destBuffer.getElemIntAt(0));    // (0,0)
+        assertEquals(8, destBuffer.getElemIntAt(10));   // (1,1)
+        assertEquals(9, destBuffer.getElemIntAt(21));   // (2,2)
+    }
+
+    @Test
     public void tetSizeInBytes_empty() {
         final SlabCache slabCache = new SlabCache(200, 300, 10, 10, storage);
 
@@ -476,26 +530,107 @@ public class SlabCacheTest {
         final SlabCache slabCache = new SlabCache(110, 310, 20, 20, storage);
         assertEquals(0L, slabCache.getSizeInBytes());
 
-        slabCache.clear();
+        final long released = slabCache.clear();
 
         assertEquals(0L, slabCache.getSizeInBytes());
+        assertEquals(0L, released);
     }
 
     @Test
     public void testClear_withData() {
         final SlabCache slabCache = new SlabCache(1000, 3000, 100, 100, storage);
-        when(storage.createBuffer(anyInt())).thenReturn(create(10000, (short)8));
+        when(storage.createBuffer(anyInt())).thenReturn(create(10000, (short)8), create(10000, (short)8), create(10000, (short)8));
 
         // trigger slab creation
         slabCache.get(0, 0, 5 ,5);
-        slabCache.get(100, 100, 5 ,5);
-        slabCache.get(200, 200, 5 ,5);
+        slabCache.get(100, 100, 5 ,4);
+        slabCache.get(200, 200, 5 ,3);
 
         assertEquals(60072L, slabCache.getSizeInBytes());
 
-        slabCache.clear();
+        final long released = slabCache.clear();
 
         assertEquals(0L, slabCache.getSizeInBytes());
+        assertEquals(60072L, released);
+
+        verify(storage, times(3)).createBuffer(anyInt());
+        verify(storage, times(3)).readRasterData(anyInt(), anyInt(), anyInt(), anyInt(), anyObject());
+        verifyNoMoreInteractions(storage);
+    }
+
+    @Test
+    public void testGetLastAccess_empty() {
+        final SlabCache slabCache = new SlabCache(80, 108, 12, 12, storage);
+
+        assertEquals(-1L, slabCache.getLastAccess());
+    }
+
+    @Test
+    public void testGetLastAccess() {
+        final SlabCache slabCache = new SlabCache(80, 108, 12, 12, storage);
+        final long now = System.currentTimeMillis();
+
+        slabCache.get(63, 77, 2, 2);
+
+        assertTrue(now <= slabCache.getLastAccess());
+    }
+
+    @Test
+    public void testGetLastAccess_resetOnClear() {
+        final SlabCache slabCache = new SlabCache(80, 108, 12, 12, storage);
+        final long now = System.currentTimeMillis();
+
+        slabCache.get(63, 77, 2, 2);
+
+        assertTrue(now <= slabCache.getLastAccess());
+
+        slabCache.clear();
+        assertEquals(-1L, slabCache.getLastAccess());
+    }
+
+    @Test
+    public void testRelease_empty() {
+        final SlabCache slabCache = new SlabCache(90, 118, 12, 12, storage);
+
+        final long released = slabCache.release(1024L);
+        assertEquals(0, released);
+    }
+
+    @Test
+    public void testRelease_one_slab() {
+        final SlabCache slabCache = new SlabCache(90, 118, 12, 12, storage);
+
+        final Slab slab = mock(Slab.class);
+        when(slab.getLastAccess()).thenReturn(10L);
+        when(slab.getSizeInBytes()).thenReturn(2048L);
+        slabCache.cache.add(slab);
+
+        final long released = slabCache.release(1024L);
+
+        assertEquals(2048L, released);
+        assertEquals(0, slabCache.cache.size());
+        assertEquals(-1L, slabCache.getLastAccess());   // it is empty now, access times are reset tb 2020-03-17
+    }
+
+    @Test
+    public void testRelease_two_slabs_one_kept() {
+        final SlabCache slabCache = new SlabCache(100, 128, 13, 12, storage);
+
+        Slab slab = mock(Slab.class);
+        when(slab.getLastAccess()).thenReturn(10L);
+        when(slab.getSizeInBytes()).thenReturn(2048L);
+        slabCache.cache.add(slab);
+
+        slab = mock(Slab.class);
+        when(slab.getLastAccess()).thenReturn(20L);
+        when(slab.getSizeInBytes()).thenReturn(2048L);
+        slabCache.cache.add(slab);
+
+        final long released = slabCache.release(1204L);
+
+        assertEquals(2048L, released);
+        assertEquals(1, slabCache.cache.size());
+        assertEquals(20L, slabCache.cache.get(0).getLastAccess());  // ensure we removed the oldest one
     }
 
     private ProductData create(int size, float fillValue) {

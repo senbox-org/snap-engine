@@ -9,18 +9,45 @@ import java.util.List;
 
 class SlabCache {
 
+    private static final long NO_DATA = -1L;
+
     private final DataStorage dataStorage;
     private final TileIndexCalculator tileCalculator;
     private final TileBoundaryCalculator tileBoundsCalculator;
+    // package access for testing only tb 2020-03-17
+    final List<Slab> cache;
 
-    private final List<Slab> cache;
+    private long lastAccess;
+    private AllocationListener listener;
 
+    /**
+     * Constructs a SlabCache.
+     *
+     * @param rasterWidth  - the width of the underlying raster
+     * @param rasterHeight - the height of the underlying raster
+     * @param tileWidth    - the width of a raster tile
+     * @param tileHeight   - the height of a raster tile
+     * @param dataStorage  - data access interface
+     */
     SlabCache(int rasterWidth, int rasterHeight, int tileWidth, int tileHeight, DataStorage dataStorage) {
         this.dataStorage = dataStorage;
         this.tileCalculator = new TileIndexCalculator(tileWidth, tileHeight);
         this.tileBoundsCalculator = new TileBoundaryCalculator(rasterWidth, rasterHeight, tileWidth, tileHeight);
 
         cache = new ArrayList<>();
+        lastAccess = NO_DATA;
+        listener = new NoOpAllocationListener();
+    }
+
+    /**
+     * Read data covering the raster region passed in. The size of the buffer must match the requested raster size.
+     *
+     * @param destRect   - the destination rectangle
+     * @param destBuffer - the buffer to contain the data
+     */
+    void read(Rectangle destRect, ProductData destBuffer) {
+        final Slab[] slabs = get(destRect.x, destRect.y, destRect.width, destRect.height);
+        copyData(destBuffer, destRect, slabs);
     }
 
     /**
@@ -60,9 +87,13 @@ class SlabCache {
                             dataStorage.readRasterData(regionXMin, regionYMin, regionWidth, regionHeight, buffer);
                         }
                         slab.setData(buffer);
-                        slab.setLastAccess(System.currentTimeMillis());
+                        lastAccess = System.currentTimeMillis();
+                        slab.setLastAccess(lastAccess);
+                        listener.allocated(slab.getSizeInBytes());
 
-                        cache.add(slab);
+                        synchronized (cache) {
+                            cache.add(slab);
+                        }
                         resultList.add(slab);
 
                         searchRegion.subtract(new Area(boundsRect));
@@ -78,6 +109,20 @@ class SlabCache {
         return resultList.toArray(new Slab[0]);
     }
 
+    /**
+     * Sets the allocation listener.
+     *
+     * @param listener - the listener
+     */
+    void setAllocationListener(AllocationListener listener) {
+        this.listener = listener;
+    }
+
+    /**
+     * Retrieves the total size in bytes allocated by this cache.
+     *
+     * @return - the size in bytes
+     */
     long getSizeInBytes() {
         long totalSize = 0;
 
@@ -87,12 +132,59 @@ class SlabCache {
         return totalSize;
     }
 
-    void clear() {
-        for (final Slab slab : cache) {
-            slab.dispose();
+    /**
+     * Retrieves the last access time for this cache in millisecs since epoch.
+     *
+     * @return - the last access time
+     */
+    long getLastAccess() {
+        return lastAccess;
+    }
+
+    /**
+     * Requests to release the number of bytes from the cached data.
+     *
+     * @param sizeInBytes - the requested size to be freed
+     * @return - the actual data size in bytes released - can be larger than the requested size
+     */
+    long release(long sizeInBytes) {
+        long releasedBytes = 0L;
+
+        synchronized (cache) {
+            cache.sort((o1, o2) -> (int) (o1.getLastAccess() - o2.getLastAccess()));
+            while (releasedBytes <= sizeInBytes && cache.size() > 0) {
+                final Slab slab = cache.get(0);
+                releasedBytes += slab.getSizeInBytes();
+                cache.remove(0);
+            }
         }
 
-        cache.clear();
+        if (cache.size() == 0) {
+            lastAccess = NO_DATA;
+        }
+
+        return releasedBytes;
+    }
+
+    /**
+     * Completely clears this cache.
+     *
+     * @return - the number of bytes released during the clear operation
+     */
+    long clear() {
+        long releasedBytes = 0L;
+
+        synchronized (cache) {
+            for (final Slab slab : cache) {
+                releasedBytes += slab.getSizeInBytes();
+                slab.dispose();
+            }
+
+            cache.clear();
+        }
+        lastAccess = NO_DATA;
+
+        return releasedBytes;
     }
 
     @SuppressWarnings("SuspiciousSystemArraycopy")
@@ -131,15 +223,18 @@ class SlabCache {
      */
     private ArrayList<Slab> getCachedData(Area searchRegion) {
         final ArrayList<Slab> resultList = new ArrayList<>(4);  // assuming we have quadratic tiles tb 2020-03-16
-        for (Slab slab : cache) {
-            final Rectangle slabRegion = slab.getRegion();
-            if (searchRegion.intersects(slabRegion)) {
-                searchRegion.subtract(new Area(slabRegion));
-                slab.setLastAccess(System.currentTimeMillis());
-                resultList.add(slab);
+        synchronized (cache) {
+            for (Slab slab : cache) {
+                final Rectangle slabRegion = slab.getRegion();
+                if (searchRegion.intersects(slabRegion)) {
+                    searchRegion.subtract(new Area(slabRegion));
+                    lastAccess = System.currentTimeMillis();
+                    slab.setLastAccess(lastAccess);
+                    resultList.add(slab);
 
-                if (searchRegion.isEmpty()) {
-                    break;  // done, we have covered the requested data region tb 2020-03-11
+                    if (searchRegion.isEmpty()) {
+                        break;  // done, we have covered the requested data region tb 2020-03-11
+                    }
                 }
             }
         }
