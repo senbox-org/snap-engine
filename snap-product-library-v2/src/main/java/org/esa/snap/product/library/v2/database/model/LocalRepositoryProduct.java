@@ -1,11 +1,7 @@
 package org.esa.snap.product.library.v2.database.model;
 
-import org.esa.snap.remote.products.repository.Attribute;
-import org.esa.snap.remote.products.repository.DataFormatType;
-import org.esa.snap.remote.products.repository.PixelType;
-import org.esa.snap.remote.products.repository.AbstractGeometry2D;
-import org.esa.snap.remote.products.repository.RepositoryProduct;
-import org.esa.snap.remote.products.repository.SensorType;
+import org.esa.snap.remote.products.repository.*;
+import org.esa.snap.remote.products.repository.RemoteMission;
 
 import java.awt.image.BufferedImage;
 import java.nio.file.Path;
@@ -24,7 +20,7 @@ public class LocalRepositoryProduct implements RepositoryProduct {
     private final AbstractGeometry2D polygon;
 
     private Path path;
-    private String mission;
+    private org.esa.snap.remote.products.repository.RemoteMission remoteMission;
     private List<Attribute> attributes;
     private BufferedImage quickLookImage;
 
@@ -73,16 +69,6 @@ public class LocalRepositoryProduct implements RepositoryProduct {
     }
 
     @Override
-    public String getMission() {
-        return this.mission;
-    }
-
-    @Override
-    public String getRepositoryName() {
-        return null;
-    }
-
-    @Override
     public BufferedImage getQuickLookImage() {
         return quickLookImage;
     }
@@ -107,12 +93,17 @@ public class LocalRepositoryProduct implements RepositoryProduct {
         this.quickLookImage = quickLookImage;
     }
 
+    @Override
+    public RemoteMission getRemoteMission() {
+        return this.remoteMission;
+    }
+
     public void setAttributes(List<Attribute> attributes) {
         this.attributes = attributes;
     }
 
-    public void setMission(String mission) {
-        this.mission = mission;
+    public void setRemoteMission(org.esa.snap.remote.products.repository.RemoteMission remoteMission) {
+        this.remoteMission = remoteMission;
     }
 
     public int getId() {

@@ -70,8 +70,8 @@ class TAORemoteRepositoryProvider implements RemoteProductsRepositoryProvider {
 
     @Override
     public void cancelDownloadProduct(RepositoryProduct repositoryProduct) {
-        TAORepositoryProduct taoRepositoryProduct = (TAORepositoryProduct)repositoryProduct;
-        TAORemoteRepositoriesManager.getInstance().cancelDownloadProduct(getRepositoryName(), taoRepositoryProduct);
+        TAORepositoryProduct taoRepositoryProduct = validateDownloadProduct(repositoryProduct);
+        TAORemoteRepositoriesManager.getInstance().cancelDownloadProduct(taoRepositoryProduct);
     }
 
     @Override
@@ -79,8 +79,20 @@ class TAORemoteRepositoryProvider implements RemoteProductsRepositoryProvider {
                                 ProgressListener progressListener, boolean uncompressedDownloadedProduct)
                                 throws Exception {
 
-        TAORepositoryProduct taoRepositoryProduct = (TAORepositoryProduct)repositoryProduct;
-        return TAORemoteRepositoriesManager.getInstance().downloadProduct(getRepositoryName(), taoRepositoryProduct, credentials, targetFolderPath,
-                                                                progressListener, uncompressedDownloadedProduct);
+        TAORepositoryProduct taoRepositoryProduct = validateDownloadProduct(repositoryProduct);
+        return TAORemoteRepositoriesManager.getInstance().downloadProduct(taoRepositoryProduct, credentials, targetFolderPath, progressListener, uncompressedDownloadedProduct);
+    }
+
+    private TAORepositoryProduct validateDownloadProduct(RepositoryProduct repositoryProduct) {
+        if (repositoryProduct == null) {
+            throw new NullPointerException("The repository product is null.");
+        }
+        if (repositoryProduct.getRemoteMission() == null) {
+            throw new NullPointerException("The repository product remote mission is null.");
+        }
+        if (!getRepositoryName().equals(repositoryProduct.getRemoteMission().getRepositoryName())) {
+            throw new IllegalArgumentException("The remote repository name '" + getRepositoryName()+"' does not match with the remote product repository name '" + repositoryProduct.getRemoteMission().getRepositoryName() +"'.");
+        }
+        return (TAORepositoryProduct)repositoryProduct;
     }
 }

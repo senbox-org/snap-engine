@@ -152,6 +152,8 @@ class LocalRepositoryDatabaseLayer {
         try (Connection connection = H2DatabaseAccessor.getConnection(databaseParameters)) {
             Connection wrappedConnection = SFSUtilities.wrapConnection(connection);
 
+            Map<Short, String> remoteRepositories = loadRemoteRepositories(connection);
+
             Date startDate = null;
             Date endDate = null;
             List<AttributeFilter> attributesToFind = null;
@@ -199,7 +201,7 @@ class LocalRepositoryDatabaseLayer {
             }
             if (remoteMissionName != null) {
                 // the mission is specified
-                sql.append(", rm.name AS remote_mission_name");
+                sql.append(", rm.name AS remote_mission_name, rm.remote_repository_id");
             }
             sql.append(" FROM ")
                .append(DatabaseTableNames.PRODUCTS)
@@ -255,7 +257,7 @@ class LocalRepositoryDatabaseLayer {
                     // no local repository filter
                     outerSql.append(", q.folder_path");
                 }
-                outerSql.append(", left_rm.name AS remote_mission_name")
+                outerSql.append(", left_rm.name AS remote_mission_name, left_rm.remote_repository_id")
                         .append(" FROM (")
                         .append(sql)
                         .append(") AS q")
@@ -304,7 +306,20 @@ class LocalRepositoryDatabaseLayer {
                         } else {
                             productLocalPath = localRepositoryFolder.getPath().resolve(localPath);
                         }
-                        String missionName = resultSet.getString("remote_mission_name"); // the remote mission name my be null
+                        org.esa.snap.remote.products.repository.RemoteMission remoteMission = null;
+                        Object remoteRepositoryIdAsObject = resultSet.getObject("remote_repository_id");
+                        if (remoteRepositoryIdAsObject != null) {
+                            String missionName = resultSet.getString("remote_mission_name"); // the remote mission name my be null
+                            if (missionName == null) {
+                                throw new NullPointerException("The mission is null.");
+                            }
+                            short remoteRepositoryId = ((Short)remoteRepositoryIdAsObject).shortValue();
+                            String remoteRepositoryName = remoteRepositories.get(remoteRepositoryId);
+                            if (remoteRepositoryName == null) {
+                                throw new NullPointerException("The remote repository is null.");
+                            }
+                            remoteMission = new org.esa.snap.remote.products.repository.RemoteMission(missionName, remoteRepositoryName);
+                        }
                         Timestamp acquisitionDate = resultSet.getTimestamp("acquisition_date");
                         long sizeInBytes = resultSet.getLong("size_in_bytes");
                         Geometry productGeometry = resultSet.getGeometry("geometry");
@@ -312,7 +327,7 @@ class LocalRepositoryDatabaseLayer {
                         //AbstractGeometry2D geometry = GeometryUtils.convertProductGeometry(productGeometry);
                         AbstractGeometry2D geometry = convertProductGeometry(productGeometry);
                         LocalRepositoryProduct localProduct = new LocalRepositoryProduct(id, name, acquisitionDate, productLocalPath, sizeInBytes, geometry);
-                        localProduct.setMission(missionName);
+                        localProduct.setRemoteMission(remoteMission);
                         productList.add(localProduct);
                     }
                 }
@@ -794,7 +809,7 @@ class LocalRepositoryDatabaseLayer {
                 short remoteRepositoryId = saveRemoteRepositoryName(remoteRepositoryName, connection);
                 remoteRepository = new RemoteRepository(remoteRepositoryId, remoteRepositoryName);
 
-                remoteMissionId = saveRemoteMissionName(remoteRepositoryId, productToSave.getMission(), productToSave.getAttributes(), connection);
+                remoteMissionId = saveRemoteMissionName(remoteRepositoryId, productToSave.getRemoteMission().getName(), productToSave.getAttributes(), connection);
 
                 FileTime fileTime = Files.getLastModifiedTime(productPath);
                 long sizeInBytes = FileIOUtils.computeFileSize(productPath);
@@ -842,7 +857,7 @@ class LocalRepositoryDatabaseLayer {
             Attribute attribute = productToSave.getAttributes().get(i);
             productAttributeNames.add(attribute.getName());
         }
-        RemoteMission remoteMission = new RemoteMission(remoteMissionId, productToSave.getMission(), remoteRepository);
+        RemoteMission remoteMission = new RemoteMission(remoteMissionId, productToSave.getRemoteMission().getName(), remoteRepository);
         return new SaveDownloadedProductData(productId, remoteMission, localRepositoryFolder, productAttributeNames);
     }
 
@@ -876,6 +891,23 @@ class LocalRepositoryDatabaseLayer {
             }
         }
         return null;
+    }
+
+    private static Map<Short, String> loadRemoteRepositories(Connection connection) throws SQLException {
+        try (Statement statement = connection.createStatement()) {
+            StringBuilder sql = new StringBuilder();
+            sql.append("SELECT id, name FROM ")
+                    .append(DatabaseTableNames.REMOTE_REPOSITORIES);
+            Map<Short, String> remoteRepositories = new HashMap<>();
+            try (ResultSet resultSet = statement.executeQuery(sql.toString())) {
+                while (resultSet.next()) {
+                    short remoteRepositoryId = resultSet.getShort("id");
+                    String remoteRepositoryName = resultSet.getString("name");
+                    remoteRepositories.put(remoteRepositoryId, remoteRepositoryName);
+                }
+            }
+            return remoteRepositories;
+        }
     }
 
     private static short saveRemoteRepositoryName(String remoteRepositoryName, Connection connection) throws SQLException {

@@ -13,7 +13,7 @@ public class TAORepositoryProduct implements RepositoryProduct {
 
     private final String id;
     private final String name;
-    private final RemoteMission mission;
+    private final RemoteMission remoteMission;
     private final String downloadURL;
     private final AbstractGeometry2D polygon;
     private final Date acquisitionDate;
@@ -26,10 +26,10 @@ public class TAORepositoryProduct implements RepositoryProduct {
     private PixelType pixelType;
     private String downloadQuickLookImageURL;
 
-    TAORepositoryProduct(String id, String name, String downloadURL, RemoteMission mission, AbstractGeometry2D polygon, Date acquisitionDate, long approximateSize) {
+    TAORepositoryProduct(String id, String name, String downloadURL, RemoteMission remoteMission, AbstractGeometry2D polygon, Date acquisitionDate, long approximateSize) {
         this.id = id;
         this.name = name;
-        this.mission = mission;
+        this.remoteMission = remoteMission;
         this.downloadURL = downloadURL;
         this.polygon = polygon;
         this.acquisitionDate = acquisitionDate;
@@ -44,16 +44,6 @@ public class TAORepositoryProduct implements RepositoryProduct {
     @Override
     public List<Attribute> getAttributes() {
         return attributes;
-    }
-
-    @Override
-    public String getMission() {
-        return this.mission.getName();
-    }
-
-    @Override
-    public String getRepositoryName() {
-        return this.mission.getRepositoryName();
     }
 
     @Override
@@ -104,6 +94,11 @@ public class TAORepositoryProduct implements RepositoryProduct {
     @Override
     public SensorType getSensorType() {
         return this.sensorType;
+    }
+
+    @Override
+    public RemoteMission getRemoteMission() {
+        return this.remoteMission;
     }
 
     void setDownloadQuickLookImageURL(String downloadQuickLookImageURL) {

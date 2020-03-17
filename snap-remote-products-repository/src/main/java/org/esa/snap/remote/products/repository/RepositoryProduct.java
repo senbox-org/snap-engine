@@ -23,10 +23,6 @@ public interface RepositoryProduct {
 
     public Date getAcquisitionDate();
 
-    public String getMission();
-
-    public String getRepositoryName();
-
     public void setQuickLookImage(BufferedImage quickLookImage);
 
     public BufferedImage getQuickLookImage();
@@ -36,4 +32,6 @@ public interface RepositoryProduct {
     public DataFormatType getDataFormatType();
 
     public SensorType getSensorType();
+
+    public RemoteMission getRemoteMission();
 }

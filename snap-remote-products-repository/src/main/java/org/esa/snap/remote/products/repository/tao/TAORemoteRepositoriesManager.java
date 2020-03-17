@@ -123,7 +123,8 @@ public class TAORemoteRepositoriesManager {
         return this.remoteRepositoryProductProviders;
     }
 
-    public void cancelDownloadProduct(String dataSourceName, TAORepositoryProduct repositoryProduct) {
+    public void cancelDownloadProduct(TAORepositoryProduct repositoryProduct) {
+        String dataSourceName = repositoryProduct.getRemoteMission().getRepositoryName();
         String key = buildKey(dataSourceName, repositoryProduct);
         DataSourceComponent downloadStrategy;
         synchronized (this.downloadingProducts) {
@@ -138,7 +139,7 @@ public class TAORemoteRepositoriesManager {
                         .append("' from the '")
                         .append(dataSourceName)
                         .append("' remote repository using the '")
-                        .append(repositoryProduct.getMission())
+                        .append(repositoryProduct.getRemoteMission().getName())
                         .append("' mission is not downloading.");
                 logger.log(Level.FINE, logMessage.toString());
             }
@@ -151,7 +152,7 @@ public class TAORemoteRepositoriesManager {
                         .append("' from the '")
                         .append(dataSourceName)
                         .append("' remote repository using the '")
-                        .append(repositoryProduct.getMission())
+                        .append(repositoryProduct.getRemoteMission().getName())
                         .append("' mission.");
                 logger.log(Level.FINE, logMessage.toString());
             }
@@ -160,10 +161,11 @@ public class TAORemoteRepositoriesManager {
         }
     }
 
-    public Path downloadProduct(String dataSourceName, TAORepositoryProduct repositoryProduct, Credentials credentials, Path targetFolderPath,
+    public Path downloadProduct(TAORepositoryProduct repositoryProduct, Credentials credentials, Path targetFolderPath,
                                 ProgressListener progressListener, boolean uncompressedDownloadedProduct)
                                 throws Exception {
 
+        String dataSourceName = repositoryProduct.getRemoteMission().getRepositoryName();
         String key = buildKey(dataSourceName, repositoryProduct);
 
         if (StringUtils.isBlank(repositoryProduct.getURL())) {
@@ -179,7 +181,7 @@ public class TAORemoteRepositoriesManager {
                         .append("' from the '")
                         .append(dataSourceName)
                         .append("' remote repository using the '")
-                        .append(repositoryProduct.getMission())
+                        .append(repositoryProduct.getRemoteMission().getName())
                         .append("' mission.");
                 logger.log(Level.FINE, logMessage.toString());
             }
@@ -190,15 +192,15 @@ public class TAORemoteRepositoriesManager {
                     dataSourceComponent = new DataSourceComponent();
                     this.downloadingProducts.put(key, dataSourceComponent);
                 } else {
-                    throw new IllegalArgumentException("The product '" + repositoryProduct.getName()+"' is already downloading from the '" + dataSourceName+"' remote repository using the '" + repositoryProduct.getMission()+"' mission.");
+                    throw new IllegalArgumentException("The product '" + repositoryProduct.getName()+"' is already downloading from the '" + dataSourceName+"' remote repository using the '" + repositoryProduct.getRemoteMission().getName()+"' mission.");
                 }
             }
 
-            TAODownloadProductProgressListener taoProgressListener = new TAODownloadProductProgressListener(progressListener, dataSourceName, repositoryProduct.getMission(), repositoryProduct.getName());
+            TAODownloadProductProgressListener taoProgressListener = new TAODownloadProductProgressListener(progressListener, dataSourceName, repositoryProduct.getRemoteMission().getName(), repositoryProduct.getName());
             TAODownloadProductStatusListener taoProductStatusListener = new TAODownloadProductStatusListener();
 
             dataSourceComponent.setDataSourceName(dataSourceName);
-            dataSourceComponent.setSensorName(repositoryProduct.getMission());
+            dataSourceComponent.setSensorName(repositoryProduct.getRemoteMission().getName());
             dataSourceComponent.setFetchMode(FetchMode.RESUME);
             dataSourceComponent.setUserName(credentials.getUserPrincipal().getName());
             dataSourceComponent.setPassword(credentials.getPassword());
@@ -208,7 +210,7 @@ public class TAORemoteRepositoriesManager {
             EOProduct product = new EOProduct();
             product.setApproximateSize(repositoryProduct.getApproximateSize());
             product.setId(repositoryProduct.getId());
-            product.setProductType(repositoryProduct.getMission());
+            product.setProductType(repositoryProduct.getRemoteMission().getName());
             product.setName(repositoryProduct.getName());
             product.setLocation(repositoryProduct.getURL());
 
@@ -225,7 +227,7 @@ public class TAORemoteRepositoriesManager {
                 // the product has been downloaded
                 String productPath = product.getLocation();
                 if (productPath == null) {
-                    throw new NullPointerException("The path of the downloaded product '" + repositoryProduct.getName() + "' is null when downloading it from the '" + dataSourceName+"' remote repository using the '"+repositoryProduct.getMission()+"' mission.");
+                    throw new NullPointerException("The path of the downloaded product '" + repositoryProduct.getName() + "' is null when downloading it from the '" + dataSourceName+"' remote repository using the '"+repositoryProduct.getRemoteMission().getName()+"' mission.");
                 }
                 URI uri = new URI(productPath);
                 return Paths.get(uri);
@@ -239,7 +241,7 @@ public class TAORemoteRepositoriesManager {
                 if (downloadingProductCancelled) {
                     throw new java.lang.InterruptedException("Downloading the product '" + repositoryProduct.getName() + "' has been cancelled.");
                 } else {
-                    throw new IllegalStateException(buildFailedDownloadExceptionMessage(repositoryProduct.getName(), dataSourceName, repositoryProduct.getMission(), taoProductStatusListener.getDownloadMessages()));
+                    throw new IllegalStateException(buildFailedDownloadExceptionMessage(repositoryProduct.getName(), dataSourceName, repositoryProduct.getRemoteMission().getName(), taoProductStatusListener.getDownloadMessages()));
                 }
             }
         } finally {
@@ -512,13 +514,16 @@ public class TAORemoteRepositoriesManager {
         if (repositoryProduct == null) {
             throw new NullPointerException("The remote repository product is null.");
         }
-        if (StringUtils.isBlank(repositoryProduct.getMission())) {
+        if (repositoryProduct.getRemoteMission() == null) {
+            throw new NullPointerException("The remote mission is null.");
+        }
+        if (StringUtils.isBlank(repositoryProduct.getRemoteMission().getName())) {
             throw new NullPointerException("The remote repository product mission is null or empty.");
         }
         if (StringUtils.isBlank(repositoryProduct.getId())) {
             throw new NullPointerException("The remote repository product id is null or empty.");
         }
-        return dataSourceName + "|" + repositoryProduct.getMission() + "|" + repositoryProduct.getId();
+        return dataSourceName + "|" + repositoryProduct.getRemoteMission().getName() + "|" + repositoryProduct.getId();
     }
 
     private static DataFormatType convertToDataFormatType(ro.cs.tao.eodata.enums.DataFormat dataFormat) {
