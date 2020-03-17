@@ -5,6 +5,7 @@ import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.quicklooks.QuicklookGenerator;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.remote.products.repository.Polygon2D;
 
@@ -133,12 +134,12 @@ public class AddLocalRepositoryFolderHelper {
             try {
                 Polygon2D polygon2D = buildProductPolygon(product);
                 BufferedImage quickLookImage = null;
-//                        try {
-//                            QuicklookGenerator quicklookGenerator = new QuicklookGenerator();
-//                            quickLookImage = quicklookGenerator.createQuickLookFromBrowseProduct(product);
-//                        } catch (Exception exception) {
-//                            logger.log(Level.SEVERE, "Failed to create the quick look image for product '" + product.getName() + "'.", exception);
-//                        }
+                try {
+                    QuicklookGenerator quicklookGenerator = new QuicklookGenerator();
+                    quickLookImage = quicklookGenerator.createQuickLookFromBrowseProduct(product);
+                } catch (Exception exception) {
+                    logger.log(Level.SEVERE, "Failed to create the quick look image for product '" + product.getName() + "'.", exception);
+                }
 
                 saveProductData = this.allLocalFolderProductsRepository.saveProduct(product, quickLookImage, polygon2D, productPath, localRepositoryFolderPath);
             } finally {

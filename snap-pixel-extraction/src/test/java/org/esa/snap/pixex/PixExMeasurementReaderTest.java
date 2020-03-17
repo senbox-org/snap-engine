@@ -21,14 +21,19 @@ import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.measurement.Measurement;
 import org.esa.snap.measurement.writer.MeasurementWriter;
-import org.esa.snap.pixex.output.*;
+import org.esa.snap.pixex.output.DefaultFormatStrategy;
+import org.esa.snap.pixex.output.PixExMeasurementFactory;
+import org.esa.snap.pixex.output.PixExProductRegistry;
+import org.esa.snap.pixex.output.PixExRasterNamesFactory;
+import org.esa.snap.pixex.output.TargetWriterFactoryAndMap;
 import org.junit.After;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 
 import javax.media.jai.RenderedOp;
 import javax.media.jai.operator.ConstantDescriptor;
-import java.awt.*;
+import java.awt.Rectangle;
 import java.awt.image.Raster;
 import java.io.File;
 import java.util.ArrayList;
@@ -46,9 +51,9 @@ public class PixExMeasurementReaderTest {
     public void setup() throws Exception {
         final File tmpDir = new File(System.getProperty("java.io.tmpdir"));
         inputDir = new File(tmpDir, getClass().getSimpleName());
-        if (!inputDir.mkdir()) {
-            fail("unable to create test directory");
-        }
+        String msg = String.format("Could not create temporary test directory (%s); skipping test", inputDir.toString());
+        Assume.assumeTrue(msg, inputDir.mkdir());
+
         windowSize = 3;
         final int upperLeftX = 20;
         final int upperLeftY = 42;

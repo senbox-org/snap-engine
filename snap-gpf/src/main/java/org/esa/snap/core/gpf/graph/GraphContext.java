@@ -24,16 +24,10 @@ import org.esa.snap.core.gpf.internal.OperatorConfiguration;
 import org.esa.snap.core.util.SystemUtils;
 
 import javax.media.jai.JAI;
-import java.awt.Dimension;
+import java.awt.*;
 import java.text.MessageFormat;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -156,9 +150,19 @@ public class GraphContext {
     }
 
     private void initOutput(Operator graphOp) throws GraphException {
+        boolean canComputeTileStack = false;
+        for (Node node : getGraph().getNodes()) {
+            NodeContext nodeContext = getNodeContext(node);
+            if (!nodeContext.isOutput()) {
+                // prevent triggering stack computation by WriteOp, which implements both computeTile AND computeTileStack tb 2020-02-11
+                canComputeTileStack |= nodeContext.canComputeTileStack();
+            }
+        }
+
         for (Node node : getGraph().getNodes()) {
             NodeContext nodeContext = getNodeContext(node);
             if (nodeContext.isOutput()) {
+                nodeContext.setComputingStack(canComputeTileStack);
                 initNodeContext(nodeContext, graphOp);
                 addOutputNodeContext(nodeContext);
             }
@@ -190,7 +194,7 @@ public class GraphContext {
         Node node = nodeContext.getNode();
         DomElement configuration = node.getConfiguration();
         OperatorConfiguration opConfiguration = this.createOperatorConfiguration(configuration,
-                                                                                 new HashMap<String, Object>());
+                new HashMap<String, Object>());
         nodeContext.setOperatorConfiguration(opConfiguration);
         nodeContext.initTargetProduct();
         getInitNodeContextDeque().addFirst(nodeContext);
@@ -262,7 +266,7 @@ public class GraphContext {
      *
      * @param node the node to get the context for
      * @return the {@link NodeContext} of the given {@code node} or
-     *         {@code null} if it's not contained in this context
+     * {@code null} if it's not contained in this context
      */
     public NodeContext getNodeContext(Node node) {
         return nodeContextMap.get(node);
@@ -290,6 +294,6 @@ public class GraphContext {
 
     private static String getMissingSourceMessage(Node node, NodeSource source) {
         return MessageFormat.format("Missing source ''{0}'' in node ''{1}''",
-                                    source.getSourceNodeId(), node.getId());
+                source.getSourceNodeId(), node.getId());
     }
 }

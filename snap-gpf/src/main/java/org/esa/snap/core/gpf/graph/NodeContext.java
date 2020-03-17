@@ -97,6 +97,10 @@ public class NodeContext {
         return operatorContext.isInitialized();
     }
 
+    public void setComputingStack(boolean computingStack) {
+        operatorContext.setComputingStack(computingStack);
+    }
+
     public void addSourceProduct(String id, Product sourceProduct) {
         operator.setSourceProduct(id, sourceProduct);
     }

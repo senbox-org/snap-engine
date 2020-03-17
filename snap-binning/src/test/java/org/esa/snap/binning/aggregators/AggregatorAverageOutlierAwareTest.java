@@ -211,6 +211,32 @@ public class AggregatorAverageOutlierAwareTest {
     }
 
     @Test
+    public void testAggregateTemporal_fiveMeasurements_sameValues() {
+        final AggregatorAverageOutlierAware agg = new AggregatorAverageOutlierAware(new MyVariableContext("var"), "var", 1.9);
+
+        final VectorImpl tvec = vec(NaN, NaN, NaN);
+        final VectorImpl out = vec(NaN, NaN, NaN);
+
+        agg.initTemporal(ctx, tvec);
+
+        agg.aggregateTemporal(ctx, vec(0.68f), 1, tvec);
+        agg.aggregateTemporal(ctx, vec(0.68f), 1, tvec);
+        agg.aggregateTemporal(ctx, vec(0.68f), 1, tvec);
+        agg.aggregateTemporal(ctx, vec(0.68f), 1, tvec);
+        agg.aggregateTemporal(ctx, vec(0.68f), 1, tvec);
+
+        agg.completeTemporal(ctx, 0, tvec);
+        assertEquals(0.68, tvec.get(0), 1e-8);
+        assertEquals(0.0, tvec.get(1), 1e-8);
+        assertEquals(5, tvec.get(2), 1e-8);
+
+        agg.computeOutput(tvec, out);
+        assertEquals(0.68, out.get(0), 1e-8);
+        assertEquals(0.0, out.get(1), 1e-8);
+        assertEquals(5, out.get(2), 1e-8);
+    }
+
+    @Test
     public void testDescriptor_createAggregator_standard() {
         final AggregatorAverageOutlierAware.Descriptor descriptor = new AggregatorAverageOutlierAware.Descriptor();
 

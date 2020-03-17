@@ -94,6 +94,10 @@ public class AllLocalFolderProductsRepository {
         LocalRepositoryDatabaseLayer.deleteProduct(repositoryProduct, this.databaseParameters);
     }
 
+    public void updateProductPath(LocalRepositoryProduct productToUpdate, Path productPath, Path localRepositoryFolderPath) throws SQLException, IOException {
+        LocalRepositoryDatabaseLayer.updateProductPath(productToUpdate, productPath, localRepositoryFolderPath, this.databaseParameters);
+    }
+
     public List<LocalRepositoryFolder> loadRepositoryFolders() throws SQLException {
         try (Connection connection = H2DatabaseAccessor.getConnection(this.databaseParameters)) {
             try (Statement statement = connection.createStatement()) {
