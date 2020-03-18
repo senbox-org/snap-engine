@@ -19,7 +19,8 @@ public class TAORepositoryProduct implements RepositoryProduct {
     private final Date acquisitionDate;
     private final long approximateSize;
 
-    private List<Attribute> attributes;
+    private List<Attribute> remoteAttributes;
+    private List<Attribute> localAttributes;
     private BufferedImage quickLookImage;
     private SensorType sensorType;
     private DataFormatType dataFormatType;
@@ -42,8 +43,13 @@ public class TAORepositoryProduct implements RepositoryProduct {
     }
 
     @Override
-    public List<Attribute> getAttributes() {
-        return attributes;
+    public List<Attribute> getRemoteAttributes() {
+        return remoteAttributes;
+    }
+
+    @Override
+    public List<Attribute> getLocalAttributes() {
+        return this.localAttributes;
     }
 
     @Override
@@ -101,6 +107,11 @@ public class TAORepositoryProduct implements RepositoryProduct {
         return this.remoteMission;
     }
 
+    @Override
+    public void setLocalAttributes(List<Attribute> localAttributes) {
+        this.localAttributes = localAttributes;
+    }
+
     void setDownloadQuickLookImageURL(String downloadQuickLookImageURL) {
         this.downloadQuickLookImageURL = downloadQuickLookImageURL;
     }
@@ -109,8 +120,8 @@ public class TAORepositoryProduct implements RepositoryProduct {
         return id;
     }
 
-    void setAttributes(List<Attribute> attributes) {
-        this.attributes = attributes;
+    void setRemoteAttributes(List<Attribute> attributes) {
+        this.remoteAttributes = attributes;
     }
 
     void setDataFormatType(DataFormatType dataFormatType) {

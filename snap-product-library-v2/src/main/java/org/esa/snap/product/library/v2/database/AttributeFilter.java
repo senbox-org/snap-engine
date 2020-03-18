@@ -5,18 +5,28 @@ import org.esa.snap.remote.products.repository.Attribute;
 /**
  * Created by jcoravu on 24/9/2019.
  */
-public class AttributeFilter extends Attribute {
+public class AttributeFilter {
 
+    private final String name;
+    private final String value;
     private final AttributeValueFilter valueFilter;
 
     public AttributeFilter(String name, String value, AttributeValueFilter attributeValueFilter) {
-        super(name, value);
-
+        this.name = name;
+        this.value = value;
         this.valueFilter = attributeValueFilter;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
     public boolean matches(Attribute attribute) {
-        if (attribute.getName().equalsIgnoreCase(getName()) && this.valueFilter.matches(attribute.getValue(), getValue())) {
+        if (attribute.getName().equalsIgnoreCase(this.name) && this.valueFilter.matches(attribute.getValue(), this.value)) {
             return true;
         }
         return false;

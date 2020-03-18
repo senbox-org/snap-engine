@@ -483,24 +483,24 @@ public class TAORemoteRepositoriesManager {
     private static List<RepositoryProduct> convertProducts(RemoteMission mission, List<EOProduct> pageResults, WKTReader wktReader) throws InterruptedException, ParseException {
         List<RepositoryProduct> downloadedPageProducts = new ArrayList<>(pageResults.size());
         for (int i=0; i<pageResults.size(); i++) {
-            EOProduct product = pageResults.get(i);
+            EOProduct taoProduct = pageResults.get(i);
 
-            Geometry productGeometry = wktReader.read(product.getGeometry());
+            Geometry productGeometry = wktReader.read(taoProduct.getGeometry());
             AbstractGeometry2D geometry = GeometryUtils.convertProductGeometry(productGeometry);
 
-            List<ro.cs.tao.eodata.Attribute> remoteAttributes = product.getAttributes();
-            List<Attribute> attributes = new ArrayList<>(remoteAttributes.size());
-            for (int k=0; k<remoteAttributes.size(); k++) {
-                ro.cs.tao.eodata.Attribute remoteAttribute = remoteAttributes.get(k);
-                attributes.add(new Attribute(remoteAttribute.getName(), remoteAttribute.getValue()));
+            List<ro.cs.tao.eodata.Attribute> taoRemoteAttributes = taoProduct.getAttributes();
+            List<Attribute> remoteAttributes = new ArrayList<>(taoRemoteAttributes.size());
+            for (int k=0; k<taoRemoteAttributes.size(); k++) {
+                ro.cs.tao.eodata.Attribute remoteAttribute = taoRemoteAttributes.get(k);
+                remoteAttributes.add(new Attribute(remoteAttribute.getName(), remoteAttribute.getValue()));
             }
 
-            TAORepositoryProduct repositoryProduct = new TAORepositoryProduct(product.getId(), product.getName(), product.getLocation(), mission, geometry, product.getAcquisitionDate(), product.getApproximateSize());
-            repositoryProduct.setAttributes(attributes);
-            repositoryProduct.setDataFormatType(convertToDataFormatType(product.getFormatType()));
-            repositoryProduct.setPixelType(convertToPixelType(product.getPixelType()));
-            repositoryProduct.setSensorType(convertToSensorType(product.getSensorType()));
-            repositoryProduct.setDownloadQuickLookImageURL(product.getQuicklookLocation());
+            TAORepositoryProduct repositoryProduct = new TAORepositoryProduct(taoProduct.getId(), taoProduct.getName(), taoProduct.getLocation(), mission, geometry, taoProduct.getAcquisitionDate(), taoProduct.getApproximateSize());
+            repositoryProduct.setRemoteAttributes(remoteAttributes);
+            repositoryProduct.setDataFormatType(convertToDataFormatType(taoProduct.getFormatType()));
+            repositoryProduct.setPixelType(convertToPixelType(taoProduct.getPixelType()));
+            repositoryProduct.setSensorType(convertToSensorType(taoProduct.getSensorType()));
+            repositoryProduct.setDownloadQuickLookImageURL(taoProduct.getQuicklookLocation());
 
             downloadedPageProducts.add(repositoryProduct);
         }

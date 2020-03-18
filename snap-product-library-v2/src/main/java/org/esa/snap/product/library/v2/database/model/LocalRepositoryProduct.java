@@ -21,7 +21,8 @@ public class LocalRepositoryProduct implements RepositoryProduct {
 
     private Path path;
     private org.esa.snap.remote.products.repository.RemoteMission remoteMission;
-    private List<Attribute> attributes;
+    private List<Attribute> remoteAttributes;
+    private List<Attribute> localAttributes;
     private BufferedImage quickLookImage;
 
     public LocalRepositoryProduct(int id, String name, Date acquisitionDate, Path path, long sizeInBytes, AbstractGeometry2D polygon) {
@@ -39,8 +40,18 @@ public class LocalRepositoryProduct implements RepositoryProduct {
     }
 
     @Override
-    public List<Attribute> getAttributes() {
-        return this.attributes;
+    public List<Attribute> getRemoteAttributes() {
+        return this.remoteAttributes;
+    }
+
+    @Override
+    public List<Attribute> getLocalAttributes() {
+        return this.localAttributes;
+    }
+
+    @Override
+    public void setLocalAttributes(List<Attribute> localAttributes) {
+        this.localAttributes = localAttributes;
     }
 
     @Override
@@ -98,8 +109,8 @@ public class LocalRepositoryProduct implements RepositoryProduct {
         return this.remoteMission;
     }
 
-    public void setAttributes(List<Attribute> attributes) {
-        this.attributes = attributes;
+    public void setRemoteAttributes(List<Attribute> remoteAttributes) {
+        this.remoteAttributes = remoteAttributes;
     }
 
     public void setRemoteMission(org.esa.snap.remote.products.repository.RemoteMission remoteMission) {

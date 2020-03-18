@@ -62,16 +62,16 @@ public class AllLocalFolderProductsRepository {
         return LocalRepositoryDatabaseLayer.loadProductList(localRepositoryFolder, remoteMissionName, parameterValues, this.databaseParameters);
     }
 
-    public SaveDownloadedProductData saveProduct(RepositoryProduct productToSave, Path productPath, String remoteRepositoryName, Path localRepositoryFolderPath, Product product)
+    public SaveProductData saveRemoteProduct(RepositoryProduct productToSave, Path productPath, String remoteRepositoryName, Path localRepositoryFolderPath, Product product)
                                         throws IOException, SQLException {
 
-        return LocalRepositoryDatabaseLayer.saveProduct(productToSave, productPath, remoteRepositoryName, localRepositoryFolderPath, product, this.databaseParameters);
+        return LocalRepositoryDatabaseLayer.saveRemoteProduct(productToSave, productPath, remoteRepositoryName, localRepositoryFolderPath, product, this.databaseParameters);
     }
 
-    public SaveProductData saveProduct(Product productToSave, BufferedImage quickLookImage, AbstractGeometry2D polygon2D, Path productPath, Path localRepositoryFolderPath)
+    public SaveProductData saveLocalProduct(Product productToSave, BufferedImage quickLookImage, AbstractGeometry2D polygon2D, Path productPath, Path localRepositoryFolderPath)
             throws IOException, SQLException {
 
-        return LocalRepositoryDatabaseLayer.saveProduct(productToSave, quickLookImage, polygon2D, productPath, localRepositoryFolderPath, this.databaseParameters);
+        return LocalRepositoryDatabaseLayer.saveLocalProduct(productToSave, quickLookImage, polygon2D, productPath, localRepositoryFolderPath, this.databaseParameters);
     }
 
     public Set<Integer> deleteMissingProducts(short localRepositoryId, Set<Integer> savedProductIds) throws SQLException {

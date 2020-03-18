@@ -84,7 +84,7 @@ public class AddLocalRepositoryFolderHelper {
                                 FileTime fileTime = Files.getLastModifiedTime(productPath);
                                 if (fileTime.toMillis() == localProductMetadata.getLastModifiedDate().getTime()) {
                                     // unchanged product
-                                    saveProductData = new SaveProductData(localProductMetadata.getId(), null, null);
+                                    saveProductData = new SaveProductData(localProductMetadata.getId(), null, null, null);
                                     savedProducts.add(saveProductData);
                                 }
                             }
@@ -141,7 +141,7 @@ public class AddLocalRepositoryFolderHelper {
                     logger.log(Level.SEVERE, "Failed to create the quick look image for product '" + product.getName() + "'.", exception);
                 }
 
-                saveProductData = this.allLocalFolderProductsRepository.saveProduct(product, quickLookImage, polygon2D, productPath, localRepositoryFolderPath);
+                saveProductData = this.allLocalFolderProductsRepository.saveLocalProduct(product, quickLookImage, polygon2D, productPath, localRepositoryFolderPath);
             } finally {
                 product.dispose();
             }

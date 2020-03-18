@@ -11,7 +11,11 @@ public interface RepositoryProduct {
 
     public AbstractGeometry2D getPolygon();
 
-    public List<Attribute> getAttributes();
+    public List<Attribute> getRemoteAttributes();
+
+    public List<Attribute> getLocalAttributes();
+
+    public void setLocalAttributes(List<Attribute> localAttributes);
 
     public String getName();
 
