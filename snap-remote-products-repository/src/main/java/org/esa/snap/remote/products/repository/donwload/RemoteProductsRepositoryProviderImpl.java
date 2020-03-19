@@ -1,4 +1,4 @@
-package org.esa.snap.remote.products.repository.tao;
+package org.esa.snap.remote.products.repository.donwload;
 
 import org.apache.http.auth.Credentials;
 import org.esa.snap.remote.products.repository.RemoteProductsRepositoryProvider;
@@ -17,11 +17,11 @@ import java.util.Map;
 /**
  * Created by jcoravu on 28/8/2019.
  */
-class TAORemoteRepositoryProvider implements RemoteProductsRepositoryProvider {
+class RemoteProductsRepositoryProviderImpl implements RemoteProductsRepositoryProvider {
 
     private final String repositoryName;
 
-    TAORemoteRepositoryProvider(String repositoryName) {
+    RemoteProductsRepositoryProviderImpl(String repositoryName) {
         this.repositoryName = repositoryName;
     }
 
@@ -32,27 +32,27 @@ class TAORemoteRepositoryProvider implements RemoteProductsRepositoryProvider {
 
     @Override
     public int getMaximumAllowedTransfersPerAccount() {
-        return TAORemoteRepositoriesManager.getMaximumAllowedTransfers(getRepositoryName());
+        return RemoteRepositoriesManager.getMaximumAllowedTransfers(getRepositoryName());
     }
 
     @Override
     public boolean requiresAuthentication() {
-        return TAORemoteRepositoriesManager.requiresAuthentication(getRepositoryName());
+        return RemoteRepositoriesManager.requiresAuthentication(getRepositoryName());
     }
 
     @Override
     public String[] getAvailableMissions() {
-        return TAORemoteRepositoriesManager.getAvailableMissions(getRepositoryName());
+        return RemoteRepositoriesManager.getAvailableMissions(getRepositoryName());
     }
 
     @Override
     public List<RepositoryQueryParameter> getMissionParameters(String mission) {
-        return TAORemoteRepositoriesManager.getMissionParameters(getRepositoryName(), mission);
+        return RemoteRepositoriesManager.getMissionParameters(getRepositoryName(), mission);
     }
 
     @Override
     public BufferedImage downloadProductQuickLookImage(Credentials credentials, String url, ThreadStatus thread) throws IOException, InterruptedException {
-        return TAORemoteRepositoriesManager.downloadProductQuickLookImage(getRepositoryName(), credentials, url, thread);
+        return RemoteRepositoriesManager.downloadProductQuickLookImage(getRepositoryName(), credentials, url, thread);
     }
 
     @Override
@@ -60,7 +60,7 @@ class TAORemoteRepositoryProvider implements RemoteProductsRepositoryProvider {
                                                        ProductListDownloaderListener downloaderListener, ThreadStatus thread)
                                                        throws Exception {
 
-        return TAORemoteRepositoriesManager.downloadProductList(getRepositoryName(), mission, credentials, parameterValues, downloaderListener, thread);
+        return RemoteRepositoriesManager.downloadProductList(getRepositoryName(), mission, credentials, parameterValues, downloaderListener, thread);
     }
 
     @Override
@@ -70,8 +70,8 @@ class TAORemoteRepositoryProvider implements RemoteProductsRepositoryProvider {
 
     @Override
     public void cancelDownloadProduct(RepositoryProduct repositoryProduct) {
-        TAORepositoryProduct taoRepositoryProduct = validateDownloadProduct(repositoryProduct);
-        TAORemoteRepositoriesManager.getInstance().cancelDownloadProduct(taoRepositoryProduct);
+        RemoteRepositoryProductImpl taoRepositoryProduct = validateDownloadProduct(repositoryProduct);
+        RemoteRepositoriesManager.getInstance().cancelDownloadProduct(taoRepositoryProduct);
     }
 
     @Override
@@ -79,11 +79,11 @@ class TAORemoteRepositoryProvider implements RemoteProductsRepositoryProvider {
                                 ProgressListener progressListener, boolean uncompressedDownloadedProduct)
                                 throws Exception {
 
-        TAORepositoryProduct taoRepositoryProduct = validateDownloadProduct(repositoryProduct);
-        return TAORemoteRepositoriesManager.getInstance().downloadProduct(taoRepositoryProduct, credentials, targetFolderPath, progressListener, uncompressedDownloadedProduct);
+        RemoteRepositoryProductImpl taoRepositoryProduct = validateDownloadProduct(repositoryProduct);
+        return RemoteRepositoriesManager.getInstance().downloadProduct(taoRepositoryProduct, credentials, targetFolderPath, progressListener, uncompressedDownloadedProduct);
     }
 
-    private TAORepositoryProduct validateDownloadProduct(RepositoryProduct repositoryProduct) {
+    private RemoteRepositoryProductImpl validateDownloadProduct(RepositoryProduct repositoryProduct) {
         if (repositoryProduct == null) {
             throw new NullPointerException("The repository product is null.");
         }
@@ -93,6 +93,6 @@ class TAORemoteRepositoryProvider implements RemoteProductsRepositoryProvider {
         if (!getRepositoryName().equals(repositoryProduct.getRemoteMission().getRepositoryName())) {
             throw new IllegalArgumentException("The remote repository name '" + getRepositoryName()+"' does not match with the remote product repository name '" + repositoryProduct.getRemoteMission().getRepositoryName() +"'.");
         }
-        return (TAORepositoryProduct)repositoryProduct;
+        return (RemoteRepositoryProductImpl)repositoryProduct;
     }
 }

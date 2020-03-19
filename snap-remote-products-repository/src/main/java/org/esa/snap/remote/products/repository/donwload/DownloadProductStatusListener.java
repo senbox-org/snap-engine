@@ -1,4 +1,4 @@
-package org.esa.snap.remote.products.repository.tao;
+package org.esa.snap.remote.products.repository.donwload;
 
 import ro.cs.tao.datasource.ProductStatusListener;
 import ro.cs.tao.eodata.EOProduct;
@@ -10,11 +10,11 @@ import java.util.List;
 /**
  * Created by jcoravu on 7/2/2020.
  */
-class TAODownloadProductStatusListener implements ProductStatusListener {
+class DownloadProductStatusListener implements ProductStatusListener {
 
     private final List<String> downloadMessages;
 
-    TAODownloadProductStatusListener() {
+    DownloadProductStatusListener() {
         this.downloadMessages = new ArrayList<>();
     }
 

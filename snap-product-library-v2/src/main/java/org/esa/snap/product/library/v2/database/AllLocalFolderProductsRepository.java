@@ -4,7 +4,7 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.product.library.v2.database.model.LocalRepositoryFolder;
 import org.esa.snap.product.library.v2.database.model.LocalRepositoryProduct;
 import org.esa.snap.remote.products.repository.Attribute;
-import org.esa.snap.remote.products.repository.AbstractGeometry2D;
+import org.esa.snap.remote.products.repository.geometry.AbstractGeometry2D;
 import org.esa.snap.remote.products.repository.RepositoryProduct;
 import org.esa.snap.remote.products.repository.RepositoryQueryParameter;
 import org.esa.snap.remote.products.repository.SensorType;

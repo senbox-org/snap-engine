@@ -7,7 +7,7 @@ import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.quicklooks.QuicklookGenerator;
 import org.esa.snap.core.util.ProductUtils;
-import org.esa.snap.remote.products.repository.Polygon2D;
+import org.esa.snap.remote.products.repository.geometry.Polygon2D;
 import org.esa.snap.remote.products.repository.ThreadStatus;
 
 import java.awt.image.BufferedImage;

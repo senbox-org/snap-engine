@@ -1,4 +1,4 @@
-package org.esa.snap.remote.products.repository;
+package org.esa.snap.remote.products.repository.geometry;
 
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;

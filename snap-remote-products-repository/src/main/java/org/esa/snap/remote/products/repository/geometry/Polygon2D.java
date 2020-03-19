@@ -1,8 +1,7 @@
-package org.esa.snap.remote.products.repository;
+package org.esa.snap.remote.products.repository.geometry;
 
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
-import java.awt.geom.Rectangle2D;
 
 /**
  * Created by jcoravu on 31/1/2020.

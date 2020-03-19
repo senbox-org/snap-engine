@@ -1,5 +1,7 @@
 package org.esa.snap.remote.products.repository;
 
+import org.esa.snap.remote.products.repository.geometry.GeometryUtils;
+import org.esa.snap.remote.products.repository.geometry.Polygon2D;
 import org.junit.Test;
 
 import java.awt.*;

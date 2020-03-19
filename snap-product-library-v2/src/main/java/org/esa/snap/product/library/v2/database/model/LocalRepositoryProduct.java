@@ -2,6 +2,7 @@ package org.esa.snap.product.library.v2.database.model;
 
 import org.esa.snap.remote.products.repository.*;
 import org.esa.snap.remote.products.repository.RemoteMission;
+import org.esa.snap.remote.products.repository.geometry.AbstractGeometry2D;
 
 import java.awt.image.BufferedImage;
 import java.nio.file.Path;

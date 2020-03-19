@@ -1,6 +1,7 @@
-package org.esa.snap.remote.products.repository.tao;
+package org.esa.snap.remote.products.repository.donwload;
 
 import org.esa.snap.remote.products.repository.*;
+import org.esa.snap.remote.products.repository.geometry.AbstractGeometry2D;
 
 import java.awt.image.BufferedImage;
 import java.util.Date;
@@ -9,7 +10,7 @@ import java.util.List;
 /**
  * Created by jcoravu on 28/8/2019.
  */
-public class TAORepositoryProduct implements RepositoryProduct {
+public class RemoteRepositoryProductImpl implements RepositoryProduct {
 
     private final String id;
     private final String name;
@@ -27,7 +28,7 @@ public class TAORepositoryProduct implements RepositoryProduct {
     private PixelType pixelType;
     private String downloadQuickLookImageURL;
 
-    TAORepositoryProduct(String id, String name, String downloadURL, RemoteMission remoteMission, AbstractGeometry2D polygon, Date acquisitionDate, long approximateSize) {
+    RemoteRepositoryProductImpl(String id, String name, String downloadURL, RemoteMission remoteMission, AbstractGeometry2D polygon, Date acquisitionDate, long approximateSize) {
         this.id = id;
         this.name = name;
         this.remoteMission = remoteMission;

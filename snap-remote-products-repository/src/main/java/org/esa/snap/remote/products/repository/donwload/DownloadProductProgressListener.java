@@ -1,4 +1,4 @@
-package org.esa.snap.remote.products.repository.tao;
+package org.esa.snap.remote.products.repository.donwload;
 
 import org.esa.snap.remote.products.repository.listener.ProgressListener;
 
@@ -8,16 +8,16 @@ import java.util.logging.Logger;
 /**
  * Created by jcoravu on 19/8/2019.
  */
-class TAODownloadProductProgressListener implements ro.cs.tao.ProgressListener {
+class DownloadProductProgressListener implements ro.cs.tao.ProgressListener {
 
-    private static final Logger logger = Logger.getLogger(TAODownloadProductProgressListener.class.getName());
+    private static final Logger logger = Logger.getLogger(DownloadProductProgressListener.class.getName());
 
     private final ProgressListener progressListener;
     private final String dataSourceName;
     private final String missionName;
     private final String productName;
 
-    TAODownloadProductProgressListener(ProgressListener progressListener, String dataSourceName, String missionName, String productName) {
+    DownloadProductProgressListener(ProgressListener progressListener, String dataSourceName, String missionName, String productName) {
         this.progressListener = progressListener;
         this.dataSourceName = dataSourceName;
         this.missionName = missionName;

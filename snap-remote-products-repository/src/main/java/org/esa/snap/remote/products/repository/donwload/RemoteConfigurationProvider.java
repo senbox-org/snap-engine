@@ -1,4 +1,4 @@
-package org.esa.snap.remote.products.repository.tao;
+package org.esa.snap.remote.products.repository.donwload;
 
 import ro.cs.tao.configuration.ConfigurationProvider;
 
@@ -9,9 +9,9 @@ import java.util.Properties;
 /**
  * Created by jcoravu on 27/1/2020.
  */
-class TAOConfigurationProvider implements ConfigurationProvider {
+class RemoteConfigurationProvider implements ConfigurationProvider {
 
-    TAOConfigurationProvider() {
+    RemoteConfigurationProvider() {
     }
 
     @Override

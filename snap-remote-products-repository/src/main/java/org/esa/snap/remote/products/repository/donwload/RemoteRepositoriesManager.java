@@ -1,14 +1,14 @@
-package org.esa.snap.remote.products.repository.tao;
+package org.esa.snap.remote.products.repository.donwload;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.auth.Credentials;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.esa.snap.remote.products.repository.AbstractGeometry2D;
+import org.esa.snap.remote.products.repository.geometry.AbstractGeometry2D;
 import org.esa.snap.remote.products.repository.Attribute;
 import org.esa.snap.remote.products.repository.DataFormatType;
-import org.esa.snap.remote.products.repository.GeometryUtils;
+import org.esa.snap.remote.products.repository.geometry.GeometryUtils;
 import org.esa.snap.remote.products.repository.HTTPServerException;
 import org.esa.snap.remote.products.repository.PixelType;
 import org.esa.snap.remote.products.repository.RemoteMission;
@@ -64,17 +64,17 @@ import java.util.logging.Logger;
 /**
  * Created by jcoravu on 21/11/2019.
  */
-public class TAORemoteRepositoriesManager {
+public class RemoteRepositoriesManager {
 
-    private static final Logger logger = Logger.getLogger(TAORemoteRepositoriesManager.class.getName());
+    private static final Logger logger = Logger.getLogger(RemoteRepositoriesManager.class.getName());
 
-    private static final TAORemoteRepositoriesManager instance = new TAORemoteRepositoriesManager();
+    private static final RemoteRepositoriesManager instance = new RemoteRepositoriesManager();
 
     private final RemoteProductsRepositoryProvider[] remoteRepositoryProductProviders;
     private final Map<String, DataSourceComponent> downloadingProducts;
 
-    private TAORemoteRepositoriesManager() {
-        ConfigurationManager.setConfigurationProvider(new TAOConfigurationProvider());
+    private RemoteRepositoriesManager() {
+        ConfigurationManager.setConfigurationProvider(new RemoteConfigurationProvider());
         Set<DataSource> services = DataSourceManager.getInstance().getRegisteredDataSources();
         this.remoteRepositoryProductProviders = new RemoteProductsRepositoryProvider[services.size()];
         int index = 0;
@@ -89,7 +89,7 @@ public class TAORemoteRepositoriesManager {
             if (filteredParameters != null && filteredParameters.size() > 0) {
 //                dataSource.setFilteredParameters(filteredParameters);
             }
-            this.remoteRepositoryProductProviders[index++] = new TAORemoteRepositoryProvider(dataSource.getId());
+            this.remoteRepositoryProductProviders[index++] = new RemoteProductsRepositoryProviderImpl(dataSource.getId());
         }
 
         if (this.remoteRepositoryProductProviders.length > 1) {
@@ -115,7 +115,7 @@ public class TAORemoteRepositoriesManager {
         this.downloadingProducts = new HashMap<>();
     }
 
-    public static TAORemoteRepositoriesManager getInstance() {
+    public static RemoteRepositoriesManager getInstance() {
         return instance;
     }
 
@@ -123,7 +123,7 @@ public class TAORemoteRepositoriesManager {
         return this.remoteRepositoryProductProviders;
     }
 
-    public void cancelDownloadProduct(TAORepositoryProduct repositoryProduct) {
+    public void cancelDownloadProduct(RemoteRepositoryProductImpl repositoryProduct) {
         String dataSourceName = repositoryProduct.getRemoteMission().getRepositoryName();
         String key = buildKey(dataSourceName, repositoryProduct);
         DataSourceComponent downloadStrategy;
@@ -161,7 +161,7 @@ public class TAORemoteRepositoriesManager {
         }
     }
 
-    public Path downloadProduct(TAORepositoryProduct repositoryProduct, Credentials credentials, Path targetFolderPath,
+    public Path downloadProduct(RemoteRepositoryProductImpl repositoryProduct, Credentials credentials, Path targetFolderPath,
                                 ProgressListener progressListener, boolean uncompressedDownloadedProduct)
                                 throws Exception {
 
@@ -196,8 +196,8 @@ public class TAORemoteRepositoriesManager {
                 }
             }
 
-            TAODownloadProductProgressListener taoProgressListener = new TAODownloadProductProgressListener(progressListener, dataSourceName, repositoryProduct.getRemoteMission().getName(), repositoryProduct.getName());
-            TAODownloadProductStatusListener taoProductStatusListener = new TAODownloadProductStatusListener();
+            DownloadProductProgressListener taoProgressListener = new DownloadProductProgressListener(progressListener, dataSourceName, repositoryProduct.getRemoteMission().getName(), repositoryProduct.getName());
+            DownloadProductStatusListener taoProductStatusListener = new DownloadProductStatusListener();
 
             dataSourceComponent.setDataSourceName(dataSourceName);
             dataSourceComponent.setSensorName(repositoryProduct.getRemoteMission().getName());
@@ -495,7 +495,7 @@ public class TAORemoteRepositoriesManager {
                 remoteAttributes.add(new Attribute(remoteAttribute.getName(), remoteAttribute.getValue()));
             }
 
-            TAORepositoryProduct repositoryProduct = new TAORepositoryProduct(taoProduct.getId(), taoProduct.getName(), taoProduct.getLocation(), mission, geometry, taoProduct.getAcquisitionDate(), taoProduct.getApproximateSize());
+            RemoteRepositoryProductImpl repositoryProduct = new RemoteRepositoryProductImpl(taoProduct.getId(), taoProduct.getName(), taoProduct.getLocation(), mission, geometry, taoProduct.getAcquisitionDate(), taoProduct.getApproximateSize());
             repositoryProduct.setRemoteAttributes(remoteAttributes);
             repositoryProduct.setDataFormatType(convertToDataFormatType(taoProduct.getFormatType()));
             repositoryProduct.setPixelType(convertToPixelType(taoProduct.getPixelType()));
@@ -507,7 +507,7 @@ public class TAORemoteRepositoriesManager {
         return downloadedPageProducts;
     }
 
-    private static String buildKey(String dataSourceName, TAORepositoryProduct repositoryProduct) {
+    private static String buildKey(String dataSourceName, RemoteRepositoryProductImpl repositoryProduct) {
         if (StringUtils.isBlank(dataSourceName)) {
             throw new NullPointerException("The data source name is null or empty.");
         }

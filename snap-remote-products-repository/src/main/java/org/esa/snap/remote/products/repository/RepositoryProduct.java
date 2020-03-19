@@ -1,5 +1,7 @@
 package org.esa.snap.remote.products.repository;
 
+import org.esa.snap.remote.products.repository.geometry.AbstractGeometry2D;
+
 import java.awt.image.BufferedImage;
 import java.util.Date;
 import java.util.List;

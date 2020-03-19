@@ -1,4 +1,4 @@
-package org.esa.snap.remote.products.repository;
+package org.esa.snap.remote.products.repository.geometry;
 
 import java.awt.geom.Path2D;
 
