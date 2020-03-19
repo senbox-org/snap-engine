@@ -1,6 +1,7 @@
 package org.esa.snap.product.library.v2.database;
 
 import org.esa.snap.product.library.v2.database.model.LocalRepositoryFolder;
+import org.esa.snap.remote.products.repository.ThreadStatus;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -22,7 +23,9 @@ public class ScanLocalRepositoryFolderHelper extends AddLocalRepositoryFolderHel
         super(allLocalFolderProductsRepository);
     }
 
-    public List<SaveProductData> scanValidProductsFromFolder(LocalRepositoryFolder localRepositoryFolder) throws IOException, SQLException {
+    public List<SaveProductData> scanValidProductsFromFolder(LocalRepositoryFolder localRepositoryFolder, ThreadStatus threadStatus)
+                                                             throws IOException, SQLException, InterruptedException {
+
         List<SaveProductData> savedProducts = null;
         if (Files.exists(localRepositoryFolder.getPath())) {
             // the local repository folder exists on the disk
@@ -32,7 +35,7 @@ public class ScanLocalRepositoryFolderHelper extends AddLocalRepositoryFolderHel
 
             List<LocalProductMetadata> existingLocalRepositoryProducts = this.allLocalFolderProductsRepository.loadRepositoryProductsMetadata(localRepositoryFolder.getId());
 
-            savedProducts = saveProductsFromFolder(localRepositoryFolder.getPath(), existingLocalRepositoryProducts);
+            savedProducts = saveProductsFromFolder(localRepositoryFolder.getPath(), existingLocalRepositoryProducts, true, threadStatus);
             Set<Integer> savedProductIds = new HashSet<>(savedProducts.size());
             for (int i=0; i<savedProducts.size(); i++) {
                 SaveProductData saveProductData = savedProducts.get(i);
@@ -44,6 +47,7 @@ public class ScanLocalRepositoryFolderHelper extends AddLocalRepositoryFolderHel
                 logger.log(Level.FINE, "Deleted " + deletedProductIds.size() + " products from the database corresponding to the local repository folder '" + localRepositoryFolder.getPath().toString() + "'.");
             }
         } else {
+            // the local repository folder does not exist on the disk
             if (logger.isLoggable(Level.FINE)) {
                 logger.log(Level.FINE, "The local repository folder '"+localRepositoryFolder.getPath().toString()+"' to scan does not exist.");
             }

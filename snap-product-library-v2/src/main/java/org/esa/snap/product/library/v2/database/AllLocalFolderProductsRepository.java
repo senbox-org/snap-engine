@@ -41,17 +41,19 @@ public class AllLocalFolderProductsRepository {
     public List<RepositoryQueryParameter> getParameters() {
         List<RepositoryQueryParameter> parameters = new ArrayList<RepositoryQueryParameter>();
 
-        parameters.add(new RepositoryQueryParameter(START_DATE_PARAMETER, Date.class, "Start date", null, false, null));
-        parameters.add(new RepositoryQueryParameter(END_DATE_PARAMETER, Date.class, "End date", null, false, null));
+        boolean required = false;
+
+        parameters.add(new RepositoryQueryParameter(START_DATE_PARAMETER, Date.class, "Start date", null, required, null));
+        parameters.add(new RepositoryQueryParameter(END_DATE_PARAMETER, Date.class, "End date", null, required, null));
 
         SensorType[] sensorTypes = SensorType.values();
         String sensorValues[] = new String[sensorTypes.length];
         for (int i = 0; i < sensorTypes.length; i++) {
             sensorValues[i] = sensorTypes[i].getName();
         }
-        parameters.add(new RepositoryQueryParameter(SENSOR_TYPE_PARAMETER, String.class, "Sensor", null, false, sensorValues));
-        parameters.add(new RepositoryQueryParameter(ATTRIBUTES_PARAMETER, Attribute.class, "Attributes", null, false, null));
-        parameters.add(new RepositoryQueryParameter(FOOT_PRINT_PARAMETER, Rectangle2D.class, "Area of interest", null, false, null));
+        parameters.add(new RepositoryQueryParameter(SENSOR_TYPE_PARAMETER, String.class, "Sensor", null, required, sensorValues));
+        parameters.add(new RepositoryQueryParameter(ATTRIBUTES_PARAMETER, Attribute.class, "Attributes", null, required, null));
+        parameters.add(new RepositoryQueryParameter(FOOT_PRINT_PARAMETER, Rectangle2D.class, "Area of interest", null, required, null));
 
         return parameters;
     }
@@ -63,13 +65,13 @@ public class AllLocalFolderProductsRepository {
     }
 
     public SaveProductData saveRemoteProduct(RepositoryProduct productToSave, Path productPath, String remoteRepositoryName, Path localRepositoryFolderPath, Product product)
-                                        throws IOException, SQLException {
+                                             throws IOException, SQLException {
 
         return LocalRepositoryDatabaseLayer.saveRemoteProduct(productToSave, productPath, remoteRepositoryName, localRepositoryFolderPath, product, this.databaseParameters);
     }
 
     public SaveProductData saveLocalProduct(Product productToSave, BufferedImage quickLookImage, AbstractGeometry2D polygon2D, Path productPath, Path localRepositoryFolderPath)
-            throws IOException, SQLException {
+                                            throws IOException, SQLException {
 
         return LocalRepositoryDatabaseLayer.saveLocalProduct(productToSave, quickLookImage, polygon2D, productPath, localRepositoryFolderPath, this.databaseParameters);
     }

@@ -8,6 +8,7 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.quicklooks.QuicklookGenerator;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.remote.products.repository.Polygon2D;
+import org.esa.snap.remote.products.repository.ThreadStatus;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -51,12 +52,19 @@ public class AddLocalRepositoryFolderHelper {
         }
     }
 
-    public List<SaveProductData> addValidProductsFromFolder(Path localRepositoryFolderPath) throws IOException, SQLException {
+    public List<SaveProductData> addValidProductsFromFolder(Path localRepositoryFolderPath, ThreadStatus threadStatus)
+                                                            throws IOException, SQLException, InterruptedException {
+
         List<SaveProductData> savedProducts = null;
         if (Files.exists(localRepositoryFolderPath)) {
             // the local repository folder exists on the disk
+            ThreadStatus.checkCancelled(threadStatus);
+
             List<LocalProductMetadata> existingLocalRepositoryProducts = this.allLocalFolderProductsRepository.loadRepositoryProductsMetadata(localRepositoryFolderPath);
-            savedProducts = saveProductsFromFolder(localRepositoryFolderPath, existingLocalRepositoryProducts);
+
+            ThreadStatus.checkCancelled(threadStatus);
+
+            savedProducts = saveProductsFromFolder(localRepositoryFolderPath, existingLocalRepositoryProducts, true, threadStatus);
         } else {
             if (logger.isLoggable(Level.FINE)) {
                 logger.log(Level.FINE, "The local repository folder '"+localRepositoryFolderPath.toString()+"' does not exist.");
@@ -65,16 +73,28 @@ public class AddLocalRepositoryFolderHelper {
         return savedProducts;
     }
 
-    protected List<SaveProductData> saveProductsFromFolder(Path localRepositoryFolderPath, List<LocalProductMetadata> existingLocalRepositoryProducts) throws IOException {
+    protected List<SaveProductData> saveProductsFromFolder(Path localRepositoryFolderPath, List<LocalProductMetadata> existingLocalRepositoryProducts,
+                                                           boolean scanOnlyFirstLevel, ThreadStatus threadStatus)
+                                                           throws IOException, InterruptedException {
+
         List<SaveProductData> savedProducts = new ArrayList<>();
         Stack<Path> stack = new Stack<>();
         stack.push(localRepositoryFolderPath);
         while (!stack.isEmpty()) {
             Path currentPath = stack.pop();
+
+            ThreadStatus.checkCancelled(threadStatus);
+
             if (Files.isDirectory(currentPath)) {
                 try (Stream<Path> stream = Files.list(currentPath)) {
+
+                    ThreadStatus.checkCancelled(threadStatus);
+
                     Iterator<Path> it = stream.iterator();
                     while (it.hasNext()) {
+
+                        ThreadStatus.checkCancelled(threadStatus);
+
                         Path productPath = it.next();
                         try {
                             LocalProductMetadata localProductMetadata = foundLocalProductMetadata(localRepositoryFolderPath, existingLocalRepositoryProducts, productPath);
@@ -88,13 +108,18 @@ public class AddLocalRepositoryFolderHelper {
                                     savedProducts.add(saveProductData);
                                 }
                             }
+
+                            ThreadStatus.checkCancelled(threadStatus);
+
                             if (saveProductData == null) {
                                 // read and save the product into the database
-                                saveProductData = readAndSaveProduct(localRepositoryFolderPath, productPath);
+                                saveProductData = readAndSaveProduct(localRepositoryFolderPath, productPath, threadStatus);
                                 if (saveProductData == null) {
                                     // no product has been loaded from the path
-                                    if (Files.isDirectory(productPath)) {
-                                        stack.push(productPath);
+                                    if (!scanOnlyFirstLevel) {
+                                        if (Files.isDirectory(productPath)) {
+                                            stack.push(productPath);
+                                        }
                                     }
                                 } else {
                                     // the product has been saved into the database
@@ -119,19 +144,26 @@ public class AddLocalRepositoryFolderHelper {
         return savedProducts;
     }
 
-    private SaveProductData readAndSaveProduct(Path localRepositoryFolderPath, Path productPath) throws IOException, SQLException {
+    private SaveProductData readAndSaveProduct(Path localRepositoryFolderPath, Path productPath, ThreadStatus threadStatus)
+                                               throws IOException, SQLException, InterruptedException {
+
         SaveProductData saveProductData = null;
         Product product = ProductIO.readProduct(productPath.toFile());
         if (product == null) {
+            // the local product has not been read
             invalidProduct(productPath);
         } else if (product.getSceneGeoCoding() == null) {
+            // the local product has not geo coding
             try {
                 product.dispose();
             } finally {
                 missingProductGeoCoding(productPath);
             }
         } else {
+            // the local product has geo coding
             try {
+                ThreadStatus.checkCancelled(threadStatus);
+
                 Polygon2D polygon2D = buildProductPolygon(product);
                 BufferedImage quickLookImage = null;
                 try {
@@ -140,6 +172,8 @@ public class AddLocalRepositoryFolderHelper {
                 } catch (Exception exception) {
                     logger.log(Level.SEVERE, "Failed to create the quick look image for product '" + product.getName() + "'.", exception);
                 }
+
+                ThreadStatus.checkCancelled(threadStatus);
 
                 saveProductData = this.allLocalFolderProductsRepository.saveLocalProduct(product, quickLookImage, polygon2D, productPath, localRepositoryFolderPath);
             } finally {

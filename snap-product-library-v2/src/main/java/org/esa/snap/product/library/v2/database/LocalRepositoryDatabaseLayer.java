@@ -479,31 +479,14 @@ class LocalRepositoryDatabaseLayer {
             boolean success = false;
             connection.setAutoCommit(false);
             try {
-                StringBuilder sql = new StringBuilder();
-                sql.append("DELETE FROM ")
-                        .append(DatabaseTableNames.PRODUCT_REMOTE_ATTRIBUTES)
-                        .append(" WHERE product_id = ?");
-                try (PreparedStatement preparedStatement = connection.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS)) {
-                    for (Integer productId : productIds) {
-                        preparedStatement.setInt(1, productId.intValue());
-                        preparedStatement.executeUpdate();
-                    }
-                }
-                try (Statement statement = connection.createStatement()) {
-                    sql = new StringBuilder();
-                    sql.append("DELETE FROM ")
-                            .append(DatabaseTableNames.PRODUCTS)
-                            .append(" WHERE local_repository_id = ")
-                            .append(localRepositoryFolder.getId());
-                    statement.executeUpdate(sql.toString());
+                deleteRecordsFromTable(DatabaseTableNames.PRODUCT_REMOTE_ATTRIBUTES, "product_id", productIds, connection);
+                deleteRecordsFromTable(DatabaseTableNames.PRODUCT_LOCAL_ATTRIBUTES, "product_id", productIds, connection);
 
-                    sql = new StringBuilder();
-                    sql.append("DELETE FROM ")
-                            .append(DatabaseTableNames.LOCAL_REPOSITORIES)
-                            .append(" WHERE id = ")
-                            .append(localRepositoryFolder.getId());
-                    statement.executeUpdate(sql.toString());
+                try (Statement statement = connection.createStatement()) {
+                    deleteRecordsFromTable(DatabaseTableNames.PRODUCTS, "local_repository_id", localRepositoryFolder.getId(), statement);
+                    deleteRecordsFromTable(DatabaseTableNames.LOCAL_REPOSITORIES, "id", localRepositoryFolder.getId(), statement);
                 }
+
                 // commit the data
                 connection.commit();
 
@@ -560,6 +543,21 @@ class LocalRepositoryDatabaseLayer {
                 .append(" = ")
                 .append(columnValue);
         return statement.executeUpdate(sql.toString());
+    }
+
+    private static void deleteRecordsFromTable(String tableName, String columnName, Set<Integer> productIds, Connection connection) throws SQLException {
+        StringBuilder sql = new StringBuilder();
+        sql.append("DELETE FROM ")
+                .append(tableName)
+                .append(" WHERE ")
+                .append(columnName)
+                .append(" = ?");
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql.toString(), Statement.NO_GENERATED_KEYS)) {
+            for (Integer productId : productIds) {
+                preparedStatement.setInt(1, productId.intValue());
+                preparedStatement.executeUpdate();
+            }
+        }
     }
 
     private static Path extractProductPathRelativeToLocalRepositoryFolder(Path productPath, Path localRepositoryFolderPath) {
