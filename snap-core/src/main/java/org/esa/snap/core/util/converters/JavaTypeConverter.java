@@ -18,12 +18,14 @@ package org.esa.snap.core.util.converters;
 
 import com.bc.ceres.binding.ConversionException;
 import com.bc.ceres.binding.converters.ClassConverter;
+import org.locationtech.jts.geom.Point;
 
 public class JavaTypeConverter extends ClassConverter {
 
     public JavaTypeConverter() {
         super();
-        addPackageQualifier("com.vividsolutions.jts.geom.");
+
+        addPackageQualifier(getPointPackageName() + ".");
     }
 
     @Override
@@ -33,9 +35,12 @@ public class JavaTypeConverter extends ClassConverter {
 
     @Override
     public Class parse(String text) throws ConversionException {
-        if(text.isEmpty()) {
+        if (text.isEmpty()) {
             throw new ConversionException(text);
-
+        }
+        String fullClassName = getPointPackageName() + "." + text;
+        if (getPointClass().getName().equals(fullClassName)) {
+            return getPointClass();
         }
         return super.parse(text);
     }
@@ -43,5 +48,13 @@ public class JavaTypeConverter extends ClassConverter {
     @Override
     public String format(Class javaType) {
         return super.format(javaType);
+    }
+
+    private static Class<?> getPointClass() {
+        return Point.class;
+    }
+
+    private static String getPointPackageName() {
+        return getPointClass().getPackage().getName();
     }
 }

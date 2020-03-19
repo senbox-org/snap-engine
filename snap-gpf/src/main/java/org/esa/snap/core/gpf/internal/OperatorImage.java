@@ -26,7 +26,7 @@ import org.esa.snap.core.image.ImageManager;
 import javax.media.jai.ImageLayout;
 import javax.media.jai.PlanarImage;
 import javax.media.jai.SourcelessOpImage;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.WritableRaster;
 
 public class OperatorImage extends SourcelessOpImage {
@@ -40,12 +40,12 @@ public class OperatorImage extends SourcelessOpImage {
 
     private OperatorImage(Band targetBand, OperatorContext operatorContext, ImageLayout imageLayout) {
         super(imageLayout,
-              operatorContext.getRenderingHints(),
-              imageLayout.getSampleModel(null),
-              imageLayout.getMinX(null),
-              imageLayout.getMinY(null),
-              imageLayout.getWidth(null),
-              imageLayout.getHeight(null));
+                operatorContext.getRenderingHints(),
+                imageLayout.getSampleModel(null),
+                imageLayout.getMinX(null),
+                imageLayout.getMinY(null),
+                imageLayout.getWidth(null),
+                imageLayout.getHeight(null));
         this.targetBand = targetBand;
         this.operatorContext = operatorContext;
         OperatorContext.setTileCache(this);
@@ -65,6 +65,8 @@ public class OperatorImage extends SourcelessOpImage {
         GPF.getDefaultInstance().executeOperator(operatorContext.getOperator());
 
         long startNanos = System.nanoTime();
+
+        //System.out.println("Tile: " + operatorContext.getOperator().getId() + " band: " + getTargetBand().getName() + ", thread: " + Thread.currentThread().getId());
 
         Tile targetTile;
         if (operatorContext.isComputingImageOf(getTargetBand())) {

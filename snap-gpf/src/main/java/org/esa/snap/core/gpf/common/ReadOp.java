@@ -17,7 +17,6 @@
 package org.esa.snap.core.gpf.common;
 
 import com.bc.ceres.core.ProgressMonitor;
-import com.vividsolutions.jts.geom.Geometry;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductSubsetDef;
@@ -38,6 +37,7 @@ import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.converters.JtsGeometryConverter;
 import org.esa.snap.core.util.converters.RectangleConverter;
+import org.locationtech.jts.geom.Geometry;
 
 import java.awt.*;
 import java.io.File;
@@ -96,7 +96,7 @@ public class ReadOp extends Operator {
     private Geometry geometryRegion;
 
     @Parameter(defaultValue = "false", description = "Whether to copy the metadata of the source product.")
-    private Boolean copyMetadata; // use the 'copyMetadata' attribute as Boolean object
+    private boolean copyMetadata;
 
     @TargetProduct
     private Product targetProduct;
@@ -115,11 +115,9 @@ public class ReadOp extends Operator {
         boolean hasBandNames = (this.bandNames != null && this.bandNames.length > 0);
         boolean hasMaskNames = (this.maskNames != null && this.maskNames.length > 0);
         ProductSubsetDef subsetDef = null;
-        if (hasBandNames || hasMaskNames || this.pixelRegion != null || this.geometryRegion != null || this.copyMetadata != null) {
+        if (hasBandNames || hasMaskNames || this.pixelRegion != null || this.geometryRegion != null || this.copyMetadata) {
             subsetDef = new ProductSubsetDef();
-            if (this.copyMetadata != null) {
-                subsetDef.setIgnoreMetadata(!this.copyMetadata.booleanValue());
-            }
+            subsetDef.setIgnoreMetadata(!this.copyMetadata);
             AbstractSubsetRegion subsetRegion = null;
             if (this.geometryRegion != null) {
                 subsetRegion = new GeometrySubsetRegion(this.geometryRegion, 0);

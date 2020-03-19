@@ -15,9 +15,7 @@
  */
 package org.esa.snap.core.dataio;
 
-import com.vividsolutions.jts.geom.Geometry;
 import org.esa.snap.core.subset.AbstractSubsetRegion;
-import org.esa.snap.core.subset.GeometrySubsetRegion;
 import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.esa.snap.core.util.Guardian;
 
@@ -233,9 +231,12 @@ public class ProductSubsetDef {
      * Gets the spatial subset as a rectangular region. Creates a new rectangle each time it is called. This prevents
      * from modifying this subset by modifying the returned region.
      *
+     * TODO TO BE removed in future
+     * @deprecated
+     * Use {@link #getSubsetRegion()} instead.
+     *
      * @return the spatial subset as a rectangular region, or <code>null</code> if no spatial region was defined
      */
-    //TODO Jean remove
     @Deprecated
     public Rectangle getRegion() {
         if (this.subsetRegion != null && this.subsetRegion instanceof PixelSubsetRegion) {
@@ -248,39 +249,45 @@ public class ProductSubsetDef {
     public HashMap<String,Rectangle> getRegionMap() {
         return regionMap;
     }
-//    /**
-//     * Sets the spatial subset as a rectangular region.
-//     *
-//     * @param region the spatial subset as a rectangular region, <code>null</code> if no spatial region shall be
-//     *               defined
-//     */
-//    //TODO Jean remove
-//    @Deprecated
-//    public void setRegion(Rectangle region) {
-//        if (region == null) {
-//            this.subsetRegion = null;
-//        } else {
-//            setRegion(region.x, region.y, region.width, region.height);
-//        }
-//    }
+    /**
+     * Sets the spatial subset as a rectangular region.
+     *
+     * TODO TO BE removed in future
+     * @deprecated
+     * Use {@link #setSubsetRegion(AbstractSubsetRegion)} instead.
+     *
+     * @param region the spatial subset as a rectangular region, <code>null</code> if no spatial region shall be
+     *               defined
+     */
+    @Deprecated
+    public void setRegion(Rectangle region) {
+        if (region == null) {
+            this.subsetRegion = null;
+        } else {
+            setRegion(region.x, region.y, region.width, region.height);
+        }
+    }
 
     public void setRegionMap(HashMap<String,Rectangle> regionMap) {
         this.regionMap = regionMap;
     }
 
-//    /**
-//     * Sets the spatial subset as a rectangular region.
-//     *
-//     * @param x the X-offset in pixels
-//     * @param y the Y-offset in pixels
-//     * @param w the width of the subset in pixels
-//     * @param h the height of the subset in pixels
-//     */
-//    //TODO Jean remove
-//    @Deprecated
-//    private void setRegion(int x, int y, int w, int h) {
-//        this.subsetRegion = new PixelSubsetRegion(x, y, w, h, 0);
-//    }
+    /**
+     * Sets the spatial subset as a rectangular region.
+     *
+     * TODO TO BE removed in future
+     * @deprecated
+     * Use {@link #setSubsetRegion(AbstractSubsetRegion)} instead.
+     *
+     * @param x the X-offset in pixels
+     * @param y the Y-offset in pixels
+     * @param w the width of the subset in pixels
+     * @param h the height of the subset in pixels
+     */
+    @Deprecated
+    public void setRegion(int x, int y, int w, int h) {
+        this.subsetRegion = new PixelSubsetRegion(x, y, w, h, 0);
+    }
 
     /**
      * Gets the sub-sampling in X- and Y-direction (vertical and horizontal).

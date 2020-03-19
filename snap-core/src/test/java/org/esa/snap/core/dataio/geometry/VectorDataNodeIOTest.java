@@ -17,8 +17,8 @@
 package org.esa.snap.core.dataio.geometry;
 
 import com.bc.ceres.core.ProgressMonitor;
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.esa.snap.core.datamodel.GeometryDescriptor;
 import org.esa.snap.core.datamodel.Placemark;
 import org.esa.snap.core.datamodel.PlacemarkDescriptor;

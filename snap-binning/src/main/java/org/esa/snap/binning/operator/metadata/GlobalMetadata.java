@@ -2,7 +2,7 @@ package org.esa.snap.binning.operator.metadata;
 
 import com.bc.ceres.binding.Property;
 import com.bc.ceres.binding.PropertySet;
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;

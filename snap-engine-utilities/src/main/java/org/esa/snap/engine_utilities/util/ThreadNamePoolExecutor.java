@@ -1,4 +1,4 @@
-package org.esa.snap.remote.execution.utils;
+package org.esa.snap.engine_utilities.util;
 
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;

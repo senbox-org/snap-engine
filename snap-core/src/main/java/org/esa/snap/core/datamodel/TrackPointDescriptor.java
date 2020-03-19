@@ -16,7 +16,7 @@
 
 package org.esa.snap.core.datamodel;
 
-import com.vividsolutions.jts.geom.Point;
+import org.locationtech.jts.geom.Point;
 import org.esa.snap.core.dataio.DecodeQualification;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.GeometryDescriptor;

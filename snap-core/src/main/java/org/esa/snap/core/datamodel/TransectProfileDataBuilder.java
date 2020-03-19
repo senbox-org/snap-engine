@@ -17,8 +17,8 @@
 package org.esa.snap.core.datamodel;
 
 import com.bc.ceres.core.Assert;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
 import org.opengis.feature.simple.SimpleFeature;
 
 import java.awt.Shape;

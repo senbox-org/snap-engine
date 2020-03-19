@@ -213,6 +213,9 @@ public class GeoTiffProductReader extends AbstractProductReader {
     }
 
     public Product readProduct(GeoTiffImageReader geoTiffImageReader, String defaultProductName) throws Exception {
+        if (geoTiffImageReader == null) {
+            throw new NullPointerException("The image reader is null.");
+        }
         ProductSubsetDef subsetDef = getSubsetDef();
         Rectangle productBounds;
         int defaultImageWidth = geoTiffImageReader.getImageWidth();
@@ -227,6 +230,16 @@ public class GeoTiffProductReader extends AbstractProductReader {
     }
 
     public Product readProduct(GeoTiffImageReader geoTiffImageReader, String defaultProductName, Rectangle productBounds) throws Exception {
+        return readProduct(geoTiffImageReader, defaultProductName, productBounds, null);
+    }
+
+    public Product readProduct(GeoTiffImageReader geoTiffImageReader, String defaultProductName, Rectangle productBounds, Double noDataValue) throws Exception {
+        if (geoTiffImageReader == null) {
+            throw new NullPointerException("The image reader is null.");
+        }
+        if (productBounds.isEmpty()) {
+            throw new IllegalStateException("Empty product bounds.");
+        }
         Dimension defaultImageSize = geoTiffImageReader.validateArea(productBounds);
 
         TIFFImageMetadata imageMetadata = geoTiffImageReader.getImageMetadata();
@@ -273,12 +286,12 @@ public class GeoTiffProductReader extends AbstractProductReader {
 
         GeoCoding bandGeoCoding = buildBandGeoCoding(product.getSceneGeoCoding(), productBounds.width, productBounds.height);
         AffineTransform2D imageToModelTransform = buildBandImageToModelTransform(productBounds.width, productBounds.height);
-        int bandCount = product.getNumBands();
-        for (int i = 0, bandIndex = 0; i < bandCount; i++, bandIndex++) {
+        for (int i = 0, bandIndex = 0; i < product.getNumBands(); i++) {
             Band band = product.getBandAt(i);
-            if (subsetDef == null || subsetDef.isNodeAccepted(band.getName())) {
-                // the product band is accepted
-                if (!(band instanceof VirtualBand || band instanceof FilterBand)) {
+            boolean addBand = (subsetDef == null || subsetDef.isNodeAccepted(band.getName()));
+            if (!(band instanceof VirtualBand || band instanceof FilterBand)) {
+                // the band is not virtual
+                if (addBand) {
                     if (band.getRasterWidth() != productBounds.width) {
                         throw new IllegalStateException("The band width " + band.getRasterWidth() + " is not equal with the product with " + productBounds.width + ".");
                     }
@@ -295,16 +308,18 @@ public class GeoTiffProductReader extends AbstractProductReader {
                         throw new IllegalStateException("The band index " + bandIndex + " must be < " + sampleModel.getNumBands() + ". The band name is '" + band.getName() + "'.");
                     }
                     int dataBufferType = ImageManager.getDataBufferType(band.getDataType()); // sampleModel.getDataType();
-                    GeoTiffMultiLevelSource multiLevelSource = new GeoTiffMultiLevelSource(geoTiffImageReader, dataBufferType, productBounds, preferredTileSize, bandIndex, band.getGeoCoding(), isGlobalShifted180);
+                    GeoTiffMultiLevelSource multiLevelSource = new GeoTiffMultiLevelSource(geoTiffImageReader, dataBufferType, productBounds, preferredTileSize,
+                                                                                           bandIndex, band.getGeoCoding(), isGlobalShifted180, noDataValue);
                     band.setSourceImage(new DefaultMultiLevelImage(multiLevelSource));
                 }
-            } else {
+                bandIndex++; // increment the band index for non virtual bands
+            }
+            if (!addBand) {
                 // the product band is not accepted
                 if (product.removeBand(band)) {
-                    bandCount--;
                     i--;
                 } else {
-                    throw new IllegalStateException("Failed to remove the band '" + band.getName()+"' from the product.");
+                    throw new IllegalStateException("Failed to remove the band '" + band.getName()+"' at index " + i + " from the product.");
                 }
             }
         }
@@ -312,11 +327,11 @@ public class GeoTiffProductReader extends AbstractProductReader {
         return product;
     }
 
-    protected AffineTransform2D buildBandImageToModelTransform(int bandWidth, int bandHeight) {
+    protected AffineTransform2D buildBandImageToModelTransform(int productWidth, int productHeight) {
         return null;
     }
 
-    protected GeoCoding buildBandGeoCoding(GeoCoding productGeoCoding, int bandWidth, int bandHeight) throws Exception {
+    protected GeoCoding buildBandGeoCoding(GeoCoding productGeoCoding, int productWidth, int productHeight) throws Exception {
         return productGeoCoding;
     }
 
@@ -394,7 +409,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
             DocumentBuilder builder = factory.newDocumentBuilder();
             inputStream = new ByteArrayInputStream(tagNumberText.getBytes());
             Document document = new DOMBuilder().build(builder.parse(inputStream));
-            product = DimapProductHelpers.createProduct(document, productSize);
+            product = DimapProductHelpers.createProduct(document, GeoTiffProductReaderPlugIn.FORMAT_NAMES[0], productSize);
             // remove the geo coding
             product.setSceneGeoCoding(null);
             TiePointGrid[] pointGrids = product.getTiePointGrids();
