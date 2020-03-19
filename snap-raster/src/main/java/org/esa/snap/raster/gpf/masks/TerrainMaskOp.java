@@ -233,12 +233,14 @@ public final class TerrainMaskOp extends Operator {
     @Override
     public void doExecute(ProgressMonitor pm) throws OperatorException {
         if (!isElevationModelAvailable) {
+            pm.beginTask("Preparing Elevation Model", 1);
             try {
-                pm.beginTask("Preparing Elevation Model", 1);
                 getElevationModel();
                 pm.worked(1);
             } catch (Throwable e) {
                 OperatorUtils.catchOperatorException(getId(), e);
+            } finally {
+                pm.done();
             }
         }
     }

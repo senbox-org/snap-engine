@@ -111,12 +111,16 @@ public final class AddElevationOp extends Operator {
 
     @Override
     public void doExecute(ProgressMonitor pm) throws OperatorException {
+        pm.beginTask("Initializing Elevation Model", 1);
         try {
             initElevationModel();
             elevationBand.setNoDataValue(demNoDataValue);
             elevationBand.setNoDataValueUsed(true);
+            pm.worked(1);
         } catch (IOException e) {
             throw new OperatorException(e);
+        } finally {
+            pm.done();
         }
     }
 

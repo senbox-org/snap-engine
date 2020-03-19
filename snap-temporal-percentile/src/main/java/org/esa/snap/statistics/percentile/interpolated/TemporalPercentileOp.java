@@ -253,42 +253,46 @@ public class TemporalPercentileOp extends Operator {
     @Override
     public void doExecute(ProgressMonitor pm) throws OperatorException {
         pm.beginTask("", 5);
-        pm.setSubTaskName("Creating product area");
-        final Area targetArea = Utils.createProductArea(getTargetProduct());
-        pm.worked(1);
-        pm.setSubTaskName("Loading products");
-        final ProductValidator productValidator = new ProductValidator(sourceBandName, bandMathsExpression,
-                validPixelExpression, startDate, endDate, targetArea, getLogger());
-        final ProductLoader productLoader = new ProductLoader(sourceProductPaths, productValidator, getLogger());
-        final Product[] products = productLoader.loadProducts();
-        gc();
-        pm.worked(1);
+        try {
+            pm.setSubTaskName("Creating product area");
+            final Area targetArea = Utils.createProductArea(getTargetProduct());
+            pm.worked(1);
+            pm.setSubTaskName("Loading products");
+            final ProductValidator productValidator = new ProductValidator(sourceBandName, bandMathsExpression,
+                    validPixelExpression, startDate, endDate, targetArea, getLogger());
+            final ProductLoader productLoader = new ProductLoader(sourceProductPaths, productValidator, getLogger());
+            final Product[] products = productLoader.loadProducts();
+            gc();
+            pm.worked(1);
 
-        pm.setSubTaskName("Group products");
-        dailyGroupedSourceProducts = Utils.groupProductsDaily(products);
-        if (dailyGroupedSourceProducts.size() < 2) {
-            throw new OperatorException("For temporal percentile calculation " +
-                    "at least two days must contain valid input products.");
-        }
-        if (dailyGroupedSourceProducts.size() == 2 && splineOrQuadraticInterpolationIsSelected()) {
-            throw new OperatorException("For temporal percentile calculation " +
-                    "with percentileCalculationMethod='" + gapFillingMethod + "' " +
-                    "at least three days must contain valid input products.");
-        }
-        pm.worked(1);
+            pm.setSubTaskName("Group products");
+            dailyGroupedSourceProducts = Utils.groupProductsDaily(products);
+            if (dailyGroupedSourceProducts.size() < 2) {
+                throw new OperatorException("For temporal percentile calculation " +
+                        "at least two days must contain valid input products.");
+            }
+            if (dailyGroupedSourceProducts.size() == 2 && splineOrQuadraticInterpolationIsSelected()) {
+                throw new OperatorException("For temporal percentile calculation " +
+                        "with percentileCalculationMethod='" + gapFillingMethod + "' " +
+                        "at least three days must contain valid input products.");
+            }
+            pm.worked(1);
 
-        addInputMetadataToProduct(getTargetProduct());
-        initTimeSeriesStartAndEnd();
-        initTimeSeriesDataProduct();
-        pm.setSubTaskName("Compute Mean Data and write to time series product");
-        computeMeanDataForEachDayAndWriteDataToTimeSeriesProduct();
-        reloadIntermediateTimeSeriesProduct();
-        dailyGroupedSourceProducts.clear();
-        pm.worked(1);
-        getLogger().log(Level.INFO, "Input products collocated with target product.");
-        pm.setSubTaskName("Init percentile computer");
-        initPercentileComputer();
-        pm.worked(1);
+            addInputMetadataToProduct(getTargetProduct());
+            initTimeSeriesStartAndEnd();
+            initTimeSeriesDataProduct();
+            pm.setSubTaskName("Compute Mean Data and write to time series product");
+            computeMeanDataForEachDayAndWriteDataToTimeSeriesProduct();
+            reloadIntermediateTimeSeriesProduct();
+            dailyGroupedSourceProducts.clear();
+            pm.worked(1);
+            getLogger().log(Level.INFO, "Input products collocated with target product.");
+            pm.setSubTaskName("Init percentile computer");
+            initPercentileComputer();
+            pm.worked(1);
+        } finally {
+            pm.done();
+        }
     }
 
     private void checkMemNeeds(Product targetProduct) {

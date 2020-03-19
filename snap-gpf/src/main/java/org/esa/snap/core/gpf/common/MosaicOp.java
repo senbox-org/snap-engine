@@ -148,21 +148,25 @@ public class MosaicOp extends Operator {
     @Override
     public void doExecute(ProgressMonitor pm) throws OperatorException {
         pm.beginTask("Creating Mosaic", 6);
-        reprojectedProducts = createReprojectedProducts();
-        pm.worked(1);
-        // for each variable and each product one 'alpha' image is created.
-        // the alpha value for a pixel is either 0.0 or 1.0
-        List<List<PlanarImage>> alphaImageList = createAlphaImages();
-        pm.worked(1);
-        // for each variable and each product one 'source' image is created.
-        List<List<RenderedImage>> sourceImageList = createSourceImages();
-        pm.worked(1);
-        List<RenderedImage> mosaicImageList = createMosaicImages(sourceImageList, alphaImageList);
-        pm.worked(1);
-        final List<RenderedImage> variableCountImageList = createVariableCountImages(alphaImageList);
-        pm.worked(1);
-        setTargetBandImages(targetProduct, mosaicImageList, variableCountImageList);
-        pm.worked(1);
+        try {
+            reprojectedProducts = createReprojectedProducts();
+            pm.worked(1);
+            // for each variable and each product one 'alpha' image is created.
+            // the alpha value for a pixel is either 0.0 or 1.0
+            List<List<PlanarImage>> alphaImageList = createAlphaImages();
+            pm.worked(1);
+            // for each variable and each product one 'source' image is created.
+            List<List<RenderedImage>> sourceImageList = createSourceImages();
+            pm.worked(1);
+            List<RenderedImage> mosaicImageList = createMosaicImages(sourceImageList, alphaImageList);
+            pm.worked(1);
+            final List<RenderedImage> variableCountImageList = createVariableCountImages(alphaImageList);
+            pm.worked(1);
+            setTargetBandImages(targetProduct, mosaicImageList, variableCountImageList);
+            pm.worked(1);
+        } finally {
+            pm.done();
+        }
     }
 
     @Override

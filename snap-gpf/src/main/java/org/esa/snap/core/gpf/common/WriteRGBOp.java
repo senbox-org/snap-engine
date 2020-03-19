@@ -99,10 +99,16 @@ public class WriteRGBOp extends Operator {
 
     @Override
     public void doExecute(ProgressMonitor pm) throws OperatorException {
-        for (Band targetBand : rgbChannelNodes) {
-            ProductData data = targetBand.createCompatibleRasterData();
-            dataMap.put(targetBand, data);
-            targetBand.setRasterData(data);
+        pm.beginTask("Preparing bands", rgbChannelNodes.length);
+        try {
+            for (Band targetBand : rgbChannelNodes) {
+                ProductData data = targetBand.createCompatibleRasterData();
+                dataMap.put(targetBand, data);
+                targetBand.setRasterData(data);
+                pm.worked(1);
+            }
+        } finally {
+            pm.done();
         }
     }
 

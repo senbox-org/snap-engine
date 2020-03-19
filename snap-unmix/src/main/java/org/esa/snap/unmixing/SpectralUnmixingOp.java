@@ -245,32 +245,39 @@ public class SpectralUnmixingOp extends Operator {
     public void doExecute(ProgressMonitor pm) throws OperatorException {
         int numSourceBands = sourceBands.length;
         int numEndmembers = endmembers.length;
-        double[][] lsuMatrixElements = new double[numSourceBands][numEndmembers];
-        for (int j = 0; j < numEndmembers; j++) {
-            Endmember endmember = endmembers[j];
-            double[] wavelengths = endmember.getWavelengths();
-            double[] radiations = endmember.getRadiations();
-            for (int i = 0; i < numSourceBands; i++) {
-                Band sourceBand = sourceBands[i];
-                float wavelength = sourceBand.getSpectralWavelength();
-                float bandwidth = sourceBand.getSpectralBandwidth();
-                int k = findEndmemberSpectralIndex(wavelengths, wavelength, Math.max(bandwidth, minBandwidth));
-                if (k == -1) {
-                    throw new OperatorException(String.format("Band %s: No matching endmember wavelength found (%f nm)",
-                            sourceBand.getName(), wavelength));
+        pm.beginTask("Setting up Model", 10 + (numSourceBands * numEndmembers));
+        try {
+            double[][] lsuMatrixElements = new double[numSourceBands][numEndmembers];
+            for (int j = 0; j < numEndmembers; j++) {
+                Endmember endmember = endmembers[j];
+                double[] wavelengths = endmember.getWavelengths();
+                double[] radiations = endmember.getRadiations();
+                for (int i = 0; i < numSourceBands; i++) {
+                    Band sourceBand = sourceBands[i];
+                    float wavelength = sourceBand.getSpectralWavelength();
+                    float bandwidth = sourceBand.getSpectralBandwidth();
+                    int k = findEndmemberSpectralIndex(wavelengths, wavelength, Math.max(bandwidth, minBandwidth));
+                    if (k == -1) {
+                        throw new OperatorException(String.format("Band %s: No matching endmember wavelength found (%f nm)",
+                                sourceBand.getName(), wavelength));
+                    }
+                    lsuMatrixElements[i][j] = radiations[k];
+                    pm.worked(1);
                 }
-                lsuMatrixElements[i][j] = radiations[k];
             }
-        }
 
-        if (UC_LSU.equals(unmixingModelName)) {
-            spectralUnmixing = new UnconstrainedLSU(lsuMatrixElements);
-        } else if (C_LSU.equals(unmixingModelName)) {
-            spectralUnmixing = new ConstrainedLSU(lsuMatrixElements);
-        } else if (FC_LSU.equals(unmixingModelName)) {
-            spectralUnmixing = new FullyConstrainedLSU(lsuMatrixElements);
-        } else if (unmixingModelName == null) {
-            spectralUnmixing = new UnconstrainedLSU(lsuMatrixElements);
+            if (UC_LSU.equals(unmixingModelName)) {
+                spectralUnmixing = new UnconstrainedLSU(lsuMatrixElements);
+            } else if (C_LSU.equals(unmixingModelName)) {
+                spectralUnmixing = new ConstrainedLSU(lsuMatrixElements);
+            } else if (FC_LSU.equals(unmixingModelName)) {
+                spectralUnmixing = new FullyConstrainedLSU(lsuMatrixElements);
+            } else if (unmixingModelName == null) {
+                spectralUnmixing = new UnconstrainedLSU(lsuMatrixElements);
+            }
+            pm.worked(10);
+        } finally {
+            pm.done();
         }
     }
 

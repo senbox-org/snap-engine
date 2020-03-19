@@ -347,16 +347,21 @@ public class BandMathsOp extends Operator {
 
     private static void copyTiePointGridData(Product sourceProduct, Product targetProduct, ProgressMonitor pm) {
         pm.beginTask("Reading Tie Point Data", targetProduct.getNumTiePointGrids());
-        for (int i = 0; i < targetProduct.getNumTiePointGrids(); i++) {
-            TiePointGrid targetTPG = targetProduct.getTiePointGridAt(i);
-            if (targetTPG.getData() == null && sourceProduct.containsTiePointGrid(targetTPG.getName())) {
-                float[] srcTiePoints = sourceProduct.getTiePointGrid(targetTPG.getName()).getTiePoints();
-                final float[] destTiePoints = new float[srcTiePoints.length];
-                System.arraycopy(srcTiePoints, 0, destTiePoints, 0, srcTiePoints.length);
-                targetTPG.setData(ProductData.createInstance(destTiePoints));
-                pm.worked(1);
+        try {
+            for (int i = 0; i < targetProduct.getNumTiePointGrids(); i++) {
+                TiePointGrid targetTPG = targetProduct.getTiePointGridAt(i);
+                if (targetTPG.getData() == null && sourceProduct.containsTiePointGrid(targetTPG.getName())) {
+                    float[] srcTiePoints = sourceProduct.getTiePointGrid(targetTPG.getName()).getTiePoints();
+                    final float[] destTiePoints = new float[srcTiePoints.length];
+                    System.arraycopy(srcTiePoints, 0, destTiePoints, 0, srcTiePoints.length);
+                    targetTPG.setData(ProductData.createInstance(destTiePoints));
+                    pm.worked(1);
+                }
             }
+        } finally {
+            pm.done();
         }
+
     }
 
     @Override
@@ -372,7 +377,7 @@ public class BandMathsOp extends Operator {
         }
 
         final RasterDataEvalEnv env = new RasterDataEvalEnv(rect.x, rect.y, rect.width, rect.height,
-                                                            new LevelImageSupport(band.getRasterWidth(), band.getRasterHeight(), ResolutionLevel.MAXRES));
+                new LevelImageSupport(band.getRasterWidth(), band.getRasterHeight(), ResolutionLevel.MAXRES));
         pm.beginTask("Evaluating expression", rect.height);
         try {
             float fv = Float.NaN;
@@ -405,7 +410,7 @@ public class BandMathsOp extends Operator {
         Tile tile = getSourceTile(symbol.getRaster(), rect);
         if (tile.getRasterDataNode().isScalingApplied()) {
             ProductData dataBuffer = ProductData.createInstance(ProductData.TYPE_FLOAT32,
-                                                                tile.getWidth() * tile.getHeight());
+                    tile.getWidth() * tile.getHeight());
             int dataBufferIndex = 0;
             for (int y = rect.y; y < rect.y + rect.height; y++) {
                 for (int x = rect.x; x < rect.x + rect.width; x++) {
@@ -428,7 +433,7 @@ public class BandMathsOp extends Operator {
             throw new OperatorException(String.format("Missing data type for band %s.", bandDescriptor.name));
         }
         Band targetBand = new Band(bandDescriptor.name, ProductData.getType(bandDescriptor.type.toLowerCase()),
-                                   targetBandDimension.width, targetBandDimension.height);
+                targetBandDimension.width, targetBandDimension.height);
 
         if (StringUtils.isNotNullAndNotEmpty(bandDescriptor.description)) {
             targetBand.setDescription(bandDescriptor.description);
@@ -493,8 +498,8 @@ public class BandMathsOp extends Operator {
 
     private Namespace createNamespace() {
         WritableNamespace namespace = BandArithmetic.createDefaultNamespace(sourceProducts, 0,
-                                                                            new SourceProductNamespacePrefixProvider(),
-                                                                            BandArithmetic::getProductNodeNamePrefix);
+                new SourceProductNamespacePrefixProvider(),
+                BandArithmetic::getProductNodeNamePrefix);
         if (variables != null) {
             for (Variable variable : variables) {
                 if (ProductData.isFloatingPointType(ProductData.getType(variable.type))) {

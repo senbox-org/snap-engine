@@ -20,6 +20,7 @@ import com.bc.ceres.binding.Property;
 import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.binding.Validator;
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.SubProgressMonitor;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductSubsetBuilder;
 import org.esa.snap.core.dataio.ProductSubsetDef;
@@ -279,56 +280,67 @@ public class PixExOp extends Operator {
 
     @Override
     public void doExecute(ProgressMonitor pm) throws OperatorException {
-        if (exportKmz) {
-            kmlDocument = new KmlDocument("placemarks", null);
-            knownKmzPlacemarks = new ArrayList<>();
+        int numTicks = 7;
+        if (sourceProducts != null) {
+            numTicks += sourceProducts.length;
         }
-
-        if (extractTimeFromFilename) {
-            timeStampExtractor = new TimeStampExtractor(dateInterpretationPattern, filenameInterpretationPattern);
-        }
-
-        initAggregatorStrategy();
-
         Set<File> sourceProductFileSet = getSourceProductFileSet(this.sourceProductPaths, getLogger());
-        coordinateList = initCoordinateList();
-        Measurement[] originalMeasurements = createOriginalMeasurements(coordinateList);
-        parseTimeDelta(timeDifference);
-        final PixExRasterNamesFactory rasterNamesFactory = new PixExRasterNamesFactory(exportBands, exportTiePoints,
-                                                                                       exportMasks, aggregatorStrategy);
-
-        final PixExProductRegistry productRegistry = new PixExProductRegistry(outputFilePrefix, outputDir);
-        formatStrategy = initFormatStrategy(rasterNamesFactory, originalMeasurements,
-                                            productRegistry);
-        MeasurementFactory measurementFactory;
-        if (aggregatorStrategy == null || windowSize == 1) {
-            measurementFactory = new PixExMeasurementFactory(rasterNamesFactory, windowSize,
-                                                             productRegistry);
-        } else {
-            measurementFactory = new AggregatingPixExMeasurementFactory(rasterNamesFactory, windowSize,
-                                                                        productRegistry, aggregatorStrategy);
+        if (!sourceProductFileSet.isEmpty()) {
+            numTicks += sourceProductFileSet.size();
         }
-        TargetWriterFactoryAndMap targetFactory = new TargetWriterFactoryAndMap(outputFilePrefix, outputDir);
-
-        measurementWriter = new MeasurementWriter(measurementFactory, targetFactory, formatStrategy);
-
+        pm.beginTask("Extracting pixels", numTicks);
         try {
+            if (exportKmz) {
+                kmlDocument = new KmlDocument("placemarks", null);
+                knownKmzPlacemarks = new ArrayList<>();
+            }
+
+            if (extractTimeFromFilename) {
+                timeStampExtractor = new TimeStampExtractor(dateInterpretationPattern, filenameInterpretationPattern);
+            }
+
+            initAggregatorStrategy();
+
+            coordinateList = initCoordinateList();
+            pm.worked(1);
+            Measurement[] originalMeasurements = createOriginalMeasurements(coordinateList);
+            pm.worked(1);
+            parseTimeDelta(timeDifference);
+            final PixExRasterNamesFactory rasterNamesFactory = new PixExRasterNamesFactory(exportBands, exportTiePoints,
+                    exportMasks, aggregatorStrategy);
+
+            final PixExProductRegistry productRegistry = new PixExProductRegistry(outputFilePrefix, outputDir);
+            formatStrategy = initFormatStrategy(rasterNamesFactory, originalMeasurements,
+                    productRegistry);
+            MeasurementFactory measurementFactory;
+            if (aggregatorStrategy == null || windowSize == 1) {
+                measurementFactory = new PixExMeasurementFactory(rasterNamesFactory, windowSize,
+                        productRegistry);
+            } else {
+                measurementFactory = new AggregatingPixExMeasurementFactory(rasterNamesFactory, windowSize,
+                        productRegistry, aggregatorStrategy);
+            }
+            TargetWriterFactoryAndMap targetFactory = new TargetWriterFactoryAndMap(outputFilePrefix, outputDir);
+
+            measurementWriter = new MeasurementWriter(measurementFactory, targetFactory, formatStrategy);
+
             boolean measurementsFound = false;
             if (sourceProducts != null) {
                 Arrays.sort(sourceProducts, new ProductComparator());
                 for (Product product : sourceProducts) {
                     measurementsFound |= extractMeasurements(product);
+                    pm.worked(1);
                 }
             }
             if (!sourceProductFileSet.isEmpty()) {
-                measurementsFound |= extractMeasurements(sourceProductFileSet);
+                measurementsFound |= extractMeasurements(sourceProductFileSet, pm);
             }
 
             if (exportKmz && measurementsFound) {
                 KmzExporter kmzExporter = new KmzExporter();
                 File outFile = new File(outputDir, outputFilePrefix + "_coordinates.kmz");
                 try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(outFile))) {
-                    kmzExporter.export(kmlDocument, zos, ProgressMonitor.NULL);
+                    kmzExporter.export(kmlDocument, zos, new SubProgressMonitor(pm, 5));
                 } catch (IOException e) {
                     getLogger().log(Level.SEVERE, "Problem writing KMZ file.", e);
                 }
@@ -339,7 +351,10 @@ public class PixExOp extends Operator {
             }
 
         } finally {
-            measurementWriter.close();
+            if (measurementWriter != null) {
+                measurementWriter.close();
+            }
+            pm.done();
         }
 
         measurements = new PixExMeasurementReader(outputDir);
@@ -640,10 +655,11 @@ public class PixExOp extends Operator {
         return extractedCoordinates;
     }
 
-    private boolean extractMeasurements(Set<File> fileSet) {
+    private boolean extractMeasurements(Set<File> fileSet, ProgressMonitor pm) {
         boolean measurementsFound = false;
         for (File file : fileSet) {
             measurementsFound |= extractMeasurements(file);
+            pm.worked(1);
         }
         return measurementsFound;
     }

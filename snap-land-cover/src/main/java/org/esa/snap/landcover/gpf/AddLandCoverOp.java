@@ -52,10 +52,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * addLandCover adds a land cover band to a product
+ * AddLandCover adds a land cover band to a product
  */
 
-@OperatorMetadata(alias = "addLandCover",
+@OperatorMetadata(alias = "AddLandCover",
         category = "Raster/Masks",
         authors = "Jun Lu, Luis Veci",
         version = "1.0",
@@ -170,11 +170,18 @@ public final class AddLandCoverOp extends Operator {
 
     @Override
     public void doExecute(ProgressMonitor pm) throws OperatorException {
-        initializeDescriptors();
+        pm.beginTask("", 2);
         try {
+            pm.setTaskName("Initializing Descriptors");
+            initializeDescriptors();
+            pm.worked(1);
+            pm.setTaskName("Setting Land Cover Band Images");
             setLandCoverBandImages();
+            pm.worked(1);
         } catch (IOException e) {
             throw new OperatorException(e.getMessage());
+        } finally {
+            pm.done();
         }
     }
 
