@@ -114,7 +114,7 @@ public class ColorManipulationDefaults {
     public static final String PROPERTY_SCHEME_AUTO_APPLY_LABEL = "Apply " + NamingConvention.COLOR_MIXED_CASE + " Schemes Automatically";
     public static final String PROPERTY_SCHEME_AUTO_APPLY_TOOLTIP = "<html>Apply " + NamingConvention.COLOR_LOWER_CASE +" schemes automatically<br>" +
             " when opening a band based on its name</html>";
-    public static final boolean PROPERTY_SCHEME_AUTO_APPLY_DEFAULT = false;
+    public static final boolean PROPERTY_SCHEME_AUTO_APPLY_DEFAULT = true;
 
     public static final String PROPERTY_SCHEME_PALETTE_KEY = PROPERTY_SCHEME_KEY_SUFFIX + ".palette";
     public static final String PROPERTY_SCHEME_PALETTE_LABEL = "Palette";
@@ -159,7 +159,7 @@ public class ColorManipulationDefaults {
     public static final String PROPERTY_SCHEME_VERBOSE_LABEL = "Verbose";
     public static final String PROPERTY_SCHEME_VERBOSE_TOOLTIP = "<html>Scheme selector will show the verbose VERBOSE_NAME field<br>" +
             " from the color_palette_schemes.xml</html>";
-    public static final boolean PROPERTY_SCHEME_VERBOSE_DEFAULT = false;
+    public static final boolean PROPERTY_SCHEME_VERBOSE_DEFAULT = true;
 
     public static final String PROPERTY_SCHEME_SHOW_DISABLED_KEY = PROPERTY_SCHEME_SELECTOR_KEY_SUFFIX + ".show.disabled";
     public static final String PROPERTY_SCHEME_SHOW_DISABLED_LABEL = "Show Disabled";
