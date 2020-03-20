@@ -16,6 +16,7 @@
 
 package org.esa.snap.core.gpf.common;
 
+import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.dataio.ProductSubsetBuilder;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
@@ -91,6 +92,7 @@ public class MosaicOpTest {
         op.pixelSizeY = 1.0;
 
         final Product product = op.getTargetProduct();
+        op.doExecute(ProgressMonitor.NULL);
 
         final GeoPos[] geoPositions = {
                 new GeoPos(8, -8), new GeoPos(4, -4), new GeoPos(-1, 1), new GeoPos(-4, 4), new GeoPos(-8, 8)
@@ -122,6 +124,7 @@ public class MosaicOpTest {
         op.pixelSizeY = 1.0;
 
         final Product product = op.getTargetProduct();
+        op.doExecute(ProgressMonitor.NULL);
 
         final GeoPos[] geoPositions = {
                 new GeoPos(8, -8), new GeoPos(4, -4), new GeoPos(-1, 1), new GeoPos(-4, 4), new GeoPos(-8, 8)
@@ -153,6 +156,7 @@ public class MosaicOpTest {
         op.pixelSizeY = 1.0;
 
         final Product product = op.getTargetProduct();
+        op.doExecute(ProgressMonitor.NULL);
 
         final GeoPos[] geoPositions = {
                 new GeoPos(8, -8), new GeoPos(4, -4), new GeoPos(-1, 1), new GeoPos(-4, 4), new GeoPos(-8, 8)
@@ -197,6 +201,7 @@ public class MosaicOpTest {
         op.pixelSizeY = 1.0;
 
         final Product product = op.getTargetProduct();
+        op.doExecute(ProgressMonitor.NULL);
 
         final GeoPos[] geoPositions = {
                 new GeoPos(8, -8), new GeoPos(4, -4), new GeoPos(-1, 1), new GeoPos(-4, 4), new GeoPos(-8, 8)
@@ -232,6 +237,7 @@ public class MosaicOpTest {
         mosaicOp.pixelSizeY = 1.0;
 
         final Product mosaicProduct = mosaicOp.getTargetProduct();
+        mosaicOp.doExecute(ProgressMonitor.NULL);
 
         final MetadataElement mosaicMetadata = mosaicProduct.getMetadataRoot().getElement("Processing_Graph");
         assertNotNull(mosaicMetadata);
@@ -266,6 +272,7 @@ public class MosaicOpTest {
         mosaicUpdateOp.updateProduct = mosaicOp.getTargetProduct();
 
         final Product product = mosaicUpdateOp.getTargetProduct();
+        mosaicUpdateOp.doExecute(ProgressMonitor.NULL);
         final MetadataElement updateMetadata = product.getMetadataRoot().getElement("Processing_Graph");
         assertNotNull(updateMetadata);
         final MetadataElement updateSourcesElement = getSourcesElement(mosaicUpdateOp, updateMetadata);
