@@ -83,28 +83,24 @@ public class ImportVectorOp extends Operator {
 
     @Override
     public void initialize() throws OperatorException {
-        try {
-
-            targetProduct = new Product(sourceProduct.getName(), sourceProduct.getProductType(),
-                    sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
-
-            ProductUtils.copyProductNodes(sourceProduct, targetProduct);
-
-            for (String bandName : sourceProduct.getBandNames()) {
-                if (!targetProduct.containsBand(bandName)) {
-                    ProductUtils.copyBand(bandName, sourceProduct, targetProduct, true);
-                }
+        targetProduct = new Product(sourceProduct.getName(), sourceProduct.getProductType(),
+                sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
+        ProductUtils.copyProductNodes(sourceProduct, targetProduct);
+        for (String bandName : sourceProduct.getBandNames()) {
+            if (!targetProduct.containsBand(bandName)) {
+                ProductUtils.copyBand(bandName, sourceProduct, targetProduct, true);
             }
-
-            if (vectorFile != null) {
-                importGeometry(targetProduct, vectorFile);
-            }
-        } catch (Throwable e) {
-            throw new OperatorException(e);
         }
     }
 
-    private void importGeometry(final Product product, final File file) {
+    @Override
+    public void doExecute(ProgressMonitor pm) throws OperatorException {
+        if (vectorFile != null) {
+            importGeometry(targetProduct, vectorFile, pm);
+        }
+    }
+
+    private void importGeometry(final Product product, final File file, ProgressMonitor pm) {
 
         final GeoCoding geoCoding = product.getSceneGeoCoding();
         if (isShapefile(file) && (geoCoding == null || !geoCoding.canGetPixelPos())) {
@@ -120,7 +116,7 @@ public class ImportVectorOp extends Operator {
 
         VectorDataNode vectorDataNode;
         try {
-            vectorDataNode = reader.readVectorDataNode(file, product, null, ProgressMonitor.NULL);
+            vectorDataNode = reader.readVectorDataNode(file, product, null, pm);
         } catch (Exception e) {
             throw new OperatorException("Failed to import geometry.\n" + "An I/O Error occurred:\n"
                     + e.getMessage()); /* I18N */

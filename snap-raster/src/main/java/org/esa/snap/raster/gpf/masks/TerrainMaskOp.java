@@ -230,6 +230,21 @@ public final class TerrainMaskOp extends Operator {
         }
     }
 
+    @Override
+    public void doExecute(ProgressMonitor pm) throws OperatorException {
+        if (!isElevationModelAvailable) {
+            pm.beginTask("Preparing Elevation Model", 1);
+            try {
+                getElevationModel();
+                pm.worked(1);
+            } catch (Throwable e) {
+                OperatorUtils.catchOperatorException(getId(), e);
+            } finally {
+                pm.done();
+            }
+        }
+    }
+
     /**
      * Called by the framework in order to compute a tile for the given target band.
      * <p>The default implementation throws a runtime exception with the message "not implemented".</p>
@@ -249,10 +264,6 @@ public final class TerrainMaskOp extends Operator {
         final int h = targetTileRectangle.height;
 
         try {
-            if (!isElevationModelAvailable) {
-                getElevationModel();
-            }
-
             final int windowSize = window.getWindowSize();
             final double[][] localDEM = new double[h + windowSize + 2][w + windowSize + 2];
             final TileGeoreferencing tileGeoRef = new TileGeoreferencing(targetProduct, x0, y0, w + windowSize, h + windowSize);
