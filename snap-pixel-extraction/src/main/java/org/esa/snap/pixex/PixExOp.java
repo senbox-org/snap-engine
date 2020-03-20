@@ -275,6 +275,7 @@ public class PixExOp extends Operator {
                 throw new OperatorException("Directory for sub-scenes does not exist and could not be created.");
             }
         }
+        measurements = new PixExMeasurementReader(outputDir);
         setDummyTargetProduct();
     }
 
@@ -356,8 +357,7 @@ public class PixExOp extends Operator {
             }
             pm.done();
         }
-
-        measurements = new PixExMeasurementReader(outputDir);
+        measurements.update();
     }
 
     @SuppressWarnings("unchecked")

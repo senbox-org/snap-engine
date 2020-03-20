@@ -376,6 +376,12 @@ public class PixExOpTest {
         try (PixExMeasurementReader reader = (PixExMeasurementReader) pixEx.getTargetProperty(
                 "measurements")) {
             final List<Measurement> measurementList = convertToList(reader);
+            assertEquals(0, measurementList.size());
+        }
+        pixEx.doExecute(ProgressMonitor.NULL);
+        try (PixExMeasurementReader reader = (PixExMeasurementReader) pixEx.getTargetProperty(
+                "measurements")) {
+            final List<Measurement> measurementList = convertToList(reader);
             assertEquals(2, measurementList.size());
             testForExistingMeasurement(measurementList, "coord1", 1, 9.5f, 10.5f, 190.5f, 80.5f);
             testForExistingMeasurement(measurementList, "coord2", 2, 19.5f, 20.5f, 200.5f, 70.5f);
