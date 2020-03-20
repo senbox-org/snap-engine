@@ -131,7 +131,7 @@ public class FileTemplate implements Template {
         if (templateType == null) {
             throw new IllegalArgumentException("Unsupported file extension");
         }
-        fileName = FileUtils.getFileNameFromPath(value);
+        fileName = FileUtils.getFilenameFromPath(value);
     }
 
     @Override

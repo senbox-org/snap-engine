@@ -34,7 +34,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 
-import static org.junit.Assert.*;
+import static org.esa.snap.core.util.io.FileUtils.getFilenameFromPath;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class FileUtilsTest {
 
@@ -135,14 +139,14 @@ public class FileUtilsTest {
 
         // check that null is not allowed as argument
         try {
-            FileUtils.getFileNameFromPath(null);
+            getFilenameFromPath((String) null);
             fail("Exception expected here!");
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException ignored) {
         }
 
-        assertEquals(expected1, FileUtils.getFileNameFromPath(path1));
-        assertEquals(expected2, FileUtils.getFileNameFromPath(path2));
-        assertEquals(expected3, FileUtils.getFileNameFromPath(path3));
+        assertEquals(expected1, getFilenameFromPath(path1));
+        assertEquals(expected2, getFilenameFromPath(path2));
+        assertEquals(expected3, getFilenameFromPath(path3));
     }
 
     @Test

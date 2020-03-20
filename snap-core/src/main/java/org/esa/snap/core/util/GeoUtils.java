@@ -6,16 +6,18 @@ import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.util.math.Range;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.CoordinateFilter;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.simplify.DouglasPeuckerSimplifier;
 
 import java.awt.Rectangle;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Area;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.PathIterator;
-import java.awt.geom.Rectangle2D;
+import java.awt.geom.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.Math.*;
 import static org.esa.snap.core.util.ProductUtils.normalizeGeoPolygon;
 
 public class GeoUtils {
@@ -643,5 +645,154 @@ public class GeoUtils {
             iterator.next();
         }
         return subPaths;
+    }
+
+    private static org.locationtech.jts.geom.Polygon convertAwtPathToJtsPolygon(Path2D path, GeometryFactory factory) {
+        final PathIterator pathIterator = path.getPathIterator(null);
+        ArrayList<double[]> coordList = new ArrayList<>();
+        int lastOpenIndex = 0;
+        while (!pathIterator.isDone()) {
+            final double[] coords = new double[6];
+            final int segType = pathIterator.currentSegment(coords);
+            if (segType == PathIterator.SEG_CLOSE) {
+                // we should only detect a single SEG_CLOSE
+                coordList.add(coordList.get(lastOpenIndex));
+                lastOpenIndex = coordList.size();
+            } else {
+                coordList.add(coords);
+            }
+            pathIterator.next();
+        }
+        final Coordinate[] coordinates = new Coordinate[coordList.size()];
+        for (int i1 = 0; i1 < coordinates.length; i1++) {
+            final double[] coord = coordList.get(i1);
+            coordinates[i1] = new Coordinate(coord[0], coord[1]);
+        }
+
+        return factory.createPolygon(factory.createLinearRing(coordinates), null);
+    }
+
+    public static Rectangle computePixelRegionUsingGeometry(GeoCoding rasterGeoCoding, int rasterWidth, int rasterHeight, Geometry geometryRegion,
+                                                            int numBorderPixels, boolean roundPixelRegion) {
+
+        final Geometry rasterGeometry = computeRasterGeometry(rasterGeoCoding, rasterWidth, rasterHeight);
+        final Geometry regionIntersection = geometryRegion.intersection(rasterGeometry);
+        if (regionIntersection.isEmpty()) {
+            return new Rectangle(); // the intersection is empty
+        }
+        final GeoUtils.PixelRegionFinder pixelRegionFinder = new GeoUtils.PixelRegionFinder(rasterGeoCoding, roundPixelRegion);
+        regionIntersection.apply(pixelRegionFinder);
+        final Rectangle pixelRegion = pixelRegionFinder.getPixelRegion();
+        pixelRegion.grow(numBorderPixels, numBorderPixels);
+        return pixelRegion.intersection(new Rectangle(rasterWidth, rasterHeight));
+    }
+
+    public static Geometry computeGeometryUsingPixelRegion(GeoCoding rasterGeoCoding, Rectangle pixelRegion) {
+        if (pixelRegion == null) {
+            throw new NullPointerException("The pixel region is null.");
+        }
+        final int step = Math.min(pixelRegion.width, pixelRegion.height) / 8;
+        GeneralPath[] paths = createGeoBoundaryPaths(rasterGeoCoding, pixelRegion, step, false);
+        final org.locationtech.jts.geom.Polygon[] polygons = new org.locationtech.jts.geom.Polygon[paths.length];
+        final GeometryFactory factory = new GeometryFactory();
+        for (int i = 0; i < paths.length; i++) {
+            polygons[i] = convertAwtPathToJtsPolygon(paths[i], factory);
+        }
+        if (polygons.length == 1) {
+            return polygons[0];
+        } else {
+            return factory.createMultiPolygon(polygons);
+        }
+    }
+
+    public static Geometry computeRasterGeometry(GeoCoding rasterGeoCoding, int rasterWidth, int rasterHeight) {
+        final GeneralPath[] paths = createGeoBoundaryPaths(rasterGeoCoding, rasterWidth, rasterHeight);
+        final org.locationtech.jts.geom.Polygon[] polygons = new org.locationtech.jts.geom.Polygon[paths.length];
+        final GeometryFactory factory = new GeometryFactory();
+        for (int i = 0; i < paths.length; i++) {
+            polygons[i] = convertAwtPathToJtsPolygon(paths[i], factory);
+        }
+        final DouglasPeuckerSimplifier peuckerSimplifier = new DouglasPeuckerSimplifier(polygons.length == 1 ? polygons[0] : factory.createMultiPolygon(polygons));
+        return peuckerSimplifier.getResultGeometry();
+    }
+
+    private static GeneralPath[] createGeoBoundaryPaths(GeoCoding productGeoCoding, int productWidth, int productHeight) {
+        final Rectangle rect = new Rectangle(0, 0, productWidth, productHeight);
+        final int step = Math.min(rect.width, rect.height) / 8;
+        return createGeoBoundaryPaths(productGeoCoding, rect, step > 0 ? step : 1, true);
+    }
+
+    private static GeoPos[] createGeoBoundary(GeoCoding geoCoding, Rectangle region, int step, boolean usePixelCenter) {
+        if (geoCoding == null) {
+            throw new NullPointerException("The geo coding is null.");
+        }
+        if (region == null) {
+            throw new NullPointerException("The region is null.");
+        }
+        final PixelPos[] points = GeoUtils.createPixelBoundaryFromRect(region, step, usePixelCenter);
+        final ArrayList<GeoPos> geoPoints = new ArrayList<>(points.length);
+        for (final PixelPos pixelPos : points) {
+            final GeoPos gcGeoPos = geoCoding.getGeoPos(pixelPos, null);
+            if (true) { // including valid positions only leads to unit test failures 'very elsewhere' rq-20140414
+                geoPoints.add(gcGeoPos);
+            }
+        }
+        return geoPoints.toArray(new GeoPos[geoPoints.size()]);
+    }
+
+    private static GeneralPath[] createGeoBoundaryPaths(GeoCoding geoCoding, Rectangle region, int step, boolean usePixelCenter) {
+        if (geoCoding == null) {
+            throw new NullPointerException("The geo coding is null.");
+        }
+        if (region == null) {
+            throw new NullPointerException("The region is null.");
+        }
+        final GeoPos[] geoPoints = createGeoBoundary(geoCoding, region, step, usePixelCenter);
+        normalizeGeoPolygon(geoPoints);
+        final ArrayList<GeneralPath> pathList = assemblePathList(geoPoints);
+        return pathList.toArray(new GeneralPath[pathList.size()]);
+    }
+
+    private static class PixelRegionFinder implements CoordinateFilter {
+
+        private final GeoCoding geoCoding;
+
+        private int x1;
+        private int y1;
+        private int x2;
+        private int y2;
+        private boolean round = false;
+
+        private PixelRegionFinder(GeoCoding geoCoding, boolean round) {
+            this.geoCoding = geoCoding;
+            x1 = Integer.MAX_VALUE;
+            x2 = Integer.MIN_VALUE;
+            y1 = Integer.MAX_VALUE;
+            y2 = Integer.MIN_VALUE;
+            this.round = round;
+        }
+
+        @Override
+        public void filter(Coordinate coordinate) {
+            final GeoPos geoPos = new GeoPos(coordinate.y, coordinate.x);
+            final PixelPos pixelPos = geoCoding.getPixelPos(geoPos, null);
+            if (pixelPos.isValid()) {
+                if(round) {
+                    x1 = min(x1, (int) round(pixelPos.x));
+                    x2 = max(x2, (int) round(pixelPos.x));
+                    y1 = min(y1, (int) round(pixelPos.y));
+                    y2 = max(y2, (int) round(pixelPos.y));
+                } else {
+                    x1 = min(x1, (int) floor(pixelPos.x));
+                    x2 = max(x2, (int) ceil(pixelPos.x));
+                    y1 = min(y1, (int) floor(pixelPos.y));
+                    y2 = max(y2, (int) ceil(pixelPos.y));
+                }
+            }
+        }
+
+        public Rectangle getPixelRegion() {
+            return new Rectangle(x1, y1, x2 - x1, y2 - y1);
+        }
     }
 }

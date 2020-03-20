@@ -5,14 +5,28 @@ import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.auth.Credentials;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.esa.snap.remote.products.repository.*;
+import org.esa.snap.remote.products.repository.AbstractGeometry2D;
+import org.esa.snap.remote.products.repository.Attribute;
+import org.esa.snap.remote.products.repository.DataFormatType;
+import org.esa.snap.remote.products.repository.GeometryUtils;
+import org.esa.snap.remote.products.repository.HTTPServerException;
+import org.esa.snap.remote.products.repository.PixelType;
+import org.esa.snap.remote.products.repository.RemoteMission;
+import org.esa.snap.remote.products.repository.RemoteProductsRepositoryProvider;
+import org.esa.snap.remote.products.repository.RepositoryProduct;
+import org.esa.snap.remote.products.repository.RepositoryQueryParameter;
+import org.esa.snap.remote.products.repository.SensorType;
+import org.esa.snap.remote.products.repository.ThreadStatus;
 import org.esa.snap.remote.products.repository.listener.ProductListDownloaderListener;
 import org.esa.snap.remote.products.repository.listener.ProgressListener;
-import org.locationtech.jts.geom.*;
+import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 import ro.cs.tao.configuration.ConfigurationManager;
-import ro.cs.tao.datasource.*;
+import ro.cs.tao.datasource.DataQuery;
+import ro.cs.tao.datasource.DataSource;
+import ro.cs.tao.datasource.DataSourceComponent;
+import ro.cs.tao.datasource.DataSourceManager;
 import ro.cs.tao.datasource.param.CommonParameterNames;
 import ro.cs.tao.datasource.param.DataSourceParameter;
 import ro.cs.tao.datasource.param.ParameterName;
@@ -33,8 +47,17 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
-import java.lang.InterruptedException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -56,6 +79,16 @@ public class TAORemoteRepositoriesManager {
         this.remoteRepositoryProductProviders = new RemoteProductsRepositoryProvider[services.size()];
         int index = 0;
         for (DataSource dataSource : services) {
+            Map<String, Map<String, Map<String, String>>> filteredParameters = null;
+            if ("Alaska Satellite Facility".equals(dataSource.getId())) {
+                filteredParameters = buildAlaskaSatelliteFacilityParameterFilter();
+            } else if ("Amazon Web Services".equals(dataSource.getId())) {
+            } else if ("Scientific Data Hub".equals(dataSource.getId())) {
+            } else if ("USGS".equals(dataSource.getId())) {
+            }
+            if (filteredParameters != null && filteredParameters.size() > 0) {
+//                dataSource.setFilteredParameters(filteredParameters);
+            }
             this.remoteRepositoryProductProviders[index++] = new TAORemoteRepositoryProvider(dataSource.getId());
         }
 
@@ -577,5 +610,28 @@ public class TAORemoteRepositoriesManager {
             }
         }
         return exceptionMessage.toString();
+    }
+
+    /**
+     * The structure of the map is: Map<Sensor, Map<ParameterName, Map<ValueSetEntry, ValueSetFriendlyValue>>>
+     */
+    private static Map<String, Map<String, Map<String, String>>> buildAlaskaSatelliteFacilityParameterFilter() {
+//        Map<String, String> productTypeParameterValues = new HashMap<>();
+//        productTypeParameterValues.put("GRD_HS", "GRD_HS");
+//        productTypeParameterValues.put("GRD_HD", "GRD_HD");
+//        productTypeParameterValues.put("GRD_MS", "GRD_MS");
+//        productTypeParameterValues.put("GRD_MD", "GRD_MD");
+//        productTypeParameterValues.put("GRD_FS", "GRD_FS");
+//        productTypeParameterValues.put("GRD_FD", "GRD_FD");
+//        productTypeParameterValues.put("SLC", "SLC");
+//        productTypeParameterValues.put("OCN", "OCN");
+//
+//        Map<String, Map<String, String>> sentinel1Parameters = new HashMap<>();
+//        sentinel1Parameters.put("productType", productTypeParameterValues);
+//
+//        Map<String, Map<String, Map<String, String>>> filteredParameters = new HashMap<>();
+//        filteredParameters.put("Sentinel1", sentinel1Parameters);
+//        return filteredParameters;
+        return null;
     }
 }

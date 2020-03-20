@@ -19,11 +19,11 @@ public class LocalRepositoryProduct implements RepositoryProduct {
 
     private final int id;
     private final String name;
-    private final Path path;
     private final Date acquisitionDate;
     private final long sizeInBytes;
     private final AbstractGeometry2D polygon;
 
+    private Path path;
     private String mission;
     private List<Attribute> attributes;
     private BufferedImage quickLookImage;
@@ -121,5 +121,9 @@ public class LocalRepositoryProduct implements RepositoryProduct {
 
     public Path getPath() {
         return path;
+    }
+
+    public void setPath(Path path) {
+        this.path = path;
     }
 }

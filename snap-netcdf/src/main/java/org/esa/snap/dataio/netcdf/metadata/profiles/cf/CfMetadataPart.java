@@ -19,11 +19,13 @@ import org.esa.snap.core.datamodel.MetadataAttribute;
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.dataio.netcdf.ProfileReadContext;
 import org.esa.snap.dataio.netcdf.ProfileWriteContext;
 import org.esa.snap.dataio.netcdf.metadata.ProfilePartIO;
 import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
 import org.esa.snap.dataio.netcdf.util.MetadataUtils;
+import org.esa.snap.dataio.netcdf.util.VariableNameHelper;
 
 import java.io.IOException;
 
@@ -42,8 +44,15 @@ public class CfMetadataPart extends ProfilePartIO {
         final MetadataAttribute[] globalAttributes = metadataRoot.getAttributes();
         for (final MetadataAttribute attribute : globalAttributes) {
             final int dataType = attribute.getDataType();
+            String attributeName = attribute.getName();
+            if (!VariableNameHelper.isVariableNameValid(attributeName)) {
+                attributeName = VariableNameHelper.convertToValidName(attributeName);
+                SystemUtils.LOG.warning("Found invalid attribute name '" + attribute.getName() +
+                                                "' - replaced by '" + attributeName + "'.");
+            }
+
             if (dataType == ProductData.TYPE_ASCII) {
-                netcdfFileWriteable.addGlobalAttribute(attribute.getName(), attribute.getData().getElemString());
+                netcdfFileWriteable.addGlobalAttribute(attributeName, attribute.getData().getElemString());
                 continue;
             }
 
@@ -59,16 +68,16 @@ public class CfMetadataPart extends ProfilePartIO {
                     dataType == ProductData.TYPE_INT32 ||
                     dataType == ProductData.TYPE_UINT32) {
                 final int data = attribute.getData().getElemInt();
-                netcdfFileWriteable.addGlobalAttribute(attribute.getName(), data);
+                netcdfFileWriteable.addGlobalAttribute(attributeName, data);
             } else if (dataType == ProductData.TYPE_FLOAT32) {
                 final float data = attribute.getData().getElemFloat();
-                netcdfFileWriteable.addGlobalAttribute(attribute.getName(), data);
+                netcdfFileWriteable.addGlobalAttribute(attributeName, data);
             } else if (dataType == ProductData.TYPE_FLOAT64) {
                 final double data = attribute.getData().getElemDouble();
-                netcdfFileWriteable.addGlobalAttribute(attribute.getName(), data);
+                netcdfFileWriteable.addGlobalAttribute(attributeName, data);
             } else if (dataType == ProductData.TYPE_INT64) {
                 final long data = (long) attribute.getData().getElemDouble();
-                netcdfFileWriteable.addGlobalAttribute(attribute.getName(), data);
+                netcdfFileWriteable.addGlobalAttribute(attributeName, data);
             }
 
         }
