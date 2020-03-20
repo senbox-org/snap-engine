@@ -19,6 +19,7 @@ package org.esa.snap.pixex;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.measurement.Measurement;
+import org.esa.snap.runtime.EngineConfig;
 
 import java.io.BufferedReader;
 import java.io.Closeable;
@@ -45,12 +46,25 @@ public class PixExMeasurementReader implements Iterator<Measurement>, Closeable 
     private BufferedReader[] bufferedReaders;
     private String measurementLine;
     private File inputDir;
-    private AtomicBoolean isInitialzed;
+    private AtomicBoolean isInitialized;
 
     public PixExMeasurementReader(File inputDir) {
         this.inputDir = inputDir;
         readerIndex = 0;
-        isInitialzed = new AtomicBoolean(false);
+        isInitialized = new AtomicBoolean(false);
+    }
+
+    void update() {
+        if (isInitialized.get()) {
+            try {
+                close();
+            } catch (IOException e) {
+                EngineConfig.instance().logger().warning("Could not close reader");
+            } finally {
+                bufferedReaders = null;
+                isInitialized.set(false);
+            }
+        }
     }
 
     private void initialize(File inputDir) {
@@ -58,7 +72,7 @@ public class PixExMeasurementReader implements Iterator<Measurement>, Closeable 
             bufferedReaders = initReader(inputDir.listFiles(new MeasurementFilenameFilter()));
             measurementLine = getNextMeasurementLine();
         } catch (IOException e) {
-            e.printStackTrace();
+            EngineConfig.instance().logger().warning("Could not initialize readers. No measurements available.");
         }
     }
 
@@ -80,7 +94,7 @@ public class PixExMeasurementReader implements Iterator<Measurement>, Closeable 
 
     @Override
     public boolean hasNext() {
-        if (isInitialzed.compareAndSet(false, true)) {
+        if (isInitialized.compareAndSet(false, true)) {
             initialize(inputDir);
         }
         return measurementLine != null;
@@ -88,7 +102,7 @@ public class PixExMeasurementReader implements Iterator<Measurement>, Closeable 
 
     @Override
     public Measurement next() {
-        if (isInitialzed.compareAndSet(false, true)) {
+        if (isInitialized.compareAndSet(false, true)) {
             initialize(inputDir);
         }
         if (measurementLine == null) {
@@ -174,7 +188,7 @@ public class PixExMeasurementReader implements Iterator<Measurement>, Closeable 
 
     @Override
     public void close() throws IOException {
-        if (isInitialzed.get()) {
+        if (isInitialized.get()) {
             for (BufferedReader bufferedReader : bufferedReaders) {
                 bufferedReader.close();
             }
