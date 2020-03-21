@@ -60,7 +60,7 @@ public final class ReaderUtils {
         return virtBand;
     }
 
-    private static String createName(String origName, String newPrefix) {
+    public static String createName(String origName, String newPrefix) {
         int sepPos = origName.indexOf("_");
         if (sepPos < 0) {
             sepPos = origName.length();
