@@ -20,9 +20,8 @@ import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.MetadataElement;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.OperatorSpi;
-import org.esa.snap.core.util.SystemUtils;
-import org.esa.snap.engine_utilities.datamodel.AbstractMetadata;
 import org.esa.snap.dem.gpf.AddElevationOp;
+import org.esa.snap.engine_utilities.datamodel.AbstractMetadata;
 import org.esa.snap.engine_utilities.util.TestUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,7 +29,9 @@ import org.junit.Test;
 import java.io.File;
 import java.util.Arrays;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
 /**
@@ -80,6 +81,7 @@ public class TestCreateElevationOp {
 
         // get targetProduct: execute initialize()
         final Product targetProduct = op.getTargetProduct();
+        op.doExecute(ProgressMonitor.NULL);
         TestUtils.verifyProduct(targetProduct, true, true, true);
 
         final Band elevBand = targetProduct.getBand("elevation");
