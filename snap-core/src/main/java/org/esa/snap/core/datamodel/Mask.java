@@ -134,9 +134,9 @@ public class Mask extends Band {
 
     private boolean isMaskImageInvalid(MultiLevelImage image) {
         return image.getSampleModel().getDataType() != DataBuffer.TYPE_BYTE
-               || image.getNumBands() != 1
-               || image.getWidth() != getRasterWidth()
-               || image.getHeight() != getRasterHeight();
+                || image.getNumBands() != 1
+                || image.getWidth() != getRasterWidth()
+                || image.getHeight() != getRasterHeight();
     }
 
     @Override
@@ -259,6 +259,9 @@ public class Mask extends Band {
             }
             try {
                 if (mask.getProduct() != null) {
+                    if (getSampleCodingRaster(expression, mask.getProduct(), product) != null) {
+                        return true;
+                    }
                     for (RasterDataNode raster : BandArithmetic.getRefRasters(expression, mask.getProduct())) {
                         if (raster instanceof Mask) {
                             if (!product.getMaskGroup().contains(raster.getName())) {
@@ -284,15 +287,72 @@ public class Mask extends Band {
         public Mask transferMask(Mask mask, Product product) {
             if (canTransferMask(mask, product)) {
                 String expression = getExpression(mask);
+                String sampleCodingRaster = getSampleCodingRaster(expression, mask.getProduct(), product);
+                if (sampleCodingRaster != null) {
+                    final String maskName = ProductUtils.getAvailableNodeName(mask.getName(), product.getMaskGroup());
+                    final RasterDataNode refRaster = product.getRasterDataNode(sampleCodingRaster);
+                    Mask trandferredMask = Mask.BandMathsType.create(maskName, mask.getDescription(),
+                            refRaster.getRasterWidth(), refRaster.getRasterHeight(),
+                            expression, mask.getImageColor(), mask.getImageTransparency());
+                    trandferredMask.setGeoCoding(refRaster.getGeoCoding());
+                    product.addMask(trandferredMask);
+                    return trandferredMask;
+                }
                 final Map<Mask, Mask> translationMap = transferReferredMasks(expression, mask.getProduct(), product);
                 expression = translateExpression(translationMap, expression);
-                final String originalMaskName = mask.getName();
-                final String maskName = ProductUtils.getAvailableNodeName(originalMaskName, product.getMaskGroup());
+                final String maskName = ProductUtils.getAvailableNodeName(mask.getName(), product.getMaskGroup());
                 return product.addMask(maskName, expression, mask.getDescription(),
-                                       mask.getImageColor(), mask.getImageTransparency());
+                        mask.getImageColor(), mask.getImageTransparency());
             }
 
             return null;
+        }
+
+        private String getSampleCodingRaster(String expression, Product sourceProduct, Product targetProduct) {
+            if (sourceProduct != null) {
+                String[] splitExpression = expression.split("\\.");
+                if (splitExpression.length == 2) {
+                    if (isFlagCodingExpression(splitExpression[0], splitExpression[1], sourceProduct, targetProduct) ||
+                            isIndexCodingExpression(splitExpression[0], splitExpression[1], sourceProduct, targetProduct)) {
+                        return splitExpression[0];
+                    }
+                }
+            }
+            return null;
+        }
+
+        private boolean isFlagCodingExpression(String rasterName, String attribute,
+                                               Product sourceProduct, Product targetProduct) {
+            Band sourceRaster = sourceProduct.getBand(rasterName);
+            Band targetRaster = targetProduct.getBand(rasterName);
+            if (sourceRaster != null && targetRaster != null && sourceRaster.isFlagBand() && targetRaster.isFlagBand()) {
+                    String flagCodingName = sourceRaster.getFlagCoding().getName();
+                    return isFlagCodingExpression(flagCodingName, attribute, sourceProduct) ||
+                            isFlagCodingExpression(flagCodingName, attribute, targetProduct);
+            }
+            return false;
+        }
+
+        private boolean isIndexCodingExpression(String rasterName, String attribute,
+                                                Product sourceProduct, Product targetProduct) {
+            Band sourceRaster = sourceProduct.getBand(rasterName);
+            Band targetRaster = targetProduct.getBand(rasterName);
+            if (sourceRaster != null && targetRaster != null && sourceRaster.isIndexBand() && targetRaster.isIndexBand()) {
+                String indexCodingName = sourceRaster.getIndexCoding().getName();
+                return isIndexCodingExpression(indexCodingName, attribute, sourceProduct) ||
+                        isIndexCodingExpression(indexCodingName, attribute, targetProduct);
+            }
+            return false;
+        }
+
+        private boolean isFlagCodingExpression(String codingName, String codingAttribute, Product product) {
+            return product.getFlagCodingGroup().contains(codingName) &&
+                    product.getFlagCodingGroup().get(codingName).getFlag(codingAttribute) != null;
+        }
+
+        private boolean isIndexCodingExpression(String codingName, String codingAttribute, Product product) {
+            return product.getIndexCodingGroup().contains(codingName) &&
+                    product.getIndexCodingGroup().get(codingName).getIndex(codingAttribute) != null;
         }
 
         private static Map<Mask, Mask> transferReferredMasks(String expression, Product sourceProduct,
@@ -372,9 +432,11 @@ public class Mask extends Band {
 
         /**
          * Used to read in Mask from legacy "BitmaskDef" format
+         *
          * @param element A DOM element
-         * @param width The width of the mask
-         * @param height The height of the mask
+         * @param width   The width of the mask
+         * @param height  The height of the mask
+         *
          * @return a mask
          */
         public static Mask createFromBitmaskDef(Element element, int width, int height) {
@@ -461,7 +523,7 @@ public class Mask extends Band {
         public PropertyContainer createImageConfig() {
 
             PropertyDescriptor vectorDataDescriptor = new PropertyDescriptor(PROPERTY_NAME_VECTOR_DATA,
-                                                                             VectorDataNode.class);
+                    VectorDataNode.class);
             vectorDataDescriptor.setNotNull(true);
 
             PropertyContainer imageConfig = super.createImageConfig();

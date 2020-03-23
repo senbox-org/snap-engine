@@ -33,7 +33,7 @@ public class GcpGeoCodingTest {
     }
 
     @Test
-    public void transferGeoCoding() throws Exception {
+    public void testTransferGeoCoding() {
         Scene source = SceneFactory.createScene(new Band("source", ProductData.TYPE_INT8, 10, 10));
         Scene target = SceneFactory.createScene(new Band("target", ProductData.TYPE_INT8, 10, 10));
 

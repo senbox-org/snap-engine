@@ -89,10 +89,18 @@ public class WatermaskOp extends Operator {
         validateParameter();
         validateSourceProduct();
         initTargetProduct();
+    }
+
+    @Override
+    public void doExecute(ProgressMonitor pm) throws OperatorException {
+        pm.beginTask("Creating Watermask Classifier", 1);
         try {
             classifier = new WatermaskClassifier(resolution, subSamplingFactorX, subSamplingFactorY);
+            pm.worked(1);
         } catch (IOException e) {
             throw new OperatorException("Error creating class WatermaskClassifier.", e);
+        } finally {
+            pm.done();
         }
     }
 

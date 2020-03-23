@@ -21,13 +21,14 @@ import org.esa.snap.core.dataio.dimap.DimapProductConstants;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.util.Guardian;
-import org.esa.snap.core.util.SystemUtils;
+import org.esa.snap.runtime.EngineConfig;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -270,7 +271,7 @@ public class ProductIO {
      */
     public static ProductReader getProductReaderForInput(Object input) {
         final long startTimeTotal = System.currentTimeMillis();
-        Logger logger = SystemUtils.LOG;
+        Logger logger = EngineConfig.instance().logger();
         logger.fine("Searching reader plugin for '" + input + "'");
         ProductIOPlugInManager registry = ProductIOPlugInManager.getInstance();
         Iterator<ProductReaderPlugIn> it = registry.getAllReaderPlugIns();
@@ -290,7 +291,7 @@ public class ProductIO {
                     selectedPlugIn = plugIn;
                 }
             } catch (Exception e) {
-                logger.severe("Error attempting to read " + input + " with plugin reader " + plugIn.toString() + ": " + e.getMessage());
+                logger.log(Level.SEVERE, "Error attempting to read " + input + " with plugin reader " + plugIn.toString(), e);
             }
         }
         final long endTimeTotal = System.currentTimeMillis();

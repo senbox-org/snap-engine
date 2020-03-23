@@ -19,6 +19,7 @@ package org.esa.snap.core.datamodel;
 import org.esa.snap.core.dataio.ProductSubsetBuilder;
 import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.datamodel.TiePointGeoCodingLongTest.TestSet;
+import org.esa.snap.core.transform.AffineTransform2D;
 import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.esa.snap.core.util.Debug;
 import org.junit.After;
@@ -69,6 +70,23 @@ public class TiePointGeoCodingTest {
     }
 
     @Test
+    public void testTransferGeoCoding_nonStandardGridParameters() {
+        final Scene srcScene = SceneFactory.createScene(createProduct(-1.5f, 2.5f, 2.5f, 2.5f));
+        final Scene destScene = SceneFactory.createScene(new Product("test2", "test2", PW + 2, PH - 2));
+
+        final boolean transferred = srcScene.transferGeoCodingTo(destScene, null);
+        assertTrue(transferred);
+        final GeoCoding destGeoCoding = destScene.getGeoCoding();
+        assertNotNull(destGeoCoding);
+        assertTrue(destGeoCoding instanceof TiePointGeoCoding);
+
+        final PixelPos pixelPos = new PixelPos(PW/2.0f, PH/2.0f);
+        final GeoPos srcGeoPos = srcScene.getGeoCoding().getGeoPos(pixelPos, null);
+        final GeoPos destGeoPos = destScene.getGeoCoding().getGeoPos(pixelPos, null);
+        assertEquals(srcGeoPos, destGeoPos);
+    }
+
+    @Test
     public void testTransferGeoCoding_WithSpatialSubset() throws IOException {
         final Scene srcScene = SceneFactory.createScene(createProduct());
         final ProductSubsetDef subsetDef = new ProductSubsetDef();
@@ -105,10 +123,17 @@ public class TiePointGeoCodingTest {
     }
 
     private Product createProduct() {
+        return createProduct(0.5f, 0.5f, S , S);
+    }
+
+    private Product createProduct(float tiePointGridOffsetX, float tiePointGridOffsetY, float subSamplingX,
+                                  float subSamplingY) {
         Product product = new Product("test", "test", PW, PH);
 
-        TiePointGrid latGrid = new TiePointGrid("latGrid", GW, GH, 0.5f, 0.5f, S, S, createLatGridData());
-        TiePointGrid lonGrid = new TiePointGrid("lonGrid", GW, GH, 0.5f, 0.5f, S, S, createLonGridData());
+        TiePointGrid latGrid = new TiePointGrid("latGrid", GW, GH, tiePointGridOffsetX, tiePointGridOffsetY,
+                subSamplingX, subSamplingY, createLatGridData());
+        TiePointGrid lonGrid = new TiePointGrid("lonGrid", GW, GH, tiePointGridOffsetX, tiePointGridOffsetY,
+                subSamplingX, subSamplingY, createLonGridData());
 
         product.addTiePointGrid(latGrid);
         product.addTiePointGrid(lonGrid);
