@@ -188,6 +188,7 @@
                 <configuration>
                     <publicPackages>
                         <publicPackage>org.hsqldb.*</publicPackage>
+                        <publicPackage>javax.annotation.*</publicPackage>
                         <publicPackage>javax.measure.*</publicPackage>
                         <publicPackage>javax.vecmath.*</publicPackage>
                         <publicPackage>org.jdom.*</publicPackage>
