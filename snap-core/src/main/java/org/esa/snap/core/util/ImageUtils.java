@@ -21,6 +21,7 @@ package org.esa.snap.core.util;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.image.ImageManager;
+import org.esa.snap.core.util.jai.JAIUtils;
 import org.esa.snap.core.util.jai.SingleBandedSampleModel;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -111,6 +112,21 @@ public class ImageUtils {
             return regionRasterSize;
         }
         return new Dimension(defaultSceneRasterWidth, defaultSceneRasterHeight);
+    }
+
+    public static Dimension computePreferredMosaicTileSize(int imageWidth, int imageHeight, int granularity) {
+        Dimension dimension = JAIUtils.computePreferredTileSize(imageWidth, imageHeight, granularity);
+        int maximumRowTileCount = 10;
+        int maximumColumnTileCount = 10;
+        int mosaicTileWidth = imageWidth / maximumColumnTileCount;
+        int mosaicTileHeight = imageHeight / maximumRowTileCount;
+        if (mosaicTileWidth < dimension.width) {
+            mosaicTileWidth = dimension.width; // increase the mosaic tile width
+        }
+        if (mosaicTileHeight < dimension.height) {
+            mosaicTileHeight = dimension.height; // increase the mosaic tile height
+        }
+        return new Dimension(mosaicTileWidth, mosaicTileHeight);
     }
 
     public static int computeTileCount(int imageSize, int tileSize) {
