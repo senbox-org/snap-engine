@@ -49,9 +49,11 @@ import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.dataop.maptransf.Datum;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.subset.PixelSubsetRegion;
+import org.esa.snap.core.util.ImageUtils;
 import org.esa.snap.core.util.geotiff.EPSGCodes;
 import org.esa.snap.core.util.geotiff.GeoTIFFCodes;
 import org.esa.snap.core.util.io.FileUtils;
+import org.esa.snap.core.util.jai.JAIUtils;
 import org.esa.snap.dataio.ImageRegistryUtils;
 import org.esa.snap.dataio.geotiff.internal.GeoKeyEntry;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
@@ -282,8 +284,8 @@ public class GeoTiffProductReader extends AbstractProductReader {
             product.getMetadataRoot().setModified(false);
         }
 
-        Dimension preferredTileSize = computePreferredTiling(isGlobalShifted180, geoTiffImageReader, product.getSceneRasterSize());
-        product.setPreferredTileSize(preferredTileSize);
+        Dimension preferredMosaicTileSize = computePreferredMosaicTileSize(isGlobalShifted180, product.getSceneRasterSize());
+        product.setPreferredTileSize(preferredMosaicTileSize);
         product.setProductReader(this);
 
         GeoCoding bandGeoCoding = buildBandGeoCoding(product.getSceneGeoCoding(), productBounds.width, productBounds.height);
@@ -310,7 +312,7 @@ public class GeoTiffProductReader extends AbstractProductReader {
                         throw new IllegalStateException("The band index " + bandIndex + " must be < " + sampleModel.getNumBands() + ". The band name is '" + band.getName() + "'.");
                     }
                     int dataBufferType = ImageManager.getDataBufferType(band.getDataType()); // sampleModel.getDataType();
-                    GeoTiffMultiLevelSource multiLevelSource = new GeoTiffMultiLevelSource(geoTiffImageReader, dataBufferType, productBounds, preferredTileSize,
+                    GeoTiffMultiLevelSource multiLevelSource = new GeoTiffMultiLevelSource(geoTiffImageReader, dataBufferType, productBounds, preferredMosaicTileSize,
                                                                                            bandIndex, band.getGeoCoding(), isGlobalShifted180, noDataValue);
                     band.setSourceImage(new DefaultMultiLevelImage(multiLevelSource));
                 }
@@ -428,11 +430,11 @@ public class GeoTiffProductReader extends AbstractProductReader {
         return product;
     }
 
-    private static Dimension computePreferredTiling(boolean isGlobalShifted180, GeoTiffImageReader geoTiffImageReader, Dimension productSize) throws IOException {
+    private static Dimension computePreferredMosaicTileSize(boolean isGlobalShifted180, Dimension productSize) {
         if (isGlobalShifted180) {
             return new Dimension(productSize.width, productSize.height);
         }
-        return geoTiffImageReader.computePreferredTiling(productSize.width, productSize.height);
+        return ImageUtils.computePreferredMosaicTileSize(productSize.width, productSize.height, 1);
     }
 
     private static ImageInfo buildIndexedImageInfo(Product product, TIFFRenderedImage baseImage, Band band) {

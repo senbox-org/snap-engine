@@ -40,7 +40,7 @@ public class GeoTiffMultiLevelSource extends AbstractMosaicSubsetMultiLevelSourc
     protected RenderedImage createImage(int level) {
         java.util.List<RenderedImage> tileImages = buildUncompressedTileImages(level, this.imageReadBounds, this.tileSize, 0.0f, 0.0f, this, null);
         if (tileImages.size() > 0) {
-            return buildMosaicOp(level, tileImages, false);
+            return buildMosaicOp(level, tileImages, true);
         }
         return null;
     }
