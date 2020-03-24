@@ -1,5 +1,7 @@
 package org.esa.snap.remote.products.repository;
 
+import org.esa.snap.remote.products.repository.geometry.AbstractGeometry2D;
+
 import java.awt.image.BufferedImage;
 import java.util.Date;
 import java.util.List;
@@ -11,7 +13,11 @@ public interface RepositoryProduct {
 
     public AbstractGeometry2D getPolygon();
 
-    public List<Attribute> getAttributes();
+    public List<Attribute> getRemoteAttributes();
+
+    public List<Attribute> getLocalAttributes();
+
+    public void setLocalAttributes(List<Attribute> localAttributes);
 
     public String getName();
 
@@ -23,10 +29,6 @@ public interface RepositoryProduct {
 
     public Date getAcquisitionDate();
 
-    public String getMission();
-
-    public String getRepositoryName();
-
     public void setQuickLookImage(BufferedImage quickLookImage);
 
     public BufferedImage getQuickLookImage();
@@ -36,4 +38,6 @@ public interface RepositoryProduct {
     public DataFormatType getDataFormatType();
 
     public SensorType getSensorType();
+
+    public RemoteMission getRemoteMission();
 }
