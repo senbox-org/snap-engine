@@ -3,7 +3,7 @@ package org.esa.snap.remote.products.repository;
 import org.apache.http.auth.Credentials;
 import org.esa.snap.remote.products.repository.listener.ProductListDownloaderListener;
 import org.esa.snap.remote.products.repository.listener.ProgressListener;
-import org.esa.snap.remote.products.repository.tao.TAORemoteRepositoriesManager;
+import org.esa.snap.remote.products.repository.donwload.RemoteRepositoriesManager;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -42,6 +42,6 @@ public interface RemoteProductsRepositoryProvider {
                                 throws Exception;
 
     public static RemoteProductsRepositoryProvider[] getRemoteProductsRepositoryProviders() {
-        return TAORemoteRepositoriesManager.getInstance().getRemoteProductsRepositoryProviders();
+        return RemoteRepositoriesManager.getInstance().getRemoteProductsRepositoryProviders();
     }
 }
