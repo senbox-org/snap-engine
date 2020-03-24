@@ -48,12 +48,17 @@ public abstract class AbstractMatrixMosaicSubsetMultiLevelSource extends Abstrac
                                                                                float translateLevelOffsetY, MosaicMatrix.MatrixCell matrixCell);
 
     @Override
-    protected RenderedImage createImage(int level) {
+    protected final RenderedImage createImage(int level) {
+        int levelTotalImageWidth = computeLevelTotalImageWidth(level);
+        int levelTotalImageHeight = computeLevelTotalImageHeight(level);
+
+        int lastRowIndex = this.mosaicMatrix.getRowCount() - 1;
+        int lastColumnIndex = this.mosaicMatrix.getColumnCount() - 1;
         java.util.List<RenderedImage> matrixTileImages = new ArrayList<>();
         int cellMatrixOffsetY = 0;
-        for (int rowIndex = 0; rowIndex < this.mosaicMatrix.getRowCount(); rowIndex++) {
+        for (int rowIndex = 0; rowIndex <= lastRowIndex; rowIndex++) {
             int cellMatrixOffsetX = 0;
-            for (int columnIndex = 0; columnIndex < this.mosaicMatrix.getColumnCount(); columnIndex++) {
+            for (int columnIndex = 0; columnIndex <= lastColumnIndex; columnIndex++) {
                 MosaicMatrix.MatrixCell matrixCell = this.mosaicMatrix.getCellAt(rowIndex, columnIndex);
                 Rectangle cellMatrixBounds = new Rectangle(cellMatrixOffsetX, cellMatrixOffsetY, matrixCell.getCellWidth(), matrixCell.getCellHeight());
                 Rectangle intersectionMatrixBounds = this.imageReadBounds.intersection(cellMatrixBounds);
@@ -62,8 +67,14 @@ public abstract class AbstractMatrixMosaicSubsetMultiLevelSource extends Abstrac
                     int cellLocalOffsetY = intersectionMatrixBounds.y - cellMatrixBounds.y;
                     Rectangle cellLocalIntersectionBounds = new Rectangle(cellLocalOffsetX, cellLocalOffsetY, intersectionMatrixBounds.width, intersectionMatrixBounds.height);
 
+                    int levelCellImageWidth = ImageUtils.computeLevelSize(cellLocalIntersectionBounds.width, level);
+                    int levelCellImageHeight = ImageUtils.computeLevelSize(cellLocalIntersectionBounds.height, level);
+
                     float cellTranslateLevelOffsetX = (float) ImageUtils.computeLevelSizeAsDouble(intersectionMatrixBounds.x - this.imageReadBounds.x, level);
+                    cellTranslateLevelOffsetX -= computeTranslateDifference(cellTranslateLevelOffsetX, levelCellImageWidth, levelTotalImageWidth, columnIndex, lastColumnIndex, level);
+
                     float cellTranslateLevelOffsetY = (float) ImageUtils.computeLevelSizeAsDouble(intersectionMatrixBounds.y - this.imageReadBounds.y, level);
+                    cellTranslateLevelOffsetY -= computeTranslateDifference(cellTranslateLevelOffsetY, levelCellImageHeight, levelTotalImageHeight, rowIndex, lastRowIndex, level);
 
                     java.util.List<RenderedImage> cellTileImages = buildMatrixCellTileImages(level, cellLocalIntersectionBounds, cellTranslateLevelOffsetX, cellTranslateLevelOffsetY, matrixCell);
                     matrixTileImages.addAll(cellTileImages);
