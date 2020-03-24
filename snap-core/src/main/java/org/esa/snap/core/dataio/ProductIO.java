@@ -473,8 +473,8 @@ public class ProductIO {
             pm.beginTask("Writing bands of product '" + product.getName() + "'...", bandsToWrite.size());
             final int numBands = bandsToWrite.size();
             final int numThreads = Runtime.getRuntime().availableProcessors();
-            int executorSize = numThreads / numBands;
-            executorSize = executorSize == 0 ? 1 : executorSize;
+            final int threadsPerBand = numThreads / numBands;
+            final int executorSize = threadsPerBand == 0 ? 1 : threadsPerBand;
             Semaphore semaphore = null;
             List<IOException> ioExceptionCollector = null;
             if (concurrent) {
