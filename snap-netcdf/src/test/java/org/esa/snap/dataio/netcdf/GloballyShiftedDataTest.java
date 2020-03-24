@@ -45,6 +45,11 @@ public class GloballyShiftedDataTest {
     // This test relates to https://senbox.atlassian.net/browse/SNAP-950
     @BeforeClass
     public static void createTestDataFile() throws IOException {
+//        Assume.assumeTrue("Runs only on windows", isWindows());
+
+        System.out.println("**************** is Running Windows: " + isWindows());
+
+        new NetCdfActivator().start();
 
         tempFile = File.createTempFile(GloballyShiftedDataTest.class.getSimpleName(), ".nc");
 //        tempFile = new File(String.format("%s\\%s.nc", System.getProperty("user.home"), GloballyShiftedDataTest.class.getSimpleName()));
@@ -183,4 +188,9 @@ public class GloballyShiftedDataTest {
         }
 
     }
+
+    private static boolean isWindows() {
+        return System.getProperty("os.name").toLowerCase().startsWith("win");
+    }
+
 }

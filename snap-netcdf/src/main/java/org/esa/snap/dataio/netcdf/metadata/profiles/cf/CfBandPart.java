@@ -408,6 +408,7 @@ public class CfBandPart extends ProfilePartIO {
             final String sampleName = CfFlagCodingPart.replaceNonWordCharacters(uniqueNames[i]);
             switch (sampleMasks.getDataType()) {
                 case BYTE:
+                case UBYTE:
                     int[] byteValues = {DataType.unsignedByteToShort(sampleMasks.getNumericValue(i).byteValue()),
                             DataType.unsignedByteToShort(sampleValues.getNumericValue(i).byteValue())};
                     if (byteValues[0] == byteValues[1]) {
@@ -417,6 +418,7 @@ public class CfBandPart extends ProfilePartIO {
                     }
                     break;
                 case SHORT:
+                case USHORT:
                     int[] shortValues = {DataType.unsignedShortToInt(sampleMasks.getNumericValue(i).shortValue()),
                             DataType.unsignedShortToInt(sampleValues.getNumericValue(i).shortValue())};
                     if (shortValues[0] == shortValues[1]) {
@@ -426,6 +428,7 @@ public class CfBandPart extends ProfilePartIO {
                     }
                     break;
                 case INT:
+                case UINT:
                     int[] intValues = {sampleMasks.getNumericValue(i).intValue(),
                             sampleValues.getNumericValue(i).intValue()};
                     if (intValues[0] == intValues[1]) {
@@ -435,6 +438,7 @@ public class CfBandPart extends ProfilePartIO {
                     }
                     break;
                 case LONG:
+                case ULONG:
                     long[] longValues = {sampleMasks.getNumericValue(i).longValue(),
                             sampleValues.getNumericValue(i).longValue()};
                     if (msb) {

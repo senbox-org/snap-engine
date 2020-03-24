@@ -1,5 +1,6 @@
 package org.esa.snap.dataio.netcdf.nc;
 
+import org.esa.snap.dataio.netcdf.NetCdfActivator;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,6 +19,10 @@ import static org.junit.Assert.fail;
  * @author Marco Peters
  */
 public class MaxStringAttributeLengthTest {
+
+    static {
+        new NetCdfActivator().start();
+    }
 
     private static final int TOO_LONG = N4Variable.MAX_ATTRIBUTE_LENGTH + 10;
     private NFileWriteable nc4Writable;
