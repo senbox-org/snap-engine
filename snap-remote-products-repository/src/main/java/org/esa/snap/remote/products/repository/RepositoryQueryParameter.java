@@ -5,6 +5,10 @@ package org.esa.snap.remote.products.repository;
  */
 public class RepositoryQueryParameter {
 
+    public static final String START_DATE = "startDate";
+    public static final String END_DATE = "endDate";
+    public static final String FOOTPRINT = "footprint";
+
     private final String name;
     private final String label;
     private final Class<?> type;
