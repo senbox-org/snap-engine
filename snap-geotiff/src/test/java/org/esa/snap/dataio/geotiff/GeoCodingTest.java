@@ -28,7 +28,7 @@ public class GeoCodingTest {
         final GeoTiffProductReader reader = new GeoTiffProductReader(new GeoTiffProductReaderPlugIn());
         FileCacheImageInputStream imageInputStream = new FileCacheImageInputStream(resource.openStream(), null);
         GeoTiffImageReader geoTiffImageReader = new GeoTiffImageReader(imageInputStream);
-        String defaultProductName = FileUtils.getFilenameWithoutExtension(new File(filePath).getName().toString());
+        String defaultProductName = FileUtils.getFilenameWithoutExtension(new File(filePath).getName());
         final Product product = reader.readProduct(geoTiffImageReader, defaultProductName);
 
         final GeoCoding geoCoding = product.getSceneGeoCoding();
@@ -38,7 +38,6 @@ public class GeoCodingTest {
         final GeoPos lr = geoCoding.getGeoPos(new PixelPos(49, 49), null);
         assertEquals(2.03596, lr.lon, 1.0e-5);
         assertEquals(48.17303, lr.lat, 1.0e-5);
-
     }
 
     @Test
@@ -56,6 +55,5 @@ public class GeoCodingTest {
         final GeoPos lr = geoCoding.getGeoPos(new PixelPos(49, 49), null);
         assertEquals(2.03596, lr.lon, 1.0e-5);
         assertEquals(48.17303, lr.lat, 1.0e-5);
-
     }
 }

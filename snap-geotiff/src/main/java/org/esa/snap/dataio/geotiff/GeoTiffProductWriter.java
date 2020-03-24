@@ -49,7 +49,7 @@ public class GeoTiffProductWriter extends AbstractProductWriter {
      *
      * @param writerPlugIn the given GeoTIFF product writer plug-in, must not be <code>null</code>
      */
-    public GeoTiffProductWriter(final ProductWriterPlugIn writerPlugIn) {
+    GeoTiffProductWriter(final ProductWriterPlugIn writerPlugIn) {
         super(writerPlugIn);
     }
 
