@@ -108,6 +108,9 @@ public class ResourceInstaller {
                         if (Files.getFileAttributeView(targetFile, PosixFileAttributeView.class) != null) {
                             Files.setPosixFilePermissions(targetFile, rwsr_xr_x);
                         }
+                        System.out.println("resource " + targetFile + " updated");
+                    } else if (!Files.isDirectory(resource)) {
+                        System.out.println("resource " + targetFile + " up-to-date");
                     }
                     pm.worked(1);
                 }
