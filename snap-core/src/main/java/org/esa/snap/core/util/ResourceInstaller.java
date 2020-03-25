@@ -27,8 +27,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.PosixFileAttributeView;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static java.nio.file.StandardCopyOption.*;
@@ -40,6 +44,8 @@ import static java.nio.file.StandardCopyOption.*;
  * @version $Revision$ $Date$
  */
 public class ResourceInstaller {
+
+    private final Set<PosixFilePermission> rwsr_xr_x = PosixFilePermissions.fromString("rwxr-xr-x");
 
     private final Path sourceBasePath;
     private final Path targetDirPath;
@@ -98,6 +104,10 @@ public class ResourceInstaller {
                         }
                         Files.createDirectories(parentPath);
                         Files.copy(resource, targetFile, REPLACE_EXISTING, COPY_ATTRIBUTES);
+                        // set executable here since maven resource plugin is broken and drops them
+                        if (Files.getFileAttributeView(targetFile, PosixFileAttributeView.class) != null) {
+                            Files.setPosixFilePermissions(targetFile, rwsr_xr_x);
+                        }
                     }
                     pm.worked(1);
                 }
