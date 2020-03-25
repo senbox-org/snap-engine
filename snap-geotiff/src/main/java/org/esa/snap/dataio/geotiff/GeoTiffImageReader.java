@@ -26,6 +26,7 @@ import org.opengis.referencing.operation.MathTransform;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
+import javax.imageio.ImageTypeSpecifier;
 import javax.imageio.stream.ImageInputStream;
 import javax.media.jai.InterpolationNearest;
 import javax.media.jai.RenderedOp;
@@ -38,6 +39,7 @@ import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.awt.image.SampleModel;
 import java.io.*;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
@@ -52,7 +54,8 @@ import java.util.zip.GZIPInputStream;
 /**
  * Created by jcoravu on 22/11/2019.
  */
-public class GeoTiffImageReader implements Closeable {
+public class GeoTiffImageReader implements Closeable, GeoTiffRasterRegion {
+
     private static final Logger logger = Logger.getLogger(GeoTiffImageReader.class.getName());
 
     private static final int BUFFER_SIZE = 1024 * 1024;
@@ -62,6 +65,8 @@ public class GeoTiffImageReader implements Closeable {
     private final Closeable closeable;
 
     private RenderedImage swappedSubsampledImage;
+    private Rectangle rectangle;
+    private ImageReadParam readParam;
 
     public GeoTiffImageReader(ImageInputStream imageInputStream) throws IOException {
         this.imageReader = findImageReader(imageInputStream);
@@ -94,6 +99,9 @@ public class GeoTiffImageReader implements Closeable {
             } catch (IOException ignore) {
                 // ignore
             }
+            this.rectangle = null;
+            this.readParam = null;
+            this.swappedSubsampledImage = null;
         } finally {
             if (this.closeable != null) {
                 try {
@@ -109,22 +117,34 @@ public class GeoTiffImageReader implements Closeable {
         return (TIFFImageMetadata) this.imageReader.getImageMetadata(FIRST_IMAGE);
     }
 
-    public Raster readRect(boolean isGlobalShifted180, int sourceOffsetX, int sourceOffsetY, int sourceStepX, int sourceStepY, int destOffsetX, int destOffsetY, int destWidth, int destHeight)
+    @Override
+    public Raster readRect(boolean isGlobalShifted180, int sourceOffsetX, int sourceOffsetY, int sourceStepX, int sourceStepY,
+                           int destOffsetX, int destOffsetY, int destWidth, int destHeight)
                            throws IOException {
 
-        ImageReadParam readParam = this.imageReader.getDefaultReadParam();
+        if (this.readParam == null) {
+            this.readParam = this.imageReader.getDefaultReadParam();
+        }
+        if (this.rectangle == null) {
+            this.rectangle = new Rectangle();
+        }
         int subsamplingXOffset = sourceOffsetX % sourceStepX;
         int subsamplingYOffset = sourceOffsetY % sourceStepY;
-        readParam.setSourceSubsampling(sourceStepX, sourceStepY, subsamplingXOffset, subsamplingYOffset);
-        RenderedImage subsampledImage = this.imageReader.readAsRenderedImage(FIRST_IMAGE, readParam);
-        Rectangle rectangle = new Rectangle(destOffsetX, destOffsetY, destWidth, destHeight);
-        if (isGlobalShifted180) {
-            if (this.swappedSubsampledImage == null) {
-                this.swappedSubsampledImage = horizontalMosaic(getHalfImages(subsampledImage));
+        this.readParam.setSourceSubsampling(sourceStepX, sourceStepY, subsamplingXOffset, subsamplingYOffset);
+        RenderedImage subsampledImage = this.imageReader.readAsRenderedImage(FIRST_IMAGE, this.readParam);
+        try {
+            this.rectangle.setBounds(destOffsetX, destOffsetY, destWidth, destHeight);
+            if (isGlobalShifted180) {
+                if (this.swappedSubsampledImage == null) {
+                    this.swappedSubsampledImage = horizontalMosaic(getHalfImages(subsampledImage));
+                }
+                return this.swappedSubsampledImage.getData(this.rectangle);
+            } else {
+                return subsampledImage.getData(this.rectangle);
             }
-            return this.swappedSubsampledImage.getData(rectangle);
-        } else {
-            return subsampledImage.getData(rectangle);
+        } finally {
+            WeakReference<RenderedImage> referenceImage = new WeakReference<>(subsampledImage);
+            referenceImage.clear();
         }
     }
 
@@ -145,9 +165,9 @@ public class GeoTiffImageReader implements Closeable {
     }
 
     public SampleModel getSampleModel() throws IOException {
-        ImageReadParam readParam = this.imageReader.getDefaultReadParam();
-        TIFFRenderedImage baseImage = (TIFFRenderedImage) this.imageReader.readAsRenderedImage(FIRST_IMAGE, readParam);
-        return baseImage.getSampleModel();
+        Iterator iter = this.imageReader.getImageTypes(FIRST_IMAGE);
+        ImageTypeSpecifier its = (ImageTypeSpecifier)iter.next();
+        return its.getSampleModel();
     }
 
     public TIFFRenderedImage getBaseImage() throws IOException {

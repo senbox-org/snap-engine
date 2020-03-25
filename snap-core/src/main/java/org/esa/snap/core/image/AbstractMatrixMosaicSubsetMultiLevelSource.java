@@ -14,7 +14,7 @@ import java.util.ArrayList;
  */
 public abstract class AbstractMatrixMosaicSubsetMultiLevelSource extends AbstractMosaicSubsetMultiLevelSource {
 
-    private final MosaicMatrix mosaicMatrix;
+    protected final MosaicMatrix mosaicMatrix;
 
     protected AbstractMatrixMosaicSubsetMultiLevelSource(MosaicMatrix mosaicMatrix, Rectangle imageMatrixReadBounds, Dimension tileSize, GeoCoding geoCoding) {
         this(mosaicMatrix, imageMatrixReadBounds, tileSize, Product.findImageToModelTransform(geoCoding));
