@@ -26,6 +26,7 @@ import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Stream;
@@ -87,7 +88,10 @@ public class ResourceInstaller {
                     Path relFilePath = sourceBasePath.relativize(resource);
                     String relPathString = relFilePath.toString();
                     Path targetFile = targetDirPath.resolve(relPathString);
-                    if (!Files.exists(targetFile) && !Files.isDirectory(resource)) {
+                    if (!(Files.exists(targetFile)
+                            && Files.readAttributes(targetFile, BasicFileAttributes.class).lastModifiedTime().compareTo(Files.readAttributes(resource, BasicFileAttributes.class).lastModifiedTime()) == 0
+                            && Files.size(targetFile) == Files.size(resource))
+                        && !Files.isDirectory(resource)) {
                         Path parentPath = targetFile.getParent();
                         if (parentPath == null) {
                             throw new IOException("Could not retrieve the parent directory of '" + targetFile.toString() + "'.");
