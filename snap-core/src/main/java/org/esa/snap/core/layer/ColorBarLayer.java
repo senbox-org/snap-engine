@@ -99,9 +99,24 @@ public class ColorBarLayer extends Layer {
             imageLegend.setShowTitle((Boolean) isShowTitle());
             imageLegend.setHeaderText((String) title);
             imageLegend.setHeaderUnitsText((String) units);
-            imageLegend.setOrientation(ImageLegend.HORIZONTAL);
+            imageLegend.setOrientation(getOrientation());
             imageLegend.setBackgroundColor((Color) Color.WHITE);
-            imageLegend.setForegroundColor((Color) Color.BLACK);
+            imageLegend.setForegroundColor(getTextColor());
+            imageLegend.setTickmarkColor(getTickmarksColor());
+            imageLegend.setTickmarkLength(getTickmarksLength());
+            imageLegend.setTickmarkWidth(getTickmarksWidth());
+            imageLegend.setTickmarkShow(isTickmarksShow());
+
+
+            imageLegend.setBorderShow(isBorderShow());
+            imageLegend.setBorderWidth(getBorderWidth());
+            imageLegend.setBorderColor(getBorderColor());
+
+
+
+
+            imageLegend.setTitleColor(getTitleColor());
+            imageLegend.setLabelColor(getTextColor());
             imageLegend.setBackgroundTransparency(((Number) 0.5).floatValue());
             imageLegend.setAntialiasing((Boolean) true);
             imageLegend.setColorBarLength((Integer) 1200);
@@ -388,9 +403,7 @@ public class ColorBarLayer extends Layer {
     }
 
 
-    private int getOrientation() {
-        return ImageLegend.HORIZONTAL;
-    }
+
 
 
     private void getUserValues() {
@@ -470,10 +483,7 @@ public class ColorBarLayer extends Layer {
                 ColorBarLayerType.PROPERTY_LABELS_COLOR_DEFAULT);
     }
 
-    private Color getTickmarksColor() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TICKMARKS_COLOR_NAME,
-                ColorBarLayerType.PROPERTY_TICKMARKS_COLOR_DEFAULT);
-    }
+
 
 
     private Color getInsideLabelsBgColor() {
@@ -495,12 +505,6 @@ public class ColorBarLayer extends Layer {
     }
 
 
-    private double getBorderWidthPixels() {
-        double borderLineWidthPts = getConfigurationProperty(ColorBarLayerType.PROPERTY_BORDER_WIDTH_NAME,
-                ColorBarLayerType.PROPERTY_BORDER_WIDTH_DEFAULT);
-
-        return getPtsToPixelsMultiplier() * borderLineWidthPts;
-    }
 
 
     private double getDashLengthPixels() {
@@ -540,6 +544,78 @@ public class ColorBarLayer extends Layer {
 
         return ptsToPixelsMultiplier;
     }
+
+
+    private int getOrientation() {
+        String orientation = getConfigurationProperty(ColorBarLayerType.PROPERTY_FORMATTING_ORIENTATION_KEY,
+                ColorBarLayerType.PROPERTY_FORMATTING_ORIENTATION_DEFAULT);
+
+        if (ColorBarLayerType.OPTION_VERTICAL.equals(orientation)) {
+            return ImageLegend.VERTICAL;
+        } else {
+            return ImageLegend.HORIZONTAL;
+        }
+    }
+
+
+    private Color getTextColor() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_FORMATTING_TEXT_COLOR_KEY,
+                ColorBarLayerType.PROPERTY_FORMATTING_TEXT_COLOR_DEFAULT);
+    }
+
+    private Color getTitleColor() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_COLOR_KEY,
+                ColorBarLayerType.PROPERTY_TITLE_COLOR_DEFAULT);
+    }
+
+
+
+
+    // Tickmarks Section
+
+    private Color getTickmarksColor() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TICKMARKS_COLOR_KEY,
+                ColorBarLayerType.PROPERTY_TICKMARKS_COLOR_DEFAULT);
+    }
+
+    private boolean isTickmarksShow() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TICKMARKS_SHOW_KEY,
+                ColorBarLayerType.PROPERTY_TICKMARKS_SHOW_DEFAULT);
+    }
+
+
+    private int getTickmarksLength() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TICKMARKS_LENGTH_KEY,
+                ColorBarLayerType.PROPERTY_TICKMARKS_LENGTH_DEFAULT);
+    }
+
+    private int getTickmarksWidth() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TICKMARKS_WIDTH_KEY,
+                ColorBarLayerType.PROPERTY_TICKMARKS_WIDTH_DEFAULT);
+    }
+
+
+
+    // Border Section
+
+    private boolean isBorderShow() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_BORDER_SHOW_KEY,
+                ColorBarLayerType.PROPERTY_BORDER_SHOW_DEFAULT);
+    }
+
+    private Color getBorderColor() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_BORDER_COLOR_KEY,
+                ColorBarLayerType.PROPERTY_BORDER_COLOR_DEFAULT);
+    }
+
+    private int getBorderWidth() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_BORDER_WIDTH_KEY,
+                ColorBarLayerType.PROPERTY_BORDER_WIDTH_DEFAULT);
+    }
+
+
+
+
 
 
     private String getLabelsFont() {
@@ -594,17 +670,17 @@ public class ColorBarLayer extends Layer {
 
 
     private boolean isShowTitle() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_COLORBAR_TITLE_SHOW_TITLE_NAME,
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_COLORBAR_TITLE_SHOW_TITLE_KEY,
                 ColorBarLayerType.PROPERTY_COLORBAR_TITLE_SHOW_TITLE_DEFAULT);
     }
 
     private String getTitle() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_COLORBAR_TITLE_TITLE_NAME,
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_COLORBAR_TITLE_TITLE_KEY,
                 ColorBarLayerType.PROPERTY_COLORBAR_TITLE_TITLE_DEFAULT);
     }
 
     private String getUnits() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_COLORBAR_TITLE_UNITS_NAME,
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_COLORBAR_TITLE_UNITS_KEY,
                 ColorBarLayerType.PROPERTY_COLORBAR_TITLE_UNITS_DEFAULT);
     }
 
@@ -671,10 +747,7 @@ public class ColorBarLayer extends Layer {
     }
 
 
-    private boolean isBorderShow() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_BORDER_SHOW_NAME,
-                ColorBarLayerType.PROPERTY_BORDER_SHOW_DEFAULT);
-    }
+
 
     private boolean isLabelsSuffix() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABELS_SUFFIX_NSWE_NAME,
@@ -686,10 +759,6 @@ public class ColorBarLayer extends Layer {
                 ColorBarLayerType.PROPERTY_LABELS_DECIMAL_VALUE_DEFAULT);
     }
 
-    private Color getBorderColor() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_BORDER_COLOR_NAME,
-                ColorBarLayerType.PROPERTY_BORDER_COLOR_DEFAULT);
-    }
 
 
     private boolean isCornerLabelsNorth() {
@@ -715,10 +784,6 @@ public class ColorBarLayer extends Layer {
     }
 
 
-    private boolean isTickmarksShow() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TICKMARKS_SHOW_NAME,
-                ColorBarLayerType.PROPERTY_TICKMARKS_SHOW_DEFAULT);
-    }
 
     private boolean isTickmarksInside() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_TICKMARKS_INSIDE_NAME,
@@ -726,12 +791,6 @@ public class ColorBarLayer extends Layer {
     }
 
 
-    private double getTickmarksLength() {
-        double tickMarkLengthPts = getConfigurationProperty(ColorBarLayerType.PROPERTY_TICKMARKS_LENGTH_NAME,
-                ColorBarLayerType.PROPERTY_TICKMARKS_LENGTH_DEFAULT);
-
-        return getPtsToPixelsMultiplier() * tickMarkLengthPts;
-    }
 
 
     private class ProductNodeHandler extends ProductNodeListenerAdapter {

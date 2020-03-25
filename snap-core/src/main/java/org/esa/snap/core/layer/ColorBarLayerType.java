@@ -22,6 +22,57 @@ import java.awt.geom.AffineTransform;
 @LayerTypeMetadata(name = "ColorBarLayerType", aliasNames = {"org.esa.snap.core.layer.ColorBarLayerType"})
 public class ColorBarLayerType extends LayerType {
 
+
+    public static final String OPTION_HORIZONTAL = "Horizontal";
+    public static final String OPTION_VERTICAL = "Vertical";
+
+
+
+    //--------------------------------------------------------------------------------------------------------------
+    // Color Bar Legend Preferences parameters
+
+    // Preferences property prefix
+    private static final String PROPERTY_ROOT_KEY = "color.bar.legend";
+    private static final String PROPERTY_ROOT_ALIAS = "colorBarLegend";
+
+
+
+    // Formatting
+
+    private static final String PROPERTY_ROOT_FORMATTING_KEY = PROPERTY_ROOT_KEY + ".formatting";
+    private static final String PROPERTY_ROOT_FORMATTING_ALIAS = PROPERTY_ROOT_ALIAS + "Formatting";
+
+    public static final String PROPERTY_FORMATTING_SECTION_KEY = PROPERTY_ROOT_FORMATTING_KEY + ".section";
+    public static final String PROPERTY_FORMATTING_SECTION_LABEL = "Formatting";
+    public static final String PROPERTY_FORMATTING_SECTION_TOOLTIP = "Formatting options for the color bar legend";
+    public static final String PROPERTY_FORMATTING_SECTION_ALIAS = "colorBarLegendFormattingSection";
+
+    public static final String PROPERTY_FORMATTING_ORIENTATION_KEY = PROPERTY_ROOT_FORMATTING_KEY + ".orientation";
+    public static final String PROPERTY_FORMATTING_ORIENTATION_LABEL = "Orientation";
+    public static final String PROPERTY_FORMATTING_ORIENTATION_TOOLTIP = "Orientation of the color bar legend";
+    public static final Class PROPERTY_FORMATTING_ORIENTATION_TYPE = String.class;
+    public static final String PROPERTY_FORMATTING_ORIENTATION_ALIAS = PROPERTY_ROOT_FORMATTING_ALIAS + "Orientation";
+    public static final String PROPERTY_FORMATTING_ORIENTATION_OPTION1 = OPTION_HORIZONTAL;
+    public static final String PROPERTY_FORMATTING_ORIENTATION_OPTION2 = OPTION_VERTICAL;
+    public static final String PROPERTY_FORMATTING_ORIENTATION_DEFAULT = OPTION_HORIZONTAL;
+    public static final Object PROPERTY_FORMATTING_ORIENTATION_VALUE_SET[] = {PROPERTY_FORMATTING_ORIENTATION_OPTION1, PROPERTY_FORMATTING_ORIENTATION_OPTION2};
+
+
+    public static final String PROPERTY_FORMATTING_TEXT_COLOR_KEY = PROPERTY_ROOT_FORMATTING_KEY + ".text.color";
+    public static final String PROPERTY_FORMATTING_TEXT_COLOR_LABEL = "Text Color";
+    public static final String PROPERTY_FORMATTING_TEXT_COLOR_TOOLTIP = "Set color of the label text";
+    private static final String PROPERTY_FORMATTING_TEXT_COLOR_ALIAS = "textColor";
+    public static final Color PROPERTY_FORMATTING_TEXT_COLOR_DEFAULT = Color.YELLOW;
+    public static final Class PROPERTY_FORMATTING_TEXT_COLOR_TYPE = Color.class;
+
+
+
+
+
+
+
+
+
     // Property Settings: ColorBar Location Section
 
     public static final String PROPERTY_COLORBAR_LOCATION_SECTION_NAME = "colorbar.location.section";
@@ -106,31 +157,112 @@ public class ColorBarLayerType extends LayerType {
 
     // Property Settings: ColorBar Title Section
 
-    public static final String PROPERTY_COLORBAR_TITLE_SECTION_NAME = "colorbar.title.section";
+    private static final String PROPERTY_ROOT_TITLE_KEY = PROPERTY_ROOT_KEY + ".title";
+    private static final String PROPERTY_ROOT_TITLE_ALIAS = PROPERTY_ROOT_ALIAS + "Title";
+
+    public static final String PROPERTY_COLORBAR_TITLE_SECTION_KEY = PROPERTY_ROOT_TITLE_KEY + ".section";
     public static final String PROPERTY_COLORBAR_TITLE_SECTION_LABEL = "Title";
     public static final String PROPERTY_COLORBAR_TITLE_SECTION_TOOLTIP = "Set title of color bar";
-    public static final String PROPERTY_COLORBAR_TITLE_SECTION_ALIAS = "colorbarTitleSection";
+    public static final String PROPERTY_COLORBAR_TITLE_SECTION_ALIAS = PROPERTY_ROOT_TITLE_ALIAS + "Section";
 
-    public static final String PROPERTY_COLORBAR_TITLE_SHOW_TITLE_NAME = "colorbar.title.show";
+    public static final String PROPERTY_COLORBAR_TITLE_SHOW_TITLE_KEY = PROPERTY_ROOT_TITLE_KEY + ".show";
     public static final String PROPERTY_COLORBAR_TITLE_SHOW_TITLE_LABEL = "Show Title";
     public static final String PROPERTY_COLORBAR_TITLE_SHOW_TITLE_TOOLTIP = "Add title to the color bar";
-    private static final String PROPERTY_COLORBAR_TITLE_SHOW_TITLE_ALIAS = "colorbarTitleShow";
+    private static final String PROPERTY_COLORBAR_TITLE_SHOW_TITLE_ALIAS = PROPERTY_ROOT_TITLE_ALIAS + "Show";
     public static final boolean PROPERTY_COLORBAR_TITLE_SHOW_TITLE_DEFAULT = true;
     public static final Class PROPERTY_COLORBAR_TITLE_SHOW_TITLE_TYPE = Boolean.class;
 
-    public static final String PROPERTY_COLORBAR_TITLE_TITLE_NAME = "colorbar.title.title";
+    public static final String PROPERTY_COLORBAR_TITLE_TITLE_KEY = PROPERTY_ROOT_TITLE_KEY + ".title";
     public static final String PROPERTY_COLORBAR_TITLE_TITLE_LABEL = "Title";
     public static final String PROPERTY_COLORBAR_TITLE_TITLE_TOOLTIP = "Add title to the color bar";
-    public static final String PROPERTY_COLORBAR_TITLE_TITLE_ALIAS = "colorbarTitleTitle";
+    public static final String PROPERTY_COLORBAR_TITLE_TITLE_ALIAS = PROPERTY_ROOT_TITLE_ALIAS + "Title";
     public static final String PROPERTY_COLORBAR_TITLE_TITLE_DEFAULT = "";
     public static final Class PROPERTY_COLORBAR_TITLE_TITLE_TYPE = String.class;
 
-    public static final String PROPERTY_COLORBAR_TITLE_UNITS_NAME = "colorbar.title.units";
+    public static final String PROPERTY_COLORBAR_TITLE_UNITS_KEY = PROPERTY_ROOT_TITLE_KEY + ".units";
     public static final String PROPERTY_COLORBAR_TITLE_UNITS_LABEL = "Units";
     public static final String PROPERTY_COLORBAR_TITLE_UNITS_TOOLTIP = "Add units to the title of the color bar";
-    public static final String PROPERTY_COLORBAR_TITLE_UNITS_ALIAS = "colorbarTitleUnits";
+    public static final String PROPERTY_COLORBAR_TITLE_UNITS_ALIAS = PROPERTY_ROOT_TITLE_ALIAS + "Units";
     public static final String PROPERTY_COLORBAR_TITLE_UNITS_DEFAULT = "";
     public static final Class PROPERTY_COLORBAR_TITLE_UNITS_TYPE = String.class;
+
+    public static final String PROPERTY_TITLE_COLOR_KEY = PROPERTY_ROOT_FORMATTING_KEY + ".color";
+    public static final String PROPERTY_TITLE_COLOR_LABEL = "Title Color";
+    public static final String PROPERTY_TITLE_COLOR_TOOLTIP = "Set color of the title";
+    private static final String PROPERTY_TITLE_COLOR_ALIAS = PROPERTY_ROOT_TITLE_ALIAS + "Color";
+    public static final Color PROPERTY_TITLE_COLOR_DEFAULT = Color.YELLOW;
+    public static final Class PROPERTY_TITLE_COLOR_TYPE = Color.class;
+
+
+
+
+    // Property Settings: ColorBar Tickmarks Section
+
+    private static final String PROPERTY_ROOT_TICKMARKS_KEY = PROPERTY_ROOT_KEY + ".tickmarks";
+    private static final String PROPERTY_ROOT_TICKMARKS_ALIAS = PROPERTY_ROOT_ALIAS + "TickMarks";
+
+    public static final String PROPERTY_TICKMARKS_SECTION_KEY = PROPERTY_ROOT_TICKMARKS_KEY + ".section";
+    public static final String PROPERTY_TICKMARKS_SECTION_LABEL = "Tickmarks";
+    public static final String PROPERTY_TICKMARKS_SECTION_TOOLTIP = "Format options for the color bar legend tickmarks";
+    public static final String PROPERTY_TICKMARKS_SECTION_ALIAS = PROPERTY_ROOT_TICKMARKS_ALIAS + "Section";
+
+    public static final String PROPERTY_TICKMARKS_SHOW_KEY = PROPERTY_ROOT_TICKMARKS_KEY + ".show";
+    public static final String PROPERTY_TICKMARKS_SHOW_LABEL = "Show";
+    public static final String PROPERTY_TICKMARKS_SHOW_TOOLTIP = "Display tickmarks";
+    public static final String PROPERTY_TICKMARKS_SHOW_ALIAS = PROPERTY_ROOT_TICKMARKS_ALIAS + "Show";
+    public static final boolean PROPERTY_TICKMARKS_SHOW_DEFAULT = true;
+    public static final Class PROPERTY_TICKMARKS_SHOW_TYPE = Boolean.class;
+
+    public static final String PROPERTY_TICKMARKS_COLOR_KEY = PROPERTY_ROOT_TICKMARKS_KEY + ".color";
+    public static final String PROPERTY_TICKMARKS_COLOR_LABEL = "Tickmark Color";
+    public static final String PROPERTY_TICKMARKS_COLOR_TOOLTIP = "Set color of the tickmarks";
+    private static final String PROPERTY_TICKMARKS_COLOR_ALIAS = PROPERTY_ROOT_TICKMARKS_ALIAS + "Color";
+    public static final Color PROPERTY_TICKMARKS_COLOR_DEFAULT = Color.YELLOW;
+    public static final Class PROPERTY_TICKMARKS_COLOR_TYPE = Color.class;
+
+    public static final String PROPERTY_TICKMARKS_LENGTH_KEY = PROPERTY_ROOT_TICKMARKS_KEY + ".length";
+    public static final String PROPERTY_TICKMARKS_LENGTH_LABEL = "Length";
+    public static final String PROPERTY_TICKMARKS_LENGTH_TOOLTIP = "Set length of tickmarks";
+    public static final String PROPERTY_TICKMARKS_LENGTH_ALIAS = PROPERTY_ROOT_TICKMARKS_ALIAS + "Length";
+    public static final int PROPERTY_TICKMARKS_LENGTH_DEFAULT = 12;
+    public static final Class PROPERTY_TICKMARKS_LENGTH_TYPE = Integer.class;
+
+    public static final String PROPERTY_TICKMARKS_WIDTH_KEY = PROPERTY_ROOT_TICKMARKS_KEY + ".width";
+    public static final String PROPERTY_TICKMARKS_WIDTH_LABEL = "Width";
+    public static final String PROPERTY_TICKMARKS_WIDTH_TOOLTIP = "Set width of tickmarks";
+    public static final String PROPERTY_TICKMARKS_WIDTH_ALIAS = PROPERTY_ROOT_TICKMARKS_ALIAS + "Width";
+    public static final int PROPERTY_TICKMARKS_WIDTH_DEFAULT = 4;
+    public static final Class PROPERTY_TICKMARKS_WIDTH_TYPE = Integer.class;
+
+
+
+    // Property Settings: Border Section
+
+    public static final String PROPERTY_BORDER_SECTION_KEY = "colorbar.border.section";
+    public static final String PROPERTY_BORDER_SECTION_ALIAS = "colorbarBorderSection";
+    public static final String PROPERTY_BORDER_SECTION_LABEL = "Border";
+    public static final String PROPERTY_BORDER_SECTION_TOOLTIP = "Configuration options for adding a border around the data image";
+
+    public static final String PROPERTY_BORDER_SHOW_KEY = "colorbar.border.show";
+    public static final String PROPERTY_BORDER_SHOW_LABEL = "Show";
+    public static final String PROPERTY_BORDER_SHOW_TOOLTIP = "Display a border around the data image";
+    private static final String PROPERTY_BORDER_SHOW_ALIAS = "colorbarBorderShow";
+    public static final boolean PROPERTY_BORDER_SHOW_DEFAULT = true;
+    public static final Class PROPERTY_BORDER_SHOW_TYPE = Boolean.class;
+
+    public static final String PROPERTY_BORDER_WIDTH_KEY = "colorbar.border.width";
+    public static final String PROPERTY_BORDER_WIDTH_LABEL = "Width";
+    public static final String PROPERTY_BORDER_WIDTH_TOOLTIP = "Width of border line";
+    private static final String PROPERTY_BORDER_WIDTH_ALIAS = "colorbarBorderWidth";
+    public static final int PROPERTY_BORDER_WIDTH_DEFAULT = 1;
+    public static final Class PROPERTY_BORDER_WIDTH_TYPE = Integer.class;
+
+    public static final String PROPERTY_BORDER_COLOR_KEY = "colorbar.border.color";
+    public static final String PROPERTY_BORDER_COLOR_LABEL = "Color";
+    public static final String PROPERTY_BORDER_COLOR_TOOLTIP = "Color of border line";
+    private static final String PROPERTY_BORDER_COLOR_ALIAS = "colorbarBorderColor";
+    public static final Color PROPERTY_BORDER_COLOR_DEFAULT = Color.BLACK;
+    public static final Class PROPERTY_BORDER_COLOR_TYPE = Color.class;
 
 
 
@@ -326,48 +458,22 @@ public class ColorBarLayerType extends LayerType {
     public static final Class PROPERTY_GRIDLINES_COLOR_TYPE = Color.class;
 
 
-    // Property Settings: Border Section
 
-    public static final String PROPERTY_BORDER_SECTION_NAME = "colorbar.border.section";
-    public static final String PROPERTY_BORDER_SECTION_ALIAS = "colorbarBorderSection";
-    public static final String PROPERTY_BORDER_SECTION_LABEL = "Border";
-    public static final String PROPERTY_BORDER_SECTION_TOOLTIP = "Configuration options for adding a border around the data image";
-
-    public static final String PROPERTY_BORDER_SHOW_NAME = "colorbar.border.show";
-    public static final String PROPERTY_BORDER_SHOW_LABEL = "Show";
-    public static final String PROPERTY_BORDER_SHOW_TOOLTIP = "Display a border around the data image";
-    private static final String PROPERTY_BORDER_SHOW_ALIAS = "colorbarBorderShow";
-    public static final boolean PROPERTY_BORDER_SHOW_DEFAULT = true;
-    public static final Class PROPERTY_BORDER_SHOW_TYPE = Boolean.class;
-
-    public static final String PROPERTY_BORDER_WIDTH_NAME = "colorbar.border.width";
-    public static final String PROPERTY_BORDER_WIDTH_LABEL = "Width";
-    public static final String PROPERTY_BORDER_WIDTH_TOOLTIP = "Width of border line";
-    private static final String PROPERTY_BORDER_WIDTH_ALIAS = "colorbarBorderWidth";
-    public static final double PROPERTY_BORDER_WIDTH_DEFAULT = 1.2;
-    public static final Class PROPERTY_BORDER_WIDTH_TYPE = Double.class;
-
-    public static final String PROPERTY_BORDER_COLOR_NAME = "colorbar.border.color";
-    public static final String PROPERTY_BORDER_COLOR_LABEL = "Color";
-    public static final String PROPERTY_BORDER_COLOR_TOOLTIP = "Color of border line";
-    private static final String PROPERTY_BORDER_COLOR_ALIAS = "colorbarBorderColor";
-    public static final Color PROPERTY_BORDER_COLOR_DEFAULT = Color.BLACK;
-    public static final Class PROPERTY_BORDER_COLOR_TYPE = Color.class;
 
 
     // Property Settings: Tickmarks Section
 
-    public static final String PROPERTY_TICKMARKS_SECTION_NAME = "colorbar.tickmarks.section";
-    public static final String PROPERTY_TICKMARKS_SECTION_ALIAS = "colorbarTickmarksSection";
-    public static final String PROPERTY_TICKMARKS_SECTION_LABEL = "Tickmarks";
-    public static final String PROPERTY_TICKMARKS_SECTION_TOOLTIP = "Configuration options for adding tickmarks around the data image";
+//    public static final String PROPERTY_TICKMARKS_SECTION_KEY = "colorbar.tickmarks.section";
+//    public static final String PROPERTY_TICKMARKS_SECTION_ALIAS = "colorbarTickmarksSection";
+//    public static final String PROPERTY_TICKMARKS_SECTION_LABEL = "Tickmarks";
+//    public static final String PROPERTY_TICKMARKS_SECTION_TOOLTIP = "Configuration options for adding tickmarks around the data image";
 
-    public static final String PROPERTY_TICKMARKS_SHOW_NAME = "colorbar.tickmarks.show";
-    public static final String PROPERTY_TICKMARKS_SHOW_LABEL = "Show";
-    public static final String PROPERTY_TICKMARKS_SHOW_TOOLTIP = "Display tickmarks";
-    public static final String PROPERTY_TICKMARKS_SHOW_ALIAS = "colorbarTickmarksShow";
-    public static final boolean PROPERTY_TICKMARKS_SHOW_DEFAULT = true;
-    public static final Class PROPERTY_TICKMARKS_SHOW_TYPE = Boolean.class;
+//    public static final String PROPERTY_TICKMARKS_SHOW_NAME = "colorbar.tickmarks.show";
+//    public static final String PROPERTY_TICKMARKS_SHOW_LABEL = "Show";
+//    public static final String PROPERTY_TICKMARKS_SHOW_TOOLTIP = "Display tickmarks";
+//    public static final String PROPERTY_TICKMARKS_SHOW_ALIAS = "colorbarTickmarksShow";
+//    public static final boolean PROPERTY_TICKMARKS_SHOW_DEFAULT = true;
+//    public static final Class PROPERTY_TICKMARKS_SHOW_TYPE = Boolean.class;
 
     public static final String PROPERTY_TICKMARKS_INSIDE_NAME = "colorbar.tickmarks.inside";
     public static final String PROPERTY_TICKMARKS_INSIDE_LABEL = "Put Inside";
@@ -376,19 +482,19 @@ public class ColorBarLayerType extends LayerType {
     public static final boolean PROPERTY_TICKMARKS_INSIDE_DEFAULT = false;
     public static final Class PROPERTY_TICKMARKS_INSIDE_TYPE = Boolean.class;
 
-    public static final String PROPERTY_TICKMARKS_LENGTH_NAME = "colorbar.tickmarks.length";
-    public static final String PROPERTY_TICKMARKS_LENGTH_LABEL = "Length";
-    public static final String PROPERTY_TICKMARKS_LENGTH_TOOLTIP = "Set length of tickmarks";
-    public static final String PROPERTY_TICKMARKS_LENGTH_ALIAS = "colorbarTickmarksLength";
-    public static final double PROPERTY_TICKMARKS_LENGTH_DEFAULT = 3.0;
-    public static final Class PROPERTY_TICKMARKS_LENGTH_TYPE = Double.class;
+//    public static final String PROPERTY_TICKMARKS_LENGTH_NAME = "colorbar.tickmarks.length";
+//    public static final String PROPERTY_TICKMARKS_LENGTH_LABEL = "Length";
+//    public static final String PROPERTY_TICKMARKS_LENGTH_TOOLTIP = "Set length of tickmarks";
+//    public static final String PROPERTY_TICKMARKS_LENGTH_ALIAS = "colorbarTickmarksLength";
+//    public static final double PROPERTY_TICKMARKS_LENGTH_DEFAULT = 3.0;
+//    public static final Class PROPERTY_TICKMARKS_LENGTH_TYPE = Double.class;
 
-    public static final String PROPERTY_TICKMARKS_COLOR_NAME = "colorbar.tickmarks.color";
-    public static final String PROPERTY_TICKMARKS_COLOR_LABEL = "Color";
-    public static final String PROPERTY_TICKMARKS_COLOR_TOOLTIP = "Set color of the tickmarks";
-    private static final String PROPERTY_TICKMARKS_COLOR_ALIAS = "colorbarTickmarksColor";
-    public static final Color PROPERTY_TICKMARKS_COLOR_DEFAULT = Color.BLACK;
-    public static final Class PROPERTY_TICKMARKS_COLOR_TYPE = Color.class;
+//    public static final String PROPERTY_TICKMARKS_COLOR_KEY = "colorbar.tickmarks.color";
+//    public static final String PROPERTY_TICKMARKS_COLOR_LABEL = "Color";
+//    public static final String PROPERTY_TICKMARKS_COLOR_TOOLTIP = "Set color of the tickmarks";
+//    private static final String PROPERTY_TICKMARKS_COLOR_ALIAS = "colorbarTickmarksColor";
+//    public static final Color PROPERTY_TICKMARKS_COLOR_DEFAULT = Color.BLACK;
+//    public static final Class PROPERTY_TICKMARKS_COLOR_TYPE = Color.class;
 
 
     // Property Settings: Corner Labels Section
@@ -488,6 +594,22 @@ public class ColorBarLayerType extends LayerType {
     public PropertySet createLayerConfig(LayerContext ctx) {
         final PropertyContainer vc = new PropertyContainer();
 
+        // Formatting Section
+
+        final Property formattingSectionModel = Property.create(PROPERTY_FORMATTING_SECTION_KEY, Boolean.class, true, true);
+        formattingSectionModel.getDescriptor().setAlias(PROPERTY_FORMATTING_SECTION_ALIAS);
+        vc.addProperty(formattingSectionModel);
+
+        final Property formattingOrientationModel = Property.create(PROPERTY_FORMATTING_ORIENTATION_KEY, PROPERTY_FORMATTING_ORIENTATION_TYPE, true, true);
+        formattingOrientationModel.getDescriptor().setAlias(PROPERTY_FORMATTING_ORIENTATION_ALIAS);
+        vc.addProperty(formattingOrientationModel);
+
+        final Property formattingTextColorModel = Property.create(PROPERTY_FORMATTING_TEXT_COLOR_KEY, PROPERTY_FORMATTING_TEXT_COLOR_TYPE, true, true);
+        formattingTextColorModel.getDescriptor().setAlias(PROPERTY_FORMATTING_TEXT_COLOR_ALIAS);
+        vc.addProperty(formattingTextColorModel);
+
+
+
         // ColorBar Location Section
 
         final Property locationSectionModel = Property.create(PROPERTY_COLORBAR_LOCATION_SECTION_NAME, Boolean.class, true, true);
@@ -530,27 +652,75 @@ public class ColorBarLayerType extends LayerType {
         vc.addProperty(locationSizeScalingModel);
 
 
-        final Property titleSectionModel = Property.create(PROPERTY_COLORBAR_TITLE_SECTION_NAME, Boolean.class, true, true);
+        final Property titleSectionModel = Property.create(PROPERTY_COLORBAR_TITLE_SECTION_KEY, Boolean.class, true, true);
         titleSectionModel.getDescriptor().setAlias(PROPERTY_COLORBAR_TITLE_SECTION_ALIAS);
         vc.addProperty(titleSectionModel);
 
-        final Property titleShowModel = Property.create(PROPERTY_COLORBAR_TITLE_SHOW_TITLE_NAME,
+        final Property titleShowModel = Property.create(PROPERTY_COLORBAR_TITLE_SHOW_TITLE_KEY,
                 PROPERTY_COLORBAR_TITLE_SHOW_TITLE_TYPE, true, true);
         titleShowModel.getDescriptor().setAlias(PROPERTY_COLORBAR_TITLE_SHOW_TITLE_ALIAS);
         vc.addProperty(titleShowModel);
 
-        final Property titleValueModel = Property.create(PROPERTY_COLORBAR_TITLE_TITLE_NAME,
+        final Property titleValueModel = Property.create(PROPERTY_COLORBAR_TITLE_TITLE_KEY,
                 PROPERTY_COLORBAR_TITLE_TITLE_TYPE, true, true);
         titleValueModel.getDescriptor().setAlias(PROPERTY_COLORBAR_TITLE_TITLE_ALIAS);
         vc.addProperty(titleValueModel);
 
-        final Property titleUnitsModel = Property.create(PROPERTY_COLORBAR_TITLE_UNITS_NAME,
+        final Property titleUnitsModel = Property.create(PROPERTY_COLORBAR_TITLE_UNITS_KEY,
                 PROPERTY_COLORBAR_TITLE_UNITS_TYPE, true, true);
         titleUnitsModel.getDescriptor().setAlias(PROPERTY_COLORBAR_TITLE_UNITS_ALIAS);
         vc.addProperty(titleUnitsModel);
 
 
 
+        final Property titleColorModel = Property.create(PROPERTY_TITLE_COLOR_KEY, PROPERTY_TITLE_COLOR_TYPE, true, true);
+        titleColorModel.getDescriptor().setAlias(PROPERTY_TITLE_COLOR_ALIAS);
+        vc.addProperty(titleColorModel);
+
+
+
+
+        // Tickmarks Section
+
+        final Property tickmarksSectionModel = Property.create(PROPERTY_TICKMARKS_SECTION_KEY, Boolean.class, true, true);
+        tickmarksSectionModel.getDescriptor().setAlias(PROPERTY_TICKMARKS_SECTION_ALIAS);
+        vc.addProperty(tickmarksSectionModel);
+
+        final Property tickMarkEnabledModel = Property.create(PROPERTY_TICKMARKS_SHOW_KEY, PROPERTY_TICKMARKS_SHOW_TYPE, PROPERTY_TICKMARKS_SHOW_DEFAULT, true);
+        tickMarkEnabledModel.getDescriptor().setAlias(PROPERTY_TICKMARKS_SHOW_ALIAS);
+        vc.addProperty(tickMarkEnabledModel);
+
+        final Property tickmarkColorModel = Property.create(PROPERTY_TICKMARKS_COLOR_KEY, PROPERTY_TICKMARKS_COLOR_TYPE, PROPERTY_TICKMARKS_COLOR_DEFAULT, true);
+        tickmarkColorModel.getDescriptor().setAlias(PROPERTY_TICKMARKS_COLOR_ALIAS);
+        vc.addProperty(tickmarkColorModel);
+
+        final Property tickMarkLengthModel = Property.create(PROPERTY_TICKMARKS_LENGTH_KEY, PROPERTY_TICKMARKS_LENGTH_TYPE, PROPERTY_TICKMARKS_LENGTH_DEFAULT, true);
+        tickMarkLengthModel.getDescriptor().setAlias(PROPERTY_TICKMARKS_LENGTH_ALIAS);
+        vc.addProperty(tickMarkLengthModel);
+
+        final Property tickMarkWidthModel = Property.create(PROPERTY_TICKMARKS_WIDTH_KEY, PROPERTY_TICKMARKS_WIDTH_TYPE, PROPERTY_TICKMARKS_LENGTH_DEFAULT, true);
+        tickMarkWidthModel.getDescriptor().setAlias(PROPERTY_TICKMARKS_WIDTH_ALIAS);
+        vc.addProperty(tickMarkWidthModel);
+
+
+
+        // Border Section
+
+        final Property borderSectionModel = Property.create(PROPERTY_BORDER_SECTION_KEY, Boolean.class, true, true);
+        borderSectionModel.getDescriptor().setAlias(PROPERTY_BORDER_SECTION_ALIAS);
+        vc.addProperty(borderSectionModel);
+
+        final Property borderEnabledModel = Property.create(PROPERTY_BORDER_SHOW_KEY, Boolean.class, PROPERTY_BORDER_SHOW_DEFAULT, true);
+        borderEnabledModel.getDescriptor().setAlias(PROPERTY_BORDER_SHOW_ALIAS);
+        vc.addProperty(borderEnabledModel);
+
+        final Property borderWidthModel = Property.create(PROPERTY_BORDER_WIDTH_KEY, PROPERTY_BORDER_WIDTH_TYPE, PROPERTY_BORDER_WIDTH_DEFAULT, true);
+        borderWidthModel.getDescriptor().setAlias(PROPERTY_BORDER_WIDTH_ALIAS);
+        vc.addProperty(borderWidthModel);
+
+        final Property borderColorModel = Property.create(PROPERTY_BORDER_COLOR_KEY, Color.class, PROPERTY_BORDER_COLOR_DEFAULT, true);
+        borderColorModel.getDescriptor().setAlias(PROPERTY_BORDER_COLOR_ALIAS);
+        vc.addProperty(borderColorModel);
 
 
 
@@ -608,9 +778,7 @@ public class ColorBarLayerType extends LayerType {
         vc.addProperty(cornerLabelsSectionModel);
 
 
-        final Property borderSectionModel = Property.create(PROPERTY_BORDER_SECTION_NAME, Boolean.class, true, true);
-        borderSectionModel.getDescriptor().setAlias(PROPERTY_BORDER_SECTION_ALIAS);
-        vc.addProperty(borderSectionModel);
+
 
         final Property gridlinesSectionModel = Property.create(PROPERTY_GRIDLINES_SECTION_NAME, Boolean.class, true, true);
         gridlinesSectionModel.getDescriptor().setAlias(PROPERTY_GRIDLINES_SECTION_ALIAS);
@@ -703,9 +871,7 @@ public class ColorBarLayerType extends LayerType {
         lineDashedPhaseModel.getDescriptor().setAlias(PROPERTY_GRIDLINES_DASHED_PHASE_ALIAS);
         vc.addProperty(lineDashedPhaseModel);
 
-        final Property borderEnabledModel = Property.create(PROPERTY_BORDER_SHOW_NAME, Boolean.class, PROPERTY_BORDER_SHOW_DEFAULT, true);
-        borderEnabledModel.getDescriptor().setAlias(PROPERTY_BORDER_SHOW_ALIAS);
-        vc.addProperty(borderEnabledModel);
+
 
         final Property formatCompassModel = Property.create(PROPERTY_LABELS_SUFFIX_NSWE_NAME, Boolean.class, PROPERTY_LABELS_SUFFIX_NSWE_DEFAULT, false);
         formatCompassModel.getDescriptor().setAlias(PROPERTY_LABELS_SUFFIX_NSWE_ALIAS);
@@ -715,14 +881,6 @@ public class ColorBarLayerType extends LayerType {
         formatDecimalModel.getDescriptor().setAlias(PROPERTY_LABELS_DECIMAL_VALUE_ALIAS);
         vc.addProperty(formatDecimalModel);
 
-
-        final Property borderColorModel = Property.create(PROPERTY_BORDER_COLOR_NAME, Color.class, PROPERTY_BORDER_COLOR_DEFAULT, true);
-        borderColorModel.getDescriptor().setAlias(PROPERTY_BORDER_COLOR_ALIAS);
-        vc.addProperty(borderColorModel);
-
-        final Property borderWidthModel = Property.create(PROPERTY_BORDER_WIDTH_NAME, Double.class, PROPERTY_BORDER_WIDTH_DEFAULT, true);
-        borderWidthModel.getDescriptor().setAlias(PROPERTY_BORDER_WIDTH_ALIAS);
-        vc.addProperty(borderWidthModel);
 
 
         final Property textCornerTopLeftLonEnabledModel = Property.create(PROPERTY_CORNER_LABELS_NORTH_NAME, Boolean.class, PROPERTY_CORNER_LABELS_NORTH_DEFAULT, true);
@@ -746,26 +904,16 @@ public class ColorBarLayerType extends LayerType {
 
         // Tickmarks Section
 
-        final Property tickmarksSectionModel = Property.create(PROPERTY_TICKMARKS_SECTION_NAME, Boolean.class, true, true);
-        tickmarksSectionModel.getDescriptor().setAlias(PROPERTY_TICKMARKS_SECTION_ALIAS);
-        vc.addProperty(tickmarksSectionModel);
 
-        final Property tickMarkEnabledModel = Property.create(PROPERTY_TICKMARKS_SHOW_NAME, PROPERTY_TICKMARKS_SHOW_TYPE, PROPERTY_TICKMARKS_SHOW_DEFAULT, true);
-        tickMarkEnabledModel.getDescriptor().setAlias(PROPERTY_TICKMARKS_SHOW_ALIAS);
-        vc.addProperty(tickMarkEnabledModel);
+
+
 
         final Property tickMarkInsideModel = Property.create(PROPERTY_TICKMARKS_INSIDE_NAME, PROPERTY_TICKMARKS_INSIDE_TYPE, PROPERTY_TICKMARKS_INSIDE_DEFAULT, true);
         tickMarkInsideModel.getDescriptor().setAlias(PROPERTY_TICKMARKS_INSIDE_ALIAS);
         vc.addProperty(tickMarkInsideModel);
 
-        final Property tickMarkLengthModel = Property.create(PROPERTY_TICKMARKS_LENGTH_NAME, PROPERTY_TICKMARKS_LENGTH_TYPE, PROPERTY_TICKMARKS_LENGTH_DEFAULT, true);
-        tickMarkLengthModel.getDescriptor().setAlias(PROPERTY_TICKMARKS_LENGTH_ALIAS);
-        vc.addProperty(tickMarkLengthModel);
 
 
-        final Property tickmarkColorModel = Property.create(PROPERTY_TICKMARKS_COLOR_NAME, PROPERTY_TICKMARKS_COLOR_TYPE, PROPERTY_TICKMARKS_COLOR_DEFAULT, true);
-        tickmarkColorModel.getDescriptor().setAlias(PROPERTY_TICKMARKS_COLOR_ALIAS);
-        vc.addProperty(tickmarkColorModel);
 
 
 

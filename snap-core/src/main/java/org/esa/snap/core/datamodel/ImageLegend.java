@@ -16,15 +16,14 @@
 package org.esa.snap.core.datamodel;
 
 import org.esa.snap.core.image.ImageManager;
+import org.esa.snap.core.layer.ColorBarLayerType;
 import org.esa.snap.core.util.PropertyMap;
 import org.esa.snap.core.util.StringUtils;
-import org.esa.snap.core.util.math.MathUtils;
 
 import java.awt.*;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -36,13 +35,13 @@ import java.util.ArrayList;
 //                 make "color legend properties" dialog a preferences page
 
 
-/**
- * The <code>ImageLegend</code> class is used to generate an image legend from a <code>{@link
- * ImageInfo}</code> instance.
- *
- * @author Norman Fomferra
- * @version $Revision$ $Date$
- */
+///**
+// * The <code>ImageLegend</code> class is used to generate an image legend from a <code>{@link
+// * ImageInfo}</code> instance.
+// *
+// * @author Norman Fomferra
+// * @version $Revision$ $Date$
+// */
 public class ImageLegend {
 
     public static final String PROPERTY_NAME_COLORBAR_TITLE_OVERRIDE = "palettes.colorbar.Title.Override";
@@ -99,6 +98,24 @@ public class ImageLegend {
     private String distributionType;
     private int numberOfTicks;
     private Color foregroundColor;
+
+    private Color tickmarkColor;
+    private int tickmarkLength = NULL_INT;
+    private int tickmarkWidth = NULL_INT;
+    private boolean tickmarkShow;
+
+
+    private int borderWidth = 5;
+    private Color borderColor = Color.RED;
+    private boolean borderShow = true;
+
+
+
+
+
+
+    private Color labelColor;
+    private Color titleColor;
     private Color backgroundColor;
     private boolean backgroundTransparencyEnabled;
     private float backgroundTransparency;
@@ -123,7 +140,6 @@ public class ImageLegend {
     private String titleOverRide = null;
 
 
-    private int tickMarkLength = NULL_INT;
     private int borderGap = NULL_INT;   // TITLE_TO_PALETTE_GAP
     private int labelGap = NULL_INT;      // LABEL_TO_COLORBAR BORDER_GAP9
     private int headerGap = NULL_INT;      // HEADER_TO_COLORBAR BORDER_GAP
@@ -136,8 +152,7 @@ public class ImageLegend {
     private int palettePosStart;
     private int palettePosEnd;
     private ArrayList<ColorBarInfo> colorBarInfos = new ArrayList<ColorBarInfo>();
-    private int tickWidth;
-    private int borderLineWidth;
+
 
 
     public ImageLegend(ImageInfo imageInfo, RasterDataNode raster) {
@@ -148,14 +163,21 @@ public class ImageLegend {
 
         orientation = HORIZONTAL;
         backgroundColor = Color.white;
-        foregroundColor = Color.black;
+        foregroundColor = ColorBarLayerType.PROPERTY_FORMATTING_TEXT_COLOR_DEFAULT;
+        tickmarkColor = ColorBarLayerType.PROPERTY_FORMATTING_TEXT_COLOR_DEFAULT;
+        labelColor = ColorBarLayerType.PROPERTY_FORMATTING_TEXT_COLOR_DEFAULT;
+        titleColor = ColorBarLayerType.PROPERTY_FORMATTING_TEXT_COLOR_DEFAULT;
+
+        setTickmarkLength(ColorBarLayerType.PROPERTY_TICKMARKS_LENGTH_DEFAULT);
+        setTickmarkWidth(ColorBarLayerType.PROPERTY_TICKMARKS_WIDTH_DEFAULT);
+        setTickmarkShow(ColorBarLayerType.PROPERTY_TICKMARKS_SHOW_DEFAULT);
+
         backgroundTransparency = 1.0f;
         antialiasing = true;
         decimalPlaces = 2;
         scalingFactor = 1;
         decimalPlacesForce = false;
         setFullCustomAddThesePoints("");
-        tickWidth = DEFAULT_TICKMARK_WIDTH;
 
 
     }
@@ -355,12 +377,16 @@ public class ImageLegend {
         }
 
         int tmpLabelsFontSize = getLabelsFontSize();
+        int tmpTickmarkLength = getTickmarkLength();
+        int tmpTickmarkWidth = getTickmarkWidth();
         int tmpTitleFontSize = getTitleFontSize();
         int tmpTitleUnitsFontSize = getTitleUnitsFontSize();
         int tmpColorBarLength = getColorBarLength();
         int tmpColorBarThickness = getColorBarThickness();
 
         setLabelsFontSize((int) Math.round(scalingFactor * getLabelsFontSize()));
+        setTickmarkLength((int) Math.round(scalingFactor * getTickmarkLength()));
+        setTickmarkWidth((int) Math.round(scalingFactor * getTickmarkWidth()));
         setTitleFontSize((int) Math.round(scalingFactor * getTitleFontSize()));
         setTitleUnitsFontSize((int) Math.round(scalingFactor * getTitleUnitsFontSize()));
         setColorBarLength((int) Math.round(scalingFactor * getColorBarLength()));
@@ -369,6 +395,8 @@ public class ImageLegend {
         BufferedImage bufferedImage = createImage();
 
         setLabelsFontSize(tmpLabelsFontSize);
+        setTickmarkLength(tmpTickmarkLength);
+        setTickmarkWidth(tmpTickmarkWidth);
         setTitleFontSize(tmpTitleFontSize);
         setTitleUnitsFontSize(tmpTitleUnitsFontSize);
         setColorBarLength(tmpColorBarLength);
@@ -844,7 +872,7 @@ public class ImageLegend {
             Font origFont = g2d.getFont();
 
             final FontMetrics fontMetrics = g2d.getFontMetrics();
-            g2d.setPaint(foregroundColor);
+            g2d.setPaint(getTitleColor());
 
             int x0 = paletteRect.x;
             int y0 = paletteRect.y - getHeaderGap();
@@ -970,9 +998,14 @@ public class ImageLegend {
         }
 
 
-        g2d.setColor(Color.black);
-        g2d.setStroke(new BasicStroke(1));
-        g2d.draw(paletteRect);
+        if (isBorderShow()) {
+            g2d.setColor(getBorderColor());
+            g2d.setStroke(new BasicStroke(getBorderWidth()));
+            g2d.draw(paletteRect);
+        }
+
+
+
         g2d.setStroke(originalStroke);
     }
 
@@ -985,23 +1018,23 @@ public class ImageLegend {
         Font originalFont = g2d.getFont();
 
         g2d.setFont(getLabelsFont());
-        g2d.setPaint(foregroundColor);
+        g2d.setPaint(getLabelColor());
 
         //   Color tickMarkColor = new Color(0, 0, 0);
         Color tickMarkColor = foregroundColor;
 
-        Stroke tickMarkStroke = new BasicStroke(tickWidth);
+        Stroke tickMarkStroke = new BasicStroke(getTickmarkWidth());
         g2d.setStroke(tickMarkStroke);
 
         double translateX, translateY;
 
         int tickMarkOverHang;
-        if (Math.floor((tickWidth) / 2) == (tickWidth) / 2) {
+        if (Math.floor((getTickmarkWidth()) / 2) == (getTickmarkWidth()) / 2) {
             // even
-            tickMarkOverHang = (int) Math.floor((tickWidth) / 2);
+            tickMarkOverHang = (int) Math.floor((getTickmarkWidth()) / 2);
         } else {
             // odd
-            tickMarkOverHang = (int) Math.floor((tickWidth - 1) / 2);
+            tickMarkOverHang = (int) Math.floor((getTickmarkWidth() - 1) / 2);
         }
 
         for (ColorBarInfo colorBarInfo : colorBarInfos) {
@@ -1037,8 +1070,12 @@ public class ImageLegend {
 
             }
             g2d.translate(translateX, translateY);
-            g2d.setPaint(foregroundColor);
-            g2d.draw(tickMarkShape);
+            g2d.setPaint(getTickmarkColor());
+
+
+            if (isTickmarkShow()) {
+                g2d.draw(tickMarkShape);
+            }
 
             final FontMetrics fontMetrics = g2d.getFontMetrics();
             int labelWidth = fontMetrics.stringWidth(formattedValue);
@@ -1053,7 +1090,7 @@ public class ImageLegend {
                 y0 = -0.5f * labelHeight + fontMetrics.getMaxAscent();
             }
 
-            g2d.setColor(tickMarkColor);
+            g2d.setColor(getLabelColor());
             g2d.drawString(formattedValue, x0, y0);
             g2d.translate(-translateX, -translateY);
         }
@@ -1206,11 +1243,11 @@ public class ImageLegend {
     private Shape createTickMarkShape() {
         GeneralPath path = new GeneralPath();
         if (orientation == HORIZONTAL) {
-            path.moveTo(0.0F, 0.7F * getTickMarkLength());
+            path.moveTo(0.0F, 0.7F * getTickmarkLength());
             path.lineTo(0.0F, 0.0F);
         } else {
             path.moveTo(0.0F, 0.0F);
-            path.lineTo(0.7F * getTickMarkLength(), 0.0F);
+            path.lineTo(0.7F * getTickmarkLength(), 0.0F);
         }
         path.closePath();
         return path;
@@ -1324,17 +1361,7 @@ public class ImageLegend {
         this.layerScaling = layerScaling;
     }
 
-    public int getTickMarkLength() {
-        if (tickMarkLength != NULL_INT) {
-            return tickMarkLength;
-        } else {
-            return (int) Math.round(0.8 * getLabelGap());
-        }
-    }
 
-    public void setTickMarkLength(int tickMarkLength) {
-        this.tickMarkLength = tickMarkLength;
-    }
 
     public int getBorderGap() {
         if (borderGap != NULL_INT) {
@@ -1543,5 +1570,87 @@ public class ImageLegend {
 
     public void setInsideOutsideLocation(String insideOutsideLocation) {
         this.insideOutsideLocation = insideOutsideLocation;
+    }
+
+    public Color getTickmarkColor() {
+        return tickmarkColor;
+    }
+
+    public void setTickmarkColor(Color tickmarkColor) {
+        this.tickmarkColor = tickmarkColor;
+    }
+
+    public Color getLabelColor() {
+        return labelColor;
+    }
+
+    public void setLabelColor(Color labelColor) {
+        this.labelColor = labelColor;
+    }
+
+    public Color getTitleColor() {
+        return titleColor;
+    }
+
+    public void setTitleColor(Color titleColor) {
+        this.titleColor = titleColor;
+    }
+
+    public int getTickmarkLength() {
+        if (tickmarkLength != NULL_INT) {
+            return tickmarkLength;
+        } else {
+            return (int) Math.round(0.8 * getLabelGap());
+        }
+    }
+
+    public void setTickmarkLength(int tickmarkLength) {
+        this.tickmarkLength = tickmarkLength;
+    }
+
+    public int getTickmarkWidth() {
+        if (tickmarkWidth != NULL_INT) {
+            return tickmarkWidth;
+        } else {
+            return (int) Math.round(0.8 * getLabelGap());
+        }
+    }
+
+    public void setTickmarkWidth(int tickmarkWidth) {
+        this.tickmarkWidth = tickmarkWidth;
+    }
+
+
+
+    public boolean isTickmarkShow() {
+        return tickmarkShow;
+    }
+
+    public void setTickmarkShow(boolean tickmarkShow) {
+        this.tickmarkShow = tickmarkShow;
+    }
+
+    public int getBorderWidth() {
+        return borderWidth;
+    }
+
+    public void setBorderWidth(int borderWidth) {
+        this.borderWidth = borderWidth;
+    }
+
+    public Color getBorderColor() {
+        return borderColor;
+    }
+
+    public void setBorderColor(Color borderColor) {
+        this.borderColor = borderColor;
+    }
+
+    public boolean isBorderShow() {
+        return borderShow;
+    }
+
+    public void setBorderShow(boolean borderShow) {
+        this.borderShow = borderShow;
     }
 }
