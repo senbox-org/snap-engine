@@ -870,6 +870,8 @@
                         </includes>
                         <systemPropertyVariables>
                             <org.esa.snap.testdata.out>target/test-data</org.esa.snap.testdata.out>
+                            <jna.debug_load>true</jna.debug_load>
+                            <jna.debug_load.jna>true</jna.debug_load.jna>
                         </systemPropertyVariables>
                         <!--<argLine>-Xmx1024M -Dfile.encoding=UTF-8 @{argLine}</argLine>-->
                         <argLine>-Xmx1024M -Dfile.encoding=UTF-8</argLine>
