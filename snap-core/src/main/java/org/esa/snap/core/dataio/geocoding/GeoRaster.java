@@ -4,8 +4,8 @@ public class GeoRaster {
 
     private final double[] longitudes;
     private final double[] latitudes;
-    private String lonVariableName;
-    private String latVariableName;
+    private final String lonVariableName;
+    private final String latVariableName;
     private final int rasterWidth;
     private final int rasterHeight;
     private final int sceneWidth;

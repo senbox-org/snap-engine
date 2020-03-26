@@ -219,7 +219,7 @@ public class RasterUtils {
         return computeResolutionInKm(resLons, resLats, R.width, R.height);
     }
 
-    public static double computeResolutionInKm(double[] lonData, double[] latData, int width, int height) {
+    private static double computeResolutionInKm(double[] lonData, double[] latData, int width, int height) {
         int count = 0;
         double distanceSum = 0;
         for (int y = 0; y < height; y++) {
