@@ -312,24 +312,11 @@ public class ColorBarLayerType extends LayerType {
 
     // Property Settings: Grid Spacing Section
 
-    public static final String PROPERTY_GRID_SPACING_SECTION_NAME = "colorbar.grid.spacing.section";
-    public static final String PROPERTY_GRID_SPACING_SECTION_LABEL = "Grid Spacing";
-    public static final String PROPERTY_GRID_SPACING_SECTION_TOOLTIP = "Set grid spacing in degrees (0=AUTOSPACING)";
-    public static final String PROPERTY_GRID_SPACING_SECTION_ALIAS = "colorbarGridSpacingSection";
 
     public static final String PROPERTY_GRID_SPACING_LAT_NAME = "colorbar.spacing.lat";
-    public static final String PROPERTY_GRID_SPACING_LAT_LABEL = "Latitude";
-    public static final String PROPERTY_GRID_SPACING_LAT_TOOLTIP = "Set latitude grid spacing in degrees (0=AUTOSPACING)";
-    private static final String PROPERTY_GRID_SPACING_LAT_ALIAS = "colorbarSpacingLat";
-    public static final double PROPERTY_GRID_SPACING_LAT_DEFAULT = 0.0;
-    public static final Class PROPERTY_GRID_SPACING_LAT_TYPE = Double.class;
 
     public static final String PROPERTY_GRID_SPACING_LON_NAME = "colorbar.spacing.lon";
-    public static final String PROPERTY_GRID_SPACING_LON_LABEL = "Longitude";
-    public static final String PROPERTY_GRID_SPACING_LON_TOOLTIP = "Set longitude grid spacing in degrees (0=AUTOSPACING)";
-    private static final String PROPERTY_GRID_SPACING_LON_ALIAS = "colorbarSpacingLon";
-    public static final double PROPERTY_GRID_SPACING_LON_DEFAULT = 0.0;
-    public static final Class PROPERTY_GRID_SPACING_LON_TYPE = Double.class;
+
 
 
     // Property Settings: Labels Section
@@ -340,54 +327,9 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_LABELS_SECTION_ALIAS = "colorbarLabelsSection";
 
 
-    public static final String PROPERTY_LABELS_NORTH_NAME = "colorbar.labels.north";
-    public static final String PROPERTY_LABELS_NORTH_LABEL = "North";
-    public static final String PROPERTY_LABELS_NORTH_TOOLTIP = "Display north labels";
-    public static final String PROPERTY_LABELS_NORTH_ALIAS = "labelsNorth";
-    public static final boolean PROPERTY_LABELS_NORTH_DEFAULT = true;
-    public static final Class PROPERTY_LABELS_NORTH_TYPE = Boolean.class;
 
-    public static final String PROPERTY_LABELS_SOUTH_NAME = "colorbar.labels.south";
-    public static final String PROPERTY_LABELS_SOUTH_LABEL = "South";
-    public static final String PROPERTY_LABELS_SOUTH_TOOLTIP = "Display south labels";
-    public static final String PROPERTY_LABELS_SOUTH_ALIAS = "labelsSouth";
-    public static final boolean PROPERTY_LABELS_SOUTH_DEFAULT = true;
-    public static final Class PROPERTY_LABELS_SOUTH_TYPE = Boolean.class;
 
-    public static final String PROPERTY_LABELS_WEST_NAME = "colorbar.labels.west";
-    public static final String PROPERTY_LABELS_WEST_LABEL = "West";
-    public static final String PROPERTY_LABELS_WEST_TOOLTIP = "Display west labels";
-    public static final String PROPERTY_LABELS_WEST_ALIAS = "labelsWest";
-    public static final boolean PROPERTY_LABELS_WEST_DEFAULT = true;
-    public static final Class PROPERTY_LABELS_WEST_TYPE = Boolean.class;
 
-    public static final String PROPERTY_LABELS_EAST_NAME = "colorbar.labels.east";
-    public static final String PROPERTY_LABELS_EAST_LABEL = "East";
-    public static final String PROPERTY_LABELS_EAST_TOOLTIP = "Display east labels";
-    public static final String PROPERTY_LABELS_EAST_ALIAS = "labelsEast";
-    public static final boolean PROPERTY_LABELS_EAST_DEFAULT = true;
-    public static final Class PROPERTY_LABELS_EAST_TYPE = Boolean.class;
-
-    public static final String PROPERTY_LABELS_INSIDE_NAME = "colorbar.labels.inside";
-    public static final String PROPERTY_LABELS_INSIDE_LABEL = "Put on Inside";
-    public static final String PROPERTY_LABELS_INSIDE_TOOLTIP = "Put on labels inside of the data image (also see backdrop options below)";
-    private static final String PROPERTY_LABELS_INSIDE_ALIAS = "labelsInside";
-    public static final boolean PROPERTY_LABELS_INSIDE_DEFAULT = false;
-    public static final Class PROPERTY_LABELS_INSIDE_TYPE = Boolean.class;
-
-    public static final String PROPERTY_LABELS_SUFFIX_NSWE_NAME = "colorbar.labels.suffix.nswe";
-    public static final String PROPERTY_LABELS_SUFFIX_NSWE_LABEL = "Suffix (N,S,W,E)";
-    public static final String PROPERTY_LABELS_SUFFIX_NSWE_TOOLTIP = "Format label text with suffix (N,S,W,E) instead of (+/-)";
-    private static final String PROPERTY_LABELS_SUFFIX_NSWE_ALIAS = "colorbarLabelsSuffixNswe";
-    public static final boolean PROPERTY_LABELS_SUFFIX_NSWE_DEFAULT = true;
-    public static final Class PROPERTY_LABELS_SUFFIX_NSWE_TYPE = Boolean.class;
-
-    public static final String PROPERTY_LABELS_DECIMAL_VALUE_NAME = "colorbar.labels.decimal.value";
-    public static final String PROPERTY_LABELS_DECIMAL_VALUE_LABEL = "Decimal Value";
-    public static final String PROPERTY_LABELS_DECIMAL_VALUE_TOOLTIP = "Format label text with decimal value instead of degrees/minutes/seconds";
-    private static final String PROPERTY_LABELS_DECIMAL_VALUE_ALIAS = "colorbarLabelsDecimalValue";
-    public static final boolean PROPERTY_LABELS_DECIMAL_VALUE_DEFAULT = false;
-    public static final Class PROPERTY_LABELS_DECIMAL_VALUE_TYPE = Boolean.class;
 
     public static final String PROPERTY_LABELS_ITALIC_NAME = "colorbar.labels.font.italic";
     public static final String PROPERTY_LABELS_ITALIC_LABEL = "Italic";
@@ -402,20 +344,6 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_LABELS_BOLD_ALIAS = "colorbarLabelsFontBold";
     public static final boolean PROPERTY_LABELS_BOLD_DEFAULT = false;
     public static final Class PROPERTY_LABELS_BOLD_TYPE = Boolean.class;
-
-    public static final String PROPERTY_LABELS_ROTATION_LON_NAME = "colorbar.labels.rotation.lon";
-    public static final String PROPERTY_LABELS_ROTATION_LON_LABEL = "Rotation (Longitude)";
-    public static final String PROPERTY_LABELS_ROTATION_LON_TOOLTIP = "Rotate longitude labels (0 degrees = perpendicular)";
-    private static final String PROPERTY_LABELS_ROTATION_LON_ALIAS = "labelsRotationLon";
-    public static final double PROPERTY_LABELS_ROTATION_LON_DEFAULT = 45;
-    public static final Class PROPERTY_LABELS_ROTATION_LON_TYPE = Double.class;
-
-    public static final String PROPERTY_LABELS_ROTATION_LAT_NAME = "colorbar.labels.rotation.lat";
-    public static final String PROPERTY_LABELS_ROTATION_LAT_LABEL = "Rotation (Latitude)";
-    public static final String PROPERTY_LABELS_ROTATION_LAT_TOOLTIP = "Rotate latitude labels (0 degrees = perpendicular)";
-    private static final String PROPERTY_LABELS_ROTATION_LAT_ALIAS = "labelsRotationLat";
-    public static final double PROPERTY_LABELS_ROTATION_LAT_DEFAULT = 0;
-    public static final Class PROPERTY_LABELS_ROTATION_LAT_TYPE = Double.class;
 
     public static final String PROPERTY_LABELS_FONT_NAME = "colorbar.labels.font.name";
     public static final String PROPERTY_LABELS_FONT_LABEL = "Font";
@@ -449,122 +377,11 @@ public class ColorBarLayerType extends LayerType {
     public static final Class PROPERTY_LABELS_COLOR_TYPE = Color.class;
 
 
-    // Property Settings: Gridlines Section
-
-    public static final String PROPERTY_GRIDLINES_SECTION_NAME = "colorbar.gridlines.section";
-    public static final String PROPERTY_GRIDLINES_SECTION_LABEL = "Gridlines";
-    public static final String PROPERTY_GRIDLINES_SECTION_TOOLTIP = "Configuration options for the gridlines";
-    public static final String PROPERTY_GRIDLINES_SECTION_ALIAS = "colorbarGridlinesSection";
-
-    public static final String PROPERTY_GRIDLINES_SHOW_NAME = "colorbar.gridlines.show";
-    public static final String PROPERTY_GRIDLINES_SHOW_LABEL = "Show";
-    public static final String PROPERTY_GRIDLINES_SHOW_TOOLTIP = "Display gridlines";
-    private static final String PROPERTY_GRIDLINES_SHOW_ALIAS = "colorbarGridlinesShow";
-    public static final boolean PROPERTY_GRIDLINES_SHOW_DEFAULT = true;
-    public static final Class PROPERTY_GRIDLINES_SHOW_TYPE = Boolean.class;
-
-    public static final String PROPERTY_GRIDLINES_WIDTH_NAME = "colorbar.gridlines.width";
-    public static final String PROPERTY_GRIDLINES_WIDTH_LABEL = "Width";
-    public static final String PROPERTY_GRIDLINES_WIDTH_TOOLTIP = "Set width of gridlines";
-    private static final String PROPERTY_GRIDLINES_WIDTH_ALIAS = "gridlinesWidth";
-    public static final double PROPERTY_GRIDLINES_WIDTH_DEFAULT = 0.8;
-    public static final Class PROPERTY_GRIDLINES_WIDTH_TYPE = Double.class;
-
-    public static final String PROPERTY_GRIDLINES_DASHED_PHASE_NAME = "colorbar.gridlines.dashed.phase";
-    public static final String PROPERTY_GRIDLINES_DASHED_PHASE_LABEL = "Dash Length";
-    public static final String PROPERTY_GRIDLINES_DASHED_PHASE_TOOLTIP = "Set dash length of gridlines or solid gridlines (0=SOLID)";
-    private static final String PROPERTY_GRIDLINES_DASHED_PHASE_ALIAS = "colorbarGridlinesDashedPhase";
-    public static final double PROPERTY_GRIDLINES_DASHED_PHASE_DEFAULT = 3;
-    public static final Class PROPERTY_GRIDLINES_DASHED_PHASE_TYPE = Double.class;
-
-    public static final String PROPERTY_GRIDLINES_TRANSPARENCY_NAME = "colorbar.gridlines.transparency";
-    public static final String PROPERTY_GRIDLINES_TRANSPARENCY_LABEL = "Transparency";
-    public static final String PROPERTY_GRIDLINES_TRANSPARENCY_TOOLTIP = "Set transparency of gridlines";
-    private static final String PROPERTY_GRIDLINES_TRANSPARENCY_ALIAS = "gridlinesTransparency";
-    public static final double PROPERTY_GRIDLINES_TRANSPARENCY_DEFAULT = 0.6;
-    public static final Class PROPERTY_GRIDLINES_TRANSPARENCY_TYPE = Double.class;
-
-    public static final String PROPERTY_GRIDLINES_COLOR_NAME = "colorbar.gridlines.color";
-    public static final String PROPERTY_GRIDLINES_COLOR_LABEL = "Color";
-    public static final String PROPERTY_GRIDLINES_COLOR_TOOLTIP = "Set color of gridlines";
-    private static final String PROPERTY_GRIDLINES_COLOR_ALIAS = "gridlinesColor";
-    public static final Color PROPERTY_GRIDLINES_COLOR_DEFAULT = new Color(0, 0, 80);
-    public static final Class PROPERTY_GRIDLINES_COLOR_TYPE = Color.class;
 
 
 
 
 
-    // Property Settings: Tickmarks Section
-
-//    public static final String PROPERTY_TICKMARKS_SECTION_KEY = "colorbar.tickmarks.section";
-//    public static final String PROPERTY_TICKMARKS_SECTION_ALIAS = "colorbarTickmarksSection";
-//    public static final String PROPERTY_TICKMARKS_SECTION_LABEL = "Tickmarks";
-//    public static final String PROPERTY_TICKMARKS_SECTION_TOOLTIP = "Configuration options for adding tickmarks around the data image";
-
-//    public static final String PROPERTY_TICKMARKS_SHOW_NAME = "colorbar.tickmarks.show";
-//    public static final String PROPERTY_TICKMARKS_SHOW_LABEL = "Show";
-//    public static final String PROPERTY_TICKMARKS_SHOW_TOOLTIP = "Display tickmarks";
-//    public static final String PROPERTY_TICKMARKS_SHOW_ALIAS = "colorbarTickmarksShow";
-//    public static final boolean PROPERTY_TICKMARKS_SHOW_DEFAULT = true;
-//    public static final Class PROPERTY_TICKMARKS_SHOW_TYPE = Boolean.class;
-
-    public static final String PROPERTY_TICKMARKS_INSIDE_NAME = "colorbar.tickmarks.inside";
-    public static final String PROPERTY_TICKMARKS_INSIDE_LABEL = "Put Inside";
-    public static final String PROPERTY_TICKMARKS_INSIDE_TOOLTIP = "Put tickmarks on inside of data image";
-    public static final String PROPERTY_TICKMARKS_INSIDE_ALIAS = "colorbarTickmarksInside";
-    public static final boolean PROPERTY_TICKMARKS_INSIDE_DEFAULT = false;
-    public static final Class PROPERTY_TICKMARKS_INSIDE_TYPE = Boolean.class;
-
-//    public static final String PROPERTY_TICKMARKS_LENGTH_NAME = "colorbar.tickmarks.length";
-//    public static final String PROPERTY_TICKMARKS_LENGTH_LABEL = "Length";
-//    public static final String PROPERTY_TICKMARKS_LENGTH_TOOLTIP = "Set length of tickmarks";
-//    public static final String PROPERTY_TICKMARKS_LENGTH_ALIAS = "colorbarTickmarksLength";
-//    public static final double PROPERTY_TICKMARKS_LENGTH_DEFAULT = 3.0;
-//    public static final Class PROPERTY_TICKMARKS_LENGTH_TYPE = Double.class;
-
-//    public static final String PROPERTY_TICKMARKS_COLOR_KEY = "colorbar.tickmarks.color";
-//    public static final String PROPERTY_TICKMARKS_COLOR_LABEL = "Color";
-//    public static final String PROPERTY_TICKMARKS_COLOR_TOOLTIP = "Set color of the tickmarks";
-//    private static final String PROPERTY_TICKMARKS_COLOR_ALIAS = "colorbarTickmarksColor";
-//    public static final Color PROPERTY_TICKMARKS_COLOR_DEFAULT = Color.BLACK;
-//    public static final Class PROPERTY_TICKMARKS_COLOR_TYPE = Color.class;
-
-
-    // Property Settings: Corner Labels Section
-
-    public static final String PROPERTY_CORNER_LABELS_SECTION_NAME = "colorbar.corner.labels.section";
-    public static final String PROPERTY_CORNER_LABELS_SECTION_ALIAS = "colorbarCornerLabelsSection";
-    public static final String PROPERTY_CORNER_LABELS_SECTION_LABEL = "Corner Labels";
-    public static final String PROPERTY_CORNER_LABELS_SECTION_TOOLTIP = "Configuration options for labels placed at the corners of the image";
-
-    public static final String PROPERTY_CORNER_LABELS_NORTH_NAME = "colorbar.corner.labels.north";
-    public static final String PROPERTY_CORNER_LABELS_NORTH_LABEL = "North";
-    public static final String PROPERTY_CORNER_LABELS_NORTH_TOOLTIP = "Display north corner labels";
-    public static final String PROPERTY_CORNER_LABELS_NORTH_ALIAS = "colorbarCornerLabelsNorth";
-    public static final boolean PROPERTY_CORNER_LABELS_NORTH_DEFAULT = false;
-    public static final Class PROPERTY_CORNER_LABELS_NORTH_TYPE = Boolean.class;
-
-    public static final String PROPERTY_CORNER_LABELS_WEST_NAME = "colorbar.corner.labels.west";
-    public static final String PROPERTY_CORNER_LABELS_WEST_LABEL = "West";
-    public static final String PROPERTY_CORNER_LABELS_WEST_TOOLTIP = "Display west corner labels";
-    public static final String PROPERTY_CORNER_LABELS_WEST_ALIAS = "colorbarCornerLabelsWest";
-    public static final boolean PROPERTY_CORNER_LABELS_WEST_DEFAULT = false;
-    public static final Class PROPERTY_CORNER_LABELS_WEST_TYPE = Boolean.class;
-
-    public static final String PROPERTY_CORNER_LABELS_EAST_NAME = "colorbar.corner.labels.east";
-    public static final String PROPERTY_CORNER_LABELS_EAST_LABEL = "East";
-    public static final String PROPERTY_CORNER_LABELS_EAST_TOOLTIP = "Display east corner labels";
-    public static final String PROPERTY_CORNER_LABELS_EAST_ALIAS = "colorbarCornerLabelsEast";
-    public static final boolean PROPERTY_CORNER_LABELS_EAST_DEFAULT = false;
-    public static final Class PROPERTY_CORNER_LABELS_EAST_TYPE = Boolean.class;
-
-    public static final String PROPERTY_CORNER_LABELS_SOUTH_NAME = "colorbar.corner.labels.south";
-    public static final String PROPERTY_CORNER_LABELS_SOUTH_LABEL = "South";
-    public static final String PROPERTY_CORNER_LABELS_SOUTH_TOOLTIP = "Display south corner labels";
-    public static final String PROPERTY_CORNER_LABELS_SOUTH_ALIAS = "colorbarCornerLabelsSouth";
-    public static final boolean PROPERTY_CORNER_LABELS_SOUTH_DEFAULT = false;
-    public static final Class PROPERTY_CORNER_LABELS_SOUTH_TYPE = Boolean.class;
 
 
 
@@ -742,6 +559,10 @@ public class ColorBarLayerType extends LayerType {
 
         // Backdrop Section
 
+        final Property insideLabelsSectionModel = Property.create(PROPERTY_BACKDROP_SECTION_KEY, Boolean.class, true, true);
+        insideLabelsSectionModel.getDescriptor().setAlias(PROPERTY_BACKDROP_SECTION_ALIAS);
+        vc.addProperty(insideLabelsSectionModel);
+
         final Property backdropShowModel = Property.create(PROPERTY_BACKDROP_SHOW_KEY, Boolean.class, PROPERTY_BACKDROP_SHOW_DEFAULT, true);
         backdropShowModel.getDescriptor().setAlias(PROPERTY_BACKDROP_SHOW_ALIAS);
         vc.addProperty(backdropShowModel);
@@ -773,24 +594,7 @@ public class ColorBarLayerType extends LayerType {
         vc.addProperty(transformModel);
 
 
-        // Grid Spacing Section
 
-        final Property gridSpacingSectionModel = Property.create(PROPERTY_GRID_SPACING_SECTION_NAME, Boolean.class, true, true);
-        gridSpacingSectionModel.getDescriptor().setAlias(PROPERTY_GRID_SPACING_SECTION_ALIAS);
-        vc.addProperty(gridSpacingSectionModel);
-
-        // hidden from user
-        final Property resPixelsModel = Property.create(PROPERTY_NUM_GRID_LINES_NAME, Integer.class, PROPERTY_NUM_GRID_LINES_DEFAULT, true);
-        resPixelsModel.getDescriptor().setAlias(PROPERTY_NUM_GRID_LINES_ALIAS);
-        vc.addProperty(resPixelsModel);
-
-        final Property gridSpacingLatModel = Property.create(PROPERTY_GRID_SPACING_LAT_NAME, PROPERTY_GRID_SPACING_LAT_TYPE, PROPERTY_GRID_SPACING_LAT_DEFAULT, true);
-        gridSpacingLatModel.getDescriptor().setAlias(PROPERTY_GRID_SPACING_LAT_ALIAS);
-        vc.addProperty(gridSpacingLatModel);
-
-        final Property gridSpacingLonModel = Property.create(PROPERTY_GRID_SPACING_LON_NAME, PROPERTY_GRID_SPACING_LON_TYPE, PROPERTY_GRID_SPACING_LON_DEFAULT, true);
-        gridSpacingLonModel.getDescriptor().setAlias(PROPERTY_GRID_SPACING_LON_ALIAS);
-        vc.addProperty(gridSpacingLonModel);
 
 
 
@@ -805,35 +609,11 @@ public class ColorBarLayerType extends LayerType {
 
 
 
-        final Property insideLabelsSectionModel = Property.create(PROPERTY_BACKDROP_SECTION_KEY, Boolean.class, true, true);
-        insideLabelsSectionModel.getDescriptor().setAlias(PROPERTY_BACKDROP_SECTION_ALIAS);
-        vc.addProperty(insideLabelsSectionModel);
-
-        final Property cornerLabelsSectionModel = Property.create(PROPERTY_CORNER_LABELS_SECTION_NAME, Boolean.class, true, true);
-        cornerLabelsSectionModel.getDescriptor().setAlias(PROPERTY_CORNER_LABELS_SECTION_ALIAS);
-        vc.addProperty(cornerLabelsSectionModel);
 
 
 
 
-        final Property gridlinesSectionModel = Property.create(PROPERTY_GRIDLINES_SECTION_NAME, Boolean.class, true, true);
-        gridlinesSectionModel.getDescriptor().setAlias(PROPERTY_GRIDLINES_SECTION_ALIAS);
-        vc.addProperty(gridlinesSectionModel);
 
-
-
-
-        final Property lineColorModel = Property.create(PROPERTY_GRIDLINES_COLOR_NAME, Color.class, PROPERTY_GRIDLINES_COLOR_DEFAULT, true);
-        lineColorModel.getDescriptor().setAlias(PROPERTY_GRIDLINES_COLOR_ALIAS);
-        vc.addProperty(lineColorModel);
-
-        final Property lineTransparencyModel = Property.create(PROPERTY_GRIDLINES_TRANSPARENCY_NAME, Double.class, PROPERTY_GRIDLINES_TRANSPARENCY_DEFAULT, true);
-        lineTransparencyModel.getDescriptor().setAlias(PROPERTY_GRIDLINES_TRANSPARENCY_ALIAS);
-        vc.addProperty(lineTransparencyModel);
-
-        final Property lineWidthModel = Property.create(PROPERTY_GRIDLINES_WIDTH_NAME, Double.class, PROPERTY_GRIDLINES_WIDTH_DEFAULT, true);
-        lineWidthModel.getDescriptor().setAlias(PROPERTY_GRIDLINES_WIDTH_ALIAS);
-        vc.addProperty(lineWidthModel);
 
 
         final Property textFgColorModel = Property.create(PROPERTY_LABELS_COLOR_NAME, Color.class, PROPERTY_LABELS_COLOR_DEFAULT, true);
@@ -860,88 +640,6 @@ public class ColorBarLayerType extends LayerType {
         final Property textFontModel = Property.create(PROPERTY_LABELS_FONT_NAME, String.class, PROPERTY_LABELS_FONT_DEFAULT, true);
         textFontModel.getDescriptor().setAlias(PROPERTY_LABELS_FONT_ALIAS);
         vc.addProperty(textFontModel);
-
-
-        final Property textOutsideModel = Property.create(PROPERTY_LABELS_INSIDE_NAME, Boolean.class, PROPERTY_LABELS_INSIDE_DEFAULT, true);
-        textOutsideModel.getDescriptor().setAlias(PROPERTY_LABELS_INSIDE_ALIAS);
-        vc.addProperty(textOutsideModel);
-
-        final Property textRotationNorthModel = Property.create(PROPERTY_LABELS_ROTATION_LON_NAME, Double.class, PROPERTY_LABELS_ROTATION_LON_DEFAULT, true);
-        textRotationNorthModel.getDescriptor().setAlias(PROPERTY_LABELS_ROTATION_LON_ALIAS);
-        vc.addProperty(textRotationNorthModel);
-
-        final Property textRotationWestModel = Property.create(PROPERTY_LABELS_ROTATION_LAT_NAME, Double.class, PROPERTY_LABELS_ROTATION_LAT_DEFAULT, true);
-        textRotationWestModel.getDescriptor().setAlias(PROPERTY_LABELS_ROTATION_LAT_ALIAS);
-        vc.addProperty(textRotationWestModel);
-
-
-        final Property textEnabledNorthModel = Property.create(PROPERTY_LABELS_NORTH_NAME, Boolean.class, PROPERTY_LABELS_NORTH_DEFAULT, true);
-        textEnabledNorthModel.getDescriptor().setAlias(PROPERTY_LABELS_NORTH_ALIAS);
-        vc.addProperty(textEnabledNorthModel);
-
-        final Property textEnabledSouthModel = Property.create(PROPERTY_LABELS_SOUTH_NAME, Boolean.class, PROPERTY_LABELS_SOUTH_DEFAULT, true);
-        textEnabledSouthModel.getDescriptor().setAlias(PROPERTY_LABELS_SOUTH_ALIAS);
-        vc.addProperty(textEnabledSouthModel);
-
-        final Property textEnabledWestModel = Property.create(PROPERTY_LABELS_WEST_NAME, Boolean.class, PROPERTY_LABELS_WEST_DEFAULT, true);
-        textEnabledWestModel.getDescriptor().setAlias(PROPERTY_LABELS_WEST_ALIAS);
-        vc.addProperty(textEnabledWestModel);
-
-        final Property textEnabledEastModel = Property.create(PROPERTY_LABELS_EAST_NAME, Boolean.class, PROPERTY_LABELS_EAST_DEFAULT, true);
-        textEnabledEastModel.getDescriptor().setAlias(PROPERTY_LABELS_EAST_ALIAS);
-        vc.addProperty(textEnabledEastModel);
-
-        final Property lineEnabledModel = Property.create(PROPERTY_GRIDLINES_SHOW_NAME, Boolean.class, PROPERTY_GRIDLINES_SHOW_DEFAULT, true);
-        lineEnabledModel.getDescriptor().setAlias(PROPERTY_GRIDLINES_SHOW_ALIAS);
-        vc.addProperty(lineEnabledModel);
-
-
-        final Property lineDashedPhaseModel = Property.create(PROPERTY_GRIDLINES_DASHED_PHASE_NAME, Double.class, PROPERTY_GRIDLINES_DASHED_PHASE_DEFAULT, true);
-        lineDashedPhaseModel.getDescriptor().setAlias(PROPERTY_GRIDLINES_DASHED_PHASE_ALIAS);
-        vc.addProperty(lineDashedPhaseModel);
-
-
-
-        final Property formatCompassModel = Property.create(PROPERTY_LABELS_SUFFIX_NSWE_NAME, Boolean.class, PROPERTY_LABELS_SUFFIX_NSWE_DEFAULT, false);
-        formatCompassModel.getDescriptor().setAlias(PROPERTY_LABELS_SUFFIX_NSWE_ALIAS);
-        vc.addProperty(formatCompassModel);
-
-        final Property formatDecimalModel = Property.create(PROPERTY_LABELS_DECIMAL_VALUE_NAME, Boolean.class, PROPERTY_LABELS_DECIMAL_VALUE_DEFAULT, false);
-        formatDecimalModel.getDescriptor().setAlias(PROPERTY_LABELS_DECIMAL_VALUE_ALIAS);
-        vc.addProperty(formatDecimalModel);
-
-
-
-        final Property textCornerTopLeftLonEnabledModel = Property.create(PROPERTY_CORNER_LABELS_NORTH_NAME, Boolean.class, PROPERTY_CORNER_LABELS_NORTH_DEFAULT, true);
-        textCornerTopLeftLonEnabledModel.getDescriptor().setAlias(PROPERTY_CORNER_LABELS_NORTH_ALIAS);
-        vc.addProperty(textCornerTopLeftLonEnabledModel);
-
-        final Property textCornerTopLeftLatEnabledModel = Property.create(PROPERTY_CORNER_LABELS_WEST_NAME, Boolean.class, PROPERTY_CORNER_LABELS_WEST_DEFAULT, true);
-        textCornerTopLeftLatEnabledModel.getDescriptor().setAlias(PROPERTY_CORNER_LABELS_WEST_ALIAS);
-        vc.addProperty(textCornerTopLeftLatEnabledModel);
-
-
-        final Property textCornerTopRightLatEnabledModel = Property.create(PROPERTY_CORNER_LABELS_EAST_NAME, Boolean.class, PROPERTY_CORNER_LABELS_EAST_DEFAULT, true);
-        textCornerTopRightLatEnabledModel.getDescriptor().setAlias(PROPERTY_CORNER_LABELS_EAST_ALIAS);
-        vc.addProperty(textCornerTopRightLatEnabledModel);
-
-
-        final Property textCornerBottomLeftLonEnabledModel = Property.create(PROPERTY_CORNER_LABELS_SOUTH_NAME, Boolean.class, PROPERTY_CORNER_LABELS_SOUTH_DEFAULT, true);
-        textCornerBottomLeftLonEnabledModel.getDescriptor().setAlias(PROPERTY_CORNER_LABELS_SOUTH_ALIAS);
-        vc.addProperty(textCornerBottomLeftLonEnabledModel);
-
-
-        // Tickmarks Section
-
-
-
-
-
-        final Property tickMarkInsideModel = Property.create(PROPERTY_TICKMARKS_INSIDE_NAME, PROPERTY_TICKMARKS_INSIDE_TYPE, PROPERTY_TICKMARKS_INSIDE_DEFAULT, true);
-        tickMarkInsideModel.getDescriptor().setAlias(PROPERTY_TICKMARKS_INSIDE_ALIAS);
-        vc.addProperty(tickMarkInsideModel);
-
-
 
 
 

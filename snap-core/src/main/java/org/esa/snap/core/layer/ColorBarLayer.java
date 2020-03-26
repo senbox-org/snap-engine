@@ -48,9 +48,6 @@ public class ColorBarLayer extends Layer {
 
 
 
-    private int minorStep = 4;
-
-
     public ColorBarLayer(RasterDataNode raster) {
         this(LAYER_TYPE, raster, initConfiguration(LAYER_TYPE.createLayerConfig(null), raster));
     }
@@ -441,9 +438,7 @@ public class ColorBarLayer extends Layer {
         if (
                 propertyName.equals(ColorBarLayerType.PROPERTY_GRID_SPACING_LAT_NAME) ||
                         propertyName.equals(ColorBarLayerType.PROPERTY_GRID_SPACING_LON_NAME) ||
-                        propertyName.equals(ColorBarLayerType.PROPERTY_NUM_GRID_LINES_NAME) ||
-                        propertyName.equals(ColorBarLayerType.PROPERTY_LABELS_SUFFIX_NSWE_NAME) ||
-                        propertyName.equals(ColorBarLayerType.PROPERTY_LABELS_DECIMAL_VALUE_NAME)
+                        propertyName.equals(ColorBarLayerType.PROPERTY_NUM_GRID_LINES_NAME)
                 ) {
             imageLegend = null;
         }
@@ -458,10 +453,6 @@ public class ColorBarLayer extends Layer {
 
 
 
-    private int getNumGridLines() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_NUM_GRID_LINES_NAME,
-                ColorBarLayerType.PROPERTY_NUM_GRID_LINES_DEFAULT);
-    }
 
 
     private Color getLabelsColor() {
