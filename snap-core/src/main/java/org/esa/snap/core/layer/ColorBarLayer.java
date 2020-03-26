@@ -97,7 +97,7 @@ public class ColorBarLayer extends Layer {
             imageLegend.setHeaderText((String) title);
             imageLegend.setHeaderUnitsText((String) units);
             imageLegend.setOrientation(getOrientation());
-            imageLegend.setForegroundColor(getTextColor());
+            imageLegend.setForegroundColor(getTitleColor());
             imageLegend.setTickmarkColor(getTickmarksColor());
             imageLegend.setTickmarkLength(getTickmarksLength());
             imageLegend.setTickmarkWidth(getTickmarksWidth());
@@ -118,14 +118,21 @@ public class ColorBarLayer extends Layer {
 
 
 
+            imageLegend.setLabelsFontName(getLabelsFontName());
+            imageLegend.setLabelsFontType(getLabelsFontType());
+            imageLegend.setLabelsColor(getLabelsColor());
+
+
+
+
             imageLegend.setTitleColor(getTitleColor());
-            imageLegend.setLabelColor(getTextColor());
+            imageLegend.setLabelsColor(getLabelsColor());
             imageLegend.setAntialiasing((Boolean) true);
             imageLegend.setColorBarLength((Integer) 1200);
             imageLegend.setColorBarThickness((Integer) 60);
             imageLegend.setTitleFontSize((Integer) 35);
             imageLegend.setTitleUnitsFontSize((Integer) 35);
-            imageLegend.setLabelsFontSize((Integer) 35);
+            imageLegend.setLabelsFontSize((Integer) getFontSizePixels());
             imageLegend.setDistributionType((String) ImageLegend.DISTRIB_EVEN_STR);
             imageLegend.setScalingFactor((Double) 1.0);
             imageLegend.setLayerScaling((Double) getSizeScaling());
@@ -438,7 +445,8 @@ public class ColorBarLayer extends Layer {
         if (
                 propertyName.equals(ColorBarLayerType.PROPERTY_GRID_SPACING_LAT_NAME) ||
                         propertyName.equals(ColorBarLayerType.PROPERTY_GRID_SPACING_LON_NAME) ||
-                        propertyName.equals(ColorBarLayerType.PROPERTY_NUM_GRID_LINES_NAME)
+                        propertyName.equals(ColorBarLayerType.PROPERTY_NUM_GRID_LINES_NAME) ||
+                        propertyName.equals(ColorBarLayerType.PROPERTY_LABELS_SIZE_NAME)
                 ) {
             imageLegend = null;
         }
@@ -471,10 +479,12 @@ public class ColorBarLayer extends Layer {
 
 
     private int getFontSizePixels() {
-        int fontSizePts = getConfigurationProperty(ColorBarLayerType.PROPERTY_LABELS_SIZE_NAME,
+        int value = getConfigurationProperty(ColorBarLayerType.PROPERTY_LABELS_SIZE_NAME,
                 ColorBarLayerType.PROPERTY_LABELS_SIZE_DEFAULT);
 
-        return (int) Math.round(getPtsToPixelsMultiplier() * fontSizePts);
+        System.out.println("value=" +value);
+
+        return value;
     }
 
 
@@ -513,10 +523,7 @@ public class ColorBarLayer extends Layer {
     }
 
 
-    private Color getTextColor() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_FORMATTING_TEXT_COLOR_KEY,
-                ColorBarLayerType.PROPERTY_FORMATTING_TEXT_COLOR_DEFAULT);
-    }
+
 
     private Color getTitleColor() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_COLOR_KEY,
@@ -594,7 +601,7 @@ public class ColorBarLayer extends Layer {
 
 
 
-    private String getLabelsFont() {
+    private String getLabelsFontName() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABELS_FONT_NAME,
                 ColorBarLayerType.PROPERTY_LABELS_FONT_DEFAULT);
     }
@@ -609,7 +616,7 @@ public class ColorBarLayer extends Layer {
                 ColorBarLayerType.PROPERTY_LABELS_BOLD_DEFAULT);
     }
 
-    private int getFontType() {
+    private int getLabelsFontType() {
         if (isLabelsItalic() && isLabelsBold()) {
             return Font.ITALIC | Font.BOLD;
         } else if (isLabelsItalic()) {

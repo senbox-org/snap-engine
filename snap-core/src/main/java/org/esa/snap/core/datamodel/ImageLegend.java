@@ -116,8 +116,14 @@ public class ImageLegend {
     private boolean backdropShow;
 
 
+    private String labelsFontName;
+    private int labelsFontType;
 
-    private Color labelColor;
+
+
+
+
+    private Color labelsColor;
     private Color titleColor;
 
     private boolean antialiasing;
@@ -164,14 +170,18 @@ public class ImageLegend {
 
         orientation = HORIZONTAL;
         backgroundColor = Color.white;
-        foregroundColor = ColorBarLayerType.PROPERTY_FORMATTING_TEXT_COLOR_DEFAULT;
-        tickmarkColor = ColorBarLayerType.PROPERTY_FORMATTING_TEXT_COLOR_DEFAULT;
-        labelColor = ColorBarLayerType.PROPERTY_FORMATTING_TEXT_COLOR_DEFAULT;
-        titleColor = ColorBarLayerType.PROPERTY_FORMATTING_TEXT_COLOR_DEFAULT;
+        foregroundColor = ColorBarLayerType.PROPERTY_TITLE_COLOR_DEFAULT;
+        tickmarkColor = ColorBarLayerType.PROPERTY_TICKMARKS_COLOR_DEFAULT;
+        labelsColor = ColorBarLayerType.PROPERTY_LABELS_COLOR_DEFAULT;
+        titleColor = ColorBarLayerType.PROPERTY_TITLE_COLOR_DEFAULT;
 
         setTickmarkLength(ColorBarLayerType.PROPERTY_TICKMARKS_LENGTH_DEFAULT);
         setTickmarkWidth(ColorBarLayerType.PROPERTY_TICKMARKS_WIDTH_DEFAULT);
         setTickmarkShow(ColorBarLayerType.PROPERTY_TICKMARKS_SHOW_DEFAULT);
+
+        setLabelsFontSize((Integer) 35);
+        setLabelsFontName(ColorBarLayerType.PROPERTY_LABELS_FONT_DEFAULT);
+
 
         backgroundTransparency = 1.0f;
         antialiasing = true;
@@ -1021,7 +1031,7 @@ public class ImageLegend {
         Font originalFont = g2d.getFont();
 
         g2d.setFont(getLabelsFont());
-        g2d.setPaint(getLabelColor());
+        g2d.setPaint(getLabelsColor());
 
         //   Color tickMarkColor = new Color(0, 0, 0);
         Color tickMarkColor = foregroundColor;
@@ -1093,7 +1103,7 @@ public class ImageLegend {
                 y0 = -0.5f * labelHeight + fontMetrics.getMaxAscent();
             }
 
-            g2d.setColor(getLabelColor());
+            g2d.setPaint(getLabelsColor());
             g2d.drawString(formattedValue, x0, y0);
             g2d.translate(-translateX, -translateY);
         }
@@ -1304,7 +1314,7 @@ public class ImageLegend {
 
 
     public Font getLabelsFont() {
-        return new Font("SansSerif", Font.TRUETYPE_FONT, getLabelsFontSize());
+        return new Font(getLabelsFontName(), getLabelsFontType(), getLabelsFontSize());
     }
 
 
@@ -1583,12 +1593,12 @@ public class ImageLegend {
         this.tickmarkColor = tickmarkColor;
     }
 
-    public Color getLabelColor() {
-        return labelColor;
+    public Color getLabelsColor() {
+        return labelsColor;
     }
 
-    public void setLabelColor(Color labelColor) {
-        this.labelColor = labelColor;
+    public void setLabelsColor(Color labelsColor) {
+        this.labelsColor = labelsColor;
     }
 
     public Color getTitleColor() {
@@ -1663,5 +1673,21 @@ public class ImageLegend {
 
     public void setBackdropShow(boolean backdropShow) {
         this.backdropShow = backdropShow;
+    }
+
+    public String getLabelsFontName() {
+        return labelsFontName;
+    }
+
+    public void setLabelsFontName(String labelsFontName) {
+        this.labelsFontName = labelsFontName;
+    }
+
+    public int getLabelsFontType() {
+        return labelsFontType;
+    }
+
+    public void setLabelsFontType(int labelsFontType) {
+        this.labelsFontType = labelsFontType;
     }
 }

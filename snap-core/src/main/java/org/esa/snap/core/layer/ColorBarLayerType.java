@@ -58,12 +58,7 @@ public class ColorBarLayerType extends LayerType {
     public static final Object PROPERTY_FORMATTING_ORIENTATION_VALUE_SET[] = {PROPERTY_FORMATTING_ORIENTATION_OPTION1, PROPERTY_FORMATTING_ORIENTATION_OPTION2};
 
 
-    public static final String PROPERTY_FORMATTING_TEXT_COLOR_KEY = PROPERTY_ROOT_FORMATTING_KEY + ".text.color";
-    public static final String PROPERTY_FORMATTING_TEXT_COLOR_LABEL = "Text Color";
-    public static final String PROPERTY_FORMATTING_TEXT_COLOR_TOOLTIP = "Set color of the label text";
-    private static final String PROPERTY_FORMATTING_TEXT_COLOR_ALIAS = "textColor";
-    public static final Color PROPERTY_FORMATTING_TEXT_COLOR_DEFAULT = Color.YELLOW;
-    public static final Class PROPERTY_FORMATTING_TEXT_COLOR_TYPE = Color.class;
+
 
 
 
@@ -301,54 +296,52 @@ public class ColorBarLayerType extends LayerType {
 
 
 
-
-
-
-
-
-
-    
-
-
-    // Property Settings: Grid Spacing Section
-
-
-    public static final String PROPERTY_GRID_SPACING_LAT_NAME = "colorbar.spacing.lat";
-
-    public static final String PROPERTY_GRID_SPACING_LON_NAME = "colorbar.spacing.lon";
-
-
-
     // Property Settings: Labels Section
 
-    public static final String PROPERTY_LABELS_SECTION_NAME = "colorbar.labels.section";
+    private static final String PROPERTY_ROOT_LABELS_KEY = PROPERTY_ROOT_KEY + ".labels";
+    private static final String PROPERTY_ROOT_LABELS_ALIAS = PROPERTY_ROOT_ALIAS + "Labels";
+
+
+    public static final String PROPERTY_LABELS_SECTION_NAME = PROPERTY_ROOT_LABELS_KEY + ".section";
     public static final String PROPERTY_LABELS_SECTION_LABEL = "Labels";
     public static final String PROPERTY_LABELS_SECTION_TOOLTIP = "Configuration options for the labels";
-    public static final String PROPERTY_LABELS_SECTION_ALIAS = "colorbarLabelsSection";
+    public static final String PROPERTY_LABELS_SECTION_ALIAS = PROPERTY_ROOT_LABELS_ALIAS + "Section";
 
+    public static final String PROPERTY_LABELS_SHOW_KEY = PROPERTY_ROOT_LABELS_KEY + ".show";
+    public static final String PROPERTY_LABELS_SHOW_LABEL = "Show";
+    public static final String PROPERTY_LABELS_SHOW_TOOLTIP = "Show labels";
+    private static final String PROPERTY_LABELS_SHOW_ALIAS = PROPERTY_ROOT_LABELS_ALIAS + "Show";
+    public static final boolean PROPERTY_LABELS_SHOW_DEFAULT = true;
+    public static final Class PROPERTY_LABELS_SHOW_TYPE = Boolean.class;
 
+    public static final String PROPERTY_LABELS_SIZE_NAME = PROPERTY_ROOT_LABELS_KEY + ".size";
+    public static final String PROPERTY_LABELS_SIZE_LABEL = "Size";
+    public static final String PROPERTY_LABELS_SIZE_TOOLTIP = "Set size of the label text";
+    private static final String PROPERTY_LABELS_SIZE_ALIAS = PROPERTY_ROOT_LABELS_ALIAS + "Size";
+    public static final int PROPERTY_LABELS_SIZE_DEFAULT = 35;
+    public static final Class PROPERTY_LABELS_SIZE_TYPE = Integer.class;
+    public static final int PROPERTY_LABELS_SIZE_VALUE_MIN = 10;
+    public static final int PROPERTY_LABELS_SIZE_VALUE_MAX = 200;
+    public static final String PROPERTY_LABELS_SIZE_INTERVAL = "[" + ColorBarLayerType.PROPERTY_LABELS_SIZE_VALUE_MIN + "," + ColorBarLayerType.PROPERTY_LABELS_SIZE_VALUE_MAX + "]";
 
-
-
-
-    public static final String PROPERTY_LABELS_ITALIC_NAME = "colorbar.labels.font.italic";
+    public static final String PROPERTY_LABELS_ITALIC_NAME = PROPERTY_ROOT_LABELS_KEY + ".font.italic";
     public static final String PROPERTY_LABELS_ITALIC_LABEL = "Italic";
     public static final String PROPERTY_LABELS_ITALIC_TOOLTIP = "Format label text font in italic";
-    public static final String PROPERTY_LABELS_ITALIC_ALIAS = "colorbarLabelsFontItalic";
+    public static final String PROPERTY_LABELS_ITALIC_ALIAS = PROPERTY_ROOT_LABELS_ALIAS + "FontItalic";
     public static final boolean PROPERTY_LABELS_ITALIC_DEFAULT = false;
     public static final Class PROPERTY_LABELS_ITALIC_TYPE = Boolean.class;
 
-    public static final String PROPERTY_LABELS_BOLD_NAME = "colorbar.labels.font.bold";
+    public static final String PROPERTY_LABELS_BOLD_NAME = PROPERTY_ROOT_LABELS_KEY + ".font.bold";
     public static final String PROPERTY_LABELS_BOLD_LABEL = "Bold";
     public static final String PROPERTY_LABELS_BOLD_TOOLTIP = "Format label text font in bold";
-    public static final String PROPERTY_LABELS_BOLD_ALIAS = "colorbarLabelsFontBold";
+    public static final String PROPERTY_LABELS_BOLD_ALIAS = PROPERTY_ROOT_LABELS_ALIAS + "FontBold";
     public static final boolean PROPERTY_LABELS_BOLD_DEFAULT = false;
     public static final Class PROPERTY_LABELS_BOLD_TYPE = Boolean.class;
 
-    public static final String PROPERTY_LABELS_FONT_NAME = "colorbar.labels.font.name";
+    public static final String PROPERTY_LABELS_FONT_NAME = PROPERTY_ROOT_LABELS_KEY + ".font.name";
     public static final String PROPERTY_LABELS_FONT_LABEL = "Font";
     public static final String PROPERTY_LABELS_FONT_TOOLTIP = "Set the text font of the labels";
-    public static final String PROPERTY_LABELS_FONT_ALIAS = "colorbarLabelsFontName";
+    public static final String PROPERTY_LABELS_FONT_ALIAS = PROPERTY_ROOT_LABELS_ALIAS + "FontName";
     public static final String PROPERTY_LABELS_FONT_DEFAULT = "SanSerif";
     public static final Class PROPERTY_LABELS_FONT_TYPE = String.class;
     public static final String PROPERTY_LABELS_FONT_VALUE_1 = "SanSerif";
@@ -357,29 +350,29 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_LABELS_FONT_VALUE_4 = "Monospaced";
     public static final Object PROPERTY_LABELS_FONT_VALUE_SET[] = {PROPERTY_LABELS_FONT_VALUE_1, PROPERTY_LABELS_FONT_VALUE_2, PROPERTY_LABELS_FONT_VALUE_3, PROPERTY_LABELS_FONT_VALUE_4};
 
-
-    public static final String PROPERTY_LABELS_SIZE_NAME = "colorbar.labels.size";
-    public static final String PROPERTY_LABELS_SIZE_LABEL = "Size";
-    public static final String PROPERTY_LABELS_SIZE_TOOLTIP = "Set size of the label text";
-    private static final String PROPERTY_LABELS_SIZE_ALIAS = "colorbarLabelsSize";
-    public static final int PROPERTY_LABELS_SIZE_DEFAULT = 12;
-    public static final Class PROPERTY_LABELS_SIZE_TYPE = Integer.class;
-    public static final int PROPERTY_LABELS_SIZE_VALUE_MIN = 6;
-    public static final int PROPERTY_LABELS_SIZE_VALUE_MAX = 70;
-    public static final String PROPERTY_LABELS_SIZE_INTERVAL = "[" + ColorBarLayerType.PROPERTY_LABELS_SIZE_VALUE_MIN + "," + ColorBarLayerType.PROPERTY_LABELS_SIZE_VALUE_MAX + "]";
-
-
-    public static final String PROPERTY_LABELS_COLOR_NAME = "colorbar.labels.color";
+    public static final String PROPERTY_LABELS_COLOR_NAME = PROPERTY_ROOT_LABELS_KEY + ".color";
     public static final String PROPERTY_LABELS_COLOR_LABEL = "Color";
     public static final String PROPERTY_LABELS_COLOR_TOOLTIP = "Set color of the label text";
-    private static final String PROPERTY_LABELS_COLOR_ALIAS = "colorbarLabelsColor";
-    public static final Color PROPERTY_LABELS_COLOR_DEFAULT = Color.BLACK;
+    private static final String PROPERTY_LABELS_COLOR_ALIAS = PROPERTY_ROOT_LABELS_ALIAS + "Color";
+    public static final Color PROPERTY_LABELS_COLOR_DEFAULT = Color.YELLOW;
     public static final Class PROPERTY_LABELS_COLOR_TYPE = Color.class;
 
 
 
 
 
+
+
+
+
+
+
+    // Property Settings: Grid Spacing Section
+
+
+    public static final String PROPERTY_GRID_SPACING_LAT_NAME = "colorbar.spacing.lat";
+
+    public static final String PROPERTY_GRID_SPACING_LON_NAME = "colorbar.spacing.lon";
 
 
 
@@ -436,9 +429,6 @@ public class ColorBarLayerType extends LayerType {
         formattingOrientationModel.getDescriptor().setAlias(PROPERTY_FORMATTING_ORIENTATION_ALIAS);
         vc.addProperty(formattingOrientationModel);
 
-        final Property formattingTextColorModel = Property.create(PROPERTY_FORMATTING_TEXT_COLOR_KEY, PROPERTY_FORMATTING_TEXT_COLOR_TYPE, true, true);
-        formattingTextColorModel.getDescriptor().setAlias(PROPERTY_FORMATTING_TEXT_COLOR_ALIAS);
-        vc.addProperty(formattingTextColorModel);
 
 
 
