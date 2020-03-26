@@ -36,7 +36,15 @@ public class NetCdfActivator implements Activator {
         }
 
         String arch = System.getProperty("os.arch").toLowerCase();
-        String jna_path = auxdataDirectory.toAbsolutePath().resolve(arch).toString() + ":/lib/x86_64-linux-gnu:/lib64";
+        String jna_path = auxdataDirectory.toAbsolutePath().resolve(arch).toString();
+        String javaLibPath = System.getProperty("java.library.path");
+        if (javaLibPath == null) {
+            javaLibPath = jna_path;
+            System.setProperty("java.library.path", javaLibPath);
+        } else if (! javaLibPath.contains(jna_path)) {
+            javaLibPath += ":" + jna_path;
+            System.setProperty("java.library.path", javaLibPath);
+        }
         try {
             Process process = new ProcessBuilder("bash", "-c",
                                                  "export LD_LIBRARY_PATH="+auxdataDirectory.toAbsolutePath().resolve(arch).toString()+":$LD_LIBRARY_PATH;" +
