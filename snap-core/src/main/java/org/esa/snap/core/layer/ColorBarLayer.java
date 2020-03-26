@@ -100,7 +100,6 @@ public class ColorBarLayer extends Layer {
             imageLegend.setHeaderText((String) title);
             imageLegend.setHeaderUnitsText((String) units);
             imageLegend.setOrientation(getOrientation());
-            imageLegend.setBackgroundColor((Color) Color.WHITE);
             imageLegend.setForegroundColor(getTextColor());
             imageLegend.setTickmarkColor(getTickmarksColor());
             imageLegend.setTickmarkLength(getTickmarksLength());
@@ -113,11 +112,17 @@ public class ColorBarLayer extends Layer {
             imageLegend.setBorderColor(getBorderColor());
 
 
+            imageLegend.setBackgroundColor(getBackdropColor());
+//            imageLegend.setBackgroundTransparency(((Number) 0.5).floatValue());
+            imageLegend.setBackgroundTransparency(((Number) getBackdropTransparency()).floatValue());
+            imageLegend.setBackdropShow(isBackdropShow());
+
+
+
 
 
             imageLegend.setTitleColor(getTitleColor());
             imageLegend.setLabelColor(getTextColor());
-            imageLegend.setBackgroundTransparency(((Number) 0.5).floatValue());
             imageLegend.setAntialiasing((Boolean) true);
             imageLegend.setColorBarLength((Integer) 1200);
             imageLegend.setColorBarThickness((Integer) 60);
@@ -451,30 +456,11 @@ public class ColorBarLayer extends Layer {
     }
 
 
-    private double getGridSpacingLon() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_GRID_SPACING_LON_NAME,
-                ColorBarLayerType.PROPERTY_GRID_SPACING_LON_DEFAULT);
-    }
 
-    private double getGridSpacingLat() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_GRID_SPACING_LAT_NAME,
-                ColorBarLayerType.PROPERTY_GRID_SPACING_LAT_DEFAULT);
-    }
 
     private int getNumGridLines() {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_NUM_GRID_LINES_NAME,
                 ColorBarLayerType.PROPERTY_NUM_GRID_LINES_DEFAULT);
-    }
-
-
-    private Color getGridlinesColor() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_GRIDLINES_COLOR_NAME,
-                ColorBarLayerType.PROPERTY_GRIDLINES_COLOR_DEFAULT);
-    }
-
-    private double getGridlinesTransparency() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_GRIDLINES_TRANSPARENCY_NAME,
-                ColorBarLayerType.PROPERTY_GRIDLINES_TRANSPARENCY_DEFAULT);
     }
 
 
@@ -486,33 +472,11 @@ public class ColorBarLayer extends Layer {
 
 
 
-    private Color getInsideLabelsBgColor() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_INSIDE_LABELS_BG_COLOR_NAME,
-                ColorBarLayerType.PROPERTY_INSIDE_LABELS_BG_COLOR_DEFAULT);
-    }
-
-    private double getInsideLabelsBgTransparency() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_INSIDE_LABELS_BG_TRANSPARENCY_NAME,
-                ColorBarLayerType.PROPERTY_INSIDE_LABELS_BG_TRANSPARENCY_DEFAULT);
-    }
-
-
-    private double getGridlinesWidthPixels() {
-        double gridLineWidthPts = getConfigurationProperty(ColorBarLayerType.PROPERTY_GRIDLINES_WIDTH_NAME,
-                ColorBarLayerType.PROPERTY_GRIDLINES_WIDTH_DEFAULT);
-
-        return getPtsToPixelsMultiplier() * gridLineWidthPts;
-    }
 
 
 
 
-    private double getDashLengthPixels() {
-        double dashLengthPts = getConfigurationProperty(ColorBarLayerType.PROPERTY_GRIDLINES_DASHED_PHASE_NAME,
-                ColorBarLayerType.PROPERTY_GRIDLINES_DASHED_PHASE_DEFAULT);
 
-        return getPtsToPixelsMultiplier() * dashLengthPts;
-    }
 
 
     private int getFontSizePixels() {
@@ -614,6 +578,27 @@ public class ColorBarLayer extends Layer {
     }
 
 
+    // Backdrop Section
+
+    private boolean isBackdropShow() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_BACKDROP_SHOW_KEY,
+                ColorBarLayerType.PROPERTY_BACKDROP_SHOW_DEFAULT);
+    }
+
+    private double getBackdropTransparency() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_BACKDROP_TRANSPARENCY_KEY,
+                ColorBarLayerType.PROPERTY_BACKDROP_TRANSPARENCY_DEFAULT);
+    }
+
+    private Color getBackdropColor() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_BACKDROP_COLOR_KEY,
+                ColorBarLayerType.PROPERTY_BACKDROP_COLOR_DEFAULT);
+    }
+
+
+
+
+
 
 
 
@@ -704,91 +689,6 @@ public class ColorBarLayer extends Layer {
 
 
 
-    private boolean isLabelsInside() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABELS_INSIDE_NAME,
-                ColorBarLayerType.PROPERTY_LABELS_INSIDE_DEFAULT);
-    }
-
-    private double getLabelsRotationLon() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABELS_ROTATION_LON_NAME,
-                ColorBarLayerType.PROPERTY_LABELS_ROTATION_LON_DEFAULT);
-    }
-
-
-    private double getLabelsRotationLat() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABELS_ROTATION_LAT_NAME,
-                ColorBarLayerType.PROPERTY_LABELS_ROTATION_LAT_DEFAULT);
-    }
-
-
-    private boolean isLabelsNorth() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABELS_NORTH_NAME,
-                ColorBarLayerType.PROPERTY_LABELS_NORTH_DEFAULT);
-    }
-
-    private boolean isLabelsSouth() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABELS_SOUTH_NAME,
-                ColorBarLayerType.PROPERTY_LABELS_SOUTH_DEFAULT);
-    }
-
-    private boolean isLabelsWest() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABELS_WEST_NAME,
-                ColorBarLayerType.PROPERTY_LABELS_WEST_DEFAULT);
-    }
-
-    private boolean isLabelsEast() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABELS_EAST_NAME,
-                ColorBarLayerType.PROPERTY_LABELS_EAST_DEFAULT);
-    }
-
-    private boolean isGridlinesShow() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_GRIDLINES_SHOW_NAME,
-                ColorBarLayerType.PROPERTY_GRIDLINES_SHOW_DEFAULT);
-    }
-
-
-
-
-    private boolean isLabelsSuffix() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABELS_SUFFIX_NSWE_NAME,
-                ColorBarLayerType.PROPERTY_LABELS_SUFFIX_NSWE_DEFAULT);
-    }
-
-    private boolean isLabelsDecimal() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABELS_DECIMAL_VALUE_NAME,
-                ColorBarLayerType.PROPERTY_LABELS_DECIMAL_VALUE_DEFAULT);
-    }
-
-
-
-    private boolean isCornerLabelsNorth() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_CORNER_LABELS_NORTH_NAME,
-                ColorBarLayerType.PROPERTY_CORNER_LABELS_NORTH_DEFAULT);
-    }
-
-    private boolean isCornerLabelsWest() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_CORNER_LABELS_WEST_NAME,
-                ColorBarLayerType.PROPERTY_CORNER_LABELS_WEST_DEFAULT);
-    }
-
-
-    private boolean isCornerLabelsEast() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_CORNER_LABELS_EAST_NAME,
-                ColorBarLayerType.PROPERTY_CORNER_LABELS_EAST_DEFAULT);
-    }
-
-
-    private boolean isCornerLabelsSouth() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_CORNER_LABELS_SOUTH_NAME,
-                ColorBarLayerType.PROPERTY_CORNER_LABELS_SOUTH_DEFAULT);
-    }
-
-
-
-    private boolean isTickmarksInside() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TICKMARKS_INSIDE_NAME,
-                ColorBarLayerType.PROPERTY_TICKMARKS_INSIDE_DEFAULT);
-    }
 
 
 

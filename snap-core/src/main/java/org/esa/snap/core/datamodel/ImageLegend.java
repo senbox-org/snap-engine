@@ -110,15 +110,16 @@ public class ImageLegend {
     private boolean borderShow = true;
 
 
-
+    private Color backgroundColor;
+    private boolean backgroundTransparencyEnabled;
+    private float backgroundTransparency;
+    private boolean backdropShow;
 
 
 
     private Color labelColor;
     private Color titleColor;
-    private Color backgroundColor;
-    private boolean backgroundTransparencyEnabled;
-    private float backgroundTransparency;
+
     private boolean antialiasing;
     private int decimalPlaces;
     private boolean decimalPlacesForce;
@@ -721,7 +722,9 @@ public class ImageLegend {
     }
 
     private void draw(Graphics2D g2d) {
-        fillBackground(g2d);
+        if (isBackdropShow()) {
+            fillBackground(g2d);
+        }
         drawHeaderText(g2d);
         drawPalette(g2d);
         drawLabels(g2d);
@@ -1652,5 +1655,13 @@ public class ImageLegend {
 
     public void setBorderShow(boolean borderShow) {
         this.borderShow = borderShow;
+    }
+
+    public boolean isBackdropShow() {
+        return backdropShow;
+    }
+
+    public void setBackdropShow(boolean backdropShow) {
+        this.backdropShow = backdropShow;
     }
 }

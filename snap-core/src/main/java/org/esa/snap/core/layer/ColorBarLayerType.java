@@ -267,6 +267,40 @@ public class ColorBarLayerType extends LayerType {
 
 
 
+    // Property Settings: Backdrop Section
+
+    private static final String PROPERTY_ROOT_BACKDROP_KEY = PROPERTY_ROOT_KEY + ".backdrop";
+    private static final String PROPERTY_ROOT_BACKDROP_ALIAS = PROPERTY_ROOT_ALIAS + "Backdrop";
+
+    public static final String PROPERTY_BACKDROP_SECTION_KEY = PROPERTY_ROOT_BACKDROP_KEY + ".section";
+    public static final String PROPERTY_BACKDROP_SECTION_ALIAS = PROPERTY_ROOT_BACKDROP_ALIAS + "Section";
+    public static final String PROPERTY_BACKDROP_SECTION_LABEL = "Backdrop";
+    public static final String PROPERTY_BACKDROP_SECTION_TOOLTIP = "Configuration options for the color bar legend backdrop";
+
+    public static final String PROPERTY_BACKDROP_SHOW_KEY = PROPERTY_ROOT_BACKDROP_KEY + ".show";
+    public static final String PROPERTY_BACKDROP_SHOW_LABEL = "Show";
+    public static final String PROPERTY_BACKDROP_SHOW_TOOLTIP = "Show the color bar legend backdrop";
+    private static final String PROPERTY_BACKDROP_SHOW_ALIAS = PROPERTY_ROOT_BACKDROP_ALIAS + "Show";
+    public static final boolean PROPERTY_BACKDROP_SHOW_DEFAULT = true;
+    public static final Class PROPERTY_BACKDROP_SHOW_TYPE = Boolean.class;
+
+    public static final String PROPERTY_BACKDROP_COLOR_KEY = PROPERTY_ROOT_BACKDROP_KEY + ".color";
+    public static final String PROPERTY_BACKDROP_COLOR_LABEL = "Color";
+    public static final String PROPERTY_BACKDROP_COLOR_TOOLTIP = "Set color of the backdrop of the color bar legend backdrop";
+    private static final String PROPERTY_BACKDROP_COLOR_ALIAS = PROPERTY_ROOT_BACKDROP_ALIAS + "Color";
+    public static final Color PROPERTY_BACKDROP_COLOR_DEFAULT = Color.BLACK;
+    public static final Class PROPERTY_BACKDROP_COLOR_TYPE = Color.class;
+
+    public static final String PROPERTY_BACKDROP_TRANSPARENCY_KEY = PROPERTY_ROOT_BACKDROP_KEY + "transparency";
+    public static final String PROPERTY_BACKDROP_TRANSPARENCY_LABEL = "Transparency";
+    public static final String PROPERTY_BACKDROP_TRANSPARENCY_TOOLTIP = "Set transparency of the color bar legend backdrop";
+    private static final String PROPERTY_BACKDROP_TRANSPARENCY_ALIAS = PROPERTY_ROOT_BACKDROP_ALIAS + "Transparency";
+    public static final double PROPERTY_BACKDROP_TRANSPARENCY_DEFAULT = 0.5;
+    public static final Class PROPERTY_BACKDROP_TRANSPARENCY_TYPE = Double.class;
+
+
+
+
 
 
 
@@ -533,26 +567,7 @@ public class ColorBarLayerType extends LayerType {
     public static final Class PROPERTY_CORNER_LABELS_SOUTH_TYPE = Boolean.class;
 
 
-    // Property Settings: Inside Labels Backdrop Section
 
-    public static final String PROPERTY_INSIDE_LABELS_SECTION_NAME = "colorbar.labels.backdrop.section";
-    public static final String PROPERTY_INSIDE_LABELS_SECTION_ALIAS = "colorbarLabelsBackdropSection";
-    public static final String PROPERTY_INSIDE_LABELS_SECTION_LABEL = "Inside Labels Backdrop";
-    public static final String PROPERTY_INSIDE_LABELS_SECTION_TOOLTIP = "Configuration options for backdrop of labels placed on the inside of the image";
-
-    public static final String PROPERTY_INSIDE_LABELS_BG_COLOR_NAME = "colorbar.text.bg.color";
-    public static final String PROPERTY_INSIDE_LABELS_BG_COLOR_LABEL = "Color";
-    public static final String PROPERTY_INSIDE_LABELS_BG_COLOR_TOOLTIP = "Set color of the backdrop of the inside labels";
-    private static final String PROPERTY_INSIDE_LABELS_BG_COLOR_ALIAS = "textBgColor";
-    public static final Color PROPERTY_INSIDE_LABELS_BG_COLOR_DEFAULT = Color.WHITE;
-    public static final Class PROPERTY_INSIDE_LABELS_BG_COLOR_TYPE = Color.class;
-
-    public static final String PROPERTY_INSIDE_LABELS_BG_TRANSPARENCY_NAME = "colorbar.text.bg.transparency";
-    public static final String PROPERTY_INSIDE_LABELS_BG_TRANSPARENCY_LABEL = "Transparency";
-    public static final String PROPERTY_INSIDE_LABELS_BG_TRANSPARENCY_TOOLTIP = "Set transparency of the backdrop of the inside labels";
-    private static final String PROPERTY_INSIDE_LABELS_BG_TRANSPARENCY_ALIAS = "textBgTransparency";
-    public static final double PROPERTY_INSIDE_LABELS_BG_TRANSPARENCY_DEFAULT = 0.3;
-    public static final Class PROPERTY_INSIDE_LABELS_BG_TRANSPARENCY_TYPE = Double.class;
 
     // ---------------------------------------------------------
 
@@ -725,6 +740,27 @@ public class ColorBarLayerType extends LayerType {
 
 
 
+        // Backdrop Section
+
+        final Property backdropShowModel = Property.create(PROPERTY_BACKDROP_SHOW_KEY, Boolean.class, PROPERTY_BACKDROP_SHOW_DEFAULT, true);
+        backdropShowModel.getDescriptor().setAlias(PROPERTY_BACKDROP_SHOW_ALIAS);
+        vc.addProperty(backdropShowModel);
+
+        final Property backdropColorModel = Property.create(PROPERTY_BACKDROP_COLOR_KEY, Color.class, PROPERTY_BACKDROP_COLOR_DEFAULT, true);
+        backdropColorModel.getDescriptor().setAlias(PROPERTY_BACKDROP_COLOR_ALIAS);
+        vc.addProperty(backdropColorModel);
+
+        final Property backdropTransparencyModel = Property.create(PROPERTY_BACKDROP_TRANSPARENCY_KEY, Double.class, PROPERTY_BACKDROP_TRANSPARENCY_DEFAULT, true);
+        backdropTransparencyModel.getDescriptor().setAlias(PROPERTY_BACKDROP_TRANSPARENCY_ALIAS);
+        vc.addProperty(backdropTransparencyModel);
+
+
+
+
+
+
+
+
 
 
 
@@ -769,8 +805,8 @@ public class ColorBarLayerType extends LayerType {
 
 
 
-        final Property insideLabelsSectionModel = Property.create(PROPERTY_INSIDE_LABELS_SECTION_NAME, Boolean.class, true, true);
-        insideLabelsSectionModel.getDescriptor().setAlias(PROPERTY_INSIDE_LABELS_SECTION_ALIAS);
+        final Property insideLabelsSectionModel = Property.create(PROPERTY_BACKDROP_SECTION_KEY, Boolean.class, true, true);
+        insideLabelsSectionModel.getDescriptor().setAlias(PROPERTY_BACKDROP_SECTION_ALIAS);
         vc.addProperty(insideLabelsSectionModel);
 
         final Property cornerLabelsSectionModel = Property.create(PROPERTY_CORNER_LABELS_SECTION_NAME, Boolean.class, true, true);
@@ -806,13 +842,6 @@ public class ColorBarLayerType extends LayerType {
 
 
 
-        final Property textBgColorModel = Property.create(PROPERTY_INSIDE_LABELS_BG_COLOR_NAME, Color.class, PROPERTY_INSIDE_LABELS_BG_COLOR_DEFAULT, true);
-        textBgColorModel.getDescriptor().setAlias(PROPERTY_INSIDE_LABELS_BG_COLOR_ALIAS);
-        vc.addProperty(textBgColorModel);
-
-        final Property textBgTransparencyModel = Property.create(PROPERTY_INSIDE_LABELS_BG_TRANSPARENCY_NAME, Double.class, PROPERTY_INSIDE_LABELS_BG_TRANSPARENCY_DEFAULT, true);
-        textBgTransparencyModel.getDescriptor().setAlias(PROPERTY_INSIDE_LABELS_BG_TRANSPARENCY_ALIAS);
-        vc.addProperty(textBgTransparencyModel);
 
 
         final Property textFontSizeModel = Property.create(PROPERTY_LABELS_SIZE_NAME, Integer.class, PROPERTY_LABELS_SIZE_DEFAULT, true);
