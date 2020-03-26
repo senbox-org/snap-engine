@@ -282,7 +282,7 @@ public class DimapProductHelpers {
                                 break;
                             }
                         } catch (Exception e) {
-                            continue;
+                            // nothing to do here
                         }
                     }
                 }
@@ -533,8 +533,7 @@ public class DimapProductHelpers {
                 Rectangle imageBounds = new Rectangle(product.getSceneRasterWidth(),
                                                       product.getSceneRasterHeight());
                 try {
-                    final CrsGeoCoding geoCoding = new CrsGeoCoding(crs, imageBounds, i2m);
-                    return geoCoding;
+                    return new CrsGeoCoding(crs, imageBounds, i2m);
                 } catch (TransformException e) {
                     Debug.trace(e);
                 }
@@ -583,8 +582,7 @@ public class DimapProductHelpers {
                 Rectangle imageBounds = new Rectangle(width,
                                                       height);
                 try {
-                    final CrsGeoCoding geoCoding = new CrsGeoCoding(crs, imageBounds, i2m);
-                    return geoCoding;
+                    return new CrsGeoCoding(crs, imageBounds, i2m);
                 } catch (TransformException e) {
                     Debug.trace(e);
                 }
@@ -760,7 +758,7 @@ public class DimapProductHelpers {
             final Element projParametersElem = projCtMethodElem.getChild(
                     DimapProductConstants.TAG_PROJECTION_PARAMETERS);
             final List projParamList = projParametersElem.getChildren(DimapProductConstants.TAG_PROJECTION_PARAMETER);
-            final Element[] projParams = (Element[]) projParamList.toArray(new Element[projParamList.size()]);
+            final Element[] projParams = (Element[]) projParamList.toArray(new Element[0]);
             final double[] parameterValues = new double[projParamList.size()];
             for (int i = 0; i < parameterValues.length; i++) {
                 final Element projParam = projParams[i];
@@ -1061,11 +1059,7 @@ public class DimapProductHelpers {
         try {
             final DocumentBuilder builder = factory.newDocumentBuilder();
             w3cDocument = builder.parse(inputStream);
-        } catch (ParserConfigurationException e) {
-            Debug.trace(e);
-        } catch (SAXException e) {
-            Debug.trace(e);
-        } catch (IOException e) {
+        } catch (ParserConfigurationException | IOException | SAXException e) {
             Debug.trace(e);
         }
         return new DOMBuilder().build(w3cDocument);
@@ -1611,7 +1605,7 @@ public class DimapProductHelpers {
 
         private void addSpectralBands(final Element parent, Dimension regionRasterSize) {
             final List children = parent.getChildren(DimapProductConstants.TAG_SPECTRAL_BAND_INFO);
-            final List<Element> filterBandElementList = new ArrayList<Element>();
+            final List<Element> filterBandElementList = new ArrayList<>();
             for (Object child : children) {
                 final Element element = (Element) child;
                 if (isFilterBand(element)) {
@@ -1851,7 +1845,7 @@ public class DimapProductHelpers {
             for (Element child : children) {
                 relationsSet.add(child.getTextTrim());
             }
-            final String[] relations = relationsSet.toArray(new String[relationsSet.size()]);
+            final String[] relations = relationsSet.toArray(new String[0]);
             rasterDataNode.setAncillaryRelations(relations);
         }
 

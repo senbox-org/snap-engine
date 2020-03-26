@@ -497,7 +497,7 @@ public class DimapProductWriterPlugIn implements ProductWriterPlugIn {
 
     public void addWriterExtender(DimapProductWriter.WriterExtender writerExtender) {
         if (dimapWriterWriterExtenders == null) {
-            dimapWriterWriterExtenders = new HashSet<DimapProductWriter.WriterExtender>();
+            dimapWriterWriterExtenders = new HashSet<>();
         }
         if (writerExtender != null) {
             dimapWriterWriterExtenders.add(writerExtender);

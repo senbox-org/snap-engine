@@ -55,7 +55,7 @@ public abstract class RasterDataNodePersistable implements DimapPersistable {
             relations.add(relation.getTextTrim());
         }
         if (relations.size() > 0) {
-            rasterDataNode.setAncillaryRelations(relations.toArray(new String[relations.size()]));
+            rasterDataNode.setAncillaryRelations(relations.toArray(new String[0]));
         }
     }
 
