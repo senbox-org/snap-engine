@@ -48,8 +48,6 @@ public class Graticule {
     private final PixelPos[] _tickPointsWest;
     private final PixelPos[] _tickPointsEast;
 
-
-
     public enum TextLocation {
         NORTH,
         SOUTH,
@@ -61,15 +59,12 @@ public class Graticule {
         RIGHT
     }
 
-
-
     public static int TOP_LEFT_CORNER_INDEX = 0;
     public static int TOP_RIGHT_CORNER_INDEX = 1;
     public static int BOTTOM_RIGHT_CORNER_INDEX = 2;
     public static int BOTTOM_LEFT_CORNER_INDEX = 3;
 
     public static int MAX_LINES_AUTO_MODE = 13;
-
 
     private Graticule(GeneralPath[] paths,
                       TextGlyph[] textGlyphsNorth,
@@ -100,7 +95,6 @@ public class Graticule {
     public GeneralPath[] getLinePaths() {
         return _linePaths;
     }
-
 
     public TextGlyph[] getTextGlyphsNorth() {
         return _textGlyphsNorth;
@@ -261,7 +255,6 @@ public class Graticule {
             return null;
         }
 
-
         final PixelPos pixelPos1 = new PixelPos(0.5f * raster.getRasterWidth(), 0.5f * raster.getRasterHeight());
         final PixelPos pixelPos2 = new PixelPos(pixelPos1.x + 1f, pixelPos1.y + 1f);
         final GeoPos geoPos1 = geoCoding.getGeoPos(pixelPos1, null);
@@ -269,7 +262,6 @@ public class Graticule {
 
         double deltaLat = 0;
         deltaLat = Math.abs(geoPos2.lat - geoPos1.lat);
-
 
         double deltaLon = 0;
         deltaLon = Math.abs(geoPos2.lon - geoPos1.lon);
@@ -399,28 +391,28 @@ public class Graticule {
             final PixelPos[] tickPointsEast = createTickPoints(parallelList, meridianList, TextLocation.EAST);
 
             return new Graticule(paths,
-                    textGlyphsNorth,
-                    textGlyphsSouth,
-                    textGlyphsWest,
-                    textGlyphsEast,
-                    textGlyphsLatCorners,
-                    textGlyphsLonCorners,
-                    tickPointsNorth,
-                    tickPointsSouth,
-                    tickPointsWest,
-                    tickPointsEast);
+                                 textGlyphsNorth,
+                                 textGlyphsSouth,
+                                 textGlyphsWest,
+                                 textGlyphsEast,
+                                 textGlyphsLatCorners,
+                                 textGlyphsLonCorners,
+                                 tickPointsNorth,
+                                 tickPointsSouth,
+                                 tickPointsWest,
+                                 tickPointsEast);
         } else {
             return new Graticule(null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null);
+                                 null,
+                                 null,
+                                 null,
+                                 null,
+                                 null,
+                                 null,
+                                 null,
+                                 null,
+                                 null,
+                                 null);
         }
     }
 
@@ -602,7 +594,7 @@ public class Graticule {
                         interpolationWeight = (lat - latBoundaryPrev) / (latBoundaryCurr - latBoundaryPrev);
                         if (interpolationWeight >= 0.0 && interpolationWeight < 1.0) {
                             lon = lonBoundaryPrev + interpolationWeight * (lonBoundaryCurr - lonBoundaryPrev);
-                            intersectionList.add(new GeoPos(lat,  lon));
+                            intersectionList.add(new GeoPos(lat, lon));
                         }
                     }
                 }
@@ -670,7 +662,7 @@ public class Graticule {
                     pa = (my - p0y) / (p1y - p0y);
                     if (pa >= 0.0 && pa < 1.0) {
                         mx = p0x + pa * (p1x - p0x);
-                        intersectionList.add(new GeoPos( my, mx));
+                        intersectionList.add(new GeoPos(my, mx));
                     }
                 }
             }
@@ -1061,19 +1053,18 @@ public class Graticule {
         return null;
     }
 
-
-    private static boolean isCoordPairValid(Coord coord1, Coord coord2) {
+    static boolean isCoordPairValid(Coord coord1, Coord coord2) {
+        // @todo 1 tb/tb check if it may also be necessary to verify the geo-locations 2020-03-26
         return coord1.pixelPos.isValid() && coord2.pixelPos.isValid();
     }
 
-
-    private static TextGlyph createTextGlyph(String text, Coord coord1, Coord coord2) {
+    static TextGlyph createTextGlyph(String text, Coord coord1, Coord coord2) {
         final double angle = Math.atan2(coord2.pixelPos.y - coord1.pixelPos.y,
-                coord2.pixelPos.x - coord1.pixelPos.x);
+                                        coord2.pixelPos.x - coord1.pixelPos.x);
         return new TextGlyph(text, coord1.pixelPos.x, coord1.pixelPos.y, angle);
     }
 
-    private static double limitLon(double lon) {
+    static double limitLon(double lon) {
         while (lon < -180f) {
             lon += 360f;
         }
@@ -1083,63 +1074,6 @@ public class Graticule {
         return lon;
     }
 
-    private static double[] normalize(double x, double[] result) {
-        final double exponent = (x == 0.0) ? 0.0 : Math.ceil(Math.log(Math.abs(x)) / Math.log(10.0));
-        final double mantissa = (x == 0.0) ? 0.0 : x / Math.pow(10.0, exponent);
-        if (result == null) {
-            result = new double[2];
-        }
-        result[0] = mantissa;
-        result[1] = exponent;
-        return result;
-    }
-
-    private static double compose(final double[] components) {
-        final double mantissa = components[0];
-        final double exponent = components[1];
-        final double mantissaRounded;
-        if (mantissa < 0.15) {
-            mantissaRounded = 0.1;
-        } else if (mantissa < 0.225) {
-            mantissaRounded = 0.2;
-        } else if (mantissa < 0.375) {
-            mantissaRounded = 0.25;
-        } else if (mantissa < 0.75) {
-            mantissaRounded = 0.5;
-        } else {
-            mantissaRounded = 1.0;
-        }
-        return mantissaRounded * Math.pow(10.0, exponent);
-    }
-
-    /**
-     * Not used, but useful for debugging: DON'T delete this method!
-     *
-     * @param geoCoding   The geo-coding
-     * @param geoBoundary The geo-boundary
-     * @return the geo-boundary
-     */
-    @SuppressWarnings({"UnusedDeclaration"})
-    private static GeneralPath createPixelBoundaryPath(final GeoCoding geoCoding, final GeoPos[] geoBoundary) {
-        final GeneralPath generalPath = new GeneralPath();
-        boolean restart = true;
-        for (final GeoPos geoPos : geoBoundary) {
-            geoPos.lon = limitLon(geoPos.lon);
-            final PixelPos pixelPos = geoCoding.getPixelPos(geoPos, null);
-            if (pixelPos.isValid()) {
-                if (restart) {
-                    generalPath.moveTo(pixelPos.x, pixelPos.y);
-                } else {
-                    generalPath.lineTo(pixelPos.x, pixelPos.y);
-                }
-                restart = false;
-            } else {
-                restart = true;
-            }
-        }
-        return generalPath;
-    }
-
     public static class TextGlyph {
 
         private final String text;
@@ -1147,7 +1081,7 @@ public class Graticule {
         private final double y;
         private final double angle;
 
-        public TextGlyph(String text, double x, double y, double angle) {
+        TextGlyph(String text, double x, double y, double angle) {
             this.text = text;
             this.x = x;
             this.y = y;
@@ -1171,7 +1105,7 @@ public class Graticule {
         }
     }
 
-    private static class Coord {
+    static class Coord {
         GeoPos geoPos;
         PixelPos pixelPos;
 
@@ -1181,10 +1115,23 @@ public class Graticule {
         }
     }
 
-    private static class GeoPosLatComparator implements Comparator<GeoPos> {
+    static class GeoPosLatComparator extends GeoPosComparator {
         @Override
         public int compare(GeoPos geoPos1, GeoPos geoPos2) {
-            final double delta = geoPos1.lat - geoPos2.lat;
+            return getCompare(geoPos1.lat - geoPos2.lat);
+        }
+    }
+
+    static class GeoPosLonComparator extends GeoPosComparator {
+        @Override
+        public int compare(GeoPos geoPos1, GeoPos geoPos2) {
+            return getCompare(geoPos1.lon - geoPos2.lon);
+        }
+    }
+
+    abstract static class GeoPosComparator implements Comparator<GeoPos> {
+
+        int getCompare(double delta) {
             if (delta < 0f) {
                 return -1;
             } else if (delta > 0f) {
@@ -1195,21 +1142,61 @@ public class Graticule {
         }
     }
 
-    private static class GeoPosLonComparator implements Comparator<GeoPos> {
-        @Override
-        public int compare(GeoPos geoPos1, GeoPos geoPos2) {
-            final double delta = geoPos1.lon - geoPos2.lon;
-            if (delta < 0f) {
-                return -1;
-            } else if (delta > 0f) {
-                return 1;
-            } else {
-                return 0;
-            }
-        }
-    }
+//    private static double[] normalize(double x, double[] result) {
+//        final double exponent = (x == 0.0) ? 0.0 : Math.ceil(Math.log(Math.abs(x)) / Math.log(10.0));
+//        final double mantissa = (x == 0.0) ? 0.0 : x / Math.pow(10.0, exponent);
+//        if (result == null) {
+//            result = new double[2];
+//        }
+//        result[0] = mantissa;
+//        result[1] = exponent;
+//        return result;
+//    }
+//
+//    private static double compose(final double[] components) {
+//        final double mantissa = components[0];
+//        final double exponent = components[1];
+//        final double mantissaRounded;
+//        if (mantissa < 0.15) {
+//            mantissaRounded = 0.1;
+//        } else if (mantissa < 0.225) {
+//            mantissaRounded = 0.2;
+//        } else if (mantissa < 0.375) {
+//            mantissaRounded = 0.25;
+//        } else if (mantissa < 0.75) {
+//            mantissaRounded = 0.5;
+//        } else {
+//            mantissaRounded = 1.0;
+//        }
+//        return mantissaRounded * Math.pow(10.0, exponent);
+//    }
 
-
-
+//    /**
+//     * Not used, but useful for debugging: DON'T delete this method!
+//     *
+//     * @param geoCoding   The geo-coding
+//     * @param geoBoundary The geo-boundary
+//     * @return the geo-boundary
+//     */
+//    @SuppressWarnings({"UnusedDeclaration"})
+//    private static GeneralPath createPixelBoundaryPath(final GeoCoding geoCoding, final GeoPos[] geoBoundary) {
+//        final GeneralPath generalPath = new GeneralPath();
+//        boolean restart = true;
+//        for (final GeoPos geoPos : geoBoundary) {
+//            geoPos.lon = limitLon(geoPos.lon);
+//            final PixelPos pixelPos = geoCoding.getPixelPos(geoPos, null);
+//            if (pixelPos.isValid()) {
+//                if (restart) {
+//                    generalPath.moveTo(pixelPos.x, pixelPos.y);
+//                } else {
+//                    generalPath.lineTo(pixelPos.x, pixelPos.y);
+//                }
+//                restart = false;
+//            } else {
+//                restart = true;
+//            }
+//        }
+//        return generalPath;
+//    }
 }
 
