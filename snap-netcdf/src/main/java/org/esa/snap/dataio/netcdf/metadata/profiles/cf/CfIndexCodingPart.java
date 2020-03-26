@@ -47,7 +47,7 @@ public class CfIndexCodingPart extends ProfilePartIO {
     public void decode(ProfileReadContext ctx, Product p) throws IOException {
         final Band[] bands = p.getBands();
         for (Band band : bands) {
-            String varName = EscapeStrings.backslashEscape(band.getName(), NetcdfFile.reservedSectionSpec);
+            String varName = EscapeStrings.backslashEscape(band.getName(), /*NetcdfFile.reservedSectionSpec*/"();,.\\");
             Variable variable = ctx.getNetcdfFile().findVariable(varName);
             UnsignedChecker.setUnsignedType(variable);
             final IndexCoding indexCoding = readIndexCoding(variable, band.getName());
