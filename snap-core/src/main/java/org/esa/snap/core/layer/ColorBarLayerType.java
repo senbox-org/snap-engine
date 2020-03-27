@@ -26,6 +26,9 @@ public class ColorBarLayerType extends LayerType {
     public static final String OPTION_HORIZONTAL = "Horizontal";
     public static final String OPTION_VERTICAL = "Vertical";
 
+    public static final String DISTRIB_EVEN_STR = "Auto Values";
+    public static final String DISTRIB_EXACT_STR = "Palette Values";
+    public static final String DISTRIB_MANUAL_STR = "User Values";
 
 
     //--------------------------------------------------------------------------------------------------------------
@@ -34,6 +37,49 @@ public class ColorBarLayerType extends LayerType {
     // Preferences property prefix
     private static final String PROPERTY_ROOT_KEY = "color.bar.legend";
     private static final String PROPERTY_ROOT_ALIAS = "colorBarLegend";
+
+
+    // Label (Values)
+
+    private static final String PROPERTY_ROOT_LABEL_VALUES_KEY = PROPERTY_ROOT_KEY + ".label.values";
+    private static final String PROPERTY_ROOT_LABEL_VALUES_ALIAS = PROPERTY_ROOT_ALIAS + "LabelValues";
+
+    public static final String PROPERTY_LABEL_VALUES_SECTION_KEY = PROPERTY_ROOT_LABEL_VALUES_KEY + ".section";
+    public static final String PROPERTY_LABEL_VALUES_SECTION_LABEL = "Label Values";
+    public static final String PROPERTY_LABEL_VALUES_SECTION_TOOLTIP = "Numeric value options for the color bar legend labels";
+    public static final String PROPERTY_LABEL_VALUES_SECTION_ALIAS = PROPERTY_ROOT_LABEL_VALUES_ALIAS +"Section";
+
+    public static final String PROPERTY_LABEL_VALUES_MODE_KEY = PROPERTY_ROOT_LABEL_VALUES_KEY + ".mode";
+    public static final String PROPERTY_LABEL_VALUES_MODE_LABEL = "Mode";
+    public static final String PROPERTY_LABEL_VALUES_MODE_TOOLTIP = "Mode for setting label values on the color bar legend";
+    public static final Class PROPERTY_LABEL_VALUES_MODE_TYPE = String.class;
+    public static final String PROPERTY_LABEL_VALUES_MODE_ALIAS = PROPERTY_ROOT_LABEL_VALUES_ALIAS + "Mode";
+    public static final String PROPERTY_LABEL_VALUES_MODE_OPTION1 = DISTRIB_EVEN_STR;
+    public static final String PROPERTY_LABEL_VALUES_MODE_OPTION2 = DISTRIB_MANUAL_STR;
+    public static final String PROPERTY_LABEL_VALUES_MODE_OPTION3 = DISTRIB_EXACT_STR;
+    public static final String PROPERTY_LABEL_VALUES_MODE_DEFAULT = DISTRIB_EVEN_STR;
+    public static final Object PROPERTY_LABEL_VALUES_MODE_VALUE_SET[] = {
+            PROPERTY_LABEL_VALUES_MODE_OPTION1,
+            PROPERTY_LABEL_VALUES_MODE_OPTION2,
+            PROPERTY_LABEL_VALUES_MODE_OPTION3 };
+
+
+    public static final String PROPERTY_LABEL_VALUES_COUNT_KEY = PROPERTY_ROOT_LABEL_VALUES_KEY + ".count";
+    public static final String PROPERTY_LABEL_VALUES_COUNT_LABEL = "Tickmark Count (Auto)";
+    public static final String PROPERTY_LABEL_VALUES_COUNT_TOOLTIP = "Number of tickmarks";
+    public static final String PROPERTY_LABEL_VALUES_COUNT_ALIAS = PROPERTY_ROOT_LABEL_VALUES_ALIAS + "Count";
+    public static final int PROPERTY_LABEL_VALUES_COUNT_DEFAULT = 5;
+    public static final Class PROPERTY_LABEL_VALUES_COUNT_TYPE = Integer.class;
+    public static final int PROPERTY_LABEL_VALUES_COUNT_MIN = 2;
+    public static final int PROPERTY_LABEL_VALUES_COUNT_MAX = 20;
+    public static final String PROPERTY_LABEL_VALUES_COUNT_INTERVAL = "[" + ColorBarLayerType.PROPERTY_LABEL_VALUES_COUNT_MIN + "," + ColorBarLayerType.PROPERTY_LABEL_VALUES_COUNT_MAX + "]";
+
+    public static final String PROPERTY_LABEL_VALUES_ACTUAL_KEY = PROPERTY_ROOT_LABEL_VALUES_KEY + ".actual";
+    public static final String PROPERTY_LABEL_VALUES_ACTUAL_LABEL = "Actual Values";
+    public static final String PROPERTY_LABEL_VALUES_ACTUAL_TOOLTIP = "Set actual values of the tickmarks";
+    private static final String PROPERTY_LABEL_VALUES_ACTUAL_ALIAS = PROPERTY_ROOT_LABEL_VALUES_ALIAS + "Actual";
+    public static final String PROPERTY_LABEL_VALUES_ACTUAL_DEFAULT = "";
+    public static final Class PROPERTY_LABEL_VALUES_ACTUAL_TYPE = String.class;
 
 
 
@@ -45,7 +91,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_FORMATTING_SECTION_KEY = PROPERTY_ROOT_FORMATTING_KEY + ".section";
     public static final String PROPERTY_FORMATTING_SECTION_LABEL = "Formatting";
     public static final String PROPERTY_FORMATTING_SECTION_TOOLTIP = "Formatting options for the color bar legend";
-    public static final String PROPERTY_FORMATTING_SECTION_ALIAS = "colorBarLegendFormattingSection";
+    public static final String PROPERTY_FORMATTING_SECTION_ALIAS = PROPERTY_ROOT_FORMATTING_ALIAS + "Section";
 
     public static final String PROPERTY_FORMATTING_ORIENTATION_KEY = PROPERTY_ROOT_FORMATTING_KEY + ".orientation";
     public static final String PROPERTY_FORMATTING_ORIENTATION_LABEL = "Orientation";
@@ -181,7 +227,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_COLORBAR_TITLE_UNITS_DEFAULT = "";
     public static final Class PROPERTY_COLORBAR_TITLE_UNITS_TYPE = String.class;
 
-    public static final String PROPERTY_TITLE_COLOR_KEY = PROPERTY_ROOT_FORMATTING_KEY + ".color";
+    public static final String PROPERTY_TITLE_COLOR_KEY = PROPERTY_ROOT_TITLE_KEY + ".color";
     public static final String PROPERTY_TITLE_COLOR_LABEL = "Title Color";
     public static final String PROPERTY_TITLE_COLOR_TOOLTIP = "Set color of the title";
     private static final String PROPERTY_TITLE_COLOR_ALIAS = PROPERTY_ROOT_TITLE_ALIAS + "Color";
@@ -419,6 +465,29 @@ public class ColorBarLayerType extends LayerType {
     public PropertySet createLayerConfig(LayerContext ctx) {
         final PropertyContainer vc = new PropertyContainer();
 
+
+        // Label Values
+
+        final Property labelValuesSectionModel = Property.create(PROPERTY_LABEL_VALUES_SECTION_KEY, Boolean.class, true, true);
+        labelValuesSectionModel.getDescriptor().setAlias(PROPERTY_LABEL_VALUES_SECTION_ALIAS);
+        vc.addProperty(labelValuesSectionModel);
+
+        final Property labelValuesModeModel = Property.create(PROPERTY_LABEL_VALUES_MODE_KEY, String.class, PROPERTY_LABEL_VALUES_MODE_DEFAULT, true);
+        labelValuesModeModel.getDescriptor().setAlias(PROPERTY_LABEL_VALUES_MODE_ALIAS);
+        vc.addProperty(labelValuesModeModel);
+
+
+        final Property labelValuesCountModel = Property.create(PROPERTY_LABEL_VALUES_COUNT_KEY, Integer.class, PROPERTY_LABEL_VALUES_COUNT_DEFAULT, true);
+        labelValuesCountModel.getDescriptor().setAlias(PROPERTY_LABEL_VALUES_COUNT_ALIAS);
+        vc.addProperty(labelValuesCountModel);
+
+        final Property labelValuesActualModel = Property.create(PROPERTY_LABEL_VALUES_ACTUAL_KEY, String.class, PROPERTY_LABEL_VALUES_ACTUAL_DEFAULT, true);
+        labelValuesActualModel.getDescriptor().setAlias(PROPERTY_LABEL_VALUES_ACTUAL_ALIAS);
+        vc.addProperty(labelValuesActualModel);
+
+
+
+
         // Formatting Section
 
         final Property formattingSectionModel = Property.create(PROPERTY_FORMATTING_SECTION_KEY, Boolean.class, true, true);
@@ -428,6 +497,12 @@ public class ColorBarLayerType extends LayerType {
         final Property formattingOrientationModel = Property.create(PROPERTY_FORMATTING_ORIENTATION_KEY, PROPERTY_FORMATTING_ORIENTATION_TYPE, true, true);
         formattingOrientationModel.getDescriptor().setAlias(PROPERTY_FORMATTING_ORIENTATION_ALIAS);
         vc.addProperty(formattingOrientationModel);
+
+
+
+
+
+
 
 
 
@@ -589,6 +664,9 @@ public class ColorBarLayerType extends LayerType {
 
 
 
+
+
+
         // Labels Section
 
         final Property labelsSectionModel = Property.create(PROPERTY_LABELS_SECTION_NAME, Boolean.class, true, true);
@@ -609,6 +687,7 @@ public class ColorBarLayerType extends LayerType {
         final Property textFgColorModel = Property.create(PROPERTY_LABELS_COLOR_NAME, Color.class, PROPERTY_LABELS_COLOR_DEFAULT, true);
         textFgColorModel.getDescriptor().setAlias(PROPERTY_LABELS_COLOR_ALIAS);
         vc.addProperty(textFgColorModel);
+
 
 
 

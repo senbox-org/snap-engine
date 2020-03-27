@@ -60,9 +60,9 @@ public class ImageLegend {
 
     public static final int NULL_INT = -999;
 
-    public static final String DISTRIB_EVEN_STR = "Use Even Distribution";
-    public static final String DISTRIB_EXACT_STR = "Use Palette Distribution";
-    public static final String DISTRIB_MANUAL_STR = "Use Manually Entered Points";
+    public static final String DISTRIB_EVEN_STR = ColorBarLayerType.DISTRIB_EVEN_STR;
+    public static final String DISTRIB_EXACT_STR = ColorBarLayerType.DISTRIB_EXACT_STR;
+    public static final String DISTRIB_MANUAL_STR = ColorBarLayerType.DISTRIB_MANUAL_STR;
 
 
     public static final int DEFAULT_COLOR_BAR_LENGTH = 1200;

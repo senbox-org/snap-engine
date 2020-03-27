@@ -15,6 +15,7 @@
  */
 package org.esa.snap.core.layer;
 
+import com.bc.ceres.binding.Property;
 import com.bc.ceres.binding.PropertySet;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerTypeRegistry;
@@ -93,6 +94,12 @@ public class ColorBarLayer extends Layer {
             String title = (getTitle() != null && getTitle().trim().length() > 0) ? getTitle() : raster.getName();
             String units = (getUnits() != null && getUnits().trim().length() > 0) ? getUnits() : raster.getUnit();
 
+            imageLegend.setNumberOfTicks(getLabelValuesCount());
+            imageLegend.setDistributionType(getLabelValuesMode());
+            imageLegend.setFullCustomAddThesePoints(getLabelValuesActual());
+
+
+
             imageLegend.setShowTitle((Boolean) isShowTitle());
             imageLegend.setHeaderText((String) title);
             imageLegend.setHeaderUnitsText((String) units);
@@ -133,10 +140,10 @@ public class ColorBarLayer extends Layer {
             imageLegend.setTitleFontSize((Integer) 35);
             imageLegend.setTitleUnitsFontSize((Integer) 35);
             imageLegend.setLabelsFontSize((Integer) getFontSizePixels());
-            imageLegend.setDistributionType((String) ImageLegend.DISTRIB_EVEN_STR);
+//            imageLegend.setDistributionType((String) ImageLegend.DISTRIB_EVEN_STR);
             imageLegend.setScalingFactor((Double) 1.0);
             imageLegend.setLayerScaling((Double) getSizeScaling());
-            imageLegend.setNumberOfTicks((Integer) 5);
+//            imageLegend.setNumberOfTicks((Integer) 5);
 
 
 
@@ -455,6 +462,15 @@ public class ColorBarLayer extends Layer {
         if (getConfiguration().getProperty(propertyName) != null) {
             getConfiguration().setValue(propertyName, event.getNewValue());
         }
+
+
+//        if (propertyName.equals(ColorBarLayerType.PROPERTY_LABEL_VALUES_MODE_KEY)) {
+//            Property property = getConfiguration().getProperty(ColorBarLayerType.PROPERTY_LABEL_VALUES_COUNT_KEY)
+//            if (property != null) {
+//                property.getContainer().getProperties().set
+//            }
+//        }
+
         super.fireLayerPropertyChanged(event);
     }
 
@@ -469,10 +485,24 @@ public class ColorBarLayer extends Layer {
     }
 
 
+    private String getLabelValuesMode() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABEL_VALUES_MODE_KEY,
+                ColorBarLayerType.PROPERTY_LABEL_VALUES_MODE_DEFAULT);
+    }
 
 
 
 
+    private int getLabelValuesCount() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABEL_VALUES_COUNT_KEY,
+                ColorBarLayerType.PROPERTY_LABEL_VALUES_COUNT_DEFAULT);
+    }
+
+
+    private String getLabelValuesActual() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABEL_VALUES_ACTUAL_KEY,
+                ColorBarLayerType.PROPERTY_LABEL_VALUES_ACTUAL_DEFAULT);
+    }
 
 
 
