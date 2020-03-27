@@ -973,7 +973,7 @@ public class Graticule {
     }
 
 
-    private static void createSouthernLongitudeTickPoints(List<List<Coord>> longitudeGridLinePoints,
+    static void createSouthernLongitudeTickPoints(List<List<Coord>> longitudeGridLinePoints,
                                                           List<PixelPos> pixelPoses) {
 
         for (final List<Coord> longitudeGridLinePoint : longitudeGridLinePoints) {
@@ -990,23 +990,19 @@ public class Graticule {
     }
 
 
-    private static void createSouthernLongitudeTextGlyphs(List<List<Coord>> longitudeGridLinePoints,
-                                                          List<TextGlyph> textGlyphs, boolean formatCompass, boolean formatDecimal) {
+    static void createSouthernLongitudeTextGlyphs(List<List<Coord>> longitudeGridLinePoints,
+                                                  List<TextGlyph> textGlyphs, boolean formatCompass, boolean formatDecimal) {
 
         // Assumes that the line was drawn from north to south
         // coord1 set to last point in order to anchor the text to the edge of the line
         // text will point upwards due to this so it may be subsequently rotated if desired
         for (List<Coord> longitudeGridLinePoint : longitudeGridLinePoints) {
-
             if (longitudeGridLinePoint.size() >= 2) {
-                int last = longitudeGridLinePoint.size() - 1;
-                int nextToLast = last - 1;
+                final int last = longitudeGridLinePoint.size() - 1;
+                final Coord coord1 = longitudeGridLinePoint.get(last);
 
-                Coord coord1 = longitudeGridLinePoint.get(last);
-                Coord coord2 = longitudeGridLinePoint.get(nextToLast);
-
-                PixelPos pixelPos2 = new PixelPos((float) (coord1.pixelPos.getX()), (float) (coord1.pixelPos.getY() - 1));
-                coord2 = new Coord(coord1.geoPos, pixelPos2);
+                final PixelPos pixelPos2 = new PixelPos((float) (coord1.pixelPos.getX()), (float) (coord1.pixelPos.getY() - 1));
+                final Coord coord2 = new Coord(coord1.geoPos, pixelPos2);
 
                 if (isCoordPairValid(coord1, coord2)) {
                     TextGlyph textGlyph = createTextGlyph(coord1.geoPos.getLonString(formatCompass, formatDecimal), coord1, coord2);
@@ -1016,38 +1012,37 @@ public class Graticule {
         }
     }
 
+    static TextGlyph getLonCornerTextGlyph(GeoCoding geoCoding, PixelPos pixelPos1, PixelPos pixelPos2, boolean formatCompass, boolean formatDecimal) {
+        if (geoCoding == null) {
+            return null;
+        }
 
-    private static TextGlyph getLonCornerTextGlyph(GeoCoding geoCoding, PixelPos pixelPos1, PixelPos pixelPos2, boolean formatCompass, boolean formatDecimal) {
+        final GeoPos geoPos1 = geoCoding.getGeoPos(pixelPos1, null);
+        final Coord coord1 = new Coord(geoPos1, pixelPos1);
 
-        if (geoCoding != null) {
-            GeoPos geoPos1 = geoCoding.getGeoPos(pixelPos1, null);
-            Coord coord1 = new Coord(geoPos1, pixelPos1);
+        final GeoPos geoPos2 = geoCoding.getGeoPos(pixelPos2, null);
+        final Coord coord2 = new Coord(geoPos2, pixelPos2);
 
-            GeoPos geoPos2 = geoCoding.getGeoPos(pixelPos2, null);
-            Coord coord2 = new Coord(geoPos2, pixelPos2);
-
-            if (isCoordPairValid(coord1, coord2)) {
-                TextGlyph textGlyph = createTextGlyph(coord1.geoPos.getLonString(formatCompass, formatDecimal), coord1, coord2);
-                return textGlyph;
-            }
+        if (isCoordPairValid(coord1, coord2)) {
+            return createTextGlyph(coord1.geoPos.getLonString(formatCompass, formatDecimal), coord1, coord2);
         }
 
         return null;
     }
 
-    private static TextGlyph getLatCornerTextGlyph(GeoCoding geoCoding, PixelPos pixelPos1, PixelPos pixelPos2, boolean formatCompass, boolean formatDecimal) {
+    static TextGlyph getLatCornerTextGlyph(GeoCoding geoCoding, PixelPos pixelPos1, PixelPos pixelPos2, boolean formatCompass, boolean formatDecimal) {
+        if (geoCoding == null) {
+            return null;
+        }
 
-        if (geoCoding != null) {
-            GeoPos geoPos1 = geoCoding.getGeoPos(pixelPos1, null);
-            Coord coord1 = new Coord(geoPos1, pixelPos1);
+        final GeoPos geoPos1 = geoCoding.getGeoPos(pixelPos1, null);
+        final Coord coord1 = new Coord(geoPos1, pixelPos1);
 
-            GeoPos geoPos2 = geoCoding.getGeoPos(pixelPos2, null);
-            Coord coord2 = new Coord(geoPos2, pixelPos2);
+        final GeoPos geoPos2 = geoCoding.getGeoPos(pixelPos2, null);
+        final Coord coord2 = new Coord(geoPos2, pixelPos2);
 
-            if (isCoordPairValid(coord1, coord2)) {
-                TextGlyph textGlyph = createTextGlyph(coord1.geoPos.getLatString(formatCompass, formatDecimal), coord1, coord2);
-                return textGlyph;
-            }
+        if (isCoordPairValid(coord1, coord2)) {
+            return createTextGlyph(coord1.geoPos.getLatString(formatCompass, formatDecimal), coord1, coord2);
         }
 
         return null;
