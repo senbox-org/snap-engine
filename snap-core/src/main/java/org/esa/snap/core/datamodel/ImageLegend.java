@@ -83,7 +83,7 @@ public class ImageLegend {
     public static final int DEFAULT_TICKMARK_WIDTH = 3;
 
 
-    public static final double WEIGHT_TOLERANCE = 0.00;
+    public static final double WEIGHT_TOLERANCE = 0.0001;  // machine error can make calculated weight slightly outside of range 0-1
     public static final double FORCED_CHANGE_FACTOR = 0.0001;
     public static final double INVALID_WEIGHT = -1.0;
 
@@ -492,6 +492,12 @@ public class ImageLegend {
 //        }
 
 
+        if (getFullCustomAddThesePoints() == null || getFullCustomAddThesePoints().length() ==0) {
+            // this will initialize the points
+            distributeEvenly();
+        }
+
+
         if (DISTRIB_EVEN_STR.equals(getDistributionType())) {
             distributeEvenly();
         } else if (DISTRIB_EXACT_STR.equals(getDistributionType())) {
@@ -559,6 +565,8 @@ public class ImageLegend {
 
                             weight = getValidWeight(weight);
                             if (weight != INVALID_WEIGHT) {
+//                                System.out.println("TEST formattedValue=" + formattedValue);
+//                                System.out.println("TEST weight=" + weight);
                                 ColorBarInfo colorBarInfo = new ColorBarInfo(value, weight, formattedValue);
                                 colorBarInfos.add(colorBarInfo);
                             }

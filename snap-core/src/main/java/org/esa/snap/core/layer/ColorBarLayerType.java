@@ -28,7 +28,7 @@ public class ColorBarLayerType extends LayerType {
 
     public static final String DISTRIB_EVEN_STR = "Auto Values";
     public static final String DISTRIB_EXACT_STR = "Palette Values";
-    public static final String DISTRIB_MANUAL_STR = "User Values";
+    public static final String DISTRIB_MANUAL_STR = "Custom Values";
 
 
     //--------------------------------------------------------------------------------------------------------------
@@ -57,7 +57,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_LABEL_VALUES_MODE_OPTION1 = DISTRIB_EVEN_STR;
     public static final String PROPERTY_LABEL_VALUES_MODE_OPTION2 = DISTRIB_MANUAL_STR;
     public static final String PROPERTY_LABEL_VALUES_MODE_OPTION3 = DISTRIB_EXACT_STR;
-    public static final String PROPERTY_LABEL_VALUES_MODE_DEFAULT = DISTRIB_EVEN_STR;
+    public static final String PROPERTY_LABEL_VALUES_MODE_DEFAULT = DISTRIB_MANUAL_STR;
     public static final Object PROPERTY_LABEL_VALUES_MODE_VALUE_SET[] = {
             PROPERTY_LABEL_VALUES_MODE_OPTION1,
             PROPERTY_LABEL_VALUES_MODE_OPTION2,
@@ -69,13 +69,14 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_LABEL_VALUES_COUNT_TOOLTIP = "Number of tickmarks";
     public static final String PROPERTY_LABEL_VALUES_COUNT_ALIAS = PROPERTY_ROOT_LABEL_VALUES_ALIAS + "Count";
     public static final int PROPERTY_LABEL_VALUES_COUNT_DEFAULT = 5;
+    public static final boolean PROPERTY_LABEL_VALUES_COUNT_ENABLED = true;
     public static final Class PROPERTY_LABEL_VALUES_COUNT_TYPE = Integer.class;
     public static final int PROPERTY_LABEL_VALUES_COUNT_MIN = 2;
     public static final int PROPERTY_LABEL_VALUES_COUNT_MAX = 20;
     public static final String PROPERTY_LABEL_VALUES_COUNT_INTERVAL = "[" + ColorBarLayerType.PROPERTY_LABEL_VALUES_COUNT_MIN + "," + ColorBarLayerType.PROPERTY_LABEL_VALUES_COUNT_MAX + "]";
 
     public static final String PROPERTY_LABEL_VALUES_ACTUAL_KEY = PROPERTY_ROOT_LABEL_VALUES_KEY + ".actual";
-    public static final String PROPERTY_LABEL_VALUES_ACTUAL_LABEL = "Actual Values";
+    public static final String PROPERTY_LABEL_VALUES_ACTUAL_LABEL = "Custom Values";
     public static final String PROPERTY_LABEL_VALUES_ACTUAL_TOOLTIP = "Set actual values of the tickmarks";
     private static final String PROPERTY_LABEL_VALUES_ACTUAL_ALIAS = PROPERTY_ROOT_LABEL_VALUES_ALIAS + "Actual";
     public static final String PROPERTY_LABEL_VALUES_ACTUAL_DEFAULT = "";

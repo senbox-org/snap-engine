@@ -17,6 +17,7 @@ package org.esa.snap.core.layer;
 
 import com.bc.ceres.binding.Property;
 import com.bc.ceres.binding.PropertySet;
+import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.glayer.LayerTypeRegistry;
 import com.bc.ceres.grender.Rendering;
@@ -152,6 +153,18 @@ public class ColorBarLayer extends Layer {
             int imageHeight = raster.getRasterHeight();
             int imageWidth = raster.getRasterWidth();
             bufferedImage = imageLegend.createImage(new Dimension(imageWidth, imageHeight), true);
+
+            try {
+                String test = getConfiguration().getProperty(ColorBarLayerType.PROPERTY_LABEL_VALUES_ACTUAL_KEY).getValue();
+
+                if (test != null && !test.equals(imageLegend.getFullCustomAddThesePoints())) {
+                    getConfiguration().getProperty(ColorBarLayerType.PROPERTY_LABEL_VALUES_ACTUAL_KEY).setValue((Object) imageLegend.getFullCustomAddThesePoints());
+                }
+
+            } catch (ValidationException v) {
+
+            }
+
 
         }
 
@@ -449,6 +462,7 @@ public class ColorBarLayer extends Layer {
     @Override
     protected void fireLayerPropertyChanged(PropertyChangeEvent event) {
         String propertyName = event.getPropertyName();
+
         if (
                 propertyName.equals(ColorBarLayerType.PROPERTY_GRID_SPACING_LAT_NAME) ||
                         propertyName.equals(ColorBarLayerType.PROPERTY_GRID_SPACING_LON_NAME) ||
@@ -509,12 +523,8 @@ public class ColorBarLayer extends Layer {
 
 
     private int getFontSizePixels() {
-        int value = getConfigurationProperty(ColorBarLayerType.PROPERTY_LABELS_SIZE_NAME,
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABELS_SIZE_NAME,
                 ColorBarLayerType.PROPERTY_LABELS_SIZE_DEFAULT);
-
-        System.out.println("value=" +value);
-
-        return value;
     }
 
 
