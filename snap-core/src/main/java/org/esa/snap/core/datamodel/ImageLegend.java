@@ -92,6 +92,7 @@ public class ImageLegend {
     private boolean initialized = false;
     private final RasterDataNode raster;
     private boolean showTitle;
+    private boolean showTitleUnits;
     private String headerText;
     private String headerUnitsText;
     private int orientation;
@@ -120,11 +121,14 @@ public class ImageLegend {
     private int labelsFontType;
 
 
-
-
+    private String titleParameterFontName;
+    private int titleParameterFontType;
+    private String titleUnitsFontName;
+    private int titleUnitsFontType;
 
     private Color labelsColor;
-    private Color titleColor;
+    private Color titleParameterColor;
+    private Color titleUnitsColor;
 
     private boolean antialiasing;
     private int decimalPlaces;
@@ -170,10 +174,11 @@ public class ImageLegend {
 
         orientation = HORIZONTAL;
         backgroundColor = Color.white;
-        foregroundColor = ColorBarLayerType.PROPERTY_TITLE_COLOR_DEFAULT;
+        foregroundColor = ColorBarLayerType.PROPERTY_TITLE_PARAMETER_COLOR_DEFAULT;
         tickmarkColor = ColorBarLayerType.PROPERTY_TICKMARKS_COLOR_DEFAULT;
         labelsColor = ColorBarLayerType.PROPERTY_LABELS_COLOR_DEFAULT;
-        titleColor = ColorBarLayerType.PROPERTY_TITLE_COLOR_DEFAULT;
+        titleParameterColor = ColorBarLayerType.PROPERTY_TITLE_PARAMETER_COLOR_DEFAULT;
+        titleUnitsColor = ColorBarLayerType.PROPERTY_TITLE_UNITS_COLOR_DEFAULT;
 
         setTickmarkLength(ColorBarLayerType.PROPERTY_TICKMARKS_LENGTH_DEFAULT);
         setTickmarkWidth(ColorBarLayerType.PROPERTY_TICKMARKS_WIDTH_DEFAULT);
@@ -732,11 +737,11 @@ public class ImageLegend {
 
 
     private boolean hasHeaderText() {
-        return showTitle && StringUtils.isNotNullAndNotEmpty(headerText);
+        return isShowTitle() && StringUtils.isNotNullAndNotEmpty(headerText);
     }
 
     private boolean hasUnitsText() {
-        return StringUtils.isNotNullAndNotEmpty(headerUnitsText);
+        return isShowTitleUnits() && StringUtils.isNotNullAndNotEmpty(headerUnitsText);
     }
 
     private void draw(Graphics2D g2d) {
@@ -769,14 +774,16 @@ public class ImageLegend {
 
         int UNITS_GAP_FACTOR = 3;
 
-        if (hasHeaderText()) {
+        if (hasHeaderText() || hasUnitsText()) {
 
             Font originalFont = g2d.getFont();
             Rectangle2D singleLetter = g2d.getFontMetrics().getStringBounds("A", g2d);
 
             if (hasHeaderText()) {
                 g2d.setFont(getTitleFont());
-                Rectangle2D headerTextRectangle = g2d.getFontMetrics().getStringBounds(headerText, g2d);
+                height = singleLetter.getHeight();
+
+                Rectangle2D headerTextRectangle = g2d.getFontMetrics().getStringBounds(getHeaderText(), g2d);
                 width += headerTextRectangle.getWidth();
 
 
@@ -787,11 +794,15 @@ public class ImageLegend {
 
             if (hasUnitsText()) {
                 g2d.setFont(getTitleUnitsFont());
+                if (singleLetter.getHeight() > height) {
+                    height = singleLetter.getHeight();
+                }
+
                 Rectangle2D unitsTextRectangle = g2d.getFontMetrics().getStringBounds(getHeaderUnitsText(), g2d);
                 width += unitsTextRectangle.getWidth();
             }
 
-            height = singleLetter.getHeight();
+
 
             g2d.setFont(originalFont);
         }
@@ -889,11 +900,11 @@ public class ImageLegend {
 
 
     private void drawHeaderText(Graphics2D g2d) {
-        if (hasHeaderText()) {
+        if (hasHeaderText() || hasUnitsText()) {
             Font origFont = g2d.getFont();
 
             final FontMetrics fontMetrics = g2d.getFontMetrics();
-            g2d.setPaint(getTitleColor());
+            g2d.setPaint(getTitleParameterColor());
 
             int x0 = paletteRect.x;
             int y0 = paletteRect.y - getHeaderGap();
@@ -902,14 +913,16 @@ public class ImageLegend {
 
             if (orientation == HORIZONTAL) {
                 Rectangle2D headerTextRectangle = g2d.getFontMetrics().getStringBounds(headerText, g2d);
-                g2d.drawString(headerText, x0, y0);
+                if (hasHeaderText()) {
+                    g2d.drawString(headerText, x0, y0);
+                }
 
                 Rectangle2D singleLetter = g2d.getFontMetrics().getStringBounds("A", g2d);
                 int gap = (int) (2 * singleLetter.getWidth());
 
                 if (hasUnitsText()) {
                     g2d.setFont(getTitleUnitsFont());
-
+                    g2d.setPaint(getTitleUnitsColor());
                     g2d.drawString(getHeaderUnitsText(), (int) (x0 + headerTextRectangle.getWidth() + gap), y0);
                 }
             } else {
@@ -936,7 +949,9 @@ public class ImageLegend {
                 g2d.rotate(rotate);
 
 
-                g2d.drawString(headerText, 0, 0);
+                if (hasHeaderText()) {
+                    g2d.drawString(headerText, 0, 0);
+                }
 
                 g2d.rotate(-rotate);
 
@@ -946,6 +961,7 @@ public class ImageLegend {
 
                 if (hasUnitsText()) {
                     g2d.setFont(getTitleUnitsFont());
+                    g2d.setPaint(getTitleUnitsColor());
                     g2d.drawString(getHeaderUnitsText(), 0, 0);
                 }
 
@@ -1313,11 +1329,11 @@ public class ImageLegend {
 
 
     public Font getTitleFont() {
-        return new Font("SansSerif", Font.BOLD, getTitleFontSize());
+        return new Font(getTitleParameterFontName(), getTitleParameterFontType(), getTitleFontSize());
     }
 
     public Font getTitleUnitsFont() {
-        return new Font("SansSerif", Font.ITALIC, getTitleUnitsFontSize());
+        return new Font(getTitleUnitsFontName(), getTitleUnitsFontType(), getTitleUnitsFontSize());
     }
 
 
@@ -1609,12 +1625,12 @@ public class ImageLegend {
         this.labelsColor = labelsColor;
     }
 
-    public Color getTitleColor() {
-        return titleColor;
+    public Color getTitleParameterColor() {
+        return titleParameterColor;
     }
 
-    public void setTitleColor(Color titleColor) {
-        this.titleColor = titleColor;
+    public void setTitleParameterColor(Color color) {
+        this.titleParameterColor = color;
     }
 
     public int getTickmarkLength() {
@@ -1697,5 +1713,53 @@ public class ImageLegend {
 
     public void setLabelsFontType(int labelsFontType) {
         this.labelsFontType = labelsFontType;
+    }
+
+    public Color getTitleUnitsColor() {
+        return titleUnitsColor;
+    }
+
+    public void setTitleUnitsColor(Color titleUnitsColor) {
+        this.titleUnitsColor = titleUnitsColor;
+    }
+
+    public boolean isShowTitleUnits() {
+        return showTitleUnits;
+    }
+
+    public void setShowTitleUnits(boolean showTitleUnits) {
+        this.showTitleUnits = showTitleUnits;
+    }
+
+    public String getTitleParameterFontName() {
+        return titleParameterFontName;
+    }
+
+    public void setTitleParameterFontName(String titleParameterFontName) {
+        this.titleParameterFontName = titleParameterFontName;
+    }
+
+    public int getTitleParameterFontType() {
+        return titleParameterFontType;
+    }
+
+    public void setTitleParameterFontType(int titleParameterFontType) {
+        this.titleParameterFontType = titleParameterFontType;
+    }
+
+    public String getTitleUnitsFontName() {
+        return titleUnitsFontName;
+    }
+
+    public void setTitleUnitsFontName(String titleUnitsFontName) {
+        this.titleUnitsFontName = titleUnitsFontName;
+    }
+
+    public int getTitleUnitsFontType() {
+        return titleUnitsFontType;
+    }
+
+    public void setTitleUnitsFontType(int titleUnitsFontType) {
+        this.titleUnitsFontType = titleUnitsFontType;
     }
 }

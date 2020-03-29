@@ -15,7 +15,6 @@
  */
 package org.esa.snap.core.layer;
 
-import com.bc.ceres.binding.Property;
 import com.bc.ceres.binding.PropertySet;
 import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.glayer.Layer;
@@ -93,19 +92,32 @@ public class ColorBarLayer extends Layer {
             imageLegend = new ImageLegend(raster.getImageInfo(), raster);
 
             String title = (getTitle() != null && getTitle().trim().length() > 0) ? getTitle() : raster.getName();
-            String units = (getUnits() != null && getUnits().trim().length() > 0) ? getUnits() : raster.getUnit();
+            String units = (getUnits() != null && getUnits().trim().length() > 0) ? getUnits() : "(" + raster.getUnit() + ")";
+
+
+
+            imageLegend.setShowTitle(isShowTitleParameter());
+            imageLegend.setHeaderText(title);
+            imageLegend.setTitleFontSize(getTitleParameterFontSize());
+            imageLegend.setTitleParameterColor(getTitleParameterColor());
+            imageLegend.setTitleParameterFontName(getTitleParameterFontName());
+            imageLegend.setTitleParameterFontType(getTitleParameterFontType());
+
+            imageLegend.setShowTitleUnits(isShowTitleUnits());
+            imageLegend.setHeaderUnitsText(units);
+            imageLegend.setTitleUnitsFontSize(getTitleUnitsFontSize());
+            imageLegend.setTitleUnitsColor(getTitleUnitsColor());
+            imageLegend.setTitleUnitsFontName(getTitleUnitsFontName());
+            imageLegend.setTitleUnitsFontType(getTitleUnitsFontType());
+
 
             imageLegend.setNumberOfTicks(getLabelValuesCount());
             imageLegend.setDistributionType(getLabelValuesMode());
             imageLegend.setFullCustomAddThesePoints(getLabelValuesActual());
 
 
-
-            imageLegend.setShowTitle((Boolean) isShowTitle());
-            imageLegend.setHeaderText((String) title);
-            imageLegend.setHeaderUnitsText((String) units);
             imageLegend.setOrientation(getOrientation());
-            imageLegend.setForegroundColor(getTitleColor());
+            imageLegend.setForegroundColor(getTitleParameterColor());
             imageLegend.setTickmarkColor(getTickmarksColor());
             imageLegend.setTickmarkLength(getTickmarksLength());
             imageLegend.setTickmarkWidth(getTickmarksWidth());
@@ -118,11 +130,8 @@ public class ColorBarLayer extends Layer {
 
 
             imageLegend.setBackgroundColor(getBackdropColor());
-//            imageLegend.setBackgroundTransparency(((Number) 0.5).floatValue());
             imageLegend.setBackgroundTransparency(((Number) getBackdropTransparency()).floatValue());
             imageLegend.setBackdropShow(isBackdropShow());
-
-
 
 
 
@@ -133,18 +142,14 @@ public class ColorBarLayer extends Layer {
 
 
 
-            imageLegend.setTitleColor(getTitleColor());
+
             imageLegend.setLabelsColor(getLabelsColor());
             imageLegend.setAntialiasing((Boolean) true);
             imageLegend.setColorBarLength((Integer) 1200);
             imageLegend.setColorBarThickness((Integer) 60);
-            imageLegend.setTitleFontSize((Integer) 35);
-            imageLegend.setTitleUnitsFontSize((Integer) 35);
             imageLegend.setLabelsFontSize((Integer) getFontSizePixels());
-//            imageLegend.setDistributionType((String) ImageLegend.DISTRIB_EVEN_STR);
             imageLegend.setScalingFactor((Double) 1.0);
             imageLegend.setLayerScaling((Double) getSizeScaling());
-//            imageLegend.setNumberOfTicks((Integer) 5);
 
 
 
@@ -154,18 +159,11 @@ public class ColorBarLayer extends Layer {
             int imageWidth = raster.getRasterWidth();
             bufferedImage = imageLegend.createImage(new Dimension(imageWidth, imageHeight), true);
 
-            try {
-                String test = getConfiguration().getProperty(ColorBarLayerType.PROPERTY_LABEL_VALUES_ACTUAL_KEY).getValue();
 
-                if (test != null && !test.equals(imageLegend.getFullCustomAddThesePoints())) {
-                    getConfiguration().getProperty(ColorBarLayerType.PROPERTY_LABEL_VALUES_ACTUAL_KEY).setValue((Object) imageLegend.getFullCustomAddThesePoints());
-                }
-
-            } catch (ValidationException v) {
-
-            }
-
-
+            // Update the properties with some calculated/looked-up values
+            setLabelValuesActual(imageLegend.getFullCustomAddThesePoints());
+            setTitle(imageLegend.getHeaderText());
+            setUnits(imageLegend.getHeaderUnitsText());
         }
 
 
@@ -518,6 +516,15 @@ public class ColorBarLayer extends Layer {
                 ColorBarLayerType.PROPERTY_LABEL_VALUES_ACTUAL_DEFAULT);
     }
 
+    private void setLabelValuesActual(String value) {
+        try {
+            String valueCurrent = getTitle();
+            if (valueCurrent == null || (valueCurrent != null && !valueCurrent.equals(value))) {
+                getConfiguration().getProperty(ColorBarLayerType.PROPERTY_LABEL_VALUES_ACTUAL_KEY).setValue((Object) value);
+            }
+        } catch (ValidationException v) {
+        }
+    }
 
 
 
@@ -563,12 +570,6 @@ public class ColorBarLayer extends Layer {
     }
 
 
-
-
-    private Color getTitleColor() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_COLOR_KEY,
-                ColorBarLayerType.PROPERTY_TITLE_COLOR_DEFAULT);
-    }
 
 
 
@@ -657,16 +658,24 @@ public class ColorBarLayer extends Layer {
     }
 
     private int getLabelsFontType() {
-        if (isLabelsItalic() && isLabelsBold()) {
+        return getFontType(isLabelsItalic(), isLabelsBold());
+    }
+
+
+    private int getFontType(boolean italic, boolean bold) {
+        if (italic && bold) {
             return Font.ITALIC | Font.BOLD;
-        } else if (isLabelsItalic()) {
+        } else if (italic) {
             return Font.ITALIC;
-        } else if (isLabelsBold()) {
+        } else if (bold) {
             return Font.BOLD;
         } else {
             return Font.PLAIN;
         }
     }
+
+
+
 
 
     private boolean isColorBarLocationInside() {
@@ -692,19 +701,133 @@ public class ColorBarLayer extends Layer {
     }
 
 
-    private boolean isShowTitle() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_COLORBAR_TITLE_SHOW_TITLE_KEY,
-                ColorBarLayerType.PROPERTY_COLORBAR_TITLE_SHOW_TITLE_DEFAULT);
+
+
+
+    private boolean isShowTitleParameter() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_PARAMETER_SHOW_KEY,
+                ColorBarLayerType.PROPERTY_TITLE_PARAMETER_SHOW_DEFAULT);
     }
 
     private String getTitle() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_COLORBAR_TITLE_TITLE_KEY,
-                ColorBarLayerType.PROPERTY_COLORBAR_TITLE_TITLE_DEFAULT);
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_PARAMETER_TEXT_KEY,
+                ColorBarLayerType.PROPERTY_TITLE_PARAMETER_TEXT_DEFAULT);
     }
 
+
+    private void setTitle(String value) {
+        try {
+            String valueCurrent = getTitle();
+            if (valueCurrent == null || (valueCurrent != null && !valueCurrent.equals(value))) {
+                getConfiguration().getProperty(ColorBarLayerType.PROPERTY_TITLE_PARAMETER_TEXT_KEY).setValue((Object) value);
+            }
+        } catch (ValidationException v) {
+        }
+    }
+
+
+    private Color getTitleParameterColor() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_PARAMETER_COLOR_KEY,
+                ColorBarLayerType.PROPERTY_TITLE_PARAMETER_COLOR_DEFAULT);
+    }
+
+
+    private int getTitleParameterFontSize() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_PARAMETER_FONT_SIZE_KEY,
+                ColorBarLayerType.PROPERTY_TITLE_PARAMETER_FONT_SIZE_DEFAULT);
+    }
+
+
+
+
+    private Boolean isTitleParameterFontItalic() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_PARAMETER_ITALIC_KEY,
+                ColorBarLayerType.PROPERTY_TITLE_PARAMETER_ITALIC_DEFAULT);
+    }
+
+    private Boolean isTitleParameterFontBold() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_PARAMETER_BOLD_KEY,
+                ColorBarLayerType.PROPERTY_TITLE_PARAMETER_BOLD_DEFAULT);
+    }
+
+    private int getTitleParameterFontType() {
+        return getFontType(isTitleParameterFontItalic(), isTitleParameterFontBold());
+    }
+
+    private String getTitleParameterFontName() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_PARAMETER_FONT_KEY,
+                ColorBarLayerType.PROPERTY_TITLE_PARAMETER_FONT_DEFAULT);
+    }
+
+
+
+
+
+
+
+
+
+
+
+    private boolean isShowTitleUnits() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_UNITS_SHOW_KEY,
+                ColorBarLayerType.PROPERTY_TITLE_UNITS_SHOW_DEFAULT);
+    }
+
+
+    private void setUnits(String value) {
+        try {
+            String valueCurrent = getUnits();
+            if (valueCurrent == null || (valueCurrent != null && !valueCurrent.equals(value))) {
+                getConfiguration().getProperty(ColorBarLayerType.PROPERTY_TITLE_UNITS_TEXT_KEY).setValue((Object) value);
+            }
+        } catch (ValidationException v) {
+        }
+    }
+
+    private int getTitleUnitsFontSize() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_SIZE_KEY,
+                ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_SIZE_DEFAULT);
+    }
+
+
+
+    private Color getTitleUnitsColor() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_UNITS_COLOR_KEY,
+                ColorBarLayerType.PROPERTY_TITLE_UNITS_COLOR_DEFAULT);
+    }
+
+
+
+
+    private Boolean isTitleUnitsFontItalic() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_UNITS_ITALIC_KEY,
+                ColorBarLayerType.PROPERTY_TITLE_UNITS_ITALIC_DEFAULT);
+    }
+
+    private Boolean isTitleUnitsFontBold() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_UNITS_BOLD_KEY,
+                ColorBarLayerType.PROPERTY_TITLE_UNITS_BOLD_DEFAULT);
+    }
+
+    private int getTitleUnitsFontType() {
+        return getFontType(isTitleUnitsFontItalic(), isTitleUnitsFontBold());
+    }
+
+    private String getTitleUnitsFontName() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_KEY,
+                ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_DEFAULT);
+    }
+
+
+
+
+
+
+
     private String getUnits() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_COLORBAR_TITLE_UNITS_KEY,
-                ColorBarLayerType.PROPERTY_COLORBAR_TITLE_UNITS_DEFAULT);
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_UNITS_TEXT_KEY,
+                ColorBarLayerType.PROPERTY_TITLE_UNITS_TEXT_DEFAULT);
     }
 
 
