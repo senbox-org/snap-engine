@@ -213,6 +213,8 @@ public class EnvisatProductReader extends AbstractProductReader {
             productName = getProductFile().getProductId();
         }
         productName = FileUtils.createValidFilename(productName);
+        productName = FileUtils.getFilenameWithoutExtension(productName); // .zip
+        productName = FileUtils.getFilenameWithoutExtension(productName); // .N1
 
         int sceneRasterHeight = getSceneRasterHeight();
         Product product = new Product(productName,
@@ -233,12 +235,12 @@ public class EnvisatProductReader extends AbstractProductReader {
         product.setAutoGrouping(getProductFile().getAutoGroupingPattern());
 
         addBandsToProduct(product);
+        addTiePointGridsToProduct(product);
+        addGeoCodingToProduct(product);
+        initPointingFactory(product);
         if (!isMetadataIgnored()) {
             addHeaderAnnotationsToProduct(product);
             addDatasetAnnotationsToProduct(product);
-            addTiePointGridsToProduct(product);
-            addGeoCodingToProduct(product);
-            initPointingFactory(product);
         }
         addDefaultMasksToProduct(product);
         addDefaultMasksDefsToBands(product);

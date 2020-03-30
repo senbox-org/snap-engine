@@ -58,17 +58,20 @@ import java.util.Locale;
 
 class BigGeoTiffProductWriter extends AbstractProductWriter {
 
-    private static String PARAM_COMPRESSION_TYPE = "snap.dataio.bigtiff.compression.type";   // value must be "LZW"
+    private static final String PARAM_COMPRESSION_TYPE = "snap.dataio.bigtiff.compression.type";   // value must be "LZW" or "NONE" or empty or null
+    private static final String COMPRESSION_TYPE_LZW = "LZW";
+    private static final String COMPRESSION_TYPE_DEFAULT = COMPRESSION_TYPE_LZW;
+    private static final String COMPRESSION_TYPE_NONE = "NONE";
 
-    private static String PARAM_COMPRESSION_QUALITY = "snap.dataio.bigtiff.compression.quality";   // value float 0 ... 1, default 0.75
-    private static float PARAM_COMPRESSION_QUALITY_DEFAULT = 0.75f;
+    private static final String PARAM_COMPRESSION_QUALITY = "snap.dataio.bigtiff.compression.quality";   // value float 0 ... 1, default 0.75
+    private static final float PARAM_COMPRESSION_QUALITY_DEFAULT = 0.75f;
 
-    private static String PARAM_TILING_WIDTH = "snap.dataio.bigtiff.tiling.width";   // integer value
-    private static String PARAM_TILING_HEIGHT = "snap.dataio.bigtiff.tiling.height";   // integer value
+    private static final String PARAM_TILING_WIDTH = "snap.dataio.bigtiff.tiling.width";   // integer value
+    private static final String PARAM_TILING_HEIGHT = "snap.dataio.bigtiff.tiling.height";   // integer value
 
-    private static String PARAM_FORCE_BIGTIFF = "snap.dataio.bigtiff.force.bigtiff";   // boolean
-    public static String PARAM_PUSH_PROCESSING = "snap.dataio.bigtiff.support.pushprocessing";   // boolean
-    private static String PARAM_ARCGIS_AUX = "snap.dataio.bigtiff.write.arcgisaux";   // boolean
+    private static final String PARAM_FORCE_BIGTIFF = "snap.dataio.bigtiff.force.bigtiff";   // boolean
+    public static final String PARAM_PUSH_PROCESSING = "snap.dataio.bigtiff.support.pushprocessing";   // boolean
+    private static final String PARAM_ARCGIS_AUX = "snap.dataio.bigtiff.write.arcgisaux";   // boolean
 
     private File outputFile;
     private TIFFImageWriter imageWriter;
@@ -140,12 +143,7 @@ class BigGeoTiffProductWriter extends AbstractProductWriter {
 
     @Override
     public boolean shouldWrite(ProductNode node) {
-        if (node instanceof VirtualBand) {
-            return false;
-        } else if (node instanceof FilterBand) {
-            return false;
-        }
-        return true;
+        return !(node instanceof VirtualBand) && !(node instanceof FilterBand);
     }
 
     @Override
@@ -214,8 +212,8 @@ class BigGeoTiffProductWriter extends AbstractProductWriter {
         }
         final ImageTypeSpecifier imageTypeSpecifier = ImageTypeSpecifier.createFromRenderedImage(writeImage);
         final TIFFImageMetadata iioMetadata = (TIFFImageMetadata) GeoTIFF.createIIOMetadata(imageWriter, imageTypeSpecifier, geoTIFFMetadata,
-                "it_geosolutions_imageioimpl_plugins_tiff_image_1.0",
-                "it.geosolutions.imageio.plugins.tiff.BaselineTIFFTagSet,it.geosolutions.imageio.plugins.tiff.BaselineTIFFTagSet");
+                                                                                            "it_geosolutions_imageioimpl_plugins_tiff_image_1.0",
+                                                                                            "it.geosolutions.imageio.plugins.tiff.BaselineTIFFTagSet,it.geosolutions.imageio.plugins.tiff.BaselineTIFFTagSet");
 
 
         addDimapMetaField(sourceProduct, iioMetadata);
@@ -230,9 +228,9 @@ class BigGeoTiffProductWriter extends AbstractProductWriter {
     private void createWriterParams() {
         writeParam = new TIFFImageWriteParam(Locale.ENGLISH);
 
-        final String compressionType = Config.instance().preferences().get(PARAM_COMPRESSION_TYPE, null);
-        if (StringUtils.isNotNullAndNotEmpty(compressionType)) {
-            if (compressionType.equals("LZW")) {
+        final String compressionType = Config.instance().preferences().get(PARAM_COMPRESSION_TYPE, COMPRESSION_TYPE_DEFAULT);
+        if (StringUtils.isNotNullAndNotEmpty(compressionType) || COMPRESSION_TYPE_NONE.equals(compressionType)) {
+            if (COMPRESSION_TYPE_DEFAULT.equals(compressionType)) {
                 writeParam.setCompressionMode(TIFFImageWriteParam.MODE_EXPLICIT);
 
                 final TIFFLZWCompressor compressor = new TIFFLZWCompressor(BaselineTIFFTagSet.PREDICTOR_NONE);
@@ -263,7 +261,7 @@ class BigGeoTiffProductWriter extends AbstractProductWriter {
     private void setWriteIntermediateProduct(boolean intermediate) {
         if (writingDataHasStarted) {
             throw new IllegalStateException("It is not allowed to change the state 'write intermediate product' " +
-                    "after some data has already been written.");
+                                                    "after some data has already been written.");
         }
         withIntermediate = intermediate;
         if (intermediate) {

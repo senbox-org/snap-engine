@@ -78,6 +78,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+			<scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -91,6 +92,8 @@
                         <publicPackage>javax.media.jai.*</publicPackage>
                         <publicPackage>javax.imageio.*</publicPackage>
                         <publicPackage>com.sun.media.*</publicPackage>
+                        <publicPackage>sun.awt.image.codec.*</publicPackage>
+                        <publicPackage>com.sun.image.codec.jpeg.*</publicPackage>
                         <publicPackage>com.sun.medialib.codec.*</publicPackage>
                         <publicPackage>com.sun.medialib.mlib.*</publicPackage>
                         <publicPackage>com.bc.ceres.compiler</publicPackage>

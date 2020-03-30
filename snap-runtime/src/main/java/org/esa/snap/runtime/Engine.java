@@ -283,11 +283,14 @@ public class Engine {
             // to the parsed value of system property "java.library.path" and caches it. This behaviour prevents it
             // from accepting any programmatical changes of system property "java.library.path".
             //
-            Field sysPathsField = ClassLoader.class.getDeclaredField("sys_paths");
-            sysPathsField.setAccessible(true);
-            sysPathsField.set(null, null);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            getLogger().log(Level.SEVERE, "Failed to modify class loader field 'sys_paths'", e);
+            java.lang.reflect.Method initializePathMethod = ClassLoader.class.getDeclaredMethod("initializePath", String.class);
+            initializePathMethod.setAccessible(true);
+            String[] updatedUsrPaths = (String[]) initializePathMethod.invoke(null, "java.library.path");
+            Field usrPathsField = ClassLoader.class.getDeclaredField("usr_paths");
+            usrPathsField.setAccessible(true);
+            usrPathsField.set(null, updatedUsrPaths);
+        } catch (NoSuchFieldException | IllegalAccessException | NoSuchMethodException | java.lang.reflect.InvocationTargetException e) {
+            getLogger().log(Level.SEVERE, "Failed to modify class loader field 'usr_paths'", e);
         }
     }
 

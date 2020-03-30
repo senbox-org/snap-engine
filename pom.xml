@@ -40,9 +40,10 @@
         <snap.version>${project.version}</snap.version>
         <javahelp.version>2.0.05</javahelp.version>
         <hdf.version>2.7.1</hdf.version>
-        <netcdf.version>5.0.0-beta6</netcdf.version>
+        <netcdf.version>4.3.22</netcdf.version>
         <slf4j.version>1.6.6</slf4j.version> <!-- used by netcdf, yes we hate that! -->
-        <geotools.version>17.1</geotools.version>
+        <geotools.version>20.0</geotools.version>
+        <org.locationtech.version>1.16.0</org.locationtech.version>
         <jide.version>3.6.1</jide.version>
         <maven.build.timestamp.format>yyyyMMdd</maven.build.timestamp.format>
         <buildDate>${maven.build.timestamp}</buildDate>
@@ -80,6 +81,7 @@
         <module>snap-envisat-reader</module>
         <module>snap-getasse30-dem</module>
         <module>snap-geotiff</module>
+        <module>snap-jp2-reader</module>
         <module>snap-hdf5-writer</module>
         <module>snap-jython</module>
         <module>snap-land-cover</module>
@@ -89,6 +91,7 @@
         <module>snap-pgx-reader</module>
         <module>snap-pixel-extraction</module>
         <module>snap-product-library</module>
+        <module>snap-product-library-v2</module>
         <module>snap-python</module>
         <module>snap-raster</module>
         <module>snap-rtp-codec</module>
@@ -102,8 +105,10 @@
         <module>globcover-worldmap</module>
         <module>snap-sta</module>
         <module>snap-remote-execution</module>
+        <module>snap-remote-products-repository</module>
 
         <module>lib-hdf</module>
+        <module>lib-openjpeg</module>
         <module>snap-test-utils</module>
     </modules>
 
@@ -235,13 +240,16 @@
                 <artifactId>lib-hdf</artifactId>
                 <version>${hdf.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>edu.ucar</groupId>
-                <artifactId>netcdfAll</artifactId>
+                <artifactId>netcdf</artifactId>
                 <version>${netcdf.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>edu.ucar</groupId>
+                <artifactId>opendap</artifactId>
+                <version>${netcdf.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
@@ -251,6 +259,11 @@
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-simple</artifactId>
                 <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>edu.ucar</groupId>
+                <artifactId>nujan</artifactId>
+                <version>1.4.1.1</version>
             </dependency>
             <dependency>
                 <groupId>org.htmlparser</groupId>
@@ -308,6 +321,11 @@
                 <groupId>org.apache.velocity</groupId>
                 <artifactId>velocity</artifactId>
                 <version>1.7</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>23.0</version>
             </dependency>
 
             <!-- ImageioIO-Ext ############################################# -->
@@ -458,50 +476,11 @@
                         <groupId>it.geosolutions.imageio-ext</groupId>
                         <artifactId>imageio-ext-utilities</artifactId>
                     </exclusion>
-
                 </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-shapefile</artifactId>
-                <version>${geotools.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_core</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_codec</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_imageio</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.geotools</groupId>
-                <artifactId>gt-render</artifactId>
-                <version>${geotools.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_core</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_codec</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_imageio</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.geotools</groupId>
-                <artifactId>gt-cql</artifactId>
                 <version>${geotools.version}</version>
                 <exclusions>
                     <exclusion>
@@ -744,6 +723,16 @@
                 <enabled>true</enabled>
                 <checksumPolicy>warn</checksumPolicy>
             </snapshots>
+        </repository>
+        <repository>
+            <id>tao-core</id>
+            <name>TAO Core</name>
+            <url>https://raw.githubusercontent.com/tao-org/tao-core/repository</url>
+        </repository>
+        <repository>
+            <id>tao-plugins</id>
+            <name>TAO Plugins</name>
+            <url>https://raw.githubusercontent.com/tao-org/tao-plugins/repository</url>
         </repository>
     </repositories>
 
@@ -1070,6 +1059,7 @@
             <plugin>
                 <groupId>org.apache.netbeans.utilities</groupId>
                 <artifactId>nbm-maven-plugin</artifactId>
+                <version>4.4</version>
             </plugin>
 
             <plugin>

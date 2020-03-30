@@ -45,6 +45,7 @@ public class GloballyShiftedDataTest {
 
     @BeforeClass
     public static void createTestDataFile() throws IOException {
+
         tempFile = File.createTempFile(GloballyShiftedDataTest.class.getSimpleName(), ".nc");
         NFileWriteable ncFile = NWritableFactory.create(tempFile.getAbsolutePath(), "netcdf4");
         ncFile.addDimension("lat", HEIGHT);
@@ -69,7 +70,6 @@ public class GloballyShiftedDataTest {
         ncFile.create();
         lat.writeFully(Array.factory(DataType.DOUBLE, new int[]{HEIGHT}, latValues));
         lon.writeFully(Array.factory(DataType.DOUBLE, new int[]{WIDTH}, lonValues));
-
 
         // rightValues are written to the left side of the image, but as the data is globally shifted
         // they will be on the right side when read in

@@ -122,7 +122,7 @@ public class NbmGenTool implements CeresModuleProject.Processor {
         nbmConfiguration.put("publicPackages", "");
         nbmConfiguration.put("requiresRestart", "true");
 
-        addPluginElement(pluginsElement, "org.codehaus.mojo", "nbm-maven-plugin", nbmConfiguration, ns);
+        addPluginElement(pluginsElement, "org.apache.netbeans.utilities", "nbm-maven-plugin", nbmConfiguration, ns);
 
         Map<String, String> jarConfiguration = new LinkedHashMap<>();
         jarConfiguration.put("useDefaultManifestFile", "true");

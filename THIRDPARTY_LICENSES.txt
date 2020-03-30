@@ -70,7 +70,7 @@ jsr275;Units and measurements;???;BSD Style;https://mvnrepository.com/artifact/n
 jsr305;Annotations for Software Defect Detection;???;The Apache Software License, Version 2.0;https://mvnrepository.com/artifact/com.google.code.findbugs/jsr305;http://www.apache.org/licenses/LICENSE-2.0.txt
 Jtar;TAR library;jtar;Apache License;https://code.google.com/archive/p/jtar/;https://www.apache.org/licenses/
 Jtransforms;Fourier transformations;Piotr Wendykier;BSD-2-Clause;https://sites.google.com/site/piotrwendykier/software/jtransforms;http://opensource.org/licenses/BSD-2-Clause
-JTS;Topology Suite;JTS;http://jgridshift.sourceforge.net/;https://sourceforge.net/projects/jts-topo-suite/;NONE
+JTS;Topology Suite;Locationtech;Eclipse Public License 2.0;https://projects.eclipse.org/projects/locationtech;https://www.eclipse.org/legal/epl-2.0/
 junit;Unit level test support;Junit;Apache License / Eclipse Public License;http://junit.org/;https://github.com/junit-team/junit5/blob/master/LICENSE.md
 Jython;Python for Java;Jython;PSF License;NONE;http://www.jython.org/license.html
 libsvm;Support Vector Machines;LIBSVM ;BSD 3 Clause;NONE;http://opensource.org/licenses/BSD-3-Clause

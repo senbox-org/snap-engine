@@ -60,7 +60,7 @@ public final class ReaderUtils {
         return virtBand;
     }
 
-    private static String createName(String origName, String newPrefix) {
+    public static String createName(String origName, String newPrefix) {
         int sepPos = origName.indexOf("_");
         if (sepPos < 0) {
             sepPos = origName.length();
@@ -177,8 +177,8 @@ public final class ReaderUtils {
 
         if (latCorners == null || lonCorners == null) return;
 
-        final int gridWidth = 10;
-        final int gridHeight = 10;
+        final int gridWidth = Math.min(10, Math.max(2, product.getSceneRasterWidth()));
+        final int gridHeight = Math.min(10, Math.max(2, product.getSceneRasterHeight()));
 
         final float[] fineLatTiePoints = new float[gridWidth * gridHeight];
         ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, latCorners, fineLatTiePoints);

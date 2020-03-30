@@ -18,6 +18,7 @@ package org.esa.snap.core.datamodel;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.dataio.ProductSubsetDef;
+import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.esa.snap.runtime.Config;
 import org.junit.Test;
 
@@ -346,7 +347,7 @@ public class PixelGeoCodingTest {
         final ProductSubsetDef def = new ProductSubsetDef();
         final int subsetWidth = sourceProduct.getSceneRasterWidth() - 3;
         final int subsetHeight = sourceProduct.getSceneRasterHeight() - 3;
-        def.setRegion(2, 2, subsetWidth, subsetHeight);
+        def.setSubsetRegion(new PixelSubsetRegion(2, 2, subsetWidth, subsetHeight, 0));
         def.setSubSampling(1, 2);
         Product targetProduct = sourceProduct.createSubset(def, "target", "");
 

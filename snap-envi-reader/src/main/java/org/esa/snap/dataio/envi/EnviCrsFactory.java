@@ -15,8 +15,8 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.MathTransformFactory;
+import tec.uom.se.unit.Units;
 
-import javax.measure.unit.SI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,7 +84,7 @@ public class EnviCrsFactory {
                     if (indices != null) {
                         double semiMajorAxis = parameter[indices[0]];
                         double semiMinorAxis = parameter[indices[1]];
-                        DefaultEllipsoid ellipsoid = DefaultEllipsoid.createEllipsoid("SPHERE", semiMajorAxis, semiMinorAxis, SI.METER);
+                        DefaultEllipsoid ellipsoid = DefaultEllipsoid.createEllipsoid("SPHERE", semiMajorAxis, semiMinorAxis, Units.METRE);
                         DefaultGeodeticDatum datum = new DefaultGeodeticDatum(datumString, ellipsoid, DefaultPrimeMeridian.GREENWICH);
                         base = new DefaultGeographicCRS(datum, DefaultEllipsoidalCS.GEODETIC_2D);
                     } else {

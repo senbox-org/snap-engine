@@ -30,25 +30,10 @@ import org.esa.snap.core.util.math.IndexValidator;
 import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.runtime.Config;
 
-import javax.media.jai.ImageLayout;
-import javax.media.jai.Interpolation;
-import javax.media.jai.JAI;
-import javax.media.jai.PointOpImage;
-import javax.media.jai.RasterAccessor;
-import javax.media.jai.RasterFactory;
-import javax.media.jai.RasterFormatTag;
-import javax.media.jai.RenderedOp;
+import javax.media.jai.*;
 import javax.media.jai.operator.ScaleDescriptor;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.image.ComponentSampleModel;
-import java.awt.image.DataBuffer;
-import java.awt.image.Raster;
-import java.awt.image.RenderedImage;
-import java.awt.image.SampleModel;
-import java.awt.image.WritableRaster;
+import java.awt.*;
+import java.awt.image.*;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -71,7 +56,7 @@ import java.util.Vector;
  * </ol>
  * <p><i>Use instances of this class with care: The constructor fully loads the data given by the latitudes and longitudes bands and
  * the valid mask (if any) into memory.</i>
- * <p>
+ *
  * <em>Note (rq-20110526):</em>
  * A better implementation of the find pixel method could be something like:
  * <ol>
@@ -127,7 +112,7 @@ public class PixelGeoCoding extends AbstractGeoCoding implements BasicPixelGeoCo
 
     /**
      * Constructs a new pixel-based geo-coding.
-     * <p>
+     *
      * <i>Use with care: In contrast to the other constructor this one loads the data not until first access to
      * {@link #getPixelPos(GeoPos, PixelPos)} or {@link #getGeoPos(PixelPos, GeoPos)}. </i>
      *
@@ -448,18 +433,39 @@ public class PixelGeoCoding extends AbstractGeoCoding implements BasicPixelGeoCo
     }
 
     private void setEpsilon() {
-        final int x_center = rasterWidth / 2;
-        final int y_center = rasterHeight / 2;
+        int x_center = rasterWidth / 2 - 1;
+        x_center = x_center < 0 ? 0 : x_center;
+
+        int y_center = rasterHeight / 2 - 1;
+        y_center = y_center < 0 ? 0 : y_center;
+
+        int d_x_1 = 0;
+        int d_y_1 = 0;
+        int d_x_2 = 0;
+        int d_y_2 = 0;
+        double div = 1.0 / Math.sqrt(2);
+
+        if (rasterWidth < 2) {
+            div = 1.0;
+        } else {
+            d_x_2 = 1;
+        }
+
+        if (rasterHeight < 2) {
+            div = 1.0;
+        } else {
+            d_y_2 = 1;
+        }
 
         final GeoPos geoPos_1 = new GeoPos();
         final GeoPos geoPos_2 = new GeoPos();
-        getGeoPosInternal(x_center, y_center, geoPos_1);
-        getGeoPosInternal(x_center + 1, y_center + 1, geoPos_2);
+        getGeoPosInternal(x_center + d_x_1, y_center + d_y_1, geoPos_1);
+        getGeoPosInternal(x_center + d_x_2, y_center + d_y_2, geoPos_2);
 
         final double deltaLat = Math.abs(geoPos_1.lat - geoPos_2.lat);
         final double deltaLon = Math.abs(geoPos_1.lon - geoPos_2.lon);
 
-        EPS = Math.max(deltaLat, deltaLon) / Math.sqrt(2);
+        EPS = Math.max(deltaLat, deltaLon) * div;
     }
 
     private String getUniqueMaskName(Product product, String startName) {
@@ -485,9 +491,9 @@ public class PixelGeoCoding extends AbstractGeoCoding implements BasicPixelGeoCo
      * @param lonElems  the longitude data buffer in row-major order
      * @param pm        a monitor to inform the user about progress
      */
-    protected void fillInvalidGaps(final IndexValidator validator,
-                                   final float[] latElems,
-                                   final float[] lonElems, ProgressMonitor pm) {
+    private void fillInvalidGaps(final IndexValidator validator,
+                                 final float[] latElems,
+                                 final float[] lonElems, ProgressMonitor pm) {
         if (pixelPosEstimator != null) {
             try {
                 pm.beginTask("Filling invalid pixel gaps", rasterHeight);
@@ -777,11 +783,11 @@ public class PixelGeoCoding extends AbstractGeoCoding implements BasicPixelGeoCo
 
         final Result result = new Result();
         boolean pixelFound = quadTreeSearch(0,
-                                            geoPos.lat, geoPos.lon,
-                                            0, 0,
-                                            rasterWidth,
-                                            rasterHeight,
-                                            result);
+                geoPos.lat, geoPos.lon,
+                0, 0,
+                rasterWidth,
+                rasterHeight,
+                result);
 
         if (pixelFound) {
             final GeoPos resultGeoPos = new GeoPos();

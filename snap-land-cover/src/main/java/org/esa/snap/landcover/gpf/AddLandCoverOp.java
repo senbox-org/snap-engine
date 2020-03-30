@@ -15,6 +15,7 @@
  */
 package org.esa.snap.landcover.gpf;
 
+import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.glevel.support.AbstractMultiLevelSource;
 import com.bc.ceres.glevel.support.DefaultMultiLevelImage;
 import org.esa.snap.core.dataio.ProductIO;
@@ -46,6 +47,9 @@ import org.esa.snap.landcover.dataio.LandCoverModelRegistry;
 
 import java.awt.image.RenderedImage;
 import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * AddLandCover adds a land cover band to a product
@@ -74,6 +78,9 @@ public final class AddLandCoverOp extends Operator {
             label = "Resampling Method")
     private String resamplingMethod = ResamplingFactory.NEAREST_NEIGHBOUR_NAME;
 
+    private static Map<LandCoverParameters, LandCoverModelDescriptor> paramsToDescriptor;
+    private static Map<LandCoverParameters, Band> paramsToBand;
+
     public static final String DEFAULT_BAND_NAME = "land_cover";
 
     /**
@@ -90,7 +97,6 @@ public final class AddLandCoverOp extends Operator {
      */
     @Override
     public void initialize() throws OperatorException {
-
         try {
             createTargetProduct();
 
@@ -102,7 +108,7 @@ public final class AddLandCoverOp extends Operator {
     /**
      * Create target product.
      */
-    void createTargetProduct() throws Exception {
+    private void createTargetProduct() {
         ensureSingleRasterSize(sourceProduct);
 
         targetProduct = new Product(sourceProduct.getName(),
@@ -112,7 +118,9 @@ public final class AddLandCoverOp extends Operator {
         ProductUtils.copyProductNodes(sourceProduct, targetProduct);
 
         for (Band srcBand : sourceProduct.getBands()) {
-            ProductUtils.copyBand(srcBand.getName(), sourceProduct, targetProduct, true);
+            if (!targetProduct.containsBand(srcBand.getName())) {
+                ProductUtils.copyBand(srcBand.getName(), sourceProduct, targetProduct, true);
+            }
         }
 
         if(landCoverNames != null) {
@@ -120,7 +128,8 @@ public final class AddLandCoverOp extends Operator {
                 final LandCoverParameters param = new LandCoverParameters(
                         landCoverName, resamplingMethod);
 
-                AddLandCover(targetProduct, param);
+                addLandCover(targetProduct, param);
+
             }
         }
         if (externalFiles != null) {
@@ -130,61 +139,109 @@ public final class AddLandCoverOp extends Operator {
                     final LandCoverParameters param = new LandCoverParameters(
                             externalFile.getName(), externalFile, resamplingMethod);
 
-                    AddLandCover(targetProduct, param);
+                    addLandCover(targetProduct, param);
                 }
             }
         }
     }
 
-    public static void AddLandCover(final Product product, final AddLandCoverOp.LandCoverParameters param) throws Exception {
+    public static void AddLandCover(final Product product, final AddLandCoverOp.LandCoverParameters param) throws IOException {
+        addLandCover(product, param);
+        initializeDescriptors();
+        setLandCoverBandImages();
+    }
+
+    private static void addLandCover(final Product product, final AddLandCoverOp.LandCoverParameters param) {
+        paramsToDescriptor = new HashMap<>();
+        paramsToBand = new HashMap<>();
         String name = LandCoverFactory.getProperName(param.name);
 
-        LandCoverModelDescriptor descriptor = null;
+        LandCoverModelDescriptor descriptor;
         if (param.externalFile != null) {
             descriptor = new FileLandCoverModelDescriptor(param.externalFile);
-
-            try {
-                Product extProduct = ProductIO.readProduct(param.externalFile);
-
-                // integer data should only use nearest neighbour
-                if (extProduct.getBandAt(0).getDataType() < ProductData.TYPE_FLOAT32) {
-                    param.resamplingMethod = ResamplingFactory.NEAREST_NEIGHBOUR_NAME;
-                }
-            } catch (Exception e) {
-                SystemUtils.LOG.warning("Unable to read external file " + param.externalFile);
-            }
+            paramsToDescriptor.put(param, descriptor);
         } else {
             final LandCoverModelRegistry modelRegistry = LandCoverModelRegistry.getInstance();
             descriptor = modelRegistry.getDescriptor(name);
-
-            if (descriptor == null)
-                throw new OperatorException("The Land Cover '" + name + "' is not supported.");
-            if (!descriptor.isInstalled()) {
-                descriptor.installFiles();
-            }
-
-            // integer data should only use nearest neighbour
-            if (descriptor.getDataType() < ProductData.TYPE_FLOAT32) {
-                param.resamplingMethod = ResamplingFactory.NEAREST_NEIGHBOUR_NAME;
-            }
+            paramsToDescriptor.put(param, descriptor);
         }
-
-        Resampling resampling = Resampling.NEAREST_NEIGHBOUR;
-        if (param.resamplingMethod != null) {
-            resampling = ResamplingFactory.createResampling(param.resamplingMethod);
-            if(resampling == null) {
-                throw new OperatorException("Resampling method "+ param.resamplingMethod + " is invalid");
-            }
-        }
-
-        final LandCoverModel landcover = descriptor.createLandCoverModel(resampling);
-        addLandCoverBand(product, landcover, param.bandName);
+        addLandCoverBand(product, descriptor, param);
     }
 
-    private static void addLandCoverBand(Product product, LandCoverModel landcover, String bandName) {
-        final GeoCoding geoCoding = product.getSceneGeoCoding();
-        final LandCoverModelDescriptor descriptor = landcover.getDescriptor();
-        final Band band = product.addBand(getValidBandName(bandName, product), descriptor.getDataType());
+    @Override
+    public void doExecute(ProgressMonitor pm) throws OperatorException {
+        pm.beginTask("", 2);
+        try {
+            pm.setTaskName("Initializing Descriptors");
+            initializeDescriptors();
+            pm.worked(1);
+            pm.setTaskName("Setting Land Cover Band Images");
+            setLandCoverBandImages();
+            pm.worked(1);
+        } catch (IOException e) {
+            throw new OperatorException(e.getMessage());
+        } finally {
+            pm.done();
+        }
+    }
+
+    @Override
+    public void dispose() {
+        paramsToDescriptor = null;
+        paramsToBand = null;
+    }
+
+    private static void initializeDescriptors() {
+        for (Map.Entry<LandCoverParameters, LandCoverModelDescriptor> entry : paramsToDescriptor.entrySet()) {
+            LandCoverParameters param = entry.getKey();
+            if (param.externalFile != null) {
+                try {
+                    Product extProduct = ProductIO.readProduct(param.externalFile);
+
+                    // integer data should only use nearest neighbour
+                    if (extProduct.getBandAt(0).getDataType() < ProductData.TYPE_FLOAT32) {
+                        param.resamplingMethod = ResamplingFactory.NEAREST_NEIGHBOUR_NAME;
+                    }
+                } catch (Exception e) {
+                    SystemUtils.LOG.warning("Unable to read external file " + param.externalFile);
+                }
+            } else {
+                LandCoverModelDescriptor descriptor = entry.getValue();
+                if (descriptor == null) {
+                    String name = LandCoverFactory.getProperName(param.name);
+                    throw new OperatorException("The Land Cover '" + name + "' is not supported.");
+                }
+                if (!descriptor.isInstalled()) {
+                    descriptor.installFiles();
+                }
+                // integer data should only use nearest neighbour
+                if (descriptor.getDataType() < ProductData.TYPE_FLOAT32) {
+                    param.resamplingMethod = ResamplingFactory.NEAREST_NEIGHBOUR_NAME;
+                }
+            }
+        }
+    }
+
+    private static void setLandCoverBandImages() throws IOException {
+        for (Map.Entry<LandCoverParameters, LandCoverModelDescriptor> entry : paramsToDescriptor.entrySet()) {
+            LandCoverParameters param = entry.getKey();
+            Resampling resampling = Resampling.NEAREST_NEIGHBOUR;
+            if (param.resamplingMethod != null) {
+                resampling = ResamplingFactory.createResampling(param.resamplingMethod);
+                if (resampling == null) {
+                    throw new OperatorException("Resampling method " + param.resamplingMethod + " is invalid");
+                }
+            }
+            LandCoverModelDescriptor descriptor = entry.getValue();
+            final LandCoverModel landcover = descriptor.createLandCoverModel(resampling);
+            Band band = paramsToBand.get(param);
+            band.setSourceImage(createLandCoverSourceImage(landcover, band));
+        }
+    }
+
+    private static void addLandCoverBand(Product product, LandCoverModelDescriptor descriptor, LandCoverParameters param) {
+        String bandName = getValidBandName(param.bandName, product);
+        final Band band = product.addBand(bandName, descriptor.getDataType());
         band.setNoDataValueUsed(true);
         band.setNoDataValue(descriptor.getNoDataValue());
         band.setUnit(descriptor.getUnit());
@@ -196,16 +253,15 @@ public final class AddLandCoverOp extends Operator {
             band.setSampleCoding(indexCoding);
             band.setImageInfo(descriptor.getImageInfo());
         }
-
-        band.setSourceImage(createLandCoverSourceImage(landcover, geoCoding, band));
+        paramsToBand.put(param, band);
     }
 
-    private static RenderedImage createLandCoverSourceImage(final LandCoverModel landcover,
-                                                            final GeoCoding geoCoding, final Band band) {
+    private static RenderedImage createLandCoverSourceImage(final LandCoverModel landcover, final Band band) {
         return new DefaultMultiLevelImage(new AbstractMultiLevelSource(band.createMultiLevelModel()) {
             @Override
             protected RenderedImage createImage(final int level) {
-                return new LandCoverSourceImage(landcover, geoCoding, band, ResolutionLevel.create(getModel(), level));
+                return new LandCoverSourceImage(landcover, band.getGeoCoding(),
+                        band, ResolutionLevel.create(getModel(), level));
             }
         });
     }

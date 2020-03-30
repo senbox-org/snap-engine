@@ -27,9 +27,13 @@ import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.TreeNode;
 import org.esa.snap.runtime.Config;
 
-import java.awt.Dimension;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The {@code AbstractProductReader}  class can be used as a base class for new product reader implementations. The
@@ -42,6 +46,8 @@ import java.io.IOException;
  * @see #readBandRasterData
  */
 public abstract class AbstractProductReader implements ProductReader {
+
+    private static final Logger logger = Logger.getLogger(AbstractProductReader.class.getName());
 
     /**
      * @since BEAM 4.9
@@ -157,24 +163,31 @@ public abstract class AbstractProductReader implements ProductReader {
      * @throws IOException                if an I/O error occurs
      * @throws IllegalFileFormatException if the file format is unknown.
      */
-    public Product readProductNodes(Object input,
-                                    ProductSubsetDef subsetDef) throws IOException {
+    public Product readProductNodes(Object input, ProductSubsetDef subsetDef) throws IOException {
         // (nf, 26.09.2007) removed (input == null) check, null inputs (= no sources) shall be allowed
         if (input != null && !isInstanceOfValidInputType(input)) {
             throw new IllegalArgumentException("invalid input source: " + input);
         }
-        final long startTime = System.currentTimeMillis();
         setInput(input);
         setSubsetDef(subsetDef);
+
+        long startTime = System.currentTimeMillis();
+        if (logger.isLoggable(Level.FINE)) {
+            logger.log(Level.FINE, "Start reading the product from input '" + input + "' using the '" + getClass().getName()+"' reader class. The subset is '" + subsetDef + "'.");
+        }
+
         final Product product = readProductNodesImpl();
         configurePreferredTileSize(product);
         product.setModified(false);
         if (product.getProductReader() == null) {
             product.setProductReader(this);
         }
-        final long endTime = System.currentTimeMillis();
-        String msg = String.format("Read product nodes (took %d ms)", (endTime - startTime));
-        SystemUtils.LOG.fine(msg);
+
+        if (logger.isLoggable(Level.FINE)) {
+            long elapsedSeconds = (System.currentTimeMillis() - startTime) / 1000;
+            logger.log(Level.FINE, "Finish reading the product from input '" + input + "' using the '" + getClass().getName()+"' reader class. The time elapsed is " + elapsedSeconds + " seconds.");
+        }
+
         return product;
     }
 
@@ -388,6 +401,14 @@ public abstract class AbstractProductReader implements ProductReader {
      * @return the discontinuity mode, always one of {@link TiePointGrid#DISCONT_NONE}, {@link TiePointGrid#DISCONT_AT_180} and {@link TiePointGrid#DISCONT_AT_360}.
      */
     protected int getGridDiscontinutity(String name) {
+        return getGridDiscontinutityValue(name);
+//        if (isNameOfLongitudeGrid(name)) {
+//            return TiePointGrid.DISCONT_AT_180;
+//        }
+//        return TiePointGrid.DISCONT_NONE;
+    }
+
+    private static int getGridDiscontinutityValue(String name) {
         if (isNameOfLongitudeGrid(name)) {
             return TiePointGrid.DISCONT_AT_180;
         }
@@ -423,15 +444,29 @@ public abstract class AbstractProductReader implements ProductReader {
                         "' with discontinuity at " + gridDiscontinutity +
                         " degree");
         }
-        return new TiePointGrid(gridName,
-                                gridWidth,
-                                gridHeight,
-                                offsetX,
-                                offsetY,
-                                subSamplingX,
-                                subSamplingY,
-                                tiePoints,
-                                gridDiscontinutity);
+//        return new TiePointGrid(gridName,
+//                                gridWidth,
+//                                gridHeight,
+//                                offsetX,
+//                                offsetY,
+//                                subSamplingX,
+//                                subSamplingY,
+//                                tiePoints,
+//                                gridDiscontinutity);
+        return buildTiePointGrid(gridName, gridWidth, gridHeight, offsetX, offsetY, subSamplingX, subSamplingY, tiePoints, gridDiscontinutity);
+    }
+
+    protected static TiePointGrid buildTiePointGrid(String gridName, int gridWidth, int gridHeight, double offsetX, double offsetY,
+                                                    double subSamplingX, double subSamplingY, float[] tiePoints) {
+
+        int gridDiscontinutity = getGridDiscontinutityValue(gridName);
+        return buildTiePointGrid(gridName, gridWidth, gridHeight, offsetX, offsetY, subSamplingX, subSamplingY, tiePoints, gridDiscontinutity);
+    }
+
+    protected static TiePointGrid buildTiePointGrid(String gridName, int gridWidth, int gridHeight, double offsetX, double offsetY,
+                                                    double subSamplingX, double subSamplingY, float[] tiePoints, int gridDiscontinutity) {
+
+        return new TiePointGrid(gridName, gridWidth, gridHeight, offsetX, offsetY, subSamplingX, subSamplingY, tiePoints, gridDiscontinutity);
     }
 
     public static void configurePreferredTileSize(Product product) {
@@ -502,5 +537,19 @@ public abstract class AbstractProductReader implements ProductReader {
         return name.equalsIgnoreCase("lon") ||
                name.equalsIgnoreCase("long") ||
                name.equalsIgnoreCase("longitude");
+    }
+
+    public static Path convertInputToPath(Object input) {
+        if (input == null) {
+            throw new NullPointerException();
+        } else if (input instanceof File) {
+            return ((File)input).toPath();
+        } else if (input instanceof Path) {
+            return (Path) input;
+        } else if (input instanceof String) {
+            return Paths.get((String) input);
+        } else {
+            throw new IllegalArgumentException("Unknown input '"+input+"'.");
+        }
     }
 }

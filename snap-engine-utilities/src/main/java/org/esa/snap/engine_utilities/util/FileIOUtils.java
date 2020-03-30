@@ -16,15 +16,18 @@
 package org.esa.snap.engine_utilities.util;
 
 import org.apache.commons.io.IOUtils;
+import org.esa.snap.core.util.io.FileUtils;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.PosixFileAttributeView;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 import static java.nio.file.FileVisitResult.CONTINUE;
 import static java.nio.file.StandardCopyOption.*;
@@ -100,10 +103,52 @@ public class FileIOUtils {
         }
 
         @Override
+        public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+            FileVisitResult visitResult = super.postVisitDirectory(dir, exc);
+
+            if (this.isMove) {
+                Files.delete(dir);
+            }
+            return visitResult;
+        }
+
+        @Override
         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
             copyFile(file, target.resolve(source.relativize(file)));
             return FileVisitResult.CONTINUE;
         }
+    }
+
+    public static Path copyFolderNew(Path sourcePath, Path targetPath) throws IOException {
+        return copyOrMoveFolder(sourcePath, targetPath, false);
+    }
+
+    public static Path moveFolderNew(Path sourcePath, Path targetPath) throws IOException {
+        return copyOrMoveFolder(sourcePath, targetPath, true);
+    }
+
+    private static Path copyOrMoveFolder(Path sourcePath, Path targetPath, boolean move) throws IOException {
+        if (sourcePath == null) {
+            throw new NullPointerException("The source path is null.");
+        }
+        if (targetPath == null) {
+            throw new NullPointerException("The target path is null.");
+        }
+        if (!Files.exists(sourcePath)) {
+            throw new FileNotFoundException("The source path '" + sourcePath + "' does not exist.");
+        }
+        if (!Files.exists(targetPath)) {
+            throw new FileNotFoundException("The target path '" + targetPath + "' does not exist.");
+        }
+        if (!Files.isDirectory(targetPath)) {
+            throw new NotDirectoryException("The target path '" + targetPath + "' is not a directory.");
+        }
+        Path target = targetPath.resolve(sourcePath.getFileName());
+        // follow links when copying files
+        EnumSet<FileVisitOption> opts = EnumSet.of(FileVisitOption.FOLLOW_LINKS);
+        CopyDirVisitor visitor = new CopyDirVisitor(sourcePath, target, move);
+        Files.walkFileTree(sourcePath, opts, Integer.MAX_VALUE, visitor);
+        return target;
     }
 
     public static void copyFolder(final Path source, final Path target) throws IOException {
@@ -138,5 +183,71 @@ public class FileIOUtils {
                 }
             }
         });
+    }
+
+    public static long computeFileSize(Path path) throws IOException {
+        FileSizeVisitor fileSizeVisitor = new FileSizeVisitor();
+        Files.walkFileTree(path, fileSizeVisitor);
+        return fileSizeVisitor.getSizeInBytes();
+    }
+
+    public static Path ensureExists(Path folder) throws IOException {
+        if (!Files.exists(folder)) {
+            if (isPosixFileSystem()) {
+                Set<PosixFilePermission> perms = PosixFilePermissions.fromString("rwxr-xr-x");
+                FileAttribute<Set<PosixFilePermission>> attrs = PosixFilePermissions.asFileAttribute(perms);
+                folder = Files.createDirectories(folder, attrs);
+            } else {
+                folder = Files.createDirectories(folder);
+            }
+
+        }
+        return folder;
+    }
+
+    public static Path ensurePermissions(Path file) throws IOException {
+        if (Files.exists(file)) {
+            if (isPosixFileSystem()) {
+                Set<PosixFilePermission> perms = PosixFilePermissions.fromString("rwxr-xr-x");
+                file = Files.setPosixFilePermissions(file, perms);
+            }
+        }
+        return file;
+    }
+
+    private static Boolean supportsPosix;
+
+    private static boolean isPosixFileSystem() {
+        if (supportsPosix == null) {
+            supportsPosix = Boolean.FALSE;
+            FileSystem fileSystem = FileSystems.getDefault();
+            Iterable<FileStore> fileStores = fileSystem.getFileStores();
+            for (FileStore fs : fileStores) {
+                supportsPosix = fs.supportsFileAttributeView(PosixFileAttributeView.class);
+                if (supportsPosix) {
+                    break;
+                }
+            }
+        }
+        return supportsPosix.booleanValue();
+    }
+
+    private static class FileSizeVisitor extends SimpleFileVisitor<Path> {
+
+        private long sizeInBytes;
+
+        private FileSizeVisitor() {
+            this.sizeInBytes = 0;
+        }
+
+        @Override
+        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+            this.sizeInBytes += Files.size(file);
+            return FileVisitResult.CONTINUE;
+        }
+
+        private long getSizeInBytes() {
+            return sizeInBytes;
+        }
     }
 }

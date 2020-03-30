@@ -21,13 +21,14 @@ import org.esa.snap.core.dataio.dimap.DimapProductConstants;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.util.Guardian;
-import org.esa.snap.core.util.SystemUtils;
+import org.esa.snap.runtime.EngineConfig;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -206,6 +207,26 @@ public class ProductIO {
         return readProductImpl(file, null);
     }
 
+    /**
+     * Reads the data product specified by the given file.
+     * <p>The product returned will be associated with the reader appropriate for the given
+     * file format (see also {@link Product#getProductReader() Product.productReader}).
+     * <p>The method does not automatically read band data, thus
+     * {@link Band#getRasterData() Band.rasterData} will always be null
+     * for all bands in the product returned by this method.
+     *
+     * @param file the data product file
+     * @param subsetDef the subset of a product
+     *
+     * @return a data model as an in-memory representation of the given product file or <code>null</code> if no
+     *         appropriate reader was found for the given product file
+     *
+     * @throws IOException if an I/O error occurs
+     */
+    public static Product readProduct(File file, ProductSubsetDef subsetDef) throws IOException {
+        return readProductImpl(file, subsetDef);
+    }
+
     private static Product readProductImpl(File file, ProductSubsetDef subsetDef) throws IOException {
         Guardian.assertNotNull("file", file);
         if (!file.exists()) {
@@ -250,7 +271,7 @@ public class ProductIO {
      */
     public static ProductReader getProductReaderForInput(Object input) {
         final long startTimeTotal = System.currentTimeMillis();
-        Logger logger = SystemUtils.LOG;
+        Logger logger = EngineConfig.instance().logger();
         logger.fine("Searching reader plugin for '" + input + "'");
         ProductIOPlugInManager registry = ProductIOPlugInManager.getInstance();
         Iterator<ProductReaderPlugIn> it = registry.getAllReaderPlugIns();
@@ -270,7 +291,7 @@ public class ProductIO {
                     selectedPlugIn = plugIn;
                 }
             } catch (Exception e) {
-                logger.severe("Error attempting to read " + input + " with plugin reader " + plugIn.toString() + ": " + e.getMessage());
+                logger.log(Level.SEVERE, "Error attempting to read " + input + " with plugin reader " + plugIn.toString(), e);
             }
         }
         final long endTimeTotal = System.currentTimeMillis();

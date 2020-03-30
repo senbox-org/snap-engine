@@ -19,6 +19,7 @@ package org.esa.snap.core.datamodel;
 import junit.framework.TestCase;
 import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.dataop.maptransf.Datum;
+import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.esa.snap.core.util.math.FXYSum;
 
 public class CombinedFXYGeoCodingTest extends TestCase {
@@ -83,7 +84,7 @@ public class CombinedFXYGeoCodingTest extends TestCase {
         final Scene srcScene = SceneFactory.createScene(new Band("srcTest", ProductData.TYPE_UINT8, 10, 10));
         final Scene destScene = SceneFactory.createScene(new Band("destTest", ProductData.TYPE_UINT8, 4, 3));
         final ProductSubsetDef subsetDef = new ProductSubsetDef("testSubset");
-        subsetDef.setRegion(3, 1, 4, 3);
+        subsetDef.setSubsetRegion(new PixelSubsetRegion(3, 1, 4, 3, 0));
 
 
         _srcGeoCoding.transferGeoCoding(srcScene, destScene, subsetDef);
@@ -117,7 +118,7 @@ public class CombinedFXYGeoCodingTest extends TestCase {
         final Scene srcScene = SceneFactory.createScene(new Band("srcTest", ProductData.TYPE_UINT8, 10, 10));
         final Scene destScene = SceneFactory.createScene(new Band("destTest", ProductData.TYPE_UINT8, 2, 2));
         final ProductSubsetDef subsetDef = new ProductSubsetDef("testSubset");
-        subsetDef.setRegion(3, 1, 4, 3);
+        subsetDef.setSubsetRegion(new PixelSubsetRegion(3, 1, 4, 3, 0));
         subsetDef.setSubSampling(2, 2);
 
 

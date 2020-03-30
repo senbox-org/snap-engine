@@ -18,11 +18,11 @@ package org.esa.snap.binning.operator;
 
 import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.glevel.MultiLevelImage;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Polygon;
-import com.vividsolutions.jts.simplify.DouglasPeuckerSimplifier;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.simplify.DouglasPeuckerSimplifier;
 import org.esa.snap.binning.BinningContext;
 import org.esa.snap.binning.CompositingType;
 import org.esa.snap.binning.MosaickingGrid;
@@ -69,6 +69,7 @@ import java.util.logging.Logger;
 public class SpatialProductBinner {
 
     private static final String PROPERTY_KEY_SLICE_HEIGHT = "snap.binning.sliceHeight";
+    private static final int FORCED_SLICE_HEIGHT = Config.instance().preferences().getInt(PROPERTY_KEY_SLICE_HEIGHT, -1);
     private static final String BINNING_MASK_NAME = "_binning_mask";
 
     /**
@@ -228,20 +229,20 @@ public class SpatialProductBinner {
 
     private static Dimension computeDefaultSliceDimension(Product product) {
         final int sliceWidth = product.getSceneRasterWidth();
-        Dimension preferredTileSize = product.getPreferredTileSize();
-        int sliceHeight;
-        if (preferredTileSize != null) {
-            sliceHeight = preferredTileSize.height;
-        } else {
-            sliceHeight = ImageManager.getPreferredTileSize(product).height;
-        }
-
-        // TODO make this a parameter nf/mz 2013-11-05
-        sliceHeight = Config.instance().preferences().getInt(PROPERTY_KEY_SLICE_HEIGHT, sliceHeight);
+        int sliceHeight = FORCED_SLICE_HEIGHT > 0 ? FORCED_SLICE_HEIGHT : deriveAutoSliceHeight(product);
         Dimension dimension = new Dimension(sliceWidth, sliceHeight);
         String logMsg = String.format("Using slice dimension [width=%d, height=%d] in binning", dimension.width, dimension.height);
-        SystemUtils.LOG.log(Level.INFO, logMsg);
+        SystemUtils.LOG.log(Level.FINE, logMsg);
         return dimension;
+    }
+
+    private static int deriveAutoSliceHeight(Product product) {
+        Dimension preferredTileSize = product.getPreferredTileSize();
+        if (preferredTileSize != null) {
+            return preferredTileSize.height;
+        } else {
+            return ImageManager.getPreferredTileSize(product).height;
+        }
     }
 
     private static void addVariablesToProduct(VariableContext variableContext, Product product,
@@ -271,7 +272,7 @@ public class SpatialProductBinner {
                 }
                 product.addBand(band);
                 if (!addedVariableBands.containsKey(product)) {
-                    addedVariableBands.put(product, new ArrayList<Band>());
+                    addedVariableBands.put(product, new ArrayList<>());
                 }
                 addedVariableBands.get(product).add(band);
             }
@@ -287,7 +288,7 @@ public class SpatialProductBinner {
                                            StringUtils.isNotNullAndNotEmpty(maskExpr) ? maskExpr : "true");
         product.addBand(band);
         if (!addedBands.containsKey(product)) {
-            addedBands.put(product, new ArrayList<Band>());
+            addedBands.put(product, new ArrayList<>());
         }
         addedBands.get(product).add(band);
     }

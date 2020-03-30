@@ -119,6 +119,7 @@ public class OperatorContext {
     private final RenderingHints renderingHints;
     private final boolean computeTileMethodImplemented;
     private final boolean computeTileStackMethodImplemented;
+    private boolean isComputingStack;
 
     private String id;
     private Product targetProduct;
@@ -150,19 +151,6 @@ public class OperatorContext {
         startTileComputationObservation();
     }
 
-    public static void setTileCache(OpImage image, boolean force) {
-        if (force && image.getTileCache() == null) {
-            image.setTileCache(getTileCache());
-            boolean disableTileCache = Config.instance().preferences().getBoolean(GPF.DISABLE_TILE_CACHE_PROPERTY, false);
-            if (disableTileCache) {
-                SystemUtils.LOG.info(String.format("Tile cache assigned to %s", image));
-            }
-        } else {
-            setTileCache(image);
-        }
-    }
-
-
     /**
      * Makes sure that the given JAI OpImage has a valid tile cache (see System property {@link GPF#USE_FILE_TILE_CACHE_PROPERTY}),
      * or makes sure that it has none (see System property {@link GPF#DISABLE_TILE_CACHE_PROPERTY}).
@@ -171,19 +159,11 @@ public class OperatorContext {
      */
     public static void setTileCache(OpImage image) {
         boolean disableTileCache = Config.instance().preferences().getBoolean(GPF.DISABLE_TILE_CACHE_PROPERTY, false);
-        if (image instanceof OperatorImage) {
-            OperatorImage operatorImage = (OperatorImage) image;
-            String bandName = operatorImage.getTargetBand().getName();
-            String operatorAlias = operatorImage.getOperatorContext().getOperatorSpi().getOperatorAlias();
-            if ("TileCache".equals(operatorAlias)) {
-                return;  // do not put TileCacheOp outputs into default tile cache, but keep their tile cache pointer
-            }
-        }
         if (disableTileCache) {
             image.setTileCache(null);
         } else if (image.getTileCache() == null) {
             image.setTileCache(getTileCache());
-            SystemUtils.LOG.fine(String.format("Tile cache assigned to %s", image));
+            SystemUtils.LOG.finest(String.format("Tile cache assigned to %s", image));
         }
     }
 
@@ -243,7 +223,7 @@ public class OperatorContext {
     }
 
     public Product[] getSourceProducts() {
-        return sourceProductList.toArray(new Product[sourceProductList.size()]);
+        return sourceProductList.toArray(new Product[0]);
     }
 
     public void setSourceProducts(Product[] products) {
@@ -320,6 +300,15 @@ public class OperatorContext {
         if (isCancelled()) {
             throw new OperatorCancelException("Operation canceled.");
         }
+    }
+
+    /**
+     * Determines whether this operator is an output node. i.e. is a final leaf in the graph that writes result data to disk.
+     *
+     * @return if so
+     */
+    public boolean isOutputNode() {
+        return getOperatorSpi().getOperatorDescriptor().isAutoWriteDisabled();
     }
 
     public OperatorSpi getOperatorSpi() {
@@ -410,6 +399,14 @@ public class OperatorContext {
         return computeTileStackMethodImplemented;
     }
 
+    public boolean isComputingStack() {
+        return isComputingStack;
+    }
+
+    public void setComputingStack(boolean computingStack) {
+        isComputingStack = computingStack;
+    }
+
     public Tile getSourceTile(RasterDataNode rasterDataNode, Rectangle region) {
         return getSourceTile(rasterDataNode, region, null);
     }
@@ -475,7 +472,7 @@ public class OperatorContext {
     }
 
     private boolean operatorMustComputeTileStack() {
-        return operator.canComputeTileStack() && !operator.canComputeTile();
+        return operator.canComputeTileStack() && (!operator.canComputeTile() || isComputingStack());
     }
 
     private static boolean implementsMethod(Class<?> aClass, String methodName, Class[] methodParameterTypes) {
@@ -509,7 +506,7 @@ public class OperatorContext {
             initTargetProperties(operator.getClass());
             setTargetImages();
             initGraphMetadata();
-            targetProduct.setProductWriterListener((ProgressMonitor pm) -> operator.execute(pm));
+            targetProduct.setProductWriterListener(operator::execute);
 
             targetProduct.setModified(false);
         } finally {
@@ -1032,7 +1029,7 @@ public class OperatorContext {
                 srcProductList.remove(product);
             }
         }
-        return srcProductList.toArray(new Product[srcProductList.size()]);
+        return srcProductList.toArray(new Product[0]);
     }
 
     private static Field[] getAnnotatedSourceProductFields(Operator operator1) {
