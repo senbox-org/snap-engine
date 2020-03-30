@@ -97,13 +97,9 @@ public class HdfEosGeocodingPart extends ProfilePartIO {
                 final MathTransformFactory transformFactory = ReferencingFactoryFinder.getMathTransformFactory(null);
                 ParameterValueGroup parameters;
                 try {
-                    parameters = transformFactory.getDefaultParameters("OGC:Sinusoidal");
-                } catch (NoSuchIdentifierException ignore) {
-                    try {
-                        parameters = transformFactory.getDefaultParameters("Sinusoidal");
-                    } catch (NoSuchIdentifierException ignore2) {
-                        return;
-                    }
+                    parameters = transformFactory.getDefaultParameters("Sinusoidal");
+                } catch (NoSuchIdentifierException ignore2) {
+                    return;
                 }
                 double semi_major;
                 double semi_minor;
