@@ -181,12 +181,14 @@ public class DimapProductWriter extends AbstractProductWriter {
         long outputPos = (long) sourceOffsetY * sourceBandWidth + (long) sourceOffsetX;
         pm.beginTask("Writing band '" + sourceBand.getName() + "'...", sourceHeight);
         try {
-            for (int sourcePos = 0; sourcePos < sourceHeight * sourceWidth; sourcePos += sourceWidth) {
-                sourceBuffer.writeTo(sourcePos, sourceWidth, outputStream, outputPos);
-                outputPos += sourceBandWidth;
-                pm.worked(1);
-                if (pm.isCanceled()) {
-                    break;
+            synchronized (outputStream) {
+                for (int sourcePos = 0; sourcePos < sourceHeight * sourceWidth; sourcePos += sourceWidth) {
+                    sourceBuffer.writeTo(sourcePos, sourceWidth, outputStream, outputPos);
+                    outputPos += sourceBandWidth;
+                    pm.worked(1);
+                    if (pm.isCanceled()) {
+                        break;
+                    }
                 }
             }
         } finally {

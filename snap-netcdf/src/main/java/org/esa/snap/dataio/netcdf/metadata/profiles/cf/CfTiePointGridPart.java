@@ -16,15 +16,19 @@
 
 package org.esa.snap.dataio.netcdf.metadata.profiles.cf;
 
+import com.bc.ceres.glevel.MultiLevelImage;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.dataio.netcdf.ProfileReadContext;
 import org.esa.snap.dataio.netcdf.ProfileWriteContext;
 import org.esa.snap.dataio.netcdf.metadata.ProfilePartIO;
+import org.esa.snap.dataio.netcdf.nc.NVariable;
 import org.esa.snap.dataio.netcdf.util.Constants;
 import org.esa.snap.dataio.netcdf.util.ReaderUtils;
 
+import java.awt.*;
+import java.awt.image.Raster;
 import java.io.IOException;
 
 public class CfTiePointGridPart extends ProfilePartIO {
@@ -45,12 +49,21 @@ public class CfTiePointGridPart extends ProfilePartIO {
         boolean doFlip = getYFlippedProperty(ctx);
 
         for (TiePointGrid tiePointGrid : p.getTiePointGrids()) {
+            final String variableName = ReaderUtils.getVariableName(tiePointGrid);
+            final NVariable variable = ctx.getNetcdfFileWriteable().findVariable(variableName);
             final int h = tiePointGrid.getRasterHeight();
             final int w = tiePointGrid.getRasterWidth();
-            final Object data = tiePointGrid.getSourceImage().getData().getDataElements(0, 0, w, h, null);
-            ProductData productData = ProductData.createInstance(ProductData.TYPE_FLOAT32, data);
-            String variableName = ReaderUtils.getVariableName(tiePointGrid);
-            ctx.getNetcdfFileWriteable().findVariable(variableName).write(0, 0, w, h, doFlip, productData);
+            MultiLevelImage sourceImage = tiePointGrid.getSourceImage();
+            Point[] tileIndices = sourceImage.getTileIndices(new Rectangle(0, 0, w, h));
+            for (Point tileIndex : tileIndices) {
+                Rectangle rect = sourceImage.getTileRect(tileIndex.x, tileIndex.y);
+                if (!rect.isEmpty()) {
+                    final Raster data = sourceImage.getData(rect);
+                    final ProductData productData = tiePointGrid.createCompatibleRasterData(rect.width, rect.height);
+                    data.getDataElements(rect.x, rect.y, rect.width, rect.height, productData.getElems());
+                    variable.write(rect.x, rect.y, rect.width, rect.height, doFlip, productData);
+                }
+            }
         }
     }
 
