@@ -26,8 +26,13 @@ import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.PosixFileAttributeView;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static java.nio.file.StandardCopyOption.*;
@@ -39,6 +44,8 @@ import static java.nio.file.StandardCopyOption.*;
  * @version $Revision$ $Date$
  */
 public class ResourceInstaller {
+
+    private final Set<PosixFilePermission> rwsr_xr_x = PosixFilePermissions.fromString("rwxr-xr-x");
 
     private final Path sourceBasePath;
     private final Path targetDirPath;
@@ -87,13 +94,23 @@ public class ResourceInstaller {
                     Path relFilePath = sourceBasePath.relativize(resource);
                     String relPathString = relFilePath.toString();
                     Path targetFile = targetDirPath.resolve(relPathString);
-                    if (!Files.exists(targetFile) && !Files.isDirectory(resource)) {
+                    if (!(Files.exists(targetFile)
+                            && Files.readAttributes(targetFile, BasicFileAttributes.class).lastModifiedTime().compareTo(Files.readAttributes(resource, BasicFileAttributes.class).lastModifiedTime()) == 0
+                            && Files.size(targetFile) == Files.size(resource))
+                        && !Files.isDirectory(resource)) {
                         Path parentPath = targetFile.getParent();
                         if (parentPath == null) {
                             throw new IOException("Could not retrieve the parent directory of '" + targetFile.toString() + "'.");
                         }
                         Files.createDirectories(parentPath);
                         Files.copy(resource, targetFile, REPLACE_EXISTING, COPY_ATTRIBUTES);
+                        // set executable here since maven resource plugin is broken and drops them
+                        if (Files.getFileAttributeView(targetFile, PosixFileAttributeView.class) != null) {
+                            Files.setPosixFilePermissions(targetFile, rwsr_xr_x);
+                        }
+                        System.out.println("resource " + targetFile + " updated");
+                    } else if (!Files.isDirectory(resource)) {
+                        System.out.println("resource " + targetFile + " up-to-date");
                     }
                     pm.worked(1);
                 }

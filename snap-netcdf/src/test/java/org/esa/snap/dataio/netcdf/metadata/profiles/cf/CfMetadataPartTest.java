@@ -12,7 +12,7 @@ import org.junit.Test;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import ucar.ma2.DataType;
 
-import java.awt.*;
+import java.awt.Dimension;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -128,7 +128,7 @@ public class CfMetadataPartTest {
         assertEquals(-182, globalNumberAttributes.get("original"));
     }
 
-    private static class TestFileWriteable implements NFileWriteable {
+    private static class TestFileWriteable extends NFileWriteable {
         private Map<String, String> globalStringAttributes;
         private Map<String, Number> globalNumberAttributes;
 
@@ -189,6 +189,11 @@ public class CfMetadataPartTest {
 
         @Override
         public String makeNameValid(String name) {
+            throw new NotImplementedException();
+        }
+
+        @Override
+        public DataType getNetcdfDataType(int dataType) {
             throw new NotImplementedException();
         }
 

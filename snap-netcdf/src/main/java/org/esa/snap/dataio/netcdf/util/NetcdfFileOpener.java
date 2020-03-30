@@ -423,8 +423,8 @@ public class NetcdfFileOpener {
         public synchronized void close() throws IOException {
             super.close();
             // ensure file lock is released. Some spi don't do it
-            if (spi != null) {
-                spi.close();
+            if (iosp != null) {
+                iosp.close();
             }
             if (file != null) {
                 file.close();

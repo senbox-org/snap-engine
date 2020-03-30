@@ -1,5 +1,6 @@
 package org.esa.snap.dataio.netcdf.nc;
 
+import org.esa.snap.dataio.netcdf.NetCdfActivator;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,6 +20,10 @@ import static org.junit.Assert.fail;
  */
 public class MaxStringAttributeLengthTest {
 
+    static {
+        new NetCdfActivator().start();
+    }
+
     private static final int TOO_LONG = N4Variable.MAX_ATTRIBUTE_LENGTH + 10;
     private NFileWriteable nc4Writable;
     private NFileWriteable nc3Writable;
@@ -28,9 +33,9 @@ public class MaxStringAttributeLengthTest {
     @Before
     public void setUp() throws Exception {
         nc4TempFile = Files.createTempFile(getClass().getSimpleName(), "nc4");
-        nc4Writable = N4FileWriteable.create(nc4TempFile.toString());
+        nc4Writable = NWritableFactory.create(nc4TempFile.toString(),"netcdf4");
         nc3TempFile = Files.createTempFile(getClass().getSimpleName(), "nc3");
-        nc3Writable = N3FileWriteable.create(nc3TempFile.toString());
+        nc3Writable = NWritableFactory.create(nc3TempFile.toString(),"netcdf3");
     }
 
     @After
@@ -61,13 +66,13 @@ public class MaxStringAttributeLengthTest {
 
     @Test
     public void testMaxStringVariableAttributeLengthNC3() throws IOException {
-        final Path tempFile = Files.createTempFile(getClass().getSimpleName(), null);
-        NFileWriteable ncFile = N3FileWriteable.create(tempFile.toString());
+        Path tempFile = Files.createTempFile(getClass().getSimpleName(), null);
+        NFileWriteable ncFile = NWritableFactory.create(tempFile.toString(),"netcdf3");
         try {
             NVariable variable = ncFile.addScalarVariable("metadataVariable", DataType.BYTE);
             variable.addAttribute("longVariableAttributeValue", createLongString(TOO_LONG));
         } finally {
-            if (!tempFile.toFile().delete()) {
+            if (!Files.deleteIfExists(tempFile)) {
                 fail("unable to delete test file");
             }
         }

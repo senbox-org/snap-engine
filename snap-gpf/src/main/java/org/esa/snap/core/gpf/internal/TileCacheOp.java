@@ -48,7 +48,6 @@ public class TileCacheOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
         SystemUtils.LOG.warning("You are using TileCache operator. Be aware that it is an experimental implementation.");
-
         if (cacheSize > 0) {
             localCache = JAI.createTileCache(cacheSize * MEGABYTES);
         } else {
