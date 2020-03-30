@@ -226,7 +226,7 @@ public class VirtualBandOpImage extends SingleBandedOpImage {
     }
 
     @Override
-    public Raster computeTile(int tileX, int tileY) {
+    public synchronized Raster computeTile(int tileX, int tileY) {
         final Term effectiveTerm = new RasterDataSymbolReplacer().apply(this.term);
         // todo - addDataToReferredRasterDataSymbols() makes wrong assumptions wrt its return value!       (nf, 2015-07-25)
         //        Consider expr "A < 0 ? B : C" --> if C is a no-data tile at (tileX,tileY), then computeTile()
@@ -237,10 +237,8 @@ public class VirtualBandOpImage extends SingleBandedOpImage {
             return super.computeTile(tileX, tileY);
         } else {
             if (noDataRaster == null) {
-                synchronized (this) {
-                    if (noDataRaster == null) {
-                        noDataRaster = createNoDataRaster(fillValue == null ? 0.0 : fillValue.doubleValue());
-                    }
+                if (noDataRaster == null) {
+                    noDataRaster = createNoDataRaster(fillValue == null ? 0.0 : fillValue.doubleValue());
                 }
             }
             return noDataRaster.createTranslatedChild(tileXToX(tileX), tileYToY(tileY));
