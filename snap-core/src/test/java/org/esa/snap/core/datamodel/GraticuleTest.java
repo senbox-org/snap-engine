@@ -1,5 +1,6 @@
 package org.esa.snap.core.datamodel;
 
+import org.esa.snap.core.util.math.Range;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -12,8 +13,12 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+@SuppressWarnings("ConstantConditions")
 public class GraticuleTest {
 
     @Test
@@ -216,5 +221,132 @@ public class GraticuleTest {
         final PixelPos pixelPos = resultList.get(0);
         assertEquals(227.0, pixelPos.x, 1e-8);
         assertEquals(1556.0, pixelPos.y, 1e-8);
+    }
+
+    @Test
+    public void testGetGeoDelta() {
+        final RasterDataNode dataNode = mock(RasterDataNode.class);
+        when(dataNode.getRasterWidth()).thenReturn(100);
+        when(dataNode.getRasterHeight()).thenReturn(200);
+
+        final GeoCoding geoCoding = mock(GeoCoding.class);
+        when(geoCoding.getGeoPos(new PixelPos(50.0, 100.0), null)).thenReturn(new GeoPos(10, 20));
+        when(geoCoding.getGeoPos(new PixelPos(51.0, 101.0), null)).thenReturn(new GeoPos(11, 20.5));
+
+        final GeoPos delta = Graticule.getGeoDelta(geoCoding, dataNode);
+        assertEquals(0.5, delta.getLon(), 1e-8);
+        assertEquals(1.0, delta.getLat(), 1e-8);
+
+        verify(dataNode, times(1)).getRasterWidth();
+        verify(dataNode, times(1)).getRasterHeight();
+        verifyNoMoreInteractions(dataNode);
+
+        verify(geoCoding, times(1)).getGeoPos(new PixelPos(50.0, 100.0), null);
+        verify(geoCoding, times(1)).getGeoPos(new PixelPos(51.0, 101.0), null);
+        verifyNoMoreInteractions(geoCoding);
+    }
+
+    @Test
+    public void testGetGeoDelta_antiMeridian() {
+        final RasterDataNode dataNode = mock(RasterDataNode.class);
+        when(dataNode.getRasterWidth()).thenReturn(100);
+        when(dataNode.getRasterHeight()).thenReturn(200);
+
+        final GeoCoding geoCoding = mock(GeoCoding.class);
+        when(geoCoding.getGeoPos(new PixelPos(50.0, 100.0), null)).thenReturn(new GeoPos(11.1, 179.5));
+        when(geoCoding.getGeoPos(new PixelPos(51.0, 101.0), null)).thenReturn(new GeoPos(11.2, -179.5));
+
+        final GeoPos delta = Graticule.getGeoDelta(geoCoding, dataNode);
+        assertEquals(1.0, delta.getLon(), 1e-8);
+        assertEquals(0.1, delta.getLat(), 1e-8);
+
+        verify(dataNode, times(1)).getRasterWidth();
+        verify(dataNode, times(1)).getRasterHeight();
+        verifyNoMoreInteractions(dataNode);
+
+        verify(geoCoding, times(1)).getGeoPos(new PixelPos(50.0, 100.0), null);
+        verify(geoCoding, times(1)).getGeoPos(new PixelPos(51.0, 101.0), null);
+        verifyNoMoreInteractions(geoCoding);
+    }
+
+    @Test
+    public void testGetSensibleDegreeIncrement() {
+        assertEquals(30.0, Graticule.getSensibleDegreeIncrement(43.0), 1e-8);
+        assertEquals(30.0, Graticule.getSensibleDegreeIncrement(30.1), 1e-8);
+        assertEquals(30.0, Graticule.getSensibleDegreeIncrement(29.9), 1e-8);
+        assertEquals(25.0, Graticule.getSensibleDegreeIncrement(24.9), 1e-8);
+        assertEquals(5.0, Graticule.getSensibleDegreeIncrement(7.3), 1e-8);
+        assertEquals(5.0, Graticule.getSensibleDegreeIncrement(4.9), 1e-8);
+        assertEquals(3.0, Graticule.getSensibleDegreeIncrement(2.7), 1e-8);
+        assertEquals(1.0, Graticule.getSensibleDegreeIncrement(1.1), 1e-8);
+        assertEquals(0.8333333333333334, Graticule.getSensibleDegreeIncrement(0.9), 1e-8);
+        assertEquals(0.16666666666666666, Graticule.getSensibleDegreeIncrement(0.168), 1e-8);
+        assertEquals(0.016666666666666666, Graticule.getSensibleDegreeIncrement(0.023), 1e-8);
+        assertEquals(0.016666666666666666, Graticule.getSensibleDegreeIncrement(0.0168), 1e-8);
+        assertEquals(0.016666666666666666, Graticule.getSensibleDegreeIncrement(0.0004), 1e-8);
+    }
+
+    @Test
+    public void testGetDesiredMinorSteps() {
+        final RasterDataNode dataNode = mock(RasterDataNode.class);
+        when(dataNode.getRasterWidth()).thenReturn(100);
+        when(dataNode.getRasterHeight()).thenReturn(200);
+
+        assertEquals(25, Graticule.getDesiredMinorSteps(dataNode));
+
+        verify(dataNode, times(1)).getRasterWidth();
+        verify(dataNode, times(1)).getRasterHeight();
+        verifyNoMoreInteractions(dataNode);
+    }
+
+    @Test
+    public void testGetDesiredMinorSteps_small_raster() {
+        final RasterDataNode dataNode = mock(RasterDataNode.class);
+        when(dataNode.getRasterWidth()).thenReturn(10);
+        when(dataNode.getRasterHeight()).thenReturn(20);
+
+        assertEquals(3, Graticule.getDesiredMinorSteps(dataNode));
+
+        verify(dataNode, times(1)).getRasterWidth();
+        verify(dataNode, times(1)).getRasterHeight();
+        verifyNoMoreInteractions(dataNode);
+    }
+
+    @Test
+    public void testGetGeoBoundaryStep() {
+        final RasterDataNode dataNode = mock(RasterDataNode.class);
+        when(dataNode.getRasterWidth()).thenReturn(512);
+        when(dataNode.getRasterHeight()).thenReturn(2048);
+
+        final GeoCoding geoCoding = mock(GeoCoding.class);
+
+        assertEquals(2, Graticule.getGeoBoundaryStep(geoCoding, dataNode));
+
+        verify(dataNode, times(1)).getRasterWidth();
+        verify(dataNode, times(1)).getRasterHeight();
+        verifyNoMoreInteractions(dataNode);
+    }
+
+    // @todo 3 tb/tb add tests for TiePointGeoCoding 2020-03-30
+
+    @Test
+    public void testGetRanges() {
+        final GeoPos[] geoPositions = new GeoPos[5];
+        geoPositions[0] = new GeoPos(0.0, 10.0);
+        geoPositions[1] = new GeoPos(1.0, 11.0);
+        geoPositions[2] = new GeoPos(2.0, 14.0);
+        geoPositions[3] = new GeoPos(1.5, 16.0);
+        geoPositions[4] = new GeoPos(0.5, 12.0);
+
+        final Range[] ranges = Graticule.getRanges(geoPositions);
+        assertEquals(2, ranges.length);
+
+        final Range lonRange = ranges[0];
+        assertEquals(10.0, lonRange.getMin(), 1e-8);
+        assertEquals(16.0, lonRange.getMax(), 1e-8);
+
+        final Range latRange = ranges[1];
+        assertEquals(0.0, latRange.getMin(), 1e-8);
+        assertEquals(2.0, latRange.getMax(), 1e-8);
     }
 }
