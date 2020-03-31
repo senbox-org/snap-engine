@@ -320,7 +320,7 @@ public class GraticuleTest {
 
         final GeoCoding geoCoding = mock(GeoCoding.class);
 
-        assertEquals(2, Graticule.getGeoBoundaryStep(geoCoding, dataNode));
+        assertEquals(10, Graticule.getGeoBoundaryStep(geoCoding, dataNode));
 
         verify(dataNode, times(1)).getRasterWidth();
         verify(dataNode, times(1)).getRasterHeight();
@@ -348,5 +348,111 @@ public class GraticuleTest {
         final Range latRange = ranges[1];
         assertEquals(0.0, latRange.getMin(), 1e-8);
         assertEquals(2.0, latRange.getMax(), 1e-8);
+    }
+
+    @Test
+    public void testComputeMeridianIntersections_fourPoints() {
+        final GeoPos[] geoBoundary = new GeoPos[5];
+        geoBoundary[0] = new GeoPos(53.338871, -79.703156);
+        geoBoundary[1] = new GeoPos(50.416569, -63.416862);
+        geoBoundary[2] = new GeoPos(47.879280, -64.973740);
+        geoBoundary[3] = new GeoPos(50.695824, -80.429863);
+        geoBoundary[4] = new GeoPos(53.338871, -79.703156); // closing polygon tb 2020-03-31
+
+        final List<GeoPos> result = new ArrayList<>();
+        Graticule.computeMeridianIntersections(geoBoundary, -72.5,  result);
+
+        assertEquals(2, result.size());
+        assertEquals(-72.5, result.get(0).lon, 1e-8);
+        assertEquals(52.04638560184177, result.get(0).lat, 1e-8);
+
+        assertEquals(-72.5, result.get(1).lon, 1e-8);
+        assertEquals(49.250778042907655, result.get(1).lat, 1e-8);
+    }
+
+    @Test
+    public void testComputeMeridianIntersections_eightPoints() {
+        final GeoPos[] geoBoundary = new GeoPos[9];
+        geoBoundary[0] = new GeoPos(53.338871, -79.703156);
+        geoBoundary[1] = new GeoPos(52.284065, -71.996193);
+        geoBoundary[2] = new GeoPos(50.416569, -63.416862);
+        geoBoundary[3] = new GeoPos(49.150463, -64.214897);
+        geoBoundary[4] = new GeoPos(47.879280, -64.973740);
+        geoBoundary[5] = new GeoPos(49.666119, -73.145988);
+        geoBoundary[6] = new GeoPos(50.695824, -80.429863);
+        geoBoundary[7] = new GeoPos(52.017761, -80.072128);
+        geoBoundary[8] = new GeoPos(53.338871, -79.703156); // closing polygon tb 2020-03-31
+
+        final List<GeoPos> result = new ArrayList<>();
+        Graticule.computeMeridianIntersections(geoBoundary, -72.5,  result);
+        assertEquals(2, result.size());
+        assertEquals(-72.5, result.get(0).lon, 1e-8);
+        assertEquals(52.35301805536591, result.get(0).lat, 1e-8);
+
+        assertEquals(-72.5, result.get(1).lon, 1e-8);
+        assertEquals(49.52487554386259, result.get(1).lat, 1e-8);
+
+        result.clear();
+
+        Graticule.computeMeridianIntersections(geoBoundary, -80.0,  result);
+        assertEquals(2, result.size());
+        assertEquals(-80.0, result.get(0).lon, 1e-8);
+        assertEquals(50.63505523606391, result.get(0).lat, 1e-8);
+
+        assertEquals(-80.0, result.get(1).lon, 1e-8);
+        assertEquals(52.27601642881305, result.get(1).lat, 1e-8);
+    }
+
+    @Test
+    public void testComputeParallelIntersections_fourPoints() {
+        final GeoPos[] geoBoundary = new GeoPos[5];
+        geoBoundary[0] = new GeoPos(53.338871, -79.703156);
+        geoBoundary[1] = new GeoPos(50.416569, -63.416862);
+        geoBoundary[2] = new GeoPos(47.879280, -64.973740);
+        geoBoundary[3] = new GeoPos(50.695824, -80.429863);
+        geoBoundary[4] = new GeoPos(53.338871, -79.703156); // closing polygon tb 2020-03-31
+
+        final List<GeoPos> result = new ArrayList<>();
+        Graticule.computeParallelIntersections(geoBoundary, 50.0,  result);
+
+        assertEquals(2, result.size());
+        assertEquals(-63.67246832296203, result.get(0).lon, 1e-8);
+        assertEquals(50.0, result.get(0).lat, 1e-8);
+
+        assertEquals(-76.6114453468932, result.get(1).lon, 1e-8);
+        assertEquals(50.0, result.get(1).lat, 1e-8);
+    }
+
+    @Test
+    public void testComputeParallelIntersections_eightPoints() {
+        final GeoPos[] geoBoundary = new GeoPos[9];
+        geoBoundary[0] = new GeoPos(53.338871, -79.703156);
+        geoBoundary[1] = new GeoPos(52.284065, -71.996193);
+        geoBoundary[2] = new GeoPos(50.416569, -63.416862);
+        geoBoundary[3] = new GeoPos(49.150463, -64.214897);
+        geoBoundary[4] = new GeoPos(47.879280, -64.973740);
+        geoBoundary[5] = new GeoPos(49.666119, -73.145988);
+        geoBoundary[6] = new GeoPos(50.695824, -80.429863);
+        geoBoundary[7] = new GeoPos(52.017761, -80.072128);
+        geoBoundary[8] = new GeoPos(53.338871, -79.703156); // closing polygon tb 2020-03-31
+
+        final List<GeoPos> result = new ArrayList<>();
+        Graticule.computeParallelIntersections(geoBoundary, 51.0,  result);
+        assertEquals(2, result.size());
+        assertEquals(-66.09716100179759, result.get(0).lon, 1e-8);
+        assertEquals(51.0, result.get(0).lat, 1e-8);
+
+        assertEquals(-80.34754863754551, result.get(1).lon, 1e-8);
+        assertEquals(51.0, result.get(1).lat, 1e-8);
+
+        result.clear();
+
+        Graticule.computeParallelIntersections(geoBoundary, 52.0,  result);
+        assertEquals(2, result.size());
+        assertEquals(-70.69119011886131, result.get(0).lon, 1e-8);
+        assertEquals(52.0, result.get(0).lat, 1e-8);
+
+        assertEquals(-80.07693437983127, result.get(1).lon, 1e-8);
+        assertEquals(52.0, result.get(1).lat, 1e-8);
     }
 }
