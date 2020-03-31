@@ -553,6 +553,9 @@ public class ProductIO {
     private static void writeRasterDataFully(ProgressMonitor pm, Band band, ExecutorService executor, Semaphore semaphore, List<IOException> ioExceptionCollector) throws IOException {
         if (band.hasRasterData()) {
             band.writeRasterData(0, 0, band.getRasterWidth(), band.getRasterHeight(), band.getRasterData(), pm);
+            if (semaphore!=null) {
+                semaphore.release();
+            }
         } else {
             final PlanarImage sourceImage = band.getSourceImage();
             final Point[] tileIndices = sourceImage.getTileIndices(
