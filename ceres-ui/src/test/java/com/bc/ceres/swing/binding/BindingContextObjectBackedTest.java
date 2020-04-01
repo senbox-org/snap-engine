@@ -65,11 +65,11 @@ public class BindingContextObjectBackedTest {
 
         textField.setText("Bibo");
         textField.postActionEvent();
-        Thread.sleep(100);
+        Thread.sleep(150);
         assertEquals("Bibo", propertyContainerOB.getValue("stringValue"));
 
         propertyContainerOB.setValue("stringValue", "Samson");
-        Thread.sleep(100);
+        Thread.sleep(150);
         assertEquals("Samson", pojo.stringValue);
         assertEquals("Samson", textField.getText());
 
@@ -93,7 +93,7 @@ public class BindingContextObjectBackedTest {
         bindingContextOB.bind("doubleValue", textField1);
         bindingContextOB.bind("stringValue", textField2);
 
-        Thread.sleep(100);
+        Thread.sleep(150);
         assertTrue(checkBox.isSelected());
         assertEquals("3.2", textField1.getText());
         assertEquals("ABC", textField2.getText());
@@ -107,7 +107,7 @@ public class BindingContextObjectBackedTest {
         assertEquals("ABC", textField2.getText());
 
         bindingContextOB.adjustComponents();
-        Thread.sleep(100);
+        Thread.sleep(150);
 
         assertFalse(checkBox.isSelected());
         assertEquals("1.5", textField1.getText());
