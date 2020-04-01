@@ -78,6 +78,8 @@ public class ImageLegend {
     public static final int DEFAULT_FILE_LENGTH_PIXELS = DEFAULT_COLOR_BAR_LENGTH; // we could set this differently in the future if we wish to scale to a different size for the file export mode
     public static final boolean DEFAULT_CENTER_ON_LAYER = Boolean.TRUE;
 
+    public static final double HORIZONTAL_TITLE_PARAMETER_UNITS_GAP_FACTOR = 2;
+    public static final double VERTICAL_TITLE_PARAMETER_UNITS_GAP_FACTOR = 2;
     public static final double HORIZONTAL_INTER_LABEL_GAP_FACTOR = 3;
     public static final double VERTICAL_INTER_LABEL_GAP_FACTOR = 0.75;
     public static final int DEFAULT_TICKMARK_WIDTH = 3;
@@ -127,6 +129,7 @@ public class ImageLegend {
     private int titleUnitsFontType;
 
     private Color labelsColor;
+    private boolean labelsShow;
     private Color titleParameterColor;
     private Color titleUnitsColor;
 
@@ -176,16 +179,16 @@ public class ImageLegend {
         backgroundColor = Color.white;
         foregroundColor = ColorBarLayerType.PROPERTY_TITLE_PARAMETER_COLOR_DEFAULT;
         tickmarkColor = ColorBarLayerType.PROPERTY_TICKMARKS_COLOR_DEFAULT;
-        labelsColor = ColorBarLayerType.PROPERTY_LABELS_COLOR_DEFAULT;
+        labelsColor = ColorBarLayerType.PROPERTY_LABELS_FONT_COLOR_DEFAULT;
         titleParameterColor = ColorBarLayerType.PROPERTY_TITLE_PARAMETER_COLOR_DEFAULT;
-        titleUnitsColor = ColorBarLayerType.PROPERTY_TITLE_UNITS_COLOR_DEFAULT;
+        titleUnitsColor = ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_COLOR_DEFAULT;
 
         setTickmarkLength(ColorBarLayerType.PROPERTY_TICKMARKS_LENGTH_DEFAULT);
         setTickmarkWidth(ColorBarLayerType.PROPERTY_TICKMARKS_WIDTH_DEFAULT);
         setTickmarkShow(ColorBarLayerType.PROPERTY_TICKMARKS_SHOW_DEFAULT);
 
         setLabelsFontSize((Integer) 35);
-        setLabelsFontName(ColorBarLayerType.PROPERTY_LABELS_FONT_DEFAULT);
+        setLabelsFontName(ColorBarLayerType.PROPERTY_LABELS_FONT_NAME_DEFAULT);
 
 
         backgroundTransparency = 1.0f;
@@ -258,7 +261,7 @@ public class ImageLegend {
         this.showTitle = usingHeader;
     }
 
-    public String getHeaderText() {
+    public String getTitleParameterText() {
 //        if (!isInitialized() && titleOverRide != null && titleOverRide.length() > 0) {
 //            return titleOverRide;
 //        } else {
@@ -271,7 +274,7 @@ public class ImageLegend {
         this.headerText = headerText;
     }
 
-    public String getHeaderUnitsText() {
+    public String getParameterUnitsText() {
         return headerUnitsText;
     }
 
@@ -613,7 +616,7 @@ public class ImageLegend {
 
         g2dTmp.setFont(getLabelsFont());
 
-        Dimension headerRequiredDimension = getHeaderTextRequiredDimension(g2dTmp);
+        Dimension headerRequiredDimension = getTitleRequiredDimension(g2dTmp);
 
         double discreteBooster = 0;
         final int n = getNumGradationCurvePoints();
@@ -736,11 +739,11 @@ public class ImageLegend {
     }
 
 
-    private boolean hasHeaderText() {
+    private boolean hasTitleParameter() {
         return isShowTitle() && StringUtils.isNotNullAndNotEmpty(headerText);
     }
 
-    private boolean hasUnitsText() {
+    private boolean hasTitleUnits() {
         return isShowTitleUnits() && StringUtils.isNotNullAndNotEmpty(headerUnitsText);
     }
 
@@ -750,7 +753,10 @@ public class ImageLegend {
         }
         drawHeaderText(g2d);
         drawPalette(g2d);
-        drawLabels(g2d);
+
+        if (isLabelsShow()) {
+            drawLabels(g2d);
+        }
     }
 
     private void fillBackground(Graphics2D g2d) {
@@ -766,43 +772,45 @@ public class ImageLegend {
     }
 
 
-    private Dimension getHeaderTextRequiredDimension(Graphics2D g2d) {
+    private Dimension getTitleRequiredDimension(Graphics2D g2d) {
 
         double width = 0;
         double height = 0;
+        double titleParameterHeight = 0;
+        double titleUnitsHeight = 0;
 
 
-        int UNITS_GAP_FACTOR = 3;
-
-        if (hasHeaderText() || hasUnitsText()) {
+        if (hasTitleParameter() || hasTitleUnits()) {
 
             Font originalFont = g2d.getFont();
-            Rectangle2D singleLetter = g2d.getFontMetrics().getStringBounds("A", g2d);
+            Rectangle2D singleLetter;
 
-            if (hasHeaderText()) {
-                g2d.setFont(getTitleFont());
-                height = singleLetter.getHeight();
+            if (hasTitleParameter()) {
+                g2d.setFont(getTitleParameterFont());
+                singleLetter = g2d.getFontMetrics().getStringBounds("A", g2d);
+                titleParameterHeight = singleLetter.getHeight();
 
-                Rectangle2D headerTextRectangle = g2d.getFontMetrics().getStringBounds(getHeaderText(), g2d);
+                Rectangle2D headerTextRectangle = g2d.getFontMetrics().getStringBounds(getTitleParameterText(), g2d);
                 width += headerTextRectangle.getWidth();
 
 
-                if (hasUnitsText()) {
-                    width += (UNITS_GAP_FACTOR * singleLetter.getWidth());
+                if (hasTitleUnits()) {
+                    width += (HORIZONTAL_TITLE_PARAMETER_UNITS_GAP_FACTOR * singleLetter.getWidth());
                 }
             }
 
-            if (hasUnitsText()) {
+            if (hasTitleUnits()) {
                 g2d.setFont(getTitleUnitsFont());
-                if (singleLetter.getHeight() > height) {
-                    height = singleLetter.getHeight();
-                }
+                singleLetter = g2d.getFontMetrics().getStringBounds("A", g2d);
+                titleUnitsHeight = singleLetter.getHeight();
 
-                Rectangle2D unitsTextRectangle = g2d.getFontMetrics().getStringBounds(getHeaderUnitsText(), g2d);
+                Rectangle2D unitsTextRectangle = g2d.getFontMetrics().getStringBounds(getParameterUnitsText(), g2d);
                 width += unitsTextRectangle.getWidth();
             }
 
 
+
+            height = Math.max(titleParameterHeight, titleUnitsHeight);
 
             g2d.setFont(originalFont);
         }
@@ -811,12 +819,15 @@ public class ImageLegend {
     }
 
 
+
+
+
     private Dimension getHorizontalLabelsRequiredDimension(Graphics2D g2d) {
 
         double width = 0;
         double height = 0;
 
-        if (colorBarInfos.size() > 0) {
+        if (isLabelsShow() && colorBarInfos.size() > 0) {
 
 
             Font originalFont = g2d.getFont();
@@ -850,7 +861,7 @@ public class ImageLegend {
         double width = 0;
         double height = 0;
 
-        if (colorBarInfos.size() > 0) {
+        if (isLabelsShow() && colorBarInfos.size() > 0) {
 
             Font originalFont = g2d.getFont();
             g2d.setFont(getLabelsFont());
@@ -900,7 +911,7 @@ public class ImageLegend {
 
 
     private void drawHeaderText(Graphics2D g2d) {
-        if (hasHeaderText() || hasUnitsText()) {
+        if (hasTitleParameter() || hasTitleUnits()) {
             Font origFont = g2d.getFont();
 
             final FontMetrics fontMetrics = g2d.getFontMetrics();
@@ -909,27 +920,27 @@ public class ImageLegend {
             int x0 = paletteRect.x;
             int y0 = paletteRect.y - getHeaderGap();
 
-            g2d.setFont(getTitleFont());
+            g2d.setFont(getTitleParameterFont());
 
             if (orientation == HORIZONTAL) {
                 Rectangle2D headerTextRectangle = g2d.getFontMetrics().getStringBounds(headerText, g2d);
-                if (hasHeaderText()) {
+                if (hasTitleParameter()) {
                     g2d.drawString(headerText, x0, y0);
                 }
 
                 Rectangle2D singleLetter = g2d.getFontMetrics().getStringBounds("A", g2d);
-                int gap = (int) (2 * singleLetter.getWidth());
+                int gap = (int) (HORIZONTAL_TITLE_PARAMETER_UNITS_GAP_FACTOR * singleLetter.getWidth());
 
-                if (hasUnitsText()) {
+                if (hasTitleUnits()) {
                     g2d.setFont(getTitleUnitsFont());
                     g2d.setPaint(getTitleUnitsColor());
-                    g2d.drawString(getHeaderUnitsText(), (int) (x0 + headerTextRectangle.getWidth() + gap), y0);
+                    g2d.drawString(getParameterUnitsText(), (int) (x0 + headerTextRectangle.getWidth() + gap), y0);
                 }
             } else {
                 Rectangle2D headerTextRectangle = g2d.getFontMetrics().getStringBounds(headerText, g2d);
 
                 Rectangle2D singleLetter = g2d.getFontMetrics().getStringBounds("A", g2d);
-                int gap = (int) (2 * singleLetter.getWidth());
+                int gap = (int) (VERTICAL_TITLE_PARAMETER_UNITS_GAP_FACTOR * singleLetter.getWidth());
 
                 int labelOverhangHeight = (int) Math.ceil(singleLetter.getHeight() / 2.0);
                 double translateX = x0
@@ -949,7 +960,7 @@ public class ImageLegend {
                 g2d.rotate(rotate);
 
 
-                if (hasHeaderText()) {
+                if (hasTitleParameter()) {
                     g2d.drawString(headerText, 0, 0);
                 }
 
@@ -959,10 +970,10 @@ public class ImageLegend {
                 g2d.translate(0, translateY2);
                 g2d.rotate(rotate);
 
-                if (hasUnitsText()) {
+                if (hasTitleUnits()) {
                     g2d.setFont(getTitleUnitsFont());
                     g2d.setPaint(getTitleUnitsColor());
-                    g2d.drawString(getHeaderUnitsText(), 0, 0);
+                    g2d.drawString(getParameterUnitsText(), 0, 0);
                 }
 
                 g2d.rotate(-rotate);
@@ -1328,7 +1339,7 @@ public class ImageLegend {
     }
 
 
-    public Font getTitleFont() {
+    public Font getTitleParameterFont() {
         return new Font(getTitleParameterFontName(), getTitleParameterFontType(), getTitleFontSize());
     }
 
@@ -1761,5 +1772,13 @@ public class ImageLegend {
 
     public void setTitleUnitsFontType(int titleUnitsFontType) {
         this.titleUnitsFontType = titleUnitsFontType;
+    }
+
+    public boolean isLabelsShow() {
+        return labelsShow;
+    }
+
+    public void setLabelsShow(boolean labelsShow) {
+        this.labelsShow = labelsShow;
     }
 }
