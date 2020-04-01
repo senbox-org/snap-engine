@@ -27,8 +27,6 @@ public class ColorBarLayerType extends LayerType {
     public static final String OPTION_VERTICAL = "Vertical";
 
 
-    // todo try to make each share this
-
     public static final String FONT_NAME_VALUE_1 = "SanSerif";
     public static final String FONT_NAME_VALUE_2 = "Serif";
     public static final String FONT_NAME_VALUE_3 = "Courier";
@@ -56,7 +54,7 @@ public class ColorBarLayerType extends LayerType {
     private static final String PROPERTY_LABEL_VALUES_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "LabelValues";
 
     public static final String PROPERTY_LABEL_VALUES_SECTION_KEY = PROPERTY_LABEL_VALUES_ROOT_KEY + ".section";
-    public static final String PROPERTY_LABEL_VALUES_SECTION_LABEL = "Label Values";
+    public static final String PROPERTY_LABEL_VALUES_SECTION_LABEL = "Tick Mark Labels";
     public static final String PROPERTY_LABEL_VALUES_SECTION_TOOLTIP = "Numeric value options for the color bar legend labels";
     public static final String PROPERTY_LABEL_VALUES_SECTION_ALIAS = PROPERTY_LABEL_VALUES_ROOT_ALIAS +"Section";
 
@@ -68,7 +66,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_LABEL_VALUES_MODE_OPTION1 = DISTRIB_EVEN_STR;
     public static final String PROPERTY_LABEL_VALUES_MODE_OPTION2 = DISTRIB_MANUAL_STR;
     public static final String PROPERTY_LABEL_VALUES_MODE_OPTION3 = DISTRIB_EXACT_STR;
-    public static final String PROPERTY_LABEL_VALUES_MODE_DEFAULT = DISTRIB_MANUAL_STR;
+    public static final String PROPERTY_LABEL_VALUES_MODE_DEFAULT = DISTRIB_EVEN_STR;
     public static final Object PROPERTY_LABEL_VALUES_MODE_VALUE_SET[] = {
             PROPERTY_LABEL_VALUES_MODE_OPTION1,
             PROPERTY_LABEL_VALUES_MODE_OPTION2,
@@ -80,7 +78,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_LABEL_VALUES_COUNT_TOOLTIP = "Number of tickmarks";
     public static final String PROPERTY_LABEL_VALUES_COUNT_ALIAS = PROPERTY_LABEL_VALUES_ROOT_ALIAS + "Count";
     public static final int PROPERTY_LABEL_VALUES_COUNT_DEFAULT = 5;
-    public static final boolean PROPERTY_LABEL_VALUES_COUNT_ENABLED = false;
+    public static final boolean PROPERTY_LABEL_VALUES_COUNT_ENABLED = true;
     public static final Class PROPERTY_LABEL_VALUES_COUNT_TYPE = Integer.class;
     public static final int PROPERTY_LABEL_VALUES_COUNT_MIN = 2;
     public static final int PROPERTY_LABEL_VALUES_COUNT_MAX = 20;
@@ -90,8 +88,44 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_LABEL_VALUES_ACTUAL_LABEL = "Custom Values";
     public static final String PROPERTY_LABEL_VALUES_ACTUAL_TOOLTIP = "Set actual values of the tickmarks";
     private static final String PROPERTY_LABEL_VALUES_ACTUAL_ALIAS = PROPERTY_LABEL_VALUES_ROOT_ALIAS + "Actual";
+    public static final boolean PROPERTY_LABEL_VALUES_ACTUAL_ENABLED = false;
+
     public static final String PROPERTY_LABEL_VALUES_ACTUAL_DEFAULT = "";
     public static final Class PROPERTY_LABEL_VALUES_ACTUAL_TYPE = String.class;
+
+    public static final String PROPERTY_LABEL_VALUES_SCALING_KEY = PROPERTY_LABEL_VALUES_ROOT_KEY + ".scaling.factor";
+    public static final String PROPERTY_LABEL_VALUES_SCALING_LABEL = "Tickmark Value Scaling Factor";
+    public static final String PROPERTY_LABEL_VALUES_SCALING_TOOLTIP = "Tickmark labels will be displayed after multiplication with this scaling factor";
+    public static final String PROPERTY_LABEL_VALUES_SCALING_ALIAS = PROPERTY_LABEL_VALUES_ROOT_ALIAS + "ScalingFactor";
+    public static final double PROPERTY_LABEL_VALUES_SCALING_DEFAULT = 1.0;
+    public static final Class PROPERTY_LABEL_VALUES_SCALING_TYPE = Double.class;
+    public static final double PROPERTY_LABEL_VALUES_SCALING_MIN = 0.0000001;
+    public static final double PROPERTY_LABEL_VALUES_SCALING_MAX = 1000000000;
+    public static final String PROPERTY_LABEL_VALUES_SCALING_INTERVAL = "[" +
+            ColorBarLayerType.PROPERTY_LABEL_VALUES_SCALING_MIN + "," +
+            ColorBarLayerType.PROPERTY_LABEL_VALUES_SCALING_MAX + "]";
+
+
+    public static final String PROPERTY_LABEL_VALUES_DECIMAL_PLACES_KEY = PROPERTY_LABEL_VALUES_ROOT_KEY + ".decimal.places";
+    public static final String PROPERTY_LABEL_VALUES_DECIMAL_PLACES_LABEL = "Decimal Places";
+    public static final String PROPERTY_LABEL_VALUES_DECIMAL_PLACES_TOOLTIP = "Decimal places to display the numeric tick mark labels";
+    public static final String PROPERTY_LABEL_VALUES_DECIMAL_PLACES_ALIAS = PROPERTY_LABEL_VALUES_ROOT_ALIAS + "DecimalPlaces";
+    public static final int PROPERTY_LABEL_VALUES_DECIMAL_PLACES_DEFAULT = 2;
+    public static final Class PROPERTY_LABEL_VALUES_DECIMAL_PLACES_TYPE = Integer.class;
+    public static final int PROPERTY_LABEL_VALUES_DECIMAL_PLACES_MIN = 0;
+    public static final int PROPERTY_LABEL_VALUES_DECIMAL_PLACES_MAX = 10;
+    public static final String PROPERTY_LABEL_VALUES_DECIMAL_PLACES_INTERVAL = "[" +
+            ColorBarLayerType.PROPERTY_LABEL_VALUES_DECIMAL_PLACES_MIN + "," +
+            ColorBarLayerType.PROPERTY_LABEL_VALUES_DECIMAL_PLACES_MAX + "]";
+
+
+    public static final String PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_KEY = PROPERTY_LABEL_VALUES_ROOT_KEY + ".force.decimal.places";
+    public static final String PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_LABEL = "Force Decimal Places";
+    public static final String PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_TOOLTIP = "Force to exact decimal places";
+    private static final String PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_ALIAS = PROPERTY_LABEL_VALUES_ROOT_ALIAS + "ForceDecimalPlaces";
+    public static final boolean PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_DEFAULT = true;
+    public static final Class PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_TYPE = Boolean.class;
+
 
 
 
@@ -173,14 +207,14 @@ public class ColorBarLayerType extends LayerType {
     public static final Class PROPERTY_LOCATION_PLACEMENT_TYPE = String.class;
 
     public static final String PROPERTY_LOCATION_OFFSET_KEY = PROPERTY_LOCATION_ROOT_KEY + ".offset";
-    public static final String PROPERTY_LOCATION_OFFSET_LABEL = "Offset";
+    public static final String PROPERTY_LOCATION_OFFSET_LABEL = "Anchor Offset";
     public static final String PROPERTY_LOCATION_OFFSET_TOOLTIP = "Move color bar away from axis (by percentage of color bar height)";
     private static final String PROPERTY_LOCATION_OFFSET_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "Offset";
     public static final Double PROPERTY_LOCATION_OFFSET_DEFAULT = 0.0;
     public static final Class PROPERTY_LOCATION_OFFSET_TYPE = Double.class;
 
     public static final String PROPERTY_LOCATION_SHIFT_KEY = PROPERTY_LOCATION_ROOT_KEY + ".shift";
-    public static final String PROPERTY_LOCATION_SHIFT_LABEL = "Shift";
+    public static final String PROPERTY_LOCATION_SHIFT_LABEL = "Anchor Shift";
     public static final String PROPERTY_LOCATION_SHIFT_TOOLTIP = "Move color bar along the axis (by percentage of color bar width)";
     private static final String PROPERTY_LOCATION_SHIFT_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "Shift";
     public static final Double PROPERTY_LOCATION_SHIFT_DEFAULT = 0.0;
@@ -206,7 +240,7 @@ public class ColorBarLayerType extends LayerType {
     public static final Class PROPERTY_IMAGE_SCALING_APPLY_SIZE_TYPE = Boolean.class;
 
     public static final String PROPERTY_IMAGE_SCALING_SIZE_NAME = PROPERTY_IMAGE_SCALING_ROOT_KEY + ".size";
-    public static final String PROPERTY_IMAGE_SCALING_SIZE_LABEL = "Scaling Percent";
+    public static final String PROPERTY_IMAGE_SCALING_SIZE_LABEL = "Image Scaling (%)";
     public static final String PROPERTY_IMAGE_SCALING_SIZE_TOOLTIP = "Percent to scale color bar relative to the scene image size";
     private static final String PROPERTY_IMAGE_SCALING_SIZE_ALIAS = PROPERTY_IMAGE_SCALING_ROOT_ALIAS + "Size";
     public static final double PROPERTY_IMAGE_SCALING_SIZE_DEFAULT = 50.0;
@@ -542,8 +576,8 @@ public class ColorBarLayerType extends LayerType {
 
     // Property Setting: Restore Defaults
     public static final String PROPERTY_RESTORE_DEFAULTS_NAME = "colorbar.restoreDefaults";
-    public static final String PROPERTY_RESTORE_TO_DEFAULTS_LABEL = "RESTORE DEFAULTS (Map Gridline Preferences)";
-    public static final String PROPERTY_RESTORE_TO_DEFAULTS_TOOLTIP = "Restore all map gridline preferences to the default";
+    public static final String PROPERTY_RESTORE_TO_DEFAULTS_LABEL = "RESTORE DEFAULTS (Color Bar Legend Preferences)";
+    public static final String PROPERTY_RESTORE_TO_DEFAULTS_TOOLTIP = "Restore all color bar legend preferences to the default";
     public static final boolean PROPERTY_RESTORE_TO_DEFAULTS_DEFAULT = false;
 
 
@@ -588,6 +622,22 @@ public class ColorBarLayerType extends LayerType {
         final Property labelValuesActualModel = Property.create(PROPERTY_LABEL_VALUES_ACTUAL_KEY, String.class, PROPERTY_LABEL_VALUES_ACTUAL_DEFAULT, true);
         labelValuesActualModel.getDescriptor().setAlias(PROPERTY_LABEL_VALUES_ACTUAL_ALIAS);
         vc.addProperty(labelValuesActualModel);
+
+        final Property labelValuesScalingFactorModel = Property.create(PROPERTY_LABEL_VALUES_SCALING_KEY, Double.class, PROPERTY_LABEL_VALUES_SCALING_DEFAULT, true);
+        labelValuesScalingFactorModel.getDescriptor().setAlias(PROPERTY_LABEL_VALUES_SCALING_ALIAS);
+        vc.addProperty(labelValuesScalingFactorModel);
+
+        final Property labelValuesDecimalPlacesModel = Property.create(PROPERTY_LABEL_VALUES_DECIMAL_PLACES_KEY, Integer.class, PROPERTY_LABEL_VALUES_DECIMAL_PLACES_DEFAULT, true);
+        labelValuesDecimalPlacesModel.getDescriptor().setAlias(PROPERTY_LABEL_VALUES_DECIMAL_PLACES_ALIAS);
+        vc.addProperty(labelValuesDecimalPlacesModel);
+
+        final Property labelValuesForceDecimalPlacesModel = Property.create(PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_KEY, Boolean.class, PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_DEFAULT , true);
+        labelValuesForceDecimalPlacesModel.getDescriptor().setAlias(PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_ALIAS);
+        vc.addProperty(labelValuesForceDecimalPlacesModel);
+
+
+
+
 
 
 
@@ -643,10 +693,10 @@ public class ColorBarLayerType extends LayerType {
         final Property scalingSectionModel = Property.create(PROPERTY_IMAGE_SCALING_SECTION_NAME, Boolean.class, true, true);
         scalingSectionModel.getDescriptor().setAlias(PROPERTY_IMAGE_SCALING_SECTION_ALIAS);
         vc.addProperty(scalingSectionModel);
-
-        final Property locationApplySizeScalingModel = Property.create(PROPERTY_IMAGE_SCALING_APPLY_SIZE_NAME, PROPERTY_IMAGE_SCALING_APPLY_SIZE_TYPE, true, true);
-        locationApplySizeScalingModel.getDescriptor().setAlias(PROPERTY_IMAGE_SCALING_APPLY_SIZE_ALIAS);
-        vc.addProperty(locationApplySizeScalingModel);
+//
+//        final Property locationApplySizeScalingModel = Property.create(PROPERTY_IMAGE_SCALING_APPLY_SIZE_NAME, PROPERTY_IMAGE_SCALING_APPLY_SIZE_TYPE, true, true);
+//        locationApplySizeScalingModel.getDescriptor().setAlias(PROPERTY_IMAGE_SCALING_APPLY_SIZE_ALIAS);
+//        vc.addProperty(locationApplySizeScalingModel);
 
         final Property locationSizeScalingModel = Property.create(PROPERTY_IMAGE_SCALING_SIZE_NAME, ColorBarLayerType.PROPERTY_IMAGE_SCALING_SIZE_TYPE, true, true);
         locationSizeScalingModel.getDescriptor().setAlias(PROPERTY_IMAGE_SCALING_SIZE_ALIAS);

@@ -193,9 +193,9 @@ public class ImageLegend {
 
         backgroundTransparency = 1.0f;
         antialiasing = true;
-        decimalPlaces = 2;
+        setDecimalPlaces(2);
         scalingFactor = 1;
-        decimalPlacesForce = false;
+        setDecimalPlacesForce(false);
         setFullCustomAddThesePoints("");
 
 

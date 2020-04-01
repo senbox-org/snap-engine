@@ -139,6 +139,9 @@ public class ColorBarLayer extends Layer {
             imageLegend.setLabelsFontType(getLabelsFontType());
             imageLegend.setLabelsColor(getLabelsColor());
             imageLegend.setLabelsShow(isLabelsShow());
+            imageLegend.setScalingFactor(getLabelValuesScalingFactor());
+            imageLegend.setDecimalPlaces(getLabelValuesDecimalPlaces());
+            imageLegend.setDecimalPlacesForce(getLabelValuesForceDecimalPlaces());
 
 
 
@@ -149,7 +152,6 @@ public class ColorBarLayer extends Layer {
             imageLegend.setColorBarLength((Integer) 1200);
             imageLegend.setColorBarThickness((Integer) 60);
             imageLegend.setLabelsFontSize((Integer) getFontSizePixels());
-            imageLegend.setScalingFactor((Double) 1.0);
             imageLegend.setLayerScaling((Double) getSizeScaling());
 
 
@@ -526,6 +528,22 @@ public class ColorBarLayer extends Layer {
     }
 
 
+    private double getLabelValuesScalingFactor() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABEL_VALUES_SCALING_KEY,
+                ColorBarLayerType.PROPERTY_LABEL_VALUES_SCALING_DEFAULT);
+    }
+
+
+    private int getLabelValuesDecimalPlaces() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABEL_VALUES_DECIMAL_PLACES_KEY,
+                ColorBarLayerType.PROPERTY_LABEL_VALUES_DECIMAL_PLACES_DEFAULT);
+    }
+
+    private boolean getLabelValuesForceDecimalPlaces() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_KEY,
+                ColorBarLayerType.PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_DEFAULT);
+    }
+
 
 
     private int getFontSizePixels() {
@@ -832,8 +850,9 @@ public class ColorBarLayer extends Layer {
 
 
     private boolean applySizeScaling() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_IMAGE_SCALING_APPLY_SIZE_NAME,
-                ColorBarLayerType.PROPERTY_IMAGE_SCALING_APPLY_SIZE_DEFAULT);
+        return true;
+//        return getConfigurationProperty(ColorBarLayerType.PROPERTY_IMAGE_SCALING_APPLY_SIZE_NAME,
+//                ColorBarLayerType.PROPERTY_IMAGE_SCALING_APPLY_SIZE_DEFAULT);
     }
 
 
