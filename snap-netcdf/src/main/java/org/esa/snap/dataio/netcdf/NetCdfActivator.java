@@ -2,13 +2,13 @@ package org.esa.snap.dataio.netcdf;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.util.ModuleMetadata;
+import org.esa.snap.core.util.NativeLibraryUtils;
 import org.esa.snap.core.util.ResourceInstaller;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.runtime.Activator;
 import ucar.nc2.jni.netcdf.Nc4Iosp;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.nio.file.Path;
 
 public class NetCdfActivator implements Activator {
@@ -38,22 +38,9 @@ public class NetCdfActivator implements Activator {
         String jna_path = auxdataDirectory.toAbsolutePath().resolve(arch).toString();
         String javaLibPath = System.getProperty("java.library.path");
         if (javaLibPath == null || ! javaLibPath.contains(jna_path)) {
-            if (javaLibPath == null) {
-                javaLibPath = jna_path;
-            } else {
-                javaLibPath += ":" + jna_path;
-            }
-            System.setProperty("java.library.path", javaLibPath);
-            // trigger re-initialisation before loading libraries
-            try {
-                Field field = ClassLoader.class.getDeclaredField("sys_paths");
-                field.setAccessible(true);
-                field.set(null, null);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            NativeLibraryUtils.registerNativePaths(jna_path);
         }
-        System.out.println("****netcdf_jna_path = " + jna_path);
+        SystemUtils.LOG.fine("****netcdf_jna_path = " + jna_path);
         Nc4Iosp.setLibraryAndPath(jna_path, null);
     }
 
