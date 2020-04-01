@@ -747,16 +747,6 @@
                 <checksumPolicy>warn</checksumPolicy>
             </snapshots>
         </repository>
-        <repository>
-            <id>tao-core</id>
-            <name>TAO Core</name>
-            <url>https://raw.githubusercontent.com/tao-org/tao-core/repository</url>
-        </repository>
-        <repository>
-            <id>tao-plugins</id>
-            <name>TAO Plugins</name>
-            <url>https://raw.githubusercontent.com/tao-org/tao-plugins/repository</url>
-        </repository>
     </repositories>
 
     <distributionManagement>
