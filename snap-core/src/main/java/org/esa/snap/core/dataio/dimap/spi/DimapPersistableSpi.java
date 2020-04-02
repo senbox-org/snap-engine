@@ -33,5 +33,4 @@ public interface DimapPersistableSpi {
     boolean canPersist(Object object);
 
     DimapPersistable createPersistable();
-
 }

@@ -19,21 +19,21 @@ package org.esa.snap.csv.dataio.writer;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.dataio.AbstractProductWriter;
 import org.esa.snap.core.dataio.ProductWriterPlugIn;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.datamodel.RasterDataNode;
-import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.csv.dataio.Constants;
+import org.jdom.Element;
+import org.jdom.output.XMLOutputter;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Arrays;
+
+import static org.esa.snap.csv.dataio.Constants.PROPERTY_NAME_RASTER_RESOLUTION;
 
 /**
  * Allows writing a {@link Product} in CSV format.
@@ -43,16 +43,17 @@ import java.util.Arrays;
  */
 public class CsvProductWriter extends AbstractProductWriter {
 
-    public static final int WRITE_PROPERTIES = 1;
-    public static final int WRITE_FEATURES = 2;
+    static final int WRITE_PROPERTIES = 1;
+    static final int WRITE_FEATURES = 2;
 
-    protected final int config;
+    private final int config;
+
     protected Writer writer;
 
     private String separator;
     private boolean productWritten;
 
-    public CsvProductWriter(ProductWriterPlugIn plugIn, int config, Writer writer) {
+    CsvProductWriter(ProductWriterPlugIn plugIn, int config, Writer writer) {
         super(plugIn);
         this.writer = writer;
         this.config = config;
@@ -61,9 +62,7 @@ public class CsvProductWriter extends AbstractProductWriter {
 
     @Override
     protected void writeProductNodesImpl() throws IOException {
-        if (writer == null) {
-            writer = new FileWriter(new File(getOutput().toString()));
-        }
+        ensureWriter();
         getSeparatorFromMetaData();
         writeProperties();
         writeHeader();
@@ -91,7 +90,14 @@ public class CsvProductWriter extends AbstractProductWriter {
         writeLine(builder.toString());
     }
 
-    private String getJavaType(int dataType) {
+    private void ensureWriter() throws IOException {
+        if (writer == null) {
+            writer = new FileWriter(new File(getOutput().toString()));
+        }
+    }
+
+    // package access for testing only tb 2020-02-28
+    static String getJavaType(int dataType) {
         switch (dataType) {
             case DataBuffer.TYPE_FLOAT: {
                 return "float";
@@ -126,7 +132,16 @@ public class CsvProductWriter extends AbstractProductWriter {
         if ((config & WRITE_PROPERTIES) != WRITE_PROPERTIES) {
             return;
         }
-        writeLine("#" + Constants.PROPERTY_NAME_SCENE_RASTER_WIDTH + "=" + getSourceProduct().getSceneRasterWidth());
+
+        final Product product = getSourceProduct();
+        writeLine(Constants.COMMENT + Constants.PROPERTY_NAME_SCENE_RASTER_WIDTH + "=" + product.getSceneRasterWidth());
+
+        final GeoCoding sceneGeoCoding = product.getSceneGeoCoding();
+        if (sceneGeoCoding instanceof ComponentGeoCoding) {
+            final ComponentGeoCoding geoCoding = (ComponentGeoCoding) sceneGeoCoding;
+            final double rasterResolutionInKm = geoCoding.getGeoRaster().getRasterResolutionInKm();
+            writeLine(Constants.COMMENT + PROPERTY_NAME_RASTER_RESOLUTION + "=" + rasterResolutionInKm);
+        }
     }
 
     @Override
@@ -136,12 +151,14 @@ public class CsvProductWriter extends AbstractProductWriter {
         if (productWritten) {
             return;
         }
+
         final RasterDataNode[] bands = getSourceProduct().getBands();
         final TiePointGrid[] tiePointGrids = getSourceProduct().getTiePointGrids();
-        final RasterDataNode[] rasterDataNodes = Arrays.copyOf(bands, bands.length + tiePointGrids.length);
-        System.arraycopy(tiePointGrids, 0, rasterDataNodes, bands.length, tiePointGrids.length );
+        final RasterDataNode[] rasterDataNodes = new RasterDataNode[bands.length + tiePointGrids.length];
+        System.arraycopy(bands, 0, rasterDataNodes, 0, bands.length);
+        System.arraycopy(tiePointGrids, 0, rasterDataNodes, bands.length, tiePointGrids.length);
 
-        final int[] dataTypes = new int[bands.length];
+        final int[] dataTypes = new int[rasterDataNodes.length];
 
         final Raster[] dataRasters = new Raster[rasterDataNodes.length];
         // todo: For big products this will not work because the whole scene is allocated. But no one wants to
@@ -151,7 +168,6 @@ public class CsvProductWriter extends AbstractProductWriter {
             dataRasters[i] = rasterDataNodes[i].getGeophysicalImage().getData(dataRect);
             dataTypes[i] = dataRasters[i].getDataBuffer().getDataType();
         }
-
 
         for (int j = 0; j < getSourceProduct().getSceneRasterHeight(); j++) {
             for (int i = 0; i < getSourceProduct().getSceneRasterWidth(); i++) {
@@ -198,6 +214,7 @@ public class CsvProductWriter extends AbstractProductWriter {
 
     @Override
     public void deleteOutput() {
+        // @todo 2 tb/** is this intentionally not implemented?? tb/tb implement this! 2020-02-27
     }
 
     private void getSeparatorFromMetaData() {

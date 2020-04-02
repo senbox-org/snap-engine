@@ -60,7 +60,7 @@ class GeneralFilterBandPersistable extends RasterDataNodePersistable {
             kernel = ConvolutionFilterBandPersistable.convertElementToKernel(kernelInfo);
         } else {
             Dimension size = parseSize(filterBandInfo);
-            if (size == null || size.width <= 0|| size.height <= 0) {
+            if (size.width <= 0|| size.height <= 0) {
                 SystemUtils.LOG.warning(String.format("BEAM-DIMAP problem in element '%s': missing or illegal value for element '%s'",
                                                       filterBandInfo.getName(), DimapProductConstants.TAG_FILTER_SUB_WINDOW_SIZE));
                 return null;
@@ -155,7 +155,7 @@ class GeneralFilterBandPersistable extends RasterDataNodePersistable {
     @Override
     public Element createXmlFromObject(Object object) {
         final GeneralFilterBand gfb = (GeneralFilterBand) object;
-        final List<Element> contentList = new ArrayList<Element>(20);
+        final List<Element> contentList = new ArrayList<>(20);
         contentList.add(createElement(DimapProductConstants.TAG_BAND_INDEX, String.valueOf(gfb.getProduct().getBandIndex(gfb.getName()))));
         contentList.add(createElement(DimapProductConstants.TAG_BAND_NAME, gfb.getName()));
         contentList.add(createElement(DimapProductConstants.TAG_BAND_DESCRIPTION, gfb.getDescription()));
@@ -169,7 +169,7 @@ class GeneralFilterBandPersistable extends RasterDataNodePersistable {
         contentList.add(createElement(DimapProductConstants.TAG_SCALING_LOG_10, String.valueOf(gfb.isLog10Scaled())));
         contentList.add(createElement(DimapProductConstants.TAG_NO_DATA_VALUE_USED, String.valueOf(gfb.isNoDataValueUsed())));
         contentList.add(createElement(DimapProductConstants.TAG_NO_DATA_VALUE, String.valueOf(gfb.getNoDataValue())));
-        final List<Element> filterBandInfoList = new ArrayList<Element>(5);
+        final List<Element> filterBandInfoList = new ArrayList<>(5);
         filterBandInfoList.add(createElement(DimapProductConstants.TAG_FILTER_SOURCE, gfb.getSource().getName()));
         filterBandInfoList.add(createElement(DimapProductConstants.TAG_FILTER_OP_TYPE, gfb.getOpType().toString()));
         filterBandInfoList.add(ConvolutionFilterBandPersistable.convertKernelToElement(gfb.getStructuringElement()));

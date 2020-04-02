@@ -303,7 +303,7 @@ public class DimapProductWriter extends AbstractProductWriter {
         if (outputStream == null) {
             outputStream = createImageOutputStream(band);
             if (bandOutputStreams == null) {
-                bandOutputStreams = new HashMap<Band, ImageOutputStream>();
+                bandOutputStreams = new HashMap<>();
             }
             bandOutputStreams.put(band, outputStream);
         }
@@ -560,7 +560,7 @@ public class DimapProductWriter extends AbstractProductWriter {
 
     public void addExtender(WriterExtender writerExtender) {
         if (writerExtenders == null) {
-            writerExtenders = new HashSet<WriterExtender>();
+            writerExtenders = new HashSet<>();
         }
         if (writerExtender != null) {
             writerExtenders.add(writerExtender);
