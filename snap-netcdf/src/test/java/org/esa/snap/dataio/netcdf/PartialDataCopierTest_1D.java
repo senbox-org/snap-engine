@@ -2,10 +2,12 @@ package org.esa.snap.dataio.netcdf;
 
 import org.junit.Test;
 import ucar.ma2.Array;
+import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 public class PartialDataCopierTest_1D {
 
@@ -67,6 +69,6 @@ public class PartialDataCopierTest_1D {
     }
 
     private Array createArray(int[] shape, int[] storage) {
-        return Array.factory(storage).reshape(shape);
+        return Array.factory(DataType.INT, new int[]{storage.length}, storage).reshape(shape);
     }
 }

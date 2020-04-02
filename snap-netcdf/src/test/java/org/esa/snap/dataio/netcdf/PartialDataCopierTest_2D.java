@@ -3,10 +3,11 @@ package org.esa.snap.dataio.netcdf;
 import org.junit.Before;
 import org.junit.Test;
 import ucar.ma2.Array;
+import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
 
 public class PartialDataCopierTest_2D {
 
@@ -15,17 +16,20 @@ public class PartialDataCopierTest_2D {
 
     @Before
     public void setUp() {
-        source = Array.factory(new int[]{
+
+        int[] sourceData = {
                 0, 1, 2, 3, 4,
                 5, 6, 7, 8, 9,
                 10, 11, 12, 13, 14,
                 15, 16, 17, 18, 19
-        }).reshape(new int[]{4, 5});
+        };
+        source = Array.factory(DataType.INT, new int[]{sourceData.length}, sourceData).reshape(new int[]{4, 5});
 
-        chunk = Array.factory(new int[]{
+        int[] chunkData = {
                 40, 40, 40,
                 40, 40, 40
-        }).reshape(new int[]{2, 3});
+        };
+        chunk = Array.factory(DataType.INT, new int[]{chunkData.length}, chunkData).reshape(new int[]{2, 3});
     }
 
     @Test

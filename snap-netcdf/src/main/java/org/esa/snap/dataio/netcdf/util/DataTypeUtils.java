@@ -70,12 +70,12 @@ public class DataTypeUtils {
     }
 
     /**
-     * Return the NetCDF equivalent to the given dataType.
+     * Return the NetCDF equivalent to the given {@link ProductData} type.
      *
      * @param dataType must be one of {@code ProductData.TYPE_*}
-     * @return the NetCDF equivalent to the given dataType or {@code null} if not {@code dataType} is
+     * @return the NetCDF equivalent to the given dataType
      * not one of {@code ProductData.TYPE_*}
-     * @see ProductData
+     * @throws IllegalArgumentException if the given type value is unknown
      */
     public static DataType getNetcdfDataType(int dataType) {
         switch (dataType) {
@@ -102,7 +102,8 @@ public class DataTypeUtils {
             case ProductData.TYPE_UTC:
                 return DataType.STRING;
             default:
-                return null;
+                String msg = String.format("ProductData type with value of '%d' is not unknown.", dataType);
+                throw new IllegalArgumentException(msg);
         }
     }
 

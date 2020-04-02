@@ -3,20 +3,21 @@ package org.esa.snap.dataio.netcdf;
 import org.junit.Before;
 import org.junit.Test;
 import ucar.ma2.Array;
+import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
 
 public class PartialDataCopierTest_3D {
 
-    private final int __ = -1;
+    private final static int INV = -1;
     private Array source;
     private Array chunk;
 
     @Before
     public void setUp() {
-        source = Array.factory(new int[]{
+        int[] data = {
                 11, 12, 13,
                 14, 15, 16,
                 17, 18, 19,
@@ -28,15 +29,17 @@ public class PartialDataCopierTest_3D {
                 31, 32, 33,
                 34, 35, 36,
                 37, 38, 39
-        }).reshape(new int[]{3, 3, 3});
+        };
+        source = Array.factory(DataType.INT, new int[]{data.length}, data).reshape(new int[]{3, 3, 3});
 
-        chunk = Array.factory(new int[]{
-                __, __,
-                __, __,
+        int[] ints = {
+                INV, INV,
+                INV, INV,
 
-                __, __,
-                __, __
-        }).reshape(new int[]{2, 2, 2});
+                INV, INV,
+                INV, INV
+        };
+        chunk = Array.factory(DataType.INT, new int[]{ints.length}, ints).reshape(new int[]{2, 2, 2});
     }
 
     @Test
@@ -76,11 +79,11 @@ public class PartialDataCopierTest_3D {
         PartialDataCopier.copy(from, source, chunk);
 
         assertThat(chunk.copyTo1DJavaArray(), equalTo(new int[]{
-                __, __,
-                __, __,
+                INV, INV,
+                INV, INV,
 
-                __, __,
-                __, 11
+                INV, INV,
+                INV, 11
         }));
     }
 
@@ -91,11 +94,11 @@ public class PartialDataCopierTest_3D {
         PartialDataCopier.copy(from, source, chunk);
 
         assertThat(chunk.copyTo1DJavaArray(), equalTo(new int[]{
-                __, __,
-                __, __,
+                INV, INV,
+                INV, INV,
 
-                __, __,
-                13, __
+                INV, INV,
+                13, INV
         }));
     }
 
@@ -106,11 +109,11 @@ public class PartialDataCopierTest_3D {
         PartialDataCopier.copy(from, source, chunk);
 
         assertThat(chunk.copyTo1DJavaArray(), equalTo(new int[]{
-                __, __,
-                __, __,
+                INV, INV,
+                INV, INV,
 
-                19, __,
-                __, __
+                19, INV,
+                INV, INV
         }));
     }
 
@@ -121,11 +124,11 @@ public class PartialDataCopierTest_3D {
         PartialDataCopier.copy(from, source, chunk);
 
         assertThat(chunk.copyTo1DJavaArray(), equalTo(new int[]{
-                __, __,
-                __, __,
+                INV, INV,
+                INV, INV,
 
-                __, 17,
-                __, __
+                INV, 17,
+                INV, INV
         }));
     }
 
@@ -136,11 +139,11 @@ public class PartialDataCopierTest_3D {
         PartialDataCopier.copy(from, source, chunk);
 
         assertThat(chunk.copyTo1DJavaArray(), equalTo(new int[]{
-                __, __,
-                __, 31,
+                INV, INV,
+                INV, 31,
 
-                __, __,
-                __, __
+                INV, INV,
+                INV, INV
         }));
     }
 
@@ -151,11 +154,11 @@ public class PartialDataCopierTest_3D {
         PartialDataCopier.copy(from, source, chunk);
 
         assertThat(chunk.copyTo1DJavaArray(), equalTo(new int[]{
-                __, __,
-                33, __,
+                INV, INV,
+                33, INV,
 
-                __, __,
-                __, __
+                INV, INV,
+                INV, INV
         }));
     }
 
@@ -166,11 +169,11 @@ public class PartialDataCopierTest_3D {
         PartialDataCopier.copy(from, source, chunk);
 
         assertThat(chunk.copyTo1DJavaArray(), equalTo(new int[]{
-                39, __,
-                __, __,
+                39, INV,
+                INV, INV,
 
-                __, __,
-                __, __
+                INV, INV,
+                INV, INV
         }));
     }
 
@@ -181,11 +184,11 @@ public class PartialDataCopierTest_3D {
         PartialDataCopier.copy(from, source, chunk);
 
         assertThat(chunk.copyTo1DJavaArray(), equalTo(new int[]{
-                __, 37,
-                __, __,
+                INV, 37,
+                INV, INV,
 
-                __, __,
-                __, __
+                INV, INV,
+                INV, INV
         }));
     }
 }

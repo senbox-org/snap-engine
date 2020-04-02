@@ -44,6 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class BeamMetadataPart extends ProfilePartIO {
 
@@ -53,7 +54,7 @@ public class BeamMetadataPart extends ProfilePartIO {
     private static final String METADATA_VARIABLE = "metadata";
     private static final String DESCRIPTION_SUFFIX = "descr";
     private static final String UNIT_SUFFIX = "unit";
-    private static final List<String> SNAP_GLOBAL_ATTRIBUTES = Arrays.asList(new String[]{"Conventions", "TileSize", "product_type", "metadata_profile", "metadata_version", "start_date", "stop_date", "auto_grouping", "quicklook_band_name", "tiepoint_coordinates", "title"});
+    private static final List<String> SNAP_GLOBAL_ATTRIBUTES = Arrays.asList("Conventions", "TileSize", "product_type", "metadata_profile", "metadata_version", "start_date", "stop_date", "auto_grouping", "quicklook_band_name", "tiepoint_coordinates", "title");
     private boolean isNC4 = false;
 
     @Override
@@ -66,9 +67,9 @@ public class BeamMetadataPart extends ProfilePartIO {
             for (Attribute attribute : metadata.getAttributes()) {
                 String attrName = attribute.getShortName();
                 if (attrName.startsWith(SPLITTER)) {
-                    attrName = attrName.substring(SPLITTER.length(), attrName.length());
+                    attrName = attrName.substring(SPLITTER.length());
                 } else if (attrName.startsWith(SPLITTER2)) {
-                    attrName = attrName.substring(SPLITTER2.length(), attrName.length());
+                    attrName = attrName.substring(SPLITTER2.length());
                 }
                 if (attrName.contains(SPLITTER)) {
                     String prefix = attrName.split(SPLITTER)[0];
@@ -82,7 +83,7 @@ public class BeamMetadataPart extends ProfilePartIO {
                 }
             }
         }
-        spliceSplitedAttributes(metadataRoot);
+        spliceAttributes(metadataRoot);
     }
 
     private void readMetadata(Attribute attribute, MetadataElement metadataRoot, String prefix, String splitter) {
@@ -102,11 +103,11 @@ public class BeamMetadataPart extends ProfilePartIO {
         // cut prefix of attribute name
         String temp = attribute.getShortName();
         if (temp.startsWith(splitter)) {
-            temp = temp.substring(splitter.length(), temp.length());
+            temp = temp.substring(splitter.length());
         }
         temp = temp.replaceFirst(prefix, "");
         if (temp.startsWith(splitter)) {
-            temp = temp.substring(splitter.length(), temp.length());
+            temp = temp.substring(splitter.length());
         }
 
         String[] splittedAttrName = temp.split(splitter);
@@ -141,7 +142,7 @@ public class BeamMetadataPart extends ProfilePartIO {
         }
     }
 
-    private void spliceSplitedAttributes(MetadataElement metadataRoot) {
+    private void spliceAttributes(MetadataElement metadataRoot) {
         metadataRoot.acceptVisitor(new ProductVisitorAdapter() {
             @Override
             public void visit(MetadataElement element) {
@@ -168,13 +169,19 @@ public class BeamMetadataPart extends ProfilePartIO {
                         MetadataAttribute currentAttribute = splittedAttributes.get(i);
                         if (firstAttribute == null) {
                             firstAttribute = currentAttribute.createDeepClone();
-                            realDataArray = Array.factory(firstAttribute.getData().getElems());
+                            realDataArray = Array.factory(DataTypeUtils.getNetcdfDataType(firstAttribute.getData().getType()),
+                                                          new int[]{firstAttribute.getData().getNumElems()},
+                                                          firstAttribute.getData().getElems());
                         } else {
                             final ProductData currentData = currentAttribute.getData();
-                            final Array currentDataArray = Array.factory(currentData.getElems());
+                            final Array currentDataArray = Array.factory(DataTypeUtils.getNetcdfDataType(currentData.getType()),
+                                                                         new int[]{currentData.getNumElems()},
+                                                                         currentData.getElems());
                             final int newSize = (int) (realDataArray.getSize()) + currentData.getNumElems();
                             final ProductData newData = firstAttribute.createCompatibleProductData(newSize);
-                            final Array newDataArray = Array.factory(newData.getElems());
+                            final Array newDataArray = Array.factory(DataTypeUtils.getNetcdfDataType(newData.getType()),
+                                                                     new int[]{newData.getNumElems()},
+                                                                     newData.getElems());
                             Array.arraycopy(realDataArray, 0, newDataArray, 0, (int) realDataArray.getSize());
                             Array.arraycopy(currentDataArray, 0, newDataArray, (int) realDataArray.getSize(), (int) currentDataArray.getSize());
                             realDataArray = newDataArray;
@@ -209,7 +216,7 @@ public class BeamMetadataPart extends ProfilePartIO {
                 if (!VariableNameHelper.isVariableNameValid(attributeName)) {
                     attributeName = VariableNameHelper.convertToValidName(attributeName);
                     SystemUtils.LOG.warning("Found invalid attribute name '" + attribute.getName() +
-                                            "' - replaced by '" + attributeName + "'.");
+                                                    "' - replaced by '" + attributeName + "'.");
                 }
                 if (!SNAP_GLOBAL_ATTRIBUTES.contains(attributeName)) {
                     final ProductData productData = attribute.getData();
@@ -226,7 +233,7 @@ public class BeamMetadataPart extends ProfilePartIO {
                         final String value = productData.getElemString();
                         ctx.getNetcdfFileWriteable().addGlobalAttribute(attributeName, value);
                     } else {
-                        final String value = Arrays.asList(productData.getElems()).stream().map(x -> String.valueOf(x)).collect(Collectors.joining(","));
+                        final String value = Stream.of(productData.getElems()).map(String::valueOf).collect(Collectors.joining(","));
                         ctx.getNetcdfFileWriteable().addGlobalAttribute(attributeName, value);
                     }
                 }
@@ -256,7 +263,7 @@ public class BeamMetadataPart extends ProfilePartIO {
 
     private boolean isGlobalAttributesElement(String subElementName) {
         return MetadataUtils.GLOBAL_ATTRIBUTES.equals(subElementName) ||
-               MetadataUtils.VARIABLE_ATTRIBUTES.equals(subElementName);
+                MetadataUtils.VARIABLE_ATTRIBUTES.equals(subElementName);
     }
 
     private void writeMetadataAttribute(NFileWriteable ncFile, MetadataAttribute metadataAttr, NVariable ncVariable, String prefix) throws IOException {
@@ -274,8 +281,10 @@ public class BeamMetadataPart extends ProfilePartIO {
         if (productData instanceof ProductData.ASCII || productData instanceof ProductData.UTC) {
             ncVariable.addAttribute(ncAttributeName, productData.getElemString());
         } else {
-            Array value = Array.factory(productData.getElems());
-            DataType dataType = DataType.getType(value.getElementType());
+            DataType dataType = DataTypeUtils.getNetcdfDataType(productData.getType());
+            Array value = Array.factory(dataType,
+                                        new int[]{productData.getNumElems()},
+                                        productData.getElems());
             // this is a hardcoded value from the constructor of
             // edu.ucar.ral.nujan.hdf.MsgAttribute from within nujan-1.4.1.1.jar
             int maxSizeInBytes = 64535;
