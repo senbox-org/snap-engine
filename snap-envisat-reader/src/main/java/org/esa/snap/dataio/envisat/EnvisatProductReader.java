@@ -415,7 +415,10 @@ public class EnvisatProductReader extends AbstractProductReader {
         final Band latBand = product.getBand(EnvisatConstants.MERIS_AMORGOS_L1B_CORR_LATITUDE_BAND_NAME);
 
         final double[] longitudes = RasterUtils.loadDataScaled(lonBand);
+        lonBand.unloadRasterData();
         final double[] latitudes = RasterUtils.loadDataScaled(latBand);
+        latBand.unloadRasterData();
+
         final double resolutionInKilometers = getResolutionInKilometers(productFile.getProductType());
 
         final GeoRaster geoRaster = new GeoRaster(longitudes, latitudes,
