@@ -9,10 +9,9 @@ import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
 import org.esa.snap.dataio.netcdf.nc.NVariable;
 import org.junit.Before;
 import org.junit.Test;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import ucar.ma2.DataType;
 
-import java.awt.*;
+import java.awt.Dimension;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -139,12 +138,12 @@ public class CfMetadataPartTest {
 
         @Override
         public void addDimension(String name, int length)  {
-            throw new NotImplementedException();
+            throw new RuntimeException("Not implemented");
         }
 
         @Override
         public String getDimensions() {
-            throw new NotImplementedException();
+            throw new RuntimeException("Not implemented");
         }
 
         @Override
@@ -159,47 +158,47 @@ public class CfMetadataPartTest {
 
         @Override
         public NVariable addScalarVariable(String name, DataType dataType) {
-            throw new NotImplementedException();
+            throw new RuntimeException("Not implemented");
         }
 
         @Override
         public NVariable addVariable(String name, DataType dataType, Dimension tileSize, String dims) {
-            throw new NotImplementedException();
+            throw new RuntimeException("Not implemented");
         }
 
         @Override
         public NVariable addVariable(String name, DataType dataType, boolean unsigned, Dimension tileSize, String dims)  {
-            throw new NotImplementedException();
+            throw new RuntimeException("Not implemented");
         }
 
         @Override
         public NVariable addVariable(String name, DataType dataType, boolean unsigned, Dimension tileSize, String dims, int compressionLevel) {
-            throw new NotImplementedException();
+            throw new RuntimeException("Not implemented");
         }
 
         @Override
         public NVariable findVariable(String variableName) {
-            throw new NotImplementedException();
+            throw new RuntimeException("Not implemented");
         }
 
         @Override
         public boolean isNameValid(String name) {
-            throw new NotImplementedException();
+            throw new RuntimeException("Not implemented");
         }
 
         @Override
         public String makeNameValid(String name) {
-            throw new NotImplementedException();
+            throw new RuntimeException("Not implemented");
         }
 
         @Override
         public void create() {
-            throw new NotImplementedException();
+            throw new RuntimeException("Not implemented");
         }
 
         @Override
         public void close()  {
-            throw new NotImplementedException();
+            throw new RuntimeException("Not implemented");
         }
 
         Map<String, String> getGlobalStringAttributes() {
