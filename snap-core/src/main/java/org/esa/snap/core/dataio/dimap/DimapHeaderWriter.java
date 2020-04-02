@@ -761,6 +761,7 @@ public final class DimapHeaderWriter extends XmlWriter {
 
         final String[] geopositionTags = createTags(indent, DimapProductConstants.TAG_GEOPOSITION);
         println(geopositionTags[0]);
+        writeBandIndexIf(index >= 0, index, indent+1);
         printLine(indent + 1, DimapProductConstants.TAG_LATITUDE_BAND, latBandName);
         printLine(indent + 1, DimapProductConstants.TAG_LONGITUDE_BAND, lonBandName);
         if (validMask != null && !validMask.trim().isEmpty()) {
