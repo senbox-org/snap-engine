@@ -24,7 +24,7 @@ public abstract class AbstractSubsetTileOpImage extends SingleBandedOpImage {
                 tileOffsetFromReadBounds, ResolutionLevel.create(imageMultiLevelModel, level));
     }
 
-    private AbstractSubsetTileOpImage(int dataBufferType, Rectangle imageReadBounds, Dimension tileSize, Dimension subTileSize,
+    protected AbstractSubsetTileOpImage(int dataBufferType, Rectangle imageReadBounds, Dimension tileSize, Dimension subTileSize,
                                       Point tileOffsetFromReadBounds, ResolutionLevel resolutionLevel) {
 
         super(dataBufferType, null, tileSize.width, tileSize.height, subTileSize, null, resolutionLevel);
