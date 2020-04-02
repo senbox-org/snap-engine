@@ -117,6 +117,7 @@ public class ColorBarLayer extends Layer {
 
 
             imageLegend.setOrientation(getOrientation());
+            imageLegend.setReversePalette(isReversePalette());
             imageLegend.setForegroundColor(getTitleParameterColor());
             imageLegend.setTickmarkColor(getTickmarksColor());
             imageLegend.setTickmarkLength(getTickmarksLength());
@@ -588,7 +589,10 @@ public class ColorBarLayer extends Layer {
 
 
 
-
+    private boolean isReversePalette() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_FORMATTING_REVERSE_PALETTE_KEY,
+                ColorBarLayerType.PROPERTY_FORMATTING_REVERSE_PALETTE_DEFAULT);
+    }
 
 
     // Tickmarks Section

@@ -150,7 +150,12 @@ public class ColorBarLayerType extends LayerType {
     public static final Object PROPERTY_FORMATTING_ORIENTATION_VALUE_SET[] = {PROPERTY_FORMATTING_ORIENTATION_OPTION1, PROPERTY_FORMATTING_ORIENTATION_OPTION2};
 
 
-
+    public static final String PROPERTY_FORMATTING_REVERSE_PALETTE_KEY = PROPERTY_FORMATTING_ROOT_KEY + ".reverse.palette";
+    public static final String PROPERTY_FORMATTING_REVERSE_PALETTE_LABEL = "Reverse Palette & Labels";
+    public static final String PROPERTY_FORMATTING_REVERSE_PALETTE_TOOLTIP = "Reverse direction of palette and labels";
+    private static final String PROPERTY_FORMATTING_REVERSE_PALETTE_ALIAS = PROPERTY_FORMATTING_ROOT_ALIAS + "ReversePalette";
+    public static final boolean PROPERTY_FORMATTING_REVERSE_PALETTE_DEFAULT = false;
+    public static final Class PROPERTY_FORMATTING_REVERSE_PALETTE_TYPE = Boolean.class;
 
 
 
@@ -667,7 +672,9 @@ public class ColorBarLayerType extends LayerType {
         formattingOrientationModel.getDescriptor().setAlias(PROPERTY_FORMATTING_ORIENTATION_ALIAS);
         vc.addProperty(formattingOrientationModel);
 
-
+        final Property reversePaletteModel = Property.create(PROPERTY_FORMATTING_REVERSE_PALETTE_KEY, PROPERTY_FORMATTING_REVERSE_PALETTE_TYPE, true, true);
+        reversePaletteModel.getDescriptor().setAlias(PROPERTY_FORMATTING_REVERSE_PALETTE_ALIAS);
+        vc.addProperty(reversePaletteModel);
 
 
 

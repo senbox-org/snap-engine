@@ -102,6 +102,8 @@ public class ImageLegend {
     private int numberOfTicks;
     private Color foregroundColor;
 
+    private boolean reversePalette = true;
+
     private Color tickmarkColor;
     private int tickmarkLength = NULL_INT;
     private int tickmarkWidth = NULL_INT;
@@ -755,7 +757,7 @@ public class ImageLegend {
         drawPalette(g2d);
 
         if (isLabelsShow()) {
-            drawLabels(g2d);
+            drawLabelsAndTickMarks(g2d);
         }
     }
 
@@ -986,6 +988,9 @@ public class ImageLegend {
         }
     }
 
+
+
+
     private void drawPalette(Graphics2D g2d) {
 
         final Color[] palette = ImageManager.createColorPalette(getRaster().getImageInfo());
@@ -1000,23 +1005,30 @@ public class ImageLegend {
             int y1 = paletteRect.y;
             int y2 = paletteRect.y + paletteRect.height;
 
-            for (int x = xStart; x < xEnd; x++) {
-                int divisor = palettePosEnd - palettePosStart;
-                int palIndex;
-                if (divisor == 0) {
-                    palIndex = x < palettePosStart ? 0 : palette.length - 1;
-                } else {
-                    palIndex = Math.round((palette.length * (x - palettePosStart)) / divisor);
-                }
-                if (palIndex < 0) {
-                    palIndex = 0;
-                }
-                if (palIndex > palette.length - 1) {
-                    palIndex = palette.length - 1;
-                }
+            int divisor = palettePosEnd - palettePosStart;
+            int palIndex;
 
-                g2d.setColor(palette[palIndex]);
-                g2d.drawLine(x, y1, x, y2);
+            if (isReversePalette()) {
+                for (int x = xEnd; x > xStart; x--) {
+
+                    if (divisor == 0) {
+                        palIndex = x < palettePosStart ? 0 : palette.length - 1;
+                    } else {
+                        palIndex = Math.round((palette.length * (palettePosEnd - x)) / divisor);
+                    }
+
+                    drawLineInHorizontalPalette(g2d, palette, palIndex, x, y1, y2);
+                }
+            } else {
+                for (int x = xStart; x < xEnd; x++) {
+                    if (divisor == 0) {
+                        palIndex = x < palettePosStart ? 0 : palette.length - 1;
+                    } else {
+                        palIndex = Math.round((palette.length * (x - palettePosStart)) / divisor);
+                    }
+
+                    drawLineInHorizontalPalette(g2d, palette, palIndex, x, y1, y2);
+                }
             }
         } else {
             int x1 = paletteRect.x;
@@ -1024,24 +1036,31 @@ public class ImageLegend {
             int yStart = paletteRect.y + paletteRect.height;
             int yEnd = paletteRect.y;
 
-            for (int y = yStart; y > yEnd; y--) {
-                int divisor = Math.abs(palettePosEnd - palettePosStart);
+            int divisor = Math.abs(palettePosEnd - palettePosStart);
+            int palIndex;
 
-                int palIndex;
-                if (divisor == 0) {
-                    palIndex = y < palettePosStart ? 0 : palette.length - 1;
-                } else {
-                    palIndex = Math.round((palette.length * (palettePosStart - y)) / divisor);
-                }
-                if (palIndex < 0) {
-                    palIndex = 0;
-                }
-                if (palIndex > palette.length - 1) {
-                    palIndex = palette.length - 1;
-                }
+            if (isReversePalette()) {
+                for (int y = yEnd; y < yStart; y++) {
 
-                g2d.setColor(palette[palIndex]);
-                g2d.drawLine(x1, y, x2, y);
+                    if (divisor == 0) {
+                        palIndex = y < palettePosStart ? 0 : palette.length - 1;
+                    } else {
+                        palIndex = Math.round((palette.length * (y - palettePosEnd)) / divisor);
+                    }
+
+                    drawLineInVerticalPalette(g2d, palette, palIndex, x1, x2, y);
+                }
+            } else {
+                for (int y = yStart; y > yEnd; y--) {
+
+                    if (divisor == 0) {
+                        palIndex = y < palettePosStart ? 0 : palette.length - 1;
+                    } else {
+                        palIndex = Math.round((palette.length * (palettePosStart - y)) / divisor);
+                    }
+
+                    drawLineInVerticalPalette(g2d, palette, palIndex, x1, x2, y);
+                }
             }
         }
 
@@ -1052,13 +1071,46 @@ public class ImageLegend {
             g2d.draw(paletteRect);
         }
 
-
-
         g2d.setStroke(originalStroke);
     }
 
 
-    private void drawLabels(Graphics2D g2d) {
+
+
+    private void drawLineInHorizontalPalette(Graphics2D g2d, Color[] palette, int index, int x, int y1, int y2) {
+        forceIndexInBounds(palette, index);
+
+        g2d.setColor(palette[index]);
+        g2d.drawLine(x, y1, x, y2);
+    }
+
+
+
+    private void drawLineInVerticalPalette(Graphics2D g2d, Color[] palette, int index, int x1, int x2, int y) {
+        forceIndexInBounds(palette, index);
+
+        g2d.setColor(palette[index]);
+        g2d.drawLine(x1, y, x2, y);
+    }
+
+
+    private int forceIndexInBounds(Color[] palette, int index) {
+        if (index < 0) {
+            index = 0;
+        }
+        if (index > palette.length - 1) {
+            index = palette.length - 1;
+        }
+
+        return index;
+    }
+
+
+
+
+
+
+    private void drawLabelsAndTickMarks(Graphics2D g2d) {
 
         Color originalColor = g2d.getColor();
         Stroke originalStroke = g2d.getStroke();
@@ -1067,9 +1119,6 @@ public class ImageLegend {
 
         g2d.setFont(getLabelsFont());
         g2d.setPaint(getLabelsColor());
-
-        //   Color tickMarkColor = new Color(0, 0, 0);
-        Color tickMarkColor = foregroundColor;
 
         Stroke tickMarkStroke = new BasicStroke(getTickmarkWidth());
         g2d.setStroke(tickMarkStroke);
@@ -1090,38 +1139,34 @@ public class ImageLegend {
             double weight = colorBarInfo.getLocationWeight();
 
             double tickMarkRelativePosition = weight * (palettePosEnd - palettePosStart);
+
             if (orientation == HORIZONTAL) {
-                translateX = palettePosStart + tickMarkRelativePosition;
                 translateY = paletteRect.y + paletteRect.height;
 
-                // make sure end tickmarks are placed within palette
-                // tickmark hardcoded at 3 width will have 1 tickMarkOverHang
-                if (translateX <= (palettePosStart + tickMarkOverHang)) {
-                    translateX = (palettePosStart + tickMarkOverHang);
+                if (isReversePalette()) {
+                    translateX = palettePosEnd - tickMarkRelativePosition;
+                    translateX = keepTickMarkInBoundsHorizontal(translateX, tickMarkOverHang);
+                } else {
+                    translateX = palettePosStart + tickMarkRelativePosition;
+                    translateX = keepTickMarkInBoundsHorizontal(translateX, tickMarkOverHang);
                 }
-
-                if (translateX >= (palettePosEnd - tickMarkOverHang)) {
-                    translateX = (palettePosEnd - tickMarkOverHang);
-                }
-
             } else {
                 translateX = paletteRect.x + paletteRect.width;
-                translateY = palettePosStart + tickMarkRelativePosition;
 
-                if (translateY >= (palettePosStart - tickMarkOverHang)) {
-                    translateY = (palettePosStart - tickMarkOverHang);
+                if (isReversePalette()) {
+                    translateY = palettePosEnd - tickMarkRelativePosition;
+                    translateY = keepTickMarkInBoundsVertical(translateY, tickMarkOverHang);
+                } else {
+                    translateY = palettePosStart + tickMarkRelativePosition;
+                    translateY = keepTickMarkInBoundsVertical(translateY, tickMarkOverHang);
                 }
-
-                if (translateY <= (palettePosEnd + tickMarkOverHang)) {
-                    translateY = (palettePosEnd + tickMarkOverHang);
-                }
-
             }
-            g2d.translate(translateX, translateY);
-            g2d.setPaint(getTickmarkColor());
 
+
+            g2d.translate(translateX, translateY);
 
             if (isTickmarkShow()) {
+                g2d.setPaint(getTickmarkColor());
                 g2d.draw(tickMarkShape);
             }
 
@@ -1148,6 +1193,40 @@ public class ImageLegend {
         g2d.setStroke(originalStroke);
         g2d.setPaint(originalPaint);
     }
+
+
+
+    private double keepTickMarkInBoundsHorizontal(double translate, int tickMarkOverHang ) {
+        // make sure end tickmarks are placed within palette
+        // tickmark hardcoded at 3 width will have 1 tickMarkOverHang
+
+        if (translate <= (palettePosStart + tickMarkOverHang)) {
+            translate = (palettePosStart + tickMarkOverHang);
+        }
+
+        if (translate >= (palettePosEnd - tickMarkOverHang)) {
+            translate = (palettePosEnd - tickMarkOverHang);
+        }
+
+        return translate;
+    }
+
+
+    private double keepTickMarkInBoundsVertical(double translate, int tickMarkOverHang ) {
+        // make sure end tickmarks are placed within palette
+        // tickmark hardcoded at 3 width will have 1 tickMarkOverHang
+
+        if (translate >= (palettePosStart - tickMarkOverHang)) {
+            translate = (palettePosStart - tickMarkOverHang);
+        }
+
+        if (translate <= (palettePosEnd + tickMarkOverHang)) {
+            translate = (palettePosEnd + tickMarkOverHang);
+        }
+
+        return translate;
+    }
+
 
 
     public static double getLinearWeightFromLinearValue(double linearValue, double min, double max) {
@@ -1780,5 +1859,13 @@ public class ImageLegend {
 
     public void setLabelsShow(boolean labelsShow) {
         this.labelsShow = labelsShow;
+    }
+
+    public boolean isReversePalette() {
+        return reversePalette;
+    }
+
+    public void setReversePalette(boolean reversePalette) {
+        this.reversePalette = reversePalette;
     }
 }
