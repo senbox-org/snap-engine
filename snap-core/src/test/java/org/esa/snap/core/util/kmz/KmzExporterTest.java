@@ -22,8 +22,6 @@ import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.Namespace;
 import org.jdom.input.DOMBuilder;
-import org.jdom.output.Format;
-import org.jdom.output.XMLOutputter;
 import org.junit.Test;
 import org.opengis.geometry.BoundingBox;
 import org.xml.sax.SAXException;
@@ -167,20 +165,6 @@ public class KmzExporterTest {
         assertEquals("30.0", latLonBox.getChildText("south", namespace));
         assertEquals("20.0", latLonBox.getChildText("east", namespace));
         assertEquals("0.0", latLonBox.getChildText("west", namespace));
-    }
-
-    // for debugging
-    @SuppressWarnings({"UnusedDeclaration"})
-    private void printDocument(Document document) {
-        final Format prettyFormat = Format.getPrettyFormat();
-        prettyFormat.setExpandEmptyElements(false);
-        prettyFormat.setOmitEncoding(true);
-        prettyFormat.setOmitDeclaration(true);
-        prettyFormat.setTextMode(Format.TextMode.NORMALIZE);
-
-        final XMLOutputter xmlOutputter = new XMLOutputter(prettyFormat);
-        final String xml = xmlOutputter.outputString(document);
-        System.out.println(xml);
     }
 
     private Document convertToDocument(String xmlString) throws ParserConfigurationException, SAXException,

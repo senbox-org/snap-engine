@@ -19,7 +19,6 @@ package org.esa.snap.csv.dataio;
 import com.bc.ceres.binding.ConversionException;
 import com.bc.ceres.binding.Converter;
 import com.bc.ceres.binding.ConverterRegistry;
-import com.sun.media.imageio.stream.FileChannelImageInputStream;
 import org.esa.snap.core.dataio.geometry.VectorDataNodeIO;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.StringUtils;
@@ -37,18 +36,13 @@ import org.opengis.feature.type.AttributeType;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
+import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.text.SimpleDateFormat;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * A CsvFile is a view on a csv file allowing a) to parse it using the {@link CsvSourceParser} interface
@@ -59,7 +53,7 @@ import java.util.TreeMap;
  */
 public class CsvFile implements CsvSourceParser, CsvSource {
 
-    public static final String DEFAULT_HEADER_NAME = "csv";
+    private static final String DEFAULT_HEADER_NAME = "csv";
 
     private final Map<String, String> properties = new HashMap<>();
     private final File csv;
@@ -78,6 +72,7 @@ public class CsvFile implements CsvSourceParser, CsvSource {
     private int headerByteSize;
     private int propertiesByteSize;
     private Converter<?>[] converters;
+    private RandomAccessFile randomAccessFile;
 
     private CsvFile(String csv) throws IOException {
         this(new File(csv), null);
@@ -87,8 +82,8 @@ public class CsvFile implements CsvSourceParser, CsvSource {
         this.csv = csv;
         ConverterRegistry.getInstance().setConverter(ProductData.UTC.class, new UTCConverter());
         this.crs = crs;
-        RandomAccessFile randomAccessFile = new RandomAccessFile(csv, "r");
-        stream = new FileChannelImageInputStream(randomAccessFile.getChannel());
+        randomAccessFile = new RandomAccessFile(csv, "r");
+        stream = new FileImageInputStream(randomAccessFile);
     }
 
     public static CsvSourceParser createCsvSourceParser(String csv) throws IOException {
@@ -140,7 +135,7 @@ public class CsvFile implements CsvSourceParser, CsvSource {
                 values.add(value);
             } catch (ConversionException e) {
                 SystemUtils.LOG.warning(String.format("Problem in '%s': %s",
-                                                      csv.getPath(), e.getMessage()));
+                        csv.getPath(), e.getMessage()));
             }
             bytePositionForOffset.put(featureCount, stream.getStreamPosition());
         }
@@ -179,7 +174,7 @@ public class CsvFile implements CsvSourceParser, CsvSource {
                         builder.set(simpleFeatureType.getDescriptor(currentIndex).getLocalName(), value);
                     } catch (ConversionException e) {
                         SystemUtils.LOG.warning(String.format("Problem in '%s': %s",
-                                                              csv.getPath(), e.getMessage()));
+                                csv.getPath(), e.getMessage()));
                     }
                 }
             }
@@ -213,11 +208,15 @@ public class CsvFile implements CsvSourceParser, CsvSource {
     }
 
     @Override
-    public void close() {
-        try {
+    public void close() throws IOException {
+        if (stream != null) {
             stream.close();
-        } catch (IOException ignore) {
         }
+        if (randomAccessFile != null) {
+            randomAccessFile.close();
+        }
+        stream = null;
+        randomAccessFile = null;
     }
 
     @Override

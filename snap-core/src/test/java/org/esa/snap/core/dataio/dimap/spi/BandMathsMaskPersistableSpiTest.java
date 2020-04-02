@@ -23,6 +23,8 @@ import org.jdom.Element;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.awt.*;
+
 import static org.junit.Assert.*;
 
 public class BandMathsMaskPersistableSpiTest {
@@ -59,6 +61,11 @@ public class BandMathsMaskPersistableSpiTest {
         });
         assertFalse(persistableSpi.canPersist(mask));
         assertFalse(DimapPersistence.getPersistable(mask) instanceof BandMathsMaskPersistable);
+    }
+
+    @Test
+    public void cannotPersistOtherObjects() {
+        assertFalse(persistableSpi.canPersist(new Rectangle(0, 0, 12, 56)));
     }
 
     @Test

@@ -214,21 +214,23 @@ public class GeoTiffProductReader extends AbstractProductReader {
         System.gc();
     }
 
-    public Product readProduct(GeoTiffImageReader geoTiffImageReader, String defaultProductName) throws Exception {
+    public Product readProduct(GeoTiffImageReader geoTiffImageReader, String productName) throws Exception {
         if (geoTiffImageReader == null) {
             throw new NullPointerException("The image reader is null.");
         }
-        ProductSubsetDef subsetDef = getSubsetDef();
+        final ProductSubsetDef subsetDef = getSubsetDef();
+        final int imageWidth = geoTiffImageReader.getImageWidth();
+        final int imageHeight = geoTiffImageReader.getImageHeight();
+
         Rectangle productBounds;
-        int defaultImageWidth = geoTiffImageReader.getImageWidth();
-        int defaultImageHeight = geoTiffImageReader.getImageHeight();
         if (subsetDef == null || subsetDef.getSubsetRegion() == null) {
-            productBounds = new Rectangle(0, 0, defaultImageWidth, defaultImageHeight);
+            productBounds = new Rectangle(0, 0, imageWidth, imageHeight);
         } else {
-            GeoCoding productDefaultGeoCoding = GeoTiffProductReader.readGeoCoding(geoTiffImageReader, null);
-            productBounds = subsetDef.getSubsetRegion().computeProductPixelRegion(productDefaultGeoCoding, defaultImageWidth, defaultImageHeight, false);
+            final GeoCoding geoCoding = GeoTiffProductReader.readGeoCoding(geoTiffImageReader, null);
+            productBounds = subsetDef.getSubsetRegion().computeProductPixelRegion(geoCoding, imageWidth, imageHeight, false);
         }
-        return readProduct(geoTiffImageReader, defaultProductName, productBounds);
+
+        return readProduct(geoTiffImageReader, productName, productBounds);
     }
 
     public Product readProduct(GeoTiffImageReader geoTiffImageReader, String defaultProductName, Rectangle productBounds) throws Exception {
@@ -558,12 +560,12 @@ public class GeoTiffProductReader extends AbstractProductReader {
     }
 
     public static GeoCoding readGeoCoding(GeoTiffImageReader geoTiffImageReader, Rectangle subsetRegion) throws Exception {
-        TIFFImageMetadata imageMetadata = geoTiffImageReader.getImageMetadata();
-        TiffFileInfo tiffInfo = new TiffFileInfo(imageMetadata.getRootIFD());
+        final TIFFImageMetadata imageMetadata = geoTiffImageReader.getImageMetadata();
+        final TiffFileInfo tiffInfo = new TiffFileInfo(imageMetadata.getRootIFD());
         if (tiffInfo.isGeotiff()) {
-            int productWidth = geoTiffImageReader.getImageWidth();
-            int productHeight = geoTiffImageReader.getImageHeight();
-            Product product = new Product("GeoTiff", GeoTiffProductReaderPlugIn.FORMAT_NAMES[0], productWidth, productHeight);
+            final int productWidth = geoTiffImageReader.getImageWidth();
+            final int productHeight = geoTiffImageReader.getImageHeight();
+            final Product product = new Product("GeoTiff", GeoTiffProductReaderPlugIn.FORMAT_NAMES[0], productWidth, productHeight);
             applyGeoCoding(tiffInfo, imageMetadata, productWidth, productHeight, product, subsetRegion);
             return product.getSceneGeoCoding();
         }

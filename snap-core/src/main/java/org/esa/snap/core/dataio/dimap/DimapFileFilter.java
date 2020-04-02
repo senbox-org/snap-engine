@@ -25,7 +25,7 @@ import static org.esa.snap.core.dataio.dimap.DimapProductConstants.*;
 
 
 public class DimapFileFilter extends SnapFileFilter {
-    public DimapFileFilter() {
+    DimapFileFilter() {
         super(DIMAP_FORMAT_NAME, DIMAP_HEADER_FILE_EXTENSION, "BEAM-DIMAP product files");
     }
 

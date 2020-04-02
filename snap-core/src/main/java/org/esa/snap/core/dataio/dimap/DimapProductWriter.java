@@ -181,12 +181,14 @@ public class DimapProductWriter extends AbstractProductWriter {
         long outputPos = (long) sourceOffsetY * sourceBandWidth + (long) sourceOffsetX;
         pm.beginTask("Writing band '" + sourceBand.getName() + "'...", sourceHeight);
         try {
-            for (int sourcePos = 0; sourcePos < sourceHeight * sourceWidth; sourcePos += sourceWidth) {
-                sourceBuffer.writeTo(sourcePos, sourceWidth, outputStream, outputPos);
-                outputPos += sourceBandWidth;
-                pm.worked(1);
-                if (pm.isCanceled()) {
-                    break;
+            synchronized (outputStream) {
+                for (int sourcePos = 0; sourcePos < sourceHeight * sourceWidth; sourcePos += sourceWidth) {
+                    sourceBuffer.writeTo(sourcePos, sourceWidth, outputStream, outputPos);
+                    outputPos += sourceBandWidth;
+                    pm.worked(1);
+                    if (pm.isCanceled()) {
+                        break;
+                    }
                 }
             }
         } finally {
@@ -301,7 +303,7 @@ public class DimapProductWriter extends AbstractProductWriter {
         if (outputStream == null) {
             outputStream = createImageOutputStream(band);
             if (bandOutputStreams == null) {
-                bandOutputStreams = new HashMap<Band, ImageOutputStream>();
+                bandOutputStreams = new HashMap<>();
             }
             bandOutputStreams.put(band, outputStream);
         }
@@ -558,7 +560,7 @@ public class DimapProductWriter extends AbstractProductWriter {
 
     public void addExtender(WriterExtender writerExtender) {
         if (writerExtenders == null) {
-            writerExtenders = new HashSet<WriterExtender>();
+            writerExtenders = new HashSet<>();
         }
         if (writerExtender != null) {
             writerExtenders.add(writerExtender);

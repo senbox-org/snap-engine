@@ -18,14 +18,13 @@ package org.esa.snap.core.util.geotiff;
 import com.sun.media.imageio.plugins.tiff.BaselineTIFFTagSet;
 import com.sun.media.imageio.plugins.tiff.GeoTIFFTagSet;
 import org.esa.snap.core.util.Debug;
+import org.esa.snap.core.util.StringUtils;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.Parent;
 import org.jdom.input.DOMBuilder;
 import org.jdom.output.DOMOutputter;
-import org.jdom.output.Format;
-import org.jdom.output.XMLOutputter;
 
 import javax.imageio.IIOException;
 import javax.imageio.IIOImage;
@@ -196,13 +195,13 @@ public class GeoTIFF {
         final Element element = new DOMBuilder().build(w3cElement);
 
         if (Debug.isEnabled()) {
-            Debug.trace("Dumping original TIFF metadata tree:\n" + toXMLString(element));
+            Debug.trace("Dumping original TIFF metadata tree:\n" + StringUtils.toXMLString(element));
         }
 
         geoTIFFMetadata.assignTo(element, metadataFormatName, classNameList);
 
         if (Debug.isEnabled()) {
-            Debug.trace("Dumping modified GeoTIFF metadata tree:\n" + toXMLString(element));
+            Debug.trace("Dumping modified GeoTIFF metadata tree:\n" + StringUtils.toXMLString(element));
         }
 
         final Parent parent = element.getParent();
@@ -218,25 +217,5 @@ public class GeoTIFF {
         }
 
         return imageMetadata;
-    }
-
-    private static String toXMLString(Element metadataElement) {
-        // following lines uses the old JDOM jar
-//        xmlOutputter.setIndent(true);
-//        xmlOutputter.setIndent("  ");
-//        xmlOutputter.setNewlines(true);
-//        xmlOutputter.setExpandEmptyElements(false);
-//        xmlOutputter.setOmitEncoding(true);
-//        xmlOutputter.setOmitDeclaration(true);
-//        xmlOutputter.setTextNormalize(false);
-        final Format prettyFormat = Format.getPrettyFormat();
-        prettyFormat.setExpandEmptyElements(false);
-        prettyFormat.setOmitEncoding(true);
-        prettyFormat.setOmitDeclaration(true);
-        prettyFormat.setTextMode(Format.TextMode.NORMALIZE);
-
-        final XMLOutputter xmlOutputter = new XMLOutputter(prettyFormat);
-        final String xml = xmlOutputter.outputString(metadataElement);
-        return xml;
     }
 }

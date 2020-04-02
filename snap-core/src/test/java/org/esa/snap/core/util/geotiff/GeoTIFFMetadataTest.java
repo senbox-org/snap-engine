@@ -47,10 +47,7 @@ public class GeoTIFFMetadataTest extends TestCase {
         md.addGeoDoubleParam(1006, 76.4);
         md.addGeoAscii(1007, "My Datum");
 
-        // md.dump();
-
         final Element rootTree = md.createRootTree("whatever");
-
         assertEquals("com_sun_media_imageio_plugins_tiff_image_1.0", rootTree.getName());
 
         final List ifds = rootTree.getChildren();
