@@ -24,6 +24,8 @@ import org.esa.snap.core.util.io.SnapFileFilter;
 import org.esa.snap.csv.dataio.Constants;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.Writer;
 import java.util.Locale;
 
@@ -33,15 +35,16 @@ import java.util.Locale;
  */
 public class CsvProductWriterPlugIn implements ProductWriterPlugIn {
 
-    private Writer writer;
+    private File inputFile;
     private final int config;
 
+    // required for service loader tb 2020-02-28
     public CsvProductWriterPlugIn() {
         this(null, CsvProductWriter.WRITE_FEATURES | CsvProductWriter.WRITE_PROPERTIES);
     }
 
-    public CsvProductWriterPlugIn(Writer writer, int config) {
-        this.writer = writer;
+    public CsvProductWriterPlugIn(File inputFile, int config) {
+        this.inputFile = inputFile;
         this.config = config;
     }
 
@@ -49,7 +52,7 @@ public class CsvProductWriterPlugIn implements ProductWriterPlugIn {
     public EncodeQualification getEncodeQualification(Product product) {
         if (product.isMultiSize()) {
             return new EncodeQualification(EncodeQualification.Preservation.UNABLE,
-                                           "Cannot write multisize products. Consider resampling the product first.");
+                    "Cannot write multisize products. Consider resampling the product first.");
         }
         return new EncodeQualification(EncodeQualification.Preservation.PARTIAL);
     }
@@ -61,6 +64,12 @@ public class CsvProductWriterPlugIn implements ProductWriterPlugIn {
 
     @Override
     public ProductWriter createWriterInstance() {
+        Writer writer;
+        try {
+            writer = new FileWriter(inputFile);
+        } catch (IOException e) {
+            return null;
+        }
         return new CsvProductWriter(this, config, writer);
     }
 

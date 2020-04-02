@@ -23,12 +23,7 @@ import org.esa.snap.core.dataio.ProductIOException;
 import org.esa.snap.dataio.geotiff.internal.GeoKeyEntry;
 import org.esa.snap.dataio.geotiff.internal.GeoKeyHeader;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 class TiffFileInfo {
 
@@ -41,7 +36,7 @@ class TiffFileInfo {
     TiffFileInfo(final TIFFDirectory dir) {
         Assert.notNull(dir);
         final TIFFField[] tiffFields = dir.getTIFFFields();
-        fieldMap = new HashMap<Integer, TIFFField>(tiffFields.length);
+        fieldMap = new HashMap<>(tiffFields.length);
         for (TIFFField tiffField : tiffFields) {
             fieldMap.put(tiffField.getTagNumber(), tiffField);
         }
@@ -51,15 +46,15 @@ class TiffFileInfo {
         return fieldMap.containsKey(GeoTIFFTagSet.TAG_GEO_KEY_DIRECTORY);
     }
 
-    public TIFFField getField(int tagNumber) {
+    TIFFField getField(int tagNumber) {
         return fieldMap.get(tagNumber);
     }
 
-    public boolean containsField(int tagNumber) {
+    boolean containsField(int tagNumber) {
         return fieldMap.containsKey(tagNumber);
     }
 
-    public static double[] getDoubleValues(TIFFField field) {
+    static double[] getDoubleValues(TIFFField field) {
         final int count = field.getCount();
         final double[] doubles = new double[count];
         for (int i = 0; i < doubles.length; i++) {
@@ -68,7 +63,7 @@ class TiffFileInfo {
         return doubles;
     }
 
-    public static String[] getStringValues(TIFFField field) {
+    static String[] getStringValues(TIFFField field) {
         final int count = field.getCount();
         final String[] strings = new String[count];
         for (int i = 0; i < strings.length; i++) {
@@ -77,7 +72,7 @@ class TiffFileInfo {
         return strings;
     }
 
-    public SortedMap<Integer, GeoKeyEntry> getGeoKeyEntries() {
+    SortedMap<Integer, GeoKeyEntry> getGeoKeyEntries() {
         final int[] dirValues = getGeoKeyDirValues();
         final double[] doubleValues = getGeoDoubleParamValues();
         final String[] asciiValues = getGeoAsciiParamValues();
@@ -99,7 +94,7 @@ class TiffFileInfo {
             } else if (tiffTagLocation == TAG_GEO_ASCII_PARAMS___SPOT && asciiValues.length > strIdx) {
                 value = asciiValues[strIdx++];
             } else {
-                value = new Integer(offsetOrValue);
+                value = offsetOrValue;
             }
             map.put(keyId, new GeoKeyEntry(keyId, tiffTagLocation, count, value));
         }
@@ -110,7 +105,6 @@ class TiffFileInfo {
         final int[] dirValues = getGeoKeyDirValues();
         return new GeoKeyHeader(dirValues[0], dirValues[1], dirValues[2], dirValues[3]);
     }
-
 
     private int[] getGeoKeyDirValues() {
         if (!containsField(TAG_GEO_KEY_DIRECTORY___SPOT)) {
@@ -145,5 +139,4 @@ class TiffFileInfo {
         }
         return new String[0];
     }
-
 }

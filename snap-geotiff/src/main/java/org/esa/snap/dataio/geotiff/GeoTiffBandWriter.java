@@ -49,7 +49,7 @@ class GeoTiffBandWriter {
         this.ios = ios;
         tempProduct = product;
         final Band[] bands = tempProduct.getBands();
-        bandsList = new ArrayList<Band>(bands.length);
+        bandsList = new ArrayList<>(bands.length);
         for (Band band : bands) {
             if(Utils.shouldWriteNode(band)) {
                 bandsList.add(band);
@@ -177,6 +177,5 @@ class GeoTiffBandWriter {
 
     private int getStripIndex(Band sourceBand) {
         return bandsList.indexOf(sourceBand);
-//        return tempProduct.getBandIndex(sourceBand.getName());
     }
 }

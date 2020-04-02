@@ -640,6 +640,13 @@
             </dependency>
 
             <dependency>
+                <groupId>org.hamcrest</groupId>
+                <artifactId>hamcrest-library</artifactId>
+                <version>2.2</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-all</artifactId>
                 <version>1.10.17</version>
@@ -746,16 +753,6 @@
                 <enabled>true</enabled>
                 <checksumPolicy>warn</checksumPolicy>
             </snapshots>
-        </repository>
-        <repository>
-            <id>tao-core</id>
-            <name>TAO Core</name>
-            <url>https://raw.githubusercontent.com/tao-org/tao-core/repository</url>
-        </repository>
-        <repository>
-            <id>tao-plugins</id>
-            <name>TAO Plugins</name>
-            <url>https://raw.githubusercontent.com/tao-org/tao-plugins/repository</url>
         </repository>
     </repositories>
 

@@ -17,43 +17,12 @@ package org.esa.snap.core.dataio.dimap;
 
 import org.esa.snap.core.dataio.dimap.spi.DimapPersistable;
 import org.esa.snap.core.dataio.dimap.spi.DimapPersistence;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.BasicPixelGeoCoding;
-import org.esa.snap.core.datamodel.ColorPaletteDef;
-import org.esa.snap.core.datamodel.CrsGeoCoding;
-import org.esa.snap.core.datamodel.FXYGeoCoding;
-import org.esa.snap.core.datamodel.FilterBand;
-import org.esa.snap.core.datamodel.FlagCoding;
-import org.esa.snap.core.datamodel.GcpGeoCoding;
-import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.core.datamodel.IndexCoding;
-import org.esa.snap.core.datamodel.MapGeoCoding;
-import org.esa.snap.core.datamodel.Mask;
-import org.esa.snap.core.datamodel.MetadataAttribute;
-import org.esa.snap.core.datamodel.MetadataElement;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.datamodel.ProductNodeGroup;
-import org.esa.snap.core.datamodel.RasterDataNode;
-import org.esa.snap.core.datamodel.SampleCoding;
-import org.esa.snap.core.datamodel.TiePointGeoCoding;
-import org.esa.snap.core.datamodel.TiePointGrid;
-import org.esa.snap.core.datamodel.VirtualBand;
-import org.esa.snap.core.dataop.maptransf.Datum;
-import org.esa.snap.core.dataop.maptransf.Ellipsoid;
-import org.esa.snap.core.dataop.maptransf.MapInfo;
-import org.esa.snap.core.dataop.maptransf.MapProjection;
-import org.esa.snap.core.dataop.maptransf.MapTransform;
-import org.esa.snap.core.dataop.maptransf.MapTransformDescriptor;
+import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.dataop.maptransf.*;
 import org.esa.snap.core.param.Parameter;
-import org.esa.snap.core.util.Debug;
-import org.esa.snap.core.util.Guardian;
-import org.esa.snap.core.util.StringUtils;
-import org.esa.snap.core.util.SystemUtils;
-import org.esa.snap.core.util.XmlWriter;
+import org.esa.snap.core.util.*;
 import org.jdom.Element;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.operation.MathTransform;
 
 import java.awt.geom.AffineTransform;
 import java.io.File;
@@ -153,7 +122,7 @@ public final class DimapHeaderWriter extends XmlWriter {
             return;
         }
         for (final MetadataAttribute attribute : attributes) {
-            final Vector<String[]> xmlAttribs = new Vector<String[]>();
+            final Vector<String[]> xmlAttribs = new Vector<>();
             xmlAttribs.add(new String[]{DimapProductConstants.ATTRIB_NAME, attribute.getName()});
             final String description = attribute.getDescription();
             if (description != null) {
@@ -204,7 +173,7 @@ public final class DimapHeaderWriter extends XmlWriter {
                     printLine(indent + 2, DimapProductConstants.TAG_BAND_RASTER_WIDTH, band.getRasterWidth());
                     printLine(indent + 2, DimapProductConstants.TAG_BAND_RASTER_HEIGHT, band.getRasterHeight());
                     printLine(indent + 2, DimapProductConstants.TAG_DATA_TYPE,
-                              ProductData.getTypeString(band.getDataType()));
+                            ProductData.getTypeString(band.getDataType()));
                     final String unit = band.getUnit();
                     if (unit != null && unit.length() > 0) {
                         printLine(indent + 2, DimapProductConstants.TAG_PHYSICAL_UNIT, unit);
@@ -212,7 +181,7 @@ public final class DimapHeaderWriter extends XmlWriter {
                     printLine(indent + 2, DimapProductConstants.TAG_SOLAR_FLUX, band.getSolarFlux());
                     if (band.getSpectralBandIndex() > -1) {
                         printLine(indent + 2, DimapProductConstants.TAG_SPECTRAL_BAND_INDEX,
-                                  band.getSpectralBandIndex());
+                                band.getSpectralBandIndex());
                     }
                     printLine(indent + 2, DimapProductConstants.TAG_BAND_WAVELEN, band.getSpectralWavelength());
                     printLine(indent + 2, DimapProductConstants.TAG_BANDWIDTH, band.getSpectralBandwidth());
@@ -343,13 +312,13 @@ public final class DimapHeaderWriter extends XmlWriter {
                             sXmlW.printLine(indent + 3, DimapProductConstants.TAG_LABEL, point.getLabel());
                         }
                         DimapProductHelpers.printColorTag(indent + 3, DimapProductConstants.TAG_COLOR, point.getColor(),
-                                                          sXmlW);
+                                sXmlW);
                         sXmlW.println(cppTags[1]);
                     }
                     DimapProductHelpers.printColorTag(indent + 2, DimapProductConstants.TAG_NO_DATA_COLOR,
-                                                      band.getImageInfo().getNoDataColor(), sXmlW);
+                            band.getImageInfo().getNoDataColor(), sXmlW);
                     sXmlW.printLine(indent + 2, DimapProductConstants.TAG_HISTOGRAM_MATCHING,
-                                    band.getImageInfo().getHistogramMatching().toString());
+                            band.getImageInfo().getHistogramMatching().toString());
                 }
 
                 sXmlW.println(bsTags[1]);
@@ -400,7 +369,7 @@ public final class DimapHeaderWriter extends XmlWriter {
                 printLine(indent + 2, DimapProductConstants.TAG_TIE_POINT_PHYSICAL_UNIT, tiePointGrid.getUnit());
                 printLine(indent + 2, DimapProductConstants.TAG_TIE_POINT_GRID_NAME, tiePointGrid.getName());
                 printLine(indent + 2, DimapProductConstants.TAG_TIE_POINT_DATA_TYPE,
-                          ProductData.getTypeString(tiePointGrid.getDataType()));
+                        ProductData.getTypeString(tiePointGrid.getDataType()));
                 printLine(indent + 2, DimapProductConstants.TAG_TIE_POINT_NCOLS, tiePointGrid.getGridWidth());
                 printLine(indent + 2, DimapProductConstants.TAG_TIE_POINT_NROWS, tiePointGrid.getGridHeight());
                 printLine(indent + 2, DimapProductConstants.TAG_TIE_POINT_OFFSET_X, tiePointGrid.getOffsetX());
@@ -423,9 +392,9 @@ public final class DimapHeaderWriter extends XmlWriter {
             println(daTags[0]);
             printLine(indent + 1, DimapProductConstants.TAG_DATA_FILE_FORMAT, DimapProductConstants.DATA_FILE_FORMAT);
             printLine(indent + 1, DimapProductConstants.TAG_DATA_FILE_FORMAT_DESC,
-                      DimapProductConstants.DATA_FILE_FORMAT_DESCRIPTION);
+                    DimapProductConstants.DATA_FILE_FORMAT_DESCRIPTION);
             printLine(indent + 1, DimapProductConstants.TAG_DATA_FILE_ORGANISATION,
-                      DimapProductConstants.DATA_FILE_ORGANISATION);
+                    DimapProductConstants.DATA_FILE_ORGANISATION);
 
             final Band[] bands = product.getBands();
             for (int i = 0; i < bands.length; i++) {
@@ -470,15 +439,15 @@ public final class DimapHeaderWriter extends XmlWriter {
     protected void writeFlagCoding(int indent) {
         SampleCoding[] a = product.getFlagCodingGroup().toArray(new FlagCoding[0]);
         writeSampleCodings(indent, a, DimapProductConstants.TAG_FLAG_CODING, DimapProductConstants.TAG_FLAG,
-                           DimapProductConstants.TAG_FLAG_NAME, DimapProductConstants.TAG_FLAG_INDEX,
-                           DimapProductConstants.TAG_FLAG_DESCRIPTION);
+                DimapProductConstants.TAG_FLAG_NAME, DimapProductConstants.TAG_FLAG_INDEX,
+                DimapProductConstants.TAG_FLAG_DESCRIPTION);
     }
 
     protected void writeIndexCoding(int indent) {
         SampleCoding[] a = product.getIndexCodingGroup().toArray(new IndexCoding[0]);
         writeSampleCodings(indent, a, DimapProductConstants.TAG_INDEX_CODING, DimapProductConstants.TAG_INDEX,
-                           DimapProductConstants.TAG_INDEX_NAME, DimapProductConstants.TAG_INDEX_VALUE,
-                           DimapProductConstants.TAG_INDEX_DESCRIPTION);
+                DimapProductConstants.TAG_INDEX_NAME, DimapProductConstants.TAG_INDEX_VALUE,
+                DimapProductConstants.TAG_INDEX_DESCRIPTION);
     }
 
     private void writeSampleCodings(int indent, SampleCoding[] a, String tagCoding, String tagFlag, String tagName,
@@ -644,7 +613,7 @@ public final class DimapHeaderWriter extends XmlWriter {
         final Parameter[] parameters = descriptor.getParameters();
 
         printLine(indent, DimapProductConstants.TAG_GEO_TABLES, new String[][]{new String[]{"version", "1.0"}},
-                  "CUSTOM");
+                "CUSTOM");
         final String[] horizontalCsTags = createTags(indent, DimapProductConstants.TAG_HORIZONTAL_CS);
         println(horizontalCsTags[0]);
         ++indent;
@@ -658,7 +627,7 @@ public final class DimapHeaderWriter extends XmlWriter {
         println(horizontalDatumTags[0]);
         ++indent;
         printLine(indent, DimapProductConstants.TAG_HORIZONTAL_DATUM_NAME,
-                  datumName);  // @todo mp - write also DX,DY,DZ
+                datumName);  // @todo mp - write also DX,DY,DZ
         final String[] ellipsoidTags = createTags(indent, DimapProductConstants.TAG_ELLIPSOID);
         println(ellipsoidTags[0]);
         ++indent;
@@ -697,7 +666,7 @@ public final class DimapHeaderWriter extends XmlWriter {
             printLine(indent, DimapProductConstants.TAG_PROJECTION_PARAMETER_NAME, parameters[i].getName());
             paramUnitAttributes[0][1] = parameters[i].getProperties().getPhysicalUnit();
             printLine(indent, DimapProductConstants.TAG_PROJECTION_PARAMETER_VALUE, paramUnitAttributes,
-                      String.valueOf(parameterValues[i]));
+                    String.valueOf(parameterValues[i]));
             println(projectionParameterTags[1]);
         }
         --indent;
@@ -766,7 +735,7 @@ public final class DimapHeaderWriter extends XmlWriter {
         printLine(indent + 1, DimapProductConstants.TAG_SEARCH_RADIUS, searchRadius);
         if (posEstimator != null) {
             final String[] pixelPosEstimatorTags = createTags(indent + 1,
-                                                              DimapProductConstants.TAG_PIXEL_POSITION_ESTIMATOR);
+                    DimapProductConstants.TAG_PIXEL_POSITION_ESTIMATOR);
             println(pixelPosEstimatorTags[0]);
             writeGeoCoding(posEstimator, indent + 2, bandIndex);
             println(pixelPosEstimatorTags[1]);
@@ -885,9 +854,9 @@ public final class DimapHeaderWriter extends XmlWriter {
         indent++;
         final String[][] ellipsoidAttrib = new String[][]{new String[]{DimapProductConstants.ATTRIB_UNIT, "M"}};
         printLine(indent, DimapProductConstants.TAG_ELLIPSOID_MAJ_AXIS,
-                  ellipsoidAttrib, String.valueOf(ellipsoid.getSemiMajor()));
+                ellipsoidAttrib, String.valueOf(ellipsoid.getSemiMajor()));
         printLine(indent, DimapProductConstants.TAG_ELLIPSOID_MIN_AXIS,
-                  ellipsoidAttrib, String.valueOf(ellipsoid.getSemiMinor()));
+                ellipsoidAttrib, String.valueOf(ellipsoid.getSemiMinor()));
         println(ellipsoidParametersTags[1]);
         --indent;
         println(ellipsoidTags[1]);
@@ -966,21 +935,21 @@ public final class DimapHeaderWriter extends XmlWriter {
         final String[] productionTags = createTags(indent, DimapProductConstants.TAG_PRODUCTION);
         println(productionTags[0]);
         printLine(indent + 1, DimapProductConstants.TAG_DATASET_PRODUCER_NAME,
-                  DimapProductConstants.DATASET_PRODUCER_NAME);
+                DimapProductConstants.DATASET_PRODUCER_NAME);
         printLine(indent + 1, DimapProductConstants.TAG_PRODUCT_TYPE, product.getProductType());
         final ProductData.UTC sceneRasterStartTime = product.getStartTime();
         if (sceneRasterStartTime != null) {
             printLine(indent + 1, DimapProductConstants.TAG_PRODUCT_SCENE_RASTER_START_TIME,
-                      sceneRasterStartTime.format());
+                    sceneRasterStartTime.format());
         }
         final ProductData.UTC sceneRasterStopTime = product.getEndTime();
         if (sceneRasterStopTime != null) {
             printLine(indent + 1, DimapProductConstants.TAG_PRODUCT_SCENE_RASTER_STOP_TIME,
-                      sceneRasterStopTime.format());
+                    sceneRasterStopTime.format());
         }
         if (product.getQuicklookBandName() != null) {
             printLine(indent + 1, DimapProductConstants.TAG_QUICKLOOK_BAND_NAME,
-                      product.getQuicklookBandName());
+                    product.getQuicklookBandName());
         }
         println(productionTags[1]);
     }

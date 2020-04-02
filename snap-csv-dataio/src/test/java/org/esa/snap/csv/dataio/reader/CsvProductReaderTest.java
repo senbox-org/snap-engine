@@ -17,13 +17,7 @@
 package org.esa.snap.csv.dataio.reader;
 
 import org.esa.snap.core.dataio.ProductReader;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.MetadataAttribute;
-import org.esa.snap.core.datamodel.MetadataElement;
-import org.esa.snap.core.datamodel.PixelPos;
-import org.esa.snap.core.datamodel.PixelTimeCoding;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.csv.dataio.Constants;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -35,12 +29,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * @author Olaf Danne
@@ -160,7 +149,7 @@ public class CsvProductReaderTest {
     }
 
     @Test
-    public void testInvalidInput() throws Exception {
+    public void testInvalidInput() {
         try {
             ((CsvProductReader) reader).getProductData(null, new ProductData.UTC());
             fail();
@@ -170,15 +159,27 @@ public class CsvProductReaderTest {
     }
 
     @Test
-    public void testGetDataType() throws Exception {
+    public void testGetDataType() {
         assertEquals(ProductData.TYPE_ASCII, ((CsvProductReader) reader).getProductDataType(String.class));
         assertEquals(ProductData.TYPE_FLOAT32, ((CsvProductReader) reader).getProductDataType(Float.class));
         assertEquals(ProductData.TYPE_FLOAT64, ((CsvProductReader) reader).getProductDataType(Double.class));
         assertEquals(ProductData.TYPE_INT8, ((CsvProductReader) reader).getProductDataType(Byte.class));
+        assertEquals(ProductData.TYPE_INT16, ((CsvProductReader) reader).getProductDataType(Short.class));
+        assertEquals(ProductData.TYPE_INT32, ((CsvProductReader) reader).getProductDataType(Integer.class));
+        assertEquals(ProductData.TYPE_UTC, ((CsvProductReader) reader).getProductDataType(ProductData.UTC.class));
     }
 
     @Test
-    public void testIsSquareNumber() throws Exception {
+    public void testGetDataType_illegal() {
+        try {
+            ((CsvProductReader) reader).getProductDataType(Object.class);
+            fail("IllegalArgumentException expected");
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    @Test
+    public void testIsSquareNumber() {
         assertTrue(CsvProductReader.isSquareNumber(1));
         assertTrue(CsvProductReader.isSquareNumber(4));
         assertTrue(CsvProductReader.isSquareNumber(9));
@@ -319,7 +320,6 @@ public class CsvProductReaderTest {
         assertEquals("01-JUN-2013 12:45:00.000000", getTimeString(timeCoding, 0.5, 1.5));
         assertEquals("NaN", Double.toString(timeCoding.getMJD(new PixelPos(1.5, 1.5))));
     }
-
 
 
     private String getTimeString(PixelTimeCoding timeCoding, double x, double y) {

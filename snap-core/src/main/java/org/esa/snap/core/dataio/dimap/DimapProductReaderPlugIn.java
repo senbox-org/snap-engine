@@ -163,7 +163,7 @@ public class DimapProductReaderPlugIn implements ProductReaderPlugIn {
             return;
         }
         if (readerExtenders == null) {
-            readerExtenders = new ArrayList<DimapProductReader.ReaderExtender>();
+            readerExtenders = new ArrayList<>();
         }
         readerExtenders.add(extender);
     }

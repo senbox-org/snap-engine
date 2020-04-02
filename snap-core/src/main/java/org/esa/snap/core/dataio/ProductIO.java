@@ -20,14 +20,23 @@ import com.bc.ceres.core.SubProgressMonitor;
 import org.esa.snap.core.dataio.dimap.DimapProductConstants;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.Guardian;
+import org.esa.snap.core.util.StopWatch;
+import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.runtime.EngineConfig;
 
+import javax.media.jai.PlanarImage;
+import java.awt.*;
+import java.awt.image.Raster;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -53,6 +62,11 @@ public class ProductIO {
      * The name of the default product format.
      */
     public static final String DEFAULT_FORMAT_NAME = DimapProductConstants.DIMAP_FORMAT_NAME;
+
+    public static final String SYSTEM_PROPERTY_CONCURRENT = "snap.productio.concurrent";
+
+    private static final boolean concurrent = Boolean.parseBoolean(System.getProperty(SYSTEM_PROPERTY_CONCURRENT, "true"));
+
 
     /**
      * Gets a product reader for the given format name.
@@ -215,7 +229,7 @@ public class ProductIO {
      * {@link Band#getRasterData() Band.rasterData} will always be null
      * for all bands in the product returned by this method.
      *
-     * @param file the data product file
+     * @param file      the data product file
      * @param subsetDef the subset of a product
      *
      * @return a data model as an in-memory representation of the given product file or <code>null</code> if no
@@ -418,8 +432,20 @@ public class ProductIO {
 
         IOException ioException = null;
         try {
+            long s;
+            long e;
+            s = System.currentTimeMillis();
             productWriter.writeProductNodes(product, file);
+            e = System.currentTimeMillis();
+            long t1 = e - s;
+            System.out.println("write product nodes to " + file.getAbsolutePath() + " took " + StopWatch.getTimeString(t1));
+
+            s = System.currentTimeMillis();
             writeAllBands(product, pm);
+            e = System.currentTimeMillis();
+            long t2 = e - s;
+            System.out.println("write all bands of product " + file.getAbsolutePath() + " took " + StopWatch.getTimeString(t2));
+            System.out.println("Write entire product " + file.getAbsolutePath() + " took " + StopWatch.getTimeString(t1 + t2));
         } catch (IOException e) {
             ioException = e;
         } finally {
@@ -450,7 +476,7 @@ public class ProductIO {
 
         // for correct progress indication we need to collect
         // all bands which shall be written to the output
-        ArrayList<Band> bandsToWrite = new ArrayList<Band>();
+        ArrayList<Band> bandsToWrite = new ArrayList<>();
         for (int i = 0; i < product.getNumBands(); i++) {
             Band band = product.getBandAt(i);
             if (productWriter.shouldWrite(band)) {
@@ -461,12 +487,10 @@ public class ProductIO {
         if (!bandsToWrite.isEmpty()) {
             pm.beginTask("Writing bands of product '" + product.getName() + "'...", bandsToWrite.size());
             try {
-                for (Band band : bandsToWrite) {
-                    if (pm.isCanceled()) {
-                        break;
-                    }
-                    pm.setSubTaskName("Writing band '" + band.getName() + "'");
-                    band.writeRasterDataFully(SubProgressMonitor.create(pm, 1));
+                if (concurrent) {
+                    writeBandsConcurrent(pm, bandsToWrite);
+                } else {
+                    writeBandsSequentially(pm, bandsToWrite);
                 }
             } finally {
                 pm.done();
@@ -474,9 +498,142 @@ public class ProductIO {
         }
     }
 
+    private static void writeBandsConcurrent(ProgressMonitor pm, ArrayList<Band> bandsToWrite) throws IOException {
+        final int numBands = bandsToWrite.size();
+        final int numThreads = Runtime.getRuntime().availableProcessors();
+        final int threadsPerBand = numThreads / numBands;
+        final int executorSize = threadsPerBand == 0 ? 1 : threadsPerBand;
+        Semaphore semaphore = new Semaphore(numThreads);
+        List<IOException> ioExceptionCollector = Collections.unmodifiableList(new ArrayList<>());
+        for (Band band : bandsToWrite) {
+            if (pm.isCanceled()) {
+                break;
+            }
+            ExecutorService executor = null;
+            semaphore.acquireUninterruptibly();
+            executor = Executors.newFixedThreadPool(executorSize);
+            pm.setSubTaskName("Writing band '" + band.getName() + "'");
+            ProgressMonitor subPM = SubProgressMonitor.create(pm, 1);
+            writeRasterDataFully(subPM, band, executor, semaphore, ioExceptionCollector);
+        }
+        while (semaphore.availablePermits() < numThreads) {
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                EngineConfig.instance().logger().log(Level.WARNING,
+                                                     "Method ProductIO.writeAllBands(...)' unexpected termination", e);
+            }
+        }
+        for (IOException e : ioExceptionCollector) {
+            SystemUtils.LOG.log(Level.SEVERE, e.getMessage(), e);
+        }
+        if (ioExceptionCollector.size() > 0) {
+            IOException ioException = ioExceptionCollector.get(0);
+            throw ioException;
+        }
+    }
+
+    private static void writeBandsSequentially(ProgressMonitor pm, ArrayList<Band> bandsToWrite) throws IOException {
+        for (Band band : bandsToWrite) {
+            if (pm.isCanceled()) {
+                break;
+            }
+            pm.setSubTaskName("Writing band '" + band.getName() + "'");
+            ProgressMonitor subPM = SubProgressMonitor.create(pm, 1);
+            writeRasterDataFully(subPM, band, null, null, null);
+        }
+    }
+
     /**
      * Constructor. Private, in order to prevent instantiation.
      */
     private ProductIO() {
+    }
+
+    private static void writeRasterDataFully(ProgressMonitor pm, Band band, ExecutorService executor, Semaphore semaphore, List<IOException> ioExceptionCollector) throws IOException {
+        if (band.hasRasterData()) {
+            band.writeRasterData(0, 0, band.getRasterWidth(), band.getRasterHeight(), band.getRasterData(), pm);
+            if (semaphore!=null) {
+                semaphore.release();
+            }
+        } else {
+            final PlanarImage sourceImage = band.getSourceImage();
+            final Point[] tileIndices = sourceImage.getTileIndices(
+                    new Rectangle(0, 0, sourceImage.getWidth(), sourceImage.getHeight()));
+            int numTiles = tileIndices.length;
+            pm.beginTask("Writing raster data...", numTiles);
+            if (executor != null) {
+//                Finisher finisher = new Finisher(band.getName(), pm, semaphore, executor, numTiles);
+                Finisher finisher = new Finisher(pm, semaphore, executor, numTiles);
+                for (Point tileIndex : tileIndices) {
+                    executor.execute(() -> {
+                        try {
+                            if (pm.isCanceled()) {
+                                return;
+                            }
+                            writeTile(sourceImage, tileIndex, band);
+                        } catch (IOException e) {
+                            ioExceptionCollector.add(e);
+                            pm.setCanceled(true);
+                        } finally {
+                            finisher.worked();
+                        }
+                    });
+                }
+            } else {
+                for (final Point tileIndex : tileIndices) {
+                    if (pm.isCanceled()) {
+                        break;
+                    }
+                    writeTile(sourceImage, tileIndex, band);
+                    pm.worked(1);
+                }
+            }
+        }
+    }
+
+    private static void writeTile(PlanarImage sourceImage, Point tileIndex, Band band) throws IOException {
+        final Rectangle rect = sourceImage.getTileRect(tileIndex.x, tileIndex.y);
+        if (!rect.isEmpty()) {
+            final Raster data = sourceImage.getData(rect);
+            final ProductData rasterData = band.createCompatibleRasterData(rect.width, rect.height);
+            data.getDataElements(rect.x, rect.y, rect.width, rect.height, rasterData.getElems());
+            band.writeRasterData(rect.x, rect.y, rect.width, rect.height, rasterData, ProgressMonitor.NULL);
+        }
+    }
+
+    private static class Finisher {
+
+        private final ProgressMonitor pm;
+        //        private final String name;
+        private final Semaphore semaphore;
+        private final ExecutorService executor;
+        private final int work;
+        private int counter;
+
+        public Finisher(ProgressMonitor pm, Semaphore semaphore, ExecutorService executor, int counter) {
+//        public Finisher(String name, ProgressMonitor pm, Semaphore semaphore, ExecutorService executor, int counter) {
+//            this.name = name;
+//            System.out.println(name + "  NumTiles = " + counter);
+            this.pm = pm;
+            this.semaphore = semaphore;
+            this.executor = executor;
+            this.work = counter;
+
+        }
+
+        public synchronized void worked() {
+            pm.worked(1);
+            counter++;
+//            System.out.println(name + ":counter = " + counter);
+            if (counter == work) {
+//                System.out.println("************************************");
+//                System.out.println(name +" finished");
+//                System.out.println("************************************");
+                semaphore.release();
+                executor.shutdown();
+                pm.done();
+            }
+        }
     }
 }

@@ -15,15 +15,11 @@
  */
 package org.esa.snap.dataio.netcdf.metadata.profiles.cf;
 
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.CrsGeoCoding;
-import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.core.datamodel.GeoCodingFactory;
-import org.esa.snap.core.datamodel.GeoPos;
-import org.esa.snap.core.datamodel.MapGeoCoding;
-import org.esa.snap.core.datamodel.PixelPos;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.dataio.geocoding.*;
+import org.esa.snap.core.dataio.geocoding.forward.PixelForward;
+import org.esa.snap.core.dataio.geocoding.inverse.PixelQuadTreeInverse;
+import org.esa.snap.core.dataio.geocoding.util.RasterUtils;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.dataio.netcdf.ProfileReadContext;
@@ -43,7 +39,7 @@ import ucar.ma2.Index;
 import ucar.nc2.Attribute;
 import ucar.nc2.Variable;
 
-import java.awt.Dimension;
+import java.awt.*;
 import java.io.IOException;
 import java.util.List;
 
@@ -193,7 +189,7 @@ public class CfGeocodingPart extends ProfilePartIO {
 
     static boolean isGeographicCRS(final GeoCoding geoCoding) {
         return (geoCoding instanceof CrsGeoCoding || geoCoding instanceof MapGeoCoding) &&
-               CRS.equalsIgnoreMetadata(geoCoding.getMapCRS(), DefaultGeographicCRS.WGS84);
+                CRS.equalsIgnoreMetadata(geoCoding.getMapCRS(), DefaultGeographicCRS.WGS84);
     }
 
     private void addGeographicCoordinateVariables(NFileWriteable ncFile, GeoPos ul, GeoPos br, String latVarName, String lonVarName) throws IOException {
@@ -256,8 +252,8 @@ public class CfGeocodingPart extends ProfilePartIO {
             if (rasterDim.fitsTo(lonVariable, latVariable)) {
                 try {
                     return createConventionBasedMapGeoCoding(lonVariable, latVariable,
-                                                             product.getSceneRasterWidth(),
-                                                             product.getSceneRasterHeight(), ctx);
+                            product.getSceneRasterWidth(),
+                            product.getSceneRasterHeight(), ctx);
                 } catch (Exception e) {
                     SystemUtils.LOG.warning("Failed to create NetCDF geo-coding");
                 }
@@ -328,10 +324,10 @@ public class CfGeocodingPart extends ProfilePartIO {
         }
         ctx.setProperty(Constants.Y_FLIPPED_PROPERTY_NAME, yFlipped);
         return new CrsGeoCoding(DefaultGeographicCRS.WGS84,
-                                sceneRasterWidth, sceneRasterHeight,
-                                easting, northing,
-                                pixelSizeX, pixelSizeY,
-                                pixelX, pixelY);
+                sceneRasterWidth, sceneRasterHeight,
+                easting, northing,
+                pixelSizeX, pixelSizeY,
+                pixelX, pixelY);
     }
 
     static boolean isGlobalShifted180(Array lonData) {
@@ -368,9 +364,28 @@ public class CfGeocodingPart extends ProfilePartIO {
             latBand = product.getBand(Constants.LATITUDE_VAR_NAME);
         }
         if (latBand != null && lonBand != null) {
-            return GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, latBand.getValidMaskExpression(), 5);
+//            return GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, latBand.getValidMaskExpression(), 5);
+            final int width = product.getSceneRasterWidth();
+            final int height = product.getSceneRasterHeight();
+
+//            final double[] longitudes = RasterUtils.loadDataScaled(lonBand);
+//            final double[] latitudes = RasterUtils.loadDataScaled(latBand);
+            final int fullSize = width * height;
+            double[] longitudes = lonBand.getSourceImage().getData().getSamples(0, 0, width, height, 0, new double[fullSize]);
+            double[] latitudes = latBand.getSourceImage().getData().getSamples(0, 0, width, height, 0, new double[fullSize]);
+
+            final double resolutionInKm = RasterUtils.computeResolutionInKm(lonBand, latBand);
+
+            final GeoRaster geoRaster = new GeoRaster(longitudes, latitudes, lonBand.getName(), latBand.getName(),
+                    width, height, resolutionInKm);
+
+            final ForwardCoding forward = ComponentFactory.getForward(PixelForward.KEY);
+            final InverseCoding inverse = ComponentFactory.getInverse(PixelQuadTreeInverse.KEY);
+
+            final ComponentGeoCoding geoCoding = new ComponentGeoCoding(geoRaster, forward, inverse, GeoChecks.ANTIMERIDIAN);
+            geoCoding.initialize();
+            return geoCoding;
         }
         return null;
     }
-
 }
