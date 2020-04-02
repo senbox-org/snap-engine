@@ -74,7 +74,7 @@ public class ColorBarLayerType extends LayerType {
 
 
     public static final String PROPERTY_LABEL_VALUES_COUNT_KEY = PROPERTY_LABEL_VALUES_ROOT_KEY + ".count";
-    public static final String PROPERTY_LABEL_VALUES_COUNT_LABEL = "Tickmark Count (Auto)";
+    public static final String PROPERTY_LABEL_VALUES_COUNT_LABEL = "Tick Mark Count";
     public static final String PROPERTY_LABEL_VALUES_COUNT_TOOLTIP = "Number of tickmarks";
     public static final String PROPERTY_LABEL_VALUES_COUNT_ALIAS = PROPERTY_LABEL_VALUES_ROOT_ALIAS + "Count";
     public static final int PROPERTY_LABEL_VALUES_COUNT_DEFAULT = 5;
@@ -94,7 +94,7 @@ public class ColorBarLayerType extends LayerType {
     public static final Class PROPERTY_LABEL_VALUES_ACTUAL_TYPE = String.class;
 
     public static final String PROPERTY_LABEL_VALUES_SCALING_KEY = PROPERTY_LABEL_VALUES_ROOT_KEY + ".scaling.factor";
-    public static final String PROPERTY_LABEL_VALUES_SCALING_LABEL = "Tickmark Value Scaling Factor";
+    public static final String PROPERTY_LABEL_VALUES_SCALING_LABEL = "Scaling Factor";
     public static final String PROPERTY_LABEL_VALUES_SCALING_TOOLTIP = "Tickmark labels will be displayed after multiplication with this scaling factor";
     public static final String PROPERTY_LABEL_VALUES_SCALING_ALIAS = PROPERTY_LABEL_VALUES_ROOT_ALIAS + "ScalingFactor";
     public static final double PROPERTY_LABEL_VALUES_SCALING_DEFAULT = 1.0;
@@ -239,12 +239,27 @@ public class ColorBarLayerType extends LayerType {
     public static final boolean PROPERTY_IMAGE_SCALING_APPLY_SIZE_DEFAULT = true;
     public static final Class PROPERTY_IMAGE_SCALING_APPLY_SIZE_TYPE = Boolean.class;
 
-    public static final String PROPERTY_IMAGE_SCALING_SIZE_NAME = PROPERTY_IMAGE_SCALING_ROOT_KEY + ".size";
+    public static final String PROPERTY_IMAGE_SCALING_SIZE_KEY = PROPERTY_IMAGE_SCALING_ROOT_KEY + ".size";
     public static final String PROPERTY_IMAGE_SCALING_SIZE_LABEL = "Image Scaling (%)";
     public static final String PROPERTY_IMAGE_SCALING_SIZE_TOOLTIP = "Percent to scale color bar relative to the scene image size";
     private static final String PROPERTY_IMAGE_SCALING_SIZE_ALIAS = PROPERTY_IMAGE_SCALING_ROOT_ALIAS + "Size";
     public static final double PROPERTY_IMAGE_SCALING_SIZE_DEFAULT = 50.0;
     public static final Class PROPERTY_IMAGE_SCALING_SIZE_TYPE = Double.class;
+
+    public static final String PROPERTY_LEGEND_LENGTH_KEY = PROPERTY_IMAGE_SCALING_ROOT_KEY + ".legend.length";
+    public static final String PROPERTY_LEGEND_LENGTH_LABEL = "Legend Length";
+    public static final String PROPERTY_LEGEND_LENGTH_TOOLTIP = "Length in pixels of the color bar";
+    private static final String PROPERTY_LEGEND_LENGTH_ALIAS = PROPERTY_IMAGE_SCALING_ROOT_ALIAS + "Legend Length";
+    public static final int PROPERTY_LEGEND_LENGTH_DEFAULT = 1200;
+    public static final Class PROPERTY_LEGEND_LENGTH_TYPE = Integer.class;
+
+    public static final String PROPERTY_LEGEND_WIDTH_KEY = PROPERTY_IMAGE_SCALING_ROOT_KEY + ".legend.width";
+    public static final String PROPERTY_LEGEND_WIDTH_LABEL = "Legend Width";
+    public static final String PROPERTY_LEGEND_WIDTH_TOOLTIP = "Width in pixels of the color bar";
+    private static final String PROPERTY_LEGEND_WIDTH_ALIAS = PROPERTY_IMAGE_SCALING_ROOT_ALIAS + "LegendWidth";
+    public static final int PROPERTY_LEGEND_WIDTH_DEFAULT = 60;
+    public static final Class PROPERTY_LEGEND_WIDTH_TYPE = Integer.class;
+
 
     
 
@@ -693,15 +708,22 @@ public class ColorBarLayerType extends LayerType {
         final Property scalingSectionModel = Property.create(PROPERTY_IMAGE_SCALING_SECTION_NAME, Boolean.class, true, true);
         scalingSectionModel.getDescriptor().setAlias(PROPERTY_IMAGE_SCALING_SECTION_ALIAS);
         vc.addProperty(scalingSectionModel);
-//
-//        final Property locationApplySizeScalingModel = Property.create(PROPERTY_IMAGE_SCALING_APPLY_SIZE_NAME, PROPERTY_IMAGE_SCALING_APPLY_SIZE_TYPE, true, true);
-//        locationApplySizeScalingModel.getDescriptor().setAlias(PROPERTY_IMAGE_SCALING_APPLY_SIZE_ALIAS);
-//        vc.addProperty(locationApplySizeScalingModel);
 
-        final Property locationSizeScalingModel = Property.create(PROPERTY_IMAGE_SCALING_SIZE_NAME, ColorBarLayerType.PROPERTY_IMAGE_SCALING_SIZE_TYPE, true, true);
+        final Property locationApplySizeScalingModel = Property.create(PROPERTY_IMAGE_SCALING_APPLY_SIZE_NAME, PROPERTY_IMAGE_SCALING_APPLY_SIZE_TYPE, true, true);
+        locationApplySizeScalingModel.getDescriptor().setAlias(PROPERTY_IMAGE_SCALING_APPLY_SIZE_ALIAS);
+        vc.addProperty(locationApplySizeScalingModel);
+
+        final Property locationSizeScalingModel = Property.create(PROPERTY_IMAGE_SCALING_SIZE_KEY, ColorBarLayerType.PROPERTY_IMAGE_SCALING_SIZE_TYPE, true, true);
         locationSizeScalingModel.getDescriptor().setAlias(PROPERTY_IMAGE_SCALING_SIZE_ALIAS);
         vc.addProperty(locationSizeScalingModel);
 
+        final Property legendLengthModel = Property.create(PROPERTY_LEGEND_LENGTH_KEY, ColorBarLayerType.PROPERTY_LEGEND_LENGTH_TYPE, true, true);
+        legendLengthModel.getDescriptor().setAlias(PROPERTY_LEGEND_LENGTH_ALIAS);
+        vc.addProperty(legendLengthModel);
+
+        final Property legendWidthModel = Property.create(PROPERTY_LEGEND_WIDTH_KEY, ColorBarLayerType.PROPERTY_LEGEND_WIDTH_TYPE, true, true);
+        legendWidthModel.getDescriptor().setAlias(PROPERTY_LEGEND_WIDTH_ALIAS);
+        vc.addProperty(legendWidthModel);
 
 
 

@@ -149,8 +149,8 @@ public class ColorBarLayer extends Layer {
 
             imageLegend.setLabelsColor(getLabelsColor());
             imageLegend.setAntialiasing((Boolean) true);
-            imageLegend.setColorBarLength((Integer) 1200);
-            imageLegend.setColorBarThickness((Integer) 60);
+            imageLegend.setColorBarLength(getLegendLength());
+            imageLegend.setColorBarThickness(getLegendWidth());
             imageLegend.setLabelsFontSize((Integer) getFontSizePixels());
             imageLegend.setLayerScaling((Double) getSizeScaling());
 
@@ -850,17 +850,27 @@ public class ColorBarLayer extends Layer {
 
 
     private boolean applySizeScaling() {
-        return true;
-//        return getConfigurationProperty(ColorBarLayerType.PROPERTY_IMAGE_SCALING_APPLY_SIZE_NAME,
-//                ColorBarLayerType.PROPERTY_IMAGE_SCALING_APPLY_SIZE_DEFAULT);
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_IMAGE_SCALING_APPLY_SIZE_NAME,
+                ColorBarLayerType.PROPERTY_IMAGE_SCALING_APPLY_SIZE_DEFAULT);
     }
 
 
     private Double getSizeScaling() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_IMAGE_SCALING_SIZE_NAME,
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_IMAGE_SCALING_SIZE_KEY,
                 ColorBarLayerType.PROPERTY_IMAGE_SCALING_SIZE_DEFAULT);
     }
 
+
+    private int getLegendLength() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LEGEND_LENGTH_KEY,
+                ColorBarLayerType.PROPERTY_LEGEND_LENGTH_DEFAULT);
+    }
+
+
+    private int getLegendWidth() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LEGEND_WIDTH_KEY,
+                ColorBarLayerType.PROPERTY_LEGEND_WIDTH_DEFAULT);
+    }
 
 
 
