@@ -207,7 +207,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_LOCATION_PLACEMENT_KEY = PROPERTY_LOCATION_ROOT_KEY + ".anchor";
     public static final String PROPERTY_LOCATION_PLACEMENT_LABEL = "Anchor";
     public static final String PROPERTY_LOCATION_PLACEMENT_TOOLTIP = "Where to place color bar on image";
-    private static final String PROPERTY_LOCATION_PLACEMENT_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "Placement";
+    private static final String PROPERTY_LOCATION_PLACEMENT_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "Anchor";
     public static final String PROPERTY_LOCATION_PLACEMENT_DEFAULT = LOCATION_LOWER_RIGHT;
     public static final Class PROPERTY_LOCATION_PLACEMENT_TYPE = String.class;
 
@@ -224,6 +224,29 @@ public class ColorBarLayerType extends LayerType {
     private static final String PROPERTY_LOCATION_SHIFT_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "Shift";
     public static final Double PROPERTY_LOCATION_SHIFT_DEFAULT = 0.0;
     public static final Class PROPERTY_LOCATION_SHIFT_TYPE = Double.class;
+
+
+    public static final String VERTICAL_TITLE_LEFT = "Left";
+    public static final String VERTICAL_TITLE_RIGHT = "Right";
+    public static final String VERTICAL_TITLE_TOP = "Top";
+    public static final String VERTICAL_TITLE_BOTTOM = "Bottom";
+
+
+    public static Object[] VERTICAL_TITLE_LOCATION_VALUE_SET = {
+            VERTICAL_TITLE_LEFT,
+            VERTICAL_TITLE_RIGHT,
+            VERTICAL_TITLE_TOP,
+            VERTICAL_TITLE_BOTTOM
+    };
+
+    public static final String PROPERTY_TITLE_VERTICAL_LOCATION_KEY = PROPERTY_LOCATION_ROOT_KEY + "title.vertical.anchor";
+    public static final String PROPERTY_TITLE_VERTICAL_LOCATION_LABEL = "Title Anchor";
+    public static final String PROPERTY_TITLE_VERTICAL_LOCATION_TOOLTIP = "Where to place title on vertical legend";
+    private static final String PROPERTY_TITLE_VERTICAL_LOCATION_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "TitleVerticalAnchor";
+    public static final String PROPERTY_TITLE_VERTICAL_LOCATION_DEFAULT = LOCATION_LOWER_RIGHT;
+    public static final Class PROPERTY_TITLE_VERTICAL_LOCATION_TYPE = String.class;
+    public static final Object PROPERTY_TITLE_VERTICAL_LOCATION_VALUE_SET[] = VERTICAL_TITLE_LOCATION_VALUE_SET;
+
 
 
 
@@ -693,9 +716,18 @@ public class ColorBarLayerType extends LayerType {
         locationInsideModel.getDescriptor().setAlias(PROPERTY_LOCATION_INSIDE_ALIAS);
         vc.addProperty(locationInsideModel);
 
-        final Property locationEdgeModel = Property.create(PROPERTY_LOCATION_PLACEMENT_KEY, PROPERTY_LOCATION_PLACEMENT_TYPE, true, true);
+        final Property locationEdgeModel = Property.create(PROPERTY_LOCATION_PLACEMENT_KEY,
+                PROPERTY_LOCATION_PLACEMENT_TYPE, true, true);
         locationEdgeModel.getDescriptor().setAlias(PROPERTY_LOCATION_PLACEMENT_ALIAS);
         vc.addProperty(locationEdgeModel);
+
+        final Property titleVerticalAnchorModel = Property.create(PROPERTY_TITLE_VERTICAL_LOCATION_KEY,
+                PROPERTY_TITLE_VERTICAL_LOCATION_TYPE, true, true);
+        titleVerticalAnchorModel.getDescriptor().setAlias(PROPERTY_TITLE_VERTICAL_LOCATION_ALIAS);
+        vc.addProperty(titleVerticalAnchorModel);
+
+
+
 
 
         final Property locationOffsetModel = Property.create(PROPERTY_LOCATION_OFFSET_KEY, PROPERTY_LOCATION_OFFSET_TYPE, true, true);

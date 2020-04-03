@@ -96,6 +96,10 @@ public class ColorBarLayer extends Layer {
 
 
 
+            imageLegend.setTitleVerticalAnchor(getTitleVerticalAnchor());
+
+
+
             imageLegend.setShowTitle(isShowTitleParameter());
             imageLegend.setHeaderText(title);
             imageLegend.setTitleFontSize(getTitleParameterFontSize());
@@ -709,6 +713,15 @@ public class ColorBarLayer extends Layer {
         return getConfigurationProperty(ColorBarLayerType.PROPERTY_LOCATION_PLACEMENT_KEY,
                 ColorBarLayerType.PROPERTY_LOCATION_PLACEMENT_DEFAULT);
     }
+
+
+    private String getTitleVerticalAnchor() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_VERTICAL_LOCATION_KEY,
+                ColorBarLayerType.PROPERTY_TITLE_VERTICAL_LOCATION_DEFAULT);
+    }
+
+
+
 
 
     private Double getLocationOffset() {

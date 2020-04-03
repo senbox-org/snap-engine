@@ -102,6 +102,9 @@ public class ImageLegend {
     private int numberOfTicks;
     private Color foregroundColor;
 
+
+    private String titleVerticalAnchor;
+
     private boolean reversePalette = true;
 
     private Color tickmarkColor;
@@ -168,7 +171,6 @@ public class ImageLegend {
     private int palettePosStart;
     private int palettePosEnd;
     private ArrayList<ColorBarInfo> colorBarInfos = new ArrayList<ColorBarInfo>();
-
 
 
     public ImageLegend(ImageInfo imageInfo, RasterDataNode raster) {
@@ -502,7 +504,7 @@ public class ImageLegend {
 //        }
 
 
-        if (getFullCustomAddThesePoints() == null || getFullCustomAddThesePoints().length() ==0) {
+        if (getFullCustomAddThesePoints() == null || getFullCustomAddThesePoints().length() == 0) {
             // this will initialize the points
             distributeEvenly();
         }
@@ -618,7 +620,7 @@ public class ImageLegend {
 
         g2dTmp.setFont(getLabelsFont());
 
-        Dimension headerRequiredDimension = getTitleRequiredDimension(g2dTmp);
+        Dimension headerRequiredDimension = getTitleRequiredDimension(g2dTmp, false);
 
         double discreteBooster = 0;
         final int n = getNumGradationCurvePoints();
@@ -720,11 +722,40 @@ public class ImageLegend {
             int labelOverhangHeight = (int) Math.ceil(firstLabelHeight / 2.0);
 
 
-            paletteRect = new Rectangle(getBorderGap(),
-                    getBorderGap() + labelOverhangHeight,
-                    getColorBarThickness(),
+
+
+            if (ColorBarLayerType.VERTICAL_TITLE_TOP.equals(getTitleVerticalAnchor())) {
+                paletteRect = new Rectangle(getBorderGap(),
+                        getBorderGap() + labelOverhangHeight,
+                        getColorBarThickness(),
 //                    MIN_VERTICAL_COLORBAR_WIDTH,
-                    legendSize.height - getBorderGap() - getBorderGap() - labelOverhangHeight - labelOverhangHeight);
+                        legendSize.height - getBorderGap() - getBorderGap() - labelOverhangHeight - labelOverhangHeight);
+
+            } else if (ColorBarLayerType.VERTICAL_TITLE_BOTTOM.equals(getTitleVerticalAnchor())) {
+                paletteRect = new Rectangle(getBorderGap(),
+                        getBorderGap() + labelOverhangHeight,
+                        getColorBarThickness(),
+//                    MIN_VERTICAL_COLORBAR_WIDTH,
+                        legendSize.height - getBorderGap() - getBorderGap() - labelOverhangHeight - labelOverhangHeight);
+
+            } else if (ColorBarLayerType.VERTICAL_TITLE_LEFT.equals(getTitleVerticalAnchor())) {
+                paletteRect = new Rectangle(getBorderGap() + headerRequiredDimension.height + getHeaderGap(),
+                        getBorderGap() + labelOverhangHeight,
+                        getColorBarThickness(),
+//                    MIN_VERTICAL_COLORBAR_WIDTH,
+                        legendSize.height - getBorderGap() - getBorderGap() - labelOverhangHeight - labelOverhangHeight);
+
+
+            } else { // VERTICAL_TITLE_RIGHT
+                paletteRect = new Rectangle(getBorderGap(),
+                        getBorderGap() + labelOverhangHeight,
+                        getColorBarThickness(),
+//                    MIN_VERTICAL_COLORBAR_WIDTH,
+                        legendSize.height - getBorderGap() - getBorderGap() - labelOverhangHeight - labelOverhangHeight);
+
+            }
+
+
 
 
 //            int paletteGap = 0;
@@ -753,8 +784,9 @@ public class ImageLegend {
         if (isBackdropShow()) {
             fillBackground(g2d);
         }
-        drawHeaderText(g2d);
         drawPalette(g2d);
+
+        drawHeaderText(g2d);
 
         if (isLabelsShow()) {
             drawLabelsAndTickMarks(g2d);
@@ -774,12 +806,20 @@ public class ImageLegend {
     }
 
 
-    private Dimension getTitleRequiredDimension(Graphics2D g2d) {
+    private Dimension getTitleRequiredDimension(Graphics2D g2d, boolean lineBreak) {
 
         double width = 0;
         double height = 0;
+
         double titleParameterHeight = 0;
         double titleUnitsHeight = 0;
+        double titleParameterWidth = 0;
+        double titleUnitsWidth = 0;
+
+        double vertical_gap_factor = 0.3;
+        double horizontal_gap = 0;
+        double vertical_gap = 0;
+
 
 
         if (hasTitleParameter() || hasTitleUnits()) {
@@ -794,6 +834,7 @@ public class ImageLegend {
 
                 Rectangle2D headerTextRectangle = g2d.getFontMetrics().getStringBounds(getTitleParameterText(), g2d);
                 width += headerTextRectangle.getWidth();
+                titleParameterWidth = headerTextRectangle.getWidth();
 
 
                 if (hasTitleUnits()) {
@@ -808,20 +849,38 @@ public class ImageLegend {
 
                 Rectangle2D unitsTextRectangle = g2d.getFontMetrics().getStringBounds(getParameterUnitsText(), g2d);
                 width += unitsTextRectangle.getWidth();
+                titleUnitsWidth = unitsTextRectangle.getWidth();
+                horizontal_gap = HORIZONTAL_TITLE_PARAMETER_UNITS_GAP_FACTOR * singleLetter.getWidth();
+                vertical_gap = vertical_gap_factor * titleUnitsHeight;
             }
 
 
+            if (hasTitleParameter() && hasTitleUnits()) {
+                if (lineBreak) {
+                    height = titleParameterHeight + vertical_gap * titleUnitsHeight + titleUnitsHeight;
+                    width = Math.max(titleParameterWidth, titleUnitsWidth);
+                } else {
+                    height = Math.max(titleParameterHeight, titleUnitsHeight);
+                    width = titleParameterWidth + horizontal_gap + titleUnitsWidth;
+                }
 
-            height = Math.max(titleParameterHeight, titleUnitsHeight);
+            } else if (hasTitleUnits()) {
+                // hasTitleUnits only
+                height = titleUnitsHeight;
+                width = titleUnitsWidth;
+
+            } else {
+                // hasTitleParameter only
+                height = titleParameterHeight;
+                width = titleParameterWidth;
+
+            }
 
             g2d.setFont(originalFont);
         }
 
         return new Dimension((int) Math.ceil(width), (int) Math.ceil(height));
     }
-
-
-
 
 
     private Dimension getHorizontalLabelsRequiredDimension(Graphics2D g2d) {
@@ -945,50 +1004,105 @@ public class ImageLegend {
                 int gap = (int) (VERTICAL_TITLE_PARAMETER_UNITS_GAP_FACTOR * singleLetter.getWidth());
 
                 int labelOverhangHeight = (int) Math.ceil(singleLetter.getHeight() / 2.0);
-                double translateX = x0
-                        + paletteRect.width
-                        + getLabelGap()
-                        + getVerticalLabelsRequiredDimension(g2d).width
-                        + getHeaderGap()
-                        + singleLetter.getHeight();
+
+                final BufferedImage bufferedImage = createBufferedImage(100, 100);
+                final Graphics2D g2dTmp = bufferedImage.createGraphics();
+                Dimension headerRequiredDimension = getTitleRequiredDimension(g2dTmp, false);
+                int headerHeight = headerRequiredDimension.height;
 
 
+                double translateX;
 
 
-                double translateY = y0 + paletteRect.height + labelOverhangHeight;
+                if (ColorBarLayerType.VERTICAL_TITLE_TOP.equals(getTitleVerticalAnchor())) {
+                    translateX = x0;
 
-                double rotate = -Math.PI / 2.0;
-                g2d.translate(translateX, translateY);
-                g2d.rotate(rotate);
+                } else if (ColorBarLayerType.VERTICAL_TITLE_BOTTOM.equals(getTitleVerticalAnchor())) {
+                    translateX = x0;
 
 
-                if (hasTitleParameter()) {
-                    g2d.drawString(headerText, 0, 0);
+                } else if (ColorBarLayerType.VERTICAL_TITLE_LEFT.equals(getTitleVerticalAnchor())) {
+                    translateX = x0 - getHeaderGap();
+
+
+                } else { // VERTICAL_TITLE_RIGHT
+                    translateX = x0
+                            + paletteRect.width
+                            + getLabelGap()
+                            + getVerticalLabelsRequiredDimension(g2d).width
+                            + getHeaderGap()
+                            + singleLetter.getHeight();
+
                 }
 
-                g2d.rotate(-rotate);
 
-                double translateY2 = -headerTextRectangle.getWidth() - gap;
-                g2d.translate(0, translateY2);
-                g2d.rotate(rotate);
+                double translateY;
 
-                if (hasTitleUnits()) {
-                    g2d.setFont(getTitleUnitsFont());
-                    g2d.setPaint(getTitleUnitsColor());
-                    g2d.drawString(getParameterUnitsText(), 0, 0);
+
+                if (ColorBarLayerType.VERTICAL_TITLE_TOP.equals(getTitleVerticalAnchor())) {
+
+                    translateY = y0 - getHeaderGap();
+
+                    g2d.translate(translateX, translateY);
+
+                    if (hasTitleParameter()) {
+                        g2d.drawString(headerText, 0, 0);
+                    }
+
+
+                    double translateY2 = -headerTextRectangle.getWidth() - gap;
+                    g2d.translate(0, translateY2);
+
+                    if (hasTitleUnits()) {
+                        g2d.setFont(getTitleUnitsFont());
+                        g2d.setPaint(getTitleUnitsColor());
+                        g2d.drawString(getParameterUnitsText(), 0, 0);
+                    }
+
+                    g2d.translate(0, -translateY2);
+                    g2d.translate(-translateX, -translateY);
+
+
+                } else if (ColorBarLayerType.VERTICAL_TITLE_BOTTOM.equals(getTitleVerticalAnchor())) {
+                    translateY = y0;
+
+                } else { // VERTICAL_TITLE_RIGHT || VERTICAL_TITLE_LEFT
+                    translateY = y0 + paletteRect.height + labelOverhangHeight;
+
+                    double rotate = -Math.PI / 2.0;
+                    g2d.translate(translateX, translateY);
+                    g2d.rotate(rotate);
+
+
+                    if (hasTitleParameter()) {
+                        g2d.drawString(headerText, 0, 0);
+                    }
+
+                    g2d.rotate(-rotate);
+
+                    double translateY2 = -headerTextRectangle.getWidth() - gap;
+                    g2d.translate(0, translateY2);
+                    g2d.rotate(rotate);
+
+                    if (hasTitleUnits()) {
+                        g2d.setFont(getTitleUnitsFont());
+                        g2d.setPaint(getTitleUnitsColor());
+                        g2d.drawString(getParameterUnitsText(), 0, 0);
+                    }
+
+                    g2d.rotate(-rotate);
+                    g2d.translate(0, -translateY2);
+                    g2d.translate(-translateX, -translateY);
+
                 }
 
-                g2d.rotate(-rotate);
-                g2d.translate(0, -translateY2);
-                g2d.translate(-translateX, -translateY);
+
             }
 
 
             g2d.setFont(origFont);
         }
     }
-
-
 
 
     private void drawPalette(Graphics2D g2d) {
@@ -1075,15 +1189,12 @@ public class ImageLegend {
     }
 
 
-
-
     private void drawLineInHorizontalPalette(Graphics2D g2d, Color[] palette, int index, int x, int y1, int y2) {
         forceIndexInBounds(palette, index);
 
         g2d.setColor(palette[index]);
         g2d.drawLine(x, y1, x, y2);
     }
-
 
 
     private void drawLineInVerticalPalette(Graphics2D g2d, Color[] palette, int index, int x1, int x2, int y) {
@@ -1104,10 +1215,6 @@ public class ImageLegend {
 
         return index;
     }
-
-
-
-
 
 
     private void drawLabelsAndTickMarks(Graphics2D g2d) {
@@ -1195,8 +1302,7 @@ public class ImageLegend {
     }
 
 
-
-    private double keepTickMarkInBoundsHorizontal(double translate, int tickMarkOverHang ) {
+    private double keepTickMarkInBoundsHorizontal(double translate, int tickMarkOverHang) {
         // make sure end tickmarks are placed within palette
         // tickmark hardcoded at 3 width will have 1 tickMarkOverHang
 
@@ -1212,7 +1318,7 @@ public class ImageLegend {
     }
 
 
-    private double keepTickMarkInBoundsVertical(double translate, int tickMarkOverHang ) {
+    private double keepTickMarkInBoundsVertical(double translate, int tickMarkOverHang) {
         // make sure end tickmarks are placed within palette
         // tickmark hardcoded at 3 width will have 1 tickMarkOverHang
 
@@ -1226,7 +1332,6 @@ public class ImageLegend {
 
         return translate;
     }
-
 
 
     public static double getLinearWeightFromLinearValue(double linearValue, double min, double max) {
@@ -1489,12 +1594,11 @@ public class ImageLegend {
     }
 
 
-
     public int getBorderGap() {
         if (borderGap != NULL_INT) {
             return borderGap;
         } else {
-            return (int) Math.round(0.5 * getLabelsFontSize());
+            return (int) Math.round(0.3 * getLabelsFontSize());
         }
     }
 
@@ -1674,7 +1778,6 @@ public class ImageLegend {
     }
 
 
-
     public String getHorizontalLocation() {
         return horizontalLocation;
     }
@@ -1746,7 +1849,6 @@ public class ImageLegend {
     public void setTickmarkWidth(int tickmarkWidth) {
         this.tickmarkWidth = tickmarkWidth;
     }
-
 
 
     public boolean isTickmarkShow() {
@@ -1867,5 +1969,13 @@ public class ImageLegend {
 
     public void setReversePalette(boolean reversePalette) {
         this.reversePalette = reversePalette;
+    }
+
+    public String getTitleVerticalAnchor() {
+        return titleVerticalAnchor;
+    }
+
+    public void setTitleVerticalAnchor(String titleVerticalAnchor) {
+        this.titleVerticalAnchor = titleVerticalAnchor;
     }
 }
