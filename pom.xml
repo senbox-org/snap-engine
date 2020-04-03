@@ -40,7 +40,7 @@
         <snap.version>${project.version}</snap.version>
         <javahelp.version>2.0.05</javahelp.version>
         <hdf.version>2.7.1</hdf.version>
-        <netcdf.version>4.3.22</netcdf.version>
+        <netcdf.version>5.3.1</netcdf.version>
         <slf4j.version>1.6.6</slf4j.version> <!-- used by netcdf, yes we hate that! -->
         <geotools.version>20.0</geotools.version>
         <org.locationtech.version>1.16.0</org.locationtech.version>
@@ -240,16 +240,44 @@
                 <artifactId>lib-hdf</artifactId>
                 <version>${hdf.version}</version>
             </dependency>
+
             <dependency>
                 <groupId>edu.ucar</groupId>
-                <artifactId>netcdf</artifactId>
+                <artifactId>netcdfAll</artifactId>
                 <version>${netcdf.version}</version>
             </dependency>
+
+            <!-- from toniof-netcdf-change_validation branch, not sure whether it is required
             <dependency>
                 <groupId>edu.ucar</groupId>
-                <artifactId>opendap</artifactId>
-                <version>${netcdf.version}</version>
+                <artifactId>cdm-core</artifactId>
+                <version>5.2.0</version>
             </dependency>
+
+            <dependency>
+                <groupId>edu.ucar</groupId>
+                <artifactId>netcdf4</artifactId>
+                <version>5.2.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>net.java.dev.jna</groupId>
+                <artifactId>jna</artifactId>
+                <version>5.4.0</version>
+            </dependency>
+            <dependency>
+                <groupId>net.java.dev.jna</groupId>
+                <artifactId>jna-platform</artifactId>
+                <version>5.4.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-jdk14</artifactId>
+                <version>1.7.30</version>
+            </dependency>
+            -->
+
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
@@ -259,11 +287,6 @@
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-simple</artifactId>
                 <version>${slf4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>edu.ucar</groupId>
-                <artifactId>nujan</artifactId>
-                <version>1.4.1.1</version>
             </dependency>
             <dependency>
                 <groupId>org.htmlparser</groupId>
@@ -731,16 +754,6 @@
                 <checksumPolicy>warn</checksumPolicy>
             </snapshots>
         </repository>
-        <repository>
-            <id>tao-core</id>
-            <name>TAO Core</name>
-            <url>https://raw.githubusercontent.com/tao-org/tao-core/repository</url>
-        </repository>
-        <repository>
-            <id>tao-plugins</id>
-            <name>TAO Plugins</name>
-            <url>https://raw.githubusercontent.com/tao-org/tao-plugins/repository</url>
-        </repository>
     </repositories>
 
     <distributionManagement>
@@ -854,6 +867,8 @@
                         </includes>
                         <systemPropertyVariables>
                             <org.esa.snap.testdata.out>target/test-data</org.esa.snap.testdata.out>
+                            <jna.debug_load>true</jna.debug_load>
+                            <jna.debug_load.jna>true</jna.debug_load.jna>
                         </systemPropertyVariables>
                         <!--<argLine>-Xmx1024M -Dfile.encoding=UTF-8 @{argLine}</argLine>-->
                         <argLine>-Xmx1024M -Dfile.encoding=UTF-8</argLine>

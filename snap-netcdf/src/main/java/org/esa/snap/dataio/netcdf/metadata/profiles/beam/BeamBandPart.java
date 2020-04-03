@@ -41,6 +41,7 @@ import org.esa.snap.dataio.netcdf.util.Constants;
 import org.esa.snap.dataio.netcdf.util.DataTypeUtils;
 import org.esa.snap.dataio.netcdf.util.NetcdfMultiLevelImage;
 import org.esa.snap.dataio.netcdf.util.ReaderUtils;
+import org.esa.snap.dataio.netcdf.util.UnsignedChecker;
 import org.geotools.referencing.CRS;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -83,8 +84,8 @@ public class BeamBandPart extends ProfilePartIO {
     public void decode(ProfileReadContext ctx, Product p) throws IOException {
         NetcdfFile netcdfFile = ctx.getNetcdfFile();
         final List<Variable> variables = netcdfFile.getVariables();
-
         for (Variable variable : variables) {
+            UnsignedChecker.setUnsignedType(variable);
             final List<Dimension> dimensions = variable.getDimensions();
             if (dimensions.size() != 2) {
                 continue;
@@ -117,7 +118,6 @@ public class BeamBandPart extends ProfilePartIO {
         // the following method was introduced at 16.06.2011.
         // The fix is mainly needed for the CoastColour project and only considers MERIS data.
         maybeApplySpectralIndexAndSolarFluxFromMetadata(p);
-
         Attribute autoGroupingAttribute = netcdfFile.findGlobalAttribute(AUTO_GROUPING);
         if (autoGroupingAttribute != null) {
             String autoGrouping = autoGroupingAttribute.getStringValue();
@@ -238,11 +238,11 @@ public class BeamBandPart extends ProfilePartIO {
                     dimMap.put(key, dimString);
                 }
                 final java.awt.Dimension tileSize = JAIUtils.computePreferredTileSize(bandSceneRasterWidth, bandSceneRasterHeight, 1);
-                variable = ncFile.addVariable(variableName, ncDataType, tileSize, dimString);
+                variable = ncFile.addVariable(variableName, ncDataType,ncDataType.isUnsigned(), tileSize, dimString);
                 encodeGeoCoding(ncFile, band, p, variable);
             } else {
                 final java.awt.Dimension tileSize = ImageManager.getPreferredTileSize(p);
-                variable = ncFile.addVariable(variableName, ncDataType, tileSize, productDimensions);
+                variable = ncFile.addVariable(variableName, ncDataType,ncDataType.isUnsigned(), tileSize, productDimensions);
             }
             CfBandPart.writeCfBandAttributes(band, variable);
             writeBeamBandAttributes(band, variable);

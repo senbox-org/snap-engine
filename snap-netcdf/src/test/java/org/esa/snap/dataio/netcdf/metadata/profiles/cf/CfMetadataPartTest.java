@@ -127,7 +127,7 @@ public class CfMetadataPartTest {
         assertEquals(-182, globalNumberAttributes.get("original"));
     }
 
-    private static class TestFileWriteable implements NFileWriteable {
+    private static class TestFileWriteable extends NFileWriteable {
         private Map<String, String> globalStringAttributes;
         private Map<String, Number> globalNumberAttributes;
 
@@ -188,6 +188,11 @@ public class CfMetadataPartTest {
 
         @Override
         public String makeNameValid(String name) {
+            throw new RuntimeException("Not implemented");
+        }
+
+        @Override
+        public DataType getNetcdfDataType(int dataType) {
             throw new RuntimeException("Not implemented");
         }
 

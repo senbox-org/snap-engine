@@ -22,7 +22,7 @@ import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
-import ucar.nc2.NetcdfFileWriteable;
+import ucar.nc2.NetcdfFileWriter;
 import ucar.nc2.Variable;
 
 import java.io.IOException;
@@ -36,12 +36,12 @@ import java.util.*;
 public class N3Variable implements NVariable {
 
     private final Variable variable;
-    private final NetcdfFileWriteable netcdfFileWriteable;
+    private final NetcdfFileWriter netcdfFileWriteable;
     private final HashMap<Integer, TileRowCache> tileRowCacheMap;
     private static final int Y_INDEX = 0;
     private static final int X_INDEX = 1;
 
-    public N3Variable(Variable variable, NetcdfFileWriteable netcdfFileWriteable) {
+    public N3Variable(Variable variable, NetcdfFileWriter netcdfFileWriteable) {
         this.variable = variable;
         this.netcdfFileWriteable = netcdfFileWriteable;
         tileRowCacheMap = new HashMap<>();
@@ -58,45 +58,55 @@ public class N3Variable implements NVariable {
     }
 
     @Override
-    public void addAttribute(String name, String value) {
-        variable.addAttribute(new Attribute(name, value));
+    public void setDataType(DataType dataType) {
+        variable.setDataType(dataType);
     }
 
     @Override
-    public void addAttribute(String name, Number value) {
-        addAttribute(name, value, false);
+    public Attribute addAttribute(String name, String value) {
+        return variable.addAttribute(new Attribute(name, value));
     }
 
     @Override
-    public void addAttribute(String name, Number value, boolean isUnsigned) {
-        if(value instanceof Long) {
-            variable.addAttribute(new Attribute(name, value.intValue()));
-        }else {
-            variable.addAttribute(new Attribute(name, value));
+    public Attribute addAttribute(String name, Number value) {
+        return addAttribute(name, value, false);
+    }
+
+    @Override
+    public Attribute addAttribute(String name, Number value, boolean isUnsigned) {
+        if (value instanceof Long) {
+            return variable.addAttribute(new Attribute(name, value.intValue()));
+        } else {
+            return variable.addAttribute(new Attribute(name, value));
         }
     }
 
     @Override
-    public void addAttribute(String name, Array value) {
-        if (DataType.getType(value.getElementType()) == DataType.LONG) {
-            long[] longElems = (long[]) value.get1DJavaArray(Long.class);
+    public Attribute addAttribute(String name, Array value) {
+        if (DataType.getType(value.getElementType(), false) == DataType.LONG) {
+            long[] longElems = (long[]) value.get1DJavaArray(DataType.LONG);
             int[] intElems = new int[longElems.length];
             for (int i = 0; i < longElems.length; i++) {
                 intElems[i] = (int) longElems[i];
             }
-            variable.addAttribute(new Attribute(name, Array.factory(intElems)));
+            return variable.addAttribute(new Attribute(name, Array.factory(DataType.INT, new int[]{longElems.length}, intElems)));
         } else {
-            variable.addAttribute(new Attribute(name, value));
+            return variable.addAttribute(new Attribute(name, value));
         }
     }
 
     @Override
     public void writeFully(Array values) throws IOException {
         try {
-            netcdfFileWriteable.write(variable.getFullName(), values);
+            netcdfFileWriteable.write(variable, values);
         } catch (InvalidRangeException e) {
             throw new IOException(e);
         }
+    }
+
+    @Override
+    public Attribute findAttribute(String name) {
+        return variable.findAttribute(name);
     }
 
     @Override

@@ -63,7 +63,10 @@ public class OpenJPEGInstaller {
                     PosixFilePermission.OTHERS_READ,
                     PosixFilePermission.OTHERS_EXECUTE));
             try {
-                Files.setPosixFilePermissions(executablePathName, permissions);
+                Set<PosixFilePermission> actualPermissions = Files.getPosixFilePermissions(executablePathName);
+                if (! actualPermissions.equals(permissions)) {
+                    Files.setPosixFilePermissions(executablePathName, permissions);
+                }
             } catch (IOException e) {
                 // can't set the permissions for this file, eg. the file was installed as root
                 // send a warning message, user will have to do that by hand.
