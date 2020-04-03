@@ -102,7 +102,7 @@ public abstract class BaseClassifier implements SupervisedClassifier {
     private String topClassifierName;
     private FeatureInfo[] topFeatureInfoList;
 
-    private static final String[] excludedBands = new String[] {"lat_band", "long_band", "flags"};
+    private static final String[] excludedBands = new String[]{"lat_band", "long_band", "flags"};
 
     public static class ClassifierParams {
         private final String classifierType;
@@ -190,7 +190,7 @@ public abstract class BaseClassifier implements SupervisedClassifier {
         return mlClassifier;
     }
 
-    public void initialize() throws OperatorException, IOException {
+    public void initialize() throws OperatorException {
 
         checkSourceProductsValidity();
 
@@ -277,7 +277,9 @@ public abstract class BaseClassifier implements SupervisedClassifier {
         if (trainingSetMaskBand != null && trainingSetMaskBand.isNoDataValueSet()) {
             maskNoDataValue = trainingSetMaskBand.getNoDataValue();
         }
+    }
 
+    public void executePreparation() {
         // polygonsAsClasses contains the names of all the polygons the user has selected to use as classes.
         // E.g., the user can create polygons named "water", "trees" and "shrubs"
         // There will be 3 classes named "water", "trees" and "shrubs".
@@ -285,6 +287,7 @@ public abstract class BaseClassifier implements SupervisedClassifier {
         // Get the corresponding VectorDataNode and store them in polygonVectorDataNodes.
         // The polygons must be in the first product.
         // Can maskProduct ever be null??
+        ProductUtils.copyVectorData(params.sourceProducts[0], targetProduct);
         if (!params.doLoadClassifier && (maskProduct != null && !params.trainOnRaster)) {
             // train on vectors/polygons
             polygonVectorDataNodeToVectorIndex = new HashMap<>();
@@ -292,9 +295,9 @@ public abstract class BaseClassifier implements SupervisedClassifier {
             if (params.trainingVectors == null || params.trainingVectors.length == 0) {
                 final List<String> geometryNames = new ArrayList<>();
                 final ProductNodeGroup<VectorDataNode> vectorDataNodes = maskProduct.getVectorDataGroup();
-                for(int i=0; i< vectorDataNodes.getNodeCount(); ++i) {
+                for (int i = 0; i < vectorDataNodes.getNodeCount(); ++i) {
                     VectorDataNode node = vectorDataNodes.get(i);
-                    if(!node.getFeatureCollection().isEmpty()) {
+                    if (!node.getFeatureCollection().isEmpty()) {
                         geometryNames.add(node.getName() + "::" + maskProduct.getName());
                     }
                 }
@@ -307,64 +310,57 @@ public abstract class BaseClassifier implements SupervisedClassifier {
                 }
                 params.trainingVectors = geometryNames.toArray(new String[geometryNames.size()]);
             }
-            if (params.trainingVectors != null) { // Can this ever be false?
-                //System.out.println("params.trainingVectors.length = " + params.trainingVectors.length);
-                if (params.trainingVectors.length == 1) {
-                    throw new OperatorException("Please select two or more vectors as classes");
+            polygonVectorDataNodes = new VectorDataNode[params.trainingVectors.length];
+            final ProductNodeGroup<VectorDataNode> vectorGroup = maskProduct.getVectorDataGroup();
+            for (int i = 0; i < params.trainingVectors.length; ++i) {
+                int multiProductIndex = params.trainingVectors[i].indexOf("::");
+                String name = params.trainingVectors[i];
+                if (multiProductIndex > 0) {
+                    name = params.trainingVectors[i].substring(0, multiProductIndex);
                 }
-
-                polygonVectorDataNodes = new VectorDataNode[params.trainingVectors.length];
-                final ProductNodeGroup<VectorDataNode> vectorGroup = maskProduct.getVectorDataGroup();
-                for (int i = 0; i < params.trainingVectors.length; ++i) {
-                    int multiProductIndex = params.trainingVectors[i].indexOf("::");
-                    String name = params.trainingVectors[i];
-                    if (multiProductIndex > 0) {
-                        name = params.trainingVectors[i].substring(0, multiProductIndex);
-                    }
-                    //System.out.println("vector " + name);
-                    polygonVectorDataNodes[i] = vectorGroup.get(name);
-                    // So for class value "i", the label is polygonVectorDataNodes[i] which corresponds to
-                    // params.trainingVectors[i]. This is used to set up classLabelMap.
-                    if (polygonVectorDataNodes[i] == null) {
-                        //System.out.println("fail to find vector " + name);
-                        throw new OperatorException("Cannot find vector " + params.trainingVectors[i]);
+                //System.out.println("vector " + name);
+                polygonVectorDataNodes[i] = vectorGroup.get(name);
+                // So for class value "i", the label is polygonVectorDataNodes[i] which corresponds to
+                // params.trainingVectors[i]. This is used to set up classLabelMap.
+                if (polygonVectorDataNodes[i] == null) {
+                    //System.out.println("fail to find vector " + name);
+                    throw new OperatorException("Cannot find vector " + params.trainingVectors[i]);
                     /*} else {
                         System.out.println("found vector " + name);*/
-                    }
                 }
+            }
 
-                //useVectorNodeNameAsLabel = params.labelSource == null || params.labelSource.isEmpty()
-                //        || params.labelSource.equals(VectorNodeNameLabelSource);
-                useVectorNodeNameAsLabel = true;
+            //useVectorNodeNameAsLabel = params.labelSource == null || params.labelSource.isEmpty()
+            //        || params.labelSource.equals(VectorNodeNameLabelSource);
+            useVectorNodeNameAsLabel = true;
 
-                // The index is going to be the class value
-                classLabelMap = new HashMap<>();
-                labelClassMap = new HashMap<>();
-                int classIndex = 0;
-                final Set<String> attribValues = new HashSet<>();
-                for (int i = 0; i < polygonVectorDataNodes.length; i++) {
-                    polygonVectorDataNodeToVectorIndex.put(polygonVectorDataNodes[i], i);
-                    if (useVectorNodeNameAsLabel) {
-                        classIndex = i;
-                        classLabelMap.put(classIndex, polygonVectorDataNodes[i].getName());
-                    } else {
-                        String classLabel = VectorUtils.getAttribStringValue(polygonVectorDataNodes[i], params.labelSource);
+            // The index is going to be the class value
+            classLabelMap = new HashMap<>();
+            labelClassMap = new HashMap<>();
+            int classIndex = 0;
+            final Set<String> attribValues = new HashSet<>();
+            for (int i = 0; i < polygonVectorDataNodes.length; i++) {
+                polygonVectorDataNodeToVectorIndex.put(polygonVectorDataNodes[i], i);
+                if (useVectorNodeNameAsLabel) {
+                    classIndex = i;
+                    classLabelMap.put(classIndex, polygonVectorDataNodes[i].getName());
+                } else {
+                    String classLabel = VectorUtils.getAttribStringValue(polygonVectorDataNodes[i], params.labelSource);
 
-                        if (!classLabelMap.values().contains(classLabel)) {
-                            classLabelMap.put(classIndex, classLabel);
-                            labelClassMap.put(classLabel, classIndex);
-                            classIndex++;
-                        }
+                    if (!classLabelMap.values().contains(classLabel)) {
+                        classLabelMap.put(classIndex, classLabel);
+                        labelClassMap.put(classLabel, classIndex);
+                        classIndex++;
                     }
                 }
             }
         }
-
         //SystemUtils.LOG.info("doLoadClassifier = " + params.doLoadClassifier);
         //SystemUtils.LOG.info("trainOnRaster = " + params.trainOnRaster);
         //SystemUtils.LOG.info("doClassValQuantization = " + doClassValQuantization);
         //SystemUtils.LOG.info("Min class value = " + minClassValue + "; class value step size = " + classValStepSize
         //        + "; class levels = " + classLevels + "; max class value = " + maxClassValue);
+        setIndexCoding();
     }
 
     public static double getMaxValue(final double minVal, final double stepSize, final int levels) {
@@ -385,7 +381,7 @@ public abstract class BaseClassifier implements SupervisedClassifier {
                 throw new OperatorException("Source products are of different dimensions");
             }
 
-            for (Band band:params.sourceProducts[i].getBands()) {
+            for (Band band : params.sourceProducts[i].getBands()) {
                 if (band.getRasterWidth() != sourceImageWidth || band.getRasterHeight() != sourceImageHeight) {
                     throw new OperatorException("Bands in source product " + params.sourceProducts[i].getName() +
                             " are of different dimensions");
@@ -417,7 +413,7 @@ public abstract class BaseClassifier implements SupervisedClassifier {
             if (!info.className.contains("???")) {
                 bandName = "predicted" + info.className;
             }
-        }  else {
+        } else {
             dataType = (params.trainOnRaster && trainingSetMaskBand != null) ? trainingSetMaskBand.getDataType() : ProductData.TYPE_INT16;
             unit = (params.trainOnRaster && trainingSetMaskBand != null ? trainingSetMaskBand.getUnit() : "discrete classes");
             bandName = (params.trainOnRaster && trainingSetMaskBand != null) ? "predicted" + trainingSetMaskBand.getName() : LabelBandName;
@@ -435,11 +431,26 @@ public abstract class BaseClassifier implements SupervisedClassifier {
         labelBand.setNoDataValue(noDataVal);
         labelBand.setNoDataValueUsed(true);
         labelBand.setValidPixelExpression(ConfidenceBandName + " >= 0.5"); // Can change this in properties of band
+        targetProduct.addBand(labelBand);
 
-        //System.out.println("BaseClassifier.createTargetProduct: trainOnRaster = " + params.trainOnRaster +
-        //    " doLoadClassifier = " + params.doLoadClassifier);
+        confidenceBand = new Band(
+                ConfidenceBandName,
+                ProductData.TYPE_FLOAT32,
+                sourceImageWidth,
+                sourceImageHeight);
+
+        confidenceBand.setUnit("(0, 1]");
+        confidenceBand.setNoDataValue(DOUBLE_NO_DATA_VALUE);
+        confidenceBand.setNoDataValueUsed(true);
+        targetProduct.addBand(confidenceBand);
+
+        return targetProduct;
+    }
+
+    private void setIndexCoding() {
         if (!params.trainOnRaster) {
             if (!params.doLoadClassifier) {
+//                ProductUtils.
                 // train on vectors/polygons
                 final IndexCoding indexCoding = new IndexCoding("Classes");
                 indexCoding.addIndex("no data", INT_NO_DATA_VALUE, "no data");
@@ -461,25 +472,11 @@ public abstract class BaseClassifier implements SupervisedClassifier {
         } else if (!params.doLoadClassifier) {
             // train on raster
             IndexCoding indexCoding = trainingSetMaskBand.getIndexCoding();
-            if(indexCoding != null) {
+            if (indexCoding != null) {
                 IndexCoding icCopy = ProductUtils.copyIndexCoding(indexCoding, targetProduct);
                 labelBand.setSampleCoding(icCopy);
             }
         }
-        targetProduct.addBand(labelBand);
-
-        confidenceBand = new Band(
-                ConfidenceBandName,
-                ProductData.TYPE_FLOAT32,
-                sourceImageWidth,
-                sourceImageHeight);
-
-        confidenceBand.setUnit("(0, 1]");
-        confidenceBand.setNoDataValue(DOUBLE_NO_DATA_VALUE);
-        confidenceBand.setNoDataValueUsed(true);
-        targetProduct.addBand(confidenceBand);
-
-        return targetProduct;
     }
 
     private static String createClassLabel(String vectorName) {
@@ -610,8 +607,8 @@ public abstract class BaseClassifier implements SupervisedClassifier {
 
             // add every other to train or test list
             boolean addToTrainList = true;
-            for(Instance instance : list) {
-                if(addToTrainList) {
+            for (Instance instance : list) {
+                if (addToTrainList) {
                     trainList.add(instance);
                     addToTrainList = false;
                 } else {
@@ -623,7 +620,7 @@ public abstract class BaseClassifier implements SupervisedClassifier {
     }
 
     public static boolean excludeBand(final String bandName) {
-        for(String excludedBand : excludedBands) {
+        for (String excludedBand : excludedBands) {
             if (bandName.startsWith(excludedBand)) {
                 return true;
             }
@@ -649,7 +646,7 @@ public abstract class BaseClassifier implements SupervisedClassifier {
                     for (Band b : p.getBands()) {
                         if (b == trainingSetMaskBand) continue;
                         String bandName = b.getName();
-                        if(excludeBand(bandName)) {
+                        if (excludeBand(bandName)) {
                             continue;
                         }
                         if (allBandnames.contains(bandName)) {
@@ -707,7 +704,7 @@ public abstract class BaseClassifier implements SupervisedClassifier {
             featureInfoList = featureInfos.toArray(new FeatureInfo[featureInfos.size()]);
 
             final LabeledInstances allLabeledInstances = getLabeledInstances(operator, params.numTrainSamples * 2,
-                                                                             featureInfoList);
+                    featureInfoList);
 
             if (params.evaluateClassifier && params.evaluateFeaturePowerSet) {
                 runFeaturePowerSet(operator, allLabeledInstances, featureInfoList, opPM);
@@ -718,7 +715,7 @@ public abstract class BaseClassifier implements SupervisedClassifier {
                 mlClassifier = createMLClassifier(featureInfoList);
 
                 Dataset trainDataset = trainClassifier1(mlClassifier, getClassifierName(), allLabeledInstances,
-                                                       featureInfoList, false);
+                        featureInfoList, false);
 
                 saveClassifier(trainDataset);
             }
@@ -729,15 +726,15 @@ public abstract class BaseClassifier implements SupervisedClassifier {
     }
 
     private Dataset trainClassifier1(final Classifier classifier, final String name,
-                                    final LabeledInstances labeledInstances,
-                                    final FeatureInfo[] featureInfos, boolean quickEvaluation) {
+                                     final LabeledInstances labeledInstances,
+                                     final FeatureInfo[] featureInfos, boolean quickEvaluation) {
 
         final List<Instance> trainList;
         final List<Instance> testList;
         if (params.trainOnRaster) {
             trainList = labeledInstances.instanceList.subList(0, labeledInstances.instanceList.size() / 2);
             testList = labeledInstances.instanceList.subList(labeledInstances.instanceList.size() / 2,
-                                                             labeledInstances.instanceList.size());
+                    labeledInstances.instanceList.size());
         } else {
             trainList = new ArrayList<>();
             testList = new ArrayList<>();
@@ -777,8 +774,8 @@ public abstract class BaseClassifier implements SupervisedClassifier {
             final Evaluator evaluator = new Evaluator(mlClassifier, classifierReport);
 
             evaluator.evaluateClassifier(labeledInstances.labelMap,
-                                         labeledInstances.instanceList,
-                                         testDataset, "Testing");
+                    labeledInstances.instanceList,
+                    testDataset, "Testing");
 
             evaluator.evaluateFeatures(featureInfos, testDataset, "Testing", pm);
 
@@ -811,8 +808,8 @@ public abstract class BaseClassifier implements SupervisedClassifier {
         final Evaluator evaluator = new Evaluator(mlClassifier, new ClassifierReport(params.classifierType, "dummy"));
 
         Evaluator.Score score = evaluator.evaluateClassifier(labeledInstances.labelMap,
-                                                             labeledInstances.instanceList,
-                                                             testDataset, "Testing");
+                labeledInstances.instanceList,
+                testDataset, "Testing");
 
         StringBuilder featureBands = new StringBuilder();
         for (FeatureInfo featureInfo : featureInfos) {
@@ -820,7 +817,7 @@ public abstract class BaseClassifier implements SupervisedClassifier {
             featureBands.append(", ");
         }
         classifierReport.addPowerSetEvaluation(name + ": " + "cv " + f(score.crossValidationPercent * 100) + "% "
-                                     + featureBands.toString());
+                + featureBands.toString());
 
         /*
         final StatusProgressMonitor pm = new StatusProgressMonitor(StatusProgressMonitor.TYPE.SUBTASK);
@@ -866,7 +863,7 @@ public abstract class BaseClassifier implements SupervisedClassifier {
 
             int cnt = 1;
             for (Set<FeatureInfo> featureSet : featureSetList) {
-                if(opPM.isCanceled()) {
+                if (opPM.isCanceled()) {
                     break;
                 }
 
@@ -881,13 +878,13 @@ public abstract class BaseClassifier implements SupervisedClassifier {
                 //                                                                 featureInfoList);
 
                 trainClassifier1(setClassifier, getClassifierName() + '.' + cnt, subsetLabeledInstances,
-                                featureInfos, true);
+                        featureInfos, true);
                 ++cnt;
                 pm.worked(1);
             }
 
             classifierReport.setTopClassifier("TOP Classifier = " + topClassifierName + " at " +
-                                         String.format("%-6.2f", topClassifierPercent * 100) + '%');
+                    String.format("%-6.2f", topClassifierPercent * 100) + '%');
 
             if (topFeatureInfoList != null) {
                 featureInfoList = topFeatureInfoList;
@@ -898,10 +895,10 @@ public abstract class BaseClassifier implements SupervisedClassifier {
                 //LabeledInstances subsetLabeledInstances = createSubsetLabeledInstances(featureInfoList, allLabeledInstances);
 
                 final LabeledInstances allLabeledInstances2 = getLabeledInstances(operator, params.numTrainSamples * 2,
-                                                                                 featureInfoList);
+                        featureInfoList);
 
                 Dataset trainDataset = trainClassifier1(mlClassifier, getClassifierName(), allLabeledInstances2,
-                                                       featureInfoList, false);
+                        featureInfoList, false);
 
                 saveClassifier(trainDataset);
 
@@ -1009,7 +1006,7 @@ public abstract class BaseClassifier implements SupervisedClassifier {
             final BufferedReader bufferedReader = new BufferedReader(fileReader);
 
             String s;
-            while((s = bufferedReader.readLine()) != null) {
+            while ((s = bufferedReader.readLine()) != null) {
                 //System.out.println("* " + s);
                 String val;
                 // Can add more if needed
@@ -1082,7 +1079,7 @@ public abstract class BaseClassifier implements SupervisedClassifier {
             if (featureNames.length > totalAvailableFeatures) {
                 classifierFailed = true; // So it won't try to train again
                 throw new OperatorException("classifier expects " + featureNames.length
-                                                    + " features; source product(s) only have " + totalAvailableFeatures);
+                        + " features; source product(s) only have " + totalAvailableFeatures);
             }
 
             mlClassifier = retrieveMLClassifier(loadedClassifierDescriptor);
@@ -1091,7 +1088,7 @@ public abstract class BaseClassifier implements SupervisedClassifier {
             final double[] featureMaxValues = loadedClassifierDescriptor.getFeatureMaxValues();
 
             SystemUtils.LOG.info("*** Loaded " + params.classifierType + " classifier (filename = " + params.savedClassifierName
-                                         + ") to predict " + loadedClassifierDescriptor.getClassName());
+                    + ") to predict " + loadedClassifierDescriptor.getClassName());
 
             double[] sortedClasses = loadedClassifierDescriptor.getSortedClassValues();
             String[] labels = loadedClassifierDescriptor.getPolygonsAsClasses();
@@ -1103,7 +1100,7 @@ public abstract class BaseClassifier implements SupervisedClassifier {
                     indexCoding.addIndex("Label_" + (i+1), (int) sortedClasses[i], "");
                 }
                 */
-            }  else {
+            } else {
                 final IndexCoding indexCoding = new IndexCoding("Classes");
                 indexCoding.addIndex("no data", INT_NO_DATA_VALUE, "no data");
                 for (int i = 0; i < sortedClasses.length; i++) {
@@ -1139,7 +1136,7 @@ public abstract class BaseClassifier implements SupervisedClassifier {
                 if (indicesSet.contains(idxPair)) {
                     classifierFailed = true; // So it won't try to train again
                     throw new OperatorException(featureProducts[indices[0]].getBandAt(indices[1]).getName() +
-                                                        " for " + featureNames[i] + " has already appeared as an earlier feature");
+                            " for " + featureNames[i] + " has already appeared as an earlier feature");
                 }
                 indicesSet.add(idxPair);
                 Band featureBand = featureProducts[indices[0]].getBandAt(indices[1]);
@@ -1228,8 +1225,8 @@ public abstract class BaseClassifier implements SupervisedClassifier {
 
                 // Get the class polygons that intersect this rectangle
                 final VectorDataNode[] polygons = VectorUtils.getPolygonsForOneRectangle(rectangle,
-                                                                                         params.sourceProducts[0].getSceneGeoCoding(),
-                                                                                         polygonVectorDataNodes);
+                        params.sourceProducts[0].getSceneGeoCoding(),
+                        polygonVectorDataNodes);
                 if (polygons.length == 0) {
                     status.worked(1);
                     continue;
@@ -1286,7 +1283,7 @@ public abstract class BaseClassifier implements SupervisedClassifier {
                                     } else {
                                         int vectorIndex = classVal;
                                         String val = VectorUtils.getAttribStringValue(polygonVectorDataNodes[vectorIndex],
-                                                                                params.labelSource);
+                                                params.labelSource);
                                         classVal = labelClassMap.get(val);
                                         instance.setClassValue((double) classVal);
                                     }
@@ -1479,7 +1476,7 @@ public abstract class BaseClassifier implements SupervisedClassifier {
 
     private String haveDuplicates(final String[] featureNames) {
         for (int i = 0; i < featureNames.length; i++) {
-            for (int j = i+1; j < featureNames.length; j++) {
+            for (int j = i + 1; j < featureNames.length; j++) {
                 if (featureNames[i].equals(featureNames[j])) {
                     return featureNames[i];
                 }
@@ -1540,10 +1537,10 @@ public abstract class BaseClassifier implements SupervisedClassifier {
         final String classUnit = labelBand.getUnit();
         ClassifierDescriptor classifierDescriptor =
                 new ClassifierDescriptor(params.classifierType, params.savedClassifierName,
-                                         objectToSave, sortedClassValues,
-                                         className, classUnit, featureNames, featureMinValues, featureMaxValues,
-                                         params.doClassValQuantization, params.minClassValue,
-                                         params.classValStepSize, params.classLevels, params.trainingVectors);
+                        objectToSave, sortedClassValues,
+                        className, classUnit, featureNames, featureMinValues, featureMaxValues,
+                        params.doClassValQuantization, params.minClassValue,
+                        params.classValStepSize, params.classLevels, params.trainingVectors);
 
         final Path filePath = getClassifierFilePath(false);
 
@@ -1558,17 +1555,17 @@ public abstract class BaseClassifier implements SupervisedClassifier {
             throw new OperatorException("Failed to save classifier " + ex.getMessage());
         }
 
-        // Now save in an xml file what the user needs to know to prepare the source products
+        // Now save in an xml file what the user needs to know to executePreparation the source products
 
         ClassifierUserInfo classifierUserInfo =
                 new ClassifierUserInfo(params.savedClassifierName, params.classifierType,
-                                       className, params.numTrainSamples, sortedClassValues, featureInfoList.length,
-                                       params.trainingBands, params.trainingVectors, featureNames,
-                                       (params.trainOnRaster && params.doClassValQuantization ? params.minClassValue : 0.0),
-                                       (params.trainOnRaster &&  params.doClassValQuantization ? params.classValStepSize : 0.0),
-                                       (params.trainOnRaster && params.doClassValQuantization ? params.classLevels : -1),
-                                       (params.trainOnRaster && params.doClassValQuantization ? maxClassValue : 0.0),
-                                        labelBand.getDataType(), labelBand.getUnit());
+                        className, params.numTrainSamples, sortedClassValues, featureInfoList.length,
+                        params.trainingBands, params.trainingVectors, featureNames,
+                        (params.trainOnRaster && params.doClassValQuantization ? params.minClassValue : 0.0),
+                        (params.trainOnRaster && params.doClassValQuantization ? params.classValStepSize : 0.0),
+                        (params.trainOnRaster && params.doClassValQuantization ? params.classLevels : -1),
+                        (params.trainOnRaster && params.doClassValQuantization ? maxClassValue : 0.0),
+                        labelBand.getDataType(), labelBand.getUnit());
 
         Object xmlToSave = getXMLInfoToSave(classifierUserInfo);
 
@@ -1609,7 +1606,7 @@ public abstract class BaseClassifier implements SupervisedClassifier {
         }
 
         FeatureInfo(Band featureBand, int id, double featureNoDataValue,
-                           double featureOffsetValue, double featureScaleValue) {
+                    double featureOffsetValue, double featureScaleValue) {
             this.featureBand = featureBand;
             this.id = id;
             this.featureNoDataValue = featureNoDataValue;
