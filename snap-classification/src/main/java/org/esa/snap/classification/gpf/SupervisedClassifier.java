@@ -34,7 +34,7 @@ public interface SupervisedClassifier {
 
     void initialize() throws OperatorException, IOException;
 
-    void prepare();
+    void executePreparation();
 
     Product createTargetProduct();
 

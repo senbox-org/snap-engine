@@ -279,7 +279,7 @@ public abstract class BaseClassifier implements SupervisedClassifier {
         }
     }
 
-    public void prepare() {
+    public void executePreparation() {
         // polygonsAsClasses contains the names of all the polygons the user has selected to use as classes.
         // E.g., the user can create polygons named "water", "trees" and "shrubs"
         // There will be 3 classes named "water", "trees" and "shrubs".
@@ -1555,7 +1555,7 @@ public abstract class BaseClassifier implements SupervisedClassifier {
             throw new OperatorException("Failed to save classifier " + ex.getMessage());
         }
 
-        // Now save in an xml file what the user needs to know to prepare the source products
+        // Now save in an xml file what the user needs to know to executePreparation the source products
 
         ClassifierUserInfo classifierUserInfo =
                 new ClassifierUserInfo(params.savedClassifierName, params.classifierType,

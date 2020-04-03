@@ -153,7 +153,7 @@ public class RandomForestClassifierOp extends Operator {
     public void doExecute(ProgressMonitor pm) throws OperatorException {
         pm.beginTask("Preparing", 1);
         try {
-            classifier.prepare();
+            classifier.executePreparation();
             pm.worked(1);
         } finally {
             pm.done();
