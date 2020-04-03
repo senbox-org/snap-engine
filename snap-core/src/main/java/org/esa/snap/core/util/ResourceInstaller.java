@@ -26,11 +26,17 @@ import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
+import java.nio.file.attribute.FileTime;
+import java.nio.file.attribute.PosixFileAttributeView;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Set;
 import java.util.stream.Stream;
 
-import static java.nio.file.StandardCopyOption.*;
+import static java.nio.file.StandardCopyOption.COPY_ATTRIBUTES;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 /**
  * Installs resources from a given source to a given target.
@@ -39,6 +45,8 @@ import static java.nio.file.StandardCopyOption.*;
  * @version $Revision$ $Date$
  */
 public class ResourceInstaller {
+
+    private final Set<PosixFilePermission> rwxr_xr_x = PosixFilePermissions.fromString("rwxr-xr-x");
 
     private final Path sourceBasePath;
     private final Path targetDirPath;
@@ -87,13 +95,17 @@ public class ResourceInstaller {
                     Path relFilePath = sourceBasePath.relativize(resource);
                     String relPathString = relFilePath.toString();
                     Path targetFile = targetDirPath.resolve(relPathString);
-                    if (!Files.exists(targetFile) && !Files.isDirectory(resource)) {
+                    if (mustInstallResource(targetFile, resource)) {
                         Path parentPath = targetFile.getParent();
                         if (parentPath == null) {
                             throw new IOException("Could not retrieve the parent directory of '" + targetFile.toString() + "'.");
                         }
                         Files.createDirectories(parentPath);
                         Files.copy(resource, targetFile, REPLACE_EXISTING, COPY_ATTRIBUTES);
+                        // set executable here since maven resource plugin is broken and drops them
+                        if (Files.getFileAttributeView(targetFile, PosixFileAttributeView.class) != null) {
+                            Files.setPosixFilePermissions(targetFile, rwxr_xr_x);
+                        }
                     }
                     pm.worked(1);
                 }
@@ -101,6 +113,17 @@ public class ResourceInstaller {
                 pm.done();
             }
         }
+    }
+
+    boolean mustInstallResource(Path targetFile, Path resource) throws IOException {
+        if (!Files.exists(targetFile)) {
+            return true;
+        }
+        boolean sizeIsDifferent = Files.size(targetFile) != Files.size(resource);
+        FileTime existingFileModifiedTime = Files.getLastModifiedTime(targetFile);
+        FileTime newFileModifiedTime = Files.getLastModifiedTime(resource);
+        boolean newFileIsNewer = existingFileModifiedTime.compareTo(newFileModifiedTime) < 0;
+        return (newFileIsNewer || sizeIsDifferent) && Files.isRegularFile(resource);
     }
 
     private Collection<Path> collectResources(String patternString) throws IOException {
