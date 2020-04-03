@@ -95,7 +95,10 @@ public class ReadOp extends Operator {
                     "If not given, the entire scene is used.")
     private Geometry geometryRegion;
 
-    @Parameter(defaultValue = "false", description = "Whether to copy the metadata of the source product.")
+    /**
+     * The default value for copy metadata is true, to copy them if the flag is not specified.
+     */
+    @Parameter(defaultValue = "true", description = "Whether to copy the metadata of the source product.")
     private boolean copyMetadata;
 
     @TargetProduct
@@ -115,7 +118,7 @@ public class ReadOp extends Operator {
         boolean hasBandNames = (this.bandNames != null && this.bandNames.length > 0);
         boolean hasMaskNames = (this.maskNames != null && this.maskNames.length > 0);
         ProductSubsetDef subsetDef = null;
-        if (hasBandNames || hasMaskNames || this.pixelRegion != null || this.geometryRegion != null || this.copyMetadata) {
+        if (hasBandNames || hasMaskNames || this.pixelRegion != null || this.geometryRegion != null || !this.copyMetadata) {
             subsetDef = new ProductSubsetDef();
             subsetDef.setIgnoreMetadata(!this.copyMetadata);
             AbstractSubsetRegion subsetRegion = null;
