@@ -148,6 +148,7 @@ public class EnvisatProductReaderTest {
 
         assertEquals(1.0, EnvisatProductReader.getResolutionInKilometers(EnvisatConstants.AATSR_L1B_TOA_PRODUCT_TYPE_NAME), 1e-8);
         assertEquals(1.0, EnvisatProductReader.getResolutionInKilometers(EnvisatConstants.AATSR_L2_NR_PRODUCT_TYPE_NAME), 1e-8);
+
         assertEquals(0.0125, EnvisatProductReader.getResolutionInKilometers(EnvisatConstants.ASAR_L1B_APG_PRODUCT_TYPE_NAME), 1e-8);
         assertEquals(0.03, EnvisatProductReader.getResolutionInKilometers(EnvisatConstants.ASAR_L1B_APP_PRODUCT_TYPE_NAME), 1e-8);
         assertEquals(0.225, EnvisatProductReader.getResolutionInKilometers(EnvisatConstants.ASAR_L1B_AP_BP_PRODUCT_TYPE_NAME), 1e-8);
@@ -165,6 +166,18 @@ public class EnvisatProductReaderTest {
         assertEquals(0.02, EnvisatProductReader.getResolutionInKilometers(EnvisatConstants.ASAR_L1B_WVI_PRODUCT_TYPE_NAME), 1e-8);
         assertEquals(5.0, EnvisatProductReader.getResolutionInKilometers(EnvisatConstants.ASAR_L1B_WVS_PRODUCT_TYPE_NAME), 1e-8);
         assertEquals(5.0, EnvisatProductReader.getResolutionInKilometers(EnvisatConstants.ASAR_L2_WVW_PRODUCT_TYPE_NAME), 1e-8);
+
+        assertEquals(0.225, EnvisatProductReader.getResolutionInKilometers(EnvisatConstants.SAR_IM__BP_PRODUCT_TYPE_NAME), 1e-8);
+        assertEquals(0.0125, EnvisatProductReader.getResolutionInKilometers(EnvisatConstants.SAR_IMG_1P_PRODUCT_TYPE_NAME), 1e-8);
+        assertEquals(0.075, EnvisatProductReader.getResolutionInKilometers(EnvisatConstants.SAR_IMM_1P_PRODUCT_TYPE_NAME), 1e-8);
+        assertEquals(0.0125, EnvisatProductReader.getResolutionInKilometers(EnvisatConstants.SAR_IMP_1P_PRODUCT_TYPE_NAME), 1e-8);
+        assertEquals(0.0125, EnvisatProductReader.getResolutionInKilometers(EnvisatConstants.SAR_IMS_1P_PRODUCT_TYPE_NAME), 1e-8);
+
+        assertEquals(1.0, EnvisatProductReader.getResolutionInKilometers(EnvisatConstants.AT1_L1B_TOA_PRODUCT_TYPE_NAME), 1e-8);
+        assertEquals(1.0, EnvisatProductReader.getResolutionInKilometers(EnvisatConstants.AT1_L2_NR_PRODUCT_TYPE_NAME), 1e-8);
+
+        assertEquals(1.0, EnvisatProductReader.getResolutionInKilometers(EnvisatConstants.AT2_L1B_TOA_PRODUCT_TYPE_NAME), 1e-8);
+        assertEquals(1.0, EnvisatProductReader.getResolutionInKilometers(EnvisatConstants.AT2_L2_NR_PRODUCT_TYPE_NAME), 1e-8);
     }
 
     private void readFloats(String resourceName, float[] floats) {

@@ -761,7 +761,11 @@ public class EnvisatProductReader extends AbstractProductReader {
 
             case EnvisatConstants.AATSR_L1B_TOA_PRODUCT_TYPE_NAME:
             case EnvisatConstants.AATSR_L2_NR_PRODUCT_TYPE_NAME:
-                return EnvisatConstants.AATSR_PX_SIZE_IN_KM;
+            case EnvisatConstants.AT1_L1B_TOA_PRODUCT_TYPE_NAME:
+            case EnvisatConstants.AT1_L2_NR_PRODUCT_TYPE_NAME:
+            case EnvisatConstants.AT2_L1B_TOA_PRODUCT_TYPE_NAME:
+            case EnvisatConstants.AT2_L2_NR_PRODUCT_TYPE_NAME:
+                return EnvisatConstants.ATSR_PX_SIZE_IN_KM;
 
             case EnvisatConstants.ASAR_L1B_APG_PRODUCT_TYPE_NAME:
             case EnvisatConstants.ASAR_L1B_IMG_PRODUCT_TYPE_NAME:
@@ -800,6 +804,17 @@ public class EnvisatProductReader extends AbstractProductReader {
             case EnvisatConstants.ASAR_L1B_GM1_PRODUCT_TYPE_NAME:
             case EnvisatConstants.ASAR_L1B_GMB_PRODUCT_TYPE_NAME:
                 return EnvisatConstants.ASAR_GM1_PX_SIZE_IN_KM;
+
+            case EnvisatConstants.SAR_IM__BP_PRODUCT_TYPE_NAME:
+                return EnvisatConstants.SAR_IM_BP_PX_SIZE_IN_KM;
+
+            case EnvisatConstants.SAR_IMG_1P_PRODUCT_TYPE_NAME:
+            case EnvisatConstants.SAR_IMP_1P_PRODUCT_TYPE_NAME:
+            case EnvisatConstants.SAR_IMS_1P_PRODUCT_TYPE_NAME:
+                return EnvisatConstants.SAR_IMx_PX_SIZE_IN_KM;
+
+            case EnvisatConstants.SAR_IMM_1P_PRODUCT_TYPE_NAME:
+                return EnvisatConstants.SAR_IMM_PX_SIZE_IN_KM;
 
             default:
                 throw new IllegalStateException("undefined product resolution for type: " + productTypeName);

@@ -101,6 +101,22 @@ public interface EnvisatConstants {
      * Product type ID for AATSR L2 products.
      */
     String AATSR_L2_NR_PRODUCT_TYPE_NAME = "ATS_NR__2P";
+    /**
+     * Product type ID for ATSR-1 L1b products.
+     */
+    String AT1_L1B_TOA_PRODUCT_TYPE_NAME = "AT1_TOA_1P";
+    /**
+     * Product type ID for ATSR-1 L2 products.
+     */
+    String AT1_L2_NR_PRODUCT_TYPE_NAME = "AT1_NR__2P";
+    /**
+     * Product type ID for ATSR-2 L1b products.
+     */
+    String AT2_L1B_TOA_PRODUCT_TYPE_NAME = "AT2_TOA_1P";
+    /**
+     * Product type ID for ATSR-2 L2 products.
+     */
+    String AT2_L2_NR_PRODUCT_TYPE_NAME = "AT2_NR__2P";
 
     /**
      * Product type ID for ASAR APG L1 products.
@@ -192,11 +208,36 @@ public interface EnvisatConstants {
      */
     String ASAR_L2_WVW_PRODUCT_TYPE_NAME = "ASA_WVW_2P";
 
+    /**
+     * Product type ID for SAR image mode browse products.
+     */
+    String SAR_IM__BP_PRODUCT_TYPE_NAME = "SAR_IM__BP";
+
+    /**
+     * Product type ID for SAR image mode geocoded products.
+     */
+    String SAR_IMG_1P_PRODUCT_TYPE_NAME = "SAR_IMG_1P";
+
+    /**
+     * Product type ID for SAR image mode medium resolution products.
+     */
+    String SAR_IMM_1P_PRODUCT_TYPE_NAME = "SAR_IMM_1P";
+
+    /**
+     * Product type ID for SAR image mode precision products.
+     */
+    String SAR_IMP_1P_PRODUCT_TYPE_NAME = "SAR_IMP_1P";
+
+    /**
+     * Product type ID for SAR image mode complex products.
+     */
+    String SAR_IMS_1P_PRODUCT_TYPE_NAME = "SAR_IMS_1P";
+
     // average pixel sizes in kilometres
     double MERIS_FR_PX_SIZE_IN_KM = 0.3;
     double MERIS_RR_PX_SIZE_IN_KM = 1.2;
 
-    double AATSR_PX_SIZE_IN_KM = 1.0;
+    double ATSR_PX_SIZE_IN_KM = 1.0;
 
     double ASAR_xxG_PX_SIZE_IN_KM = 0.0125;
     double ASAR_xxM_PX_SIZE_IN_KM = 0.15;
@@ -208,6 +249,10 @@ public interface EnvisatConstants {
     double ASAR_WS_BP_PX_SIZE_IN_KM = 0.9;
     double ASAR_WVI_PX_SIZE_IN_KM = 0.02;
     double ASAR_WVS_PX_SIZE_IN_KM = 5.0;
+
+    double SAR_IM_BP_PX_SIZE_IN_KM = 0.225;
+    double SAR_IMx_PX_SIZE_IN_KM = 0.0125;
+    double SAR_IMM_PX_SIZE_IN_KM = 0.075;
 
     /**
      * A pattern which matches MERIS L1b product types
