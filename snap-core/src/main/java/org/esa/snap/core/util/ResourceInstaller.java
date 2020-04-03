@@ -26,7 +26,7 @@ import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
-import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
@@ -95,10 +95,7 @@ public class ResourceInstaller {
                     Path relFilePath = sourceBasePath.relativize(resource);
                     String relPathString = relFilePath.toString();
                     Path targetFile = targetDirPath.resolve(relPathString);
-                    if (!(Files.exists(targetFile)
-                            && Files.readAttributes(targetFile, BasicFileAttributes.class).lastModifiedTime().compareTo(Files.readAttributes(resource, BasicFileAttributes.class).lastModifiedTime()) == 0
-                            && Files.size(targetFile) == Files.size(resource))
-                        && !Files.isDirectory(resource)) {
+                    if (mustInstallResource(targetFile, resource)) {
                         Path parentPath = targetFile.getParent();
                         if (parentPath == null) {
                             throw new IOException("Could not retrieve the parent directory of '" + targetFile.toString() + "'.");
@@ -116,6 +113,17 @@ public class ResourceInstaller {
                 pm.done();
             }
         }
+    }
+
+    boolean mustInstallResource(Path targetFile, Path resource) throws IOException {
+        if (!Files.exists(targetFile)) {
+            return true;
+        }
+        boolean sizeIsDifferent = Files.size(targetFile) != Files.size(resource);
+        FileTime existingFileModifiedTime = Files.getLastModifiedTime(targetFile);
+        FileTime newFileModifiedTime = Files.getLastModifiedTime(resource);
+        boolean newFileIsNewer = existingFileModifiedTime.compareTo(newFileModifiedTime) < 0;
+        return (newFileIsNewer || sizeIsDifferent) && Files.isRegularFile(resource);
     }
 
     private Collection<Path> collectResources(String patternString) throws IOException {
