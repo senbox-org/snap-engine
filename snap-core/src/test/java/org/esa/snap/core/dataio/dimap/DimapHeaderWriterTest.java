@@ -267,7 +267,15 @@ public class DimapHeaderWriterTest {
     }
 
     @Test
-//    @Ignore
+    public void testWriteMultiPixelGeoCoding() throws IOException {
+        final String expected = setMultiPixelGeoCodingAndGetExpected();
+
+        dimapHeaderWriter.writeHeader();
+
+        assertEquals(expected, stringWriter.toString());
+    }
+
+    @Test
     public void testWritePixelGeoCodingWithoutEstimator() throws IOException {
         final String expectedForPixelGeoCoding = setPixelGeoCodingWithoutEstimatorAndGetExpected();
 
@@ -893,6 +901,95 @@ public class DimapHeaderWriterTest {
         product.setSceneGeoCoding(pixelGeoCoding);
         return header +
                 "    <Geoposition>" + LS +
+                "        <LATITUDE_BAND>" + pixelGeoCoding.getLatBand().getName() + "</LATITUDE_BAND>" + LS +
+                "        <LONGITUDE_BAND>" + pixelGeoCoding.getLonBand().getName() + "</LONGITUDE_BAND>" + LS +
+                "        <VALID_MASK_EXPRESSION>" + pixelGeoCoding.getValidMask() + "</VALID_MASK_EXPRESSION>" + LS +
+                "        <SEARCH_RADIUS>" + pixelGeoCoding.getSearchRadius() + "</SEARCH_RADIUS>" + LS +
+                "        <Pixel_Position_Estimator>" + LS +
+                "        " + pixelPosEstimator + LS +
+                "        </Pixel_Position_Estimator>" + LS +
+                "    </Geoposition>" + LS +
+                "    <Raster_Dimensions>" + LS +
+                "        <NCOLS>200</NCOLS>" + LS +
+                "        <NROWS>300</NROWS>" + LS +
+                "        <NBANDS>2</NBANDS>" + LS +
+                "    </Raster_Dimensions>" + LS +
+                "    <Data_Access>" + LS +
+                "        <DATA_FILE_FORMAT>ENVI</DATA_FILE_FORMAT>" + LS +
+                "        <DATA_FILE_FORMAT_DESC>ENVI File Format</DATA_FILE_FORMAT_DESC>" + LS +
+                "        <DATA_FILE_ORGANISATION>BAND_SEPARATE</DATA_FILE_ORGANISATION>" + LS +
+                "        <Data_File>" + LS +
+                "            <DATA_FILE_PATH href=\"test.data/b1.hdr\" />" + LS +
+                "            <BAND_INDEX>0</BAND_INDEX>" + LS +
+                "        </Data_File>" + LS +
+                "        <Data_File>" + LS +
+                "            <DATA_FILE_PATH href=\"test.data/b2.hdr\" />" + LS +
+                "            <BAND_INDEX>1</BAND_INDEX>" + LS +
+                "        </Data_File>" + LS +
+                "    </Data_Access>" + LS +
+                "    <Image_Interpretation>" + LS +
+                "        <Spectral_Band_Info>" + LS +
+                "            <BAND_INDEX>0</BAND_INDEX>" + LS +
+                "            <BAND_DESCRIPTION />" + LS +
+                "            <BAND_NAME>b1</BAND_NAME>" + LS +
+                "            <BAND_RASTER_WIDTH>200</BAND_RASTER_WIDTH>" + LS +
+                "            <BAND_RASTER_HEIGHT>300</BAND_RASTER_HEIGHT>" + LS +
+                "            <DATA_TYPE>int8</DATA_TYPE>" + LS +
+                "            <SOLAR_FLUX>0.0</SOLAR_FLUX>" + LS +
+                "            <BAND_WAVELEN>0.0</BAND_WAVELEN>" + LS +
+                "            <BANDWIDTH>0.0</BANDWIDTH>" + LS +
+                "            <SCALING_FACTOR>1.0</SCALING_FACTOR>" + LS +
+                "            <SCALING_OFFSET>0.0</SCALING_OFFSET>" + LS +
+                "            <LOG10_SCALED>false</LOG10_SCALED>" + LS +
+                "            <NO_DATA_VALUE_USED>false</NO_DATA_VALUE_USED>" + LS +
+                "            <NO_DATA_VALUE>0.0</NO_DATA_VALUE>" + LS +
+                "        </Spectral_Band_Info>" + LS +
+                "        <Spectral_Band_Info>" + LS +
+                "            <BAND_INDEX>1</BAND_INDEX>" + LS +
+                "            <BAND_DESCRIPTION />" + LS +
+                "            <BAND_NAME>b2</BAND_NAME>" + LS +
+                "            <BAND_RASTER_WIDTH>200</BAND_RASTER_WIDTH>" + LS +
+                "            <BAND_RASTER_HEIGHT>300</BAND_RASTER_HEIGHT>" + LS +
+                "            <DATA_TYPE>int8</DATA_TYPE>" + LS +
+                "            <SOLAR_FLUX>0.0</SOLAR_FLUX>" + LS +
+                "            <BAND_WAVELEN>0.0</BAND_WAVELEN>" + LS +
+                "            <BANDWIDTH>0.0</BANDWIDTH>" + LS +
+                "            <SCALING_FACTOR>1.0</SCALING_FACTOR>" + LS +
+                "            <SCALING_OFFSET>0.0</SCALING_OFFSET>" + LS +
+                "            <LOG10_SCALED>false</LOG10_SCALED>" + LS +
+                "            <NO_DATA_VALUE_USED>false</NO_DATA_VALUE_USED>" + LS +
+                "            <NO_DATA_VALUE>0.0</NO_DATA_VALUE>" + LS +
+                "        </Spectral_Band_Info>" + LS +
+                "    </Image_Interpretation>" + LS +
+                footer;
+    }
+
+    private String setMultiPixelGeoCodingAndGetExpected() {
+        final Band b1 = product.addBand("b1", ProductData.TYPE_INT8);
+        final Band b2 = product.addBand("b2", ProductData.TYPE_INT8);
+        final byte[] bandData = new byte[product.getSceneRasterWidth() * product.getSceneRasterHeight()];
+        b1.setDataElems(bandData);
+        b2.setDataElems(bandData);
+
+        final String pixelPosEstimator = setFXYGeoCodingAndGetCore().replace(LS, LS + "        ");
+        final PixelGeoCoding pixelGeoCoding;
+        pixelGeoCoding = new PixelGeoCoding(b1, b2, "NOT NaN", 4);
+        b1.setGeoCoding(pixelGeoCoding);
+        b2.setGeoCoding(pixelGeoCoding);
+
+        return header +
+                "    <Geoposition>" + LS +
+                "        <BAND_INDEX>" + 0 + "</BAND_INDEX>" + LS +
+                "        <LATITUDE_BAND>" + pixelGeoCoding.getLatBand().getName() + "</LATITUDE_BAND>" + LS +
+                "        <LONGITUDE_BAND>" + pixelGeoCoding.getLonBand().getName() + "</LONGITUDE_BAND>" + LS +
+                "        <VALID_MASK_EXPRESSION>" + pixelGeoCoding.getValidMask() + "</VALID_MASK_EXPRESSION>" + LS +
+                "        <SEARCH_RADIUS>" + pixelGeoCoding.getSearchRadius() + "</SEARCH_RADIUS>" + LS +
+                "        <Pixel_Position_Estimator>" + LS +
+                "        " + pixelPosEstimator + LS +
+                "        </Pixel_Position_Estimator>" + LS +
+                "    </Geoposition>" + LS +
+                "    <Geoposition>" + LS +
+                "        <BAND_INDEX>" + 1 + "</BAND_INDEX>" + LS +
                 "        <LATITUDE_BAND>" + pixelGeoCoding.getLatBand().getName() + "</LATITUDE_BAND>" + LS +
                 "        <LONGITUDE_BAND>" + pixelGeoCoding.getLonBand().getName() + "</LONGITUDE_BAND>" + LS +
                 "        <VALID_MASK_EXPRESSION>" + pixelGeoCoding.getValidMask() + "</VALID_MASK_EXPRESSION>" + LS +
