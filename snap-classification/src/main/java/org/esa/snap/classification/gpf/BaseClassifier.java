@@ -634,11 +634,7 @@ public abstract class BaseClassifier implements SupervisedClassifier {
 
         if (classifierTrained || classifierFailed) return;
 
-        Path path = getClassifierFilePath(true);
-        if (path == null) {
-            classifierFailed = true; // So it won't try to train again
-            throw new OperatorException("Stopped by user. Please type in new classifier name.");
-        }
+        Path path = getClassifierFilePath();
 
         try {
             if (params.featureBands == null) {
@@ -948,25 +944,15 @@ public abstract class BaseClassifier implements SupervisedClassifier {
         return new LabeledInstances(allLabeledInstances.labelMap, instanceList);
     }
 
-    private Path getClassifierFilePath(boolean doCheck) throws IOException {
+    private Path getClassifierFilePath() throws IOException {
 
         final Path classifierDir = SystemUtils.getAuxDataPath().
                 resolve(CLASSIFIER_ROOT_FOLDER).resolve(params.classifierType);
-        Path path = null;
+
         if (Files.notExists(classifierDir)) {
             Files.createDirectories(classifierDir);
         }
-        path = classifierDir.resolve(params.savedClassifierName + CLASSIFIER_FILE_EXTENSION);
-        if (doCheck && !Files.notExists(path)) {
-            final int answer = JOptionPane.showOptionDialog(null,
-                    "File " + path + " already exists.\nWould you like to overwrite?", "Overwrite?",
-                    JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
-
-            if (answer == JOptionPane.NO_OPTION) {
-                return null;
-            }
-        }
-        return path;
+        return classifierDir.resolve(params.savedClassifierName + CLASSIFIER_FILE_EXTENSION);
     }
 
     public static void findBandInProducts(final Product[] products, final String bandName, final int[] indices) {
@@ -1038,7 +1024,7 @@ public abstract class BaseClassifier implements SupervisedClassifier {
     private void loadClassifierDescriptor() {
 
         try {
-            final Path filePath = getClassifierFilePath(false);
+            final Path filePath = getClassifierFilePath();
 
             final FileInputStream fis = new FileInputStream(filePath.toString());
             try (final ObjectInputStream in = new ObjectInputStream(fis)) {
@@ -1544,7 +1530,7 @@ public abstract class BaseClassifier implements SupervisedClassifier {
                                          params.doClassValQuantization, params.minClassValue,
                                          params.classValStepSize, params.classLevels, params.trainingVectors);
 
-        final Path filePath = getClassifierFilePath(false);
+        final Path filePath = getClassifierFilePath();
 
         FileOutputStream fos;
         ObjectOutputStream out;
