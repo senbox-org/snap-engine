@@ -89,6 +89,17 @@ public class ImageLegend {
     public static final double FORCED_CHANGE_FACTOR = 0.0001;
     public static final double INVALID_WEIGHT = -1.0;
 
+
+    private double titleToUnitsVerticalGap;
+    private double titleToUnitsHorizontalGap;
+    private double titleParameterHeight;
+    private double titleParameterWidth;
+    private double titleParameterSingleLetterWidth;
+    private double titleUnitsHeight;
+    private double titleUnitsWidth;
+    private double titleUnitsSingleLetterWidth;
+
+
     // Independent attributes (Properties)
     private final ImageInfo imageInfo;
     private boolean initialized = false;
@@ -266,12 +277,13 @@ public class ImageLegend {
     }
 
     public String getTitleParameterText() {
+        return (headerText == null) ? "null-test" : headerText;
 //        if (!isInitialized() && titleOverRide != null && titleOverRide.length() > 0) {
 //            return titleOverRide;
 //        } else {
 //            return headerText;
 //        }
-        return headerText;
+//        return headerText;
     }
 
     public void setHeaderText(String headerText) {
@@ -279,7 +291,9 @@ public class ImageLegend {
     }
 
     public String getParameterUnitsText() {
-        return headerUnitsText;
+        return (headerUnitsText == null) ? "null-test" : headerUnitsText;
+
+//        return headerUnitsText;
     }
 
     public void setHeaderUnitsText(String headerUnitsText) {
@@ -618,23 +632,52 @@ public class ImageLegend {
         final BufferedImage bufferedImage = createBufferedImage(100, 100);
         final Graphics2D g2dTmp = bufferedImage.createGraphics();
 
+        initCoreGraphicSizes(g2dTmp);
+
+
         g2dTmp.setFont(getLabelsFont());
 
-        Dimension headerRequiredDimension = getTitleRequiredDimension(g2dTmp, false);
+        Dimension headerRequiredDimension;
+
+        if (orientation == HORIZONTAL) {
+            headerRequiredDimension = getTitleRequiredDimension(false, false);
+        } else {
+            if (ColorBarLayerType.VERTICAL_TITLE_TOP.equals(getTitleVerticalAnchor()) ||
+                    ColorBarLayerType.VERTICAL_TITLE_BOTTOM.equals(getTitleVerticalAnchor())) {
+                headerRequiredDimension = getTitleRequiredDimension(true, false);
+
+            } else {
+                headerRequiredDimension = getTitleRequiredDimension(false, true);
+            }
+        }
+
+        System.out.println("Title required width =" + headerRequiredDimension.width);
+        System.out.println("Title required height =" + headerRequiredDimension.height);
+        System.out.println("Title =" + getTitleParameterText());
+        System.out.println("Title units =" + getParameterUnitsText());
 
         double discreteBooster = 0;
         final int n = getNumGradationCurvePoints();
+
+        double firstLabelWidth = getSingleLabelRequiredDimension(g2dTmp, 0).getWidth();
+        int firstLabelOverhangWidth = (int) Math.ceil(firstLabelWidth / 2.0);
+
+        double lastLabelWidth = getSingleLabelRequiredDimension(g2dTmp, colorBarInfos.size() - 1).getWidth();
+        int lastLabelOverhangWidth = (int) Math.ceil(lastLabelWidth / 2.0);
+
+        double firstLabelHeight = getSingleLabelRequiredDimension(g2dTmp, 0).getHeight();
+        int labelOverhangHeight = (int) Math.ceil(firstLabelHeight / 2.0);
+
 
         if (orientation == HORIZONTAL) {
 
 
             Dimension labelsRequiredDimension = getHorizontalLabelsRequiredDimension(g2dTmp);
 
+            double colorBarWithLabelsRequiredLength = firstLabelOverhangWidth + getColorBarLength() + lastLabelOverhangWidth;
 
-            double requiredWidth = Math.max(labelsRequiredDimension.getWidth(),
+            double requiredWidth = Math.max(colorBarWithLabelsRequiredLength,
                     headerRequiredDimension.getWidth());
-
-            requiredWidth = Math.max(requiredWidth, getColorBarLength());
 
             requiredWidth = getBorderGap() + requiredWidth + getBorderGap();
 
@@ -646,7 +689,7 @@ public class ImageLegend {
             }
 
             //todo Danny changed this to make legend size stable
-            requiredWidth = getColorBarLength();
+//            requiredWidth = getColorBarLength();
 
 
             int requiredHeaderHeight = (int) Math.ceil(headerRequiredDimension.getHeight());
@@ -663,12 +706,6 @@ public class ImageLegend {
 
 
             legendSize = new Dimension((int) requiredWidth, requiredHeight);
-
-            double firstLabelWidth = getSingleLabelRequiredDimension(g2dTmp, 0).getWidth();
-            int firstLabelOverhangWidth = (int) Math.ceil(firstLabelWidth / 2.0);
-
-            double lastLabelWidth = getSingleLabelRequiredDimension(g2dTmp, colorBarInfos.size() - 1).getWidth();
-            int lastLabelOverhangWidth = (int) Math.ceil(lastLabelWidth / 2.0);
 
 
             paletteRect = new Rectangle(getBorderGap() + firstLabelOverhangWidth,
@@ -688,74 +725,105 @@ public class ImageLegend {
 
 
             Dimension labelsRequiredDimension = getVerticalLabelsRequiredDimension(g2dTmp);
-
-            double requiredWidth = getBorderGap()
-                    + getColorBarThickness()
-                    + getLabelGap()
-                    + labelsRequiredDimension.getWidth()
-                    + getHeaderGap()
-                    + headerRequiredDimension.getHeight()
-                    + getBorderGap();
-
-
             int requiredLabelsHeight = (int) Math.ceil(labelsRequiredDimension.getHeight());
 
-            int requiredHeight = (int) Math.max(requiredLabelsHeight, headerRequiredDimension.getWidth());
-            requiredHeight = Math.max(requiredHeight, getColorBarLength());
+            double requiredWidth;
+            double requiredHeight;
+
+
+            if (ColorBarLayerType.VERTICAL_TITLE_TOP.equals(getTitleVerticalAnchor()) ||
+                    ColorBarLayerType.VERTICAL_TITLE_BOTTOM.equals(getTitleVerticalAnchor())) {
+
+
+                double colorBarAndLabelsRequiredWidth = getColorBarThickness() + getLabelGap() + labelsRequiredDimension.getWidth();
+
+                requiredWidth = Math.max(headerRequiredDimension.getWidth(), colorBarAndLabelsRequiredWidth);
+
+                requiredWidth = getBorderGap() + requiredWidth + getBorderGap();
+
+
+                double colorBarWithLabelsRequiredHeight = labelOverhangHeight + getColorBarLength() + labelOverhangHeight;
+
+
+                requiredHeight = getBorderGap() +
+                        colorBarWithLabelsRequiredHeight +
+                        getHeaderGap() +
+                        headerRequiredDimension.getHeight()
+                        + getBorderGap();
+
+
+                //todo Danny changed this to make legend size stable
+
+                if (n > 1 && imageInfo.getColorPaletteDef().isDiscrete()) {
+                    discreteBooster = labelsRequiredDimension.getHeight() / (n - 1);
+                    requiredWidth += discreteBooster;
+                }
+
+
+                legendSize = new Dimension((int) requiredWidth, (int) requiredHeight);
+
+
+            } else {
+
+                requiredWidth = getBorderGap()
+                        + getTitleParameterHeight()
+                        + getColorBarThickness()
+                        + getTickmarkLength()
+                        + getLabelGap()
+                        + getLongestLabelWidth(g2dTmp)
+                        + getHeaderGap()
+                        + getBorderGap();
+
+
+
+
+                double colorBarWithLabelsRequiredHeight = labelOverhangHeight + getColorBarLength() + labelOverhangHeight;
+
+                requiredHeight = Math.max(colorBarWithLabelsRequiredHeight, headerRequiredDimension.getHeight());
+//                requiredHeight = Math.max(requiredHeight, getColorBarLength());
 //            requiredHeight = Math.max(requiredHeight, MIN_VERTICAL_COLORBAR_HEIGHT);
-            requiredHeight = getBorderGap() + requiredHeight + getBorderGap();
+                requiredHeight = getBorderGap() + requiredHeight + getBorderGap();
 
-            //todo Danny changed this to make legend size stable
+                //todo Danny changed this to make legend size stable
 
-            if (n > 1 && imageInfo.getColorPaletteDef().isDiscrete()) {
-                discreteBooster = labelsRequiredDimension.getHeight() / (n - 1);
-                requiredWidth += discreteBooster;
+                if (n > 1 && imageInfo.getColorPaletteDef().isDiscrete()) {
+                    discreteBooster = labelsRequiredDimension.getHeight() / (n - 1);
+                    requiredWidth += discreteBooster;
+                }
+
+//                requiredHeight = getColorBarLength();
+
+
+                legendSize = new Dimension((int) requiredWidth, (int) requiredHeight);
             }
-
-            requiredHeight = getColorBarLength();
-
-
-            legendSize = new Dimension((int) requiredWidth, requiredHeight);
-
-
-            double firstLabelHeight = getSingleLabelRequiredDimension(g2dTmp, 0).getHeight();
-            int labelOverhangHeight = (int) Math.ceil(firstLabelHeight / 2.0);
-
-
 
 
             if (ColorBarLayerType.VERTICAL_TITLE_TOP.equals(getTitleVerticalAnchor())) {
                 paletteRect = new Rectangle(getBorderGap(),
-                        getBorderGap() + labelOverhangHeight,
+                        getBorderGap() + labelOverhangHeight + (int) headerRequiredDimension.getHeight() + getHeaderGap(),
                         getColorBarThickness(),
-//                    MIN_VERTICAL_COLORBAR_WIDTH,
-                        legendSize.height - getBorderGap() - getBorderGap() - labelOverhangHeight - labelOverhangHeight);
+                        getColorBarLength());
 
             } else if (ColorBarLayerType.VERTICAL_TITLE_BOTTOM.equals(getTitleVerticalAnchor())) {
                 paletteRect = new Rectangle(getBorderGap(),
                         getBorderGap() + labelOverhangHeight,
                         getColorBarThickness(),
-//                    MIN_VERTICAL_COLORBAR_WIDTH,
-                        legendSize.height - getBorderGap() - getBorderGap() - labelOverhangHeight - labelOverhangHeight);
+                        getColorBarLength());
 
             } else if (ColorBarLayerType.VERTICAL_TITLE_LEFT.equals(getTitleVerticalAnchor())) {
-                paletteRect = new Rectangle(getBorderGap() + headerRequiredDimension.height + getHeaderGap(),
+                paletteRect = new Rectangle(getBorderGap() + headerRequiredDimension.width + getHeaderGap(),
                         getBorderGap() + labelOverhangHeight,
                         getColorBarThickness(),
-//                    MIN_VERTICAL_COLORBAR_WIDTH,
-                        legendSize.height - getBorderGap() - getBorderGap() - labelOverhangHeight - labelOverhangHeight);
+                        getColorBarLength());
 
 
             } else { // VERTICAL_TITLE_RIGHT
                 paletteRect = new Rectangle(getBorderGap(),
                         getBorderGap() + labelOverhangHeight,
                         getColorBarThickness(),
-//                    MIN_VERTICAL_COLORBAR_WIDTH,
-                        legendSize.height - getBorderGap() - getBorderGap() - labelOverhangHeight - labelOverhangHeight);
+                        getColorBarLength());
 
             }
-
-
 
 
 //            int paletteGap = 0;
@@ -806,80 +874,80 @@ public class ImageLegend {
     }
 
 
-    private Dimension getTitleRequiredDimension(Graphics2D g2d, boolean lineBreak) {
+    private void initCoreGraphicSizes(Graphics2D g2d) {
+
+        double vertical_gap_factor = 0.3;
+        double horizontal_gap_factor = HORIZONTAL_TITLE_PARAMETER_UNITS_GAP_FACTOR;
+
+        Font originalFont = g2d.getFont();
+
+        g2d.setFont(getTitleParameterFont());
+        Rectangle2D titleRectangle = g2d.getFontMetrics().getStringBounds(getTitleParameterText(), g2d);
+        Rectangle2D titleSingleLetterRectangle = g2d.getFontMetrics().getStringBounds("A", g2d);
+
+        double titleParameterHeight = titleRectangle.getHeight();
+        double titleParameterWidth = titleRectangle.getWidth();
+        double titleParameterSingleLetterWidth = titleSingleLetterRectangle.getWidth();
+
+        g2d.setFont(getTitleUnitsFont());
+        Rectangle2D unitsRectangle = g2d.getFontMetrics().getStringBounds(getParameterUnitsText(), g2d);
+        Rectangle2D unitsSingleLetterRectangle = g2d.getFontMetrics().getStringBounds("A", g2d);
+
+        double titleUnitsHeight = unitsRectangle.getHeight();
+        double titleUnitsWidth = unitsRectangle.getWidth();
+        double titleUnitsSingleLetterWidth = unitsSingleLetterRectangle.getWidth();
+
+        double titleToUnitsVerticalGap = 0.0;
+        double titleToUnitsHorizontalGap = 0.0;
+
+        if (hasTitleParameter() && hasTitleUnits()) {
+            titleToUnitsVerticalGap = vertical_gap_factor * ((titleParameterHeight + titleUnitsHeight) / 2.0);
+            titleToUnitsHorizontalGap = horizontal_gap_factor * ((titleParameterSingleLetterWidth + titleUnitsSingleLetterWidth) / 2.0);
+        }
+
+        setTitleToUnitsVerticalGap(titleToUnitsVerticalGap);
+        setTitleToUnitsHorizontalGap(titleToUnitsHorizontalGap);
+
+        setTitleParameterHeight(titleParameterHeight);
+        setTitleParameterWidth(titleParameterWidth);
+        setTitleParameterSingleLetterWidth(titleParameterSingleLetterWidth);
+
+        setTitleUnitsHeight(titleUnitsHeight);
+        setTitleUnitsWidth(titleUnitsWidth);
+        setTitleUnitsSingleLetterWidth(titleUnitsSingleLetterWidth);
+
+        g2d.setFont(originalFont);
+    }
+
+
+    private Dimension getTitleRequiredDimension(boolean lineBreak, boolean rotate) {
 
         double width = 0;
         double height = 0;
 
-        double titleParameterHeight = 0;
-        double titleUnitsHeight = 0;
-        double titleParameterWidth = 0;
-        double titleUnitsWidth = 0;
-
-        double vertical_gap_factor = 0.3;
-        double horizontal_gap = 0;
-        double vertical_gap = 0;
-
-
-
-        if (hasTitleParameter() || hasTitleUnits()) {
-
-            Font originalFont = g2d.getFont();
-            Rectangle2D singleLetter;
-
-            if (hasTitleParameter()) {
-                g2d.setFont(getTitleParameterFont());
-                singleLetter = g2d.getFontMetrics().getStringBounds("A", g2d);
-                titleParameterHeight = singleLetter.getHeight();
-
-                Rectangle2D headerTextRectangle = g2d.getFontMetrics().getStringBounds(getTitleParameterText(), g2d);
-                width += headerTextRectangle.getWidth();
-                titleParameterWidth = headerTextRectangle.getWidth();
-
-
-                if (hasTitleUnits()) {
-                    width += (HORIZONTAL_TITLE_PARAMETER_UNITS_GAP_FACTOR * singleLetter.getWidth());
-                }
-            }
-
-            if (hasTitleUnits()) {
-                g2d.setFont(getTitleUnitsFont());
-                singleLetter = g2d.getFontMetrics().getStringBounds("A", g2d);
-                titleUnitsHeight = singleLetter.getHeight();
-
-                Rectangle2D unitsTextRectangle = g2d.getFontMetrics().getStringBounds(getParameterUnitsText(), g2d);
-                width += unitsTextRectangle.getWidth();
-                titleUnitsWidth = unitsTextRectangle.getWidth();
-                horizontal_gap = HORIZONTAL_TITLE_PARAMETER_UNITS_GAP_FACTOR * singleLetter.getWidth();
-                vertical_gap = vertical_gap_factor * titleUnitsHeight;
-            }
-
-
-            if (hasTitleParameter() && hasTitleUnits()) {
-                if (lineBreak) {
-                    height = titleParameterHeight + vertical_gap * titleUnitsHeight + titleUnitsHeight;
-                    width = Math.max(titleParameterWidth, titleUnitsWidth);
-                } else {
-                    height = Math.max(titleParameterHeight, titleUnitsHeight);
-                    width = titleParameterWidth + horizontal_gap + titleUnitsWidth;
-                }
-
-            } else if (hasTitleUnits()) {
-                // hasTitleUnits only
-                height = titleUnitsHeight;
-                width = titleUnitsWidth;
-
+        if (hasTitleParameter() && hasTitleUnits()) {
+            if (lineBreak) {
+                height = getTitleParameterHeight() + getTitleToUnitsVerticalGap() + getTitleUnitsHeight();
+                width = Math.max(getTitleParameterWidth(), getTitleUnitsWidth());
             } else {
-                // hasTitleParameter only
-                height = titleParameterHeight;
-                width = titleParameterWidth;
-
+                height = Math.max(getTitleParameterHeight(), getTitleUnitsHeight());
+                width = getTitleParameterWidth() + getTitleToUnitsHorizontalGap() + getTitleUnitsWidth();
             }
-
-            g2d.setFont(originalFont);
+        } else if (hasTitleUnits()) {
+            // hasTitleUnits only
+            height = getTitleUnitsHeight();
+            width = getTitleUnitsWidth();
+        } else {
+            // hasTitleParameter only
+            height = getTitleParameterHeight();
+            width = getTitleParameterWidth();
         }
 
-        return new Dimension((int) Math.ceil(width), (int) Math.ceil(height));
+        if (rotate) {
+            return new Dimension((int) Math.ceil(height), (int) Math.ceil(width));
+        } else {
+            return new Dimension((int) Math.ceil(width), (int) Math.ceil(height));
+        }
     }
 
 
@@ -949,6 +1017,27 @@ public class ImageLegend {
     }
 
 
+    private double getLongestLabelWidth(Graphics2D g2d) {
+
+        double width = 0;
+
+        if (isLabelsShow() && colorBarInfos.size() > 0) {
+
+            Font originalFont = g2d.getFont();
+            g2d.setFont(getLabelsFont());
+
+            for (ColorBarInfo colorBarInfo : colorBarInfos) {
+                Rectangle2D labelRectangle = g2d.getFontMetrics().getStringBounds(colorBarInfo.getFormattedValue(), g2d);
+                width = Math.max(width, labelRectangle.getWidth());
+            }
+
+            g2d.setFont(originalFont);
+        }
+
+        return width;
+    }
+
+
     private Dimension getSingleLabelRequiredDimension(Graphics2D g2d, int colorBarInfoIndex) {
 
         double width = 0;
@@ -974,41 +1063,49 @@ public class ImageLegend {
     private void drawHeaderText(Graphics2D g2d) {
         if (hasTitleParameter() || hasTitleUnits()) {
             Font origFont = g2d.getFont();
-
-            final FontMetrics fontMetrics = g2d.getFontMetrics();
-            g2d.setPaint(getTitleParameterColor());
+            Paint origPaint = g2d.getPaint();
 
             int x0 = paletteRect.x;
-            int y0 = paletteRect.y - getHeaderGap();
+            int y0 = paletteRect.y;
 
-            g2d.setFont(getTitleParameterFont());
 
             if (orientation == HORIZONTAL) {
-                Rectangle2D headerTextRectangle = g2d.getFontMetrics().getStringBounds(headerText, g2d);
+                double translateTitleX = x0;
+                double translateTitleY = y0 - getHeaderGap();
+
+                double translateUnitsX = 0;
+                double translateUnitsY = 0;
+
+                g2d.translate(translateTitleX, translateTitleY);
+
+
                 if (hasTitleParameter()) {
-                    g2d.drawString(headerText, x0, y0);
+                    g2d.setFont(getTitleParameterFont());
+                    g2d.setPaint(getTitleParameterColor());
+                    g2d.drawString(headerText, 0, 0);
+
+                    translateUnitsX = getTitleParameterWidth() + getTitleToUnitsHorizontalGap();
                 }
 
-                Rectangle2D singleLetter = g2d.getFontMetrics().getStringBounds("A", g2d);
-                int gap = (int) (HORIZONTAL_TITLE_PARAMETER_UNITS_GAP_FACTOR * singleLetter.getWidth());
+
+                g2d.translate(translateUnitsX, translateUnitsY);
 
                 if (hasTitleUnits()) {
                     g2d.setFont(getTitleUnitsFont());
                     g2d.setPaint(getTitleUnitsColor());
-                    g2d.drawString(getParameterUnitsText(), (int) (x0 + headerTextRectangle.getWidth() + gap), y0);
+                    g2d.drawString(getParameterUnitsText(), 0, 0);
                 }
+
+
+                g2d.translate(-translateUnitsX, -translateUnitsY);
+                g2d.translate(-translateTitleX, -translateTitleY);
+
+
             } else {
-                Rectangle2D headerTextRectangle = g2d.getFontMetrics().getStringBounds(headerText, g2d);
 
+                g2d.setFont(getTitleUnitsFont());
                 Rectangle2D singleLetter = g2d.getFontMetrics().getStringBounds("A", g2d);
-                int gap = (int) (VERTICAL_TITLE_PARAMETER_UNITS_GAP_FACTOR * singleLetter.getWidth());
-
                 int labelOverhangHeight = (int) Math.ceil(singleLetter.getHeight() / 2.0);
-
-                final BufferedImage bufferedImage = createBufferedImage(100, 100);
-                final Graphics2D g2dTmp = bufferedImage.createGraphics();
-                Dimension headerRequiredDimension = getTitleRequiredDimension(g2dTmp, false);
-                int headerHeight = headerRequiredDimension.height;
 
 
                 double translateX;
@@ -1020,18 +1117,18 @@ public class ImageLegend {
                 } else if (ColorBarLayerType.VERTICAL_TITLE_BOTTOM.equals(getTitleVerticalAnchor())) {
                     translateX = x0;
 
-
                 } else if (ColorBarLayerType.VERTICAL_TITLE_LEFT.equals(getTitleVerticalAnchor())) {
-                    translateX = x0 - getHeaderGap();
+                    translateX = x0 - getHeaderGap() - 0.5 * getTitleParameterHeight();
 
 
                 } else { // VERTICAL_TITLE_RIGHT
                     translateX = x0
-                            + paletteRect.width
+                            + 0.5 * getTitleParameterHeight()
+                            + getColorBarThickness()
+                            + getTickmarkLength()
                             + getLabelGap()
-                            + getVerticalLabelsRequiredDimension(g2d).width
-                            + getHeaderGap()
-                            + singleLetter.getHeight();
+                            + getLongestLabelWidth(g2d)
+                            + getHeaderGap();
 
                 }
 
@@ -1039,18 +1136,32 @@ public class ImageLegend {
                 double translateY;
 
 
-                if (ColorBarLayerType.VERTICAL_TITLE_TOP.equals(getTitleVerticalAnchor())) {
+                if (ColorBarLayerType.VERTICAL_TITLE_TOP.equals(getTitleVerticalAnchor()) ||
+                        ColorBarLayerType.VERTICAL_TITLE_BOTTOM.equals(getTitleVerticalAnchor())) {
 
-                    translateY = y0 - getHeaderGap();
+                    double translateY2 = 0;
+
+
+                    if (ColorBarLayerType.VERTICAL_TITLE_TOP.equals(getTitleVerticalAnchor())) {
+                        if (hasTitleParameter() && hasTitleUnits()) {
+                            translateY = y0 - getHeaderGap() - labelOverhangHeight  - getTitleUnitsHeight() - 0.5* getTitleParameterHeight() - getTitleToUnitsVerticalGap();
+                        } else {
+                            translateY = y0 - getHeaderGap() - labelOverhangHeight - 0.5* getTitleParameterHeight();
+                        }
+                    } else {
+                            translateY = y0 + getColorBarLength() + labelOverhangHeight + getHeaderGap() + 0.5* getTitleParameterHeight();
+                    }
 
                     g2d.translate(translateX, translateY);
 
                     if (hasTitleParameter()) {
+                        g2d.setFont(getTitleParameterFont());
+                        g2d.setPaint(getTitleParameterColor());
                         g2d.drawString(headerText, 0, 0);
+                        translateY2 = getTitleParameterHeight() + getTitleToUnitsVerticalGap();
                     }
 
 
-                    double translateY2 = -headerTextRectangle.getWidth() - gap;
                     g2d.translate(0, translateY2);
 
                     if (hasTitleUnits()) {
@@ -1067,30 +1178,35 @@ public class ImageLegend {
                     translateY = y0;
 
                 } else { // VERTICAL_TITLE_RIGHT || VERTICAL_TITLE_LEFT
-                    translateY = y0 + paletteRect.height + labelOverhangHeight;
+                    translateY = y0 + getColorBarLength();
+                    double translateY2 = 0;
+
 
                     double rotate = -Math.PI / 2.0;
                     g2d.translate(translateX, translateY);
-                    g2d.rotate(rotate);
 
 
                     if (hasTitleParameter()) {
+                        g2d.rotate(rotate);
+                        g2d.setFont(getTitleParameterFont());
+                        g2d.setPaint(getTitleParameterColor());
                         g2d.drawString(headerText, 0, 0);
+                        g2d.rotate(-rotate);
+
+                        translateY2 = -getTitleParameterWidth() - getTitleToUnitsHorizontalGap();
                     }
 
-                    g2d.rotate(-rotate);
 
-                    double translateY2 = -headerTextRectangle.getWidth() - gap;
                     g2d.translate(0, translateY2);
-                    g2d.rotate(rotate);
 
                     if (hasTitleUnits()) {
+                        g2d.rotate(rotate);
                         g2d.setFont(getTitleUnitsFont());
                         g2d.setPaint(getTitleUnitsColor());
                         g2d.drawString(getParameterUnitsText(), 0, 0);
+                        g2d.rotate(-rotate);
                     }
 
-                    g2d.rotate(-rotate);
                     g2d.translate(0, -translateY2);
                     g2d.translate(-translateX, -translateY);
 
@@ -1100,6 +1216,8 @@ public class ImageLegend {
             }
 
 
+            // Restore font graphics
+            g2d.setPaint(origPaint);
             g2d.setFont(origFont);
         }
     }
@@ -1977,5 +2095,71 @@ public class ImageLegend {
 
     public void setTitleVerticalAnchor(String titleVerticalAnchor) {
         this.titleVerticalAnchor = titleVerticalAnchor;
+    }
+
+
+    private double getTitleToUnitsVerticalGap() {
+        return titleToUnitsVerticalGap;
+    }
+
+    private void setTitleToUnitsVerticalGap(double titleToUnitsVerticalGap) {
+        this.titleToUnitsVerticalGap = titleToUnitsVerticalGap;
+    }
+
+
+    public double getTitleToUnitsHorizontalGap() {
+        return titleToUnitsHorizontalGap;
+    }
+
+    public void setTitleToUnitsHorizontalGap(double titleToUnitsHorizontalGap) {
+        this.titleToUnitsHorizontalGap = titleToUnitsHorizontalGap;
+    }
+
+    public double getTitleParameterHeight() {
+        return titleParameterHeight;
+    }
+
+    public void setTitleParameterHeight(double titleParameterHeight) {
+        this.titleParameterHeight = titleParameterHeight;
+    }
+
+    public double getTitleParameterWidth() {
+        return titleParameterWidth;
+    }
+
+    public void setTitleParameterWidth(double titleParameterWidth) {
+        this.titleParameterWidth = titleParameterWidth;
+    }
+
+    public double getTitleParameterSingleLetterWidth() {
+        return titleParameterSingleLetterWidth;
+    }
+
+    public void setTitleParameterSingleLetterWidth(double titleParameterSingleLetterWidth) {
+        this.titleParameterSingleLetterWidth = titleParameterSingleLetterWidth;
+    }
+
+    public double getTitleUnitsHeight() {
+        return titleUnitsHeight;
+    }
+
+    public void setTitleUnitsHeight(double titleUnitsHeight) {
+        this.titleUnitsHeight = titleUnitsHeight;
+    }
+
+    public double getTitleUnitsWidth() {
+        return titleUnitsWidth;
+    }
+
+    public void setTitleUnitsWidth(double titleUnitsWidth) {
+        this.titleUnitsWidth = titleUnitsWidth;
+    }
+
+    public double getTitleUnitsSingleLetterWidth() {
+        return titleUnitsSingleLetterWidth;
+    }
+
+    public void setTitleUnitsSingleLetterWidth(double titleUnitsSingleLetterWidth) {
+        this.titleUnitsSingleLetterWidth = titleUnitsSingleLetterWidth;
     }
 }
