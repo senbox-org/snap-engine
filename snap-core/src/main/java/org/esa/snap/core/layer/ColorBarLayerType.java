@@ -54,7 +54,7 @@ public class ColorBarLayerType extends LayerType {
     private static final String PROPERTY_LABEL_VALUES_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "LabelValues";
 
     public static final String PROPERTY_LABEL_VALUES_SECTION_KEY = PROPERTY_LABEL_VALUES_ROOT_KEY + ".section";
-    public static final String PROPERTY_LABEL_VALUES_SECTION_LABEL = "Tick Mark Labels";
+    public static final String PROPERTY_LABEL_VALUES_SECTION_LABEL = "Labels";
     public static final String PROPERTY_LABEL_VALUES_SECTION_TOOLTIP = "Numeric value options for the color bar legend labels";
     public static final String PROPERTY_LABEL_VALUES_SECTION_ALIAS = PROPERTY_LABEL_VALUES_ROOT_ALIAS +"Section";
 
@@ -135,7 +135,7 @@ public class ColorBarLayerType extends LayerType {
     private static final String PROPERTY_FORMATTING_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "Orientation";
 
     public static final String PROPERTY_FORMATTING_SECTION_KEY = PROPERTY_FORMATTING_ROOT_KEY + ".section";
-    public static final String PROPERTY_FORMATTING_SECTION_LABEL = "Orientation & Placement";
+    public static final String PROPERTY_FORMATTING_SECTION_LABEL = "Orientation & Direction";
     public static final String PROPERTY_FORMATTING_SECTION_TOOLTIP = "Orientation options for the color bar legend";
     public static final String PROPERTY_FORMATTING_SECTION_ALIAS = PROPERTY_FORMATTING_ROOT_ALIAS + "Section";
 
@@ -256,7 +256,7 @@ public class ColorBarLayerType extends LayerType {
     private static final String PROPERTY_IMAGE_SCALING_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "Scaling";
 
     public static final String PROPERTY_IMAGE_SCALING_SECTION_NAME = PROPERTY_IMAGE_SCALING_ROOT_KEY + ".section";
-    public static final String PROPERTY_IMAGE_SCALING_SECTION_LABEL = "Scaling";
+    public static final String PROPERTY_IMAGE_SCALING_SECTION_LABEL = "Size & Scaling";
     public static final String PROPERTY_IMAGE_SCALING_SECTION_TOOLTIP = "Set scaling and relative size of color bar image";
     public static final String PROPERTY_IMAGE_SCALING_SECTION_ALIAS = PROPERTY_IMAGE_SCALING_ROOT_ALIAS + "Section";
 
@@ -275,14 +275,14 @@ public class ColorBarLayerType extends LayerType {
     public static final Class PROPERTY_IMAGE_SCALING_SIZE_TYPE = Double.class;
 
     public static final String PROPERTY_LEGEND_LENGTH_KEY = PROPERTY_IMAGE_SCALING_ROOT_KEY + ".legend.length";
-    public static final String PROPERTY_LEGEND_LENGTH_LABEL = "Legend Length";
+    public static final String PROPERTY_LEGEND_LENGTH_LABEL = "Color Bar Length";
     public static final String PROPERTY_LEGEND_LENGTH_TOOLTIP = "Length in pixels of the color bar";
     private static final String PROPERTY_LEGEND_LENGTH_ALIAS = PROPERTY_IMAGE_SCALING_ROOT_ALIAS + "Legend Length";
     public static final int PROPERTY_LEGEND_LENGTH_DEFAULT = 1200;
     public static final Class PROPERTY_LEGEND_LENGTH_TYPE = Integer.class;
 
     public static final String PROPERTY_LEGEND_WIDTH_KEY = PROPERTY_IMAGE_SCALING_ROOT_KEY + ".legend.width";
-    public static final String PROPERTY_LEGEND_WIDTH_LABEL = "Legend Width";
+    public static final String PROPERTY_LEGEND_WIDTH_LABEL = "Color Bar Width";
     public static final String PROPERTY_LEGEND_WIDTH_TOOLTIP = "Width in pixels of the color bar";
     private static final String PROPERTY_LEGEND_WIDTH_ALIAS = PROPERTY_IMAGE_SCALING_ROOT_ALIAS + "LegendWidth";
     public static final int PROPERTY_LEGEND_WIDTH_DEFAULT = 60;
@@ -341,7 +341,7 @@ public class ColorBarLayerType extends LayerType {
 
 
     public static final String PROPERTY_TITLE_PARAMETER_FONT_SIZE_KEY = PROPERTY_TITLE_PARAMETER_ROOT_KEY + "font.size";
-    public static final String PROPERTY_TITLE_PARAMETER_FONT_SIZE_LABEL = "Font Size (pixels)";
+    public static final String PROPERTY_TITLE_PARAMETER_FONT_SIZE_LABEL = "Title Size";
     public static final String PROPERTY_TITLE_PARAMETER_FONT_SIZE_TOOLTIP = "Set size of the title parameter";
     private static final String PROPERTY_TITLE_PARAMETER_FONT_SIZE_ALIAS = PROPERTY_TITLE_PARAMETER_ROOT_ALIAS + "FontSize";
     public static final int PROPERTY_TITLE_PARAMETER_FONT_SIZE_DEFAULT = 35;
@@ -411,7 +411,7 @@ public class ColorBarLayerType extends LayerType {
     public static final Object PROPERTY_TITLE_UNITS_FONT_NAME_VALUE_SET[] = FONT_NAME_VALUE_SET;
 
     public static final String PROPERTY_TITLE_UNITS_FONT_SIZE_KEY = PROPERTY_TITLE_UNITS_ROOT_KEY + ".font.size";
-    public static final String PROPERTY_TITLE_UNITS_FONT_SIZE_LABEL = "Font Size (pixels)";
+    public static final String PROPERTY_TITLE_UNITS_FONT_SIZE_LABEL = "Units Size";
     public static final String PROPERTY_TITLE_UNITS_FONT_SIZE_TOOLTIP = "Set size of the title units";
     private static final String PROPERTY_TITLE_UNITS_FONT_SIZE_ALIAS = PROPERTY_TITLE_UNITS_ROOT_ALIAS + "FontSize";
     public static final int PROPERTY_TITLE_UNITS_FONT_SIZE_DEFAULT = 35;
@@ -440,7 +440,7 @@ public class ColorBarLayerType extends LayerType {
     private static final String PROPERTY_LABELS_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "Labels";
 
     public static final String PROPERTY_LABELS_SECTION_KEY = PROPERTY_LABELS_ROOT_KEY + ".section";
-    public static final String PROPERTY_LABELS_SECTION_LABEL = "Tick-Mark Labels";
+    public static final String PROPERTY_LABELS_SECTION_LABEL = "Labels Disabled";
     public static final String PROPERTY_LABELS_SECTION_TOOLTIP = "Configuration options for the labels";
     public static final String PROPERTY_LABELS_SECTION_ALIAS = PROPERTY_LABELS_ROOT_ALIAS + "Section";
 
@@ -474,7 +474,7 @@ public class ColorBarLayerType extends LayerType {
     public static final Object PROPERTY_LABELS_FONT_NAME_VALUE_SET[] = FONT_NAME_VALUE_SET;
 
     public static final String PROPERTY_LABELS_FONT_SIZE_KEY = PROPERTY_LABELS_ROOT_KEY + ".font.size";
-    public static final String PROPERTY_LABELS_FONT_SIZE_LABEL = "Size";
+    public static final String PROPERTY_LABELS_FONT_SIZE_LABEL = "Labels Size";
     public static final String PROPERTY_LABELS_FONT_SIZE_TOOLTIP = "Set the size of the tick-mark labels";
     private static final String PROPERTY_LABELS_FONT_SIZE_ALIAS = PROPERTY_LABELS_ROOT_ALIAS + "FontSize";
     public static final int PROPERTY_LABELS_FONT_SIZE_DEFAULT = 35;
@@ -504,7 +504,7 @@ public class ColorBarLayerType extends LayerType {
     private static final String PROPERTY_TICKMARKS_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "TickMarks";
 
     public static final String PROPERTY_TICKMARKS_SECTION_KEY = PROPERTY_TICKMARKS_ROOT_KEY + ".section";
-    public static final String PROPERTY_TICKMARKS_SECTION_LABEL = "Tickmarks";
+    public static final String PROPERTY_TICKMARKS_SECTION_LABEL = "Tick Marks";
     public static final String PROPERTY_TICKMARKS_SECTION_TOOLTIP = "Format options for the color bar legend tickmarks";
     public static final String PROPERTY_TICKMARKS_SECTION_ALIAS = PROPERTY_TICKMARKS_ROOT_ALIAS + "Section";
 
