@@ -184,6 +184,7 @@ public class ImageLegend {
     private ArrayList<ColorBarInfo> colorBarInfos = new ArrayList<ColorBarInfo>();
 
 
+
     public ImageLegend(ImageInfo imageInfo, RasterDataNode raster) {
         this.imageInfo = imageInfo;
         this.raster = raster;
@@ -651,10 +652,10 @@ public class ImageLegend {
             }
         }
 
-        System.out.println("Title required width =" + headerRequiredDimension.width);
-        System.out.println("Title required height =" + headerRequiredDimension.height);
-        System.out.println("Title =" + getTitleParameterText());
-        System.out.println("Title units =" + getParameterUnitsText());
+//        System.out.println("Title required width =" + headerRequiredDimension.width);
+//        System.out.println("Title required height =" + headerRequiredDimension.height);
+//        System.out.println("Title =" + getTitleParameterText());
+//        System.out.println("Title units =" + getParameterUnitsText());
 
         double discreteBooster = 0;
         final int n = getNumGradationCurvePoints();
@@ -2162,4 +2163,6 @@ public class ImageLegend {
     public void setTitleUnitsSingleLetterWidth(double titleUnitsSingleLetterWidth) {
         this.titleUnitsSingleLetterWidth = titleUnitsSingleLetterWidth;
     }
+
+
 }

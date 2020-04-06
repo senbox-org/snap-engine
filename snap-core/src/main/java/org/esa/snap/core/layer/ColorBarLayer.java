@@ -47,6 +47,8 @@ public class ColorBarLayer extends Layer {
     private double NULL_DOUBLE = -1.0;
     private double ptsToPixelsMultiplier = NULL_DOUBLE;
 
+    private boolean allowImageLegendReset = true;
+
 
 
     public ColorBarLayer(RasterDataNode raster) {
@@ -85,14 +87,17 @@ public class ColorBarLayer extends Layer {
 
     @Override
     public void renderLayer(Rendering rendering) {
+        System.out.println("Rendering Layer");
 
         getUserValues();
 
         if (imageLegend == null) {
+            System.out.println("imageLegend == null  so creating new image");
+
             imageLegend = new ImageLegend(raster.getImageInfo(), raster);
 
-            String title = (getTitle() != null && getTitle().trim().length() > 0) ? getTitle() : raster.getName();
-            String units = (getUnits() != null && getUnits().trim().length() > 0) ? getUnits() : "(" + raster.getUnit() + ")";
+            String title = (ColorBarLayerType.NULL_SPECIAL.equals(getTitle())) ? raster.getName() : getTitle();
+            String units = (ColorBarLayerType.NULL_SPECIAL.equals(getUnits())) ? "(" + raster.getUnit() + ")" : getUnits();
 
 
 
@@ -165,13 +170,36 @@ public class ColorBarLayer extends Layer {
 
             int imageHeight = raster.getRasterHeight();
             int imageWidth = raster.getRasterWidth();
+
+
             bufferedImage = imageLegend.createImage(new Dimension(imageWidth, imageHeight), true);
 
 
             // Update the properties with some calculated/looked-up values
-            setLabelValuesActual(imageLegend.getFullCustomAddThesePoints());
-            setTitle(imageLegend.getTitleParameterText());
-            setUnits(imageLegend.getParameterUnitsText());
+
+            allowImageLegendReset = false;
+
+            if (imageLegend != null) {
+                if (getLabelValuesActual() == null || !getLabelValuesActual().equals(imageLegend.getFullCustomAddThesePoints())) {
+                    setLabelValuesActual(imageLegend.getFullCustomAddThesePoints());
+                }
+            }
+
+            if (imageLegend != null) {
+                if (getTitle() == null || !getTitle().equals(imageLegend.getTitleParameterText())) {
+                    setTitle(imageLegend.getTitleParameterText());
+                }
+            }
+
+            if (imageLegend != null) {
+                if (getUnits() == null || !getUnits().equals(imageLegend.getParameterUnitsText())) {
+                    setUnits(imageLegend.getParameterUnitsText());
+                }
+            }
+
+            allowImageLegendReset = true;
+
+
         }
 
 
@@ -478,7 +506,11 @@ public class ColorBarLayer extends Layer {
 //            imageLegend = null;
 //
 //        }
-        imageLegend = null;
+
+        if (allowImageLegendReset) {
+            imageLegend = null;
+        }
+
 
         if (getConfiguration().getProperty(propertyName) != null) {
             getConfiguration().setValue(propertyName, event.getNewValue());

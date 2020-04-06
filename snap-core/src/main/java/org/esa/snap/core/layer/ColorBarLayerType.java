@@ -39,6 +39,8 @@ public class ColorBarLayerType extends LayerType {
     public static final String DISTRIB_EXACT_STR = "Palette Values";
     public static final String DISTRIB_MANUAL_STR = "Custom Values";
 
+    public static final String NULL_SPECIAL = "-1";  // a null value that the user might not enter just in case the user wants to enter ""
+
 
     //--------------------------------------------------------------------------------------------------------------
     // Color Bar Legend parameters
@@ -66,7 +68,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_LABEL_VALUES_MODE_OPTION1 = DISTRIB_EVEN_STR;
     public static final String PROPERTY_LABEL_VALUES_MODE_OPTION2 = DISTRIB_MANUAL_STR;
     public static final String PROPERTY_LABEL_VALUES_MODE_OPTION3 = DISTRIB_EXACT_STR;
-    public static final String PROPERTY_LABEL_VALUES_MODE_DEFAULT = DISTRIB_EVEN_STR;
+    public static final String PROPERTY_LABEL_VALUES_MODE_DEFAULT = DISTRIB_MANUAL_STR;
     public static final Object PROPERTY_LABEL_VALUES_MODE_VALUE_SET[] = {
             PROPERTY_LABEL_VALUES_MODE_OPTION1,
             PROPERTY_LABEL_VALUES_MODE_OPTION2,
@@ -74,28 +76,28 @@ public class ColorBarLayerType extends LayerType {
 
 
     public static final String PROPERTY_LABEL_VALUES_COUNT_KEY = PROPERTY_LABEL_VALUES_ROOT_KEY + ".count";
-    public static final String PROPERTY_LABEL_VALUES_COUNT_LABEL = "Tick Mark Count";
-    public static final String PROPERTY_LABEL_VALUES_COUNT_TOOLTIP = "Number of tickmarks";
+    public static final String PROPERTY_LABEL_VALUES_COUNT_LABEL = "Label Count";
+    public static final String PROPERTY_LABEL_VALUES_COUNT_TOOLTIP = "Number of tick marks and labels";
     public static final String PROPERTY_LABEL_VALUES_COUNT_ALIAS = PROPERTY_LABEL_VALUES_ROOT_ALIAS + "Count";
     public static final int PROPERTY_LABEL_VALUES_COUNT_DEFAULT = 5;
-    public static final boolean PROPERTY_LABEL_VALUES_COUNT_ENABLED = true;
+    public static final boolean PROPERTY_LABEL_VALUES_COUNT_ENABLED = false;
     public static final Class PROPERTY_LABEL_VALUES_COUNT_TYPE = Integer.class;
     public static final int PROPERTY_LABEL_VALUES_COUNT_MIN = 2;
     public static final int PROPERTY_LABEL_VALUES_COUNT_MAX = 20;
     public static final String PROPERTY_LABEL_VALUES_COUNT_INTERVAL = "[" + ColorBarLayerType.PROPERTY_LABEL_VALUES_COUNT_MIN + "," + ColorBarLayerType.PROPERTY_LABEL_VALUES_COUNT_MAX + "]";
 
     public static final String PROPERTY_LABEL_VALUES_ACTUAL_KEY = PROPERTY_LABEL_VALUES_ROOT_KEY + ".actual";
-    public static final String PROPERTY_LABEL_VALUES_ACTUAL_LABEL = "Custom Values";
-    public static final String PROPERTY_LABEL_VALUES_ACTUAL_TOOLTIP = "Set actual values of the tickmarks";
+    public static final String PROPERTY_LABEL_VALUES_ACTUAL_LABEL = "Label Values";
+    public static final String PROPERTY_LABEL_VALUES_ACTUAL_TOOLTIP = "Set actual values of the tick marks";
     private static final String PROPERTY_LABEL_VALUES_ACTUAL_ALIAS = PROPERTY_LABEL_VALUES_ROOT_ALIAS + "Actual";
-    public static final boolean PROPERTY_LABEL_VALUES_ACTUAL_ENABLED = false;
+    public static final boolean PROPERTY_LABEL_VALUES_ACTUAL_ENABLED = true;
 
     public static final String PROPERTY_LABEL_VALUES_ACTUAL_DEFAULT = "";
     public static final Class PROPERTY_LABEL_VALUES_ACTUAL_TYPE = String.class;
 
     public static final String PROPERTY_LABEL_VALUES_SCALING_KEY = PROPERTY_LABEL_VALUES_ROOT_KEY + ".scaling.factor";
-    public static final String PROPERTY_LABEL_VALUES_SCALING_LABEL = "Scaling Factor";
-    public static final String PROPERTY_LABEL_VALUES_SCALING_TOOLTIP = "Tickmark labels will be displayed after multiplication with this scaling factor";
+    public static final String PROPERTY_LABEL_VALUES_SCALING_LABEL = "Label Scaling";
+    public static final String PROPERTY_LABEL_VALUES_SCALING_TOOLTIP = "Tick mark labels will be displayed after multiplication with this scaling factor";
     public static final String PROPERTY_LABEL_VALUES_SCALING_ALIAS = PROPERTY_LABEL_VALUES_ROOT_ALIAS + "ScalingFactor";
     public static final double PROPERTY_LABEL_VALUES_SCALING_DEFAULT = 1.0;
     public static final Class PROPERTY_LABEL_VALUES_SCALING_TYPE = Double.class;
@@ -251,10 +253,10 @@ public class ColorBarLayerType extends LayerType {
     };
 
     public static final String PROPERTY_TITLE_VERTICAL_LOCATION_KEY = PROPERTY_LOCATION_ROOT_KEY + "title.vertical.anchor";
-    public static final String PROPERTY_TITLE_VERTICAL_LOCATION_LABEL = "Title Anchor";
+    public static final String PROPERTY_TITLE_VERTICAL_LOCATION_LABEL = "Title Anchor (Vert)";
     public static final String PROPERTY_TITLE_VERTICAL_LOCATION_TOOLTIP = "Where to place title on vertical legend";
     private static final String PROPERTY_TITLE_VERTICAL_LOCATION_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "TitleVerticalAnchor";
-    public static final String PROPERTY_TITLE_VERTICAL_LOCATION_DEFAULT = LOCATION_LOWER_RIGHT;
+    public static final String PROPERTY_TITLE_VERTICAL_LOCATION_DEFAULT = VERTICAL_TITLE_TOP;
     public static final Class PROPERTY_TITLE_VERTICAL_LOCATION_TYPE = String.class;
     public static final Object PROPERTY_TITLE_VERTICAL_LOCATION_VALUE_SET[] = VERTICAL_TITLE_LOCATION_VALUE_SET;
 
@@ -279,7 +281,7 @@ public class ColorBarLayerType extends LayerType {
     public static final Class PROPERTY_IMAGE_SCALING_APPLY_SIZE_TYPE = Boolean.class;
 
     public static final String PROPERTY_IMAGE_SCALING_SIZE_KEY = PROPERTY_IMAGE_SCALING_ROOT_KEY + ".size";
-    public static final String PROPERTY_IMAGE_SCALING_SIZE_LABEL = "Image Scaling (%)";
+    public static final String PROPERTY_IMAGE_SCALING_SIZE_LABEL = "Legend Scaling (%)";
     public static final String PROPERTY_IMAGE_SCALING_SIZE_TOOLTIP = "Percent to scale color bar relative to the scene image size";
     private static final String PROPERTY_IMAGE_SCALING_SIZE_ALIAS = PROPERTY_IMAGE_SCALING_ROOT_ALIAS + "Size";
     public static final double PROPERTY_IMAGE_SCALING_SIZE_DEFAULT = 50.0;
@@ -325,7 +327,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_TITLE_PARAMETER_TEXT_LABEL = "Title";
     public static final String PROPERTY_TITLE_PARAMETER_TEXT_TOOLTIP = "Add title parameter to the color bar";
     public static final String PROPERTY_TITLE_PARAMETER_TEXT_ALIAS = PROPERTY_TITLE_PARAMETER_ROOT_ALIAS + "Text";
-    public static final String PROPERTY_TITLE_PARAMETER_TEXT_DEFAULT = "";
+    public static final String PROPERTY_TITLE_PARAMETER_TEXT_DEFAULT = NULL_SPECIAL;
     public static final Class PROPERTY_TITLE_PARAMETER_TEXT_TYPE = String.class;
 
     public static final String PROPERTY_TITLE_PARAMETER_FONT_BOLD_KEY = PROPERTY_TITLE_PARAMETER_ROOT_KEY + ".font.bold";
@@ -396,7 +398,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_TITLE_UNITS_TEXT_LABEL = "Units";
     public static final String PROPERTY_TITLE_UNITS_TEXT_TOOLTIP = "Add units to the title of the color bar";
     public static final String PROPERTY_TITLE_UNITS_TEXT_ALIAS = PROPERTY_TITLE_UNITS_ROOT_ALIAS + "Text";
-    public static final String PROPERTY_TITLE_UNITS_TEXT_DEFAULT = "";
+    public static final String PROPERTY_TITLE_UNITS_TEXT_DEFAULT = NULL_SPECIAL;
     public static final Class PROPERTY_TITLE_UNITS_TEXT_TYPE = String.class;
 
     public static final String PROPERTY_TITLE_UNITS_FONT_BOLD_KEY = PROPERTY_TITLE_UNITS_ROOT_KEY + ".font.bold";
@@ -534,14 +536,14 @@ public class ColorBarLayerType extends LayerType {
     public static final Class PROPERTY_TICKMARKS_COLOR_TYPE = Color.class;
 
     public static final String PROPERTY_TICKMARKS_LENGTH_KEY = PROPERTY_TICKMARKS_ROOT_KEY + ".length";
-    public static final String PROPERTY_TICKMARKS_LENGTH_LABEL = "Length";
+    public static final String PROPERTY_TICKMARKS_LENGTH_LABEL = "Line Length";
     public static final String PROPERTY_TICKMARKS_LENGTH_TOOLTIP = "Set length of tickmarks";
     public static final String PROPERTY_TICKMARKS_LENGTH_ALIAS = PROPERTY_TICKMARKS_ROOT_ALIAS + "Length";
     public static final int PROPERTY_TICKMARKS_LENGTH_DEFAULT = 12;
     public static final Class PROPERTY_TICKMARKS_LENGTH_TYPE = Integer.class;
 
     public static final String PROPERTY_TICKMARKS_WIDTH_KEY = PROPERTY_TICKMARKS_ROOT_KEY + ".width";
-    public static final String PROPERTY_TICKMARKS_WIDTH_LABEL = "Width";
+    public static final String PROPERTY_TICKMARKS_WIDTH_LABEL = "Line Width";
     public static final String PROPERTY_TICKMARKS_WIDTH_TOOLTIP = "Set width of tickmarks";
     public static final String PROPERTY_TICKMARKS_WIDTH_ALIAS = PROPERTY_TICKMARKS_ROOT_ALIAS + "Width";
     public static final int PROPERTY_TICKMARKS_WIDTH_DEFAULT = 4;
@@ -567,14 +569,14 @@ public class ColorBarLayerType extends LayerType {
     public static final Class PROPERTY_BORDER_SHOW_TYPE = Boolean.class;
 
     public static final String PROPERTY_BORDER_WIDTH_KEY = PROPERTY_BORDER_ROOT_KEY + ".width";
-    public static final String PROPERTY_BORDER_WIDTH_LABEL = "Width";
+    public static final String PROPERTY_BORDER_WIDTH_LABEL = "Line Width";
     public static final String PROPERTY_BORDER_WIDTH_TOOLTIP = "Width of border line";
     private static final String PROPERTY_BORDER_WIDTH_ALIAS = PROPERTY_BORDER_ROOT_ALIAS + "Width";
     public static final int PROPERTY_BORDER_WIDTH_DEFAULT = 1;
     public static final Class PROPERTY_BORDER_WIDTH_TYPE = Integer.class;
 
     public static final String PROPERTY_BORDER_COLOR_KEY = PROPERTY_BORDER_ROOT_KEY + ".color";
-    public static final String PROPERTY_BORDER_COLOR_LABEL = "Color";
+    public static final String PROPERTY_BORDER_COLOR_LABEL = "Line Color";
     public static final String PROPERTY_BORDER_COLOR_TOOLTIP = "Color of border line";
     private static final String PROPERTY_BORDER_COLOR_ALIAS = PROPERTY_BORDER_ROOT_ALIAS + "Color";
     public static final Color PROPERTY_BORDER_COLOR_DEFAULT = Color.BLACK;
