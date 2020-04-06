@@ -123,9 +123,20 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_LABEL = "Force Decimal Places";
     public static final String PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_TOOLTIP = "Force to exact decimal places";
     private static final String PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_ALIAS = PROPERTY_LABEL_VALUES_ROOT_ALIAS + "ForceDecimalPlaces";
-    public static final boolean PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_DEFAULT = true;
+    public static final boolean PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_DEFAULT = false;
     public static final Class PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_TYPE = Boolean.class;
 
+
+
+    // Title
+
+    private static final String PROPERTY_TITLE_ROOT_KEY = PROPERTY_ROOT_KEY + ".title";
+    private static final String PROPERTY_TITLE_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "Title";
+
+    public static final String PROPERTY_TITLE_SECTION_KEY = PROPERTY_TITLE_ROOT_KEY + ".section";
+    public static final String PROPERTY_TITLE_SECTION_LABEL = "Title";
+    public static final String PROPERTY_TITLE_SECTION_TOOLTIP = "Title for the color bar legend";
+    public static final String PROPERTY_TITLE_SECTION_ALIAS = PROPERTY_TITLE_ROOT_ALIAS + "Section";
 
 
 
@@ -135,7 +146,7 @@ public class ColorBarLayerType extends LayerType {
     private static final String PROPERTY_FORMATTING_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "Orientation";
 
     public static final String PROPERTY_FORMATTING_SECTION_KEY = PROPERTY_FORMATTING_ROOT_KEY + ".section";
-    public static final String PROPERTY_FORMATTING_SECTION_LABEL = "Orientation & Direction";
+    public static final String PROPERTY_FORMATTING_SECTION_LABEL = "Orientation & Location";
     public static final String PROPERTY_FORMATTING_SECTION_TOOLTIP = "Orientation options for the color bar legend";
     public static final String PROPERTY_FORMATTING_SECTION_ALIAS = PROPERTY_FORMATTING_ROOT_ALIAS + "Section";
 
@@ -205,21 +216,21 @@ public class ColorBarLayerType extends LayerType {
     }
 
     public static final String PROPERTY_LOCATION_PLACEMENT_KEY = PROPERTY_LOCATION_ROOT_KEY + ".anchor";
-    public static final String PROPERTY_LOCATION_PLACEMENT_LABEL = "Anchor";
+    public static final String PROPERTY_LOCATION_PLACEMENT_LABEL = "Legend Anchor";
     public static final String PROPERTY_LOCATION_PLACEMENT_TOOLTIP = "Where to place color bar on image";
     private static final String PROPERTY_LOCATION_PLACEMENT_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "Anchor";
     public static final String PROPERTY_LOCATION_PLACEMENT_DEFAULT = LOCATION_LOWER_RIGHT;
     public static final Class PROPERTY_LOCATION_PLACEMENT_TYPE = String.class;
 
     public static final String PROPERTY_LOCATION_OFFSET_KEY = PROPERTY_LOCATION_ROOT_KEY + ".offset";
-    public static final String PROPERTY_LOCATION_OFFSET_LABEL = "Anchor Offset";
+    public static final String PROPERTY_LOCATION_OFFSET_LABEL = "Legend Offset";
     public static final String PROPERTY_LOCATION_OFFSET_TOOLTIP = "Move color bar away from axis (by percentage of color bar height)";
     private static final String PROPERTY_LOCATION_OFFSET_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "Offset";
     public static final Double PROPERTY_LOCATION_OFFSET_DEFAULT = 0.0;
     public static final Class PROPERTY_LOCATION_OFFSET_TYPE = Double.class;
 
     public static final String PROPERTY_LOCATION_SHIFT_KEY = PROPERTY_LOCATION_ROOT_KEY + ".shift";
-    public static final String PROPERTY_LOCATION_SHIFT_LABEL = "Anchor Shift";
+    public static final String PROPERTY_LOCATION_SHIFT_LABEL = "Legend Shift";
     public static final String PROPERTY_LOCATION_SHIFT_TOOLTIP = "Move color bar along the axis (by percentage of color bar width)";
     private static final String PROPERTY_LOCATION_SHIFT_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "Shift";
     public static final Double PROPERTY_LOCATION_SHIFT_DEFAULT = 0.0;
@@ -299,7 +310,7 @@ public class ColorBarLayerType extends LayerType {
     private static final String PROPERTY_TITLE_PARAMETER_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "TitleParameter";
 
     public static final String PROPERTY_TITLE_PARAMETER_SECTION_KEY = PROPERTY_TITLE_PARAMETER_ROOT_KEY + ".section";
-    public static final String PROPERTY_TITLE_PARAMETER_SECTION_LABEL = "Title Parameter";
+    public static final String PROPERTY_TITLE_PARAMETER_SECTION_LABEL = "Title Formatting";
     public static final String PROPERTY_TITLE_PARAMETER_SECTION_TOOLTIP = "Set parameter options in title of color bar";
     public static final String PROPERTY_TITLE_PARAMETER_SECTION_ALIAS = PROPERTY_TITLE_PARAMETER_ROOT_ALIAS + "Section";
 
@@ -311,7 +322,7 @@ public class ColorBarLayerType extends LayerType {
     public static final Class PROPERTY_TITLE_PARAMETER_SHOW_TYPE = Boolean.class;
 
     public static final String PROPERTY_TITLE_PARAMETER_TEXT_KEY = PROPERTY_TITLE_PARAMETER_ROOT_KEY + ".text";
-    public static final String PROPERTY_TITLE_PARAMETER_TEXT_LABEL = "Text";
+    public static final String PROPERTY_TITLE_PARAMETER_TEXT_LABEL = "Title";
     public static final String PROPERTY_TITLE_PARAMETER_TEXT_TOOLTIP = "Add title parameter to the color bar";
     public static final String PROPERTY_TITLE_PARAMETER_TEXT_ALIAS = PROPERTY_TITLE_PARAMETER_ROOT_ALIAS + "Text";
     public static final String PROPERTY_TITLE_PARAMETER_TEXT_DEFAULT = "";
@@ -370,7 +381,7 @@ public class ColorBarLayerType extends LayerType {
     private static final String PROPERTY_TITLE_UNITS_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "TitleUnits";
 
     public static final String PROPERTY_TITLE_UNITS_SECTION_KEY = PROPERTY_TITLE_UNITS_ROOT_KEY + ".section";
-    public static final String PROPERTY_TITLE_UNITS_SECTION_LABEL = "Title Units";
+    public static final String PROPERTY_TITLE_UNITS_SECTION_LABEL = "Title Units Formatting";
     public static final String PROPERTY_TITLE_UNITS_SECTION_TOOLTIP = "Set title units of color bar";
     public static final String PROPERTY_TITLE_UNITS_SECTION_ALIAS = PROPERTY_TITLE_UNITS_ROOT_ALIAS + "Section";
 
@@ -382,7 +393,7 @@ public class ColorBarLayerType extends LayerType {
     public static final Class PROPERTY_TITLE_UNITS_SHOW_TYPE = Boolean.class;
 
     public static final String PROPERTY_TITLE_UNITS_TEXT_KEY = PROPERTY_TITLE_UNITS_ROOT_KEY + ".text";
-    public static final String PROPERTY_TITLE_UNITS_TEXT_LABEL = "Text";
+    public static final String PROPERTY_TITLE_UNITS_TEXT_LABEL = "Units";
     public static final String PROPERTY_TITLE_UNITS_TEXT_TOOLTIP = "Add units to the title of the color bar";
     public static final String PROPERTY_TITLE_UNITS_TEXT_ALIAS = PROPERTY_TITLE_UNITS_ROOT_ALIAS + "Text";
     public static final String PROPERTY_TITLE_UNITS_TEXT_DEFAULT = "";
@@ -440,7 +451,7 @@ public class ColorBarLayerType extends LayerType {
     private static final String PROPERTY_LABELS_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "Labels";
 
     public static final String PROPERTY_LABELS_SECTION_KEY = PROPERTY_LABELS_ROOT_KEY + ".section";
-    public static final String PROPERTY_LABELS_SECTION_LABEL = "Labels Disabled";
+    public static final String PROPERTY_LABELS_SECTION_LABEL = "Labels Formatting";
     public static final String PROPERTY_LABELS_SECTION_TOOLTIP = "Configuration options for the labels";
     public static final String PROPERTY_LABELS_SECTION_ALIAS = PROPERTY_LABELS_ROOT_ALIAS + "Section";
 
@@ -679,6 +690,20 @@ public class ColorBarLayerType extends LayerType {
         vc.addProperty(labelValuesForceDecimalPlacesModel);
 
 
+
+
+
+
+
+
+
+
+
+        // Title Section
+
+        final Property titleSectionModel = Property.create(PROPERTY_TITLE_SECTION_KEY, Boolean.class, true, true);
+        titleSectionModel.getDescriptor().setAlias(PROPERTY_TITLE_SECTION_ALIAS);
+        vc.addProperty(titleSectionModel);
 
 
 
