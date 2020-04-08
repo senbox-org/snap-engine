@@ -61,7 +61,7 @@ public class DimapHeaderWriterTest {
 
     private static final String LS = SystemUtils.LS;
     private static final String header =
-            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + LS +
+            "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>" + LS +
                     "<Dimap_Document name=\"test.dim\">" + LS +
                     "    <Metadata_Id>" + LS +
                     "        <METADATA_FORMAT version=\"" + DimapProductConstants.DIMAP_CURRENT_VERSION + "\">DIMAP</METADATA_FORMAT>" + LS +

@@ -28,18 +28,15 @@ import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.Arrays;
 
 /**
  * Utility class for writing XML.
- *
  * @deprecated since BEAM 4.2, XML shall only be written via a DOM (e.g. JDOM). Used by BEAM-DIMAP product writer.
  */
 @Deprecated
 public class XmlWriter {
 
-    private static final String FILE_ENCODING = "UTF-8";
-    public final static String XML_HEADER_LINE = "<?xml version=\"1.0\" encoding=\"" + FILE_ENCODING + "\"?>";
+    public final static String XML_HEADER_LINE = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>";
 
     private final PrintWriter _pWriter;
     private static XMLOutputter _xmlOutputter;
@@ -111,17 +108,18 @@ public class XmlWriter {
     public static String[] createTags(int indent, String name, String[][] attributes) {
         Debug.assertNotNullOrEmpty(name);
         Debug.assertNotNull(attributes);
-        final StringBuilder tag = new StringBuilder();
+        final StringBuffer tag = new StringBuffer();
         final String indentWs = getIndentWhiteSpace(indent);
         tag.append(indentWs);
         tag.append("<");
         tag.append(name);
-        for (final String[] att_val : attributes) {
+        for (int i = 0; i < attributes.length; i++) {
+            final String[] att_val = attributes[i];
             if (att_val.length > 1) {
                 final String attribute = att_val[0];
                 final String value = att_val[1];
                 if (attribute != null && attribute.length() > 0) {
-                    tag.append(" ").append(attribute).append("=\"");
+                    tag.append(" " + attribute + "=\"");
                     if (value != null) {
                         tag.append(encode(value));
                     }
@@ -174,8 +172,8 @@ public class XmlWriter {
 
     private static String getIndentWhiteSpace(int indent) {
         final int length = indent * 4;
-        char[] newStr = new char[length];
-        Arrays.fill(newStr, ' ');
+        char newStr[] = new char[length];
+        for (int i = 0; i < newStr.length; i++) newStr[i] = ' ';
         return new String(newStr);
     }
 
