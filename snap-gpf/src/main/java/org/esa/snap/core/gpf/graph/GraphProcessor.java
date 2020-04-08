@@ -124,16 +124,20 @@ public class GraphProcessor {
     }
 
     private void executeNodeSources(NodeSource[] sources, GraphContext graphContext, ProgressMonitor pm) {
-        for (NodeSource source : sources) {
-            Node node = source.getSourceNode();
-            if (node != null) {
-                executeNodeSources(node.getSources(), graphContext, pm);
-                NodeContext nodeContext = graphContext.getNodeContext(node);
-                if (nodeContext != null) {
-                    ProgressMonitor subPm = SubProgressMonitor.create(pm, 90 / graphContext.getGraph().getNodeCount());
-                    nodeContext.getOperator().execute(subPm);
+        pm.beginTask("Executing node sources", sources.length * 2);
+        try {
+            for (NodeSource source : sources) {
+                Node node = source.getSourceNode();
+                if (node != null) {
+                    executeNodeSources(node.getSources(), graphContext, SubProgressMonitor.create(pm, 1));
+                    NodeContext nodeContext = graphContext.getNodeContext(node);
+                    if (nodeContext != null) {                   
+                        nodeContext.getOperator().execute(SubProgressMonitor.create(pm, 1);
+                    }
                 }
             }
+        } finally {
+            pm.done()
         }
     }
 
