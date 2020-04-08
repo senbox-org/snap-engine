@@ -26,7 +26,6 @@ import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductSubsetBuilder;
 import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.dataio.ProductWriter;
-import org.esa.snap.core.dataio.ProductWriterListener;
 import org.esa.snap.core.datamodel.quicklooks.Quicklook;
 import org.esa.snap.core.dataop.barithm.BandArithmetic;
 import org.esa.snap.core.dataop.barithm.RasterDataSymbol;
@@ -221,7 +220,6 @@ public class Product extends ProductNode {
      * @since BEAM 5.0
      */
     private int numResolutionsMax;
-    private ProductWriterListener productWriterListener;
 
     /**
      * Creates a new product without any reader (in-memory product)
@@ -600,25 +598,7 @@ public class Product extends ProductNode {
      * @param writer the product writer, can be {@code null}
      */
     public void setProductWriter(final ProductWriter writer) {
-        if (this.writer != null) {
-            this.writer.removeProductWriterListener(productWriterListener);
-        }
         this.writer = writer;
-        if (writer != null && productWriterListener != null) {
-            writer.addProductWriterListener(productWriterListener);
-        }
-    }
-
-    /**
-     * Sets a product writer listener that is set to a product's product writer.
-     *
-     * @param productWriterListener the product writer listener
-     */
-    public void setProductWriterListener(ProductWriterListener productWriterListener) {
-        this.productWriterListener = productWriterListener;
-        if (writer != null) {
-            writer.addProductWriterListener(productWriterListener);
-        }
     }
 
     /**
@@ -670,7 +650,6 @@ public class Product extends ProductNode {
         if (writer != null) {
             writer.flush();
             writer.close();
-            writer.removeProductWriterListener(productWriterListener);
             writer = null;
         }
     }
@@ -726,7 +705,6 @@ public class Product extends ProductNode {
 
         reader = null;
         writer = null;
-        productWriterListener = null;
 
         metadataRoot.dispose();
         bandGroup.dispose();

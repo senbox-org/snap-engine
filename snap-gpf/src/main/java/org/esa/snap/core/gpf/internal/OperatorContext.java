@@ -33,6 +33,7 @@ import com.bc.ceres.glevel.MultiLevelImage;
 import com.bc.ceres.jai.tilecache.DefaultSwapSpace;
 import com.bc.ceres.jai.tilecache.SwappingTileCache;
 import org.esa.snap.core.dataio.ProductIO;
+import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductWriter;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.MetadataAttribute;
@@ -89,6 +90,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
@@ -132,7 +134,7 @@ public class OperatorContext {
     private PropertySet parameterSet;
     private boolean initialising;
     private boolean requiresAllBands;
-    private boolean executed;
+    private AtomicBoolean executed;
 
     public OperatorContext(Operator operator) {
         if (operator == null) {
@@ -147,6 +149,7 @@ public class OperatorContext {
         this.targetPropertyMap = new HashMap<>(3);
         this.logger = SystemUtils.LOG;
         this.renderingHints = new RenderingHints(JAI.KEY_TILE_CACHE_METRIC, this);
+        this.executed = new AtomicBoolean(false);
 
         startTileComputationObservation();
     }
@@ -527,8 +530,6 @@ public class OperatorContext {
             initTargetProperties(operator.getClass());
             setTargetImages();
             initGraphMetadata();
-            targetProduct.setProductWriterListener(operator::execute);
-
             targetProduct.setModified(false);
         } finally {
             initialising = false;
@@ -544,12 +545,12 @@ public class OperatorContext {
      */
     public void updateOperator() throws OperatorException {
         targetProduct = null;
-        executed = false;
+        executed.set(false);
         initializeOperator();
     }
 
     public boolean isExecuted() {
-        return executed;
+        return executed.get();
     }
 
     public PropertySet getParameterSet() {
@@ -1286,10 +1287,19 @@ public class OperatorContext {
     }
 
     public synchronized void executeOperator(ProgressMonitor pm) {
-        if (!executed) {
+        if (!executed.get()) {
+            for (Product sourceProduct : getSourceProducts()) {
+                ProductReader productReader = sourceProduct.getProductReader();
+                if (productReader instanceof OperatorProductReader) {
+                    OperatorContext operatorContext = ((OperatorProductReader) productReader).getOperatorContext();
+                    if (operatorContext != this) {
+                        operatorContext.executeOperator(pm);
+                    }
+                }
+            }
             getOperator().doExecute(pm);
             setTargetImages();
-            executed = true;
+            executed.set(true);
         }
     }
 
