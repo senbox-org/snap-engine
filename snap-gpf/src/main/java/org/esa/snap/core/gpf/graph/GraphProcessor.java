@@ -130,7 +130,8 @@ public class GraphProcessor {
                 executeNodeSources(node.getSources(), graphContext, pm);
                 NodeContext nodeContext = graphContext.getNodeContext(node);
                 if (nodeContext != null) {
-                    nodeContext.getOperator().execute(pm);
+                    ProgressMonitor subPm = SubProgressMonitor.create(pm, 90 / graphContext.getGraph().getNodeCount());
+                    nodeContext.getOperator().execute(subPm);
                 }
             }
         }
