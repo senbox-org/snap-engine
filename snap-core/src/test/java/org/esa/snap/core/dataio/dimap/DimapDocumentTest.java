@@ -473,7 +473,7 @@ public class DimapDocumentTest {
         final StringWriter sw = new StringWriter();
         final PrintWriter pw = new PrintWriter(sw);
 
-        pw.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        pw.println("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>");
         pw.println("<Dimap_Document name=\"test_product.dim\">");
         pw.println("    <Metadata_Id>");
         pw.println("        <METADATA_FORMAT version=\"" + DimapProductConstants.DIMAP_CURRENT_VERSION + "\">DIMAP</METADATA_FORMAT>");
