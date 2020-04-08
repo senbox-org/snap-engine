@@ -110,6 +110,11 @@ public abstract class ProductData implements Cloneable {
     public static final int TYPE_UINT32 = 22;
 
     /**
+     * The ID for an unsigned 64-bit integer data type.
+     */
+    public static final int TYPE_UINT64 = 23;
+
+    /**
      * The ID for a signed 32-bit floating point data type.
      */
     public static final int TYPE_FLOAT32 = 30;
@@ -165,6 +170,10 @@ public abstract class ProductData implements Cloneable {
      * The string representation of {@code TYPE_UINT32}
      */
     public static final String TYPESTRING_UINT32 = "uint32";
+    /**
+     * The string representation of {@code TYPE_UINT64}
+     */
+    public static final String TYPESTRING_UINT64 = "uint64";
     /**
      * The string representation of {@code TYPE_FLOAT32}
      */
@@ -241,6 +250,8 @@ public abstract class ProductData implements Cloneable {
                 return new ProductData.ASCII(numElems);
             case TYPE_UTC:
                 return new ProductData.UTC();
+            case TYPE_UINT64:
+                throw new IllegalArgumentException(ProductData.TYPESTRING_UINT64 + " not supported in Java. Cannot create product data instance.");
             default:
                 throw new IllegalArgumentException("Unknown type. Cannot create product data instance.");
         }
@@ -366,6 +377,7 @@ public abstract class ProductData implements Cloneable {
             case TYPE_UTC:
                 return 4;
             case TYPE_INT64:
+            case TYPE_UINT64:
             case TYPE_FLOAT64:
                 return 8;
             default:
@@ -403,6 +415,8 @@ public abstract class ProductData implements Cloneable {
                 return TYPESTRING_UINT16;
             case TYPE_UINT32:
                 return TYPESTRING_UINT32;
+            case TYPE_UINT64:
+                return TYPESTRING_UINT64;
             case TYPE_FLOAT32:
                 return TYPESTRING_FLOAT32;
             case TYPE_FLOAT64:
@@ -437,6 +451,8 @@ public abstract class ProductData implements Cloneable {
                 return TYPE_UINT16;
             case TYPESTRING_UINT32:
                 return TYPE_UINT32;
+            case TYPESTRING_UINT64:
+                return TYPE_UINT64;
             case TYPESTRING_FLOAT32:
                 return TYPE_FLOAT32;
             case TYPESTRING_FLOAT64:

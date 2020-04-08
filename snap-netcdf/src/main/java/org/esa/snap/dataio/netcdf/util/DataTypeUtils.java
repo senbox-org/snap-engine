@@ -54,7 +54,9 @@ public class DataTypeUtils {
         } else if (DataType.UINT.equals(dataType)) {
             return ProductData.TYPE_UINT32;
         } else if (DataType.LONG.equals(dataType)) {
-            return ProductData.TYPE_INT64;
+            return unsigned ? ProductData.TYPE_UINT64 : ProductData.TYPE_INT64;
+        } else if (DataType.ULONG.equals(dataType)) {
+            return ProductData.TYPE_UINT64;
         } else if (DataType.FLOAT.equals(dataType)) {
             return ProductData.TYPE_FLOAT32;
         } else if (DataType.DOUBLE.equals(dataType)) {
