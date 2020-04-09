@@ -130,7 +130,7 @@ public class GraphProcessor {
                 executeNodeSources(node.getSources(), graphContext, pm);
                 NodeContext nodeContext = graphContext.getNodeContext(node);
                 if (nodeContext != null) {
-                    nodeContext.getOperator().execute(pm);
+                    nodeContext.getOperator().execute(SubProgressMonitor.create(pm, 1));
                 }
             }
         }
@@ -149,11 +149,6 @@ public class GraphProcessor {
         //Header header = graphContext.getGraph().getHeader();
         // TODO use header to specify execution order (mz, 2009-11-16)
         NodeContext[] outputNodeContexts = graphContext.getOutputNodeContexts();
-        for (NodeContext outputNodeContext : outputNodeContexts) {
-            NodeSource[] sources = outputNodeContext.getNode().getSources();
-            executeNodeSources(sources, graphContext, pm);
-            outputNodeContext.getOperator().execute(pm);
-        }
         Map<Dimension, List<NodeContext>> tileDimMap = buildTileDimensionMap(outputNodeContexts);
 
         List<Dimension> dimList = new ArrayList<>(tileDimMap.keySet());
@@ -163,7 +158,7 @@ public class GraphProcessor {
             return area1.compareTo(area2);
         });
 
-        int numPmTicks = 0;
+        int numPmTicks = graphContext.getGraph().getNodeCount();
         for (Dimension dimension : dimList) {
             numPmTicks += dimension.width * dimension.height * tileDimMap.get(dimension).size();
         }
@@ -187,7 +182,13 @@ public class GraphProcessor {
         }
 
         try {
-            pm.beginTask("Computing raster data...", numPmTicks);
+            pm.beginTask("Executing operators...", numPmTicks);
+            for (NodeContext outputNodeContext : outputNodeContexts) {
+                NodeSource[] sources = outputNodeContext.getNode().getSources();
+                executeNodeSources(sources, graphContext, pm);
+                outputNodeContext.getOperator().execute(SubProgressMonitor.create(pm, 1));
+            }
+            pm.setTaskName("Computing raster data...");
             for (Dimension dimension : dimList) {
                 List<NodeContext> nodeContextList = tileDimMap.get(dimension);
                 final int numXTiles = dimension.width;

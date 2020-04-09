@@ -157,23 +157,4 @@ public interface ProductWriter {
      * @param formatName The name of the file format.
      */
     void setFormatName(final String formatName);
-
-    /**
-     * To be called right before the product is written out.
-     *
-     * @param pm A progress monitor to monitor the writing preparation
-     */
-    void prepareWriting(ProgressMonitor pm);
-
-    /**
-     * Adds a <code>ProductWriterListener</code> that will be notified in the case of events.
-     * @param productWriterListener The product writer listener to be notified
-     */
-    void addProductWriterListener(ProductWriterListener productWriterListener);
-
-    /**
-     * Removes a <code>ProductWriterListener</code>.
-     * @param productWriterListener The product writer listener that shall no longer be notified
-     */
-    void removeProductWriterListener(ProductWriterListener productWriterListener);
 }

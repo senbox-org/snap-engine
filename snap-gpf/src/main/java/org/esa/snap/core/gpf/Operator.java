@@ -156,12 +156,15 @@ public abstract class Operator {
      * <li>as a result of a call to {@link #execute(ProgressMonitor)}.</li>
      * </ol>
      * <p>
-     * The default implementation does nothing.
+     * The default implementation only progresses the progress monitor.
      *
      * @param pm A progress monitor to be notified for long-running tasks.
      * @throws OperatorException If an error occurs during computation of the target raster.
      */
     public void doExecute(ProgressMonitor pm) throws OperatorException {
+        pm.beginTask("", 1);
+        pm.worked(1);
+        pm.done();
     }
 
     // todo - remove ProgressMonitor parameter, it has never been used and wastes processing time (nf - 17.12.2010)

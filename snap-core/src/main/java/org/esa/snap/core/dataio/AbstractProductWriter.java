@@ -47,9 +47,6 @@ public abstract class AbstractProductWriter implements ProductWriter {
      */
     private Object _output;
 
-    private ArrayList<ProductWriterListener> productWriterListeners;
-    private boolean writerPreparationTriggered;
-
     /**
      * Constructs a <code>ProductWriter</code>. Since no output destination is set, the <code>setOutput</code>
      * method must be called before data can be written.
@@ -61,8 +58,6 @@ public abstract class AbstractProductWriter implements ProductWriter {
     public AbstractProductWriter(ProductWriterPlugIn writerPlugIn) {
         Guardian.assertNotNull("writerPlugIn", writerPlugIn);
         _writerPlugIn = writerPlugIn;
-        productWriterListeners = new ArrayList<>();
-        writerPreparationTriggered = false;
     }
 
     /**
@@ -194,24 +189,4 @@ public abstract class AbstractProductWriter implements ProductWriter {
     */
     public void setFormatName(final String formatName) {}
 
-    @Override
-    public void prepareWriting(ProgressMonitor pm) {
-        if (writerPreparationTriggered) {
-            return;
-        }
-        writerPreparationTriggered = true;
-        for (ProductWriterListener productWriterListener : productWriterListeners) {
-            productWriterListener.aboutToWriteProduct(pm);
-        }
-    }
-
-    @Override
-    public void addProductWriterListener(ProductWriterListener productWriterListener) {
-        productWriterListeners.add(productWriterListener);
-    }
-
-    @Override
-    public void removeProductWriterListener(ProductWriterListener productWriterListener) {
-        productWriterListeners.remove(productWriterListener);
-    }
 }
