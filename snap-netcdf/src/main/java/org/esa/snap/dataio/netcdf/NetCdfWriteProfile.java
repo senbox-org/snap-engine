@@ -18,6 +18,7 @@ package org.esa.snap.dataio.netcdf;
 
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.util.StopWatch;
+import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.dataio.netcdf.metadata.ProfileInitPartWriter;
 import org.esa.snap.dataio.netcdf.metadata.ProfilePartWriter;
 
@@ -53,7 +54,7 @@ class NetCdfWriteProfile {
             long start = System.currentTimeMillis();
             profilePart.encode(ctx, product);
             long end = System.currentTimeMillis();
-            System.out.println("Encoding " + profilePart.getClass().getTypeName() + " took " + StopWatch.getTimeString(end - start));
+            SystemUtils.LOG.fine("Encoding " + profilePart.getClass().getTypeName() + " took " + StopWatch.getTimeString(end - start));
         }
     }
 }
