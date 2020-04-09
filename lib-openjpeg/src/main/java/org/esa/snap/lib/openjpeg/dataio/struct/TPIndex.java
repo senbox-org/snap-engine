@@ -42,14 +42,19 @@ public class TPIndex extends Structure {
         this.end_header = end_header;
         this.end_pos = end_pos;
     }
+
     public TPIndex(Pointer peer) {
         super(peer);
     }
 
-    protected List<?> getFieldOrder() {
+    @Override
+    protected List<String> getFieldOrder() {
         return fieldNames;
     }
 
-    public static class ByReference extends TPIndex implements Structure.ByReference { }
-    public static class ByValue extends TPIndex implements Structure.ByValue { }
+    public static class ByReference extends TPIndex implements Structure.ByReference {
+    }
+
+    public static class ByValue extends TPIndex implements Structure.ByValue {
+    }
 }

@@ -70,7 +70,7 @@ public class DecompressionCodec extends Structure {
     }
 
     @Override
-    protected List<?> getFieldOrder() {
+    protected List<String> getFieldOrder() {
         return fieldNames;
     }
 

@@ -233,14 +233,19 @@ public class CompressionParams extends Structure {
     public CompressionParams() {
         super();
     }
+
     public CompressionParams(Pointer peer) {
         super(peer);
     }
 
-    protected List<?> getFieldOrder() {
+    @Override
+    protected List<String> getFieldOrder() {
         return fieldNames;
     }
 
-    public static class ByReference extends CompressionParams implements Structure.ByReference { }
-    public static class ByValue extends CompressionParams implements Structure.ByValue { }
+    public static class ByReference extends CompressionParams implements Structure.ByReference {
+    }
+
+    public static class ByValue extends CompressionParams implements Structure.ByValue {
+    }
 }

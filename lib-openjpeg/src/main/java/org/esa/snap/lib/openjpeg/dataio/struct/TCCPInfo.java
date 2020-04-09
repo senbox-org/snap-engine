@@ -86,14 +86,19 @@ public class TCCPInfo extends Structure {
     public TCCPInfo() {
         super();
     }
+
     public TCCPInfo(Pointer peer) {
         super(peer);
     }
 
-    protected List<?> getFieldOrder() {
+    @Override
+    protected List<String> getFieldOrder() {
         return fieldNames;
     }
 
-    public static class ByReference extends TCCPInfo implements Structure.ByReference { }
-    public static class ByValue extends TCCPInfo implements Structure.ByValue { }
+    public static class ByReference extends TCCPInfo implements Structure.ByReference {
+    }
+
+    public static class ByValue extends TCCPInfo implements Structure.ByValue {
+    }
 }

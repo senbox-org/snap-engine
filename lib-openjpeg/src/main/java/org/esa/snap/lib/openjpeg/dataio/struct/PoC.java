@@ -198,14 +198,19 @@ public class PoC extends Structure {
     public PoC() {
         super();
     }
+
     public PoC(Pointer peer) {
         super(peer);
     }
 
-    protected List<?> getFieldOrder() {
+    @Override
+    protected List<String> getFieldOrder() {
         return fieldNames;
     }
 
-    public static class ByReference extends PoC implements Structure.ByReference { }
-    public static class ByValue extends PoC implements Structure.ByValue { }
+    public static class ByReference extends PoC implements Structure.ByReference {
+    }
+
+    public static class ByValue extends PoC implements Structure.ByValue {
+    }
 }
