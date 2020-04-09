@@ -31,6 +31,13 @@ public class DataTypeUtils {
         return getRasterDataType(dataType, unsigned) != -1;
     }
 
+    /**
+     * Tries to detect if the variable is signed or unsigned. Might fail for some implementations, e.g. BUFR.
+     * In such cases use {@link #getRasterDataType(DataType, boolean)}
+     *
+     * @param variable the variable to retrieve the type from
+     * @return the {@link ProductData} type
+     */
     public static int getRasterDataType(Variable variable) {
         return getRasterDataType(variable.getDataType(), variable.getDataType().isUnsigned());
     }
