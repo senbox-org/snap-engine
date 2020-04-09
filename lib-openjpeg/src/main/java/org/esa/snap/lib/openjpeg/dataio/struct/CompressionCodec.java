@@ -69,7 +69,7 @@ public class CompressionCodec extends Structure {
     }
 
     @Override
-    protected List<?> getFieldOrder() {
+    protected List<String> getFieldOrder() {
         return fieldNames;
     }
 

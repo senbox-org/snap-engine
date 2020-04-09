@@ -2,7 +2,16 @@ package org.esa.snap.lib.openjpeg.dataio.struct;
 
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
-import org.esa.snap.lib.openjpeg.dataio.library.Callbacks.*;
+import org.esa.snap.lib.openjpeg.dataio.library.Callbacks.DecodeCallback;
+import org.esa.snap.lib.openjpeg.dataio.library.Callbacks.DecodeTileDataCallback;
+import org.esa.snap.lib.openjpeg.dataio.library.Callbacks.DestroyCallback;
+import org.esa.snap.lib.openjpeg.dataio.library.Callbacks.EndDecompressCallback;
+import org.esa.snap.lib.openjpeg.dataio.library.Callbacks.GetDecodedTileCallback;
+import org.esa.snap.lib.openjpeg.dataio.library.Callbacks.ReadHeaderCallback;
+import org.esa.snap.lib.openjpeg.dataio.library.Callbacks.ReadTileHeaderCallback;
+import org.esa.snap.lib.openjpeg.dataio.library.Callbacks.SetDecodeAreaCallback;
+import org.esa.snap.lib.openjpeg.dataio.library.Callbacks.SetDecodedResolutionFactorCallback;
+import org.esa.snap.lib.openjpeg.dataio.library.Callbacks.SetupDecoderCallback;
 
 import java.util.Arrays;
 import java.util.List;
@@ -92,7 +101,7 @@ public class DecompressionHandler extends Structure {
     }
 
     @Override
-    protected List<?> getFieldOrder() {
+    protected List<String> getFieldOrder() {
         return fieldNames;
     }
 

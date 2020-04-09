@@ -59,10 +59,14 @@ public class CodestreamIndex extends Structure {
         this.tile_index = tile_index;
     }
 
-    protected List<?> getFieldOrder() {
+    @Override
+    protected List<String> getFieldOrder() {
         return fieldNames;
     }
 
-    public static class ByReference extends CodestreamIndex implements Structure.ByReference { }
-    public static class ByValue extends CodestreamIndex implements Structure.ByValue { }
+    public static class ByReference extends CodestreamIndex implements Structure.ByReference {
+    }
+
+    public static class ByValue extends CodestreamIndex implements Structure.ByValue {
+    }
 }

@@ -36,16 +36,17 @@ public class SegmentedFileInfo extends Structure {
     public SegmentedFileInfo() {
         super();
     }
+
     /**
-     * @param infile C type : char[4096]<br>
-     * @param p_file C type : FilePointer*<br>
-     * @param dataLength C type : OPJ_SIZE_T<br>
-     * @param dataRead C type : OPJ_SIZE_T<br>
+     * @param infile                 C type : char[4096]<br>
+     * @param p_file                 C type : FilePointer*<br>
+     * @param dataLength             C type : OPJ_SIZE_T<br>
+     * @param dataRead               C type : OPJ_SIZE_T<br>
      * @param p_segmentPositionsList C type : OPJ_OFF_T*<br>
-     * @param p_segmentLengths C type : OPJ_SIZE_T*<br>
-     * @param curPos C type : OPJ_OFF_T
+     * @param p_segmentLengths       C type : OPJ_SIZE_T*<br>
+     * @param curPos                 C type : OPJ_OFF_T
      */
-    public SegmentedFileInfo(byte infile[], FilePointer p_file, NativeSize dataLength, NativeSize dataRead, int numSegmentsMinusOne, LongByReference p_segmentPositionsList, NativeSizeByReference p_segmentLengths, long curPos, int curSegment) {
+    public SegmentedFileInfo(byte[] infile, FilePointer p_file, NativeSize dataLength, NativeSize dataRead, int numSegmentsMinusOne, LongByReference p_segmentPositionsList, NativeSizeByReference p_segmentLengths, long curPos, int curSegment) {
         super();
         if ((infile.length != this.infile.length))
             throw new IllegalArgumentException("Wrong array size !");
@@ -59,14 +60,19 @@ public class SegmentedFileInfo extends Structure {
         this.curPos = curPos;
         this.curSegment = curSegment;
     }
+
     public SegmentedFileInfo(Pointer peer) {
         super(peer);
     }
 
-    protected List<?> getFieldOrder() {
+    @Override
+    protected List<String> getFieldOrder() {
         return fieldNames;
     }
 
-    public static class ByReference extends SegmentedFileInfo implements Structure.ByReference { }
-    public static class ByValue extends SegmentedFileInfo implements Structure.ByValue { }
+    public static class ByReference extends SegmentedFileInfo implements Structure.ByReference {
+    }
+
+    public static class ByValue extends SegmentedFileInfo implements Structure.ByValue {
+    }
 }

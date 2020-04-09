@@ -27,14 +27,19 @@ public class Precision extends Structure {
         this.prec = prec;
         this.mode = mode;
     }
+
     public Precision(Pointer peer) {
         super(peer);
     }
 
-    protected List<?> getFieldOrder() {
+    @Override
+    protected List<String> getFieldOrder() {
         return fieldNames;
     }
 
-    public static class ByReference extends Precision implements Structure.ByReference { }
-    public static class ByValue extends Precision implements Structure.ByValue { }
+    public static class ByReference extends Precision implements Structure.ByReference {
+    }
+
+    public static class ByValue extends Precision implements Structure.ByValue {
+    }
 }

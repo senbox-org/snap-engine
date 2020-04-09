@@ -73,10 +73,14 @@ public class ImageComponentParams extends Structure {
         this.sgnd = sgnd;
     }
 
-    protected List<?> getFieldOrder() {
+    @Override
+    protected List<String> getFieldOrder() {
         return fieldNames;
     }
 
-    public static class ByReference extends ImageComponentParams implements Structure.ByReference { }
-    public static class ByValue extends ImageComponentParams implements Structure.ByValue { }
+    public static class ByReference extends ImageComponentParams implements Structure.ByReference {
+    }
+
+    public static class ByValue extends ImageComponentParams implements Structure.ByValue {
+    }
 }

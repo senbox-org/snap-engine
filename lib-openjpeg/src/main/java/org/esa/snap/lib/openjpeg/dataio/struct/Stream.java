@@ -86,18 +86,23 @@ public class Stream extends Structure {
      * C type : OPJ_UINT32
      */
     public int m_status;
-    
+
     public Stream() {
         super();
     }
+
     public Stream(Pointer peer) {
         super(peer);
     }
 
-    protected List<?> getFieldOrder() {
+    @Override
+    protected List<String> getFieldOrder() {
         return fieldNames;
     }
-    
-    public static class ByReference extends Stream implements Structure.ByReference { }
-    public static class ByValue extends Stream implements Structure.ByValue { }
+
+    public static class ByReference extends Stream implements Structure.ByReference {
+    }
+
+    public static class ByValue extends Stream implements Structure.ByValue {
+    }
 }

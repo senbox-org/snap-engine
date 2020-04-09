@@ -68,7 +68,7 @@ public class TileInfo2 extends Structure {
         super(peer);
     }
 
-    protected List<?> getFieldOrder() {
+    protected List<String> getFieldOrder() {
         return fieldNames;
     }
 
