@@ -38,7 +38,6 @@ import org.esa.snap.engine_utilities.gpf.StackUtils;
 import org.esa.snap.engine_utilities.gpf.TileIndex;
 import org.esa.snap.engine_utilities.util.VectorUtils;
 
-import javax.swing.*;
 import java.awt.*;
 import java.io.*;
 import java.nio.file.Files;
@@ -559,7 +558,12 @@ public abstract class BaseClassifier implements SupervisedClassifier {
                 final Instance instance = new DenseInstance(features);
 
                 double confidence = DOUBLE_NO_DATA_VALUE;
-                Object classVal = mlClassifier.classify(instance);
+                Object classVal;
+                try {
+                    classVal = mlClassifier.classify(instance);
+                } catch (Exception e) {
+                    classVal = null;
+                }
                 if (classVal == null) {
                     //classVal = params.trainOnRaster ? DOUBLE_NO_DATA_VALUE : INT_NO_DATA_VALUE;
                     classVal = noDataVal;
