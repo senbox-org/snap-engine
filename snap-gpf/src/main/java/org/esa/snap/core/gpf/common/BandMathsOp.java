@@ -22,7 +22,6 @@ import org.esa.snap.core.datamodel.IndexCoding;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.RasterDataNode;
-import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.dataop.barithm.BandArithmetic;
 import org.esa.snap.core.dataop.barithm.ProductNamespacePrefixProvider;
 import org.esa.snap.core.dataop.barithm.RasterDataEvalEnv;
@@ -280,7 +279,7 @@ public class BandMathsOp extends Operator {
         }
 
         ProductUtils.copyMetadata(sourceProducts[0], targetProduct);
-        copyTiePointGridsWithoutData(sourceProducts[0], targetProduct);
+        ProductUtils.copyTiePointGrids(sourceProducts[0], targetProduct);
         copyFlagCodingsIfPossible(sourceProducts[0], targetProduct);
         copyIndexCodingsIfPossible(sourceProducts[0], targetProduct);
         // copying GeoCoding from product to product, bands which do not have a GC yet will be geo-coded afterwards
@@ -293,23 +292,6 @@ public class BandMathsOp extends Operator {
                 targetProduct.setStartTime(sourceProduct.getStartTime());
                 targetProduct.setEndTime(sourceProduct.getEndTime());
                 break;
-            }
-        }
-    }
-
-    private static void copyTiePointGridsWithoutData(Product sourceProduct, Product targetProduct) {
-        for (int i = 0; i < sourceProduct.getNumTiePointGrids(); i++) {
-            TiePointGrid srcTPG = sourceProduct.getTiePointGridAt(i);
-            if (!targetProduct.containsRasterDataNode(srcTPG.getName())) {
-                TiePointGrid targetTPG = new TiePointGrid(srcTPG.getName(),
-                        srcTPG.getGridWidth(),
-                        srcTPG.getGridHeight(),
-                        srcTPG.getOffsetX(),
-                        srcTPG.getOffsetY(),
-                        srcTPG.getSubSamplingX(),
-                        srcTPG.getSubSamplingY());
-                targetTPG.setDiscontinuity(srcTPG.getDiscontinuity());
-                targetProduct.addTiePointGrid(targetTPG);
             }
         }
     }
@@ -340,29 +322,6 @@ public class BandMathsOp extends Operator {
         }
     }
 
-    @Override
-    public void doExecute(ProgressMonitor pm) throws OperatorException {
-        copyTiePointGridData(sourceProducts[0], targetProduct, pm);
-    }
-
-    private static void copyTiePointGridData(Product sourceProduct, Product targetProduct, ProgressMonitor pm) {
-        pm.beginTask("Reading Tie Point Data", targetProduct.getNumTiePointGrids());
-        try {
-            for (int i = 0; i < targetProduct.getNumTiePointGrids(); i++) {
-                TiePointGrid targetTPG = targetProduct.getTiePointGridAt(i);
-                if (targetTPG.getData() == null && sourceProduct.containsTiePointGrid(targetTPG.getName())) {
-                    float[] srcTiePoints = sourceProduct.getTiePointGrid(targetTPG.getName()).getTiePoints();
-                    final float[] destTiePoints = new float[srcTiePoints.length];
-                    System.arraycopy(srcTiePoints, 0, destTiePoints, 0, srcTiePoints.length);
-                    targetTPG.setData(ProductData.createInstance(destTiePoints));
-                    pm.worked(1);
-                }
-            }
-        } finally {
-            pm.done();
-        }
-
-    }
 
     @Override
     public void computeTile(Band band, Tile targetTile, ProgressMonitor pm) throws OperatorException {
