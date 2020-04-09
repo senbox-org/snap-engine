@@ -47,14 +47,19 @@ public class PacketInfo extends Structure {
         this.end_pos = end_pos;
         this.disto = disto;
     }
+
     public PacketInfo(Pointer peer) {
         super(peer);
     }
 
-    protected List<?> getFieldOrder() {
+    @Override
+    protected List<String> getFieldOrder() {
         return fieldNames;
     }
 
-    public static class ByReference extends PacketInfo implements Structure.ByReference { }
-    public static class ByValue extends PacketInfo implements Structure.ByValue { }
+    public static class ByReference extends PacketInfo implements Structure.ByReference {
+    }
+
+    public static class ByValue extends PacketInfo implements Structure.ByValue {
+    }
 }

@@ -72,10 +72,14 @@ public class CodestreamInfo2 extends Structure {
         this.tile_info = tile_info;
     }
 
-    protected List<?> getFieldOrder() {
+    @Override
+    protected List<String> getFieldOrder() {
         return fieldNames;
     }
-    
-    public static class ByReference extends CodestreamInfo2 implements Structure.ByReference { }
-    public static class ByValue extends CodestreamInfo2 implements Structure.ByValue { }
+
+    public static class ByReference extends CodestreamInfo2 implements Structure.ByReference {
+    }
+
+    public static class ByValue extends CodestreamInfo2 implements Structure.ByValue {
+    }
 }

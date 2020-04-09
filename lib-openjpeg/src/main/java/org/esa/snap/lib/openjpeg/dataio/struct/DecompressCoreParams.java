@@ -101,10 +101,14 @@ public class DecompressCoreParams extends Structure {
         super(peer);
     }
 
-    protected List<?> getFieldOrder() {
+    @Override
+    protected List<String> getFieldOrder() {
         return fieldNames;
     }
 
-    public static class ByReference extends DecompressCoreParams implements Structure.ByReference { }
-    public static class ByValue extends DecompressCoreParams implements Structure.ByValue { }
+    public static class ByReference extends DecompressCoreParams implements Structure.ByReference {
+    }
+
+    public static class ByValue extends DecompressCoreParams implements Structure.ByValue {
+    }
 }

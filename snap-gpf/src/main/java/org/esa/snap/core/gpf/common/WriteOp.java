@@ -280,38 +280,40 @@ public class WriteOp extends Operator {
                 writableBands.add(band);
             }
         }
-        if (writableBands.size() == 0) {
-            return;
-        }
-        tileSizes = new Dimension[writableBands.size()];
-        tileCountsX = new int[writableBands.size()];
-        tilesWritten = new boolean[writableBands.size()][][];
-        for (int i = 0; i < writableBands.size(); i++) {
-            Band writableBand = writableBands.get(i);
-            Dimension tileSize = determineTileSize(writableBand);
-
-            tileSizes[i] = tileSize;
-            int tileCountX = MathUtils.ceilInt(writableBand.getRasterWidth() / (double) tileSize.width);
-            tileCountsX[i] = tileCountX;
-            int tileCountY = MathUtils.ceilInt(writableBand.getRasterHeight() / (double) tileSize.height);
-            tilesWritten[i] = new boolean[tileCountY][tileCountX];
-
-            if (writeEntireTileRows && i > 0 && !tileSize.equals(tileSizes[0])) {
-                writeEntireTileRows = false;        // don't writeEntireTileRows for multisize bands
-            }
-        }
-
-        if (writeEntireTileRows && writableBands.size() > 0) {
-            targetProduct.setPreferredTileSize(tileSizes[0]);
-        }
+        pm.beginTask("Preparing writing", writableBands.size() + 1);
         try {
+            tileSizes = new Dimension[writableBands.size()];
+            tileCountsX = new int[writableBands.size()];
+            tilesWritten = new boolean[writableBands.size()][][];
+            for (int i = 0; i < writableBands.size(); i++) {
+                Band writableBand = writableBands.get(i);
+                Dimension tileSize = determineTileSize(writableBand);
+
+                tileSizes[i] = tileSize;
+                int tileCountX = MathUtils.ceilInt(writableBand.getRasterWidth() / (double) tileSize.width);
+                tileCountsX[i] = tileCountX;
+                int tileCountY = MathUtils.ceilInt(writableBand.getRasterHeight() / (double) tileSize.height);
+                tilesWritten[i] = new boolean[tileCountY][tileCountX];
+
+                if (writeEntireTileRows && i > 0 && !tileSize.equals(tileSizes[0])) {
+                    writeEntireTileRows = false;        // don't writeEntireTileRows for multisize bands
+                }
+                pm.worked(1);
+            }
+
+            if (writeEntireTileRows && writableBands.size() > 0) {
+                targetProduct.setPreferredTileSize(tileSizes[0]);
+            }
             // Create not existing directories before writing
             if (file != null && file.getParentFile() != null) {
                 file.getParentFile().mkdirs();
             }
             productWriter.writeProductNodes(targetProduct, file);
+            pm.worked(1);
         } catch (IOException e) {
             throw new OperatorException("Not able to write product file: '" + file.getAbsolutePath() + "'", e);
+        } finally {
+            pm.done();
         }
     }
 

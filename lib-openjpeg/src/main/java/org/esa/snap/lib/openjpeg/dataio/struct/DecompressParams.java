@@ -90,14 +90,19 @@ public class DecompressParams extends Structure {
         core = new DecompressCoreParams.ByReference();
         precision = new Precision.ByReference();
     }
+
     public DecompressParams(Pointer peer) {
         super(peer);
     }
 
-    protected List<?> getFieldOrder() {
+    @Override
+    protected List<String> getFieldOrder() {
         return fieldNames;
     }
 
-    public static class ByReference extends DecompressParams implements Structure.ByReference { }
-    public static class ByValue extends DecompressParams implements Structure.ByValue { }
+    public static class ByReference extends DecompressParams implements Structure.ByReference {
+    }
+
+    public static class ByValue extends DecompressParams implements Structure.ByValue {
+    }
 }

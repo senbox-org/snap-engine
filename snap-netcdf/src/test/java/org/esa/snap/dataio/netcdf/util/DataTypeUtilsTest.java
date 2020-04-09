@@ -16,6 +16,7 @@
 
 package org.esa.snap.dataio.netcdf.util;
 
+import org.esa.snap.core.datamodel.ProductData;
 import org.junit.Test;
 import ucar.ma2.DataType;
 
@@ -86,5 +87,35 @@ public class DataTypeUtilsTest {
     @Test(expected = IllegalArgumentException.class)
     public void testConvertToWithIllegalArgument() {
         DataTypeUtils.convertTo(12.3, DataType.STRING);
+    }
+
+    @Test
+    public void testGetEquivalentProductDataType() {
+        assertEquals(ProductData.TYPE_UINT8, DataTypeUtils.getEquivalentProductDataType(DataType.BYTE, true, false));
+        assertEquals(ProductData.TYPE_INT8, DataTypeUtils.getEquivalentProductDataType(DataType.BYTE, false, false));
+
+        assertEquals(ProductData.TYPE_UINT8, DataTypeUtils.getEquivalentProductDataType(DataType.UBYTE, true, false));
+
+        assertEquals(ProductData.TYPE_UINT16, DataTypeUtils.getEquivalentProductDataType(DataType.SHORT, true, false));
+        assertEquals(ProductData.TYPE_INT16, DataTypeUtils.getEquivalentProductDataType(DataType.SHORT, false, false));
+
+        assertEquals(ProductData.TYPE_UINT16, DataTypeUtils.getEquivalentProductDataType(DataType.USHORT, true, false));
+
+        assertEquals(ProductData.TYPE_UINT32, DataTypeUtils.getEquivalentProductDataType(DataType.INT, true, false));
+        assertEquals(ProductData.TYPE_INT32, DataTypeUtils.getEquivalentProductDataType(DataType.INT, false, false));
+
+        assertEquals(ProductData.TYPE_UINT32, DataTypeUtils.getEquivalentProductDataType(DataType.UINT, true, false));
+
+        assertEquals(ProductData.TYPE_INT64, DataTypeUtils.getEquivalentProductDataType(DataType.LONG, false, false));
+        assertEquals(ProductData.TYPE_UINT64, DataTypeUtils.getEquivalentProductDataType(DataType.LONG, true, false));
+
+        assertEquals(ProductData.TYPE_UINT64, DataTypeUtils.getEquivalentProductDataType(DataType.ULONG, false, false));
+
+        assertEquals(ProductData.TYPE_FLOAT32, DataTypeUtils.getEquivalentProductDataType(DataType.FLOAT, false, false));
+        assertEquals(ProductData.TYPE_FLOAT64, DataTypeUtils.getEquivalentProductDataType(DataType.DOUBLE, false, false));
+
+        assertEquals(-1, DataTypeUtils.getEquivalentProductDataType(DataType.CHAR, false, true));
+        assertEquals(ProductData.TYPE_ASCII, DataTypeUtils.getEquivalentProductDataType(DataType.CHAR, false, false));
+        assertEquals(ProductData.TYPE_ASCII, DataTypeUtils.getEquivalentProductDataType(DataType.STRING, false, false));
     }
 }

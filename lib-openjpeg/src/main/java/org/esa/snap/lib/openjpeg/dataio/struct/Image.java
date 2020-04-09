@@ -75,10 +75,14 @@ public class Image extends Structure {
         this.icc_profile_len = icc_profile_len;
     }
 
-    protected List<?> getFieldOrder() {
+    @Override
+    protected List<String> getFieldOrder() {
         return fieldNames;
     }
-    
-    public static class ByReference extends Image implements Structure.ByReference { }
-    public static class ByValue extends Image implements Structure.ByValue { }
+
+    public static class ByReference extends Image implements Structure.ByReference {
+    }
+
+    public static class ByValue extends Image implements Structure.ByValue {
+    }
 }

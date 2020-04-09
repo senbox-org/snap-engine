@@ -66,14 +66,19 @@ public class TileIndex extends Structure {
     public TileIndex() {
         super();
     }
+
     public TileIndex(Pointer peer) {
         super(peer);
     }
 
-    protected List<?> getFieldOrder() {
+    @Override
+    protected List<String> getFieldOrder() {
         return fieldNames;
     }
 
-    public static class ByReference extends TileIndex implements Structure.ByReference { }
-    public static class ByValue extends TileIndex implements Structure.ByValue { }
+    public static class ByReference extends TileIndex implements Structure.ByReference {
+    }
+
+    public static class ByValue extends TileIndex implements Structure.ByValue {
+    }
 }

@@ -2,7 +2,12 @@ package org.esa.snap.lib.openjpeg.dataio.struct;
 
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
-import org.esa.snap.lib.openjpeg.dataio.library.Callbacks.*;
+import org.esa.snap.lib.openjpeg.dataio.library.Callbacks.DestroyCallback;
+import org.esa.snap.lib.openjpeg.dataio.library.Callbacks.EncodeCallback;
+import org.esa.snap.lib.openjpeg.dataio.library.Callbacks.EndCompressCallback;
+import org.esa.snap.lib.openjpeg.dataio.library.Callbacks.SetupEncoderCallback;
+import org.esa.snap.lib.openjpeg.dataio.library.Callbacks.StartCompressCallback;
+import org.esa.snap.lib.openjpeg.dataio.library.Callbacks.WriteTileCallback;
 
 import java.util.Arrays;
 import java.util.List;
@@ -61,10 +66,14 @@ public class CompressionHandler extends Structure {
         this.opj_setup_encoder = opj_setup_encoder;
     }
 
-    protected List<?> getFieldOrder() {
+    @Override
+    protected List<String> getFieldOrder() {
         return fieldNames;
     }
 
-    public static class ByReference extends CompressionHandler implements Structure.ByReference { }
-    public static class ByValue extends CompressionHandler implements Structure.ByValue { }
+    public static class ByReference extends CompressionHandler implements Structure.ByReference {
+    }
+
+    public static class ByValue extends CompressionHandler implements Structure.ByValue {
+    }
 }
