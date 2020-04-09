@@ -1293,7 +1293,8 @@ public class OperatorContext {
                 if (productReader instanceof OperatorProductReader) {
                     OperatorContext operatorContext = ((OperatorProductReader) productReader).getOperatorContext();
                     if (operatorContext != this) {
-                        operatorContext.executeOperator(pm);
+                        // the passed in progress monitor is only meant for the "main" operator
+                        operatorContext.executeOperator(ProgressMonitor.NULL);
                     }
                 }
             }
