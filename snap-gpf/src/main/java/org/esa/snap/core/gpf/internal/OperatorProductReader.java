@@ -24,6 +24,7 @@ import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.util.io.SnapFileFilter;
 
@@ -100,6 +101,18 @@ public class OperatorProductReader implements ProductReader {
         //
         /////////////////////////////////////////////////////////////////////
         data.getDataElements(destOffsetX, destOffsetY, destWidth, destHeight, destBuffer.getElems());
+    }
+
+    @Override
+    public void readTiePointGridRasterData(TiePointGrid tpg, int destOffsetX, int destOffsetY, int destWidth,
+                                           int destHeight, ProductData destBuffer, ProgressMonitor pm) throws IOException {
+        operatorContext.getTargetProduct();
+        operatorContext.executeOperator(pm);
+        ProductData tpgData = tpg.getData();
+        if (tpgData == null) {
+            throw new IOException("Could not read tie-point data");
+        }
+        destBuffer.setElems(tpgData.getElems());
     }
 
     public synchronized void close() throws IOException {
