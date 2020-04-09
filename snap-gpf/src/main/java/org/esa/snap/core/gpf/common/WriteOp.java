@@ -300,15 +300,16 @@ public class WriteOp extends Operator {
                 }
                 pm.worked(1);
             }
-
-            if (writeEntireTileRows && writableBands.size() > 0) {
-                targetProduct.setPreferredTileSize(tileSizes[0]);
+            if (writableBands.size() > 0) {
+                if (writeEntireTileRows) {
+                    targetProduct.setPreferredTileSize(tileSizes[0]);
+                }
+                // Create not existing directories before writing
+                if (file != null && file.getParentFile() != null) {
+                    file.getParentFile().mkdirs();
+                }
+                productWriter.writeProductNodes(targetProduct, file);
             }
-            // Create not existing directories before writing
-            if (file != null && file.getParentFile() != null) {
-                file.getParentFile().mkdirs();
-            }
-            productWriter.writeProductNodes(targetProduct, file);
             pm.worked(1);
         } catch (IOException e) {
             throw new OperatorException("Not able to write product file: '" + file.getAbsolutePath() + "'", e);
