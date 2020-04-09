@@ -35,14 +35,19 @@ public class MarkerInfo extends Structure {
         this.pos = pos;
         this.len = len;
     }
+
     public MarkerInfo(Pointer peer) {
         super(peer);
     }
 
-    protected List<?> getFieldOrder() {
+    @Override
+    protected List<String> getFieldOrder() {
         return fieldNames;
     }
 
-    public static class ByReference extends MarkerInfo implements Structure.ByReference { }
-    public static class ByValue extends MarkerInfo implements Structure.ByValue { }
+    public static class ByReference extends MarkerInfo implements Structure.ByReference {
+    }
+
+    public static class ByValue extends MarkerInfo implements Structure.ByValue {
+    }
 }

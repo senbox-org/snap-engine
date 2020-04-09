@@ -53,26 +53,18 @@
             <artifactId>snap-core</artifactId>
         </dependency>
         <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna-platform</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>edu.ucar</groupId>
             <artifactId>netcdfAll</artifactId>
         </dependency>
-
-        <!-- from toniof-netcdf-change_validation branch, not sure whether it is required
-        <dependency>
-            <groupId>edu.ucar</groupId>
-            <artifactId>cdm-core</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>edu.ucar</groupId>
-            <artifactId>netcdf4</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-jdk14</artifactId>
-        </dependency>
-        -->
         
         <!--
         We have to include the following UGLY dependencies so that they are put into the NBM module's ext folder.

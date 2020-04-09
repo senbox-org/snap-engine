@@ -73,14 +73,19 @@ public class ImageComponent extends Structure {
         super();
         data = new IntByReference();
     }
+
     public ImageComponent(Pointer peer) {
         super(peer);
     }
 
-    protected List<?> getFieldOrder() {
+    @Override
+    protected List<String> getFieldOrder() {
         return fieldNames;
     }
 
-    public static class ByReference extends ImageComponent implements Structure.ByReference { }
-    public static class ByValue extends ImageComponent implements Structure.ByValue { }
+    public static class ByReference extends ImageComponent implements Structure.ByReference {
+    }
+
+    public static class ByValue extends ImageComponent implements Structure.ByValue {
+    }
 }
