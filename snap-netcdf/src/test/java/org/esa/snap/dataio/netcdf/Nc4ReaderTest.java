@@ -27,7 +27,7 @@ import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.util.DummyProductBuilder;
 import org.esa.snap.dataio.netcdf.metadata.profiles.cf.CfNetCdfReaderPlugIn;
 import org.esa.snap.runtime.Config;
-import org.junit.Ignore;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
@@ -45,8 +45,10 @@ import static org.junit.Assert.assertTrue;
  * @author Ralf Quast
  */
 public class Nc4ReaderTest {
-    static {
-        new NetCdfActivator().start();
+
+    @BeforeClass
+    public static void setupTestClass() {
+        NetCdfActivator.activate();
     }
 
     @Test
