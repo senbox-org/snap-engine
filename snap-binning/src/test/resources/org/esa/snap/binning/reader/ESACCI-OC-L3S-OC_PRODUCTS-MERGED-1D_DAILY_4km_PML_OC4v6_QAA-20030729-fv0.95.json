@@ -26,7 +26,7 @@
         "bands": [
             {
                 "name": "nobs",
-                "noDataValue": "-1.0",
+                "noDataValue": "0.0",
                 "noDataValueUsed": "true",
                 "spectralWavelength": "0.0",
                 "spectralBandwidth": "0.0",
@@ -45,7 +45,7 @@
             },
             {
                 "name": "MODISA_index",
-                "noDataValue": "-1.0",
+                "noDataValue": "0.0",
                 "noDataValueUsed": "true",
                 "spectralWavelength": "0.0",
                 "spectralBandwidth": "0.0",
@@ -64,7 +64,7 @@
             },
             {
                 "name": "MERIS_index",
-                "noDataValue": "-1.0",
+                "noDataValue": "0.0",
                 "noDataValueUsed": "true",
                 "spectralWavelength": "0.0",
                 "spectralBandwidth": "0.0",
@@ -83,7 +83,7 @@
             },
             {
                 "name": "SeaWiFS_index",
-                "noDataValue": "-1.0",
+                "noDataValue": "0.0",
                 "noDataValueUsed": "true",
                 "spectralWavelength": "0.0",
                 "spectralBandwidth": "0.0",

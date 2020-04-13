@@ -425,7 +425,7 @@
             },
             {
                 "name": "sensor_contributions_0",
-                "noDataValue": "-1.0",
+                "noDataValue": "0.0",
                 "noDataValueUsed": "true",
                 "spectralWavelength": "0.0",
                 "spectralBandwidth": "0.0",
@@ -444,7 +444,7 @@
             },
             {
                 "name": "sensor_contributions_1",
-                "noDataValue": "-1.0",
+                "noDataValue": "0.0",
                 "noDataValueUsed": "true",
                 "spectralWavelength": "0.0",
                 "spectralBandwidth": "0.0",
@@ -463,7 +463,7 @@
             },
             {
                 "name": "sensor_contributions_2",
-                "noDataValue": "-1.0",
+                "noDataValue": "0.0",
                 "noDataValueUsed": "true",
                 "spectralWavelength": "0.0",
                 "spectralBandwidth": "0.0",
