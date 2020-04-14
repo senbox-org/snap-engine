@@ -80,7 +80,7 @@ public class CfGeocodingPart extends ProfilePartIO {
         }
     }
 
-    private void hdfDecode(ProfileReadContext ctx, Product p) throws IOException {
+    private void hdfDecode(ProfileReadContext ctx, Product p) {
         final CfHdfEosGeoInfoExtractor cfHdfEosGeoInfoExtractor = new CfHdfEosGeoInfoExtractor(
                 ctx.getNetcdfFile().getGlobalAttributes());
         cfHdfEosGeoInfoExtractor.extractInfo();
@@ -179,8 +179,8 @@ public class CfGeocodingPart extends ProfilePartIO {
                 geoCoding.getGeoPos(pixelPos, geoPos);
                 lon[x] = geoPos.getLon();
             }
-            latVariable.writeFully( Array.factory(DataType.DOUBLE,new int[]{h}, lat));
-            lonVariable.writeFully( Array.factory(DataType.DOUBLE,new int[]{w},lon));
+            latVariable.writeFully(Array.factory(DataType.DOUBLE, new int[]{h}, lat));
+            lonVariable.writeFully(Array.factory(DataType.DOUBLE, new int[]{w}, lon));
         } else {
             final double[] lat = new double[w];
             final double[] lon = new double[w];
@@ -294,7 +294,7 @@ public class CfGeocodingPart extends ProfilePartIO {
             // add a global attribute which will be analyzed when setting up the image(s)
             final List<Variable> variables = ctx.getNetcdfFile().getVariables();
             for (Variable next : variables) {
-                next.addAttribute(new Attribute("LONGITUDE_SHIFTED_180",1));
+                next.addAttribute(new Attribute("LONGITUDE_SHIFTED_180", 1));
             }
             for (int i = 0; i < lonData.getSize(); i++) {
                 final Index ii = lonData.getIndex().set(i);
@@ -360,7 +360,7 @@ public class CfGeocodingPart extends ProfilePartIO {
                 lastValue >= 360.0 - lonDelta && lastValue <= 360.0);
     }
 
-    private static GeoCoding readPixelGeoCoding(Product product) throws IOException {
+    private static GeoCoding readPixelGeoCoding(Product product) {
         Band lonBand = product.getBand(Constants.LON_INTERN_VAR_NAME);
         if (lonBand == null) {
             lonBand = product.getBand(Constants.LON_VAR_NAME);
@@ -375,31 +375,30 @@ public class CfGeocodingPart extends ProfilePartIO {
         if (latBand == null) {
             latBand = product.getBand(Constants.LATITUDE_VAR_NAME);
         }
-        if (latBand != null && lonBand != null) {
-//            return GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, latBand.getValidMaskExpression(), 5);
-            final int width = product.getSceneRasterWidth();
-            final int height = product.getSceneRasterHeight();
-
-//            final double[] longitudes = RasterUtils.loadDataScaled(lonBand);
-//            final double[] latitudes = RasterUtils.loadDataScaled(latBand);
-            final int fullSize = width * height;
-            double[] longitudes = lonBand.getSourceImage().getData().getSamples(0, 0, width, height, 0, new double[fullSize]);
-            lonBand.unloadRasterData();
-            double[] latitudes = latBand.getSourceImage().getData().getSamples(0, 0, width, height, 0, new double[fullSize]);
-            latBand.unloadRasterData();
-
-            final double resolutionInKm = RasterUtils.computeResolutionInKm(lonBand, latBand);
-
-            final GeoRaster geoRaster = new GeoRaster(longitudes, latitudes, lonBand.getName(), latBand.getName(),
-                                                      width, height, resolutionInKm);
-
-            final ForwardCoding forward = ComponentFactory.getForward(PixelForward.KEY);
-            final InverseCoding inverse = ComponentFactory.getInverse(PixelQuadTreeInverse.KEY);
-
-            final ComponentGeoCoding geoCoding = new ComponentGeoCoding(geoRaster, forward, inverse, GeoChecks.ANTIMERIDIAN);
-            geoCoding.initialize();
-            return geoCoding;
+        if (latBand == null || lonBand == null) {
+            return null;
         }
-        return null;
+
+        final int width = product.getSceneRasterWidth();
+        final int height = product.getSceneRasterHeight();
+
+        final int fullSize = width * height;
+
+        final double[] longitudes = lonBand.getSourceImage().getData().getSamples(0, 0, width, height, 0, new double[fullSize]);
+        lonBand.unloadRasterData();
+        final double[] latitudes = latBand.getSourceImage().getData().getSamples(0, 0, width, height, 0, new double[fullSize]);
+        latBand.unloadRasterData();
+
+        final double resolutionInKm = RasterUtils.computeResolutionInKm(longitudes, latitudes, width, height);
+
+        final GeoRaster geoRaster = new GeoRaster(longitudes, latitudes, lonBand.getName(), latBand.getName(),
+                                                  width, height, resolutionInKm);
+
+        final ForwardCoding forward = ComponentFactory.getForward(PixelForward.KEY);
+        final InverseCoding inverse = ComponentFactory.getInverse(PixelQuadTreeInverse.KEY);
+
+        final ComponentGeoCoding geoCoding = new ComponentGeoCoding(geoRaster, forward, inverse, GeoChecks.ANTIMERIDIAN);
+        geoCoding.initialize();
+        return geoCoding;
     }
 }
