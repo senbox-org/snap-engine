@@ -16,7 +16,7 @@ public class PixelQuadTreeInverse implements InverseCoding {
     public static final String KEY = "INV_PIXEL_QUAD_TREE";
     public static final String KEY_INTERPOLATING = "INV_PIXEL_QUAD_TREE_INTERPOLATING";
 
-    private static final double TO_DEG = 180.0 / Math.PI ;
+    private static final double TO_DEG = 180.0 / Math.PI;
 
     private final boolean fractionalAccuracy;
     private final XYInterpolator interpolator;
@@ -54,10 +54,10 @@ public class PixelQuadTreeInverse implements InverseCoding {
 
         final Result result = new Result();
         boolean pixelFound = quadTreeSearch(0,
-                geoPos.lat, geoPos.lon,
-                0, 0,
-                rasterWidth, rasterHeight,
-                result);
+                                            geoPos.lat, geoPos.lon,
+                                            0, 0,
+                                            rasterWidth, rasterHeight,
+                                            result);
 
         if (pixelFound) {
             final GeoPos resultGeoPos = new GeoPos();
@@ -186,31 +186,56 @@ public class PixelQuadTreeInverse implements InverseCoding {
         final int y_1 = y;
         final int y_2 = y_1 + h - 1;
 
-        final GeoPos geoPos = new GeoPos();
-        getGeoPos(x_1, y_1, geoPos);
-        final double lat_0 = geoPos.lat;
-        final double lon_0 = geoPos.lon;
-        getGeoPos(x_1, y_2, geoPos);
-        final double lat_1 = geoPos.lat;
-        final double lon_1 = geoPos.lon;
-        getGeoPos(x_2, y_1, geoPos);
-        final double lat_2 = geoPos.lat;
-        final double lon_2 = geoPos.lon;
-        getGeoPos(x_2, y_2, geoPos);
-        final double lat_3 = geoPos.lat;
-        final double lon_3 = geoPos.lon;
 
         double lonMin;
         double lonMax;
         double latMin;
         double latMax;
 
+        double lat_0;
+        double lon_0;
+        double lat_1;
+        double lon_1;
+        double lat_2;
+        double lon_2;
+        double lat_3;
+        double lon_3;
+
         if (depth == 0) {
             lonMin = lonRange.getMin();
             lonMax = lonRange.getMax();
             latMin = latRange.getMin();
             latMax = latRange.getMax();
+
+            lon_0 = lonMin;
+            lat_0 = latMin;
+
+            lon_1 = lonMax;
+            lat_1 = latMin;
+
+            lon_2 = lonMax;
+            lat_2 = latMax;
+
+            lon_3 = lonMin;
+            lat_3 = latMax;
         } else {
+            final GeoPos geoPos = new GeoPos();
+            getGeoPos(x_1, y_1, geoPos);
+            lat_0 = geoPos.lat;
+            lon_0 = geoPos.lon;
+
+            getGeoPos(x_1, y_2, geoPos);
+            lat_1 = geoPos.lat;
+            lon_1 = geoPos.lon;
+
+            getGeoPos(x_2, y_1, geoPos);
+            lat_2 = geoPos.lat;
+            lon_2 = geoPos.lon;
+
+            getGeoPos(x_2, y_2, geoPos);
+            lat_3  = geoPos.lat;
+            lon_3 = geoPos.lon;
+
             latMin = Math.min(lat_0, Math.min(lat_1, Math.min(lat_2, lat_3))) - epsilon;
             latMax = Math.max(lat_0, Math.max(lat_1, Math.max(lat_2, lat_3))) + epsilon;
 
