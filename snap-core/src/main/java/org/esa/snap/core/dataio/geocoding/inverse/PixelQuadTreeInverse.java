@@ -8,6 +8,7 @@ import org.esa.snap.core.dataio.geocoding.util.XYInterpolator;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.util.math.MathUtils;
+import org.esa.snap.core.util.math.Range;
 import org.esa.snap.core.util.math.RsMathUtils;
 
 public class PixelQuadTreeInverse implements InverseCoding {
@@ -28,6 +29,8 @@ public class PixelQuadTreeInverse implements InverseCoding {
     private boolean isCrossingMeridian;
     private double[] longitudes;
     private double[] latitudes;
+    private Range lonRange;
+    private Range latRange;
 
     PixelQuadTreeInverse() {
         this(false);
@@ -91,6 +94,9 @@ public class PixelQuadTreeInverse implements InverseCoding {
 
         offsetX = geoRaster.getOffsetX();
         offsetY = geoRaster.getOffsetY();
+
+        lonRange = Range.computeRangeDouble(longitudes, null);
+        latRange = Range.computeRangeDouble(latitudes, null);
     }
 
     @Override
@@ -194,25 +200,35 @@ public class PixelQuadTreeInverse implements InverseCoding {
         final double lat_3 = geoPos.lat;
         final double lon_3 = geoPos.lon;
 
-        final double latMin = Math.min(lat_0, Math.min(lat_1, Math.min(lat_2, lat_3))) - epsilon;
-        final double latMax = Math.max(lat_0, Math.max(lat_1, Math.max(lat_2, lat_3))) + epsilon;
-
         double lonMin;
         double lonMax;
-        if (isCrossingMeridian) {
-            final double signumLon = Math.signum(lon);
-            if (signumLon > 0f) {
-                // position is in a region with positive longitudes, so cut negative longitudes from quad area
-                lonMax = 180.0f;
-                lonMin = getPositiveLonMin(lon_0, lon_1, lon_2, lon_3);
-            } else {
-                // position is in a region with negative longitudes, so cut positive longitudes from quad area
-                lonMin = -180.0f;
-                lonMax = getNegativeLonMax(lon_0, lon_1, lon_2, lon_3);
-            }
+        double latMin;
+        double latMax;
+
+        if (depth == 0) {
+            lonMin = lonRange.getMin();
+            lonMax = lonRange.getMax();
+            latMin = latRange.getMin();
+            latMax = latRange.getMax();
         } else {
-            lonMin = Math.min(lon_0, Math.min(lon_1, Math.min(lon_2, lon_3))) - epsilon;
-            lonMax = Math.max(lon_0, Math.max(lon_1, Math.max(lon_2, lon_3))) + epsilon;
+            latMin = Math.min(lat_0, Math.min(lat_1, Math.min(lat_2, lat_3))) - epsilon;
+            latMax = Math.max(lat_0, Math.max(lat_1, Math.max(lat_2, lat_3))) + epsilon;
+
+            if (isCrossingMeridian) {
+                final double signumLon = Math.signum(lon);
+                if (signumLon > 0f) {
+                    // position is in a region with positive longitudes, so cut negative longitudes from quad area
+                    lonMax = 180.0f;
+                    lonMin = getPositiveLonMin(lon_0, lon_1, lon_2, lon_3);
+                } else {
+                    // position is in a region with negative longitudes, so cut positive longitudes from quad area
+                    lonMin = -180.0f;
+                    lonMax = getNegativeLonMax(lon_0, lon_1, lon_2, lon_3);
+                }
+            } else {
+                lonMin = Math.min(lon_0, Math.min(lon_1, Math.min(lon_2, lon_3))) - epsilon;
+                lonMax = Math.max(lon_0, Math.max(lon_1, Math.max(lon_2, lon_3))) + epsilon;
+            }
         }
 
         final boolean definitelyOutside = lat < latMin || lat > latMax || lon < lonMin || lon > lonMax;
@@ -263,10 +279,12 @@ public class PixelQuadTreeInverse implements InverseCoding {
         if (h2 < 2) {
             h2 = 2;
         }
-        final boolean b1 = quadTreeSearch(depth + 1, lat, lon, i, j, w2, h2, result);
-        final boolean b2 = quadTreeSearch(depth + 1, lat, lon, i, j2, w2, h2r, result);
-        final boolean b3 = quadTreeSearch(depth + 1, lat, lon, i2, j, w2r, h2, result);
-        final boolean b4 = quadTreeSearch(depth + 1, lat, lon, i2, j2, w2r, h2r, result);
+
+        final int increasedDepth = depth + 1;
+        final boolean b1 = quadTreeSearch(increasedDepth, lat, lon, i, j, w2, h2, result);
+        final boolean b2 = quadTreeSearch(increasedDepth, lat, lon, i, j2, w2, h2r, result);
+        final boolean b3 = quadTreeSearch(increasedDepth, lat, lon, i2, j, w2r, h2, result);
+        final boolean b4 = quadTreeSearch(increasedDepth, lat, lon, i2, j2, w2r, h2r, result);
 
         return b1 || b2 || b3 || b4;
     }
