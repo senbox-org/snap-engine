@@ -198,39 +198,26 @@ public class RasterUtils {
         return poleCandidates;
     }
 
-    public static Rectangle getCenterExtractWindow(Band lonBand) {
-        final Product product = lonBand.getProduct();
-        final int width = product.getSceneRasterWidth();
-        final int height = product.getSceneRasterHeight();
+    public static double computeResolutionInKm(double[] lonData, double[] latData, final int width, final int height) {
+        Rectangle r = getCenterExtractWindow(width, height);
 
-        final Rectangle R = new Rectangle(0, 0, 10, 10);
-        R.width = Math.min(R.width, width);
-        R.height = Math.min(R.height, height);
-        if (width > R.width) {
-            R.x = (width - R.width) / 2;
-        }
-        if (height > R.height) {
-            R.y = (height - R.height) / 2;
-        }
-        return R;
-    }
-
-    public static double computeResolutionInKm(double[] lonData, double[] latData, int width, int height) {
         int count = 0;
         double distanceSum = 0;
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
+        int yMax = r.y + r.height - 1;
+        int xMax = r.x + r.width - 1;
+        for (int y = r.y; y <= yMax; y++) {
+            for (int x = r.x; x <= xMax; x++) {
                 final int idx = y * width + x;
                 final double resLon = lonData[idx];
                 final double resLat = latData[idx];
                 final SphericalDistance spherDist = new SphericalDistance(resLon, resLat);
-                if (x < width - 1) {
+                if (x < xMax) {
                     final int idxRight = idx + 1;
                     final double distance = spherDist.distance(lonData[idxRight], latData[idxRight]);
                     distanceSum += distance;
                     count++;
                 }
-                if (y < height - 1) {
+                if (y < yMax) {
                     final int idxBottom = idx + width;
                     final double distance = spherDist.distance(lonData[idxBottom], latData[idxBottom]);
                     distanceSum += distance;
@@ -247,5 +234,18 @@ public class RasterUtils {
         final double meanEarthRadiusKm = meanEarthRadiusM / 1000.0;
 
         return distanceMeanRadian * meanEarthRadiusKm;
+    }
+
+    private static Rectangle getCenterExtractWindow(int width, int height) {
+        final Rectangle R = new Rectangle(0, 0, 10, 10);
+        R.width = Math.min(R.width, width);
+        R.height = Math.min(R.height, height);
+        if (width > R.width) {
+            R.x = (width - R.width) / 2;
+        }
+        if (height > R.height) {
+            R.y = (height - R.height) / 2;
+        }
+        return R;
     }
 }

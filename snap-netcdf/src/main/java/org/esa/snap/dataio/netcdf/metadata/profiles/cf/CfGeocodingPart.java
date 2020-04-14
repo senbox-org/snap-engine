@@ -52,7 +52,6 @@ import ucar.nc2.Attribute;
 import ucar.nc2.Variable;
 
 import java.awt.Dimension;
-import java.awt.Rectangle;
 import java.io.IOException;
 import java.util.List;
 
@@ -67,7 +66,7 @@ public class CfGeocodingPart extends ProfilePartIO {
     public void decode(ProfileReadContext ctx, Product p) throws IOException {
         GeoCoding geoCoding = readConventionBasedMapGeoCoding(ctx, p);
         if (geoCoding == null) {
-            geoCoding = readPixelGeoCoding(p);
+            geoCoding = readPixelBasedGeoCoding(p);
         }
         // If there is still no geocoding, check special case of netcdf file which was converted
         // from hdf file and has 'StructMetadata.n' element.
@@ -361,7 +360,7 @@ public class CfGeocodingPart extends ProfilePartIO {
                 lastValue >= 360.0 - lonDelta && lastValue <= 360.0);
     }
 
-    private static GeoCoding readPixelGeoCoding(Product product) {
+    private static GeoCoding readPixelBasedGeoCoding(Product product) {
         Band lonBand = product.getBand(Constants.LON_INTERN_VAR_NAME);
         if (lonBand == null) {
             lonBand = product.getBand(Constants.LON_VAR_NAME);
@@ -383,8 +382,6 @@ public class CfGeocodingPart extends ProfilePartIO {
         final int width = product.getSceneRasterWidth();
         final int height = product.getSceneRasterHeight();
 
-        final Rectangle wind = RasterUtils.getCenterExtractWindow(lonBand);
-        final int resPixelsSize = wind.width * wind.height;
         final int fullSize = width * height;
 
         // These call seems to violate the encapsulation principle. At this point in code
@@ -396,14 +393,12 @@ public class CfGeocodingPart extends ProfilePartIO {
         // In my opinion, the Band class shall expose the functionality required here and encapsulate the inner workings
         // tb 2020-04-14
         final double[] longitudes = lonBand.getSourceImage().getData().getSamples(0, 0, width, height, 0, new double[fullSize]);
-        final double[] resLons = lonBand.getSourceImage().getData().getSamples(wind.x, wind.y, wind.width, wind.height, 0, new double[resPixelsSize]);
         lonBand.unloadRasterData();
 
         final double[] latitudes = latBand.getSourceImage().getData().getSamples(0, 0, width, height, 0, new double[fullSize]);
-        final double[] resLats = latBand.getSourceImage().getData().getSamples(wind.x, wind.y, wind.width, wind.height, 0, new double[resPixelsSize]);
         latBand.unloadRasterData();
 
-        final double resolutionInKm = RasterUtils.computeResolutionInKm(resLons, resLats, wind.width, wind.height);
+        final double resolutionInKm = RasterUtils.computeResolutionInKm(longitudes, latitudes, width, height);
 
         final GeoRaster geoRaster = new GeoRaster(longitudes, latitudes, lonBand.getName(), latBand.getName(),
                                                   width, height, resolutionInKm);
