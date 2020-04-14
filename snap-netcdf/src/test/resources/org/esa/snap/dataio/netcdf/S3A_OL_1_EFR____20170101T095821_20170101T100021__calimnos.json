@@ -1961,16 +1961,8 @@
                 "value": "fully_normalized_water_leaving_reflectance_at_1020nm"
             },
             {
-                "path": "Global_Attributes/comment",
-                "value": ""
-            },
-            {
                 "path": "Variable_Attributes/poly_Rw764/coordinates",
                 "value": "lat lon"
-            },
-            {
-                "path": "Variable_Attributes/poly_TSM_Nechad_865_TSM_Calimnos/standard_name",
-                "value": ""
             },
             {
                 "path": "Global_Attributes/iso19115_topic_categories",
