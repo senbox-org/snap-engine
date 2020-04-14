@@ -12,7 +12,8 @@ import org.esa.snap.core.util.math.SphericalDistance;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.referencing.datum.Ellipsoid;
 
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -197,7 +198,7 @@ public class RasterUtils {
         return poleCandidates;
     }
 
-    public static double computeResolutionInKm(Band lonBand, Band latBand) {
+    public static Rectangle getCenterExtractWindow(Band lonBand) {
         final Product product = lonBand.getProduct();
         final int width = product.getSceneRasterWidth();
         final int height = product.getSceneRasterHeight();
@@ -211,12 +212,7 @@ public class RasterUtils {
         if (height > R.height) {
             R.y = (height - R.height) / 2;
         }
-
-        final int resPixelsSize = R.width * R.height;
-        double[] resLons = lonBand.getSourceImage().getData().getSamples(R.x, R.y, R.width, R.height, 0, new double[resPixelsSize]);
-        double[] resLats = latBand.getSourceImage().getData().getSamples(R.x, R.y, R.width, R.height, 0, new double[resPixelsSize]);
-
-        return computeResolutionInKm(resLons, resLats, R.width, R.height);
+        return R;
     }
 
     public static double computeResolutionInKm(double[] lonData, double[] latData, int width, int height) {

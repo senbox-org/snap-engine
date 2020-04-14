@@ -52,6 +52,7 @@ import ucar.nc2.Attribute;
 import ucar.nc2.Variable;
 
 import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.io.IOException;
 import java.util.List;
 
@@ -382,14 +383,27 @@ public class CfGeocodingPart extends ProfilePartIO {
         final int width = product.getSceneRasterWidth();
         final int height = product.getSceneRasterHeight();
 
+        final Rectangle wind = RasterUtils.getCenterExtractWindow(lonBand);
+        final int resPixelsSize = wind.width * wind.height;
         final int fullSize = width * height;
 
+        // These call seems to violate the encapsulation principle. At this point in code
+        // - I have a band object
+        // - I want the geophysical data
+        //
+        // - I DO NOT want to be forced to know that I require a source image which exposes a getData() method which
+        //   I'm forced to understand the parametrisation  etc ...
+        // In my opinion, the Band class shall expose the functionality required here and encapsulate the inner workings
+        // tb 2020-04-14
         final double[] longitudes = lonBand.getSourceImage().getData().getSamples(0, 0, width, height, 0, new double[fullSize]);
+        final double[] resLons = lonBand.getSourceImage().getData().getSamples(wind.x, wind.y, wind.width, wind.height, 0, new double[resPixelsSize]);
         lonBand.unloadRasterData();
+
         final double[] latitudes = latBand.getSourceImage().getData().getSamples(0, 0, width, height, 0, new double[fullSize]);
+        final double[] resLats = latBand.getSourceImage().getData().getSamples(wind.x, wind.y, wind.width, wind.height, 0, new double[resPixelsSize]);
         latBand.unloadRasterData();
 
-        final double resolutionInKm = RasterUtils.computeResolutionInKm(longitudes, latitudes, width, height);
+        final double resolutionInKm = RasterUtils.computeResolutionInKm(resLons, resLats, wind.width, wind.height);
 
         final GeoRaster geoRaster = new GeoRaster(longitudes, latitudes, lonBand.getName(), latBand.getName(),
                                                   width, height, resolutionInKm);
