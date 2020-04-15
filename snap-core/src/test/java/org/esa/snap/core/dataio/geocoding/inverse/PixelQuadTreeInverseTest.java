@@ -12,6 +12,7 @@ import org.junit.Test;
 import static java.lang.Double.NaN;
 import static org.esa.snap.core.dataio.geocoding.TestData.get_SLSTR_OL;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class PixelQuadTreeInverseTest {
@@ -431,6 +432,12 @@ public class PixelQuadTreeInverseTest {
         assertEquals(4.0, PixelQuadTreeInverse.sq(2.0, 0.0), 1e-8);
         assertEquals(13.0, PixelQuadTreeInverse.sq(2.0, 3.0), 1e-8);
         assertEquals(16.0, PixelQuadTreeInverse.sq(0.0, 4.0), 1e-8);
+    }
+
+    @Test
+    public void testIsCrossingAntiMeridianInsideQuad() {
+        assertTrue(PixelQuadTreeInverse.isCrossingAntiMeridianInsideQuad(176.0, 174.44, -172.98, -174.88));
+        assertFalse(PixelQuadTreeInverse.isCrossingAntiMeridianInsideQuad(176.0, 174.44, 172.98, 174.88));
     }
 
     @Test
