@@ -109,6 +109,10 @@ todo - address the following BinningOp requirements (nf, 2012-03-09)
         autoWriteDisabled = true)
 public class BinningOp extends Operator {
 
+    private BinningConfig binningConfig;
+    private ProductData.UTC startDateUtc;
+    private ProductData.UTC endDateUtc;
+
     public enum TimeFilterMethod {
         NONE,
         TIME_RANGE,
@@ -411,16 +415,19 @@ public class BinningOp extends Operator {
 
         validateInput();
 
-        ProductData.UTC startDateUtc = null;
-        ProductData.UTC endDateUtc = null;
+        startDateUtc = null;
+        endDateUtc = null;
         if (startDateTime != null) {
             startDateUtc = parseStartDateUtc(startDateTime);
             double startMJD = startDateUtc.getMJD();
             double endMJD = startMJD + periodDuration;
             endDateUtc = new ProductData.UTC(endMJD);
         }
+        setTargetProduct(createTargetProduct());
+    }
 
-
+    @Override
+    public void doExecute(ProgressMonitor pm) throws OperatorException {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
 
@@ -440,10 +447,12 @@ public class BinningOp extends Operator {
 
         metadataAggregator = MetadataAggregatorFactory.create(metadataAggregatorName);
         numProductsAggregated = 0;
-
+        pm.beginTask("Binning", 3);
         try {
             // Step 1: Spatial binning - creates time-series of spatial bins for each bin ID ordered by ID. The tree map structure is <ID, time-series>
+            pm.setSubTaskName("Do Spatial Binning");
             final SpatialBinCollection spatialBinMap = doSpatialBinning(productFilter);
+            pm.worked(1);
             if (numProductsAggregated == 0) {
                 throw new OperatorException("No valid input products found during spatial binning. Quitting operator");
             }
@@ -452,33 +461,52 @@ public class BinningOp extends Operator {
                 if (region == null && regionArea != null) {
                     region = JTS.toGeometry(regionArea, new GeometryFactory());
                 }
+                pm.setSubTaskName("Do Temporal Binning");
                 // Step 2: Temporal binning - creates a list of temporal bins, sorted by bin ID
                 TemporalBinList temporalBins = doTemporalBinning(spatialBinMap);
+                pm.worked(1);
                 // Step 3: Formatting
+                pm.setSubTaskName("Formatting");
                 try {
                     if (startDateTime != null) {
                         writeOutput(temporalBins, startDateUtc, endDateUtc);
                     } else {
                         writeOutput(temporalBins, minDateUtc, maxDateUtc);
                     }
+                    pm.worked(1);
                 } finally {
                     temporalBins.close();
 
                 }
             } else {
                 getLogger().warning("No bins have been generated, no output has been written");
+                pm.worked(2);
             }
         } catch (OperatorException e) {
             throw e;
         } catch (Exception e) {
             throw new OperatorException(e);
         } finally {
+            pm.done();
             cleanSourceProducts();
         }
 
         stopWatch.stopAndTrace(String.format("Total time for binning %d product(s)", numProductsAggregated));
 
         globalMetadata.processMetadataTemplates(metadataTemplateDir, this, targetProduct, getLogger());
+    }
+
+    private Product createTargetProduct() {
+        if (outputTargetProduct && outputType.equalsIgnoreCase("Product")) {
+            Product product = new Product(formatterConfig.getOutputFile(), "BINNED-L3");
+            if (startDateTime != null) {
+                product.setStartTime(startDateUtc);
+                product.setEndTime(endDateUtc);
+            }
+            product.setPreferredTileSize(512, 512);
+            return product;
+        }
+        return new Product("Dummy", "t", 10, 10);
     }
 
     @Override
@@ -508,7 +536,7 @@ public class BinningOp extends Operator {
         if (planetaryGridClass != null) {
             config.setPlanetaryGrid(planetaryGridClass);
         }
-        if (compositingType!= null) {
+        if (compositingType != null) {
             config.setCompositingType(compositingType);
         }
         return config;
@@ -588,22 +616,23 @@ public class BinningOp extends Operator {
         globalMetadata.load(metadataPropertiesFile, getLogger());
     }
 
-    private static Product copyProduct(Product writtenProduct) {
-        Product targetProduct = new Product(writtenProduct.getName(), writtenProduct.getProductType(),
-                                            writtenProduct.getSceneRasterWidth(),
-                                            writtenProduct.getSceneRasterHeight());
-        targetProduct.setStartTime(writtenProduct.getStartTime());
-        targetProduct.setEndTime(writtenProduct.getEndTime());
-        ProductUtils.copyMetadata(writtenProduct, targetProduct);
-        ProductUtils.copyGeoCoding(writtenProduct, targetProduct);
-        ProductUtils.copyTiePointGrids(writtenProduct, targetProduct);
-        ProductUtils.copyMasks(writtenProduct, targetProduct);
-        ProductUtils.copyVectorData(writtenProduct, targetProduct);
+    private static void copyProductProperties(Product writtenProduct, Product tProduct) {
+        tProduct.setStartTime(writtenProduct.getStartTime());
+        tProduct.setEndTime(writtenProduct.getEndTime());
         for (Band band : writtenProduct.getBands()) {
             // Force setting source image, otherwise GPF will set an OperatorImage and invoke computeTile()!!
-            ProductUtils.copyBand(band.getName(), writtenProduct, targetProduct, true);
+            ProductUtils.copyBand(band.getName(), writtenProduct, tProduct, true);
         }
-        return targetProduct;
+        // only use metadata from written product
+        MetadataElement targetMetadata = tProduct.getMetadataRoot();
+        for (MetadataElement element: targetMetadata.getElements()) {
+            targetMetadata.removeElement(element);
+        }
+        ProductUtils.copyMetadata(writtenProduct, tProduct);
+        ProductUtils.copyGeoCoding(writtenProduct, tProduct);
+        ProductUtils.copyTiePointGrids(writtenProduct, tProduct);
+        ProductUtils.copyMasks(writtenProduct, tProduct);
+        ProductUtils.copyVectorData(writtenProduct, tProduct);
     }
 
     private SpatialBinCollection doSpatialBinning(BinningProductFilter productFilter) throws IOException {
@@ -619,7 +648,7 @@ public class BinningOp extends Operator {
                 }
             }
         }
-        if (sourceProductPaths != null && sourceProductPaths.length > 0)  {
+        if (sourceProductPaths != null && sourceProductPaths.length > 0) {
             getLogger().info("expanding sourceProductPaths wildcards.");
             SortedSet<File> fileSet = new TreeSet<>();
             for (String filePattern : sourceProductPaths) {
@@ -743,7 +772,7 @@ public class BinningOp extends Operator {
                 final RectangleExtender rectangleExtender = new RectangleExtender(clippingRect, 1, 1);
                 final Rectangle extendedSubsetRectangle = rectangleExtender.extend(subsetRectangle);
                 // check if rectangle is still to small
-                if(extendedSubsetRectangle.height <= 2 || extendedSubsetRectangle.width <= 2) {
+                if (extendedSubsetRectangle.height <= 2 || extendedSubsetRectangle.width <= 2) {
                     getLogger().warning(String.format("Skipped binning of product '%s', raster dimensions are to small [%d,%d]",
                                                       productName, sceneRasterWidth, sceneRasterHeight));
                     return;
@@ -855,12 +884,8 @@ public class BinningOp extends Operator {
                 final File writtenProductFile = new File(outputFile);
                 String format = FormatterFactory.getOutputFormat(formatterConfig, writtenProductFile);
                 writtenProduct = ProductIO.readProduct(writtenProductFile, format);
-                this.targetProduct = copyProduct(writtenProduct);
-            } else {
-                this.targetProduct = new Product("Dummy", "t", 10, 10);
+                copyProductProperties(writtenProduct, targetProduct);
             }
-        } else {
-            this.targetProduct = new Product("Dummy", "t", 10, 10);
         }
     }
 

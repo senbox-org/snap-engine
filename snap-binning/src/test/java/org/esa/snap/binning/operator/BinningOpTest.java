@@ -16,6 +16,7 @@
 
 package org.esa.snap.binning.operator;
 
+import com.bc.ceres.core.ProgressMonitor;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.io.ParseException;
@@ -118,6 +119,7 @@ public class BinningOpTest {
         assertNull(binningOp.getMetadataProperties());
 
         Product targetProduct = binningOp.getTargetProduct();
+        binningOp.execute(ProgressMonitor.NULL);
 
         try {
             SortedMap<String, String> metadataProperties = binningOp.getMetadataProperties();
@@ -272,6 +274,7 @@ public class BinningOpTest {
         binningOp.setRegion(geometryConverter.parse("POLYGON ((-180 -90, -180 90, 180 90, 180 -90, -180 -90))"));
 
         final Product targetProduct = binningOp.getTargetProduct();
+        binningOp.execute(ProgressMonitor.NULL);
         assertNotNull(targetProduct);
         try {
             assertGlobalBinningProductIsOk(targetProduct, null, obs1, obs2, obs3, obs4, obs5);
@@ -324,6 +327,7 @@ public class BinningOpTest {
         binningOp.setPeriodDuration(10.0);
 
         final Product targetProduct = binningOp.getTargetProduct();
+        binningOp.execute(ProgressMonitor.NULL);
         assertNotNull(targetProduct);
         try {
             assertLocalBinningProductIsOk(targetProduct, null, obs1, obs2, obs3, obs4, obs5);
