@@ -123,7 +123,7 @@ public class CfFlagCodingPart extends ProfilePartIO {
         return createFlagCoding(codingName, maskValues, flagNames);
     }
 
-    private static Array enforceUnsignedDataType(Array flagMasksArray) {
+    static Array enforceUnsignedDataType(Array flagMasksArray) {
         Array unsignedMaskData;
         switch (flagMasksArray.getDataType()) {
             case BYTE:
