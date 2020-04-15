@@ -17,6 +17,7 @@ public class PixelQuadTreeInverse implements InverseCoding {
     public static final String KEY_INTERPOLATING = "INV_PIXEL_QUAD_TREE_INTERPOLATING";
 
     private static final double TO_DEG = 180.0 / Math.PI;
+    private static final double ANGLE_THRESHOLD = 330.0;
 
     private final boolean fractionalAccuracy;
     private final XYInterpolator interpolator;
@@ -168,7 +169,7 @@ public class PixelQuadTreeInverse implements InverseCoding {
         double lonMin = Math.min(lon0, Math.min(lon1, Math.min(lon2, lon3)));
         double lonMax = Math.max(lon0, Math.max(lon1, Math.max(lon2, lon3)));
 
-        return Math.abs(lonMax - lonMin) > 330.0;
+        return Math.abs(lonMax - lonMin) > ANGLE_THRESHOLD;
     }
 
     // package access for testing only tb 2019-12-16
