@@ -17,16 +17,16 @@
 package org.esa.snap.dataio.netcdf;
 
 import org.esa.snap.core.dataio.ProductWriter;
-import org.esa.snap.dataio.netcdf.metadata.profiles.beam.BeamNetCdfWriterPlugIn;
+import org.esa.snap.dataio.netcdf.metadata.profiles.beam.BeamNetCdf4WriterPlugIn;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
 
 public class Nc4BeamWriterTest {
 
     @Test
     public void testWriting() {
-        ProductWriter writerInstance = new BeamNetCdfWriterPlugIn().createWriterInstance();
+        ProductWriter writerInstance = new BeamNetCdf4WriterPlugIn().createWriterInstance();
         assertNotNull(writerInstance);
     }
 }

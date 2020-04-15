@@ -56,17 +56,15 @@ public class VersionChecker {
     }
 
     private VersionChecker() {
-        this(null, null);
+        this(null, null, EngineConfig.instance().load().preferences());
     }
 
 
     // constructor used for tests
-    VersionChecker(InputStream localVersionStream, InputStream remoteVersionStream) {
+    VersionChecker(InputStream localVersionStream, InputStream remoteVersionStream, Preferences preferences) {
         this.localVersionStream = localVersionStream;
         this.remoteVersionStream = remoteVersionStream;
-        EngineConfig config = EngineConfig.instance().load();
-        preferences = config.preferences();
-
+        this.preferences = preferences;
     }
 
     public boolean mustCheck() {

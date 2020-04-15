@@ -49,7 +49,7 @@ public class GloballyShiftedDataTest {
 
         System.out.println("**************** is Running Windows: " + isWindows());
 
-        new NetCdfActivator().start();
+        NetCdfActivator.activate();
 
         tempFile = File.createTempFile(GloballyShiftedDataTest.class.getSimpleName(), ".nc");
 //        tempFile = new File(String.format("%s\\%s.nc", System.getProperty("user.home"), GloballyShiftedDataTest.class.getSimpleName()));

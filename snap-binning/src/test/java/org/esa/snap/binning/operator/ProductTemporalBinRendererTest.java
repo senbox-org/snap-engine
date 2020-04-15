@@ -30,6 +30,8 @@ import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.converters.JtsGeometryConverter;
+import org.esa.snap.dataio.netcdf.NetCdfActivator;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.media.jai.operator.ConstantDescriptor;
@@ -39,12 +41,19 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.Arrays;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 /**
  * @author Marco Peters
  */
 public class ProductTemporalBinRendererTest {
+
+    @BeforeClass
+    public static void setupTestClass() {
+        NetCdfActivator.activate();
+    }
 
     @Test
     public void testRenderBin() throws Exception {
@@ -151,7 +160,7 @@ public class ProductTemporalBinRendererTest {
         String[] resultFeatureNames = binningContext.getBinManager().getResultFeatureNames();
         double pixelSize = Reprojector.getRasterPixelSize(binningContext.getPlanetaryGrid());
         GeoCoding geoCoding = ProductTemporalBinRenderer.createMapGeoCoding(region, pixelSize);
-        return new ProductTemporalBinRenderer(resultFeatureNames, tempFile, "NetCDF-BEAM", region, geoCoding, startTime, endTime, productCustomizer);
+        return new ProductTemporalBinRenderer(resultFeatureNames, tempFile, "NetCDF4-BEAM", region, geoCoding, startTime, endTime, productCustomizer);
     }
 
     private class MyProductCustomizer extends ProductCustomizer {

@@ -41,17 +41,6 @@
             </file>
         </folder>
         <folder name="Writers">
-            <file name="org-esa-snap-dataio-netcdf-ExportNetCdfCFProduct.instance">
-                <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.context"/>
-                <attr name="type" stringvalue="org.esa.snap.core.datamodel.ProductNode"/>
-                <attr name="selectionType" stringvalue="EXACTLY_ONE"/>
-                <attr name="delegate" methodvalue="org.esa.snap.rcp.actions.file.ExportProductAction.create"/>
-                <attr name="displayName" stringvalue="NetCDF-CF"/>
-                <attr name="formatName" stringvalue="NetCDF-CF"/>
-                <attr name="useAllFileFilter" boolvalue="true"/>
-                <attr name="ShortDescription" stringvalue="Writes a product in NetCDF/CF format."/>
-                <attr name="helpId" stringvalue="exportNetCdfProduct"/>
-            </file>
             <file name="org-esa-snap-dataio-netcdf-ExportNetCdf4CFProduct.instance">
                 <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.context"/>
                 <attr name="type" stringvalue="org.esa.snap.core.datamodel.ProductNode"/>
@@ -61,17 +50,6 @@
                 <attr name="formatName" stringvalue="NetCDF4-CF"/>
                 <attr name="useAllFileFilter" boolvalue="true"/>
                 <attr name="ShortDescription" stringvalue="Writes a product in NetCDF-4/CF format."/>
-                <attr name="helpId" stringvalue="exportNetCdfProduct"/>
-            </file>
-            <file name="org-esa-snap-dataio-netcdf-ExportNetCdfBEAMProduct.instance">
-                <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.context"/>
-                <attr name="type" stringvalue="org.esa.snap.core.datamodel.ProductNode"/>
-                <attr name="selectionType" stringvalue="EXACTLY_ONE"/>
-                <attr name="delegate" methodvalue="org.esa.snap.rcp.actions.file.ExportProductAction.create"/>
-                <attr name="displayName" stringvalue="NetCDF-BEAM"/>
-                <attr name="formatName" stringvalue="NetCDF-BEAM"/>
-                <attr name="useAllFileFilter" boolvalue="true"/>
-                <attr name="ShortDescription" stringvalue="Writes a product in NetCDF/BEAM format."/>
                 <attr name="helpId" stringvalue="exportNetCdfProduct"/>
             </file>
             <file name="org-esa-snap-dataio-netcdf-ExportNetCdf4BEAMProduct.instance">
@@ -85,6 +63,30 @@
                 <attr name="ShortDescription" stringvalue="Writes a product in NetCDF-4/BEAM format."/>
                 <attr name="helpId" stringvalue="exportNetCdfProduct"/>
             </file>
+<!-- Disabled NetCdf3 writing
+            <file name="org-esa-snap-dataio-netcdf-ExportNetCdfCFProduct.instance">
+                <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.context"/>
+                <attr name="type" stringvalue="org.esa.snap.core.datamodel.ProductNode"/>
+                <attr name="selectionType" stringvalue="EXACTLY_ONE"/>
+                <attr name="delegate" methodvalue="org.esa.snap.rcp.actions.file.ExportProductAction.create"/>
+                <attr name="displayName" stringvalue="NetCDF-CF"/>
+                <attr name="formatName" stringvalue="NetCDF-CF"/>
+                <attr name="useAllFileFilter" boolvalue="true"/>
+                <attr name="ShortDescription" stringvalue="Writes a product in NetCDF/CF format."/>
+                <attr name="helpId" stringvalue="exportNetCdfProduct"/>
+            </file>
+            <file name="org-esa-snap-dataio-netcdf-ExportNetCdfBEAMProduct.instance">
+                <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.context"/>
+                <attr name="type" stringvalue="org.esa.snap.core.datamodel.ProductNode"/>
+                <attr name="selectionType" stringvalue="EXACTLY_ONE"/>
+                <attr name="delegate" methodvalue="org.esa.snap.rcp.actions.file.ExportProductAction.create"/>
+                <attr name="displayName" stringvalue="NetCDF-BEAM"/>
+                <attr name="formatName" stringvalue="NetCDF-BEAM"/>
+                <attr name="useAllFileFilter" boolvalue="true"/>
+                <attr name="ShortDescription" stringvalue="Writes a product in NetCDF/BEAM format."/>
+                <attr name="helpId" stringvalue="exportNetCdfProduct"/>
+            </file>
+-->
         </folder>
     </folder>
 
@@ -107,18 +109,20 @@
                 </folder>
             </folder>
             <folder name="Export">
-                <file name="org-esa-snap-dataio-netcdf-ExportNetCdfCFProduct.shadow">
-                    <attr name="originalFile" stringvalue="Actions/Writers/org-esa-snap-dataio-netcdf-ExportNetCdfCFProduct.instance"/>
-                </file>
                 <file name="org-esa-snap-dataio-netcdf-ExportNetCdf4CFProduct.shadow">
                     <attr name="originalFile" stringvalue="Actions/Writers/org-esa-snap-dataio-netcdf-ExportNetCdf4CFProduct.instance"/>
-                </file>
-                <file name="org-esa-snap-dataio-netcdf-ExportNetCdfBEAMProduct.shadow">
-                    <attr name="originalFile" stringvalue="Actions/Writers/org-esa-snap-dataio-netcdf-ExportNetCdfBEAMProduct.instance"/>
                 </file>
                 <file name="org-esa-snap-dataio-netcdf-ExportNetCdf4BEAMProduct.shadow">
                     <attr name="originalFile" stringvalue="Actions/Writers/org-esa-snap-dataio-netcdf-ExportNetCdf4BEAMProduct.instance"/>
                 </file>
+                <!-- Disabled NetCdf3 writing
+                                <file name="org-esa-snap-dataio-netcdf-ExportNetCdfCFProduct.shadow">
+                                    <attr name="originalFile" stringvalue="Actions/Writers/org-esa-snap-dataio-netcdf-ExportNetCdfCFProduct.instance"/>
+                                </file>
+                                <file name="org-esa-snap-dataio-netcdf-ExportNetCdfBEAMProduct.shadow">
+                                    <attr name="originalFile" stringvalue="Actions/Writers/org-esa-snap-dataio-netcdf-ExportNetCdfBEAMProduct.instance"/>
+                                </file>
+                -->
             </folder>
         </folder>
     </folder>

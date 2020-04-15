@@ -96,17 +96,21 @@ public class CfFlagCodingPart extends ProfilePartIO {
 
     private static FlagCoding readFlagCoding(Variable variable, String codingName) {
         final Attribute flagMasks = variable.findAttribute(FLAG_MASKS);
-        final int[] maskValues;
+        int[] maskValues = null;
         if (flagMasks != null) {
             final Array flagMasksArray = flagMasks.getValues();
-            // must set the unsigned property explicitly,
-            // even though it is set when writing the flag_masks attribute
-            maskValues = new int[flagMasks.getLength()];
-            for (int i = 0; i < maskValues.length; i++) {
-                maskValues[i] = flagMasksArray.getInt(i);
+            if (flagMasksArray != null) {
+                // must enforce unsigned data type
+                // even though the unsigned property is set when writing the flag_masks attribute
+                Array unsignedMaskData = enforceUnsignedDataType(flagMasksArray);
+
+                // unsignedMaskData.get1DJavaArray(DataType.UINT) is not usable.
+                // The resulting data is signed again --> manually copying
+                maskValues = new int[flagMasks.getLength()];
+                for (int i = 0; i < maskValues.length; i++) {
+                    maskValues[i] = unsignedMaskData.getInt(i);
+                }
             }
-        } else {
-            maskValues = null;
         }
 
         final Attribute flagMeanings = variable.findAttribute(FLAG_MEANINGS);
@@ -117,6 +121,25 @@ public class CfFlagCodingPart extends ProfilePartIO {
             flagNames = null;
         }
         return createFlagCoding(codingName, maskValues, flagNames);
+    }
+
+    static Array enforceUnsignedDataType(Array flagMasksArray) {
+        Array unsignedMaskData;
+        switch (flagMasksArray.getDataType()) {
+            case BYTE:
+                unsignedMaskData = Array.factory(DataType.UBYTE, flagMasksArray.getShape(), flagMasksArray.getStorage());
+                break;
+            case SHORT:
+                unsignedMaskData = Array.factory(DataType.USHORT, flagMasksArray.getShape(), flagMasksArray.getStorage());
+                break;
+            case INT:
+                unsignedMaskData = Array.factory(DataType.UINT, flagMasksArray.getShape(), flagMasksArray.getStorage());
+                break;
+            default:
+                unsignedMaskData = flagMasksArray;
+                break;
+        }
+        return unsignedMaskData;
     }
 
     private static FlagCoding createFlagCoding(String codingName, int[] maskValues, String[] flagNames) {

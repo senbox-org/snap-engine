@@ -3,6 +3,7 @@ package org.esa.snap.dataio.netcdf.nc;
 import org.esa.snap.dataio.netcdf.NetCdfActivator;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import ucar.ma2.DataType;
 
@@ -20,8 +21,9 @@ import static org.junit.Assert.fail;
  */
 public class MaxStringAttributeLengthTest {
 
-    static {
-        new NetCdfActivator().start();
+    @BeforeClass
+    public static void setupTestClass() {
+        NetCdfActivator.activate();
     }
 
     private static final int TOO_LONG = N4Variable.MAX_ATTRIBUTE_LENGTH + 10;
