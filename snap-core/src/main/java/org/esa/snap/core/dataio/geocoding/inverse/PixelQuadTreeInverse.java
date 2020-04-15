@@ -163,6 +163,14 @@ public class PixelQuadTreeInverse implements InverseCoding {
         return lonMax;
     }
 
+    static boolean isCrossingAntiMeridianInsideQuad(double lon0, double lon1,
+                                                    double lon2, double lon3) {
+        double lonMin = Math.min(lon0, Math.min(lon1, Math.min(lon2, lon3)));
+        double lonMax = Math.max(lon0, Math.max(lon1, Math.max(lon2, lon3)));
+
+        return Math.abs(lonMax - lonMin) > 330.0;
+    }
+
     // package access for testing only tb 2019-12-16
     static double sq(final double dx, final double dy) {
         return dx * dx + dy * dy;
@@ -185,7 +193,6 @@ public class PixelQuadTreeInverse implements InverseCoding {
 
         final int y_1 = y;
         final int y_2 = y_1 + h - 1;
-
 
         double lonMin;
         double lonMax;
@@ -233,23 +240,23 @@ public class PixelQuadTreeInverse implements InverseCoding {
             lon_2 = geoPos.lon;
 
             getGeoPos(x_2, y_2, geoPos);
-            lat_3  = geoPos.lat;
+            lat_3 = geoPos.lat;
             lon_3 = geoPos.lon;
 
             latMin = Math.min(lat_0, Math.min(lat_1, Math.min(lat_2, lat_3))) - epsilon;
             latMax = Math.max(lat_0, Math.max(lat_1, Math.max(lat_2, lat_3))) + epsilon;
 
-            if (isCrossingMeridian) {
-                final double signumLon = Math.signum(lon);
-                if (signumLon > 0f) {
-                    // position is in a region with positive longitudes, so cut negative longitudes from quad area
-                    lonMax = 180.0f;
-                    lonMin = getPositiveLonMin(lon_0, lon_1, lon_2, lon_3);
-                } else {
-                    // position is in a region with negative longitudes, so cut positive longitudes from quad area
-                    lonMin = -180.0f;
-                    lonMax = getNegativeLonMax(lon_0, lon_1, lon_2, lon_3);
-                }
+            if (isCrossingMeridian && isCrossingAntiMeridianInsideQuad(lon_0, lon_1, lon_2, lon_3)) {
+                    final double signumLon = Math.signum(lon);
+                    if (signumLon > 0f) {
+                        // position is in a region with positive longitudes, so cut negative longitudes from quad area
+                        lonMax = 180.0f;
+                        lonMin = getPositiveLonMin(lon_0, lon_1, lon_2, lon_3);
+                    } else {
+                        // position is in a region with negative longitudes, so cut positive longitudes from quad area
+                        lonMin = -180.0f;
+                        lonMax = getNegativeLonMax(lon_0, lon_1, lon_2, lon_3);
+                    }
             } else {
                 lonMin = Math.min(lon_0, Math.min(lon_1, Math.min(lon_2, lon_3))) - epsilon;
                 lonMax = Math.max(lon_0, Math.max(lon_1, Math.max(lon_2, lon_3))) + epsilon;
