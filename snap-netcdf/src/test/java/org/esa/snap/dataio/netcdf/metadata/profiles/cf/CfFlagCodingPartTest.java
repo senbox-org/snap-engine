@@ -25,6 +25,7 @@ import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
 import org.esa.snap.dataio.netcdf.nc.NVariable;
 import org.esa.snap.dataio.netcdf.nc.NWritableFactory;
 import org.esa.snap.dataio.netcdf.util.DataTypeUtils;
+import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.nc2.Attribute;
 
@@ -82,5 +83,36 @@ public class CfFlagCodingPartTest extends TestCase {
         final int maskValue = 1 << index;
         attribute.getData().setElemInt(maskValue);
         flagCoding.addAttribute(attribute);
+    }
+
+    public void testEnforceUsingedDataType_byte() {
+        byte[] bytes = {1, 2, 127, -128};
+        Array factory = Array.factory(DataType.BYTE, new int[]{bytes.length}, bytes);
+        Array unsingedBytes = CfFlagCodingPart.enforceUnsignedDataType(factory);
+        assertEquals(1, unsingedBytes.getInt(0));
+        assertEquals(2, unsingedBytes.getInt(1));
+        assertEquals(127, unsingedBytes.getInt(2));
+        assertEquals(128, unsingedBytes.getInt(3));
+    }
+
+    public void testEnforceUsingedDataType_short() {
+        short[] shorts = {1, 2, 32767, -32768};
+        Array factory = Array.factory(DataType.SHORT, new int[]{shorts.length}, shorts);
+        Array unsingedShorts = CfFlagCodingPart.enforceUnsignedDataType(factory);
+        assertEquals(1, unsingedShorts.getInt(0));
+        assertEquals(2, unsingedShorts.getInt(1));
+        assertEquals(32767, unsingedShorts.getInt(2));
+        assertEquals(32768, unsingedShorts.getInt(3));
+    }
+
+    public void testEnforceUsingedDataType_int() {
+        int[] ints = {1, 2, 2147483647, -2147483648};
+        Array factory = Array.factory(DataType.INT, new int[]{ints.length}, ints);
+        Array unsingedInt = CfFlagCodingPart.enforceUnsignedDataType(factory);
+        assertEquals(1, unsingedInt.getInt(0));
+        assertEquals(2, unsingedInt.getInt(1));
+        assertEquals(2147483647, unsingedInt.getInt(2));
+        // Long data type is not supported, so this values needs to stay negative.
+        assertEquals(-2147483648, unsingedInt.getInt(3));
     }
 }
