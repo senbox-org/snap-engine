@@ -155,6 +155,7 @@
                         <publicPackage>ucar.nc2.iosp.hdf5</publicPackage>
                         <publicPackage>ucar.nc2.iosp.netcdf3</publicPackage>
                         <publicPackage>ucar.nc2.wmo</publicPackage>
+                        <publicPackage>ucar.nc2.write</publicPackage>
                         <publicPackage>ucar.unidata.geoloc</publicPackage>
                         <publicPackage>ucar.unidata.io</publicPackage>
                         <publicPackage>ucar.unidata.io.bzip2</publicPackage>
