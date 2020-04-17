@@ -17,8 +17,6 @@
 package org.esa.snap.dataio.geotiff;
 
 import com.bc.ceres.core.ProgressMonitor;
-import com.sun.media.imageioimpl.plugins.tiff.TIFFImageReader;
-import com.sun.media.imageioimpl.plugins.tiff.TIFFRenderedImage;
 import com.sun.media.jai.codec.ByteArraySeekableStream;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.ColorPaletteDef;
@@ -41,7 +39,6 @@ import org.esa.snap.core.dataop.maptransf.MapProjectionRegistry;
 import org.esa.snap.core.dataop.maptransf.MapTransform;
 import org.esa.snap.core.dataop.maptransf.MapTransformDescriptor;
 import org.esa.snap.core.image.ImageManager;
-import org.esa.snap.test.LongTestRunner;
 import org.esa.snap.core.util.io.FileUtils;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.ReferencingFactoryFinder;
@@ -50,7 +47,6 @@ import org.geotools.referencing.cs.DefaultCartesianCS;
 import org.geotools.referencing.datum.DefaultGeodeticDatum;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.opengis.parameter.ParameterValueGroup;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -68,15 +64,20 @@ import javax.imageio.stream.MemoryCacheImageOutputStream;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
+import java.awt.image.RenderedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 @SuppressWarnings({"InstanceVariableMayNotBeInitialized"})
-@RunWith(LongTestRunner.class)
+//@RunWith(LongTestRunner.class)
 public class GeoTiffWriteReadTest {
     private static final String WGS_84 = "EPSG:4326";
     private static final String WGS_72 = "EPSG:4322";
@@ -168,22 +169,20 @@ public class GeoTiffWriteReadTest {
         ByteArraySeekableStream inputStream = new ByteArraySeekableStream(outputStream.toByteArray());
         final MemoryCacheImageInputStream imageStream = new MemoryCacheImageInputStream(inputStream);
         Iterator<ImageReader> imageReaders = ImageIO.getImageReaders(imageStream);
-        TIFFImageReader imageReader = null;
-        while(imageReaders.hasNext()) {
-            final ImageReader nextReader = imageReaders.next();
-            if (nextReader instanceof TIFFImageReader) {
-                imageReader = (TIFFImageReader) nextReader;
-            }
+        ImageReader imageReader = null;
+        if (imageReaders.hasNext()) {
+            imageReader = imageReaders.next();
         }
+
         if (imageReader == null) {
-            throw new IllegalStateException("No TIFFImageReader found");
+            throw new IllegalStateException("No ImageReader found");
         }
 
         imageReader.setInput(imageStream);
         assertEquals(1, imageReader.getNumImages(true));
 
         final ImageReadParam readParam = imageReader.getDefaultReadParam();
-        TIFFRenderedImage image = (TIFFRenderedImage) imageReader.readAsRenderedImage(0, readParam);
+        RenderedImage image = imageReader.readAsRenderedImage(0, readParam);
         assertEquals(1, image.getSampleModel().getNumBands());
         inputStream.close();
     }
