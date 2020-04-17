@@ -21,6 +21,7 @@ import org.esa.snap.core.dataio.AbstractProductWriter;
 import org.esa.snap.core.dataio.ProductIOException;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
 import org.esa.snap.dataio.netcdf.nc.NVariable;
@@ -30,6 +31,7 @@ import org.esa.snap.dataio.netcdf.util.ReaderUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.logging.Level;
 
 /**
  * Default NetCDF writer configured by an implementation of {@link AbstractNetCdfWriterPlugIn}.
@@ -117,6 +119,17 @@ public class DefaultNetCdfWriter extends AbstractProductWriter {
 
     @Override
     public void flush() {
+        if (writeable == null) {
+            return;
+        }
+
+        try {
+            synchronized (writeable) {
+                writeable.getWriter().flush();
+            }
+        } catch (IOException e) {
+            SystemUtils.LOG.log(Level.SEVERE, "Could not flush data.", e);
+        }
     }
 
     @Override
@@ -159,5 +172,7 @@ public class DefaultNetCdfWriter extends AbstractProductWriter {
         return FileUtils.ensureExtension(path, Constants.FILE_EXTENSION_NC);
     }
 
-    protected NFileWriteable getWriteable() { return writeable; }
+    protected NFileWriteable getWriteable() {
+        return writeable;
+    }
 }
