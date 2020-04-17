@@ -167,21 +167,22 @@ pipeline {
                         //]
                     }
                 }
-                stage ('Starting GUI Tests') {
-                    agent { label 'snap-test' }
-                    when {
-                        expression {
-                            return "${env.GIT_BRANCH}" =~ /\d+\.x/;
-                        }
-                    }
-                    steps {
-                        echo "Launch snap-gui-tests using docker image snap:${branchVersion}"
-                        build job: "snap-gui-tests/${branchVersion}", parameters: [
-                            [$class: 'StringParameterValue', name: 'dockerTagName', value: "snap:${branchVersion}"],
-                            [$class: 'StringParameterValue', name: 'testFileList', value: "qftests.lst"]
-                        ]
-                    }
-                }
+                // DISABLE GUI TESTING
+                // stage ('Starting GUI Tests') {
+                //     agent { label 'snap-test' }
+                //     when {
+                //         expression {
+                //             return "${env.GIT_BRANCH}" =~ /\d+\.x/;
+                //         }
+                //     }
+                //     steps {
+                //         echo "Launch snap-gui-tests using docker image snap:${branchVersion}"
+                //         build job: "snap-gui-tests/${branchVersion}", parameters: [
+                //             [$class: 'StringParameterValue', name: 'dockerTagName', value: "snap:${branchVersion}"],
+                //             [$class: 'StringParameterValue', name: 'testFileList', value: "qftests.lst"]
+                //         ]
+                //     }
+                // }
             }
         }
     }
