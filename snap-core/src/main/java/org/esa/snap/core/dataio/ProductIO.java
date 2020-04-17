@@ -27,7 +27,8 @@ import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.runtime.EngineConfig;
 
 import javax.media.jai.PlanarImage;
-import java.awt.*;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.image.Raster;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -36,7 +37,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -438,14 +441,14 @@ public class ProductIO {
             productWriter.writeProductNodes(product, file);
             e = System.currentTimeMillis();
             long t1 = e - s;
-            System.out.println("write product nodes to " + file.getAbsolutePath() + " took " + StopWatch.getTimeString(t1));
+            SystemUtils.LOG.fine("write product nodes to " + file.getAbsolutePath() + " took " + StopWatch.getTimeString(t1));
 
             s = System.currentTimeMillis();
             writeAllBands(product, pm);
             e = System.currentTimeMillis();
             long t2 = e - s;
-            System.out.println("write all bands of product " + file.getAbsolutePath() + " took " + StopWatch.getTimeString(t2));
-            System.out.println("Write entire product " + file.getAbsolutePath() + " took " + StopWatch.getTimeString(t1 + t2));
+            SystemUtils.LOG.fine("write all bands of product " + file.getAbsolutePath() + " took " + StopWatch.getTimeString(t2));
+            SystemUtils.LOG.fine("Write entire product " + file.getAbsolutePath() + " took " + StopWatch.getTimeString(t1 + t2));
         } catch (IOException e) {
             ioException = e;
         } finally {
