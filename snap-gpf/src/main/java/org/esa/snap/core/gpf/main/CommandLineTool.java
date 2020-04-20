@@ -365,7 +365,10 @@ public class CommandLineTool implements GraphProcessingObserver {
         }
         OperatorDescriptor operatorDescriptor = operatorSpi.getOperatorDescriptor();
 
-        if (!operatorDescriptor.isAutoWriteDisabled()) {
+        // check if writer node already exists
+        Node writerNode = findWriterNode(graph);
+
+        if (!operatorDescriptor.isAutoWriteDisabled() && writerNode != null) {
             // Auto-writing is permitted, so add a WriteOp as last node
             String writeOperatorAlias = OperatorSpi.getOperatorAlias(WriteOp.class);
 
@@ -389,6 +392,16 @@ public class CommandLineTool implements GraphProcessingObserver {
         velocityContext.put("graph", graph);
 
         metadataResourceEngine.readResource("graphXml", graphFile.getPath());
+    }
+
+    private static Node findWriterNode(final Graph graph) {
+        String writeOperatorAlias = OperatorSpi.getOperatorAlias(WriteOp.class);
+        for(Node node : graph.getNodes()) {
+            if(node.getOperatorName().equals(writeOperatorAlias)) {
+                return node;
+            }
+        }
+        return null;
     }
 
     private Map<String, Object> convertParameterMap(String operatorName, Map<String, String> parameterMap,
