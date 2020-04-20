@@ -283,11 +283,6 @@
                 <artifactId>htmlparser</artifactId>
                 <version>1.6</version>
             </dependency>
-            <dependency>
-                <groupId>com.googlecode.efficient-java-matrix-library</groupId>
-                <artifactId>core</artifactId>
-                <version>0.26</version>
-            </dependency>
 
             <!-- JDOM Library ############################################# -->
 
@@ -410,11 +405,6 @@
                     <exclusion>
                         <groupId>javax.media</groupId>
                         <artifactId>jai_imageio</artifactId>
-                    </exclusion>
-                    <!-- this lib is also used in snap-cluster-analysis and in jlinda-core -->
-                    <exclusion>
-                        <groupId>com.googlecode.efficient-java-matrix-library</groupId>
-                        <artifactId>core</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>

@@ -128,10 +128,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.googlecode.efficient-java-matrix-library</groupId>
-            <artifactId>core</artifactId>
-        </dependency>
-        <dependency>
             <groupId>it.geosolutions.imageio-ext</groupId>
             <artifactId>imageio-ext-tiff</artifactId>
         </dependency>
@@ -197,7 +193,6 @@
                         <publicPackage>Jama</publicPackage>
 						<publicPackage>org.apache.*</publicPackage>
                         <publicPackage>net.coobird.thumbnailator.*</publicPackage>
-                        <publicPackage>org.ejml.*</publicPackage>
                         <publicPackage>com.bc.io</publicPackage>
                         <publicPackage>org.esa.snap.core.jexp</publicPackage>
                         <publicPackage>org.esa.snap.core.jexp.impl</publicPackage>
