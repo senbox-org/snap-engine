@@ -18,12 +18,22 @@ package org.esa.snap.core.gpf;
 
 import com.bc.ceres.core.Assert;
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.snap.core.datamodel.*;
-import org.esa.snap.core.gpf.annotations.*;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductManager;
+import org.esa.snap.core.datamodel.RasterDataNode;
+import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.gpf.annotations.OperatorMetadata;
+import org.esa.snap.core.gpf.annotations.Parameter;
+import org.esa.snap.core.gpf.annotations.SourceProduct;
+import org.esa.snap.core.gpf.annotations.SourceProducts;
+import org.esa.snap.core.gpf.annotations.TargetProduct;
+import org.esa.snap.core.gpf.annotations.TargetProperty;
 import org.esa.snap.core.gpf.internal.OperatorContext;
 
 import javax.media.jai.BorderExtender;
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.text.MessageFormat;
 import java.util.Map;
 import java.util.logging.Logger;
