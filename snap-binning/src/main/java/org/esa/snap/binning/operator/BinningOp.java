@@ -17,8 +17,6 @@
 package org.esa.snap.binning.operator;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryFactory;
 import org.esa.snap.binning.AggregatorConfig;
 import org.esa.snap.binning.BinningContext;
 import org.esa.snap.binning.CellProcessorConfig;
@@ -62,16 +60,23 @@ import org.esa.snap.core.util.StopWatch;
 import org.esa.snap.core.util.converters.JtsGeometryConverter;
 import org.esa.snap.core.util.io.WildcardMatcher;
 import org.geotools.geometry.jts.JTS;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
 
-import java.awt.*;
+import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
-import java.util.*;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.logging.Level;
 
 /*
@@ -101,7 +106,7 @@ todo - address the following BinningOp requirements (nf, 2012-03-09)
  */
 @SuppressWarnings("UnusedDeclaration")
 @OperatorMetadata(alias = "Binning",
-        category = "Raster/Geometric Operations",
+        category = "Raster/Geometric",
         version = "1.0",
         authors = "Norman Fomferra, Marco Zühlke, Thomas Storm",
         copyright = "(c) 2014 by Brockmann Consult GmbH",

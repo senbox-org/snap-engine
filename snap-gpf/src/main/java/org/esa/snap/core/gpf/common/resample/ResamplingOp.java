@@ -7,7 +7,6 @@ import com.bc.ceres.glevel.support.AbstractMultiLevelSource;
 import com.bc.ceres.glevel.support.DefaultMultiLevelImage;
 import com.bc.ceres.glevel.support.DefaultMultiLevelModel;
 import com.bc.ceres.glevel.support.DefaultMultiLevelSource;
-import org.locationtech.jts.geom.Geometry;
 import org.esa.snap.core.datamodel.AbstractGeoCoding;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
@@ -42,6 +41,7 @@ import org.geotools.feature.FeatureIterator;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.geometry.jts.GeometryCoordinateSequenceTransformer;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
+import org.locationtech.jts.geom.Geometry;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.FactoryException;
@@ -64,7 +64,7 @@ import java.util.logging.Logger;
  * @author Tonio Fincke
  */
 @OperatorMetadata(alias = "Resample",
-        category = "Raster/Geometric Operations",
+        category = "Raster/Geometric",
         version = "2.0",
         authors = "Tonio Fincke",
         copyright = "(c) 2016 by Brockmann Consult",
