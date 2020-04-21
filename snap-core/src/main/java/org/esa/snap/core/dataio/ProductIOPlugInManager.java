@@ -177,8 +177,8 @@ public class ProductIOPlugInManager {
                 }
             }
         }
-
-        return formats.toArray(new String[formats.size()]);
+        formats.sort(String::compareTo);
+        return formats.toArray(new String[0]);
     }
 
     private static <T extends ProductIOPlugIn> Iterator<T> getProductIOPlugIns(Set<T> ioPlugIns, String formatName) {
