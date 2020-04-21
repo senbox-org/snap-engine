@@ -24,7 +24,9 @@ import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.util.ImageUtils;
 
 import javax.media.jai.PlanarImage;
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.image.Raster;
 import java.awt.image.SampleModel;
 import java.awt.image.WritableRaster;
