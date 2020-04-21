@@ -365,10 +365,13 @@ public class CommandLineTool implements GraphProcessingObserver {
         }
         OperatorDescriptor operatorDescriptor = operatorSpi.getOperatorDescriptor();
 
-        // check if writer node already exists
-        Node writerNode = findWriterNode(graph);
+        boolean shallAddWriteNode = !operatorDescriptor.isAutoWriteDisabled();
+        if (shallAddWriteNode) {
+            // check if writer node already exists
+            shallAddWriteNode = findWriterNode(graph) == null;
+        }
 
-        if (!operatorDescriptor.isAutoWriteDisabled() && writerNode != null) {
+        if (shallAddWriteNode) {
             // Auto-writing is permitted, so add a WriteOp as last node
             String writeOperatorAlias = OperatorSpi.getOperatorAlias(WriteOp.class);
 
