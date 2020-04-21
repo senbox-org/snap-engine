@@ -177,8 +177,6 @@ public abstract class Operator {
         pm.done();
     }
 
-    // todo - remove ProgressMonitor parameter, it has never been used and wastes processing time (nf - 17.12.2010)
-
     /**
      * Called by the framework in order to compute a tile for the given target band.
      * <p>The default implementation throws a runtime exception with the message "not implemented".
@@ -193,8 +191,6 @@ public abstract class Operator {
         throw new RuntimeException(
                 MessageFormat.format("{0}: ''computeTile()'' method not implemented", getClass().getSimpleName()));
     }
-
-    // todo - remove ProgressMonitor parameter, it has never been used and wastes processing time (nf - 17.12.2010)
 
     /**
      * Called by the framework in order to compute the stack of tiles for the given target bands.
