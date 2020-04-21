@@ -16,6 +16,7 @@
 package org.esa.snap.core.gpf.internal;
 
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.SubProgressMonitor;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.Operator;
@@ -109,20 +110,31 @@ public class OperatorExecutor {
     }
 
     public void execute(ExecutionOrder executionOrder, String executionMessage, ProgressMonitor pm) {
+
+        pm.beginTask(executionMessage, 5);
+        try {
+            imagesProvider.init(SubProgressMonitor.create(pm, 1));
+            scheduleBandsComputation(executionOrder, executionMessage, imagesProvider,
+                                     SubProgressMonitor.create(pm, 4));
+        } finally {
+            pm.done();
+        }
+    }
+
+    private void scheduleBandsComputation(ExecutionOrder executionOrder, String executionMessage, ImagesProvider imagesProvider, ProgressMonitor pm) {
+        PlanarImage[] images = imagesProvider.getImages();
+        int tileCountX = imagesProvider.getTileCountX();
+        int tileCountY = imagesProvider.getTileCountY();
+
         final Semaphore semaphore = new Semaphore(parallelism, true);
         final TileComputationListener tcl = new OperatorTileComputationListener(semaphore, pm);
         final TileComputationListener[] listeners = new TileComputationListener[]{tcl};
 
-        ImagingListener imagingListener = JAI.getDefaultInstance().getImagingListener();
-        JAI.getDefaultInstance().setImagingListener(new GPFImagingListener());
-        imagesProvider.init(pm);
-        PlanarImage[] images = imagesProvider.getImages();
-        int tileCountX = imagesProvider.getTileCountX();
-        int tileCountY = imagesProvider.getTileCountY();
-        pm.beginTask(executionMessage, tileCountX * tileCountY * images.length);
-
         ExecutionOrder effectiveExecutionOrder = getEffectiveExecutionOrder(executionOrder);
 
+        pm.beginTask(executionMessage, tileCountX * tileCountY * images.length);
+        ImagingListener imagingListener = JAI.getDefaultInstance().getImagingListener();
+        JAI.getDefaultInstance().setImagingListener(new GPFImagingListener());
         try {
             if (effectiveExecutionOrder == ExecutionOrder.SCHEDULE_ROW_BAND_COLUMN) {
                 scheduleRowBandColumn(images, tileCountX, tileCountY, semaphore, listeners, pm);
