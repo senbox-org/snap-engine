@@ -26,7 +26,7 @@ import org.esa.snap.core.image.ImageManager;
 import javax.media.jai.ImageLayout;
 import javax.media.jai.PlanarImage;
 import javax.media.jai.SourcelessOpImage;
-import java.awt.*;
+import java.awt.Rectangle;
 import java.awt.image.WritableRaster;
 
 public class OperatorImage extends SourcelessOpImage {
