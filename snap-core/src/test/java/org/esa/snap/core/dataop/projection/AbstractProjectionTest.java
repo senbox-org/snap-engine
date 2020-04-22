@@ -16,6 +16,7 @@
 
 package org.esa.snap.core.dataop.projection;
 
+import org.esa.snap.test.LongTestRunner;
 import org.geotools.factory.FactoryRegistry;
 import org.geotools.geometry.DirectPosition2D;
 import org.geotools.parameter.ParameterGroup;
@@ -24,6 +25,7 @@ import org.geotools.referencing.operation.MathTransformProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.opengis.geometry.DirectPosition;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.ReferenceIdentifier;
@@ -42,6 +44,7 @@ import static org.junit.Assert.assertEquals;
  * Test data can be found at General Cartographic Transformation Package (GCTP).
  * It can be retrieved from: ftp://edcftp.cr.usgs.gov/pub/software/gctpc/
  */
+@RunWith(LongTestRunner.class)
 public abstract class AbstractProjectionTest {
 
     private static final double TOLERANCE = 1.0E-4;

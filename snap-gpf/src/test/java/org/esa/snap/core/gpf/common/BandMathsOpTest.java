@@ -49,7 +49,14 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class BandMathsOpTest {
 
@@ -73,7 +80,7 @@ public class BandMathsOpTest {
         band.readPixels(0, 0, 4, 4, floatValues, ProgressMonitor.NULL);
         float[] expectedValues = new float[16];
         Arrays.fill(expectedValues, 1.0f);
-        assertTrue(Arrays.equals(expectedValues, floatValues));
+        assertArrayEquals(expectedValues, floatValues, 1.0e-4f);
 
         assertNotNull(targetProduct.getStartTime());
         assertEquals(sourceProduct.getStartTime(), targetProduct.getStartTime());
@@ -228,7 +235,7 @@ public class BandMathsOpTest {
         band.readPixels(0, 0, 4, 4, intValues, ProgressMonitor.NULL);
         int[] expectedValues = new int[16];
         Arrays.fill(expectedValues, 1);
-        assertTrue(Arrays.equals(expectedValues, intValues));
+        assertArrayEquals(expectedValues, intValues);
     }
 
     @Test
@@ -252,14 +259,14 @@ public class BandMathsOpTest {
         band.readPixels(0, 0, 4, 4, floatValues, ProgressMonitor.NULL);
         float[] expectedValues = new float[16];
         Arrays.fill(expectedValues, 3.0f);
-        assertTrue(Arrays.equals(expectedValues, floatValues));
+        assertArrayEquals(expectedValues, floatValues, 1.0e-4f);
 
         Band bband = targetProduct.getBand("bBandName");
         int[] intValues = new int[16];
         bband.readPixels(0, 0, 4, 4, intValues, ProgressMonitor.NULL);
         int[] expectedIntValues = new int[16];
         Arrays.fill(expectedValues, (3 & 64));
-        assertTrue(Arrays.equals(expectedIntValues, intValues));
+        assertArrayEquals(expectedIntValues, intValues);
     }
 
     @Test
@@ -284,7 +291,7 @@ public class BandMathsOpTest {
         band.readPixels(0, 0, 4, 4, floatValues, ProgressMonitor.NULL);
         float[] expectedValues = new float[16];
         Arrays.fill(expectedValues, 1.0F);
-        assertTrue(Arrays.equals(expectedValues, floatValues));
+        assertArrayEquals(expectedValues, floatValues, 1.0e-4f);
     }
 
     @Test
@@ -302,7 +309,7 @@ public class BandMathsOpTest {
         band.readPixels(0, 0, 4, 4, actualValues, ProgressMonitor.NULL);
         float[] expectedValues = new float[16];
         Arrays.fill(expectedValues, 3.5f);
-        assertTrue(Arrays.equals(expectedValues, actualValues));
+        assertArrayEquals(expectedValues, actualValues, 1.0e-4f);
     }
 
     @Test
@@ -323,7 +330,7 @@ public class BandMathsOpTest {
         byte[] actualBooleanValues = (byte[]) b1.getRasterData().getElems();
         byte[] expectedBooleanValues = new byte[16];
         Arrays.fill(expectedBooleanValues, (byte) 0);
-        assertTrue(Arrays.equals(expectedBooleanValues, actualBooleanValues));
+        assertArrayEquals(expectedBooleanValues, actualBooleanValues);
 
         Band b2 = targetProduct.getBand("b2");
 
@@ -333,7 +340,7 @@ public class BandMathsOpTest {
         int[] actualIntValues = (int[]) b2.getRasterData().getElems();
         int[] expectedIntValues = new int[16];
         Arrays.fill(expectedIntValues, 6);
-        assertTrue(Arrays.equals(expectedIntValues, actualIntValues));
+        assertArrayEquals(expectedIntValues, actualIntValues);
     }
 
     @Test
@@ -354,7 +361,7 @@ public class BandMathsOpTest {
         band.readPixels(0, 0, 4, 4, actualValues, ProgressMonitor.NULL);
         float[] expectedValues = new float[16];
         Arrays.fill(expectedValues, 3.5f);
-        assertTrue(Arrays.equals(expectedValues, actualValues));
+        assertArrayEquals(expectedValues, actualValues, 1.0e-4f);
     }
 
     @Test
@@ -375,7 +382,7 @@ public class BandMathsOpTest {
         band.readPixels(0, 0, 4, 4, actualValues, ProgressMonitor.NULL);
         float[] expectedValues = new float[16];
         Arrays.fill(expectedValues, 3.5f);
-        assertTrue(Arrays.equals(expectedValues, actualValues));
+        assertArrayEquals(expectedValues, actualValues, 1.0e-4f);
     }
 
     @Test
@@ -398,7 +405,7 @@ public class BandMathsOpTest {
         band.readPixels(0, 0, 4, 4, floatValues, ProgressMonitor.NULL);
         float[] expectedValues = new float[16];
         Arrays.fill(expectedValues, Float.NaN);
-        assertTrue(Arrays.equals(expectedValues, floatValues));
+        assertArrayEquals(expectedValues, floatValues, 1.0e-4f);
     }
 
     @Test
@@ -523,7 +530,7 @@ public class BandMathsOpTest {
         return testProduct;
     }
 
-    public static BandMathsOp createBooleanExpressionBand(Product sourceProduct, String expression) {
+    private static BandMathsOp createBooleanExpressionBand(Product sourceProduct, String expression) {
         BandMathsOp.BandDescriptor bandDescriptor = new BandMathsOp.BandDescriptor();
         bandDescriptor.name = "band1";
         bandDescriptor.expression = expression;

@@ -2,7 +2,6 @@ package org.esa.snap.core.gpf;
 
 import com.bc.ceres.core.Assert;
 import com.bc.ceres.core.ProgressMonitor;
-import junit.framework.TestCase;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
@@ -11,10 +10,13 @@ import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.gpf.internal.DefaultTileIterator;
 import org.esa.snap.core.util.BitSetter;
+import org.junit.Test;
 
 import javax.media.jai.operator.ConstantDescriptor;
 import java.awt.Rectangle;
 import java.util.Iterator;
+
+import static org.junit.Assert.assertEquals;
 
 
 /**
@@ -22,13 +24,14 @@ import java.util.Iterator;
  *
  * @author Norman
  */
-public class DirectDriverTest extends TestCase {
+public class DirectDriverTest {
 
-    static final int W = 4;
-    static final int H = 4;
-    static final float valueA = 0.4f;
-    static final float valueB = 0.5f;
+    private static final int W = 4;
+    private static final int H = 4;
+    private static final float valueA = 0.4f;
+    private static final float valueB = 0.5f;
 
+    @Test
     public void testDirect() {
         Operator op = new MyOp();
         Product sourceProduct = new Product("N", "T", W, H);
@@ -42,10 +45,10 @@ public class DirectDriverTest extends TestCase {
         DirectTile row1 = new DirectTile(bandC, data, new Rectangle(0, 0, W, 1));
         op.computeTile(bandC, row1, ProgressMonitor.NULL);
 
-        assertEquals(valueA + valueB, data.getElemFloatAt(0));
-        assertEquals(valueA + valueB, data.getElemFloatAt(1));
-        assertEquals(valueA + valueB, data.getElemFloatAt(2));
-        assertEquals(valueA + valueB, data.getElemFloatAt(3));
+        assertEquals(valueA + valueB, data.getElemFloatAt(0), 1.0e-4);
+        assertEquals(valueA + valueB, data.getElemFloatAt(1), 1.0e-4);
+        assertEquals(valueA + valueB, data.getElemFloatAt(2), 1.0e-4);
+        assertEquals(valueA + valueB, data.getElemFloatAt(3), 1.0e-4);
     }
 
     public static class MyOp extends Operator {
@@ -96,11 +99,11 @@ public class DirectDriverTest extends TestCase {
         private final float[] dataBufferFloat;
         private final double[] dataBufferDouble;
 
-        public DirectTile(RasterDataNode rasterDataNode, ProductData dataBuffer, Rectangle rectangle) {
+        DirectTile(RasterDataNode rasterDataNode, ProductData dataBuffer, Rectangle rectangle) {
             this(rasterDataNode, dataBuffer, rectangle, true);
         }
 
-        public DirectTile(RasterDataNode rasterDataNode, ProductData dataBuffer, Rectangle rectangle, boolean target) {
+        DirectTile(RasterDataNode rasterDataNode, ProductData dataBuffer, Rectangle rectangle, boolean target) {
             Assert.notNull(rasterDataNode, "rasterDataNode");
 
             this.rasterDataNode = rasterDataNode;
@@ -479,7 +482,6 @@ public class DirectDriverTest extends TestCase {
             int sample = dataBuffer.getElemIntAt(index(x, y));
             // handle unsigned data types, see also [BEAM-1147] (nf - 20100527)
             if (signedByte) {
-                //noinspection SillyAssignment
                 sample = (byte) sample;
             }
             if (scaled) {
@@ -501,7 +503,6 @@ public class DirectDriverTest extends TestCase {
             float sample = dataBuffer.getElemFloatAt(index(x, y));
             // handle unsigned data types, see also [BEAM-1147] (nf - 20100527)
             if (signedByte) {
-                //noinspection SillyAssignment
                 sample = (byte) sample;
             }
             if (scaled) {
@@ -524,7 +525,6 @@ public class DirectDriverTest extends TestCase {
             double sample = dataBuffer.getElemDoubleAt(index(x, y));
             // handle unsigned data types, see also [BEAM-1147] (nf - 20100527)
             if (signedByte) {
-                //noinspection SillyAssignment
                 sample = (byte) sample;
             }
             if (scaled) {

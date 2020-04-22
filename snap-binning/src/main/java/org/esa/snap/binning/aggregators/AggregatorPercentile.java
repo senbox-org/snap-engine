@@ -42,8 +42,8 @@ public class AggregatorPercentile extends AbstractAggregator {
 
     private final int varIndex;
     private final int percentage;
-    private final String mlName;
-    private final String icName;
+    private String mlName;
+    private String icName;
 
     public AggregatorPercentile(VariableContext varCtx, String varName, String targetName, int percentage) {
         super(Descriptor.NAME,
@@ -69,6 +69,7 @@ public class AggregatorPercentile extends AbstractAggregator {
     @Override
     public void initSpatial(BinContext ctx, WritableVector vector) {
         vector.set(0, 0.0f);
+        icName = ctx.ensureUnique(icName);
         ctx.put(icName, new int[1]);
     }
 
@@ -98,6 +99,7 @@ public class AggregatorPercentile extends AbstractAggregator {
     @Override
     public void initTemporal(BinContext ctx, WritableVector vector) {
         vector.set(0, 0.0f);
+        mlName = ctx.ensureUnique(mlName);
         ctx.put(mlName, new GrowableVector(256));
     }
 

@@ -16,7 +16,6 @@
 
 package org.esa.snap.csv.dataio.reader;
 
-import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.MetadataAttribute;
@@ -32,8 +31,16 @@ import org.junit.Test;
 
 import java.awt.image.Raster;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author Olaf Danne
@@ -146,8 +153,10 @@ public class CsvProductReaderTest {
         assertEquals(Float.NaN, radiance2Data.getSampleFloat(2, 1, 0), 1.0E-6);
     }
 
-    private Product readTestProduct(String name) throws IOException {
-        return reader.readProductNodes(getClass().getResource(name).getFile(), null);
+    private Product readTestProduct(String name) throws IOException, URISyntaxException {
+        URL url = getClass().getResource(name);
+        URI uri = new URI(url.toString());
+        return reader.readProductNodes(uri.getPath(), null);
     }
 
     @Test
@@ -181,9 +190,8 @@ public class CsvProductReaderTest {
         assertFalse(CsvProductReader.isSquareNumber(11));
     }
 
-    // Metadata support not yet implemented, therefore test is ignored
     @Test
-    @Ignore
+    @Ignore("Metadata support not yet implemented, therefore test is ignored")
     public void testReadMetaData() throws Exception {
         final Product product = readTestProduct("simple_format_example.txt");
         final MetadataElement[] metadataElements = product.getMetadataRoot().getElements();
@@ -235,7 +243,7 @@ public class CsvProductReaderTest {
     }
 
     @Test
-    public void testCreateTimeCoding_firstTimeColumn() throws IOException {
+    public void testCreateTimeCoding_firstTimeColumn() throws IOException, URISyntaxException {
         Product product = readTestProduct("simple_format_no_properties_but_time_column.txt");
 
         CsvProductReader.CSVTimeCoding timeCoding = (CsvProductReader.CSVTimeCoding) product.getSceneTimeCoding();
@@ -252,7 +260,7 @@ public class CsvProductReaderTest {
     }
 
     @Test
-    public void testCreateTimeCoding_firstCompleteTimeColumn() throws IOException {
+    public void testCreateTimeCoding_firstCompleteTimeColumn() throws IOException, URISyntaxException {
         Product product = readTestProduct("simple_format_no_properties_gaps_in_first_time_column.txt");
 
         CsvProductReader.CSVTimeCoding timeCoding = (CsvProductReader.CSVTimeCoding) product.getSceneTimeCoding();
@@ -270,7 +278,7 @@ public class CsvProductReaderTest {
     }
 
     @Test
-    public void testCreateTimeCoding_timeColumnProperty() throws IOException {
+    public void testCreateTimeCoding_timeColumnProperty() throws IOException, URISyntaxException {
         Product product = readTestProduct("simple_format_with_time_column_property.txt");
 
         CsvProductReader.CSVTimeCoding timeCoding = (CsvProductReader.CSVTimeCoding) product.getSceneTimeCoding();
@@ -312,39 +320,6 @@ public class CsvProductReaderTest {
         assertEquals("NaN", Double.toString(timeCoding.getMJD(new PixelPos(1.5, 1.5))));
     }
 
-    @Test
-    public void test2x2csvProduct() throws Exception {
-        final String dimap = getClass().getResource("MER_FR__1PNUPA20030808_073810_000000982018_00450_07518_6007.dim").getPath();
-        final String csv = getClass().getResource("MER_FR__1PNUPA20030808_073810_000000982018_00450_07518_6007.csv").getPath();
-        Product dimPro = ProductIO.readProduct(dimap);
-        Product csvPro = ProductIO.readProduct(csv);
-
-        assertEquals("org.esa.snap.core.dataio.dimap.DimapProductReader", dimPro.getProductReader().getClass().getName());
-        assertEquals(true, dimPro.containsBand("new_band_2"));
-        assertEquals(true, dimPro.containsBand("new_band_3"));
-
-        assertEquals("org.esa.snap.csv.dataio.reader.CsvProductReader", csvPro.getProductReader().getClass().getName());
-        assertEquals(true, csvPro.containsBand("new_band_2"));
-        assertEquals(true, csvPro.containsBand("new_band_3"));
-
-        Band dimBand2 = dimPro.getBand("new_band_2");
-        Band dimBand3 = dimPro.getBand("new_band_3");
-        Band csvBand2 = csvPro.getBand("new_band_2");
-        Band csvBand3 = csvPro.getBand("new_band_3");
-
-
-        for (int y = 0; y < dimBand2.getRasterHeight(); y++) {
-            for (int x = 0; x < dimBand2.getRasterWidth(); x++) {
-                float[] expecteds = dimBand2.readPixels(x, y, 1, 1, new float[1]);
-                float[] actuals = csvBand2.readPixels(x, y, 1, 1, new float[1]);
-                assertEquals("new_band_2 value at x="+x+", y="+y, expecteds[0], actuals[0], 0.0001f);
-
-                expecteds = dimBand3.readPixels(x, y, 1, 1, new float[1]);
-                actuals = csvBand3.readPixels(x, y, 1, 1, new float[1]);
-                assertEquals("new_band_3 value at x=" + x + ", y=" + y, expecteds[0], actuals[0], 0.0001f);
-            }
-        }
-    }
 
 
     private String getTimeString(PixelTimeCoding timeCoding, double x, double y) {

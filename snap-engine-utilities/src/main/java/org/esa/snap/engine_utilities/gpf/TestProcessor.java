@@ -324,7 +324,7 @@ public class TestProcessor {
 
     private int recurseReadFolder(final File origFolder,
                                          final ProductReaderPlugIn readerPlugin,
-                                         final ProductReader reader,
+                                         ProductReader reader,
                                          final String[] productTypeExemptions,
                                          final String[] exceptionExemptions,
                                          int iterations) throws Exception {
@@ -347,6 +347,9 @@ public class TestProcessor {
                     try {
                         SystemUtils.LOG.info("Reading [" + iterations + "] " + file.toString());
 
+                        if(reader == null) {
+                            reader = readerPlugin.createReaderInstance();
+                        }
                         final Product product = reader.readProductNodes(file, null);
                         if (productTypeExemptions != null && containsProductType(productTypeExemptions, product.getProductType()))
                             continue;

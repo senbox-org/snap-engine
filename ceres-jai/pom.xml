@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.esa.snap</groupId>
         <artifactId>snap-engine</artifactId>
-        <version>7.0.0-SNAPSHOT</version>
+        <version>8.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>ceres-jai</artifactId>
@@ -25,15 +25,15 @@
         </dependency>
         <dependency>
             <groupId>javax.media.jai</groupId>
-            <artifactId>jai-core</artifactId>
+            <artifactId>jai-core-openjdk</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.media.jai</groupId>
-            <artifactId>jai-codec</artifactId>
+            <artifactId>jai-codec-openjdk</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.media.jai</groupId>
-            <artifactId>mlibwrapper-jai</artifactId>
+            <artifactId>mlibwrapper-jai-openjdk</artifactId>
         </dependency>
         <dependency>
             <groupId>com.sun.media</groupId>
@@ -46,7 +46,29 @@
         <dependency>
             <groupId>it.geosolutions.imageio-ext</groupId>
             <artifactId>imageio-ext-tiff</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.media</groupId>
+                    <artifactId>jai_core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax.media</groupId>
+                    <artifactId>jai_codec</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax.media</groupId>
+                    <artifactId>jai_imageio</artifactId>
+                </exclusion>
+            </exclusions>
+
         </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-test-utils</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+
 
         <dependency>
             <groupId>rhino</groupId>
@@ -56,13 +78,14 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+			<scope>test</scope>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
+                <groupId>org.apache.netbeans.utilities</groupId>
                 <artifactId>nbm-maven-plugin</artifactId>
                 <configuration>
                     <publicPackages>

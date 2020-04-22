@@ -7,15 +7,18 @@ import org.junit.Test;
 import java.io.File;
 import java.net.URL;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Norman Fomferra
  */
 public class ProcessObserverTest {
     private static final String JAVA_HOME = System.getProperty("java.home", ".");
-    private static final String JAVA_EXEC_PATH = JAVA_HOME + "/bin/java";
-    private static String classPath;
+    static final String JAVA_EXEC_PATH = JAVA_HOME + "/bin/java";
+    static String classPath;
 
     @BeforeClass
     public static void setUp() throws Exception {
@@ -24,33 +27,8 @@ public class ProcessObserverTest {
     }
 
     @Test
-    public void testJavaProcessOk() throws Exception {
-        final String commandLine = String.format(JAVA_EXEC_PATH + " -cp %s %s 2 10", classPath, TestExecutable.class.getName());
-        final Process process = Runtime.getRuntime().exec(commandLine);
-        final MyHandler handler = new MyHandler();
-        new ProcessObserver(process).setHandler(handler).start();
-        assertTrue(handler.started);
-        assertEquals("Start\n" +
-                             "Progress 10%\n" +
-                             "Progress 20%\n" +
-                             "Progress 30%\n" +
-                             "Progress 40%\n" +
-                             "Progress 50%\n" +
-                             "Progress 60%\n" +
-                             "Progress 70%\n" +
-                             "Progress 80%\n" +
-                             "Progress 90%\n" +
-                             "Progress 100%\n" +
-                             "Done\n", handler.out);
-
-        // assertEquals("", handler.err); // leads to error on travis something is written to err
-        assertTrue(handler.ended);
-        assertEquals(0, handler.exitCode.intValue());
-    }
-
-    @Test
     public void testJavaProcessMissingArg() throws Exception {
-        final String commandLine = String.format(JAVA_EXEC_PATH + " -cp %s %s 2", classPath, TestExecutable.class.getName());
+        final String commandLine = String.format(getJavaExecPath() + " -cp %s %s 2", getClassPath(), TestExecutable.class.getName());
         final Process process = Runtime.getRuntime().exec(commandLine);
         final MyHandler handler = new MyHandler();
         new ProcessObserver(process).setHandler(handler).start();
@@ -63,7 +41,7 @@ public class ProcessObserverTest {
 
     @Ignore("This test fails to often on the server. No Idea why.")
     public void testJavaProcessCancel() throws Exception {
-        final String commandLine = String.format(JAVA_EXEC_PATH + " -cp %s %s 10 2", classPath, TestExecutable.class.getName());
+        final String commandLine = String.format(getJavaExecPath() + " -cp %s %s 10 2", getClassPath(), TestExecutable.class.getName());
         final Process process = Runtime.getRuntime().exec(commandLine);
         final MyHandler handler = new MyHandler();
         final ProcessObserver.ObservedProcess observedProcess = new ProcessObserver(process)
@@ -80,7 +58,25 @@ public class ProcessObserverTest {
         assertNull(handler.exitCode);
     }
 
-    private static class MyHandler implements ProcessObserver.Handler {
+    protected String getJavaExecPath() {
+        //Add "" to JAVA path if it has blank spaces
+        if(JAVA_EXEC_PATH.contains(" ")) {
+            return "\"" + JAVA_EXEC_PATH + "\"";
+        }
+
+        return JAVA_EXEC_PATH;
+    }
+
+    protected String getClassPath() {
+        //Add "" to claspath if it has blank spaces
+        if(classPath.contains(" ")) {
+            return "\"" + classPath + "\"";
+        }
+
+        return classPath;
+    }
+
+    static class MyHandler implements ProcessObserver.Handler {
         boolean started;
         String out = "";
         String err = "";

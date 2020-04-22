@@ -24,6 +24,7 @@ import org.esa.snap.core.datamodel.Placemark;
 import org.esa.snap.core.datamodel.PlacemarkDescriptor;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.gpf.OperatorException;
 import org.junit.Test;
 import org.opengis.parameter.ParameterValue;
 import org.opengis.parameter.ParameterValueGroup;
@@ -34,9 +35,25 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class ReprojectionOpTest extends AbstractReprojectionOpTest {
+
+
+    @Test
+    public void testWithoutGeoCoding() {
+        sourceProduct.setSceneGeoCoding(null);
+        parameterMap.put("crs", WGS84_CODE);
+        try {
+            createReprojectedProduct();
+            fail("Expected OperatorException because source product has no GeoCoding");
+        } catch (OperatorException ignore) {
+        }
+    }
 
     @Test
     public void testGeoLatLon() throws IOException {

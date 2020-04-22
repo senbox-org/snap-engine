@@ -3,20 +3,22 @@ package org.esa.snap.dataio.netcdf;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.util.jai.JAIUtils;
+import org.esa.snap.dataio.netcdf.nc.NFileWriteable;
+import org.esa.snap.dataio.netcdf.nc.NVariable;
+import org.esa.snap.dataio.netcdf.nc.NWritableFactory;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Assume;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
-import ucar.ma2.InvalidRangeException;
-import ucar.nc2.NetcdfFileWriter;
-import ucar.nc2.Variable;
 
+import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.image.DataBuffer;
 import java.awt.image.RenderedImage;
@@ -24,7 +26,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * @author Marco Peters
@@ -42,21 +45,16 @@ public class GloballyShiftedDataTest {
 
     @BeforeClass
     public static void createTestDataFile() throws IOException {
-        // Fails on Linux: "Unable to load library 'netcdf': libnetcdf.so: cannot open shared object file: No such file or directory"
-        // why is it failing writing Netcdf files in test mode but not when SNAP is installed?
-        // Probably because we use the Nujan lib for writing usually.
-        Assume.assumeTrue(isWindows());
-        
+
         tempFile = File.createTempFile(GloballyShiftedDataTest.class.getSimpleName(), ".nc");
-//        tempFile = new File(String.format("%s\\%s.nc", System.getProperty("user.home"), GloballyShiftedDataTest.class.getSimpleName()));
-        NetcdfFileWriter ncFile = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, tempFile.getAbsolutePath());
-        ncFile.addDimension(null, "lat", HEIGHT);
-        ncFile.addDimension(null, "lon", WIDTH);
-        Variable lat = ncFile.addVariable(null, "lat", DataType.DOUBLE, "lat");
+        NFileWriteable ncFile = NWritableFactory.create(tempFile.getAbsolutePath(), "netcdf4");
+        ncFile.addDimension("lat", HEIGHT);
+        ncFile.addDimension("lon", WIDTH);
+        Dimension tileSize = JAIUtils.computePreferredTileSize(WIDTH, HEIGHT, 1);
 
-        Variable lon = ncFile.addVariable(null, "lon", DataType.DOUBLE, "lon");
-
-        Variable data = ncFile.addVariable(null, "data", DataType.INT, "lat lon");
+        NVariable lat = ncFile.addVariable("lat", DataType.DOUBLE, null, "lat");
+        NVariable lon = ncFile.addVariable("lon", DataType.DOUBLE, null, "lon");
+        NVariable data = ncFile.addVariable("data", DataType.INT, tileSize, "lat lon");
 
         final double[] latValues = new double[HEIGHT];
         double latStep = 180.0 / HEIGHT;
@@ -70,30 +68,23 @@ public class GloballyShiftedDataTest {
         }
 
         ncFile.create();
-        try {
-            ncFile.write(lat, Array.factory(DataType.DOUBLE, new int[]{HEIGHT}, latValues));
-            ncFile.write(lon, Array.factory(DataType.DOUBLE, new int[]{WIDTH},lonValues));
-            ncFile.flush();
-        } catch (InvalidRangeException e) {
-            throw new IOException(e);
-        }
+        lat.writeFully(Array.factory(DataType.DOUBLE, new int[]{HEIGHT}, latValues));
+        lon.writeFully(Array.factory(DataType.DOUBLE, new int[]{WIDTH}, lonValues));
 
+        // rightValues are written to the left side of the image, but as the data is globally shifted
+        // they will be on the right side when read in
+        int[] rightDataValues = new int[HALF_WIDTH * STEP_HEIGHT];
+        int[] leftDataValues = new int[HALF_WIDTH * STEP_HEIGHT];
+        Arrays.setAll(rightDataValues, i -> i + HALF_WIDTH);
+        Arrays.setAll(leftDataValues, i -> i);
+        Array rightValues = Array.factory(DataType.INT, new int[]{STEP_HEIGHT, HALF_WIDTH}, rightDataValues);
+        Array leftValues = Array.factory(DataType.INT, new int[]{STEP_HEIGHT, HALF_WIDTH}, leftDataValues);
+        ProductData rightProduData = ProductData.createInstance(ProductData.TYPE_INT32, rightValues.copyTo1DJavaArray());
+        ProductData leftProduData = ProductData.createInstance(ProductData.TYPE_INT32, leftValues.copyTo1DJavaArray());
 
-        try {
-            // rightValues are written to the left side of the image, but as the data is globally shifted
-            // they will be on the right side when read in
-            int[] rightDataValues = new int[HALF_WIDTH * STEP_HEIGHT];
-            int[] leftDataValues = new int[HALF_WIDTH * STEP_HEIGHT];
-            Arrays.setAll(rightDataValues, i -> i + HALF_WIDTH);
-            Arrays.setAll(leftDataValues, i -> i);
-            Array rightValues = Array.factory(DataType.INT, new int[]{STEP_HEIGHT, HALF_WIDTH}, rightDataValues);
-            Array leftValues = Array.factory(DataType.INT, new int[]{STEP_HEIGHT, HALF_WIDTH}, leftDataValues);
-            for (int i = 0; i < HEIGHT; i = i + STEP_HEIGHT) {
-                ncFile.write(data, new int[]{i, 0}, rightValues);
-                ncFile.write(data, new int[]{i, HALF_WIDTH}, leftValues);
-            }
-        } catch (InvalidRangeException e) {
-            throw new IOException(e);
+        for (int i = 0; i < HEIGHT; i = i + STEP_HEIGHT) {
+            data.write(0, i, HALF_WIDTH, STEP_HEIGHT, false, rightProduData);
+            data.write(HALF_WIDTH, i, HALF_WIDTH, STEP_HEIGHT, false, leftProduData);
         }
 
         ncFile.close();
@@ -154,8 +145,8 @@ public class GloballyShiftedDataTest {
 
     }
 
-    @Ignore("Not fixed yet: SNAP-951")
     @Test
+    @Ignore("Not fixed yet: SNAP-951")
     public void testLevelImagesNotScrambled() {
         Band band = product.getBandAt(0);
 

@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import javax.imageio.stream.FileCacheImageInputStream;
 import java.io.File;
+import java.net.URI;
 import java.net.URL;
 
 import static org.junit.Assert.*;
@@ -21,7 +22,8 @@ public class GeoCodingTest {
     @Test
     public void testSmallImageNearGreenwichMeridian() throws Exception {
         final URL resource = getClass().getResource("nearGreenwichMeridian.tif");
-        final String filePath = resource.getFile();
+        final URI uri = new URI(resource.toString());
+        final String filePath = uri.getPath();
         final GeoTiffProductReader reader = new GeoTiffProductReader(new GeoTiffProductReaderPlugIn());
         final Product product = reader.readGeoTIFFProduct(new FileCacheImageInputStream(resource.openStream(), null), new File(filePath));
 
@@ -38,7 +40,8 @@ public class GeoCodingTest {
     @Test
     public void testReadingZip() throws Exception {
         final URL resource = getClass().getResource("nearGreenwichMeridian.zip");
-        final String filePath = resource.getFile();
+        final URI uri = new URI(resource.toString());
+        final String filePath = uri.getPath();
         final GeoTiffProductReader reader = new GeoTiffProductReader(new GeoTiffProductReaderPlugIn());
         final Product product = reader.readProductNodes(filePath, null);
 

@@ -3,6 +3,7 @@ package org.esa.snap.binning.support;
 import org.esa.snap.core.util.grid.isin.IsinPoint;
 import org.junit.Test;
 
+import static org.esa.snap.core.util.grid.isin.IsinAPI.Raster.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -340,5 +341,17 @@ public class IsinPlanetaryGridTest {
         assertEquals(160000, grid.getFirstBinIndex(16));
         assertEquals(18780000, grid.getFirstBinIndex(1878));
         assertEquals(170047990000L, grid.getFirstBinIndex(86399));
+    }
+
+    @Test
+    public void testGetRaster() {
+         IsinPlanetaryGrid planetaryGrid = new IsinPlanetaryGrid(18 * 1200);
+        assertEquals(GRID_1_KM, planetaryGrid.getRaster());
+
+        planetaryGrid = new IsinPlanetaryGrid(18 * 2400);
+        assertEquals(GRID_500_M, planetaryGrid.getRaster());
+
+        planetaryGrid = new IsinPlanetaryGrid(18 * 4800);
+        assertEquals(GRID_250_M, planetaryGrid.getRaster());
     }
 }

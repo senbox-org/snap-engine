@@ -16,10 +16,6 @@
 
 package org.esa.snap.dataio.envisat;
 
-import junit.framework.Assert;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 import org.esa.snap.core.datamodel.AngularDirection;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.PixelPos;
@@ -30,19 +26,19 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.test.LongTestRunner;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 
 
-public class PointingTest extends TestCase {
+@RunWith(LongTestRunner.class)
+public class PointingTest {
 
-
-    public PointingTest(String testName) {
-        super(testName);
-    }
-
-    public static Test suite() {
-        return new TestSuite(PointingTest.class);
-    }
-
+    @Test
     public void testPointingForMerisLikeProduct() {
         Product product = createMerisLikeProduct();
         testMerisPointingAt00(product, product.getBand("radiance_7").getPointing());
@@ -50,6 +46,7 @@ public class PointingTest extends TestCase {
         testMerisPointingAt00(product, product.getBand("l1_flags").getPointing());
     }
 
+    @Test
     public void testPointingForAatsrLikeProduct() {
         Product product = createAatsrLikeProduct();
         testAatsrPointingAt00Fward(product, product.getBand("reflec_fward_0670").getPointing());
@@ -99,7 +96,7 @@ public class PointingTest extends TestCase {
         assertNotNull(pointing);
         assertSame(product.getSceneGeoCoding(), pointing.getGeoCoding());
         final PixelPos pixel00 = new PixelPos(0, 0);
-        Assert.assertEquals(new AngularDirection(2, 1), pointing.getSunDir(pixel00, null));
+        assertEquals(new AngularDirection(2, 1), pointing.getSunDir(pixel00, null));
         assertEquals(new AngularDirection(10, 0), pointing.getViewDir(pixel00, null));
         assertEquals(20.0f, pointing.getElevation(pixel00), 1.0e-10f);
     }

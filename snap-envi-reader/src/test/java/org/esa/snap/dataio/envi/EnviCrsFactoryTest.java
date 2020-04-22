@@ -1,7 +1,9 @@
 package org.esa.snap.dataio.envi;
 
+import org.esa.snap.test.LongTestRunner;
 import org.geotools.referencing.CRS;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.opengis.parameter.GeneralParameterValue;
 import org.opengis.parameter.ParameterValue;
 import org.opengis.parameter.ParameterValueGroup;
@@ -9,8 +11,9 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
+@RunWith(LongTestRunner.class)
 public class EnviCrsFactoryTest {
 
     @Test(expected = IllegalArgumentException.class)

@@ -28,7 +28,6 @@ import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.SourceProducts;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
 import org.esa.snap.core.util.io.FileUtils;
-import org.esa.snap.core.util.math.MathUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -44,7 +43,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 
 public class GPFFacadeTest {
@@ -75,16 +81,16 @@ public class GPFFacadeTest {
     public void testAutoParameterConversion() {
 
         // First test with no parameter values --> parameters have default values
-        HashMap<String, Object> parameters = new HashMap<String, Object>();
+        HashMap<String, Object> parameters = new HashMap<>();
         FooOp fooOp = makeFooOp(parameters);
         assertEquals(0, fooOp.intParam);
         assertEquals(0.0, fooOp.doubleParam, 1e-7);
-        assertEquals(null, fooOp.floatArrayParam);
-        assertEquals(null, fooOp.stringParam);
-        assertEquals(false, fooOp.booleanParam);
+        assertNull(fooOp.floatArrayParam);
+        assertNull(fooOp.stringParam);
+        assertFalse(fooOp.booleanParam);
 
         // Then we test with parameter values that already have the expected parameter type
-        parameters = new HashMap<String, Object>();
+        parameters = new HashMap<>();
         parameters.put("intParam", 44);
         parameters.put("doubleParam", 0.441);
         parameters.put("floatArrayParam", new float[]{0.2f, 0.4f, 0.8f});
@@ -93,9 +99,9 @@ public class GPFFacadeTest {
         fooOp = makeFooOp(parameters);
         assertEquals(44, fooOp.intParam);
         assertEquals(0.441, fooOp.doubleParam, 1e-7);
-        assertTrue(Arrays.equals(new float[]{0.2f, 0.4f, 0.8f}, fooOp.floatArrayParam));
+        assertArrayEquals(new float[]{0.2f, 0.4f, 0.8f}, fooOp.floatArrayParam, 0.0f);
         assertEquals("Banana", fooOp.stringParam);
-        assertEquals(true, fooOp.booleanParam);
+        assertTrue(fooOp.booleanParam);
 
         // Finally we test that values are correctly converted if provided as text
         parameters.put("intParam", "42");
@@ -106,14 +112,14 @@ public class GPFFacadeTest {
         fooOp = makeFooOp(parameters);
         assertEquals(42, fooOp.intParam);
         assertEquals(0.421, fooOp.doubleParam, 1e-7);
-        assertTrue(Arrays.equals(new float[]{0.1f, 0.2f, 0.5f}, fooOp.floatArrayParam));
+        assertArrayEquals(new float[]{0.1f, 0.2f, 0.5f}, fooOp.floatArrayParam, 0.0f);
         assertEquals("Mexico", fooOp.stringParam);
-        assertEquals(true, fooOp.booleanParam);
+        assertTrue(fooOp.booleanParam);
     }
 
     private FooOp makeFooOp(Map<String, Object> parameters) {
         Product p1 = new Product("A", "B", 16, 16);
-        HashMap<String, Product> sourceProducts = new HashMap<String, Product>();
+        HashMap<String, Product> sourceProducts = new HashMap<>();
         sourceProducts.put("sourceProduct", p1);
         FooOp fooOp = (FooOp) GPF.getDefaultInstance().createOperator("Foo", parameters, sourceProducts, null);
         fooOp.getTargetProduct();
@@ -126,7 +132,7 @@ public class GPFFacadeTest {
 
         String filePath = GPFFacadeTest.class.getResource("test-product.dim").toURI().getPath();
 
-        Map<String, Object> parameters = new HashMap<String, Object>();
+        Map<String, Object> parameters = new HashMap<>();
         parameters.put("file", new File(filePath));
 
         Product p1 = GPF.createProduct("Read", parameters);
@@ -164,7 +170,7 @@ public class GPFFacadeTest {
 
         String filePath = GPFFacadeTest.class.getResource("test-product.dim").toURI().getPath();
 
-        Map<String, Object> parameters = new HashMap<String, Object>();
+        Map<String, Object> parameters = new HashMap<>();
         parameters.put("file", new File(filePath));
 
         Product p1 = GPF.createProduct("Read", parameters);
@@ -189,12 +195,12 @@ public class GPFFacadeTest {
 
         String filePath = GPFFacadeTest.class.getResource("test-product.dim").toURI().getPath();
 
-        Map<String, Object> parameters = new HashMap<String, Object>();
+        Map<String, Object> parameters = new HashMap<>();
         parameters.put("file", new File(filePath));
 
         Product p1 = GPF.createProduct("Read", parameters);
         Product p2 = GPF.createProduct("Foo", GPF.NO_PARAMS, new Product[]{p1});
-        Product p3 = GPF.createProduct("Foos", GPF.NO_PARAMS, new Product[]{p1, p2});
+        Product p3 = GPF.createProduct("Foos", GPF.NO_PARAMS, p1, p2);
         MetadataElement metadataElement = p3.getMetadataRoot().getElement("Processing_Graph");
         MetadataElement sourceElement = null;
         for (MetadataElement element : metadataElement.getElements()) {
@@ -296,7 +302,7 @@ public class GPFFacadeTest {
 
     public static class FooOpSpi extends OperatorSpi {
 
-        public FooOpSpi() {
+        FooOpSpi() {
             super(FooOp.class);
         }
     }
@@ -332,13 +338,13 @@ public class GPFFacadeTest {
 
     public static class FoosOpSpi extends OperatorSpi {
 
-        public FoosOpSpi() {
+        FoosOpSpi() {
             super(FoosOp.class);
         }
     }
 
     @Test
-    public void testWriteProduct() throws Exception {
+    public void testWriteProduct() {
         StackOp stackOp = new StackOp();
         Product source = new Product("name", "type", 1000, 1000);
         source.setPreferredTileSize(200, 200);
@@ -355,7 +361,7 @@ public class GPFFacadeTest {
     }
 
     @Test
-    public void testWriteProductWithCacheClearing() throws Exception {
+    public void testWriteProductWithCacheClearing() {
         StackOp stackOp = new StackOp();
         Product source = new Product("name", "type", 1000, 1000);
         source.setPreferredTileSize(200, 200);
@@ -394,10 +400,5 @@ public class GPFFacadeTest {
             Arrays.fill(targetTiles.get(getTargetProduct().getBand("B")).getDataBufferFloat(), 7f);
         }
 
-        private void logTileIndex(int x, int y) {
-            int tileX = MathUtils.floorInt(x / (double) tileSize.width);
-            int tileY = MathUtils.floorInt(y / (double) tileSize.height);
-            System.out.println("tileY = " + tileY + "  tileX = " + tileX);
-        }
     }
 }

@@ -53,27 +53,39 @@ public class GenericNetCdfReader extends AbstractProductReader {
     protected Product readProductNodesImpl() throws IOException {
 
         final File fileLocation = new File(getInput().toString());
-        netcdfFile = NetcdfFileOpener.open(fileLocation.getPath());
-        if (netcdfFile == null) {
-            throw new IOException("Failed to open file " + fileLocation.getPath());
-        }
-        AbstractNetCdfReaderPlugIn[] plugIns = GenericNetCdfReaderPlugIn.getAllNetCdfReaderPlugIns();
-        AbstractNetCdfReaderPlugIn bestPlugIn = null;
-        for (AbstractNetCdfReaderPlugIn plugIn : plugIns) {
-            DecodeQualification decodeQualification = plugIn.getDecodeQualification(netcdfFile);
-            if (DecodeQualification.INTENDED.equals(decodeQualification)) {
-                bestPlugIn = plugIn;
-                break;
+        try {
+            netcdfFile = NetcdfFileOpener.open(fileLocation.getPath());
+            if (netcdfFile == null) {
+                throw new IOException("Failed to open file " + fileLocation.getPath());
             }
-            if (DecodeQualification.SUITABLE.equals(decodeQualification) && bestPlugIn == null) {
-                bestPlugIn = plugIn;
+            AbstractNetCdfReaderPlugIn[] plugIns = GenericNetCdfReaderPlugIn.getAllNetCdfReaderPlugIns();
+            AbstractNetCdfReaderPlugIn bestPlugIn = null;
+            for (AbstractNetCdfReaderPlugIn plugIn : plugIns) {
+                DecodeQualification decodeQualification = plugIn.getDecodeQualification(netcdfFile);
+                if (DecodeQualification.INTENDED.equals(decodeQualification)) {
+                    bestPlugIn = plugIn;
+                    break;
+                }
+                if (DecodeQualification.SUITABLE.equals(decodeQualification) && bestPlugIn == null) {
+                    bestPlugIn = plugIn;
+                }
+            }
+            if (bestPlugIn == null) {
+                String msg = String.format("Not able to read %s. No suitable NetCDF reader found.", getInput());
+                throw new IOException(msg);
+            }
+            netCdfReader = bestPlugIn.createReaderInstance();
+        }  catch (Throwable t) {
+            t.printStackTrace();
+        } finally {
+            try {
+                if (netcdfFile != null) {
+                    netcdfFile.close();
+                }
+            } catch (IOException ignored) {
+                // OK, ignored
             }
         }
-        if (bestPlugIn == null) {
-            String msg = String.format("Not able to read %s. No suitable NetCDF reader found.", getInput());
-            throw new IOException(msg);
-        }
-        netCdfReader = bestPlugIn.createReaderInstance();
         return netCdfReader.readProductNodes(getInput(), getSubsetDef());
     }
 

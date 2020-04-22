@@ -14,6 +14,9 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Date;
 import java.util.Properties;
 import java.util.Set;
@@ -31,10 +34,10 @@ public class StatisticsDatabaseTest {
     }
 
     @Test
-    public void testDatabaseWithRealData() throws IOException {
+    public void testDatabaseWithRealData() throws IOException, URISyntaxException {
         //preparation
-        final File shapeFile = new File(this.getClass().getResource("20070504_out_cwbody_desh_gk3.shp").getFile());
-        final File mappingFile = new File(this.getClass().getResource("20070504_out_cwbody_desh_gk3_band_mapping.txt").getFile());
+        final File shapeFile = new File(getResourceFilePath("20070504_out_cwbody_desh_gk3.shp"));
+        final File mappingFile = new File(getResourceFilePath("20070504_out_cwbody_desh_gk3_band_mapping.txt"));
         final FeatureCollection<SimpleFeatureType, SimpleFeature> featureCollection = FeatureUtils.loadFeatureCollectionFromShapefile(shapeFile);
         final Properties mapping = new Properties();
         mapping.load(new FileReader(mappingFile));
@@ -117,5 +120,11 @@ public class StatisticsDatabaseTest {
         final DefaultFeatureCollection fc1 = new DefaultFeatureCollection("id", feature1.getFeatureType());
         fc1.add(feature1);
         return fc1;
+    }
+
+    private String getResourceFilePath(String name) throws URISyntaxException {
+        final URL resource = getClass().getResource(name);
+        final URI uri = new URI(resource.toString());
+        return uri.getPath();
     }
 }

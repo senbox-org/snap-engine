@@ -21,7 +21,11 @@ import org.junit.Test;
 
 import java.net.URL;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Thomas Storm
@@ -36,7 +40,7 @@ public class WatermaskClassifierTest {
     }
 
     @Test
-    public void testGetWatermaskSampleAboveSixtyGC() throws Exception {
+    public void testGetWatermaskSampleAboveSixtyGC() {
         assertEquals(WatermaskClassifier.WATER_VALUE, gcClassifier.getWaterMaskSample(70.860277f, 29.205115f));
         assertEquals(WatermaskClassifier.WATER_VALUE, gcClassifier.getWaterMaskSample(70.853971f, 29.210610f));
 
@@ -85,51 +89,51 @@ public class WatermaskClassifierTest {
     }
 
     @Test
-    public void testGetZipfile() throws Exception {
+    public void testImgFileCreation() {
         // north-west
 
         assertEquals("w002n51.img", WatermaskUtils.createImgFileName(51.007f, -1.30f));
-        assertFalse("w001n51.img".equals(WatermaskUtils.createImgFileName(51.007f, -1.30f)));
+        assertNotEquals("w001n51.img", WatermaskUtils.createImgFileName(51.007f, -1.30f));
 
         assertEquals("w002n48.img", WatermaskUtils.createImgFileName(48.007f, -1.83f));
-        assertFalse("w001n48.img".equals(WatermaskUtils.createImgFileName(48.007f, -1.83f)));
+        assertNotEquals("w001n48.img", WatermaskUtils.createImgFileName(48.007f, -1.83f));
 
         // north-east
 
         assertEquals("e000n51.img", WatermaskUtils.createImgFileName(51.007f, 0.30f));
-        assertFalse("e001n51.img".equals(WatermaskUtils.createImgFileName(51.007f, 0.30f)));
+        assertNotEquals("e001n51.img", WatermaskUtils.createImgFileName(51.007f, 0.30f));
 
         assertEquals("e000n49.img", WatermaskUtils.createImgFileName(49.993961334228516f, 0.006230226717889309f));
-        assertFalse("w001n49.img".equals(WatermaskUtils.createImgFileName(51.007f, 0.30f)));
+        assertNotEquals("w001n49.img", WatermaskUtils.createImgFileName(51.007f, 0.30f));
 
         assertEquals("e001n51.img", WatermaskUtils.createImgFileName(51.007f, 1.30f));
-        assertFalse("e000n51.img".equals(WatermaskUtils.createImgFileName(51.007f, 1.30f)));
+        assertNotEquals("e000n51.img", WatermaskUtils.createImgFileName(51.007f, 1.30f));
 
         assertEquals("e000n45.img", WatermaskUtils.createImgFileName(45.001f, 0.005f));
-        assertFalse("w000n45.img".equals(WatermaskUtils.createImgFileName(45.001f, 0.005f)));
+        assertNotEquals("w000n45.img", WatermaskUtils.createImgFileName(45.001f, 0.005f));
 
         assertEquals("e111n30.img", WatermaskUtils.createImgFileName(30.27f, 111.581f));
-        assertFalse("e111n30.img".equals(WatermaskUtils.createImgFileName(29.01f, 112.01f)));
+        assertNotEquals("e111n30.img", WatermaskUtils.createImgFileName(29.01f, 112.01f));
 
         // south-west
 
         assertEquals("w001s01.img", WatermaskUtils.createImgFileName(-0.01f, -0.30f));
-        assertFalse("w000s01.img".equals(WatermaskUtils.createImgFileName(-0.01f, -0.30f)));
+        assertNotEquals("w000s01.img", WatermaskUtils.createImgFileName(-0.01f, -0.30f));
 
         assertEquals("w002s02.img", WatermaskUtils.createImgFileName(-1.01f, -1.30f));
-        assertFalse("w001s01.img".equals(WatermaskUtils.createImgFileName(-1.01f, -1.30f)));
+        assertNotEquals("w001s01.img", WatermaskUtils.createImgFileName(-1.01f, -1.30f));
 
         // south-east
 
         assertEquals("e000s01.img", WatermaskUtils.createImgFileName(-0.01f, 0.30f));
-        assertFalse("e000s00.img".equals(WatermaskUtils.createImgFileName(-0.01f, 0.30f)));
+        assertNotEquals("e000s00.img", WatermaskUtils.createImgFileName(-0.01f, 0.30f));
 
         assertEquals("e001s01.img", WatermaskUtils.createImgFileName(-0.01f, 1.30f));
-        assertFalse("e001s00.img".equals(WatermaskUtils.createImgFileName(-0.01f, 1.30f)));
+        assertNotEquals("e001s00.img", WatermaskUtils.createImgFileName(-0.01f, 1.30f));
     }
 
     @Test
-    public void testGetResource() throws Exception {
+    public void testGetResource() {
         URL resource = getClass().getResource("image.properties");
         assertNotNull(resource);
     }

@@ -16,8 +16,7 @@
 package org.esa.snap.core.dataio;
 
 import com.bc.ceres.core.ProgressMonitor;
-import com.bc.ceres.core.SubProgressMonitor;
-import org.esa.snap.core.datamodel.AbstractGeoCoding;
+import com.bc.ceres.glevel.MultiLevelImage;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.FlagCoding;
 import org.esa.snap.core.datamodel.GeoCoding;
@@ -41,8 +40,10 @@ import org.esa.snap.core.util.ProductUtils;
 
 import javax.media.jai.Histogram;
 import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -89,20 +90,50 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
                 ProductUtils.copyMetadata(srcAbsRoot, trgAbsRoot);
             }
 
+            final Rectangle region = subsetDef.getRegion();
+            final MetadataAttribute height = trgAbsRoot.getAttribute("num_output_lines");
+            if(height != null)
+                height.getData().setElemUInt(targetProduct.getSceneRasterHeight());
+
+            final MetadataAttribute width = trgAbsRoot.getAttribute("num_samples_per_line");
+            if(width != null)
+                width.getData().setElemUInt(targetProduct.getSceneRasterWidth());
+
+            final MetadataAttribute offsetX = trgAbsRoot.getAttribute("subset_offset_x");
+            if(offsetX != null && region != null)
+                offsetX.getData().setElemUInt(region.x);
+
+            final MetadataAttribute offsetY = trgAbsRoot.getAttribute("subset_offset_y");
+            if(offsetY != null && region != null)
+                offsetY.getData().setElemUInt(region.y);
+
+            boolean isSARProduct = trgAbsRoot.getAttributeDouble("radar_frequency", 99999) != 99999;
+            if(!isSARProduct)
+                return;
+
+            // update subset metadata for SAR products
+
             boolean nearRangeOnLeft = isNearRangeOnLeft(targetProduct);
 
-            final MetadataAttribute firstLineTime = trgAbsRoot.getAttribute("first_line_time");
-            if(firstLineTime != null) {
-                final ProductData.UTC startTime = targetProduct.getStartTime();
-                if(startTime != null)
-                    firstLineTime.getData().setElems(startTime.getArray());
+            final int sourceImageHeight = sourceProduct.getSceneRasterHeight();
+            final double srcFirstLineTime = ProductData.UTC.parse(srcAbsRoot.getAttributeString("first_line_time")).getMJD(); // in days
+            final double srcLastLineTime = ProductData.UTC.parse(srcAbsRoot.getAttributeString("last_line_time")).getMJD(); // in days
+            final double lineTimeInterval = (srcLastLineTime - srcFirstLineTime) / (sourceImageHeight - 1); // in days
+            if(region != null) {
+                final int regionY = region.y;
+                final double regionHeight = region.getHeight();
+                final double newFirstLineTime = srcFirstLineTime + lineTimeInterval * regionY;
+                final double newLastLineTime = newFirstLineTime + lineTimeInterval * (regionHeight - 1);
+                final MetadataAttribute firstLineTime = trgAbsRoot.getAttribute("first_line_time");
+                if (firstLineTime != null) {
+                    firstLineTime.getData().setElems((new ProductData.UTC(newFirstLineTime)).getArray());
+                }
+                final MetadataAttribute lastLineTime = trgAbsRoot.getAttribute("last_line_time");
+                if (lastLineTime != null) {
+                    lastLineTime.getData().setElems((new ProductData.UTC(newLastLineTime)).getArray());
+                }
             }
-            final MetadataAttribute lastLineTime = trgAbsRoot.getAttribute("last_line_time");
-            if(lastLineTime != null) {
-                final ProductData.UTC endTime = targetProduct.getEndTime();
-                if(endTime != null)
-                    lastLineTime.getData().setElems(endTime.getArray());
-            }
+
             final MetadataAttribute totalSize = trgAbsRoot.getAttribute("total_size");
             if(totalSize != null)
                 totalSize.getData().setElemUInt(targetProduct.getRawStorageSize());
@@ -127,35 +158,36 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
                         0.5f, targetProduct.getSceneRasterHeight() - 1 + 0.5f);
             }
 
-            final MetadataAttribute height = trgAbsRoot.getAttribute("num_output_lines");
-            if(height != null)
-                height.getData().setElemUInt(targetProduct.getSceneRasterHeight());
-
-            final MetadataAttribute width = trgAbsRoot.getAttribute("num_samples_per_line");
-            if(width != null)
-                width.getData().setElemUInt(targetProduct.getSceneRasterWidth());
-
-            final MetadataAttribute offsetX = trgAbsRoot.getAttribute("subset_offset_x");
-            if(offsetX != null && subsetDef.getRegion() != null)
-                offsetX.getData().setElemUInt(subsetDef.getRegion().x);
-
-            final MetadataAttribute offsetY = trgAbsRoot.getAttribute("subset_offset_y");
-            if(offsetY != null && subsetDef.getRegion() != null)
-                offsetY.getData().setElemUInt(subsetDef.getRegion().y);
-
             final MetadataAttribute slantRange = trgAbsRoot.getAttribute("slant_range_to_first_pixel");
             if(slantRange != null) {
                 final TiePointGrid srTPG = targetProduct.getTiePointGrid("slant_range_time");
-                if(srTPG != null) {
-                    final double slantRangeTime;
-                    if (nearRangeOnLeft) {
-                        slantRangeTime = srTPG.getPixelDouble(0,0) / 1000000000.0; // ns to s
+                if(srTPG != null && region != null) {
+                    final boolean srgrFlag = srcAbsRoot.getAttributeInt("srgr_flag") != 0;
+                    double slantRangeDist;
+                    if (srgrFlag) {
+                        final double slantRangeTime;
+                        if (nearRangeOnLeft) {
+                            slantRangeTime = srTPG.getPixelDouble(
+                                    region.x, region.y) / 1000000000.0; // ns to s
+                        } else {
+                            slantRangeTime = srTPG.getPixelDouble(
+                                    targetProduct.getSceneRasterWidth() - region.x - 1,
+                                    region.y) / 1000000000.0; // ns to s
+                        }
+                        final double halfLightSpeed = 299792458.0 / 2.0;
+                        slantRangeDist = slantRangeTime * halfLightSpeed;
+                        slantRange.getData().setElemDouble(slantRangeDist);
                     } else {
-                        slantRangeTime = srTPG.getPixelDouble(targetProduct.getSceneRasterWidth()-1,0) / 1000000000.0; // ns to s
+                        final double slantRangeToFirstPixel = srcAbsRoot.getAttributeDouble("slant_range_to_first_pixel");
+                        final double rangeSpacing = srcAbsRoot.getAttributeDouble("RANGE_SPACING", 0);
+                        if (nearRangeOnLeft) {
+                            slantRangeDist = slantRangeToFirstPixel + region.x*rangeSpacing;
+                        } else {
+                            slantRangeDist = slantRangeToFirstPixel +
+                                    (targetProduct.getSceneRasterWidth() - region.x - 1)*rangeSpacing;
+                        }
+                        slantRange.getData().setElemDouble(slantRangeDist);
                     }
-                    final double halfLightSpeed = 299792458.0 / 2.0;
-                    final double slantRangeDist = slantRangeTime * halfLightSpeed;
-                    slantRange.getData().setElemDouble(slantRangeDist);
                 }
             }
 
@@ -304,16 +336,48 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
                                          pm);
                 // else if the desired destination region is smaller than the source raster
             } else {
-                readBandRasterDataSubSampling(sourceBand,
-                                              sourceOffsetX, sourceOffsetY,
-                                              sourceWidth, sourceHeight,
-                                              sourceStepX, sourceStepY,
-                                              destBuffer,
-                                              destWidth,
-                                              pm);
+                Rectangle destRect = new Rectangle(destOffsetX, destOffsetY, destWidth, destHeight);
+                readBandRasterDataSubsampled(sourceBand, destBuffer, destRect, sourceOffsetX, sourceOffsetY,
+                                             sourceWidth, sourceHeight, sourceStepX, sourceStepY);
             }
         }
     }
+
+    private static void readBandRasterDataSubsampled(Band band, ProductData destData, Rectangle destRect, int sourceOffsetX, int sourceOffsetY,
+                                                     int sourceWidth, int sourceHeight, int sourceStepX, int sourceStepY) throws IOException {
+
+        Point[] tileIndices = band.getSourceImage().getTileIndices(new Rectangle(sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight));
+        HashMap<Rectangle, ProductData> tileMap = new HashMap<>();
+        for (Point tileIndex : tileIndices) {
+            Rectangle tileRect = band.getSourceImage().getTileRect(tileIndex.x, tileIndex.y);
+            if (tileRect.isEmpty()) {
+                continue;
+            }
+            final ProductData tileData = ProductData.createInstance(band.getDataType(), tileRect.width * tileRect.height);
+            band.readRasterData(tileRect.x, tileRect.y, tileRect.width, tileRect.height, tileData, ProgressMonitor.NULL);
+            tileMap.put(tileRect, tileData);
+        }
+
+        for (int y = 0; y < destRect.height; y++) {
+            final int currentSrcYOffset = sourceOffsetY + y * sourceStepY;
+            int currentDestYOffset = y * destRect.width;
+            for (int x = 0; x < destRect.width; x++) {
+                double value = getSourceValue(band, tileMap, sourceOffsetX + x * sourceStepX, currentSrcYOffset);
+                destData.setElemDoubleAt(currentDestYOffset + x, value);
+            }
+
+        }
+    }
+
+    private static double getSourceValue(Band band, HashMap<Rectangle, ProductData> tileMap, int sourceX, int sourceY) {
+        MultiLevelImage img = band.getSourceImage();
+        Rectangle tileRect = img.getTileRect(img.XToTileX(sourceX), img.YToTileY(sourceY));
+        ProductData productData = tileMap.get(tileRect);
+        int currentX = sourceX - tileRect.x;
+        int currentY = sourceY - tileRect.y;
+        return productData.getElemDoubleAt(currentY * tileRect.width + currentX);
+    }
+
 
     private void copyBandRasterDataFully(Band sourceBand, ProductData destBuffer, int destWidth, int destHeight) {
         copyData(sourceBand.getRasterData(),
@@ -335,33 +399,6 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
                                   destBuffer, pm);
     }
 
-    private void readBandRasterDataSubSampling(Band sourceBand,
-                                               int sourceOffsetX, int sourceOffsetY,
-                                               int sourceWidth, int sourceHeight,
-                                               int sourceStepX, int sourceStepY,
-                                               ProductData destBuffer,
-                                               int destWidth, ProgressMonitor pm) throws IOException {
-        final int sourceMinY = sourceOffsetY;
-        final int sourceMaxY = sourceOffsetY + sourceHeight - 1;
-        ProductData lineBuffer = ProductData.createInstance(destBuffer.getType(), sourceWidth);
-        int destPos = 0;
-        try {
-            pm.beginTask("Reading sub sampled raster data...", 2 * (sourceMaxY - sourceMinY));
-            for (int sourceY = sourceMinY; sourceY <= sourceMaxY; sourceY += sourceStepY) {
-                sourceBand.readRasterData(sourceOffsetX, sourceY, sourceWidth, 1, lineBuffer,
-                                          SubProgressMonitor.create(pm, 1));
-                if (sourceStepX == 1) {
-                    copyData(lineBuffer, 0, destBuffer, destPos, destWidth);
-                } else {
-                    copyLine(lineBuffer, 0, sourceWidth, sourceStepX, destBuffer, destPos);
-                }
-                pm.worked(1);
-                destPos += destWidth;
-            }
-        } finally {
-            pm.done();
-        }
-    }
 
     private void copyBandRasterDataSubSampling(Band sourceBand,
                                                int sourceOffsetX, int sourceOffsetY,
@@ -667,7 +704,7 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
 
             if (isNodeAccepted(gridName) || (gridName.equals(latGridName) || gridName.equals(lonGridName))) {
                 final TiePointGrid tiePointGrid = TiePointGrid.createSubset(sourceTiePointGrid, getSubsetDef());
-                if (isFullScene(getSubsetDef(), sourceTiePointGrid) && sourceTiePointGrid.isStxSet()) {
+                if (isFullScene(getSubsetDef(), tiePointGrid) && sourceTiePointGrid.isStxSet()) {
                     copyStx(sourceTiePointGrid, tiePointGrid);
                 }
                 product.addTiePointGrid(tiePointGrid);
@@ -708,17 +745,6 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
         }
     }
 
-    private boolean isFullScene(ProductSubsetDef subsetDef) {
-        if (subsetDef == null) {
-            return true;
-        }
-        final Rectangle sourceRegion = new Rectangle(0, 0, sourceProduct.getSceneRasterWidth(), getSceneRasterHeight());
-        return subsetDef.getRegion() == null
-                || subsetDef.getRegion().equals(sourceRegion)
-                && subsetDef.getSubSamplingX() == 1
-                && subsetDef.getSubSamplingY() == 1;
-    }
-
     private boolean isFullScene(ProductSubsetDef subsetDef, RasterDataNode rasterDataNode) {
         if (subsetDef == null) {
             return true;
@@ -740,6 +766,17 @@ public class ProductSubsetBuilder extends AbstractProductBuilder {
 
         if (!getSourceProduct().transferGeoCodingTo(product, getSubsetDef())) {
             Debug.trace("GeoCoding could not be transferred.");
+        }
+
+        //Adjust sceneGeocoding
+        if(getSubsetDef() != null && getSubsetDef().getRegionMap() != null) {
+            for(RasterDataNode rasterDataNode : product.getRasterDataNodes()) {
+                if(rasterDataNode.getRasterWidth() == product.getSceneRasterSize().getWidth() &&
+                        rasterDataNode.getRasterHeight() == product.getSceneRasterSize().getHeight()
+                        && rasterDataNode.getGeoCoding() != null) {
+                    ProductUtils.copyGeoCoding(rasterDataNode,product);
+                }
+            }
         }
     }
 

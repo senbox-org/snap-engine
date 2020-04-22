@@ -11,6 +11,8 @@ import java.nio.file.Path;
 import java.util.Random;
 import java.util.stream.IntStream;
 
+import static org.junit.Assert.fail;
+
 
 /**
  * @author Marco Peters
@@ -59,9 +61,16 @@ public class MaxStringAttributeLengthTest {
 
     @Test
     public void testMaxStringVariableAttributeLengthNC3() throws IOException {
-        NFileWriteable ncFile = N3FileWriteable.create(Files.createTempFile(getClass().getSimpleName(), null).toString());
-        NVariable variable = ncFile.addScalarVariable("metadataVariable", DataType.BYTE);
-        variable.addAttribute("longVariableAttributeValue", createLongString(TOO_LONG));
+        final Path tempFile = Files.createTempFile(getClass().getSimpleName(), null);
+        NFileWriteable ncFile = N3FileWriteable.create(tempFile.toString());
+        try {
+            NVariable variable = ncFile.addScalarVariable("metadataVariable", DataType.BYTE);
+            variable.addAttribute("longVariableAttributeValue", createLongString(TOO_LONG));
+        } finally {
+            if (!tempFile.toFile().delete()) {
+                fail("unable to delete test file");
+            }
+        }
     }
 
     private String createLongString(int length) {

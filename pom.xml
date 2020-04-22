@@ -22,7 +22,7 @@
 
     <groupId>org.esa.snap</groupId>
     <artifactId>snap-engine</artifactId>
-    <version>7.0.0-SNAPSHOT</version>
+    <version>8.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>SNAP Engine Project</name>
@@ -101,9 +101,10 @@
         <module>blue-marble-worldmap</module>
         <module>globcover-worldmap</module>
         <module>snap-sta</module>
-        <module>snap-cloud-exploitation-platform</module>
+        <module>snap-remote-execution</module>
 
         <module>lib-hdf</module>
+        <module>snap-test-utils</module>
     </modules>
 
     <organization>
@@ -194,6 +195,13 @@
                 <groupId>org.esa.snap</groupId>
                 <artifactId>snap-engine-utilities</artifactId>
                 <version>${snap.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.esa.snap</groupId>
+                <artifactId>snap-test-utils</artifactId>
+                <version>${snap.version}</version>
+                <type>test-jar</type>
+                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.esa.snap</groupId>
@@ -315,7 +323,7 @@
             <dependency>
                 <groupId>it.geosolutions.imageio-ext</groupId>
                 <artifactId>imageio-ext-tiff</artifactId>
-                <version>1.2-SENTBX</version>
+                <version>1.2.4-SNAPSHOT</version>
                 <exclusions>
                     <exclusion>
                         <groupId>javax.media</groupId>
@@ -458,50 +466,11 @@
                         <groupId>it.geosolutions.imageio-ext</groupId>
                         <artifactId>imageio-ext-utilities</artifactId>
                     </exclusion>
-
                 </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.geotools</groupId>
                 <artifactId>gt-shapefile</artifactId>
-                <version>${geotools.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_core</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_codec</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_imageio</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.geotools</groupId>
-                <artifactId>gt-render</artifactId>
-                <version>${geotools.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_core</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_codec</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.media</groupId>
-                        <artifactId>jai_imageio</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.geotools</groupId>
-                <artifactId>gt-cql</artifactId>
                 <version>${geotools.version}</version>
                 <exclusions>
                     <exclusion>
@@ -586,18 +555,18 @@
 
             <dependency>
                 <groupId>javax.media.jai</groupId>
-                <artifactId>jai-core</artifactId>
-                <version>1.1.3</version>
+                <artifactId>jai-core-openjdk</artifactId>
+                <version>1.1.4</version>
             </dependency>
             <dependency>
                 <groupId>javax.media.jai</groupId>
-                <artifactId>jai-codec</artifactId>
-                <version>1.1.3</version>
+                <artifactId>jai-codec-openjdk</artifactId>
+                <version>1.1.4</version>
             </dependency>
             <dependency>
                 <groupId>javax.media.jai</groupId>
-                <artifactId>mlibwrapper-jai</artifactId>
-                <version>1.1.3</version>
+                <artifactId>mlibwrapper-jai-openjdk</artifactId>
+                <version>1.1.4</version>
             </dependency>
             <dependency>
                 <!-- This artifact is build by our own. It fixes the vendorName == null! problem.
@@ -718,6 +687,14 @@
                 <groupId>org.esa.snap</groupId>
                 <artifactId>snap-smart-configurator</artifactId>
                 <version>${snap.version}</version>
+            </dependency>
+
+            <!-- JSoup -->
+
+            <dependency>
+                <groupId>org.jsoup</groupId>
+                <artifactId>jsoup</artifactId>
+                <version>1.11.3</version>
             </dependency>
 
         </dependencies>
@@ -851,7 +828,8 @@
                         <systemPropertyVariables>
                             <org.esa.snap.testdata.out>target/test-data</org.esa.snap.testdata.out>
                         </systemPropertyVariables>
-                        <argLine>-Xmx1024M -Dfile.encoding=UTF-8 @{argLine}</argLine>
+                        <!--<argLine>-Xmx1024M -Dfile.encoding=UTF-8 @{argLine}</argLine>-->
+                        <argLine>-Xmx1024M -Dfile.encoding=UTF-8</argLine>
                     </configuration>
                 </plugin>
 
@@ -944,9 +922,9 @@
                 </plugin>
 
                 <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
+                    <groupId>org.apache.netbeans.utilities</groupId>
                     <artifactId>nbm-maven-plugin</artifactId>
-                    <version>4.1</version>
+                    <version>4.4</version>
                     <extensions>true</extensions>
                     <dependencies>
                         <dependency>
@@ -956,6 +934,11 @@
                         </dependency>
                     </dependencies>
                     <configuration>
+                        <!-- necessary because of issue described here:
+                        http://mail-archives.apache.org/mod_mbox/netbeans-dev/201906.mbox/%3cCAArD4mAMKOXQtxCwcMdB2tVEXCNirEfKT4+c=0-rUm6YDg8EHg@mail.gmail.com%3e
+                        -->
+                        <verifyRuntime>false</verifyRuntime>
+
                         <moduleType>normal</moduleType>
                         <licenseName>GPL 3</licenseName>
                         <licenseFile>${project.basedir}/../LICENSE.txt</licenseFile>
@@ -1054,7 +1037,7 @@
             </plugin>
 
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
+                <groupId>org.apache.netbeans.utilities</groupId>
                 <artifactId>nbm-maven-plugin</artifactId>
             </plugin>
 
@@ -1071,7 +1054,7 @@
                         <configuration>
                             <rules>
                                 <requireMavenVersion>
-                                    <version>[3.2.5,3.6.0]</version>
+                                    <version>[3.2.5,)</version>
                                 </requireMavenVersion>
                                 <requireJavaVersion>
                                     <version>1.8</version>

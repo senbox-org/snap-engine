@@ -19,6 +19,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 /**
  * test ProductSetReader usage in GPF
@@ -39,10 +42,10 @@ public class ProductSetReaderOpTest {
     }
 
     @Test
-    public void testProductSetGraph() throws IOException, GraphException {
-        final String graphPath = ProductSetReaderOpTest.class.getResource("/org/esa/snap/core/gpf/common/productset/ProductSetMosaicGraph.xml").getFile();
-        final File product1 = new File(ProductSetReaderOpTest.class.getResource("/org/esa/snap/core/gpf/common/productset/subset1.dim").getFile());
-        final File product2 = new File(ProductSetReaderOpTest.class.getResource("/org/esa/snap/core/gpf/common/productset/subset2.dim").getFile());
+    public void testProductSetGraph() throws IOException, GraphException, URISyntaxException {
+        final String graphPath = getTestFilePath("/org/esa/snap/core/gpf/common/productset/ProductSetMosaicGraph.xml");
+        final File product1 = new File(getTestFilePath("/org/esa/snap/core/gpf/common/productset/subset1.dim"));
+        final File product2 = new File(getTestFilePath("/org/esa/snap/core/gpf/common/productset/subset2.dim"));
         final File[] srcFiles = new File[] { product1, product2 };
 
         Graph graph;
@@ -57,9 +60,9 @@ public class ProductSetReaderOpTest {
     }
 
     @Test
-    public void testFolderProductSetGraph() throws IOException, GraphException {
-        final String graphPath = ProductSetReaderOpTest.class.getResource("/org/esa/snap/core/gpf/common/productset/ProductSetMosaicGraph.xml").getFile();
-        final File product1 = new File(ProductSetReaderOpTest.class.getResource("/org/esa/snap/core/gpf/common/productset/subset1.dim").getFile());
+    public void testFolderProductSetGraph() throws IOException, GraphException, URISyntaxException {
+        final String graphPath = getTestFilePath("/org/esa/snap/core/gpf/common/productset/ProductSetMosaicGraph.xml");
+        final File product1 = new File(getTestFilePath("/org/esa/snap/core/gpf/common/productset/subset1.dim"));
         final File[] srcFiles = new File[] { product1.getParentFile() };
 
         Graph graph;
@@ -102,5 +105,11 @@ public class ProductSetReaderOpTest {
                 return n;
         }
         return null;
+    }
+
+    private String getTestFilePath(String name) throws URISyntaxException {
+        URL url = ProductSetReaderOpTest.class.getResource(name);
+        URI uri = new URI(url.toString());
+        return uri.getPath();
     }
 }

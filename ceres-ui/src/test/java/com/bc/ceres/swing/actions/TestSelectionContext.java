@@ -18,15 +18,13 @@ package com.bc.ceres.swing.actions;
 
 import com.bc.ceres.swing.selection.Selection;
 import com.bc.ceres.swing.selection.support.DefaultSelectionContext;
-import org.junit.Ignore;
 
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.util.ArrayList;
 
-@Ignore
 class TestSelectionContext extends DefaultSelectionContext {
-    ArrayList<String> items = new ArrayList<String>();
+    ArrayList<String> items = new ArrayList<>();
 
     TestSelectionContext() {
         items.add("A");
@@ -36,14 +34,12 @@ class TestSelectionContext extends DefaultSelectionContext {
 
     @Override
     public boolean canInsert(Transferable contents) {
-        boolean flavorSupported = contents.isDataFlavorSupported(DataFlavor.stringFlavor);
-        return flavorSupported;
+        return contents.isDataFlavorSupported(DataFlavor.stringFlavor);
     }
 
     @Override
     public void insert(Transferable transferable) {
-        String value = getValue(transferable);
-        items.add(value);
+        items.add(getValue(transferable));
     }
 
     @Override

@@ -7,7 +7,8 @@ import org.junit.Test;
 
 import java.util.Calendar;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 
 /**
@@ -37,7 +38,7 @@ public class TemporalDataPeriodTest {
         float[] latitude;
     }
 
-    public static final String[] INPUT_FILES = {
+    private static final String[] INPUT_FILES = {
             "MER_RR__2PNUPA20051202_102336_000026292043_00051_19644_7303.N1",
             "MER_RR__2PNUPA20051202_120412_000026292043_00052_19645_7304.N1",
             "MER_RR__2PNUPA20051202_134448_000026292043_00053_19646_1187.N1",
@@ -71,10 +72,9 @@ public class TemporalDataPeriodTest {
     /**
      * at the moment: just printing
      *
-     * @throws Exception
      */
     @Test
-    @Ignore("Ignoring in order to not irritate the build server")
+    @Ignore("not for running on the test server, local testing only")
     public void testName() throws Exception {
 
         instr input = new instr();

@@ -27,7 +27,7 @@ import java.util.Locale;
 
 /**
  * Performance tests for FastMath.
- * Not enabled by default, as the class does not end in Test.
+ * Not enabled by default, as the class does not end in test.
  * <p>
  * Invoke by running<br/>
  * {@code mvn test -Dtest=org.esa.snap.util.math.FastMathPerformance}<br/>
@@ -59,6 +59,7 @@ public class FastMathPerformance {
     }
 
     private static void report(String name, double result, long strictMathTime, long fastMathTime, long mathTime) {
+        @SuppressWarnings("UnnecessaryLocalVariable")
         long unitTime = mathTime;
 
         System.out.println(String.format(FMT_DTL,
@@ -74,7 +75,7 @@ public class FastMathPerformance {
     }
 
     @Test
-    @Ignore
+    @Ignore("Performance run for FastMath. Not a unit level test")
     public void test() {
         for (int i = 0; i < 10; ++i) {
             testLog();
@@ -103,7 +104,7 @@ public class FastMathPerformance {
         System.out.println("#results = " + results.size());
     }
 
-    public void testLog() {
+    private void testLog() {
         System.gc();
         double x = 0;
         long time = System.nanoTime();
@@ -128,7 +129,7 @@ public class FastMathPerformance {
         report("log", x + y + z, strictMath, fastTime, mathTime);
     }
 
-    public void testLog10() {
+    private void testLog10() {
         System.gc();
         double x = 0;
         long time = System.nanoTime();
@@ -153,7 +154,7 @@ public class FastMathPerformance {
         report("log10", x + y + z, strictMath, fastTime, mathTime);
     }
 
-    public void testLog1p() {
+    private void testLog1p() {
         System.gc();
         double x = 0;
         long time = System.nanoTime();
@@ -178,7 +179,7 @@ public class FastMathPerformance {
         report("log1p", x + y + z, strictMath, fastTime, mathTime);
     }
 
-    public void testPow() {
+    private void testPow() {
         System.gc();
         double x = 0;
         long time = System.nanoTime();
@@ -202,7 +203,7 @@ public class FastMathPerformance {
         report("pow", x + y + z, strictTime, fastTime, mathTime);
     }
 
-    public void testPowFromIntToInt() {
+    private void testPowFromIntToInt() {
         System.gc();
         double x = 0;
         long time = System.nanoTime();
@@ -226,7 +227,7 @@ public class FastMathPerformance {
         report("powII", x + y + z, strictTime, fastTime, mathTime);
     }
 
-    public void testExp() {
+    private void testExp() {
         System.gc();
         double x = 0;
         long time = System.nanoTime();
@@ -251,7 +252,7 @@ public class FastMathPerformance {
         report("exp", x + y + z, strictTime, fastTime, mathTime);
     }
 
-    public void testSin() {
+    private void testSin() {
         System.gc();
         double x = 0;
         long time = System.nanoTime();
@@ -276,7 +277,7 @@ public class FastMathPerformance {
         report("sin", x + y + z, strictTime, fastTime, mathTime);
     }
 
-    public void testAsin() {
+    private void testAsin() {
         System.gc();
         double x = 0;
         long time = System.nanoTime();
@@ -301,7 +302,7 @@ public class FastMathPerformance {
         report("asin", x + y + z, strictTime, fastTime, mathTime);
     }
 
-    public void testCos() {
+    private void testCos() {
         System.gc();
         double x = 0;
         long time = System.nanoTime();
@@ -326,7 +327,7 @@ public class FastMathPerformance {
         report("cos", x + y + z, strictTime, fastTime, mathTime);
     }
 
-    public void testAcos() {
+    private void testAcos() {
         System.gc();
         double x = 0;
         long time = System.nanoTime();
@@ -350,7 +351,7 @@ public class FastMathPerformance {
         report("acos", x + y + z, strictTime, fastTime, mathTime);
     }
 
-    public void testTan() {
+    private void testTan() {
         System.gc();
         double x = 0;
         long time = System.nanoTime();
@@ -375,7 +376,7 @@ public class FastMathPerformance {
         report("tan", x + y + z, strictTime, fastTime, mathTime);
     }
 
-    public void testAtan() {
+    private void testAtan() {
         System.gc();
         double x = 0;
         long time = System.nanoTime();
@@ -400,7 +401,7 @@ public class FastMathPerformance {
         report("atan", x + y + z, strictTime, fastTime, mathTime);
     }
 
-    public void testAtan2() {
+    private void testAtan2() {
         System.gc();
         double x = 0;
         long time = System.nanoTime();
@@ -425,7 +426,7 @@ public class FastMathPerformance {
         report("atan2", x + y + z, strictTime, fastTime, mathTime);
     }
 
-    public void testHypot() {
+    private void testHypot() {
         System.gc();
         double x = 0;
         long time = System.nanoTime();
@@ -450,7 +451,7 @@ public class FastMathPerformance {
         report("hypot", x + y + z, strictTime, fastTime, mathTime);
     }
 
-    public void testCbrt() {
+    private void testCbrt() {
         System.gc();
         double x = 0;
         long time = System.nanoTime();
@@ -475,7 +476,7 @@ public class FastMathPerformance {
         report("cbrt", x + y + z, strictTime, fastTime, mathTime);
     }
 
-    public void testSqrt() {
+    private void testSqrt() {
         System.gc();
         double x = 0;
         long time = System.nanoTime();
@@ -500,7 +501,7 @@ public class FastMathPerformance {
         report("sqrt", x + y + z, strictTime, fastTime, mathTime);
     }
 
-    public void testCosh() {
+    private void testCosh() {
         System.gc();
         double x = 0;
         long time = System.nanoTime();
@@ -525,7 +526,7 @@ public class FastMathPerformance {
         report("cosh", x + y + z, strictTime, fastTime, mathTime);
     }
 
-    public void testSinh() {
+    private void testSinh() {
         System.gc();
         double x = 0;
         long time = System.nanoTime();
@@ -550,7 +551,7 @@ public class FastMathPerformance {
         report("sinh", x + y + z, strictTime, fastTime, mathTime);
     }
 
-    public void testTanh() {
+    private void testTanh() {
         System.gc();
         double x = 0;
         long time = System.nanoTime();
@@ -575,7 +576,7 @@ public class FastMathPerformance {
         report("tanh", x + y + z, strictTime, fastTime, mathTime);
     }
 
-    public void testExpm1() {
+    private void testExpm1() {
         System.gc();
         double x = 0;
         long time = System.nanoTime();
@@ -599,7 +600,7 @@ public class FastMathPerformance {
         report("expm1", x + y + z, strictTime, fastTime, mathTime);
     }
 
-    public void testAbs() {
+    private void testAbs() {
         System.gc();
         double x = 0;
         long time = System.nanoTime();

@@ -41,6 +41,7 @@ import java.io.IOException;
 
 public abstract class AbstractNetCdfReaderPlugIn implements ProductReaderPlugIn {
 
+    private static final String ZIP_FILE_EXTENSION = ".zip";
     ///////////////////////////////////////////////
     // ProductReaderPlugIn related methods
 
@@ -62,13 +63,14 @@ public abstract class AbstractNetCdfReaderPlugIn implements ProductReaderPlugIn 
             // ok -- just clean up and return UNABLE
             if (input != null) {
                 String pathname = input.toString();
-                if (pathname.toLowerCase().trim().endsWith(".zip")) {
+                if (pathname.toLowerCase().trim().endsWith(ZIP_FILE_EXTENSION)) {
                     final String trimmed = pathname.trim();
                     pathname = trimmed.substring(0, trimmed.length() - 4);
                     final File file = new File(pathname);
                     if (file.isFile() && file.length() == 0) {
-                        file.deleteOnExit();
-                        file.delete();
+                        if(!file.delete()) {
+                            file.deleteOnExit();
+                        }
                     }
                 }
             }

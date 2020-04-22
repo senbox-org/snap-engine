@@ -1,9 +1,11 @@
 package org.esa.snap.jython;
 
 
+import org.esa.snap.test.LongTestRunner;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.python.core.PyObject;
 import org.python.util.PythonInterpreter;
 
@@ -12,28 +14,31 @@ import java.net.URI;
 import java.net.URL;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Norman Fomferra
  * see org.esa.snap.python.gpf.PyOperatorSpiTest
  */
+@RunWith(LongTestRunner.class)
 public class PluginActivatorTest {
 
     @BeforeClass
-    public static void setUp() throws Exception {
+    public static void setUp() {
         File file = getResourceFile("/");
         assertTrue(file.isDirectory());
         System.setProperty(PluginActivator.JYTHON_EXTRA_PATHS_PROPERTY, file.getPath());
     }
 
     @AfterClass
-    public static void tearDown() throws Exception {
+    public static void tearDown() {
         System.clearProperty(PluginActivator.JYTHON_EXTRA_PATHS_PROPERTY);
     }
 
     @Test
-    public void testActivator() throws Exception {
+    public void testActivator() {
 
         PluginActivator activator = new PluginActivator();
 

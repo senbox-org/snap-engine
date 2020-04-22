@@ -35,6 +35,7 @@ import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.RasterDataNode;
 import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.dataop.barithm.BandArithmetic;
+import org.esa.snap.core.dataop.resamp.Resampling;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorException;
 import org.esa.snap.core.gpf.OperatorSpi;
@@ -56,6 +57,7 @@ import java.awt.geom.PathIterator;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Level;
 
 import static java.lang.Math.*;
@@ -72,7 +74,7 @@ import static java.lang.Math.*;
  * @since BEAM 4.9
  */
 @OperatorMetadata(alias = "Subset",
-        category = "Raster/Geometric",
+        category = "Raster",
         authors = "Marco Zuehlke, Norman Fomferra, Marco Peters",
         version = "1.2",
         copyright = "(c) 2011 by Brockmann Consult",
@@ -178,6 +180,8 @@ public class SubsetOp extends Operator {
 
     @Override
     public void initialize() throws OperatorException {
+        boolean isMultisize = sourceProduct.isMultiSize();
+
         subsetReader = new ProductSubsetBuilder();
         final ProductSubsetDef subsetDef = new ProductSubsetDef();
         if (tiePointGridNames != null) {
@@ -201,13 +205,14 @@ public class SubsetOp extends Operator {
         }
 
         if (geoRegion != null) {
-            if(sourceProduct.isMultiSize()) {
-                subsetDef.setRegionMap(computeRegionMap(geoRegion,sourceProduct,null));
+            if(isMultisize) {
+                subsetDef.setRegionMap(computeRegionMap(geoRegion,sourceProduct,subsetDef.getNodeNames()));
+                region = null;
             } else {
                 region = computePixelRegion(sourceProduct, geoRegion, 0);
             }
 
-            if (region.isEmpty()) {
+            if (region != null && region.isEmpty()) {
                 targetProduct = new Product("Empty_" + sourceProduct.getName(), "EMPTY", 0, 0);
                 String msg = "No intersection with source product boundary " + sourceProduct.getName();
                 targetProduct.setDescription(msg);
@@ -220,7 +225,7 @@ public class SubsetOp extends Operator {
         }
         
         if (region != null && !region.isEmpty()) {
-            if(referenceBand == null || referenceBand.length() == 0) {
+            if(!isMultisize || referenceBand == null) {
                 if (region.width == 0 || region.x + region.width > sourceProduct.getSceneRasterWidth()) {
                     region.width = sourceProduct.getSceneRasterWidth() - region.x;
                 }
@@ -229,7 +234,22 @@ public class SubsetOp extends Operator {
                 }
                 subsetDef.setRegion(region);
             } else {
-                subsetDef.setRegionMap(computeRegionMap (region, referenceBand, sourceProduct, null));
+                subsetDef.setRegionMap(computeRegionMap (region, referenceBand, sourceProduct, subsetDef.getNodeNames()));
+            }
+        }
+
+        if(region == null && geoRegion == null && subsetDef.getNodeNames() != null) {
+            HashMap<String,Rectangle> regionMap = new HashMap<>();
+            for (String nodeName : subsetDef.getNodeNames()) {
+                RasterDataNode rdn = sourceProduct.getRasterDataNode(nodeName);
+                if(rdn == null || rdn.getRasterWidth() == 0 || rdn.getRasterHeight() == 0) {
+                    continue;
+                }
+                regionMap.put(nodeName,new Rectangle(rdn.getRasterWidth(),
+                              rdn.getRasterHeight()));
+            }
+            if(regionMap.size() > 0) {
+                subsetDef.setRegionMap(regionMap);
             }
         }
 
@@ -418,7 +438,11 @@ public class SubsetOp extends Operator {
 
     public static HashMap<String,Rectangle> computeRegionMap (Rectangle region, Product product, String[] rasterNames) {
         if(rasterNames == null || rasterNames.length == 0) {
-            rasterNames = product.getBandNames();
+            List<RasterDataNode> rasterDataNodes = product.getRasterDataNodes();
+            rasterNames = new String[rasterDataNodes.size()];
+            for(int i = 0 ; i < rasterDataNodes.size() ; i++) {
+                rasterNames[i] = rasterDataNodes.get(i).getName();
+            }
         }
 
         HashMap<String,Rectangle> regionMap = new HashMap<>();
@@ -428,7 +452,7 @@ public class SubsetOp extends Operator {
         Geometry geoRegion = computeGeoRegion(product,region);
         Geometry finalGeometry = null;
         for(String rasterName : rasterNames) {
-            RasterDataNode rasterDataNode = product.getBand(rasterName);
+            RasterDataNode rasterDataNode = product.getRasterDataNode(rasterName);
             if(rasterDataNode == null) {
                 continue;
             }
@@ -444,7 +468,7 @@ public class SubsetOp extends Operator {
         }
 
         for(String rasterName : rasterNames) {
-            RasterDataNode rasterDataNode = product.getBand(rasterName);
+            RasterDataNode rasterDataNode = product.getRasterDataNode(rasterName);
             if(rasterDataNode == null) {
                 continue;
             }
@@ -457,7 +481,11 @@ public class SubsetOp extends Operator {
 
     public static HashMap<String,Rectangle> computeRegionMap (Rectangle region, String referenceBandName, Product product, String[] rasterNames) {
         if(rasterNames == null || rasterNames.length == 0) {
-            rasterNames = product.getBandNames();
+            List<RasterDataNode> rasterDataNodes = product.getRasterDataNodes();
+            rasterNames = new String[rasterDataNodes.size()];
+            for(int i = 0 ; i < rasterDataNodes.size() ; i++) {
+                rasterNames[i] = rasterDataNodes.get(i).getName();
+            }
         }
 
         HashMap<String,Rectangle> regionMap = new HashMap<>();
@@ -466,7 +494,7 @@ public class SubsetOp extends Operator {
         Geometry geoRegion = computeGeoRegion(referenceNode,region);
 
         for(String rasterName : rasterNames) {
-            RasterDataNode rasterDataNode = product.getBand(rasterName);
+            RasterDataNode rasterDataNode = product.getRasterDataNode(rasterName);
             if(rasterDataNode == null) {
                 continue;
             }
@@ -483,13 +511,17 @@ public class SubsetOp extends Operator {
 
     public static HashMap<String,Rectangle> computeRegionMap (Geometry geoRegion, Product product, String[] rasterNames) {
         if(rasterNames == null || rasterNames.length == 0) {
-            rasterNames = product.getBandNames();
+            List<RasterDataNode> rasterDataNodes = product.getRasterDataNodes();
+            rasterNames = new String[rasterDataNodes.size()];
+            for(int i = 0 ; i < rasterDataNodes.size() ; i++) {
+                rasterNames[i] = rasterDataNodes.get(i).getName();
+            }
         }
 
         HashMap<String,Rectangle> regionMap = new HashMap<>();
 
         for(String rasterName : rasterNames) {
-            RasterDataNode rasterDataNode = product.getBand(rasterName);
+            RasterDataNode rasterDataNode = product.getRasterDataNode(rasterName);
             if(rasterDataNode == null) {
                 continue;
             }
