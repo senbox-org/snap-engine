@@ -305,6 +305,7 @@ public class VirtualBandOpImage extends SingleBandedOpImage {
                 dataType = rasterDataNode.getDataType();
             }
             final Raster sourceRaster = sourceImage.getData(destRect);
+            System.out.println("destRect = " + destRect.toString());
             if (sourceRaster instanceof NoDataRaster) {
                 return false;
             }

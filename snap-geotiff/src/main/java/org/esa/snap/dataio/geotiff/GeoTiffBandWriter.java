@@ -39,7 +39,7 @@ import java.util.ArrayList;
  */
 class GeoTiffBandWriter {
 
-    private ImageOutputStream ios;
+    private final ImageOutputStream ios;
     private TiffIFD ifd;
     private Product tempProduct;
     private ArrayList<Band> bandsList;
@@ -59,7 +59,7 @@ class GeoTiffBandWriter {
 
     public void dispose() {
         ifd = null;
-        ios = null;
+//        ios = null;
         tempProduct = null;
     }
 
@@ -117,56 +117,80 @@ class GeoTiffBandWriter {
         pm.beginTask("Writing band '" + sourceBand.getName() + "'...", regionHeight);
         try {
             for (int y = 0; y < regionHeight; y++) {
-                ios.seek(startOffset + y * sourceWidthBytes);
                 final int stride = y * regionWidth;
                 if (bandDataType == ProductData.TYPE_UINT8) {
                     final byte[] data = new byte[regionWidth];
                     for (int x = 0; x < regionWidth; x++) {
                         data[x] = (byte) regionData.getElemUIntAt(stride + x);
                     }
-                    ios.write(data);
+                    synchronized (ios) {
+                        ios.seek(startOffset + y * sourceWidthBytes);
+                        ios.write(data);
+                    }
                 } else if (bandDataType == ProductData.TYPE_INT8) {
                     final byte[] data = new byte[regionWidth];
                     for (int x = 0; x < regionWidth; x++) {
                         data[x] = (byte) regionData.getElemIntAt(stride + x);
                     }
-                    ios.write(data);
+                    synchronized (ios) {
+                        ios.seek(startOffset + y * sourceWidthBytes);
+                        ios.write(data);
+                    }
                 } else if (bandDataType == ProductData.TYPE_UINT16) {
                     final short[] data = new short[regionWidth];
                     for (int x = 0; x < regionWidth; x++) {
                         data[x] = (short) regionData.getElemUIntAt(stride + x);
                     }
-                    ios.writeShorts(data, 0, regionWidth);
+                    synchronized (ios) {
+                        ios.seek(startOffset + y * sourceWidthBytes);
+                        ios.writeShorts(data, 0, regionWidth);
+                    }
                 } else if (bandDataType == ProductData.TYPE_INT16) {
                     final short[] data = new short[regionWidth];
                     for (int x = 0; x < regionWidth; x++) {
+                        ios.seek(startOffset + y * sourceWidthBytes);
                         data[x] = (short) regionData.getElemIntAt(stride + x);
                     }
-                    ios.writeShorts(data, 0, regionWidth);
+                    synchronized (ios) {
+                        ios.seek(startOffset + y * sourceWidthBytes);
+                        ios.writeShorts(data, 0, regionWidth);
+                    }
                 } else if (bandDataType == ProductData.TYPE_UINT32) {
                     final int[] data = new int[regionWidth];
                     for (int x = 0; x < regionWidth; x++) {
                         data[x] = (int) regionData.getElemUIntAt(stride + x);
                     }
-                    ios.writeInts(data, 0, regionWidth);
+                    synchronized (ios) {
+                        ios.seek(startOffset + y * sourceWidthBytes);
+                        ios.writeInts(data, 0, regionWidth);
+                    }
                 } else if (bandDataType == ProductData.TYPE_INT32) {
                     final int[] data = new int[regionWidth];
                     for (int x = 0; x < regionWidth; x++) {
                         data[x] = regionData.getElemIntAt(stride + x);
                     }
-                    ios.writeInts(data, 0, regionWidth);
+                    synchronized (ios) {
+                        ios.seek(startOffset + y * sourceWidthBytes);
+                        ios.writeInts(data, 0, regionWidth);
+                    }
                 } else if (bandDataType == ProductData.TYPE_FLOAT32) {
                     final float[] data = new float[regionWidth];
                     for (int x = 0; x < regionWidth; x++) {
                         data[x] = regionData.getElemFloatAt(stride + x);
                     }
-                    ios.writeFloats(data, 0, regionWidth);
+                    synchronized (ios) {
+                        ios.seek(startOffset + y * sourceWidthBytes);
+                        ios.writeFloats(data, 0, regionWidth);
+                    }
                 } else if (bandDataType == ProductData.TYPE_FLOAT64) {
                     final double[] data = new double[regionWidth];
                     for (int x = 0; x < regionWidth; x++) {
                         data[x] = regionData.getElemDoubleAt(stride + x);
                     }
-                    ios.writeDoubles(data, 0, regionWidth);
+                    synchronized (ios) {
+                        ios.seek(startOffset + y * sourceWidthBytes);
+                        ios.writeDoubles(data, 0, regionWidth);
+                    }
                 }
                 pm.worked(1);
             }
