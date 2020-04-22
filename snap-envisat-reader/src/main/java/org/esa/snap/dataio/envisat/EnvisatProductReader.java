@@ -18,20 +18,14 @@ package org.esa.snap.dataio.envisat;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.IllegalFileFormatException;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.GeoCodingFactory;
-import org.esa.snap.core.datamodel.LineTimeCoding;
-import org.esa.snap.core.datamodel.Mask;
-import org.esa.snap.core.datamodel.MetadataAttribute;
-import org.esa.snap.core.datamodel.MetadataElement;
-import org.esa.snap.core.datamodel.PointingFactory;
-import org.esa.snap.core.datamodel.PointingFactoryRegistry;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.datamodel.ProductNodeGroup;
-import org.esa.snap.core.datamodel.TiePointGeoCoding;
-import org.esa.snap.core.datamodel.TiePointGrid;
-import org.esa.snap.core.datamodel.VirtualBand;
+import org.esa.snap.core.dataio.geocoding.*;
+import org.esa.snap.core.dataio.geocoding.forward.PixelForward;
+import org.esa.snap.core.dataio.geocoding.forward.PixelInterpolatingForward;
+import org.esa.snap.core.dataio.geocoding.forward.TiePointBilinearForward;
+import org.esa.snap.core.dataio.geocoding.inverse.PixelQuadTreeInverse;
+import org.esa.snap.core.dataio.geocoding.inverse.TiePointInverse;
+import org.esa.snap.core.dataio.geocoding.util.RasterUtils;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.util.ArrayUtils;
 import org.esa.snap.core.util.Debug;
 import org.esa.snap.core.util.io.FileUtils;
@@ -39,7 +33,7 @@ import org.esa.snap.runtime.Config;
 
 import javax.imageio.stream.FileCacheImageInputStream;
 import javax.imageio.stream.ImageInputStream;
-import java.awt.Dimension;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -64,6 +58,11 @@ public class EnvisatProductReader extends AbstractProductReader {
      * @since BEAM 4.9
      */
     private static final String SYSPROP_ENVISAT_USE_PIXEL_GEO_CODING = "snap.envisat.usePixelGeoCoding";
+    // @todo 2 tb/** this is defined at least 3 times as private constant. Move to a common location 2020-01-16
+    private static final String SYSPROP_SNAP_PIXEL_CODING_FRACTION_ACCURACY = "snap.pixelGeoCoding.fractionAccuracy";
+    private static final String SYSPROP_ENVISAT_PIXEL_CODING_FORWARD = "snap.envisat.pixelGeoCoding.forward";
+    private static final String SYSPROP_ENVISAT_PIXEL_CODING_INVERSE = "snap.envisat.pixelGeoCoding.inverse";
+    private static final String SYSPROP_ENVISAT_TIE_POINT_CODING_FORWARD = "snap.envisat.tiePointGeoCoding.forward";
 
     /**
      * Represents the product's file.
@@ -189,8 +188,8 @@ public class EnvisatProductReader extends AbstractProductReader {
                 }
 
                 bandLineReader.readRasterLine(sourceMinX, sourceMaxX, sourceStepX,
-                                              sourceY,
-                                              destBuffer, destArrayPos);
+                        sourceY,
+                        destBuffer, destArrayPos);
 
                 destArrayPos += destWidth;
                 pm.worked(sourceStepY);
@@ -213,13 +212,15 @@ public class EnvisatProductReader extends AbstractProductReader {
             productName = getProductFile().getProductId();
         }
         productName = FileUtils.createValidFilename(productName);
+        productName = FileUtils.getFilenameWithoutExtension(productName); // .zip
+        productName = FileUtils.getFilenameWithoutExtension(productName); // .N1
 
         int sceneRasterHeight = getSceneRasterHeight();
         Product product = new Product(productName,
-                                      getProductFile().getProductType(),
-                                      getSceneRasterWidth(),
-                                      sceneRasterHeight,
-                                      this);
+                getProductFile().getProductType(),
+                getSceneRasterWidth(),
+                sceneRasterHeight,
+                this);
 
         product.setFileLocation(getProductFile().getFile());
         product.setDescription(getProductFile().getProductDescription());
@@ -233,12 +234,12 @@ public class EnvisatProductReader extends AbstractProductReader {
         product.setAutoGrouping(getProductFile().getAutoGroupingPattern());
 
         addBandsToProduct(product);
+        addTiePointGridsToProduct(product);
+        addGeoCodingToProduct(product);
+        initPointingFactory(product);
         if (!isMetadataIgnored()) {
             addHeaderAnnotationsToProduct(product);
             addDatasetAnnotationsToProduct(product);
-            addTiePointGridsToProduct(product);
-            addGeoCodingToProduct(product);
-            initPointingFactory(product);
         }
         addDefaultMasksToProduct(product);
         addDefaultMasksDefsToBands(product);
@@ -279,12 +280,12 @@ public class EnvisatProductReader extends AbstractProductReader {
                 if (bandLineReader instanceof BandLineReader.Virtual) {
                     final BandLineReader.Virtual virtual = ((BandLineReader.Virtual) bandLineReader);
                     band = new VirtualBand(bandName, ProductData.TYPE_FLOAT64,//bandInfo.getDataType(),
-                                           width, height,
-                                           virtual.getExpression());
+                            width, height,
+                            virtual.getExpression());
                 } else {
                     band = new Band(bandName,
-                                    bandInfo.getDataType() < ProductData.TYPE_FLOAT32 ? bandInfo.getDataType() : bandLineReader.getPixelDataField().getDataType(),
-                                    width, height);
+                            bandInfo.getDataType() < ProductData.TYPE_FLOAT32 ? bandInfo.getDataType() : bandLineReader.getPixelDataField().getDataType(),
+                            width, height);
                 }
                 band.setScalingOffset(bandInfo.getScalingOffset());
 
@@ -372,7 +373,6 @@ public class EnvisatProductReader extends AbstractProductReader {
                     band.setSolarFlux(solar_fluxes[sbi % solar_fluxes.length]);
                 }
             }
-//            Debug.trace(band.toString());
         }
     }
 
@@ -386,47 +386,106 @@ public class EnvisatProductReader extends AbstractProductReader {
         }
     }
 
-    private static void addGeoCodingToProduct(Product product) {
-        initTiePointGeoCoding(product);
-
-        Preferences preferences = Config.instance("snap").preferences();
+    private void addGeoCodingToProduct(Product product) throws IOException {
+        final Preferences preferences = Config.instance("snap").preferences();
         final boolean usePixelGeoCoding = preferences.getBoolean(SYSPROP_ENVISAT_USE_PIXEL_GEO_CODING, false);
-        if (usePixelGeoCoding) {
-            Band latBand = product.getBand(EnvisatConstants.LAT_DS_NAME);
-            if (latBand == null) {
-                latBand = product.getBand(EnvisatConstants.MERIS_AMORGOS_L1B_CORR_LATITUDE_BAND_NAME);
-            }
-            Band lonBand = product.getBand(EnvisatConstants.LON_DS_NAME);
-            if (lonBand == null) {
-                lonBand = product.getBand(EnvisatConstants.MERIS_AMORGOS_L1B_CORR_LONGITUDE_BAND_NAME);
-            }
-            if (latBand != null && lonBand != null) {
-                String validMask;
-                if (EnvisatConstants.MERIS_L1_TYPE_PATTERN.matcher(product.getProductType()).matches()) {
-                    validMask = "NOT l1_flags.INVALID";
-                } else {
-                    validMask = "l2_flags.LAND or l2_flags.CLOUD or l2_flags.WATER";
-                }
-                product.setSceneGeoCoding(GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, validMask, 6));
-            }
+
+        final String productType = productFile.getProductType();
+
+        final ComponentGeoCoding geoCoding;
+        if (usePixelGeoCoding &&
+                (productType.equalsIgnoreCase(EnvisatConstants.MERIS_FSG_L1B_PRODUCT_TYPE_NAME) ||
+                        productType.equalsIgnoreCase(EnvisatConstants.MERIS_FRG_L1B_PRODUCT_TYPE_NAME))) {
+            geoCoding = createPixelGeoCoding(product);
+        } else {
+            geoCoding = createTiePointGeoCoding(product);
         }
+
+        if (geoCoding == null) {
+            return;
+        }
+
+        // @todo 2 tb/tb maybe not here? 2020-01-15
+        geoCoding.initialize();
+        product.setSceneGeoCoding(geoCoding);
     }
 
-    /**
-     * Installs an Envisat-specific tie-point geo-coding in the given product.
-     */
-    public static void initTiePointGeoCoding(final Product product) {
-        TiePointGrid latGrid = product.getTiePointGrid(EnvisatConstants.LAT_DS_NAME);
-        TiePointGrid lonGrid = product.getTiePointGrid(EnvisatConstants.LON_DS_NAME);
-        if (latGrid != null && lonGrid != null) {
-            product.setSceneGeoCoding(new TiePointGeoCoding(latGrid, lonGrid));
+    private ComponentGeoCoding createPixelGeoCoding(Product product) throws IOException {
+        final Band lonBand = product.getBand(EnvisatConstants.MERIS_AMORGOS_L1B_CORR_LONGITUDE_BAND_NAME);
+        final Band latBand = product.getBand(EnvisatConstants.MERIS_AMORGOS_L1B_CORR_LATITUDE_BAND_NAME);
+
+        final double[] longitudes = RasterUtils.loadDataScaled(lonBand);
+        lonBand.unloadRasterData();
+        final double[] latitudes = RasterUtils.loadDataScaled(latBand);
+        latBand.unloadRasterData();
+
+        final double resolutionInKilometers = getResolutionInKilometers(productFile.getProductType());
+
+        final GeoRaster geoRaster = new GeoRaster(longitudes, latitudes,
+                EnvisatConstants.MERIS_AMORGOS_L1B_CORR_LONGITUDE_BAND_NAME, EnvisatConstants.MERIS_AMORGOS_L1B_CORR_LATITUDE_BAND_NAME,
+                lonBand.getRasterWidth(), lonBand.getRasterHeight(), resolutionInKilometers);
+        final String[] codingKeys = getForwardAndInverseKeys_pixelCoding();
+
+        final ForwardCoding forward = ComponentFactory.getForward(codingKeys[0]);
+        final InverseCoding inverse = ComponentFactory.getInverse(codingKeys[1]);
+
+        return new ComponentGeoCoding(geoRaster, forward, inverse, GeoChecks.ANTIMERIDIAN);
+    }
+
+    private String[] getForwardAndInverseKeys_pixelCoding() {
+        final String[] codingNames = new String[2];
+
+        final Preferences preferences = Config.instance("snap").preferences();
+        final boolean useFractAccuracy = preferences.getBoolean(SYSPROP_SNAP_PIXEL_CODING_FRACTION_ACCURACY, false);
+        if (useFractAccuracy) {
+            codingNames[0] = PixelInterpolatingForward.KEY;
+        } else {
+            codingNames[0] = preferences.get(SYSPROP_ENVISAT_PIXEL_CODING_FORWARD, PixelForward.KEY);
         }
+
+        codingNames[1] = preferences.get(SYSPROP_ENVISAT_PIXEL_CODING_INVERSE, PixelQuadTreeInverse.KEY);
+
+        return codingNames;
+    }
+
+    private String[] getForwardAndInverseKeys_tiePointCoding() {
+        final String[] codingNames = new String[2];
+
+        final Preferences preferences = Config.instance("snap").preferences();
+        codingNames[0] = preferences.get(SYSPROP_ENVISAT_TIE_POINT_CODING_FORWARD, TiePointBilinearForward.KEY);
+        codingNames[1] = TiePointInverse.KEY;
+
+        return codingNames;
+    }
+
+    private ComponentGeoCoding createTiePointGeoCoding(Product product) throws IOException {
+        final TiePointGrid lonGrid = product.getTiePointGrid(EnvisatConstants.LON_DS_NAME);
+        final TiePointGrid latGrid = product.getTiePointGrid(EnvisatConstants.LAT_DS_NAME);
+        if (lonGrid == null || latGrid == null) {
+            return null;
+        }
+
+        final double[] longitudes = RasterUtils.loadData(lonGrid);
+        final double[] latitudes = RasterUtils.loadData(latGrid);
+        final double resolutionInKilometers = getResolutionInKilometers(productFile.getProductType());
+
+        final GeoRaster geoRaster = new GeoRaster(longitudes, latitudes, EnvisatConstants.LON_DS_NAME, EnvisatConstants.LAT_DS_NAME,
+                lonGrid.getGridWidth(), lonGrid.getGridHeight(),
+                product.getSceneRasterWidth(), product.getSceneRasterHeight(), resolutionInKilometers,
+                lonGrid.getOffsetX(), lonGrid.getOffsetY(),
+                lonGrid.getSubSamplingX(), lonGrid.getSubSamplingY());
+
+        final String[] codingKeys = getForwardAndInverseKeys_tiePointCoding();
+        final ForwardCoding forward = ComponentFactory.getForward(codingKeys[0]);
+        final InverseCoding inverse = ComponentFactory.getInverse(codingKeys[1]);
+
+        return new ComponentGeoCoding(geoRaster, forward, inverse, GeoChecks.ANTIMERIDIAN);
     }
 
     /**
      * Installs an Envisat-specific pointing factory in the given product.
      */
-    public static void initPointingFactory(final Product product) {
+    private static void initPointingFactory(final Product product) {
         PointingFactoryRegistry registry = PointingFactoryRegistry.getInstance();
         PointingFactory pointingFactory = registry.getPointingFactory(product.getProductType());
         product.setPointingFactory(pointingFactory);
@@ -447,22 +506,22 @@ public class EnvisatProductReader extends AbstractProductReader {
                 final MetadataElement dsdGroup = new MetadataElement("DSD." + (i + 1));
                 dsdGroup.addAttribute(
                         new MetadataAttribute("DATASET_NAME",
-                                              ProductData.createInstance(getNonNullString(dsd.getDatasetName())),
-                                              true));
+                                ProductData.createInstance(getNonNullString(dsd.getDatasetName())),
+                                true));
                 dsdGroup.addAttribute(new MetadataAttribute("DATASET_TYPE",
-                                                            ProductData.createInstance(new String(new char[]{dsd.getDatasetType()})),
-                                                            true));
+                        ProductData.createInstance(new String(new char[]{dsd.getDatasetType()})),
+                        true));
                 dsdGroup.addAttribute(new MetadataAttribute("FILE_NAME",
-                                                            ProductData.createInstance(getNonNullString(dsd.getFileName())),
-                                                            true));
+                        ProductData.createInstance(getNonNullString(dsd.getFileName())),
+                        true));
                 dsdGroup.addAttribute(new MetadataAttribute("OFFSET", ProductData.createInstance(new long[]{dsd.getDatasetOffset()}), true));
                 dsdGroup.addAttribute(new MetadataAttribute("SIZE", ProductData.createInstance(new long[]{dsd.getDatasetSize()}), true));
                 dsdGroup.addAttribute(new MetadataAttribute("NUM_RECORDS",
-                                                            ProductData.createInstance(new int[]{dsd.getNumRecords()}),
-                                                            true));
+                        ProductData.createInstance(new int[]{dsd.getNumRecords()}),
+                        true));
                 dsdGroup.addAttribute(new MetadataAttribute("RECORD_SIZE",
-                                                            ProductData.createInstance(new int[]{dsd.getRecordSize()}),
-                                                            true));
+                        ProductData.createInstance(new int[]{dsd.getRecordSize()}),
+                        true));
                 dsdsGroup.addElement(dsdGroup);
             }
         }
@@ -585,13 +644,13 @@ public class EnvisatProductReader extends AbstractProductReader {
         double subSamplingY = getProductFile().getTiePointSubSamplingY(gridWidth);
 
         final TiePointGrid tiePointGrid = createTiePointGrid(bandName,
-                                                             gridWidth,
-                                                             gridHeight,
-                                                             offsetX,
-                                                             offsetY,
-                                                             subSamplingX,
-                                                             subSamplingY,
-                                                             tiePoints);
+                gridWidth,
+                gridHeight,
+                offsetX,
+                offsetY,
+                subSamplingX,
+                subSamplingY,
+                tiePoints);
         if (bandInfo.getPhysicalUnit() != null) {
             tiePointGrid.setUnit(bandInfo.getPhysicalUnit());
         }
@@ -672,14 +731,93 @@ public class EnvisatProductReader extends AbstractProductReader {
         if (name.equalsIgnoreCase(EnvisatConstants.MERIS_SUN_AZIMUTH_DS_NAME) ||
                 name.equalsIgnoreCase(EnvisatConstants.MERIS_VIEW_AZIMUTH_DS_NAME)) {
             return TiePointGrid.DISCONT_AT_360;
-        } else if (name.equalsIgnoreCase(EnvisatConstants.LON_DS_NAME) ||
-                name.equalsIgnoreCase(EnvisatConstants.AATSR_SUN_AZIMUTH_NADIR_DS_NAME) ||
+        } else if (name.equalsIgnoreCase(EnvisatConstants.AATSR_SUN_AZIMUTH_NADIR_DS_NAME) ||
                 name.equalsIgnoreCase(EnvisatConstants.AATSR_VIEW_AZIMUTH_NADIR_DS_NAME) ||
                 name.equalsIgnoreCase(EnvisatConstants.AATSR_SUN_AZIMUTH_FWARD_DS_NAME) ||
                 name.equalsIgnoreCase(EnvisatConstants.AATSR_VIEW_AZIMUTH_FWARD_DS_NAME)) {
             return TiePointGrid.DISCONT_AT_180;
         } else {
             return TiePointGrid.DISCONT_NONE;
+        }
+    }
+
+    static double getResolutionInKilometers(String productTypeName) {
+        switch (productTypeName) {
+            case EnvisatConstants.MERIS_FR_L1B_PRODUCT_TYPE_NAME:
+            case EnvisatConstants.MERIS_FRS_L1B_PRODUCT_TYPE_NAME:
+            case EnvisatConstants.MERIS_FSG_L1B_PRODUCT_TYPE_NAME:
+            case EnvisatConstants.MERIS_FRG_L1B_PRODUCT_TYPE_NAME:
+            case EnvisatConstants.MERIS_FR_L2_PRODUCT_TYPE_NAME:
+            case EnvisatConstants.MERIS_FRS_L2_PRODUCT_TYPE_NAME:
+            case EnvisatConstants.MERIS_FSG_L2_PRODUCT_TYPE_NAME:
+                return EnvisatConstants.MERIS_FR_PX_SIZE_IN_KM;
+
+            case EnvisatConstants.MERIS_RR_L1B_PRODUCT_TYPE_NAME:
+            case EnvisatConstants.MERIS_RRG_L1B_PRODUCT_TYPE_NAME:
+            case EnvisatConstants.MERIS_RR_L2_PRODUCT_TYPE_NAME:
+            case EnvisatConstants.MERIS_RRC_L2_PRODUCT_TYPE_NAME:
+            case EnvisatConstants.MERIS_RRV_L2_PRODUCT_TYPE_NAME:
+                return EnvisatConstants.MERIS_RR_PX_SIZE_IN_KM;
+
+            case EnvisatConstants.AATSR_L1B_TOA_PRODUCT_TYPE_NAME:
+            case EnvisatConstants.AATSR_L2_NR_PRODUCT_TYPE_NAME:
+            case EnvisatConstants.AT1_L1B_TOA_PRODUCT_TYPE_NAME:
+            case EnvisatConstants.AT1_L2_NR_PRODUCT_TYPE_NAME:
+            case EnvisatConstants.AT2_L1B_TOA_PRODUCT_TYPE_NAME:
+            case EnvisatConstants.AT2_L2_NR_PRODUCT_TYPE_NAME:
+                return EnvisatConstants.ATSR_PX_SIZE_IN_KM;
+
+            case EnvisatConstants.ASAR_L1B_APG_PRODUCT_TYPE_NAME:
+            case EnvisatConstants.ASAR_L1B_IMG_PRODUCT_TYPE_NAME:
+                return EnvisatConstants.ASAR_xxG_PX_SIZE_IN_KM;
+
+            case EnvisatConstants.ASAR_L1B_APP_PRODUCT_TYPE_NAME:
+            case EnvisatConstants.ASAR_L1B_IMP_PRODUCT_TYPE_NAME:
+                return EnvisatConstants.ASAR_xxP_PX_SIZE_IN_KM;
+
+            case EnvisatConstants.ASAR_L1B_AP_BP_PRODUCT_TYPE_NAME:
+            case EnvisatConstants.ASAR_L1B_IM_BP_PRODUCT_TYPE_NAME:
+                return EnvisatConstants.ASAR_BP_PX_SIZE_IN_KM;
+
+            case EnvisatConstants.ASAR_L1B_IMM_PRODUCT_TYPE_NAME:
+            case EnvisatConstants.ASAR_L1B_APM_PRODUCT_TYPE_NAME:
+            case EnvisatConstants.ASAR_L1B_WSM_PRODUCT_TYPE_NAME:
+                return EnvisatConstants.ASAR_xxM_PX_SIZE_IN_KM;
+
+            case EnvisatConstants.ASAR_L1B_APS_PRODUCT_TYPE_NAME:
+                return EnvisatConstants.ASAR_APS_PX_SIZE_IN_KM;
+
+            case EnvisatConstants.ASAR_L1B_IMS_PRODUCT_TYPE_NAME:
+            case EnvisatConstants.ASAR_L1B_WSS_PRODUCT_TYPE_NAME:
+                return EnvisatConstants.ASAR_xxS_PX_SIZE_IN_KM;
+
+            case EnvisatConstants.ASAR_L1B_WS_BP_PRODUCT_TYPE_NAME:
+                return EnvisatConstants.ASAR_WS_BP_PX_SIZE_IN_KM;
+
+            case EnvisatConstants.ASAR_L1B_WVI_PRODUCT_TYPE_NAME:
+                return EnvisatConstants.ASAR_WVI_PX_SIZE_IN_KM;
+
+            case EnvisatConstants.ASAR_L1B_WVS_PRODUCT_TYPE_NAME:
+            case EnvisatConstants.ASAR_L2_WVW_PRODUCT_TYPE_NAME:
+                return EnvisatConstants.ASAR_WVS_PX_SIZE_IN_KM;
+
+            case EnvisatConstants.ASAR_L1B_GM1_PRODUCT_TYPE_NAME:
+            case EnvisatConstants.ASAR_L1B_GMB_PRODUCT_TYPE_NAME:
+                return EnvisatConstants.ASAR_GM1_PX_SIZE_IN_KM;
+
+            case EnvisatConstants.SAR_IM__BP_PRODUCT_TYPE_NAME:
+                return EnvisatConstants.SAR_IM_BP_PX_SIZE_IN_KM;
+
+            case EnvisatConstants.SAR_IMG_1P_PRODUCT_TYPE_NAME:
+            case EnvisatConstants.SAR_IMP_1P_PRODUCT_TYPE_NAME:
+            case EnvisatConstants.SAR_IMS_1P_PRODUCT_TYPE_NAME:
+                return EnvisatConstants.SAR_IMx_PX_SIZE_IN_KM;
+
+            case EnvisatConstants.SAR_IMM_1P_PRODUCT_TYPE_NAME:
+                return EnvisatConstants.SAR_IMM_PX_SIZE_IN_KM;
+
+            default:
+                throw new IllegalStateException("undefined product resolution for type: " + productTypeName);
         }
     }
 }

@@ -56,7 +56,6 @@ public class InputProductValidator {
     }
 
     public boolean isSARProduct() {
-        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
         return absRoot != null && absRoot.getAttributeDouble("radar_frequency", 99999) != 99999;
     }
 
@@ -76,11 +75,9 @@ public class InputProductValidator {
     }
 
     public boolean isComplex() {
-        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
         if (absRoot != null) {
             final String sampleType = absRoot.getAttributeString(AbstractMetadata.SAMPLE_TYPE, AbstractMetadata.NO_METADATA_STRING).trim();
-            if (sampleType.equalsIgnoreCase("complex"))
-                return true;
+            return sampleType.equalsIgnoreCase("complex");
         }
         return false;
     }
@@ -143,7 +140,7 @@ public class InputProductValidator {
 
     public boolean isTOPSARProduct() {
         boolean isS1 = false;
-        final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION, "");
+        final String mission = absRoot != null ? absRoot.getAttributeString(AbstractMetadata.MISSION, "") : "";
         if (mission.startsWith("SENTINEL-1") || mission.startsWith("RS2")) {  // also include RS2 in TOPS mode
             isS1 = true;
         }
@@ -188,12 +185,14 @@ public class InputProductValidator {
         final MetadataElement[] elems = annotation.getElements();
         for (MetadataElement elem : elems) {
             final MetadataElement product = elem.getElement("product");
-            final MetadataElement swathTiming = product.getElement("swathTiming");
-            final MetadataElement burstList = swathTiming.getElement("burstList");
-            final int count = Integer.parseInt(burstList.getAttributeString("count"));
-            if (count != 0) {
-                isDebursted = false;
-                break;
+            if(product != null) {
+                final MetadataElement swathTiming = product.getElement("swathTiming");
+                final MetadataElement burstList = swathTiming.getElement("burstList");
+                final int count = Integer.parseInt(burstList.getAttributeString("count"));
+                if (count != 0) {
+                    isDebursted = false;
+                    break;
+                }
             }
         }
         return isDebursted;
@@ -233,15 +232,18 @@ public class InputProductValidator {
         }
     }
 
-    public boolean isMapProjected() {
+    public static boolean isMapProjected(final Product product) {
         if (product.getSceneGeoCoding() instanceof MapGeoCoding || product.getSceneGeoCoding() instanceof CrsGeoCoding)
             return true;
-        final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
-        return absRoot != null && !AbstractMetadata.isNoData(absRoot, AbstractMetadata.map_projection);
+        if(AbstractMetadata.hasAbstractedMetadata(product)) {
+            MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
+            return absRoot != null && !AbstractMetadata.isNoData(absRoot, AbstractMetadata.map_projection);
+        }
+        return false;
     }
 
     public void checkIfMapProjected(final boolean shouldBe) throws OperatorException {
-        final boolean isMapProjected = isMapProjected();
+        final boolean isMapProjected = isMapProjected(product);
         if (!shouldBe && isMapProjected) {
             throw new OperatorException(SHOULD_NOT_BE_MAP_PROJECTED);
         } else if (shouldBe && !isMapProjected) {
@@ -264,7 +266,7 @@ public class InputProductValidator {
     }
 
     public void checkIfTanDEMXProduct() throws OperatorException {
-        final String mission = absRoot.getAttributeString(AbstractMetadata.MISSION);
+        final String mission = absRoot != null ? absRoot.getAttributeString(AbstractMetadata.MISSION) : "";
         if (!mission.startsWith("TDM")) {
             throw new OperatorException("Input should be a TanDEM-X product.");
         }

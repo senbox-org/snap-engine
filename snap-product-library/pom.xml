@@ -4,7 +4,7 @@
     <parent>
         <artifactId>snap-engine</artifactId>
         <groupId>org.esa.snap</groupId>
-        <version>7.0.0-SNAPSHOT</version>
+        <version>8.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>snap-product-library</artifactId>
@@ -68,7 +68,7 @@
             <artifactId>jasypt</artifactId>
             <version>1.9.2</version>
         </dependency>
-		
+
 		<dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -79,7 +79,7 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
+                <groupId>org.apache.netbeans.utilities</groupId>
                 <artifactId>nbm-maven-plugin</artifactId>
                 <configuration>
                     <publicPackages>

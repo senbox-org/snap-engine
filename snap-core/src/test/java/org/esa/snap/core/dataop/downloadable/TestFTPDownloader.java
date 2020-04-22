@@ -16,10 +16,13 @@
 package org.esa.snap.core.dataop.downloadable;
 
 import org.esa.snap.core.util.SystemUtils;
-import org.junit.Ignore;
+import org.junit.Assume;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Map;
 
 import static org.junit.Assert.fail;
@@ -32,8 +35,20 @@ import static org.junit.Assert.fail;
 public class TestFTPDownloader {
 
     @Test
-    @Ignore
     public void testConnect() throws Exception {
+
+        boolean internetAvailable;
+        try {
+            URLConnection urlConnection = new URL("http://speedtest.tele2.net/").openConnection();
+            urlConnection.setConnectTimeout(2000);
+            urlConnection.getContent();
+            internetAvailable = true;
+        } catch (IOException e) {
+            internetAvailable = false;
+        }
+
+        Assume.assumeTrue("Internet connection not available, skipping BrrOpIntegrationTest", internetAvailable);
+
         final String server = "speedtest.tele2.net";
         final String remotePath = "";
 

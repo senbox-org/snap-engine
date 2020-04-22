@@ -1,8 +1,8 @@
 package org.esa.snap.binning.support;
 
 import com.bc.ceres.core.ProgressMonitor;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.esa.snap.binning.MosaickingGrid;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.GeoCoding;
@@ -174,7 +174,7 @@ public class CrsGrid implements MosaickingGrid {
     }
 
     public Rectangle getBounds(Geometry pixelGeometry) {
-        com.vividsolutions.jts.geom.Envelope envelopeInternal = pixelGeometry.getEnvelopeInternal();
+        org.locationtech.jts.geom.Envelope envelopeInternal = pixelGeometry.getEnvelopeInternal();
         int minX = (int)Math.floor(envelopeInternal.getMinX());
         int minY = (int)Math.floor(envelopeInternal.getMinY());
         int maxX = (int)Math.ceil(envelopeInternal.getMaxX());
@@ -222,6 +222,6 @@ public class CrsGrid implements MosaickingGrid {
 
 
     private Geometry getTileGeometry(Rectangle rect) {
-        return this.geometryFactory.toGeometry(new com.vividsolutions.jts.geom.Envelope(rect.x, (rect.x + rect.width), rect.y, (rect.y + rect.height)));
+        return this.geometryFactory.toGeometry(new org.locationtech.jts.geom.Envelope(rect.x, (rect.x + rect.width), rect.y, (rect.y + rect.height)));
     }
 }

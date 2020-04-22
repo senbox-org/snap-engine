@@ -20,7 +20,7 @@
     <parent>
         <artifactId>snap-engine</artifactId>
         <groupId>org.esa.snap</groupId>
-        <version>7.0.0-SNAPSHOT</version>
+        <version>8.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>snap-cluster-analysis</artifactId>
@@ -55,8 +55,9 @@
             <artifactId>snap-gpf</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.googlecode.efficient-java-matrix-library</groupId>
-            <artifactId>core</artifactId>
+            <groupId>org.ejml</groupId>
+            <artifactId>ejml-ddense</artifactId>
+            <version>0.39</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -67,7 +68,7 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
+                <groupId>org.apache.netbeans.utilities</groupId>
                 <artifactId>nbm-maven-plugin</artifactId>
             </plugin>
             <plugin>

@@ -118,10 +118,14 @@ public class ConfigurationOptimizer {
      *
      */
     public void computeOptimisedRAMParams(PerformanceParameters performanceParameters) {
-        long freeRAM = sysInfos.getFreeRAM();
-        long reservedRAM = sysInfos.getReservedRam();
+        // See https://senbox.atlassian.net/browse/SNAP-1229.
+        // FreeRAM is not having into account cached memory.
+        // Approach is changed to use 70% of total memory.
 
-        long optimisedJVMMem = reservedRAM + freeRAM;
+        //long freeRAM = sysInfos.getFreeRAM();
+        //long reservedRAM = sysInfos.getReservedRam();
+        //long optimisedJVMMem = reservedRAM + freeRAM;
+        long optimisedJVMMem = computeRecommendedXmx();
         performanceParameters.setVmXMX(optimisedJVMMem);
 
         Double doubleCache = optimisedJVMMem*0.7;
@@ -135,6 +139,9 @@ public class ConfigurationOptimizer {
         }
     }
 
+    private long computeRecommendedXmx(){
+        return (long) (sysInfos.getRAM() * 0.7);
+    }
 
     /**
      * Compute the optimised path parameters.

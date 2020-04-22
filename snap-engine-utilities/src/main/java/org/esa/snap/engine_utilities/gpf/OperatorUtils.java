@@ -649,19 +649,19 @@ public final class OperatorUtils {
 
             for (double lat : lats) {
                 if (lat < scnProp.latMin) {
-                    scnProp.latMin = (float)lat;
+                    scnProp.latMin = lat;
                 }
                 if (lat > scnProp.latMax) {
-                    scnProp.latMax = (float)lat;
+                    scnProp.latMax = lat;
                 }
             }
 
             for (double lon : lons) {
                 if (lon < scnProp.lonMin) {
-                    scnProp.lonMin = (float)lon;
+                    scnProp.lonMin = lon;
                 }
                 if (lon > scnProp.lonMax) {
-                    scnProp.lonMax = (float)lon;
+                    scnProp.lonMax = lon;
                 }
             }
         }
@@ -722,7 +722,7 @@ public final class OperatorUtils {
 
     public static class SceneProperties {
         public int sceneWidth, sceneHeight;
-        public float latMin, lonMin, latMax, lonMax;
+        public double latMin, lonMin, latMax, lonMax;
 
         public final Map<Product, double[]> srcCornerLatitudeMap = new HashMap<>(10);
         public final Map<Product, double[]> srcCornerLongitudeMap = new HashMap<>(10);

@@ -20,11 +20,7 @@ import junit.framework.TestCase;
 
 public class RangeTest extends TestCase {
 
-    private final IndexValidator _validator = new IndexValidator() {
-        public boolean validateIndex(int index) {
-            return index > 1 && index < 6;
-        }
-    };
+    private final IndexValidator _validator = index -> index > 1 && index < 6;
 
     public void testThatRangeIgnoresNaN() {
         double min = 0;
@@ -171,6 +167,22 @@ public class RangeTest extends TestCase {
 
         assertEquals(-6, range.getMin(), 1e-10d);
         assertEquals(7, range.getMax(), 1e-10d);
+    }
+
+    public void testComputeRangeDouble_noValidator() {
+        double[] doubles = new double[]{2, -3, 4, 5, -6, 7, 8, 9};
+        Range range = new Range();
+
+        Range.computeRangeDouble(doubles, range);
+
+        assertEquals(-6, range.getMin(), 1e-8);
+        assertEquals(9, range.getMax(), 1e-8);
+
+        doubles = new double[]{178.4, 22.9, -23, 11.98, -0.00456, 19.456, -11.00987, 19.652};
+        range = Range.computeRangeDouble(doubles, null);
+
+        assertEquals(-23.0, range.getMin(), 1e-8);
+        assertEquals(178.4, range.getMax(), 1e-8);
     }
 
     public void testComputeRangeDoubleArray() {

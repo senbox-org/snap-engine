@@ -31,6 +31,7 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -110,7 +111,7 @@ public class ProductSubsetBuilderTest {
     @Test
     public void testPreserveImageInfoAndSubset() throws IOException {
         final ProductSubsetDef subsetDef = new ProductSubsetDef();
-        subsetDef.setRegion(2, 2, 5, 5);
+        subsetDef.setSubsetRegion(new PixelSubsetRegion(2, 2, 5, 5, 0));
         final Product product2 = ProductSubsetBuilder.createProductSubset(product, subsetDef, "subset", "");
         final Band band = product2.getBand(INDEX_CODED_BAND_NAME);
         final Band band2 = product2.getBand(COLORED_BAND_NAME);
@@ -176,7 +177,7 @@ public class ProductSubsetBuilderTest {
         assertEquals(3, product.getGcpGroup().getNodeCount());
 
         final ProductSubsetDef subsetDef = new ProductSubsetDef();
-        subsetDef.setRegion(2, 2, 5, 5);
+        subsetDef.setSubsetRegion(new PixelSubsetRegion(2, 2, 5, 5, 0));
         final Product product2 = ProductSubsetBuilder.createProductSubset(product, subsetDef, "subset", "");
 
         assertEquals("P2", product2.getPinGroup().get(0).getName());

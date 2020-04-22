@@ -19,6 +19,7 @@ package org.esa.snap.core.gpf.common;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductReader;
+import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
@@ -30,9 +31,15 @@ import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.annotations.OperatorMetadata;
 import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
+import org.esa.snap.core.subset.AbstractSubsetRegion;
+import org.esa.snap.core.subset.GeometrySubsetRegion;
+import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.core.util.converters.JtsGeometryConverter;
+import org.esa.snap.core.util.converters.RectangleConverter;
+import org.locationtech.jts.geom.Geometry;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 
@@ -69,81 +76,123 @@ public class ReadOp extends Operator {
     @Parameter(description = "An (optional) format name.", notNull = false, notEmpty = true)
     private String formatName;
 
+    @Parameter(description = "The list of source bands.", alias = "sourceBands", label = "Source Bands")
+    private String[] bandNames;
+
+    @Parameter(description = "The list of source masks.", alias = "sourceMasks", label = "Source Masks")
+    private String[] maskNames;
+
+    @Parameter(converter = RectangleConverter.class,
+            description = "The subset region in pixel coordinates.\n" +
+                    "Use the following format: <x>,<y>,<width>,<height>\n" +
+                    "If not given, the entire scene is used. The 'geoRegion' parameter has precedence over this parameter.")
+    private Rectangle pixelRegion;
+
+    @Parameter(converter = JtsGeometryConverter.class,
+            description = "The subset region in geographical coordinates using WKT-format,\n" +
+                    "e.g. POLYGON((<lon1> <lat1>, <lon2> <lat2>, ..., <lon1> <lat1>))\n" +
+                    "(make sure to quote the option due to spaces in <geometry>).\n" +
+                    "If not given, the entire scene is used.")
+    private Geometry geometryRegion;
+
+    /**
+     * The default value for copy metadata is true, to copy them if the flag is not specified.
+     */
+    @Parameter(defaultValue = "true", description = "Whether to copy the metadata of the source product.")
+    private boolean copyMetadata;
+
     @TargetProduct
     private Product targetProduct;
 
     @Override
     public void initialize() throws OperatorException {
-        if (file == null) {
+        if (this.file == null) {
             throw new OperatorException("The 'file' parameter is not set");
         }
-        if (!file.exists()) {
-            throw new OperatorException(String.format("Specified 'file' [%s] does not exist.", file));
+        if (!this.file.exists()) {
+            throw new OperatorException(String.format("Specified 'file' [%s] does not exist.", this.file));
+        }
+        if (this.pixelRegion != null && this.geometryRegion != null) {
+            throw new OperatorException("Both types of region are specified: pixel and geometry. At most one must be specified.");
+        }
+        boolean hasBandNames = (this.bandNames != null && this.bandNames.length > 0);
+        boolean hasMaskNames = (this.maskNames != null && this.maskNames.length > 0);
+        ProductSubsetDef subsetDef = null;
+        if (hasBandNames || hasMaskNames || this.pixelRegion != null || this.geometryRegion != null || !this.copyMetadata) {
+            subsetDef = new ProductSubsetDef();
+            subsetDef.setIgnoreMetadata(!this.copyMetadata);
+            AbstractSubsetRegion subsetRegion = null;
+            if (this.geometryRegion != null) {
+                subsetRegion = new GeometrySubsetRegion(this.geometryRegion, 0);
+            } else if (this.pixelRegion != null) {
+                subsetRegion = new PixelSubsetRegion(this.pixelRegion, 0);
+            }
+            subsetDef.setSubsetRegion(subsetRegion);
+            if (hasBandNames) {
+                subsetDef.addNodeNames(this.bandNames);
+            }
+            if (hasMaskNames) {
+                subsetDef.addNodeNames(this.maskNames);
+            }
         }
 
         try {
             Product openedProduct = getOpenedProduct();
-            if (openedProduct != null) {
-                //targetProduct = openedProduct;    // won't work. Product must be copied and use copySourceImage
-
-                targetProduct = new Product(openedProduct.getName(), openedProduct.getProductType(),
-                                            openedProduct.getSceneRasterWidth(), openedProduct.getSceneRasterHeight());
+            if (openedProduct != null && subsetDef == null) {
+                this.targetProduct = new Product(openedProduct.getName(), openedProduct.getProductType(), openedProduct.getSceneRasterWidth(), openedProduct.getSceneRasterHeight());
                 for (Band srcband : openedProduct.getBands()) {
-                    if (targetProduct.getBand(srcband.getName()) != null) {
+                    if (this.targetProduct.getBand(srcband.getName()) != null) {
                         continue;
                     }
                     if (srcband instanceof VirtualBand) {
                         ProductUtils.copyVirtualBand(targetProduct, (VirtualBand) srcband, srcband.getName());
                     } else {
-                        ProductUtils.copyBand(srcband.getName(), openedProduct, targetProduct, true);
+                        ProductUtils.copyBand(srcband.getName(), openedProduct, this.targetProduct, true);
                     }
                 }
-                ProductUtils.copyProductNodes(openedProduct, targetProduct);
-                targetProduct.setFileLocation(openedProduct.getFileLocation());
-
-            }else {
+                ProductUtils.copyProductNodes(openedProduct, this.targetProduct);
+                this.targetProduct.setFileLocation(openedProduct.getFileLocation());
+            } else {
                 ProductReader productReader;
-                if (formatName != null && !formatName.trim().isEmpty()) {
-                    productReader = ProductIO.getProductReader(formatName);
+                if (this.formatName != null && !this.formatName.trim().isEmpty()) {
+                    productReader = ProductIO.getProductReader(this.formatName);
                     if (productReader == null) {
-                        throw new OperatorException("No product reader found for format '" + this.formatName + "'");
+                        throw new OperatorException("No product reader found for format '" + this.formatName + "'.");
                     }
                 } else {
-                    productReader = ProductIO.getProductReaderForInput(file);
+                    productReader = ProductIO.getProductReaderForInput(this.file);
                     if (productReader == null) {
-                        throw new OperatorException("No product reader found for file " + file);
+                        throw new OperatorException("No product reader found for file '" + this.file.getAbsolutePath() + "'.");
                     }
                 }
-                targetProduct = productReader.readProductNodes(file, null);
-                targetProduct.setFileLocation(file);
+                this.targetProduct = productReader.readProductNodes(this.file, subsetDef);
+                this.targetProduct.setFileLocation(this.file);
             }
+        } catch (IOException e) {
+            throw new OperatorException(e);
+        }
+    }
+
+    @Override
+    public void computeTile(Band band, Tile targetTile, ProgressMonitor pm) throws OperatorException {
+        ProductData dataBuffer = targetTile.getRawSamples();
+        Rectangle rectangle = targetTile.getRectangle();
+        try {
+            this.targetProduct.getProductReader().readBandRasterData(band, rectangle.x, rectangle.y, rectangle.width, rectangle.height, dataBuffer, pm);
+            targetTile.setRawSamples(dataBuffer);
         } catch (IOException e) {
             throw new OperatorException(e);
         }
     }
 
     private Product getOpenedProduct() {
-        final Product[] openedProducts = getProductManager().getProducts();
+        Product[] openedProducts = getProductManager().getProducts();
         for (Product openedProduct : openedProducts) {
-            if (file.equals(openedProduct.getFileLocation())) {
+            if (this.file.equals(openedProduct.getFileLocation())) {
                 return openedProduct;
             }
         }
         return null;
-    }
-
-    @Override
-    public void computeTile(Band band, Tile targetTile, ProgressMonitor pm) throws OperatorException {
-
-        ProductData dataBuffer = targetTile.getRawSamples();
-        Rectangle rectangle = targetTile.getRectangle();
-        try {
-            targetProduct.getProductReader().readBandRasterData(band, rectangle.x, rectangle.y, rectangle.width,
-                                                                rectangle.height, dataBuffer, pm);
-            targetTile.setRawSamples(dataBuffer);
-        } catch (IOException e) {
-            throw new OperatorException(e);
-        }
     }
 
     public static class Spi extends OperatorSpi {

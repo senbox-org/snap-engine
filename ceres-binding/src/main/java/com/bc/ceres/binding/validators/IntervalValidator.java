@@ -16,12 +16,12 @@
 
 package com.bc.ceres.binding.validators;
 
+import com.bc.ceres.binding.Property;
 import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.binding.Validator;
-import com.bc.ceres.binding.Property;
 import com.bc.ceres.binding.ValueRange;
 
-import java.text.MessageFormat;
+import static java.text.MessageFormat.format;
 
 public class IntervalValidator implements Validator {
     private final ValueRange valueRange;
@@ -35,9 +35,10 @@ public class IntervalValidator implements Validator {
         if (value instanceof Number) {
 
             if (!valueRange.contains(((Number) value).doubleValue())) {
-                final String message = MessageFormat.format("Value for ''{0}'' is out of range {1}.",
-                                                            property.getDescriptor().getDisplayName(),
-                                                            valueRange.toString());
+                final String message = format("Value for ''{0}'' is out of range {1}.\n" +
+                                                      "( = excluding; ] = including; *= max value",
+                                              property.getDescriptor().getDisplayName(),
+                                              valueRange.toString());
                 throw new ValidationException(message);
             }
         }

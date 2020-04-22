@@ -135,7 +135,7 @@ public class DimapProductReader extends AbstractProductReader {
         initInput();
         Document dom = readDom();
 
-        this.product = existingProduct == null ? DimapProductHelpers.createProduct(dom) : existingProduct;
+        this.product = existingProduct == null ? DimapProductHelpers.createProduct(dom, DimapProductConstants.DIMAP_FORMAT_NAME, null) : existingProduct;
         this.product.setProductReader(this);
 
         if (existingProduct == null) {
@@ -386,7 +386,7 @@ public class DimapProductReader extends AbstractProductReader {
                 return null;
             }
             if (bandInputStreams == null) {
-                bandInputStreams = new Hashtable<Band, ImageInputStream>();
+                bandInputStreams = new Hashtable<>();
             }
             bandInputStreams.put(band, inputStream);
         }
@@ -414,9 +414,7 @@ public class DimapProductReader extends AbstractProductReader {
     }
 
     private void addVectorDataToProduct(File vectorFile, final CoordinateReferenceSystem modelCrs) throws IOException {
-        FileReader reader = null;
-        try {
-            reader = new FileReader(vectorFile);
+        try (FileReader reader = new FileReader(vectorFile)) {
             FeatureUtils.FeatureCrsProvider crsProvider = new FeatureUtils.FeatureCrsProvider() {
                 @Override
                 public CoordinateReferenceSystem getFeatureCrs(Product product) {
@@ -430,9 +428,9 @@ public class DimapProductReader extends AbstractProductReader {
             };
             OptimalPlacemarkDescriptorProvider descriptorProvider = new OptimalPlacemarkDescriptorProvider();
             VectorDataNode vectorDataNode = VectorDataNodeReader.read(vectorFile.getName(), reader, product,
-                                                                      crsProvider, descriptorProvider, modelCrs,
-                                                                      VectorDataNodeIO.DEFAULT_DELIMITER_CHAR,
-                                                                      ProgressMonitor.NULL);
+                    crsProvider, descriptorProvider, modelCrs,
+                    VectorDataNodeIO.DEFAULT_DELIMITER_CHAR,
+                    ProgressMonitor.NULL);
             if (vectorDataNode != null) {
                 final ProductNodeGroup<VectorDataNode> vectorDataGroup = product.getVectorDataGroup();
                 final VectorDataNode existing = vectorDataGroup.get(vectorDataNode.getName());
@@ -443,26 +441,19 @@ public class DimapProductReader extends AbstractProductReader {
             }
         } catch (IOException e) {
             SystemUtils.LOG.log(Level.SEVERE, "Error reading '" + vectorFile + "'", e);
-        } finally {
-            if (reader != null) {
-                reader.close();
-            }
         }
     }
 
     private File[] getVectorDataFiles(File vectorDataDir, final boolean onlyGCPs) {
-        return vectorDataDir.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                if (name.endsWith(VectorDataNodeIO.FILENAME_EXTENSION)) {
-                    if (onlyGCPs) {
-                        return name.equals("ground_control_points.csv");
-                    } else {
-                        return true;
-                    }
+        return vectorDataDir.listFiles((dir, name) -> {
+            if (name.endsWith(VectorDataNodeIO.FILENAME_EXTENSION)) {
+                if (onlyGCPs) {
+                    return name.equals("ground_control_points.csv");
+                } else {
+                    return true;
                 }
-                return false;
             }
+            return false;
         });
     }
 
@@ -471,7 +462,7 @@ public class DimapProductReader extends AbstractProductReader {
             return;
         }
         if (readerExtenders == null) {
-            readerExtenders = new HashSet<ReaderExtender>();
+            readerExtenders = new HashSet<>();
         }
         readerExtenders.add(extender);
     }

@@ -87,15 +87,15 @@ public class FileUtils {
     /**
      * Gets the filename without its extension from the given filename.
      *
-     * @param fileName the name of the file whose filename is to be extracted.
+     * @param filename the name of the file whose filename is to be extracted.
      * @return the filename without its extension.
      */
-    public static String getFilenameWithoutExtension(String fileName) {
-        int i = fileName.lastIndexOf('.');
-        if (i > 0 && i < fileName.length() - 1) {
-            return fileName.substring(0, i);
+    public static String getFilenameWithoutExtension(String filename) {
+        int i = filename.lastIndexOf('.');
+        if (i > 0 && i < filename.length() - 1) {
+            return filename.substring(0, i);
         }
-        return fileName;
+        return filename;
     }
 
     /**
@@ -243,19 +243,27 @@ public class FileUtils {
     }
 
     /**
+     * @deprecated since SNAP 8.0, use {@link #getFilenameFromPath(String)} instead, this has been changed because of typo in method name.
+     */
+    @Deprecated
+    public static String getFileNameFromPath(String path) {
+        return getFilenameFromPath(path);
+    }
+
+    /**
      * Retrieves the file name from a complete path. example: "c:/testData/MERIS/meris_test.N1" will be converted to
      * "meris_test.N1"
      */
-    public static String getFileNameFromPath(String path) {
+    public static String getFilenameFromPath(String path) {
         Guardian.assertNotNullOrEmpty("path", path);
-        String fileName;
+        String filename;
         int lastChar = path.lastIndexOf(File.separator);
         if (lastChar >= 0) {
-            fileName = path.substring(lastChar + 1, path.length());
+            filename = path.substring(lastChar + 1, path.length());
         } else {
-            fileName = path;
+            filename = path;
         }
-        return fileName;
+        return filename;
     }
 
     /**

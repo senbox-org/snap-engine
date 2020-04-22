@@ -15,6 +15,8 @@
  */
 package org.esa.snap.dataio.netcdf.metadata.profiles.beam;
 
+import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
+import org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.BasicPixelGeoCoding;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
@@ -27,6 +29,7 @@ import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.util.StringUtils;
+import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.jai.JAIUtils;
 import org.esa.snap.dataio.netcdf.ProfileReadContext;
 import org.esa.snap.dataio.netcdf.ProfileWriteContext;
@@ -38,7 +41,11 @@ import org.esa.snap.dataio.netcdf.util.Constants;
 import org.esa.snap.dataio.netcdf.util.DataTypeUtils;
 import org.esa.snap.dataio.netcdf.util.NetcdfMultiLevelImage;
 import org.esa.snap.dataio.netcdf.util.ReaderUtils;
+import org.esa.snap.dataio.netcdf.util.UnsignedChecker;
 import org.geotools.referencing.CRS;
+import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
@@ -52,9 +59,13 @@ import ucar.nc2.Variable;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+
+import static org.esa.snap.core.dataio.Constants.GEOCODING;
+import static org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistable.TAG_COMPONENT_GEO_CODING;
 
 public class BeamBandPart extends ProfilePartIO {
 
@@ -65,7 +76,6 @@ public class BeamBandPart extends ProfilePartIO {
     public static final String QUICKLOOK_BAND_NAME = "quicklook_band_name";
     public static final String SOLAR_FLUX = "solar_flux";
     public static final String SPECTRAL_BAND_INDEX = "spectral_band_index";
-    public static final String GEOCODING = "geocoding";
 
     private static final int LON_INDEX = 0;
     private static final int LAT_INDEX = 1;
@@ -74,8 +84,8 @@ public class BeamBandPart extends ProfilePartIO {
     public void decode(ProfileReadContext ctx, Product p) throws IOException {
         NetcdfFile netcdfFile = ctx.getNetcdfFile();
         final List<Variable> variables = netcdfFile.getVariables();
-
         for (Variable variable : variables) {
+            UnsignedChecker.setUnsignedType(variable);
             final List<Dimension> dimensions = variable.getDimensions();
             if (dimensions.size() != 2) {
                 continue;
@@ -87,11 +97,11 @@ public class BeamBandPart extends ProfilePartIO {
             final int height = dimensions.get(yDimIndex).getLength();
             Band band;
             if (height == p.getSceneRasterHeight()
-                    && width == p.getSceneRasterWidth()) {
+                && width == p.getSceneRasterWidth()) {
                 band = p.addBand(variable.getFullName(), rasterDataType);
             } else {
                 if (dimensions.get(xDimIndex).getFullName().startsWith("tp_") ||
-                        dimensions.get(yDimIndex).getFullName().startsWith("tp_")) {
+                    dimensions.get(yDimIndex).getFullName().startsWith("tp_")) {
                     continue;
                 }
                 band = new Band(variable.getFullName(), rasterDataType, width, height);
@@ -108,7 +118,6 @@ public class BeamBandPart extends ProfilePartIO {
         // the following method was introduced at 16.06.2011.
         // The fix is mainly needed for the CoastColour project and only considers MERIS data.
         maybeApplySpectralIndexAndSolarFluxFromMetadata(p);
-
         Attribute autoGroupingAttribute = netcdfFile.findGlobalAttribute(AUTO_GROUPING);
         if (autoGroupingAttribute != null) {
             String autoGrouping = autoGroupingAttribute.getStringValue();
@@ -125,7 +134,10 @@ public class BeamBandPart extends ProfilePartIO {
         }
     }
 
-    private void setGeoCoding(ProfileReadContext ctx, Product p, Variable variable, Band band) throws IOException {
+    /**
+     * No public API !  Package visible for testing purposes only.
+     */
+    void setGeoCoding(ProfileReadContext ctx, Product p, Variable variable, Band band) throws IOException {
         final Attribute geoCodingAttribute = variable.findAttribute(GEOCODING);
         final NetcdfFile netcdfFile = ctx.getNetcdfFile();
         if (geoCodingAttribute != null) {
@@ -140,11 +152,28 @@ public class BeamBandPart extends ProfilePartIO {
                         band.setGeoCoding(createGeoCodingFromWKT(p, wktAtt.getStringValue(), i2mAtt.getStringValue()));
                     }
                 }
+            } else if (geoCodingValue.contains("<" + TAG_COMPONENT_GEO_CODING + ">")) {
+                try {
+                    final SAXBuilder saxBuilder = new SAXBuilder();
+                    String xml = geoCodingValue.replace("\n", "").replace("\r", "").replaceAll("> *<", "><");
+                    final org.jdom.Document build = saxBuilder.build(new StringReader(xml));
+                    final Element rootElement = build.getRootElement();
+                    final Element parent = new Element("parent");
+                    parent.addContent(rootElement.detach());
+                    final ComponentGeoCodingPersistable pers = new ComponentGeoCodingPersistable();
+                    final Object objectFromXml = pers.createObjectFromXml(parent, p, null);
+                    if (objectFromXml instanceof GeoCoding) {
+                        band.setGeoCoding((GeoCoding) objectFromXml);
+                    }
+                } catch (JDOMException | IOException e) {
+                    SystemUtils.LOG.warning("Unable to instanciate ComponentGeoCoding for Band '" + band.getName() + "' from NetCDF.");
+                    SystemUtils.LOG.warning(e.getMessage());
+                }
             } else {
                 final String[] tpGridNames = geoCodingValue.split(" ");
                 if (tpGridNames.length == 2
-                        && p.containsTiePointGrid(tpGridNames[LON_INDEX])
-                        && p.containsTiePointGrid(tpGridNames[LAT_INDEX])) {
+                    && p.containsTiePointGrid(tpGridNames[LON_INDEX])
+                    && p.containsTiePointGrid(tpGridNames[LAT_INDEX])) {
                     final TiePointGrid lon = p.getTiePointGrid(tpGridNames[LON_INDEX]);
                     final TiePointGrid lat = p.getTiePointGrid(tpGridNames[LAT_INDEX]);
                     band.setGeoCoding(new TiePointGeoCoding(lat, lon));
@@ -209,11 +238,11 @@ public class BeamBandPart extends ProfilePartIO {
                     dimMap.put(key, dimString);
                 }
                 final java.awt.Dimension tileSize = JAIUtils.computePreferredTileSize(bandSceneRasterWidth, bandSceneRasterHeight, 1);
-                variable = ncFile.addVariable(variableName, ncDataType, tileSize, dimString);
+                variable = ncFile.addVariable(variableName, ncDataType,ncDataType.isUnsigned(), tileSize, dimString);
                 encodeGeoCoding(ncFile, band, p, variable);
             } else {
                 final java.awt.Dimension tileSize = ImageManager.getPreferredTileSize(p);
-                variable = ncFile.addVariable(variableName, ncDataType, tileSize, productDimensions);
+                variable = ncFile.addVariable(variableName, ncDataType,ncDataType.isUnsigned(), tileSize, productDimensions);
             }
             CfBandPart.writeCfBandAttributes(band, variable);
             writeBeamBandAttributes(band, variable);
@@ -228,10 +257,18 @@ public class BeamBandPart extends ProfilePartIO {
         }
     }
 
-    private void encodeGeoCoding(NFileWriteable ncFile, Band band, Product product, NVariable variable) throws IOException {
+    /**
+     * No public API !  Package visible for testing purposes only.
+     */
+    void encodeGeoCoding(NFileWriteable ncFile, Band band, Product product, NVariable variable) throws IOException {
         final GeoCoding geoCoding = band.getGeoCoding();
         if (!geoCoding.equals(product.getSceneGeoCoding())) {
-            if (geoCoding instanceof TiePointGeoCoding) {
+            if (geoCoding instanceof ComponentGeoCoding) {
+                final ComponentGeoCodingPersistable persistable = new ComponentGeoCodingPersistable();
+                final Element xmlFromObject = persistable.createXmlFromObject(geoCoding);
+                final String value = StringUtils.toXMLString(xmlFromObject);
+                variable.addAttribute(GEOCODING, value);
+            } else if (geoCoding instanceof TiePointGeoCoding) {
                 final TiePointGeoCoding tpGC = (TiePointGeoCoding) geoCoding;
                 final String[] names = new String[2];
                 names[LON_INDEX] = tpGC.getLonGrid().getName();

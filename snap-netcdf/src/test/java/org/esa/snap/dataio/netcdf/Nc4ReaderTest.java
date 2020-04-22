@@ -27,6 +27,7 @@ import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.util.DummyProductBuilder;
 import org.esa.snap.dataio.netcdf.metadata.profiles.cf.CfNetCdfReaderPlugIn;
 import org.esa.snap.runtime.Config;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
@@ -36,13 +37,19 @@ import java.net.URLDecoder;
 import java.util.Calendar;
 import java.util.HashMap;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Ralf Quast
- * @version $Revision: 2182 $ $Date: 2008-06-12 11:09:11 +0200 (Do, 12 Jun 2008) $
  */
 public class Nc4ReaderTest {
+
+    @BeforeClass
+    public static void setupTestClass() {
+        NetCdfActivator.activate();
+    }
 
     @Test
     public void testGlobalAttributes() throws IOException {
@@ -99,6 +106,7 @@ public class Nc4ReaderTest {
     }
 
     @Test
+    //@Ignore("fails already while creating test product independent of NetCDF version, test is not in master")
     public void testWithExistingLatLonBandsAndCrsGeoCoding() throws IOException {
         DummyProductBuilder pb = new DummyProductBuilder();
         pb.size(DummyProductBuilder.Size.SMALL);

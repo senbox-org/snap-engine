@@ -19,17 +19,21 @@ package org.esa.snap.csv.dataio.writer;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.dataio.AbstractProductWriter;
 import org.esa.snap.core.dataio.ProductWriterPlugIn;
-import org.esa.snap.core.datamodel.Band;
-import org.esa.snap.core.datamodel.Product;
-import org.esa.snap.core.datamodel.ProductData;
-import org.esa.snap.core.datamodel.TiePointGrid;
+import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
+import org.esa.snap.core.datamodel.*;
 import org.esa.snap.csv.dataio.Constants;
+import org.jdom.Element;
+import org.jdom.output.XMLOutputter;
 
+import java.awt.*;
 import java.awt.image.DataBuffer;
+import java.awt.image.Raster;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+
+import static org.esa.snap.csv.dataio.Constants.PROPERTY_NAME_RASTER_RESOLUTION;
 
 /**
  * Allows writing a {@link Product} in CSV format.
@@ -39,16 +43,17 @@ import java.io.Writer;
  */
 public class CsvProductWriter extends AbstractProductWriter {
 
-    public static final int WRITE_PROPERTIES = 1;
-    public static final int WRITE_FEATURES = 2;
+    static final int WRITE_PROPERTIES = 1;
+    static final int WRITE_FEATURES = 2;
 
-    protected final int config;
+    private final int config;
+
     protected Writer writer;
 
     private String separator;
     private boolean productWritten;
 
-    public CsvProductWriter(ProductWriterPlugIn plugIn, int config, Writer writer) {
+    CsvProductWriter(ProductWriterPlugIn plugIn, int config, Writer writer) {
         super(plugIn);
         this.writer = writer;
         this.config = config;
@@ -57,9 +62,7 @@ public class CsvProductWriter extends AbstractProductWriter {
 
     @Override
     protected void writeProductNodesImpl() throws IOException {
-        if (writer == null) {
-            writer = new FileWriter(new File(getOutput().toString()));
-        }
+        ensureWriter();
         getSeparatorFromMetaData();
         writeProperties();
         writeHeader();
@@ -87,7 +90,14 @@ public class CsvProductWriter extends AbstractProductWriter {
         writeLine(builder.toString());
     }
 
-    private String getJavaType(int dataType) {
+    private void ensureWriter() throws IOException {
+        if (writer == null) {
+            writer = new FileWriter(new File(getOutput().toString()));
+        }
+    }
+
+    // package access for testing only tb 2020-02-28
+    static String getJavaType(int dataType) {
         switch (dataType) {
             case DataBuffer.TYPE_FLOAT: {
                 return "float";
@@ -122,7 +132,16 @@ public class CsvProductWriter extends AbstractProductWriter {
         if ((config & WRITE_PROPERTIES) != WRITE_PROPERTIES) {
             return;
         }
-        writeLine("#" + Constants.PROPERTY_NAME_SCENE_RASTER_WIDTH + "=" + getSourceProduct().getSceneRasterWidth());
+
+        final Product product = getSourceProduct();
+        writeLine(Constants.COMMENT + Constants.PROPERTY_NAME_SCENE_RASTER_WIDTH + "=" + product.getSceneRasterWidth());
+
+        final GeoCoding sceneGeoCoding = product.getSceneGeoCoding();
+        if (sceneGeoCoding instanceof ComponentGeoCoding) {
+            final ComponentGeoCoding geoCoding = (ComponentGeoCoding) sceneGeoCoding;
+            final double rasterResolutionInKm = geoCoding.getGeoRaster().getRasterResolutionInKm();
+            writeLine(Constants.COMMENT + PROPERTY_NAME_RASTER_RESOLUTION + "=" + rasterResolutionInKm);
+        }
     }
 
     @Override
@@ -132,61 +151,42 @@ public class CsvProductWriter extends AbstractProductWriter {
         if (productWritten) {
             return;
         }
-        final Band[] bands = getSourceProduct().getBands();
-        final DataBuffer[] bandDataBuffers = new DataBuffer[bands.length];
-        final int[] bandTypes = new int[bands.length];
-        for (int i = 0; i < bands.length; i++) {
-            final Band band = bands[i];
-            bandDataBuffers[i] = band.getGeophysicalImage().getData().getDataBuffer();
-            bandTypes[i] = bandDataBuffers[i].getDataType();
-        }
 
+        final RasterDataNode[] bands = getSourceProduct().getBands();
         final TiePointGrid[] tiePointGrids = getSourceProduct().getTiePointGrids();
-        final DataBuffer[] tpgDataBuffers = new DataBuffer[tiePointGrids.length];
-        final int[] tpgTypes = new int[tiePointGrids.length];
-        for (int i = 0; i < tiePointGrids.length; i++) {
-            final TiePointGrid tpg = tiePointGrids[i];
-            tpgDataBuffers[i] = tpg.getGeophysicalImage().getData().getDataBuffer();
-            tpgTypes[i] = tpgDataBuffers[i].getDataType();
+        final RasterDataNode[] rasterDataNodes = new RasterDataNode[bands.length + tiePointGrids.length];
+        System.arraycopy(bands, 0, rasterDataNodes, 0, bands.length);
+        System.arraycopy(tiePointGrids, 0, rasterDataNodes, bands.length, tiePointGrids.length);
+
+        final int[] dataTypes = new int[rasterDataNodes.length];
+
+        final Raster[] dataRasters = new Raster[rasterDataNodes.length];
+        // todo: For big products this will not work because the whole scene is allocated. But no one wants to
+        //  export big scenes to ASCII. So this is minor and can be addressed when the need arises.
+        Rectangle dataRect = new Rectangle(getSourceProduct().getSceneRasterWidth(), getSourceProduct().getSceneRasterHeight());
+        for (int i = 0; i < rasterDataNodes.length; i++) {
+            dataRasters[i] = rasterDataNodes[i].getGeophysicalImage().getData(dataRect);
+            dataTypes[i] = dataRasters[i].getDataBuffer().getDataType();
         }
 
         for (int j = 0; j < getSourceProduct().getSceneRasterHeight(); j++) {
             for (int i = 0; i < getSourceProduct().getSceneRasterWidth(); i++) {
                 StringBuilder line = new StringBuilder();
-                final int index = j * getSourceProduct().getSceneRasterWidth() + i;
-                line.append(getFeatureIdFromMetadata(index));
-                for (int k = 0; k < bandDataBuffers.length; k++) {
-                    final DataBuffer buffer = bandDataBuffers[k];
+                line.append(getFeatureIdFromMetadata(j * getSourceProduct().getSceneRasterWidth() + i));
+                for (int k = 0; k < dataRasters.length; k++) {
+                    final Raster raster = dataRasters[k];
                     line.append(separator);
                     final Number elem;
-                    final int type = bandTypes[k];
+                    final int type = dataTypes[k];
                     if (type == DataBuffer.TYPE_INT || type == DataBuffer.TYPE_SHORT ||
-                        type == DataBuffer.TYPE_USHORT || type == DataBuffer.TYPE_BYTE) {
-                        elem = buffer.getElem(index);
+                            type == DataBuffer.TYPE_USHORT || type == DataBuffer.TYPE_BYTE) {
+                        elem = raster.getSample(i, j, 0);
                     } else if (type == DataBuffer.TYPE_FLOAT) {
-                        elem = buffer.getElemFloat(index);
+                        elem = raster.getSampleFloat(i, j, 0);
                     } else if (type == DataBuffer.TYPE_DOUBLE) {
-                        elem = buffer.getElemDouble(index);
+                        elem = raster.getSampleDouble(i, j, 0);
                     } else {
-                        throw new IllegalArgumentException("Undefined band data type '" + type + "' in source product.");
-                    }
-                    line.append(elem);
-                }
-
-                for (int k = 0; k < tpgDataBuffers.length; k++) {
-                    final DataBuffer buffer = tpgDataBuffers[k];
-                    line.append(separator);
-                    final Number elem;
-                    final int type = tpgTypes[k];
-                    if (type == DataBuffer.TYPE_INT || type == DataBuffer.TYPE_SHORT ||
-                        type == DataBuffer.TYPE_USHORT || type == DataBuffer.TYPE_BYTE) {
-                        elem = buffer.getElem(index);
-                    } else if (type == DataBuffer.TYPE_FLOAT) {
-                        elem = buffer.getElemFloat(index);
-                    } else if (type == DataBuffer.TYPE_DOUBLE) {
-                        elem = buffer.getElemDouble(index);
-                    } else {
-                        throw new IllegalArgumentException("Undefined tie point grid data type '" + type + "' in source product.");
+                        throw new IllegalArgumentException("Undefined data type '" + type + "' for raster data node '" + rasterDataNodes[k] + "' in source product.");
                     }
                     line.append(elem);
                 }
@@ -200,6 +200,9 @@ public class CsvProductWriter extends AbstractProductWriter {
 
     @Override
     public void flush() throws IOException {
+        if (writer != null) {
+            writer.flush();
+        }
     }
 
     @Override
@@ -210,7 +213,8 @@ public class CsvProductWriter extends AbstractProductWriter {
     }
 
     @Override
-    public void deleteOutput() throws IOException {
+    public void deleteOutput() {
+        // @todo 2 tb/** is this intentionally not implemented?? tb/tb implement this! 2020-02-27
     }
 
     private void getSeparatorFromMetaData() {

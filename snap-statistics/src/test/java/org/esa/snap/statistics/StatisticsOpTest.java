@@ -35,6 +35,8 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -76,7 +78,9 @@ public class StatisticsOpTest {
         bandConfiguration.sourceBandName = "algal_2";
         statisticsOp.bandConfigurations = new BandConfiguration[]{bandConfiguration};
         statisticsOp.sourceProducts = new Product[]{TestUtil.getTestProduct()};
-        statisticsOp.shapefile = new File(getClass().getResource("4_pixels.shp").getFile());
+        final URL resource = getClass().getResource("4_pixels.shp");
+        final URI uri = new URI(resource.toString());
+        statisticsOp.shapefile = new File(uri.getPath());
         final MyOutputter outputter = new MyOutputter();
         statisticsOp.allStatisticsOutputters.add(outputter);
 
@@ -103,7 +107,9 @@ public class StatisticsOpTest {
         bandConfiguration.sourceBandName = "algal_2";
         statisticsOp.bandConfigurations = new BandConfiguration[]{bandConfiguration};
         statisticsOp.sourceProducts = new Product[]{TestUtil.getTestProduct()};
-        statisticsOp.shapefile = new File(getClass().getResource("4_pixels.shp").getFile());
+        final URL resource = getClass().getResource("4_pixels.shp");
+        final URI uri = new URI(resource.toString());
+        statisticsOp.shapefile = new File(uri.getPath());
         statisticsOp.accuracy = 6;
 
         final MyOutputter outputter = new MyOutputter();
@@ -132,7 +138,9 @@ public class StatisticsOpTest {
         bandConfiguration.sourceBandName = "algal_2";
         statisticsOp.bandConfigurations = new BandConfiguration[]{bandConfiguration};
         statisticsOp.sourceProducts = new Product[]{TestUtil.getTestProduct()};
-        statisticsOp.shapefile = new File(getClass().getResource("4_pixels.shp").getFile());
+        final URL resource = getClass().getResource("4_pixels.shp");
+        final URI uri = new URI(resource.toString());
+        statisticsOp.shapefile = new File(uri.getPath());
         statisticsOp.accuracy = 6;
         statisticsOp.percentiles = null;
 
@@ -164,7 +172,9 @@ public class StatisticsOpTest {
         bandConfiguration.expression = "algal_2 * PI";
         statisticsOp.bandConfigurations = new BandConfiguration[]{bandConfiguration};
         statisticsOp.sourceProducts = new Product[]{TestUtil.getTestProduct()};
-        statisticsOp.shapefile = new File(getClass().getResource("4_pixels.shp").getFile());
+        final URL resource = getClass().getResource("4_pixels.shp");
+        final URI uri = new URI(resource.toString());
+        statisticsOp.shapefile = new File(uri.getPath());
 
         final MyOutputter outputter = new MyOutputter();
         statisticsOp.allStatisticsOutputters.add(outputter);
@@ -193,7 +203,9 @@ public class StatisticsOpTest {
         bandConfiguration.validPixelExpression = "algal_2 > 0.7";
         statisticsOp.bandConfigurations = new BandConfiguration[]{bandConfiguration};
         statisticsOp.sourceProducts = new Product[]{TestUtil.getTestProduct()};
-        statisticsOp.shapefile = new File(getClass().getResource("4_pixels.shp").getFile());
+        final URL resource = getClass().getResource("4_pixels.shp");
+        final URI uri = new URI(resource.toString());
+        statisticsOp.shapefile = new File(uri.getPath());
 
         final MyOutputter outputter = new MyOutputter();
         statisticsOp.allStatisticsOutputters.add(outputter);
@@ -258,7 +270,9 @@ public class StatisticsOpTest {
         bandConfiguration.sourceBandName = "algal_2";
         statisticsOp.bandConfigurations = new BandConfiguration[]{bandConfiguration};
         statisticsOp.sourceProducts = new Product[]{TestUtil.getTestProduct()};
-        statisticsOp.shapefile = new File(getClass().getResource("4_pixels.shp").getFile());
+        final URL resource = getClass().getResource("4_pixels.shp");
+        final URI uri = new URI(resource.toString());
+        statisticsOp.shapefile = new File(uri.getPath());
         statisticsOp.percentiles = new int[]{20, 51, 90};
 
         final MyOutputter outputter = new MyOutputter();

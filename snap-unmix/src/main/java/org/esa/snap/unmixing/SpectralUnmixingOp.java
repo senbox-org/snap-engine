@@ -48,9 +48,9 @@ import java.util.Map;
  */
 @OperatorMetadata(alias = "Unmix",
         category = "Raster/Image Analysis",
-        version = "1.0",
-        authors = "Norman Fomferra, Helmut Schiller",
-        copyright = "(c) 2007 by Brockmann Consult",
+        version = "1.1",
+        authors = "Tom Block, Norman Fomferra, Helmut Schiller",
+        copyright = "(c) 2020 by Brockmann Consult",
         description = "Performs a linear spectral unmixing.")
 public class SpectralUnmixingOp extends Operator {
 
@@ -58,7 +58,7 @@ public class SpectralUnmixingOp extends Operator {
     private final String C_LSU = "Constrained LSU";
     private final String FC_LSU = "Fully Constrained LSU";
 
-    @SourceProduct(alias="source", description = "The source product.")
+    @SourceProduct(alias = "source", description = "The source product.")
     Product sourceProduct;
 
     @TargetProduct(description = "The target product.")
@@ -93,10 +93,8 @@ public class SpectralUnmixingOp extends Operator {
     private Band[] errorBands;
     private Band summaryErrorBand;
     private SpectralUnmixing spectralUnmixing;
-    private boolean computeTileMethodUsable;
 
     public SpectralUnmixingOp() {
-        computeTileMethodUsable = true;
     }
 
 
@@ -183,13 +181,13 @@ public class SpectralUnmixingOp extends Operator {
 
         if (sourceBandNames == null || sourceBandNames.length == 0) {
             Band[] bands = sourceProduct.getBands();
-            ArrayList<String> bandNameList = new ArrayList<String>();
+            ArrayList<String> bandNameList = new ArrayList<>();
             for (Band band : bands) {
                 if (band.getSpectralWavelength() > 0) {
                     bandNameList.add(band.getName());
                 }
             }
-            sourceBandNames = bandNameList.toArray(new String[bandNameList.size()]);
+            sourceBandNames = bandNameList.toArray(new String[0]);
         }
 
         validateParameters();
@@ -215,33 +213,6 @@ public class SpectralUnmixingOp extends Operator {
             throw new OperatorException("Number of source bands must be >= number of endmembers.");
         }
 
-        double[][] lsuMatrixElements = new double[numSourceBands][numEndmembers];
-        for (int j = 0; j < numEndmembers; j++) {
-            Endmember endmember = endmembers[j];
-            double[] wavelengths = endmember.getWavelengths();
-            double[] radiations = endmember.getRadiations();
-            for (int i = 0; i < numSourceBands; i++) {
-                Band sourceBand = sourceBands[i];
-                float wavelength = sourceBand.getSpectralWavelength();
-                float bandwidth = sourceBand.getSpectralBandwidth();
-                int k = findEndmemberSpectralIndex(wavelengths, wavelength, Math.max(bandwidth, minBandwidth));
-                if (k == -1) {
-                    throw new OperatorException(String.format("Band %s: No matching endmember wavelength found (%f nm)", sourceBand.getName(), wavelength));
-                }
-                lsuMatrixElements[i][j] = radiations[k];
-            }
-        }
-
-        if (UC_LSU.equals(unmixingModelName)) {
-            spectralUnmixing = new UnconstrainedLSU(lsuMatrixElements);
-        } else if (C_LSU.equals(unmixingModelName)) {
-            spectralUnmixing = new ConstrainedLSU(lsuMatrixElements);
-        } else if (FC_LSU.equals(unmixingModelName)) {
-            spectralUnmixing = new FullyConstrainedLSU(lsuMatrixElements);
-        } else if (unmixingModelName == null) {
-            spectralUnmixing = new UnconstrainedLSU(lsuMatrixElements);
-        }
-
         int width = sourceBands[0].getRasterWidth();
         int height = sourceBands[0].getRasterHeight();
 
@@ -264,9 +235,51 @@ public class SpectralUnmixingOp extends Operator {
         }
 
         ProductUtils.copyMetadata(sourceProduct, targetProduct);
-        if (sourceProduct.getSceneRasterSize().equals(targetProduct.getSceneRasterSize())) {
+        if (sourceProduct.isMultiSize()) {
+            ProductUtils.copyGeoCoding(sourceBands[0], targetProduct);
+        } else if (sourceProduct.getSceneRasterSize().equals(targetProduct.getSceneRasterSize())) {
             ProductUtils.copyTiePointGrids(sourceProduct, targetProduct);
             ProductUtils.copyGeoCoding(sourceProduct, targetProduct);
+        }
+    }
+
+    @Override
+    public void doExecute(ProgressMonitor pm) throws OperatorException {
+        int numSourceBands = sourceBands.length;
+        int numEndmembers = endmembers.length;
+        pm.beginTask("Setting up Model", 10 + (numSourceBands * numEndmembers));
+        try {
+            double[][] lsuMatrixElements = new double[numSourceBands][numEndmembers];
+            for (int j = 0; j < numEndmembers; j++) {
+                Endmember endmember = endmembers[j];
+                double[] wavelengths = endmember.getWavelengths();
+                double[] radiations = endmember.getRadiations();
+                for (int i = 0; i < numSourceBands; i++) {
+                    Band sourceBand = sourceBands[i];
+                    float wavelength = sourceBand.getSpectralWavelength();
+                    float bandwidth = sourceBand.getSpectralBandwidth();
+                    int k = findEndmemberSpectralIndex(wavelengths, wavelength, Math.max(bandwidth, minBandwidth));
+                    if (k == -1) {
+                        throw new OperatorException(String.format("Band %s: No matching endmember wavelength found (%f nm)",
+                                                                  sourceBand.getName(), wavelength));
+                    }
+                    lsuMatrixElements[i][j] = radiations[k];
+                    pm.worked(1);
+                }
+            }
+
+            if (UC_LSU.equals(unmixingModelName)) {
+                spectralUnmixing = new UnconstrainedLSU(lsuMatrixElements);
+            } else if (C_LSU.equals(unmixingModelName)) {
+                spectralUnmixing = new ConstrainedLSU(lsuMatrixElements);
+            } else if (FC_LSU.equals(unmixingModelName)) {
+                spectralUnmixing = new FullyConstrainedLSU(lsuMatrixElements);
+            } else if (unmixingModelName == null) {
+                spectralUnmixing = new UnconstrainedLSU(lsuMatrixElements);
+            }
+            pm.worked(10);
+        } finally {
+            pm.done();
         }
     }
 
@@ -415,6 +428,7 @@ public class SpectralUnmixingOp extends Operator {
             throw new OperatorException(e);
         }
     }
+
     private static List<Endmember> readGraphs(Reader reader) throws IOException {
 
         CsvReader csvReader = new CsvReader(reader, new char[]{'\t'});

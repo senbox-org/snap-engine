@@ -27,6 +27,7 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.gpf.Operator;
 import org.esa.snap.core.gpf.OperatorSpi;
 import org.esa.snap.core.gpf.common.WriteOp;
+import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.engine_utilities.util.ProductFunctions;
@@ -86,7 +87,7 @@ public class TestProcessor {
         subsetDef.addNodeNames(sourceProduct.getBandNames());
         final int w = within(subsetWidth, bandWidth);
         final int h = within(subsetHeight, bandHeight);
-        subsetDef.setRegion(within(subsetX, bandWidth - w), within(subsetY, bandHeight - h), w, h);
+        subsetDef.setSubsetRegion(new PixelSubsetRegion(within(subsetX, bandWidth - w), within(subsetY, bandHeight - h), w, h, 0));
         subsetDef.setIgnoreMetadata(false);
         subsetDef.setTreatVirtualBandsAsRealBands(false);
 
@@ -112,7 +113,7 @@ public class TestProcessor {
         subsetDef.addNodeNames(new String[]{bandName});
         final int w = within(subsetWidth, bandWidth);
         final int h = within(subsetHeight, bandHeight);
-        subsetDef.setRegion(within(subsetX, bandWidth - w), within(subsetY, bandHeight - h), w, h);
+        subsetDef.setSubsetRegion(new PixelSubsetRegion(within(subsetX, bandWidth - w), within(subsetY, bandHeight - h), w, h, 0));
         subsetDef.setIgnoreMetadata(false);
         subsetDef.setTreatVirtualBandsAsRealBands(true);
 
@@ -324,7 +325,7 @@ public class TestProcessor {
 
     private int recurseReadFolder(final File origFolder,
                                          final ProductReaderPlugIn readerPlugin,
-                                         final ProductReader reader,
+                                         ProductReader reader,
                                          final String[] productTypeExemptions,
                                          final String[] exceptionExemptions,
                                          int iterations) throws Exception {
@@ -347,6 +348,9 @@ public class TestProcessor {
                     try {
                         SystemUtils.LOG.info("Reading [" + iterations + "] " + file.toString());
 
+                        if(reader == null) {
+                            reader = readerPlugin.createReaderInstance();
+                        }
                         final Product product = reader.readProductNodes(file, null);
                         if (productTypeExemptions != null && containsProductType(productTypeExemptions, product.getProductType()))
                             continue;

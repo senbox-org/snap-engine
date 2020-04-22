@@ -1,0 +1,48 @@
+[INFO] Start to read j2k main header (524).
+[INFO] Main header has been correctly decoded.
+Image info {
+	 x0=0, y0=0
+	 x1=10980, y1=10980
+	 numcomps=1
+		 component 0 {
+		 dx=1, dy=1
+		 prec=16
+		 sgnd=0
+	}
+}
+Codestream info from main header: {
+	 tx0=0, ty0=0
+	 tdx=2048, tdy=2048
+	 tw=6, th=6
+	 default tile {
+		 csty=0
+		 prg=0x2
+		 numlayers=1
+		 mct=0
+		 comp 0 {
+			 csty=0
+			 numresolutions=6
+			 cblkw=2^6
+			 cblkh=2^6
+			 cblksty=0
+			 qmfbid=1
+			 preccintsize (w,h)=(15,15) (15,15) (15,15) (15,15) (15,15) (15,15) 
+			 qntsty=0
+			 numgbits=1
+			 stepsizes (m,e)=(0,17) (0,18) (0,18) (0,19) (0,18) (0,18) (0,19) (0,18) (0,18) (0,19) (0,18) (0,18) (0,18) (0,17) (0,17) (0,18) 
+			 roishift=0
+		 }
+	 }
+}
+Codestream index from main header: {
+	 Main header start position=524
+	 Main header end position=717
+	 Marker list: {
+		 type=0xff4f, pos=524, len=2
+		 type=0xff51, pos=526, len=43
+		 type=0xff52, pos=569, len=14
+		 type=0xff5c, pos=583, len=21
+		 type=0xff64, pos=604, len=19
+		 type=0xff64, pos=623, len=94
+	 }
+}

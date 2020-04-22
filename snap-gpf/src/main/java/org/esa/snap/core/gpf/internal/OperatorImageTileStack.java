@@ -18,6 +18,7 @@ package org.esa.snap.core.gpf.internal;
 import com.bc.ceres.core.Assert;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.util.ImageUtils;
@@ -79,8 +80,8 @@ public class OperatorImageTileStack extends OperatorImage {
 
                 /* Clip output rectangle to image bounds. */
                 Rectangle rect = new Rectangle(location.x, location.y,
-                                               sampleModel.getWidth(),
-                                               sampleModel.getHeight());
+                        sampleModel.getWidth(),
+                        sampleModel.getHeight());
                 Rectangle destRect = rect.intersection(getBounds());
                 computeRect((PlanarImage[]) null, dest, destRect);
                 return dest;
@@ -92,7 +93,7 @@ public class OperatorImageTileStack extends OperatorImage {
     protected void computeRect(PlanarImage[] ignored, WritableRaster tile, Rectangle destRect) {
 
         final OperatorContext operatorContext = getOperatorContext();
-        operatorContext.executeOperator(ProgressMonitor.NULL);
+        GPF.getDefaultInstance().executeOperator(operatorContext.getOperator());
 
         long startNanos = System.nanoTime();
 
@@ -100,8 +101,14 @@ public class OperatorImageTileStack extends OperatorImage {
         Map<Band, Tile> targetTiles = new HashMap<Band, Tile>(targetBands.length * 2);
         Map<Band, WritableRaster> writableRasters = new HashMap<Band, WritableRaster>(targetBands.length);
 
+
         for (Band band : targetBands) {
-            if (band == getTargetBand() || operatorContext.isComputingImageOf(band)) {
+            // tb 2020-03-09
+            // this first conditional skips the creation of a WritableRaster for output-nodes. For some reason not
+            // really understood, this overwrites the tile-data computed by operators further up the graph when running
+            // in tile-stack-computation modus.
+            if (!(operatorContext.isOutputNode())
+                    && (band == getTargetBand() || operatorContext.isComputingImageOf(band))) {
                 WritableRaster tileRaster = getWritableRaster(band, tile);
                 writableRasters.put(band, tileRaster);
                 Tile targetTile = createTargetTile(band, tileRaster, destRect);
@@ -170,7 +177,7 @@ public class OperatorImageTileStack extends OperatorImage {
     private WritableRaster createWritableRaster(Rectangle rectangle) {
         final int dataBufferType = ImageManager.getDataBufferType(getTargetBand().getDataType());
         SampleModel sampleModel = ImageUtils.createSingleBandedSampleModel(dataBufferType, rectangle.width,
-                                                                           rectangle.height);
+                rectangle.height);
         final Point location = new Point(rectangle.x, rectangle.y);
         return createWritableRaster(sampleModel, location);
     }

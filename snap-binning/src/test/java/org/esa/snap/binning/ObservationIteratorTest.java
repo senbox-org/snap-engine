@@ -21,8 +21,10 @@ import org.esa.snap.binning.support.SEAGrid;
 import org.esa.snap.binning.support.VariableContextImpl;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.test.LongTestRunner;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import javax.media.jai.PlanarImage;
 import java.awt.Point;
@@ -33,12 +35,17 @@ import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.util.NoSuchElementException;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 
 /**
  * @author Marco Peters
  */
+@RunWith(LongTestRunner.class)
 public class ObservationIteratorTest {
 
     @Test

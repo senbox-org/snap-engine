@@ -18,26 +18,28 @@ package org.esa.snap.core.util;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.prefs.Preferences;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class VersionCheckerTest {
 
     @Test
-    public void testVersions() throws IOException {
-        VersionChecker vc = new VersionChecker(asInputStream("5.0"), asInputStream("4.9.12"));
+    public void testVersions() {
+        VersionChecker vc = new VersionChecker(asInputStream("5.0"), asInputStream("4.9.12"), Preferences.systemRoot());
         String actual = vc.getLocalVersion().toString();
         assertEquals("5.0", actual);
         assertEquals("4.9.12", vc.getRemoteVersion().toString());
     }
 
     @Test
-    public void mustCheck() throws Exception {
+    public void mustCheck() {
         assertFalse(VersionChecker.mustCheck(VersionChecker.CHECK.NEVER, LocalDateTime.now()));
         assertFalse(VersionChecker.mustCheck(VersionChecker.CHECK.NEVER, LocalDateTime.now().minus(100, ChronoUnit.DAYS)));
         assertTrue(VersionChecker.mustCheck(VersionChecker.CHECK.ON_START, LocalDateTime.now()));
@@ -51,15 +53,15 @@ public class VersionCheckerTest {
     }
 
     @Test
-    public void testCheckForNewRelease_WithRemoteGreater() throws Exception {
+    public void testCheckForNewRelease_WithRemoteGreater() {
 
-        VersionChecker vc = new VersionChecker(asInputStream("5.0"), asInputStream("6.0"));
+        VersionChecker vc = new VersionChecker(asInputStream("5.0"), asInputStream("6.0"), Preferences.systemRoot());
         assertTrue(vc.checkForNewRelease());
     }
 
     @Test
-    public void testCheckForNewRelease_WithRemoteLower() throws Exception {
-        VersionChecker vc = new VersionChecker(asInputStream("5.0"), asInputStream("4.0"));
+    public void testCheckForNewRelease_WithRemoteLower() {
+        VersionChecker vc = new VersionChecker(asInputStream("5.0"), asInputStream("4.0"), Preferences.systemRoot());
         assertFalse(vc.checkForNewRelease());
     }
 

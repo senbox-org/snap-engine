@@ -149,6 +149,17 @@ public class RandomForestClassifierOp extends Operator {
         }
     }
 
+    @Override
+    public void doExecute(ProgressMonitor pm) throws OperatorException {
+        pm.beginTask("Preparing", 1);
+        try {
+            classifier.executePreparation();
+            pm.worked(1);
+        } finally {
+            pm.done();
+        }
+    }
+
     public void computeTileStack(Map<Band, Tile> targetTileMap, Rectangle targetRectangle, ProgressMonitor pm)
             throws OperatorException {
         try {

@@ -53,7 +53,11 @@ public class FileUtilsTest_RelativeUri {
         final URI uri = FileUtils.getRelativeUri(twoDeeperRootDir.toURI(), relativeFileTwoDirsHigher);
 
         final String path = relativeFileTwoDirsHigher.getCanonicalPath().replace("\\", "/");
-        final String expected = "file:" + (path.startsWith("/") ? path : "/" + path);
+        String expected = "file:" + (path.startsWith("/") ? path : "/" + path);
+
+        //Fix when space on path
+        expected = expected.replaceAll(" ","%20");
+
         assertEquals(expected, uri.toString());
     }
 }

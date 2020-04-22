@@ -17,8 +17,6 @@
 package org.esa.snap.binning.operator;
 
 import com.bc.ceres.core.ProgressMonitor;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import org.esa.snap.binning.AggregatorConfig;
 import org.esa.snap.binning.BinningContext;
 import org.esa.snap.binning.CellProcessorConfig;
@@ -31,6 +29,9 @@ import org.esa.snap.binning.TemporalBin;
 import org.esa.snap.binning.TemporalBinSource;
 import org.esa.snap.binning.TemporalBinner;
 import org.esa.snap.binning.cellprocessor.CellProcessorChain;
+import org.esa.snap.binning.operator.formatter.Formatter;
+import org.esa.snap.binning.operator.formatter.FormatterConfig;
+import org.esa.snap.binning.operator.formatter.FormatterFactory;
 import org.esa.snap.binning.operator.metadata.GlobalMetadata;
 import org.esa.snap.binning.operator.metadata.MetadataAggregator;
 import org.esa.snap.binning.operator.metadata.MetadataAggregatorFactory;
@@ -38,6 +39,7 @@ import org.esa.snap.binning.support.SpatialDataPeriod;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.MetadataElement;
+import org.esa.snap.core.datamodel.PixelGeoCoding;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.gpf.Operator;
@@ -53,11 +55,15 @@ import org.esa.snap.core.gpf.graph.Graph;
 import org.esa.snap.core.gpf.graph.GraphContext;
 import org.esa.snap.core.gpf.graph.GraphIO;
 import org.esa.snap.core.util.ProductUtils;
+import org.esa.snap.core.util.RectangleExtender;
 import org.esa.snap.core.util.StopWatch;
 import org.esa.snap.core.util.converters.JtsGeometryConverter;
 import org.esa.snap.core.util.io.WildcardMatcher;
 import org.geotools.geometry.jts.JTS;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
 
+import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
 import java.io.File;
@@ -246,7 +252,9 @@ public class BinningOp extends Operator {
     private transient BinWriter binWriter;
     private transient Area regionArea;
     private transient MetadataAggregator metadataAggregator;
-    private transient String planetaryGridClass;
+
+    @Parameter(defaultValue = "org.esa.snap.binning.support.SEAGrid")
+    private String planetaryGridClass;
     private transient CompositingType compositingType;
 
     private final Map<Product, List<Band>> addedVariableBands;
@@ -440,7 +448,10 @@ public class BinningOp extends Operator {
 
         try {
             // Step 1: Spatial binning - creates time-series of spatial bins for each bin ID ordered by ID. The tree map structure is <ID, time-series>
-            SpatialBinCollection spatialBinMap = doSpatialBinning(productFilter);
+            final SpatialBinCollection spatialBinMap = doSpatialBinning(productFilter);
+            if (numProductsAggregated == 0) {
+                throw new OperatorException("No valid input products found during spatial binning. Quitting operator");
+            }
             if (!spatialBinMap.isEmpty()) {
                 // update region
                 if (region == null && regionArea != null) {
@@ -613,7 +624,7 @@ public class BinningOp extends Operator {
                 }
             }
         }
-        if (sourceProductPaths != null) {
+        if (sourceProductPaths != null && sourceProductPaths.length > 0)  {
             getLogger().info("expanding sourceProductPaths wildcards.");
             SortedSet<File> fileSet = new TreeSet<>();
             for (String filePattern : sourceProductPaths) {
@@ -656,7 +667,7 @@ public class BinningOp extends Operator {
                 }
             }
         }
-        if (sourceGraphPaths != null) {
+        if (sourceGraphPaths != null && sourceGraphPaths.length > 0) {
             getLogger().info("expanding sourceGraphPaths wildcards.");
             SortedSet<File> fileSet = new TreeSet<>();
             for (String filePattern : sourceGraphPaths) {
@@ -721,12 +732,32 @@ public class BinningOp extends Operator {
 
         final String productName = sourceProduct.getName();
         getLogger().info(String.format("Spatial binning of product '%s'...", productName));
-        getLogger().fine(String.format("Product start time: '%s'", sourceProduct.getStartTime()));
-        getLogger().fine(String.format("Product end time:   '%s'", sourceProduct.getEndTime()));
         if (region != null) {
             SubsetOp subsetOp = new SubsetOp();
             subsetOp.setSourceProduct(sourceProduct);
-            subsetOp.setGeoRegion(region);
+
+            final Rectangle subsetRectangle = SubsetOp.computePixelRegion(sourceProduct, region, 0);
+            if (sourceProduct.getSceneGeoCoding() instanceof PixelGeoCoding && (subsetRectangle.height <= 2 || subsetRectangle.width <= 2)) {
+                // workaround for SNAP-1264
+                // PixelGeoCodings can't work on such small rasters
+                // increase rectangle size by 1 pixel to each side, making sure not to extend source product boundaries
+                int sceneRasterWidth = sourceProduct.getSceneRasterWidth();
+                int sceneRasterHeight = sourceProduct.getSceneRasterHeight();
+                final Rectangle clippingRect = new Rectangle(sceneRasterWidth,
+                                                             sceneRasterHeight);
+                final RectangleExtender rectangleExtender = new RectangleExtender(clippingRect, 1, 1);
+                final Rectangle extendedSubsetRectangle = rectangleExtender.extend(subsetRectangle);
+                // check if rectangle is still to small
+                if(extendedSubsetRectangle.height <= 2 || extendedSubsetRectangle.width <= 2) {
+                    getLogger().warning(String.format("Skipped binning of product '%s', raster dimensions are to small [%d,%d]",
+                                                      productName, sceneRasterWidth, sceneRasterHeight));
+                    return;
+                }
+                subsetOp.setRegion(extendedSubsetRectangle);
+            } else {
+                subsetOp.setGeoRegion(region);
+            }
+
             sourceProduct = subsetOp.getTargetProduct();
             // TODO mz/nf/mp 2013-11-06: avoid creation of subset products
             //  - replace subset with rectangle as parameter to SpatialProductBinner
@@ -738,6 +769,8 @@ public class BinningOp extends Operator {
                                                                 ProgressMonitor.NULL);
         stopWatch.stop();
 
+        getLogger().fine(String.format("Product start time: '%s'", sourceProduct.getStartTime()));
+        getLogger().fine(String.format("Product end time:   '%s'", sourceProduct.getEndTime()));
         getLogger().info(String.format("Spatial binning of product '%s' done, %d observations seen, took %s", productName, numObs, stopWatch));
 
         if (region == null && regionArea != null) {
@@ -808,7 +841,9 @@ public class BinningOp extends Operator {
         if (outputTargetProduct) {
             getLogger().info(String.format("Writing mapped product '%s'...", formatterConfig.getOutputFile()));
             final MetadataElement processingGraphMetadata = getProcessingGraphMetadata();
-            Formatter.format(binningContext.getPlanetaryGrid(),
+
+            final Formatter defaultFormatter = FormatterFactory.get("default");
+            defaultFormatter.format(binningContext.getPlanetaryGrid(),
                              getTemporalBinSource(temporalBins),
                              binningContext.getBinManager().getResultFeatureNames(),
                              formatterConfig,
@@ -823,7 +858,7 @@ public class BinningOp extends Operator {
 
             if (outputType.equalsIgnoreCase("Product")) {
                 final File writtenProductFile = new File(outputFile);
-                String format = Formatter.getOutputFormat(formatterConfig, writtenProductFile);
+                String format = FormatterFactory.getOutputFormat(formatterConfig, writtenProductFile);
                 writtenProduct = ProductIO.readProduct(writtenProductFile, format);
                 this.targetProduct = copyProduct(writtenProduct);
             } else {
@@ -882,7 +917,7 @@ public class BinningOp extends Operator {
         }
     }
 
-    // package access for tessting only tb 2013-05-07
+    // package access for testing only tb 2013-05-07
     static ProductData.UTC parseStartDateUtc(String date) {
         try {
             if (date.matches("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}")) {
@@ -895,7 +930,7 @@ public class BinningOp extends Operator {
         }
     }
 
-    private static class SimpleTemporalBinSource implements TemporalBinSource {
+    public static class SimpleTemporalBinSource implements TemporalBinSource {
 
         private final List<TemporalBin> temporalBins;
 

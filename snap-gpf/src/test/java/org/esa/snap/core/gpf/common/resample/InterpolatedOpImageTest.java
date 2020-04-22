@@ -279,6 +279,7 @@ public class InterpolatedOpImageTest {
     }
 
     @Test
+    @Ignore
     public void testInterpolate_Double_CubicConvolution() throws NoninvertibleTransformException {
         testCubicConvolution(ProductData.TYPE_FLOAT64);
     }

@@ -766,25 +766,28 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
      */
     @Override
     public boolean transferGeoCoding(final Scene srcScene, final Scene destScene, final ProductSubsetDef subsetDef) {
-        final String latGridName = getLatGrid().getName();
-        final String lonGridName = getLonGrid().getName();
-        final Product destProduct = destScene.getProduct();
-        TiePointGrid latGrid = destProduct.getTiePointGrid(latGridName);
-        if (latGrid == null) {
-            latGrid = TiePointGrid.createSubset(getLatGrid(), subsetDef);
-            destProduct.addTiePointGrid(latGrid);
-        }
-        TiePointGrid lonGrid = destProduct.getTiePointGrid(lonGridName);
-        if (lonGrid == null) {
-            lonGrid = TiePointGrid.createSubset(getLonGrid(), subsetDef);
-            destProduct.addTiePointGrid(lonGrid);
-        }
-        if (latGrid != null && lonGrid != null) {
-            destScene.setGeoCoding(new TiePointGeoCoding(latGrid, lonGrid));
+        TiePointGrid destLatGrid = getDestGrid(getLatGrid(), destScene, subsetDef);
+        TiePointGrid destLonGrid = getDestGrid(getLonGrid(), destScene, subsetDef);
+        if (destLatGrid != null && destLonGrid != null) {
+            destScene.setGeoCoding(new TiePointGeoCoding(destLatGrid, destLonGrid));
             return true;
         } else {
             return false;
         }
+    }
+
+    protected TiePointGrid getDestGrid(TiePointGrid grid, final Scene destScene, final ProductSubsetDef subsetDef) {
+        final Product destProduct = destScene.getProduct();
+        TiePointGrid destGrid = destProduct.getTiePointGrid(grid.getName());
+        if (destGrid == null) {
+            if (subsetDef != null) {
+                destGrid = TiePointGrid.createSubset(grid, subsetDef);
+            } else {
+                destGrid = grid.cloneTiePointGrid();
+            }
+            destProduct.addTiePointGrid(destGrid);
+        }
+        return destGrid;
     }
 
     /////////////////////////////////////////////////////////////////////////

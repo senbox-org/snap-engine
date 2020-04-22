@@ -18,6 +18,7 @@ package org.esa.snap.core.gpf.internal;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.descriptor.OperatorDescriptor;
 import org.esa.snap.core.image.ImageManager;
@@ -39,12 +40,12 @@ public class OperatorImage extends SourcelessOpImage {
 
     private OperatorImage(Band targetBand, OperatorContext operatorContext, ImageLayout imageLayout) {
         super(imageLayout,
-              operatorContext.getRenderingHints(),
-              imageLayout.getSampleModel(null),
-              imageLayout.getMinX(null),
-              imageLayout.getMinY(null),
-              imageLayout.getWidth(null),
-              imageLayout.getHeight(null));
+                operatorContext.getRenderingHints(),
+                imageLayout.getSampleModel(null),
+                imageLayout.getMinX(null),
+                imageLayout.getMinY(null),
+                imageLayout.getWidth(null),
+                imageLayout.getHeight(null));
         this.targetBand = targetBand;
         this.operatorContext = operatorContext;
         OperatorContext.setTileCache(this);
@@ -61,10 +62,11 @@ public class OperatorImage extends SourcelessOpImage {
 
     @Override
     protected void computeRect(PlanarImage[] ignored, WritableRaster tile, Rectangle destRect) {
-
-        operatorContext.executeOperator(ProgressMonitor.NULL);
+        GPF.getDefaultInstance().executeOperator(operatorContext.getOperator());
 
         long startNanos = System.nanoTime();
+
+        //System.out.println("Tile: " + operatorContext.getOperator().getId() + " band: " + getTargetBand().getName() + ", thread: " + Thread.currentThread().getId());
 
         Tile targetTile;
         if (operatorContext.isComputingImageOf(getTargetBand())) {

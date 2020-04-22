@@ -19,7 +19,6 @@ package com.bc.ceres.metadata;
 import com.bc.ceres.resource.Resource;
 import org.apache.velocity.VelocityContext;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
@@ -29,7 +28,11 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class MetadataResourceEngineTest {
 
@@ -52,7 +55,6 @@ public class MetadataResourceEngineTest {
     /**
      * A typical end-to-end example usage of the {@code MetadataResourceEngine}.
      */
-    @Ignore
     public void useCaseOverview() throws Exception {
         metadataResourceEngine.readResource("metadata", "input/metadata.properties");
         metadataResourceEngine.readRelatedResource("source1", "input/MER_L1_1.N1"); // <-"input/MER_L1_1-report.xml", "input/MER_L1_1-meta.txt"

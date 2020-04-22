@@ -35,8 +35,8 @@ import java.util.Locale;
 
 /**
  * The <code>OperatorProductReader</code> is an adapter class that wraps
- * <code>Operator</code>s to BEAM <code>ProductReader</code>s. It enables
- * the usage of BEAM <code>Product</code>s inside of this framework without
+ * <code>Operator</code>s to SNAP <code>ProductReader</code>s. It enables
+ * the usage of SNAP <code>Product</code>s inside of this framework without
  * the necessity to make changes on the <code>Product</code>'s signature.
  *
  * @author Marco Peters
@@ -74,7 +74,9 @@ public class OperatorProductReader implements ProductReader {
 
     public Product readProductNodes(Object input, ProductSubsetDef subsetDef) throws IOException {
         try {
-            return operatorContext.getTargetProduct();
+            Product targetProduct = operatorContext.getTargetProduct();
+            operatorContext.executeOperator(ProgressMonitor.NULL);
+            return targetProduct;
         } catch (OperatorException e) {
             throw new IOException(e);
         }

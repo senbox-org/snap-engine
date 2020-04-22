@@ -23,9 +23,10 @@ import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.jai.JAIUtils;
 import org.junit.Assert;
+import org.junit.Test;
 
 import javax.imageio.stream.MemoryCacheImageOutputStream;
-import java.awt.Dimension;
+import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -65,10 +66,7 @@ public class TiffIFDTest extends TestCase {
         final Dimension tileSize = JAIUtils.computePreferredTileSize(WIDTH, HEIGHT, 1);
         _product.setPreferredTileSize(tileSize);
 
-
         final TiffIFD ifd = new TiffIFD(_product);
-
-
         final double[] expWidth = new double[]{WIDTH};
         final double[] expHeight = new double[]{HEIGHT};
         final double[] expBitsPerSample = new double[]{
@@ -118,11 +116,10 @@ public class TiffIFDTest extends TestCase {
         checkTag(TiffTag.RESOLUTION_UNIT, TiffShort.class, expResolutionUnit, null, ifd);
         checkAsciiTag(TiffTag.BEAM_METADATA, beamMetadata, null, ifd);
 
-
         final long ifdSize = ifd.getRequiredIfdSize();
         final long expRequiredReferencedValuesSize =
                 computeRequiredValuesSize(expBitsPerSample, expStripOffsets, expStripByteCounts, expSampleFormat,
-                                          expXResolution, expYResolution, expImageDescription, beamMetadata);
+                        expXResolution, expYResolution, expImageDescription, beamMetadata);
         final long referencedValuesSize = ifd.getRequiredReferencedValuesSize();
         final long sizeForStrips = ifd.getRequiredSizeForStrips();
         final long expEntireSize = ifdSize + referencedValuesSize + sizeForStrips;
@@ -150,7 +147,7 @@ public class TiffIFDTest extends TestCase {
         };
         final double[] expCompression = new double[]{1};
         final double[] expPhotoInter = new double[]{TiffCode.PHOTOMETRIC_BLACK_IS_ZERO.getValue()};
-        final TiffAscii expImageDescription = new TiffAscii(_product.getName());;
+        final TiffAscii expImageDescription = new TiffAscii(_product.getName());
         final double[] expStripOffsets = new double[]{
                 0, 400, 800
         };
@@ -191,7 +188,7 @@ public class TiffIFDTest extends TestCase {
         final long ifdSize = ifd.getRequiredIfdSize();
         final long expRequiredReferencedValuesSize =
                 computeRequiredValuesSize(expBitsPerSample, expStripOffsets, expStripByteCounts, expSampleFormat,
-                                          expXResolution, expYResolution, expImageDescription, beamMetadata);
+                        expXResolution, expYResolution, expImageDescription, beamMetadata);
         final long referencedValuesSize = ifd.getRequiredReferencedValuesSize();
         final long sizeForStrips = ifd.getRequiredSizeForStrips();
         final long expEntireSize = ifdSize + referencedValuesSize + sizeForStrips;
@@ -212,10 +209,8 @@ public class TiffIFDTest extends TestCase {
         final int startOffset = 50;
         final MemoryCacheImageOutputStream stream = new MemoryCacheImageOutputStream(new ByteArrayOutputStream());
 
-
         final TiffIFD ifd = new TiffIFD(_product);
         ifd.write(stream, startOffset, 0);
-
 
         final long expectedStreamLength = ifd.getRequiredIfdSize() + ifd.getRequiredReferencedValuesSize() + startOffset;
 
@@ -258,8 +253,9 @@ public class TiffIFDTest extends TestCase {
         offset += 8;
         final TiffLong expOffset10 = new TiffLong(offset);
         final TiffLong expOffset11 = null;
-        final TiffLong expOffset12 = null;
-        final TiffLong expOffset13 = null;
+        // never used, keethose for readability tb 2020-03-24
+//        final TiffLong expOffset12 = null;
+//        final TiffLong expOffset13 = null;
         final TiffLong expOffset14 = null;
         offset += 8;
         final TiffLong expOffset15 = new TiffLong(offset);
@@ -296,7 +292,7 @@ public class TiffIFDTest extends TestCase {
         Assert.assertArrayEquals(expIfdBytes, actBytes);
     }
 
-    public void testWriteToStream_WithIllegalOffset() throws Exception {
+    public void testWriteToStream_WithIllegalOffset() {
         _product.addBand("b1", ProductData.TYPE_UINT16);
         fillBandWithData(_product.getBandAt(0), 20);
         final MemoryCacheImageOutputStream stream = new MemoryCacheImageOutputStream(new ByteArrayOutputStream());
@@ -326,7 +322,12 @@ public class TiffIFDTest extends TestCase {
         assertNotNull(stripOffsets);
         assertEquals(1, stripOffsets.length);
         assertEquals(ifd.getRequiredIfdSize() + firstIFDOffset + ifd.getRequiredReferencedValuesSize(),
-                     stripOffsets[0].getValue());
+                stripOffsets[0].getValue());
+    }
+
+    @Test
+    public void testDimapHeader_ComponentGeoCoding() {
+
     }
 
     private long computeRequiredValuesSize(final double[] expBitsPerSample,
@@ -351,8 +352,8 @@ public class TiffIFDTest extends TestCase {
 
     private long sumOf(final double[] doubles) {
         double sum = 0;
-        for (int i = 0; i < doubles.length; i++) {
-            sum += doubles[i];
+        for (double aDouble : doubles) {
+            sum += aDouble;
         }
         return Math.round(sum);
     }
@@ -383,10 +384,10 @@ public class TiffIFDTest extends TestCase {
         };
         ios.writeShort(entryTags.length);
 
-        long nextEntryPos = 2 +startOffset;
-        for (int i = 0; i < entryTags.length; i++) {
+        long nextEntryPos = 2 + startOffset;
+        for (TiffShort entryTag : entryTags) {
             ios.seek(nextEntryPos);
-            ifd.getEntry(entryTags[i]).write(ios);
+            ifd.getEntry(entryTag).write(ios);
             nextEntryPos += TiffDirectoryEntry.BYTES_PER_ENTRY;
         }
         ios.writeInt(nextIFDOffset);
@@ -397,7 +398,7 @@ public class TiffIFDTest extends TestCase {
     }
 
     private void checkAsciiTag(final TiffShort tag, final TiffAscii expectedValue,
-                          final TiffLong expectedOffset, final TiffIFD tiffIFD) throws Exception {
+                               final TiffLong expectedOffset, final TiffIFD tiffIFD) {
         final TiffDirectoryEntry entry = tiffIFD.getEntry(tag);
         assertNotNull(entry);
         final TiffLong valuesOffset = entry.getValuesOffset();
@@ -408,7 +409,7 @@ public class TiffIFDTest extends TestCase {
             assertNull(valuesOffset);
         }
         final TiffValue actualValue = entry.getValues()[0];
-        final TiffAscii value = (TiffAscii)actualValue;
+        final TiffAscii value = (TiffAscii) actualValue;
         assertEquals(expectedValue.getValue(), value.getValue());
     }
 

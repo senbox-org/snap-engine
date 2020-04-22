@@ -1,7 +1,5 @@
 package com.bc.ceres.core;
 
-import org.junit.Ignore;
-
 /**
  * An executable used by {@link ProcessObserverTest}.
  * The executable has two arguments:
@@ -20,7 +18,6 @@ import org.junit.Ignore;
  *
  * @author Norman Fomferra
  */
-@Ignore
 public class TestExecutable {
     /**
      * Runs the test executable.

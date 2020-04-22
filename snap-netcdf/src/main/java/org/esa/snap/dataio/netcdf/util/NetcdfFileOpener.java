@@ -412,8 +412,23 @@ public class NetcdfFileOpener {
     // use internal class to defer execution of static initializer
     private static class DummyNetcdfFile extends NetcdfFile {
 
+        private final RandomAccessFile file;
+
         private DummyNetcdfFile(IOServiceProvider spi, RandomAccessFile raf, String location) throws IOException {
             super(spi, raf, location, null);
+            this.file = raf;
+        }
+
+        @Override
+        public synchronized void close() throws IOException {
+            super.close();
+            // ensure file lock is released. Some spi don't do it
+            if (iosp != null) {
+                iosp.close();
+            }
+            if (file != null) {
+                file.close();
+            }
         }
     }
 

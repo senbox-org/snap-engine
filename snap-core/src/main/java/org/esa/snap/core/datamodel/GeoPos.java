@@ -21,8 +21,15 @@ import org.esa.snap.core.util.math.MathUtils;
  * The <code>GeoPos</code> class represents a geographical position measured in longitudes and latitudes.
  *
  * @author Norman Fomferra
+ * @author Daniel Knowles
  * @version $Revision$ $Date$
+ * @
  */
+// SEP2018 - Daniel Knowles - Modified to support multiple format options for string representation of the latitude and longitude values.
+//                            Compass Format: indicate North, South, West, East either as "+/-" or with the suffixes "N,S,W,E"
+//                            Decimal Format: display value either as a decimal number or in the format DDD°[MM'[SS"]]
+
+
 public class GeoPos {
 
     private static final double MIN_PER_DEG = 60.0;
@@ -151,7 +158,7 @@ public class GeoPos {
      */
     @Override
     public int hashCode() {
-        return (int)(Double.doubleToLongBits(lat) + Double.doubleToLongBits(lon));
+        return (int) (Double.doubleToLongBits(lat) + Double.doubleToLongBits(lon));
     }
 
     /**
@@ -197,33 +204,61 @@ public class GeoPos {
      *
      * @return a string of the form DDD°[MM'[SS"]] [N|S].
      */
+    // SEP2018 - Daniel Knowles - Modified to call getLatString(lat, true, false)
     public String getLatString() {
-        return getLatString(lat);
+        return getLatString(lat, true, false);
     }
+
+
 
     /**
      * Returns a string representation of the latitude value.
      *
      * @return a string of the form DDD°[MM'[SS"]] [W|E].
      */
+    // SEP2018 - Daniel Knowles - Modified to call getLonString(lon, true, false)
     public String getLonString() {
-        return getLonString(lon);
+        return getLonString(lon, true, false);
     }
 
+
+
+
+
     /**
-     * Returns a string representation of the given longitude value.
+     * Returns a string representation of the given latitude value.
      *
      * @param lat the geographical latitude in decimal degree
      *
      * @return a string of the form DDD°[MM'[SS"]] [N|S].
      */
+    // SEP2018 - Daniel Knowles - Modified to call getLatString(lon, true, false)
     public static String getLatString(double lat) {
+        return getLatString(lat, true, false);
+    }
+
+
+    /**
+     * Returns a string representation of the given latitude value.
+     *
+     * @param lat
+     * @param compassFormat true: "[degrees] [N|S]"
+     *                      false: "+/- [degrees]"
+     * @param decimalFormat true: "degrees in decimal"
+     *                      false: "degrees in DDD°[MM'[SS"]]"
+     * @return a formatted string representing latitude
+     * @author Daniel Knowles
+     * @since Sept 2018
+     */
+    public static String getLatString(double lat, boolean compassFormat, boolean decimalFormat) {
         if (isLatValid(lat)) {
-            return getDegreeString(lat, false);
+            return getDegreeString(lat, false, compassFormat, decimalFormat);
         } else {
             return "Inv N (" + lat + ")";
         }
     }
+
+
 
     /**
      * Returns a string representation of the given longitude value.
@@ -232,9 +267,30 @@ public class GeoPos {
      *
      * @return a string of the form DDD°[MM'[SS"]] [W|E].
      */
+    // SEP2018 - Daniel Knowles - Modified to call getLonString(lon, true, false)
     public static String getLonString(double lon) {
+        return getLonString(lon, true, false);
+    }
+
+
+
+
+
+    /**
+     * Returns a string representation of the given longitude value.
+     *
+     * @param lon
+     * @param compassFormat true: "[degrees] [N|S]"
+     *                      false: "+/- [degrees]"
+     * @param decimalFormat true: "degrees in decimal"
+     *                      false: "degrees in DDD°[MM'[SS"]]"
+     * @return a formatted string representing latitude
+     * @author Daniel Knowles
+     * @since Sept 2018
+     */
+    public static String getLonString(double lon, boolean compassFormat, boolean decimalFormat) {
         if (isLonValid(lon)) {
-            return getDegreeString(lon, true);
+            return getDegreeString(lon, true, compassFormat, decimalFormat);
         } else {
             return "Inv E (" + lon + ")";
         }
@@ -242,10 +298,11 @@ public class GeoPos {
 
 
     /**
-     * Creates a string representation of the given decimal degree value. The string returned has the format
-     * DDD°[MM'[SS"]] [N|S|W|E].
+     * Creates a string representation of the given decimal degree value.
      */
-    private static String getDegreeString(double value, boolean longitudial) {
+    // SEP2018 - Daniel Knowles - Modified to support compassFormat and decimalFormat options
+    private static String getDegreeString(double value, boolean longitudial, boolean compassFormat, boolean decimalFormat) {
+
 
         int sign = (value == 0.0F) ? 0 : (value < 0.0F) ? -1 : 1;
         double rest = Math.abs(value);
@@ -253,7 +310,7 @@ public class GeoPos {
         rest -= degree;
         int minutes = MathUtils.floorInt(MIN_PER_DEG * rest);
         rest -= minutes / MIN_PER_DEG;
-        int seconds = (int)Math.round(SEC_PER_DEG * rest);
+        int seconds = (int) Math.round(SEC_PER_DEG * rest);
         rest -= seconds / SEC_PER_DEG;
         if (seconds == 60) {
             seconds = 0;
@@ -265,35 +322,46 @@ public class GeoPos {
         }
 
         StringBuilder sb = new StringBuilder();
-        sb.append(degree);
-        sb.append("°");
-        if (minutes != 0 || seconds != 0) {
-            if (minutes < 10) {
-                sb.append('0');
-            }
-            sb.append(minutes);
-            sb.append('\'');
-            if (seconds != 0) {
-                if (seconds < 10) {
+        if (!compassFormat && sign == -1) {
+            sb.append("- ");
+        }
+
+        if (decimalFormat) {
+            sb.append(Math.abs(value));
+        } else {
+            sb.append(degree);
+            sb.append("°");
+            if (minutes != 0 || seconds != 0) {
+                if (minutes < 10) {
                     sb.append('0');
                 }
-                sb.append(seconds);
-                sb.append('"');
+                sb.append(minutes);
+                sb.append('\'');
+                if (seconds != 0) {
+                    if (seconds < 10) {
+                        sb.append('0');
+                    }
+                    sb.append(seconds);
+                    sb.append('"');
+                }
             }
         }
-        if (sign == -1) {
-            sb.append(' ');
-            if (longitudial) {
-                sb.append('W');
-            } else {
-                sb.append('S');
-            }
-        } else if (sign == 1) {
-            sb.append(' ');
-            if (longitudial) {
-                sb.append('E');
-            } else {
-                sb.append('N');
+
+        if (compassFormat) {
+            if (sign == -1) {
+                sb.append(' ');
+                if (longitudial) {
+                    sb.append('W');
+                } else {
+                    sb.append('S');
+                }
+            } else if (sign == 1) {
+                sb.append(' ');
+                if (longitudial) {
+                    sb.append('E');
+                } else {
+                    sb.append('N');
+                }
             }
         }
 
@@ -308,5 +376,41 @@ public class GeoPos {
     private static boolean isLonValid(double lon) {
         return !Double.isNaN(lon) && !Double.isInfinite(lon);
     }
+
+
+    /**
+     * Returns a string representation of the latitude value.
+     *
+     * @param compassFormat true: "[degrees] [N|S]"
+     *                      false: "+/- [degrees]"
+     * @param decimalFormat true: "degrees in decimal"
+     *                      false: "degrees in DDD°[MM'[SS"]]"
+     * @return a formatted string representing latitude
+     * @author Daniel Knowles
+     * @since Sept 2018
+     */
+    public String getLatString(boolean compassFormat, boolean decimalFormat) {
+        return getLatString(lat, compassFormat, decimalFormat);
+    }
+
+
+
+    /**
+     * Returns a string representation of the longitude value.
+     *
+     * @param compassFormat true: "[degrees] [N|S]"
+     *                      false: "+/- [degrees]"
+     * @param decimalFormat true: "degrees in decimal"
+     *                      false: "degrees in DDD°[MM'[SS"]]"
+     * @return a formatted string representing longitude
+     * @author Daniel Knowles
+     * @since Sept 2018
+     */
+    public String getLonString(boolean compassFormat, boolean decimalFormat) {
+        return getLonString(lon, compassFormat, decimalFormat);
+    }
+
+
+
 
 }

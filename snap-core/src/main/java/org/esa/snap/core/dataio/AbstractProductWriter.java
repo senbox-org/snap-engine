@@ -15,12 +15,14 @@
  */
 package org.esa.snap.core.dataio;
 
+import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductNode;
 import org.esa.snap.core.util.Guardian;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * The <code>AbstractProductWriter</code> class can be used as a base class for new product writer implementations.
@@ -186,4 +188,5 @@ public abstract class AbstractProductWriter implements ProductWriter {
     * @param formatName The name of the file format.
     */
     public void setFormatName(final String formatName) {}
+
 }

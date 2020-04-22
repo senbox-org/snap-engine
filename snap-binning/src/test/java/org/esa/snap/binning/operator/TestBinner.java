@@ -17,7 +17,7 @@
 package org.esa.snap.binning.operator;
 
 import com.bc.ceres.core.ProgressMonitor;
-import com.vividsolutions.jts.io.WKTReader;
+import org.locationtech.jts.io.WKTReader;
 import org.esa.snap.binning.BinningContext;
 import org.esa.snap.binning.PlanetaryGrid;
 import org.esa.snap.binning.SpatialBin;
@@ -26,6 +26,9 @@ import org.esa.snap.binning.SpatialBinner;
 import org.esa.snap.binning.TemporalBin;
 import org.esa.snap.binning.TemporalBinSource;
 import org.esa.snap.binning.TemporalBinner;
+import org.esa.snap.binning.operator.formatter.Formatter;
+import org.esa.snap.binning.operator.formatter.FormatterConfig;
+import org.esa.snap.binning.operator.formatter.FormatterFactory;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.MetadataElement;
@@ -34,7 +37,6 @@ import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.Debug;
 import org.esa.snap.core.util.StopWatch;
 import org.esa.snap.core.util.io.FileUtils;
-import org.junit.Ignore;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -50,7 +52,7 @@ import java.util.TreeMap;
 /**
  * <p>
  * Usage: <code>TestBinner <i>sourceDir</i> <i>regionWkt</i> <i>binnerConfig</i> <i>formatterConfig</i> [<i>formatterConfig</i> ...]</code>
- *
+ * <p>
  * with
  * <ul>
  * <li><code><i>sourceDir</i></code> Directory containing input product files</li>
@@ -63,12 +65,11 @@ import java.util.TreeMap;
  * <ul>
  * <li>{@link SpatialBinner}</li>
  * <li>{@link TemporalBinner}</li>
- * <li>{@link org.esa.snap.binning.operator.Formatter}</li>
+ * <li>{@link Formatter}</li>
  * </ul>
  *
  * @author Norman Fomferra
  */
-@Ignore
 public class TestBinner {
 
     public static void main(String[] args) throws Exception {
@@ -119,7 +120,7 @@ public class TestBinner {
             final Product product = ProductIO.readProduct(sourceFile);
             System.out.println("processing " + sourceFile);
             final long numObs = SpatialProductBinner.processProduct(product, spatialBinner,
-                                                                    new HashMap<Product, List<Band>>(), ProgressMonitor.NULL);
+                    new HashMap<Product, List<Band>>(), ProgressMonitor.NULL);
             System.out.println("done, " + numObs + " observations processed");
 
             stopWatch.stopAndTrace("Spatial binning of product took");
@@ -148,14 +149,15 @@ public class TestBinner {
         stopWatch.start();
         PlanetaryGrid planetaryGrid = binningContext.getPlanetaryGrid();
         String[] resultFeatureNames = binningContext.getBinManager().getResultFeatureNames();
-        org.esa.snap.binning.operator.Formatter.format(planetaryGrid,
-                                                       new MyTemporalBinSource(temporalBins),
-                                                       resultFeatureNames,
-                                                       formatterConfig,
-                                                       new WKTReader().read(regionWKT),
-                                                       new ProductData.UTC(),
-                                                       new ProductData.UTC(),
-                                                       new MetadataElement("TODO_add_metadata_here")
+        final Formatter formatter = FormatterFactory.get("default");
+        formatter.format(planetaryGrid,
+                new MyTemporalBinSource(temporalBins),
+                resultFeatureNames,
+                formatterConfig,
+                new WKTReader().read(regionWKT),
+                new ProductData.UTC(),
+                new ProductData.UTC(),
+                new MetadataElement("TODO_add_metadata_here")
         );
 
         stopWatch.stopAndTrace("Writing output took");

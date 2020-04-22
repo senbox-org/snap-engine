@@ -336,7 +336,7 @@ public class BandMathsOp extends Operator {
         }
 
         final RasterDataEvalEnv env = new RasterDataEvalEnv(rect.x, rect.y, rect.width, rect.height,
-                                                            new LevelImageSupport(band.getRasterWidth(), band.getRasterHeight(), ResolutionLevel.MAXRES));
+                new LevelImageSupport(band.getRasterWidth(), band.getRasterHeight(), ResolutionLevel.MAXRES));
         pm.beginTask("Evaluating expression", rect.height);
         try {
             float fv = Float.NaN;
@@ -369,7 +369,7 @@ public class BandMathsOp extends Operator {
         Tile tile = getSourceTile(symbol.getRaster(), rect);
         if (tile.getRasterDataNode().isScalingApplied()) {
             ProductData dataBuffer = ProductData.createInstance(ProductData.TYPE_FLOAT32,
-                                                                tile.getWidth() * tile.getHeight());
+                    tile.getWidth() * tile.getHeight());
             int dataBufferIndex = 0;
             for (int y = rect.y; y < rect.y + rect.height; y++) {
                 for (int x = rect.x; x < rect.x + rect.width; x++) {
@@ -392,7 +392,7 @@ public class BandMathsOp extends Operator {
             throw new OperatorException(String.format("Missing data type for band %s.", bandDescriptor.name));
         }
         Band targetBand = new Band(bandDescriptor.name, ProductData.getType(bandDescriptor.type.toLowerCase()),
-                                   targetBandDimension.width, targetBandDimension.height);
+                targetBandDimension.width, targetBandDimension.height);
 
         if (StringUtils.isNotNullAndNotEmpty(bandDescriptor.description)) {
             targetBand.setDescription(bandDescriptor.description);
@@ -457,8 +457,8 @@ public class BandMathsOp extends Operator {
 
     private Namespace createNamespace() {
         WritableNamespace namespace = BandArithmetic.createDefaultNamespace(sourceProducts, 0,
-                                                                            new SourceProductNamespacePrefixProvider(),
-                                                                            BandArithmetic::getProductNodeNamePrefix);
+                new SourceProductNamespacePrefixProvider(),
+                BandArithmetic::getProductNodeNamePrefix);
         if (variables != null) {
             for (Variable variable : variables) {
                 if (ProductData.isFloatingPointType(ProductData.getType(variable.type))) {

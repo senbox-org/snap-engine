@@ -31,8 +31,15 @@ public class DataTypeUtils {
         return getRasterDataType(dataType, unsigned) != -1;
     }
 
+    /**
+     * Tries to detect if the variable is signed or unsigned. Might fail for some implementations, e.g. BUFR.
+     * In such cases use {@link #getRasterDataType(DataType, boolean)}
+     *
+     * @param variable the variable to retrieve the type from
+     * @return the {@link ProductData} type
+     */
     public static int getRasterDataType(Variable variable) {
-        return getRasterDataType(variable.getDataType(), variable.isUnsigned());
+        return getRasterDataType(variable.getDataType(), variable.getDataType().isUnsigned());
     }
 
     public static int getRasterDataType(final DataType dataType, boolean unsigned) {
@@ -47,8 +54,16 @@ public class DataTypeUtils {
             return unsigned ? ProductData.TYPE_UINT16 : ProductData.TYPE_INT16;
         } else if (DataType.INT.equals(dataType)) {
             return unsigned ? ProductData.TYPE_UINT32 : ProductData.TYPE_INT32;
+        } else if (DataType.UBYTE.equals(dataType)) {
+            return ProductData.TYPE_UINT8;
+        } else if (DataType.USHORT.equals(dataType)) {
+            return ProductData.TYPE_UINT16;
+        } else if (DataType.UINT.equals(dataType)) {
+            return ProductData.TYPE_UINT32;
         } else if (DataType.LONG.equals(dataType)) {
-            return ProductData.TYPE_INT64;
+            return unsigned ? ProductData.TYPE_UINT64 : ProductData.TYPE_INT64;
+        } else if (DataType.ULONG.equals(dataType)) {
+            return ProductData.TYPE_UINT64;
         } else if (DataType.FLOAT.equals(dataType)) {
             return ProductData.TYPE_FLOAT32;
         } else if (DataType.DOUBLE.equals(dataType)) {
@@ -64,26 +79,66 @@ public class DataTypeUtils {
     }
 
     /**
-     * Return the NetCDF equivalent to the given dataType.
+     * Return the NetCDF equivalent to the given {@link ProductData} type.
      *
      * @param dataType must be one of {@code ProductData.TYPE_*}
-     *
-     * @return the NetCDF equivalent to the given dataType or {@code null} if not {@code dataType} is
-     *         not one of {@code ProductData.TYPE_*}
-     *
-     * @see ProductData
+     * @return the NetCDF equivalent to the given dataType
+     * not one of {@code ProductData.TYPE_*}
+     * @throws IllegalArgumentException if the given type value is unknown
      */
     public static DataType getNetcdfDataType(int dataType) {
         switch (dataType) {
             case ProductData.TYPE_INT8:
-            case ProductData.TYPE_UINT8:
                 return DataType.BYTE;
+            case ProductData.TYPE_UINT8:
+                return DataType.UBYTE;
             case ProductData.TYPE_INT16:
-            case ProductData.TYPE_UINT16:
                 return DataType.SHORT;
+            case ProductData.TYPE_UINT16:
+                return DataType.USHORT;
             case ProductData.TYPE_INT32:
-            case ProductData.TYPE_UINT32:
                 return DataType.INT;
+            case ProductData.TYPE_UINT32:
+                return DataType.UINT;
+            case ProductData.TYPE_INT64:
+                return DataType.LONG;
+            case ProductData.TYPE_FLOAT32:
+                return DataType.FLOAT;
+            case ProductData.TYPE_FLOAT64:
+                return DataType.DOUBLE;
+            case ProductData.TYPE_ASCII:
+                return DataType.STRING;
+            case ProductData.TYPE_UTC:
+                return DataType.STRING;
+            default:
+                String msg = String.format("ProductData type with value of '%d' is not unknown.", dataType);
+                throw new IllegalArgumentException(msg);
+        }
+    }
+
+
+    /**
+     * Return the NetCDF equivalent to the given dataType.
+     *
+     * @param dataType must be one of {@code ProductData.TYPE_*}
+     * @return the NetCDF equivalent to the given dataType or {@code null} if not {@code dataType} is
+     * not one of {@code ProductData.TYPE_*}
+     * @see ProductData
+     */
+    public static DataType getNetcdf4DataType(int dataType) {
+        switch (dataType) {
+            case ProductData.TYPE_INT8:
+                return DataType.BYTE;
+            case ProductData.TYPE_UINT8:
+                return DataType.UBYTE;
+            case ProductData.TYPE_INT16:
+                return DataType.SHORT;
+            case ProductData.TYPE_UINT16:
+                return DataType.USHORT;
+            case ProductData.TYPE_INT32:
+                return DataType.INT;
+            case ProductData.TYPE_UINT32:
+                return DataType.UINT;
             case ProductData.TYPE_INT64:
                 return DataType.LONG;
             case ProductData.TYPE_FLOAT32:
@@ -104,9 +159,7 @@ public class DataTypeUtils {
      *
      * @param value    The value to be converted.
      * @param dataType The NetCDF data type.
-     *
      * @return The converted value corresponding to the given {@link DataType data type}.
-     *
      * @throws IllegalArgumentException if {@link DataType dataType} is not one of {@link DataType#BYTE},
      *                                  {@link DataType#SHORT}, {@link DataType#INT}, {@link DataType#LONG},
      *                                  {@link DataType#FLOAT} or {@link DataType#DOUBLE}.
@@ -114,12 +167,16 @@ public class DataTypeUtils {
     public static Number convertTo(double value, DataType dataType) {
         switch (dataType) {
             case BYTE:
+            case UBYTE:
                 return (byte) value;
             case SHORT:
+            case USHORT:
                 return (short) value;
             case INT:
+            case UINT:
                 return (int) value;
             case LONG:
+            case ULONG:
                 return (long) value;
             case FLOAT:
                 return (float) value;
@@ -134,7 +191,6 @@ public class DataTypeUtils {
      * Creates a ProductData instance for the given netcdf attribute.
      *
      * @param attribute A netcdf attribute.
-     *
      * @return A new ProductData instance with the attribute's data type and value.
      */
     public static ProductData createProductData(Attribute attribute) {

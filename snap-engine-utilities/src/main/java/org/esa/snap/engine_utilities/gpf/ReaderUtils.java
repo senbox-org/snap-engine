@@ -31,6 +31,7 @@ import org.esa.snap.engine_utilities.datamodel.Unit;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.util.Arrays;
 
@@ -59,7 +60,7 @@ public final class ReaderUtils {
         return virtBand;
     }
 
-    private static String createName(String origName, String newPrefix) {
+    public static String createName(String origName, String newPrefix) {
         int sepPos = origName.indexOf("_");
         if (sepPos < 0) {
             sepPos = origName.length();
@@ -73,8 +74,11 @@ public final class ReaderUtils {
 
     public static Band createVirtualIntensityBand(final Product product, final Band bandI, final Band bandQ,
                                                   final String bandName, final String suffix) {
-        final String expression = bandI.getName() + " * " + bandI.getName() + " + " +
-                bandQ.getName() + " * " + bandQ.getName();
+        final String bandNameI = bandI.getName();
+        final double nodatavalueI = bandI.getNoDataValue();
+        final String bandNameQ = bandQ.getName();
+        final String expression = bandNameI +" == " + nodatavalueI +" ? " + nodatavalueI +" : " +
+                bandNameI + " * " + bandNameI + " + " + bandNameQ + " * " + bandNameQ;
 
         String name = bandName;
         if (!name.endsWith(suffix)) {
@@ -88,7 +92,7 @@ public final class ReaderUtils {
         virtBand.setUnit(Unit.INTENSITY);
         virtBand.setDescription("Intensity from complex data");
         virtBand.setNoDataValueUsed(true);
-        virtBand.setNoDataValue(bandI.getNoDataValue());
+        virtBand.setNoDataValue(nodatavalueI);
         virtBand.setOwner(product);
         product.addBand(virtBand);
 
@@ -108,6 +112,7 @@ public final class ReaderUtils {
      * @param input an input object of unknown type
      * @return a <code>File</code> or <code>null</code> it the input can not be resolved to a <code>File</code>.
      */
+    @Deprecated
     public static File getFileFromInput(final Object input) {
         if (input instanceof String) {
             return new File((String) input);
@@ -118,15 +123,15 @@ public final class ReaderUtils {
     }
 
     /**
-     * Returns a <code>File</code> if the given input is a <code>String</code> or <code>File</code>,
+     * Returns a <code>Path</code> if the given input is a <code>String</code> or <code>File</code>,
      * otherwise it returns null;
      *
      * @param input an input object of unknown type
-     * @return a <code>File</code> or <code>null</code> it the input can not be resolved to a <code>File</code>.
+     * @return a <code>Path</code> or <code>null</code> it the input can not be resolved to a <code>Path</code>.
      */
     public static Path getPathFromInput(final Object input) {
         if (input instanceof String) {
-            return new File((String) input).toPath();
+            return Paths.get((String) input);
         } else if (input instanceof File) {
             return ((File)input).toPath();
         } else if (input instanceof Path) {
@@ -172,8 +177,8 @@ public final class ReaderUtils {
 
         if (latCorners == null || lonCorners == null) return;
 
-        final int gridWidth = 10;
-        final int gridHeight = 10;
+        final int gridWidth = Math.min(10, Math.max(2, product.getSceneRasterWidth()));
+        final int gridHeight = Math.min(10, Math.max(2, product.getSceneRasterHeight()));
 
         final float[] fineLatTiePoints = new float[gridWidth * gridHeight];
         ReaderUtils.createFineTiePointGrid(2, 2, gridWidth, gridHeight, latCorners, fineLatTiePoints);

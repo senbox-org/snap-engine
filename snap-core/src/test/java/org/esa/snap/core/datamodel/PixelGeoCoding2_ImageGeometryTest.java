@@ -1,12 +1,15 @@
 package org.esa.snap.core.datamodel;
 
+import org.esa.snap.test.LongTestRunner;
 import org.geotools.referencing.CRS;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.awt.Rectangle;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
+@RunWith(LongTestRunner.class)
 public class PixelGeoCoding2_ImageGeometryTest {
 
     private static final int S = 2100;

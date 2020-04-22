@@ -110,6 +110,11 @@ public abstract class ProductData implements Cloneable {
     public static final int TYPE_UINT32 = 22;
 
     /**
+     * The ID for an unsigned 64-bit integer data type.
+     */
+    public static final int TYPE_UINT64 = 23;
+
+    /**
      * The ID for a signed 32-bit floating point data type.
      */
     public static final int TYPE_FLOAT32 = 30;
@@ -134,6 +139,8 @@ public abstract class ProductData implements Cloneable {
      * The type ID of this value.
      */
     private final int _type;
+
+    private final int _elemSize;
 
     /**
      * The string representation of {@code TYPE_INT8}
@@ -164,6 +171,10 @@ public abstract class ProductData implements Cloneable {
      */
     public static final String TYPESTRING_UINT32 = "uint32";
     /**
+     * The string representation of {@code TYPE_UINT64}
+     */
+    public static final String TYPESTRING_UINT64 = "uint64";
+    /**
      * The string representation of {@code TYPE_FLOAT32}
      */
     public static final String TYPESTRING_FLOAT32 = "float32";
@@ -188,6 +199,7 @@ public abstract class ProductData implements Cloneable {
      */
     protected ProductData(int type) {
         _type = type;
+        _elemSize = getElemSize(type);
     }
 
     /**
@@ -207,7 +219,7 @@ public abstract class ProductData implements Cloneable {
      * @param type     the value's type
      * @param numElems the number of elements, must be greater than zero if type is not {@link ProductData#TYPE_UTC}
      *
-     * @return a new value instance, {@code null} if the given type is not known
+     * @return a new value instance
      *
      * @throws IllegalArgumentException if one of the arguments is invalid
      */
@@ -238,8 +250,10 @@ public abstract class ProductData implements Cloneable {
                 return new ProductData.ASCII(numElems);
             case TYPE_UTC:
                 return new ProductData.UTC();
+            case TYPE_UINT64:
+                throw new IllegalArgumentException(ProductData.TYPESTRING_UINT64 + " not supported in Java. Cannot create product data instance.");
             default:
-                return null;
+                throw new IllegalArgumentException("Unknown type. Cannot create product data instance.");
         }
     }
 
@@ -278,7 +292,7 @@ public abstract class ProductData implements Cloneable {
             case TYPE_UTC:
                 return new ProductData.UTC((int[]) data);
             default:
-                return null;
+                throw new IllegalArgumentException("Unknown type. Cannot create product data instance.");
         }
     }
 
@@ -363,6 +377,7 @@ public abstract class ProductData implements Cloneable {
             case TYPE_UTC:
                 return 4;
             case TYPE_INT64:
+            case TYPE_UINT64:
             case TYPE_FLOAT64:
                 return 8;
             default:
@@ -376,7 +391,7 @@ public abstract class ProductData implements Cloneable {
      * @return the size of a single element in bytes
      */
     public int getElemSize() {
-        return getElemSize(getType());
+        return _elemSize;
     }
 
     /**
@@ -400,6 +415,8 @@ public abstract class ProductData implements Cloneable {
                 return TYPESTRING_UINT16;
             case TYPE_UINT32:
                 return TYPESTRING_UINT32;
+            case TYPE_UINT64:
+                return TYPESTRING_UINT64;
             case TYPE_FLOAT32:
                 return TYPESTRING_FLOAT32;
             case TYPE_FLOAT64:
@@ -434,6 +451,8 @@ public abstract class ProductData implements Cloneable {
                 return TYPE_UINT16;
             case TYPESTRING_UINT32:
                 return TYPE_UINT32;
+            case TYPESTRING_UINT64:
+                return TYPE_UINT64;
             case TYPESTRING_FLOAT32:
                 return TYPE_FLOAT32;
             case TYPESTRING_FLOAT64:
@@ -916,7 +935,7 @@ public abstract class ProductData implements Cloneable {
      * @throws IOException if an I/O error occurs
      */
     public void readFrom(int startPos, int numElems, ImageInputStream input, long inputPos) throws IOException {
-        input.seek(getElemSize() * inputPos);
+        input.seek(_elemSize * inputPos);
         readFrom(startPos, numElems, input);
     }
 
@@ -978,7 +997,7 @@ public abstract class ProductData implements Cloneable {
      * @throws IOException if an I/O error occurs
      */
     public void writeTo(int startPos, int numElems, ImageOutputStream output, long outputPos) throws IOException {
-        output.seek(getElemSize() * outputPos);
+        output.seek(_elemSize * outputPos);
         writeTo(startPos, numElems, output);
     }
 

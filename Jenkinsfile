@@ -23,18 +23,20 @@ pipeline {
         deployDirName = ''
         snapMajorVersion = ''
         sonarOption = ""
+        longTestsOption = ""
     }
     agent { label 'snap-test' }
     parameters {
         booleanParam(name: 'launchTests', defaultValue: true, description: 'When true all stages are launched, When false only stages "Package", "Deploy" and "Save installer data" are launched.')
+        booleanParam(name: 'runLongUnitTests', defaultValue: true, description: 'When true the option -Denable.long.tests=true is added to maven command so the long unit tests will be executed')
     }
     stages {
-        stage('Package') {
+        stage('Package and deploy') {
             agent {
                 docker {
                     label 'snap-test'
                     image 'snap-build-server.tilaa.cloud/maven:3.6.0-jdk-8'
-                    args '-e MAVEN_CONFIG=/var/maven/.m2 -v /data/ssd/testData/:/data/ssd/testData/ -v /opt/maven/.m2/settings.xml:/home/snap/.m2/settings.xml'
+                    args '-e MAVEN_CONFIG=/var/maven/.m2 -v /data/ssd/testData/:/data/ssd/testData/ -v /opt/maven/.m2/settings.xml:/home/snap/.m2/settings.xml -v docker_local-update-center:/local-update-center'
                 }
             }
             steps {
@@ -48,18 +50,31 @@ pipeline {
                         // Only use sonar on master branch
                         sonarOption = "sonar:sonar"
                     }
+                    longTestsOption = ""
+                    if("${params.runLongUnitTests}" == "true") {
+                        longTestsOption = "-Denable.long.tests=true"
+                    }
                 }
                 echo "Build Job ${env.JOB_NAME} from ${env.GIT_BRANCH} with commit ${env.GIT_COMMIT}"
-                sh "mvn -Dm2repo=/var/tmp/repository/ -Duser.home=/home/snap -Dsnap.userdir=/home/snap -Dsnap.vfs.tests.data.dir=/data/ssd/testData/s2tbx -Dsnap.cep.tests.data.dir=/data/ssd/testData/s2tbx clean package install ${sonarOption} -DskipTests=false"
+                sh "mvn -Dm2repo=/var/tmp/repository/ -Duser.home=/home/snap -Dsnap.userdir=/home/snap -Dsnap.vfs.tests.data.dir=/data/ssd/testData/s2tbx -Dsnap.cep.tests.data.dir=/data/ssd/testData/s2tbx clean package install ${sonarOption} ${longTestsOption} -DskipTests=false"
             }
             post {
                 always {
                     junit "**/target/surefire-reports/*.xml"
                     jacoco(execPattern: '**/*.exec')
                 }
+                success {
+                    script {
+                        if ("${env.GIT_BRANCH}" == 'master' || "${env.GIT_BRANCH}" =~ /\d+\.x/ || "${env.GIT_BRANCH}" =~ /\d+\.\d+\.\d+(-rc\d+)?$/) {
+                            echo "Deploy ${env.JOB_NAME} from ${env.GIT_BRANCH} with commit ${env.GIT_COMMIT}"
+                            sh "mvn -Dm2repo=/var/tmp/repository/ -Duser.home=/home/snap -Dsnap.userdir=/home/snap -Dsnap.vfs.tests.data.dir=/data/ssd/testData/s2tbx -Dsnap.cep.tests.data.dir=/data/ssd/testData/s2tbx deploy -DskipTests=true"
+                            sh "/opt/scripts/saveToLocalUpdateCenter.sh . ${deployDirName} ${branchVersion} ${toolName}"
+                        }
+                    }
+                }
             }
         }
-        stage('Deploy') {
+        /*stage('Deploy') {
             agent {
                 docker {
                     label 'snap-test'
@@ -77,7 +92,7 @@ pipeline {
                 sh "mvn -Dm2repo=/var/tmp/repository/ -Duser.home=/home/snap -Dsnap.userdir=/home/snap -Dsnap.vfs.tests.data.dir=/data/ssd/testData/s2tbx -Dsnap.cep.tests.data.dir=/data/ssd/testData/s2tbx deploy -U -DskipTests=true"
                 sh "/opt/scripts/saveToLocalUpdateCenter.sh . ${deployDirName} ${branchVersion} ${toolName}"
             }
-        }
+        }*/
         stage('Save installer data') {
             agent {
                 docker {
@@ -115,26 +130,24 @@ pipeline {
             }
         }
         stage('Create docker image') {
-            agent {
-                docker {
-                    label 'snap-test'
-                    image 'snap-build-server.tilaa.cloud/scripts:1.0'
-                    // We add the docker group from host (i.e. 999)
-                    args ' --group-add 999 -v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/bin/docker -v /usr/lib/x86_64-linux-gnu/libltdl.so.7:/usr/lib/x86_64-linux-gnu/libltdl.so.7 -v docker_local-update-center:/local-update-center -v /opt/maven/.docker:/home/snap/.docker -v docker_snap-installer:/snap-installer'
-                }
-            }
+            agent { label 'snap-test' }
             when {
                 expression {
-                    return "${env.GIT_BRANCH}" =~ /\d+\.x/;
+                    return "${params.launchTests}" == "true";
                 }
             }
             steps {
-                echo "Create docker image of ${env.JOB_NAME} from ${env.GIT_BRANCH} using commit ${env.GIT_COMMIT}"
-                script {
-                    dockerName = "${toolName}:${branchVersion}-${toolVersion}-${env.GIT_COMMIT}"
-                }
-                // Launch deploy script
-                sh "/opt/scripts/deploy.sh ${snapMajorVersion} ${deployDirName} ${branchVersion} ${dockerName} ${toolName}"
+                echo "Launch snap-installer"
+                build job: "create-snap-docker-image", parameters: [
+                    [$class: 'StringParameterValue', name: 'toolName', value: "${toolName}"],
+                    [$class: 'StringParameterValue', name: 'snapMajorVersion', value: "${snapMajorVersion}"],
+                    [$class: 'StringParameterValue', name: 'deployDirName', value: "${deployDirName}"],
+                    [$class: 'StringParameterValue', name: 'branchVersion', value: "${branchVersion}"],
+                    [$class: 'BooleanParameterValue', name: 'maintenanceBranch', value: "false"]
+                ],
+                quietPeriod: 0,
+                propagate: true,
+                wait: true
             }
         }
         stage ('Starting Tests') {
@@ -148,27 +161,28 @@ pipeline {
                     }
                     steps {
                         echo "Launch snap-gpt-tests using docker image snap:${branchVersion} and scope REGULAR"
-                        build job: "snap-gpt-tests/${branchVersion}", parameters: [
-                            [$class: 'StringParameterValue', name: 'dockerTagName', value: "snap:${branchVersion}"],
-                            [$class: 'StringParameterValue', name: 'testScope', value: "REGULAR"]
-                        ]
+                        // build job: "snap-gpt-tests/${branchVersion}", parameters: [
+                        //    [$class: 'StringParameterValue', name: 'dockerTagName', value: "snap:${branchVersion}"],
+                        //    [$class: 'StringParameterValue', name: 'testScope', value: "REGULAR"]
+                        //]
                     }
                 }
-                stage ('Starting GUI Tests') {
-                    agent { label 'snap-test' }
-                    when {
-                        expression {
-                            return "${env.GIT_BRANCH}" =~ /\d+\.x/;
-                        }
-                    }
-                    steps {
-                        echo "Launch snap-gui-tests using docker image snap:${branchVersion}"
-                        build job: "snap-gui-tests/${branchVersion}", parameters: [
-                            [$class: 'StringParameterValue', name: 'dockerTagName', value: "snap:${branchVersion}"],
-                            [$class: 'StringParameterValue', name: 'testFileList', value: "qftests.lst"]
-                        ]
-                    }
-                }
+                // DISABLE GUI TESTING
+                // stage ('Starting GUI Tests') {
+                //     agent { label 'snap-test' }
+                //     when {
+                //         expression {
+                //             return "${env.GIT_BRANCH}" =~ /\d+\.x/;
+                //         }
+                //     }
+                //     steps {
+                //         echo "Launch snap-gui-tests using docker image snap:${branchVersion}"
+                //         build job: "snap-gui-tests/${branchVersion}", parameters: [
+                //             [$class: 'StringParameterValue', name: 'dockerTagName', value: "snap:${branchVersion}"],
+                //             [$class: 'StringParameterValue', name: 'testFileList', value: "qftests.lst"]
+                //         ]
+                //     }
+                // }
             }
         }
     }

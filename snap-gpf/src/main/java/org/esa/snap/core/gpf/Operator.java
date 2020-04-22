@@ -83,7 +83,6 @@ import java.util.logging.Logger;
  * @see SourceProduct
  * @see SourceProducts
  * @see Tile
- *
  * @since 4.1
  */
 public abstract class Operator {
@@ -126,7 +125,7 @@ public abstract class Operator {
      * only once durting the lifetime of an {@code Operator} instance.
      * If not already done, calling the {@link #getTargetProduct()} will always trigger
      * a call to the {@code initialize()} method.
-     *
+     * <p>
      * Any client code that must be performed before computation of tile data
      * should be placed here.
      *
@@ -167,15 +166,16 @@ public abstract class Operator {
      * <li>as a result of a call to {@link #execute(ProgressMonitor)}.</li>
      * </ol>
      * <p>
-     * The default implementation does nothing.
+     * The default implementation only progresses the progress monitor.
      *
      * @param pm A progress monitor to be notified for long-running tasks.
      * @throws OperatorException If an error occurs during computation of the target raster.
      */
     public void doExecute(ProgressMonitor pm) throws OperatorException {
+        pm.beginTask("", 1);
+        pm.worked(1);
+        pm.done();
     }
-
-    // todo - remove ProgressMonitor parameter, it has never been used and wastes processing time (nf - 17.12.2010)
 
     /**
      * Called by the framework in order to compute a tile for the given target band.
@@ -191,8 +191,6 @@ public abstract class Operator {
         throw new RuntimeException(
                 MessageFormat.format("{0}: ''computeTile()'' method not implemented", getClass().getSimpleName()));
     }
-
-    // todo - remove ProgressMonitor parameter, it has never been used and wastes processing time (nf - 17.12.2010)
 
     /**
      * Called by the framework in order to compute the stack of tiles for the given target bands.
@@ -524,16 +522,16 @@ public abstract class Operator {
         for (Product product : products) {
             if (product.isMultiSize()) {
                 String message = String.format("Source product '%s' contains rasters of different sizes and can not be processed.\n" +
-                                                       "Please consider resampling it so that all rasters have the same size.",
-                                               product.getName());
+                                "Please consider resampling it so that all rasters have the same size.",
+                        product.getName());
                 throw new OperatorException(message);
             }
             if (sceneRasterSize == null) {
                 sceneRasterSize = product.getSceneRasterSize();
             } else if (!product.getSceneRasterSize().equals(sceneRasterSize)) {
                 throw new OperatorException(String.format("All source products must have the same raster size of %d x %d pixels.",
-                                                          sceneRasterSize.width,
-                                                          sceneRasterSize.height));
+                        sceneRasterSize.width,
+                        sceneRasterSize.height));
             }
         }
         return sceneRasterSize;
@@ -554,8 +552,8 @@ public abstract class Operator {
                 rasterSize = rasterDataNode.getRasterSize();
             } else if (!rasterSize.equals(rasterDataNode.getRasterSize())) {
                 throw new OperatorException(String.format("All source rasters must have the same size of %d x %d pixels.",
-                                                          rasterSize.width,
-                                                          rasterSize.height));
+                        rasterSize.width,
+                        rasterSize.height));
             }
         }
         return rasterSize;
@@ -608,5 +606,4 @@ public abstract class Operator {
         Assert.argument(operatorSpi.getOperatorClass().isAssignableFrom(getClass()), "operatorSpi");
         context.setOperatorSpi(operatorSpi);
     }
-
 }

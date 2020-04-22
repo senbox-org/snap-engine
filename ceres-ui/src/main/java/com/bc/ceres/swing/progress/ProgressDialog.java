@@ -310,6 +310,10 @@ public class ProgressDialog {
         Window parentWindow = null;
         if (parentComponent != null) {
             parentWindow = SwingUtilities.getWindowAncestor(parentComponent);
+            // parentComponent can be the mainFrame, then there is no ancestor
+            if (parentWindow == null && parentComponent instanceof Window) {
+                parentWindow = (Window) parentComponent;
+            }
         }
 
         progressBar = new JProgressBar();

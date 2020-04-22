@@ -27,45 +27,49 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.logging.Logger;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Unit test for simple ModuleReader.
  */
 public class RepositoryScannerTest {
 
-    Logger NO_LOGGER = Logger.getAnonymousLogger();
-    ProgressMonitor NO_PM = ProgressMonitor.NULL;
-    ProxyConfig NO_PROXY = ProxyConfig.NULL;
+    private Logger NO_LOGGER = Logger.getAnonymousLogger();
+    private ProgressMonitor NO_PM = ProgressMonitor.NULL;
+    private ProxyConfig NO_PROXY = ProxyConfig.NULL;
 
-    @Ignore
+    @Ignore("old unused code, no need to test")
     public void testNullArgConvention() throws IOException, CoreException {
         URL NO_URL = new File("").getAbsoluteFile().toURI().toURL();
 
         try {
             new RepositoryScanner(null, NO_URL, NO_PROXY);
             fail();
-        } catch (NullPointerException e) {
+        } catch (NullPointerException ignored) {
         }
 
         try {
             new RepositoryScanner(NO_LOGGER, null, NO_PROXY);
             fail();
-        } catch (NullPointerException e) {
+        } catch (NullPointerException ignored) {
         }
         try {
             new RepositoryScanner(NO_LOGGER, NO_URL, null);
             fail();
-        } catch (NullPointerException e) {
+        } catch (NullPointerException ignored) {
         }
         try {
             new RepositoryScanner(NO_LOGGER, NO_URL, NO_PROXY).scan(null);
             fail();
-        } catch (NullPointerException e) {
+        } catch (NullPointerException ignored) {
         }
     }
 
-    @Ignore
+    @Ignore("old unused code, no need to test")
     public void testRepository() throws IOException, CoreException {
         File repositoryDir = Config.getRepositoryDir();
 
@@ -76,32 +80,32 @@ public class RepositoryScannerTest {
         Module rm;
         rm = findModule(repositoryModules, "module-a");
         assertNotNull(rm);
-        assertEquals(true, rm.getContentLength() > 0);
-        assertEquals(true, rm.getLastModified() > 0);
+        assertTrue(rm.getContentLength() > 0);
+        assertTrue(rm.getLastModified() > 0);
         assertNull(rm.getAboutUrl());
 
         rm = findModule(repositoryModules, "module-b");
         assertNotNull(rm);
-        assertEquals(true, rm.getContentLength() > 0);
-        assertEquals(true, rm.getLastModified() > 0);
+        assertTrue(rm.getContentLength() > 0);
+        assertTrue(rm.getLastModified() > 0);
         assertNull(rm.getAboutUrl());
 
         rm = findModule(repositoryModules, "module-c");
         assertNotNull(rm);
-        assertEquals(true, rm.getContentLength() > 0);
-        assertEquals(true, rm.getLastModified() > 0);
+        assertTrue(rm.getContentLength() > 0);
+        assertTrue(rm.getLastModified() > 0);
         assertNotNull(rm.getAboutUrl());
 
         rm = findModule(repositoryModules, "module-d");
         assertNotNull(rm);
-        assertEquals(true, rm.getContentLength() > 0);
-        assertEquals(true, rm.getLastModified() > 0);
+        assertTrue(rm.getContentLength() > 0);
+        assertTrue(rm.getLastModified() > 0);
         assertNull(rm.getAboutUrl());
 
         rm = findModule(repositoryModules, "module-e");
         assertNotNull(rm);
-        assertEquals(true, rm.getContentLength() > 0);
-        assertEquals(true, rm.getLastModified() > 0);
+        assertTrue(rm.getContentLength() > 0);
+        assertTrue(rm.getLastModified() > 0);
         assertNotNull(rm.getAboutUrl());
 
         rm = findModule(repositoryModules, "module-f");
@@ -111,17 +115,6 @@ public class RepositoryScannerTest {
         assertNull(rm);
     }
 
-    @Ignore
-    public void testDumpModuleNames() throws Exception {
-        URL url = new URL("http://www.brockmann-consult.de/beam/software/repositories/4.10");
-
-        final RepositoryScanner repositoryScanner = new RepositoryScanner(Logger.getAnonymousLogger(), url, ProxyConfig.NULL);
-
-        final Module[] modules = repositoryScanner.scan(ProgressMonitor.NULL);
-        for (Module module : modules) {
-            System.out.println("module = " + module.getName());
-        }
-    }
 
     private Module findModule(Module[] modules, String name) {
         for (Module module : modules) {

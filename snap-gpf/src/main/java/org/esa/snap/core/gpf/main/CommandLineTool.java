@@ -24,7 +24,7 @@ import com.bc.ceres.binding.dom.DefaultDomConverter;
 import com.bc.ceres.binding.dom.DefaultDomElement;
 import com.bc.ceres.binding.dom.DomElement;
 import com.bc.ceres.binding.dom.XppDomElement;
-import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.PrintWriterConciseProgressMonitor;
 import com.bc.ceres.metadata.MetadataResourceEngine;
 import com.bc.ceres.resource.Resource;
 import com.thoughtworks.xstream.io.copy.HierarchicalStreamCopier;
@@ -135,7 +135,7 @@ public class CommandLineTool implements GraphProcessingObserver {
             commandLineContext.print(CommandLineUsage.getUsageTextForOperator(commandLineArgs.getOperatorName()));
         } else if (commandLineArgs.getGraphFilePath() != null) {
             commandLineContext.print(CommandLineUsage.getUsageTextForGraph(commandLineArgs.getGraphFilePath(),
-                                                                           commandLineContext));
+                    commandLineContext));
         } else {
             commandLineContext.print(CommandLineUsage.getUsageText());
         }
@@ -160,8 +160,8 @@ public class CommandLineTool implements GraphProcessingObserver {
 
         commandLineContext.print("Cache size: " + fromBytes(JAI.getDefaultInstance().getTileCache().getMemoryCapacity()) + '\n');
         commandLineContext.print("Tile parallelism: " + JAI.getDefaultInstance().getTileScheduler().getParallelism() + '\n');
-        commandLineContext.print("Tile size: " + (int)JAI.getDefaultTileSize().getWidth() + " x " +
-                (int)JAI.getDefaultTileSize().getHeight() + " pixels" + '\n');
+        commandLineContext.print("Tile size: " + (int) JAI.getDefaultTileSize().getWidth() + " x " +
+                (int) JAI.getDefaultTileSize().getHeight() + " pixels" + '\n');
 
         commandLineContext.print("\nTo configure your gpt memory usage:\n");
         commandLineContext.print("Edit snap/bin/gpt.vmoptions\n");
@@ -170,12 +170,12 @@ public class CommandLineTool implements GraphProcessingObserver {
     }
 
     static String fromBytes(long bytes) {
-        if(bytes > CommandLineArgs.G) {
-            return String.format("%.1f GB",(double)bytes / CommandLineArgs.G);
-        } else if(bytes > CommandLineArgs.M) {
-            return String.format("%.1f MB",(double)bytes / CommandLineArgs.M);
-        } else if(bytes > CommandLineArgs.K) {
-            return String.format("%.1f KB",(double)bytes / CommandLineArgs.K);
+        if (bytes > CommandLineArgs.G) {
+            return String.format("%.1f GB", (double) bytes / CommandLineArgs.G);
+        } else if (bytes > CommandLineArgs.M) {
+            return String.format("%.1f MB", (double) bytes / CommandLineArgs.M);
+        } else if (bytes > CommandLineArgs.K) {
+            return String.format("%.1f KB", (double) bytes / CommandLineArgs.K);
         }
         return String.format("%d B", bytes);
     }
@@ -306,12 +306,9 @@ public class CommandLineTool implements GraphProcessingObserver {
         Product targetProduct = operator.getTargetProduct();
 
         OperatorDescriptor operatorDescriptor = operatorSpi.getOperatorDescriptor();
-        if (operatorDescriptor.isAutoWriteDisabled()) {
-            // operator has its own output management, we "execute" by pulling at tiles
-            final OperatorExecutor executor = OperatorExecutor.create(operator);
-            executor.execute(ProgressMonitor.NULL);
-        } else {
-            // framework writes target product
+        final OperatorExecutor executor = OperatorExecutor.create(operator);
+        executor.execute(new PrintWriterConciseProgressMonitor(System.out));
+        if (!operatorDescriptor.isAutoWriteDisabled()) {
             String filePath = commandLineArgs.getTargetFilePath();
             String formatName = commandLineArgs.getTargetFormatName();
             writeProduct(targetProduct, filePath, formatName, commandLineArgs.isClearCacheAfterRowWrite());
@@ -368,7 +365,13 @@ public class CommandLineTool implements GraphProcessingObserver {
         }
         OperatorDescriptor operatorDescriptor = operatorSpi.getOperatorDescriptor();
 
-        if (!operatorDescriptor.isAutoWriteDisabled()) {
+        boolean shallAddWriteNode = !operatorDescriptor.isAutoWriteDisabled();
+        if (shallAddWriteNode) {
+            // check if writer node already exists
+            shallAddWriteNode = findWriterNode(graph) == null;
+        }
+
+        if (shallAddWriteNode) {
             // Auto-writing is permitted, so add a WriteOp as last node
             String writeOperatorAlias = OperatorSpi.getOperatorAlias(WriteOp.class);
 
@@ -394,12 +397,22 @@ public class CommandLineTool implements GraphProcessingObserver {
         metadataResourceEngine.readResource("graphXml", graphFile.getPath());
     }
 
+    private static Node findWriterNode(final Graph graph) {
+        String writeOperatorAlias = OperatorSpi.getOperatorAlias(WriteOp.class);
+        for(Node node : graph.getNodes()) {
+            if(node.getOperatorName().equals(writeOperatorAlias)) {
+                return node;
+            }
+        }
+        return null;
+    }
+
     private Map<String, Object> convertParameterMap(String operatorName, Map<String, String> parameterMap,
                                                     Map<String, Product> sourceProductMap) throws ValidationException {
         HashMap<String, Object> parameters = new HashMap<>();
         PropertyContainer container = ParameterDescriptorFactory.createMapBackedOperatorPropertyContainer(operatorName,
-                                                                                                          parameters,
-                                                                                                          sourceProductMap);
+                parameters,
+                sourceProductMap);
         // explicitly set default values for putting them into the backing map
         container.setDefaultValues();
 
@@ -584,7 +597,7 @@ public class CommandLineTool implements GraphProcessingObserver {
                 logger.info(String.format(msgPattern, commandLineArgs.getTargetFilePath()));
 
                 metadataResourceEngine.writeRelatedResource(templatePath,
-                                                            commandLineArgs.getTargetFilePath());
+                        commandLineArgs.getTargetFilePath());
             } catch (IOException e) {
                 String msgPattern = "Can't write related resource using template file '%s': %s";
                 logSevereProblem(String.format(msgPattern, templateName, e.getMessage()), e);

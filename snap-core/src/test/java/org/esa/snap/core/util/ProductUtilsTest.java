@@ -324,6 +324,71 @@ public class ProductUtilsTest {
     }
 
     @Test
+    public void testCopySampleCodingBands() {
+        final int size = 10;
+        final Product source = new Product("source", "test", size, size);
+        final Band flagBand = source.addBand("flag", ProductData.TYPE_INT8);
+        flagBand.setSourceImage(ConstantDescriptor.create((float) size, (float) size, new Byte[]{42}, null));
+        final FlagCoding originalFlagCoding = new FlagCoding("flagCoding");
+        originalFlagCoding.addFlag("erni", 1, "erni flag");
+        originalFlagCoding.addFlag("bert", 2, "bert flag");
+        originalFlagCoding.addFlag("bibo", 4, "bibo flag");
+        flagBand.setSampleCoding(originalFlagCoding);
+        source.getFlagCodingGroup().add(originalFlagCoding);
+        final String flagMaskName = "erni_mask";
+        final Mask flagmask = Mask.BandMathsType.create(flagMaskName, "erni detected", size, size, "flag.erni",
+                Color.WHITE, 0.6f);
+        source.getMaskGroup().add(flagmask);
+
+        final Band indexBand = source.addBand("index", ProductData.TYPE_INT8);
+        indexBand.setSourceImage(ConstantDescriptor.create((float) size, (float) size, new Byte[]{42}, null));
+        final IndexCoding originalIndexCoding = new IndexCoding("indexCoding");
+        originalIndexCoding.addIndex("manfred", 1, "manfred index");
+        originalIndexCoding.addIndex("lilo", 2, "lilo index");
+        originalIndexCoding.addIndex("tiffy", 3, "tiffy index");
+        indexBand.setSampleCoding(originalIndexCoding);
+        source.getIndexCodingGroup().add(originalIndexCoding);
+        final String indexMaskName = "manfred_mask";
+        final Mask indexMask = Mask.BandMathsType.create(indexMaskName, "manfred detected", size, size, "index.manfred",
+                Color.WHITE, 0.6f);
+        source.getMaskGroup().add(indexMask);
+
+        Product target = new Product("target", "T", size, size);
+        ProductUtils.copySampleCodingBands(source, target, false);
+
+        assertEquals(1, target.getFlagCodingGroup().getNodeCount());
+        Band targetFlagBand = target.getBand("flag");
+        assertNotNull(targetFlagBand);
+        assertTrue(targetFlagBand.isFlagBand());
+        assertFalse(targetFlagBand.isSourceImageSet());
+        assertTrue(target.getMaskGroup().contains(flagMaskName));
+
+        assertEquals(1, target.getIndexCodingGroup().getNodeCount());
+        Band targetIndexBand = target.getBand("index");
+        assertNotNull(targetIndexBand);
+        assertTrue(targetIndexBand.isIndexBand());
+        assertFalse(targetIndexBand.isSourceImageSet());
+        assertTrue(target.getMaskGroup().contains(indexMaskName));
+
+        target = new Product("target", "T", size, size);
+        ProductUtils.copySampleCodingBands(source, target, true);
+
+        assertEquals(1, target.getFlagCodingGroup().getNodeCount());
+        targetFlagBand = target.getBand("flag");
+        assertNotNull(targetFlagBand);
+        assertTrue(targetFlagBand.isFlagBand());
+        assertTrue(targetFlagBand.isSourceImageSet());
+        assertTrue(target.getMaskGroup().contains(flagMaskName));
+
+        assertEquals(1, target.getIndexCodingGroup().getNodeCount());
+        targetIndexBand = target.getBand("index");
+        assertNotNull(targetIndexBand);
+        assertTrue(targetIndexBand.isIndexBand());
+        assertTrue(targetIndexBand.isSourceImageSet());
+        assertTrue(target.getMaskGroup().contains(indexMaskName));
+    }
+
+    @Test
     public void testCopyBandsForGeomTransform() {
         final int sourceWidth = 100;
         final int sourceHeight = 200;

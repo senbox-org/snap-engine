@@ -17,9 +17,7 @@
 package com.foo;
 
 import com.acme.TestSpi2;
-import org.junit.Ignore;
 
-@Ignore
 public class TestSpi2Impl implements TestSpi2 {
 
     public Object createAnotherService() {

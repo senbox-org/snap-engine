@@ -56,25 +56,31 @@ public class VersionChecker {
     }
 
     private VersionChecker() {
-        this(null, null);
+        this(null, null, EngineConfig.instance().load().preferences());
     }
 
 
     // constructor used for tests
-    VersionChecker(InputStream localVersionStream, InputStream remoteVersionStream) {
+    VersionChecker(InputStream localVersionStream, InputStream remoteVersionStream, Preferences preferences) {
         this.localVersionStream = localVersionStream;
         this.remoteVersionStream = remoteVersionStream;
-        EngineConfig config = EngineConfig.instance().load();
-        preferences = config.preferences();
-
+        this.preferences = preferences;
     }
 
     public boolean mustCheck() {
-        String dateText = preferences.get(VersionChecker.PK_LAST_DATE, null);
-        return mustCheck(
-                CHECK.valueOf(preferences.get(VersionChecker.PK_CHECK_INTERVAL, CHECK.WEEKLY.name())),
-                dateText != null ? LocalDateTime.parse(dateText, DATE_FORMATTER) : null);
+        final LocalDateTime dateTimeOfLastCheck = getDateTimeOfLastCheck();
+        final CHECK checkInterval = getCheckInterval();
+        return mustCheck(checkInterval, dateTimeOfLastCheck);
+    }
 
+    public CHECK getCheckInterval() {
+        final String intervalName = preferences.get(VersionChecker.PK_CHECK_INTERVAL, CHECK.WEEKLY.name());
+        return CHECK.valueOf(intervalName);
+    }
+
+    public LocalDateTime getDateTimeOfLastCheck() {
+        String dateText = preferences.get(VersionChecker.PK_LAST_DATE, null);
+        return dateText != null ? LocalDateTime.parse(dateText, DATE_FORMATTER) : null;
     }
 
     public boolean checkForNewRelease() {
@@ -111,6 +117,7 @@ public class VersionChecker {
             try {
                 localVersion.set(readVersionFromStream(localVersionStream == null ? Files.newInputStream(versionFile) : localVersionStream));
             } catch (IOException e) {
+                e.printStackTrace();
                 return null;
             }
         }
@@ -128,6 +135,7 @@ public class VersionChecker {
                 remoteVersion.set(readVersionFromStream(
                         remoteVersionStream == null ? new URL(VersionChecker.REMOTE_VERSION_FILE_URL).openStream() : remoteVersionStream));
             } catch (IOException e) {
+                e.printStackTrace();
                 return null;
             }
         }
@@ -180,7 +188,7 @@ public class VersionChecker {
         MONTHLY(30),
         NEVER(-1);
 
-        private final int days;
+        public final int days;
 
         CHECK(int days) {
             this.days = days;

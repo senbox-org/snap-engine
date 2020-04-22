@@ -18,31 +18,20 @@ package org.esa.snap.core.util;
 // Important: make sure that we get no dependencies to
 // other org.esa.snap packages here above org.esa.snap.util
 
+import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.image.ImageManager;
+import org.esa.snap.core.util.jai.JAIUtils;
 import org.esa.snap.core.util.jai.SingleBandedSampleModel;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.operation.TransformException;
 
+import javax.media.jai.JAI;
 import javax.media.jai.PlanarImage;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.Transparency;
+import java.awt.*;
 import java.awt.color.ColorSpace;
-import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.ComponentColorModel;
-import java.awt.image.DataBuffer;
-import java.awt.image.DataBufferByte;
-import java.awt.image.DataBufferDouble;
-import java.awt.image.DataBufferFloat;
-import java.awt.image.DataBufferInt;
-import java.awt.image.DataBufferShort;
-import java.awt.image.DataBufferUShort;
-import java.awt.image.IndexColorModel;
-import java.awt.image.Raster;
-import java.awt.image.RenderedImage;
-import java.awt.image.SampleModel;
-import java.awt.image.WritableRaster;
+import java.awt.image.*;
 import java.util.Vector;
 
 /**
@@ -50,9 +39,130 @@ import java.util.Vector;
  * <p> All functions have been implemented with extreme caution in order to provide a maximum performance.
  *
  * @author Norman Fomferra
+ * modified 20200206 to compute product and band bounds based on subset information by Denisa Stefanescu
  * @version $Revision$ $Date$
  */
 public class ImageUtils {
+
+    public static CrsGeoCoding buildCrsGeoCoding(Point.Double coordinateUpperLeft, Point.Double resolution, Dimension defaultSize,
+                                                 CoordinateReferenceSystem mapCRS, Rectangle subsetBounds)
+                                                 throws FactoryException, TransformException {
+
+        return buildCrsGeoCoding(coordinateUpperLeft.x, coordinateUpperLeft.y, resolution.x, resolution.y, defaultSize.width, defaultSize.height, mapCRS, subsetBounds);
+    }
+
+    public static CrsGeoCoding buildCrsGeoCoding(double coordinateUpperLeftX, double coordinateUpperLeftY, double resolutionX, double resolutionY, Dimension defaultSize,
+                                                 CoordinateReferenceSystem mapCRS, Rectangle subsetBounds)
+                                                 throws FactoryException, TransformException {
+
+        return buildCrsGeoCoding(coordinateUpperLeftX, coordinateUpperLeftY, resolutionX, resolutionY, defaultSize.width, defaultSize.height, mapCRS, subsetBounds);
+    }
+
+    public static CrsGeoCoding buildCrsGeoCoding(double coordinateUpperLeftX, double coordinateUpperLeftY, double resolutionX, double resolutionY,
+                                                 int defaultWidth, int defaultHeight, CoordinateReferenceSystem mapCRS, Rectangle subsetBounds)
+                                                 throws FactoryException, TransformException {
+
+        return buildCrsGeoCoding(coordinateUpperLeftX, coordinateUpperLeftY, resolutionX, resolutionY, defaultWidth, defaultHeight, mapCRS, subsetBounds, 0.0d, 0.0d);
+    }
+
+    public static CrsGeoCoding buildCrsGeoCoding(double coordinateUpperLeftX, double coordinateUpperLeftY, double resolutionX, double resolutionY,
+                                                 int defaultWidth, int defaultHeight, CoordinateReferenceSystem mapCRS, Rectangle subsetBounds,
+                                                 double referencePixelX, double referencePixelY)
+                                                 throws FactoryException, TransformException {
+
+        if (defaultWidth <= 0) {
+            throw new IllegalArgumentException("Invalid default width " + defaultWidth + ".");
+        }
+        if (defaultHeight <= 0) {
+            throw new IllegalArgumentException("Invalid default height " + defaultHeight + ".");
+        }
+        if (mapCRS == null) {
+            throw new NullPointerException("The coordinate reference system is null.");
+        }
+
+        double offsetX = 0.0d;
+        double offsetY = 0.0d;
+        int imageWidth = defaultWidth;
+        int imageHeight = defaultHeight;
+        if (subsetBounds != null) {
+            if ((subsetBounds.x < 0) || ((subsetBounds.x + subsetBounds.width) > imageWidth)) {
+                throw new IllegalArgumentException("Invalid subset bounds: bounds.x="+subsetBounds.x+", bounds.width="+subsetBounds.width+", default.width="+imageWidth);
+            }
+            if ((subsetBounds.y < 0) || ((subsetBounds.y + subsetBounds.height) > imageHeight)) {
+                throw new IllegalArgumentException("Invalid subset bounds: bounds.y="+subsetBounds.y+", bounds.height="+subsetBounds.height+", default.height="+imageHeight);
+            }
+
+            offsetX = subsetBounds.x * resolutionX;
+            offsetY = subsetBounds.y * resolutionY;
+            imageWidth = subsetBounds.width;
+            imageHeight = subsetBounds.height;
+        }
+        return new CrsGeoCoding(mapCRS, imageWidth, imageHeight, coordinateUpperLeftX + offsetX, coordinateUpperLeftY - offsetY,
+                                resolutionX, resolutionY, referencePixelX, referencePixelY);
+    }
+
+    public static Dimension computeSceneRasterSize(int defaultSceneRasterWidth, int defaultSceneRasterHeight, Dimension regionRasterSize) {
+        if (regionRasterSize != null) {
+            if (regionRasterSize.width > defaultSceneRasterWidth) {
+                throw new IllegalArgumentException("The region width " + regionRasterSize.width + " cannot be greater than the raster width " + defaultSceneRasterWidth + ".");
+            }
+            if (regionRasterSize.height > defaultSceneRasterHeight) {
+                throw new IllegalArgumentException("The region height " + regionRasterSize.height + " cannot be greater than the raster height " + defaultSceneRasterHeight + ".");
+            }
+            return regionRasterSize;
+        }
+        return new Dimension(defaultSceneRasterWidth, defaultSceneRasterHeight);
+    }
+
+    public static Dimension computePreferredMosaicTileSize(int imageWidth, int imageHeight, int granularity) {
+        Dimension dimension = JAIUtils.computePreferredTileSize(imageWidth, imageHeight, granularity);
+        int maximumRowTileCount = 10;
+        int maximumColumnTileCount = 10;
+        int mosaicTileWidth = imageWidth / maximumColumnTileCount;
+        int mosaicTileHeight = imageHeight / maximumRowTileCount;
+        if (mosaicTileWidth < dimension.width) {
+            mosaicTileWidth = dimension.width; // increase the mosaic tile width
+        }
+        if (mosaicTileHeight < dimension.height) {
+            mosaicTileHeight = dimension.height; // increase the mosaic tile height
+        }
+        return new Dimension(mosaicTileWidth, mosaicTileHeight);
+    }
+
+    public static int computeTileCount(int imageSize, int tileSize) {
+        int tileCount = imageSize / tileSize;
+        if (imageSize % tileSize != 0) {
+            tileCount++;
+        }
+        return tileCount;
+    }
+
+    public static double computeLevelSizeAsDouble(int sourceSize, int level) {
+        return sourceSize / Math.pow(2, level);
+    }
+
+    public static Point computeLevelOffset(Point offset, int level) {
+        return new Point(ImageUtils.computeLevelSize(offset.x, level), ImageUtils.computeLevelSize(offset.y, level));
+    }
+
+    public static int computeLevelSize(int sourceSize, int level) {
+        return (int) Math.ceil(computeLevelSizeAsDouble(sourceSize, level));
+    }
+
+    public static Dimension computeLevelTileDimension(Dimension tileSize, int level) {
+        return computeLevelTileDimension(tileSize.width, tileSize.height, level);
+    }
+
+    public static Dimension computeLevelTileDimension(int fullTileWidth, int fullTileHeight, int level) {
+        int width = computeLevelSize(fullTileWidth, level);
+        int height = computeLevelSize(fullTileHeight, level);
+        return getTileDimension(width, height);
+    }
+
+    private static Dimension getTileDimension(int width, int height) {
+        Dimension defaultSize = JAI.getDefaultTileSize();
+        return new Dimension((width < defaultSize.width) ? width : defaultSize.width, (height < defaultSize.height) ? height : defaultSize.height);
+    }
 
     /**
      * Converts the given rendered image into an image of the given {#link java.awt.image.BufferedImage} type.
