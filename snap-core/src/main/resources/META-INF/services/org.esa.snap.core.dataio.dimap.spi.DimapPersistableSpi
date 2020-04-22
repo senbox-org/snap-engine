@@ -2,3 +2,4 @@ org.esa.snap.core.dataio.dimap.spi.GeneralFilterBandPersistableSpi
 org.esa.snap.core.dataio.dimap.spi.ConvolutionFilterBandPersistableSpi
 org.esa.snap.core.dataio.dimap.spi.BandMathsMaskPersistableSpi
 org.esa.snap.core.dataio.dimap.spi.RangeTypeMaskPersistableSpi
+org.esa.snap.core.dataio.geocoding.ComponentGeoCodingPersistableSpi

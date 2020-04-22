@@ -52,7 +52,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static java.text.MessageFormat.*;
+import static java.text.MessageFormat.format;
 
 /**
  * This operator is used to spatially collocate two data products. It requires two source products,
@@ -64,7 +64,7 @@ import static java.text.MessageFormat.*;
  * @since BEAM 4.1
  */
 @OperatorMetadata(alias = "Collocate",
-        category = "Raster/Geometric Operations",
+        category = "Raster/Geometric",
         version = "1.2",
         authors = "Ralf Quast, Norman Fomferra",
         copyright = "(c) 2007-2011 by Brockmann Consult",

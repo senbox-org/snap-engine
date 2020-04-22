@@ -16,8 +16,8 @@
 
 package org.esa.snap.binning.operator;
 
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.esa.snap.binning.BinManager;
 import org.esa.snap.binning.CompositingType;
 import org.esa.snap.binning.TemporalBin;

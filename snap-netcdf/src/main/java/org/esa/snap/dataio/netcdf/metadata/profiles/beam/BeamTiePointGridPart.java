@@ -121,7 +121,7 @@ public class BeamTiePointGridPart extends ProfilePartIO {
             final int y = tiePointGrid.getGridHeight();
             final int x = tiePointGrid.getGridWidth();
             final int[] shape = new int[]{y, x};
-            final Array values = Array.factory(DataType.FLOAT, shape, tiePointGrid.getDataElems());
+            final Array values = Array.factory(DataType.FLOAT, shape, tiePointGrid.getGridData().getElems());
             String variableName = ReaderUtils.getVariableName(tiePointGrid);
             ctx.getNetcdfFileWriteable().findVariable(variableName).writeFully(values);
         }

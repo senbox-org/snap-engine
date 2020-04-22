@@ -195,7 +195,7 @@ public class BindingContextValueBackedTest {
         assertEquals("Bibo", propertyContainerVB.getValue("stringValue"));
 
         propertyContainerVB.setValue("stringValue", "Samson");
-        Thread.sleep(100);
+        Thread.sleep(150);
         assertEquals("Samson", textArea.getText());
     }
 

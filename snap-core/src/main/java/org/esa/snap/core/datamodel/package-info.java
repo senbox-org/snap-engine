@@ -96,7 +96,7 @@
  * {@link org.esa.snap.core.datamodel.Product Product} and its components</li>
  * <li>{@link org.esa.snap.core.util.FeatureUtils} - Static utilities methods around the
  * {@link org.opengis.feature.simple.SimpleFeature SimpleFeature} and
- * {@link com.vividsolutions.jts.geom.Geometry Geometry} used in conjunction with
+ * {@link org.locationtech.jts.geom.Geometry Geometry} used in conjunction with
  * {@link org.esa.snap.core.datamodel.VectorDataNode}</li>
  * </ul>
  * <p>

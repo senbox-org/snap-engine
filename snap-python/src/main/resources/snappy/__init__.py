@@ -358,8 +358,8 @@ try:
     SimpleFeatureBuilder = jpy.get_type('org.geotools.feature.simple.SimpleFeatureBuilder')
 
     # JTS
-    Geometry = jpy.get_type('com.vividsolutions.jts.geom.Geometry')
-    WKTReader = jpy.get_type('com.vividsolutions.jts.io.WKTReader')
+    Geometry = jpy.get_type('org.locationtech.jts.geom.Geometry')
+    WKTReader = jpy.get_type('org.locationtech.jts.io.WKTReader')
 
 
 except Exception:

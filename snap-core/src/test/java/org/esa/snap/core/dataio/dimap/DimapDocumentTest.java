@@ -207,7 +207,7 @@ public class DimapDocumentTest {
 
     private Product createProductFromXML(String code) {
         final Document dom = createDom(code);
-        Product product = DimapProductHelpers.createProduct(dom);
+        Product product = DimapProductHelpers.createProduct(dom, DimapProductConstants.DIMAP_FORMAT_NAME, null);
         GeoCoding[] geocodings = DimapProductHelpers.createGeoCoding(dom, product);
         if (geocodings != null && geocodings.length > 0) {
             final GeoCoding geoCoding = geocodings[0];

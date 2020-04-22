@@ -30,8 +30,8 @@ import java.io.IOException;
  */
 public class TiePointGridOpImage extends RasterDataNodeOpImage {
 
-    public TiePointGridOpImage(TiePointGrid band, ResolutionLevel level) {
-        super(band, level);
+    public TiePointGridOpImage(TiePointGrid grid, ResolutionLevel level) {
+        super(grid, level);
     }
 
     public TiePointGrid getTiePointGrid() {

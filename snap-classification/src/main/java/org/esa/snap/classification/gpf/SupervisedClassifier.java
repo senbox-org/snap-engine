@@ -34,6 +34,8 @@ public interface SupervisedClassifier {
 
     void initialize() throws OperatorException, IOException;
 
+    void executePreparation();
+
     Product createTargetProduct();
 
     void computeTileStack(Operator operator, Map<Band, Tile> targetTileMap, Rectangle targetRectangle,

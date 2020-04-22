@@ -55,24 +55,28 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 class BigGeoTiffProductWriter extends AbstractProductWriter {
 
-    private static String PARAM_COMPRESSION_TYPE = "snap.dataio.bigtiff.compression.type";   // value must be "LZW"
+    private static final String PARAM_COMPRESSION_TYPE = "snap.dataio.bigtiff.compression.type";   // value must be "LZW" or "NONE" or empty or null
+    private static final String COMPRESSION_TYPE_LZW = "LZW";
+    private static final String COMPRESSION_TYPE_DEFAULT = COMPRESSION_TYPE_LZW;
+    private static final String COMPRESSION_TYPE_NONE = "NONE";
 
-    private static String PARAM_COMPRESSION_QUALITY = "snap.dataio.bigtiff.compression.quality";   // value float 0 ... 1, default 0.75
-    private static float PARAM_COMPRESSION_QUALITY_DEFAULT = 0.75f;
+    private static final String PARAM_COMPRESSION_QUALITY = "snap.dataio.bigtiff.compression.quality";   // value float 0 ... 1, default 0.75
+    private static final float PARAM_COMPRESSION_QUALITY_DEFAULT = 0.75f;
 
-    private static String PARAM_TILING_WIDTH = "snap.dataio.bigtiff.tiling.width";   // integer value
-    private static String PARAM_TILING_HEIGHT = "snap.dataio.bigtiff.tiling.height";   // integer value
+    private static final String PARAM_TILING_WIDTH = "snap.dataio.bigtiff.tiling.width";   // integer value
+    private static final String PARAM_TILING_HEIGHT = "snap.dataio.bigtiff.tiling.height";   // integer value
 
-    private static String PARAM_FORCE_BIGTIFF = "snap.dataio.bigtiff.force.bigtiff";   // boolean
-    public static String PARAM_PUSH_PROCESSING = "snap.dataio.bigtiff.support.pushprocessing";   // boolean
-    private static String PARAM_ARCGIS_AUX = "snap.dataio.bigtiff.write.arcgisaux";   // boolean
+    private static final String PARAM_FORCE_BIGTIFF = "snap.dataio.bigtiff.force.bigtiff";   // boolean
+    public static final String PARAM_PUSH_PROCESSING = "snap.dataio.bigtiff.support.pushprocessing";   // boolean
+    private static final String PARAM_ARCGIS_AUX = "snap.dataio.bigtiff.write.arcgisaux";   // boolean
 
     private File outputFile;
     private TIFFImageWriter imageWriter;
-    private boolean isWritten;
+    private AtomicBoolean isDataWritten;
     private FileImageOutputStream outputStream;
     private TIFFImageWriteParam writeParam;
     private boolean withIntermediate;
@@ -86,6 +90,7 @@ class BigGeoTiffProductWriter extends AbstractProductWriter {
         createWriterParams();
         final boolean writeIntermediateProduct = Config.instance().preferences().getBoolean(PARAM_PUSH_PROCESSING, false);
         setWriteIntermediateProduct(writeIntermediateProduct);
+        isDataWritten = new AtomicBoolean(false);
     }
 
 
@@ -105,7 +110,7 @@ class BigGeoTiffProductWriter extends AbstractProductWriter {
                 _writeProductNodesImpl();
                 Product product = ProductIO.readProduct(intermediateFile, "BEAM-DIMAP");
                 product.setName(FileUtils.getFilenameWithoutExtension(outputFile));
-                _writeBandRasterData(product);
+                _writeBandRasterData(product, ProgressMonitor.NULL);
                 intermediateWriter.deleteOutput();
                 intermediateWriter = null;
             }
@@ -140,12 +145,7 @@ class BigGeoTiffProductWriter extends AbstractProductWriter {
 
     @Override
     public boolean shouldWrite(ProductNode node) {
-        if (node instanceof VirtualBand) {
-            return false;
-        } else if (node instanceof FilterBand) {
-            return false;
-        }
-        return true;
+        return !(node instanceof VirtualBand) && !(node instanceof FilterBand);
     }
 
     @Override
@@ -162,12 +162,9 @@ class BigGeoTiffProductWriter extends AbstractProductWriter {
         if (withIntermediate) {
             intermediateWriter.writeBandRasterData(sourceBand, sourceOffsetX, sourceOffsetY, sourceWidth, sourceHeight, sourceBuffer, pm);
         } else {
-            if (isWritten) {
-                return;
+            if (!isDataWritten.getAndSet(true)) {
+                _writeBandRasterData(sourceBand.getProduct(), pm);
             }
-            final Product sourceProduct = sourceBand.getProduct();
-            _writeBandRasterData(sourceProduct);
-            isWritten = true;
         }
     }
 
@@ -191,48 +188,54 @@ class BigGeoTiffProductWriter extends AbstractProductWriter {
         }
     }
 
-    private void _writeBandRasterData(Product sourceProduct) throws IOException {
-        final int targetDataType = getTargetDataType(sourceProduct);
-        final ArrayList<Band> bandsToExport = getBandsToExport(sourceProduct);
+    private void _writeBandRasterData(Product sourceProduct, ProgressMonitor pm) throws IOException {
+        pm.beginTask("Writing all GeoTiff bands", 1);
+        try {
+            final int targetDataType = getTargetDataType(sourceProduct);
+            final ArrayList<Band> bandsToExport = getBandsToExport(sourceProduct);
 
-        RenderedImage writeImage;
-        if (bandsToExport.size() > 1) {
-            final ParameterBlock parameterBlock = new ParameterBlock();
-            for (int i = 0; i < bandsToExport.size(); i++) {
-                final Band subsetBand = bandsToExport.get(i);
-                final RenderedImage sourceImage = getImageWithTargetDataType(targetDataType, subsetBand);
-                parameterBlock.setSource(sourceImage, i);
+            RenderedImage writeImage;
+            if (bandsToExport.size() > 1) {
+                final ParameterBlock parameterBlock = new ParameterBlock();
+                for (int i = 0; i < bandsToExport.size(); i++) {
+                    final Band subsetBand = bandsToExport.get(i);
+                    final RenderedImage sourceImage = getImageWithTargetDataType(targetDataType, subsetBand);
+                    parameterBlock.setSource(sourceImage, i);
+                }
+                writeImage = JAI.create("bandmerge", parameterBlock, null);
+            } else {
+                writeImage = getImageWithTargetDataType(targetDataType, bandsToExport.get(0));
             }
-            writeImage = JAI.create("bandmerge", parameterBlock, null);
-        } else {
-            writeImage = getImageWithTargetDataType(targetDataType, bandsToExport.get(0));
+
+            GeoTIFFMetadata geoTIFFMetadata = ProductUtils.createGeoTIFFMetadata(sourceProduct);
+            if (geoTIFFMetadata == null) {
+                geoTIFFMetadata = new GeoTIFFMetadata();
+            }
+            final ImageTypeSpecifier imageTypeSpecifier = ImageTypeSpecifier.createFromRenderedImage(writeImage);
+            final TIFFImageMetadata iioMetadata = (TIFFImageMetadata) GeoTIFF.createIIOMetadata(imageWriter, imageTypeSpecifier, geoTIFFMetadata,
+                                                                                                "it_geosolutions_imageioimpl_plugins_tiff_image_1.0",
+                                                                                                "it.geosolutions.imageio.plugins.tiff.BaselineTIFFTagSet,it.geosolutions.imageio.plugins.tiff.BaselineTIFFTagSet");
+
+
+            addDimapMetaField(sourceProduct, iioMetadata);
+
+            final SampleModel sampleModel = writeImage.getSampleModel();
+            writeParam.setDestinationType(new ImageTypeSpecifier(new BogusAndCheatingColorModel(sampleModel), sampleModel));
+
+            final IIOImage iioImage = new IIOImage(writeImage, null, iioMetadata);
+            imageWriter.write(null, iioImage, writeParam);
+            pm.worked(1);
+        } finally {
+            pm.done();
         }
-
-        GeoTIFFMetadata geoTIFFMetadata = ProductUtils.createGeoTIFFMetadata(sourceProduct);
-        if (geoTIFFMetadata == null) {
-            geoTIFFMetadata = new GeoTIFFMetadata();
-        }
-        final ImageTypeSpecifier imageTypeSpecifier = ImageTypeSpecifier.createFromRenderedImage(writeImage);
-        final TIFFImageMetadata iioMetadata = (TIFFImageMetadata) GeoTIFF.createIIOMetadata(imageWriter, imageTypeSpecifier, geoTIFFMetadata,
-                "it_geosolutions_imageioimpl_plugins_tiff_image_1.0",
-                "it.geosolutions.imageio.plugins.tiff.BaselineTIFFTagSet,it.geosolutions.imageio.plugins.tiff.BaselineTIFFTagSet");
-
-
-        addDimapMetaField(sourceProduct, iioMetadata);
-
-        final SampleModel sampleModel = writeImage.getSampleModel();
-        writeParam.setDestinationType(new ImageTypeSpecifier(new BogusAndCheatingColorModel(sampleModel), sampleModel));
-
-        final IIOImage iioImage = new IIOImage(writeImage, null, iioMetadata);
-        imageWriter.write(null, iioImage, writeParam);
     }
 
     private void createWriterParams() {
         writeParam = new TIFFImageWriteParam(Locale.ENGLISH);
 
-        final String compressionType = Config.instance().preferences().get(PARAM_COMPRESSION_TYPE, null);
-        if (StringUtils.isNotNullAndNotEmpty(compressionType)) {
-            if (compressionType.equals("LZW")) {
+        final String compressionType = Config.instance().preferences().get(PARAM_COMPRESSION_TYPE, COMPRESSION_TYPE_DEFAULT);
+        if (StringUtils.isNotNullAndNotEmpty(compressionType) || COMPRESSION_TYPE_NONE.equals(compressionType)) {
+            if (COMPRESSION_TYPE_DEFAULT.equals(compressionType)) {
                 writeParam.setCompressionMode(TIFFImageWriteParam.MODE_EXPLICIT);
 
                 final TIFFLZWCompressor compressor = new TIFFLZWCompressor(BaselineTIFFTagSet.PREDICTOR_NONE);
@@ -263,7 +266,7 @@ class BigGeoTiffProductWriter extends AbstractProductWriter {
     private void setWriteIntermediateProduct(boolean intermediate) {
         if (writingDataHasStarted) {
             throw new IllegalStateException("It is not allowed to change the state 'write intermediate product' " +
-                    "after some data has already been written.");
+                                                    "after some data has already been written.");
         }
         withIntermediate = intermediate;
         if (intermediate) {

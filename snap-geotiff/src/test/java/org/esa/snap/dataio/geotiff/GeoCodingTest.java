@@ -4,6 +4,7 @@ import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.util.io.FileUtils;
 import org.junit.Test;
 
 import javax.imageio.stream.FileCacheImageInputStream;
@@ -25,7 +26,10 @@ public class GeoCodingTest {
         final URI uri = new URI(resource.toString());
         final String filePath = uri.getPath();
         final GeoTiffProductReader reader = new GeoTiffProductReader(new GeoTiffProductReaderPlugIn());
-        final Product product = reader.readGeoTIFFProduct(new FileCacheImageInputStream(resource.openStream(), null), new File(filePath));
+        FileCacheImageInputStream imageInputStream = new FileCacheImageInputStream(resource.openStream(), null);
+        GeoTiffImageReader geoTiffImageReader = new GeoTiffImageReader(imageInputStream);
+        String defaultProductName = FileUtils.getFilenameWithoutExtension(new File(filePath).getName());
+        final Product product = reader.readProduct(geoTiffImageReader, defaultProductName);
 
         final GeoCoding geoCoding = product.getSceneGeoCoding();
         final GeoPos ul = geoCoding.getGeoPos(new PixelPos(0, 0), null);
@@ -34,7 +38,6 @@ public class GeoCodingTest {
         final GeoPos lr = geoCoding.getGeoPos(new PixelPos(49, 49), null);
         assertEquals(2.03596, lr.lon, 1.0e-5);
         assertEquals(48.17303, lr.lat, 1.0e-5);
-
     }
 
     @Test
@@ -52,6 +55,5 @@ public class GeoCodingTest {
         final GeoPos lr = geoCoding.getGeoPos(new PixelPos(49, 49), null);
         assertEquals(2.03596, lr.lon, 1.0e-5);
         assertEquals(48.17303, lr.lat, 1.0e-5);
-
     }
 }

@@ -304,7 +304,7 @@ public class EnviHeader {
         double referencePixelX = 0, referencePixelY = 0;
         double easting = 0, northing = 0;
         double pixelSizeX = 0, pixelSizeY = 0;
-        String datumName = "";
+        String datumName;
         int utmZone = -1;
         String utmHemisphere = "";
         MapProjection mapProjection = null;
@@ -325,11 +325,11 @@ public class EnviHeader {
                 mapProjectionName = "UTM";
                 String zoneStr = crsName.substring(crsName.indexOf("ZONE") + 5, crsName.length()).trim();
                 int i = 0;
-                String zoneNumStr = "";
+                StringBuilder zoneNumStr = new StringBuilder();
                 while (Character.isDigit(zoneStr.charAt(i))) {
-                    zoneNumStr += zoneStr.charAt(i++);
+                    zoneNumStr.append(zoneStr.charAt(i++));
                 }
-                utmZone = Integer.parseInt(zoneNumStr);
+                utmZone = Integer.parseInt(zoneNumStr.toString());
 
                 GeoPos centrePos = crsGeoCoding.getGeoPos(new PixelPos(rasterDataNode.getRasterWidth() / 2,
                                                                        rasterDataNode.getRasterHeight() / 2), null);

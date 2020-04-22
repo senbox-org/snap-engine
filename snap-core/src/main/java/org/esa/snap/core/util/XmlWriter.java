@@ -173,7 +173,7 @@ public class XmlWriter {
     private static String getIndentWhiteSpace(int indent) {
         final int length = indent * 4;
         char newStr[] = new char[length];
-        for(int i=0; i<newStr.length; i++) newStr[i]=' ';
+        for (int i = 0; i < newStr.length; i++) newStr[i] = ' ';
         return new String(newStr);
     }
 

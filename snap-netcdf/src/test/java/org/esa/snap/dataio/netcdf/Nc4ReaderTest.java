@@ -16,13 +16,18 @@
 
 package org.esa.snap.dataio.netcdf;
 
+import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.datamodel.MetadataAttribute;
 import org.esa.snap.core.datamodel.MetadataElement;
+import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.gpf.GPF;
+import org.esa.snap.core.util.DummyProductBuilder;
 import org.esa.snap.dataio.netcdf.metadata.profiles.cf.CfNetCdfReaderPlugIn;
 import org.esa.snap.runtime.Config;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
@@ -30,6 +35,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.Calendar;
+import java.util.HashMap;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -39,6 +45,11 @@ import static org.junit.Assert.assertTrue;
  * @author Ralf Quast
  */
 public class Nc4ReaderTest {
+
+    @BeforeClass
+    public static void setupTestClass() {
+        NetCdfActivator.activate();
+    }
 
     @Test
     public void testGlobalAttributes() throws IOException {
@@ -94,6 +105,31 @@ public class Nc4ReaderTest {
         assertEquals(5, unconstrainedLonValueCount);
     }
 
+    @Test
+    //@Ignore("fails already while creating test product independent of NetCDF version, test is not in master")
+    public void testWithExistingLatLonBandsAndCrsGeoCoding() throws IOException {
+        DummyProductBuilder pb = new DummyProductBuilder();
+        pb.size(DummyProductBuilder.Size.SMALL);
+        pb.gc(DummyProductBuilder.GC.PER_PIXEL);
+        pb.gcOcc(DummyProductBuilder.GCOcc.UNIQUE);
+        pb.sizeOcc(DummyProductBuilder.SizeOcc.SINGLE);
+        Product product = pb.create();
+        product.getBand("latitude").setName("lat");
+        product.getBand("longitude").setName("lon");
+
+        HashMap<String, Object> parameters = new HashMap<>();
+        parameters.put("crs", "EPSG:4326");
+        Product reprojectProduct = GPF.createProduct("Reproject", parameters, product);
+
+        File nc4testFile = File.createTempFile("nc4test", ".nc");
+        ProductIO.writeProduct(reprojectProduct, nc4testFile.getAbsolutePath(), "NetCDF4-CF");
+        reprojectProduct.dispose();
+        product.dispose();
+
+        Product readProduct = ProductIO.readProduct(nc4testFile.getAbsolutePath());
+        assertNotNull(readProduct.getSceneGeoCoding().getGeoPos(new PixelPos(5.0, 5.0), null));
+
+    }
 
     private void checkStartTime(final Product product) {
         final ProductData.UTC utc = product.getStartTime();

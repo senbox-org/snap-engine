@@ -19,6 +19,7 @@ import com.bc.ceres.core.Assert;
 import com.bc.ceres.jai.GeneralFilterFunction;
 import com.bc.ceres.jai.operator.GeneralFilterDescriptor;
 
+import java.awt.Dimension;
 import java.awt.RenderingHints;
 import java.awt.image.RenderedImage;
 
@@ -69,6 +70,19 @@ public class GeneralFilterBand extends FilterBand {
               source.getRasterWidth(),
               source.getRasterHeight(),
               source);
+        Assert.notNull(opType, "opType");
+        Assert.notNull(structuringElement, "structuringElement");
+        this.opType = opType;
+        this.structuringElement = structuringElement;
+        this.iterationCount = iterationCount;
+    }
+
+    public GeneralFilterBand(String name, RasterDataNode source, Dimension filterBandSize, OpType opType, Kernel structuringElement, int iterationCount) {
+        super(name,
+                source.getGeophysicalDataType() == ProductData.TYPE_FLOAT64 ? ProductData.TYPE_FLOAT64 : ProductData.TYPE_FLOAT32,
+                filterBandSize.width,
+                filterBandSize.height,
+                source);
         Assert.notNull(opType, "opType");
         Assert.notNull(structuringElement, "structuringElement");
         this.opType = opType;

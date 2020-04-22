@@ -97,6 +97,10 @@ class BigGeoTiffProductReader extends AbstractProductReader {
 
     private static final int FIRST_IMAGE = 0;
 
+    // non standard ASCII tag (code 42112) to extract GDAL metadata,
+    // see https://gdal.org/drivers/raster/gtiff.html#metadata:
+    private static final int TIFFTAG_GDAL_METADATA = 42112;
+
     private ImageInputStream inputStream;
     private TIFFImageReader imageReader;
     private Map<Band, Integer> bandMap;
@@ -628,9 +632,37 @@ class BigGeoTiffProductReader extends AbstractProductReader {
         final int numBands = rawImageType.getNumBands();
         final int productDataType = ImageManager.getProductDataType(rawImageType.getSampleModel().getDataType());
         bandMap = new HashMap<>(numBands);
+
+        final TIFFField gdalMetadataTiffField = tiffFileInfo.getField(TIFFTAG_GDAL_METADATA);
+        if (gdalMetadataTiffField != null) {
+            final String gdalMetadataXmlString = gdalMetadataTiffField.getAsString(0);
+            try {
+                final Band[] bandsFromGdalMetadata = BigGeoTiffUtils.setupBandsFromGdalMetadata(gdalMetadataXmlString,
+                                                                                      productDataType,
+                                                                                      product.getSceneRasterWidth(),
+                                                                                      product.getSceneRasterHeight());
+                if (bandsFromGdalMetadata.length == numBands) {
+                    for (int i = 0; i < bandsFromGdalMetadata.length; i++) {
+                        product.addBand(bandsFromGdalMetadata[i]);
+                    }
+                } else {
+                    for (int i = 0; i < numBands; i++) {
+                        final String bandName = String.format("band_%d", i + 1);
+                        product.addBand(bandName, productDataType);
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            for (int i = 0; i < numBands; i++) {
+                final String bandName = String.format("band_%d", i + 1);
+                product.addBand(bandName, productDataType);
+            }
+        }
+
         for (int bandIndex = 0; bandIndex < numBands; bandIndex++) {
-            final String bandName = String.format("band_%d", bandIndex + 1);
-            final Band band = product.addBand(bandName, productDataType);
+            final Band band = product.getBandAt(bandIndex);
             // SNAP-1133 - disabled reading via images. This has threading issues
 //            band.setSourceImage(getMultiLevelImageSourceImage(band, bandIndex));
             if (tiffFileInfo.containsField(BaselineTIFFTagSet.TAG_COLOR_MAP) &&
@@ -684,7 +716,7 @@ class BigGeoTiffProductReader extends AbstractProductReader {
             final DocumentBuilder builder = factory.newDocumentBuilder();
             is = new ByteArrayInputStream(field.getAsString(0).trim().getBytes());
             final Document document = new DOMBuilder().build(builder.parse(is));
-            final Product product = DimapProductHelpers.createProduct(document);
+            final Product product = DimapProductHelpers.createProduct(document, BigGeoTiffProductReaderPlugIn.FORMAT_NAME, null);
             removeGeoCodingAndTiePointGrids(product);
             setPreferredTiling(product);
             initBandsMap(product);

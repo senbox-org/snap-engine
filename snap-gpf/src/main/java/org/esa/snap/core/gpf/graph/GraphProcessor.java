@@ -26,20 +26,12 @@ import org.esa.snap.core.gpf.internal.ProductSetHandler;
 import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.math.MathUtils;
 
-import javax.media.jai.JAI;
-import javax.media.jai.PlanarImage;
-import javax.media.jai.TileComputationListener;
-import javax.media.jai.TileRequest;
-import javax.media.jai.TileScheduler;
+import javax.media.jai.*;
 import javax.media.jai.util.ImagingListener;
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.Raster;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.logging.Logger;
 
@@ -91,7 +83,6 @@ public class GraphProcessor {
      * processing steps of the currently running processing graph.
      *
      * @param processingObserver the observer
-     *
      * @see GraphProcessingObserver
      */
     public void addObserver(GraphProcessingObserver processingObserver) {
@@ -112,7 +103,6 @@ public class GraphProcessor {
      *
      * @param graph the {@link Graph}
      * @param pm    a progress monitor. Can be used to signal progress.
-     *
      * @throws GraphException if any error occurs during execution
      * @see GraphProcessor#executeGraph(GraphContext, com.bc.ceres.core.ProgressMonitor)
      */
@@ -140,7 +130,7 @@ public class GraphProcessor {
                 executeNodeSources(node.getSources(), graphContext, pm);
                 NodeContext nodeContext = graphContext.getNodeContext(node);
                 if (nodeContext != null) {
-                    nodeContext.getOperator().execute(pm);
+                    nodeContext.getOperator().execute(SubProgressMonitor.create(pm, 1));
                 }
             }
         }
@@ -151,7 +141,6 @@ public class GraphProcessor {
      *
      * @param graphContext the {@link GraphContext} to execute
      * @param pm           a progress monitor. Can be used to signal progress.
-     *
      * @return the output products of the executed graph
      */
     public Product[] executeGraph(GraphContext graphContext, ProgressMonitor pm) {
@@ -160,11 +149,6 @@ public class GraphProcessor {
         //Header header = graphContext.getGraph().getHeader();
         // TODO use header to specify execution order (mz, 2009-11-16)
         NodeContext[] outputNodeContexts = graphContext.getOutputNodeContexts();
-        for (NodeContext outputNodeContext : outputNodeContexts) {
-            NodeSource[] sources = outputNodeContext.getNode().getSources();
-            executeNodeSources(sources, graphContext, pm);
-            outputNodeContext.getOperator().execute(pm);
-        }
         Map<Dimension, List<NodeContext>> tileDimMap = buildTileDimensionMap(outputNodeContexts);
 
         List<Dimension> dimList = new ArrayList<>(tileDimMap.keySet());
@@ -174,7 +158,7 @@ public class GraphProcessor {
             return area1.compareTo(area2);
         });
 
-        int numPmTicks = 0;
+        int numPmTicks = graphContext.getGraph().getNodeCount();
         for (Dimension dimension : dimList) {
             numPmTicks += dimension.width * dimension.height * tileDimMap.get(dimension).size();
         }
@@ -188,8 +172,23 @@ public class GraphProcessor {
         final TileComputationListener tcl = new GraphTileComputationListener(semaphore, parallelism);
         final TileComputationListener[] listeners = new TileComputationListener[]{tcl};
 
+        // loop over all nodes and check if one of them computes tile-stack. If so, we do stack-processing. tb 2020-02-07
+        boolean canComputeTileStack = false;
+        final Deque<NodeContext> nodeContexts = graphContext.getInitNodeContextDeque();
+        for (NodeContext nodeContext : nodeContexts) {
+            if (!nodeContext.isOutput()) {
+                canComputeTileStack |= nodeContext.canComputeTileStack();
+            }
+        }
+
         try {
-            pm.beginTask("Computing raster data...", numPmTicks);
+            pm.beginTask("Executing operators...", numPmTicks);
+            for (NodeContext outputNodeContext : outputNodeContexts) {
+                NodeSource[] sources = outputNodeContext.getNode().getSources();
+                executeNodeSources(sources, graphContext, pm);
+                outputNodeContext.getOperator().execute(SubProgressMonitor.create(pm, 1));
+            }
+            pm.setTaskName("Computing raster data...");
             for (Dimension dimension : dimList) {
                 List<NodeContext> nodeContextList = tileDimMap.get(dimension);
                 final int numXTiles = dimension.width;
@@ -202,14 +201,13 @@ public class GraphProcessor {
                             return graphContext.getOutputProducts();
                         }
                         Rectangle tileRectangle = new Rectangle(tileX * tileSize.width,
-                                                                tileY * tileSize.height,
-                                                                tileSize.width,
-                                                                tileSize.height);
+                                tileY * tileSize.height,
+                                tileSize.width,
+                                tileSize.height);
                         fireTileStarted(graphContext, tileRectangle);
                         for (NodeContext nodeContext : nodeContextList) {
                             Product targetProduct = nodeContext.getTargetProduct();
-                            if (nodeContext.canComputeTileStack()) {
-
+                            if (canComputeTileStack) {
                                 // (1) Pull tile from first OperatorImage we find. This will trigger pulling
                                 // tiles of all other OperatorImage computed stack-wise.
                                 //
@@ -217,7 +215,8 @@ public class GraphProcessor {
                                     PlanarImage image = nodeContext.getTargetImage(band);
                                     if (image != null) {
                                         forceTileComputation(image, tileX, tileY, semaphore, tileScheduler, listeners,
-                                                             parallelism);
+                                                parallelism);
+
                                         break;
                                     }
                                 }
@@ -229,22 +228,21 @@ public class GraphProcessor {
                                     if (image == null) {
                                         if (OperatorContext.isRegularBand(band) && band.isSourceImageSet()) {
                                             forceTileComputation(band.getSourceImage(), tileX, tileY, semaphore,
-                                                                 tileScheduler, listeners, parallelism);
+                                                    tileScheduler, listeners, parallelism);
                                         }
                                     }
                                 }
                             } else {
-
                                 // Simply pull tile from source images of regular bands.
                                 //
                                 for (Band band : targetProduct.getBands()) {
                                     PlanarImage image = nodeContext.getTargetImage(band);
                                     if (image != null) {
                                         forceTileComputation(image, tileX, tileY, semaphore, tileScheduler, listeners,
-                                                             parallelism);
+                                                parallelism);
                                     } else if (OperatorContext.isRegularBand(band) && band.isSourceImageSet()) {
                                         forceTileComputation(band.getSourceImage(), tileX, tileY, semaphore,
-                                                             tileScheduler, listeners, parallelism);
+                                                tileScheduler, listeners, parallelism);
                                     }
                                 }
                             }

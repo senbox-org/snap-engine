@@ -15,10 +15,18 @@
  */
 package org.esa.snap.dataio.netcdf.metadata.profiles.cf;
 
+import org.esa.snap.core.dataio.geocoding.ComponentFactory;
+import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
+import org.esa.snap.core.dataio.geocoding.ForwardCoding;
+import org.esa.snap.core.dataio.geocoding.GeoChecks;
+import org.esa.snap.core.dataio.geocoding.GeoRaster;
+import org.esa.snap.core.dataio.geocoding.InverseCoding;
+import org.esa.snap.core.dataio.geocoding.forward.PixelForward;
+import org.esa.snap.core.dataio.geocoding.inverse.PixelQuadTreeInverse;
+import org.esa.snap.core.dataio.geocoding.util.RasterUtils;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.GeoCoding;
-import org.esa.snap.core.datamodel.GeoCodingFactory;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.MapGeoCoding;
 import org.esa.snap.core.datamodel.PixelPos;
@@ -58,7 +66,7 @@ public class CfGeocodingPart extends ProfilePartIO {
     public void decode(ProfileReadContext ctx, Product p) throws IOException {
         GeoCoding geoCoding = readConventionBasedMapGeoCoding(ctx, p);
         if (geoCoding == null) {
-            geoCoding = readPixelGeoCoding(p);
+            geoCoding = readPixelBasedGeoCoding(p);
         }
         // If there is still no geocoding, check special case of netcdf file which was converted
         // from hdf file and has 'StructMetadata.n' element.
@@ -72,7 +80,7 @@ public class CfGeocodingPart extends ProfilePartIO {
         }
     }
 
-    private void hdfDecode(ProfileReadContext ctx, Product p) throws IOException {
+    private void hdfDecode(ProfileReadContext ctx, Product p) {
         final CfHdfEosGeoInfoExtractor cfHdfEosGeoInfoExtractor = new CfHdfEosGeoInfoExtractor(
                 ctx.getNetcdfFile().getGlobalAttributes());
         cfHdfEosGeoInfoExtractor.extractInfo();
@@ -171,8 +179,8 @@ public class CfGeocodingPart extends ProfilePartIO {
                 geoCoding.getGeoPos(pixelPos, geoPos);
                 lon[x] = geoPos.getLon();
             }
-            latVariable.writeFully(Array.factory(lat));
-            lonVariable.writeFully(Array.factory(lon));
+            latVariable.writeFully(Array.factory(DataType.DOUBLE, new int[]{h}, lat));
+            lonVariable.writeFully(Array.factory(DataType.DOUBLE, new int[]{w}, lon));
         } else {
             final double[] lat = new double[w];
             final double[] lon = new double[w];
@@ -193,7 +201,7 @@ public class CfGeocodingPart extends ProfilePartIO {
 
     static boolean isGeographicCRS(final GeoCoding geoCoding) {
         return (geoCoding instanceof CrsGeoCoding || geoCoding instanceof MapGeoCoding) &&
-               CRS.equalsIgnoreMetadata(geoCoding.getMapCRS(), DefaultGeographicCRS.WGS84);
+                CRS.equalsIgnoreMetadata(geoCoding.getMapCRS(), DefaultGeographicCRS.WGS84);
     }
 
     private void addGeographicCoordinateVariables(NFileWriteable ncFile, GeoPos ul, GeoPos br, String latVarName, String lonVarName) throws IOException {
@@ -286,7 +294,7 @@ public class CfGeocodingPart extends ProfilePartIO {
             // add a global attribute which will be analyzed when setting up the image(s)
             final List<Variable> variables = ctx.getNetcdfFile().getVariables();
             for (Variable next : variables) {
-                next.getAttributes().add(new Attribute("LONGITUDE_SHIFTED_180", 1));
+                next.addAttribute(new Attribute("LONGITUDE_SHIFTED_180", 1));
             }
             for (int i = 0; i < lonData.getSize(); i++) {
                 final Index ii = lonData.getIndex().set(i);
@@ -352,7 +360,7 @@ public class CfGeocodingPart extends ProfilePartIO {
                 lastValue >= 360.0 - lonDelta && lastValue <= 360.0);
     }
 
-    private static GeoCoding readPixelGeoCoding(Product product) throws IOException {
+    private static GeoCoding readPixelBasedGeoCoding(Product product) {
         Band lonBand = product.getBand(Constants.LON_INTERN_VAR_NAME);
         if (lonBand == null) {
             lonBand = product.getBand(Constants.LON_VAR_NAME);
@@ -367,10 +375,39 @@ public class CfGeocodingPart extends ProfilePartIO {
         if (latBand == null) {
             latBand = product.getBand(Constants.LATITUDE_VAR_NAME);
         }
-        if (latBand != null && lonBand != null) {
-            return GeoCodingFactory.createPixelGeoCoding(latBand, lonBand, latBand.getValidMaskExpression(), 5);
+        if (latBand == null || lonBand == null) {
+            return null;
         }
-        return null;
-    }
 
+        final int width = product.getSceneRasterWidth();
+        final int height = product.getSceneRasterHeight();
+
+        final int fullSize = width * height;
+
+        // These call seems to violate the encapsulation principle. At this point in code
+        // - I have a band object
+        // - I want the geophysical data
+        //
+        // - I DO NOT want to be forced to know that I require a source image which exposes a getData() method which
+        //   I'm forced to understand the parametrisation  etc ...
+        // In my opinion, the Band class shall expose the functionality required here and encapsulate the inner workings
+        // tb 2020-04-14
+        final double[] longitudes = lonBand.getSourceImage().getData().getSamples(0, 0, width, height, 0, new double[fullSize]);
+        lonBand.unloadRasterData();
+
+        final double[] latitudes = latBand.getSourceImage().getData().getSamples(0, 0, width, height, 0, new double[fullSize]);
+        latBand.unloadRasterData();
+
+        final double resolutionInKm = RasterUtils.computeResolutionInKm(longitudes, latitudes, width, height);
+
+        final GeoRaster geoRaster = new GeoRaster(longitudes, latitudes, lonBand.getName(), latBand.getName(),
+                                                  width, height, resolutionInKm);
+
+        final ForwardCoding forward = ComponentFactory.getForward(PixelForward.KEY);
+        final InverseCoding inverse = ComponentFactory.getInverse(PixelQuadTreeInverse.KEY);
+
+        final ComponentGeoCoding geoCoding = new ComponentGeoCoding(geoRaster, forward, inverse, GeoChecks.ANTIMERIDIAN);
+        geoCoding.initialize();
+        return geoCoding;
+    }
 }

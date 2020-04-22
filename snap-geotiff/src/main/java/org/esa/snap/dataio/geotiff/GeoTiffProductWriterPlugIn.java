@@ -65,7 +65,6 @@ public class GeoTiffProductWriterPlugIn implements ProductWriterPlugIn {
         }
     }
 
-
     /**
      * Returns a string array containing the single entry <code>&quot;GeoTIFF&quot;</code>.
      */

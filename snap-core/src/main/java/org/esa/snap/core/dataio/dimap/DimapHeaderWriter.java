@@ -53,7 +53,6 @@ import org.esa.snap.core.util.SystemUtils;
 import org.esa.snap.core.util.XmlWriter;
 import org.jdom.Element;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.operation.MathTransform;
 
 import java.awt.geom.AffineTransform;
 import java.io.File;
@@ -549,10 +548,7 @@ public final class DimapHeaderWriter extends XmlWriter {
     private void writeGeoCoding(final CrsGeoCoding crsGeoCoding, int indent, int bandIndex) {
         final CoordinateReferenceSystem crs = crsGeoCoding.getMapCRS();
         final double[] matrix = new double[6];
-        final MathTransform transform = crsGeoCoding.getImageToMapTransform();
-        if (transform instanceof AffineTransform) {
-            ((AffineTransform) transform).getMatrix(matrix);
-        }
+        ((AffineTransform) crsGeoCoding.getImageToMapTransform()).getMatrix(matrix);
 
         final String[] crsTags = createTags(indent, DimapProductConstants.TAG_COORDINATE_REFERENCE_SYSTEM);
         println(crsTags[0]);
@@ -570,9 +566,9 @@ public final class DimapHeaderWriter extends XmlWriter {
         final String[] geopositionTags = createTags(indent, DimapProductConstants.TAG_GEOPOSITION);
         println(geopositionTags[0]);
         writeBandIndexIf(bandIndex >= 0, bandIndex, indent + 1);
+        // TODO: 10.01.2020 SE -- why tag "image to model transform" is used? The context is "image to map" and not "image to model"
         printLine(indent + 1, DimapProductConstants.TAG_IMAGE_TO_MODEL_TRANSFORM, StringUtils.arrayToCsv(matrix));
         println(geopositionTags[1]);
-
     }
 
     private void writeGeoCoding(final GcpGeoCoding gcpPointGeoCoding, int indent, int bandIndex) {
@@ -647,7 +643,7 @@ public final class DimapHeaderWriter extends XmlWriter {
         final Parameter[] parameters = descriptor.getParameters();
 
         printLine(indent, DimapProductConstants.TAG_GEO_TABLES, new String[][]{new String[]{"version", "1.0"}},
-                  "CUSTOM");
+                "CUSTOM");
         final String[] horizontalCsTags = createTags(indent, DimapProductConstants.TAG_HORIZONTAL_CS);
         println(horizontalCsTags[0]);
         ++indent;
@@ -661,7 +657,7 @@ public final class DimapHeaderWriter extends XmlWriter {
         println(horizontalDatumTags[0]);
         ++indent;
         printLine(indent, DimapProductConstants.TAG_HORIZONTAL_DATUM_NAME,
-                  datumName);  // @todo mp - write also DX,DY,DZ
+                datumName);  // @todo mp - write also DX,DY,DZ
         final String[] ellipsoidTags = createTags(indent, DimapProductConstants.TAG_ELLIPSOID);
         println(ellipsoidTags[0]);
         ++indent;
@@ -700,7 +696,7 @@ public final class DimapHeaderWriter extends XmlWriter {
             printLine(indent, DimapProductConstants.TAG_PROJECTION_PARAMETER_NAME, parameters[i].getName());
             paramUnitAttributes[0][1] = parameters[i].getProperties().getPhysicalUnit();
             printLine(indent, DimapProductConstants.TAG_PROJECTION_PARAMETER_VALUE, paramUnitAttributes,
-                      String.valueOf(parameterValues[i]));
+                    String.valueOf(parameterValues[i]));
             println(projectionParameterTags[1]);
         }
         --indent;
@@ -761,6 +757,7 @@ public final class DimapHeaderWriter extends XmlWriter {
 
         final String[] geopositionTags = createTags(indent, DimapProductConstants.TAG_GEOPOSITION);
         println(geopositionTags[0]);
+        writeBandIndexIf(bandIndex >= 0, bandIndex, indent + 1);
         printLine(indent + 1, DimapProductConstants.TAG_LATITUDE_BAND, latBandName);
         printLine(indent + 1, DimapProductConstants.TAG_LONGITUDE_BAND, lonBandName);
         if (validMask != null && !validMask.trim().isEmpty()) {
@@ -771,7 +768,8 @@ public final class DimapHeaderWriter extends XmlWriter {
             final String[] pixelPosEstimatorTags = createTags(indent + 1,
                                                               DimapProductConstants.TAG_PIXEL_POSITION_ESTIMATOR);
             println(pixelPosEstimatorTags[0]);
-            writeGeoCoding(posEstimator, indent + 2, bandIndex);
+            // no band index needed, estimator is part of PixelGeoCoding
+            writeGeoCoding(posEstimator, indent + 2, -1);
             println(pixelPosEstimatorTags[1]);
         }
         println(geopositionTags[1]);
@@ -888,9 +886,9 @@ public final class DimapHeaderWriter extends XmlWriter {
         indent++;
         final String[][] ellipsoidAttrib = new String[][]{new String[]{DimapProductConstants.ATTRIB_UNIT, "M"}};
         printLine(indent, DimapProductConstants.TAG_ELLIPSOID_MAJ_AXIS,
-                  ellipsoidAttrib, String.valueOf(ellipsoid.getSemiMajor()));
+                ellipsoidAttrib, String.valueOf(ellipsoid.getSemiMajor()));
         printLine(indent, DimapProductConstants.TAG_ELLIPSOID_MIN_AXIS,
-                  ellipsoidAttrib, String.valueOf(ellipsoid.getSemiMinor()));
+                ellipsoidAttrib, String.valueOf(ellipsoid.getSemiMinor()));
         println(ellipsoidParametersTags[1]);
         --indent;
         println(ellipsoidTags[1]);
@@ -969,21 +967,21 @@ public final class DimapHeaderWriter extends XmlWriter {
         final String[] productionTags = createTags(indent, DimapProductConstants.TAG_PRODUCTION);
         println(productionTags[0]);
         printLine(indent + 1, DimapProductConstants.TAG_DATASET_PRODUCER_NAME,
-                  DimapProductConstants.DATASET_PRODUCER_NAME);
+                DimapProductConstants.DATASET_PRODUCER_NAME);
         printLine(indent + 1, DimapProductConstants.TAG_PRODUCT_TYPE, product.getProductType());
         final ProductData.UTC sceneRasterStartTime = product.getStartTime();
         if (sceneRasterStartTime != null) {
             printLine(indent + 1, DimapProductConstants.TAG_PRODUCT_SCENE_RASTER_START_TIME,
-                      sceneRasterStartTime.format());
+                    sceneRasterStartTime.format());
         }
         final ProductData.UTC sceneRasterStopTime = product.getEndTime();
         if (sceneRasterStopTime != null) {
             printLine(indent + 1, DimapProductConstants.TAG_PRODUCT_SCENE_RASTER_STOP_TIME,
-                      sceneRasterStopTime.format());
+                    sceneRasterStopTime.format());
         }
         if (product.getQuicklookBandName() != null) {
             printLine(indent + 1, DimapProductConstants.TAG_QUICKLOOK_BAND_NAME,
-                      product.getQuicklookBandName());
+                    product.getQuicklookBandName());
         }
         println(productionTags[1]);
     }

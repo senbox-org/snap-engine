@@ -28,7 +28,7 @@ pipeline {
     agent { label 'snap-test' }
     parameters {
         booleanParam(name: 'launchTests', defaultValue: true, description: 'When true all stages are launched, When false only stages "Package", "Deploy" and "Save installer data" are launched.')
-        booleanParam(name: 'runLongUnitTests', defaultValue: false, description: 'When true the option -Denable.long.tests=true is added to maven command so the long unit tests will be executed')
+        booleanParam(name: 'runLongUnitTests', defaultValue: true, description: 'When true the option -Denable.long.tests=true is added to maven command so the long unit tests will be executed')
     }
     stages {
         stage('Package and deploy') {
@@ -161,27 +161,28 @@ pipeline {
                     }
                     steps {
                         echo "Launch snap-gpt-tests using docker image snap:${branchVersion} and scope REGULAR"
-                        build job: "snap-gpt-tests/${branchVersion}", parameters: [
-                            [$class: 'StringParameterValue', name: 'dockerTagName', value: "snap:${branchVersion}"],
-                            [$class: 'StringParameterValue', name: 'testScope', value: "REGULAR"]
-                        ]
+                        // build job: "snap-gpt-tests/${branchVersion}", parameters: [
+                        //    [$class: 'StringParameterValue', name: 'dockerTagName', value: "snap:${branchVersion}"],
+                        //    [$class: 'StringParameterValue', name: 'testScope', value: "REGULAR"]
+                        //]
                     }
                 }
-                stage ('Starting GUI Tests') {
-                    agent { label 'snap-test' }
-                    when {
-                        expression {
-                            return "${env.GIT_BRANCH}" =~ /\d+\.x/;
-                        }
-                    }
-                    steps {
-                        echo "Launch snap-gui-tests using docker image snap:${branchVersion}"
-                        build job: "snap-gui-tests/${branchVersion}", parameters: [
-                            [$class: 'StringParameterValue', name: 'dockerTagName', value: "snap:${branchVersion}"],
-                            [$class: 'StringParameterValue', name: 'testFileList', value: "qftests.lst"]
-                        ]
-                    }
-                }
+                // DISABLE GUI TESTING
+                // stage ('Starting GUI Tests') {
+                //     agent { label 'snap-test' }
+                //     when {
+                //         expression {
+                //             return "${env.GIT_BRANCH}" =~ /\d+\.x/;
+                //         }
+                //     }
+                //     steps {
+                //         echo "Launch snap-gui-tests using docker image snap:${branchVersion}"
+                //         build job: "snap-gui-tests/${branchVersion}", parameters: [
+                //             [$class: 'StringParameterValue', name: 'dockerTagName', value: "snap:${branchVersion}"],
+                //             [$class: 'StringParameterValue', name: 'testFileList', value: "qftests.lst"]
+                //         ]
+                //     }
+                // }
             }
         }
     }

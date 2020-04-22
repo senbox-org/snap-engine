@@ -20,6 +20,7 @@ import com.bc.ceres.binding.Property;
 import com.bc.ceres.binding.ValidationException;
 import com.bc.ceres.binding.Validator;
 import com.bc.ceres.core.ProgressMonitor;
+import com.bc.ceres.core.SubProgressMonitor;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.dataio.ProductSubsetBuilder;
 import org.esa.snap.core.dataio.ProductSubsetDef;
@@ -39,6 +40,7 @@ import org.esa.snap.core.gpf.annotations.Parameter;
 import org.esa.snap.core.gpf.annotations.SourceProducts;
 import org.esa.snap.core.gpf.annotations.TargetProperty;
 import org.esa.snap.core.image.VirtualBandOpImage;
+import org.esa.snap.core.subset.PixelSubsetRegion;
 import org.esa.snap.core.util.ProductUtils;
 import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.SystemUtils;
@@ -92,7 +94,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipOutputStream;
 
-import static java.lang.Math.*;
+import static java.lang.Math.floor;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 /**
  * This operator is used to extract pixels from given locations and source products.
@@ -273,58 +277,73 @@ public class PixExOp extends Operator {
                 throw new OperatorException("Directory for sub-scenes does not exist and could not be created.");
             }
         }
-        if (exportKmz) {
-            kmlDocument = new KmlDocument("placemarks", null);
-            knownKmzPlacemarks = new ArrayList<>();
+        measurements = new PixExMeasurementReader(outputDir);
+        setDummyTargetProduct();
+    }
+
+    @Override
+    public void doExecute(ProgressMonitor pm) throws OperatorException {
+        int numTicks = 7;
+        if (sourceProducts != null) {
+            numTicks += sourceProducts.length;
         }
-
-        if (extractTimeFromFilename) {
-            timeStampExtractor = new TimeStampExtractor(dateInterpretationPattern, filenameInterpretationPattern);
-        }
-
-        initAggregatorStrategy();
-
         Set<File> sourceProductFileSet = getSourceProductFileSet(this.sourceProductPaths, getLogger());
-        coordinateList = initCoordinateList();
-        Measurement[] originalMeasurements = createOriginalMeasurements(coordinateList);
-        parseTimeDelta(timeDifference);
-        final PixExRasterNamesFactory rasterNamesFactory = new PixExRasterNamesFactory(exportBands, exportTiePoints,
-                                                                                       exportMasks, aggregatorStrategy);
-
-        final PixExProductRegistry productRegistry = new PixExProductRegistry(outputFilePrefix, outputDir);
-        formatStrategy = initFormatStrategy(rasterNamesFactory, originalMeasurements,
-                                            productRegistry);
-        MeasurementFactory measurementFactory;
-        if (aggregatorStrategy == null || windowSize == 1) {
-            measurementFactory = new PixExMeasurementFactory(rasterNamesFactory, windowSize,
-                                                             productRegistry);
-        } else {
-            measurementFactory = new AggregatingPixExMeasurementFactory(rasterNamesFactory, windowSize,
-                                                                        productRegistry, aggregatorStrategy);
+        if (!sourceProductFileSet.isEmpty()) {
+            numTicks += sourceProductFileSet.size();
         }
-        TargetWriterFactoryAndMap targetFactory = new TargetWriterFactoryAndMap(outputFilePrefix, outputDir);
-
-        measurementWriter = new MeasurementWriter(measurementFactory, targetFactory, formatStrategy);
-
+        pm.beginTask("Extracting pixels", numTicks);
         try {
+            if (exportKmz) {
+                kmlDocument = new KmlDocument("placemarks", null);
+                knownKmzPlacemarks = new ArrayList<>();
+            }
+
+            if (extractTimeFromFilename) {
+                timeStampExtractor = new TimeStampExtractor(dateInterpretationPattern, filenameInterpretationPattern);
+            }
+
+            initAggregatorStrategy();
+
+            coordinateList = initCoordinateList();
+            pm.worked(1);
+            Measurement[] originalMeasurements = createOriginalMeasurements(coordinateList);
+            pm.worked(1);
+            parseTimeDelta(timeDifference);
+            final PixExRasterNamesFactory rasterNamesFactory = new PixExRasterNamesFactory(exportBands, exportTiePoints,
+                    exportMasks, aggregatorStrategy);
+
+            final PixExProductRegistry productRegistry = new PixExProductRegistry(outputFilePrefix, outputDir);
+            formatStrategy = initFormatStrategy(rasterNamesFactory, originalMeasurements,
+                    productRegistry);
+            MeasurementFactory measurementFactory;
+            if (aggregatorStrategy == null || windowSize == 1) {
+                measurementFactory = new PixExMeasurementFactory(rasterNamesFactory, windowSize,
+                        productRegistry);
+            } else {
+                measurementFactory = new AggregatingPixExMeasurementFactory(rasterNamesFactory, windowSize,
+                        productRegistry, aggregatorStrategy);
+            }
+            TargetWriterFactoryAndMap targetFactory = new TargetWriterFactoryAndMap(outputFilePrefix, outputDir);
+
+            measurementWriter = new MeasurementWriter(measurementFactory, targetFactory, formatStrategy);
+
             boolean measurementsFound = false;
             if (sourceProducts != null) {
                 Arrays.sort(sourceProducts, new ProductComparator());
                 for (Product product : sourceProducts) {
                     measurementsFound |= extractMeasurements(product);
+                    pm.worked(1);
                 }
             }
             if (!sourceProductFileSet.isEmpty()) {
-                measurementsFound |= extractMeasurements(sourceProductFileSet);
+                measurementsFound |= extractMeasurements(sourceProductFileSet, pm);
             }
-
-            setDummyTargetProduct();
 
             if (exportKmz && measurementsFound) {
                 KmzExporter kmzExporter = new KmzExporter();
                 File outFile = new File(outputDir, outputFilePrefix + "_coordinates.kmz");
                 try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(outFile))) {
-                    kmzExporter.export(kmlDocument, zos, ProgressMonitor.NULL);
+                    kmzExporter.export(kmlDocument, zos, new SubProgressMonitor(pm, 5));
                 } catch (IOException e) {
                     getLogger().log(Level.SEVERE, "Problem writing KMZ file.", e);
                 }
@@ -335,10 +354,12 @@ public class PixExOp extends Operator {
             }
 
         } finally {
-            measurementWriter.close();
+            if (measurementWriter != null) {
+                measurementWriter.close();
+            }
+            pm.done();
         }
-
-        measurements = new PixExMeasurementReader(outputDir);
+        measurements.update();
     }
 
     @SuppressWarnings("unchecked")
@@ -636,10 +657,11 @@ public class PixExOp extends Operator {
         return extractedCoordinates;
     }
 
-    private boolean extractMeasurements(Set<File> fileSet) {
+    private boolean extractMeasurements(Set<File> fileSet, ProgressMonitor pm) {
         boolean measurementsFound = false;
         for (File file : fileSet) {
             measurementsFound |= extractMeasurements(file);
+            pm.worked(1);
         }
         return measurementsFound;
     }
@@ -754,7 +776,7 @@ public class PixExOp extends Operator {
         final Rectangle productBounds = new Rectangle(0, 0, product.getSceneRasterWidth(),
                                                       product.getSceneRasterHeight());
         Rectangle finalRegion = productBounds.intersection(region);
-        subsetDef.setRegion(finalRegion);
+        subsetDef.setSubsetRegion(new PixelSubsetRegion(finalRegion, 0));
         final Product subset = ProductSubsetBuilder.createProductSubset(product, subsetDef, null, null);
         final String[] extension = ProductIO.getProductWriterExtensions(ProductIO.DEFAULT_FORMAT_NAME);
         final File productFile = new File(subScenesDir, product.getName() + extension[0]);

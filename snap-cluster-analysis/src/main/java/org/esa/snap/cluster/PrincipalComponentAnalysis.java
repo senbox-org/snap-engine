@@ -1,11 +1,11 @@
 package org.esa.snap.cluster;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.DecompositionFactory;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.NormOps;
-import org.ejml.ops.SingularOps;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.NormOps_DDRM;
+import org.ejml.dense.row.SingularOps_DDRM;
 
 /**
  * <p>
@@ -41,7 +41,7 @@ public class PrincipalComponentAnalysis {
 
     private final int sampleSize;
     // principal component subspace is stored in the rows
-    private DenseMatrix64F V_t;
+    private DMatrixRMaj V_t;
 
     // how many principal components are used
     private int numComponents = -1;
@@ -73,7 +73,7 @@ public class PrincipalComponentAnalysis {
         this.mean = new double[sampleSize];
         this.numComponents = numComponents;
 
-        DenseMatrix64F A = DenseMatrix64F.wrap(sampleCount, sampleSize, samples);
+        DMatrixRMaj A = DMatrixRMaj.wrap(sampleCount, sampleSize, samples);
 
         // compute the mean of all the samples
         for (int i = 0; i < sampleCount; i++) {
@@ -93,16 +93,16 @@ public class PrincipalComponentAnalysis {
         }
 
         // Compute SVD and save time by not computing U
-        SingularValueDecomposition<DenseMatrix64F> svd =
-                DecompositionFactory.svd(A.numRows, A.numCols, false, true, false);
+        SingularValueDecomposition<DMatrixRMaj> svd =
+                DecompositionFactory_DDRM.svd(A.numRows, A.numCols, false, true, false);
         if (!svd.decompose(A))
             throw new RuntimeException("SVD failed");
 
         V_t = svd.getV(null, true);
-        DenseMatrix64F W = svd.getW(null);
+        DMatrixRMaj W = svd.getW(null);
 
         // Singular values are in an arbitrary order initially
-        SingularOps.descendingOrder(null, false, W, V_t, true);
+        SingularOps_DDRM.descendingOrder(null, false, W, V_t, true);
 
         // strip off unneeded components and find the basis
         V_t.reshape(numComponents, mean.length, true);
@@ -122,8 +122,8 @@ public class PrincipalComponentAnalysis {
         if (which < 0 || which >= numComponents)
             throw new IllegalArgumentException("Invalid component");
 
-        DenseMatrix64F v = new DenseMatrix64F(1, sampleSize);
-        CommonOps.extract(V_t, which, which + 1, 0, sampleSize, v, 0, 0);
+        DMatrixRMaj v = new DMatrixRMaj(1, sampleSize);
+        CommonOps_DDRM.extract(V_t, which, which + 1, 0, sampleSize, v, 0, 0);
 
         return v.data;
     }
@@ -137,14 +137,14 @@ public class PrincipalComponentAnalysis {
     public double[] sampleToEigenSpace(double[] sampleData) {
         if (sampleData.length != sampleSize)
             throw new IllegalArgumentException("Unexpected sample length");
-        DenseMatrix64F mean = DenseMatrix64F.wrap(sampleSize, 1, this.mean);
+        DMatrixRMaj mean = DMatrixRMaj.wrap(sampleSize, 1, this.mean);
 
-        DenseMatrix64F s = new DenseMatrix64F(sampleSize, 1, true, sampleData);
-        DenseMatrix64F r = new DenseMatrix64F(numComponents, 1);
+        DMatrixRMaj s = new DMatrixRMaj(sampleSize, 1, true, sampleData);
+        DMatrixRMaj r = new DMatrixRMaj(numComponents, 1);
 
-        CommonOps.subtract(s, mean, s);
+        CommonOps_DDRM.subtract(s, mean, s);
 
-        CommonOps.mult(V_t, s, r);
+        CommonOps_DDRM.mult(V_t, s, r);
 
         return r.data;
     }
@@ -159,13 +159,13 @@ public class PrincipalComponentAnalysis {
         if (eigenData.length != numComponents)
             throw new IllegalArgumentException("Unexpected sample length");
 
-        DenseMatrix64F s = new DenseMatrix64F(sampleSize, 1);
-        DenseMatrix64F r = DenseMatrix64F.wrap(numComponents, 1, eigenData);
+        DMatrixRMaj s = new DMatrixRMaj(sampleSize, 1);
+        DMatrixRMaj r = DMatrixRMaj.wrap(numComponents, 1, eigenData);
 
-        CommonOps.multTransA(V_t, r, s);
+        CommonOps_DDRM.multTransA(V_t, r, s);
 
-        DenseMatrix64F mean = DenseMatrix64F.wrap(sampleSize, 1, this.mean);
-        CommonOps.add(s, mean, s);
+        DMatrixRMaj mean = DMatrixRMaj.wrap(sampleSize, 1, this.mean);
+        CommonOps_DDRM.add(s, mean, s);
 
         return s.data;
     }
@@ -209,12 +209,12 @@ public class PrincipalComponentAnalysis {
         if (sample.length != sampleSize)
             throw new IllegalArgumentException("Expected input vector to be in sample space");
 
-        DenseMatrix64F dots = new DenseMatrix64F(numComponents, 1);
-        DenseMatrix64F s = DenseMatrix64F.wrap(sampleSize, 1, sample);
+        DMatrixRMaj dots = new DMatrixRMaj(numComponents, 1);
+        DMatrixRMaj s = DMatrixRMaj.wrap(sampleSize, 1, sample);
 
-        CommonOps.mult(V_t, s, dots);
+        CommonOps_DDRM.mult(V_t, s, dots);
 
-        return NormOps.normF(dots);
+        return NormOps_DDRM.normF(dots);
     }
 }
 

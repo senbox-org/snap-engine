@@ -21,7 +21,6 @@ import com.bc.ceres.core.ProgressMonitor;
 import com.bc.ceres.core.SubProgressMonitor;
 import com.bc.ceres.glayer.Layer;
 import com.bc.ceres.grender.support.BufferedImageRendering;
-import com.vividsolutions.jts.geom.Geometry;
 import org.esa.snap.core.datamodel.*;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.layer.MaskLayerType;
@@ -33,18 +32,23 @@ import org.esa.snap.core.util.math.Range;
 import org.geotools.feature.DefaultFeatureCollection;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.locationtech.jts.geom.Geometry;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import javax.media.jai.PlanarImage;
 import java.awt.*;
-import java.awt.geom.*;
+import java.awt.geom.Area;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.*;
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class provides many static factory methods to be used in conjunction with data products.
@@ -726,6 +730,35 @@ public class ProductUtils {
                 }
             }
 
+            // first the bands have to be copied and then the masks
+            // other wise the referenced bands, e.g. flag band, is not contained in the target product
+            // and the mask is not copied
+            copyMasks(sourceProduct, targetProduct);
+            copyOverlayMasks(sourceProduct, targetProduct);
+        }
+    }
+
+    /**
+     * Copies all bands which contain a flag-coding or an index-coding from the source product to the target product.
+     *
+     * @param sourceProduct   the source product
+     * @param targetProduct   the target product
+     * @param copySourceImage whether the source image of the source band should be copied.
+     * @since SNAP 8.0
+     */
+    public static void copySampleCodingBands(Product sourceProduct, Product targetProduct, boolean copySourceImage) {
+        Guardian.assertNotNull("source", sourceProduct);
+        Guardian.assertNotNull("target", targetProduct);
+        if (sourceProduct.getFlagCodingGroup().getNodeCount() > 0 ||
+                sourceProduct.getIndexCodingGroup().getNodeCount() > 0) {
+            // loop over bands and check if they have a sample coding attached
+            for (int i = 0; i < sourceProduct.getNumBands(); i++) {
+                Band sourceBand = sourceProduct.getBandAt(i);
+                String bandName = sourceBand.getName();
+                if ((sourceBand.isFlagBand() || sourceBand.isIndexBand()) && targetProduct.getBand(bandName) == null) {
+                    copyBand(bandName, sourceProduct, targetProduct, copySourceImage);
+                }
+            }
             // first the bands have to be copied and then the masks
             // other wise the referenced bands, e.g. flag band, is not contained in the target product
             // and the mask is not copied
@@ -1458,75 +1491,6 @@ public class ProductUtils {
     }
 
     /**
-     * @deprecated since SNAP 6.0. Area can have multiple sub-paths. Better use {@link #areaToSubPaths(Area, double)}
-     */
-    @Deprecated
-    public static GeneralPath areaToPath(Area area, double deltaX) {
-        final GeneralPath pixelPath = new GeneralPath(GeneralPath.WIND_NON_ZERO);
-        final float[] floats = new float[6];
-// move to correct rectangle
-        final AffineTransform transform = AffineTransform.getTranslateInstance(deltaX, 0.0);
-        final PathIterator iterator = area.getPathIterator(transform);
-
-        while (!iterator.isDone()) {
-            final int segmentType = iterator.currentSegment(floats);
-            switch (segmentType) {
-                case PathIterator.SEG_LINETO:
-                    pixelPath.lineTo(floats[0], floats[1]);
-                    break;
-                case PathIterator.SEG_MOVETO:
-                    pixelPath.moveTo(floats[0], floats[1]);
-                    break;
-                case PathIterator.SEG_CLOSE:
-                    pixelPath.closePath();
-                    break;
-                default:
-                    throw new IllegalStateException("unhandled segment type in path iterator: " + segmentType);
-            }
-            iterator.next();
-        }
-        return pixelPath;
-    }
-
-    /**
-     * @deprecated use {@link GeoUtils} instead
-     */
-    @Deprecated
-    public static List<GeneralPath> areaToSubPaths(Area area, double deltaX) {
-        List<GeneralPath> subPaths = new ArrayList<>();
-
-        final float[] floats = new float[6];
-// move to correct rectangle
-        final AffineTransform transform = AffineTransform.getTranslateInstance(deltaX, 0.0);
-        final PathIterator iterator = area.getPathIterator(transform);
-
-        GeneralPath pixelPath = null;
-        while (!iterator.isDone()) {
-            if (pixelPath == null) {
-                pixelPath = new GeneralPath(GeneralPath.WIND_NON_ZERO);
-            }
-            final int segmentType = iterator.currentSegment(floats);
-            switch (segmentType) {
-                case PathIterator.SEG_LINETO:
-                    pixelPath.lineTo(floats[0], floats[1]);
-                    break;
-                case PathIterator.SEG_MOVETO:
-                    pixelPath.moveTo(floats[0], floats[1]);
-                    break;
-                case PathIterator.SEG_CLOSE:
-                    pixelPath.closePath();
-                    subPaths.add(pixelPath);
-                    pixelPath = null;
-                    break;
-                default:
-                    throw new IllegalStateException("unhandled segment type in path iterator: " + segmentType);
-            }
-            iterator.next();
-        }
-        return subPaths;
-    }
-
-    /**
      * Adds a given elem to the history of the given product. If the products metadata root
      * does not contain a history entry a new one will be created.
      *
@@ -1924,7 +1888,7 @@ public class ProductUtils {
 
         if (geoPoints.length > 1) {
             final GeneralPath path = new GeneralPath(GeneralPath.WIND_NON_ZERO, geoPoints.length + 8);
-            Range range = fillPath(geoPoints, path);
+            Range range = GeoUtils.fillPath(geoPoints, path);
 
             int runIndexMin = (int) Math.floor((range.getMin() + 180) / 360);
             int runIndexMax = (int) Math.floor((range.getMax() + 180) / 360);
@@ -1940,7 +1904,7 @@ public class ProductUtils {
                 final Area currentArea = new Area(new Rectangle2D.Double(k * 360.0 - 180.0, -90.0, 360.0, 180.0));
                 currentArea.intersect(pathArea);
                 if (!currentArea.isEmpty()) {
-                    pathList.addAll(areaToSubPaths(currentArea, -k * 360.0));
+                    pathList.addAll(GeoUtils.areaToSubPaths(currentArea, -k * 360.0));
                 }
             }
         }
@@ -2140,33 +2104,4 @@ public class ProductUtils {
         }
         return true;
     }
-
-    /**
-     * @deprecated use {@link GeoUtils} instead
-     */
-    @Deprecated
-    static Range fillPath(GeoPos[] geoPoints, GeneralPath path) {
-        double lon = geoPoints[0].getLon();
-
-        Range range = new Range(lon, lon);
-        path.moveTo(lon, geoPoints[0].getLat());
-
-        for (int i = 1; i < geoPoints.length; i++) {
-            lon = geoPoints[i].getLon();
-            final double lat = geoPoints[i].getLat();
-            if (Double.isNaN(lon) || Double.isNaN(lat)) {
-                continue;
-            }
-            if (lon < range.getMin()) {
-                range.setMin(lon);
-            }
-            if (lon > range.getMax()) {
-                range.setMax(lon);
-            }
-            path.lineTo(lon, lat);
-        }
-        path.closePath();
-        return range;
-    }
-
 }

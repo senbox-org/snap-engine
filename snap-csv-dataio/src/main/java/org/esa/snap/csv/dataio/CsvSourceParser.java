@@ -67,6 +67,6 @@ public interface CsvSourceParser {
     /**
      * Closes the parser and its associated data sources.
      */
-    void close();
+    void close() throws IOException;
 
 }

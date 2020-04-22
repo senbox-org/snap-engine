@@ -664,7 +664,7 @@ public class OperatorExecutionsTest {
 
     private void assertRunningAsConnectedOperatorInGraphWorksWithBandMaths_oneBand(String operatorName) throws Exception {
         String graph = OPERATOR_WITH_BAND_MATHS_GRAPH.replace("{operator_name}", operatorName);
-        String graphFileName = "OperatorExecutionsTest/" + operatorName + "_racoig_bm.dim";
+        String graphFileName = "OperatorExecutionsTest/" + operatorName + "_racoig_bm.xml";
         File graphFile = GlobalTestConfig.getSnapTestDataOutputFile(graphFileName);
         PrintWriter printWriter = new PrintWriter(graphFile);
         printWriter.print(graph);
@@ -682,7 +682,7 @@ public class OperatorExecutionsTest {
 
     private void assertRunningAsConnectedOperatorInGraphWorksWithFollowUpDoExecute_oneBand(String operatorName) throws Exception {
         String graph = OPERATOR_WITH_FOLLOW_UP_DO_EXECUTE_GRAPH.replace("{operator_name}", operatorName);
-        String graphFileName = "OperatorExecutionsTest/" + operatorName + "_racoig_fudo.dim";
+        String graphFileName = "OperatorExecutionsTest/" + operatorName + "_racoig_fudo.xml";
         File graphFile = GlobalTestConfig.getSnapTestDataOutputFile(graphFileName);
         PrintWriter printWriter = new PrintWriter(graphFile);
         printWriter.print(graph);
@@ -700,7 +700,7 @@ public class OperatorExecutionsTest {
 
     private void assertRunningAsConnectedOperatorInGraphWorksWithFollowUpDoExecute_twoBands(String operatorName) throws Exception {
         String graph = OPERATOR_WITH_FOLLOW_UP_DO_EXECUTE_GRAPH.replace("{operator_name}", operatorName);
-        String graphFileName = "OperatorExecutionsTest/" + operatorName + "_racoig_fudo.dim";
+        String graphFileName = "OperatorExecutionsTest/" + operatorName + "_racoig_fudo.xml";
         File graphFile = GlobalTestConfig.getSnapTestDataOutputFile(graphFileName);
         PrintWriter printWriter = new PrintWriter(graphFile);
         printWriter.print(graph);
@@ -721,7 +721,7 @@ public class OperatorExecutionsTest {
 
     private void assertRunningAsConnectedOperatorInGraphWorksWithFollowUpDoExecuteAndComputeTile_oneBand(String operatorName) throws Exception {
         String graph = OPERATOR_WITH_FOLLOW_UP_DO_EXECUTE_AND_COMPUTE_TILE_GRAPH.replace("{operator_name}", operatorName);
-        String graphFileName = "OperatorExecutionsTest/" + operatorName + "_racoig_fudoact.dim";
+        String graphFileName = "OperatorExecutionsTest/" + operatorName + "_racoig_fudoact.xml";
         File graphFile = GlobalTestConfig.getSnapTestDataOutputFile(graphFileName);
         PrintWriter printWriter = new PrintWriter(graphFile);
         printWriter.print(graph);
@@ -739,7 +739,7 @@ public class OperatorExecutionsTest {
 
     private void assertRunningAsConnectedOperatorInGraphWorksWithFollowUpDoExecuteAndComputeTile_twoBands(String operatorName) throws Exception {
         String graph = OPERATOR_WITH_FOLLOW_UP_DO_EXECUTE_AND_COMPUTE_TILE_GRAPH.replace("{operator_name}", operatorName);
-        String graphFileName = "OperatorExecutionsTest/" + operatorName + "_racoig_fudoact.dim";
+        String graphFileName = "OperatorExecutionsTest/" + operatorName + "_racoig_fudoact.xml";
         File graphFile = GlobalTestConfig.getSnapTestDataOutputFile(graphFileName);
         PrintWriter printWriter = new PrintWriter(graphFile);
         printWriter.print(graph);

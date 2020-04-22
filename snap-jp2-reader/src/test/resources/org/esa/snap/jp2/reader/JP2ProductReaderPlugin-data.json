@@ -1,0 +1,9 @@
+{
+  "testProducts": [
+    {
+      "id": "JP2_Short",
+      "relativePath": "_jp2/1_8bit_component_gamma_1_8_space.jp2",
+      "description": "jp2 product"
+    }
+  ]
+}

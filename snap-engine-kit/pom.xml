@@ -98,9 +98,19 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-product-library-v2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>ncsa.hdf</groupId>
             <artifactId>lib-hdf</artifactId>
             <version>${hdf.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>lib-openjpeg</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <!-- Engine Extension Modules -->
@@ -157,6 +167,11 @@
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-geotiff</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.esa.snap</groupId>
+            <artifactId>snap-jp2-reader</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -267,6 +282,11 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>snap-remote-execution</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>snap-remote-products-repository</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

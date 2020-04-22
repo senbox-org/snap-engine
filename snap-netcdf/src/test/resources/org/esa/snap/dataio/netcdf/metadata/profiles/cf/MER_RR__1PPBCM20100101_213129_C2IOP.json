@@ -1417,10 +1417,6 @@
             {
                 "path": "Global_Attributes/stop_date",
                 "value": "01-JAN-2010 21:38:06.503636"
-            },
-            {
-                "path": "Variable_Attributes/dem_rough/_ChunkSize",
-                "value": "452,564"
             }
         ]
     }

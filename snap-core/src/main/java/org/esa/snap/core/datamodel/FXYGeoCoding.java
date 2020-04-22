@@ -150,7 +150,10 @@ public class FXYGeoCoding extends AbstractGeoCoding {
     @Override
     public GeoPos getGeoPos(final PixelPos pixelPos, GeoPos geoPos) {
         if (geoPos == null) {
-            geoPos = new GeoPos(0.0f, 0.0f);
+            // TODO: 20.02.2020 SE fixed -- Marked GETGEOPOS why?
+//            geoPos = new GeoPos(0.0f, 0.0f);
+            // TODO: 20.02.2020 SE fixed -- Marked GETGEOPOS ... instead that way?
+            geoPos = new GeoPos();
         }
         final double x = _pixelOffsetX + _pixelSizeX * pixelPos.x;
         final double y = _pixelOffsetY + _pixelSizeY * pixelPos.y;

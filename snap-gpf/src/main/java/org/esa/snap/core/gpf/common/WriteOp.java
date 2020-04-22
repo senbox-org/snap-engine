@@ -48,6 +48,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * This standard operator is used to store a data product to a specified file location.
@@ -190,6 +191,16 @@ public class WriteOp extends Operator {
         this.clearCacheAfterRowWrite = clearCacheAfterRowWrite;
     }
 
+    @Override
+    public boolean canComputeTile() {
+        return true;
+    }
+
+    @Override
+    public boolean canComputeTileStack() {
+        return true;
+    }
+
     /**
      * Writes the source product.
      *
@@ -213,9 +224,9 @@ public class WriteOp extends Operator {
             int h = getTargetProduct().getSceneRasterHeight();
 
             getLogger().info(String.format("Time: %6.3f s total, %6.3f ms per line, %3.6f ms per pixel",
-                                           seconds,
-                                           millis / h,
-                                           millis / h / w));
+                    seconds,
+                    millis / h,
+                    millis / h / w));
 
             stopTileComputationObservation();
         } catch (OperatorException e) {
@@ -243,7 +254,7 @@ public class WriteOp extends Operator {
         final EncodeQualification encodeQualification = productWriter.getWriterPlugIn().getEncodeQualification(sourceProduct);
         if (encodeQualification.getPreservation() == EncodeQualification.Preservation.UNABLE) {
             throw new OperatorException("Product writer is unable to write this product as '" + formatName +
-                                                "': " + encodeQualification.getInfoString());
+                    "': " + encodeQualification.getInfoString());
         }
         productWriter.setIncrementalMode(incremental);
         productWriter.setFormatName(formatName);
@@ -258,14 +269,13 @@ public class WriteOp extends Operator {
         }
         if (tileSize == null) {
             tileSize = JAIUtils.computePreferredTileSize(band.getRasterWidth(),
-                                                         band.getRasterHeight(), 1);
+                    band.getRasterHeight(), 1);
         }
         return tileSize;
     }
 
     @Override
     public void doExecute(ProgressMonitor pm) {
-        productWriter.prepareWriting(pm);
         final Band[] bands = targetProduct.getBands();
         writableBands = new ArrayList<>(bands.length);
         for (final Band band : bands) {
@@ -274,38 +284,41 @@ public class WriteOp extends Operator {
                 writableBands.add(band);
             }
         }
-        if (writableBands.size() == 0) {
-            return;
-        }
-        tileSizes = new Dimension[writableBands.size()];
-        tileCountsX = new int[writableBands.size()];
-        tilesWritten = new boolean[writableBands.size()][][];
-        for (int i = 0; i < writableBands.size(); i++) {
-            Band writableBand = writableBands.get(i);
-            Dimension tileSize = determineTileSize(writableBand);
-
-            tileSizes[i] = tileSize;
-            int tileCountX = MathUtils.ceilInt(writableBand.getRasterWidth() / (double) tileSize.width);
-            tileCountsX[i] = tileCountX;
-            int tileCountY = MathUtils.ceilInt(writableBand.getRasterHeight() / (double) tileSize.height);
-            tilesWritten[i] = new boolean[tileCountY][tileCountX];
-
-            if (writeEntireTileRows && i > 0 && !tileSize.equals(tileSizes[0])) {
-                writeEntireTileRows = false;        // don't writeEntireTileRows for multisize bands
-            }
-        }
-
-        if(writeEntireTileRows && writableBands.size() > 0) {
-            targetProduct.setPreferredTileSize(tileSizes[0]);
-        }
+        pm.beginTask("Preparing writing", writableBands.size() + 1);
         try {
-            // Create not existing directories before writing
-            if(file != null && file.getParentFile() != null){
-                file.getParentFile().mkdirs();
+            tileSizes = new Dimension[writableBands.size()];
+            tileCountsX = new int[writableBands.size()];
+            tilesWritten = new boolean[writableBands.size()][][];
+            for (int i = 0; i < writableBands.size(); i++) {
+                Band writableBand = writableBands.get(i);
+                Dimension tileSize = determineTileSize(writableBand);
+
+                tileSizes[i] = tileSize;
+                int tileCountX = MathUtils.ceilInt(writableBand.getRasterWidth() / (double) tileSize.width);
+                tileCountsX[i] = tileCountX;
+                int tileCountY = MathUtils.ceilInt(writableBand.getRasterHeight() / (double) tileSize.height);
+                tilesWritten[i] = new boolean[tileCountY][tileCountX];
+
+                if (writeEntireTileRows && i > 0 && !tileSize.equals(tileSizes[0])) {
+                    writeEntireTileRows = false;        // don't writeEntireTileRows for multisize bands
+                }
+                pm.worked(1);
             }
-            productWriter.writeProductNodes(targetProduct, file);
+            if (writableBands.size() > 0) {
+                if (writeEntireTileRows) {
+                    targetProduct.setPreferredTileSize(tileSizes[0]);
+                }
+                // Create not existing directories before writing
+                if (file != null && file.getParentFile() != null) {
+                    file.getParentFile().mkdirs();
+                }
+                productWriter.writeProductNodes(targetProduct, file);
+            }
+            pm.worked(1);
         } catch (IOException e) {
             throw new OperatorException("Not able to write product file: '" + file.getAbsolutePath() + "'", e);
+        } finally {
+            pm.done();
         }
     }
 
@@ -338,7 +351,7 @@ public class WriteOp extends Operator {
                 final ProductData rawSamples = targetTile.getRawSamples();
                 synchronized (productWriter) {
                     productWriter.writeBandRasterData(targetBand, rect.x, rect.y, rect.width, rect.height, rawSamples,
-                                                      pm);
+                            pm);
                 }
                 markTileAsHandled(targetBand, tileX, tileY);
             }
@@ -361,6 +374,17 @@ public class WriteOp extends Operator {
             } else {
                 throw new OperatorException("Not able to write product file: '" + file.getAbsolutePath() + "'", e);
             }
+        }
+    }
+
+    @Override
+    public void computeTileStack(Map<Band, Tile> targetTiles, Rectangle targetRectangle, ProgressMonitor pm) throws OperatorException {
+        final Set<Map.Entry<Band, Tile>> entrySet = targetTiles.entrySet();
+        for (Map.Entry<Band, Tile> tileEntry : entrySet) {
+            final Band band = tileEntry.getKey();
+            final Tile tile = tileEntry.getValue();
+
+            computeTile(band, tile, pm);
         }
     }
 

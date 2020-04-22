@@ -21,10 +21,13 @@ import org.esa.snap.core.util.io.SnapFileFilter;
 
 import java.io.File;
 
-import static org.esa.snap.core.dataio.dimap.DimapProductConstants.*;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.DIMAP_DATA_DIRECTORY_EXTENSION;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.DIMAP_FORMAT_NAME;
+import static org.esa.snap.core.dataio.dimap.DimapProductConstants.DIMAP_HEADER_FILE_EXTENSION;
 
 
 public class DimapFileFilter extends SnapFileFilter {
+    // Used in snap-examples
     public DimapFileFilter() {
         super(DIMAP_FORMAT_NAME, DIMAP_HEADER_FILE_EXTENSION, "BEAM-DIMAP product files");
     }

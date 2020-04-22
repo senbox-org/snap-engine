@@ -15,11 +15,12 @@
  */
 package org.esa.snap.core.gpf.common;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LinearRing;
-import com.vividsolutions.jts.geom.Polygon;
+import org.esa.snap.core.util.GeoUtils;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LinearRing;
+import org.locationtech.jts.geom.Polygon;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.GcpDescriptor;
@@ -34,6 +35,8 @@ import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.dataop.maptransf.Datum;
 import org.esa.snap.core.gpf.GPF;
 import org.esa.snap.core.gpf.graph.GraphException;
+import org.esa.snap.core.subset.AbstractSubsetRegion;
+import org.esa.snap.core.util.ProductUtils;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.junit.Test;
 import org.opengis.referencing.FactoryException;
@@ -201,10 +204,9 @@ public class SubsetOpTest {
         AffineTransform at = AffineTransform.getTranslateInstance(-180, -90);
         CrsGeoCoding geoCoding = new CrsGeoCoding(DefaultGeographicCRS.WGS84, new Rectangle(360, 180), at);
         product.setSceneGeoCoding(geoCoding);
-        geometry = SubsetOp.computeProductGeometry(product);
+        geometry = GeoUtils.computeRasterGeometry(product.getSceneGeoCoding(), product.getSceneRasterWidth(), product.getSceneRasterHeight());
         assertTrue(geometry instanceof Polygon);
-        assertEquals("POLYGON ((-179.5 -89.5, -179.5 89.5, 179.5 89.5, 179.5 -89.5, -179.5 -89.5))",
-                     geometry.toString());
+        assertEquals("POLYGON ((-179.5 -89.5, -179.5 89.5, 179.5 89.5, 179.5 -89.5, -179.5 -89.5))", geometry.toString());
 
         Rectangle rectangle;
 
@@ -215,7 +217,7 @@ public class SubsetOpTest {
         op.setSourceProduct(product);
         op.setRegion(new Rectangle(180 - 50, 90 - 25, 100, 50));
         product = op.getTargetProduct();
-        geometry = SubsetOp.computeProductGeometry(product);
+        geometry = GeoUtils.computeRasterGeometry(product.getSceneGeoCoding(), product.getSceneRasterWidth(), product.getSceneRasterHeight());
         assertTrue(geometry instanceof Polygon);
         assertEquals("POLYGON ((-49.5 -24.5, -49.5 24.5, 49.5 24.5, 49.5 -24.5, -49.5 -24.5))", geometry.toString());
 

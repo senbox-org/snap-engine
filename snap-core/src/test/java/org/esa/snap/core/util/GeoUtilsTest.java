@@ -18,7 +18,7 @@ public class GeoUtilsTest {
     public void testCreatePixelBoundaryFromRect_usePixelCenter_false() {
         final boolean usePixelCenter = false;
         final PixelPos[] rectBoundary = GeoUtils.createPixelBoundaryFromRect(new Rectangle(2, 3, 15, 20), 7,
-                usePixelCenter);
+                                                                             usePixelCenter);
         assertEquals(12, rectBoundary.length);
         assertEquals(new PixelPos(2, 3), rectBoundary[0]);
         assertEquals(new PixelPos(9, 3), rectBoundary[1]);
@@ -364,7 +364,7 @@ public class GeoUtilsTest {
     public void testCreateGeoBoundaryPaths() {
         final Product slstrProduct = createSLSTR();
 
-        final GeneralPath[] geoBoundary = GeoUtils.createGeoBoundaryPaths(slstrProduct, null,5, false);
+        final GeneralPath[] geoBoundary = GeoUtils.createGeoBoundaryPaths(slstrProduct, null, 5, false);
         assertEquals(1, geoBoundary.length);
 
         assertEquals(1, geoBoundary[0].getWindingRule());
@@ -407,7 +407,7 @@ public class GeoUtilsTest {
     public void testCreateGeoBoundaryPaths_default_on_center() {
         final Product slstrProduct = createSLSTR();
 
-        final GeneralPath[] geoBoundary = GeoUtils.createGeoBoundaryPaths(slstrProduct, null,5);
+        final GeneralPath[] geoBoundary = GeoUtils.createGeoBoundaryPaths(slstrProduct, null, 5);
         assertEquals(1, geoBoundary.length);
 
         assertEquals(1, geoBoundary[0].getWindingRule());
@@ -514,11 +514,15 @@ public class GeoUtilsTest {
             }
             geoPos.setInvalid();
 
-            final int x = (int) Math.floor(pixelPos.x);
-            final int y = (int) Math.floor(pixelPos.y);
-            if (x < 0 || x >= width || y < 0 || y >= height) {
+            final double pipoX = pixelPos.x;
+            final double pipoY = pixelPos.y;
+            // TODO: 20.02.2020 SE fixed -- Marked GETGEOPOS abort condition
+            if (pipoX < 0 || pipoX > width || pipoY < 0 || pipoY > height) {
                 return geoPos;
             }
+
+            final int x = (int) Math.floor(pipoX) - (pipoX == width ? 1 : 0);
+            final int y = (int) Math.floor(pipoY) - (pipoY == height ? 1 : 0);
 
             final int index = y * width + x;
             geoPos.lon = longitudes[index];

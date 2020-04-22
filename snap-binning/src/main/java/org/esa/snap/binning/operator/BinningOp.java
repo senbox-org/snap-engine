@@ -17,9 +17,17 @@
 package org.esa.snap.binning.operator;
 
 import com.bc.ceres.core.ProgressMonitor;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import org.esa.snap.binning.*;
+import org.esa.snap.binning.AggregatorConfig;
+import org.esa.snap.binning.BinningContext;
+import org.esa.snap.binning.CellProcessorConfig;
+import org.esa.snap.binning.CompositingType;
+import org.esa.snap.binning.DataPeriod;
+import org.esa.snap.binning.ProductCustomizerConfig;
+import org.esa.snap.binning.SpatialBin;
+import org.esa.snap.binning.SpatialBinner;
+import org.esa.snap.binning.TemporalBin;
+import org.esa.snap.binning.TemporalBinSource;
+import org.esa.snap.binning.TemporalBinner;
 import org.esa.snap.binning.cellprocessor.CellProcessorChain;
 import org.esa.snap.binning.operator.formatter.Formatter;
 import org.esa.snap.binning.operator.formatter.FormatterConfig;
@@ -31,6 +39,7 @@ import org.esa.snap.binning.support.SpatialDataPeriod;
 import org.esa.snap.core.dataio.ProductIO;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.MetadataElement;
+import org.esa.snap.core.datamodel.PixelGeoCoding;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.gpf.Operator;
@@ -51,16 +60,23 @@ import org.esa.snap.core.util.StopWatch;
 import org.esa.snap.core.util.converters.JtsGeometryConverter;
 import org.esa.snap.core.util.io.WildcardMatcher;
 import org.geotools.geometry.jts.JTS;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
 
-import java.awt.*;
+import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
-import java.util.*;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.logging.Level;
 
 /*
@@ -90,7 +106,7 @@ todo - address the following BinningOp requirements (nf, 2012-03-09)
  */
 @SuppressWarnings("UnusedDeclaration")
 @OperatorMetadata(alias = "Binning",
-        category = "Raster/Geometric Operations",
+        category = "Raster/Geometric",
         version = "1.0",
         authors = "Norman Fomferra, Marco Zühlke, Thomas Storm",
         copyright = "(c) 2014 by Brockmann Consult GmbH",
@@ -716,19 +732,27 @@ public class BinningOp extends Operator {
 
         final String productName = sourceProduct.getName();
         getLogger().info(String.format("Spatial binning of product '%s'...", productName));
-        getLogger().fine(String.format("Product start time: '%s'", sourceProduct.getStartTime()));
-        getLogger().fine(String.format("Product end time:   '%s'", sourceProduct.getEndTime()));
         if (region != null) {
             SubsetOp subsetOp = new SubsetOp();
             subsetOp.setSourceProduct(sourceProduct);
 
             final Rectangle subsetRectangle = SubsetOp.computePixelRegion(sourceProduct, region, 0);
-            if (subsetRectangle.height <= 2 || subsetRectangle.width <= 2) {
+            if (sourceProduct.getSceneGeoCoding() instanceof PixelGeoCoding && (subsetRectangle.height <= 2 || subsetRectangle.width <= 2)) {
+                // workaround for SNAP-1264
+                // PixelGeoCodings can't work on such small rasters
                 // increase rectangle size by 1 pixel to each side, making sure not to extend source product boundaries
-                final Rectangle clippingRect = new Rectangle(sourceProduct.getSceneRasterWidth(),
-                                                             sourceProduct.getSceneRasterHeight());
+                int sceneRasterWidth = sourceProduct.getSceneRasterWidth();
+                int sceneRasterHeight = sourceProduct.getSceneRasterHeight();
+                final Rectangle clippingRect = new Rectangle(sceneRasterWidth,
+                                                             sceneRasterHeight);
                 final RectangleExtender rectangleExtender = new RectangleExtender(clippingRect, 1, 1);
                 final Rectangle extendedSubsetRectangle = rectangleExtender.extend(subsetRectangle);
+                // check if rectangle is still to small
+                if(extendedSubsetRectangle.height <= 2 || extendedSubsetRectangle.width <= 2) {
+                    getLogger().warning(String.format("Skipped binning of product '%s', raster dimensions are to small [%d,%d]",
+                                                      productName, sceneRasterWidth, sceneRasterHeight));
+                    return;
+                }
                 subsetOp.setRegion(extendedSubsetRectangle);
             } else {
                 subsetOp.setGeoRegion(region);
@@ -745,6 +769,8 @@ public class BinningOp extends Operator {
                                                                 ProgressMonitor.NULL);
         stopWatch.stop();
 
+        getLogger().fine(String.format("Product start time: '%s'", sourceProduct.getStartTime()));
+        getLogger().fine(String.format("Product end time:   '%s'", sourceProduct.getEndTime()));
         getLogger().info(String.format("Spatial binning of product '%s' done, %d observations seen, took %s", productName, numObs, stopWatch));
 
         if (region == null && regionArea != null) {

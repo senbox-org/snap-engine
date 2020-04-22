@@ -24,7 +24,7 @@ import org.jdom.Element;
  * @author Marco Peters
  * @since BEAM 4.7
  */
-public class RangeTypeMaskPersistableSpi implements DimapPersistableSpi{
+public class RangeTypeMaskPersistableSpi implements DimapPersistableSpi {
 
     @Override
     public boolean canDecode(Element element) {
@@ -35,10 +35,8 @@ public class RangeTypeMaskPersistableSpi implements DimapPersistableSpi{
     @Override
     public boolean canPersist(Object object) {
         if (object instanceof Mask) {
-            Mask mask = (Mask) object;
-            if(mask.getImageType() == Mask.RangeType.INSTANCE) {
-                return true;
-            }
+            final Mask mask = (Mask) object;
+            return mask.getImageType() == Mask.RangeType.INSTANCE;
         }
         return false;
     }

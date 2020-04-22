@@ -1957,28 +1957,12 @@
         ],
         "metadata": [
             {
-                "path": "Variable_Attributes/poly_Rw560/_ChunkSize",
-                "value": "1,219,181"
-            },
-            {
-                "path": "Variable_Attributes/poly_owt_412_779_13C_owt_04/_FillValue",
-                "value": "9.96921E36"
-            },
-            {
                 "path": "Variable_Attributes/poly_Rw1020/standard_name",
                 "value": "fully_normalized_water_leaving_reflectance_at_1020nm"
             },
             {
-                "path": "Global_Attributes/comment",
-                "value": ""
-            },
-            {
                 "path": "Variable_Attributes/poly_Rw764/coordinates",
                 "value": "lat lon"
-            },
-            {
-                "path": "Variable_Attributes/poly_TSM_Nechad_865_TSM_Calimnos/standard_name",
-                "value": ""
             },
             {
                 "path": "Global_Attributes/iso19115_topic_categories",
@@ -1987,10 +1971,6 @@
             {
                 "path": "Global_Attributes/time_coverage_end",
                 "value": "01-JAN-2017 09:59:20.494171"
-            },
-            {
-                "path": "Variable_Attributes/poly_TSM_Nechad_779_Turb_Calimnos/_FillValue",
-                "value": "9.96921E36"
             },
             {
                 "path": "Global_Attributes/gcmd_keywords",

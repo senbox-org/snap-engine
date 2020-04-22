@@ -19,6 +19,9 @@ package org.esa.snap.core.util.math;
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.util.Guardian;
 
+import java.util.OptionalDouble;
+import java.util.stream.DoubleStream;
+
 /**
  * Instances of the <code>Range</code> class provide a minimum and a maximum value of type <code>double</code>.
  */
@@ -120,7 +123,6 @@ public class Range {
      *                  IndexValidator#TRUE} instead.
      * @param range     if not <code>null</code>, used as return value, otherwise a new instance is created
      * @param pm        a monitor to inform the user about progress
-     *
      * @return the value range for the given array
      */
     public static Range computeRangeByte(final byte[] values,
@@ -141,7 +143,6 @@ public class Range {
      *                  IndexValidator#TRUE} instead.
      * @param range     if not <code>null</code>, used as return value, otherwise a new instance is created
      * @param pm        a monitor to inform the user about progress
-     *
      * @return the value range for the given array
      */
     public static Range computeRangeUByte(final byte[] values,
@@ -163,7 +164,6 @@ public class Range {
      *                  IndexValidator#TRUE} instead.
      * @param range     if not <code>null</code>, used as return value, otherwise a new instance is created
      * @param pm        a monitor to inform the user about progress
-     *
      * @return the value range for the given array
      */
     public static Range computeRangeShort(final short[] values,
@@ -183,7 +183,6 @@ public class Range {
      * @param validator used to validate the array indexes, must not be <code>null</code>. Use {@link
      *                  IndexValidator#TRUE} instead.
      * @param range     if not <code>null</code>, used as return value, otherwise a new instance is created
-     *
      * @return the value range for the given array
      */
     public static Range computeRangeUShort(final short[] values,
@@ -203,7 +202,6 @@ public class Range {
      *                  IndexValidator#TRUE} instead.
      * @param range     if not <code>null</code>, used as return value, otherwise a new instance is created
      * @param pm        a monitor to inform the user about progress
-     *
      * @return the value range for the given array
      */
     public static Range computeRangeInt(final int[] values,
@@ -224,7 +222,6 @@ public class Range {
      *                  IndexValidator#TRUE} instead.
      * @param range     if not <code>null</code>, used as return value, otherwise a new instance is created
      * @param pm        a monitor to inform the user about progress
-     *
      * @return the value range for the given array
      */
     public static Range computeRangeUInt(final int[] values,
@@ -245,7 +242,6 @@ public class Range {
      *                  IndexValidator#TRUE} instead.
      * @param range     if not <code>null</code>, used as return value, otherwise a new instance is created
      * @param pm        a monitor to inform the user about progress
-     *
      * @return the value range for the given array
      */
     public static Range computeRangeFloat(final float[] values,
@@ -266,7 +262,6 @@ public class Range {
      *                  IndexValidator#TRUE} instead.
      * @param range     if not <code>null</code>, used as return value, otherwise a new instance is created
      * @param pm        a monitor to inform the user about progress
-     *
      * @return the value range for the given array
      */
     public static Range computeRangeDouble(final double[] values,
@@ -275,6 +270,37 @@ public class Range {
                                            ProgressMonitor pm) {
         Guardian.assertNotNull("validator", validator);
         return computeRangeDouble(new DoubleList.Double(values), validator, range, pm);
+    }
+
+    /**
+     * Computes the value range for the values in the given <code>double</code> array.
+     *
+     * @param values the array whose value range to compute
+     * @param range  if not <code>null</code>, used as return value, otherwise a new instance is created
+     * @return the value range for the given array
+     */
+    public static Range computeRangeDouble(final double[] values,
+                                           Range range) {
+        final OptionalDouble min = DoubleStream.of(values).min();
+        final OptionalDouble max = DoubleStream.of(values).max();
+
+        double minValue = Double.NaN;
+        if (min.isPresent()) {
+            minValue = min.getAsDouble();
+        }
+
+        double maxValue = Double.NaN;
+        if (max.isPresent()) {
+            maxValue = max.getAsDouble();
+        }
+
+        if (range == null) {
+            range = new Range(minValue, maxValue);
+        } else {
+            range.min = minValue;
+            range.max = maxValue;
+        }
+        return range;
     }
 
     /**
@@ -287,7 +313,6 @@ public class Range {
      *                  instead.
      * @param range     if not <code>null</code>, used as return value, otherwise a new instance is created
      * @param pm        a monitor to inform the user about progress
-     *
      * @return the value range for the given values
      */
     public static Range computeRangeDouble(final DoubleList values,
@@ -339,9 +364,7 @@ public class Range {
      *                  instead.
      * @param range     if not <code>null</code>, used as return value, otherwise a new instance is created
      * @param pm        a monitor to inform the user about progress
-     *
      * @return the value range for the given values
-     *
      * @throws IllegalArgumentException if the given object is not an istance of the supported types.
      */
     public static Range computeRangeGeneric(final Object values,
