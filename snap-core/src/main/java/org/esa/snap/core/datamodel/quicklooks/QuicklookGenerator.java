@@ -33,10 +33,7 @@ import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageOutputStream;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.prefs.Preferences;
@@ -340,27 +337,43 @@ public class QuicklookGenerator {
 
     public static boolean writeImage(final BufferedImage bufferedImage, final File quickLookFile) {
         try {
-            if (quickLookFile.createNewFile()) {
-                //ImageIO.write(bufferedImage, "JPG", quickLookFile);
+            touch(quickLookFile);
 
-                ImageWriter jpgWriter = ImageIO.getImageWritersByFormatName("jpg").next();
-                ImageWriteParam jpgWriteParam = jpgWriter.getDefaultWriteParam();
-                jpgWriteParam.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-                jpgWriteParam.setCompressionQuality(0.8f);
+            ImageWriter jpgWriter = ImageIO.getImageWritersByFormatName("jpg").next();
+            ImageWriteParam jpgWriteParam = jpgWriter.getDefaultWriteParam();
 
-                ImageOutputStream outputStream = ImageIO.createImageOutputStream(quickLookFile);
-                jpgWriter.setOutput(outputStream);
-                IIOImage outputImage = new IIOImage(bufferedImage, null, null);
-                jpgWriter.write(null, outputImage, jpgWriteParam);
-                jpgWriter.dispose();
+            ImageOutputStream outputStream = ImageIO.createImageOutputStream(quickLookFile);
+            jpgWriter.setOutput(outputStream);
+            IIOImage outputImage = new IIOImage(ensureOpaque(bufferedImage), null, null);
+            jpgWriter.write(null, outputImage, jpgWriteParam);
+            jpgWriter.dispose();
 
-                return true;
-            } else {
-                SystemUtils.LOG.severe("Unable to save quicklook: " + quickLookFile);
-            }
+            return true;
         } catch (IOException e) {
-            SystemUtils.LOG.severe("Unable to save quicklook: " + quickLookFile);
+            SystemUtils.LOG.severe("Unable to save quicklook: " + quickLookFile +" "+ e.getMessage());
         }
         return false;
+    }
+
+    static BufferedImage ensureOpaque(BufferedImage bi) {
+        if (bi.getTransparency() == BufferedImage.OPAQUE)
+            return bi;
+        int w = bi.getWidth();
+        int h = bi.getHeight();
+        int[] pixels = new int[w * h];
+        bi.getRGB(0, 0, w, h, pixels, 0, w);
+        BufferedImage bi2 = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+        bi2.setRGB(0, 0, w, h, pixels, 0, w);
+        return bi2;
+    }
+
+    private static void touch(final File file) throws IOException {
+        if (!file.exists()) {
+            if (!file.getParentFile().exists())
+                file.getParentFile().mkdirs();
+            new FileOutputStream(file).close();
+        } else {
+            file.setLastModified(System.currentTimeMillis());
+        }
     }
 }
