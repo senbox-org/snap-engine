@@ -109,7 +109,7 @@ public class GeoCoding2GeoTIFFMetadata {
         metadata.addGeoShortParam(GeoTIFFCodes.GTModelTypeGeoKey, GeoTIFFCodes.ModelTypeGeographic);
         metadata.addGeoShortParam(GeoTIFFCodes.GTRasterTypeGeoKey, GeoTIFFCodes.RasterPixelIsArea);
         metadata.addGeoShortParam(GeoTIFFCodes.GeographicTypeGeoKey, EPSGCodes.GCS_WGS_84);
-        final int numTotMax = 128;
+        final int numTotMax = (width / 16) * (height / 16);
         int numHor = (int) Math.sqrt(numTotMax * ((double) width / (double) height));
         if (numHor < 2) {
             numHor = 2;
