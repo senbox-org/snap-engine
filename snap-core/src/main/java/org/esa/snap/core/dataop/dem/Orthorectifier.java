@@ -237,6 +237,16 @@ public class Orthorectifier implements GeoCoding {
         throw new IllegalStateException("not implemented");
     }
 
+    /**
+     * Check if geocoding can be cloned.
+     *
+     * @return if so or not
+     */
+    @Override
+    public boolean canClone() {
+        return false;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

@@ -110,6 +110,42 @@ public class PixelForwardTest {
     }
 
     @Test
+    public void testClone() {
+        final GeoRaster geoRaster = TestData.get_SLSTR_OL();
+
+        pixelForward.initialize(geoRaster, false, new PixelPos[0]);
+
+        final ForwardCoding clone = pixelForward.clone();
+
+        GeoPos geoPos = pixelForward.getGeoPos(new PixelPos(1.5, 1.5), null);
+        assertEquals(-130.347406, geoPos.lon, 1e-8);
+        assertEquals(45.851861, geoPos.lat, 1e-8);
+
+        final GeoPos cloneGeoPos = clone.getGeoPos(new PixelPos(1.5, 1.5), null);
+        assertEquals(geoPos.lon, cloneGeoPos.lon, 1e-8);
+        assertEquals(geoPos.lat, cloneGeoPos.lat, 1e-8);
+    }
+
+    @Test
+    public void testClone_disposeOriginal() {
+        final GeoRaster geoRaster = TestData.get_SLSTR_OL();
+
+        pixelForward.initialize(geoRaster, false, new PixelPos[0]);
+
+        final ForwardCoding clone = pixelForward.clone();
+
+        GeoPos geoPos = pixelForward.getGeoPos(new PixelPos(2.5, 2.5), null);
+        assertEquals(-130.344121, geoPos.lon, 1e-8);
+        assertEquals(45.848675, geoPos.lat, 1e-8);
+
+        pixelForward.dispose();
+
+        final GeoPos cloneGeoPos = clone.getGeoPos(new PixelPos(2.5, 2.5), null);
+        assertEquals(geoPos.lon, cloneGeoPos.lon, 1e-8);
+        assertEquals(geoPos.lat, cloneGeoPos.lat, 1e-8);
+    }
+
+    @Test
     public void testPluginCreate() {
         final PixelForward.Plugin plugin = new PixelForward.Plugin();
 

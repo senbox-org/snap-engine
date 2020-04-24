@@ -955,6 +955,10 @@ public class ProductUtilsTest {
             throw new IllegalStateException("not implemented");
         }
 
+        @Override
+        public boolean canClone() {
+            return false;
+        }
     }
 
     public static class DGeoCoding implements GeoCoding {
@@ -1021,6 +1025,11 @@ public class ProductUtilsTest {
         @Override
         public GeoCoding clone() {
             throw new IllegalStateException("not implemented");
+        }
+
+        @Override
+        public boolean canClone() {
+            return false;
         }
     }
 

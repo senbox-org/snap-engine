@@ -585,6 +585,11 @@ public class GeoUtilsTest {
         public GeoCoding clone() {
             throw new IllegalStateException("not implemented");
         }
+
+        @Override
+        public boolean canClone() {
+            return false;
+        }
     }
 
     // SLSTR longitudes 8 x 10 px

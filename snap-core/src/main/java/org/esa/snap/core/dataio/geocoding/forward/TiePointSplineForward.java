@@ -102,6 +102,11 @@ public class TiePointSplineForward extends TiePointForward {
         }
     }
 
+    @Override
+    public ForwardCoding clone() {
+        throw new IllegalStateException("not implemented");
+    }
+
     private void copyInterpolationSubset(int gridWidth, int i, int j) {
         final InterpolationContext ic = contextTL.get();
         final double[] lonTiePoints = geoRaster.getLongitudes();

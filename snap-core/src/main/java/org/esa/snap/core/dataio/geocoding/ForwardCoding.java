@@ -34,5 +34,15 @@ public interface ForwardCoding {
      */
     String getKey();
 
+    /**
+     * Free all resources allocated
+     */
     void dispose();
+
+    /**
+     * Create a shallow copy of the ForwardCoding, rasterdata is shared;
+     *
+     * @return the clone
+     */
+    ForwardCoding clone();
 }

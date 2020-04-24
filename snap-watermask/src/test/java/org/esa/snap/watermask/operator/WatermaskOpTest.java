@@ -136,5 +136,10 @@ public class WatermaskOpTest {
         public GeoCoding clone() {
             throw new IllegalStateException("not implemented");
         }
+
+        @Override
+        public boolean canClone() {
+            return false;
+        }
     }
 }

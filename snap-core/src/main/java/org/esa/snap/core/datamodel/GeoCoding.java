@@ -122,4 +122,11 @@ public interface GeoCoding {
      */
     GeoCoding clone();
 
+    /**
+     * Check if geocoding can be cloned.
+     *
+     * @return if so or not
+     */
+    boolean canClone();
+
 }

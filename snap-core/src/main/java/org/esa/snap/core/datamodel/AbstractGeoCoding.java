@@ -127,6 +127,16 @@ public abstract class AbstractGeoCoding implements GeoCoding {
         throw new IllegalStateException("not implemented");
     }
 
+    /**
+     * Check if geocoding can be cloned.
+     *
+     * @return if so or not
+     */
+    @Override
+    public boolean canClone() {
+        return false;
+    }
+
     protected static DefaultDerivedCRS createImageCRS(CoordinateReferenceSystem baseCRS,
                                                       MathTransform baseToDerivedTransform) {
         return new DefaultDerivedCRS("Image CS based on " + baseCRS.getName(),
