@@ -117,6 +117,16 @@ public abstract class AbstractGeoCoding implements GeoCoding {
         return image2Map;
     }
 
+    /**
+     * Creates a shallow clone of this geocoding. Geolocation raster data is shared.
+     *
+     * @return the cloned geocoding
+     */
+    @Override
+    public GeoCoding clone() {
+        throw new IllegalStateException("not implemented");
+    }
+
     protected static DefaultDerivedCRS createImageCRS(CoordinateReferenceSystem baseCRS,
                                                       MathTransform baseToDerivedTransform) {
         return new DefaultDerivedCRS("Image CS based on " + baseCRS.getName(),

@@ -949,6 +949,12 @@ public class ProductUtilsTest {
         public MathTransform getImageToMapTransform() {
             return null;
         }
+
+        @Override
+        public GeoCoding clone() {
+            throw new IllegalStateException("not implemented");
+        }
+
     }
 
     public static class DGeoCoding implements GeoCoding {
@@ -1012,6 +1018,10 @@ public class ProductUtilsTest {
             return null;
         }
 
+        @Override
+        public GeoCoding clone() {
+            throw new IllegalStateException("not implemented");
+        }
     }
 
     private static void assertMetadataAttributeEqualityInt(MetadataAttribute expected, MetadataAttribute actual) {

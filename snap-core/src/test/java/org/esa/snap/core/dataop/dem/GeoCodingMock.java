@@ -91,4 +91,9 @@ class GeoCodingMock implements GeoCoding {
     public boolean isCrossingMeridianAt180() {
         return false;
     }
+
+    @Override
+    public GeoCoding clone() {
+        throw new IllegalStateException("not implemented");
+    }
 }

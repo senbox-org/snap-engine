@@ -227,6 +227,16 @@ public class Orthorectifier implements GeoCoding {
         return getGeoCoding().isCrossingMeridianAt180();
     }
 
+    /**
+     * Creates a shallow clone of this geocoding. Geolocation raster data is shared.
+     *
+     * @return the cloned geocoding
+     */
+    @Override
+    public GeoCoding clone() {
+        throw new IllegalStateException("not implemented");
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
