@@ -111,7 +111,7 @@ public class CfBandPart extends ProfilePartIO {
         }
         if (rasterDataNode.isNoDataValueUsed()) {
             Number fillValue = DataTypeUtils.convertTo(noDataValue, variable.getDataType());
-            variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, fillValue,variable.getDataType().isUnsigned());
+            variable.addAttribute(Constants.FILL_VALUE_ATT_NAME, fillValue, variable.getDataType().isUnsigned());
         }
         variable.addAttribute("coordinates", "lat lon");
         if (rasterDataNode instanceof Band) {
@@ -138,7 +138,7 @@ public class CfBandPart extends ProfilePartIO {
             }
             DataType netcdfDataType = DataTypeUtils.getNetcdfDataType(dataType);
             java.awt.Dimension tileSize = ImageManager.getPreferredTileSize(rasterDataNode.getProduct());
-            final NVariable variable = ncFile.addVariable(variableName, netcdfDataType,netcdfDataType.isUnsigned(), tileSize, dimensions);
+            final NVariable variable = ncFile.addVariable(variableName, netcdfDataType, netcdfDataType.isUnsigned(), tileSize, dimensions);
             writeCfBandAttributes(rasterDataNode, variable);
         }
     }
@@ -146,7 +146,7 @@ public class CfBandPart extends ProfilePartIO {
     @Override
     public void decode(final ProfileReadContext ctx, final Product p) throws IOException {
         for (final Variable variable : ctx.getRasterDigest().getRasterVariables()) {
-            UnsignedChecker.setUnsignedType(variable);          
+            UnsignedChecker.setUnsignedType(variable);
             final List<Dimension> dimensions = variable.getDimensions();
             final int rank = dimensions.size();
             final String bandBasename = variable.getShortName();
@@ -213,10 +213,10 @@ public class CfBandPart extends ProfilePartIO {
             addSampleCodingOrMasksIfApplicable(p, upperBand, variable, variable.getFullName() + "_msb", true);
         } else {
             final Band band;
-            if (variable.getGroup().isRoot()) {
-                band = p.addBand(bandBasename, rasterDataType);
+            if (p.containsBand(bandBasename)) {
+                band = p.addBand(bandBasename + "_" + variable.getParentGroup().getShortName(), rasterDataType);
             } else {
-                band = p.addBand(bandBasename + "_" + variable.getGroup().getName(), rasterDataType);
+                band = p.addBand(bandBasename, rasterDataType);
             }
             readCfBandAttributes(variable, band);
             band.setSourceImage(new NetcdfMultiLevelImage(band, variable, origin, ctx));
