@@ -608,16 +608,12 @@ public class ProductIO {
     private static class Finisher {
 
         private final ProgressMonitor pm;
-        //        private final String name;
         private final Semaphore semaphore;
         private final ExecutorService executor;
         private final int work;
         private int counter;
 
         public Finisher(ProgressMonitor pm, Semaphore semaphore, ExecutorService executor, int counter) {
-//        public Finisher(String name, ProgressMonitor pm, Semaphore semaphore, ExecutorService executor, int counter) {
-//            this.name = name;
-//            System.out.println(name + "  NumTiles = " + counter);
             this.pm = pm;
             this.semaphore = semaphore;
             this.executor = executor;
@@ -626,16 +622,15 @@ public class ProductIO {
         }
 
         public synchronized void worked() {
-            pm.worked(1);
-            counter++;
-//            System.out.println(name + ":counter = " + counter);
-            if (counter == work) {
-//                System.out.println("************************************");
-//                System.out.println(name +" finished");
-//                System.out.println("************************************");
-                semaphore.release();
-                executor.shutdown();
-                pm.done();
+            try {
+                pm.worked(1);
+            } finally {
+                counter++;
+                if (counter == work) {
+                    semaphore.release();
+                    executor.shutdown();
+                    pm.done();
+                }
             }
         }
     }
