@@ -1,6 +1,11 @@
 {
   "testProducts": [
     {
+      "id": "S5P_NRTI_L2__NO2____20180729T113636",
+      "relativePath": "sensors_platforms/SENTINEL-5p/S5P_NRTI_L2__NO2____20180729T113636_20180729T114136_04102_01_010100_20180729T122421.nc",
+      "description": "Read Sentinel-5p, to ensure it's basic functionality"
+    },
+    {
       "id": "ESACCI-OC-L3S-OC_PRODUCTS-MERGED-1D_DAILY_4km_PML_OC4v6_QAA-20090711-fv0.9",
       "relativePath": "projects/oc/oc-v0.9/ESACCI-OC-L3S-OC_PRODUCTS-MERGED-1D_DAILY_4km_PML_OC4v6_QAA-20090711-fv0.9.nc",
       "description": "sparse grid file OC-CCI format version 0.9"
