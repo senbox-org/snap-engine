@@ -417,6 +417,14 @@ public class ComponentGeoCodingTest {
         assertEquals(geoRaster.getSubsamplingY(), cloned.getSubsamplingY(), 1e-8);
     }
 
+    @Test
+    public void testCanClone() {
+        final GeoRaster geoRaster = TestData.get_OLCI();
+        final ComponentGeoCoding geoCoding = new ComponentGeoCoding(geoRaster, forwardCoding, inverseCoding, GeoChecks.NONE);
+
+        assertTrue(geoCoding.canClone());
+    }
+
     @SuppressWarnings("deprecation")
     @Test
     public void testGetDatum() {

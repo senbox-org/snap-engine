@@ -140,16 +140,15 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
     public boolean transferGeoCoding(Scene srcScene, Scene destScene, ProductSubsetDef subsetDef) {
         transferRequiredRasters(srcScene, destScene, subsetDef);
 
+        if (subsetDef == null || subsetDef.isEntireProductSelected()) {
+            destScene.setGeoCoding(clone());
+            return true;
+        }
+
         final String lonVariableName = this.geoRaster.getLonVariableName();
         final String latVariableName = this.geoRaster.getLatVariableName();
 
-        final GeoRaster geoRaster;
-        if (subsetDef == null) {
-            geoRaster = cloneGeoRaster(lonVariableName, latVariableName);
-        } else {
-            geoRaster = calculateGeoRaster(destScene, subsetDef, lonVariableName, latVariableName);
-        }
-
+        final GeoRaster geoRaster = calculateGeoRaster(destScene, subsetDef, lonVariableName, latVariableName);
         ForwardCoding forwardCoding = null;
         if (this.forwardCoding != null) {
             forwardCoding = ComponentFactory.getForward(this.forwardCoding.getKey());
@@ -163,6 +162,7 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
         final ComponentGeoCoding destGeoCoding = new ComponentGeoCoding(geoRaster, forwardCoding, inverseCoding, geoChecks, geoCRS);
         destGeoCoding.initialize();
         destScene.setGeoCoding(destGeoCoding);
+
         return true;
     }
 
@@ -247,7 +247,7 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
 
         ForwardCoding cloneForward = null;
         if (forwardCoding != null) {
-             cloneForward = forwardCoding.clone();
+            cloneForward = forwardCoding.clone();
         }
 
         InverseCoding cloneInverse = null;
@@ -259,6 +259,11 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
         clone.isInitialized = this.isInitialized;
 
         return clone;
+    }
+
+    @Override
+    public boolean canClone() {
+        return true;
     }
 
     public void initialize() {
