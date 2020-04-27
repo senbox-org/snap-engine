@@ -244,12 +244,21 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
     @Override
     public GeoCoding clone() {
         final GeoRaster geoRaster = cloneGeoRaster(this.geoRaster.getLonVariableName(), this.geoRaster.getLatVariableName());
-        final ComponentGeoCoding componentGeoCoding = new ComponentGeoCoding(geoRaster, forwardCoding, inverseCoding, geoChecks);
 
-        componentGeoCoding.isInitialized = this.isInitialized;
-        //@todo 1 tb/tb clone forward and inverse and attach 2020-04-27
+        ForwardCoding cloneForward = null;
+        if (forwardCoding != null) {
+             cloneForward = forwardCoding.clone();
+        }
 
-        return componentGeoCoding;
+        InverseCoding cloneInverse = null;
+        if (inverseCoding != null) {
+            cloneInverse = inverseCoding.clone();
+        }
+        final ComponentGeoCoding clone = new ComponentGeoCoding(geoRaster, cloneForward, cloneInverse, geoChecks);
+
+        clone.isInitialized = this.isInitialized;
+
+        return clone;
     }
 
     public void initialize() {
