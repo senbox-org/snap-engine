@@ -114,6 +114,22 @@ public class TiePointInverse implements InverseCoding {
         }
     }
 
+    @Override
+    public InverseCoding clone() {
+        final TiePointInverse clone = new TiePointInverse();
+
+        clone.lonGrid = lonGrid.cloneTiePointGrid();
+        clone.latGrid = latGrid.cloneTiePointGrid();
+
+        clone.rasterWidth = rasterWidth;
+        clone.rasterHeight = rasterHeight;
+
+        clone.boundaries = boundaries;
+        clone.approximations = approximations;
+
+        return clone;
+    }
+
     // package access for testing only tb 2019-12-12
     static Approximation getBestApproximation(Approximation[] approximations, double lat, double lon) {
         Approximation approximation = null;

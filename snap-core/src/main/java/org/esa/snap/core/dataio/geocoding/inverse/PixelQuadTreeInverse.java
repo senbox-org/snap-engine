@@ -115,6 +115,29 @@ public class PixelQuadTreeInverse implements InverseCoding {
         latitudes = null;
     }
 
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
+    @Override
+    public InverseCoding clone() {
+        final PixelQuadTreeInverse clone = new PixelQuadTreeInverse(fractionalAccuracy);
+
+        clone.rasterWidth = rasterWidth;
+        clone.rasterHeight = rasterHeight;
+
+        clone.longitudes = longitudes;
+        clone.latitudes = latitudes;
+
+        clone.lonRange = lonRange;
+        clone.latRange = latRange;
+
+        clone.epsilon = epsilon;
+        clone.isCrossingMeridian = isCrossingMeridian;
+
+        clone.offsetX = offsetX;
+        clone.offsetY = offsetY;
+
+        return clone;
+    }
+
     // package access for testing only tb 2019-12-16
     void getGeoPos(int pixelX, int pixelY, GeoPos geoPos) {
         final int index = pixelY * rasterWidth + pixelX;

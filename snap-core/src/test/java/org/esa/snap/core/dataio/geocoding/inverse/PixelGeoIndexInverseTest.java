@@ -20,7 +20,7 @@ public class PixelGeoIndexInverseTest {
     }
 
     @Test
-    public void testGeoPixelPos_AMSRE() {
+    public void testGetPixelPos_AMSRE() {
         final GeoRaster geoRaster = TestData.get_AMSRE();
 
         inverse.initialize(geoRaster, false, new PixelPos[0]);
@@ -47,7 +47,7 @@ public class PixelGeoIndexInverseTest {
     }
 
     @Test
-    public void testGeoPixelPos_AMSRE_outside() {
+    public void testGetPixelPos_AMSRE_outside() {
         final GeoRaster geoRaster = TestData.get_AMSRE();
 
         inverse.initialize(geoRaster, false, new PixelPos[0]);
@@ -70,7 +70,7 @@ public class PixelGeoIndexInverseTest {
     }
 
     @Test
-    public void testGeoPixelPos_OLCI() {
+    public void testGetPixelPos_OLCI() {
         final GeoRaster geoRaster = TestData.get_OLCI();
 
         inverse.initialize(geoRaster, false, new PixelPos[0]);
@@ -93,7 +93,7 @@ public class PixelGeoIndexInverseTest {
     }
 
     @Test
-    public void testGeoPixelPos_SYN_AOD_fillValues() {
+    public void testGetPixelPos_SYN_AOD_fillValues() {
         final GeoRaster geoRaster = TestData.get_SYN_AOD();
 
         inverse.initialize(geoRaster, false, new PixelPos[0]);
@@ -163,6 +163,84 @@ public class PixelGeoIndexInverseTest {
         final GeoRaster geoRaster = TestData.get_AMSRE();
         inverse.initialize(geoRaster, false, new PixelPos[0]);
         inverse.dispose();
+    }
+
+    @Test
+    public void testClone() {
+        final GeoRaster geoRaster = TestData.get_OLCI();
+
+        inverse.initialize(geoRaster, false, new PixelPos[0]);
+
+        final GeoPos geoPos = new GeoPos(66.42871, -24.082217);
+
+        PixelPos pixelPos = inverse.getPixelPos(geoPos, null);
+        assertEquals(25.5, pixelPos.x, 1e-8);
+        assertEquals(35.5, pixelPos.y, 1e-8);
+
+        final InverseCoding clone = inverse.clone();
+        pixelPos = clone.getPixelPos(geoPos, null);
+        assertEquals(25.5, pixelPos.x, 1e-8);
+        assertEquals(35.5, pixelPos.y, 1e-8);
+    }
+
+    @Test
+    public void testClone_disposeOriginal() {
+        final GeoRaster geoRaster = TestData.get_OLCI();
+
+        inverse.initialize(geoRaster, false, new PixelPos[0]);
+
+        final GeoPos geoPos = new GeoPos(66.51111, -24.15865);
+
+        PixelPos pixelPos = inverse.getPixelPos(geoPos, null);
+        assertEquals(5.5, pixelPos.x, 1e-8);
+        assertEquals(6.5, pixelPos.y, 1e-8);
+
+        final InverseCoding clone = inverse.clone();
+        inverse.dispose();
+
+        pixelPos = clone.getPixelPos(geoPos, null);
+        assertEquals(5.5, pixelPos.x, 1e-8);
+        assertEquals(6.5, pixelPos.y, 1e-8);
+    }
+
+    @Test
+    public void testClone_interpolating() {
+        inverse = new PixelGeoIndexInverse(true);
+
+        final GeoRaster geoRaster = TestData.get_AMSRE();
+        inverse.initialize(geoRaster, false, new PixelPos[0]);
+
+        final GeoPos geoPos = new GeoPos(-0.8398334, 18.610895);
+
+        PixelPos pixelPos = inverse.getPixelPos(geoPos, null);
+        assertEquals(3.1083222743108525, pixelPos.x, 1e-8);
+        assertEquals(0.6808134209816874, pixelPos.y, 1e-8);
+
+        final InverseCoding clone = inverse.clone();
+        pixelPos = clone.getPixelPos(geoPos, null);
+        assertEquals(3.1083222743108525, pixelPos.x, 1e-8);
+        assertEquals(0.6808134209816874, pixelPos.y, 1e-8);
+    }
+
+    @Test
+    public void testClone_interpolating_disposeOriginal() {
+        inverse = new PixelGeoIndexInverse(true);
+
+        final GeoRaster geoRaster = TestData.get_AMSRE();
+        inverse.initialize(geoRaster, false, new PixelPos[0]);
+
+        final GeoPos geoPos = new GeoPos(-0.8398334, 18.610895);
+
+        PixelPos pixelPos = inverse.getPixelPos(geoPos, null);
+        assertEquals(3.1083222743108525, pixelPos.x, 1e-8);
+        assertEquals(0.6808134209816874, pixelPos.y, 1e-8);
+
+        final InverseCoding clone = inverse.clone();
+        inverse.dispose();
+
+        pixelPos = clone.getPixelPos(geoPos, null);
+        assertEquals(3.1083222743108525, pixelPos.x, 1e-8);
+        assertEquals(0.6808134209816874, pixelPos.y, 1e-8);
     }
 
     @Test
