@@ -69,7 +69,14 @@ public class TiePointBilinearForward extends TiePointForward {
 
     @Override
     public ForwardCoding clone() {
-        throw new IllegalStateException("not implemented");
+        final TiePointBilinearForward clone = new TiePointBilinearForward();
+
+        clone.lonGrid = lonGrid.cloneTiePointGrid();
+        clone.latGrid = latGrid.cloneTiePointGrid();
+        clone.sceneWidth = sceneWidth;
+        clone.sceneHeight = sceneHeight;
+
+        return clone;
     }
 
     public static class Plugin implements ForwardPlugin{

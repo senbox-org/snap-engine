@@ -63,6 +63,7 @@ public class PixelForward implements ForwardCoding {
         latitudes = null;
     }
 
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
     public ForwardCoding clone() {
         final PixelForward clone = new PixelForward();

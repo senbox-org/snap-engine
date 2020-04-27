@@ -247,6 +247,7 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
         final ComponentGeoCoding componentGeoCoding = new ComponentGeoCoding(geoRaster, forwardCoding, inverseCoding, geoChecks);
 
         componentGeoCoding.isInitialized = this.isInitialized;
+        //@todo 1 tb/tb clone forward and inverse and attach 2020-04-27
 
         return componentGeoCoding;
     }
