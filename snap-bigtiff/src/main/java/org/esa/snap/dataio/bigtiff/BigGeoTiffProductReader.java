@@ -786,8 +786,6 @@ class BigGeoTiffProductReader extends AbstractProductReader {
             @Override
             protected RenderedImage createImage(int level) {
                 final ImageReadParam readParam = new ImageReadParam();
-                readParam.setSourceBands(new int[]{bandIndex});
-                readParam.setDestinationBands(new int[]{bandIndex});
                 if (level > 0) {
                     int sourceSubsampling = 1 << level;
                     readParam.setSourceSubsampling(sourceSubsampling, sourceSubsampling, 0, 0);
