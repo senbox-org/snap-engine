@@ -74,11 +74,11 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
         Guardian.assertNotNull("lonGrid", lonGrid);
         Guardian.assertNotNull("geoCRS", geoCRS);
         if (latGrid.getGridWidth() != lonGrid.getGridWidth() ||
-            latGrid.getGridHeight() != lonGrid.getGridHeight() ||
-            latGrid.getOffsetX() != lonGrid.getOffsetX() ||
-            latGrid.getOffsetY() != lonGrid.getOffsetY() ||
-            latGrid.getSubSamplingX() != lonGrid.getSubSamplingX() ||
-            latGrid.getSubSamplingY() != lonGrid.getSubSamplingY()) {
+                latGrid.getGridHeight() != lonGrid.getGridHeight() ||
+                latGrid.getOffsetX() != lonGrid.getOffsetX() ||
+                latGrid.getOffsetY() != lonGrid.getOffsetY() ||
+                latGrid.getSubSamplingX() != lonGrid.getSubSamplingX() ||
+                latGrid.getSubSamplingY() != lonGrid.getSubSamplingY()) {
             throw new IllegalArgumentException("latGrid is not compatible with lonGrid");
         }
         this.latGrid = latGrid;
@@ -101,17 +101,155 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
         Guardian.assertNotNull("lonGrid", lonGrid);
         Guardian.assertNotNull("datum", datum);
         if (latGrid.getGridWidth() != lonGrid.getGridWidth() ||
-            latGrid.getGridHeight() != lonGrid.getGridHeight() ||
-            latGrid.getOffsetX() != lonGrid.getOffsetX() ||
-            latGrid.getOffsetY() != lonGrid.getOffsetY() ||
-            latGrid.getSubSamplingX() != lonGrid.getSubSamplingX() ||
-            latGrid.getSubSamplingY() != lonGrid.getSubSamplingY()) {
+                latGrid.getGridHeight() != lonGrid.getGridHeight() ||
+                latGrid.getOffsetX() != lonGrid.getOffsetX() ||
+                latGrid.getOffsetY() != lonGrid.getOffsetY() ||
+                latGrid.getSubSamplingX() != lonGrid.getSubSamplingX() ||
+                latGrid.getSubSamplingY() != lonGrid.getSubSamplingY()) {
             throw new IllegalArgumentException("latGrid is not compatible with lonGrid");
         }
         this.latGrid = latGrid;
         this.lonGrid = lonGrid;
         this.datum = datum;
         approximationsComputed = false;
+    }
+
+    /**
+     * Gets the normalized latitude value.
+     * The method returns <code>Double.NaN</code> if the given latitude value is out of bounds.
+     *
+     * @param lat the raw latitude value in the range -90 to +90 degrees
+     * @return the normalized latitude value, <code>Double.NaN</code> else
+     */
+    public static double normalizeLat(double lat) {
+        if (lat < -90 || lat > 90) {
+            return Double.NaN;
+        }
+        return lat;
+    }
+
+    private static FXYSum getBestPolynomial(double[][] data, int[] indices) {
+        // These are the potential polynomials which we will check
+        final FXYSum[] potentialPolynomials = new FXYSum[]{
+                new FXYSum.Linear(),
+                new FXYSum.BiLinear(),
+                new FXYSum.Quadric(),
+                new FXYSum.BiQuadric(),
+                new FXYSum.Cubic(),
+                new FXYSum.BiCubic(),
+                new FXYSum(FXYSum.FXY_4TH, 4),
+                new FXYSum(FXYSum.FXY_BI_4TH, 4 + 4)
+        };
+
+        // Find the polynomial which best fitts the warp points
+        //
+        double rmseMin = Double.MAX_VALUE;
+        int index = -1;
+        for (int i = 0; i < potentialPolynomials.length; i++) {
+            FXYSum potentialPolynomial = potentialPolynomials[i];
+            final int order = potentialPolynomial.getOrder();
+            final int numPointsRequired;
+            if (order >= 0) {
+                numPointsRequired = (order + 2) * (order + 1) / 2;
+            } else {
+                numPointsRequired = 2 * potentialPolynomial.getNumTerms();
+            }
+            if (data.length >= numPointsRequired) {
+                try {
+                    potentialPolynomial.approximate(data, indices);
+                    double rmse = potentialPolynomial.getRootMeanSquareError();
+                    double maxError = potentialPolynomial.getMaxError();
+                    if (rmse < rmseMin) {
+                        index = i;
+                        rmseMin = rmse;
+                    }
+                    if (maxError < ABS_ERROR_LIMIT) { // this accuracy is sufficient
+                        index = i;
+                        break;
+                    }
+                } catch (ArithmeticException e) {
+                    Debug.trace("Polynomial cannot be constructed due to a numerically singular or degenerate matrix:");
+                    Debug.trace(e);
+                }
+            }
+        }
+        return index >= 0 ? potentialPolynomials[index] : null;
+    }
+
+    //package local for testing
+    //maybe use this method later
+    static int[] determineWarpParameters(int sw, int sh) {
+        // Determine stepI and stepJ so that maximum number of warp points is not exceeded,
+        // numU * numV shall be less than _MAX_NUM_POINTS_PER_TILE.
+        //
+        int numU = sw;
+        int numV = sh;
+        int stepI = 1;
+        int stepJ = 1;
+
+        // Adjust number of hor/ver (numU,numV) tie-points to be considered
+        // so that a maximum of circa numPointsMax points is not exceeded
+        boolean adjustStepI = numU >= numV;
+        while (numU * numV > MAX_NUM_POINTS_PER_TILE) {
+            if (adjustStepI) {
+                stepI++;
+                numU = sw / stepI;
+                while (numU * stepI < sw) {
+                    numU++;
+                }
+            } else {
+                stepJ++;
+                numV = sh / stepJ;
+                while (numV * stepJ < sh) {
+                    numV++;
+                }
+            }
+            adjustStepI = numU >= numV;
+        }
+        return new int[]{numU, numV, stepI, stepJ};
+    }
+
+    private static double getMaxSquareDistance(final double[][] data, double centerLat, double centerLon) {
+        double maxSquareDistance = 0.0;
+        for (final double[] point : data) {
+            final double dLat = point[0] - centerLat;
+            final double dLon = point[1] - centerLon;
+            final double squareDistance = dLat * dLat + dLon * dLon;
+            if (squareDistance > maxSquareDistance) {
+                maxSquareDistance = squareDistance;
+            }
+        }
+        return maxSquareDistance;
+    }
+
+    private static Approximation getBestApproximation(final Approximation[] approximations, double lat, double lon) {
+        Approximation approximation = null;
+        if (approximations.length == 1) {
+            Approximation a = approximations[0];
+            final double squareDistance = a.getSquareDistance(lat, lon);
+            if (squareDistance < a.getMinSquareDistance()) {
+                approximation = a;
+            }
+        } else {
+            double minSquareDistance = Double.MAX_VALUE;
+            for (final Approximation a : approximations) {
+                final double squareDistance = a.getSquareDistance(lat, lon);
+                if (squareDistance < minSquareDistance && squareDistance < a.getMinSquareDistance()) {
+                    minSquareDistance = squareDistance;
+                    approximation = a;
+                }
+            }
+        }
+
+        return approximation;
+    }
+
+    private static double rescaleLongitude(double lon, double centerLon) {
+        return (lon - centerLon) / 90.0;
+    }
+
+    private static double rescaleLatitude(double lat) {
+        return lat / 90.0;
     }
 
     private synchronized void computeApproximations() {
@@ -217,7 +355,7 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
             geoPos = new GeoPos();
         }
         if (pixelPos.x < 0 || pixelPos.x > latGrid.getRasterWidth()
-            || pixelPos.y < 0 || pixelPos.y > latGrid.getRasterHeight()) {
+                || pixelPos.y < 0 || pixelPos.y > latGrid.getRasterHeight()) {
             geoPos.setInvalid();
         } else {
             geoPos.lat = latGrid.getPixelDouble(pixelPos.x, pixelPos.y);
@@ -280,22 +418,32 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
         return pixelPos;
     }
 
-    private boolean isValidGeoPos(final double lat, final double lon) {
-        return !Double.isNaN(lat) && !Double.isNaN(lon);
+    @Override
+    public boolean canClone() {
+        return true;
     }
 
-    /**
-     * Gets the normalized latitude value.
-     * The method returns <code>Double.NaN</code> if the given latitude value is out of bounds.
-     *
-     * @param lat the raw latitude value in the range -90 to +90 degrees
-     * @return the normalized latitude value, <code>Double.NaN</code> else
-     */
-    public static double normalizeLat(double lat) {
-        if (lat < -90 || lat > 90) {
-            return Double.NaN;
-        }
-        return lat;
+    /////////////////////////////////////////////////////////////////////////
+    // Private stuff
+
+    @Override
+    public GeoCoding clone() {
+        final TiePointGeoCoding clone = new TiePointGeoCoding(latGrid, lonGrid);
+        clone.approximations = approximations;
+        clone.approximationsComputed = approximationsComputed;
+        clone.normalized = normalized;
+        clone.normalizedLonMin = normalizedLonMin;
+        clone.normalizedLonMax = normalizedLonMax;
+        clone.latMin = latMin;
+        clone.latMax = latMax;
+        clone.overlapStart = overlapStart;
+        clone.overlapEnd = overlapEnd;
+
+        return clone;
+    }
+
+    private boolean isValidGeoPos(final double lat, final double lon) {
+        return !Double.isNaN(lat) && !Double.isNaN(lon);
     }
 
     /**
@@ -351,9 +499,6 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
     @Override
     public void dispose() {
     }
-
-    /////////////////////////////////////////////////////////////////////////
-    // Private stuff
 
     private TiePointGrid initNormalizedLonGrid() {
         final int w = lonGrid.getGridWidth();
@@ -510,54 +655,6 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
         return approximations;
     }
 
-    private static FXYSum getBestPolynomial(double[][] data, int[] indices) {
-        // These are the potential polynomials which we will check
-        final FXYSum[] potentialPolynomials = new FXYSum[]{
-                new FXYSum.Linear(),
-                new FXYSum.BiLinear(),
-                new FXYSum.Quadric(),
-                new FXYSum.BiQuadric(),
-                new FXYSum.Cubic(),
-                new FXYSum.BiCubic(),
-                new FXYSum(FXYSum.FXY_4TH, 4),
-                new FXYSum(FXYSum.FXY_BI_4TH, 4 + 4)
-        };
-
-        // Find the polynomial which best fitts the warp points
-        //
-        double rmseMin = Double.MAX_VALUE;
-        int index = -1;
-        for (int i = 0; i < potentialPolynomials.length; i++) {
-            FXYSum potentialPolynomial = potentialPolynomials[i];
-            final int order = potentialPolynomial.getOrder();
-            final int numPointsRequired;
-            if (order >= 0) {
-                numPointsRequired = (order + 2) * (order + 1) / 2;
-            } else {
-                numPointsRequired = 2 * potentialPolynomial.getNumTerms();
-            }
-            if (data.length >= numPointsRequired) {
-                try {
-                    potentialPolynomial.approximate(data, indices);
-                    double rmse = potentialPolynomial.getRootMeanSquareError();
-                    double maxError = potentialPolynomial.getMaxError();
-                    if (rmse < rmseMin) {
-                        index = i;
-                        rmseMin = rmse;
-                    }
-                    if (maxError < ABS_ERROR_LIMIT) { // this accuracy is sufficient
-                        index = i;
-                        break;
-                    }
-                } catch (ArithmeticException e) {
-                    Debug.trace("Polynomial cannot be constructed due to a numerically singular or degenerate matrix:");
-                    Debug.trace(e);
-                }
-            }
-        }
-        return index >= 0 ? potentialPolynomials[index] : null;
-    }
-
     private double[][] createWarpPoints(TiePointGrid lonGrid, Rectangle subsetRect) {
         final TiePointGrid latGrid = getLatGrid();
         final int w = latGrid.getGridWidth();
@@ -616,39 +713,6 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
         return data;
     }
 
-    //package local for testing
-    //maybe use this method later
-    static int[] determineWarpParameters(int sw, int sh) {
-        // Determine stepI and stepJ so that maximum number of warp points is not exceeded,
-        // numU * numV shall be less than _MAX_NUM_POINTS_PER_TILE.
-        //
-        int numU = sw;
-        int numV = sh;
-        int stepI = 1;
-        int stepJ = 1;
-
-        // Adjust number of hor/ver (numU,numV) tie-points to be considered
-        // so that a maximum of circa numPointsMax points is not exceeded
-        boolean adjustStepI = numU >= numV;
-        while (numU * numV > MAX_NUM_POINTS_PER_TILE) {
-            if (adjustStepI) {
-                stepI++;
-                numU = sw / stepI;
-                while (numU * stepI < sw) {
-                    numU++;
-                }
-            } else {
-                stepJ++;
-                numV = sh / stepJ;
-                while (numV * stepJ < sh) {
-                    numV++;
-                }
-            }
-            adjustStepI = numU >= numV;
-        }
-        return new int[]{numU, numV, stepI, stepJ};
-    }
-
     private Approximation createApproximation(TiePointGrid normalizedLonGrid, Rectangle subsetRect) {
         final double[][] data = createWarpPoints(normalizedLonGrid, subsetRect);
 
@@ -694,41 +758,6 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
         return new Approximation(fX, fY, centerLat, centerLon, maxSquareDistance * 1.1);
     }
 
-    private static double getMaxSquareDistance(final double[][] data, double centerLat, double centerLon) {
-        double maxSquareDistance = 0.0;
-        for (final double[] point : data) {
-            final double dLat = point[0] - centerLat;
-            final double dLon = point[1] - centerLon;
-            final double squareDistance = dLat * dLat + dLon * dLon;
-            if (squareDistance > maxSquareDistance) {
-                maxSquareDistance = squareDistance;
-            }
-        }
-        return maxSquareDistance;
-    }
-
-    private static Approximation getBestApproximation(final Approximation[] approximations, double lat, double lon) {
-        Approximation approximation = null;
-        if (approximations.length == 1) {
-            Approximation a = approximations[0];
-            final double squareDistance = a.getSquareDistance(lat, lon);
-            if (squareDistance < a.getMinSquareDistance()) {
-                approximation = a;
-            }
-        } else {
-            double minSquareDistance = Double.MAX_VALUE;
-            for (final Approximation a : approximations) {
-                final double squareDistance = a.getSquareDistance(lat, lon);
-                if (squareDistance < minSquareDistance && squareDistance < a.getMinSquareDistance()) {
-                    minSquareDistance = squareDistance;
-                    approximation = a;
-                }
-            }
-        }
-
-        return approximation;
-    }
-
     private Approximation findRenormalizedApproximation(final double lat, final double renormalizedLon,
                                                         final double distance) {
         Approximation renormalizedApproximation = getBestApproximation(approximations, lat, renormalizedLon);
@@ -745,15 +774,6 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
         return normalizedLonMin;
     }
 
-
-    private static double rescaleLongitude(double lon, double centerLon) {
-        return (lon - centerLon) / 90.0;
-    }
-
-    private static double rescaleLatitude(double lat) {
-        return lat / 90.0;
-    }
-
     /**
      * Transfers the geo-coding of the {@link Scene srcScene} to the {@link Scene destScene} with respect to the given
      * {@link ProductSubsetDef subsetDef}.
@@ -766,6 +786,12 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
      */
     @Override
     public boolean transferGeoCoding(final Scene srcScene, final Scene destScene, final ProductSubsetDef subsetDef) {
+        if (subsetDef == null || subsetDef.isEntireProductSelected()) {
+            copyGridsToDestScene(destScene);
+            destScene.setGeoCoding(clone());
+            return true;
+        }
+
         TiePointGrid destLatGrid = getDestGrid(getLatGrid(), destScene, subsetDef);
         TiePointGrid destLonGrid = getDestGrid(getLonGrid(), destScene, subsetDef);
         if (destLatGrid != null && destLonGrid != null) {
@@ -773,6 +799,18 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
             return true;
         } else {
             return false;
+        }
+    }
+
+    private void copyGridsToDestScene(Scene destScene) {
+        final Product destProduct = destScene.getProduct();
+        final TiePointGrid lonGrid = getLonGrid();
+        if (!destProduct.containsTiePointGrid(lonGrid.getName())) {
+            destProduct.addTiePointGrid(lonGrid);
+        }
+        final TiePointGrid latGrid = getLatGrid();
+        if (!destProduct.containsTiePointGrid(latGrid.getName())) {
+            destProduct.addTiePointGrid(latGrid);
         }
     }
 
