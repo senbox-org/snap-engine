@@ -210,7 +210,7 @@ public class RGBImageProfileTest {
         assertEquals("0.3", ((VirtualBand) p1.getBand(RGBImageProfile.RED_BAND_NAME)).getExpression());
         assertEquals("2.0", ((VirtualBand) p1.getBand(RGBImageProfile.GREEN_BAND_NAME)).getExpression());
         assertEquals("6.7", ((VirtualBand) p1.getBand(RGBImageProfile.BLUE_BAND_NAME)).getExpression());
-        assertEquals("", ((VirtualBand) p1.getBand(RGBImageProfile.ALPHA_BAND_NAME)).getExpression());
+        assertEquals("0", ((VirtualBand) p1.getBand(RGBImageProfile.ALPHA_BAND_NAME)).getExpression());
     }
 
     private Product createTestProduct() {
