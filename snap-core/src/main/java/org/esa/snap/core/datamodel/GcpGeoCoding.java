@@ -22,7 +22,12 @@ import org.esa.snap.core.dataop.maptransf.Datum;
 import java.awt.geom.Point2D;
 import java.util.Arrays;
 
-import static java.lang.Math.*;
+import static java.lang.Math.asin;
+import static java.lang.Math.atan2;
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
+import static java.lang.Math.toDegrees;
+import static java.lang.Math.toRadians;
 
 /**
  * Ground control point (GCP) geo-coding.
@@ -97,26 +102,75 @@ public class GcpGeoCoding extends AbstractGeoCoding {
         boundaryCrossingMeridianAt180 = isBoundaryCrossingMeridianAt180();
     }
 
+    private GcpGeoCoding() {
+    }
+
+    static boolean isSegmentCrossingMeridianAt180(double lon, double lon2) {
+        return Math.abs(lon) > 90.0 && Math.abs(lon2) > 90.0 && lon * lon2 < 0.0;
+    }
+
+    private static void calculateXYZ(double[] lons, double[] lats, double[] x, double[] y, double[] z) {
+        for (int i = 0; i < lats.length; i++) {
+            final double u = toRadians(lons[i]);
+            final double v = toRadians(lats[i]);
+            final double w = cos(v);
+
+            x[i] = cos(u) * w;
+            y[i] = sin(u) * w;
+            z[i] = sin(v);
+        }
+    }
+
+    static GeoPos calculateCentralGeoPos(double[] lons, double[] lats) {
+        // calculate (x, y, z) in order to avoid issues with anti-meridian and poles
+        final int size = lats.length;
+        final double[] x = new double[size];
+        final double[] y = new double[size];
+        final double[] z = new double[size];
+
+        calculateXYZ(lons, lats, x, y, z);
+
+        double xc = 0.0;
+        double yc = 0.0;
+        double zc = 0.0;
+        for (int i = 0; i < size; i++) {
+            xc += x[i];
+            yc += y[i];
+            zc += z[i];
+        }
+        final double length = Math.sqrt(xc * xc + yc * yc + zc * zc);
+        xc /= length;
+        yc /= length;
+        zc /= length;
+
+        final double lat = toDegrees(asin(zc));
+        final double lon = toDegrees(atan2(yc, xc));
+
+        return new GeoPos(lat, lon);
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
     public boolean transferGeoCoding(Scene sourceScene, Scene targetScene, ProductSubsetDef subsetDef) {
+        if (subsetDef == null || subsetDef.isEntireProductSelected()) {
+            targetScene.setGeoCoding(clone());
+            return true;
+        }
+
         final double[] x2 = new double[x.length];
         final double[] y2 = new double[y.length];
 
         int offsetX = 0;
         int offsetY = 0;
-        if (subsetDef != null && subsetDef.getRegion() != null) {
+        if (subsetDef.getRegion() != null) {
             offsetX = subsetDef.getRegion().x;
             offsetY = subsetDef.getRegion().y;
         }
-        int subSamplingX = 1;
-        int subSamplingY = 1;
-        if (subsetDef != null) {
-            subSamplingX = subsetDef.getSubSamplingX();
-            subSamplingY = subsetDef.getSubSamplingY();
-        }
+
+        final int subSamplingX = subsetDef.getSubSamplingX();
+        final int subSamplingY = subsetDef.getSubSamplingY();
 
         final int sceneWidth = targetScene.getRasterWidth();
         final int sceneHeight = targetScene.getRasterHeight();
@@ -127,6 +181,31 @@ public class GcpGeoCoding extends AbstractGeoCoding {
         }
         targetScene.setGeoCoding(new GcpGeoCoding(getMethod(), x2, y2, lons, lats, sceneWidth, sceneHeight, datum));
         return true;
+    }
+
+    @Override
+    public boolean canClone() {
+        return true;
+    }
+
+    @Override
+    public GeoCoding clone() {
+        final GcpGeoCoding clone = new GcpGeoCoding();
+
+        clone.x = x;
+        clone.y = y;
+        clone.lons = lons;
+        clone.lats = lats;
+
+        clone.sceneWidth = sceneWidth;
+        clone.sceneHeight = sceneHeight;
+
+        clone.forwardMap = forwardMap;
+        clone.inverseMap = inverseMap;
+        clone.rotator = rotator;
+        clone.method = method;
+
+        return clone;
     }
 
     /**
@@ -160,9 +239,8 @@ public class GcpGeoCoding extends AbstractGeoCoding {
             pixelPos = new PixelPos();
         }
         pixelPos.setLocation(inverseMap.getValue(point));
-        if (!pixelPos.isValid() || pixelPos.x < 0 || pixelPos.x >= sceneWidth || pixelPos.y < 0 || pixelPos.y >= sceneHeight) {
-            pixelPos.x = -1;
-            pixelPos.y = -1;
+        if (pixelPos.x < 0 || pixelPos.x >= sceneWidth || pixelPos.y < 0 || pixelPos.y >= sceneHeight) {
+            pixelPos.setInvalid();
         }
         return pixelPos;
     }
@@ -171,11 +249,16 @@ public class GcpGeoCoding extends AbstractGeoCoding {
      * {@inheritDoc}
      */
     public GeoPos getGeoPos(final PixelPos pixelPos, GeoPos geoPos) {
-        final Point2D point = forwardMap.getValue(pixelPos);
-        rotator.transformInversely(point);
         if (geoPos == null) {
             geoPos = new GeoPos();
         }
+        if (pixelPos.x < 0 || pixelPos.x >= sceneWidth || pixelPos.y < 0 || pixelPos.y >= sceneHeight) {
+            geoPos.setInvalid();
+            return geoPos;
+        }
+
+        final Point2D point = forwardMap.getValue(pixelPos);
+        rotator.transformInversely(point);
         geoPos.setLocation(point.getY(), point.getX());
 
         return geoPos;
@@ -253,12 +336,12 @@ public class GcpGeoCoding extends AbstractGeoCoding {
 
     }
 
-    public void setOriginalGeoCoding(GeoCoding geoCoding) {
-        originalGeoCoding = geoCoding;
-    }
-
     public GeoCoding getOriginalGeoCoding() {
         return originalGeoCoding;
+    }
+
+    public void setOriginalGeoCoding(GeoCoding geoCoding) {
+        originalGeoCoding = geoCoding;
     }
 
     public void setGcps(Placemark[] gcps) {
@@ -312,50 +395,6 @@ public class GcpGeoCoding extends AbstractGeoCoding {
         inverseMap = new RationalFunctionMap2D(type.getDegreeP(), type.getDegreeQ(), lons2, lats2, x, y);
     }
 
-    private static boolean isSegmentCrossingMeridianAt180(double lon, double lon2) {
-        return Math.abs(lon) > 90.0 && Math.abs(lon2) > 90.0 && lon * lon2 < 0.0;
-    }
-
-    private static void calculateXYZ(double[] lons, double[] lats, double[] x, double[] y, double[] z) {
-        for (int i = 0; i < lats.length; i++) {
-            final double u = toRadians(lons[i]);
-            final double v = toRadians(lats[i]);
-            final double w = cos(v);
-
-            x[i] = cos(u) * w;
-            y[i] = sin(u) * w;
-            z[i] = sin(v);
-        }
-    }
-
-    static GeoPos calculateCentralGeoPos(double[] lons, double[] lats) {
-        // calculate (x, y, z) in order to avoid issues with anti-meridian and poles
-        final int size = lats.length;
-        final double[] x = new double[size];
-        final double[] y = new double[size];
-        final double[] z = new double[size];
-
-        calculateXYZ(lons, lats, x, y, z);
-
-        double xc = 0.0;
-        double yc = 0.0;
-        double zc = 0.0;
-        for (int i = 0; i < size; i++) {
-            xc += x[i];
-            yc += y[i];
-            zc += z[i];
-        }
-        final double length = Math.sqrt(xc * xc + yc * yc + zc * zc);
-        xc /= length;
-        yc /= length;
-        zc /= length;
-
-        final double lat = toDegrees(asin(zc));
-        final double lon = toDegrees(atan2(yc, xc));
-
-        return new GeoPos(lat, lon);
-    }
-
     private void initCoordinates(Placemark[] gcps) {
         for (final Placemark gcp : gcps) {
             final PixelPos pixelPos = gcp.getPixelPos();
@@ -379,34 +418,6 @@ public class GcpGeoCoding extends AbstractGeoCoding {
             lons[i] = geoPos.getLon();
             lats[i] = geoPos.getLat();
         }
-    }
-
-    static class RationalFunctionMap2D {
-
-        private final RationalFunctionModel um;
-        private final RationalFunctionModel vm;
-
-        RationalFunctionMap2D(int degreeP, int degreeQ, double[] x, double[] y, double[] u, double[] v) {
-            um = new RationalFunctionModel(degreeP, degreeQ, x, y, u);
-            vm = new RationalFunctionModel(degreeP, degreeQ, x, y, v);
-        }
-
-        public final Point2D getValue(Point2D point) {
-            return getValue(point.getX(), point.getY());
-        }
-
-        public final Point2D getValue(double x, double y) {
-            return new Point2D.Double(um.getValue(x, y), vm.getValue(x, y));
-        }
-
-        public double getRmseU() {
-            return um.getRmse();
-        }
-
-        public double getRmseV() {
-            return vm.getRmse();
-        }
-
     }
 
     /**
@@ -434,11 +445,11 @@ public class GcpGeoCoding extends AbstractGeoCoding {
         private int degreeP;
         private int degreeQ;
 
-        private Method(String name, int degreeP) {
+        Method(String name, int degreeP) {
             this(name, degreeP, 0);
         }
 
-        private Method(String name, int degreeP, int degreeQ) {
+        Method(String name, int degreeP, int degreeQ) {
             this.name = name;
             this.degreeP = degreeP;
             this.degreeQ = degreeQ;
@@ -495,4 +506,31 @@ public class GcpGeoCoding extends AbstractGeoCoding {
         }
     }
 
+    static class RationalFunctionMap2D {
+
+        private final RationalFunctionModel um;
+        private final RationalFunctionModel vm;
+
+        RationalFunctionMap2D(int degreeP, int degreeQ, double[] x, double[] y, double[] u, double[] v) {
+            um = new RationalFunctionModel(degreeP, degreeQ, x, y, u);
+            vm = new RationalFunctionModel(degreeP, degreeQ, x, y, v);
+        }
+
+        public final Point2D getValue(Point2D point) {
+            return getValue(point.getX(), point.getY());
+        }
+
+        public final Point2D getValue(double x, double y) {
+            return new Point2D.Double(um.getValue(x, y), vm.getValue(x, y));
+        }
+
+        public double getRmseU() {
+            return um.getRmse();
+        }
+
+        public double getRmseV() {
+            return vm.getRmse();
+        }
+
+    }
 }
