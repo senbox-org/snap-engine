@@ -425,10 +425,12 @@ public class RGBImageProfile implements ConfigurableExtension {
     public static void storeRgbaExpressions(final Product product, final String[] rgbaExpressions, final String[] bandNames) {
         for (int i = 0; i < bandNames.length; i++) {
             final String rgbBandName = bandNames[i];
-            final String rgbaExpression = rgbaExpressions[i];
+            String rgbaExpression = rgbaExpressions[i];
             final Band rgbBand = product.getBand(rgbBandName);
             final boolean expressionIsEmpty = rgbaExpression.equals("");
             final boolean alphaChannel = i == 3;
+
+            rgbaExpression = expressionIsEmpty ? "0" : rgbaExpression;
 
             if (rgbBand != null) { // band already exists
                 if (rgbBand instanceof VirtualBand) {
@@ -440,7 +442,7 @@ public class RGBImageProfile implements ConfigurableExtension {
                                                     ProductData.TYPE_FLOAT32,
                                                     product.getSceneRasterWidth(),
                                                     product.getSceneRasterHeight(),
-                                                    expressionIsEmpty ? "0" : rgbaExpression));
+                                                    rgbaExpression));
                 }
             } else { // band does not exist
                 if (!alphaChannel || !expressionIsEmpty) { // don't add empty alpha channels
@@ -448,7 +450,7 @@ public class RGBImageProfile implements ConfigurableExtension {
                                                     ProductData.TYPE_FLOAT32,
                                                     product.getSceneRasterWidth(),
                                                     product.getSceneRasterHeight(),
-                                                    expressionIsEmpty ? "0" : rgbaExpression));
+                                                    rgbaExpression));
                 }
             }
         }
