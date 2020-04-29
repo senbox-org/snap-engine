@@ -215,6 +215,19 @@ public class FXYGeoCoding extends AbstractGeoCoding {
         return true;
     }
 
+    @Override
+    public boolean canClone() {
+        return true;
+    }
+
+    @Override
+    public GeoCoding clone() {
+        return new FXYGeoCoding(_pixelOffsetX, _pixelOffsetY,
+                                _pixelSizeX, _pixelSizeY,
+                                _pixelXFunction, _pixelYFunction,
+                                _latFunction, _lonFunction, _datum);
+    }
+
     public FXYGeoCoding createCloneWithNewOffsetAndSize(float pixelOffsetX, float pixelOffsetY,
                                                         float pixelSizeX, float pixelSizeY) {
         final FXYSum pixelXFunction = FXYSum.createCopy(_pixelXFunction);
