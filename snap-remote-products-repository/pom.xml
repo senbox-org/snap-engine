@@ -33,10 +33,16 @@
             <artifactId>httpclient</artifactId>
             <version>4.5.1</version>
         </dependency>
+        <!-- Add the 'org.geotools:gt-epsg-hsql' dependency here used by the TAO modules. -->
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-epsg-hsql</artifactId>
             <version>${geotools.version}</version>
+        </dependency>
+        <!-- Add the 'org.ejml:ejml-ddense' dependency here used by the TAO modules. -->
+        <dependency>
+            <groupId>org.ejml</groupId>
+            <artifactId>ejml-ddense</artifactId>
         </dependency>
         <dependency>
             <groupId>ro.cs.tao</groupId>
@@ -58,6 +64,10 @@
                 <exclusion>
                     <groupId>javax.xml.bind</groupId>
                     <artifactId>jaxb-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.ejml</groupId>
+                    <artifactId>ejml-ddense</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
