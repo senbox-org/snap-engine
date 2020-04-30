@@ -27,6 +27,7 @@ import org.junit.Test;
 import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
 @SuppressWarnings("ConstantConditions")
@@ -205,7 +206,7 @@ public class FXYGeoCodingTest {
     }
 
     private void assertFXYGeoCodingIsCopied(final FXYGeoCoding subsetGeoCoding, ProductSubsetDef subset) {
-        assertTrue(_geoCoding != subsetGeoCoding);
+        assertNotSame(_geoCoding, subsetGeoCoding);
 
         if (subset == null) {
             subset = new ProductSubsetDef("s");
@@ -216,20 +217,6 @@ public class FXYGeoCodingTest {
         assertEquals(_geoCoding.getPixelOffsetY() + subset.getRegion().getY(), subsetGeoCoding.getPixelOffsetY(), 1.e-6);
         assertEquals(_geoCoding.getPixelSizeX() * subset.getSubSamplingX(), subsetGeoCoding.getPixelSizeX(), 1.e-6);
         assertEquals(_geoCoding.getPixelSizeY() * subset.getSubSamplingY(), subsetGeoCoding.getPixelSizeY(), 1.e-6);
-
-        assertTrue(_geoCoding.getPixelXFunction() != subsetGeoCoding.getPixelXFunction());
-        assertTrue(_geoCoding.getPixelYFunction() != subsetGeoCoding.getPixelYFunction());
-        assertTrue(_geoCoding.getLatFunction() != subsetGeoCoding.getLatFunction());
-        assertTrue(_geoCoding.getLonFunction() != subsetGeoCoding.getLonFunction());
-
-        assertTrue(_geoCoding.getPixelXFunction().getCoefficients() !=
-                           subsetGeoCoding.getPixelXFunction().getCoefficients());
-        assertTrue(_geoCoding.getPixelYFunction().getCoefficients() !=
-                           subsetGeoCoding.getPixelYFunction().getCoefficients());
-        assertTrue(_geoCoding.getLatFunction().getCoefficients() !=
-                           subsetGeoCoding.getLatFunction().getCoefficients());
-        assertTrue(_geoCoding.getLonFunction().getCoefficients() !=
-                           subsetGeoCoding.getLonFunction().getCoefficients());
 
         assertTrue(Arrays.equals(_geoCoding.getPixelXFunction().getCoefficients(),
                                  subsetGeoCoding.getPixelXFunction().getCoefficients()));
