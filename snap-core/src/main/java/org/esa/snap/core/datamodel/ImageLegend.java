@@ -98,6 +98,9 @@ public class ImageLegend {
     private double titleUnitsHeight;
     private double titleUnitsWidth;
     private double titleUnitsSingleLetterWidth;
+    private double labelHeight;
+    private double labelLongestWidth;
+    private double labelSingleLetterWidth;
 
 
     // Independent attributes (Properties)
@@ -902,9 +905,17 @@ public class ImageLegend {
         double titleToUnitsHorizontalGap = 0.0;
 
         if (hasTitleParameter() && hasTitleUnits()) {
-            titleToUnitsVerticalGap = vertical_gap_factor * ((titleParameterHeight + titleUnitsHeight) / 2.0);
-            titleToUnitsHorizontalGap = horizontal_gap_factor * ((titleParameterSingleLetterWidth + titleUnitsSingleLetterWidth) / 2.0);
+            titleToUnitsVerticalGap = vertical_gap_factor * titleUnitsHeight;
+            titleToUnitsHorizontalGap = horizontal_gap_factor * titleUnitsSingleLetterWidth;
         }
+
+        g2d.setFont(getTitleUnitsFont());
+        Rectangle2D labelSingleLetterRectangle = g2d.getFontMetrics().getStringBounds("A", g2d);
+
+        int headerGap = (int) Math.round(0.5 * getTitleFontSize());
+        int borderGap = (int) Math.round(0.3 * getTitleFontSize());
+
+
 
         setTitleToUnitsVerticalGap(titleToUnitsVerticalGap);
         setTitleToUnitsHorizontalGap(titleToUnitsHorizontalGap);
@@ -916,6 +927,14 @@ public class ImageLegend {
         setTitleUnitsHeight(titleUnitsHeight);
         setTitleUnitsWidth(titleUnitsWidth);
         setTitleUnitsSingleLetterWidth(titleUnitsSingleLetterWidth);
+
+        setLabelLongestWidth(getLongestLabelWidth(g2d));
+        setLabelHeight(labelSingleLetterRectangle.getHeight());
+        setLabelSingleLetterWidth(labelSingleLetterRectangle.getWidth());
+
+        setHeaderGap(headerGap);
+        setBorderGap(borderGap);
+
 
         g2d.setFont(originalFont);
     }
@@ -2165,4 +2184,27 @@ public class ImageLegend {
     }
 
 
+    public double getLabelHeight() {
+        return labelHeight;
+    }
+
+    public void setLabelHeight(double labelHeight) {
+        this.labelHeight = labelHeight;
+    }
+
+    public double getLabelLongestWidth() {
+        return labelLongestWidth;
+    }
+
+    public void setLabelLongestWidth(double labelLongestWidth) {
+        this.labelLongestWidth = labelLongestWidth;
+    }
+
+    public double getLabelSingleLetterWidth() {
+        return labelSingleLetterWidth;
+    }
+
+    public void setLabelSingleLetterWidth(double labelSingleLetterWidth) {
+        this.labelSingleLetterWidth = labelSingleLetterWidth;
+    }
 }

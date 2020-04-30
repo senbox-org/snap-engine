@@ -27,17 +27,17 @@ public class ColorBarLayerType extends LayerType {
     public static final String OPTION_VERTICAL = "Vertical";
 
 
-    public static final String FONT_NAME_VALUE_1 = "SanSerif";
-    public static final String FONT_NAME_VALUE_2 = "Serif";
-    public static final String FONT_NAME_VALUE_3 = "Courier";
-    public static final String FONT_NAME_VALUE_4 = "Monospaced";
-    public static final Object FONT_NAME_VALUE_SET[] = {FONT_NAME_VALUE_1, FONT_NAME_VALUE_2, FONT_NAME_VALUE_3, FONT_NAME_VALUE_4};
+    public static final String FONT_NAME_SANSERIF = "SanSerif";
+    public static final String FONT_NAME_SERIF = "Serif";
+    public static final String FONT_NAME_COURIER = "Courier";
+    public static final String FONT_NAME_MONOSPACED = "Monospaced";
+    public static final Object FONT_NAME_VALUE_SET[] = {FONT_NAME_SANSERIF, FONT_NAME_SERIF, FONT_NAME_COURIER, FONT_NAME_MONOSPACED};
 
 
 
-    public static final String DISTRIB_EVEN_STR = "Auto Values";
+    public static final String DISTRIB_EVEN_STR = "Generated Values";
     public static final String DISTRIB_EXACT_STR = "Palette Values";
-    public static final String DISTRIB_MANUAL_STR = "Custom Values";
+    public static final String DISTRIB_MANUAL_STR = "Entered Values";
 
     public static final String NULL_SPECIAL = "-1";  // a null value that the user might not enter just in case the user wants to enter ""
 
@@ -274,7 +274,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_IMAGE_SCALING_SECTION_ALIAS = PROPERTY_IMAGE_SCALING_ROOT_ALIAS + "Section";
 
     public static final String PROPERTY_IMAGE_SCALING_APPLY_SIZE_NAME = PROPERTY_IMAGE_SCALING_ROOT_KEY + ".apply";
-    public static final String PROPERTY_IMAGE_SCALING_APPLY_SIZE_LABEL = "Scale size relative to image size";
+    public static final String PROPERTY_IMAGE_SCALING_APPLY_SIZE_LABEL = "Scale legend size relative to image size";
     public static final String PROPERTY_IMAGE_SCALING_APPLY_SIZE_TOOLTIP = "Scale the color bar size relative to the scene image size";
     private static final String PROPERTY_IMAGE_SCALING_APPLY_SIZE_ALIAS = PROPERTY_IMAGE_SCALING_ROOT_ALIAS + "Apply";
     public static final boolean PROPERTY_IMAGE_SCALING_APPLY_SIZE_DEFAULT = true;
@@ -291,6 +291,10 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_LEGEND_LENGTH_LABEL = "Color Bar Length";
     public static final String PROPERTY_LEGEND_LENGTH_TOOLTIP = "Length in pixels of the color bar";
     private static final String PROPERTY_LEGEND_LENGTH_ALIAS = PROPERTY_IMAGE_SCALING_ROOT_ALIAS + "Legend Length";
+    public static final int PROPERTY_LEGEND_LENGTH_VALUE_MIN = 200;
+    public static final int PROPERTY_LEGEND_LENGTH_VALUE_MAX = 4000;
+    public static final String PROPERTY_LEGEND_LENGTH_VALUE_INTERVAL = "[" + ColorBarLayerType.PROPERTY_LEGEND_LENGTH_VALUE_MIN + "," + ColorBarLayerType.PROPERTY_LEGEND_LENGTH_VALUE_MAX + "]";
+
     public static final int PROPERTY_LEGEND_LENGTH_DEFAULT = 1200;
     public static final Class PROPERTY_LEGEND_LENGTH_TYPE = Integer.class;
 
@@ -298,6 +302,10 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_LEGEND_WIDTH_LABEL = "Color Bar Width";
     public static final String PROPERTY_LEGEND_WIDTH_TOOLTIP = "Width in pixels of the color bar";
     private static final String PROPERTY_LEGEND_WIDTH_ALIAS = PROPERTY_IMAGE_SCALING_ROOT_ALIAS + "LegendWidth";
+    public static final int PROPERTY_LEGEND_WIDTH_MIN = 5;
+    public static final int PROPERTY_LEGEND_WIDTH_MAX = 400;
+    public static final String PROPERTY_LEGEND_WIDTH_INTERVAL = "[" + ColorBarLayerType.PROPERTY_LEGEND_WIDTH_MIN + "," + ColorBarLayerType.PROPERTY_LEGEND_WIDTH_MAX + "]";
+
     public static final int PROPERTY_LEGEND_WIDTH_DEFAULT = 60;
     public static final Class PROPERTY_LEGEND_WIDTH_TYPE = Integer.class;
 
@@ -348,7 +356,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_TITLE_PARAMETER_FONT_NAME_LABEL = "Font Name";
     public static final String PROPERTY_TITLE_PARAMETER_FONT_NAME_TOOLTIP = "Set the text font of the title parameter";
     public static final String PROPERTY_TITLE_PARAMETER_FONT_NAME_ALIAS = PROPERTY_TITLE_PARAMETER_ROOT_ALIAS + "FontName";
-    public static final String PROPERTY_TITLE_PARAMETER_FONT_NAME_DEFAULT = FONT_NAME_VALUE_1;
+    public static final String PROPERTY_TITLE_PARAMETER_FONT_NAME_DEFAULT = FONT_NAME_SANSERIF;
     public static final Class PROPERTY_TITLE_PARAMETER_FONT_NAME_TYPE = String.class;
     public static final Object PROPERTY_TITLE_PARAMETER_FONT_NAME_VALUE_SET[] = FONT_NAME_VALUE_SET;
 
@@ -419,7 +427,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_TITLE_UNITS_FONT_NAME_LABEL = "Font Name";
     public static final String PROPERTY_TITLE_UNITS_FONT_NAME_TOOLTIP = "Set the text font of the title units";
     public static final String PROPERTY_TITLE_UNITS_FONT_NAME_ALIAS = PROPERTY_TITLE_UNITS_ROOT_ALIAS + "FontName";
-    public static final String PROPERTY_TITLE_UNITS_FONT_NAME_DEFAULT = FONT_NAME_VALUE_1;
+    public static final String PROPERTY_TITLE_UNITS_FONT_NAME_DEFAULT = FONT_NAME_SANSERIF;
     public static final Class PROPERTY_TITLE_UNITS_FONT_NAME_TYPE = String.class;
     public static final Object PROPERTY_TITLE_UNITS_FONT_NAME_VALUE_SET[] = FONT_NAME_VALUE_SET;
 
@@ -482,7 +490,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_LABELS_FONT_NAME_LABEL = "Font Name";
     public static final String PROPERTY_LABELS_FONT_NAME_TOOLTIP = "Set the font of the tick-mark labels";
     public static final String PROPERTY_LABELS_FONT_NAME_ALIAS = PROPERTY_LABELS_ROOT_ALIAS + "FontName";
-    public static final String PROPERTY_LABELS_FONT_NAME_DEFAULT = FONT_NAME_VALUE_1;
+    public static final String PROPERTY_LABELS_FONT_NAME_DEFAULT = FONT_NAME_SANSERIF;
     public static final Class PROPERTY_LABELS_FONT_NAME_TYPE = String.class;
     public static final Object PROPERTY_LABELS_FONT_NAME_VALUE_SET[] = FONT_NAME_VALUE_SET;
 
