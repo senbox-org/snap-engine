@@ -74,6 +74,11 @@ public class CombinedFXYGeoCoding extends AbstractGeoCoding {
     public boolean transferGeoCoding(final Scene srcScene,
                                      final Scene destScene,
                                      final ProductSubsetDef subsetDef) {
+        if (subsetDef == null || subsetDef.isEntireProductSelected()) {
+            destScene.setGeoCoding(clone());
+            return true;
+        }
+
         final CodingWrapper[] wrappers = new CodingWrapper[_codingWrappers.length];
         int ccdCarryover = 0;
         for (int i = 0; i < _codingWrappers.length; i++) {
