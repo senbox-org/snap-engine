@@ -34,12 +34,13 @@ import java.awt.image.SampleModel;
 
 /**
  * DEPRECATED!
- * please use ComponentGeoCoding instead
+ *
  * <p>
  * This is an experimental pixel geo-coding, which solves some problems of {@link PixelGeoCoding},
  * but may bring-up others.
  *
  * @author Ralf Quast
+ * @deprecated since SNAP 8, use {@link org.esa.snap.core.dataio.geocoding.ComponentGeoCoding} instead
  */
 @Deprecated
 class PixelGeoCoding2 extends AbstractGeoCoding implements BasicPixelGeoCoding {

@@ -58,7 +58,6 @@ import java.util.Vector;
 /**
  * DEPRECATED!
  *
- * please use ComponentGeoCoding instead
  *
  * The <code>PixelGeoCoding</code> is an implementation of a {@link GeoCoding} which uses
  * dedicated latitude and longitude bands in order to provide geographical positions
@@ -96,6 +95,8 @@ import java.util.Vector;
  * <p>
  * The advantage of this algorithm is that it obviously avoids problems related
  * to the antimeridian and poles included in the source region.
+ *
+ * @deprecated since SNAP 8, use {@link org.esa.snap.core.dataio.geocoding.ComponentGeoCoding} instead
  */
 @Deprecated
 public class PixelGeoCoding extends AbstractGeoCoding implements BasicPixelGeoCoding {
