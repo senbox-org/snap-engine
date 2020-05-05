@@ -16,9 +16,6 @@
 package org.esa.snap.core.gpf.common;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryFactory;
 import org.esa.snap.core.dataio.geometry.VectorDataNodeIO;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.GeoPos;
@@ -43,6 +40,9 @@ import org.geotools.feature.FeatureCollection;
 import org.geotools.geometry.jts.GeometryCoordinateSequenceTransformer;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -83,24 +83,28 @@ public class ImportVectorOp extends Operator {
 
     @Override
     public void initialize() throws OperatorException {
-        targetProduct = new Product(sourceProduct.getName(), sourceProduct.getProductType(),
-                sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
-        ProductUtils.copyProductNodes(sourceProduct, targetProduct);
-        for (String bandName : sourceProduct.getBandNames()) {
-            if (!targetProduct.containsBand(bandName)) {
-                ProductUtils.copyBand(bandName, sourceProduct, targetProduct, true);
+        try {
+
+            targetProduct = new Product(sourceProduct.getName(), sourceProduct.getProductType(),
+                                        sourceProduct.getSceneRasterWidth(), sourceProduct.getSceneRasterHeight());
+
+            ProductUtils.copyProductNodes(sourceProduct, targetProduct);
+
+            for (String bandName : sourceProduct.getBandNames()) {
+                if (!targetProduct.containsBand(bandName)) {
+                    ProductUtils.copyBand(bandName, sourceProduct, targetProduct, true);
+                }
             }
+
+            if (vectorFile != null) {
+                importGeometry(targetProduct, vectorFile);
+            }
+        } catch (Throwable e) {
+            throw new OperatorException(e);
         }
     }
 
-    @Override
-    public void doExecute(ProgressMonitor pm) throws OperatorException {
-        if (vectorFile != null) {
-            importGeometry(targetProduct, vectorFile, pm);
-        }
-    }
-
-    private void importGeometry(final Product product, final File file, ProgressMonitor pm) {
+    private void importGeometry(final Product product, final File file) {
 
         final GeoCoding geoCoding = product.getSceneGeoCoding();
         if (isShapefile(file) && (geoCoding == null || !geoCoding.canGetPixelPos())) {
@@ -116,7 +120,7 @@ public class ImportVectorOp extends Operator {
 
         VectorDataNode vectorDataNode;
         try {
-            vectorDataNode = reader.readVectorDataNode(file, product, null, pm);
+            vectorDataNode = reader.readVectorDataNode(file, product, null, ProgressMonitor.NULL);
         } catch (Exception e) {
             throw new OperatorException("Failed to import geometry.\n" + "An I/O Error occurred:\n"
                     + e.getMessage()); /* I18N */
