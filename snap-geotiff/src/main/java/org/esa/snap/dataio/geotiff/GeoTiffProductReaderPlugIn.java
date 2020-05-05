@@ -77,7 +77,9 @@ public class GeoTiffProductReaderPlugIn implements ProductReaderPlugIn {
                 if (fileExtension != null) {
                     boolean extensionMatches = Arrays.stream(TIFF_FILE_EXTENSION).anyMatch(fileExtension::equalsIgnoreCase);
                     if (extensionMatches) {
-                        return DecodeQualification.SUITABLE;    //INTENDED
+                        try (ImageInputStream imageInputStream = ImageIO.createImageInputStream(productInputFile)) {
+                            return getDecodeQualificationImpl(imageInputStream);
+                        }
                     } else if (fileExtension.equalsIgnoreCase(ZIP_FILE_EXTENSION)) {
                         return checkZipArchive(productPath);
                     }
