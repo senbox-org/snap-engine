@@ -49,6 +49,8 @@ public class GeoCodingFactory {
 
     public static final String USE_ALTERNATE_PIXEL_GEO_CODING_PROPERTY = "snap.useAlternatePixelGeoCoding";
 
+    // use ComponentGeoCoding instead
+    @Deprecated
     public static BasicPixelGeoCoding createPixelGeoCoding(final Band latBand,
                                                            final Band lonBand,
                                                            final String validMask,
@@ -59,6 +61,8 @@ public class GeoCodingFactory {
         return new PixelGeoCoding2(latBand, lonBand, validMask, 2);
     }
 
+    // use ComponentGeoCoding instead
+    @Deprecated
     public static BasicPixelGeoCoding createPixelGeoCoding(final Band latBand,
                                                            final Band lonBand,
                                                            final String validMask,
