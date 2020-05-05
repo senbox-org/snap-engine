@@ -226,7 +226,7 @@ public class VirtualBandOpImage extends SingleBandedOpImage {
     }
 
     @Override
-    public synchronized Raster computeTile(int tileX, int tileY) {
+    public Raster computeTile(int tileX, int tileY) {
         final Term effectiveTerm = new RasterDataSymbolReplacer().apply(this.term);
         // todo - addDataToReferredRasterDataSymbols() makes wrong assumptions wrt its return value!       (nf, 2015-07-25)
         //        Consider expr "A < 0 ? B : C" --> if C is a no-data tile at (tileX,tileY), then computeTile()
@@ -292,7 +292,7 @@ public class VirtualBandOpImage extends SingleBandedOpImage {
         }
     }
 
-    private boolean addDataToReferredRasterDataSymbols(Rectangle destRect, Term term) {
+    private boolean addDataToReferredRasterDataSymbols(Rectangle r, Term term) {
         for (final RasterDataSymbol symbol : BandArithmetic.getRefRasterDataSymbols(term)) {
             final RenderedImage sourceImage;
             final int dataType;
@@ -304,19 +304,18 @@ public class VirtualBandOpImage extends SingleBandedOpImage {
                 sourceImage = ImageManager.getInstance().getSourceImage(rasterDataNode, getLevel());
                 dataType = rasterDataNode.getDataType();
             }
-            final Raster sourceRaster = sourceImage.getData(destRect);
+            final Raster sourceRaster = sourceImage.getData(r);
             if (sourceRaster instanceof NoDataRaster) {
                 return false;
             }
             DataBuffer dataBuffer = sourceRaster.getDataBuffer();
-            if (dataBuffer.getSize() != destRect.width * destRect.height) {
-                final WritableRaster writableRaster = sourceRaster.createCompatibleWritableRaster(destRect);
-                sourceImage.copyData(writableRaster);
-                dataBuffer = writableRaster.getDataBuffer();
+            if (dataBuffer.getSize() != r.width * r.height) {
+                Object dataElements = sourceRaster.getDataElements(r.x, r.y, r.width, r.height, null);
+                symbol.setData(ProductData.createInstance(dataType, dataElements));
+            } else {
+                symbol.setData(ProductData.createInstance(dataType, ImageUtils.getPrimitiveArray(dataBuffer)));
             }
-            symbol.setData(ProductData.createInstance(dataType, ImageUtils.getPrimitiveArray(dataBuffer)));
         }
         return true;
     }
-
 }
