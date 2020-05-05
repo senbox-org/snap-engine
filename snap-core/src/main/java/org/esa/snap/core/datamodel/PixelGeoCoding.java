@@ -56,6 +56,9 @@ import java.util.Vector;
 
 
 /**
+ * DEPRECATED!
+ *
+ *
  * The <code>PixelGeoCoding</code> is an implementation of a {@link GeoCoding} which uses
  * dedicated latitude and longitude bands in order to provide geographical positions
  * for <i>each</i> pixel. Unlike the {@link TiePointGeoCoding}, which uses sub-sampled {@link TiePointGrid tie-point grids},
@@ -92,7 +95,10 @@ import java.util.Vector;
  * <p>
  * The advantage of this algorithm is that it obviously avoids problems related
  * to the antimeridian and poles included in the source region.
+ *
+ * @deprecated since SNAP 8, use {@link org.esa.snap.core.dataio.geocoding.ComponentGeoCoding} instead
  */
+@Deprecated
 public class PixelGeoCoding extends AbstractGeoCoding implements BasicPixelGeoCoding {
 
     /**
@@ -663,11 +669,16 @@ public class PixelGeoCoding extends AbstractGeoCoding implements BasicPixelGeoCo
         }
         final int x0 = (int) Math.floor(pixelPos.x);
         final int y0 = (int) Math.floor(pixelPos.y);
-        if (x0 >= 0 && x0 < rasterWidth && y0 >= 0 && y0 < rasterHeight) {
+        // allow estimator to be wrong at most searchRadius pixels to decide whether we are outside, mb, 2020-04-30
+        if (x0 >= 0-searchRadius && x0 < rasterWidth+searchRadius && y0 >= 0-searchRadius && y0 < rasterHeight+searchRadius) {
             final double lat0 = geoPos.lat;
             final double lon0 = geoPos.lon;
 
-            pixelPos.setLocation(x0, y0);
+            // abuse pixelPos as container for array indices instead of fractional pixel positions
+            // move it inside image in case it isn't, to find the nearest pixel
+            pixelPos.setLocation(Math.max(Math.min(x0, rasterWidth-1), 0),
+                                 Math.max(Math.min(y0, rasterHeight-1), 0));
+
             int y1;
             int x1;
             double minDelta;
@@ -680,6 +691,7 @@ public class PixelGeoCoding extends AbstractGeoCoding implements BasicPixelGeoCo
             while (++cycles < MAX_SEARCH_CYCLES && (x1 != (int) pixelPos.x || y1 != (int) pixelPos.y) && bestPixelIsOnSearchBorder(
                     x1, y1, pixelPos));
             if (Math.sqrt(minDelta) < deltaThreshold) {
+                // revert abuse and shift back pixelPos to the middle of the pixel
                 pixelPos.setLocation(pixelPos.x + 0.5f, pixelPos.y + 0.5f);
             } else {
                 pixelPos.setInvalid();
