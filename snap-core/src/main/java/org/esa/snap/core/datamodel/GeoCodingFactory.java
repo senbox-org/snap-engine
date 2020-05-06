@@ -1,20 +1,4 @@
 /*
- * Copyright (C) 2015 Brockmann Consult GmbH (info@brockmann-consult.de)
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the Free
- * Software Foundation; either version 3 of the License, or (at your option)
- * any later version.
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, see http://www.gnu.org/licenses/
- */
-
-package org.esa.snap.core.datamodel;/*
  * Copyright (C) 2012 Brockmann Consult GmbH (info@brockmann-consult.de)
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -29,6 +13,8 @@ package org.esa.snap.core.datamodel;/*
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
+
+package org.esa.snap.core.datamodel;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.dataio.ProductSubsetDef;
@@ -45,10 +31,18 @@ import java.awt.Rectangle;
 import java.awt.image.RenderedImage;
 import java.io.IOException;
 
+/**
+ * @deprecated since SNAP 8, use {@link org.esa.snap.core.dataio.geocoding.ComponentGeoCoding} instead
+ */
+@Deprecated
 public class GeoCodingFactory {
 
     public static final String USE_ALTERNATE_PIXEL_GEO_CODING_PROPERTY = "snap.useAlternatePixelGeoCoding";
 
+    /**
+     * @deprecated since SNAP 8, use {@link org.esa.snap.core.dataio.geocoding.ComponentGeoCoding} instead
+     */
+    @Deprecated
     public static BasicPixelGeoCoding createPixelGeoCoding(final Band latBand,
                                                            final Band lonBand,
                                                            final String validMask,
@@ -59,6 +53,11 @@ public class GeoCodingFactory {
         return new PixelGeoCoding2(latBand, lonBand, validMask, 2);
     }
 
+
+    /**
+     * @deprecated since SNAP 8, use {@link org.esa.snap.core.dataio.geocoding.ComponentGeoCoding} instead
+     */
+    @Deprecated
     public static BasicPixelGeoCoding createPixelGeoCoding(final Band latBand,
                                                            final Band lonBand,
                                                            final String validMask,

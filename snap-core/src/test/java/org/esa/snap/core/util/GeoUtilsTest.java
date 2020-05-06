@@ -580,6 +580,16 @@ public class GeoUtilsTest {
         public MathTransform getImageToMapTransform() {
             throw new RuntimeException("not implemented");
         }
+
+        @Override
+        public GeoCoding clone() {
+            throw new IllegalStateException("not implemented");
+        }
+
+        @Override
+        public boolean canClone() {
+            return false;
+        }
     }
 
     // SLSTR longitudes 8 x 10 px

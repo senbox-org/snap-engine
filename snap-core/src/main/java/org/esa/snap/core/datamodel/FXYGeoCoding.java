@@ -122,7 +122,6 @@ public class FXYGeoCoding extends AbstractGeoCoding {
      * @param geoPos   the geographical position as lat/lon.
      * @param pixelPos an instance of <code>Point</code> to be used as retun value. If this parameter is
      *                 <code>null</code>, the method creates a new instance which it then returns.
-     *
      * @return the pixel co-ordinates as x/y
      */
     @Override
@@ -144,7 +143,6 @@ public class FXYGeoCoding extends AbstractGeoCoding {
      * @param pixelPos the pixel's co-ordinates given as x,y
      * @param geoPos   an instance of <code>GeoPos</code> to be used as retun value. If this parameter is
      *                 <code>null</code>, the method creates a new instance which it then returns.
-     *
      * @return the geographical position as lat/lon.
      */
     @Override
@@ -191,28 +189,43 @@ public class FXYGeoCoding extends AbstractGeoCoding {
      * @param srcScene  the source scene
      * @param destScene the destination scene
      * @param subsetDef the definition of the subset, may be <code>null</code>
-     *
      * @return true, if the geo-coding could be transferred.
      */
     @Override
     public boolean transferGeoCoding(final Scene srcScene, final Scene destScene, final ProductSubsetDef subsetDef) {
+        if (subsetDef == null || subsetDef.isEntireProductSelected()) {
+            destScene.setGeoCoding(clone());
+            return true;
+        }
+
         float pixelOffsetX = getPixelOffsetX();
         float pixelOffsetY = getPixelOffsetY();
         float pixelSizeX = getPixelSizeX();
         float pixelSizeY = getPixelSizeY();
 
-        if (subsetDef != null) {
-            if (subsetDef.getRegion() != null) {
-                pixelOffsetX += subsetDef.getRegion().getX() * pixelSizeX;
-                pixelOffsetY += subsetDef.getRegion().getY() * pixelSizeY;
-            }
-            pixelSizeX *= subsetDef.getSubSamplingX();
-            pixelSizeY *= subsetDef.getSubSamplingY();
+        if (subsetDef.getRegion() != null) {
+            pixelOffsetX += subsetDef.getRegion().getX() * pixelSizeX;
+            pixelOffsetY += subsetDef.getRegion().getY() * pixelSizeY;
         }
+        pixelSizeX *= subsetDef.getSubSamplingX();
+        pixelSizeY *= subsetDef.getSubSamplingY();
 
         destScene.setGeoCoding(createCloneWithNewOffsetAndSize(pixelOffsetX, pixelOffsetY,
                                                                pixelSizeX, pixelSizeY));
         return true;
+    }
+
+    @Override
+    public boolean canClone() {
+        return true;
+    }
+
+    @Override
+    public GeoCoding clone() {
+        return new FXYGeoCoding(_pixelOffsetX, _pixelOffsetY,
+                                _pixelSizeX, _pixelSizeY,
+                                _pixelXFunction, _pixelYFunction,
+                                _latFunction, _lonFunction, _datum);
     }
 
     public FXYGeoCoding createCloneWithNewOffsetAndSize(float pixelOffsetX, float pixelOffsetY,

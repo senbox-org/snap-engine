@@ -133,6 +133,20 @@ public class PixelGeoIndexInverse implements InverseCoding {
         geoRaster = null;
     }
 
+    @Override
+    public InverseCoding clone() {
+        final PixelGeoIndexInverse clone = new PixelGeoIndexInverse(fractionalAccuracy);
+
+        clone.regionIndex = (TreeMap<Long, RasterRegion>) regionIndex.clone();
+        clone.multiplicator = multiplicator;
+        clone.geoRaster = geoRaster;
+        clone.longitudes = longitudes;
+        clone.latitudes = latitudes;
+        clone.epsilon = epsilon;
+
+        return clone;
+    }
+
     long toIndex(double lon, double lat) {
         int lon_idx = (int) Math.floor((lon + 180.0) * multiplicator);
         int lat_idx = (int) Math.floor((lat + 90.0) * multiplicator);

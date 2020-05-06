@@ -3,6 +3,7 @@ package org.esa.snap.core.dataio.geocoding;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
 public class GeoRasterTest {
@@ -59,5 +60,26 @@ public class GeoRasterTest {
         assertEquals(7.0, geoRaster.getOffsetY(), 1e-8);
         assertEquals(8.0, geoRaster.getSubsamplingX(), 1e-8);
         assertEquals(9.0, geoRaster.getSubsamplingY(), 1e-8);
+    }
+
+    @Test
+    public void testFullConstruction_dispose() {
+        double[] longitudes = new double[]{2, 3, 4, 5, 6, 7};
+        double[] latitudes = new double[]{8, 9, 10, 11, 12, 13};
+
+        final GeoRaster geoRaster = new GeoRaster(longitudes, latitudes,
+                                                  "long", "latt",
+                                                  2, 3, 4, 5, 18.7,
+                                                  6.0, 7.0, 8.0, 9.0);
+
+        assertSame(longitudes, geoRaster.getLongitudes());
+        assertSame(latitudes, geoRaster.getLatitudes());
+
+        geoRaster.dispose();
+
+        assertNull(geoRaster.getLongitudes());
+        assertNull(geoRaster.getLatitudes());
+        assertNull(geoRaster.getLonVariableName());
+        assertNull(geoRaster.getLatVariableName());
     }
 }

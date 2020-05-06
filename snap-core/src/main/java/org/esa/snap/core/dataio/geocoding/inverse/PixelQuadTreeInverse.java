@@ -46,6 +46,55 @@ public class PixelQuadTreeInverse implements InverseCoding {
         }
     }
 
+    // package access for testing only tb 2019-12-16
+    static double getPositiveLonMin(double lon0, double lon1, double lon2, double lon3) {
+        double lonMin = 180.0f;
+        if (lon0 >= 0.0) {
+            lonMin = lon0;
+        }
+        if (lon1 >= 0.0) {
+            lonMin = Math.min(lon1, lonMin);
+        }
+        if (lon2 >= 0.0) {
+            lonMin = Math.min(lon2, lonMin);
+        }
+        if (lon3 >= 0.0) {
+            lonMin = Math.min(lon3, lonMin);
+        }
+        return lonMin;
+    }
+
+    // package access for testing only tb 2019-12-16
+    static double getNegativeLonMax(double lon0, double lon1, double lon2, double lon3) {
+        double lonMax = -180.0f;
+        if (lon0 < 0.0f) {
+            lonMax = lon0;
+        }
+        if (lon1 < 0.0f) {
+            lonMax = Math.max(lon1, lonMax);
+        }
+        if (lon2 < 0.0f) {
+            lonMax = Math.max(lon2, lonMax);
+        }
+        if (lon3 < 0.0f) {
+            lonMax = Math.max(lon3, lonMax);
+        }
+        return lonMax;
+    }
+
+    static boolean isCrossingAntiMeridianInsideQuad(double lon0, double lon1,
+                                                    double lon2, double lon3) {
+        double lonMin = Math.min(lon0, Math.min(lon1, Math.min(lon2, lon3)));
+        double lonMax = Math.max(lon0, Math.max(lon1, Math.max(lon2, lon3)));
+
+        return Math.abs(lonMax - lonMin) > ANGLE_THRESHOLD;
+    }
+
+    // package access for testing only tb 2019-12-16
+    static double sq(final double dx, final double dy) {
+        return dx * dx + dy * dy;
+    }
+
     @Override
     public PixelPos getPixelPos(GeoPos geoPos, PixelPos pixelPos) {
         if (pixelPos == null) {
@@ -115,6 +164,29 @@ public class PixelQuadTreeInverse implements InverseCoding {
         latitudes = null;
     }
 
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
+    @Override
+    public InverseCoding clone() {
+        final PixelQuadTreeInverse clone = new PixelQuadTreeInverse(fractionalAccuracy);
+
+        clone.rasterWidth = rasterWidth;
+        clone.rasterHeight = rasterHeight;
+
+        clone.longitudes = longitudes;
+        clone.latitudes = latitudes;
+
+        clone.lonRange = new Range(lonRange.getMin(), lonRange.getMax());
+        clone.latRange = new Range(latRange.getMin(), latRange.getMax());
+
+        clone.epsilon = epsilon;
+        clone.isCrossingMeridian = isCrossingMeridian;
+
+        clone.offsetX = offsetX;
+        clone.offsetY = offsetY;
+
+        return clone;
+    }
+
     // package access for testing only tb 2019-12-16
     void getGeoPos(int pixelX, int pixelY, GeoPos geoPos) {
         final int index = pixelY * rasterWidth + pixelX;
@@ -126,55 +198,6 @@ public class PixelQuadTreeInverse implements InverseCoding {
     double getEpsilon(double resolutionInKm) {
         final double angle = 2.0 * Math.asin((resolutionInKm * 1000.0) / (2 * RsMathUtils.MEAN_EARTH_RADIUS));
         return TO_DEG * angle * 2.0;
-    }
-
-    // package access for testing only tb 2019-12-16
-    static double getPositiveLonMin(double lon0, double lon1, double lon2, double lon3) {
-        double lonMin = 180.0f;
-        if (lon0 >= 0.0) {
-            lonMin = lon0;
-        }
-        if (lon1 >= 0.0) {
-            lonMin = Math.min(lon1, lonMin);
-        }
-        if (lon2 >= 0.0) {
-            lonMin = Math.min(lon2, lonMin);
-        }
-        if (lon3 >= 0.0) {
-            lonMin = Math.min(lon3, lonMin);
-        }
-        return lonMin;
-    }
-
-    // package access for testing only tb 2019-12-16
-    static double getNegativeLonMax(double lon0, double lon1, double lon2, double lon3) {
-        double lonMax = -180.0f;
-        if (lon0 < 0.0f) {
-            lonMax = lon0;
-        }
-        if (lon1 < 0.0f) {
-            lonMax = Math.max(lon1, lonMax);
-        }
-        if (lon2 < 0.0f) {
-            lonMax = Math.max(lon2, lonMax);
-        }
-        if (lon3 < 0.0f) {
-            lonMax = Math.max(lon3, lonMax);
-        }
-        return lonMax;
-    }
-
-    static boolean isCrossingAntiMeridianInsideQuad(double lon0, double lon1,
-                                                    double lon2, double lon3) {
-        double lonMin = Math.min(lon0, Math.min(lon1, Math.min(lon2, lon3)));
-        double lonMax = Math.max(lon0, Math.max(lon1, Math.max(lon2, lon3)));
-
-        return Math.abs(lonMax - lonMin) > ANGLE_THRESHOLD;
-    }
-
-    // package access for testing only tb 2019-12-16
-    static double sq(final double dx, final double dy) {
-        return dx * dx + dy * dy;
     }
 
     @SuppressWarnings("UnnecessaryLocalVariable")
@@ -248,16 +271,16 @@ public class PixelQuadTreeInverse implements InverseCoding {
             latMax = Math.max(lat_0, Math.max(lat_1, Math.max(lat_2, lat_3))) + epsilon;
 
             if (isCrossingMeridian && isCrossingAntiMeridianInsideQuad(lon_0, lon_1, lon_2, lon_3)) {
-                    final double signumLon = Math.signum(lon);
-                    if (signumLon > 0f) {
-                        // position is in a region with positive longitudes, so cut negative longitudes from quad area
-                        lonMax = 180.0f;
-                        lonMin = getPositiveLonMin(lon_0, lon_1, lon_2, lon_3);
-                    } else {
-                        // position is in a region with negative longitudes, so cut positive longitudes from quad area
-                        lonMin = -180.0f;
-                        lonMax = getNegativeLonMax(lon_0, lon_1, lon_2, lon_3);
-                    }
+                final double signumLon = Math.signum(lon);
+                if (signumLon > 0f) {
+                    // position is in a region with positive longitudes, so cut negative longitudes from quad area
+                    lonMax = 180.0f;
+                    lonMin = getPositiveLonMin(lon_0, lon_1, lon_2, lon_3);
+                } else {
+                    // position is in a region with negative longitudes, so cut positive longitudes from quad area
+                    lonMin = -180.0f;
+                    lonMax = getNegativeLonMax(lon_0, lon_1, lon_2, lon_3);
+                }
             } else {
                 lonMin = Math.min(lon_0, Math.min(lon_1, Math.min(lon_2, lon_3))) - epsilon;
                 lonMax = Math.max(lon_0, Math.max(lon_1, Math.max(lon_2, lon_3))) + epsilon;

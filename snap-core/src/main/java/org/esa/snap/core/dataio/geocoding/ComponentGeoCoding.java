@@ -2,7 +2,16 @@ package org.esa.snap.core.dataio.geocoding;
 
 import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.dataio.geocoding.util.RasterUtils;
-import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.datamodel.AbstractGeoCoding;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.GeoCodingFactory;
+import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.RasterDataNode;
+import org.esa.snap.core.datamodel.Scene;
+import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.dataop.maptransf.Datum;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -131,16 +140,15 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
     public boolean transferGeoCoding(Scene srcScene, Scene destScene, ProductSubsetDef subsetDef) {
         transferRequiredRasters(srcScene, destScene, subsetDef);
 
+        if (subsetDef == null || subsetDef.isEntireProductSelected()) {
+            destScene.setGeoCoding(clone());
+            return true;
+        }
+
         final String lonVariableName = this.geoRaster.getLonVariableName();
         final String latVariableName = this.geoRaster.getLatVariableName();
 
-        final GeoRaster geoRaster;
-        if (subsetDef == null) {
-            geoRaster = cloneGeoRaster(lonVariableName, latVariableName);
-        } else {
-            geoRaster = calculateGeoRaster(destScene, subsetDef, lonVariableName, latVariableName);
-        }
-
+        final GeoRaster geoRaster = calculateGeoRaster(destScene, subsetDef, lonVariableName, latVariableName);
         ForwardCoding forwardCoding = null;
         if (this.forwardCoding != null) {
             forwardCoding = ComponentFactory.getForward(this.forwardCoding.getKey());
@@ -154,7 +162,144 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
         final ComponentGeoCoding destGeoCoding = new ComponentGeoCoding(geoRaster, forwardCoding, inverseCoding, geoChecks, geoCRS);
         destGeoCoding.initialize();
         destScene.setGeoCoding(destGeoCoding);
+
         return true;
+    }
+
+    // package access for testing only tb 2020-02-20
+    GeoRaster cloneGeoRaster(String lonVariableName, String latVariableName) {
+        return new GeoRaster(this.geoRaster.getLongitudes(), this.geoRaster.getLatitudes(),
+                             lonVariableName, latVariableName,
+                             this.geoRaster.getRasterWidth(), this.geoRaster.getRasterHeight(),
+                             this.geoRaster.getSceneWidth(), this.geoRaster.getSceneHeight(),
+                             this.geoRaster.getRasterResolutionInKm(),
+                             this.geoRaster.getOffsetX(), this.geoRaster.getOffsetY(),
+                             this.geoRaster.getSubsamplingX(), this.geoRaster.getSubsamplingY());
+    }
+
+    // package access for testing only tb 2020-02-20
+    void transferRequiredRasters(Scene srcScene, Scene destScene, ProductSubsetDef subsetDef) {
+        final String lonVarName = geoRaster.getLonVariableName();
+        final String latVarName = geoRaster.getLatVariableName();
+
+        final Product srcProduct = srcScene.getProduct();
+        final Product destProduct = destScene.getProduct();
+
+        final RasterDataNode srcLonRaster = srcProduct.getRasterDataNode(lonVarName);
+        if (srcLonRaster instanceof TiePointGrid) {
+            TiePointGrid destTpgLon = destProduct.getTiePointGrid(lonVarName);
+            if (destTpgLon == null) {
+                final TiePointGrid srcTpgLon = srcProduct.getTiePointGrid(lonVarName);
+                destTpgLon = TiePointGrid.createSubset(srcTpgLon, subsetDef);
+                destProduct.addTiePointGrid(destTpgLon);
+            }
+            TiePointGrid destTpgLat = destProduct.getTiePointGrid(latVarName);
+            if (destTpgLat == null) {
+                final TiePointGrid srcTpgLat = srcProduct.getTiePointGrid(latVarName);
+                destTpgLat = TiePointGrid.createSubset(srcTpgLat, subsetDef);
+                destProduct.addTiePointGrid(destTpgLat);
+            }
+        } else {
+            Band destLonBand = destProduct.getBand(lonVarName);
+            if (destLonBand == null) {
+                final Band srcLonBand = srcProduct.getBand(lonVarName);
+                destLonBand = GeoCodingFactory.createSubset(srcLonBand, destScene, subsetDef);
+                destProduct.addBand(destLonBand);
+            }
+            Band destLatBand = destProduct.getBand(latVarName);
+            if (destLatBand == null) {
+                final Band srcLatBand = srcProduct.getBand(latVarName);
+                destLatBand = GeoCodingFactory.createSubset(srcLatBand, destScene, subsetDef);
+                destProduct.addBand(destLatBand);
+            }
+        }
+    }
+
+    @Override
+    public void dispose() {
+        isInitialized = false;
+        if (forwardCoding != null) {
+            forwardCoding.dispose();
+        }
+        if (inverseCoding != null) {
+            inverseCoding.dispose();
+        }
+        if (geoRaster != null) {
+            geoRaster.dispose();
+        }
+    }
+
+    /**
+     * Gets the datum, the reference point or surface against which {@link GeoPos} measurements are made.
+     *
+     * @return the datum
+     * @deprecated use the datum of the associated {@link #getMapCRS() map CRS}.
+     */
+    @Override
+    @Deprecated
+    public Datum getDatum() {
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public GeoCoding clone() {
+        final GeoRaster geoRaster = cloneGeoRaster(this.geoRaster.getLonVariableName(), this.geoRaster.getLatVariableName());
+
+        ForwardCoding cloneForward = null;
+        if (forwardCoding != null) {
+            cloneForward = forwardCoding.clone();
+        }
+
+        InverseCoding cloneInverse = null;
+        if (inverseCoding != null) {
+            cloneInverse = inverseCoding.clone();
+        }
+        final ComponentGeoCoding clone = new ComponentGeoCoding(geoRaster, cloneForward, cloneInverse, geoChecks);
+
+        clone.isInitialized = this.isInitialized;
+
+        return clone;
+    }
+
+    @Override
+    public boolean canClone() {
+        return true;
+    }
+
+    public void initialize() {
+        PixelPos[] poleLocations = new PixelPos[0];
+
+        if (geoChecks != GeoChecks.NONE) {
+            isCrossingAntiMeridian = RasterUtils.containsAntiMeridian(geoRaster.getLongitudes(), geoRaster.getRasterWidth());
+            if (isCrossingAntiMeridian && geoChecks == GeoChecks.POLES) {
+                poleLocations = RasterUtils.getPoleLocations(geoRaster);
+            }
+        }
+
+        if (forwardCoding != null) {
+            forwardCoding.initialize(geoRaster, isCrossingAntiMeridian, poleLocations);
+        }
+        if (inverseCoding != null) {
+            inverseCoding.initialize(geoRaster, isCrossingAntiMeridian, poleLocations);
+        }
+
+        isInitialized = true;
+    }
+
+    public GeoChecks getGeoChecks() {
+        return geoChecks;
+    }
+
+    public ForwardCoding getForwardCoding() {
+        return forwardCoding;
+    }
+
+    public InverseCoding getInverseCoding() {
+        return inverseCoding;
+    }
+
+    public GeoRaster getGeoRaster() {
+        return geoRaster;
     }
 
     private GeoRaster calculateGeoRaster(Scene destScene, ProductSubsetDef subsetDef, String lonVariableName, String latVariableName) {
@@ -201,116 +346,9 @@ public class ComponentGeoCoding extends AbstractGeoCoding {
         }
 
         geoRaster = new GeoRaster(longitudes, latitudes, lonVariableName, latVariableName,
-                gridWidth, gridHeight, destScene.getRasterWidth(), destScene.getRasterHeight(),
-                this.geoRaster.getRasterResolutionInKm() * subsetDef.getSubSamplingX(),
-                offsetX, offsetY, subsamplingX, subsamplingY);
-        return geoRaster;
-    }
-
-    // package access for testing only tb 2020-02-20
-    GeoRaster cloneGeoRaster(String lonVariableName, String latVariableName) {
-        return new GeoRaster(this.geoRaster.getLongitudes().clone(), this.geoRaster.getLatitudes().clone(),
-                lonVariableName, latVariableName,
-                this.geoRaster.getRasterWidth(), this.geoRaster.getRasterHeight(),
-                this.geoRaster.getSceneWidth(), this.geoRaster.getSceneHeight(),
-                this.geoRaster.getRasterResolutionInKm(),
-                this.geoRaster.getOffsetX(), this.geoRaster.getOffsetY(),
-                this.geoRaster.getSubsamplingX(), this.geoRaster.getSubsamplingY());
-    }
-
-    // package access for testing only tb 2020-02-20
-    void transferRequiredRasters(Scene srcScene, Scene destScene, ProductSubsetDef subsetDef) {
-        final String lonVarName = geoRaster.getLonVariableName();
-        final String latVarName = geoRaster.getLatVariableName();
-
-        final Product srcProduct = srcScene.getProduct();
-        final Product destProduct = destScene.getProduct();
-
-        final RasterDataNode srcLonRaster = srcProduct.getRasterDataNode(lonVarName);
-        if (srcLonRaster instanceof TiePointGrid) {
-            TiePointGrid destTpgLon = destProduct.getTiePointGrid(lonVarName);
-            if (destTpgLon == null) {
-                final TiePointGrid srcTpgLon = srcProduct.getTiePointGrid(lonVarName);
-                destTpgLon = TiePointGrid.createSubset(srcTpgLon, subsetDef);
-                destProduct.addTiePointGrid(destTpgLon);
-            }
-            TiePointGrid destTpgLat = destProduct.getTiePointGrid(latVarName);
-            if (destTpgLat == null) {
-                final TiePointGrid srcTpgLat = srcProduct.getTiePointGrid(latVarName);
-                destTpgLat = TiePointGrid.createSubset(srcTpgLat, subsetDef);
-                destProduct.addTiePointGrid(destTpgLat);
-            }
-        } else {
-            Band destLonBand = destProduct.getBand(lonVarName);
-            if (destLonBand == null) {
-                final Band srcLonBand = srcProduct.getBand(lonVarName);
-                destLonBand = GeoCodingFactory.createSubset(srcLonBand, destScene, subsetDef);
-                destProduct.addBand(destLonBand);
-            }
-            Band destLatBand = destProduct.getBand(latVarName);
-            if (destLatBand == null) {
-                final Band srcLatBand = srcProduct.getBand(latVarName);
-                destLatBand = GeoCodingFactory.createSubset(srcLatBand, destScene, subsetDef);
-                destProduct.addBand(destLatBand);
-            }
-        }
-    }
-
-    @Override
-    public void dispose() {
-        if (forwardCoding != null) {
-            forwardCoding.dispose();
-        }
-        if (inverseCoding != null) {
-            inverseCoding.dispose();
-        }
-    }
-
-    /**
-     * Gets the datum, the reference point or surface against which {@link GeoPos} measurements are made.
-     *
-     * @return the datum
-     * @deprecated use the datum of the associated {@link #getMapCRS() map CRS}.
-     */
-    @Override
-    @Deprecated
-    public Datum getDatum() {
-        throw new NotImplementedException();
-    }
-
-    public void initialize() {
-        PixelPos[] poleLocations = new PixelPos[0];
-
-        if (geoChecks != GeoChecks.NONE) {
-            isCrossingAntiMeridian = RasterUtils.containsAntiMeridian(geoRaster.getLongitudes(), geoRaster.getRasterWidth());
-            if (isCrossingAntiMeridian && geoChecks == GeoChecks.POLES) {
-                poleLocations = RasterUtils.getPoleLocations(geoRaster);
-            }
-        }
-
-        if (forwardCoding != null) {
-            forwardCoding.initialize(geoRaster, isCrossingAntiMeridian, poleLocations);
-        }
-        if (inverseCoding != null) {
-            inverseCoding.initialize(geoRaster, isCrossingAntiMeridian, poleLocations);
-        }
-
-        isInitialized = true;
-    }
-
-    public GeoChecks getGeoChecks() {
-        return geoChecks;
-    }
-
-    public ForwardCoding getForwardCoding() {
-        return forwardCoding;
-    }
-
-    public InverseCoding getInverseCoding() {
-        return inverseCoding;
-    }
-
-    public GeoRaster getGeoRaster() {
+                                  gridWidth, gridHeight, destScene.getRasterWidth(), destScene.getRasterHeight(),
+                                  this.geoRaster.getRasterResolutionInKm() * subsetDef.getSubSamplingX(),
+                                  offsetX, offsetY, subsamplingX, subsamplingY);
         return geoRaster;
     }
 }

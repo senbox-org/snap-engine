@@ -33,13 +33,13 @@ import java.util.ArrayList;
  */
 public class CombinedFXYGeoCoding extends AbstractGeoCoding {
 
-    private CodingWrapper[] _codingWrappers;
     private final Datum _datum;
+    private CodingWrapper[] _codingWrappers;
     private int _lastIndex;
 
     public CombinedFXYGeoCoding(final CodingWrapper[] codingWrappers) {
         Guardian.assertNotNull("codingWrappers", codingWrappers);
-        final ArrayList<CodingWrapper> wrappers = new ArrayList<CodingWrapper>();
+        final ArrayList<CodingWrapper> wrappers = new ArrayList<>();
         for (int i = 0; i < codingWrappers.length; i++) {
             final CodingWrapper codingWrapper = codingWrappers[i];
             if (codingWrapper != null) {
@@ -47,7 +47,7 @@ public class CombinedFXYGeoCoding extends AbstractGeoCoding {
             }
         }
         Guardian.assertGreaterThan("number of coding wrappers", wrappers.size(), 0);
-        _codingWrappers = wrappers.toArray(new CodingWrapper[wrappers.size()]);
+        _codingWrappers = wrappers.toArray(new CodingWrapper[0]);
         _datum = _codingWrappers[0].getGeoGoding().getDatum();
         _lastIndex = 0;
     }
@@ -68,13 +68,17 @@ public class CombinedFXYGeoCoding extends AbstractGeoCoding {
      * @param srcScene  the source scene
      * @param destScene the destination scene
      * @param subsetDef the definition of the subset, may be <code>null</code>
-     *
      * @return true, if the geo-coding could be transferred.
      */
     @Override
     public boolean transferGeoCoding(final Scene srcScene,
                                      final Scene destScene,
                                      final ProductSubsetDef subsetDef) {
+        if (subsetDef == null || subsetDef.isEntireProductSelected()) {
+            destScene.setGeoCoding(clone());
+            return true;
+        }
+
         final CodingWrapper[] wrappers = new CodingWrapper[_codingWrappers.length];
         int ccdCarryover = 0;
         for (int i = 0; i < _codingWrappers.length; i++) {
@@ -151,6 +155,20 @@ public class CombinedFXYGeoCoding extends AbstractGeoCoding {
         }
         destScene.setGeoCoding(new CombinedFXYGeoCoding(wrappers));
         return true;
+    }
+
+    @Override
+    public boolean canClone() {
+        return true;
+    }
+
+    @Override
+    public GeoCoding clone() {
+        final CodingWrapper[] cloneWrappers = new CodingWrapper[_codingWrappers.length];
+        for (int i = 0; i < _codingWrappers.length; i++) {
+            cloneWrappers[i] = _codingWrappers[i].clone();
+        }
+        return new CombinedFXYGeoCoding(cloneWrappers);
     }
 
     public boolean isCrossingMeridianAt180() {
@@ -232,6 +250,13 @@ public class CombinedFXYGeoCoding extends AbstractGeoCoding {
 
         public FXYGeoCoding getGeoGoding() {
             return _geoGoding;
+        }
+
+        @SuppressWarnings("MethodDoesntCallSuperMethod")
+        public CodingWrapper clone() {
+            return new CodingWrapper((FXYGeoCoding) _geoGoding.clone(),
+                                     _location.x, _location.y,
+                                     _dimension.width, _dimension.height);
         }
 
         private Point getLocation() {

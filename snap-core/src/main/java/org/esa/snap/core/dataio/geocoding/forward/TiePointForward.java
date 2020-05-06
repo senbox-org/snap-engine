@@ -17,10 +17,12 @@ abstract class TiePointForward implements ForwardCoding {
         }
     }
 
-
     void checkGeoRaster(GeoRaster geoRaster) {
         if (geoRaster.getLongitudes().length != geoRaster.getLatitudes().length) {
             throw new IllegalArgumentException("lonGrid is not compatible with latGrid");
         }
     }
+
+    @Override
+    abstract public ForwardCoding clone();
 }

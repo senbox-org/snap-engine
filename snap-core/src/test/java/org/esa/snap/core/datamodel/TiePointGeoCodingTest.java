@@ -122,6 +122,52 @@ public class TiePointGeoCodingTest {
         assertEquals(70, warpParameters[3]);
     }
 
+    @Test
+    public void testCanClone() {
+        final Product product = createProduct();
+        final GeoCoding geoCoding = product.getSceneGeoCoding();
+
+        assertTrue(geoCoding.canClone());
+    }
+
+    @Test
+    public void testClone() {
+        final Product product = createProduct();
+        final GeoCoding geoCoding = product.getSceneGeoCoding();
+
+        final PixelPos pixelPos = new PixelPos(4, 3);
+
+        GeoPos geoPos = geoCoding.getGeoPos(pixelPos, null);
+        assertEquals(11.11328125, geoPos.lon, 1e-8);
+        assertEquals(52.33203172683716, geoPos.lat, 1e-8);
+
+        final GeoCoding clone = geoCoding.clone();
+        geoPos = clone.getGeoPos(pixelPos, null);
+        assertEquals(11.11328125, geoPos.lon, 1e-8);
+        assertEquals(52.33203172683716, geoPos.lat, 1e-8);
+    }
+
+    @Test
+    public void testClone_disposeOriginal() {
+        final Product product = createProduct();
+        final GeoCoding geoCoding = product.getSceneGeoCoding();
+
+        final PixelPos pixelPos = new PixelPos(4, 3);
+
+        GeoPos geoPos = geoCoding.getGeoPos(pixelPos, null);
+        assertEquals(11.11328125, geoPos.lon, 1e-8);
+        assertEquals(52.33203172683716, geoPos.lat, 1e-8);
+
+        final GeoCoding clone = geoCoding.clone();
+        geoCoding.dispose();
+
+        geoPos = clone.getGeoPos(pixelPos, null);
+        assertEquals(11.11328125, geoPos.lon, 1e-8);
+        assertEquals(52.33203172683716, geoPos.lat, 1e-8);
+
+        clone.dispose();
+    }
+
     private Product createProduct() {
         return createProduct(0.5f, 0.5f, S , S);
     }

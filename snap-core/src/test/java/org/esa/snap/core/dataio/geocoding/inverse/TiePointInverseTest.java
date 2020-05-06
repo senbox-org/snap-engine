@@ -338,6 +338,44 @@ public class TiePointInverseTest {
     }
 
     @Test
+    public void testClone() {
+        final TiePointInverse inverse = new TiePointInverse();
+        final GeoRaster geoRaster = TestData.get_MER_RR();
+        inverse.initialize(geoRaster, false, new PixelPos[0]);
+
+        final GeoPos geoPos = new GeoPos(72.23247, 17.933608);
+
+        PixelPos pixelPos = inverse.getPixelPos(geoPos, null);
+        assertEquals(0.50263718071056475, pixelPos.x, 1e-8);
+        assertEquals(0.5990279717018105, pixelPos.y, 1e-8);
+
+        final InverseCoding clone = inverse.clone();
+        pixelPos = clone.getPixelPos(geoPos, null);
+        assertEquals(0.50263718071056475, pixelPos.x, 1e-8);
+        assertEquals(0.5990279717018105, pixelPos.y, 1e-8);
+    }
+
+    @Test
+    public void testClone_disposeOriginal() {
+        final TiePointInverse inverse = new TiePointInverse();
+        final GeoRaster geoRaster = TestData.get_MER_RR();
+        inverse.initialize(geoRaster, false, new PixelPos[0]);
+
+        final GeoPos geoPos = new GeoPos(72.23147, 17.932608);
+
+        PixelPos pixelPos = inverse.getPixelPos(geoPos, null);
+        assertEquals(0.5057342815309056, pixelPos.x, 1e-8);
+        assertEquals(0.698795141887042, pixelPos.y, 1e-8);
+
+        final InverseCoding clone = inverse.clone();
+        inverse.dispose();
+
+        pixelPos = clone.getPixelPos(geoPos, null);
+        assertEquals(0.5057342815309056, pixelPos.x, 1e-8);
+        assertEquals(0.698795141887042, pixelPos.y, 1e-8);
+    }
+
+    @Test
     public void testGetPixelPos_MER_RR() {
         final TiePointInverse inverse = new TiePointInverse();
         final GeoRaster geoRaster = TestData.get_MER_RR();

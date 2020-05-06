@@ -116,6 +116,38 @@ public class TiePointBilinearForwardTest {
     }
 
     @Test
+    public void testClone() {
+        final GeoRaster geoRaster = TestData.get_MER_RR();
+        coding.initialize(geoRaster, false, new PixelPos[0]);
+
+        GeoPos geoPos = coding.getGeoPos(new PixelPos(2.5, 2.5), null);
+        assertEquals(17.970598697662354, geoPos.lon, 1e-8);
+        assertEquals(72.20760107040405, geoPos.lat, 1e-8);
+
+        final ForwardCoding clone = coding.clone();
+        geoPos = clone.getGeoPos(new PixelPos(2.5, 2.5), null);
+        assertEquals(17.970598697662354, geoPos.lon, 1e-8);
+        assertEquals(72.20760107040405, geoPos.lat, 1e-8);
+    }
+
+    @Test
+    public void testClone_disposeOriginal() {
+        final GeoRaster geoRaster = TestData.get_MER_RR();
+        coding.initialize(geoRaster, false, new PixelPos[0]);
+
+        GeoPos geoPos = coding.getGeoPos(new PixelPos(3.5, 3.5), null);
+        assertEquals(17.988551795482635, geoPos.lon, 1e-8);
+        assertEquals(72.19467198848724, geoPos.lat, 1e-8);
+
+        final ForwardCoding clone = coding.clone();
+        coding.dispose();
+
+        geoPos = clone.getGeoPos(new PixelPos(3.5, 3.5), null);
+        assertEquals(17.988551795482635, geoPos.lon, 1e-8);
+        assertEquals(72.19467198848724, geoPos.lat, 1e-8);
+    }
+
+    @Test
     public void testPlugin_create() {
         final TiePointBilinearForward.Plugin plugin = new TiePointBilinearForward.Plugin();
 

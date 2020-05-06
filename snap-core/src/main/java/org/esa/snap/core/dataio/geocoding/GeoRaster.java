@@ -2,10 +2,6 @@ package org.esa.snap.core.dataio.geocoding;
 
 public class GeoRaster {
 
-    private final double[] longitudes;
-    private final double[] latitudes;
-    private final String lonVariableName;
-    private final String latVariableName;
     private final int rasterWidth;
     private final int rasterHeight;
     private final int sceneWidth;
@@ -15,6 +11,11 @@ public class GeoRaster {
     private final double offsetY;
     private final double subsamplingX;
     private final double subsamplingY;
+
+    private double[] longitudes;
+    private double[] latitudes;
+    private String lonVariableName;
+    private String latVariableName;
 
     /**
      * Constructs a geoRaster; convenience constructor for pixel geolocation raster with the center pixel as reference location.
@@ -31,7 +32,7 @@ public class GeoRaster {
     public GeoRaster(double[] longitudes, double[] latitudes, String lonVariableName, String latVariableName,
                      int rasterWidth, int rasterHeight, double rasterResolutionInKm) {
         this(longitudes, latitudes, lonVariableName, latVariableName, rasterWidth, rasterHeight, rasterWidth, rasterHeight, rasterResolutionInKm,
-                0.5, 0.5, 1.0, 1.0);
+             0.5, 0.5, 1.0, 1.0);
     }
 
     /**
@@ -119,5 +120,12 @@ public class GeoRaster {
 
     public double getSubsamplingY() {
         return subsamplingY;
+    }
+
+    public void dispose() {
+        longitudes = null;
+        latitudes = null;
+        lonVariableName = null;
+        latVariableName = null;
     }
 }

@@ -15,27 +15,16 @@ public class TiePointSplineForward extends TiePointForward {
 
     private int gridWidth;
     private int gridHeight;
+    private boolean containsAntiMeridian;
 
     @Override
     public void initialize(GeoRaster geoRaster, boolean containsAntiMeridian, PixelPos[] poleLocations) {
         checkGeoRaster(geoRaster);
 
         this.geoRaster = geoRaster;
+        this.containsAntiMeridian = containsAntiMeridian;
 
-        contextTL = ThreadLocal.withInitial(() -> {
-            final InterpolationContext context = new InterpolationContext();
-            if (containsAntiMeridian) {
-                context.lonInterpolator = new AntiMeridianLonInterpolator();
-            } else {
-                context.lonInterpolator = new StandardLonInterpolator();
-            }
-
-            context.latSubset = new double[3][3];
-            context.lonSubset = new double[3][3];
-            context.xSpline = Integer.MIN_VALUE;
-            context.ySpline = Integer.MIN_VALUE;
-            return context;
-        });
+        contextTL = ThreadLocal.withInitial(() -> initThreadLocal(containsAntiMeridian));
 
         gridWidth = geoRaster.getRasterWidth();
         gridHeight = geoRaster.getRasterHeight();
@@ -100,6 +89,35 @@ public class TiePointSplineForward extends TiePointForward {
             contextTL.remove();
             contextTL = null;
         }
+    }
+
+    @Override
+    public ForwardCoding clone() {
+        final TiePointSplineForward clone = new TiePointSplineForward();
+
+        clone.geoRaster = geoRaster;
+        clone.containsAntiMeridian = containsAntiMeridian;
+        clone.gridHeight= gridHeight;
+        clone.gridWidth = gridWidth;
+
+        clone.contextTL = ThreadLocal.withInitial(() -> initThreadLocal(containsAntiMeridian));;
+
+        return clone;
+    }
+
+    private InterpolationContext initThreadLocal(boolean containsAntiMeridian) {
+        final InterpolationContext context = new InterpolationContext();
+        if (containsAntiMeridian) {
+            context.lonInterpolator = new AntiMeridianLonInterpolator();
+        } else {
+            context.lonInterpolator = new StandardLonInterpolator();
+        }
+
+        context.latSubset = new double[3][3];
+        context.lonSubset = new double[3][3];
+        context.xSpline = Integer.MIN_VALUE;
+        context.ySpline = Integer.MIN_VALUE;
+        return context;
     }
 
     private void copyInterpolationSubset(int gridWidth, int i, int j) {

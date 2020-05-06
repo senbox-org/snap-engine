@@ -32,7 +32,6 @@ public class PixelInterpolatingForward implements ForwardCoding {
             return geoPos;
         }
 
-
         int x0 = (int) Math.floor(x);
         if (x0 == sceneWidth) {
             x0 -= 1;
@@ -92,6 +91,21 @@ public class PixelInterpolatingForward implements ForwardCoding {
     public void dispose() {
         longitudes = null;
         latitudes = null;
+    }
+
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
+    @Override
+    public ForwardCoding clone() {
+        final PixelInterpolatingForward clone = new PixelInterpolatingForward();
+
+        clone.longitudes = longitudes;
+        clone.latitudes = latitudes;
+        clone.sceneWidth = sceneWidth;
+        clone.sceneHeight = sceneHeight;
+
+        clone.lonInterpolator = lonInterpolator;
+
+        return clone;
     }
 
     private InterpolationContext getInterpolationContext(double[] data, int x0, int y0) {

@@ -33,11 +33,16 @@ import java.awt.image.RenderedImage;
 import java.awt.image.SampleModel;
 
 /**
+ * DEPRECATED!
+ *
+ * <p>
  * This is an experimental pixel geo-coding, which solves some problems of {@link PixelGeoCoding},
  * but may bring-up others.
  *
  * @author Ralf Quast
+ * @deprecated since SNAP 8, use {@link org.esa.snap.core.dataio.geocoding.ComponentGeoCoding} instead
  */
+@Deprecated
 class PixelGeoCoding2 extends AbstractGeoCoding implements BasicPixelGeoCoding {
 
     private static final String SYSPROP_PIXEL_GEO_CODING_FRACTION_ACCURACY = "snap.pixelGeoCoding.fractionAccuracy";
@@ -59,7 +64,7 @@ class PixelGeoCoding2 extends AbstractGeoCoding implements BasicPixelGeoCoding {
 
     /**
      * Constructs a new pixel-based geo-coding.
-     * <p>
+     *
      * <i>Use with care: In contrast to the other constructor this one loads the data not until first access to
      * {@link #getPixelPos(GeoPos, PixelPos)} or {@link #getGeoPos(PixelPos, GeoPos)}. </i>
      *

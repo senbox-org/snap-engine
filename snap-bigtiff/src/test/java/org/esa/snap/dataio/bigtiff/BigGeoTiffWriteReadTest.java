@@ -44,7 +44,6 @@ import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.runtime.Config;
-import org.esa.snap.test.LongTestRunner;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.ReferencingFactoryFinder;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
@@ -53,8 +52,8 @@ import org.geotools.referencing.cs.DefaultCartesianCS;
 import org.geotools.referencing.datum.DefaultGeodeticDatum;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.opengis.parameter.ParameterValueGroup;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -80,7 +79,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 @SuppressWarnings({"InstanceVariableMayNotBeInitialized"})
-@RunWith(LongTestRunner.class)
+//@RunWith(LongTestRunner.class)
+@Ignore("This tests doesn't make sense at the moment. Can be reactivated when both geotiff readers are merged")
 public class BigGeoTiffWriteReadTest {
 
     private static final String WGS_84 = "EPSG:4326";
