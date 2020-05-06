@@ -34,6 +34,7 @@ import ro.cs.tao.datasource.param.QueryParameter;
 import ro.cs.tao.datasource.remote.FetchMode;
 import ro.cs.tao.eodata.EOProduct;
 import ro.cs.tao.eodata.enums.ProductStatus;
+import ro.cs.tao.products.landsat.Landsat8ProductHelper;
 import ro.cs.tao.utils.HttpMethod;
 import ro.cs.tao.utils.NetUtils;
 
@@ -45,6 +46,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -638,5 +640,18 @@ public class RemoteRepositoriesManager {
 //        filteredParameters.put("Sentinel1", sentinel1Parameters);
 //        return filteredParameters;
         return null;
+    }
+
+    //TODO Jean temporary method until the Landsat8 product reader will be changed to read the product from a folder
+    public static Path prepareProductPathToOpen(Path productPath, RepositoryProduct repositoryProduct) {
+        if (Files.isDirectory(productPath)) {
+            // the product parth is a folder
+            RemoteMission productRemoteMission = repositoryProduct.getRemoteMission();
+            if ("Landsat8".equalsIgnoreCase(productRemoteMission.getName())) {
+                Landsat8ProductHelper landsat8ProductHelper = new Landsat8ProductHelper(repositoryProduct.getName());
+                return productPath.resolve(landsat8ProductHelper.getMetadataFileName());
+            }
+        }
+        return productPath;
     }
 }

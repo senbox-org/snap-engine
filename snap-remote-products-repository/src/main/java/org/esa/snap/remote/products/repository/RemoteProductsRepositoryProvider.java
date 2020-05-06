@@ -1,9 +1,9 @@
 package org.esa.snap.remote.products.repository;
 
 import org.apache.http.auth.Credentials;
+import org.esa.snap.remote.products.repository.donwload.RemoteRepositoriesManager;
 import org.esa.snap.remote.products.repository.listener.ProductListDownloaderListener;
 import org.esa.snap.remote.products.repository.listener.ProgressListener;
-import org.esa.snap.remote.products.repository.donwload.RemoteRepositoriesManager;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -43,5 +43,10 @@ public interface RemoteProductsRepositoryProvider {
 
     public static RemoteProductsRepositoryProvider[] getRemoteProductsRepositoryProviders() {
         return RemoteRepositoriesManager.getInstance().getRemoteProductsRepositoryProviders();
+    }
+
+    //TODO Jean temporary method until the Landsat8 product reader will be changed to read the product from a folder
+    public static Path prepareProductPathToOpen(Path productPath, RepositoryProduct repositoryProduct) {
+        return RemoteRepositoriesManager.prepareProductPathToOpen(productPath, repositoryProduct);
     }
 }
