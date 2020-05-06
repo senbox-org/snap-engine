@@ -17,7 +17,6 @@
 package org.esa.snap.core.gpf.graph;
 
 import com.bc.ceres.core.ProgressMonitor;
-import junit.framework.TestCase;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
@@ -29,6 +28,12 @@ import org.esa.snap.core.gpf.OperatorSpiRegistry;
 import org.esa.snap.core.gpf.Tile;
 import org.esa.snap.core.gpf.annotations.SourceProduct;
 import org.esa.snap.core.gpf.annotations.TargetProduct;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import javax.media.jai.JAI;
 import java.awt.Rectangle;
@@ -36,18 +41,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class GraphCallSequenceTest extends TestCase {
+public class GraphCallSequenceTest {
 
-    private static List<String> callRecordList = Collections.synchronizedList(new ArrayList<String>());
-    private N1Spi n1Spi;
-    private N2Spi n2Spi;
-    private N3Spi n3Spi;
-    private N4Spi n4Spi;
-    private N5Spi n5Spi;
-    private N6Spi n6Spi;
+    private static final List<String> callRecordList = Collections.synchronizedList(new ArrayList<>());
+    private static N1Spi n1Spi;
+    private static N2Spi n2Spi;
+    private static N3Spi n3Spi;
+    private static N4Spi n4Spi;
+    private static N5Spi n5Spi;
+    private static N6Spi n6Spi;
 
-    @Override
-    protected void setUp() throws Exception {
+    @BeforeClass
+    public static void setUpTest() {
         n1Spi = new N1Spi();
         final OperatorSpiRegistry registry = GPF.getDefaultInstance().getOperatorSpiRegistry();
         registry.addOperatorSpi(n1Spi);
@@ -61,14 +66,10 @@ public class GraphCallSequenceTest extends TestCase {
         registry.addOperatorSpi(n5Spi);
         n6Spi = new N6Spi();
         registry.addOperatorSpi(n6Spi);
-
-        callRecordList.clear();
-        JAI.getDefaultInstance().getTileCache().flush();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        JAI.getDefaultInstance().getTileCache().flush();
+    @AfterClass
+    public static void tearDownTest() {
         final OperatorSpiRegistry spiRegistry = GPF.getDefaultInstance().getOperatorSpiRegistry();
         spiRegistry.removeOperatorSpi(n1Spi);
         spiRegistry.removeOperatorSpi(n2Spi);
@@ -76,6 +77,17 @@ public class GraphCallSequenceTest extends TestCase {
         spiRegistry.removeOperatorSpi(n4Spi);
         spiRegistry.removeOperatorSpi(n5Spi);
         spiRegistry.removeOperatorSpi(n6Spi);
+    }
+
+    @Before
+    public void setUp() throws Exception {
+        callRecordList.clear();
+        JAI.getDefaultInstance().getTileCache().flush();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        JAI.getDefaultInstance().getTileCache().flush();
         callRecordList.clear();
     }
 
@@ -86,6 +98,7 @@ public class GraphCallSequenceTest extends TestCase {
     //                N2
     //
     //
+    @Test
     public void testTwoNodeTraversion() throws GraphException {
 
         Node node1 = new Node("N1", "N1");
@@ -101,10 +114,10 @@ public class GraphCallSequenceTest extends TestCase {
         GraphContext graphContext = new GraphContext(graph);
         Product[] targetProducts = processor.executeGraph(graphContext, ProgressMonitor.NULL);
 
-        assertNotNull(targetProducts);
-        assertEquals(1, targetProducts.length);
-        assertNotNull(targetProducts[0]);
-        assertEquals("N2", targetProducts[0].getName());
+        Assert.assertNotNull(targetProducts);
+        Assert.assertEquals(1, targetProducts.length);
+        Assert.assertNotNull(targetProducts[0]);
+        Assert.assertEquals("N2", targetProducts[0].getName());
 
         graphContext.dispose();
 
@@ -121,10 +134,10 @@ public class GraphCallSequenceTest extends TestCase {
                 "N1:Operator.dispose",
         };
 
-        assertEquals(expectedRecordStrings.length, callRecordList.size());
+        Assert.assertEquals(expectedRecordStrings.length, callRecordList.size());
 
         for (int i = 0; i < expectedRecordStrings.length; i++) {
-            assertEquals(expectedRecordStrings[i], callRecordList.get(i));
+            Assert.assertEquals(expectedRecordStrings[i], callRecordList.get(i));
         }
     }
 
@@ -137,6 +150,7 @@ public class GraphCallSequenceTest extends TestCase {
     //              N3
     //
     //
+    @Test
     public void testThreeNodeTraversion() throws GraphException {
         Node node1 = new Node("N1", "N1");
         Node node2 = new Node("N2", "N2");
@@ -154,10 +168,10 @@ public class GraphCallSequenceTest extends TestCase {
         GraphContext graphContext = new GraphContext(graph);
         Product[] targetProducts = processor.executeGraph(graphContext, ProgressMonitor.NULL);
 
-        assertNotNull(targetProducts);
-        assertEquals(1, targetProducts.length);
-        assertNotNull(targetProducts[0]);
-        assertEquals("N3", targetProducts[0].getName());
+        Assert.assertNotNull(targetProducts);
+        Assert.assertEquals(1, targetProducts.length);
+        Assert.assertNotNull(targetProducts[0]);
+        Assert.assertEquals("N3", targetProducts[0].getName());
 
         graphContext.dispose();
 
@@ -179,10 +193,10 @@ public class GraphCallSequenceTest extends TestCase {
                 "N1:Operator.dispose",
         };
 
-        assertEquals(expectedRecordStrings.length, callRecordList.size());
+        Assert.assertEquals(expectedRecordStrings.length, callRecordList.size());
 
         for (int i = 0; i < expectedRecordStrings.length; i++) {
-            assertEquals(expectedRecordStrings[i], callRecordList.get(i));
+            Assert.assertEquals(expectedRecordStrings[i], callRecordList.get(i));
         }
     }
 
@@ -196,6 +210,7 @@ public class GraphCallSequenceTest extends TestCase {
     //              N4   N5
     //
     //
+    @Test
     public void testSingleSources3Ouputs() throws GraphException {
         Node node1 = new Node("N1", "N1");
         Node node2 = new Node("N2", "N2");
@@ -219,15 +234,15 @@ public class GraphCallSequenceTest extends TestCase {
         GraphContext graphContext = new GraphContext(graph);
         Product[] outputProducts = processor.executeGraph(graphContext, ProgressMonitor.NULL);
 
-        assertNotNull(outputProducts);
-        assertEquals(3, outputProducts.length);
-        assertNotNull(outputProducts[0]);
-        assertNotNull(outputProducts[1]);
-        assertNotNull(outputProducts[2]);
+        Assert.assertNotNull(outputProducts);
+        Assert.assertEquals(3, outputProducts.length);
+        Assert.assertNotNull(outputProducts[0]);
+        Assert.assertNotNull(outputProducts[1]);
+        Assert.assertNotNull(outputProducts[2]);
         // Nodes shall be processed in the order they are defined!
-        assertEquals("N3", outputProducts[0].getName());
-        assertEquals("N4", outputProducts[1].getName());
-        assertEquals("N5", outputProducts[2].getName());
+        Assert.assertEquals("N3", outputProducts[0].getName());
+        Assert.assertEquals("N4", outputProducts[1].getName());
+        Assert.assertEquals("N5", outputProducts[2].getName());
 
         graphContext.dispose();
 
@@ -265,7 +280,7 @@ public class GraphCallSequenceTest extends TestCase {
         for (String expectedRecord : expectedRecords) {
 //            System.out.println("callRecordList = " + callRecordList.get(i).toString());
             boolean contains = callRecordList.contains(expectedRecord);
-            assertTrue("Graph must call " + expectedRecord, contains);
+            Assert.assertTrue("Graph must call " + expectedRecord, contains);
         }
     }
 
@@ -278,6 +293,7 @@ public class GraphCallSequenceTest extends TestCase {
     //              N4   N6      <-- N6 has 2 sources!
     //
     //
+    @Test
     public void test2Sources1Ouput() throws GraphException {
         Node node1 = new Node("N1", "N1");
         Node node2 = new Node("N2", "N2");
@@ -302,13 +318,13 @@ public class GraphCallSequenceTest extends TestCase {
         GraphContext graphContext = new GraphContext(graph);
         Product[] outputProducts = processor.executeGraph(graphContext, ProgressMonitor.NULL);
 
-        assertNotNull(outputProducts);
-        assertEquals(2, outputProducts.length);
-        assertNotNull(outputProducts[0]);
-        assertNotNull(outputProducts[1]);
+        Assert.assertNotNull(outputProducts);
+        Assert.assertEquals(2, outputProducts.length);
+        Assert.assertNotNull(outputProducts[0]);
+        Assert.assertNotNull(outputProducts[1]);
         // Nodes shall be processed in the order they are defined!
-        assertEquals("N4", outputProducts[0].getName());
-        assertEquals("N6", outputProducts[1].getName());
+        Assert.assertEquals("N4", outputProducts[0].getName());
+        Assert.assertEquals("N6", outputProducts[1].getName());
 
         graphContext.dispose();
 
@@ -346,7 +362,7 @@ public class GraphCallSequenceTest extends TestCase {
         for (String expectedRecord : expectedRecords) {
 //          System.out.println("callRecordList = " + callRecordList.get(i).toString());
             boolean contains = callRecordList.contains(expectedRecord);
-            assertTrue("Graph must call " + expectedRecord, contains);
+            Assert.assertTrue("Graph must call " + expectedRecord, contains);
         }
     }
 
