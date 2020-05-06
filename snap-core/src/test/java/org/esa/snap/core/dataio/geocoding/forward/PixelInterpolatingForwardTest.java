@@ -157,6 +157,40 @@ public class PixelInterpolatingForwardTest {
     }
 
     @Test
+    public void testClone() {
+        final GeoRaster geoRaster = TestData.get_AMSR_2_anti_meridian();
+
+        pixelForward.initialize(geoRaster, true, new PixelPos[0]);
+
+        GeoPos geoPos = pixelForward.getGeoPos(new PixelPos(1.0, 1.0), null);
+        assertEquals(-176.78545499999998, geoPos.lon, 1e-8);
+        assertEquals(-70.62587400000001, geoPos.lat, 1e-8);
+
+        final ForwardCoding clone = pixelForward.clone();
+        geoPos = clone.getGeoPos(new PixelPos(1.0, 1.0), null);
+        assertEquals(-176.78545499999998, geoPos.lon, 1e-8);
+        assertEquals(-70.62587400000001, geoPos.lat, 1e-8);
+    }
+
+    @Test
+    public void testClone_disposeOriginal() {
+        final GeoRaster geoRaster = TestData.get_AMSR_2_anti_meridian();
+
+        pixelForward.initialize(geoRaster, true, new PixelPos[0]);
+
+        GeoPos geoPos = pixelForward.getGeoPos(new PixelPos(2.0, 2.0), null);
+        assertEquals(-177.125365, geoPos.lon, 1e-8);
+        assertEquals(-70.55756975, geoPos.lat, 1e-8);
+
+        final ForwardCoding clone = pixelForward.clone();
+        pixelForward.dispose();
+
+        geoPos = clone.getGeoPos(new PixelPos(2.0, 2.0), null);
+        assertEquals(-177.125365, geoPos.lon, 1e-8);
+        assertEquals(-70.55756975, geoPos.lat, 1e-8);
+    }
+
+    @Test
     public void testPlugin_create() {
         final PixelInterpolatingForward.Plugin plugin = new PixelInterpolatingForward.Plugin();
 

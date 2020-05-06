@@ -21,9 +21,7 @@ import org.esa.snap.core.dataio.AbstractProductReader;
 import org.esa.snap.core.dataio.DecodeQualification;
 import org.esa.snap.core.dataio.ProductReader;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
-import org.esa.snap.core.dataop.maptransf.Datum;
 import org.esa.snap.core.dataop.maptransf.IdentityTransformDescriptor;
-import org.esa.snap.core.dataop.maptransf.MapInfo;
 import org.esa.snap.core.dataop.maptransf.MapProjection;
 import org.esa.snap.core.dataop.maptransf.MapTransform;
 import org.esa.snap.core.util.ProductUtilsTest;
@@ -41,7 +39,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 
 public class ProductTest {
@@ -51,6 +56,29 @@ public class ProductTest {
     private static final int _sceneHeight = 30;
 
     private Product product;
+
+    private static void testBitmaskHandlingFullRaster(Product product, String expr, int[] expected) {
+
+        int[] res = new int[4 * 4];
+        RenderedImage maskImage = product.getMaskImage(expr, null).getImage(0);
+        maskImage.getData(new Rectangle(0, 0, 4, 4)).getSamples(0, 0, 4, 4, 0, res);
+
+        assertArrayEquals(expected, res);
+    }
+
+    private static void readBitmaskLineWise(Product product, String expr, int[] res) {
+        int[] line = new int[4];
+        RenderedImage maskImage = product.getMaskImage(expr, null).getImage(0);
+        for (int y = 0; y < 4; y++) {
+            maskImage.getData(new Rectangle(0, y, 4, 1)).getSamples(0, y, 4, 1, 0, line);
+            System.arraycopy(line, 0, res, y * 4, 4);
+        }
+    }
+
+    private static MapProjection createMapProjectionForTestSetGeocoding() {
+        MapTransform mapTransform = new IdentityTransformDescriptor().createTransform(null);
+        return new MapProjection("p1", mapTransform, "unit");
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -296,30 +324,12 @@ public class ProductTest {
         testBitmaskHandlingLineWise(product, expr, expected);
     }
 
-    private static void testBitmaskHandlingFullRaster(Product product, String expr, int[] expected) {
-
-        int[] res = new int[4 * 4];
-        RenderedImage maskImage = product.getMaskImage(expr, null).getImage(0);
-        maskImage.getData(new Rectangle(0, 0, 4, 4)).getSamples(0, 0, 4, 4, 0, res);
-        
-        assertArrayEquals(expected, res);
-    }
-
     private void testBitmaskHandlingLineWise(Product product, String expr, int[] expected) {
 
         int[] res = new int[4 * 4];
         readBitmaskLineWise(product, expr, res);
-        
-        assertArrayEquals(expected, res);
-    }
 
-    private static void readBitmaskLineWise(Product product, String expr, int[] res) {
-        int[] line = new int[4];
-        RenderedImage maskImage = product.getMaskImage(expr, null).getImage(0);
-        for (int y = 0; y < 4; y++) {
-            maskImage.getData(new Rectangle(0, y, 4, 1)).getSamples(0, y, 4, 1, 0, line);
-            System.arraycopy(line, 0, res, y * 4, 4);
-        }
+        assertArrayEquals(expected, res);
     }
 
     @Test
@@ -679,45 +689,6 @@ public class ProductTest {
     }
 
     @Test
-    public void testSetGeocoding() {
-        MapProjection projection = createMapProjectionForTestSetGeocoding();
-        MapInfo mapInfo = new MapInfo(projection, 0, 0, 23, 24, 12, 13, Datum.WGS_84);
-        MapGeoCoding mapGeoCoding = new MapGeoCoding(mapInfo);
-        int sceneRasterWidth = 243;
-        int sceneRasterHeight = 524;
-        Product product = new Product("name", "type", sceneRasterWidth, sceneRasterHeight);
-
-        mapInfo.setSceneWidth(sceneRasterWidth + 1);
-        mapInfo.setSceneHeight(sceneRasterHeight);
-        try {
-            product.setSceneGeoCoding(mapGeoCoding);
-            fail("IllegalArgumentException expected");
-        } catch (IllegalArgumentException ignored) {
-            // IllegalArgumentException expected
-        }
-
-        mapInfo.setSceneWidth(sceneRasterWidth);
-        mapInfo.setSceneHeight(sceneRasterHeight + 1);
-
-        try {
-            product.setSceneGeoCoding(mapGeoCoding);
-            fail("IllegalArgumentException expected");
-        } catch (IllegalArgumentException ignored) {
-            // IllegalArgumentException expected
-        }
-
-        mapInfo.setSceneWidth(sceneRasterWidth);
-        mapInfo.setSceneHeight(sceneRasterHeight);
-
-        try {
-            product.setSceneGeoCoding(mapGeoCoding);
-            // IllegalArgumentException not expected
-        } catch (IllegalArgumentException ignored) {
-            fail("IllegalArgumentException not expected");
-        }
-    }
-
-    @Test
     public void testDefaultGroups() throws Exception {
         final Product p = new Product("n", "t", 10, 10);
         final ProductNodeGroup<ProductNodeGroup> groups = p.getGroups();
@@ -763,7 +734,6 @@ public class ProductTest {
         spectra.add(new MetadataElement("reflectance"));
         assertEquals(listener.events.size(), eventCount0 + 3);
     }
-
 
     @Test
     public void testUniqueGeoCodings() {
@@ -888,11 +858,6 @@ public class ProductTest {
 
         product.setPreferredTileSize(null);
         assertEquals(null, product.getPreferredTileSize());
-    }
-
-    private static MapProjection createMapProjectionForTestSetGeocoding() {
-        MapTransform mapTransform = new IdentityTransformDescriptor().createTransform(null);
-        return new MapProjection("p1", mapTransform, "unit");
     }
 
     private static class MyProductNodeListener implements ProductNodeListener {

@@ -30,7 +30,6 @@ import org.esa.snap.core.datamodel.quicklooks.Quicklook;
 import org.esa.snap.core.dataop.barithm.BandArithmetic;
 import org.esa.snap.core.dataop.barithm.RasterDataSymbol;
 import org.esa.snap.core.dataop.barithm.SingleFlagSymbol;
-import org.esa.snap.core.dataop.maptransf.MapInfo;
 import org.esa.snap.core.dataop.maptransf.MapProjection;
 import org.esa.snap.core.dataop.maptransf.MapTransform;
 import org.esa.snap.core.image.ResolutionLevel;
@@ -85,7 +84,7 @@ import java.util.stream.Stream;
  * product itself does not hold the remote sensing data. Data products can contain multiple geophysical parameters
  * stored as bands and can also have multiple metadata attributes. Also, a {@code Product} can contain any number
  * of {@code TiePointGrids} holding the tie point data.
- * <p>
+ *
  * <p>Every product can also have a product reader and writer assigned to it. The reader represents the data source from
  * which a product was created, whereas the writer represents the data sink. Both, the source and the sink must not
  * necessarily store data in the same format. Furthermore, it is not mandatory for a product to have both of them.
@@ -104,75 +103,14 @@ public class Product extends ProductNode {
     public static final String PROPERTY_NAME_FILE_LOCATION = "fileLocation";
 
     public static final String GEOMETRY_FEATURE_TYPE_NAME = PlainFeatureFactory.DEFAULT_TYPE_NAME;
-
-    private static final String PIN_GROUP_NAME = "pins";
-    private static final String GCP_GROUP_NAME = "ground_control_points";
-
     /**
      * The default BEAM image coordinate reference system.
      */
     public static final ImageCRS DEFAULT_IMAGE_CRS = new DefaultImageCRS("SNAP_IMAGE_CRS",
                                                                          new DefaultImageDatum("SNAP_IMAGE_DATUM", PixelInCell.CELL_CORNER),
                                                                          DefaultCartesianCS.DISPLAY);
-
-
-    /**
-     * The model coordinate reference system.
-     *
-     * @since SNAP 2
-     */
-    private CoordinateReferenceSystem sceneCrs;
-
-    /**
-     * The location file of this product.
-     */
-    private File fileLocation;
-
-    /**
-     * The reader for this product. Once the reader is set, and can never be changed again.
-     */
-    private ProductReader reader;
-
-    /**
-     * The writer for this product. The writer is an exchangeable property of a product.
-     */
-    private ProductWriter writer;
-
-    /**
-     * The time-coding of this product, if any.
-     */
-    private TimeCoding sceneTimeCoding;
-
-    /**
-     * The geo-coding of this product, if any.
-     */
-    private GeoCoding sceneGeoCoding;
-
-    /**
-     * The list of product listeners.
-     */
-    private List<ProductNodeListener> listeners;
-
-    /**
-     * This product's type ID.
-     */
-    private String productType;
-
-    /**
-     * The product's scene raster size in pixels.
-     */
-    private Dimension sceneRasterSize;
-
-    /**
-     * The start time of the first raster line.
-     */
-    private ProductData.UTC startTime;
-
-    /**
-     * The start time of the first raster line.
-     */
-    private ProductData.UTC endTime;
-
+    private static final String PIN_GROUP_NAME = "pins";
+    private static final String GCP_GROUP_NAME = "ground_control_points";
     private final MetadataElement metadataRoot;
     private final ProductNodeGroup<Band> bandGroup;
     private final ProductNodeGroup<TiePointGrid> tiePointGridGroup;
@@ -181,38 +119,74 @@ public class Product extends ProductNode {
     private final ProductNodeGroup<IndexCoding> indexCodingGroup;
     private final ProductNodeGroup<Mask> maskGroup;
     private final ProductNodeGroup<Quicklook> quicklookGroup;
-
-    /**
-     * The internal reference number of this product
-     */
-    private int refNo;
-
-    /**
-     * The internal reference string of this product
-     */
-    private String refStr;
-
-    private ProductManager productManager;
-
-    private PointingFactory pointingFactory;
-
-    private String quicklookBandName;
-
-    private Dimension preferredTileSize;
-    private AutoGrouping autoGrouping;
     private final PlacemarkGroup pinGroup;
     private final PlacemarkGroup gcpGroup;
-
-    private Map<String, WeakReference<MultiLevelImage>> maskCache;
-
-
     /**
      * The group which contains all other product node groups.
      *
      * @since BEAM 5.0
      */
     private final ProductNodeGroup<ProductNodeGroup> groups;
-
+    /**
+     * The model coordinate reference system.
+     *
+     * @since SNAP 2
+     */
+    private CoordinateReferenceSystem sceneCrs;
+    /**
+     * The location file of this product.
+     */
+    private File fileLocation;
+    /**
+     * The reader for this product. Once the reader is set, and can never be changed again.
+     */
+    private ProductReader reader;
+    /**
+     * The writer for this product. The writer is an exchangeable property of a product.
+     */
+    private ProductWriter writer;
+    /**
+     * The time-coding of this product, if any.
+     */
+    private TimeCoding sceneTimeCoding;
+    /**
+     * The geo-coding of this product, if any.
+     */
+    private GeoCoding sceneGeoCoding;
+    /**
+     * The list of product listeners.
+     */
+    private List<ProductNodeListener> listeners;
+    /**
+     * This product's type ID.
+     */
+    private String productType;
+    /**
+     * The product's scene raster size in pixels.
+     */
+    private Dimension sceneRasterSize;
+    /**
+     * The start time of the first raster line.
+     */
+    private ProductData.UTC startTime;
+    /**
+     * The start time of the first raster line.
+     */
+    private ProductData.UTC endTime;
+    /**
+     * The internal reference number of this product
+     */
+    private int refNo;
+    /**
+     * The internal reference string of this product
+     */
+    private String refStr;
+    private ProductManager productManager;
+    private PointingFactory pointingFactory;
+    private String quicklookBandName;
+    private Dimension preferredTileSize;
+    private AutoGrouping autoGrouping;
+    private Map<String, WeakReference<MultiLevelImage>> maskCache;
     /**
      * The maximum number of resolution levels common to all band images.
      * Must be greater than zero, otherwise the  number of resolution levels is considered to be unknown.
@@ -341,6 +315,112 @@ public class Product extends ProductNode {
     }
 
     /**
+     * Finds an appropriate transformation from image coordinates used by the given
+     * geo-coding (if any) into "model" coordinates used to render
+     * (e.g. display, print or otherwise visualise) the image together with other features such
+     * as geometric shapes or other images. Model coordinates are different from image coordinates for
+     * rectified images where model coordinate units are defined by a geodetic/geographic coordinate
+     * reference system (map CRS, map-projected images). In this case the model CRS equals the map CRS in use.
+     * Model coordinates are also different from image coordinates for images in satellite view
+     * that use a linearily downsampled or upsampled version of a common reference grid.
+     *
+     * <b>WARNING:</b> Note that this method is only useful, if it can be ensured that the given geo-coding's
+     * {@link GeoCoding#getImageToMapTransform() image-to-map transform} is an affine transformation.
+     * In all other cases, the method returns the identity transformation which might not
+     * be what you expect and what might not be even correct.
+     *
+     * @param geoCoding The geo-coding or {@code null}.
+     * @return An affine image-to-map transformation derived from the given geo-coding. If {@code geoCoding}
+     * is {@code null} or an affine image-to-map transformation cannot be derived the identity transform
+     * is returned.
+     * @see #findModelCRS
+     * @see GeoCoding#getImageToMapTransform()
+     * @see RasterDataNode#getImageToModelTransform()
+     * @see MultiLevelModel#getImageToModelTransform(int)
+     * @since SNAP 2.0
+     */
+    public static AffineTransform findImageToModelTransform(GeoCoding geoCoding) {
+        if (geoCoding != null) {
+            MathTransform image2Map = geoCoding.getImageToMapTransform();
+            if (image2Map instanceof AffineTransform) {
+                return new AffineTransform((AffineTransform) image2Map);
+            }
+        }
+        return new AffineTransform();
+    }
+
+    /**
+     * Finds a coordinate reference system (CRS) that is appropriate as a scene CRS.
+     * <p>
+     * Finds a "model" coordinate reference system for the given
+     * geo-coding (if any) that provides the units for ccordinates to be rendered
+     * (e.g. display, print or otherwise visualise) a geo-coded image together with other features such
+     * as geometric shapes or other images. Model coordinates are different from image coordinates for
+     * rectified images where model coordinate units are defined by a geodetic/geographic coordinate
+     * reference system (map CRS, map-projected images). In this case the model CRS equals the map CRS in use.
+     * Model coordinates are also different from image coordinates for images in satellite view
+     * that use a linearily downsampled or upsampled version of a common reference grid.
+     * <p>
+     * If the geo-coding's {@link GeoCoding#getImageToMapTransform() image-to-map transform} is an affine transform,
+     * then the returned CRS is the geo-coding's {@link GeoCoding#getMapCRS() map CRS}, otherwise it is its
+     * {@link GeoCoding#getImageCRS() image CRS}. If the geo-coding is {@code null}, a default image CRS is returned
+     * ({@link Product#DEFAULT_IMAGE_CRS}).
+     *
+     * @param geoCoding The geo-coding or {@code null}.
+     * @return An appropriate "model" coordinate reference system.
+     * @see #findImageToModelTransform
+     * @see RasterDataNode#getImageToModelTransform()
+     * @see MultiLevelModel#getImageToModelTransform(int)
+     * @since SNAP 2.0
+     */
+    public static CoordinateReferenceSystem findModelCRS(GeoCoding geoCoding) {
+        if (geoCoding != null) {
+            MathTransform image2Map = geoCoding.getImageToMapTransform();
+            if (image2Map instanceof AffineTransform) {
+                return geoCoding.getMapCRS();
+            }
+            return geoCoding.getImageCRS();
+        } else {
+            return Product.DEFAULT_IMAGE_CRS;
+        }
+    }
+
+    private static boolean equalsLatLon(final GeoPos pos1, final GeoPos pos2, final float eps) {
+        return equalsOrNaN(pos1.lat, pos2.lat, eps) && equalsOrNaN(pos1.lon, pos2.lon, eps);
+    }
+
+    private static boolean equalsOrNaN(double v1, double v2, float eps) {
+        return MathUtils.equalValues(v1, v2, eps) || (Double.isNaN(v1) && Double.isNaN(v2));
+    }
+
+    static void fireEvent(final ProductNodeEvent event, final ProductNodeListener[] productNodeListeners) {
+        for (ProductNodeListener listener : productNodeListeners) {
+            fireEvent(event, listener);
+        }
+    }
+
+    static void fireEvent(final ProductNodeEvent event, final ProductNodeListener listener) {
+        switch (event.getType()) {
+            case ProductNodeEvent.NODE_CHANGED:
+                listener.nodeChanged(event);
+                break;
+            case ProductNodeEvent.NODE_DATA_CHANGED:
+                listener.nodeDataChanged(event);
+                break;
+            case ProductNodeEvent.NODE_ADDED:
+                listener.nodeAdded(event);
+                break;
+            case ProductNodeEvent.NODE_REMOVED:
+                listener.nodeRemoved(event);
+                break;
+        }
+    }
+
+    private static boolean isFlagSymbol(final String symbolName) {
+        return symbolName.indexOf('.') != -1;
+    }
+
+    /**
      * Gets the scene coordinate reference system (scene CRS). It provides a common coordinate system
      * <ul>
      * <li>for the geometries used by all vector data;</li>
@@ -385,77 +465,6 @@ public class Product extends ProductNode {
     }
 
     /**
-     * Finds an appropriate transformation from image coordinates used by the given
-     * geo-coding (if any) into "model" coordinates used to render
-     * (e.g. display, print or otherwise visualise) the image together with other features such
-     * as geometric shapes or other images. Model coordinates are different from image coordinates for
-     * rectified images where model coordinate units are defined by a geodetic/geographic coordinate
-     * reference system (map CRS, map-projected images). In this case the model CRS equals the map CRS in use.
-     * Model coordinates are also different from image coordinates for images in satellite view
-     * that use a linearily downsampled or upsampled version of a common reference grid.
-     * <p>
-     * <b>WARNING:</b> Note that this method is only useful, if it can be ensured that the given geo-coding's
-     * {@link GeoCoding#getImageToMapTransform() image-to-map transform} is an affine transformation.
-     * In all other cases, the method returns the identity transformation which might not
-     * be what you expect and what might not be even correct.
-     *
-     * @param geoCoding The geo-coding or {@code null}.
-     * @return An affine image-to-map transformation derived from the given geo-coding. If {@code geoCoding}
-     * is {@code null} or an affine image-to-map transformation cannot be derived the identity transform
-     * is returned.
-     * @see #findModelCRS
-     * @see GeoCoding#getImageToMapTransform()
-     * @see RasterDataNode#getImageToModelTransform()
-     * @see MultiLevelModel#getImageToModelTransform(int)
-     * @since SNAP 2.0
-     */
-    public static AffineTransform findImageToModelTransform(GeoCoding geoCoding) {
-        if (geoCoding != null) {
-            MathTransform image2Map = geoCoding.getImageToMapTransform();
-            if (image2Map instanceof AffineTransform) {
-                return new AffineTransform((AffineTransform) image2Map);
-            }
-        }
-        return new AffineTransform();
-    }
-
-    /**
-     * Finds a coordinate reference system (CRS) that is appropriate as a scene CRS.
-     *
-     * Finds a "model" coordinate reference system for the given
-     * geo-coding (if any) that provides the units for ccordinates to be rendered
-     * (e.g. display, print or otherwise visualise) a geo-coded image together with other features such
-     * as geometric shapes or other images. Model coordinates are different from image coordinates for
-     * rectified images where model coordinate units are defined by a geodetic/geographic coordinate
-     * reference system (map CRS, map-projected images). In this case the model CRS equals the map CRS in use.
-     * Model coordinates are also different from image coordinates for images in satellite view
-     * that use a linearily downsampled or upsampled version of a common reference grid.
-     * <p>
-     * If the geo-coding's {@link GeoCoding#getImageToMapTransform() image-to-map transform} is an affine transform,
-     * then the returned CRS is the geo-coding's {@link GeoCoding#getMapCRS() map CRS}, otherwise it is its
-     * {@link GeoCoding#getImageCRS() image CRS}. If the geo-coding is {@code null}, a default image CRS is returned
-     * ({@link Product#DEFAULT_IMAGE_CRS}).
-     *
-     * @param geoCoding The geo-coding or {@code null}.
-     * @return An appropriate "model" coordinate reference system.
-     * @see #findImageToModelTransform
-     * @see RasterDataNode#getImageToModelTransform()
-     * @see MultiLevelModel#getImageToModelTransform(int)
-     * @since SNAP 2.0
-     */
-    public static CoordinateReferenceSystem findModelCRS(GeoCoding geoCoding) {
-        if (geoCoding != null) {
-            MathTransform image2Map = geoCoding.getImageToMapTransform();
-            if (image2Map instanceof AffineTransform) {
-                return geoCoding.getMapCRS();
-            }
-            return geoCoding.getImageCRS();
-        } else {
-            return Product.DEFAULT_IMAGE_CRS;
-        }
-    }
-
-    /**
      * Tests if all the raster data nodes contained in this product share the same model
      * coordinate reference system which is equal to the scene coordinate reference system
      * used by this product.
@@ -471,6 +480,9 @@ public class Product extends ProductNode {
                 && isSceneCrsEqualToModelCrsOf(getTiePointGridGroup())
                 && isSceneCrsEqualToModelCrsOf(getMaskGroup());
     }
+
+    //////////////////////////////////////////////////////////////////////////
+    // Attribute Query
 
     /**
      * Tests if the given raster data node uses this product's scene coordinate reference system
@@ -540,10 +552,6 @@ public class Product extends ProductNode {
         throw new IllegalStateException("a product can not have an owner");
     }
 
-    //////////////////////////////////////////////////////////////////////////
-    // Attribute Query
-
-
     /**
      * Gets the product type string.
      *
@@ -569,6 +577,17 @@ public class Product extends ProductNode {
     }
 
     /**
+     * Returns the reader which was used to create this product in-memory represention from an external source and which
+     * will be used to (re-)load band rasters.
+     *
+     * @return the product reader, can be {@code null}
+     */
+    @Override
+    public ProductReader getProductReader() {
+        return reader;
+    }
+
+    /**
      * Sets the product reader which will be used to create this product in-memory represention from an external source
      * and which will be used to (re-)load band rasters.
      *
@@ -581,14 +600,14 @@ public class Product extends ProductNode {
     }
 
     /**
-     * Returns the reader which was used to create this product in-memory represention from an external source and which
-     * will be used to (re-)load band rasters.
+     * Returns the writer which will be used to write modifications of this product's in-memory represention to an
+     * external destination.
      *
-     * @return the product reader, can be {@code null}
+     * @return the product writer, can be {@code null}
      */
     @Override
-    public ProductReader getProductReader() {
-        return reader;
+    public ProductWriter getProductWriter() {
+        return writer;
     }
 
     /**
@@ -599,17 +618,6 @@ public class Product extends ProductNode {
      */
     public void setProductWriter(final ProductWriter writer) {
         this.writer = writer;
-    }
-
-    /**
-     * Returns the writer which will be used to write modifications of this product's in-memory represention to an
-     * external destination.
-     *
-     * @return the product writer, can be {@code null}
-     */
-    @Override
-    public ProductWriter getProductWriter() {
-        return writer;
     }
 
     /**
@@ -690,9 +698,9 @@ public class Product extends ProductNode {
      * allow the garbage collector to perform a vanilla job.
      * <p>This method should be called only if it is for sure that this object instance will never be used again. The
      * results of referencing an instance of this class after a call to {@code dispose()} are undefined.
-     * <p>
+     *
      * <p>Overrides of this method should always call {@code super.dispose();} after disposing this instance.
-     * <p>
+     *
      * <p>This implementation also calls the {@code closeIO} in order to release all open I/O resources.
      */
     @Override
@@ -754,7 +762,6 @@ public class Product extends ProductNode {
         return sceneTimeCoding;
     }
 
-
     /**
      * Sets the time-coding for the associated scene raster.
      *
@@ -769,7 +776,6 @@ public class Product extends ProductNode {
             fireNodeChanged(this, PROPERTY_NAME_SCENE_TIME_CODING, oldValue, sceneTimeCoding);
         }
     }
-
 
     /**
      * Gets the pointing factory associated with this data product.
@@ -790,34 +796,25 @@ public class Product extends ProductNode {
     }
 
     /**
-     * Sets the geo-coding to be associated with the scene raster.
-     *
-     * @param sceneGeoCoding the geo-coding, or {@code null}
-     * @throws IllegalArgumentException <br>- if the given {@code GeoCoding} is a {@code TiePointGeoCoding}
-     *                                  and {@code latGrid} or {@code lonGrid} are not instances of tie point
-     *                                  grids in this product. <br>- if the given {@code GeoCoding} is a
-     *                                  {@code MapGeoCoding} and its {@code MapInfo} is {@code null}
-     *                                  <br>- if the given {@code GeoCoding} is a {@code MapGeoCoding} and the
-     *                                  {@code sceneWith} or {@code sceneHeight} of its {@code MapInfo}
-     *                                  is not equal to this products {@code sceneRasterWidth} or
-     *                                  {@code sceneRasterHeight}
-     */
-    public void setSceneGeoCoding(final GeoCoding sceneGeoCoding) {
-        checkGeoCoding(sceneGeoCoding);
-        if (!ObjectUtils.equalObjects(this.sceneGeoCoding, sceneGeoCoding)) {
-            this.sceneGeoCoding = sceneGeoCoding;
-            fireProductNodeChanged(PROPERTY_NAME_SCENE_GEO_CODING);
-            setModified(true);
-        }
-    }
-
-    /**
      * Gets the geo-coding associated with the scene raster.
      *
      * @return the geo-coding, can be {@code null} if this product is not geo-coded.
      */
     public GeoCoding getSceneGeoCoding() {
         return sceneGeoCoding;
+    }
+
+    /**
+     * Sets the geo-coding to be associated with the scene raster.
+     *
+     * @param sceneGeoCoding the geo-coding, or {@code null}
+     */
+    public void setSceneGeoCoding(final GeoCoding sceneGeoCoding) {
+        if (!ObjectUtils.equalObjects(this.sceneGeoCoding, sceneGeoCoding)) {
+            this.sceneGeoCoding = sceneGeoCoding;
+            fireProductNodeChanged(PROPERTY_NAME_SCENE_GEO_CODING);
+            setModified(true);
+        }
     }
 
     /**
@@ -901,6 +898,9 @@ public class Product extends ProductNode {
         return sceneRasterSize;
     }
 
+    //////////////////////////////////////////////////////////////////////////
+    // Group support
+
     /**
      * Gets the (sensing) start time associated with the first raster data line.
      * <p>For Level-1/2 products this is
@@ -931,6 +931,9 @@ public class Product extends ProductNode {
             fireProductNodeChanged("startTime", old, this.startTime);
         }
     }
+
+    //////////////////////////////////////////////////////////////////////////
+    // Tie-point grid support
 
     /**
      * Gets the (sensing) stop time associated with the last raster data line.
@@ -973,9 +976,6 @@ public class Product extends ProductNode {
         return metadataRoot;
     }
 
-    //////////////////////////////////////////////////////////////////////////
-    // Group support
-
     /**
      * @return The group which contains all other product node groups.
      * @since BEAM 5.0
@@ -992,9 +992,6 @@ public class Product extends ProductNode {
     public ProductNodeGroup getGroup(String name) {
         return groups.get(name);
     }
-
-    //////////////////////////////////////////////////////////////////////////
-    // Tie-point grid support
 
     /**
      * Gets the tie-point grid group of this product.
@@ -1037,6 +1034,9 @@ public class Product extends ProductNode {
     public int getNumTiePointGrids() {
         return tiePointGridGroup.getNodeCount();
     }
+
+    //////////////////////////////////////////////////////////////////////////
+    // Band support
 
     /**
      * Returns the tie-point grid at the given index.
@@ -1085,7 +1085,6 @@ public class Product extends ProductNode {
         return tiePointGridGroup.get(name);
     }
 
-
     /**
      * Tests if a tie-point grid with the given name is contained in this product.
      *
@@ -1097,9 +1096,6 @@ public class Product extends ProductNode {
         Guardian.assertNotNullOrEmpty("name", name);
         return tiePointGridGroup.contains(name);
     }
-
-    //////////////////////////////////////////////////////////////////////////
-    // Band support
 
     /**
      * Gets the band group of this product.
@@ -1169,7 +1165,6 @@ public class Product extends ProductNode {
         return band;
     }
 
-
     /**
      * Removes the given band from this product.
      *
@@ -1198,6 +1193,9 @@ public class Product extends ProductNode {
         return bandGroup.get(index);
     }
 
+    //////////////////////////////////////////////////////////////////////////
+    // Raster data node  support
+
     /**
      * Returns a string array containing the names of the bands contained in this product
      *
@@ -1218,7 +1216,6 @@ public class Product extends ProductNode {
         return bandGroup.toArray(new Band[getNumBands()]);
     }
 
-
     /**
      * Returns the band with the given name.
      *
@@ -1231,6 +1228,9 @@ public class Product extends ProductNode {
         Guardian.assertNotNullOrEmpty("name", name);
         return bandGroup.get(name);
     }
+
+    //////////////////////////////////////////////////////////////////////////
+    // Quicklook support
 
     /**
      * Returns the index for the band with the given name.
@@ -1256,9 +1256,6 @@ public class Product extends ProductNode {
         Guardian.assertNotNullOrEmpty("name", name);
         return bandGroup.contains(name);
     }
-
-    //////////////////////////////////////////////////////////////////////////
-    // Raster data node  support
 
     /**
      * Tests if a raster data node with the given name is contained in this product. Raster data nodes can be bands or
@@ -1315,23 +1312,30 @@ public class Product extends ProductNode {
         return rasterDataNodes;
     }
 
+
     //////////////////////////////////////////////////////////////////////////
-    // Quicklook support
+    // Mask support
 
     public ProductNodeGroup<Quicklook> getQuicklookGroup() {
         return quicklookGroup;
     }
 
+    //////////////////////////////////////////////////////////////////////////
+    // Vector data support
+
     public Quicklook getDefaultQuicklook() {
-        if(quicklookGroup.getNodeCount() == 0) {
+        if (quicklookGroup.getNodeCount() == 0) {
             boolean wasModified = isModified();
             quicklookGroup.add(new Quicklook(this, Quicklook.DEFAULT_QUICKLOOK_NAME));
-            if(!wasModified) {
+            if (!wasModified) {
                 setModified(false);
             }
         }
         return quicklookGroup.get(0);
     }
+
+    //////////////////////////////////////////////////////////////////////////
+    // Sample-coding support
 
     /**
      * Returns the Quicklook with the given name.
@@ -1355,6 +1359,9 @@ public class Product extends ProductNode {
         return quicklookBandName;
     }
 
+    //////////////////////////////////////////////////////////////////////////
+    // Pixel Coordinate Tests
+
     /**
      * Sets the name of the band suitable for quicklook generation.
      *
@@ -1364,34 +1371,27 @@ public class Product extends ProductNode {
         this.quicklookBandName = quicklookBandName;
     }
 
-
-    //////////////////////////////////////////////////////////////////////////
-    // Mask support
-
     public ProductNodeGroup<Mask> getMaskGroup() {
         return maskGroup;
     }
 
     //////////////////////////////////////////////////////////////////////////
-    // Vector data support
+    // GCP support
 
     public ProductNodeGroup<VectorDataNode> getVectorDataGroup() {
         return vectorDataGroup;
     }
 
-    //////////////////////////////////////////////////////////////////////////
-    // Sample-coding support
-
     public ProductNodeGroup<FlagCoding> getFlagCodingGroup() {
         return flagCodingGroup;
     }
 
+    //////////////////////////////////////////////////////////////////////////
+    // Pin support
+
     public ProductNodeGroup<IndexCoding> getIndexCodingGroup() {
         return indexCodingGroup;
     }
-
-    //////////////////////////////////////////////////////////////////////////
-    // Pixel Coordinate Tests
 
     /**
      * Tests if the given pixel position is within the product pixel bounds.
@@ -1406,6 +1406,9 @@ public class Product extends ProductNode {
                 y >= 0.0f && y <= getSceneRasterHeight();
     }
 
+    //
+    //////////////////////////////////////////////////////////////////////////
+
     /**
      * Tests if the given pixel position is within the product pixel bounds.
      *
@@ -1416,9 +1419,6 @@ public class Product extends ProductNode {
     public boolean containsPixel(final PixelPos pixelPos) {
         return containsPixel(pixelPos.x, pixelPos.y);
     }
-
-    //////////////////////////////////////////////////////////////////////////
-    // GCP support
 
     private synchronized PlacemarkGroup createGcpGroup() {
         final VectorDataNode vectorDataNode = new VectorDataNode(GCP_GROUP_NAME, Placemark.createGcpFeatureType());
@@ -1436,9 +1436,6 @@ public class Product extends ProductNode {
     public PlacemarkGroup getGcpGroup() {
         return gcpGroup;
     }
-
-    //////////////////////////////////////////////////////////////////////////
-    // Pin support
 
     private synchronized PlacemarkGroup createPinGroup() {
         final VectorDataNode vectorDataNode = new VectorDataNode(PIN_GROUP_NAME, Placemark.createPinFeatureType());
@@ -1458,9 +1455,6 @@ public class Product extends ProductNode {
         return pinGroup;
     }
 
-    //
-    //////////////////////////////////////////////////////////////////////////
-
     /**
      * @return The maximum number of resolution levels common to all band images.
      * If less than or equal to zero, the  number of resolution levels is considered to be unknown.
@@ -1478,6 +1472,10 @@ public class Product extends ProductNode {
     public void setNumResolutionsMax(int numResolutionsMax) {
         this.numResolutionsMax = numResolutionsMax;
     }
+
+
+    //////////////////////////////////////////////////////////////////////////
+    // Visitor-Pattern support
 
     /**
      * Checks whether or not the given product is compatible with this product.
@@ -1552,13 +1550,8 @@ public class Product extends ProductNode {
         return true;
     }
 
-    private static boolean equalsLatLon(final GeoPos pos1, final GeoPos pos2, final float eps) {
-        return equalsOrNaN(pos1.lat, pos2.lat, eps) && equalsOrNaN(pos1.lon, pos2.lon, eps);
-    }
-
-    private static boolean equalsOrNaN(double v1, double v2, float eps) {
-        return MathUtils.equalValues(v1, v2, eps) || (Double.isNaN(v1) && Double.isNaN(v2));
-    }
+    //////////////////////////////////////////////////////////////////////////
+    // Product listener support
 
     /**
      * Parses a mathematical expression given as a text string.
@@ -1592,15 +1585,11 @@ public class Product extends ProductNode {
         return nodes;
     }
 
-
-    //////////////////////////////////////////////////////////////////////////
-    // Visitor-Pattern support
-
     /**
      * Accepts the given visitor. This method implements the well known 'Visitor' design pattern of the gang-of-four.
      * The visitor pattern allows to define new operations on the product data model without the need to add more code
      * to it. The new operation is implemented by the visitor.
-     * <p>
+     *
      * <p>The method subsequentially visits (calls {@code acceptVisitor} for) all bands, tie-point grids and flag
      * codings. Finally it visits product metadata root element and calls {@code visitor.visit(this)}.
      *
@@ -1619,9 +1608,6 @@ public class Product extends ProductNode {
         metadataRoot.acceptVisitor(visitor);
         visitor.visit(this);
     }
-
-    //////////////////////////////////////////////////////////////////////////
-    // Product listener support
 
     /**
      * Adds a {@code ProductNodeListener} to this product. The {@code ProductNodeListener} is informed each
@@ -1699,29 +1685,6 @@ public class Product extends ProductNode {
         fireEvent(event, listeners.toArray(new ProductNodeListener[listeners.size()]));
     }
 
-    static void fireEvent(final ProductNodeEvent event, final ProductNodeListener[] productNodeListeners) {
-        for (ProductNodeListener listener : productNodeListeners) {
-            fireEvent(event, listener);
-        }
-    }
-
-    static void fireEvent(final ProductNodeEvent event, final ProductNodeListener listener) {
-        switch (event.getType()) {
-            case ProductNodeEvent.NODE_CHANGED:
-                listener.nodeChanged(event);
-                break;
-            case ProductNodeEvent.NODE_DATA_CHANGED:
-                listener.nodeDataChanged(event);
-                break;
-            case ProductNodeEvent.NODE_ADDED:
-                listener.nodeAdded(event);
-                break;
-            case ProductNodeEvent.NODE_REMOVED:
-                listener.nodeRemoved(event);
-                break;
-        }
-    }
-
     /**
      * @return The reference number of this product.
      */
@@ -1767,6 +1730,9 @@ public class Product extends ProductNode {
         return productManager;
     }
 
+    //////////////////////////////////////////////////////////////////////////
+    // Utilities
+
     /**
      * Sets the product manager for this product. Called by a {@code PropductManager} to set the product's
      * ownership.
@@ -1776,9 +1742,6 @@ public class Product extends ProductNode {
     void setProductManager(final ProductManager productManager) {
         this.productManager = productManager;
     }
-
-    //////////////////////////////////////////////////////////////////////////
-    // Utilities
 
     /**
      * Tests if the given band arithmetic expression can be computed using this product.
@@ -1801,7 +1764,7 @@ public class Product extends ProductNode {
      */
     public boolean isCompatibleBandArithmeticExpression(final String expression, Parser parser) {
         Guardian.assertNotNull("expression", expression);
-        if(containsBand(expression)) {
+        if (containsBand(expression)) {
             return true;
         }
         if (parser == null) {
@@ -1840,7 +1803,6 @@ public class Product extends ProductNode {
         return true;
     }
 
-
     /**
      * Creates a parser for band arithmetic expressions.
      * The parser created will use a namespace comprising all tie-point grids, bands and flags of this product.
@@ -1861,7 +1823,6 @@ public class Product extends ProductNode {
     public WritableNamespace createBandArithmeticDefaultNamespace() {
         return BandArithmetic.createDefaultNamespace(new Product[]{this}, 0);
     }
-
 
     /**
      * Creates a subset of this product. The returned product represents a true spatial and spectral subset of this
@@ -1897,6 +1858,16 @@ public class Product extends ProductNode {
         }
     }
 
+//    private static String extractProductName(File file) {
+//        Guardian.assertNotNull("file", file);
+//        String filename = file.getName();
+//        int dotIndex = filename.indexOf('.');
+//        if (dotIndex > -1) {
+//            filename = filename.substring(0, dotIndex);
+//        }
+//        return filename;
+//    }
+
     /**
      * Gets an estimated, raw storage size in bytes of this product node.
      *
@@ -1924,16 +1895,6 @@ public class Product extends ProductNode {
         size += getMetadataRoot().getRawStorageSize(subsetDef);
         return size;
     }
-
-//    private static String extractProductName(File file) {
-//        Guardian.assertNotNull("file", file);
-//        String filename = file.getName();
-//        int dotIndex = filename.indexOf('.');
-//        if (dotIndex > -1) {
-//            filename = filename.substring(0, dotIndex);
-//        }
-//        return filename;
-//    }
 
     /**
      * Creates a string containing all available information at the given pixel position. The string returned is a line
@@ -2098,9 +2059,9 @@ public class Product extends ProductNode {
      * Creates a string containing all available information at the given pixel position in the given raster.
      * The string returned is a line separated text with each line containing a key/value pair.
      *
-     * @param pixelX      the pixel X co-ordinate in the given raster
-     * @param pixelY      the pixel Y co-ordinate in the given raster
-     * @param raster      raster reference for the pixel position
+     * @param pixelX the pixel X co-ordinate in the given raster
+     * @param pixelY the pixel Y co-ordinate in the given raster
+     * @param raster raster reference for the pixel position
      * @return the info string at the given position
      */
     public String createPixelInfoString(final int pixelX, final int pixelY,
@@ -2112,7 +2073,7 @@ public class Product extends ProductNode {
         sb.append("Product:\t");
         sb.append(getName()).append("\n\n");
 
-        if (!isMultiSize){
+        if (!isMultiSize) {
             sb.append("Image-X:\t");
             sb.append(pixelX);
             sb.append("\tpixel\n");
@@ -2122,11 +2083,11 @@ public class Product extends ProductNode {
             sb.append("\tpixel\n");
         } else {
             // Add the raster name to the identification of the pixel
-            sb.append("Image-X." + raster.getName() +":\t");
+            sb.append("Image-X." + raster.getName() + ":\t");
             sb.append(pixelX);
             sb.append("\tpixel\n");
 
-            sb.append("Image-Y." + raster.getName() +":\t");
+            sb.append("Image-Y." + raster.getName() + ":\t");
             sb.append(pixelY);
             sb.append("\tpixel\n");
         }
@@ -2163,8 +2124,6 @@ public class Product extends ProductNode {
                 sb.append("\t").append(mapUnit).append("\n");
             }
         } // rasterGeoding not null
-
-
 
 
         if (raster.isPixelWithinImageBounds(pixelX, pixelY)) {
@@ -2283,9 +2242,10 @@ public class Product extends ProductNode {
 
     /**
      * Convert the pixel X and Y read in a reference raster into another raster
-     * @param pixelPosRef      the pixel X and Y co-ordinate read in the reference raster
-     * @param referenceRaster  reference raster where the pixel X and Y co-ordinate where read
-     * @param currentRaster    current raster where we want the pixel X and Y to be expressed
+     *
+     * @param pixelPosRef     the pixel X and Y co-ordinate read in the reference raster
+     * @param referenceRaster reference raster where the pixel X and Y co-ordinate where read
+     * @param currentRaster   current raster where we want the pixel X and Y to be expressed
      * @return the pixel X and Y co-ordinate in current raster
      */
     public PixelPos getPixelForBand(final PixelPos pixelPosRef, final RasterDataNode referenceRaster,
@@ -2304,7 +2264,7 @@ public class Product extends ProductNode {
             try {
                 // Compute the model coordinate position (only for multi-size product)
                 final Point2D.Double sourcePixel = new Point2D.Double(pixelPosRef.getX(), pixelPosRef.getY());
-                final Point2D.Double modelCoord = (Point2D.Double) referenceRaster.getImageToModelTransform().transform(sourcePixel,null);
+                final Point2D.Double modelCoord = (Point2D.Double) referenceRaster.getImageToModelTransform().transform(sourcePixel, null);
                 Point2D.Double point2DForBand = (Point2D.Double) currentRaster.getImageToModelTransform().createInverse().transform(modelCoord, null);
                 pixelForBand = new PixelPos(point2DForBand.x, point2DForBand.y);
 
@@ -2336,21 +2296,6 @@ public class Product extends ProductNode {
         removedNodes.addAll(quicklookGroup.getRemovedNodes());
         removedNodes.addAll(vectorDataGroup.getRemovedNodes());
         return removedNodes.toArray(new ProductNode[removedNodes.size()]);
-    }
-
-
-    private void checkGeoCoding(final GeoCoding geoCoding) {
-        if (geoCoding instanceof TiePointGeoCoding) {
-            final TiePointGeoCoding gc = (TiePointGeoCoding) geoCoding;
-            Guardian.assertSame("gc.getLatGrid()", gc.getLatGrid(), getTiePointGrid(gc.getLatGrid().getName()));
-            Guardian.assertSame("gc.getLonGrid()", gc.getLonGrid(), getTiePointGrid(gc.getLonGrid().getName()));
-        } else if (geoCoding instanceof MapGeoCoding) {
-            final MapGeoCoding gc = (MapGeoCoding) geoCoding;
-            final MapInfo mapInfo = gc.getMapInfo();
-            Guardian.assertNotNull("mapInfo", mapInfo);
-            Guardian.assertEquals("mapInfo.getSceneWidth()", mapInfo.getSceneWidth(), getSceneRasterWidth());
-            Guardian.assertEquals("mapInfo.getSceneHeight()", mapInfo.getSceneHeight(), getSceneRasterHeight());
-        }
     }
 
     /**
@@ -2424,11 +2369,6 @@ public class Product extends ProductNode {
         return description;
     }
 
-    private static boolean isFlagSymbol(final String symbolName) {
-        return symbolName.indexOf('.') != -1;
-    }
-
-
     /**
      * Gets the preferred tile size which may be used for a the {@link java.awt.image.RenderedImage rendered image}
      * created for a {@link RasterDataNode} of this product.
@@ -2445,18 +2385,6 @@ public class Product extends ProductNode {
      * Sets the preferred tile size which may be used for a the {@link java.awt.image.RenderedImage rendered image}
      * created for a {@link RasterDataNode} of this product.
      *
-     * @param tileWidth  the preferred tile width
-     * @param tileHeight the preferred tile height
-     * @see #setPreferredTileSize(java.awt.Dimension)
-     */
-    public void setPreferredTileSize(int tileWidth, int tileHeight) {
-        setPreferredTileSize(new Dimension(tileWidth, tileHeight));
-    }
-
-    /**
-     * Sets the preferred tile size which may be used for a the {@link java.awt.image.RenderedImage rendered image}
-     * created for a {@link RasterDataNode} of this product.
-     *
      * @param preferredTileSize the preferred tile size, may be {@code null} if not specified
      * @see RasterDataNode#getSourceImage()
      * @see RasterDataNode#setSourceImage(java.awt.image.RenderedImage)
@@ -2466,11 +2394,23 @@ public class Product extends ProductNode {
     }
 
     /**
+     * Sets the preferred tile size which may be used for a the {@link java.awt.image.RenderedImage rendered image}
+     * created for a {@link RasterDataNode} of this product.
+     *
+     * @param tileWidth  the preferred tile width
+     * @param tileHeight the preferred tile height
+     * @see #setPreferredTileSize(java.awt.Dimension)
+     */
+    public void setPreferredTileSize(int tileWidth, int tileHeight) {
+        setPreferredTileSize(new Dimension(tileWidth, tileHeight));
+    }
+
+    /**
      * Returns the names of all flags of all flag datasets contained this product.
      * <p>A flag name contains the dataset (a band of this product) and the actual flag name as defined in the
      * flag-coding associated with the dataset. The general format for the flag name strings returned is therefore
      * <code>"<i>dataset</i>.<i>flag_name</i>"</code>.
-     * <p>
+     *
      * <p>The method is used to find out which flags a product has in order to use them in bit-mask expressions.
      *
      * @return the array of all flag names. If this product does not support flags, an empty array is returned, but
@@ -2508,20 +2448,6 @@ public class Product extends ProductNode {
 
     /**
      * Sets the auto-grouping applicable to product nodes contained in this product.
-     *
-     * @param autoGrouping The auto-grouping or {@code null}.
-     * @since BEAM 4.8
-     */
-    public void setAutoGrouping(AutoGrouping autoGrouping) {
-        AutoGrouping old = this.autoGrouping;
-        if (!ObjectUtils.equalObjects(old, autoGrouping)) {
-            this.autoGrouping = autoGrouping;
-            fireProductNodeChanged("autoGrouping", old, this.autoGrouping);
-        }
-    }
-
-    /**
-     * Sets the auto-grouping applicable to product nodes contained in this product.
      * A given {@code pattern} parameter is a textual representation of the auto-grouping.
      * The syntax for the pattern is:
      * <pre>
@@ -2543,6 +2469,20 @@ public class Product extends ProductNode {
     }
 
     /**
+     * Sets the auto-grouping applicable to product nodes contained in this product.
+     *
+     * @param autoGrouping The auto-grouping or {@code null}.
+     * @since BEAM 4.8
+     */
+    public void setAutoGrouping(AutoGrouping autoGrouping) {
+        AutoGrouping old = this.autoGrouping;
+        if (!ObjectUtils.equalObjects(old, autoGrouping)) {
+            this.autoGrouping = autoGrouping;
+            fireProductNodeChanged("autoGrouping", old, this.autoGrouping);
+        }
+    }
+
+    /**
      * Creates a new mask with the given name and image type and adds it to this product and returns it.
      * The new mask's samples are computed from the given image type.
      *
@@ -2561,15 +2501,14 @@ public class Product extends ProductNode {
      * Creates a new mask using a band arithmetic expression
      * and adds it to this product and returns it.
      *
-     *
      * @param maskName     the new mask's name
      * @param expression   the band arithmetic expression
      * @param description  the mask's description
      * @param color        the display color
      * @param transparency the display transparency
      * @return the new mask which has just been added
-     * @since BEAM 4.10
      * @throws IllegalArgumentException when the expression references rasters of different sizes
+     * @since BEAM 4.10
      */
     public Mask addMask(String maskName, String expression, String description, Color color, double transparency) {
         RasterDataNode[] refRasters = new RasterDataNode[0];
@@ -2678,250 +2617,6 @@ public class Product extends ProductNode {
     public void addMask(Mask mask) {
         getMaskGroup().add(mask);
     }
-
-    /**
-     * AutoGrouping can be used by an application to auto-group a long list of product nodes (e.g. bands)
-     * as a tree of product nodes.
-     *
-     * @since BEAM 4.8
-     */
-    public interface AutoGrouping extends List<String[]> {
-
-        static AutoGrouping parse(String text) {
-            return AutoGroupingImpl.parse(text);
-        }
-
-        /**
-         * Gets the index of the first group path that matches the given name.
-         *
-         * @param name A product node name.
-         * @return The index of the group path or {@code -1} if no group path matches the given name.
-         */
-        int indexOf(String name);
-    }
-
-    private static class AutoGroupingImpl extends AbstractList<String[]> implements AutoGrouping {
-
-        private static final String GROUP_SEPARATOR = "/";
-        private static final String PATH_SEPARATOR = ":";
-
-        private final AutoGroupingPath[] autoGroupingPaths;
-        private final Index[] indexes;
-
-        private AutoGroupingImpl(String[][] inputPaths) {
-            autoGroupingPaths = new AutoGroupingPath[inputPaths.length];
-            this.indexes = new Index[inputPaths.length];
-            for (int i = 0; i < inputPaths.length; i++) {
-                final AutoGroupingPath autoGroupingPath = new AutoGroupingPath(inputPaths[i]);
-                autoGroupingPaths[i] = autoGroupingPath;
-                indexes[i] = new Index(autoGroupingPath, i);
-            }
-            Arrays.sort(indexes, (o1, o2) -> {
-                final String[] o1InputPath = o1.path.getInputPath();
-                final String[] o2InputPath = o2.path.getInputPath();
-                int index = 0;
-
-                while (index < o1InputPath.length && index < o2InputPath.length) {
-                    final String currentO1InputPathString = o1InputPath[index];
-                    final String currentO2InputPathString = o2InputPath[index];
-                    if (currentO1InputPathString.length() != currentO2InputPathString.length()) {
-                        return currentO2InputPathString.length() - currentO1InputPathString.length();
-                    }
-                    index++;
-                }
-                if (o1InputPath.length != o2InputPath.length) {
-                    return o2InputPath.length - o1InputPath.length;
-                }
-                return o2InputPath[0].compareTo(o1InputPath[0]);
-            });
-        }
-
-        @Override
-        public int indexOf(String name) {
-            for (Index index : indexes) {
-                final int i = index.index;
-                if (index.path.contains(name)) {
-                    return i;
-                }
-            }
-            return -1;
-        }
-
-        @Override
-        public String[] get(int index) {
-            return autoGroupingPaths[index].getInputPath();
-        }
-
-        @Override
-        public int size() {
-            return autoGroupingPaths.length;
-        }
-
-        public static AutoGrouping parse(String text) {
-            List<String[]> pathLists = new ArrayList<>();
-            if (StringUtils.isNotNullAndNotEmpty(text)) {
-                String[] pathTexts = StringUtils.toStringArray(text, PATH_SEPARATOR);
-                for (String pathText : pathTexts) {
-                    final String[] subPaths = StringUtils.toStringArray(pathText, GROUP_SEPARATOR);
-                    final ArrayList<String> subPathsList = new ArrayList<>();
-                    for (String subPath : subPaths) {
-                        if (StringUtils.isNotNullAndNotEmpty(subPath)) {
-                            subPathsList.add(subPath);
-                        }
-                    }
-                    if (!subPathsList.isEmpty()) {
-                        pathLists.add(subPathsList.toArray(new String[subPathsList.size()]));
-                    }
-                }
-                if (pathLists.isEmpty()) {
-                    return null;
-                }
-                return new AutoGroupingImpl(pathLists.toArray(new String[pathLists.size()][]));
-            } else {
-                return null;
-            }
-        }
-
-        public String format() {
-            if (autoGroupingPaths.length > 0) {
-                StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < autoGroupingPaths.length; i++) {
-                    if (i > 0) {
-                        sb.append(PATH_SEPARATOR);
-                    }
-                    String[] path = autoGroupingPaths[i].getInputPath();
-                    for (int j = 0; j < path.length; j++) {
-                        if (j > 0) {
-                            sb.append(GROUP_SEPARATOR);
-                        }
-                        sb.append(path[j]);
-                    }
-                }
-                return sb.toString();
-            } else {
-                return "";
-            }
-        }
-
-        @Override
-        public String toString() {
-            return format();
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            } else if (o instanceof AutoGrouping) {
-                AutoGrouping other = (AutoGrouping) o;
-                if (other.size() != size()) {
-                    return false;
-                }
-                for (int i = 0; i < autoGroupingPaths.length; i++) {
-                    String[] path = autoGroupingPaths[i].getInputPath();
-                    if (!ObjectUtils.equalObjects(path, other.get(i))) {
-                        return false;
-                    }
-                }
-                return true;
-            } else {
-                return false;
-            }
-        }
-
-        @Override
-        public int hashCode() {
-            int code = 0;
-            for (AutoGroupingPath autoGroupingPath : autoGroupingPaths) {
-                String[] path = autoGroupingPath.getInputPath();
-                code += Arrays.hashCode(path);
-            }
-            return code;
-        }
-
-
-        private static class Index {
-
-            final int index;
-            final AutoGroupingPath path;
-
-            private Index(AutoGroupingPath path, int index) {
-                this.path = path;
-                this.index = index;
-            }
-
-        }
-    }
-
-    private static class AutoGroupingPath {
-
-        private final String[] groups;
-        private final Entry[] entries;
-
-        AutoGroupingPath(String[] groups) {
-            this.groups = groups;
-            entries = new Entry[groups.length];
-            for (int i = 0; i < groups.length; i++) {
-                if (groups[i].contains("*") || groups[i].contains("?")) {
-                    entries[i] = new WildCardEntry(groups[i]);
-                } else {
-                    entries[i] = new EntryImpl(groups[i]);
-                }
-            }
-        }
-
-        boolean contains(String name) {
-            for (Entry entry : entries) {
-                if (!entry.matches(name)) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        String[] getInputPath() {
-            return groups;
-        }
-
-    }
-
-    interface Entry {
-
-        boolean matches(String name);
-
-    }
-
-    private static class EntryImpl implements Entry {
-
-        private final String group;
-
-        EntryImpl(String group) {
-            this.group = group;
-        }
-
-
-        @Override
-        public boolean matches(String name) {
-            return name.contains(group);
-        }
-    }
-
-    private static class WildCardEntry implements Entry {
-
-        private final WildcardMatcher wildcardMatcher;
-
-        WildCardEntry(String group) {
-            wildcardMatcher = new WildcardMatcher(group);
-        }
-
-        @Override
-        public boolean matches(String name) {
-            return wildcardMatcher.matches(name);
-        }
-    }
-
-    /////////////////////////////////////////////////////////////////////////
-    // Deprecated API
 
     /**
      * Gets a multi-level mask image for the given band maths expression and an optional associated raster.
@@ -3041,6 +2736,9 @@ public class Product extends ProductNode {
         }
     }
 
+    /////////////////////////////////////////////////////////////////////////
+    // Deprecated API
+
     private void handleVectorDataNodeRemoved(ProductNodeEvent event) {
         final Mask mask = getMask((VectorDataNode) event.getSourceNode());
         if (mask != null) {
@@ -3148,6 +2846,247 @@ public class Product extends ProductNode {
             }
         };
         acceptVisitor(productVisitorAdapter);
+    }
+
+    /**
+     * AutoGrouping can be used by an application to auto-group a long list of product nodes (e.g. bands)
+     * as a tree of product nodes.
+     *
+     * @since BEAM 4.8
+     */
+    public interface AutoGrouping extends List<String[]> {
+
+        static AutoGrouping parse(String text) {
+            return AutoGroupingImpl.parse(text);
+        }
+
+        /**
+         * Gets the index of the first group path that matches the given name.
+         *
+         * @param name A product node name.
+         * @return The index of the group path or {@code -1} if no group path matches the given name.
+         */
+        int indexOf(String name);
+    }
+
+    interface Entry {
+
+        boolean matches(String name);
+
+    }
+
+    private static class AutoGroupingImpl extends AbstractList<String[]> implements AutoGrouping {
+
+        private static final String GROUP_SEPARATOR = "/";
+        private static final String PATH_SEPARATOR = ":";
+
+        private final AutoGroupingPath[] autoGroupingPaths;
+        private final Index[] indexes;
+
+        private AutoGroupingImpl(String[][] inputPaths) {
+            autoGroupingPaths = new AutoGroupingPath[inputPaths.length];
+            this.indexes = new Index[inputPaths.length];
+            for (int i = 0; i < inputPaths.length; i++) {
+                final AutoGroupingPath autoGroupingPath = new AutoGroupingPath(inputPaths[i]);
+                autoGroupingPaths[i] = autoGroupingPath;
+                indexes[i] = new Index(autoGroupingPath, i);
+            }
+            Arrays.sort(indexes, (o1, o2) -> {
+                final String[] o1InputPath = o1.path.getInputPath();
+                final String[] o2InputPath = o2.path.getInputPath();
+                int index = 0;
+
+                while (index < o1InputPath.length && index < o2InputPath.length) {
+                    final String currentO1InputPathString = o1InputPath[index];
+                    final String currentO2InputPathString = o2InputPath[index];
+                    if (currentO1InputPathString.length() != currentO2InputPathString.length()) {
+                        return currentO2InputPathString.length() - currentO1InputPathString.length();
+                    }
+                    index++;
+                }
+                if (o1InputPath.length != o2InputPath.length) {
+                    return o2InputPath.length - o1InputPath.length;
+                }
+                return o2InputPath[0].compareTo(o1InputPath[0]);
+            });
+        }
+
+        public static AutoGrouping parse(String text) {
+            List<String[]> pathLists = new ArrayList<>();
+            if (StringUtils.isNotNullAndNotEmpty(text)) {
+                String[] pathTexts = StringUtils.toStringArray(text, PATH_SEPARATOR);
+                for (String pathText : pathTexts) {
+                    final String[] subPaths = StringUtils.toStringArray(pathText, GROUP_SEPARATOR);
+                    final ArrayList<String> subPathsList = new ArrayList<>();
+                    for (String subPath : subPaths) {
+                        if (StringUtils.isNotNullAndNotEmpty(subPath)) {
+                            subPathsList.add(subPath);
+                        }
+                    }
+                    if (!subPathsList.isEmpty()) {
+                        pathLists.add(subPathsList.toArray(new String[subPathsList.size()]));
+                    }
+                }
+                if (pathLists.isEmpty()) {
+                    return null;
+                }
+                return new AutoGroupingImpl(pathLists.toArray(new String[pathLists.size()][]));
+            } else {
+                return null;
+            }
+        }
+
+        @Override
+        public int indexOf(String name) {
+            for (Index index : indexes) {
+                final int i = index.index;
+                if (index.path.contains(name)) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        @Override
+        public String[] get(int index) {
+            return autoGroupingPaths[index].getInputPath();
+        }
+
+        @Override
+        public int size() {
+            return autoGroupingPaths.length;
+        }
+
+        public String format() {
+            if (autoGroupingPaths.length > 0) {
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < autoGroupingPaths.length; i++) {
+                    if (i > 0) {
+                        sb.append(PATH_SEPARATOR);
+                    }
+                    String[] path = autoGroupingPaths[i].getInputPath();
+                    for (int j = 0; j < path.length; j++) {
+                        if (j > 0) {
+                            sb.append(GROUP_SEPARATOR);
+                        }
+                        sb.append(path[j]);
+                    }
+                }
+                return sb.toString();
+            } else {
+                return "";
+            }
+        }
+
+        @Override
+        public String toString() {
+            return format();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            } else if (o instanceof AutoGrouping) {
+                AutoGrouping other = (AutoGrouping) o;
+                if (other.size() != size()) {
+                    return false;
+                }
+                for (int i = 0; i < autoGroupingPaths.length; i++) {
+                    String[] path = autoGroupingPaths[i].getInputPath();
+                    if (!ObjectUtils.equalObjects(path, other.get(i))) {
+                        return false;
+                    }
+                }
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public int hashCode() {
+            int code = 0;
+            for (AutoGroupingPath autoGroupingPath : autoGroupingPaths) {
+                String[] path = autoGroupingPath.getInputPath();
+                code += Arrays.hashCode(path);
+            }
+            return code;
+        }
+
+
+        private static class Index {
+
+            final int index;
+            final AutoGroupingPath path;
+
+            private Index(AutoGroupingPath path, int index) {
+                this.path = path;
+                this.index = index;
+            }
+
+        }
+    }
+
+    private static class AutoGroupingPath {
+
+        private final String[] groups;
+        private final Entry[] entries;
+
+        AutoGroupingPath(String[] groups) {
+            this.groups = groups;
+            entries = new Entry[groups.length];
+            for (int i = 0; i < groups.length; i++) {
+                if (groups[i].contains("*") || groups[i].contains("?")) {
+                    entries[i] = new WildCardEntry(groups[i]);
+                } else {
+                    entries[i] = new EntryImpl(groups[i]);
+                }
+            }
+        }
+
+        boolean contains(String name) {
+            for (Entry entry : entries) {
+                if (!entry.matches(name)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        String[] getInputPath() {
+            return groups;
+        }
+
+    }
+
+    private static class EntryImpl implements Entry {
+
+        private final String group;
+
+        EntryImpl(String group) {
+            this.group = group;
+        }
+
+
+        @Override
+        public boolean matches(String name) {
+            return name.contains(group);
+        }
+    }
+
+    private static class WildCardEntry implements Entry {
+
+        private final WildcardMatcher wildcardMatcher;
+
+        WildCardEntry(String group) {
+            wildcardMatcher = new WildcardMatcher(group);
+        }
+
+        @Override
+        public boolean matches(String name) {
+            return wildcardMatcher.matches(name);
+        }
     }
 
     private class VectorDataNodeProductNodeGroup extends ProductNodeGroup<VectorDataNode> {

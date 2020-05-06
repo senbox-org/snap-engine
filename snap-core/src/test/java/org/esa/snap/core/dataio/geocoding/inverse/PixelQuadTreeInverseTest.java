@@ -451,6 +451,83 @@ public class PixelQuadTreeInverseTest {
     }
 
     @Test
+    public void testClone() {
+        final GeoRaster geoRaster = TestData.get_SYN_AOD();
+
+        inverse.initialize(geoRaster, false, new PixelPos[0]);
+
+        final GeoPos geoPos = new GeoPos(59.2431, -136.13505);
+        PixelPos pixelPos = inverse.getPixelPos(geoPos, null);
+        assertEquals(9.5, pixelPos.x, 1e-8);
+        assertEquals(1.5, pixelPos.y, 1e-8);
+
+        final InverseCoding clone = inverse.clone();
+        pixelPos = clone.getPixelPos(geoPos, null);
+        assertEquals(9.5, pixelPos.x, 1e-8);
+        assertEquals(1.5, pixelPos.y, 1e-8);
+    }
+
+    @Test
+    public void testClone_disposeOriginal() {
+        final GeoRaster geoRaster = TestData.get_SYN_AOD();
+
+        inverse.initialize(geoRaster, false, new PixelPos[0]);
+
+        final GeoPos geoPos = new GeoPos(59.2431, -136.13505);
+
+        PixelPos pixelPos = inverse.getPixelPos(geoPos, null);
+        assertEquals(9.5, pixelPos.x, 1e-8);
+        assertEquals(1.5, pixelPos.y, 1e-8);
+
+        final InverseCoding clone = inverse.clone();
+        inverse.dispose();
+
+        pixelPos = clone.getPixelPos(geoPos, null);
+        assertEquals(9.5, pixelPos.x, 1e-8);
+        assertEquals(1.5, pixelPos.y, 1e-8);
+    }
+
+    @Test
+    public void testClone_interpolating() {
+        inverse = new PixelQuadTreeInverse(true);
+
+        final GeoRaster geoRaster = TestData.get_AMSRE();
+        inverse.initialize(geoRaster, false, new PixelPos[0]);
+
+        final GeoPos geoPos = new GeoPos(-0.8298334, 18.600895);
+
+        PixelPos pixelPos = inverse.getPixelPos(geoPos, null);
+        assertEquals(3.5, pixelPos.x, 1e-8);
+        assertEquals(0.5, pixelPos.y, 1e-8);
+
+        final InverseCoding clone = inverse.clone();
+        pixelPos = clone.getPixelPos(geoPos, null);
+        assertEquals(3.5, pixelPos.x, 1e-8);
+        assertEquals(0.5, pixelPos.y, 1e-8);
+    }
+
+    @Test
+    public void testClone_interpolating_disposeOriginal() {
+        inverse = new PixelQuadTreeInverse(true);
+
+        final GeoRaster geoRaster = TestData.get_AMSRE();
+        inverse.initialize(geoRaster, false, new PixelPos[0]);
+
+        final GeoPos geoPos = new GeoPos(-0.8298334, 18.600895);
+
+        PixelPos pixelPos = inverse.getPixelPos(geoPos, null);
+        assertEquals(3.5, pixelPos.x, 1e-8);
+        assertEquals(0.5, pixelPos.y, 1e-8);
+
+        final InverseCoding clone = inverse.clone();
+        inverse.dispose();
+
+        pixelPos = clone.getPixelPos(geoPos, null);
+        assertEquals(3.5, pixelPos.x, 1e-8);
+        assertEquals(0.5, pixelPos.y, 1e-8);
+    }
+
+    @Test
     public void testPlugin_create() {
         final PixelQuadTreeInverse.Plugin plugin = new PixelQuadTreeInverse.Plugin(false);
 

@@ -67,6 +67,18 @@ public class TiePointBilinearForward extends TiePointForward {
         latGrid = null;
     }
 
+    @Override
+    public ForwardCoding clone() {
+        final TiePointBilinearForward clone = new TiePointBilinearForward();
+
+        clone.lonGrid = lonGrid.cloneTiePointGrid();
+        clone.latGrid = latGrid.cloneTiePointGrid();
+        clone.sceneWidth = sceneWidth;
+        clone.sceneHeight = sceneHeight;
+
+        return clone;
+    }
+
     public static class Plugin implements ForwardPlugin{
         @Override
         public ForwardCoding create() {

@@ -2,7 +2,14 @@ package org.esa.snap.core.dataio.geocoding;
 
 import org.esa.snap.core.dataio.ProductSubsetDef;
 import org.esa.snap.core.dataio.geocoding.util.RasterUtils;
-import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.GeoPos;
+import org.esa.snap.core.datamodel.PixelPos;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.Scene;
+import org.esa.snap.core.datamodel.SceneFactory;
+import org.esa.snap.core.datamodel.TiePointGrid;
 import org.geotools.referencing.crs.DefaultDerivedCRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.referencing.cs.DefaultEllipsoidalCS;
@@ -12,8 +19,19 @@ import org.junit.Test;
 import org.opengis.referencing.operation.MathTransform;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 public class ComponentGeoCodingTest {
 
@@ -325,12 +343,12 @@ public class ComponentGeoCodingTest {
 
         final Product sourceProduct = new Product("source", "TEST", 5, 5);
         sourceProduct.addTiePointGrid(new TiePointGrid(geoRaster.getLonVariableName(), geoRaster.getRasterWidth(), geoRaster.getRasterHeight(),
-                geoRaster.getOffsetX(), geoRaster.getOffsetY(), geoRaster.getSubsamplingX(), geoRaster.getSubsamplingY(),
-                RasterUtils.toFloat(geoRaster.getLongitudes())));
+                                                       geoRaster.getOffsetX(), geoRaster.getOffsetY(), geoRaster.getSubsamplingX(), geoRaster.getSubsamplingY(),
+                                                       RasterUtils.toFloat(geoRaster.getLongitudes())));
 
         sourceProduct.addTiePointGrid(new TiePointGrid(geoRaster.getLatVariableName(), geoRaster.getRasterWidth(), geoRaster.getRasterHeight(),
-                geoRaster.getOffsetX(), geoRaster.getOffsetY(), geoRaster.getSubsamplingX(), geoRaster.getSubsamplingY(),
-                RasterUtils.toFloat(geoRaster.getLatitudes())));
+                                                       geoRaster.getOffsetX(), geoRaster.getOffsetY(), geoRaster.getSubsamplingX(), geoRaster.getSubsamplingY(),
+                                                       RasterUtils.toFloat(geoRaster.getLatitudes())));
 
         final Scene sourceScene = SceneFactory.createScene(sourceProduct);
 
@@ -399,6 +417,15 @@ public class ComponentGeoCodingTest {
         assertEquals(geoRaster.getSubsamplingY(), cloned.getSubsamplingY(), 1e-8);
     }
 
+    @Test
+    public void testCanClone() {
+        final GeoRaster geoRaster = TestData.get_OLCI();
+        final ComponentGeoCoding geoCoding = new ComponentGeoCoding(geoRaster, forwardCoding, inverseCoding, GeoChecks.NONE);
+
+        assertTrue(geoCoding.canClone());
+    }
+
+    @SuppressWarnings("deprecation")
     @Test
     public void testGetDatum() {
         final ComponentGeoCoding geoCoding = new ComponentGeoCoding(null, forwardCoding, inverseCoding);

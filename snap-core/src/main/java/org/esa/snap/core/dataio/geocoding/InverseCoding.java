@@ -28,4 +28,11 @@ public interface InverseCoding {
     String getKey();
 
     void dispose();
+
+    /**
+     * Create a shallow copy of the InverseCoding, rasterdata is shared;
+     *
+     * @return the clone
+     */
+    InverseCoding clone();
 }

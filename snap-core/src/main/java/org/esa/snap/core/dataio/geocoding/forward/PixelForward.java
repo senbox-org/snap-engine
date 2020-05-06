@@ -63,6 +63,19 @@ public class PixelForward implements ForwardCoding {
         latitudes = null;
     }
 
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
+    @Override
+    public ForwardCoding clone() {
+        final PixelForward clone = new PixelForward();
+
+        clone.longitudes = longitudes;
+        clone.latitudes = latitudes;
+        clone.sceneWidth = sceneWidth;
+        clone.sceneHeight = sceneHeight;
+
+        return clone;
+    }
+
     public static class Plugin implements ForwardPlugin {
 
         @Override

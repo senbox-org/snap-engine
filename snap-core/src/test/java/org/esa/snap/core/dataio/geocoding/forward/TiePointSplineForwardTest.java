@@ -121,6 +121,38 @@ public class TiePointSplineForwardTest {
     }
 
     @Test
+    public void testClone() {
+        final GeoRaster geoRaster = TestData.get_MER_RR();
+        coding.initialize(geoRaster, false, new PixelPos[0]);
+
+        GeoPos geoPos = coding.getGeoPos(new PixelPos(4.5, 4.5), null);
+        assertEquals(18.00644644921875, geoPos.lon, 1e-8);
+        assertEquals(72.1818866506958, geoPos.lat, 1e-8);
+
+        final ForwardCoding clone = coding.clone();
+        geoPos = clone.getGeoPos(new PixelPos(4.5, 4.5), null);
+        assertEquals(18.00644644921875, geoPos.lon, 1e-8);
+        assertEquals(72.1818866506958, geoPos.lat, 1e-8);
+    }
+
+    @Test
+    public void testClone_disposeOriginal() {
+        final GeoRaster geoRaster = TestData.get_MER_RR();
+        coding.initialize(geoRaster, false, new PixelPos[0]);
+
+        GeoPos geoPos = coding.getGeoPos(new PixelPos(5.5, 5.5), null);
+        assertEquals(18.024336467636108, geoPos.lon, 1e-8);
+        assertEquals(72.16899097761222, geoPos.lat, 1e-8);
+
+        final ForwardCoding clone = coding.clone();
+        coding.dispose();
+
+        geoPos = clone.getGeoPos(new PixelPos(5.5, 5.5), null);
+        assertEquals(18.024336467636108, geoPos.lon, 1e-8);
+        assertEquals(72.16899097761222, geoPos.lat, 1e-8);
+    }
+
+    @Test
     public void testPlugin_create() {
         final TiePointSplineForward.Plugin plugin = new TiePointSplineForward.Plugin();
 

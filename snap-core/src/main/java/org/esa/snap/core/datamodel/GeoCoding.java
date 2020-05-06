@@ -94,19 +94,19 @@ public interface GeoCoding {
 
     /**
      * @return The image coordinate reference system (CRS). It is usually derived from the base CRS by including
-     *         a linear or non-linear transformation from base (geodetic) coordinates to image coordinates.
+     * a linear or non-linear transformation from base (geodetic) coordinates to image coordinates.
      */
     CoordinateReferenceSystem getImageCRS();
 
     /**
      * @return The map coordinate reference system (CRS). It may be either a geographical CRS (nominal case is
-     *         "WGS-84") or a derived projected CRS, e.g. "UTM 32 - North".
+     * "WGS-84") or a derived projected CRS, e.g. "UTM 32 - North".
      */
     CoordinateReferenceSystem getMapCRS();
 
     /**
      * @return The geographical coordinate reference system (CRS). It may be either "WGS-84" (nominal case) or
-     *         any other geographical CRS.
+     * any other geographical CRS.
      */
     CoordinateReferenceSystem getGeoCRS();
 
@@ -114,5 +114,19 @@ public interface GeoCoding {
      * @return The math transformation used to convert image coordinates to map coordinates.
      */
     MathTransform getImageToMapTransform();
+
+    /**
+     * Creates a shallow clone of this geocoding. Geolocation raster data is shared.
+     *
+     * @return the cloned geocoding
+     */
+    GeoCoding clone();
+
+    /**
+     * Check if geocoding can be cloned.
+     *
+     * @return if so or not
+     */
+    boolean canClone();
 
 }

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2010 Brockmann Consult GmbH (info@brockmann-consult.de)
- * 
+ *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation; either version 3 of the License, or (at your option)
@@ -9,7 +9,7 @@
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
  * more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
@@ -32,7 +32,7 @@ import org.opengis.referencing.operation.MathTransform;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Thomas Storm
@@ -42,17 +42,17 @@ import static org.junit.Assert.*;
 public class WatermaskOpTest {
 
     private Product sourceProduct;
-    private Map<String,Object> parameters;
+    private Map<String, Object> parameters;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         sourceProduct = new Product("dummy", "type", 1, 1);
         sourceProduct.setSceneGeoCoding(new MyGeoCoding());
         parameters = new HashMap<>();
     }
 
     @Test
-    public void testWithSubsampling() throws Exception {
+    public void testWithSubsampling() {
         parameters.put("subSamplingFactorX", 10);
         parameters.put("subSamplingFactorY", 10);
         Product lwProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(WatermaskOp.class), parameters, sourceProduct);
@@ -62,7 +62,7 @@ public class WatermaskOpTest {
     }
 
     @Test
-    public void testWithoutSubsampling() throws Exception {
+    public void testWithoutSubsampling() {
         Product lwProduct = GPF.createProduct(OperatorSpi.getOperatorAlias(WatermaskOp.class), parameters, sourceProduct);
         Band band = lwProduct.getBand("land_water_fraction");
         byte sample = (byte) band.getSourceImage().getData().getSample(0, 0, 0);
@@ -130,6 +130,16 @@ public class WatermaskOpTest {
         @Override
         public MathTransform getImageToMapTransform() {
             return null;
+        }
+
+        @Override
+        public GeoCoding clone() {
+            throw new IllegalStateException("not implemented");
+        }
+
+        @Override
+        public boolean canClone() {
+            return false;
         }
     }
 }

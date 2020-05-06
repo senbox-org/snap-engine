@@ -1,5 +1,6 @@
 package org.esa.snap.core.dataio.geocoding.forward;
 
+import org.esa.snap.core.dataio.geocoding.ForwardCoding;
 import org.esa.snap.core.dataio.geocoding.GeoRaster;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.PixelPos;
@@ -136,6 +137,11 @@ public class TiePointForwardTest {
 
         @Override
         public void dispose() {
+        }
+
+        @Override
+        public ForwardCoding clone() {
+            throw new IllegalStateException("not implemented");
         }
     }
 }
