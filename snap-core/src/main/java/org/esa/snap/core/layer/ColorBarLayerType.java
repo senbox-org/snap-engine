@@ -22,6 +22,7 @@ import java.awt.geom.AffineTransform;
 @LayerTypeMetadata(name = "ColorBarLayerType", aliasNames = {"org.esa.snap.core.layer.ColorBarLayerType"})
 public class ColorBarLayerType extends LayerType {
 
+    public static final String COLOR_BAR_LAYER_NAME = "ColorBar";
 
     public static final String OPTION_HORIZONTAL = "Horizontal";
     public static final String OPTION_VERTICAL = "Vertical";

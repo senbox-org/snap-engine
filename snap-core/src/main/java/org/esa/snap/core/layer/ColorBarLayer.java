@@ -57,7 +57,7 @@ public class ColorBarLayer extends Layer {
 
     public ColorBarLayer(ColorBarLayerType type, RasterDataNode raster, PropertySet configuration) {
         super(type, configuration);
-        setName("ColorBar Layer");
+        setName(ColorBarLayerType.COLOR_BAR_LAYER_NAME);
         this.raster = raster;
 
         productNodeHandler = new ProductNodeHandler();
@@ -71,6 +71,7 @@ public class ColorBarLayer extends Layer {
 
 
     }
+
 
     private static PropertySet initConfiguration(PropertySet configurationTemplate, RasterDataNode raster) {
         configurationTemplate.setValue(ColorBarLayerType.PROPERTY_NAME_RASTER, raster);
@@ -949,4 +950,8 @@ public class ColorBarLayer extends Layer {
         }
     }
 
+
+    public ImageLegend getImageLegend() {
+        return imageLegend;
+    }
 }
