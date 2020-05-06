@@ -202,7 +202,7 @@ def _get_snap_jvm_options():
                       "existing SNAP distribution directory.")
 
     env = _get_snap_jvm_env()
-    class_path = env[0].values()
+    class_path = list(env[0].values())
     library_path = env[1]
 
     if config.has_option('DEFAULT', 'java_class_path'):

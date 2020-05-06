@@ -30,10 +30,12 @@ import org.esa.snap.core.util.io.SnapFileFilter;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
 import javax.imageio.stream.MemoryCacheImageInputStream;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -84,12 +86,6 @@ public class GeoTiffProductReaderPlugInTest {
 
     @Test
     public void testDecodeQualification() throws URISyntaxException {
-        assertEquals(DecodeQualification.UNABLE, plugIn.getDecodeQualification("file.zip"));
-        assertEquals(DecodeQualification.UNABLE, plugIn.getDecodeQualification("file"));
-        assertEquals(DecodeQualification.SUITABLE, plugIn.getDecodeQualification("file.tif"));
-        assertEquals(DecodeQualification.SUITABLE, plugIn.getDecodeQualification("file.tiff"));
-        assertEquals(DecodeQualification.SUITABLE, plugIn.getDecodeQualification("file.btf"));
-        assertEquals(DecodeQualification.SUITABLE, plugIn.getDecodeQualification("file.gtif"));
 
         final File zippedgeoTiff = new File(getClass().getResource("nearGreenwichMeridian.zip").toURI());
         if(zippedgeoTiff.exists()) {
@@ -97,10 +93,30 @@ public class GeoTiffProductReaderPlugInTest {
         }
 
         final File tifInDirInZip = new File(getClass().getResource("tifInDirInZip.zip").toURI());
-        if(tifInDirInZip.exists()) {
+        if (tifInDirInZip.exists()) {
             assertEquals(DecodeQualification.UNABLE, plugIn.getDecodeQualification(tifInDirInZip));
         }
 
+    }
+
+    @Test
+    public void testGetTiffMode() throws IOException {
+        String tiffMode;
+        ByteArrayInputStream bigEndianBigTiff = new ByteArrayInputStream(new byte[]{0x4d, 0x4d, 0x00, 0x2b});
+        tiffMode = GeoTiffProductReaderPlugIn.getTiffMode(ImageIO.createImageInputStream(bigEndianBigTiff));
+        assertEquals("BigTiff", tiffMode);
+
+        ByteArrayInputStream bigEndianTiff = new ByteArrayInputStream(new byte[]{0x4d, 0x4d, 0x00, 0x2a});
+        tiffMode = GeoTiffProductReaderPlugIn.getTiffMode(ImageIO.createImageInputStream(bigEndianTiff));
+        assertEquals("Tiff", tiffMode);
+
+        ByteArrayInputStream littleEndianBigTiff = new ByteArrayInputStream(new byte[]{0x49, 0x49, 0x2b, 0x00});
+        tiffMode = GeoTiffProductReaderPlugIn.getTiffMode(ImageIO.createImageInputStream(littleEndianBigTiff));
+        assertEquals("BigTiff", tiffMode);
+
+        ByteArrayInputStream littleEndianTiff = new ByteArrayInputStream(new byte[]{0x49, 0x49, 0x2a, 0x00});
+        tiffMode = GeoTiffProductReaderPlugIn.getTiffMode(ImageIO.createImageInputStream(littleEndianTiff));
+        assertEquals("Tiff", tiffMode);
     }
 
     @Test

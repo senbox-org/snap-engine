@@ -20,39 +20,40 @@ import com.bc.ceres.core.ProgressMonitor;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFImageReader;
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFRenderedImage;
 import org.esa.snap.core.dataio.ProductIO;
+import org.esa.snap.core.dataio.geocoding.ComponentFactory;
+import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
+import org.esa.snap.core.dataio.geocoding.ForwardCoding;
+import org.esa.snap.core.dataio.geocoding.GeoChecks;
+import org.esa.snap.core.dataio.geocoding.GeoRaster;
+import org.esa.snap.core.dataio.geocoding.InverseCoding;
+import org.esa.snap.core.dataio.geocoding.forward.TiePointBilinearForward;
+import org.esa.snap.core.dataio.geocoding.inverse.TiePointInverse;
+import org.esa.snap.core.dataio.geocoding.util.RasterUtils;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.ColorPaletteDef;
 import org.esa.snap.core.datamodel.CrsGeoCoding;
 import org.esa.snap.core.datamodel.GeoCoding;
 import org.esa.snap.core.datamodel.GeoPos;
 import org.esa.snap.core.datamodel.IndexCoding;
-import org.esa.snap.core.datamodel.MapGeoCoding;
 import org.esa.snap.core.datamodel.PixelPos;
 import org.esa.snap.core.datamodel.Product;
 import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.datamodel.VirtualBand;
-import org.esa.snap.core.dataop.maptransf.Datum;
-import org.esa.snap.core.dataop.maptransf.LambertConformalConicDescriptor;
-import org.esa.snap.core.dataop.maptransf.MapInfo;
-import org.esa.snap.core.dataop.maptransf.MapProjection;
-import org.esa.snap.core.dataop.maptransf.MapProjectionRegistry;
-import org.esa.snap.core.dataop.maptransf.MapTransform;
-import org.esa.snap.core.dataop.maptransf.MapTransformDescriptor;
 import org.esa.snap.core.image.ImageManager;
 import org.esa.snap.core.util.io.FileUtils;
 import org.esa.snap.runtime.Config;
-import org.esa.snap.test.LongTestRunner;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.ReferencingFactoryFinder;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.referencing.crs.DefaultProjectedCRS;
 import org.geotools.referencing.cs.DefaultCartesianCS;
 import org.geotools.referencing.datum.DefaultGeodeticDatum;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.opengis.parameter.ParameterValueGroup;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -78,7 +79,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 @SuppressWarnings({"InstanceVariableMayNotBeInitialized"})
-@RunWith(LongTestRunner.class)
+//@RunWith(LongTestRunner.class)
+@Ignore("This tests doesn't make sense at the moment. Can be reactivated when both geotiff readers are merged")
 public class BigGeoTiffWriteReadTest {
 
     private static final String WGS_84 = "EPSG:4326";
@@ -388,13 +390,6 @@ public class BigGeoTiffWriteReadTest {
     }
 
     @Test
-    public void testWriteReadLambertConformalConic_MapGeoCoding() throws IOException, TransformException, FactoryException {
-        setLambertConformalConicGeoCoding_MapGeoCoding(outProduct);
-
-        performTest(2.0e-4f);
-    }
-
-    @Test
     public void testWriteReadStereographic() throws IOException, TransformException, FactoryException {
         setGeoCoding(outProduct, WGS84_ARCTIC_POLAR_STEREOGRAPHIC);
 
@@ -491,6 +486,8 @@ public class BigGeoTiffWriteReadTest {
         if (gc1 instanceof CrsGeoCoding) {
             assertEquals(CrsGeoCoding.class, gc2.getClass());
             CRS.equalsIgnoreMetadata(gc1, gc2);
+        } else if (gc1 instanceof ComponentGeoCoding) {
+            assertEquals(ComponentGeoCoding.class, gc2.getClass());
         } else if (gc1 instanceof TiePointGeoCoding) {
             assertEquals(TiePointGeoCoding.class, gc2.getClass());
         }
@@ -545,21 +542,6 @@ public class BigGeoTiffWriteReadTest {
         product.setSceneGeoCoding(new CrsGeoCoding(crs, imageBounds, imageToMap));
     }
 
-    private static void setLambertConformalConicGeoCoding_MapGeoCoding(final Product product) {
-        final MapTransformDescriptor descriptor = MapProjectionRegistry.getDescriptor(
-                LambertConformalConicDescriptor.TYPE_ID);
-        final double[] values = descriptor.getParameterDefaultValues();
-        for (int i = 0; i < values.length; i++) {
-            values[i] = values[i] - 0.001;
-        }
-        final MapTransform transform = descriptor.createTransform(values);
-        final MapProjection mapProjection = new MapProjection(descriptor.getTypeID(), transform);
-        final MapInfo mapInfo = new MapInfo(mapProjection, .5f, .6f, .7f, .8f, .09f, .08f, Datum.WGS_84);
-        mapInfo.setSceneWidth(product.getSceneRasterWidth());
-        mapInfo.setSceneHeight(product.getSceneRasterHeight());
-        product.setSceneGeoCoding(new MapGeoCoding(mapInfo));
-    }
-
     private static void setLambertConformalConicGeoCoding(final Product product) throws FactoryException,
             TransformException {
         final MathTransformFactory transformFactory = ReferencingFactoryFinder.getMathTransformFactory(null);
@@ -611,20 +593,50 @@ public class BigGeoTiffWriteReadTest {
     }
 
     private static void setTiePointGeoCoding(final Product product) {
-        final TiePointGrid latGrid = new TiePointGrid("lat", 3, 3, 0.5f, 0.5f, 5, 5, new float[]{
+        int gridWidth = 3;
+        int gridHeight = 3;
+        float offsetX = 0.5f;
+        float offsetY = 0.5f;
+        int subSamplingX = 5;
+        int subSamplingY = 5;
+        double[] lats = {
                 85, 84, 83,
                 75, 74, 73,
                 65, 64, 63
-        });
-        final TiePointGrid lonGrid = new TiePointGrid("lon", 3, 3, 0.5f, 0.5f, 5, 5, new float[]{
+        };
+        final TiePointGrid latGrid = new TiePointGrid("lat", gridWidth, gridHeight, offsetX, offsetY, subSamplingX, subSamplingY, toFloat(lats));
+        double[] lons = {
                 -15, -5, 5,
                 -16, -6, 4,
                 -17, -7, 3
-        });
+        };
+        final TiePointGrid lonGrid = new TiePointGrid("lon", gridWidth, gridHeight, offsetX, offsetY, 5, 5, toFloat(lons));
         product.addTiePointGrid(latGrid);
         product.addTiePointGrid(lonGrid);
-        product.setSceneGeoCoding(new TiePointGeoCoding(latGrid, lonGrid));
+
+        double tiePointResolutionInKm = RasterUtils.computeResolutionInKm(lons, lats, gridWidth, gridHeight);
+        GeoRaster geoRaster = new GeoRaster(
+                lons, lats, lonGrid.getName(), latGrid.getName(), gridWidth, gridHeight,
+                product.getSceneRasterWidth(), product.getSceneRasterHeight(), tiePointResolutionInKm,
+                offsetX, offsetY, subSamplingX, subSamplingY);
+        final ForwardCoding forward = ComponentFactory.getForward(TiePointBilinearForward.KEY);
+        final InverseCoding inverse = ComponentFactory.getInverse(TiePointInverse.KEY);
+
+        ComponentGeoCoding geoCoding = new ComponentGeoCoding(geoRaster, forward, inverse, GeoChecks.ANTIMERIDIAN, DefaultGeographicCRS.WGS84);
+        geoCoding.initialize();
+        product.setSceneGeoCoding(geoCoding);
     }
+
+    public static float[] toFloat(double[] doubles) {
+        final float[] floats = new float[doubles.length];
+
+        for (int i = 0; i < doubles.length; i++) {
+            floats[i] = (float) doubles[i];
+        }
+
+        return floats;
+    }
+
 
     private Product writeReadProduct() throws IOException {
         location = new File(TEST_DIR, "test_product.tif");

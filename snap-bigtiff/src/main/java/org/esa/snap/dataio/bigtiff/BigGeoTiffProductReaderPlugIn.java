@@ -11,7 +11,9 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteOrder;
 import java.util.Iterator;
 import java.util.Locale;
 
@@ -73,14 +75,16 @@ public class BigGeoTiffProductReaderPlugIn implements ProductReaderPlugIn {
     // @todo 3 tb/tb write test following the original GeoTiff pattern 2015-01-08
     static DecodeQualification getDecodeQualificationImpl(ImageInputStream stream) {
         try {
-            TIFFImageReader imageReader = getTiffImageReader(stream);
-            if (imageReader == null) {
-                return DecodeQualification.UNABLE;
+            String mode = getTiffMode(stream);
+            if ("BigTiff".equals(mode)) {
+                if (getTiffImageReader(stream) != null) {
+                    return DecodeQualification.SUITABLE;
+                }
             }
         } catch (Exception ignore) {
             return DecodeQualification.UNABLE;
         }
-        return DecodeQualification.SUITABLE;
+        return DecodeQualification.UNABLE;
     }
 
     static TIFFImageReader getTiffImageReader(ImageInputStream stream) {
@@ -96,5 +100,38 @@ public class BigGeoTiffProductReaderPlugIn implements ProductReaderPlugIn {
         }
 
         return imageReader;
+    }
+
+    static String getTiffMode(ImageInputStream stream) throws IOException {
+        try {
+            stream.mark();
+            int byteOrder = stream.readUnsignedShort();
+            switch (byteOrder) {
+                case 0x4d4d:
+                    stream.setByteOrder(ByteOrder.BIG_ENDIAN);
+                    break;
+                case 0x4949:
+                    stream.setByteOrder(ByteOrder.LITTLE_ENDIAN);
+                    break;
+                default:
+                    // Fallback
+                    stream.setByteOrder(ByteOrder.LITTLE_ENDIAN);
+                    break;
+            }
+
+            int magic = stream.readUnsignedShort();
+            switch (magic) {
+                case 43:
+                    // BIG-TIFF
+                    return "BigTiff";
+                case 42:
+                    // normal TIFF
+                    return "Tiff";
+                default:
+                    return "Unknown";
+            }
+        } finally {
+            stream.reset();
+        }
     }
 }
