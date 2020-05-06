@@ -20,12 +20,15 @@ import com.bc.ceres.core.ProgressMonitor;
 import org.esa.snap.core.dataio.AbstractProductWriter;
 import org.esa.snap.core.dataio.ProductWriterPlugIn;
 import org.esa.snap.core.dataio.geocoding.ComponentGeoCoding;
-import org.esa.snap.core.datamodel.*;
+import org.esa.snap.core.datamodel.Band;
+import org.esa.snap.core.datamodel.GeoCoding;
+import org.esa.snap.core.datamodel.Product;
+import org.esa.snap.core.datamodel.ProductData;
+import org.esa.snap.core.datamodel.RasterDataNode;
+import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.csv.dataio.Constants;
-import org.jdom.Element;
-import org.jdom.output.XMLOutputter;
 
-import java.awt.*;
+import java.awt.Rectangle;
 import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
 import java.io.File;
@@ -58,6 +61,33 @@ public class CsvProductWriter extends AbstractProductWriter {
         this.writer = writer;
         this.config = config;
         this.productWritten = false;
+    }
+
+    // package access for testing only tb 2020-02-28
+    static String getJavaType(int dataType) {
+        switch (dataType) {
+            case DataBuffer.TYPE_FLOAT: {
+                return "float";
+            }
+            case DataBuffer.TYPE_DOUBLE: {
+                return "double";
+            }
+            case DataBuffer.TYPE_BYTE: {
+                return "byte";
+            }
+            case DataBuffer.TYPE_SHORT: {
+                return "short";
+            }
+            case DataBuffer.TYPE_USHORT: {
+                return "ushort";
+            }
+            case DataBuffer.TYPE_INT: {
+                return "int";
+            }
+            default: {
+                throw new IllegalArgumentException("Unsupported type '" + dataType + "'.");
+            }
+        }
     }
 
     @Override
@@ -93,33 +123,6 @@ public class CsvProductWriter extends AbstractProductWriter {
     private void ensureWriter() throws IOException {
         if (writer == null) {
             writer = new FileWriter(new File(getOutput().toString()));
-        }
-    }
-
-    // package access for testing only tb 2020-02-28
-    static String getJavaType(int dataType) {
-        switch (dataType) {
-            case DataBuffer.TYPE_FLOAT: {
-                return "float";
-            }
-            case DataBuffer.TYPE_DOUBLE: {
-                return "double";
-            }
-            case DataBuffer.TYPE_BYTE: {
-                return "byte";
-            }
-            case DataBuffer.TYPE_SHORT: {
-                return "short";
-            }
-            case DataBuffer.TYPE_USHORT: {
-                return "ushort";
-            }
-            case DataBuffer.TYPE_INT: {
-                return "int";
-            }
-            default: {
-                throw new IllegalArgumentException("Unsupported type '" + dataType + "'.");
-            }
         }
     }
 
