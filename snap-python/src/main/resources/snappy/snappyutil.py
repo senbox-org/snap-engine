@@ -152,7 +152,7 @@ def _configure_snappy(snap_home=None,
                            "Or get the source code from https://github.com/bcdev/jpy and follow the build instructions:",
                            "  $ git clone https://github.com/bcdev/jpy.git",
                            "  $ cd jpy"
-                           ])
+                           ]))
 
             return _ERR_CODE_NO_MATCHING_JPY_WHEEL_FOUND
     else:
