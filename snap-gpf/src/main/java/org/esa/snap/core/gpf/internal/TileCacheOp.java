@@ -29,8 +29,8 @@ import java.awt.image.RenderedImage;
         authors = "Marco Peters, Martin Böttcher",
         copyright = "Brockmann Consult GmbH",
         version = "0.1",
-        internal = true,
-        description = "Operator which provides a dedicated cache for its source product.")
+        description = "Experimental Operator which provides a dedicated cache for its source product.\n" +
+                "A guide on how this operator is used is provided at https://senbox.atlassian.net/wiki/x/VQCTLw.")
 public class TileCacheOp extends Operator {
 
     private static final long MEGABYTES = 1024 * 1024;
