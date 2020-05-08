@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import static java.nio.file.FileVisitResult.*;
+import static java.nio.file.FileVisitResult.CONTINUE;
 
 /**
  * This main class offers to create a bundle either from an existing SNAP installation, or from checked-out and build
@@ -57,7 +57,8 @@ public class BundleCreator {
         }
 
         EngineConfig config = EngineConfig.instance();
-        config.logger().info("Creating assembly file " + targetFile + " for SNAP installation '" + installationDir + "'...");
+        Logger logger = config.logger();
+        logger.info("Creating assembly file " + targetFile + " for SNAP installation '" + installationDir + "'...");
 
         Path installationPath = Paths.get(installationDir);
         config.installDir(installationPath);
@@ -68,8 +69,8 @@ public class BundleCreator {
         List<Path> libraryPathEntries = scanResult.libraryPathEntries;
 
         if (classPathEntries.isEmpty() && libraryPathEntries.isEmpty()) {
-            config.logger().warning("Nothing found in directory '" + installationDir + "'. Please make sure a valid " +
-                    "SNAP installation is provided.");
+            logger.warning("Nothing found in directory '" + installationDir + "'. Please make sure a valid " +
+                                   "SNAP installation is provided.");
             System.exit(0);
         }
 
@@ -78,18 +79,10 @@ public class BundleCreator {
             nbUserDir = Paths.get(System.getProperty("user.home")).resolve("AppData").resolve("Roaming").resolve("SNAP");
         }
 
-        Logger logger = config.logger();
-        Path zipfile = Paths.get(targetFile);
-        URI fileUri = zipfile.toUri();
+        URI zipUri = createZipUri(targetFile);
+
         Map<String, String> env = new HashMap<>();
         env.put("create", "true");
-        URI zipUri;
-        try {
-            zipUri = new URI("jar:" + fileUri.getScheme(), fileUri.getRawPath(), null);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-
         try (FileSystem zipfs = FileSystems.newFileSystem(zipUri, env)) {
             logger.fine("Adding classpath entries to zip...");
             for (Path classPathEntry : classPathEntries) {
@@ -130,50 +123,51 @@ public class BundleCreator {
 
         JarVisitor jarVisitor = new JarVisitor();
         SoVisitor soVisitor = new SoVisitor();
-        List<Path> classPathEntries = new ArrayList<>();
-        List<Path> libraryPathEntries = new ArrayList<>();
         for (int i = 1; i < args.length; i++) {
             String inputDir = args[i];
             Files.walkFileTree(Paths.get(inputDir), jarVisitor);
             Files.walkFileTree(Paths.get(inputDir), soVisitor);
         }
-        classPathEntries.addAll(jarVisitor.resultFiles);
-        libraryPathEntries.addAll(soVisitor.resultFiles);
+        List<Path> classPathEntries = new ArrayList<>(jarVisitor.resultFiles);
+        List<Path> libraryPathEntries = new ArrayList<>(soVisitor.resultFiles);
 
-        Path zipfile = Paths.get(targetFile);
-        URI fileUri = zipfile.toUri();
+        URI zipUri = createZipUri(targetFile);
+
         Map<String, String> env = new HashMap<>();
         env.put("create", "true");
-        URI zipUri;
-        try {
-            zipUri = new URI("jar:" + fileUri.getScheme(), fileUri.getRawPath(), null);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-
         try (FileSystem zipfs = FileSystems.newFileSystem(zipUri, env)) {
             logger.fine("Adding classpath entries to zip...");
-            for (Path classPathEntry : classPathEntries) {
-                String targetFilename;
-                targetFilename = getTargetFilename(classPathEntry.getParent().toString(), classPathEntry);
-                targetFilename = targetFilename.replace(File.separator, "_");
-                Files.copy(classPathEntry, zipfs.getPath(File.separator + targetFilename), StandardCopyOption.REPLACE_EXISTING);
-                logger.fine("Added '" + classPathEntry.toString() + "'");
-            }
+            addEntriesToZipfile(classPathEntries, zipfs, logger);
             logger.fine("done. Adding shared objects entries to zip...");
-            for (Path libraryPathEntry : libraryPathEntries) {
-                String targetFilename;
-                targetFilename = getTargetFilename(libraryPathEntry.getParent().toString(), libraryPathEntry);
-                targetFilename = targetFilename.replace(File.separator, "_");
-                Files.copy(libraryPathEntry, zipfs.getPath(File.separator + targetFilename), StandardCopyOption.REPLACE_EXISTING);
-                logger.fine("Added '" + libraryPathEntry.toString() + "'");
-            }
+            addEntriesToZipfile(libraryPathEntries, zipfs, logger);
         } catch (IOException e) {
             e.printStackTrace();
         }
         logger.info("...done.");
 
 
+    }
+
+    private static URI createZipUri(String targetFile) {
+        Path zipfile = Paths.get(targetFile);
+        URI fileUri = zipfile.toUri();
+        URI zipUri;
+        try {
+            zipUri = new URI("jar:" + fileUri.getScheme(), fileUri.getRawPath(), null);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+        return zipUri;
+    }
+
+    private static void addEntriesToZipfile(List<Path> libraryPathEntries, FileSystem zipfs, Logger logger) throws IOException {
+        for (Path libraryPathEntry : libraryPathEntries) {
+            String targetFilename;
+            targetFilename = getTargetFilename(libraryPathEntry.getParent().toString(), libraryPathEntry);
+            targetFilename = targetFilename.replace(File.separator, "_");
+            Files.copy(libraryPathEntry, zipfs.getPath(File.separator + targetFilename), StandardCopyOption.REPLACE_EXISTING);
+            logger.fine("Added '" + libraryPathEntry.toString() + "'");
+        }
     }
 
     private static boolean detectMode(String arg2) {
