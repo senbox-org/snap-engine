@@ -175,7 +175,7 @@ public class PixelGeoCodingTest {
 
     // @todo investigate why this fails and correct (SNAP-1308) tb 2020-04-29
     @Test
-    @Ignore
+    @Ignore("PixelGeoCoding is deprecated anyway. Better to switch to ComponentGeoCoding")
     public void testGetPixelPos() throws IOException {
         Product product = createProduct(ProductData.TYPE_FLOAT32);
         TiePointGeoCoding tiePointGeoCoding = (TiePointGeoCoding) product.getSceneGeoCoding();
