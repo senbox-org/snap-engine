@@ -16,6 +16,7 @@
 package org.esa.snap.core.datamodel;
 
 import org.esa.snap.core.image.ImageManager;
+import org.esa.snap.core.layer.ColorBarLayer;
 import org.esa.snap.core.layer.ColorBarLayerType;
 import org.esa.snap.core.util.PropertyMap;
 import org.esa.snap.core.util.StringUtils;
@@ -214,11 +215,174 @@ public class ImageLegend {
         antialiasing = true;
         setDecimalPlaces(2);
         scalingFactor = 1;
+
         setDecimalPlacesForce(false);
         setFullCustomAddThesePoints("");
 
 
     }
+
+
+    public ImageLegend getCopyOfImageLegend() {
+
+
+        ImageLegend imageLegendCopy = new ImageLegend(raster.getImageInfo(), raster);
+
+        imageLegendCopy.setTitleVerticalAnchor(getTitleVerticalAnchor());
+
+        imageLegendCopy.setShowTitle(isShowTitle());
+        imageLegendCopy.setHeaderText(getTitleText());
+        imageLegendCopy.setTitleFontSize(getTitleFontSize());
+        imageLegendCopy.setTitleParameterColor(getTitleParameterColor());
+        imageLegendCopy.setTitleParameterFontName(getTitleParameterFontName());
+        imageLegendCopy.setTitleParameterFontType(getTitleParameterFontType());
+
+        imageLegendCopy.setShowTitleUnits(isShowTitleUnits());
+        imageLegendCopy.setHeaderUnitsText(getTitleUnitsText());
+        imageLegendCopy.setTitleUnitsFontSize(getTitleUnitsFontSize());
+        imageLegendCopy.setTitleUnitsColor(getTitleUnitsColor());
+        imageLegendCopy.setTitleUnitsFontName(getTitleUnitsFontName());
+        imageLegendCopy.setTitleUnitsFontType(getTitleUnitsFontType());
+
+        imageLegendCopy.setNumberOfTicks(getNumberOfTicks());
+        imageLegendCopy.setDistributionType(getDistributionType());
+        imageLegendCopy.setFullCustomAddThesePoints(getFullCustomAddThesePoints());
+
+        imageLegendCopy.setOrientation(getOrientation());
+        imageLegendCopy.setReversePalette(isReversePalette());
+        imageLegendCopy.setForegroundColor(getForegroundColor());
+        imageLegendCopy.setTickmarkColor(getTickmarkColor());
+        imageLegendCopy.setTickmarkLength(getTickmarkLength());
+        imageLegendCopy.setTickmarkWidth(getTickmarkWidth());
+        imageLegendCopy.setTickmarkShow(isTickmarkShow());
+
+        imageLegendCopy.setBorderShow(isBorderShow());
+        imageLegendCopy.setBorderWidth(getBorderWidth());
+        imageLegendCopy.setBorderColor(getBorderColor());
+
+        imageLegendCopy.setBackgroundColor(getBackgroundColor());
+        imageLegendCopy.setBackgroundTransparency(getBackgroundTransparency());
+        imageLegendCopy.setBackdropShow(isBackdropShow());
+
+        imageLegendCopy.setLabelsFontName(getLabelsFontName());
+        imageLegendCopy.setLabelsFontType(getLabelsFontType());
+        imageLegendCopy.setLabelsColor(getLabelsColor());
+        imageLegendCopy.setLabelsShow(isLabelsShow());
+        imageLegendCopy.setScalingFactor(getScalingFactor());
+        imageLegendCopy.setDecimalPlaces(getDecimalPlaces());
+        imageLegendCopy.setDecimalPlacesForce(isDecimalPlacesForce());
+
+        imageLegendCopy.setLabelsColor(getLabelsColor());
+        imageLegendCopy.setAntialiasing((Boolean) true);
+        imageLegendCopy.setColorBarLength(getColorBarLength());
+        imageLegendCopy.setColorBarThickness(getColorBarThickness());
+        imageLegendCopy.setLabelsFontSize(getLabelsFontSize());
+        imageLegendCopy.setLayerScaling(getLayerScaling());
+
+        //            imageLegend.setBackgroundTransparencyEnabled(true);
+
+        return imageLegendCopy;
+    }
+
+
+
+
+    public void updateWithProperties(PropertyMap configuration, RasterDataNode raster) {
+
+
+            // Title parameters
+
+            setShowTitle(
+                    configuration.getPropertyBool(ColorBarLayerType.PROPERTY_TITLE_PARAMETER_SHOW_KEY,
+                            ColorBarLayerType.PROPERTY_TITLE_PARAMETER_SHOW_DEFAULT));
+
+
+
+            String titleTextDefault = configuration.getPropertyString(ColorBarLayerType.PROPERTY_TITLE_PARAMETER_TEXT_KEY,
+                    ColorBarLayerType.PROPERTY_TITLE_PARAMETER_TEXT_DEFAULT);
+
+            String titleText = (ColorBarLayerType.NULL_SPECIAL.equals(titleTextDefault)) ? raster.getName() : titleTextDefault;
+
+            setHeaderText(titleText);
+
+
+
+            setTitleFontSize(
+                    configuration.getPropertyInt(ColorBarLayerType.PROPERTY_TITLE_PARAMETER_FONT_SIZE_KEY,
+                            ColorBarLayerType.PROPERTY_TITLE_PARAMETER_FONT_SIZE_DEFAULT));
+
+            setTitleParameterColor(
+                    configuration.getPropertyColor(ColorBarLayerType.PROPERTY_TITLE_PARAMETER_COLOR_KEY,
+                            ColorBarLayerType.PROPERTY_TITLE_PARAMETER_COLOR_DEFAULT));
+
+            setTitleParameterFontName(
+                    configuration.getPropertyString(ColorBarLayerType.PROPERTY_TITLE_PARAMETER_FONT_NAME_KEY,
+                            ColorBarLayerType.PROPERTY_TITLE_PARAMETER_FONT_NAME_DEFAULT));
+
+
+
+            boolean titleParameterBold = configuration.getPropertyBool(ColorBarLayerType.PROPERTY_TITLE_PARAMETER_FONT_BOLD_KEY,
+                    ColorBarLayerType.PROPERTY_TITLE_PARAMETER_FONT_BOLD_DEFAULT);
+
+            boolean titleParameterItalic = configuration.getPropertyBool(ColorBarLayerType.PROPERTY_TITLE_PARAMETER_FONT_ITALIC_KEY,
+                    ColorBarLayerType.PROPERTY_TITLE_PARAMETER_FONT_ITALIC_DEFAULT);
+
+            int titleFontType = ColorBarLayer.getFontType(titleParameterItalic, titleParameterBold);
+
+            setTitleParameterFontType(titleFontType);
+
+
+
+
+
+            // Header Units parameters
+
+            setShowTitleUnits(
+                    configuration.getPropertyBool(ColorBarLayerType.PROPERTY_TITLE_UNITS_SHOW_KEY,
+                            ColorBarLayerType.PROPERTY_TITLE_UNITS_SHOW_DEFAULT));
+
+
+
+            String titleUnitsTextDefault = configuration.getPropertyString(ColorBarLayerType.PROPERTY_TITLE_UNITS_TEXT_KEY,
+                    ColorBarLayerType.PROPERTY_TITLE_UNITS_TEXT_DEFAULT);
+
+
+            String titleUnitsText = (ColorBarLayerType.NULL_SPECIAL.equals(titleUnitsTextDefault)) ?  "(" + raster.getUnit() + ")" : titleUnitsTextDefault;
+
+            setHeaderUnitsText(titleUnitsText);
+
+
+
+            setTitleUnitsFontSize(
+                    configuration.getPropertyInt(ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_SIZE_KEY,
+                            ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_SIZE_DEFAULT));
+
+            setTitleUnitsColor(
+                    configuration.getPropertyColor(ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_COLOR_KEY,
+                            ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_COLOR_DEFAULT));
+
+            setTitleUnitsFontName(
+                    configuration.getPropertyString(ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_NAME_KEY,
+                            ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_NAME_DEFAULT));
+
+
+
+            boolean titleUnitsBold = configuration.getPropertyBool(ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_BOLD_KEY,
+                    ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_BOLD_DEFAULT);
+
+            boolean titleUnitsItalic = configuration.getPropertyBool(ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_ITALIC_KEY,
+                    ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_ITALIC_DEFAULT);
+
+            int titleUnitsFontType = ColorBarLayer.getFontType(titleUnitsItalic, titleUnitsBold);
+
+            setTitleUnitsFontType(titleUnitsFontType);
+
+
+        }
+
+
+
+
 
     // todo Danny tmp edit
 //    public void initDefaults(PropertyMap configuration) {
@@ -280,7 +444,7 @@ public class ImageLegend {
         this.showTitle = usingHeader;
     }
 
-    public String getTitleParameterText() {
+    public String getTitleText() {
         return (headerText == null) ? "null-test" : headerText;
 //        if (!isInitialized() && titleOverRide != null && titleOverRide.length() > 0) {
 //            return titleOverRide;
@@ -294,7 +458,7 @@ public class ImageLegend {
         this.headerText = headerText;
     }
 
-    public String getParameterUnitsText() {
+    public String getTitleUnitsText() {
         return (headerUnitsText == null) ? "null-test" : headerUnitsText;
 
 //        return headerUnitsText;
@@ -657,8 +821,8 @@ public class ImageLegend {
 
 //        System.out.println("Title required width =" + headerRequiredDimension.width);
 //        System.out.println("Title required height =" + headerRequiredDimension.height);
-//        System.out.println("Title =" + getTitleParameterText());
-//        System.out.println("Title units =" + getParameterUnitsText());
+//        System.out.println("Title =" + getTitleText());
+//        System.out.println("Title units =" + getTitleUnitsText());
 
         double discreteBooster = 0;
         final int n = getNumGradationCurvePoints();
@@ -886,7 +1050,7 @@ public class ImageLegend {
         Font originalFont = g2d.getFont();
 
         g2d.setFont(getTitleParameterFont());
-        Rectangle2D titleRectangle = g2d.getFontMetrics().getStringBounds(getTitleParameterText(), g2d);
+        Rectangle2D titleRectangle = g2d.getFontMetrics().getStringBounds(getTitleText(), g2d);
         Rectangle2D titleSingleLetterRectangle = g2d.getFontMetrics().getStringBounds("A", g2d);
 
         double titleParameterHeight = titleRectangle.getHeight();
@@ -894,7 +1058,7 @@ public class ImageLegend {
         double titleParameterSingleLetterWidth = titleSingleLetterRectangle.getWidth();
 
         g2d.setFont(getTitleUnitsFont());
-        Rectangle2D unitsRectangle = g2d.getFontMetrics().getStringBounds(getParameterUnitsText(), g2d);
+        Rectangle2D unitsRectangle = g2d.getFontMetrics().getStringBounds(getTitleUnitsText(), g2d);
         Rectangle2D unitsSingleLetterRectangle = g2d.getFontMetrics().getStringBounds("A", g2d);
 
         double titleUnitsHeight = unitsRectangle.getHeight();
@@ -1113,7 +1277,7 @@ public class ImageLegend {
                 if (hasTitleUnits()) {
                     g2d.setFont(getTitleUnitsFont());
                     g2d.setPaint(getTitleUnitsColor());
-                    g2d.drawString(getParameterUnitsText(), 0, 0);
+                    g2d.drawString(getTitleUnitsText(), 0, 0);
                 }
 
 
@@ -1187,7 +1351,7 @@ public class ImageLegend {
                     if (hasTitleUnits()) {
                         g2d.setFont(getTitleUnitsFont());
                         g2d.setPaint(getTitleUnitsColor());
-                        g2d.drawString(getParameterUnitsText(), 0, 0);
+                        g2d.drawString(getTitleUnitsText(), 0, 0);
                     }
 
                     g2d.translate(0, -translateY2);
@@ -1223,7 +1387,7 @@ public class ImageLegend {
                         g2d.rotate(rotate);
                         g2d.setFont(getTitleUnitsFont());
                         g2d.setPaint(getTitleUnitsColor());
-                        g2d.drawString(getParameterUnitsText(), 0, 0);
+                        g2d.drawString(getTitleUnitsText(), 0, 0);
                         g2d.rotate(-rotate);
                     }
 

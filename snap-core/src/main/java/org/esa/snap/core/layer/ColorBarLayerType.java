@@ -321,7 +321,7 @@ public class ColorBarLayerType extends LayerType {
     private static final String PROPERTY_TITLE_PARAMETER_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "TitleParameter";
 
     public static final String PROPERTY_TITLE_PARAMETER_SECTION_KEY = PROPERTY_TITLE_PARAMETER_ROOT_KEY + ".section";
-    public static final String PROPERTY_TITLE_PARAMETER_SECTION_LABEL = "Title Formatting";
+    public static final String PROPERTY_TITLE_PARAMETER_SECTION_LABEL = "Header Formatting";
     public static final String PROPERTY_TITLE_PARAMETER_SECTION_TOOLTIP = "Set parameter options in title of color bar";
     public static final String PROPERTY_TITLE_PARAMETER_SECTION_ALIAS = PROPERTY_TITLE_PARAMETER_ROOT_ALIAS + "Section";
 
@@ -363,7 +363,7 @@ public class ColorBarLayerType extends LayerType {
 
 
     public static final String PROPERTY_TITLE_PARAMETER_FONT_SIZE_KEY = PROPERTY_TITLE_PARAMETER_ROOT_KEY + "font.size";
-    public static final String PROPERTY_TITLE_PARAMETER_FONT_SIZE_LABEL = "Title Size";
+    public static final String PROPERTY_TITLE_PARAMETER_FONT_SIZE_LABEL = "Header Size";
     public static final String PROPERTY_TITLE_PARAMETER_FONT_SIZE_TOOLTIP = "Set size of the title parameter";
     private static final String PROPERTY_TITLE_PARAMETER_FONT_SIZE_ALIAS = PROPERTY_TITLE_PARAMETER_ROOT_ALIAS + "FontSize";
     public static final int PROPERTY_TITLE_PARAMETER_FONT_SIZE_DEFAULT = 35;

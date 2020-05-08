@@ -187,14 +187,14 @@ public class ColorBarLayer extends Layer {
             }
 
             if (imageLegend != null) {
-                if (getTitle() == null || !getTitle().equals(imageLegend.getTitleParameterText())) {
-                    setTitle(imageLegend.getTitleParameterText());
+                if (getTitle() == null || !getTitle().equals(imageLegend.getTitleText())) {
+                    setTitle(imageLegend.getTitleText());
                 }
             }
 
             if (imageLegend != null) {
-                if (getUnits() == null || !getUnits().equals(imageLegend.getParameterUnitsText())) {
-                    setUnits(imageLegend.getParameterUnitsText());
+                if (getUnits() == null || !getUnits().equals(imageLegend.getTitleUnitsText())) {
+                    setUnits(imageLegend.getTitleUnitsText());
                 }
             }
 
@@ -720,7 +720,7 @@ public class ColorBarLayer extends Layer {
     }
 
 
-    private int getFontType(boolean italic, boolean bold) {
+    public static int getFontType(boolean italic, boolean bold) {
         if (italic && bold) {
             return Font.ITALIC | Font.BOLD;
         } else if (italic) {
