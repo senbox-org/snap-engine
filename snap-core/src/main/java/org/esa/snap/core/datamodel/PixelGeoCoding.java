@@ -463,7 +463,7 @@ public class PixelGeoCoding extends AbstractGeoCoding implements BasicPixelGeoCo
         getGeoPosInternal(x_center + d_x_2, y_center + d_y_2, geoPos_2);
 
         final double deltaLat = Math.abs(geoPos_1.lat - geoPos_2.lat);
-        final double deltaLon = Math.abs(geoPos_1.lon - geoPos_2.lon);
+        final double deltaLon = Math.abs((geoPos_1.lon - geoPos_2.lon + 540.0) % 360.0 - 180.0);
 
         EPS = Math.max(deltaLat, deltaLon) * div;
     }
