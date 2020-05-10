@@ -141,6 +141,7 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
      */
     @Override
     public boolean isCrossingMeridianAt180() {
+        computeApproximations();
         return normalized;
     }
 
