@@ -91,8 +91,7 @@ public class PixelGeoCoding extends AbstractGeoCoding implements BasicPixelGeoCo
 
     private static final int MAX_SEARCH_CYCLES = 10;
 
-    // TODO - (nf) make EPS for quad-tree search dependent on current scene
-    private static final double EPS = 0.04; // used by quad-tree search
+    private  double EPS = 0.04; // used by quad-tree search
     private static final boolean TRACE = false;
     private static final double D2R = Math.PI / 180.0;
     private final Band latBand;
@@ -771,11 +770,48 @@ public class PixelGeoCoding extends AbstractGeoCoding implements BasicPixelGeoCo
         if (!initialized) {
             try {
                 initData(latBand, lonBand, validMaskExpression, ProgressMonitor.NULL);
+                setEpsilon();
             } catch (IOException e) {
                 throw new IllegalStateException("Unable to initialise data for pixel geo-coding", e);
             }
             initialized = true;
         }
+    }
+
+    private void setEpsilon() {
+        int x_center = rasterWidth / 2 - 1;
+        x_center = x_center < 0 ? 0 : x_center;
+
+        int y_center = rasterHeight / 2 - 1;
+        y_center = y_center < 0 ? 0 : y_center;
+
+        int d_x_1 = 0;
+        int d_y_1 = 0;
+        int d_x_2 = 0;
+        int d_y_2 = 0;
+        double div = 1.0 / Math.sqrt(2);
+
+        if (rasterWidth < 2) {
+            div = 1.0;
+        } else {
+            d_x_2 = 1;
+        }
+
+        if (rasterHeight < 2) {
+            div = 1.0;
+        } else {
+            d_y_2 = 1;
+        }
+
+        final GeoPos geoPos_1 = new GeoPos();
+        final GeoPos geoPos_2 = new GeoPos();
+        getGeoPosInternal(x_center + d_x_1, y_center + d_y_1, geoPos_1);
+        getGeoPosInternal(x_center + d_x_2, y_center + d_y_2, geoPos_2);
+
+        final double deltaLat = Math.abs(geoPos_1.lat - geoPos_2.lat);
+        final double deltaLon = Math.abs((geoPos_1.lon - geoPos_2.lon + 540.0) % 360.0 - 180.0);
+
+        EPS = Math.max(deltaLat, deltaLon) * div;
     }
 
     /**
