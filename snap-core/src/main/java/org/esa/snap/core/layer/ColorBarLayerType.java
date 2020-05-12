@@ -11,6 +11,7 @@ import com.bc.ceres.glayer.LayerType;
 import com.bc.ceres.glayer.annotations.LayerTypeMetadata;
 import org.esa.snap.core.datamodel.RasterDataNode;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 
@@ -57,7 +58,7 @@ public class ColorBarLayerType extends LayerType {
     private static final String PROPERTY_LABEL_VALUES_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "LabelValues";
 
     public static final String PROPERTY_LABEL_VALUES_SECTION_KEY = PROPERTY_LABEL_VALUES_ROOT_KEY + ".section";
-    public static final String PROPERTY_LABEL_VALUES_SECTION_LABEL = "Labels";
+    public static final String PROPERTY_LABEL_VALUES_SECTION_LABEL = "Tick Label Values";
     public static final String PROPERTY_LABEL_VALUES_SECTION_TOOLTIP = "Numeric value options for the color bar legend labels";
     public static final String PROPERTY_LABEL_VALUES_SECTION_ALIAS = PROPERTY_LABEL_VALUES_ROOT_ALIAS +"Section";
 
@@ -149,7 +150,7 @@ public class ColorBarLayerType extends LayerType {
     private static final String PROPERTY_FORMATTING_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "Orientation";
 
     public static final String PROPERTY_FORMATTING_SECTION_KEY = PROPERTY_FORMATTING_ROOT_KEY + ".section";
-    public static final String PROPERTY_FORMATTING_SECTION_LABEL = "Orientation & Location";
+    public static final String PROPERTY_FORMATTING_SECTION_LABEL = "Orientation";
     public static final String PROPERTY_FORMATTING_SECTION_TOOLTIP = "Orientation options for the color bar legend";
     public static final String PROPERTY_FORMATTING_SECTION_ALIAS = PROPERTY_FORMATTING_ROOT_ALIAS + "Section";
 
@@ -185,7 +186,7 @@ public class ColorBarLayerType extends LayerType {
     private static final String PROPERTY_LOCATION_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "Location";
 
     public static final String PROPERTY_LOCATION_SECTION_KEY = PROPERTY_LOCATION_ROOT_KEY + ".section";
-    public static final String PROPERTY_LOCATION_SECTION_LABEL = "Location";
+    public static final String PROPERTY_LOCATION_SECTION_LABEL = "Placement Location";
     public static final String PROPERTY_LOCATION_SECTION_TOOLTIP = "Set location and relative size of color bar image";
     public static final String PROPERTY_LOCATION_SECTION_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "Section";
 
@@ -321,40 +322,40 @@ public class ColorBarLayerType extends LayerType {
     private static final String PROPERTY_TITLE_PARAMETER_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "TitleParameter";
 
     public static final String PROPERTY_TITLE_PARAMETER_SECTION_KEY = PROPERTY_TITLE_PARAMETER_ROOT_KEY + ".section";
-    public static final String PROPERTY_TITLE_PARAMETER_SECTION_LABEL = "Header Formatting";
+    public static final String PROPERTY_TITLE_PARAMETER_SECTION_LABEL = "Title Format";
     public static final String PROPERTY_TITLE_PARAMETER_SECTION_TOOLTIP = "Set parameter options in title of color bar";
     public static final String PROPERTY_TITLE_PARAMETER_SECTION_ALIAS = PROPERTY_TITLE_PARAMETER_ROOT_ALIAS + "Section";
 
     public static final String PROPERTY_TITLE_PARAMETER_SHOW_KEY = PROPERTY_TITLE_PARAMETER_ROOT_KEY + ".show";
-    public static final String PROPERTY_TITLE_PARAMETER_SHOW_LABEL = "Show";
+    public static final String PROPERTY_TITLE_PARAMETER_SHOW_LABEL = "Show Title";
     public static final String PROPERTY_TITLE_PARAMETER_SHOW_TOOLTIP = "Add title to the color bar";
     private static final String PROPERTY_TITLE_PARAMETER_SHOW_ALIAS = PROPERTY_TITLE_PARAMETER_ROOT_ALIAS + "Show";
     public static final boolean PROPERTY_TITLE_PARAMETER_SHOW_DEFAULT = true;
     public static final Class PROPERTY_TITLE_PARAMETER_SHOW_TYPE = Boolean.class;
 
     public static final String PROPERTY_TITLE_PARAMETER_TEXT_KEY = PROPERTY_TITLE_PARAMETER_ROOT_KEY + ".text";
-    public static final String PROPERTY_TITLE_PARAMETER_TEXT_LABEL = "Title";
+    public static final String PROPERTY_TITLE_PARAMETER_TEXT_LABEL = "Title Text";
     public static final String PROPERTY_TITLE_PARAMETER_TEXT_TOOLTIP = "Add title parameter to the color bar";
     public static final String PROPERTY_TITLE_PARAMETER_TEXT_ALIAS = PROPERTY_TITLE_PARAMETER_ROOT_ALIAS + "Text";
     public static final String PROPERTY_TITLE_PARAMETER_TEXT_DEFAULT = NULL_SPECIAL;
     public static final Class PROPERTY_TITLE_PARAMETER_TEXT_TYPE = String.class;
 
     public static final String PROPERTY_TITLE_PARAMETER_FONT_BOLD_KEY = PROPERTY_TITLE_PARAMETER_ROOT_KEY + ".font.bold";
-    public static final String PROPERTY_TITLE_PARAMETER_FONT_BOLD_LABEL = "Font Bold";
+    public static final String PROPERTY_TITLE_PARAMETER_FONT_BOLD_LABEL = "Title Font Bold";
     public static final String PROPERTY_TITLE_PARAMETER_FONT_BOLD_TOOLTIP = "Format title parameter text font in bold";
     public static final String PROPERTY_TITLE_PARAMETER_FONT_BOLD_ALIAS = PROPERTY_TITLE_PARAMETER_ROOT_ALIAS + "FontBold";
     public static final boolean PROPERTY_TITLE_PARAMETER_FONT_BOLD_DEFAULT = false;
     public static final Class PROPERTY_TITLE_PARAMETER_FONT_BOLD_TYPE = Boolean.class;
 
     public static final String PROPERTY_TITLE_PARAMETER_FONT_ITALIC_KEY = PROPERTY_TITLE_PARAMETER_ROOT_KEY + ".font.italic";
-    public static final String PROPERTY_TITLE_PARAMETER_FONT_ITALIC_LABEL = "Font Italic";
+    public static final String PROPERTY_TITLE_PARAMETER_FONT_ITALIC_LABEL = "Title Font Italic";
     public static final String PROPERTY_TITLE_PARAMETER_FONT_ITALIC_TOOLTIP = "Format title parameter text font in italic";
     public static final String PROPERTY_TITLE_PARAMETER_FONT_ITALIC_ALIAS = PROPERTY_TITLE_PARAMETER_ROOT_ALIAS + "FontItalic";
     public static final boolean PROPERTY_TITLE_PARAMETER_FONT_ITALIC_DEFAULT = false;
     public static final Class PROPERTY_TITLE_PARAMETER_FONT_ITALIC_TYPE = Boolean.class;
 
     public static final String PROPERTY_TITLE_PARAMETER_FONT_NAME_KEY = PROPERTY_TITLE_PARAMETER_ROOT_KEY + ".font.name";
-    public static final String PROPERTY_TITLE_PARAMETER_FONT_NAME_LABEL = "Font Name";
+    public static final String PROPERTY_TITLE_PARAMETER_FONT_NAME_LABEL = "Title Font";
     public static final String PROPERTY_TITLE_PARAMETER_FONT_NAME_TOOLTIP = "Set the text font of the title parameter";
     public static final String PROPERTY_TITLE_PARAMETER_FONT_NAME_ALIAS = PROPERTY_TITLE_PARAMETER_ROOT_ALIAS + "FontName";
     public static final String PROPERTY_TITLE_PARAMETER_FONT_NAME_DEFAULT = FONT_NAME_SANSERIF;
@@ -363,7 +364,7 @@ public class ColorBarLayerType extends LayerType {
 
 
     public static final String PROPERTY_TITLE_PARAMETER_FONT_SIZE_KEY = PROPERTY_TITLE_PARAMETER_ROOT_KEY + "font.size";
-    public static final String PROPERTY_TITLE_PARAMETER_FONT_SIZE_LABEL = "Header Size";
+    public static final String PROPERTY_TITLE_PARAMETER_FONT_SIZE_LABEL = "Title Size";
     public static final String PROPERTY_TITLE_PARAMETER_FONT_SIZE_TOOLTIP = "Set size of the title parameter";
     private static final String PROPERTY_TITLE_PARAMETER_FONT_SIZE_ALIAS = PROPERTY_TITLE_PARAMETER_ROOT_ALIAS + "FontSize";
     public static final int PROPERTY_TITLE_PARAMETER_FONT_SIZE_DEFAULT = 35;
@@ -376,7 +377,7 @@ public class ColorBarLayerType extends LayerType {
 
 
     public static final String PROPERTY_TITLE_PARAMETER_COLOR_KEY = PROPERTY_TITLE_PARAMETER_ROOT_KEY + "font.color";
-    public static final String PROPERTY_TITLE_PARAMETER_COLOR_LABEL = "Font Color";
+    public static final String PROPERTY_TITLE_PARAMETER_COLOR_LABEL = "Title Color";
     public static final String PROPERTY_TITLE_PARAMETER_COLOR_TOOLTIP = "Set color of the title";
     private static final String PROPERTY_TITLE_PARAMETER_COLOR_ALIAS = PROPERTY_TITLE_PARAMETER_ROOT_ALIAS + "FontColor";
     public static final Color PROPERTY_TITLE_PARAMETER_COLOR_DEFAULT = Color.YELLOW;
@@ -392,40 +393,40 @@ public class ColorBarLayerType extends LayerType {
     private static final String PROPERTY_TITLE_UNITS_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "TitleUnits";
 
     public static final String PROPERTY_TITLE_UNITS_SECTION_KEY = PROPERTY_TITLE_UNITS_ROOT_KEY + ".section";
-    public static final String PROPERTY_TITLE_UNITS_SECTION_LABEL = "Title Units Formatting";
+    public static final String PROPERTY_TITLE_UNITS_SECTION_LABEL = "Units Format";
     public static final String PROPERTY_TITLE_UNITS_SECTION_TOOLTIP = "Set title units of color bar";
     public static final String PROPERTY_TITLE_UNITS_SECTION_ALIAS = PROPERTY_TITLE_UNITS_ROOT_ALIAS + "Section";
 
     public static final String PROPERTY_TITLE_UNITS_SHOW_KEY = PROPERTY_TITLE_UNITS_ROOT_KEY + ".show";
-    public static final String PROPERTY_TITLE_UNITS_SHOW_LABEL = "Show";
+    public static final String PROPERTY_TITLE_UNITS_SHOW_LABEL = "Show Units";
     public static final String PROPERTY_TITLE_UNITS_SHOW_TOOLTIP = "Add title units to the color bar";
     private static final String PROPERTY_TITLE_UNITS_SHOW_ALIAS = PROPERTY_TITLE_UNITS_ROOT_ALIAS + "Show";
     public static final boolean PROPERTY_TITLE_UNITS_SHOW_DEFAULT = true;
     public static final Class PROPERTY_TITLE_UNITS_SHOW_TYPE = Boolean.class;
 
     public static final String PROPERTY_TITLE_UNITS_TEXT_KEY = PROPERTY_TITLE_UNITS_ROOT_KEY + ".text";
-    public static final String PROPERTY_TITLE_UNITS_TEXT_LABEL = "Units";
+    public static final String PROPERTY_TITLE_UNITS_TEXT_LABEL = "Units Text";
     public static final String PROPERTY_TITLE_UNITS_TEXT_TOOLTIP = "Add units to the title of the color bar";
     public static final String PROPERTY_TITLE_UNITS_TEXT_ALIAS = PROPERTY_TITLE_UNITS_ROOT_ALIAS + "Text";
     public static final String PROPERTY_TITLE_UNITS_TEXT_DEFAULT = NULL_SPECIAL;
     public static final Class PROPERTY_TITLE_UNITS_TEXT_TYPE = String.class;
 
     public static final String PROPERTY_TITLE_UNITS_FONT_BOLD_KEY = PROPERTY_TITLE_UNITS_ROOT_KEY + ".font.bold";
-    public static final String PROPERTY_TITLE_UNITS_FONT_BOLD_LABEL = "Font Bold";
+    public static final String PROPERTY_TITLE_UNITS_FONT_BOLD_LABEL = "Units Bold Font";
     public static final String PROPERTY_TITLE_UNITS_FONT_BOLD_TOOLTIP = "Format title units text font in bold";
     public static final String PROPERTY_TITLE_UNITS_FONT_BOLD_ALIAS = PROPERTY_TITLE_UNITS_ROOT_ALIAS + "FontBold";
     public static final boolean PROPERTY_TITLE_UNITS_FONT_BOLD_DEFAULT = false;
     public static final Class PROPERTY_TITLE_UNITS_FONT_BOLD_TYPE = Boolean.class;
 
     public static final String PROPERTY_TITLE_UNITS_FONT_ITALIC_KEY = PROPERTY_TITLE_UNITS_ROOT_KEY + ".font.italic";
-    public static final String PROPERTY_TITLE_UNITS_FONT_ITALIC_LABEL = "Font Italic";
+    public static final String PROPERTY_TITLE_UNITS_FONT_ITALIC_LABEL = "Units Italic Font";
     public static final String PROPERTY_TITLE_UNITS_FONT_ITALIC_TOOLTIP = "Format title units text font in italic";
     public static final String PROPERTY_TITLE_UNITS_FONT_ITALIC_ALIAS = PROPERTY_TITLE_UNITS_ROOT_ALIAS + "FontItalic";
     public static final boolean PROPERTY_TITLE_UNITS_FONT_ITALIC_DEFAULT = false;
     public static final Class PROPERTY_TITLE_UNITS_FONT_ITALIC_TYPE = Boolean.class;
 
     public static final String PROPERTY_TITLE_UNITS_FONT_NAME_KEY = PROPERTY_TITLE_UNITS_ROOT_KEY + ".font.name";
-    public static final String PROPERTY_TITLE_UNITS_FONT_NAME_LABEL = "Font Name";
+    public static final String PROPERTY_TITLE_UNITS_FONT_NAME_LABEL = "Units Typeface";
     public static final String PROPERTY_TITLE_UNITS_FONT_NAME_TOOLTIP = "Set the text font of the title units";
     public static final String PROPERTY_TITLE_UNITS_FONT_NAME_ALIAS = PROPERTY_TITLE_UNITS_ROOT_ALIAS + "FontName";
     public static final String PROPERTY_TITLE_UNITS_FONT_NAME_DEFAULT = FONT_NAME_SANSERIF;
@@ -445,7 +446,7 @@ public class ColorBarLayerType extends LayerType {
                     "," + ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_SIZE_VALUE_MAX + "]";
 
     public static final String PROPERTY_TITLE_UNITS_FONT_COLOR_KEY = PROPERTY_TITLE_UNITS_ROOT_KEY + ".font.color";
-    public static final String PROPERTY_TITLE_UNITS_FONT_COLOR_LABEL = "Font Color";
+    public static final String PROPERTY_TITLE_UNITS_FONT_COLOR_LABEL = "Units Color";
     public static final String PROPERTY_TITLE_UNITS_FONT_COLOR_TOOLTIP = "Set color of the title units";
     private static final String PROPERTY_TITLE_UNITS_FONT_COLOR_ALIAS = PROPERTY_TITLE_UNITS_ROOT_ALIAS + "FontColor";
     public static final Color PROPERTY_TITLE_UNITS_FONT_COLOR_DEFAULT = Color.YELLOW;
@@ -462,33 +463,33 @@ public class ColorBarLayerType extends LayerType {
     private static final String PROPERTY_LABELS_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "Labels";
 
     public static final String PROPERTY_LABELS_SECTION_KEY = PROPERTY_LABELS_ROOT_KEY + ".section";
-    public static final String PROPERTY_LABELS_SECTION_LABEL = "Labels Formatting";
+    public static final String PROPERTY_LABELS_SECTION_LABEL = "Tick Label Format";
     public static final String PROPERTY_LABELS_SECTION_TOOLTIP = "Configuration options for the labels";
     public static final String PROPERTY_LABELS_SECTION_ALIAS = PROPERTY_LABELS_ROOT_ALIAS + "Section";
 
     public static final String PROPERTY_LABELS_SHOW_KEY = PROPERTY_LABELS_ROOT_KEY + ".show";
-    public static final String PROPERTY_LABELS_SHOW_LABEL = "Show";
+    public static final String PROPERTY_LABELS_SHOW_LABEL = "Show Tick Labels";
     public static final String PROPERTY_LABELS_SHOW_TOOLTIP = "Show the tick-mark labels";
     private static final String PROPERTY_LABELS_SHOW_ALIAS = PROPERTY_LABELS_ROOT_ALIAS + "Show";
     public static final boolean PROPERTY_LABELS_SHOW_DEFAULT = true;
     public static final Class PROPERTY_LABELS_SHOW_TYPE = Boolean.class;
 
     public static final String PROPERTY_LABELS_FONT_BOLD_KEY = PROPERTY_LABELS_ROOT_KEY + ".font.bold";
-    public static final String PROPERTY_LABELS_FONT_BOLD_LABEL = "Font Bold";
+    public static final String PROPERTY_LABELS_FONT_BOLD_LABEL = "Labels Font Bold";
     public static final String PROPERTY_LABELS_FONT_BOLD_TOOLTIP = "Format tick-mark label text font in bold";
     public static final String PROPERTY_LABELS_FONT_BOLD_ALIAS = PROPERTY_LABELS_ROOT_ALIAS + "FontBold";
     public static final boolean PROPERTY_LABELS_FONT_BOLD_DEFAULT = false;
     public static final Class PROPERTY_LABELS_FONT_BOLD_TYPE = Boolean.class;
 
     public static final String PROPERTY_LABELS_FONT_ITALIC_KEY = PROPERTY_LABELS_ROOT_KEY + ".font.italic";
-    public static final String PROPERTY_LABELS_FONT_ITALIC_LABEL = "Font Italic";
+    public static final String PROPERTY_LABELS_FONT_ITALIC_LABEL = "Labels Font Italic";
     public static final String PROPERTY_LABELS_FONT_ITALIC_TOOLTIP = "Format tick-mark label text font in italic";
     public static final String PROPERTY_LABELS_FONT_ITALIC_ALIAS = PROPERTY_LABELS_ROOT_ALIAS + "FontItalic";
     public static final boolean PROPERTY_LABELS_FONT_ITALIC_DEFAULT = false;
     public static final Class PROPERTY_LABELS_FONT_ITALIC_TYPE = Boolean.class;
 
     public static final String PROPERTY_LABELS_FONT_NAME_KEY = PROPERTY_LABELS_ROOT_KEY + ".font.name";
-    public static final String PROPERTY_LABELS_FONT_NAME_LABEL = "Font Name";
+    public static final String PROPERTY_LABELS_FONT_NAME_LABEL = "Labels Font";
     public static final String PROPERTY_LABELS_FONT_NAME_TOOLTIP = "Set the font of the tick-mark labels";
     public static final String PROPERTY_LABELS_FONT_NAME_ALIAS = PROPERTY_LABELS_ROOT_ALIAS + "FontName";
     public static final String PROPERTY_LABELS_FONT_NAME_DEFAULT = FONT_NAME_SANSERIF;
@@ -506,7 +507,7 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_LABELS_FONT_SIZE_VALUE_INTERVAL = "[" + ColorBarLayerType.PROPERTY_LABELS_FONT_SIZE_VALUE_MIN + "," + ColorBarLayerType.PROPERTY_LABELS_FONT_SIZE_VALUE_MAX + "]";
 
     public static final String PROPERTY_LABELS_FONT_COLOR_KEY = PROPERTY_LABELS_ROOT_KEY + ".font.color";
-    public static final String PROPERTY_LABELS_FONT_COLOR_LABEL = "Font Color";
+    public static final String PROPERTY_LABELS_FONT_COLOR_LABEL = "Labels Color";
     public static final String PROPERTY_LABELS_FONT_COLOR_TOOLTIP = "Set the color of the tick-mark labels";
     private static final String PROPERTY_LABELS_FONT_COLOR_ALIAS = PROPERTY_LABELS_ROOT_ALIAS + "FontColor";
     public static final Color PROPERTY_LABELS_FONT_COLOR_DEFAULT = Color.YELLOW;
@@ -531,28 +532,28 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_TICKMARKS_SECTION_ALIAS = PROPERTY_TICKMARKS_ROOT_ALIAS + "Section";
 
     public static final String PROPERTY_TICKMARKS_SHOW_KEY = PROPERTY_TICKMARKS_ROOT_KEY + ".show";
-    public static final String PROPERTY_TICKMARKS_SHOW_LABEL = "Show";
+    public static final String PROPERTY_TICKMARKS_SHOW_LABEL = "Show Tick Marks";
     public static final String PROPERTY_TICKMARKS_SHOW_TOOLTIP = "Display tickmarks";
     public static final String PROPERTY_TICKMARKS_SHOW_ALIAS = PROPERTY_TICKMARKS_ROOT_ALIAS + "Show";
     public static final boolean PROPERTY_TICKMARKS_SHOW_DEFAULT = true;
     public static final Class PROPERTY_TICKMARKS_SHOW_TYPE = Boolean.class;
 
     public static final String PROPERTY_TICKMARKS_COLOR_KEY = PROPERTY_TICKMARKS_ROOT_KEY + ".color";
-    public static final String PROPERTY_TICKMARKS_COLOR_LABEL = "Tickmark Color";
+    public static final String PROPERTY_TICKMARKS_COLOR_LABEL = "Tick Color";
     public static final String PROPERTY_TICKMARKS_COLOR_TOOLTIP = "Set color of the tickmarks";
     private static final String PROPERTY_TICKMARKS_COLOR_ALIAS = PROPERTY_TICKMARKS_ROOT_ALIAS + "Color";
     public static final Color PROPERTY_TICKMARKS_COLOR_DEFAULT = Color.YELLOW;
     public static final Class PROPERTY_TICKMARKS_COLOR_TYPE = Color.class;
 
     public static final String PROPERTY_TICKMARKS_LENGTH_KEY = PROPERTY_TICKMARKS_ROOT_KEY + ".length";
-    public static final String PROPERTY_TICKMARKS_LENGTH_LABEL = "Line Length";
+    public static final String PROPERTY_TICKMARKS_LENGTH_LABEL = "Tick Length";
     public static final String PROPERTY_TICKMARKS_LENGTH_TOOLTIP = "Set length of tickmarks";
     public static final String PROPERTY_TICKMARKS_LENGTH_ALIAS = PROPERTY_TICKMARKS_ROOT_ALIAS + "Length";
     public static final int PROPERTY_TICKMARKS_LENGTH_DEFAULT = 12;
     public static final Class PROPERTY_TICKMARKS_LENGTH_TYPE = Integer.class;
 
     public static final String PROPERTY_TICKMARKS_WIDTH_KEY = PROPERTY_TICKMARKS_ROOT_KEY + ".width";
-    public static final String PROPERTY_TICKMARKS_WIDTH_LABEL = "Line Width";
+    public static final String PROPERTY_TICKMARKS_WIDTH_LABEL = "Tick Width";
     public static final String PROPERTY_TICKMARKS_WIDTH_TOOLTIP = "Set width of tickmarks";
     public static final String PROPERTY_TICKMARKS_WIDTH_ALIAS = PROPERTY_TICKMARKS_ROOT_ALIAS + "Width";
     public static final int PROPERTY_TICKMARKS_WIDTH_DEFAULT = 4;
@@ -567,29 +568,61 @@ public class ColorBarLayerType extends LayerType {
 
     public static final String PROPERTY_BORDER_SECTION_KEY = PROPERTY_BORDER_ROOT_KEY + ".section";
     public static final String PROPERTY_BORDER_SECTION_ALIAS = PROPERTY_BORDER_ROOT_ALIAS + "Section";
-    public static final String PROPERTY_BORDER_SECTION_LABEL = "Border";
+    public static final String PROPERTY_BORDER_SECTION_LABEL = "Palette Border";
     public static final String PROPERTY_BORDER_SECTION_TOOLTIP = "Configuration options for adding a border around the data image";
 
     public static final String PROPERTY_BORDER_SHOW_KEY = PROPERTY_BORDER_ROOT_KEY + ".show";
-    public static final String PROPERTY_BORDER_SHOW_LABEL = "Show";
+    public static final String PROPERTY_BORDER_SHOW_LABEL = "Show Palette Border";
     public static final String PROPERTY_BORDER_SHOW_TOOLTIP = "Display a border around the data image";
     private static final String PROPERTY_BORDER_SHOW_ALIAS = PROPERTY_BORDER_ROOT_ALIAS + "Show";
     public static final boolean PROPERTY_BORDER_SHOW_DEFAULT = true;
     public static final Class PROPERTY_BORDER_SHOW_TYPE = Boolean.class;
 
     public static final String PROPERTY_BORDER_WIDTH_KEY = PROPERTY_BORDER_ROOT_KEY + ".width";
-    public static final String PROPERTY_BORDER_WIDTH_LABEL = "Line Width";
+    public static final String PROPERTY_BORDER_WIDTH_LABEL = "Border Width";
     public static final String PROPERTY_BORDER_WIDTH_TOOLTIP = "Width of border line";
     private static final String PROPERTY_BORDER_WIDTH_ALIAS = PROPERTY_BORDER_ROOT_ALIAS + "Width";
     public static final int PROPERTY_BORDER_WIDTH_DEFAULT = 1;
     public static final Class PROPERTY_BORDER_WIDTH_TYPE = Integer.class;
 
     public static final String PROPERTY_BORDER_COLOR_KEY = PROPERTY_BORDER_ROOT_KEY + ".color";
-    public static final String PROPERTY_BORDER_COLOR_LABEL = "Line Color";
+    public static final String PROPERTY_BORDER_COLOR_LABEL = "Border Color";
     public static final String PROPERTY_BORDER_COLOR_TOOLTIP = "Color of border line";
     private static final String PROPERTY_BORDER_COLOR_ALIAS = PROPERTY_BORDER_ROOT_ALIAS + "Color";
     public static final Color PROPERTY_BORDER_COLOR_DEFAULT = Color.BLACK;
     public static final Class PROPERTY_BORDER_COLOR_TYPE = Color.class;
+
+
+
+
+    private static final String PROPERTY_BACKDROP_BORDER_ROOT_KEY = PROPERTY_ROOT_KEY + ".backdrop.border";
+    private static final String PROPERTY_BACKDROP_BORDER_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "BackdropBorder";
+
+    public static final String PROPERTY_BACKDROP_BORDER_SECTION_KEY = PROPERTY_BACKDROP_BORDER_ROOT_KEY + ".section";
+    public static final String PROPERTY_BACKDROP_BORDER_SECTION_ALIAS = PROPERTY_BACKDROP_BORDER_ROOT_ALIAS + "Section";
+    public static final String PROPERTY_BACKDROP_BORDER_SECTION_LABEL = "Legend Border";
+    public static final String PROPERTY_BACKDROP_BORDER_SECTION_TOOLTIP = "Configuration options for adding a border around the data image";
+
+    public static final String PROPERTY_BACKDROP_BORDER_SHOW_KEY = PROPERTY_BACKDROP_BORDER_ROOT_KEY + ".border.show";
+    public static final String PROPERTY_BACKDROP_BORDER_SHOW_LABEL = "Show Legend Border";
+    public static final String PROPERTY_BACKDROP_BORDER_SHOW_TOOLTIP = "Display a border around the data image";
+    private static final String PROPERTY_BACKDROP_BORDER_SHOW_ALIAS = PROPERTY_BACKDROP_BORDER_ROOT_ALIAS + "BorderShow";
+    public static final boolean PROPERTY_BACKDROP_BORDER_SHOW_DEFAULT = true;
+    public static final Class PROPERTY_BACKDROP_BORDER_SHOW_TYPE = Boolean.class;
+
+    public static final String PROPERTY_BACKDROP_BORDER_WIDTH_KEY = PROPERTY_BACKDROP_BORDER_ROOT_KEY + ".border.width";
+    public static final String PROPERTY_BACKDROP_BORDER_WIDTH_LABEL = "Border Width";
+    public static final String PROPERTY_BACKDROP_BORDER_WIDTH_TOOLTIP = "Width of border line";
+    private static final String PROPERTY_BACKDROP_BORDER_WIDTH_ALIAS = PROPERTY_BACKDROP_BORDER_ROOT_ALIAS + "BorderWidth";
+    public static final int PROPERTY_BACKDROP_BORDER_WIDTH_DEFAULT = 1;
+    public static final Class PROPERTY_BACKDROP_BORDER_WIDTH_TYPE = Integer.class;
+
+    public static final String PROPERTY_BACKDROP_BORDER_COLOR_KEY = PROPERTY_BACKDROP_BORDER_ROOT_KEY + ".border.color";
+    public static final String PROPERTY_BACKDROP_BORDER_COLOR_LABEL = "Border Color";
+    public static final String PROPERTY_BACKDROP_BORDER_COLOR_TOOLTIP = "Color of border line";
+    private static final String PROPERTY_BACKDROP_BORDER_COLOR_ALIAS = PROPERTY_BACKDROP_BORDER_ROOT_ALIAS + "BorderColor";
+    public static final Color PROPERTY_BACKDROP_BORDER_COLOR_DEFAULT = Color.BLACK;
+    public static final Class PROPERTY_BACKDROP_BORDER_COLOR_TYPE = Color.class;
 
 
 
@@ -605,21 +638,21 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_BACKDROP_SECTION_TOOLTIP = "Configuration options for the color bar legend backdrop";
 
     public static final String PROPERTY_BACKDROP_SHOW_KEY = PROPERTY_BACKDROP_ROOT_KEY + ".show";
-    public static final String PROPERTY_BACKDROP_SHOW_LABEL = "Show";
+    public static final String PROPERTY_BACKDROP_SHOW_LABEL = "Show Backdrop";
     public static final String PROPERTY_BACKDROP_SHOW_TOOLTIP = "Show the color bar legend backdrop";
     private static final String PROPERTY_BACKDROP_SHOW_ALIAS = PROPERTY_BACKDROP_ROOT_ALIAS + "Show";
     public static final boolean PROPERTY_BACKDROP_SHOW_DEFAULT = true;
     public static final Class PROPERTY_BACKDROP_SHOW_TYPE = Boolean.class;
 
     public static final String PROPERTY_BACKDROP_COLOR_KEY = PROPERTY_BACKDROP_ROOT_KEY + ".color";
-    public static final String PROPERTY_BACKDROP_COLOR_LABEL = "Color";
+    public static final String PROPERTY_BACKDROP_COLOR_LABEL = "Backdrop Color";
     public static final String PROPERTY_BACKDROP_COLOR_TOOLTIP = "Set color of the backdrop of the color bar legend backdrop";
     private static final String PROPERTY_BACKDROP_COLOR_ALIAS = PROPERTY_BACKDROP_ROOT_ALIAS + "Color";
     public static final Color PROPERTY_BACKDROP_COLOR_DEFAULT = Color.BLACK;
     public static final Class PROPERTY_BACKDROP_COLOR_TYPE = Color.class;
 
     public static final String PROPERTY_BACKDROP_TRANSPARENCY_KEY = PROPERTY_BACKDROP_ROOT_KEY + "transparency";
-    public static final String PROPERTY_BACKDROP_TRANSPARENCY_LABEL = "Transparency";
+    public static final String PROPERTY_BACKDROP_TRANSPARENCY_LABEL = "Backdrop Trans";
     public static final String PROPERTY_BACKDROP_TRANSPARENCY_TOOLTIP = "Set transparency of the color bar legend backdrop";
     private static final String PROPERTY_BACKDROP_TRANSPARENCY_ALIAS = PROPERTY_BACKDROP_ROOT_ALIAS + "Transparency";
     public static final double PROPERTY_BACKDROP_TRANSPARENCY_DEFAULT = 0.5;
@@ -1026,6 +1059,22 @@ public class ColorBarLayerType extends LayerType {
         vc.addProperty(backdropTransparencyModel);
 
 
+
+        final Property backdropBorderSectionModel = Property.create(PROPERTY_BACKDROP_BORDER_SECTION_KEY, Boolean.class, true, true);
+        backdropBorderSectionModel.getDescriptor().setAlias(PROPERTY_BACKDROP_BORDER_SECTION_ALIAS);
+        vc.addProperty(backdropBorderSectionModel);
+
+        final Property backdropBorderShowModel = Property.create(PROPERTY_BACKDROP_BORDER_SHOW_KEY, Boolean.class, PROPERTY_BACKDROP_BORDER_SHOW_DEFAULT, true);
+        backdropBorderShowModel.getDescriptor().setAlias(PROPERTY_BACKDROP_BORDER_SHOW_ALIAS);
+        vc.addProperty(backdropBorderShowModel);
+
+        final Property backdropBorderColorModel = Property.create(PROPERTY_BACKDROP_BORDER_COLOR_KEY, Color.class, PROPERTY_BACKDROP_BORDER_COLOR_DEFAULT, true);
+        backdropBorderColorModel.getDescriptor().setAlias(PROPERTY_BACKDROP_BORDER_COLOR_ALIAS);
+        vc.addProperty(backdropBorderColorModel);
+
+        final Property backdropBorderWidthModel = Property.create(PROPERTY_BACKDROP_BORDER_WIDTH_KEY, Integer.class, PROPERTY_BACKDROP_BORDER_WIDTH_DEFAULT, true);
+        backdropBorderWidthModel.getDescriptor().setAlias(PROPERTY_BACKDROP_BORDER_WIDTH_ALIAS);
+        vc.addProperty(backdropBorderWidthModel);
 
 
 

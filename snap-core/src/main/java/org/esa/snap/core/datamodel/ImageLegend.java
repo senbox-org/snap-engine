@@ -138,6 +138,10 @@ public class ImageLegend {
     private float backgroundTransparency;
     private boolean backdropShow;
 
+    private Color backdropBorderColor;
+    private int backdropBorderWidth;
+    private boolean backdropBorderShow;
+
 
     private String labelsFontName;
     private int labelsFontType;
@@ -181,6 +185,7 @@ public class ImageLegend {
 
     // Dependent, internal attributes
     private Rectangle paletteRect;
+    private Rectangle legendRect;
     private Dimension legendSize;
     private Shape tickMarkShape;
     private int palettePosStart;
@@ -263,6 +268,10 @@ public class ImageLegend {
         imageLegendCopy.setBackgroundColor(getBackgroundColor());
         imageLegendCopy.setBackgroundTransparency(getBackgroundTransparency());
         imageLegendCopy.setBackdropShow(isBackdropShow());
+        imageLegendCopy.setBackdropBorderColor(getBackdropBorderColor());
+        imageLegendCopy.setBackdropBorderWidth(getBackdropBorderWidth());
+        imageLegendCopy.setBackdropBorderShow(isBackdropBorderShow());
+
 
         imageLegendCopy.setLabelsFontName(getLabelsFontName());
         imageLegendCopy.setLabelsFontType(getLabelsFontType());
@@ -881,6 +890,8 @@ public class ImageLegend {
                     legendSize.width - getBorderGap() - getBorderGap() - firstLabelOverhangWidth - lastLabelOverhangWidth,
                     getColorBarThickness());
 
+            legendRect = new Rectangle(0,0,legendSize.width-1, legendSize.height-1);
+
 
             int paletteGap = 0;
             palettePosStart = paletteRect.x + paletteGap;
@@ -971,18 +982,24 @@ public class ImageLegend {
                         getBorderGap() + labelOverhangHeight + (int) headerRequiredDimension.getHeight() + getHeaderGap(),
                         getColorBarThickness(),
                         getColorBarLength());
+                legendRect = new Rectangle(0,0,legendSize.width-1, legendSize.height-1);
+
 
             } else if (ColorBarLayerType.VERTICAL_TITLE_BOTTOM.equals(getTitleVerticalAnchor())) {
                 paletteRect = new Rectangle(getBorderGap(),
                         getBorderGap() + labelOverhangHeight,
                         getColorBarThickness(),
                         getColorBarLength());
+                legendRect = new Rectangle(0,0,legendSize.width-1, legendSize.height-1);
+
 
             } else if (ColorBarLayerType.VERTICAL_TITLE_LEFT.equals(getTitleVerticalAnchor())) {
                 paletteRect = new Rectangle(getBorderGap() + headerRequiredDimension.width + getHeaderGap(),
                         getBorderGap() + labelOverhangHeight,
                         getColorBarThickness(),
                         getColorBarLength());
+                legendRect = new Rectangle(0,0,legendSize.width-1, legendSize.height-1);
+
 
 
             } else { // VERTICAL_TITLE_RIGHT
@@ -990,6 +1007,8 @@ public class ImageLegend {
                         getBorderGap() + labelOverhangHeight,
                         getColorBarThickness(),
                         getColorBarLength());
+                legendRect = new Rectangle(0,0,legendSize.width-1, legendSize.height-1);
+
 
             }
 
@@ -1020,6 +1039,10 @@ public class ImageLegend {
         if (isBackdropShow()) {
             fillBackground(g2d);
         }
+
+
+
+
         drawPalette(g2d);
 
         drawHeaderText(g2d);
@@ -1485,6 +1508,12 @@ public class ImageLegend {
             g2d.setColor(getBorderColor());
             g2d.setStroke(new BasicStroke(getBorderWidth()));
             g2d.draw(paletteRect);
+        }
+
+        if (isBackdropBorderShow()) {
+            g2d.setColor(getBackdropBorderColor());
+            g2d.setStroke(new BasicStroke(getBackdropBorderWidth()));
+            g2d.draw(legendRect);
         }
 
         g2d.setStroke(originalStroke);
@@ -2370,5 +2399,29 @@ public class ImageLegend {
 
     public void setLabelSingleLetterWidth(double labelSingleLetterWidth) {
         this.labelSingleLetterWidth = labelSingleLetterWidth;
+    }
+
+    public Color getBackdropBorderColor() {
+        return backdropBorderColor;
+    }
+
+    public void setBackdropBorderColor(Color backdropBorderColor) {
+        this.backdropBorderColor = backdropBorderColor;
+    }
+
+    public int getBackdropBorderWidth() {
+        return backdropBorderWidth;
+    }
+
+    public void setBackdropBorderWidth(int backdropBorderWidth) {
+        this.backdropBorderWidth = backdropBorderWidth;
+    }
+
+    public boolean isBackdropBorderShow() {
+        return backdropBorderShow;
+    }
+
+    public void setBackdropBorderShow(boolean backdropBorderShow) {
+        this.backdropBorderShow = backdropBorderShow;
     }
 }

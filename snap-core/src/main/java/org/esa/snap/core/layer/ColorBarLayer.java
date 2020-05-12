@@ -23,6 +23,7 @@ import com.bc.ceres.grender.Rendering;
 import com.bc.ceres.grender.Viewport;
 import org.esa.snap.core.datamodel.*;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
@@ -92,6 +93,7 @@ public class ColorBarLayer extends Layer {
 
         getUserValues();
 
+
         if (imageLegend == null) {
             System.out.println("imageLegend == null  so creating new image");
 
@@ -143,6 +145,11 @@ public class ColorBarLayer extends Layer {
             imageLegend.setBackgroundColor(getBackdropColor());
             imageLegend.setBackgroundTransparency(((Number) getBackdropTransparency()).floatValue());
             imageLegend.setBackdropShow(isBackdropShow());
+            imageLegend.setBackdropBorderColor(getBackdropBorderColor());
+            imageLegend.setBackdropBorderWidth(getBackdropBorderWidth());
+            imageLegend.setBackdropBorderShow(isBackdropBorderShow());
+
+
 
 
 
@@ -693,6 +700,23 @@ public class ColorBarLayer extends Layer {
     }
 
 
+
+
+
+    private boolean isBackdropBorderShow() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_BACKDROP_BORDER_SHOW_KEY,
+                ColorBarLayerType.PROPERTY_BACKDROP_BORDER_SHOW_DEFAULT);
+    }
+
+    private int getBackdropBorderWidth() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_BACKDROP_BORDER_WIDTH_KEY,
+                ColorBarLayerType.PROPERTY_BACKDROP_BORDER_WIDTH_DEFAULT);
+    }
+
+    private Color getBackdropBorderColor() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_BACKDROP_BORDER_COLOR_KEY,
+                ColorBarLayerType.PROPERTY_BACKDROP_BORDER_COLOR_DEFAULT);
+    }
 
 
 
