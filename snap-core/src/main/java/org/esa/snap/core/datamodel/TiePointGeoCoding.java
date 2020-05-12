@@ -424,7 +424,7 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
 
     @Override
     public GeoCoding clone() {
-        final TiePointGeoCoding clone = new TiePointGeoCoding(latGrid, lonGrid);
+        final TiePointGeoCoding clone = new TiePointGeoCoding(latGrid.cloneTiePointGrid(), lonGrid.cloneTiePointGrid());
         clone.approximations = approximations;
         clone.approximationsComputed = approximationsComputed;
         clone.normalized = normalized;
@@ -782,11 +782,12 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
      */
     @Override
     public boolean transferGeoCoding(final Scene srcScene, final Scene destScene, final ProductSubsetDef subsetDef) {
-        if (subsetDef == null || subsetDef.isEntireProductSelected()) {
-            copyGridsToDestScene(destScene);
-            destScene.setGeoCoding(clone());
-            return true;
-        }
+        // @todo 3 tb/tb investigate why the ProductFlipperTests fauils if we clone 2020-05-12
+//        if (subsetDef == null || subsetDef.isEntireProductSelected()) {
+//            copyGridsToDestScene(destScene);
+//            destScene.setGeoCoding(clone());
+//            return true;
+//        }
 
         TiePointGrid destLatGrid = getDestGrid(getLatGrid(), destScene, subsetDef);
         TiePointGrid destLonGrid = getDestGrid(getLonGrid(), destScene, subsetDef);
