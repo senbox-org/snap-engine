@@ -252,7 +252,7 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
         return lat / 90.0;
     }
 
-    private synchronized void computeApproximations() {
+    private synchronized void ensureApproximations() {
         if (!approximationsComputed) {
             final TiePointGrid normalizedLonGrid = initNormalizedLonGrid();
             initLatLonMinMax(normalizedLonGrid);
@@ -279,6 +279,7 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
      */
     @Override
     public boolean isCrossingMeridianAt180() {
+        ensureApproximations();
         return normalized;
     }
 
@@ -288,9 +289,7 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
      * @return the number of approximations, zero if no approximations could be computed
      */
     public int getNumApproximations() {
-        if (!approximationsComputed) {
-            computeApproximations();
-        }
+        ensureApproximations();
         return approximations != null ? approximations.length : 0;
     }
 
@@ -321,9 +320,7 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
      */
     @Override
     public boolean canGetPixelPos() {
-        if (!approximationsComputed) {
-            computeApproximations();
-        }
+        ensureApproximations();
         return approximations != null;
     }
 
@@ -374,9 +371,8 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
      */
     @Override
     public PixelPos getPixelPos(GeoPos geoPos, PixelPos pixelPos) {
-        if (!approximationsComputed) {
-            computeApproximations();
-        }
+        ensureApproximations();
+
         if (approximations != null) {
             double lat = normalizeLat(geoPos.lat);
             double lon = normalizeLon(geoPos.lon);
