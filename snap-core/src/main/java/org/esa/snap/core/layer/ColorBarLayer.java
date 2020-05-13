@@ -645,18 +645,18 @@ public class ColorBarLayer extends Layer {
     // Border Section
 
     private boolean isBorderShow() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_BORDER_SHOW_KEY,
-                ColorBarLayerType.PROPERTY_BORDER_SHOW_DEFAULT);
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_PALETTE_BORDER_SHOW_KEY,
+                ColorBarLayerType.PROPERTY_PALETTE_BORDER_SHOW_DEFAULT);
     }
 
     private Color getBorderColor() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_BORDER_COLOR_KEY,
-                ColorBarLayerType.PROPERTY_BORDER_COLOR_DEFAULT);
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_PALETTE_BORDER_COLOR_KEY,
+                ColorBarLayerType.PROPERTY_PALETTE_BORDER_COLOR_DEFAULT);
     }
 
     private int getBorderWidth() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_BORDER_WIDTH_KEY,
-                ColorBarLayerType.PROPERTY_BORDER_WIDTH_DEFAULT);
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_PALETTE_BORDER_WIDTH_KEY,
+                ColorBarLayerType.PROPERTY_PALETTE_BORDER_WIDTH_DEFAULT);
     }
 
 
@@ -682,18 +682,18 @@ public class ColorBarLayer extends Layer {
 
 
     private boolean isBackdropBorderShow() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_BACKDROP_BORDER_SHOW_KEY,
-                ColorBarLayerType.PROPERTY_BACKDROP_BORDER_SHOW_DEFAULT);
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LEGEND_BORDER_SHOW_KEY,
+                ColorBarLayerType.PROPERTY_LEGEND_BORDER_SHOW_DEFAULT);
     }
 
     private int getBackdropBorderWidth() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_BACKDROP_BORDER_WIDTH_KEY,
-                ColorBarLayerType.PROPERTY_BACKDROP_BORDER_WIDTH_DEFAULT);
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LEGEND_BORDER_WIDTH_KEY,
+                ColorBarLayerType.PROPERTY_LEGEND_BORDER_WIDTH_DEFAULT);
     }
 
     private Color getBackdropBorderColor() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_BACKDROP_BORDER_COLOR_KEY,
-                ColorBarLayerType.PROPERTY_BACKDROP_BORDER_COLOR_DEFAULT);
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LEGEND_BORDER_COLOR_KEY,
+                ColorBarLayerType.PROPERTY_LEGEND_BORDER_COLOR_DEFAULT);
     }
 
 
@@ -896,7 +896,7 @@ public class ColorBarLayer extends Layer {
 
 
     private boolean applySizeScaling() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_IMAGE_SCALING_APPLY_SIZE_NAME,
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_IMAGE_SCALING_APPLY_SIZE_KEY,
                 ColorBarLayerType.PROPERTY_IMAGE_SCALING_APPLY_SIZE_DEFAULT);
     }
 
