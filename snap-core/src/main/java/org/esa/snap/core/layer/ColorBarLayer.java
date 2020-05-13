@@ -23,7 +23,6 @@ import com.bc.ceres.grender.Rendering;
 import com.bc.ceres.grender.Viewport;
 import org.esa.snap.core.datamodel.*;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
@@ -66,10 +65,6 @@ public class ColorBarLayer extends Layer {
 
         setTransparency(0.0);
 
-// todo Danny this doesn't work but would like to init the param in the Editor with the value
-//        configuration.setValue(ColorBarLayerType.PROPERTY_COLORBAR_TITLE_TITLE_ALIAS, raster.getName());
-//        configuration.setValue(ColorBarLayerType.PROPERTY_COLORBAR_TITLE_UNITS_ALIAS, raster.getUnit());
-
 
     }
 
@@ -108,12 +103,12 @@ public class ColorBarLayer extends Layer {
 
 
 
-            imageLegend.setShowTitle(isShowTitleParameter());
+            imageLegend.setShowTitle(isShowTitle());
             imageLegend.setHeaderText(title);
-            imageLegend.setTitleFontSize(getTitleParameterFontSize());
-            imageLegend.setTitleParameterColor(getTitleParameterColor());
-            imageLegend.setTitleParameterFontName(getTitleParameterFontName());
-            imageLegend.setTitleParameterFontType(getTitleParameterFontType());
+            imageLegend.setTitleFontSize(getTitleFontSize());
+            imageLegend.setTitleColor(getTitleColor());
+            imageLegend.setTitleParameterFontName(getTitleFontName());
+            imageLegend.setTitleParameterFontType(getTitleFontType());
 
             imageLegend.setShowTitleUnits(isShowTitleUnits());
             imageLegend.setHeaderUnitsText(units);
@@ -130,7 +125,6 @@ public class ColorBarLayer extends Layer {
 
             imageLegend.setOrientation(getOrientation());
             imageLegend.setReversePalette(isReversePalette());
-            imageLegend.setForegroundColor(getTitleParameterColor());
             imageLegend.setTickmarkColor(getTickmarksColor());
             imageLegend.setTickmarkLength(getTickmarksLength());
             imageLegend.setTickmarkWidth(getTickmarksWidth());
@@ -460,22 +454,6 @@ public class ColorBarLayer extends Layer {
 
 
 
-    private String getInsideOutsideLocation() {
-        return ColorBarParamInfo.LOCATION_INSIDE_STR;
-    }
-
-
-    private String getHorizontalLocation() {
-        return ColorBarParamInfo.LOCATION_BOTTOM_RIGHT;
-    }
-
-    private String getVerticalLocation() {
-        return ColorBarParamInfo.LOCATION_RIGHT_LOWER;
-    }
-
-
-
-
 
     private void getUserValues() {
 
@@ -621,8 +599,8 @@ public class ColorBarLayer extends Layer {
 
 
     private int getOrientation() {
-        String orientation = getConfigurationProperty(ColorBarLayerType.PROPERTY_FORMATTING_ORIENTATION_KEY,
-                ColorBarLayerType.PROPERTY_FORMATTING_ORIENTATION_DEFAULT);
+        String orientation = getConfigurationProperty(ColorBarLayerType.PROPERTY_ORIENTATION_KEY,
+                ColorBarLayerType.PROPERTY_ORIENTATION_DEFAULT);
 
         if (ColorBarLayerType.OPTION_VERTICAL.equals(orientation)) {
             return ImageLegend.VERTICAL;
@@ -634,8 +612,8 @@ public class ColorBarLayer extends Layer {
 
 
     private boolean isReversePalette() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_FORMATTING_REVERSE_PALETTE_KEY,
-                ColorBarLayerType.PROPERTY_FORMATTING_REVERSE_PALETTE_DEFAULT);
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_ORIENTATION_REVERSE_PALETTE_KEY,
+                ColorBarLayerType.PROPERTY_ORIENTATION_REVERSE_PALETTE_DEFAULT);
     }
 
 
@@ -773,8 +751,8 @@ public class ColorBarLayer extends Layer {
 
 
     private String getTitleVerticalAnchor() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_VERTICAL_LOCATION_KEY,
-                ColorBarLayerType.PROPERTY_TITLE_VERTICAL_LOCATION_DEFAULT);
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_LOCATION_TITLE_VERTICAL_KEY,
+                ColorBarLayerType.PROPERTY_LOCATION_TITLE_VERTICAL_DEFAULT);
     }
 
 
@@ -795,59 +773,53 @@ public class ColorBarLayer extends Layer {
 
 
 
-    private boolean isShowTitleParameter() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_PARAMETER_SHOW_KEY,
-                ColorBarLayerType.PROPERTY_TITLE_PARAMETER_SHOW_DEFAULT);
+    private boolean isShowTitle() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_SHOW_KEY,
+                ColorBarLayerType.PROPERTY_TITLE_SHOW_DEFAULT);
     }
 
     private String getTitle() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_PARAMETER_TEXT_KEY,
-                ColorBarLayerType.PROPERTY_TITLE_PARAMETER_TEXT_DEFAULT);
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_TEXT_KEY,
+                ColorBarLayerType.PROPERTY_TITLE_TEXT_DEFAULT);
     }
-
 
     private void setTitle(String value) {
         try {
             String valueCurrent = getTitle();
             if (valueCurrent == null || (valueCurrent != null && !valueCurrent.equals(value))) {
-                getConfiguration().getProperty(ColorBarLayerType.PROPERTY_TITLE_PARAMETER_TEXT_KEY).setValue((Object) value);
+                getConfiguration().getProperty(ColorBarLayerType.PROPERTY_TITLE_TEXT_KEY).setValue((Object) value);
             }
         } catch (ValidationException v) {
         }
     }
 
-
-    private Color getTitleParameterColor() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_PARAMETER_COLOR_KEY,
-                ColorBarLayerType.PROPERTY_TITLE_PARAMETER_COLOR_DEFAULT);
+    private Color getTitleColor() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_COLOR_KEY,
+                ColorBarLayerType.PROPERTY_TITLE_COLOR_DEFAULT);
     }
 
-
-    private int getTitleParameterFontSize() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_PARAMETER_FONT_SIZE_KEY,
-                ColorBarLayerType.PROPERTY_TITLE_PARAMETER_FONT_SIZE_DEFAULT);
+    private int getTitleFontSize() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_FONT_SIZE_KEY,
+                ColorBarLayerType.PROPERTY_TITLE_FONT_SIZE_DEFAULT);
     }
 
-
-
-
-    private Boolean isTitleParameterFontItalic() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_PARAMETER_FONT_ITALIC_KEY,
-                ColorBarLayerType.PROPERTY_TITLE_PARAMETER_FONT_ITALIC_DEFAULT);
+    private Boolean isTitleFontItalic() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_FONT_ITALIC_KEY,
+                ColorBarLayerType.PROPERTY_TITLE_FONT_ITALIC_DEFAULT);
     }
 
-    private Boolean isTitleParameterFontBold() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_PARAMETER_FONT_BOLD_KEY,
-                ColorBarLayerType.PROPERTY_TITLE_PARAMETER_FONT_BOLD_DEFAULT);
+    private Boolean isTitleFontBold() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_FONT_BOLD_KEY,
+                ColorBarLayerType.PROPERTY_TITLE_FONT_BOLD_DEFAULT);
     }
 
-    private int getTitleParameterFontType() {
-        return getFontType(isTitleParameterFontItalic(), isTitleParameterFontBold());
+    private int getTitleFontType() {
+        return getFontType(isTitleFontItalic(), isTitleFontBold());
     }
 
-    private String getTitleParameterFontName() {
-        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_PARAMETER_FONT_NAME_KEY,
-                ColorBarLayerType.PROPERTY_TITLE_PARAMETER_FONT_NAME_DEFAULT);
+    private String getTitleFontName() {
+        return getConfigurationProperty(ColorBarLayerType.PROPERTY_TITLE_FONT_NAME_KEY,
+                ColorBarLayerType.PROPERTY_TITLE_FONT_NAME_DEFAULT);
     }
 
 

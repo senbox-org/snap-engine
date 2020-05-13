@@ -56,8 +56,7 @@ public class ImageLegend {
     public static final int HORIZONTAL = 0;
     public static final int VERTICAL = 1;
 
-    public static final int INSIDE = 0;
-    public static final int OUTSIDE = 1;
+
 
     public static final int NULL_INT = -999;
 
@@ -115,7 +114,6 @@ public class ImageLegend {
     private int orientation;
     private String distributionType;
     private int numberOfTicks;
-    private Color foregroundColor;
 
 
     private String titleVerticalAnchor;
@@ -154,7 +152,7 @@ public class ImageLegend {
 
     private Color labelsColor;
     private boolean labelsShow;
-    private Color titleParameterColor;
+    private Color titleColor;
     private Color titleUnitsColor;
 
     private boolean antialiasing;
@@ -169,12 +167,7 @@ public class ImageLegend {
     private int colorBarLength;
     private int colorBarThickness;
     private double layerScaling;
-    private double layerOffset;
-    private double layerShift;
-    private boolean centerOnLayer;
-    private String horizontalLocation;
-    private String verticalLocation;
-    private String insideOutsideLocation;
+
     private String titleOverRide = null;
 
 
@@ -202,10 +195,9 @@ public class ImageLegend {
 
         orientation = HORIZONTAL;
         backgroundColor = Color.white;
-        foregroundColor = ColorBarLayerType.PROPERTY_TITLE_PARAMETER_COLOR_DEFAULT;
         tickmarkColor = ColorBarLayerType.PROPERTY_TICKMARKS_COLOR_DEFAULT;
         labelsColor = ColorBarLayerType.PROPERTY_LABELS_FONT_COLOR_DEFAULT;
-        titleParameterColor = ColorBarLayerType.PROPERTY_TITLE_PARAMETER_COLOR_DEFAULT;
+        titleColor = ColorBarLayerType.PROPERTY_TITLE_COLOR_DEFAULT;
         titleUnitsColor = ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_COLOR_DEFAULT;
 
         setTickmarkLength(ColorBarLayerType.PROPERTY_TICKMARKS_LENGTH_DEFAULT);
@@ -238,7 +230,7 @@ public class ImageLegend {
         imageLegendCopy.setShowTitle(isShowTitle());
         imageLegendCopy.setHeaderText(getTitleText());
         imageLegendCopy.setTitleFontSize(getTitleFontSize());
-        imageLegendCopy.setTitleParameterColor(getTitleParameterColor());
+        imageLegendCopy.setTitleColor(getTitleColor());
         imageLegendCopy.setTitleParameterFontName(getTitleParameterFontName());
         imageLegendCopy.setTitleParameterFontType(getTitleParameterFontType());
 
@@ -255,7 +247,6 @@ public class ImageLegend {
 
         imageLegendCopy.setOrientation(getOrientation());
         imageLegendCopy.setReversePalette(isReversePalette());
-        imageLegendCopy.setForegroundColor(getForegroundColor());
         imageLegendCopy.setTickmarkColor(getTickmarkColor());
         imageLegendCopy.setTickmarkLength(getTickmarkLength());
         imageLegendCopy.setTickmarkWidth(getTickmarkWidth());
@@ -302,13 +293,13 @@ public class ImageLegend {
             // Title parameters
 
             setShowTitle(
-                    configuration.getPropertyBool(ColorBarLayerType.PROPERTY_TITLE_PARAMETER_SHOW_KEY,
-                            ColorBarLayerType.PROPERTY_TITLE_PARAMETER_SHOW_DEFAULT));
+                    configuration.getPropertyBool(ColorBarLayerType.PROPERTY_TITLE_SHOW_KEY,
+                            ColorBarLayerType.PROPERTY_TITLE_SHOW_DEFAULT));
 
 
 
-            String titleTextDefault = configuration.getPropertyString(ColorBarLayerType.PROPERTY_TITLE_PARAMETER_TEXT_KEY,
-                    ColorBarLayerType.PROPERTY_TITLE_PARAMETER_TEXT_DEFAULT);
+            String titleTextDefault = configuration.getPropertyString(ColorBarLayerType.PROPERTY_TITLE_TEXT_KEY,
+                    ColorBarLayerType.PROPERTY_TITLE_TEXT_DEFAULT);
 
             String titleText = (ColorBarLayerType.NULL_SPECIAL.equals(titleTextDefault)) ? raster.getName() : titleTextDefault;
 
@@ -317,24 +308,24 @@ public class ImageLegend {
 
 
             setTitleFontSize(
-                    configuration.getPropertyInt(ColorBarLayerType.PROPERTY_TITLE_PARAMETER_FONT_SIZE_KEY,
-                            ColorBarLayerType.PROPERTY_TITLE_PARAMETER_FONT_SIZE_DEFAULT));
+                    configuration.getPropertyInt(ColorBarLayerType.PROPERTY_TITLE_FONT_SIZE_KEY,
+                            ColorBarLayerType.PROPERTY_TITLE_FONT_SIZE_DEFAULT));
 
-            setTitleParameterColor(
-                    configuration.getPropertyColor(ColorBarLayerType.PROPERTY_TITLE_PARAMETER_COLOR_KEY,
-                            ColorBarLayerType.PROPERTY_TITLE_PARAMETER_COLOR_DEFAULT));
+            setTitleColor(
+                    configuration.getPropertyColor(ColorBarLayerType.PROPERTY_TITLE_COLOR_KEY,
+                            ColorBarLayerType.PROPERTY_TITLE_COLOR_DEFAULT));
 
             setTitleParameterFontName(
-                    configuration.getPropertyString(ColorBarLayerType.PROPERTY_TITLE_PARAMETER_FONT_NAME_KEY,
-                            ColorBarLayerType.PROPERTY_TITLE_PARAMETER_FONT_NAME_DEFAULT));
+                    configuration.getPropertyString(ColorBarLayerType.PROPERTY_TITLE_FONT_NAME_KEY,
+                            ColorBarLayerType.PROPERTY_TITLE_FONT_NAME_DEFAULT));
 
 
 
-            boolean titleParameterBold = configuration.getPropertyBool(ColorBarLayerType.PROPERTY_TITLE_PARAMETER_FONT_BOLD_KEY,
-                    ColorBarLayerType.PROPERTY_TITLE_PARAMETER_FONT_BOLD_DEFAULT);
+            boolean titleParameterBold = configuration.getPropertyBool(ColorBarLayerType.PROPERTY_TITLE_FONT_BOLD_KEY,
+                    ColorBarLayerType.PROPERTY_TITLE_FONT_BOLD_DEFAULT);
 
-            boolean titleParameterItalic = configuration.getPropertyBool(ColorBarLayerType.PROPERTY_TITLE_PARAMETER_FONT_ITALIC_KEY,
-                    ColorBarLayerType.PROPERTY_TITLE_PARAMETER_FONT_ITALIC_DEFAULT);
+            boolean titleParameterItalic = configuration.getPropertyBool(ColorBarLayerType.PROPERTY_TITLE_FONT_ITALIC_KEY,
+                    ColorBarLayerType.PROPERTY_TITLE_FONT_ITALIC_DEFAULT);
 
             int titleFontType = ColorBarLayer.getFontType(titleParameterItalic, titleParameterBold);
 
@@ -518,13 +509,7 @@ public class ImageLegend {
         this.backgroundColor = backgroundColor;
     }
 
-    public Color getForegroundColor() {
-        return foregroundColor;
-    }
 
-    public void setForegroundColor(Color foregroundColor) {
-        this.foregroundColor = foregroundColor;
-    }
 
     public boolean isAntialiasing() {
         return antialiasing;
@@ -1288,7 +1273,7 @@ public class ImageLegend {
 
                 if (hasTitleParameter()) {
                     g2d.setFont(getTitleParameterFont());
-                    g2d.setPaint(getTitleParameterColor());
+                    g2d.setPaint(getTitleColor());
                     g2d.drawString(headerText, 0, 0);
 
                     translateUnitsX = getTitleParameterWidth() + getTitleToUnitsHorizontalGap();
@@ -1363,7 +1348,7 @@ public class ImageLegend {
 
                     if (hasTitleParameter()) {
                         g2d.setFont(getTitleParameterFont());
-                        g2d.setPaint(getTitleParameterColor());
+                        g2d.setPaint(getTitleColor());
                         g2d.drawString(headerText, 0, 0);
                         translateY2 = getTitleParameterHeight() + getTitleToUnitsVerticalGap();
                     }
@@ -1396,7 +1381,7 @@ public class ImageLegend {
                     if (hasTitleParameter()) {
                         g2d.rotate(rotate);
                         g2d.setFont(getTitleParameterFont());
-                        g2d.setPaint(getTitleParameterColor());
+                        g2d.setPaint(getTitleColor());
                         g2d.drawString(headerText, 0, 0);
                         g2d.rotate(-rotate);
 
@@ -1962,13 +1947,7 @@ public class ImageLegend {
     }
 
 
-    public boolean isCenterOnLayer() {
-        return centerOnLayer;
-    }
 
-    public void setCenterOnLayer(boolean centerOnLayer) {
-        this.centerOnLayer = centerOnLayer;
-    }
 
     public static double round(double value, int places) {
         if (places < 0) throw new IllegalArgumentException();
@@ -2091,47 +2070,9 @@ public class ImageLegend {
         }
     }
 
-    public double getLayerOffset() {
-        return layerOffset;
-    }
-
-    public void setLayerOffset(double layerOffset) {
-        this.layerOffset = layerOffset;
-    }
 
 
-    public double getLayerShift() {
-        return layerShift;
-    }
 
-    public void setLayerShift(double layerShift) {
-        this.layerShift = layerShift;
-    }
-
-
-    public String getHorizontalLocation() {
-        return horizontalLocation;
-    }
-
-    public void setHorizontalLocation(String horizontalLocation) {
-        this.horizontalLocation = horizontalLocation;
-    }
-
-    public String getVerticalLocation() {
-        return verticalLocation;
-    }
-
-    public void setVerticalLocation(String verticalLocation) {
-        this.verticalLocation = verticalLocation;
-    }
-
-    public String getInsideOutsideLocation() {
-        return insideOutsideLocation;
-    }
-
-    public void setInsideOutsideLocation(String insideOutsideLocation) {
-        this.insideOutsideLocation = insideOutsideLocation;
-    }
 
     public Color getTickmarkColor() {
         return tickmarkColor;
@@ -2149,12 +2090,12 @@ public class ImageLegend {
         this.labelsColor = labelsColor;
     }
 
-    public Color getTitleParameterColor() {
-        return titleParameterColor;
+    public Color getTitleColor() {
+        return titleColor;
     }
 
-    public void setTitleParameterColor(Color color) {
-        this.titleParameterColor = color;
+    public void setTitleColor(Color color) {
+        this.titleColor = color;
     }
 
     public int getTickmarkLength() {

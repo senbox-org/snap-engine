@@ -11,7 +11,6 @@ import com.bc.ceres.glayer.LayerType;
 import com.bc.ceres.glayer.annotations.LayerTypeMetadata;
 import org.esa.snap.core.datamodel.RasterDataNode;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 
@@ -134,43 +133,43 @@ public class ColorBarLayerType extends LayerType {
 
     // Title
 
-    private static final String PROPERTY_TITLE_ROOT_KEY = PROPERTY_ROOT_KEY + ".title";
-    private static final String PROPERTY_TITLE_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "Title";
+    private static final String PROPERTY_TITLE_TEXT_ROOT_KEY = PROPERTY_ROOT_KEY + ".title";
+    private static final String PROPERTY_TITLE_TEXT_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "Title";
 
-    public static final String PROPERTY_TITLE_SECTION_KEY = PROPERTY_TITLE_ROOT_KEY + ".section";
-    public static final String PROPERTY_TITLE_SECTION_LABEL = "Title";
-    public static final String PROPERTY_TITLE_SECTION_TOOLTIP = "Title for the color bar legend";
-    public static final String PROPERTY_TITLE_SECTION_ALIAS = PROPERTY_TITLE_ROOT_ALIAS + "Section";
+    public static final String PROPERTY_TITLE_TEXT_SECTION_KEY = PROPERTY_TITLE_TEXT_ROOT_KEY + ".section";
+    public static final String PROPERTY_TITLE_TEXT_SECTION_LABEL = "Title";
+    public static final String PROPERTY_TITLE_TEXT_SECTION_TOOLTIP = "Title for the color bar legend";
+    public static final String PROPERTY_TITLE_TEXT_SECTION_ALIAS = PROPERTY_TITLE_TEXT_ROOT_ALIAS + "Section";
 
 
 
     // Orientation
 
-    private static final String PROPERTY_FORMATTING_ROOT_KEY = PROPERTY_ROOT_KEY + ".orientation";
-    private static final String PROPERTY_FORMATTING_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "Orientation";
+    private static final String PROPERTY_ORIENTATION_ROOT_KEY = PROPERTY_ROOT_KEY + ".orientation";
+    private static final String PROPERTY_ORIENTATION_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "Orientation";
 
-    public static final String PROPERTY_FORMATTING_SECTION_KEY = PROPERTY_FORMATTING_ROOT_KEY + ".section";
-    public static final String PROPERTY_FORMATTING_SECTION_LABEL = "Orientation";
-    public static final String PROPERTY_FORMATTING_SECTION_TOOLTIP = "Orientation options for the color bar legend";
-    public static final String PROPERTY_FORMATTING_SECTION_ALIAS = PROPERTY_FORMATTING_ROOT_ALIAS + "Section";
+    public static final String PROPERTY_ORIENTATION_SECTION_KEY = PROPERTY_ORIENTATION_ROOT_KEY + ".section";
+    public static final String PROPERTY_ORIENTATION_SECTION_LABEL = "Orientation";
+    public static final String PROPERTY_ORIENTATION_SECTION_TOOLTIP = "Orientation options for the color bar legend";
+    public static final String PROPERTY_ORIENTATION_SECTION_ALIAS = PROPERTY_ORIENTATION_ROOT_ALIAS + "Section";
 
-    public static final String PROPERTY_FORMATTING_ORIENTATION_KEY = PROPERTY_FORMATTING_ROOT_KEY + ".orientation";
-    public static final String PROPERTY_FORMATTING_ORIENTATION_LABEL = "Orientation";
-    public static final String PROPERTY_FORMATTING_ORIENTATION_TOOLTIP = "Orientation of the color bar legend";
-    public static final Class PROPERTY_FORMATTING_ORIENTATION_TYPE = String.class;
-    public static final String PROPERTY_FORMATTING_ORIENTATION_ALIAS = PROPERTY_FORMATTING_ROOT_ALIAS + "Orientation";
-    public static final String PROPERTY_FORMATTING_ORIENTATION_OPTION1 = OPTION_HORIZONTAL;
-    public static final String PROPERTY_FORMATTING_ORIENTATION_OPTION2 = OPTION_VERTICAL;
-    public static final String PROPERTY_FORMATTING_ORIENTATION_DEFAULT = OPTION_HORIZONTAL;
-    public static final Object PROPERTY_FORMATTING_ORIENTATION_VALUE_SET[] = {PROPERTY_FORMATTING_ORIENTATION_OPTION1, PROPERTY_FORMATTING_ORIENTATION_OPTION2};
+    public static final String PROPERTY_ORIENTATION_KEY = PROPERTY_ORIENTATION_ROOT_KEY + ".orientation";
+    public static final String PROPERTY_ORIENTATION_LABEL = "Orientation";
+    public static final String PROPERTY_ORIENTATION_TOOLTIP = "Orientation of the color bar legend";
+    public static final Class PROPERTY_ORIENTATION_TYPE = String.class;
+    public static final String PROPERTY_ORIENTATION_ALIAS = PROPERTY_ORIENTATION_ROOT_ALIAS + "Orientation";
+    public static final String PROPERTY_ORIENTATION_OPTION1 = OPTION_HORIZONTAL;
+    public static final String PROPERTY_ORIENTATION_OPTION2 = OPTION_VERTICAL;
+    public static final String PROPERTY_ORIENTATION_DEFAULT = OPTION_HORIZONTAL;
+    public static final Object PROPERTY_ORIENTATION_VALUE_SET[] = {PROPERTY_ORIENTATION_OPTION1, PROPERTY_ORIENTATION_OPTION2};
 
 
-    public static final String PROPERTY_FORMATTING_REVERSE_PALETTE_KEY = PROPERTY_FORMATTING_ROOT_KEY + ".reverse.palette";
-    public static final String PROPERTY_FORMATTING_REVERSE_PALETTE_LABEL = "Reverse Palette & Labels";
-    public static final String PROPERTY_FORMATTING_REVERSE_PALETTE_TOOLTIP = "Reverse direction of palette and labels";
-    private static final String PROPERTY_FORMATTING_REVERSE_PALETTE_ALIAS = PROPERTY_FORMATTING_ROOT_ALIAS + "ReversePalette";
-    public static final boolean PROPERTY_FORMATTING_REVERSE_PALETTE_DEFAULT = false;
-    public static final Class PROPERTY_FORMATTING_REVERSE_PALETTE_TYPE = Boolean.class;
+    public static final String PROPERTY_ORIENTATION_REVERSE_PALETTE_KEY = PROPERTY_ORIENTATION_ROOT_KEY + ".reverse.palette";
+    public static final String PROPERTY_ORIENTATION_REVERSE_PALETTE_LABEL = "Reverse Palette & Labels";
+    public static final String PROPERTY_ORIENTATION_REVERSE_PALETTE_TOOLTIP = "Reverse direction of palette and labels";
+    private static final String PROPERTY_ORIENTATION_REVERSE_PALETTE_ALIAS = PROPERTY_ORIENTATION_ROOT_ALIAS + "ReversePalette";
+    public static final boolean PROPERTY_ORIENTATION_REVERSE_PALETTE_DEFAULT = false;
+    public static final Class PROPERTY_ORIENTATION_REVERSE_PALETTE_TYPE = Boolean.class;
 
 
 
@@ -254,13 +253,13 @@ public class ColorBarLayerType extends LayerType {
             VERTICAL_TITLE_BOTTOM
     };
 
-    public static final String PROPERTY_TITLE_VERTICAL_LOCATION_KEY = PROPERTY_LOCATION_ROOT_KEY + "title.vertical.anchor";
-    public static final String PROPERTY_TITLE_VERTICAL_LOCATION_LABEL = "Title Anchor (Vert)";
-    public static final String PROPERTY_TITLE_VERTICAL_LOCATION_TOOLTIP = "Where to place title on vertical legend";
-    private static final String PROPERTY_TITLE_VERTICAL_LOCATION_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "TitleVerticalAnchor";
-    public static final String PROPERTY_TITLE_VERTICAL_LOCATION_DEFAULT = VERTICAL_TITLE_TOP;
-    public static final Class PROPERTY_TITLE_VERTICAL_LOCATION_TYPE = String.class;
-    public static final Object PROPERTY_TITLE_VERTICAL_LOCATION_VALUE_SET[] = VERTICAL_TITLE_LOCATION_VALUE_SET;
+    public static final String PROPERTY_LOCATION_TITLE_VERTICAL_KEY = PROPERTY_LOCATION_ROOT_KEY + "title.vertical.anchor";
+    public static final String PROPERTY_LOCATION_TITLE_VERTICAL_LABEL = "Title Anchor (Vert)";
+    public static final String PROPERTY_LOCATION_TITLE_VERTICAL_TOOLTIP = "Where to place title on vertical legend";
+    private static final String PROPERTY_LOCATION_TITLE_VERTICAL_ALIAS = PROPERTY_LOCATION_ROOT_ALIAS + "TitleVerticalAnchor";
+    public static final String PROPERTY_LOCATION_TITLE_VERTICAL_DEFAULT = VERTICAL_TITLE_TOP;
+    public static final Class PROPERTY_LOCATION_TITLE_VERTICAL_TYPE = String.class;
+    public static final Object PROPERTY_LOCATION_TITLE_VERTICAL_VALUE_SET[] = VERTICAL_TITLE_LOCATION_VALUE_SET;
 
 
 
@@ -316,78 +315,78 @@ public class ColorBarLayerType extends LayerType {
 
 
 
-    // Title Parameter Section
+    // Title Section
 
-    private static final String PROPERTY_TITLE_PARAMETER_ROOT_KEY = PROPERTY_ROOT_KEY + ".title.parameter";
-    private static final String PROPERTY_TITLE_PARAMETER_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "TitleParameter";
+    private static final String PROPERTY_TITLE_ROOT_KEY = PROPERTY_ROOT_KEY + ".title.parameter";
+    private static final String PROPERTY_TITLE_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "TitleParameter";
 
-    public static final String PROPERTY_TITLE_PARAMETER_SECTION_KEY = PROPERTY_TITLE_PARAMETER_ROOT_KEY + ".section";
-    public static final String PROPERTY_TITLE_PARAMETER_SECTION_LABEL = "Title Format";
-    public static final String PROPERTY_TITLE_PARAMETER_SECTION_TOOLTIP = "Set parameter options in title of color bar";
-    public static final String PROPERTY_TITLE_PARAMETER_SECTION_ALIAS = PROPERTY_TITLE_PARAMETER_ROOT_ALIAS + "Section";
+    public static final String PROPERTY_TITLE_SECTION_KEY = PROPERTY_TITLE_ROOT_KEY + ".section";
+    public static final String PROPERTY_TITLE_SECTION_LABEL = "Title Format";
+    public static final String PROPERTY_TITLE_SECTION_TOOLTIP = "Set parameter options in title of color bar";
+    public static final String PROPERTY_TITLE_SECTION_ALIAS = PROPERTY_TITLE_ROOT_ALIAS + "Section";
 
-    public static final String PROPERTY_TITLE_PARAMETER_SHOW_KEY = PROPERTY_TITLE_PARAMETER_ROOT_KEY + ".show";
-    public static final String PROPERTY_TITLE_PARAMETER_SHOW_LABEL = "Show Title";
-    public static final String PROPERTY_TITLE_PARAMETER_SHOW_TOOLTIP = "Add title to the color bar";
-    private static final String PROPERTY_TITLE_PARAMETER_SHOW_ALIAS = PROPERTY_TITLE_PARAMETER_ROOT_ALIAS + "Show";
-    public static final boolean PROPERTY_TITLE_PARAMETER_SHOW_DEFAULT = true;
-    public static final Class PROPERTY_TITLE_PARAMETER_SHOW_TYPE = Boolean.class;
+    public static final String PROPERTY_TITLE_SHOW_KEY = PROPERTY_TITLE_ROOT_KEY + ".show";
+    public static final String PROPERTY_TITLE_SHOW_LABEL = "Show Title";
+    public static final String PROPERTY_TITLE_SHOW_TOOLTIP = "Add title to the color bar";
+    private static final String PROPERTY_TITLE_SHOW_ALIAS = PROPERTY_TITLE_ROOT_ALIAS + "Show";
+    public static final boolean PROPERTY_TITLE_SHOW_DEFAULT = true;
+    public static final Class PROPERTY_TITLE_SHOW_TYPE = Boolean.class;
 
-    public static final String PROPERTY_TITLE_PARAMETER_TEXT_KEY = PROPERTY_TITLE_PARAMETER_ROOT_KEY + ".text";
-    public static final String PROPERTY_TITLE_PARAMETER_TEXT_LABEL = "Title Text";
-    public static final String PROPERTY_TITLE_PARAMETER_TEXT_TOOLTIP = "Add title parameter to the color bar";
-    public static final String PROPERTY_TITLE_PARAMETER_TEXT_ALIAS = PROPERTY_TITLE_PARAMETER_ROOT_ALIAS + "Text";
-    public static final String PROPERTY_TITLE_PARAMETER_TEXT_DEFAULT = NULL_SPECIAL;
-    public static final Class PROPERTY_TITLE_PARAMETER_TEXT_TYPE = String.class;
+    public static final String PROPERTY_TITLE_TEXT_KEY = PROPERTY_TITLE_ROOT_KEY + ".text";
+    public static final String PROPERTY_TITLE_TEXT_LABEL = "Title Text";
+    public static final String PROPERTY_TITLE_TEXT_TOOLTIP = "Add title parameter to the color bar";
+    public static final String PROPERTY_TITLE_TEXT_ALIAS = PROPERTY_TITLE_ROOT_ALIAS + "Text";
+    public static final String PROPERTY_TITLE_TEXT_DEFAULT = NULL_SPECIAL;
+    public static final Class PROPERTY_TITLE_TEXT_TYPE = String.class;
 
-    public static final String PROPERTY_TITLE_PARAMETER_FONT_BOLD_KEY = PROPERTY_TITLE_PARAMETER_ROOT_KEY + ".font.bold";
-    public static final String PROPERTY_TITLE_PARAMETER_FONT_BOLD_LABEL = "Title Font Bold";
-    public static final String PROPERTY_TITLE_PARAMETER_FONT_BOLD_TOOLTIP = "Format title parameter text font in bold";
-    public static final String PROPERTY_TITLE_PARAMETER_FONT_BOLD_ALIAS = PROPERTY_TITLE_PARAMETER_ROOT_ALIAS + "FontBold";
-    public static final boolean PROPERTY_TITLE_PARAMETER_FONT_BOLD_DEFAULT = false;
-    public static final Class PROPERTY_TITLE_PARAMETER_FONT_BOLD_TYPE = Boolean.class;
+    public static final String PROPERTY_TITLE_FONT_BOLD_KEY = PROPERTY_TITLE_ROOT_KEY + ".font.bold";
+    public static final String PROPERTY_TITLE_FONT_BOLD_LABEL = "Title Font Bold";
+    public static final String PROPERTY_TITLE_FONT_BOLD_TOOLTIP = "Format title parameter text font in bold";
+    public static final String PROPERTY_TITLE_FONT_BOLD_ALIAS = PROPERTY_TITLE_ROOT_ALIAS + "FontBold";
+    public static final boolean PROPERTY_TITLE_FONT_BOLD_DEFAULT = false;
+    public static final Class PROPERTY_TITLE_FONT_BOLD_TYPE = Boolean.class;
 
-    public static final String PROPERTY_TITLE_PARAMETER_FONT_ITALIC_KEY = PROPERTY_TITLE_PARAMETER_ROOT_KEY + ".font.italic";
-    public static final String PROPERTY_TITLE_PARAMETER_FONT_ITALIC_LABEL = "Title Font Italic";
-    public static final String PROPERTY_TITLE_PARAMETER_FONT_ITALIC_TOOLTIP = "Format title parameter text font in italic";
-    public static final String PROPERTY_TITLE_PARAMETER_FONT_ITALIC_ALIAS = PROPERTY_TITLE_PARAMETER_ROOT_ALIAS + "FontItalic";
-    public static final boolean PROPERTY_TITLE_PARAMETER_FONT_ITALIC_DEFAULT = false;
-    public static final Class PROPERTY_TITLE_PARAMETER_FONT_ITALIC_TYPE = Boolean.class;
+    public static final String PROPERTY_TITLE_FONT_ITALIC_KEY = PROPERTY_TITLE_ROOT_KEY + ".font.italic";
+    public static final String PROPERTY_TITLE_FONT_ITALIC_LABEL = "Title Font Italic";
+    public static final String PROPERTY_TITLE_FONT_ITALIC_TOOLTIP = "Format title parameter text font in italic";
+    public static final String PROPERTY_TITLE_FONT_ITALIC_ALIAS = PROPERTY_TITLE_ROOT_ALIAS + "FontItalic";
+    public static final boolean PROPERTY_TITLE_FONT_ITALIC_DEFAULT = false;
+    public static final Class PROPERTY_TITLE_FONT_ITALIC_TYPE = Boolean.class;
 
-    public static final String PROPERTY_TITLE_PARAMETER_FONT_NAME_KEY = PROPERTY_TITLE_PARAMETER_ROOT_KEY + ".font.name";
-    public static final String PROPERTY_TITLE_PARAMETER_FONT_NAME_LABEL = "Title Font";
-    public static final String PROPERTY_TITLE_PARAMETER_FONT_NAME_TOOLTIP = "Set the text font of the title parameter";
-    public static final String PROPERTY_TITLE_PARAMETER_FONT_NAME_ALIAS = PROPERTY_TITLE_PARAMETER_ROOT_ALIAS + "FontName";
-    public static final String PROPERTY_TITLE_PARAMETER_FONT_NAME_DEFAULT = FONT_NAME_SANSERIF;
-    public static final Class PROPERTY_TITLE_PARAMETER_FONT_NAME_TYPE = String.class;
-    public static final Object PROPERTY_TITLE_PARAMETER_FONT_NAME_VALUE_SET[] = FONT_NAME_VALUE_SET;
-
-
-    public static final String PROPERTY_TITLE_PARAMETER_FONT_SIZE_KEY = PROPERTY_TITLE_PARAMETER_ROOT_KEY + "font.size";
-    public static final String PROPERTY_TITLE_PARAMETER_FONT_SIZE_LABEL = "Title Size";
-    public static final String PROPERTY_TITLE_PARAMETER_FONT_SIZE_TOOLTIP = "Set size of the title parameter";
-    private static final String PROPERTY_TITLE_PARAMETER_FONT_SIZE_ALIAS = PROPERTY_TITLE_PARAMETER_ROOT_ALIAS + "FontSize";
-    public static final int PROPERTY_TITLE_PARAMETER_FONT_SIZE_DEFAULT = 35;
-    public static final Class PROPERTY_TITLE_PARAMETER_FONT_SIZE_TYPE = Integer.class;
-    public static final int PROPERTY_TITLE_PARAMETER_FONT_SIZE_VALUE_MIN = 10;
-    public static final int PROPERTY_TITLE_PARAMETER_FONT_SIZE_VALUE_MAX = 200;
-    public static final String PROPERTY_TITLE_PARAMETER_FONT_SIZE_INTERVAL =
-            "[" + ColorBarLayerType.PROPERTY_TITLE_PARAMETER_FONT_SIZE_VALUE_MIN +
-                    "," + ColorBarLayerType.PROPERTY_TITLE_PARAMETER_FONT_SIZE_VALUE_MAX + "]";
+    public static final String PROPERTY_TITLE_FONT_NAME_KEY = PROPERTY_TITLE_ROOT_KEY + ".font.name";
+    public static final String PROPERTY_TITLE_FONT_NAME_LABEL = "Title Font";
+    public static final String PROPERTY_TITLE_FONT_NAME_TOOLTIP = "Set the text font of the title parameter";
+    public static final String PROPERTY_TITLE_FONT_NAME_ALIAS = PROPERTY_TITLE_ROOT_ALIAS + "FontName";
+    public static final String PROPERTY_TITLE_FONT_NAME_DEFAULT = FONT_NAME_SANSERIF;
+    public static final Class PROPERTY_TITLE_FONT_NAME_TYPE = String.class;
+    public static final Object PROPERTY_TITLE_FONT_NAME_VALUE_SET[] = FONT_NAME_VALUE_SET;
 
 
-    public static final String PROPERTY_TITLE_PARAMETER_COLOR_KEY = PROPERTY_TITLE_PARAMETER_ROOT_KEY + "font.color";
-    public static final String PROPERTY_TITLE_PARAMETER_COLOR_LABEL = "Title Color";
-    public static final String PROPERTY_TITLE_PARAMETER_COLOR_TOOLTIP = "Set color of the title";
-    private static final String PROPERTY_TITLE_PARAMETER_COLOR_ALIAS = PROPERTY_TITLE_PARAMETER_ROOT_ALIAS + "FontColor";
-    public static final Color PROPERTY_TITLE_PARAMETER_COLOR_DEFAULT = Color.YELLOW;
-    public static final Class PROPERTY_TITLE_PARAMETER_COLOR_TYPE = Color.class;
+    public static final String PROPERTY_TITLE_FONT_SIZE_KEY = PROPERTY_TITLE_ROOT_KEY + "font.size";
+    public static final String PROPERTY_TITLE_FONT_SIZE_LABEL = "Title Size";
+    public static final String PROPERTY_TITLE_FONT_SIZE_TOOLTIP = "Set size of the title parameter";
+    private static final String PROPERTY_TITLE_FONT_SIZE_ALIAS = PROPERTY_TITLE_ROOT_ALIAS + "FontSize";
+    public static final int PROPERTY_TITLE_FONT_SIZE_DEFAULT = 35;
+    public static final Class PROPERTY_TITLE_FONT_SIZE_TYPE = Integer.class;
+    public static final int PROPERTY_TITLE_FONT_SIZE_VALUE_MIN = 10;
+    public static final int PROPERTY_TITLE_FONT_SIZE_VALUE_MAX = 200;
+    public static final String PROPERTY_TITLE_FONT_SIZE_INTERVAL =
+            "[" + ColorBarLayerType.PROPERTY_TITLE_FONT_SIZE_VALUE_MIN +
+                    "," + ColorBarLayerType.PROPERTY_TITLE_FONT_SIZE_VALUE_MAX + "]";
 
 
+    public static final String PROPERTY_TITLE_COLOR_KEY = PROPERTY_TITLE_ROOT_KEY + "font.color";
+    public static final String PROPERTY_TITLE_COLOR_LABEL = "Title Color";
+    public static final String PROPERTY_TITLE_COLOR_TOOLTIP = "Set color of the title";
+    private static final String PROPERTY_TITLE_COLOR_ALIAS = PROPERTY_TITLE_ROOT_ALIAS + "FontColor";
+    public static final Color PROPERTY_TITLE_COLOR_DEFAULT = Color.YELLOW;
+    public static final Class PROPERTY_TITLE_COLOR_TYPE = Color.class;
 
 
 
-    // Title Units Section
+
+
+    // Units Section
 
     private static final String PROPERTY_TITLE_UNITS_ROOT_KEY = PROPERTY_ROOT_KEY + ".title.units";
     private static final String PROPERTY_TITLE_UNITS_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "TitleUnits";
@@ -745,8 +744,8 @@ public class ColorBarLayerType extends LayerType {
 
         // Title Section
 
-        final Property titleSectionModel = Property.create(PROPERTY_TITLE_SECTION_KEY, Boolean.class, true, true);
-        titleSectionModel.getDescriptor().setAlias(PROPERTY_TITLE_SECTION_ALIAS);
+        final Property titleSectionModel = Property.create(PROPERTY_TITLE_TEXT_SECTION_KEY, Boolean.class, true, true);
+        titleSectionModel.getDescriptor().setAlias(PROPERTY_TITLE_TEXT_SECTION_ALIAS);
         vc.addProperty(titleSectionModel);
 
 
@@ -756,16 +755,16 @@ public class ColorBarLayerType extends LayerType {
 
         // Formatting Section
 
-        final Property formattingSectionModel = Property.create(PROPERTY_FORMATTING_SECTION_KEY, Boolean.class, true, true);
-        formattingSectionModel.getDescriptor().setAlias(PROPERTY_FORMATTING_SECTION_ALIAS);
+        final Property formattingSectionModel = Property.create(PROPERTY_ORIENTATION_SECTION_KEY, Boolean.class, true, true);
+        formattingSectionModel.getDescriptor().setAlias(PROPERTY_ORIENTATION_SECTION_ALIAS);
         vc.addProperty(formattingSectionModel);
 
-        final Property formattingOrientationModel = Property.create(PROPERTY_FORMATTING_ORIENTATION_KEY, PROPERTY_FORMATTING_ORIENTATION_TYPE, true, true);
-        formattingOrientationModel.getDescriptor().setAlias(PROPERTY_FORMATTING_ORIENTATION_ALIAS);
+        final Property formattingOrientationModel = Property.create(PROPERTY_ORIENTATION_KEY, PROPERTY_ORIENTATION_TYPE, true, true);
+        formattingOrientationModel.getDescriptor().setAlias(PROPERTY_ORIENTATION_ALIAS);
         vc.addProperty(formattingOrientationModel);
 
-        final Property reversePaletteModel = Property.create(PROPERTY_FORMATTING_REVERSE_PALETTE_KEY, PROPERTY_FORMATTING_REVERSE_PALETTE_TYPE, true, true);
-        reversePaletteModel.getDescriptor().setAlias(PROPERTY_FORMATTING_REVERSE_PALETTE_ALIAS);
+        final Property reversePaletteModel = Property.create(PROPERTY_ORIENTATION_REVERSE_PALETTE_KEY, PROPERTY_ORIENTATION_REVERSE_PALETTE_TYPE, true, true);
+        reversePaletteModel.getDescriptor().setAlias(PROPERTY_ORIENTATION_REVERSE_PALETTE_ALIAS);
         vc.addProperty(reversePaletteModel);
 
 
@@ -790,9 +789,9 @@ public class ColorBarLayerType extends LayerType {
         locationEdgeModel.getDescriptor().setAlias(PROPERTY_LOCATION_PLACEMENT_ALIAS);
         vc.addProperty(locationEdgeModel);
 
-        final Property titleVerticalAnchorModel = Property.create(PROPERTY_TITLE_VERTICAL_LOCATION_KEY,
-                PROPERTY_TITLE_VERTICAL_LOCATION_TYPE, true, true);
-        titleVerticalAnchorModel.getDescriptor().setAlias(PROPERTY_TITLE_VERTICAL_LOCATION_ALIAS);
+        final Property titleVerticalAnchorModel = Property.create(PROPERTY_LOCATION_TITLE_VERTICAL_KEY,
+                PROPERTY_LOCATION_TITLE_VERTICAL_TYPE, true, true);
+        titleVerticalAnchorModel.getDescriptor().setAlias(PROPERTY_LOCATION_TITLE_VERTICAL_ALIAS);
         vc.addProperty(titleVerticalAnchorModel);
 
 
@@ -843,67 +842,67 @@ public class ColorBarLayerType extends LayerType {
 
         // Title Parameter Section
 
-        final Property titleParameterSectionModel = Property.create(PROPERTY_TITLE_PARAMETER_SECTION_KEY,
+        final Property titleParameterSectionModel = Property.create(PROPERTY_TITLE_SECTION_KEY,
                 Boolean.class,
                 true,
                 true);
-        titleParameterSectionModel.getDescriptor().setAlias(PROPERTY_TITLE_PARAMETER_SECTION_ALIAS);
+        titleParameterSectionModel.getDescriptor().setAlias(PROPERTY_TITLE_SECTION_ALIAS);
         vc.addProperty(titleParameterSectionModel);
 
 
-        final Property titleParameterShowModel = Property.create(PROPERTY_TITLE_PARAMETER_SHOW_KEY,
-                PROPERTY_TITLE_PARAMETER_SHOW_TYPE,
-                PROPERTY_TITLE_PARAMETER_SHOW_DEFAULT,
+        final Property titleParameterShowModel = Property.create(PROPERTY_TITLE_SHOW_KEY,
+                PROPERTY_TITLE_SHOW_TYPE,
+                PROPERTY_TITLE_SHOW_DEFAULT,
                 true);
-        titleParameterShowModel.getDescriptor().setAlias(PROPERTY_TITLE_PARAMETER_SHOW_ALIAS);
+        titleParameterShowModel.getDescriptor().setAlias(PROPERTY_TITLE_SHOW_ALIAS);
         vc.addProperty(titleParameterShowModel);
 
 
-        final Property titleParameterTextModel = Property.create(PROPERTY_TITLE_PARAMETER_TEXT_KEY,
-                PROPERTY_TITLE_PARAMETER_TEXT_TYPE,
-                PROPERTY_TITLE_PARAMETER_TEXT_DEFAULT,
+        final Property titleParameterTextModel = Property.create(PROPERTY_TITLE_TEXT_KEY,
+                PROPERTY_TITLE_TEXT_TYPE,
+                PROPERTY_TITLE_TEXT_DEFAULT,
                 true);
-        titleParameterTextModel.getDescriptor().setAlias(PROPERTY_TITLE_PARAMETER_TEXT_ALIAS);
+        titleParameterTextModel.getDescriptor().setAlias(PROPERTY_TITLE_TEXT_ALIAS);
         vc.addProperty(titleParameterTextModel);
 
 
-        final Property titleParameterBoldModel = Property.create(PROPERTY_TITLE_PARAMETER_FONT_BOLD_KEY,
-                PROPERTY_TITLE_PARAMETER_FONT_BOLD_TYPE,
-                PROPERTY_TITLE_PARAMETER_FONT_BOLD_DEFAULT,
+        final Property titleParameterBoldModel = Property.create(PROPERTY_TITLE_FONT_BOLD_KEY,
+                PROPERTY_TITLE_FONT_BOLD_TYPE,
+                PROPERTY_TITLE_FONT_BOLD_DEFAULT,
                 true);
-        titleParameterBoldModel.getDescriptor().setAlias(PROPERTY_TITLE_PARAMETER_FONT_BOLD_ALIAS);
+        titleParameterBoldModel.getDescriptor().setAlias(PROPERTY_TITLE_FONT_BOLD_ALIAS);
         vc.addProperty(titleParameterBoldModel);
 
 
-        final Property titleParameterItalicModel = Property.create(PROPERTY_TITLE_PARAMETER_FONT_ITALIC_KEY,
-                PROPERTY_TITLE_PARAMETER_FONT_ITALIC_TYPE,
-                PROPERTY_TITLE_PARAMETER_FONT_ITALIC_DEFAULT,
+        final Property titleParameterItalicModel = Property.create(PROPERTY_TITLE_FONT_ITALIC_KEY,
+                PROPERTY_TITLE_FONT_ITALIC_TYPE,
+                PROPERTY_TITLE_FONT_ITALIC_DEFAULT,
                 true);
-        titleParameterItalicModel.getDescriptor().setAlias(PROPERTY_TITLE_PARAMETER_FONT_ITALIC_ALIAS);
+        titleParameterItalicModel.getDescriptor().setAlias(PROPERTY_TITLE_FONT_ITALIC_ALIAS);
         vc.addProperty(titleParameterItalicModel);
 
 
-        final Property titleParameterFontNameModel = Property.create(PROPERTY_TITLE_PARAMETER_FONT_NAME_KEY,
-                PROPERTY_TITLE_PARAMETER_FONT_NAME_TYPE,
-                PROPERTY_TITLE_PARAMETER_FONT_NAME_DEFAULT,
+        final Property titleParameterFontNameModel = Property.create(PROPERTY_TITLE_FONT_NAME_KEY,
+                PROPERTY_TITLE_FONT_NAME_TYPE,
+                PROPERTY_TITLE_FONT_NAME_DEFAULT,
                 true);
-        titleParameterFontNameModel.getDescriptor().setAlias(PROPERTY_TITLE_PARAMETER_FONT_NAME_ALIAS);
+        titleParameterFontNameModel.getDescriptor().setAlias(PROPERTY_TITLE_FONT_NAME_ALIAS);
         vc.addProperty(titleParameterFontNameModel);
 
 
-        final Property titleParameterColorModel = Property.create(PROPERTY_TITLE_PARAMETER_COLOR_KEY,
-                PROPERTY_TITLE_PARAMETER_COLOR_TYPE,
-                PROPERTY_TITLE_PARAMETER_COLOR_DEFAULT,
+        final Property titleParameterColorModel = Property.create(PROPERTY_TITLE_COLOR_KEY,
+                PROPERTY_TITLE_COLOR_TYPE,
+                PROPERTY_TITLE_COLOR_DEFAULT,
                 true);
-        titleParameterColorModel.getDescriptor().setAlias(PROPERTY_TITLE_PARAMETER_COLOR_ALIAS);
+        titleParameterColorModel.getDescriptor().setAlias(PROPERTY_TITLE_COLOR_ALIAS);
         vc.addProperty(titleParameterColorModel);
 
 
-        final Property titleParameterFontSizeModel = Property.create(PROPERTY_TITLE_PARAMETER_FONT_SIZE_KEY,
-                PROPERTY_TITLE_PARAMETER_FONT_SIZE_TYPE,
-                PROPERTY_TITLE_PARAMETER_FONT_SIZE_DEFAULT,
+        final Property titleParameterFontSizeModel = Property.create(PROPERTY_TITLE_FONT_SIZE_KEY,
+                PROPERTY_TITLE_FONT_SIZE_TYPE,
+                PROPERTY_TITLE_FONT_SIZE_DEFAULT,
                 true);
-        titleParameterFontSizeModel.getDescriptor().setAlias(PROPERTY_TITLE_PARAMETER_FONT_SIZE_ALIAS);
+        titleParameterFontSizeModel.getDescriptor().setAlias(PROPERTY_TITLE_FONT_SIZE_ALIAS);
         vc.addProperty(titleParameterFontSizeModel);
 
 
