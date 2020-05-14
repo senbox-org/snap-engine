@@ -125,32 +125,18 @@ public class ColorBarLayer extends Layer {
 
             imageLegend.setOrientation(getOrientation());
             imageLegend.setReversePalette(isReversePalette());
-            imageLegend.setTickmarkColor(getTickmarksColor());
-            imageLegend.setTickmarkLength(getTickmarksLength());
-            imageLegend.setTickmarkWidth(getTickmarksWidth());
-            imageLegend.setTickmarkShow(isTickmarksShow());
-
-
-            imageLegend.setBorderShow(isBorderShow());
-            imageLegend.setBorderWidth(getBorderWidth());
-            imageLegend.setBorderColor(getBorderColor());
-
-
-            imageLegend.setBackgroundColor(getBackdropColor());
-            imageLegend.setBackgroundTransparency(((Number) getBackdropTransparency()).floatValue());
-            imageLegend.setBackdropShow(isBackdropShow());
-            imageLegend.setBackdropBorderColor(getBackdropBorderColor());
-            imageLegend.setBackdropBorderWidth(getBackdropBorderWidth());
-            imageLegend.setBackdropBorderShow(isBackdropBorderShow());
 
 
 
 
 
-            imageLegend.setLabelsFontName(getLabelsFontName());
-            imageLegend.setLabelsFontType(getLabelsFontType());
-            imageLegend.setLabelsColor(getLabelsColor());
-            imageLegend.setLabelsShow(isLabelsShow());
+
+
+
+
+
+
+
             imageLegend.setScalingFactor(getLabelValuesScalingFactor());
             imageLegend.setDecimalPlaces(getLabelValuesDecimalPlaces());
             imageLegend.setDecimalPlacesForce(getLabelValuesForceDecimalPlaces());
@@ -159,12 +145,39 @@ public class ColorBarLayer extends Layer {
 
 
 
-            imageLegend.setLabelsColor(getLabelsColor());
             imageLegend.setAntialiasing((Boolean) true);
             imageLegend.setColorBarLength(getLegendLength());
             imageLegend.setColorBarThickness(getLegendWidth());
-            imageLegend.setLabelsFontSize((Integer) getFontSizePixels());
             imageLegend.setLayerScaling((Double) getSizeScaling());
+
+
+
+
+            imageLegend.setLabelsShow(isLabelsShow());
+            imageLegend.setLabelsFontName(getLabelsFontName());
+            imageLegend.setLabelsFontType(getLabelsFontType());
+            imageLegend.setLabelsFontSize((Integer) getFontSizePixels());
+            imageLegend.setLabelsColor(getLabelsColor());
+
+
+            imageLegend.setTickmarkColor(getTickmarksColor());
+            imageLegend.setTickmarkLength(getTickmarksLength());
+            imageLegend.setTickmarkWidth(getTickmarksWidth());
+            imageLegend.setTickmarkShow(isTickmarksShow());
+
+            imageLegend.setBackgroundColor(getBackdropColor());
+            imageLegend.setBackgroundTransparency(((Number) getBackdropTransparency()).floatValue());
+            imageLegend.setBackdropShow(isBackdropShow());
+
+            imageLegend.setBorderShow(isBorderShow());
+            imageLegend.setBorderWidth(getBorderWidth());
+            imageLegend.setBorderColor(getBorderColor());
+
+            imageLegend.setBackdropBorderColor(getBackdropBorderColor());
+            imageLegend.setBackdropBorderWidth(getBackdropBorderWidth());
+            imageLegend.setBackdropBorderShow(isBackdropBorderShow());
+
+
 
 
 

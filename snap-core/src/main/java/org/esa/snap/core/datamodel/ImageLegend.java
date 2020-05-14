@@ -57,7 +57,6 @@ public class ImageLegend {
     public static final int VERTICAL = 1;
 
 
-
     public static final int NULL_INT = -999;
 
     public static final String DISTRIB_EVEN_STR = ColorBarLayerType.DISTRIB_EVEN_STR;
@@ -186,7 +185,6 @@ public class ImageLegend {
     private ArrayList<ColorBarInfo> colorBarInfos = new ArrayList<ColorBarInfo>();
 
 
-
     public ImageLegend(ImageInfo imageInfo, RasterDataNode raster) {
         this.imageInfo = imageInfo;
         this.raster = raster;
@@ -241,27 +239,15 @@ public class ImageLegend {
         imageLegendCopy.setTitleUnitsFontName(getTitleUnitsFontName());
         imageLegendCopy.setTitleUnitsFontType(getTitleUnitsFontType());
 
+
+
         imageLegendCopy.setNumberOfTicks(getNumberOfTicks());
         imageLegendCopy.setDistributionType(getDistributionType());
         imageLegendCopy.setFullCustomAddThesePoints(getFullCustomAddThesePoints());
 
         imageLegendCopy.setOrientation(getOrientation());
         imageLegendCopy.setReversePalette(isReversePalette());
-        imageLegendCopy.setTickmarkColor(getTickmarkColor());
-        imageLegendCopy.setTickmarkLength(getTickmarkLength());
-        imageLegendCopy.setTickmarkWidth(getTickmarkWidth());
-        imageLegendCopy.setTickmarkShow(isTickmarkShow());
 
-        imageLegendCopy.setBorderShow(isBorderShow());
-        imageLegendCopy.setBorderWidth(getBorderWidth());
-        imageLegendCopy.setBorderColor(getBorderColor());
-
-        imageLegendCopy.setBackgroundColor(getBackgroundColor());
-        imageLegendCopy.setBackgroundTransparency(getBackgroundTransparency());
-        imageLegendCopy.setBackdropShow(isBackdropShow());
-        imageLegendCopy.setBackdropBorderColor(getBackdropBorderColor());
-        imageLegendCopy.setBackdropBorderWidth(getBackdropBorderWidth());
-        imageLegendCopy.setBackdropBorderShow(isBackdropBorderShow());
 
 
         imageLegendCopy.setLabelsFontName(getLabelsFontName());
@@ -279,109 +265,219 @@ public class ImageLegend {
         imageLegendCopy.setLabelsFontSize(getLabelsFontSize());
         imageLegendCopy.setLayerScaling(getLayerScaling());
 
+
+
+
+        imageLegendCopy.setTickmarkColor(getTickmarkColor());
+        imageLegendCopy.setTickmarkLength(getTickmarkLength());
+        imageLegendCopy.setTickmarkWidth(getTickmarkWidth());
+        imageLegendCopy.setTickmarkShow(isTickmarkShow());
+
+        imageLegendCopy.setBackgroundColor(getBackgroundColor());
+        imageLegendCopy.setBackgroundTransparency(getBackgroundTransparency());
+        imageLegendCopy.setBackdropShow(isBackdropShow());
+
+        imageLegendCopy.setBorderShow(isBorderShow());
+        imageLegendCopy.setBorderWidth(getBorderWidth());
+        imageLegendCopy.setBorderColor(getBorderColor());
+
+        imageLegendCopy.setBackdropBorderColor(getBackdropBorderColor());
+        imageLegendCopy.setBackdropBorderWidth(getBackdropBorderWidth());
+        imageLegendCopy.setBackdropBorderShow(isBackdropBorderShow());
+
+
+
         //            imageLegend.setBackgroundTransparencyEnabled(true);
 
         return imageLegendCopy;
     }
 
 
-
-
     public void updateWithProperties(PropertyMap configuration, RasterDataNode raster) {
 
 
-            // Title parameters
+        // Title parameters
 
-            setShowTitle(
-                    configuration.getPropertyBool(ColorBarLayerType.PROPERTY_TITLE_SHOW_KEY,
-                            ColorBarLayerType.PROPERTY_TITLE_SHOW_DEFAULT));
-
-
-
-            String titleTextDefault = configuration.getPropertyString(ColorBarLayerType.PROPERTY_TITLE_TEXT_KEY,
-                    ColorBarLayerType.PROPERTY_TITLE_TEXT_DEFAULT);
-
-            String titleText = (ColorBarLayerType.NULL_SPECIAL.equals(titleTextDefault)) ? raster.getName() : titleTextDefault;
-
-            setHeaderText(titleText);
+        setShowTitle(
+                configuration.getPropertyBool(ColorBarLayerType.PROPERTY_TITLE_SHOW_KEY,
+                        ColorBarLayerType.PROPERTY_TITLE_SHOW_DEFAULT));
 
 
+        String titleTextDefault = configuration.getPropertyString(ColorBarLayerType.PROPERTY_TITLE_TEXT_KEY,
+                ColorBarLayerType.PROPERTY_TITLE_TEXT_DEFAULT);
 
-            setTitleFontSize(
-                    configuration.getPropertyInt(ColorBarLayerType.PROPERTY_TITLE_FONT_SIZE_KEY,
-                            ColorBarLayerType.PROPERTY_TITLE_FONT_SIZE_DEFAULT));
+        String titleText = (ColorBarLayerType.NULL_SPECIAL.equals(titleTextDefault)) ? raster.getName() : titleTextDefault;
 
-            setTitleColor(
-                    configuration.getPropertyColor(ColorBarLayerType.PROPERTY_TITLE_COLOR_KEY,
-                            ColorBarLayerType.PROPERTY_TITLE_COLOR_DEFAULT));
-
-            setTitleParameterFontName(
-                    configuration.getPropertyString(ColorBarLayerType.PROPERTY_TITLE_FONT_NAME_KEY,
-                            ColorBarLayerType.PROPERTY_TITLE_FONT_NAME_DEFAULT));
+        setHeaderText(titleText);
 
 
+        setTitleFontSize(
+                configuration.getPropertyInt(ColorBarLayerType.PROPERTY_TITLE_FONT_SIZE_KEY,
+                        ColorBarLayerType.PROPERTY_TITLE_FONT_SIZE_DEFAULT));
 
-            boolean titleParameterBold = configuration.getPropertyBool(ColorBarLayerType.PROPERTY_TITLE_FONT_BOLD_KEY,
-                    ColorBarLayerType.PROPERTY_TITLE_FONT_BOLD_DEFAULT);
+        setTitleColor(
+                configuration.getPropertyColor(ColorBarLayerType.PROPERTY_TITLE_COLOR_KEY,
+                        ColorBarLayerType.PROPERTY_TITLE_COLOR_DEFAULT));
 
-            boolean titleParameterItalic = configuration.getPropertyBool(ColorBarLayerType.PROPERTY_TITLE_FONT_ITALIC_KEY,
-                    ColorBarLayerType.PROPERTY_TITLE_FONT_ITALIC_DEFAULT);
+        setTitleParameterFontName(
+                configuration.getPropertyString(ColorBarLayerType.PROPERTY_TITLE_FONT_NAME_KEY,
+                        ColorBarLayerType.PROPERTY_TITLE_FONT_NAME_DEFAULT));
 
-            int titleFontType = ColorBarLayer.getFontType(titleParameterItalic, titleParameterBold);
 
-            setTitleParameterFontType(titleFontType);
+        boolean titleParameterBold = configuration.getPropertyBool(ColorBarLayerType.PROPERTY_TITLE_FONT_BOLD_KEY,
+                ColorBarLayerType.PROPERTY_TITLE_FONT_BOLD_DEFAULT);
+
+        boolean titleParameterItalic = configuration.getPropertyBool(ColorBarLayerType.PROPERTY_TITLE_FONT_ITALIC_KEY,
+                ColorBarLayerType.PROPERTY_TITLE_FONT_ITALIC_DEFAULT);
+
+        int titleFontType = ColorBarLayer.getFontType(titleParameterItalic, titleParameterBold);
+
+        setTitleParameterFontType(titleFontType);
 
 
 
 
 
-            // Header Units parameters
-
-            setShowTitleUnits(
-                    configuration.getPropertyBool(ColorBarLayerType.PROPERTY_TITLE_UNITS_SHOW_KEY,
-                            ColorBarLayerType.PROPERTY_TITLE_UNITS_SHOW_DEFAULT));
 
 
 
-            String titleUnitsTextDefault = configuration.getPropertyString(ColorBarLayerType.PROPERTY_TITLE_UNITS_TEXT_KEY,
-                    ColorBarLayerType.PROPERTY_TITLE_UNITS_TEXT_DEFAULT);
+        // Labels Parameters
 
+        setLabelsShow(configuration.getPropertyBool(ColorBarLayerType.PROPERTY_LABELS_SHOW_KEY,
+                ColorBarLayerType.PROPERTY_LABELS_SHOW_DEFAULT));
 
-            String titleUnitsText = (ColorBarLayerType.NULL_SPECIAL.equals(titleUnitsTextDefault)) ?  "(" + raster.getUnit() + ")" : titleUnitsTextDefault;
+        setLabelsFontName(configuration.getPropertyString(ColorBarLayerType.PROPERTY_LABELS_FONT_NAME_KEY,
+                ColorBarLayerType.PROPERTY_LABELS_FONT_NAME_DEFAULT));
 
-            setHeaderUnitsText(titleUnitsText);
+        boolean labelsFontBold = configuration.getPropertyBool(ColorBarLayerType.PROPERTY_LABELS_FONT_BOLD_KEY,
+                ColorBarLayerType.PROPERTY_LABELS_FONT_BOLD_DEFAULT);
 
+        boolean labelsFontItalic = configuration.getPropertyBool(ColorBarLayerType.PROPERTY_LABELS_FONT_ITALIC_KEY,
+                ColorBarLayerType.PROPERTY_LABELS_FONT_ITALIC_DEFAULT);
 
+        setLabelsFontType(ColorBarLayer.getFontType(labelsFontItalic, labelsFontBold));
 
-            setTitleUnitsFontSize(
-                    configuration.getPropertyInt(ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_SIZE_KEY,
-                            ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_SIZE_DEFAULT));
+        setLabelsFontSize(configuration.getPropertyInt(ColorBarLayerType.PROPERTY_LABELS_FONT_SIZE_KEY,
+                ColorBarLayerType.PROPERTY_LABELS_FONT_SIZE_DEFAULT));
 
-            setTitleUnitsColor(
-                    configuration.getPropertyColor(ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_COLOR_KEY,
-                            ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_COLOR_DEFAULT));
-
-            setTitleUnitsFontName(
-                    configuration.getPropertyString(ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_NAME_KEY,
-                            ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_NAME_DEFAULT));
-
-
-
-            boolean titleUnitsBold = configuration.getPropertyBool(ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_BOLD_KEY,
-                    ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_BOLD_DEFAULT);
-
-            boolean titleUnitsItalic = configuration.getPropertyBool(ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_ITALIC_KEY,
-                    ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_ITALIC_DEFAULT);
-
-            int titleUnitsFontType = ColorBarLayer.getFontType(titleUnitsItalic, titleUnitsBold);
-
-            setTitleUnitsFontType(titleUnitsFontType);
-
-
-        }
+        setLabelsColor(configuration.getPropertyColor(ColorBarLayerType.PROPERTY_LABELS_FONT_COLOR_KEY,
+                ColorBarLayerType.PROPERTY_LABELS_FONT_COLOR_DEFAULT));
 
 
 
+
+
+
+
+        // Units parameters
+
+        setShowTitleUnits(
+                configuration.getPropertyBool(ColorBarLayerType.PROPERTY_TITLE_UNITS_SHOW_KEY,
+                        ColorBarLayerType.PROPERTY_TITLE_UNITS_SHOW_DEFAULT));
+
+
+        String titleUnitsTextDefault = configuration.getPropertyString(ColorBarLayerType.PROPERTY_TITLE_UNITS_TEXT_KEY,
+                ColorBarLayerType.PROPERTY_TITLE_UNITS_TEXT_DEFAULT);
+
+
+        String titleUnitsText = (ColorBarLayerType.NULL_SPECIAL.equals(titleUnitsTextDefault)) ? "(" + raster.getUnit() + ")" : titleUnitsTextDefault;
+
+        setHeaderUnitsText(titleUnitsText);
+
+
+        setTitleUnitsFontSize(
+                configuration.getPropertyInt(ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_SIZE_KEY,
+                        ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_SIZE_DEFAULT));
+
+        setTitleUnitsColor(
+                configuration.getPropertyColor(ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_COLOR_KEY,
+                        ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_COLOR_DEFAULT));
+
+        setTitleUnitsFontName(
+                configuration.getPropertyString(ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_NAME_KEY,
+                        ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_NAME_DEFAULT));
+
+
+        boolean titleUnitsBold = configuration.getPropertyBool(ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_BOLD_KEY,
+                ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_BOLD_DEFAULT);
+
+        boolean titleUnitsItalic = configuration.getPropertyBool(ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_ITALIC_KEY,
+                ColorBarLayerType.PROPERTY_TITLE_UNITS_FONT_ITALIC_DEFAULT);
+
+        int titleUnitsFontType = ColorBarLayer.getFontType(titleUnitsItalic, titleUnitsBold);
+
+        setTitleUnitsFontType(titleUnitsFontType);
+
+
+
+
+
+
+
+        // Tick Marks Section
+
+        setTickmarkShow(configuration.getPropertyBool(ColorBarLayerType.PROPERTY_TICKMARKS_SHOW_KEY,
+                ColorBarLayerType.PROPERTY_TICKMARKS_SHOW_DEFAULT));
+
+        setTickmarkLength(configuration.getPropertyInt(ColorBarLayerType.PROPERTY_TICKMARKS_LENGTH_KEY,
+                ColorBarLayerType.PROPERTY_TICKMARKS_LENGTH_DEFAULT));
+
+        setTickmarkWidth(configuration.getPropertyInt(ColorBarLayerType.PROPERTY_TICKMARKS_WIDTH_KEY,
+                ColorBarLayerType.PROPERTY_TICKMARKS_WIDTH_DEFAULT));
+
+        setTickmarkColor(configuration.getPropertyColor(ColorBarLayerType.PROPERTY_TICKMARKS_COLOR_KEY,
+                ColorBarLayerType.PROPERTY_TICKMARKS_COLOR_DEFAULT));
+
+
+
+
+
+        // Backdrop Section
+
+        setBackdropShow(configuration.getPropertyBool(ColorBarLayerType.PROPERTY_BACKDROP_SHOW_KEY,
+                ColorBarLayerType.PROPERTY_BACKDROP_SHOW_DEFAULT));
+
+        setBackgroundColor(configuration.getPropertyColor(ColorBarLayerType.PROPERTY_BACKDROP_COLOR_KEY,
+                ColorBarLayerType.PROPERTY_BACKDROP_COLOR_DEFAULT));
+
+        double backdropTrans = configuration.getPropertyDouble(ColorBarLayerType.PROPERTY_BACKDROP_TRANSPARENCY_KEY,
+                ColorBarLayerType.PROPERTY_BACKDROP_TRANSPARENCY_DEFAULT);
+
+        setBackgroundTransparency(((Number) backdropTrans).floatValue());
+
+
+
+
+
+        // Palette Border Section
+
+        setBorderShow(configuration.getPropertyBool(ColorBarLayerType.PROPERTY_PALETTE_BORDER_SHOW_KEY,
+                ColorBarLayerType.PROPERTY_PALETTE_BORDER_SHOW_DEFAULT));
+
+        setBorderWidth(configuration.getPropertyInt(ColorBarLayerType.PROPERTY_PALETTE_BORDER_WIDTH_KEY,
+                ColorBarLayerType.PROPERTY_PALETTE_BORDER_WIDTH_DEFAULT));
+
+        setBorderColor(configuration.getPropertyColor(ColorBarLayerType.PROPERTY_PALETTE_BORDER_COLOR_KEY,
+                ColorBarLayerType.PROPERTY_PALETTE_BORDER_COLOR_DEFAULT));
+
+
+
+
+
+        // Legend Border Section
+
+        setBackdropBorderShow(configuration.getPropertyBool(ColorBarLayerType.PROPERTY_LEGEND_BORDER_SHOW_KEY,
+                ColorBarLayerType.PROPERTY_LEGEND_BORDER_SHOW_DEFAULT));
+
+        setBackdropBorderWidth(configuration.getPropertyInt(ColorBarLayerType.PROPERTY_LEGEND_BORDER_WIDTH_KEY,
+                ColorBarLayerType.PROPERTY_LEGEND_BORDER_WIDTH_DEFAULT));
+
+        setBackdropBorderColor(configuration.getPropertyColor(ColorBarLayerType.PROPERTY_LEGEND_BORDER_COLOR_KEY,
+                ColorBarLayerType.PROPERTY_LEGEND_BORDER_COLOR_DEFAULT));
+
+
+
+    }
 
 
     // todo Danny tmp edit
@@ -508,7 +604,6 @@ public class ImageLegend {
     public void setBackgroundColor(Color backgroundColor) {
         this.backgroundColor = backgroundColor;
     }
-
 
 
     public boolean isAntialiasing() {
@@ -875,7 +970,7 @@ public class ImageLegend {
                     legendSize.width - getBorderGap() - getBorderGap() - firstLabelOverhangWidth - lastLabelOverhangWidth,
                     getColorBarThickness());
 
-            legendRect = new Rectangle(0,0,legendSize.width-1, legendSize.height-1);
+            legendRect = new Rectangle(0, 0, legendSize.width - 1, legendSize.height - 1);
 
 
             int paletteGap = 0;
@@ -939,8 +1034,6 @@ public class ImageLegend {
                         + getBorderGap();
 
 
-
-
                 double colorBarWithLabelsRequiredHeight = labelOverhangHeight + getColorBarLength() + labelOverhangHeight;
 
                 requiredHeight = Math.max(colorBarWithLabelsRequiredHeight, headerRequiredDimension.getHeight());
@@ -967,7 +1060,7 @@ public class ImageLegend {
                         getBorderGap() + labelOverhangHeight + (int) headerRequiredDimension.getHeight() + getHeaderGap(),
                         getColorBarThickness(),
                         getColorBarLength());
-                legendRect = new Rectangle(0,0,legendSize.width-1, legendSize.height-1);
+                legendRect = new Rectangle(0, 0, legendSize.width - 1, legendSize.height - 1);
 
 
             } else if (ColorBarLayerType.VERTICAL_TITLE_BOTTOM.equals(getTitleVerticalAnchor())) {
@@ -975,7 +1068,7 @@ public class ImageLegend {
                         getBorderGap() + labelOverhangHeight,
                         getColorBarThickness(),
                         getColorBarLength());
-                legendRect = new Rectangle(0,0,legendSize.width-1, legendSize.height-1);
+                legendRect = new Rectangle(0, 0, legendSize.width - 1, legendSize.height - 1);
 
 
             } else if (ColorBarLayerType.VERTICAL_TITLE_LEFT.equals(getTitleVerticalAnchor())) {
@@ -983,8 +1076,7 @@ public class ImageLegend {
                         getBorderGap() + labelOverhangHeight,
                         getColorBarThickness(),
                         getColorBarLength());
-                legendRect = new Rectangle(0,0,legendSize.width-1, legendSize.height-1);
-
+                legendRect = new Rectangle(0, 0, legendSize.width - 1, legendSize.height - 1);
 
 
             } else { // VERTICAL_TITLE_RIGHT
@@ -992,7 +1084,7 @@ public class ImageLegend {
                         getBorderGap() + labelOverhangHeight,
                         getColorBarThickness(),
                         getColorBarLength());
-                legendRect = new Rectangle(0,0,legendSize.width-1, legendSize.height-1);
+                legendRect = new Rectangle(0, 0, legendSize.width - 1, legendSize.height - 1);
 
 
             }
@@ -1024,8 +1116,6 @@ public class ImageLegend {
         if (isBackdropShow()) {
             fillBackground(g2d);
         }
-
-
 
 
         drawPalette(g2d);
@@ -1086,7 +1176,6 @@ public class ImageLegend {
 
         int headerGap = (int) Math.round(0.5 * getTitleFontSize());
         int borderGap = (int) Math.round(0.3 * getTitleFontSize());
-
 
 
         setTitleToUnitsVerticalGap(titleToUnitsVerticalGap);
@@ -1336,12 +1425,12 @@ public class ImageLegend {
 
                     if (ColorBarLayerType.VERTICAL_TITLE_TOP.equals(getTitleVerticalAnchor())) {
                         if (hasTitleParameter() && hasTitleUnits()) {
-                            translateY = y0 - getHeaderGap() - labelOverhangHeight  - getTitleUnitsHeight() - 0.5* getTitleParameterHeight() - getTitleToUnitsVerticalGap();
+                            translateY = y0 - getHeaderGap() - labelOverhangHeight - getTitleUnitsHeight() - 0.5 * getTitleParameterHeight() - getTitleToUnitsVerticalGap();
                         } else {
-                            translateY = y0 - getHeaderGap() - labelOverhangHeight - 0.5* getTitleParameterHeight();
+                            translateY = y0 - getHeaderGap() - labelOverhangHeight - 0.5 * getTitleParameterHeight();
                         }
                     } else {
-                            translateY = y0 + getColorBarLength() + labelOverhangHeight + getHeaderGap() + 0.5* getTitleParameterHeight();
+                        translateY = y0 + getColorBarLength() + labelOverhangHeight + getHeaderGap() + 0.5 * getTitleParameterHeight();
                     }
 
                     g2d.translate(translateX, translateY);
@@ -1947,8 +2036,6 @@ public class ImageLegend {
     }
 
 
-
-
     public static double round(double value, int places) {
         if (places < 0) throw new IllegalArgumentException();
 
@@ -2069,9 +2156,6 @@ public class ImageLegend {
             return DEFAULT_COLORBAR_ALLOW_RESET;
         }
     }
-
-
-
 
 
     public Color getTickmarkColor() {

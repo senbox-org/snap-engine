@@ -560,6 +560,45 @@ public class ColorBarLayerType extends LayerType {
 
 
 
+
+
+
+    // Backdrop Section
+
+    private static final String PROPERTY_BACKDROP_ROOT_KEY = PROPERTY_ROOT_KEY + ".backdrop";
+    private static final String PROPERTY_BACKDROP_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "Backdrop";
+
+    public static final String PROPERTY_BACKDROP_SECTION_KEY = PROPERTY_BACKDROP_ROOT_KEY + ".section";
+    public static final String PROPERTY_BACKDROP_SECTION_ALIAS = PROPERTY_BACKDROP_ROOT_ALIAS + "Section";
+    public static final String PROPERTY_BACKDROP_SECTION_LABEL = "Backdrop";
+    public static final String PROPERTY_BACKDROP_SECTION_TOOLTIP = "Configuration options for the color bar legend backdrop";
+
+    public static final String PROPERTY_BACKDROP_SHOW_KEY = PROPERTY_BACKDROP_ROOT_KEY + ".show";
+    public static final String PROPERTY_BACKDROP_SHOW_LABEL = "Show Backdrop";
+    public static final String PROPERTY_BACKDROP_SHOW_TOOLTIP = "Show the color bar legend backdrop";
+    private static final String PROPERTY_BACKDROP_SHOW_ALIAS = PROPERTY_BACKDROP_ROOT_ALIAS + "Show";
+    public static final boolean PROPERTY_BACKDROP_SHOW_DEFAULT = true;
+    public static final Class PROPERTY_BACKDROP_SHOW_TYPE = Boolean.class;
+
+    public static final String PROPERTY_BACKDROP_COLOR_KEY = PROPERTY_BACKDROP_ROOT_KEY + ".color";
+    public static final String PROPERTY_BACKDROP_COLOR_LABEL = "Backdrop Color";
+    public static final String PROPERTY_BACKDROP_COLOR_TOOLTIP = "Set color of the backdrop of the color bar legend backdrop";
+    private static final String PROPERTY_BACKDROP_COLOR_ALIAS = PROPERTY_BACKDROP_ROOT_ALIAS + "Color";
+    public static final Color PROPERTY_BACKDROP_COLOR_DEFAULT = Color.BLACK;
+    public static final Class PROPERTY_BACKDROP_COLOR_TYPE = Color.class;
+
+    public static final String PROPERTY_BACKDROP_TRANSPARENCY_KEY = PROPERTY_BACKDROP_ROOT_KEY + "transparency";
+    public static final String PROPERTY_BACKDROP_TRANSPARENCY_LABEL = "Backdrop Trans";
+    public static final String PROPERTY_BACKDROP_TRANSPARENCY_TOOLTIP = "Set transparency of the color bar legend backdrop";
+    private static final String PROPERTY_BACKDROP_TRANSPARENCY_ALIAS = PROPERTY_BACKDROP_ROOT_ALIAS + "Transparency";
+    public static final double PROPERTY_BACKDROP_TRANSPARENCY_DEFAULT = 0.5;
+    public static final Class PROPERTY_BACKDROP_TRANSPARENCY_TYPE = Double.class;
+
+
+
+
+
+
     // Border Section
 
     private static final String PROPERTY_PALETTE_BORDER_ROOT_KEY = PROPERTY_ROOT_KEY + ".palette.border";
@@ -624,38 +663,6 @@ public class ColorBarLayerType extends LayerType {
     public static final Class PROPERTY_LEGEND_BORDER_COLOR_TYPE = Color.class;
 
 
-
-
-    // Backdrop Section
-
-    private static final String PROPERTY_BACKDROP_ROOT_KEY = PROPERTY_ROOT_KEY + ".backdrop";
-    private static final String PROPERTY_BACKDROP_ROOT_ALIAS = PROPERTY_ROOT_ALIAS + "Backdrop";
-
-    public static final String PROPERTY_BACKDROP_SECTION_KEY = PROPERTY_BACKDROP_ROOT_KEY + ".section";
-    public static final String PROPERTY_BACKDROP_SECTION_ALIAS = PROPERTY_BACKDROP_ROOT_ALIAS + "Section";
-    public static final String PROPERTY_BACKDROP_SECTION_LABEL = "Backdrop";
-    public static final String PROPERTY_BACKDROP_SECTION_TOOLTIP = "Configuration options for the color bar legend backdrop";
-
-    public static final String PROPERTY_BACKDROP_SHOW_KEY = PROPERTY_BACKDROP_ROOT_KEY + ".show";
-    public static final String PROPERTY_BACKDROP_SHOW_LABEL = "Show Backdrop";
-    public static final String PROPERTY_BACKDROP_SHOW_TOOLTIP = "Show the color bar legend backdrop";
-    private static final String PROPERTY_BACKDROP_SHOW_ALIAS = PROPERTY_BACKDROP_ROOT_ALIAS + "Show";
-    public static final boolean PROPERTY_BACKDROP_SHOW_DEFAULT = true;
-    public static final Class PROPERTY_BACKDROP_SHOW_TYPE = Boolean.class;
-
-    public static final String PROPERTY_BACKDROP_COLOR_KEY = PROPERTY_BACKDROP_ROOT_KEY + ".color";
-    public static final String PROPERTY_BACKDROP_COLOR_LABEL = "Backdrop Color";
-    public static final String PROPERTY_BACKDROP_COLOR_TOOLTIP = "Set color of the backdrop of the color bar legend backdrop";
-    private static final String PROPERTY_BACKDROP_COLOR_ALIAS = PROPERTY_BACKDROP_ROOT_ALIAS + "Color";
-    public static final Color PROPERTY_BACKDROP_COLOR_DEFAULT = Color.BLACK;
-    public static final Class PROPERTY_BACKDROP_COLOR_TYPE = Color.class;
-
-    public static final String PROPERTY_BACKDROP_TRANSPARENCY_KEY = PROPERTY_BACKDROP_ROOT_KEY + "transparency";
-    public static final String PROPERTY_BACKDROP_TRANSPARENCY_LABEL = "Backdrop Trans";
-    public static final String PROPERTY_BACKDROP_TRANSPARENCY_TOOLTIP = "Set transparency of the color bar legend backdrop";
-    private static final String PROPERTY_BACKDROP_TRANSPARENCY_ALIAS = PROPERTY_BACKDROP_ROOT_ALIAS + "Transparency";
-    public static final double PROPERTY_BACKDROP_TRANSPARENCY_DEFAULT = 0.5;
-    public static final Class PROPERTY_BACKDROP_TRANSPARENCY_TYPE = Double.class;
 
 
 
