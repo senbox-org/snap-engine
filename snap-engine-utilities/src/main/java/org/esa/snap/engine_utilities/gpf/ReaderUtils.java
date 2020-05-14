@@ -25,6 +25,7 @@ import org.esa.snap.core.datamodel.TiePointGeoCoding;
 import org.esa.snap.core.datamodel.TiePointGrid;
 import org.esa.snap.core.datamodel.VirtualBand;
 import org.esa.snap.core.util.Guardian;
+import org.esa.snap.core.util.StringUtils;
 import org.esa.snap.core.util.math.MathUtils;
 import org.esa.snap.engine_utilities.datamodel.AbstractMetadata;
 import org.esa.snap.engine_utilities.datamodel.Unit;
@@ -329,21 +330,29 @@ public final class ReaderUtils {
         if (elem == null)
             return AbstractMetadata.NO_METADATA_UTC;
         final String timeStr = createValidUTCString(elem.getAttributeString(tag, " ").toUpperCase(),
-                                                    new char[]{':', '.', '-'}, ' ').trim();
+                                                    new char[]{':','.','-'}, ' ').trim();
         return AbstractMetadata.parseUTC(timeStr, timeFormat);
     }
 
+    private static String[] MONTHS = new String[] {"JAN","FEB","MAR","APR","JUN","JUL","AUG","SEP","OCT","NOV","DEC"};
+
     private static String createValidUTCString(final String name, final char[] validChars, final char replaceChar) {
         Guardian.assertNotNull("name", name);
-        char[] sortedValidChars = null;
+        char[] sortedValidChars;
         if (validChars == null) {
             sortedValidChars = new char[5];
         } else {
-            sortedValidChars = (char[]) validChars.clone();
+            sortedValidChars = validChars.clone();
         }
         Arrays.sort(sortedValidChars);
         final StringBuilder validName = new StringBuilder(name.length());
         for (int i = 0; i < name.length(); i++) {
+            String month = name.substring(i, Math.min(name.length(), i+3));
+            if(StringUtils.contains(MONTHS, month)) {
+                i += 2;
+                validName.append(month);
+                continue;
+            }
             final char ch = name.charAt(i);
             if (Character.isDigit(ch)) {
                 validName.append(ch);
