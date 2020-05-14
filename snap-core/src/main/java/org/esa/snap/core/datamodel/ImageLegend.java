@@ -223,7 +223,10 @@ public class ImageLegend {
 
         ImageLegend imageLegendCopy = new ImageLegend(raster.getImageInfo(), raster);
 
-        imageLegendCopy.setTitleVerticalAnchor(getTitleVerticalAnchor());
+
+
+        imageLegendCopy.setOrientation(getOrientation());
+        imageLegendCopy.setReversePalette(isReversePalette());
 
         imageLegendCopy.setShowTitle(isShowTitle());
         imageLegendCopy.setHeaderText(getTitleText());
@@ -241,32 +244,43 @@ public class ImageLegend {
 
 
 
+
+
+
         imageLegendCopy.setNumberOfTicks(getNumberOfTicks());
         imageLegendCopy.setDistributionType(getDistributionType());
         imageLegendCopy.setFullCustomAddThesePoints(getFullCustomAddThesePoints());
-
-        imageLegendCopy.setOrientation(getOrientation());
-        imageLegendCopy.setReversePalette(isReversePalette());
-
-
-
-        imageLegendCopy.setLabelsFontName(getLabelsFontName());
-        imageLegendCopy.setLabelsFontType(getLabelsFontType());
-        imageLegendCopy.setLabelsColor(getLabelsColor());
-        imageLegendCopy.setLabelsShow(isLabelsShow());
         imageLegendCopy.setScalingFactor(getScalingFactor());
         imageLegendCopy.setDecimalPlaces(getDecimalPlaces());
         imageLegendCopy.setDecimalPlacesForce(isDecimalPlacesForce());
 
-        imageLegendCopy.setLabelsColor(getLabelsColor());
-        imageLegendCopy.setAntialiasing((Boolean) true);
+
+
+        imageLegendCopy.setTitleVerticalAnchor(getTitleVerticalAnchor());
         imageLegendCopy.setColorBarLength(getColorBarLength());
         imageLegendCopy.setColorBarThickness(getColorBarThickness());
-        imageLegendCopy.setLabelsFontSize(getLabelsFontSize());
+
+
+
+
+        // todo start
+
+        // todo this applies only to layers and not image export
         imageLegendCopy.setLayerScaling(getLayerScaling());
+        //            imageLegend.setBackgroundTransparencyEnabled(true);
+
+
+        imageLegendCopy.setAntialiasing((Boolean) true);
+
+        // todo end
 
 
 
+        imageLegendCopy.setLabelsShow(isLabelsShow());
+        imageLegendCopy.setLabelsFontName(getLabelsFontName());
+        imageLegendCopy.setLabelsFontType(getLabelsFontType());
+        imageLegendCopy.setLabelsFontSize(getLabelsFontSize());
+        imageLegendCopy.setLabelsColor(getLabelsColor());
 
         imageLegendCopy.setTickmarkColor(getTickmarkColor());
         imageLegendCopy.setTickmarkLength(getTickmarkLength());
@@ -287,13 +301,68 @@ public class ImageLegend {
 
 
 
-        //            imageLegend.setBackgroundTransparencyEnabled(true);
 
         return imageLegendCopy;
     }
 
 
     public void updateWithProperties(PropertyMap configuration, RasterDataNode raster) {
+
+
+
+
+        // Orientation Parameters
+
+        String orientationString = configuration.getPropertyString(ColorBarLayerType.PROPERTY_ORIENTATION_KEY,
+                ColorBarLayerType.PROPERTY_ORIENTATION_DEFAULT);
+
+        if (ColorBarLayerType.OPTION_VERTICAL.equals(orientationString)) {
+            setOrientation(ImageLegend.VERTICAL);
+        } else {
+            setOrientation(ImageLegend.HORIZONTAL);
+        }
+
+        setReversePalette(configuration.getPropertyBool(ColorBarLayerType.PROPERTY_ORIENTATION_REVERSE_PALETTE_KEY,
+                ColorBarLayerType.PROPERTY_ORIENTATION_REVERSE_PALETTE_DEFAULT));
+
+
+
+
+        // Label Distribution and Values
+
+        setNumberOfTicks(configuration.getPropertyInt(ColorBarLayerType.PROPERTY_LABEL_VALUES_COUNT_KEY,
+                ColorBarLayerType.PROPERTY_LABEL_VALUES_COUNT_DEFAULT));
+
+        setDistributionType(configuration.getPropertyString(ColorBarLayerType.PROPERTY_LABEL_VALUES_MODE_KEY,
+                ColorBarLayerType.PROPERTY_LABEL_VALUES_MODE_DEFAULT));
+
+        setFullCustomAddThesePoints(configuration.getPropertyString(ColorBarLayerType.PROPERTY_LABEL_VALUES_ACTUAL_KEY,
+                ColorBarLayerType.PROPERTY_LABEL_VALUES_ACTUAL_DEFAULT));
+
+        setScalingFactor(configuration.getPropertyDouble(ColorBarLayerType.PROPERTY_LABEL_VALUES_SCALING_KEY,
+                ColorBarLayerType.PROPERTY_LABEL_VALUES_SCALING_DEFAULT));
+
+        setDecimalPlaces(configuration.getPropertyInt(ColorBarLayerType.PROPERTY_LABEL_VALUES_DECIMAL_PLACES_KEY,
+                ColorBarLayerType.PROPERTY_LABEL_VALUES_DECIMAL_PLACES_DEFAULT));
+
+        setDecimalPlacesForce(configuration.getPropertyBool(ColorBarLayerType.PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_KEY,
+                ColorBarLayerType.PROPERTY_LABEL_VALUES_FORCE_DECIMAL_PLACES_DEFAULT));
+
+
+
+
+
+        // Sizing and Location
+        setColorBarLength(configuration.getPropertyInt(ColorBarLayerType.PROPERTY_LEGEND_LENGTH_KEY,
+                ColorBarLayerType.PROPERTY_LEGEND_LENGTH_DEFAULT));
+
+        setColorBarThickness(configuration.getPropertyInt(ColorBarLayerType.PROPERTY_LEGEND_WIDTH_KEY,
+                ColorBarLayerType.PROPERTY_LEGEND_WIDTH_DEFAULT));
+
+        setTitleVerticalAnchor(configuration.getPropertyString(ColorBarLayerType.PROPERTY_LOCATION_TITLE_VERTICAL_KEY,
+                ColorBarLayerType.PROPERTY_LOCATION_TITLE_VERTICAL_DEFAULT));
+
+
 
 
         // Title parameters
@@ -341,30 +410,6 @@ public class ImageLegend {
 
 
 
-        // Labels Parameters
-
-        setLabelsShow(configuration.getPropertyBool(ColorBarLayerType.PROPERTY_LABELS_SHOW_KEY,
-                ColorBarLayerType.PROPERTY_LABELS_SHOW_DEFAULT));
-
-        setLabelsFontName(configuration.getPropertyString(ColorBarLayerType.PROPERTY_LABELS_FONT_NAME_KEY,
-                ColorBarLayerType.PROPERTY_LABELS_FONT_NAME_DEFAULT));
-
-        boolean labelsFontBold = configuration.getPropertyBool(ColorBarLayerType.PROPERTY_LABELS_FONT_BOLD_KEY,
-                ColorBarLayerType.PROPERTY_LABELS_FONT_BOLD_DEFAULT);
-
-        boolean labelsFontItalic = configuration.getPropertyBool(ColorBarLayerType.PROPERTY_LABELS_FONT_ITALIC_KEY,
-                ColorBarLayerType.PROPERTY_LABELS_FONT_ITALIC_DEFAULT);
-
-        setLabelsFontType(ColorBarLayer.getFontType(labelsFontItalic, labelsFontBold));
-
-        setLabelsFontSize(configuration.getPropertyInt(ColorBarLayerType.PROPERTY_LABELS_FONT_SIZE_KEY,
-                ColorBarLayerType.PROPERTY_LABELS_FONT_SIZE_DEFAULT));
-
-        setLabelsColor(configuration.getPropertyColor(ColorBarLayerType.PROPERTY_LABELS_FONT_COLOR_KEY,
-                ColorBarLayerType.PROPERTY_LABELS_FONT_COLOR_DEFAULT));
-
-
-
 
 
 
@@ -408,6 +453,34 @@ public class ImageLegend {
 
         setTitleUnitsFontType(titleUnitsFontType);
 
+
+
+
+
+
+
+
+        // Labels Parameters
+
+        setLabelsShow(configuration.getPropertyBool(ColorBarLayerType.PROPERTY_LABELS_SHOW_KEY,
+                ColorBarLayerType.PROPERTY_LABELS_SHOW_DEFAULT));
+
+        setLabelsFontName(configuration.getPropertyString(ColorBarLayerType.PROPERTY_LABELS_FONT_NAME_KEY,
+                ColorBarLayerType.PROPERTY_LABELS_FONT_NAME_DEFAULT));
+
+        boolean labelsFontBold = configuration.getPropertyBool(ColorBarLayerType.PROPERTY_LABELS_FONT_BOLD_KEY,
+                ColorBarLayerType.PROPERTY_LABELS_FONT_BOLD_DEFAULT);
+
+        boolean labelsFontItalic = configuration.getPropertyBool(ColorBarLayerType.PROPERTY_LABELS_FONT_ITALIC_KEY,
+                ColorBarLayerType.PROPERTY_LABELS_FONT_ITALIC_DEFAULT);
+
+        setLabelsFontType(ColorBarLayer.getFontType(labelsFontItalic, labelsFontBold));
+
+        setLabelsFontSize(configuration.getPropertyInt(ColorBarLayerType.PROPERTY_LABELS_FONT_SIZE_KEY,
+                ColorBarLayerType.PROPERTY_LABELS_FONT_SIZE_DEFAULT));
+
+        setLabelsColor(configuration.getPropertyColor(ColorBarLayerType.PROPERTY_LABELS_FONT_COLOR_KEY,
+                ColorBarLayerType.PROPERTY_LABELS_FONT_COLOR_DEFAULT));
 
 
 
@@ -775,10 +848,11 @@ public class ImageLegend {
 //        }
 
 
-        if (getFullCustomAddThesePoints() == null || getFullCustomAddThesePoints().length() == 0) {
-            // this will initialize the points
-            distributeEvenly();
-        }
+//        if (getFullCustomAddThesePoints() == null || getFullCustomAddThesePoints().length() == 0) {
+//            // this will initialize the points
+//            distributeEvenly();
+//            colorBarInfos.clear();
+//        }
 
 
         if (DISTRIB_EVEN_STR.equals(getDistributionType())) {
@@ -814,6 +888,12 @@ public class ImageLegend {
                 setFullCustomAddThesePoints(manualPoints);
             }
         } else if (DISTRIB_MANUAL_STR.equals(getDistributionType())) {
+            if (getFullCustomAddThesePoints() == null || getFullCustomAddThesePoints().length() == 0) {
+                // this will initialize the points
+                distributeEvenly();
+                colorBarInfos.clear();
+            }
+
             String addThese = getFullCustomAddThesePoints();
 
             if (addThese != null && addThese.length() > 0) {

@@ -92,7 +92,6 @@ public class ColorBarLayerType extends LayerType {
     public static final String PROPERTY_LABEL_VALUES_ACTUAL_TOOLTIP = "Set actual values of the tick marks";
     private static final String PROPERTY_LABEL_VALUES_ACTUAL_ALIAS = PROPERTY_LABEL_VALUES_ROOT_ALIAS + "Actual";
     public static final boolean PROPERTY_LABEL_VALUES_ACTUAL_ENABLED = true;
-
     public static final String PROPERTY_LABEL_VALUES_ACTUAL_DEFAULT = "";
     public static final Class PROPERTY_LABEL_VALUES_ACTUAL_TYPE = String.class;
 
