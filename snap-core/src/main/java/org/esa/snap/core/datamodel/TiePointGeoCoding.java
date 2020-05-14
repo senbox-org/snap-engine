@@ -30,7 +30,12 @@ import java.awt.Rectangle;
 /**
  * A geo-coding based on two tie-point grids. One grid stores the latitude tie-points, the other stores the longitude
  * tie-points.
+ *
+ * @deprecated since SNAP 8.0.0, Better use {@link org.esa.snap.core.dataio.geocoding.ComponentGeoCoding ComponentGeoCoding} with
+ * {@link org.esa.snap.core.dataio.geocoding.inverse.TiePointInverse TiePointInverse} and one of {@link org.esa.snap.core.dataio.geocoding.inverse.TiePointInverse TiePointInverse},
+ * {@link org.esa.snap.core.dataio.geocoding.forward.TiePointBilinearForward TiePointBilinearForward} and {@link org.esa.snap.core.dataio.geocoding.forward.TiePointSplineForward TiePointSplineForward}
  */
+@Deprecated
 public class TiePointGeoCoding extends AbstractGeoCoding {
 
     private static final double ABS_ERROR_LIMIT = 0.5; // pixels
@@ -801,13 +806,13 @@ public class TiePointGeoCoding extends AbstractGeoCoding {
 
     protected void copyGridsToDestScene(Scene destScene) {
         final Product destProduct = destScene.getProduct();
-        final TiePointGrid lonGrid = getLonGrid().cloneTiePointGrid();
-        if (!destProduct.containsTiePointGrid(lonGrid.getName())) {
-            destProduct.addTiePointGrid(lonGrid);
-        }
         final TiePointGrid latGrid = getLatGrid().cloneTiePointGrid();
         if (!destProduct.containsTiePointGrid(latGrid.getName())) {
             destProduct.addTiePointGrid(latGrid);
+        }
+        final TiePointGrid lonGrid = getLonGrid().cloneTiePointGrid();
+        if (!destProduct.containsTiePointGrid(lonGrid.getName())) {
+            destProduct.addTiePointGrid(lonGrid);
         }
     }
 
