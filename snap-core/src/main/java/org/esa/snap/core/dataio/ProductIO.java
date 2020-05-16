@@ -24,6 +24,7 @@ import org.esa.snap.core.datamodel.ProductData;
 import org.esa.snap.core.util.Guardian;
 import org.esa.snap.core.util.StopWatch;
 import org.esa.snap.core.util.SystemUtils;
+import org.esa.snap.runtime.Config;
 import org.esa.snap.runtime.EngineConfig;
 
 import javax.media.jai.PlanarImage;
@@ -67,8 +68,7 @@ public class ProductIO {
     public static final String DEFAULT_FORMAT_NAME = DimapProductConstants.DIMAP_FORMAT_NAME;
 
     public static final String SYSTEM_PROPERTY_CONCURRENT = "snap.productio.concurrent";
-
-    private static final boolean concurrent = Boolean.parseBoolean(System.getProperty(SYSTEM_PROPERTY_CONCURRENT, "true"));
+    public static final boolean DEFAULT_WRITE_RASTER_CONCURRENT = true;
 
 
     /**
@@ -476,6 +476,7 @@ public class ProductIO {
      */
     private static void writeAllBands(Product product, ProgressMonitor pm) throws IOException {
         ProductWriter productWriter = product.getProductWriter();
+        final boolean concurrent = Config.instance("snap").load().preferences().getBoolean(SYSTEM_PROPERTY_CONCURRENT, DEFAULT_WRITE_RASTER_CONCURRENT);
 
         // for correct progress indication we need to collect
         // all bands which shall be written to the output
@@ -556,7 +557,7 @@ public class ProductIO {
     private static void writeRasterDataFully(ProgressMonitor pm, Band band, ExecutorService executor, Semaphore semaphore, List<IOException> ioExceptionCollector) throws IOException {
         if (band.hasRasterData()) {
             band.writeRasterData(0, 0, band.getRasterWidth(), band.getRasterHeight(), band.getRasterData(), pm);
-            if (semaphore!=null) {
+            if (semaphore != null) {
                 semaphore.release();
             }
         } else {
