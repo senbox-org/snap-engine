@@ -41,6 +41,7 @@ public final class Unit {
     public static final String METERS_PER_DAY = "m/day";
 
     public static final String CLASS = "class";
+    public static final String INDEX = "index";
     public static final String SOIL_MOISTURE = "m^3water/m^3soil";
 
     // tiepoint grid units
@@ -56,25 +57,28 @@ public final class Unit {
         AMPLITUDE, INTENSITY, REAL, IMAGINARY, PHASE, ABS_PHASE, COHERENCE,
         AMPLITUDE_DB, INTENSITY_DB,
         METERS, CENTIMETERS, METERS_PER_DAY,
-        CLASS, SOIL_MOISTURE,
-        DEGREES, NANOSECONDS, UNKNOWN
+        CLASS, INDEX, SOIL_MOISTURE,
+        DEGREES, RADIANS, NANOSECONDS, BIT, UNKNOWN
     }
 
     public static UnitType getUnitType(final Band sourceBand) {
 
-        if (sourceBand.getUnit() == null)
+        if (sourceBand.getUnit() == null) {
             return UnitType.UNKNOWN;
+        }
         final String unit = sourceBand.getUnit().toLowerCase();
         if (unit.contains(AMPLITUDE)) {
-            if (unit.contains(DB))
+            if (unit.contains(DB)) {
                 return UnitType.AMPLITUDE_DB;
-            else
+            } else {
                 return UnitType.AMPLITUDE;
+            }
         } else if (unit.contains(INTENSITY)) {
-            if (unit.contains(DB))
+            if (unit.contains(DB)) {
                 return UnitType.INTENSITY_DB;
-            else
+            } else {
                 return UnitType.INTENSITY;
+            }
         } else if (unit.contains(PHASE)) {
             return UnitType.PHASE;
         } else if (unit.contains(ABS_PHASE)) {
@@ -93,12 +97,18 @@ public final class Unit {
             return UnitType.COHERENCE;
         } else if (unit.contains(CLASS)) {
             return UnitType.CLASS;
+        } else if (unit.contains(INDEX)) {
+            return UnitType.INDEX;
         } else if (unit.contains(SOIL_MOISTURE)) {
             return UnitType.SOIL_MOISTURE;
         } else if (unit.contains(DEGREES)) {
             return UnitType.DEGREES;
+        } else if (unit.contains(RADIANS)) {
+            return UnitType.RADIANS;
         } else if (unit.contains(NANOSECONDS)) {
             return UnitType.NANOSECONDS;
+        } else if (unit.contains(BIT)) {
+            return UnitType.BIT;
         } else {
             return UnitType.UNKNOWN;
         }
